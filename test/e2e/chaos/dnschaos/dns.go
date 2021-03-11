@@ -60,7 +60,7 @@ func TestcaseDNSRandom(
 			Action:             v1alpha1.RandomAction,
 			Mode:               v1alpha1.AllPodMode,
 			DomainNamePatterns: []string{"not-exist-?ost.*", "not_exist?host.abc", "not-exist-host.def"},
-			Selector: v1alpha1.SelectorSpec{
+			Selector: selector.PodSelectorSpec{
 				Namespaces:     []string{ns},
 				LabelSelectors: map[string]string{"app": "network-peer"},
 			},
@@ -118,7 +118,7 @@ func TestcaseDNSError(
 			Action:             v1alpha1.ErrorAction,
 			Mode:               v1alpha1.AllPodMode,
 			DomainNamePatterns: []string{"chaos-mes?.org", "github.com", "16?.co*"},
-			Selector: v1alpha1.SelectorSpec{
+			Selector: selector.PodSelectorSpec{
 				Namespaces:     []string{ns},
 				LabelSelectors: map[string]string{"app": "network-peer"},
 			},

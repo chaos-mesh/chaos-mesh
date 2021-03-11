@@ -115,7 +115,7 @@ func makeNetworkPartitionChaos(
 	var target *v1alpha1.Target
 	if toLabelSelectors != nil {
 		target = &v1alpha1.Target{
-			TargetSelector: v1alpha1.SelectorSpec{
+			TargetSelector: selector.PodSelectorSpec{
 				Namespaces:     []string{namespace},
 				LabelSelectors: toLabelSelectors,
 			},
@@ -130,7 +130,7 @@ func makeNetworkPartitionChaos(
 		},
 		Spec: v1alpha1.NetworkChaosSpec{
 			Action: v1alpha1.PartitionAction,
-			Selector: v1alpha1.SelectorSpec{
+			Selector: selector.PodSelectorSpec{
 				Namespaces:     []string{namespace},
 				LabelSelectors: fromLabelSelectors,
 			},
@@ -151,7 +151,7 @@ func makeNetworkDelayChaos(
 	var target *v1alpha1.Target
 	if toLabelSelectors != nil {
 		target = &v1alpha1.Target{
-			TargetSelector: v1alpha1.SelectorSpec{
+			TargetSelector: selector.PodSelectorSpec{
 				Namespaces:     []string{namespace},
 				LabelSelectors: toLabelSelectors,
 			},
@@ -166,7 +166,7 @@ func makeNetworkDelayChaos(
 		},
 		Spec: v1alpha1.NetworkChaosSpec{
 			Action: v1alpha1.DelayAction,
-			Selector: v1alpha1.SelectorSpec{
+			Selector: selector.PodSelectorSpec{
 				Namespaces:     []string{namespace},
 				LabelSelectors: fromLabelSelectors,
 			},

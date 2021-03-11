@@ -49,7 +49,7 @@ func TestcaseContainerKillOnceThenDelete(ns string, kubeCli kubernetes.Interface
 			Namespace: ns,
 		},
 		Spec: v1alpha1.PodChaosSpec{
-			Selector: v1alpha1.SelectorSpec{
+			Selector: selector.PodSelectorSpec{
 				Namespaces: []string{
 					ns,
 				},
@@ -148,7 +148,7 @@ func TestcaseContainerKillPauseThenUnPause(ns string, kubeCli kubernetes.Interfa
 			Namespace: ns,
 		},
 		Spec: v1alpha1.PodChaosSpec{
-			Selector: v1alpha1.SelectorSpec{
+			Selector: selector.PodSelectorSpec{
 				Namespaces: []string{
 					ns,
 				},

@@ -50,7 +50,7 @@ func TestcaseIODelayDurationForATimeThenRecover(
 			Namespace: ns,
 		},
 		Spec: v1alpha1.IoChaosSpec{
-			Selector: v1alpha1.SelectorSpec{
+			Selector: selector.PodSelectorSpec{
 				Namespaces:     []string{ns},
 				LabelSelectors: map[string]string{"app": "io"},
 			},
@@ -119,7 +119,7 @@ func TestcaseIODelayDurationForATimePauseAndUnPause(
 			Namespace: ns,
 		},
 		Spec: v1alpha1.IoChaosSpec{
-			Selector: v1alpha1.SelectorSpec{
+			Selector: selector.PodSelectorSpec{
 				Namespaces:     []string{ns},
 				LabelSelectors: map[string]string{"app": "io"},
 			},
@@ -240,7 +240,7 @@ func TestcaseIODelayWithSpecifiedContainer(
 			Namespace: ns,
 		},
 		Spec: v1alpha1.IoChaosSpec{
-			Selector: v1alpha1.SelectorSpec{
+			Selector: selector.PodSelectorSpec{
 				Namespaces:     []string{ns},
 				LabelSelectors: map[string]string{"app": "io"},
 			},

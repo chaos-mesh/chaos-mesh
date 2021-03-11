@@ -124,9 +124,9 @@ type SelectorInfo struct {
 	Pods map[string][]string `json:"pods" binding:"PodsValid"`
 }
 
-// ParseSelector parses SelectorInfo to v1alpha1.SelectorSpec
-func (s *SelectorInfo) ParseSelector() v1alpha1.SelectorSpec {
-	selector := v1alpha1.SelectorSpec{}
+// ParseSelector parses SelectorInfo to selector.PodSelectorSpec
+func (s *SelectorInfo) ParseSelector() selector.PodSelectorSpec {
+	selector := selector.PodSelectorSpec{}
 	selector.Namespaces = append(selector.Namespaces, s.NamespaceSelectors...)
 
 	selector.LabelSelectors = make(map[string]string)

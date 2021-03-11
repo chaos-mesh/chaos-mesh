@@ -72,7 +72,7 @@ var _ = Describe("TimeChaos", func() {
 			Spec: v1alpha1.TimeChaosSpec{
 				Mode:       v1alpha1.AllPodMode,
 				Value:      "0",
-				Selector:   v1alpha1.SelectorSpec{Namespaces: []string{metav1.NamespaceDefault}},
+				Selector:   selector.PodSelectorSpec{Namespaces: []string{metav1.NamespaceDefault}},
 				TimeOffset: "0s0ns",
 				Duration:   &duration,
 				Scheduler:  nil,

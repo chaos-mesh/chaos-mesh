@@ -75,7 +75,7 @@ var _ = Describe("PodChaos", func() {
 				Name:      "podchaos-name",
 			},
 			Spec: v1alpha1.PodChaosSpec{
-				Selector:      v1alpha1.SelectorSpec{Namespaces: []string{metav1.NamespaceDefault}},
+				Selector:      selector.PodSelectorSpec{Namespaces: []string{metav1.NamespaceDefault}},
 				Mode:          v1alpha1.OnePodMode,
 				ContainerName: "container-name",
 				Scheduler:     &v1alpha1.SchedulerSpec{Cron: "@hourly"},

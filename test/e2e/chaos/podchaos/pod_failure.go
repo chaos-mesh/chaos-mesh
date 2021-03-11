@@ -58,7 +58,7 @@ func TestcasePodFailureOnceThenDelete(ns string, kubeCli kubernetes.Interface, c
 			Namespace: ns,
 		},
 		Spec: v1alpha1.PodChaosSpec{
-			Selector: v1alpha1.SelectorSpec{
+			Selector: selector.PodSelectorSpec{
 				Namespaces: []string{
 					ns,
 				},
@@ -143,7 +143,7 @@ func TestcasePodFailurePauseThenUnPause(ns string, kubeCli kubernetes.Interface,
 			Namespace: ns,
 		},
 		Spec: v1alpha1.PodChaosSpec{
-			Selector: v1alpha1.SelectorSpec{
+			Selector: selector.PodSelectorSpec{
 				Namespaces:     []string{ns},
 				LabelSelectors: map[string]string{"app": appName},
 			},

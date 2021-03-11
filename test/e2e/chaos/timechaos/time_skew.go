@@ -55,7 +55,7 @@ func TestcaseTimeSkewOnceThenRecover(
 			Namespace: ns,
 		},
 		Spec: v1alpha1.TimeChaosSpec{
-			Selector: v1alpha1.SelectorSpec{
+			Selector: selector.PodSelectorSpec{
 				Namespaces:     []string{ns},
 				LabelSelectors: map[string]string{"app": "timer"},
 			},
@@ -124,7 +124,7 @@ func TestcaseTimeSkewPauseThenUnpause(
 			Namespace: ns,
 		},
 		Spec: v1alpha1.TimeChaosSpec{
-			Selector: v1alpha1.SelectorSpec{
+			Selector: selector.PodSelectorSpec{
 				Namespaces:     []string{ns},
 				LabelSelectors: map[string]string{"app": "timer"},
 			},
@@ -244,7 +244,7 @@ func TestcaseTimeSkewStartAtWaitingThenIntoRunning(
 			Namespace: ns,
 		},
 		Spec: v1alpha1.TimeChaosSpec{
-			Selector: v1alpha1.SelectorSpec{
+			Selector: selector.PodSelectorSpec{
 				Namespaces:     []string{ns},
 				LabelSelectors: map[string]string{"app": "timer"},
 			},

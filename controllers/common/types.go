@@ -16,13 +16,12 @@ package common
 import (
 	"context"
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1/selector"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
 	"github.com/go-logr/logr"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	selectorUtils "github.com/chaos-mesh/chaos-mesh/pkg/selector"
 )
 
 // Reconciler for common chaos
@@ -54,9 +53,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	if status.Experiment.Records == nil {
 		// TODO: get selectors from obj
 		for group, sel := range obj.GetSelectors() {
-			var podSelector *selector.PodSelector
-			var containerNames []string
-			pods, err := selectorUtils.SelectAndFilterPods(context.TODO(), r.Client, r.Reader, podSelector, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces)
+			pods, err := pod.SelectAndFilterPods(context.TODO(), r.Client, r.Reader, podSelector, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces)
 			if err != nil {
 
 			}

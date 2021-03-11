@@ -145,7 +145,7 @@ func TestGetPods(t *testing.T) {
 
 	tests := []struct {
 		name              string
-		chaosSelector     v1alpha1.SelectorSpec
+		chaosSelector     selector.PodSelectorSpec
 		chaosStatus       v1alpha1.ChaosStatus
 		wait              bool
 		expectedPodNum    int
@@ -154,7 +154,7 @@ func TestGetPods(t *testing.T) {
 	}{
 		{
 			name:              "chaos on two pods",
-			chaosSelector:     v1alpha1.SelectorSpec{LabelSelectors: map[string]string{"app": "pod"}},
+			chaosSelector:     selector.PodSelectorSpec{LabelSelectors: map[string]string{"app": "pod"}},
 			chaosStatus:       v1alpha1.ChaosStatus{},
 			expectedPodNum:    2,
 			expectedDaemonNum: 2,
@@ -162,7 +162,7 @@ func TestGetPods(t *testing.T) {
 		},
 		{
 			name: "chaos on one pod",
-			chaosSelector: v1alpha1.SelectorSpec{
+			chaosSelector: selector.PodSelectorSpec{
 				Nodes:          []string{"node0"},
 				LabelSelectors: map[string]string{"app": "pod"},
 			},
@@ -173,7 +173,7 @@ func TestGetPods(t *testing.T) {
 		},
 		{
 			name:          "wait for 100ms for chaos to start",
-			chaosSelector: v1alpha1.SelectorSpec{LabelSelectors: map[string]string{"app": "pod"}},
+			chaosSelector: selector.PodSelectorSpec{LabelSelectors: map[string]string{"app": "pod"}},
 			chaosStatus: v1alpha1.ChaosStatus{
 				Experiment: v1alpha1.ExperimentStatus{
 					Phase: v1alpha1.ExperimentPhaseWaiting,
@@ -189,7 +189,7 @@ func TestGetPods(t *testing.T) {
 		},
 		{
 			name:          "wrong selector to get pod",
-			chaosSelector: v1alpha1.SelectorSpec{LabelSelectors: map[string]string{"app": "oops"}},
+			chaosSelector: selector.PodSelectorSpec{LabelSelectors: map[string]string{"app": "oops"}},
 			chaosStatus:   v1alpha1.ChaosStatus{},
 			expectedErr:   true,
 		},

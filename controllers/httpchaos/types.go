@@ -16,6 +16,7 @@ package httpchaos
 import (
 	"context"
 	"errors"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
 
 	"golang.org/x/sync/errgroup"
 	v1 "k8s.io/api/core/v1"
@@ -30,7 +31,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/router"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 	end "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
-	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 )
 
 type endpoint struct {
@@ -45,7 +45,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 		return err
 	}
 
-	pods, err := selector.SelectAndFilterPods(ctx, r.Client, r.Reader, &httpFaultChaos.Spec.PodSelector, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces)
+	pods, err := pod.SelectAndFilterPods(ctx, r.Client, r.Reader, &httpFaultChaos.Spec.PodSelector, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces)
 	if err != nil {
 		r.Log.Error(err, "failed to select and filter pods")
 		return err

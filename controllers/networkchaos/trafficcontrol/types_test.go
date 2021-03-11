@@ -101,7 +101,7 @@ func TestReconciler_applyNetem(t *testing.T) {
 				},
 				Direction: v1alpha1.To,
 				Target: &v1alpha1.Target{
-					TargetSelector: v1alpha1.SelectorSpec{},
+					TargetSelector: selector.PodSelectorSpec{},
 				},
 				ExternalTargets: []string{"8.8.8.8", "www.google.com"},
 			},

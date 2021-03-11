@@ -47,7 +47,7 @@ func TestcaseIOErrorDurationForATimeThenRecover(
 			Namespace: ns,
 		},
 		Spec: v1alpha1.IoChaosSpec{
-			Selector: v1alpha1.SelectorSpec{
+			Selector: selector.PodSelectorSpec{
 				Namespaces:     []string{ns},
 				LabelSelectors: map[string]string{"app": "io"},
 			},
@@ -112,7 +112,7 @@ func TestcaseIOErrorDurationForATimePauseAndUnPause(
 			Namespace: ns,
 		},
 		Spec: v1alpha1.IoChaosSpec{
-			Selector: v1alpha1.SelectorSpec{
+			Selector: selector.PodSelectorSpec{
 				Namespaces:     []string{ns},
 				LabelSelectors: map[string]string{"app": "io"},
 			},
@@ -226,7 +226,7 @@ func TestcaseIOErrorWithSpecifiedContainer(
 			Namespace: ns,
 		},
 		Spec: v1alpha1.IoChaosSpec{
-			Selector: v1alpha1.SelectorSpec{
+			Selector: selector.PodSelectorSpec{
 				Namespaces:     []string{ns},
 				LabelSelectors: map[string]string{"app": "io"},
 			},

@@ -36,9 +36,9 @@ const (
 	RandomMaxPercentPodMode PodMode = "random-max-percent"
 )
 
-// SelectorSpec defines the some selectors to select objects.
+// PodSelectorSpec defines the some selectors to select objects.
 // If the all selectors are empty, all objects will be used in chaos experiment.
-type SelectorSpec struct {
+type PodSelectorSpec struct {
 	// Namespaces is a set of namespace to which objects belong.
 	// +optional
 	Namespaces []string `json:"namespaces,omitempty"`
@@ -87,7 +87,7 @@ type SelectorSpec struct {
 
 type PodSelector struct {
 	// Selector is used to select pods that are used to inject chaos action.
-	Selector SelectorSpec `json:"selector"`
+	Selector PodSelectorSpec `json:"selector"`
 
 	// Mode defines the mode to run chaos action.
 	// Supported mode: one / all / fixed / fixed-percent / random-max-percent
