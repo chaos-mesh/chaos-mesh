@@ -139,6 +139,14 @@ func NewReconciler(name string, object runtime.Object, mgr ctrl.Manager, endpoin
 func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 	err := ctrl.NewControllerManagedBy(mgr).
 		For(r.Object.DeepCopyObject()).
+		WithEventFilter(predicate.Funcs{
+			UpdateFunc: func(e event.UpdateEvent) bool {
+				old, _ := e.ObjectOld.(v1alpha1.InnerObject).GetSpecAndMetaString()
+				new, _ := e.ObjectNew.(v1alpha1.InnerObject).GetSpecAndMetaString()
+
+				return old != new
+			},
+		}).
 		Complete(r)
 
 	if err != nil {
