@@ -17,6 +17,8 @@ import (
 	"context"
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector/container"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
 	"github.com/go-logr/logr"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -24,10 +26,16 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+type StatefulObjectWithSelector interface {
+	v1alpha1.StatefulObject
+
+	GetSelectorSpecs() map[string]interface{}
+}
+
 // Reconciler for common chaos
 type Reconciler struct {
 	// Object is used to mark the target type of this Reconciler
-	Object v1alpha1.StatefulObject
+	Object StatefulObjectWithSelector
 
 	// Client is used to operate on the Kubernetes cluster
 	client.Client
@@ -38,7 +46,7 @@ type Reconciler struct {
 
 // Reconcile the common chaos
 func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	obj := r.Object.DeepCopyObject().(v1alpha1.StatefulObject)
+	obj := r.Object.DeepCopyObject().(StatefulObjectWithSelector)
 
 	if err := r.Client.Get(context.TODO(), req.NamespacedName, obj); err != nil {
 		if apierrors.IsNotFound(err) {
@@ -51,8 +59,25 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	status := obj.GetStatus()
 	if status.Experiment.Records == nil {
+		selectedTargets := make(map[string][]interface{})
 		// TODO: get selectors from obj
-		for group, sel := range obj.GetSelectors() {
+		for name, sel := range obj.GetSelectorSpecs() {
+			selector := selector.New(selector.SelectorParams{
+				PodSelector: pod.New(r.Client, r.Reader, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces),
+				ContainerSelector: container.New(r.Client, r.Reader, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces),
+			})
+			targets, err := selector.Select(context.TODO(), sel)
+			if err != nil {
+				r.Log.Error(err, "fail to select")
+			}
+
+			selectedTargets[name] = targets
+		}
+
+		for name, targets := range selectedTargets {
+			for _, tgt := range targets {
+				Apply(name, tgt, selectedTargets, obj)
+			}
 		}
 	}
 	return ctrl.Result{}, nil

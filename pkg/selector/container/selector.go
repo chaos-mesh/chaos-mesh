@@ -66,7 +66,7 @@ func (impl *SelectImpl) Select(ctx context.Context, cs *selector.ContainerSelect
 	return result, nil
 }
 
-func NewSelectImpl(c client.Client, r client.Reader, clusterScoped bool, targetNamespace, allowedNamespaces, ignoredNamespaces string) *SelectImpl {
+func New(c client.Client, r client.Reader, clusterScoped bool, targetNamespace, allowedNamespaces, ignoredNamespaces string) *SelectImpl {
 	return &SelectImpl{
 		c,
 		r,

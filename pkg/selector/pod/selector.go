@@ -69,7 +69,7 @@ func (impl *SelectImpl) Select(ctx context.Context, ps *selector.PodSelector) ([
 	return result, nil
 }
 
-func NewSelectImpl(c client.Client, r client.Reader, clusterScoped bool, targetNamespace, allowedNamespaces, ignoredNamespaces string) *SelectImpl {
+func New(c client.Client, r client.Reader, clusterScoped bool, targetNamespace, allowedNamespaces, ignoredNamespaces string) *SelectImpl {
 	return &SelectImpl{
 		c,
 		r,

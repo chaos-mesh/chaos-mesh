@@ -25,10 +25,10 @@ type Selector struct {
 	selectorMap map[reflect.Type]interface{}
 }
 
-func (s *Selector) Select(ctx context.Context, selector interface{}) ([]interface{}, error) {
-	impl, ok := s.selectorMap[reflect.TypeOf(selector)]
+func (s *Selector) Select(ctx context.Context, spec interface{}) ([]interface{}, error) {
+	impl, ok := s.selectorMap[reflect.TypeOf(spec)]
 	if ok {
-		vals := reflect.ValueOf(impl).MethodByName("Select").Call([]reflect.Value{reflect.ValueOf(ctx), reflect.ValueOf(selector)})
+		vals := reflect.ValueOf(impl).MethodByName("Select").Call([]reflect.Value{reflect.ValueOf(ctx), reflect.ValueOf(spec)})
 		ret := vals[0].Interface().([]interface{})
 		err := vals[1].Interface().(error)
 		return ret, err
@@ -42,7 +42,7 @@ type SelectorParams struct {
 	ContainerSelector *container.SelectImpl
 }
 
-func NewSelector(p SelectorParams) *Selector {
+func New(p SelectorParams) *Selector {
 	selectorMap := make(map[reflect.Type]interface{})
 
 	val := reflect.ValueOf(p)
