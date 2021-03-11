@@ -291,6 +291,8 @@ else
 	DOCKER_BUILDKIT=1 DOCKER_CLI_EXPERIMENTAL=enabled docker buildx build --load --cache-to type=local,dest=$(DOCKER_CACHE_DIR)/image-$(1) -t ${DOCKER_REGISTRY_PREFIX}pingcap/$(1):${IMAGE_TAG} ${DOCKER_BUILD_ARGS} $(2)
 endif
 
+else ifneq ($(TARGET_PLATFORM),)
+	DOCKER_BUILDKIT=1 docker buildx build --load --platform linux/$(TARGET_PLATFORM) -t ${DOCKER_REGISTRY_PREFIX}pingcap/$(1):${IMAGE_TAG} --build-arg TARGET_PLATFORM=$(TARGET_PLATFORM) ${DOCKER_BUILD_ARGS} $(2)
 else
 	DOCKER_BUILDKIT=1 docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/$(1):${IMAGE_TAG} ${DOCKER_BUILD_ARGS} $(2)
 endif
