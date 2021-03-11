@@ -74,13 +74,13 @@ type ExperimentStatus struct {
 	Records []TargetStatus `json:"containerRecords,omitempty"`
 }
 
-type TargetPhase string
+type Phase string
 
 const (
 	// NotInjected means the target is not injected yet. The controller could call "Inject" on the target
-	NotInjected TargetPhase = "Not Injected"
+	NotInjected Phase = "Not Injected"
 	// Injected means the target is injected. It's safe to recover it.
-	Injected TargetPhase = "Injected"
+	Injected Phase = "Injected"
 )
 
 // PodStatus represents information about the status of a pod in chaos experiment.
@@ -99,7 +99,7 @@ type TargetStatus struct {
 	// +optional
 	Message string `json:"message"`
 
-	Phase TargetPhase `json:"phase"`
+	Phase       Phase  `json:"phase"`
 	SelectGroup string `json:"selectGroup"`
 }
 

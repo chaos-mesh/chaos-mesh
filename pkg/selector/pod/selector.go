@@ -41,9 +41,47 @@ import (
 
 var log = ctrl.Log.WithName("selector")
 
-func Select(ctx context.Context, selector selector.PodSelectorSpec) {
-	
+type Option struct {
+	clusterScoped bool
+	targetNamespace string
+	allowedNamespaces string
+	ignoredNamespaces string
 }
+
+type SelectImpl struct {
+	c client.Client
+	r client.Reader
+
+	Option
+}
+
+func (impl *SelectImpl) Select(ctx context.Context, ps *selector.PodSelector) ([]interface{}, error) {
+	pods, err := SelectAndFilterPods(ctx, impl.c, impl.r, ps, impl.clusterScoped, impl.targetNamespace, impl.allowedNamespaces, impl.ignoredNamespaces)
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]interface{}, len(pods), len(pods))
+	for _, pod := range pods {
+		result = append(result, pod)
+	}
+
+	return result, nil
+}
+
+func NewSelectImpl(c client.Client, r client.Reader, clusterScoped bool, targetNamespace, allowedNamespaces, ignoredNamespaces string) *SelectImpl {
+	return &SelectImpl{
+		c,
+		r,
+		Option {
+			clusterScoped,
+			targetNamespace,
+			allowedNamespaces,
+			ignoredNamespaces,
+		},
+	}
+}
+
 
 // SelectAndFilterPods returns the list of pods that filtered by selector and PodMode
 func SelectAndFilterPods(ctx context.Context, c client.Client, r client.Reader, spec *selector.PodSelector, clusterScoped bool, targetNamespace string, allowedNamespaces, ignoredNamespaces string) ([]v1.Pod, error) {

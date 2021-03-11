@@ -53,10 +53,6 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	if status.Experiment.Records == nil {
 		// TODO: get selectors from obj
 		for group, sel := range obj.GetSelectors() {
-			pods, err := pod.SelectAndFilterPods(context.TODO(), r.Client, r.Reader, podSelector, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces)
-			if err != nil {
-
-			}
 		}
 	}
 	return ctrl.Result{}, nil
