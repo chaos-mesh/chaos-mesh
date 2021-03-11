@@ -50,7 +50,7 @@ FAILPOINT_ENABLE  := $$(find $$PWD/ -type d | grep -vE "(\.git|bin)" | xargs $(G
 FAILPOINT_DISABLE := $$(find $$PWD/ -type d | grep -vE "(\.git|bin)" | xargs $(GOBIN)/failpoint-ctl disable)
 
 GO_BUILD_CACHE ?= $(HOME)/.cache/chaos-mesh
-
+all: manifests/crd.yaml image
 go_build_cache_directory:
 	mkdir -p $(GO_BUILD_CACHE)/chaos-mesh-gobuild
 	mkdir -p $(GO_BUILD_CACHE)/chaos-mesh-gopath
@@ -67,7 +67,6 @@ endif
 
 CLEAN_TARGETS :=
 
-all: manifests/crd.yaml image
 
 check: fmt vet boilerplate lint generate manifests/crd.yaml tidy
 
