@@ -19,8 +19,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/namespaceannoationfilter"
-
 	"github.com/chaos-mesh/chaos-mesh/controllers/metrics"
 	"github.com/chaos-mesh/chaos-mesh/pkg/annotation"
 	controllerCfg "github.com/chaos-mesh/chaos-mesh/pkg/config"
