@@ -153,7 +153,7 @@ func TestSelectPods(t *testing.T) {
 	var (
 		testCfgClusterScoped         = true
 		testCfgTargetNamespace       = ""
-		testCfgEnableNamespaceFilter = true
+		testCfgEnableNamespaceFilter = false
 	)
 
 	for _, tc := range tcs {
