@@ -22,8 +22,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/namespaceannoationfilter"
-
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/label"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
@@ -41,6 +39,8 @@ import (
 )
 
 var log = ctrl.Log.WithName("selector")
+
+const injectAnnotationKey = "chaos-mesh.org/inject"
 
 type SelectSpec interface {
 	GetSelector() v1alpha1.SelectorSpec
@@ -498,7 +498,7 @@ func filterByNamespaces(ctx context.Context, c client.Client, pods []v1.Pod) []v
 	var filteredList []v1.Pod
 
 	for _, pod := range pods {
-		ok, err := namespaceannoationfilter.IsAllowedNamespaces(ctx, c, pod.Namespace)
+		ok, err := IsAllowedNamespaces(ctx, c, pod.Namespace)
 		if err != nil {
 			log.Error(err, "fail to check whether this namespace is allowed", "namespace", pod.Namespace)
 			continue
@@ -511,6 +511,21 @@ func filterByNamespaces(ctx context.Context, c client.Client, pods []v1.Pod) []v
 		}
 	}
 	return filteredList
+}
+
+func IsAllowedNamespaces(ctx context.Context, c client.Client, namespace string) (bool, error) {
+	ns := &v1.Namespace{}
+
+	err := c.Get(ctx, types.NamespacedName{Name: namespace}, ns)
+	if err != nil {
+		return false, err
+	}
+
+	if ns.Annotations[injectAnnotationKey] == "enabled" {
+		return true, nil
+	}
+
+	return false, nil
 }
 
 // filterByNamespaceSelector filters a list of pods by a given namespace selector.

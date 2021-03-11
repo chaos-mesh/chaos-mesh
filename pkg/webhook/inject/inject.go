@@ -147,7 +147,7 @@ func injectRequired(metadata *metav1.ObjectMeta, cli client.Client, cfg *config.
 	}
 
 	if controllerCfg.EnableFilterNamespace {
-		ok, err := namespaceannoationfilter.IsAllowedNamespaces(context.Background(), cli, metadata.Namespace)
+		ok, err := selector.IsAllowedNamespaces(context.Background(), cli, metadata.Namespace)
 		if err != nil {
 			log.Error(err, "fail to check whether this namespace should be injected", "namespace", metadata.Namespace)
 		}
