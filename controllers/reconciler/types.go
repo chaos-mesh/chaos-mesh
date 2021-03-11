@@ -23,7 +23,6 @@ import (
 
 // InnerReconciler is interface for reconciler
 type InnerReconciler interface {
-
 	// Apply means the reconciler perform the chaos action
 	Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error
 
