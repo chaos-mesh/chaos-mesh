@@ -14,15 +14,18 @@
 package chaosdaemon
 
 import (
-	"bufio"
 	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/shirou/gopsutil/process"
+
+	jrpc "github.com/ethereum/go-ethereum/rpc"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
@@ -76,11 +79,17 @@ func (s *DaemonServer) ApplyIoChaos(ctx context.Context, in *pb.ApplyIoChaosRequ
 		processBuilder = processBuilder.SetNS(pid, bpm.MountNS).SetNS(pid, bpm.PidNS)
 	}
 
-	var outBuffer bytes.Buffer
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	var caller, receiver bytes.Buffer
+	client, err := jrpc.DialIO(ctx, &receiver, &caller)
+	if err != nil {
+		return nil, err
+	}
 
 	cmd := processBuilder.Build()
-	cmd.Stdin = strings.NewReader(in.Actions)
-	cmd.Stdout = bufio.NewWriter(&outBuffer)
+	cmd.Stdin = io.MultiReader(strings.NewReader(in.Actions), &caller)
+	cmd.Stdout = io.MultiWriter(&receiver, os.Stdout)
 	cmd.Stderr = os.Stderr
 
 	err = s.backgroundProcessManager.StartProcess(cmd)
@@ -101,17 +110,12 @@ func (s *DaemonServer) ApplyIoChaos(ctx context.Context, in *pb.ApplyIoChaosRequ
 	}
 
 	log.Info("Waiting for toda to start")
-
-	for {
-		data, err := outBuffer.ReadString('\n')
-		os.Stdout.Write([]byte(data))
-		if err != nil {
-			log.Error(err, "an error occured during toda startup")
-			return nil, err
-		}
-		if strings.Contains(data, "toda: waiting for signal to exit") {
-			break
-		} // Marking a successful startup
+	time.Sleep(time.Second * 3)
+	var ret string
+	err = client.Call(&ret, "ping", struct{}{})
+	if err != nil || ret != "pong" {
+		log.Info("Starting toda takes too long")
+		return nil, fmt.Errorf("Toda startup takes too long or an error occurs")
 	}
 
 	return &pb.ApplyIoChaosResponse{
