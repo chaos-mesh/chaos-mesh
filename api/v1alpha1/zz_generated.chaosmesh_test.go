@@ -132,6 +132,14 @@ func TestDNSChaosGetStatus(t *testing.T) {
 	chaos.GetStatus()
 }
 
+func TestDNSChaosGetSpecAndMetaString(t *testing.T) {
+	g := NewGomegaWithT(t)
+	chaos := &DNSChaos{}
+	err := faker.FakeData(chaos)
+	g.Expect(err).To(BeNil())
+	chaos.GetSpecAndMetaString()
+}
+
 func TestDNSChaosListChaos(t *testing.T) {
 	g := NewGomegaWithT(t)
 
@@ -251,6 +259,14 @@ func TestHTTPChaosGetStatus(t *testing.T) {
 	g.Expect(err).To(BeNil())
 
 	chaos.GetStatus()
+}
+
+func TestHTTPChaosGetSpecAndMetaString(t *testing.T) {
+	g := NewGomegaWithT(t)
+	chaos := &HTTPChaos{}
+	err := faker.FakeData(chaos)
+	g.Expect(err).To(BeNil())
+	chaos.GetSpecAndMetaString()
 }
 
 func TestHTTPChaosListChaos(t *testing.T) {
@@ -374,6 +390,14 @@ func TestIoChaosGetStatus(t *testing.T) {
 	chaos.GetStatus()
 }
 
+func TestIoChaosGetSpecAndMetaString(t *testing.T) {
+	g := NewGomegaWithT(t)
+	chaos := &IoChaos{}
+	err := faker.FakeData(chaos)
+	g.Expect(err).To(BeNil())
+	chaos.GetSpecAndMetaString()
+}
+
 func TestIoChaosListChaos(t *testing.T) {
 	g := NewGomegaWithT(t)
 
@@ -493,6 +517,14 @@ func TestJVMChaosGetStatus(t *testing.T) {
 	g.Expect(err).To(BeNil())
 
 	chaos.GetStatus()
+}
+
+func TestJVMChaosGetSpecAndMetaString(t *testing.T) {
+	g := NewGomegaWithT(t)
+	chaos := &JVMChaos{}
+	err := faker.FakeData(chaos)
+	g.Expect(err).To(BeNil())
+	chaos.GetSpecAndMetaString()
 }
 
 func TestJVMChaosListChaos(t *testing.T) {
@@ -616,6 +648,14 @@ func TestKernelChaosGetStatus(t *testing.T) {
 	chaos.GetStatus()
 }
 
+func TestKernelChaosGetSpecAndMetaString(t *testing.T) {
+	g := NewGomegaWithT(t)
+	chaos := &KernelChaos{}
+	err := faker.FakeData(chaos)
+	g.Expect(err).To(BeNil())
+	chaos.GetSpecAndMetaString()
+}
+
 func TestKernelChaosListChaos(t *testing.T) {
 	g := NewGomegaWithT(t)
 
@@ -735,6 +775,14 @@ func TestNetworkChaosGetStatus(t *testing.T) {
 	g.Expect(err).To(BeNil())
 
 	chaos.GetStatus()
+}
+
+func TestNetworkChaosGetSpecAndMetaString(t *testing.T) {
+	g := NewGomegaWithT(t)
+	chaos := &NetworkChaos{}
+	err := faker.FakeData(chaos)
+	g.Expect(err).To(BeNil())
+	chaos.GetSpecAndMetaString()
 }
 
 func TestNetworkChaosListChaos(t *testing.T) {
@@ -858,6 +906,14 @@ func TestPodChaosGetStatus(t *testing.T) {
 	chaos.GetStatus()
 }
 
+func TestPodChaosGetSpecAndMetaString(t *testing.T) {
+	g := NewGomegaWithT(t)
+	chaos := &PodChaos{}
+	err := faker.FakeData(chaos)
+	g.Expect(err).To(BeNil())
+	chaos.GetSpecAndMetaString()
+}
+
 func TestPodChaosListChaos(t *testing.T) {
 	g := NewGomegaWithT(t)
 
@@ -979,6 +1035,14 @@ func TestStressChaosGetStatus(t *testing.T) {
 	chaos.GetStatus()
 }
 
+func TestStressChaosGetSpecAndMetaString(t *testing.T) {
+	g := NewGomegaWithT(t)
+	chaos := &StressChaos{}
+	err := faker.FakeData(chaos)
+	g.Expect(err).To(BeNil())
+	chaos.GetSpecAndMetaString()
+}
+
 func TestStressChaosListChaos(t *testing.T) {
 	g := NewGomegaWithT(t)
 
@@ -1098,6 +1162,14 @@ func TestTimeChaosGetStatus(t *testing.T) {
 	g.Expect(err).To(BeNil())
 
 	chaos.GetStatus()
+}
+
+func TestTimeChaosGetSpecAndMetaString(t *testing.T) {
+	g := NewGomegaWithT(t)
+	chaos := &TimeChaos{}
+	err := faker.FakeData(chaos)
+	g.Expect(err).To(BeNil())
+	chaos.GetSpecAndMetaString()
 }
 
 func TestTimeChaosListChaos(t *testing.T) {
