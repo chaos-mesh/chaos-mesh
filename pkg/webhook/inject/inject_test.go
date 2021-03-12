@@ -34,7 +34,7 @@ var _ = Describe("webhook inject", func() {
 			var testClient client.Client
 			var cfg *config.Config
 			var controllerCfg *controllerCfg.ChaosControllerConfig
-			res := Inject(&admissionv1beta1.AdmissionRequest{}, testClient, cfg, controllerCfg, nil)
+			res := Inject(&admissionv1.AdmissionRequest{}, testClient, cfg, controllerCfg, nil)
 			Expect(res.Result.Message).To(ContainSubstring("unexpected end of JSON input"))
 		})
 	})
