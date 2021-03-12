@@ -74,9 +74,9 @@ const Token: React.FC<TokenProps> = ({ onSubmitCallback }) => {
 
         if (data && data.code === 'error.api.invalid_request' && data.message.includes('Unauthorized')) {
           setFieldError('token', 'Please check the validity of the token')
-        } else {
-          restSteps()
         }
+
+        api.auth.resetToken()
       })
   }
 
