@@ -158,7 +158,7 @@ spec:
                   type: integer
                 maxOccurrences:
                   description: There will be [1, MaxOccurrences] segments of wrong
-                    data. If MaxOccurrences is 0, no mistake will be injected
+                    data.
                   format: int64
                   minimum: 1
                   type: integer
