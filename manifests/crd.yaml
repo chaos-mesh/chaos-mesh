@@ -852,15 +852,20 @@ spec:
               properties:
                 filling:
                   description: Filling determines what is filled in the miskate data.
+                  enum:
+                  - zero
+                  - random
                   type: string
                 maxLength:
                   description: Max length of each wrong data segment in bytes
                   format: int64
+                  minimum: 1
                   type: integer
                 maxOccurrences:
                   description: There will be [1, MaxOccurrences] segments of wrong
                     data. If MaxOccurrences is 0, no mistake will be injected
                   format: int64
+                  minimum: 1
                   type: integer
               type: object
             mode:
@@ -2528,15 +2533,20 @@ spec:
                       filling:
                         description: Filling determines what is filled in the miskate
                           data.
+                        enum:
+                        - zero
+                        - random
                         type: string
                       maxLength:
                         description: Max length of each wrong data segment in bytes
                         format: int64
+                        minimum: 1
                         type: integer
                       maxOccurrences:
                         description: There will be [1, MaxOccurrences] segments of
                           wrong data. If MaxOccurrences is 0, no mistake will be injected
                         format: int64
+                        minimum: 1
                         type: integer
                     type: object
                   mtime:

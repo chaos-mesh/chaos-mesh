@@ -135,14 +135,17 @@ type AttrOverrideSpec struct {
 type MistakeSpec struct {
 	// Filling determines what is filled in the miskate data.
 	// +optional
+	// +kubebuilder:validation:Enum=zero;random
 	Filling FillingType `json:"filling,omitempty"`
 
 	// There will be [1, MaxOccurrences] segments of wrong data. If MaxOccurrences is 0, no mistake will be injected
 	// +optional
+	// +kubebuilder:validation:Minimum=1
 	MaxOccurrences int64 `json:"maxOccurrences,omitempty"`
 
 	// Max length of each wrong data segment in bytes
 	// +optional
+	// +kubebuilder:validation:Minimum=1
 	MaxLength int64 `json:"maxLength,omitempty"`
 }
 
