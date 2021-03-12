@@ -138,13 +138,13 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/component: admission-webhook
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
-  {{- if $certManagerEnabled }}
+  {{- if $certEnabled }}
   annotations:
     cert-manager.io/inject-ca-from: {{ printf "%s/%s" .Release.Namespace "chaos-mesh-cert" | quote }}
   {{- end }}
 webhooks:
   - clientConfig:
-      {{- if $certManagerEnabled }}
+      {{- if $certEnabled }}
       caBundle: Cg==
       {{- else }}
       caBundle: {{ ternary (b64enc $ca.Cert) (b64enc (trim $crtPEM)) (empty $crtPEM) }}

@@ -1754,7 +1754,7 @@ webhooks:
         resources:
           - jvmchaos
 ---
-# Source: chaos-mesh/templates/secrets-configuration.yaml
+# Source: chaos-mesh/templates/webhook-configuration.yaml
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: ValidatingWebhookConfiguration
 metadata:
