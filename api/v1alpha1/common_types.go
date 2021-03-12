@@ -269,6 +269,7 @@ type InnerObject interface {
 	IsDeleted() bool
 	IsPaused() bool
 	GetChaos() *ChaosInstance
+	GetSpecAndMetaString() (string, error)
 	StatefulObject
 }
 
