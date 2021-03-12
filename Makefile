@@ -50,7 +50,7 @@ FAILPOINT_ENABLE  := $$(find $$PWD/ -type d | grep -vE "(\.git|bin)" | xargs $(G
 FAILPOINT_DISABLE := $$(find $$PWD/ -type d | grep -vE "(\.git|bin)" | xargs $(GOBIN)/failpoint-ctl disable)
 
 GO_BUILD_CACHE ?= $(HOME)/.cache/chaos-mesh
-
+all: manifests/crd.yaml image
 go_build_cache_directory:
 	mkdir -p $(GO_BUILD_CACHE)/chaos-mesh-gobuild
 	mkdir -p $(GO_BUILD_CACHE)/chaos-mesh-gopath
@@ -67,7 +67,6 @@ endif
 
 CLEAN_TARGETS :=
 
-all: manifests/crd.yaml image
 
 check: fmt vet boilerplate lint generate manifests/crd.yaml tidy
 
@@ -292,6 +291,8 @@ else
 	DOCKER_BUILDKIT=1 DOCKER_CLI_EXPERIMENTAL=enabled docker buildx build --load --cache-to type=local,dest=$(DOCKER_CACHE_DIR)/image-$(1) -t ${DOCKER_REGISTRY_PREFIX}pingcap/$(1):${IMAGE_TAG} ${DOCKER_BUILD_ARGS} $(2)
 endif
 
+else ifneq ($(TARGET_PLATFORM),)
+	DOCKER_BUILDKIT=1 docker buildx build --load --platform linux/$(TARGET_PLATFORM) -t ${DOCKER_REGISTRY_PREFIX}pingcap/$(1):${IMAGE_TAG} --build-arg TARGET_PLATFORM=$(TARGET_PLATFORM) ${DOCKER_BUILD_ARGS} $(2)
 else
 	DOCKER_BUILDKIT=1 docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/$(1):${IMAGE_TAG} ${DOCKER_BUILD_ARGS} $(2)
 endif

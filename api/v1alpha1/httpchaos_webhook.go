@@ -1,4 +1,4 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,45 +23,43 @@ import (
 )
 
 // log is for logging in this package.
-var kernelchaoslog = logf.Log.WithName("kernelchaos-resource")
+var httpchaoslog = logf.Log.WithName("httpchaos-resource")
 
-// +kubebuilder:webhook:path=/mutate-chaos-mesh-org-v1alpha1-kernelchaos,mutating=true,failurePolicy=fail,groups=chaos-mesh.org,resources=kernelchaos,verbs=create;update,versions=v1alpha1,name=mkernelchaos.kb.io
+// +kubebuilder:webhook:path=/mutate-chaos-mesh-org-v1alpha1-awschaos,mutating=true,failurePolicy=fail,groups=chaos-mesh.org,resources=awschaos,verbs=create;update,versions=v1alpha1,name=mawschaos.kb.io
 
-var _ webhook.Defaulter = &KernelChaos{}
+var _ webhook.Defaulter = &HTTPChaos{}
 
 // Default implements webhook.Defaulter so a webhook will be registered for the type
-func (in *KernelChaos) Default() {
-	kernelchaoslog.Info("default", "name", in.Name)
-
-	in.Spec.Selector.DefaultNamespace(in.GetNamespace())
+func (in *HTTPChaos) Default() {
+	httpchaoslog.Info("default", "name", in.Name)
 }
 
-// +kubebuilder:webhook:verbs=create;update,path=/validate-chaos-mesh-org-v1alpha1-kernelchaos,mutating=false,failurePolicy=fail,groups=chaos-mesh.org,resources=kernelchaos,versions=v1alpha1,name=vkernelchaos.kb.io
+// +kubebuilder:webhook:verbs=create;update,path=/validate-chaos-mesh-org-v1alpha1-awschaos,mutating=false,failurePolicy=fail,groups=chaos-mesh.org,resources=awschaos,versions=v1alpha1,name=vawschaos.kb.io
 
-var _ ChaosValidator = &KernelChaos{}
+var _ ChaosValidator = &HTTPChaos{}
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
-func (in *KernelChaos) ValidateCreate() error {
-	kernelchaoslog.Info("validate create", "name", in.Name)
+func (in *HTTPChaos) ValidateCreate() error {
+	httpchaoslog.Info("validate create", "name", in.Name)
 	return in.Validate()
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
-func (in *KernelChaos) ValidateUpdate(old runtime.Object) error {
-	kernelchaoslog.Info("validate update", "name", in.Name)
+func (in *HTTPChaos) ValidateUpdate(old runtime.Object) error {
+	httpchaoslog.Info("validate update", "name", in.Name)
 	return in.Validate()
 }
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type
-func (in *KernelChaos) ValidateDelete() error {
-	kernelchaoslog.Info("validate delete", "name", in.Name)
+func (in *HTTPChaos) ValidateDelete() error {
+	httpchaoslog.Info("validate delete", "name", in.Name)
 
 	// Nothing to do?
 	return nil
 }
 
 // Validate validates chaos object
-func (in *KernelChaos) Validate() error {
+func (in *HTTPChaos) Validate() error {
 	specField := field.NewPath("spec")
 	allErrs := in.ValidateScheduler(specField)
 	allErrs = append(allErrs, in.ValidatePodMode(specField)...)
@@ -73,16 +71,17 @@ func (in *KernelChaos) Validate() error {
 }
 
 // ValidateScheduler validates the scheduler and duration
-func (in *KernelChaos) ValidateScheduler(spec *field.Path) field.ErrorList {
+func (in *HTTPChaos) ValidateScheduler(spec *field.Path) field.ErrorList {
 	return ValidateScheduler(in, spec)
 }
 
 // ValidatePodMode validates the value with podmode
-func (in *KernelChaos) ValidatePodMode(spec *field.Path) field.ErrorList {
-	return ValidatePodMode(in.Spec.Value, in.Spec.Mode, spec.Child("value"))
+func (in *HTTPChaos) ValidatePodMode(spec *field.Path) field.ErrorList {
+	// Because aws chaos does not need a pod mode, so return nil here.
+	return nil
 }
 
 // SelectSpec returns the selector config for authority validate
-func (in *KernelChaos) GetSelectSpec() []SelectSpec {
-	return []SelectSpec{&in.Spec}
+func (in *HTTPChaos) GetSelectSpec() []SelectSpec {
+	return nil
 }

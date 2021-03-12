@@ -1,31 +1,23 @@
-import { MenuItem, TextField } from '@material-ui/core'
-import React, { useEffect } from 'react'
 import { useHistory, useLocation } from 'react-router-dom'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
+import Autocomplete from '@material-ui/lab/Autocomplete'
+import Paper from 'components-mui/Paper'
 import T from 'components/T'
+import { TextField } from '@material-ui/core'
 import api from 'api'
 import clsx from 'clsx'
 import { getNamespaces } from 'slices/experiments'
 import { makeStyles } from '@material-ui/core/styles'
 import { setNameSpace } from 'slices/globalStatus'
+import { useEffect } from 'react'
 
 const useStyles = makeStyles((theme) => ({
   namespace: {
     minWidth: 180,
-    '& .MuiInputBase-root': {
-      height: 32,
-      color: theme.palette.background.default,
-    },
-    '& .MuiFormLabel-root': {
-      margin: 0,
-      color: theme.palette.background.default,
-    },
-    '& .MuiSelect-icon': {
-      color: theme.palette.background.default,
-    },
-    '& .MuiOutlinedInput-notchedOutline': {
-      borderColor: `${theme.palette.background.default} !important`,
+    [theme.breakpoints.down('xs')]: {
+      flex: 1,
+      minWidth: 'unset',
     },
   },
 }))
@@ -43,8 +35,8 @@ const ControlBar = () => {
     dispatch(getNamespaces())
   }, [dispatch])
 
-  const handleSelectGlobalNamespace = (e: React.ChangeEvent<{ value: unknown }>) => {
-    const ns = e.target.value as string
+  const handleSelectGlobalNamespace = (_: any, newVal: any) => {
+    const ns = newVal
 
     api.auth.namespace(ns)
     dispatch(setNameSpace(ns))
@@ -54,20 +46,23 @@ const ControlBar = () => {
   }
 
   return (
-    <TextField
+    <Autocomplete
       className={clsx(classes.namespace, 'nav-namespace')}
-      select
-      variant="outlined"
-      label={T('common.chooseNamespace')}
       value={namespace}
+      options={['All', ...namespaces]}
       onChange={handleSelectGlobalNamespace}
-    >
-      {['All', ...namespaces].map((option) => (
-        <MenuItem key={option} value={option}>
-          {option}
-        </MenuItem>
-      ))}
-    </TextField>
+      disableClearable={true}
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          variant="outlined"
+          size="small"
+          label={T('common.chooseNamespace')}
+          aria-label="Choose namespace"
+        />
+      )}
+      PaperComponent={(props) => <Paper {...props} padding={false} />}
+    />
   )
 }
 
