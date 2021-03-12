@@ -77,11 +77,10 @@ func (in *HTTPChaos) ValidateScheduler(spec *field.Path) field.ErrorList {
 
 // ValidatePodMode validates the value with podmode
 func (in *HTTPChaos) ValidatePodMode(spec *field.Path) field.ErrorList {
-	// Because aws chaos does not need a pod mode, so return nil here.
-	return nil
+	return ValidatePodMode(in.Spec.Value, in.Spec.Mode, spec.Child("value"))
 }
 
 // SelectSpec returns the selector config for authority validate
 func (in *HTTPChaos) GetSelectSpec() []SelectSpec {
-	return nil
+	return []SelectSpec{&in.Spec}
 }
