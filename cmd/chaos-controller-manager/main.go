@@ -49,6 +49,7 @@ import (
 
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
+	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/util/workqueue"
@@ -120,6 +121,12 @@ func main() {
 		os.Exit(1)
 	}
 
+	authCli, err := authorizationv1.NewForConfig(cfg)
+	if err != nil {
+		setupLog.Error(err, "unable to get authorization client")
+		os.Exit(1)
+	}
+
 	err = router.SetupWithManagerAndConfigs(mgr, ccfg.ControllerCfg)
 	if err != nil {
 		setupLog.Error(err, "fail to setup with manager")
@@ -186,6 +193,12 @@ func main() {
 			ControllerCfg: ccfg.ControllerCfg,
 			Metrics:       metricsCollector,
 		}},
+	)
+
+	hookServer.Register("/validate-auth", &webhook.Admission{
+		Handler: apiWebhook.NewAuthValidator(ccfg.ControllerCfg.SecurityMode, mgr.GetClient(), mgr.GetAPIReader(), authCli,
+			ccfg.ControllerCfg.ClusterScoped, ccfg.ControllerCfg.TargetNamespace, ccfg.ControllerCfg.AllowedNamespaces, ccfg.ControllerCfg.IgnoredNamespaces),
+	},
 	)
 
 	// +kubebuilder:scaffold:builder
