@@ -66,6 +66,9 @@ type ChaosControllerConfig struct {
 	DNSServiceName string `envconfig:"CHAOS_DNS_SERVICE_NAME" default:""`
 	DNSServicePort int    `envconfig:"CHAOS_DNS_SERVICE_PORT" default:""`
 
+	// SecurityMode is used for enable authority validation in admission webhook
+	SecurityMode bool `envconfig:"SECURITY_MODE" default:"true" json:"security_mode"`
+
 	// Namespace is the namespace which the controller manager run in
 	Namespace string `envconfig:"NAMESPACE" default:""`
 
