@@ -1393,9 +1393,6 @@ webhooks:
         apiGroups: [""]
         apiVersions: ["v1"]
         resources: ["pods"]
-    namespaceSelector:
-      matchLabels:
-        admission-webhook: enabled
     failurePolicy: Ignore
   - clientConfig:
       caBundle: "${CA_BUNDLE}"
