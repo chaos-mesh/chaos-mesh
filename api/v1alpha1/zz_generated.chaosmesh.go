@@ -1266,3 +1266,39 @@ func init() {
 	})
 
 }
+
+// GetChaosValidator returns chaos object by kind
+func GetChaosValidator(chaosKind string) ChaosValidator {
+	switch chaosKind {
+
+	case KindDNSChaos:
+		return &DNSChaos{}
+
+	case KindHTTPChaos:
+		return &HTTPChaos{}
+
+	case KindIoChaos:
+		return &IoChaos{}
+
+	case KindJVMChaos:
+		return &JVMChaos{}
+
+	case KindKernelChaos:
+		return &KernelChaos{}
+
+	case KindNetworkChaos:
+		return &NetworkChaos{}
+
+	case KindPodChaos:
+		return &PodChaos{}
+
+	case KindStressChaos:
+		return &StressChaos{}
+
+	case KindTimeChaos:
+		return &TimeChaos{}
+
+	default:
+		return nil
+	}
+}

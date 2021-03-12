@@ -55,6 +55,7 @@ func main() {
 
 	testCode := codeHeader + testImport
 	initImpl := ""
+	allTypes := make([]string, 0, 10)
 
 	filepath.Walk("./api/v1alpha1", func(path string, info os.FileInfo, err error) error {
 		log := log.WithValues("file", path)
@@ -106,6 +107,7 @@ func main() {
 						implCode += generateImpl(baseType.Name.Name)
 						testCode += generateTest(baseType.Name.Name)
 						initImpl += generateInit(baseType.Name.Name)
+						allTypes = append(allTypes, baseType.Name.Name)
 						continue out
 					}
 				}
@@ -114,6 +116,8 @@ func main() {
 
 		return nil
 	})
+
+	validatorCode := generateGetChaosValidatorFunc(allTypes)
 
 	implCode += fmt.Sprintf(`
 func init() {
@@ -126,6 +130,7 @@ func init() {
 		os.Exit(1)
 	}
 	fmt.Fprint(file, implCode)
+	fmt.Fprint(file, validatorCode)
 
 	testCode += testInit
 	file, err = os.Create("./api/v1alpha1/zz_generated.chaosmesh_test.go")

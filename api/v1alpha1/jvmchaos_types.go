@@ -51,6 +51,21 @@ type JVMChaosSpec struct {
 	JVMParameter `json:",inline"`
 }
 
+// GetSelector is a getter for Selector (for implementing SelectSpec)
+func (in *JVMChaosSpec) GetSelector() SelectorSpec {
+	return in.Selector
+}
+
+// GetMode is a getter for Mode (for implementing SelectSpec)
+func (in *JVMChaosSpec) GetMode() PodMode {
+	return in.Mode
+}
+
+// GetValue is a getter for Value (for implementing SelectSpec)
+func (in *JVMChaosSpec) GetValue() string {
+	return in.Value
+}
+
 // JVMChaosAction represents the chaos action about jvm
 type JVMChaosAction string
 
