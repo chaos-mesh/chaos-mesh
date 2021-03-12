@@ -138,7 +138,7 @@ type MistakeSpec struct {
 	// +kubebuilder:validation:Enum=zero;random
 	Filling FillingType `json:"filling,omitempty"`
 
-	// There will be [1, MaxOccurrences] segments of wrong data. If MaxOccurrences is 0, no mistake will be injected
+	// There will be [1, MaxOccurrences] segments of wrong data.
 	// +optional
 	// +kubebuilder:validation:Minimum=1
 	MaxOccurrences int64 `json:"maxOccurrences,omitempty"`
