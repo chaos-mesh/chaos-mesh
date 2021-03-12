@@ -29,9 +29,9 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /mutate-chaos-mesh-org-v1alpha1-awschaos
+      path: /mutate-chaos-mesh-org-v1alpha1-httpchaos
   failurePolicy: Fail
-  name: mawschaos.kb.io
+  name: mhttpchaos.kb.io
   rules:
   - apiGroups:
     - chaos-mesh.org
@@ -41,7 +41,7 @@ webhooks:
     - CREATE
     - UPDATE
     resources:
-    - awschaos
+    - httpchaos
 - clientConfig:
     caBundle: Cg==
     service:
@@ -235,9 +235,9 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-chaos-mesh-org-v1alpha1-awschaos
+      path: /validate-chaos-mesh-org-v1alpha1-httpchaos
   failurePolicy: Fail
-  name: vawschaos.kb.io
+  name: vhttpchaos.kb.io
   rules:
   - apiGroups:
     - chaos-mesh.org
@@ -247,7 +247,7 @@ webhooks:
     - CREATE
     - UPDATE
     resources:
-    - awschaos
+    - httpchaos
 - clientConfig:
     caBundle: Cg==
     service:

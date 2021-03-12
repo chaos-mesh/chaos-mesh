@@ -25,7 +25,7 @@ import (
 // log is for logging in this package.
 var httpchaoslog = logf.Log.WithName("httpchaos-resource")
 
-// +kubebuilder:webhook:path=/mutate-chaos-mesh-org-v1alpha1-awschaos,mutating=true,failurePolicy=fail,groups=chaos-mesh.org,resources=awschaos,verbs=create;update,versions=v1alpha1,name=mawschaos.kb.io
+// +kubebuilder:webhook:path=/mutate-chaos-mesh-org-v1alpha1-httpchaos,mutating=true,failurePolicy=fail,groups=chaos-mesh.org,resources=httpchaos,verbs=create;update,versions=v1alpha1,name=mhttpchaos.kb.io
 
 var _ webhook.Defaulter = &HTTPChaos{}
 
@@ -34,7 +34,7 @@ func (in *HTTPChaos) Default() {
 	httpchaoslog.Info("default", "name", in.Name)
 }
 
-// +kubebuilder:webhook:verbs=create;update,path=/validate-chaos-mesh-org-v1alpha1-awschaos,mutating=false,failurePolicy=fail,groups=chaos-mesh.org,resources=awschaos,versions=v1alpha1,name=vawschaos.kb.io
+// +kubebuilder:webhook:verbs=create;update,path=/validate-chaos-mesh-org-v1alpha1-httpchaos,mutating=false,failurePolicy=fail,groups=chaos-mesh.org,resources=httpchaos,versions=v1alpha1,name=vhttpchaos.kb.io
 
 var _ ChaosValidator = &HTTPChaos{}
 
