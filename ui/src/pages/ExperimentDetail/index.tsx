@@ -99,8 +99,7 @@ export default function ExperimentDetail() {
 
   const fetchEvents = () =>
     api.events
-      .events()
-      .then(({ data }) => setEvents(data.filter((d) => d.experiment_id === uuid)))
+      .events({ experimentName: detail!.yaml.name })
       .catch(console.error)
       .finally(() => {
         setLoading(false)
