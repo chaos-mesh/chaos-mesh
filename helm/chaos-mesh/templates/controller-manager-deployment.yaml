@@ -79,6 +79,8 @@ spec:
             value: {{ .Values.dnsServer.name }}
           - name: CHAOS_DNS_SERVICE_PORT
             value: !!str {{ .Values.dnsServer.grpcPort }}
+          - name: SECURITY_MODE
+            value: "{{ .Values.dashboard.securityMode }}"
           {{- if .Values.dashboard.securityMode}}
           - name: CHAOS_DAEMON_CLIENT_CERT
             value: /etc/chaos-daemon/cert/tls.crt

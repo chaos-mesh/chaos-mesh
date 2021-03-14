@@ -56,6 +56,11 @@ rules:
       - services
 {{- end }}
     verbs: [ "get", "list", "watch" ]
+  - apiGroups: [ "authorization.k8s.io" ]
+    resources:
+      - subjectaccessreviews
+    verbs: [ "create" ]
+      
 
 ---
 kind: Role
@@ -70,6 +75,10 @@ rules:
   - apiGroups: [ "" ]
     resources: [ "configmaps", "services" ]
     verbs: [ "get", "list", "watch" ]
+  - apiGroups: [ "authorization.k8s.io" ]
+    resources:
+      - subjectaccessreviews
+    verbs: [ "create" ]
 
 ---
 # bindings cluster level
