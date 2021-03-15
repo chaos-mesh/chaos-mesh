@@ -20,13 +20,15 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/test"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
 var _ = Describe("container kill", func() {
-	defer mock.With("MockContainerdClient", &MockClient{})()
-	s, _ := newDaemonServer(containerRuntimeContainerd)
+	defer mock.With("MockContainerdClient", &test.MockClient{})()
+	s, _ := newDaemonServer(crclients.ContainerRuntimeContainerd)
 
 	Context("ContainerKill", func() {
 		It("should work", func() {
