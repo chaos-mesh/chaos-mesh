@@ -183,6 +183,28 @@ var _ = Describe("TwoPhase StateMachine", func() {
 			Expect(updated).To(Equal(true))
 			Expect(sm.Chaos.GetStatus().Experiment.Phase).To(Equal(v1alpha1.ExperimentPhaseRunning))
 		})
+
+		It("StateMachine Unexpected State", func() {
+			unexpectedState := "wrong-state"
+
+			for _, status := range statuses {
+				now := time.Now()
+				sm := setupStateMachineWithStatus(status)
+
+				updated, err := sm.run(context.TODO(), unexpectedState, now)
+				Expect(updated).To(Equal(false))
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("unexpected target phase"))
+			}
+
+			sm := setupStateMachineWithStatus(unexpectedState)
+			for _, status := range statuses {
+				updated, err := sm.run(context.TODO(), status, now)
+				Expect(updated).To(Equal(false))
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("unexpected current phase"))
+			}
+		})
 	})
 
 })
