@@ -1,5 +1,6 @@
 import { Box, Drawer, List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core'
 
+import AccountTreeOutlinedIcon from '@material-ui/icons/AccountTreeOutlined'
 import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
 import DashboardOutlinedIcon from '@material-ui/icons/DashboardOutlined'
 import GitHubIcon from '@material-ui/icons/GitHub'
@@ -100,6 +101,10 @@ const listItems = [
   {
     icon: <StorageOutlinedIcon />,
     text: 'experiments',
+  },
+  {
+    icon: <AccountTreeOutlinedIcon />,
+    text: 'workflows',
   },
   {
     icon: <TimelineOutlinedIcon />,

@@ -110,6 +110,9 @@
     "pauseDesc": "You can restart the experiment in the same position",
     "startDesc": "The operation will take effect immediately"
   },
+  "workflows": {
+    "title": "Workflows"
+  },
   "events": {
     "title": "Events",
     "noEventsFound": "No events found",

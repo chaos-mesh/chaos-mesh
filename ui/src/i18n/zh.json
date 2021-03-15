@@ -110,6 +110,9 @@
     "pauseDesc": "你可以在同一位置重启这个实验",
     "startDesc": "此操作将立即生效"
   },
+  "workflows": {
+    "title": "工作流"
+  },
   "events": {
     "title": "事件",
     "noEventsFound": "未发现事件",

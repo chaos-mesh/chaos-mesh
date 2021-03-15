@@ -8,6 +8,7 @@ import NewExperiment from 'components/NewExperimentNext'
 import { RouteProps } from 'react-router'
 import Settings from 'pages/Settings'
 import Swagger from 'pages/Swagger'
+import Workflows from 'pages/Workflows'
 
 const routes: RouteProps[] = [
   {
@@ -22,6 +23,11 @@ const routes: RouteProps[] = [
   {
     component: Experiments,
     path: '/experiments',
+    exact: true,
+  },
+  {
+    component: Workflows,
+    path: '/workflows',
     exact: true,
   },
   {
