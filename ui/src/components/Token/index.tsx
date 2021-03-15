@@ -54,14 +54,34 @@ const Token: React.FC<TokenProps> = ({ onSubmitCallback }) => {
     dispatch(setTokens(tokens))
   }
 
-  const submitToken = (values: TokenFormValues, { resetForm }: FormikHelpers<TokenFormValues>) => {
+  const submitToken = (values: TokenFormValues, { setFieldError, resetForm }: FormikHelpers<TokenFormValues>) => {
     api.auth.token(values.token)
 
-    saveToken(values)
+    function restSteps() {
+      saveToken(values)
 
-    typeof onSubmitCallback === 'function' && onSubmitCallback(values)
+      typeof onSubmitCallback === 'function' && onSubmitCallback(values)
 
-    resetForm()
+      resetForm()
+    }
+
+    // Test the validity of the token in advance
+    api.experiments
+      .state()
+      .then(restSteps)
+      .catch((error) => {
+        const data = error.response?.data
+
+        if (data && data.code === 'error.api.invalid_request' && data.message.includes('Unauthorized')) {
+          setFieldError('token', 'Please check the validity of the token')
+
+          api.auth.resetToken()
+
+          return
+        }
+
+        restSteps()
+      })
   }
 
   return (
