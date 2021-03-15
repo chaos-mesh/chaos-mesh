@@ -6,6 +6,7 @@ import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
 import ConfirmDialog from 'components-mui/ConfirmDialog'
 import ExperimentListItem from 'components/ExperimentListItem'
 import Loading from 'components-mui/Loading'
+import NotFound from 'components-mui/NotFound'
 import T from 'components/T'
 import _groupBy from 'lodash.groupby'
 import api from 'api'
@@ -84,10 +85,10 @@ export default function Archives() {
           .sort((a, b) => (a[0] > b[0] ? 1 : -1))
           .map(([kind, archivesByKind]) => (
             <Box key={kind} mb={6}>
-              <Box mb={6}>
-                <Typography variant="button">{kind}</Typography>
+              <Box mb={3} ml={1}>
+                <Typography variant="overline">{kind}</Typography>
               </Box>
-              <Grid container spacing={3}>
+              <Grid container spacing={6}>
                 {archivesByKind.length > 0 &&
                   archivesByKind.map((e) => (
                     <Grid key={e.uid} item xs={12}>
@@ -105,14 +106,12 @@ export default function Archives() {
           ))}
 
       {!loading && archives && archives.length === 0 && (
-        <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" height="100%">
+        <NotFound textAlign="center">
           <Box mb={3}>
             <ArchiveOutlinedIcon fontSize="large" />
           </Box>
-          <Typography variant="h6" align="center">
-            {T('archives.noArchivesFound')}
-          </Typography>
-        </Box>
+          <Typography variant="h6">{T('archives.noArchivesFound')}</Typography>
+        </NotFound>
       )}
 
       {loading && <Loading />}

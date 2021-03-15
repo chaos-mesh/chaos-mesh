@@ -29,29 +29,22 @@ const useStyles = makeStyles((theme) => ({
   },
   card: {
     flex: '0 0 240px',
-    marginRight: theme.spacing(3),
     cursor: 'pointer',
-    '&:last-child': {
-      marginRight: 0,
-    },
     '&:hover': {
-      color: theme.palette.primary.main,
-      borderColor: theme.palette.primary.main,
+      background: theme.palette.action.hover,
     },
   },
   addCard: {
     width: 210,
-    '&:hover': {
-      color: 'unset',
-      borderColor: 'unset',
-    },
   },
   editorPaperWrapper: {
     position: 'absolute',
     top: '50%',
     left: '50%',
+    display: 'flex',
+    flexDirection: 'column',
     width: '50vw',
-    height: '80vh',
+    height: '90vh',
     transform: 'translate(-50%, -50%)',
     [theme.breakpoints.down('sm')]: {
       width: '90vw',
@@ -142,7 +135,7 @@ const Predefined = React.memo(() => {
 
   return (
     <>
-      <Box className={classes.container}>
+      <Space className={classes.container}>
         <YAML
           callback={saveExperiment}
           buttonProps={{ className: clsx(classes.card, classes.addCard, 'predefined-upload') }}
@@ -159,7 +152,7 @@ const Predefined = React.memo(() => {
             </Box>
           </Card>
         ))}
-      </Box>
+      </Space>
       <Modal open={editorOpen} onClose={onModalClose}>
         <div>
           <Paper className={classes.editorPaperWrapper} padding={false}>

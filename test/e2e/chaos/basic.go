@@ -209,6 +209,20 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				iochaostestcases.TestcaseIOErrorWithSpecifiedContainer(ns, cli, c, port)
 			})
 		})
+
+		// io mistake case in [IOMistake] context
+		ginkgo.Context("[IOMistake]", func() {
+
+			ginkgo.It("[Schedule]", func() {
+				iochaostestcases.TestcaseIOMistakeDurationForATimeThenRecover(ns, cli, c, port)
+			})
+			ginkgo.It("[Pause]", func() {
+				iochaostestcases.TestcaseIOMistakeDurationForATimePauseAndUnPause(ns, cli, c, port)
+			})
+			ginkgo.It("[SpecifyContainer]", func() {
+				iochaostestcases.TestcaseIOMistakeWithSpecifiedContainer(ns, cli, c, port)
+			})
+		})
 	})
 
 	ginkgo.Context("[Sidecar Config]", func() {
