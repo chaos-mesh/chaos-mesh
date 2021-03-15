@@ -88,11 +88,27 @@ We follow the kubernetes pattern, make operations based on desired states and cu
 
 ### Workflow Entry Reconciler
 
+Workflow entry reconciler watches on workflow, create the first `WorkflowNode` referenced by entry, then update the status of the workflow.
+
 ### Deadline Reconciler
+
+Deadline reconciler will update the condition `DeadlineExceed` when deadline exceed.
 
 ### Serial Node Reconciler
 
+We use three fields to describe current statue of serial node:
+
+- ExpectedChildren *int
+- ActiveChildren []corev1.LocalObjectReference
+- FinishedChildren []corev1.LocalObjectReference
+
+Serial reconciler will create new `WorkflowNode` if `ActiveChildren` is empty, then add this object into `ActiveChildren`.
+
 ### Accomplish Watcher
+
+> Currently, `Serial`, `Parallel` and `Task` all have these fields mentioned above.
+
+Accomplish watcher keeps watching on all `WorkflowNode`s, as one of `Accomplished` and `DeadlineExceed` becomes true, it will update its parent's status.
 
 ### Others
 
