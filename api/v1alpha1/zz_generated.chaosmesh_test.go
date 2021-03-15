@@ -390,6 +390,14 @@ func TestGcpChaosGetStatus(t *testing.T) {
 	chaos.GetStatus()
 }
 
+func TestGcpChaosGetSpecAndMetaString(t *testing.T) {
+	g := NewGomegaWithT(t)
+	chaos := &GcpChaos{}
+	err := faker.FakeData(chaos)
+	g.Expect(err).To(BeNil())
+	chaos.GetSpecAndMetaString()
+}
+
 func TestGcpChaosListChaos(t *testing.T) {
 	g := NewGomegaWithT(t)
 

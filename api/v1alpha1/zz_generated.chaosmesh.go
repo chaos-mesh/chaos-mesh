@@ -385,6 +385,20 @@ func (in *GcpChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
 }
 
+// GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
+func (in *GcpChaos) GetSpecAndMetaString() (string, error) {
+	spec, err := json.Marshal(in.Spec)
+	if err != nil {
+		return "", err
+	}
+
+	meta := in.ObjectMeta.DeepCopy()
+	meta.SetResourceVersion("")
+	meta.SetGeneration(0)
+
+	return string(spec) + meta.String(), nil
+}
+
 // +kubebuilder:object:root=true
 
 // GcpChaosList contains a list of GcpChaos
@@ -1538,6 +1552,9 @@ func GetChaosValidator(chaosKind string) ChaosValidator {
 
 	case KindDNSChaos:
 		return &DNSChaos{}
+
+	case KindGcpChaos:
+		return &GcpChaos{}
 
 	case KindHTTPChaos:
 		return &HTTPChaos{}
