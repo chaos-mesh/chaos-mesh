@@ -42,7 +42,7 @@ type endpoint struct {
 }
 
 // GetComputeService is used to get the GCP compute Service.
-func GetComputeService (ctx context.Context, cli client.Client, gcpchaos *v1alpha1.GcpChaos) (*compute.Service, error) {
+func GetComputeService(ctx context.Context, cli client.Client, gcpchaos *v1alpha1.GcpChaos) (*compute.Service, error) {
 	if gcpchaos.Spec.SecretName != nil {
 		secret := &v1.Secret{}
 		err := cli.Get(ctx, types.NamespacedName{
