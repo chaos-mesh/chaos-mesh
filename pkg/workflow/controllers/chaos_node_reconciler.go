@@ -18,8 +18,10 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -27,8 +29,6 @@ import (
 	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
 type ChaosNodeReconciler struct {
@@ -50,9 +50,9 @@ func (it *ChaosNodeReconciler) Reconcile(request reconcile.Request) (reconcile.R
 		return reconcile.Result{}, client.IgnoreNotFound(err)
 	}
 
-	// TODO: use condition
 	if ConditionEqualsTo(node.Status, v1alpha1.ConditionDeadlineExceed, corev1.ConditionTrue) {
-		return reconcile.Result{}, nil
+		err := it.recoverChaos(ctx, node)
+		return reconcile.Result{}, err
 	}
 
 	if availableChaos(string(node.Spec.Type)) {
@@ -65,7 +65,6 @@ func (it *ChaosNodeReconciler) Reconcile(request reconcile.Request) (reconcile.R
 
 func (it *ChaosNodeReconciler) injectChaos(ctx context.Context, node v1alpha1.WorkflowNode) error {
 	var chaosObject runtime.Object
-
 	var meta metav1.Object
 
 	if node.Spec.Type == v1alpha1.TypeNetworkChaos {
@@ -78,9 +77,7 @@ func (it *ChaosNodeReconciler) injectChaos(ctx context.Context, node v1alpha1.Wo
 		}
 		meta = networkChaos.GetObjectMeta()
 		chaosObject = &networkChaos
-	}
-
-	if node.Spec.Type == v1alpha1.TypePodChaos {
+	} else if node.Spec.Type == v1alpha1.TypePodChaos {
 		podChaos := v1alpha1.PodChaos{
 			ObjectMeta: metav1.ObjectMeta{
 				GenerateName: fmt.Sprintf("%s-", node.Name),
@@ -90,9 +87,7 @@ func (it *ChaosNodeReconciler) injectChaos(ctx context.Context, node v1alpha1.Wo
 		}
 		meta = podChaos.GetObjectMeta()
 		chaosObject = &podChaos
-	}
-
-	if meta == nil || chaosObject == nil {
+	} else {
 		it.logger.Info("unsupported chaos nodes", "key", fmt.Sprintf("%s/%s", node.Namespace, node.Name), "type", node.Spec.Type)
 		return nil
 	}
@@ -144,6 +139,63 @@ func (it *ChaosNodeReconciler) injectChaos(ctx context.Context, node v1alpha1.Wo
 
 	})
 	return updateError
+}
+
+func (it *ChaosNodeReconciler) recoverChaos(ctx context.Context, node v1alpha1.WorkflowNode) error {
+	if node.Status.ChaosResource == nil {
+		return nil
+	}
+
+	var chaosObject runtime.Object
+
+	var err error
+	if node.Spec.Type == v1alpha1.TypeNetworkChaos {
+		target := v1alpha1.NetworkChaos{}
+		err = it.kubeClient.Get(ctx,
+			types.NamespacedName{Namespace: node.Namespace, Name: node.Status.ChaosResource.Name},
+			&target)
+		chaosObject = &target
+	} else if node.Spec.Type == v1alpha1.TypePodChaos {
+		target := v1alpha1.PodChaos{}
+		err = it.kubeClient.Get(ctx,
+			types.NamespacedName{Namespace: node.Namespace, Name: node.Status.ChaosResource.Name},
+			&target)
+		chaosObject = &target
+	} else {
+		it.logger.Info("unsupported chaos nodes", "key", fmt.Sprintf("%s/%s", node.Namespace, node.Name), "type", node.Spec.Type)
+		return nil
+	}
+
+	if apierrors.IsNotFound(err) {
+		// TODO: debug log
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+
+	err = it.kubeClient.Delete(ctx, chaosObject)
+
+	if client.IgnoreNotFound(err) != nil {
+		return err
+	}
+
+	err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		node := v1alpha1.WorkflowNode{}
+		err := it.kubeClient.Get(ctx, types.NamespacedName{
+			Namespace: node.Namespace,
+			Name:      node.Name,
+		}, &node)
+		if err != nil {
+			return client.IgnoreNotFound(err)
+		}
+
+		node.Status.ChaosResource = nil
+		err = it.kubeClient.Update(ctx, &node)
+		return client.IgnoreNotFound(err)
+	})
+
+	return err
 }
 
 func availableChaos(kind string) bool {
