@@ -26,6 +26,12 @@ export default function insertCommonStyle() {
         overflow-y: scroll;
       }
 
+      @media screen and (max-width: 768px) {
+        .chaos-events-legends {
+          display: none;
+        }
+      }
+
       .chaos-events-legends > div {
         display: flex;
         align-items: center;

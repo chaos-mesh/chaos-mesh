@@ -14,6 +14,7 @@
 package v1alpha1
 
 import (
+	"encoding/json"
 	"reflect"
 	"time"
 
@@ -118,6 +119,20 @@ func (in *AwsChaos) GetChaos() *ChaosInstance {
 // GetStatus returns the status
 func (in *AwsChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
+}
+
+// GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
+func (in *AwsChaos) GetSpecAndMetaString() (string, error) {
+	spec, err := json.Marshal(in.Spec)
+	if err != nil {
+		return "", err
+	}
+
+	meta := in.ObjectMeta.DeepCopy()
+	meta.SetResourceVersion("")
+	meta.SetGeneration(0)
+
+	return string(spec) + meta.String(), nil
 }
 
 // +kubebuilder:object:root=true
@@ -238,6 +253,20 @@ func (in *DNSChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
 }
 
+// GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
+func (in *DNSChaos) GetSpecAndMetaString() (string, error) {
+	spec, err := json.Marshal(in.Spec)
+	if err != nil {
+		return "", err
+	}
+
+	meta := in.ObjectMeta.DeepCopy()
+	meta.SetResourceVersion("")
+	meta.SetGeneration(0)
+
+	return string(spec) + meta.String(), nil
+}
+
 // +kubebuilder:object:root=true
 
 // DNSChaosList contains a list of DNSChaos
@@ -354,6 +383,20 @@ func (in *HTTPChaos) GetChaos() *ChaosInstance {
 // GetStatus returns the status
 func (in *HTTPChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
+}
+
+// GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
+func (in *HTTPChaos) GetSpecAndMetaString() (string, error) {
+	spec, err := json.Marshal(in.Spec)
+	if err != nil {
+		return "", err
+	}
+
+	meta := in.ObjectMeta.DeepCopy()
+	meta.SetResourceVersion("")
+	meta.SetGeneration(0)
+
+	return string(spec) + meta.String(), nil
 }
 
 // +kubebuilder:object:root=true
@@ -474,6 +517,20 @@ func (in *IoChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
 }
 
+// GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
+func (in *IoChaos) GetSpecAndMetaString() (string, error) {
+	spec, err := json.Marshal(in.Spec)
+	if err != nil {
+		return "", err
+	}
+
+	meta := in.ObjectMeta.DeepCopy()
+	meta.SetResourceVersion("")
+	meta.SetGeneration(0)
+
+	return string(spec) + meta.String(), nil
+}
+
 // +kubebuilder:object:root=true
 
 // IoChaosList contains a list of IoChaos
@@ -590,6 +647,20 @@ func (in *JVMChaos) GetChaos() *ChaosInstance {
 // GetStatus returns the status
 func (in *JVMChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
+}
+
+// GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
+func (in *JVMChaos) GetSpecAndMetaString() (string, error) {
+	spec, err := json.Marshal(in.Spec)
+	if err != nil {
+		return "", err
+	}
+
+	meta := in.ObjectMeta.DeepCopy()
+	meta.SetResourceVersion("")
+	meta.SetGeneration(0)
+
+	return string(spec) + meta.String(), nil
 }
 
 // +kubebuilder:object:root=true
@@ -710,6 +781,20 @@ func (in *KernelChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
 }
 
+// GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
+func (in *KernelChaos) GetSpecAndMetaString() (string, error) {
+	spec, err := json.Marshal(in.Spec)
+	if err != nil {
+		return "", err
+	}
+
+	meta := in.ObjectMeta.DeepCopy()
+	meta.SetResourceVersion("")
+	meta.SetGeneration(0)
+
+	return string(spec) + meta.String(), nil
+}
+
 // +kubebuilder:object:root=true
 
 // KernelChaosList contains a list of KernelChaos
@@ -826,6 +911,20 @@ func (in *NetworkChaos) GetChaos() *ChaosInstance {
 // GetStatus returns the status
 func (in *NetworkChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
+}
+
+// GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
+func (in *NetworkChaos) GetSpecAndMetaString() (string, error) {
+	spec, err := json.Marshal(in.Spec)
+	if err != nil {
+		return "", err
+	}
+
+	meta := in.ObjectMeta.DeepCopy()
+	meta.SetResourceVersion("")
+	meta.SetGeneration(0)
+
+	return string(spec) + meta.String(), nil
 }
 
 // +kubebuilder:object:root=true
@@ -946,6 +1045,20 @@ func (in *PodChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
 }
 
+// GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
+func (in *PodChaos) GetSpecAndMetaString() (string, error) {
+	spec, err := json.Marshal(in.Spec)
+	if err != nil {
+		return "", err
+	}
+
+	meta := in.ObjectMeta.DeepCopy()
+	meta.SetResourceVersion("")
+	meta.SetGeneration(0)
+
+	return string(spec) + meta.String(), nil
+}
+
 // +kubebuilder:object:root=true
 
 // PodChaosList contains a list of PodChaos
@@ -1062,6 +1175,20 @@ func (in *StressChaos) GetChaos() *ChaosInstance {
 // GetStatus returns the status
 func (in *StressChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
+}
+
+// GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
+func (in *StressChaos) GetSpecAndMetaString() (string, error) {
+	spec, err := json.Marshal(in.Spec)
+	if err != nil {
+		return "", err
+	}
+
+	meta := in.ObjectMeta.DeepCopy()
+	meta.SetResourceVersion("")
+	meta.SetGeneration(0)
+
+	return string(spec) + meta.String(), nil
 }
 
 // +kubebuilder:object:root=true
@@ -1182,6 +1309,20 @@ func (in *TimeChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
 }
 
+// GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
+func (in *TimeChaos) GetSpecAndMetaString() (string, error) {
+	spec, err := json.Marshal(in.Spec)
+	if err != nil {
+		return "", err
+	}
+
+	meta := in.ObjectMeta.DeepCopy()
+	meta.SetResourceVersion("")
+	meta.SetGeneration(0)
+
+	return string(spec) + meta.String(), nil
+}
+
 // +kubebuilder:object:root=true
 
 // TimeChaosList contains a list of TimeChaos
@@ -1262,4 +1403,43 @@ func init() {
 		ChaosList: &TimeChaosList{},
 	})
 
+}
+
+// GetChaosValidator returns chaos object by kind
+func GetChaosValidator(chaosKind string) ChaosValidator {
+	switch chaosKind {
+
+	case KindAwsChaos:
+		return &AwsChaos{}
+
+	case KindDNSChaos:
+		return &DNSChaos{}
+
+	case KindHTTPChaos:
+		return &HTTPChaos{}
+
+	case KindIoChaos:
+		return &IoChaos{}
+
+	case KindJVMChaos:
+		return &JVMChaos{}
+
+	case KindKernelChaos:
+		return &KernelChaos{}
+
+	case KindNetworkChaos:
+		return &NetworkChaos{}
+
+	case KindPodChaos:
+		return &PodChaos{}
+
+	case KindStressChaos:
+		return &StressChaos{}
+
+	case KindTimeChaos:
+		return &TimeChaos{}
+
+	default:
+		return nil
+	}
 }
