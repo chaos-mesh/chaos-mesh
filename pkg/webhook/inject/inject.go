@@ -30,7 +30,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"k8s.io/api/admission/v1"
+	"k8s.io/api/admission/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -49,11 +49,11 @@ const (
 )
 
 // Inject do pod template config inject
-func Inject(res *v1.AdmissionRequest, cli client.Client, cfg *config.Config, controllerCfg *controllerCfg.ChaosControllerConfig, metrics *metrics.ChaosCollector) *v1.AdmissionResponse {
+func Inject(res *v1beta1.AdmissionRequest, cli client.Client, cfg *config.Config, controllerCfg *controllerCfg.ChaosControllerConfig, metrics *metrics.ChaosCollector) *v1beta1.AdmissionResponse {
 	var pod corev1.Pod
 	if err := json.Unmarshal(res.Object.Raw, &pod); err != nil {
 		log.Error(err, "Could not unmarshal raw object")
-		return &v1.AdmissionResponse{
+		return &v1beta1.AdmissionResponse{
 			Result: &metav1.Status{
 				Message: err.Error(),
 			},
@@ -75,7 +75,7 @@ func Inject(res *v1.AdmissionRequest, cli client.Client, cfg *config.Config, con
 	requiredKey, ok := injectRequired(&pod.ObjectMeta, cli, cfg, controllerCfg)
 	if !ok {
 		log.Info("Skipping injection due to policy check", "namespace", pod.ObjectMeta.Namespace, "name", podName)
-		return &v1.AdmissionResponse{
+		return &v1beta1.AdmissionResponse{
 			Allowed: true,
 		}
 	}
@@ -88,7 +88,7 @@ func Inject(res *v1.AdmissionRequest, cli client.Client, cfg *config.Config, con
 		log.Error(err, "Error getting injection config, permitting launch of pod with no sidecar injected", "injectionConfig",
 			injectionConfig)
 		// dont prevent pods from launching! just return allowed
-		return &v1.AdmissionResponse{
+		return &v1beta1.AdmissionResponse{
 			Allowed: true,
 		}
 	}
@@ -97,7 +97,7 @@ func Inject(res *v1.AdmissionRequest, cli client.Client, cfg *config.Config, con
 		meet, err := selector.CheckPodMeetSelector(pod, *injectionConfig.Selector)
 		if err != nil {
 			log.Error(err, "Failed to check pod selector", "namespace", pod.Namespace)
-			return &v1.AdmissionResponse{
+			return &v1beta1.AdmissionResponse{
 				Allowed: true,
 			}
 		}
@@ -105,7 +105,7 @@ func Inject(res *v1.AdmissionRequest, cli client.Client, cfg *config.Config, con
 		if !meet {
 			log.Info("Skipping injection, this pod does not meet the selection criteria",
 				"namespace", pod.Namespace, "name", pod.Name)
-			return &v1.AdmissionResponse{
+			return &v1beta1.AdmissionResponse{
 				Allowed: true,
 			}
 		}
@@ -115,7 +115,7 @@ func Inject(res *v1.AdmissionRequest, cli client.Client, cfg *config.Config, con
 
 	patchBytes, err := createPatch(&pod, injectionConfig, annotations)
 	if err != nil {
-		return &v1.AdmissionResponse{
+		return &v1beta1.AdmissionResponse{
 			Result: &metav1.Status{
 				Message: err.Error(),
 			},
@@ -126,11 +126,11 @@ func Inject(res *v1.AdmissionRequest, cli client.Client, cfg *config.Config, con
 	if metrics != nil {
 		metrics.Injections.WithLabelValues(res.Namespace, requiredKey).Inc()
 	}
-	return &v1.AdmissionResponse{
+	return &v1beta1.AdmissionResponse{
 		Allowed: true,
 		Patch:   patchBytes,
-		PatchType: func() *v1.PatchType {
-			pt := v1.PatchTypeJSONPatch
+		PatchType: func() *v1beta1.PatchType {
+			pt := v1beta1.PatchTypeJSONPatch
 			return &pt
 		}(),
 	}
