@@ -25,7 +25,8 @@ import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight'
 import LastPageIcon from '@material-ui/icons/LastPage'
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
-import RunningLabel from 'components-mui/RunningLabel'
+import StateLabel from 'components-mui/StateLabel'
+import { StateOfExperimentsEnum } from 'api/experiments.type'
 import T from 'components/T'
 import { makeStyles } from '@material-ui/core/styles'
 import { useIntl } from 'react-intl'
@@ -182,7 +183,11 @@ const EventsTableRow: React.FC<EventsTableRowProps> = ({ event: e, detailed, onS
     <TableCell>{e.kind}</TableCell>
     <TableCell>{format(e.start_time)}</TableCell>
     <TableCell>
-      {e.finish_time ? format(e.finish_time) : <RunningLabel>{T('experiments.state.running')}</RunningLabel>}
+      {e.finish_time ? (
+        format(e.finish_time)
+      ) : (
+        <StateLabel state={StateOfExperimentsEnum.Running}>{T('experiments.state.running')}</StateLabel>
+      )}
     </TableCell>
     {detailed && (
       <TableCell>
@@ -296,7 +301,7 @@ const EventsTable: React.ForwardRefRenderFunction<EventsTableHandles, EventsTabl
           }}
         >
           <PaperTop title={T('common.detail')}>
-            <IconButton color="primary" onClick={closeEventDetail}>
+            <IconButton onClick={closeEventDetail}>
               <CloseIcon />
             </IconButton>
           </PaperTop>
