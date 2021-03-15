@@ -18,7 +18,7 @@ const Chaos: React.FC<ChaosProps> = ({ kind, data }) => (
         {iconByKind(kind)}
       </Box>
       <Box flex={1.5}>
-        <Typography variant="button" color="textSecondary" gutterBottom>
+        <Typography variant="overline" color="textSecondary" gutterBottom>
           {transByKind(kind)}
         </Typography>
         <Typography variant="h5">{data.sum}</Typography>
