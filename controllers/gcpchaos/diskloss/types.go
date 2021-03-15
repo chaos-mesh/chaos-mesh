@@ -15,20 +15,17 @@ package diskloss
 
 import (
 	"context"
-	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
 
-	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	"google.golang.org/api/compute/v1"
-	"google.golang.org/api/option"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/gcpchaos/nodestop"
 	"github.com/chaos-mesh/chaos-mesh/pkg/router"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 	end "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
@@ -49,35 +46,10 @@ func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 		e.Log.Error(err, "chaos is not GcpChaos", "chaos", chaos)
 		return err
 	}
-	var computeService *compute.Service
-	var err error
-	if gcpchaos.Spec.SecretName != nil {
-		secret := &v1.Secret{}
-		err = e.Client.Get(ctx, types.NamespacedName{
-			Name:      *gcpchaos.Spec.SecretName,
-			Namespace: gcpchaos.Namespace,
-		}, secret)
-		if err != nil {
-			e.Log.Error(err, "fail to get cloud secret")
-			return err
-		}
-
-		decodeBytes, err := base64.StdEncoding.DecodeString(string(secret.Data["service_account"]))
-		if err != nil {
-			e.Log.Error(err, "fail to decode service_account")
-			return err
-		}
-		computeService, err = compute.NewService(ctx, option.WithCredentialsJSON(decodeBytes))
-		if err != nil {
-			e.Log.Error(err, "fail to create the google compute service")
-			return err
-		}
-	} else {
-		computeService, err = compute.NewService(ctx)
-		if err != nil {
-			e.Log.Error(err, "fail to create the google compute service")
-			return err
-		}
+	computeService, err := nodestop.GetComputeService(ctx, e.Client, gcpchaos)
+	if err != nil {
+		e.Log.Error(err, "fail to get the compute service")
+		return err
 	}
 
 	haveDisk := false
@@ -124,35 +96,10 @@ func (e *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		return err
 	}
 	gcpchaos.Finalizers = make([]string, 0)
-	var computeService *compute.Service
-	var err error
-	if gcpchaos.Spec.SecretName != nil {
-		secret := &v1.Secret{}
-		err = e.Client.Get(ctx, types.NamespacedName{
-			Name:      *gcpchaos.Spec.SecretName,
-			Namespace: gcpchaos.Namespace,
-		}, secret)
-		if err != nil {
-			e.Log.Error(err, "fail to get cloud secret")
-			return err
-		}
-
-		decodeBytes, err := base64.StdEncoding.DecodeString(string(secret.Data["service_account"]))
-		if err != nil {
-			e.Log.Error(err, "fail to decode service_account")
-			return err
-		}
-		computeService, err = compute.NewService(ctx, option.WithCredentialsJSON(decodeBytes))
-		if err != nil {
-			e.Log.Error(err, "fail to create the google compute service")
-			return err
-		}
-	} else {
-		computeService, err = compute.NewService(ctx)
-		if err != nil {
-			e.Log.Error(err, "fail to create the google compute service")
-			return err
-		}
+	computeService, err := nodestop.GetComputeService(ctx, e.Client, gcpchaos)
+	if err != nil {
+		e.Log.Error(err, "fail to get the compute service")
+		return err
 	}
 	var disk compute.AttachedDisk
 	err = json.Unmarshal([]byte(gcpchaos.Spec.AttachedDiskString), &disk)

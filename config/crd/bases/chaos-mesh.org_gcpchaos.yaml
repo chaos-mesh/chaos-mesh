@@ -72,7 +72,8 @@ spec:
               - cron
               type: object
             secretName:
-              description: SecretName defines the name of kubernetes secret.
+              description: SecretName defines the name of kubernetes secret. It is
+                used for GCP credentials.
               type: string
             zone:
               description: Zone defines the zone of gcp project.

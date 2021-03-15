@@ -57,7 +57,7 @@ type GcpChaosSpec struct {
 	// +optional
 	Scheduler *SchedulerSpec `json:"scheduler,omitempty"`
 
-	// SecretName defines the name of kubernetes secret.
+	// SecretName defines the name of kubernetes secret. It is used for GCP credentials.
 	// +optional
 	SecretName *string `json:"secretName,omitempty"`
 
