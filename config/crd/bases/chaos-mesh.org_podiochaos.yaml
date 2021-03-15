@@ -104,6 +104,28 @@ spec:
                     items:
                       type: string
                     type: array
+                  mistake:
+                    description: MistakeSpec represents the mistake to inject
+                    properties:
+                      filling:
+                        description: Filling determines what is filled in the miskate
+                          data.
+                        enum:
+                        - zero
+                        - random
+                        type: string
+                      maxLength:
+                        description: Max length of each wrong data segment in bytes
+                        format: int64
+                        minimum: 1
+                        type: integer
+                      maxOccurrences:
+                        description: There will be [1, MaxOccurrences] segments of
+                          wrong data.
+                        format: int64
+                        minimum: 1
+                        type: integer
+                    type: object
                   mtime:
                     description: Timespec represents a time
                     properties:
