@@ -18,6 +18,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -849,6 +850,7 @@ func (s *Service) deleteExperiment(c *gin.Context) {
 		chaosMeta metav1.Object
 		ok        bool
 		exp       *core.Experiment
+		errFlag   bool
 	)
 
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
@@ -857,74 +859,79 @@ func (s *Service) deleteExperiment(c *gin.Context) {
 		return
 	}
 
-	uid := c.Param("uid")
-	if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
-		if gorm.IsRecordNotFoundError(err) {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInvalidRequest.New("the experiment is not found"))
-		} else {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
-		}
-		return
-	}
-
-	kind := exp.Kind
-	ns := exp.Namespace
-	name := exp.Name
+	uids := c.Param("uid")
+	uidSlice := strings.Split(uids, ",")
 	force := c.DefaultQuery("force", "false")
+	errFlag = false
 
-	ctx := context.TODO()
-	chaosKey := types.NamespacedName{Namespace: ns, Name: name}
+	for _, uid := range uidSlice {
+		if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
+			if gorm.IsRecordNotFoundError(err) {
+				_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("delete experiment uid (%s) error, because the experiment is not found", uid)))
+			} else {
+				_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("delete experiment uid (%s) error, because %s", uid, err.Error())))
+			}
+			errFlag = true
+			continue
+		}
 
-	if chaosKind, ok = v1alpha1.AllKinds()[kind]; !ok {
-		c.Status(http.StatusBadRequest)
-		_ = c.Error(utils.ErrInvalidRequest.New(kind + " is not supported"))
-		return
+		kind := exp.Kind
+		ns := exp.Namespace
+		name := exp.Name
+
+		ctx := context.TODO()
+		chaosKey := types.NamespacedName{Namespace: ns, Name: name}
+
+		if chaosKind, ok = v1alpha1.AllKinds()[kind]; !ok {
+			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("delete experiment uid (%s) error, because kind (%s) is not supported", uid, kind)))
+			errFlag = true
+			continue
+		}
+		if err := kubeCli.Get(ctx, chaosKey, chaosKind.Chaos); err != nil {
+			if apierrors.IsNotFound(err) {
+				_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("delete experiment uid (%s) error, because the chaos is not found", uid)))
+			} else {
+				_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("delete experiment uid (%s) error, because %s", uid, err.Error())))
+			}
+			errFlag = true
+			continue
+		}
+
+		if force == "true" {
+			if chaosMeta, ok = chaosKind.Chaos.(metav1.Object); !ok {
+				_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("delete experiment uid (%s) error, because failed to get chaos meta information", uid)))
+				errFlag = true
+				continue
+			}
+
+			annotations := chaosMeta.GetAnnotations()
+			if annotations == nil {
+				annotations = make(map[string]string)
+			}
+			annotations[common.AnnotationCleanFinalizer] = common.AnnotationCleanFinalizerForced
+			chaosMeta.SetAnnotations(annotations)
+			if err := kubeCli.Update(context.Background(), chaosKind.Chaos); err != nil {
+				_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("forced delete experiment uid (%s) error, because update chaos annotation error", uid)))
+				errFlag = true
+				continue
+			}
+		}
+
+		if err := kubeCli.Delete(ctx, chaosKind.Chaos, &client.DeleteOptions{}); err != nil {
+			if apierrors.IsNotFound(err) {
+				_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("delete experiment uid (%s) error, because the chaos is not found", uid)))
+			} else {
+				_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("delete experiment uid (%s) error, because %s", uid, err.Error())))
+			}
+			errFlag = true
+			continue
+		}
 	}
-	if err := kubeCli.Get(ctx, chaosKey, chaosKind.Chaos); err != nil {
-		if apierrors.IsNotFound(err) {
-			c.Status(http.StatusNotFound)
-			_ = c.Error(utils.ErrNotFound.NewWithNoMessage())
-		} else {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
-		}
-		return
+	if errFlag == true {
+		c.Status(http.StatusInternalServerError)
+	} else {
+		c.JSON(http.StatusOK, StatusResponse{Status: "success"})
 	}
-
-	if force == "true" {
-		if chaosMeta, ok = chaosKind.Chaos.(metav1.Object); !ok {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("failed to get chaos meta information")))
-			return
-		}
-
-		annotations := chaosMeta.GetAnnotations()
-		if annotations == nil {
-			annotations = make(map[string]string)
-		}
-		annotations[common.AnnotationCleanFinalizer] = common.AnnotationCleanFinalizerForced
-		chaosMeta.SetAnnotations(annotations)
-		if err := kubeCli.Update(context.Background(), chaosKind.Chaos); err != nil {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("forced deletion of chaos failed, because update chaos annotation error")))
-			return
-		}
-	}
-
-	if err := kubeCli.Delete(ctx, chaosKind.Chaos, &client.DeleteOptions{}); err != nil {
-		if apierrors.IsNotFound(err) {
-			c.Status(http.StatusNotFound)
-			_ = c.Error(utils.ErrNotFound.NewWithNoMessage())
-		} else {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
-		}
-		return
-	}
-
-	c.JSON(http.StatusOK, StatusResponse{Status: "success"})
 }
 
 // @Summary Get chaos experiments state from Kubernetes cluster.
