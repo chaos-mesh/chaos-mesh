@@ -185,12 +185,11 @@ var _ = Describe("TwoPhase StateMachine", func() {
 		})
 
 		It("StateMachine Unexpected State", func() {
-			unexpectedState := "wrong-state"
+			var unexpectedState v1alpha1.ExperimentPhase = "wrong-state"
+			now := time.Now()
 
 			for _, status := range statuses {
-				now := time.Now()
 				sm := setupStateMachineWithStatus(status)
-
 				updated, err := sm.run(context.TODO(), unexpectedState, now)
 				Expect(updated).To(Equal(false))
 				Expect(err).To(HaveOccurred())
