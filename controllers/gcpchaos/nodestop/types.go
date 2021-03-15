@@ -62,13 +62,13 @@ func GetComputeService(ctx context.Context, cli client.Client, gcpchaos *v1alpha
 			return nil, err
 		}
 		return computeService, nil
-	} else {
-		computeService, err := compute.NewService(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return computeService, nil
 	}
+
+	computeService, err := compute.NewService(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return computeService, nil
 }
 
 func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
