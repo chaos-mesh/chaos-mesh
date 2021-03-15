@@ -53,8 +53,8 @@ export default function Dashboard() {
   return (
     <>
       <Grow in={true} style={{ transformOrigin: '0 0 0' }}>
-        <Grid container spacing={3}>
-          <Grid item md={12} lg={3}>
+        <Grid container spacing={6}>
+          <Grid item xs={12} md={12} lg={3}>
             <Welcome />
           </Grid>
 
@@ -88,7 +88,7 @@ export default function Dashboard() {
             </Grid>
 
             <Grid item xs={12}>
-              <Box mt={3}>
+              <Box mt={6}>
                 <Paper>
                   <PaperTop title={T('dashboard.predefined')} subtitle={T('dashboard.predefinedDesc')} />
 
