@@ -95,6 +95,11 @@ func (in *IoChaos) ValidatePodMode(spec *field.Path) field.ErrorList {
 	return ValidatePodMode(in.Spec.Value, in.Spec.Mode, spec.Child("value"))
 }
 
+// SelectSpec returns the selector config for authority validate
+func (in *IoChaos) GetSelectSpec() []SelectSpec {
+	return []SelectSpec{&in.Spec}
+}
+
 func (in *IoChaosSpec) validateDelay(delay *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 	if in.Action == IoLatency {

@@ -52,6 +52,7 @@ CLUSTER_MANAGER_TOKEN_LIST=($CLUSTER_MANAGER_TOKEN)
 
 CLUSTER_VIEW_TOKEN_LIST=($CLUSTER_MANAGER_TOKEN $CLUSTER_VIEWER_TOKEN)
 CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST=($BUSYBOX_MANAGER_TOKEN $BUSYBOX_VIEWER_TOKEN)
+CLUSTER_MANAGER_FORBIDDEN_TOKEN_LIST=($CLUSTER_VIEWER_TOKEN $BUSYBOX_MANAGER_TOKEN $BUSYBOX_VIEWER_TOKEN)
 BUSYBOX_MANAGE_TOKEN_LIST=($CLUSTER_MANAGER_TOKEN $BUSYBOX_MANAGER_TOKEN)
 BUSYBOX_MANAGER_FORBIDDEN_TOKEN_LIST=($CLUSTER_VIEWER_TOKEN $BUSYBOX_VIEWER_TOKEN)
 BUSYBOX_VIEW_TOKEN_LIST=($CLUSTER_MANAGER_TOKEN $CLUSTER_VIEWER_TOKEN $BUSYBOX_MANAGER_TOKEN $BUSYBOX_VIEWER_TOKEN)
@@ -145,7 +146,7 @@ echo "***** update chaos experiments *****"
 echo "viewer is forbidden to update experiments"
 REQUEST BUSYBOX_MANAGER_FORBIDDEN_TOKEN_LIST[@] "PUT" "/api/experiments/update" "update_exp.out" "is forbidden"
 
-echo "only manager can pause experiments"
+echo "only manager can update experiments"
 REQUEST BUSYBOX_MANAGE_TOKEN_LIST[@] "PUT" "/api/experiments/update" "update_exp.out" '"name":"ci-test"'
 
 
@@ -248,5 +249,23 @@ echo "only manager can delete archive experiments success"
 # here use one manager token to delete it
 REQUEST BUSYBOX_MANAGER_TOKEN_LIST[@] "DELETE" "/api/archives/${EXP_UID}?namespace=busybox" "delete_archives.out" "success"
 
+
+echo "***** test webhook authority ******"
+
+EXP_JSON='{"name": "ci-test2", "namespace": "busybox", "scope": {"mode": "one", "namespace_selectors": ["busybox"]}, "target": {"kind": "NetworkChaos", "network_chaos": {"direction": "both", "target_scope": {"namespace_selectors": ["chaos-testing"], "mode": "one"}, "action": "delay", "delay": {"latency": "1ms"}}}}'
+UPDATE_EXP_JSON='{"apiVersion": "chaos-mesh.org/v1alpha1", "kind": "NetworkChaos", "metadata": {"name": "ci-test2", "namespace": "busybox"}, "spec": {"direction": "both", "target": {"selector": {"namespaces": ["chaos-testing", "default" ]}, "mode": "one"}, "action": "delay", "latency": "2ms", "mode": "one"}}'
+
+# create experiment require the privileges of namespace busybox and chaos-testing, so only cluster manager can create exp success
+REQUEST CLUSTER_MANAGER_FORBIDDEN_TOKEN_LIST[@] "POST" "/api/experiments/new" "create_exp.out" 'is forbidden'
+
+REQUEST CLUSTER_MANAGER_TOKEN_LIST[@] "POST" "/api/experiments/new" "create_exp.out" '"name":"ci-test2"'
+
+# update the experiment require the privileges of namespace busybox, chaos-testing and default, so only cluster manager can update exp success
+REQUEST CLUSTER_MANAGER_FORBIDDEN_TOKEN_LIST[@] "PUT" "/api/experiments/update" "update_exp.out" "is forbidden"
+
+REQUEST CLUSTER_MANAGER_TOKEN_LIST[@] "PUT" "/api/experiments/update" "update_exp.out" '"name":"ci-test2"'
+
+# delete experiment
+kubectl delete networkchaos.chaos-mesh.org ci-test2 -n busybox
 
 echo "pass the dashboard authority test!"

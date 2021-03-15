@@ -216,6 +216,9 @@ const (
 	Bmap        IoMethod = "bmap"
 )
 
+// KindPodIoChaos is the kind for pod io chaos
+const KindPodIoChaos = "PodIoChaos"
+
 // +kubebuilder:object:root=true
 
 // PodIoChaos is the Schema for the podiochaos API
