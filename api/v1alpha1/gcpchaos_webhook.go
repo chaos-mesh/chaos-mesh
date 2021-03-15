@@ -58,6 +58,11 @@ func (in *GcpChaos) ValidateDelete() error {
 	return nil
 }
 
+// SelectSpec returns the selector config for authority validate
+func (in *GcpChaos) GetSelectSpec() []SelectSpec {
+	return nil
+}
+
 // Validate validates chaos object
 func (in *GcpChaos) Validate() error {
 	specField := field.NewPath("spec")
