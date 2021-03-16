@@ -36,10 +36,13 @@ type WorkflowNodeSpec struct {
 	TemplateName string       `json:"template_name"`
 	WorkflowName string       `json:"workflow_name"`
 	Type         TemplateType `json:"type"`
-	StartTime    *metav1.Time `json:"start_time,omitempty"`
-	Deadline     *metav1.Time `json:"deadline,omitempty"`
-	Tasks        []string     `json:"tasks,omitempty"`
-	EmbedChaos   `json:",inline"`
+	StartTime    *metav1.Time `json:"start_time"`
+	// +optional
+	Deadline *metav1.Time `json:"deadline,omitempty"`
+	// +optional
+	Tasks []string `json:"tasks,omitempty"`
+	// +optional
+	*EmbedChaos `json:",inline,omitempty"`
 }
 
 type WorkflowNodeStatus struct {

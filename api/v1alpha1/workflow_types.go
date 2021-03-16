@@ -35,23 +35,23 @@ type Workflow struct {
 // TODO: code generation
 type EmbedChaos struct {
 	// +optional
-	DNSChaos *DNSChaosSpec `json:"dns_chaos"`
+	DNSChaos *DNSChaosSpec `json:"dns_chaos,omitempty"`
 	// +optional
-	HTTPChaos *HTTPChaosSpec `json:"http_chaos"`
+	HTTPChaos *HTTPChaosSpec `json:"http_chaos,omitempty"`
 	// +optional
-	IoChaos *IoChaosSpec `json:"io_chaos"`
+	IoChaos *IoChaosSpec `json:"io_chaos,omitempty"`
 	// +optional
-	JVMChaos *JVMChaosSpec `json:"jvm_chaos"`
+	JVMChaos *JVMChaosSpec `json:"jvm_chaos,omitempty"`
 	// +optional
-	KernelChaos *KernelChaosSpec `json:"kernel_chaos"`
+	KernelChaos *KernelChaosSpec `json:"kernel_chaos,omitempty"`
 	// +optional
-	NetworkChaos *NetworkChaosSpec `json:"network_chaos"`
+	NetworkChaos *NetworkChaosSpec `json:"network_chaos,omitempty"`
 	// +optional
-	PodChaos *PodChaosSpec `json:"pod_chaos"`
+	PodChaos *PodChaosSpec `json:"pod_chaos,omitempty"`
 	// +optional
-	StressChaos *StressChaosSpec `json:"stress_chaos"`
+	StressChaos *StressChaosSpec `json:"stress_chaos,omitempty"`
 	// +optional
-	TimeChaos *TimeChaosSpec `json:"time_chaos"`
+	TimeChaos *TimeChaosSpec `json:"time_chaos,omitempty"`
 }
 
 type WorkflowSpec struct {
@@ -61,9 +61,9 @@ type WorkflowSpec struct {
 
 type WorkflowStatus struct {
 	// +optional
-	EntryNode *string `json:"entry_node"`
+	EntryNode *string `json:"entry_node,omitempty"`
 	// +optional
-	Nodes []corev1.LocalObjectReference `json:"nodes"`
+	Nodes []corev1.LocalObjectReference `json:"nodes,omitempty"`
 }
 
 type TemplateType string
@@ -85,11 +85,12 @@ const (
 )
 
 type Template struct {
-	Name       string       `json:"name"`
-	Type       TemplateType `json:"template_type"`
-	Duration   *string      `json:"duration,omitempty"`
-	Tasks      []string     `json:"tasks,omitempty"`
-	EmbedChaos `json:",inline"`
+	Name     string       `json:"name"`
+	Type     TemplateType `json:"template_type"`
+	Duration *string      `json:"duration,omitempty"`
+	Tasks    []string     `json:"tasks,omitempty"`
+	// +optional
+	*EmbedChaos `json:",inline"`
 }
 
 // +kubebuilder:object:root=true

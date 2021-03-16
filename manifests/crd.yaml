@@ -5302,6 +5302,7 @@ spec:
             workflow_name:
               type: string
           required:
+          - start_time
           - template_name
           - type
           - workflow_name
