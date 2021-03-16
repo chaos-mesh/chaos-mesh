@@ -125,8 +125,8 @@ type SelectorInfo struct {
 }
 
 // ParseSelector parses SelectorInfo to selector.PodSelectorSpec
-func (s *SelectorInfo) ParseSelector() selector.PodSelectorSpec {
-	selector := selector.PodSelectorSpec{}
+func (s *SelectorInfo) ParseSelector() v1alpha1.PodSelectorSpec {
+	selector := v1alpha1.PodSelectorSpec{}
 	selector.Namespaces = append(selector.Namespaces, s.NamespaceSelectors...)
 
 	selector.LabelSelectors = make(map[string]string)

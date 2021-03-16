@@ -14,7 +14,6 @@
 package v1alpha1
 
 import (
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1/selector"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -82,7 +81,7 @@ const (
 
 // NetworkChaosSpec defines the desired state of NetworkChaos
 type NetworkChaosSpec struct {
-	selector.PodSelector `json:",inline"`
+	PodSelector `json:",inline"`
 
 	// Action defines the specific network chaos action.
 	// Supported action: partition, netem, delay, loss, duplicate, corrupt
@@ -103,7 +102,7 @@ type NetworkChaosSpec struct {
 
 	// Target represents network target, this applies on netem and network partition action
 	// +optional
-	Target *selector.PodSelector `json:"target,omitempty"`
+	Target *PodSelector `json:"target,omitempty"`
 
 	// ExternalTargets represents network targets outside k8s
 	// +optional
@@ -172,4 +171,11 @@ type ReorderSpec struct {
 	Reorder     string `json:"reorder"`
 	Correlation string `json:"correlation"`
 	Gap         int    `json:"gap"`
+}
+
+func (obj *NetworkChaos) GetSelectorSpecs() map[string]interface{} {
+	return map[string]interface{} {
+		".": obj.Spec.PodSelector,
+		".Target": obj.Spec.Target,
+	}
 }

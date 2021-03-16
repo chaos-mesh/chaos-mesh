@@ -58,7 +58,7 @@ type DNSChaosSpec struct {
 	// +kubebuilder:validation:Enum=error;random
 	Action DNSChaosAction `json:"action"`
 
-	selector.PodSelector `json:",inline"`
+	PodSelector `json:",inline"`
 
 	// Duration represents the duration of the chaos action
 	Duration *string `json:"duration,omitempty"`
@@ -77,4 +77,10 @@ type DNSChaosSpec struct {
 // DNSChaosStatus defines the observed state of DNSChaos
 type DNSChaosStatus struct {
 	ChaosStatus `json:",inline"`
+}
+
+func (obj *DNSChaos) GetSelectorSpecs() map[string]interface{} {
+	return map[string]interface{}{
+		".": obj.Spec.PodSelector,
+	}
 }

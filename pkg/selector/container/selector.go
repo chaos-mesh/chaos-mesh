@@ -15,7 +15,7 @@ package container
 
 import (
 	"context"
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1/selector"
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
 	v1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -40,7 +40,11 @@ type Container struct {
 	ContainerName string
 }
 
-func (impl *SelectImpl) Select(ctx context.Context, cs *selector.ContainerSelector) ([]interface{}, error) {
+func (c *Container) Id() string {
+	return c.Pod.Namespace + "/" + c.Pod.Name + "/" + c.ContainerName
+}
+
+func (impl *SelectImpl) Select(ctx context.Context, cs *v1alpha1.ContainerSelector) ([]*Container, error) {
 	pods, err := pod.SelectAndFilterPods(ctx, impl.c, impl.r, &cs.PodSelector, impl.clusterScoped, impl.targetNamespace, impl.allowedNamespaces, impl.ignoredNamespaces)
 	if err != nil {
 		return nil, err
@@ -51,11 +55,11 @@ func (impl *SelectImpl) Select(ctx context.Context, cs *selector.ContainerSelect
 		containerNameMap[name] = struct{}{}
 	}
 
-	var result []interface{}
+	var result []*Container
 	for _, pod := range pods {
 		for _, container := range pod.Spec.Containers {
 			if _, ok := containerNameMap[container.Name]; ok {
-				result = append(result, Container {
+				result = append(result, &Container {
 					Pod: pod,
 					ContainerName: container.Name,
 				})

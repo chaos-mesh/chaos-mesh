@@ -11,11 +11,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package v1alpha1
+package controller
 
-// DefaultNamespace set the namespace of chaos object as the default namespace selector if namespaces not set
-func (in *SelectorSpec) DefaultNamespace(namespace string) {
-	if len(in.Namespaces) == 0 {
-		in.Namespaces = []string{namespace}
+import (
+	"k8s.io/apimachinery/pkg/types"
+	"strings"
+)
+
+func ParseNamespacedName(namespacedName string) types.NamespacedName {
+	parts := strings.Split(namespacedName, "/")
+	return types.NamespacedName{
+		Namespace: parts[0],
+		Name: parts[1],
 	}
+}
+
+func ParseNamespacedNameContainer(namespacedName string) (types.NamespacedName, string) {
+	parts := strings.Split(namespacedName, "/")
+	return types.NamespacedName{
+		Namespace: parts[0],
+		Name: parts[1],
+	}, strings.Join(parts[2:], "")
 }

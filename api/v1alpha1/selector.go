@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package selector
+package v1alpha1
 
 import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -83,6 +83,12 @@ type PodSelectorSpec struct {
 	// supported value: Pending / Running / Succeeded / Failed / Unknown
 	// +optional
 	PodPhaseSelectors []string `json:"podPhaseSelectors,omitempty"`
+}
+
+func (in *PodSelectorSpec) DefaultNamespace(namespace string) {
+	if len(in.Namespaces) == 0 {
+		in.Namespaces = []string{namespace}
+	}
 }
 
 type PodSelector struct {

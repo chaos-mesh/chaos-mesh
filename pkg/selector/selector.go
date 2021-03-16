@@ -25,13 +25,27 @@ type Selector struct {
 	selectorMap map[reflect.Type]interface{}
 }
 
-func (s *Selector) Select(ctx context.Context, spec interface{}) ([]interface{}, error) {
+type Target interface {
+	Id() string
+}
+
+func (s *Selector) Select(ctx context.Context, spec interface{}) ([]Target, error) {
+	var targets []Target
 	impl, ok := s.selectorMap[reflect.TypeOf(spec)]
 	if ok {
 		vals := reflect.ValueOf(impl).MethodByName("Select").Call([]reflect.Value{reflect.ValueOf(ctx), reflect.ValueOf(spec)})
-		ret := vals[0].Interface().([]interface{})
-		err := vals[1].Interface().(error)
-		return ret, err
+		ret := vals[0]
+
+		for i:=0;i<ret.Len();i++ {
+			targets = append(targets, ret.Index(i).Interface().(Target))
+		}
+
+		err := vals[1].Interface()
+		if err == nil {
+			return targets, nil
+		}
+
+		return targets, err.(error)
 	}
 
 	return nil, errors.New("specification type not found")
@@ -46,7 +60,7 @@ func New(p SelectorParams) *Selector {
 	selectorMap := make(map[reflect.Type]interface{})
 
 	val := reflect.ValueOf(p)
-	for i:=0;i<=val.NumField();i++ {
+	for i:=0;i<val.NumField();i++ {
 		method := val.Field(i).MethodByName("Select")
 		if method.IsValid() && method.Type().NumIn() > 1 {
 			typ := method.Type().In(1)

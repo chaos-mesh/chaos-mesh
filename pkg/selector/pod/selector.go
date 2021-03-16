@@ -17,7 +17,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1/selector"
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"math"
 	"math/rand"
 	"strconv"
@@ -55,15 +55,28 @@ type SelectImpl struct {
 	Option
 }
 
-func (impl *SelectImpl) Select(ctx context.Context, ps *selector.PodSelector) ([]interface{}, error) {
+type Pod struct {
+	v1.Pod
+}
+
+func (pod *Pod) Id() string {
+	return (types.NamespacedName{
+		Name: pod.Name,
+		Namespace: pod.Namespace,
+	}).String()
+}
+
+func (impl *SelectImpl) Select(ctx context.Context, ps *v1alpha1.PodSelector) ([]*Pod, error) {
 	pods, err := SelectAndFilterPods(ctx, impl.c, impl.r, ps, impl.clusterScoped, impl.targetNamespace, impl.allowedNamespaces, impl.ignoredNamespaces)
 	if err != nil {
 		return nil, err
 	}
 
-	result := make([]interface{}, len(pods), len(pods))
+	var result []*Pod
 	for _, pod := range pods {
-		result = append(result, pod)
+		result = append(result, &Pod {
+			pod,
+		})
 	}
 
 	return result, nil
@@ -84,7 +97,7 @@ func New(c client.Client, r client.Reader, clusterScoped bool, targetNamespace, 
 
 
 // SelectAndFilterPods returns the list of pods that filtered by selector and PodMode
-func SelectAndFilterPods(ctx context.Context, c client.Client, r client.Reader, spec *selector.PodSelector, clusterScoped bool, targetNamespace string, allowedNamespaces, ignoredNamespaces string) ([]v1.Pod, error) {
+func SelectAndFilterPods(ctx context.Context, c client.Client, r client.Reader, spec *v1alpha1.PodSelector, clusterScoped bool, targetNamespace string, allowedNamespaces, ignoredNamespaces string) ([]v1.Pod, error) {
 	if pods := mock.On("MockSelectAndFilterPods"); pods != nil {
 		return pods.(func() []v1.Pod)(), nil
 	}
@@ -119,7 +132,7 @@ func SelectAndFilterPods(ctx context.Context, c client.Client, r client.Reader, 
 // SelectPods returns the list of pods that are available for pod chaos action.
 // It returns all pods that match the configured label, annotation and namespace selectors.
 // If pods are specifically specified by `selector.Pods`, it just returns the selector.Pods.
-func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector selector.PodSelectorSpec, clusterScoped bool, targetNamespace string, allowedNamespaces, ignoredNamespaces string) ([]v1.Pod, error) {
+func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector v1alpha1.PodSelectorSpec, clusterScoped bool, targetNamespace string, allowedNamespaces, ignoredNamespaces string) ([]v1.Pod, error) {
 	// TODO: refactor: make different selectors to replace if-else logics
 	var pods []v1.Pod
 
@@ -293,7 +306,7 @@ func GetService(ctx context.Context, c client.Client, namespace, controllerNames
 
 // CheckPodMeetSelector checks if this pod meets the selection criteria.
 // TODO: support to check fieldsSelector
-func CheckPodMeetSelector(pod v1.Pod, selector selector.PodSelectorSpec) (bool, error) {
+func CheckPodMeetSelector(pod v1.Pod, selector v1alpha1.PodSelectorSpec) (bool, error) {
 	if len(selector.Pods) > 0 {
 		meet := false
 		for ns, names := range selector.Pods {
@@ -388,20 +401,20 @@ func filterPodByNode(pods []v1.Pod, nodes []v1.Node) []v1.Pod {
 }
 
 // filterPodsByMode filters pods by mode from pod list
-func filterPodsByMode(pods []v1.Pod, mode selector.PodMode, value string) ([]v1.Pod, error) {
+func filterPodsByMode(pods []v1.Pod, mode v1alpha1.PodMode, value string) ([]v1.Pod, error) {
 	if len(pods) == 0 {
 		return nil, errors.New("cannot generate pods from empty list")
 	}
 
 	switch mode {
-	case selector.OnePodMode:
+	case v1alpha1.OnePodMode:
 		index := rand.Intn(len(pods))
 		pod := pods[index]
 
 		return []v1.Pod{pod}, nil
-	case selector.AllPodMode:
+	case v1alpha1.AllPodMode:
 		return pods, nil
-	case selector.FixedPodMode:
+	case v1alpha1.FixedPodMode:
 		num, err := strconv.Atoi(value)
 		if err != nil {
 			return nil, err
@@ -416,7 +429,7 @@ func filterPodsByMode(pods []v1.Pod, mode selector.PodMode, value string) ([]v1.
 		}
 
 		return getFixedSubListFromPodList(pods, num), nil
-	case selector.FixedPercentPodMode:
+	case v1alpha1.FixedPercentPodMode:
 		percentage, err := strconv.Atoi(value)
 		if err != nil {
 			return nil, err
@@ -433,7 +446,7 @@ func filterPodsByMode(pods []v1.Pod, mode selector.PodMode, value string) ([]v1.
 		num := int(math.Floor(float64(len(pods)) * float64(percentage) / 100))
 
 		return getFixedSubListFromPodList(pods, num), nil
-	case selector.RandomMaxPercentPodMode:
+	case v1alpha1.RandomMaxPercentPodMode:
 		maxPercentage, err := strconv.Atoi(value)
 		if err != nil {
 			return nil, err

@@ -48,7 +48,7 @@ const (
 
 // PodChaosSpec defines the attributes that a user creates on a chaos experiment about pods.
 type PodChaosSpec struct {
-	selector.ContainerSelector `json:",inline"`
+	ContainerSelector `json:",inline"`
 
 	// Action defines the specific pod chaos action.
 	// Supported action: pod-kill / pod-failure / container-kill
@@ -75,4 +75,19 @@ type PodChaosSpec struct {
 // PodChaosStatus represents the current status of the chaos experiment about pods.
 type PodChaosStatus struct {
 	ChaosStatus `json:",inline"`
+}
+
+func (obj *PodChaos) GetSelectorSpecs() map[string]interface{} {
+	switch(obj.Spec.Action) {
+	case PodKillAction, PodFailureAction:
+		return map[string]interface{}{
+			".": &obj.Spec.PodSelector,
+		}
+	case ContainerKillAction:
+		return map[string]interface{}{
+			".": &obj.Spec.ContainerSelector,
+		}
+	}
+
+	return nil
 }

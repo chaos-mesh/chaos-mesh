@@ -13,7 +13,9 @@
 
 package v1alpha1
 
-import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+import (
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
 
 // +kubebuilder:object:root=true
 // +chaos-mesh:base
@@ -49,7 +51,7 @@ type Matcher struct {
 }
 
 type HTTPChaosSpec struct {
-	selector.PodSelector `json:",inline"`
+	PodSelector `json:",inline"`
 
 	// Action defines the specific pod chaos action.
 	// Supported action: delay | abort | mixed
@@ -81,4 +83,10 @@ func (in *HTTPChaosSpec) GetHeaders() []Matcher {
 
 type HTTPChaosStatus struct {
 	ChaosStatus `json:",inline"`
+}
+
+func (obj *HTTPChaos) GetSelectorSpecs() map[string]interface{} {
+	return map[string]interface{}{
+		".": obj.Spec.PodSelector,
+	}
 }

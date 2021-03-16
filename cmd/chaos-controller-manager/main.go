@@ -15,52 +15,28 @@ package main
 
 import (
 	"flag"
-	"net/http"
-	_ "net/http/pprof"
-	"os"
-	"time"
-
-	"golang.org/x/time/rate"
-
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	apiWebhook "github.com/chaos-mesh/chaos-mesh/api/webhook"
+	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
-	"github.com/chaos-mesh/chaos-mesh/controllers/metrics"
+	"github.com/chaos-mesh/chaos-mesh/controllers/podchaos"
+	"github.com/chaos-mesh/chaos-mesh/controllers/podchaos/containerkill"
+	"github.com/chaos-mesh/chaos-mesh/controllers/podchaos/podfailure"
+	"github.com/chaos-mesh/chaos-mesh/controllers/podchaos/podkill"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podiochaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos"
 	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
-	"github.com/chaos-mesh/chaos-mesh/pkg/router"
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
-	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
-	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config/watcher"
-
-	_ "github.com/chaos-mesh/chaos-mesh/controllers/awschaos/detachvolume"
-	_ "github.com/chaos-mesh/chaos-mesh/controllers/awschaos/ec2restart"
-	_ "github.com/chaos-mesh/chaos-mesh/controllers/awschaos/ec2stop"
-	_ "github.com/chaos-mesh/chaos-mesh/controllers/dnschaos"
-	_ "github.com/chaos-mesh/chaos-mesh/controllers/httpchaos"
-	_ "github.com/chaos-mesh/chaos-mesh/controllers/iochaos"
-	_ "github.com/chaos-mesh/chaos-mesh/controllers/jvmchaos"
-	_ "github.com/chaos-mesh/chaos-mesh/controllers/kernelchaos"
-	_ "github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/partition"
-	_ "github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/trafficcontrol"
-	_ "github.com/chaos-mesh/chaos-mesh/controllers/podchaos/containerkill"
-	_ "github.com/chaos-mesh/chaos-mesh/controllers/podchaos/podfailure"
-	_ "github.com/chaos-mesh/chaos-mesh/controllers/podchaos/podkill"
-	_ "github.com/chaos-mesh/chaos-mesh/controllers/stresschaos"
-	_ "github.com/chaos-mesh/chaos-mesh/controllers/timechaos"
-
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"k8s.io/client-go/rest"
-	"k8s.io/client-go/util/workqueue"
+	"net/http"
+	_ "net/http/pprof"
+	"os"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	controllermetrics "sigs.k8s.io/controller-runtime/pkg/metrics"
-	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	// +kubebuilder:scaffold:imports
 )
 
@@ -123,10 +99,26 @@ func main() {
 		os.Exit(1)
 	}
 
-	err = router.SetupWithManagerAndConfigs(mgr, ccfg.ControllerCfg)
-	if err != nil {
-		setupLog.Error(err, "fail to setup with manager")
-		os.Exit(1)
+	if err := ctrl.NewControllerManagedBy(mgr).
+		For(&v1alpha1.PodChaos{}).
+		Complete(&common.Reconciler{
+			Impl: podchaos.NewImpl(
+				podkill.NewImpl(mgr.GetClient()),
+				podfailure.NewImpl(mgr.GetClient()),
+				containerkill.NewImpl(mgr.GetClient(), ctrl.Log),
+				),
+			Object: &v1alpha1.PodChaos{},
+			Client: mgr.GetClient(),
+			Reader: mgr.GetAPIReader(),
+			Log: ctrl.Log,
+		}); err != nil {
+		setupLog.Error(err, "fail to setup PodChaos reconciler")
+	}
+
+	if err := ctrl.NewWebhookManagedBy(mgr).
+		For(&v1alpha1.PodChaos{}).
+		Complete(); err != nil {
+		setupLog.Error(err, "fail to setup PodChaos webhook")
 	}
 
 	// We only setup webhook for podiochaos, and the logic of applying chaos are in the mutation
@@ -153,13 +145,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Init metrics collector
-	metricsCollector := metrics.NewChaosCollector(mgr.GetCache(), controllermetrics.Registry)
-
 	setupLog.Info("Setting up webhook server")
 	hookServer := mgr.GetWebhookServer()
 	hookServer.CertDir = ccfg.ControllerCfg.CertsDir
-	conf := config.NewConfigWatcherConf()
 
 	stopCh := ctrl.SetupSignalHandler()
 
@@ -171,25 +159,6 @@ func main() {
 			}
 		}()
 	}
-
-	if err = ccfg.ControllerCfg.WatcherConfig.Verify(); err != nil {
-		setupLog.Error(err, "invalid environment configuration")
-		os.Exit(1)
-	}
-	configWatcher, err := watcher.New(*ccfg.ControllerCfg.WatcherConfig, metricsCollector)
-	if err != nil {
-		setupLog.Error(err, "unable to create config watcher")
-		os.Exit(1)
-	}
-
-	go watchConfig(configWatcher, conf, stopCh)
-	hookServer.Register("/inject-v1-pod", &webhook.Admission{
-		Handler: &apiWebhook.PodInjector{
-			Config:        conf,
-			ControllerCfg: ccfg.ControllerCfg,
-			Metrics:       metricsCollector,
-		}},
-	)
 
 	// +kubebuilder:scaffold:builder
 
@@ -209,75 +178,3 @@ func setRestConfig(c *rest.Config) {
 	}
 }
 
-func setupWatchQueue(stopCh <-chan struct{}, configWatcher *watcher.K8sConfigMapWatcher) workqueue.Interface {
-	// watch for reconciliation signals, and grab configmaps, then update the running configuration
-	// for the server
-	sigChan := make(chan interface{}, 10)
-
-	queue := workqueue.NewRateLimitingQueue(&workqueue.BucketRateLimiter{Limiter: rate.NewLimiter(rate.Limit(0.5), 1)})
-
-	go func() {
-		for {
-			select {
-			case <-stopCh:
-				queue.ShutDown()
-				return
-			case <-sigChan:
-				queue.AddRateLimited(struct{}{})
-			}
-		}
-	}()
-
-	go func() {
-		for {
-			setupLog.Info("Launching watcher for ConfigMaps")
-			if err := configWatcher.Watch(sigChan, stopCh); err != nil {
-				switch err {
-				case watcher.ErrWatchChannelClosed:
-					// known issue: https://github.com/kubernetes/client-go/issues/334
-					setupLog.Info("watcher channel has closed, restart watcher")
-				default:
-					setupLog.Error(err, "unable to watch new ConfigMaps")
-					os.Exit(1)
-				}
-			}
-
-			select {
-			case <-stopCh:
-				close(sigChan)
-				return
-			default:
-				// sleep 2 seconds to prevent excessive log due to infinite restart
-				time.Sleep(2 * time.Second)
-			}
-		}
-	}()
-
-	return queue
-}
-
-func watchConfig(configWatcher *watcher.K8sConfigMapWatcher, cfg *config.Config, stopCh <-chan struct{}) {
-	queue := setupWatchQueue(stopCh, configWatcher)
-
-	for {
-		item, shutdown := queue.Get()
-		if shutdown {
-			break
-		}
-		func() {
-			defer queue.Done(item)
-
-			setupLog.Info("Triggering ConfigMap reconciliation")
-			updatedInjectionConfigs, err := configWatcher.GetInjectionConfigs()
-			if err != nil {
-				setupLog.Error(err, "unable to get ConfigMaps")
-				return
-			}
-
-			setupLog.Info("Updating server with newly loaded configurations",
-				"original configs count", len(cfg.Injections), "updated configs count", len(updatedInjectionConfigs))
-			cfg.ReplaceInjectionConfigs(updatedInjectionConfigs)
-			setupLog.Info("Configuration replaced")
-		}()
-	}
-}

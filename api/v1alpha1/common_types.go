@@ -71,7 +71,13 @@ type ExperimentStatus struct {
 	Duration string `json:"duration,omitempty"`
 	// +optional
 	// Records are used to track the running status
-	Records []TargetStatus `json:"containerRecords,omitempty"`
+	Records []*Record `json:"containerRecords,omitempty"`
+}
+
+type Record struct {
+	Id string `json:"id"`
+	SelectorKey string `json:"selectorKey"`
+	Phase Phase `json:"phase"`
 }
 
 type Phase string
@@ -82,26 +88,6 @@ const (
 	// Injected means the target is injected. It's safe to recover it.
 	Injected Phase = "Injected"
 )
-
-// PodStatus represents information about the status of a pod in chaos experiment.
-type TargetStatus struct {
-	Namespace string `json:"namespace"`
-	Name      string `json:"name"`
-	Action    string `json:"action"`
-	HostIP    string `json:"hostIP"`
-	PodIP     string `json:"podIP"`
-
-	// +optional
-	ContainerName string `json:"containerName"`
-
-	// A brief CamelCase message indicating details about the chaos action.
-	// e.g. "delete this pod" or "pause this pod"
-	// +optional
-	Message string `json:"message"`
-
-	Phase       Phase  `json:"phase"`
-	SelectGroup string `json:"selectGroup"`
-}
 
 var log = ctrl.Log.WithName("api")
 

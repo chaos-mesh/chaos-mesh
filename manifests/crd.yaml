@@ -76,6 +76,27 @@ spec:
             experiment:
               description: Experiment records the last experiment state.
               properties:
+                containerRecords:
+                  description: Records are used to track the running status
+                  items:
+                    properties:
+                      id:
+                        type: string
+                      phase:
+                        type: string
+                      selectorKey:
+                        type: string
+                    required:
+                    - id
+                    - phase
+                    - selectorKey
+                    type: object
+                  type: array
+                desiredPhase:
+                  enum:
+                  - Run
+                  - Stop
+                  type: string
                 duration:
                   type: string
                 endTime:
@@ -84,34 +105,6 @@ spec:
                 phase:
                   description: ExperimentPhase is the current status of chaos experiment.
                   type: string
-                podRecords:
-                  items:
-                    description: PodStatus represents information about the status
-                      of a pod in chaos experiment.
-                    properties:
-                      action:
-                        type: string
-                      hostIP:
-                        type: string
-                      message:
-                        description: A brief CamelCase message indicating details
-                          about the chaos action. e.g. "delete this pod" or "pause
-                          this pod duration 5m"
-                        type: string
-                      name:
-                        type: string
-                      namespace:
-                        type: string
-                      podIP:
-                        type: string
-                    required:
-                    - action
-                    - hostIP
-                    - name
-                    - namespace
-                    - podIP
-                    type: object
-                  type: array
                 reason:
                   type: string
                 startTime:
@@ -312,6 +305,27 @@ spec:
             experiment:
               description: Experiment records the last experiment state.
               properties:
+                containerRecords:
+                  description: Records are used to track the running status
+                  items:
+                    properties:
+                      id:
+                        type: string
+                      phase:
+                        type: string
+                      selectorKey:
+                        type: string
+                    required:
+                    - id
+                    - phase
+                    - selectorKey
+                    type: object
+                  type: array
+                desiredPhase:
+                  enum:
+                  - Run
+                  - Stop
+                  type: string
                 duration:
                   type: string
                 endTime:
@@ -320,34 +334,6 @@ spec:
                 phase:
                   description: ExperimentPhase is the current status of chaos experiment.
                   type: string
-                podRecords:
-                  items:
-                    description: PodStatus represents information about the status
-                      of a pod in chaos experiment.
-                    properties:
-                      action:
-                        type: string
-                      hostIP:
-                        type: string
-                      message:
-                        description: A brief CamelCase message indicating details
-                          about the chaos action. e.g. "delete this pod" or "pause
-                          this pod duration 5m"
-                        type: string
-                      name:
-                        type: string
-                      namespace:
-                        type: string
-                      podIP:
-                        type: string
-                    required:
-                    - action
-                    - hostIP
-                    - name
-                    - namespace
-                    - podIP
-                    type: object
-                  type: array
                 reason:
                   type: string
                 startTime:
@@ -570,6 +556,27 @@ spec:
             experiment:
               description: Experiment records the last experiment state.
               properties:
+                containerRecords:
+                  description: Records are used to track the running status
+                  items:
+                    properties:
+                      id:
+                        type: string
+                      phase:
+                        type: string
+                      selectorKey:
+                        type: string
+                    required:
+                    - id
+                    - phase
+                    - selectorKey
+                    type: object
+                  type: array
+                desiredPhase:
+                  enum:
+                  - Run
+                  - Stop
+                  type: string
                 duration:
                   type: string
                 endTime:
@@ -578,34 +585,6 @@ spec:
                 phase:
                   description: ExperimentPhase is the current status of chaos experiment.
                   type: string
-                podRecords:
-                  items:
-                    description: PodStatus represents information about the status
-                      of a pod in chaos experiment.
-                    properties:
-                      action:
-                        type: string
-                      hostIP:
-                        type: string
-                      message:
-                        description: A brief CamelCase message indicating details
-                          about the chaos action. e.g. "delete this pod" or "pause
-                          this pod duration 5m"
-                        type: string
-                      name:
-                        type: string
-                      namespace:
-                        type: string
-                      podIP:
-                        type: string
-                    required:
-                    - action
-                    - hostIP
-                    - name
-                    - namespace
-                    - podIP
-                    type: object
-                  type: array
                 reason:
                   type: string
                 startTime:
@@ -742,10 +721,6 @@ spec:
                   format: int32
                   type: integer
               type: object
-            containerName:
-              description: ContainerName indicates the target container to inject
-                iochaos in
-              type: string
             containerNames:
               description: ContainerName indicates the name of affected container.
                 If not set, all containers will be injected
@@ -905,6 +880,27 @@ spec:
             experiment:
               description: Experiment records the last experiment state.
               properties:
+                containerRecords:
+                  description: Records are used to track the running status
+                  items:
+                    properties:
+                      id:
+                        type: string
+                      phase:
+                        type: string
+                      selectorKey:
+                        type: string
+                    required:
+                    - id
+                    - phase
+                    - selectorKey
+                    type: object
+                  type: array
+                desiredPhase:
+                  enum:
+                  - Run
+                  - Stop
+                  type: string
                 duration:
                   type: string
                 endTime:
@@ -913,34 +909,6 @@ spec:
                 phase:
                   description: ExperimentPhase is the current status of chaos experiment.
                   type: string
-                podRecords:
-                  items:
-                    description: PodStatus represents information about the status
-                      of a pod in chaos experiment.
-                    properties:
-                      action:
-                        type: string
-                      hostIP:
-                        type: string
-                      message:
-                        description: A brief CamelCase message indicating details
-                          about the chaos action. e.g. "delete this pod" or "pause
-                          this pod duration 5m"
-                        type: string
-                      name:
-                        type: string
-                      namespace:
-                        type: string
-                      podIP:
-                        type: string
-                    required:
-                    - action
-                    - hostIP
-                    - name
-                    - namespace
-                    - podIP
-                    type: object
-                  type: array
                 reason:
                   type: string
                 startTime:
@@ -1170,6 +1138,27 @@ spec:
             experiment:
               description: Experiment records the last experiment state.
               properties:
+                containerRecords:
+                  description: Records are used to track the running status
+                  items:
+                    properties:
+                      id:
+                        type: string
+                      phase:
+                        type: string
+                      selectorKey:
+                        type: string
+                    required:
+                    - id
+                    - phase
+                    - selectorKey
+                    type: object
+                  type: array
+                desiredPhase:
+                  enum:
+                  - Run
+                  - Stop
+                  type: string
                 duration:
                   type: string
                 endTime:
@@ -1178,34 +1167,6 @@ spec:
                 phase:
                   description: ExperimentPhase is the current status of chaos experiment.
                   type: string
-                podRecords:
-                  items:
-                    description: PodStatus represents information about the status
-                      of a pod in chaos experiment.
-                    properties:
-                      action:
-                        type: string
-                      hostIP:
-                        type: string
-                      message:
-                        description: A brief CamelCase message indicating details
-                          about the chaos action. e.g. "delete this pod" or "pause
-                          this pod duration 5m"
-                        type: string
-                      name:
-                        type: string
-                      namespace:
-                        type: string
-                      podIP:
-                        type: string
-                    required:
-                    - action
-                    - hostIP
-                    - name
-                    - namespace
-                    - podIP
-                    type: object
-                  type: array
                 reason:
                   type: string
                 startTime:
@@ -1453,6 +1414,27 @@ spec:
             experiment:
               description: Experiment records the last experiment state.
               properties:
+                containerRecords:
+                  description: Records are used to track the running status
+                  items:
+                    properties:
+                      id:
+                        type: string
+                      phase:
+                        type: string
+                      selectorKey:
+                        type: string
+                    required:
+                    - id
+                    - phase
+                    - selectorKey
+                    type: object
+                  type: array
+                desiredPhase:
+                  enum:
+                  - Run
+                  - Stop
+                  type: string
                 duration:
                   type: string
                 endTime:
@@ -1461,34 +1443,6 @@ spec:
                 phase:
                   description: ExperimentPhase is the current status of chaos experiment.
                   type: string
-                podRecords:
-                  items:
-                    description: PodStatus represents information about the status
-                      of a pod in chaos experiment.
-                    properties:
-                      action:
-                        type: string
-                      hostIP:
-                        type: string
-                      message:
-                        description: A brief CamelCase message indicating details
-                          about the chaos action. e.g. "delete this pod" or "pause
-                          this pod duration 5m"
-                        type: string
-                      name:
-                        type: string
-                      namespace:
-                        type: string
-                      podIP:
-                        type: string
-                    required:
-                    - action
-                    - hostIP
-                    - name
-                    - namespace
-                    - podIP
-                    type: object
-                  type: array
                 reason:
                   type: string
                 startTime:
@@ -1915,6 +1869,27 @@ spec:
             experiment:
               description: Experiment records the last experiment state.
               properties:
+                containerRecords:
+                  description: Records are used to track the running status
+                  items:
+                    properties:
+                      id:
+                        type: string
+                      phase:
+                        type: string
+                      selectorKey:
+                        type: string
+                    required:
+                    - id
+                    - phase
+                    - selectorKey
+                    type: object
+                  type: array
+                desiredPhase:
+                  enum:
+                  - Run
+                  - Stop
+                  type: string
                 duration:
                   type: string
                 endTime:
@@ -1923,34 +1898,6 @@ spec:
                 phase:
                   description: ExperimentPhase is the current status of chaos experiment.
                   type: string
-                podRecords:
-                  items:
-                    description: PodStatus represents information about the status
-                      of a pod in chaos experiment.
-                    properties:
-                      action:
-                        type: string
-                      hostIP:
-                        type: string
-                      message:
-                        description: A brief CamelCase message indicating details
-                          about the chaos action. e.g. "delete this pod" or "pause
-                          this pod duration 5m"
-                        type: string
-                      name:
-                        type: string
-                      namespace:
-                        type: string
-                      podIP:
-                        type: string
-                    required:
-                    - action
-                    - hostIP
-                    - name
-                    - namespace
-                    - podIP
-                    type: object
-                  type: array
                 reason:
                   type: string
                 startTime:
@@ -2159,6 +2106,27 @@ spec:
             experiment:
               description: Experiment records the last experiment state.
               properties:
+                containerRecords:
+                  description: Records are used to track the running status
+                  items:
+                    properties:
+                      id:
+                        type: string
+                      phase:
+                        type: string
+                      selectorKey:
+                        type: string
+                    required:
+                    - id
+                    - phase
+                    - selectorKey
+                    type: object
+                  type: array
+                desiredPhase:
+                  enum:
+                  - Run
+                  - Stop
+                  type: string
                 duration:
                   type: string
                 endTime:
@@ -2167,34 +2135,6 @@ spec:
                 phase:
                   description: ExperimentPhase is the current status of chaos experiment.
                   type: string
-                podRecords:
-                  items:
-                    description: PodStatus represents information about the status
-                      of a pod in chaos experiment.
-                    properties:
-                      action:
-                        type: string
-                      hostIP:
-                        type: string
-                      message:
-                        description: A brief CamelCase message indicating details
-                          about the chaos action. e.g. "delete this pod" or "pause
-                          this pod duration 5m"
-                        type: string
-                      name:
-                        type: string
-                      namespace:
-                        type: string
-                      podIP:
-                        type: string
-                    required:
-                    - action
-                    - hostIP
-                    - name
-                    - namespace
-                    - podIP
-                    type: object
-                  type: array
                 reason:
                   type: string
                 startTime:
@@ -2615,6 +2555,27 @@ spec:
             experiment:
               description: Experiment records the last experiment state.
               properties:
+                containerRecords:
+                  description: Records are used to track the running status
+                  items:
+                    properties:
+                      id:
+                        type: string
+                      phase:
+                        type: string
+                      selectorKey:
+                        type: string
+                    required:
+                    - id
+                    - phase
+                    - selectorKey
+                    type: object
+                  type: array
+                desiredPhase:
+                  enum:
+                  - Run
+                  - Stop
+                  type: string
                 duration:
                   type: string
                 endTime:
@@ -2623,34 +2584,6 @@ spec:
                 phase:
                   description: ExperimentPhase is the current status of chaos experiment.
                   type: string
-                podRecords:
-                  items:
-                    description: PodStatus represents information about the status
-                      of a pod in chaos experiment.
-                    properties:
-                      action:
-                        type: string
-                      hostIP:
-                        type: string
-                      message:
-                        description: A brief CamelCase message indicating details
-                          about the chaos action. e.g. "delete this pod" or "pause
-                          this pod duration 5m"
-                        type: string
-                      name:
-                        type: string
-                      namespace:
-                        type: string
-                      podIP:
-                        type: string
-                    required:
-                    - action
-                    - hostIP
-                    - name
-                    - namespace
-                    - podIP
-                    type: object
-                  type: array
                 reason:
                   type: string
                 startTime:
@@ -2886,6 +2819,27 @@ spec:
             experiment:
               description: Experiment records the last experiment state.
               properties:
+                containerRecords:
+                  description: Records are used to track the running status
+                  items:
+                    properties:
+                      id:
+                        type: string
+                      phase:
+                        type: string
+                      selectorKey:
+                        type: string
+                    required:
+                    - id
+                    - phase
+                    - selectorKey
+                    type: object
+                  type: array
+                desiredPhase:
+                  enum:
+                  - Run
+                  - Stop
+                  type: string
                 duration:
                   type: string
                 endTime:
@@ -2894,34 +2848,6 @@ spec:
                 phase:
                   description: ExperimentPhase is the current status of chaos experiment.
                   type: string
-                podRecords:
-                  items:
-                    description: PodStatus represents information about the status
-                      of a pod in chaos experiment.
-                    properties:
-                      action:
-                        type: string
-                      hostIP:
-                        type: string
-                      message:
-                        description: A brief CamelCase message indicating details
-                          about the chaos action. e.g. "delete this pod" or "pause
-                          this pod duration 5m"
-                        type: string
-                      name:
-                        type: string
-                      namespace:
-                        type: string
-                      podIP:
-                        type: string
-                    required:
-                    - action
-                    - hostIP
-                    - name
-                    - namespace
-                    - podIP
-                    type: object
-                  type: array
                 reason:
                   type: string
                 startTime:
@@ -3137,6 +3063,27 @@ spec:
             experiment:
               description: Experiment records the last experiment state.
               properties:
+                containerRecords:
+                  description: Records are used to track the running status
+                  items:
+                    properties:
+                      id:
+                        type: string
+                      phase:
+                        type: string
+                      selectorKey:
+                        type: string
+                    required:
+                    - id
+                    - phase
+                    - selectorKey
+                    type: object
+                  type: array
+                desiredPhase:
+                  enum:
+                  - Run
+                  - Stop
+                  type: string
                 duration:
                   type: string
                 endTime:
@@ -3145,34 +3092,6 @@ spec:
                 phase:
                   description: ExperimentPhase is the current status of chaos experiment.
                   type: string
-                podRecords:
-                  items:
-                    description: PodStatus represents information about the status
-                      of a pod in chaos experiment.
-                    properties:
-                      action:
-                        type: string
-                      hostIP:
-                        type: string
-                      message:
-                        description: A brief CamelCase message indicating details
-                          about the chaos action. e.g. "delete this pod" or "pause
-                          this pod duration 5m"
-                        type: string
-                      name:
-                        type: string
-                      namespace:
-                        type: string
-                      podIP:
-                        type: string
-                    required:
-                    - action
-                    - hostIP
-                    - name
-                    - namespace
-                    - podIP
-                    type: object
-                  type: array
                 reason:
                   type: string
                 startTime:

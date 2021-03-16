@@ -15,7 +15,6 @@ package v1alpha1
 
 import (
 	"fmt"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -39,7 +38,7 @@ type StressChaos struct {
 
 // StressChaosSpec defines the desired state of StressChaos
 type StressChaosSpec struct {
-	selector.ContainerSelector `json:",inline"`
+	ContainerSelector `json:",inline"`
 
 	// Stressors defines plenty of stressors supported to stress system components out.
 	// You can use one or more of them to make up various kinds of stresses. At least
@@ -144,4 +143,10 @@ type CPUStressor struct {
 	// extend stress-ng options
 	// +optional
 	Options []string `json:"options,omitempty"`
+}
+
+func (obj *StressChaos) GetSelectorSpecs() map[string]interface{} {
+	return map[string]interface{} {
+		".": obj.Spec.ContainerSelector,
+	}
 }

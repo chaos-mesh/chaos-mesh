@@ -14,7 +14,6 @@
 package v1alpha1
 
 import (
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1/selector"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -35,7 +34,7 @@ type IoChaos struct {
 
 // IoChaosSpec defines the desired state of IoChaos
 type IoChaosSpec struct {
-	selector.ContainerSelector `json:",inline"`
+	ContainerSelector `json:",inline"`
 
 	// Action defines the specific pod chaos action.
 	// Supported action: latency / fault / attrOverride
@@ -76,10 +75,6 @@ type IoChaosSpec struct {
 	// VolumePath represents the mount path of injected volume
 	VolumePath string `json:"volumePath"`
 
-	// ContainerName indicates the target container to inject iochaos in
-	// +optional
-	ContainerName *string `json:"containerName,omitempty"`
-
 	// Duration represents the duration of the chaos action.
 	// It is required when the action is `PodFailureAction`.
 	// A duration string is a possibly signed sequence of
@@ -93,4 +88,10 @@ type IoChaosSpec struct {
 // IoChaosStatus defines the observed state of IoChaos
 type IoChaosStatus struct {
 	ChaosStatus `json:",inline"`
+}
+
+func (obj *IoChaos) GetSelectorSpecs() map[string]interface{} {
+	return map[string]interface{}{
+		".": obj.Spec.ContainerSelector,
+	}
 }

@@ -35,7 +35,7 @@ type TimeChaos struct {
 
 // TimeChaosSpec defines the desired state of TimeChaos
 type TimeChaosSpec struct {
-	selector.ContainerSelector `json:",inline"`
+	ContainerSelector `json:",inline"`
 
 	// TimeOffset defines the delta time of injected program. It's a possibly signed sequence of decimal numbers, such as
 	// "300ms", "-1.5h" or "2h45m". Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
@@ -67,4 +67,10 @@ func (in *TimeChaosSpec) DefaultClockIds() {
 // TimeChaosStatus defines the observed state of TimeChaos
 type TimeChaosStatus struct {
 	ChaosStatus `json:",inline"`
+}
+
+func (obj *TimeChaos) GetSelectorSpecs() map[string]interface{} {
+	return map[string]interface{} {
+		".": obj.Spec.ContainerSelector,
+	}
 }
