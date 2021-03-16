@@ -384,11 +384,12 @@ spec:
                     properties:
                       action:
                         description: 'Action defines the specific pod chaos action.
-                          Supported action: latency / fault / attrOverride'
+                          Supported action: latency / fault / attrOverride / mistake'
                         enum:
                         - latency
                         - fault
                         - attrOverride
+                        - mistake
                         type: string
                       attr:
                         description: Attr defines the overrided attribution
@@ -489,6 +490,30 @@ spec:
                         items:
                           type: string
                         type: array
+                      mistake:
+                        description: Mistake defines what types of incorrectness are
+                          injected to IO operations
+                        properties:
+                          filling:
+                            description: Filling determines what is filled in the
+                              miskate data.
+                            enum:
+                            - zero
+                            - random
+                            type: string
+                          maxLength:
+                            description: Max length of each wrong data segment in
+                              bytes
+                            format: int64
+                            minimum: 1
+                            type: integer
+                          maxOccurrences:
+                            description: There will be [1, MaxOccurrences] segments
+                              of wrong data.
+                            format: int64
+                            minimum: 1
+                            type: integer
+                        type: object
                       mode:
                         description: 'Mode defines the mode to run chaos action. Supported
                           mode: one / all / fixed / fixed-percent / random-max-percent'
