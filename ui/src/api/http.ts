@@ -17,8 +17,8 @@ const http = axios.create({
 http.interceptors.response.use(undefined, (error: AxiosError<ErrorData>) => {
   const data = error.response?.data
 
-  if (data) {
-    // error.api.xxx => xxx
+  if (data && data.code) {
+    // slice(10): error.api.xxx => xxx
     switch (data.code.slice(10)) {
       case 'invalid_request':
         if (data.message.includes('Unauthorized')) {
