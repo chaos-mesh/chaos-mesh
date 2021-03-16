@@ -117,6 +117,10 @@ func (in *fakeTwoPhaseChaos) IsPaused() bool {
 	return false
 }
 
+func (in *fakeTwoPhaseChaos) GetSpecAndMetaString() (string, error) {
+	return "", nil
+}
+
 func (r fakeEndpoint) Object() v1alpha1.InnerObject {
 	return &fakeTwoPhaseChaos{}
 }

@@ -20,49 +20,45 @@ import (
 	"os"
 	"time"
 
-	wfcontrollers "github.com/chaos-mesh/chaos-mesh/pkg/workflow/controllers"
-
 	"golang.org/x/time/rate"
-
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	apiWebhook "github.com/chaos-mesh/chaos-mesh/api/webhook"
-	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
-	"github.com/chaos-mesh/chaos-mesh/controllers/metrics"
-	"github.com/chaos-mesh/chaos-mesh/controllers/podiochaos"
-	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos"
-	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
-	"github.com/chaos-mesh/chaos-mesh/pkg/router"
-	"github.com/chaos-mesh/chaos-mesh/pkg/version"
-	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
-	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config/watcher"
-
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
+	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/util/workqueue"
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+	controllermetrics "sigs.k8s.io/controller-runtime/pkg/metrics"
+	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	apiWebhook "github.com/chaos-mesh/chaos-mesh/api/webhook"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/awschaos/detachvolume"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/awschaos/ec2restart"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/awschaos/ec2stop"
+	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/dnschaos"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/httpchaos"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/iochaos"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/jvmchaos"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/kernelchaos"
+	"github.com/chaos-mesh/chaos-mesh/controllers/metrics"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/partition"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/trafficcontrol"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/podchaos/containerkill"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/podchaos/podfailure"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/podchaos/podkill"
+	"github.com/chaos-mesh/chaos-mesh/controllers/podiochaos"
+	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/stresschaos"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/timechaos"
-
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
-
-	controllermetrics "sigs.k8s.io/controller-runtime/pkg/metrics"
-	"sigs.k8s.io/controller-runtime/pkg/webhook"
+	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
+	"github.com/chaos-mesh/chaos-mesh/pkg/router"
+	"github.com/chaos-mesh/chaos-mesh/pkg/version"
+	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
+	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config/watcher"
+	wfcontrollers "github.com/chaos-mesh/chaos-mesh/pkg/workflow/controllers"
 	// +kubebuilder:scaffold:imports
 )
 
@@ -122,6 +118,12 @@ func main() {
 	mgr, err := ctrl.NewManager(cfg, options)
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")
+		os.Exit(1)
+	}
+
+	authCli, err := authorizationv1.NewForConfig(cfg)
+	if err != nil {
+		setupLog.Error(err, "unable to get authorization client")
 		os.Exit(1)
 	}
 
@@ -198,6 +200,12 @@ func main() {
 			ControllerCfg: ccfg.ControllerCfg,
 			Metrics:       metricsCollector,
 		}},
+	)
+
+	hookServer.Register("/validate-auth", &webhook.Admission{
+		Handler: apiWebhook.NewAuthValidator(ccfg.ControllerCfg.SecurityMode, mgr.GetClient(), mgr.GetAPIReader(), authCli,
+			ccfg.ControllerCfg.ClusterScoped, ccfg.ControllerCfg.TargetNamespace, ccfg.ControllerCfg.AllowedNamespaces, ccfg.ControllerCfg.IgnoredNamespaces),
+	},
 	)
 
 	// +kubebuilder:scaffold:builder

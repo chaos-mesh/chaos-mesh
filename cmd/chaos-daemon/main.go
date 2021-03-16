@@ -39,6 +39,9 @@ func init() {
 	flag.IntVar(&conf.GRPCPort, "grpc-port", 31767, "the port which grpc server listens on")
 	flag.IntVar(&conf.HTTPPort, "http-port", 31766, "the port which http server listens on")
 	flag.StringVar(&conf.Runtime, "runtime", "docker", "current container runtime")
+	flag.StringVar(&conf.CaCert, "ca", "", "ca certificate of grpc server")
+	flag.StringVar(&conf.Cert, "cert", "", "certificate of grpc server")
+	flag.StringVar(&conf.Key, "key", "", "key of grpc server")
 	flag.BoolVar(&conf.Profiling, "pprof", false, "enable pprof")
 
 	flag.Parse()

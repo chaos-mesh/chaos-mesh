@@ -1,7 +1,9 @@
 import { ExperimentKind } from '../components/NewExperiment/types'
 
 export interface EventsParams {
+  experimentName?: string
   namespace?: string
+  kind?: ExperimentKind
   limit?: number
 }
 
