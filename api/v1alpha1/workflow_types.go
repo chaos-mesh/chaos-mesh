@@ -14,7 +14,6 @@
 package v1alpha1
 
 import (
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -62,8 +61,6 @@ type WorkflowSpec struct {
 type WorkflowStatus struct {
 	// +optional
 	EntryNode *string `json:"entry_node,omitempty"`
-	// +optional
-	Nodes []corev1.LocalObjectReference `json:"nodes,omitempty"`
 }
 
 type TemplateType string

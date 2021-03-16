@@ -46,7 +46,7 @@ func (it *WorkflowEntryReconciler) Reconcile(request reconcile.Request) (reconci
 		return reconcile.Result{}, client.IgnoreNotFound(err)
 	}
 
-	if workflow.Status.EntryNode == nil && len(workflow.Status.Nodes) == 0 {
+	if workflow.Status.EntryNode == nil {
 		// This workflow is just created, create entry node
 		nodes, err := renderNodesByTemplates(&workflow, nil, workflow.Spec.Entry)
 		if err != nil {
@@ -75,7 +75,6 @@ func (it *WorkflowEntryReconciler) Reconcile(request reconcile.Request) (reconci
 				return err
 			}
 			workflow.Status.EntryNode = &entryNode.Name
-			workflow.Status.Nodes = append(workflow.Status.Nodes, corev1.LocalObjectReference{Name: entryNode.Name})
 
 			// TODO: add metav1.FinalizerDeleteDependents for workflow's finalizer in webhook
 			err = it.kubeClient.Update(ctx, &workflow)
