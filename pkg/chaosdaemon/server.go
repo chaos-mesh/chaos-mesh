@@ -32,6 +32,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
 )
@@ -70,14 +71,14 @@ func (c *Config) GrpcAddr() string {
 
 // DaemonServer represents a grpc server for tc daemon
 type DaemonServer struct {
-	crClient                 ContainerRuntimeInfoClient
+	crClient                 crclients.ContainerRuntimeInfoClient
 	backgroundProcessManager bpm.BackgroundProcessManager
 
 	IPSetLocker *locker.Locker
 }
 
 func newDaemonServer(containerRuntime string) (*DaemonServer, error) {
-	crClient, err := CreateContainerRuntimeInfoClient(containerRuntime)
+	crClient, err := crclients.CreateContainerRuntimeInfoClient(containerRuntime)
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +87,7 @@ func newDaemonServer(containerRuntime string) (*DaemonServer, error) {
 }
 
 // NewDaemonServerWithCRClient returns DaemonServer with container runtime client
-func NewDaemonServerWithCRClient(crClient ContainerRuntimeInfoClient) *DaemonServer {
+func NewDaemonServerWithCRClient(crClient crclients.ContainerRuntimeInfoClient) *DaemonServer {
 	return &DaemonServer{
 		IPSetLocker:              locker.New(),
 		crClient:                 crClient,
