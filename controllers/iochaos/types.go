@@ -102,6 +102,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 			},
 			Latency:          iochaos.Spec.Delay,
 			AttrOverrideSpec: iochaos.Spec.Attr,
+			MistakeSpec:      iochaos.Spec.Mistake,
 			Source:           m.Source,
 		})
 
