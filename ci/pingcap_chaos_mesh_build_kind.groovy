@@ -231,6 +231,9 @@ def call(BUILD_BRANCH, CREDENTIALS_ID) {
 		builds["E2E v1.12.10"] = {
                 build("v1.12", "${GLOBALS} GINKGO_NODES=6 KUBE_VERSION=v1.12.10 ./hack/e2e.sh -- --ginkgo.focus='Basic'")
         }
+        builds["E2E on kubernetes 1.20.4"] = {
+                build("v1.20", "${GLOBALS} GINKGO_NODES=6 KUBE_VERSION=v1.20.4 ./hack/e2e.sh -- --ginkgo.focus='Basic'")
+        }
 		builds.failFast = false
 		parallel builds
 
