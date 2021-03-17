@@ -923,7 +923,7 @@ metadata:
     app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/component: controller-manager
 ---
-# Source: chaos-mesh/templates/webhook-configuration.yaml
+# Source: chaos-mesh/templates/secrets-configuration.yaml
 kind: Secret
 apiVersion: v1
 metadata:
@@ -935,6 +935,7 @@ metadata:
     app.kubernetes.io/component: webhook-secret
 type: Opaque
 data:
+  ca.crt: "${CA_BUNDLE}"
   tls.crt: "${TLS_CRT}"
   tls.key: "${TLS_KEY}"
 ---
@@ -986,6 +987,10 @@ rules:
       - namespaces
       - services
     verbs: [ "get", "list", "watch" ]
+  - apiGroups: [ "authorization.k8s.io" ]
+    resources:
+      - subjectaccessreviews
+    verbs: [ "create" ]
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 # bindings cluster level
@@ -1039,6 +1044,10 @@ rules:
   - apiGroups: [ "" ]
     resources: [ "configmaps", "services" ]
     verbs: [ "get", "list", "watch" ]
+  - apiGroups: [ "authorization.k8s.io" ]
+    resources:
+      - subjectaccessreviews
+    verbs: [ "create" ]
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 # binding for control plane namespace
@@ -1158,6 +1167,7 @@ spec:
         app.kubernetes.io/name: chaos-mesh
         app.kubernetes.io/instance: chaos-mesh
         app.kubernetes.io/component: chaos-daemon
+      annotations:
     spec:
       hostNetwork: ${host_network}
       serviceAccount: chaos-daemon
@@ -1342,6 +1352,8 @@ spec:
             value: chaos-mesh-dns-server
           - name: CHAOS_DNS_SERVICE_PORT
             value: !!str 9288
+          - name: SECURITY_MODE
+            value: "false"
         volumeMounts:
           - name: webhook-certs
             mountPath: /etc/webhook/certs
@@ -1358,7 +1370,7 @@ spec:
           secret:
             secretName: chaos-mesh-webhook-certs
 ---
-# Source: chaos-mesh/templates/webhook-configuration.yaml
+# Source: chaos-mesh/templates/secrets-configuration.yaml
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: MutatingWebhookConfiguration
 metadata:
@@ -1369,6 +1381,7 @@ metadata:
     app.kubernetes.io/component: admission-webhook
 webhooks:
   - name: admission-webhook.chaos-mesh.org
+    timeoutSeconds: 5
     clientConfig:
       caBundle: "${CA_BUNDLE}"
       service:
@@ -1392,6 +1405,7 @@ webhooks:
         path: /mutate-chaos-mesh-org-v1alpha1-podchaos
     failurePolicy: Fail
     name: mpodchaos.kb.io
+    timeoutSeconds: 5
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1410,6 +1424,7 @@ webhooks:
         path: /mutate-chaos-mesh-org-v1alpha1-iochaos
     failurePolicy: Fail
     name: miochaos.kb.io
+    timeoutSeconds: 5
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1428,6 +1443,7 @@ webhooks:
         path: /mutate-chaos-mesh-org-v1alpha1-timechaos
     failurePolicy: Fail
     name: mtimechaos.kb.io
+    timeoutSeconds: 5
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1446,6 +1462,7 @@ webhooks:
         path: /mutate-chaos-mesh-org-v1alpha1-networkchaos
     failurePolicy: Fail
     name: mnetworkchaos.kb.io
+    timeoutSeconds: 5
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1464,6 +1481,7 @@ webhooks:
         path: /mutate-chaos-mesh-org-v1alpha1-kernelchaos
     failurePolicy: Fail
     name: mkernelchaos.kb.io
+    timeoutSeconds: 5
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1482,6 +1500,7 @@ webhooks:
         path: /mutate-chaos-mesh-org-v1alpha1-stresschaos
     failurePolicy: Fail
     name: mstresschaos.kb.io
+    timeoutSeconds: 5
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1500,6 +1519,7 @@ webhooks:
         path: /mutate-chaos-mesh-org-v1alpha1-awschaos
     failurePolicy: Fail
     name: mawschaos.kb.io
+    timeoutSeconds: 5
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1518,6 +1538,7 @@ webhooks:
         path: /mutate-chaos-mesh-org-v1alpha1-podiochaos
     failurePolicy: Fail
     name: mpodiochaos.kb.io
+    timeoutSeconds: 5
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1536,6 +1557,7 @@ webhooks:
         path: /mutate-chaos-mesh-org-v1alpha1-podnetworkchaos
     failurePolicy: Fail
     name: mpodnetworkchaos.kb.io
+    timeoutSeconds: 5
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1554,6 +1576,7 @@ webhooks:
         path: /mutate-chaos-mesh-org-v1alpha1-dnschaos
     failurePolicy: Fail
     name: mdnschaos.kb.io
+    timeoutSeconds: 5
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1572,6 +1595,7 @@ webhooks:
         path: /mutate-chaos-mesh-org-v1alpha1-jvmchaos
     failurePolicy: Fail
     name: mjvmchaos.kb.io
+    timeoutSeconds: 5
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1583,7 +1607,7 @@ webhooks:
         resources:
           - jvmchaos
 ---
-# Source: chaos-mesh/templates/webhook-configuration.yaml
+# Source: chaos-mesh/templates/secrets-configuration.yaml
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: ValidatingWebhookConfiguration
 metadata:
@@ -1601,6 +1625,7 @@ webhooks:
         path: /validate-chaos-mesh-org-v1alpha1-podchaos
     failurePolicy: Fail
     name: vpodchaos.kb.io
+    timeoutSeconds: 5
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1619,6 +1644,7 @@ webhooks:
         path: /validate-chaos-mesh-org-v1alpha1-iochaos
     failurePolicy: Fail
     name: viochaos.kb.io
+    timeoutSeconds: 5
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1637,6 +1663,7 @@ webhooks:
         path: /validate-chaos-mesh-org-v1alpha1-timechaos
     failurePolicy: Fail
     name: vtimechaos.kb.io
+    timeoutSeconds: 5
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1655,6 +1682,7 @@ webhooks:
         path: /validate-chaos-mesh-org-v1alpha1-networkchaos
     failurePolicy: Fail
     name: vnetworkchaos.kb.io
+    timeoutSeconds: 5
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1673,6 +1701,7 @@ webhooks:
         path: /validate-chaos-mesh-org-v1alpha1-kernelchaos
     failurePolicy: Fail
     name: vkernelchaos.kb.io
+    timeoutSeconds: 5
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1691,6 +1720,7 @@ webhooks:
         path: /validate-chaos-mesh-org-v1alpha1-stresschaos
     failurePolicy: Fail
     name: vstresschaos.kb.io
+    timeoutSeconds: 5
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1709,6 +1739,7 @@ webhooks:
         path: /validate-chaos-mesh-org-v1alpha1-awschaos
     failurePolicy: Fail
     name: vawschaos.kb.io
+    timeoutSeconds: 5
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1727,6 +1758,7 @@ webhooks:
         path: /validate-chaos-mesh-org-v1alpha1-podnetworkchaos
     failurePolicy: Fail
     name: vpodnetworkchaos.kb.io
+    timeoutSeconds: 5
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1745,6 +1777,7 @@ webhooks:
         path: /validate-chaos-mesh-org-v1alpha1-dnschaos
     failurePolicy: Fail
     name: vdnschaos.kb.io
+    timeoutSeconds: 5
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1763,6 +1796,7 @@ webhooks:
         path: /validate-chaos-mesh-org-v1alpha1-jvmchaos
     failurePolicy: Fail
     name: vjvmchaos.kb.io
+    timeoutSeconds: 5
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1773,6 +1807,34 @@ webhooks:
           - UPDATE
         resources:
           - jvmchaos
+---
+# Source: chaos-mesh/templates/secrets-configuration.yaml
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: validate-auth
+  labels:
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/component: admission-webhook
+webhooks:
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /validate-auth
+    failurePolicy: Fail
+    name: vauth.kb.io
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources: [ "*" ]
 EOF
     # chaos-mesh.yaml end
 }
