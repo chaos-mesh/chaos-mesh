@@ -270,12 +270,17 @@ endif
 
 image-chaos-mesh-e2e-dependencies += test/image/e2e/manifests test/image/e2e/chaos-mesh
 
+e2e: e2e-build
+	./test/image/e2e/bin/ginkgo  ./test/image/e2e/bin/e2e.test
+
 e2e-build: test/image/e2e/bin/ginkgo test/image/e2e/bin/e2e.test
 
 test/image/e2e/manifests: manifests
+	rm -rf test/image/e2e/manifests
 	cp -r manifests test/image/e2e
 
 test/image/e2e/chaos-mesh: helm/chaos-mesh
+	rm -rf test/image/e2e/chaos-mesh
 	cp -r helm/chaos-mesh test/image/e2e
 
 define IMAGE_TEMPLATE

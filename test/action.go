@@ -29,6 +29,7 @@ import (
 	"k8s.io/klog"
 	aggregatorclientset "k8s.io/kube-aggregator/pkg/client/clientset_generated/clientset"
 
+	"github.com/chaos-mesh/chaos-mesh/test/e2e/e2econst"
 	e2eutil "github.com/chaos-mesh/chaos-mesh/test/e2e/util"
 )
 
@@ -60,10 +61,17 @@ func NewOperatorAction(
 }
 
 func (oa *operatorAction) DeployOperator(info OperatorConfig) error {
+	klog.Infof("create namespace chaos-testing")
+	cmd := fmt.Sprintf(`kubectl create ns %s`, e2econst.ChaosMeshNamespace)
+	klog.Infof(cmd)
+	output, err := exec.Command("/bin/sh", "-c", cmd).CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("failed to create namespace chaos-testing: %v %s", err, string(output))
+	}
 	klog.Infof("deploying chaos-mesh:%v", info.ReleaseName)
-	cmd := fmt.Sprintf(`helm install %s --name %s --namespace %s --set-string %s`,
-		oa.operatorChartPath(info.Tag),
+	cmd = fmt.Sprintf(`helm install %s %s --namespace %s --set-string %s`,
 		info.ReleaseName,
+		oa.operatorChartPath(info.Tag),
 		info.Namespace,
 		info.operatorHelmSetString())
 	klog.Info(cmd)

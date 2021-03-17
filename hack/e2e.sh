@@ -33,7 +33,6 @@ Usage: hack/e2e.sh [-h] -- [extra test args]
     -h      show this message and exit
 Environments:
     PROVIDER                    Kubernetes provider, e.g. kind, gke, eks, defaults: kind
-    HELM_IMAGE                  image for helm tiller
     DOCKER_REGISTRY             image docker registry
     IMAGE_TAG                   image tag
     SKIP_BUILD                  skip building binaries
@@ -63,8 +62,6 @@ Examples:
     SKIP_UP=y SKIP_DOWN=y ./hack/e2e.sh -- <e2e args>
 4) use registry mirrors
     DOCKER_IO_MIRROR=https://dockerhub.azk8s.cn QUAY_IO_MIRROR=https://quay.azk8s.cn GCR_IO_MIRROR=https://gcr.azk8s.cn ./hack/e2e.sh -- <e2e args>
-5) use mirror helm image
-    HELM_IMAGE=registry.cn-hangzhou.aliyuncs.com/google_containers/tiller:v2.9.1 ./hack/e2e.sh
 EOF
 
 }
@@ -86,8 +83,6 @@ hack::ensure_kind
 echo "ensured kind"
 hack::ensure_kubectl
 echo "ensured kubectl"
-hack::ensure_helm
-echo "ensured helm"
 hack::ensure_kubebuilder
 echo "ensured kubebuilder"
 hack::ensure_kustomize
@@ -96,7 +91,6 @@ hack::ensure_kubetest2
 echo "ensured kubetest2"
 
 PROVIDER=${PROVIDER:-kind}
-HELM_IMAGE=${HELM_IMAGE:-gcr.io/kubernetes-helm/tiller:v2.9.1}
 DOCKER_REGISTRY=${DOCKER_REGISTRY:-localhost:5000}
 IMAGE_TAG=${IMAGE_TAG:-latest}
 CLUSTER=${CLUSTER:-chaos-mesh}
@@ -108,7 +102,7 @@ SKIP_DOWN=${SKIP_DOWN:-}
 SKIP_DUMP=${SKIP_DUMP:-}
 SKIP_TEST=${SKIP_TEST:-}
 KIND_DATA_HOSTPATH=${KIND_DATA_HOSTPATH:-none}
-KUBE_VERSION=${KUBE_VERSION:-v1.12.10}
+KUBE_VERSION=${KUBE_VERSION:-v1.15.11}
 KUBE_WORKERS=${KUBE_WORKERS:-3}
 DOCKER_IO_MIRROR=${DOCKER_IO_MIRROR:-}
 GCR_IO_MIRROR=${GCR_IO_MIRROR:-}
