@@ -29,7 +29,7 @@ HELM_BIN=$OUTPUT_BIN/helm
 # Don't ugprade to 2.15.x/2.16.x until this issue
 # (https://github.com/helm/helm/issues/6361) has been fixed.
 #
-HELM_VERSION=2.9.1
+HELM_VERSION=3.5.3
 KIND_VERSION=${KIND_VERSION:-0.8.1}
 KIND_BIN=$OUTPUT_BIN/kind
 KUBEBUILDER_PATH=$OUTPUT_BIN/kubebuilder
@@ -74,7 +74,7 @@ function hack::ensure_helm() {
     if hack::verify_helm; then
         return 0
     fi
-    local HELM_URL=http://storage.googleapis.com/kubernetes-helm/helm-v${HELM_VERSION}-${OS}-${ARCH}.tar.gz
+    local HELM_URL=https://get.helm.sh/helm-v${HELM_VERSION}-${OS}-${ARCH}.tar.gz
     curl --retry 10 -L -s "$HELM_URL" | tar --strip-components 1 -C $OUTPUT_BIN -zxf - ${OS}-${ARCH}/helm
 }
 
