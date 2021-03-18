@@ -95,12 +95,22 @@ const Welcome = () => {
       <Button
         className={clsx(classes.button, 'dashboard-new-experiment')}
         component={Link}
-        to="/newExperiment"
+        to="/experiments/new"
         variant="contained"
         color="primary"
         startIcon={<AddIcon />}
       >
         {T('newE.title')}
+      </Button>
+      <Button
+        className={classes.button}
+        component={Link}
+        to="/workflows/new"
+        variant="contained"
+        color="primary"
+        startIcon={<AddIcon />}
+      >
+        {T('newW.title')}
       </Button>
     </Paper>
   )

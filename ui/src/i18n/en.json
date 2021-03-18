@@ -113,6 +113,16 @@
   "workflows": {
     "title": "Workflows"
   },
+  "newW": {
+    "title": "New Workflow",
+    "node": {
+      "choose": "Choose node type",
+      "single": "Single",
+      "serial": "Serial",
+      "parallel": "Parallel",
+      "number": "Number"
+    }
+  },
   "events": {
     "title": "Events",
     "noEventsFound": "No events found",

@@ -4,7 +4,8 @@ import Dashboard from 'pages/Dashboard'
 import Events from 'pages/Events'
 import ExperimentDetail from 'pages/ExperimentDetail'
 import Experiments from 'pages/Experiments'
-import NewExperiment from 'components/NewExperimentNext'
+import NewExperiment from 'pages/Experiments/New'
+import NewWorkflow from 'components/NewWorkflow'
 import { RouteProps } from 'react-router'
 import Settings from 'pages/Settings'
 import Swagger from 'pages/Swagger'
@@ -17,13 +18,17 @@ const routes: RouteProps[] = [
     exact: true,
   },
   {
-    component: NewExperiment,
-    path: '/newExperiment',
-  },
-  {
     component: Experiments,
     path: '/experiments',
     exact: true,
+  },
+  {
+    component: NewExperiment,
+    path: '/experiments/new',
+  },
+  {
+    component: ExperimentDetail,
+    path: '/experiments/:uuid',
   },
   {
     component: Workflows,
@@ -31,8 +36,8 @@ const routes: RouteProps[] = [
     exact: true,
   },
   {
-    component: ExperimentDetail,
-    path: '/experiments/:uuid',
+    component: NewWorkflow,
+    path: '/workflows/new',
   },
   {
     component: Events,

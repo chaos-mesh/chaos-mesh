@@ -113,6 +113,16 @@
   "workflows": {
     "title": "工作流"
   },
+  "newW": {
+    "title": "新的工作流",
+    "node": {
+      "choose": "选择节点类型",
+      "single": "单一",
+      "serial": "顺序",
+      "parallel": "并行",
+      "number": "数目"
+    }
+  },
   "events": {
     "title": "事件",
     "noEventsFound": "未发现事件",

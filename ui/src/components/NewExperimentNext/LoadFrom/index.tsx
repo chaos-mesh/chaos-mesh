@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react'
 import { Archive } from 'api/archives.type'
 import { Experiment } from 'api/experiments.type'
 import Paper from 'components-mui/Paper'
-import PaperTop from 'components-mui/PaperTop'
 import RadioLabel from './RadioLabel'
 import SkeletonN from 'components-mui/SkeletonN'
 import T from 'components/T'
@@ -17,7 +16,11 @@ import { useIntl } from 'react-intl'
 import { useStoreDispatch } from 'store'
 import { yamlToExperiment } from 'lib/formikhelpers'
 
-const LoadFrom = () => {
+interface LoadFromProps {
+  loadCallback?: () => void
+}
+
+const LoadFrom: React.FC<LoadFromProps> = ({ loadCallback }) => {
   const intl = useIntl()
 
   const dispatch = useStoreDispatch()
@@ -66,6 +69,8 @@ const LoadFrom = () => {
       .then(({ data }) => {
         fillExperiment(data.yaml)
 
+        loadCallback && loadCallback()
+
         dispatch(
           setAlert({
             type: 'success',
@@ -78,23 +83,23 @@ const LoadFrom = () => {
 
   return (
     <Paper>
-      <PaperTop title={T('newE.loadFrom')}>
-        <YAML callback={fillExperiment} />
-      </PaperTop>
-      <Box p={3} maxHeight={450} style={{ overflowY: 'scroll' }}>
+      <Box p={3}>
         <RadioGroup value={radio} onChange={onRadioChange}>
-          <Box mb={3}>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
             <Typography>{T('experiments.title')}</Typography>
+            <YAML callback={fillExperiment} />
           </Box>
           {experiments && experiments.length > 0 ? (
-            experiments.map((e) => (
-              <FormControlLabel
-                key={e.uid}
-                value={`e+${e.uid}`}
-                control={<Radio color="primary" />}
-                label={RadioLabel(e)}
-              />
-            ))
+            <Box display="flex" flexWrap="wrap">
+              {experiments.map((e) => (
+                <FormControlLabel
+                  key={e.uid}
+                  value={`e+${e.uid}`}
+                  control={<Radio color="primary" />}
+                  label={RadioLabel(e)}
+                />
+              ))}
+            </Box>
           ) : experiments?.length === 0 ? (
             <Typography variant="body2">{T('experiments.noExperimentsFound')}</Typography>
           ) : (
@@ -107,14 +112,16 @@ const LoadFrom = () => {
             <Typography>{T('archives.title')}</Typography>
           </Box>
           {archives && archives.length > 0 ? (
-            archives.map((a) => (
-              <FormControlLabel
-                key={a.uid}
-                value={`a+${a.uid}`}
-                control={<Radio color="primary" />}
-                label={RadioLabel(a)}
-              />
-            ))
+            <Box display="flex" flexWrap="wrap">
+              {archives.map((a) => (
+                <FormControlLabel
+                  key={a.uid}
+                  value={`a+${a.uid}`}
+                  control={<Radio color="primary" />}
+                  label={RadioLabel(a)}
+                />
+              ))}
+            </Box>
           ) : archives?.length === 0 ? (
             <Typography variant="body2">{T('archives.noArchivesFound')}</Typography>
           ) : (

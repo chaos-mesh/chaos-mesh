@@ -2,6 +2,7 @@ import { Box, Button, Typography } from '@material-ui/core'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
 import DoneAllIcon from '@material-ui/icons/DoneAll'
+import { Experiment } from 'components/NewExperiment/types'
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
 import PublishIcon from '@material-ui/icons/Publish'
@@ -14,7 +15,11 @@ import { setAlert } from 'slices/globalStatus'
 import { useHistory } from 'react-router-dom'
 import { useIntl } from 'react-intl'
 
-const Step3 = () => {
+interface Step3Props {
+  onSubmit?: (values: Experiment) => void
+}
+
+const Step3: React.FC<Step3Props> = ({ onSubmit }) => {
   const state = useStoreSelector((state) => state)
   const { step1, step2, basic, target } = state.experiments
   const { debugMode } = state.settings
@@ -34,21 +39,26 @@ const Step3 = () => {
     }
 
     if (!debugMode) {
-      api.experiments
-        .newExperiment(parsedValues)
-        .then(() => {
-          dispatch(
-            setAlert({
-              type: 'success',
-              message: intl.formatMessage({ id: 'common.createSuccessfully' }),
-            })
-          )
+      if (onSubmit) {
+        console.log(1)
+        onSubmit(parsedValues)
+      } else {
+        api.experiments
+          .newExperiment(parsedValues)
+          .then(() => {
+            dispatch(
+              setAlert({
+                type: 'success',
+                message: intl.formatMessage({ id: 'common.createSuccessfully' }),
+              })
+            )
 
-          dispatch(resetNewExperiment())
+            dispatch(resetNewExperiment())
 
-          history.push('/experiments')
-        })
-        .catch(console.error)
+            history.push('/experiments')
+          })
+          .catch(console.error)
+      }
     }
   }
 
@@ -57,7 +67,7 @@ const Step3 = () => {
       {step1 && step2 && (
         <Paper>
           <PaperTop title={T('common.submit')} />
-          <Box p={6} textAlign="center">
+          <Box p={3} textAlign="center">
             <DoneAllIcon fontSize="large" />
             <Typography>{T('newE.complete')}</Typography>
             <Box mt={6} textAlign="right">

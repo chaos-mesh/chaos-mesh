@@ -3,13 +3,14 @@ import EventsTable, { EventsTableHandles } from 'components/EventsTable'
 import React, { useEffect, useRef, useState } from 'react'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 
-import BlurLinearIcon from '@material-ui/icons/BlurLinear'
 import { Event } from 'api/events.type'
 import Loading from 'components-mui/Loading'
+import NotFound from 'components-mui/NotFound'
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
 import { RootState } from 'store'
 import T from 'components/T'
+import TimelineOutlinedIcon from '@material-ui/icons/TimelineOutlined'
 import api from 'api'
 import genEventsChart from 'lib/d3/eventsChart'
 import { useIntl } from 'react-intl'
@@ -87,14 +88,12 @@ export default function Events() {
       )}
 
       {!loading && events && events.length === 0 && (
-        <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" height="100%">
+        <NotFound textAlign="center">
           <Box mb={3}>
-            <BlurLinearIcon fontSize="large" />
+            <TimelineOutlinedIcon fontSize="large" />
           </Box>
-          <Typography variant="h6" align="center">
-            {T('events.noEventsFound')}
-          </Typography>
-        </Box>
+          <Typography variant="h6">{T('events.noEventsFound')}</Typography>
+        </NotFound>
       )}
 
       {loading && <Loading />}

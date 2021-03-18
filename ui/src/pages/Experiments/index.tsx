@@ -7,8 +7,8 @@ import { Experiment } from 'api/experiments.type'
 import ExperimentListItem from 'components/ExperimentListItem'
 import Loading from 'components-mui/Loading'
 import NotFound from 'components-mui/NotFound'
+import StorageOutlinedIcon from '@material-ui/icons/StorageOutlined'
 import T from 'components/T'
-import TuneIcon from '@material-ui/icons/Tune'
 import _groupBy from 'lodash.groupby'
 import api from 'api'
 import { setAlert } from 'slices/globalStatus'
@@ -91,7 +91,7 @@ export default function Experiments() {
   return (
     <>
       <Box mb={6}>
-        <Button variant="outlined" startIcon={<AddIcon />} onClick={() => history.push('/newExperiment')}>
+        <Button variant="outlined" startIcon={<AddIcon />} onClick={() => history.push('/experiments/new')}>
           {T('newE.title')}
         </Button>
       </Box>
@@ -124,7 +124,7 @@ export default function Experiments() {
       {!loading && experiments && experiments.length === 0 && (
         <NotFound textAlign="center">
           <Box mb={3}>
-            <TuneIcon fontSize="large" />
+            <StorageOutlinedIcon fontSize="large" />
           </Box>
           <Typography variant="h6">{T('experiments.noExperimentsFound')}</Typography>
         </NotFound>

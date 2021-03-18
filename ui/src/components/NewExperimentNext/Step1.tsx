@@ -5,7 +5,7 @@ import { setStep1, setTarget as setTargetToStore } from 'slices/experiments'
 import targetData, { Kind, Target, schema } from './data/target'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
-import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline'
+import CheckIcon from '@material-ui/icons/Check'
 import Kernel from './form/Kernel'
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
@@ -107,23 +107,19 @@ const Step1 = () => {
         title={
           <Box display="flex">
             {step1 && (
-              <Box display="flex" alignItems="center" mr={3}>
-                <CheckCircleOutlineIcon className={classes.submitIcon} />
+              <Box display="flex" mr={3}>
+                <CheckIcon className={classes.submitIcon} />
               </Box>
             )}
             {T('newE.titleStep1')}
           </Box>
         }
       >
-        {step1 && (
-          <Box display="flex" alignItems="center">
-            <UndoIcon className={classes.asButton} onClick={handleUndo} />
-          </Box>
-        )}
+        {step1 && <UndoIcon className={classes.asButton} onClick={handleUndo} />}
       </PaperTop>
       <Box hidden={step1}>
         <Box p={3} overflow="hidden">
-          <GridList className={classes.gridList} cols={isDesktopScreen ? 1.5 : 3.5} spacing={9} cellHeight="auto">
+          <GridList className={classes.gridList} cols={isDesktopScreen ? 1.5 : 4.5} spacing={9} cellHeight="auto">
             {targetDataEntries.map(([key, t]) => (
               <GridListTile key={key}>
                 <Card

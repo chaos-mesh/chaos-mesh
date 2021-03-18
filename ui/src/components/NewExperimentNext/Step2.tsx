@@ -8,7 +8,7 @@ import { setBasic, setStep2 } from 'slices/experiments'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
 import AdvancedOptions from 'components/AdvancedOptions'
-import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline'
+import CheckIcon from '@material-ui/icons/Check'
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
 import PublishIcon from '@material-ui/icons/Publish'
@@ -64,19 +64,15 @@ const Step2 = () => {
         title={
           <Box display="flex">
             {step2 && (
-              <Box display="flex" alignItems="center" mr={3}>
-                <CheckCircleOutlineIcon className={classes.submitIcon} />
+              <Box display="flex" mr={3}>
+                <CheckIcon className={classes.submitIcon} />
               </Box>
             )}
             {T('newE.titleStep2')}
           </Box>
         }
       >
-        {step2 && (
-          <Box display="flex" alignItems="center">
-            <UndoIcon className={classes.asButton} onClick={handleUndo} />
-          </Box>
-        )}
+        {step2 && <UndoIcon className={classes.asButton} onClick={handleUndo} />}
       </PaperTop>
       <Box position="relative" p={6} hidden={step2}>
         <Formik

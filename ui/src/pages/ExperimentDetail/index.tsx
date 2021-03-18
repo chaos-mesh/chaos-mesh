@@ -99,7 +99,7 @@ export default function ExperimentDetail() {
 
   const fetchEvents = () =>
     api.events
-      .events({ experimentName: detail!.yaml.name })
+      .events({ experimentName: detail!.yaml.metadata.name })
       .then(({ data }) => setEvents(data))
       .catch(console.error)
       .finally(() => {
