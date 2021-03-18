@@ -51,7 +51,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 }
 
 func NewImpl(c client.Client) *Impl {
-	return &Impl {
+	return &Impl{
 		Client: c,
 	}
 }

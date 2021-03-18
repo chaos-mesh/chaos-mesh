@@ -16,12 +16,14 @@ package main
 import (
 	"flag"
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/podchaos"
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/podchaos/containerkill"
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/podchaos/podfailure"
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/podchaos/podkill"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
-	"github.com/chaos-mesh/chaos-mesh/controllers/podchaos"
-	"github.com/chaos-mesh/chaos-mesh/controllers/podchaos/containerkill"
-	"github.com/chaos-mesh/chaos-mesh/controllers/podchaos/podfailure"
-	"github.com/chaos-mesh/chaos-mesh/controllers/podchaos/podkill"
+	"github.com/chaos-mesh/chaos-mesh/controllers/delete"
+	"github.com/chaos-mesh/chaos-mesh/controllers/desiredphase"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podiochaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos"
 	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
@@ -101,12 +103,37 @@ func main() {
 
 	if err := ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.PodChaos{}).
+		Named("podchaos-records").
 		Complete(&common.Reconciler{
 			Impl: podchaos.NewImpl(
 				podkill.NewImpl(mgr.GetClient()),
 				podfailure.NewImpl(mgr.GetClient()),
 				containerkill.NewImpl(mgr.GetClient(), ctrl.Log),
 				),
+			Object: &v1alpha1.PodChaos{},
+			Client: mgr.GetClient(),
+			Reader: mgr.GetAPIReader(),
+			Log: ctrl.Log,
+		}); err != nil {
+		setupLog.Error(err, "fail to setup PodChaos reconciler")
+	}
+
+	if err := ctrl.NewControllerManagedBy(mgr).
+		For(&v1alpha1.PodChaos{}).
+		Named("podchaos-desiredphase").
+		Complete(&desiredphase.Reconciler{
+			Object: &v1alpha1.PodChaos{},
+			Client: mgr.GetClient(),
+			Reader: mgr.GetAPIReader(),
+			Log: ctrl.Log,
+		}); err != nil {
+		setupLog.Error(err, "fail to setup PodChaos reconciler")
+	}
+
+	if err := ctrl.NewControllerManagedBy(mgr).
+		For(&v1alpha1.PodChaos{}).
+		Named("podchaos-delete").
+		Complete(&delete.Reconciler{
 			Object: &v1alpha1.PodChaos{},
 			Client: mgr.GetClient(),
 			Reader: mgr.GetAPIReader(),

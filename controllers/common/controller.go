@@ -22,6 +22,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
 	"github.com/go-logr/logr"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/client-go/util/retry"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -67,11 +68,13 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	shouldUpdate := false
 
-	status := obj.GetStatus()
-	if status.Experiment.Records == nil {
-		var records []*v1alpha1.Record
+	desiredPhase := obj.GetStatus().Experiment.DesiredPhase
+	records := obj.GetStatus().Experiment.Records
+	selectors := obj.GetSelectorSpecs()
+
+	if records == nil {
 		// TODO: get selectors from obj
-		for name, sel := range obj.GetSelectorSpecs() {
+		for name, sel := range selectors {
 			selector := selector.New(selector.SelectorParams{
 				PodSelector: pod.New(r.Client, r.Reader, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces),
 				ContainerSelector: container.New(r.Client, r.Reader, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces),
@@ -88,43 +91,52 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 					SelectorKey: name,
 					Phase: v1alpha1.NotInjected,
 				})
+				shouldUpdate = true
 			}
 		}
-
-		status.Experiment.Records = records
-		shouldUpdate = true
 		// TODO: dynamic upgrade the records when some of these pods/containers stopped
 	}
 
-	// TODO: seperate the defaulter logic to another place
-	if status.Experiment.DesiredPhase == "" {
-		status.Experiment.DesiredPhase = v1alpha1.RunningPhase
-	}
-
-	for index, record := range status.Experiment.Records {
+	for index, record := range records {
 		var err error
-		if status.Experiment.DesiredPhase == v1alpha1.RunningPhase && record.Phase != v1alpha1.Injected {
-			record.Phase, err = r.Impl.Apply(context.TODO(), index, status.Experiment.Records, obj)
+		if desiredPhase == v1alpha1.RunningPhase && record.Phase != v1alpha1.Injected {
+			r.Log.Info("apply chaos", "id", records[index].Id)
+			record.Phase, err = r.Impl.Apply(context.TODO(), index, records, obj)
 			if err != nil {
 				// TODO: handle this error
 				r.Log.Error(err, "fail to apply chaos")
 			}
+
+			shouldUpdate = true
 		}
-		if status.Experiment.DesiredPhase == v1alpha1.StoppedPhase && record.Phase != v1alpha1.NotInjected {
-			record.Phase, err = r.Impl.Recover(context.TODO(), index, status.Experiment.Records, obj)
+		if desiredPhase == v1alpha1.StoppedPhase && record.Phase != v1alpha1.NotInjected {
+			r.Log.Info("recover chaos", "id", records[index].Id)
+			record.Phase, err = r.Impl.Recover(context.TODO(), index, records, obj)
 			if err != nil {
 				// TODO: handle this error
 				r.Log.Error(err, "fail to recover chaos")
 			}
+
+			shouldUpdate = true
 		}
 	}
 
 	if shouldUpdate {
-		err := r.Client.Update(context.TODO(), obj)
-		if err != nil {
+		updateError := retry.RetryOnConflict(retry.DefaultBackoff,func() error {
+			r.Log.Info("updating records", "records", records)
+			obj := r.Object.DeepCopyObject().(InnerObjectWithSelector)
+
+			if err := r.Client.Get(context.TODO(), req.NamespacedName, obj); err != nil {
+				r.Log.Error(err, "unable to get chaos")
+				return err
+			}
+
+			obj.GetStatus().Experiment.Records = records
+			return r.Client.Update(context.TODO(), obj)
+		})
+		if updateError != nil {
 			// TODO: handle this error
-			// TODO: retry and update `status.Experiment.Records`
-			r.Log.Error(err, "fail to update object", "obj", obj)
+			r.Log.Error(updateError, "fail to update")
 		}
 	}
 	return ctrl.Result{}, nil

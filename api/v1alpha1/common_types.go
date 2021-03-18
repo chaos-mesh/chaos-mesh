@@ -98,6 +98,7 @@ type InnerObject interface {
 	IsDeleted() bool
 	IsPaused() bool
 	GetChaos() *ChaosInstance
+	GetDuration() (*time.Duration, error)
 	StatefulObject
 }
 
@@ -107,6 +108,7 @@ type InnerObject interface {
 type StatefulObject interface {
 	runtime.Object
 	GetStatus() *ChaosStatus
+	GetObjectMeta() *metav1.ObjectMeta
 }
 
 // +kubebuilder:object:generate=false

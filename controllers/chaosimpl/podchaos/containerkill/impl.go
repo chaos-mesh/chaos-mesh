@@ -77,7 +77,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 }
 
 func NewImpl(c client.Client, log logr.Logger) *Impl {
-	return &Impl {
+	return &Impl{
 		Client: c,
 		Log: log.WithName("containerkill"),
 	}

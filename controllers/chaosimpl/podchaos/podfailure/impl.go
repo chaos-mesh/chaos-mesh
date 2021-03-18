@@ -41,28 +41,11 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		return v1alpha1.NotInjected, err
 	}
 
-	for index := range pod.Spec.InitContainers {
-		originImage := pod.Spec.InitContainers[index].Image
-		name := pod.Spec.InitContainers[index].Name
-
-		key := annotation.GenKeyForImage(podchaos, name)
-		if pod.Annotations == nil {
-			pod.Annotations = make(map[string]string)
-		}
-
-		// If the annotation is already existed, we could skip the reconcile for this container
-		if _, ok := pod.Annotations[key]; ok {
-			continue
-		}
-		pod.Annotations[key] = originImage
-		pod.Spec.InitContainers[index].Image = pauseImage
-	}
-
 	for index := range pod.Spec.Containers {
 		originImage := pod.Spec.Containers[index].Image
 		name := pod.Spec.Containers[index].Name
 
-		key := annotation.GenKeyForImage(podchaos, name)
+		key := annotation.GenKeyForImage(podchaos, name, false)
 		if pod.Annotations == nil {
 			pod.Annotations = make(map[string]string)
 		}
@@ -73,6 +56,23 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		}
 		pod.Annotations[key] = originImage
 		pod.Spec.Containers[index].Image = pauseImage
+	}
+
+	for index := range pod.Spec.InitContainers {
+		originImage := pod.Spec.InitContainers[index].Image
+		name := pod.Spec.InitContainers[index].Name
+
+		key := annotation.GenKeyForImage(podchaos, name, true)
+		if pod.Annotations == nil {
+			pod.Annotations = make(map[string]string)
+		}
+
+		// If the annotation is already existed, we could skip the reconcile for this container
+		if _, ok := pod.Annotations[key]; ok {
+			continue
+		}
+		pod.Annotations[key] = originImage
+		pod.Spec.InitContainers[index].Image = pauseImage
 	}
 
 	err = impl.Update(ctx, &pod)
@@ -96,7 +96,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 
 	for index := range pod.Spec.Containers {
 		name := pod.Spec.Containers[index].Name
-		key := annotation.GenKeyForImage(podchaos, name)
+		key := annotation.GenKeyForImage(podchaos, name, false)
 
 		if pod.Annotations == nil {
 			pod.Annotations = make(map[string]string)
@@ -104,12 +104,13 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		// check annotation
 		if image, ok := pod.Annotations[key]; ok {
 			pod.Spec.Containers[index].Image = image
+			delete(pod.Annotations, key)
 		}
 	}
 
 	for index := range pod.Spec.InitContainers {
 		name := pod.Spec.InitContainers[index].Name
-		key := annotation.GenKeyForImage(podchaos, name)
+		key := annotation.GenKeyForImage(podchaos, name, true)
 
 		if pod.Annotations == nil {
 			pod.Annotations = make(map[string]string)
@@ -117,6 +118,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		// check annotation
 		if image, ok := pod.Annotations[key]; ok {
 			pod.Spec.InitContainers[index].Image = image
+			delete(pod.Annotations, key)
 		}
 	}
 
@@ -130,7 +132,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 }
 
 func NewImpl(c client.Client) *Impl {
-	return &Impl {
+	return &Impl{
 		Client: c,
 	}
 }
