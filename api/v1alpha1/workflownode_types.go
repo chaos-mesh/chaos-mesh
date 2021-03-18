@@ -24,11 +24,11 @@ type WorkflowNode struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	// Spec defines the behavior of a pod chaos experiment
+	// Spec defines the behavior of a node of workflow
 	Spec WorkflowNodeSpec `json:"spec"`
 
 	// +optional
-	// Most recently observed status of the chaos experiment about pods
+	// Most recently observed status of the workflow node
 	Status WorkflowNodeStatus `json:"status"`
 }
 
