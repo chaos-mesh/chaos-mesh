@@ -5,7 +5,8 @@ import AffectedPods from 'components/AffectedPods'
 import { Event } from 'api/events.type'
 import Loading from 'components-mui/Loading'
 import { RootState } from 'store'
-import RunningLabel from 'components-mui/RunningLabel'
+import StateLabel from 'components-mui/StateLabel'
+import { StateOfExperimentsEnum } from 'api/experiments.type'
 import T from 'components/T'
 import api from 'api'
 import { format } from 'lib/luxon'
@@ -96,7 +97,7 @@ const EventDetail: React.FC<EventDetailProps> = ({ eventID }) => {
                   {e.finish_time ? (
                     format(e.finish_time, lang)
                   ) : (
-                    <RunningLabel>{T('experiments.state.running')}</RunningLabel>
+                    <StateLabel state={StateOfExperimentsEnum.Running}>{T('experiments.state.running')}</StateLabel>
                   )}
                 </Typography>
               </TableCell>

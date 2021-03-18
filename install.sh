@@ -923,7 +923,7 @@ metadata:
     app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/component: controller-manager
 ---
-# Source: chaos-mesh/templates/webhook-configuration.yaml
+# Source: chaos-mesh/templates/secrets-configuration.yaml
 kind: Secret
 apiVersion: v1
 metadata:
@@ -935,6 +935,7 @@ metadata:
     app.kubernetes.io/component: webhook-secret
 type: Opaque
 data:
+  ca.crt: "${CA_BUNDLE}"
   tls.crt: "${TLS_CRT}"
   tls.key: "${TLS_KEY}"
 ---
@@ -986,6 +987,10 @@ rules:
       - namespaces
       - services
     verbs: [ "get", "list", "watch" ]
+  - apiGroups: [ "authorization.k8s.io" ]
+    resources:
+      - subjectaccessreviews
+    verbs: [ "create" ]
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 # bindings cluster level
@@ -1039,6 +1044,10 @@ rules:
   - apiGroups: [ "" ]
     resources: [ "configmaps", "services" ]
     verbs: [ "get", "list", "watch" ]
+  - apiGroups: [ "authorization.k8s.io" ]
+    resources:
+      - subjectaccessreviews
+    verbs: [ "create" ]
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 # binding for control plane namespace
@@ -1158,6 +1167,7 @@ spec:
         app.kubernetes.io/name: chaos-mesh
         app.kubernetes.io/instance: chaos-mesh
         app.kubernetes.io/component: chaos-daemon
+      annotations:
     spec:
       hostNetwork: ${host_network}
       serviceAccount: chaos-daemon
@@ -1342,6 +1352,8 @@ spec:
             value: chaos-mesh-dns-server
           - name: CHAOS_DNS_SERVICE_PORT
             value: !!str 9288
+          - name: SECURITY_MODE
+            value: "false"
         volumeMounts:
           - name: webhook-certs
             mountPath: /etc/webhook/certs
@@ -1358,7 +1370,7 @@ spec:
           secret:
             secretName: chaos-mesh-webhook-certs
 ---
-# Source: chaos-mesh/templates/webhook-configuration.yaml
+# Source: chaos-mesh/templates/secrets-configuration.yaml
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: MutatingWebhookConfiguration
 metadata:
@@ -1595,7 +1607,7 @@ webhooks:
         resources:
           - jvmchaos
 ---
-# Source: chaos-mesh/templates/webhook-configuration.yaml
+# Source: chaos-mesh/templates/secrets-configuration.yaml
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: ValidatingWebhookConfiguration
 metadata:
@@ -1795,6 +1807,34 @@ webhooks:
           - UPDATE
         resources:
           - jvmchaos
+---
+# Source: chaos-mesh/templates/secrets-configuration.yaml
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: validate-auth
+  labels:
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/component: admission-webhook
+webhooks:
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /validate-auth
+    failurePolicy: Fail
+    name: vauth.kb.io
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources: [ "*" ]
 EOF
     # chaos-mesh.yaml end
 }

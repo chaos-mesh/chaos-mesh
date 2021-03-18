@@ -78,7 +78,9 @@ See the [contributing guide](./CONTRIBUTING.md) and [development guide](https://
 Please reach out for bugs, feature requests, and other issues via:
 
 - Following us on Twitter at [@chaos_mesh](https://twitter.com/chaos_mesh).
-- Joining the #project-chaos-mesh channel in the [CNCF Slack](https://cloud-native.slack.com/join/shared_invite/zt-lo88vmyc-9e3jSdUXf3dLP2yKql4A0Q#/) workspace.
+
+- Joining the #project-chaos-mesh channel in the [CNCF Slack](https://slack.cncf.io/) workspace.
+
 - Filing an issue or opening a PR against this repository.
 
 ### Community meeting
