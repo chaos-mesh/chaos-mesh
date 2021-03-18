@@ -3511,7 +3511,7 @@ spec:
         metadata:
           type: object
         spec:
-          description: Spec defines the behavior of a pod chaos experiment
+          description: Spec defines the behavior of a node of workflow
           properties:
             deadline:
               format: date-time
@@ -5377,8 +5377,7 @@ spec:
           - workflow_name
           type: object
         status:
-          description: Most recently observed status of the chaos experiment about
-            pods
+          description: Most recently observed status of the workflow node
           properties:
             active_children:
               description: ActiveChildren means the created children node
@@ -5493,7 +5492,7 @@ spec:
         metadata:
           type: object
         spec:
-          description: Spec defines the behavior of a pod chaos experiment
+          description: Spec defines the behavior of a workflow
           properties:
             entry:
               type: string
@@ -7415,8 +7414,7 @@ spec:
           - templates
           type: object
         status:
-          description: Most recently observed status of the chaos experiment about
-            pods
+          description: Most recently observed status of the workflow
           properties:
             entry_node:
               type: string
