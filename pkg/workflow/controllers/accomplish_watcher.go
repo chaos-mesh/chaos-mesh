@@ -48,7 +48,7 @@ func (it *AccomplishWatcher) Reconcile(request reconcile.Request) (reconcile.Res
 		return reconcile.Result{}, client.IgnoreNotFound(err)
 	}
 
-	if ConditionEqualsTo(node.Status, v1alpha1.CondiitonAccomplished, corev1.ConditionTrue) ||
+	if ConditionEqualsTo(node.Status, v1alpha1.ConditionAccomplished, corev1.ConditionTrue) ||
 		ConditionEqualsTo(node.Status, v1alpha1.ConditionDeadlineExceed, corev1.ConditionTrue) {
 		owners := node.OwnerReferences
 		// NOOP

@@ -62,7 +62,7 @@ func (it *SerialNodeReconciler) Reconcile(request reconcile.Request) (reconcile.
 
 	// this node should finished
 	if len(node.Status.FinishedChildren) == *node.Status.ExpectedChildren {
-		if !ConditionEqualsTo(node.Status, v1alpha1.CondiitonAccomplished, corev1.ConditionTrue) {
+		if !ConditionEqualsTo(node.Status, v1alpha1.ConditionAccomplished, corev1.ConditionTrue) {
 			updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
 				node := v1alpha1.WorkflowNode{}
 				err := it.kubeClient.Get(ctx, request.NamespacedName, &node)
@@ -70,7 +70,7 @@ func (it *SerialNodeReconciler) Reconcile(request reconcile.Request) (reconcile.
 					return client.IgnoreNotFound(err)
 				}
 				SetCondition(&node.Status, v1alpha1.WorkflowNodeCondition{
-					Type:   v1alpha1.CondiitonAccomplished,
+					Type:   v1alpha1.ConditionAccomplished,
 					Status: corev1.ConditionTrue,
 					Reason: v1alpha1.NodeAccomplished,
 				})
