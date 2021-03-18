@@ -110,12 +110,12 @@ func (s *DaemonServer) ApplyIoChaos(ctx context.Context, in *pb.ApplyIoChaosRequ
 	}
 
 	log.Info("Waiting for toda to start")
-	time.Sleep(time.Second * 3)
+	time.Sleep(time.Second * 3) // Is 3 seconds too long or too short?
 	var ret string
-	err = client.Call(&ret, "ping", struct{}{})
-	if err != nil || ret != "pong" {
+	err = client.Call(&ret, "get_status", struct{}{})
+	if err != nil || ret != "ok" {
 		log.Info("Starting toda takes too long")
-		return nil, fmt.Errorf("Toda startup takes too long or an error occurs")
+		return nil, fmt.Errorf("Toda startup takes too long or an error occurs: %s", ret)
 	}
 
 	return &pb.ApplyIoChaosResponse{
