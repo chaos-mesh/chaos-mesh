@@ -54,7 +54,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           <Button size="small" onClick={handleClose}>
             {T('common.cancel')}
           </Button>
-          <Button variant="contained" color="primary" size="small" autoFocus onClick={handleConfirm}>
+          <Button variant="contained" color="primary" size="small" autoFocus disableFocusRipple onClick={handleConfirm}>
             {T('common.confirm')}
           </Button>
         </DialogActions>

@@ -45,24 +45,20 @@ const Welcome = () => {
       content: T('dashboard.tutorial.step5'),
     },
     {
-      selector: '.nav-new-experiment',
+      selector: '.nav-search',
       content: T('dashboard.tutorial.step6'),
     },
     {
-      selector: '.nav-search',
+      selector: '.nav-namespace',
       content: T('dashboard.tutorial.step7'),
     },
     {
-      selector: '.nav-namespace',
+      selector: '.predefined-upload',
       content: T('dashboard.tutorial.step8'),
     },
     {
-      selector: '.predefined-upload',
-      content: T('dashboard.tutorial.step9'),
-    },
-    {
       selector: '.dashboard-tutorial',
-      content: T('dashboard.tutorial.step10'),
+      content: T('dashboard.tutorial.step9'),
     },
   ].map((d) => ({
     ...d,

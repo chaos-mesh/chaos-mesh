@@ -16,15 +16,18 @@ package chaosdaemon
 import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/prometheus/client_golang/prometheus"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/test"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
 var _ = Describe("netem server", func() {
 	Context("newDaemonServer", func() {
 		It("should work", func() {
-			defer mock.With("MockContainerdClient", &MockClient{})()
-			_, err := newDaemonServer(containerRuntimeContainerd)
+			defer mock.With("MockContainerdClient", &test.MockClient{})()
+			_, err := newDaemonServer(crclients.ContainerRuntimeContainerd)
 			Expect(err).To(BeNil())
 		})
 
@@ -36,17 +39,27 @@ var _ = Describe("netem server", func() {
 
 	Context("newGRPCServer", func() {
 		It("should work", func() {
-			defer mock.With("MockContainerdClient", &MockClient{})()
-			_, err := newGRPCServer(containerRuntimeContainerd, &MockRegisterer{})
+			defer mock.With("MockContainerdClient", &test.MockClient{})()
+			_, err := newGRPCServer(crclients.ContainerRuntimeContainerd, &MockRegisterer{}, tlsConfig{})
 			Expect(err).To(BeNil())
 		})
 
 		It("should panic", func() {
 			Ω(func() {
-				defer mock.With("MockContainerdClient", &MockClient{})()
+				defer mock.With("MockContainerdClient", &test.MockClient{})()
 				defer mock.With("PanicOnMustRegister", "mock panic")()
-				newGRPCServer(containerRuntimeContainerd, &MockRegisterer{})
+				newGRPCServer(crclients.ContainerRuntimeContainerd, &MockRegisterer{}, tlsConfig{})
 			}).Should(Panic())
 		})
 	})
 })
+
+type MockRegisterer struct {
+	RegisterGatherer
+}
+
+func (*MockRegisterer) MustRegister(...prometheus.Collector) {
+	if err := mock.On("PanicOnMustRegister"); err != nil {
+		panic(err)
+	}
+}
