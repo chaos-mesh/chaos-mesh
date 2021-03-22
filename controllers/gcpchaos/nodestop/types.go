@@ -15,60 +15,24 @@ package nodestop
 
 import (
 	"context"
-	"encoding/base64"
 	"errors"
 
-	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-
-	"google.golang.org/api/compute/v1"
-	"google.golang.org/api/option"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	gcp "github.com/chaos-mesh/chaos-mesh/controllers/gcpchaos"
 	"github.com/chaos-mesh/chaos-mesh/pkg/router"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 	end "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
 )
 
 const (
-	GcpFinalizer = "gcp-Finalizer"
+	GcpFinalizer = "gcp-finalizer"
 )
 
 type endpoint struct {
 	ctx.Context
-}
-
-// GetComputeService is used to get the GCP compute Service.
-func GetComputeService(ctx context.Context, cli client.Client, gcpchaos *v1alpha1.GcpChaos) (*compute.Service, error) {
-	if gcpchaos.Spec.SecretName != nil {
-		secret := &v1.Secret{}
-		err := cli.Get(ctx, types.NamespacedName{
-			Name:      *gcpchaos.Spec.SecretName,
-			Namespace: gcpchaos.Namespace,
-		}, secret)
-		if err != nil {
-			return nil, err
-		}
-
-		decodeBytes, err := base64.StdEncoding.DecodeString(string(secret.Data["service_account"]))
-		if err != nil {
-			return nil, err
-		}
-		computeService, err := compute.NewService(ctx, option.WithCredentialsJSON(decodeBytes))
-		if err != nil {
-			return nil, err
-		}
-		return computeService, nil
-	}
-
-	computeService, err := compute.NewService(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return computeService, nil
 }
 
 func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
@@ -78,7 +42,7 @@ func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 		e.Log.Error(err, "chaos is not GcpChaos", "chaos", chaos)
 		return err
 	}
-	computeService, err := GetComputeService(ctx, e.Client, gcpchaos)
+	computeService, err := gcp.GetComputeService(ctx, e.Client, gcpchaos)
 	if err != nil {
 		e.Log.Error(err, "fail to get the compute service")
 		return err
@@ -102,7 +66,7 @@ func (e *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		return err
 	}
 	gcpchaos.Finalizers = make([]string, 0)
-	computeService, err := GetComputeService(ctx, e.Client, gcpchaos)
+	computeService, err := gcp.GetComputeService(ctx, e.Client, gcpchaos)
 	if err != nil {
 		e.Log.Error(err, "fail to get the compute service")
 		return err

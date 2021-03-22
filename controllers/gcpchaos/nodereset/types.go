@@ -21,7 +21,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/gcpchaos/nodestop"
+	gcp "github.com/chaos-mesh/chaos-mesh/controllers/gcpchaos"
 	"github.com/chaos-mesh/chaos-mesh/pkg/router"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 	end "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
@@ -38,7 +38,7 @@ func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 		e.Log.Error(err, "chaos is not GcpChaos", "chaos", chaos)
 		return err
 	}
-	computeService, err := nodestop.GetComputeService(ctx, e.Client, gcpchaos)
+	computeService, err := gcp.GetComputeService(ctx, e.Client, gcpchaos)
 	if err != nil {
 		e.Log.Error(err, "fail to get the compute service")
 		return err
