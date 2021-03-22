@@ -15,7 +15,7 @@ package controllers
 
 import (
 	"context"
-
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -23,8 +23,6 @@ import (
 	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
 // SerialNodeReconciler watches on nodes which type is Serial
