@@ -1,22 +1,39 @@
-import { Box, MenuItem, StepLabel, Typography } from '@material-ui/core'
+import { Box, Button, MenuItem, StepLabel, Typography } from '@material-ui/core'
 import { Form, Formik } from 'formik'
 import { SelectField, TextField } from 'components/FormField'
+import { TemplateExperiment, setTemplate } from 'slices/workflows'
 import { useRef, useState } from 'react'
 
 import AddCircleIcon from '@material-ui/icons/AddCircle'
-import { Experiment } from 'components/NewExperiment/types'
+import MultiNode from './MultiNode'
 import NewExperimentNext from 'components/NewExperimentNext'
+import PublishIcon from '@material-ui/icons/Publish'
 import Space from 'components-mui/Space'
 import T from 'components/T'
 import { makeStyles } from '@material-ui/core/styles'
-import { setTemplate } from 'slices/workflows'
 import { useStoreDispatch } from 'store'
 
 const useStyles = makeStyles((theme) => ({
+  fields: {
+    display: 'flex',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    [theme.breakpoints.down('xs')]: {
+      justifyContent: 'unset',
+      '& > *': {
+        marginBottom: theme.spacing(3),
+        '&:last-child': {
+          marginBottom: 0,
+        },
+      },
+    },
+  },
   field: {
     width: 180,
     marginTop: 0,
-    marginBottom: 0,
+    [theme.breakpoints.up('sm')]: {
+      marginBottom: 0,
+    },
     '& .MuiInputBase-input': {
       padding: 8,
     },
@@ -39,21 +56,65 @@ const Add: React.FC<AddProps> = ({ onSubmitCallback }) => {
   const dispatch = useStoreDispatch()
 
   const [showNum, setShowNum] = useState(false)
+  const [num, setNum] = useState(1)
+  const [experiments, setExperiments] = useState<TemplateExperiment[]>([])
+  const [current, setCurrent] = useState(0)
   const formRef = useRef<any>()
 
-  const onValidate = ({ type }: { type: string; num: number }) => {
-    setShowNum(type === 'serial' || type === 'parallel')
+  const resetNoSingle = () => {
+    setShowNum(false)
+    setExperiments([])
+    setCurrent(0)
   }
 
-  const onSubmit = (values: Experiment) => {
+  const onValidate = ({ type, num: newNum }: { type: string; num: number }) => {
+    if (formRef.current.values.type !== 'single' && type === 'single') {
+      resetNoSingle()
+    }
+
+    if (type === 'serial' || type === 'parallel') {
+      setShowNum(true)
+    }
+
+    // Delete extra experiments
+    if (num > newNum) {
+      setExperiments(experiments.slice(0, -1))
+    }
+
+    setNum(newNum)
+  }
+
+  const onSubmit = (experiment: any) => {
+    const type = formRef.current.values.type
+
+    if (type === 'single') {
+      dispatch(
+        setTemplate({
+          type,
+          name: experiment.basic.name,
+          experiments: [experiment],
+        })
+      )
+    } else {
+      setCurrent(current + 1)
+      setExperiments([...experiments, experiment])
+    }
+
+    onSubmitCallback && onSubmitCallback()
+  }
+
+  const submitNoSingleNode = () => {
+    const { type, name } = formRef.current.values
+
     dispatch(
       setTemplate({
-        type: formRef.current.values.type,
-        experiment: values,
+        type,
+        name,
+        experiments,
       })
     )
 
-    onSubmitCallback && onSubmitCallback()
+    resetNoSingle()
   }
 
   return (
@@ -61,13 +122,13 @@ const Add: React.FC<AddProps> = ({ onSubmitCallback }) => {
       <StepLabel icon={<AddCircleIcon color="primary" />}>
         <Formik
           innerRef={formRef}
-          initialValues={{ type: 'single', num: 1 }}
+          initialValues={{ type: 'single', num: 2, name: '' }}
           onSubmit={() => {}}
           validate={onValidate}
           validateOnBlur={false}
         >
           <Form>
-            <Space display="flex">
+            <Space className={classes.fields}>
               <SelectField mb={0} className={classes.field} name="type" label={T('newW.node.choose')}>
                 {types.map((d) => (
                   <MenuItem key={d} value={d}>
@@ -86,6 +147,21 @@ const Add: React.FC<AddProps> = ({ onSubmitCallback }) => {
                 />
               )}
             </Space>
+            {showNum && (
+              <Space display="flex" justifyContent="space-between" alignItems="center" mt={3}>
+                <TextField mb={0} className={classes.field} name="name" label={T('newE.basic.name')} />
+                <MultiNode count={num} current={current} setCurrent={setCurrent} />
+                <Button
+                  variant="contained"
+                  color="primary"
+                  startIcon={<PublishIcon />}
+                  disabled={experiments.length !== num}
+                  onClick={submitNoSingleNode}
+                >
+                  {T('common.submit')}
+                </Button>
+              </Space>
+            )}
           </Form>
         </Formik>
       </StepLabel>

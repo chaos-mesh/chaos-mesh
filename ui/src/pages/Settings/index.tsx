@@ -20,7 +20,7 @@ const Settings = () => {
   return (
     <Grow in={true} style={{ transformOrigin: '0 0 0' }}>
       <Grid container>
-        <Grid item sm={12} md={6}>
+        <Grid item sm={12} md={8}>
           <Paper>
             {securityMode && (
               <>

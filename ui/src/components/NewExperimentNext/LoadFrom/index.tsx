@@ -77,6 +77,8 @@ const LoadFrom: React.FC<LoadFromProps> = ({ loadCallback }) => {
             message: intl.formatMessage({ id: 'common.loadSuccessfully' }),
           })
         )
+
+        setRadio('')
       })
       .catch(console.error)
   }

@@ -121,7 +121,8 @@
       "serial": "顺序",
       "parallel": "并行",
       "number": "数目"
-    }
+    },
+    "submit": "提交工作流"
   },
   "events": {
     "title": "事件",

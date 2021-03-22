@@ -1,8 +1,8 @@
 import { Box, Breadcrumbs, Link } from '@material-ui/core'
 import React, { useState } from 'react'
 
-import { Experiment } from 'components/NewExperiment/types'
 import LoadFrom from './LoadFrom'
+import Space from 'components-mui/Space'
 import Step1 from './Step1'
 import Step2 from './Step2'
 import Step3 from './Step3'
@@ -12,7 +12,7 @@ type PanelType = 'initial' | 'existing'
 
 interface NewExperimentProps {
   initPanel?: PanelType
-  onSubmit?: (values: Experiment) => void
+  onSubmit?: (experiment: { target: any; basic: any }) => void
   loadFrom?: boolean
 }
 
@@ -21,8 +21,8 @@ const NewExperiment: React.FC<NewExperimentProps> = ({ initPanel = 'initial', on
 
   const loadCallback = () => setShowNewPanel('initial')
 
-  const internalOnSubmit = (values: Experiment) => {
-    onSubmit!(values)
+  const internalOnSubmit = (experiment: any) => {
+    onSubmit!(experiment)
 
     setShowNewPanel('existing')
   }
@@ -49,15 +49,11 @@ const NewExperiment: React.FC<NewExperimentProps> = ({ initPanel = 'initial', on
           </Breadcrumbs>
         </Box>
       )}
-      <Box style={{ display: showNewPanel === 'initial' ? 'initial' : 'none' }}>
+      <Space spacing={6} vertical style={{ display: showNewPanel === 'initial' ? 'initial' : 'none' }}>
         <Step1 />
-        <Box mt={6}>
-          <Step2 />
-        </Box>
-        <Box mt={loadFrom ? 6 : undefined}>
-          <Step3 onSubmit={onSubmit ? internalOnSubmit : undefined} />
-        </Box>
-      </Box>
+        <Step2 />
+        <Step3 onSubmit={onSubmit ? internalOnSubmit : undefined} />
+      </Space>
       {loadFrom && (
         <Box style={{ display: showNewPanel === 'existing' ? 'initial' : 'none' }}>
           <LoadFrom loadCallback={loadCallback} />

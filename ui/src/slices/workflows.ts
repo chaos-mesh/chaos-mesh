@@ -1,16 +1,22 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 
-import { Experiment } from 'components/NewExperiment/types'
-
-interface Template {
+export type TemplateExperiment = {
+  target: any
+  basic: any
+}
+export interface Template {
   type: 'single' | 'serial' | 'parallel'
-  experiment: Experiment
+  index?: number
+  name?: string
+  experiments: TemplateExperiment[]
 }
 
+let index = 0
+
 const initialState: {
-  templates: Template[]
+  templates: Record<string, Template>
 } = {
-  templates: [],
+  templates: {},
 }
 
 const workflowsSlice = createSlice({
@@ -18,11 +24,25 @@ const workflowsSlice = createSlice({
   initialState,
   reducers: {
     setTemplate(state, action: PayloadAction<Template>) {
-      state.templates = [...state.templates, action.payload]
+      const tpl = action.payload
+      let { type, name, experiments } = tpl
+
+      if (type === 'single' && !name) {
+        name = experiments[0].basic.name
+      }
+
+      tpl.index = index++
+      state.templates[name!] = tpl
     },
+    updateTemplate(state, action: PayloadAction<Template>) {
+      const { name } = action.payload
+
+      state.templates[name!] = action.payload
+    },
+    appendToTemplate(state, action: PayloadAction<TemplateExperiment>) {},
   },
 })
 
-export const { setTemplate } = workflowsSlice.actions
+export const { setTemplate, updateTemplate } = workflowsSlice.actions
 
 export default workflowsSlice.reducer

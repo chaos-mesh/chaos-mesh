@@ -121,7 +121,8 @@
       "serial": "Serial",
       "parallel": "Parallel",
       "number": "Number"
-    }
+    },
+    "submit": "Submit workflow"
   },
   "events": {
     "title": "Events",

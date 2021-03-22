@@ -2,7 +2,6 @@ import { Box, Button, Typography } from '@material-ui/core'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
 import DoneAllIcon from '@material-ui/icons/DoneAll'
-import { Experiment } from 'components/NewExperiment/types'
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
 import PublishIcon from '@material-ui/icons/Publish'
@@ -16,7 +15,7 @@ import { useHistory } from 'react-router-dom'
 import { useIntl } from 'react-intl'
 
 interface Step3Props {
-  onSubmit?: (values: Experiment) => void
+  onSubmit?: (experiment: { target: any; basic: any }) => void
 }
 
 const Step3: React.FC<Step3Props> = ({ onSubmit }) => {
@@ -40,8 +39,7 @@ const Step3: React.FC<Step3Props> = ({ onSubmit }) => {
 
     if (!debugMode) {
       if (onSubmit) {
-        console.log(1)
-        onSubmit(parsedValues)
+        onSubmit({ target, basic })
       } else {
         api.experiments
           .newExperiment(parsedValues)

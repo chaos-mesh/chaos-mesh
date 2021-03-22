@@ -3,7 +3,7 @@ import NewExperiment from 'components/NewExperimentNext'
 
 const New = () => (
   <Grid container>
-    <Grid item xs={12} md={9}>
+    <Grid item xs={12} md={8}>
       <NewExperiment />
     </Grid>
   </Grid>
