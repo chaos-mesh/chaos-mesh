@@ -21,8 +21,11 @@ const useStyles = makeStyles((theme) => ({
   finish: {
     color: theme.palette.success.main,
   },
-  info: {
-    color: theme.palette.info.main,
+  primary: {
+    color: theme.palette.primary.main,
+  },
+  disabled: {
+    color: theme.palette.action.disabled,
   },
 }))
 
@@ -53,7 +56,7 @@ const MultiNode: React.FC<MultiNodeProps> = ({ count, current, setCurrent, setCu
                 <AdjustIcon
                   className={clsx(
                     classes.asButton,
-                    current > index ? classes.finish : current === index ? classes.info : null
+                    current > index ? classes.finish : current === index ? classes.primary : classes.disabled
                   )}
                 />
               }

@@ -25,11 +25,7 @@ const workflowsSlice = createSlice({
   reducers: {
     setTemplate(state, action: PayloadAction<Template>) {
       const tpl = action.payload
-      let { type, name, experiments } = tpl
-
-      if (type === 'single' && !name) {
-        name = experiments[0].basic.name
-      }
+      const { name } = tpl
 
       tpl.index = index++
       state.templates[name!] = tpl
