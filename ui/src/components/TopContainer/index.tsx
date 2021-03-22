@@ -157,11 +157,10 @@ const TopContainer = () => {
         <Box className={openDrawer ? classes.rootShift : classes.root}>
           {!isMobileScreen && <Sidebar open={openDrawer} />}
           <Paper className={classes.main} component="main" elevation={0}>
-            {/* <ControlBar /> */}
-            <Navbar handleDrawerToggle={handleDrawerToggle} breadcrumbs={breadcrumbs} />
-
             <Box className={classes.switchContent}>
               <ContentContainer>
+                <Navbar openDrawer={openDrawer} handleDrawerToggle={handleDrawerToggle} breadcrumbs={breadcrumbs} />
+
                 {loading ? (
                   <Loading />
                 ) : (
