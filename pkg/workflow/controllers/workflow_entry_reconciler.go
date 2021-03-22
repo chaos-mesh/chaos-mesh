@@ -26,7 +26,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
-// WorkflowEntryReconciler watches on Workflow, creates ew Entry Node for created Workflow.
+// WorkflowEntryReconciler watches on Workflow, creates new Entry Node for created Workflow.
 type WorkflowEntryReconciler struct {
 	kubeClient    client.Client
 	eventRecorder record.EventRecorder

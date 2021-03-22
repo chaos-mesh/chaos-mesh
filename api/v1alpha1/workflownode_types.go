@@ -47,9 +47,9 @@ type WorkflowNodeSpec struct {
 
 type WorkflowNodeStatus struct {
 
-	// ExpectedChildren means the expected children to execute
+	// ExpectedChildrenNum means the expected children to execute
 	// +optional
-	ExpectedChildren *int `json:"expected_children,omitempty"`
+	ExpectedChildrenNum *int `json:"expected_children_num,omitempty"`
 
 	// ChaosResource refs to the real chaos CR object.
 	// +optional

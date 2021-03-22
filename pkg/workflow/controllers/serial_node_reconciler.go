@@ -55,13 +55,13 @@ func (it *SerialNodeReconciler) Reconcile(request reconcile.Request) (reconcile.
 	}
 
 	// un-synced expected children
-	if node.Status.ExpectedChildren == nil {
+	if node.Status.ExpectedChildrenNum == nil {
 		expected := len(node.Spec.Tasks)
-		node.Status.ExpectedChildren = &expected
+		node.Status.ExpectedChildrenNum = &expected
 	}
 
 	// this node should finished
-	if len(node.Status.FinishedChildren) == *node.Status.ExpectedChildren {
+	if len(node.Status.FinishedChildren) == *node.Status.ExpectedChildrenNum {
 		if !ConditionEqualsTo(node.Status, v1alpha1.ConditionAccomplished, corev1.ConditionTrue) {
 			updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
 				node := v1alpha1.WorkflowNode{}

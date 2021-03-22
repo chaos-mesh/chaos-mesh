@@ -89,6 +89,7 @@ func (it *ChaosNodeReconciler) injectChaos(ctx context.Context, node v1alpha1.Wo
 		meta = podChaos.GetObjectMeta()
 		chaosObject = &podChaos
 	} else {
+		// TODO: support other type of chaos by code generation
 		it.logger.Info("unsupported chaos nodes", "key", fmt.Sprintf("%s/%s", node.Namespace, node.Name), "type", node.Spec.Type)
 		return nil
 	}
