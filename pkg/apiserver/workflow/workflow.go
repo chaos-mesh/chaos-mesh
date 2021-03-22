@@ -14,11 +14,13 @@
 package workflow
 
 import (
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
-	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 // StatusResponse defines a common status struct.

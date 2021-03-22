@@ -14,10 +14,12 @@
 package core
 
 import (
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"reflect"
 	"testing"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
 func Test_conversionWorkflow(t *testing.T) {
@@ -40,8 +42,7 @@ func Test_conversionWorkflow(t *testing.T) {
 					Spec: v1alpha1.WorkflowSpec{
 						Entry: "an-entry",
 					},
-					Status: v1alpha1.WorkflowStatus{
-					},
+					Status: v1alpha1.WorkflowStatus{},
 				},
 			},
 			want: Workflow{
@@ -153,8 +154,7 @@ func Test_conversionWorkflowNode(t *testing.T) {
 						Type:         v1alpha1.TypeSerial,
 						Tasks:        []string{"child-0", "child-1"},
 					},
-					Status: v1alpha1.WorkflowNodeStatus{
-					},
+					Status: v1alpha1.WorkflowNodeStatus{},
 				},
 			},
 			want: Node{
