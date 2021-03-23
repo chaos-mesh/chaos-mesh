@@ -82,7 +82,8 @@ func (it *AccomplishWatcher) Reconcile(request reconcile.Request) (reconcile.Res
 				}
 				it.logger.Info("unsupported owner node type", "node type", parentNode.Spec.Type)
 			} else if owner.Kind == GetKindOf(&v1alpha1.Workflow{}) {
-				it.logger.Info("unfinished update for workflow", "kind", owner.Kind)
+				// TODO: update the status of workflow
+				it.logger.Info("unsupported update for workflow", "kind", owner.Kind)
 			} else {
 				it.logger.Info("unsupported owner type", "kind", owner.Kind)
 			}

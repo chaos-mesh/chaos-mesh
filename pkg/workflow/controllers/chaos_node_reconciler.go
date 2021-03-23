@@ -169,7 +169,7 @@ func (it *ChaosNodeReconciler) recoverChaos(ctx context.Context, node v1alpha1.W
 	}
 
 	if apierrors.IsNotFound(err) {
-		// TODO: debug log
+		it.logger.V(4).Info("target chaos not exist", "namespace", node.Namespace, "name", node.Status.ChaosResource.Name, "chaos kind", node.Status.ChaosResource.Kind)
 		return nil
 	}
 	if err != nil {
