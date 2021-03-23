@@ -1,6 +1,7 @@
 import { Box, Button } from '@material-ui/core'
 
 import AddIcon from '@material-ui/icons/Add'
+import DataTable from './DataTable'
 import T from 'components/T'
 import { useHistory } from 'react-router-dom'
 
@@ -14,6 +15,7 @@ const Workflows = () => {
           {T('newW.title')}
         </Button>
       </Box>
+      <DataTable />
     </>
   )
 }

@@ -1,4 +1,4 @@
-import { TableCell as MUITableCell, Paper, Table, TableBody, TableRow, Typography, withStyles } from '@material-ui/core'
+import { TableCell as MUITableCell, Table, TableBody, TableRow, Typography, withStyles } from '@material-ui/core'
 import React, { useEffect, useState } from 'react'
 
 import AffectedPods from 'components/AffectedPods'
@@ -106,9 +106,7 @@ const EventDetail: React.FC<EventDetailProps> = ({ eventID }) => {
             <TableRow>
               <TableCell>{T('newE.scope.affectedPods')}</TableCell>
               <TableCell>
-                <Paper variant="outlined">
-                  <AffectedPods pods={e.pods!} />
-                </Paper>
+                <AffectedPods pods={e.pods!} />
               </TableCell>
             </TableRow>
           </TableBody>

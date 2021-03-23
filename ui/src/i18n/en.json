@@ -113,6 +113,14 @@
   "workflows": {
     "title": "Workflows"
   },
+  "workflow": {
+    "partialTopology": "Partial Topology",
+    "time": "Time",
+    "state": "State",
+    "created": "Created",
+    "rerun": "Re-run",
+    "topology": "Topology"
+  },
   "newW": {
     "title": "New Workflow",
     "node": {
@@ -204,6 +212,8 @@
     "version": "Version",
     "doc": "Documentation",
     "tutorial": "Tutorial",
+    "name": "Name",
+    "operation": "Operation",
     "add": "Add",
     "confirm": "Confirm",
     "cancel": "Cancel",
@@ -254,6 +264,7 @@
     }
   },
   "k8s": {
+    "namespace": "Namespace",
     "labels": "Labels",
     "annotations": "Annotations",
     "labelSelectors": "Label Selectors",

@@ -113,6 +113,14 @@
   "workflows": {
     "title": "工作流"
   },
+  "workflow": {
+    "partialTopology": "部分拓扑",
+    "time": "时间",
+    "state": "状态",
+    "created": "创建于",
+    "rerun": "重新启动",
+    "topology": "拓扑"
+  },
   "newW": {
     "title": "新的工作流",
     "node": {
@@ -204,6 +212,8 @@
     "version": "版本",
     "doc": "文档",
     "tutorial": "教程",
+    "name": "名称",
+    "operation": "操作",
     "add": "添加",
     "confirm": "确认",
     "cancel": "取消",
@@ -254,6 +264,7 @@
     }
   },
   "k8s": {
+    "namespace": "命名空间",
     "labels": "标签",
     "annotations": "注解",
     "labelSelectors": "标签选择器",

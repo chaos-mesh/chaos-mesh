@@ -9,6 +9,7 @@ import NewWorkflow from 'components/NewWorkflow'
 import { RouteProps } from 'react-router'
 import Settings from 'pages/Settings'
 import Swagger from 'pages/Swagger'
+import WorkflowDetail from 'pages/WorkflowDetail'
 import Workflows from 'pages/Workflows'
 
 const routes: RouteProps[] = [
@@ -38,6 +39,10 @@ const routes: RouteProps[] = [
   {
     component: NewWorkflow,
     path: '/workflows/new',
+  },
+  {
+    component: WorkflowDetail,
+    path: '/workflows/:namespaceAndName',
   },
   {
     component: Events,
