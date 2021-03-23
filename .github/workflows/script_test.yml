@@ -25,6 +25,9 @@ jobs:
       - name: Install Chaos Mesh
         run: |
           bash install.sh --local kind --crd ./manifests/crd.yaml
+          # TODO: the old version can't handle the webhook for validate authority, so delete it
+          # will remove this after the pr #1535 merged
+          kubectl delete ValidatingWebhookConfiguration validate-auth -n chaos-testing
 
       - name: Run integration test
         run: |

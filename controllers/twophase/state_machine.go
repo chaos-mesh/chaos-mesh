@@ -97,24 +97,41 @@ func apply(ctx context.Context, m *chaosStateMachine, targetPhase v1alpha1.Exper
 }
 
 func recover(ctx context.Context, m *chaosStateMachine, targetPhase v1alpha1.ExperimentPhase, now time.Time) (bool, error) {
+	duration, err := m.Chaos.GetDuration()
+	if err != nil {
+		m.Log.Error(err, "failed to get chaos duration")
+		return false, err
+	}
+	if duration == nil {
+		zero := time.Duration(0)
+		duration = &zero
+	}
+
 	currentPhase := m.Chaos.GetStatus().Experiment.Phase
 	status := m.Chaos.GetStatus()
 
 	m.Log.Info("recovering", "current phase", currentPhase, "target phase", targetPhase)
-	err := m.Recover(ctx, m.Req, m.Chaos)
-	if err != nil {
+	if err := m.Recover(ctx, m.Req, m.Chaos); err != nil {
 		status.FailedMessage = err.Error()
 
 		m.Log.Error(err, "fail to recover")
 		return true, err
 	}
+
 	status.Experiment.Phase = targetPhase
 	status.Experiment.EndTime = &metav1.Time{
 		Time: now,
 	}
+
 	if status.Experiment.StartTime != nil {
 		status.Experiment.Duration = now.Sub(status.Experiment.StartTime.Time).String()
 	}
+
+	// If this recover action is not called by pause action, reset recover time
+	if !now.Before(m.Chaos.GetNextRecover()) {
+		m.Chaos.SetNextRecover(m.Chaos.GetNextStart().Add(*duration))
+	}
+
 	return true, nil
 }
 
@@ -148,9 +165,8 @@ func resume(ctx context.Context, m *chaosStateMachine, _ v1alpha1.ExperimentPhas
 	}()
 
 	counter := 0
-	// nextStart is always after nextRecover
 	for {
-		if nextRecover.After(now) {
+		if nextRecover.After(now) && nextRecover.Before(nextStart) {
 			startTime = lastStart
 
 			return apply(ctx, m, v1alpha1.ExperimentPhaseRunning, startTime)
@@ -184,6 +200,16 @@ func resume(ctx context.Context, m *chaosStateMachine, _ v1alpha1.ExperimentPhas
 func (m *chaosStateMachine) run(ctx context.Context, targetPhase v1alpha1.ExperimentPhase, now time.Time) (bool, error) {
 	currentPhase := m.Chaos.GetStatus().Experiment.Phase
 	m.Log.Info("change phase", "current phase", currentPhase, "target phase", targetPhase)
+
+	if phaseTransitionMap[currentPhase] == nil {
+		err := errors.Errorf("unexpected current phase '%s'", currentPhase)
+		return false, err
+	}
+
+	if phaseTransitionMap[currentPhase][targetPhase] == nil {
+		err := errors.Errorf("unexpected target phase '%s'", targetPhase)
+		return false, err
+	}
 
 	return phaseTransitionMap[currentPhase][targetPhase](ctx, m, targetPhase, now)
 }

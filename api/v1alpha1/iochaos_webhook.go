@@ -77,6 +77,7 @@ func (in *IoChaos) Validate() error {
 	allErrs = append(allErrs, in.Spec.validateDelay(specField.Child("delay"))...)
 	allErrs = append(allErrs, in.Spec.validateErrno(specField.Child("errno"))...)
 	allErrs = append(allErrs, in.Spec.validatePercent(specField.Child("percent"))...)
+	allErrs = append(allErrs, in.Spec.validateMistake(specField.Child("mistake"))...)
 
 	if len(allErrs) > 0 {
 		return fmt.Errorf(allErrs.ToAggregate().Error())
@@ -92,6 +93,11 @@ func (in *IoChaos) ValidateScheduler(spec *field.Path) field.ErrorList {
 // ValidatePodMode validates the value with podmode
 func (in *IoChaos) ValidatePodMode(spec *field.Path) field.ErrorList {
 	return ValidatePodMode(in.Spec.Value, in.Spec.Mode, spec.Child("value"))
+}
+
+// SelectSpec returns the selector config for authority validate
+func (in *IoChaos) GetSelectSpec() []SelectSpec {
+	return []SelectSpec{&in.Spec}
 }
 
 func (in *IoChaosSpec) validateDelay(delay *field.Path) field.ErrorList {
@@ -124,5 +130,11 @@ func (in *IoChaosSpec) validatePercent(percentField *field.Path) field.ErrorList
 			"percent field should be in 0-100"))
 	}
 
+	return allErrs
+}
+
+// Doing nothing now, but keep it here for future use
+func (in *IoChaosSpec) validateMistake(mistakeField *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
 	return allErrs
 }

@@ -51,8 +51,10 @@ const useStyles = makeStyles((theme: Theme) =>
       position: 'absolute',
       top: '50%',
       left: '50%',
+      display: 'flex',
+      flexDirection: 'column',
       width: '50vw',
-      height: '80vh',
+      height: '90vh',
       transform: 'translate(-50%, -50%)',
       [theme.breakpoints.down('sm')]: {
         width: '90vw',
@@ -97,8 +99,8 @@ export default function ExperimentDetail() {
 
   const fetchEvents = () =>
     api.events
-      .events()
-      .then(({ data }) => setEvents(data.filter((d) => d.experiment_id === uuid)))
+      .events({ experimentName: detail!.yaml.name })
+      .then(({ data }) => setEvents(data))
       .catch(console.error)
       .finally(() => {
         setLoading(false)

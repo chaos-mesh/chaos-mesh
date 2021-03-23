@@ -46,3 +46,29 @@ func getPodIODelay(c http.Client, port uint16) (time.Duration, error) {
 
 	return dur, nil
 }
+
+func getPodIoMistake(c http.Client, port uint16) (bool, error) {
+	resp, err := c.Get(fmt.Sprintf("http://localhost:%d/mistake", port))
+	if err != nil {
+		return false, err
+	}
+
+	out, err := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
+	if err != nil {
+		return false, err
+	}
+
+	result := string(out)
+	fmt.Println("e2e server io mistake test response: ", resp, result)
+	if strings.Contains(result, "true") {
+		return true, nil
+	}
+	if strings.Contains(result, "false") {
+		return false, nil
+	}
+	if strings.Contains(result, "err") {
+		return false, errors.New(result)
+	}
+	return false, errors.New("Unexpected reply from e2e server")
+}
