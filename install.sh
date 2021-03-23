@@ -1312,8 +1312,8 @@ spec:
       priorityClassName: 
       containers:
       - name: chaos-mesh
-        image: ${DOCKER_REGISTRY_PREFIX}/pingcap/chaos-mesh:${VERSION_TAG}
-        imagePullPolicy: IfNotPresent
+        image: localhost:5000/pingcap/chaos-mesh:${VERSION_TAG}
+        imagePullPolicy: Never
         resources:
             limits: {}
             requests:
