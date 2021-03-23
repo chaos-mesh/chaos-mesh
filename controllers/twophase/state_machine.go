@@ -27,7 +27,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
-const iterMax = 2
+const iterMax = 1e4
 
 type chaosStateMachine struct {
 	Chaos v1alpha1.InnerSchedulerObject
