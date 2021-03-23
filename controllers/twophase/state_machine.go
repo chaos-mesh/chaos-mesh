@@ -27,7 +27,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
-const iterMax = 1e4
+const iterMax = 2
 
 type chaosStateMachine struct {
 	Chaos v1alpha1.InnerSchedulerObject
@@ -189,8 +189,18 @@ func resume(ctx context.Context, m *chaosStateMachine, _ v1alpha1.ExperimentPhas
 
 		counter++
 		if counter > iterMax {
-			err = errors.Errorf("the number of iterations exceeded while resuming from pause with nextRecover(%s) nextStart(%s)", nextRecover, nextStart)
-			return false, err
+			// If counter > iterMax, it means that chaos has been suspended for a long time,
+			// then directly restart chaos and set startTime to now.
+			startTime = now
+			start, recover, err = m.IterateNextTime(startTime, *duration)
+			if err != nil {
+				m.Log.Error(err, "failed to get the next start time and recover time")
+				return false, err
+			}
+			nextStart = *start
+			nextRecover = *recover
+
+			return apply(ctx, m, v1alpha1.ExperimentPhaseRunning, startTime)
 		}
 	}
 }
