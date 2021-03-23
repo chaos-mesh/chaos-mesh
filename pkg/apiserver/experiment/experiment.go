@@ -38,6 +38,7 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/util/retry"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
@@ -1167,8 +1168,10 @@ func (s *Service) updateExperiment(c *gin.Context) {
 		_ = c.Error(utils.ErrInvalidRequest.New(exp.Kind + " is not supported"))
 		return
 	}
-
-	if err := f(exp, kubeCli); err != nil {
+	err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		return f(exp, kubeCli)
+	})
+	if err != nil {
 		if apierrors.IsNotFound(err) {
 			c.Status(http.StatusNotFound)
 			_ = c.Error(utils.ErrNotFound.WrapWithNoMessage(err))
@@ -1176,9 +1179,7 @@ func (s *Service) updateExperiment(c *gin.Context) {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
 		}
-		return
 	}
-
 	c.JSON(http.StatusOK, exp)
 }
 
