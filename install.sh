@@ -461,6 +461,7 @@ metadata:
   name: "local-storage"
 provisioner: "kubernetes.io/no-provisioner"
 volumeBindingMode: "WaitForFirstConsumer"
+
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -474,6 +475,7 @@ data:
     local-storage:
       hostDir: /mnt/disks
       mountDir: /mnt/disks
+
 ---
 apiVersion: apps/v1
 kind: DaemonSet
@@ -535,12 +537,14 @@ spec:
         - name: local-disks
           hostPath:
             path: /mnt/disks
+
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: local-storage-admin
   namespace: kube-system
+
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
