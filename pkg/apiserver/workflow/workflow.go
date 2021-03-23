@@ -63,21 +63,21 @@ func NewServiceWithKubeRepo(repo *core.KubeWorkflowRepository, conf *config.Chao
 func (it *Service) listWorkflows(c *gin.Context) {
 
 	namespace := c.Query("namespace")
-	var result []core.Workflow
+	result := make([]core.Workflow, 0)
 	if namespace != "" {
 		workflowFromNs, err := it.repo.ListWorkflowWithNamespace(c.Request.Context(), namespace)
 		if err != nil {
 			utils.SetErrorForGinCtx(c, err)
 			return
 		}
-		result = workflowFromNs
+		result = append(result, workflowFromNs...)
 	} else {
 		allWorkflow, err := it.repo.ListWorkflowFromAllNamespace(c.Request.Context())
 		if err != nil {
 			utils.SetErrorForGinCtx(c, err)
 			return
 		}
-		result = allWorkflow
+		result = append(result, allWorkflow...)
 	}
 
 	c.JSON(http.StatusOK, result)

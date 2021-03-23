@@ -259,11 +259,13 @@ func conversionWorkflow(kubeWorkflow v1alpha1.Workflow) Workflow {
 }
 
 func conversionWorkflowDetail(kubeWorkflow v1alpha1.Workflow, kubeNodes ...v1alpha1.WorkflowNode) WorkflowDetail {
-	var nodes []Node
+	nodes := make([]Node, 0)
 	result := WorkflowDetail{
-		Workflow:     conversionWorkflow(kubeWorkflow),
-		Topology:     Topology{},
-		CurrentNodes: nil,
+		Workflow: conversionWorkflow(kubeWorkflow),
+		Topology: Topology{
+			Nodes: nodes,
+		},
+		CurrentNodes: []Node{},
 	}
 
 	for _, item := range kubeNodes {
@@ -271,7 +273,6 @@ func conversionWorkflowDetail(kubeWorkflow v1alpha1.Workflow, kubeNodes ...v1alp
 		nodes = append(nodes, node)
 	}
 
-	result.Topology.Nodes = nodes
 	return result
 }
 
@@ -279,8 +280,8 @@ func conversionWorkflowNode(kubeWorkflowNode v1alpha1.WorkflowNode) Node {
 	result := Node{
 		Name:     kubeWorkflowNode.Name,
 		Type:     mappingTemplateType(kubeWorkflowNode.Spec.Type),
-		Serial:   NodeSerial{},
-		Parallel: NodeParallel{},
+		Serial:   NodeSerial{Tasks: []string{}},
+		Parallel: NodeParallel{Tasks: []string{}},
 		Template: kubeWorkflowNode.Spec.TemplateName,
 	}
 

@@ -94,9 +94,9 @@ func Test_conversionWorkflowDetail(t *testing.T) {
 					Status: "",
 				},
 				Topology: Topology{
-					Nodes: nil,
+					Nodes: []Node{},
 				},
-				CurrentNodes: nil,
+				CurrentNodes: []Node{},
 			},
 		},
 		// TODO: Add test cases.
@@ -136,8 +136,8 @@ func Test_conversionWorkflowNode(t *testing.T) {
 			want: Node{
 				Name:     "fake-node-0",
 				Type:     ChaosNode,
-				Serial:   NodeSerial{},
-				Parallel: NodeParallel{},
+				Serial:   NodeSerial{[]string{}},
+				Parallel: NodeParallel{[]string{}},
 				Template: "fake-template-0",
 			},
 		}, {
@@ -163,7 +163,7 @@ func Test_conversionWorkflowNode(t *testing.T) {
 				Serial: NodeSerial{
 					Tasks: []string{"child-0", "child-1"},
 				},
-				Parallel: NodeParallel{},
+				Parallel: NodeParallel{[]string{}},
 				Template: "fake-serial-node",
 			},
 		},
@@ -187,7 +187,7 @@ func Test_conversionWorkflowNode(t *testing.T) {
 			want: Node{
 				Name:   "parallel-node-0",
 				Type:   ParallelNode,
-				Serial: NodeSerial{},
+				Serial: NodeSerial{[]string{}},
 				Parallel: NodeParallel{
 					Tasks: []string{"child-1", "child-0"},
 				},
@@ -223,8 +223,8 @@ func Test_conversionWorkflowNode(t *testing.T) {
 			want: Node{
 				Name:     "io-chaos-0",
 				Type:     ChaosNode,
-				Serial:   NodeSerial{},
-				Parallel: NodeParallel{},
+				Serial:   NodeSerial{[]string{}},
+				Parallel: NodeParallel{[]string{}},
 				Template: "io-chaos",
 			},
 		},
