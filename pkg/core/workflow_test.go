@@ -48,7 +48,6 @@ func Test_conversionWorkflow(t *testing.T) {
 			want: Workflow{
 				Name:   "fake-workflow-0",
 				Entry:  "an-entry",
-				Status: "",
 			},
 		},
 	}
@@ -91,7 +90,6 @@ func Test_conversionWorkflowDetail(t *testing.T) {
 				Workflow: Workflow{
 					Name:   "another-fake-workflow",
 					Entry:  "another-entry",
-					Status: "",
 				},
 				Topology: Topology{
 					Nodes: []Node{},

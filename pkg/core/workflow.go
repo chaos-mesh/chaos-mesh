@@ -34,7 +34,6 @@ type WorkflowRepository interface {
 type Workflow struct {
 	Name   string         `json:"name"`
 	Entry  string         `json:"entry"` // the entry node name
-	Status WorkflowStatus `json:"status"`
 }
 
 type WorkflowDetail struct {
@@ -42,27 +41,6 @@ type WorkflowDetail struct {
 	Topology     Topology `json:"topology"`
 	CurrentNodes []Node   `json:"current_nodes"`
 }
-
-// workflowState defines the current state of a workflow.
-//
-// Includes: Initializing, Running, Errored, Finished.
-//
-// Const definitions can be found below this type.
-type WorkflowStatus string
-
-const (
-	// WorkflowInitializing represents a workflow is being initialized.
-	WorkflowInitializing WorkflowStatus = "Initializing"
-
-	// WorkflowRunning represents that a workflow is running.
-	WorkflowRunning WorkflowStatus = "Running"
-
-	// WorkflowErrored represents an error in a workflow.
-	WorkflowErrored WorkflowStatus = "Errored"
-
-	// WorkflowFinished represents that a workflow has ended.
-	WorkflowFinished WorkflowStatus = "Finished"
-)
 
 // Topology describes the process of a workflow.
 type Topology struct {
@@ -110,50 +88,6 @@ const (
 
 	// TaskNode represents a node that will perform user-defined task.
 	TaskNode NodeType = "TaskNode"
-)
-
-// NodeState represents a node in different stage.
-//
-// It should be note that not all states are applicable to any node types.
-// A Node will contains only partial defined states.
-//
-// Const definitions can be found below this type.
-type NodeState string
-
-const (
-	// NodeInitializing represents a node is being initialized.
-	NodeInitializing NodeState = "Initializing"
-
-	// NodeWaitingForSchedule represents a node is idle and safe for next scheduling.
-	//
-	// Only available in: SerialNode, ParallelNode and TaskNode.
-	NodeWaitingForSchedule NodeState = "WaitingForSchedule"
-
-	// NodeWaitingForChild represents at least 1 child node is in Running or Holding state.
-	//
-	// Only available in: SerialNode, ParallelNode and TaskNode.
-	NodeWaitingForChild NodeState = "WaitingForChild"
-
-	// NodeRunning represents a node is doing dirty works.
-	//
-	// Available in: ChaosNode, SuspendNode and TaskNode.
-	NodeRunning NodeState = "Running"
-
-	// NodeEvaluating represents a node is collecting the result of a user's pod, then picks a template to execute.
-	//
-	// Only available: TaskNode.
-	NodeEvaluating NodeState = "Evaluating"
-
-	// NodeHolding represents that the current node is waiting for the next action.
-	//
-	// Only available: ChaosNode and SuspendNode.
-	NodeHolding NodeState = "Holding"
-
-	// NodeSucceed represents a node is completed.
-	NodeSucceed NodeState = "Succeed"
-
-	// NodeFailed represents a node is failed.
-	NodeFailed NodeState = "Failed"
 )
 
 // Detail defines the detail of a workflow.
@@ -253,7 +187,6 @@ func conversionWorkflow(kubeWorkflow v1alpha1.Workflow) Workflow {
 	result := Workflow{
 		Name:   kubeWorkflow.Name,
 		Entry:  kubeWorkflow.Spec.Entry,
-		Status: "",
 	}
 	return result
 }
