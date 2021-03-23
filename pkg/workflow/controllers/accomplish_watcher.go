@@ -63,30 +63,28 @@ func (it *AccomplishWatcher) Reconcile(request reconcile.Request) (reconcile.Res
 			return reconcile.Result{}, nil
 		}
 
-		if len(owners) == 1 {
-			owner := owners[0]
-			it.logger.V(4).Info("fetch node's owner", "node", request.NamespacedName, "owner", owner)
-			if owner.Kind == GetKindOf(&v1alpha1.WorkflowNode{}) {
-				parentNode := v1alpha1.WorkflowNode{}
+		owner := owners[0]
+		it.logger.V(4).Info("fetch node's owner", "node", request.NamespacedName, "owner", owner)
+		if owner.Kind == GetKindOf(&v1alpha1.WorkflowNode{}) {
+			parentNode := v1alpha1.WorkflowNode{}
 
-				err := it.kubeClient.Get(ctx, types.NamespacedName{
-					Namespace: request.Namespace,
-					Name:      owner.Name,
-				}, &parentNode)
-				if err != nil {
-					return reconcile.Result{}, err
-				}
-				if parentNode.Spec.Type == v1alpha1.TypeSerial {
-					err = it.updateParentSerialNode(ctx, node, parentNode)
-					return reconcile.Result{}, err
-				}
-				it.logger.Info("unsupported owner node type", "node type", parentNode.Spec.Type)
-			} else if owner.Kind == GetKindOf(&v1alpha1.Workflow{}) {
-				// TODO: update the status of workflow
-				it.logger.Info("unsupported update for workflow", "kind", owner.Kind)
-			} else {
-				it.logger.Info("unsupported owner type", "kind", owner.Kind)
+			err := it.kubeClient.Get(ctx, types.NamespacedName{
+				Namespace: request.Namespace,
+				Name:      owner.Name,
+			}, &parentNode)
+			if err != nil {
+				return reconcile.Result{}, err
 			}
+			if parentNode.Spec.Type == v1alpha1.TypeSerial {
+				err = it.updateParentSerialNode(ctx, node, parentNode)
+				return reconcile.Result{}, err
+			}
+			it.logger.Info("unsupported owner node type", "node type", parentNode.Spec.Type)
+		} else if owner.Kind == GetKindOf(&v1alpha1.Workflow{}) {
+			// TODO: update the status of workflow
+			it.logger.Info("unsupported update for workflow", "kind", owner.Kind)
+		} else {
+			it.logger.Info("unsupported owner type", "kind", owner.Kind)
 		}
 	}
 	return reconcile.Result{}, nil
