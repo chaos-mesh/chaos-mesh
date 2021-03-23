@@ -32,19 +32,23 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint := r.Group("/workflows")
 	endpoint.GET("", s.listWorkflows)
 	endpoint.POST("/new", s.createWorkflow)
-	endpoint.GET("/detail/:uid", s.getWorkflowDetail)
-	endpoint.DELETE("/:uid", s.deleteWorkflow)
-	endpoint.PUT("/:uid", s.updateWorkflow)
+	endpoint.GET("/detail/:namespace/:name", s.getWorkflowDetail)
+	endpoint.DELETE("/:namespace/:name", s.deleteWorkflow)
+	endpoint.PUT("/:namespace/:name", s.updateWorkflow)
 }
 
 // Service defines a handler service for workflows.
 type Service struct {
-	repo core.WorkflowRepository
+	repo core.WorkflowRepository `name:"workflowrepo"`
 	conf *config.ChaosDashboardConfig
 }
 
 func NewService(repo core.WorkflowRepository, conf *config.ChaosDashboardConfig) *Service {
 	return &Service{repo: repo, conf: conf}
+}
+
+func NewServiceWithKubeRepo(repo *core.KubeWorkflowRepository, conf *config.ChaosDashboardConfig) *Service {
+	return NewService(repo, conf)
 }
 
 // @Summary List workflows from Kubernetes cluster.

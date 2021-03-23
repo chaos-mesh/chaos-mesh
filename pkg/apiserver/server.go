@@ -27,6 +27,7 @@ import (
 	apiutils "github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/apivalidator"
 	"github.com/chaos-mesh/chaos-mesh/pkg/config"
+	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 	"github.com/chaos-mesh/chaos-mesh/pkg/swaggerserver"
 	"github.com/chaos-mesh/chaos-mesh/pkg/uiserver"
 )
@@ -37,6 +38,7 @@ var (
 		fx.Provide(
 			newEngine,
 			newAPIRouter,
+			core.NewKubeWorkflowRepository,
 		),
 		handlerModule,
 		fx.Invoke(serverRegister),
