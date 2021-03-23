@@ -46,8 +46,8 @@ func Test_conversionWorkflow(t *testing.T) {
 				},
 			},
 			want: Workflow{
-				Name:   "fake-workflow-0",
-				Entry:  "an-entry",
+				Name:  "fake-workflow-0",
+				Entry: "an-entry",
 			},
 		},
 	}
@@ -64,6 +64,7 @@ func Test_conversionWorkflowDetail(t *testing.T) {
 	type args struct {
 		kubeWorkflow v1alpha1.Workflow
 		nodes        []v1alpha1.WorkflowNode
+		runningNodes []v1alpha1.WorkflowNode
 	}
 	tests := []struct {
 		name string
@@ -84,12 +85,13 @@ func Test_conversionWorkflowDetail(t *testing.T) {
 					},
 					Status: v1alpha1.WorkflowStatus{},
 				},
-				nodes: nil,
+				nodes:        nil,
+				runningNodes: nil,
 			},
 			want: WorkflowDetail{
 				Workflow: Workflow{
-					Name:   "another-fake-workflow",
-					Entry:  "another-entry",
+					Name:  "another-fake-workflow",
+					Entry: "another-entry",
 				},
 				Topology: Topology{
 					Nodes: []Node{},
@@ -101,7 +103,7 @@ func Test_conversionWorkflowDetail(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := conversionWorkflowDetail(tt.args.kubeWorkflow, tt.args.nodes...); !reflect.DeepEqual(got, tt.want) {
+			if got := conversionWorkflowDetail(tt.args.kubeWorkflow, tt.args.nodes, tt.args.runningNodes); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("conversionWorkflowDetail() = %v, want %v", got, tt.want)
 			}
 		})

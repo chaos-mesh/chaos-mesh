@@ -32,8 +32,8 @@ type WorkflowRepository interface {
 
 // Workflow defines the root structure of a workflow.
 type Workflow struct {
-	Name   string         `json:"name"`
-	Entry  string         `json:"entry"` // the entry node name
+	Name  string `json:"name"`
+	Entry string `json:"entry"` // the entry node name
 }
 
 type WorkflowDetail struct {
@@ -163,7 +163,8 @@ func (it *KubeWorkflowRepository) GetWorkflowByNamespacedName(ctx context.Contex
 		return WorkflowDetail{}, err
 	}
 
-	return conversionWorkflowDetail(kubeWorkflow, workflowNodes.Items...), nil
+	// TODO: provide the running kube nodes
+	return conversionWorkflowDetail(kubeWorkflow, workflowNodes.Items, nil), nil
 }
 
 func (it *KubeWorkflowRepository) DeleteWorkflowByNamespacedName(ctx context.Context, namespace, name string) error {
@@ -185,25 +186,31 @@ func (it *KubeWorkflowRepository) MutateWithKubeClient(anotherKubeclient client.
 
 func conversionWorkflow(kubeWorkflow v1alpha1.Workflow) Workflow {
 	result := Workflow{
-		Name:   kubeWorkflow.Name,
-		Entry:  kubeWorkflow.Spec.Entry,
+		Name:  kubeWorkflow.Name,
+		Entry: kubeWorkflow.Spec.Entry,
 	}
 	return result
 }
 
-func conversionWorkflowDetail(kubeWorkflow v1alpha1.Workflow, kubeNodes ...v1alpha1.WorkflowNode) WorkflowDetail {
+func conversionWorkflowDetail(kubeWorkflow v1alpha1.Workflow, kubeNodes []v1alpha1.WorkflowNode, runningKubeNodes []v1alpha1.WorkflowNode) WorkflowDetail {
 	nodes := make([]Node, 0)
+	runningNodes := make([]Node, 0)
 	result := WorkflowDetail{
 		Workflow: conversionWorkflow(kubeWorkflow),
 		Topology: Topology{
 			Nodes: nodes,
 		},
-		CurrentNodes: []Node{},
+		CurrentNodes: runningNodes,
 	}
 
 	for _, item := range kubeNodes {
 		node := conversionWorkflowNode(item)
 		nodes = append(nodes, node)
+	}
+
+	for _, item := range runningKubeNodes {
+		node := conversionWorkflowNode(item)
+		runningNodes = append(runningNodes, node)
 	}
 
 	return result
