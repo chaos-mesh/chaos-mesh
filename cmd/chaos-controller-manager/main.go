@@ -16,6 +16,9 @@ package main
 import (
 	"flag"
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/networkchaos"
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/networkchaos/partition"
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/networkchaos/trafficcontrol"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/podchaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/podchaos/containerkill"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/podchaos/podfailure"
@@ -142,10 +145,56 @@ func main() {
 		setupLog.Error(err, "fail to setup PodChaos reconciler")
 	}
 
+	if err := ctrl.NewControllerManagedBy(mgr).
+		For(&v1alpha1.NetworkChaos{}).
+		Named("networkchaos-records").
+		Complete(&common.Reconciler{
+			Impl: networkchaos.NewImpl(
+				trafficcontrol.NewImpl(mgr.GetClient(), ctrl.Log),
+				partition.NewImpl(mgr.GetClient(), ctrl.Log),
+			),
+			Object: &v1alpha1.NetworkChaos{},
+			Client: mgr.GetClient(),
+			Reader: mgr.GetAPIReader(),
+			Log: ctrl.Log,
+		}); err != nil {
+		setupLog.Error(err, "fail to setup NetworkChaos reconciler")
+	}
+
+	if err := ctrl.NewControllerManagedBy(mgr).
+		For(&v1alpha1.NetworkChaos{}).
+		Named("networkchaos-desiredphase").
+		Complete(&desiredphase.Reconciler{
+			Object: &v1alpha1.NetworkChaos{},
+			Client: mgr.GetClient(),
+			Reader: mgr.GetAPIReader(),
+			Log: ctrl.Log,
+		}); err != nil {
+		setupLog.Error(err, "fail to setup NetworkChaos reconciler")
+	}
+
+	if err := ctrl.NewControllerManagedBy(mgr).
+		For(&v1alpha1.NetworkChaos{}).
+		Named("networkchaos-delete").
+		Complete(&delete.Reconciler{
+			Object: &v1alpha1.NetworkChaos{},
+			Client: mgr.GetClient(),
+			Reader: mgr.GetAPIReader(),
+			Log: ctrl.Log,
+		}); err != nil {
+		setupLog.Error(err, "fail to setup NetworkChaos reconciler")
+	}
+
 	if err := ctrl.NewWebhookManagedBy(mgr).
 		For(&v1alpha1.PodChaos{}).
 		Complete(); err != nil {
 		setupLog.Error(err, "fail to setup PodChaos webhook")
+	}
+
+	if err := ctrl.NewWebhookManagedBy(mgr).
+		For(&v1alpha1.NetworkChaos{}).
+		Complete(); err != nil {
+		setupLog.Error(err, "fail to setup NetworkChaos webhook")
 	}
 
 	// We only setup webhook for podiochaos, and the logic of applying chaos are in the mutation

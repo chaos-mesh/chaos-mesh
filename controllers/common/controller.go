@@ -99,6 +99,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	for index, record := range records {
 		var err error
+		r.Log.Info("iterating record", "record", record, "desiredPhase", desiredPhase)
 		if desiredPhase == v1alpha1.RunningPhase && record.Phase != v1alpha1.Injected {
 			r.Log.Info("apply chaos", "id", records[index].Id)
 			record.Phase, err = r.Impl.Apply(context.TODO(), index, records, obj)

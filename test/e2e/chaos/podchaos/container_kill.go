@@ -49,19 +49,20 @@ func TestcaseContainerKillOnceThenDelete(ns string, kubeCli kubernetes.Interface
 			Namespace: ns,
 		},
 		Spec: v1alpha1.PodChaosSpec{
-			Selector: selector.PodSelectorSpec{
-				Namespaces: []string{
-					ns,
-				},
-				LabelSelectors: map[string]string{
-					"app": "nginx",
-				},
-			},
 			Action:        v1alpha1.ContainerKillAction,
-			Mode:          v1alpha1.OnePodMode,
-			ContainerName: "nginx",
-			Scheduler: &v1alpha1.SchedulerSpec{
-				Cron: "@every 10s",
+			ContainerSelector: v1alpha1.ContainerSelector{
+				PodSelector: v1alpha1.PodSelector{
+					Selector: v1alpha1.PodSelectorSpec{
+						Namespaces: []string{
+							ns,
+						},
+						LabelSelectors: map[string]string{
+							"app": "nginx",
+						},
+					},
+					Mode:          v1alpha1.OnePodMode,
+				},
+				ContainerNames: []string{"nginx"},
 			},
 		},
 	}
@@ -148,20 +149,21 @@ func TestcaseContainerKillPauseThenUnPause(ns string, kubeCli kubernetes.Interfa
 			Namespace: ns,
 		},
 		Spec: v1alpha1.PodChaosSpec{
-			Selector: selector.PodSelectorSpec{
-				Namespaces: []string{
-					ns,
-				},
-				LabelSelectors: map[string]string{
-					"app": "nginx",
-				},
-			},
 			Action:        v1alpha1.ContainerKillAction,
-			Mode:          v1alpha1.OnePodMode,
-			ContainerName: "nginx",
 			Duration:      pointer.StringPtr("9m"),
-			Scheduler: &v1alpha1.SchedulerSpec{
-				Cron: "@every 10m",
+			ContainerSelector: v1alpha1.ContainerSelector{
+				PodSelector: v1alpha1.PodSelector{
+					Selector: v1alpha1.PodSelectorSpec{
+						Namespaces: []string{
+							ns,
+						},
+						LabelSelectors: map[string]string{
+							"app": "nginx",
+						},
+					},
+					Mode:          v1alpha1.OnePodMode,
+				},
+				ContainerNames: []string{"nginx"},
 			},
 		},
 	}

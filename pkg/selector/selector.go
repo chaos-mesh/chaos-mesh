@@ -15,9 +15,9 @@ package selector
 
 import (
 	"context"
-	"errors"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/container"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
+	"github.com/pkg/errors"
 	"reflect"
 )
 
@@ -48,7 +48,7 @@ func (s *Selector) Select(ctx context.Context, spec interface{}) ([]Target, erro
 		return targets, err.(error)
 	}
 
-	return nil, errors.New("specification type not found")
+	return nil, errors.Errorf("specification type not found: %s", reflect.TypeOf(spec))
 }
 
 type SelectorParams struct {

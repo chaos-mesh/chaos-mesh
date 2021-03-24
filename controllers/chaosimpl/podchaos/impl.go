@@ -16,16 +16,16 @@ package podchaos
 import (
 	"context"
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	containerkill2 "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/podchaos/containerkill"
-	podfailure2 "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/podchaos/podfailure"
-	podkill2 "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/podchaos/podkill"
+	 "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/podchaos/containerkill"
+	 "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/podchaos/podfailure"
+	 "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/podchaos/podkill"
 	"github.com/pkg/errors"
 )
 
 type Impl struct {
-	podkill *podkill2.Impl
-	podfailure *podfailure2.Impl
-	containerkill *containerkill2.Impl
+	podkill *podkill.Impl
+	podfailure *podfailure.Impl
+	containerkill *containerkill.Impl
 }
 
 func (i Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
@@ -58,7 +58,7 @@ func (i Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Record
 	}
 }
 
-func NewImpl(podkill *podkill2.Impl, podfailure *podfailure2.Impl, containerkill *containerkill2.Impl) *Impl {
+func NewImpl(podkill *podkill.Impl, podfailure *podfailure.Impl, containerkill *containerkill.Impl) *Impl {
 	return &Impl{
 		podkill,
 		podfailure,

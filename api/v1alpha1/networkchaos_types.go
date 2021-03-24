@@ -175,7 +175,7 @@ type ReorderSpec struct {
 
 func (obj *NetworkChaos) GetSelectorSpecs() map[string]interface{} {
 	return map[string]interface{} {
-		".": obj.Spec.PodSelector,
+		".": &obj.Spec.PodSelector,
 		".Target": obj.Spec.Target,
 	}
 }

@@ -61,9 +61,6 @@ func TestcaseForbidHostNetwork(
 		v1alpha1.OnePodMode,
 		v1alpha1.To,
 		pointer.StringPtr("9m"),
-		&v1alpha1.SchedulerSpec{
-			Cron: "@every 10m",
-		},
 	)
 
 	err = cli.Create(ctx, networkPartition.DeepCopy())
@@ -120,9 +117,6 @@ func TestcaseNetworkPartition(
 
 	var (
 		testDelayDuration      = pointer.StringPtr("9m")
-		testDelaySchedulerSpec = &v1alpha1.SchedulerSpec{
-			Cron: "@every 10m",
-		}
 	)
 
 	baseNetworkPartition := makeNetworkPartitionChaos(
@@ -133,7 +127,6 @@ func TestcaseNetworkPartition(
 		v1alpha1.OnePodMode,
 		v1alpha1.To,
 		testDelayDuration,
-		testDelaySchedulerSpec,
 	)
 
 	By("block from peer-0 to peer-1")
@@ -173,7 +166,6 @@ func TestcaseNetworkPartition(
 		v1alpha1.OnePodMode,
 		v1alpha1.Both,
 		testDelayDuration,
-		testDelaySchedulerSpec,
 	)
 	err = cli.Create(ctx, bothDirectionNetworkPartition.DeepCopy())
 	framework.ExpectNoError(err, "create network chaos error")
@@ -211,7 +203,6 @@ func TestcaseNetworkPartition(
 		v1alpha1.OnePodMode,
 		v1alpha1.From,
 		testDelayDuration,
-		testDelaySchedulerSpec,
 	)
 
 	err = cli.Create(ctx, fromDirectionNetworkPartition.DeepCopy())
@@ -251,7 +242,6 @@ func TestcaseNetworkPartition(
 		v1alpha1.AllPodMode,
 		v1alpha1.Both,
 		testDelayDuration,
-		testDelaySchedulerSpec,
 	)
 	err = cli.Create(ctx, bothDirectionWithPartitionNetworkPartition.DeepCopy())
 	framework.ExpectNoError(err, "create network chaos error")
@@ -289,7 +279,6 @@ func TestcaseNetworkPartition(
 		v1alpha1.AllPodMode,
 		v1alpha1.To,
 		testDelayDuration,
-		testDelaySchedulerSpec,
 	)
 	err = cli.Create(ctx, bothDirectionWithPartitionNetworkPartition.DeepCopy())
 	framework.ExpectNoError(err, "create network chaos error")

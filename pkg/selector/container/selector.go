@@ -57,6 +57,14 @@ func (impl *SelectImpl) Select(ctx context.Context, cs *v1alpha1.ContainerSelect
 
 	var result []*Container
 	for _, pod := range pods {
+		if len(cs.ContainerNames) == 0 {
+			result = append(result, &Container {
+				Pod: pod,
+				ContainerName: pod.Spec.Containers[0].Name,
+			})
+			continue
+		}
+
 		for _, container := range pod.Spec.Containers {
 			if _, ok := containerNameMap[container.Name]; ok {
 				result = append(result, &Container {

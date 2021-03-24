@@ -105,6 +105,10 @@ func SelectAndFilterPods(ctx context.Context, c client.Client, r client.Reader, 
 		return nil, err.(error)
 	}
 
+	if spec == nil {
+		return nil, nil
+	}
+
 	selector := spec.Selector
 	mode := spec.Mode
 	value := spec.Value

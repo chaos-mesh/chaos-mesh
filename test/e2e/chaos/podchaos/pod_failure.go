@@ -58,16 +58,20 @@ func TestcasePodFailureOnceThenDelete(ns string, kubeCli kubernetes.Interface, c
 			Namespace: ns,
 		},
 		Spec: v1alpha1.PodChaosSpec{
-			Selector: selector.PodSelectorSpec{
-				Namespaces: []string{
-					ns,
-				},
-				LabelSelectors: map[string]string{
-					"app": appName,
+			Action: v1alpha1.PodFailureAction,
+			ContainerSelector: v1alpha1.ContainerSelector{
+				PodSelector: v1alpha1.PodSelector{
+					Selector: v1alpha1.PodSelectorSpec{
+						Namespaces: []string{
+							ns,
+						},
+						LabelSelectors: map[string]string{
+							"app": appName,
+						},
+					},
+					Mode:          v1alpha1.OnePodMode,
 				},
 			},
-			Action: v1alpha1.PodFailureAction,
-			Mode:   v1alpha1.OnePodMode,
 		},
 	}
 
@@ -143,15 +147,20 @@ func TestcasePodFailurePauseThenUnPause(ns string, kubeCli kubernetes.Interface,
 			Namespace: ns,
 		},
 		Spec: v1alpha1.PodChaosSpec{
-			Selector: selector.PodSelectorSpec{
-				Namespaces:     []string{ns},
-				LabelSelectors: map[string]string{"app": appName},
-			},
 			Action:   v1alpha1.PodFailureAction,
-			Mode:     v1alpha1.OnePodMode,
 			Duration: pointer.StringPtr("9m"),
-			Scheduler: &v1alpha1.SchedulerSpec{
-				Cron: "@every 10m",
+			ContainerSelector: v1alpha1.ContainerSelector{
+				PodSelector: v1alpha1.PodSelector{
+					Selector: v1alpha1.PodSelectorSpec{
+						Namespaces: []string{
+							ns,
+						},
+						LabelSelectors: map[string]string{
+							"app": appName,
+						},
+					},
+					Mode:          v1alpha1.OnePodMode,
+				},
 			},
 		},
 	}

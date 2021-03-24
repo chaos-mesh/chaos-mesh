@@ -24,7 +24,6 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/klog"
 	"k8s.io/kubernetes/test/e2e/framework"
-	"k8s.io/utils/pointer"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -50,19 +49,19 @@ func TestcaseIODelayDurationForATimeThenRecover(
 			Namespace: ns,
 		},
 		Spec: v1alpha1.IoChaosSpec{
-			Selector: selector.PodSelectorSpec{
-				Namespaces:     []string{ns},
-				LabelSelectors: map[string]string{"app": "io"},
-			},
 			Action:     v1alpha1.IoLatency,
-			Mode:       v1alpha1.OnePodMode,
 			VolumePath: "/var/run/data",
 			Path:       "/var/run/data/*",
 			Delay:      "1s",
 			Percent:    100,
-			Duration:   pointer.StringPtr("9m"),
-			Scheduler: &v1alpha1.SchedulerSpec{
-				Cron: "@every 10m",
+			ContainerSelector: v1alpha1.ContainerSelector{
+				PodSelector: v1alpha1.PodSelector{
+					Selector: v1alpha1.PodSelectorSpec{
+						Namespaces:     []string{ns},
+						LabelSelectors: map[string]string{"app": "io"},
+					},
+					Mode:       v1alpha1.OnePodMode,
+				},
 			},
 		},
 	}
@@ -119,19 +118,19 @@ func TestcaseIODelayDurationForATimePauseAndUnPause(
 			Namespace: ns,
 		},
 		Spec: v1alpha1.IoChaosSpec{
-			Selector: selector.PodSelectorSpec{
-				Namespaces:     []string{ns},
-				LabelSelectors: map[string]string{"app": "io"},
-			},
 			Action:     v1alpha1.IoLatency,
-			Mode:       v1alpha1.OnePodMode,
 			VolumePath: "/var/run/data",
 			Path:       "/var/run/data/*",
 			Delay:      "10ms",
 			Percent:    100,
-			Duration:   pointer.StringPtr("9m"),
-			Scheduler: &v1alpha1.SchedulerSpec{
-				Cron: "@every 10m",
+			ContainerSelector: v1alpha1.ContainerSelector{
+				PodSelector: v1alpha1.PodSelector{
+					Selector: v1alpha1.PodSelectorSpec{
+						Namespaces:     []string{ns},
+						LabelSelectors: map[string]string{"app": "io"},
+					},
+					Mode:       v1alpha1.OnePodMode,
+				},
 			},
 		},
 	}
@@ -240,20 +239,20 @@ func TestcaseIODelayWithSpecifiedContainer(
 			Namespace: ns,
 		},
 		Spec: v1alpha1.IoChaosSpec{
-			Selector: selector.PodSelectorSpec{
-				Namespaces:     []string{ns},
-				LabelSelectors: map[string]string{"app": "io"},
-			},
 			Action:        v1alpha1.IoLatency,
-			Mode:          v1alpha1.OnePodMode,
 			VolumePath:    "/var/run/data",
 			Path:          "/var/run/data/*",
 			Delay:         "10ms",
 			Percent:       100,
-			ContainerName: &containerName,
-			Duration:      pointer.StringPtr("9m"),
-			Scheduler: &v1alpha1.SchedulerSpec{
-				Cron: "@every 10m",
+			ContainerSelector: v1alpha1.ContainerSelector{
+				PodSelector: v1alpha1.PodSelector{
+					Selector: v1alpha1.PodSelectorSpec{
+						Namespaces:     []string{ns},
+						LabelSelectors: map[string]string{"app": "io"},
+					},
+					Mode:       v1alpha1.OnePodMode,
+				},
+				ContainerNames: []string{containerName},
 			},
 		},
 	}

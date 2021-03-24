@@ -105,6 +105,7 @@ func (ctx *reconcileContext) CalcDesiredPhase() v1alpha1.DesiredPhase {
 func (ctx *reconcileContext) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	desiredPhase := ctx.CalcDesiredPhase()
 
+	ctx.Log.Info("modify desiredPhase", "desiredPhase", desiredPhase)
 	if ctx.obj.GetStatus().Experiment.DesiredPhase != desiredPhase {
 		updateError := retry.RetryOnConflict(retry.DefaultBackoff,func() error {
 			obj := ctx.Object.DeepCopyObject().(v1alpha1.InnerObject)
@@ -114,8 +115,13 @@ func (ctx *reconcileContext) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 				return err
 			}
 
-			obj.GetStatus().Experiment.DesiredPhase = desiredPhase
-			return ctx.Client.Update(context.TODO(), obj)
+			if obj.GetStatus().Experiment.DesiredPhase != desiredPhase {
+				obj.GetStatus().Experiment.DesiredPhase = desiredPhase
+				ctx.Log.Info("update object", "namespace", obj.GetObjectMeta().GetNamespace(), "name", obj.GetObjectMeta().GetName())
+				return ctx.Client.Update(context.TODO(), obj)
+			} else {
+				return nil
+			}
 		})
 		if updateError != nil {
 			// TODO: handle this error

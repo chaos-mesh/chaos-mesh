@@ -15,7 +15,6 @@ package timechaos
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -55,15 +54,16 @@ func TestcaseTimeSkewOnceThenRecover(
 			Namespace: ns,
 		},
 		Spec: v1alpha1.TimeChaosSpec{
-			Selector: selector.PodSelectorSpec{
-				Namespaces:     []string{ns},
-				LabelSelectors: map[string]string{"app": "timer"},
-			},
-			Mode:       v1alpha1.OnePodMode,
 			Duration:   pointer.StringPtr("9m"),
 			TimeOffset: "-1h",
-			Scheduler: &v1alpha1.SchedulerSpec{
-				Cron: "@every 10m",
+			ContainerSelector: v1alpha1.ContainerSelector{
+				PodSelector: v1alpha1.PodSelector{
+					Selector: v1alpha1.PodSelectorSpec{
+						Namespaces:     []string{ns},
+						LabelSelectors: map[string]string{"app": "timer"},
+					},
+					Mode:          v1alpha1.OnePodMode,
+				},
 			},
 		},
 	}
@@ -124,15 +124,16 @@ func TestcaseTimeSkewPauseThenUnpause(
 			Namespace: ns,
 		},
 		Spec: v1alpha1.TimeChaosSpec{
-			Selector: selector.PodSelectorSpec{
-				Namespaces:     []string{ns},
-				LabelSelectors: map[string]string{"app": "timer"},
-			},
-			Mode:       v1alpha1.OnePodMode,
 			Duration:   pointer.StringPtr("9m"),
 			TimeOffset: "-1h",
-			Scheduler: &v1alpha1.SchedulerSpec{
-				Cron: "@every 10m",
+			ContainerSelector: v1alpha1.ContainerSelector{
+				PodSelector: v1alpha1.PodSelector{
+					Selector: v1alpha1.PodSelectorSpec{
+						Namespaces:     []string{ns},
+						LabelSelectors: map[string]string{"app": "timer"},
+					},
+					Mode:          v1alpha1.OnePodMode,
+				},
 			},
 		},
 	}
@@ -230,10 +231,6 @@ func TestcaseTimeSkewStartAtWaitingThenIntoRunning(
 	err := util.WaitE2EHelperReady(c, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
-	By("create cron")
-	minuteNow := time.Now().Minute()
-	crontab := fmt.Sprintf("%d * * * *", (minuteNow+3)%60)
-
 	By("create chaos CRD objects")
 	initTime, err := getPodTimeNS(c, port)
 	framework.ExpectNoError(err, "failed to get pod time")
@@ -244,15 +241,16 @@ func TestcaseTimeSkewStartAtWaitingThenIntoRunning(
 			Namespace: ns,
 		},
 		Spec: v1alpha1.TimeChaosSpec{
-			Selector: selector.PodSelectorSpec{
-				Namespaces:     []string{ns},
-				LabelSelectors: map[string]string{"app": "timer"},
-			},
-			Mode:       v1alpha1.OnePodMode,
 			Duration:   pointer.StringPtr("9m"),
 			TimeOffset: "-1h",
-			Scheduler: &v1alpha1.SchedulerSpec{
-				Cron: crontab,
+			ContainerSelector: v1alpha1.ContainerSelector{
+				PodSelector: v1alpha1.PodSelector{
+					Selector: v1alpha1.PodSelectorSpec{
+						Namespaces:     []string{ns},
+						LabelSelectors: map[string]string{"app": "timer"},
+					},
+					Mode:          v1alpha1.OnePodMode,
+				},
 			},
 		},
 	}
