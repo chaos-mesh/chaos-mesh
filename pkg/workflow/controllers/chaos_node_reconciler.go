@@ -125,7 +125,7 @@ func (it *ChaosNodeReconciler) injectChaos(ctx context.Context, node v1alpha1.Wo
 		nodeNeedUpdate := v1alpha1.WorkflowNode{}
 		err := it.kubeClient.Get(ctx, types.NamespacedName{
 			Namespace: node.Namespace,
-			Name: node.Name,
+			Name:      node.Name,
 		}, &nodeNeedUpdate)
 		if err != nil {
 			return client.IgnoreNotFound(err)
