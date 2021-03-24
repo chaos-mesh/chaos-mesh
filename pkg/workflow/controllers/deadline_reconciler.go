@@ -56,25 +56,25 @@ func (it *DeadlineReconciler) Reconcile(request reconcile.Request) (reconcile.Re
 	if node.Spec.Deadline.Before(&now) {
 
 		updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-			node := v1alpha1.WorkflowNode{}
-			err := it.kubeClient.Get(ctx, request.NamespacedName, &node)
+			nodeNeedUpdate := v1alpha1.WorkflowNode{}
+			err := it.kubeClient.Get(ctx, request.NamespacedName, &nodeNeedUpdate)
 			if err != nil {
 				return err
 			}
 
 			var reason string
-			if ConditionEqualsTo(node.Status, v1alpha1.ConditionAccomplished, corev1.ConditionTrue) {
+			if ConditionEqualsTo(nodeNeedUpdate.Status, v1alpha1.ConditionAccomplished, corev1.ConditionTrue) {
 				reason = v1alpha1.NodeDeadlineOmitted
 			} else {
 				reason = v1alpha1.NodeDeadlineExceed
 			}
 
-			SetCondition(&node.Status, v1alpha1.WorkflowNodeCondition{
+			SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
 				Type:   v1alpha1.ConditionDeadlineExceed,
 				Status: corev1.ConditionTrue,
 				Reason: reason,
 			})
-			return it.kubeClient.Update(ctx, &node)
+			return it.kubeClient.Update(ctx, &nodeNeedUpdate)
 		})
 
 		if updateError != nil {
@@ -83,17 +83,17 @@ func (it *DeadlineReconciler) Reconcile(request reconcile.Request) (reconcile.Re
 		it.logger.Info("deadline exceed", "key", request.NamespacedName, "deadline", node.Spec.Deadline.Time)
 	} else {
 		updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-			node := v1alpha1.WorkflowNode{}
-			err := it.kubeClient.Get(ctx, request.NamespacedName, &node)
+			nodeNeedUpdate := v1alpha1.WorkflowNode{}
+			err := it.kubeClient.Get(ctx, request.NamespacedName, &nodeNeedUpdate)
 			if err != nil {
 				return err
 			}
-			SetCondition(&node.Status, v1alpha1.WorkflowNodeCondition{
+			SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
 				Type:   v1alpha1.ConditionDeadlineExceed,
 				Status: corev1.ConditionFalse,
 				Reason: v1alpha1.NodeDeadlineNotExceed,
 			})
-			return it.kubeClient.Update(ctx, &node)
+			return it.kubeClient.Update(ctx, &nodeNeedUpdate)
 		})
 
 		if updateError != nil {

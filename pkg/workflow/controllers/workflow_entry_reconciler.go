@@ -69,17 +69,17 @@ func (it *WorkflowEntryReconciler) Reconcile(request reconcile.Request) (reconci
 		it.eventRecorder.Event(&workflow, corev1.EventTypeNormal, v1alpha1.EntryCreated, "Entry node created")
 
 		updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-			workflow := v1alpha1.Workflow{}
-			err := it.kubeClient.Get(ctx, request.NamespacedName, &workflow)
+			workflowNeedUpdate := v1alpha1.Workflow{}
+			err := it.kubeClient.Get(ctx, request.NamespacedName, &workflowNeedUpdate)
 			if err != nil {
 				return err
 			}
-			workflow.Status.EntryNode = &entryNode.Name
+			workflowNeedUpdate.Status.EntryNode = &entryNode.Name
 
-			// TODO: add metav1.FinalizerDeleteDependents for workflow's finalizer in webhook
-			err = it.kubeClient.Update(ctx, &workflow)
+			// TODO: add metav1.FinalizerDeleteDependents for workflowNeedUpdate's finalizer in webhook
+			err = it.kubeClient.Update(ctx, &workflowNeedUpdate)
 			if err != nil {
-				it.logger.Error(err, "failed to update workflow status")
+				it.logger.Error(err, "failed to update workflowNeedUpdate status")
 				return err
 			}
 			return nil

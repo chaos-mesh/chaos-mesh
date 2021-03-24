@@ -93,13 +93,11 @@ func (it *AccomplishWatcher) Reconcile(request reconcile.Request) (reconcile.Res
 func (it *AccomplishWatcher) updateParentSerialNode(ctx context.Context, childNode, parentNode v1alpha1.WorkflowNode) error {
 
 	updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		namespace := parentNode.Namespace
-		name := parentNode.Name
-		parentNode := v1alpha1.WorkflowNode{}
+		nodeNeedUpdate := v1alpha1.WorkflowNode{}
 		err := it.kubeClient.Get(ctx, types.NamespacedName{
-			Namespace: namespace,
-			Name:      name,
-		}, &parentNode)
+			Namespace: parentNode.Namespace,
+			Name:      parentNode.Name,
+		}, &nodeNeedUpdate)
 
 		if err != nil {
 			return client.IgnoreNotFound(err)
@@ -108,7 +106,7 @@ func (it *AccomplishWatcher) updateParentSerialNode(ctx context.Context, childNo
 		// filter out accomplished node
 		var newActiveChildren []corev1.LocalObjectReference
 
-		for _, item := range parentNode.Status.ActiveChildren {
+		for _, item := range nodeNeedUpdate.Status.ActiveChildren {
 			item := item
 			if item.Name == childNode.Name {
 				continue
@@ -116,12 +114,12 @@ func (it *AccomplishWatcher) updateParentSerialNode(ctx context.Context, childNo
 			newActiveChildren = append(newActiveChildren, item)
 		}
 
-		parentNode.Status.ActiveChildren = newActiveChildren
+		nodeNeedUpdate.Status.ActiveChildren = newActiveChildren
 
-		if !childrenContains(parentNode.Status.FinishedChildren, childNode.Name) {
-			parentNode.Status.FinishedChildren = append(parentNode.Status.FinishedChildren, corev1.LocalObjectReference{Name: childNode.Name})
+		if !childrenContains(nodeNeedUpdate.Status.FinishedChildren, childNode.Name) {
+			nodeNeedUpdate.Status.FinishedChildren = append(nodeNeedUpdate.Status.FinishedChildren, corev1.LocalObjectReference{Name: childNode.Name})
 		}
-		return it.kubeClient.Update(ctx, &parentNode)
+		return it.kubeClient.Update(ctx, &nodeNeedUpdate)
 	})
 
 	return updateError

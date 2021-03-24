@@ -68,17 +68,17 @@ func (it *SerialNodeReconciler) Reconcile(request reconcile.Request) (reconcile.
 	if len(node.Status.FinishedChildren) == *node.Status.ExpectedChildrenNum {
 		if !ConditionEqualsTo(node.Status, v1alpha1.ConditionAccomplished, corev1.ConditionTrue) {
 			updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-				node := v1alpha1.WorkflowNode{}
-				err := it.kubeClient.Get(ctx, request.NamespacedName, &node)
+				nodeNeedUpdate := v1alpha1.WorkflowNode{}
+				err := it.kubeClient.Get(ctx, request.NamespacedName, &nodeNeedUpdate)
 				if err != nil {
 					return client.IgnoreNotFound(err)
 				}
-				SetCondition(&node.Status, v1alpha1.WorkflowNodeCondition{
+				SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
 					Type:   v1alpha1.ConditionAccomplished,
 					Status: corev1.ConditionTrue,
 					Reason: v1alpha1.NodeAccomplished,
 				})
-				return it.kubeClient.Update(ctx, &node)
+				return it.kubeClient.Update(ctx, &nodeNeedUpdate)
 			})
 
 			if updateError != nil {
@@ -118,15 +118,15 @@ func (it *SerialNodeReconciler) Reconcile(request reconcile.Request) (reconcile.
 		}
 
 		updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-			node := v1alpha1.WorkflowNode{}
-			err := it.kubeClient.Get(ctx, request.NamespacedName, &node)
+			nodeNeedUpdate := v1alpha1.WorkflowNode{}
+			err := it.kubeClient.Get(ctx, request.NamespacedName, &nodeNeedUpdate)
 			if err != nil {
 				return err
 			}
 			for _, item := range childrenNodes {
-				node.Status.ActiveChildren = append(node.Status.ActiveChildren, corev1.LocalObjectReference{Name: item.Name})
+				nodeNeedUpdate.Status.ActiveChildren = append(nodeNeedUpdate.Status.ActiveChildren, corev1.LocalObjectReference{Name: item.Name})
 			}
-			return it.kubeClient.Update(ctx, &node)
+			return it.kubeClient.Update(ctx, &nodeNeedUpdate)
 		})
 
 		if updateError != nil {
