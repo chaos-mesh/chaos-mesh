@@ -14,6 +14,7 @@
 package core
 
 import (
+	corev1 "k8s.io/api/core/v1"
 	"reflect"
 	"testing"
 
@@ -37,7 +38,8 @@ func Test_conversionWorkflow(t *testing.T) {
 				v1alpha1.Workflow{
 					TypeMeta: metav1.TypeMeta{},
 					ObjectMeta: metav1.ObjectMeta{
-						Name: "fake-workflow-0",
+						Namespace: "fake-namespace",
+						Name:      "fake-workflow-0",
 					},
 					Spec: v1alpha1.WorkflowSpec{
 						Entry: "an-entry",
@@ -46,8 +48,9 @@ func Test_conversionWorkflow(t *testing.T) {
 				},
 			},
 			want: Workflow{
-				Name:  "fake-workflow-0",
-				Entry: "an-entry",
+				Namespace: "fake-namespace",
+				Name:      "fake-workflow-0",
+				Entry:     "an-entry",
 			},
 		},
 	}
@@ -77,7 +80,8 @@ func Test_conversionWorkflowDetail(t *testing.T) {
 				kubeWorkflow: v1alpha1.Workflow{
 					TypeMeta: metav1.TypeMeta{},
 					ObjectMeta: metav1.ObjectMeta{
-						Name: "another-fake-workflow",
+						Namespace: "another-namespace",
+						Name:      "another-fake-workflow",
 					},
 					Spec: v1alpha1.WorkflowSpec{
 						Entry:     "another-entry",
@@ -90,8 +94,9 @@ func Test_conversionWorkflowDetail(t *testing.T) {
 			},
 			want: WorkflowDetail{
 				Workflow: Workflow{
-					Name:  "another-fake-workflow",
-					Entry: "another-entry",
+					Namespace: "another-namespace",
+					Name:      "another-fake-workflow",
+					Entry:     "another-entry",
 				},
 				Topology: Topology{
 					Nodes: []Node{},
@@ -124,7 +129,8 @@ func Test_conversionWorkflowNode(t *testing.T) {
 			args: args{kubeWorkflowNode: v1alpha1.WorkflowNode{
 				TypeMeta: metav1.TypeMeta{},
 				ObjectMeta: metav1.ObjectMeta{
-					Name: "fake-node-0",
+					Namespace: "fake-namespace",
+					Name:      "fake-node-0",
 				},
 				Spec: v1alpha1.WorkflowNodeSpec{
 					WorkflowName: "fake-workflow-0",
@@ -139,6 +145,7 @@ func Test_conversionWorkflowNode(t *testing.T) {
 				Serial:   NodeSerial{[]string{}},
 				Parallel: NodeParallel{[]string{}},
 				Template: "fake-template-0",
+				State:    NodeRunning,
 			},
 		}, {
 			name: "serial node",
@@ -146,7 +153,8 @@ func Test_conversionWorkflowNode(t *testing.T) {
 				kubeWorkflowNode: v1alpha1.WorkflowNode{
 					TypeMeta: metav1.TypeMeta{},
 					ObjectMeta: metav1.ObjectMeta{
-						Name: "fake-serial-node-0",
+						Namespace: "fake-namespace",
+						Name:      "fake-serial-node-0",
 					},
 					Spec: v1alpha1.WorkflowNodeSpec{
 						TemplateName: "fake-serial-node",
@@ -165,6 +173,7 @@ func Test_conversionWorkflowNode(t *testing.T) {
 				},
 				Parallel: NodeParallel{[]string{}},
 				Template: "fake-serial-node",
+				State:    NodeRunning,
 			},
 		},
 		{
@@ -173,7 +182,8 @@ func Test_conversionWorkflowNode(t *testing.T) {
 				kubeWorkflowNode: v1alpha1.WorkflowNode{
 					TypeMeta: metav1.TypeMeta{},
 					ObjectMeta: metav1.ObjectMeta{
-						Name: "parallel-node-0",
+						Namespace: "fake-namespace",
+						Name:      "parallel-node-0",
 					},
 					Spec: v1alpha1.WorkflowNodeSpec{
 						TemplateName: "parallel-node",
@@ -192,6 +202,7 @@ func Test_conversionWorkflowNode(t *testing.T) {
 					Tasks: []string{"child-1", "child-0"},
 				},
 				Template: "parallel-node",
+				State:    NodeRunning,
 			},
 		},
 		{
@@ -200,7 +211,8 @@ func Test_conversionWorkflowNode(t *testing.T) {
 				kubeWorkflowNode: v1alpha1.WorkflowNode{
 					TypeMeta: metav1.TypeMeta{},
 					ObjectMeta: metav1.ObjectMeta{
-						Name: "io-chaos-0",
+						Namespace: "fake-namespace",
+						Name:      "io-chaos-0",
 					},
 					Spec: v1alpha1.WorkflowNodeSpec{
 						TemplateName: "io-chaos",
@@ -226,6 +238,82 @@ func Test_conversionWorkflowNode(t *testing.T) {
 				Serial:   NodeSerial{[]string{}},
 				Parallel: NodeParallel{[]string{}},
 				Template: "io-chaos",
+				State:    NodeRunning,
+			},
+		},
+		{
+			name: "accomplished node",
+			args: args{
+				kubeWorkflowNode: v1alpha1.WorkflowNode{
+					TypeMeta: metav1.TypeMeta{},
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: "fake-namespace",
+						Name:      "the-entry-0",
+					},
+					Spec: v1alpha1.WorkflowNodeSpec{
+						TemplateName: "the-entry",
+						WorkflowName: "fake-workflow-0",
+						Type:         v1alpha1.TypeSerial,
+						Tasks:        []string{"unimportant-task-0"},
+					},
+					Status: v1alpha1.WorkflowNodeStatus{
+						Conditions: []v1alpha1.WorkflowNodeCondition{
+							{
+								Type:   v1alpha1.ConditionAccomplished,
+								Status: corev1.ConditionTrue,
+								Reason: "unit test mocked true",
+							},
+						},
+					},
+				},
+			},
+			want: Node{
+				Name:  "the-entry-0",
+				Type:  SerialNode,
+				State: NodeSucceed,
+				Serial: NodeSerial{
+					Tasks: []string{"unimportant-task-0"},
+				},
+				Parallel: NodeParallel{
+					Tasks: []string{},
+				},
+				Template: "the-entry",
+			},
+		},
+		{
+			name: "deadline exceed node",
+			args: args{kubeWorkflowNode: v1alpha1.WorkflowNode{
+				TypeMeta: metav1.TypeMeta{},
+				ObjectMeta: metav1.ObjectMeta{
+					Namespace: "fake-namespace",
+					Name:      "deadline-exceed-node-0",
+				},
+				Spec: v1alpha1.WorkflowNodeSpec{
+					TemplateName: "deadline-exceed-node",
+					WorkflowName: "some-workflow",
+					Type:         v1alpha1.TypePodChaos,
+				},
+				Status: v1alpha1.WorkflowNodeStatus{
+					Conditions: []v1alpha1.WorkflowNodeCondition{
+						{
+							Type:   v1alpha1.ConditionDeadlineExceed,
+							Status: corev1.ConditionTrue,
+							Reason: "unit test mocked true",
+						},
+					},
+				},
+			}},
+			want: Node{
+				Name:  "deadline-exceed-node-0",
+				Type:  ChaosNode,
+				State: NodeSucceed,
+				Serial: NodeSerial{
+					Tasks: []string{},
+				},
+				Parallel: NodeParallel{
+					Tasks: []string{},
+				},
+				Template: "deadline-exceed-node",
 			},
 		},
 	}

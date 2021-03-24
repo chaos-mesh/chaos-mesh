@@ -15,6 +15,8 @@ package core
 
 import (
 	"context"
+	wfcontrollers "github.com/chaos-mesh/chaos-mesh/pkg/workflow/controllers"
+	corev1 "k8s.io/api/core/v1"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -32,8 +34,9 @@ type WorkflowRepository interface {
 
 // Workflow defines the root structure of a workflow.
 type Workflow struct {
-	Name  string `json:"name"`
-	Entry string `json:"entry"` // the entry node name
+	Namespace string `json:"namespace"`
+	Name      string `json:"name"`
+	Entry     string `json:"entry"` // the entry node name
 }
 
 type WorkflowDetail struct {
@@ -47,10 +50,19 @@ type Topology struct {
 	Nodes []Node `json:"nodes"`
 }
 
+type NodeState string
+
+const (
+	NodeRunning NodeState = "Running"
+	NodeSucceed NodeState = "Succeed"
+	NodeFailed  NodeState = "Failed"
+)
+
 // Node defines the single step of a workflow.
 type Node struct {
 	Name     string       `json:"name"`
 	Type     NodeType     `json:"type"`
+	State    NodeState    `json:"state"`
 	Serial   NodeSerial   `json:"serial,omitempty"`
 	Parallel NodeParallel `json:"parallel,omitempty"`
 	Template string       `json:"template"`
@@ -186,8 +198,9 @@ func (it *KubeWorkflowRepository) MutateWithKubeClient(anotherKubeclient client.
 
 func conversionWorkflow(kubeWorkflow v1alpha1.Workflow) Workflow {
 	result := Workflow{
-		Name:  kubeWorkflow.Name,
-		Entry: kubeWorkflow.Spec.Entry,
+		Namespace: kubeWorkflow.Namespace,
+		Name:      kubeWorkflow.Name,
+		Entry:     kubeWorkflow.Spec.Entry,
 	}
 	return result
 }
@@ -229,6 +242,14 @@ func conversionWorkflowNode(kubeWorkflowNode v1alpha1.WorkflowNode) Node {
 		result.Serial.Tasks = append(kubeWorkflowNode.Spec.Tasks)
 	} else if kubeWorkflowNode.Spec.Type == v1alpha1.TypeParallel {
 		result.Parallel.Tasks = append(kubeWorkflowNode.Spec.Tasks)
+	}
+
+	// TODO: refactor this
+	if wfcontrollers.ConditionEqualsTo(kubeWorkflowNode.Status, v1alpha1.ConditionAccomplished, corev1.ConditionTrue) ||
+		wfcontrollers.ConditionEqualsTo(kubeWorkflowNode.Status, v1alpha1.ConditionDeadlineExceed, corev1.ConditionTrue) {
+		result.State = NodeSucceed
+	} else {
+		result.State = NodeRunning
 	}
 
 	return result
