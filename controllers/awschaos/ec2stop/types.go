@@ -34,7 +34,7 @@ import (
 )
 
 const (
-	AwsFinalizer = "aws-Finalizer"
+	AwsFinalizer = "aws-finalizer"
 )
 
 type endpoint struct {

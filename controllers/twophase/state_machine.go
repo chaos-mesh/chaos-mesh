@@ -201,6 +201,16 @@ func (m *chaosStateMachine) run(ctx context.Context, targetPhase v1alpha1.Experi
 	currentPhase := m.Chaos.GetStatus().Experiment.Phase
 	m.Log.Info("change phase", "current phase", currentPhase, "target phase", targetPhase)
 
+	if phaseTransitionMap[currentPhase] == nil {
+		err := errors.Errorf("unexpected current phase '%s'", currentPhase)
+		return false, err
+	}
+
+	if phaseTransitionMap[currentPhase][targetPhase] == nil {
+		err := errors.Errorf("unexpected target phase '%s'", targetPhase)
+		return false, err
+	}
+
 	return phaseTransitionMap[currentPhase][targetPhase](ctx, m, targetPhase, now)
 }
 

@@ -188,11 +188,8 @@ fi
 set -e
 
 ${KUBECTL_BIN} apply -f ${ROOT}/manifests/local-volume-provisioner.yaml
-${KUBECTL_BIN} apply -f ${ROOT}/manifests/tiller-rbac.yaml
 
 $KUBECTL_BIN create ns chaos-testing
-
-if [[ $(helm version --client --short) == "Client: v2"* ]]; then helm init --service-account=tiller --wait; fi
 
 echo "############# success create cluster:[${clusterName}] #############"
 
