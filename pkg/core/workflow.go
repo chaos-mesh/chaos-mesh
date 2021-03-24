@@ -195,13 +195,6 @@ func conversionWorkflow(kubeWorkflow v1alpha1.Workflow) Workflow {
 func conversionWorkflowDetail(kubeWorkflow v1alpha1.Workflow, kubeNodes []v1alpha1.WorkflowNode, runningKubeNodes []v1alpha1.WorkflowNode) WorkflowDetail {
 	nodes := make([]Node, 0)
 	runningNodes := make([]Node, 0)
-	result := WorkflowDetail{
-		Workflow: conversionWorkflow(kubeWorkflow),
-		Topology: Topology{
-			Nodes: nodes,
-		},
-		CurrentNodes: runningNodes,
-	}
 
 	for _, item := range kubeNodes {
 		node := conversionWorkflowNode(item)
@@ -213,6 +206,13 @@ func conversionWorkflowDetail(kubeWorkflow v1alpha1.Workflow, kubeNodes []v1alph
 		runningNodes = append(runningNodes, node)
 	}
 
+	result := WorkflowDetail{
+		Workflow: conversionWorkflow(kubeWorkflow),
+		Topology: Topology{
+			Nodes: nodes,
+		},
+		CurrentNodes: runningNodes,
+	}
 	return result
 }
 
