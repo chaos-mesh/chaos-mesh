@@ -1186,6 +1186,7 @@ func (s *Service) updateExperiment(c *gin.Context) {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
 		}
+		return
 	}
 	c.JSON(http.StatusOK, exp)
 }
