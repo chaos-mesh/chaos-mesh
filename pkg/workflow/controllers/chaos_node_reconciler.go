@@ -57,8 +57,10 @@ func (it *ChaosNodeReconciler) Reconcile(request reconcile.Request) (reconcile.R
 	}
 
 	if availableChaos(string(node.Spec.Type)) {
-		err = it.injectChaos(ctx, node)
-		return reconcile.Result{}, err
+		if !ConditionEqualsTo(node.Status, v1alpha1.ConditionChaosInjected, corev1.ConditionTrue) {
+			err = it.injectChaos(ctx, node)
+			return reconcile.Result{}, err
+		}
 	}
 
 	return reconcile.Result{}, nil
@@ -120,10 +122,12 @@ func (it *ChaosNodeReconciler) injectChaos(ctx context.Context, node v1alpha1.Wo
 	}
 
 	updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		namespace := node.Namespace
+		name := node.Name
 		node := v1alpha1.WorkflowNode{}
 		err := it.kubeClient.Get(ctx, types.NamespacedName{
-			Namespace: node.Namespace,
-			Name:      node.Name,
+			Namespace: namespace,
+			Name:      name,
 		}, &node)
 		if err != nil {
 			return client.IgnoreNotFound(err)
