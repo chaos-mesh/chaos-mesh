@@ -90,7 +90,7 @@ func (it *Service) listWorkflows(c *gin.Context) {
 // @Param namespace path string true "namespace"
 // @Param name path string true "name"
 // @Router /workflows/detail/{namespace}/{name} [GET]
-// @Success 200 {object} core.Workflow
+// @Success 200 {object} core.WorkflowDetail
 // @Failure 400 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
 func (it *Service) getWorkflowDetail(c *gin.Context) {
