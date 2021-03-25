@@ -33,16 +33,22 @@ interface MultiNodeProps {
   count: number
   current: number
   setCurrent: React.Dispatch<React.SetStateAction<number>>
-  setCurrentCallback?: (index: number) => void
+  setCurrentCallback?: (index: number) => boolean
 }
 
 const MultiNode: React.FC<MultiNodeProps> = ({ count, current, setCurrent, setCurrentCallback }) => {
   const classes = useStyles()
 
   const handleSetCurrent = (index: number) => () => {
-    setCurrent(index)
+    if (setCurrentCallback) {
+      const result = setCurrentCallback(index)
 
-    setCurrentCallback && setCurrentCallback(index)
+      if (!result) {
+        return
+      }
+    }
+
+    setCurrent(index)
   }
 
   return (

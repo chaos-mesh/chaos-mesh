@@ -5,7 +5,7 @@ export type TemplateExperiment = {
   basic: any
 }
 export interface Template {
-  type: 'single' | 'serial' | 'parallel'
+  type: 'single' | 'serial' | 'parallel' | 'suspend'
   index?: number
   name?: string
   experiments: TemplateExperiment[]

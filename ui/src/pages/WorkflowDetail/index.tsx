@@ -1,12 +1,15 @@
 import { Box, Button, Grid } from '@material-ui/core'
-import cytoscape, { workflowStyle } from 'lib/cytoscape'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
+import { WorkflowDetail as APIWorkflowDetail } from 'api/workflows.type'
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
 import ReplayIcon from '@material-ui/icons/Replay'
 import T from 'components/T'
+import api from 'api'
+import { constructWorkflowTopology } from 'lib/cytoscape'
 import { makeStyles } from '@material-ui/core/styles'
+import { useParams } from 'react-router-dom'
 
 const useStyles = makeStyles(() => ({
   topology: {
@@ -16,94 +19,26 @@ const useStyles = makeStyles(() => ({
 
 const WorkflowDetail = () => {
   const classes = useStyles()
+  const { namespace, name } = useParams<any>()
 
+  const [detail, setDetail] = useState<APIWorkflowDetail>()
   const topologyRef = useRef<HTMLDivElement>(null)
 
+  const fetchWorkflowDetail = (ns: string, name: string) =>
+    api.workflows
+      .detail(ns, name)
+      .then(({ data }) => setDetail(data))
+      .catch(console.error)
+
   useEffect(() => {
-    cytoscape(topologyRef.current!, {
-      elements: {
-        nodes: [
-          {
-            data: {
-              id: 'random-pod-failure',
-            },
-          },
-          {
-            data: {
-              id: 'random-pod-kill',
-            },
-          },
-          {
-            data: {
-              id: 'network-loss',
-              position: {
-                x: 100,
-                y: 100,
-              },
-            },
-          },
-          {
-            data: {
-              id: 'network-delay',
-            },
-          },
-          {
-            data: {
-              id: 'random-pod-kill-1',
-            },
-          },
-          {
-            data: {
-              id: 'random-pod-kill-2',
-            },
-          },
-        ],
-        edges: [
-          {
-            data: {
-              id: 'random-pod-failure-to-random-pod-kill',
-              source: 'random-pod-failure',
-              target: 'random-pod-kill',
-            },
-          },
-          {
-            data: {
-              id: 'random-pod-kill-to-network-loss',
-              source: 'random-pod-kill',
-              target: 'network-loss',
-            },
-          },
-          {
-            data: {
-              id: 'network-loss-to-random-pod-kill-1',
-              source: 'network-loss',
-              target: 'random-pod-kill-1',
-            },
-          },
-          {
-            data: {
-              id: 'random-pod-kill-to-network-delay',
-              source: 'random-pod-kill',
-              target: 'network-delay',
-            },
-          },
-          {
-            data: {
-              id: 'network-delay-to-random-pod-kill-2',
-              source: 'network-delay',
-              target: 'random-pod-kill-2',
-            },
-          },
-        ],
-      },
-      style: workflowStyle,
-      layout: {
-        name: 'dagre',
-        rankDir: 'LR',
-        minLen: 9,
-      } as any,
-    })
-  }, [])
+    fetchWorkflowDetail(namespace, name)
+  }, [namespace, name])
+
+  useEffect(() => {
+    if (detail) {
+      constructWorkflowTopology(topologyRef.current!, detail)
+    }
+  }, [detail])
 
   return (
     <>

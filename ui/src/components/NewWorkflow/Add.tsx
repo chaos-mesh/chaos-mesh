@@ -1,16 +1,20 @@
 import { Box, Button, MenuItem, StepLabel, Typography } from '@material-ui/core'
 import { Form, Formik } from 'formik'
+import NewExperimentNext, { NewExperimentHandles } from 'components/NewExperimentNext'
 import { SelectField, TextField } from 'components/FormField'
 import { TemplateExperiment, setTemplate } from 'slices/workflows'
 import { useRef, useState } from 'react'
 
 import AddCircleIcon from '@material-ui/icons/AddCircle'
 import MultiNode from './MultiNode'
-import NewExperimentNext from 'components/NewExperimentNext'
 import PublishIcon from '@material-ui/icons/Publish'
 import Space from 'components-mui/Space'
 import T from 'components/T'
+import _snakecase from 'lodash.snakecase'
 import { makeStyles } from '@material-ui/core/styles'
+import { setAlert } from 'slices/globalStatus'
+import { setExternalExperiment } from 'slices/experiments'
+import { useIntl } from 'react-intl'
 import { useStoreDispatch } from 'store'
 
 const useStyles = makeStyles((theme) => ({
@@ -44,7 +48,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
-const types = ['single', 'serial', 'parallel']
+const types = ['single', 'serial', 'parallel', 'suspend']
 
 interface AddProps {
   onSubmitCallback?: () => void
@@ -52,14 +56,17 @@ interface AddProps {
 
 const Add: React.FC<AddProps> = ({ onSubmitCallback }) => {
   const classes = useStyles()
+  const intl = useIntl()
 
   const dispatch = useStoreDispatch()
 
   const [showNum, setShowNum] = useState(false)
   const [num, setNum] = useState(1)
+  const [otherTypes, setOtherTypes] = useState(false)
   const [experiments, setExperiments] = useState<TemplateExperiment[]>([])
   const [current, setCurrent] = useState(0)
   const formRef = useRef<any>()
+  const newERef = useRef<NewExperimentHandles>(null)
 
   const resetNoSingle = () => {
     setShowNum(false)
@@ -68,20 +75,38 @@ const Add: React.FC<AddProps> = ({ onSubmitCallback }) => {
   }
 
   const onValidate = ({ type, num: newNum }: { type: string; num: number }) => {
-    if (formRef.current.values.type !== 'single' && type === 'single') {
+    if (type !== 'suspend') {
+      setOtherTypes(false)
+    }
+
+    const prevType = formRef.current.values.type
+
+    if (prevType !== 'single' && type === 'single') {
       resetNoSingle()
+
+      return
     }
 
     if (type === 'serial' || type === 'parallel') {
       setShowNum(true)
+
+      // Delete extra experiments
+      if (num > newNum) {
+        setExperiments(experiments.slice(0, -1))
+      }
+
+      setNum(newNum)
+
+      return
     }
 
-    // Delete extra experiments
-    if (num > newNum) {
-      setExperiments(experiments.slice(0, -1))
-    }
+    if (type === 'suspend') {
+      if (prevType === 'serial' || prevType === 'parallel') {
+        resetNoSingle()
+      }
 
-    setNum(newNum)
+      setOtherTypes(true)
+    }
   }
 
   const onSubmit = (experiment: any) => {
@@ -97,7 +122,24 @@ const Add: React.FC<AddProps> = ({ onSubmitCallback }) => {
       )
     } else {
       setCurrent(current + 1)
-      setExperiments([...experiments, experiment])
+
+      // Edit the node that has been submitted before
+      if (current < experiments.length) {
+        const es = experiments
+
+        es[current] = experiment
+
+        setExperiments(es)
+
+        dispatch(
+          setAlert({
+            type: 'success',
+            message: intl.formatMessage({ id: 'common.updateSuccessfully' }),
+          })
+        )
+      } else {
+        setExperiments([...experiments, experiment])
+      }
     }
 
     onSubmitCallback && onSubmitCallback()
@@ -115,6 +157,37 @@ const Add: React.FC<AddProps> = ({ onSubmitCallback }) => {
     )
 
     resetNoSingle()
+  }
+
+  const setCurrentCallback = (index: number) => {
+    if (index > experiments.length) {
+      dispatch(
+        setAlert({
+          type: 'warning',
+          message: intl.formatMessage({ id: 'newW.messages.m1' }),
+        })
+      )
+
+      return false
+    }
+
+    if (index < experiments.length) {
+      const e = experiments[index]
+
+      const kind = e.target.kind
+
+      dispatch(
+        setExternalExperiment({
+          kindAction: [kind, e.target[_snakecase(kind)].action ?? ''],
+          target: e.target,
+          basic: e.basic,
+        })
+      )
+
+      newERef.current?.setShowNewPanel('initial')
+    }
+
+    return true
   }
 
   return (
@@ -150,7 +223,12 @@ const Add: React.FC<AddProps> = ({ onSubmitCallback }) => {
             {showNum && (
               <Space display="flex" justifyContent="space-between" alignItems="center" mt={3}>
                 <TextField mb={0} className={classes.field} name="name" label={T('newE.basic.name')} />
-                <MultiNode count={num} current={current} setCurrent={setCurrent} />
+                <MultiNode
+                  count={num}
+                  current={current}
+                  setCurrent={setCurrent}
+                  setCurrentCallback={setCurrentCallback}
+                />
                 <Button
                   variant="contained"
                   color="primary"
@@ -166,7 +244,9 @@ const Add: React.FC<AddProps> = ({ onSubmitCallback }) => {
         </Formik>
       </StepLabel>
       <Box mt={6} ml={8}>
-        <NewExperimentNext initPanel="existing" onSubmit={onSubmit} />
+        <Box style={{ display: otherTypes ? 'none' : 'initial' }}>
+          <NewExperimentNext ref={newERef} initPanel="existing" onSubmit={onSubmit} />
+        </Box>
       </Box>
     </>
   )

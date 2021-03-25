@@ -42,7 +42,7 @@ const routes: RouteProps[] = [
   },
   {
     component: WorkflowDetail,
-    path: '/workflows/:namespaceAndName',
+    path: '/workflows/:namespace/:name',
   },
   {
     component: Events,

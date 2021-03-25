@@ -1,5 +1,5 @@
 import { Box, Breadcrumbs, Link } from '@material-ui/core'
-import React, { useState } from 'react'
+import React, { useImperativeHandle, useState } from 'react'
 
 import LoadFrom from './LoadFrom'
 import Space from 'components-mui/Space'
@@ -10,14 +10,25 @@ import T from 'components/T'
 
 type PanelType = 'initial' | 'existing'
 
+export interface NewExperimentHandles {
+  setShowNewPanel: React.Dispatch<React.SetStateAction<PanelType>>
+}
+
 interface NewExperimentProps {
   initPanel?: PanelType
   onSubmit?: (experiment: { target: any; basic: any }) => void
   loadFrom?: boolean
 }
 
-const NewExperiment: React.FC<NewExperimentProps> = ({ initPanel = 'initial', onSubmit, loadFrom = true }) => {
+const NewExperiment: React.ForwardRefRenderFunction<NewExperimentHandles, NewExperimentProps> = (
+  { initPanel = 'initial', onSubmit, loadFrom = true },
+  ref
+) => {
   const [showNewPanel, setShowNewPanel] = useState<PanelType>(initPanel)
+
+  useImperativeHandle(ref, () => ({
+    setShowNewPanel,
+  }))
 
   const loadCallback = () => setShowNewPanel('initial')
 
@@ -63,4 +74,4 @@ const NewExperiment: React.FC<NewExperimentProps> = ({ initPanel = 'initial', on
   )
 }
 
-export default NewExperiment
+export default React.forwardRef(NewExperiment)

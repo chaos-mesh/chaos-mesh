@@ -114,6 +114,7 @@
     "title": "工作流"
   },
   "workflow": {
+    "entry": "入口",
     "partialTopology": "部分拓扑",
     "time": "时间",
     "state": "状态",
@@ -128,9 +129,13 @@
       "single": "单一",
       "serial": "顺序",
       "parallel": "并行",
+      "suspend": "暂停",
       "number": "数目"
     },
-    "submit": "提交工作流"
+    "submit": "提交工作流",
+    "messages": {
+      "m1": "请首先完成当前节点的创建"
+    }
   },
   "events": {
     "title": "事件",

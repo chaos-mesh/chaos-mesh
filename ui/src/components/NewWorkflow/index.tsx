@@ -60,11 +60,18 @@ const NewWorkflow = () => {
 
   const onSubmitCallback = () => dispatch(resetNewExperiment())
 
-  const restoreExperiment = (e: any, index: number) => () => {
+  const restoreExperiment = (experiments: any, index: number) => () => {
     if (restoreIndex !== -1) {
       dispatch(resetNewExperiment())
       setRestoreIndex(-1)
     } else {
+      const length = experiments.length
+      let e
+
+      if (length === 1) {
+        e = experiments[0]
+      }
+
       const kind = e.target.kind
 
       dispatch(
@@ -94,6 +101,7 @@ const NewWorkflow = () => {
     }
   }
 
+  // TODO
   const submitWorkflow = () => {}
 
   return (

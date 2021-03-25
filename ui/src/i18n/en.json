@@ -114,6 +114,7 @@
     "title": "Workflows"
   },
   "workflow": {
+    "entry": "Entry",
     "partialTopology": "Partial Topology",
     "time": "Time",
     "state": "State",
@@ -128,9 +129,13 @@
       "single": "Single",
       "serial": "Serial",
       "parallel": "Parallel",
+      "suspend": "Suspend",
       "number": "Number"
     },
-    "submit": "Submit workflow"
+    "submit": "Submit workflow",
+    "messages": {
+      "m1": "Please complete the creation of the current node first"
+    }
   },
   "events": {
     "title": "Events",
