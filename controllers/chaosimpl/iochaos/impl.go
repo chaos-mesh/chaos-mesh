@@ -15,18 +15,19 @@ package iochaos
 
 import (
 	"context"
-	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/iochaos/podiochaosmanager"
-	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/networkchaos/podnetworkchaosmanager"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
+
 	"github.com/go-logr/logr"
 	v1 "k8s.io/api/core/v1"
 	k8sError "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/iochaos/podiochaosmanager"
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/networkchaos/podnetworkchaosmanager"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
+
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
-
 
 type Impl struct {
 	client.Client
@@ -45,7 +46,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 
 	source := iochaos.Namespace + "/" + iochaos.Name
 	m := podiochaosmanager.WithInit(source, impl.Log, impl.Client, types.NamespacedName{
-		Name: pod.Name,
+		Name:      pod.Name,
 		Namespace: pod.Namespace,
 	})
 
@@ -77,7 +78,6 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	return v1alpha1.Injected, nil
 }
 
-
 func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	podId, _ := controller.ParseNamespacedNameContainer(records[index].Id)
 	var pod v1.Pod
@@ -94,7 +94,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 
 	source := iochaos.Namespace + "/" + iochaos.Name
 	m := podiochaosmanager.WithInit(source, impl.Log, impl.Client, types.NamespacedName{
-		Name: pod.Name,
+		Name:      pod.Name,
 		Namespace: pod.Namespace,
 	})
 

@@ -84,7 +84,7 @@ func TestcaseContainerKillOnceThenDelete(ns string, kubeCli kubernetes.Interface
 		}
 		pod := pods.Items[0]
 		for _, cs := range pod.Status.ContainerStatuses {
-			if cs.Name == "nginx" && !cs.Ready && cs.LastTerminationState.Terminated != nil {
+			if cs.Name == "nginx" && cs.LastTerminationState.Terminated != nil {
 				return true, nil
 			}
 		}

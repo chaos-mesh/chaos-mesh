@@ -17,6 +17,8 @@ import (
 	"time"
 
 	"github.com/kelseyhightower/envconfig"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config/watcher"
 )
 
 // TLSConfig defines the configuration for chaos-daemon tls client
@@ -52,7 +54,8 @@ type ChaosControllerConfig struct {
 	// IgnoredNamespaces is a regular expression, and the chaos task will be ignored by a matching namespace
 	IgnoredNamespaces string `envconfig:"IGNORED_NAMESPACES" default:""`
 	// RPCTimeout is timeout of RPC between controllers and chaos-operator
-	RPCTimeout time.Duration `envconfig:"RPC_TIMEOUT" default:"1m"`
+	RPCTimeout    time.Duration `envconfig:"RPC_TIMEOUT" default:"1m"`
+	WatcherConfig *watcher.Config
 	// ClusterScoped means control Chaos Object in cluster level(all namespace),
 	ClusterScoped bool `envconfig:"CLUSTER_SCOPED" default:"true"`
 	// TargetNamespace is the target namespace to injecting chaos.
@@ -62,6 +65,9 @@ type ChaosControllerConfig struct {
 	// DNSServiceName is the name of DNS service, which is used for DNS chaos
 	DNSServiceName string `envconfig:"CHAOS_DNS_SERVICE_NAME" default:""`
 	DNSServicePort int    `envconfig:"CHAOS_DNS_SERVICE_PORT" default:""`
+
+	// SecurityMode is used for enable authority validation in admission webhook
+	SecurityMode bool `envconfig:"SECURITY_MODE" default:"true" json:"security_mode"`
 
 	// Namespace is the namespace which the controller manager run in
 	Namespace string `envconfig:"NAMESPACE" default:""`

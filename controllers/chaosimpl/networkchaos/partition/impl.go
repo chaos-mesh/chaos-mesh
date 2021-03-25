@@ -144,7 +144,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	err = m.Commit(ctx)
 	if err != nil {
 		if err == podnetworkchaosmanager.ErrPodNotFound || err == podnetworkchaosmanager.ErrPodNotRunning {
-			return v1alpha1.NotInjected, err
+			return v1alpha1.NotInjected, nil
 		}
 		return v1alpha1.Injected, err
 	}

@@ -163,27 +163,4 @@ func TestcasePodKillPauseThenUnPause(ns string, kubeCli kubernetes.Interface, cl
 	framework.ExpectError(err, "wait pod not killed failed")
 	framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
 
-	// resume experiment
-	err = util.UnPauseChaos(ctx, cli, podKillChaos)
-	framework.ExpectNoError(err, "resume chaos error")
-
-	err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
-		chaos := &v1alpha1.PodChaos{}
-		err = cli.Get(ctx, chaosKey, chaos)
-		framework.ExpectNoError(err, "get pod chaos error")
-		if chaos.Status.Experiment.DesiredPhase == v1alpha1.RunningPhase {
-			return true, nil
-		}
-		return false, err
-	})
-	framework.ExpectNoError(err, "check resumed chaos failed")
-
-	// some pod is killed by resumed experiment
-	err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
-		newPods, err = kubeCli.CoreV1().Pods(ns).List(listOption)
-		framework.ExpectNoError(err, "get nginx pods error")
-		return !fixture.HaveSameUIDs(pods.Items, newPods.Items), nil
-	})
-	framework.ExpectNoError(err, "wait pod killed failed")
-
 }
