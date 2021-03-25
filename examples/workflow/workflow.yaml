@@ -7,7 +7,7 @@ spec:
   templates:
     - name: the-entry
       template_type: Serial
-      duration: 120s
+      duration: 240s
       tasks:
         - prefix-suspending
         - workflow-network-chaos
@@ -18,7 +18,7 @@ spec:
       duration: 10s
     - name: workflow-network-chaos
       template_type: NetworkChaos
-      duration: 10s
+      duration: 20s
       network_chaos:
         direction: to
         action: delay
@@ -32,13 +32,15 @@ spec:
           jitter: "90ms"
     - name: worklfow-pod-chaos
       template_type: PodChaos
-      duration: 10s
+      duration: 40s
       pod_chaos:
         action: pod-kill
         mode: one
         selector:
           labelSelectors:
             "app": "hello-kubernetes"
+        scheduler:
+          cron: "@every 10s"
     - name: suffix-suspending
       template_type: Suspend
       duration: 5s

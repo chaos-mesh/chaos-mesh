@@ -34,6 +34,10 @@ type SerialNodeReconciler struct {
 	logger        logr.Logger
 }
 
+func NewSerialNodeReconciler(kubeClient client.Client, eventRecorder record.EventRecorder, logger logr.Logger) *SerialNodeReconciler {
+	return &SerialNodeReconciler{kubeClient: kubeClient, eventRecorder: eventRecorder, logger: logger}
+}
+
 func (it *SerialNodeReconciler) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	ctx := context.TODO()
 
@@ -55,26 +59,26 @@ func (it *SerialNodeReconciler) Reconcile(request reconcile.Request) (reconcile.
 	}
 
 	// un-synced expected children
-	if node.Status.ExpectedChildren == nil {
+	if node.Status.ExpectedChildrenNum == nil {
 		expected := len(node.Spec.Tasks)
-		node.Status.ExpectedChildren = &expected
+		node.Status.ExpectedChildrenNum = &expected
 	}
 
 	// this node should finished
-	if len(node.Status.FinishedChildren) == *node.Status.ExpectedChildren {
+	if len(node.Status.FinishedChildren) == *node.Status.ExpectedChildrenNum {
 		if !ConditionEqualsTo(node.Status, v1alpha1.ConditionAccomplished, corev1.ConditionTrue) {
 			updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-				node := v1alpha1.WorkflowNode{}
-				err := it.kubeClient.Get(ctx, request.NamespacedName, &node)
+				nodeNeedUpdate := v1alpha1.WorkflowNode{}
+				err := it.kubeClient.Get(ctx, request.NamespacedName, &nodeNeedUpdate)
 				if err != nil {
 					return client.IgnoreNotFound(err)
 				}
-				SetCondition(&node.Status, v1alpha1.WorkflowNodeCondition{
+				SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
 					Type:   v1alpha1.ConditionAccomplished,
 					Status: corev1.ConditionTrue,
 					Reason: v1alpha1.NodeAccomplished,
 				})
-				return it.kubeClient.Update(ctx, &node)
+				return it.kubeClient.Update(ctx, &nodeNeedUpdate)
 			})
 
 			if updateError != nil {
@@ -114,15 +118,15 @@ func (it *SerialNodeReconciler) Reconcile(request reconcile.Request) (reconcile.
 		}
 
 		updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-			node := v1alpha1.WorkflowNode{}
-			err := it.kubeClient.Get(ctx, request.NamespacedName, &node)
+			nodeNeedUpdate := v1alpha1.WorkflowNode{}
+			err := it.kubeClient.Get(ctx, request.NamespacedName, &nodeNeedUpdate)
 			if err != nil {
 				return err
 			}
 			for _, item := range childrenNodes {
-				node.Status.ActiveChildren = append(node.Status.ActiveChildren, corev1.LocalObjectReference{Name: item.Name})
+				nodeNeedUpdate.Status.ActiveChildren = append(nodeNeedUpdate.Status.ActiveChildren, corev1.LocalObjectReference{Name: item.Name})
 			}
-			return it.kubeClient.Update(ctx, &node)
+			return it.kubeClient.Update(ctx, &nodeNeedUpdate)
 		})
 
 		if updateError != nil {
@@ -137,8 +141,4 @@ func (it *SerialNodeReconciler) Reconcile(request reconcile.Request) (reconcile.
 	}
 
 	return reconcile.Result{}, nil
-}
-
-func NewSerialNodeReconciler(kubeClient client.Client, eventRecorder record.EventRecorder, logger logr.Logger) *SerialNodeReconciler {
-	return &SerialNodeReconciler{kubeClient: kubeClient, eventRecorder: eventRecorder, logger: logger}
 }

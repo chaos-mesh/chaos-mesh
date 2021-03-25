@@ -57,8 +57,10 @@ func (it *ChaosNodeReconciler) Reconcile(request reconcile.Request) (reconcile.R
 	}
 
 	if availableChaos(string(node.Spec.Type)) {
-		err = it.injectChaos(ctx, node)
-		return reconcile.Result{}, err
+		if !ConditionEqualsTo(node.Status, v1alpha1.ConditionChaosInjected, corev1.ConditionTrue) {
+			err = it.injectChaos(ctx, node)
+			return reconcile.Result{}, err
+		}
 	}
 
 	return reconcile.Result{}, nil
@@ -89,6 +91,7 @@ func (it *ChaosNodeReconciler) injectChaos(ctx context.Context, node v1alpha1.Wo
 		meta = podChaos.GetObjectMeta()
 		chaosObject = &podChaos
 	} else {
+		// TODO: support other type of chaos by code generation
 		it.logger.Info("unsupported chaos nodes", "key", fmt.Sprintf("%s/%s", node.Namespace, node.Name), "type", node.Spec.Type)
 		return nil
 	}
@@ -119,24 +122,24 @@ func (it *ChaosNodeReconciler) injectChaos(ctx context.Context, node v1alpha1.Wo
 	}
 
 	updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		node := v1alpha1.WorkflowNode{}
+		nodeNeedUpdate := v1alpha1.WorkflowNode{}
 		err := it.kubeClient.Get(ctx, types.NamespacedName{
 			Namespace: node.Namespace,
 			Name:      node.Name,
-		}, &node)
+		}, &nodeNeedUpdate)
 		if err != nil {
 			return client.IgnoreNotFound(err)
 		}
-		node.Status.ChaosResource = &chaosRef
+		nodeNeedUpdate.Status.ChaosResource = &chaosRef
 
 		// TODO: this condition should be set by observation
-		SetCondition(&node.Status, v1alpha1.WorkflowNodeCondition{
+		SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
 			Type:   v1alpha1.ConditionChaosInjected,
 			Status: corev1.ConditionTrue,
 			Reason: v1alpha1.ChaosCRCreated,
 		})
 
-		return it.kubeClient.Update(ctx, &node)
+		return it.kubeClient.Update(ctx, &nodeNeedUpdate)
 
 	})
 	return updateError
@@ -168,7 +171,7 @@ func (it *ChaosNodeReconciler) recoverChaos(ctx context.Context, node v1alpha1.W
 	}
 
 	if apierrors.IsNotFound(err) {
-		// TODO: debug log
+		it.logger.V(4).Info("target chaos not exist", "namespace", node.Namespace, "name", node.Status.ChaosResource.Name, "chaos kind", node.Status.ChaosResource.Kind)
 		return nil
 	}
 	if err != nil {
@@ -182,17 +185,17 @@ func (it *ChaosNodeReconciler) recoverChaos(ctx context.Context, node v1alpha1.W
 	}
 
 	err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		node := v1alpha1.WorkflowNode{}
+		nodeNeedUpdate := v1alpha1.WorkflowNode{}
 		err := it.kubeClient.Get(ctx, types.NamespacedName{
 			Namespace: node.Namespace,
 			Name:      node.Name,
-		}, &node)
+		}, &nodeNeedUpdate)
 		if err != nil {
 			return client.IgnoreNotFound(err)
 		}
 
-		node.Status.ChaosResource = nil
-		err = it.kubeClient.Update(ctx, &node)
+		nodeNeedUpdate.Status.ChaosResource = nil
+		err = it.kubeClient.Update(ctx, &nodeNeedUpdate)
 		return client.IgnoreNotFound(err)
 	})
 

@@ -50,8 +50,8 @@ func renderNodesByTemplates(workflow *v1alpha1.Workflow, parent *v1alpha1.Workfl
 					// TODO: logger
 					return nil, err
 				}
-				result := metav1.NewTime(now.DeepCopy().Add(duration))
-				deadline = &result
+				copiedDuration := metav1.NewTime(now.DeepCopy().Add(duration))
+				deadline = &copiedDuration
 			}
 
 			renderedNode := v1alpha1.WorkflowNode{
@@ -106,7 +106,7 @@ func renderNodesByTemplates(workflow *v1alpha1.Workflow, parent *v1alpha1.Workfl
 			continue
 		}
 		return nil, errors.New(
-			fmt.Sprintf("workflow %s do not contains template claled %s",
+			fmt.Sprintf("workflow %s do not contains template called %s",
 				workflow.Name,
 				name,
 			))

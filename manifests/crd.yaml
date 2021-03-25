@@ -5426,8 +5426,8 @@ spec:
                 - type
                 type: object
               type: array
-            expected_children:
-              description: ExpectedChildren means the expected children to execute
+            expected_children_num:
+              description: ExpectedChildrenNum means the expected children to execute
               type: integer
             finished_children:
               description: Children is necessary for representing the order when replicated
