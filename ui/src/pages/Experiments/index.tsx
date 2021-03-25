@@ -7,7 +7,7 @@ import { Experiment } from 'api/experiments.type'
 import ExperimentListItem from 'components/ExperimentListItem'
 import Loading from 'components-mui/Loading'
 import NotFound from 'components-mui/NotFound'
-import StorageOutlinedIcon from '@material-ui/icons/StorageOutlined'
+import PlaylistAddCheckIcon from '@material-ui/icons/PlaylistAddCheck'
 import T from 'components/T'
 import _groupBy from 'lodash.groupby'
 import api from 'api'
@@ -24,7 +24,7 @@ export default function Experiments() {
   const dispatch = useStoreDispatch()
 
   const [loading, setLoading] = useState(false)
-  const [experiments, setExperiments] = useState<Experiment[] | null>(null)
+  const [experiments, setExperiments] = useState<Experiment[]>([])
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selected, setSelected] = useState({
     uuid: '',
@@ -90,43 +90,40 @@ export default function Experiments() {
 
   return (
     <>
-      <Box mb={6}>
+      <Box display="flex" justifyContent="space-between" mb={6}>
         <Button variant="outlined" startIcon={<AddIcon />} onClick={() => history.push('/experiments/new')}>
           {T('newE.title')}
         </Button>
+        <Button variant="outlined" startIcon={<PlaylistAddCheckIcon />} onClick={() => {}}>
+          {T('common.batchOperation')}
+        </Button>
       </Box>
 
-      {experiments &&
-        experiments.length > 0 &&
-        Object.entries(_groupBy(experiments, 'kind'))
-          .sort((a, b) => (a[0] > b[0] ? 1 : -1))
-          .map(([kind, experimentsByKind]) => (
-            <Box key={kind} mb={6}>
-              <Box mb={3} ml={1}>
-                <Typography variant="overline">{transByKind(kind as any)}</Typography>
-              </Box>
-              <Grid container spacing={6}>
-                {experimentsByKind.length > 0 &&
-                  experimentsByKind.map((e) => (
-                    <Grid key={e.uid} item xs={12}>
-                      <ExperimentListItem
-                        experiment={e}
-                        handleSelect={setSelected}
-                        handleDialogOpen={setDialogOpen}
-                        intl={intl}
-                      />
-                    </Grid>
-                  ))}
-              </Grid>
+      {experiments.length > 0 &&
+        Object.entries(_groupBy(experiments, 'kind')).map(([kind, experimentsByKind]) => (
+          <Box key={kind} mb={6}>
+            <Box mb={3} ml={1}>
+              <Typography variant="overline">{transByKind(kind as any)}</Typography>
             </Box>
-          ))}
-
-      {!loading && experiments && experiments.length === 0 && (
-        <NotFound textAlign="center">
-          <Box mb={3}>
-            <StorageOutlinedIcon fontSize="large" />
+            <Grid container spacing={6}>
+              {experimentsByKind.length > 0 &&
+                experimentsByKind.map((e) => (
+                  <Grid key={e.uid} item xs={12}>
+                    <ExperimentListItem
+                      experiment={e}
+                      handleSelect={setSelected}
+                      handleDialogOpen={setDialogOpen}
+                      intl={intl}
+                    />
+                  </Grid>
+                ))}
+            </Grid>
           </Box>
-          <Typography variant="h6">{T('experiments.noExperimentsFound')}</Typography>
+        ))}
+
+      {!loading && experiments.length === 0 && (
+        <NotFound illustrated textAlign="center">
+          <Typography>{T('experiments.noExperimentsFound')}</Typography>
         </NotFound>
       )}
 

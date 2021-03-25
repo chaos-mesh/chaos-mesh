@@ -6,6 +6,7 @@ import { Event } from 'api/events.type'
 import { IntlShape } from 'react-intl'
 import { Theme } from 'slices/settings'
 import _debounce from 'lodash.debounce'
+import { truncate } from '../utils'
 import wrapText from './wrapText'
 
 /**
@@ -189,7 +190,8 @@ export default function gen({
     legends
       .insert('div')
       .attr('class', 'experiment')
-      .text((d) => d.name)
+      .attr('title', (d) => d.name)
+      .text((d) => truncate(d.name))
   }
 
   const tooltip = d3

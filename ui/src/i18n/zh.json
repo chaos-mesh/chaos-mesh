@@ -111,7 +111,8 @@
     "startDesc": "此操作将立即生效"
   },
   "workflows": {
-    "title": "工作流"
+    "title": "工作流",
+    "noWorkflowsFound": "未发现工作流"
   },
   "workflow": {
     "entry": "入口",
@@ -161,7 +162,7 @@
     "title": "归档",
     "single": "归档",
     "noArchivesFound": "未发现归档",
-    "deleteDesc": "归档将被永久删除",
+    "deleteDesc": "此归档将被永久删除",
     "numberOfRuns": "运行次数",
     "numberOfAffectedPods": "受到实验作用的 Pod 数目"
   },
@@ -219,6 +220,8 @@
     "tutorial": "教程",
     "name": "名称",
     "operation": "操作",
+    "batchOperation": "批量操作",
+    "selectAll": "全选",
     "add": "添加",
     "confirm": "确认",
     "cancel": "取消",

@@ -111,7 +111,8 @@
     "startDesc": "The operation will take effect immediately"
   },
   "workflows": {
-    "title": "Workflows"
+    "title": "Workflows",
+    "noWorkflowsFound": "No workflows found"
   },
   "workflow": {
     "entry": "Entry",
@@ -161,7 +162,7 @@
     "title": "Archives",
     "single": "Archive",
     "noArchivesFound": "No archives found",
-    "deleteDesc": "The Archive will be permanently deleted",
+    "deleteDesc": "This Archive will be permanently deleted",
     "numberOfRuns": "Number of Runs",
     "numberOfAffectedPods": "Number of Affected Pods"
   },
@@ -219,6 +220,8 @@
     "tutorial": "Tutorial",
     "name": "Name",
     "operation": "Operation",
+    "batchOperation": "Batch operation",
+    "selectAll": "Select all",
     "add": "Add",
     "confirm": "Confirm",
     "cancel": "Cancel",

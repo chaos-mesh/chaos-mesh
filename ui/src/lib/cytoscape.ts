@@ -3,32 +3,49 @@ import cytoscape, { EdgeDefinition, NodeDefinition, Stylesheet } from 'cytoscape
 
 import _flattenDeep from 'lodash.flattendeep'
 import dagre from 'cytoscape-dagre'
+import theme from 'theme'
 
 cytoscape.use(dagre)
+
+const workflowNodeStyle = {
+  width: 24,
+  height: 24,
+  color: 'rgb(0, 0, 0)',
+  opacity: 0,
+  'background-color': 'grey',
+  'text-margin-y': '-3px',
+  'text-opacity': 0.87,
+  label: 'data(id)',
+}
 
 const workflowStyle: Stylesheet[] = [
   {
     selector: 'node',
+    style: workflowNodeStyle,
+  },
+  {
+    selector: 'node.Succeed',
     style: {
-      width: 16,
-      height: 16,
-      color: 'rgb(0, 0, 0)',
-      'background-color': 'grey',
-      'text-margin-y': '-3px',
-      'text-opacity': 0.87,
-      label: 'data(id)',
+      'background-color': theme.palette.success.main,
     },
   },
   {
     selector: 'edge',
     style: {
       width: 3,
+      opacity: 0,
       'line-color': 'rgb(0, 0, 0)',
       'line-opacity': 0.12,
       'curve-style': 'taxi',
       'taxi-direction': 'horizontal',
       'taxi-turn': 100,
     } as any,
+  },
+  {
+    selector: 'edge.Succeed',
+    style: {
+      'line-color': theme.palette.success.main,
+    },
   },
 ]
 
@@ -41,25 +58,38 @@ function generateWorkflowNodes(detail: WorkflowDetail) {
   const order = entryNode?.serial?.tasks
 
   function toCytoscapeNode(node: Node): RecursiveNodeDefinition {
-    const { template, type } = node
+    const { template, type, state } = node
 
-    if (type === 'SerialNode') {
+    if (type === 'SerialNode' && node.serial!.tasks.length) {
       return [type, node.serial!.tasks.map((d) => toCytoscapeNode(nodeMap.get(d)!))]
-    } else if (type === 'ParallelNode') {
+    } else if (type === 'ParallelNode' && node.parallel!.tasks.length) {
       return [type, node.parallel!.tasks.map((d) => toCytoscapeNode(nodeMap.get(d)!))]
     } else {
       return {
         data: {
           id: template,
           type,
+          state,
         },
+        classes: state,
       }
     }
   }
 
   if (order) {
-    return order.map((d) => nodeMap.get(d)).map((d) => toCytoscapeNode(d!))
+    return order
+      .map((d) => nodeMap.get(d))
+      .filter((d) => d !== undefined)
+      .map((d) => toCytoscapeNode(d!))
   }
+}
+
+function mergeStates(source: Node['state'], target: Node['state']) {
+  if (source === 'Succeed' && target === 'Succeed') {
+    return 'Succeed'
+  }
+
+  return undefined
 }
 
 type RecursiveEdgeDefinition = EdgeDefinition | Array<string | RecursiveEdgeDefinition>
@@ -78,6 +108,7 @@ function generateWorkflowEdges(nodes: RecursiveNodeDefinition[]) {
     } else {
       // N (source) is a single node
       const source = n.data.id!
+      const sourceState = n.data.state
       const target = arr[i + 1]
 
       // The target is not a single node
@@ -87,6 +118,7 @@ function generateWorkflowEdges(nodes: RecursiveNodeDefinition[]) {
         if (type === 'SerialNode') {
           const firstNode = (target[1] as NodeDefinition[])[0]
           const targetID = firstNode.data.id!
+          const state = mergeStates(sourceState, firstNode.data.state)
 
           result.push({
             data: {
@@ -94,15 +126,21 @@ function generateWorkflowEdges(nodes: RecursiveNodeDefinition[]) {
               source,
               target: targetID,
             },
+            classes: state,
           })
         } else if (type === 'ParallelNode') {
-          ;(target[1] as NodeDefinition[]).map((d) => ({
-            data: {
-              id: `${source}-to-${d.data.id!}`,
-              source,
-              target: d.data.id!,
-            },
-          }))
+          ;(target[1] as NodeDefinition[]).map((d) => {
+            const state = mergeStates(sourceState, d.data.state)
+
+            return {
+              data: {
+                id: `${source}-to-${d.data.id!}`,
+                source,
+                target: d.data.id!,
+              },
+              classes: state,
+            }
+          })
         }
       } else {
         // The target is a single node
@@ -112,6 +150,7 @@ function generateWorkflowEdges(nodes: RecursiveNodeDefinition[]) {
             source,
             target: target.data.id!,
           },
+          classes: mergeStates(sourceState, target.data.state),
         })
       }
     }
@@ -121,21 +160,50 @@ function generateWorkflowEdges(nodes: RecursiveNodeDefinition[]) {
 }
 
 export const constructWorkflowTopology = (container: HTMLElement, detail: WorkflowDetail) => {
-  const nodes = generateWorkflowNodes(detail)!
-  const edges = generateWorkflowEdges(nodes)
+  function generateElements(detail: WorkflowDetail) {
+    const nodes = generateWorkflowNodes(detail)!
+    const edges = generateWorkflowEdges(nodes)
 
-  cytoscape({
-    container,
-    elements: {
+    return {
       nodes: _flattenDeep(nodes).filter((d) => typeof d !== 'string') as NodeDefinition[],
       edges: edges as EdgeDefinition[],
+    }
+  }
+
+  const layout = {
+    name: 'dagre',
+    fit: false,
+    rankDir: 'LR',
+    nodeSep: 250,
+    minLen: 9,
+  } as any
+
+  const animateOptions = {
+    style: {
+      opacity: 1,
     },
+    easing: 'ease-in-out' as 'ease-in-out',
+  }
+
+  const cy = cytoscape({
+    container,
     style: workflowStyle,
-    layout: {
-      name: 'dagre',
-      rankDir: 'LR',
-      nodeSep: 250,
-      minLen: 9,
-    } as any,
+    minZoom: 0.5,
+    maxZoom: 1.5,
   })
+    .pan({ x: 150, y: 150 })
+    .zoom(0.75)
+
+  function updateElements(detail: WorkflowDetail) {
+    cy.json({
+      elements: generateElements(detail),
+    })
+    cy.layout(layout).run()
+
+    cy.elements().animate(animateOptions, { duration: 500 })
+  }
+
+  updateElements(detail)
+
+  return { updateElements }
 }
