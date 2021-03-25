@@ -19,6 +19,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
 	"github.com/chaos-mesh/chaos-mesh/pkg/annotation"
 	v1 "k8s.io/api/core/v1"
+	k8sError "k8s.io/apimachinery/pkg/api/errors"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -91,6 +92,9 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	err := impl.Get(ctx, controller.ParseNamespacedName(records[index].Id), &pod)
 	if err != nil {
 		// TODO: handle this error
+		if k8sError.IsNotFound(err) {
+			return v1alpha1.NotInjected, nil
+		}
 		return v1alpha1.NotInjected, err
 	}
 

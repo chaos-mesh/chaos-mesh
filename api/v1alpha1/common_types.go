@@ -33,19 +33,6 @@ type ChaosStatus struct {
 	Experiment ExperimentStatus `json:"experiment"`
 }
 
-// ExperimentPhase is the current status of chaos experiment.
-type ExperimentPhase string
-
-const (
-	// TODO IN THIS PR: modify ExperimentPhase
-	ExperimentPhaseUninitialized ExperimentPhase = ""
-	ExperimentPhaseRunning       ExperimentPhase = "Running"
-	ExperimentPhaseWaiting       ExperimentPhase = "Waiting"
-	ExperimentPhasePaused        ExperimentPhase = "Paused"
-	ExperimentPhaseFailed        ExperimentPhase = "Failed"
-	ExperimentPhaseFinished      ExperimentPhase = "Finished"
-)
-
 type DesiredPhase string
 
 const (
@@ -58,17 +45,6 @@ const (
 type ExperimentStatus struct {
 	// +kubebuilder:validation:Enum=Run;Stop
 	DesiredPhase `json:"desiredPhase,omitempty"`
-
-	// +optional
-	Phase ExperimentPhase `json:"phase,omitempty"`
-	// +optional
-	Reason string `json:"reason,omitempty"`
-	// +optional
-	StartTime *metav1.Time `json:"startTime,omitempty"`
-	// +optional
-	EndTime *metav1.Time `json:"endTime,omitempty"`
-	// +optional
-	Duration string `json:"duration,omitempty"`
 	// +optional
 	// Records are used to track the running status
 	Records []*Record `json:"containerRecords,omitempty"`

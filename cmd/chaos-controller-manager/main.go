@@ -23,6 +23,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/podchaos/containerkill"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/podchaos/podfailure"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/podchaos/podkill"
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/timechaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/delete"
@@ -185,6 +186,45 @@ func main() {
 		setupLog.Error(err, "fail to setup NetworkChaos reconciler")
 	}
 
+	if err := ctrl.NewControllerManagedBy(mgr).
+		For(&v1alpha1.TimeChaos{}).
+		Named("timechaos-records").
+		Complete(&common.Reconciler{
+			Impl: timechaos.NewImpl(
+				mgr.GetClient(), ctrl.Log,
+			),
+			Object: &v1alpha1.TimeChaos{},
+			Client: mgr.GetClient(),
+			Reader: mgr.GetAPIReader(),
+			Log: ctrl.Log,
+		}); err != nil {
+		setupLog.Error(err, "fail to setup TimeChaos reconciler")
+	}
+
+	if err := ctrl.NewControllerManagedBy(mgr).
+		For(&v1alpha1.TimeChaos{}).
+		Named("timechaos-desiredphase").
+		Complete(&desiredphase.Reconciler{
+			Object: &v1alpha1.TimeChaos{},
+			Client: mgr.GetClient(),
+			Reader: mgr.GetAPIReader(),
+			Log: ctrl.Log,
+		}); err != nil {
+		setupLog.Error(err, "fail to setup TimeChaos reconciler")
+	}
+
+	if err := ctrl.NewControllerManagedBy(mgr).
+		For(&v1alpha1.TimeChaos{}).
+		Named("timechaos-delete").
+		Complete(&delete.Reconciler{
+			Object: &v1alpha1.TimeChaos{},
+			Client: mgr.GetClient(),
+			Reader: mgr.GetAPIReader(),
+			Log: ctrl.Log,
+		}); err != nil {
+		setupLog.Error(err, "fail to setup TimeChaos reconciler")
+	}
+
 	if err := ctrl.NewWebhookManagedBy(mgr).
 		For(&v1alpha1.PodChaos{}).
 		Complete(); err != nil {
@@ -195,6 +235,12 @@ func main() {
 		For(&v1alpha1.NetworkChaos{}).
 		Complete(); err != nil {
 		setupLog.Error(err, "fail to setup NetworkChaos webhook")
+	}
+
+	if err := ctrl.NewWebhookManagedBy(mgr).
+		For(&v1alpha1.TimeChaos{}).
+		Complete(); err != nil {
+		setupLog.Error(err, "fail to setup TimeChaos webhook")
 	}
 
 	// We only setup webhook for podiochaos, and the logic of applying chaos are in the mutation

@@ -71,6 +71,6 @@ type TimeChaosStatus struct {
 
 func (obj *TimeChaos) GetSelectorSpecs() map[string]interface{} {
 	return map[string]interface{} {
-		".": obj.Spec.ContainerSelector,
+		".": &obj.Spec.ContainerSelector,
 	}
 }

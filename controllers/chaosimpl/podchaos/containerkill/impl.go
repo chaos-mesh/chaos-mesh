@@ -15,13 +15,10 @@ package containerkill
 
 import (
 	"context"
-	"fmt"
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/go-logr/logr"
-	v1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -32,40 +29,21 @@ type Impl struct {
 }
 
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
-	var pod v1.Pod
-	podId, containerName := controller.ParseNamespacedNameContainer(records[index].Id)
-	err := impl.Get(ctx, podId, &pod)
+	pbClient, containerId, err := utils.DecodeContainerRecord(ctx, records[index], impl.Client)
+	if pbClient != nil {
+		defer pbClient.Close()
+	}
 	if err != nil {
-		// TODO: handle this error
 		return v1alpha1.NotInjected, err
-	}
-
-	pbClient, err := chaosdaemon.NewChaosDaemonClient(ctx, impl.Client, &pod)
-	defer pbClient.Close()
-	if len(pod.Status.ContainerStatuses) == 0 {
-		// TODO: organize the error in a better way
-		return v1alpha1.NotInjected, fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
-	}
-
-	containerID := ""
-	for _, container := range pod.Status.ContainerStatuses {
-		if container.Name == containerName {
-			containerID = container.ContainerID
-			break
-		}
-	}
-	if len(containerID) == 0 {
-		// TODO: organize the error in a better way
-		return v1alpha1.NotInjected, fmt.Errorf("cannot find container %s in %s", containerName, podId.String())
 	}
 
 	if _, err = pbClient.ContainerKill(ctx, &pb.ContainerRequest{
 		Action: &pb.ContainerAction{
 			Action: pb.ContainerAction_KILL,
 		},
-		ContainerId: containerID,
+		ContainerId: containerId,
 	}); err != nil {
-		impl.Log.Error(err, "kill container error", "namespace", pod.Namespace, "podName", pod.Name, "containerID", containerID)
+		impl.Log.Error(err, "kill container error", "containerID", containerId)
 		return v1alpha1.NotInjected, err
 	}
 
