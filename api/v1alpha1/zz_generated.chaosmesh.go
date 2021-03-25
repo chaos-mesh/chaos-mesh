@@ -60,7 +60,7 @@ func (in *AwsChaos) GetChaos() *ChaosInstance {
 		Kind:      KindAwsChaos,
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
-		Status:    string(in.Status.Experiment.Phase),
+		//Status:    string(in.Status.Experiment.Phase),
 		UID:       string(in.UID),
 	}
 
@@ -140,7 +140,7 @@ func (in *DNSChaos) GetChaos() *ChaosInstance {
 		Kind:      KindDNSChaos,
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
-		Status:    string(in.Status.Experiment.Phase),
+		//Status:    string(in.Status.Experiment.Phase),
 		UID:       string(in.UID),
 	}
 
@@ -220,7 +220,7 @@ func (in *HTTPChaos) GetChaos() *ChaosInstance {
 		Kind:      KindHTTPChaos,
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
-		Status:    string(in.Status.Experiment.Phase),
+		//Status:    string(in.Status.Experiment.Phase),
 		UID:       string(in.UID),
 	}
 
@@ -300,7 +300,7 @@ func (in *IoChaos) GetChaos() *ChaosInstance {
 		Kind:      KindIoChaos,
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
-		Status:    string(in.Status.Experiment.Phase),
+		//Status:    string(in.Status.Experiment.Phase),
 		UID:       string(in.UID),
 	}
 
@@ -380,7 +380,7 @@ func (in *JVMChaos) GetChaos() *ChaosInstance {
 		Kind:      KindJVMChaos,
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
-		Status:    string(in.Status.Experiment.Phase),
+		//Status:    string(in.Status.Experiment.Phase),
 		UID:       string(in.UID),
 	}
 
@@ -460,7 +460,7 @@ func (in *KernelChaos) GetChaos() *ChaosInstance {
 		Kind:      KindKernelChaos,
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
-		Status:    string(in.Status.Experiment.Phase),
+		//Status:    string(in.Status.Experiment.Phase),
 		UID:       string(in.UID),
 	}
 
@@ -540,7 +540,7 @@ func (in *NetworkChaos) GetChaos() *ChaosInstance {
 		Kind:      KindNetworkChaos,
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
-		Status:    string(in.Status.Experiment.Phase),
+		//Status:    string(in.Status.Experiment.Phase),
 		UID:       string(in.UID),
 	}
 
@@ -620,7 +620,7 @@ func (in *PodChaos) GetChaos() *ChaosInstance {
 		Kind:      KindPodChaos,
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
-		Status:    string(in.Status.Experiment.Phase),
+		//Status:    string(in.Status.Experiment.Phase),
 		UID:       string(in.UID),
 	}
 
@@ -700,7 +700,7 @@ func (in *StressChaos) GetChaos() *ChaosInstance {
 		Kind:      KindStressChaos,
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
-		Status:    string(in.Status.Experiment.Phase),
+		//Status:    string(in.Status.Experiment.Phase),
 		UID:       string(in.UID),
 	}
 
@@ -780,7 +780,7 @@ func (in *TimeChaos) GetChaos() *ChaosInstance {
 		Kind:      KindTimeChaos,
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
-		Status:    string(in.Status.Experiment.Phase),
+		//Status:    string(in.Status.Experiment.Phase),
 		UID:       string(in.UID),
 	}
 

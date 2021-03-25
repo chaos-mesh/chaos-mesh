@@ -15,6 +15,7 @@ package main
 
 import (
 	"flag"
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/iochaos"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
@@ -226,6 +227,45 @@ func main() {
 		setupLog.Error(err, "fail to setup TimeChaos reconciler")
 	}
 
+	if err := ctrl.NewControllerManagedBy(mgr).
+		For(&v1alpha1.IoChaos{}).
+		Named("iochaos-records").
+		Complete(&common.Reconciler{
+			Impl: iochaos.NewImpl(
+				mgr.GetClient(), ctrl.Log,
+			),
+			Object: &v1alpha1.IoChaos{},
+			Client: mgr.GetClient(),
+			Reader: mgr.GetAPIReader(),
+			Log:    ctrl.Log,
+		}); err != nil {
+		setupLog.Error(err, "fail to setup IoChaos reconciler")
+	}
+
+	if err := ctrl.NewControllerManagedBy(mgr).
+		For(&v1alpha1.IoChaos{}).
+		Named("iochaos-desiredphase").
+		Complete(&desiredphase.Reconciler{
+			Object: &v1alpha1.IoChaos{},
+			Client: mgr.GetClient(),
+			Reader: mgr.GetAPIReader(),
+			Log:    ctrl.Log,
+		}); err != nil {
+		setupLog.Error(err, "fail to setup IoChaos reconciler")
+	}
+
+	if err := ctrl.NewControllerManagedBy(mgr).
+		For(&v1alpha1.IoChaos{}).
+		Named("iochaos-delete").
+		Complete(&delete.Reconciler{
+			Object: &v1alpha1.IoChaos{},
+			Client: mgr.GetClient(),
+			Reader: mgr.GetAPIReader(),
+			Log:    ctrl.Log,
+		}); err != nil {
+		setupLog.Error(err, "fail to setup IoChaos reconciler")
+	}
+
 	if err := ctrl.NewWebhookManagedBy(mgr).
 		For(&v1alpha1.PodChaos{}).
 		Complete(); err != nil {
@@ -240,6 +280,12 @@ func main() {
 
 	if err := ctrl.NewWebhookManagedBy(mgr).
 		For(&v1alpha1.TimeChaos{}).
+		Complete(); err != nil {
+		setupLog.Error(err, "fail to setup TimeChaos webhook")
+	}
+
+	if err := ctrl.NewWebhookManagedBy(mgr).
+		For(&v1alpha1.IoChaos{}).
 		Complete(); err != nil {
 		setupLog.Error(err, "fail to setup TimeChaos webhook")
 	}

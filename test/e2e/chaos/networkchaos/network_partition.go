@@ -75,16 +75,19 @@ func TestcaseForbidHostNetwork(
 		if err != nil {
 			return false, err
 		}
-		experimentPhase := networkPartition.Status.ChaosStatus.Experiment.Phase
-		klog.Infof("current chaos phase: %s", experimentPhase)
-		if experimentPhase == v1alpha1.ExperimentPhaseFailed {
-			return true, nil
+
+		failed := true
+		for _, record := range networkPartition.Status.ChaosStatus.Experiment.Records {
+			klog.Infof("current chaos record %s phase: %s", record.Id, record.Phase)
+			if record.Phase != v1alpha1.NotInjected {
+				failed = false
+			}
 		}
-		return false, nil
+		return failed, nil
 	})
 
 	framework.ExpectNoError(err, "failed to waiting on ExperimentPhaseFailed state with chaos")
-	framework.ExpectEqual(networkPartition.Status.ChaosStatus.Experiment.Phase, v1alpha1.ExperimentPhaseFailed)
+	framework.ExpectEqual(networkPartition.Status.ChaosStatus.Experiment.DesiredPhase, v1alpha1.Injected)
 	framework.ExpectEqual(strings.Contains(networkPartition.Status.ChaosStatus.FailedMessage, "it's dangerous to inject network chaos on a pod"), true)
 }
 

@@ -19,18 +19,25 @@ type failToFindContainer struct {
 	namespace     string
 	name          string
 	containerName string
+
+	err error
 }
 
-func NewFailToFindContainer(namespace string, name string, containerName string) error {
+func NewFailToFindContainer(namespace string, name string, containerName string, err error) error {
 	return &failToFindContainer{
 		namespace,
 		name,
 		containerName,
+		err,
 	}
 }
 
 func (e *failToFindContainer) Error() string {
-	return fmt.Sprintf("fail to find container %s on pod %s/%s", e.containerName, e.namespace, e.name)
+	if e.err == nil {
+		return fmt.Sprintf("fail to find container %s on pod %s/%s", e.containerName, e.namespace, e.name)
+	} else {
+		return e.err.Error()
+	}
 }
 
 func IsFailToGet(e error) bool {

@@ -195,19 +195,6 @@ spec:
                   - Run
                   - Stop
                   type: string
-                duration:
-                  type: string
-                endTime:
-                  format: date-time
-                  type: string
-                phase:
-                  description: ExperimentPhase is the current status of chaos experiment.
-                  type: string
-                reason:
-                  type: string
-                startTime:
-                  format: date-time
-                  type: string
               type: object
             failedMessage:
               type: string

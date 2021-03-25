@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package podnetworkchaosmanager
+package podiochaosmanager
 
 import (
 	"context"
@@ -37,22 +37,22 @@ var (
 	ErrPodNotRunning = errors.New("pod not running")
 )
 
-// PodNetworkManager will save all the related podnetworkchaos
-type PodNetworkManager struct {
+// PodIoManager will save all the related podiochaos
+type PodIoManager struct {
 	Source string
 	Log    logr.Logger
 	client.Client
 
 	Key types.NamespacedName
-	T   *PodNetworkTransaction
+	T   *PodIoTransaction
 }
 
-// New creates a new PodNetworkManager
-func WithInit(source string, logger logr.Logger, client client.Client, key types.NamespacedName) *PodNetworkManager {
-	t := &PodNetworkTransaction{}
+// New creates a new PodIoManager
+func WithInit(source string, logger logr.Logger, client client.Client, key types.NamespacedName) *PodIoManager {
+	t := &PodIoTransaction{}
 	t.Clear(source)
 
-	return &PodNetworkManager{
+	return &PodIoManager{
 		Source: source,
 		Log:    logger,
 		Client: client,
@@ -69,21 +69,21 @@ type CommitResponse struct {
 }
 
 // Commit will update all modifications to the cluster
-func (m *PodNetworkManager) Commit(ctx context.Context) error {
+func (m *PodIoManager) Commit(ctx context.Context) error {
 	m.Log.Info("running modification on pod", "key", m.Key, "modification", m.T)
 	updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		chaos := &v1alpha1.PodNetworkChaos{}
+		chaos := &v1alpha1.PodIoChaos{}
 
 		err := m.Client.Get(ctx, m.Key, chaos)
 		if err != nil {
 			if !k8sError.IsNotFound(err) {
-				m.Log.Error(err, "error while getting podnetworkchaos")
+				m.Log.Error(err, "error while getting podiochaos")
 				return err
 			}
 
-			err := m.CreateNewPodNetworkChaos(ctx)
+			err := m.CreateNewPodIOChaos(ctx)
 			if err != nil {
-				m.Log.Error(err, "error while creating new podnetworkchaos")
+				m.Log.Error(err, "error while creating new podiochaos")
 				return err
 			}
 
@@ -101,9 +101,9 @@ func (m *PodNetworkManager) Commit(ctx context.Context) error {
 	return updateError
 }
 
-func (m *PodNetworkManager) CreateNewPodNetworkChaos(ctx context.Context) error {
+func (m *PodIoManager) CreateNewPodIOChaos(ctx context.Context) error {
 	var err error
-	chaos := &v1alpha1.PodNetworkChaos{}
+	chaos := &v1alpha1.PodIoChaos{}
 
 	pod := v1.Pod{}
 	err = m.Client.Get(ctx, m.Key, &pod)

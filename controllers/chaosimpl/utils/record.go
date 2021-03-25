@@ -30,11 +30,13 @@ func DecodeContainerRecord(ctx context.Context, record *v1alpha1.Record, c clien
 	podId, containerName := controller.ParseNamespacedNameContainer(record.Id)
 	err = c.Get(ctx, podId, &pod)
 	if err != nil {
+		// TODO: organize the error in a better way
+		err = NewFailToFindContainer(pod.Namespace, pod.Name, containerName, err)
 		return
 	}
 	if len(pod.Status.ContainerStatuses) == 0 {
 		// TODO: organize the error in a better way
-		err = NewFailToFindContainer(pod.Namespace, pod.Name, containerName)
+		err = NewFailToFindContainer(pod.Namespace, pod.Name, containerName, nil)
 		return
 	}
 
@@ -46,7 +48,7 @@ func DecodeContainerRecord(ctx context.Context, record *v1alpha1.Record, c clien
 	}
 	if len(containerId) == 0 {
 		// TODO: organize the error in a better way
-		err = NewFailToFindContainer(pod.Namespace, pod.Name, containerName)
+		err = NewFailToFindContainer(pod.Namespace, pod.Name, containerName, nil)
 		return
 	}
 
