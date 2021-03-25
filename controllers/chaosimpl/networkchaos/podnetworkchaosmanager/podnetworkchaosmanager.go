@@ -44,7 +44,7 @@ type PodNetworkManager struct {
 	client.Client
 
 	Key types.NamespacedName
-	T *PodNetworkTransaction
+	T   *PodNetworkTransaction
 }
 
 // New creates a new PodNetworkMap
@@ -53,12 +53,12 @@ func WithInit(source string, logger logr.Logger, client client.Client, key types
 	t.Clear(source)
 
 	return &PodNetworkManager{
-		Source:        source,
-		Log:           logger,
-		Client:        client,
+		Source: source,
+		Log:    logger,
+		Client: client,
 
 		Key: key,
-		T: t,
+		T:   t,
 	}
 }
 

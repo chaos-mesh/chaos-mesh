@@ -17,12 +17,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/networkchaos/podnetworkchaosmanager"
-	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/netutils"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
+
 	"github.com/go-logr/logr"
 	k8sError "k8s.io/apimachinery/pkg/api/errors"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/networkchaos/podnetworkchaosmanager"
+	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/netutils"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
 
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -206,6 +208,6 @@ func (impl *Impl) ApplyTc(ctx context.Context, m *podnetworkchaosmanager.PodNetw
 func NewImpl(c client.Client, log logr.Logger) *Impl {
 	return &Impl{
 		Client: c,
-		Log: log.WithName("trafficcontrol"),
+		Log:    log.WithName("trafficcontrol"),
 	}
 }

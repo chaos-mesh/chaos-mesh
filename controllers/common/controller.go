@@ -15,16 +15,18 @@ package common
 
 import (
 	"context"
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/config"
-	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
-	"github.com/chaos-mesh/chaos-mesh/pkg/selector/container"
-	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
+
 	"github.com/go-logr/logr"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/client-go/util/retry"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/config"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector/container"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
 )
 
 type InnerObjectWithSelector interface {
@@ -76,7 +78,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		// TODO: get selectors from obj
 		for name, sel := range selectors {
 			selector := selector.New(selector.SelectorParams{
-				PodSelector: pod.New(r.Client, r.Reader, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces),
+				PodSelector:       pod.New(r.Client, r.Reader, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces),
 				ContainerSelector: container.New(r.Client, r.Reader, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces),
 			})
 			targets, err := selector.Select(context.TODO(), sel)
@@ -87,9 +89,9 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 			for _, target := range targets {
 				records = append(records, &v1alpha1.Record{
-					Id: target.Id(),
+					Id:          target.Id(),
 					SelectorKey: name,
-					Phase: v1alpha1.NotInjected,
+					Phase:       v1alpha1.NotInjected,
 				})
 				shouldUpdate = true
 			}
@@ -123,7 +125,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	if shouldUpdate {
-		updateError := retry.RetryOnConflict(retry.DefaultBackoff,func() error {
+		updateError := retry.RetryOnConflict(retry.DefaultBackoff, func() error {
 			r.Log.Info("updating records", "records", records)
 			obj := r.Object.DeepCopyObject().(InnerObjectWithSelector)
 

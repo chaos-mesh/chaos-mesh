@@ -17,9 +17,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
-	"time"
 
 	dnspb "github.com/chaos-mesh/k8s_dns_chaos/pb"
 	"github.com/go-logr/logr"

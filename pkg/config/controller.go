@@ -52,7 +52,7 @@ type ChaosControllerConfig struct {
 	// IgnoredNamespaces is a regular expression, and the chaos task will be ignored by a matching namespace
 	IgnoredNamespaces string `envconfig:"IGNORED_NAMESPACES" default:""`
 	// RPCTimeout is timeout of RPC between controllers and chaos-operator
-	RPCTimeout    time.Duration `envconfig:"RPC_TIMEOUT" default:"1m"`
+	RPCTimeout time.Duration `envconfig:"RPC_TIMEOUT" default:"1m"`
 	// ClusterScoped means control Chaos Object in cluster level(all namespace),
 	ClusterScoped bool `envconfig:"CLUSTER_SCOPED" default:"true"`
 	// TargetNamespace is the target namespace to injecting chaos.

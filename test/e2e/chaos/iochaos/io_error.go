@@ -53,14 +53,14 @@ func TestcaseIOErrorDurationForATimeThenRecover(
 			// errno 5 is EIO -> I/O error
 			Errno: 5,
 			// only inject write method
-			Methods:  []v1alpha1.IoMethod{v1alpha1.Write},
+			Methods: []v1alpha1.IoMethod{v1alpha1.Write},
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{
 					Selector: v1alpha1.PodSelectorSpec{
 						Namespaces:     []string{ns},
 						LabelSelectors: map[string]string{"app": "io"},
 					},
-					Mode:       v1alpha1.OnePodMode,
+					Mode: v1alpha1.OnePodMode,
 				},
 			},
 		},
@@ -118,14 +118,14 @@ func TestcaseIOErrorDurationForATimePauseAndUnPause(
 			// errno 5 is EIO -> I/O error
 			Errno: 5,
 			// only inject write method
-			Methods:  []v1alpha1.IoMethod{v1alpha1.Write},
+			Methods: []v1alpha1.IoMethod{v1alpha1.Write},
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{
 					Selector: v1alpha1.PodSelectorSpec{
 						Namespaces:     []string{ns},
 						LabelSelectors: map[string]string{"app": "io"},
 					},
-					Mode:       v1alpha1.OnePodMode,
+					Mode: v1alpha1.OnePodMode,
 				},
 			},
 		},
@@ -232,14 +232,14 @@ func TestcaseIOErrorWithSpecifiedContainer(
 			// errno 5 is EIO -> I/O error
 			Errno: 5,
 			// only inject write method
-			Methods:       []v1alpha1.IoMethod{v1alpha1.Write},
+			Methods: []v1alpha1.IoMethod{v1alpha1.Write},
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{
 					Selector: v1alpha1.PodSelectorSpec{
 						Namespaces:     []string{ns},
 						LabelSelectors: map[string]string{"app": "io"},
 					},
-					Mode:       v1alpha1.OnePodMode,
+					Mode: v1alpha1.OnePodMode,
 				},
 				ContainerNames: []string{containerName},
 			},

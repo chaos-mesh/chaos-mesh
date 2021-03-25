@@ -14,15 +14,16 @@
 package controller
 
 import (
-	"k8s.io/apimachinery/pkg/types"
 	"strings"
+
+	"k8s.io/apimachinery/pkg/types"
 )
 
 func ParseNamespacedName(namespacedName string) types.NamespacedName {
 	parts := strings.Split(namespacedName, "/")
 	return types.NamespacedName{
 		Namespace: parts[0],
-		Name: parts[1],
+		Name:      parts[1],
 	}
 }
 
@@ -30,6 +31,6 @@ func ParseNamespacedNameContainer(namespacedName string) (types.NamespacedName, 
 	parts := strings.Split(namespacedName, "/")
 	return types.NamespacedName{
 		Namespace: parts[0],
-		Name: parts[1],
+		Name:      parts[1],
 	}, strings.Join(parts[2:], "")
 }

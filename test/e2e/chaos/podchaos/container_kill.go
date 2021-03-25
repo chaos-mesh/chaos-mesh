@@ -49,7 +49,7 @@ func TestcaseContainerKillOnceThenDelete(ns string, kubeCli kubernetes.Interface
 			Namespace: ns,
 		},
 		Spec: v1alpha1.PodChaosSpec{
-			Action:        v1alpha1.ContainerKillAction,
+			Action: v1alpha1.ContainerKillAction,
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{
 					Selector: v1alpha1.PodSelectorSpec{
@@ -60,7 +60,7 @@ func TestcaseContainerKillOnceThenDelete(ns string, kubeCli kubernetes.Interface
 							"app": "nginx",
 						},
 					},
-					Mode:          v1alpha1.OnePodMode,
+					Mode: v1alpha1.OnePodMode,
 				},
 				ContainerNames: []string{"nginx"},
 			},
@@ -149,8 +149,8 @@ func TestcaseContainerKillPauseThenUnPause(ns string, kubeCli kubernetes.Interfa
 			Namespace: ns,
 		},
 		Spec: v1alpha1.PodChaosSpec{
-			Action:        v1alpha1.ContainerKillAction,
-			Duration:      pointer.StringPtr("9m"),
+			Action:   v1alpha1.ContainerKillAction,
+			Duration: pointer.StringPtr("9m"),
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{
 					Selector: v1alpha1.PodSelectorSpec{
@@ -161,7 +161,7 @@ func TestcaseContainerKillPauseThenUnPause(ns string, kubeCli kubernetes.Interfa
 							"app": "nginx",
 						},
 					},
-					Mode:          v1alpha1.OnePodMode,
+					Mode: v1alpha1.OnePodMode,
 				},
 				ContainerNames: []string{"nginx"},
 			},

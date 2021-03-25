@@ -16,8 +16,9 @@ package iochaos
 import (
 	"context"
 	"errors"
-	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
 	"strings"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
 
 	"github.com/hashicorp/go-multierror"
 	v1 "k8s.io/api/core/v1"

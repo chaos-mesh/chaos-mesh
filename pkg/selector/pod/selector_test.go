@@ -15,8 +15,9 @@ package pod
 
 import (
 	"context"
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"testing"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 
 	. "github.com/onsi/gomega"
 

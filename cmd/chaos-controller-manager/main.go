@@ -15,6 +15,15 @@ package main
 
 import (
 	"flag"
+	"net/http"
+	_ "net/http/pprof"
+	"os"
+
+	"k8s.io/apimachinery/pkg/runtime"
+	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	"k8s.io/client-go/rest"
+
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/networkchaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/networkchaos/partition"
@@ -32,17 +41,9 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos"
 	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
-	"k8s.io/apimachinery/pkg/runtime"
-	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-	"k8s.io/client-go/rest"
-	"net/http"
-	_ "net/http/pprof"
-	"os"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
-
 	// +kubebuilder:scaffold:imports
 )
 
@@ -113,11 +114,11 @@ func main() {
 				podkill.NewImpl(mgr.GetClient()),
 				podfailure.NewImpl(mgr.GetClient()),
 				containerkill.NewImpl(mgr.GetClient(), ctrl.Log),
-				),
+			),
 			Object: &v1alpha1.PodChaos{},
 			Client: mgr.GetClient(),
 			Reader: mgr.GetAPIReader(),
-			Log: ctrl.Log,
+			Log:    ctrl.Log,
 		}); err != nil {
 		setupLog.Error(err, "fail to setup PodChaos reconciler")
 	}
@@ -129,7 +130,7 @@ func main() {
 			Object: &v1alpha1.PodChaos{},
 			Client: mgr.GetClient(),
 			Reader: mgr.GetAPIReader(),
-			Log: ctrl.Log,
+			Log:    ctrl.Log,
 		}); err != nil {
 		setupLog.Error(err, "fail to setup PodChaos reconciler")
 	}
@@ -141,7 +142,7 @@ func main() {
 			Object: &v1alpha1.PodChaos{},
 			Client: mgr.GetClient(),
 			Reader: mgr.GetAPIReader(),
-			Log: ctrl.Log,
+			Log:    ctrl.Log,
 		}); err != nil {
 		setupLog.Error(err, "fail to setup PodChaos reconciler")
 	}
@@ -157,7 +158,7 @@ func main() {
 			Object: &v1alpha1.NetworkChaos{},
 			Client: mgr.GetClient(),
 			Reader: mgr.GetAPIReader(),
-			Log: ctrl.Log,
+			Log:    ctrl.Log,
 		}); err != nil {
 		setupLog.Error(err, "fail to setup NetworkChaos reconciler")
 	}
@@ -169,7 +170,7 @@ func main() {
 			Object: &v1alpha1.NetworkChaos{},
 			Client: mgr.GetClient(),
 			Reader: mgr.GetAPIReader(),
-			Log: ctrl.Log,
+			Log:    ctrl.Log,
 		}); err != nil {
 		setupLog.Error(err, "fail to setup NetworkChaos reconciler")
 	}
@@ -181,7 +182,7 @@ func main() {
 			Object: &v1alpha1.NetworkChaos{},
 			Client: mgr.GetClient(),
 			Reader: mgr.GetAPIReader(),
-			Log: ctrl.Log,
+			Log:    ctrl.Log,
 		}); err != nil {
 		setupLog.Error(err, "fail to setup NetworkChaos reconciler")
 	}
@@ -196,7 +197,7 @@ func main() {
 			Object: &v1alpha1.TimeChaos{},
 			Client: mgr.GetClient(),
 			Reader: mgr.GetAPIReader(),
-			Log: ctrl.Log,
+			Log:    ctrl.Log,
 		}); err != nil {
 		setupLog.Error(err, "fail to setup TimeChaos reconciler")
 	}
@@ -208,7 +209,7 @@ func main() {
 			Object: &v1alpha1.TimeChaos{},
 			Client: mgr.GetClient(),
 			Reader: mgr.GetAPIReader(),
-			Log: ctrl.Log,
+			Log:    ctrl.Log,
 		}); err != nil {
 		setupLog.Error(err, "fail to setup TimeChaos reconciler")
 	}
@@ -220,7 +221,7 @@ func main() {
 			Object: &v1alpha1.TimeChaos{},
 			Client: mgr.GetClient(),
 			Reader: mgr.GetAPIReader(),
-			Log: ctrl.Log,
+			Log:    ctrl.Log,
 		}); err != nil {
 		setupLog.Error(err, "fail to setup TimeChaos reconciler")
 	}
@@ -299,4 +300,3 @@ func setRestConfig(c *rest.Config) {
 		c.Burst = restConfigBurst
 	}
 }
-

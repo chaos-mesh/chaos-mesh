@@ -128,7 +128,7 @@ func makeNetworkPartitionChaos(
 			Namespace: namespace,
 		},
 		Spec: v1alpha1.NetworkChaosSpec{
-			Action: v1alpha1.PartitionAction,
+			Action:    v1alpha1.PartitionAction,
 			Direction: direction,
 			Target:    target,
 			Duration:  duration,
@@ -137,7 +137,7 @@ func makeNetworkPartitionChaos(
 					Namespaces:     []string{namespace},
 					LabelSelectors: fromLabelSelectors,
 				},
-				Mode:      fromPodMode,
+				Mode: fromPodMode,
 			},
 		},
 	}
@@ -164,7 +164,7 @@ func makeNetworkDelayChaos(
 			Namespace: namespace,
 		},
 		Spec: v1alpha1.NetworkChaosSpec{
-			Action: v1alpha1.DelayAction,
+			Action:      v1alpha1.DelayAction,
 			TcParameter: tcparam,
 			Duration:    duration,
 			Target:      target,
@@ -174,7 +174,7 @@ func makeNetworkDelayChaos(
 					Namespaces:     []string{namespace},
 					LabelSelectors: fromLabelSelectors,
 				},
-				Mode:        fromPodMode,
+				Mode: fromPodMode,
 			},
 		},
 	}

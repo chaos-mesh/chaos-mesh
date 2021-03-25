@@ -51,9 +51,9 @@ type ExperimentStatus struct {
 }
 
 type Record struct {
-	Id string `json:"id"`
+	Id          string `json:"id"`
 	SelectorKey string `json:"selectorKey"`
-	Phase Phase `json:"phase"`
+	Phase       Phase  `json:"phase"`
 }
 
 type Phase string

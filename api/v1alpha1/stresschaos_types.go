@@ -15,6 +15,7 @@ package v1alpha1
 
 import (
 	"fmt"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -146,7 +147,7 @@ type CPUStressor struct {
 }
 
 func (obj *StressChaos) GetSelectorSpecs() map[string]interface{} {
-	return map[string]interface{} {
+	return map[string]interface{}{
 		".": obj.Spec.ContainerSelector,
 	}
 }

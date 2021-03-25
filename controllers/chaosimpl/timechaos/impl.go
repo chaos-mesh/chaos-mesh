@@ -15,8 +15,9 @@ package timechaos
 
 import (
 	"context"
-	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/utils"
 	"time"
+
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/utils"
 
 	"github.com/go-logr/logr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -101,6 +102,6 @@ func secAndNSecFromDuration(duration time.Duration) (sec int64, nsec int64) {
 func NewImpl(c client.Client, log logr.Logger) *Impl {
 	return &Impl{
 		Client: c,
-		Log: log.WithName("timechaos"),
+		Log:    log.WithName("timechaos"),
 	}
 }

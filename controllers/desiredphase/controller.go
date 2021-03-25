@@ -15,14 +15,16 @@ package desiredphase
 
 import (
 	"context"
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"time"
+
 	"github.com/go-logr/logr"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/util/retry"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"time"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
 // Reconciler for common chaos
@@ -51,9 +53,9 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, nil
 	}
 
-	ctx :=  &reconcileContext{
-		obj: obj,
-		Reconciler: r,
+	ctx := &reconcileContext{
+		obj:          obj,
+		Reconciler:   r,
 		shouldUpdate: false,
 	}
 	return ctx.Reconcile(req)
@@ -65,7 +67,6 @@ type reconcileContext struct {
 	*Reconciler
 	shouldUpdate bool
 	requeueAfter time.Duration
-
 }
 
 func (ctx *reconcileContext) GetCreationTimestamp() metav1.Time {
@@ -107,7 +108,7 @@ func (ctx *reconcileContext) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	ctx.Log.Info("modify desiredPhase", "desiredPhase", desiredPhase)
 	if ctx.obj.GetStatus().Experiment.DesiredPhase != desiredPhase {
-		updateError := retry.RetryOnConflict(retry.DefaultBackoff,func() error {
+		updateError := retry.RetryOnConflict(retry.DefaultBackoff, func() error {
 			obj := ctx.Object.DeepCopyObject().(v1alpha1.InnerObject)
 
 			if err := ctx.Client.Get(context.TODO(), req.NamespacedName, obj); err != nil {

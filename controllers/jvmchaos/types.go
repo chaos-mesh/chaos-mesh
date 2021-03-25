@@ -17,7 +17,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
+
+	"github.com/hashicorp/go-multierror"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
@@ -28,8 +32,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/router"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 	end "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
-	"github.com/hashicorp/go-multierror"
-	"golang.org/x/sync/errgroup"
 
 	v1 "k8s.io/api/core/v1"
 	k8serror "k8s.io/apimachinery/pkg/api/errors"

@@ -15,16 +15,18 @@ package podchaos
 
 import (
 	"context"
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	 "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/podchaos/containerkill"
-	 "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/podchaos/podfailure"
-	 "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/podchaos/podkill"
+
 	"github.com/pkg/errors"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/podchaos/containerkill"
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/podchaos/podfailure"
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/podchaos/podkill"
 )
 
 type Impl struct {
-	podkill *podkill.Impl
-	podfailure *podfailure.Impl
+	podkill       *podkill.Impl
+	podfailure    *podfailure.Impl
 	containerkill *containerkill.Impl
 }
 
@@ -65,4 +67,3 @@ func NewImpl(podkill *podkill.Impl, podfailure *podfailure.Impl, containerkill *
 		containerkill,
 	}
 }
-

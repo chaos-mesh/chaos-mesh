@@ -17,11 +17,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"math"
 	"math/rand"
 	"strconv"
 	"strings"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/label"
@@ -42,8 +43,8 @@ import (
 var log = ctrl.Log.WithName("selector")
 
 type Option struct {
-	clusterScoped bool
-	targetNamespace string
+	clusterScoped     bool
+	targetNamespace   string
 	allowedNamespaces string
 	ignoredNamespaces string
 }
@@ -61,7 +62,7 @@ type Pod struct {
 
 func (pod *Pod) Id() string {
 	return (types.NamespacedName{
-		Name: pod.Name,
+		Name:      pod.Name,
 		Namespace: pod.Namespace,
 	}).String()
 }
@@ -74,7 +75,7 @@ func (impl *SelectImpl) Select(ctx context.Context, ps *v1alpha1.PodSelector) ([
 
 	var result []*Pod
 	for _, pod := range pods {
-		result = append(result, &Pod {
+		result = append(result, &Pod{
 			pod,
 		})
 	}
@@ -86,7 +87,7 @@ func New(c client.Client, r client.Reader, clusterScoped bool, targetNamespace, 
 	return &SelectImpl{
 		c,
 		r,
-		Option {
+		Option{
 			clusterScoped,
 			targetNamespace,
 			allowedNamespaces,
@@ -94,7 +95,6 @@ func New(c client.Client, r client.Reader, clusterScoped bool, targetNamespace, 
 		},
 	}
 }
-
 
 // SelectAndFilterPods returns the list of pods that filtered by selector and PodMode
 func SelectAndFilterPods(ctx context.Context, c client.Client, r client.Reader, spec *v1alpha1.PodSelector, clusterScoped bool, targetNamespace string, allowedNamespaces, ignoredNamespaces string) ([]v1.Pod, error) {

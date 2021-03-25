@@ -116,7 +116,7 @@ func TestcaseNetworkPartition(
 	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
 
 	var (
-		testDelayDuration      = pointer.StringPtr("9m")
+		testDelayDuration = pointer.StringPtr("9m")
 	)
 
 	baseNetworkPartition := makeNetworkPartitionChaos(

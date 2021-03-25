@@ -15,11 +15,13 @@ package containerkill
 
 import (
 	"context"
+
+	"github.com/go-logr/logr"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
-	"github.com/go-logr/logr"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type Impl struct {
@@ -57,6 +59,6 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 func NewImpl(c client.Client, log logr.Logger) *Impl {
 	return &Impl{
 		Client: c,
-		Log: log.WithName("containerkill"),
+		Log:    log.WithName("containerkill"),
 	}
 }

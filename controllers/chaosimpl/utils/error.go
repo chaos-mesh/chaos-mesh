@@ -16,8 +16,8 @@ package utils
 import "fmt"
 
 type failToFindContainer struct {
-	namespace string
-	name string
+	namespace     string
+	name          string
 	containerName string
 }
 

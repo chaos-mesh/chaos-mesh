@@ -18,11 +18,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
 	"io"
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
 
 	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"

@@ -15,15 +15,17 @@ package container
 
 import (
 	"context"
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
+
 	v1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
 )
 
 type Option struct {
-	clusterScoped bool
-	targetNamespace string
+	clusterScoped     bool
+	targetNamespace   string
 	allowedNamespaces string
 	ignoredNamespaces string
 }
@@ -58,8 +60,8 @@ func (impl *SelectImpl) Select(ctx context.Context, cs *v1alpha1.ContainerSelect
 	var result []*Container
 	for _, pod := range pods {
 		if len(cs.ContainerNames) == 0 {
-			result = append(result, &Container {
-				Pod: pod,
+			result = append(result, &Container{
+				Pod:           pod,
 				ContainerName: pod.Spec.Containers[0].Name,
 			})
 			continue
@@ -67,8 +69,8 @@ func (impl *SelectImpl) Select(ctx context.Context, cs *v1alpha1.ContainerSelect
 
 		for _, container := range pod.Spec.Containers {
 			if _, ok := containerNameMap[container.Name]; ok {
-				result = append(result, &Container {
-					Pod: pod,
+				result = append(result, &Container{
+					Pod:           pod,
 					ContainerName: container.Name,
 				})
 			}
@@ -82,7 +84,7 @@ func New(c client.Client, r client.Reader, clusterScoped bool, targetNamespace, 
 	return &SelectImpl{
 		c,
 		r,
-		Option {
+		Option{
 			clusterScoped,
 			targetNamespace,
 			allowedNamespaces,

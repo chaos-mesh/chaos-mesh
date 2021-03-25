@@ -15,12 +15,14 @@ package delete
 
 import (
 	"context"
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+
 	"github.com/go-logr/logr"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/client-go/util/retry"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
 // Reconciler for common chaos
@@ -72,7 +74,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	if shouldUpdate {
-		updateError := retry.RetryOnConflict(retry.DefaultBackoff,func() error {
+		updateError := retry.RetryOnConflict(retry.DefaultBackoff, func() error {
 			obj := r.Object.DeepCopyObject().(v1alpha1.InnerObject)
 
 			if err := r.Client.Get(context.TODO(), req.NamespacedName, obj); err != nil {

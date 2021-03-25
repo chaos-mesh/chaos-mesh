@@ -15,10 +15,12 @@ package selector
 
 import (
 	"context"
+	"reflect"
+
+	"github.com/pkg/errors"
+
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/container"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
-	"github.com/pkg/errors"
-	"reflect"
 )
 
 type Selector struct {
@@ -36,7 +38,7 @@ func (s *Selector) Select(ctx context.Context, spec interface{}) ([]Target, erro
 		vals := reflect.ValueOf(impl).MethodByName("Select").Call([]reflect.Value{reflect.ValueOf(ctx), reflect.ValueOf(spec)})
 		ret := vals[0]
 
-		for i:=0;i<ret.Len();i++ {
+		for i := 0; i < ret.Len(); i++ {
 			targets = append(targets, ret.Index(i).Interface().(Target))
 		}
 
@@ -52,7 +54,7 @@ func (s *Selector) Select(ctx context.Context, spec interface{}) ([]Target, erro
 }
 
 type SelectorParams struct {
-	PodSelector *pod.SelectImpl
+	PodSelector       *pod.SelectImpl
 	ContainerSelector *container.SelectImpl
 }
 
@@ -60,7 +62,7 @@ func New(p SelectorParams) *Selector {
 	selectorMap := make(map[reflect.Type]interface{})
 
 	val := reflect.ValueOf(p)
-	for i:=0;i<val.NumField();i++ {
+	for i := 0; i < val.NumField(); i++ {
 		method := val.Field(i).MethodByName("Select")
 		if method.IsValid() && method.Type().NumIn() > 1 {
 			typ := method.Type().In(1)
