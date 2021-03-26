@@ -37,7 +37,6 @@ interface ExperimentListItemProps {
   experiment: Experiment | Archive
   isArchive?: boolean
   handleSelect: (info: { uuid: uuid; title: string; description: string; action: string }) => void
-  handleDialogOpen: (open: boolean) => void
   intl: IntlShape
 }
 
@@ -45,7 +44,6 @@ const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
   experiment: e,
   isArchive = false,
   handleSelect,
-  handleDialogOpen,
   intl,
 }) => {
   const theme = useTheme()
@@ -66,7 +64,6 @@ const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
   const handleAction = (action: string) => (event: React.MouseEvent<HTMLSpanElement>) => {
     event.stopPropagation()
 
-    handleDialogOpen(true)
     switch (action) {
       case 'archive':
         handleSelect({

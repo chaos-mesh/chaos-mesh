@@ -1,8 +1,8 @@
 import { Box, Button, Grid, Typography } from '@material-ui/core'
-import { useEffect, useState } from 'react'
+import ConfirmDialog, { ConfirmDialogHandles } from 'components-mui/ConfirmDialog'
+import { useEffect, useRef, useState } from 'react'
 
 import AddIcon from '@material-ui/icons/Add'
-import ConfirmDialog from 'components-mui/ConfirmDialog'
 import { Experiment } from 'api/experiments.type'
 import ExperimentListItem from 'components/ExperimentListItem'
 import Loading from 'components-mui/Loading'
@@ -18,6 +18,13 @@ import { useHistory } from 'react-router-dom'
 import { useIntl } from 'react-intl'
 import { useStoreDispatch } from 'store'
 
+const initialSelected = {
+  uuid: '',
+  title: '',
+  description: '',
+  action: '',
+}
+
 export default function Experiments() {
   const intl = useIntl()
   const history = useHistory()
@@ -26,13 +33,8 @@ export default function Experiments() {
 
   const [loading, setLoading] = useState(true)
   const [experiments, setExperiments] = useState<Experiment[]>([])
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const [selected, setSelected] = useState({
-    uuid: '',
-    title: '',
-    description: '',
-    action: 'archive',
-  })
+  const [selected, setSelected] = useState(initialSelected)
+  const confirmRef = useRef<ConfirmDialogHandles>(null)
 
   const fetchExperiments = () => {
     api.experiments
@@ -42,7 +44,6 @@ export default function Experiments() {
       .finally(() => setLoading(false))
   }
 
-  // Get all experiments after mount
   useEffect(fetchExperiments, [])
 
   const handleExperiment = (action: string) => () => {
@@ -65,26 +66,24 @@ export default function Experiments() {
         actionFunc = null
     }
 
-    if (actionFunc === null) {
-      return
-    }
-
-    setDialogOpen(false)
+    confirmRef.current!.setOpen(false)
 
     const { uuid } = selected
 
-    actionFunc(uuid)
-      .then(() => {
-        dispatch(
-          setAlert({
-            type: 'success',
-            message: intl.formatMessage({ id: `common.${action}Successfully` }),
-          })
-        )
+    if (actionFunc) {
+      actionFunc(uuid)
+        .then(() => {
+          dispatch(
+            setAlert({
+              type: 'success',
+              message: intl.formatMessage({ id: `common.${action}Successfully` }),
+            })
+          )
 
-        setTimeout(fetchExperiments, 300)
-      })
-      .catch(console.error)
+          setTimeout(fetchExperiments, 300)
+        })
+        .catch(console.error)
+    }
   }
 
   return (
@@ -108,12 +107,7 @@ export default function Experiments() {
               {experimentsByKind.length > 0 &&
                 experimentsByKind.map((e) => (
                   <Grid key={e.uid} item xs={12}>
-                    <ExperimentListItem
-                      experiment={e}
-                      handleSelect={setSelected}
-                      handleDialogOpen={setDialogOpen}
-                      intl={intl}
-                    />
+                    <ExperimentListItem experiment={e} handleSelect={setSelected} intl={intl} />
                   </Grid>
                 ))}
             </Grid>
@@ -129,8 +123,7 @@ export default function Experiments() {
       {loading && <Loading />}
 
       <ConfirmDialog
-        open={dialogOpen}
-        setOpen={setDialogOpen}
+        ref={confirmRef}
         title={selected.title}
         description={selected.description}
         onConfirm={handleExperiment(selected.action)}

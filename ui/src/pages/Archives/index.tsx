@@ -1,9 +1,9 @@
 import { Box, Button, Checkbox, Typography } from '@material-ui/core'
+import ConfirmDialog, { ConfirmDialogHandles } from 'components-mui/ConfirmDialog'
 import { FixedSizeList as RWList, ListChildComponentProps as RWListChildComponentProps } from 'react-window'
 import { useEffect, useState } from 'react'
 
 import { Archive } from 'api/archives.type'
-import ConfirmDialog from 'components-mui/ConfirmDialog'
 import DeleteOutlinedIcon from '@material-ui/icons/DeleteOutlined'
 import ExperimentListItem from 'components/ExperimentListItem'
 import FilterListIcon from '@material-ui/icons/FilterList'
@@ -19,6 +19,13 @@ import { transByKind } from 'lib/byKind'
 import { useIntl } from 'react-intl'
 import { useStoreDispatch } from 'store'
 
+const initialSelected = {
+  uuid: '',
+  title: '',
+  description: '',
+  action: '',
+}
+
 export default function Archives() {
   const intl = useIntl()
 
@@ -26,16 +33,11 @@ export default function Archives() {
 
   const [loading, setLoading] = useState(true)
   const [archives, setArchives] = useState<Archive[]>([])
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const [selected, setSelected] = useState({
-    uuid: '',
-    title: '',
-    description: '',
-    action: 'archive',
-  })
+  const [selected, setSelected] = useState(initialSelected)
   const [batch, setBatch] = useState<Record<uuid, boolean>>({})
   const batchLength = Object.keys(batch).length
   const isBatchEmpty = batchLength === 0
+  const confirmRef = useRef<ConfirmDialogHandles>(null)
 
   const fetchArchives = () => {
     api.archives
@@ -59,33 +61,31 @@ export default function Archives() {
         actionFunc = null
     }
 
-    if (actionFunc === null) {
-      return
-    }
-
-    setDialogOpen(false)
+    confirmRef.current!.setOpen(false)
 
     const { uuid } = selected
 
-    actionFunc(uuid)
-      .then(() => {
-        dispatch(
-          setAlert({
-            type: 'success',
-            message: intl.formatMessage({ id: `common.${action}Successfully` }),
-          })
-        )
+    if (actionFunc) {
+      actionFunc(uuid)
+        .then(() => {
+          dispatch(
+            setAlert({
+              type: 'success',
+              message: intl.formatMessage({ id: `common.${action}Successfully` }),
+            })
+          )
 
-        fetchArchives()
-      })
-      .catch(console.error)
+          fetchArchives()
+        })
+        .catch(console.error)
+    }
   }
 
   const handleBatchSelect = () => setBatch(isBatchEmpty ? { [archives[0].uid]: true } : {})
 
   const handleBatchSelectAll = () =>
     setBatch(
-      batchLength < archives.length
+      batchLength <= archives.length
         ? archives.reduce<Record<uuid, boolean>>((acc, d) => {
             acc[d.uid] = true
 
@@ -119,13 +119,7 @@ export default function Archives() {
         />
       )}
       <Box flex={1}>
-        <ExperimentListItem
-          experiment={data[index]}
-          isArchive
-          handleSelect={setSelected}
-          handleDialogOpen={setDialogOpen}
-          intl={intl}
-        />
+        <ExperimentListItem experiment={data[index]} isArchive handleSelect={setSelected} intl={intl} />
       </Box>
     </Box>
   )
@@ -178,8 +172,7 @@ export default function Archives() {
       {loading && <Loading />}
 
       <ConfirmDialog
-        open={dialogOpen}
-        setOpen={setDialogOpen}
+        ref={confirmRef}
         title={selected.title}
         description={selected.description}
         onConfirm={handleExperiment(selected.action)}

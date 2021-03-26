@@ -180,7 +180,7 @@ const TopContainer = () => {
               </>
             )}
 
-            <Auth open={authOpen} setOpen={setAuthOpen} />
+            <Auth open={authOpen} />
 
             <Portal>
               <Snackbar

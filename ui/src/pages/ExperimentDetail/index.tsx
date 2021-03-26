@@ -1,8 +1,8 @@
 import { Button, Grid, Grow, Modal } from '@material-ui/core'
 import EventsTable, { EventsTableHandles } from 'components/EventsTable'
-import React, { useEffect, useRef, useState } from 'react'
 import { RootState, useStoreDispatch } from 'store'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
+import { useEffect, useRef, useState } from 'react'
 import { useHistory, useParams } from 'react-router-dom'
 
 import { Ace } from 'ace-builds'
@@ -63,6 +63,12 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 )
 
+const initialSelected = {
+  title: '',
+  description: '',
+  action: '',
+}
+
 export default function ExperimentDetail() {
   const classes = useStyles()
 
@@ -83,12 +89,8 @@ export default function ExperimentDetail() {
   const prevEvents = usePrevious(events)
   const [yamlEditor, setYAMLEditor] = useState<Ace.Editor>()
   const [configOpen, setConfigOpen] = useState(false)
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const [dialogInfo, setDialogInfo] = useState({
-    title: '',
-    description: '',
-    action: 'archive',
-  })
+  const [selected, setSelected] = useState(initialSelected)
+  const resetSelected = () => setSelected(initialSelected)
 
   const fetchExperimentDetail = () => {
     api.experiments
@@ -142,7 +144,7 @@ export default function ExperimentDetail() {
   const handleAction = (action: string) => () => {
     switch (action) {
       case 'archive':
-        setDialogInfo({
+        setSelected({
           title: `${intl.formatMessage({ id: 'archives.single' })} ${detail!.name}`,
           description: intl.formatMessage({ id: 'experiments.deleteDesc' }),
           action: 'archive',
@@ -150,7 +152,7 @@ export default function ExperimentDetail() {
 
         break
       case 'pause':
-        setDialogInfo({
+        setSelected({
           title: `${intl.formatMessage({ id: 'common.pause' })} ${detail!.name}`,
           description: intl.formatMessage({ id: 'experiments.pauseDesc' }),
           action: 'pause',
@@ -158,7 +160,7 @@ export default function ExperimentDetail() {
 
         break
       case 'start':
-        setDialogInfo({
+        setSelected({
           title: `${intl.formatMessage({ id: 'common.start' })} ${detail!.name}`,
           description: intl.formatMessage({ id: 'experiments.startDesc' }),
           action: 'start',
@@ -168,8 +170,6 @@ export default function ExperimentDetail() {
       default:
         break
     }
-
-    setDialogOpen(true)
   }
 
   const handleExperiment = (action: string) => () => {
@@ -192,11 +192,11 @@ export default function ExperimentDetail() {
         actionFunc = null
     }
 
+    resetSelected()
+
     if (actionFunc === null) {
       return
     }
-
-    setDialogOpen(false)
 
     actionFunc(uuid)
       .then(() => {
@@ -341,11 +341,9 @@ export default function ExperimentDetail() {
       </Modal>
 
       <ConfirmDialog
-        open={dialogOpen}
-        setOpen={setDialogOpen}
-        title={dialogInfo.title}
-        description={dialogInfo.description}
-        onConfirm={handleExperiment(dialogInfo.action)}
+        title={selected.title}
+        description={selected.description}
+        onConfirm={handleExperiment(selected.action)}
       />
 
       {loading && <Loading />}

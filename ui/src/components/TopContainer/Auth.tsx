@@ -1,6 +1,6 @@
 import { Box, Button, Link, Typography } from '@material-ui/core'
-import React, { useState } from 'react'
 import Token, { TokenFormValues } from 'components/Token'
+import { useEffect, useState } from 'react'
 import { useHistory, useLocation } from 'react-router-dom'
 
 import ConfirmDialog from 'components-mui/ConfirmDialog'
@@ -11,19 +11,23 @@ import { useStoreDispatch } from 'store'
 
 interface AuthProps {
   open: boolean
-  setOpen: (open: boolean) => void
 }
 
-const Auth: React.FC<AuthProps> = ({ open, setOpen }) => {
+const Auth: React.FC<AuthProps> = ({ open }) => {
   const history = useHistory()
   const { pathname } = useLocation()
 
   const dispatch = useStoreDispatch()
 
-  const [genOpen, setGenOpen] = useState(false)
+  const [title, setTitle] = useState<string | JSX.Element>('')
+  const [genTitle, setGenTitle] = useState<string | JSX.Element>('')
+
+  useEffect(() => {
+    setTitle(open ? T('settings.addToken.prompt') : '')
+  }, [open])
 
   const handleSubmitCallback = (values: TokenFormValues) => {
-    setOpen(false)
+    setTitle('')
 
     dispatch(setTokenName(values.name))
 
@@ -31,14 +35,12 @@ const Auth: React.FC<AuthProps> = ({ open, setOpen }) => {
     setTimeout(() => history.replace(pathname))
   }
 
-  const openGenerator = () => setGenOpen(true)
-  const closeGenerator = () => setGenOpen(false)
+  const openGenerator = () => setGenTitle(T('settings.addToken.generator'))
+  const closeGenerator = () => setGenTitle('')
 
   return (
     <ConfirmDialog
-      open={open}
-      setOpen={setOpen}
-      title={T('settings.addToken.prompt')}
+      title={title}
       dialogProps={{
         disableBackdropClick: true,
         disableEscapeKeyDown: true,
@@ -56,11 +58,9 @@ const Auth: React.FC<AuthProps> = ({ open, setOpen }) => {
         </Typography>
       </Box>
       <Token onSubmitCallback={handleSubmitCallback} />
-      {genOpen && (
+      {genTitle && (
         <ConfirmDialog
-          open={genOpen}
-          setOpen={setGenOpen}
-          title={T('settings.addToken.generator')}
+          title={genTitle}
           dialogProps={{
             PaperProps: {
               style: { width: 750, maxWidth: 'unset' }, // max-width: 600
