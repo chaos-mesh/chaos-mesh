@@ -23,14 +23,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kelseyhightower/envconfig"
-
 	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 
 	"github.com/fatih/color"
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -41,7 +40,6 @@ import (
 	ctrlconfig "github.com/chaos-mesh/chaos-mesh/controllers/config"
 	daemonClient "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/client"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
-	tconfig "github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/portforward"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 )
@@ -421,18 +419,35 @@ func NewChaosDaemonClientLocally(port int) (daemonClient.ChaosDaemonClientInterf
 	if err != nil {
 		return nil, err
 	}
-	cc, err := grpcUtils.CreateGrpcConnection("localhost", port, config.ChaosMeshCACert, config.ChaosDaemonClientCert, config.ChaosDaemonClientKey)
+	cc, err := grpcUtils.CreateGrpcConnectionFromRaw("localhost", port, config.caCert, config.cert, config.key)
 	if err != nil {
 		return nil, err
 	}
 	return daemonClient.New(cc), nil
 }
 
-func getTLSConfig() (*tconfig.TLSConfig, error) {
-	var config tconfig.TLSConfig
-	err := envconfig.Process("", &config)
+func getTLSConfig() (*rawTLSConfig, error) {
+	var cfg rawTLSConfig
+	restconfig, err := config.GetConfig()
 	if err != nil {
 		return nil, err
 	}
-	return &config, nil
+	kubeClient, err := kubernetes.NewForConfig(restconfig)
+	if err != nil {
+		return nil, err
+	}
+	secret, err := kubeClient.CoreV1().Secrets("chaos-testing").Get("chaos-mesh-daemon-client-certs", metav1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+	cfg.caCert = secret.Data["ca.crt"]
+	cfg.cert = secret.Data["tls.crt"]
+	cfg.key = secret.Data["tls.key"]
+	return &cfg, nil
+}
+
+type rawTLSConfig struct {
+	caCert []byte
+	cert   []byte
+	key    []byte
 }

@@ -70,6 +70,33 @@ func CreateGrpcConnection(address string, port int, caCertPath string, certPath 
 	return conn, nil
 }
 
+// CreateGrpcConnectionFromRaw create a grpc connection with given port and address, and use raw data instead of file path
+func CreateGrpcConnectionFromRaw(address string, port int, caCert []byte, cert []byte, key []byte) (*grpc.ClientConn, error) {
+	options := []grpc.DialOption{grpc.WithUnaryInterceptor(TimeoutClientInterceptor)}
+
+	caCertPool := x509.NewCertPool()
+	caCertPool.AppendCertsFromPEM(caCert)
+
+	clientCert, err := tls.X509KeyPair(cert, key)
+	if err != nil {
+		return nil, err
+	}
+
+	creds := credentials.NewTLS(&tls.Config{
+		Certificates: []tls.Certificate{clientCert},
+		RootCAs:      caCertPool,
+		ServerName:   "chaos-daemon.chaos-mesh.org",
+	})
+	options = append(options, grpc.WithTransportCredentials(creds))
+
+	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", address, port),
+		options...)
+	if err != nil {
+		return nil, err
+	}
+	return conn, nil
+}
+
 // TimeoutClientInterceptor wraps the RPC with a timeout.
 func TimeoutClientInterceptor(ctx context.Context, method string, req, reply interface{},
 	cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
