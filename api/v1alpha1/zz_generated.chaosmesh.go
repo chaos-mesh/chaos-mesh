@@ -61,7 +61,7 @@ func (in *AwsChaos) GetChaos() *ChaosInstance {
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
 		//Status:    string(in.Status.Experiment.Phase),
-		UID:       string(in.UID),
+		UID: string(in.UID),
 	}
 
 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
@@ -141,7 +141,7 @@ func (in *DNSChaos) GetChaos() *ChaosInstance {
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
 		//Status:    string(in.Status.Experiment.Phase),
-		UID:       string(in.UID),
+		UID: string(in.UID),
 	}
 
 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
@@ -221,7 +221,7 @@ func (in *HTTPChaos) GetChaos() *ChaosInstance {
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
 		//Status:    string(in.Status.Experiment.Phase),
-		UID:       string(in.UID),
+		UID: string(in.UID),
 	}
 
 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
@@ -301,7 +301,7 @@ func (in *IoChaos) GetChaos() *ChaosInstance {
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
 		//Status:    string(in.Status.Experiment.Phase),
-		UID:       string(in.UID),
+		UID: string(in.UID),
 	}
 
 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
@@ -381,7 +381,7 @@ func (in *JVMChaos) GetChaos() *ChaosInstance {
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
 		//Status:    string(in.Status.Experiment.Phase),
-		UID:       string(in.UID),
+		UID: string(in.UID),
 	}
 
 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
@@ -461,7 +461,7 @@ func (in *KernelChaos) GetChaos() *ChaosInstance {
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
 		//Status:    string(in.Status.Experiment.Phase),
-		UID:       string(in.UID),
+		UID: string(in.UID),
 	}
 
 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
@@ -541,7 +541,7 @@ func (in *NetworkChaos) GetChaos() *ChaosInstance {
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
 		//Status:    string(in.Status.Experiment.Phase),
-		UID:       string(in.UID),
+		UID: string(in.UID),
 	}
 
 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
@@ -621,7 +621,7 @@ func (in *PodChaos) GetChaos() *ChaosInstance {
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
 		//Status:    string(in.Status.Experiment.Phase),
-		UID:       string(in.UID),
+		UID: string(in.UID),
 	}
 
 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
@@ -701,7 +701,7 @@ func (in *StressChaos) GetChaos() *ChaosInstance {
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
 		//Status:    string(in.Status.Experiment.Phase),
-		UID:       string(in.UID),
+		UID: string(in.UID),
 	}
 
 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
@@ -781,7 +781,7 @@ func (in *TimeChaos) GetChaos() *ChaosInstance {
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
 		//Status:    string(in.Status.Experiment.Phase),
-		UID:       string(in.UID),
+		UID: string(in.UID),
 	}
 
 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
