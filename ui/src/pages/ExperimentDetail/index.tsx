@@ -244,7 +244,7 @@ export default function ExperimentDetail() {
       <Grow in={!loading} style={{ transformOrigin: '0 0 0' }}>
         <Grid container spacing={6}>
           <Grid item xs={12}>
-            <Space display="flex">
+            <Space>
               <Button
                 variant="outlined"
                 size="small"

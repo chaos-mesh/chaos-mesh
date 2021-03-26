@@ -96,7 +96,7 @@ const RBACGenerator = () => {
               />
             </FormControl>
           </Box>
-          <Space display="flex" mb={3}>
+          <Space mb={3}>
             <Box flex={1}>
               <SelectField
                 name="namespace"

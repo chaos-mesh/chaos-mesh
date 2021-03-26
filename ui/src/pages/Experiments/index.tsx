@@ -8,6 +8,7 @@ import ExperimentListItem from 'components/ExperimentListItem'
 import Loading from 'components-mui/Loading'
 import NotFound from 'components-mui/NotFound'
 import PlaylistAddCheckIcon from '@material-ui/icons/PlaylistAddCheck'
+import Space from 'components-mui/Space'
 import T from 'components/T'
 import _groupBy from 'lodash.groupby'
 import api from 'api'
@@ -23,7 +24,7 @@ export default function Experiments() {
 
   const dispatch = useStoreDispatch()
 
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [experiments, setExperiments] = useState<Experiment[]>([])
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selected, setSelected] = useState({
@@ -34,8 +35,6 @@ export default function Experiments() {
   })
 
   const fetchExperiments = () => {
-    setLoading(true)
-
     api.experiments
       .experiments()
       .then(({ data }) => setExperiments(data))
@@ -90,14 +89,14 @@ export default function Experiments() {
 
   return (
     <>
-      <Box display="flex" justifyContent="space-between" mb={6}>
+      <Space mb={6}>
         <Button variant="outlined" startIcon={<AddIcon />} onClick={() => history.push('/experiments/new')}>
           {T('newE.title')}
         </Button>
         <Button variant="outlined" startIcon={<PlaylistAddCheckIcon />} onClick={() => {}}>
           {T('common.batchOperation')}
         </Button>
-      </Box>
+      </Space>
 
       {experiments.length > 0 &&
         Object.entries(_groupBy(experiments, 'kind')).map(([kind, experimentsByKind]) => (

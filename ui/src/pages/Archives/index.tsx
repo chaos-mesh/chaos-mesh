@@ -1,4 +1,5 @@
-import { Box, Button, Checkbox, Grid, Typography } from '@material-ui/core'
+import { Box, Button, Checkbox, Typography } from '@material-ui/core'
+import { FixedSizeList as RWList, ListChildComponentProps as RWListChildComponentProps } from 'react-window'
 import { useEffect, useState } from 'react'
 
 import { Archive } from 'api/archives.type'
@@ -23,7 +24,7 @@ export default function Archives() {
 
   const dispatch = useStoreDispatch()
 
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [archives, setArchives] = useState<Archive[]>([])
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selected, setSelected] = useState({
@@ -37,8 +38,6 @@ export default function Archives() {
   const isBatchEmpty = batchLength === 0
 
   const fetchArchives = () => {
-    setLoading(true)
-
     api.archives
       .archives()
       .then(({ data }) => setArchives(data))
@@ -95,79 +94,78 @@ export default function Archives() {
         : {}
     )
 
-  const handleBatchDelete = () => {}
+  const handleBatchDelete = () => {
+    Object.keys(batch).forEach((d) => {
+      api.archives.del(d)
+    })
+
+    setBatch({})
+  }
 
   const onCheckboxChange = (uuid: uuid) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newBatch = batch
-
-    newBatch[uuid] = e.target.checked
-
-    setBatch(newBatch)
+    setBatch({
+      ...batch,
+      [uuid]: e.target.checked,
+    })
   }
+
+  const Row = ({ data, index, style }: RWListChildComponentProps) => (
+    <Box display="flex" alignItems="center" mb={3} style={style}>
+      {!isBatchEmpty && (
+        <Checkbox
+          color="primary"
+          checked={batch[data[index].uid] === true}
+          onChange={onCheckboxChange(data[index].uid)}
+        />
+      )}
+      <Box flex={1}>
+        <ExperimentListItem
+          experiment={data[index]}
+          isArchive
+          handleSelect={setSelected}
+          handleDialogOpen={setDialogOpen}
+          intl={intl}
+        />
+      </Box>
+    </Box>
+  )
 
   return (
     <>
-      <Box mb={6} textAlign="right">
-        <Space>
-          {!isBatchEmpty && (
-            <>
-              <Button
-                variant="outlined"
-                color="secondary"
-                startIcon={<DeleteOutlinedIcon />}
-                onClick={handleBatchDelete}
-              >
-                {T('common.delete')}
-              </Button>
-              <Button variant="outlined" startIcon={<PlaylistAddCheckIcon />} onClick={handleBatchSelectAll}>
-                {T('common.selectAll')}
-              </Button>
-            </>
-          )}
-          <Button
-            variant="outlined"
-            startIcon={<FilterListIcon />}
-            onClick={handleBatchSelect}
-            disabled={archives.length === 0}
-          >
-            {T(`common.${isBatchEmpty ? 'batchOperation' : 'cancel'}`)}
-          </Button>
-        </Space>
-      </Box>
+      <Space mb={6}>
+        <Button
+          variant="outlined"
+          startIcon={<FilterListIcon />}
+          onClick={handleBatchSelect}
+          disabled={archives.length === 0}
+        >
+          {T(`common.${isBatchEmpty ? 'batchOperation' : 'cancel'}`)}
+        </Button>
+        {!isBatchEmpty && (
+          <>
+            <Button variant="outlined" startIcon={<PlaylistAddCheckIcon />} onClick={handleBatchSelectAll}>
+              {T('common.selectAll')}
+            </Button>
+            <Button variant="outlined" color="secondary" startIcon={<DeleteOutlinedIcon />} onClick={handleBatchDelete}>
+              {T('common.delete')}
+            </Button>
+          </>
+        )}
+      </Space>
 
-      {archives &&
-        archives.length > 0 &&
+      {archives.length > 0 &&
         Object.entries(_groupBy(archives, 'kind')).map(([kind, archivesByKind]) => (
           <Box key={kind} mb={6}>
-            <Box mb={3} ml={1}>
-              <Typography variant="overline">{transByKind(kind as any)}</Typography>
-            </Box>
-            <Grid container spacing={6}>
-              {archivesByKind.length > 0 &&
-                archivesByKind.map((e) => (
-                  <Grid key={e.uid} item xs={12}>
-                    <Box display="flex">
-                      <Box flex={1}>
-                        <ExperimentListItem
-                          experiment={e}
-                          isArchive
-                          handleSelect={setSelected}
-                          handleDialogOpen={setDialogOpen}
-                          intl={intl}
-                        />
-                      </Box>
-                      {!isBatchEmpty && (
-                        <Checkbox
-                          color="primary"
-                          checked={batch[e.uid] === true}
-                          onChange={onCheckboxChange(e.uid)}
-                          style={{ width: 56 }}
-                        />
-                      )}
-                    </Box>
-                  </Grid>
-                ))}
-            </Grid>
+            <Typography variant="overline">{transByKind(kind as any)}</Typography>
+            <RWList
+              width="100%"
+              height={archivesByKind.length > 3 ? 300 : archivesByKind.length * 68}
+              itemCount={archivesByKind.length}
+              itemSize={68}
+              itemData={archivesByKind}
+            >
+              {Row}
+            </RWList>
           </Box>
         ))}
 

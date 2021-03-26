@@ -112,7 +112,7 @@ const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
   const handleJumpTo = () => history.push(isArchive ? `/archives/${e.uid}` : `/experiments/${(e as Experiment).uid}`)
 
   const Actions = () => (
-    <Space display="flex" justifyContent="flex-end" alignItems="center">
+    <Space display="flex" justifyContent="end" alignItems="center">
       <Typography variant="body2">
         {T('experiments.createdAt')}{' '}
         {DateTime.fromISO(isArchive ? (e as Archive).start_time : (e as Experiment).created, {

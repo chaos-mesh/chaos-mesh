@@ -159,7 +159,7 @@ const Predefined = React.memo(() => {
             {experiment && (
               <>
                 <PaperTop title={experiment.name}>
-                  <Space display="flex">
+                  <Space>
                     <Button color="secondary" size="small" onClick={handleDeleteExperiment}>
                       {T('common.delete')}
                     </Button>

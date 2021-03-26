@@ -135,7 +135,7 @@ export default function gen({
   const timelines = svg
     .append('g')
     .attr('transform', `translate(${margin.left}, ${margin.top})`)
-    .attr('stroke-opacity', 0.6)
+    .attr('stroke-opacity', 0.12)
     .selectAll()
     .data(allUniqueUUIDs)
     .join('line')

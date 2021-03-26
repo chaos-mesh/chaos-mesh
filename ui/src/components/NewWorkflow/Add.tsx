@@ -221,7 +221,7 @@ const Add: React.FC<AddProps> = ({ onSubmitCallback }) => {
               )}
             </Space>
             {showNum && (
-              <Space display="flex" justifyContent="space-between" alignItems="center" mt={3}>
+              <Box display="flex" justifyContent="space-between" alignItems="center" mt={3}>
                 <TextField mb={0} className={classes.field} name="name" label={T('newE.basic.name')} />
                 <MultiNode
                   count={num}
@@ -238,7 +238,7 @@ const Add: React.FC<AddProps> = ({ onSubmitCallback }) => {
                 >
                   {T('common.submit')}
                 </Button>
-              </Space>
+              </Box>
             )}
           </Form>
         </Formik>
