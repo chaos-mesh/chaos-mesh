@@ -43,9 +43,6 @@ spec:
               - node-reset
               - disk-loss
               type: string
-            attachedDiskString:
-              description: The attached disk info string. Needed in disk-loss.
-              type: string
             deviceName:
               description: The device name of the disk to detach. Needed in disk-loss.
               type: string
@@ -87,6 +84,9 @@ spec:
         status:
           description: GcpChaosStatus represents the status of a GcpChaos
           properties:
+            attachedDiskString:
+              description: The attached disk info string. Needed in disk-loss.
+              type: string
             experiment:
               description: Experiment records the last experiment state.
               properties:

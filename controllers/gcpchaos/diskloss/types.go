@@ -78,7 +78,7 @@ func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 
 	gcpchaos.Finalizers = []string{GcpFinalizer}
 	_, err = computeService.Instances.DetachDisk(gcpchaos.Spec.Project, gcpchaos.Spec.Zone, gcpchaos.Spec.Instance, *gcpchaos.Spec.DeviceName).Do()
-	gcpchaos.Spec.AttachedDiskString = string(bytes)
+	gcpchaos.Status.AttachedDiskString = string(bytes)
 	if err != nil {
 		gcpchaos.Finalizers = make([]string, 0)
 		e.Log.Error(err, "fail to detach the disk")
@@ -102,7 +102,7 @@ func (e *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		return err
 	}
 	var disk compute.AttachedDisk
-	err = json.Unmarshal([]byte(gcpchaos.Spec.AttachedDiskString), &disk)
+	err = json.Unmarshal([]byte(gcpchaos.Status.AttachedDiskString), &disk)
 	if err != nil {
 		e.Log.Error(err, "fail to unmarshal the disk info")
 		return err
