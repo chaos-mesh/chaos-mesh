@@ -121,6 +121,11 @@ func (r *ChaosCollector) recordEvent(req ctrl.Request, obj v1alpha1.InnerObject)
 }
 
 func (r *ChaosCollector) createEvent(req ctrl.Request, kind string, status *v1alpha1.ChaosStatus, UID string) error {
+	if status.Experiment.StartTime == nil {
+		r.Log.Info("failed to create event, because experiment startTime is empty")
+		return fmt.Errorf("failed to create event, because experiment startTime is empty")
+	}
+
 	event := &core.Event{
 		Experiment:   req.Name,
 		Namespace:    req.Namespace,
