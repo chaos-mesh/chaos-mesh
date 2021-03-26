@@ -23,9 +23,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kelseyhightower/envconfig"
+
 	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
-	"github.com/kelseyhightower/envconfig"
 
 	"github.com/fatih/color"
 	"github.com/pkg/errors"
