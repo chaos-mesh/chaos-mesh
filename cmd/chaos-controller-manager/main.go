@@ -20,6 +20,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/dnschaos"
+
 	"golang.org/x/time/rate"
 	"k8s.io/client-go/util/workqueue"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
@@ -278,6 +280,45 @@ func main() {
 		setupLog.Error(err, "fail to setup IoChaos reconciler")
 	}
 
+	if err := ctrl.NewControllerManagedBy(mgr).
+		For(&v1alpha1.DNSChaos{}).
+		Named("dnschaos-records").
+		Complete(&common.Reconciler{
+			Impl: dnschaos.NewImpl(
+				mgr.GetClient(), ctrl.Log,
+			),
+			Object: &v1alpha1.DNSChaos{},
+			Client: mgr.GetClient(),
+			Reader: mgr.GetAPIReader(),
+			Log:    ctrl.Log,
+		}); err != nil {
+		setupLog.Error(err, "fail to setup DNSChaos reconciler")
+	}
+
+	if err := ctrl.NewControllerManagedBy(mgr).
+		For(&v1alpha1.DNSChaos{}).
+		Named("dnschaos-desiredphase").
+		Complete(&desiredphase.Reconciler{
+			Object: &v1alpha1.DNSChaos{},
+			Client: mgr.GetClient(),
+			Reader: mgr.GetAPIReader(),
+			Log:    ctrl.Log,
+		}); err != nil {
+		setupLog.Error(err, "fail to setup DNSChaos reconciler")
+	}
+
+	if err := ctrl.NewControllerManagedBy(mgr).
+		For(&v1alpha1.DNSChaos{}).
+		Named("dnschaos-delete").
+		Complete(&delete.Reconciler{
+			Object: &v1alpha1.DNSChaos{},
+			Client: mgr.GetClient(),
+			Reader: mgr.GetAPIReader(),
+			Log:    ctrl.Log,
+		}); err != nil {
+		setupLog.Error(err, "fail to setup DNSChaos reconciler")
+	}
+
 	if err := ctrl.NewWebhookManagedBy(mgr).
 		For(&v1alpha1.PodChaos{}).
 		Complete(); err != nil {
@@ -298,6 +339,12 @@ func main() {
 
 	if err := ctrl.NewWebhookManagedBy(mgr).
 		For(&v1alpha1.IoChaos{}).
+		Complete(); err != nil {
+		setupLog.Error(err, "fail to setup TimeChaos webhook")
+	}
+
+	if err := ctrl.NewWebhookManagedBy(mgr).
+		For(&v1alpha1.DNSChaos{}).
 		Complete(); err != nil {
 		setupLog.Error(err, "fail to setup TimeChaos webhook")
 	}
