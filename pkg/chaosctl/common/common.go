@@ -25,6 +25,7 @@ import (
 
 	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
+	"github.com/kelseyhightower/envconfig"
 
 	"github.com/fatih/color"
 	"github.com/pkg/errors"
@@ -39,6 +40,7 @@ import (
 	ctrlconfig "github.com/chaos-mesh/chaos-mesh/controllers/config"
 	daemonClient "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/client"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	tconfig "github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/portforward"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 )
@@ -312,8 +314,7 @@ func GetPidFromPod(ctx context.Context, pod v1.Pod, daemon v1.Pod) (uint32, erro
 		pfCancel()
 	}()
 
-	// TODO: support specify the cert file or get cert file automatically
-	daemonClient, err := NewChaosDaemonClientLocally(int(localPort), "", "", "")
+	daemonClient, err := NewChaosDaemonClientLocally(int(localPort))
 	if err != nil {
 		return 0, errors.Wrapf(err, "failed to create new chaos daemon client with local port %d", localPort)
 	}
@@ -408,17 +409,29 @@ Please check network policy / firewall, or see FAQ on website`, daemon.Name, dae
 }
 
 // NewChaosDaemonClientLocally would create ChaosDaemonClient in localhost
-func NewChaosDaemonClientLocally(port int, caCert string, cert string, key string) (daemonClient.ChaosDaemonClientInterface, error) {
+func NewChaosDaemonClientLocally(port int) (daemonClient.ChaosDaemonClientInterface, error) {
 	if cli := mock.On("MockChaosDaemonClient"); cli != nil {
 		return cli.(daemonClient.ChaosDaemonClientInterface), nil
 	}
 	if err := mock.On("NewChaosDaemonClientError"); err != nil {
 		return nil, err.(error)
 	}
-
-	cc, err := grpcUtils.CreateGrpcConnection("localhost", port, caCert, cert, key)
+	config, err := getTLSConfig()
+	if err != nil {
+		return nil, err
+	}
+	cc, err := grpcUtils.CreateGrpcConnection("localhost", port, config.ChaosMeshCACert, config.ChaosDaemonClientCert, config.ChaosDaemonClientKey)
 	if err != nil {
 		return nil, err
 	}
 	return daemonClient.New(cc), nil
+}
+
+func getTLSConfig() (*tconfig.TLSConfig, error) {
+	var config tconfig.TLSConfig
+	err := envconfig.Process("", &config)
+	if err != nil {
+		return nil, err
+	}
+	return &config, nil
 }
