@@ -17,6 +17,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	pkgconfig "github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"math"
 	"math/rand"
 	"strconv"
@@ -41,8 +42,26 @@ import (
 
 var log = ctrl.Log.WithName("selector")
 
+// Selector defines cluster- and namespace-related settings when selecting pods.
+type Selector struct {
+	ClusterScoped     bool
+	TargetNamespace   string
+	AllowedNamespaces string
+	IgnoredNamespaces string
+}
+
+// FromConfig takes a controller config and creates a Selector instance from it.
+func FromConfig(cfg *pkgconfig.ChaosControllerConfig) Selector {
+	return Selector{
+		ClusterScoped:     cfg.ClusterScoped,
+		TargetNamespace:   cfg.TargetNamespace,
+		AllowedNamespaces: cfg.AllowedNamespaces,
+		IgnoredNamespaces: cfg.IgnoredNamespaces,
+	}
+}
+
 // SelectAndFilterPods returns the list of pods that filtered by selector and PodMode
-func SelectAndFilterPods(ctx context.Context, c client.Client, r client.Reader, spec v1alpha1.SelectSpec, clusterScoped bool, targetNamespace string, allowedNamespaces, ignoredNamespaces string) ([]v1.Pod, error) {
+func SelectAndFilterPods(ctx context.Context, c client.Client, r client.Reader, spec v1alpha1.SelectSpec, s Selector) ([]v1.Pod, error) {
 	if pods := mock.On("MockSelectAndFilterPods"); pods != nil {
 		return pods.(func() []v1.Pod)(), nil
 	}
@@ -54,7 +73,7 @@ func SelectAndFilterPods(ctx context.Context, c client.Client, r client.Reader, 
 	mode := spec.GetMode()
 	value := spec.GetValue()
 
-	pods, err := SelectPods(ctx, c, r, selector, clusterScoped, targetNamespace, allowedNamespaces, ignoredNamespaces)
+	pods, err := SelectPods(ctx, c, r, selector, s)
 	if err != nil {
 		return nil, err
 	}
@@ -77,20 +96,20 @@ func SelectAndFilterPods(ctx context.Context, c client.Client, r client.Reader, 
 // SelectPods returns the list of pods that are available for pod chaos action.
 // It returns all pods that match the configured label, annotation and namespace selectors.
 // If pods are specifically specified by `selector.Pods`, it just returns the selector.Pods.
-func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector v1alpha1.SelectorSpec, clusterScoped bool, targetNamespace string, allowedNamespaces, ignoredNamespaces string) ([]v1.Pod, error) {
+func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector v1alpha1.SelectorSpec, s Selector) ([]v1.Pod, error) {
 	// TODO: refactor: make different selectors to replace if-else logics
 	var pods []v1.Pod
 
 	// pods are specifically specified
 	if len(selector.Pods) > 0 {
 		for ns, names := range selector.Pods {
-			if !clusterScoped {
-				if targetNamespace != ns {
+			if !s.ClusterScoped {
+				if s.TargetNamespace != ns {
 					log.Info("skip namespace because ns is out of scope within namespace scoped mode", "namespace", ns)
 					continue
 				}
 			}
-			if !config.IsAllowedNamespaces(ns, allowedNamespaces, ignoredNamespaces) {
+			if !config.IsAllowedNamespaces(ns, s.AllowedNamespaces, s.IgnoredNamespaces) {
 				log.Info("filter pod by namespaces", "namespace", ns)
 				continue
 			}
@@ -117,19 +136,19 @@ func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector 
 		return pods, nil
 	}
 
-	if !clusterScoped {
+	if !s.ClusterScoped {
 		if len(selector.Namespaces) > 1 {
 			return nil, fmt.Errorf("could NOT use more than 1 namespace selector within namespace scoped mode")
 		} else if len(selector.Namespaces) == 1 {
-			if selector.Namespaces[0] != targetNamespace {
+			if selector.Namespaces[0] != s.TargetNamespace {
 				return nil, fmt.Errorf("could NOT list pods from out of scoped namespace: %s", selector.Namespaces[0])
 			}
 		}
 	}
 
 	var listOptions = client.ListOptions{}
-	if !clusterScoped {
-		listOptions.Namespace = targetNamespace
+	if !s.ClusterScoped {
+		listOptions.Namespace = s.TargetNamespace
 	}
 	if len(selector.LabelSelectors) > 0 || len(selector.ExpressionSelectors) > 0 {
 		metav1Ls := &metav1.LabelSelector{
@@ -199,7 +218,7 @@ func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector 
 		}
 		pods = filterPodByNode(pods, nodes)
 	}
-	pods = filterByNamespaces(pods, allowedNamespaces, ignoredNamespaces)
+	pods = filterByNamespaces(pods, s.AllowedNamespaces, s.IgnoredNamespaces)
 
 	namespaceSelector, err := parseSelector(strings.Join(selector.Namespaces, ","))
 	if err != nil {
