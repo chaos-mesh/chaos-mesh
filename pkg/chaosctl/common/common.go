@@ -186,7 +186,7 @@ func GetPods(ctx context.Context, chaosName string, status v1alpha1.ChaosStatus,
 		time.Sleep(waitTime)
 	}
 
-	pods, err := selector.SelectPods(ctx, c, c, selectorSpec, ctrlconfig.ControllerCfg.ClusterScoped, ctrlconfig.ControllerCfg.TargetNamespace, ctrlconfig.ControllerCfg.EnableFilterNamespace)
+	pods, err := selector.SelectPods(ctx, c, c, selectorSpec, selector.FromConfig(ctrlconfig.ControllerCfg))
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "failed to SelectPods")
 	}
@@ -204,7 +204,7 @@ func GetPods(ctx context.Context, chaosName string, status v1alpha1.ChaosStatus,
 			Nodes:          []string{nodeName},
 			LabelSelectors: map[string]string{"app.kubernetes.io/component": "chaos-daemon"},
 		}
-		daemons, err := selector.SelectPods(ctx, c, nil, daemonSelector, ctrlconfig.ControllerCfg.ClusterScoped, ctrlconfig.ControllerCfg.TargetNamespace, ctrlconfig.ControllerCfg.EnableFilterNamespace)
+		daemons, err := selector.SelectPods(ctx, c, nil, daemonSelector, selector.FromConfig(ctrlconfig.ControllerCfg))
 		if err != nil {
 			return nil, nil, errors.Wrap(err, fmt.Sprintf("failed to select daemon pod for pod %s", pod.GetName()))
 		}
@@ -382,7 +382,7 @@ func checkConnForCtrlAndDaemon(ctx context.Context, daemons []v1.Pod, c *ClientS
 	ctrlSelector := v1alpha1.SelectorSpec{
 		LabelSelectors: map[string]string{"app.kubernetes.io/component": "controller-manager"},
 	}
-	ctrlMgrs, err := selector.SelectPods(ctx, c.CtrlCli, c.CtrlCli, ctrlSelector, ctrlconfig.ControllerCfg.ClusterScoped, ctrlconfig.ControllerCfg.TargetNamespace, ctrlconfig.ControllerCfg.EnableFilterNamespace)
+	ctrlMgrs, err := selector.SelectPods(ctx, c.CtrlCli, c.CtrlCli, ctrlSelector, selector.FromConfig(ctrlconfig.ControllerCfg))
 	if err != nil {
 		return errors.Wrapf(err, "failed to select pod for controller-manager")
 	}
