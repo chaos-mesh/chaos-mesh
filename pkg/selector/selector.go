@@ -17,11 +17,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	pkgconfig "github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"math"
 	"math/rand"
 	"strconv"
 	"strings"
+
+	pkgconfig "github.com/chaos-mesh/chaos-mesh/pkg/config"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
@@ -50,8 +51,8 @@ type Selector struct {
 	IgnoredNamespaces string
 }
 
-// FromConfig takes a controller config and creates a Selector instance from it.
-func FromConfig(cfg *pkgconfig.ChaosControllerConfig) Selector {
+// FromControllerConfig takes a controller config and creates a Selector instance from it.
+func FromControllerConfig(cfg *pkgconfig.ChaosControllerConfig) Selector {
 	return Selector{
 		ClusterScoped:     cfg.ClusterScoped,
 		TargetNamespace:   cfg.TargetNamespace,

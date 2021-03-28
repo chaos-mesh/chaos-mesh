@@ -63,7 +63,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 		return err
 	}
 
-	pods, err := selector.SelectAndFilterPods(ctx, r.Client, r.Reader, &kernelChaos.Spec, selector.FromConfig(config.ControllerCfg))
+	pods, err := selector.SelectAndFilterPods(ctx, r.Client, r.Reader, &kernelChaos.Spec, selector.FromControllerConfig(config.ControllerCfg))
 	if err != nil {
 		r.Log.Error(err, "failed to select and filter pods")
 		return err
