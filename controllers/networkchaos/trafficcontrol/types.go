@@ -72,7 +72,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 	source := networkchaos.Namespace + "/" + networkchaos.Name
 	m := podnetworkchaosmanager.New(source, r.Log, r.Client)
 
-	sources, err := selector.SelectAndFilterPods(ctx, r.Client, r.Reader, &networkchaos.Spec, selector.FromConfig(config.ControllerCfg))
+	sources, err := selector.SelectAndFilterPods(ctx, r.Client, r.Reader, &networkchaos.Spec, selector.FromControllerConfig(config.ControllerCfg))
 	if err != nil {
 		r.Log.Error(err, "failed to select and filter source pods")
 		return err
@@ -82,7 +82,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 
 	// We should only apply filter when we specify targets
 	if networkchaos.Spec.Target != nil {
-		targets, err = selector.SelectAndFilterPods(ctx, r.Client, r.Reader, networkchaos.Spec.Target, selector.FromConfig(config.ControllerCfg))
+		targets, err = selector.SelectAndFilterPods(ctx, r.Client, r.Reader, networkchaos.Spec.Target, selector.FromControllerConfig(config.ControllerCfg))
 		if err != nil {
 			r.Log.Error(err, "failed to select and filter target pods")
 			return err

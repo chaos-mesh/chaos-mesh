@@ -64,7 +64,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 
 	timechaos.SetDefaultValue()
 
-	pods, err := selector.SelectAndFilterPods(ctx, r.Client, r.Reader, &timechaos.Spec, selector.FromConfig(config.ControllerCfg))
+	pods, err := selector.SelectAndFilterPods(ctx, r.Client, r.Reader, &timechaos.Spec, selector.FromControllerConfig(config.ControllerCfg))
 
 	if err != nil {
 		r.Log.Error(err, "failed to select and filter pods")
