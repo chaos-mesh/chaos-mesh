@@ -61,6 +61,16 @@ func FromControllerConfig(cfg *pkgconfig.ChaosControllerConfig) Selector {
 	}
 }
 
+// FromDashboardConfig takes a dashboard config and creates a Selector instance from it.
+func FromDashboardConfig(cfg *pkgconfig.ChaosDashboardConfig) Selector {
+	return Selector{
+		ClusterScoped:     cfg.ClusterScoped,
+		TargetNamespace:   cfg.TargetNamespace,
+		AllowedNamespaces: cfg.AllowedNamespaces,
+		IgnoredNamespaces: cfg.IgnoredNamespaces,
+	}
+}
+
 // SelectAndFilterPods returns the list of pods that filtered by selector and PodMode
 func SelectAndFilterPods(ctx context.Context, c client.Client, r client.Reader, spec v1alpha1.SelectSpec, s Selector) ([]v1.Pod, error) {
 	if pods := mock.On("MockSelectAndFilterPods"); pods != nil {
