@@ -85,7 +85,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint.GET("", s.listExperiments)
 	endpoint.POST("/new", s.createExperiment)
 	endpoint.GET("/detail/:uid", s.getExperimentDetail)
-	endpoint.DELETE("/:uid", s.deleteExperiment)
+	endpoint.DELETE("", s.deleteExperiment)
 	endpoint.PUT("/update", s.updateExperiment)
 	endpoint.PUT("/pause/:uid", s.pauseExperiment)
 	endpoint.PUT("/start/:uid", s.startExperiment)
@@ -839,7 +839,7 @@ func (s *Service) getExperimentDetail(c *gin.Context) {
 // @Description Delete the specified chaos experiment.
 // @Tags experiments
 // @Produce json
-// @Param uid path string true "uid"
+// @Param uids query string true "uids"
 // @Param force query string true "force" Enums(true, false)
 // @Success 200 {object} StatusResponse
 // @Failure 400 {object} utils.APIError
@@ -861,7 +861,7 @@ func (s *Service) deleteExperiment(c *gin.Context) {
 		return
 	}
 
-	uids := c.Param("uid")
+	uids := c.Query("uids")
 	uidSlice := strings.Split(uids, ",")
 	force := c.DefaultQuery("force", "false")
 	errFlag = false

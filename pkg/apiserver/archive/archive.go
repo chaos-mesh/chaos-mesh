@@ -17,6 +17,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -57,7 +58,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint.GET("", s.list)
 	endpoint.GET("/detail", s.detail)
 	endpoint.GET("/report", s.report)
-	endpoint.DELETE("/:uid", s.delete)
+	endpoint.DELETE("", s.delete)
 }
 
 // Archive defines the basic information of an archive.
@@ -278,7 +279,7 @@ func (s *Service) report(c *gin.Context) {
 // @Description Delete the specified archived experiment.
 // @Tags archives
 // @Produce json
-// @Param uid path string true "uid"
+// @Param uids query string true "uids"
 // @Success 200 {object} StatusResponse
 // @Failure 500 {object} utils.APIError
 // @Router /archives/{uid} [delete]
@@ -288,28 +289,36 @@ func (s *Service) delete(c *gin.Context) {
 		exp *core.Experiment
 	)
 
-	uid := c.Param("uid")
+	uids := c.Query("uids")
+	uidSlice := strings.Split(uids, ",")
+	errFlag := false
 
-	if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
-		if gorm.IsRecordNotFoundError(err) {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInvalidRequest.New("the archived experiment is not found"))
-		} else {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+	for _, uid := range uidSlice {
+		if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
+			if gorm.IsRecordNotFoundError(err) {
+				_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("delete archive uid (%s) error, because the archive is not found", uid)))
+			} else {
+				_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("delete archive uid (%s) error, because %s", uid, err.Error())))
+			}
+			errFlag = true
+			continue
 		}
-		return
+
+		if err = s.archive.Delete(context.Background(), exp); err != nil {
+			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("delete archive uid (%s) error, because %s", uid, err.Error())))
+			errFlag = true
+			continue
+		} else {
+			if err = s.event.DeleteByUID(context.Background(), uid); err != nil {
+				_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("delete archive uid (%s) error, because %s", uid, err.Error())))
+				errFlag = true
+				continue
+			}
+		}
 	}
-
-	if err = s.archive.Delete(context.Background(), exp); err != nil {
+	if errFlag == true {
 		c.Status(http.StatusInternalServerError)
-		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
 	} else {
-		if err = s.event.DeleteByUID(context.Background(), uid); err != nil {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
-		} else {
-			c.JSON(http.StatusOK, StatusResponse{Status: "success"})
-		}
+		c.JSON(http.StatusOK, StatusResponse{Status: "success"})
 	}
 }
