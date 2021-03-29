@@ -71,7 +71,7 @@ CLEAN_TARGETS :=
 check: fmt vet boilerplate lint generate manifests/crd.yaml tidy
 
 # Run tests
-test: failpoint-enable generate generate-mock manifests test-utils
+test: failpoint-enable generate manifests test-utils
 	rm -rf cover.* cover
 	$(GOTEST) $$($(PACKAGE_LIST)) -coverprofile cover.out.tmp
 	cat cover.out.tmp | grep -v "_generated.deepcopy.go" > cover.out
@@ -84,13 +84,6 @@ timer:
 
 multithread_tracee: test/cmd/multithread_tracee/main.c
 	cc test/cmd/multithread_tracee/main.c -lpthread -O2 -o ./bin/test/multithread_tracee
-
-mockgen:
-	GO111MODULE=on go get github.com/golang/mock/mockgen@v1.5.0
-
-generate-mock: mockgen
-	go generate ./pkg/workflow
-	make fmt vet lint
 
 coverage:
 ifeq ("$(CI)", "1")
@@ -389,7 +382,7 @@ install-local-coverage-tools:
 	&& go get -u github.com/matm/gocov-html
 
 .PHONY: all clean test install manifests groupimports fmt vet tidy image \
-	docker-push lint generate config mockgen generate-mock \
+	docker-push lint generate config \
 	$(all-tool-dependencies) install.sh $(GO_TARGET_PHONY) \
 	manager chaosfs chaosdaemon chaos-dashboard \
 	dashboard dashboard-server-frontend gosec-scan \
