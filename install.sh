@@ -1262,6 +1262,8 @@ spec:
               value: "true"
             - name: TARGET_NAMESPACE
               value: "chaos-testing"
+            - name: ENABLE_FILTER_NAMESPACE
+              value: "false"
             - name: SECURITY_MODE
               value: "false"
             - name: DNS_SERVER_CREATE
@@ -1342,6 +1344,8 @@ spec:
             value: "app.kubernetes.io/component:template"
           - name: CONFIGMAP_LABELS
             value: "app.kubernetes.io/component:webhook"
+          - name: ENABLE_FILTER_NAMESPACE
+            value: "false"
           - name: PPROF_ADDR
             value: ":10081"
           - name: CHAOS_DNS_SERVICE_NAME

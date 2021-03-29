@@ -40,24 +40,22 @@ type AuthValidator struct {
 
 	decoder *admission.Decoder
 
-	clusterScoped     bool
-	targetNamespace   string
-	allowedNamespaces string
-	ignoredNamespaces string
+	clusterScoped         bool
+	targetNamespace       string
+	enableFilterNamespace bool
 }
 
 // NewAuthValidator returns a new AuthValidator
 func NewAuthValidator(enabled bool, client client.Client, reader client.Reader, authCli *authorizationv1.AuthorizationV1Client,
-	clusterScoped bool, targetNamespace, allowedNamespaces, ignoredNamespaces string) *AuthValidator {
+	clusterScoped bool, targetNamespace string, enableFilterNamespace bool) *AuthValidator {
 	return &AuthValidator{
-		enabled:           enabled,
-		client:            client,
-		reader:            reader,
-		authCli:           authCli,
-		clusterScoped:     clusterScoped,
-		targetNamespace:   targetNamespace,
-		allowedNamespaces: allowedNamespaces,
-		ignoredNamespaces: ignoredNamespaces,
+		enabled:               enabled,
+		client:                client,
+		reader:                reader,
+		authCli:               authCli,
+		clusterScoped:         clusterScoped,
+		targetNamespace:       targetNamespace,
+		enableFilterNamespace: enableFilterNamespace,
 	}
 }
 
