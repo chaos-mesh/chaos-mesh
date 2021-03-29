@@ -148,6 +148,10 @@ type CPUStressor struct {
 
 func (obj *StressChaos) GetSelectorSpecs() map[string]interface{} {
 	return map[string]interface{}{
-		".": obj.Spec.ContainerSelector,
+		".": &obj.Spec.ContainerSelector,
 	}
+}
+
+func (obj *StressChaos) GetCustomStatus() interface{} {
+	return &obj.Status.Instances
 }

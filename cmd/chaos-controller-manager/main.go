@@ -15,6 +15,7 @@ package main
 
 import (
 	"flag"
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/stresschaos"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
@@ -319,6 +320,45 @@ func main() {
 		setupLog.Error(err, "fail to setup DNSChaos reconciler")
 	}
 
+	if err := ctrl.NewControllerManagedBy(mgr).
+		For(&v1alpha1.StressChaos{}).
+		Named("stresschaos-records").
+		Complete(&common.Reconciler{
+			Impl: stresschaos.NewImpl(
+				mgr.GetClient(), ctrl.Log,
+			),
+			Object: &v1alpha1.StressChaos{},
+			Client: mgr.GetClient(),
+			Reader: mgr.GetAPIReader(),
+			Log:    ctrl.Log,
+		}); err != nil {
+		setupLog.Error(err, "fail to setup StressChaos reconciler")
+	}
+
+	if err := ctrl.NewControllerManagedBy(mgr).
+		For(&v1alpha1.StressChaos{}).
+		Named("stresschaos-desiredphase").
+		Complete(&desiredphase.Reconciler{
+			Object: &v1alpha1.StressChaos{},
+			Client: mgr.GetClient(),
+			Reader: mgr.GetAPIReader(),
+			Log:    ctrl.Log,
+		}); err != nil {
+		setupLog.Error(err, "fail to setup StressChaos reconciler")
+	}
+
+	if err := ctrl.NewControllerManagedBy(mgr).
+		For(&v1alpha1.StressChaos{}).
+		Named("stresschaos-delete").
+		Complete(&delete.Reconciler{
+			Object: &v1alpha1.StressChaos{},
+			Client: mgr.GetClient(),
+			Reader: mgr.GetAPIReader(),
+			Log:    ctrl.Log,
+		}); err != nil {
+		setupLog.Error(err, "fail to setup StressChaos reconciler")
+	}
+
 	if err := ctrl.NewWebhookManagedBy(mgr).
 		For(&v1alpha1.PodChaos{}).
 		Complete(); err != nil {
@@ -340,13 +380,19 @@ func main() {
 	if err := ctrl.NewWebhookManagedBy(mgr).
 		For(&v1alpha1.IoChaos{}).
 		Complete(); err != nil {
-		setupLog.Error(err, "fail to setup TimeChaos webhook")
+		setupLog.Error(err, "fail to setup IOChaos webhook")
 	}
 
 	if err := ctrl.NewWebhookManagedBy(mgr).
 		For(&v1alpha1.DNSChaos{}).
 		Complete(); err != nil {
-		setupLog.Error(err, "fail to setup TimeChaos webhook")
+		setupLog.Error(err, "fail to setup DNSChaos webhook")
+	}
+
+	if err := ctrl.NewWebhookManagedBy(mgr).
+		For(&v1alpha1.StressChaos{}).
+		Complete(); err != nil {
+		setupLog.Error(err, "fail to setup StressChaos webhook")
 	}
 
 	// We only setup webhook for podiochaos, and the logic of applying chaos are in the mutation

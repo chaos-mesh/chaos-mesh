@@ -42,6 +42,12 @@ spec:
               - error
               - random
               type: string
+            containerNames:
+              description: ContainerName indicates the name of affected container.
+                If not set, all containers will be injected
+              items:
+                type: string
+              type: array
             duration:
               description: Duration represents the duration of the chaos action
               type: string

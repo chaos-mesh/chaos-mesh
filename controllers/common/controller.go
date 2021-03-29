@@ -15,6 +15,7 @@ package common
 
 import (
 	"context"
+	"reflect"
 
 	"github.com/go-logr/logr"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -28,6 +29,12 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/container"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
 )
+
+type InnerObjectWithCustomStatus interface {
+	v1alpha1.InnerObject
+
+	GetCustomStatus() interface{}
+}
 
 type InnerObjectWithSelector interface {
 	v1alpha1.InnerObject
@@ -124,6 +131,11 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		}
 	}
 
+	// TODO: auto generate SetCustomStatus rather than reflect
+	var customStatus reflect.Value
+	if objWithStatus, ok := obj.(InnerObjectWithCustomStatus); ok {
+		customStatus = reflect.Indirect(reflect.ValueOf(objWithStatus.GetCustomStatus()))
+	}
 	if shouldUpdate {
 		updateError := retry.RetryOnConflict(retry.DefaultBackoff, func() error {
 			r.Log.Info("updating records", "records", records)
@@ -135,6 +147,11 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			}
 
 			obj.GetStatus().Experiment.Records = records
+			if objWithStatus, ok := obj.(InnerObjectWithCustomStatus); ok {
+				ptrToCustomStatus := objWithStatus.GetCustomStatus()
+				// TODO: auto generate SetCustomStatus rather than reflect
+				reflect.Indirect(reflect.ValueOf(ptrToCustomStatus)).Set(reflect.Indirect(customStatus))
+			}
 			return r.Client.Update(context.TODO(), obj)
 		})
 		if updateError != nil {
