@@ -269,7 +269,7 @@ func (s *server) stressCondition(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response, err := json.Marshal(map[string]uint64 {
-		"cpuLoad": stats.CPU.Usage.Total,
+		"cpuTime": stats.CPU.Usage.Total,
 		"memoryUsage": stats.Memory.Usage.Usage,
 	})
 	if err != nil {
