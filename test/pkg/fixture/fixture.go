@@ -14,8 +14,9 @@
 package fixture
 
 import (
-	"k8s.io/apimachinery/pkg/api/resource"
 	"sort"
+
+	"k8s.io/apimachinery/pkg/api/resource"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -161,7 +162,6 @@ func NewNetworkTestDeployment(name, namespace string, extraLabels map[string]str
 	}
 }
 
-
 // NewStressTestDeployment creates a deployment for e2e test
 func NewStressTestDeployment(name, namespace string, extraLabels map[string]string) *appsv1.Deployment {
 	labels := map[string]string{
@@ -194,25 +194,25 @@ func NewStressTestDeployment(name, namespace string, extraLabels map[string]stri
 							Command:         []string{"/bin/test"},
 							Resources: corev1.ResourceRequirements{
 								Requests: corev1.ResourceList{
-									corev1.ResourceCPU: resource.MustParse("0"),
+									corev1.ResourceCPU:    resource.MustParse("0"),
 									corev1.ResourceMemory: resource.MustParse("0"),
 								},
-								Limits:   corev1.ResourceList{
-									corev1.ResourceCPU: resource.MustParse("1") ,
+								Limits: corev1.ResourceList{
+									corev1.ResourceCPU:    resource.MustParse("1"),
 									corev1.ResourceMemory: resource.MustParse("100M"),
 								},
 							},
 							VolumeMounts: []corev1.VolumeMount{
 								{
-									Name:             "sys",
-									MountPath:        "/sys",
+									Name:      "sys",
+									MountPath: "/sys",
 								},
 							},
 						},
 					},
 					Volumes: []corev1.Volume{
 						{
-							Name:         "sys",
+							Name: "sys",
 							VolumeSource: corev1.VolumeSource{
 								HostPath: &corev1.HostPathVolumeSource{
 									Path: "/sys",

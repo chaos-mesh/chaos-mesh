@@ -15,13 +15,14 @@ package stresschaos
 
 import (
 	"context"
+	"net/http"
+	"time"
+
 	. "github.com/onsi/ginkgo"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/kubernetes/test/e2e/framework"
-	"net/http"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"time"
 )
 
 func TestcaseMemoryStressInjectionOnceThenRecover(
@@ -43,7 +44,7 @@ func TestcaseMemoryStressInjectionOnceThenRecover(
 		if err != nil {
 			return false, err
 		}
-		if conditions[0].MemoryUsage > 50 * 1024 * 1024 && conditions[1].MemoryUsage < 50 * 1024 * 1024 {
+		if conditions[0].MemoryUsage > 50*1024*1024 && conditions[1].MemoryUsage < 50*1024*1024 {
 			return true, nil
 		}
 		framework.Logf("get Memory: [%d, %d]", conditions[0].MemoryUsage, conditions[1].MemoryUsage)
@@ -60,7 +61,7 @@ func TestcaseMemoryStressInjectionOnceThenRecover(
 		if err != nil {
 			return false, err
 		}
-		if conditions[0].MemoryUsage < 50 * 1024 * 1024 && conditions[1].MemoryUsage < 50 * 1024 * 1024 {
+		if conditions[0].MemoryUsage < 50*1024*1024 && conditions[1].MemoryUsage < 50*1024*1024 {
 			return true, nil
 		}
 		framework.Logf("get Memory: [%d, %d]", conditions[0].MemoryUsage, conditions[1].MemoryUsage)
@@ -68,7 +69,6 @@ func TestcaseMemoryStressInjectionOnceThenRecover(
 	})
 	framework.ExpectNoError(err, "fail to recover from memory stress")
 }
-
 
 func TestcaseCPUStressInjectionOnceThenRecover(
 	ns string,
@@ -97,7 +97,7 @@ func TestcaseCPUStressInjectionOnceThenRecover(
 		lastCPUTime[0] = conditions[0].CpuTime
 		lastCPUTime[1] = conditions[1].CpuTime
 		framework.Logf("get CPU: [%d, %d]", diff[0], diff[1])
-		if diff[0] > 5e8 && diff[1] < 5e6{
+		if diff[0] > 5e8 && diff[1] < 5e6 {
 			return true, nil
 		}
 		return false, nil
@@ -121,7 +121,7 @@ func TestcaseCPUStressInjectionOnceThenRecover(
 		lastCPUTime[0] = conditions[0].CpuTime
 		lastCPUTime[1] = conditions[1].CpuTime
 		framework.Logf("get CPU: [%d, %d]", diff[0], diff[1])
-		if diff[0] < 1e7  && diff[1] < 5e6 {
+		if diff[0] < 1e7 && diff[1] < 5e6 {
 			return true, nil
 		}
 		return false, nil

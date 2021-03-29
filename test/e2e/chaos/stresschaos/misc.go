@@ -16,12 +16,14 @@ package stresschaos
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"io/ioutil"
+	"net/http"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/klog"
-	"net/http"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
 func makeMemoryStressChaos(
@@ -36,18 +38,17 @@ func makeMemoryStressChaos(
 		Spec: v1alpha1.StressChaosSpec{
 			Mode: v1alpha1.AllPodMode,
 			Selector: v1alpha1.SelectorSpec{
-				Namespaces:          []string{podNs},
+				Namespaces: []string{podNs},
 				LabelSelectors: map[string]string{
 					"app": podAppName,
 				},
 			},
 			Stressors: &v1alpha1.Stressors{
 				MemoryStressor: &v1alpha1.MemoryStressor{
-					Size: memorySize,
+					Size:     memorySize,
 					Stressor: v1alpha1.Stressor{Workers: worker},
 				},
 			},
-
 		},
 	}
 }
@@ -109,7 +110,7 @@ func getStressCondition(c http.Client, port uint16) (*StressCondition, error) {
 
 func probeStressCondition(
 	c http.Client, peers []*corev1.Pod, ports []uint16,
-	) (map[int]*StressCondition, error) {
+) (map[int]*StressCondition, error) {
 	stressConditions := make(map[int]*StressCondition)
 
 	for index, port := range ports {

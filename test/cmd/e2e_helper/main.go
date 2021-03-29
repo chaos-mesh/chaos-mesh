@@ -18,7 +18,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/containerd/cgroups"
 	"io"
 	"io/ioutil"
 	"net"
@@ -26,6 +25,8 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/containerd/cgroups"
 )
 
 func main() {
@@ -268,8 +269,8 @@ func (s *server) stressCondition(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response, err := json.Marshal(map[string]uint64 {
-		"cpuTime": stats.CPU.Usage.Total,
+	response, err := json.Marshal(map[string]uint64{
+		"cpuTime":     stats.CPU.Usage.Total,
 		"memoryUsage": stats.Memory.Usage.Usage,
 	})
 	if err != nil {
