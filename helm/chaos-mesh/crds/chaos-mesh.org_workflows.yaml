@@ -1762,6 +1762,12 @@ spec:
                                 items:
                                   type: string
                                 type: array
+                              size:
+                                description: Size specifies N bytes consumed per vm
+                                  worker, default is the total available memory. One
+                                  can specify the size as % of total available memory
+                                  or in units of B, KB/KiB, MB/MiB, GB/GiB, TB/TiB.
+                                type: string
                               workers:
                                 description: Workers specifies N workers to apply
                                   the stressor.
