@@ -17,7 +17,7 @@ import (
 	"time"
 
 	chaosmeshv1alph1 "github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/errors"
+	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/errors"
 )
 
 type NetworkChaosTemplate interface {

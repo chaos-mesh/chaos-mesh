@@ -16,20 +16,17 @@ package template
 import (
 	"time"
 
-	chaosmeshv1alph1 "github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/errors"
+	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/errors"
 )
 
-type PodChaosTemplate interface {
+type SuspendTemplate interface {
 	Template
-	ChaosNamePrefix() string
-	PodChaosSpec() chaosmeshv1alph1.PodChaosSpec
 	Duration() (time.Duration, error)
 }
 
-func ParsePodChaosTemplate(raw interface{}) (PodChaosTemplate, error) {
-	op := "template.ParsePodChaosTemplate"
-	if target, ok := raw.(PodChaosTemplate); ok {
+func ParseSuspendTemplate(raw interface{}) (SuspendTemplate, error) {
+	op := "template.ParseSuspendTemplate"
+	if target, ok := raw.(SuspendTemplate); ok {
 		return target, nil
 	}
 	return nil, errors.NewParseSerialTemplateFailedError(op, raw)

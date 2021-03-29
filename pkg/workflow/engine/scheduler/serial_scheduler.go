@@ -17,10 +17,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/errors"
-	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/model/node"
-	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/model/template"
-	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/model/workflow"
+	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/errors"
+	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/node"
+	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/template"
+	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/workflow"
 )
 
 type serialScheduler struct {
