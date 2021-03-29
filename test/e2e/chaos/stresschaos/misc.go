@@ -80,7 +80,7 @@ func makeCPUStressChaos(
 }
 
 type StressCondition struct {
-	CpuLoad     uint64 `json:"cpuLoad"`
+	CpuTime     uint64 `json:"cpuTime"`
 	MemoryUsage uint64 `json:"memoryUsage"`
 }
 

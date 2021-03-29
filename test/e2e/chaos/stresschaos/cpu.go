@@ -92,10 +92,10 @@ func TestcaseCPUStressInjectionOnceThenRecover(
 			return false, err
 		}
 
-		diff[0] = conditions[0].CpuLoad - lastCPUTime[0]
-		diff[1] = conditions[1].CpuLoad - lastCPUTime[1]
-		lastCPUTime[0] = conditions[0].CpuLoad
-		lastCPUTime[1] = conditions[1].CpuLoad
+		diff[0] = conditions[0].CpuTime - lastCPUTime[0]
+		diff[1] = conditions[1].CpuTime - lastCPUTime[1]
+		lastCPUTime[0] = conditions[0].CpuTime
+		lastCPUTime[1] = conditions[1].CpuTime
 		framework.Logf("get CPU: [%d, %d]", diff[0], diff[1])
 		if diff[0] > 5e8 && diff[1] < 5e6{
 			return true, nil
@@ -116,10 +116,10 @@ func TestcaseCPUStressInjectionOnceThenRecover(
 			return false, err
 		}
 
-		diff[0] = conditions[0].CpuLoad - lastCPUTime[0]
-		diff[1] = conditions[1].CpuLoad - lastCPUTime[1]
-		lastCPUTime[0] = conditions[0].CpuLoad
-		lastCPUTime[1] = conditions[1].CpuLoad
+		diff[0] = conditions[0].CpuTime - lastCPUTime[0]
+		diff[1] = conditions[1].CpuTime - lastCPUTime[1]
+		lastCPUTime[0] = conditions[0].CpuTime
+		lastCPUTime[1] = conditions[1].CpuTime
 		framework.Logf("get CPU: [%d, %d]", diff[0], diff[1])
 		if diff[0] < 1e7  && diff[1] < 5e6 {
 			return true, nil
