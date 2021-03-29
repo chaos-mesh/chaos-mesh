@@ -11,7 +11,7 @@ on:
 
 jobs:
   run:
-    name: Test
+    name: Script Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
