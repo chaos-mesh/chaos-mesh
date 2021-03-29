@@ -46,7 +46,13 @@ export default function Experiments() {
 
   useEffect(fetchExperiments, [])
 
-  const handleExperiment = (action: string) => () => {
+  const handleSelect = (selected: typeof initialSelected) => {
+    setSelected(selected)
+
+    confirmRef.current!.setOpen(true)
+  }
+
+  const handleAction = (action: string) => () => {
     let actionFunc: any
 
     switch (action) {
@@ -92,7 +98,12 @@ export default function Experiments() {
         <Button variant="outlined" startIcon={<AddIcon />} onClick={() => history.push('/experiments/new')}>
           {T('newE.title')}
         </Button>
-        <Button variant="outlined" startIcon={<PlaylistAddCheckIcon />} onClick={() => {}}>
+        <Button
+          variant="outlined"
+          startIcon={<PlaylistAddCheckIcon />}
+          onClick={() => {}}
+          disabled={experiments.length === 0}
+        >
           {T('common.batchOperation')}
         </Button>
       </Space>
@@ -107,7 +118,7 @@ export default function Experiments() {
               {experimentsByKind.length > 0 &&
                 experimentsByKind.map((e) => (
                   <Grid key={e.uid} item xs={12}>
-                    <ExperimentListItem experiment={e} handleSelect={setSelected} intl={intl} />
+                    <ExperimentListItem experiment={e} onSelect={handleSelect} intl={intl} />
                   </Grid>
                 ))}
             </Grid>
@@ -126,7 +137,7 @@ export default function Experiments() {
         ref={confirmRef}
         title={selected.title}
         description={selected.description}
-        onConfirm={handleExperiment(selected.action)}
+        onConfirm={handleAction(selected.action)}
       />
     </>
   )

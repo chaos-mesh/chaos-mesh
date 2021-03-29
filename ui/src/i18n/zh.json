@@ -112,7 +112,8 @@
   },
   "workflows": {
     "title": "工作流",
-    "noWorkflowsFound": "未发现工作流"
+    "noWorkflowsFound": "未发现工作流",
+    "deleteDesc": "此工作流将被永久删除"
   },
   "workflow": {
     "entry": "入口",

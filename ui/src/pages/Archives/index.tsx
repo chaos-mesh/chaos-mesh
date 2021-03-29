@@ -1,7 +1,7 @@
 import { Box, Button, Checkbox, Typography } from '@material-ui/core'
 import ConfirmDialog, { ConfirmDialogHandles } from 'components-mui/ConfirmDialog'
 import { FixedSizeList as RWList, ListChildComponentProps as RWListChildComponentProps } from 'react-window'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { Archive } from 'api/archives.type'
 import DeleteOutlinedIcon from '@material-ui/icons/DeleteOutlined'
@@ -49,7 +49,13 @@ export default function Archives() {
 
   useEffect(fetchArchives, [])
 
-  const handleExperiment = (action: string) => () => {
+  const handleSelect = (selected: typeof initialSelected) => {
+    setSelected(selected)
+
+    confirmRef.current!.setOpen(true)
+  }
+
+  const handleAction = (action: string) => () => {
     let actionFunc: any
 
     switch (action) {
@@ -119,7 +125,7 @@ export default function Archives() {
         />
       )}
       <Box flex={1}>
-        <ExperimentListItem experiment={data[index]} isArchive handleSelect={setSelected} intl={intl} />
+        <ExperimentListItem experiment={data[index]} isArchive onSelect={handleSelect} intl={intl} />
       </Box>
     </Box>
   )
@@ -175,7 +181,7 @@ export default function Archives() {
         ref={confirmRef}
         title={selected.title}
         description={selected.description}
-        onConfirm={handleExperiment(selected.action)}
+        onConfirm={handleAction(selected.action)}
       />
     </>
   )

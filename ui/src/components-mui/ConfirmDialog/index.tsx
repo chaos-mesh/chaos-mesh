@@ -15,17 +15,17 @@ export interface ConfirmDialogHandles {
   setOpen: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-interface Props {
+interface ConfirmDialogProps {
   title: string | JSX.Element
   description?: string
   onConfirm?: () => void
   dialogProps?: Omit<DialogProps, 'open'>
 }
 
-const ConfirmDialog: React.ForwardRefRenderFunction<ConfirmDialogHandles, Props> = (
-  { title, description, onConfirm, children, dialogProps },
-  ref
-) => {
+const ConfirmDialog: React.ForwardRefRenderFunction<
+  ConfirmDialogHandles,
+  React.PropsWithChildren<ConfirmDialogProps>
+> = ({ title, description, onConfirm, children, dialogProps }, ref) => {
   const [open, setOpen] = useState(false)
 
   // Methods exposed to the parent

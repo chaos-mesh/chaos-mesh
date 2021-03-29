@@ -1,4 +1,5 @@
 import { Button, Grid, Grow, Modal } from '@material-ui/core'
+import ConfirmDialog, { ConfirmDialogHandles } from 'components-mui/ConfirmDialog'
 import EventsTable, { EventsTableHandles } from 'components/EventsTable'
 import { RootState, useStoreDispatch } from 'store'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
@@ -9,7 +10,6 @@ import { Ace } from 'ace-builds'
 import Alert from '@material-ui/lab/Alert'
 import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
 import CloudDownloadOutlinedIcon from '@material-ui/icons/CloudDownloadOutlined'
-import ConfirmDialog from 'components-mui/ConfirmDialog'
 import { Event } from 'api/events.type'
 import ExperimentConfiguration from 'components/ExperimentConfiguration'
 import { ExperimentDetail as ExperimentDetailType } from 'api/experiments.type'
@@ -82,6 +82,7 @@ export default function ExperimentDetail() {
 
   const chartRef = useRef<HTMLDivElement>(null)
   const eventsTableRef = useRef<EventsTableHandles>(null)
+  const confirmRef = useRef<ConfirmDialogHandles>(null)
 
   const [loading, setLoading] = useState(true)
   const [detail, setDetail] = useState<ExperimentDetailType>()
@@ -90,7 +91,6 @@ export default function ExperimentDetail() {
   const [yamlEditor, setYAMLEditor] = useState<Ace.Editor>()
   const [configOpen, setConfigOpen] = useState(false)
   const [selected, setSelected] = useState(initialSelected)
-  const resetSelected = () => setSelected(initialSelected)
 
   const fetchExperimentDetail = () => {
     api.experiments
@@ -192,30 +192,28 @@ export default function ExperimentDetail() {
         actionFunc = null
     }
 
-    resetSelected()
+    confirmRef.current!.setOpen(false)
 
-    if (actionFunc === null) {
-      return
+    if (actionFunc) {
+      actionFunc(uuid)
+        .then(() => {
+          dispatch(
+            setAlert({
+              type: 'success',
+              message: intl.formatMessage({ id: `common.${action}Successfully` }),
+            })
+          )
+
+          if (action === 'archive') {
+            history.push('/experiments')
+          }
+
+          if (action === 'pause' || action === 'start') {
+            setTimeout(fetchExperimentDetail, 300)
+          }
+        })
+        .catch(console.error)
     }
-
-    actionFunc(uuid)
-      .then(() => {
-        dispatch(
-          setAlert({
-            type: 'success',
-            message: intl.formatMessage({ id: `common.${action}Successfully` }),
-          })
-        )
-
-        if (action === 'archive') {
-          history.push('/experiments')
-        }
-
-        if (action === 'pause' || action === 'start') {
-          setTimeout(fetchExperimentDetail, 300)
-        }
-      })
-      .catch(console.error)
   }
 
   const handleDownloadExperiment = () => fileDownload(yaml.dump(detail!.yaml), `${detail!.name}.yaml`)
@@ -318,7 +316,7 @@ export default function ExperimentDetail() {
           </Grid>
 
           <Grid item xs={12}>
-            {events && <EventsTable ref={eventsTableRef} events={events} detailed />}
+            {events && <EventsTable ref={eventsTableRef} events={events} />}
           </Grid>
         </Grid>
       </Grow>
@@ -341,6 +339,7 @@ export default function ExperimentDetail() {
       </Modal>
 
       <ConfirmDialog
+        ref={confirmRef}
         title={selected.title}
         description={selected.description}
         onConfirm={handleExperiment(selected.action)}

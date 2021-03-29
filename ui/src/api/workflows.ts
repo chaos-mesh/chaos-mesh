@@ -8,3 +8,5 @@ export const workflows = (params?: workflowParams) =>
   })
 
 export const detail = (ns: string, name: string) => http.get<WorkflowDetail>(`/workflows/detail/${ns}/${name}`)
+
+export const del = (ns: string, name: string) => http.delete(`/workflows/${ns}/${name}`)

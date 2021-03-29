@@ -1,9 +1,9 @@
 import { Box, Button, Link, Typography } from '@material-ui/core'
+import ConfirmDialog, { ConfirmDialogHandles } from 'components-mui/ConfirmDialog'
 import Token, { TokenFormValues } from 'components/Token'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { useHistory, useLocation } from 'react-router-dom'
 
-import ConfirmDialog from 'components-mui/ConfirmDialog'
 import RBACGenerator from 'components/RBACGenerator'
 import T from 'components/T'
 import { setTokenName } from 'slices/globalStatus'
@@ -19,15 +19,15 @@ const Auth: React.FC<AuthProps> = ({ open }) => {
 
   const dispatch = useStoreDispatch()
 
-  const [title, setTitle] = useState<string | JSX.Element>('')
-  const [genTitle, setGenTitle] = useState<string | JSX.Element>('')
+  const confirmRef = useRef<ConfirmDialogHandles>(null)
+  const confirmRefRBAC = useRef<ConfirmDialogHandles>(null)
 
   useEffect(() => {
-    setTitle(open ? T('settings.addToken.prompt') : '')
+    confirmRef.current!.setOpen(open)
   }, [open])
 
   const handleSubmitCallback = (values: TokenFormValues) => {
-    setTitle('')
+    confirmRef.current!.setOpen(false)
 
     dispatch(setTokenName(values.name))
 
@@ -35,12 +35,13 @@ const Auth: React.FC<AuthProps> = ({ open }) => {
     setTimeout(() => history.replace(pathname))
   }
 
-  const openGenerator = () => setGenTitle(T('settings.addToken.generator'))
-  const closeGenerator = () => setGenTitle('')
+  const openGenerator = () => confirmRefRBAC.current!.setOpen(true)
+  const closeGenerator = () => confirmRefRBAC.current!.setOpen(false)
 
   return (
     <ConfirmDialog
-      title={title}
+      ref={confirmRef}
+      title={T('settings.addToken.prompt')}
       dialogProps={{
         disableBackdropClick: true,
         disableEscapeKeyDown: true,
@@ -58,21 +59,20 @@ const Auth: React.FC<AuthProps> = ({ open }) => {
         </Typography>
       </Box>
       <Token onSubmitCallback={handleSubmitCallback} />
-      {genTitle && (
-        <ConfirmDialog
-          title={genTitle}
-          dialogProps={{
-            PaperProps: {
-              style: { width: 750, maxWidth: 'unset' }, // max-width: 600
-            },
-          }}
-        >
-          <RBACGenerator />
-          <Box textAlign="right">
-            <Button onClick={closeGenerator}>{T('common.close')}</Button>
-          </Box>
-        </ConfirmDialog>
-      )}
+      <ConfirmDialog
+        ref={confirmRefRBAC}
+        title={T('settings.addToken.generator')}
+        dialogProps={{
+          PaperProps: {
+            style: { width: 750, maxWidth: 'unset' }, // max-width: 600
+          },
+        }}
+      >
+        <RBACGenerator />
+        <Box textAlign="right">
+          <Button onClick={closeGenerator}>{T('common.close')}</Button>
+        </Box>
+      </ConfirmDialog>
     </ConfirmDialog>
   )
 }

@@ -99,16 +99,12 @@ interface EventsTableHeadProps {
   order: Order
   orderBy: keyof SortedEvent
   onSort: (e: React.MouseEvent<unknown>, k: keyof SortedEvent) => void
-  detailed: boolean
 }
 
-const EventsTableHead: React.FC<EventsTableHeadProps> = ({ order, orderBy, onSort, detailed }) => {
+const EventsTableHead: React.FC<EventsTableHeadProps> = ({ order, orderBy, onSort }) => {
   const handleSortEvents = (k: keyof SortedEvent) => (e: React.MouseEvent<unknown>) => onSort(e, k)
 
-  let cells = headCells
-  if (detailed) {
-    cells = cells.concat([{ id: 'Detail' as keyof SortedEvent, label: '' }])
-  }
+  let cells = headCells.concat([{ id: 'Detail' as keyof SortedEvent, label: '' }])
 
   return (
     <TableHead>
@@ -171,11 +167,10 @@ const TablePaginationActions: React.FC<TablePaginationActionsProps> = ({ count, 
 
 interface EventsTableRowProps {
   event: SortedEventWithPods
-  detailed: boolean
   onSelectEvent: (e: Event) => () => void
 }
 
-const EventsTableRow: React.FC<EventsTableRowProps> = ({ event: e, detailed, onSelectEvent }) => (
+const EventsTableRow: React.FC<EventsTableRowProps> = ({ event: e, onSelectEvent }) => (
   <TableRow hover>
     <TableCell>{e.experiment}</TableCell>
     <TableCell>{e.experiment_id}</TableCell>
@@ -189,13 +184,11 @@ const EventsTableRow: React.FC<EventsTableRowProps> = ({ event: e, detailed, onS
         <StateLabel state={StateOfExperimentsEnum.Running}>{T('experiments.state.running')}</StateLabel>
       )}
     </TableCell>
-    {detailed && (
-      <TableCell>
-        <Button variant="outlined" size="small" color="primary" onClick={onSelectEvent(e)}>
-          {T('common.detail')}
-        </Button>
-      </TableCell>
-    )}
+    <TableCell>
+      <Button variant="outlined" size="small" color="primary" onClick={onSelectEvent(e)}>
+        {T('common.detail')}
+      </Button>
+    </TableCell>
   </TableRow>
 )
 
@@ -205,11 +198,10 @@ export interface EventsTableHandles {
 
 interface EventsTableProps {
   events: Event[]
-  detailed?: boolean
 }
 
 const EventsTable: React.ForwardRefRenderFunction<EventsTableHandles, EventsTableProps> = (
-  { events: allEvents, detailed = false },
+  { events: allEvents },
   ref
 ) => {
   const classes = useStyles()
@@ -257,19 +249,14 @@ const EventsTable: React.ForwardRefRenderFunction<EventsTableHandles, EventsTabl
     <Box position="relative" minHeight={600}>
       <TableContainer component={(props) => <Paper {...props} padding={false} />}>
         <Table stickyHeader>
-          <EventsTableHead order={order} orderBy={orderBy} onSort={handleSortEvents} detailed={detailed} />
+          <EventsTableHead order={order} orderBy={orderBy} onSort={handleSortEvents} />
 
           <TableBody>
             {events &&
               stableSort<SortedEvent>(events, getComparator(order, orderBy))
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((e) => (
-                  <EventsTableRow
-                    key={e.id}
-                    event={e as SortedEventWithPods}
-                    detailed={detailed}
-                    onSelectEvent={onSelectEvent}
-                  />
+                  <EventsTableRow key={e.id} event={e as SortedEventWithPods} onSelectEvent={onSelectEvent} />
                 ))}
           </TableBody>
 

@@ -82,7 +82,7 @@ export default function Events() {
               <PaperTop title={T('common.timeline')} />
               <div ref={chartRef} className={classes.eventsChart} />
             </Paper>
-            <EventsTable ref={eventsTableRef} events={events} detailed />
+            <EventsTable ref={eventsTableRef} events={events} />
           </Box>
         </Grow>
       )}

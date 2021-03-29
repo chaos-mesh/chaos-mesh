@@ -36,14 +36,14 @@ const useStyles = makeStyles((theme: Theme) =>
 interface ExperimentListItemProps {
   experiment: Experiment | Archive
   isArchive?: boolean
-  handleSelect: (info: { uuid: uuid; title: string; description: string; action: string }) => void
+  onSelect: (info: { uuid: uuid; title: string; description: string; action: string }) => void
   intl: IntlShape
 }
 
 const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
   experiment: e,
   isArchive = false,
-  handleSelect,
+  onSelect,
   intl,
 }) => {
   const theme = useTheme()
@@ -66,7 +66,7 @@ const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
 
     switch (action) {
       case 'archive':
-        handleSelect({
+        onSelect({
           uuid: (e as Experiment).uid,
           title: `${intl.formatMessage({ id: 'archives.single' })} ${e.name}`,
           description: intl.formatMessage({ id: 'experiments.deleteDesc' }),
@@ -75,7 +75,7 @@ const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
 
         return
       case 'pause':
-        handleSelect({
+        onSelect({
           uuid: (e as Experiment).uid,
           title: `${intl.formatMessage({ id: 'common.pause' })} ${e.name}`,
           description: intl.formatMessage({ id: 'experiments.pauseDesc' }),
@@ -84,7 +84,7 @@ const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
 
         return
       case 'start':
-        handleSelect({
+        onSelect({
           uuid: (e as Experiment).uid,
           title: `${intl.formatMessage({ id: 'common.start' })} ${e.name}`,
           description: intl.formatMessage({ id: 'experiments.startDesc' }),
@@ -93,7 +93,7 @@ const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
 
         return
       case 'delete':
-        handleSelect({
+        onSelect({
           uuid: (e as Experiment).uid,
           title: `${intl.formatMessage({ id: 'common.delete' })} ${e.name}`,
           description: intl.formatMessage({ id: 'archives.deleteDesc' }),
