@@ -308,12 +308,10 @@ func (s *Service) delete(c *gin.Context) {
 			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("delete archive uid (%s) error, because %s", uid, err.Error())))
 			errFlag = true
 			continue
-		} else {
-			if err = s.event.DeleteByUID(context.Background(), uid); err != nil {
-				_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("delete archive uid (%s) error, because %s", uid, err.Error())))
-				errFlag = true
-				continue
-			}
+		}
+		if err = s.event.DeleteByUID(context.Background(), uid); err != nil {
+			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("delete archive uid (%s) error, because %s", uid, err.Error())))
+			errFlag = true
 		}
 	}
 	if errFlag == true {
