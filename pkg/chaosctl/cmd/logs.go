@@ -96,7 +96,7 @@ func (o *logsOptions) Run(args []string) error {
 		}
 
 		// TODO: just use kubernetes native label selector
-		components, err := selector.SelectPods(ctx, c.CtrlCli, nil, selectorSpec, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces)
+		components, err := selector.SelectPods(ctx, c.CtrlCli, nil, selectorSpec, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.EnableFilterNamespace)
 		if err != nil {
 			return errors.Wrapf(err, "failed to SelectPods for component %s", name)
 		}
