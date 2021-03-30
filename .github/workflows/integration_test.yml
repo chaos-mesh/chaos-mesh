@@ -37,4 +37,5 @@ jobs:
 
       - name: Run integration test
         run: |
+          make chaosctl
           bash test/integration_test/run.sh
