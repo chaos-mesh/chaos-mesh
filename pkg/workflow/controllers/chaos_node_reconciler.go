@@ -67,35 +67,14 @@ func (it *ChaosNodeReconciler) Reconcile(request reconcile.Request) (reconcile.R
 }
 
 func (it *ChaosNodeReconciler) injectChaos(ctx context.Context, node v1alpha1.WorkflowNode) error {
-	var chaosObject runtime.Object
-	var meta metav1.Object
 
-	if node.Spec.Type == v1alpha1.TypeNetworkChaos {
-		networkChaos := v1alpha1.NetworkChaos{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: fmt.Sprintf("%s-", node.Name),
-				Namespace:    node.Namespace,
-			},
-			Spec: *node.Spec.NetworkChaos,
-		}
-		meta = networkChaos.GetObjectMeta()
-		chaosObject = &networkChaos
-	} else if node.Spec.Type == v1alpha1.TypePodChaos {
-		podChaos := v1alpha1.PodChaos{
-			ObjectMeta: metav1.ObjectMeta{
-				GenerateName: fmt.Sprintf("%s-", node.Name),
-				Namespace:    node.Namespace,
-			},
-			Spec: *node.Spec.PodChaos,
-		}
-		meta = podChaos.GetObjectMeta()
-		chaosObject = &podChaos
-	} else {
-		// TODO: support other type of chaos by code generation
-		it.logger.Info("unsupported chaos nodes", "key", fmt.Sprintf("%s/%s", node.Namespace, node.Name), "type", node.Spec.Type)
-		return nil
+	chaosObject, meta, err := node.Spec.EmbedChaos.SpawnNewObject(node.Spec.Type)
+	if err != nil {
+		return err
 	}
 
+	meta.SetGenerateName(fmt.Sprintf("%s-", node.Name))
+	meta.SetNamespace(node.Namespace)
 	meta.SetOwnerReferences(append(meta.GetOwnerReferences(), metav1.OwnerReference{
 		APIVersion:         node.APIVersion,
 		Kind:               node.Kind,
@@ -105,7 +84,7 @@ func (it *ChaosNodeReconciler) injectChaos(ctx context.Context, node v1alpha1.Wo
 		BlockOwnerDeletion: &blockOwnerDeletion,
 	}))
 
-	err := it.kubeClient.Create(ctx, chaosObject)
+	err = it.kubeClient.Create(ctx, chaosObject)
 	if err != nil {
 		it.eventRecorder.Event(&node, corev1.EventTypeWarning, v1alpha1.ChaosCRCreateFailed, "Failed to create chaos CR")
 		it.logger.Error(err, "failed to create chaos")
@@ -153,22 +132,14 @@ func (it *ChaosNodeReconciler) recoverChaos(ctx context.Context, node v1alpha1.W
 	var chaosObject runtime.Object
 
 	var err error
-	if node.Spec.Type == v1alpha1.TypeNetworkChaos {
-		target := v1alpha1.NetworkChaos{}
-		err = it.kubeClient.Get(ctx,
-			types.NamespacedName{Namespace: node.Namespace, Name: node.Status.ChaosResource.Name},
-			&target)
-		chaosObject = &target
-	} else if node.Spec.Type == v1alpha1.TypePodChaos {
-		target := v1alpha1.PodChaos{}
-		err = it.kubeClient.Get(ctx,
-			types.NamespacedName{Namespace: node.Namespace, Name: node.Status.ChaosResource.Name},
-			&target)
-		chaosObject = &target
-	} else {
-		it.logger.Info("unsupported chaos nodes", "key", fmt.Sprintf("%s/%s", node.Namespace, node.Name), "type", node.Spec.Type)
-		return nil
+	target, err := v1alpha1.FetchChaosByTemplateType(node.Spec.Type)
+	if err != nil {
+		return err
 	}
+
+	err = it.kubeClient.Get(ctx,
+		types.NamespacedName{Namespace: node.Namespace, Name: node.Status.ChaosResource.Name},
+		target)
 
 	if apierrors.IsNotFound(err) {
 		it.logger.V(4).Info("target chaos not exist", "namespace", node.Namespace, "name", node.Status.ChaosResource.Name, "chaos kind", node.Status.ChaosResource.Kind)

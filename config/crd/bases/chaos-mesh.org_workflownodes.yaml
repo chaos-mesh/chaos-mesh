@@ -36,6 +36,61 @@ spec:
         spec:
           description: Spec defines the behavior of a node of workflow
           properties:
+            aws_chaos:
+              description: AwsChaosSpec is the content of the specification for an
+                AwsChaos
+              properties:
+                action:
+                  description: 'Action defines the specific aws chaos action. Supported
+                    action: ec2-stop / ec2-restart / detach-volume Default action:
+                    ec2-stop'
+                  enum:
+                  - ec2-stop
+                  - ec2-restart
+                  - detach-volume
+                  type: string
+                awsRegion:
+                  description: AwsRegion defines the region of aws.
+                  type: string
+                deviceName:
+                  description: DeviceName indicates the name of the device. Needed
+                    in detach-volume.
+                  type: string
+                duration:
+                  description: Duration represents the duration of the chaos action.
+                  type: string
+                ec2Instance:
+                  description: Ec2Instance indicates the ID of the ec2 instance.
+                  type: string
+                endpoint:
+                  description: Endpoint indicates the endpoint of the aws server.
+                    Just used it in test now.
+                  type: string
+                scheduler:
+                  description: Scheduler defines some schedule rules to control the
+                    running time of the chaos experiment about time.
+                  properties:
+                    cron:
+                      description: "Cron defines a cron job rule. \n Some rule examples:
+                        \"0 30 * * * *\" means to \"Every hour on the half hour\"
+                        \"@hourly\"      means to \"Every hour\" \"@every 1h30m\"
+                        means to \"Every hour thirty\" \n More rule info: https://godoc.org/github.com/robfig/cron"
+                      type: string
+                  required:
+                  - cron
+                  type: object
+                secretName:
+                  description: SecretName defines the name of kubernetes secret.
+                  type: string
+                volumeID:
+                  description: EbsVolume indicates the ID of the EBS volume. Needed
+                    in detach-volume.
+                  type: string
+              required:
+              - action
+              - awsRegion
+              - ec2Instance
+              type: object
             deadline:
               format: date-time
               type: string

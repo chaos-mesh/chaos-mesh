@@ -14,7 +14,10 @@
 package v1alpha1
 
 import (
+	"fmt"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 // +kubebuilder:object:root=true
@@ -31,28 +34,6 @@ type Workflow struct {
 	Status WorkflowStatus `json:"status"`
 }
 
-// TODO: code generation
-type EmbedChaos struct {
-	// +optional
-	DNSChaos *DNSChaosSpec `json:"dns_chaos,omitempty"`
-	// +optional
-	HTTPChaos *HTTPChaosSpec `json:"http_chaos,omitempty"`
-	// +optional
-	IoChaos *IoChaosSpec `json:"io_chaos,omitempty"`
-	// +optional
-	JVMChaos *JVMChaosSpec `json:"jvm_chaos,omitempty"`
-	// +optional
-	KernelChaos *KernelChaosSpec `json:"kernel_chaos,omitempty"`
-	// +optional
-	NetworkChaos *NetworkChaosSpec `json:"network_chaos,omitempty"`
-	// +optional
-	PodChaos *PodChaosSpec `json:"pod_chaos,omitempty"`
-	// +optional
-	StressChaos *StressChaosSpec `json:"stress_chaos,omitempty"`
-	// +optional
-	TimeChaos *TimeChaosSpec `json:"time_chaos,omitempty"`
-}
-
 type WorkflowSpec struct {
 	Entry     string     `json:"entry"`
 	Templates []Template `json:"templates"`
@@ -66,19 +47,10 @@ type WorkflowStatus struct {
 type TemplateType string
 
 const (
-	TypeTask         TemplateType = "Task"
-	TypeSerial       TemplateType = "Serial"
-	TypeParallel     TemplateType = "Parallel"
-	TypeSuspend      TemplateType = "Suspend"
-	TypeIoChaos      TemplateType = "IoChaos"
-	TypeNetworkChaos TemplateType = "NetworkChaos"
-	TypeStressChaos  TemplateType = "StressChaos"
-	TypePodChaos     TemplateType = "PodChaos"
-	TypeTimeChaos    TemplateType = "TimeChaos"
-	TypeKernelChaos  TemplateType = "KernelChaos"
-	TypeDnsChaos     TemplateType = "DnsChaos"
-	TypeHttpChaos    TemplateType = "HttpChaos"
-	TypeJvmChaos     TemplateType = "JvmChaos"
+	TypeTask     TemplateType = "Task"
+	TypeSerial   TemplateType = "Serial"
+	TypeParallel TemplateType = "Parallel"
+	TypeSuspend  TemplateType = "Suspend"
 )
 
 type Template struct {
@@ -99,4 +71,11 @@ type WorkflowList struct {
 
 func init() {
 	SchemeBuilder.Register(&Workflow{}, &WorkflowList{})
+}
+
+func FetchChaosByTemplateType(templateType TemplateType) (runtime.Object, error) {
+	if kind, ok := all.kinds[string(templateType)]; ok {
+		return kind.Chaos.DeepCopyObject(), nil
+	}
+	return nil, fmt.Errorf("no such kind refers to template type %s", templateType)
 }

@@ -249,7 +249,7 @@ dashboard:
         tlsSecret: dashboard.local-tls
 
 dnsServer:
-  create: false
+  create: true
 
   serviceAccount: chaos-dns-server
 
