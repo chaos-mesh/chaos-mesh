@@ -58,7 +58,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint.GET("", s.list)
 	endpoint.GET("/detail", s.detail)
 	endpoint.GET("/report", s.report)
-	endpoint.DELETE("", s.delete)
+	endpoint.DELETE("/:uid", s.delete)
 }
 
 // Archive defines the basic information of an archive.
@@ -279,7 +279,8 @@ func (s *Service) report(c *gin.Context) {
 // @Description Delete the specified archived experiment.
 // @Tags archives
 // @Produce json
-// @Param uids query string true "uids"
+// @Param uid path string false "uid"
+// @Param uids query string false "uids"
 // @Success 200 {object} StatusResponse
 // @Failure 500 {object} utils.APIError
 // @Router /archives/{uid} [delete]
@@ -289,9 +290,22 @@ func (s *Service) delete(c *gin.Context) {
 		exp *core.Experiment
 	)
 
+	uid := c.Param("uid")
 	uids := c.Query("uids")
 	uidSlice := strings.Split(uids, ",")
 	errFlag := false
+
+	if uid != "" && uids != "" {
+		c.Status(http.StatusBadRequest)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("uid and uids cannot exist at the same time")))
+		return
+	} else if uid == "" && uids == "" {
+		c.Status(http.StatusBadRequest)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("uid and uids cannot be empty at the same time")))
+		return
+	}
+
+	uidSlice = append(uidSlice, uid)
 
 	for _, uid := range uidSlice {
 		if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {

@@ -153,11 +153,11 @@ REQUEST BUSYBOX_MANAGE_TOKEN_LIST[@] "PUT" "/api/experiments/update" "update_exp
 echo "***** delete chaos experiments *****"
 
 echo "viewer is forbidden to delete experiments"
-REQUEST BUSYBOX_MANAGER_FORBIDDEN_TOKEN_LIST[@] "DELETE" "/api/experiments?uids=${EXP_UID}" "delete_exp.out" "is forbidden"
+REQUEST BUSYBOX_MANAGER_FORBIDDEN_TOKEN_LIST[@] "DELETE" "/api/experiments/${EXP_UID}" "delete_exp.out" "is forbidden"
 
 echo "only manager can delete experiments success"
 # here just use cluster manager because experiment can be delete only one time
-REQUEST CLUSTER_MANAGER_TOKEN_LIST[@] "DELETE" "/api/experiments?uids=${EXP_UID}" "delete_exp.out" "success"
+REQUEST CLUSTER_MANAGER_TOKEN_LIST[@] "DELETE" "/api/experiments/${EXP_UID}" "delete_exp.out" "success"
 
 
 echo "***** list events *****"
@@ -243,11 +243,11 @@ REQUEST CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@] "GET" "/api/archives/report?uid=${E
 echo "***** delete archive chaos experiment *****"
 
 echo "viewer is forbidden to delete archive experiments"
-REQUEST BUSYBOX_MANAGER_FORBIDDEN_TOKEN_LIST[@] "DELETE" "/api/archives?uids=${EXP_UID}?namespace=busybox" "delete_archives.out" "can't"
+REQUEST BUSYBOX_MANAGER_FORBIDDEN_TOKEN_LIST[@] "DELETE" "/api/archives/${EXP_UID}?namespace=busybox" "delete_archives.out" "can't"
 
 echo "only manager can delete archive experiments success"
 # here use one manager token to delete it
-REQUEST BUSYBOX_MANAGER_TOKEN_LIST[@] "DELETE" "/api/archives?uids=${EXP_UID}?namespace=busybox" "delete_archives.out" "success"
+REQUEST BUSYBOX_MANAGER_TOKEN_LIST[@] "DELETE" "/api/archives/${EXP_UID}?namespace=busybox" "delete_archives.out" "success"
 
 
 echo "***** test webhook authority ******"

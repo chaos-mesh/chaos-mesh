@@ -85,7 +85,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint.GET("", s.listExperiments)
 	endpoint.POST("/new", s.createExperiment)
 	endpoint.GET("/detail/:uid", s.getExperimentDetail)
-	endpoint.DELETE("", s.deleteExperiment)
+	endpoint.DELETE("/:uid", s.deleteExperiment)
 	endpoint.PUT("/update", s.updateExperiment)
 	endpoint.PUT("/pause/:uid", s.pauseExperiment)
 	endpoint.PUT("/start/:uid", s.startExperiment)
@@ -839,7 +839,8 @@ func (s *Service) getExperimentDetail(c *gin.Context) {
 // @Description Delete the specified chaos experiment.
 // @Tags experiments
 // @Produce json
-// @Param uids query string true "uids"
+// @Param uid path string false "uid"
+// @Param uids query string false "uids"
 // @Param force query string true "force" Enums(true, false)
 // @Success 200 {object} StatusResponse
 // @Failure 400 {object} utils.APIError
@@ -861,10 +862,23 @@ func (s *Service) deleteExperiment(c *gin.Context) {
 		return
 	}
 
+	uid := c.Param("uid")
 	uids := c.Query("uids")
 	uidSlice := strings.Split(uids, ",")
 	force := c.DefaultQuery("force", "false")
 	errFlag = false
+
+	if uid != "" && uids != "" {
+		c.Status(http.StatusBadRequest)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("uid and uids cannot exist at the same time")))
+		return
+	} else if uid == "" && uids == "" {
+		c.Status(http.StatusBadRequest)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("uid and uids cannot be empty at the same time")))
+		return
+	}
+
+	uidSlice = append(uidSlice, uid)
 
 	for _, uid := range uidSlice {
 		if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
