@@ -1,13 +1,23 @@
-name: Upload tagged install related files to CDN
+name: Upload latest install related files to CDN
 on:
   push:
-    tags:
-      - v*
+    branches:
+      - master
+    paths:
+      - install.sh
+      - manifests/crd.yaml
+      - examples/web-show/deploy.sh
 jobs:
   run:
     name: Upload
     runs-on: ubuntu-latest
     steps:
+      - name: Set up Go 1.14
+        uses: action/setup-go@v1
+        with:
+          go-version: 1.14.4
+        id: go
+
       - uses: actions/checkout@master
         with:
           # Must use at least depth 2!
@@ -19,9 +29,16 @@ jobs:
           pip3 install awscli
           printf "%s\n" ${{ secrets.AWS_ACCESS_KEY }} ${{ secrets.AWS_SECRET_KEY }} ${{ secrets.AWS_REGION }} "json" | aws configure
 
+      - name: Build chaosctl
+        run: make chaosctl
+
       - name: Upload files
         run: |
           GIT_TAG=${GITHUB_REF##*/}
+          if [[ "$GIT_TAG" == "master" ]]; then
+            GIT_TAG="latest"
+          fi
           aws s3 cp install.sh ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/install.sh
           aws s3 cp manifests/crd.yaml ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/crd.yaml
           aws s3 cp examples/web-show/deploy.sh ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/web-show/deploy.sh
+          aws s3 cp bin/chaosctl ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/chaosctl
