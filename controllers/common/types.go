@@ -67,6 +67,12 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	status := chaos.GetStatus()
 
+	phase := status.Experiment.Phase
+	failedMessage := status.FailedMessage
+	startTime := status.Experiment.StartTime
+	endTime := status.Experiment.EndTime
+	duration := status.Experiment.Duration
+
 	if chaos.IsDeleted() {
 		// This chaos was deleted
 		r.Log.Info("Removing self")
@@ -75,8 +81,8 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			updateFailedMessage(ctx, r, chaos, err.Error())
 			return ctrl.Result{Requeue: true}, err
 		}
-		status.Experiment.Phase = v1alpha1.ExperimentPhaseFinished
-		status.FailedMessage = emptyString
+		phase = v1alpha1.ExperimentPhaseFinished
+		failedMessage = emptyString
 	} else if chaos.IsPaused() {
 		if status.Experiment.Phase == v1alpha1.ExperimentPhaseRunning {
 			r.Log.Info("Pausing")
@@ -87,15 +93,15 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 				return ctrl.Result{Requeue: true}, err
 			}
 			now := time.Now()
-			status.Experiment.EndTime = &metav1.Time{
+			endTime = &metav1.Time{
 				Time: now,
 			}
 			if status.Experiment.StartTime != nil {
-				status.Experiment.Duration = now.Sub(status.Experiment.StartTime.Time).String()
+				duration = now.Sub(status.Experiment.StartTime.Time).String()
 			}
 		}
-		status.Experiment.Phase = v1alpha1.ExperimentPhasePaused
-		status.FailedMessage = emptyString
+		phase = v1alpha1.ExperimentPhasePaused
+		failedMessage = emptyString
 	} else if status.Experiment.Phase == v1alpha1.ExperimentPhaseRunning {
 		r.Log.Info("The common chaos is already running", "name", req.Name, "namespace", req.Namespace)
 		return ctrl.Result{}, nil
@@ -107,26 +113,31 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			r.Log.Error(err, "failed to apply chaos action")
 			updateFailedMessage(ctx, r, chaos, err.Error())
 
-			status.Experiment.Phase = v1alpha1.ExperimentPhaseFailed
-
-			updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-				return r.Update(ctx, chaos)
-			})
-			if updateError != nil {
-				r.Log.Error(updateError, "unable to update chaos finalizers")
-				updateFailedMessage(ctx, r, chaos, updateError.Error())
-			}
+			phase = v1alpha1.ExperimentPhaseFailed
 
 			return ctrl.Result{Requeue: true}, err
 		}
-		status.Experiment.StartTime = &metav1.Time{
+		startTime = &metav1.Time{
 			Time: time.Now(),
 		}
-		status.Experiment.Phase = v1alpha1.ExperimentPhaseRunning
-		status.FailedMessage = emptyString
+		phase = v1alpha1.ExperimentPhaseRunning
+		failedMessage = emptyString
 	}
+	err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		if err = r.Client.Get(ctx, req.NamespacedName, chaos); err != nil {
+			r.Log.Error(err, "unable to get chaos")
+			return err
+		}
 
-	if err := r.Update(ctx, chaos); err != nil {
+		status := chaos.GetStatus()
+		status.Experiment.Phase = phase
+		status.FailedMessage = failedMessage
+		status.Experiment.StartTime = startTime
+		status.Experiment.EndTime = endTime
+		status.Experiment.Duration = duration
+		return r.Update(ctx, chaos)
+	})
+	if err != nil {
 		r.Log.Error(err, "unable to update chaos status")
 		return ctrl.Result{}, err
 	}
@@ -134,6 +145,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	return ctrl.Result{}, nil
 }
 
+// Since this will make the reconciler requeued, we do not retry it.
 func updateFailedMessage(
 	ctx context.Context,
 	r *Reconciler,
