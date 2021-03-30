@@ -286,13 +286,16 @@ func (s *Service) report(c *gin.Context) {
 // @Router /archives/{uid} [delete]
 func (s *Service) delete(c *gin.Context) {
 	var (
-		err error
-		exp *core.Experiment
+		err      error
+		exp      *core.Experiment
+		uidSlice []string
 	)
 
 	uid := c.Param("uid")
 	uids := c.Query("uids")
-	uidSlice := strings.Split(uids, ",")
+	if uids != "" {
+		uidSlice = strings.Split(uids, ",")
+	}
 	errFlag := false
 
 	if uid != "" && uids != "" {

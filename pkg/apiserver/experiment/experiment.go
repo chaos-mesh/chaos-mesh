@@ -854,6 +854,7 @@ func (s *Service) deleteExperiment(c *gin.Context) {
 		ok        bool
 		exp       *core.Experiment
 		errFlag   bool
+		uidSlice  []string
 	)
 
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
@@ -864,7 +865,9 @@ func (s *Service) deleteExperiment(c *gin.Context) {
 
 	uid := c.Param("uid")
 	uids := c.Query("uids")
-	uidSlice := strings.Split(uids, ",")
+	if uids != "" {
+		uidSlice = strings.Split(uids, ",")
+	}
 	force := c.DefaultQuery("force", "false")
 	errFlag = false
 
