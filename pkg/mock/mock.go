@@ -56,8 +56,8 @@ var points = mockPoints{m: make(map[string]interface{})}
 func On(fpname string) interface{} {
 	var ret interface{}
 	failpoint.Inject(fpname, func() {
-			ret = points.get(fpname)
-		})
+		ret = points.get(fpname)
+	})
 	return ret
 }
 
