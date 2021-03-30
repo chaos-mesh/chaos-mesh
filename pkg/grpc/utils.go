@@ -37,37 +37,23 @@ var log = ctrl.Log.WithName("util")
 
 // CreateGrpcConnection create a grpc connection with given port and address
 func CreateGrpcConnection(address string, port int, caCertPath string, certPath string, keyPath string) (*grpc.ClientConn, error) {
-	options := []grpc.DialOption{grpc.WithUnaryInterceptor(TimeoutClientInterceptor)}
-
+	var caCert, cert, key []byte
 	if caCertPath != "" && certPath != "" && keyPath != "" {
-		caCert, err := ioutil.ReadFile(caCertPath)
+		var err error
+		caCert, err = ioutil.ReadFile(caCertPath)
 		if err != nil {
 			return nil, err
 		}
-		caCertPool := x509.NewCertPool()
-		caCertPool.AppendCertsFromPEM(caCert)
-
-		clientCert, err := tls.LoadX509KeyPair(certPath, keyPath)
+		cert, err = ioutil.ReadFile(certPath)
 		if err != nil {
 			return nil, err
 		}
-
-		creds := credentials.NewTLS(&tls.Config{
-			Certificates: []tls.Certificate{clientCert},
-			RootCAs:      caCertPool,
-			ServerName:   "chaos-daemon.chaos-mesh.org",
-		})
-		options = append(options, grpc.WithTransportCredentials(creds))
-	} else {
-		options = append(options, grpc.WithInsecure())
+		key, err = ioutil.ReadFile(keyPath)
+		if err != nil {
+			return nil, err
+		}
 	}
-
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", address, port),
-		options...)
-	if err != nil {
-		return nil, err
-	}
-	return conn, nil
+	return CreateGrpcConnectionFromRaw(address, port, caCert, cert, key)
 }
 
 // CreateGrpcConnectionFromRaw create a grpc connection with given port and address, and use raw data instead of file path
