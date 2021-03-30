@@ -23,9 +23,10 @@ import (
 	"strings"
 	"time"
 
+	"google.golang.org/grpc"
+
 	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
-	"google.golang.org/grpc"
 
 	"github.com/fatih/color"
 	"github.com/pkg/errors"
@@ -437,10 +438,9 @@ func getGrpcClient(port int) (*grpc.ClientConn, error) {
 			return nil, err
 		}
 		return grpcUtils.CreateGrpcConnectionFromRaw("localhost", port, config.caCert, config.cert, config.key)
-	} else {
-		PrettyPrint("Using TLS Files.", 0, Green)
-		return grpcUtils.CreateGrpcConnection("localhost", port, TLSFiles.CaCert, TLSFiles.Cert, TLSFiles.Key)
 	}
+	PrettyPrint("Using TLS Files.", 0, Green)
+	return grpcUtils.CreateGrpcConnection("localhost", port, TLSFiles.CaCert, TLSFiles.Cert, TLSFiles.Key)
 }
 
 func getTLSConfigFromSecrets() (*rawTLSConfig, error) {
