@@ -25,6 +25,7 @@ import (
 
 	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
+	"google.golang.org/grpc"
 
 	"github.com/fatih/color"
 	"github.com/pkg/errors"
@@ -84,6 +85,11 @@ const (
 	ItemSuccess = iota + 1
 	ItemFailure
 )
+
+const ChaosDaemonClientCert = "chaos-mesh-daemon-client-certs"
+const ChaosDaemonNamespace = "chaos-testing"
+
+var TLSFiles TLSFileConfig
 
 type ItemResult struct {
 	Name    string
@@ -313,7 +319,7 @@ func GetPidFromPod(ctx context.Context, pod v1.Pod, daemon v1.Pod) (uint32, erro
 		pfCancel()
 	}()
 
-	daemonClient, err := NewChaosDaemonClientLocally(int(localPort))
+	daemonClient, err := ConnectToLocalChaosDaemon(int(localPort))
 	if err != nil {
 		return 0, errors.Wrapf(err, "failed to create new chaos daemon client with local port %d", localPort)
 	}
@@ -407,26 +413,37 @@ Please check network policy / firewall, or see FAQ on website`, daemon.Name, dae
 	return nil
 }
 
-// NewChaosDaemonClientLocally would create ChaosDaemonClient in localhost
-func NewChaosDaemonClientLocally(port int) (daemonClient.ChaosDaemonClientInterface, error) {
+// ConnectToLocalChaosDaemon would connect to ChaosDaemon run in localhost
+func ConnectToLocalChaosDaemon(port int) (daemonClient.ChaosDaemonClientInterface, error) {
 	if cli := mock.On("MockChaosDaemonClient"); cli != nil {
 		return cli.(daemonClient.ChaosDaemonClientInterface), nil
 	}
 	if err := mock.On("NewChaosDaemonClientError"); err != nil {
 		return nil, err.(error)
 	}
-	config, err := getTLSConfig()
-	if err != nil {
-		return nil, err
-	}
-	cc, err := grpcUtils.CreateGrpcConnectionFromRaw("localhost", port, config.caCert, config.cert, config.key)
+	cc, err := getGrpcClient(port)
+
 	if err != nil {
 		return nil, err
 	}
 	return daemonClient.New(cc), nil
 }
 
-func getTLSConfig() (*rawTLSConfig, error) {
+func getGrpcClient(port int) (*grpc.ClientConn, error) {
+	if TLSFiles.CaCert == "" || TLSFiles.Cert == "" || TLSFiles.Key == "" {
+		PrettyPrint("TLS Files are not complete, fall back to use secrets.", 0, Green)
+		config, err := getTLSConfigFromSecrets()
+		if err != nil {
+			return nil, err
+		}
+		return grpcUtils.CreateGrpcConnectionFromRaw("localhost", port, config.caCert, config.cert, config.key)
+	} else {
+		PrettyPrint("Using TLS Files.", 0, Green)
+		return grpcUtils.CreateGrpcConnection("localhost", port, TLSFiles.CaCert, TLSFiles.Cert, TLSFiles.Key)
+	}
+}
+
+func getTLSConfigFromSecrets() (*rawTLSConfig, error) {
 	var cfg rawTLSConfig
 	restconfig, err := config.GetConfig()
 	if err != nil {
@@ -436,7 +453,7 @@ func getTLSConfig() (*rawTLSConfig, error) {
 	if err != nil {
 		return nil, err
 	}
-	secret, err := kubeClient.CoreV1().Secrets("chaos-testing").Get("chaos-mesh-daemon-client-certs", metav1.GetOptions{})
+	secret, err := kubeClient.CoreV1().Secrets(ChaosDaemonNamespace).Get(ChaosDaemonClientCert, metav1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -450,4 +467,9 @@ type rawTLSConfig struct {
 	caCert []byte
 	cert   []byte
 	key    []byte
+}
+type TLSFileConfig struct {
+	CaCert string
+	Cert   string
+	Key    string
 }
