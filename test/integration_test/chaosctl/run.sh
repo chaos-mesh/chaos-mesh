@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set -eu
-
+set -u
+code=0
 cur=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 cd $cur/../../../bin
 
@@ -45,11 +45,14 @@ kubectl apply -f delay.yaml
 
 echo "Checking chaosctl function"
 ./chaosctl logs 1>/dev/null
-./chaosctl debug networkchaos web-show-network-delay
-
-echo "Everything good, cleaning up"
+status=$(./chaosctl debug networkchaos web-show-network-delay | grep "Execute as expected")
+if [[ -z "$status" ]]; then
+    echo "Chaos is not running as expected"
+    code=1
+fi
+echo "Cleaning up"
 kubectl delete -f delay.yaml
 rm delay.yaml
 sh deploy.sh -d
 rm deploy.sh
-exit 0
+exit $code
