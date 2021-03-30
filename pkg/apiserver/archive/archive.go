@@ -305,8 +305,9 @@ func (s *Service) delete(c *gin.Context) {
 		return
 	}
 
-	uidSlice = append(uidSlice, uid)
-
+	if uid != "" {
+		uidSlice = append(uidSlice, uid)
+	}
 	for _, uid := range uidSlice {
 		if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
 			if gorm.IsRecordNotFoundError(err) {
