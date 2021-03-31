@@ -35,6 +35,20 @@ const (
 
 )
 
+var allChaosTemplateType = []TemplateType{
+	TypeAwsChaos,
+	TypeDNSChaos,
+	TypeHTTPChaos,
+	TypeIoChaos,
+	TypeJVMChaos,
+	TypeKernelChaos,
+	TypeNetworkChaos,
+	TypePodChaos,
+	TypeStressChaos,
+	TypeTimeChaos,
+
+}
+
 type EmbedChaos struct {
 	// +optional
 	AwsChaos *AwsChaosSpec `json:"aws_chaos,omitempty"`

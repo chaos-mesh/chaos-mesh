@@ -16,13 +16,11 @@ package controllers
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/retry"
@@ -51,16 +49,18 @@ func (it *ChaosNodeReconciler) Reconcile(request reconcile.Request) (reconcile.R
 		return reconcile.Result{}, client.IgnoreNotFound(err)
 	}
 
+	if !v1alpha1.IsChoasTemplateType(node.Spec.Type) {
+		return reconcile.Result{}, nil
+	}
+
 	if ConditionEqualsTo(node.Status, v1alpha1.ConditionDeadlineExceed, corev1.ConditionTrue) {
 		err := it.recoverChaos(ctx, node)
 		return reconcile.Result{}, err
 	}
 
-	if availableChaos(string(node.Spec.Type)) {
-		if !ConditionEqualsTo(node.Status, v1alpha1.ConditionChaosInjected, corev1.ConditionTrue) {
-			err = it.injectChaos(ctx, node)
-			return reconcile.Result{}, err
-		}
+	if !ConditionEqualsTo(node.Status, v1alpha1.ConditionChaosInjected, corev1.ConditionTrue) {
+		err = it.injectChaos(ctx, node)
+		return reconcile.Result{}, err
 	}
 
 	return reconcile.Result{}, nil
@@ -90,6 +90,7 @@ func (it *ChaosNodeReconciler) injectChaos(ctx context.Context, node v1alpha1.Wo
 		it.logger.Error(err, "failed to create chaos")
 		return nil
 	}
+	it.logger.Info("chaos object created", "namespace", meta.GetNamespace(), "name", meta.GetName())
 
 	it.eventRecorder.Event(&node, corev1.EventTypeNormal, v1alpha1.ChaosCRCreated, fmt.Sprintf("Chaos CR %s/%s created", meta.GetNamespace(), meta.GetName()))
 
@@ -169,9 +170,4 @@ func (it *ChaosNodeReconciler) recoverChaos(ctx context.Context, node v1alpha1.W
 	})
 
 	return err
-}
-
-func availableChaos(kind string) bool {
-	// TODO: use generated KindMap
-	return strings.Contains(strings.ToLower(kind), "chaos")
 }

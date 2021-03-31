@@ -51,6 +51,11 @@ func (it *workflowCodeGenerator) Render() string {
 	for _, item := range it.chaosTypes {
 		spawnMethod += generateSpawnMethodItem(item)
 	}
+	allChaosTemplateTypeEntries := ""
+	for _, item := range it.chaosTypes {
+		allChaosTemplateTypeEntries += fmt.Sprintf(`	Type%s,
+`, item)
+	}
 
 	imports := `import (
 	"fmt"
@@ -66,6 +71,10 @@ func (it *workflowCodeGenerator) Render() string {
 const (
 %s
 )
+
+var allChaosTemplateType = []TemplateType{
+%s
+}
 
 type EmbedChaos struct {
 %s
@@ -85,6 +94,7 @@ func (it *EmbedChaos) SpawnNewObject(templateType TemplateType) (runtime.Object,
 		codeHeader,
 		imports,
 		workflowTemplateTypesEntries,
+		allChaosTemplateTypeEntries,
 		embedChaosEntries,
 		spawnMethod,
 	)

@@ -53,6 +53,19 @@ const (
 	TypeSuspend  TemplateType = "Suspend"
 )
 
+func IsChoasTemplateType(target TemplateType) bool {
+	return contains(allChaosTemplateType, target)
+}
+
+func contains(arr []TemplateType, target TemplateType) bool {
+	for _, item := range arr {
+		if item == target {
+			return true
+		}
+	}
+	return false
+}
+
 type Template struct {
 	Name     string       `json:"name"`
 	Type     TemplateType `json:"template_type"`
