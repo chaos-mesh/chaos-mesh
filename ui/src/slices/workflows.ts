@@ -7,7 +7,7 @@ export type TemplateExperiment = {
 export interface Template {
   type: 'single' | 'serial' | 'parallel' | 'suspend'
   index?: number
-  name?: string
+  name: string
   experiments: TemplateExperiment[]
 }
 
@@ -35,10 +35,19 @@ const workflowsSlice = createSlice({
 
       state.templates[name!] = action.payload
     },
+    deleteTemplate(state, action: PayloadAction<string>) {
+      const name = action.payload
+      const templates = state.templates
+
+      delete templates[name]
+
+      state.templates = templates
+      index--
+    },
     appendToTemplate(state, action: PayloadAction<TemplateExperiment>) {},
   },
 })
 
-export const { setTemplate, updateTemplate } = workflowsSlice.actions
+export const { setTemplate, updateTemplate, deleteTemplate } = workflowsSlice.actions
 
 export default workflowsSlice.reducer

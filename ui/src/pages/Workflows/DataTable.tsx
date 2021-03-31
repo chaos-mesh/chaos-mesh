@@ -36,9 +36,7 @@ const DataTable: React.FC<DataTableProps> = ({ data, fetchData }) => {
 
   const handleJumpTo = (ns: string, name: string) => () => history.push(`/workflows/${ns}/${name}`)
 
-  const handleSelect = (selected: typeof initialSelected) => (e: any) => {
-    e.stopPropagation()
-
+  const handleSelect = (selected: typeof initialSelected) => () => {
     setSelected(selected)
 
     confirmRef.current!.setOpen(true)

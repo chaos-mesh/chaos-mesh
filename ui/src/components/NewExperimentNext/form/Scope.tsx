@@ -1,6 +1,6 @@
 import { AutocompleteMultipleField, SelectField, TextField } from 'components/FormField'
 import { Box, InputAdornment, MenuItem, Typography } from '@material-ui/core'
-import React, { useEffect, useMemo, useRef } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import { arrToObjBySep, joinObjKVs, toTitleCase } from 'lib/utils'
 import {
   getAnnotations,
@@ -50,8 +50,6 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
   const labelKVs = useMemo(() => joinObjKVs(labels, kvSeparator), [labels])
   const annotationKVs = useMemo(() => joinObjKVs(annotations, kvSeparator), [annotations])
 
-  const firstRender = useRef(true)
-
   const handleChangeIncludeAll = (id: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const lastValues = getIn(values, id)
     const currentValues = (e.target.value as unknown) as string[]
@@ -92,22 +90,18 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
   }, [currentNamespaces, getPods, dispatch])
 
   useEffect(() => {
-    if (firstRender.current) {
-      firstRender.current = false
-
-      return
+    if (currentLabels.length || currentAnnotations.length) {
+      dispatch(
+        getPods({
+          namespace_selectors: currentNamespaces,
+          label_selectors: arrToObjBySep(currentLabels, kvSeparator),
+          annotation_selectors: arrToObjBySep(currentAnnotations, kvSeparator),
+        })
+      )
     }
 
-    dispatch(
-      getPods({
-        namespace_selectors: currentNamespaces,
-        label_selectors: arrToObjBySep(currentLabels, kvSeparator),
-        annotation_selectors: arrToObjBySep(currentAnnotations, kvSeparator),
-      })
-    )
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [firstRender, currentLabels, currentAnnotations])
+  }, [currentLabels, currentAnnotations])
 
   return (
     <>

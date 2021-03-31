@@ -32,12 +32,6 @@ const NewExperiment: React.ForwardRefRenderFunction<NewExperimentHandles, NewExp
 
   const loadCallback = () => setShowNewPanel('initial')
 
-  const internalOnSubmit = (experiment: any) => {
-    onSubmit!(experiment)
-
-    setShowNewPanel('existing')
-  }
-
   return (
     <>
       {loadFrom && (
@@ -60,11 +54,13 @@ const NewExperiment: React.ForwardRefRenderFunction<NewExperimentHandles, NewExp
           </Breadcrumbs>
         </Box>
       )}
-      <Space spacing={6} vertical style={{ display: showNewPanel === 'initial' ? 'initial' : 'none' }}>
-        <Step1 />
-        <Step2 />
-        <Step3 onSubmit={onSubmit ? internalOnSubmit : undefined} />
-      </Space>
+      {showNewPanel === 'initial' && (
+        <Space spacing={6} vertical>
+          <Step1 />
+          <Step2 />
+          <Step3 onSubmit={onSubmit ? onSubmit : undefined} />
+        </Space>
+      )}
       {loadFrom && (
         <Box style={{ display: showNewPanel === 'existing' ? 'initial' : 'none' }}>
           <LoadFrom loadCallback={loadCallback} />

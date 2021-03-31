@@ -1,4 +1,5 @@
 import { Box, Divider, FormControlLabel, Radio, RadioGroup, Typography } from '@material-ui/core'
+import { PreDefinedValue, getDB } from 'lib/idb'
 import React, { useEffect, useState } from 'react'
 
 import { Archive } from 'api/archives.type'
@@ -27,6 +28,7 @@ const LoadFrom: React.FC<LoadFromProps> = ({ loadCallback }) => {
 
   const [experiments, setExperiments] = useState<Experiment[]>()
   const [archives, setArchives] = useState<Archive[]>()
+  const [predefined, setPredefined] = useState<PreDefinedValue[]>()
   const [radio, setRadio] = useState('')
 
   const fetchExperiments = () =>
@@ -41,8 +43,12 @@ const LoadFrom: React.FC<LoadFromProps> = ({ loadCallback }) => {
       .then(({ data }) => setArchives(data))
       .catch(console.error)
 
+  const fetchPredefined = async () => setPredefined(await (await getDB()).getAll('predefined'))
+
   useEffect(() => {
     Promise.all([fetchExperiments(), fetchArchives()])
+
+    fetchPredefined()
   }, [])
 
   function fillExperiment(original: any) {
@@ -60,6 +66,17 @@ const LoadFrom: React.FC<LoadFromProps> = ({ loadCallback }) => {
 
   const onRadioChange = (e: any) => {
     const [type, uuid] = e.target.value.split('+')
+
+    if (type === 'p') {
+      const experiment = predefined?.filter((p) => p.name === uuid)[0].yaml
+
+      fillExperiment(experiment)
+
+      loadCallback && loadCallback()
+
+      return
+    }
+
     const apiRequest = type === 'e' ? api.experiments : api.archives
 
     setRadio(e.target.value)
@@ -77,8 +94,6 @@ const LoadFrom: React.FC<LoadFromProps> = ({ loadCallback }) => {
             message: intl.formatMessage({ id: 'common.loadSuccessfully' }),
           })
         )
-
-        setRadio('')
       })
       .catch(console.error)
   }
@@ -98,7 +113,7 @@ const LoadFrom: React.FC<LoadFromProps> = ({ loadCallback }) => {
                   key={e.uid}
                   value={`e+${e.uid}`}
                   control={<Radio color="primary" />}
-                  label={RadioLabel(e)}
+                  label={RadioLabel(e.name, e.uid)}
                 />
               ))}
             </Box>
@@ -120,12 +135,34 @@ const LoadFrom: React.FC<LoadFromProps> = ({ loadCallback }) => {
                   key={a.uid}
                   value={`a+${a.uid}`}
                   control={<Radio color="primary" />}
-                  label={RadioLabel(a)}
+                  label={RadioLabel(a.name, a.uid)}
                 />
               ))}
             </Box>
           ) : archives?.length === 0 ? (
             <Typography variant="body2">{T('archives.noArchivesFound')}</Typography>
+          ) : (
+            <SkeletonN n={3} />
+          )}
+          <Box my={6}>
+            <Divider />
+          </Box>
+          <Box mb={3}>
+            <Typography>{T('dashboard.predefined')}</Typography>
+          </Box>
+          {predefined && predefined.length > 0 ? (
+            <Box display="flex" flexWrap="wrap">
+              {predefined.map((p) => (
+                <FormControlLabel
+                  key={p.name}
+                  value={`p+${p.name}`}
+                  control={<Radio color="primary" />}
+                  label={RadioLabel(p.name)}
+                />
+              ))}
+            </Box>
+          ) : predefined?.length === 0 ? (
+            <Typography variant="body2">{T('dashboard.noPredefinedFound')}</Typography>
           ) : (
             <SkeletonN n={3} />
           )}

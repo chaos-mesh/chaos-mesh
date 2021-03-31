@@ -1,19 +1,19 @@
 import { Box, Button, MenuItem, StepLabel, Typography } from '@material-ui/core'
-import { Form, Formik } from 'formik'
+import { Form, Formik, FormikHelpers } from 'formik'
+import MultiNode, { MultiNodeHandles } from './MultiNode'
 import NewExperimentNext, { NewExperimentHandles } from 'components/NewExperimentNext'
 import { SelectField, TextField } from 'components/FormField'
 import { TemplateExperiment, setTemplate } from 'slices/workflows'
+import { resetNewExperiment, setExternalExperiment } from 'slices/experiments'
 import { useRef, useState } from 'react'
 
 import AddCircleIcon from '@material-ui/icons/AddCircle'
-import MultiNode from './MultiNode'
 import PublishIcon from '@material-ui/icons/Publish'
 import Space from 'components-mui/Space'
 import T from 'components/T'
 import _snakecase from 'lodash.snakecase'
 import { makeStyles } from '@material-ui/core/styles'
 import { setAlert } from 'slices/globalStatus'
-import { setExternalExperiment } from 'slices/experiments'
 import { useIntl } from 'react-intl'
 import { useStoreDispatch } from 'store'
 
@@ -50,11 +50,7 @@ const useStyles = makeStyles((theme) => ({
 
 const types = ['single', 'serial', 'parallel', 'suspend']
 
-interface AddProps {
-  onSubmitCallback?: () => void
-}
-
-const Add: React.FC<AddProps> = ({ onSubmitCallback }) => {
+const Add = () => {
   const classes = useStyles()
   const intl = useIntl()
 
@@ -64,14 +60,14 @@ const Add: React.FC<AddProps> = ({ onSubmitCallback }) => {
   const [num, setNum] = useState(1)
   const [otherTypes, setOtherTypes] = useState(false)
   const [experiments, setExperiments] = useState<TemplateExperiment[]>([])
-  const [current, setCurrent] = useState(0)
   const formRef = useRef<any>()
   const newERef = useRef<NewExperimentHandles>(null)
+  const multiNodeRef = useRef<MultiNodeHandles>(null)
 
   const resetNoSingle = () => {
     setShowNum(false)
     setExperiments([])
-    setCurrent(0)
+    multiNodeRef.current?.setCurrent(0)
   }
 
   const onValidate = ({ type, num: newNum }: { type: string; num: number }) => {
@@ -121,7 +117,9 @@ const Add: React.FC<AddProps> = ({ onSubmitCallback }) => {
         })
       )
     } else {
-      setCurrent(current + 1)
+      const current = multiNodeRef.current!.current
+
+      multiNodeRef.current!.setCurrent(current + 1)
 
       // Edit the node that has been submitted before
       if (current < experiments.length) {
@@ -142,11 +140,23 @@ const Add: React.FC<AddProps> = ({ onSubmitCallback }) => {
       }
     }
 
-    onSubmitCallback && onSubmitCallback()
+    newERef.current?.setShowNewPanel('existing')
+    dispatch(resetNewExperiment())
   }
 
-  const submitNoSingleNode = () => {
+  const submitNoSingleNode = (_: any, { resetForm }: FormikHelpers<any>) => {
     const { type, name } = formRef.current.values
+
+    if (name === '') {
+      dispatch(
+        setAlert({
+          type: 'warning',
+          message: intl.formatMessage({ id: 'newW.nameValidation' }),
+        })
+      )
+
+      return
+    }
 
     dispatch(
       setTemplate({
@@ -157,6 +167,7 @@ const Add: React.FC<AddProps> = ({ onSubmitCallback }) => {
     )
 
     resetNoSingle()
+    resetForm()
   }
 
   const setCurrentCallback = (index: number) => {
@@ -196,7 +207,7 @@ const Add: React.FC<AddProps> = ({ onSubmitCallback }) => {
         <Formik
           innerRef={formRef}
           initialValues={{ type: 'single', num: 2, name: '' }}
-          onSubmit={() => {}}
+          onSubmit={submitNoSingleNode}
           validate={onValidate}
           validateOnBlur={false}
         >
@@ -223,18 +234,13 @@ const Add: React.FC<AddProps> = ({ onSubmitCallback }) => {
             {showNum && (
               <Box display="flex" justifyContent="space-between" alignItems="center" mt={3}>
                 <TextField mb={0} className={classes.field} name="name" label={T('newE.basic.name')} />
-                <MultiNode
-                  count={num}
-                  current={current}
-                  setCurrent={setCurrent}
-                  setCurrentCallback={setCurrentCallback}
-                />
+                <MultiNode ref={multiNodeRef} count={num} setCurrentCallback={setCurrentCallback} />
                 <Button
+                  type="submit"
                   variant="contained"
                   color="primary"
                   startIcon={<PublishIcon />}
                   disabled={experiments.length !== num}
-                  onClick={submitNoSingleNode}
                 >
                   {T('common.submit')}
                 </Button>

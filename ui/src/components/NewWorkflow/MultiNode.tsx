@@ -1,7 +1,7 @@
+import React, { useImperativeHandle, useState } from 'react'
 import { Step, StepLabel, Stepper } from '@material-ui/core'
 
 import AdjustIcon from '@material-ui/icons/Adjust'
-import React from 'react'
 import clsx from 'clsx'
 import { makeStyles } from '@material-ui/core/styles'
 
@@ -29,15 +29,28 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
-interface MultiNodeProps {
-  count: number
+export interface MultiNodeHandles {
   current: number
   setCurrent: React.Dispatch<React.SetStateAction<number>>
+}
+
+interface MultiNodeProps {
+  count: number
   setCurrentCallback?: (index: number) => boolean
 }
 
-const MultiNode: React.FC<MultiNodeProps> = ({ count, current, setCurrent, setCurrentCallback }) => {
+const MultiNode: React.ForwardRefRenderFunction<MultiNodeHandles, MultiNodeProps> = (
+  { count, setCurrentCallback },
+  ref
+) => {
   const classes = useStyles()
+  const [current, setCurrent] = useState(0)
+
+  // Methods exposed to the parent
+  useImperativeHandle(ref, () => ({
+    current,
+    setCurrent,
+  }))
 
   const handleSetCurrent = (index: number) => () => {
     if (setCurrentCallback) {
@@ -74,4 +87,4 @@ const MultiNode: React.FC<MultiNodeProps> = ({ count, current, setCurrent, setCu
   )
 }
 
-export default MultiNode
+export default React.forwardRef(MultiNode)

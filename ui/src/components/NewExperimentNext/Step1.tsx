@@ -1,8 +1,8 @@
 import { Box, Card, Divider, GridList, GridListTile, Typography, useMediaQuery, useTheme } from '@material-ui/core'
-import React, { useEffect, useState } from 'react'
 import { iconByKind, transByKind } from 'lib/byKind'
-import { setStep1, setTarget as setTargetToStore } from 'slices/experiments'
+import { setKindAction as setKindActionToStore, setStep1, setTarget as setTargetToStore } from 'slices/experiments'
 import targetData, { Kind, Target, schema } from './data/target'
+import { useEffect, useState } from 'react'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
 import CheckIcon from '@material-ui/icons/Check'
@@ -68,8 +68,7 @@ const Step1 = () => {
   const dispatch = useStoreDispatch()
 
   const [kindAction, setKindAction] = useState<[Kind | '', string]>([_kind, _action])
-  const kind = kindAction[0]
-  const action = kindAction[1]
+  const [kind, action] = kindAction
 
   useEffect(() => {
     setKindAction([_kind, _action])
@@ -77,18 +76,26 @@ const Step1 = () => {
 
   const handleSelectTarget = (key: Kind) => () => setKindAction([key, ''])
 
-  const handleSelectAction = (action: string) => () => {
-    if (submitDirectly.includes(action)) {
-      handleSubmitStep1(targetData[kind as Kind].categories!.filter(({ key }) => key === action)[0].spec)
-    }
+  const handleSelectAction = (newAction: string) => () => {
+    dispatch(setKindActionToStore([kind, newAction]))
 
-    setKindAction([kind, action])
+    if (submitDirectly.includes(newAction)) {
+      handleSubmitStep1({ action: newAction })
+    }
   }
 
   const handleSubmitStep1 = (values: Record<string, any>) => {
     const result = {
       kind,
-      [_snakecase(kind)]: values,
+      [_snakecase(kind)]:
+        submitDirectly.includes(values.action) && Object.keys(values).length === 1
+          ? values
+          : action
+          ? {
+              ...values,
+              action,
+            }
+          : values,
     }
 
     if (process.env.NODE_ENV === 'development') {

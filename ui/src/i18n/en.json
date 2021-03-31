@@ -23,7 +23,7 @@
     "recent": "Recent"
   },
   "newE": {
-    "title": "New Experiment",
+    "title": "New experiment",
     "titleStep1": "Choose a Target",
     "titleStep2": "Fill the experiment info",
     "steps": {
@@ -112,7 +112,8 @@
   },
   "workflows": {
     "title": "Workflows",
-    "noWorkflowsFound": "No workflows found"
+    "noWorkflowsFound": "No workflows found",
+    "deleteDesc": "This workflow will be permanently deleted"
   },
   "workflow": {
     "entry": "Entry",
@@ -131,8 +132,11 @@
       "serial": "Serial",
       "parallel": "Parallel",
       "suspend": "Suspend",
-      "number": "Number"
+      "number": "Number",
+      "deleteDesc": "This node will be deleted",
+      "submitAll": "Submit All"
     },
+    "nameValidation": "The name is required",
     "submit": "Submit workflow",
     "messages": {
       "m1": "Please complete the creation of the current node first"
@@ -162,7 +166,7 @@
     "title": "Archives",
     "single": "Archive",
     "noArchivesFound": "No archives found",
-    "deleteDesc": "This Archive will be permanently deleted",
+    "deleteDesc": "This archive will be permanently deleted",
     "numberOfRuns": "Number of Runs",
     "numberOfAffectedPods": "Number of Affected Pods"
   },
