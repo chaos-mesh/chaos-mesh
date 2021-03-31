@@ -58,6 +58,7 @@ func main() {
 	allTypes := make([]string, 0, 10)
 
 	workflowGenerator := newWorkflowCodeGenerator(nil)
+	workflowTestGenerator := newWorkflowTestCodeGenerator(nil)
 
 	filepath.Walk("./api/v1alpha1", func(path string, info os.FileInfo, err error) error {
 		log := log.WithValues("file", path)
@@ -113,6 +114,7 @@ func main() {
 						testCode += generateTest(baseType.Name.Name)
 						initImpl += generateInit(baseType.Name.Name)
 						workflowGenerator.AppendTypes(baseType.Name.Name)
+						workflowTestGenerator.AppendTypes(baseType.Name.Name)
 						allTypes = append(allTypes, baseType.Name.Name)
 						continue out
 					}
@@ -152,5 +154,12 @@ func init() {
 		os.Exit(1)
 	}
 	fmt.Fprint(file, workflowGenerator.Render())
+
+	file, err = os.Create("./api/v1alpha1/zz_generated.workflow.chaosmesh_test.go")
+	if err != nil {
+		log.Error(err, "fail to create file")
+		os.Exit(1)
+	}
+	fmt.Fprint(file, workflowTestGenerator.Render())
 
 }
