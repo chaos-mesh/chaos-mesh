@@ -155,7 +155,7 @@ const Predefined = React.memo(() => {
       </Space>
       <Modal open={editorOpen} onClose={onModalClose}>
         <div>
-          <Paper className={classes.editorPaperWrapper} padding={false}>
+          <Paper className={classes.editorPaperWrapper} padding={0}>
             {experiment && (
               <>
                 <PaperTop title={experiment.name}>

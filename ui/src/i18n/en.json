@@ -137,6 +137,7 @@
       "submitAll": "Submit All"
     },
     "nameValidation": "The name is required",
+    "durationHelper": "The suspend duration",
     "submit": "Submit workflow",
     "messages": {
       "m1": "Please complete the creation of the current node first"

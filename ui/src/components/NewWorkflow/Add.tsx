@@ -10,6 +10,7 @@ import { useRef, useState } from 'react'
 import AddCircleIcon from '@material-ui/icons/AddCircle'
 import PublishIcon from '@material-ui/icons/Publish'
 import Space from 'components-mui/Space'
+import Suspend from './Suspend'
 import T from 'components/T'
 import _snakecase from 'lodash.snakecase'
 import { makeStyles } from '@material-ui/core/styles'
@@ -253,6 +254,7 @@ const Add = () => {
         <Box style={{ display: otherTypes ? 'none' : 'initial' }}>
           <NewExperimentNext ref={newERef} initPanel="existing" onSubmit={onSubmit} />
         </Box>
+        {otherTypes && <Suspend />}
       </Box>
     </>
   )

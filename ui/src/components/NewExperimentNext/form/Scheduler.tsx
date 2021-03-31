@@ -9,6 +9,7 @@ import T from 'components/T'
 import { TextField } from 'components/FormField'
 import Tooltip from 'components-mui/Tooltip'
 import { useSelector } from 'react-redux'
+import { validateDuration } from 'lib/formikhelpers'
 
 const mustBeScheduled = ['pod-kill', 'container-kill']
 
@@ -17,16 +18,6 @@ function validateCron(value: string) {
 
   if (value === '') {
     error = 'The cron is required'
-  }
-
-  return error
-}
-
-function validateDuration(value: string) {
-  let error
-
-  if (value === '') {
-    error = 'The duration is required'
   }
 
   return error

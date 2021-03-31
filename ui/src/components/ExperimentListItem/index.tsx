@@ -168,7 +168,7 @@ const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
   )
 
   return (
-    <Paper padding={false} className={classes.root} onClick={handleJumpTo}>
+    <Paper padding={0} className={classes.root} onClick={handleJumpTo}>
       <Box display="flex" justifyContent="space-between" alignItems="center" p={3}>
         <Space display="flex" alignItems="center">
           {!isArchive &&

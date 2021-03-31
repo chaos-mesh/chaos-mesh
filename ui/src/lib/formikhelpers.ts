@@ -176,3 +176,13 @@ export function yamlToExperiment(yamlObj: any): any {
     },
   }
 }
+
+export function validateDuration(value: string) {
+  let error
+
+  if (value === '') {
+    error = 'The duration is required'
+  }
+
+  return error
+}

@@ -138,6 +138,7 @@
       "submitAll": "提交所有改动"
     },
     "nameValidation": "名称不能为空",
+    "durationHelper": "暂停的持续时间",
     "submit": "提交工作流",
     "messages": {
       "m1": "请首先完成当前节点的创建"

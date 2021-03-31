@@ -3,12 +3,12 @@ import { Box, Paper as MUIPaper, PaperProps as MUIPaperProps } from '@material-u
 import React from 'react'
 
 interface PaperProps extends MUIPaperProps {
-  padding?: boolean
+  padding?: number
 }
 
 const Paper: React.FC<PaperProps> = ({ padding = true, children, ...rest }) => (
   <MUIPaper {...rest} variant="outlined">
-    {padding ? <Box p={3}>{children}</Box> : children}
+    <Box p={padding || 3}>{children}</Box>
   </MUIPaper>
 )
 

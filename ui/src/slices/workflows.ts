@@ -9,6 +9,7 @@ export interface Template {
   index?: number
   name: string
   experiments: TemplateExperiment[]
+  suspend?: { duration: string }
 }
 
 let index = 0
@@ -44,7 +45,6 @@ const workflowsSlice = createSlice({
       state.templates = templates
       index--
     },
-    appendToTemplate(state, action: PayloadAction<TemplateExperiment>) {},
   },
 })
 

@@ -323,7 +323,7 @@ export default function ExperimentDetail() {
 
       <Modal open={configOpen} onClose={onModalClose}>
         <div>
-          <Paper className={classes.configPaper} padding={false}>
+          <Paper className={classes.configPaper} padding={0}>
             {detail && configOpen && (
               <>
                 <PaperTop title={detail.name}>
