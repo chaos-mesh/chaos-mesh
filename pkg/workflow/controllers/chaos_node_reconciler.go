@@ -129,17 +129,15 @@ func (it *ChaosNodeReconciler) recoverChaos(ctx context.Context, node v1alpha1.W
 		return nil
 	}
 
-	var chaosObject runtime.Object
-
 	var err error
-	target, err := v1alpha1.FetchChaosByTemplateType(node.Spec.Type)
+	chaosObject, err := v1alpha1.FetchChaosByTemplateType(node.Spec.Type)
 	if err != nil {
 		return err
 	}
 
 	err = it.kubeClient.Get(ctx,
 		types.NamespacedName{Namespace: node.Namespace, Name: node.Status.ChaosResource.Name},
-		target)
+		chaosObject)
 
 	if apierrors.IsNotFound(err) {
 		it.logger.V(4).Info("target chaos not exist", "namespace", node.Namespace, "name", node.Status.ChaosResource.Name, "chaos kind", node.Status.ChaosResource.Kind)
