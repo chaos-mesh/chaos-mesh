@@ -21,7 +21,7 @@ cd $cur/../../../bin
 pwd
 echo "deploy deployments and chaos for testing"
 wget https://mirrors.chaos-mesh.org/v1.1.2/web-show/deploy.sh
-sh deploy.sh
+bash deploy.sh
 cat <<EOF >delay.yaml
 apiVersion: chaos-mesh.org/v1alpha1
 kind: NetworkChaos
@@ -53,6 +53,6 @@ fi
 echo "Cleaning up"
 kubectl delete -f delay.yaml
 rm delay.yaml
-sh deploy.sh -d
+bash deploy.sh -d
 rm deploy.sh
 exit $code
