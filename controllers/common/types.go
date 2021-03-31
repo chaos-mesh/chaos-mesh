@@ -111,10 +111,8 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 		if err = r.Apply(ctx, req, chaos); err != nil {
 			r.Log.Error(err, "failed to apply chaos action")
+			status.Experiment.Phase = v1alpha1.ExperimentPhaseFailed
 			updateFailedMessage(ctx, r, chaos, err.Error())
-
-			phase = v1alpha1.ExperimentPhaseFailed
-
 			return ctrl.Result{Requeue: true}, err
 		}
 		startTime = &metav1.Time{
