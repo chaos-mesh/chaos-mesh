@@ -45,10 +45,9 @@ kubectl apply -f delay.yaml
 
 echo "Checking chaosctl function"
 ./chaosctl logs 1>/dev/null
-status=$(./chaosctl debug networkchaos web-show-network-delay | grep "Execute as expected")
+status=$(./chaosctl debug -i networkchaos web-show-network-delay | grep "Execute as expected")
 echo $status
 if [[ -z "$status" ]]; then
-    ./chaosctl debug networkchaos web-show-network-delay
     echo "Chaos is not running as expected"
     code=1
 fi

@@ -38,7 +38,7 @@ type DebugOptions struct {
 	CaCertFile string
 	CertFile   string
 	KeyFile    string
-	Secure     bool
+	Insecure   bool
 }
 
 const (
@@ -152,7 +152,7 @@ Examples:
 	debugCmd.PersistentFlags().StringVar(&o.CaCertFile, "cacert", "", "file path to cacert file")
 	debugCmd.PersistentFlags().StringVar(&o.CertFile, "cert", "", "file path to cert file")
 	debugCmd.PersistentFlags().StringVar(&o.KeyFile, "key", "", "file path to key file")
-	debugCmd.PersistentFlags().BoolVarP(&o.Secure, "secure", "s", true, "Secure mode")
+	debugCmd.PersistentFlags().BoolVarP(&o.Insecure, "insecure", "i", false, "Insecure mode will use unauthorized grpc")
 	err := debugCmd.RegisterFlagCompletionFunc("namespace", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		clientset, err := cm.InitClientSet()
 		if err != nil {
@@ -182,7 +182,7 @@ func (o *DebugOptions) Run(chaosType string, args []string, c *cm.ClientSet) err
 	}
 	var result []cm.ChaosResult
 	common.TLSFiles = common.TLSFileConfig{CaCert: o.CaCertFile, Cert: o.CertFile, Key: o.KeyFile}
-	common.Secure = o.Secure
+	common.Insecure = o.Insecure
 	for i, chaos := range chaosList {
 		var chaosResult cm.ChaosResult
 		chaosResult.Name = chaosNameList[i]
