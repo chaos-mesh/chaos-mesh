@@ -15,51 +15,41 @@ package detachvolume
 
 import (
 	"context"
-	"errors"
+	"encoding/json"
+	"github.com/go-logr/logr"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
-	ctrl "sigs.k8s.io/controller-runtime"
 
 	awscfg "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/pkg/router"
-	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
-	end "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
 )
 
-const (
-	AwsFinalizer = "aws-Finalizer"
-)
+type Impl struct {
+	client.Client
 
-type endpoint struct {
-	ctx.Context
+	Log logr.Logger
 }
 
-func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
-	awschaos, ok := chaos.(*v1alpha1.AwsChaos)
-	if !ok {
-		err := errors.New("chaos is not awschaos")
-		e.Log.Error(err, "chaos is not AwsChaos", "chaos", chaos)
-		return err
-	}
+func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
+	awschaos := obj.(*v1alpha1.AwsChaos)
 
 	opts := []func(*awscfg.LoadOptions) error{
 		awscfg.WithRegion(awschaos.Spec.AwsRegion),
 	}
 	if awschaos.Spec.SecretName != nil {
 		secret := &v1.Secret{}
-		err := e.Client.Get(ctx, types.NamespacedName{
+		err := impl.Client.Get(ctx, types.NamespacedName{
 			Name:      *awschaos.Spec.SecretName,
 			Namespace: awschaos.Namespace,
 		}, secret)
 		if err != nil {
-			e.Log.Error(err, "fail to get cloud secret")
-			return err
+			impl.Log.Error(err, "fail to get cloud secret")
+			return v1alpha1.NotInjected, err
 		}
 		opts = append(opts, awscfg.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(
 			string(secret.Data["aws_access_key_id"]),
@@ -69,49 +59,43 @@ func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 	}
 	cfg, err := awscfg.LoadDefaultConfig(ctx, opts...)
 	if err != nil {
-		e.Log.Error(err, "unable to load aws SDK config")
-		return err
+		impl.Log.Error(err, "unable to load aws SDK config")
+		return v1alpha1.NotInjected, err
 	}
 	ec2client := ec2.NewFromConfig(cfg)
 
-	awschaos.Finalizers = []string{AwsFinalizer}
+	var selected v1alpha1.AwsSelector
+	json.Unmarshal([]byte(records[index].Id), &selected)
 	_, err = ec2client.DetachVolume(context.TODO(), &ec2.DetachVolumeInput{
-		VolumeId:   awschaos.Spec.EbsVolume,
-		Device:     awschaos.Spec.DeviceName,
+		VolumeId:   selected.EbsVolume,
+		Device:     selected.DeviceName,
 		Force:      true,
-		InstanceId: &awschaos.Spec.Ec2Instance,
+		InstanceId: &selected.Ec2Instance,
 	})
 
 	if err != nil {
-		awschaos.Finalizers = make([]string, 0)
-		e.Log.Error(err, "fail to detach the volume")
-		return err
+		impl.Log.Error(err, "fail to detach the volume")
+		return v1alpha1.NotInjected, err
 	}
 
-	return nil
+	return v1alpha1.Injected, nil
 }
 
-func (e *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
-	awschaos, ok := chaos.(*v1alpha1.AwsChaos)
-	if !ok {
-		err := errors.New("chaos is not awschaos")
-		e.Log.Error(err, "chaos is not AwsChaos", "chaos", chaos)
-		return err
-	}
+func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
+	awschaos := obj.(*v1alpha1.AwsChaos)
 
-	awschaos.Finalizers = make([]string, 0)
 	opts := []func(*awscfg.LoadOptions) error{
 		awscfg.WithRegion(awschaos.Spec.AwsRegion),
 	}
 	if awschaos.Spec.SecretName != nil {
 		secret := &v1.Secret{}
-		err := e.Client.Get(ctx, types.NamespacedName{
+		err := impl.Client.Get(ctx, types.NamespacedName{
 			Name:      *awschaos.Spec.SecretName,
 			Namespace: awschaos.Namespace,
 		}, secret)
 		if err != nil {
-			e.Log.Error(err, "fail to get cloud secret")
-			return err
+			impl.Log.Error(err, "fail to get cloud secret")
+			return v1alpha1.Injected, err
 		}
 		opts = append(opts, awscfg.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(
 			string(secret.Data["aws_access_key_id"]),
@@ -121,40 +105,31 @@ func (e *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	}
 	cfg, err := awscfg.LoadDefaultConfig(ctx, opts...)
 	if err != nil {
-		e.Log.Error(err, "unable to load aws SDK config")
-		return err
+		impl.Log.Error(err, "unable to load aws SDK config")
+		return v1alpha1.Injected, err
 	}
 	ec2client := ec2.NewFromConfig(cfg)
+
+	var selected v1alpha1.AwsSelector
+	json.Unmarshal([]byte(records[index].Id), &selected)
 
 	_, err = ec2client.AttachVolume(context.TODO(), &ec2.AttachVolumeInput{
-		Device:     awschaos.Spec.DeviceName,
-		InstanceId: &awschaos.Spec.Ec2Instance,
-		VolumeId:   awschaos.Spec.EbsVolume,
+		Device:     selected.DeviceName,
+		InstanceId: &selected.Ec2Instance,
+		VolumeId:   selected.EbsVolume,
 	})
 
 	if err != nil {
-		e.Log.Error(err, "fail to attach the volume")
-		return err
+		impl.Log.Error(err, "fail to attach the volume")
+		return v1alpha1.Injected, err
 	}
 
-	return nil
+	return v1alpha1.NotInjected, nil
 }
 
-func (e *endpoint) Object() v1alpha1.InnerObject {
-	return &v1alpha1.AwsChaos{}
-}
-
-func init() {
-	router.Register("awschaos", &v1alpha1.AwsChaos{}, func(obj runtime.Object) bool {
-		chaos, ok := obj.(*v1alpha1.AwsChaos)
-		if !ok {
-			return false
-		}
-
-		return chaos.Spec.Action == v1alpha1.DetachVolume
-	}, func(ctx ctx.Context) end.Endpoint {
-		return &endpoint{
-			Context: ctx,
-		}
-	})
+func NewImpl(c client.Client, log logr.Logger) *Impl {
+	return &Impl{
+		Client: c,
+		Log:    log.WithName("detachvolume"),
+	}
 }

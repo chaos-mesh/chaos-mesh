@@ -14,6 +14,7 @@
 package v1alpha1
 
 import (
+	"encoding/json"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -57,6 +58,22 @@ type AwsChaosSpec struct {
 	// +optional
 	SecretName *string `json:"secretName,omitempty"`
 
+	AwsSelector `json:",inline"`
+}
+
+// AwsChaosStatus represents the status of an AwsChaos
+type AwsChaosStatus struct {
+	ChaosStatus `json:",inline"`
+}
+
+type AwsSelector struct {
+	// TODO: it would be better to split them into multiple different selector and implementation
+	// but to keep the minimal modification on current implementation, it hasn't been splited.
+
+	// Endpoint indicates the endpoint of the aws server. Just used it in test now.
+	// +optional
+	Endpoint *string `json:"endpoint,omitempty"`
+
 	// AwsRegion defines the region of aws.
 	AwsRegion string `json:"awsRegion"`
 
@@ -73,12 +90,18 @@ type AwsChaosSpec struct {
 	// +optional
 	DeviceName *string `json:"deviceName,omitempty"`
 
-	// Endpoint indicates the endpoint of the aws server. Just used it in test now.
-	// +optional
-	Endpoint *string `json:"endpoint,omitempty"`
 }
 
-// AwsChaosStatus represents the status of an AwsChaos
-type AwsChaosStatus struct {
-	ChaosStatus `json:",inline"`
+func (obj *AwsChaos) GetSelectorSpecs() map[string]interface{} {
+	return map[string]interface{}{
+		".": &obj.Spec.AwsSelector,
+	}
+}
+
+func (selector *AwsSelector) Id() string {
+	// TODO: handle the error here
+	// or ignore it is enough ?
+	json, _ := json.Marshal(selector)
+
+	return string(json)
 }

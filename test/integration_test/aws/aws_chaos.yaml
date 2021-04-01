@@ -7,6 +7,6 @@ spec:
   action: ec2-stop
   secretName: "cloud-key-secret"
   awsRegion: "us-east-1"
-  ec2Instance: "instance-id-placeholder"
-  endpoint: "endpoint-placeholder"
+  ec2Instance: "i-37c1736c654156074"
+  endpoint: "http://192.168.39.13:31566"
   duration: "5s"

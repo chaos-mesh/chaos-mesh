@@ -15,6 +15,10 @@ package main
 
 import (
 	"flag"
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/awschaos"
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/awschaos/detachvolume"
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/awschaos/ec2restart"
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/awschaos/ec2stop"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/stresschaos"
 	"net/http"
 	_ "net/http/pprof"
@@ -359,6 +363,47 @@ func main() {
 		setupLog.Error(err, "fail to setup StressChaos reconciler")
 	}
 
+	if err := ctrl.NewControllerManagedBy(mgr).
+		For(&v1alpha1.AwsChaos{}).
+		Named("awschaos-records").
+		Complete(&common.Reconciler{
+			Impl: awschaos.NewImpl(
+				detachvolume.NewImpl(mgr.GetClient(), ctrl.Log ),
+				ec2restart.NewImpl(mgr.GetClient(), ctrl.Log ),
+				ec2stop.NewImpl(mgr.GetClient(), ctrl.Log ),
+			),
+			Object: &v1alpha1.AwsChaos{},
+			Client: mgr.GetClient(),
+			Reader: mgr.GetAPIReader(),
+			Log:    ctrl.Log,
+		}); err != nil {
+		setupLog.Error(err, "fail to setup AwsChaos reconciler")
+	}
+
+	if err := ctrl.NewControllerManagedBy(mgr).
+		For(&v1alpha1.AwsChaos{}).
+		Named("awschaos-desiredphase").
+		Complete(&desiredphase.Reconciler{
+			Object: &v1alpha1.AwsChaos{},
+			Client: mgr.GetClient(),
+			Reader: mgr.GetAPIReader(),
+			Log:    ctrl.Log,
+		}); err != nil {
+		setupLog.Error(err, "fail to setup AwsChaos reconciler")
+	}
+
+	if err := ctrl.NewControllerManagedBy(mgr).
+		For(&v1alpha1.AwsChaos{}).
+		Named("awschaos-delete").
+		Complete(&delete.Reconciler{
+			Object: &v1alpha1.AwsChaos{},
+			Client: mgr.GetClient(),
+			Reader: mgr.GetAPIReader(),
+			Log:    ctrl.Log,
+		}); err != nil {
+		setupLog.Error(err, "fail to setup AwsChaos reconciler")
+	}
+
 	if err := ctrl.NewWebhookManagedBy(mgr).
 		For(&v1alpha1.PodChaos{}).
 		Complete(); err != nil {
@@ -393,6 +438,12 @@ func main() {
 		For(&v1alpha1.StressChaos{}).
 		Complete(); err != nil {
 		setupLog.Error(err, "fail to setup StressChaos webhook")
+	}
+
+	if err := ctrl.NewWebhookManagedBy(mgr).
+		For(&v1alpha1.AwsChaos{}).
+		Complete(); err != nil {
+		setupLog.Error(err, "fail to setup AwsChaos webhook")
 	}
 
 	// We only setup webhook for podiochaos, and the logic of applying chaos are in the mutation

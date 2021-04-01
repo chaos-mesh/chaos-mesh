@@ -15,6 +15,7 @@ package selector
 
 import (
 	"context"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector/aws"
 	"reflect"
 
 	"github.com/pkg/errors"
@@ -56,6 +57,7 @@ func (s *Selector) Select(ctx context.Context, spec interface{}) ([]Target, erro
 type SelectorParams struct {
 	PodSelector       *pod.SelectImpl
 	ContainerSelector *container.SelectImpl
+	AwsSelector *aws.SelectImpl
 }
 
 func New(p SelectorParams) *Selector {
