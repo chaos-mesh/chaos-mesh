@@ -24,6 +24,7 @@ import (
 const (
 	TypeAwsChaos TemplateType = "AwsChaos"
 	TypeDNSChaos TemplateType = "DNSChaos"
+	TypeGcpChaos TemplateType = "GcpChaos"
 	TypeHTTPChaos TemplateType = "HTTPChaos"
 	TypeIoChaos TemplateType = "IoChaos"
 	TypeJVMChaos TemplateType = "JVMChaos"
@@ -38,6 +39,7 @@ const (
 var allChaosTemplateType = []TemplateType{
 	TypeAwsChaos,
 	TypeDNSChaos,
+	TypeGcpChaos,
 	TypeHTTPChaos,
 	TypeIoChaos,
 	TypeJVMChaos,
@@ -54,6 +56,8 @@ type EmbedChaos struct {
 	AwsChaos *AwsChaosSpec `json:"aws_chaos,omitempty"`
 	// +optional
 	DNSChaos *DNSChaosSpec `json:"dns_chaos,omitempty"`
+	// +optional
+	GcpChaos *GcpChaosSpec `json:"gcp_chaos,omitempty"`
 	// +optional
 	HTTPChaos *HTTPChaosSpec `json:"http_chaos,omitempty"`
 	// +optional
@@ -83,6 +87,10 @@ func (it *EmbedChaos) SpawnNewObject(templateType TemplateType) (runtime.Object,
 	case TypeDNSChaos:
 		result := DNSChaos{}
 		result.Spec = *it.DNSChaos
+		return &result, result.GetObjectMeta(), nil
+	case TypeGcpChaos:
+		result := GcpChaos{}
+		result.Spec = *it.GcpChaos
 		return &result, result.GetObjectMeta(), nil
 	case TypeHTTPChaos:
 		result := HTTPChaos{}

@@ -245,6 +245,56 @@ spec:
               - mode
               - selector
               type: object
+            gcp_chaos:
+              description: GcpChaosSpec is the content of the specification for a
+                GcpChaos
+              properties:
+                action:
+                  description: 'Action defines the specific gcp chaos action. Supported
+                    action: node-stop / node-reset / disk-loss Default action: node-stop'
+                  enum:
+                  - node-stop
+                  - node-reset
+                  - disk-loss
+                  type: string
+                deviceName:
+                  description: The device name of the disk to detach. Needed in disk-loss.
+                  type: string
+                duration:
+                  description: Duration represents the duration of the chaos action.
+                  type: string
+                instance:
+                  description: Instance defines the name of the instance
+                  type: string
+                project:
+                  description: Project defines the name of gcp project.
+                  type: string
+                scheduler:
+                  description: Scheduler defines some schedule rules to control the
+                    running time of the chaos experiment about time.
+                  properties:
+                    cron:
+                      description: "Cron defines a cron job rule. \n Some rule examples:
+                        \"0 30 * * * *\" means to \"Every hour on the half hour\"
+                        \"@hourly\"      means to \"Every hour\" \"@every 1h30m\"
+                        means to \"Every hour thirty\" \n More rule info: https://godoc.org/github.com/robfig/cron"
+                      type: string
+                  required:
+                  - cron
+                  type: object
+                secretName:
+                  description: SecretName defines the name of kubernetes secret. It
+                    is used for GCP credentials.
+                  type: string
+                zone:
+                  description: Zone defines the zone of gcp project.
+                  type: string
+              required:
+              - action
+              - instance
+              - project
+              - zone
+              type: object
             http_chaos:
               properties:
                 action:

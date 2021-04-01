@@ -479,6 +479,11 @@ func (in *EmbedChaos) DeepCopyInto(out *EmbedChaos) {
 		*out = new(DNSChaosSpec)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.GcpChaos != nil {
+		in, out := &in.GcpChaos, &out.GcpChaos
+		*out = new(GcpChaosSpec)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.HTTPChaos != nil {
 		in, out := &in.HTTPChaos, &out.HTTPChaos
 		*out = new(HTTPChaosSpec)
