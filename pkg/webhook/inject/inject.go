@@ -25,8 +25,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
 
-	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
-
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -145,9 +143,17 @@ func injectRequired(metadata *metav1.ObjectMeta, cli client.Client, cfg *config.
 			return "", false
 		}
 	}
-	if !ccfg.IsAllowedNamespaces(metadata.Namespace, controllerCfg.AllowedNamespaces, controllerCfg.IgnoredNamespaces) {
-		log.Info("Skip mutation for it' in special namespace", "name", metadata.Name, "namespace", metadata.Namespace)
-		return "", false
+
+	if controllerCfg.EnableFilterNamespace {
+		ok, err := selector.IsAllowedNamespaces(context.Background(), cli, metadata.Namespace)
+		if err != nil {
+			log.Error(err, "fail to check whether this namespace should be injected", "namespace", metadata.Namespace)
+		}
+
+		if !ok {
+			log.Info("Skip mutation for it' in special namespace", "name", metadata.Name, "namespace", metadata.Namespace)
+			return "", false
+		}
 	}
 
 	log.V(4).Info("meta", "meta", metadata)
