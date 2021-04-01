@@ -9,7 +9,7 @@ on:
 
 jobs:
   run:
-    name: Test
+    name: Integration Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
@@ -28,7 +28,9 @@ jobs:
           kubectl set env deployment/chaos-controller-manager SECURITY_MODE=true -n chaos-testing
           sleep 5
           kubectl port-forward -n chaos-testing svc/chaos-dashboard 2333:2333 &
-
+      - name: Make chaosctl
+        run: |
+          make chaosctl
       - name: Install localstack && aws client
         run: |
           helm repo add localstack-repo http://helm.localstack.cloud

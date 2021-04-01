@@ -17,6 +17,8 @@ import (
 	"context"
 	"testing"
 
+	"k8s.io/apimachinery/pkg/runtime"
+
 	. "github.com/onsi/gomega"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -149,14 +151,76 @@ func TestSelectPods(t *testing.T) {
 	}
 
 	var (
-		testCfgClusterScoped     = true
-		testCfgTargetNamespace   = ""
-		testCfgAllowedNamespaces = ""
-		testCfgIgnoredNamespaces = ""
+		testCfgClusterScoped         = true
+		testCfgTargetNamespace       = ""
+		testCfgEnableNamespaceFilter = false
 	)
 
 	for _, tc := range tcs {
-		filteredPods, err := SelectPods(context.Background(), c, r, tc.selector, testCfgClusterScoped, testCfgTargetNamespace, testCfgAllowedNamespaces, testCfgIgnoredNamespaces)
+		filteredPods, err := SelectPods(context.Background(), c, r, tc.selector, testCfgClusterScoped, testCfgTargetNamespace, testCfgEnableNamespaceFilter)
+		g.Expect(err).ShouldNot(HaveOccurred(), tc.name)
+		g.Expect(len(filteredPods)).To(Equal(len(tc.expectedPods)), tc.name)
+	}
+}
+
+func TestSelectPodWithNamespaceFilter(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	objectsInNs1, podsInNs1 := GenerateNPods("ns1", 5, PodArg{Namespace: "ns1"})
+	objectsInNs2, podsInNs2 := GenerateNPods("ns2", 5, PodArg{Namespace: "ns2"})
+	namespaces := []runtime.Object{
+		&v1.Namespace{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "ns1",
+			},
+		},
+		&v1.Namespace{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "ns2",
+				Annotations: map[string]string{
+					"chaos-mesh.org/inject": "enabled",
+				},
+			},
+		},
+	}
+
+	objs := append(objectsInNs1, objectsInNs2...)
+	objs = append(objs, namespaces...)
+	c := fake.NewFakeClient(objs...)
+
+	type TestCase struct {
+		name                  string
+		selector              v1alpha1.SelectorSpec
+		expectedPods          []v1.Pod
+		enableNamespaceFilter bool
+	}
+	tcs := []TestCase{
+		{
+			name: "without namespace filter",
+			selector: v1alpha1.SelectorSpec{
+				Namespaces: []string{"ns1", "ns2"},
+			},
+			enableNamespaceFilter: false,
+			expectedPods:          append(podsInNs1, podsInNs2...),
+		},
+		{
+			name: "with namespace filter",
+			selector: v1alpha1.SelectorSpec{
+				Namespaces: []string{"ns1", "ns2"},
+			},
+			enableNamespaceFilter: true,
+			expectedPods:          podsInNs2,
+		},
+	}
+
+	var (
+		testCfgClusterScoped   = true
+		testCfgTargetNamespace = ""
+	)
+
+	var r client.Reader
+	for _, tc := range tcs {
+		filteredPods, err := SelectPods(context.Background(), c, r, tc.selector, testCfgClusterScoped, testCfgTargetNamespace, tc.enableNamespaceFilter)
 		g.Expect(err).ShouldNot(HaveOccurred(), tc.name)
 		g.Expect(len(filteredPods)).To(Equal(len(tc.expectedPods)), tc.name)
 	}
