@@ -53,15 +53,14 @@ func CreateGrpcConnection(address string, port int, caCertPath string, certPath 
 			return nil, err
 		}
 		return CreateGrpcConnectionFromRaw(address, port, caCert, cert, key)
-	} else {
-		options := []grpc.DialOption{grpc.WithUnaryInterceptor(TimeoutClientInterceptor)}
-		options = append(options, grpc.WithInsecure())
-		conn, err := grpc.Dial(fmt.Sprintf("%s:%d", address, port), options...)
-		if err != nil {
-			return nil, err
-		}
-		return conn, nil
 	}
+	options := []grpc.DialOption{grpc.WithUnaryInterceptor(TimeoutClientInterceptor)}
+	options = append(options, grpc.WithInsecure())
+	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", address, port), options...)
+	if err != nil {
+		return nil, err
+	}
+	return conn, nil
 }
 
 // CreateGrpcConnectionFromRaw create a grpc connection with given port and address, and use raw data instead of file path
