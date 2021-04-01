@@ -52,37 +52,43 @@ func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 		return err
 	}
 
-	haveDisk := false
 	instance, err := computeService.Instances.Get(gcpchaos.Spec.Project, gcpchaos.Spec.Zone, gcpchaos.Spec.Instance).Do()
 	if err != nil {
 		e.Log.Error(err, "fail to get the instance")
 		return err
 	}
-	var bytes []byte
-	for _, disk := range instance.Disks {
-		if disk.DeviceName == *gcpchaos.Spec.DeviceName {
-			haveDisk = true
-			bytes, err = json.Marshal(disk)
-			if err != nil {
-				e.Log.Error(err, "fail to marshal the disk info")
-				return err
+	var (
+		bytes    []byte
+		notFound []string
+	)
+	for _, specDeviceName := range *gcpchaos.Spec.DeviceName {
+		haveDisk := false
+		for _, disk := range instance.Disks {
+			if disk.DeviceName == specDeviceName {
+				haveDisk = true
+				bytes, err = json.Marshal(disk)
+				gcpchaos.Status.AttachedDiskString = append(gcpchaos.Status.AttachedDiskString, string(bytes))
+				break
 			}
-			break
+		}
+		if haveDisk == false {
+			notFound = append(notFound, specDeviceName)
 		}
 	}
-	if haveDisk == false {
-		err = fmt.Errorf("instance (%s) does not have the disk (%s)", gcpchaos.Spec.Instance, *gcpchaos.Spec.DeviceName)
+	if len(notFound) != 0 {
+		err = fmt.Errorf("instance (%s) does not have the disk (%s)", gcpchaos.Spec.Instance, notFound)
 		e.Log.Error(err, "the instance does not have the disk")
 		return err
 	}
 
 	gcpchaos.Finalizers = []string{GcpFinalizer}
-	_, err = computeService.Instances.DetachDisk(gcpchaos.Spec.Project, gcpchaos.Spec.Zone, gcpchaos.Spec.Instance, *gcpchaos.Spec.DeviceName).Do()
-	gcpchaos.Status.AttachedDiskString = string(bytes)
-	if err != nil {
-		gcpchaos.Finalizers = make([]string, 0)
-		e.Log.Error(err, "fail to detach the disk")
-		return err
+	for _, specDeviceName := range *gcpchaos.Spec.DeviceName {
+		_, err = computeService.Instances.DetachDisk(gcpchaos.Spec.Project, gcpchaos.Spec.Zone, gcpchaos.Spec.Instance, specDeviceName).Do()
+		if err != nil {
+			gcpchaos.Finalizers = make([]string, 0)
+			e.Log.Error(err, "fail to detach the disk")
+			return err
+		}
 	}
 
 	return nil
@@ -102,15 +108,17 @@ func (e *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		return err
 	}
 	var disk compute.AttachedDisk
-	err = json.Unmarshal([]byte(gcpchaos.Status.AttachedDiskString), &disk)
-	if err != nil {
-		e.Log.Error(err, "fail to unmarshal the disk info")
-		return err
-	}
-	_, err = computeService.Instances.AttachDisk(gcpchaos.Spec.Project, gcpchaos.Spec.Zone, gcpchaos.Spec.Instance, &disk).Do()
-	if err != nil {
-		e.Log.Error(err, "fail to attach the disk to the instance")
-		return err
+	for _, attachedDiskString := range gcpchaos.Status.AttachedDiskString {
+		err = json.Unmarshal([]byte(attachedDiskString), &disk)
+		if err != nil {
+			e.Log.Error(err, "fail to unmarshal the disk info")
+			return err
+		}
+		_, err = computeService.Instances.AttachDisk(gcpchaos.Spec.Project, gcpchaos.Spec.Zone, gcpchaos.Spec.Instance, &disk).Do()
+		if err != nil {
+			e.Log.Error(err, "fail to attach the disk to the instance")
+			return err
+		}
 	}
 	return nil
 }
