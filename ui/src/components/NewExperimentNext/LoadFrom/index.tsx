@@ -100,74 +100,72 @@ const LoadFrom: React.FC<LoadFromProps> = ({ loadCallback }) => {
 
   return (
     <Paper>
-      <Box p={3}>
-        <RadioGroup value={radio} onChange={onRadioChange}>
-          <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-            <Typography>{T('experiments.title')}</Typography>
-            <YAML callback={fillExperiment} />
+      <RadioGroup value={radio} onChange={onRadioChange}>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+          <Typography>{T('experiments.title')}</Typography>
+          <YAML callback={fillExperiment} />
+        </Box>
+        {experiments && experiments.length > 0 ? (
+          <Box display="flex" flexWrap="wrap">
+            {experiments.map((e) => (
+              <FormControlLabel
+                key={e.uid}
+                value={`e+${e.uid}`}
+                control={<Radio color="primary" />}
+                label={RadioLabel(e.name, e.uid)}
+              />
+            ))}
           </Box>
-          {experiments && experiments.length > 0 ? (
-            <Box display="flex" flexWrap="wrap">
-              {experiments.map((e) => (
-                <FormControlLabel
-                  key={e.uid}
-                  value={`e+${e.uid}`}
-                  control={<Radio color="primary" />}
-                  label={RadioLabel(e.name, e.uid)}
-                />
-              ))}
-            </Box>
-          ) : experiments?.length === 0 ? (
-            <Typography variant="body2">{T('experiments.noExperimentsFound')}</Typography>
-          ) : (
-            <SkeletonN n={3} />
-          )}
-          <Box my={6}>
-            <Divider />
+        ) : experiments?.length === 0 ? (
+          <Typography variant="body2">{T('experiments.noExperimentsFound')}</Typography>
+        ) : (
+          <SkeletonN n={3} />
+        )}
+        <Box my={6}>
+          <Divider />
+        </Box>
+        <Box mb={3}>
+          <Typography>{T('archives.title')}</Typography>
+        </Box>
+        {archives && archives.length > 0 ? (
+          <Box display="flex" flexWrap="wrap">
+            {archives.map((a) => (
+              <FormControlLabel
+                key={a.uid}
+                value={`a+${a.uid}`}
+                control={<Radio color="primary" />}
+                label={RadioLabel(a.name, a.uid)}
+              />
+            ))}
           </Box>
-          <Box mb={3}>
-            <Typography>{T('archives.title')}</Typography>
+        ) : archives?.length === 0 ? (
+          <Typography variant="body2">{T('archives.noArchivesFound')}</Typography>
+        ) : (
+          <SkeletonN n={3} />
+        )}
+        <Box my={6}>
+          <Divider />
+        </Box>
+        <Box mb={3}>
+          <Typography>{T('dashboard.predefined')}</Typography>
+        </Box>
+        {predefined && predefined.length > 0 ? (
+          <Box display="flex" flexWrap="wrap">
+            {predefined.map((p) => (
+              <FormControlLabel
+                key={p.name}
+                value={`p+${p.name}`}
+                control={<Radio color="primary" />}
+                label={RadioLabel(p.name)}
+              />
+            ))}
           </Box>
-          {archives && archives.length > 0 ? (
-            <Box display="flex" flexWrap="wrap">
-              {archives.map((a) => (
-                <FormControlLabel
-                  key={a.uid}
-                  value={`a+${a.uid}`}
-                  control={<Radio color="primary" />}
-                  label={RadioLabel(a.name, a.uid)}
-                />
-              ))}
-            </Box>
-          ) : archives?.length === 0 ? (
-            <Typography variant="body2">{T('archives.noArchivesFound')}</Typography>
-          ) : (
-            <SkeletonN n={3} />
-          )}
-          <Box my={6}>
-            <Divider />
-          </Box>
-          <Box mb={3}>
-            <Typography>{T('dashboard.predefined')}</Typography>
-          </Box>
-          {predefined && predefined.length > 0 ? (
-            <Box display="flex" flexWrap="wrap">
-              {predefined.map((p) => (
-                <FormControlLabel
-                  key={p.name}
-                  value={`p+${p.name}`}
-                  control={<Radio color="primary" />}
-                  label={RadioLabel(p.name)}
-                />
-              ))}
-            </Box>
-          ) : predefined?.length === 0 ? (
-            <Typography variant="body2">{T('dashboard.noPredefinedFound')}</Typography>
-          ) : (
-            <SkeletonN n={3} />
-          )}
-        </RadioGroup>
-      </Box>
+        ) : predefined?.length === 0 ? (
+          <Typography variant="body2">{T('dashboard.noPredefinedFound')}</Typography>
+        ) : (
+          <SkeletonN n={3} />
+        )}
+      </RadioGroup>
     </Paper>
   )
 }

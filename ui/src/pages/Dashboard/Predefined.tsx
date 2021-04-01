@@ -41,8 +41,6 @@ const useStyles = makeStyles((theme) => ({
     position: 'absolute',
     top: '50%',
     left: '50%',
-    display: 'flex',
-    flexDirection: 'column',
     width: '50vw',
     height: '90vh',
     transform: 'translate(-50%, -50%)',
@@ -157,19 +155,23 @@ const Predefined = React.memo(() => {
         <div>
           <Paper className={classes.editorPaperWrapper} padding={0}>
             {experiment && (
-              <>
-                <PaperTop title={experiment.name}>
-                  <Space>
-                    <Button color="secondary" size="small" onClick={handleDeleteExperiment}>
-                      {T('common.delete')}
-                    </Button>
-                    <Button variant="contained" color="primary" size="small" onClick={handleApplyExperiment}>
-                      {T('common.submit')}
-                    </Button>
-                  </Space>
-                </PaperTop>
-                <YAMLEditor theme={theme} data={yaml.dump(experiment.yaml)} mountEditor={setYAMLEditor} />
-              </>
+              <Box display="flex" flexDirection="column" height="100%">
+                <Box px={3} pt={3}>
+                  <PaperTop title={experiment.name}>
+                    <Space>
+                      <Button color="secondary" size="small" onClick={handleDeleteExperiment}>
+                        {T('common.delete')}
+                      </Button>
+                      <Button variant="contained" color="primary" size="small" onClick={handleApplyExperiment}>
+                        {T('common.submit')}
+                      </Button>
+                    </Space>
+                  </PaperTop>
+                </Box>
+                <Box flex={1}>
+                  <YAMLEditor theme={theme} data={yaml.dump(experiment.yaml)} mountEditor={setYAMLEditor} />
+                </Box>
+              </Box>
             )}
           </Paper>
         </div>

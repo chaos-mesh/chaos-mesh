@@ -41,6 +41,9 @@ const useStyles = makeStyles({
     height: '100%',
     overflowY: 'scroll',
   },
+  asButton: {
+    cursor: 'pointer',
+  },
 })
 
 function descendingComparator<T extends Record<string, any>>(a: T, b: T, orderBy: string) {
@@ -247,7 +250,7 @@ const EventsTable: React.ForwardRefRenderFunction<EventsTableHandles, EventsTabl
 
   return (
     <Box position="relative" minHeight={600}>
-      <TableContainer component={(props) => <Paper {...props} padding={false} />}>
+      <TableContainer component={(props) => <Paper {...props} padding={0} />}>
         <Table stickyHeader>
           <EventsTableHead order={order} orderBy={orderBy} onSort={handleSortEvents} />
 
@@ -288,9 +291,7 @@ const EventsTable: React.ForwardRefRenderFunction<EventsTableHandles, EventsTabl
           }}
         >
           <PaperTop title={T('common.detail')}>
-            <IconButton onClick={closeEventDetail}>
-              <CloseIcon />
-            </IconButton>
+            <CloseIcon className={classes.asButton} onClick={closeEventDetail} />
           </PaperTop>
           <EventDetail eventID={eventID} />
         </Paper>

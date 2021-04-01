@@ -62,7 +62,7 @@ const TotalState: React.FC<TotalStateProps> = (props) => {
       {s.some((d) => d.value >= 1) ? (
         <ResponsivePie
           data={s}
-          margin={{ top: 30, right: 30, bottom: 30, left: 30 }}
+          margin={{ top: 15, right: 15, bottom: 15, left: 15 }}
           colors={schemeTableau10 as any}
           innerRadius={0.75}
           padAngle={0.25}

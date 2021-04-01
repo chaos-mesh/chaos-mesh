@@ -15,9 +15,19 @@ import T from 'components/T'
 import _groupBy from 'lodash.groupby'
 import api from 'api'
 import { setAlert } from 'slices/globalStatus'
+import { styled } from '@material-ui/core/styles'
 import { transByKind } from 'lib/byKind'
 import { useIntl } from 'react-intl'
 import { useStoreDispatch } from 'store'
+
+const StyledCheckBox = styled(Checkbox)({
+  position: 'relative',
+  left: -11,
+  paddingRight: 0,
+  '&:hover': {
+    background: 'none !important',
+  },
+})
 
 const initialSelected = {
   uuid: '',
@@ -118,10 +128,11 @@ export default function Archives() {
   const Row = ({ data, index, style }: RWListChildComponentProps) => (
     <Box display="flex" alignItems="center" mb={3} style={style}>
       {!isBatchEmpty && (
-        <Checkbox
+        <StyledCheckBox
           color="primary"
           checked={batch[data[index].uid] === true}
           onChange={onCheckboxChange(data[index].uid)}
+          disableRipple
         />
       )}
       <Box flex={1}>
@@ -159,9 +170,9 @@ export default function Archives() {
             <Typography variant="overline">{transByKind(kind as any)}</Typography>
             <RWList
               width="100%"
-              height={archivesByKind.length > 3 ? 300 : archivesByKind.length * 68}
+              height={archivesByKind.length > 3 ? 300 : archivesByKind.length * 70}
               itemCount={archivesByKind.length}
-              itemSize={68}
+              itemSize={70}
               itemData={archivesByKind}
             >
               {Row}

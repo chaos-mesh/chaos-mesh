@@ -138,6 +138,7 @@
       "submitAll": "提交所有改动"
     },
     "nameValidation": "名称不能为空",
+    "suspendTitle": "设置暂停时间",
     "durationHelper": "暂停的持续时间",
     "submit": "提交工作流",
     "messages": {
@@ -235,6 +236,7 @@
     "copied": "已复制！",
     "close": "关闭",
     "submit": "提交",
+    "preview": "预览",
     "upload": "上传",
     "download": "下载",
     "detail": "详情",

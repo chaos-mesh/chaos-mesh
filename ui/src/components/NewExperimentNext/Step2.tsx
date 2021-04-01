@@ -1,16 +1,15 @@
 import { Box, Button, Divider, Grid, MenuItem, Typography } from '@material-ui/core'
 import { Form, Formik } from 'formik'
 import { LabelField, SelectField, TextField } from 'components/FormField'
-import React, { useEffect, useState } from 'react'
 import basicData, { schema } from './data/basic'
 import { createStyles, makeStyles } from '@material-ui/core/styles'
 import { setBasic, setStep2 } from 'slices/experiments'
+import { useEffect, useState } from 'react'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
 import AdvancedOptions from 'components/AdvancedOptions'
 import CheckIcon from '@material-ui/icons/Check'
 import Paper from 'components-mui/Paper'
-import PaperTop from 'components-mui/PaperTop'
 import PublishIcon from '@material-ui/icons/Publish'
 import Scheduler from './form/Scheduler'
 import Scope from './form/Scope'
@@ -60,21 +59,18 @@ const Step2 = () => {
 
   return (
     <Paper className={step2 ? classes.submit : ''}>
-      <PaperTop
-        title={
-          <Box display="flex">
-            {step2 && (
-              <Box display="flex" mr={3}>
-                <CheckIcon className={classes.submitIcon} />
-              </Box>
-            )}
-            {T('newE.titleStep2')}
-          </Box>
-        }
-      >
+      <Box display="flex" justifyContent="space-between" mb={step2 ? 0 : 6}>
+        <Box display="flex" alignItems="center">
+          {step2 && (
+            <Box display="flex" mr={3}>
+              <CheckIcon className={classes.submitIcon} />
+            </Box>
+          )}
+          <Typography>{T('newE.titleStep2')}</Typography>
+        </Box>
         {step2 && <UndoIcon className={classes.asButton} onClick={handleUndo} />}
-      </PaperTop>
-      <Box position="relative" p={6} hidden={step2}>
+      </Box>
+      <Box position="relative" hidden={step2}>
         <Formik
           enableReinitialize
           initialValues={init}
@@ -84,7 +80,7 @@ const Step2 = () => {
         >
           {({ errors, touched }) => (
             <Form>
-              <Grid container spacing={9}>
+              <Grid container spacing={6}>
                 <Grid item xs={12} md={6}>
                   <Box mb={3}>
                     <Typography>{T('newE.steps.scope')}</Typography>

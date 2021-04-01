@@ -1,7 +1,9 @@
 import { CallchainFrame, Experiment, ExperimentScope } from 'components/NewExperiment/types'
 
+import { Template } from 'slices/workflows'
 import _snakecase from 'lodash.snakecase'
 import basic from 'components/NewExperimentNext/data/basic'
+import dedent from 'ts-dedent'
 import snakeCaseKeys from 'snakecase-keys'
 
 export function parseSubmit(e: Experiment) {
@@ -185,4 +187,44 @@ export function validateDuration(value: string) {
   }
 
   return error
+}
+
+export function constructWorkflow(name: string, duration: string, templates: Template[]) {
+  let yaml = dedent`
+    apiVersion: chaos-mesh.org/v1alpha1
+    kind: Workflow
+    metadata:
+      name: ${name}
+    entry: entry
+    templates:
+      - name: the-entry
+        template_type: Serial
+        duration: ${duration}
+        tasks:
+  `
+
+  const realTemplates = []
+
+  const templateSpecs = templates
+    .sort((a, b) => a.index! - b.index!)
+    .map((t) => {
+      switch (t.type) {
+        case 'single':
+          break
+        case 'serial':
+          break
+        case 'parallel':
+          break
+        case 'suspend':
+          return dedent`
+            - name: ${t.name}
+              template_type: Suspend
+              duration: ${t.suspend!.duration}
+          `
+        default:
+          return null
+      }
+    })
+
+  return yaml
 }

@@ -25,27 +25,25 @@ const Settings = () => {
             {securityMode && (
               <>
                 <PaperTop title={T('settings.addToken.title')} />
-                <Box mx={3}>
-                  <Token />
-                  <Box mb={6} />
-                  <TokensTable />
-                  <Box mb={6} />
-                </Box>
+                <Token />
+                <Box mb={6} />
+                <TokensTable />
+                <Box mt={12} />
               </>
             )}
 
             <PaperTop title={T('experiments.title')} />
-            <Box mx={3}>
-              <Experiments />
-            </Box>
+            <Experiments />
+
+            <Box mt={12} />
 
             <PaperTop title={T('common.other')} />
-            <Box mx={3}>
-              <Other />
-            </Box>
+            <Other />
+
+            <Box mt={12} />
 
             <PaperTop title={T('common.version')} />
-            <Box m={3}>
+            <Box my={3}>
               <img style={{ height: 36 }} src={theme === 'light' ? logo : logoWhite} alt="Chaos Mesh" />
               <Box mt={1.5}>
                 <Typography variant="body2" color="textSecondary">

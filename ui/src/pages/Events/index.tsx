@@ -23,7 +23,6 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     eventsChart: {
       height: 450,
-      margin: theme.spacing(3),
     },
   })
 )

@@ -8,8 +8,8 @@ import { validateDuration } from 'lib/formikhelpers'
 
 const Suspend = () => {
   return (
-    <Paper padding={6}>
-      <PaperTop title="Suspend" />
+    <Paper>
+      <PaperTop title={T('newW.suspendTitle')} />
       <Formik initialValues={{ duration: '' }} onSubmit={() => {}}>
         {({ errors, touched }) => (
           <Form>

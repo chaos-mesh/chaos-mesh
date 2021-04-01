@@ -8,7 +8,6 @@ import { useStoreDispatch, useStoreSelector } from 'store'
 import CheckIcon from '@material-ui/icons/Check'
 import Kernel from './form/Kernel'
 import Paper from 'components-mui/Paper'
-import PaperTop from 'components-mui/PaperTop'
 import RadioButtonCheckedOutlinedIcon from '@material-ui/icons/RadioButtonCheckedOutlined'
 import RadioButtonUncheckedOutlinedIcon from '@material-ui/icons/RadioButtonUncheckedOutlined'
 import Stress from './form/Stress'
@@ -110,22 +109,19 @@ const Step1 = () => {
 
   return (
     <Paper className={step1 ? classes.submit : ''}>
-      <PaperTop
-        title={
-          <Box display="flex">
-            {step1 && (
-              <Box display="flex" mr={3}>
-                <CheckIcon className={classes.submitIcon} />
-              </Box>
-            )}
-            {T('newE.titleStep1')}
-          </Box>
-        }
-      >
+      <Box display="flex" justifyContent="space-between" mb={step1 ? 0 : 6}>
+        <Box display="flex" alignItems="center">
+          {step1 && (
+            <Box display="flex" mr={3}>
+              <CheckIcon className={classes.submitIcon} />
+            </Box>
+          )}
+          <Typography>{T('newE.titleStep1')}</Typography>
+        </Box>
         {step1 && <UndoIcon className={classes.asButton} onClick={handleUndo} />}
-      </PaperTop>
+      </Box>
       <Box hidden={step1}>
-        <Box p={3} overflow="hidden">
+        <Box overflow="hidden">
           <GridList className={classes.gridList} cols={isDesktopScreen ? 1.5 : 4.5} spacing={9} cellHeight="auto">
             {targetDataEntries.map(([key, t]) => (
               <GridListTile key={key}>
@@ -148,8 +144,8 @@ const Step1 = () => {
           </GridList>
         </Box>
         {kind && (
-          <Box p={3} overflow="hidden">
-            <Box mb={6}>
+          <Box overflow="hidden">
+            <Box my={6}>
               <Divider />
             </Box>
             {targetData[kind].categories ? (

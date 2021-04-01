@@ -11,12 +11,13 @@ import Add from './Add'
 import CheckIcon from '@material-ui/icons/Check'
 import NewExperiment from 'components/NewExperimentNext'
 import Paper from 'components-mui/Paper'
-import PaperTop from 'components-mui/PaperTop'
 import PublishIcon from '@material-ui/icons/Publish'
 import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline'
+import Space from 'components-mui/Space'
 import T from 'components/T'
 import { TextField } from 'components/FormField'
 import UndoIcon from '@material-ui/icons/Undo'
+import YAMLEditor from 'components/YAMLEditor'
 import _isEmpty from 'lodash.isempty'
 import _snakecase from 'lodash.snakecase'
 import clsx from 'clsx'
@@ -33,9 +34,7 @@ const initialSelected = {
 
 const useStyles = makeStyles((theme) => ({
   stepper: {
-    paddingTop: 0,
-    paddingRight: 0,
-    paddingLeft: 0,
+    padding: 0,
   },
   success: {
     color: theme.palette.success.main,
@@ -77,7 +76,9 @@ const NewWorkflow = () => {
   const classes = useStyles()
   const intl = useIntl()
 
-  const { templates } = useStoreSelector((state) => state.workflows)
+  const state = useStoreSelector((state) => state)
+  const { templates } = state.workflows
+  const { theme } = state.settings
   const dispatch = useStoreDispatch()
 
   const [steps, setSteps] = useState<IStep[]>([])
@@ -233,7 +234,7 @@ const NewWorkflow = () => {
 
   return (
     <>
-      <Grid container>
+      <Grid container spacing={6}>
         <Grid item xs={12} md={8}>
           <Stepper className={classes.stepper} orientation="vertical">
             {steps.length > 0 &&
@@ -264,20 +265,17 @@ const NewWorkflow = () => {
                     }
                   >
                     <Paper className={showRemove === index ? classes.removeSubmittedStep : classes.submittedStep}>
-                      <PaperTop
-                        title={
-                          <Typography component="div" variant={restoreIndex === index ? 'h6' : 'body1'}>
-                            {step.name}
-                          </Typography>
-                        }
-                      >
+                      <Box display="flex" justifyContent="space-between">
+                        <Typography component="div" variant={restoreIndex === index ? 'h6' : 'body1'}>
+                          {step.name}
+                        </Typography>
                         <UndoIcon
                           className={classes.asButton}
                           onClick={restoreExperiment(step.experiments, step.index!)}
                         />
-                      </PaperTop>
+                      </Box>
                       {restoreIndex === index && (
-                        <Box m={3} mt={6}>
+                        <Box mt={6}>
                           {(step.type === 'serial' || step.type === 'parallel') && (
                             <Formik initialValues={{ name: step.name }} onSubmit={() => {}}>
                               <Form>
@@ -315,16 +313,28 @@ const NewWorkflow = () => {
             <Step>
               <Add />
             </Step>
-            {!_isEmpty(templates) && (
-              <Step>
-                <StepLabel icon={<PublishIcon className={classes.primary} />}>
-                  <Button variant="contained" color="primary" fullWidth onClick={submitWorkflow}>
-                    {T('newW.submit')}
-                  </Button>
-                </StepLabel>
-              </Step>
-            )}
           </Stepper>
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <Space display="flex" flexDirection="column" height="100%" vertical spacing={6}>
+            <Box display="flex" justifyContent="space-between">
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={<PublishIcon />}
+                disabled={_isEmpty(templates)}
+                onClick={submitWorkflow}
+              >
+                {T('newW.submit')}
+              </Button>
+            </Box>
+            <Typography>{T('common.preview')}</Typography>
+            <Box flex={1}>
+              <Paper style={{ height: '100%' }} padding={0}>
+                <YAMLEditor theme={theme} data={''} />
+              </Paper>
+            </Box>
+          </Space>
         </Grid>
       </Grid>
       <ConfirmDialog

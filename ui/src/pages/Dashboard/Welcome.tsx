@@ -14,8 +14,9 @@ import clsx from 'clsx'
 
 const useStyles = makeStyles((theme) => ({
   button: {
-    width: `calc(100% - ${theme.spacing(6)})`,
-    margin: theme.spacing(3),
+    width: `calc(100% - ${theme.spacing(3)})`,
+    marginTop: theme.spacing(3),
+    marginBottom: theme.spacing(3),
   },
 }))
 

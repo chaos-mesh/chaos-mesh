@@ -1,4 +1,4 @@
-import { Button, Grid, Grow, Modal } from '@material-ui/core'
+import { Box, Button, Grid, Grow, Modal } from '@material-ui/core'
 import ConfirmDialog, { ConfirmDialogHandles } from 'components-mui/ConfirmDialog'
 import EventsTable, { EventsTableHandles } from 'components/EventsTable'
 import { RootState, useStoreDispatch } from 'store'
@@ -51,8 +51,6 @@ const useStyles = makeStyles((theme: Theme) =>
       position: 'absolute',
       top: '50%',
       left: '50%',
-      display: 'flex',
-      flexDirection: 'column',
       width: '50vw',
       height: '90vh',
       transform: 'translate(-50%, -50%)',
@@ -325,14 +323,18 @@ export default function ExperimentDetail() {
         <div>
           <Paper className={classes.configPaper} padding={0}>
             {detail && configOpen && (
-              <>
-                <PaperTop title={detail.name}>
-                  <Button variant="contained" color="primary" size="small" onClick={handleUpdateExperiment}>
-                    {T('common.confirm')}
-                  </Button>
-                </PaperTop>
-                <YAMLEditor theme={theme} data={yaml.dump(detail.yaml)} mountEditor={setYAMLEditor} />
-              </>
+              <Box display="flex" flexDirection="column" height="100%">
+                <Box px={3} pt={3}>
+                  <PaperTop title={detail.name}>
+                    <Button variant="contained" color="primary" size="small" onClick={handleUpdateExperiment}>
+                      {T('common.confirm')}
+                    </Button>
+                  </PaperTop>
+                </Box>
+                <Box flex={1}>
+                  <YAMLEditor theme={theme} data={yaml.dump(detail.yaml)} mountEditor={setYAMLEditor} />
+                </Box>
+              </Box>
             )}
           </Paper>
         </div>
