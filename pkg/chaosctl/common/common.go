@@ -91,7 +91,7 @@ const ChaosDaemonClientCert = "chaos-mesh-daemon-client-certs"
 const ChaosDaemonNamespace = "chaos-testing"
 
 var TLSFiles TLSFileConfig
-var Secure bool
+var Insecure bool
 
 type ItemResult struct {
 	Name    string
@@ -432,7 +432,7 @@ func ConnectToLocalChaosDaemon(port int) (daemonClient.ChaosDaemonClientInterfac
 }
 
 func getGrpcClient(port int) (*grpc.ClientConn, error) {
-	if !Secure {
+	if Insecure {
 		return grpcUtils.CreateGrpcConnection("localhost", port, "", "", "")
 	}
 	if TLSFiles.CaCert == "" || TLSFiles.Cert == "" || TLSFiles.Key == "" {
