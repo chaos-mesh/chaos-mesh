@@ -2906,7 +2906,9 @@ spec:
             containerName:
               description: ContainerName indicates the target container to inject
                 stress in
-              type: string
+              items:
+                type: string
+              type: array
             duration:
               description: Duration represents the duration of the chaos action
               type: string
@@ -3128,16 +3130,18 @@ spec:
               type: string
             instances:
               additionalProperties:
-                description: StressInstance is an instance generates stresses
-                properties:
-                  startTime:
-                    description: StartTime specifies when the instance starts
-                    format: date-time
-                    type: string
-                  uid:
-                    description: UID is the instance identifier
-                    type: string
-                type: object
+                items:
+                  description: StressInstance is an instance generates stresses
+                  properties:
+                    startTime:
+                      description: StartTime specifies when the instance starts
+                      format: date-time
+                      type: string
+                    uid:
+                      description: UID is the instance identifier
+                      type: string
+                  type: object
+                type: array
               description: Instances always specifies stressing instances
               type: object
             scheduler:

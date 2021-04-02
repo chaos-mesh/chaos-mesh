@@ -15,6 +15,7 @@ package v1alpha1
 
 import (
 	"fmt"
+	_"go/types"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -70,7 +71,7 @@ type StressChaosSpec struct {
 
 	// ContainerName indicates the target container to inject stress in
 	// +optional
-	ContainerName *string `json:"containerName,omitempty"`
+	ContainerName []string `json:"containerName,omitempty"`
 
 	// Duration represents the duration of the chaos action
 	// +optional
@@ -96,12 +97,13 @@ func (in *StressChaosSpec) GetValue() string {
 	return in.Value
 }
 
+type StressInstances []StressInstance
 // StressChaosStatus defines the observed state of StressChaos
 type StressChaosStatus struct {
 	ChaosStatus `json:",inline"`
 	// Instances always specifies stressing instances
 	// +optional
-	Instances map[string]StressInstance `json:"instances,omitempty"`
+	Instances map[string]StressInstances `json:"instances,omitempty"`
 }
 
 // StressInstance is an instance generates stresses

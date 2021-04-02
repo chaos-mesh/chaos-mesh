@@ -23,7 +23,8 @@ service ChaosDaemon {
   rpc ApplyIoChaos(ApplyIoChaosRequest) returns (ApplyIoChaosResponse) {}
 
   rpc SetDNSServer (SetDNSServerRequest) returns (google.protobuf.Empty) {}
-}
+  }
+
 
 message TcHandle {
   uint32 major = 1;
@@ -218,3 +219,4 @@ message SetDNSServerRequest {
   bool enable = 3;
   bool enterNS = 4;
 }
+

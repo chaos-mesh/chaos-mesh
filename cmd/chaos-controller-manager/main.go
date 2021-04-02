@@ -50,6 +50,7 @@ import (
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/stresschaos"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/timechaos"
 
+
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -64,6 +65,7 @@ import (
 	// +kubebuilder:scaffold:imports
 )
 
+
 var (
 	scheme   = runtime.NewScheme()
 	setupLog = ctrl.Log.WithName("setup")
@@ -73,6 +75,7 @@ var (
 	printVersion                   bool
 	restConfigQPS, restConfigBurst int
 )
+
 
 func init() {
 	_ = clientgoscheme.AddToScheme(scheme)

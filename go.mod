@@ -2,6 +2,7 @@ module github.com/chaos-mesh/chaos-mesh
 
 require (
 	code.cloudfoundry.org/bytefmt v0.0.0-20200131002437-cf55d5288a48
+	github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802
 	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/aws/aws-sdk-go-v2 v0.31.0
 	github.com/aws/aws-sdk-go-v2/config v0.4.0

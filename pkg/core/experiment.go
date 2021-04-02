@@ -222,7 +222,7 @@ type TimeChaosInfo struct {
 type StressChaosInfo struct {
 	Stressors         *v1alpha1.Stressors `json:"stressors"`
 	StressngStressors string              `json:"stressng_stressors,omitempty"`
-	ContainerName     *string             `json:"container_name,omitempty"`
+	ContainerName     []string             `json:"container_name,omitempty"`
 }
 
 // DNSChaosInfo defines the basic information of dns chaos for creating a new DNSChaos.

@@ -17,7 +17,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strings"
+	_"github.com/BurntSushi/xgb/res"
+	_"go/types"
+	_"go/types"
+	_"strings"
 	"sync"
 	"time"
 
@@ -70,7 +73,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 		return err
 	}
 
-	stresschaos.Status.Instances = make(map[string]v1alpha1.StressInstance, len(pods))
+	stresschaos.Status.Instances = make(map[string]v1alpha1.StressInstances, len(pods))
 	if err = r.applyAllPods(ctx, pods, stresschaos); err != nil {
 		r.Log.Error(err, "failed to apply chaos on all pods")
 		return err
@@ -125,16 +128,18 @@ func (r *recoverer) RecoverPod(ctx context.Context, pod *v1.Pod, somechaos v1alp
 	if len(pod.Status.ContainerStatuses) == 0 {
 		return fmt.Errorf("%s/%s can't get the state of container", pod.Namespace, pod.Name)
 	}
-	instance, ok := chaos.Status.Instances[fmt.Sprintf("%s/%s", pod.Namespace, pod.Name)]
+	instances, ok := chaos.Status.Instances[fmt.Sprintf("%s/%s", pod.Namespace, pod.Name)]
 	if !ok {
 		r.Log.Info("Pod seems already recovered", "pod", pod.UID)
 		return nil
 	}
-	if _, err = daemonClient.CancelStressors(ctx, &pb.CancelStressRequest{
-		Instance:  instance.UID,
-		StartTime: instance.StartTime.UnixNano() / int64(time.Millisecond),
-	}); err != nil {
-		return err
+	for _, item := range instances{
+		if _, err = daemonClient.CancelStressors(ctx, &pb.CancelStressRequest{
+			Instance:  item.UID,
+			StartTime: item.StartTime.UnixNano() / int64(time.Millisecond),
+		}); err != nil {
+			return err
+		}
 	}
 	delete(chaos.Status.Instances, fmt.Sprintf("%s/%s", pod.Namespace, pod.Name))
 	return nil
@@ -182,51 +187,58 @@ func (r *endpoint) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.St
 		r.Log.Info("an stress-ng instance is running for this pod")
 		return nil
 	}
-
+	var targets []string
 	if len(pod.Status.ContainerStatuses) == 0 {
 		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
 	}
-	target := pod.Status.ContainerStatuses[0].ContainerID
 	if chaos.Spec.ContainerName != nil &&
-		len(strings.TrimSpace(*chaos.Spec.ContainerName)) != 0 {
-		target = ""
+		len(chaos.Spec.ContainerName) != 0{
 		for _, container := range pod.Status.ContainerStatuses {
-			if container.Name == *chaos.Spec.ContainerName {
-				target = container.ContainerID
-				break
+			for _, item := range chaos.Spec.ContainerName{
+				if item == container.Name{
+					targets = append(targets, container.ContainerID)
+					break
+				}
 			}
+
 		}
-		if len(target) == 0 {
-			return fmt.Errorf("cannot find container with name %s", *chaos.Spec.ContainerName)
+		if len(targets) == 0 {
+			return fmt.Errorf("cannot find container with name %s", chaos.Spec.ContainerName)
 		}
 	}
-
-	stressors := chaos.Spec.StressngStressors
-	if len(stressors) == 0 {
+		stressors := chaos.Spec.StressngStressors
+		if len(stressors) == 0 {
 		stressors, err = chaos.Spec.Stressors.Normalize()
 		if err != nil {
 			return err
 		}
 	}
-	res, err := daemonClient.ExecStressors(ctx, &pb.ExecStressRequest{
-		Scope:     pb.ExecStressRequest_CONTAINER,
-		Target:    target,
-		Stressors: stressors,
-		EnterNS:   true,
-	})
-	if err != nil {
-		return err
+	var responses []*pb.ExecStressResponse
+	for _, item := range targets {
+		res, err := daemonClient.ExecStressors(ctx, &pb.ExecStressRequest{
+			Scope:     pb.ExecStressRequest_CONTAINER,
+			Target:    item,
+			Stressors: stressors,
+			EnterNS:   true,
+		})
+		if err != nil {
+			return err
+		}
+		responses = append(responses, res)
 	}
-
-	instancesLock.Lock()
-	chaos.Status.Instances[key] = v1alpha1.StressInstance{
-		UID: res.Instance,
-		StartTime: &metav1.Time{
-			Time: time.Unix(res.StartTime/1000, (res.StartTime%1000)*int64(time.Millisecond)),
-		},
+	instances := make([]v1alpha1.StressInstance, len(responses))
+	for index, item := range responses {
+		instances[index] = v1alpha1.StressInstance{
+			UID: item.Instance,
+			StartTime: &metav1.Time{
+				Time: time.Unix(item.StartTime/1000, (item.StartTime%1000)*int64(time.Millisecond)),
+			},
+		}
 	}
-	instancesLock.Unlock()
-	return nil
+		instancesLock.Lock()
+		chaos.Status.Instances[key] = instances
+		instancesLock.Unlock()
+		return nil
 }
 
 func init() {
