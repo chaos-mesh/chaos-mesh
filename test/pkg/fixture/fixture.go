@@ -16,6 +16,8 @@ package fixture
 import (
 	"sort"
 
+	"k8s.io/apimachinery/pkg/api/resource"
+
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -152,6 +154,70 @@ func NewNetworkTestDeployment(name, namespace string, extraLabels map[string]str
 							ImagePullPolicy: corev1.PullIfNotPresent,
 							Name:            "network",
 							Command:         []string{"/bin/test"},
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+// NewStressTestDeployment creates a deployment for e2e test
+func NewStressTestDeployment(name, namespace string, extraLabels map[string]string) *appsv1.Deployment {
+	labels := map[string]string{
+		"app": name,
+	}
+	for key, val := range extraLabels {
+		labels[key] = val
+	}
+	return &appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+			Labels:    labels,
+		},
+		Spec: appsv1.DeploymentSpec{
+			Replicas: pointer.Int32Ptr(1),
+			Selector: &metav1.LabelSelector{
+				MatchLabels: labels,
+			},
+			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: labels,
+				},
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Image:           config.TestConfig.E2EImage,
+							ImagePullPolicy: corev1.PullIfNotPresent,
+							Name:            "stress",
+							Command:         []string{"/bin/test"},
+							Resources: corev1.ResourceRequirements{
+								Requests: corev1.ResourceList{
+									corev1.ResourceCPU:    resource.MustParse("0"),
+									corev1.ResourceMemory: resource.MustParse("0"),
+								},
+								Limits: corev1.ResourceList{
+									corev1.ResourceCPU:    resource.MustParse("1"),
+									corev1.ResourceMemory: resource.MustParse("100M"),
+								},
+							},
+							VolumeMounts: []corev1.VolumeMount{
+								{
+									Name:      "sys",
+									MountPath: "/sys",
+								},
+							},
+						},
+					},
+					Volumes: []corev1.Volume{
+						{
+							Name: "sys",
+							VolumeSource: corev1.VolumeSource{
+								HostPath: &corev1.HostPathVolumeSource{
+									Path: "/sys",
+								},
+							},
 						},
 					},
 				},
