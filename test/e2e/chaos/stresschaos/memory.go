@@ -14,15 +14,15 @@
 package stresschaos
 
 import (
-"context"
-"net/http"
-"time"
+	"context"
+	"net/http"
+	"time"
 
-. "github.com/onsi/ginkgo"
-corev1 "k8s.io/api/core/v1"
-"k8s.io/apimachinery/pkg/util/wait"
-"k8s.io/kubernetes/test/e2e/framework"
-"sigs.k8s.io/controller-runtime/pkg/client"
+	. "github.com/onsi/ginkgo"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/util/wait"
+	"k8s.io/kubernetes/test/e2e/framework"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 func TestcaseMemoryStressInjectionOnceThenRecover(
@@ -44,7 +44,7 @@ func TestcaseMemoryStressInjectionOnceThenRecover(
 		if err != nil {
 			return false, err
 		}
-		if conditions[0].MemoryUsage - conditions[1].MemoryUsage > 50*1024*1024 {
+		if conditions[0].MemoryUsage-conditions[1].MemoryUsage > 50*1024*1024 {
 			return true, nil
 		}
 		framework.Logf("get Memory: [%d, %d]", conditions[0].MemoryUsage, conditions[1].MemoryUsage)
@@ -61,7 +61,7 @@ func TestcaseMemoryStressInjectionOnceThenRecover(
 		if err != nil {
 			return false, err
 		}
-		if conditions[0].MemoryUsage - conditions[1].MemoryUsage < 1*1024*1024  {
+		if conditions[0].MemoryUsage-conditions[1].MemoryUsage < 1*1024*1024 {
 			return true, nil
 		}
 		framework.Logf("get Memory: [%d, %d]", conditions[0].MemoryUsage, conditions[1].MemoryUsage)
