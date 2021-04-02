@@ -25,7 +25,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-func TestcaseCPUStressInjectionOnceThenRecover(
+func TestcaseMemoryStressInjectionOnceThenRecover(
 	ns string,
 	cli client.Client,
 	peers []*corev1.Pod,
@@ -33,57 +33,39 @@ func TestcaseCPUStressInjectionOnceThenRecover(
 	c http.Client,
 ) {
 	ctx := context.Background()
-	By("create cpu stress chaos CRD objects")
-	cpuStressChaos := makeCPUStressChaos(ns, "cpu-stress", ns, "stress-peer-0", 1, 100)
-	err := cli.Create(ctx, cpuStressChaos.DeepCopy())
+	By("create memory stress chaos CRD objects")
+	memoryStressChaos := makeMemoryStressChaos(ns, "memory-stress", ns, "stress-peer-0", "50M", 1)
+	err := cli.Create(ctx, memoryStressChaos.DeepCopy())
 	framework.ExpectNoError(err, "create stresschaos error")
 
-	lastCPUTime := make([]uint64, 2)
-	diff := make([]uint64, 2)
-	By("waiting for assertion some pods are experiencing cpu stress ")
+	By("waiting for assertion some pods are experiencing memory stress ")
 	err = wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
 		conditions, err := probeStressCondition(c, peers, ports)
 		if err != nil {
 			return false, err
 		}
-
-		diff[0] = conditions[0].CpuTime - lastCPUTime[0]
-		diff[1] = conditions[1].CpuTime - lastCPUTime[1]
-		lastCPUTime[0] = conditions[0].CpuTime
-		lastCPUTime[1] = conditions[1].CpuTime
-		framework.Logf("get CPU: [%d, %d]", diff[0], diff[1])
-		// diff means the increasing CPU time (in nanosecond)
-		// just pick two threshold, 5e8 is a little shorter than one second
-		if diff[0] > 5e8 && diff[1] < 5e6 {
+		if conditions[0].MemoryUsage-conditions[1].MemoryUsage > 50*1024*1024 {
 			return true, nil
 		}
+		framework.Logf("get Memory: [%d, %d]", conditions[0].MemoryUsage, conditions[1].MemoryUsage)
 		return false, nil
 	})
-	framework.ExpectNoError(err, "cpu stress failed")
+	framework.ExpectNoError(err, "memory stress failed")
 	By("delete pod failure chaos CRD objects")
 
-	err = cli.Delete(ctx, cpuStressChaos.DeepCopy())
+	err = cli.Delete(ctx, memoryStressChaos.DeepCopy())
 	framework.ExpectNoError(err, "delete stresschaos error")
 	By("waiting for assertion recovering")
-	lastCPUTime = make([]uint64, 2)
-	diff = make([]uint64, 2)
 	err = wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
 		conditions, err := probeStressCondition(c, peers, ports)
 		if err != nil {
 			return false, err
 		}
-
-		diff[0] = conditions[0].CpuTime - lastCPUTime[0]
-		diff[1] = conditions[1].CpuTime - lastCPUTime[1]
-		lastCPUTime[0] = conditions[0].CpuTime
-		lastCPUTime[1] = conditions[1].CpuTime
-		framework.Logf("get CPU: [%d, %d]", diff[0], diff[1])
-		// diff means the increasing CPU time (in nanosecond)
-		// just pick two threshold, they are both much shorter than 1 second
-		if diff[0] < 1e7 && diff[1] < 5e6 {
+		if conditions[0].MemoryUsage-conditions[1].MemoryUsage < 1*1024*1024 {
 			return true, nil
 		}
+		framework.Logf("get Memory: [%d, %d]", conditions[0].MemoryUsage, conditions[1].MemoryUsage)
 		return false, nil
 	})
-	framework.ExpectNoError(err, "fail to recover from cpu stress")
+	framework.ExpectNoError(err, "fail to recover from memory stress")
 }
