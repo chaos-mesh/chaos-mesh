@@ -21,6 +21,7 @@ import YAMLEditor from 'components/YAMLEditor'
 import _isEmpty from 'lodash.isempty'
 import _snakecase from 'lodash.snakecase'
 import clsx from 'clsx'
+import { constructWorkflow } from 'lib/formikhelpers'
 import { makeStyles } from '@material-ui/core/styles'
 import { setAlert } from 'slices/globalStatus'
 import { useIntl } from 'react-intl'
@@ -36,14 +37,14 @@ const useStyles = makeStyles((theme) => ({
   stepper: {
     padding: 0,
   },
+  primary: {
+    color: theme.palette.primary.main,
+  },
   success: {
     color: theme.palette.success.main,
   },
   error: {
     color: theme.palette.error.main,
-  },
-  primary: {
-    color: theme.palette.primary.main,
   },
   submittedStep: {
     borderColor: theme.palette.success.main,
@@ -53,6 +54,11 @@ const useStyles = makeStyles((theme) => ({
   },
   asButton: {
     cursor: 'pointer',
+  },
+  leftSticky: {
+    position: 'sticky',
+    top: 0,
+    height: `calc(100vh - 56px - ${theme.spacing(12)})`,
   },
   field: {
     width: 180,
@@ -315,7 +321,7 @@ const NewWorkflow = () => {
             </Step>
           </Stepper>
         </Grid>
-        <Grid item xs={12} md={4}>
+        <Grid item xs={12} md={4} className={classes.leftSticky}>
           <Space display="flex" flexDirection="column" height="100%" vertical spacing={6}>
             <Box display="flex" justifyContent="space-between">
               <Button
@@ -331,7 +337,7 @@ const NewWorkflow = () => {
             <Typography>{T('common.preview')}</Typography>
             <Box flex={1}>
               <Paper style={{ height: '100%' }} padding={0}>
-                <YAMLEditor theme={theme} data={''} />
+                <YAMLEditor theme={theme} data={constructWorkflow('test', '120s', Object.values(templates))} />
               </Paper>
             </Box>
           </Space>

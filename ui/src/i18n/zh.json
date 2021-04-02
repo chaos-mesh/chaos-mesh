@@ -134,12 +134,17 @@
       "parallel": "并行",
       "suspend": "暂停",
       "number": "数目",
+      "chooseChildren": "选择子节点",
       "deleteDesc": "此节点将被删除",
       "submitAll": "提交所有改动"
     },
-    "nameValidation": "名称不能为空",
+    "serialTitle": "填写顺序节点",
+    "parallelTitle": "填写并行节点",
     "suspendTitle": "设置暂停时间",
-    "durationHelper": "暂停的持续时间",
+    "nameHelper": "节点的名称",
+    "nameValidation": "节点名称不能为空",
+    "durationHelper": "节点的持续时间",
+    "durationValidation": "节点持续时间不能为空",
     "submit": "提交工作流",
     "messages": {
       "m1": "请首先完成当前节点的创建"

@@ -1,14 +1,15 @@
-import { Box, Button, MenuItem, StepLabel, Typography } from '@material-ui/core'
+import { Box, Grid, MenuItem, StepLabel, Typography } from '@material-ui/core'
 import { Form, Formik, FormikHelpers } from 'formik'
 import MultiNode, { MultiNodeHandles } from './MultiNode'
 import NewExperimentNext, { NewExperimentHandles } from 'components/NewExperimentNext'
-import { SelectField, TextField } from 'components/FormField'
+import { SelectField, Submit, TextField } from 'components/FormField'
 import { TemplateExperiment, setTemplate } from 'slices/workflows'
 import { resetNewExperiment, setExternalExperiment } from 'slices/experiments'
 import { useRef, useState } from 'react'
 
 import AddCircleIcon from '@material-ui/icons/AddCircle'
-import PublishIcon from '@material-ui/icons/Publish'
+import Paper from 'components-mui/Paper'
+import PaperTop from 'components-mui/PaperTop'
 import Space from 'components-mui/Space'
 import Suspend from './Suspend'
 import T from 'components/T'
@@ -204,52 +205,62 @@ const Add = () => {
 
   return (
     <>
-      <StepLabel icon={<AddCircleIcon color="primary" />}>
-        <Formik
-          innerRef={formRef}
-          initialValues={{ type: 'single', num: 2, name: '' }}
-          onSubmit={submitNoSingleNode}
-          validate={onValidate}
-          validateOnBlur={false}
-        >
+      <Formik
+        innerRef={formRef}
+        initialValues={{ type: 'single', num: 2, name: '' }}
+        onSubmit={submitNoSingleNode}
+        validate={onValidate}
+        validateOnBlur={false}
+      >
+        {({ values }) => (
           <Form>
-            <Space className={classes.fields}>
-              <SelectField mb={0} className={classes.field} name="type" label={T('newW.node.choose')}>
-                {types.map((d) => (
-                  <MenuItem key={d} value={d}>
-                    <Typography variant="body2">{T(`newW.node.${d}`)}</Typography>
-                  </MenuItem>
-                ))}
-              </SelectField>
-              {showNum && (
-                <TextField
-                  mb={0}
-                  className={classes.field}
-                  type="number"
-                  name="num"
-                  label={T('newW.node.number')}
-                  inputProps={{ min: 1 }}
-                />
-              )}
-            </Space>
+            <StepLabel icon={<AddCircleIcon color="primary" />}>
+              <Space className={classes.fields}>
+                <SelectField mb={0} className={classes.field} name="type" label={T('newW.node.choose')}>
+                  {types.map((d) => (
+                    <MenuItem key={d} value={d}>
+                      <Typography variant="body2">{T(`newW.node.${d}`)}</Typography>
+                    </MenuItem>
+                  ))}
+                </SelectField>
+                {showNum && (
+                  <TextField
+                    mb={0}
+                    className={classes.field}
+                    type="number"
+                    name="num"
+                    label={T('newW.node.number')}
+                    inputProps={{ min: 1 }}
+                  />
+                )}
+              </Space>
+            </StepLabel>
+
             {showNum && (
-              <Box display="flex" justifyContent="space-between" alignItems="center" mt={3}>
-                <TextField mb={0} className={classes.field} name="name" label={T('newE.basic.name')} />
-                <MultiNode ref={multiNodeRef} count={num} setCurrentCallback={setCurrentCallback} />
-                <Button
-                  type="submit"
-                  variant="contained"
-                  color="primary"
-                  startIcon={<PublishIcon />}
-                  disabled={experiments.length !== num}
-                >
-                  {T('common.submit')}
-                </Button>
+              <Box mt={6} ml={8}>
+                <Paper>
+                  <PaperTop title={T(`newW.${values.type}Title`)} />
+                  <Grid container spacing={6}>
+                    <Grid item xs={12} md={6}>
+                      <TextField name="name" label={T('newE.basic.name')} helperText={T(`newW.nameHelper`)} />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                      <TextField
+                        name="duration"
+                        label={T('newE.schedule.duration')}
+                        helperText={T('newW.durationHelper')}
+                      />
+                    </Grid>
+                  </Grid>
+                  <PaperTop title={T(`newW.node.chooseChildren`)} />
+                  <MultiNode ref={multiNodeRef} count={num} setCurrentCallback={setCurrentCallback} />
+                  <Submit disabled={experiments.length !== num} />
+                </Paper>
               </Box>
             )}
           </Form>
-        </Formik>
-      </StepLabel>
+        )}
+      </Formik>
       <Box mt={6} ml={8}>
         <Box style={{ display: otherTypes ? 'none' : 'initial' }}>
           <NewExperimentNext ref={newERef} initPanel="existing" onSubmit={onSubmit} />

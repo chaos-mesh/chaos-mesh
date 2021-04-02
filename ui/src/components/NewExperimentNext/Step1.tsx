@@ -122,7 +122,7 @@ const Step1 = () => {
       </Box>
       <Box hidden={step1}>
         <Box overflow="hidden">
-          <GridList className={classes.gridList} cols={isDesktopScreen ? 1.5 : 4.5} spacing={9} cellHeight="auto">
+          <GridList className={classes.gridList} cols={isDesktopScreen ? 1.5 : 3.5} spacing={9} cellHeight="auto">
             {targetDataEntries.map(([key, t]) => (
               <GridListTile key={key}>
                 <Card
@@ -134,7 +134,7 @@ const Step1 = () => {
                     <Box display="flex" justifyContent="center" flex={1}>
                       {iconByKind(key)}
                     </Box>
-                    <Box display="flex" justifyContent="center" flex={2} px={1.5} textAlign="center">
+                    <Box display="flex" justifyContent="center" flex={1.5} textAlign="center">
                       <Typography variant="button">{transByKind(key)}</Typography>
                     </Box>
                   </Box>

@@ -3,8 +3,8 @@ import { CallchainFrame, Experiment, ExperimentScope } from 'components/NewExper
 import { Template } from 'slices/workflows'
 import _snakecase from 'lodash.snakecase'
 import basic from 'components/NewExperimentNext/data/basic'
-import dedent from 'ts-dedent'
 import snakeCaseKeys from 'snakecase-keys'
+import yaml from 'js-yaml'
 
 export function parseSubmit(e: Experiment) {
   const values: Experiment = JSON.parse(JSON.stringify(e))
@@ -190,41 +190,81 @@ export function validateDuration(value: string) {
 }
 
 export function constructWorkflow(name: string, duration: string, templates: Template[]) {
-  let yaml = dedent`
-    apiVersion: chaos-mesh.org/v1alpha1
-    kind: Workflow
-    metadata:
-      name: ${name}
-    entry: entry
-    templates:
-      - name: the-entry
-        template_type: Serial
-        duration: ${duration}
-        tasks:
-  `
+  const tasks: string[] = []
+  const realTemplates: Record<string, any>[] = []
 
-  const realTemplates = []
-
-  const templateSpecs = templates
+  templates
     .sort((a, b) => a.index! - b.index!)
-    .map((t) => {
+    .forEach((t) => {
+      tasks.push(t.name)
+
       switch (t.type) {
         case 'single':
+          const experiment = t.experiments[0]
+          const kind = experiment.target.kind
+          const spec = _snakecase(kind)
+
+          realTemplates.push({
+            name: t.name,
+            template_type: kind,
+            duration: experiment.basic.scheduler.duration,
+            [spec]: experiment.target[spec],
+          })
+
           break
         case 'serial':
+          t.experiments.forEach((d) => {
+            const name = d.basic.name
+            const kind = d.target.kind
+            const spec = _snakecase(kind)
+
+            if (!realTemplates.some((t) => t.name === name)) {
+              realTemplates.push({
+                name,
+                template_type: kind,
+                duration: d.basic.scheduler.duration,
+                [spec]: d.target[spec],
+              })
+            }
+          })
+
+          realTemplates.push({
+            name: t.name,
+            template_type: 'Serial',
+            tasks: t.experiments.map((d) => d.basic.name),
+          })
+
           break
         case 'parallel':
           break
         case 'suspend':
-          return dedent`
-            - name: ${t.name}
-              template_type: Suspend
-              duration: ${t.suspend!.duration}
-          `
+          realTemplates.push({
+            name: t.name,
+            template_type: 'Suspend',
+            duration: t.suspend!.duration,
+          })
+
+          break
         default:
-          return null
+          break
       }
     })
 
-  return yaml
+  return yaml.dump({
+    apiVersion: 'chaos-mesh.org/v1alpha1',
+    kind: 'Workflow',
+    metadata: {
+      name,
+    },
+    entry: 'entry',
+    templates: [
+      {
+        name: 'entry',
+        template_type: 'Serial',
+        duration,
+        tasks,
+      },
+      ...realTemplates,
+    ],
+  })
 }
