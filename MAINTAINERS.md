@@ -19,7 +19,7 @@ Ben Ye ([yeya24](https://github.com/yeya24)) | [yb532204897@gmail.com](mailto:
 Hengliang Tan ([Gallardot](https://github.com/Gallardot)) | [tttick@gmail.com](mailto:tttick@gmail.com) | [Xpeng Motors](https://www.xiaopeng.com/)
 
 
-The Committers of Chaos Mesh, along with their emails and focus area, are listed below:
+The Committers of Chaos Mesh, along with their emails, are listed below:
 
 | Name                         | Email                    | Org     |
 |------------------------------|--------------------------|---------|
