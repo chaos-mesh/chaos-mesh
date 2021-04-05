@@ -229,7 +229,10 @@ def call(BUILD_BRANCH, CREDENTIALS_ID) {
 		def artifacts = "go/src/github.com/chaos-mesh/chaos-mesh/artifacts"
 		def builds = [:]
 		builds["E2E v1.12.10"] = {
-                build("v1.12", "${GLOBALS} GINKGO_NODES=6 KUBE_VERSION=v1.12.10 ./hack/e2e.sh -- --ginkgo.focus='Basic'")
+                build("v1.12", "${GLOBALS} GINKGO_NODES=6 KUBE_VERSION=v1.12.10  KIND_VERSION=0.8.1 ./hack/e2e.sh -- --ginkgo.focus='Basic'")
+        }
+        builds["E2E on kubernetes 1.20.4"] = {
+                build("v1.20", "${GLOBALS} GINKGO_NODES=6 KUBE_VERSION=v1.20.2 ./hack/e2e.sh -- --ginkgo.focus='Basic'")
         }
 		builds.failFast = false
 		parallel builds

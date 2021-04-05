@@ -199,6 +199,7 @@ type IOChaosInfo struct {
 	Delay         string                     `json:"delay"`
 	Errno         uint32                     `json:"errno"`
 	Attr          *v1alpha1.AttrOverrideSpec `json:"attr"`
+	Mistake       *v1alpha1.MistakeSpec      `json:"mistake"`
 	Path          string                     `json:"path"`
 	Percent       int                        `json:"percent"`
 	Methods       []v1alpha1.IoMethod        `json:"methods"`

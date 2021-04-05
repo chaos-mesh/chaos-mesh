@@ -117,6 +117,10 @@ func (in *fakeTwoPhaseChaos) IsPaused() bool {
 	return false
 }
 
+func (in *fakeTwoPhaseChaos) GetSpecAndMetaString() (string, error) {
+	return "", nil
+}
+
 func (r fakeEndpoint) Object() v1alpha1.InnerObject {
 	return &fakeTwoPhaseChaos{}
 }
@@ -283,10 +287,12 @@ var _ = Describe("TwoPhase", func() {
 		})
 
 		It("TwoPhase Delete", func() {
+			duration := "5m"
 			chaos := fakeTwoPhaseChaos{
 				TypeMeta:   typeMeta,
 				ObjectMeta: objectMeta,
 				Scheduler:  &v1alpha1.SchedulerSpec{Cron: "@hourly"},
+				Duration:   &duration,
 				Deleted:    true,
 			}
 

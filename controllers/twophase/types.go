@@ -86,6 +86,11 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		if phase == v1alpha1.ExperimentPhaseWaiting {
 			targetPhase = phase
 			chaos.SetNextStart(*nextStart)
+			duration, err := chaos.GetDuration()
+			if err != nil {
+				return ctrl.Result{}, err
+			}
+			chaos.SetNextRecover(nextStart.Add(*duration))
 		}
 	}
 
@@ -131,7 +136,12 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		// because nothing will be better with retrying
 		return ctrl.Result{}, nil
 	}
+
 	r.Log.Info("requeue", "requeue after", requeueAfter)
+	if requeueAfter == time.Duration(0) {
+		return ctrl.Result{Requeue: true}, nil
+	}
+
 	return ctrl.Result{
 		RequeueAfter: requeueAfter,
 	}, nil
@@ -142,9 +152,19 @@ func calcRequeueAfterTime(chaos v1alpha1.InnerSchedulerObject, now time.Time) (t
 	// requeueAfter = min(filter([nextRecoverAfter, nextStartAfter], >0))
 	nextRecoverAfter := chaos.GetNextRecover().Sub(now)
 	nextStartAfter := chaos.GetNextStart().Sub(now)
-	if nextRecoverAfter > 0 && requeueAfter > nextRecoverAfter {
+
+	// If the `nextRecoverAfter` is less zero, we reset `nextRecoverAfter` to zero,
+	// which represents that the chaos action should be recovered immediately.
+	// `chaos.GetNextRecover()` ignores millisecond field, which will cause the `nextRecoverAfter` is less zero
+	// when the duration is zero or less 1 second.
+	if nextRecoverAfter < 0 {
+		nextRecoverAfter = 0 * time.Second
+	}
+
+	if requeueAfter > nextRecoverAfter {
 		requeueAfter = nextRecoverAfter
 	}
+
 	if nextStartAfter > 0 && requeueAfter > nextStartAfter {
 		requeueAfter = nextStartAfter
 	}
