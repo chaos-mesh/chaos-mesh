@@ -1,5 +1,7 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 
+import { toTitleCase } from 'lib/utils'
+
 export interface NavigationBreadCrumbProps {
   name: string
   path?: string
@@ -33,7 +35,7 @@ const navigationSlice = createSlice({
       if (breadcrumbs[0].name) {
         state.breadcrumbs = breadcrumbs
 
-        document.title = breadcrumbs.map((b) => b.name).join(' / ') + ' | Chaos Mesh Dashboard'
+        document.title = toTitleCase(breadcrumbs.map((b) => b.name).join(' / ') + ' | Chaos Mesh Dashboard')
       }
     },
   },

@@ -12,7 +12,6 @@ export interface Alert {
 const initialState: {
   alert: Alert
   alertOpen: boolean
-  searchModalOpen: boolean
   namespace: string
   securityMode: boolean
   dnsServerCreate: boolean
@@ -25,7 +24,6 @@ const initialState: {
     message: '',
   },
   alertOpen: false,
-  searchModalOpen: false,
   namespace: 'All',
   securityMode: true,
   dnsServerCreate: false,
@@ -44,9 +42,6 @@ const globalStatusSlice = createSlice({
     },
     setAlertOpen(state, action: PayloadAction<boolean>) {
       state.alertOpen = action.payload
-    },
-    setSearchModalOpen(state, action: PayloadAction<boolean>) {
-      state.searchModalOpen = action.payload
     },
     setNameSpace(state, action: PayloadAction<string>) {
       const ns = action.payload
@@ -77,14 +72,6 @@ const globalStatusSlice = createSlice({
   },
 })
 
-export const {
-  setAlert,
-  setAlertOpen,
-  setSearchModalOpen,
-  setNameSpace,
-  setConfig,
-  setTokens,
-  setTokenName,
-} = globalStatusSlice.actions
+export const { setAlert, setAlertOpen, setNameSpace, setConfig, setTokens, setTokenName } = globalStatusSlice.actions
 
 export default globalStatusSlice.reducer

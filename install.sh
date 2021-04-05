@@ -461,7 +461,6 @@ metadata:
   name: "local-storage"
 provisioner: "kubernetes.io/no-provisioner"
 volumeBindingMode: "WaitForFirstConsumer"
-
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -475,7 +474,6 @@ data:
     local-storage:
       hostDir: /mnt/disks
       mountDir: /mnt/disks
-
 ---
 apiVersion: apps/v1
 kind: DaemonSet
@@ -537,14 +535,12 @@ spec:
         - name: local-disks
           hostPath:
             path: /mnt/disks
-
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: local-storage-admin
   namespace: kube-system
-
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -987,6 +983,10 @@ rules:
       - namespaces
       - services
     verbs: [ "get", "list", "watch" ]
+  - apiGroups: [ "authorization.k8s.io" ]
+    resources:
+      - subjectaccessreviews
+    verbs: [ "create" ]
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 # bindings cluster level
@@ -1040,6 +1040,10 @@ rules:
   - apiGroups: [ "" ]
     resources: [ "configmaps", "services" ]
     verbs: [ "get", "list", "watch" ]
+  - apiGroups: [ "authorization.k8s.io" ]
+    resources:
+      - subjectaccessreviews
+    verbs: [ "create" ]
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 # binding for control plane namespace
@@ -1258,6 +1262,8 @@ spec:
               value: "true"
             - name: TARGET_NAMESPACE
               value: "chaos-testing"
+            - name: ENABLE_FILTER_NAMESPACE
+              value: "false"
             - name: SECURITY_MODE
               value: "false"
             - name: DNS_SERVER_CREATE
@@ -1338,12 +1344,16 @@ spec:
             value: "app.kubernetes.io/component:template"
           - name: CONFIGMAP_LABELS
             value: "app.kubernetes.io/component:webhook"
+          - name: ENABLE_FILTER_NAMESPACE
+            value: "false"
           - name: PPROF_ADDR
             value: ":10081"
           - name: CHAOS_DNS_SERVICE_NAME
             value: chaos-mesh-dns-server
           - name: CHAOS_DNS_SERVICE_PORT
             value: !!str 9288
+          - name: SECURITY_MODE
+            value: "false"
         volumeMounts:
           - name: webhook-certs
             mountPath: /etc/webhook/certs
@@ -1520,6 +1530,25 @@ webhooks:
           - UPDATE
         resources:
           - awschaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /mutate-chaos-mesh-org-v1alpha1-gcpchaos
+    failurePolicy: Fail
+    name: mgcpchaos.kb.io
+    timeoutSeconds: 5
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - gcpchaos
   - clientConfig:
       caBundle: "${CA_BUNDLE}"
       service:
@@ -1745,6 +1774,25 @@ webhooks:
       service:
         name: chaos-mesh-controller-manager
         namespace: "chaos-testing"
+        path: /validate-chaos-mesh-org-v1alpha1-gcpchaos
+    failurePolicy: Fail
+    name: vgcpchaos.kb.io
+    timeoutSeconds: 5
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - gcpchaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
         path: /validate-chaos-mesh-org-v1alpha1-podnetworkchaos
     failurePolicy: Fail
     name: vpodnetworkchaos.kb.io
@@ -1797,6 +1845,34 @@ webhooks:
           - UPDATE
         resources:
           - jvmchaos
+---
+# Source: chaos-mesh/templates/secrets-configuration.yaml
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: validate-auth
+  labels:
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/component: admission-webhook
+webhooks:
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /validate-auth
+    failurePolicy: Fail
+    name: vauth.kb.io
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources: [ "*" ]
 EOF
     # chaos-mesh.yaml end
 }

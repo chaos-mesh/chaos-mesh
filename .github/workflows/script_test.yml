@@ -3,15 +3,13 @@ on:
   push:
     branches:
       - master
-      - release-1.0
   pull_request:
     branches:
       - master
-      - release-1.0
 
 jobs:
   run:
-    name: Test
+    name: Script Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
@@ -19,7 +17,7 @@ jobs:
           # Must use at least depth 2!
           fetch-depth: 2
 
-      - name: Creating kind cluster 
+      - name: Creating kind cluster
         uses: helm/kind-action@v1.0.0-rc.1
 
       - name: Install Chaos Mesh

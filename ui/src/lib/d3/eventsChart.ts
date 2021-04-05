@@ -57,7 +57,7 @@ export default function gen({
 
   const margin = {
     top: 0,
-    right: enableLegends ? 150 : 0,
+    right: enableLegends && document.documentElement.offsetWidth > 768 ? 150 : 0,
     bottom: 30,
     left: 0,
   }
