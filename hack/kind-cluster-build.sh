@@ -86,7 +86,7 @@ done
 
 clusterName=${clusterName:-kind}
 nodeNum=${nodeNum:-3}
-k8sVersion=${k8sVersion:-v1.15.6}
+k8sVersion=${k8sVersion:-v1.20.2}
 volumeNum=${volumeNum:-5}
 registryName=${registryName:-registry}
 registryPort=${registryPort:-5000}
