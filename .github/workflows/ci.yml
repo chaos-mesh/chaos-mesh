@@ -42,6 +42,10 @@ jobs:
           export PATH=$PATH:$GOPATH/bin
           make ensure-kubebuilder || echo 0
           make ensure-kustomize || echo 0
+
+          # preload go modules before goimports
+          go mod download -x
+
           make groupimports || echo 0
           #use sh function
 

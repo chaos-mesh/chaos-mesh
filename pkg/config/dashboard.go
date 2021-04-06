@@ -34,10 +34,9 @@ type ChaosDashboardConfig struct {
 	// TargetNamespace is the target namespace to injecting chaos.
 	// It only works with ClusterScoped is false;
 	TargetNamespace string `envconfig:"TARGET_NAMESPACE" default:"" json:"target_namespace"`
-	// AllowedNamespaces is a regular expression, and matching namespace will allow the chaos task to be performed
-	AllowedNamespaces string `envconfig:"ALLOWED_NAMESPACES" default:"" json:"-"`
-	// IgnoredNamespaces is a regular expression, and the chaos task will be ignored by a matching namespace
-	IgnoredNamespaces string `envconfig:"IGNORED_NAMESPACES" default:"" json:"-"`
+	// EnableFilterNamespace will filter namespace with annotation. Only the pods/containers in namespace
+	// annotated with `chaos-mesh.org/inject=enabled` will be injected
+	EnableFilterNamespace bool `envconfig:"ENABLE_FILTER_NAMESPACE" default:"false"`
 
 	// SecurityMode will use the token login by the user if set to true
 	SecurityMode    bool   `envconfig:"SECURITY_MODE" default:"true" json:"security_mode"`
