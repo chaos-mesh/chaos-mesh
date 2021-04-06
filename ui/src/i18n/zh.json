@@ -179,6 +179,7 @@
       "token": "令牌",
       "tokenHelper": "请输入令牌",
       "tokenValidation": "令牌不能为空",
+      "duplicateDesc": "令牌名称不能重复",
       "deleteDesc": "此操作不可逆"
     }
   },
