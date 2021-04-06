@@ -6,8 +6,6 @@ import { useHistory, useLocation } from 'react-router-dom'
 import ConfirmDialog from 'components-mui/ConfirmDialog'
 import RBACGenerator from 'components/RBACGenerator'
 import T from 'components/T'
-import { setTokenName } from 'slices/globalStatus'
-import { useStoreDispatch } from 'store'
 
 interface AuthProps {
   open: boolean
@@ -18,14 +16,10 @@ const Auth: React.FC<AuthProps> = ({ open, setOpen }) => {
   const history = useHistory()
   const { pathname } = useLocation()
 
-  const dispatch = useStoreDispatch()
-
   const [genOpen, setGenOpen] = useState(false)
 
-  const handleSubmitCallback = (values: TokenFormValues) => {
+  const handleSubmitCallback = () => {
     setOpen(false)
-
-    dispatch(setTokenName(values.name))
 
     history.replace('/authed')
     setTimeout(() => history.replace(pathname))
