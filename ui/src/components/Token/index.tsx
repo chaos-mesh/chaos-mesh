@@ -3,7 +3,6 @@ import { Form, Formik, FormikHelpers } from 'formik'
 import { setTokenName, setTokens } from 'slices/globalStatus'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
-import LS from 'lib/localStorage'
 import React from 'react'
 import T from 'components/T'
 import { TextField } from 'components/FormField'

@@ -1,11 +1,11 @@
 import { Box, Button, Link, Typography } from '@material-ui/core'
 import React, { useState } from 'react'
-import Token, { TokenFormValues } from 'components/Token'
 import { useHistory, useLocation } from 'react-router-dom'
 
 import ConfirmDialog from 'components-mui/ConfirmDialog'
 import RBACGenerator from 'components/RBACGenerator'
 import T from 'components/T'
+import Token from 'components/Token'
 
 interface AuthProps {
   open: boolean
