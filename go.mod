@@ -36,7 +36,7 @@ require (
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/grpc-ecosystem/grpc-gateway v1.14.1 // indirect
 	github.com/hashicorp/go-multierror v1.1.0
-	github.com/hashicorp/golang-lru v0.5.5-0.20210104140557-80c98217689d
+	github.com/hashicorp/golang-lru v0.5.3
 	github.com/jinzhu/gorm v1.9.12
 	github.com/joomcode/errorx v1.0.1
 	github.com/kelseyhightower/envconfig v1.4.0
@@ -46,7 +46,7 @@ require (
 	github.com/mitchellh/mapstructure v1.3.3
 	github.com/moby/locker v1.0.1
 	github.com/onsi/ginkgo v1.12.1
-	github.com/onsi/gomega v1.10.1
+	github.com/onsi/gomega v1.9.0
 	github.com/pingcap/check v0.0.0-20191216031241-8a5a85928f12 // indirect
 	github.com/pingcap/errors v0.11.5-0.20190809092503-95897b64e011
 	github.com/pingcap/failpoint v0.0.0-20200210140405-f8f9fb234798
@@ -55,7 +55,7 @@ require (
 	github.com/prometheus/client_golang v1.0.0
 	github.com/prometheus/procfs v0.6.0 // indirect
 	github.com/robfig/cron/v3 v3.0.1
-	github.com/shirou/gopsutil v2.20.5+incompatible
+	github.com/shirou/gopsutil v0.0.0-20180427012116-c95755e4bcd7
 	github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749 // indirect
 	github.com/shurcooL/vfsgen v0.0.0-20181202132449-6a9ea43bcacd
 	github.com/spf13/cobra v1.1.1
@@ -69,11 +69,11 @@ require (
 	go.uber.org/fx v1.12.0
 	go.uber.org/zap v1.15.0
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
-	golang.org/x/net v0.0.0-20200822124328-c89045814202
+	golang.org/x/net v0.0.0-20200320220750-118fecf932d8
 	golang.org/x/sync v0.0.0-20201207232520-09787c993a3a
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0
 	golang.org/x/tools v0.0.0-20200309202150-20ab64c0d93f
-	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1
+	golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543
 	google.golang.org/api v0.13.0
 	google.golang.org/grpc v1.27.0
 	honnef.co/go/tools v0.0.1-2020.1.3 // indirect
