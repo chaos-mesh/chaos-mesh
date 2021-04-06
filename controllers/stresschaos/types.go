@@ -17,10 +17,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	_"github.com/BurntSushi/xgb/res"
-	_"go/types"
-	_"go/types"
-	_"strings"
 	"sync"
 	"time"
 
@@ -133,7 +129,7 @@ func (r *recoverer) RecoverPod(ctx context.Context, pod *v1.Pod, somechaos v1alp
 		r.Log.Info("Pod seems already recovered", "pod", pod.UID)
 		return nil
 	}
-	for _, item := range instances{
+	for _, item := range instances {
 		if _, err = daemonClient.CancelStressors(ctx, &pb.CancelStressRequest{
 			Instance:  item.UID,
 			StartTime: item.StartTime.UnixNano() / int64(time.Millisecond),
@@ -192,10 +188,10 @@ func (r *endpoint) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.St
 		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
 	}
 	if chaos.Spec.ContainerName != nil &&
-		len(chaos.Spec.ContainerName) != 0{
+		len(chaos.Spec.ContainerName) != 0 {
 		for _, container := range pod.Status.ContainerStatuses {
-			for _, item := range chaos.Spec.ContainerName{
-				if item == container.Name{
+			for _, item := range chaos.Spec.ContainerName {
+				if item == container.Name {
 					targets = append(targets, container.ContainerID)
 					break
 				}
@@ -206,8 +202,8 @@ func (r *endpoint) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.St
 			return fmt.Errorf("cannot find container with name %s", chaos.Spec.ContainerName)
 		}
 	}
-		stressors := chaos.Spec.StressngStressors
-		if len(stressors) == 0 {
+	stressors := chaos.Spec.StressngStressors
+	if len(stressors) == 0 {
 		stressors, err = chaos.Spec.Stressors.Normalize()
 		if err != nil {
 			return err
@@ -235,10 +231,10 @@ func (r *endpoint) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.St
 			},
 		}
 	}
-		instancesLock.Lock()
-		chaos.Status.Instances[key] = instances
-		instancesLock.Unlock()
-		return nil
+	instancesLock.Lock()
+	chaos.Status.Instances[key] = instances
+	instancesLock.Unlock()
+	return nil
 }
 
 func init() {

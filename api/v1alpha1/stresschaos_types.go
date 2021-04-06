@@ -15,7 +15,6 @@ package v1alpha1
 
 import (
 	"fmt"
-	_"go/types"
 
 	"github.com/docker/go-units"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -99,6 +98,7 @@ func (in *StressChaosSpec) GetValue() string {
 }
 
 type StressInstances []StressInstance
+
 // StressChaosStatus defines the observed state of StressChaos
 type StressChaosStatus struct {
 	ChaosStatus `json:",inline"`

@@ -1602,7 +1602,9 @@ spec:
                       containerName:
                         description: ContainerName indicates the target container
                           to inject stress in
-                        type: string
+                        items:
+                          type: string
+                        type: array
                       duration:
                         description: Duration represents the duration of the chaos
                           action

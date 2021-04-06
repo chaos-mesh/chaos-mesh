@@ -20,6 +20,8 @@ import (
 	"os"
 	"time"
 
+	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
+
 	"golang.org/x/time/rate"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -47,8 +49,6 @@ import (
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/stresschaos"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/timechaos"
 
-
-
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -67,10 +67,8 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config/watcher"
 	wfcontrollers "github.com/chaos-mesh/chaos-mesh/pkg/workflow/controllers"
-
 	// +kubebuilder:scaffold:imports
 )
-
 
 var (
 	scheme   = runtime.NewScheme()
@@ -81,7 +79,6 @@ var (
 	printVersion                   bool
 	restConfigQPS, restConfigBurst int
 )
-
 
 func init() {
 	_ = clientgoscheme.AddToScheme(scheme)
