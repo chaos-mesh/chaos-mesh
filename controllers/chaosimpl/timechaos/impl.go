@@ -17,6 +17,10 @@ import (
 	"context"
 	"time"
 
+	"go.uber.org/fx"
+
+	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/utils"
 
 	"github.com/go-logr/logr"
@@ -103,9 +107,20 @@ func secAndNSecFromDuration(duration time.Duration) (sec int64, nsec int64) {
 	return
 }
 
-func NewImpl(c client.Client, log logr.Logger) *Impl {
-	return &Impl{
-		Client: c,
-		Log:    log.WithName("timechaos"),
+func NewImpl(c client.Client, log logr.Logger) *common.ChaosImplPair {
+	return &common.ChaosImplPair{
+		Name:   "timechaos",
+		Object: &v1alpha1.TimeChaos{},
+		Impl: &Impl{
+			Client: c,
+			Log:    log.WithName("timechaos"),
+		},
 	}
 }
+
+var Module = fx.Provide(
+	fx.Annotated{
+		Group:  "impl",
+		Target: NewImpl,
+	},
+)

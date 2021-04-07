@@ -174,9 +174,9 @@ type SchedulerInfo struct {
 
 // PodChaosInfo defines the basic information of pod chaos for creating a new PodChaos.
 type PodChaosInfo struct {
-	Action        string `json:"action" binding:"oneof='' 'pod-kill' 'pod-failure' 'container-kill'"`
+	Action         string   `json:"action" binding:"oneof='' 'pod-kill' 'pod-failure' 'container-kill'"`
 	ContainerNames []string `json:"container_name"`
-	GracePeriod   int64  `json:"grace_period"`
+	GracePeriod    int64    `json:"grace_period"`
 }
 
 // NetworkChaosInfo defines the basic information of network chaos for creating a new NetworkChaos.
@@ -194,15 +194,15 @@ type NetworkChaosInfo struct {
 
 // IOChaosInfo defines the basic information of io chaos for creating a new IOChaos.
 type IOChaosInfo struct {
-	Action        string                     `json:"action" binding:"oneof='' 'latency' 'fault' 'attrOverride'"`
-	Delay         string                     `json:"delay"`
-	Errno         uint32                     `json:"errno"`
-	Attr          *v1alpha1.AttrOverrideSpec `json:"attr"`
-	Path          string                     `json:"path"`
-	Percent       int                        `json:"percent"`
-	Methods       []v1alpha1.IoMethod        `json:"methods"`
-	VolumePath    string                     `json:"volume_path"`
-	ContainerNames []string                     `json:"container_name"`
+	Action         string                     `json:"action" binding:"oneof='' 'latency' 'fault' 'attrOverride'"`
+	Delay          string                     `json:"delay"`
+	Errno          uint32                     `json:"errno"`
+	Attr           *v1alpha1.AttrOverrideSpec `json:"attr"`
+	Path           string                     `json:"path"`
+	Percent        int                        `json:"percent"`
+	Methods        []v1alpha1.IoMethod        `json:"methods"`
+	VolumePath     string                     `json:"volume_path"`
+	ContainerNames []string                   `json:"container_name"`
 }
 
 // KernelChaosInfo defines the basic information of kernel chaos for creating a new KernelChaos.
@@ -221,14 +221,14 @@ type TimeChaosInfo struct {
 type StressChaosInfo struct {
 	Stressors         *v1alpha1.Stressors `json:"stressors"`
 	StressngStressors string              `json:"stressng_stressors,omitempty"`
-	ContainerNames     []string             `json:"container_name,omitempty"`
+	ContainerNames    []string            `json:"container_name,omitempty"`
 }
 
 // DNSChaosInfo defines the basic information of dns chaos for creating a new DNSChaos.
 type DNSChaosInfo struct {
 	Action             string   `json:"action" binding:"oneof='error' 'random'"`
 	DomainNamePatterns []string `json:"patterns"`
-	ContainerNames     []string             `json:"container_name,omitempty"`
+	ContainerNames     []string `json:"container_name,omitempty"`
 }
 
 // ParsePodChaos Parse PodChaos JSON string into ExperimentYAMLDescription.

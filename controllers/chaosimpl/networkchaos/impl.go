@@ -17,6 +17,9 @@ import (
 	"context"
 
 	"github.com/pkg/errors"
+	"go.uber.org/fx"
+
+	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/networkchaos/partition"
@@ -54,9 +57,22 @@ func (i Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Record
 	}
 }
 
-func NewImpl(trafficcontrol *trafficcontrol.Impl, partition *partition.Impl) *Impl {
-	return &Impl{
-		trafficcontrol,
-		partition,
+func NewImpl(trafficcontrol *trafficcontrol.Impl, partition *partition.Impl) *common.ChaosImplPair {
+	return &common.ChaosImplPair{
+		Name:   "networkchaos",
+		Object: &v1alpha1.NetworkChaos{},
+		Impl: &Impl{
+			trafficcontrol,
+			partition,
+		},
 	}
 }
+
+var Module = fx.Provide(
+	fx.Annotated{
+		Group:  "impl",
+		Target: NewImpl,
+	},
+	trafficcontrol.NewImpl,
+	partition.NewImpl,
+)

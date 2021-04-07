@@ -18,6 +18,10 @@ import (
 	"fmt"
 	"time"
 
+	"go.uber.org/fx"
+
+	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/utils"
@@ -188,9 +192,20 @@ func (impl *Impl) cancelDNSServerRules(dnsServerIP string, port int, name string
 	return nil
 }
 
-func NewImpl(c client.Client, log logr.Logger) *Impl {
-	return &Impl{
-		Client: c,
-		Log:    log.WithName("dnschaos"),
+func NewImpl(c client.Client, log logr.Logger) *common.ChaosImplPair {
+	return &common.ChaosImplPair{
+		Name:   "dnschaos",
+		Object: &v1alpha1.DNSChaos{},
+		Impl: &Impl{
+			Client: c,
+			Log:    log.WithName("dnschaos"),
+		},
 	}
 }
+
+var Module = fx.Provide(
+	fx.Annotated{
+		Group:  "impl",
+		Target: NewImpl,
+	},
+)

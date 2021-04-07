@@ -16,6 +16,10 @@ package podchaos
 import (
 	"context"
 
+	"go.uber.org/fx"
+
+	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+
 	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -60,10 +64,24 @@ func (i Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Record
 	}
 }
 
-func NewImpl(podkill *podkill.Impl, podfailure *podfailure.Impl, containerkill *containerkill.Impl) *Impl {
-	return &Impl{
-		podkill,
-		podfailure,
-		containerkill,
+func NewImpl(podkill *podkill.Impl, podfailure *podfailure.Impl, containerkill *containerkill.Impl) *common.ChaosImplPair {
+	return &common.ChaosImplPair{
+		Name:   "podchaos",
+		Object: &v1alpha1.PodChaos{},
+		Impl: &Impl{
+			podkill,
+			podfailure,
+			containerkill,
+		},
 	}
 }
+
+var Module = fx.Provide(
+	fx.Annotated{
+		Group:  "impl",
+		Target: NewImpl,
+	},
+	podkill.NewImpl,
+	podfailure.NewImpl,
+	containerkill.NewImpl,
+)

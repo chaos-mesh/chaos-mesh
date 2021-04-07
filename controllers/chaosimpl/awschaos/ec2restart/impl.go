@@ -16,6 +16,7 @@ package ec2restart
 import (
 	"context"
 	"encoding/json"
+
 	"github.com/go-logr/logr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 

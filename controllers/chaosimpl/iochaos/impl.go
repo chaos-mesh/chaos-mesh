@@ -16,6 +16,10 @@ package iochaos
 import (
 	"context"
 
+	"go.uber.org/fx"
+
+	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+
 	"github.com/go-logr/logr"
 	v1 "k8s.io/api/core/v1"
 	k8sError "k8s.io/apimachinery/pkg/api/errors"
@@ -109,9 +113,20 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	return v1alpha1.NotInjected, nil
 }
 
-func NewImpl(c client.Client, log logr.Logger) *Impl {
-	return &Impl{
-		Client: c,
-		Log:    log.WithName("iochaos"),
+func NewImpl(c client.Client, log logr.Logger) *common.ChaosImplPair {
+	return &common.ChaosImplPair{
+		Name:   "iochaos",
+		Object: &v1alpha1.IoChaos{},
+		Impl: &Impl{
+			Client: c,
+			Log:    log.WithName("iochaos"),
+		},
 	}
 }
+
+var Module = fx.Provide(
+	fx.Annotated{
+		Group:  "impl",
+		Target: NewImpl,
+	},
+)

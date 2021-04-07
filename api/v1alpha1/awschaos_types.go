@@ -15,6 +15,7 @@ package v1alpha1
 
 import (
 	"encoding/json"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -89,7 +90,6 @@ type AwsSelector struct {
 	// Needed in detach-volume.
 	// +optional
 	DeviceName *string `json:"deviceName,omitempty"`
-
 }
 
 func (obj *AwsChaos) GetSelectorSpecs() map[string]interface{} {

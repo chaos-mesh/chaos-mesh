@@ -16,6 +16,8 @@ package container
 import (
 	"context"
 
+	"github.com/chaos-mesh/chaos-mesh/controllers/config"
+
 	v1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -80,15 +82,15 @@ func (impl *SelectImpl) Select(ctx context.Context, cs *v1alpha1.ContainerSelect
 	return result, nil
 }
 
-func New(c client.Client, r client.Reader, clusterScoped bool, targetNamespace, allowedNamespaces, ignoredNamespaces string) *SelectImpl {
+func New(c client.Client, r client.Reader) *SelectImpl {
 	return &SelectImpl{
 		c,
 		r,
 		Option{
-			clusterScoped,
-			targetNamespace,
-			allowedNamespaces,
-			ignoredNamespaces,
+			config.ControllerCfg.ClusterScoped,
+			config.ControllerCfg.TargetNamespace,
+			config.ControllerCfg.AllowedNamespaces,
+			config.ControllerCfg.IgnoredNamespaces,
 		},
 	}
 }

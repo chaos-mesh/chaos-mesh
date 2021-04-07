@@ -83,15 +83,15 @@ func (impl *SelectImpl) Select(ctx context.Context, ps *v1alpha1.PodSelector) ([
 	return result, nil
 }
 
-func New(c client.Client, r client.Reader, clusterScoped bool, targetNamespace, allowedNamespaces, ignoredNamespaces string) *SelectImpl {
+func New(c client.Client, r client.Reader) *SelectImpl {
 	return &SelectImpl{
 		c,
 		r,
 		Option{
-			clusterScoped,
-			targetNamespace,
-			allowedNamespaces,
-			ignoredNamespaces,
+			config.ControllerCfg.ClusterScoped,
+			config.ControllerCfg.TargetNamespace,
+			config.ControllerCfg.AllowedNamespaces,
+			config.ControllerCfg.IgnoredNamespaces,
 		},
 	}
 }

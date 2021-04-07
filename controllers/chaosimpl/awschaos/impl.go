@@ -15,9 +15,13 @@ package awschaos
 
 import (
 	"context"
+
+	"go.uber.org/fx"
+
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/awschaos/detachvolume"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/awschaos/ec2restart"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/awschaos/ec2stop"
+	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 
 	"github.com/pkg/errors"
 
@@ -60,10 +64,23 @@ func (i Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Record
 	}
 }
 
-func NewImpl(detachvolume *detachvolume.Impl, ec2restart *ec2restart.Impl, ec2stop *ec2stop.Impl) *Impl {
-	return &Impl{
-		detachvolume,
-		ec2restart,
-		ec2stop,
+func NewImpl(detachvolume *detachvolume.Impl, ec2restart *ec2restart.Impl, ec2stop *ec2stop.Impl) *common.ChaosImplPair {
+	return &common.ChaosImplPair{
+		Name:   "awschaos",
+		Object: &v1alpha1.AwsChaos{},
+		Impl: &Impl{
+			detachvolume,
+			ec2restart,
+			ec2stop,
+		},
 	}
 }
+
+var Module = fx.Provide(
+	fx.Annotated{
+		Group:  "impl",
+		Target: NewImpl,
+	},
+	detachvolume.NewImpl,
+	ec2restart.NewImpl,
+	ec2stop.NewImpl)

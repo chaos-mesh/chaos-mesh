@@ -16,6 +16,7 @@ package ec2stop
 import (
 	"context"
 	"encoding/json"
+
 	"github.com/go-logr/logr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -92,7 +93,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	var selected v1alpha1.AwsSelector
 	json.Unmarshal([]byte(records[index].Id), &selected)
 
-	opts := []func(*awscfg.LoadOptions) error {
+	opts := []func(*awscfg.LoadOptions) error{
 		awscfg.WithRegion(selected.AwsRegion),
 	}
 

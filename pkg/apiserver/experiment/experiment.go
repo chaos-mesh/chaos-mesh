@@ -27,8 +27,8 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/finalizers"
+	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
 	"github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
@@ -180,9 +180,9 @@ func (s *Service) createPodChaos(exp *core.ExperimentInfo, kubeCli client.Client
 		Spec: v1alpha1.PodChaosSpec{
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{
-					Selector:       exp.Scope.ParseSelector(),
-					Mode:           v1alpha1.PodMode(exp.Scope.Mode),
-					Value:          exp.Scope.Value,
+					Selector: exp.Scope.ParseSelector(),
+					Mode:     v1alpha1.PodMode(exp.Scope.Mode),
+					Value:    exp.Scope.Value,
 				},
 				ContainerNames: exp.Target.PodChaos.ContainerNames,
 			},
@@ -207,7 +207,7 @@ func (s *Service) createNetworkChaos(exp *core.ExperimentInfo, kubeCli client.Cl
 			Annotations: exp.Annotations,
 		},
 		Spec: v1alpha1.NetworkChaosSpec{
-			Action:   v1alpha1.NetworkChaosAction(exp.Target.NetworkChaos.Action),
+			Action: v1alpha1.NetworkChaosAction(exp.Target.NetworkChaos.Action),
 			PodSelector: v1alpha1.PodSelector{
 				Selector: exp.Scope.ParseSelector(),
 				Mode:     v1alpha1.PodMode(exp.Scope.Mode),
@@ -251,20 +251,20 @@ func (s *Service) createIOChaos(exp *core.ExperimentInfo, kubeCli client.Client)
 		Spec: v1alpha1.IoChaosSpec{
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{
-					Selector:      exp.Scope.ParseSelector(),
-					Mode:          v1alpha1.PodMode(exp.Scope.Mode),
-					Value:         exp.Scope.Value,
+					Selector: exp.Scope.ParseSelector(),
+					Mode:     v1alpha1.PodMode(exp.Scope.Mode),
+					Value:    exp.Scope.Value,
 				},
 				ContainerNames: exp.Target.IOChaos.ContainerNames,
 			},
-			Action:        v1alpha1.IoChaosType(exp.Target.IOChaos.Action),
-			Delay:         exp.Target.IOChaos.Delay,
-			Errno:         exp.Target.IOChaos.Errno,
-			Attr:          exp.Target.IOChaos.Attr,
-			Path:          exp.Target.IOChaos.Path,
-			Methods:       exp.Target.IOChaos.Methods,
-			Percent:       exp.Target.IOChaos.Percent,
-			VolumePath:    exp.Target.IOChaos.VolumePath,
+			Action:     v1alpha1.IoChaosType(exp.Target.IOChaos.Action),
+			Delay:      exp.Target.IOChaos.Delay,
+			Errno:      exp.Target.IOChaos.Errno,
+			Attr:       exp.Target.IOChaos.Attr,
+			Path:       exp.Target.IOChaos.Path,
+			Methods:    exp.Target.IOChaos.Methods,
+			Percent:    exp.Target.IOChaos.Percent,
+			VolumePath: exp.Target.IOChaos.VolumePath,
 		},
 	}
 
@@ -286,14 +286,14 @@ func (s *Service) createTimeChaos(exp *core.ExperimentInfo, kubeCli client.Clien
 		Spec: v1alpha1.TimeChaosSpec{
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{
-					Selector:       exp.Scope.ParseSelector(),
-					Mode:           v1alpha1.PodMode(exp.Scope.Mode),
-					Value:          exp.Scope.Value,
+					Selector: exp.Scope.ParseSelector(),
+					Mode:     v1alpha1.PodMode(exp.Scope.Mode),
+					Value:    exp.Scope.Value,
 				},
 				ContainerNames: exp.Target.TimeChaos.ContainerNames,
 			},
-			TimeOffset:     exp.Target.TimeChaos.TimeOffset,
-			ClockIds:       exp.Target.TimeChaos.ClockIDs,
+			TimeOffset: exp.Target.TimeChaos.TimeOffset,
+			ClockIds:   exp.Target.TimeChaos.ClockIDs,
 		},
 	}
 
@@ -314,9 +314,9 @@ func (s *Service) createKernelChaos(exp *core.ExperimentInfo, kubeCli client.Cli
 		},
 		Spec: v1alpha1.KernelChaosSpec{
 			PodSelector: v1alpha1.PodSelector{
-				Selector:        exp.Scope.ParseSelector(),
-				Mode:            v1alpha1.PodMode(exp.Scope.Mode),
-				Value:           exp.Scope.Value,
+				Selector: exp.Scope.ParseSelector(),
+				Mode:     v1alpha1.PodMode(exp.Scope.Mode),
+				Value:    exp.Scope.Value,
 			},
 			FailKernRequest: exp.Target.KernelChaos.FailKernRequest,
 		},
@@ -355,9 +355,9 @@ func (s *Service) createStressChaos(exp *core.ExperimentInfo, kubeCli client.Cli
 		Spec: v1alpha1.StressChaosSpec{
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{
-					Selector:          exp.Scope.ParseSelector(),
-					Mode:              v1alpha1.PodMode(exp.Scope.Mode),
-					Value:             exp.Scope.Value,
+					Selector: exp.Scope.ParseSelector(),
+					Mode:     v1alpha1.PodMode(exp.Scope.Mode),
+					Value:    exp.Scope.Value,
 				},
 				ContainerNames: exp.Target.StressChaos.ContainerNames,
 			},
@@ -385,9 +385,9 @@ func (s *Service) createDNSChaos(exp *core.ExperimentInfo, kubeCli client.Client
 		Spec: v1alpha1.DNSChaosSpec{
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{
-					Selector:           exp.Scope.ParseSelector(),
-					Mode:               v1alpha1.PodMode(exp.Scope.Mode),
-					Value:              exp.Scope.Value,
+					Selector: exp.Scope.ParseSelector(),
+					Mode:     v1alpha1.PodMode(exp.Scope.Mode),
+					Value:    exp.Scope.Value,
 				},
 				ContainerNames: exp.Target.DNSChaos.ContainerNames,
 			},

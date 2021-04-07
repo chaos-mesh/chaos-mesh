@@ -15,8 +15,12 @@ package stresschaos
 
 import (
 	"context"
-	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/utils"
 	"time"
+
+	"go.uber.org/fx"
+
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/utils"
+	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 
 	"github.com/go-logr/logr"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -117,9 +121,20 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	return v1alpha1.NotInjected, nil
 }
 
-func NewImpl(c client.Client, log logr.Logger) *Impl {
-	return &Impl{
-		Client: c,
-		Log:    log.WithName("containerkill"),
+func NewImpl(c client.Client, log logr.Logger) *common.ChaosImplPair {
+	return &common.ChaosImplPair{
+		Name:   "stresschaos",
+		Object: &v1alpha1.StressChaos{},
+		Impl: &Impl{
+			Client: c,
+			Log:    log.WithName("stresschaos"),
+		},
 	}
 }
+
+var Module = fx.Provide(
+	fx.Annotated{
+		Group:  "impl",
+		Target: NewImpl,
+	},
+)

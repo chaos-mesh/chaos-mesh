@@ -66,7 +66,8 @@ require (
 	github.com/swaggo/swag v1.6.7
 	github.com/tmc/grpc-websocket-proxy v0.0.0-20200122045848-3419fae592fc // indirect
 	github.com/vishvananda/netlink v1.0.0
-	go.uber.org/fx v1.12.0
+	go.uber.org/fx v1.13.1
+	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.15.0
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
 	golang.org/x/net v0.0.0-20200320220750-118fecf932d8

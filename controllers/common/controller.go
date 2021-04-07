@@ -24,10 +24,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
-	"github.com/chaos-mesh/chaos-mesh/pkg/selector/container"
-	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
 )
 
 type InnerObjectWithCustomStatus interface {
@@ -58,6 +55,8 @@ type Reconciler struct {
 	client.Client
 	client.Reader
 
+	Selector *selector.Selector
+
 	Log logr.Logger
 }
 
@@ -84,11 +83,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	if records == nil {
 		// TODO: get selectors from obj
 		for name, sel := range selectors {
-			selector := selector.New(selector.SelectorParams{
-				PodSelector:       pod.New(r.Client, r.Reader, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces),
-				ContainerSelector: container.New(r.Client, r.Reader, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces),
-			})
-			targets, err := selector.Select(context.TODO(), sel)
+			targets, err := r.Selector.Select(context.TODO(), sel)
 			if err != nil {
 				// TODO: handle this error
 				r.Log.Error(err, "fail to select")
