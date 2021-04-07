@@ -15,6 +15,7 @@ package desiredphase
 
 import (
 	"context"
+	"k8s.io/client-go/tools/record"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -36,6 +37,7 @@ type Reconciler struct {
 	client.Client
 	client.Reader
 
+	Recorder record.EventRecorder
 	Log logr.Logger
 }
 
@@ -76,6 +78,7 @@ func (ctx *reconcileContext) GetCreationTimestamp() metav1.Time {
 func (ctx *reconcileContext) CalcDesiredPhase() v1alpha1.DesiredPhase {
 	// Consider the finalizers
 	if ctx.obj.IsDeleted() {
+		ctx.Recorder.Eventf(ctx.obj,"Normal", "Deleted", "Turn into StoppedPhase")
 		return v1alpha1.StoppedPhase
 	}
 
@@ -89,6 +92,7 @@ func (ctx *reconcileContext) CalcDesiredPhase() v1alpha1.DesiredPhase {
 	if duration != nil {
 		stopTime := ctx.GetCreationTimestamp().Add(*duration)
 		if stopTime.Before(now) {
+			ctx.Recorder.Eventf(ctx.obj,"Normal", "TimeUp", "Turn into StoppedPhase")
 			return v1alpha1.StoppedPhase
 		} else {
 			ctx.requeueAfter = stopTime.Sub(now)
@@ -97,6 +101,7 @@ func (ctx *reconcileContext) CalcDesiredPhase() v1alpha1.DesiredPhase {
 
 	// Then decide the pause logic
 	if ctx.obj.IsPaused() {
+		ctx.Recorder.Eventf(ctx.obj,"Normal", "Paused", "Turn into StoppedPhase")
 		return v1alpha1.StoppedPhase
 	} else {
 		return v1alpha1.RunningPhase
@@ -125,9 +130,12 @@ func (ctx *reconcileContext) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			}
 		})
 		if updateError != nil {
-			// TODO: handle this error
 			ctx.Log.Error(updateError, "fail to update")
+			ctx.Recorder.Eventf(ctx.obj, "Normal", "Failed", "Failed to update desiredphase: %s", updateError.Error())
+			return ctrl.Result{}, nil
 		}
+
+		ctx.Recorder.Event(ctx.obj, "Normal", "Updated", "Successfully update desiredPhase of resource")
 	}
 	return ctrl.Result{RequeueAfter: ctx.requeueAfter}, nil
 }

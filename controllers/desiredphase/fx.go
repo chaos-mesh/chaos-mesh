@@ -38,7 +38,8 @@ func NewController(mgr ctrl.Manager, client client.Client, reader client.Reader,
 				Object: obj.Object,
 				Client: client,
 				Reader: reader,
-				Log:    logger,
+				Recorder: mgr.GetEventRecorderFor("desiredphase"),
+				Log:    logger.WithName("desiredphase"),
 			})
 		if err != nil {
 			return "", err

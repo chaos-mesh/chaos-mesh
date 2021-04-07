@@ -20,7 +20,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/chaos-mesh/chaos-mesh/controllers/desiredphase"
 	"github.com/chaos-mesh/chaos-mesh/controllers/finalizers"
-	"github.com/chaos-mesh/chaos-mesh/controllers/status"
 )
 
 var Module = fx.Options(
@@ -36,9 +35,5 @@ var Module = fx.Options(
 		fx.Annotated{
 			Group:  "controller",
 			Target: desiredphase.NewController,
-		},
-		fx.Annotated{
-			Group:  "controller",
-			Target: status.NewController,
 		},
 	), chaosimpl.AllImpl)

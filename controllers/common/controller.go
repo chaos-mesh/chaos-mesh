@@ -15,6 +15,7 @@ package common
 
 import (
 	"context"
+	"k8s.io/client-go/tools/record"
 	"reflect"
 
 	"github.com/go-logr/logr"
@@ -55,6 +56,8 @@ type Reconciler struct {
 	client.Client
 	client.Reader
 
+	Recorder record.EventRecorder
+
 	Selector *selector.Selector
 
 	Log logr.Logger
@@ -81,12 +84,12 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	selectors := obj.GetSelectorSpecs()
 
 	if records == nil {
-		// TODO: get selectors from obj
 		for name, sel := range selectors {
 			targets, err := r.Selector.Select(context.TODO(), sel)
 			if err != nil {
-				// TODO: handle this error
 				r.Log.Error(err, "fail to select")
+				r.Recorder.Eventf(obj, "Warning", "Failed", "Failed to select targets: %s", err.Error())
+				return ctrl.Result{}, nil
 			}
 
 			for _, target := range targets {
@@ -105,24 +108,36 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		var err error
 		r.Log.Info("iterating record", "record", record, "desiredPhase", desiredPhase)
 		if desiredPhase == v1alpha1.RunningPhase && record.Phase != v1alpha1.Injected {
+			originalPhase := record.Phase
+
 			r.Log.Info("apply chaos", "id", records[index].Id)
 			record.Phase, err = r.Impl.Apply(context.TODO(), index, records, obj)
+			if record.Phase != originalPhase {
+				shouldUpdate = true
+			}
 			if err != nil {
-				// TODO: handle this error
 				r.Log.Error(err, "fail to apply chaos")
+				r.Recorder.Eventf(obj, "Warning", "Failed", "Failed to apply chaos: %s", err.Error())
+				continue
 			}
 
-			shouldUpdate = true
+			r.Recorder.Eventf(obj, "Normal", "Applied", "Successfully apply chaos for %s", records[index].Id)
 		}
 		if desiredPhase == v1alpha1.StoppedPhase && record.Phase != v1alpha1.NotInjected {
+			originalPhase := record.Phase
+
 			r.Log.Info("recover chaos", "id", records[index].Id)
 			record.Phase, err = r.Impl.Recover(context.TODO(), index, records, obj)
+			if record.Phase != originalPhase {
+				shouldUpdate = true
+			}
 			if err != nil {
-				// TODO: handle this error
 				r.Log.Error(err, "fail to recover chaos")
+				r.Recorder.Eventf(obj, "Warning", "Failed", "Failed to recover chaos: %s", err.Error())
+				continue
 			}
 
-			shouldUpdate = true
+			r.Recorder.Eventf(obj, "Normal", "Recovered", "Successfully recover chaos for %s", records[index].Id)
 		}
 	}
 
@@ -150,9 +165,12 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			return r.Client.Update(context.TODO(), obj)
 		})
 		if updateError != nil {
-			// TODO: handle this error
 			r.Log.Error(updateError, "fail to update")
+			r.Recorder.Eventf(obj, "Normal", "Failed", "Failed to update records: %s", updateError.Error())
+			return ctrl.Result{}, nil
 		}
+
+		r.Recorder.Event(obj, "Normal", "Updated", "Successfully update records of resource")
 	}
 	return ctrl.Result{}, nil
 }

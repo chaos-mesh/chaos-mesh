@@ -42,22 +42,7 @@ const (
 	StoppedPhase DesiredPhase = "Stop"
 )
 
-// ExperimentPhase is the current status of chaos experiment.
-type ExperimentPhase string
-
-const (
-	ExperimentPhaseUninitialized ExperimentPhase = ""
-	ExperimentPhaseRunning       ExperimentPhase = "Running"
-	ExperimentPhaseWaiting       ExperimentPhase = "Waiting"
-	ExperimentPhasePaused        ExperimentPhase = "Paused"
-	ExperimentPhaseFailed        ExperimentPhase = "Failed"
-	ExperimentPhaseFinished      ExperimentPhase = "Finished"
-)
-
 type ExperimentStatus struct {
-	// +optional
-	Phase ExperimentPhase `json:"phase,omitempty"`
-
 	// +kubebuilder:validation:Enum=Run;Stop
 	DesiredPhase `json:"desiredPhase,omitempty"`
 	// +optional

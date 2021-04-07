@@ -48,8 +48,9 @@ func NewController(mgr ctrl.Manager, client client.Client, reader client.Reader,
 				Object:   pair.Object,
 				Client:   client,
 				Reader:   reader,
+				Recorder: mgr.GetEventRecorderFor("common"),
 				Selector: selector,
-				Log:      logger,
+				Log:      logger.WithName("records"),
 			})
 		if err != nil {
 			return "", err

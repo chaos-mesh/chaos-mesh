@@ -30,7 +30,6 @@ type Objs struct {
 
 func NewController(mgr ctrl.Manager, client client.Client, reader client.Reader, logger logr.Logger, pairs Objs) (types.Controller, error) {
 	for _, obj := range pairs.Objs {
-
 		err := ctrl.NewControllerManagedBy(mgr).
 			For(obj.Object).
 			Named(obj.Name + "-finalizers").
@@ -38,7 +37,8 @@ func NewController(mgr ctrl.Manager, client client.Client, reader client.Reader,
 				Object: obj.Object,
 				Client: client,
 				Reader: reader,
-				Log:    logger,
+				Recorder: mgr.GetEventRecorderFor("finalizer"),
+				Log:    logger.WithName("finalizers"),
 			})
 		if err != nil {
 			return "", err
