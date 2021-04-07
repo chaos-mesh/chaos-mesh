@@ -53,7 +53,10 @@ func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet, result *c
 	for i := range pods {
 		podName := pods[i].Name
 		podResult := cm.PodResult{Name: podName}
-		_ = debugEachPod(ctx, pods[i], daemons[i], networkChaos, c, &podResult)
+		err = debugEachPod(ctx, pods[i], daemons[i], networkChaos, c, &podResult)
+		if err != nil {
+			fmt.Println(err)
+		}
 		result.Pods = append(result.Pods, podResult)
 		// TODO: V(4) log when err != nil, wait for #1433
 	}
