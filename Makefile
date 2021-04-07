@@ -135,7 +135,7 @@ NAMESPACE ?= chaos-testing
 # Install CRDs into a cluster
 install: manifests
 	$(KUBECTL_BIN) apply -f manifests/crd.yaml
-	$(HELM_BIN) upgrade --install chaos-mesh helm/chaos-mesh --namespace=${NAMESPACE};
+	$(HELM_BIN) upgrade --install chaos-mesh helm/chaos-mesh --namespace=${NAMESPACE} --set registry=${DOCKER_REGISTRY};
 
 # Generate manifests e.g. CRD, RBAC etc.
 config: $(GOBIN)/controller-gen
