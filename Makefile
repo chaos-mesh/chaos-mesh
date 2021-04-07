@@ -131,10 +131,11 @@ chaosctl:
 run: generate fmt vet manifests
 	$(GO) run ./cmd/controller-manager/main.go
 
+NAMESPACE ?= chaos-testing
 # Install CRDs into a cluster
 install: manifests
 	$(KUBECTL_BIN) apply -f manifests/crd.yaml
-	bash -c '[[ `$(HELM_BIN) version --client --short` == "Client: v2"* ]] && $(HELM_BIN) install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing || $(HELM_BIN) install chaos-mesh helm/chaos-mesh --namespace=chaos-testing;'
+	$(HELM_BIN) upgrade --install chaos-mesh helm/chaos-mesh --namespace=${NAMESPACE};
 
 # Generate manifests e.g. CRD, RBAC etc.
 config: $(GOBIN)/controller-gen
