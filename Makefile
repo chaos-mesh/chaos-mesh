@@ -183,6 +183,8 @@ boilerplate:
 
 image: image-chaos-daemon image-chaos-mesh image-chaos-dashboard
 
+e2e-image: image-e2e-helper
+
 GO_TARGET_PHONY :=
 
 BINARIES :=
@@ -255,24 +257,21 @@ $(eval $(call COMPILE_GO_TEMPLATE,images/chaos-dashboard/bin/chaos-dashboard,./c
 $(eval $(call BUILD_IN_DOCKER_TEMPLATE,chaos-mesh,images/chaos-mesh/bin/chaos-controller-manager))
 $(eval $(call COMPILE_GO_TEMPLATE,images/chaos-mesh/bin/chaos-controller-manager,./cmd/chaos-controller-manager/main.go,0))
 
-$(eval $(call BUILD_IN_DOCKER_TEMPLATE,chaos-mesh-e2e,test/image/e2e/bin/ginkgo))
-$(eval $(call COMPILE_GO_TEMPLATE,test/image/e2e/bin/ginkgo,github.com/onsi/ginkgo/ginkgo,0))
+prepare-e2e: all e2e-image docker-push docker-push-e2e
 
-$(eval $(call BUILD_IN_DOCKER_TEMPLATE,chaos-mesh-e2e,test/image/e2e/bin/e2e.test))
-ifeq ($(IN_DOCKER),1)
-test/image/e2e/bin/e2e.test:
-	$(GO) test -c  -o ./test/image/e2e/bin/e2e.test ./test/e2e
-$(eval $(call BUILD_IN_DOCKER_TEMPLATE,chaos-mesh-e2e,test/image/e2e/bin/e2e.test))
-
-GO_TARGET_PHONY += test/image/e2e/bin/e2e.test
-endif
-
-image-chaos-mesh-e2e-dependencies += test/image/e2e/manifests test/image/e2e/chaos-mesh
-
+GINKGO_FLAGS ?=
 e2e: e2e-build
-	./test/image/e2e/bin/ginkgo  ./test/image/e2e/bin/e2e.test
+	./test/image/e2e/bin/ginkgo ${GINKGO_FLAGS} ./test/image/e2e/bin/e2e.test -- --e2e-image ${DOCKER_REGISTRY_PREFIX}pingcap/e2e-helper:latest
 
 e2e-build: test/image/e2e/bin/ginkgo test/image/e2e/bin/e2e.test
+
+CLEAN_TARGETS+=test/image/e2e/bin/ginkgo
+test/image/e2e/bin/ginkgo:
+	$(GO) build -ldflags "$(LDFLAGS)" -tags "${BUILD_TAGS}" -o test/image/e2e/bin/ginkgo github.com/onsi/ginkgo/ginkgo
+
+CLEAN_TARGETS+=test/image/e2e/bin/e2e.test
+test/image/e2e/bin/e2e.test:
+	$(GO) test -c  -o ./test/image/e2e/bin/e2e.test ./test/e2e
 
 test/image/e2e/manifests: manifests
 	rm -rf test/image/e2e/manifests
@@ -320,6 +319,9 @@ docker-push:
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh:${IMAGE_TAG}"
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-dashboard:${IMAGE_TAG}"
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-daemon:${IMAGE_TAG}"
+
+docker-push-e2e:
+	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/e2e-helper:${IMAGE_TAG}"
 
 docker-push-chaos-kernel:
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-kernel:${IMAGE_TAG}"
