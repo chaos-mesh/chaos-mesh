@@ -258,7 +258,7 @@ $(eval $(call COMPILE_GO_TEMPLATE,images/chaos-dashboard/bin/chaos-dashboard,./c
 $(eval $(call BUILD_IN_DOCKER_TEMPLATE,chaos-mesh,images/chaos-mesh/bin/chaos-controller-manager))
 $(eval $(call COMPILE_GO_TEMPLATE,images/chaos-mesh/bin/chaos-controller-manager,./cmd/chaos-controller-manager/main.go,0))
 
-prepare-install: all docker-push
+prepare-install: all docker-push docker-push-dns-server
 
 prepare-e2e: e2e-image docker-push-e2e
 
@@ -328,6 +328,13 @@ docker-push:
 
 docker-push-e2e:
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/e2e-helper:${IMAGE_TAG}"
+
+# the version of dns server should keep consistent with helm
+DNS_SERVER_VERSION ?= v0.2.0
+docker-push-dns-server:
+	docker pull pingcap/coredns:${DNS_SERVER_VERSION}
+	docker tag pingcap/coredns:${DNS_SERVER_VERSION} "${DOCKER_REGISTRY_PREFIX}pingcap/coredns:${DNS_SERVER_VERSION}"
+	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/coredns:${DNS_SERVER_VERSION}"
 
 docker-push-chaos-kernel:
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-kernel:${IMAGE_TAG}"
