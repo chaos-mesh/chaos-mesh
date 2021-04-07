@@ -266,6 +266,9 @@ GINKGO_FLAGS ?=
 e2e: e2e-build
 	./test/image/e2e/bin/ginkgo ${GINKGO_FLAGS} ./test/image/e2e/bin/e2e.test -- --e2e-image ${DOCKER_REGISTRY_PREFIX}pingcap/e2e-helper:${IMAGE_TAG}
 
+image-chaos-mesh-e2e-dependencies += test/image/e2e/manifests test/image/e2e/chaos-mesh e2e-build
+CLEAN_TARGETS += test/image/e2e/manifests test/image/e2e/chaos-mesh
+
 e2e-build: test/image/e2e/bin/ginkgo test/image/e2e/bin/e2e.test
 
 CLEAN_TARGETS+=test/image/e2e/bin/ginkgo
