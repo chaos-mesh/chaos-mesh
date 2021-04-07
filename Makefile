@@ -264,7 +264,7 @@ prepare-e2e: e2e-image docker-push-e2e
 
 GINKGO_FLAGS ?=
 e2e: e2e-build
-	./test/image/e2e/bin/ginkgo ${GINKGO_FLAGS} ./test/image/e2e/bin/e2e.test -- --e2e-image ${DOCKER_REGISTRY_PREFIX}pingcap/e2e-helper:latest
+	./test/image/e2e/bin/ginkgo ${GINKGO_FLAGS} ./test/image/e2e/bin/e2e.test -- --e2e-image ${DOCKER_REGISTRY_PREFIX}pingcap/e2e-helper:${IMAGE_TAG}
 
 e2e-build: test/image/e2e/bin/ginkgo test/image/e2e/bin/e2e.test
 
