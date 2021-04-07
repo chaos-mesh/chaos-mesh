@@ -86,7 +86,7 @@ multithread_tracee: test/cmd/multithread_tracee/main.c
 	cc test/cmd/multithread_tracee/main.c -lpthread -O2 -o ./bin/test/multithread_tracee
 
 mockgen:
-	GO111MODULE=on go get github.com/golang/mock/mockgen@v1.5.0
+	GO111MODULE=on $(GO) install github.com/golang/mock/mockgen@v1.5.0
 
 generate-mock: mockgen
 	go generate ./pkg/workflow
@@ -325,15 +325,15 @@ docker-push-chaos-kernel:
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-kernel:${IMAGE_TAG}"
 
 $(GOBIN)/controller-gen:
-	$(GO) get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.2.5
+	$(GO) install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.2.5
 $(GOBIN)/revive:
-	$(GO) get github.com/mgechev/revive@v1.0.2-0.20200225072153-6219ca02fffb
+	$(GO) install github.com/mgechev/revive@v1.0.2-0.20200225072153-6219ca02fffb
 $(GOBIN)/failpoint-ctl:
-	$(GO) get github.com/pingcap/failpoint/failpoint-ctl@v0.0.0-20200210140405-f8f9fb234798
+	$(GO) install github.com/pingcap/failpoint/failpoint-ctl@v0.0.0-20200210140405-f8f9fb234798
 $(GOBIN)/goimports:
-	$(GO) get golang.org/x/tools/cmd/goimports@v0.0.0-20200309202150-20ab64c0d93f
+	$(GO) install golang.org/x/tools/cmd/goimports@v0.0.0-20200309202150-20ab64c0d93f
 $(GOBIN)/gosec:
-	$(GO) get github.com/securego/gosec/cmd/gosec@v0.0.0-20200401082031-e946c8c39989
+	$(GO) install github.com/securego/gosec/cmd/gosec@v0.0.0-20200401082031-e946c8c39989
 
 lint: $(GOBIN)/revive
 	@echo "linting"
