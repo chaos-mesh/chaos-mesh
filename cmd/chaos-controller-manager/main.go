@@ -20,6 +20,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/awschaos/ec2restart"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/awschaos/ec2stop"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/stresschaos"
+	"github.com/chaos-mesh/chaos-mesh/controllers/status"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
@@ -52,7 +53,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/timechaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
-	"github.com/chaos-mesh/chaos-mesh/controllers/delete"
+	"github.com/chaos-mesh/chaos-mesh/controllers/finalizers"
 	"github.com/chaos-mesh/chaos-mesh/controllers/desiredphase"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podiochaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos"
@@ -157,8 +158,20 @@ func main() {
 
 	if err := ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.PodChaos{}).
-		Named("podchaos-delete").
-		Complete(&delete.Reconciler{
+		Named("podchaos-finalizers").
+		Complete(&finalizers.Reconciler{
+			Object: &v1alpha1.PodChaos{},
+			Client: mgr.GetClient(),
+			Reader: mgr.GetAPIReader(),
+			Log:    ctrl.Log,
+		}); err != nil {
+		setupLog.Error(err, "fail to setup PodChaos reconciler")
+	}
+
+	if err := ctrl.NewControllerManagedBy(mgr).
+		For(&v1alpha1.PodChaos{}).
+		Named("podchaos-finalizers").
+		Complete(&status.Reconciler{
 			Object: &v1alpha1.PodChaos{},
 			Client: mgr.GetClient(),
 			Reader: mgr.GetAPIReader(),
@@ -197,8 +210,20 @@ func main() {
 
 	if err := ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.NetworkChaos{}).
-		Named("networkchaos-delete").
-		Complete(&delete.Reconciler{
+		Named("networkchaos-finalizers").
+		Complete(&finalizers.Reconciler{
+			Object: &v1alpha1.NetworkChaos{},
+			Client: mgr.GetClient(),
+			Reader: mgr.GetAPIReader(),
+			Log:    ctrl.Log,
+		}); err != nil {
+		setupLog.Error(err, "fail to setup NetworkChaos reconciler")
+	}
+
+	if err := ctrl.NewControllerManagedBy(mgr).
+		For(&v1alpha1.NetworkChaos{}).
+		Named("networkchaos-finalizers").
+		Complete(&status.Reconciler{
 			Object: &v1alpha1.NetworkChaos{},
 			Client: mgr.GetClient(),
 			Reader: mgr.GetAPIReader(),
@@ -236,8 +261,20 @@ func main() {
 
 	if err := ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.TimeChaos{}).
-		Named("timechaos-delete").
-		Complete(&delete.Reconciler{
+		Named("timechaos-finalizers").
+		Complete(&finalizers.Reconciler{
+			Object: &v1alpha1.TimeChaos{},
+			Client: mgr.GetClient(),
+			Reader: mgr.GetAPIReader(),
+			Log:    ctrl.Log,
+		}); err != nil {
+		setupLog.Error(err, "fail to setup TimeChaos reconciler")
+	}
+
+	if err := ctrl.NewControllerManagedBy(mgr).
+		For(&v1alpha1.TimeChaos{}).
+		Named("timechaos-status").
+		Complete(&finalizers.Reconciler{
 			Object: &v1alpha1.TimeChaos{},
 			Client: mgr.GetClient(),
 			Reader: mgr.GetAPIReader(),
@@ -275,8 +312,20 @@ func main() {
 
 	if err := ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.IoChaos{}).
-		Named("iochaos-delete").
-		Complete(&delete.Reconciler{
+		Named("iochaos-finalizers").
+		Complete(&finalizers.Reconciler{
+			Object: &v1alpha1.IoChaos{},
+			Client: mgr.GetClient(),
+			Reader: mgr.GetAPIReader(),
+			Log:    ctrl.Log,
+		}); err != nil {
+		setupLog.Error(err, "fail to setup IoChaos reconciler")
+	}
+
+	if err := ctrl.NewControllerManagedBy(mgr).
+		For(&v1alpha1.IoChaos{}).
+		Named("iochaos-status").
+		Complete(&status.Reconciler{
 			Object: &v1alpha1.IoChaos{},
 			Client: mgr.GetClient(),
 			Reader: mgr.GetAPIReader(),
@@ -314,8 +363,20 @@ func main() {
 
 	if err := ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.DNSChaos{}).
-		Named("dnschaos-delete").
-		Complete(&delete.Reconciler{
+		Named("dnschaos-finalizers").
+		Complete(&finalizers.Reconciler{
+			Object: &v1alpha1.DNSChaos{},
+			Client: mgr.GetClient(),
+			Reader: mgr.GetAPIReader(),
+			Log:    ctrl.Log,
+		}); err != nil {
+		setupLog.Error(err, "fail to setup DNSChaos reconciler")
+	}
+
+	if err := ctrl.NewControllerManagedBy(mgr).
+		For(&v1alpha1.DNSChaos{}).
+		Named("dnschaos-status").
+		Complete(&status.Reconciler{
 			Object: &v1alpha1.DNSChaos{},
 			Client: mgr.GetClient(),
 			Reader: mgr.GetAPIReader(),
@@ -353,8 +414,20 @@ func main() {
 
 	if err := ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.StressChaos{}).
-		Named("stresschaos-delete").
-		Complete(&delete.Reconciler{
+		Named("stresschaos-finalizers").
+		Complete(&finalizers.Reconciler{
+			Object: &v1alpha1.StressChaos{},
+			Client: mgr.GetClient(),
+			Reader: mgr.GetAPIReader(),
+			Log:    ctrl.Log,
+		}); err != nil {
+		setupLog.Error(err, "fail to setup StressChaos reconciler")
+	}
+
+	if err := ctrl.NewControllerManagedBy(mgr).
+		For(&v1alpha1.StressChaos{}).
+		Named("dnschaos-status").
+		Complete(&status.Reconciler{
 			Object: &v1alpha1.StressChaos{},
 			Client: mgr.GetClient(),
 			Reader: mgr.GetAPIReader(),
@@ -394,8 +467,20 @@ func main() {
 
 	if err := ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.AwsChaos{}).
-		Named("awschaos-delete").
-		Complete(&delete.Reconciler{
+		Named("awschaos-finalizers").
+		Complete(&finalizers.Reconciler{
+			Object: &v1alpha1.AwsChaos{},
+			Client: mgr.GetClient(),
+			Reader: mgr.GetAPIReader(),
+			Log:    ctrl.Log,
+		}); err != nil {
+		setupLog.Error(err, "fail to setup AwsChaos reconciler")
+	}
+
+	if err := ctrl.NewControllerManagedBy(mgr).
+		For(&v1alpha1.StressChaos{}).
+		Named("awschaos-status").
+		Complete(&status.Reconciler{
 			Object: &v1alpha1.AwsChaos{},
 			Client: mgr.GetClient(),
 			Reader: mgr.GetAPIReader(),

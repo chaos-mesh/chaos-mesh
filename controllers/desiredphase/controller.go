@@ -74,7 +74,7 @@ func (ctx *reconcileContext) GetCreationTimestamp() metav1.Time {
 }
 
 func (ctx *reconcileContext) CalcDesiredPhase() v1alpha1.DesiredPhase {
-	// Consider the delete
+	// Consider the finalizers
 	if ctx.obj.IsDeleted() {
 		return v1alpha1.StoppedPhase
 	}

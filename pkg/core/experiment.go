@@ -169,14 +169,13 @@ type TargetInfo struct {
 
 // SchedulerInfo defines the scheduler information.
 type SchedulerInfo struct {
-	Cron     string `json:"cron" binding:"CronValid"`
 	Duration string `json:"duration" binding:"DurationValid"`
 }
 
 // PodChaosInfo defines the basic information of pod chaos for creating a new PodChaos.
 type PodChaosInfo struct {
 	Action        string `json:"action" binding:"oneof='' 'pod-kill' 'pod-failure' 'container-kill'"`
-	ContainerName string `json:"container_name"`
+	ContainerNames []string `json:"container_name"`
 	GracePeriod   int64  `json:"grace_period"`
 }
 
@@ -203,7 +202,7 @@ type IOChaosInfo struct {
 	Percent       int                        `json:"percent"`
 	Methods       []v1alpha1.IoMethod        `json:"methods"`
 	VolumePath    string                     `json:"volume_path"`
-	ContainerName string                     `json:"container_name"`
+	ContainerNames []string                     `json:"container_name"`
 }
 
 // KernelChaosInfo defines the basic information of kernel chaos for creating a new KernelChaos.
@@ -222,13 +221,14 @@ type TimeChaosInfo struct {
 type StressChaosInfo struct {
 	Stressors         *v1alpha1.Stressors `json:"stressors"`
 	StressngStressors string              `json:"stressng_stressors,omitempty"`
-	ContainerName     *string             `json:"container_name,omitempty"`
+	ContainerNames     []string             `json:"container_name,omitempty"`
 }
 
 // DNSChaosInfo defines the basic information of dns chaos for creating a new DNSChaos.
 type DNSChaosInfo struct {
 	Action             string   `json:"action" binding:"oneof='error' 'random'"`
 	DomainNamePatterns []string `json:"patterns"`
+	ContainerNames     []string             `json:"container_name,omitempty"`
 }
 
 // ParsePodChaos Parse PodChaos JSON string into ExperimentYAMLDescription.

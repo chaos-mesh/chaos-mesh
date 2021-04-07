@@ -226,6 +226,9 @@ spec:
                   - Run
                   - Stop
                   type: string
+                phase:
+                  description: ExperimentPhase is the current status of chaos experiment.
+                  type: string
               type: object
             failedMessage:
               type: string

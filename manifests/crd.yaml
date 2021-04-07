@@ -97,6 +97,9 @@ spec:
                   - Run
                   - Stop
                   type: string
+                phase:
+                  description: ExperimentPhase is the current status of chaos experiment.
+                  type: string
               type: object
             failedMessage:
               type: string
@@ -318,6 +321,9 @@ spec:
                   enum:
                   - Run
                   - Stop
+                  type: string
+                phase:
+                  description: ExperimentPhase is the current status of chaos experiment.
                   type: string
               type: object
             failedMessage:
@@ -556,6 +562,9 @@ spec:
                   enum:
                   - Run
                   - Stop
+                  type: string
+                phase:
+                  description: ExperimentPhase is the current status of chaos experiment.
                   type: string
               type: object
             failedMessage:
@@ -868,6 +877,9 @@ spec:
                   - Run
                   - Stop
                   type: string
+                phase:
+                  description: ExperimentPhase is the current status of chaos experiment.
+                  type: string
               type: object
             failedMessage:
               type: string
@@ -1112,6 +1124,9 @@ spec:
                   enum:
                   - Run
                   - Stop
+                  type: string
+                phase:
+                  description: ExperimentPhase is the current status of chaos experiment.
                   type: string
               type: object
             failedMessage:
@@ -1375,6 +1390,9 @@ spec:
                   enum:
                   - Run
                   - Stop
+                  type: string
+                phase:
+                  description: ExperimentPhase is the current status of chaos experiment.
                   type: string
               type: object
             failedMessage:
@@ -1818,6 +1836,9 @@ spec:
                   - Run
                   - Stop
                   type: string
+                phase:
+                  description: ExperimentPhase is the current status of chaos experiment.
+                  type: string
               type: object
             failedMessage:
               type: string
@@ -2041,6 +2062,9 @@ spec:
                   enum:
                   - Run
                   - Stop
+                  type: string
+                phase:
+                  description: ExperimentPhase is the current status of chaos experiment.
                   type: string
               type: object
             failedMessage:
@@ -2478,6 +2502,9 @@ spec:
                   - Run
                   - Stop
                   type: string
+                phase:
+                  description: ExperimentPhase is the current status of chaos experiment.
+                  type: string
               type: object
             failedMessage:
               type: string
@@ -2735,6 +2762,9 @@ spec:
                   - Run
                   - Stop
                   type: string
+                phase:
+                  description: ExperimentPhase is the current status of chaos experiment.
+                  type: string
               type: object
             failedMessage:
               type: string
@@ -2965,6 +2995,9 @@ spec:
                   enum:
                   - Run
                   - Stop
+                  type: string
+                phase:
+                  description: ExperimentPhase is the current status of chaos experiment.
                   type: string
               type: object
             failedMessage:

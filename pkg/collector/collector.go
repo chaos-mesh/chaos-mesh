@@ -17,7 +17,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
+	"time"
 
 	"github.com/go-logr/logr"
 	"github.com/jinzhu/gorm"
@@ -121,11 +121,13 @@ func (r *ChaosCollector) recordEvent(req ctrl.Request, obj v1alpha1.InnerObject)
 }
 
 func (r *ChaosCollector) createEvent(req ctrl.Request, kind string, status *v1alpha1.ChaosStatus, UID string) error {
+	now := time.Now()
+
 	event := &core.Event{
 		Experiment:   req.Name,
 		Namespace:    req.Namespace,
 		Kind:         kind,
-		StartTime:    &status.Experiment.StartTime.Time,
+		StartTime:    &now,
 		ExperimentID: UID,
 		// TODO: add state for each event
 		Message: status.FailedMessage,
@@ -137,17 +139,6 @@ func (r *ChaosCollector) createEvent(req ctrl.Request, kind string, status *v1al
 		return nil
 	}
 
-	for _, pod := range status.Experiment.PodRecords {
-		podRecord := &core.PodRecord{
-			EventID:   event.ID,
-			PodIP:     pod.PodIP,
-			PodName:   pod.Name,
-			Namespace: pod.Namespace,
-			Message:   pod.Message,
-			Action:    pod.Action,
-		}
-		event.Pods = append(event.Pods, podRecord)
-	}
 	if err := r.event.Create(context.Background(), event); err != nil {
 		r.Log.Error(err, "failed to store event", "event", event)
 		return err
@@ -157,17 +148,10 @@ func (r *ChaosCollector) createEvent(req ctrl.Request, kind string, status *v1al
 }
 
 func (r *ChaosCollector) updateOrCreateEvent(req ctrl.Request, kind string, status *v1alpha1.ChaosStatus, UID string) error {
-	if status.Experiment.StartTime == nil || status.Experiment.EndTime == nil {
-		return fmt.Errorf("failed to get experiment time, startTime or endTime is empty")
-	}
-
 	event := &core.Event{
 		Experiment:   req.Name,
 		Namespace:    req.Namespace,
 		Kind:         kind,
-		StartTime:    &status.Experiment.StartTime.Time,
-		FinishTime:   &status.Experiment.EndTime.Time,
-		Duration:     status.Experiment.Duration,
 		ExperimentID: UID,
 	}
 

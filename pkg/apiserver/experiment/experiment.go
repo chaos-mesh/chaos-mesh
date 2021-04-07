@@ -27,8 +27,8 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
+	"github.com/chaos-mesh/chaos-mesh/controllers/finalizers"
 	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
 	"github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
@@ -179,18 +179,16 @@ func (s *Service) createPodChaos(exp *core.ExperimentInfo, kubeCli client.Client
 		},
 		Spec: v1alpha1.PodChaosSpec{
 			ContainerSelector: v1alpha1.ContainerSelector{
-				Selector:       exp.Scope.ParseSelector(),
-				Mode:           v1alpha1.PodMode(exp.Scope.Mode),
-				Value:          exp.Scope.Value,
-				ContainerNames: exp.Target.PodChaos.ContainerName,
+				PodSelector: v1alpha1.PodSelector{
+					Selector:       exp.Scope.ParseSelector(),
+					Mode:           v1alpha1.PodMode(exp.Scope.Mode),
+					Value:          exp.Scope.Value,
+				},
+				ContainerNames: exp.Target.PodChaos.ContainerNames,
 			},
 			Action:      v1alpha1.PodChaosAction(exp.Target.PodChaos.Action),
 			GracePeriod: exp.Target.PodChaos.GracePeriod,
 		},
-	}
-
-	if exp.Scheduler.Cron != "" {
-		chaos.Spec.Scheduler = &v1alpha1.SchedulerSpec{Cron: exp.Scheduler.Cron}
 	}
 
 	if exp.Scheduler.Duration != "" {
@@ -209,10 +207,12 @@ func (s *Service) createNetworkChaos(exp *core.ExperimentInfo, kubeCli client.Cl
 			Annotations: exp.Annotations,
 		},
 		Spec: v1alpha1.NetworkChaosSpec{
-			Selector: exp.Scope.ParseSelector(),
 			Action:   v1alpha1.NetworkChaosAction(exp.Target.NetworkChaos.Action),
-			Mode:     v1alpha1.PodMode(exp.Scope.Mode),
-			Value:    exp.Scope.Value,
+			PodSelector: v1alpha1.PodSelector{
+				Selector: exp.Scope.ParseSelector(),
+				Mode:     v1alpha1.PodMode(exp.Scope.Mode),
+				Value:    exp.Scope.Value,
+			},
 			TcParameter: v1alpha1.TcParameter{
 				Delay:     exp.Target.NetworkChaos.Delay,
 				Loss:      exp.Target.NetworkChaos.Loss,
@@ -226,15 +226,11 @@ func (s *Service) createNetworkChaos(exp *core.ExperimentInfo, kubeCli client.Cl
 	}
 
 	if exp.Target.NetworkChaos.TargetScope != nil {
-		chaos.Spec.Target = &v1alpha1.Target{
-			TargetSelector: exp.Target.NetworkChaos.TargetScope.ParseSelector(),
-			TargetMode:     v1alpha1.PodMode(exp.Target.NetworkChaos.TargetScope.Mode),
-			TargetValue:    exp.Target.NetworkChaos.TargetScope.Value,
+		chaos.Spec.Target = &v1alpha1.PodSelector{
+			Selector: exp.Target.NetworkChaos.TargetScope.ParseSelector(),
+			Mode:     v1alpha1.PodMode(exp.Target.NetworkChaos.TargetScope.Mode),
+			Value:    exp.Target.NetworkChaos.TargetScope.Value,
 		}
-	}
-
-	if exp.Scheduler.Cron != "" {
-		chaos.Spec.Scheduler = &v1alpha1.SchedulerSpec{Cron: exp.Scheduler.Cron}
 	}
 
 	if exp.Scheduler.Duration != "" {
@@ -253,9 +249,14 @@ func (s *Service) createIOChaos(exp *core.ExperimentInfo, kubeCli client.Client)
 			Annotations: exp.Annotations,
 		},
 		Spec: v1alpha1.IoChaosSpec{
-			Selector:      exp.Scope.ParseSelector(),
-			Mode:          v1alpha1.PodMode(exp.Scope.Mode),
-			Value:         exp.Scope.Value,
+			ContainerSelector: v1alpha1.ContainerSelector{
+				PodSelector: v1alpha1.PodSelector{
+					Selector:      exp.Scope.ParseSelector(),
+					Mode:          v1alpha1.PodMode(exp.Scope.Mode),
+					Value:         exp.Scope.Value,
+				},
+				ContainerNames: exp.Target.IOChaos.ContainerNames,
+			},
 			Action:        v1alpha1.IoChaosType(exp.Target.IOChaos.Action),
 			Delay:         exp.Target.IOChaos.Delay,
 			Errno:         exp.Target.IOChaos.Errno,
@@ -264,12 +265,7 @@ func (s *Service) createIOChaos(exp *core.ExperimentInfo, kubeCli client.Client)
 			Methods:       exp.Target.IOChaos.Methods,
 			Percent:       exp.Target.IOChaos.Percent,
 			VolumePath:    exp.Target.IOChaos.VolumePath,
-			ContainerName: &exp.Target.IOChaos.ContainerName,
 		},
-	}
-
-	if exp.Scheduler.Cron != "" {
-		chaos.Spec.Scheduler = &v1alpha1.SchedulerSpec{Cron: exp.Scheduler.Cron}
 	}
 
 	if exp.Scheduler.Duration != "" {
@@ -288,17 +284,17 @@ func (s *Service) createTimeChaos(exp *core.ExperimentInfo, kubeCli client.Clien
 			Annotations: exp.Annotations,
 		},
 		Spec: v1alpha1.TimeChaosSpec{
-			Selector:       exp.Scope.ParseSelector(),
-			Mode:           v1alpha1.PodMode(exp.Scope.Mode),
-			Value:          exp.Scope.Value,
+			ContainerSelector: v1alpha1.ContainerSelector{
+				PodSelector: v1alpha1.PodSelector{
+					Selector:       exp.Scope.ParseSelector(),
+					Mode:           v1alpha1.PodMode(exp.Scope.Mode),
+					Value:          exp.Scope.Value,
+				},
+				ContainerNames: exp.Target.TimeChaos.ContainerNames,
+			},
 			TimeOffset:     exp.Target.TimeChaos.TimeOffset,
 			ClockIds:       exp.Target.TimeChaos.ClockIDs,
-			ContainerNames: exp.Target.TimeChaos.ContainerNames,
 		},
-	}
-
-	if exp.Scheduler.Cron != "" {
-		chaos.Spec.Scheduler = &v1alpha1.SchedulerSpec{Cron: exp.Scheduler.Cron}
 	}
 
 	if exp.Scheduler.Duration != "" {
@@ -317,15 +313,13 @@ func (s *Service) createKernelChaos(exp *core.ExperimentInfo, kubeCli client.Cli
 			Annotations: exp.Annotations,
 		},
 		Spec: v1alpha1.KernelChaosSpec{
-			Selector:        exp.Scope.ParseSelector(),
-			Mode:            v1alpha1.PodMode(exp.Scope.Mode),
-			Value:           exp.Scope.Value,
+			PodSelector: v1alpha1.PodSelector{
+				Selector:        exp.Scope.ParseSelector(),
+				Mode:            v1alpha1.PodMode(exp.Scope.Mode),
+				Value:           exp.Scope.Value,
+			},
 			FailKernRequest: exp.Target.KernelChaos.FailKernRequest,
 		},
-	}
-
-	if exp.Scheduler.Cron != "" {
-		chaos.Spec.Scheduler = &v1alpha1.SchedulerSpec{Cron: exp.Scheduler.Cron}
 	}
 
 	if exp.Scheduler.Duration != "" {
@@ -359,24 +353,22 @@ func (s *Service) createStressChaos(exp *core.ExperimentInfo, kubeCli client.Cli
 			Annotations: exp.Annotations,
 		},
 		Spec: v1alpha1.StressChaosSpec{
-			Selector:          exp.Scope.ParseSelector(),
-			Mode:              v1alpha1.PodMode(exp.Scope.Mode),
-			Value:             exp.Scope.Value,
+			ContainerSelector: v1alpha1.ContainerSelector{
+				PodSelector: v1alpha1.PodSelector{
+					Selector:          exp.Scope.ParseSelector(),
+					Mode:              v1alpha1.PodMode(exp.Scope.Mode),
+					Value:             exp.Scope.Value,
+				},
+				ContainerNames: exp.Target.StressChaos.ContainerNames,
+			},
+
 			Stressors:         stressors,
 			StressngStressors: exp.Target.StressChaos.StressngStressors,
 		},
 	}
 
-	if exp.Scheduler.Cron != "" {
-		chaos.Spec.Scheduler = &v1alpha1.SchedulerSpec{Cron: exp.Scheduler.Cron}
-	}
-
 	if exp.Scheduler.Duration != "" {
 		chaos.Spec.Duration = &exp.Scheduler.Duration
-	}
-
-	if exp.Target.StressChaos.ContainerName != nil {
-		chaos.Spec.ContainerName = exp.Target.StressChaos.ContainerName
 	}
 
 	return kubeCli.Create(context.Background(), chaos)
@@ -391,16 +383,18 @@ func (s *Service) createDNSChaos(exp *core.ExperimentInfo, kubeCli client.Client
 			Annotations: exp.Annotations,
 		},
 		Spec: v1alpha1.DNSChaosSpec{
-			Selector:           exp.Scope.ParseSelector(),
-			Mode:               v1alpha1.PodMode(exp.Scope.Mode),
-			Value:              exp.Scope.Value,
+			ContainerSelector: v1alpha1.ContainerSelector{
+				PodSelector: v1alpha1.PodSelector{
+					Selector:           exp.Scope.ParseSelector(),
+					Mode:               v1alpha1.PodMode(exp.Scope.Mode),
+					Value:              exp.Scope.Value,
+				},
+				ContainerNames: exp.Target.DNSChaos.ContainerNames,
+			},
+
 			Action:             v1alpha1.DNSChaosAction(exp.Target.DNSChaos.Action),
 			DomainNamePatterns: exp.Target.DNSChaos.DomainNamePatterns,
 		},
-	}
-
-	if exp.Scheduler.Cron != "" {
-		chaos.Spec.Scheduler = &v1alpha1.SchedulerSpec{Cron: exp.Scheduler.Cron}
 	}
 
 	if exp.Scheduler.Duration != "" {
@@ -906,7 +900,7 @@ func (s *Service) deleteExperiment(c *gin.Context) {
 		if annotations == nil {
 			annotations = make(map[string]string)
 		}
-		annotations[common.AnnotationCleanFinalizer] = common.AnnotationCleanFinalizerForced
+		annotations[finalizers.AnnotationCleanFinalizer] = finalizers.AnnotationCleanFinalizerForced
 		chaosMeta.SetAnnotations(annotations)
 		if err := kubeCli.Update(context.Background(), chaosKind.Chaos); err != nil {
 			c.Status(http.StatusInternalServerError)
