@@ -1,13 +1,11 @@
 import { Box, Button, Link, Typography } from '@material-ui/core'
 import ConfirmDialog, { ConfirmDialogHandles } from 'components-mui/ConfirmDialog'
-import Token, { TokenFormValues } from 'components/Token'
 import { useEffect, useRef } from 'react'
 import { useHistory, useLocation } from 'react-router-dom'
 
 import RBACGenerator from 'components/RBACGenerator'
 import T from 'components/T'
-import { setTokenName } from 'slices/globalStatus'
-import { useStoreDispatch } from 'store'
+import Token from 'components/Token'
 
 interface AuthProps {
   open: boolean
@@ -17,8 +15,6 @@ const Auth: React.FC<AuthProps> = ({ open }) => {
   const history = useHistory()
   const { pathname } = useLocation()
 
-  const dispatch = useStoreDispatch()
-
   const confirmRef = useRef<ConfirmDialogHandles>(null)
   const confirmRefRBAC = useRef<ConfirmDialogHandles>(null)
 
@@ -26,10 +22,8 @@ const Auth: React.FC<AuthProps> = ({ open }) => {
     confirmRef.current!.setOpen(open)
   }, [open])
 
-  const handleSubmitCallback = (values: TokenFormValues) => {
+  const handleSubmitCallback = () => {
     confirmRef.current!.setOpen(false)
-
-    dispatch(setTokenName(values.name))
 
     history.replace('/authed')
     setTimeout(() => history.replace(pathname))

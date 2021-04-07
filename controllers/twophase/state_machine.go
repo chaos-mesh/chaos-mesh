@@ -189,8 +189,18 @@ func resume(ctx context.Context, m *chaosStateMachine, _ v1alpha1.ExperimentPhas
 
 		counter++
 		if counter > iterMax {
-			err = errors.Errorf("the number of iterations exceeded while resuming from pause with nextRecover(%s) nextStart(%s)", nextRecover, nextStart)
-			return false, err
+			// If counter > iterMax, it means that chaos has been suspended for a long time,
+			// then directly restart chaos and set startTime to now.
+			startTime = now
+			start, recover, err = m.IterateNextTime(startTime, *duration)
+			if err != nil {
+				m.Log.Error(err, "failed to get the next start time and recover time")
+				return false, err
+			}
+			nextStart = *start
+			nextRecover = *recover
+
+			return apply(ctx, m, v1alpha1.ExperimentPhaseRunning, startTime)
 		}
 	}
 }
@@ -200,6 +210,16 @@ func resume(ctx context.Context, m *chaosStateMachine, _ v1alpha1.ExperimentPhas
 func (m *chaosStateMachine) run(ctx context.Context, targetPhase v1alpha1.ExperimentPhase, now time.Time) (bool, error) {
 	currentPhase := m.Chaos.GetStatus().Experiment.Phase
 	m.Log.Info("change phase", "current phase", currentPhase, "target phase", targetPhase)
+
+	if phaseTransitionMap[currentPhase] == nil {
+		err := errors.Errorf("unexpected current phase '%s'", currentPhase)
+		return false, err
+	}
+
+	if phaseTransitionMap[currentPhase][targetPhase] == nil {
+		err := errors.Errorf("unexpected target phase '%s'", targetPhase)
+		return false, err
+	}
 
 	return phaseTransitionMap[currentPhase][targetPhase](ctx, m, targetPhase, now)
 }

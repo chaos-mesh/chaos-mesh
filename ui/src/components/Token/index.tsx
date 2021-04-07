@@ -1,13 +1,14 @@
 import { Box, Button } from '@material-ui/core'
 import { Form, Formik, FormikHelpers } from 'formik'
+import { setTokenName, setTokens } from 'slices/globalStatus'
+import { useStoreDispatch, useStoreSelector } from 'store'
 
-import LS from 'lib/localStorage'
 import React from 'react'
 import T from 'components/T'
 import { TextField } from 'components/FormField'
 import api from 'api'
-import { setTokens } from 'slices/globalStatus'
-import { useStoreDispatch } from 'store'
+import { setAlert } from 'slices/globalStatus'
+import { useIntl } from 'react-intl'
 
 function validateName(value: string) {
   let error
@@ -39,22 +40,28 @@ interface TokenProps {
 }
 
 const Token: React.FC<TokenProps> = ({ onSubmitCallback }) => {
+  const intl = useIntl()
+
+  const { tokens } = useStoreSelector((state) => state.globalStatus)
   const dispatch = useStoreDispatch()
 
   const saveToken = (values: TokenFormValues) => {
-    let tokens = []
-    const previous = LS.get('token')
-
-    if (previous) {
-      tokens = JSON.parse(previous)
-    }
-
-    tokens.push(values)
-
-    dispatch(setTokens(tokens))
+    dispatch(setTokens([...tokens, values]))
+    dispatch(setTokenName(values.name))
   }
 
   const submitToken = (values: TokenFormValues, { setFieldError, resetForm }: FormikHelpers<TokenFormValues>) => {
+    if (tokens.some((token) => token.name === values.name)) {
+      dispatch(
+        setAlert({
+          type: 'warning',
+          message: intl.formatMessage({ id: 'settings.addToken.duplicateDesc' }),
+        })
+      )
+
+      return
+    }
+
     api.auth.token(values.token)
 
     function restSteps() {

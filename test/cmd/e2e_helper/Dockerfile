@@ -3,6 +3,7 @@ FROM golang:alpine3.10
 WORKDIR /src
 
 COPY main.go /src
+COPY go.mod /src
 
 RUN go build -o test main.go
 

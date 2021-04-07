@@ -231,8 +231,8 @@ $(2): image-build-env go_build_cache_directory
 	docker exec --workdir /mnt/ \
 		--env IMG_LDFLAGS="${LDFLAGS}" \
 		--env UI=${UI} --env SWAGGER=${SWAGGER} \
-		$$$$DOCKER_ID /usr/bin/make $(2); \
-	[[ "$(DOCKER_HOST)" == "" ]] || docker cp $$$$DOCKER_ID:/mnt/$(2) $(2); \
+		$$$$DOCKER_ID /usr/bin/make $(2) && \
+	([[ "$(DOCKER_HOST)" == "" ]] || docker cp $$$$DOCKER_ID:/mnt/$(2) $(2)) && \
 	docker rm -f $$$$DOCKER_ID
 endif
 
@@ -269,12 +269,17 @@ endif
 
 image-chaos-mesh-e2e-dependencies += test/image/e2e/manifests test/image/e2e/chaos-mesh
 
+e2e: e2e-build
+	./test/image/e2e/bin/ginkgo  ./test/image/e2e/bin/e2e.test
+
 e2e-build: test/image/e2e/bin/ginkgo test/image/e2e/bin/e2e.test
 
 test/image/e2e/manifests: manifests
+	rm -rf test/image/e2e/manifests
 	cp -r manifests test/image/e2e
 
 test/image/e2e/chaos-mesh: helm/chaos-mesh
+	rm -rf test/image/e2e/chaos-mesh
 	cp -r helm/chaos-mesh test/image/e2e
 
 define IMAGE_TEMPLATE
