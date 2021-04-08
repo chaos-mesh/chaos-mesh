@@ -12,7 +12,7 @@
 # distributed under the License is distributed on an "AS IS" BASIS,
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+trap 'kill $(jobs -p)' EXIT
 set -eu
 
 cur=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
@@ -83,4 +83,4 @@ fi
 kubectl delete -f aws_chaos.yaml
 helm uninstall localstack
 # kill child process
-trap 'kill $(jobs -p)' EXIT
+
