@@ -15,6 +15,7 @@ package stresschaos
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -51,7 +52,7 @@ func TestcaseCPUStressInjectionOnceThenRecover(
 		diff[1] = conditions[1].CpuTime - lastCPUTime[1]
 		lastCPUTime[0] = conditions[0].CpuTime
 		lastCPUTime[1] = conditions[1].CpuTime
-		framework.Logf("get CPU: [%d, %d]", diff[0], diff[1])
+		By(fmt.Sprintf("get CPU: [%d, %d]", diff[0], diff[1]))
 		// diff means the increasing CPU time (in nanosecond)
 		// just pick two threshold, 5e8 is a little shorter than one second
 		if diff[0] > 5e8 && diff[1] < 5e6 {
@@ -77,7 +78,7 @@ func TestcaseCPUStressInjectionOnceThenRecover(
 		diff[1] = conditions[1].CpuTime - lastCPUTime[1]
 		lastCPUTime[0] = conditions[0].CpuTime
 		lastCPUTime[1] = conditions[1].CpuTime
-		framework.Logf("get CPU: [%d, %d]", diff[0], diff[1])
+		By(fmt.Sprintf("get CPU: [%d, %d]", diff[0], diff[1]))
 		// diff means the increasing CPU time (in nanosecond)
 		// just pick two threshold, they are both much shorter than 1 second
 		if diff[0] < 1e7 && diff[1] < 5e6 {
