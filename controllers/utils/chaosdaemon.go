@@ -77,8 +77,7 @@ func NewChaosDaemonClient(ctx context.Context, c client.Client, pod *v1.Pod) (ch
 	if err != nil {
 		return nil, err
 	}
-
-	cc, err := grpcUtils.CreateGrpcConnection(daemonIP, config.ControllerCfg.ChaosDaemonPort, config.ControllerCfg.TLSConfig.ChaosMeshCACert, config.ControllerCfg.TLSConfig.ChaosDaemonClientCert, config.ControllerCfg.TLSConfig.ChaosDaemonClientKey)
+	cc, err := grpcUtils.Builder().WithDefaultTimeout().Address(daemonIP).Port(config.ControllerCfg.ChaosDaemonPort).TryTLSFromFiles(config.ControllerCfg.TLSConfig.ChaosMeshCACert, config.ControllerCfg.TLSConfig.ChaosDaemonClientCert, config.ControllerCfg.TLSConfig.ChaosDaemonClientKey).Build()
 	if err != nil {
 		return nil, err
 	}

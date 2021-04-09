@@ -432,19 +432,23 @@ func ConnectToLocalChaosDaemon(port int) (daemonClient.ChaosDaemonClientInterfac
 }
 
 func getGrpcClient(port int) (*grpc.ClientConn, error) {
+	builder := grpcUtils.Builder().Address("localhost").Port(port)
 	if Insecure {
-		return grpcUtils.CreateGrpcConnection("localhost", port, "", "", "")
-	}
-	if TLSFiles.CaCert == "" || TLSFiles.Cert == "" || TLSFiles.Key == "" {
-		PrettyPrint("TLS Files are not complete, fall back to use secrets.", 0, Green)
-		config, err := getTLSConfigFromSecrets()
-		if err != nil {
-			return nil, err
+		builder.Insecure()
+	} else {
+		if TLSFiles.CaCert == "" || TLSFiles.Cert == "" || TLSFiles.Key == "" {
+			PrettyPrint("TLS Files are not complete, fall back to use secrets.", 0, Green)
+			config, err := getTLSConfigFromSecrets()
+			if err != nil {
+				return nil, err
+			}
+			builder.TLSFromRaw(config.caCert, config.cert, config.key)
+		} else {
+			PrettyPrint("Using TLS Files.", 0, Green)
+			builder.TLSFromFiles(TLSFiles.CaCert, TLSFiles.Cert, TLSFiles.Key)
 		}
-		return grpcUtils.CreateGrpcConnectionFromRaw("localhost", port, config.caCert, config.cert, config.key)
 	}
-	PrettyPrint("Using TLS Files.", 0, Green)
-	return grpcUtils.CreateGrpcConnection("localhost", port, TLSFiles.CaCert, TLSFiles.Cert, TLSFiles.Key)
+	return builder.Build()
 }
 
 func getTLSConfigFromSecrets() (*rawTLSConfig, error) {

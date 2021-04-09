@@ -39,6 +39,7 @@ type GrpcBuilder struct {
 	options []grpc.DialOption
 	address string
 	port    int
+	err     error
 }
 
 func Builder() *GrpcBuilder {
@@ -70,20 +71,20 @@ func (it *GrpcBuilder) Insecure() *GrpcBuilder {
 	return it
 }
 
-func (it *GrpcBuilder) TryTLSFromFiles(caCertPath string, certPath string, keyPath string) (*GrpcBuilder, error) {
+func (it *GrpcBuilder) TryTLSFromFiles(caCertPath string, certPath string, keyPath string) *GrpcBuilder {
 	if caCertPath == "" || certPath == "" || keyPath != "" {
-		return it.Insecure(), nil
+		return it.Insecure()
 	}
 	caCert, err := ioutil.ReadFile(caCertPath)
 	if err != nil {
-		return it.Insecure(), nil
+		return it.Insecure()
 	}
 	caCertPool := x509.NewCertPool()
 	caCertPool.AppendCertsFromPEM(caCert)
 
 	clientCert, err := tls.LoadX509KeyPair(certPath, keyPath)
 	if err != nil {
-		return it.Insecure(), nil
+		return it.Insecure()
 	}
 
 	creds := credentials.NewTLS(&tls.Config{
@@ -92,20 +93,26 @@ func (it *GrpcBuilder) TryTLSFromFiles(caCertPath string, certPath string, keyPa
 		ServerName:   "chaos-daemon.chaos-mesh.org",
 	})
 	it.options = append(it.options, grpc.WithTransportCredentials(creds))
-	return it, nil
+	return it
 }
 
-func (it *GrpcBuilder) TLSFromFiles(caCertPath string, certPath string, keyPath string) (*GrpcBuilder, error) {
+func (it *GrpcBuilder) TLSFromFiles(caCertPath string, certPath string, keyPath string) *GrpcBuilder {
 	caCert, err := ioutil.ReadFile(caCertPath)
 	if err != nil {
-		return it, err
+		if it.err == nil {
+			it.err = err
+		}
+		return it
 	}
 	caCertPool := x509.NewCertPool()
 	caCertPool.AppendCertsFromPEM(caCert)
 
 	clientCert, err := tls.LoadX509KeyPair(certPath, keyPath)
 	if err != nil {
-		return it, err
+		if it.err == nil {
+			it.err = err
+		}
+		return it
 	}
 
 	creds := credentials.NewTLS(&tls.Config{
@@ -114,16 +121,19 @@ func (it *GrpcBuilder) TLSFromFiles(caCertPath string, certPath string, keyPath 
 		ServerName:   "chaos-daemon.chaos-mesh.org",
 	})
 	it.options = append(it.options, grpc.WithTransportCredentials(creds))
-	return it, nil
+	return it
 }
 
-func (it *GrpcBuilder) TLSFromRaw(caCert []byte, cert []byte, key []byte) (*GrpcBuilder, error) {
+func (it *GrpcBuilder) TLSFromRaw(caCert []byte, cert []byte, key []byte) *GrpcBuilder {
 	caCertPool := x509.NewCertPool()
 	caCertPool.AppendCertsFromPEM(caCert)
 
 	clientCert, err := tls.X509KeyPair(cert, key)
 	if err != nil {
-		return it, err
+		if it.err == nil {
+			it.err = err
+		}
+		return it
 	}
 
 	creds := credentials.NewTLS(&tls.Config{
@@ -132,11 +142,18 @@ func (it *GrpcBuilder) TLSFromRaw(caCert []byte, cert []byte, key []byte) (*Grpc
 		ServerName:   "chaos-daemon.chaos-mesh.org",
 	})
 	it.options = append(it.options, grpc.WithTransportCredentials(creds))
-	return it, nil
+	return it
 }
 
 func (it *GrpcBuilder) Build() (*grpc.ClientConn, error) {
+	if it.err != nil {
+		return nil, it.err
+	}
 	return grpc.Dial(fmt.Sprintf("%s:%d", it.address, it.port), it.options...)
+}
+
+func (it *GrpcBuilder) GetError() error {
+	return it.err
 }
 
 // TimeoutClientInterceptor wraps the RPC with a timeout.
