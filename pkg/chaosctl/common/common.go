@@ -432,7 +432,7 @@ func ConnectToLocalChaosDaemon(port int) (daemonClient.ChaosDaemonClientInterfac
 }
 
 func getGrpcClient(port int) (*grpc.ClientConn, error) {
-	builder := grpcUtils.Builder().Address("localhost").Port(port)
+	builder := grpcUtils.Builder("localhost", port)
 	if Insecure {
 		builder.Insecure()
 	} else {
