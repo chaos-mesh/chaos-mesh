@@ -64,15 +64,15 @@ type CredentialProvider struct {
 func (it *CredentialProvider) getCredentialOption() (grpc.DialOption, error) {
 	if it.insecure {
 		return grpc.WithInsecure(), nil
-	} else {
-		if it.fromType == RAW {
-			return it.TLSFromRaw()
-		}
-		if it.fromType == FILE {
-			return it.TLSFromFile()
-		}
 	}
-	return nil, fmt.Errorf("An authorization method must be specified.")
+	if it.fromType == RAW {
+		return it.TLSFromRaw()
+	}
+	if it.fromType == FILE {
+		return it.TLSFromFile()
+	}
+
+	return nil, fmt.Errorf("an authorization method must be specified")
 }
 
 func (it *CredentialProvider) TLSFromFile() (grpc.DialOption, error) {
