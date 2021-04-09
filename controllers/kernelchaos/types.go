@@ -249,7 +249,7 @@ func CreateBPFKIConnection(ctx context.Context, c kubeclient.Client, pod *v1.Pod
 	}
 	builder := grpcUtils.Builder(daemonIP, config.ControllerCfg.BPFKIPort).WithDefaultTimeout()
 	if config.ControllerCfg.SecurityMode {
-		builder.TLSFromFiles(config.ControllerCfg.TLSConfig.ChaosMeshCACert, config.ControllerCfg.TLSConfig.ChaosDaemonClientCert, config.ControllerCfg.TLSConfig.ChaosDaemonClientKey)
+		builder.TLSFromFile(config.ControllerCfg.TLSConfig.ChaosMeshCACert, config.ControllerCfg.TLSConfig.ChaosDaemonClientCert, config.ControllerCfg.TLSConfig.ChaosDaemonClientKey)
 	} else {
 		builder.Insecure()
 	}
