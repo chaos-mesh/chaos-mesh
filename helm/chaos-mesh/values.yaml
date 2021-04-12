@@ -119,6 +119,7 @@ chaosDaemon:
 
 dashboard:
   create: false
+  hostNetwork: false
 
   replicaCount: 1
 
