@@ -58,9 +58,14 @@ export default function gen({
 
   const margin = {
     top: 0,
-    right: enableLegends && document.documentElement.offsetWidth > 768 ? 150 : 0,
+    right: 0,
     bottom: 30,
     left: 0,
+  }
+  updateMargin()
+
+  function updateMargin() {
+    margin.right = enableLegends && document.documentElement.offsetWidth > 768 ? 150 : 0
   }
 
   const halfHourLater = (events.length ? DateTime.fromISO(events[events.length - 1].start_time) : now()).plus({
@@ -294,6 +299,8 @@ export default function gen({
     function reGen() {
       const newWidth = root.offsetWidth
       width = newWidth
+
+      updateMargin()
 
       svg.attr('width', width).call(zoom.transform, d3.zoomIdentity)
       gXAxis.call(xAxis.scale(x.range([margin.left, width - margin.right])))
