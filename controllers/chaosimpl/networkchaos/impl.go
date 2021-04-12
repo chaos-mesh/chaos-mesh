@@ -14,9 +14,7 @@
 package networkchaos
 
 import (
-	"context"
-
-	"github.com/pkg/errors"
+	"github.com/chaos-mesh/chaos-mesh/controllers/action"
 	"go.uber.org/fx"
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
@@ -27,44 +25,18 @@ import (
 )
 
 type Impl struct {
-	trafficcontrol *trafficcontrol.Impl
-	partition      *partition.Impl
+	fx.In
+
+	TrafficControl *trafficcontrol.Impl `action:"bandwidth,netem,delay,loss,duplicate,corrupt"`
+	Partition      *partition.Impl `action:"partition"`
 }
 
-func (i Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
-	networkchaos := obj.(*v1alpha1.NetworkChaos)
-
-	switch networkchaos.Spec.Action {
-	case v1alpha1.BandwidthAction, v1alpha1.NetemAction, v1alpha1.DelayAction, v1alpha1.LossAction, v1alpha1.DuplicateAction, v1alpha1.CorruptAction:
-		return i.trafficcontrol.Apply(ctx, index, records, obj)
-	case v1alpha1.PartitionAction:
-		return i.partition.Apply(ctx, index, records, obj)
-	default:
-		return v1alpha1.NotInjected, errors.Errorf("action %s is not expected", networkchaos.Spec.Action)
-	}
-}
-
-func (i Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
-	networkchaos := obj.(*v1alpha1.NetworkChaos)
-
-	switch networkchaos.Spec.Action {
-	case v1alpha1.BandwidthAction, v1alpha1.NetemAction, v1alpha1.DelayAction, v1alpha1.LossAction, v1alpha1.DuplicateAction, v1alpha1.CorruptAction:
-		return i.trafficcontrol.Recover(ctx, index, records, obj)
-	case v1alpha1.PartitionAction:
-		return i.partition.Recover(ctx, index, records, obj)
-	default:
-		return v1alpha1.NotInjected, errors.Errorf("action %s is not expected", networkchaos.Spec.Action)
-	}
-}
-
-func NewImpl(trafficcontrol *trafficcontrol.Impl, partition *partition.Impl) *common.ChaosImplPair {
+func NewImpl(impl Impl) *common.ChaosImplPair {
+	delegate := action.New(&impl)
 	return &common.ChaosImplPair{
 		Name:   "networkchaos",
 		Object: &v1alpha1.NetworkChaos{},
-		Impl: &Impl{
-			trafficcontrol,
-			partition,
-		},
+		Impl: &delegate,
 	}
 }
 

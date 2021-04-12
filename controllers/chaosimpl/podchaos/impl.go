@@ -14,13 +14,11 @@
 package podchaos
 
 import (
-	"context"
+	"github.com/chaos-mesh/chaos-mesh/controllers/action"
 
 	"go.uber.org/fx"
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
-
-	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/podchaos/containerkill"
@@ -29,50 +27,19 @@ import (
 )
 
 type Impl struct {
-	podkill       *podkill.Impl
-	podfailure    *podfailure.Impl
-	containerkill *containerkill.Impl
+	fx.In
+
+	PodKill       *podkill.Impl `action:"pod-kill"`
+	PodFailure    *podfailure.Impl `action:"pod-failure"`
+	ContainerKill *containerkill.Impl `action:"container-kill"`
 }
 
-func (i Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
-	podchaos := obj.(*v1alpha1.PodChaos)
-
-	switch podchaos.Spec.Action {
-	case v1alpha1.PodKillAction:
-		return i.podkill.Apply(ctx, index, records, obj)
-	case v1alpha1.PodFailureAction:
-		return i.podfailure.Apply(ctx, index, records, obj)
-	case v1alpha1.ContainerKillAction:
-		return i.containerkill.Apply(ctx, index, records, obj)
-	default:
-		return v1alpha1.NotInjected, errors.Errorf("action %s is not expected", podchaos.Spec.Action)
-	}
-}
-
-func (i Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
-	podchaos := obj.(*v1alpha1.PodChaos)
-
-	switch podchaos.Spec.Action {
-	case v1alpha1.PodKillAction:
-		return i.podkill.Recover(ctx, index, records, obj)
-	case v1alpha1.PodFailureAction:
-		return i.podfailure.Recover(ctx, index, records, obj)
-	case v1alpha1.ContainerKillAction:
-		return i.containerkill.Recover(ctx, index, records, obj)
-	default:
-		return v1alpha1.NotInjected, errors.Errorf("action %s is not expected", podchaos.Spec.Action)
-	}
-}
-
-func NewImpl(podkill *podkill.Impl, podfailure *podfailure.Impl, containerkill *containerkill.Impl) *common.ChaosImplPair {
+func NewImpl(impl Impl) *common.ChaosImplPair {
+	delegate := action.New(&impl)
 	return &common.ChaosImplPair{
 		Name:   "podchaos",
 		Object: &v1alpha1.PodChaos{},
-		Impl: &Impl{
-			podkill,
-			podfailure,
-			containerkill,
-		},
+		Impl: &delegate,
 	}
 }
 
