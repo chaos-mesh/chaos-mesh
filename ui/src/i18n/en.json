@@ -137,7 +137,7 @@
       "submitAll": "Submit All"
     },
     "nameValidation": "The name is required",
-    "suspendTitle": "Set suspend time",
+    "suspendTitle": "Set suspend",
     "durationHelper": "The suspend duration",
     "submit": "Submit workflow",
     "messages": {
@@ -236,6 +236,7 @@
     "copied": "Copied!",
     "close": "Close",
     "submit": "Submit",
+    "process": "Process",
     "preview": "Preview",
     "upload": "Upload",
     "download": "Download",

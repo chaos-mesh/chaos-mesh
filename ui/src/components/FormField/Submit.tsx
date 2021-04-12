@@ -3,15 +3,15 @@ import { Box, Button, ButtonProps } from '@material-ui/core'
 import PublishIcon from '@material-ui/icons/Publish'
 import T from 'components/T'
 
-export default function Submit(props: ButtonProps) {
+export default function Submit({ mt = 6, ...rest }: ButtonProps & { mt?: number }) {
   return (
-    <Box mt={6} textAlign="right">
+    <Box mt={mt} textAlign="right">
       <Button
-        type={props.onClick ? undefined : 'submit'}
+        type={rest.onClick ? undefined : 'submit'}
         variant="contained"
         color="primary"
         startIcon={<PublishIcon />}
-        {...props}
+        {...rest}
       >
         {T('common.submit')}
       </Button>

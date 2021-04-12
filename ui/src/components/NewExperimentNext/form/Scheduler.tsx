@@ -130,7 +130,7 @@ const Scheduler: React.FC<SchedulerProps> = ({ errors, touched }) => {
               fast
               name="scheduler.duration"
               label={T('newE.schedule.duration')}
-              validate={validateDuration}
+              validate={validateDuration()}
               helperText={
                 getIn(errors, 'scheduler.duration') && getIn(touched, 'scheduler.duration')
                   ? getIn(errors, 'scheduler.duration')

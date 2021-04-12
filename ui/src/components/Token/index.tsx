@@ -1,24 +1,14 @@
 import { Box, Button } from '@material-ui/core'
 import { Form, Formik, FormikHelpers } from 'formik'
-import { setTokenName, setTokens } from 'slices/globalStatus'
+import { setAlert, setTokenName, setTokens } from 'slices/globalStatus'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
 import React from 'react'
 import T from 'components/T'
 import { TextField } from 'components/FormField'
 import api from 'api'
-import { setAlert } from 'slices/globalStatus'
 import { useIntl } from 'react-intl'
-
-function validateName(value: string) {
-  let error
-
-  if (value === '') {
-    error = (T('settings.addToken.nameValidation') as unknown) as string
-  }
-
-  return error
-}
+import { validateName } from 'lib/formikhelpers'
 
 function validateToken(value: string) {
   let error
@@ -98,7 +88,7 @@ const Token: React.FC<TokenProps> = ({ onSubmitCallback }) => {
           <TextField
             name="name"
             label={T('settings.addToken.name')}
-            validate={validateName}
+            validate={validateName((T('settings.addToken.nameValidation') as unknown) as string)}
             helperText={errors.name && touched.name ? errors.name : T('settings.addToken.nameHelper')}
             error={errors.name && touched.name ? true : false}
           />

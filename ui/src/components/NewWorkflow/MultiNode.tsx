@@ -1,31 +1,26 @@
+import { Avatar, Typography } from '@material-ui/core'
 import React, { useImperativeHandle, useState } from 'react'
-import { Step, StepLabel, Stepper } from '@material-ui/core'
 
-import AdjustIcon from '@material-ui/icons/Adjust'
+import Space from 'components-mui/Space'
+import T from 'components/T'
 import clsx from 'clsx'
 import { makeStyles } from '@material-ui/core/styles'
 
 const useStyles = makeStyles((theme) => ({
-  stepper: {
-    justifyContent: 'end',
-    flex: 0.75,
-    padding: 0,
-  },
-  step: {
-    paddingLeft: theme.spacing(6),
-    paddingRight: theme.spacing(6),
-  },
-  asButton: {
+  avatar: {
+    width: 20,
+    height: 20,
+    fontSize: '1rem',
     cursor: 'pointer',
   },
   finish: {
-    color: theme.palette.success.main,
+    background: theme.palette.success.main,
   },
   primary: {
-    color: theme.palette.primary.main,
+    background: theme.palette.primary.main,
   },
   disabled: {
-    color: theme.palette.action.disabled,
+    background: theme.palette.action.disabled,
   },
 }))
 
@@ -65,25 +60,23 @@ const MultiNode: React.ForwardRefRenderFunction<MultiNodeHandles, MultiNodeProps
   }
 
   return (
-    <Stepper className={classes.stepper}>
+    <Space display="flex" alignItems="center">
+      <Typography>{T(`newW.node.chooseChildren`)}</Typography>
       {Array(count)
         .fill(0)
         .map((_, index) => (
-          <Step key={index}>
-            <StepLabel
-              icon={
-                <AdjustIcon
-                  className={clsx(
-                    classes.asButton,
-                    current > index ? classes.finish : current === index ? classes.primary : classes.disabled
-                  )}
-                />
-              }
-              onClick={handleSetCurrent(index)}
-            />
-          </Step>
+          <Avatar
+            key={index}
+            className={clsx(
+              classes.avatar,
+              current > index ? classes.finish : current === index ? classes.primary : classes.disabled
+            )}
+            onClick={handleSetCurrent(index)}
+          >
+            {index + 1}
+          </Avatar>
         ))}
-    </Stepper>
+    </Space>
   )
 }
 

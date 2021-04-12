@@ -2,6 +2,7 @@ import { Box, Button, Grid, Step, StepLabel, Stepper, Typography } from '@materi
 import ConfirmDialog, { ConfirmDialogHandles } from 'components-mui/ConfirmDialog'
 import { Form, Formik } from 'formik'
 import MultiNode, { MultiNodeHandles } from './MultiNode'
+import Suspend, { SuspendValues } from './Suspend'
 import { Template, deleteTemplate, updateTemplate } from 'slices/workflows'
 import { resetNewExperiment, setExternalExperiment } from 'slices/experiments'
 import { useEffect, useRef, useState } from 'react'
@@ -117,17 +118,20 @@ const NewWorkflow = () => {
     if (restoreIndex !== -1) {
       resetRestore()
     } else {
-      const e = experiments[0]
+      if (experiments.length) {
+        const e = experiments[0]
 
-      const kind = e.target.kind
+        const kind = e.target.kind
 
-      dispatch(
-        setExternalExperiment({
-          kindAction: [kind, e.target[_snakecase(kind)].action ?? ''],
-          target: e.target,
-          basic: e.basic,
-        })
-      )
+        dispatch(
+          setExternalExperiment({
+            kindAction: [kind, e.target[_snakecase(kind)].action ?? ''],
+            target: e.target,
+            basic: e.basic,
+          })
+        )
+      } else {
+      }
 
       setRestoreIndex(index)
     }
@@ -199,6 +203,23 @@ const NewWorkflow = () => {
     resetRestore()
   }
 
+  const onSuspendRestoreSubmit = (stepIndex: number) => ({ name, duration }: SuspendValues) => {
+    dispatch(
+      updateTemplate({
+        ...steps[stepIndex],
+        name,
+        duration,
+      })
+    )
+    dispatch(
+      setAlert({
+        type: 'success',
+        message: intl.formatMessage({ id: 'common.updateSuccessfully' }),
+      })
+    )
+    resetRestore()
+  }
+
   const removeExperiment = (name: string) => {
     dispatch(deleteTemplate(name))
     dispatch(
@@ -242,104 +263,127 @@ const NewWorkflow = () => {
     <>
       <Grid container spacing={6}>
         <Grid item xs={12} md={8}>
-          <Stepper className={classes.stepper} orientation="vertical">
-            {steps.length > 0 &&
-              steps.map((step, index) => (
-                <Step key={step.type + index}>
-                  <StepLabel
-                    icon={
-                      <Box
-                        position="relative"
-                        display="flex"
-                        alignItems="center"
-                        onMouseEnter={() => setShowRemove(index)}
-                        onMouseLeave={() => setShowRemove(-1)}
-                      >
-                        <CheckIcon
-                          className={classes.success}
-                          style={{ visibility: showRemove === index ? 'hidden' : 'unset' }}
-                        />
-                        {showRemove === index && (
-                          <Box position="absolute" top={0} title={intl.formatMessage({ id: 'common.delete' })}>
-                            <RemoveCircleOutlineIcon
-                              className={clsx(classes.error, classes.asButton)}
-                              onClick={handleSelect(step.name, 'delete')}
-                            />
+          <Space vertical spacing={6}>
+            <Typography>{T('common.process')}</Typography>
+            <Stepper className={classes.stepper} orientation="vertical">
+              {steps.length > 0 &&
+                steps.map((step, index) => (
+                  <Step key={step.type + index}>
+                    <StepLabel
+                      icon={
+                        <Box
+                          position="relative"
+                          display="flex"
+                          alignItems="center"
+                          onMouseEnter={() => setShowRemove(index)}
+                          onMouseLeave={() => setShowRemove(-1)}
+                        >
+                          <CheckIcon
+                            className={classes.success}
+                            style={{ visibility: showRemove === index ? 'hidden' : 'unset' }}
+                          />
+                          {showRemove === index && (
+                            <Box position="absolute" top={0} title={intl.formatMessage({ id: 'common.delete' })}>
+                              <RemoveCircleOutlineIcon
+                                className={clsx(classes.error, classes.asButton)}
+                                onClick={handleSelect(step.name, 'delete')}
+                              />
+                            </Box>
+                          )}
+                        </Box>
+                      }
+                    >
+                      <Paper className={showRemove === index ? classes.removeSubmittedStep : classes.submittedStep}>
+                        <Box display="flex" justifyContent="space-between">
+                          <Typography component="div" variant={restoreIndex === index ? 'h6' : 'body1'}>
+                            {step.name}
+                          </Typography>
+                          <UndoIcon
+                            className={classes.asButton}
+                            onClick={restoreExperiment(step.experiments, step.index!)}
+                          />
+                        </Box>
+                        {restoreIndex === index && (
+                          <Box mt={6}>
+                            {(step.type === 'serial' || step.type === 'parallel') && (
+                              <Formik initialValues={{ name: step.name, duration: step.duration }} onSubmit={() => {}}>
+                                <Form>
+                                  <Box display="flex" justifyContent="space-between" alignItems="center" mb={6}>
+                                    <Space>
+                                      <TextField
+                                        mb={0}
+                                        className={classes.field}
+                                        name="name"
+                                        label={T('newE.basic.name')}
+                                      />
+                                      <TextField
+                                        mb={0}
+                                        className={classes.field}
+                                        name="duration"
+                                        label={T('newE.schedule.duration')}
+                                      />
+                                    </Space>
+                                    <Space display="flex">
+                                      <MultiNode
+                                        ref={multiNodeRef}
+                                        count={step.experiments.length}
+                                        setCurrentCallback={setCurrentCallback(step.experiments)}
+                                      />
+                                      <Button
+                                        variant="contained"
+                                        color="primary"
+                                        startIcon={<PublishIcon />}
+                                        onClick={onNoSingleRestoreSubmit(index)}
+                                      >
+                                        {T('newW.node.submitAll')}
+                                      </Button>
+                                    </Space>
+                                  </Box>
+                                </Form>
+                              </Formik>
+                            )}
+                            {step.type !== 'suspend' && (
+                              <NewExperiment loadFrom={false} onSubmit={onRestoreSubmit(step.type, index)} />
+                            )}
+                            {step.type === 'suspend' && (
+                              <Suspend
+                                initialValues={{
+                                  name: steps[index].name,
+                                  duration: steps[index].duration!,
+                                }}
+                                onSubmit={onSuspendRestoreSubmit(index)}
+                              />
+                            )}
                           </Box>
                         )}
-                      </Box>
-                    }
-                  >
-                    <Paper className={showRemove === index ? classes.removeSubmittedStep : classes.submittedStep}>
-                      <Box display="flex" justifyContent="space-between">
-                        <Typography component="div" variant={restoreIndex === index ? 'h6' : 'body1'}>
-                          {step.name}
-                        </Typography>
-                        <UndoIcon
-                          className={classes.asButton}
-                          onClick={restoreExperiment(step.experiments, step.index!)}
-                        />
-                      </Box>
-                      {restoreIndex === index && (
-                        <Box mt={6}>
-                          {(step.type === 'serial' || step.type === 'parallel') && (
-                            <Formik initialValues={{ name: step.name }} onSubmit={() => {}}>
-                              <Form>
-                                <Box display="flex" justifyContent="space-between" alignItems="center" mb={6}>
-                                  <TextField
-                                    mb={0}
-                                    className={classes.field}
-                                    name="name"
-                                    label={T('newE.basic.name')}
-                                  />
-                                  <MultiNode
-                                    ref={multiNodeRef}
-                                    count={step.experiments.length}
-                                    setCurrentCallback={setCurrentCallback(step.experiments)}
-                                  />
-                                  <Button
-                                    variant="contained"
-                                    color="primary"
-                                    startIcon={<PublishIcon />}
-                                    onClick={onNoSingleRestoreSubmit(index)}
-                                  >
-                                    {T('newW.node.submitAll')}
-                                  </Button>
-                                </Box>
-                              </Form>
-                            </Formik>
-                          )}
-                          <NewExperiment loadFrom={false} onSubmit={onRestoreSubmit(step.type, index)} />
-                        </Box>
-                      )}
-                    </Paper>
-                  </StepLabel>
-                </Step>
-              ))}
-            <Step>
-              <Add />
-            </Step>
-          </Stepper>
+                      </Paper>
+                    </StepLabel>
+                  </Step>
+                ))}
+              <Step>
+                <Add />
+              </Step>
+            </Stepper>
+          </Space>
         </Grid>
         <Grid item xs={12} md={4} className={classes.leftSticky}>
           <Space display="flex" flexDirection="column" height="100%" vertical spacing={6}>
-            <Box display="flex" justifyContent="space-between">
-              <Button
-                variant="contained"
-                color="primary"
-                startIcon={<PublishIcon />}
-                disabled={_isEmpty(templates)}
-                onClick={submitWorkflow}
-              >
-                {T('newW.submit')}
-              </Button>
-            </Box>
             <Typography>{T('common.preview')}</Typography>
             <Box flex={1}>
               <Paper style={{ height: '100%' }} padding={0}>
-                <YAMLEditor theme={theme} data={constructWorkflow('test', '120s', Object.values(templates))} />
+                <YAMLEditor theme={theme} data={constructWorkflow('workflow', 'xxx', Object.values(templates))} />
               </Paper>
             </Box>
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<PublishIcon />}
+              fullWidth
+              disabled={_isEmpty(templates)}
+              onClick={submitWorkflow}
+            >
+              {T('newW.submit')}
+            </Button>
           </Space>
         </Grid>
       </Grid>

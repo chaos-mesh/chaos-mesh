@@ -8,8 +8,8 @@ export interface Template {
   type: 'single' | 'serial' | 'parallel' | 'suspend'
   index?: number
   name: string
+  duration?: string
   experiments: TemplateExperiment[]
-  suspend?: { duration: string }
 }
 
 let index = 0

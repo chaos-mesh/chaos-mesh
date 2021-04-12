@@ -6,6 +6,7 @@ import { SelectField, Submit, TextField } from 'components/FormField'
 import { TemplateExperiment, setTemplate } from 'slices/workflows'
 import { resetNewExperiment, setExternalExperiment } from 'slices/experiments'
 import { useRef, useState } from 'react'
+import { validateDuration, validateName } from 'lib/formikhelpers'
 
 import AddCircleIcon from '@material-ui/icons/AddCircle'
 import Paper from 'components-mui/Paper'
@@ -147,23 +148,13 @@ const Add = () => {
   }
 
   const submitNoSingleNode = (_: any, { resetForm }: FormikHelpers<any>) => {
-    const { type, name } = formRef.current.values
-
-    if (name === '') {
-      dispatch(
-        setAlert({
-          type: 'warning',
-          message: intl.formatMessage({ id: 'newW.nameValidation' }),
-        })
-      )
-
-      return
-    }
+    const { type, name, duration } = formRef.current.values
 
     dispatch(
       setTemplate({
         type,
         name,
+        duration,
         experiments,
       })
     )
@@ -207,12 +198,12 @@ const Add = () => {
     <>
       <Formik
         innerRef={formRef}
-        initialValues={{ type: 'single', num: 2, name: '' }}
+        initialValues={{ type: 'single', num: 2, name: '', duration: '' }}
         onSubmit={submitNoSingleNode}
         validate={onValidate}
         validateOnBlur={false}
       >
-        {({ values }) => (
+        {({ values, errors, touched }) => (
           <Form>
             <StepLabel icon={<AddCircleIcon color="primary" />}>
               <Space className={classes.fields}>
@@ -242,19 +233,28 @@ const Add = () => {
                   <PaperTop title={T(`newW.${values.type}Title`)} />
                   <Grid container spacing={6}>
                     <Grid item xs={12} md={6}>
-                      <TextField name="name" label={T('newE.basic.name')} helperText={T(`newW.nameHelper`)} />
+                      <TextField
+                        name="name"
+                        label={T('newE.basic.name')}
+                        validate={validateName((T('newW.nameValidation') as unknown) as string)}
+                        helperText={errors.name && touched.name ? errors.name : T('newW.nameHelper')}
+                        error={errors.name && touched.name ? true : false}
+                      />
                     </Grid>
                     <Grid item xs={12} md={6}>
                       <TextField
                         name="duration"
                         label={T('newE.schedule.duration')}
-                        helperText={T('newW.durationHelper')}
+                        validate={validateDuration((T('newW.durationValidation') as unknown) as string)}
+                        helperText={errors.duration && touched.duration ? errors.duration : T('newW.durationHelper')}
+                        error={errors.duration && touched.duration ? true : false}
                       />
                     </Grid>
                   </Grid>
-                  <PaperTop title={T(`newW.node.chooseChildren`)} />
-                  <MultiNode ref={multiNodeRef} count={num} setCurrentCallback={setCurrentCallback} />
-                  <Submit disabled={experiments.length !== num} />
+                  <Box display="flex" justifyContent="space-between" alignItems="center">
+                    <MultiNode ref={multiNodeRef} count={num} setCurrentCallback={setCurrentCallback} />
+                    <Submit mt={0} disabled={experiments.length !== num} />
+                  </Box>
                 </Paper>
               </Box>
             )}

@@ -1,10 +1,10 @@
 import { Box, Button, Grid, Grow, Modal } from '@material-ui/core'
 import ConfirmDialog, { ConfirmDialogHandles } from 'components-mui/ConfirmDialog'
 import EventsTable, { EventsTableHandles } from 'components/EventsTable'
-import { RootState, useStoreDispatch } from 'store'
-import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
+import { createStyles, makeStyles } from '@material-ui/core/styles'
 import { useEffect, useRef, useState } from 'react'
 import { useHistory, useParams } from 'react-router-dom'
+import { useStoreDispatch, useStoreSelector } from 'store'
 
 import { Ace } from 'ace-builds'
 import Alert from '@material-ui/lab/Alert'
@@ -28,12 +28,11 @@ import loadable from '@loadable/component'
 import { setAlert } from 'slices/globalStatus'
 import { useIntl } from 'react-intl'
 import { usePrevious } from 'lib/hooks'
-import { useSelector } from 'react-redux'
 import yaml from 'js-yaml'
 
 const YAMLEditor = loadable(() => import('components/YAMLEditor'))
 
-const useStyles = makeStyles((theme: Theme) =>
+const useStyles = makeStyles((theme) =>
   createStyles({
     eventsChart: {
       height: 150,
@@ -75,7 +74,7 @@ export default function ExperimentDetail() {
   const history = useHistory()
   const { uuid } = useParams<{ uuid: string }>()
 
-  const { theme } = useSelector((state: RootState) => state.settings)
+  const { theme } = useStoreSelector((state) => state.settings)
   const dispatch = useStoreDispatch()
 
   const chartRef = useRef<HTMLDivElement>(null)
@@ -165,9 +164,9 @@ export default function ExperimentDetail() {
         })
 
         break
-      default:
-        break
     }
+
+    confirmRef.current!.setOpen(true)
   }
 
   const handleExperiment = (action: string) => () => {
