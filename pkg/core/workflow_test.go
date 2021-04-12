@@ -66,14 +66,15 @@ func Test_conversionWorkflow(t *testing.T) {
 
 func Test_conversionWorkflowDetail(t *testing.T) {
 	type args struct {
-		kubeWorkflow v1alpha1.Workflow
-		nodes        []v1alpha1.WorkflowNode
-		runningNodes []v1alpha1.WorkflowNode
+		kubeWorkflow     v1alpha1.Workflow
+		kubeNodes        []v1alpha1.WorkflowNode
+		runningKubeNodes []v1alpha1.WorkflowNode
 	}
 	tests := []struct {
-		name string
-		args args
-		want WorkflowDetail
+		name    string
+		args    args
+		want    WorkflowDetail
+		wantErr bool
 	}{
 		{
 			name: "simple workflow detail with no nodes",
@@ -90,8 +91,8 @@ func Test_conversionWorkflowDetail(t *testing.T) {
 					},
 					Status: v1alpha1.WorkflowStatus{},
 				},
-				nodes:        nil,
-				runningNodes: nil,
+				kubeNodes:        nil,
+				runningKubeNodes: nil,
 			},
 			want: WorkflowDetail{
 				Workflow: Workflow{
@@ -109,8 +110,13 @@ func Test_conversionWorkflowDetail(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := conversionWorkflowDetail(tt.args.kubeWorkflow, tt.args.nodes, tt.args.runningNodes); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("conversionWorkflowDetail() = %v, want %v", got, tt.want)
+			got, err := conversionWorkflowDetail(tt.args.kubeWorkflow, tt.args.kubeNodes, tt.args.runningKubeNodes)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("conversionWorkflowDetail() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("conversionWorkflowDetail() got = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -121,9 +127,10 @@ func Test_conversionWorkflowNode(t *testing.T) {
 		kubeWorkflowNode v1alpha1.WorkflowNode
 	}
 	tests := []struct {
-		name string
-		args args
-		want Node
+		name    string
+		args    args
+		want    Node
+		wantErr bool
 	}{
 		{
 			name: "simple node",
@@ -136,7 +143,7 @@ func Test_conversionWorkflowNode(t *testing.T) {
 				Spec: v1alpha1.WorkflowNodeSpec{
 					WorkflowName: "fake-workflow-0",
 					TemplateName: "fake-template-0",
-					Type:         v1alpha1.TypeJvmChaos,
+					Type:         v1alpha1.TypeJVMChaos,
 				},
 				Status: v1alpha1.WorkflowNodeStatus{},
 			}},
@@ -320,8 +327,13 @@ func Test_conversionWorkflowNode(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := conversionWorkflowNode(tt.args.kubeWorkflowNode); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("conversionWorkflowNode() = %v, want %v", got, tt.want)
+			got, err := conversionWorkflowNode(tt.args.kubeWorkflowNode)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("conversionWorkflowNode() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("conversionWorkflowNode() got = %v, want %v", got, tt.want)
 			}
 		})
 	}

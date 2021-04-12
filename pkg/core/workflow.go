@@ -16,15 +16,14 @@ package core
 import (
 	"context"
 
+	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
-
-	wfcontrollers "github.com/chaos-mesh/chaos-mesh/pkg/workflow/controllers"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	wfcontrollers "github.com/chaos-mesh/chaos-mesh/pkg/workflow/controllers"
 )
 
 type WorkflowRepository interface {
@@ -104,6 +103,13 @@ const (
 	TaskNode NodeType = "TaskNode"
 )
 
+var nodeTypeTemplateTypeMapping = map[v1alpha1.TemplateType]NodeType{
+	v1alpha1.TypeSerial:   SerialNode,
+	v1alpha1.TypeParallel: ParallelNode,
+	v1alpha1.TypeSuspend:  SuspendNode,
+	v1alpha1.TypeTask:     TaskNode,
+}
+
 // Detail defines the detail of a workflow.
 type Detail struct {
 	WorkflowUID string     `json:"workflow_uid"`
@@ -178,7 +184,7 @@ func (it *KubeWorkflowRepository) GetWorkflowByNamespacedName(ctx context.Contex
 	}
 
 	// TODO: provide the running kube nodes
-	return conversionWorkflowDetail(kubeWorkflow, workflowNodes.Items, nil), nil
+	return conversionWorkflowDetail(kubeWorkflow, workflowNodes.Items, nil)
 }
 
 func (it *KubeWorkflowRepository) DeleteWorkflowByNamespacedName(ctx context.Context, namespace, name string) error {
@@ -207,17 +213,23 @@ func conversionWorkflow(kubeWorkflow v1alpha1.Workflow) Workflow {
 	return result
 }
 
-func conversionWorkflowDetail(kubeWorkflow v1alpha1.Workflow, kubeNodes []v1alpha1.WorkflowNode, runningKubeNodes []v1alpha1.WorkflowNode) WorkflowDetail {
+func conversionWorkflowDetail(kubeWorkflow v1alpha1.Workflow, kubeNodes []v1alpha1.WorkflowNode, runningKubeNodes []v1alpha1.WorkflowNode) (WorkflowDetail, error) {
 	nodes := make([]Node, 0)
 	runningNodes := make([]Node, 0)
 
 	for _, item := range kubeNodes {
-		node := conversionWorkflowNode(item)
+		node, err := conversionWorkflowNode(item)
+		if err != nil {
+			return WorkflowDetail{}, nil
+		}
 		nodes = append(nodes, node)
 	}
 
 	for _, item := range runningKubeNodes {
-		node := conversionWorkflowNode(item)
+		node, err := conversionWorkflowNode(item)
+		if err != nil {
+			return WorkflowDetail{}, nil
+		}
 		runningNodes = append(runningNodes, node)
 	}
 
@@ -228,13 +240,17 @@ func conversionWorkflowDetail(kubeWorkflow v1alpha1.Workflow, kubeNodes []v1alph
 		},
 		CurrentNodes: runningNodes,
 	}
-	return result
+	return result, nil
 }
 
-func conversionWorkflowNode(kubeWorkflowNode v1alpha1.WorkflowNode) Node {
+func conversionWorkflowNode(kubeWorkflowNode v1alpha1.WorkflowNode) (Node, error) {
+	templateType, err := mappingTemplateType(kubeWorkflowNode.Spec.Type)
+	if err != nil {
+		return Node{}, err
+	}
 	result := Node{
 		Name:     kubeWorkflowNode.Name,
-		Type:     mappingTemplateType(kubeWorkflowNode.Spec.Type),
+		Type:     templateType,
 		Serial:   NodeSerial{Tasks: []string{}},
 		Parallel: NodeParallel{Tasks: []string{}},
 		Template: kubeWorkflowNode.Spec.TemplateName,
@@ -254,26 +270,15 @@ func conversionWorkflowNode(kubeWorkflowNode v1alpha1.WorkflowNode) Node {
 		result.State = NodeRunning
 	}
 
-	return result
+	return result, nil
 }
 
-func mappingTemplateType(templateType v1alpha1.TemplateType) NodeType {
-	// FIXME: automate this part 😓
-	switch templateType {
-	case v1alpha1.TypeSerial:
-		return SerialNode
-	case v1alpha1.TypeSuspend:
-		return SuspendNode
-	case v1alpha1.TypeParallel:
-		return ParallelNode
-	case v1alpha1.TypeTask:
-		return TaskNode
-	case v1alpha1.TypeJvmChaos, v1alpha1.TypePodChaos, v1alpha1.TypeNetworkChaos,
-		v1alpha1.TypeDnsChaos, v1alpha1.TypeHttpChaos, v1alpha1.TypeIoChaos,
-		v1alpha1.TypeKernelChaos, v1alpha1.TypeStressChaos, v1alpha1.TypeTimeChaos:
-		return ChaosNode
-	default:
-		// TODO: logs or error
-		return ""
+func mappingTemplateType(templateType v1alpha1.TemplateType) (NodeType, error) {
+	if v1alpha1.IsChoasTemplateType(templateType) {
+		return ChaosNode, nil
+	} else if target, ok := nodeTypeTemplateTypeMapping[templateType]; ok {
+		return target, nil
+	} else {
+		return "", errors.Errorf("can not resolve such type called %s", templateType)
 	}
 }
