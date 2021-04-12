@@ -34,9 +34,14 @@ export default function gen({
 
   const margin = {
     top: 0,
-    right: enableLegends && document.documentElement.offsetWidth > 768 ? 150 : 0,
+    right: 0,
     bottom: 30,
     left: 0,
+  }
+  updateMargin()
+
+  function updateMargin() {
+    margin.right = enableLegends && document.documentElement.offsetWidth > 768 ? 150 : 0
   }
 
   const svg = d3
@@ -85,26 +90,18 @@ export default function gen({
     .domain(allUniqueUUIDs)
     .range([0, height - margin.top - margin.bottom])
     .padding(0.5)
-  const yAxis = d3.axisLeft(y).tickFormat('' as any)
-  // gYAxis
-  svg
+
+  const timelines = svg
     .append('g')
     .attr('transform', `translate(${margin.left}, ${margin.top})`)
-    .call(yAxis)
-    .call((g) => g.select('.domain').remove())
-    .call((g) => g.selectAll('.tick').remove())
-    .call((g) =>
-      g
-        .append('g')
-        .attr('stroke-opacity', 0.5)
-        .selectAll('line')
-        .data(allUniqueUUIDs)
-        .join('line')
-        .attr('y1', (d) => y(d)! + y.bandwidth() / 2)
-        .attr('y2', (d) => y(d)! + y.bandwidth() / 2)
-        .attr('x2', width - margin.right - margin.left)
-        .attr('stroke', colorPalette)
-    )
+    .attr('stroke-opacity', 0.12)
+    .selectAll()
+    .data(allUniqueUUIDs)
+    .join('line')
+    .attr('y1', (d) => y(d)! + y.bandwidth() / 2)
+    .attr('y2', (d) => y(d)! + y.bandwidth() / 2)
+    .attr('x2', width - margin.right - margin.left)
+    .attr('stroke', colorPalette)
 
   // clipX
   svg
@@ -267,10 +264,12 @@ export default function gen({
     const newWidth = root.offsetWidth
     width = newWidth
 
-    svg.attr('width', width)
-    x.range([margin.left, width - margin.right])
-    gXAxis.call(xAxis)
+    updateMargin()
+
+    svg.attr('width', width).call(zoom.transform, d3.zoomIdentity)
+    gXAxis.call(xAxis.scale(x.range([margin.left, width - margin.right])))
     svg.selectAll('.tick text').call(wrapText, 30)
+    timelines.attr('x2', width - margin.right - margin.left)
     circles.attr('x', (d) => x(day(d.start_time))!)
   }
 
