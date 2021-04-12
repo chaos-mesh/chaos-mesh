@@ -104,6 +104,7 @@ export interface ExperimentTargetStress {
     }
     memory?: {
       workers: number
+      size: string
       options: string[]
     }
   }

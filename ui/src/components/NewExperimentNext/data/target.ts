@@ -357,6 +357,7 @@ const data: Record<Kind, Target> = {
         },
         memory: {
           workers: 0,
+          size: "",
           options: [],
         },
       },
