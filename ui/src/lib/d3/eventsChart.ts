@@ -6,30 +6,38 @@ import { Event } from 'api/events.type'
 import { IntlShape } from 'react-intl'
 import { Theme } from 'slices/settings'
 import _debounce from 'lodash.debounce'
+import { truncate } from '../utils'
 import wrapText from './wrapText'
-
-const margin = {
-  top: 15,
-  right: 15,
-  bottom: 30,
-  left: 15,
-}
 
 export default function gen({
   root,
   events,
-  onSelectEvent,
   intl,
   theme,
+  options = {
+    enableLegends: true,
+  },
 }: {
   root: HTMLElement
   events: Event[]
-  onSelectEvent?: (e: Event) => () => void
   intl: IntlShape
   theme: Theme
+  options?: {
+    enableLegends?: boolean
+    onSelectEvent?: (e: Event) => () => void
+  }
 }) {
+  const { enableLegends, onSelectEvent } = options
+
   let width = root.offsetWidth
   const height = root.offsetHeight
+
+  const margin = {
+    top: 0,
+    right: enableLegends && document.documentElement.offsetWidth > 768 ? 150 : 0,
+    bottom: 30,
+    left: 0,
+  }
 
   const svg = d3
     .select(root)
@@ -111,38 +119,40 @@ export default function gen({
 
   // legends
   const legendsRoot = d3.select(document.createElement('div')).attr('class', 'chaos-events-legends')
-  const legends = legendsRoot
-    .selectAll()
-    .data(allUniqueExperiments)
-    .enter()
-    .append('div')
-    .on('click', function (d) {
-      const _events = events.filter((e) => e.experiment_id === d.uuid)
-      const event = _events[_events.length - 1]
+  if (enableLegends) {
+    legends()
+  }
+  function legends() {
+    const legends = legendsRoot
+      .selectAll()
+      .data(allUniqueExperiments)
+      .enter()
+      .append('div')
+      .on('click', function (d) {
+        const _events = events.filter((e) => e.experiment_id === d.uuid)
+        const event = _events[_events.length - 1]
 
-      svg
-        .transition()
-        .duration(750)
-        .call(
-          zoom.transform as any,
-          d3.zoomIdentity
-            .translate(width / 2, 0)
-            .scale(2)
-            .translate(-x(day(event.start_time))!, 0)
-        )
-    })
-  legends
-    .append('div')
-    .attr('style', (d) => `width: 14px; height: 14px; background: ${colorPalette(d.uuid)}; border-radius: 50%;`)
-  legends
-    .insert('div')
-    .attr(
-      'style',
-      `margin-left: 8px; color: ${
-        theme === 'light' ? 'rgba(0, 0, 0, 0.54)' : 'rgba(255, 255, 255, 0.7)'
-      }; font-size: 0.75rem; font-weight: bold;`
-    )
-    .text((d) => d.name)
+        svg
+          .transition()
+          .duration(750)
+          .call(
+            zoom.transform,
+            d3.zoomIdentity
+              .translate((width - margin.left - margin.right) / 2, 0)
+              .scale(3)
+              .translate(-x(day(event.start_time))!, 0)
+          )
+      })
+    legends
+      .append('div')
+      .attr('class', 'square')
+      .attr('style', (d) => `background: ${colorPalette(d.uuid)};`)
+    legends
+      .insert('div')
+      .attr('class', 'experiment')
+      .attr('title', (d) => d.name)
+      .text((d) => truncate(d.name))
+  }
 
   // event circles
   const circles = gMain
@@ -156,7 +166,7 @@ export default function gen({
     .attr('fill', (d) => colorPalette(d.experiment_id))
     .style('cursor', 'pointer')
 
-  const zoom = d3.zoom().scaleExtent([0.1, 5]).on('zoom', zoomed)
+  const zoom = d3.zoom<SVGSVGElement, unknown>().scaleExtent([0.1, 6]).on('zoom', zoomed)
   function zoomed() {
     const eventTransform = d3.event.transform
 

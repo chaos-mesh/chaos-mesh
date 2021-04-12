@@ -2,6 +2,14 @@ export function toTitleCase(s: string) {
   return s.charAt(0).toUpperCase() + s.substr(1)
 }
 
+export function truncate(s: string) {
+  if (s.length > 7) {
+    return s.substring(0, 15) + '...'
+  }
+
+  return s
+}
+
 export function joinObjKVs(obj: Record<string, string[]>, separator: string, filters?: string[]) {
   return Object.entries(obj)
     .filter((d) => !filters?.includes(d[0]))
