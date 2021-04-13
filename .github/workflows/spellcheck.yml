@@ -1,4 +1,4 @@
-name: ci
+name: spellcheck
 
 on:
   pull_request:
@@ -15,6 +15,7 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           path: go/src/github.com/${{ github.repository }}
-      - name: GitHub Spellcheck Action
-        uses: rojopolis/spellcheck-github-actions@0.12.0
+      - name: Check spelling
+        uses: check-spelling/check-spelling@0.0.17-alpha
+
 
