@@ -224,6 +224,7 @@ func DefaultProcessBuilder(cmd string, args ...string) *ProcessBuilder {
 type ProcessBuilder struct {
 	cmd  string
 	args []string
+	env  []string
 
 	nsOptions []nsOption
 
@@ -238,6 +239,12 @@ type ProcessBuilder struct {
 // GetNsPath returns corresponding namespace path
 func GetNsPath(pid uint32, typ NsType) string {
 	return fmt.Sprintf("%s/%d/ns/%s", DefaultProcPrefix, pid, string(typ))
+}
+
+// SetEnv sets the environment variables of the process
+func (b *ProcessBuilder) SetEnv(key, value string) *ProcessBuilder {
+	b.env = append(b.env, fmt.Sprintf("%s=%s", key, value))
+	return b
 }
 
 // SetNS sets the namespace of the process
