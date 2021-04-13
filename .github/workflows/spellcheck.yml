@@ -1,0 +1,20 @@
+name: ci
+
+on:
+  pull_request:
+    branches:
+      - master
+      - release-*
+
+jobs:
+  pull:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: go/src/github.com/${{ github.repository }}
+      - name: GitHub Spellcheck Action
+        uses: rojopolis/spellcheck-github-actions@0.12.0
+
