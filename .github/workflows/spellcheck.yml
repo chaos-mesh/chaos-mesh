@@ -16,6 +16,6 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           path: go/src/github.com/${{ github.repository }}
       - name: Check spelling
-        uses: check-spelling/check-spelling@0.0.17-alpha
+        uses: check-spelling/check-spelling@main
 
 
