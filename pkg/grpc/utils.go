@@ -47,13 +47,6 @@ type TLSFile struct {
 	Key    string
 }
 
-type TLSFromType = string
-
-const (
-	RAW  TLSFromType = "RAW"
-	FILE TLSFromType = "FILE"
-)
-
 type FileProvider struct {
 	file TLSFile
 }
