@@ -78,7 +78,7 @@ func (it *SerialNodeReconciler) Reconcile(request reconcile.Request) (reconcile.
 					Status: corev1.ConditionTrue,
 					Reason: v1alpha1.NodeAccomplished,
 				})
-				return it.kubeClient.Update(ctx, &nodeNeedUpdate)
+				return it.kubeClient.Status().Update(ctx, &nodeNeedUpdate)
 			})
 
 			if updateError != nil {
@@ -126,7 +126,7 @@ func (it *SerialNodeReconciler) Reconcile(request reconcile.Request) (reconcile.
 			for _, item := range childrenNodes {
 				nodeNeedUpdate.Status.ActiveChildren = append(nodeNeedUpdate.Status.ActiveChildren, corev1.LocalObjectReference{Name: item.Name})
 			}
-			return it.kubeClient.Update(ctx, &nodeNeedUpdate)
+			return it.kubeClient.Status().Update(ctx, &nodeNeedUpdate)
 		})
 
 		if updateError != nil {

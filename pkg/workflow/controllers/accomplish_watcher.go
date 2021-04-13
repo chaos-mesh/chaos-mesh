@@ -119,7 +119,7 @@ func (it *AccomplishWatcher) updateParentSerialNode(ctx context.Context, childNo
 		if !childrenContains(nodeNeedUpdate.Status.FinishedChildren, childNode.Name) {
 			nodeNeedUpdate.Status.FinishedChildren = append(nodeNeedUpdate.Status.FinishedChildren, corev1.LocalObjectReference{Name: childNode.Name})
 		}
-		return it.kubeClient.Update(ctx, &nodeNeedUpdate)
+		return it.kubeClient.Status().Update(ctx, &nodeNeedUpdate)
 	})
 
 	return updateError

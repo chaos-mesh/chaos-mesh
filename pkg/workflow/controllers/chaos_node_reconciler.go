@@ -119,7 +119,7 @@ func (it *ChaosNodeReconciler) injectChaos(ctx context.Context, node v1alpha1.Wo
 			Reason: v1alpha1.ChaosCRCreated,
 		})
 
-		return it.kubeClient.Update(ctx, &nodeNeedUpdate)
+		return it.kubeClient.Status().Update(ctx, &nodeNeedUpdate)
 
 	})
 	return updateError
@@ -165,7 +165,7 @@ func (it *ChaosNodeReconciler) recoverChaos(ctx context.Context, node v1alpha1.W
 		}
 
 		nodeNeedUpdate.Status.ChaosResource = nil
-		err = it.kubeClient.Update(ctx, &nodeNeedUpdate)
+		err = it.kubeClient.Status().Update(ctx, &nodeNeedUpdate)
 		return client.IgnoreNotFound(err)
 	})
 
