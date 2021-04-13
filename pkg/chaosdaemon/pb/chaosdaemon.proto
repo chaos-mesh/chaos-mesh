@@ -22,6 +22,8 @@ service ChaosDaemon {
 
   rpc ApplyIoChaos(ApplyIoChaosRequest) returns (ApplyIoChaosResponse) {}
 
+  rpc ApplyHttpChaos(ApplyHttpChaosRequest) returns (ApplyHttpChaosResponse) {}
+
   rpc SetDNSServer (SetDNSServerRequest) returns (google.protobuf.Empty) {}
 }
 
@@ -190,6 +192,22 @@ message ApplyIoChaosResponse {
   int64 instance = 1;
   int64 startTime = 2;
 }
+
+message ApplyHttpChaosRequest {
+  string rules = 1;
+  repeated uint32 proxy_ports = 2;
+  string container_id = 3;
+
+  int64 instance = 4;
+  int64 startTime = 5;
+  bool enterNS = 6;
+}
+
+message ApplyHttpChaosResponse {
+  int64 instance = 1;
+  int64 startTime = 2;
+}
+
 
 message TcsRequest {
   repeated Tc tcs = 1;

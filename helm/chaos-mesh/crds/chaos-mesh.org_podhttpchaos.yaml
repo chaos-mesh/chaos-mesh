@@ -1,0 +1,160 @@
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.2.5
+  creationTimestamp: null
+  name: podhttpchaos.chaos-mesh.org
+spec:
+  group: chaos-mesh.org
+  names:
+    kind: PodHttpChaos
+    listKind: PodHttpChaosList
+    plural: podhttpchaos
+    singular: podhttpchaos
+  preserveUnknownFields: false
+  scope: Namespaced
+  validation:
+    openAPIV3Schema:
+      description: PodHttpChaos is the Schema for the podiochaos API
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          description: PodHttpChaosSpec defines the desired state of IoChaos
+          properties:
+            container:
+              description: 'TODO: support multiple different container to inject in
+                one pod'
+              type: string
+            pid:
+              description: Pid represents a running toda process id
+              format: int64
+              type: integer
+            proxyPorts:
+              description: ProxyPorts represents the target ports to be proxy of.
+              items:
+                format: int32
+                type: integer
+              type: array
+            requestRules:
+              description: Rules are a list of injection rule for http request
+              items:
+                description: PodHttpChaosRule defines the injection rule for http
+                  request
+                properties:
+                  actions:
+                    description: HttpChaosAction defines possible actions of HttpChaos
+                    properties:
+                      abort:
+                        type: boolean
+                      append:
+                        description: PodHttpChaosAppendActions defines possible append-actions
+                          of HttpChaos
+                        properties:
+                          headers:
+                            items:
+                              items:
+                                type: string
+                              type: array
+                            type: array
+                          queries:
+                            items:
+                              items:
+                                type: string
+                              type: array
+                            type: array
+                        type: object
+                      delay:
+                        description: Delay represents the delay of the target request/response.
+                          A duration string is a possibly signed sequence of decimal
+                          numbers, each with optional fraction and a unit suffix,
+                          such as "300ms", "-1.5h" or "2h45m". Valid time units are
+                          "ns", "us" (or "µs"), "ms", "s", "m", "h".
+                        type: string
+                      replace:
+                        description: PodHttpChaosReplaceActions defines possible replace-actions
+                          of HttpChaos
+                        properties:
+                          body:
+                            format: byte
+                            type: string
+                          code:
+                            format: int32
+                            type: integer
+                          headers:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          method:
+                            type: string
+                          path:
+                            type: string
+                          queries:
+                            additionalProperties:
+                              type: string
+                            type: object
+                        type: object
+                    type: object
+                  selector:
+                    properties:
+                      code:
+                        format: int32
+                        type: integer
+                      headers:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      method:
+                        type: string
+                      path:
+                        type: string
+                      port:
+                        format: int32
+                        type: integer
+                      response_headers:
+                        additionalProperties:
+                          type: string
+                        type: object
+                    type: object
+                  target:
+                    description: PodHttpChaosTarget represents the type of an HttpChaos
+                      Action
+                    type: string
+                required:
+                - actions
+                - selector
+                - target
+                type: object
+              type: array
+            startTime:
+              description: StartTime represents the start time of a toda process
+              format: int64
+              type: integer
+          required:
+          - proxyPorts
+          type: object
+      type: object
+  version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
