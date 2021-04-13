@@ -28,6 +28,9 @@ spec:
 {{ toYaml . | indent 8 }}
     {{- end }}
     spec:
+      {{- if .Values.dashboard.hostNetwork }}
+      hostNetwork: true
+      {{- end }}
       {{- if .Values.dashboard.serviceAccount }}
       serviceAccount: {{ .Values.dashboard.serviceAccount }}
       {{- end }}
