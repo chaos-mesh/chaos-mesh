@@ -54,28 +54,21 @@ const (
 	FILE TLSFromType = "FILE"
 )
 
-type CredentialProvider struct {
-	raw      TLSRaw
-	file     TLSFile
-	insecure bool
-	fromType TLSFromType
+type FileProvider struct {
+	file TLSFile
 }
 
-func (it *CredentialProvider) getCredentialOption() (grpc.DialOption, error) {
-	if it.insecure {
-		return grpc.WithInsecure(), nil
-	}
-	if it.fromType == RAW {
-		return it.TLSFromRaw()
-	}
-	if it.fromType == FILE {
-		return it.TLSFromFile()
-	}
-
-	return nil, fmt.Errorf("an authorization method must be specified")
+type RawProvider struct {
+	raw TLSRaw
 }
 
-func (it *CredentialProvider) TLSFromFile() (grpc.DialOption, error) {
+type InsecureProvider struct {
+}
+type CredentialProvider interface {
+	getCredentialOption() (grpc.DialOption, error)
+}
+
+func (it *FileProvider) getCredentialOption() (grpc.DialOption, error) {
 	caCert, err := ioutil.ReadFile(it.file.CaCert)
 	if err != nil {
 		return nil, err
@@ -96,7 +89,7 @@ func (it *CredentialProvider) TLSFromFile() (grpc.DialOption, error) {
 	return grpc.WithTransportCredentials(creds), nil
 }
 
-func (it *CredentialProvider) TLSFromRaw() (grpc.DialOption, error) {
+func (it *RawProvider) getCredentialOption() (grpc.DialOption, error) {
 	caCertPool := x509.NewCertPool()
 	caCertPool.AppendCertsFromPEM(it.raw.CaCert)
 
@@ -111,6 +104,10 @@ func (it *CredentialProvider) TLSFromRaw() (grpc.DialOption, error) {
 		ServerName:   "chaos-daemon.chaos-mesh.org",
 	})
 	return grpc.WithTransportCredentials(creds), nil
+}
+
+func (it *InsecureProvider) getCredentialOption() (grpc.DialOption, error) {
+	return grpc.WithInsecure(), nil
 }
 
 type GrpcBuilder struct {
@@ -134,44 +131,38 @@ func (it *GrpcBuilder) WithTimeout(timeout time.Duration) *GrpcBuilder {
 	return it
 }
 
-func (it *GrpcBuilder) Address(address string) *GrpcBuilder {
-	it.address = address
-	return it
-}
-
-func (it *GrpcBuilder) Port(port int) *GrpcBuilder {
-	it.port = port
-	return it
-}
-
 func (it *GrpcBuilder) Insecure() *GrpcBuilder {
-	it.credentialProvider.insecure = true
+	it.credentialProvider = &InsecureProvider{}
 	return it
 }
 
 func (it *GrpcBuilder) TLSFromRaw(caCert []byte, cert []byte, key []byte) *GrpcBuilder {
-	it.credentialProvider.insecure = false
-	it.credentialProvider.fromType = RAW
-	it.credentialProvider.raw = TLSRaw{
-		CaCert: caCert,
-		Cert:   cert,
-		Key:    key,
+	it.credentialProvider = &RawProvider{
+		raw: TLSRaw{
+			CaCert: caCert,
+			Cert:   cert,
+			Key:    key,
+		},
 	}
+
 	return it
 }
 
 func (it *GrpcBuilder) TLSFromFile(caCertPath string, certPath string, keyPath string) *GrpcBuilder {
-	it.credentialProvider.insecure = false
-	it.credentialProvider.fromType = FILE
-	it.credentialProvider.file = TLSFile{
-		CaCert: caCertPath,
-		Cert:   certPath,
-		Key:    keyPath,
+	it.credentialProvider = &FileProvider{
+		file: TLSFile{
+			CaCert: caCertPath,
+			Cert:   certPath,
+			Key:    keyPath,
+		},
 	}
 	return it
 }
 
 func (it *GrpcBuilder) Build() (*grpc.ClientConn, error) {
+	if it.credentialProvider == nil {
+		return nil, fmt.Errorf("an authorization method must be specified")
+	}
 	option, err := it.credentialProvider.getCredentialOption()
 	if err != nil {
 		return nil, err
