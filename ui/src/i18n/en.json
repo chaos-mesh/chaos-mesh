@@ -179,6 +179,7 @@
       "token": "Token",
       "tokenHelper": "Please fill the secret token",
       "tokenValidation": "The token is required",
+      "duplicateDesc": "Token name can't be duplicate",
       "deleteDesc": "The operation is irreversible"
     }
   },

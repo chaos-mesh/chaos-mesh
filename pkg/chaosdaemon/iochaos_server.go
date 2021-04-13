@@ -17,10 +17,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/shirou/gopsutil/process"
+
+	jrpc "github.com/ethereum/go-ethereum/rpc"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
@@ -74,26 +78,56 @@ func (s *DaemonServer) ApplyIoChaos(ctx context.Context, in *pb.ApplyIoChaosRequ
 		processBuilder = processBuilder.SetNS(pid, bpm.MountNS).SetNS(pid, bpm.PidNS)
 	}
 
-	cmd := processBuilder.Build()
-	cmd.Stdin = strings.NewReader(in.Actions)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	err = s.backgroundProcessManager.StartProcess(cmd)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	caller, receiver := bpm.NewBlockingBuffer(), bpm.NewBlockingBuffer()
+	defer caller.Close()
+	defer receiver.Close()
+	client, err := jrpc.DialIO(ctx, receiver, caller)
 	if err != nil {
 		return nil, err
 	}
 
+	cmd := processBuilder.Build()
+	cmd.Stdin = caller
+	cmd.Stdout = io.MultiWriter(receiver, os.Stdout)
+	cmd.Stderr = os.Stderr
+	err = s.backgroundProcessManager.StartProcess(cmd)
+	if err != nil {
+		log.Error(err, "bpm failed")
+		return nil, err
+	}
+	var ret string
+
 	procState, err := process.NewProcess(int32(cmd.Process.Pid))
 	if err != nil {
+		log.Error(err, "new process failed")
 		return nil, err
 	}
 	ct, err := procState.CreateTime()
 	if err != nil {
+		log.Error(err, "get create time failed")
 		if kerr := cmd.Process.Kill(); kerr != nil {
 			log.Error(kerr, "kill toda failed", "request", in)
 		}
 		return nil, err
+	}
+
+	log.Info("Waiting for toda to start")
+	var rpcError error
+	maxWaitTime := time.Millisecond * 2000
+	timeOut, cancel := context.WithTimeout(ctx, maxWaitTime)
+	defer cancel()
+	_ = client.CallContext(timeOut, &ret, "update", actions)
+	rpcError = client.CallContext(timeOut, &ret, "get_status", "ping")
+	if rpcError != nil || ret != "ok" {
+		log.Info("Starting toda takes too long or encounter an error")
+		caller.Close()
+		receiver.Close()
+		if kerr := s.killIoChaos(ctx, int64(cmd.Process.Pid), ct); kerr != nil {
+			log.Error(kerr, "kill toda failed", "request", in)
+		}
+		return nil, fmt.Errorf("Toda startup takes too long or an error occurs: %s", ret)
 	}
 
 	return &pb.ApplyIoChaosResponse{
