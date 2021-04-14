@@ -77,18 +77,20 @@ See the [contributing guide](./CONTRIBUTING.md) and [development guide](https://
 
 Please reach out for bugs, feature requests, and other issues via:
 
-- Following us on Twitter at [@chaos_mesh](https://twitter.com/chaos_mesh).
-- Joining the #project-chaos-mesh channel in the [CNCF Slack](https://cloud-native.slack.com/join/shared_invite/zt-lo88vmyc-9e3jSdUXf3dLP2yKql4A0Q#/) workspace.
+- Following us on Twitter [@chaos_mesh](https://twitter.com/chaos_mesh).
+
+- Joining the #project-chaos-mesh channel in the [CNCF Slack](https://slack.cncf.io/) workspace.
+
 - Filing an issue or opening a PR against this repository.
 
 ### Community meeting
 
-On the fourth Thursday of every month (unless otherwise specified), the Chaos Mesh community holds a monthly meeting by video conference to discuss the status of Chaos Mesh.
+On the fourth Friday of every month (unless otherwise specified), the Chaos Mesh community holds a monthly meeting by video conference to discuss the status of Chaos Mesh.
 
 **Quick links:**
 
+- [RSVP here](https://community.cncf.io/chaos-mesh-community/)
 - [Meeting notes](https://docs.google.com/document/d/1H8IfmhIJiJ1ltg-XLjqR_P_RaMHUGrl1CzvHnKM_9Sc/edit?usp=sharing)
-- [Zoom meeting link](https://zoom.us/j/91354182294)
 
 ### Community blog
 

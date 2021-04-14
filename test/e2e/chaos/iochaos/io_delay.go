@@ -15,7 +15,9 @@ package iochaos
 
 import (
 	"context"
+	"k8s.io/utils/pointer"
 	"net/http"
+	"strings"
 	"time"
 
 	. "github.com/onsi/ginkgo"
@@ -288,4 +290,57 @@ func TestcaseIODelayWithSpecifiedContainer(
 		return true, nil
 	})
 	framework.ExpectNoError(err, "fail to recover io chaos")
+}
+
+func TestcaseIODelayWithWrongSpec(
+	ns string,
+	cli client.Client,
+	c http.Client,
+	port uint16,
+) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	By("waiting on e2e helper ready")
+	err := util.WaitE2EHelperReady(c, port)
+	framework.ExpectNoError(err, "wait e2e helper ready error")
+	By("create IO delay chaos CRD objects")
+	ioChaos := &v1alpha1.IoChaos{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "io-chaos",
+			Namespace: ns,
+		},
+		Spec: v1alpha1.IoChaosSpec{
+			ContainerSelector: v1alpha1.ContainerSelector{
+				PodSelector: v1alpha1.PodSelector{
+					Selector: v1alpha1.PodSelectorSpec{
+						Namespaces:     []string{ns},
+						LabelSelectors: map[string]string{"app": "io"},
+					},
+					Mode:       v1alpha1.OnePodMode,
+				},
+			},
+			Action:     v1alpha1.IoLatency,
+			VolumePath: "/var/run/data/123",
+			Path:       "/var/run/data/*",
+			Delay:      "1s",
+			Percent:    100,
+			Duration:   pointer.StringPtr("9m"),
+		},
+	}
+	err = cli.Create(ctx, ioChaos)
+	framework.ExpectNoError(err, "create io chaos error")
+	err = wait.PollImmediate(5*time.Second, 30*time.Second, func() (bool, error) {
+		err := cli.Get(ctx, types.NamespacedName{Namespace: ioChaos.ObjectMeta.Namespace, Name: ioChaos.ObjectMeta.Name}, ioChaos)
+		if err != nil {
+			return false, err
+		}
+		errStr := ioChaos.Status.ChaosStatus.FailedMessage
+		klog.Infof("get chaos err: %s", errStr)
+		if strings.Contains(errStr, "Toda startup takes too long or an error occurs") {
+			return true, nil
+		}
+		return false, nil
+	})
+	framework.ExpectNoError(err, "A wrong chaos spec should raise an error")
 }

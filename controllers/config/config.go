@@ -16,7 +16,6 @@ package config
 import (
 	"fmt"
 	"os"
-	"regexp"
 	"strings"
 
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
@@ -63,9 +62,6 @@ func validate(config *config.ChaosControllerConfig) error {
 		if strings.TrimSpace(config.TargetNamespace) == "" {
 			return fmt.Errorf("no target namespace specified with namespace scoped mode")
 		}
-		if !IsAllowedNamespaces(config.TargetNamespace, config.AllowedNamespaces, config.IgnoredNamespaces) {
-			return fmt.Errorf("target namespace %s is not allowed with filter, please check config AllowedNamespaces and IgnoredNamespaces", config.TargetNamespace)
-		}
 
 		if config.TargetNamespace != config.WatcherConfig.TargetNamespace {
 			return fmt.Errorf("K8sConfigMapWatcher config TargertNamespace is not same with controller-manager TargetNamespace. k8s configmap watcher: %s, controller manager: %s", config.WatcherConfig.TargetNamespace, config.TargetNamespace)
@@ -73,25 +69,4 @@ func validate(config *config.ChaosControllerConfig) error {
 	}
 
 	return nil
-}
-
-// IsAllowedNamespaces returns whether namespace allows the execution of a chaos task
-func IsAllowedNamespaces(namespace string, allowedNamespaces, ignoredNamespaces string) bool {
-	if allowedNamespaces != "" {
-		matched, err := regexp.MatchString(allowedNamespaces, namespace)
-		if err != nil {
-			return false
-		}
-		return matched
-	}
-
-	if ignoredNamespaces != "" {
-		matched, err := regexp.MatchString(ignoredNamespaces, namespace)
-		if err != nil {
-			return false
-		}
-		return !matched
-	}
-
-	return true
 }

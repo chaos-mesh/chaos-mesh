@@ -49,15 +49,14 @@ type ChaosControllerConfig struct {
 	MetricsAddr string `envconfig:"METRICS_ADDR" default:":10080"`
 	// PprofAddr is the address the pprof endpoint binds to.
 	PprofAddr string `envconfig:"PPROF_ADDR" default:"0"`
-	// EnableLeaderElection is enable leader election for controller manager
+	// EnableLeaderElection enables leader election for controller manager
 	// Enabling this will ensure there is only one active controller manager
 	EnableLeaderElection bool `envconfig:"ENABLE_LEADER_ELECTION" default:"false"`
+	// EnableFilterNamespace will filter namespace with annotation. Only the pods/containers in namespace
+	// annotated with `chaos-mesh.org/inject=enabled` will be injected
+	EnableFilterNamespace bool `envconfig:"ENABLE_FILTER_NAMESPACE" default:"false"`
 	// CertsDir is the directory for storing certs key file and cert file
 	CertsDir string `envconfig:"CERTS_DIR" default:"/etc/webhook/certs"`
-	// AllowedNamespaces is a regular expression, and matching namespace will allow the chaos task to be performed
-	AllowedNamespaces string `envconfig:"ALLOWED_NAMESPACES" default:""`
-	// IgnoredNamespaces is a regular expression, and the chaos task will be ignored by a matching namespace
-	IgnoredNamespaces string `envconfig:"IGNORED_NAMESPACES" default:""`
 	// RPCTimeout is timeout of RPC between controllers and chaos-operator
 	RPCTimeout    time.Duration `envconfig:"RPC_TIMEOUT" default:"1m"`
 	WatcherConfig *watcher.Config

@@ -20,6 +20,7 @@ import (
 
 const implImport = `
 import (
+	"encoding/json"
 	"reflect"
 	"time"
 
@@ -87,6 +88,20 @@ func (in *{{.Type}}) GetChaos() *ChaosInstance {
 // GetStatus returns the status
 func (in *{{.Type}}) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
+}
+
+// GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
+func (in *{{.Type}}) GetSpecAndMetaString() (string, error) {
+	spec, err := json.Marshal(in.Spec)
+	if err != nil {
+		return "", err
+	}
+
+	meta := in.ObjectMeta.DeepCopy()
+	meta.SetResourceVersion("")
+	meta.SetGeneration(0)
+
+	return string(spec) + meta.String(), nil
 }
 
 // +kubebuilder:object:root=true

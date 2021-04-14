@@ -25,18 +25,11 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
 )
 
-type Option struct {
-	clusterScoped     bool
-	targetNamespace   string
-	allowedNamespaces string
-	ignoredNamespaces string
-}
-
 type SelectImpl struct {
 	c client.Client
 	r client.Reader
 
-	Option
+	pod.Option
 }
 
 type Container struct {
@@ -49,7 +42,7 @@ func (c *Container) Id() string {
 }
 
 func (impl *SelectImpl) Select(ctx context.Context, cs *v1alpha1.ContainerSelector) ([]*Container, error) {
-	pods, err := pod.SelectAndFilterPods(ctx, impl.c, impl.r, &cs.PodSelector, impl.clusterScoped, impl.targetNamespace, impl.allowedNamespaces, impl.ignoredNamespaces)
+	pods, err := pod.SelectAndFilterPods(ctx, impl.c, impl.r, &cs.PodSelector, impl.ClusterScoped, impl.TargetNamespace, impl.EnableFilterNamespace)
 	if err != nil {
 		return nil, err
 	}
@@ -86,11 +79,10 @@ func New(c client.Client, r client.Reader) *SelectImpl {
 	return &SelectImpl{
 		c,
 		r,
-		Option{
+		pod.Option{
 			config.ControllerCfg.ClusterScoped,
 			config.ControllerCfg.TargetNamespace,
-			config.ControllerCfg.AllowedNamespaces,
-			config.ControllerCfg.IgnoredNamespaces,
+			config.ControllerCfg.EnableFilterNamespace,
 		},
 	}
 }

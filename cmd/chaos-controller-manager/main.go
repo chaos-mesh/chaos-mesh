@@ -15,6 +15,7 @@ package main
 
 import (
 	"flag"
+	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
@@ -83,6 +84,7 @@ func main() {
 				provider.NewManager,
 				provider.NewReader,
 				provider.NewLogger,
+				provider.NewAuthCli,
 			),
 			controllers.Module,
 			selector.Module,
@@ -101,6 +103,7 @@ type RunParams struct {
 	Client client.Client
 	Reader client.Reader
 	Logger logr.Logger
+	AuthCli *authorizationv1.AuthorizationV1Client
 
 	Controllers []types.Controller `group:"controller"`
 	Objs        []types.Object     `group:"objs"`
@@ -111,6 +114,7 @@ func Run(params RunParams) error {
 	logger := params.Logger
 	client := params.Client
 	reader := params.Reader
+	authCli := params.AuthCli
 
 	var err error
 	for _, obj := range params.Objs {
@@ -182,6 +186,11 @@ func Run(params RunParams) error {
 			ControllerCfg: ccfg.ControllerCfg,
 			Metrics:       metricsCollector,
 		}},
+	)
+	hookServer.Register("/validate-auth", &webhook.Admission{
+		Handler: apiWebhook.NewAuthValidator(ccfg.ControllerCfg.SecurityMode, mgr.GetClient(), mgr.GetAPIReader(), authCli,
+			ccfg.ControllerCfg.ClusterScoped, ccfg.ControllerCfg.TargetNamespace, ccfg.ControllerCfg.EnableFilterNamespace),
+	},
 	)
 
 	setupLog.Info("Starting manager")

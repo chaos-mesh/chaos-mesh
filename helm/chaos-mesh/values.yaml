@@ -36,8 +36,7 @@ controllerManager:
   image: pingcap/chaos-mesh:latest
   imagePullPolicy: IfNotPresent
 
-  allowedNamespaces: ""
-  ignoredNamespaces: ""
+  enableFilterNamespace: false
 
   # targetNamespace only works with clusterScoped is false(namespace scoped mode).
   # It means namespace which will be injected chaos
@@ -134,6 +133,7 @@ chaosDaemon:
 
 dashboard:
   create: false
+  hostNetwork: false
 
   replicaCount: 1
 
@@ -349,6 +349,7 @@ webhook:
     - kernelchaos
     - stresschaos
     - awschaos
+    - gcpchaos
     - podiochaos
     - podnetworkchaos
     - dnschaos

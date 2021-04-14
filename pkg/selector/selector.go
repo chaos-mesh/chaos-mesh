@@ -36,6 +36,10 @@ type Target interface {
 }
 
 func (s *Selector) Select(ctx context.Context, spec interface{}) ([]Target, error) {
+	if spec == nil {
+		return []Target{}, nil
+	}
+
 	var targets []Target
 	impl, ok := s.selectorMap[reflect.TypeOf(spec)]
 	if ok {

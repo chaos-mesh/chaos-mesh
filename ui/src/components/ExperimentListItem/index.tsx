@@ -8,7 +8,7 @@ import DateTime from 'lib/luxon'
 import DeleteOutlinedIcon from '@material-ui/icons/DeleteOutlined'
 import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline'
 import { Experiment } from 'api/experiments.type'
-import ExperimentEventsPreview from 'components/ExperimentEventsPreview'
+import ExperimentStatus from 'components/ExperimentStatus'
 import { IntlShape } from 'react-intl'
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown'
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp'
@@ -16,7 +16,9 @@ import Paper from 'components-mui/Paper'
 import PauseCircleOutlineIcon from '@material-ui/icons/PauseCircleOutline'
 import PlayCircleOutlineIcon from '@material-ui/icons/PlayCircleOutline'
 import { RootState } from 'store'
+import Space from 'components-mui/Space'
 import T from 'components/T'
+import { truncate } from 'lib/utils'
 import { useHistory } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 
@@ -26,14 +28,6 @@ const useStyles = makeStyles((theme: Theme) =>
       '&:hover': {
         backgroundColor: theme.palette.action.hover,
         cursor: 'pointer',
-      },
-    },
-    marginRight: {
-      '& > *': {
-        marginRight: theme.spacing(3),
-        '&:last-child': {
-          marginRight: 0,
-        },
       },
     },
   })
@@ -118,7 +112,7 @@ const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
   const handleJumpTo = () => history.push(isArchive ? `/archives/${e.uid}` : `/experiments/${(e as Experiment).uid}`)
 
   const Actions = () => (
-    <Box display="flex" justifyContent="flex-end" alignItems="center" className={classes.marginRight}>
+    <Space display="flex" justifyContent="flex-end" alignItems="center">
       <Typography variant="body2">
         {T('experiments.createdAt')}{' '}
         {DateTime.fromISO(isArchive ? (e as Archive).start_time : (e as Experiment).created, {
@@ -173,33 +167,33 @@ const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
           </IconButton>
         </>
       )}
-    </Box>
+    </Space>
   )
 
   return (
     <Paper padding={false} className={classes.root} onClick={handleJumpTo}>
       <Box display="flex" justifyContent="space-between" alignItems="center" p={3}>
-        <Box display="flex" alignItems="center" className={classes.marginRight}>
+        <Space display="flex" alignItems="center">
           {!isArchive &&
             ((e as Experiment).status === 'Failed' ? (
               <ErrorOutlineIcon color="error" />
             ) : (
-              <ExperimentEventsPreview events={(e as Experiment).events} />
+              <ExperimentStatus status={(e as Experiment).status} />
             ))}
           <Typography variant="body1" component="div">
             {e.name}
             {isTabletScreen && (
-              <Typography variant="body2" color="textSecondary">
-                {e.uid}
+              <Typography variant="body2" color="textSecondary" title={e.uid}>
+                {truncate(e.uid)}
               </Typography>
             )}
           </Typography>
           {!isTabletScreen && (
-            <Typography variant="body2" color="textSecondary">
-              {e.uid}
+            <Typography variant="body2" color="textSecondary" title={e.uid}>
+              {truncate(e.uid)}
             </Typography>
           )}
-        </Box>
+        </Space>
         {isTabletScreen ? (
           <IconButton aria-label="Expand row" size="small" onClick={handleToggle}>
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}

@@ -116,3 +116,35 @@ type ContainerSelector struct {
 	// +optional
 	ContainerNames []string `json:"containerNames,omitempty"`
 }
+
+// ClusterScoped returns true if the selector selects Pods in the cluster
+func (s PodSelectorSpec) ClusterScoped() bool {
+	// in fact, this will never happened, will add namespace if it is empty, so len(s.Namespaces) can not be 0,
+	// but still add judgentment here for safe
+	// https://github.com/chaos-mesh/chaos-mesh/blob/478d00d01bb0f9fb08a1085428a7da8c8f9df4e8/api/v1alpha1/common_webhook.go#L22
+	if len(s.Namespaces) == 0 && len(s.Pods) == 0 {
+		return true
+	}
+
+	return false
+}
+
+// AffectedNamespaces returns all the namespaces which the selector effect
+func (s PodSelectorSpec) AffectedNamespaces() []string {
+	affectedNamespacesMap := make(map[string]struct{})
+	affectedNamespacesArray := make([]string, 0, 2)
+
+	for namespace := range s.Pods {
+		affectedNamespacesMap[namespace] = struct{}{}
+	}
+
+	for _, namespace := range s.Namespaces {
+		affectedNamespacesMap[namespace] = struct{}{}
+	}
+
+	for namespace := range affectedNamespacesMap {
+		affectedNamespacesArray = append(affectedNamespacesArray, namespace)
+	}
+
+	return affectedNamespacesArray
+}

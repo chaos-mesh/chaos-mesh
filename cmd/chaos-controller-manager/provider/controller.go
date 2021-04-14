@@ -17,6 +17,7 @@ import (
 	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
+	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -67,6 +68,19 @@ func NewManager(options *ctrl.Options) (ctrl.Manager, error) {
 	}
 
 	return ctrl.NewManager(cfg, *options)
+}
+
+func NewAuthCli() (*authorizationv1.AuthorizationV1Client, error) {
+	cfg := ctrl.GetConfigOrDie()
+
+	if ccfg.ControllerCfg.QPS > 0 {
+		cfg.QPS = ccfg.ControllerCfg.QPS
+	}
+	if ccfg.ControllerCfg.Burst > 0 {
+		cfg.Burst = ccfg.ControllerCfg.Burst
+	}
+
+	return authorizationv1.NewForConfig(cfg)
 }
 
 func NewClient(mgr ctrl.Manager) client.Client {

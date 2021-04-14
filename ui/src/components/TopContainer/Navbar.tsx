@@ -1,19 +1,17 @@
 import { AppBar, Box, Breadcrumbs, IconButton, Toolbar, Typography } from '@material-ui/core'
-import { Theme, makeStyles } from '@material-ui/core/styles'
 
-import AddIcon from '@material-ui/icons/Add'
-import { Link } from 'react-router-dom'
 import MenuIcon from '@material-ui/icons/Menu'
+import MenuOpenIcon from '@material-ui/icons/MenuOpen'
 import Namespace from './Namespace'
 import { NavigationBreadCrumbProps } from 'slices/navigation'
 import React from 'react'
-import SearchTrigger from 'components/SearchTrigger'
+import Search from 'components/Search'
 import Space from 'components-mui/Space'
 import T from 'components/T'
-import { useHistory } from 'react-router-dom'
+import { makeStyles } from '@material-ui/core/styles'
 
-const useStyles = makeStyles((theme: Theme) => ({
-  fill: {
+const useStyles = makeStyles((theme) => ({
+  toolbar: {
     margin: theme.spacing(6),
     marginBottom: 0,
   },
@@ -21,35 +19,21 @@ const useStyles = makeStyles((theme: Theme) => ({
     position: 'absolute',
     width: `calc(100% - ${theme.spacing(12)})`,
     margin: theme.spacing(6),
-    borderRadius: theme.shape.borderRadius,
   },
   menuButton: {
-    marginLeft: theme.spacing(0),
     [theme.breakpoints.down('sm')]: {
       display: 'none',
     },
   },
   nav: {
-    marginLeft: theme.spacing(3),
     color: 'inherit',
     [theme.breakpoints.down('xs')]: {
       display: 'none',
     },
   },
-  hoverLink: {
-    textDecoration: 'none',
-    '&:link': {
-      color: 'inherit',
-    },
-    '&:visited': {
-      color: 'inherit',
-    },
-    '&:hover': {
-      textDecoration: 'underline',
-      cursor: 'pointer',
-    },
-  },
-  tail: {
+  navRight: {
+    display: 'flex',
+    alignItems: 'center',
     [theme.breakpoints.down('xs')]: {
       width: '100%',
     },
@@ -61,19 +45,21 @@ function hasLocalBreadcrumb(b: string) {
 }
 
 interface HeaderProps {
+  openDrawer: boolean
   handleDrawerToggle: () => void
   breadcrumbs: NavigationBreadCrumbProps[]
 }
 
-const Navbar: React.FC<HeaderProps> = ({ handleDrawerToggle, breadcrumbs }) => {
+const Navbar: React.FC<HeaderProps> = ({ openDrawer, handleDrawerToggle, breadcrumbs }) => {
   const classes = useStyles()
-  const history = useHistory()
+
+  const b = breadcrumbs[0] // first breadcrumb
 
   return (
     <>
-      <Toolbar className={classes.fill} />
-      <AppBar className={classes.appBar}>
-        <Toolbar>
+      <Toolbar className={classes.toolbar} />
+      <AppBar className={classes.appBar} color="inherit" elevation={0}>
+        <Toolbar disableGutters>
           <IconButton
             className={classes.menuButton}
             color="inherit"
@@ -81,38 +67,19 @@ const Navbar: React.FC<HeaderProps> = ({ handleDrawerToggle, breadcrumbs }) => {
             aria-label="Toggle drawer"
             onClick={handleDrawerToggle}
           >
-            <MenuIcon />
+            {openDrawer ? <MenuOpenIcon /> : <MenuIcon />}
           </IconButton>
           <Box display="flex" justifyContent="space-between" alignItems="center" width="100%">
-            <Breadcrumbs className={classes.nav}>
-              {breadcrumbs.length > 0 &&
-                breadcrumbs.map((b) => {
-                  return b.path ? (
-                    <Link key={b.name} to={b.path} className={classes.hoverLink}>
-                      <Typography variant="h6" component="h2" color="inherit">
-                        {hasLocalBreadcrumb(b.name) ? T(`${b.name}.title`) : b.name}
-                      </Typography>
-                    </Link>
-                  ) : (
-                    <Typography key={b.name} variant="h6" component="h2" color="inherit">
-                      {hasLocalBreadcrumb(b.name) ? T(`${b.name === 'newExperiment' ? 'newE' : b.name}.title`) : b.name}
-                    </Typography>
-                  )
-                })}
-            </Breadcrumbs>
-            <Space className={classes.tail} display="flex" justifyContent="space-between" alignItems="center">
+            {b && (
+              <Breadcrumbs className={classes.nav}>
+                <Typography variant="h6" component="h2">
+                  {hasLocalBreadcrumb(b.name) ? T(`${b.name === 'newExperiment' ? 'newE' : b.name}.title`) : b.name}
+                </Typography>
+              </Breadcrumbs>
+            )}
+            <Space className={classes.navRight}>
+              <Search />
               <Namespace />
-              <Box>
-                <SearchTrigger />
-                <IconButton
-                  className="nav-new-experiment"
-                  color="inherit"
-                  aria-label="New Experiment"
-                  onClick={() => history.push('/newExperiment')}
-                >
-                  <AddIcon />
-                </IconButton>
-              </Box>
             </Space>
           </Box>
         </Toolbar>

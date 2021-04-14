@@ -37,8 +37,8 @@ type IoChaosSpec struct {
 	ContainerSelector `json:",inline"`
 
 	// Action defines the specific pod chaos action.
-	// Supported action: latency / fault / attrOverride
-	// +kubebuilder:validation:Enum=latency;fault;attrOverride
+	// Supported action: latency / fault / attrOverride / mistake
+	// +kubebuilder:validation:Enum=latency;fault;attrOverride;mistake
 	Action IoChaosType `json:"action"`
 
 	// Delay defines the value of I/O chaos action delay.
@@ -57,6 +57,10 @@ type IoChaosSpec struct {
 	// Attr defines the overrided attribution
 	// +optional
 	Attr *AttrOverrideSpec `json:"attr,omitempty"`
+
+	// Mistake defines what types of incorrectness are injected to IO operations
+	// +optional
+	Mistake *MistakeSpec `json:"mistake,omitempty"`
 
 	// Path defines the path of files for injecting I/O chaos action.
 	// +optional

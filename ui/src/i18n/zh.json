@@ -8,12 +8,11 @@
       "step2": "实验页面管理着所有的实验，在这里你可以对实验进行多种操作（暂停，归档，更新等）。",
       "step3": "事件页面展示了所有实验产生的事件。",
       "step4": "归档页面展示了所有已归档的实验。",
-      "step5": "你可以在这里开始你的第一个实验。～",
-      "step6": "或者点击这里随时创建新的实验。",
-      "step7": "搜索提供了多种语法来帮助你快速地定位实验或事件。你可以在创建实验后尝试它。",
-      "step8": "在这里通过选择不同的命名空间来浏览各自的实验，事件及归档。",
-      "step9": "预定义可以存储自定义的实验，方便未来快速执行。",
-      "step10": "🎉 恭喜你完成了所有的教程步骤！点击空白处即可退出。"
+      "step5": "你可以在这里开始你的第一个实验。",
+      "step6": "搜索提供了多种语法来帮助你快速地定位实验或事件。你可以在创建实验后尝试它。",
+      "step7": "在这里通过选择不同的命名空间来浏览各自的实验，事件及归档。",
+      "step8": "预定义可以存储自定义的实验，方便未来快速执行。",
+      "step9": "🎉 恭喜你完成了所有的教程步骤！点击空白处即可退出。"
     },
     "veteran": "已经是熟手了",
     "veteranDesc": "🧨 从一个新的实验开始！创建成功后，你可以返回仪表板以观察其状态。",
@@ -180,6 +179,7 @@
       "token": "令牌",
       "tokenHelper": "请输入令牌",
       "tokenValidation": "令牌不能为空",
+      "duplicateDesc": "令牌名称不能重复",
       "deleteDesc": "此操作不可逆"
     }
   },
@@ -229,29 +229,15 @@
   "search": {
     "placeholder": "搜索",
     "tip": {
-      "title": "以下搜索语法可以帮助快速地定位事件，实验以及归档：",
-      "namespace": "namespace:default xxx 将搜索命名空间为 default 的事件，实验以及归档",
-      "kind": "kind:NetworkChaos xxx 将搜索类型为 NetworkChaos 的事件，实验以及归档，您也可以输入 kind:net，因为搜索是模糊匹配的",
-      "pod": "pod:echoserver-774cdcc8b6-nrm65 将通过受影响的 Pod 搜索事件",
-      "ip": "ip:172.17.0.6 类似于 pod:xxx，通过 Pod IP 进行过滤",
-      "uuid": "uuid:2f79a4d6-1952-45b5-b2d5-ce715823c7a7 将通过实验 UUID 搜索事件，实验以及归档"
+      "title": "使用以下语法来快速定位事件，实验和归档：",
+      "namespace": "namespace:default xxx 将搜索命名空间为 default 的事件，实验和归档",
+      "kind": "kind:NetworkChaos xxx 将搜索类型为 NetworkChaos 的事件，实验和归档",
+      "pod": "pod:echoserver 将通过 Pod 搜索事件",
+      "ip": "ip:172.17.0.6 将通过 Pod IP 搜索事件"
     },
     "result": {
-      "category": {
-        "events": "事件",
-        "experiments": "实验",
-        "archives": "归档"
-      },
-      "keywords": {
-        "Experiment": "实验",
-        "UUID": "UUID",
-        "IP": "IP地址",
-        "Kind": "实验类型",
-        "Pod": "Pod",
-        "Namespace": "命名空间",
-        "Start Time": "开始时间"
-      },
-      "noResult": "无结果"
+      "acquiring": "获取中...",
+      "noResult": "没有结果"
     }
   },
   "k8s": {

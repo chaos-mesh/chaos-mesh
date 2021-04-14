@@ -61,19 +61,12 @@ func (in *AwsChaos) ValidateDelete() error {
 // Validate validates chaos object
 func (in *AwsChaos) Validate() error {
 	specField := field.NewPath("spec")
-	allErrs := in.ValidatePodMode(specField)
-	allErrs = append(allErrs, in.Spec.validateEbsVolume(specField.Child("volumeID"))...)
+	allErrs := in.Spec.validateEbsVolume(specField.Child("volumeID"))
 	allErrs = append(allErrs, in.Spec.validateDeviceName(specField.Child("deviceName"))...)
 
 	if len(allErrs) > 0 {
 		return fmt.Errorf(allErrs.ToAggregate().Error())
 	}
-	return nil
-}
-
-// ValidatePodMode validates the value with podmode
-func (in *AwsChaos) ValidatePodMode(spec *field.Path) field.ErrorList {
-	// Because aws chaos does not need a pod mode, so return nil here.
 	return nil
 }
 

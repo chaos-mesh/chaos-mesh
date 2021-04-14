@@ -58,6 +58,10 @@ type IoChaosAction struct {
 	// +optional
 	*AttrOverrideSpec `json:",inline"`
 
+	// MistakeSpec represents the mistake to inject
+	// +optional
+	*MistakeSpec `json:"mistake,omitempty"`
+
 	// Source represents the source of current rules
 	Source string `json:"source,omitempty"`
 }
@@ -74,6 +78,9 @@ const (
 
 	// IoAttrOverride represents replacing attribution for io operation
 	IoAttrOverride IoChaosType = "attrOverride"
+
+	// IoMistake represents injecting incorrect read or write for io operation
+	IoMistake IoChaosType = "mistake"
 )
 
 // Filter represents a filter of IoChaos action, which will define the
@@ -123,6 +130,35 @@ type AttrOverrideSpec struct {
 	//+optional
 	Rdev *uint32 `json:"rdev,omitempty"`
 }
+
+// MistakeSpec represents one type of mistake
+type MistakeSpec struct {
+	// Filling determines what is filled in the miskate data.
+	// +optional
+	// +kubebuilder:validation:Enum=zero;random
+	Filling FillingType `json:"filling,omitempty"`
+
+	// There will be [1, MaxOccurrences] segments of wrong data.
+	// +optional
+	// +kubebuilder:validation:Minimum=1
+	MaxOccurrences int64 `json:"maxOccurrences,omitempty"`
+
+	// Max length of each wrong data segment in bytes
+	// +optional
+	// +kubebuilder:validation:Minimum=1
+	MaxLength int64 `json:"maxLength,omitempty"`
+}
+
+// FillingType represents type of data is filled for incorrectness
+type FillingType string
+
+const (
+	// All zero
+	Zero FillingType = "zero"
+
+	// Random octets
+	Random FillingType = "random"
+)
 
 // Timespec represents a time
 type Timespec struct {
@@ -179,6 +215,9 @@ const (
 	SetLk       IoMethod = "setlk"
 	Bmap        IoMethod = "bmap"
 )
+
+// KindPodIoChaos is the kind for pod io chaos
+const KindPodIoChaos = "PodIoChaos"
 
 // +kubebuilder:object:root=true
 
