@@ -26,6 +26,7 @@ import (
 	wfcontrollers "github.com/chaos-mesh/chaos-mesh/pkg/workflow/controllers"
 )
 
+
 type WorkflowRepository interface {
 	ListWorkflowWithNamespace(ctx context.Context, namespace string) ([]Workflow, error)
 	ListWorkflowFromAllNamespace(ctx context.Context) ([]Workflow, error)
@@ -197,11 +198,6 @@ func (it *KubeWorkflowRepository) DeleteWorkflowByNamespacedName(ctx context.Con
 		return err
 	}
 	return it.kubeclient.Delete(ctx, &kubeWorkflow)
-}
-
-// func MutateWithKubeClient could spawn a new repo with the new kubeclient with another auth session.
-func (it *KubeWorkflowRepository) MutateWithKubeClient(anotherKubeclient client.Client) *KubeWorkflowRepository {
-	return NewKubeWorkflowRepository(anotherKubeclient)
 }
 
 func conversionWorkflow(kubeWorkflow v1alpha1.Workflow) Workflow {

@@ -19,6 +19,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
+	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
 	"github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 )
@@ -32,23 +33,22 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint := r.Group("/workflows")
 	endpoint.GET("", s.listWorkflows)
 	endpoint.POST("/new", s.createWorkflow)
-	endpoint.GET("/detail/:namespace/:name", s.getWorkflowDetail)
+	endpoint.GET("/:namespace/:name", s.getWorkflowDetail)
 	endpoint.DELETE("/:namespace/:name", s.deleteWorkflow)
 	endpoint.PUT("/:namespace/:name", s.updateWorkflow)
 }
 
 // Service defines a handler service for workflows.
 type Service struct {
-	repo core.WorkflowRepository `name:"workflowrepo"`
 	conf *config.ChaosDashboardConfig
 }
 
-func NewService(repo core.WorkflowRepository, conf *config.ChaosDashboardConfig) *Service {
-	return &Service{repo: repo, conf: conf}
+func NewService(conf *config.ChaosDashboardConfig) *Service {
+	return &Service{conf: conf}
 }
 
-func NewServiceWithKubeRepo(repo *core.KubeWorkflowRepository, conf *config.ChaosDashboardConfig) *Service {
-	return NewService(repo, conf)
+func NewServiceWithKubeRepo(conf *config.ChaosDashboardConfig) *Service {
+	return NewService(conf)
 }
 
 // @Summary List workflows from Kubernetes cluster.
@@ -64,15 +64,23 @@ func (it *Service) listWorkflows(c *gin.Context) {
 
 	namespace := c.Query("namespace")
 	result := make([]core.Workflow, 0)
+
+	kubeClient, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
+	if err != nil {
+		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		return
+	}
+	repo := core.NewKubeWorkflowRepository(kubeClient)
+
 	if namespace != "" {
-		workflowFromNs, err := it.repo.ListWorkflowWithNamespace(c.Request.Context(), namespace)
+		workflowFromNs, err := repo.ListWorkflowWithNamespace(c.Request.Context(), namespace)
 		if err != nil {
 			utils.SetErrorForGinCtx(c, err)
 			return
 		}
 		result = append(result, workflowFromNs...)
 	} else {
-		allWorkflow, err := it.repo.ListWorkflowFromAllNamespace(c.Request.Context())
+		allWorkflow, err := repo.ListWorkflowFromAllNamespace(c.Request.Context())
 		if err != nil {
 			utils.SetErrorForGinCtx(c, err)
 			return
@@ -96,7 +104,15 @@ func (it *Service) listWorkflows(c *gin.Context) {
 func (it *Service) getWorkflowDetail(c *gin.Context) {
 	namespace := c.Param("namespace")
 	name := c.Param("name")
-	result, err := it.repo.GetWorkflowByNamespacedName(c.Request.Context(), namespace, name)
+
+	kubeClient, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
+	if err != nil {
+		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		return
+	}
+	repo := core.NewKubeWorkflowRepository(kubeClient)
+
+	result, err := repo.GetWorkflowByNamespacedName(c.Request.Context(), namespace, name)
 	if err != nil {
 		utils.SetErrorForGinCtx(c, err)
 		return
@@ -132,7 +148,15 @@ func (it *Service) createWorkflow(c *gin.Context) {
 func (it *Service) deleteWorkflow(c *gin.Context) {
 	namespace := c.Param("namespace")
 	name := c.Param("name")
-	err := it.repo.DeleteWorkflowByNamespacedName(c.Request.Context(), namespace, name)
+
+	kubeClient, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
+	if err != nil {
+		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		return
+	}
+	repo := core.NewKubeWorkflowRepository(kubeClient)
+
+	err = repo.DeleteWorkflowByNamespacedName(c.Request.Context(), namespace, name)
 	if err != nil {
 		utils.SetErrorForGinCtx(c, err)
 		return
