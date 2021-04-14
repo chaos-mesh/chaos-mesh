@@ -32,6 +32,6 @@ CURRENT_CLUSTER=$(kubectl config get-contexts "${CURRENT_CONTEXT}" |awk 'NR==2'|
 kubectl config set-context fake-sa-test --cluster "${CURRENT_CLUSTER}" --user fake-sa
 
 kubectl --context fake-sa-test auth can-i create podchaos || exit 1
-kubectl --context fake-sa-test auth can-i get podchaos && exit 1 || exit 0
+kubectl --context fake-sa-test auth can-i get podchaos && exit 1
 
-k --context fake-sa-test create -f podchaos-example.yaml || exit 1
+kubectl --context fake-sa-test create -f podchaos-example.yaml || exit 1
