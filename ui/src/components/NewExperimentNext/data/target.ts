@@ -120,6 +120,33 @@ const dnsCommon: Spec = {
   },
 }
 
+const gcpCommon: Spec = {
+  secretName: {
+    field: 'text',
+    label: 'Secret name',
+    value: '',
+    helperText: 'Optional. The Kubernetes secret which includes GCP credentials',
+  },
+  project: {
+    field: 'text',
+    label: 'Project',
+    value: '',
+    helperText: 'The name of a GCP project',
+  },
+  zone: {
+    field: 'text',
+    label: 'Zone',
+    value: '',
+    helperText: 'The zone of a GCP project',
+  },
+  instance: {
+    field: 'text',
+    label: 'Instance',
+    value: '',
+    helperText: 'The name of a VM instance',
+  },
+}
+
 const data: Record<Kind, Target> = {
   // Pod Fault
   PodChaos: {
@@ -356,7 +383,7 @@ const data: Record<Kind, Target> = {
         },
         memory: {
           workers: 0,
-          size: "",
+          size: '',
           options: [],
         },
       },
@@ -422,7 +449,47 @@ const data: Record<Kind, Target> = {
       },
     ],
   },
+  GcpChaos: {
+    categories: [
+      {
+        name: 'Stop node',
+        key: 'node-stop',
+        spec: {
+          action: 'node-stop' as any,
+          ...gcpCommon,
+        },
+      },
+      {
+        name: 'Reset node',
+        key: 'node-reset',
+        spec: {
+          action: 'node-reset' as any,
+          ...gcpCommon,
+        },
+      },
+      {
+        name: 'Loss disk',
+        key: 'disk-loss',
+        spec: {
+          action: 'disk-loss' as any,
+          ...gcpCommon,
+          deviceName: {
+            field: 'text',
+            label: 'Device name',
+            value: '',
+            helperText: 'The device name for the volume',
+          },
+        },
+      },
+    ],
+  },
 }
+
+const GcpChaosCommonSchema = Yup.object({
+  project: Yup.string().required('The project is required'),
+  zone: Yup.string().required('The zone is required'),
+  instance: Yup.string().required('The instance is required'),
+})
 
 export const schema: Partial<Record<Kind, Record<string, Yup.ObjectSchema>>> = {
   PodChaos: {
@@ -503,6 +570,13 @@ export const schema: Partial<Record<Kind, Record<string, Yup.ObjectSchema>>> = {
     }),
     random: Yup.object({
       patterns: Yup.array().of(Yup.string()).required('The patterns is required'),
+    }),
+  },
+  GcpChaos: {
+    'node-stop': GcpChaosCommonSchema,
+    'node-reset': GcpChaosCommonSchema,
+    'detach-volume': GcpChaosCommonSchema.shape({
+      deviceName: Yup.string().required('The device name is required'),
     }),
   },
 }

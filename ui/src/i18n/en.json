@@ -83,6 +83,9 @@
       },
       "dns": {
         "title": "DNS Fault"
+      },
+      "gcp": {
+        "title": "GCP Fault"
       }
     },
     "schedule": {
