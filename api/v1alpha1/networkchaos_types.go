@@ -79,66 +79,18 @@ const (
 	Both Direction = "both"
 )
 
-// Target represents network partition and netem action target.
-type Target struct {
-	// TargetSelector defines the target selector
-	TargetSelector SelectorSpec `json:"selector" mapstructure:"selector"`
-
-	// TargetMode defines the target selector mode
-	// +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent;""
-	TargetMode PodMode `json:"mode" mapstructure:"mode"`
-
-	// TargetValue is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
-	// If `FixedPodMode`, provide an integer of pods to do chaos action.
-	// If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
-	// If `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
-	// +optional
-	TargetValue string `json:"value" mapstructure:"value"`
-}
-
-// GetSelector is a getter for Selector (for implementing SelectSpec)
-func (in *Target) GetSelector() SelectorSpec {
-	return in.TargetSelector
-}
-
-// GetMode is a getter for Mode (for implementing SelectSpec)
-func (in *Target) GetMode() PodMode {
-	return in.TargetMode
-}
-
-// GetValue is a getter for Value (for implementing SelectSpec)
-func (in *Target) GetValue() string {
-	return in.TargetValue
-}
-
 // NetworkChaosSpec defines the desired state of NetworkChaos
 type NetworkChaosSpec struct {
+	PodSelector `json:",inline"`
+
 	// Action defines the specific network chaos action.
 	// Supported action: partition, netem, delay, loss, duplicate, corrupt
 	// Default action: delay
 	// +kubebuilder:validation:Enum=netem;delay;loss;duplicate;corrupt;partition;bandwidth
 	Action NetworkChaosAction `json:"action"`
 
-	// Mode defines the mode to run chaos action.
-	// Supported mode: one / all / fixed / fixed-percent / random-max-percent
-	// +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
-	Mode PodMode `json:"mode"`
-
-	// Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
-	// If `FixedPodMode`, provide an integer of pods to do chaos action.
-	// If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
-	// If `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
-	// +optional
-	Value string `json:"value"`
-
-	// Selector is used to select pods that are used to inject chaos action.
-	Selector SelectorSpec `json:"selector"`
-
 	// Duration represents the duration of the chaos action
 	Duration *string `json:"duration,omitempty"`
-
-	// Scheduler defines some schedule rules to control the running time of the chaos experiment about network.
-	Scheduler *SchedulerSpec `json:"scheduler,omitempty"`
 
 	// TcParameter represents the traffic control definition
 	TcParameter `json:",inline"`
@@ -150,26 +102,11 @@ type NetworkChaosSpec struct {
 
 	// Target represents network target, this applies on netem and network partition action
 	// +optional
-	Target *Target `json:"target,omitempty"`
+	Target *PodSelector `json:"target,omitempty"`
 
 	// ExternalTargets represents network targets outside k8s
 	// +optional
 	ExternalTargets []string `json:"externalTargets,omitempty"`
-}
-
-// GetSelector is a getter for Selector (for implementing SelectSpec)
-func (in *NetworkChaosSpec) GetSelector() SelectorSpec {
-	return in.Selector
-}
-
-// GetMode is a getter for Mode (for implementing SelectSpec)
-func (in *NetworkChaosSpec) GetMode() PodMode {
-	return in.Mode
-}
-
-// GetValue is a getter for Value (for implementing SelectSpec)
-func (in *NetworkChaosSpec) GetValue() string {
-	return in.Value
 }
 
 // NetworkChaosStatus defines the observed state of NetworkChaos
@@ -234,4 +171,11 @@ type ReorderSpec struct {
 	Reorder     string `json:"reorder"`
 	Correlation string `json:"correlation"`
 	Gap         int    `json:"gap"`
+}
+
+func (obj *NetworkChaos) GetSelectorSpecs() map[string]interface{} {
+	return map[string]interface{}{
+		".":       &obj.Spec.PodSelector,
+		".Target": obj.Spec.Target,
+	}
 }

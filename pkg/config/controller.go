@@ -38,6 +38,11 @@ type ChaosControllerConfig struct {
 
 	TLSConfig
 
+	// The QPS config for kubernetes client
+	QPS float32 `envconfig:"QPS" default:"30"`
+	// The Burst config for kubernetes client
+	Burst int `envconfig:"BURST" default:"50"`
+
 	// BPFKIPort is the port which BFFKI grpc server listens on
 	BPFKIPort int `envconfig:"BPFKI_PORT" default:"50051"`
 	// MetricsAddr is the address the metric endpoint binds to
@@ -65,6 +70,9 @@ type ChaosControllerConfig struct {
 	// DNSServiceName is the name of DNS service, which is used for DNS chaos
 	DNSServiceName string `envconfig:"CHAOS_DNS_SERVICE_NAME" default:""`
 	DNSServicePort int    `envconfig:"CHAOS_DNS_SERVICE_PORT" default:""`
+
+	// SecurityMode is used for enable authority validation in admission webhook
+	SecurityMode bool `envconfig:"SECURITY_MODE" default:"true" json:"security_mode"`
 
 	// Namespace is the namespace which the controller manager run in
 	Namespace string `envconfig:"NAMESPACE" default:""`

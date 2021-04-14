@@ -30,7 +30,7 @@ var _ = Describe("timechaos_webhook", func() {
 			Expect(timechaos.Spec.ClockIds[0]).To(Equal("CLOCK_REALTIME"))
 		})
 	})
-	Context("ChaosValidator of timechaos", func() {
+	Context("webhook.Validator of timechaos", func() {
 		It("Validate", func() {
 
 			type TestCase struct {

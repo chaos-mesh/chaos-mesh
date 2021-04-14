@@ -30,7 +30,7 @@ var _ = Describe("stresschaos_webhook", func() {
 			Expect(stresschaos.Spec.Selector.Namespaces[0]).To(Equal(metav1.NamespaceDefault))
 		})
 	})
-	Context("ChaosValidator of stresschaos", func() {
+	Context("webhook.Validator of stresschaos", func() {
 		It("Validate StressChaos", func() {
 
 			type TestCase struct {
@@ -185,6 +185,20 @@ var _ = Describe("stresschaos_webhook", func() {
 			parent := field.NewPath("parent")
 			for _, tc := range tcs {
 				Expect(tc.stressor.Validate(parent)).To(HaveLen(tc.errs))
+			}
+		})
+
+		It("Parse MemoryStressor fields", func() {
+			vm := MemoryStressor{}
+			incorrectBytes := []string{"-1", "-1%", "101%", "x%", "-1Kb"}
+			for _, b := range incorrectBytes {
+				vm.Size = b
+				Expect(vm.tryParseBytes()).Should(HaveOccurred())
+			}
+			correctBytes := []string{"", "1%", "100KB", "100B"}
+			for _, b := range correctBytes {
+				vm.Size = b
+				Expect(vm.tryParseBytes()).ShouldNot(HaveOccurred())
 			}
 		})
 

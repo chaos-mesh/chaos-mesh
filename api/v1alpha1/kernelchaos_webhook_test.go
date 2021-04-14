@@ -29,7 +29,7 @@ var _ = Describe("kernelchaos_webhook", func() {
 			Expect(kernelchaos.Spec.Selector.Namespaces[0]).To(Equal(metav1.NamespaceDefault))
 		})
 	})
-	Context("ChaosValidator of kernelchaos", func() {
+	Context("webhook.Validator of kernelchaos", func() {
 		It("Validate", func() {
 
 			type TestCase struct {

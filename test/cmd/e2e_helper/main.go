@@ -23,6 +23,8 @@ import (
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/containerd/cgroups"
 )
 
 func main() {
@@ -66,6 +68,7 @@ func newServer(dataDir string) *server {
 	s.mux.HandleFunc("/network/recv", s.networkRecvTest)
 	s.mux.HandleFunc("/network/ping", s.networkPingTest)
 	s.mux.HandleFunc("/dns", s.dnsTest)
+	s.mux.HandleFunc("/stress", s.stressCondition)
 	return s
 }
 
@@ -215,4 +218,29 @@ func (s *server) networkRecvTest(w http.ResponseWriter, r *http.Request) {
 	for index := range s.recvBuf {
 		s.recvBuf[index] = 0
 	}
+}
+
+func (s *server) stressCondition(w http.ResponseWriter, r *http.Request) {
+	control, err := cgroups.Load(cgroups.V1, cgroups.PidPath(1))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	stats, err := control.Stat(cgroups.IgnoreNotExist)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	response, err := json.Marshal(map[string]uint64{
+		"cpuTime":     stats.CPU.Usage.Total,
+		"memoryUsage": stats.Memory.Usage.Usage,
+	})
+	if err != nil {
+		http.Error(w, "fail to marshal response", http.StatusInternalServerError)
+		return
+	}
+
+	w.Write(response)
 }

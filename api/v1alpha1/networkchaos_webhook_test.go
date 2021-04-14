@@ -45,7 +45,7 @@ var _ = Describe("networkchaos_webhook", func() {
 			Expect(networkchaos.Spec.Delay.Jitter).To(Equal(DefaultJitter))
 		})
 	})
-	Context("ChaosValidator of networkchaos", func() {
+	Context("webhook.Validator of networkchaos", func() {
 		It("Validate", func() {
 
 			type TestCase struct {

@@ -23,6 +23,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
+
 	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 
@@ -40,7 +42,6 @@ import (
 	daemonClient "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/client"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/portforward"
-	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 )
 
 type Color string
@@ -170,7 +171,7 @@ func InitClientSet() (*ClientSet, error) {
 }
 
 // GetPods returns pod list and corresponding chaos daemon
-func GetPods(ctx context.Context, chaosName string, status v1alpha1.ChaosStatus, selectorSpec v1alpha1.SelectorSpec, c client.Client) ([]v1.Pod, []v1.Pod, error) {
+func GetPods(ctx context.Context, chaosName string, status v1alpha1.ChaosStatus, selectorSpec selector.PodSelectorSpec, c client.Client) ([]v1.Pod, []v1.Pod, error) {
 	// get podName
 	failedMessage := status.FailedMessage
 	if failedMessage != "" {
@@ -186,7 +187,7 @@ func GetPods(ctx context.Context, chaosName string, status v1alpha1.ChaosStatus,
 		time.Sleep(waitTime)
 	}
 
-	pods, err := selector.SelectPods(ctx, c, c, selectorSpec, ctrlconfig.ControllerCfg.ClusterScoped, ctrlconfig.ControllerCfg.TargetNamespace, ctrlconfig.ControllerCfg.AllowedNamespaces, ctrlconfig.ControllerCfg.IgnoredNamespaces)
+	pods, err := pod.SelectPods(ctx, c, c, selectorSpec, ctrlconfig.ControllerCfg.ClusterScoped, ctrlconfig.ControllerCfg.TargetNamespace, ctrlconfig.ControllerCfg.AllowedNamespaces, ctrlconfig.ControllerCfg.IgnoredNamespaces)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "failed to SelectPods")
 	}
@@ -200,11 +201,11 @@ func GetPods(ctx context.Context, chaosName string, status v1alpha1.ChaosStatus,
 	// get chaos daemon
 	for _, pod := range pods {
 		nodeName := pod.Spec.NodeName
-		daemonSelector := v1alpha1.SelectorSpec{
+		daemonSelector := selector.PodSelectorSpec{
 			Nodes:          []string{nodeName},
 			LabelSelectors: map[string]string{"app.kubernetes.io/component": "chaos-daemon"},
 		}
-		daemons, err := selector.SelectPods(ctx, c, nil, daemonSelector, ctrlconfig.ControllerCfg.ClusterScoped, ctrlconfig.ControllerCfg.TargetNamespace, ctrlconfig.ControllerCfg.AllowedNamespaces, ctrlconfig.ControllerCfg.IgnoredNamespaces)
+		daemons, err := pod.SelectPods(ctx, c, nil, daemonSelector, ctrlconfig.ControllerCfg.ClusterScoped, ctrlconfig.ControllerCfg.TargetNamespace, ctrlconfig.ControllerCfg.AllowedNamespaces, ctrlconfig.ControllerCfg.IgnoredNamespaces)
 		if err != nil {
 			return nil, nil, errors.Wrap(err, fmt.Sprintf("failed to select daemon pod for pod %s", pod.GetName()))
 		}
@@ -379,10 +380,10 @@ func CheckFailedMessage(ctx context.Context, failedMessage string, daemons []v1.
 }
 
 func checkConnForCtrlAndDaemon(ctx context.Context, daemons []v1.Pod, c *ClientSet) error {
-	ctrlSelector := v1alpha1.SelectorSpec{
+	ctrlSelector := selector.PodSelectorSpec{
 		LabelSelectors: map[string]string{"app.kubernetes.io/component": "controller-manager"},
 	}
-	ctrlMgrs, err := selector.SelectPods(ctx, c.CtrlCli, c.CtrlCli, ctrlSelector, ctrlconfig.ControllerCfg.ClusterScoped, ctrlconfig.ControllerCfg.TargetNamespace, ctrlconfig.ControllerCfg.AllowedNamespaces, ctrlconfig.ControllerCfg.IgnoredNamespaces)
+	ctrlMgrs, err := pod.SelectPods(ctx, c.CtrlCli, c.CtrlCli, ctrlSelector, ctrlconfig.ControllerCfg.ClusterScoped, ctrlconfig.ControllerCfg.TargetNamespace, ctrlconfig.ControllerCfg.AllowedNamespaces, ctrlconfig.ControllerCfg.IgnoredNamespaces)
 	if err != nil {
 		return errors.Wrapf(err, "failed to select pod for controller-manager")
 	}

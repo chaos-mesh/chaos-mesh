@@ -163,33 +163,6 @@ func (in *PodNetworkChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
 }
 
-// GetChaos returns a chaos instance
-func (in *PodNetworkChaos) GetChaos() *ChaosInstance {
-	instance := &ChaosInstance{
-		Name:      in.Name,
-		Namespace: in.Namespace,
-		Kind:      "NetworkChaos",
-		StartTime: in.CreationTimestamp.Time,
-		Status:    string(in.GetStatus().Experiment.Phase),
-	}
-	if in.DeletionTimestamp != nil {
-		instance.EndTime = in.DeletionTimestamp.Time
-	}
-	return instance
-}
-
-// ListChaos returns a list of network chaos
-func (in *PodNetworkChaosList) ListChaos() []*ChaosInstance {
-	if len(in.Items) == 0 {
-		return nil
-	}
-	res := make([]*ChaosInstance, 0, len(in.Items))
-	for _, item := range in.Items {
-		res = append(res, item.GetChaos())
-	}
-	return res
-}
-
 func init() {
 	SchemeBuilder.Register(&PodNetworkChaos{}, &PodNetworkChaosList{})
 }

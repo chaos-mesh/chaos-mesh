@@ -48,7 +48,7 @@ func (in *NetworkChaos) Default() {
 	in.Spec.Selector.DefaultNamespace(in.GetNamespace())
 	// the target's namespace selector
 	if in.Spec.Target != nil {
-		in.Spec.Target.TargetSelector.DefaultNamespace(in.GetNamespace())
+		in.Spec.Target.Selector.DefaultNamespace(in.GetNamespace())
 	}
 
 	// set default direction
@@ -73,7 +73,7 @@ func (in *NetworkChaosSpec) DefaultDelay() {
 
 // +kubebuilder:webhook:verbs=create;update,path=/validate-chaos-mesh-org-v1alpha1-networkchaos,mutating=false,failurePolicy=fail,groups=chaos-mesh.org,resources=networkchaos,versions=v1alpha1,name=vnetworkchaos.kb.io
 
-var _ ChaosValidator = &NetworkChaos{}
+var _ webhook.Validator = &NetworkChaos{}
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
 func (in *NetworkChaos) ValidateCreate() error {
@@ -98,9 +98,7 @@ func (in *NetworkChaos) ValidateDelete() error {
 // Validate validates chaos object
 func (in *NetworkChaos) Validate() error {
 	specField := field.NewPath("spec")
-	allErrs := in.ValidateScheduler(specField)
-	allErrs = append(allErrs, in.ValidatePodMode(specField)...)
-	allErrs = append(allErrs, in.ValidateTargets(specField)...)
+	var allErrs field.ErrorList
 
 	if in.Spec.Delay != nil {
 		allErrs = append(allErrs, in.Spec.Delay.validateDelay(specField.Child("delay"))...)
@@ -118,52 +116,10 @@ func (in *NetworkChaos) Validate() error {
 		allErrs = append(allErrs, in.Spec.Bandwidth.validateBandwidth(specField.Child("bandwidth"))...)
 	}
 
-	if in.Spec.Target != nil {
-		allErrs = append(allErrs, in.Spec.Target.validateTarget(specField.Child("target"))...)
-	}
-
 	if len(allErrs) > 0 {
 		return fmt.Errorf(allErrs.ToAggregate().Error())
 	}
 	return nil
-}
-
-// ValidateScheduler validates the scheduler and duration
-func (in *NetworkChaos) ValidateScheduler(spec *field.Path) field.ErrorList {
-	return ValidateScheduler(in, spec)
-}
-
-// ValidatePodMode validates the value with podmode
-func (in *NetworkChaos) ValidatePodMode(spec *field.Path) field.ErrorList {
-	return ValidatePodMode(in.Spec.Value, in.Spec.Mode, spec.Child("value"))
-}
-
-// ValidateTargets validates externalTargets and Targets
-func (in *NetworkChaos) ValidateTargets(target *field.Path) field.ErrorList {
-	allErrs := field.ErrorList{}
-
-	if (in.Spec.Direction == From || in.Spec.Direction == Both) &&
-		in.Spec.ExternalTargets != nil && in.Spec.Action != PartitionAction {
-		allErrs = append(allErrs,
-			field.Invalid(target.Child("direction"), in.Spec.Direction,
-				fmt.Sprintf("external targets cannot be used with `from` and `both` direction in netem action yet")))
-	}
-
-	if (in.Spec.Direction == From || in.Spec.Direction == Both) && in.Spec.Target == nil {
-		if in.Spec.Action != PartitionAction {
-			allErrs = append(allErrs,
-				field.Invalid(target.Child("direction"), in.Spec.Direction,
-					fmt.Sprintf("`from` and `both` direction cannot be used when targets is empty in netem action")))
-		} else if in.Spec.ExternalTargets == nil {
-			allErrs = append(allErrs,
-				field.Invalid(target.Child("direction"), in.Spec.Direction,
-					fmt.Sprintf("`from` and `both` direction cannot be used when targets and external targets are both empty")))
-		}
-	}
-
-	// TODO: validate externalTargets are in ip or domain form
-
-	return allErrs
 }
 
 // validateDelay validates the delay
@@ -284,20 +240,6 @@ func (in *BandwidthSpec) validateBandwidth(bandwidth *field.Path) field.ErrorLis
 				fmt.Sprintf("parse rate field error:%s", err)))
 	}
 	return allErrs
-}
-
-// validateTarget validates the target
-func (in *Target) validateTarget(target *field.Path) field.ErrorList {
-	modes := []PodMode{OnePodMode, AllPodMode, FixedPodMode, FixedPercentPodMode, RandomMaxPercentPodMode}
-
-	for _, mode := range modes {
-		if in.TargetMode == mode {
-			return ValidatePodMode(in.TargetValue, in.TargetMode, target.Child("value"))
-		}
-	}
-
-	return field.ErrorList{field.Invalid(target.Child("mode"), in.TargetMode,
-		fmt.Sprintf("mode %s not supported", in.TargetMode))}
 }
 
 func ConvertUnitToBytes(nu string) (uint64, error) {

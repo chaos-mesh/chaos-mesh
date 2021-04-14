@@ -29,7 +29,7 @@ var _ = Describe("iochaos_webhook", func() {
 			Expect(iochaos.Spec.Selector.Namespaces[0]).To(Equal(metav1.NamespaceDefault))
 		})
 	})
-	Context("ChaosValidator of iochaos", func() {
+	Context("webhook.Validator of iochaos", func() {
 		It("Validate", func() {
 
 			type TestCase struct {

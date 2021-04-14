@@ -20,7 +20,7 @@ import (
 )
 
 var _ = Describe("awschaos_webhook", func() {
-	Context("ChaosValidator of awschaos", func() {
+	Context("webhook.Validator of awschaos", func() {
 		It("Validate", func() {
 
 			type TestCase struct {

@@ -13,7 +13,9 @@
 
 package v1alpha1
 
-import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+import (
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
 
 // +kubebuilder:object:root=true
 // +chaos-mesh:base
@@ -49,30 +51,13 @@ type Matcher struct {
 }
 
 type HTTPChaosSpec struct {
-	// Selector is used to select pods that are used to inject chaos action.
-	Selector SelectorSpec `json:"selector"`
-
-	// Scheduler defines some schedule rules to
-	// control the running time of the chaos experiment about pods.
-	Scheduler *SchedulerSpec `json:"scheduler,omitempty"`
+	PodSelector `json:",inline"`
 
 	// Action defines the specific pod chaos action.
 	// Supported action: delay | abort | mixed
 	// Default action: delay
 	// +kubebuilder:validation:Enum=delay;abort;mixed
 	Action HTTPChaosAction `json:"action"`
-
-	// Mode defines the mode to run chaos action.
-	// Supported mode: one / all / fixed / fixed-percent / random-max-percent
-	// +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
-	Mode PodMode `json:"mode"`
-
-	// Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
-	// If `FixedPodMode`, provide an integer of pods to do chaos action.
-	// If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
-	// IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
-	// +optional
-	Value string `json:"value"`
 
 	// Duration represents the duration of the chaos action.
 	// It is required when the action is `PodFailureAction`.
@@ -96,18 +81,12 @@ func (in *HTTPChaosSpec) GetHeaders() []Matcher {
 	return in.Headers
 }
 
-func (in *HTTPChaosSpec) GetMode() PodMode {
-	return in.Mode
-}
-
-func (in *HTTPChaosSpec) GetValue() string {
-	return in.Value
-}
-
-func (in *HTTPChaosSpec) GetSelector() SelectorSpec {
-	return in.Selector
-}
-
 type HTTPChaosStatus struct {
 	ChaosStatus `json:",inline"`
+}
+
+func (obj *HTTPChaos) GetSelectorSpecs() map[string]interface{} {
+	return map[string]interface{}{
+		".": obj.Spec.PodSelector,
+	}
 }

@@ -22,16 +22,17 @@ import (
 	"strings"
 	"time"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
+
+	"github.com/gin-gonic/gin"
+	v1 "k8s.io/api/core/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
 	"github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
-	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
-
-	"github.com/gin-gonic/gin"
-	v1 "k8s.io/api/core/v1"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 const (
@@ -162,7 +163,7 @@ func (s *Service) listPods(c *gin.Context) {
 		return
 	}
 	ctx := context.TODO()
-	filteredPods, err := selector.SelectPods(ctx, kubeCli, nil, exp.ParseSelector(), s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.AllowedNamespaces, s.conf.IgnoredNamespaces)
+	filteredPods, err := pod.SelectPods(ctx, kubeCli, nil, exp.ParseSelector(), s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.AllowedNamespaces, s.conf.IgnoredNamespaces)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
@@ -290,7 +291,7 @@ func (s *Service) getLabels(c *gin.Context) {
 	exp.NamespaceSelectors = nsList
 
 	ctx := context.TODO()
-	filteredPods, err := selector.SelectPods(ctx, kubeCli, nil, exp.ParseSelector(), s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.AllowedNamespaces, s.conf.IgnoredNamespaces)
+	filteredPods, err := pod.SelectPods(ctx, kubeCli, nil, exp.ParseSelector(), s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.AllowedNamespaces, s.conf.IgnoredNamespaces)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
@@ -342,7 +343,7 @@ func (s *Service) getAnnotations(c *gin.Context) {
 	exp.NamespaceSelectors = nsList
 
 	ctx := context.TODO()
-	filteredPods, err := selector.SelectPods(ctx, kubeCli, nil, exp.ParseSelector(), s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.AllowedNamespaces, s.conf.IgnoredNamespaces)
+	filteredPods, err := pod.SelectPods(ctx, kubeCli, nil, exp.ParseSelector(), s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.AllowedNamespaces, s.conf.IgnoredNamespaces)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))

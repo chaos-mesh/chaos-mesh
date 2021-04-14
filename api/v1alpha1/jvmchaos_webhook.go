@@ -39,7 +39,7 @@ func (in *JVMChaos) Default() {
 
 // +kubebuilder:webhook:verbs=create;update,path=/validate-chaos-mesh-org-v1alpha1-jvmchaos,mutating=false,failurePolicy=fail,groups=chaos-mesh.org,resources=jvmchaos,versions=v1alpha1,name=vjvmchaos.kb.io
 
-var _ ChaosValidator = &JVMChaos{}
+var _ webhook.Validator = &JVMChaos{}
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
 func (in *JVMChaos) ValidateCreate() error {
@@ -66,24 +66,12 @@ func (in *JVMChaos) ValidateDelete() error {
 // Validate validates chaos object
 func (in *JVMChaos) Validate() error {
 	specField := field.NewPath("spec")
-	allErrs := in.ValidateScheduler(specField)
-	allErrs = append(allErrs, in.ValidatePodMode(specField)...)
-	allErrs = append(allErrs, in.validateJvmChaos(specField)...)
+	allErrs := in.validateJvmChaos(specField)
 	if len(allErrs) > 0 {
 		return fmt.Errorf(allErrs.ToAggregate().Error())
 	}
 
 	return nil
-}
-
-// ValidateScheduler validates the scheduler and duration
-func (in *JVMChaos) ValidateScheduler(spec *field.Path) field.ErrorList {
-	return ValidateScheduler(in, spec)
-}
-
-// ValidatePodMode validates the value with podmode
-func (in *JVMChaos) ValidatePodMode(spec *field.Path) field.ErrorList {
-	return ValidatePodMode(in.Spec.Value, in.Spec.Mode, spec.Child("value"))
 }
 
 func (in *JVMChaos) validateJvmChaos(spec *field.Path) field.ErrorList {
