@@ -575,7 +575,7 @@ export const schema: Partial<Record<Kind, Record<string, Yup.ObjectSchema>>> = {
   GcpChaos: {
     'node-stop': GcpChaosCommonSchema,
     'node-reset': GcpChaosCommonSchema,
-    'detach-volume': GcpChaosCommonSchema.shape({
+    'disk-loss': GcpChaosCommonSchema.shape({
       deviceName: Yup.string().required('The device name is required'),
     }),
   },
