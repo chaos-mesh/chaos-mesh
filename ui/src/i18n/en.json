@@ -29,6 +29,7 @@
     "steps": {
       "basic": "Basic",
       "scope": "Scope",
+      "scopeDisabled": " (No need to fill in)",
       "schedule": "Schedule"
     },
     "loadFrom": "Load from",
@@ -83,6 +84,9 @@
       },
       "dns": {
         "title": "DNS Fault"
+      },
+      "aws": {
+        "title": "AWS Fault"
       }
     },
     "schedule": {
