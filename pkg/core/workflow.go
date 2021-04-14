@@ -26,7 +26,6 @@ import (
 	wfcontrollers "github.com/chaos-mesh/chaos-mesh/pkg/workflow/controllers"
 )
 
-
 type WorkflowRepository interface {
 	ListWorkflowWithNamespace(ctx context.Context, namespace string) ([]Workflow, error)
 	ListWorkflowFromAllNamespace(ctx context.Context) ([]Workflow, error)
