@@ -54,7 +54,7 @@ func NewBlockingBuffer() io.ReadWriteCloser {
 	}
 }
 
-func NewConcurrentBuffer(buf io.ReadWriteCloser) io.ReadWriteCloser {
+func NewConcurrentBuffer() io.ReadWriteCloser {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	buffer := &concurrentBuffer{
