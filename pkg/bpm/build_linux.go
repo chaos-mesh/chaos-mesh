@@ -59,6 +59,10 @@ func (b *ProcessBuilder) Build() *ManagedProcess {
 	command.SysProcAttr = &syscall.SysProcAttr{}
 	command.SysProcAttr.Pdeathsig = syscall.SIGTERM
 
+	if b.stdin != nil {
+		command.Stdin = b.stdin
+	}
+
 	return &ManagedProcess{
 		Cmd:        command,
 		Identifier: b.identifier,

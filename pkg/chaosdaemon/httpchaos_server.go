@@ -16,8 +16,8 @@ package chaosdaemon
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"os"
-	"strings"
 
 	"github.com/shirou/gopsutil/process"
 
@@ -27,17 +27,23 @@ import (
 )
 
 const (
-	tproxyBin = "/usr/local/bin/tproxy"
+	tproxyBin    = "/usr/local/bin/tproxy"
+	rustLog      = "RUST_LOG"
+	rustLogLevel = "trace"
 )
 
 func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaosRequest) (*pb.ApplyHttpChaosResponse, error) {
-	log.Info("applying io chaos", "Request", in)
+	log.Info("applying http chaos", "Request", in)
 
-	if in.Instance != 0 {
-		err := s.killHttpChaos(ctx, in.Instance, in.StartTime)
-		if err != nil {
+	if in.Instance == 0 {
+		if err := s.createHttpChaos(ctx, in); err != nil {
 			return nil, err
 		}
+	}
+
+	stdin := s.backgroundProcessManager.Stdio(int(in.Instance), in.StartTime).Stdin
+	if stdin == nil {
+		return nil, fmt.Errorf("fail to get stdin of process")
 	}
 
 	rules := []*v1alpha1.PodHttpChaosRule{}
@@ -48,55 +54,28 @@ func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 	}
 
 	log.Info("the length of actions", "length", len(rules))
-	if len(rules) == 0 {
-		return &pb.ApplyHttpChaosResponse{
-			Instance:  0,
-			StartTime: 0,
-		}, nil
+
+	httpChaosSpec := v1alpha1.PodHttpChaosSpec{
+		ProxyPorts: make([]int32, 0, len(in.ProxyPorts)),
+		Rules:      rules,
+	}
+	for _, port := range in.ProxyPorts {
+		httpChaosSpec.ProxyPorts = append(httpChaosSpec.ProxyPorts, int32(port))
 	}
 
-	pid, err := s.crClient.GetPidFromContainerID(ctx, in.ContainerId)
-	if err != nil {
-		log.Error(err, "error while getting PID")
-		return nil, err
-	}
-
-	// TODO: make this log level configurable
-	log.Info("executing", "cmd", tproxyBin)
-
-	processBuilder := bpm.DefaultProcessBuilder(tproxyBin).
-		EnableLocalMnt().
-		SetIdentifier(in.ContainerId)
-
-	if in.EnterNS {
-		processBuilder = processBuilder.SetNS(pid, bpm.MountNS).SetNS(pid, bpm.PidNS)
-	}
-
-	cmd := processBuilder.Build()
-	cmd.Stdin = strings.NewReader("")
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	err = s.backgroundProcessManager.StartProcess(cmd)
+	config, err := json.Marshal(&httpChaosSpec)
 	if err != nil {
 		return nil, err
 	}
 
-	procState, err := process.NewProcess(int32(cmd.Process.Pid))
+	_, err = stdin.Write([]byte(fmt.Sprintf("%s\n", string(config))))
 	if err != nil {
-		return nil, err
-	}
-	ct, err := procState.CreateTime()
-	if err != nil {
-		if kerr := cmd.Process.Kill(); kerr != nil {
-			log.Error(kerr, "kill toda failed", "request", in)
-		}
 		return nil, err
 	}
 
 	return &pb.ApplyHttpChaosResponse{
-		Instance:  int64(cmd.Process.Pid),
-		StartTime: ct,
+		Instance:  int64(in.Instance),
+		StartTime: in.StartTime,
 	}, nil
 }
 
@@ -108,5 +87,48 @@ func (s *DaemonServer) killHttpChaos(ctx context.Context, pid int64, startTime i
 		return err
 	}
 	log.Info("kill tproxy successfully")
+	return nil
+}
+
+func (s *DaemonServer) createHttpChaos(ctx context.Context, in *pb.ApplyHttpChaosRequest) error {
+	pid, err := s.crClient.GetPidFromContainerID(ctx, in.ContainerId)
+	if err != nil {
+		log.Error(err, "error while getting PID")
+		return err
+	}
+	processBuilder := bpm.DefaultProcessBuilder(tproxyBin).
+		SetIdentifier(in.ContainerId).
+		SetEnv(rustLog, rustLogLevel).
+		SetStdin(bpm.NewConcurrentBuffer())
+
+	if in.EnterNS {
+		processBuilder = processBuilder.SetNS(pid, bpm.MountNS).SetNS(pid, bpm.PidNS)
+	}
+
+	cmd := processBuilder.Build()
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	err = s.backgroundProcessManager.StartProcess(cmd)
+	if err != nil {
+		return err
+	}
+
+	procState, err := process.NewProcess(int32(cmd.Process.Pid))
+	if err != nil {
+		log.Error(err, "new process failed")
+		return err
+	}
+	ct, err := procState.CreateTime()
+	if err != nil {
+		log.Error(err, "get create time failed")
+		if kerr := cmd.Process.Kill(); kerr != nil {
+			log.Error(kerr, "kill tproxy failed", "request", in)
+		}
+		return err
+	}
+
+	in.Instance = int64(cmd.Process.Pid)
+	in.StartTime = ct
 	return nil
 }

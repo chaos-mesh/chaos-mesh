@@ -16,6 +16,7 @@ package bpm
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"sync"
@@ -65,10 +66,16 @@ type ProcessPair struct {
 	CreateTime int64
 }
 
+// Stdio contains stdin, stdout and stderr
+type Stdio struct {
+	Stdin io.ReadWriteCloser
+}
+
 // BackgroundProcessManager manages all background processes
 type BackgroundProcessManager struct {
 	deathSig    *sync.Map
 	identifiers *sync.Map
+	stdio       *sync.Map
 }
 
 // NewBackgroundProcessManager creates a background process manager
@@ -76,6 +83,7 @@ func NewBackgroundProcessManager() BackgroundProcessManager {
 	return BackgroundProcessManager{
 		deathSig:    &sync.Map{},
 		identifiers: &sync.Map{},
+		stdio:       &sync.Map{},
 	}
 }
 
@@ -114,6 +122,12 @@ func (m *BackgroundProcessManager) StartProcess(cmd *ManagedProcess) error {
 	channel, _ := m.deathSig.LoadOrStore(pair, make(chan bool, 1))
 	deathChannel := channel.(chan bool)
 
+	if cmd.Stdin != nil {
+		if stdin, ok := cmd.Stdin.(io.ReadWriteCloser); ok {
+			m.stdio.Store(pair, &Stdio{Stdin: stdin})
+		}
+	}
+
 	log := log.WithValues("pid", pid)
 
 	go func() {
@@ -134,6 +148,13 @@ func (m *BackgroundProcessManager) StartProcess(cmd *ManagedProcess) error {
 
 		deathChannel <- true
 		m.deathSig.Delete(pair)
+		if io, loaded := m.stdio.LoadAndDelete(pair); loaded {
+			if stdio, ok := io.(*Stdio); ok {
+				if err = stdio.Stdin.Close(); err != nil {
+					log.Error(err, "stdin fails to be closed")
+				}
+			}
+		}
 
 		if identifierLock != nil {
 			identifierLock.Unlock()
@@ -208,6 +229,46 @@ func (m *BackgroundProcessManager) KillBackgroundProcess(ctx context.Context, pi
 	return nil
 }
 
+func (m *BackgroundProcessManager) Stdio(pid int, startTime int64) *Stdio {
+	log := log.WithValues("pid", pid)
+
+	_, err := os.FindProcess(int(pid))
+	if err != nil {
+		log.Error(err, "unreachable path. `os.FindProcess` will never return an error on unix")
+		return nil
+	}
+
+	procState, err := process.NewProcess(int32(pid))
+	if err != nil {
+		// return successfully as the process has exited
+		return nil
+	}
+	ct, err := procState.CreateTime()
+	if err != nil {
+		log.Error(err, "fail to read create time")
+		// return successfully as the process has exited
+		return nil
+	}
+	if startTime != ct {
+		log.Info("process has exited", "startTime", ct, "expectedStartTime", startTime)
+		// return successfully as the process has exited
+		return nil
+	}
+
+	pair := ProcessPair{
+		Pid:        pid,
+		CreateTime: ct,
+	}
+
+	io, ok := m.stdio.Load(pair)
+	if !ok {
+		// stdio is not stored
+		return nil
+	}
+
+	return io.(*Stdio)
+}
+
 // DefaultProcessBuilder returns the default process builder
 func DefaultProcessBuilder(cmd string, args ...string) *ProcessBuilder {
 	return &ProcessBuilder{
@@ -232,6 +293,7 @@ type ProcessBuilder struct {
 	localMnt bool
 
 	identifier *string
+	stdin      io.ReadWriteCloser
 
 	ctx context.Context
 }
@@ -285,6 +347,13 @@ func (b *ProcessBuilder) EnableLocalMnt() *ProcessBuilder {
 // SetContext sets context for process
 func (b *ProcessBuilder) SetContext(ctx context.Context) *ProcessBuilder {
 	b.ctx = ctx
+
+	return b
+}
+
+// SetStdin sets stdin for process
+func (b *ProcessBuilder) SetStdin(stdin io.ReadWriteCloser) *ProcessBuilder {
+	b.stdin = stdin
 
 	return b
 }
