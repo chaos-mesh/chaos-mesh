@@ -17,6 +17,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 
 	authv1 "k8s.io/api/authorization/v1"
 	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
@@ -138,14 +139,18 @@ func (v *AuthValidator) InjectDecoder(d *admission.Decoder) error {
 	return nil
 }
 
-func (v *AuthValidator) auth(username string, groups []string, namespace string, resource string) (bool, error) {
+func (v *AuthValidator) auth(username string, groups []string, namespace string, chaosKind string) (bool, error) {
+	resourceName, err := v.resourceFor(chaosKind)
+	if err != nil {
+		return false, err
+	}
 	sar := authv1.SubjectAccessReview{
 		Spec: authv1.SubjectAccessReviewSpec{
 			ResourceAttributes: &authv1.ResourceAttributes{
 				Namespace: namespace,
 				Verb:      "create",
 				Group:     "chaos-mesh.org",
-				Resource:  resource,
+				Resource:  resourceName,
 			},
 			User:   username,
 			Groups: groups,
@@ -158,4 +163,9 @@ func (v *AuthValidator) auth(username string, groups []string, namespace string,
 	}
 
 	return response.Status.Allowed, nil
+}
+
+func (v *AuthValidator) resourceFor(name string) (string, error) {
+	// TODO: we should use RESTMapper, but it relates to many dependencies
+	return strings.ToLower(name), nil
 }
