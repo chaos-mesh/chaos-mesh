@@ -41,9 +41,10 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
 
   const state = useStoreSelector((state) => state)
   const { enableKubeSystemNS } = state.settings
-  const { labels, annotations } = state.experiments
+  const { labels, annotations, target } = state.experiments
   const pods = scope === 'scope' ? state.experiments.pods : state.experiments.networkTargetPods
   const getPods = scope === 'scope' ? getCommonPods : getNetworkTargetPods
+  const disabled = target.kind === 'AwsChaos'
   const dispatch = useStoreDispatch()
 
   const kvSeparator = ': '
@@ -124,6 +125,7 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
         error={
           getIn(errors, `${scope}.namespace_selectors`) && getIn(touched, `${scope}.namespace_selectors`) ? true : false
         }
+        disabled={disabled}
       />
 
       <AutocompleteMultipleField
@@ -132,6 +134,7 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
         label={T('k8s.labelSelectors')}
         helperText={T('common.multiOptions')}
         options={labelKVs}
+        disabled={disabled}
       />
 
       <AdvancedOptions>
@@ -141,6 +144,7 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
           label={T('k8s.annotationsSelectors')}
           helperText={T('common.multiOptions')}
           options={annotationKVs}
+          disabled={disabled}
         />
 
         <SelectField
@@ -148,6 +152,7 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
           name={`${scope}.mode`}
           label={T('newE.scope.mode')}
           helperText={T('newE.scope.modeHelper')}
+          disabled={disabled}
         >
           <MenuItem value="all">All</MenuItem>
           {modes.map((option) => (
@@ -168,6 +173,7 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
                 <InputAdornment position="end">%</InputAdornment>
               ),
             }}
+            disabled={disabled}
           />
         )}
 
@@ -178,6 +184,7 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
           helperText={T('common.multiOptions')}
           multiple
           onChange={handleChangeIncludeAll(`${scope}.phase_selectors`)}
+          disabled={disabled}
         >
           {phases.map((option: string) => (
             <MenuItem key={option} value={option}>
