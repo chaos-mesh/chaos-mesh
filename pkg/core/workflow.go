@@ -315,9 +315,9 @@ func conversionWorkflowNode(kubeWorkflowNode v1alpha1.WorkflowNode) (Node, error
 	}
 
 	if kubeWorkflowNode.Spec.Type == v1alpha1.TypeSerial {
-		result.Serial.Tasks = append(kubeWorkflowNode.Spec.Tasks)
+		result.Serial.Tasks = kubeWorkflowNode.Spec.Tasks
 	} else if kubeWorkflowNode.Spec.Type == v1alpha1.TypeParallel {
-		result.Parallel.Tasks = append(kubeWorkflowNode.Spec.Tasks)
+		result.Parallel.Tasks = kubeWorkflowNode.Spec.Tasks
 	}
 
 	// TODO: refactor this
