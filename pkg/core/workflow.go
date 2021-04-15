@@ -41,9 +41,8 @@ type Workflow struct {
 }
 
 type WorkflowDetail struct {
-	Workflow     `json:",inline"`
-	Topology     Topology `json:"topology"`
-	CurrentNodes []Node   `json:"current_nodes"`
+	Workflow `json:",inline"`
+	Topology Topology `json:"topology"`
 }
 
 // Topology describes the process of a workflow.
@@ -184,7 +183,7 @@ func (it *KubeWorkflowRepository) GetWorkflowByNamespacedName(ctx context.Contex
 	}
 
 	// TODO: provide the running kube nodes
-	return conversionWorkflowDetail(kubeWorkflow, workflowNodes.Items, nil)
+	return conversionWorkflowDetail(kubeWorkflow, workflowNodes.Items)
 }
 
 func (it *KubeWorkflowRepository) DeleteWorkflowByNamespacedName(ctx context.Context, namespace, name string) error {
@@ -208,9 +207,8 @@ func conversionWorkflow(kubeWorkflow v1alpha1.Workflow) Workflow {
 	return result
 }
 
-func conversionWorkflowDetail(kubeWorkflow v1alpha1.Workflow, kubeNodes []v1alpha1.WorkflowNode, runningKubeNodes []v1alpha1.WorkflowNode) (WorkflowDetail, error) {
+func conversionWorkflowDetail(kubeWorkflow v1alpha1.Workflow, kubeNodes []v1alpha1.WorkflowNode) (WorkflowDetail, error) {
 	nodes := make([]Node, 0)
-	runningNodes := make([]Node, 0)
 
 	for _, item := range kubeNodes {
 		node, err := conversionWorkflowNode(item)
@@ -220,20 +218,11 @@ func conversionWorkflowDetail(kubeWorkflow v1alpha1.Workflow, kubeNodes []v1alph
 		nodes = append(nodes, node)
 	}
 
-	for _, item := range runningKubeNodes {
-		node, err := conversionWorkflowNode(item)
-		if err != nil {
-			return WorkflowDetail{}, nil
-		}
-		runningNodes = append(runningNodes, node)
-	}
-
 	result := WorkflowDetail{
 		Workflow: conversionWorkflow(kubeWorkflow),
 		Topology: Topology{
 			Nodes: nodes,
 		},
-		CurrentNodes: runningNodes,
 	}
 	return result, nil
 }

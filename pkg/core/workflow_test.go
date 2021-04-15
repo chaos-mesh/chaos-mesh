@@ -66,9 +66,8 @@ func Test_conversionWorkflow(t *testing.T) {
 
 func Test_conversionWorkflowDetail(t *testing.T) {
 	type args struct {
-		kubeWorkflow     v1alpha1.Workflow
-		kubeNodes        []v1alpha1.WorkflowNode
-		runningKubeNodes []v1alpha1.WorkflowNode
+		kubeWorkflow v1alpha1.Workflow
+		kubeNodes    []v1alpha1.WorkflowNode
 	}
 	tests := []struct {
 		name    string
@@ -91,8 +90,7 @@ func Test_conversionWorkflowDetail(t *testing.T) {
 					},
 					Status: v1alpha1.WorkflowStatus{},
 				},
-				kubeNodes:        nil,
-				runningKubeNodes: nil,
+				kubeNodes: nil,
 			},
 			want: WorkflowDetail{
 				Workflow: Workflow{
@@ -103,14 +101,13 @@ func Test_conversionWorkflowDetail(t *testing.T) {
 				Topology: Topology{
 					Nodes: []Node{},
 				},
-				CurrentNodes: []Node{},
 			},
 		},
 		// TODO: Add test cases.
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := conversionWorkflowDetail(tt.args.kubeWorkflow, tt.args.kubeNodes, tt.args.runningKubeNodes)
+			got, err := conversionWorkflowDetail(tt.args.kubeWorkflow, tt.args.kubeNodes)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("conversionWorkflowDetail() error = %v, wantErr %v", err, tt.wantErr)
 				return
