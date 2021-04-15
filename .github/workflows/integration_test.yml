@@ -5,6 +5,7 @@ on:
       - master
   pull_request:
     branches:
+      - nirvana
       - master
 
 jobs:
