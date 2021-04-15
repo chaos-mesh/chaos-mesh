@@ -10,5 +10,3 @@ spec:
       "app.kubernetes.io/component": "tikv"
   timeOffset: "-10m100ns"
   duration: "30s"
-  scheduler:
-    cron: "@every 1m"

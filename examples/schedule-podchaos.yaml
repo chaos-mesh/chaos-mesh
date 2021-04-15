@@ -1,0 +1,13 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: Schedule
+metadata:
+  name: schedule-pod-kill-example
+spec:
+  schedule: "@every 5s"
+  type: "PodChaos"
+  pod_chaos:
+    action: "pod-kill"
+    mode: one
+    selector:
+      labelSelectors:
+        "app.kubernetes.io/component": "tikv"

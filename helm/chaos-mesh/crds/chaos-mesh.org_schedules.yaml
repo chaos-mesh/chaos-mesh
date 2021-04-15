@@ -6,20 +6,19 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.2.5
   creationTimestamp: null
-  name: workflownodes.chaos-mesh.org
+  name: schedules.chaos-mesh.org
 spec:
   group: chaos-mesh.org
   names:
-    kind: WorkflowNode
-    listKind: WorkflowNodeList
-    plural: workflownodes
-    shortNames:
-    - wfn
-    singular: workflownode
+    kind: Schedule
+    listKind: ScheduleList
+    plural: schedules
+    singular: schedule
   preserveUnknownFields: false
   scope: Namespaced
   validation:
     openAPIV3Schema:
+      description: Schedule is the cronly schedule object
       properties:
         apiVersion:
           description: 'APIVersion defines the versioned schema of this representation
@@ -34,8 +33,12 @@ spec:
         metadata:
           type: object
         spec:
-          description: Spec defines the behavior of a node of workflow
+          description: ScheduleSpec is the specification of a schedule object
           properties:
+            ConcurrencyPolicy:
+              type: string
+            HistoryLimit:
+              type: integer
             aws_chaos:
               description: AwsChaosSpec is the content of the specification for an
                 AwsChaos
@@ -78,9 +81,6 @@ spec:
               - awsRegion
               - ec2Instance
               type: object
-            deadline:
-              format: date-time
-              type: string
             dns_chaos:
               description: DNSChaosSpec defines the desired state of DNSChaos
               properties:
@@ -1560,8 +1560,7 @@ spec:
               - mode
               - selector
               type: object
-            start_time:
-              format: date-time
+            schedule:
               type: string
             stress_chaos:
               description: StressChaosSpec defines the desired state of StressChaos
@@ -1744,12 +1743,6 @@ spec:
               - mode
               - selector
               type: object
-            tasks:
-              items:
-                type: string
-              type: array
-            template_name:
-              type: string
             time_chaos:
               description: TimeChaosSpec defines the desired state of TimeChaos
               properties:
@@ -1891,81 +1884,61 @@ spec:
               - timeOffset
               type: object
             type:
-              type: string
-            workflow_name:
+              description: 'TODO: use a custom type, as `TemplateType` contains other
+                possible values'
               type: string
           required:
-          - start_time
-          - template_name
+          - schedule
           - type
-          - workflow_name
           type: object
         status:
-          description: Most recently observed status of the workflow node
+          description: ScheduleStatus is the status of a schedule object
           properties:
-            active_children:
-              description: ActiveChildren means the created children node
+            active:
               items:
-                description: LocalObjectReference contains enough information to let
-                  you locate the referenced object inside the same namespace.
+                description: ObjectReference contains enough information to let you
+                  inspect or modify the referred object.
                 properties:
+                  apiVersion:
+                    description: API version of the referent.
+                    type: string
+                  fieldPath:
+                    description: 'If referring to a piece of an object instead of
+                      an entire object, this string should contain a valid JSON/Go
+                      field access statement, such as desiredState.manifest.containers[2].
+                      For example, if the object reference is to a container within
+                      a pod, this would take on a value like: "spec.containers{name}"
+                      (where "name" refers to the name of the container that triggered
+                      the event) or if no container name is specified "spec.containers[2]"
+                      (container with index 2 in this pod). This syntax is chosen
+                      only to have some well-defined way of referencing a part of
+                      an object. TODO: this design is not final and this field is
+                      subject to change in the future.'
+                    type: string
+                  kind:
+                    description: 'Kind of the referent. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+                    type: string
                   name:
-                    description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                      TODO: Add other useful fields. apiVersion, kind, uid?'
+                    description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names'
+                    type: string
+                  namespace:
+                    description: 'Namespace of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/'
+                    type: string
+                  resourceVersion:
+                    description: 'Specific resourceVersion to which this reference
+                      is made, if any. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#concurrency-control-and-consistency'
+                    type: string
+                  uid:
+                    description: 'UID of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#uids'
                     type: string
                 type: object
               type: array
-            chaos_resource:
-              description: ChaosResource refs to the real chaos CR object.
-              properties:
-                apiGroup:
-                  description: APIGroup is the group for the resource being referenced.
-                    If APIGroup is not specified, the specified Kind must be in the
-                    core API group. For any other third-party types, APIGroup is required.
-                  type: string
-                kind:
-                  description: Kind is the type of resource being referenced
-                  type: string
-                name:
-                  description: Name is the name of resource being referenced
-                  type: string
-              required:
-              - kind
-              - name
-              type: object
-            conditions:
-              description: Represents the latest available observations of a worklfow
-                node's current state.
-              items:
-                properties:
-                  reason:
-                    type: string
-                  status:
-                    type: string
-                  type:
-                    type: string
-                required:
-                - reason
-                - status
-                - type
-                type: object
-              type: array
-            expected_children_num:
-              description: ExpectedChildrenNum means the expected children to execute
-              type: integer
-            finished_children:
-              description: Children is necessary for representing the order when replicated
-                child template references by parent template.
-              items:
-                description: LocalObjectReference contains enough information to let
-                  you locate the referenced object inside the same namespace.
-                properties:
-                  name:
-                    description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                      TODO: Add other useful fields. apiVersion, kind, uid?'
-                    type: string
-                type: object
-              type: array
+            time:
+              format: date-time
+              type: string
+          required:
+          - active
+          - time
           type: object
       required:
       - spec

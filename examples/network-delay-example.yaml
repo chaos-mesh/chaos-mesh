@@ -14,5 +14,3 @@ spec:
     correlation: "25"
     jitter: "90ms"
   duration: "10s"
-  scheduler:
-    cron: "@every 15s"

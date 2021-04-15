@@ -13,5 +13,3 @@ spec:
     loss: "25"
     correlation: "25"
   duration: "10s"
-  scheduler:
-    cron: "@every 15s"

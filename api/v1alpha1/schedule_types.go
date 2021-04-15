@@ -13,7 +13,12 @@
 
 package v1alpha1
 
-import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+import (
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
+
+// +kubebuilder:object:root=true
 
 // Schedule is the cronly schedule object
 type Schedule struct {
@@ -21,15 +26,43 @@ type Schedule struct {
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	Spec ScheduleSpec `json:"spec"`
+
+	// +optional
 	Status ScheduleStatus `json:"status"`
 }
 
 // ScheduleSpec is the specification of a schedule object
 type ScheduleSpec struct {
 	Schedule string `json:"schedule"`
+
+	// +optional
+	ConcurrencyPolicy string `json:"ConcurrencyPolicy,omitempty"`
+
+	// +optional
+	HistoryLimit int `json:"HistoryLimit,omitempty"`
+
+	// TODO: use a custom type, as `TemplateType` contains other possible values
+	Type     TemplateType `json:"type"`
+	// TODO: support Workflow
+	EmbedChaos `json:",inline"`
 }
 
 // ScheduleStatus is the status of a schedule object
 type ScheduleStatus struct {
+	Active []corev1.ObjectReference `json:"active"`
+	LastScheduleTime metav1.Time `json:"time"`
+}
 
+// +kubebuilder:object:root=true
+
+// ScheduleList contains a list of Schedule
+type ScheduleList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []Schedule`json:"items"`
+}
+
+func init() {
+	SchemeBuilder.Register(&Schedule{})
+	SchemeBuilder.Register(&ScheduleList{})
 }
