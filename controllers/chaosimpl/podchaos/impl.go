@@ -29,8 +29,8 @@ import (
 type Impl struct {
 	fx.In
 
-	PodKill       *podkill.Impl `action:"pod-kill"`
-	PodFailure    *podfailure.Impl `action:"pod-failure"`
+	PodKill       *podkill.Impl       `action:"pod-kill"`
+	PodFailure    *podfailure.Impl    `action:"pod-failure"`
 	ContainerKill *containerkill.Impl `action:"container-kill"`
 }
 
@@ -39,7 +39,7 @@ func NewImpl(impl Impl) *common.ChaosImplPair {
 	return &common.ChaosImplPair{
 		Name:   "podchaos",
 		Object: &v1alpha1.PodChaos{},
-		Impl: &delegate,
+		Impl:   &delegate,
 	}
 }
 

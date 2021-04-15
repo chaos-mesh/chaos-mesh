@@ -15,8 +15,9 @@ package v1alpha1
 
 // this file tests the coupling with all kinds map and each TemplateType
 import (
-	. "github.com/onsi/gomega"
 	"testing"
+
+	. "github.com/onsi/gomega"
 )
 
 func TestChaosKindMapShouldContainsAwsChaos(t *testing.T) {
@@ -107,4 +108,3 @@ func TestChaosKindMapShouldContainsTimeChaos(t *testing.T) {
 	_, ok := all.kinds[string(requiredType)]
 	g.Expect(ok).To(Equal(true), "all kinds map should contains this type", requiredType)
 }
-

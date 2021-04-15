@@ -34,11 +34,11 @@ func NewController(mgr ctrl.Manager, client client.Client, reader client.Reader,
 			For(obj.Object).
 			Named(obj.Name + "-finalizers").
 			Complete(&Reconciler{
-				Object: obj.Object,
-				Client: client,
-				Reader: reader,
+				Object:   obj.Object,
+				Client:   client,
+				Reader:   reader,
 				Recorder: mgr.GetEventRecorderFor("finalizer"),
-				Log:    logger.WithName("finalizers"),
+				Log:      logger.WithName("finalizers"),
 			})
 		if err != nil {
 			return "", err

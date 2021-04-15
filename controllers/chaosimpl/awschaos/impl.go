@@ -30,8 +30,8 @@ type Impl struct {
 	fx.In
 
 	DetachVolume *detachvolume.Impl `action:"detach-volume"`
-	Ec2Restart   *ec2restart.Impl `action:"ec2-restart"`
-	Ec2Stop      *ec2stop.Impl `action:"ec2-stop"`
+	Ec2Restart   *ec2restart.Impl   `action:"ec2-restart"`
+	Ec2Stop      *ec2stop.Impl      `action:"ec2-stop"`
 }
 
 func NewImpl(impl Impl) *common.ChaosImplPair {
@@ -39,7 +39,7 @@ func NewImpl(impl Impl) *common.ChaosImplPair {
 	return &common.ChaosImplPair{
 		Name:   "awschaos",
 		Object: &v1alpha1.AwsChaos{},
-		Impl: &delegate,
+		Impl:   &delegate,
 	}
 }
 

@@ -15,10 +15,12 @@ package action
 
 import (
 	"context"
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/pkg/errors"
 	"reflect"
 	"strings"
+
+	"github.com/pkg/errors"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
 type Delegate struct {
@@ -33,7 +35,7 @@ func (i *Delegate) callAccordingToAction(action, methodName string, defaultPhase
 	for _, arg := range args {
 		reflectArgs = append(reflectArgs, reflect.ValueOf(arg))
 	}
-	for i := 0 ;i < implType.NumField();i++ {
+	for i := 0; i < implType.NumField(); i++ {
 		field := implType.Field(i)
 
 		actions := strings.Split(field.Tag.Get("action"), ",")

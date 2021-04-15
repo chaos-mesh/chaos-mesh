@@ -15,8 +15,9 @@ package common
 
 import (
 	"context"
-	"k8s.io/client-go/tools/record"
 	"reflect"
+
+	"k8s.io/client-go/tools/record"
 
 	"github.com/go-logr/logr"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"

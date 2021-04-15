@@ -15,8 +15,9 @@ package desiredphase
 
 import (
 	"context"
-	"k8s.io/client-go/tools/record"
 	"time"
+
+	"k8s.io/client-go/tools/record"
 
 	"github.com/go-logr/logr"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -38,7 +39,7 @@ type Reconciler struct {
 	client.Reader
 
 	Recorder record.EventRecorder
-	Log logr.Logger
+	Log      logr.Logger
 }
 
 // Reconcile the common chaos
@@ -78,7 +79,7 @@ func (ctx *reconcileContext) GetCreationTimestamp() metav1.Time {
 func (ctx *reconcileContext) CalcDesiredPhase() v1alpha1.DesiredPhase {
 	// Consider the finalizers
 	if ctx.obj.IsDeleted() {
-		ctx.Recorder.Eventf(ctx.obj,"Normal", "Deleted", "Turn into StoppedPhase")
+		ctx.Recorder.Eventf(ctx.obj, "Normal", "Deleted", "Turn into StoppedPhase")
 		return v1alpha1.StoppedPhase
 	}
 
@@ -92,7 +93,7 @@ func (ctx *reconcileContext) CalcDesiredPhase() v1alpha1.DesiredPhase {
 	if duration != nil {
 		stopTime := ctx.GetCreationTimestamp().Add(*duration)
 		if stopTime.Before(now) {
-			ctx.Recorder.Eventf(ctx.obj,"Normal", "TimeUp", "Turn into StoppedPhase")
+			ctx.Recorder.Eventf(ctx.obj, "Normal", "TimeUp", "Turn into StoppedPhase")
 			return v1alpha1.StoppedPhase
 		} else {
 			ctx.requeueAfter = stopTime.Sub(now)
@@ -101,7 +102,7 @@ func (ctx *reconcileContext) CalcDesiredPhase() v1alpha1.DesiredPhase {
 
 	// Then decide the pause logic
 	if ctx.obj.IsPaused() {
-		ctx.Recorder.Eventf(ctx.obj,"Normal", "Paused", "Turn into StoppedPhase")
+		ctx.Recorder.Eventf(ctx.obj, "Normal", "Paused", "Turn into StoppedPhase")
 		return v1alpha1.StoppedPhase
 	} else {
 		return v1alpha1.RunningPhase

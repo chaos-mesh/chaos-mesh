@@ -41,11 +41,12 @@ import (
 )
 
 var log = ctrl.Log.WithName("selector")
+
 const injectAnnotationKey = "chaos-mesh.org/inject"
 
 type Option struct {
-	ClusterScoped     bool
-	TargetNamespace   string
+	ClusterScoped         bool
+	TargetNamespace       string
 	EnableFilterNamespace bool
 }
 
@@ -98,7 +99,6 @@ func New(c client.Client, r client.Reader) *SelectImpl {
 		},
 	}
 }
-
 
 // SelectAndFilterPods returns the list of pods that filtered by selector and PodMode
 func SelectAndFilterPods(ctx context.Context, c client.Client, r client.Reader, spec *v1alpha1.PodSelector, clusterScoped bool, targetNamespace string, enableFilterNamespace bool) ([]v1.Pod, error) {

@@ -14,8 +14,9 @@
 package networkchaos
 
 import (
-	"github.com/chaos-mesh/chaos-mesh/controllers/action"
 	"go.uber.org/fx"
+
+	"github.com/chaos-mesh/chaos-mesh/controllers/action"
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 
@@ -28,7 +29,7 @@ type Impl struct {
 	fx.In
 
 	TrafficControl *trafficcontrol.Impl `action:"bandwidth,netem,delay,loss,duplicate,corrupt"`
-	Partition      *partition.Impl `action:"partition"`
+	Partition      *partition.Impl      `action:"partition"`
 }
 
 func NewImpl(impl Impl) *common.ChaosImplPair {
@@ -36,7 +37,7 @@ func NewImpl(impl Impl) *common.ChaosImplPair {
 	return &common.ChaosImplPair{
 		Name:   "networkchaos",
 		Object: &v1alpha1.NetworkChaos{},
-		Impl: &delegate,
+		Impl:   &delegate,
 	}
 }
 

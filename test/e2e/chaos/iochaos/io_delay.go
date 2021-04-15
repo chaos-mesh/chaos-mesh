@@ -15,10 +15,11 @@ package iochaos
 
 import (
 	"context"
-	"k8s.io/utils/pointer"
 	"net/http"
 	"strings"
 	"time"
+
+	"k8s.io/utils/pointer"
 
 	. "github.com/onsi/ginkgo"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -317,7 +318,7 @@ func TestcaseIODelayWithWrongSpec(
 						Namespaces:     []string{ns},
 						LabelSelectors: map[string]string{"app": "io"},
 					},
-					Mode:       v1alpha1.OnePodMode,
+					Mode: v1alpha1.OnePodMode,
 				},
 			},
 			Action:     v1alpha1.IoLatency,

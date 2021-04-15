@@ -35,11 +35,11 @@ func NewController(mgr ctrl.Manager, client client.Client, reader client.Reader,
 			For(obj.Object).
 			Named(obj.Name + "-desiredphase").
 			Complete(&Reconciler{
-				Object: obj.Object,
-				Client: client,
-				Reader: reader,
+				Object:   obj.Object,
+				Client:   client,
+				Reader:   reader,
 				Recorder: mgr.GetEventRecorderFor("desiredphase"),
-				Log:    logger.WithName("desiredphase"),
+				Log:      logger.WithName("desiredphase"),
 			})
 		if err != nil {
 			return "", err

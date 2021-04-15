@@ -15,11 +15,12 @@ package main
 
 import (
 	"flag"
-	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
 	"time"
+
+	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 
 	"github.com/go-logr/logr"
 	"go.uber.org/fx"
@@ -99,10 +100,10 @@ func main() {
 type RunParams struct {
 	fx.In
 
-	Mgr    ctrl.Manager
-	Client client.Client
-	Reader client.Reader
-	Logger logr.Logger
+	Mgr     ctrl.Manager
+	Client  client.Client
+	Reader  client.Reader
+	Logger  logr.Logger
 	AuthCli *authorizationv1.AuthorizationV1Client
 
 	Controllers []types.Controller `group:"controller"`
