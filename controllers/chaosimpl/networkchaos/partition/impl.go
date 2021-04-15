@@ -64,8 +64,8 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 
 	source := networkchaos.Namespace + "/" + networkchaos.Name
 	m := podnetworkchaosmanager.WithInit(source, impl.Log, impl.Client, types.NamespacedName{
-		pod.Namespace,
-		pod.Name,
+		Namespace: pod.Namespace,
+		Name:      pod.Name,
 	})
 
 	if record.SelectorKey == "." {
