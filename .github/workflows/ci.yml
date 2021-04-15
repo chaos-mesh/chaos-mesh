@@ -18,10 +18,10 @@ jobs:
           - build
           - test
     steps:
-      - name: Set up Go 1.14
+      - name: Set up Go 1.15
         uses: actions/setup-go@v1
         with:
-          go-version: 1.14.4
+          go-version: 1.15.11
         id: go
 
       - name: Check out code into the Go module directory
