@@ -53,28 +53,27 @@ var allChaosTemplateType = []TemplateType{
 
 type EmbedChaos struct {
 	// +optional
-	AwsChaos *AwsChaosSpec `json:"aws_chaos,omitempty"`
+	AwsChaos *AwsChaosSpec `json:"aws_chaos,omitempty" mapstructure:"aws_chaos"`
 	// +optional
-	DNSChaos *DNSChaosSpec `json:"dns_chaos,omitempty"`
+	DNSChaos *DNSChaosSpec `json:"dns_chaos,omitempty" mapstructure:"dns_chaos"`
 	// +optional
-	GcpChaos *GcpChaosSpec `json:"gcp_chaos,omitempty"`
+	GcpChaos *GcpChaosSpec `json:"gcp_chaos,omitempty" mapstructure:"gcp_chaos"`
 	// +optional
-	HTTPChaos *HTTPChaosSpec `json:"http_chaos,omitempty"`
+	HTTPChaos *HTTPChaosSpec `json:"http_chaos,omitempty" mapstructure:"http_chaos"`
 	// +optional
-	IoChaos *IoChaosSpec `json:"io_chaos,omitempty"`
+	IoChaos *IoChaosSpec `json:"io_chaos,omitempty" mapstructure:"io_chaos"`
 	// +optional
-	JVMChaos *JVMChaosSpec `json:"jvm_chaos,omitempty"`
+	JVMChaos *JVMChaosSpec `json:"jvm_chaos,omitempty" mapstructure:"jvm_chaos"`
 	// +optional
-	KernelChaos *KernelChaosSpec `json:"kernel_chaos,omitempty"`
+	KernelChaos *KernelChaosSpec `json:"kernel_chaos,omitempty" mapstructure:"kernel_chaos"`
 	// +optional
-	NetworkChaos *NetworkChaosSpec `json:"network_chaos,omitempty"`
+	NetworkChaos *NetworkChaosSpec `json:"network_chaos,omitempty" mapstructure:"network_chaos"`
 	// +optional
-	PodChaos *PodChaosSpec `json:"pod_chaos,omitempty"`
+	PodChaos *PodChaosSpec `json:"pod_chaos,omitempty" mapstructure:"pod_chaos"`
 	// +optional
-	StressChaos *StressChaosSpec `json:"stress_chaos,omitempty"`
+	StressChaos *StressChaosSpec `json:"stress_chaos,omitempty" mapstructure:"stress_chaos"`
 	// +optional
-	TimeChaos *TimeChaosSpec `json:"time_chaos,omitempty"`
-
+	TimeChaos *TimeChaosSpec `json:"time_chaos,omitempty" mapstructure:"time_chaos"`
 }
 
 func (it *EmbedChaos) SpawnNewObject(templateType TemplateType) (runtime.Object, metav1.Object, error) {

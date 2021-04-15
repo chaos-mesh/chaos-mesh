@@ -15,6 +15,7 @@ package core
 
 import (
 	"context"
+	"github.com/mitchellh/mapstructure"
 
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
@@ -27,6 +28,8 @@ import (
 )
 
 type WorkflowRepository interface {
+	CreateWorkflowWithRaw(ctx context.Context, raw KubeObjectYAMLDescription) (WorkflowDetail, error)
+	UpdateWorkflowWithRaw(ctx context.Context, raw KubeObjectYAMLDescription) (WorkflowDetail, error)
 	ListWorkflowWithNamespace(ctx context.Context, namespace string) ([]Workflow, error)
 	ListWorkflowFromAllNamespace(ctx context.Context) ([]Workflow, error)
 	GetWorkflowByNamespacedName(ctx context.Context, namespace, name string) (WorkflowDetail, error)
@@ -42,7 +45,8 @@ type Workflow struct {
 
 type WorkflowDetail struct {
 	Workflow `json:",inline"`
-	Topology Topology `json:"topology"`
+	Topology Topology                  `json:"topology"`
+	Yaml     KubeObjectYAMLDescription `json:"yaml,omitempty"`
 }
 
 // Topology describes the process of a workflow.
@@ -127,6 +131,76 @@ type KubeWorkflowRepository struct {
 	kubeclient client.Client
 }
 
+func (it *KubeWorkflowRepository) CreateWorkflowWithRaw(ctx context.Context, raw KubeObjectYAMLDescription) (WorkflowDetail, error) {
+	workflow := v1alpha1.Workflow{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:        raw.Metadata.Name,
+			Namespace:   raw.Metadata.Namespace,
+			Labels:      raw.Metadata.Labels,
+			Annotations: raw.Metadata.Annotations,
+		},
+		Spec: v1alpha1.WorkflowSpec{},
+	}
+
+	err := mapstructure.Decode(raw.Spec, &workflow.Spec)
+	if err != nil {
+		return WorkflowDetail{}, err
+	}
+
+	// TODO: we need decode the inlined field again, it's better to resolve that in a common methods
+	// TODO: same issue in UpdateWorkflowWithRaw, and http api with experiments
+	for index := range workflow.Spec.Templates {
+		switch parsed := raw.Spec.(type) {
+		case map[string]interface{}:
+			switch templates := parsed["templates"].(type) {
+			case []interface{}:
+				target := v1alpha1.EmbedChaos{}
+				err := mapstructure.Decode(templates[index], &target)
+				if err != nil {
+					return WorkflowDetail{}, err
+				}
+			}
+
+		}
+	}
+
+	err = it.kubeclient.Create(ctx, &workflow)
+	if err != nil {
+		return WorkflowDetail{}, err
+	}
+	return it.GetWorkflowByNamespacedName(ctx, workflow.Namespace, workflow.Name)
+}
+
+func (it *KubeWorkflowRepository) UpdateWorkflowWithRaw(ctx context.Context, raw KubeObjectYAMLDescription) (WorkflowDetail, error) {
+	workflow := v1alpha1.Workflow{}
+
+	err := mapstructure.Decode(raw.Spec, &workflow.Spec)
+	if err != nil {
+		return WorkflowDetail{}, err
+	}
+
+	for index := range workflow.Spec.Templates {
+		switch parsed := raw.Spec.(type) {
+		case map[string]interface{}:
+			switch templates := parsed["templates"].(type) {
+			case []interface{}:
+				target := v1alpha1.EmbedChaos{}
+				err := mapstructure.Decode(templates[index], &target)
+				if err != nil {
+					return WorkflowDetail{}, err
+				}
+			}
+
+		}
+	}
+
+	err = it.kubeclient.Update(ctx, &workflow)
+	if err != nil {
+		return WorkflowDetail{}, err
+	}
+	return it.GetWorkflowByNamespacedName(ctx, workflow.Namespace, workflow.Name)
+}
+
 func NewKubeWorkflowRepository(kubeclient client.Client) *KubeWorkflowRepository {
 	return &KubeWorkflowRepository{kubeclient: kubeclient}
 }
@@ -182,7 +256,6 @@ func (it *KubeWorkflowRepository) GetWorkflowByNamespacedName(ctx context.Contex
 		return WorkflowDetail{}, err
 	}
 
-	// TODO: provide the running kube nodes
 	return conversionWorkflowDetail(kubeWorkflow, workflowNodes.Items)
 }
 

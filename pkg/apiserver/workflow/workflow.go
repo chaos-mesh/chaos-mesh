@@ -14,6 +14,7 @@
 package workflow
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -97,7 +98,7 @@ func (it *Service) listWorkflows(c *gin.Context) {
 // @Produce json
 // @Param namespace path string true "namespace"
 // @Param name path string true "name"
-// @Router /workflows/detail/{namespace}/{name} [GET]
+// @Router /workflows/{namespace}/{name} [GET]
 // @Success 200 {object} core.WorkflowDetail
 // @Failure 400 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
@@ -124,13 +125,32 @@ func (it *Service) getWorkflowDetail(c *gin.Context) {
 // @Description Create a new workflow.
 // @Tags workflows
 // @Produce json
-// @Param request body core.Workflow true "Request body"
-// @Success 200 {object} core.Workflow
+// @Param request body core.KubeObjectYAMLDescription true "Request body"
+// @Success 200 {object} core.KubeObjectYAMLDescription
 // @Failure 400 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
 // @Router /workflows/new [post]
 func (it *Service) createWorkflow(c *gin.Context) {
-	panic("unimplemented")
+	payloadToCreate := core.KubeObjectYAMLDescription{}
+	err := json.NewDecoder(c.Request.Body).Decode(&payloadToCreate)
+	if err != nil {
+		_ = c.Error(utils.ErrInternalServer.Wrap(err, "failed to parse request body"))
+		return
+	}
+
+	kubeClient, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
+	if err != nil {
+		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		return
+	}
+	repo := core.NewKubeWorkflowRepository(kubeClient)
+
+	result, err := repo.CreateWorkflowWithRaw(c.Request.Context(), payloadToCreate)
+	if err != nil {
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		return
+	}
+	c.JSON(http.StatusOK, result)
 }
 
 // @Summary Delete the specified workflow.
@@ -168,11 +188,51 @@ func (it *Service) deleteWorkflow(c *gin.Context) {
 // @Description Update a workflow.
 // @Tags workflows
 // @Produce json
-// @Param request body core.Workflow true "Request body"
-// @Success 200 {object} core.Workflow
+// @Param request body core.KubeObjectYAMLDescription true "Request body"
+// @Success 200 {object} core.KubeObjectYAMLDescription
 // @Failure 400 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
 // @Router /workflows/update [put]
 func (it *Service) updateWorkflow(c *gin.Context) {
-	panic("unimplemented")
+	payloadToUpdate := core.KubeObjectYAMLDescription{}
+	err := json.NewDecoder(c.Request.Body).Decode(&payloadToUpdate)
+	if err != nil {
+		_ = c.Error(utils.ErrInternalServer.Wrap(err, "failed to parse request body"))
+		return
+	}
+	// validate the consistent with path parameter and request body of namespace and name
+	namespace := c.Param("namespace")
+	name := c.Param("name")
+
+	if namespace != payloadToUpdate.Metadata.Namespace {
+		_ = c.Error(utils.ErrInvalidRequest.Wrap(err,
+			"namespace is not consistent, pathParameter: %s, metaInRaw: %s",
+			namespace,
+			payloadToUpdate.Metadata.Namespace),
+		)
+		return
+	}
+	if name != payloadToUpdate.Metadata.Name {
+		_ = c.Error(utils.ErrInvalidRequest.Wrap(err,
+			"name is not consistent, pathParameter: %s, metaInRaw: %s",
+			name,
+			payloadToUpdate.Metadata.Name),
+		)
+		return
+	}
+
+	kubeClient, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
+	if err != nil {
+		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		return
+	}
+	repo := core.NewKubeWorkflowRepository(kubeClient)
+
+	result, err := repo.UpdateWorkflowWithRaw(c.Request.Context(), payloadToUpdate)
+	if err != nil {
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		return
+	}
+	c.JSON(http.StatusOK, result)
+
 }
