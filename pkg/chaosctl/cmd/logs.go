@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
 
 	"github.com/go-logr/logr"
@@ -88,7 +89,7 @@ func (o *logsOptions) Run(args []string) error {
 
 	componentsNeeded := []string{"controller-manager", "chaos-daemon", "chaos-dashboard"}
 	for _, name := range componentsNeeded {
-		selectorSpec := selector.PodSelectorSpec{
+		selectorSpec := v1alpha1.PodSelectorSpec{
 			LabelSelectors: map[string]string{"app.kubernetes.io/component": name},
 		}
 		if o.node != "" {
@@ -96,7 +97,7 @@ func (o *logsOptions) Run(args []string) error {
 		}
 
 		// TODO: just use kubernetes native label selector
-		components, err := pod.SelectPods(ctx, c.CtrlCli, nil, selectorSpec, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces)
+		components, err := pod.SelectPods(ctx, c.CtrlCli, nil, selectorSpec, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, false)
 		if err != nil {
 			return errors.Wrapf(err, "failed to SelectPods for component %s", name)
 		}

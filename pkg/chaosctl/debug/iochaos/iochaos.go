@@ -33,7 +33,7 @@ func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet, result *c
 		return fmt.Errorf("chaos is not iochaos")
 	}
 	chaosStatus := ioChaos.Status.ChaosStatus
-	chaosSelector := ioChaos.Spec.GetSelector()
+	chaosSelector := ioChaos.Spec.Selector
 
 	pods, daemons, err := cm.GetPods(ctx, ioChaos.GetName(), chaosStatus, chaosSelector, c.CtrlCli)
 	if err != nil {
