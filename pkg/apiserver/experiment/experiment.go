@@ -153,6 +153,7 @@ func (s *Service) createExperiment(c *gin.Context) {
 		v1alpha1.KindTimeChaos:    s.createTimeChaos,
 		v1alpha1.KindKernelChaos:  s.createKernelChaos,
 		v1alpha1.KindDNSChaos:     s.createDNSChaos,
+		v1alpha1.KindAwsChaos:     s.createAwsChaos,
 	}
 
 	f, ok := createFuncs[exp.Target.Kind]
@@ -397,6 +398,35 @@ func (s *Service) createDNSChaos(exp *core.ExperimentInfo, kubeCli client.Client
 			Value:              exp.Scope.Value,
 			Action:             v1alpha1.DNSChaosAction(exp.Target.DNSChaos.Action),
 			DomainNamePatterns: exp.Target.DNSChaos.DomainNamePatterns,
+		},
+	}
+
+	if exp.Scheduler.Cron != "" {
+		chaos.Spec.Scheduler = &v1alpha1.SchedulerSpec{Cron: exp.Scheduler.Cron}
+	}
+
+	if exp.Scheduler.Duration != "" {
+		chaos.Spec.Duration = &exp.Scheduler.Duration
+	}
+
+	return kubeCli.Create(context.Background(), chaos)
+}
+
+func (s *Service) createAwsChaos(exp *core.ExperimentInfo, kubeCli client.Client) error {
+	chaos := &v1alpha1.AwsChaos{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:        exp.Name,
+			Namespace:   exp.Namespace,
+			Labels:      exp.Labels,
+			Annotations: exp.Annotations,
+		},
+		Spec: v1alpha1.AwsChaosSpec{
+			Action:      v1alpha1.AwsChaosAction(exp.Target.AwsChaos.Action),
+			SecretName:  exp.Target.AwsChaos.SecretName,
+			AwsRegion:   exp.Target.AwsChaos.AwsRegion,
+			Ec2Instance: exp.Target.AwsChaos.Ec2Instance,
+			EbsVolume:   exp.Target.AwsChaos.EbsVolume,
+			DeviceName:  exp.Target.AwsChaos.DeviceName,
 		},
 	}
 
@@ -712,6 +742,49 @@ func (s *Service) getDNSChaosDetail(namespace string, name string, kubeCli clien
 	}, nil
 }
 
+func (s *Service) getAwsChaosDetail(namespace string, name string, kubeCli client.Client) (Detail, error) {
+	chaos := &v1alpha1.AwsChaos{}
+
+	chaosKey := types.NamespacedName{Namespace: namespace, Name: name}
+	if err := kubeCli.Get(context.Background(), chaosKey, chaos); err != nil {
+		if apierrors.IsNotFound(err) {
+			return Detail{}, utils.ErrNotFound.NewWithNoMessage()
+		}
+
+		return Detail{}, err
+	}
+
+	gvk, err := apiutil.GVKForObject(chaos, s.scheme)
+	if err != nil {
+		return Detail{}, err
+	}
+
+	return Detail{
+		Experiment: Experiment{
+			Base: Base{
+				Kind:      gvk.Kind,
+				Namespace: chaos.Namespace,
+				Name:      chaos.Name,
+			},
+			Created:       chaos.GetChaos().StartTime.Format(time.RFC3339),
+			Status:        chaos.GetChaos().Status,
+			UID:           chaos.GetChaos().UID,
+			FailedMessage: chaos.GetStatus().FailedMessage,
+		},
+		YAML: core.KubeObjectYAMLDescription{
+			APIVersion: gvk.GroupVersion().String(),
+			Kind:       gvk.Kind,
+			Metadata: core.KubeObjectYAMLMetadata{
+				Name:        chaos.Name,
+				Namespace:   chaos.Namespace,
+				Labels:      chaos.Labels,
+				Annotations: chaos.Annotations,
+			},
+			Spec: chaos.Spec,
+		},
+	}, nil
+}
+
 // @Summary Get chaos experiments from Kubernetes cluster.
 // @Description Get chaos experiments from Kubernetes cluster.
 // @Tags experiments
@@ -825,6 +898,8 @@ func (s *Service) getExperimentDetail(c *gin.Context) {
 		expDetail, err = s.getStressChaosDetail(ns, name, kubeCli)
 	case v1alpha1.KindDNSChaos:
 		expDetail, err = s.getDNSChaosDetail(ns, name, kubeCli)
+	case v1alpha1.KindAwsChaos:
+		expDetail, err = s.getAwsChaosDetail(ns, name, kubeCli)
 	}
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
@@ -1167,6 +1242,7 @@ func (s *Service) updateExperiment(c *gin.Context) {
 		v1alpha1.KindTimeChaos:    s.updateTimeChaos,
 		v1alpha1.KindKernelChaos:  s.updateKernelChaos,
 		v1alpha1.KindDNSChaos:     s.updateDNSChaos,
+		v1alpha1.KindAwsChaos:     s.updateAwsChaos,
 	}
 
 	f, ok := updateFuncs[exp.Kind]
@@ -1322,6 +1398,25 @@ func (s *Service) updateDNSChaos(exp *core.KubeObjectYAMLDescription, kubeCli cl
 	chaos.SetAnnotations(meta.Annotations)
 
 	var spec v1alpha1.DNSChaosSpec
+	mapstructure.Decode(exp.Spec, &spec)
+	chaos.Spec = spec
+
+	return kubeCli.Update(context.Background(), chaos)
+}
+
+func (s *Service) updateAwsChaos(exp *core.KubeObjectYAMLDescription, kubeCli client.Client) error {
+	chaos := &v1alpha1.AwsChaos{}
+	meta := &exp.Metadata
+	key := types.NamespacedName{Namespace: meta.Namespace, Name: meta.Name}
+
+	if err := kubeCli.Get(context.Background(), key, chaos); err != nil {
+		return err
+	}
+
+	chaos.SetLabels(meta.Labels)
+	chaos.SetAnnotations(meta.Annotations)
+
+	var spec v1alpha1.AwsChaosSpec
 	mapstructure.Decode(exp.Spec, &spec)
 	chaos.Spec = spec
 

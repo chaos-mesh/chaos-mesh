@@ -119,7 +119,7 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 				if numCurrent == numExpect {
 					continue
 				}
-				// alphabetic charactors
+				// alphabetic characters
 				alpCurrent := regexp.MustCompile("[[:alpha:]]+").FindString(itemCurrent)
 				alpExpect := regexp.MustCompile("[[:alpha:]]+").FindString(itemExpect)
 				if alpCurrent == alpExpect {

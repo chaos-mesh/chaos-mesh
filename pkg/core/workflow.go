@@ -15,6 +15,7 @@ package core
 
 import (
 	"context"
+
 	"github.com/mitchellh/mapstructure"
 
 	"github.com/pkg/errors"
@@ -84,7 +85,7 @@ type NodeParallel struct {
 
 // NodeType defines the type of a workflow node.
 //
-// There will be five types can be refered as NodeType: Chaos, Serial, Parallel, Suspend, Task.
+// There will be five types can be referred as NodeType: Chaos, Serial, Parallel, Suspend, Task.
 //
 // Const definitions can be found below this type.
 type NodeType string

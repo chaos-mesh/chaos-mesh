@@ -34,7 +34,7 @@ const networkCommon: Spec = {
   },
   external_targets: {
     field: 'label',
-    label: 'External Targets',
+    label: 'External targets',
     value: [],
     helperText: 'Type string and end with a space to generate the network targets outside k8s',
   },
@@ -80,7 +80,7 @@ const ioMethods = [
 const ioCommon: Spec = {
   volume_path: {
     field: 'text',
-    label: 'Volume Path',
+    label: 'Volume path',
     value: '',
     helperText: 'The mount path of injected volume',
   },
@@ -92,7 +92,7 @@ const ioCommon: Spec = {
   },
   container_name: {
     field: 'text',
-    label: 'Container Name',
+    label: 'Container name',
     value: '',
     helperText: 'Optional. The target container to inject in',
   },
@@ -120,6 +120,27 @@ const dnsCommon: Spec = {
   },
 }
 
+const awsCommon: Spec = {
+  secretName: {
+    field: 'text',
+    label: 'Secret name',
+    value: '',
+    helperText: 'Optional. The Kubernetes secret which includes AWS credentials',
+  },
+  awsRegion: {
+    field: 'text',
+    label: 'Region',
+    value: '',
+    helperText: 'The AWS region',
+  },
+  ec2Instance: {
+    field: 'text',
+    label: 'EC2 instance',
+    value: '',
+    helperText: 'The ID of a EC2 instance',
+  },
+}
+
 const data: Record<Kind, Target> = {
   // Pod Fault
   PodChaos: {
@@ -138,7 +159,7 @@ const data: Record<Kind, Target> = {
           action: 'pod-kill' as any,
           grace_period: {
             field: 'number',
-            label: 'Grace Period',
+            label: 'Grace period',
             value: 0,
             helperText: 'Optional. Grace period represents the duration in seconds before the pod should be deleted',
           },
@@ -151,7 +172,7 @@ const data: Record<Kind, Target> = {
           action: 'container-kill' as any,
           container_name: {
             field: 'text',
-            label: 'Container Name',
+            label: 'Container name',
             value: '',
             helperText: 'Fill the container name',
           },
@@ -422,6 +443,47 @@ const data: Record<Kind, Target> = {
       },
     ],
   },
+  // Aws
+  AwsChaos: {
+    categories: [
+      {
+        name: 'Stop EC2',
+        key: 'ec2-stop',
+        spec: {
+          action: 'ec2-stop' as any,
+          ...awsCommon,
+        },
+      },
+      {
+        name: 'Restart EC2',
+        key: 'ec2-restart',
+        spec: {
+          action: 'ec2-restart' as any,
+          ...awsCommon,
+        },
+      },
+      {
+        name: 'Detach Volumne',
+        key: 'detach-volume',
+        spec: {
+          action: 'detach-volume' as any,
+          ...awsCommon,
+          deviceName: {
+            field: 'text',
+            label: 'Device name',
+            value: '',
+            helperText: 'The device name for the volume',
+          },
+          volumeID: {
+            field: 'text',
+            label: 'EBS volume',
+            value: '',
+            helperText: 'The ID of a EBS volume',
+          },
+        },
+      },
+    ],
+  },
 }
 
 export const schema: Partial<Record<Kind, Record<string, Yup.ObjectSchema>>> = {
@@ -503,6 +565,22 @@ export const schema: Partial<Record<Kind, Record<string, Yup.ObjectSchema>>> = {
     }),
     random: Yup.object({
       patterns: Yup.array().of(Yup.string()).required('The patterns is required'),
+    }),
+  },
+  AwsChaos: {
+    'ec2-stop': Yup.object({
+      awsRegion: Yup.string().required('The region is required'),
+      ec2Instance: Yup.string().required('The ID of the EC2 instance is required'),
+    }),
+    'ec2-restart': Yup.object({
+      awsRegion: Yup.string().required('The region is required'),
+      ec2Instance: Yup.string().required('The ID of the EC2 instance is required'),
+    }),
+    'detach-volume': Yup.object({
+      awsRegion: Yup.string().required('The region is required'),
+      ec2Instance: Yup.string().required('The ID of the EC2 instance is required'),
+      deviceName: Yup.string().required('The device name is required'),
+      volumeID: Yup.string().required('The ID of the EBS volume is required'),
     }),
   },
 }
