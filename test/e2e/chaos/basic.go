@@ -194,6 +194,9 @@ var _ = ginkgo.Describe("[Basic]", func() {
 			ginkgo.It("[SpecifyContainer]", func() {
 				iochaostestcases.TestcaseIODelayWithSpecifiedContainer(ns, cli, c, port)
 			})
+			ginkgo.It("[WrongSpec]", func() {
+				iochaostestcases.TestcaseIODelayWithWrongSpec(ns, cli, c, port)
+			})
 		})
 
 		// io chaos case in [IOError] context
