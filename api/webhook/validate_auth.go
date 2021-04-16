@@ -28,6 +28,15 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
+var alwaysAllowedKind = []string{
+	v1alpha1.KindAwsChaos,
+	v1alpha1.KindPodNetworkChaos,
+	v1alpha1.KindPodIoChaos,
+	v1alpha1.KindGcpChaos,
+	"Workflow",
+	"WorkflowNode",
+}
+
 var authLog = ctrl.Log.WithName("validate-auth")
 
 // +kubebuilder:webhook:path=/validate-auth,mutating=false,failurePolicy=fail,groups=chaos-mesh.org,resources=*,verbs=create;update,versions=v1alpha1,name=vauth.kb.io
@@ -68,16 +77,15 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 
 	username := req.UserInfo.Username
 	groups := req.UserInfo.Groups
-	chaosKind := req.Kind.Kind
+	requestKind := req.Kind.Kind
 
-	// these chaos doesn't contain selector field
-	if chaosKind == v1alpha1.KindAwsChaos || chaosKind == v1alpha1.KindPodNetworkChaos || chaosKind == v1alpha1.KindPodIoChaos || chaosKind == "Workflow" || chaosKind == "WorkflowNode" {
-		return admission.Allowed("")
+	if contains(alwaysAllowedKind, requestKind) {
+		return admission.Allowed(fmt.Sprintf("skip the RBAC check for type %s", requestKind))
 	}
 
-	chaos := v1alpha1.GetChaosValidator(chaosKind)
+	chaos := v1alpha1.GetChaosValidator(requestKind)
 	if chaos == nil {
-		err := fmt.Errorf("kind %s is not support", chaosKind)
+		err := fmt.Errorf("kind %s is not support", requestKind)
 		return admission.Errored(http.StatusBadRequest, err)
 	}
 
@@ -101,7 +109,7 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 	}
 
 	if requireClusterPrivileges {
-		allow, err := v.auth(username, groups, "", chaosKind)
+		allow, err := v.auth(username, groups, "", requestKind)
 		if err != nil {
 			return admission.Errored(http.StatusBadRequest, err)
 		}
@@ -112,7 +120,7 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 		authLog.Info("user have the privileges on cluster, auth validate passed", "user", username, "groups", groups, "namespace", affectedNamespaces)
 	} else {
 		for namespace := range affectedNamespaces {
-			allow, err := v.auth(username, groups, namespace, chaosKind)
+			allow, err := v.auth(username, groups, namespace, requestKind)
 			if err != nil {
 				return admission.Errored(http.StatusBadRequest, err)
 			}
@@ -166,4 +174,13 @@ func (v *AuthValidator) auth(username string, groups []string, namespace string,
 func (v *AuthValidator) resourceFor(name string) (string, error) {
 	// TODO: we should use RESTMapper, but it relates to many dependencies
 	return strings.ToLower(name), nil
+}
+
+func contains(arr []string, target string) bool {
+	for _, item := range arr {
+		if item == target {
+			return true
+		}
+	}
+	return false
 }
