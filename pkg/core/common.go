@@ -24,7 +24,7 @@ type KubeObjectYAMLDescription struct {
 	Spec       interface{}            `json:"spec"`
 }
 
-// KubeObjectYAMLMetadata defines the metadata of YAMLDescription.
+// KubeObjectYAMLMetadata defines the metadata of KubeObjectYAMLDescription.
 type KubeObjectYAMLMetadata struct {
 	Name        string            `json:"name"`
 	Namespace   string            `json:"namespace"`

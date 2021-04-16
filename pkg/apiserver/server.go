@@ -38,7 +38,6 @@ var (
 		fx.Provide(
 			newEngine,
 			newAPIRouter,
-			core.NewKubeWorkflowRepository,
 		),
 		handlerModule,
 		fx.Invoke(serverRegister),
