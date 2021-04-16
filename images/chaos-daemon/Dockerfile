@@ -14,7 +14,7 @@ ENV RUST_BACKTRACE 1
 
 RUN curl -L https://github.com/chaos-mesh/toda/releases/download/v0.2.0/toda-linux-amd64.tar.gz -o /usr/local/bin/toda.tar.gz
 RUN curl -L https://github.com/chaos-mesh/nsexec/releases/download/v0.1.5/nsexec-linux-amd64.tar.gz -o /usr/local/bin/nsexec.tar.gz
-RUN curl -L https://github.com/chaos-mesh/rs-tproxy/releases/download/v0.1.0/tproxy-linux-amd64.tar.gz -o /usr/local/bin/tproxy.tar.gz
+RUN curl -L https://github.com/chaos-mesh/rs-tproxy/releases/download/v0.1.1/tproxy-linux-amd64.tar.gz -o /usr/local/bin/tproxy.tar.gz
 
 RUN tar xvf /usr/local/bin/toda.tar.gz -C /usr/local/bin
 RUN rm /usr/local/bin/toda.tar.gz
