@@ -56,10 +56,15 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	now := time.Now()
 	shouldSpawn := false
 	lastScheduleTime := schedule.Status.LastScheduleTime.Time
+	expectScheduleTime := cron.Next(lastScheduleTime)
 	if lastScheduleTime.IsZero() {
 		shouldSpawn = true
-	} else if cron.Next(lastScheduleTime).Before(now) {
+	} else if expectScheduleTime.Before(now) {
 		shouldSpawn = true
+	} else if expectScheduleTime.After(now) {
+		shouldSpawn = false
+		r.Log.Info("requeue later to reconcile the schedule", "requeue-after", expectScheduleTime.Sub(now))
+		return ctrl.Result{RequeueAfter: expectScheduleTime.Sub(now)}, nil
 	}
 
 	if shouldSpawn {
@@ -80,6 +85,9 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 				Controller:         &t,
 				BlockOwnerDeletion: &t,
 			},
+		})
+		meta.SetLabels(map[string]string {
+			"managed-by": schedule.Name,
 		})
 		meta.SetNamespace(schedule.Namespace)
 		meta.SetName(names.SimpleNameGenerator.GenerateName(schedule.Name + "-"))

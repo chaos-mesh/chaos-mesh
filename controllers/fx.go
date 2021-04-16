@@ -14,7 +14,7 @@
 package controllers
 
 import (
-	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/cron"
+	"github.com/chaos-mesh/chaos-mesh/controllers/schedule"
 	"go.uber.org/fx"
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl"
@@ -37,8 +37,6 @@ var Module = fx.Options(
 			Group:  "controller",
 			Target: desiredphase.NewController,
 		},
-		fx.Annotated{
-			Group:  "controller",
-			Target: cron.NewController,
-		},
-	), chaosimpl.AllImpl)
+	),
+	schedule.Module,
+	chaosimpl.AllImpl)

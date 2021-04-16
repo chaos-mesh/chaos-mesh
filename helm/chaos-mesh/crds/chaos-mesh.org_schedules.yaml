@@ -35,10 +35,6 @@ spec:
         spec:
           description: ScheduleSpec is the specification of a schedule object
           properties:
-            ConcurrencyPolicy:
-              type: string
-            HistoryLimit:
-              type: integer
             aws_chaos:
               description: AwsChaosSpec is the content of the specification for an
                 AwsChaos
@@ -262,6 +258,8 @@ spec:
               - project
               - zone
               type: object
+            historyLimit:
+              type: integer
             http_chaos:
               properties:
                 action:
@@ -1936,9 +1934,6 @@ spec:
             time:
               format: date-time
               type: string
-          required:
-          - active
-          - time
           type: object
       required:
       - spec

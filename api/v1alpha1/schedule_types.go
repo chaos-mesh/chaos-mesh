@@ -36,10 +36,7 @@ type ScheduleSpec struct {
 	Schedule string `json:"schedule"`
 
 	// +optional
-	ConcurrencyPolicy string `json:"ConcurrencyPolicy,omitempty"`
-
-	// +optional
-	HistoryLimit int `json:"HistoryLimit,omitempty"`
+	HistoryLimit int `json:"historyLimit,omitempty"`
 
 	// TODO: use a custom type, as `TemplateType` contains other possible values
 	Type     TemplateType `json:"type"`
@@ -49,8 +46,11 @@ type ScheduleSpec struct {
 
 // ScheduleStatus is the status of a schedule object
 type ScheduleStatus struct {
-	Active []corev1.ObjectReference `json:"active"`
-	LastScheduleTime metav1.Time `json:"time"`
+	// +optional
+	Active []corev1.ObjectReference `json:"active,omitempty"`
+
+	// +optional
+	LastScheduleTime metav1.Time `json:"time,omitempty"`
 }
 
 // +kubebuilder:object:root=true
