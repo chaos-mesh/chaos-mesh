@@ -1,0 +1,32 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: fake-sa
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: pod-chaos-creation-only
+rules:
+  - apiGroups:
+      - chaos-mesh.org
+    resources:
+      - podchaos
+    verbs:
+      - 'create'
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: fake-sa-could-only-create-podchaos
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: pod-chaos-creation-only
+subjects:
+  - kind: ServiceAccount
+    name: fake-sa
+    namespace: default
