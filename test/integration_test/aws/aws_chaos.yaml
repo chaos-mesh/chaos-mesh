@@ -1,0 +1,14 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: AwsChaos
+metadata:
+  name: aws-ec2-stop
+  namespace: chaos-testing
+spec:
+  action: ec2-stop
+  secretName: "cloud-key-secret"
+  awsRegion: "us-east-1"
+  ec2Instance: "i-cb34193fee773a43c"
+  endpoint: "http://192.168.99.100:31566"
+  duration: "5s"
+  scheduler:
+    cron: "@every 10s"
