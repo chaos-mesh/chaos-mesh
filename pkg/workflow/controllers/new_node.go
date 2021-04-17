@@ -31,8 +31,6 @@ var (
 	KindWorkflowNode   = "WorkflowNode"
 )
 
-const LabelControlledBy = "chaos-mesh.org/controlled-by"
-
 // renderNodesByTemplates will render the nodes one by one, will setup owner by given parent. If parent is nil, it will use workflow as its owner.
 func renderNodesByTemplates(workflow *v1alpha1.Workflow, parent *v1alpha1.WorkflowNode, templates ...string) ([]*v1alpha1.WorkflowNode, error) {
 	templateNameSet := make(map[string]v1alpha1.Template)
@@ -85,7 +83,7 @@ func renderNodesByTemplates(workflow *v1alpha1.Workflow, parent *v1alpha1.Workfl
 				if renderedNode.Labels == nil {
 					renderedNode.Labels = make(map[string]string)
 				}
-				renderedNode.Labels[LabelControlledBy] = parent.Name
+				renderedNode.Labels[v1alpha1.LabelControlledBy] = parent.Name
 			} else {
 				renderedNode.OwnerReferences = append(renderedNode.OwnerReferences, metav1.OwnerReference{
 					APIVersion:         ApiVersion,
@@ -98,9 +96,10 @@ func renderNodesByTemplates(workflow *v1alpha1.Workflow, parent *v1alpha1.Workfl
 				if renderedNode.Labels == nil {
 					renderedNode.Labels = make(map[string]string)
 				}
-				renderedNode.Labels[LabelControlledBy] = workflow.Name
+				renderedNode.Labels[v1alpha1.LabelControlledBy] = workflow.Name
 			}
 
+			renderedNode.Labels[v1alpha1.LabelWorkflow] = workflow.Name
 			renderedNode.Finalizers = append(renderedNode.Finalizers, metav1.FinalizerDeleteDependents)
 
 			result = append(result, &renderedNode)
