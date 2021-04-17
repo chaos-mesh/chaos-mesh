@@ -15,6 +15,7 @@ package stresschaos
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -47,7 +48,7 @@ func TestcaseMemoryStressInjectionOnceThenRecover(
 		if conditions[0].MemoryUsage-conditions[1].MemoryUsage > 50*1024*1024 {
 			return true, nil
 		}
-		framework.Logf("get Memory: [%d, %d]", conditions[0].MemoryUsage, conditions[1].MemoryUsage)
+		By(fmt.Sprintf("get Memory: [%d, %d]", conditions[0].MemoryUsage, conditions[1].MemoryUsage))
 		return false, nil
 	})
 	framework.ExpectNoError(err, "memory stress failed")
@@ -64,7 +65,7 @@ func TestcaseMemoryStressInjectionOnceThenRecover(
 		if conditions[0].MemoryUsage-conditions[1].MemoryUsage < 1*1024*1024 {
 			return true, nil
 		}
-		framework.Logf("get Memory: [%d, %d]", conditions[0].MemoryUsage, conditions[1].MemoryUsage)
+		By(fmt.Sprintf("get Memory: [%d, %d]", conditions[0].MemoryUsage, conditions[1].MemoryUsage))
 		return false, nil
 	})
 	framework.ExpectNoError(err, "fail to recover from memory stress")
