@@ -15,11 +15,7 @@ const useStyles = makeStyles({
   },
 })
 
-const SelectField: React.FC<TextFieldProps & { multiple?: boolean; mb?: number }> = ({
-  multiple = false,
-  mb = 1.5,
-  ...props
-}) => {
+const SelectField: React.FC<TextFieldProps & { multiple?: boolean }> = ({ multiple = false, ...props }) => {
   const classes = useStyles()
 
   const { values, setFieldValue } = useFormikContext<Experiment>()
@@ -64,7 +60,7 @@ const SelectField: React.FC<TextFieldProps & { multiple?: boolean; mb?: number }
     />
   )
 
-  return mb > 0 ? <Box mb={mb}>{rendered}</Box> : rendered
+  return rendered
 }
 
 export default SelectField

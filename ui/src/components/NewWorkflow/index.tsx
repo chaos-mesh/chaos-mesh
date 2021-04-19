@@ -83,6 +83,12 @@ const useStyles = makeStyles((theme) => ({
 
 type IStep = Template
 
+export type WorkflowBasic = {
+  name: string
+  namespace: string
+  duration: string
+}
+
 const NewWorkflow = () => {
   const classes = useStyles()
   const intl = useIntl()
@@ -96,6 +102,11 @@ const NewWorkflow = () => {
   const [steps, setSteps] = useState<IStep[]>([])
   const [restoreIndex, setRestoreIndex] = useState(-1)
   const [showRemove, setShowRemove] = useState(-1)
+  const [workflowBasic, setWorkflowBasic] = useState<WorkflowBasic>({
+    name: '',
+    namespace: '',
+    duration: '',
+  })
   const [yamlEditor, setYAMLEditor] = useState<Ace.Editor>()
   const [selected, setSelected] = useState(initialSelected)
   const confirmRef = useRef<ConfirmDialogHandles>(null)
@@ -262,6 +273,8 @@ const NewWorkflow = () => {
     confirmRef.current!.setOpen(false)
   }
 
+  const onValidate = setWorkflowBasic
+
   // TODO
   const submitWorkflow = () => {
     const workflow = yamlEditor?.getValue()
@@ -321,14 +334,8 @@ const NewWorkflow = () => {
                                 <Form>
                                   <Box display="flex" justifyContent="space-between" alignItems="center" mb={6}>
                                     <Space>
+                                      <TextField className={classes.field} name="name" label={T('newE.basic.name')} />
                                       <TextField
-                                        mb={0}
-                                        className={classes.field}
-                                        name="name"
-                                        label={T('newE.basic.name')}
-                                      />
-                                      <TextField
-                                        mb={0}
                                         className={classes.field}
                                         name="duration"
                                         label={T('newE.schedule.duration')}
@@ -378,7 +385,12 @@ const NewWorkflow = () => {
           </Space>
         </Grid>
         <Grid item xs={12} md={4} className={classes.leftSticky}>
-          <Formik initialValues={{ name: '', namespace: '', duration: '' }} onSubmit={submitWorkflow}>
+          <Formik
+            initialValues={{ name: '', namespace: '', duration: '' }}
+            onSubmit={() => {}}
+            validate={onValidate}
+            validateOnBlur={false}
+          >
             {({ errors, touched }) => (
               <Space display="flex" flexDirection="column" height="100%" vertical spacing={6}>
                 <Typography>{T('common.preview')}</Typography>
@@ -407,25 +419,24 @@ const NewWorkflow = () => {
                     validate={validateDuration((T('newW.durationValidation') as unknown) as string)}
                     helperText={errors.duration && touched.duration ? errors.duration : T('newW.durationHelper')}
                     error={errors.duration && touched.duration ? true : false}
-                    mb={0}
                   />
                 </Form>
                 <Box flex={1}>
                   <Paper style={{ height: '100%' }} padding={0}>
                     <YAMLEditor
                       theme={theme}
-                      data={constructWorkflow('workflow', 'xxx', Object.values(templates))}
+                      data={constructWorkflow(workflowBasic, Object.values(templates))}
                       mountEditor={setYAMLEditor}
                     />
                   </Paper>
                 </Box>
                 <Button
-                  type="submit"
                   variant="contained"
                   color="primary"
                   startIcon={<PublishIcon />}
                   fullWidth
                   disabled={_isEmpty(templates)}
+                  onClick={submitWorkflow}
                 >
                   {T('newW.submit')}
                 </Button>

@@ -82,7 +82,6 @@ const DataTable: React.FC<DataTableProps> = ({ data, fetchData }) => {
             <TableRow>
               <TableCell>{T('common.name')}</TableCell>
               <TableCell>{T('workflow.entry')}</TableCell>
-              <TableCell>{T('workflow.partialTopology')}</TableCell>
               <TableCell>{T('workflow.time')}</TableCell>
               <TableCell>{T('workflow.state')}</TableCell>
               <TableCell>{T('workflow.created')}</TableCell>
@@ -98,7 +97,6 @@ const DataTable: React.FC<DataTableProps> = ({ data, fetchData }) => {
                 <TableRow key={key} hover>
                   <TableCell>{d.name}</TableCell>
                   <TableCell>{d.entry}</TableCell>
-                  <TableCell></TableCell>
                   <TableCell></TableCell>
                   <TableCell></TableCell>
                   <TableCell></TableCell>

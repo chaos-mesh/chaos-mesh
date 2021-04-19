@@ -122,7 +122,6 @@
   },
   "workflow": {
     "entry": "入口",
-    "partialTopology": "部分拓扑",
     "time": "时间",
     "state": "状态",
     "created": "创建于",

@@ -1,6 +1,7 @@
 import { CallchainFrame, Experiment, ExperimentScope } from 'components/NewExperiment/types'
 
 import { Template } from 'slices/workflows'
+import { WorkflowBasic } from 'components/NewWorkflow'
 import _snakecase from 'lodash.snakecase'
 import basic from 'components/NewExperimentNext/data/basic'
 import snakeCaseKeys from 'snakecase-keys'
@@ -214,7 +215,8 @@ function scopeToYAMLJSON(scope: ExperimentScope) {
   return result
 }
 
-export function constructWorkflow(name: string, duration: string, templates: Template[]) {
+export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
+  const { name, namespace, duration } = basic
   const tasks: string[] = []
   const realTemplates: Record<string, any>[] = []
 
@@ -243,8 +245,8 @@ export function constructWorkflow(name: string, duration: string, templates: Tem
           break
         case 'serial':
           t.experiments.forEach((d) => {
-            const name = d.basic.name
-            const basic = experiment.basic
+            const basic = d.basic
+            const name = basic.name
             const kind = d.target.kind
             const spec = _snakecase(kind)
 
@@ -289,6 +291,7 @@ export function constructWorkflow(name: string, duration: string, templates: Tem
     kind: 'Workflow',
     metadata: {
       name,
+      namespace,
     },
     spec: {
       entry: 'entry',

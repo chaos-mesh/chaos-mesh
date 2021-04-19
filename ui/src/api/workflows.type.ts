@@ -1,6 +1,5 @@
 export interface workflowParams {
   namespace?: string
-  status?: 'initializing' | 'Running' | 'Errored' | 'Finished'
 }
 
 export interface Workflow {
@@ -25,8 +24,8 @@ export interface Node {
 }
 
 export interface WorkflowDetail extends Workflow {
-  current_nodes: Node[]
   topology: {
     nodes: Node[]
   }
+  yaml: any
 }

@@ -1,11 +1,10 @@
-import { Box, TextField as MUITextField, TextFieldProps } from '@material-ui/core'
 import { FastField, Field, FieldValidator } from 'formik'
+import { TextField as MUITextField, TextFieldProps } from '@material-ui/core'
 
 import React from 'react'
 
-const TextField: React.FC<TextFieldProps & { validate?: FieldValidator; fast?: boolean; mb?: number }> = ({
+const TextField: React.FC<TextFieldProps & { validate?: FieldValidator; fast?: boolean }> = ({
   fast = false,
-  mb = 1.5,
   ...rest
 }) => {
   const rendered = fast ? (
@@ -14,7 +13,7 @@ const TextField: React.FC<TextFieldProps & { validate?: FieldValidator; fast?: b
     <Field {...rest} as={MUITextField} variant="outlined" margin="dense" fullWidth />
   )
 
-  return mb > 0 ? <Box mb={mb}>{rendered}</Box> : rendered
+  return rendered
 }
 
 export default TextField

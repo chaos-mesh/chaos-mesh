@@ -9,6 +9,9 @@ export const workflows = (params?: workflowParams) =>
 
 export const newWorkflow = (data: any) => http.post('/workflows/new', data)
 
-export const detail = (ns: string, name: string) => http.get<WorkflowDetail>(`/workflows/detail/${ns}/${name}`)
+export const detail = (ns: string, name: string) => http.get<WorkflowDetail>(`/workflows/${ns}/${name}`)
 
 export const del = (ns: string, name: string) => http.delete(`/workflows/${ns}/${name}`)
+
+export const update = (ns: string, name: string, data: WorkflowDetail['yaml']) =>
+  http.put(`/workflows/${ns}/${name}`, data)

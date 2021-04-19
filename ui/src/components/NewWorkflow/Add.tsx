@@ -207,7 +207,7 @@ const Add = () => {
           <Form>
             <StepLabel icon={<AddCircleIcon color="primary" />}>
               <Space className={classes.fields}>
-                <SelectField mb={0} className={classes.field} name="type" label={T('newW.node.choose')}>
+                <SelectField className={classes.field} name="type" label={T('newW.node.choose')}>
                   {types.map((d) => (
                     <MenuItem key={d} value={d}>
                       <Typography variant="body2">{T(`newW.node.${d}`)}</Typography>
@@ -216,7 +216,6 @@ const Add = () => {
                 </SelectField>
                 {showNum && (
                   <TextField
-                    mb={0}
                     className={classes.field}
                     type="number"
                     name="num"

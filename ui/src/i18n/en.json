@@ -121,7 +121,6 @@
   },
   "workflow": {
     "entry": "Entry",
-    "partialTopology": "Partial Topology",
     "time": "Time",
     "state": "State",
     "created": "Created",
