@@ -3910,7 +3910,9 @@ spec:
                   type: string
                 deviceName:
                   description: The device name of the disk to detach. Needed in disk-loss.
-                  type: string
+                  items:
+                    type: string
+                  type: array
                 duration:
                   description: Duration represents the duration of the chaos action.
                   type: string
@@ -6015,7 +6017,9 @@ spec:
                       deviceName:
                         description: The device name of the disk to detach. Needed
                           in disk-loss.
-                        type: string
+                        items:
+                          type: string
+                        type: array
                       duration:
                         description: Duration represents the duration of the chaos
                           action.

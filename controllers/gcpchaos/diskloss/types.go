@@ -69,7 +69,7 @@ func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 				haveDisk = true
 				bytes, err = json.Marshal(disk)
 				if err != nil {
-					marshalErr = append(marshalErr, specDeviceName)
+					marshalErr = append(marshalErr, err.Error())
 				}
 				gcpchaos.Status.AttachedDiskString = append(gcpchaos.Status.AttachedDiskString, string(bytes))
 				break
@@ -85,7 +85,7 @@ func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 		return err
 	}
 	if len(marshalErr) != 0 {
-		err = fmt.Errorf("marshal disk info (%s) error", marshalErr)
+		err = fmt.Errorf("instance (%s), marshal disk info error (%s)", gcpchaos.Spec.Instance, marshalErr)
 		e.Log.Error(err, "marshal disk info error")
 		return err
 	}
