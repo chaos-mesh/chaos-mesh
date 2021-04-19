@@ -58,8 +58,9 @@ func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 		return err
 	}
 	var (
-		bytes    []byte
-		notFound []string
+		bytes      []byte
+		notFound   []string
+		marshalErr []string
 	)
 	for _, specDeviceName := range *gcpchaos.Spec.DeviceName {
 		haveDisk := false
@@ -67,6 +68,9 @@ func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 			if disk.DeviceName == specDeviceName {
 				haveDisk = true
 				bytes, err = json.Marshal(disk)
+				if err != nil {
+					marshalErr = append(marshalErr, specDeviceName)
+				}
 				gcpchaos.Status.AttachedDiskString = append(gcpchaos.Status.AttachedDiskString, string(bytes))
 				break
 			}
@@ -78,6 +82,11 @@ func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 	if len(notFound) != 0 {
 		err = fmt.Errorf("instance (%s) does not have the disk (%s)", gcpchaos.Spec.Instance, notFound)
 		e.Log.Error(err, "the instance does not have the disk")
+		return err
+	}
+	if len(marshalErr) != 0 {
+		err = fmt.Errorf("marshal disk info (%s) error", marshalErr)
+		e.Log.Error(err, "marshal disk info error")
 		return err
 	}
 
