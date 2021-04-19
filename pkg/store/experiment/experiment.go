@@ -124,6 +124,12 @@ func (e *experimentStore) DeleteByFinishTime(_ context.Context, ttl time.Duratio
 	return nil
 }
 
+// DeleteByUids deletes archives by the uid list.
+func (e *experimentStore) DeleteByUids (_ context.Context, uids []string) error {
+	err := e.db.Table("experiments").Unscoped().Delete(core.Experiment{}, uids).Error
+	return err
+}
+
 // DeleteIncompleteExperiments implements the core.ExperimentStore.DeleteIncompleteExperiments method.
 func (e *experimentStore) DeleteIncompleteExperiments(_ context.Context) error {
 	return e.db.Where("finish_time IS NULL").Unscoped().Delete(core.Event{}).Error

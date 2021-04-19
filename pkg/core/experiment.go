@@ -46,6 +46,9 @@ type ExperimentStore interface {
 	// DeleteByFinishTime deletes archives which time difference is greater than the given time from FinishTime.
 	DeleteByFinishTime(context.Context, time.Duration) error
 
+	// DeleteByUids deletes archives by the uid list.
+	DeleteByUids(context.Context, []string) error
+
 	// DeleteIncompleteExperiments deletes all incomplete experiments.
 	// If the chaos-dashboard was restarted and the experiment is completed during the restart,
 	// which means the experiment would never save the finish_time.
