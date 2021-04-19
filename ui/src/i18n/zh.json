@@ -29,6 +29,7 @@
     "steps": {
       "basic": "基本信息",
       "scope": "范围",
+      "scopeDisabled": "（无需填写）",
       "schedule": "计划"
     },
     "loadFrom": "加载自",
@@ -83,6 +84,9 @@
       },
       "dns": {
         "title": "DNS 故障"
+      },
+      "aws": {
+        "title": "AWS 故障"
       }
     },
     "schedule": {
@@ -179,6 +183,7 @@
       "token": "令牌",
       "tokenHelper": "请输入令牌",
       "tokenValidation": "令牌不能为空",
+      "duplicateDesc": "令牌名称不能重复",
       "deleteDesc": "此操作不可逆"
     }
   },

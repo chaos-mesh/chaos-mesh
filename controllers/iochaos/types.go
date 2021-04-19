@@ -112,7 +112,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 		}
 		iochaos.Finalizers = finalizer.InsertFinalizer(iochaos.Finalizers, key)
 	}
-	r.Log.Info("commiting updates of podiochaos")
+	r.Log.Info("committing updates of podiochaos")
 	responses := m.Commit(ctx)
 	iochaos.Status.Experiment.PodRecords = make([]v1alpha1.PodStatus, 0, len(pods))
 	for _, keyErrorTuple := range responses {
