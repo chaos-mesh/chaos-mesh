@@ -262,6 +262,8 @@ dnsServer:
 
   nodeSelector: {}
 
+  podAnnotations: {}
+
   runtime: docker
 
   name: chaos-mesh-dns-server
