@@ -15,8 +15,9 @@ package v1alpha1
 
 // this file tests the coupling with all kinds map and each TemplateType
 import (
-	. "github.com/onsi/gomega"
 	"testing"
+
+	. "github.com/onsi/gomega"
 )
 
 func TestChaosKindMapShouldContainsAwsChaos(t *testing.T) {
