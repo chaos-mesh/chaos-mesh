@@ -17,12 +17,13 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/active"
 	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/cron"
 	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/gc"
+	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/utils"
 	"go.uber.org/fx"
 )
 
 var Module = fx.Provide(
 	fx.Annotated{
-		Group: "controller",
+		Group:  "controller",
 		Target: cron.NewController,
 	},
 	fx.Annotated{
@@ -30,7 +31,8 @@ var Module = fx.Provide(
 		Target: active.NewController,
 	},
 	fx.Annotated{
-		Group: "controller",
+		Group:  "controller",
 		Target: gc.NewController,
 	},
-	)
+	utils.NewActiveLister,
+)

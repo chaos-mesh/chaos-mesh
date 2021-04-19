@@ -15,12 +15,15 @@ package cron
 
 import (
 	"context"
+	"reflect"
 	"time"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/utils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
 	"github.com/go-logr/logr"
-	"github.com/robfig/cron"
+	"go.uber.org/fx"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apiserver/pkg/storage/names"
 	"k8s.io/client-go/tools/record"
@@ -31,7 +34,8 @@ import (
 
 type Reconciler struct {
 	client.Client
-	Log logr.Logger
+	Log          logr.Logger
+	ActiveLister *utils.ActiveLister
 
 	Recorder record.EventRecorder
 }
@@ -48,24 +52,42 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, nil
 	}
 
-	cron, err := cron.Parse(schedule.Spec.Schedule)
-	if err != nil {
-		r.Recorder.Eventf(schedule, "Warning", "Failed", "Failed to parse schedule: %s", err.Error())
-		return ctrl.Result{}, nil
-	}
-
 	now := time.Now()
 	shouldSpawn := false
-	lastScheduleTime := schedule.Status.LastScheduleTime.Time
-	expectScheduleTime := cron.Next(lastScheduleTime)
-	if lastScheduleTime.IsZero() {
-		shouldSpawn = true
-	} else if expectScheduleTime.Before(now) {
-		shouldSpawn = true
-	} else if expectScheduleTime.After(now) {
-		shouldSpawn = false
-		r.Log.Info("requeue later to reconcile the schedule", "requeue-after", expectScheduleTime.Sub(now))
-		return ctrl.Result{RequeueAfter: expectScheduleTime.Sub(now)}, nil
+	missedRun, nextRun, err := getRecentUnmetScheduleTime(schedule, now)
+	if err != nil {
+		r.Recorder.Eventf(schedule, "Warning", "Failed", "Failed to get run time: %s", err.Error())
+		return ctrl.Result{}, nil
+	}
+	if missedRun == nil {
+		r.Log.Info("requeue later to reconcile the schedule", "requeue-after", nextRun.Sub(now))
+		return ctrl.Result{RequeueAfter: nextRun.Sub(now)}, nil
+	}
+
+	if schedule.Spec.StartingDeadlineSeconds != nil {
+		if missedRun.Add(time.Second * time.Duration(*schedule.Spec.StartingDeadlineSeconds)).Before(now) {
+			r.Recorder.Eventf(schedule, "Warning", "MissSchedule", "Missed scheduled time to start a job: %s", missedRun.Format(time.RFC1123Z))
+			return ctrl.Result{}, nil
+		}
+	}
+
+	shouldSpawn = true
+
+	if schedule.Spec.ConcurrencyPolicy == v1alpha1.ForbidConcurrent {
+		list, err := r.ActiveLister.ListActiveJobs(ctx, schedule)
+		if err != nil {
+			r.Recorder.Eventf(schedule, "Warning", "Failed", "Failed to list active jobs: %s", err.Error())
+			return ctrl.Result{}, nil
+		}
+
+		items := reflect.ValueOf(list).Elem().FieldByName("Items")
+		for i := 0; i < items.Len(); i++ {
+			item := items.Index(i).Addr().Interface().(v1alpha1.InnerObject)
+			if !controller.IsChaosFinished(item, now) {
+				shouldSpawn = false
+				break
+			}
+		}
 	}
 
 	if shouldSpawn {
@@ -98,8 +120,9 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			r.Recorder.Eventf(schedule, "Warning", "Failed", "Failed to create new object: %s", err.Error())
 			return ctrl.Result{}, nil
 		}
+		r.Recorder.Eventf(schedule, "Normal", "Created", "Create new object: %s", meta.GetName())
 
-		lastScheduleTime = now
+		lastScheduleTime := now
 		updateError := retry.RetryOnConflict(retry.DefaultBackoff, func() error {
 			r.Log.Info("updating lastScheduleTime", "time", lastScheduleTime)
 			schedule = schedule.DeepCopyObject().(*v1alpha1.Schedule)
@@ -114,7 +137,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		})
 		if updateError != nil {
 			r.Log.Error(updateError, "fail to update")
-			r.Recorder.Eventf(schedule, "Normal", "Failed", "Failed to update lastScheduleTime: %s", updateError.Error())
+			r.Recorder.Eventf(schedule, "Warning", "Failed", "Failed to update lastScheduleTime: %s", updateError.Error())
 			return ctrl.Result{}, nil
 		}
 
@@ -124,13 +147,20 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	return ctrl.Result{}, nil
 }
 
-func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger) (types.Controller, error) {
+type Objs struct {
+	fx.In
+
+	Objs []types.Object `group:"objs"`
+}
+
+func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger, objs Objs, lister *utils.ActiveLister) (types.Controller, error) {
 	ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.Schedule{}).
 		Named("schedule-cron").
 		Complete(&Reconciler{
 			client,
 			log.WithName("schedule-cron"),
+			lister,
 			mgr.GetEventRecorderFor("schedule-cron"),
 		})
 	return "schedule", nil

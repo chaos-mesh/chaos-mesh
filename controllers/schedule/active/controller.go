@@ -18,6 +18,7 @@ import (
 	"reflect"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/utils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/go-logr/logr"
 	"go.uber.org/fx"
@@ -36,6 +37,8 @@ type Reconciler struct {
 	client.Client
 	Log logr.Logger
 
+	ActiveLister *utils.ActiveLister
+
 	Recorder record.EventRecorder
 }
 
@@ -49,18 +52,9 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, nil
 	}
 
-	kind, ok := v1alpha1.AllKinds()[string(schedule.Spec.Type)]
-	if !ok {
-		r.Log.Info("unknown kind", "kind", schedule.Spec.Type)
-		r.Recorder.Eventf(schedule, "Warning", "Failed", "Unknown type: %s", schedule.Spec.Type)
-		return ctrl.Result{}, nil
-	}
-
-	list := kind.ChaosList.DeepCopyObject()
-	err = r.List(ctx, list, client.MatchingLabels{"managed-by": schedule.Name})
+	list, err := r.ActiveLister.ListActiveJobs(ctx, schedule)
 	if err != nil {
-		r.Log.Error(err, "fail to list chaos")
-		r.Recorder.Eventf(schedule, "Warning", "Failed", "Failed to list chaos: %s", err.Error())
+		r.Recorder.Eventf(schedule, "Warning", "Failed", "Failed to list active jobs: %s", err.Error())
 		return ctrl.Result{}, nil
 	}
 
@@ -107,7 +101,7 @@ type Objs struct {
 	Objs []types.Object `group:"objs"`
 }
 
-func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger, objs Objs, scheme *runtime.Scheme) (types.Controller, error) {
+func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger, objs Objs, scheme *runtime.Scheme, lister *utils.ActiveLister) (types.Controller, error) {
 	builder := ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.Schedule{}).
 		Named("schedule-active")
@@ -121,6 +115,7 @@ func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger, objs
 		scheme,
 		client,
 		log.WithName("schedule-active"),
+		lister,
 		mgr.GetEventRecorderFor("schedule-active"),
 	})
 	return "schedule", nil

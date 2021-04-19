@@ -88,9 +88,9 @@ spec:
           - name: CHAOS_MESH_CA_CERT
             value: /etc/chaos-daemon/cert/ca.crt
           - name: QPS
-            value: 30
+            value: "30"
           - name: BURST
-            value: 50
+            value: "50"
           {{- end }}
         volumeMounts:
           - name: webhook-certs

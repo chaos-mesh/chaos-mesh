@@ -18,11 +18,13 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const KindSchedule = "Schedule"
+
 // +kubebuilder:object:root=true
 
 // Schedule is the cronly schedule object
 type Schedule struct {
-	metav1.TypeMeta `json:",inline"`
+	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	Spec ScheduleSpec `json:"spec"`
@@ -31,15 +33,35 @@ type Schedule struct {
 	Status ScheduleStatus `json:"status"`
 }
 
+type ConcurrencyPolicy string
+
+var (
+	ForbidConcurrent ConcurrencyPolicy = "Forbid"
+	AllowConcurrent  ConcurrencyPolicy = "Allow"
+)
+
 // ScheduleSpec is the specification of a schedule object
 type ScheduleSpec struct {
 	Schedule string `json:"schedule"`
 
 	// +optional
+	// +nullable
+	// +kubebuilder:default=0
+	// +kubebuilder:validation:Minimum=0
+	StartingDeadlineSeconds *int64 `json:"startingDeadlineSeconds"`
+
+	// +optional
+	// +kubebuilder:validation:Enum=Forbid;Allow
+	// +kubebuilder:default=Forbid
+	ConcurrencyPolicy ConcurrencyPolicy `json:"concurrencyPolicy"`
+
+	// +optional
+	// +kubebuilder:default=1
+	// +kubebuilder:validation:Minimum=1
 	HistoryLimit int `json:"historyLimit,omitempty"`
 
 	// TODO: use a custom type, as `TemplateType` contains other possible values
-	Type     TemplateType `json:"type"`
+	Type TemplateType `json:"type"`
 	// TODO: support Workflow
 	EmbedChaos `json:",inline"`
 }
@@ -59,7 +81,7 @@ type ScheduleStatus struct {
 type ScheduleList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []Schedule`json:"items"`
+	Items           []Schedule `json:"items"`
 }
 
 func init() {

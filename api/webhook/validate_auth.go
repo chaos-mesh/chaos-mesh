@@ -77,6 +77,12 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 		return admission.Allowed("")
 	}
 
+	// TODO: check the auth
+	// The resouce will be created by the SA of controller-manager, so checking the auth of Schedule is needed.
+	if chaosKind == v1alpha1.KindSchedule {
+		return admission.Allowed("")
+	}
+
 	kind, ok := v1alpha1.AllKinds()[chaosKind]
 	if !ok {
 		return admission.Errored(http.StatusBadRequest, fmt.Errorf("unknown kind %s", chaosKind))

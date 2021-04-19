@@ -15,27 +15,31 @@ package gc
 
 import (
 	"context"
+	"reflect"
+	"sort"
+
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/go-logr/logr"
 	"go.uber.org/fx"
+	k8sError "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
-	"reflect"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sort"
 )
 
 type Reconciler struct {
 	client.Client
-	Log logr.Logger
+	Log      logr.Logger
 	Recorder record.EventRecorder
 }
 
 func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ctx := context.Background()
 
+	// In this controller, schedule could be out of date, as the reconcilation may be not caused by
+	// an update on Schedule, but by a *Chaos.
 	schedule := &v1alpha1.Schedule{}
 	err := r.Get(ctx, req.NamespacedName, schedule)
 	if err != nil {
@@ -65,7 +69,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		statefulItems = append(statefulItems, item)
 	}
 
-	sort.Slice(statefulItems, func (x, y int) bool {
+	sort.Slice(statefulItems, func(x, y int) bool {
 		return statefulItems[x].GetObjectMeta().CreationTimestamp.Time.Before(statefulItems[y].GetObjectMeta().CreationTimestamp.Time)
 	})
 
@@ -74,7 +78,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	if exceededHistory > 0 {
 		for _, obj := range statefulItems[0:exceededHistory] {
 			err := r.Client.Delete(ctx, obj)
-			if err != nil {
+			if err != nil && !k8sError.IsNotFound(err) {
 				r.Recorder.Eventf(schedule, "Warning", "Failed", "Failed to delete: %s/%s", obj.GetObjectMeta().Namespace, obj.GetObjectMeta().Name)
 			}
 		}
@@ -86,7 +90,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 type Objs struct {
 	fx.In
 
-	Objs        []types.Object     `group:"objs"`
+	Objs []types.Object `group:"objs"`
 }
 
 func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger, objs Objs, scheme *runtime.Scheme) (types.Controller, error) {
