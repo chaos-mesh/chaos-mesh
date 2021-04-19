@@ -123,7 +123,7 @@ const Step1 = () => {
       <Box hidden={step1}>
         <Box overflow="hidden">
           <GridList className={classes.gridList} cols={isDesktopScreen ? 1.5 : 3.5} spacing={9} cellHeight="auto">
-            {targetDataEntries.map(([key, t]) => (
+            {targetDataEntries.map(([key]) => (
               <GridListTile key={key}>
                 <Card
                   className={clsx(classes.card, kind === key ? classes.cardActive : '')}

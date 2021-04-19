@@ -35,7 +35,7 @@ const AutocompleteMultipleField: React.FC<AutocompleteMultipleFieldProps & TextF
     <Box mb={1.5}>
       <Autocomplete
         multiple
-        options={options}
+        options={!props.disabled ? options : []}
         noOptionsText={T('common.noOptions')}
         value={labels}
         onChange={onChange}

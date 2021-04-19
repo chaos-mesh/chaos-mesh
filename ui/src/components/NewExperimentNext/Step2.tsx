@@ -34,7 +34,8 @@ const useStyles = makeStyles((theme) =>
 const Step2 = () => {
   const classes = useStyles()
 
-  const { namespaces, step2, basic } = useStoreSelector((state) => state.experiments)
+  const { namespaces, step2, basic, target } = useStoreSelector((state) => state.experiments)
+  const scopeDisabled = target.kind === 'AwsChaos'
   const dispatch = useStoreDispatch()
 
   const [init, setInit] = useState(basicData)
@@ -83,7 +84,10 @@ const Step2 = () => {
               <Grid container spacing={6}>
                 <Grid item xs={12} md={6}>
                   <Box mb={3}>
-                    <Typography>{T('newE.steps.scope')}</Typography>
+                    <Typography color={scopeDisabled ? 'textSecondary' : undefined}>
+                      {T('newE.steps.scope')}
+                      {scopeDisabled && T('newE.steps.scopeDisabled')}
+                    </Typography>
                   </Box>
                   {namespaces.length ? <Scope namespaces={namespaces} /> : <SkeletonN n={6} />}
                 </Grid>
