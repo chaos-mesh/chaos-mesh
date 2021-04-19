@@ -113,6 +113,30 @@ func (e *eventStore) ListByUID(_ context.Context, uid string) ([]*core.Event, er
 	return eventList, nil
 }
 
+// ListByUID returns an event list by the uid of the experiment.
+func (e *eventStore) ListByUIDs(_ context.Context, uids []string) ([]*core.Event, error) {
+	var resList []core.Event
+	eventList := make([]*core.Event, 0)
+
+	if err := e.db.Where(
+		"experiment_id IN ?", uids).
+		Find(&resList).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
+		return nil, err
+	}
+
+	for _, et := range resList {
+		pods, err := e.findPodRecordsByEventID(context.Background(), et.ID)
+		if err != nil {
+			return nil, err
+		}
+		var event core.Event = et
+		event.Pods = pods
+		eventList = append(eventList, &event)
+	}
+
+	return eventList, nil
+}
+
 // ListByExperiment returns an event list by the name and namespace of the experiment.
 func (e *eventStore) ListByExperiment(_ context.Context, namespace string, experiment string) ([]*core.Event, error) {
 	var resList []core.Event
@@ -441,6 +465,22 @@ func (e *eventStore) DeleteByUID(_ context.Context, uid string) error {
 	}
 	return e.db.Where("experiment_id = ?", uid).Unscoped().
 		Delete(core.Event{}).Error
+}
+
+// DeleteByUIDs deletes events by the uid list of the experiment.
+func (e *eventStore) DeleteByUIDs(_ context.Context, uids []string) error {
+	eventList, err := e.ListByUIDs(context.Background(), uids)
+	if err != nil {
+		return err
+	}
+	eventIDList := make([]uint, len(eventList))
+	for _, et := range eventList {
+		eventIDList = append(eventIDList, et.ID)
+	}
+	if err = e.db.Model(core.PodRecord{}).Where("event_id IN ?", eventIDList).Unscoped().Delete(core.PodRecord{}).Error; err != nil {
+		return err
+	}
+	return e.db.Where("experiment_id IN ?", uids).Unscoped().Delete(core.Event{}).Error
 }
 
 func (e *eventStore) getUID(_ context.Context, ns, name string) (string, error) {

@@ -265,7 +265,7 @@ func (m *MockExperimentStore) DeleteIncompleteExperiments(context.Context) error
 	panic("implement me")
 }
 
-func (m *MockExperimentStore) DeleteByUids(context.Context) error {
+func (m *MockExperimentStore) DeleteByUIDs(context.Context) error {
 	panic("implement me")
 }
 

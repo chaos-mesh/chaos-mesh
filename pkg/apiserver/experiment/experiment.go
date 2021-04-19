@@ -86,6 +86,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint.POST("/new", s.createExperiment)
 	endpoint.GET("/detail/:uid", s.getExperimentDetail)
 	endpoint.DELETE("/:uid", s.deleteExperiment)
+	endpoint.DELETE("/", s.batchDeleteExperiment)
 	endpoint.PUT("/update", s.updateExperiment)
 	endpoint.PUT("/pause/:uid", s.pauseExperiment)
 	endpoint.PUT("/start/:uid", s.startExperiment)
@@ -914,8 +915,7 @@ func (s *Service) getExperimentDetail(c *gin.Context) {
 // @Description Delete the specified chaos experiment.
 // @Tags experiments
 // @Produce json
-// @Param uid path string false "uid"
-// @Param uids query string false "uids"
+// @Param uid path string true "uid"
 // @Param force query string true "force" Enums(true, false)
 // @Success 200 {object} StatusResponse
 // @Failure 400 {object} utils.APIError
@@ -923,6 +923,102 @@ func (s *Service) getExperimentDetail(c *gin.Context) {
 // @Failure 500 {object} utils.APIError
 // @Router /experiments/{uid} [delete]
 func (s *Service) deleteExperiment(c *gin.Context) {
+	var (
+		chaosKind *v1alpha1.ChaosKind
+		chaosMeta metav1.Object
+		ok        bool
+		exp       *core.Experiment
+	)
+
+	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
+	if err != nil {
+		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		return
+	}
+
+	uid := c.Param("uid")
+	if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInvalidRequest.New("the experiment is not found"))
+		} else {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
+		}
+		return
+	}
+
+	kind := exp.Kind
+	ns := exp.Namespace
+	name := exp.Name
+	force := c.DefaultQuery("force", "false")
+
+	ctx := context.TODO()
+	chaosKey := types.NamespacedName{Namespace: ns, Name: name}
+
+	if chaosKind, ok = v1alpha1.AllKinds()[kind]; !ok {
+		c.Status(http.StatusBadRequest)
+		_ = c.Error(utils.ErrInvalidRequest.New(kind + " is not supported"))
+		return
+	}
+	if err := kubeCli.Get(ctx, chaosKey, chaosKind.Chaos); err != nil {
+		if apierrors.IsNotFound(err) {
+			c.Status(http.StatusNotFound)
+			_ = c.Error(utils.ErrNotFound.NewWithNoMessage())
+		} else {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		}
+		return
+	}
+
+	if force == "true" {
+		if chaosMeta, ok = chaosKind.Chaos.(metav1.Object); !ok {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("failed to get chaos meta information")))
+			return
+		}
+
+		annotations := chaosMeta.GetAnnotations()
+		if annotations == nil {
+			annotations = make(map[string]string)
+		}
+		annotations[common.AnnotationCleanFinalizer] = common.AnnotationCleanFinalizerForced
+		chaosMeta.SetAnnotations(annotations)
+		if err := kubeCli.Update(context.Background(), chaosKind.Chaos); err != nil {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("forced deletion of chaos failed, because update chaos annotation error")))
+			return
+		}
+	}
+
+	if err := kubeCli.Delete(ctx, chaosKind.Chaos, &client.DeleteOptions{}); err != nil {
+		if apierrors.IsNotFound(err) {
+			c.Status(http.StatusNotFound)
+			_ = c.Error(utils.ErrNotFound.NewWithNoMessage())
+		} else {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		}
+		return
+	}
+
+	c.JSON(http.StatusOK, StatusResponse{Status: "success"})
+}
+
+
+// @Summary Delete the specified chaos experiment.
+// @Description Delete the specified chaos experiment.
+// @Tags experiments
+// @Produce json
+// @Param uids query string true "uids"
+// @Param force query string true "force" Enums(true, false)
+// @Success 200 {object} StatusResponse
+// @Failure 400 {object} utils.APIError
+// @Failure 404 {object} utils.APIError
+// @Failure 500 {object} utils.APIError
+// @Router /experiments/{uid} [delete]
+func (s *Service) batchDeleteExperiment(c *gin.Context) {
 	var (
 		chaosKind *v1alpha1.ChaosKind
 		chaosMeta metav1.Object
@@ -938,27 +1034,16 @@ func (s *Service) deleteExperiment(c *gin.Context) {
 		return
 	}
 
-	uid := c.Param("uid")
 	uids := c.Query("uids")
-	if uids != "" {
-		uidSlice = strings.Split(uids, ",")
+	if uids == "" {
+		c.Status(http.StatusBadRequest)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("uids cannot be empty")))
+		return
 	}
 	force := c.DefaultQuery("force", "false")
+	uidSlice = strings.Split(uids, ",")
 	errFlag = false
 
-	if uid != "" && uids != "" {
-		c.Status(http.StatusBadRequest)
-		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("uid and uids cannot exist at the same time")))
-		return
-	} else if uid == "" && uids == "" {
-		c.Status(http.StatusBadRequest)
-		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("uid and uids cannot be empty at the same time")))
-		return
-	}
-
-	if uid != "" {
-		uidSlice = append(uidSlice, uid)
-	}
 	for _, uid := range uidSlice {
 		if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
 			if gorm.IsRecordNotFoundError(err) {

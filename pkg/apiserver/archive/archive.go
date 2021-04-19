@@ -329,7 +329,6 @@ func (s *Service) delete(c *gin.Context) {
 func (s *Service) batchDelete(c *gin.Context) {
 	var (
 		err      error
-		exp      *core.Experiment
 		uidSlice []string
 	)
 
@@ -343,7 +342,7 @@ func (s *Service) batchDelete(c *gin.Context) {
 	errFlag := false
 
 	for _, uid := range uidSlice {
-		if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
+		if _, err = s.archive.FindByUID(context.Background(), uid); err != nil {
 			if gorm.IsRecordNotFoundError(err) {
 				_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("delete archive uid (%s) error, because the archive is not found", uid)))
 			} else {
@@ -352,19 +351,23 @@ func (s *Service) batchDelete(c *gin.Context) {
 			errFlag = true
 			continue
 		}
-		if err = s.event.DeleteByUID(context.Background(), uid); err != nil {
-			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("delete archive uid (%s) error, because %s", uid, err.Error())))
-			errFlag = true
-		}
 	}
 	if errFlag {
 		c.Status(http.StatusInternalServerError)
 		return
 	}
-	if err = s.archive.DeleteByUids(context.Background(), uidSlice); err != nil {
+	if err = s.archive.DeleteByUIDs(context.Background(), uidSlice); err != nil {
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
 		c.Status(http.StatusInternalServerError)
+		errFlag = true
+	}
+	if err = s.event.DeleteByUIDs(context.Background(), uidSlice); err != nil {
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		c.Status(http.StatusInternalServerError)
+		errFlag = true
 	}
 
-	c.JSON(http.StatusOK, StatusResponse{Status: "success"})
+	if !errFlag {
+		c.JSON(http.StatusOK, StatusResponse{Status: "success"})
+	}
 }
