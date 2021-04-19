@@ -363,7 +363,7 @@ func (s *Service) batchDelete(c *gin.Context) {
 			errFlag = true
 		}
 	}
-	if errFlag == true {
+	if errFlag {
 		c.Status(http.StatusInternalServerError)
 	} else {
 		c.JSON(http.StatusOK, StatusResponse{Status: "success"})
