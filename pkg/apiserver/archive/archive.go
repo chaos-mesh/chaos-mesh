@@ -341,21 +341,6 @@ func (s *Service) batchDelete(c *gin.Context) {
 	uidSlice = strings.Split(uids, ",")
 	errFlag := false
 
-	for _, uid := range uidSlice {
-		if _, err = s.archive.FindByUID(context.Background(), uid); err != nil {
-			if gorm.IsRecordNotFoundError(err) {
-				_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("delete archive uid (%s) error, because the archive is not found", uid)))
-			} else {
-				_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("delete archive uid (%s) error, because %s", uid, err.Error())))
-			}
-			errFlag = true
-			continue
-		}
-	}
-	if errFlag {
-		c.Status(http.StatusInternalServerError)
-		return
-	}
 	if err = s.archive.DeleteByUIDs(context.Background(), uidSlice); err != nil {
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
 		c.Status(http.StatusInternalServerError)
