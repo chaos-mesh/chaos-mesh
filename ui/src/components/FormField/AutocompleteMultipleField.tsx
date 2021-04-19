@@ -32,7 +32,7 @@ const AutocompleteMultipleField: React.FC<AutocompleteMultipleFieldProps & TextF
   const onDelete = (val: string) => () => setLabels(labels.filter((d) => d !== val))
 
   return (
-    <Box mb={3}>
+    <Box mb={1.5}>
       <Autocomplete
         multiple
         options={options}

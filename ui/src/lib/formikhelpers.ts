@@ -193,6 +193,27 @@ function validate(defaultI18n: string, i18n?: string) {
 export const validateName = (i18n?: string) => validate('The name is required', i18n)
 export const validateDuration = (i18n?: string) => validate('The duration is required', i18n)
 
+function scopeToYAMLJSON(scope: ExperimentScope) {
+  const result = {
+    selectors: {} as any,
+    mode: scope.mode,
+  }
+
+  if (scope.namespace_selectors.length) {
+    result.selectors.namespaces = scope.namespace_selectors
+  }
+
+  if ((scope.label_selectors as string[]).length) {
+    result.selectors.labels = scope.label_selectors
+  }
+
+  if ((scope.annotation_selectors as string[]).length) {
+    result.selectors.annotations = scope.annotation_selectors
+  }
+
+  return result
+}
+
 export function constructWorkflow(name: string, duration: string, templates: Template[]) {
   const tasks: string[] = []
   const realTemplates: Record<string, any>[] = []
@@ -205,6 +226,7 @@ export function constructWorkflow(name: string, duration: string, templates: Tem
       switch (t.type) {
         case 'single':
           const experiment = t.experiments[0]
+          const basic = experiment.basic
           const kind = experiment.target.kind
           const spec = _snakecase(kind)
 
@@ -212,13 +234,17 @@ export function constructWorkflow(name: string, duration: string, templates: Tem
             name: t.name,
             template_type: kind,
             duration: experiment.basic.scheduler.duration,
-            [spec]: experiment.target[spec],
+            [spec]: {
+              ...scopeToYAMLJSON(basic.scope),
+              ...experiment.target[spec],
+            },
           })
 
           break
         case 'serial':
           t.experiments.forEach((d) => {
             const name = d.basic.name
+            const basic = experiment.basic
             const kind = d.target.kind
             const spec = _snakecase(kind)
 
@@ -227,7 +253,10 @@ export function constructWorkflow(name: string, duration: string, templates: Tem
                 name,
                 template_type: kind,
                 duration: d.basic.scheduler.duration,
-                [spec]: d.target[spec],
+                [spec]: {
+                  ...scopeToYAMLJSON(basic.scope),
+                  ...d.target[spec],
+                },
               })
             }
           })
@@ -261,15 +290,17 @@ export function constructWorkflow(name: string, duration: string, templates: Tem
     metadata: {
       name,
     },
-    entry: 'entry',
-    templates: [
-      {
-        name: 'entry',
-        template_type: 'Serial',
-        duration,
-        tasks,
-      },
-      ...realTemplates,
-    ],
+    spec: {
+      entry: 'entry',
+      templates: [
+        {
+          name: 'entry',
+          template_type: 'Serial',
+          duration,
+          tasks,
+        },
+        ...realTemplates,
+      ],
+    },
   })
 }

@@ -5,7 +5,7 @@ import React from 'react'
 
 const TextField: React.FC<TextFieldProps & { validate?: FieldValidator; fast?: boolean; mb?: number }> = ({
   fast = false,
-  mb = 3,
+  mb = 1.5,
   ...rest
 }) => {
   const rendered = fast ? (

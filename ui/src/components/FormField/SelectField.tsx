@@ -17,7 +17,7 @@ const useStyles = makeStyles({
 
 const SelectField: React.FC<TextFieldProps & { multiple?: boolean; mb?: number }> = ({
   multiple = false,
-  mb = 3,
+  mb = 1.5,
   ...props
 }) => {
   const classes = useStyles()
@@ -54,8 +54,8 @@ const SelectField: React.FC<TextFieldProps & { multiple?: boolean; mb?: number }
   const rendered = (
     <Field
       {...props}
-      as={TextField}
       className={clsx(multiple && classes.root, props.className)}
+      as={TextField}
       variant="outlined"
       select
       margin="dense"

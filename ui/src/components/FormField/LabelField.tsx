@@ -82,7 +82,7 @@ const LabelField: React.FC<LabelFieldProps & TextFieldProps> = ({ isKV = false, 
   const onDelete = (val: string) => () => setLabels(labels.filter((d: string) => d !== val))
 
   return (
-    <Box mb={3}>
+    <Box mb={1.5}>
       <Autocomplete
         multiple
         options={labels}

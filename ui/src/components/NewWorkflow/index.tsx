@@ -1,13 +1,16 @@
-import { Box, Button, Grid, Step, StepLabel, Stepper, Typography } from '@material-ui/core'
+import { Box, Button, Grid, MenuItem, Step, StepLabel, Stepper, Typography } from '@material-ui/core'
 import ConfirmDialog, { ConfirmDialogHandles } from 'components-mui/ConfirmDialog'
 import { Form, Formik } from 'formik'
 import MultiNode, { MultiNodeHandles } from './MultiNode'
+import { SelectField, TextField } from 'components/FormField'
 import Suspend, { SuspendValues } from './Suspend'
 import { Template, deleteTemplate, updateTemplate } from 'slices/workflows'
 import { resetNewExperiment, setExternalExperiment } from 'slices/experiments'
 import { useEffect, useRef, useState } from 'react'
 import { useStoreDispatch, useStoreSelector } from 'store'
+import { validateDuration, validateName } from 'lib/formikhelpers'
 
+import { Ace } from 'ace-builds'
 import Add from './Add'
 import CheckIcon from '@material-ui/icons/Check'
 import NewExperiment from 'components/NewExperimentNext'
@@ -16,16 +19,17 @@ import PublishIcon from '@material-ui/icons/Publish'
 import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline'
 import Space from 'components-mui/Space'
 import T from 'components/T'
-import { TextField } from 'components/FormField'
 import UndoIcon from '@material-ui/icons/Undo'
 import YAMLEditor from 'components/YAMLEditor'
 import _isEmpty from 'lodash.isempty'
 import _snakecase from 'lodash.snakecase'
+import api from 'api'
 import clsx from 'clsx'
 import { constructWorkflow } from 'lib/formikhelpers'
 import { makeStyles } from '@material-ui/core/styles'
 import { setAlert } from 'slices/globalStatus'
 import { useIntl } from 'react-intl'
+import yaml from 'js-yaml'
 
 const initialSelected = {
   name: '',
@@ -84,6 +88,7 @@ const NewWorkflow = () => {
   const intl = useIntl()
 
   const state = useStoreSelector((state) => state)
+  const { namespaces } = state.experiments
   const { templates } = state.workflows
   const { theme } = state.settings
   const dispatch = useStoreDispatch()
@@ -91,6 +96,7 @@ const NewWorkflow = () => {
   const [steps, setSteps] = useState<IStep[]>([])
   const [restoreIndex, setRestoreIndex] = useState(-1)
   const [showRemove, setShowRemove] = useState(-1)
+  const [yamlEditor, setYAMLEditor] = useState<Ace.Editor>()
   const [selected, setSelected] = useState(initialSelected)
   const confirmRef = useRef<ConfirmDialogHandles>(null)
   const multiNodeRef = useRef<MultiNodeHandles>(null)
@@ -257,7 +263,12 @@ const NewWorkflow = () => {
   }
 
   // TODO
-  const submitWorkflow = () => {}
+  const submitWorkflow = () => {
+    const workflow = yamlEditor?.getValue()
+
+    console.log(yaml.load(workflow!))
+    api.workflows.newWorkflow(yaml.load(workflow!))
+  }
 
   return (
     <>
@@ -367,24 +378,60 @@ const NewWorkflow = () => {
           </Space>
         </Grid>
         <Grid item xs={12} md={4} className={classes.leftSticky}>
-          <Space display="flex" flexDirection="column" height="100%" vertical spacing={6}>
-            <Typography>{T('common.preview')}</Typography>
-            <Box flex={1}>
-              <Paper style={{ height: '100%' }} padding={0}>
-                <YAMLEditor theme={theme} data={constructWorkflow('workflow', 'xxx', Object.values(templates))} />
-              </Paper>
-            </Box>
-            <Button
-              variant="contained"
-              color="primary"
-              startIcon={<PublishIcon />}
-              fullWidth
-              disabled={_isEmpty(templates)}
-              onClick={submitWorkflow}
-            >
-              {T('newW.submit')}
-            </Button>
-          </Space>
+          <Formik initialValues={{ name: '', namespace: '', duration: '' }} onSubmit={submitWorkflow}>
+            {({ errors, touched }) => (
+              <Space display="flex" flexDirection="column" height="100%" vertical spacing={6}>
+                <Typography>{T('common.preview')}</Typography>
+                <Form>
+                  <TextField
+                    name="name"
+                    label={T('newE.basic.name')}
+                    validate={validateName((T('newW.nameValidation') as unknown) as string)}
+                    helperText={errors.name && touched.name ? errors.name : T('newW.nameHelper')}
+                    error={errors.name && touched.name ? true : false}
+                  />
+                  <SelectField
+                    name="namespace"
+                    label={T('newE.basic.namespace')}
+                    helperText={T('newE.basic.namespaceHelper')}
+                  >
+                    {namespaces.map((n) => (
+                      <MenuItem key={n} value={n}>
+                        {n}
+                      </MenuItem>
+                    ))}
+                  </SelectField>
+                  <TextField
+                    name="duration"
+                    label={T('newE.schedule.duration')}
+                    validate={validateDuration((T('newW.durationValidation') as unknown) as string)}
+                    helperText={errors.duration && touched.duration ? errors.duration : T('newW.durationHelper')}
+                    error={errors.duration && touched.duration ? true : false}
+                    mb={0}
+                  />
+                </Form>
+                <Box flex={1}>
+                  <Paper style={{ height: '100%' }} padding={0}>
+                    <YAMLEditor
+                      theme={theme}
+                      data={constructWorkflow('workflow', 'xxx', Object.values(templates))}
+                      mountEditor={setYAMLEditor}
+                    />
+                  </Paper>
+                </Box>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                  startIcon={<PublishIcon />}
+                  fullWidth
+                  disabled={_isEmpty(templates)}
+                >
+                  {T('newW.submit')}
+                </Button>
+              </Space>
+            )}
+          </Formik>
         </Grid>
       </Grid>
       <ConfirmDialog
