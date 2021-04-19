@@ -25,12 +25,12 @@ func newScheduleCodeGenerator(types []string) *scheduleCodeGenerator {
 	return &scheduleCodeGenerator{chaosTypes: types}
 }
 
-func (it *workflowCodeGenerator) AppendTypes(typeName string) {
+func (it *scheduleCodeGenerator) AppendTypes(typeName string) {
 	it.chaosTypes = append(it.chaosTypes, typeName)
 }
 
-func (it *workflowCodeGenerator) Render() string {
+func (it *scheduleCodeGenerator) Render() string {
 	return fmt.Sprintf(`
 
-`)
+	`)
 }

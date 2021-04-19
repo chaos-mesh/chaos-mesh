@@ -15,6 +15,8 @@ package cron
 
 import (
 	"context"
+	"time"
+
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/go-logr/logr"
@@ -25,7 +27,6 @@ import (
 	"k8s.io/client-go/util/retry"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"time"
 )
 
 type Reconciler struct {
@@ -86,7 +87,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 				BlockOwnerDeletion: &t,
 			},
 		})
-		meta.SetLabels(map[string]string {
+		meta.SetLabels(map[string]string{
 			"managed-by": schedule.Name,
 		})
 		meta.SetNamespace(schedule.Namespace)
@@ -103,13 +104,13 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			r.Log.Info("updating lastScheduleTime", "time", lastScheduleTime)
 			schedule = schedule.DeepCopyObject().(*v1alpha1.Schedule)
 
-			if err := r.Client.Get(context.TODO(), req.NamespacedName, schedule); err != nil {
+			if err := r.Client.Get(ctx, req.NamespacedName, schedule); err != nil {
 				r.Log.Error(err, "unable to get schedule")
 				return err
 			}
 
 			schedule.Status.LastScheduleTime.Time = lastScheduleTime
-			return r.Client.Update(context.TODO(), schedule)
+			return r.Client.Update(ctx, schedule)
 		})
 		if updateError != nil {
 			r.Log.Error(updateError, "fail to update")
@@ -123,7 +124,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	return ctrl.Result{}, nil
 }
 
-func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger ) (types.Controller, error) {
+func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger) (types.Controller, error) {
 	ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.Schedule{}).
 		Named("schedule-cron").
@@ -131,6 +132,6 @@ func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger ) (ty
 			client,
 			log.WithName("schedule-cron"),
 			mgr.GetEventRecorderFor("schedule-cron"),
-	})
+		})
 	return "schedule", nil
 }

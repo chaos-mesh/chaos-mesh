@@ -15,6 +15,8 @@ package active
 
 import (
 	"context"
+	"reflect"
+
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/go-logr/logr"
@@ -24,7 +26,6 @@ import (
 	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/tools/reference"
 	"k8s.io/client-go/util/retry"
-	"reflect"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -82,13 +83,13 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		r.Log.Info("updating active", "active", active)
 		schedule = schedule.DeepCopyObject().(*v1alpha1.Schedule)
 
-		if err := r.Client.Get(context.TODO(), req.NamespacedName, schedule); err != nil {
+		if err := r.Client.Get(ctx, req.NamespacedName, schedule); err != nil {
 			r.Log.Error(err, "unable to get schedule")
 			return err
 		}
 
 		schedule.Status.Active = active
-		return r.Client.Update(context.TODO(), schedule)
+		return r.Client.Update(ctx, schedule)
 	})
 	if updateError != nil {
 		r.Log.Error(updateError, "fail to update")
@@ -103,7 +104,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 type Objs struct {
 	fx.In
 
-	Objs        []types.Object     `group:"objs"`
+	Objs []types.Object `group:"objs"`
 }
 
 func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger, objs Objs, scheme *runtime.Scheme) (types.Controller, error) {
@@ -118,9 +119,9 @@ func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger, objs
 
 	builder.Complete(&Reconciler{
 		scheme,
-			client,
-			log.WithName("schedule-active"),
-			mgr.GetEventRecorderFor("schedule-active"),
-		})
+		client,
+		log.WithName("schedule-active"),
+		mgr.GetEventRecorderFor("schedule-active"),
+	})
 	return "schedule", nil
 }
