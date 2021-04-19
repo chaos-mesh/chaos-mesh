@@ -125,7 +125,7 @@ func (e *experimentStore) DeleteByFinishTime(_ context.Context, ttl time.Duratio
 }
 
 // DeleteByUIDs deletes archives by the uid list.
-func (e *experimentStore) DeleteByUIDs (_ context.Context, uids []string) error {
+func (e *experimentStore) DeleteByUIDs(_ context.Context, uids []string) error {
 	return e.db.Where("uid IN ?", uids).Unscoped().Delete(core.Experiment{}).Error
 }
 

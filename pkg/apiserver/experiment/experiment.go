@@ -1006,7 +1006,6 @@ func (s *Service) deleteExperiment(c *gin.Context) {
 	c.JSON(http.StatusOK, StatusResponse{Status: "success"})
 }
 
-
 // @Summary Delete the specified chaos experiment.
 // @Description Delete the specified chaos experiment.
 // @Tags experiments
