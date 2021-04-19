@@ -352,12 +352,6 @@ func (s *Service) batchDelete(c *gin.Context) {
 			errFlag = true
 			continue
 		}
-
-		if err = s.archive.Delete(context.Background(), exp); err != nil {
-			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("delete archive uid (%s) error, because %s", uid, err.Error())))
-			errFlag = true
-			continue
-		}
 		if err = s.event.DeleteByUID(context.Background(), uid); err != nil {
 			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("delete archive uid (%s) error, because %s", uid, err.Error())))
 			errFlag = true
@@ -365,7 +359,12 @@ func (s *Service) batchDelete(c *gin.Context) {
 	}
 	if errFlag {
 		c.Status(http.StatusInternalServerError)
-	} else {
-		c.JSON(http.StatusOK, StatusResponse{Status: "success"})
+		return
 	}
+	if err = s.archive.DeleteByUids(context.Background(), uidSlice); err != nil {
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		c.Status(http.StatusInternalServerError)
+	}
+
+	c.JSON(http.StatusOK, StatusResponse{Status: "success"})
 }
