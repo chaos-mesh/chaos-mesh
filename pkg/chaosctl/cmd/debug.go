@@ -25,15 +25,20 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
 	cm "github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug/iochaos"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug/networkchaos"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug/stresschaos"
 )
 
-type debugOptions struct {
-	logger    logr.Logger
-	namespace string
+type DebugOptions struct {
+	logger     logr.Logger
+	namespace  string
+	CaCertFile string
+	CertFile   string
+	KeyFile    string
+	Insecure   bool
 }
 
 const (
@@ -43,7 +48,7 @@ const (
 )
 
 func NewDebugCommand(logger logr.Logger) (*cobra.Command, error) {
-	o := &debugOptions{
+	o := &DebugOptions{
 		logger: logger,
 	}
 
@@ -144,6 +149,10 @@ Examples:
 	debugCmd.AddCommand(ioCmd)
 
 	debugCmd.PersistentFlags().StringVarP(&o.namespace, "namespace", "n", "default", "namespace to find chaos")
+	debugCmd.PersistentFlags().StringVar(&o.CaCertFile, "cacert", "", "file path to cacert file")
+	debugCmd.PersistentFlags().StringVar(&o.CertFile, "cert", "", "file path to cert file")
+	debugCmd.PersistentFlags().StringVar(&o.KeyFile, "key", "", "file path to key file")
+	debugCmd.PersistentFlags().BoolVarP(&o.Insecure, "insecure", "i", false, "Insecure mode will use unauthorized grpc")
 	err := debugCmd.RegisterFlagCompletionFunc("namespace", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		clientset, err := cm.InitClientSet()
 		if err != nil {
@@ -155,7 +164,7 @@ Examples:
 }
 
 // Run debug
-func (o *debugOptions) Run(chaosType string, args []string, c *cm.ClientSet) error {
+func (o *DebugOptions) Run(chaosType string, args []string, c *cm.ClientSet) error {
 	if len(args) > 1 {
 		return fmt.Errorf("only one chaos could be specified")
 	}
@@ -172,7 +181,8 @@ func (o *debugOptions) Run(chaosType string, args []string, c *cm.ClientSet) err
 		return err
 	}
 	var result []cm.ChaosResult
-
+	common.TLSFiles = common.TLSFileConfig{CaCert: o.CaCertFile, Cert: o.CertFile, Key: o.KeyFile}
+	common.Insecure = o.Insecure
 	for i, chaos := range chaosList {
 		var chaosResult cm.ChaosResult
 		chaosResult.Name = chaosNameList[i]

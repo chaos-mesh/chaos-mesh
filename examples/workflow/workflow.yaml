@@ -9,10 +9,11 @@ spec:
       template_type: Serial
       duration: 240s
       tasks:
+        - workflow-stress-chaos
         - prefix-suspending
         - workflow-network-chaos
         - suffix-suspending
-        - worklfow-pod-chaos
+        - workflow-pod-chaos
     - name: prefix-suspending
       template_type: Suspend
       duration: 10s
@@ -30,7 +31,7 @@ spec:
           latency: "90ms"
           correlation: "25"
           jitter: "90ms"
-    - name: worklfow-pod-chaos
+    - name: workflow-pod-chaos
       template_type: PodChaos
       duration: 40s
       pod_chaos:
@@ -41,6 +42,19 @@ spec:
             "app": "hello-kubernetes"
         scheduler:
           cron: "@every 10s"
+    - name: workflow-stress-chaos
+      template_type: StressChaos
+      duration: 20s
+      stress_chaos:
+        mode: one
+        selector:
+          labelSelectors:
+            "app": "hello-kubernetes"
+        stressors:
+          cpu:
+            workers: 1
+            load: 20
+            options: ["--cpu 1", "--timeout 600"]
     - name: suffix-suspending
       template_type: Suspend
       duration: 5s

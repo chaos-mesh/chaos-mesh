@@ -50,10 +50,6 @@ FAILPOINT_ENABLE  := $$(find $$PWD/ -type d | grep -vE "(\.git|bin)" | xargs $(G
 FAILPOINT_DISABLE := $$(find $$PWD/ -type d | grep -vE "(\.git|bin)" | xargs $(GOBIN)/failpoint-ctl disable)
 
 GO_BUILD_CACHE ?= $(HOME)/.cache/chaos-mesh
-all: manifests/crd.yaml image
-go_build_cache_directory:
-	mkdir -p $(GO_BUILD_CACHE)/chaos-mesh-gobuild
-	mkdir -p $(GO_BUILD_CACHE)/chaos-mesh-gopath
 
 BUILD_TAGS ?=
 
@@ -67,6 +63,10 @@ endif
 
 CLEAN_TARGETS :=
 
+all: manifests/crd.yaml image
+go_build_cache_directory:
+	mkdir -p $(GO_BUILD_CACHE)/chaos-mesh-gobuild
+	mkdir -p $(GO_BUILD_CACHE)/chaos-mesh-gopath
 
 check: fmt vet boilerplate lint generate manifests/crd.yaml tidy
 
@@ -131,10 +131,11 @@ chaosctl:
 run: generate fmt vet manifests
 	$(GO) run ./cmd/controller-manager/main.go
 
+NAMESPACE ?= chaos-testing
 # Install CRDs into a cluster
 install: manifests
 	$(KUBECTL_BIN) apply -f manifests/crd.yaml
-	bash -c '[[ `$(HELM_BIN) version --client --short` == "Client: v2"* ]] && $(HELM_BIN) install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing || $(HELM_BIN) install chaos-mesh helm/chaos-mesh --namespace=chaos-testing;'
+	$(HELM_BIN) upgrade --install chaos-mesh helm/chaos-mesh --namespace=${NAMESPACE} --set registry=${DOCKER_REGISTRY} --set dnsServer.create=true --set dashboard.create=true;
 
 # Generate manifests e.g. CRD, RBAC etc.
 config: $(GOBIN)/controller-gen
@@ -182,6 +183,8 @@ boilerplate:
 	./hack/verify-boilerplate.sh
 
 image: image-chaos-daemon image-chaos-mesh image-chaos-dashboard
+
+e2e-image: image-e2e-helper
 
 GO_TARGET_PHONY :=
 
@@ -255,24 +258,26 @@ $(eval $(call COMPILE_GO_TEMPLATE,images/chaos-dashboard/bin/chaos-dashboard,./c
 $(eval $(call BUILD_IN_DOCKER_TEMPLATE,chaos-mesh,images/chaos-mesh/bin/chaos-controller-manager))
 $(eval $(call COMPILE_GO_TEMPLATE,images/chaos-mesh/bin/chaos-controller-manager,./cmd/chaos-controller-manager/main.go,0))
 
-$(eval $(call BUILD_IN_DOCKER_TEMPLATE,chaos-mesh-e2e,test/image/e2e/bin/ginkgo))
-$(eval $(call COMPILE_GO_TEMPLATE,test/image/e2e/bin/ginkgo,github.com/onsi/ginkgo/ginkgo,0))
+prepare-install: all docker-push docker-push-dns-server
 
-$(eval $(call BUILD_IN_DOCKER_TEMPLATE,chaos-mesh-e2e,test/image/e2e/bin/e2e.test))
-ifeq ($(IN_DOCKER),1)
-test/image/e2e/bin/e2e.test:
-	$(GO) test -c  -o ./test/image/e2e/bin/e2e.test ./test/e2e
-$(eval $(call BUILD_IN_DOCKER_TEMPLATE,chaos-mesh-e2e,test/image/e2e/bin/e2e.test))
+prepare-e2e: e2e-image docker-push-e2e
 
-GO_TARGET_PHONY += test/image/e2e/bin/e2e.test
-endif
-
-image-chaos-mesh-e2e-dependencies += test/image/e2e/manifests test/image/e2e/chaos-mesh
-
+GINKGO_FLAGS ?=
 e2e: e2e-build
-	./test/image/e2e/bin/ginkgo  ./test/image/e2e/bin/e2e.test
+	./test/image/e2e/bin/ginkgo ${GINKGO_FLAGS} ./test/image/e2e/bin/e2e.test -- --e2e-image ${DOCKER_REGISTRY_PREFIX}pingcap/e2e-helper:${IMAGE_TAG}
+
+image-chaos-mesh-e2e-dependencies += test/image/e2e/manifests test/image/e2e/chaos-mesh e2e-build
+CLEAN_TARGETS += test/image/e2e/manifests test/image/e2e/chaos-mesh
 
 e2e-build: test/image/e2e/bin/ginkgo test/image/e2e/bin/e2e.test
+
+CLEAN_TARGETS+=test/image/e2e/bin/ginkgo
+test/image/e2e/bin/ginkgo:
+	$(GO) build -ldflags "$(LDFLAGS)" -tags "${BUILD_TAGS}" -o test/image/e2e/bin/ginkgo github.com/onsi/ginkgo/ginkgo
+
+CLEAN_TARGETS+=test/image/e2e/bin/e2e.test
+test/image/e2e/bin/e2e.test:
+	$(GO) test -c  -o ./test/image/e2e/bin/e2e.test ./test/e2e
 
 test/image/e2e/manifests: manifests
 	rm -rf test/image/e2e/manifests
@@ -320,6 +325,16 @@ docker-push:
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh:${IMAGE_TAG}"
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-dashboard:${IMAGE_TAG}"
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-daemon:${IMAGE_TAG}"
+
+docker-push-e2e:
+	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/e2e-helper:${IMAGE_TAG}"
+
+# the version of dns server should keep consistent with helm
+DNS_SERVER_VERSION ?= v0.2.0
+docker-push-dns-server:
+	docker pull pingcap/coredns:${DNS_SERVER_VERSION}
+	docker tag pingcap/coredns:${DNS_SERVER_VERSION} "${DOCKER_REGISTRY_PREFIX}pingcap/coredns:${DNS_SERVER_VERSION}"
+	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/coredns:${DNS_SERVER_VERSION}"
 
 docker-push-chaos-kernel:
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-kernel:${IMAGE_TAG}"
