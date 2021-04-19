@@ -118,8 +118,8 @@ func (e *eventStore) ListByUIDs(_ context.Context, uids []string) ([]*core.Event
 	var resList []core.Event
 	eventList := make([]*core.Event, 0)
 
-	if err := e.db.Where(
-		"experiment_id IN ?", uids).
+	if err := e.db.Table("events").Where(
+		"experiment_id IN (?)", uids).
 		Find(&resList).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
 		return nil, err
 	}
@@ -477,10 +477,10 @@ func (e *eventStore) DeleteByUIDs(_ context.Context, uids []string) error {
 	for _, et := range eventList {
 		eventIDList = append(eventIDList, et.ID)
 	}
-	if err = e.db.Model(core.PodRecord{}).Where("event_id IN ?", eventIDList).Unscoped().Delete(core.PodRecord{}).Error; err != nil {
+	if err = e.db.Model(core.PodRecord{}).Where("event_id IN (?)", eventIDList).Unscoped().Delete(core.PodRecord{}).Error; err != nil {
 		return err
 	}
-	return e.db.Where("experiment_id IN ?", uids).Unscoped().Delete(core.Event{}).Error
+	return e.db.Where("experiment_id IN (?)", uids).Unscoped().Delete(core.Event{}).Error
 }
 
 func (e *eventStore) getUID(_ context.Context, ns, name string) (string, error) {
