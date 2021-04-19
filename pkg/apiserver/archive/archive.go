@@ -59,6 +59,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint.GET("/detail", s.detail)
 	endpoint.GET("/report", s.report)
 	endpoint.DELETE("/:uid", s.delete)
+	endpoint.DELETE("/", s.batchDelete)
 }
 
 // Archive defines the basic information of an archive.
@@ -281,38 +282,66 @@ func (s *Service) report(c *gin.Context) {
 // @Description Delete the specified archived experiment.
 // @Tags archives
 // @Produce json
-// @Param uid path string false "uid"
-// @Param uids query string false "uids"
+// @Param uid path string true "uid"
 // @Success 200 {object} StatusResponse
 // @Failure 500 {object} utils.APIError
 // @Router /archives/{uid} [delete]
 func (s *Service) delete(c *gin.Context) {
+	var (
+		err error
+		exp *core.Experiment
+	)
+
+	uid := c.Param("uid")
+
+	if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInvalidRequest.New("the archived experiment is not found"))
+		} else {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		}
+		return
+	}
+
+	if err = s.archive.Delete(context.Background(), exp); err != nil {
+		c.Status(http.StatusInternalServerError)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+	} else {
+		if err = s.event.DeleteByUID(context.Background(), uid); err != nil {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		} else {
+			c.JSON(http.StatusOK, StatusResponse{Status: "success"})
+		}
+	}
+}
+
+// @Summary Delete the specified archived experiment.
+// @Description Delete the specified archived experiment.
+// @Tags archives
+// @Produce json
+// @Param uids query string true "uids"
+// @Success 200 {object} StatusResponse
+// @Failure 500 {object} utils.APIError
+// @Router /archives/{uid} [delete]
+func (s *Service) batchDelete(c *gin.Context) {
 	var (
 		err      error
 		exp      *core.Experiment
 		uidSlice []string
 	)
 
-	uid := c.Param("uid")
 	uids := c.Query("uids")
-	if uids != "" {
-		uidSlice = strings.Split(uids, ",")
+	if uids == "" {
+		c.Status(http.StatusBadRequest)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("uids cannot be empty")))
+		return
 	}
+	uidSlice = strings.Split(uids, ",")
 	errFlag := false
 
-	if uid != "" && uids != "" {
-		c.Status(http.StatusBadRequest)
-		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("uid and uids cannot exist at the same time")))
-		return
-	} else if uid == "" && uids == "" {
-		c.Status(http.StatusBadRequest)
-		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("uid and uids cannot be empty at the same time")))
-		return
-	}
-
-	if uid != "" {
-		uidSlice = append(uidSlice, uid)
-	}
 	for _, uid := range uidSlice {
 		if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
 			if gorm.IsRecordNotFoundError(err) {
