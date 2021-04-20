@@ -131,4 +131,3 @@ func (it *EmbedChaos) SpawnNewObject(templateType TemplateType) (runtime.Object,
 
 	return nil, &metav1.ObjectMeta{}, nil
 }
-
