@@ -91,6 +91,10 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			if err != nil {
 				return ctrl.Result{}, err
 			}
+			if duration == nil {
+				zero := 0 * time.Second
+				duration = &zero
+			}
 			chaos.SetNextRecover(nextStart.Add(*duration))
 		}
 	}
