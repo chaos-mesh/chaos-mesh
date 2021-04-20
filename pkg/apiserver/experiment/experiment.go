@@ -1506,25 +1506,6 @@ func (s *Service) updateAwsChaos(exp *core.KubeObjectYAMLDescription, kubeCli cl
 	return kubeCli.Update(context.Background(), chaos)
 }
 
-func (s *Service) updateAwsChaos(exp *core.KubeObjectYAMLDescription, kubeCli client.Client) error {
-	chaos := &v1alpha1.AwsChaos{}
-	meta := &exp.Metadata
-	key := types.NamespacedName{Namespace: meta.Namespace, Name: meta.Name}
-
-	if err := kubeCli.Get(context.Background(), key, chaos); err != nil {
-		return err
-	}
-
-	chaos.SetLabels(meta.Labels)
-	chaos.SetAnnotations(meta.Annotations)
-
-	var spec v1alpha1.AwsChaosSpec
-	mapstructure.Decode(exp.Spec, &spec)
-	chaos.Spec = spec
-
-	return kubeCli.Update(context.Background(), chaos)
-}
-
 func setAnnotation(kubeCli client.Client, kind string, ns string, name string) error {
 	var (
 		chaosKind *v1alpha1.ChaosKind
