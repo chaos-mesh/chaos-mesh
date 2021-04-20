@@ -286,6 +286,32 @@ var _ = Describe("TwoPhase", func() {
 			Expect(err.Error()).To(ContainSubstring("misdefined scheduler"))
 		})
 
+		It("TwoPhase Apply without Duration", func() {
+			chaos := fakeTwoPhaseChaos{
+				TypeMeta:   typeMeta,
+				ObjectMeta: objectMeta,
+				Scheduler:  &v1alpha1.SchedulerSpec{Cron: "0/15 * * * *"},
+			}
+
+			c := fake.NewFakeClientWithScheme(scheme.Scheme, &chaos)
+
+			r := Reconciler{
+				Endpoint: fakeEndpoint{},
+				Context: ctx.Context{
+					Client: c,
+					Log:    ctrl.Log.WithName("controllers").WithName("TwoPhase"),
+				},
+			}
+
+			_, err = r.Reconcile(req)
+
+			Expect(err).ToNot(HaveOccurred())
+			_chaos := r.Object()
+			err = r.Client.Get(context.TODO(), req.NamespacedName, _chaos)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(_chaos.(v1alpha1.InnerSchedulerObject).GetStatus().Experiment.Phase).To(Equal(v1alpha1.ExperimentPhaseWaiting))
+		})
+
 		It("TwoPhase Delete", func() {
 			duration := "5m"
 			chaos := fakeTwoPhaseChaos{
