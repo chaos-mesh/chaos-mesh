@@ -29,6 +29,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/kubernetes/test/e2e/framework"
+	"k8s.io/utils/pointer"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -106,8 +107,9 @@ func TestcasePodKillPauseThenUnPause(ns string, kubeCli kubernetes.Interface, cl
 				Namespaces:     []string{ns},
 				LabelSelectors: map[string]string{"app": "nginx"},
 			},
-			Action: v1alpha1.PodKillAction,
-			Mode:   v1alpha1.OnePodMode,
+			Action:   v1alpha1.PodKillAction,
+			Mode:     v1alpha1.OnePodMode,
+			Duration: pointer.StringPtr("9m"),
 			Scheduler: &v1alpha1.SchedulerSpec{
 				Cron: "@every 10m",
 			},
