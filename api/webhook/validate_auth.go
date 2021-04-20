@@ -17,6 +17,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 
 	authv1 "k8s.io/api/authorization/v1"
 	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
@@ -26,6 +27,15 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
+
+var alwaysAllowedKind = []string{
+	v1alpha1.KindAwsChaos,
+	v1alpha1.KindPodNetworkChaos,
+	v1alpha1.KindPodIoChaos,
+	v1alpha1.KindGcpChaos,
+	"Workflow",
+	"WorkflowNode",
+}
 
 var authLog = ctrl.Log.WithName("validate-auth")
 
@@ -67,16 +77,15 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 
 	username := req.UserInfo.Username
 	groups := req.UserInfo.Groups
-	chaosKind := req.Kind.Kind
+	requestKind := req.Kind.Kind
 
-	// these chaos doesn't contain selector field
-	if chaosKind == v1alpha1.KindAwsChaos || chaosKind == v1alpha1.KindPodNetworkChaos || chaosKind == v1alpha1.KindPodIoChaos {
-		return admission.Allowed("")
+	if contains(alwaysAllowedKind, requestKind) {
+		return admission.Allowed(fmt.Sprintf("skip the RBAC check for type %s", requestKind))
 	}
 
-	chaos := v1alpha1.GetChaosValidator(chaosKind)
+	chaos := v1alpha1.GetChaosValidator(requestKind)
 	if chaos == nil {
-		err := fmt.Errorf("kind %s is not support", chaosKind)
+		err := fmt.Errorf("kind %s is not support", requestKind)
 		return admission.Errored(http.StatusBadRequest, err)
 	}
 
@@ -100,7 +109,7 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 	}
 
 	if requireClusterPrivileges {
-		allow, err := v.auth(username, groups, "", chaosKind)
+		allow, err := v.auth(username, groups, "", requestKind)
 		if err != nil {
 			return admission.Errored(http.StatusBadRequest, err)
 		}
@@ -111,7 +120,7 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 		authLog.Info("user have the privileges on cluster, auth validate passed", "user", username, "groups", groups, "namespace", affectedNamespaces)
 	} else {
 		for namespace := range affectedNamespaces {
-			allow, err := v.auth(username, groups, namespace, chaosKind)
+			allow, err := v.auth(username, groups, namespace, requestKind)
 			if err != nil {
 				return admission.Errored(http.StatusBadRequest, err)
 			}
@@ -136,14 +145,18 @@ func (v *AuthValidator) InjectDecoder(d *admission.Decoder) error {
 	return nil
 }
 
-func (v *AuthValidator) auth(username string, groups []string, namespace string, resource string) (bool, error) {
+func (v *AuthValidator) auth(username string, groups []string, namespace string, chaosKind string) (bool, error) {
+	resourceName, err := v.resourceFor(chaosKind)
+	if err != nil {
+		return false, err
+	}
 	sar := authv1.SubjectAccessReview{
 		Spec: authv1.SubjectAccessReviewSpec{
 			ResourceAttributes: &authv1.ResourceAttributes{
 				Namespace: namespace,
 				Verb:      "create",
 				Group:     "chaos-mesh.org",
-				Resource:  resource,
+				Resource:  resourceName,
 			},
 			User:   username,
 			Groups: groups,
@@ -156,4 +169,18 @@ func (v *AuthValidator) auth(username string, groups []string, namespace string,
 	}
 
 	return response.Status.Allowed, nil
+}
+
+func (v *AuthValidator) resourceFor(name string) (string, error) {
+	// TODO: we should use RESTMapper, but it relates to many dependencies
+	return strings.ToLower(name), nil
+}
+
+func contains(arr []string, target string) bool {
+	for _, item := range arr {
+		if item == target {
+			return true
+		}
+	}
+	return false
 }

@@ -133,6 +133,7 @@ chaosDaemon:
 
 dashboard:
   create: false
+  hostNetwork: false
 
   replicaCount: 1
 
@@ -260,6 +261,8 @@ dnsServer:
   priorityClassName: ""
 
   nodeSelector: {}
+
+  podAnnotations: {}
 
   runtime: docker
 
