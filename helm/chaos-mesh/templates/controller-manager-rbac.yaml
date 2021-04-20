@@ -69,9 +69,9 @@ rules:
     resources:
       - subjectaccessreviews
     verbs: [ "create" ]
-      
 
 ---
+{{- if not .Values.clusterScoped }}
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
@@ -87,11 +87,7 @@ rules:
   - apiGroups: [ "" ]
     resources: [ "configmaps", "services" ]
     verbs: [ "get", "list", "watch" ]
-  - apiGroups: [ "authorization.k8s.io" ]
-    resources:
-      - subjectaccessreviews
-    verbs: [ "create" ]
-
+{{- end }}
 ---
 # bindings cluster level
 kind: ClusterRoleBinding
@@ -115,6 +111,7 @@ subjects:
 
 ---
 # binding for control plane namespace
+{{- if not .Values.clusterScoped }}
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
@@ -134,7 +131,7 @@ subjects:
   - kind: ServiceAccount
     name: {{ .Values.controllerManager.serviceAccount }}
     namespace: {{ .Release.Namespace | quote }}
-
+{{- end }}
 ---
 {{- if .Values.clusterScoped }}
 kind: ClusterRoleBinding
@@ -144,7 +141,9 @@ kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ .Release.Name }}-chaos-controller-manager-target-namespace
+{{- if not .Values.clusterScoped }}
   namespace: {{ .Values.controllerManager.targetNamespace | quote }}
+{{- end }}
   labels:
     app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}

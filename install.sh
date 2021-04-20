@@ -989,6 +989,7 @@ rules:
     verbs: [ "create" ]
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
+---
 # bindings cluster level
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
@@ -1012,7 +1013,6 @@ kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: chaos-mesh-chaos-controller-manager-target-namespace
-  namespace: "chaos-testing"
   labels:
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
@@ -1021,45 +1021,6 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: chaos-mesh-chaos-controller-manager-target-namespace
-subjects:
-  - kind: ServiceAccount
-    name: chaos-controller-manager
-    namespace: "chaos-testing"
----
-# Source: chaos-mesh/templates/controller-manager-rbac.yaml
-kind: Role
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: chaos-mesh-chaos-controller-manager-control-plane
-  namespace: "chaos-testing"
-  labels:
-    app.kubernetes.io/name: chaos-mesh
-    app.kubernetes.io/instance: chaos-mesh
-    app.kubernetes.io/component: controller-manager
-rules:
-  - apiGroups: [ "" ]
-    resources: [ "configmaps", "services" ]
-    verbs: [ "get", "list", "watch" ]
-  - apiGroups: [ "authorization.k8s.io" ]
-    resources:
-      - subjectaccessreviews
-    verbs: [ "create" ]
----
-# Source: chaos-mesh/templates/controller-manager-rbac.yaml
-# binding for control plane namespace
-kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: chaos-mesh-chaos-controller-manager-control-plane
-  namespace: "chaos-testing"
-  labels:
-    app.kubernetes.io/name: chaos-mesh
-    app.kubernetes.io/instance: chaos-mesh
-    app.kubernetes.io/component: controller-manager
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: chaos-mesh-chaos-controller-manager-control-plane
 subjects:
   - kind: ServiceAccount
     name: chaos-controller-manager
@@ -1369,6 +1330,9 @@ spec:
         - name: webhook-certs
           secret:
             secretName: chaos-mesh-webhook-certs
+---
+# Source: chaos-mesh/templates/controller-manager-rbac.yaml
+# binding for control plane namespace
 ---
 # Source: chaos-mesh/templates/secrets-configuration.yaml
 apiVersion: admissionregistration.k8s.io/v1beta1
