@@ -1010,7 +1010,6 @@ func (s *Service) deleteExperiment(c *gin.Context) {
 func (s *Service) batchDeleteExperiment(c *gin.Context) {
 	var (
 		chaosKind *v1alpha1.ChaosKind
-		chaosMeta metav1.Object
 		ok        bool
 		exp       *core.Experiment
 		errFlag   bool
