@@ -1016,7 +1016,7 @@ func (s *Service) deleteExperiment(c *gin.Context) {
 // @Failure 400 {object} utils.APIError
 // @Failure 404 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
-// @Router /experiments/{uid} [delete]
+// @Router /experiments [delete]
 func (s *Service) batchDeleteExperiment(c *gin.Context) {
 	var (
 		chaosKind *v1alpha1.ChaosKind

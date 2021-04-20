@@ -325,7 +325,7 @@ func (s *Service) delete(c *gin.Context) {
 // @Param uids query string true "uids"
 // @Success 200 {object} StatusResponse
 // @Failure 500 {object} utils.APIError
-// @Router /archives/{uid} [delete]
+// @Router /archives [delete]
 func (s *Service) batchDelete(c *gin.Context) {
 	var (
 		err      error
@@ -339,20 +339,17 @@ func (s *Service) batchDelete(c *gin.Context) {
 		return
 	}
 	uidSlice = strings.Split(uids, ",")
-	errFlag := false
 
 	if err = s.archive.DeleteByUIDs(context.Background(), uidSlice); err != nil {
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
 		c.Status(http.StatusInternalServerError)
-		errFlag = true
+		return
 	}
 	if err = s.event.DeleteByUIDs(context.Background(), uidSlice); err != nil {
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
 		c.Status(http.StatusInternalServerError)
-		errFlag = true
+		return
 	}
 
-	if !errFlag {
-		c.JSON(http.StatusOK, StatusResponse{Status: "success"})
-	}
+	c.JSON(http.StatusOK, StatusResponse{Status: "success"})
 }
