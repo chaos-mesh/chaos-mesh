@@ -925,7 +925,6 @@ func (s *Service) getExperimentDetail(c *gin.Context) {
 func (s *Service) deleteExperiment(c *gin.Context) {
 	var (
 		chaosKind *v1alpha1.ChaosKind
-		chaosMeta metav1.Object
 		ok        bool
 		exp       *core.Experiment
 	)
@@ -973,19 +972,10 @@ func (s *Service) deleteExperiment(c *gin.Context) {
 	}
 
 	if force == "true" {
-		if chaosMeta, ok = chaosKind.Chaos.(metav1.Object); !ok {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("failed to get chaos meta information")))
-			return
-		}
-
-		annotations := chaosMeta.GetAnnotations()
-		if annotations == nil {
-			annotations = make(map[string]string)
-		}
-		annotations[common.AnnotationCleanFinalizer] = common.AnnotationCleanFinalizerForced
-		chaosMeta.SetAnnotations(annotations)
-		if err := kubeCli.Update(context.Background(), chaosKind.Chaos); err != nil {
+		err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
+			return setAnnotation(kubeCli, kind, ns, name)
+		})
+		if err != nil {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("forced deletion of chaos failed, because update chaos annotation error")))
 			return
@@ -1077,19 +1067,10 @@ func (s *Service) batchDeleteExperiment(c *gin.Context) {
 		}
 
 		if force == "true" {
-			if chaosMeta, ok = chaosKind.Chaos.(metav1.Object); !ok {
-				_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("delete experiment uid (%s) error, because failed to get chaos meta information", uid)))
-				errFlag = true
-				continue
-			}
-
-			annotations := chaosMeta.GetAnnotations()
-			if annotations == nil {
-				annotations = make(map[string]string)
-			}
-			annotations[common.AnnotationCleanFinalizer] = common.AnnotationCleanFinalizerForced
-			chaosMeta.SetAnnotations(annotations)
-			if err := kubeCli.Update(context.Background(), chaosKind.Chaos); err != nil {
+			err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
+				return setAnnotation(kubeCli, kind, ns, name)
+			})
+			if err != nil {
 				_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("forced delete experiment uid (%s) error, because update chaos annotation error", uid)))
 				errFlag = true
 				continue
@@ -1523,4 +1504,52 @@ func (s *Service) updateAwsChaos(exp *core.KubeObjectYAMLDescription, kubeCli cl
 	chaos.Spec = spec
 
 	return kubeCli.Update(context.Background(), chaos)
+}
+
+func (s *Service) updateAwsChaos(exp *core.KubeObjectYAMLDescription, kubeCli client.Client) error {
+	chaos := &v1alpha1.AwsChaos{}
+	meta := &exp.Metadata
+	key := types.NamespacedName{Namespace: meta.Namespace, Name: meta.Name}
+
+	if err := kubeCli.Get(context.Background(), key, chaos); err != nil {
+		return err
+	}
+
+	chaos.SetLabels(meta.Labels)
+	chaos.SetAnnotations(meta.Annotations)
+
+	var spec v1alpha1.AwsChaosSpec
+	mapstructure.Decode(exp.Spec, &spec)
+	chaos.Spec = spec
+
+	return kubeCli.Update(context.Background(), chaos)
+}
+
+func setAnnotation(kubeCli client.Client, kind string, ns string, name string) error {
+	var (
+		chaosKind *v1alpha1.ChaosKind
+		chaosMeta metav1.Object
+		ok        bool
+	)
+
+	if chaosKind, ok = v1alpha1.AllKinds()[kind]; !ok {
+		return fmt.Errorf(kind + " is not supported")
+	}
+	ctx := context.TODO()
+	chaosKey := types.NamespacedName{Namespace: ns, Name: name}
+	if err := kubeCli.Get(ctx, chaosKey, chaosKind.Chaos); err != nil {
+		return err
+	}
+
+	if chaosMeta, ok = chaosKind.Chaos.(metav1.Object); !ok {
+		return fmt.Errorf("failed to get chaos meta information")
+	}
+	annotations := chaosMeta.GetAnnotations()
+	if annotations == nil {
+		annotations = make(map[string]string)
+	}
+	annotations[common.AnnotationCleanFinalizer] = common.AnnotationCleanFinalizerForced
+	chaosMeta.SetAnnotations(annotations)
+
+	return kubeCli.Update(context.Background(), chaosKind.Chaos)
 }
