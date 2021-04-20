@@ -75,6 +75,7 @@ export default function Archives() {
     switch (action) {
       case 'delete':
         actionFunc = api.archives.del
+        arg = uuid
 
         break
       case 'deleteMulti':
