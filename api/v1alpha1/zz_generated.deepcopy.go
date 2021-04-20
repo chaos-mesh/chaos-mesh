@@ -1816,8 +1816,8 @@ func (in *PodHttpChaosSelector) DeepCopyInto(out *PodHttpChaosSelector) {
 		*out = new(int32)
 		**out = **in
 	}
-	if in.Headers != nil {
-		in, out := &in.Headers, &out.Headers
+	if in.RequestHeaders != nil {
+		in, out := &in.RequestHeaders, &out.RequestHeaders
 		*out = make(map[string]string, len(*in))
 		for key, val := range *in {
 			(*out)[key] = val

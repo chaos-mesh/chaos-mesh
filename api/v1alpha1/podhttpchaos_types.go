@@ -58,7 +58,7 @@ type PodHttpChaosSelector struct {
 	Code *int32 `json:"code,omitempty"`
 
 	// +optional
-	Headers map[string]string `json:"headers,omitempty"`
+	RequestHeaders map[string]string `json:"request_headers,omitempty"`
 
 	// +optional
 	ResponseHeaders map[string]string `json:"response_headers,omitempty"`
