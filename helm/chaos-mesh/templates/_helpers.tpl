@@ -31,6 +31,28 @@ Create chart name and version as used by the chart label.
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
+{{/* Generate basic labels */}}
+{{- define "chaos-mesh.labels" }}
+chaos-mesh.org/version: {{ .Chart.AppVersion }}
+helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
+app.kubernetes.io/part-of: {{ template "chaos-mesh.name" . }}
+app.kubernetes.io/version: "{{ .Chart.Version }}"
+{{- if .Values.customLabels }}
+{{ toYaml .Values.customLabels }}
+{{- end }}
+{{- end }}
+
+{{/*
+Specify default selectors
+*/}}
+{{- define "chaos-mesh.selectors" }}
+app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
 {{/*
 Define the svc's name
 */}}
