@@ -77,6 +77,8 @@ var _ = Describe("TwoPhase StateMachine", func() {
 					Expect(err).To(HaveOccurred())
 					Expect(err.Error()).To(ContainSubstring("RecoverError"))
 					Expect(sm.Chaos.GetStatus().FailedMessage).To(ContainSubstring("RecoverError"))
+
+					return
 				} else {
 					Expect(updated).To(Equal(true))
 				}
