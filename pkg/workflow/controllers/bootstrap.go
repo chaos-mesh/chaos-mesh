@@ -49,25 +49,13 @@ func BootstrapWorkflowControllers(mgr manager.Manager, logger logr.Logger) error
 	// TODO: maybe we could use select with labelSelector as instead
 	err = ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.WorkflowNode{}).
+		Owns(&v1alpha1.WorkflowNode{}).
 		Named("workflow-serial-node-reconciler").
 		Complete(
 			NewSerialNodeReconciler(
 				noCacheClient,
 				mgr.GetEventRecorderFor("workflow-serial-node-reconciler"),
 				logger.WithName("workflow-serial-node-reconciler"),
-			),
-		)
-	if err != nil {
-		return err
-	}
-	err = ctrl.NewControllerManagedBy(mgr).
-		For(&v1alpha1.WorkflowNode{}).
-		Named("workflow-accomplish-watcher").
-		Complete(
-			NewAccomplishWatcher(
-				mgr.GetClient(),
-				mgr.GetEventRecorderFor("workflow-accomplish-watcher"),
-				logger.WithName("workflow-accomplish-watcher"),
 			),
 		)
 	if err != nil {
