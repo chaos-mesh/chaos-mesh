@@ -16,6 +16,10 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"sort"
+	"strings"
+	"time"
+
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -25,9 +29,6 @@ import (
 	"k8s.io/klog"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"sort"
-	"strings"
-	"time"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
@@ -84,6 +85,9 @@ func (it *SerialNodeReconciler) Reconcile(request reconcile.Request) (reconcile.
 		}
 
 		activeChildren, finishedChildren, err := it.fetchChildrenNodes(ctx, nodeNeedUpdate)
+		if err != nil {
+			return err
+		}
 
 		nodeNeedUpdate.Status.FinishedChildren = nil
 		for _, finishedChild := range finishedChildren {
