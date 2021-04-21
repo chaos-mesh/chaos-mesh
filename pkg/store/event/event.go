@@ -467,6 +467,22 @@ func (e *eventStore) DeleteByUID(_ context.Context, uid string) error {
 		Delete(core.Event{}).Error
 }
 
+// DeleteByUIDs deletes events by the uid list of the experiment.
+func (e *eventStore) DeleteByUIDs(_ context.Context, uids []string) error {
+	eventList, err := e.ListByUIDs(context.Background(), uids)
+	if err != nil {
+		return err
+	}
+	eventIDList := make([]uint, len(eventList))
+	for _, et := range eventList {
+		eventIDList = append(eventIDList, et.ID)
+	}
+	if err = e.db.Model(core.PodRecord{}).Where("event_id IN (?)", eventIDList).Unscoped().Delete(core.PodRecord{}).Error; err != nil {
+		return err
+	}
+	return e.db.Where("experiment_id IN (?)", uids).Unscoped().Delete(core.Event{}).Error
+}
+
 func (e *eventStore) getUID(_ context.Context, ns, name string) (string, error) {
 	events := make([]*core.Event, 0)
 

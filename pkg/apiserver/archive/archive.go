@@ -76,7 +76,7 @@ type Archive struct {
 // Detail represents an archive instance.
 type Detail struct {
 	Archive
-	YAML core.KubeObjectYAMLDescription `json:"yaml"`
+	YAML core.ExperimentYAMLDescription `json:"yaml"`
 }
 
 // Report defines the report of archive experiments.
@@ -137,7 +137,7 @@ func (s *Service) list(c *gin.Context) {
 func (s *Service) detail(c *gin.Context) {
 	var (
 		err    error
-		yaml   core.KubeObjectYAMLDescription
+		yaml   core.ExperimentYAMLDescription
 		detail Detail
 	)
 	uid := c.Query("uid")
