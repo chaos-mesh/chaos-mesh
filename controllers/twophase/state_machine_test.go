@@ -70,10 +70,15 @@ var _ = Describe("TwoPhase StateMachine", func() {
 					Expect(sm.Chaos.GetStatus().FailedMessage).To(ContainSubstring("RecoverError"))
 
 					return
-				} else if status != v1alpha1.ExperimentPhaseFinished {
-					Expect(updated).To(Equal(true))
-				} else {
+				} else if status == v1alpha1.ExperimentPhaseFinished {
 					Expect(updated).To(Equal(false))
+				} else if status == v1alpha1.ExperimentPhaseFailed{
+					Expect(updated).To(Equal(true))
+					Expect(err).To(HaveOccurred())
+					Expect(err.Error()).To(ContainSubstring("RecoverError"))
+					Expect(sm.Chaos.GetStatus().FailedMessage).To(ContainSubstring("RecoverError"))
+				} else {
+					Expect(updated).To(Equal(true))
 				}
 
 				Expect(err).ToNot(HaveOccurred())
