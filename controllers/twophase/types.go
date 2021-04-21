@@ -86,6 +86,15 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		if phase == v1alpha1.ExperimentPhaseWaiting {
 			targetPhase = phase
 			chaos.SetNextStart(*nextStart)
+			duration, err := chaos.GetDuration()
+			if err != nil {
+				return ctrl.Result{}, err
+			}
+			if duration == nil {
+				zero := 0 * time.Second
+				duration = &zero
+			}
+			chaos.SetNextRecover(nextStart.Add(*duration))
 		}
 	}
 

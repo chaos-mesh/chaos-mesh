@@ -29,29 +29,20 @@ const useStyles = makeStyles((theme) => ({
   },
   card: {
     flex: '0 0 240px',
-    marginRight: theme.spacing(3),
     cursor: 'pointer',
-    '&:last-child': {
-      marginRight: 0,
-    },
     '&:hover': {
-      color: theme.palette.primary.main,
-      borderColor: theme.palette.primary.main,
+      background: theme.palette.action.hover,
     },
   },
   addCard: {
     width: 210,
-    '&:hover': {
-      color: 'unset',
-      borderColor: 'unset',
-    },
   },
   editorPaperWrapper: {
     position: 'absolute',
     top: '50%',
     left: '50%',
     width: '50vw',
-    height: '80vh',
+    height: '90vh',
     transform: 'translate(-50%, -50%)',
     [theme.breakpoints.down('sm')]: {
       width: '90vw',
@@ -142,7 +133,7 @@ const Predefined = React.memo(() => {
 
   return (
     <>
-      <Box className={classes.container}>
+      <Space className={classes.container}>
         <YAML
           callback={saveExperiment}
           buttonProps={{ className: clsx(classes.card, classes.addCard, 'predefined-upload') }}
@@ -159,24 +150,28 @@ const Predefined = React.memo(() => {
             </Box>
           </Card>
         ))}
-      </Box>
+      </Space>
       <Modal open={editorOpen} onClose={onModalClose}>
         <div>
-          <Paper className={classes.editorPaperWrapper} padding={false}>
+          <Paper className={classes.editorPaperWrapper} padding={0}>
             {experiment && (
-              <>
-                <PaperTop title={experiment.name}>
-                  <Space display="flex">
-                    <Button color="secondary" size="small" onClick={handleDeleteExperiment}>
-                      {T('common.delete')}
-                    </Button>
-                    <Button variant="contained" color="primary" size="small" onClick={handleApplyExperiment}>
-                      {T('common.submit')}
-                    </Button>
-                  </Space>
-                </PaperTop>
-                <YAMLEditor theme={theme} data={yaml.dump(experiment.yaml)} mountEditor={setYAMLEditor} />
-              </>
+              <Box display="flex" flexDirection="column" height="100%">
+                <Box px={3} pt={3}>
+                  <PaperTop title={experiment.name}>
+                    <Space>
+                      <Button color="secondary" size="small" onClick={handleDeleteExperiment}>
+                        {T('common.delete')}
+                      </Button>
+                      <Button variant="contained" color="primary" size="small" onClick={handleApplyExperiment}>
+                        {T('common.submit')}
+                      </Button>
+                    </Space>
+                  </PaperTop>
+                </Box>
+                <Box flex={1}>
+                  <YAMLEditor theme={theme} data={yaml.dump(experiment.yaml)} mountEditor={setYAMLEditor} />
+                </Box>
+              </Box>
             )}
           </Paper>
         </div>

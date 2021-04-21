@@ -18,7 +18,7 @@ const Chaos: React.FC<ChaosProps> = ({ kind, data }) => (
         {iconByKind(kind)}
       </Box>
       <Box flex={1.5}>
-        <Typography variant="button" color="textSecondary" gutterBottom>
+        <Typography variant="overline" color="textSecondary" gutterBottom>
           {transByKind(kind)}
         </Typography>
         <Typography variant="h5">{data.sum}</Typography>
@@ -36,6 +36,7 @@ const TotalExperiments = () => {
     TimeChaos: 0,
     StressChaos: 0,
     DNSChaos: 0,
+    AwsChaos: 0,
   })
 
   const fetchExperiments = () => {
@@ -67,6 +68,7 @@ const TotalExperiments = () => {
       <Chaos kind="TimeChaos" data={{ sum: experiments['TimeChaos'] }} />
       <Chaos kind="StressChaos" data={{ sum: experiments['StressChaos'] }} />
       <Chaos kind="DNSChaos" data={{ sum: experiments['DNSChaos'] }} />
+      <Chaos kind="AwsChaos" data={{ sum: experiments['AwsChaos'] }} />
     </Grid>
   )
 }

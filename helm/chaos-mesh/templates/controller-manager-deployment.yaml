@@ -63,14 +63,8 @@ spec:
             value: "app.kubernetes.io/component:template"
           - name: CONFIGMAP_LABELS
             value: "app.kubernetes.io/component:webhook"
-          {{- if .Values.controllerManager.allowedNamespaces }}
-          - name: ALLOWED_NAMESPACES
-            value: {{ .Values.controllerManager.allowedNamespaces }}
-          {{- end }}
-          {{- if .Values.controllerManager.ignoredNamespaces }}
-          - name: IGNORED_NAMESPACES
-            value: {{ .Values.controllerManager.ignoredNamespaces }}
-          {{- end }}
+          - name: ENABLE_FILTER_NAMESPACE
+            value: "{{ .Values.controllerManager.enableFilterNamespace }}"
           {{- if .Values.enableProfiling }}
           - name: PPROF_ADDR
             value: ":10081"

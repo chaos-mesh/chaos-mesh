@@ -57,7 +57,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 	source := iochaos.Namespace + "/" + iochaos.Name
 	m := podiochaosmanager.New(source, r.Log, r.Client)
 
-	pods, err := selector.SelectAndFilterPods(ctx, r.Client, r.Reader, &iochaos.Spec, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces)
+	pods, err := selector.SelectAndFilterPods(ctx, r.Client, r.Reader, &iochaos.Spec, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.EnableFilterNamespace)
 	if err != nil {
 		r.Log.Error(err, "failed to select and filter pods")
 		return err
@@ -102,6 +102,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 			},
 			Latency:          iochaos.Spec.Delay,
 			AttrOverrideSpec: iochaos.Spec.Attr,
+			MistakeSpec:      iochaos.Spec.Mistake,
 			Source:           m.Source,
 		})
 
@@ -111,7 +112,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 		}
 		iochaos.Finalizers = finalizer.InsertFinalizer(iochaos.Finalizers, key)
 	}
-	r.Log.Info("commiting updates of podiochaos")
+	r.Log.Info("committing updates of podiochaos")
 	responses := m.Commit(ctx)
 	iochaos.Status.Experiment.PodRecords = make([]v1alpha1.PodStatus, 0, len(pods))
 	for _, keyErrorTuple := range responses {

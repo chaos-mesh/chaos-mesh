@@ -43,6 +43,22 @@ func TestcaseContainerKillOnceThenDelete(ns string, kubeCli kubernetes.Interface
 	err = util.WaitDeploymentReady("nginx", ns, kubeCli)
 	framework.ExpectNoError(err, "wait nginx deployment ready error")
 
+	listOption := metav1.ListOptions{
+		LabelSelector: labels.SelectorFromSet(map[string]string{
+			"app": "nginx",
+		}).String(),
+	}
+	var originalRestartTimes int32
+	pods, err := kubeCli.CoreV1().Pods(ns).List(listOption)
+	framework.ExpectNoError(err, "fail to get pods")
+	pod := pods.Items[0]
+	for _, cs := range pod.Status.ContainerStatuses {
+		if cs.Name == "nginx" {
+			originalRestartTimes = cs.RestartCount
+			break
+		}
+	}
+
 	containerKillChaos := &v1alpha1.PodChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "nginx-container-kill",
@@ -83,7 +99,7 @@ func TestcaseContainerKillOnceThenDelete(ns string, kubeCli kubernetes.Interface
 		}
 		pod := pods.Items[0]
 		for _, cs := range pod.Status.ContainerStatuses {
-			if cs.Name == "nginx" && !cs.Ready && cs.LastTerminationState.Terminated != nil {
+			if cs.Name == "nginx" && ((!cs.Ready && cs.LastTerminationState.Terminated != nil) || cs.RestartCount > originalRestartTimes) {
 				return true, nil
 			}
 		}

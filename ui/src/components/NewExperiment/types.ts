@@ -104,6 +104,7 @@ export interface ExperimentTargetStress {
     }
     memory?: {
       workers: number
+      size: string
       options: string[]
     }
   }
@@ -119,6 +120,7 @@ export type ExperimentKind =
   | 'TimeChaos'
   | 'StressChaos'
   | 'DNSChaos'
+  | 'AwsChaos'
 
 export interface ExperimentTarget {
   kind: ExperimentKind

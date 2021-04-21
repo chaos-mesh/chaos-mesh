@@ -25,6 +25,10 @@ spec:
       labels:
         {{- include "chaos-mesh.labels" . | indent 8 }}
         app.kubernetes.io/component: chaos-dns-server
+    {{- with .Values.dnsServer.podAnnotations }}
+      annotations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
     spec:
       serviceAccountName: chaos-dns-server
       affinity:

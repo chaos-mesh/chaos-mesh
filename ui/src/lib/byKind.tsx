@@ -1,3 +1,4 @@
+import { ReactComponent as AWSIcon } from 'images/chaos/aws.svg'
 import { ReactComponent as ClockIcon } from 'images/chaos/time.svg'
 import { ReactComponent as DNSIcon } from 'images/chaos/dns.svg'
 import { ExperimentKind } from 'components/NewExperiment/types'
@@ -5,7 +6,6 @@ import { ReactComponent as FileSystemIOIcon } from 'images/chaos/io.svg'
 import { ReactComponent as LinuxKernelIcon } from 'images/chaos/kernel.svg'
 import { ReactComponent as NetworkIcon } from 'images/chaos/network.svg'
 import { ReactComponent as PodLifecycleIcon } from 'images/chaos/pod.svg'
-import React from 'react'
 import { ReactComponent as StressIcon } from 'images/chaos/stress.svg'
 import { SvgIcon } from '@material-ui/core'
 import T from 'components/T'
@@ -35,8 +35,8 @@ export function iconByKind(kind: ExperimentKind, size: 'small' | 'large' = 'larg
     case 'DNSChaos':
       icon = <DNSIcon />
       break
-    default:
-      icon = <PodLifecycleIcon />
+    case 'AwsChaos':
+      icon = <AWSIcon />
   }
 
   return <SvgIcon fontSize={size}>{icon}</SvgIcon>
@@ -58,7 +58,7 @@ export function transByKind(kind: ExperimentKind) {
       return T('newE.target.stress.title')
     case 'DNSChaos':
       return T('newE.target.dns.title')
-    default:
-      return T('newE.target.pod.title')
+    case 'AwsChaos':
+      return T('newE.target.aws.title')
   }
 }

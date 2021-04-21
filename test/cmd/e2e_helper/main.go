@@ -14,6 +14,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -22,7 +23,10 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"path/filepath"
 	"time"
+
+	"github.com/containerd/cgroups"
 )
 
 func main() {
@@ -62,10 +66,12 @@ func newServer(dataDir string) *server {
 	s.mux.HandleFunc("/ping", pong)
 	s.mux.HandleFunc("/time", s.timer)
 	s.mux.HandleFunc("/io", s.ioTest)
+	s.mux.HandleFunc("/mistake", s.mistakeTest)
 	s.mux.HandleFunc("/network/send", s.networkSendTest)
 	s.mux.HandleFunc("/network/recv", s.networkRecvTest)
 	s.mux.HandleFunc("/network/ping", s.networkPingTest)
 	s.mux.HandleFunc("/dns", s.dnsTest)
+	s.mux.HandleFunc("/stress", s.stressCondition)
 	return s
 }
 
@@ -94,6 +100,39 @@ func (s *server) setupUDPServer() error {
 // a handler to print out the current time
 func (s *server) timer(w http.ResponseWriter, _ *http.Request) {
 	w.Write([]byte(time.Now().Format(time.RFC3339Nano)))
+}
+
+// a handler to test io chaos
+func (s *server) mistakeTest(w http.ResponseWriter, _ *http.Request) {
+	path := filepath.Join(s.dataDir, "e2e-test")
+	origData := []byte("hello world!!!!!!!!!!!!")
+
+	err := ioutil.WriteFile(path, origData, 0644)
+	if err != nil {
+		w.Write([]byte(fmt.Sprintf("failed to write file %v", err)))
+		return
+	}
+	gotData, err := ioutil.ReadFile(path)
+	if err != nil {
+		w.Write([]byte(err.Error()))
+		return
+	}
+	result := bytes.Equal(origData, gotData)
+	if result {
+		w.Write([]byte("false"))
+		return
+	}
+	for i := 0; i < 10; i++ {
+		tmp, err := ioutil.ReadFile(path)
+		if err != nil {
+			w.Write([]byte(err.Error()))
+		}
+		if !bytes.Equal(tmp, gotData) {
+			w.Write([]byte("true"))
+			return
+		}
+	}
+	w.Write([]byte("err"))
 }
 
 // a handler to test io chaos
@@ -215,4 +254,29 @@ func (s *server) networkRecvTest(w http.ResponseWriter, r *http.Request) {
 	for index := range s.recvBuf {
 		s.recvBuf[index] = 0
 	}
+}
+
+func (s *server) stressCondition(w http.ResponseWriter, r *http.Request) {
+	control, err := cgroups.Load(cgroups.V1, cgroups.PidPath(1))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	stats, err := control.Stat(cgroups.IgnoreNotExist)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	response, err := json.Marshal(map[string]uint64{
+		"cpuTime":     stats.CPU.Usage.Total,
+		"memoryUsage": stats.Memory.Usage.Usage,
+	})
+	if err != nil {
+		http.Error(w, "fail to marshal response", http.StatusInternalServerError)
+		return
+	}
+
+	w.Write(response)
 }

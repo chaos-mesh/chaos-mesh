@@ -84,6 +84,7 @@ const Stress: React.FC<StressProps> = ({ onSubmit }) => {
             error={getIn(errors, 'stressors.memory.workers') ? true : false}
             inputProps={{ min: 0 }}
           />
+          <TextField name="stressors.memory.size" label="Size" helperText="Memory size" />
           <LabelField
             name="stressors.memory.options"
             label="Options of Memory stressors"

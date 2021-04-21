@@ -44,6 +44,7 @@ import (
 	networkchaostestcases "github.com/chaos-mesh/chaos-mesh/test/e2e/chaos/networkchaos"
 	podchaostestcases "github.com/chaos-mesh/chaos-mesh/test/e2e/chaos/podchaos"
 	sidecartestcases "github.com/chaos-mesh/chaos-mesh/test/e2e/chaos/sidecar"
+	stresstestcases "github.com/chaos-mesh/chaos-mesh/test/e2e/chaos/stresschaos"
 	timechaostestcases "github.com/chaos-mesh/chaos-mesh/test/e2e/chaos/timechaos"
 )
 
@@ -194,6 +195,9 @@ var _ = ginkgo.Describe("[Basic]", func() {
 			ginkgo.It("[SpecifyContainer]", func() {
 				iochaostestcases.TestcaseIODelayWithSpecifiedContainer(ns, cli, c, port)
 			})
+			ginkgo.It("[WrongSpec]", func() {
+				iochaostestcases.TestcaseIODelayWithWrongSpec(ns, cli, c, port)
+			})
 		})
 
 		// io chaos case in [IOError] context
@@ -207,6 +211,20 @@ var _ = ginkgo.Describe("[Basic]", func() {
 			})
 			ginkgo.It("[SpecifyContainer]", func() {
 				iochaostestcases.TestcaseIOErrorWithSpecifiedContainer(ns, cli, c, port)
+			})
+		})
+
+		// io mistake case in [IOMistake] context
+		ginkgo.Context("[IOMistake]", func() {
+
+			ginkgo.It("[Schedule]", func() {
+				iochaostestcases.TestcaseIOMistakeDurationForATimeThenRecover(ns, cli, c, port)
+			})
+			ginkgo.It("[Pause]", func() {
+				iochaostestcases.TestcaseIOMistakeDurationForATimePauseAndUnPause(ns, cli, c, port)
+			})
+			ginkgo.It("[SpecifyContainer]", func() {
+				iochaostestcases.TestcaseIOMistakeWithSpecifiedContainer(ns, cli, c, port)
 			})
 		})
 	})
@@ -341,6 +359,54 @@ var _ = ginkgo.Describe("[Basic]", func() {
 
 		ginkgo.It("[ERROR]", func() {
 			dnschaostestcases.TestcaseDNSError(ns, cli, port, c)
+		})
+	})
+	// DNS chaos case in [StressChaos] context
+	ginkgo.Context("[StressChaos]", func() {
+		var err error
+
+		var ports []uint16
+		var stressPeers []*v1.Pod
+		var pfCancels []context.CancelFunc
+
+		ginkgo.JustBeforeEach(func() {
+			ports = []uint16{}
+			stressPeers = []*v1.Pod{}
+			for index := 0; index < 2; index++ {
+				name := fmt.Sprintf("stress-peer-%d", index)
+
+				svc := fixture.NewE2EService(name, ns)
+				_, err = kubeCli.CoreV1().Services(ns).Create(svc)
+				framework.ExpectNoError(err, "create service error")
+				nd := fixture.NewStressTestDeployment(name, ns, map[string]string{"partition": strconv.Itoa(index % 2)})
+				_, err = kubeCli.AppsV1().Deployments(ns).Create(nd)
+				framework.ExpectNoError(err, "create network-peer deployment error")
+				err = util.WaitDeploymentReady(name, ns, kubeCli)
+				framework.ExpectNoError(err, "wait network-peer deployment ready error")
+
+				pod, err := getPod(kubeCli, ns, name)
+				framework.ExpectNoError(err, "select network-peer pod error")
+				stressPeers = append(stressPeers, pod)
+
+				_, port, pfCancel, err := portforward.ForwardOnePort(fw, ns, "svc/"+svc.Name, 8080)
+				ports = append(ports, port)
+				pfCancels = append(pfCancels, pfCancel)
+				framework.ExpectNoError(err, "create helper io port port-forward failed")
+			}
+		})
+
+		ginkgo.It("[CPU]", func() {
+			stresstestcases.TestcaseCPUStressInjectionOnceThenRecover(ns, cli, stressPeers, ports, c)
+		})
+
+		ginkgo.It("[Memory]", func() {
+			stresstestcases.TestcaseMemoryStressInjectionOnceThenRecover(ns, cli, stressPeers, ports, c)
+		})
+
+		ginkgo.JustAfterEach(func() {
+			for _, cancel := range pfCancels {
+				cancel()
+			}
 		})
 	})
 })

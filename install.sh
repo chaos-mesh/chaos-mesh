@@ -461,7 +461,6 @@ metadata:
   name: "local-storage"
 provisioner: "kubernetes.io/no-provisioner"
 volumeBindingMode: "WaitForFirstConsumer"
-
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -475,7 +474,6 @@ data:
     local-storage:
       hostDir: /mnt/disks
       mountDir: /mnt/disks
-
 ---
 apiVersion: apps/v1
 kind: DaemonSet
@@ -537,14 +535,12 @@ spec:
         - name: local-disks
           hostPath:
             path: /mnt/disks
-
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: local-storage-admin
   namespace: kube-system
-
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -1313,6 +1309,8 @@ spec:
               value: "true"
             - name: TARGET_NAMESPACE
               value: "chaos-testing"
+            - name: ENABLE_FILTER_NAMESPACE
+              value: "false"
             - name: SECURITY_MODE
               value: "false"
             - name: DNS_SERVER_CREATE
@@ -1399,6 +1397,8 @@ spec:
             value: "app.kubernetes.io/component:template"
           - name: CONFIGMAP_LABELS
             value: "app.kubernetes.io/component:webhook"
+          - name: ENABLE_FILTER_NAMESPACE
+            value: "false"
           - name: PPROF_ADDR
             value: ":10081"
           - name: CHAOS_DNS_SERVICE_NAME
@@ -1586,6 +1586,25 @@ webhooks:
           - UPDATE
         resources:
           - awschaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /mutate-chaos-mesh-org-v1alpha1-gcpchaos
+    failurePolicy: Fail
+    name: mgcpchaos.kb.io
+    timeoutSeconds: 5
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - gcpchaos
   - clientConfig:
       caBundle: "${CA_BUNDLE}"
       service:
@@ -1809,6 +1828,25 @@ webhooks:
           - UPDATE
         resources:
           - awschaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /validate-chaos-mesh-org-v1alpha1-gcpchaos
+    failurePolicy: Fail
+    name: vgcpchaos.kb.io
+    timeoutSeconds: 5
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - gcpchaos
   - clientConfig:
       caBundle: "${CA_BUNDLE}"
       service:

@@ -180,7 +180,7 @@ const TopContainer = () => {
               </>
             )}
 
-            <Auth open={authOpen} setOpen={setAuthOpen} />
+            <Auth open={authOpen} />
 
             <Portal>
               <Snackbar
@@ -188,7 +188,7 @@ const TopContainer = () => {
                   vertical: 'bottom',
                   horizontal: 'center',
                 }}
-                autoHideDuration={9000}
+                autoHideDuration={3000}
                 open={alertOpen}
                 onClose={handleSnackClose}
               >

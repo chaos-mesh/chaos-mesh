@@ -14,8 +14,11 @@
 package v1alpha1
 
 import (
+	"errors"
 	"fmt"
+	"strconv"
 
+	"github.com/docker/go-units"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -140,7 +143,34 @@ func (in *MemoryStressor) Validate(parent *field.Path) field.ErrorList {
 	errs := field.ErrorList{}
 	current := parent.Child("vm")
 	errs = append(errs, in.Stressor.Validate(current)...)
+	if err := in.tryParseBytes(); err != nil {
+		errs = append(errs, field.Invalid(current, in,
+			fmt.Sprintf("incorrect bytes format: %s", err)))
+	}
 	return errs
+}
+
+func (in *MemoryStressor) tryParseBytes() error {
+	length := len(in.Size)
+	if length == 0 {
+		return nil
+	}
+	if in.Size[length-1] == '%' {
+		percent, err := strconv.Atoi(in.Size[:length-1])
+		if err != nil {
+			return err
+		}
+		if percent > 100 || percent < 0 {
+			return errors.New("illegal proportion")
+		}
+	} else {
+		size, err := units.FromHumanSize(in.Size)
+		if err != nil {
+			return err
+		}
+		in.Size = fmt.Sprintf("%db", size)
+	}
+	return nil
 }
 
 // Validate validates whether the CPUStressor is well defined
