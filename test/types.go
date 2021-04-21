@@ -32,12 +32,13 @@ const (
 
 // OperatorConfig describe the configuration during installing chaos-mesh
 type OperatorConfig struct {
-	Namespace   string
-	ReleaseName string
-	Manager     ManagerConfig
-	Daemon      DaemonConfig
-	Tag         string
-	DNSImage    string
+	Namespace       string
+	ReleaseName     string
+	Manager         ManagerConfig
+	Daemon          DaemonConfig
+	Tag             string
+	DNSImage        string
+	EnableDashboard bool
 }
 
 // ManagerConfig describe the chaos-operator configuration during installing chaos-mesh
@@ -96,6 +97,7 @@ func (oi *OperatorConfig) operatorHelmSetString() string {
 		"chaosDaemon.imagePullPolicy":       oi.Daemon.ImagePullPolicy,
 		"dnsServer.create":                  "true",
 		"dnsServer.image":                   oi.DNSImage,
+		"dashboard.create":                  fmt.Sprintf("%t", oi.EnableDashboard),
 	}
 	arr := make([]string, 0, len(set))
 	for k, v := range set {

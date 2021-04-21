@@ -25,6 +25,7 @@ type Config struct {
 	E2EImage         string
 	ChaosDNSImage    string
 	InstallChaosMesh bool
+	EnableDashboard  bool
 }
 
 // NewDefaultConfig describe the default configuration for operator test
