@@ -1297,8 +1297,8 @@ func (s *Service) patchExperiment(exp *Base, annotations map[string]string, kube
 // @Description Update a chaos experiment.
 // @Tags experiments
 // @Produce json
-// @Param request body core.KubeObjectYAMLDescription true "Request body"
-// @Success 200 {object} core.KubeObjectYAMLDescription
+// @Param request body core.ExperimentYAMLDescription true "Request body"
+// @Success 200 {object} core.ExperimentYAMLDescription
 // @Failure 400 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
 // @Router /experiments/update [put]
