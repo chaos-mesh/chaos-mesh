@@ -77,6 +77,7 @@ metadata:
   labels:
     app: web-show
 spec:
+  type: NodePort
   selector:
     app: web-show
   ports:
