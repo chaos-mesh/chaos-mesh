@@ -461,6 +461,7 @@ metadata:
   name: "local-storage"
 provisioner: "kubernetes.io/no-provisioner"
 volumeBindingMode: "WaitForFirstConsumer"
+
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -474,6 +475,7 @@ data:
     local-storage:
       hostDir: /mnt/disks
       mountDir: /mnt/disks
+
 ---
 apiVersion: apps/v1
 kind: DaemonSet
@@ -535,12 +537,14 @@ spec:
         - name: local-disks
           hostPath:
             path: /mnt/disks
+
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: local-storage-admin
   namespace: kube-system
+
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -1167,7 +1171,7 @@ spec:
       serviceAccount: chaos-daemon
       hostIPC: true
       hostPID: true
-      priorityClassName: 
+      priorityClassName:
       containers:
         - name: chaos-daemon
           image: ${DOCKER_REGISTRY_PREFIX}/pingcap/chaos-daemon:${VERSION_TAG}
@@ -1239,7 +1243,7 @@ spec:
         app.kubernetes.io/component: chaos-dashboard
     spec:
       serviceAccount: chaos-controller-manager
-      priorityClassName: 
+      priorityClassName:
       containers:
         - name: chaos-dashboard
           image: ${DOCKER_REGISTRY_PREFIX}/pingcap/chaos-dashboard:${VERSION_TAG}
@@ -1309,7 +1313,7 @@ spec:
     spec:
       hostNetwork: ${host_network}
       serviceAccount: chaos-controller-manager
-      priorityClassName: 
+      priorityClassName:
       containers:
       - name: chaos-mesh
         image: ${DOCKER_REGISTRY_PREFIX}/pingcap/chaos-mesh:${VERSION_TAG}
@@ -1782,4 +1786,3 @@ EOF
 }
 
 main "$@" || exit 1
-
