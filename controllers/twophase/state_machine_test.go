@@ -72,7 +72,7 @@ var _ = Describe("TwoPhase StateMachine", func() {
 					return
 				} else if status == v1alpha1.ExperimentPhaseFinished {
 					Expect(updated).To(Equal(false))
-				} else if status == v1alpha1.ExperimentPhaseFailed{
+				} else if status == v1alpha1.ExperimentPhaseFailed {
 					Expect(updated).To(Equal(true))
 					Expect(err).To(HaveOccurred())
 					Expect(err.Error()).To(ContainSubstring("RecoverError"))
