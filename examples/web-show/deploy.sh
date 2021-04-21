@@ -63,6 +63,10 @@ fi
 
 TARGET_IP=$(kubectl get pod -n kube-system -o wide| grep kube-controller | head -n 1 | awk '{print $6}')
 
+if [ -z "${TARGET_IP}" ]; then
+   TARGET_IP=$(kubectl get pod -n kube-system -o wide | grep Running | head -n 1 | awk '{print $6}')
+fi
+
 if [ ${DOCKER_MIRROR} == "true" ]; then
     docker pull dockerhub.azk8s.cn/pingcap/web-show || true
     docker tag dockerhub.azk8s.cn/pingcap/web-show pingcap/web-show  || true
