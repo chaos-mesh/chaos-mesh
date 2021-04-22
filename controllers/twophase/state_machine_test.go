@@ -70,10 +70,17 @@ var _ = Describe("TwoPhase StateMachine", func() {
 					Expect(sm.Chaos.GetStatus().FailedMessage).To(ContainSubstring("RecoverError"))
 
 					return
-				} else if status != v1alpha1.ExperimentPhaseFinished {
-					Expect(updated).To(Equal(true))
-				} else {
+				} else if status == v1alpha1.ExperimentPhaseFinished {
 					Expect(updated).To(Equal(false))
+				} else if status == v1alpha1.ExperimentPhaseFailed {
+					Expect(updated).To(Equal(true))
+					Expect(err).To(HaveOccurred())
+					Expect(err.Error()).To(ContainSubstring("RecoverError"))
+					Expect(sm.Chaos.GetStatus().FailedMessage).To(ContainSubstring("RecoverError"))
+
+					return
+				} else {
+					Expect(updated).To(Equal(true))
 				}
 
 				Expect(err).ToNot(HaveOccurred())
@@ -182,27 +189,6 @@ var _ = Describe("TwoPhase StateMachine", func() {
 			Expect(err).ToNot(HaveOccurred())
 			Expect(updated).To(Equal(true))
 			Expect(sm.Chaos.GetStatus().Experiment.Phase).To(Equal(v1alpha1.ExperimentPhaseRunning))
-		})
-
-		It("StateMachine Unexpected State", func() {
-			var unexpectedState v1alpha1.ExperimentPhase = "wrong-state"
-			now := time.Now()
-
-			for _, status := range statuses {
-				sm := setupStateMachineWithStatus(status)
-				updated, err := sm.run(context.TODO(), unexpectedState, now)
-				Expect(updated).To(Equal(false))
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("unexpected target phase"))
-			}
-
-			sm := setupStateMachineWithStatus(unexpectedState)
-			for _, status := range statuses {
-				updated, err := sm.run(context.TODO(), status, now)
-				Expect(updated).To(Equal(false))
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("unexpected current phase"))
-			}
 		})
 	})
 
