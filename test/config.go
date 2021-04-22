@@ -41,5 +41,6 @@ func NewDefaultConfig() *Config {
 		E2EImage:         "localhost:5000/pingcap/e2e-helper:latest",
 		ChaosDNSImage:    "localhost:5000/pingcap/chaos-dns:latest",
 		InstallChaosMesh: false,
+		EnableDashboard:  false,
 	}
 }
