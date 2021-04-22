@@ -19,7 +19,6 @@ const TokensTable = () => {
   const { tokens, tokenName } = useSelector((state: RootState) => state.globalStatus)
   const dispatch = useStoreDispatch()
 
-  const [dialogOpen, setDialogOpen] = useState(false)
   const [selected, setSelected] = useState({
     tokenName: '',
     title: '',
@@ -31,14 +30,12 @@ const TokensTable = () => {
     api.auth.token(_token.token)
   }
 
-  const handleRemoveToken = (token: TokenFormValues) => (_: any, __: any) => {
+  const handleRemoveToken = (token: TokenFormValues) => (_: any, __: any) =>
     setSelected({
       tokenName: token.name,
       title: `${intl.formatMessage({ id: 'common.delete' })} ${token.name}`,
       description: intl.formatMessage({ id: 'settings.addToken.deleteDesc' }),
     })
-    setDialogOpen(true)
-  }
 
   const handleRemoveTokenConfirm = () => {
     const current = tokens.filter(({ name }) => name !== selected.tokenName)
@@ -98,13 +95,7 @@ const TokensTable = () => {
         </Table>
       </TableContainer>
 
-      <ConfirmDialog
-        open={dialogOpen}
-        setOpen={setDialogOpen}
-        title={selected.title}
-        description={selected.description}
-        onConfirm={handleRemoveTokenConfirm}
-      />
+      <ConfirmDialog title={selected.title} description={selected.description} onConfirm={handleRemoveTokenConfirm} />
     </>
   )
 }

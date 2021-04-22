@@ -7,32 +7,37 @@ import {
   DialogProps,
   DialogTitle,
 } from '@material-ui/core'
+import React, { useImperativeHandle, useState } from 'react'
 
-import React from 'react'
 import T from 'components/T'
 
+export interface ConfirmDialogHandles {
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>
+}
+
 interface ConfirmDialogProps {
-  open: boolean
-  setOpen: (open: boolean) => void
   title: string | JSX.Element
   description?: string
   onConfirm?: () => void
   dialogProps?: Omit<DialogProps, 'open'>
 }
 
-const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
-  open,
-  setOpen,
-  title,
-  description,
-  onConfirm,
-  children,
-  dialogProps,
-}) => {
+const ConfirmDialog: React.ForwardRefRenderFunction<
+  ConfirmDialogHandles,
+  React.PropsWithChildren<ConfirmDialogProps>
+> = ({ title, description, onConfirm, children, dialogProps }, ref) => {
+  const [open, setOpen] = useState(false)
+
+  // Methods exposed to the parent
+  useImperativeHandle(ref, () => ({
+    setOpen,
+  }))
+
   const handleClose = () => setOpen(false)
 
   const handleConfirm = () => {
     typeof onConfirm === 'function' && onConfirm()
+
     handleClose()
   }
 
@@ -63,4 +68,4 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   )
 }
 
-export default ConfirmDialog
+export default React.forwardRef(ConfirmDialog)
