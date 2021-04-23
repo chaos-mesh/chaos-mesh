@@ -174,15 +174,15 @@ export default function ExperimentDetail() {
 
     switch (action) {
       case 'archive':
-        actionFunc = api.experiments.deleteExperiment
+        actionFunc = api.experiments.del
 
         break
       case 'pause':
-        actionFunc = api.experiments.pauseExperiment
+        actionFunc = api.experiments.pause
 
         break
       case 'start':
-        actionFunc = api.experiments.startExperiment
+        actionFunc = api.experiments.start
 
         break
       default:

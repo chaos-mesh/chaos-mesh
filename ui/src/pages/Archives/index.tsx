@@ -4,6 +4,7 @@ import { FixedSizeList as RWList, ListChildComponentProps as RWListChildComponen
 import { useEffect, useRef, useState } from 'react'
 
 import { Archive } from 'api/archives.type'
+import CloseIcon from '@material-ui/icons/Close'
 import DeleteOutlinedIcon from '@material-ui/icons/DeleteOutlined'
 import ExperimentListItem from 'components/ExperimentListItem'
 import FilterListIcon from '@material-ui/icons/FilterList'
@@ -66,23 +67,30 @@ export default function Archives() {
   }
 
   const handleAction = (action: string) => () => {
+    const { uuid } = selected
+
     let actionFunc: any
+    let arg: any
 
     switch (action) {
       case 'delete':
         actionFunc = api.archives.del
+        arg = uuid
 
         break
-      default:
-        actionFunc = null
+      case 'deleteMulti':
+        action = 'archive'
+        actionFunc = api.archives.delMulti
+        arg = Object.keys(batch)
+        setBatch({})
+
+        break
     }
 
     confirmRef.current!.setOpen(false)
 
-    const { uuid } = selected
-
     if (actionFunc) {
-      actionFunc(uuid)
+      actionFunc(arg)
         .then(() => {
           dispatch(
             setAlert({
@@ -110,13 +118,13 @@ export default function Archives() {
         : {}
     )
 
-  const handleBatchDelete = () => {
-    Object.keys(batch).forEach((d) => {
-      api.archives.del(d)
+  const handleBatchDelete = () =>
+    handleSelect({
+      uuid: '',
+      title: `${intl.formatMessage({ id: 'archives.deleteMulti' })}`,
+      description: intl.formatMessage({ id: 'archives.deleteDesc' }),
+      action: 'deleteMulti',
     })
-
-    setBatch({})
-  }
 
   const onCheckboxChange = (uuid: uuid) => (e: React.ChangeEvent<HTMLInputElement>) => {
     setBatch({
@@ -146,7 +154,7 @@ export default function Archives() {
       <Space mb={6}>
         <Button
           variant="outlined"
-          startIcon={<FilterListIcon />}
+          startIcon={isBatchEmpty ? <FilterListIcon /> : <CloseIcon />}
           onClick={handleBatchSelect}
           disabled={archives.length === 0}
         >

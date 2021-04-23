@@ -35,6 +35,7 @@ func RegisterOperatorFlags(flags *flag.FlagSet) {
 	flags.StringVar(&TestConfig.E2EImage, "e2e-image", "pingcap/e2e-helper:latest", "e2e helper image")
 	flags.StringVar(&TestConfig.ChaosDNSImage, "chaos-dns-image", "pingcap/coredns:v0.2.0", "chaos-dns image")
 	flags.BoolVar(&TestConfig.InstallChaosMesh, "install-chaos-mesh", false, "automatically install chaos-mesh")
+	flags.BoolVar(&TestConfig.EnableDashboard, "enable-dashboard", false, "enable Chaos Dashboard")
 }
 
 // LoadClientRawConfig would provide client raw config
