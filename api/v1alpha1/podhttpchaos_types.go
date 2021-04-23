@@ -24,17 +24,17 @@ type PodHttpChaosSpec struct {
 	// +optional
 	Container *string `json:"container,omitempty"`
 
-	// Pid represents a running toda process id
+	// Pid represents a running tproxy process id
 	// +optional
 	Pid int64 `json:"pid,omitempty"`
 
-	// StartTime represents the start time of a toda process
+	// StartTime represents the start time of a tproxy process
 	// +optional
 	StartTime int64 `json:"startTime,omitempty"`
 
 	// Rules are a list of injection rule for http request
 	// +optional
-	Rules []*PodHttpChaosRule `json:"requestRules,omitempty"`
+	Rules []*PodHttpChaosRule `json:"rules,omitempty"`
 }
 
 // PodHttpChaosRule defines the injection rule for http request

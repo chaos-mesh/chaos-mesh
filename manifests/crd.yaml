@@ -2627,7 +2627,7 @@ spec:
                 one pod'
               type: string
             pid:
-              description: Pid represents a running toda process id
+              description: Pid represents a running tproxy process id
               format: int64
               type: integer
             proxyPorts:
@@ -2636,7 +2636,7 @@ spec:
                 format: int32
                 type: integer
               type: array
-            requestRules:
+            rules:
               description: Rules are a list of injection rule for http request
               items:
                 description: PodHttpChaosRule defines the injection rule for http
@@ -2700,10 +2700,6 @@ spec:
                       code:
                         format: int32
                         type: integer
-                      headers:
-                        additionalProperties:
-                          type: string
-                        type: object
                       method:
                         type: string
                       path:
@@ -2711,6 +2707,10 @@ spec:
                       port:
                         format: int32
                         type: integer
+                      request_headers:
+                        additionalProperties:
+                          type: string
+                        type: object
                       response_headers:
                         additionalProperties:
                           type: string
@@ -2727,7 +2727,7 @@ spec:
                 type: object
               type: array
             startTime:
-              description: StartTime represents the start time of a toda process
+              description: StartTime represents the start time of a tproxy process
               format: int64
               type: integer
           required:

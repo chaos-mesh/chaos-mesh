@@ -97,12 +97,13 @@ func (s *DaemonServer) createHttpChaos(ctx context.Context, in *pb.ApplyHttpChao
 		return err
 	}
 	processBuilder := bpm.DefaultProcessBuilder(tproxyBin).
+		EnableLocalMnt().
 		SetIdentifier(in.ContainerId).
 		SetEnv(rustLog, rustLogLevel).
 		SetStdin(bpm.NewConcurrentBuffer())
 
 	if in.EnterNS {
-		processBuilder = processBuilder.SetNS(pid, bpm.MountNS).SetNS(pid, bpm.PidNS)
+		processBuilder = processBuilder.SetNS(pid, bpm.PidNS)
 	}
 
 	cmd := processBuilder.Build()
