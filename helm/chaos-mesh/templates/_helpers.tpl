@@ -33,7 +33,7 @@ Create chart name and version as used by the chart label.
 
 {{/* Generate basic labels */}}
 {{- define "chaos-mesh.labels" -}}
-helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.AppVersion }}
+helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
