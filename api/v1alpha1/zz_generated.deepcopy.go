@@ -701,8 +701,8 @@ func (in *GcpChaosSpec) DeepCopyInto(out *GcpChaosSpec) {
 		*out = new(string)
 		**out = **in
 	}
-	if in.DeviceName != nil {
-		in, out := &in.DeviceName, &out.DeviceName
+	if in.DeviceNames != nil {
+		in, out := &in.DeviceNames, &out.DeviceNames
 		*out = new([]string)
 		if **in != nil {
 			in, out := *in, *out
@@ -726,8 +726,8 @@ func (in *GcpChaosSpec) DeepCopy() *GcpChaosSpec {
 func (in *GcpChaosStatus) DeepCopyInto(out *GcpChaosStatus) {
 	*out = *in
 	in.ChaosStatus.DeepCopyInto(&out.ChaosStatus)
-	if in.AttachedDiskString != nil {
-		in, out := &in.AttachedDiskString, &out.AttachedDiskString
+	if in.AttachedDisksStrings != nil {
+		in, out := &in.AttachedDisksStrings, &out.AttachedDisksStrings
 		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}

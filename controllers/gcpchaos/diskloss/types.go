@@ -62,7 +62,7 @@ func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 		notFound   []string
 		marshalErr []string
 	)
-	for _, specDeviceName := range *gcpchaos.Spec.DeviceName {
+	for _, specDeviceName := range *gcpchaos.Spec.DeviceNames {
 		haveDisk := false
 		for _, disk := range instance.Disks {
 			if disk.DeviceName == specDeviceName {
@@ -71,7 +71,7 @@ func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 				if err != nil {
 					marshalErr = append(marshalErr, err.Error())
 				}
-				gcpchaos.Status.AttachedDiskString = append(gcpchaos.Status.AttachedDiskString, string(bytes))
+				gcpchaos.Status.AttachedDisksStrings = append(gcpchaos.Status.AttachedDisksStrings, string(bytes))
 				break
 			}
 		}
@@ -91,7 +91,7 @@ func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 	}
 
 	gcpchaos.Finalizers = []string{GcpFinalizer}
-	for _, specDeviceName := range *gcpchaos.Spec.DeviceName {
+	for _, specDeviceName := range *gcpchaos.Spec.DeviceNames {
 		_, err = computeService.Instances.DetachDisk(gcpchaos.Spec.Project, gcpchaos.Spec.Zone, gcpchaos.Spec.Instance, specDeviceName).Do()
 		if err != nil {
 			gcpchaos.Finalizers = make([]string, 0)
@@ -117,7 +117,7 @@ func (e *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		return err
 	}
 	var disk compute.AttachedDisk
-	for _, attachedDiskString := range gcpchaos.Status.AttachedDiskString {
+	for _, attachedDiskString := range gcpchaos.Status.AttachedDisksStrings {
 		err = json.Unmarshal([]byte(attachedDiskString), &disk)
 		if err != nil {
 			e.Log.Error(err, "fail to unmarshal the disk info")
