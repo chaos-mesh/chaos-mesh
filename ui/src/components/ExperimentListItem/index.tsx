@@ -36,16 +36,14 @@ const useStyles = makeStyles((theme: Theme) =>
 interface ExperimentListItemProps {
   experiment: Experiment | Archive
   isArchive?: boolean
-  handleSelect: (info: { uuid: uuid; title: string; description: string; action: string }) => void
-  handleDialogOpen: (open: boolean) => void
+  onSelect: (info: { uuid: uuid; title: string; description: string; action: string }) => void
   intl: IntlShape
 }
 
 const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
   experiment: e,
   isArchive = false,
-  handleSelect,
-  handleDialogOpen,
+  onSelect,
   intl,
 }) => {
   const theme = useTheme()
@@ -66,10 +64,9 @@ const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
   const handleAction = (action: string) => (event: React.MouseEvent<HTMLSpanElement>) => {
     event.stopPropagation()
 
-    handleDialogOpen(true)
     switch (action) {
       case 'archive':
-        handleSelect({
+        onSelect({
           uuid: (e as Experiment).uid,
           title: `${intl.formatMessage({ id: 'archives.single' })} ${e.name}`,
           description: intl.formatMessage({ id: 'experiments.deleteDesc' }),
@@ -78,7 +75,7 @@ const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
 
         return
       case 'pause':
-        handleSelect({
+        onSelect({
           uuid: (e as Experiment).uid,
           title: `${intl.formatMessage({ id: 'common.pause' })} ${e.name}`,
           description: intl.formatMessage({ id: 'experiments.pauseDesc' }),
@@ -87,7 +84,7 @@ const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
 
         return
       case 'start':
-        handleSelect({
+        onSelect({
           uuid: (e as Experiment).uid,
           title: `${intl.formatMessage({ id: 'common.start' })} ${e.name}`,
           description: intl.formatMessage({ id: 'experiments.startDesc' }),
@@ -96,7 +93,7 @@ const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
 
         return
       case 'delete':
-        handleSelect({
+        onSelect({
           uuid: (e as Experiment).uid,
           title: `${intl.formatMessage({ id: 'common.delete' })} ${e.name}`,
           description: intl.formatMessage({ id: 'archives.deleteDesc' }),
@@ -112,7 +109,7 @@ const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
   const handleJumpTo = () => history.push(isArchive ? `/archives/${e.uid}` : `/experiments/${(e as Experiment).uid}`)
 
   const Actions = () => (
-    <Space display="flex" justifyContent="flex-end" alignItems="center">
+    <Space display="flex" justifyContent="end" alignItems="center">
       <Typography variant="body2">
         {T('experiments.createdAt')}{' '}
         {DateTime.fromISO(isArchive ? (e as Archive).start_time : (e as Experiment).created, {
@@ -171,7 +168,7 @@ const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
   )
 
   return (
-    <Paper padding={false} className={classes.root} onClick={handleJumpTo}>
+    <Paper padding={0} className={classes.root} onClick={handleJumpTo}>
       <Box display="flex" justifyContent="space-between" alignItems="center" p={3}>
         <Space display="flex" alignItems="center">
           {!isArchive &&

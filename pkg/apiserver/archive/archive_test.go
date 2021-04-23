@@ -265,6 +265,10 @@ func (m *MockExperimentStore) DeleteIncompleteExperiments(context.Context) error
 	panic("implement me")
 }
 
+func (m *MockExperimentStore) DeleteByUIDs(context.Context, []string) error {
+	panic("implement me")
+}
+
 var _ = Describe("event", func() {
 	var router *gin.Engine
 	BeforeEach(func() {
