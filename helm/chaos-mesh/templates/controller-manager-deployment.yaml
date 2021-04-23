@@ -4,7 +4,7 @@ metadata:
   namespace: {{ .Release.Namespace | quote }}
   name: chaos-controller-manager
   labels:
-    {{- include "chaos-mesh.labels" . | indent 4 }}
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: controller-manager
 spec:
   replicas: {{ .Values.controllerManager.replicaCount }}
@@ -15,7 +15,7 @@ spec:
   template:
     metadata:
       labels:
-        {{- include "chaos-mesh.labels" . | indent 8 }}
+        {{- include "chaos-mesh.labels" . | nindent 8 }}
         app.kubernetes.io/component: controller-manager
       annotations:
         rollme: {{ randAlphaNum 5 | quote }}

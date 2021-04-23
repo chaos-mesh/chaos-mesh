@@ -5,7 +5,7 @@ metadata:
   namespace: {{ .Release.Namespace | quote }}
   name: {{ .Values.controllerManager.serviceAccount }}
   labels:
-    {{- include "chaos-mesh.labels" . | indent 4 }}
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: controller-manager
 
 ---
@@ -15,7 +15,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ .Release.Name }}-chaos-controller-manager-target-namespace
   labels:
-    {{- include "chaos-mesh.labels" . | indent 4 }}
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: controller-manager
 rules:
   - apiGroups: [ "" ]
@@ -45,7 +45,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ .Release.Name }}-chaos-controller-manager-cluster-level
   labels:
-    {{- include "chaos-mesh.labels" . | indent 4 }}
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: controller-manager
 rules:
   - apiGroups: [ "" ]
@@ -60,7 +60,7 @@ rules:
     resources:
       - subjectaccessreviews
     verbs: [ "create" ]
-      
+
 
 ---
 kind: Role
@@ -69,7 +69,7 @@ metadata:
   name: {{ .Release.Name }}-chaos-controller-manager-control-plane
   namespace: {{ .Release.Namespace | quote }}
   labels:
-    {{- include "chaos-mesh.labels" . | indent 4 }}
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: controller-manager
 rules:
   - apiGroups: [ "" ]
@@ -87,7 +87,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ .Release.Name }}-chaos-controller-manager-cluster-level
   labels:
-    {{- include "chaos-mesh.labels" . | indent 4 }}
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: controller-manager
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -106,7 +106,7 @@ metadata:
   name: {{ .Release.Name }}-chaos-controller-manager-control-plane
   namespace: {{ .Release.Namespace | quote }}
   labels:
-    {{- include "chaos-mesh.labels" . | indent 4 }}
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: controller-manager
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -128,7 +128,7 @@ metadata:
   name: {{ .Release.Name }}-chaos-controller-manager-target-namespace
   namespace: {{ .Values.controllerManager.targetNamespace | quote }}
   labels:
-    {{- include "chaos-mesh.labels" . | indent 4 }}
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: controller-manager
 roleRef:
   apiGroup: rbac.authorization.k8s.io

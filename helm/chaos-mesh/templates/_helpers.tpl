@@ -39,7 +39,7 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
 app.kubernetes.io/part-of: {{ template "chaos-mesh.name" . }}
-app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+app.kubernetes.io/version: {{ .Chart.AppVersion }}
 {{- if .Values.customLabels }}
 {{ toYaml .Values.customLabels }}
 {{- end }}

@@ -5,7 +5,7 @@ metadata:
   namespace: {{ .Release.Namespace | quote }}
   name: prometheus-config
   labels:
-    {{- include "chaos-mesh.labels" . | indent 4 }}
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: prometheus
 data:
   prometheus.yml: |-

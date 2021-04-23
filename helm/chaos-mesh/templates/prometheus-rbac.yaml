@@ -7,7 +7,7 @@ metadata:
   namespace: {{ .Release.Namespace | quote }}
   name: {{ .Values.prometheus.serviceAccount }}
   labels:
-    {{- include "chaos-mesh.labels" . | indent 4 }}
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: prometheus
 ---
 kind: ClusterRole
@@ -15,7 +15,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ .Release.Name }}-chaos-prometheus
   labels:
-    {{- include "chaos-mesh.labels" . | indent 4 }}
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: prometheus
 rules:
   - apiGroups: [""]
@@ -27,7 +27,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ .Release.Name }}-chaos-prometheus
   labels:
-    {{- include "chaos-mesh.labels" . | indent 4 }}
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: prometheus
 subjects:
   - kind: ServiceAccount

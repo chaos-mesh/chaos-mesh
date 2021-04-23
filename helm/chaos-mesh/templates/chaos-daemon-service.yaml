@@ -4,7 +4,7 @@ metadata:
   namespace: {{ .Release.Namespace | quote }}
   name: {{ template "chaos-daemon.svc" . }}
   labels:
-    {{- include "chaos-mesh.labels" . | indent 4 }}
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: chaos-daemon
 spec:
   clusterIP: None

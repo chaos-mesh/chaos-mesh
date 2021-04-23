@@ -6,7 +6,7 @@ metadata:
   namespace: {{ .Release.Namespace | quote }}
   name: {{ .Values.chaosDaemon.serviceAccount }}
   labels:
-    {{- include "chaos-mesh.labels" . | indent 4 }}
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: chaos-daemon
 {{- end}}
 {{- if .Values.chaosDaemon.podSecurityPolicy }}
@@ -18,7 +18,7 @@ metadata:
   name: {{ .Release.Name }}-chaos-daemon-target-namespace
   namespace: chaos-testing
   labels:
-    {{- include "chaos-mesh.labels" . | indent 4 }}
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: chaos-daemon
 subjects:
   - kind: ServiceAccount
@@ -35,7 +35,7 @@ kind: ClusterRole
 metadata:
   name: {{ .Release.Name }}-chaos-daemon-psp
   labels:
-    {{- include "chaos-mesh.labels" . | indent 4 }}
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: chaos-daemon
 rules:
 - apiGroups:
@@ -55,7 +55,7 @@ kind: PodSecurityPolicy
 metadata:
   name: {{ .Release.Name }}-chaos-daemon
   labels:
-    {{- include "chaos-mesh.labels" . | indent 4 }}
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: chaos-daemon
 spec:
   privileged: false

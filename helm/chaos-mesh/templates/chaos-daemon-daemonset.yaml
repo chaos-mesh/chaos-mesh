@@ -4,8 +4,8 @@ metadata:
   namespace: {{ .Release.Namespace | quote }}
   name: chaos-daemon
   labels:
-    {{- include "chaos-mesh.labels" . | indent 4 }}
     app.kubernetes.io/component: chaos-daemon
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
 spec:
   selector:
     matchLabels:
@@ -14,7 +14,7 @@ spec:
   template:
     metadata:
       labels:
-        {{- include "chaos-mesh.labels" . | indent 8 }}
+        {{- include "chaos-mesh.labels" . | nindent 8 }}
         app.kubernetes.io/component: chaos-daemon
       annotations:
         {{- if .Values.dashboard.securityMode }}
