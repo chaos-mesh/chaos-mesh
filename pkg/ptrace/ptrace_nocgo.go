@@ -15,6 +15,12 @@
 
 package ptrace
 
+import (
+
+	"github.com/go-logr/logr"
+	"github.com/chaos-mesh/chaos-mesh/pkg/mapreader"
+)
+
 // RegisterLogger registers a logger on ptrace pkg
 func RegisterLogger(logger logr.Logger) {
 	// no implement
