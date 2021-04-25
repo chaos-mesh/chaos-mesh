@@ -467,8 +467,8 @@ spec:
               - node-reset
               - disk-loss
               type: string
-            deviceName:
-              description: The device name of the disk to detach. Needed in disk-loss.
+            deviceNames:
+              description: The device name of the disks to detach. Needed in disk-loss.
               items:
                 type: string
               type: array
@@ -3908,8 +3908,8 @@ spec:
                   - node-reset
                   - disk-loss
                   type: string
-                deviceName:
-                  description: The device name of the disk to detach. Needed in disk-loss.
+                deviceNames:
+                  description: The device name of the disks to detach. Needed in disk-loss.
                   items:
                     type: string
                   type: array
@@ -6014,8 +6014,8 @@ spec:
                         - node-reset
                         - disk-loss
                         type: string
-                      deviceName:
-                        description: The device name of the disk to detach. Needed
+                      deviceNames:
+                        description: The device name of the disks to detach. Needed
                           in disk-loss.
                         items:
                           type: string
