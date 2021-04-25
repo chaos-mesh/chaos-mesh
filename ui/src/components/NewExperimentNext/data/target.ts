@@ -536,11 +536,28 @@ const data: Record<Kind, Target> = {
         spec: {
           action: 'disk-loss' as any,
           ...gcpCommon,
+          deviceNames: {
+            field: 'label',
+            label: 'Device names',
+            value: [],
+            helperText: 'Type string and end with a space to generate the device names',
+          },
         },
       },
     ],
   },
 }
+
+const targetScopeSchema = Yup.object({
+  namespace_selectors: Yup.array().min(1, 'The namespace selectors is required'),
+})
+
+const patternsSchema = Yup.array().of(Yup.string()).required('The patterns is required')
+
+const AwsChaosCommonSchema = Yup.object({
+  awsRegion: Yup.string().required('The region is required'),
+  ec2Instance: Yup.string().required('The ID of the EC2 instance is required'),
+})
 
 const GcpChaosCommonSchema = Yup.object({
   project: Yup.string().required('The project is required'),
@@ -560,49 +577,37 @@ export const schema: Partial<Record<Kind, Record<string, Yup.ObjectSchema>>> = {
   NetworkChaos: {
     partition: Yup.object({
       direction: Yup.string().required('The direction is required'),
-      target_scope: Yup.object({
-        namespace_selectors: Yup.array().min(1, 'The namespace selectors is required'),
-      }),
+      target_scope: targetScopeSchema,
     }),
     loss: Yup.object({
       loss: Yup.object({
         loss: Yup.string().required('The loss is required'),
       }),
-      target_scope: Yup.object({
-        namespace_selectors: Yup.array().min(1, 'The namespace selectors is required'),
-      }),
+      target_scope: targetScopeSchema,
     }),
     delay: Yup.object({
       delay: Yup.object({
         latency: Yup.string().required('The latency is required'),
       }),
-      target_scope: Yup.object({
-        namespace_selectors: Yup.array().min(1, 'The namespace selectors is required'),
-      }),
+      target_scope: targetScopeSchema,
     }),
     duplicate: Yup.object({
       duplicate: Yup.object({
         duplicate: Yup.string().required('The duplicate is required'),
       }),
-      target_scope: Yup.object({
-        namespace_selectors: Yup.array().min(1, 'The namespace selectors is required'),
-      }),
+      target_scope: targetScopeSchema,
     }),
     corrupt: Yup.object({
       corrupt: Yup.object({
         corrupt: Yup.string().required('The corrupt is required'),
       }),
-      target_scope: Yup.object({
-        namespace_selectors: Yup.array().min(1, 'The namespace selectors is required'),
-      }),
+      target_scope: targetScopeSchema,
     }),
     bandwidth: Yup.object({
       bandwidth: Yup.object({
         rate: Yup.string().required('The rate of bandwidth is required'),
       }),
-      target_scope: Yup.object({
-        namespace_selectors: Yup.array().min(1, 'The namespace selectors is required'),
-      }),
+      target_scope: targetScopeSchema,
     }),
   },
   IoChaos: {
@@ -623,24 +628,16 @@ export const schema: Partial<Record<Kind, Record<string, Yup.ObjectSchema>>> = {
   },
   DNSChaos: {
     error: Yup.object({
-      patterns: Yup.array().of(Yup.string()).required('The patterns is required'),
+      patterns: patternsSchema,
     }),
     random: Yup.object({
-      patterns: Yup.array().of(Yup.string()).required('The patterns is required'),
+      patterns: patternsSchema,
     }),
   },
   AwsChaos: {
-    'ec2-stop': Yup.object({
-      awsRegion: Yup.string().required('The region is required'),
-      ec2Instance: Yup.string().required('The ID of the EC2 instance is required'),
-    }),
-    'ec2-restart': Yup.object({
-      awsRegion: Yup.string().required('The region is required'),
-      ec2Instance: Yup.string().required('The ID of the EC2 instance is required'),
-    }),
-    'detach-volume': Yup.object({
-      awsRegion: Yup.string().required('The region is required'),
-      ec2Instance: Yup.string().required('The ID of the EC2 instance is required'),
+    'ec2-stop': AwsChaosCommonSchema,
+    'ec2-restart': AwsChaosCommonSchema,
+    'detach-volume': AwsChaosCommonSchema.shape({
       deviceName: Yup.string().required('The device name is required'),
       volumeID: Yup.string().required('The ID of the EBS volume is required'),
     }),
@@ -649,7 +646,7 @@ export const schema: Partial<Record<Kind, Record<string, Yup.ObjectSchema>>> = {
     'node-stop': GcpChaosCommonSchema,
     'node-reset': GcpChaosCommonSchema,
     'disk-loss': GcpChaosCommonSchema.shape({
-      deviceName: Yup.string().required('The device name is required'),
+      deviceNames: Yup.array().of(Yup.string()).required('At least one device name is required'),
     }),
   },
 }

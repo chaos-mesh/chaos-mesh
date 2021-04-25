@@ -238,7 +238,7 @@ type GcpChaosInfo struct {
 	Project     string    `json:"project"`
 	Zone        string    `json:"zone"`
 	Instance    string    `json:"instance"`
-	DeviceNames *[]string `json:"deviceName,omitempty"`
+	DeviceNames *[]string `json:"deviceNames,omitempty"`
 }
 
 // ParsePodChaos Parse PodChaos JSON string into KubeObjectYAMLDescription.

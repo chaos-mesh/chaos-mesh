@@ -510,8 +510,8 @@ spec:
         status:
           description: GcpChaosStatus represents the status of a GcpChaos
           properties:
-            attachedDiskString:
-              description: The attached disk info string. Needed in disk-loss.
+            attachedDiskStrings:
+              description: The attached disk info strings. Needed in disk-loss.
               items:
                 type: string
               type: array
