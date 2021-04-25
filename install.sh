@@ -1106,7 +1106,7 @@ spec:
       port: 31766
       targetPort: http
       protocol: TCP
-  selector:    
+  selector:
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/component: chaos-daemon
@@ -1160,7 +1160,7 @@ spec:
       targetPort: webhook
       protocol: TCP
       name: webhook
-  selector:    
+  selector:
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/component: controller-manager
@@ -1179,7 +1179,7 @@ metadata:
     app.kubernetes.io/version: v0.9.0
 spec:
   selector:
-    matchLabels:      
+    matchLabels:
       app.kubernetes.io/name: chaos-mesh
       app.kubernetes.io/instance: chaos-mesh
       app.kubernetes.io/component: chaos-daemon
@@ -1253,7 +1253,7 @@ metadata:
 spec:
   replicas: 1
   selector:
-    matchLabels:      
+    matchLabels:
       app.kubernetes.io/name: chaos-mesh
       app.kubernetes.io/instance: chaos-mesh
       app.kubernetes.io/component: chaos-dashboard
@@ -1326,7 +1326,7 @@ metadata:
 spec:
   replicas: 1
   selector:
-    matchLabels:      
+    matchLabels:
       app.kubernetes.io/name: chaos-mesh
       app.kubernetes.io/instance: chaos-mesh
       app.kubernetes.io/component: controller-manager
@@ -1892,8 +1892,10 @@ kind: ValidatingWebhookConfiguration
 metadata:
   name: validate-auth
   labels:
-    app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: v0.9.0
     app.kubernetes.io/component: admission-webhook
 webhooks:
   - clientConfig:
