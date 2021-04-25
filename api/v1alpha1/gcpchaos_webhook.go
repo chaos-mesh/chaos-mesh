@@ -110,9 +110,9 @@ func (in *GcpChaos) ValidatePodMode(spec *field.Path) field.ErrorList {
 func (in *GcpChaosSpec) validateDeviceName(containerField *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 	if in.Action == DiskLoss {
-		if in.DeviceName == nil {
+		if in.DeviceNames == nil {
 			err := fmt.Errorf("the name of device should not be empty on %s action", in.Action)
-			allErrs = append(allErrs, field.Invalid(containerField, in.DeviceName, err.Error()))
+			allErrs = append(allErrs, field.Invalid(containerField, in.DeviceNames, err.Error()))
 		}
 	}
 	return allErrs

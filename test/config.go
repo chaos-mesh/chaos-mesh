@@ -25,6 +25,7 @@ type Config struct {
 	E2EImage         string
 	ChaosDNSImage    string
 	InstallChaosMesh bool
+	EnableDashboard  bool
 }
 
 // NewDefaultConfig describe the default configuration for operator test
@@ -40,5 +41,6 @@ func NewDefaultConfig() *Config {
 		E2EImage:         "localhost:5000/pingcap/e2e-helper:latest",
 		ChaosDNSImage:    "localhost:5000/pingcap/chaos-dns:latest",
 		InstallChaosMesh: false,
+		EnableDashboard:  false,
 	}
 }

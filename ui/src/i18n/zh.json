@@ -29,6 +29,7 @@
     "steps": {
       "basic": "基本信息",
       "scope": "范围",
+      "scopeDisabled": "（无需填写）",
       "schedule": "计划"
     },
     "loadFrom": "加载自",
@@ -84,6 +85,9 @@
       "dns": {
         "title": "DNS 故障"
       },
+      "aws": {
+        "title": "AWS 故障"
+      },
       "gcp": {
         "title": "GCP 故障"
       }
@@ -109,6 +113,7 @@
     },
     "noExperimentsFound": "未发现实验",
     "createdAt": "创建于",
+    "deleteMulti": "归档所选实验",
     "deleteDesc": "你仍然可以在归档中找到此实验",
     "pauseDesc": "你可以在同一位置重启这个实验",
     "startDesc": "此操作将立即生效"
@@ -137,6 +142,7 @@
     "title": "归档",
     "single": "归档",
     "noArchivesFound": "未发现归档",
+    "deleteMulti": "删除所选归档",
     "deleteDesc": "归档将被永久删除",
     "numberOfRuns": "运行次数",
     "numberOfAffectedPods": "受到实验作用的 Pod 数目"
@@ -194,6 +200,8 @@
     "version": "版本",
     "doc": "文档",
     "tutorial": "教程",
+    "batchOperation": "批量操作",
+    "selectAll": "全选",
     "add": "添加",
     "confirm": "确认",
     "cancel": "取消",
