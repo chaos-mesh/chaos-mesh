@@ -11,7 +11,7 @@ spec:
   replicas: {{ .Values.dashboard.replicaCount }}
   selector:
     matchLabels:
-      {{- include "chaos-mesh.selectors" . | indent 6 }}
+      {{- include "chaos-mesh.selectors" . | nindent 6 }}
       app.kubernetes.io/component: chaos-dashboard
   template:
     metadata:
