@@ -28,6 +28,7 @@ func RegisterLogger(logger logr.Logger) {
 
 // TracedProgram is a program traced by ptrace
 type TracedProgram struct {
+	Entries []mapreader.Entry
 }
 
 // Pid return the pid of traced program
