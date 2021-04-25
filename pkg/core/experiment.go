@@ -381,7 +381,7 @@ func (e *Experiment) ParseDNSChaos() (KubeObjectYAMLDescription, error) {
 	}, nil
 }
 
-// ParseDNSChaos Parse AwsChaos JSON string into ExperimentYAMLDescription.
+// ParseDNSChaos Parse AwsChaos JSON string into KubeObjectYAMLDescription.
 func (e *Experiment) ParseAwsChaos() (KubeObjectYAMLDescription, error) {
 	chaos := &v1alpha1.AwsChaos{}
 	if err := json.Unmarshal([]byte(e.Experiment), &chaos); err != nil {
@@ -401,7 +401,7 @@ func (e *Experiment) ParseAwsChaos() (KubeObjectYAMLDescription, error) {
 	}, nil
 }
 
-// ParseDNSChaos Parse AwsChaos JSON string into ExperimentYAMLDescription.
+// ParseDNSChaos Parse AwsChaos JSON string into KubeObjectYAMLDescription.
 func (e *Experiment) ParseGcpChaos() (KubeObjectYAMLDescription, error) {
 	chaos := &v1alpha1.GcpChaos{}
 	if err := json.Unmarshal([]byte(e.Experiment), &chaos); err != nil {
