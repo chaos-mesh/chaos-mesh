@@ -270,7 +270,7 @@ spec:
                         - disk-loss
                         type: string
                       deviceNames:
-                        description: The device name of the disks to detach. Needed
+                        description: The device name of disks to detach. Needed
                           in disk-loss.
                         items:
                           type: string
