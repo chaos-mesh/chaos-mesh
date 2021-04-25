@@ -47,7 +47,7 @@ app.kubernetes.io/version: {{ .Chart.AppVersion }}
 {{/*
 Specify default selectors
 */}}
-{{- define "chaos-mesh.selectors" }}
+{{- define "chaos-mesh.selectors" -}}
 app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
