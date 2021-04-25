@@ -18,7 +18,7 @@ import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 // PodHttpChaosSpec defines the desired state of IoChaos
 type PodHttpChaosSpec struct {
 	// ProxyPorts represents the target ports to be proxy of.
-	ProxyPorts []int32 `json:"proxyPorts"`
+	ProxyPorts []int32 `json:"proxy_ports"`
 
 	// TODO: support multiple different container to inject in one pod
 	// +optional
@@ -30,7 +30,7 @@ type PodHttpChaosSpec struct {
 
 	// StartTime represents the start time of a tproxy process
 	// +optional
-	StartTime int64 `json:"startTime,omitempty"`
+	StartTime int64 `json:"start_time,omitempty"`
 
 	// Rules are a list of injection rule for http request
 	// +optional

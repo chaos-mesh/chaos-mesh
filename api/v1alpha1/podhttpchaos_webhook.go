@@ -16,6 +16,7 @@ package v1alpha1
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -71,15 +72,18 @@ func (r *PodHttpChaosWebhookRunner) Handle(ctx context.Context, req admission.Re
 			// TODO: refine the http status code
 			return admission.Errored(http.StatusInternalServerError, err)
 		}
+		log.Info(fmt.Sprintf("get applied chaos: %#v", chaos))
 	}
 
 	// mutate the fields in pod
-
 	marshaledPodHttpChaos, err := json.Marshal(chaos)
 	if err != nil {
 		return admission.Errored(http.StatusInternalServerError, err)
 	}
-	return admission.PatchResponseFromRaw(req.Object.Raw, marshaledPodHttpChaos)
+	resp := admission.PatchResponseFromRaw(req.Object.Raw, marshaledPodHttpChaos)
+
+	log.Info(fmt.Sprintf("get patched response: %#v", resp))
+	return resp
 }
 
 // InjectDecoder injects decoder into webhook runner

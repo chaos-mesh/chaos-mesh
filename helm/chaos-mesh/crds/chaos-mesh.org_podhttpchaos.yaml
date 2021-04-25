@@ -43,7 +43,7 @@ spec:
               description: Pid represents a running tproxy process id
               format: int64
               type: integer
-            proxyPorts:
+            proxy_ports:
               description: ProxyPorts represents the target ports to be proxy of.
               items:
                 format: int32
@@ -139,12 +139,12 @@ spec:
                 - target
                 type: object
               type: array
-            startTime:
+            start_time:
               description: StartTime represents the start time of a tproxy process
               format: int64
               type: integer
           required:
-          - proxyPorts
+          - proxy_ports
           type: object
       type: object
   version: v1alpha1

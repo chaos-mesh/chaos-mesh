@@ -30,6 +30,7 @@ const (
 	tproxyBin    = "/usr/local/bin/tproxy"
 	rustLog      = "RUST_LOG"
 	rustLogLevel = "trace"
+	pathEnv      = "PATH"
 )
 
 func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaosRequest) (*pb.ApplyHttpChaosResponse, error) {
@@ -100,10 +101,11 @@ func (s *DaemonServer) createHttpChaos(ctx context.Context, in *pb.ApplyHttpChao
 		EnableLocalMnt().
 		SetIdentifier(in.ContainerId).
 		SetEnv(rustLog, rustLogLevel).
+		SetEnv(pathEnv, os.Getenv(pathEnv)).
 		SetStdin(bpm.NewConcurrentBuffer())
 
 	if in.EnterNS {
-		processBuilder = processBuilder.SetNS(pid, bpm.PidNS)
+		processBuilder = processBuilder.SetNS(pid, bpm.PidNS).SetNS(pid, bpm.NetNS)
 	}
 
 	cmd := processBuilder.Build()
