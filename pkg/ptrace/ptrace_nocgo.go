@@ -16,14 +16,13 @@
 package ptrace
 
 import (
-
 	"github.com/go-logr/logr"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mapreader"
 )
 
 // RegisterLogger registers a logger on ptrace pkg
 func RegisterLogger(logger logr.Logger) {
-	// no implement
+	panic("unimplemented")
 }
 
 // TracedProgram is a program traced by ptrace
@@ -33,85 +32,85 @@ type TracedProgram struct {
 
 // Pid return the pid of traced program
 func (p *TracedProgram) Pid() int {
-	return 0
+	panic("unimplemented")
 }
 
 // Trace ptrace all threads of a process
 func Trace(pid int) (*TracedProgram, error) {
-	return nil, nil
+	panic("unimplemented")
 }
 
 // Detach detaches from all threads of the processes
 func (p *TracedProgram) Detach() error {
-	return nil
+	panic("unimplemented")
 }
 
 // Protect will backup regs and rip into fields
 func (p *TracedProgram) Protect() error {
-	return nil
+	panic("unimplemented")
 }
 
 // Restore will restore regs and rip from fields
 func (p *TracedProgram) Restore() error {
-	return nil
+	panic("unimplemented")
 }
 
 // Wait waits until the process stops
 func (p *TracedProgram) Wait() error {
-	return nil
+	panic("unimplemented")
 }
 
 // Step moves one step forward
 func (p *TracedProgram) Step() error {
-	return nil
+	panic("unimplemented")
 }
 
 // Syscall runs a syscall at main thread of process
 func (p *TracedProgram) Syscall(number uint64, args ...uint64) (uint64, error) {
-	return 0, nil
+	panic("unimplemented")
 }
 
 // Mmap runs mmap syscall
 func (p *TracedProgram) Mmap(length uint64, fd uint64) (uint64, error) {
-	return 0, nil
+	panic("unimplemented")
 }
 
 // ReadSlice reads from addr and return a slice
 func (p *TracedProgram) ReadSlice(addr uint64, size uint64) (*[]byte, error) {
-	return nil, nil
+	panic("unimplemented")
 }
 
 // WriteSlice writes a buffer into addr
 func (p *TracedProgram) WriteSlice(addr uint64, buffer []byte) error {
-	return nil
+	panic("unimplemented")
 }
 
 // PtraceWriteSlice uses ptrace rather than process_vm_write to write a buffer into addr
 func (p *TracedProgram) PtraceWriteSlice(addr uint64, buffer []byte) error {
-	return nil
+	panic("unimplemented")
 }
 
 // GetLibBuffer reads an entry
 func (p *TracedProgram) GetLibBuffer(entry *mapreader.Entry) (*[]byte, error) {
-	return nil, nil
+	panic("unimplemented")
 }
 
 // MmapSlice mmaps a slice and return it's addr
 func (p *TracedProgram) MmapSlice(slice []byte) (*mapreader.Entry, error) {
-	return nil, nil
+	panic("unimplemented")
 }
 
 // FindSymbolInEntry finds symbol in entry through parsing elf
 func (p *TracedProgram) FindSymbolInEntry(symbolName string, entry *mapreader.Entry) (uint64, error) {
-	return 0, nil
+	panic("unimplemented")
 }
 
 // WriteUint64ToAddr writes uint64 to addr
 func (p *TracedProgram) WriteUint64ToAddr(addr uint64, value uint64) error {
-	return nil
+	panic("unimplemented")
 }
 
 // JumpToFakeFunc writes jmp instruction to jump to fake function
 func (p *TracedProgram) JumpToFakeFunc(originAddr uint64, targetAddr uint64) error {
-	return nil
+	panic("unimplemented")
 }
