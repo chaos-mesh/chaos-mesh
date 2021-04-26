@@ -233,7 +233,7 @@ func (it *SerialNodeReconciler) fetchChildrenNodes(ctx context.Context, node v1a
 	childrenNodes := v1alpha1.WorkflowNodeList{}
 	controlledByThisNode, err := metav1.LabelSelectorAsSelector(&metav1.LabelSelector{
 		MatchLabels: map[string]string{
-			LabelControlledBy: node.Name,
+			v1alpha1.LabelControlledBy: node.Name,
 		},
 	})
 
