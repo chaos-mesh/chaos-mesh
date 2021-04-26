@@ -26,7 +26,6 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/retry"
-	"k8s.io/klog"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
@@ -47,7 +46,10 @@ func NewSerialNodeReconciler(kubeClient client.Client, eventRecorder record.Even
 func (it *SerialNodeReconciler) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	startTime := time.Now()
 	defer func() {
-		klog.V(4).Infof("Finished syncing for serial node %q (%v)", request.NamespacedName, time.Since(startTime))
+		it.logger.V(4).Info("Finished syncing for serial node",
+			"node", request.NamespacedName,
+			"duration", time.Since(startTime),
+		)
 	}()
 
 	ctx := context.TODO()
