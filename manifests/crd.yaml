@@ -2740,6 +2740,11 @@ spec:
               - awsRegion
               - ec2Instance
               type: object
+            concurrencyPolicy:
+              enum:
+              - Forbid
+              - Allow
+              type: string
             dns_chaos:
               description: DNSChaosSpec defines the desired state of DNSChaos
               properties:
@@ -2922,6 +2927,7 @@ spec:
               - zone
               type: object
             historyLimit:
+              minimum: 1
               type: integer
             http_chaos:
               properties:
@@ -4223,6 +4229,11 @@ spec:
               type: object
             schedule:
               type: string
+            startingDeadlineSeconds:
+              format: int64
+              minimum: 0
+              nullable: true
+              type: integer
             stress_chaos:
               description: StressChaosSpec defines the desired state of StressChaos
               properties:

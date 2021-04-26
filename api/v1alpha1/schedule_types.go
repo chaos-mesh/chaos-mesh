@@ -40,23 +40,28 @@ var (
 	AllowConcurrent  ConcurrencyPolicy = "Allow"
 )
 
+func (c ConcurrencyPolicy) IsForbid() bool {
+	return c == ForbidConcurrent || c == ""
+}
+
+func (c ConcurrencyPolicy) IsAllow() bool {
+	return c == AllowConcurrent
+}
+
 // ScheduleSpec is the specification of a schedule object
 type ScheduleSpec struct {
 	Schedule string `json:"schedule"`
 
 	// +optional
 	// +nullable
-	// +kubebuilder:default=0
 	// +kubebuilder:validation:Minimum=0
 	StartingDeadlineSeconds *int64 `json:"startingDeadlineSeconds"`
 
 	// +optional
 	// +kubebuilder:validation:Enum=Forbid;Allow
-	// +kubebuilder:default=Forbid
 	ConcurrencyPolicy ConcurrencyPolicy `json:"concurrencyPolicy"`
 
 	// +optional
-	// +kubebuilder:default=1
 	// +kubebuilder:validation:Minimum=1
 	HistoryLimit int `json:"historyLimit,omitempty"`
 

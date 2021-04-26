@@ -73,7 +73,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	shouldSpawn = true
 
-	if schedule.Spec.ConcurrencyPolicy == v1alpha1.ForbidConcurrent {
+	if shouldSpawn && schedule.Spec.ConcurrencyPolicy.IsForbid() {
 		list, err := r.ActiveLister.ListActiveJobs(ctx, schedule)
 		if err != nil {
 			r.Recorder.Eventf(schedule, "Warning", "Failed", "Failed to list active jobs: %s", err.Error())
@@ -85,6 +85,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			item := items.Index(i).Addr().Interface().(v1alpha1.InnerObject)
 			if !controller.IsChaosFinished(item, now) {
 				shouldSpawn = false
+				r.Recorder.Eventf(schedule, "Warning", "Forbid", "Forbid spawning new job because: %s is still running", item.GetObjectMeta().Name)
 				break
 			}
 		}

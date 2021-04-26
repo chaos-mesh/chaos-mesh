@@ -61,6 +61,5 @@ func getRecentUnmetScheduleTime(schedule *v1alpha1.Schedule, now time.Time) (*ti
 		}
 	}
 
-	// impossible branch
 	return missedRun, &nextRun, nil
 }

@@ -21,14 +21,10 @@ spec:
       description: AwsChaos is the Schema for the awschaos API
       properties:
         apiVersion:
-          description: 'APIVersion defines the versioned schema of this representation
-            of an object. Servers should convert recognized schemas to the latest
-            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
           type: string
         kind:
-          description: 'Kind is a string value representing the REST resource this
-            object represents. Servers may infer this from the endpoint the client
-            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
           type: string
         metadata:
           type: object
@@ -36,8 +32,7 @@ spec:
           description: AwsChaosSpec is the content of the specification for an AwsChaos
           properties:
             action:
-              description: 'Action defines the specific aws chaos action. Supported
-                action: ec2-stop / ec2-restart / detach-volume Default action: ec2-stop'
+              description: 'Action defines the specific aws chaos action. Supported action: ec2-stop / ec2-restart / detach-volume Default action: ec2-stop'
               enum:
               - ec2-stop
               - ec2-restart
@@ -47,8 +42,7 @@ spec:
               description: AwsRegion defines the region of aws.
               type: string
             deviceName:
-              description: DeviceName indicates the name of the device. Needed in
-                detach-volume.
+              description: DeviceName indicates the name of the device. Needed in detach-volume.
               type: string
             duration:
               description: Duration represents the duration of the chaos action.
@@ -57,15 +51,13 @@ spec:
               description: Ec2Instance indicates the ID of the ec2 instance.
               type: string
             endpoint:
-              description: Endpoint indicates the endpoint of the aws server. Just
-                used it in test now.
+              description: Endpoint indicates the endpoint of the aws server. Just used it in test now.
               type: string
             secretName:
               description: SecretName defines the name of kubernetes secret.
               type: string
             volumeID:
-              description: EbsVolume indicates the ID of the EBS volume. Needed in
-                detach-volume.
+              description: EbsVolume indicates the ID of the EBS volume. Needed in detach-volume.
               type: string
           required:
           - action
