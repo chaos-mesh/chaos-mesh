@@ -79,8 +79,8 @@ var _ = Describe("concurrent buffer", func() {
 		return func() {
 			wg := sync.WaitGroup{}
 			for i := 0; i < testTimes; i++ {
+				wg.Add(1)
 				go func() {
-					wg.Add(1)
 					fn()
 					wg.Done()
 				}()
