@@ -3,6 +3,7 @@ import { CallchainFrame, Experiment, ExperimentScope } from 'components/NewExper
 import { Template } from 'slices/workflows'
 import { WorkflowBasic } from 'components/NewWorkflow'
 import _snakecase from 'lodash.snakecase'
+import { arrToObjBySep } from './utils'
 import basic from 'components/NewExperimentNext/data/basic'
 import snakeCaseKeys from 'snakecase-keys'
 import yaml from 'js-yaml'
@@ -205,11 +206,11 @@ function scopeToYAMLJSON(scope: ExperimentScope) {
   }
 
   if ((scope.label_selectors as string[]).length) {
-    result.selectors.labels = scope.label_selectors
+    result.selectors.labelSelectors = arrToObjBySep(scope.label_selectors as string[], ': ')
   }
 
   if ((scope.annotation_selectors as string[]).length) {
-    result.selectors.annotations = scope.annotation_selectors
+    result.selectors.annotationSelectors = arrToObjBySep(scope.annotation_selectors as string[], ': ')
   }
 
   return result
@@ -286,24 +287,40 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
       }
     })
 
-  return yaml.dump({
-    apiVersion: 'chaos-mesh.org/v1alpha1',
-    kind: 'Workflow',
-    metadata: {
-      name,
-      namespace,
+  return yaml.dump(
+    {
+      apiVersion: 'chaos-mesh.org/v1alpha1',
+      kind: 'Workflow',
+      metadata: {
+        name,
+        namespace,
+      },
+      spec: {
+        entry: 'entry',
+        templates: [
+          {
+            name: 'entry',
+            template_type: 'Serial',
+            duration,
+            tasks,
+          },
+          ...realTemplates,
+        ],
+      },
     },
-    spec: {
-      entry: 'entry',
-      templates: [
-        {
-          name: 'entry',
-          template_type: 'Serial',
-          duration,
-          tasks,
-        },
-        ...realTemplates,
-      ],
-    },
-  })
+    {
+      replacer: (_, value) => {
+        if (Array.isArray(value)) {
+          return value.length ? value : undefined
+        }
+
+        switch (typeof value) {
+          case 'string':
+            return value !== '' ? value : undefined
+          default:
+            return value
+        }
+      },
+    }
+  )
 }

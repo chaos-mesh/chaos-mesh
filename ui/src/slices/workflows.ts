@@ -12,12 +12,10 @@ export interface Template {
   experiments: TemplateExperiment[]
 }
 
-let index = 0
-
 const initialState: {
-  templates: Record<string, Template>
+  templates: Template[]
 } = {
-  templates: {},
+  templates: [],
 }
 
 const workflowsSlice = createSlice({
@@ -26,24 +24,19 @@ const workflowsSlice = createSlice({
   reducers: {
     setTemplate(state, action: PayloadAction<Template>) {
       const tpl = action.payload
-      const { name } = tpl
 
-      tpl.index = index++
-      state.templates[name!] = tpl
+      state.templates.push(tpl)
     },
     updateTemplate(state, action: PayloadAction<Template>) {
-      const { name } = action.payload
+      const { index } = action.payload
 
-      state.templates[name!] = action.payload
+      state.templates[index!] = action.payload
     },
-    deleteTemplate(state, action: PayloadAction<string>) {
-      const name = action.payload
+    deleteTemplate(state, action: PayloadAction<number>) {
+      const index = action.payload
       const templates = state.templates
 
-      delete templates[name]
-
-      state.templates = templates
-      index--
+      state.templates = templates.filter((_, i) => i !== index)
     },
   },
 })

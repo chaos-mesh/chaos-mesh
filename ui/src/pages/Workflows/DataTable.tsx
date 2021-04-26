@@ -1,5 +1,5 @@
-import { Button, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@material-ui/core'
 import ConfirmDialog, { ConfirmDialogHandles } from 'components-mui/ConfirmDialog'
+import { IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@material-ui/core'
 import { useRef, useState } from 'react'
 
 import DeleteOutlinedIcon from '@material-ui/icons/DeleteOutlined'
@@ -36,7 +36,9 @@ const DataTable: React.FC<DataTableProps> = ({ data, fetchData }) => {
 
   const handleJumpTo = (ns: string, name: string) => () => history.push(`/workflows/${ns}/${name}`)
 
-  const handleSelect = (selected: typeof initialSelected) => () => {
+  const handleSelect = (selected: typeof initialSelected) => (event: React.MouseEvent<HTMLSpanElement>) => {
+    event.stopPropagation()
+
     setSelected(selected)
 
     confirmRef.current!.setOpen(true)
@@ -86,7 +88,6 @@ const DataTable: React.FC<DataTableProps> = ({ data, fetchData }) => {
               <TableCell>{T('workflow.state')}</TableCell>
               <TableCell>{T('workflow.created')}</TableCell>
               <TableCell>{T('common.operation')}</TableCell>
-              <TableCell />
             </TableRow>
           </TableHead>
           <TableBody>
@@ -94,7 +95,7 @@ const DataTable: React.FC<DataTableProps> = ({ data, fetchData }) => {
               const key = `${d.namespace}/${d.name}`
 
               return (
-                <TableRow key={key} hover>
+                <TableRow key={key} hover onClick={handleJumpTo(d.namespace, d.name)}>
                   <TableCell>{d.name}</TableCell>
                   <TableCell>{d.entry}</TableCell>
                   <TableCell></TableCell>
@@ -119,11 +120,6 @@ const DataTable: React.FC<DataTableProps> = ({ data, fetchData }) => {
                         <DeleteOutlinedIcon />
                       </IconButton>
                     </Space>
-                  </TableCell>
-                  <TableCell>
-                    <Button variant="outlined" size="small" color="primary" onClick={handleJumpTo(d.namespace, d.name)}>
-                      {T('common.detail')}
-                    </Button>
                   </TableCell>
                 </TableRow>
               )

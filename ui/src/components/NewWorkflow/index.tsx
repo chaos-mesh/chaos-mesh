@@ -33,6 +33,7 @@ import yaml from 'js-yaml'
 
 const initialSelected = {
   name: '',
+  index: 0,
   title: '',
   description: '',
   action: '',
@@ -147,7 +148,6 @@ const NewWorkflow = () => {
             basic: e.basic,
           })
         )
-      } else {
       }
 
       setRestoreIndex(index)
@@ -224,6 +224,7 @@ const NewWorkflow = () => {
     dispatch(
       updateTemplate({
         ...steps[stepIndex],
+        index: stepIndex,
         name,
         duration,
       })
@@ -237,8 +238,8 @@ const NewWorkflow = () => {
     resetRestore()
   }
 
-  const removeExperiment = (name: string) => {
-    dispatch(deleteTemplate(name))
+  const removeExperiment = (index: number) => {
+    dispatch(deleteTemplate(index))
     dispatch(
       setAlert({
         type: 'success',
@@ -248,11 +249,12 @@ const NewWorkflow = () => {
     resetRestore()
   }
 
-  const handleSelect = (name: string, action: string) => () => {
+  const handleSelect = (name: string, index: number, action: string) => () => {
     switch (action) {
       case 'delete':
         setSelected({
           name,
+          index,
           title: `${intl.formatMessage({ id: 'common.delete' })} ${name}`,
           description: intl.formatMessage({ id: 'newW.node.deleteDesc' }),
           action,
@@ -266,7 +268,7 @@ const NewWorkflow = () => {
   const handleAction = (action: string) => () => {
     switch (action) {
       case 'delete':
-        removeExperiment(selected.name)
+        removeExperiment(selected.index)
         break
     }
 
@@ -275,12 +277,14 @@ const NewWorkflow = () => {
 
   const onValidate = setWorkflowBasic
 
-  // TODO
   const submitWorkflow = () => {
     const workflow = yamlEditor?.getValue()
 
-    console.log(yaml.load(workflow!))
-    api.workflows.newWorkflow(yaml.load(workflow!))
+    if (process.env.NODE_ENV === 'development') {
+      console.debug('Debug workflow:', workflow)
+    }
+
+    // api.workflows.newWorkflow(yaml.load(workflow!))
   }
 
   return (
@@ -310,7 +314,7 @@ const NewWorkflow = () => {
                             <Box position="absolute" top={0} title={intl.formatMessage({ id: 'common.delete' })}>
                               <RemoveCircleOutlineIcon
                                 className={clsx(classes.error, classes.asButton)}
-                                onClick={handleSelect(step.name, 'delete')}
+                                onClick={handleSelect(step.name, index, 'delete')}
                               />
                             </Box>
                           )}
@@ -322,10 +326,7 @@ const NewWorkflow = () => {
                           <Typography component="div" variant={restoreIndex === index ? 'h6' : 'body1'}>
                             {step.name}
                           </Typography>
-                          <UndoIcon
-                            className={classes.asButton}
-                            onClick={restoreExperiment(step.experiments, step.index!)}
-                          />
+                          <UndoIcon className={classes.asButton} onClick={restoreExperiment(step.experiments, index)} />
                         </Box>
                         {restoreIndex === index && (
                           <Box mt={6}>
@@ -387,60 +388,62 @@ const NewWorkflow = () => {
         <Grid item xs={12} md={4} className={classes.leftSticky}>
           <Formik
             initialValues={{ name: '', namespace: '', duration: '' }}
-            onSubmit={() => {}}
+            onSubmit={submitWorkflow}
             validate={onValidate}
             validateOnBlur={false}
           >
             {({ errors, touched }) => (
-              <Space display="flex" flexDirection="column" height="100%" vertical spacing={6}>
-                <Typography>{T('common.preview')}</Typography>
-                <Form>
-                  <TextField
-                    name="name"
-                    label={T('newE.basic.name')}
-                    validate={validateName((T('newW.nameValidation') as unknown) as string)}
-                    helperText={errors.name && touched.name ? errors.name : T('newW.nameHelper')}
-                    error={errors.name && touched.name ? true : false}
-                  />
-                  <SelectField
-                    name="namespace"
-                    label={T('newE.basic.namespace')}
-                    helperText={T('newE.basic.namespaceHelper')}
-                  >
-                    {namespaces.map((n) => (
-                      <MenuItem key={n} value={n}>
-                        {n}
-                      </MenuItem>
-                    ))}
-                  </SelectField>
-                  <TextField
-                    name="duration"
-                    label={T('newE.schedule.duration')}
-                    validate={validateDuration((T('newW.durationValidation') as unknown) as string)}
-                    helperText={errors.duration && touched.duration ? errors.duration : T('newW.durationHelper')}
-                    error={errors.duration && touched.duration ? true : false}
-                  />
-                </Form>
-                <Box flex={1}>
-                  <Paper style={{ height: '100%' }} padding={0}>
-                    <YAMLEditor
-                      theme={theme}
-                      data={constructWorkflow(workflowBasic, Object.values(templates))}
-                      mountEditor={setYAMLEditor}
+              <Form style={{ height: '100%' }}>
+                <Space display="flex" flexDirection="column" height="100%" vertical spacing={6}>
+                  <Typography>{T('common.preview')}</Typography>
+                  <Box>
+                    <TextField
+                      name="name"
+                      label={T('newE.basic.name')}
+                      validate={validateName((T('newW.nameValidation') as unknown) as string)}
+                      helperText={errors.name && touched.name ? errors.name : T('newW.nameHelper')}
+                      error={errors.name && touched.name ? true : false}
                     />
-                  </Paper>
-                </Box>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  startIcon={<PublishIcon />}
-                  fullWidth
-                  disabled={_isEmpty(templates)}
-                  onClick={submitWorkflow}
-                >
-                  {T('newW.submit')}
-                </Button>
-              </Space>
+                    <SelectField
+                      name="namespace"
+                      label={T('newE.basic.namespace')}
+                      helperText={T('newE.basic.namespaceHelper')}
+                    >
+                      {namespaces.map((n) => (
+                        <MenuItem key={n} value={n}>
+                          {n}
+                        </MenuItem>
+                      ))}
+                    </SelectField>
+                    <TextField
+                      name="duration"
+                      label={T('newE.schedule.duration')}
+                      validate={validateDuration((T('newW.durationValidation') as unknown) as string)}
+                      helperText={errors.duration && touched.duration ? errors.duration : T('newW.durationHelper')}
+                      error={errors.duration && touched.duration ? true : false}
+                    />
+                  </Box>
+                  <Box flex={1}>
+                    <Paper style={{ height: '100%' }} padding={0}>
+                      <YAMLEditor
+                        theme={theme}
+                        data={constructWorkflow(workflowBasic, Object.values(templates))}
+                        mountEditor={setYAMLEditor}
+                      />
+                    </Paper>
+                  </Box>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    color="primary"
+                    startIcon={<PublishIcon />}
+                    fullWidth
+                    disabled={_isEmpty(templates)}
+                  >
+                    {T('newW.submit')}
+                  </Button>
+                </Space>
+              </Form>
             )}
           </Formik>
         </Grid>

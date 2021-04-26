@@ -38,7 +38,7 @@ const Workflows = () => {
         </Button>
       </Box>
 
-      <DataTable data={workflows} fetchData={fetchWorkflows} />
+      {workflows.length > 0 && <DataTable data={workflows} fetchData={fetchWorkflows} />}
 
       {!loading && workflows.length === 0 && (
         <NotFound illustrated textAlign="center">
