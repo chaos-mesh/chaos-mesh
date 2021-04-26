@@ -116,7 +116,7 @@ func (cb *concurrentBuffer) start() {
 		case data := <-cb.writeChan:
 			cb.buf.Write(data)
 		case <-cb.ctx.Done():
-			break
+			return
 		case ctx := <-cb.readChan:
 			ln, err := cb.buf.Read(ctx.data)
 			ctx.ret <- readRet{
