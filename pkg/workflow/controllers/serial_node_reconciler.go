@@ -148,9 +148,7 @@ func (it *SerialNodeReconciler) syncChildrenNodes(ctx context.Context, node v1al
 			if index < len(finishedChildrenNodes) {
 				// TODO: if the definition/spec of task changed, we should also respawn the node
 				// child node start with task name
-				if strings.Index(finishedChildrenNodes[index].Name, task) == 0 {
-					continue
-				} else {
+				if strings.Index(finishedChildrenNodes[index].Name, task) != 0 {
 					// TODO: emit event
 					taskToStartup = task
 
