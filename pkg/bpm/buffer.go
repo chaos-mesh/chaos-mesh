@@ -108,7 +108,7 @@ func (cb *concurrentBuffer) start() {
 				cb.buf.Write(data)
 				continue
 			case <-cb.ctx.Done():
-				break
+				return
 			}
 		}
 
