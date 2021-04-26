@@ -353,7 +353,7 @@ var phaseTransitionMap = map[v1alpha1.ExperimentPhase]map[v1alpha1.ExperimentPha
 		v1alpha1.ExperimentPhaseWaiting:       noop,
 		v1alpha1.ExperimentPhasePaused:        noop,
 		v1alpha1.ExperimentPhaseFailed:        noop,
-		v1alpha1.ExperimentPhaseFinished:      noop,
+		v1alpha1.ExperimentPhaseFinished:      recover,
 	},
 	v1alpha1.ExperimentPhaseFinished: {
 		v1alpha1.ExperimentPhaseUninitialized: unexpected,

@@ -132,7 +132,7 @@ chaosDaemon:
   affinity: {}
 
 dashboard:
-  create: false
+  create: true
   hostNetwork: false
 
   replicaCount: 1
@@ -261,6 +261,8 @@ dnsServer:
   priorityClassName: ""
 
   nodeSelector: {}
+
+  podAnnotations: {}
 
   runtime: docker
 

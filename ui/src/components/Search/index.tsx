@@ -216,7 +216,7 @@ const Search: React.FC = () => {
           }}
         />
       )}
-      PaperComponent={(props) => <Paper {...props} padding={false} />}
+      PaperComponent={(props) => <Paper {...props} padding={0} />}
     />
   )
 }
