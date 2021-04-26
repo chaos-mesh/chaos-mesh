@@ -54,7 +54,7 @@ func (s *DaemonServer) ContainerGetPid(ctx context.Context, req *pb.ContainerReq
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
 	if err != nil {
-		log.Error(err, "error while killing container")
+		log.Error(err, "error while getting pid from container")
 		return nil, err
 	}
 
