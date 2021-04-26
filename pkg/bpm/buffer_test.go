@@ -67,6 +67,7 @@ var _ = Describe("concurrent buffer", func() {
 		buffer := NewConcurrentBuffer()
 		for i := 0; i < workers; i++ {
 			go func() {
+				defer GinkgoRecover()
 				Expect(writeBuffer(linesChan, buffer)).To(BeNil())
 			}()
 		}
@@ -81,6 +82,7 @@ var _ = Describe("concurrent buffer", func() {
 			for i := 0; i < testTimes; i++ {
 				wg.Add(1)
 				go func() {
+					defer GinkgoRecover()
 					fn()
 					wg.Done()
 				}()
