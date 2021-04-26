@@ -80,17 +80,6 @@ func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 	}, nil
 }
 
-func (s *DaemonServer) killHttpChaos(ctx context.Context, pid int64, startTime int64) error {
-	log.Info("killing tproxy", "pid", pid)
-
-	err := s.backgroundProcessManager.KillBackgroundProcess(ctx, int(pid), startTime)
-	if err != nil {
-		return err
-	}
-	log.Info("kill tproxy successfully")
-	return nil
-}
-
 func (s *DaemonServer) createHttpChaos(ctx context.Context, in *pb.ApplyHttpChaosRequest) error {
 	pid, err := s.crClient.GetPidFromContainerID(ctx, in.ContainerId)
 	if err != nil {
