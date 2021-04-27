@@ -151,7 +151,7 @@ gosec-scan: $(GOBIN)/gosec
 	$(GOENV) $< ./api/... ./controllers/... ./pkg/... || echo "*** sec-scan failed: known-issues ***"
 
 groupimports: $(GOBIN)/goimports
-	$< -w -l -local github.com/chaos-mesh/chaos-mesh $$(find . -type f -name '*.go' -not -path 'zz_generated.*.go')
+	$< -w -l -local github.com/chaos-mesh/chaos-mesh $$(find . -type f -name '*.go' -not -path '**/zz_generated.*.go')
 
 failpoint-enable: $(GOBIN)/failpoint-ctl
 # Converting gofail failpoints...
