@@ -13,6 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+UI=${UI:1}
+SWAGGER=${SWAGGER:1}
+
 set -o errexit
 set -o nounset
 set -o pipefail
@@ -106,7 +109,7 @@ fi
 
 if [ -z "$SKIP_IMAGE_BUILD" ]; then
     echo "info: building docker images"
-    DOCKER_REGISTRY_PREFIX=$DOCKER_REGISTRY_PREFIX IMAGE_TAG=$IMAGE_TAG UI=1 SWAGGER=1 make image
+    DOCKER_REGISTRY_PREFIX=$DOCKER_REGISTRY_PREFIX IMAGE_TAG=$IMAGE_TAG UI=${UI} SWAGGER=${SWAGGER} make image
 else
     echo "info: skip building docker images"
 fi
