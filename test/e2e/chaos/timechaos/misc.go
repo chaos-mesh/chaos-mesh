@@ -21,7 +21,7 @@ import (
 )
 
 // get pod current time in nanosecond
-func getPodTimeNS(c http.Client, port uint16) (*time.Time, error) {
+func GetPodTimeNS(c http.Client, port uint16) (*time.Time, error) {
 	resp, err := c.Get(fmt.Sprintf("http://localhost:%d/time", port))
 	if err != nil {
 		return nil, err

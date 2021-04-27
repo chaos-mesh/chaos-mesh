@@ -46,6 +46,7 @@ import (
 	sidecartestcases "github.com/chaos-mesh/chaos-mesh/test/e2e/chaos/sidecar"
 	stresstestcases "github.com/chaos-mesh/chaos-mesh/test/e2e/chaos/stresschaos"
 	timechaostestcases "github.com/chaos-mesh/chaos-mesh/test/e2e/chaos/timechaos"
+	workflowtestcases "github.com/chaos-mesh/chaos-mesh/test/e2e/chaos/workflow"
 )
 
 var _ = ginkgo.Describe("[Basic]", func() {
@@ -361,7 +362,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 			dnschaostestcases.TestcaseDNSError(ns, cli, port, c)
 		})
 	})
-	// DNS chaos case in [StressChaos] context
+	// Stress chaos case in [StressChaos] context
 	ginkgo.Context("[StressChaos]", func() {
 		var err error
 
@@ -408,6 +409,37 @@ var _ = ginkgo.Describe("[Basic]", func() {
 			for _, cancel := range pfCancels {
 				cancel()
 			}
+		})
+	})
+
+	ginkgo.Context("[Workflow]", func() {
+		var err error
+		var port uint16
+		var pfCancel context.CancelFunc
+
+		ginkgo.JustBeforeEach(func() {
+			svc := fixture.NewE2EService("timer", ns)
+			_, err = kubeCli.CoreV1().Services(ns).Create(svc)
+			framework.ExpectNoError(err, "create service error")
+			nd := fixture.NewTimerDeployment("timer", ns)
+			_, err = kubeCli.AppsV1().Deployments(ns).Create(nd)
+			framework.ExpectNoError(err, "create timer deployment error")
+			err = util.WaitDeploymentReady("timer", ns, kubeCli)
+			framework.ExpectNoError(err, "wait timer deployment ready error")
+			_, port, pfCancel, err = portforward.ForwardOnePort(fw, ns, "svc/timer", 8080)
+			framework.ExpectNoError(err, "create helper port-forward failed")
+		})
+
+		ginkgo.JustAfterEach(func() {
+			if pfCancel != nil {
+				pfCancel()
+			}
+		})
+
+		ginkgo.It("[WorkflowSerial]", func() {
+			workflowtestcases.TestcaseWorkflowSerial(ns,kubeCli, cli, c, port, map[string]string{
+				"app": "timer",
+			})
 		})
 	})
 })

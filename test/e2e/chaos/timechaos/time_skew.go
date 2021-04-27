@@ -46,7 +46,7 @@ func TestcaseTimeSkewOnceThenRecover(
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
 	By("create chaos CRD objects")
-	initTime, err := getPodTimeNS(c, port)
+	initTime, err := GetPodTimeNS(c, port)
 	framework.ExpectNoError(err, "failed to get pod time")
 
 	timeChaos := &v1alpha1.TimeChaos{
@@ -72,7 +72,7 @@ func TestcaseTimeSkewOnceThenRecover(
 
 	By("waiting for assertion")
 	err = wait.PollImmediate(5*time.Second, 5*time.Minute, func() (done bool, err error) {
-		podTime, err := getPodTimeNS(c, port)
+		podTime, err := GetPodTimeNS(c, port)
 		framework.ExpectNoError(err, "failed to get pod time")
 		if podTime.Before(*initTime) {
 			return true, nil
@@ -87,7 +87,7 @@ func TestcaseTimeSkewOnceThenRecover(
 
 	By("waiting for assertion recovering")
 	err = wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
-		podTime, err := getPodTimeNS(c, port)
+		podTime, err := GetPodTimeNS(c, port)
 		framework.ExpectNoError(err, "failed to get pod time")
 		// since there is no timechaos now, current pod time should not be earlier
 		// than the init time
@@ -114,7 +114,7 @@ func TestcaseTimeSkewPauseThenUnpause(
 	err := util.WaitE2EHelperReady(c, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
-	initTime, err := getPodTimeNS(c, port)
+	initTime, err := GetPodTimeNS(c, port)
 	framework.ExpectNoError(err, "failed to get pod time")
 
 	By("create chaos CRD objects")
@@ -141,7 +141,7 @@ func TestcaseTimeSkewPauseThenUnpause(
 
 	By("waiting for assertion")
 	err = wait.PollImmediate(5*time.Second, 5*time.Minute, func() (done bool, err error) {
-		podTime, err := getPodTimeNS(c, port)
+		podTime, err := GetPodTimeNS(c, port)
 		framework.ExpectNoError(err, "failed to get pod time")
 		if podTime.Before(*initTime) {
 			return true, nil
@@ -175,7 +175,7 @@ func TestcaseTimeSkewPauseThenUnpause(
 	// wait for 1 minutes and check timer
 	framework.ExpectNoError(err, "get timer pod error")
 	err = wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
-		podTime, err := getPodTimeNS(c, port)
+		podTime, err := GetPodTimeNS(c, port)
 		framework.ExpectNoError(err, "failed to get pod time")
 		if podTime.Before(*initTime) {
 			return true, nil
@@ -204,7 +204,7 @@ func TestcaseTimeSkewPauseThenUnpause(
 	// timechaos is running again, we want to check pod
 	// whether time is earlier than init time,
 	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (done bool, err error) {
-		podTime, err := getPodTimeNS(c, port)
+		podTime, err := GetPodTimeNS(c, port)
 		framework.ExpectNoError(err, "failed to get pod time")
 		if podTime.Before(*initTime) {
 			return true, nil
@@ -235,7 +235,7 @@ func TestcaseTimeSkewStartAtWaitingThenIntoRunning(
 	crontab := fmt.Sprintf("%d * * * *", (minuteNow+3)%60)
 
 	By("create chaos CRD objects")
-	initTime, err := getPodTimeNS(c, port)
+	initTime, err := GetPodTimeNS(c, port)
 	framework.ExpectNoError(err, "failed to get pod time")
 
 	timeChaos := &v1alpha1.TimeChaos{
@@ -277,7 +277,7 @@ func TestcaseTimeSkewStartAtWaitingThenIntoRunning(
 	framework.ExpectNoError(err, "check chaos in waiting failed")
 
 	err = wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
-		podTime, err := getPodTimeNS(c, port)
+		podTime, err := GetPodTimeNS(c, port)
 		framework.ExpectNoError(err, "failed to get pod time")
 		if podTime.Before(*initTime) {
 			return true, nil
@@ -300,7 +300,7 @@ func TestcaseTimeSkewStartAtWaitingThenIntoRunning(
 	framework.ExpectNoError(err, "check chaos in running failed")
 
 	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (done bool, err error) {
-		podTime, err := getPodTimeNS(c, port)
+		podTime, err := GetPodTimeNS(c, port)
 		framework.ExpectNoError(err, "failed to get pod time")
 		if podTime.Before(*initTime) {
 			return true, nil
