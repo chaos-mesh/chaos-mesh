@@ -49,9 +49,9 @@ var _ = Describe("concurrent buffer", func() {
 	}
 
 	const seperator = "\r\n"
-	const repeated = 1000
-	const workers = 100
-	const testTimes = 100
+	const repeated = 100
+	const workers = 10
+	const testTimes = 10
 
 	testSequentially := func() {
 		linesChan := makeLinesChain(testLines, repeated)
