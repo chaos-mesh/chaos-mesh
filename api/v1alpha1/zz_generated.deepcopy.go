@@ -1859,11 +1859,6 @@ func (in *PodHttpChaosSpec) DeepCopyInto(out *PodHttpChaosSpec) {
 		*out = make([]int32, len(*in))
 		copy(*out, *in)
 	}
-	if in.Container != nil {
-		in, out := &in.Container, &out.Container
-		*out = new(string)
-		**out = **in
-	}
 	if in.Rules != nil {
 		in, out := &in.Rules, &out.Rules
 		*out = make([]*PodHttpChaosRule, len(*in))

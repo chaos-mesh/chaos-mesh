@@ -2626,10 +2626,6 @@ spec:
         spec:
           description: PodHttpChaosSpec defines the desired state of IoChaos
           properties:
-            container:
-              description: 'TODO: support multiple different container to inject in
-                one pod'
-              type: string
             pid:
               description: Pid represents a running tproxy process id
               format: int64

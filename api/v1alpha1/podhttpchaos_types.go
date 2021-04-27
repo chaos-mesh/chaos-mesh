@@ -20,10 +20,6 @@ type PodHttpChaosSpec struct {
 	// ProxyPorts represents the target ports to be proxy of.
 	ProxyPorts []int32 `json:"proxy_ports"`
 
-	// TODO: support multiple different container to inject in one pod
-	// +optional
-	Container *string `json:"container,omitempty"`
-
 	// Pid represents a running tproxy process id
 	// +optional
 	Pid int64 `json:"pid,omitempty"`
