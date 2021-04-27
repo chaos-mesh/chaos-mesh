@@ -1573,6 +1573,25 @@ webhooks:
       service:
         name: chaos-mesh-controller-manager
         namespace: "chaos-testing"
+        path: /mutate-chaos-mesh-org-v1alpha1-podhttpchaos
+    failurePolicy: Fail
+    name: mpodhttpchaos.kb.io
+    timeoutSeconds: 5
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - podhttpchaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
         path: /mutate-chaos-mesh-org-v1alpha1-podnetworkchaos
     failurePolicy: Fail
     name: mpodnetworkchaos.kb.io
