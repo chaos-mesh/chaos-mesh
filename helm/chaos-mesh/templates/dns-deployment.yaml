@@ -18,12 +18,12 @@ spec:
       maxUnavailable: 1
   selector:
     matchLabels:
-      {{- include "chaos-mesh.selectors" . | indent 6 }}
+      {{- include "chaos-mesh.selectors" . | nindent 6 }}
       app.kubernetes.io/component: chaos-dns-server
   template:
     metadata:
       labels:
-        {{- include "chaos-mesh.labels" . | indent 8 }}
+        {{- include "chaos-mesh.labels" . | nindent 8 }}
         app.kubernetes.io/component: chaos-dns-server
     {{- with .Values.dnsServer.podAnnotations }}
       annotations:

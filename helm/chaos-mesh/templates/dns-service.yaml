@@ -12,7 +12,7 @@ metadata:
     app.kubernetes.io/component: dns-server
 spec:
   selector:
-    {{- include "chaos-mesh.selectors" . | indent 4 }}
+    {{- include "chaos-mesh.selectors" . | nindent 4 }}
     app.kubernetes.io/component: chaos-dns-server
   ports:
   - name: dns

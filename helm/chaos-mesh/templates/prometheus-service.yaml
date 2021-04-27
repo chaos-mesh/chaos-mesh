@@ -15,7 +15,7 @@ spec:
       targetPort: 9090
       name: http
   selector:
-    {{- include "chaos-mesh.selectors" . | indent 4 }}
+    {{- include "chaos-mesh.selectors" . | nindent 4 }}
     app.kubernetes.io/component: prometheus
 
 {{- end }}
