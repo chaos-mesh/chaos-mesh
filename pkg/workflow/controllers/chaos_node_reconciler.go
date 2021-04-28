@@ -78,6 +78,9 @@ func (it *ChaosNodeReconciler) Reconcile(request reconcile.Request) (reconcile.R
 		}
 
 		chaosList, err := it.fetchChildrenChaosCustomResource(ctx, nodeNeedUpdate)
+		if err != nil {
+			return client.IgnoreNotFound(err)
+		}
 		if len(chaosList) > 1 {
 			it.logger.Info("the number of chaos custom resource affected by chaos node is more than 1",
 				"chaos node", fmt.Sprintf("%s/%s", node.Namespace, node.Name),
