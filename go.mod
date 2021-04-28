@@ -69,7 +69,7 @@ require (
 	go.uber.org/fx v1.12.0
 	go.uber.org/zap v1.15.0
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
-	golang.org/x/net v0.0.0-20200320220750-118fecf932d8
+	golang.org/x/net v0.0.0-20200320220750-118fecf932d8 // indirect
 	golang.org/x/sync v0.0.0-20201207232520-09787c993a3a
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0
 	golang.org/x/tools v0.0.0-20200309202150-20ab64c0d93f
