@@ -3669,6 +3669,8 @@ spec:
     singular: workflownode
   preserveUnknownFields: false
   scope: Namespaced
+  subresources:
+    status: {}
   validation:
     openAPIV3Schema:
       properties:
@@ -5763,6 +5765,8 @@ spec:
     singular: workflow
   preserveUnknownFields: false
   scope: Namespaced
+  subresources:
+    status: {}
   validation:
     openAPIV3Schema:
       properties:

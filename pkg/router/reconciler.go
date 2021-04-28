@@ -141,10 +141,11 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 		For(r.Object.DeepCopyObject()).
 		WithEventFilter(predicate.Funcs{
 			UpdateFunc: func(e event.UpdateEvent) bool {
-				old, _ := e.ObjectOld.(v1alpha1.InnerObject).GetSpecAndMetaString()
-				new, _ := e.ObjectNew.(v1alpha1.InnerObject).GetSpecAndMetaString()
-
-				return old != new
+				return false
+				//old, _ := e.ObjectOld.(v1alpha1.InnerObject).GetSpecAndMetaString()
+				//new, _ := e.ObjectNew.(v1alpha1.InnerObject).GetSpecAndMetaString()
+				//
+				//return old != new
 			},
 		}).
 		Complete(r)
