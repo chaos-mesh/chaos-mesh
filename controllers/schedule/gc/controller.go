@@ -17,8 +17,10 @@ import (
 	"context"
 	"reflect"
 	"sort"
+	"time"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/utils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/go-logr/logr"
 	"go.uber.org/fx"
@@ -33,6 +35,8 @@ type Reconciler struct {
 	client.Client
 	Log      logr.Logger
 	Recorder record.EventRecorder
+
+	ActiveLister *utils.ActiveLister
 }
 
 func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
@@ -43,22 +47,15 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	schedule := &v1alpha1.Schedule{}
 	err := r.Get(ctx, req.NamespacedName, schedule)
 	if err != nil {
-		r.Log.Error(err, "unable to get chaos")
+		if !k8sError.IsNotFound(err) {
+			r.Log.Error(err, "unable to get chaos")
+		}
 		return ctrl.Result{}, nil
 	}
 
-	kind, ok := v1alpha1.AllKinds()[string(schedule.Spec.Type)]
-	if !ok {
-		r.Log.Info("unknown kind", "kind", schedule.Spec.Type)
-		r.Recorder.Eventf(schedule, "Warning", "Failed", "Unknown type: %s", schedule.Spec.Type)
-		return ctrl.Result{}, nil
-	}
-
-	list := kind.ChaosList.DeepCopyObject()
-	err = r.List(ctx, list, client.MatchingLabels{"managed-by": schedule.Name})
+	list, err := r.ActiveLister.ListActiveJobs(ctx, schedule)
 	if err != nil {
-		r.Log.Error(err, "fail to list chaos")
-		r.Recorder.Eventf(schedule, "Warning", "Failed", "Failed to list chaos: %s", err.Error())
+		r.Recorder.Eventf(schedule, "Warning", "Failed", "Failed to list active jobs: %s", err.Error())
 		return ctrl.Result{}, nil
 	}
 
@@ -73,10 +70,26 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return statefulItems[x].GetObjectMeta().CreationTimestamp.Time.Before(statefulItems[y].GetObjectMeta().CreationTimestamp.Time)
 	})
 
-	// TODO: only delete finished chaos
 	exceededHistory := len(statefulItems) - schedule.Spec.HistoryLimit
+	requeuAfter := time.Duration(0)
 	if exceededHistory > 0 {
 		for _, obj := range statefulItems[0:exceededHistory] {
+			innerObj, ok := obj.(v1alpha1.InnerObject)
+			if ok {
+				durationExceeded, untilStop, err := innerObj.DurationExceeded(time.Now())
+				if err != nil {
+					r.Log.Error(err, "failed to parse duration")
+				}
+
+				if !durationExceeded {
+					r.Recorder.Eventf(schedule, "Warning", "Skip", "Skip removing history: %s is still running", innerObj.GetChaos().Name)
+					continue
+				} else {
+					if requeuAfter > untilStop {
+						requeuAfter = untilStop
+					}
+				}
+			}
 			err := r.Client.Delete(ctx, obj)
 			if err != nil && !k8sError.IsNotFound(err) {
 				r.Recorder.Eventf(schedule, "Warning", "Failed", "Failed to delete: %s/%s", obj.GetObjectMeta().Namespace, obj.GetObjectMeta().Name)
@@ -84,7 +97,9 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		}
 	}
 
-	return ctrl.Result{}, nil
+	return ctrl.Result{
+		RequeueAfter: requeuAfter,
+	}, nil
 }
 
 type Objs struct {
@@ -93,7 +108,7 @@ type Objs struct {
 	Objs []types.Object `group:"objs"`
 }
 
-func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger, objs Objs, scheme *runtime.Scheme) (types.Controller, error) {
+func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger, objs Objs, scheme *runtime.Scheme, lister *utils.ActiveLister) (types.Controller, error) {
 	builder := ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.Schedule{}).
 		Named("schedule-active")
@@ -107,6 +122,7 @@ func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger, objs
 		client,
 		log.WithName("schedule-gc"),
 		mgr.GetEventRecorderFor("schedule-gc"),
+		lister,
 	})
 	return "schedule-gc", nil
 }

@@ -16,6 +16,7 @@ package active
 import (
 	"context"
 	"reflect"
+	"sort"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/utils"
@@ -23,6 +24,7 @@ import (
 	"github.com/go-logr/logr"
 	"go.uber.org/fx"
 	v1 "k8s.io/api/core/v1"
+	k8sError "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/tools/reference"
@@ -48,7 +50,9 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	schedule := &v1alpha1.Schedule{}
 	err := r.Get(ctx, req.NamespacedName, schedule)
 	if err != nil {
-		r.Log.Error(err, "unable to get chaos")
+		if !k8sError.IsNotFound(err) {
+			r.Log.Error(err, "unable to get chaos")
+		}
 		return ctrl.Result{}, nil
 	}
 
@@ -71,6 +75,13 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		}
 
 		active = append(active, *ref)
+	}
+	sort.Slice(active, func(i, j int) bool {
+		return active[i].Name < active[j].Name
+	})
+	if reflect.DeepEqual(active, schedule.Status.Active) {
+		r.Log.Info("don't need to update active")
+		return ctrl.Result{}, nil
 	}
 
 	updateError := retry.RetryOnConflict(retry.DefaultBackoff, func() error {

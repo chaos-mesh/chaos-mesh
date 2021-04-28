@@ -46,13 +46,15 @@ func getRecentUnmetScheduleTime(schedule *v1alpha1.Schedule, now time.Time) (*ti
 		}
 	}
 	if earliestTime.After(now) {
-		return nil, nil, fmt.Errorf("earliestTime is earilier than now: earliestTime: %v, now: %v", earliestTime, now)
+		return nil, nil, fmt.Errorf("earliestTime is later than now: earliestTime: %v, now: %v", earliestTime, now)
 	}
 
 	iterateTime := 0
 	var missedRun *time.Time
 	nextRun := sched.Next(earliestTime)
 	for t := sched.Next(earliestTime); !t.After(now); t = sched.Next(t) {
+		t := t
+
 		missedRun = &t
 		nextRun = sched.Next(*missedRun)
 		if iterateTime > 100 {

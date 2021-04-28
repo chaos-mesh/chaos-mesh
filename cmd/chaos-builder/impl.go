@@ -121,6 +121,24 @@ func (in *{{.Type}}List) ListChaos() []*ChaosInstance {
 	}
 	return res
 }
+
+func (in *{{.Type}}) DurationExceeded(now time.Time) (bool, time.Duration, error) {
+	duration, err := in.GetDuration()
+	if err != nil {
+		return false, 0, err
+	}
+
+	if duration != nil {
+		stopTime := in.GetCreationTimestamp().Add(*duration)
+		if stopTime.Before(now) {
+			return true, 0, nil
+		} else {
+			return false, stopTime.Sub(now), nil
+		}
+	} else {
+		return false, 0, nil
+	}
+}
 `
 
 func generateImpl(name string) string {

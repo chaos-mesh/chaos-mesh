@@ -108,6 +108,14 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	for index, record := range records {
 		var err error
 		r.Log.Info("iterating record", "record", record, "desiredPhase", desiredPhase)
+
+		// TODO: fix the cache invalidate problem
+		// If the common controller is running, applying and modifying records,
+		// during the same time, the desirephase controller updates the resource several
+		// times. For example, the user update and remove the pause mark.
+		// Then in the next reconcilation, the controller will found the records are not
+		// updated, and apply again.
+		// In this controller, it should at least get the latest records to keep safety.
 		if desiredPhase == v1alpha1.RunningPhase && record.Phase != v1alpha1.Injected {
 			originalPhase := record.Phase
 
@@ -117,6 +125,8 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 				shouldUpdate = true
 			}
 			if err != nil {
+				// TODO: add backoff and retry mechanism
+				// but the retry shouldn't block other resource process
 				r.Log.Error(err, "fail to apply chaos")
 				r.Recorder.Eventf(obj, "Warning", "Failed", "Failed to apply chaos: %s", err.Error())
 				continue
@@ -133,6 +143,8 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 				shouldUpdate = true
 			}
 			if err != nil {
+				// TODO: add backoff and retry mechanism
+				// but the retry shouldn't block other resource process
 				r.Log.Error(err, "fail to recover chaos")
 				r.Recorder.Eventf(obj, "Warning", "Failed", "Failed to recover chaos: %s", err.Error())
 				continue

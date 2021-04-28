@@ -86,18 +86,15 @@ func (ctx *reconcileContext) CalcDesiredPhase() v1alpha1.DesiredPhase {
 	// Consider the duration
 	now := time.Now()
 
-	duration, err := ctx.obj.GetDuration()
+	durationExceeded, untilStop, err := ctx.obj.DurationExceeded(now)
 	if err != nil {
 		ctx.Log.Error(err, "failed to parse duration")
 	}
-	if duration != nil {
-		stopTime := ctx.GetCreationTimestamp().Add(*duration)
-		if stopTime.Before(now) {
-			ctx.Recorder.Eventf(ctx.obj, "Normal", "TimeUp", "Turn into StoppedPhase")
-			return v1alpha1.StoppedPhase
-		} else {
-			ctx.requeueAfter = stopTime.Sub(now)
-		}
+	if durationExceeded {
+		ctx.Recorder.Eventf(ctx.obj, "Normal", "TimeUp", "Turn into StoppedPhase")
+		return v1alpha1.StoppedPhase
+	} else {
+		ctx.requeueAfter = untilStop
 	}
 
 	// Then decide the pause logic

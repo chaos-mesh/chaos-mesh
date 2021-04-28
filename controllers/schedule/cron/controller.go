@@ -25,6 +25,7 @@ import (
 	"github.com/go-logr/logr"
 	"go.uber.org/fx"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/apiserver/pkg/storage/names"
 	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/retry"
@@ -54,6 +55,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	now := time.Now()
 	shouldSpawn := false
+	r.Log.Info("calculate schedule time", "schedule", schedule.Spec.Schedule, "lastScheduleTime", schedule.Status.LastScheduleTime, "now", now)
 	missedRun, nextRun, err := getRecentUnmetScheduleTime(schedule, now)
 	if err != nil {
 		r.Recorder.Eventf(schedule, "Warning", "Failed", "Failed to get run time: %s", err.Error())
@@ -71,6 +73,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		}
 	}
 
+	r.Log.Info("schedule to spawn new chaos", "missedRun", missedRun, "nextRun", nextRun)
 	shouldSpawn = true
 
 	if shouldSpawn && schedule.Spec.ConcurrencyPolicy.IsForbid() {
@@ -86,6 +89,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			if !controller.IsChaosFinished(item, now) {
 				shouldSpawn = false
 				r.Recorder.Eventf(schedule, "Warning", "Forbid", "Forbid spawning new job because: %s is still running", item.GetObjectMeta().Name)
+				r.Log.Info("forbid to spawn new chaos", "running", item.GetChaos().Name)
 				break
 			}
 		}
@@ -119,9 +123,11 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		err = r.Create(ctx, newObj)
 		if err != nil {
 			r.Recorder.Eventf(schedule, "Warning", "Failed", "Failed to create new object: %s", err.Error())
+			r.Log.Error(err, "fail to create new object", "obj", newObj)
 			return ctrl.Result{}, nil
 		}
 		r.Recorder.Eventf(schedule, "Normal", "Created", "Create new object: %s", meta.GetName())
+		r.Log.Info("create new object", "namespace", meta.GetNamespace(), "name", meta.GetName())
 
 		lastScheduleTime := now
 		updateError := retry.RetryOnConflict(retry.DefaultBackoff, func() error {
@@ -143,6 +149,23 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		}
 
 		r.Recorder.Event(schedule, "Normal", "Updated", "Successfully update lastScheduleTime of resource")
+
+		// TODO: make the interval and total time configurable
+		// The following codes ensure the Schedule in cache has the latest lastScheduleTime
+		ensureLatestError := wait.Poll(100*time.Millisecond, 2*time.Second, func() (bool, error) {
+			schedule = schedule.DeepCopyObject().(*v1alpha1.Schedule)
+
+			if err := r.Client.Get(ctx, req.NamespacedName, schedule); err != nil {
+				r.Log.Error(err, "unable to get schedule")
+				return false, err
+			}
+
+			return schedule.Status.LastScheduleTime.Time == lastScheduleTime, nil
+		})
+		if ensureLatestError != nil {
+			r.Log.Error(ensureLatestError, "fail to ensure that the resource in cache has the latest lastScheduleTime")
+			return ctrl.Result{}, nil
+		}
 	}
 
 	return ctrl.Result{}, nil
