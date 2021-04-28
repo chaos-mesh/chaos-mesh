@@ -16,11 +16,12 @@ package utils
 import (
 	"context"
 
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
 type ActiveLister struct {

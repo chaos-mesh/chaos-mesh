@@ -17,10 +17,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/pointer"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
 func TestGetRecentUnmetScheduleTime(t *testing.T) {

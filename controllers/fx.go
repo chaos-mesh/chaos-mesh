@@ -14,8 +14,9 @@
 package controllers
 
 import (
-	"github.com/chaos-mesh/chaos-mesh/controllers/schedule"
 	"go.uber.org/fx"
+
+	"github.com/chaos-mesh/chaos-mesh/controllers/schedule"
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"

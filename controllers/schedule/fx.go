@@ -14,11 +14,12 @@
 package schedule
 
 import (
+	"go.uber.org/fx"
+
 	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/active"
 	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/cron"
 	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/gc"
 	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/utils"
-	"go.uber.org/fx"
 )
 
 var Module = fx.Provide(
