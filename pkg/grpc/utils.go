@@ -19,6 +19,8 @@ import (
 	"crypto/x509"
 	"fmt"
 	"io/ioutil"
+	"net"
+	"strconv"
 	"time"
 
 	"google.golang.org/grpc/credentials"
@@ -164,7 +166,7 @@ func (it *GrpcBuilder) Build() (*grpc.ClientConn, error) {
 		return nil, err
 	}
 	it.options = append(it.options, option)
-	return grpc.Dial(fmt.Sprintf("%s:%d", it.address, it.port), it.options...)
+	return grpc.Dial(net.JoinHostPort(it.address, strconv.Itoa(it.port)), it.options...)
 }
 
 // TimeoutClientInterceptor wraps the RPC with a timeout.
