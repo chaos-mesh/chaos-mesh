@@ -35,6 +35,8 @@ var RPCTimeout = DefaultRPCTimeout
 
 var log = ctrl.Log.WithName("util")
 
+const ChaosDaemonServerName = "chaos-daemon.chaos-mesh.org"
+
 type TLSRaw struct {
 	CaCert []byte
 	Cert   []byte
@@ -57,6 +59,7 @@ type RawProvider struct {
 
 type InsecureProvider struct {
 }
+
 type CredentialProvider interface {
 	getCredentialOption() (grpc.DialOption, error)
 }
@@ -77,7 +80,7 @@ func (it *FileProvider) getCredentialOption() (grpc.DialOption, error) {
 	creds := credentials.NewTLS(&tls.Config{
 		Certificates: []tls.Certificate{clientCert},
 		RootCAs:      caCertPool,
-		ServerName:   "chaos-daemon.chaos-mesh.org",
+		ServerName:   ChaosDaemonServerName,
 	})
 	return grpc.WithTransportCredentials(creds), nil
 }
@@ -94,7 +97,7 @@ func (it *RawProvider) getCredentialOption() (grpc.DialOption, error) {
 	creds := credentials.NewTLS(&tls.Config{
 		Certificates: []tls.Certificate{clientCert},
 		RootCAs:      caCertPool,
-		ServerName:   "chaos-daemon.chaos-mesh.org",
+		ServerName:   ChaosDaemonServerName,
 	})
 	return grpc.WithTransportCredentials(creds), nil
 }
