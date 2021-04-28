@@ -71,7 +71,44 @@ func (it *ChaosNodeReconciler) Reconcile(request reconcile.Request) (reconcile.R
 
 	// TODO: sync status
 	updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		return nil
+		nodeNeedUpdate := v1alpha1.WorkflowNode{}
+		err := it.kubeClient.Get(ctx, request.NamespacedName, &nodeNeedUpdate)
+		if err != nil {
+			return client.IgnoreNotFound(err)
+		}
+
+		chaosList, err := it.fetchChildrenChaosCustomResource(ctx, nodeNeedUpdate)
+		if len(chaosList) > 1 {
+			it.logger.Info("the number of chaos custom resource affected by chaos node is more than 1",
+				"chaos node", fmt.Sprintf("%s/%s", node.Namespace, node.Name),
+				"chaos custom resources",
+			)
+		}
+
+		if len(chaosList) > 0 {
+			chaosObject := chaosList[0]
+			group := chaosObject.GetObjectKind().GroupVersionKind().Group
+			chaosRef := corev1.TypedLocalObjectReference{
+				APIGroup: &group,
+				Kind:     chaosObject.GetObjectKind().GroupVersionKind().Kind,
+				Name:     chaosObject.GetName(),
+			}
+			nodeNeedUpdate.Status.ChaosResource = &chaosRef
+			SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
+				Type:   v1alpha1.ConditionChaosInjected,
+				Status: corev1.ConditionTrue,
+				Reason: v1alpha1.ChaosCRCreated,
+			})
+		} else {
+			nodeNeedUpdate.Status.ChaosResource = nil
+			SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
+				Type:   v1alpha1.ConditionChaosInjected,
+				Status: corev1.ConditionFalse,
+				Reason: v1alpha1.ChaosCRNotExists,
+			})
+		}
+
+		return client.IgnoreNotFound(it.kubeClient.Status().Update(ctx, &nodeNeedUpdate))
 	})
 
 	return reconcile.Result{}, updateError
@@ -89,6 +126,7 @@ func (it *ChaosNodeReconciler) syncChaosResources(ctx context.Context, node v1al
 		for _, item := range chaosList {
 			// best efforts deletion
 			item := item
+			// TODO: it should not be delete directly with the new implementation of *Chaos controller in branch nirvana
 			err := it.kubeClient.Delete(ctx, item)
 			if client.IgnoreNotFound(err) != nil {
 				it.logger.Error(err, "failed to delete chaos CR for workflow chaos node",
@@ -103,6 +141,17 @@ func (it *ChaosNodeReconciler) syncChaosResources(ctx context.Context, node v1al
 		if len(chaosList) == 0 {
 			return it.createChaos(ctx, node)
 		} else if len(chaosList) > 1 {
+
+			var chaosCrToRemove []string
+			for _, item := range chaosList[1:] {
+				chaosCrToRemove = append(chaosCrToRemove, item.GetName())
+			}
+
+			it.logger.Info("removing duplicated chaos custom resource",
+				"chaos node", fmt.Sprintf("%s/%s", node.Namespace, node.Name),
+				"chaos cr to remove", chaosCrToRemove,
+			)
+
 			for _, item := range chaosList[1:] {
 				// best efforts deletion
 				item := item
@@ -118,6 +167,8 @@ func (it *ChaosNodeReconciler) syncChaosResources(ctx context.Context, node v1al
 		} else {
 			it.logger.V(4).Info("do not need spawn or remove chaos CR")
 		}
+
+		// TODO: also respawn the chaos resource if Spec changed in workflow
 	}
 
 	return nil

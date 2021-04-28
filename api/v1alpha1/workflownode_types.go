@@ -111,6 +111,7 @@ const (
 	NodeDeadlineOmitted   string = "NodeDeadlineOmitted"
 	ChaosCRCreated        string = "ChaosCRCreated"
 	ChaosCRCreateFailed   string = "ChaosCRCreateFailed"
+	ChaosCRNotExists      string = "ChaosCRNotExists"
 )
 
 // TODO: GenericChaosList/GenericChaos is very similar to ChaosList/ChaosInstance, maybe we could combine them later.
