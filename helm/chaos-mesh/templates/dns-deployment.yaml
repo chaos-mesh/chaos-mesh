@@ -5,11 +5,8 @@ metadata:
   name: chaos-dns-server
   namespace: {{ .Release.Namespace | quote }}
   labels:
-    app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: chaos-dns-server
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
 spec:
   # replicas: not specified here:
   # 1. In order to make Addon Manager do not reconcile this replicas parameter.
@@ -21,14 +18,12 @@ spec:
       maxUnavailable: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
-      app.kubernetes.io/instance: {{ .Release.Name }}
+      {{- include "chaos-mesh.selectors" . | nindent 6 }}
       app.kubernetes.io/component: chaos-dns-server
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
-        app.kubernetes.io/instance: {{ .Release.Name }}
+        {{- include "chaos-mesh.labels" . | nindent 8 }}
         app.kubernetes.io/component: chaos-dns-server
     {{- with .Values.dnsServer.podAnnotations }}
       annotations:
