@@ -131,3 +131,137 @@ func (it *EmbedChaos) SpawnNewObject(templateType TemplateType) (runtime.Object,
 
 	return nil, &metav1.ObjectMeta{}, nil
 }
+
+func (it *EmbedChaos) SpawnNewList(templateType TemplateType) (GenericChaosList, error) {
+
+	switch templateType {
+	case TypeAwsChaos:
+		result := AwsChaosList{}
+		return &result, nil
+	case TypeDNSChaos:
+		result := DNSChaosList{}
+		return &result, nil
+	case TypeGcpChaos:
+		result := GcpChaosList{}
+		return &result, nil
+	case TypeHTTPChaos:
+		result := HTTPChaosList{}
+		return &result, nil
+	case TypeIoChaos:
+		result := IoChaosList{}
+		return &result, nil
+	case TypeJVMChaos:
+		result := JVMChaosList{}
+		return &result, nil
+	case TypeKernelChaos:
+		result := KernelChaosList{}
+		return &result, nil
+	case TypeNetworkChaos:
+		result := NetworkChaosList{}
+		return &result, nil
+	case TypePodChaos:
+		result := PodChaosList{}
+		return &result, nil
+	case TypeStressChaos:
+		result := StressChaosList{}
+		return &result, nil
+	case TypeTimeChaos:
+		result := TimeChaosList{}
+		return &result, nil
+
+	default:
+		return nil, fmt.Errorf("unsupported template type %s", templateType)
+	}
+
+	return nil, nil
+}
+
+func (in *AwsChaosList) GetItems() []GenericChaos {
+	var result []GenericChaos
+	for _, item := range in.Items {
+		item := item
+		result = append(result, &item)
+	}
+	return result
+}
+func (in *DNSChaosList) GetItems() []GenericChaos {
+	var result []GenericChaos
+	for _, item := range in.Items {
+		item := item
+		result = append(result, &item)
+	}
+	return result
+}
+func (in *GcpChaosList) GetItems() []GenericChaos {
+	var result []GenericChaos
+	for _, item := range in.Items {
+		item := item
+		result = append(result, &item)
+	}
+	return result
+}
+func (in *HTTPChaosList) GetItems() []GenericChaos {
+	var result []GenericChaos
+	for _, item := range in.Items {
+		item := item
+		result = append(result, &item)
+	}
+	return result
+}
+func (in *IoChaosList) GetItems() []GenericChaos {
+	var result []GenericChaos
+	for _, item := range in.Items {
+		item := item
+		result = append(result, &item)
+	}
+	return result
+}
+func (in *JVMChaosList) GetItems() []GenericChaos {
+	var result []GenericChaos
+	for _, item := range in.Items {
+		item := item
+		result = append(result, &item)
+	}
+	return result
+}
+func (in *KernelChaosList) GetItems() []GenericChaos {
+	var result []GenericChaos
+	for _, item := range in.Items {
+		item := item
+		result = append(result, &item)
+	}
+	return result
+}
+func (in *NetworkChaosList) GetItems() []GenericChaos {
+	var result []GenericChaos
+	for _, item := range in.Items {
+		item := item
+		result = append(result, &item)
+	}
+	return result
+}
+func (in *PodChaosList) GetItems() []GenericChaos {
+	var result []GenericChaos
+	for _, item := range in.Items {
+		item := item
+		result = append(result, &item)
+	}
+	return result
+}
+func (in *StressChaosList) GetItems() []GenericChaos {
+	var result []GenericChaos
+	for _, item := range in.Items {
+		item := item
+		result = append(result, &item)
+	}
+	return result
+}
+func (in *TimeChaosList) GetItems() []GenericChaos {
+	var result []GenericChaos
+	for _, item := range in.Items {
+		item := item
+		result = append(result, &item)
+	}
+	return result
+}
+

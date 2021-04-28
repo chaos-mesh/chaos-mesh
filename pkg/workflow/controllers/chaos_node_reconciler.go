@@ -16,12 +16,12 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"sort"
+	"time"
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -41,6 +41,15 @@ func NewChaosNodeReconciler(kubeClient client.Client, eventRecorder record.Event
 }
 
 func (it *ChaosNodeReconciler) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+
+	startTime := time.Now()
+	defer func() {
+		it.logger.V(4).Info("Finished syncing for chaos node",
+			"node", request.NamespacedName,
+			"duration", time.Since(startTime),
+		)
+	}()
+
 	ctx := context.TODO()
 	node := v1alpha1.WorkflowNode{}
 
@@ -53,20 +62,69 @@ func (it *ChaosNodeReconciler) Reconcile(request reconcile.Request) (reconcile.R
 		return reconcile.Result{}, nil
 	}
 
-	if ConditionEqualsTo(node.Status, v1alpha1.ConditionDeadlineExceed, corev1.ConditionTrue) {
-		err := it.recoverChaos(ctx, node)
+	it.logger.V(4).Info("resolve chaos node", "node", request)
+
+	err = it.syncChaosResources(ctx, node)
+	if err != nil {
 		return reconcile.Result{}, err
 	}
 
-	if !ConditionEqualsTo(node.Status, v1alpha1.ConditionChaosInjected, corev1.ConditionTrue) {
-		err = it.injectChaos(ctx, node)
-		return reconcile.Result{}, err
-	}
+	// TODO: sync status
+	updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		return nil
+	})
 
-	return reconcile.Result{}, nil
+	return reconcile.Result{}, updateError
 }
 
-func (it *ChaosNodeReconciler) injectChaos(ctx context.Context, node v1alpha1.WorkflowNode) error {
+func (it *ChaosNodeReconciler) syncChaosResources(ctx context.Context, node v1alpha1.WorkflowNode) error {
+
+	chaosList, err := it.fetchChildrenChaosCustomResource(ctx, node)
+	if err != nil {
+		return err
+	}
+
+	if WorkflowNodeFinished(node.Status) {
+		// make the number of chaos resource to 0
+		for _, item := range chaosList {
+			// best efforts deletion
+			item := item
+			err := it.kubeClient.Delete(ctx, item)
+			if client.IgnoreNotFound(err) != nil {
+				it.logger.Error(err, "failed to delete chaos CR for workflow chaos node",
+					"namespace", node.Namespace,
+					"chaos node", node.Name,
+					"chaos CR name", item.GetName(),
+				)
+			}
+		}
+	} else {
+		// make the number of chaos resource to 1
+		if len(chaosList) == 0 {
+			return it.createChaos(ctx, node)
+		} else if len(chaosList) > 1 {
+			for _, item := range chaosList[1:] {
+				// best efforts deletion
+				item := item
+				err := it.kubeClient.Delete(ctx, item)
+				if client.IgnoreNotFound(err) != nil {
+					it.logger.Error(err, "failed to delete chaos CR for workflow chaos node",
+						"namespace", node.Namespace,
+						"chaos node", node.Name,
+						"chaos CR name", item.GetName(),
+					)
+				}
+			}
+		} else {
+			it.logger.V(4).Info("do not need spawn or remove chaos CR")
+		}
+	}
+
+	return nil
+}
+
+// inject Chaos will create one instance of chaos CR
+func (it *ChaosNodeReconciler) createChaos(ctx context.Context, node v1alpha1.WorkflowNode) error {
 
 	chaosObject, meta, err := node.Spec.EmbedChaos.SpawnNewObject(node.Spec.Type)
 	if err != nil {
@@ -83,6 +141,9 @@ func (it *ChaosNodeReconciler) injectChaos(ctx context.Context, node v1alpha1.Wo
 		Controller:         &isController,
 		BlockOwnerDeletion: &blockOwnerDeletion,
 	}))
+	meta.SetLabels(map[string]string{
+		v1alpha1.LabelControlledBy: node.Name,
+	})
 
 	err = it.kubeClient.Create(ctx, chaosObject)
 	if err != nil {
@@ -91,83 +152,45 @@ func (it *ChaosNodeReconciler) injectChaos(ctx context.Context, node v1alpha1.Wo
 		return nil
 	}
 	it.logger.Info("chaos object created", "namespace", meta.GetNamespace(), "name", meta.GetName())
-
 	it.eventRecorder.Event(&node, corev1.EventTypeNormal, v1alpha1.ChaosCRCreated, fmt.Sprintf("Chaos CR %s/%s created", meta.GetNamespace(), meta.GetName()))
-
-	group := chaosObject.GetObjectKind().GroupVersionKind().Group
-	chaosRef := corev1.TypedLocalObjectReference{
-		APIGroup: &group,
-		Kind:     chaosObject.GetObjectKind().GroupVersionKind().Kind,
-		Name:     meta.GetName(),
-	}
-
-	updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		nodeNeedUpdate := v1alpha1.WorkflowNode{}
-		err := it.kubeClient.Get(ctx, types.NamespacedName{
-			Namespace: node.Namespace,
-			Name:      node.Name,
-		}, &nodeNeedUpdate)
-		if err != nil {
-			return client.IgnoreNotFound(err)
-		}
-		nodeNeedUpdate.Status.ChaosResource = &chaosRef
-
-		// TODO: this condition should be set by observation
-		SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
-			Type:   v1alpha1.ConditionChaosInjected,
-			Status: corev1.ConditionTrue,
-			Reason: v1alpha1.ChaosCRCreated,
-		})
-
-		return it.kubeClient.Update(ctx, &nodeNeedUpdate)
-
-	})
-	return updateError
+	return nil
 }
 
-func (it *ChaosNodeReconciler) recoverChaos(ctx context.Context, node v1alpha1.WorkflowNode) error {
-	if node.Status.ChaosResource == nil {
-		return nil
-	}
-
-	var err error
-	chaosObject, err := v1alpha1.FetchChaosByTemplateType(node.Spec.Type)
+func (it *ChaosNodeReconciler) fetchChildrenChaosCustomResource(ctx context.Context, node v1alpha1.WorkflowNode) ([]v1alpha1.GenericChaos, error) {
+	genericChaosList, err := node.Spec.EmbedChaos.SpawnNewList(node.Spec.Type)
 	if err != nil {
-		return err
+		return nil, err
 	}
-
-	err = it.kubeClient.Get(ctx,
-		types.NamespacedName{Namespace: node.Namespace, Name: node.Status.ChaosResource.Name},
-		chaosObject)
-
-	if apierrors.IsNotFound(err) {
-		it.logger.V(4).Info("target chaos not exist", "namespace", node.Namespace, "name", node.Status.ChaosResource.Name, "chaos kind", node.Status.ChaosResource.Kind)
-		return nil
-	}
+	controlledByThisNode, err := metav1.LabelSelectorAsSelector(&metav1.LabelSelector{
+		MatchLabels: map[string]string{
+			v1alpha1.LabelControlledBy: node.Name,
+		},
+	})
 	if err != nil {
-		return err
+		it.logger.Error(err, "failed to build label selector with filtering children workflow node controlled by current node",
+			"current node", fmt.Sprintf("%s/%s", node.Namespace, node.Name))
+		return nil, err
 	}
 
-	err = it.kubeClient.Delete(ctx, chaosObject)
-
-	if client.IgnoreNotFound(err) != nil {
-		return err
-	}
-
-	err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		nodeNeedUpdate := v1alpha1.WorkflowNode{}
-		err := it.kubeClient.Get(ctx, types.NamespacedName{
-			Namespace: node.Namespace,
-			Name:      node.Name,
-		}, &nodeNeedUpdate)
-		if err != nil {
-			return client.IgnoreNotFound(err)
-		}
-
-		nodeNeedUpdate.Status.ChaosResource = nil
-		err = it.kubeClient.Update(ctx, &nodeNeedUpdate)
-		return client.IgnoreNotFound(err)
+	err = it.kubeClient.List(ctx, genericChaosList, &client.ListOptions{
+		LabelSelector: controlledByThisNode,
 	})
 
-	return err
+	var sorted SortGenericChaosByCreationTimestamp = genericChaosList.GetItems()
+	sort.Sort(sorted)
+	return sorted, err
+}
+
+type SortGenericChaosByCreationTimestamp []v1alpha1.GenericChaos
+
+func (it SortGenericChaosByCreationTimestamp) Len() int {
+	return len(it)
+}
+
+func (it SortGenericChaosByCreationTimestamp) Less(i, j int) bool {
+	return it[j].GetCreationTimestamp().After(it[i].GetCreationTimestamp().Time)
+}
+
+func (it SortGenericChaosByCreationTimestamp) Swap(i, j int) {
+	it[i], it[j] = it[j], it[i]
 }
