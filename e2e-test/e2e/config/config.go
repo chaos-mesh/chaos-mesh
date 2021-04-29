@@ -20,7 +20,7 @@ import (
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 	"k8s.io/kubernetes/test/e2e/framework"
 
-	"github.com/chaos-mesh/chaos-mesh/e2e-test"
+	test "github.com/chaos-mesh/chaos-mesh/e2e-test"
 )
 
 // TestConfig for the test config
