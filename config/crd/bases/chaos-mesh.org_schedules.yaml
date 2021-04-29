@@ -21,10 +21,14 @@ spec:
       description: Schedule is the cronly schedule object
       properties:
         apiVersion:
-          description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
           type: string
         kind:
-          description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
           type: string
         metadata:
           type: object
@@ -32,10 +36,13 @@ spec:
           description: ScheduleSpec is the specification of a schedule object
           properties:
             aws_chaos:
-              description: AwsChaosSpec is the content of the specification for an AwsChaos
+              description: AwsChaosSpec is the content of the specification for an
+                AwsChaos
               properties:
                 action:
-                  description: 'Action defines the specific aws chaos action. Supported action: ec2-stop / ec2-restart / detach-volume Default action: ec2-stop'
+                  description: 'Action defines the specific aws chaos action. Supported
+                    action: ec2-stop / ec2-restart / detach-volume Default action:
+                    ec2-stop'
                   enum:
                   - ec2-stop
                   - ec2-restart
@@ -45,7 +52,8 @@ spec:
                   description: AwsRegion defines the region of aws.
                   type: string
                 deviceName:
-                  description: DeviceName indicates the name of the device. Needed in detach-volume.
+                  description: DeviceName indicates the name of the device. Needed
+                    in detach-volume.
                   type: string
                 duration:
                   description: Duration represents the duration of the chaos action.
@@ -54,13 +62,15 @@ spec:
                   description: Ec2Instance indicates the ID of the ec2 instance.
                   type: string
                 endpoint:
-                  description: Endpoint indicates the endpoint of the aws server. Just used it in test now.
+                  description: Endpoint indicates the endpoint of the aws server.
+                    Just used it in test now.
                   type: string
                 secretName:
                   description: SecretName defines the name of kubernetes secret.
                   type: string
                 volumeID:
-                  description: EbsVolume indicates the ID of the EBS volume. Needed in detach-volume.
+                  description: EbsVolume indicates the ID of the EBS volume. Needed
+                    in detach-volume.
                   type: string
               required:
               - action
@@ -76,13 +86,15 @@ spec:
               description: DNSChaosSpec defines the desired state of DNSChaos
               properties:
                 action:
-                  description: 'Action defines the specific DNS chaos action. Supported action: error, random Default action: error'
+                  description: 'Action defines the specific DNS chaos action. Supported
+                    action: error, random Default action: error'
                   enum:
                   - error
                   - random
                   type: string
                 containerNames:
-                  description: ContainerName indicates the name of affected container. If not set, all containers will be injected
+                  description: ContainerName indicates the name of affected container.
+                    If not set, all containers will be injected
                   items:
                     type: string
                   type: array
@@ -90,7 +102,8 @@ spec:
                   description: Duration represents the duration of the chaos action
                   type: string
                 mode:
-                  description: 'Mode defines the mode to run chaos action. Supported mode: one / all / fixed / fixed-percent / random-max-percent'
+                  description: 'Mode defines the mode to run chaos action. Supported
+                    mode: one / all / fixed / fixed-percent / random-max-percent'
                   enum:
                   - one
                   - all
@@ -99,31 +112,50 @@ spec:
                   - random-max-percent
                   type: string
                 patterns:
-                  description: "Choose which domain names to take effect, support the placeholder ? and wildcard *, or the Specified domain name. Note:      1. The wildcard * must be at the end of the string. For example, chaos-*.org is invalid.      2. if the patterns is empty, will take effect on all the domain names. For example: \t\tThe value is [\"google.com\", \"github.*\", \"chaos-mes?.org\"], \t\twill take effect on \"google.com\", \"github.com\" and \"chaos-mesh.org\""
+                  description: "Choose which domain names to take effect, support
+                    the placeholder ? and wildcard *, or the Specified domain name.
+                    Note:      1. The wildcard * must be at the end of the string.
+                    For example, chaos-*.org is invalid.      2. if the patterns is
+                    empty, will take effect on all the domain names. For example:
+                    \t\tThe value is [\"google.com\", \"github.*\", \"chaos-mes?.org\"],
+                    \t\twill take effect on \"google.com\", \"github.com\" and \"chaos-mesh.org\""
                   items:
                     type: string
                   type: array
                 selector:
-                  description: Selector is used to select pods that are used to inject chaos action.
+                  description: Selector is used to select pods that are used to inject
+                    chaos action.
                   properties:
                     annotationSelectors:
                       additionalProperties:
                         type: string
-                      description: Map of string keys and values that can be used to select objects. A selector based on annotations.
+                      description: Map of string keys and values that can be used
+                        to select objects. A selector based on annotations.
                       type: object
                     expressionSelectors:
-                      description: a slice of label selector expressions that can be used to select objects. A list of selectors based on set-based label expressions.
+                      description: a slice of label selector expressions that can
+                        be used to select objects. A list of selectors based on set-based
+                        label expressions.
                       items:
-                        description: A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.
+                        description: A label selector requirement is a selector that
+                          contains values, a key, and an operator that relates the
+                          key and values.
                         properties:
                           key:
-                            description: key is the label key that the selector applies to.
+                            description: key is the label key that the selector applies
+                              to.
                             type: string
                           operator:
-                            description: operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+                            description: operator represents a key's relationship
+                              to a set of values. Valid operators are In, NotIn, Exists
+                              and DoesNotExist.
                             type: string
                           values:
-                            description: values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+                            description: values is an array of string values. If the
+                              operator is In or NotIn, the values array must be non-empty.
+                              If the operator is Exists or DoesNotExist, the values
+                              array must be empty. This array is replaced during a
+                              strategic merge patch.
                             items:
                               type: string
                             type: array
@@ -135,30 +167,38 @@ spec:
                     fieldSelectors:
                       additionalProperties:
                         type: string
-                      description: Map of string keys and values that can be used to select objects. A selector based on fields.
+                      description: Map of string keys and values that can be used
+                        to select objects. A selector based on fields.
                       type: object
                     labelSelectors:
                       additionalProperties:
                         type: string
-                      description: Map of string keys and values that can be used to select objects. A selector based on labels.
+                      description: Map of string keys and values that can be used
+                        to select objects. A selector based on labels.
                       type: object
                     namespaces:
-                      description: Namespaces is a set of namespace to which objects belong.
+                      description: Namespaces is a set of namespace to which objects
+                        belong.
                       items:
                         type: string
                       type: array
                     nodeSelectors:
                       additionalProperties:
                         type: string
-                      description: Map of string keys and values that can be used to select nodes. Selector which must match a node's labels, and objects must belong to these selected nodes.
+                      description: Map of string keys and values that can be used
+                        to select nodes. Selector which must match a node's labels,
+                        and objects must belong to these selected nodes.
                       type: object
                     nodes:
-                      description: Nodes is a set of node name and objects must belong to these nodes.
+                      description: Nodes is a set of node name and objects must belong
+                        to these nodes.
                       items:
                         type: string
                       type: array
                     podPhaseSelectors:
-                      description: 'PodPhaseSelectors is a set of condition of a pod at the current time. supported value: Pending / Running / Succeeded / Failed / Unknown'
+                      description: 'PodPhaseSelectors is a set of condition of a pod
+                        at the current time. supported value: Pending / Running /
+                        Succeeded / Failed / Unknown'
                       items:
                         type: string
                       type: array
@@ -167,11 +207,19 @@ spec:
                         items:
                           type: string
                         type: array
-                      description: Pods is a map of string keys and a set values that used to select pods. The key defines the namespace which pods belong, and the each values is a set of pod names.
+                      description: Pods is a map of string keys and a set values that
+                        used to select pods. The key defines the namespace which pods
+                        belong, and the each values is a set of pod names.
                       type: object
                   type: object
                 value:
-                  description: Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`, provide an integer of pods to do chaos action. If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+                  description: Value is required when the mode is set to `FixedPodMode`
+                    / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
+                    provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
+                    provide a number from 0-100 to specify the percent of pods the
+                    server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                    a number from 0-100 to specify the max percent of pods to do chaos
+                    action
                   type: string
               required:
               - action
@@ -179,10 +227,12 @@ spec:
               - selector
               type: object
             gcp_chaos:
-              description: GcpChaosSpec is the content of the specification for a GcpChaos
+              description: GcpChaosSpec is the content of the specification for a
+                GcpChaos
               properties:
                 action:
-                  description: 'Action defines the specific gcp chaos action. Supported action: node-stop / node-reset / disk-loss Default action: node-stop'
+                  description: 'Action defines the specific gcp chaos action. Supported
+                    action: node-stop / node-reset / disk-loss Default action: node-stop'
                   enum:
                   - node-stop
                   - node-reset
@@ -201,7 +251,8 @@ spec:
                   description: Project defines the name of gcp project.
                   type: string
                 secretName:
-                  description: SecretName defines the name of kubernetes secret. It is used for GCP credentials.
+                  description: SecretName defines the name of kubernetes secret. It
+                    is used for GCP credentials.
                   type: string
                 zone:
                   description: Zone defines the zone of gcp project.
@@ -218,17 +269,24 @@ spec:
             http_chaos:
               properties:
                 action:
-                  description: 'Action defines the specific pod chaos action. Supported action: delay | abort | mixed Default action: delay'
+                  description: 'Action defines the specific pod chaos action. Supported
+                    action: delay | abort | mixed Default action: delay'
                   enum:
                   - delay
                   - abort
                   - mixed
                   type: string
                 duration:
-                  description: Duration represents the duration of the chaos action. It is required when the action is `PodFailureAction`. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as "300ms", "-1.5h" or "2h45m". Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+                  description: Duration represents the duration of the chaos action.
+                    It is required when the action is `PodFailureAction`. A duration
+                    string is a possibly signed sequence of decimal numbers, each
+                    with optional fraction and a unit suffix, such as "300ms", "-1.5h"
+                    or "2h45m". Valid time units are "ns", "us" (or "µs"), "ms", "s",
+                    "m", "h".
                   type: string
                 headers:
-                  description: Specifies how the header match will be performed to route the request.
+                  description: Specifies how the header match will be performed to
+                    route the request.
                   items:
                     properties:
                       exact_match:
@@ -254,7 +312,8 @@ spec:
                     type: object
                   type: array
                 mode:
-                  description: 'Mode defines the mode to run chaos action. Supported mode: one / all / fixed / fixed-percent / random-max-percent'
+                  description: 'Mode defines the mode to run chaos action. Supported
+                    mode: one / all / fixed / fixed-percent / random-max-percent'
                   enum:
                   - one
                   - all
@@ -263,29 +322,43 @@ spec:
                   - random-max-percent
                   type: string
                 percent:
-                  description: 'Percent defines the percentage of injection errors and provides a number from 0-100. default: 100.'
+                  description: 'Percent defines the percentage of injection errors
+                    and provides a number from 0-100. default: 100.'
                   type: string
                 selector:
-                  description: Selector is used to select pods that are used to inject chaos action.
+                  description: Selector is used to select pods that are used to inject
+                    chaos action.
                   properties:
                     annotationSelectors:
                       additionalProperties:
                         type: string
-                      description: Map of string keys and values that can be used to select objects. A selector based on annotations.
+                      description: Map of string keys and values that can be used
+                        to select objects. A selector based on annotations.
                       type: object
                     expressionSelectors:
-                      description: a slice of label selector expressions that can be used to select objects. A list of selectors based on set-based label expressions.
+                      description: a slice of label selector expressions that can
+                        be used to select objects. A list of selectors based on set-based
+                        label expressions.
                       items:
-                        description: A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.
+                        description: A label selector requirement is a selector that
+                          contains values, a key, and an operator that relates the
+                          key and values.
                         properties:
                           key:
-                            description: key is the label key that the selector applies to.
+                            description: key is the label key that the selector applies
+                              to.
                             type: string
                           operator:
-                            description: operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+                            description: operator represents a key's relationship
+                              to a set of values. Valid operators are In, NotIn, Exists
+                              and DoesNotExist.
                             type: string
                           values:
-                            description: values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+                            description: values is an array of string values. If the
+                              operator is In or NotIn, the values array must be non-empty.
+                              If the operator is Exists or DoesNotExist, the values
+                              array must be empty. This array is replaced during a
+                              strategic merge patch.
                             items:
                               type: string
                             type: array
@@ -297,30 +370,38 @@ spec:
                     fieldSelectors:
                       additionalProperties:
                         type: string
-                      description: Map of string keys and values that can be used to select objects. A selector based on fields.
+                      description: Map of string keys and values that can be used
+                        to select objects. A selector based on fields.
                       type: object
                     labelSelectors:
                       additionalProperties:
                         type: string
-                      description: Map of string keys and values that can be used to select objects. A selector based on labels.
+                      description: Map of string keys and values that can be used
+                        to select objects. A selector based on labels.
                       type: object
                     namespaces:
-                      description: Namespaces is a set of namespace to which objects belong.
+                      description: Namespaces is a set of namespace to which objects
+                        belong.
                       items:
                         type: string
                       type: array
                     nodeSelectors:
                       additionalProperties:
                         type: string
-                      description: Map of string keys and values that can be used to select nodes. Selector which must match a node's labels, and objects must belong to these selected nodes.
+                      description: Map of string keys and values that can be used
+                        to select nodes. Selector which must match a node's labels,
+                        and objects must belong to these selected nodes.
                       type: object
                     nodes:
-                      description: Nodes is a set of node name and objects must belong to these nodes.
+                      description: Nodes is a set of node name and objects must belong
+                        to these nodes.
                       items:
                         type: string
                       type: array
                     podPhaseSelectors:
-                      description: 'PodPhaseSelectors is a set of condition of a pod at the current time. supported value: Pending / Running / Succeeded / Failed / Unknown'
+                      description: 'PodPhaseSelectors is a set of condition of a pod
+                        at the current time. supported value: Pending / Running /
+                        Succeeded / Failed / Unknown'
                       items:
                         type: string
                       type: array
@@ -329,11 +410,19 @@ spec:
                         items:
                           type: string
                         type: array
-                      description: Pods is a map of string keys and a set values that used to select pods. The key defines the namespace which pods belong, and the each values is a set of pod names.
+                      description: Pods is a map of string keys and a set values that
+                        used to select pods. The key defines the namespace which pods
+                        belong, and the each values is a set of pod names.
                       type: object
                   type: object
                 value:
-                  description: Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`, provide an integer of pods to do chaos action. If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+                  description: Value is required when the mode is set to `FixedPodMode`
+                    / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
+                    provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
+                    provide a number from 0-100 to specify the percent of pods the
+                    server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                    a number from 0-100 to specify the max percent of pods to do chaos
+                    action
                   type: string
               required:
               - action
@@ -344,7 +433,8 @@ spec:
               description: IoChaosSpec defines the desired state of IoChaos
               properties:
                 action:
-                  description: 'Action defines the specific pod chaos action. Supported action: latency / fault / attrOverride / mistake'
+                  description: 'Action defines the specific pod chaos action. Supported
+                    action: latency / fault / attrOverride / mistake'
                   enum:
                   - latency
                   - fault
@@ -421,30 +511,43 @@ spec:
                       type: integer
                   type: object
                 containerNames:
-                  description: ContainerName indicates the name of affected container. If not set, all containers will be injected
+                  description: ContainerName indicates the name of affected container.
+                    If not set, all containers will be injected
                   items:
                     type: string
                   type: array
                 delay:
-                  description: Delay defines the value of I/O chaos action delay. A delay string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as "300ms". Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+                  description: Delay defines the value of I/O chaos action delay.
+                    A delay string is a possibly signed sequence of decimal numbers,
+                    each with optional fraction and a unit suffix, such as "300ms".
+                    Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
                   type: string
                 duration:
-                  description: Duration represents the duration of the chaos action. It is required when the action is `PodFailureAction`. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as "300ms", "-1.5h" or "2h45m". Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+                  description: Duration represents the duration of the chaos action.
+                    It is required when the action is `PodFailureAction`. A duration
+                    string is a possibly signed sequence of decimal numbers, each
+                    with optional fraction and a unit suffix, such as "300ms", "-1.5h"
+                    or "2h45m". Valid time units are "ns", "us" (or "µs"), "ms", "s",
+                    "m", "h".
                   type: string
                 errno:
-                  description: 'Errno defines the error code that returned by I/O action. refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html'
+                  description: 'Errno defines the error code that returned by I/O
+                    action. refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html'
                   format: int32
                   type: integer
                 methods:
-                  description: 'Methods defines the I/O methods for injecting I/O chaos action. default: all I/O methods.'
+                  description: 'Methods defines the I/O methods for injecting I/O
+                    chaos action. default: all I/O methods.'
                   items:
                     type: string
                   type: array
                 mistake:
-                  description: Mistake defines what types of incorrectness are injected to IO operations
+                  description: Mistake defines what types of incorrectness are injected
+                    to IO operations
                   properties:
                     filling:
-                      description: Filling determines what is filled in the miskate data.
+                      description: Filling determines what is filled in the miskate
+                        data.
                       enum:
                       - zero
                       - random
@@ -455,13 +558,15 @@ spec:
                       minimum: 1
                       type: integer
                     maxOccurrences:
-                      description: There will be [1, MaxOccurrences] segments of wrong data.
+                      description: There will be [1, MaxOccurrences] segments of wrong
+                        data.
                       format: int64
                       minimum: 1
                       type: integer
                   type: object
                 mode:
-                  description: 'Mode defines the mode to run chaos action. Supported mode: one / all / fixed / fixed-percent / random-max-percent'
+                  description: 'Mode defines the mode to run chaos action. Supported
+                    mode: one / all / fixed / fixed-percent / random-max-percent'
                   enum:
                   - one
                   - all
@@ -470,32 +575,47 @@ spec:
                   - random-max-percent
                   type: string
                 path:
-                  description: Path defines the path of files for injecting I/O chaos action.
+                  description: Path defines the path of files for injecting I/O chaos
+                    action.
                   type: string
                 percent:
-                  description: 'Percent defines the percentage of injection errors and provides a number from 0-100. default: 100.'
+                  description: 'Percent defines the percentage of injection errors
+                    and provides a number from 0-100. default: 100.'
                   type: integer
                 selector:
-                  description: Selector is used to select pods that are used to inject chaos action.
+                  description: Selector is used to select pods that are used to inject
+                    chaos action.
                   properties:
                     annotationSelectors:
                       additionalProperties:
                         type: string
-                      description: Map of string keys and values that can be used to select objects. A selector based on annotations.
+                      description: Map of string keys and values that can be used
+                        to select objects. A selector based on annotations.
                       type: object
                     expressionSelectors:
-                      description: a slice of label selector expressions that can be used to select objects. A list of selectors based on set-based label expressions.
+                      description: a slice of label selector expressions that can
+                        be used to select objects. A list of selectors based on set-based
+                        label expressions.
                       items:
-                        description: A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.
+                        description: A label selector requirement is a selector that
+                          contains values, a key, and an operator that relates the
+                          key and values.
                         properties:
                           key:
-                            description: key is the label key that the selector applies to.
+                            description: key is the label key that the selector applies
+                              to.
                             type: string
                           operator:
-                            description: operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+                            description: operator represents a key's relationship
+                              to a set of values. Valid operators are In, NotIn, Exists
+                              and DoesNotExist.
                             type: string
                           values:
-                            description: values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+                            description: values is an array of string values. If the
+                              operator is In or NotIn, the values array must be non-empty.
+                              If the operator is Exists or DoesNotExist, the values
+                              array must be empty. This array is replaced during a
+                              strategic merge patch.
                             items:
                               type: string
                             type: array
@@ -507,30 +627,38 @@ spec:
                     fieldSelectors:
                       additionalProperties:
                         type: string
-                      description: Map of string keys and values that can be used to select objects. A selector based on fields.
+                      description: Map of string keys and values that can be used
+                        to select objects. A selector based on fields.
                       type: object
                     labelSelectors:
                       additionalProperties:
                         type: string
-                      description: Map of string keys and values that can be used to select objects. A selector based on labels.
+                      description: Map of string keys and values that can be used
+                        to select objects. A selector based on labels.
                       type: object
                     namespaces:
-                      description: Namespaces is a set of namespace to which objects belong.
+                      description: Namespaces is a set of namespace to which objects
+                        belong.
                       items:
                         type: string
                       type: array
                     nodeSelectors:
                       additionalProperties:
                         type: string
-                      description: Map of string keys and values that can be used to select nodes. Selector which must match a node's labels, and objects must belong to these selected nodes.
+                      description: Map of string keys and values that can be used
+                        to select nodes. Selector which must match a node's labels,
+                        and objects must belong to these selected nodes.
                       type: object
                     nodes:
-                      description: Nodes is a set of node name and objects must belong to these nodes.
+                      description: Nodes is a set of node name and objects must belong
+                        to these nodes.
                       items:
                         type: string
                       type: array
                     podPhaseSelectors:
-                      description: 'PodPhaseSelectors is a set of condition of a pod at the current time. supported value: Pending / Running / Succeeded / Failed / Unknown'
+                      description: 'PodPhaseSelectors is a set of condition of a pod
+                        at the current time. supported value: Pending / Running /
+                        Succeeded / Failed / Unknown'
                       items:
                         type: string
                       type: array
@@ -539,11 +667,19 @@ spec:
                         items:
                           type: string
                         type: array
-                      description: Pods is a map of string keys and a set values that used to select pods. The key defines the namespace which pods belong, and the each values is a set of pod names.
+                      description: Pods is a map of string keys and a set values that
+                        used to select pods. The key defines the namespace which pods
+                        belong, and the each values is a set of pod names.
                       type: object
                   type: object
                 value:
-                  description: Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`, provide an integer of pods to do chaos action. If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+                  description: Value is required when the mode is set to `FixedPodMode`
+                    / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
+                    provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
+                    provide a number from 0-100 to specify the percent of pods the
+                    server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                    a number from 0-100 to specify the max percent of pods to do chaos
+                    action
                   type: string
                 volumePath:
                   description: VolumePath represents the mount path of injected volume
@@ -558,7 +694,8 @@ spec:
               description: JVMChaosSpec defines the desired state of JVMChaos
               properties:
                 action:
-                  description: 'Action defines the specific jvm chaos action. Supported action: delay;return;script;cfl;oom;ccf;tce;cpf;tde;tpf'
+                  description: 'Action defines the specific jvm chaos action. Supported
+                    action: delay;return;script;cfl;oom;ccf;tce;cpf;tde;tpf'
                   enum:
                   - delay
                   - return
@@ -572,7 +709,8 @@ spec:
                   - tpf
                   type: string
                 containerNames:
-                  description: ContainerName indicates the name of affected container. If not set, all containers will be injected
+                  description: ContainerName indicates the name of affected container.
+                    If not set, all containers will be injected
                   items:
                     type: string
                   type: array
@@ -590,7 +728,8 @@ spec:
                   description: Matchers represents the matching rules for the target
                   type: object
                 mode:
-                  description: 'Mode defines the mode to run chaos action. Supported mode: one / all / fixed / fixed-percent / random-max-percent'
+                  description: 'Mode defines the mode to run chaos action. Supported
+                    mode: one / all / fixed / fixed-percent / random-max-percent'
                   enum:
                   - one
                   - all
@@ -599,26 +738,39 @@ spec:
                   - random-max-percent
                   type: string
                 selector:
-                  description: Selector is used to select pods that are used to inject chaos action.
+                  description: Selector is used to select pods that are used to inject
+                    chaos action.
                   properties:
                     annotationSelectors:
                       additionalProperties:
                         type: string
-                      description: Map of string keys and values that can be used to select objects. A selector based on annotations.
+                      description: Map of string keys and values that can be used
+                        to select objects. A selector based on annotations.
                       type: object
                     expressionSelectors:
-                      description: a slice of label selector expressions that can be used to select objects. A list of selectors based on set-based label expressions.
+                      description: a slice of label selector expressions that can
+                        be used to select objects. A list of selectors based on set-based
+                        label expressions.
                       items:
-                        description: A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.
+                        description: A label selector requirement is a selector that
+                          contains values, a key, and an operator that relates the
+                          key and values.
                         properties:
                           key:
-                            description: key is the label key that the selector applies to.
+                            description: key is the label key that the selector applies
+                              to.
                             type: string
                           operator:
-                            description: operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+                            description: operator represents a key's relationship
+                              to a set of values. Valid operators are In, NotIn, Exists
+                              and DoesNotExist.
                             type: string
                           values:
-                            description: values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+                            description: values is an array of string values. If the
+                              operator is In or NotIn, the values array must be non-empty.
+                              If the operator is Exists or DoesNotExist, the values
+                              array must be empty. This array is replaced during a
+                              strategic merge patch.
                             items:
                               type: string
                             type: array
@@ -630,30 +782,38 @@ spec:
                     fieldSelectors:
                       additionalProperties:
                         type: string
-                      description: Map of string keys and values that can be used to select objects. A selector based on fields.
+                      description: Map of string keys and values that can be used
+                        to select objects. A selector based on fields.
                       type: object
                     labelSelectors:
                       additionalProperties:
                         type: string
-                      description: Map of string keys and values that can be used to select objects. A selector based on labels.
+                      description: Map of string keys and values that can be used
+                        to select objects. A selector based on labels.
                       type: object
                     namespaces:
-                      description: Namespaces is a set of namespace to which objects belong.
+                      description: Namespaces is a set of namespace to which objects
+                        belong.
                       items:
                         type: string
                       type: array
                     nodeSelectors:
                       additionalProperties:
                         type: string
-                      description: Map of string keys and values that can be used to select nodes. Selector which must match a node's labels, and objects must belong to these selected nodes.
+                      description: Map of string keys and values that can be used
+                        to select nodes. Selector which must match a node's labels,
+                        and objects must belong to these selected nodes.
                       type: object
                     nodes:
-                      description: Nodes is a set of node name and objects must belong to these nodes.
+                      description: Nodes is a set of node name and objects must belong
+                        to these nodes.
                       items:
                         type: string
                       type: array
                     podPhaseSelectors:
-                      description: 'PodPhaseSelectors is a set of condition of a pod at the current time. supported value: Pending / Running / Succeeded / Failed / Unknown'
+                      description: 'PodPhaseSelectors is a set of condition of a pod
+                        at the current time. supported value: Pending / Running /
+                        Succeeded / Failed / Unknown'
                       items:
                         type: string
                       type: array
@@ -662,11 +822,14 @@ spec:
                         items:
                           type: string
                         type: array
-                      description: Pods is a map of string keys and a set values that used to select pods. The key defines the namespace which pods belong, and the each values is a set of pod names.
+                      description: Pods is a map of string keys and a set values that
+                        used to select pods. The key defines the namespace which pods
+                        belong, and the each values is a set of pod names.
                       type: object
                   type: object
                 target:
-                  description: 'Target defines the specific jvm chaos target. Supported target: servlet;psql;jvm;jedis;http;dubbo;rocketmq;tars;mysql;druid;redisson;rabbitmq;mongodb'
+                  description: 'Target defines the specific jvm chaos target. Supported
+                    target: servlet;psql;jvm;jedis;http;dubbo;rocketmq;tars;mysql;druid;redisson;rabbitmq;mongodb'
                   enum:
                   - servlet
                   - psql
@@ -683,7 +846,13 @@ spec:
                   - mongodb
                   type: string
                 value:
-                  description: Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`, provide an integer of pods to do chaos action. If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+                  description: Value is required when the mode is set to `FixedPodMode`
+                    / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
+                    provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
+                    provide a number from 0-100 to specify the percent of pods the
+                    server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                    a number from 0-100 to specify the max percent of pods to do chaos
+                    action
                   type: string
               required:
               - action
@@ -701,34 +870,59 @@ spec:
                   description: FailKernRequest defines the request of kernel injection
                   properties:
                     callchain:
-                      description: 'Callchain indicate a special call chain, such as:     ext4_mount       -> mount_subtree          -> ...             -> should_failslab With an optional set of predicates and an optional set of parameters, which used with predicates. You can read call chan and predicate examples from https://github.com/chaos-mesh/bpfki/tree/develop/examples to learn more. If no special call chain, just keep Callchain empty, which means it will fail at any call chain with slab alloc (eg: kmalloc).'
+                      description: 'Callchain indicate a special call chain, such
+                        as:     ext4_mount       -> mount_subtree          -> ...             ->
+                        should_failslab With an optional set of predicates and an
+                        optional set of parameters, which used with predicates. You
+                        can read call chan and predicate examples from https://github.com/chaos-mesh/bpfki/tree/develop/examples
+                        to learn more. If no special call chain, just keep Callchain
+                        empty, which means it will fail at any call chain with slab
+                        alloc (eg: kmalloc).'
                       items:
-                        description: Frame defines the function signature and predicate in function's body
+                        description: Frame defines the function signature and predicate
+                          in function's body
                         properties:
                           funcname:
-                            description: Funcname can be find from kernel source or `/proc/kallsyms`, such as `ext4_mount`
+                            description: Funcname can be find from kernel source or
+                              `/proc/kallsyms`, such as `ext4_mount`
                             type: string
                           parameters:
-                            description: Parameters is used with predicate, for example, if you want to inject slab error in `d_alloc_parallel(struct dentry *parent, const struct qstr *name)` with a special name `bananas`, you need to set it to `struct dentry *parent, const struct qstr *name` otherwise omit it.
+                            description: Parameters is used with predicate, for example,
+                              if you want to inject slab error in `d_alloc_parallel(struct
+                              dentry *parent, const struct qstr *name)` with a special
+                              name `bananas`, you need to set it to `struct dentry
+                              *parent, const struct qstr *name` otherwise omit it.
                             type: string
                           predicate:
-                            description: Predicate will access the arguments of this Frame, example with Parameters's, you can set it to `STRNCMP(name->name, "bananas", 8)` to make inject only with it, or omit it to inject for all d_alloc_parallel call chain.
+                            description: Predicate will access the arguments of this
+                              Frame, example with Parameters's, you can set it to
+                              `STRNCMP(name->name, "bananas", 8)` to make inject only
+                              with it, or omit it to inject for all d_alloc_parallel
+                              call chain.
                             type: string
                         type: object
                       type: array
                     failtype:
-                      description: 'FailType indicates what to fail, can be set to ''0'' / ''1'' / ''2'' If `0`, indicates slab to fail (should_failslab) If `1`, indicates alloc_page to fail (should_fail_alloc_page) If `2`, indicates bio to fail (should_fail_bio) You can read:   1. https://www.kernel.org/doc/html/latest/fault-injection/fault-injection.html   2. http://github.com/iovisor/bcc/blob/master/tools/inject_example.txt to learn more'
+                      description: 'FailType indicates what to fail, can be set to
+                        ''0'' / ''1'' / ''2'' If `0`, indicates slab to fail (should_failslab)
+                        If `1`, indicates alloc_page to fail (should_fail_alloc_page)
+                        If `2`, indicates bio to fail (should_fail_bio) You can read:   1.
+                        https://www.kernel.org/doc/html/latest/fault-injection/fault-injection.html   2.
+                        http://github.com/iovisor/bcc/blob/master/tools/inject_example.txt
+                        to learn more'
                       format: int32
                       maximum: 2
                       minimum: 0
                       type: integer
                     headers:
-                      description: 'Headers indicates the appropriate kernel headers you need. Eg: "linux/mmzone.h", "linux/blkdev.h" and so on'
+                      description: 'Headers indicates the appropriate kernel headers
+                        you need. Eg: "linux/mmzone.h", "linux/blkdev.h" and so on'
                       items:
                         type: string
                       type: array
                     probability:
-                      description: Probability indicates the fails with probability. If you want 1%, please set this field with 1.
+                      description: Probability indicates the fails with probability.
+                        If you want 1%, please set this field with 1.
                       format: int32
                       maximum: 100
                       minimum: 0
@@ -742,7 +936,8 @@ spec:
                   - failtype
                   type: object
                 mode:
-                  description: 'Mode defines the mode to run chaos action. Supported mode: one / all / fixed / fixed-percent / random-max-percent'
+                  description: 'Mode defines the mode to run chaos action. Supported
+                    mode: one / all / fixed / fixed-percent / random-max-percent'
                   enum:
                   - one
                   - all
@@ -751,26 +946,39 @@ spec:
                   - random-max-percent
                   type: string
                 selector:
-                  description: Selector is used to select pods that are used to inject chaos action.
+                  description: Selector is used to select pods that are used to inject
+                    chaos action.
                   properties:
                     annotationSelectors:
                       additionalProperties:
                         type: string
-                      description: Map of string keys and values that can be used to select objects. A selector based on annotations.
+                      description: Map of string keys and values that can be used
+                        to select objects. A selector based on annotations.
                       type: object
                     expressionSelectors:
-                      description: a slice of label selector expressions that can be used to select objects. A list of selectors based on set-based label expressions.
+                      description: a slice of label selector expressions that can
+                        be used to select objects. A list of selectors based on set-based
+                        label expressions.
                       items:
-                        description: A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.
+                        description: A label selector requirement is a selector that
+                          contains values, a key, and an operator that relates the
+                          key and values.
                         properties:
                           key:
-                            description: key is the label key that the selector applies to.
+                            description: key is the label key that the selector applies
+                              to.
                             type: string
                           operator:
-                            description: operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+                            description: operator represents a key's relationship
+                              to a set of values. Valid operators are In, NotIn, Exists
+                              and DoesNotExist.
                             type: string
                           values:
-                            description: values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+                            description: values is an array of string values. If the
+                              operator is In or NotIn, the values array must be non-empty.
+                              If the operator is Exists or DoesNotExist, the values
+                              array must be empty. This array is replaced during a
+                              strategic merge patch.
                             items:
                               type: string
                             type: array
@@ -782,30 +990,38 @@ spec:
                     fieldSelectors:
                       additionalProperties:
                         type: string
-                      description: Map of string keys and values that can be used to select objects. A selector based on fields.
+                      description: Map of string keys and values that can be used
+                        to select objects. A selector based on fields.
                       type: object
                     labelSelectors:
                       additionalProperties:
                         type: string
-                      description: Map of string keys and values that can be used to select objects. A selector based on labels.
+                      description: Map of string keys and values that can be used
+                        to select objects. A selector based on labels.
                       type: object
                     namespaces:
-                      description: Namespaces is a set of namespace to which objects belong.
+                      description: Namespaces is a set of namespace to which objects
+                        belong.
                       items:
                         type: string
                       type: array
                     nodeSelectors:
                       additionalProperties:
                         type: string
-                      description: Map of string keys and values that can be used to select nodes. Selector which must match a node's labels, and objects must belong to these selected nodes.
+                      description: Map of string keys and values that can be used
+                        to select nodes. Selector which must match a node's labels,
+                        and objects must belong to these selected nodes.
                       type: object
                     nodes:
-                      description: Nodes is a set of node name and objects must belong to these nodes.
+                      description: Nodes is a set of node name and objects must belong
+                        to these nodes.
                       items:
                         type: string
                       type: array
                     podPhaseSelectors:
-                      description: 'PodPhaseSelectors is a set of condition of a pod at the current time. supported value: Pending / Running / Succeeded / Failed / Unknown'
+                      description: 'PodPhaseSelectors is a set of condition of a pod
+                        at the current time. supported value: Pending / Running /
+                        Succeeded / Failed / Unknown'
                       items:
                         type: string
                       type: array
@@ -814,11 +1030,19 @@ spec:
                         items:
                           type: string
                         type: array
-                      description: Pods is a map of string keys and a set values that used to select pods. The key defines the namespace which pods belong, and the each values is a set of pod names.
+                      description: Pods is a map of string keys and a set values that
+                        used to select pods. The key defines the namespace which pods
+                        belong, and the each values is a set of pod names.
                       type: object
                   type: object
                 value:
-                  description: Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`, provide an integer of pods to do chaos action. If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+                  description: Value is required when the mode is set to `FixedPodMode`
+                    / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
+                    provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
+                    provide a number from 0-100 to specify the percent of pods the
+                    server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                    a number from 0-100 to specify the max percent of pods to do chaos
+                    action
                   type: string
               required:
               - failKernRequest
@@ -829,7 +1053,9 @@ spec:
               description: NetworkChaosSpec defines the desired state of NetworkChaos
               properties:
                 action:
-                  description: 'Action defines the specific network chaos action. Supported action: partition, netem, delay, loss, duplicate, corrupt Default action: delay'
+                  description: 'Action defines the specific network chaos action.
+                    Supported action: partition, netem, delay, loss, duplicate, corrupt
+                    Default action: delay'
                   enum:
                   - netem
                   - delay
@@ -840,30 +1066,40 @@ spec:
                   - bandwidth
                   type: string
                 bandwidth:
-                  description: Bandwidth represents the detail about bandwidth control action
+                  description: Bandwidth represents the detail about bandwidth control
+                    action
                   properties:
                     buffer:
-                      description: Buffer is the maximum amount of bytes that tokens can be available for instantaneously.
+                      description: Buffer is the maximum amount of bytes that tokens
+                        can be available for instantaneously.
                       format: int32
                       minimum: 1
                       type: integer
                     limit:
-                      description: Limit is the number of bytes that can be queued waiting for tokens to become available.
+                      description: Limit is the number of bytes that can be queued
+                        waiting for tokens to become available.
                       format: int32
                       minimum: 1
                       type: integer
                     minburst:
-                      description: Minburst specifies the size of the peakrate bucket. For perfect accuracy, should be set to the MTU of the interface.  If a peakrate is needed, but some burstiness is acceptable, this size can be raised. A 3000 byte minburst allows around 3mbit/s of peakrate, given 1000 byte packets.
+                      description: Minburst specifies the size of the peakrate bucket.
+                        For perfect accuracy, should be set to the MTU of the interface.  If
+                        a peakrate is needed, but some burstiness is acceptable, this
+                        size can be raised. A 3000 byte minburst allows around 3mbit/s
+                        of peakrate, given 1000 byte packets.
                       format: int32
                       minimum: 0
                       type: integer
                     peakrate:
-                      description: Peakrate is the maximum depletion rate of the bucket. The peakrate does not need to be set, it is only necessary if perfect millisecond timescale shaping is required.
+                      description: Peakrate is the maximum depletion rate of the bucket.
+                        The peakrate does not need to be set, it is only necessary
+                        if perfect millisecond timescale shaping is required.
                       format: int64
                       minimum: 0
                       type: integer
                     rate:
-                      description: Rate is the speed knob. Allows bps, kbps, mbps, gbps, tbps unit. bps means bytes per second.
+                      description: Rate is the speed knob. Allows bps, kbps, mbps,
+                        gbps, tbps unit. bps means bytes per second.
                       type: string
                   required:
                   - buffer
@@ -908,7 +1144,8 @@ spec:
                   - latency
                   type: object
                 direction:
-                  description: Direction represents the direction, this applies on netem and network partition action
+                  description: Direction represents the direction, this applies on
+                    netem and network partition action
                   enum:
                   - to
                   - from
@@ -930,7 +1167,8 @@ spec:
                   description: Duration represents the duration of the chaos action
                   type: string
                 externalTargets:
-                  description: ExternalTargets represents network targets outside k8s
+                  description: ExternalTargets represents network targets outside
+                    k8s
                   items:
                     type: string
                   type: array
@@ -946,7 +1184,8 @@ spec:
                   - loss
                   type: object
                 mode:
-                  description: 'Mode defines the mode to run chaos action. Supported mode: one / all / fixed / fixed-percent / random-max-percent'
+                  description: 'Mode defines the mode to run chaos action. Supported
+                    mode: one / all / fixed / fixed-percent / random-max-percent'
                   enum:
                   - one
                   - all
@@ -955,26 +1194,39 @@ spec:
                   - random-max-percent
                   type: string
                 selector:
-                  description: Selector is used to select pods that are used to inject chaos action.
+                  description: Selector is used to select pods that are used to inject
+                    chaos action.
                   properties:
                     annotationSelectors:
                       additionalProperties:
                         type: string
-                      description: Map of string keys and values that can be used to select objects. A selector based on annotations.
+                      description: Map of string keys and values that can be used
+                        to select objects. A selector based on annotations.
                       type: object
                     expressionSelectors:
-                      description: a slice of label selector expressions that can be used to select objects. A list of selectors based on set-based label expressions.
+                      description: a slice of label selector expressions that can
+                        be used to select objects. A list of selectors based on set-based
+                        label expressions.
                       items:
-                        description: A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.
+                        description: A label selector requirement is a selector that
+                          contains values, a key, and an operator that relates the
+                          key and values.
                         properties:
                           key:
-                            description: key is the label key that the selector applies to.
+                            description: key is the label key that the selector applies
+                              to.
                             type: string
                           operator:
-                            description: operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+                            description: operator represents a key's relationship
+                              to a set of values. Valid operators are In, NotIn, Exists
+                              and DoesNotExist.
                             type: string
                           values:
-                            description: values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+                            description: values is an array of string values. If the
+                              operator is In or NotIn, the values array must be non-empty.
+                              If the operator is Exists or DoesNotExist, the values
+                              array must be empty. This array is replaced during a
+                              strategic merge patch.
                             items:
                               type: string
                             type: array
@@ -986,30 +1238,38 @@ spec:
                     fieldSelectors:
                       additionalProperties:
                         type: string
-                      description: Map of string keys and values that can be used to select objects. A selector based on fields.
+                      description: Map of string keys and values that can be used
+                        to select objects. A selector based on fields.
                       type: object
                     labelSelectors:
                       additionalProperties:
                         type: string
-                      description: Map of string keys and values that can be used to select objects. A selector based on labels.
+                      description: Map of string keys and values that can be used
+                        to select objects. A selector based on labels.
                       type: object
                     namespaces:
-                      description: Namespaces is a set of namespace to which objects belong.
+                      description: Namespaces is a set of namespace to which objects
+                        belong.
                       items:
                         type: string
                       type: array
                     nodeSelectors:
                       additionalProperties:
                         type: string
-                      description: Map of string keys and values that can be used to select nodes. Selector which must match a node's labels, and objects must belong to these selected nodes.
+                      description: Map of string keys and values that can be used
+                        to select nodes. Selector which must match a node's labels,
+                        and objects must belong to these selected nodes.
                       type: object
                     nodes:
-                      description: Nodes is a set of node name and objects must belong to these nodes.
+                      description: Nodes is a set of node name and objects must belong
+                        to these nodes.
                       items:
                         type: string
                       type: array
                     podPhaseSelectors:
-                      description: 'PodPhaseSelectors is a set of condition of a pod at the current time. supported value: Pending / Running / Succeeded / Failed / Unknown'
+                      description: 'PodPhaseSelectors is a set of condition of a pod
+                        at the current time. supported value: Pending / Running /
+                        Succeeded / Failed / Unknown'
                       items:
                         type: string
                       type: array
@@ -1018,14 +1278,18 @@ spec:
                         items:
                           type: string
                         type: array
-                      description: Pods is a map of string keys and a set values that used to select pods. The key defines the namespace which pods belong, and the each values is a set of pod names.
+                      description: Pods is a map of string keys and a set values that
+                        used to select pods. The key defines the namespace which pods
+                        belong, and the each values is a set of pod names.
                       type: object
                   type: object
                 target:
-                  description: Target represents network target, this applies on netem and network partition action
+                  description: Target represents network target, this applies on netem
+                    and network partition action
                   properties:
                     mode:
-                      description: 'Mode defines the mode to run chaos action. Supported mode: one / all / fixed / fixed-percent / random-max-percent'
+                      description: 'Mode defines the mode to run chaos action. Supported
+                        mode: one / all / fixed / fixed-percent / random-max-percent'
                       enum:
                       - one
                       - all
@@ -1034,26 +1298,39 @@ spec:
                       - random-max-percent
                       type: string
                     selector:
-                      description: Selector is used to select pods that are used to inject chaos action.
+                      description: Selector is used to select pods that are used to
+                        inject chaos action.
                       properties:
                         annotationSelectors:
                           additionalProperties:
                             type: string
-                          description: Map of string keys and values that can be used to select objects. A selector based on annotations.
+                          description: Map of string keys and values that can be used
+                            to select objects. A selector based on annotations.
                           type: object
                         expressionSelectors:
-                          description: a slice of label selector expressions that can be used to select objects. A list of selectors based on set-based label expressions.
+                          description: a slice of label selector expressions that
+                            can be used to select objects. A list of selectors based
+                            on set-based label expressions.
                           items:
-                            description: A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.
+                            description: A label selector requirement is a selector
+                              that contains values, a key, and an operator that relates
+                              the key and values.
                             properties:
                               key:
-                                description: key is the label key that the selector applies to.
+                                description: key is the label key that the selector
+                                  applies to.
                                 type: string
                               operator:
-                                description: operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+                                description: operator represents a key's relationship
+                                  to a set of values. Valid operators are In, NotIn,
+                                  Exists and DoesNotExist.
                                 type: string
                               values:
-                                description: values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+                                description: values is an array of string values.
+                                  If the operator is In or NotIn, the values array
+                                  must be non-empty. If the operator is Exists or
+                                  DoesNotExist, the values array must be empty. This
+                                  array is replaced during a strategic merge patch.
                                 items:
                                   type: string
                                 type: array
@@ -1065,30 +1342,38 @@ spec:
                         fieldSelectors:
                           additionalProperties:
                             type: string
-                          description: Map of string keys and values that can be used to select objects. A selector based on fields.
+                          description: Map of string keys and values that can be used
+                            to select objects. A selector based on fields.
                           type: object
                         labelSelectors:
                           additionalProperties:
                             type: string
-                          description: Map of string keys and values that can be used to select objects. A selector based on labels.
+                          description: Map of string keys and values that can be used
+                            to select objects. A selector based on labels.
                           type: object
                         namespaces:
-                          description: Namespaces is a set of namespace to which objects belong.
+                          description: Namespaces is a set of namespace to which objects
+                            belong.
                           items:
                             type: string
                           type: array
                         nodeSelectors:
                           additionalProperties:
                             type: string
-                          description: Map of string keys and values that can be used to select nodes. Selector which must match a node's labels, and objects must belong to these selected nodes.
+                          description: Map of string keys and values that can be used
+                            to select nodes. Selector which must match a node's labels,
+                            and objects must belong to these selected nodes.
                           type: object
                         nodes:
-                          description: Nodes is a set of node name and objects must belong to these nodes.
+                          description: Nodes is a set of node name and objects must
+                            belong to these nodes.
                           items:
                             type: string
                           type: array
                         podPhaseSelectors:
-                          description: 'PodPhaseSelectors is a set of condition of a pod at the current time. supported value: Pending / Running / Succeeded / Failed / Unknown'
+                          description: 'PodPhaseSelectors is a set of condition of
+                            a pod at the current time. supported value: Pending /
+                            Running / Succeeded / Failed / Unknown'
                           items:
                             type: string
                           type: array
@@ -1097,18 +1382,33 @@ spec:
                             items:
                               type: string
                             type: array
-                          description: Pods is a map of string keys and a set values that used to select pods. The key defines the namespace which pods belong, and the each values is a set of pod names.
+                          description: Pods is a map of string keys and a set values
+                            that used to select pods. The key defines the namespace
+                            which pods belong, and the each values is a set of pod
+                            names.
                           type: object
                       type: object
                     value:
-                      description: Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`, provide an integer of pods to do chaos action. If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+                      description: Value is required when the mode is set to `FixedPodMode`
+                        / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
+                        provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
+                        provide a number from 0-100 to specify the percent of pods
+                        the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                        a number from 0-100 to specify the max percent of pods to
+                        do chaos action
                       type: string
                   required:
                   - mode
                   - selector
                   type: object
                 value:
-                  description: Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`, provide an integer of pods to do chaos action. If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+                  description: Value is required when the mode is set to `FixedPodMode`
+                    / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
+                    provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
+                    provide a number from 0-100 to specify the percent of pods the
+                    server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                    a number from 0-100 to specify the max percent of pods to do chaos
+                    action
                   type: string
               required:
               - action
@@ -1116,30 +1416,43 @@ spec:
               - selector
               type: object
             pod_chaos:
-              description: PodChaosSpec defines the attributes that a user creates on a chaos experiment about pods.
+              description: PodChaosSpec defines the attributes that a user creates
+                on a chaos experiment about pods.
               properties:
                 action:
-                  description: 'Action defines the specific pod chaos action. Supported action: pod-kill / pod-failure / container-kill Default action: pod-kill'
+                  description: 'Action defines the specific pod chaos action. Supported
+                    action: pod-kill / pod-failure / container-kill Default action:
+                    pod-kill'
                   enum:
                   - pod-kill
                   - pod-failure
                   - container-kill
                   type: string
                 containerNames:
-                  description: ContainerName indicates the name of affected container. If not set, all containers will be injected
+                  description: ContainerName indicates the name of affected container.
+                    If not set, all containers will be injected
                   items:
                     type: string
                   type: array
                 duration:
-                  description: Duration represents the duration of the chaos action. It is required when the action is `PodFailureAction`. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as "300ms", "-1.5h" or "2h45m". Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+                  description: Duration represents the duration of the chaos action.
+                    It is required when the action is `PodFailureAction`. A duration
+                    string is a possibly signed sequence of decimal numbers, each
+                    with optional fraction and a unit suffix, such as "300ms", "-1.5h"
+                    or "2h45m". Valid time units are "ns", "us" (or "µs"), "ms", "s",
+                    "m", "h".
                   type: string
                 gracePeriod:
-                  description: GracePeriod is used in pod-kill action. It represents the duration in seconds before the pod should be deleted. Value must be non-negative integer. The default value is zero that indicates delete immediately.
+                  description: GracePeriod is used in pod-kill action. It represents
+                    the duration in seconds before the pod should be deleted. Value
+                    must be non-negative integer. The default value is zero that indicates
+                    delete immediately.
                   format: int64
                   minimum: 0
                   type: integer
                 mode:
-                  description: 'Mode defines the mode to run chaos action. Supported mode: one / all / fixed / fixed-percent / random-max-percent'
+                  description: 'Mode defines the mode to run chaos action. Supported
+                    mode: one / all / fixed / fixed-percent / random-max-percent'
                   enum:
                   - one
                   - all
@@ -1148,26 +1461,39 @@ spec:
                   - random-max-percent
                   type: string
                 selector:
-                  description: Selector is used to select pods that are used to inject chaos action.
+                  description: Selector is used to select pods that are used to inject
+                    chaos action.
                   properties:
                     annotationSelectors:
                       additionalProperties:
                         type: string
-                      description: Map of string keys and values that can be used to select objects. A selector based on annotations.
+                      description: Map of string keys and values that can be used
+                        to select objects. A selector based on annotations.
                       type: object
                     expressionSelectors:
-                      description: a slice of label selector expressions that can be used to select objects. A list of selectors based on set-based label expressions.
+                      description: a slice of label selector expressions that can
+                        be used to select objects. A list of selectors based on set-based
+                        label expressions.
                       items:
-                        description: A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.
+                        description: A label selector requirement is a selector that
+                          contains values, a key, and an operator that relates the
+                          key and values.
                         properties:
                           key:
-                            description: key is the label key that the selector applies to.
+                            description: key is the label key that the selector applies
+                              to.
                             type: string
                           operator:
-                            description: operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+                            description: operator represents a key's relationship
+                              to a set of values. Valid operators are In, NotIn, Exists
+                              and DoesNotExist.
                             type: string
                           values:
-                            description: values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+                            description: values is an array of string values. If the
+                              operator is In or NotIn, the values array must be non-empty.
+                              If the operator is Exists or DoesNotExist, the values
+                              array must be empty. This array is replaced during a
+                              strategic merge patch.
                             items:
                               type: string
                             type: array
@@ -1179,30 +1505,38 @@ spec:
                     fieldSelectors:
                       additionalProperties:
                         type: string
-                      description: Map of string keys and values that can be used to select objects. A selector based on fields.
+                      description: Map of string keys and values that can be used
+                        to select objects. A selector based on fields.
                       type: object
                     labelSelectors:
                       additionalProperties:
                         type: string
-                      description: Map of string keys and values that can be used to select objects. A selector based on labels.
+                      description: Map of string keys and values that can be used
+                        to select objects. A selector based on labels.
                       type: object
                     namespaces:
-                      description: Namespaces is a set of namespace to which objects belong.
+                      description: Namespaces is a set of namespace to which objects
+                        belong.
                       items:
                         type: string
                       type: array
                     nodeSelectors:
                       additionalProperties:
                         type: string
-                      description: Map of string keys and values that can be used to select nodes. Selector which must match a node's labels, and objects must belong to these selected nodes.
+                      description: Map of string keys and values that can be used
+                        to select nodes. Selector which must match a node's labels,
+                        and objects must belong to these selected nodes.
                       type: object
                     nodes:
-                      description: Nodes is a set of node name and objects must belong to these nodes.
+                      description: Nodes is a set of node name and objects must belong
+                        to these nodes.
                       items:
                         type: string
                       type: array
                     podPhaseSelectors:
-                      description: 'PodPhaseSelectors is a set of condition of a pod at the current time. supported value: Pending / Running / Succeeded / Failed / Unknown'
+                      description: 'PodPhaseSelectors is a set of condition of a pod
+                        at the current time. supported value: Pending / Running /
+                        Succeeded / Failed / Unknown'
                       items:
                         type: string
                       type: array
@@ -1211,11 +1545,19 @@ spec:
                         items:
                           type: string
                         type: array
-                      description: Pods is a map of string keys and a set values that used to select pods. The key defines the namespace which pods belong, and the each values is a set of pod names.
+                      description: Pods is a map of string keys and a set values that
+                        used to select pods. The key defines the namespace which pods
+                        belong, and the each values is a set of pod names.
                       type: object
                   type: object
                 value:
-                  description: Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`, provide an integer of pods to do chaos action. If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+                  description: Value is required when the mode is set to `FixedPodMode`
+                    / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
+                    provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
+                    provide a number from 0-100 to specify the percent of pods the
+                    server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                    a number from 0-100 to specify the max percent of pods to do chaos
+                    action
                   type: string
               required:
               - action
@@ -1233,7 +1575,8 @@ spec:
               description: StressChaosSpec defines the desired state of StressChaos
               properties:
                 containerNames:
-                  description: ContainerName indicates the name of affected container. If not set, all containers will be injected
+                  description: ContainerName indicates the name of affected container.
+                    If not set, all containers will be injected
                   items:
                     type: string
                   type: array
@@ -1241,7 +1584,8 @@ spec:
                   description: Duration represents the duration of the chaos action
                   type: string
                 mode:
-                  description: 'Mode defines the mode to run chaos action. Supported mode: one / all / fixed / fixed-percent / random-max-percent'
+                  description: 'Mode defines the mode to run chaos action. Supported
+                    mode: one / all / fixed / fixed-percent / random-max-percent'
                   enum:
                   - one
                   - all
@@ -1250,26 +1594,39 @@ spec:
                   - random-max-percent
                   type: string
                 selector:
-                  description: Selector is used to select pods that are used to inject chaos action.
+                  description: Selector is used to select pods that are used to inject
+                    chaos action.
                   properties:
                     annotationSelectors:
                       additionalProperties:
                         type: string
-                      description: Map of string keys and values that can be used to select objects. A selector based on annotations.
+                      description: Map of string keys and values that can be used
+                        to select objects. A selector based on annotations.
                       type: object
                     expressionSelectors:
-                      description: a slice of label selector expressions that can be used to select objects. A list of selectors based on set-based label expressions.
+                      description: a slice of label selector expressions that can
+                        be used to select objects. A list of selectors based on set-based
+                        label expressions.
                       items:
-                        description: A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.
+                        description: A label selector requirement is a selector that
+                          contains values, a key, and an operator that relates the
+                          key and values.
                         properties:
                           key:
-                            description: key is the label key that the selector applies to.
+                            description: key is the label key that the selector applies
+                              to.
                             type: string
                           operator:
-                            description: operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+                            description: operator represents a key's relationship
+                              to a set of values. Valid operators are In, NotIn, Exists
+                              and DoesNotExist.
                             type: string
                           values:
-                            description: values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+                            description: values is an array of string values. If the
+                              operator is In or NotIn, the values array must be non-empty.
+                              If the operator is Exists or DoesNotExist, the values
+                              array must be empty. This array is replaced during a
+                              strategic merge patch.
                             items:
                               type: string
                             type: array
@@ -1281,30 +1638,38 @@ spec:
                     fieldSelectors:
                       additionalProperties:
                         type: string
-                      description: Map of string keys and values that can be used to select objects. A selector based on fields.
+                      description: Map of string keys and values that can be used
+                        to select objects. A selector based on fields.
                       type: object
                     labelSelectors:
                       additionalProperties:
                         type: string
-                      description: Map of string keys and values that can be used to select objects. A selector based on labels.
+                      description: Map of string keys and values that can be used
+                        to select objects. A selector based on labels.
                       type: object
                     namespaces:
-                      description: Namespaces is a set of namespace to which objects belong.
+                      description: Namespaces is a set of namespace to which objects
+                        belong.
                       items:
                         type: string
                       type: array
                     nodeSelectors:
                       additionalProperties:
                         type: string
-                      description: Map of string keys and values that can be used to select nodes. Selector which must match a node's labels, and objects must belong to these selected nodes.
+                      description: Map of string keys and values that can be used
+                        to select nodes. Selector which must match a node's labels,
+                        and objects must belong to these selected nodes.
                       type: object
                     nodes:
-                      description: Nodes is a set of node name and objects must belong to these nodes.
+                      description: Nodes is a set of node name and objects must belong
+                        to these nodes.
                       items:
                         type: string
                       type: array
                     podPhaseSelectors:
-                      description: 'PodPhaseSelectors is a set of condition of a pod at the current time. supported value: Pending / Running / Succeeded / Failed / Unknown'
+                      description: 'PodPhaseSelectors is a set of condition of a pod
+                        at the current time. supported value: Pending / Running /
+                        Succeeded / Failed / Unknown'
                       items:
                         type: string
                       type: array
@@ -1313,20 +1678,34 @@ spec:
                         items:
                           type: string
                         type: array
-                      description: Pods is a map of string keys and a set values that used to select pods. The key defines the namespace which pods belong, and the each values is a set of pod names.
+                      description: Pods is a map of string keys and a set values that
+                        used to select pods. The key defines the namespace which pods
+                        belong, and the each values is a set of pod names.
                       type: object
                   type: object
                 stressngStressors:
-                  description: StressngStressors defines plenty of stressors just like `Stressors` except that it's an experimental feature and more powerful. You can define stressors in `stress-ng` (see also `man stress-ng`) dialect, however not all of the supported stressors are well tested. It maybe retired in later releases. You should always use `Stressors` to define the stressors and use this only when you want more stressors unsupported by `Stressors`. When both `StressngStressors` and `Stressors` are defined, `StressngStressors` wins.
+                  description: StressngStressors defines plenty of stressors just
+                    like `Stressors` except that it's an experimental feature and
+                    more powerful. You can define stressors in `stress-ng` (see also
+                    `man stress-ng`) dialect, however not all of the supported stressors
+                    are well tested. It maybe retired in later releases. You should
+                    always use `Stressors` to define the stressors and use this only
+                    when you want more stressors unsupported by `Stressors`. When
+                    both `StressngStressors` and `Stressors` are defined, `StressngStressors`
+                    wins.
                   type: string
                 stressors:
-                  description: Stressors defines plenty of stressors supported to stress system components out. You can use one or more of them to make up various kinds of stresses. At least one of the stressors should be specified.
+                  description: Stressors defines plenty of stressors supported to
+                    stress system components out. You can use one or more of them
+                    to make up various kinds of stresses. At least one of the stressors
+                    should be specified.
                   properties:
                     cpu:
                       description: CPUStressor stresses CPU out
                       properties:
                         load:
-                          description: Load specifies P percent loading per CPU worker. 0 is effectively a sleep (no load) and 100 is full loading.
+                          description: Load specifies P percent loading per CPU worker.
+                            0 is effectively a sleep (no load) and 100 is full loading.
                           type: integer
                         options:
                           description: extend stress-ng options
@@ -1348,7 +1727,10 @@ spec:
                             type: string
                           type: array
                         size:
-                          description: Size specifies N bytes consumed per vm worker, default is the total available memory. One can specify the size as % of total available memory or in units of B, KB/KiB, MB/MiB, GB/GiB, TB/TiB.
+                          description: Size specifies N bytes consumed per vm worker,
+                            default is the total available memory. One can specify
+                            the size as % of total available memory or in units of
+                            B, KB/KiB, MB/MiB, GB/GiB, TB/TiB.
                           type: string
                         workers:
                           description: Workers specifies N workers to apply the stressor.
@@ -1358,7 +1740,13 @@ spec:
                       type: object
                   type: object
                 value:
-                  description: Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`, provide an integer of pods to do chaos action. If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+                  description: Value is required when the mode is set to `FixedPodMode`
+                    / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
+                    provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
+                    provide a number from 0-100 to specify the percent of pods the
+                    server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                    a number from 0-100 to specify the max percent of pods to do chaos
+                    action
                   type: string
               required:
               - mode
@@ -1368,12 +1756,16 @@ spec:
               description: TimeChaosSpec defines the desired state of TimeChaos
               properties:
                 clockIds:
-                  description: ClockIds defines all affected clock id All available options are ["CLOCK_REALTIME","CLOCK_MONOTONIC","CLOCK_PROCESS_CPUTIME_ID","CLOCK_THREAD_CPUTIME_ID", "CLOCK_MONOTONIC_RAW","CLOCK_REALTIME_COARSE","CLOCK_MONOTONIC_COARSE","CLOCK_BOOTTIME","CLOCK_REALTIME_ALARM", "CLOCK_BOOTTIME_ALARM"] Default value is ["CLOCK_REALTIME"]
+                  description: ClockIds defines all affected clock id All available
+                    options are ["CLOCK_REALTIME","CLOCK_MONOTONIC","CLOCK_PROCESS_CPUTIME_ID","CLOCK_THREAD_CPUTIME_ID",
+                    "CLOCK_MONOTONIC_RAW","CLOCK_REALTIME_COARSE","CLOCK_MONOTONIC_COARSE","CLOCK_BOOTTIME","CLOCK_REALTIME_ALARM",
+                    "CLOCK_BOOTTIME_ALARM"] Default value is ["CLOCK_REALTIME"]
                   items:
                     type: string
                   type: array
                 containerNames:
-                  description: ContainerName indicates the name of affected container. If not set, all containers will be injected
+                  description: ContainerName indicates the name of affected container.
+                    If not set, all containers will be injected
                   items:
                     type: string
                   type: array
@@ -1381,7 +1773,8 @@ spec:
                   description: Duration represents the duration of the chaos action
                   type: string
                 mode:
-                  description: 'Mode defines the mode to run chaos action. Supported mode: one / all / fixed / fixed-percent / random-max-percent'
+                  description: 'Mode defines the mode to run chaos action. Supported
+                    mode: one / all / fixed / fixed-percent / random-max-percent'
                   enum:
                   - one
                   - all
@@ -1390,26 +1783,39 @@ spec:
                   - random-max-percent
                   type: string
                 selector:
-                  description: Selector is used to select pods that are used to inject chaos action.
+                  description: Selector is used to select pods that are used to inject
+                    chaos action.
                   properties:
                     annotationSelectors:
                       additionalProperties:
                         type: string
-                      description: Map of string keys and values that can be used to select objects. A selector based on annotations.
+                      description: Map of string keys and values that can be used
+                        to select objects. A selector based on annotations.
                       type: object
                     expressionSelectors:
-                      description: a slice of label selector expressions that can be used to select objects. A list of selectors based on set-based label expressions.
+                      description: a slice of label selector expressions that can
+                        be used to select objects. A list of selectors based on set-based
+                        label expressions.
                       items:
-                        description: A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.
+                        description: A label selector requirement is a selector that
+                          contains values, a key, and an operator that relates the
+                          key and values.
                         properties:
                           key:
-                            description: key is the label key that the selector applies to.
+                            description: key is the label key that the selector applies
+                              to.
                             type: string
                           operator:
-                            description: operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+                            description: operator represents a key's relationship
+                              to a set of values. Valid operators are In, NotIn, Exists
+                              and DoesNotExist.
                             type: string
                           values:
-                            description: values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+                            description: values is an array of string values. If the
+                              operator is In or NotIn, the values array must be non-empty.
+                              If the operator is Exists or DoesNotExist, the values
+                              array must be empty. This array is replaced during a
+                              strategic merge patch.
                             items:
                               type: string
                             type: array
@@ -1421,30 +1827,38 @@ spec:
                     fieldSelectors:
                       additionalProperties:
                         type: string
-                      description: Map of string keys and values that can be used to select objects. A selector based on fields.
+                      description: Map of string keys and values that can be used
+                        to select objects. A selector based on fields.
                       type: object
                     labelSelectors:
                       additionalProperties:
                         type: string
-                      description: Map of string keys and values that can be used to select objects. A selector based on labels.
+                      description: Map of string keys and values that can be used
+                        to select objects. A selector based on labels.
                       type: object
                     namespaces:
-                      description: Namespaces is a set of namespace to which objects belong.
+                      description: Namespaces is a set of namespace to which objects
+                        belong.
                       items:
                         type: string
                       type: array
                     nodeSelectors:
                       additionalProperties:
                         type: string
-                      description: Map of string keys and values that can be used to select nodes. Selector which must match a node's labels, and objects must belong to these selected nodes.
+                      description: Map of string keys and values that can be used
+                        to select nodes. Selector which must match a node's labels,
+                        and objects must belong to these selected nodes.
                       type: object
                     nodes:
-                      description: Nodes is a set of node name and objects must belong to these nodes.
+                      description: Nodes is a set of node name and objects must belong
+                        to these nodes.
                       items:
                         type: string
                       type: array
                     podPhaseSelectors:
-                      description: 'PodPhaseSelectors is a set of condition of a pod at the current time. supported value: Pending / Running / Succeeded / Failed / Unknown'
+                      description: 'PodPhaseSelectors is a set of condition of a pod
+                        at the current time. supported value: Pending / Running /
+                        Succeeded / Failed / Unknown'
                       items:
                         type: string
                       type: array
@@ -1453,14 +1867,25 @@ spec:
                         items:
                           type: string
                         type: array
-                      description: Pods is a map of string keys and a set values that used to select pods. The key defines the namespace which pods belong, and the each values is a set of pod names.
+                      description: Pods is a map of string keys and a set values that
+                        used to select pods. The key defines the namespace which pods
+                        belong, and the each values is a set of pod names.
                       type: object
                   type: object
                 timeOffset:
-                  description: TimeOffset defines the delta time of injected program. It's a possibly signed sequence of decimal numbers, such as "300ms", "-1.5h" or "2h45m". Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+                  description: TimeOffset defines the delta time of injected program.
+                    It's a possibly signed sequence of decimal numbers, such as "300ms",
+                    "-1.5h" or "2h45m". Valid time units are "ns", "us" (or "µs"),
+                    "ms", "s", "m", "h".
                   type: string
                 value:
-                  description: Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`, provide an integer of pods to do chaos action. If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+                  description: Value is required when the mode is set to `FixedPodMode`
+                    / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
+                    provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
+                    provide a number from 0-100 to specify the percent of pods the
+                    server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                    a number from 0-100 to specify the max percent of pods to do chaos
+                    action
                   type: string
               required:
               - mode
@@ -1468,7 +1893,8 @@ spec:
               - timeOffset
               type: object
             type:
-              description: 'TODO: use a custom type, as `TemplateType` contains other possible values'
+              description: 'TODO: use a custom type, as `TemplateType` contains other
+                possible values'
               type: string
           required:
           - schedule
@@ -1479,13 +1905,24 @@ spec:
           properties:
             active:
               items:
-                description: ObjectReference contains enough information to let you inspect or modify the referred object.
+                description: ObjectReference contains enough information to let you
+                  inspect or modify the referred object.
                 properties:
                   apiVersion:
                     description: API version of the referent.
                     type: string
                   fieldPath:
-                    description: 'If referring to a piece of an object instead of an entire object, this string should contain a valid JSON/Go field access statement, such as desiredState.manifest.containers[2]. For example, if the object reference is to a container within a pod, this would take on a value like: "spec.containers{name}" (where "name" refers to the name of the container that triggered the event) or if no container name is specified "spec.containers[2]" (container with index 2 in this pod). This syntax is chosen only to have some well-defined way of referencing a part of an object. TODO: this design is not final and this field is subject to change in the future.'
+                    description: 'If referring to a piece of an object instead of
+                      an entire object, this string should contain a valid JSON/Go
+                      field access statement, such as desiredState.manifest.containers[2].
+                      For example, if the object reference is to a container within
+                      a pod, this would take on a value like: "spec.containers{name}"
+                      (where "name" refers to the name of the container that triggered
+                      the event) or if no container name is specified "spec.containers[2]"
+                      (container with index 2 in this pod). This syntax is chosen
+                      only to have some well-defined way of referencing a part of
+                      an object. TODO: this design is not final and this field is
+                      subject to change in the future.'
                     type: string
                   kind:
                     description: 'Kind of the referent. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
@@ -1497,7 +1934,8 @@ spec:
                     description: 'Namespace of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/'
                     type: string
                   resourceVersion:
-                    description: 'Specific resourceVersion to which this reference is made, if any. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#concurrency-control-and-consistency'
+                    description: 'Specific resourceVersion to which this reference
+                      is made, if any. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#concurrency-control-and-consistency'
                     type: string
                   uid:
                     description: 'UID of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#uids'
