@@ -76,6 +76,7 @@ require (
 	golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543
 	google.golang.org/api v0.13.0
 	google.golang.org/grpc v1.27.0
+	google.golang.org/protobuf v1.23.0
 	honnef.co/go/tools v0.0.1-2020.1.3 // indirect
 	k8s.io/api v0.17.0
 	k8s.io/apiextensions-apiserver v0.17.0
@@ -95,7 +96,6 @@ require (
 
 replace (
 	github.com/chaos-mesh/chaos-mesh/api/v1alpha1 => ./api/v1alpha1
-	google.golang.org/grpc => google.golang.org/grpc v1.26.0
 	k8s.io/api => k8s.io/api v0.17.0
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.17.0
 	k8s.io/apimachinery => k8s.io/apimachinery v0.17.1-beta.0
