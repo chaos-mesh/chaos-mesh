@@ -400,9 +400,9 @@ var _ = ginkgo.Describe("[Basic]", func() {
 		})
 
 		// TODO: unstable test
-		// ginkgo.It("[Memory]", func() {
-		// 	stresstestcases.TestcaseMemoryStressInjectionOnceThenRecover(ns, cli, stressPeers, ports, c)
-		// })
+		ginkgo.It("[Memory]", func() {
+			stresstestcases.TestcaseMemoryStressInjectionOnceThenRecover(ns, cli, stressPeers, ports, c)
+		})
 
 		ginkgo.JustAfterEach(func() {
 			for _, cancel := range pfCancels {
