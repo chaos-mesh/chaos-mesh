@@ -64,8 +64,8 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 
 	source := networkchaos.Namespace + "/" + networkchaos.Name
 	m := podnetworkchaosmanager.WithInit(source, impl.Log, impl.Client, types.NamespacedName{
-		pod.Namespace,
-		pod.Name,
+		Namespace: pod.Namespace,
+		Name:      pod.Name,
 	})
 
 	if record.SelectorKey == "." {
@@ -113,8 +113,6 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		impl.Log.Info("unknown selector key", "record", record)
 		return v1alpha1.NotInjected, nil
 	}
-
-	return v1alpha1.Injected, nil
 }
 
 func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
@@ -138,8 +136,8 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 
 	source := networkchaos.Namespace + "/" + networkchaos.Name
 	m := podnetworkchaosmanager.WithInit(source, impl.Log, impl.Client, types.NamespacedName{
-		pod.Namespace,
-		pod.Name,
+		Namespace: pod.Namespace,
+		Name:      pod.Name,
 	})
 	err = m.Commit(ctx)
 	if err != nil {

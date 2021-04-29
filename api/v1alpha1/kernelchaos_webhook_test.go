@@ -80,24 +80,6 @@ var _ = Describe("kernelchaos_webhook", func() {
 					expect: "",
 				},
 				{
-					name: "only define the Scheduler",
-					chaos: KernelChaos{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: metav1.NamespaceDefault,
-							Name:      "foo4",
-						},
-						Spec: KernelChaosSpec{
-							Scheduler: &SchedulerSpec{
-								Cron: "@every 10m",
-							},
-						},
-					},
-					execute: func(chaos *KernelChaos) error {
-						return chaos.ValidateCreate()
-					},
-					expect: "error",
-				},
-				{
 					name: "only define the Duration",
 					chaos: KernelChaos{
 						ObjectMeta: metav1.ObjectMeta{
@@ -111,7 +93,7 @@ var _ = Describe("kernelchaos_webhook", func() {
 					execute: func(chaos *KernelChaos) error {
 						return chaos.ValidateCreate()
 					},
-					expect: "error",
+					expect: "",
 				},
 			}
 

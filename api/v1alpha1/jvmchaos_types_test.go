@@ -15,7 +15,6 @@ package v1alpha1
 
 import (
 	"context"
-	"time"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -56,7 +55,11 @@ var _ = Describe("JVMChaos", func() {
 				Spec: JVMChaosSpec{
 					Action: JVMDelayAction,
 					Target: SERVLET,
-					Mode:   OnePodMode,
+					ContainerSelector: ContainerSelector{
+						PodSelector: PodSelector{
+							Mode: OnePodMode,
+						},
+					},
 				},
 			}
 
@@ -70,20 +73,6 @@ var _ = Describe("JVMChaos", func() {
 			By("deleting the created object")
 			Expect(k8sClient.Delete(context.TODO(), created)).To(Succeed())
 			Expect(k8sClient.Get(context.TODO(), key, created)).ToNot(Succeed())
-		})
-
-		It("should set next start time successfully", func() {
-			jvmchaos := &JVMChaos{}
-			nTime := time.Now()
-			jvmchaos.SetNextStart(nTime)
-			Expect(jvmchaos.GetNextStart()).To(Equal(nTime))
-		})
-
-		It("should set recover time successfully", func() {
-			jvmchaos := &JVMChaos{}
-			nTime := time.Now()
-			jvmchaos.SetNextRecover(nTime)
-			Expect(jvmchaos.GetNextRecover()).To(Equal(nTime))
 		})
 	})
 })
