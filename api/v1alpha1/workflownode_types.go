@@ -53,10 +53,6 @@ type WorkflowNodeSpec struct {
 
 type WorkflowNodeStatus struct {
 
-	// ExpectedChildrenNum means the expected children to execute
-	// +optional
-	ExpectedChildrenNum *int `json:"expected_children_num,omitempty"`
-
 	// ChaosResource refs to the real chaos CR object.
 	// +optional
 	ChaosResource *corev1.TypedLocalObjectReference `json:"chaos_resource,omitempty"`

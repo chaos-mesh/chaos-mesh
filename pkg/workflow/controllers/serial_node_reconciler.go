@@ -80,12 +80,6 @@ func (it *SerialNodeReconciler) Reconcile(request reconcile.Request) (reconcile.
 			return err
 		}
 
-		// un-synced expected children
-		if nodeNeedUpdate.Status.ExpectedChildrenNum == nil || *nodeNeedUpdate.Status.ExpectedChildrenNum != len(nodeNeedUpdate.Spec.Tasks) {
-			expected := len(nodeNeedUpdate.Spec.Tasks)
-			nodeNeedUpdate.Status.ExpectedChildrenNum = &expected
-		}
-
 		activeChildren, finishedChildren, err := it.fetchChildrenNodes(ctx, nodeNeedUpdate)
 		if err != nil {
 			return err
@@ -111,7 +105,8 @@ func (it *SerialNodeReconciler) Reconcile(request reconcile.Request) (reconcile.
 			it.logger.Info("warning: serial node has more than 1 active children", "namespace", nodeNeedUpdate.Namespace, "name", nodeNeedUpdate.Name, "children", nodeNeedUpdate.Status.ActiveChildren)
 		}
 
-		if nodeNeedUpdate.Status.ExpectedChildrenNum != nil && len(finishedChildren) == *nodeNeedUpdate.Status.ExpectedChildrenNum {
+		// TODO: also check the consistent between spec in task and the spec in child node
+		if len(finishedChildren) == len(nodeNeedUpdate.Spec.Tasks) {
 			SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
 				Type:   v1alpha1.ConditionAccomplished,
 				Status: corev1.ConditionTrue,
@@ -150,7 +145,8 @@ func (it *SerialNodeReconciler) syncChildrenNodes(ctx context.Context, node v1al
 			if index < len(finishedChildrenNodes) {
 				// TODO: if the definition/spec of task changed, we should also respawn the node
 				// child node start with task name
-				if strings.Index(finishedChildrenNodes[index].Name, task) != 0 {
+
+				if strings.HasPrefix(task, finishedChildrenNodes[index].Name) {
 					// TODO: emit event
 					taskToStartup = task
 
