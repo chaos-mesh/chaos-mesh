@@ -37,7 +37,7 @@ func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet, result *c
 		return fmt.Errorf("chaos is not stresschaos")
 	}
 	chaosStatus := stressChaos.Status.ChaosStatus
-	chaosSelector := stressChaos.Spec.GetSelector()
+	chaosSelector := stressChaos.Spec.Selector
 
 	pods, daemons, err := cm.GetPods(ctx, stressChaos.GetName(), chaosStatus, chaosSelector, c.CtrlCli)
 	if err != nil {

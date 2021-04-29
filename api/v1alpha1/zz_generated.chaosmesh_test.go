@@ -16,7 +16,6 @@ package v1alpha1
 import (
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/bxcodec/faker"
 	. "github.com/onsi/gomega"
@@ -53,61 +52,6 @@ func TestAwsChaosGetDuration(t *testing.T) {
 	g.Expect(err).To(BeNil())
 
 	chaos.GetDuration()
-}
-
-func TestAwsChaosGetNextStart(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &AwsChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.GetNextStart()
-}
-
-func TestAwsChaosSetNextStart(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &AwsChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.SetNextStart(time.Now())
-}
-
-func TestAwsChaosGetNextRecover(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &AwsChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.GetNextRecover()
-}
-
-func TestAwsChaosSetNextRecover(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &AwsChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.SetNextRecover(time.Now())
-}
-
-func TestAwsChaosGetScheduler(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &AwsChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.GetScheduler()
 }
 
 func TestAwsChaosGetChaos(t *testing.T) {
@@ -184,61 +128,6 @@ func TestDNSChaosGetDuration(t *testing.T) {
 	chaos.GetDuration()
 }
 
-func TestDNSChaosGetNextStart(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &DNSChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.GetNextStart()
-}
-
-func TestDNSChaosSetNextStart(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &DNSChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.SetNextStart(time.Now())
-}
-
-func TestDNSChaosGetNextRecover(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &DNSChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.GetNextRecover()
-}
-
-func TestDNSChaosSetNextRecover(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &DNSChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.SetNextRecover(time.Now())
-}
-
-func TestDNSChaosGetScheduler(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &DNSChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.GetScheduler()
-}
-
 func TestDNSChaosGetChaos(t *testing.T) {
 	g := NewGomegaWithT(t)
 
@@ -311,61 +200,6 @@ func TestGcpChaosGetDuration(t *testing.T) {
 	g.Expect(err).To(BeNil())
 
 	chaos.GetDuration()
-}
-
-func TestGcpChaosGetNextStart(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &GcpChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.GetNextStart()
-}
-
-func TestGcpChaosSetNextStart(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &GcpChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.SetNextStart(time.Now())
-}
-
-func TestGcpChaosGetNextRecover(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &GcpChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.GetNextRecover()
-}
-
-func TestGcpChaosSetNextRecover(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &GcpChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.SetNextRecover(time.Now())
-}
-
-func TestGcpChaosGetScheduler(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &GcpChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.GetScheduler()
 }
 
 func TestGcpChaosGetChaos(t *testing.T) {
@@ -442,61 +276,6 @@ func TestHTTPChaosGetDuration(t *testing.T) {
 	chaos.GetDuration()
 }
 
-func TestHTTPChaosGetNextStart(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &HTTPChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.GetNextStart()
-}
-
-func TestHTTPChaosSetNextStart(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &HTTPChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.SetNextStart(time.Now())
-}
-
-func TestHTTPChaosGetNextRecover(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &HTTPChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.GetNextRecover()
-}
-
-func TestHTTPChaosSetNextRecover(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &HTTPChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.SetNextRecover(time.Now())
-}
-
-func TestHTTPChaosGetScheduler(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &HTTPChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.GetScheduler()
-}
-
 func TestHTTPChaosGetChaos(t *testing.T) {
 	g := NewGomegaWithT(t)
 
@@ -569,61 +348,6 @@ func TestIoChaosGetDuration(t *testing.T) {
 	g.Expect(err).To(BeNil())
 
 	chaos.GetDuration()
-}
-
-func TestIoChaosGetNextStart(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &IoChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.GetNextStart()
-}
-
-func TestIoChaosSetNextStart(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &IoChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.SetNextStart(time.Now())
-}
-
-func TestIoChaosGetNextRecover(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &IoChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.GetNextRecover()
-}
-
-func TestIoChaosSetNextRecover(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &IoChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.SetNextRecover(time.Now())
-}
-
-func TestIoChaosGetScheduler(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &IoChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.GetScheduler()
 }
 
 func TestIoChaosGetChaos(t *testing.T) {
@@ -700,61 +424,6 @@ func TestJVMChaosGetDuration(t *testing.T) {
 	chaos.GetDuration()
 }
 
-func TestJVMChaosGetNextStart(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &JVMChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.GetNextStart()
-}
-
-func TestJVMChaosSetNextStart(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &JVMChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.SetNextStart(time.Now())
-}
-
-func TestJVMChaosGetNextRecover(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &JVMChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.GetNextRecover()
-}
-
-func TestJVMChaosSetNextRecover(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &JVMChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.SetNextRecover(time.Now())
-}
-
-func TestJVMChaosGetScheduler(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &JVMChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.GetScheduler()
-}
-
 func TestJVMChaosGetChaos(t *testing.T) {
 	g := NewGomegaWithT(t)
 
@@ -827,61 +496,6 @@ func TestKernelChaosGetDuration(t *testing.T) {
 	g.Expect(err).To(BeNil())
 
 	chaos.GetDuration()
-}
-
-func TestKernelChaosGetNextStart(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &KernelChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.GetNextStart()
-}
-
-func TestKernelChaosSetNextStart(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &KernelChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.SetNextStart(time.Now())
-}
-
-func TestKernelChaosGetNextRecover(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &KernelChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.GetNextRecover()
-}
-
-func TestKernelChaosSetNextRecover(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &KernelChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.SetNextRecover(time.Now())
-}
-
-func TestKernelChaosGetScheduler(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &KernelChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.GetScheduler()
 }
 
 func TestKernelChaosGetChaos(t *testing.T) {
@@ -958,61 +572,6 @@ func TestNetworkChaosGetDuration(t *testing.T) {
 	chaos.GetDuration()
 }
 
-func TestNetworkChaosGetNextStart(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &NetworkChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.GetNextStart()
-}
-
-func TestNetworkChaosSetNextStart(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &NetworkChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.SetNextStart(time.Now())
-}
-
-func TestNetworkChaosGetNextRecover(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &NetworkChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.GetNextRecover()
-}
-
-func TestNetworkChaosSetNextRecover(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &NetworkChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.SetNextRecover(time.Now())
-}
-
-func TestNetworkChaosGetScheduler(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &NetworkChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.GetScheduler()
-}
-
 func TestNetworkChaosGetChaos(t *testing.T) {
 	g := NewGomegaWithT(t)
 
@@ -1085,61 +644,6 @@ func TestPodChaosGetDuration(t *testing.T) {
 	g.Expect(err).To(BeNil())
 
 	chaos.GetDuration()
-}
-
-func TestPodChaosGetNextStart(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &PodChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.GetNextStart()
-}
-
-func TestPodChaosSetNextStart(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &PodChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.SetNextStart(time.Now())
-}
-
-func TestPodChaosGetNextRecover(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &PodChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.GetNextRecover()
-}
-
-func TestPodChaosSetNextRecover(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &PodChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.SetNextRecover(time.Now())
-}
-
-func TestPodChaosGetScheduler(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &PodChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.GetScheduler()
 }
 
 func TestPodChaosGetChaos(t *testing.T) {
@@ -1216,61 +720,6 @@ func TestStressChaosGetDuration(t *testing.T) {
 	chaos.GetDuration()
 }
 
-func TestStressChaosGetNextStart(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &StressChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.GetNextStart()
-}
-
-func TestStressChaosSetNextStart(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &StressChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.SetNextStart(time.Now())
-}
-
-func TestStressChaosGetNextRecover(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &StressChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.GetNextRecover()
-}
-
-func TestStressChaosSetNextRecover(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &StressChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.SetNextRecover(time.Now())
-}
-
-func TestStressChaosGetScheduler(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &StressChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.GetScheduler()
-}
-
 func TestStressChaosGetChaos(t *testing.T) {
 	g := NewGomegaWithT(t)
 
@@ -1343,61 +792,6 @@ func TestTimeChaosGetDuration(t *testing.T) {
 	g.Expect(err).To(BeNil())
 
 	chaos.GetDuration()
-}
-
-func TestTimeChaosGetNextStart(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &TimeChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.GetNextStart()
-}
-
-func TestTimeChaosSetNextStart(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &TimeChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.SetNextStart(time.Now())
-}
-
-func TestTimeChaosGetNextRecover(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &TimeChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.GetNextRecover()
-}
-
-func TestTimeChaosSetNextRecover(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &TimeChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.SetNextRecover(time.Now())
-}
-
-func TestTimeChaosGetScheduler(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &TimeChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.GetScheduler()
 }
 
 func TestTimeChaosGetChaos(t *testing.T) {

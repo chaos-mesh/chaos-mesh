@@ -55,9 +55,6 @@ var _ = Describe("gcpchaos_webhook", func() {
 							Name:      "foo4",
 						},
 						Spec: GcpChaosSpec{
-							Scheduler: &SchedulerSpec{
-								Cron: "@every 10m",
-							},
 							Action: NodeStop,
 						},
 					},

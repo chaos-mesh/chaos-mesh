@@ -86,25 +86,6 @@ var _ = Describe("podchaos_webhook", func() {
 					expect: "",
 				},
 				{
-					name: "only define the Scheduler and execute PodFailureAction",
-					chaos: PodChaos{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: metav1.NamespaceDefault,
-							Name:      "foo4",
-						},
-						Spec: PodChaosSpec{
-							Scheduler: &SchedulerSpec{
-								Cron: "@every 10m",
-							},
-							Action: PodFailureAction,
-						},
-					},
-					execute: func(chaos *PodChaos) error {
-						return chaos.ValidateCreate()
-					},
-					expect: "error",
-				},
-				{
 					name: "only define the Duration and execute PodFailureAction",
 					chaos: PodChaos{
 						ObjectMeta: metav1.ObjectMeta{
@@ -119,7 +100,7 @@ var _ = Describe("podchaos_webhook", func() {
 					execute: func(chaos *PodChaos) error {
 						return chaos.ValidateCreate()
 					},
-					expect: "error",
+					expect: "",
 				},
 				{
 					name: "unknow action",

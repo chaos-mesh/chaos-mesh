@@ -25,7 +25,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
 	cm "github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug/iochaos"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug/networkchaos"
@@ -181,8 +180,8 @@ func (o *DebugOptions) Run(chaosType string, args []string, c *cm.ClientSet) err
 		return err
 	}
 	var result []cm.ChaosResult
-	common.TLSFiles = common.TLSFileConfig{CaCert: o.CaCertFile, Cert: o.CertFile, Key: o.KeyFile}
-	common.Insecure = o.Insecure
+	cm.TLSFiles = cm.TLSFileConfig{CaCert: o.CaCertFile, Cert: o.CertFile, Key: o.KeyFile}
+	cm.Insecure = o.Insecure
 	for i, chaos := range chaosList {
 		var chaosResult cm.ChaosResult
 		chaosResult.Name = chaosNameList[i]

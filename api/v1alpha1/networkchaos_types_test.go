@@ -15,7 +15,6 @@ package v1alpha1
 
 import (
 	"context"
-	"time"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -54,7 +53,9 @@ var _ = Describe("NetworkChaos", func() {
 					Namespace: "default",
 				},
 				Spec: NetworkChaosSpec{
-					Mode:   OnePodMode,
+					PodSelector: PodSelector{
+						Mode: OnePodMode,
+					},
 					Action: DelayAction,
 				},
 			}
@@ -69,20 +70,6 @@ var _ = Describe("NetworkChaos", func() {
 			By("deleting the created object")
 			Expect(k8sClient.Delete(context.TODO(), created)).To(Succeed())
 			Expect(k8sClient.Get(context.TODO(), key, created)).ToNot(Succeed())
-		})
-
-		It("should set next start time successfully", func() {
-			nwChaos := &NetworkChaos{}
-			nTime := time.Now()
-			nwChaos.SetNextStart(nTime)
-			Expect(nwChaos.GetNextStart()).To(Equal(nTime))
-		})
-
-		It("should set recover time successfully", func() {
-			nwChaos := &NetworkChaos{}
-			nTime := time.Now()
-			nwChaos.SetNextRecover(nTime)
-			Expect(nwChaos.GetNextRecover()).To(Equal(nTime))
 		})
 	})
 })

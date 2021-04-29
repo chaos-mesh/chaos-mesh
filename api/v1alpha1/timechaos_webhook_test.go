@@ -84,25 +84,6 @@ var _ = Describe("timechaos_webhook", func() {
 					expect: "",
 				},
 				{
-					name: "only define the Scheduler",
-					chaos: TimeChaos{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: metav1.NamespaceDefault,
-							Name:      "foo4",
-						},
-						Spec: TimeChaosSpec{
-							Scheduler: &SchedulerSpec{
-								Cron: "@every 10m",
-							},
-							TimeOffset: "1s",
-						},
-					},
-					execute: func(chaos *TimeChaos) error {
-						return chaos.ValidateCreate()
-					},
-					expect: "error",
-				},
-				{
 					name: "only define the Duration",
 					chaos: TimeChaos{
 						ObjectMeta: metav1.ObjectMeta{
@@ -117,7 +98,7 @@ var _ = Describe("timechaos_webhook", func() {
 					execute: func(chaos *TimeChaos) error {
 						return chaos.ValidateCreate()
 					},
-					expect: "error",
+					expect: "",
 				},
 				{
 					name: "validate the timeOffset",

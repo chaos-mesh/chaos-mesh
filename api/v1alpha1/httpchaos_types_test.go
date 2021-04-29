@@ -15,7 +15,6 @@ package v1alpha1
 
 import (
 	"context"
-	"time"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -55,7 +54,9 @@ var _ = Describe("HTTPChaos", func() {
 				},
 				Spec: HTTPChaosSpec{
 					Action: HTTPDelayAction,
-					Mode:   OnePodMode,
+					PodSelector: PodSelector{
+						Mode: OnePodMode,
+					},
 				},
 			}
 
@@ -71,18 +72,5 @@ var _ = Describe("HTTPChaos", func() {
 			Expect(k8sClient.Get(context.TODO(), key, created)).ToNot(Succeed())
 		})
 
-		It("should set next start time successfully", func() {
-			httpChaos := &HTTPChaos{}
-			nTime := time.Now()
-			httpChaos.SetNextStart(nTime)
-			Expect(httpChaos.GetNextStart()).To(Equal(nTime))
-		})
-
-		It("should set recover time successfully", func() {
-			httpChaos := &HTTPChaos{}
-			nTime := time.Now()
-			httpChaos.SetNextRecover(nTime)
-			Expect(httpChaos.GetNextRecover()).To(Equal(nTime))
-		})
 	})
 })
