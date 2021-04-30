@@ -184,6 +184,8 @@ func (s *Service) detail(c *gin.Context) {
 		yaml, err = exp.ParseDNSChaos()
 	case v1alpha1.KindAwsChaos:
 		yaml, err = exp.ParseAwsChaos()
+	case v1alpha1.KindGcpChaos:
+		yaml, err = exp.ParseGcpChaos()
 	default:
 		err = fmt.Errorf("kind %s is not support", exp.Kind)
 	}

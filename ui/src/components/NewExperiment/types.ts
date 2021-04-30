@@ -121,6 +121,7 @@ export type ExperimentKind =
   | 'StressChaos'
   | 'DNSChaos'
   | 'AwsChaos'
+  | 'GcpChaos'
 
 export interface ExperimentTarget {
   kind: ExperimentKind
