@@ -232,12 +232,6 @@ func (m *BackgroundProcessManager) KillBackgroundProcess(ctx context.Context, pi
 func (m *BackgroundProcessManager) Stdio(pid int, startTime int64) *Stdio {
 	log := log.WithValues("pid", pid)
 
-	_, err := os.FindProcess(int(pid))
-	if err != nil {
-		log.Error(err, "unreachable path. `os.FindProcess` will never return an error on unix")
-		return nil
-	}
-
 	procState, err := process.NewProcess(int32(pid))
 	if err != nil {
 		// return successfully as the process has exited
