@@ -226,8 +226,11 @@ func convertWorkflow(kubeWorkflow v1alpha1.Workflow) Workflow {
 	result := Workflow{
 		Namespace: kubeWorkflow.Namespace,
 		Name:      kubeWorkflow.Name,
-		Entry:     *kubeWorkflow.Status.EntryNode,
-		Created:   kubeWorkflow.Status.StartTime.Format(time.RFC3339),
+		Entry:     kubeWorkflow.Spec.Entry,
+	}
+
+	if kubeWorkflow.Status.StartTime != nil {
+		result.Created = kubeWorkflow.Status.StartTime.Format(time.RFC3339)
 	}
 
 	return result

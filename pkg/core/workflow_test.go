@@ -101,6 +101,15 @@ func Test_convertWorkflowDetail(t *testing.T) {
 				Topology: Topology{
 					Nodes: []Node{},
 				},
+				KubeObject: KubeObjectDesc{
+					Meta: KubeObjectMeta{
+						Name:      "another-fake-workflow",
+						Namespace: "another-namespace",
+					},
+					Spec: v1alpha1.WorkflowSpec{
+						Entry: "another-entry",
+					},
+				},
 			},
 		},
 		// TODO: Add test cases.
