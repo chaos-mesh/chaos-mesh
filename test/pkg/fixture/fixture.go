@@ -199,7 +199,7 @@ func NewStressTestDeployment(name, namespace string, extraLabels map[string]stri
 								},
 								Limits: corev1.ResourceList{
 									corev1.ResourceCPU:    resource.MustParse("1"),
-									corev1.ResourceMemory: resource.MustParse("100M"),
+									corev1.ResourceMemory: resource.MustParse("150M"),
 								},
 							},
 							VolumeMounts: []corev1.VolumeMount{

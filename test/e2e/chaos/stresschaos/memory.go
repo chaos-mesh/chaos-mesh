@@ -45,7 +45,7 @@ func TestcaseMemoryStressInjectionOnceThenRecover(
 		if err != nil {
 			return false, err
 		}
-		if conditions[0].MemoryUsage-conditions[1].MemoryUsage > 50*1024*1024 {
+		if conditions[0].MemoryUsage-conditions[1].MemoryUsage > 50*1024*1024*0.9 {
 			return true, nil
 		}
 		By(fmt.Sprintf("get Memory: [%d, %d]", conditions[0].MemoryUsage, conditions[1].MemoryUsage))
@@ -62,7 +62,7 @@ func TestcaseMemoryStressInjectionOnceThenRecover(
 		if err != nil {
 			return false, err
 		}
-		if conditions[0].MemoryUsage-conditions[1].MemoryUsage < 1*1024*1024 {
+		if conditions[0].MemoryUsage < conditions[1].MemoryUsage+1*1024*1024 {
 			return true, nil
 		}
 		By(fmt.Sprintf("get Memory: [%d, %d]", conditions[0].MemoryUsage, conditions[1].MemoryUsage))

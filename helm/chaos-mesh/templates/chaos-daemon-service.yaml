@@ -4,11 +4,8 @@ metadata:
   namespace: {{ .Release.Namespace | quote }}
   name: {{ template "chaos-daemon.svc" . }}
   labels:
-    app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: chaos-daemon
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
 spec:
   clusterIP: None
   ports:
@@ -21,5 +18,5 @@ spec:
       targetPort: http
       protocol: TCP
   selector:
+    {{- include "chaos-mesh.selectors" . | nindent 4 }}
     app.kubernetes.io/component: chaos-daemon
-    app.kubernetes.io/instance: {{ .Release.Name }}
