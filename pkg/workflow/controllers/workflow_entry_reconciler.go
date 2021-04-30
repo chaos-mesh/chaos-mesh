@@ -76,7 +76,7 @@ func (it *WorkflowEntryReconciler) Reconcile(request reconcile.Request) (reconci
 			}
 			workflowNeedUpdate.Status = v1alpha1.WorkflowStatus{
 				EntryNode: &entryNode.Name,
-				StartTime: &workflow.CreationTimestamp.Time,
+				StartTime: &workflow.CreationTimestamp,
 			}
 
 			// TODO: add metav1.FinalizerDeleteDependents for workflowNeedUpdate's finalizer in webhook

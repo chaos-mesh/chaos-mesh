@@ -15,7 +15,6 @@ package v1alpha1
 
 import (
 	"fmt"
-	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -44,7 +43,7 @@ type WorkflowStatus struct {
 	// +optional
 	EntryNode *string `json:"entry_node,omitempty"`
 	// +optional
-	StartTime *time.Time `json:"start_time,omitempty"`
+	StartTime *metav1.Time `json:"start_time,omitempty"`
 }
 
 type TemplateType string
