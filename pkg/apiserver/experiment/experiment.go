@@ -861,10 +861,12 @@ func (s *Service) getGcpChaosDetail(namespace string, name string, kubeCli clien
 			UID:           chaos.GetChaos().UID,
 			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
-		YAML: core.KubeObjectYAMLDescription{
-			APIVersion: gvk.GroupVersion().String(),
-			Kind:       gvk.Kind,
-			Metadata: core.KubeObjectYAMLMetadata{
+		KubeObject: core.KubeObjectDesc{
+			TypeMeta: metav1.TypeMeta{
+				APIVersion: gvk.GroupVersion().String(),
+				Kind:       gvk.Kind,
+			},
+			Meta: core.KubeObjectMeta{
 				Name:        chaos.Name,
 				Namespace:   chaos.Namespace,
 				Labels:      chaos.Labels,
@@ -1597,9 +1599,9 @@ func (s *Service) updateAwsChaos(exp *core.KubeObjectDesc, kubeCli client.Client
 	return kubeCli.Update(context.Background(), chaos)
 }
 
-func (s *Service) updateGcpChaos(exp *core.KubeObjectYAMLDescription, kubeCli client.Client) error {
+func (s *Service) updateGcpChaos(exp *core.KubeObjectDesc, kubeCli client.Client) error {
 	chaos := &v1alpha1.AwsChaos{}
-	meta := &exp.Metadata
+	meta := &exp.Meta
 	key := types.NamespacedName{Namespace: meta.Namespace, Name: meta.Name}
 
 	if err := kubeCli.Get(context.Background(), key, chaos); err != nil {

@@ -417,7 +417,7 @@ func (e *Experiment) ParseAwsChaos() (KubeObjectDesc, error) {
 	}, nil
 }
 
-// ParseGcpChaos Parse AwsChaos JSON string into KubeObjectDesc.
+// ParseGcpChaos Parse GcpChaos JSON string into KubeObjectDesc.
 func (e *Experiment) ParseGcpChaos() (KubeObjectDesc, error) {
 	chaos := &v1alpha1.GcpChaos{}
 	if err := json.Unmarshal([]byte(e.Experiment), &chaos); err != nil {
@@ -425,9 +425,11 @@ func (e *Experiment) ParseGcpChaos() (KubeObjectDesc, error) {
 	}
 
 	return KubeObjectDesc{
-		APIVersion: chaos.APIVersion,
-		Kind:       chaos.Kind,
-		Metadata: KubeObjectYAMLMetadata{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: chaos.APIVersion,
+			Kind:       chaos.Kind,
+		},
+		Meta: KubeObjectMeta{
 			Name:        chaos.Name,
 			Namespace:   chaos.Namespace,
 			Labels:      chaos.Labels,
