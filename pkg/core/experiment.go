@@ -144,7 +144,7 @@ func (s *SelectorInfo) ParseSelector() v1alpha1.SelectorSpec {
 
 // TargetInfo defines the information of target objects.
 type TargetInfo struct {
-	Kind         string            `json:"kind" binding:"required,oneof=PodChaos NetworkChaos IoChaos KernelChaos TimeChaos StressChaos DNSChaos AwsChaos"`
+	Kind         string            `json:"kind" binding:"required,oneof=PodChaos NetworkChaos IoChaos KernelChaos TimeChaos StressChaos DNSChaos AwsChaos GcpChaos"`
 	PodChaos     *PodChaosInfo     `json:"pod_chaos,omitempty" binding:"RequiredFieldEqual=Kind:PodChaos"`
 	NetworkChaos *NetworkChaosInfo `json:"network_chaos,omitempty" binding:"RequiredFieldEqual=Kind:NetworkChaos"`
 	IOChaos      *IOChaosInfo      `json:"io_chaos,omitempty" binding:"RequiredFieldEqual=Kind:IoChaos"`
@@ -153,6 +153,7 @@ type TargetInfo struct {
 	StressChaos  *StressChaosInfo  `json:"stress_chaos,omitempty" binding:"RequiredFieldEqual=Kind:StressChaos"`
 	DNSChaos     *DNSChaosInfo     `json:"dns_chaos,omitempty" binding:"RequiredFieldEqual=Kind:DNSChaos"`
 	AwsChaos     *AwsChaosInfo     `json:"aws_chaos,omitempty" binding:"RequiredFieldEqual=Kind:AwsChaos"`
+	GcpChaos     *GcpChaosInfo     `json:"gcp_chaos,omitempty" binding:"RequiredFieldEqual=Kind:GcpChaos"`
 }
 
 // SchedulerInfo defines the scheduler information.
@@ -228,6 +229,16 @@ type AwsChaosInfo struct {
 	Ec2Instance string  `json:"ec2Instance"`
 	EbsVolume   *string `json:"volumeID,omitempty"`
 	DeviceName  *string `json:"deviceName,omitempty"`
+}
+
+// GcpChaosInfo defines the basic information of aws chaos for creating a new AwsChaos.
+type GcpChaosInfo struct {
+	Action      string    `json:"action" binding:"oneof='node-stop' 'node-reset' 'disk-loss'"`
+	SecretName  *string   `json:"secretName,omitempty"`
+	Project     string    `json:"project"`
+	Zone        string    `json:"zone"`
+	Instance    string    `json:"instance"`
+	DeviceNames *[]string `json:"deviceNames,omitempty"`
 }
 
 // ParsePodChaos Parse PodChaos JSON string into KubeObjectDesc.
@@ -384,7 +395,7 @@ func (e *Experiment) ParseDNSChaos() (KubeObjectDesc, error) {
 	}, nil
 }
 
-// ParseDNSChaos Parse AwsChaos JSON string into ExperimentYAMLDescription.
+// ParseAwsChaos Parse AwsChaos JSON string into KubeObjectDesc.
 func (e *Experiment) ParseAwsChaos() (KubeObjectDesc, error) {
 	chaos := &v1alpha1.AwsChaos{}
 	if err := json.Unmarshal([]byte(e.Experiment), &chaos); err != nil {
@@ -397,6 +408,26 @@ func (e *Experiment) ParseAwsChaos() (KubeObjectDesc, error) {
 			Kind:       chaos.Kind,
 		},
 		Meta: KubeObjectMeta{
+			Name:        chaos.Name,
+			Namespace:   chaos.Namespace,
+			Labels:      chaos.Labels,
+			Annotations: chaos.Annotations,
+		},
+		Spec: chaos.Spec,
+	}, nil
+}
+
+// ParseGcpChaos Parse AwsChaos JSON string into KubeObjectDesc.
+func (e *Experiment) ParseGcpChaos() (KubeObjectDesc, error) {
+	chaos := &v1alpha1.GcpChaos{}
+	if err := json.Unmarshal([]byte(e.Experiment), &chaos); err != nil {
+		return KubeObjectDesc{}, err
+	}
+
+	return KubeObjectDesc{
+		APIVersion: chaos.APIVersion,
+		Kind:       chaos.Kind,
+		Metadata: KubeObjectYAMLMetadata{
 			Name:        chaos.Name,
 			Namespace:   chaos.Namespace,
 			Labels:      chaos.Labels,
