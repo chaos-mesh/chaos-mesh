@@ -16,7 +16,7 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"text/template"
+	"html/template"
 )
 
 // struct workflowTestCodeGenerator will render content of one file for testing the coupling with chaosKindMap
