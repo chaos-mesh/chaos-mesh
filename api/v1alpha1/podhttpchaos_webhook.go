@@ -57,7 +57,7 @@ type PodHttpChaosWebhookRunner struct {
 	decoder *admission.Decoder
 }
 
-// Handle will run poiochaoshandler for this resource
+// Handle will run podhttpchaoshandler for this resource
 func (r *PodHttpChaosWebhookRunner) Handle(ctx context.Context, req admission.Request) admission.Response {
 	chaos := &PodHttpChaos{}
 	err := r.decoder.Decode(req, chaos)
