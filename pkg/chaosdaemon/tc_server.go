@@ -371,24 +371,6 @@ func (c *tcClient) addTbf(device string, parent string, handle string, tbf *pb.T
 	return nil
 }
 
-func (c *tcClient) addFilter(device string, parent string, classid string, ipset string) error {
-	log.Info("adding filter", "parent", parent, "classid", classid, "ipset", ipset)
-
-	args := strings.Split(fmt.Sprintf("filter add dev %s %s basic match", device, parent), " ")
-	args = append(args, fmt.Sprintf("ipset(%s dst)", ipset))
-	args = append(args, strings.Split(classid, " ")...)
-	processBuilder := bpm.DefaultProcessBuilder("tc", args...).SetContext(c.ctx)
-	if c.enterNS {
-		processBuilder = processBuilder.SetNS(c.pid, bpm.NetNS)
-	}
-	cmd := processBuilder.Build()
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		return encodeOutputToError(output, err)
-	}
-	return nil
-}
-
 func convertNetemToArgs(netem *pb.Netem) string {
 	args := ""
 	if netem.Time > 0 {
