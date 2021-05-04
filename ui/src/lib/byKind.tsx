@@ -3,6 +3,7 @@ import { ReactComponent as ClockIcon } from 'images/chaos/time.svg'
 import { ReactComponent as DNSIcon } from 'images/chaos/dns.svg'
 import { ExperimentKind } from 'components/NewExperiment/types'
 import { ReactComponent as FileSystemIOIcon } from 'images/chaos/io.svg'
+import { ReactComponent as GCPIcon } from 'images/chaos/gcp.svg'
 import { ReactComponent as LinuxKernelIcon } from 'images/chaos/kernel.svg'
 import { ReactComponent as NetworkIcon } from 'images/chaos/network.svg'
 import { ReactComponent as PodLifecycleIcon } from 'images/chaos/pod.svg'
@@ -37,6 +38,10 @@ export function iconByKind(kind: ExperimentKind, size: 'small' | 'large' = 'larg
       break
     case 'AwsChaos':
       icon = <AWSIcon />
+      break
+    case 'GcpChaos':
+      icon = <GCPIcon />
+      break
   }
 
   return <SvgIcon fontSize={size}>{icon}</SvgIcon>
@@ -60,5 +65,7 @@ export function transByKind(kind: ExperimentKind) {
       return T('newE.target.dns.title')
     case 'AwsChaos':
       return T('newE.target.aws.title')
+    case 'GcpChaos':
+      return T('newE.target.gcp.title')
   }
 }
