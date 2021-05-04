@@ -14,8 +14,9 @@
 package apiserver
 
 import (
-	"fmt"
+	"net"
 	"net/http"
+	"strconv"
 
 	"go.uber.org/fx"
 
@@ -44,7 +45,7 @@ var (
 )
 
 func serverRegister(r *gin.Engine, conf *config.ChaosDashboardConfig) {
-	listenAddr := fmt.Sprintf("%s:%d", conf.ListenHost, conf.ListenPort)
+	listenAddr := net.JoinHostPort(conf.ListenHost, strconv.Itoa(conf.ListenPort))
 
 	go r.Run(listenAddr)
 }

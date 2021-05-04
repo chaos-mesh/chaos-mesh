@@ -17,9 +17,9 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
-	"fmt"
 	"io/ioutil"
 	"net"
+	"strconv"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
@@ -61,12 +61,12 @@ type tlsConfig struct {
 
 // Get the http address
 func (c *Config) HttpAddr() string {
-	return fmt.Sprintf("%s:%d", c.Host, c.HTTPPort)
+	return net.JoinHostPort(c.Host, strconv.Itoa(c.HTTPPort))
 }
 
 // Get the grpc address
 func (c *Config) GrpcAddr() string {
-	return fmt.Sprintf("%s:%d", c.Host, c.GRPCPort)
+	return net.JoinHostPort(c.Host, strconv.Itoa(c.GRPCPort))
 }
 
 // DaemonServer represents a grpc server for tc daemon
