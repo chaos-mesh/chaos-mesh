@@ -46,6 +46,7 @@ var (
 func serverRegister(r *gin.Engine, conf *config.ChaosDashboardConfig) {
 	listenAddr := fmt.Sprintf("%s:%d", conf.ListenHost, conf.ListenPort)
 
+	// nolint
 	go r.Run(listenAddr)
 }
 
@@ -58,16 +59,16 @@ func newEngine() *gin.Engine {
 	r.Use(apiutils.MWHandleErrors())
 
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
-		v.RegisterValidation("NameValid", apivalidator.NameValid)
-		v.RegisterValidation("NamespaceSelectorsValid", apivalidator.NamespaceSelectorsValid)
-		v.RegisterValidation("MapSelectorsValid", apivalidator.MapSelectorsValid)
-		v.RegisterValidation("RequirementSelectorsValid", apivalidator.RequirementSelectorsValid)
-		v.RegisterValidation("PhaseSelectorsValid", apivalidator.PhaseSelectorsValid)
-		v.RegisterValidation("CronValid", apivalidator.CronValid)
-		v.RegisterValidation("DurationValid", apivalidator.DurationValid)
-		v.RegisterValidation("ValueValid", apivalidator.ValueValid)
-		v.RegisterValidation("PodsValid", apivalidator.PodsValid)
-		v.RegisterValidation("RequiredFieldEqual", apivalidator.RequiredFieldEqualValid, true)
+		v.RegisterValidation("NameValid", apivalidator.NameValid)                                 // nolint
+		v.RegisterValidation("NamespaceSelectorsValid", apivalidator.NamespaceSelectorsValid)     // nolint
+		v.RegisterValidation("MapSelectorsValid", apivalidator.MapSelectorsValid)                 // nolint
+		v.RegisterValidation("RequirementSelectorsValid", apivalidator.RequirementSelectorsValid) // nolint
+		v.RegisterValidation("PhaseSelectorsValid", apivalidator.PhaseSelectorsValid)             // nolint
+		v.RegisterValidation("CronValid", apivalidator.CronValid)                                 // nolint
+		v.RegisterValidation("DurationValid", apivalidator.DurationValid)                         // nolint
+		v.RegisterValidation("ValueValid", apivalidator.ValueValid)                               // nolint
+		v.RegisterValidation("PodsValid", apivalidator.PodsValid)                                 // nolint
+		v.RegisterValidation("RequiredFieldEqual", apivalidator.RequiredFieldEqualValid, true)    // nolint
 	}
 
 	moveToUIRoot := func(c *gin.Context) {

@@ -28,7 +28,7 @@ import (
 var _ = Describe("containerd client", func() {
 	Context("ContainerdClient GetPidFromContainerID", func() {
 		It("should return the magic number 9527", func() {
-			defer mock.With("pid", int(9527))()
+			defer mock.With("pid", int(9527))() //nolint
 			m := &test.MockClient{}
 			c := ContainerdClient{client: m}
 			pid, err := c.GetPidFromContainerID(context.TODO(), "containerd://valid-container-id")
@@ -52,7 +52,7 @@ var _ = Describe("containerd client", func() {
 			_, err := c.GetPidFromContainerID(context.TODO(), "containerd://valid-container-id")
 			Expect(err).NotTo(BeNil())
 			Expect(fmt.Sprintf("%s", err)).To(Equal(errorStr))
-			mock.Reset("LoadContainerError")
+			mock.Reset("LoadContainerError") // nolint
 
 			mock.With("TaskError", errors.New(errorStr))
 			m = &test.MockClient{}
@@ -60,7 +60,7 @@ var _ = Describe("containerd client", func() {
 			_, err = c.GetPidFromContainerID(context.TODO(), "containerd://valid-container-id")
 			Expect(err).NotTo(BeNil())
 			Expect(fmt.Sprintf("%s", err)).To(Equal(errorStr))
-			mock.Reset("TaskError")
+			mock.Reset("TaskError") //nolint
 		})
 	})
 
@@ -78,7 +78,7 @@ var _ = Describe("containerd client", func() {
 				errorStr := fmt.Sprintf("this is a mocked error on %s", e)
 				m := &test.MockClient{}
 				c := ContainerdClient{client: m}
-				defer mock.With(e+"Error", errors.New(errorStr))()
+				defer mock.With(e+"Error", errors.New(errorStr))() //nolint
 				err := c.ContainerKillByContainerID(context.TODO(), "containerd://valid-container-id")
 				Expect(err).ToNot(BeNil())
 				Expect(fmt.Sprintf("%s", err)).To(Equal(errorStr))

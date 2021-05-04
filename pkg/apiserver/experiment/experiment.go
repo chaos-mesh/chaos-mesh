@@ -1161,7 +1161,7 @@ func (s *Service) batchDeleteExperiment(c *gin.Context) {
 			continue
 		}
 	}
-	if errFlag == true {
+	if errFlag {
 		c.Status(http.StatusInternalServerError)
 	} else {
 		c.JSON(http.StatusOK, StatusResponse{Status: "success"})
@@ -1438,7 +1438,10 @@ func (s *Service) updatePodChaos(exp *core.KubeObjectYAMLDescription, kubeCli cl
 	chaos.SetAnnotations(meta.Annotations)
 
 	var spec v1alpha1.PodChaosSpec
-	mapstructure.Decode(exp.Spec, &spec)
+	err := mapstructure.Decode(exp.Spec, &spec)
+	if err != nil {
+		return err
+	}
 	chaos.Spec = spec
 
 	return kubeCli.Update(context.Background(), chaos)
@@ -1457,11 +1460,18 @@ func (s *Service) updateNetworkChaos(exp *core.KubeObjectYAMLDescription, kubeCl
 	chaos.SetAnnotations(meta.Annotations)
 
 	var spec v1alpha1.NetworkChaosSpec
-	mapstructure.Decode(exp.Spec, &spec)
+	err := mapstructure.Decode(exp.Spec, &spec)
+	if err != nil {
+		return err
+	}
 	chaos.Spec = spec
 
 	var tcParameter v1alpha1.TcParameter
-	mapstructure.Decode(exp.Spec, &tcParameter)
+	err = mapstructure.Decode(exp.Spec, &tcParameter)
+	if err != nil {
+		return err
+	}
+
 	chaos.Spec.TcParameter = tcParameter
 
 	return kubeCli.Update(context.Background(), chaos)

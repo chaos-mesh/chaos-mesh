@@ -30,7 +30,7 @@ var _ = Describe("chaosdaemon util", func() {
 			_, err := CreateContainerRuntimeInfoClient(ContainerRuntimeDocker)
 			Expect(err).To(BeNil())
 
-			defer mock.With("MockContainerdClient", &test.MockClient{})()
+			defer mock.With("MockContainerdClient", &test.MockClient{})() // nolint
 			_, err = CreateContainerRuntimeInfoClient(ContainerRuntimeContainerd)
 			Expect(err).To(BeNil())
 		})

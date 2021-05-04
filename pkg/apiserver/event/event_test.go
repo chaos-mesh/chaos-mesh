@@ -201,7 +201,7 @@ var _ = Describe("event", func() {
 
 	AfterEach(func() {
 		// Add any teardown steps that needs to be executed after each test
-		pkgmock.Reset("MockAuthRequired")
+		pkgmock.Reset("MockAuthRequired") // nolint
 	})
 
 	Context("ListEvents", func() {

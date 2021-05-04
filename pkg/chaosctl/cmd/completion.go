@@ -70,15 +70,15 @@ PS> ./bin/chaosctl completion powershell > chaosctl.ps1
 	Run: func(cmd *cobra.Command, args []string) {
 		switch args[0] {
 		case "bash":
-			cmd.Root().GenBashCompletion(os.Stdout)
+			cmd.Root().GenBashCompletion(os.Stdout) //nolint
 		case "zsh":
-			cmd.Root().GenZshCompletion(os.Stdout)
+			cmd.Root().GenZshCompletion(os.Stdout) //nolint
 		case "fish":
-			cmd.Root().GenFishCompletion(os.Stdout, true)
+			cmd.Root().GenFishCompletion(os.Stdout, true) //nolint
 		// TODO: powershell completion is still not fully supported, see https://github.com/spf13/cobra/pull/1208
 		// Need to update cobra version when this PR is merged
 		case "powershell":
-			cmd.Root().GenPowerShellCompletion(os.Stdout)
+			cmd.Root().GenPowerShellCompletion(os.Stdout) //nolint
 		}
 	},
 }

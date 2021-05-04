@@ -40,7 +40,11 @@ func CompressName(originalName string, targetLength int, namePostFix string) (na
 	nameRest := originalName[5:]
 
 	hasher := sha1.New()
-	hasher.Write([]byte(nameRest))
+	_, err := hasher.Write([]byte(nameRest))
+	if err != nil {
+		log.Fatal("unable to write bytes")
+	}
+
 	hashValue := fmt.Sprintf("%x", hasher.Sum(nil))
 
 	// keep the length does not exceed targetLength

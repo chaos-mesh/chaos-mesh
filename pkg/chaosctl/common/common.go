@@ -190,7 +190,7 @@ func GetPods(ctx context.Context, chaosName string, status v1alpha1.ChaosStatus,
 	nextStart := status.Scheduler.NextStart
 
 	if phase == v1alpha1.ExperimentPhaseWaiting {
-		waitTime := nextStart.Sub(time.Now())
+		waitTime := time.Until(nextStart.Time)
 		L().WithName("GetPods").V(1).Info(fmt.Sprintf("Waiting for chaos %s to start, in %s\n", chaosName, waitTime))
 		time.Sleep(waitTime)
 	}

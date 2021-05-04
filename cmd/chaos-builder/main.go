@@ -60,7 +60,7 @@ func main() {
 	workflowGenerator := newWorkflowCodeGenerator(nil)
 	workflowTestGenerator := newWorkflowTestCodeGenerator(nil)
 
-	filepath.Walk("./api/v1alpha1", func(path string, info os.FileInfo, err error) error {
+	err := filepath.Walk("./api/v1alpha1", func(path string, info os.FileInfo, err error) error {
 		log := log.WithValues("file", path)
 
 		if err != nil {
@@ -124,6 +124,9 @@ func main() {
 
 		return nil
 	})
+	if err != nil {
+		log.Error(err, "fail to read ./api/v1alpha")
+	}
 
 	validatorCode := generateGetChaosValidatorFunc(allTypes)
 

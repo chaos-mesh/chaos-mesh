@@ -36,7 +36,7 @@ import (
 
 const (
 	roleManager = "manager"
-	roleViewer  = "viewer"
+	roleViewer  = "viewer" // nolint
 
 	serviceAccountTemplate = `kind: ServiceAccount
 apiVersion: v1

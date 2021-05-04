@@ -20,7 +20,7 @@ import (
 	chaosdaemon "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
-var log = ctrl.Log.WithName("chaos-daemon-client-utils")
+var _ = ctrl.Log.WithName("chaos-daemon-client-utils")
 
 // ChaosDaemonClientInterface represents the ChaosDaemonClient, it's used to simply unit test
 type ChaosDaemonClientInterface interface {

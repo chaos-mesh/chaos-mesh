@@ -55,7 +55,7 @@ func TestGetChaosList(t *testing.T) {
 		},
 	}
 
-	v1alpha1.SchemeBuilder.AddToScheme(kubectlscheme.Scheme)
+	v1alpha1.SchemeBuilder.AddToScheme(kubectlscheme.Scheme) // nolint
 
 	client := fake.NewFakeClientWithScheme(kubectlscheme.Scheme, &chaos1, &chaos2)
 
@@ -140,7 +140,7 @@ func TestGetPods(t *testing.T) {
 
 	allObjects := append(nodeObjects, daemonObjects0[0], podObjects0[0], daemonObjects1[0], podObjects1[0])
 
-	v1alpha1.SchemeBuilder.AddToScheme(kubectlscheme.Scheme)
+	v1alpha1.SchemeBuilder.AddToScheme(kubectlscheme.Scheme) // nolint
 	client := fake.NewFakeClientWithScheme(kubectlscheme.Scheme, allObjects...)
 
 	tests := []struct {

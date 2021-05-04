@@ -155,7 +155,7 @@ func (m *PodIoManager) Commit(ctx context.Context) []CommitResponse {
 		index++
 	}
 
-	g.Wait()
+	g.Wait() // nolint
 
 	return results
 }

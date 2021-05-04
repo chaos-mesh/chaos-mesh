@@ -136,7 +136,6 @@ func recover(ctx context.Context, m *chaosStateMachine, targetPhase v1alpha1.Exp
 }
 
 func resume(ctx context.Context, m *chaosStateMachine, _ v1alpha1.ExperimentPhase, now time.Time) (bool, error) {
-	startTime := now
 	duration, err := m.Chaos.GetDuration()
 	if err != nil {
 		m.Log.Error(err, "failed to get chaos duration")

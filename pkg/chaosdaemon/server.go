@@ -175,7 +175,9 @@ func StartServer(conf *Config, reg RegisterGatherer) error {
 		log.Info("Starting http endpoint", "address", httpBindAddr)
 		if err := httpServer.ListenAndServe(); err != nil {
 			log.Error(err, "failed to start http endpoint")
-			httpServer.Shutdown(context.Background())
+			if er := httpServer.Shutdown(context.Background()); err != nil {
+				return er
+			}
 			return err
 		}
 		return nil

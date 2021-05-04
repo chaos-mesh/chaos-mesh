@@ -31,6 +31,7 @@ func AuthRequired(c *gin.Context) {
 
 	authCli, err := clientpool.ExtractTokenAndGetAuthClient(c.Request.Header)
 	if err != nil {
+		// nolint
 		c.AbortWithError(http.StatusUnauthorized, ErrInvalidRequest.WrapWithNoMessage(err))
 		return
 	}
@@ -55,14 +56,17 @@ func AuthRequired(c *gin.Context) {
 
 	response, err := authCli.SelfSubjectAccessReviews().Create(sar)
 	if err != nil {
+		// nolint
 		c.AbortWithError(http.StatusUnauthorized, ErrInvalidRequest.WrapWithNoMessage(err))
 		return
 	}
 
 	if !response.Status.Allowed {
 		if len(namespace) == 0 {
+			// nolint
 			c.AbortWithError(http.StatusUnauthorized, ErrNoClusterPrivilege.New("can't %s resource in the cluster", verb))
 		} else {
+			// nolint
 			c.AbortWithError(http.StatusUnauthorized, ErrNoNamespacePrivilege.New("can't %s resource in namespace %s", verb, namespace))
 		}
 		return

@@ -100,6 +100,7 @@ func TestcaseNetworkDelay(
 	err := cli.Create(ctx, networkDelay.DeepCopy())
 	framework.ExpectNoError(err, "create network chaos error")
 
+	// nolint
 	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 3 {
@@ -115,6 +116,7 @@ func TestcaseNetworkDelay(
 	err = cli.Delete(ctx, networkDelay.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 
+	// nolint
 	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 0 {

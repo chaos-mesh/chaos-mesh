@@ -80,14 +80,23 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 		})
 
 		// TODO: support chaos on multiple volume
-		t.SetVolumePath(iochaos.Spec.VolumePath)
+		err := t.SetVolumePath(iochaos.Spec.VolumePath)
+		if err != nil {
+			r.Log.Error(err, "failed to set volume path")
+			return err
+		}
 
 		if iochaos.Spec.ContainerName != nil &&
 			len(strings.TrimSpace(*iochaos.Spec.ContainerName)) != 0 {
-			t.SetContainer(*iochaos.Spec.ContainerName)
+			err := t.SetContainer(*iochaos.Spec.ContainerName)
+			if err != nil {
+				r.Log.Error(err, "failed to set container")
+				return err
+			}
+
 		}
 
-		t.Append(v1alpha1.IoChaosAction{
+		err = t.Append(v1alpha1.IoChaosAction{
 			Type: iochaos.Spec.Action,
 			Filter: v1alpha1.Filter{
 				Path:    iochaos.Spec.Path,
@@ -105,6 +114,9 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 			MistakeSpec:      iochaos.Spec.Mistake,
 			Source:           m.Source,
 		})
+		if err != nil {
+			return err
+		}
 
 		key, err := cache.MetaNamespaceKeyFunc(&pod)
 		if err != nil {

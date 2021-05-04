@@ -48,7 +48,7 @@ var _ = Describe("netem server", func() {
 			Ω(func() {
 				defer mock.With("MockContainerdClient", &test.MockClient{})()
 				defer mock.With("PanicOnMustRegister", "mock panic")()
-				newGRPCServer(crclients.ContainerRuntimeContainerd, &MockRegisterer{}, tlsConfig{})
+				newGRPCServer(crclients.ContainerRuntimeContainerd, &MockRegisterer{}, tlsConfig{}) //nolint
 			}).Should(Panic())
 		})
 	})

@@ -132,8 +132,14 @@ func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 			Namespace: pod.Namespace,
 		})
 
-		t.Append(sourceSet)
-		t.Append(targetSet)
+		e := t.Append(sourceSet)
+		if e != nil {
+			return e
+		}
+		e = t.Append(targetSet)
+		if e != nil {
+			return e
+		}
 	}
 
 	sourcesChains := []v1alpha1.RawIptables{}

@@ -371,6 +371,7 @@ func (c *tcClient) addTbf(device string, parent string, handle string, tbf *pb.T
 	return nil
 }
 
+// nolint
 func (c *tcClient) addFilter(device string, parent string, classid string, ipset string) error {
 	log.Info("adding filter", "parent", parent, "classid", classid, "ipset", ipset)
 
