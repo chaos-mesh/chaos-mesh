@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"time"
+	"net"
 
 	"google.golang.org/grpc/credentials"
 
@@ -56,7 +57,7 @@ func CreateGrpcConnection(address string, port int, caCertPath string, certPath 
 	}
 	options := []grpc.DialOption{grpc.WithUnaryInterceptor(TimeoutClientInterceptor)}
 	options = append(options, grpc.WithInsecure())
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", address, port), options...)
+	conn, err := grpc.Dial(net.JoinHostPort(address, fmt.Sprintf("%d", port)), options...)
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +83,7 @@ func CreateGrpcConnectionFromRaw(address string, port int, caCert []byte, cert [
 	})
 	options = append(options, grpc.WithTransportCredentials(creds))
 
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", address, port),
+	conn, err := grpc.Dial(net.JoinHostPort(address, fmt.Sprintf("%d", port)),
 		options...)
 	if err != nil {
 		return nil, err
