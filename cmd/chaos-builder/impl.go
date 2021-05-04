@@ -15,7 +15,7 @@ package main
 
 import (
 	"bytes"
-	"html/template"
+	"text/template"
 )
 
 const implImport = `
