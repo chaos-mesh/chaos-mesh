@@ -23,6 +23,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/klog"
 	aggregatorclientset "k8s.io/kube-aggregator/pkg/client/clientset_generated/clientset"
+	"k8s.io/kubernetes/test/e2e/framework"
 )
 
 const (
@@ -79,6 +80,7 @@ func NewDefaultOperatorConfig() OperatorConfig {
 }
 
 type operatorAction struct {
+	framework *framework.Framework
 	kubeCli   kubernetes.Interface
 	aggrCli   aggregatorclientset.Interface
 	apiExtCli apiextensionsclientset.Interface
