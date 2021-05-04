@@ -61,12 +61,12 @@ type tlsConfig struct {
 
 // Get the http address
 func (c *Config) HttpAddr() string {
-	return net.JoinHostPort(c.Host, fmt.Sprintf("%d", HTTPPort))
+	return net.JoinHostPort(c.Host, fmt.Sprintf("%d", c.HTTPPort))
 }
 
 // Get the grpc address
 func (c *Config) GrpcAddr() string {
-	return net.JoinHostPort(c.Host, fmt.Sprintf("%d", GRPCPort))
+	return net.JoinHostPort(c.Host, fmt.Sprintf("%d", c.GRPCPort))
 }
 
 // DaemonServer represents a grpc server for tc daemon

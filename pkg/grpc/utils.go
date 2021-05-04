@@ -19,8 +19,8 @@ import (
 	"crypto/x509"
 	"fmt"
 	"io/ioutil"
-	"time"
 	"net"
+	"time"
 
 	"google.golang.org/grpc/credentials"
 
