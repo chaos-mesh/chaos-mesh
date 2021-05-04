@@ -24,7 +24,7 @@ import (
 	"google.golang.org/grpc/credentials"
 
 	"google.golang.org/grpc"
-	ctrl "sigs.k8s.io/controller-runtime"
+	// ctrl "sigs.k8s.io/controller-runtime"
 )
 
 // DefaultRPCTimeout specifies default timeout of RPC between controller and chaos-operator
@@ -33,7 +33,8 @@ const DefaultRPCTimeout = 60 * time.Second
 // RPCTimeout specifies timeout of RPC between controller and chaos-operator
 var RPCTimeout = DefaultRPCTimeout
 
-var log = ctrl.Log.WithName("util")
+// commeting this as this is not getting used
+// var log = ctrl.Log.WithName("util")
 
 // CreateGrpcConnection create a grpc connection with given port and address
 func CreateGrpcConnection(address string, port int, caCertPath string, certPath string, keyPath string) (*grpc.ClientConn, error) {

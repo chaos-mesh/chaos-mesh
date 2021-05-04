@@ -15,12 +15,13 @@ package client
 
 import (
 	"google.golang.org/grpc"
-	ctrl "sigs.k8s.io/controller-runtime"
+	// ctrl "sigs.k8s.io/controller-runtime"
 
 	chaosdaemon "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
-var log = ctrl.Log.WithName("chaos-daemon-client-utils")
+// Commeting as this is not getting used
+// var log = ctrl.Log.WithName("chaos-daemon-client-utils")
 
 // ChaosDaemonClientInterface represents the ChaosDaemonClient, it's used to simply unit test
 type ChaosDaemonClientInterface interface {
