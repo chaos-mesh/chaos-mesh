@@ -435,6 +435,10 @@ func randomStringWithCharset(length int, charset string) string {
 	ll := len(charset)
 	b := make([]byte, length)
 	rand.Read(b) // generates len(b) random bytes
+	_, err := rand.Read(b)
+	if err != nil {
+		return ""
+	}
 	for i := 0; i < length; i++ {
 		b[i] = charset[int(b[i])%ll]
 	}
