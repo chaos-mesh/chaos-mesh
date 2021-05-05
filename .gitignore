@@ -29,8 +29,8 @@ node_modules
 output/
 _artifacts/
 
-test/image/e2e/chaos-mesh
-test/image/e2e/manifests/
+e2e-test/image/e2e/chaos-mesh
+e2e-test/image/e2e/manifests/
 
 /pkg/uiserver/embedded_assets_handler.go
 
@@ -41,4 +41,4 @@ test/image/e2e/manifests/
 !/images/*/bin/.gitkeep
 
 .dockerbuilt
-Dockerfile
+/Dockerfile
