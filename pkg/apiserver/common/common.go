@@ -36,7 +36,6 @@ import (
 
 const (
 	roleManager = "manager"
-	roleViewer  = "viewer"
 
 	serviceAccountTemplate = `kind: ServiceAccount
 apiVersion: v1
