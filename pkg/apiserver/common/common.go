@@ -15,12 +15,11 @@ package common
 
 import (
 	"context"
+	"crypto/rand"
 	"fmt"
-	"math/rand"
 	"net/http"
 	"sort"
 	"strings"
-	"time"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
@@ -433,10 +432,11 @@ func inSlice(v string, sl []string) bool {
 const charset = "abcdefghijklmnopqrstuvwxyz"
 
 func randomStringWithCharset(length int, charset string) string {
-	var seededRand = rand.New(rand.NewSource(time.Now().UnixNano()))
+	ll := len(charset)
 	b := make([]byte, length)
-	for i := range b {
-		b[i] = charset[seededRand.Intn(len(charset))]
+	rand.Read(b) // generates len(b) random bytes
+	for i := 0; i < length; i++ {
+		b[i] = charset[int(b[i])%ll]
 	}
 	return string(b)
 }

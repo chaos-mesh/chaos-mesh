@@ -15,10 +15,11 @@ package selector
 
 import (
 	"context"
+	"crypto/rand"
 	"errors"
 	"fmt"
 	"math"
-	"math/rand"
+	"math/big"
 	"strconv"
 	"strings"
 
@@ -358,7 +359,11 @@ func filterPodsByMode(pods []v1.Pod, mode v1alpha1.PodMode, value string) ([]v1.
 
 	switch mode {
 	case v1alpha1.OnePodMode:
-		index := rand.Intn(len(pods))
+		nBig, err := rand.Int(rand.Reader, big.NewInt(int64(len(pods))))
+		if err != nil {
+			return nil, err
+		}
+		index := nBig.Int64()
 		pod := pods[index]
 
 		return []v1.Pod{pod}, nil
@@ -410,7 +415,11 @@ func filterPodsByMode(pods []v1.Pod, mode v1alpha1.PodMode, value string) ([]v1.
 			return nil, fmt.Errorf("fixed percentage value of %d is invalid, Must be [0-100]", maxPercentage)
 		}
 
-		percentage := rand.Intn(maxPercentage + 1) // + 1 because Intn works with half open interval [0,n) and we want [0,n]
+		nBig, err := rand.Int(rand.Reader, big.NewInt(int64(maxPercentage)))
+		if err != nil {
+			return nil, err
+		}
+		percentage := nBig.Int64()
 		num := int(math.Floor(float64(len(pods)) * float64(percentage) / 100))
 
 		return getFixedSubListFromPodList(pods, num), nil
@@ -627,8 +636,11 @@ func RandomFixedIndexes(start, end, count uint) []uint {
 	}
 
 	for i := 0; i < int(count); {
-		index := uint(rand.Intn(int(end-start))) + start
-
+		nBig, err := rand.Int(rand.Reader, big.NewInt(int64(end-start)))
+		if err != nil {
+			continue
+		}
+		index := uint(nBig.Int64()) + start
 		_, exist := m[index]
 		if exist {
 			continue
