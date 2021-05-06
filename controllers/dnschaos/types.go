@@ -17,6 +17,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net"
 	"time"
 
 	dnspb "github.com/chaos-mesh/k8s_dns_chaos/pb"
@@ -258,7 +259,7 @@ func (r *endpoint) setDNSServerRules(dnsServerIP string, port int, name string, 
 }
 
 func (r *endpoint) cancelDNSServerRules(dnsServerIP string, port int, name string) error {
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", dnsServerIP, port), grpc.WithInsecure())
+	conn, err := grpc.Dial(net.JoinHostPort(dnsServerIP, fmt.Sprintf("%d", port)), grpc.WithInsecure())
 	if err != nil {
 		return err
 	}
