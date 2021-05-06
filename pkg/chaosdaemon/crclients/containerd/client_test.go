@@ -56,7 +56,8 @@ var _ = Describe("containerd client", func() {
 			_, err := c.GetPidFromContainerID(context.TODO(), "containerd://valid-container-id")
 			Expect(err).NotTo(BeNil())
 			Expect(fmt.Sprintf("%s", err)).To(Equal(errorStr))
-			mock.Reset("LoadContainerError")
+			err = mock.Reset("LoadContainerError")
+			Expect(err).NotTo(BeNil())
 
 			mock.With("TaskError", errors.New(errorStr))
 			m = &test.MockClient{}
@@ -64,7 +65,8 @@ var _ = Describe("containerd client", func() {
 			_, err = c.GetPidFromContainerID(context.TODO(), "containerd://valid-container-id")
 			Expect(err).NotTo(BeNil())
 			Expect(fmt.Sprintf("%s", err)).To(Equal(errorStr))
-			mock.Reset("TaskError")
+			err = mock.Reset("TaskError")
+			Expect(err).NotTo(BeNil())
 		})
 	})
 

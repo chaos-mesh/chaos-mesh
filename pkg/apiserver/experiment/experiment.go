@@ -1461,7 +1461,10 @@ func (s *Service) updateNetworkChaos(exp *core.KubeObjectYAMLDescription, kubeCl
 	chaos.Spec = spec
 
 	var tcParameter v1alpha1.TcParameter
-	mapstructure.Decode(exp.Spec, &tcParameter)
+	err := mapstructure.Decode(exp.Spec, &tcParameter)
+	if err != nil {
+		return err
+	}
 	chaos.Spec.TcParameter = tcParameter
 
 	return kubeCli.Update(context.Background(), chaos)
