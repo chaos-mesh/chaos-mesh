@@ -99,12 +99,12 @@ const useStyles = makeStyles((theme) => {
 const listItems = [
   { icon: <DashboardOutlinedIcon />, text: 'dashboard' },
   {
-    icon: <StorageOutlinedIcon />,
-    text: 'experiments',
-  },
-  {
     icon: <AccountTreeOutlinedIcon />,
     text: 'workflows',
+  },
+  {
+    icon: <StorageOutlinedIcon />,
+    text: 'experiments',
   },
   {
     icon: <TimelineOutlinedIcon />,

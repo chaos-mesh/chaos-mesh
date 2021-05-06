@@ -49,20 +49,7 @@ const AutocompleteMultipleField: React.FC<AutocompleteMultipleFieldProps & TextF
           />
         ))
       }
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          {...props}
-          variant="outlined"
-          margin="dense"
-          fullWidth
-          InputProps={{
-            ...params.InputProps,
-            ...props.InputProps,
-            style: { paddingTop: 8 },
-          }}
-        />
-      )}
+      renderInput={(params) => <TextField {...params} {...props} variant="outlined" margin="dense" fullWidth />}
     />
   )
 }

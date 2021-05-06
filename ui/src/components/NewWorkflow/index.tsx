@@ -120,11 +120,7 @@ const NewWorkflow = () => {
   }, [dispatch])
 
   useEffect(() => {
-    if (!_isEmpty(templates)) {
-      setSteps(Object.values(templates).sort((a, b) => a.index! - b.index!))
-    } else {
-      setSteps([])
-    }
+    setSteps(_isEmpty(templates) ? [] : templates)
   }, [templates])
 
   const resetRestore = () => {
@@ -284,7 +280,7 @@ const NewWorkflow = () => {
       console.debug('Debug workflow:', workflow)
     }
 
-    // api.workflows.newWorkflow(yaml.load(workflow!))
+    api.workflows.newWorkflow(yaml.load(workflow!))
   }
 
   return (
@@ -362,7 +358,11 @@ const NewWorkflow = () => {
                               </Formik>
                             )}
                             {step.type !== 'suspend' && (
-                              <NewExperiment loadFrom={false} onSubmit={onRestoreSubmit(step.type, index)} />
+                              <NewExperiment
+                                loadFrom={false}
+                                onSubmit={onRestoreSubmit(step.type, index)}
+                                inWorkflow={true}
+                              />
                             )}
                             {step.type === 'suspend' && (
                               <Suspend

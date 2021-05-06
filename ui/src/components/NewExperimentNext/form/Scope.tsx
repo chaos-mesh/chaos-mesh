@@ -188,7 +188,7 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
         </SelectField>
       </AdvancedOptions>
 
-      <Box mb={3}>
+      <Box my={3}>
         <Typography>{podsPreviewTitle || T('newE.scope.affectedPodsPreview')}</Typography>
         <Typography variant="subtitle2" color="textSecondary">
           {podsPreviewDesc || T('newE.scope.affectedPodsPreviewHelper')}

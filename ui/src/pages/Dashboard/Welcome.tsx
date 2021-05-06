@@ -94,16 +94,6 @@ const Welcome = () => {
 
       <PaperTop title={T('dashboard.veteran')} subtitle={T('dashboard.veteranDesc')} />
       <Button
-        className={clsx(classes.button, 'dashboard-new-experiment')}
-        component={Link}
-        to="/experiments/new"
-        variant="contained"
-        color="primary"
-        startIcon={<AddIcon />}
-      >
-        {T('newE.title')}
-      </Button>
-      <Button
         className={classes.button}
         component={Link}
         to="/workflows/new"
@@ -112,6 +102,16 @@ const Welcome = () => {
         startIcon={<AddIcon />}
       >
         {T('newW.title')}
+      </Button>
+      <Button
+        className={clsx(classes.button, 'dashboard-new-experiment')}
+        component={Link}
+        to="/experiments/new"
+        variant="contained"
+        color="primary"
+        startIcon={<AddIcon />}
+      >
+        {T('newE.title')}
       </Button>
     </Paper>
   )

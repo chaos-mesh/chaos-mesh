@@ -236,7 +236,7 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
           realTemplates.push({
             name: t.name,
             template_type: kind,
-            duration: experiment.basic.scheduler.duration,
+            duration: experiment.basic.duration,
             [spec]: {
               ...scopeToYAMLJSON(basic.scope),
               ...experiment.target[spec],
@@ -255,7 +255,7 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
               realTemplates.push({
                 name,
                 template_type: kind,
-                duration: d.basic.scheduler.duration,
+                duration: d.basic.duration,
                 [spec]: {
                   ...scopeToYAMLJSON(basic.scope),
                   ...d.target[spec],

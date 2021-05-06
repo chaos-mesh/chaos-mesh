@@ -42,7 +42,7 @@ const Suspend: React.FC<SuspendProps> = ({ initialValues, onSubmit }) => {
               name="name"
               label={T('newE.basic.name')}
               validate={validateName((T('newW.nameValidation') as unknown) as string)}
-              helperText={errors.name && touched.name ? errors.name : T('newW.nameHelper')}
+              helperText={errors.name && touched.name ? errors.name : T('newW.node.nameHelper')}
               error={errors.name && touched.name ? true : false}
             />
             <TextField
@@ -50,7 +50,7 @@ const Suspend: React.FC<SuspendProps> = ({ initialValues, onSubmit }) => {
               name="duration"
               label={T('newE.schedule.duration')}
               validate={validateDuration((T('newW.durationValidation') as unknown) as string)}
-              helperText={errors.duration && touched.duration ? errors.duration : T('newW.durationHelper')}
+              helperText={errors.duration && touched.duration ? errors.duration : T('newW.node.durationHelper')}
               error={errors.duration && touched.duration ? true : false}
             />
             <Submit />

@@ -7,10 +7,17 @@ import Space from 'components-mui/Space'
 import T from 'components/T'
 import { Workflow } from 'api/workflows.type'
 import api from 'api'
+import { makeStyles } from '@material-ui/core/styles'
 import { setAlert } from 'slices/globalStatus'
 import { useHistory } from 'react-router-dom'
 import { useIntl } from 'react-intl'
 import { useStoreDispatch } from 'store'
+
+const useStyles = makeStyles({
+  tableRow: {
+    cursor: 'pointer',
+  },
+})
 
 const initialSelected = {
   namespace: '',
@@ -26,6 +33,7 @@ interface DataTableProps {
 }
 
 const DataTable: React.FC<DataTableProps> = ({ data, fetchData }) => {
+  const classes = useStyles()
   const history = useHistory()
   const intl = useIntl()
 
@@ -95,7 +103,7 @@ const DataTable: React.FC<DataTableProps> = ({ data, fetchData }) => {
               const key = `${d.namespace}/${d.name}`
 
               return (
-                <TableRow key={key} hover onClick={handleJumpTo(d.namespace, d.name)}>
+                <TableRow key={key} className={classes.tableRow} hover onClick={handleJumpTo(d.namespace, d.name)}>
                   <TableCell>{d.name}</TableCell>
                   <TableCell>{d.entry}</TableCell>
                   <TableCell></TableCell>

@@ -16,6 +16,7 @@ import Scope from './form/Scope'
 import SkeletonN from 'components-mui/SkeletonN'
 import T from 'components/T'
 import UndoIcon from '@material-ui/icons/Undo'
+import { string as yupString } from 'yup'
 
 const useStyles = makeStyles((theme) =>
   createStyles({
@@ -31,7 +32,11 @@ const useStyles = makeStyles((theme) =>
   })
 )
 
-const Step2 = () => {
+interface Step2Props {
+  inWorkflow?: boolean
+}
+
+const Step2: React.FC<Step2Props> = ({ inWorkflow = false }) => {
   const classes = useStyles()
 
   const { namespaces, step2, basic, target } = useStoreSelector((state) => state.experiments)
@@ -74,8 +79,14 @@ const Step2 = () => {
       <Box position="relative" hidden={step2}>
         <Formik
           enableReinitialize
-          initialValues={init}
-          validationSchema={schema}
+          initialValues={inWorkflow ? { ...init, duration: '' } : init}
+          validationSchema={
+            inWorkflow
+              ? schema.shape({
+                  duration: yupString().required('The duration is required'),
+                })
+              : schema
+          }
           validateOnChange={false}
           onSubmit={handleOnSubmitStep2}
         >
@@ -102,6 +113,19 @@ const Step2 = () => {
                     helperText={errors.name && touched.name ? errors.name : T('newE.basic.nameHelper')}
                     error={errors.name && touched.name ? true : false}
                   />
+                  {inWorkflow && (
+                    <TextField
+                      fast
+                      name="duration"
+                      label={T('newE.schedule.duration')}
+                      helperText={
+                        (errors as any).duration && (touched as any).duration
+                          ? (errors as any).duration
+                          : T('newW.node.durationHelper')
+                      }
+                      error={(errors as any).duration && (touched as any).duration ? true : false}
+                    />
+                  )}
 
                   <AdvancedOptions>
                     {namespaces.length && (
@@ -120,7 +144,7 @@ const Step2 = () => {
                     <LabelField name="labels" label={T('k8s.labels')} isKV />
                     <LabelField name="annotations" label={T('k8s.annotations')} isKV />
                   </AdvancedOptions>
-                  <Box mb={3}>
+                  <Box my={3}>
                     <Divider />
                   </Box>
                   <Scheduler errors={errors} touched={touched} />

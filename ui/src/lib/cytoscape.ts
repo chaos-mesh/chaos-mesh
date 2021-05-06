@@ -191,7 +191,7 @@ export const constructWorkflowTopology = (container: HTMLElement, detail: Workfl
     minZoom: 0.5,
     maxZoom: 1.5,
   })
-    .pan({ x: 150, y: 150 })
+    .pan({ x: 150, y: container.offsetHeight / 2 })
     .zoom(0.75)
 
   function updateElements(detail: WorkflowDetail) {

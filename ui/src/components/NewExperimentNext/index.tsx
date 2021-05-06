@@ -18,10 +18,11 @@ interface NewExperimentProps {
   initPanel?: PanelType
   onSubmit?: (experiment: { target: any; basic: any }) => void
   loadFrom?: boolean
+  inWorkflow?: boolean
 }
 
 const NewExperiment: React.ForwardRefRenderFunction<NewExperimentHandles, NewExperimentProps> = (
-  { initPanel = 'initial', onSubmit, loadFrom = true },
+  { initPanel = 'initial', onSubmit, loadFrom = true, inWorkflow = false },
   ref
 ) => {
   const [showNewPanel, setShowNewPanel] = useState<PanelType>(initPanel)
@@ -57,7 +58,7 @@ const NewExperiment: React.ForwardRefRenderFunction<NewExperimentHandles, NewExp
       {showNewPanel === 'initial' && (
         <Space spacing={6} vertical>
           <Step1 />
-          <Step2 />
+          <Step2 inWorkflow={inWorkflow} />
           <Step3 onSubmit={onSubmit ? onSubmit : undefined} />
         </Space>
       )}

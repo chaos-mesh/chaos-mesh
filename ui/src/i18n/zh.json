@@ -38,7 +38,7 @@
       "name": "名称",
       "nameHelper": "实验的名称",
       "namespace": "命名空间",
-      "namespaceHelper": "选择实验的命名空间"
+      "namespaceHelper": "选择命名空间"
     },
     "scope": {
       "namespaceSelectors": "命名空间选择器",
@@ -129,7 +129,6 @@
     "time": "时间",
     "state": "状态",
     "created": "创建于",
-    "rerun": "重新启动",
     "topology": "拓扑"
   },
   "newW": {
@@ -142,16 +141,20 @@
       "suspend": "暂停",
       "number": "数目",
       "chooseChildren": "选择子节点",
+      "nameHelper": "节点的名称",
+      "nameValidation": "节点名称不能为空",
+      "durationHelper": "节点的持续时间",
+      "durationValidation": "节点持续时间不能为空",
       "deleteDesc": "此节点将被删除",
       "submitAll": "提交所有改动"
     },
     "serialTitle": "填写顺序节点",
     "parallelTitle": "填写并行节点",
     "suspendTitle": "设置暂停",
-    "nameHelper": "节点的名称",
-    "nameValidation": "节点名称不能为空",
-    "durationHelper": "节点的持续时间",
-    "durationValidation": "节点持续时间不能为空",
+    "nameHelper": "工作流的名称",
+    "nameValidation": "工作流名称不能为空",
+    "durationHelper": "工作流的持续时间",
+    "durationValidation": "工作流持续时间不能为空",
     "submit": "提交工作流",
     "messages": {
       "m1": "请首先完成当前节点的创建"

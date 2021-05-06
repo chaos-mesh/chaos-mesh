@@ -36,7 +36,6 @@ const useStyles = makeStyles((theme) =>
   createStyles({
     eventsChart: {
       height: 150,
-      margin: theme.spacing(3),
     },
     eventDetailPaper: {
       position: 'absolute',

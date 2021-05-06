@@ -1,11 +1,10 @@
-import { Box, Button, CircularProgress, Grid } from '@material-ui/core'
+import { Box, Button, CircularProgress, Grow } from '@material-ui/core'
 import { useEffect, useRef, useState } from 'react'
 
 import { WorkflowDetail as APIWorkflowDetail } from 'api/workflows.type'
-import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline'
+import DeleteOutlinedIcon from '@material-ui/icons/DeleteOutlined'
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
-import ReplayIcon from '@material-ui/icons/Replay'
 import Space from 'components-mui/Space'
 import T from 'components/T'
 import api from 'api'
@@ -14,11 +13,11 @@ import { makeStyles } from '@material-ui/core/styles'
 import { useParams } from 'react-router-dom'
 
 const useStyles = makeStyles((theme) => ({
-  topology: {
-    height: 300,
+  root: {
+    height: `calc(100vh - 56px - ${theme.spacing(18)})`,
   },
-  success: {
-    color: theme.palette.success.main,
+  topology: {
+    flex: 1,
   },
 }))
 
@@ -26,8 +25,8 @@ const WorkflowDetail = () => {
   const classes = useStyles()
   const { namespace, name } = useParams<any>()
 
-  const [detail, setDetail] = useState<APIWorkflowDetail>()
   const [loading, setLoading] = useState(false)
+  const [detail, setDetail] = useState<APIWorkflowDetail>()
   const topologyRef = useRef<any>(null)
 
   const fetchWorkflowDetail = (ns: string, name: string) =>
@@ -35,14 +34,15 @@ const WorkflowDetail = () => {
       .detail(ns, name)
       .then(({ data }) => setDetail(data))
       .catch(console.error)
+      .finally(() => setTimeout(() => setLoading(true), 1000))
 
   useEffect(() => {
     fetchWorkflowDetail(namespace, name)
 
     const id = setInterval(() => {
       setLoading(false)
+
       fetchWorkflowDetail(namespace, name)
-      setTimeout(() => setLoading(true), 1000)
     }, 6000)
 
     return () => clearInterval(id)
@@ -65,32 +65,26 @@ const WorkflowDetail = () => {
   }, [detail])
 
   return (
-    <>
-      <Box mb={6}>
-        <Button variant="outlined" startIcon={<ReplayIcon />} onClick={() => {}}>
-          {T('workflow.rerun')}
-        </Button>
-      </Box>
-      <Grid container>
-        <Grid item xs={12} md={8}>
-          <Paper>
-            <PaperTop
-              title={
-                <Space spacing={1.5} display="flex" alignItems="center">
-                  <Box>{T('workflow.topology')}</Box>
-                  {loading ? (
-                    <CircularProgress size={15} />
-                  ) : (
-                    <CheckCircleOutlineIcon className={classes.success} style={{ width: 20, height: 20 }} />
-                  )}
-                </Space>
-              }
-            />
-            <div className={classes.topology} ref={topologyRef}></div>
-          </Paper>
-        </Grid>
-      </Grid>
-    </>
+    <Grow in={true} style={{ transformOrigin: '0 0 0' }}>
+      <Space display="flex" flexDirection="column" className={classes.root} vertical spacing={6}>
+        <Space>
+          <Button variant="outlined" size="small" startIcon={<DeleteOutlinedIcon />} onClick={() => {}}>
+            {T('common.delete')}
+          </Button>
+        </Space>
+        <Paper className={classes.topology} boxProps={{ display: 'flex', flexDirection: 'column' }}>
+          <PaperTop
+            title={
+              <Space spacing={1.5} display="flex" alignItems="center">
+                <Box>{T('workflow.topology')}</Box>
+                {loading && <CircularProgress size={15} />}
+              </Space>
+            }
+          />
+          <div ref={topologyRef} style={{ flex: 1 }} />
+        </Paper>
+      </Space>
+    </Grow>
   )
 }
 

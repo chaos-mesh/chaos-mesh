@@ -37,7 +37,7 @@
       "name": "Name",
       "nameHelper": "The experiment name",
       "namespace": "Namespace",
-      "namespaceHelper": "Select the experiment's namespace"
+      "namespaceHelper": "Select the namespace"
     },
     "scope": {
       "namespaceSelectors": "Namespace Selectors",
@@ -128,7 +128,6 @@
     "time": "Time",
     "state": "State",
     "created": "Created",
-    "rerun": "Re-run",
     "topology": "Topology"
   },
   "newW": {
@@ -140,12 +139,21 @@
       "parallel": "Parallel",
       "suspend": "Suspend",
       "number": "Number",
+      "chooseChildren": "Choose child node",
+      "nameHelper": "The node name",
+      "nameValidation": "The node name is required",
+      "durationHelper": "The node duration",
+      "durationValidation": "The node duration is required",
       "deleteDesc": "This node will be deleted",
       "submitAll": "Submit All"
     },
-    "nameValidation": "The name is required",
+    "serialTitle": "Set serial",
+    "parallelTitle": "Set parallel",
     "suspendTitle": "Set suspend",
-    "durationHelper": "The suspend duration",
+    "nameHelper": "The workflow name",
+    "nameValidation": "The workflow name is required",
+    "durationHelper": "The workflow duration",
+    "durationValidation": "The workflow duration is required",
     "submit": "Submit workflow",
     "messages": {
       "m1": "Please complete the creation of the current node first"
