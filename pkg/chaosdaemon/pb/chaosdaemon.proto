@@ -138,7 +138,7 @@ message Chain {
   string protocol = 5;
   string source_ports = 6;
   string destination_ports = 7;
-  string accept_tcp_flags = 8;
+  string tcp_flags = 8;
 }
 
 message TimeRequest {

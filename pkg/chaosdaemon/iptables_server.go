@@ -104,6 +104,10 @@ func (iptables *iptablesClient) setIptablesChain(chain *pb.Chain) error {
 		if len(chain.DestinationPorts) > 0 {
 			protocolAndPort += " " + chain.DestinationPorts
 		}
+
+		if len(chain.TcpFlags) > 0 {
+			protocolAndPort += " --tcp-flags " + chain.TcpFlags
+		}
 	}
 
 	rules := []string{}
