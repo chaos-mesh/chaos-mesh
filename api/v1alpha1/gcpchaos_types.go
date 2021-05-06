@@ -70,17 +70,17 @@ type GcpChaosSpec struct {
 	// Instance defines the name of the instance
 	Instance string `json:"instance"`
 
-	// The device name of the disk to detach.
+	// The device name of disks to detach.
 	// Needed in disk-loss.
 	// +optional
-	DeviceName *string `json:"deviceName,omitempty"`
+	DeviceNames *[]string `json:"deviceNames,omitempty"`
 }
 
 // GcpChaosStatus represents the status of a GcpChaos
 type GcpChaosStatus struct {
 	ChaosStatus `json:",inline"`
 
-	// The attached disk info string.
+	// The attached disk info strings.
 	// Needed in disk-loss.
-	AttachedDiskString string `json:"attachedDiskString,omitempty"`
+	AttachedDisksStrings []string `json:"attachedDiskStrings,omitempty"`
 }

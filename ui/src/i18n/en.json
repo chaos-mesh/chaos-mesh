@@ -87,6 +87,9 @@
       },
       "aws": {
         "title": "AWS Fault"
+      },
+      "gcp": {
+        "title": "GCP Fault"
       }
     },
     "schedule": {

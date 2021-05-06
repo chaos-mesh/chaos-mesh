@@ -115,7 +115,6 @@ $ make test
    Following command will rebuild project code and reinstall chaos mesh.
 
    ```bash
-   #
    $ ./hack/local-up-chaos-mesh.sh
    ```
 

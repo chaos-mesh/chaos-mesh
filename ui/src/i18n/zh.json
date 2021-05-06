@@ -88,6 +88,9 @@
       },
       "aws": {
         "title": "AWS 故障"
+      },
+      "gcp": {
+        "title": "GCP 故障"
       }
     },
     "schedule": {
