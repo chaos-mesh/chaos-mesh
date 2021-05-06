@@ -230,7 +230,7 @@ func (r *endpoint) setDNSServerRules(dnsServerIP string, port int, name string, 
 		}
 	}
 
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", dnsServerIP, port), grpc.WithInsecure())
+	conn, err := grpc.Dial(net.JoinHostPort(dnsServerIP, fmt.Sprintf("%d", port)), grpc.WithInsecure())
 	if err != nil {
 		return err
 	}
