@@ -467,8 +467,8 @@ spec:
               - node-reset
               - disk-loss
               type: string
-            deviceName:
-              description: The device name of the disk to detach. Needed in disk-loss.
+            deviceNames:
+              description: The device name of disks to detach. Needed in disk-loss.
               items:
                 type: string
               type: array
@@ -510,8 +510,8 @@ spec:
         status:
           description: GcpChaosStatus represents the status of a GcpChaos
           properties:
-            attachedDiskString:
-              description: The attached disk info string. Needed in disk-loss.
+            attachedDiskStrings:
+              description: The attached disk info strings. Needed in disk-loss.
               items:
                 type: string
               type: array
@@ -3910,8 +3910,8 @@ spec:
                   - node-reset
                   - disk-loss
                   type: string
-                deviceName:
-                  description: The device name of the disk to detach. Needed in disk-loss.
+                deviceNames:
+                  description: The device name of disks to detach. Needed in disk-loss.
                   items:
                     type: string
                   type: array
@@ -6015,9 +6015,9 @@ spec:
                         - node-reset
                         - disk-loss
                         type: string
-                      deviceName:
-                        description: The device name of the disk to detach. Needed
-                          in disk-loss.
+                      deviceNames:
+                        description: The device name of disks to detach. Needed in
+                          disk-loss.
                         items:
                           type: string
                         type: array
