@@ -12,6 +12,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	protoregistry "google.golang.org/protobuf/reflect/protoregistry"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -385,15 +386,15 @@ func (m *StatusResponse) GetMsg() string {
 }
 
 func init() {
-	proto.RegisterEnum("bpfki.FailKernRequest_FAILTYPE", FailKernRequest_FAILTYPE_name, FailKernRequest_FAILTYPE_value)
-	proto.RegisterType((*BumpTimeRequest)(nil), "bpfki.BumpTimeRequest")
-	proto.RegisterType((*FailKernRequest)(nil), "bpfki.FailKernRequest")
-	proto.RegisterType((*FailKernRequestFrame)(nil), "bpfki.FailKernRequest.frame")
-	proto.RegisterType((*FailSyscallRequest)(nil), "bpfki.FailSyscallRequest")
-	proto.RegisterType((*StatusResponse)(nil), "bpfki.StatusResponse")
+	protoregistry.GlobalTypes.RegisterEnum("bpfki.FailKernRequest_FAILTYPE", FailKernRequest_FAILTYPE_name, FailKernRequest_FAILTYPE_value)
+	protoregistry.GlobalTypes.RegisterMessage((*BumpTimeRequest)(nil), "bpfki.BumpTimeRequest")
+	protoregistry.GlobalTypes.RegisterMessage((*FailKernRequest)(nil), "bpfki.FailKernRequest")
+	protoregistry.GlobalTypes.RegisterMessage((*FailKernRequestFrame)(nil), "bpfki.FailKernRequest.frame")
+	protoregistry.GlobalTypes.RegisterMessage((*FailSyscallRequest)(nil), "bpfki.FailSyscallRequest")
+	protoregistry.GlobalTypes.RegisterMessage((*StatusResponse)(nil), "bpfki.StatusResponse")
 }
 
-func init() { proto.RegisterFile("bpfki.proto", fileDescriptor_62eed357eb71de0e) }
+func init() { protoregistry.GlobalFiles.RegisterFile("bpfki.proto", fileDescriptor_62eed357eb71de0e) }
 
 var fileDescriptor_62eed357eb71de0e = []byte{
 	// 518 bytes of a gzipped FileDescriptorProto
