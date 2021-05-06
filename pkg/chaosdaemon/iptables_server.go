@@ -95,7 +95,7 @@ func (iptables *iptablesClient) setIptablesChain(chain *pb.Chain) error {
 		return fmt.Errorf("unknown chain direction %d", chain.Direction)
 	}
 
-	protocolAndPort := " "
+	protocolAndPort := ""
 	if len(protocolAndPort) > 0 {
 		if len(chain.Protocol) > 0 {
 			protocolAndPort += "--protocol " + chain.Protocol
