@@ -18,6 +18,11 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const (
+	LabelControlledBy = "chaos-mesh.org/controlled-by"
+	LabelWorkflow     = "chaos-mesh.org/workflow"
+)
+
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:shortName=wfn
 type WorkflowNode struct {

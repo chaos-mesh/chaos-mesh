@@ -22,8 +22,9 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
 	"google.golang.org/grpc"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
 
 	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"

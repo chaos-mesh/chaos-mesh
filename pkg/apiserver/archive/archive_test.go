@@ -265,6 +265,10 @@ func (m *MockExperimentStore) DeleteIncompleteExperiments(context.Context) error
 	panic("implement me")
 }
 
+func (m *MockExperimentStore) DeleteByUIDs(context.Context, []string) error {
+	panic("implement me")
+}
+
 var _ = Describe("event", func() {
 	var router *gin.Engine
 	BeforeEach(func() {
@@ -340,10 +344,10 @@ var _ = Describe("event", func() {
 					StartTime:  time.Time{},
 					FinishTime: time.Time{},
 				},
-				YAML: core.ExperimentYAMLDescription{
+				YAML: core.KubeObjectYAMLDescription{
 					APIVersion: "",
 					Kind:       "",
-					Metadata: core.ExperimentYAMLMetadata{
+					Metadata: core.KubeObjectYAMLMetadata{
 						Name:        "",
 						Namespace:   "",
 						Labels:      nil,
@@ -373,10 +377,10 @@ var _ = Describe("event", func() {
 					StartTime:  time.Time{},
 					FinishTime: time.Time{},
 				},
-				YAML: core.ExperimentYAMLDescription{
+				YAML: core.KubeObjectYAMLDescription{
 					APIVersion: "",
 					Kind:       "",
-					Metadata: core.ExperimentYAMLMetadata{
+					Metadata: core.KubeObjectYAMLMetadata{
 						Name:        "",
 						Namespace:   "",
 						Labels:      nil,
@@ -406,10 +410,10 @@ var _ = Describe("event", func() {
 					StartTime:  time.Time{},
 					FinishTime: time.Time{},
 				},
-				YAML: core.ExperimentYAMLDescription{
+				YAML: core.KubeObjectYAMLDescription{
 					APIVersion: "",
 					Kind:       "",
-					Metadata: core.ExperimentYAMLMetadata{
+					Metadata: core.KubeObjectYAMLMetadata{
 						Name:        "",
 						Namespace:   "",
 						Labels:      nil,
@@ -439,10 +443,10 @@ var _ = Describe("event", func() {
 					StartTime:  time.Time{},
 					FinishTime: time.Time{},
 				},
-				YAML: core.ExperimentYAMLDescription{
+				YAML: core.KubeObjectYAMLDescription{
 					APIVersion: "",
 					Kind:       "",
-					Metadata: core.ExperimentYAMLMetadata{
+					Metadata: core.KubeObjectYAMLMetadata{
 						Name:        "",
 						Namespace:   "",
 						Labels:      nil,
@@ -472,10 +476,10 @@ var _ = Describe("event", func() {
 					StartTime:  time.Time{},
 					FinishTime: time.Time{},
 				},
-				YAML: core.ExperimentYAMLDescription{
+				YAML: core.KubeObjectYAMLDescription{
 					APIVersion: "",
 					Kind:       "",
-					Metadata: core.ExperimentYAMLMetadata{
+					Metadata: core.KubeObjectYAMLMetadata{
 						Name:        "",
 						Namespace:   "",
 						Labels:      nil,
@@ -505,10 +509,10 @@ var _ = Describe("event", func() {
 					StartTime:  time.Time{},
 					FinishTime: time.Time{},
 				},
-				YAML: core.ExperimentYAMLDescription{
+				YAML: core.KubeObjectYAMLDescription{
 					APIVersion: "",
 					Kind:       "",
-					Metadata: core.ExperimentYAMLMetadata{
+					Metadata: core.KubeObjectYAMLMetadata{
 						Name:        "",
 						Namespace:   "",
 						Labels:      nil,

@@ -237,9 +237,11 @@ spec:
                   - node-reset
                   - disk-loss
                   type: string
-                deviceName:
-                  description: The device name of the disk to detach. Needed in disk-loss.
-                  type: string
+                deviceNames:
+                  description: The device name of disks to detach. Needed in disk-loss.
+                  items:
+                    type: string
+                  type: array
                 duration:
                   description: Duration represents the duration of the chaos action.
                   type: string

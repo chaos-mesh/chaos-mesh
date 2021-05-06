@@ -18,8 +18,6 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	v1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/config"
@@ -109,32 +107,3 @@ var _ = Describe("Namespace-scoped Chaos", func() {
 		})
 	})
 })
-
-// TODO: reuse this function
-func newPod(
-	name string,
-	status v1.PodPhase,
-	namespace string,
-	ans map[string]string,
-	ls map[string]string,
-	nodename string,
-) v1.Pod {
-	return v1.Pod{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Pod",
-			APIVersion: "v1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:        name,
-			Namespace:   namespace,
-			Labels:      ls,
-			Annotations: ans,
-		},
-		Spec: v1.PodSpec{
-			NodeName: nodename,
-		},
-		Status: v1.PodStatus{
-			Phase: status,
-		},
-	}
-}

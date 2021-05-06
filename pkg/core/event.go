@@ -38,6 +38,9 @@ type EventStore interface {
 	// ListByUID returns an event list by the UID.
 	ListByUID(context.Context, string) ([]*Event, error)
 
+	// ListByUIDs returns an event list by the UID list.
+	ListByUIDs(context.Context, []string) ([]*Event, error)
+
 	// DryListByFilter returns an event list by experimentName, experimentNamespace, uid, kind, startTime and finishTime.
 	DryListByFilter(context.Context, Filter) ([]*Event, error)
 
@@ -64,6 +67,9 @@ type EventStore interface {
 
 	// DeleteByUID deletes events list by the UID.
 	DeleteByUID(context.Context, string) error
+
+	// DeleteByUIDs deletes events list by the UID list.
+	DeleteByUIDs(context.Context, []string) error
 
 	// UpdateIncompleteEvents updates the incomplete event by the namespace and name
 	// If chaos is deleted before an event is over, then the incomplete event would be stored in datastore,

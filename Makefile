@@ -50,10 +50,6 @@ FAILPOINT_ENABLE  := $$(find $$PWD/ -type d | grep -vE "(\.git|bin)" | xargs $(G
 FAILPOINT_DISABLE := $$(find $$PWD/ -type d | grep -vE "(\.git|bin)" | xargs $(GOBIN)/failpoint-ctl disable)
 
 GO_BUILD_CACHE ?= $(HOME)/.cache/chaos-mesh
-all: manifests/crd.yaml image
-go_build_cache_directory:
-	mkdir -p $(GO_BUILD_CACHE)/chaos-mesh-gobuild
-	mkdir -p $(GO_BUILD_CACHE)/chaos-mesh-gopath
 
 BUILD_TAGS ?=
 
@@ -67,6 +63,10 @@ endif
 
 CLEAN_TARGETS :=
 
+all: manifests/crd.yaml image
+go_build_cache_directory:
+	mkdir -p $(GO_BUILD_CACHE)/chaos-mesh-gobuild
+	mkdir -p $(GO_BUILD_CACHE)/chaos-mesh-gopath
 
 check: fmt vet boilerplate lint generate manifests/crd.yaml tidy
 
@@ -264,28 +264,28 @@ prepare-e2e: e2e-image docker-push-e2e
 
 GINKGO_FLAGS ?=
 e2e: e2e-build
-	./test/image/e2e/bin/ginkgo ${GINKGO_FLAGS} ./test/image/e2e/bin/e2e.test -- --e2e-image ${DOCKER_REGISTRY_PREFIX}pingcap/e2e-helper:${IMAGE_TAG}
+	./e2e-test/image/e2e/bin/ginkgo ${GINKGO_FLAGS} ./e2e-test/image/e2e/bin/e2e.test -- --e2e-image ${DOCKER_REGISTRY_PREFIX}pingcap/e2e-helper:${IMAGE_TAG}
 
-image-chaos-mesh-e2e-dependencies += test/image/e2e/manifests test/image/e2e/chaos-mesh e2e-build
-CLEAN_TARGETS += test/image/e2e/manifests test/image/e2e/chaos-mesh
+image-chaos-mesh-e2e-dependencies += e2e-test/image/e2e/manifests e2e-test/image/e2e/chaos-mesh e2e-build
+CLEAN_TARGETS += e2e-test/image/e2e/manifests e2e-test/image/e2e/chaos-mesh
 
-e2e-build: test/image/e2e/bin/ginkgo test/image/e2e/bin/e2e.test
+e2e-build: e2e-test/image/e2e/bin/ginkgo e2e-test/image/e2e/bin/e2e.test
 
-CLEAN_TARGETS+=test/image/e2e/bin/ginkgo
-test/image/e2e/bin/ginkgo:
-	$(GO) build -ldflags "$(LDFLAGS)" -tags "${BUILD_TAGS}" -o test/image/e2e/bin/ginkgo github.com/onsi/ginkgo/ginkgo
+CLEAN_TARGETS+=e2e-test/image/e2e/bin/ginkgo
+e2e-test/image/e2e/bin/ginkgo:
+	cd e2e-test && $(GO) build -ldflags "$(LDFLAGS)" -tags "${BUILD_TAGS}" -o image/e2e/bin/ginkgo github.com/onsi/ginkgo/ginkgo
 
-CLEAN_TARGETS+=test/image/e2e/bin/e2e.test
-test/image/e2e/bin/e2e.test:
-	$(GO) test -c  -o ./test/image/e2e/bin/e2e.test ./test/e2e
+CLEAN_TARGETS+=e2e-test/image/e2e/bin/e2e.test
+e2e-test/image/e2e/bin/e2e.test:
+	cd e2e-test && $(GO) test -c  -o ./image/e2e/bin/e2e.test ./e2e
 
-test/image/e2e/manifests: manifests
-	rm -rf test/image/e2e/manifests
-	cp -r manifests test/image/e2e
+e2e-test/image/e2e/manifests: manifests
+	rm -rf e2e-test/image/e2e/manifests
+	cp -r manifests e2e-test/image/e2e
 
-test/image/e2e/chaos-mesh: helm/chaos-mesh
-	rm -rf test/image/e2e/chaos-mesh
-	cp -r helm/chaos-mesh test/image/e2e
+e2e-test/image/e2e/chaos-mesh: helm/chaos-mesh
+	rm -rf e2e-test/image/e2e/chaos-mesh
+	cp -r helm/chaos-mesh e2e-test/image/e2e
 
 define IMAGE_TEMPLATE
 CLEAN_TARGETS += $(2)/.dockerbuilt
@@ -313,9 +313,9 @@ $(eval $(call IMAGE_TEMPLATE,chaos-daemon,images/chaos-daemon))
 $(eval $(call IMAGE_TEMPLATE,chaos-mesh,images/chaos-mesh))
 $(eval $(call IMAGE_TEMPLATE,chaos-dashboard,images/chaos-dashboard))
 $(eval $(call IMAGE_TEMPLATE,build-env,images/build-env))
-$(eval $(call IMAGE_TEMPLATE,e2e-helper,test/cmd/e2e_helper))
+$(eval $(call IMAGE_TEMPLATE,e2e-helper,e2e-test/cmd/e2e_helper))
 $(eval $(call IMAGE_TEMPLATE,chaos-mesh-protoc,hack/protoc))
-$(eval $(call IMAGE_TEMPLATE,chaos-mesh-e2e,test/image/e2e))
+$(eval $(call IMAGE_TEMPLATE,chaos-mesh-e2e,e2e-test/image/e2e))
 $(eval $(call IMAGE_TEMPLATE,chaos-kernel,images/chaos-kernel))
 $(eval $(call IMAGE_TEMPLATE,chaos-jvm,images/chaos-jvm))
 

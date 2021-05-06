@@ -134,14 +134,16 @@ const ExperimentConfiguration: React.FC<ExperimentConfigurationProps> = ({ exper
                   </TableCell>
                 </TableRow>
 
-                <TableRow>
-                  <TableCell>{T('newE.schedule.duration')}</TableCell>
-                  <TableCell>
-                    <Typography variant="body2" color="textSecondary">
-                      {e.yaml.spec.duration || 'immediate'}
-                    </Typography>
-                  </TableCell>
-                </TableRow>
+                {e.yaml.spec.duration && (
+                  <TableRow>
+                    <TableCell>{T('newE.schedule.duration')}</TableCell>
+                    <TableCell>
+                      <Typography variant="body2" color="textSecondary">
+                        {e.yaml.spec.duration}
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                )}
               </>
             ) : (
               <TableRow>

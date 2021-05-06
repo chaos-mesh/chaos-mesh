@@ -1,8 +1,9 @@
-import { LabelAccessorFunction, PieTooltipProps, ResponsivePie } from '@nivo/pie'
+import { ComputedDatum, PieTooltipProps, ResponsivePie } from '@nivo/pie'
 import React, { useEffect, useState } from 'react'
 
 import { Box } from '@material-ui/core'
 import NotFound from 'components-mui/NotFound'
+import { PropertyAccessor } from '@nivo/core'
 import { StateOfExperiments } from 'api/experiments.type'
 import T from 'components/T'
 import api from 'api'
@@ -32,7 +33,7 @@ const TotalState: React.FC<TotalStateProps> = (props) => {
       .catch(console.error)
   }
 
-  const radialLabel: LabelAccessorFunction<SingleData> = (d) =>
+  const arcLinkLabel: PropertyAccessor<ComputedDatum<SingleData>, string> = (d) =>
     d.value + ' ' + intl.formatMessage({ id: `experiments.state.${d.id.toString().toLowerCase()}` })
 
   const tooltip = ({ datum }: PieTooltipProps<SingleData>) => (
@@ -67,16 +68,18 @@ const TotalState: React.FC<TotalStateProps> = (props) => {
           innerRadius={0.75}
           padAngle={0.25}
           cornerRadius={4}
-          radialLabel={radialLabel}
-          radialLabelsSkipAngle={4}
-          radialLabelsLinkDiagonalLength={8}
-          radialLabelsLinkHorizontalLength={12}
-          radialLabelsLinkColor={{
+          enableArcLabels={false}
+          arcLinkLabel={arcLinkLabel}
+          arcLinkLabelsSkipAngle={4}
+          arcLinkLabelsDiagonalLength={8}
+          arcLinkLabelsStraightLength={12}
+          arcLinkLabelsColor={{
             from: 'color',
           }}
-          radialLabelsTextColor={theme.palette.text.primary}
-          enableSliceLabels={false}
+          arcLinkLabelsTextColor={theme.palette.text.primary}
           tooltip={tooltip}
+          activeInnerRadiusOffset={2}
+          activeOuterRadiusOffset={2}
         />
       ) : (
         <NotFound>{T('experiments.noExperimentsFound')}</NotFound>
