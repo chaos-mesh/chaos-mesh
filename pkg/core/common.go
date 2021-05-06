@@ -13,21 +13,21 @@
 
 package core
 
-// TODO: using YAML in name might make confusion, because it is actually transferred by json.
-// TODO: how about "raw"?
+import (
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
 
-// KubeObjectYAMLDescription defines the YAML structure of an object stored in kubernetes API.
-type KubeObjectYAMLDescription struct {
-	APIVersion string                 `json:"apiVersion"`
-	Kind       string                 `json:"kind"`
-	Metadata   KubeObjectYAMLMetadata `json:"metadata"`
-	Spec       interface{}            `json:"spec"`
+// KubeObjectDesc defines a simple kube object description which uses in apiserver.
+type KubeObjectDesc struct {
+	metav1.TypeMeta `json:",inline"`
+	Meta            KubeObjectMeta `json:"metadata"`
+	Spec            interface{}    `json:"spec"`
 }
 
-// KubeObjectYAMLMetadata defines the metadata of KubeObjectYAMLDescription.
-type KubeObjectYAMLMetadata struct {
+// KubeObjectMetadata extracts the required fields from metav1.ObjectMeta.
+type KubeObjectMeta struct {
 	Name        string            `json:"name"`
 	Namespace   string            `json:"namespace"`
-	Labels      map[string]string `json:"labels"`
-	Annotations map[string]string `json:"annotations"`
+	Labels      map[string]string `json:"labels,omitempty"`
+	Annotations map[string]string `json:"annotations,omitempty"`
 }
