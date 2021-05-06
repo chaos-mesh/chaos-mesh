@@ -73,8 +73,8 @@ function e2e::image_load() {
         local nodes=$($KIND_BIN get nodes --name $CLUSTER | grep -v 'control-plane$')
         echo $nodes
         echo "info: load images ${images[@]}"
-        for image in ${images[@]}; do
-            $KIND_BIN load docker-image --name $CLUSTER ${DOCKER_REGISTRY}/$image:$IMAGE_TAG --nodes $(hack::join ',' ${nodes[@]})
+        for image in "${images[@]}"; do
+            $KIND_BIN load docker-image --name $CLUSTER ${DOCKER_REGISTRY}/$image:$IMAGE_TAG --nodes $(hack::join ',' "${nodes[@]}")
         done
 
         # bypassing docker pull rate limit inner the kind container: kindest/node has no credentials
@@ -84,9 +84,9 @@ function e2e::image_load() {
         docker pull pingcap/coredns:v0.2.0
         docker pull nginx:latest
         docker pull gcr.io/google-containers/pause:latest
-        $KIND_BIN load docker-image --name $CLUSTER pingcap/coredns:v0.2.0 --nodes $(hack::join ',' ${nodes[@]})
-        $KIND_BIN load docker-image --name $CLUSTER nginx:latest --nodes $(hack::join ',' ${nodes[@]})
-        $KIND_BIN load docker-image --name $CLUSTER gcr.io/google-containers/pause:latest --nodes $(hack::join ',' ${nodes[@]})
+        $KIND_BIN load docker-image --name $CLUSTER pingcap/coredns:v0.2.0 --nodes $(hack::join ',' "${nodes[@]}")
+        $KIND_BIN load docker-image --name $CLUSTER nginx:latest --nodes $(hack::join ',' "${nodes[@]}")
+        $KIND_BIN load docker-image --name $CLUSTER gcr.io/google-containers/pause:latest --nodes $(hack::join ',' "${nodes[@]}")
     fi
 }
 
@@ -177,4 +177,4 @@ if [ -n "$REPORT_DIR" ]; then
 fi
 
 echo "info: docker ${docker_args[@]} $E2E_IMAGE ${e2e_args[@]}"
-docker ${docker_args[@]} $E2E_IMAGE ${e2e_args[@]}
+docker "${docker_args[@]}" $E2E_IMAGE "${e2e_args[@]}"
