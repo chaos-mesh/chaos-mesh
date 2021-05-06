@@ -36,6 +36,10 @@ func init() {
 	// +kubebuilder:scaffold:scheme
 }
 
+func NewScheme() *runtime.Scheme {
+	return scheme
+}
+
 func NewOption(logger logr.Logger) *ctrl.Options {
 	setupLog := logger.WithName("setup")
 

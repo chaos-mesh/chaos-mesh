@@ -114,6 +114,24 @@ func (in *AwsChaosList) ListChaos() []*ChaosInstance {
 	return res
 }
 
+func (in *AwsChaos) DurationExceeded(now time.Time) (bool, time.Duration, error) {
+	duration, err := in.GetDuration()
+	if err != nil {
+		return false, 0, err
+	}
+
+	if duration != nil {
+		stopTime := in.GetCreationTimestamp().Add(*duration)
+		if stopTime.Before(now) {
+			return true, 0, nil
+		} else {
+			return false, stopTime.Sub(now), nil
+		}
+	} else {
+		return false, 0, nil
+	}
+}
+
 const KindDNSChaos = "DNSChaos"
 
 // IsDeleted returns whether this resource has been deleted
@@ -205,6 +223,24 @@ func (in *DNSChaosList) ListChaos() []*ChaosInstance {
 		res = append(res, item.GetChaos())
 	}
 	return res
+}
+
+func (in *DNSChaos) DurationExceeded(now time.Time) (bool, time.Duration, error) {
+	duration, err := in.GetDuration()
+	if err != nil {
+		return false, 0, err
+	}
+
+	if duration != nil {
+		stopTime := in.GetCreationTimestamp().Add(*duration)
+		if stopTime.Before(now) {
+			return true, 0, nil
+		} else {
+			return false, stopTime.Sub(now), nil
+		}
+	} else {
+		return false, 0, nil
+	}
 }
 
 const KindGcpChaos = "GcpChaos"
@@ -300,6 +336,24 @@ func (in *GcpChaosList) ListChaos() []*ChaosInstance {
 	return res
 }
 
+func (in *GcpChaos) DurationExceeded(now time.Time) (bool, time.Duration, error) {
+	duration, err := in.GetDuration()
+	if err != nil {
+		return false, 0, err
+	}
+
+	if duration != nil {
+		stopTime := in.GetCreationTimestamp().Add(*duration)
+		if stopTime.Before(now) {
+			return true, 0, nil
+		} else {
+			return false, stopTime.Sub(now), nil
+		}
+	} else {
+		return false, 0, nil
+	}
+}
+
 const KindHTTPChaos = "HTTPChaos"
 
 // IsDeleted returns whether this resource has been deleted
@@ -391,6 +445,24 @@ func (in *HTTPChaosList) ListChaos() []*ChaosInstance {
 		res = append(res, item.GetChaos())
 	}
 	return res
+}
+
+func (in *HTTPChaos) DurationExceeded(now time.Time) (bool, time.Duration, error) {
+	duration, err := in.GetDuration()
+	if err != nil {
+		return false, 0, err
+	}
+
+	if duration != nil {
+		stopTime := in.GetCreationTimestamp().Add(*duration)
+		if stopTime.Before(now) {
+			return true, 0, nil
+		} else {
+			return false, stopTime.Sub(now), nil
+		}
+	} else {
+		return false, 0, nil
+	}
 }
 
 const KindIoChaos = "IoChaos"
@@ -486,6 +558,24 @@ func (in *IoChaosList) ListChaos() []*ChaosInstance {
 	return res
 }
 
+func (in *IoChaos) DurationExceeded(now time.Time) (bool, time.Duration, error) {
+	duration, err := in.GetDuration()
+	if err != nil {
+		return false, 0, err
+	}
+
+	if duration != nil {
+		stopTime := in.GetCreationTimestamp().Add(*duration)
+		if stopTime.Before(now) {
+			return true, 0, nil
+		} else {
+			return false, stopTime.Sub(now), nil
+		}
+	} else {
+		return false, 0, nil
+	}
+}
+
 const KindJVMChaos = "JVMChaos"
 
 // IsDeleted returns whether this resource has been deleted
@@ -577,6 +667,24 @@ func (in *JVMChaosList) ListChaos() []*ChaosInstance {
 		res = append(res, item.GetChaos())
 	}
 	return res
+}
+
+func (in *JVMChaos) DurationExceeded(now time.Time) (bool, time.Duration, error) {
+	duration, err := in.GetDuration()
+	if err != nil {
+		return false, 0, err
+	}
+
+	if duration != nil {
+		stopTime := in.GetCreationTimestamp().Add(*duration)
+		if stopTime.Before(now) {
+			return true, 0, nil
+		} else {
+			return false, stopTime.Sub(now), nil
+		}
+	} else {
+		return false, 0, nil
+	}
 }
 
 const KindKernelChaos = "KernelChaos"
@@ -672,6 +780,24 @@ func (in *KernelChaosList) ListChaos() []*ChaosInstance {
 	return res
 }
 
+func (in *KernelChaos) DurationExceeded(now time.Time) (bool, time.Duration, error) {
+	duration, err := in.GetDuration()
+	if err != nil {
+		return false, 0, err
+	}
+
+	if duration != nil {
+		stopTime := in.GetCreationTimestamp().Add(*duration)
+		if stopTime.Before(now) {
+			return true, 0, nil
+		} else {
+			return false, stopTime.Sub(now), nil
+		}
+	} else {
+		return false, 0, nil
+	}
+}
+
 const KindNetworkChaos = "NetworkChaos"
 
 // IsDeleted returns whether this resource has been deleted
@@ -763,6 +889,24 @@ func (in *NetworkChaosList) ListChaos() []*ChaosInstance {
 		res = append(res, item.GetChaos())
 	}
 	return res
+}
+
+func (in *NetworkChaos) DurationExceeded(now time.Time) (bool, time.Duration, error) {
+	duration, err := in.GetDuration()
+	if err != nil {
+		return false, 0, err
+	}
+
+	if duration != nil {
+		stopTime := in.GetCreationTimestamp().Add(*duration)
+		if stopTime.Before(now) {
+			return true, 0, nil
+		} else {
+			return false, stopTime.Sub(now), nil
+		}
+	} else {
+		return false, 0, nil
+	}
 }
 
 const KindPodChaos = "PodChaos"
@@ -858,6 +1002,24 @@ func (in *PodChaosList) ListChaos() []*ChaosInstance {
 	return res
 }
 
+func (in *PodChaos) DurationExceeded(now time.Time) (bool, time.Duration, error) {
+	duration, err := in.GetDuration()
+	if err != nil {
+		return false, 0, err
+	}
+
+	if duration != nil {
+		stopTime := in.GetCreationTimestamp().Add(*duration)
+		if stopTime.Before(now) {
+			return true, 0, nil
+		} else {
+			return false, stopTime.Sub(now), nil
+		}
+	} else {
+		return false, 0, nil
+	}
+}
+
 const KindStressChaos = "StressChaos"
 
 // IsDeleted returns whether this resource has been deleted
@@ -951,6 +1113,24 @@ func (in *StressChaosList) ListChaos() []*ChaosInstance {
 	return res
 }
 
+func (in *StressChaos) DurationExceeded(now time.Time) (bool, time.Duration, error) {
+	duration, err := in.GetDuration()
+	if err != nil {
+		return false, 0, err
+	}
+
+	if duration != nil {
+		stopTime := in.GetCreationTimestamp().Add(*duration)
+		if stopTime.Before(now) {
+			return true, 0, nil
+		} else {
+			return false, stopTime.Sub(now), nil
+		}
+	} else {
+		return false, 0, nil
+	}
+}
+
 const KindTimeChaos = "TimeChaos"
 
 // IsDeleted returns whether this resource has been deleted
@@ -1042,6 +1222,24 @@ func (in *TimeChaosList) ListChaos() []*ChaosInstance {
 		res = append(res, item.GetChaos())
 	}
 	return res
+}
+
+func (in *TimeChaos) DurationExceeded(now time.Time) (bool, time.Duration, error) {
+	duration, err := in.GetDuration()
+	if err != nil {
+		return false, 0, err
+	}
+
+	if duration != nil {
+		stopTime := in.GetCreationTimestamp().Add(*duration)
+		if stopTime.Before(now) {
+			return true, 0, nil
+		} else {
+			return false, stopTime.Sub(now), nil
+		}
+	} else {
+		return false, 0, nil
+	}
 }
 
 func init() {
