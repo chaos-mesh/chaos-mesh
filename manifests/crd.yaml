@@ -467,9 +467,11 @@ spec:
               - node-reset
               - disk-loss
               type: string
-            deviceName:
-              description: The device name of the disk to detach. Needed in disk-loss.
-              type: string
+            deviceNames:
+              description: The device name of disks to detach. Needed in disk-loss.
+              items:
+                type: string
+              type: array
             duration:
               description: Duration represents the duration of the chaos action.
               type: string
@@ -508,9 +510,11 @@ spec:
         status:
           description: GcpChaosStatus represents the status of a GcpChaos
           properties:
-            attachedDiskString:
-              description: The attached disk info string. Needed in disk-loss.
-              type: string
+            attachedDiskStrings:
+              description: The attached disk info strings. Needed in disk-loss.
+              items:
+                type: string
+              type: array
             experiment:
               description: Experiment records the last experiment state.
               properties:
@@ -3904,9 +3908,11 @@ spec:
                   - node-reset
                   - disk-loss
                   type: string
-                deviceName:
-                  description: The device name of the disk to detach. Needed in disk-loss.
-                  type: string
+                deviceNames:
+                  description: The device name of disks to detach. Needed in disk-loss.
+                  items:
+                    type: string
+                  type: array
                 duration:
                   description: Duration represents the duration of the chaos action.
                   type: string
@@ -6008,10 +6014,12 @@ spec:
                         - node-reset
                         - disk-loss
                         type: string
-                      deviceName:
-                        description: The device name of the disk to detach. Needed
-                          in disk-loss.
-                        type: string
+                      deviceNames:
+                        description: The device name of disks to detach. Needed in
+                          disk-loss.
+                        items:
+                          type: string
+                        type: array
                       duration:
                         description: Duration represents the duration of the chaos
                           action.
@@ -7815,6 +7823,9 @@ spec:
           description: Most recently observed status of the workflow
           properties:
             entry_node:
+              type: string
+            start_time:
+              format: date-time
               type: string
           type: object
       required:

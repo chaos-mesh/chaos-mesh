@@ -6,11 +6,8 @@ metadata:
   namespace: {{ .Release.Namespace | quote }}
   name: {{ .Values.chaosDaemon.serviceAccount }}
   labels:
-    app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: chaos-daemon
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
 {{- end}}
 {{- if .Values.chaosDaemon.podSecurityPolicy }}
 ---
@@ -21,11 +18,8 @@ metadata:
   name: {{ .Release.Name }}-chaos-daemon-target-namespace
   namespace: chaos-testing
   labels:
-    app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: chaos-daemon
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
 subjects:
   - kind: ServiceAccount
     name: {{ .Values.chaosDaemon.serviceAccount }}
@@ -41,11 +35,8 @@ kind: ClusterRole
 metadata:
   name: {{ .Release.Name }}-chaos-daemon-psp
   labels:
-    app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: chaos-daemon
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
 rules:
 - apiGroups:
   - policy
@@ -64,11 +55,8 @@ kind: PodSecurityPolicy
 metadata:
   name: {{ .Release.Name }}-chaos-daemon
   labels:
-    app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: chaos-daemon
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
 spec:
   privileged: false
   allowPrivilegeEscalation: true

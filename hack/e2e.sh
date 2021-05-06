@@ -102,7 +102,7 @@ SKIP_DOWN=${SKIP_DOWN:-}
 SKIP_DUMP=${SKIP_DUMP:-}
 SKIP_TEST=${SKIP_TEST:-}
 KIND_DATA_HOSTPATH=${KIND_DATA_HOSTPATH:-none}
-KUBE_VERSION=${KUBE_VERSION:-v1.12.10}
+KUBE_VERSION=${KUBE_VERSION:-v1.20.2}
 KUBE_WORKERS=${KUBE_WORKERS:-3}
 DOCKER_IO_MIRROR=${DOCKER_IO_MIRROR:-}
 GCR_IO_MIRROR=${GCR_IO_MIRROR:-}
@@ -333,4 +333,4 @@ if [ -n "${ARTIFACTS}" -a -z "$SKIP_DUMP" ]; then
 fi
 
 echo "info: run 'kubetest2 ${kubetest2_args[@]} -- hack/run-e2e.sh $@'"
-$KUBETSTS2_BIN ${kubetest2_args[@]} -- hack/run-e2e.sh "$@"
+$KUBETSTS2_BIN "${kubetest2_args[@]}" -- hack/run-e2e.sh "$@"

@@ -5,11 +5,8 @@ metadata:
   namespace: {{ .Release.Namespace | quote }}
   name: {{ template "chaos-dashboard.svc" . }}
   labels:
-    app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: chaos-dashboard
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
 {{- if .Values.dashboard.ingress.labels }}
 {{ toYaml .Values.dashboard.ingress.labels | indent 4 }}
 {{- end }}

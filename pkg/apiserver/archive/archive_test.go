@@ -22,6 +22,8 @@ import (
 	"testing"
 	"time"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 	pkgmock "github.com/chaos-mesh/chaos-mesh/pkg/mock"
@@ -265,6 +267,10 @@ func (m *MockExperimentStore) DeleteIncompleteExperiments(context.Context) error
 	panic("implement me")
 }
 
+func (m *MockExperimentStore) DeleteByUIDs(context.Context, []string) error {
+	panic("implement me")
+}
+
 var _ = Describe("event", func() {
 	var router *gin.Engine
 	BeforeEach(func() {
@@ -340,10 +346,12 @@ var _ = Describe("event", func() {
 					StartTime:  time.Time{},
 					FinishTime: time.Time{},
 				},
-				YAML: core.KubeObjectYAMLDescription{
-					APIVersion: "",
-					Kind:       "",
-					Metadata: core.KubeObjectYAMLMetadata{
+				KubeObject: core.KubeObjectDesc{
+					TypeMeta: metav1.TypeMeta{
+						APIVersion: "",
+						Kind:       "",
+					},
+					Meta: core.KubeObjectMeta{
 						Name:        "",
 						Namespace:   "",
 						Labels:      nil,
@@ -373,10 +381,12 @@ var _ = Describe("event", func() {
 					StartTime:  time.Time{},
 					FinishTime: time.Time{},
 				},
-				YAML: core.KubeObjectYAMLDescription{
-					APIVersion: "",
-					Kind:       "",
-					Metadata: core.KubeObjectYAMLMetadata{
+				KubeObject: core.KubeObjectDesc{
+					TypeMeta: metav1.TypeMeta{
+						APIVersion: "",
+						Kind:       "",
+					},
+					Meta: core.KubeObjectMeta{
 						Name:        "",
 						Namespace:   "",
 						Labels:      nil,
@@ -406,10 +416,12 @@ var _ = Describe("event", func() {
 					StartTime:  time.Time{},
 					FinishTime: time.Time{},
 				},
-				YAML: core.KubeObjectYAMLDescription{
-					APIVersion: "",
-					Kind:       "",
-					Metadata: core.KubeObjectYAMLMetadata{
+				KubeObject: core.KubeObjectDesc{
+					TypeMeta: metav1.TypeMeta{
+						APIVersion: "",
+						Kind:       "",
+					},
+					Meta: core.KubeObjectMeta{
 						Name:        "",
 						Namespace:   "",
 						Labels:      nil,
@@ -439,10 +451,12 @@ var _ = Describe("event", func() {
 					StartTime:  time.Time{},
 					FinishTime: time.Time{},
 				},
-				YAML: core.KubeObjectYAMLDescription{
-					APIVersion: "",
-					Kind:       "",
-					Metadata: core.KubeObjectYAMLMetadata{
+				KubeObject: core.KubeObjectDesc{
+					TypeMeta: metav1.TypeMeta{
+						APIVersion: "",
+						Kind:       "",
+					},
+					Meta: core.KubeObjectMeta{
 						Name:        "",
 						Namespace:   "",
 						Labels:      nil,
@@ -472,10 +486,12 @@ var _ = Describe("event", func() {
 					StartTime:  time.Time{},
 					FinishTime: time.Time{},
 				},
-				YAML: core.KubeObjectYAMLDescription{
-					APIVersion: "",
-					Kind:       "",
-					Metadata: core.KubeObjectYAMLMetadata{
+				KubeObject: core.KubeObjectDesc{
+					TypeMeta: metav1.TypeMeta{
+						APIVersion: "",
+						Kind:       "",
+					},
+					Meta: core.KubeObjectMeta{
 						Name:        "",
 						Namespace:   "",
 						Labels:      nil,
@@ -505,10 +521,12 @@ var _ = Describe("event", func() {
 					StartTime:  time.Time{},
 					FinishTime: time.Time{},
 				},
-				YAML: core.KubeObjectYAMLDescription{
-					APIVersion: "",
-					Kind:       "",
-					Metadata: core.KubeObjectYAMLMetadata{
+				KubeObject: core.KubeObjectDesc{
+					TypeMeta: metav1.TypeMeta{
+						APIVersion: "",
+						Kind:       "",
+					},
+					Meta: core.KubeObjectMeta{
 						Name:        "",
 						Namespace:   "",
 						Labels:      nil,
