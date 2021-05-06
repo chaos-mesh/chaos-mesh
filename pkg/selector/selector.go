@@ -18,7 +18,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"math/rand"
+	"crypto/rand"
 	"strconv"
 	"strings"
 
