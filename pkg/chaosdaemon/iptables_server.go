@@ -96,10 +96,8 @@ func (iptables *iptablesClient) setIptablesChain(chain *pb.Chain) error {
 	}
 
 	protocolAndPort := ""
-	if len(protocolAndPort) > 0 {
-		if len(chain.Protocol) > 0 {
-			protocolAndPort += "--protocol " + chain.Protocol
-		}
+	if len(chain.Protocol) > 0 {
+		protocolAndPort += "--protocol " + chain.Protocol
 
 		if len(chain.SourcePorts) > 0 {
 			protocolAndPort += " " + chain.SourcePorts
