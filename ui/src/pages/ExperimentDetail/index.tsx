@@ -1,7 +1,6 @@
 import { Box, Button, Grid, Grow, Modal } from '@material-ui/core'
 import ConfirmDialog, { ConfirmDialogHandles } from 'components-mui/ConfirmDialog'
 import EventsTable, { EventsTableHandles } from 'components/EventsTable'
-import { createStyles, makeStyles } from '@material-ui/core/styles'
 import { useEffect, useRef, useState } from 'react'
 import { useHistory, useParams } from 'react-router-dom'
 import { useStoreDispatch, useStoreSelector } from 'store'
@@ -25,6 +24,7 @@ import api from 'api'
 import fileDownload from 'js-file-download'
 import genEventsChart from 'lib/d3/eventsChart'
 import loadable from '@loadable/component'
+import { makeStyles } from '@material-ui/core/styles'
 import { setAlert } from 'slices/globalStatus'
 import { useIntl } from 'react-intl'
 import { usePrevious } from 'lib/hooks'
@@ -32,32 +32,30 @@ import yaml from 'js-yaml'
 
 const YAMLEditor = loadable(() => import('components/YAMLEditor'))
 
-const useStyles = makeStyles((theme) =>
-  createStyles({
-    eventsChart: {
-      height: 150,
+const useStyles = makeStyles((theme) => ({
+  eventsChart: {
+    height: 150,
+  },
+  eventDetailPaper: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    overflowY: 'scroll',
+  },
+  configPaper: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    width: '50vw',
+    height: '90vh',
+    transform: 'translate(-50%, -50%)',
+    [theme.breakpoints.down('sm')]: {
+      width: '90vw',
     },
-    eventDetailPaper: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      width: '100%',
-      height: '100%',
-      overflowY: 'scroll',
-    },
-    configPaper: {
-      position: 'absolute',
-      top: '50%',
-      left: '50%',
-      width: '50vw',
-      height: '90vh',
-      transform: 'translate(-50%, -50%)',
-      [theme.breakpoints.down('sm')]: {
-        width: '90vw',
-      },
-    },
-  })
-)
+  },
+}))
 
 const initialSelected = {
   title: '',
@@ -220,7 +218,8 @@ export default function ExperimentDetail() {
     api.experiments
       .update(data)
       .then(() => {
-        setConfigOpen(false)
+        onModalClose()
+
         dispatch(
           setAlert({
             type: 'success',

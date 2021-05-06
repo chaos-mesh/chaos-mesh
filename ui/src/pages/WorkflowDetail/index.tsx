@@ -1,16 +1,26 @@
-import { Box, Button, CircularProgress, Grow } from '@material-ui/core'
+import { Box, Button, CircularProgress, Grow, Modal } from '@material-ui/core'
+import ConfirmDialog, { ConfirmDialogHandles } from 'components-mui/ConfirmDialog'
 import { useEffect, useRef, useState } from 'react'
+import { useHistory, useParams } from 'react-router-dom'
+import { useStoreDispatch, useStoreSelector } from 'store'
 
 import { WorkflowDetail as APIWorkflowDetail } from 'api/workflows.type'
+import { Ace } from 'ace-builds'
 import DeleteOutlinedIcon from '@material-ui/icons/DeleteOutlined'
+import NoteOutlinedIcon from '@material-ui/icons/NoteOutlined'
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
 import Space from 'components-mui/Space'
 import T from 'components/T'
 import api from 'api'
 import { constructWorkflowTopology } from 'lib/cytoscape'
+import loadable from '@loadable/component'
 import { makeStyles } from '@material-ui/core/styles'
-import { useParams } from 'react-router-dom'
+import { setAlert } from 'slices/globalStatus'
+import { useIntl } from 'react-intl'
+import yaml from 'js-yaml'
+
+const YAMLEditor = loadable(() => import('components/YAMLEditor'))
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -19,14 +29,42 @@ const useStyles = makeStyles((theme) => ({
   topology: {
     flex: 1,
   },
+  configPaper: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    width: '50vw',
+    height: '90vh',
+    transform: 'translate(-50%, -50%)',
+    [theme.breakpoints.down('sm')]: {
+      width: '90vw',
+    },
+  },
 }))
+
+const initialSelected = {
+  namespace: '',
+  name: '',
+  title: '',
+  description: '',
+  action: '',
+}
 
 const WorkflowDetail = () => {
   const classes = useStyles()
+  const intl = useIntl()
+  const history = useHistory()
   const { namespace, name } = useParams<any>()
+
+  const { theme } = useStoreSelector((state) => state.settings)
+  const dispatch = useStoreDispatch()
 
   const [loading, setLoading] = useState(false)
   const [detail, setDetail] = useState<APIWorkflowDetail>()
+  const [yamlEditor, setYAMLEditor] = useState<Ace.Editor>()
+  const [configOpen, setConfigOpen] = useState(false)
+  const [selected, setSelected] = useState(initialSelected)
+  const confirmRef = useRef<ConfirmDialogHandles>(null)
   const topologyRef = useRef<any>(null)
 
   const fetchWorkflowDetail = (ns: string, name: string) =>
@@ -62,29 +100,144 @@ const WorkflowDetail = () => {
 
       topologyRef.current = updateElements
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [detail])
 
+  const onModalOpen = () => setConfigOpen(true)
+  const onModalClose = () => setConfigOpen(false)
+
+  const handleSelect = (selected: typeof initialSelected) => () => {
+    setSelected(selected)
+
+    confirmRef.current!.setOpen(true)
+  }
+
+  const handleAction = (action: string) => () => {
+    let actionFunc: any
+
+    switch (action) {
+      case 'delete':
+        actionFunc = api.workflows.del
+
+        break
+      default:
+        actionFunc = null
+    }
+
+    confirmRef.current!.setOpen(false)
+
+    const { namespace, name } = selected
+
+    if (actionFunc) {
+      actionFunc(namespace, name)
+        .then(() => {
+          dispatch(
+            setAlert({
+              type: 'success',
+              message: intl.formatMessage({ id: `common.${action}Successfully` }),
+            })
+          )
+
+          if (action === 'delete') {
+            history.push('/workflows')
+          }
+        })
+        .catch(console.error)
+    }
+  }
+
+  const handleUpdateWorkflow = () => {
+    const data = yaml.load(yamlEditor!.getValue())
+
+    api.workflows
+      .update(namespace, name, data)
+      .then(() => {
+        onModalClose()
+
+        dispatch(
+          setAlert({
+            type: 'success',
+            message: intl.formatMessage({ id: `common.updateSuccessfully` }),
+          })
+        )
+
+        fetchWorkflowDetail(namespace, name)
+      })
+      .catch(console.error)
+  }
+
   return (
-    <Grow in={true} style={{ transformOrigin: '0 0 0' }}>
-      <Space display="flex" flexDirection="column" className={classes.root} vertical spacing={6}>
-        <Space>
-          <Button variant="outlined" size="small" startIcon={<DeleteOutlinedIcon />} onClick={() => {}}>
-            {T('common.delete')}
-          </Button>
+    <>
+      <Grow in={true} style={{ transformOrigin: '0 0 0' }}>
+        <Space display="flex" flexDirection="column" className={classes.root} vertical spacing={6}>
+          <Space>
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<DeleteOutlinedIcon />}
+              onClick={handleSelect({
+                namespace,
+                name,
+                title: `${intl.formatMessage({ id: 'common.delete' })} ${name}`,
+                description: intl.formatMessage({ id: 'workflows.deleteDesc' }),
+                action: 'delete',
+              })}
+            >
+              {T('common.delete')}
+            </Button>
+          </Space>
+          <Paper className={classes.topology} boxProps={{ display: 'flex', flexDirection: 'column' }}>
+            <PaperTop
+              title={
+                <Space spacing={1.5} display="flex" alignItems="center">
+                  <Box>{T('workflow.topology')}</Box>
+                  {loading && <CircularProgress size={15} />}
+                </Space>
+              }
+            >
+              <Button
+                variant="outlined"
+                size="small"
+                color="primary"
+                startIcon={<NoteOutlinedIcon />}
+                onClick={onModalOpen}
+              >
+                {T('common.update')}
+              </Button>
+            </PaperTop>
+            <div ref={topologyRef} style={{ flex: 1 }} />
+          </Paper>
         </Space>
-        <Paper className={classes.topology} boxProps={{ display: 'flex', flexDirection: 'column' }}>
-          <PaperTop
-            title={
-              <Space spacing={1.5} display="flex" alignItems="center">
-                <Box>{T('workflow.topology')}</Box>
-                {loading && <CircularProgress size={15} />}
-              </Space>
-            }
-          />
-          <div ref={topologyRef} style={{ flex: 1 }} />
-        </Paper>
-      </Space>
-    </Grow>
+      </Grow>
+
+      <Modal open={configOpen} onClose={onModalClose}>
+        <div>
+          <Paper className={classes.configPaper} padding={0}>
+            {detail && configOpen && (
+              <Box display="flex" flexDirection="column" height="100%">
+                <Box px={3} pt={3}>
+                  <PaperTop title={detail.name}>
+                    <Button variant="contained" color="primary" size="small" onClick={handleUpdateWorkflow}>
+                      {T('common.confirm')}
+                    </Button>
+                  </PaperTop>
+                </Box>
+                <Box flex={1}>
+                  <YAMLEditor theme={theme} data={yaml.dump(detail.kube_object)} mountEditor={setYAMLEditor} />
+                </Box>
+              </Box>
+            )}
+          </Paper>
+        </div>
+      </Modal>
+
+      <ConfirmDialog
+        ref={confirmRef}
+        title={selected.title}
+        description={selected.description}
+        onConfirm={handleAction(selected.action)}
+      />
+    </>
   )
 }
 

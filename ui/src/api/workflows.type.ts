@@ -6,6 +6,7 @@ export interface Workflow {
   name: string
   namespace: string
   entry: string
+  created: string
 }
 
 interface MultiNode {
@@ -27,5 +28,5 @@ export interface WorkflowDetail extends Workflow {
   topology: {
     nodes: Node[]
   }
-  yaml: any
+  kube_object: any
 }

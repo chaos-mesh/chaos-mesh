@@ -34,8 +34,8 @@ interface DataTableProps {
 
 const DataTable: React.FC<DataTableProps> = ({ data, fetchData }) => {
   const classes = useStyles()
-  const history = useHistory()
   const intl = useIntl()
+  const history = useHistory()
 
   const dispatch = useStoreDispatch()
 

@@ -13,5 +13,5 @@ export const detail = (ns: string, name: string) => http.get<WorkflowDetail>(`/w
 
 export const del = (ns: string, name: string) => http.delete(`/workflows/${ns}/${name}`)
 
-export const update = (ns: string, name: string, data: WorkflowDetail['yaml']) =>
+export const update = (ns: string, name: string, data: WorkflowDetail['kube_object']) =>
   http.put(`/workflows/${ns}/${name}`, data)

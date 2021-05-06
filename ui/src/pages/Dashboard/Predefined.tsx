@@ -50,7 +50,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
-const Predefined = React.memo(() => {
+const Predefined = () => {
   const classes = useStyles()
 
   const intl = useIntl()
@@ -178,6 +178,6 @@ const Predefined = React.memo(() => {
       </Modal>
     </>
   )
-})
+}
 
 export default Predefined
