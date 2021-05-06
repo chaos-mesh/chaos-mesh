@@ -27,7 +27,7 @@ spec:
       hostNetwork: true
       {{- end }}
       {{- if .Values.dashboard.serviceAccount }}
-      serviceAccount: {{ .Values.dashboard.serviceAccount }}
+      serviceAccountName: {{ .Values.dashboard.serviceAccount }}
       {{- end }}
       priorityClassName: {{ .Values.dashboard.priorityClassName}}
       containers:
