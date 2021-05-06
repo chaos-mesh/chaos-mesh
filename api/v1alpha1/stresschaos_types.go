@@ -49,7 +49,7 @@ type StressChaosSpec struct {
 	// If `FixedPercentPodMod`, provide a number from 0-100 to specify the max % of pods the server can do chaos action.
 	// If `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the % of pods to do chaos action
 	// +optional
-	Value string `json:"value"`
+	Value string `json:"value,omitempty"`
 
 	// Selector is used to select pods that are used to inject chaos action.
 	Selector SelectorSpec `json:"selector"`

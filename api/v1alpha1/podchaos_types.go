@@ -71,7 +71,7 @@ type PodChaosSpec struct {
 	// If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
 	// IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
 	// +optional
-	Value string `json:"value"`
+	Value string `json:"value,omitempty"`
 
 	// Duration represents the duration of the chaos action.
 	// It is required when the action is `PodFailureAction`.
@@ -85,7 +85,7 @@ type PodChaosSpec struct {
 	// ContainerName indicates the name of the container.
 	// Needed in container-kill.
 	// +optional
-	ContainerName string `json:"containerName"`
+	ContainerName string `json:"containerName,omitempty"`
 
 	// GracePeriod is used in pod-kill action. It represents the duration in seconds before the pod should be deleted.
 	// Value must be non-negative integer. The default value is zero that indicates delete immediately.
