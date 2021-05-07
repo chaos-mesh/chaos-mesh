@@ -16,9 +16,9 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"html/template"
 	"regexp"
 	"strings"
-	"text/template"
 )
 
 // struct workflowCodeGenerator will render content of one file contains code blocks that required by workflow
