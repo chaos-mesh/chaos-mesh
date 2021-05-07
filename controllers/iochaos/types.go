@@ -90,7 +90,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 			}
 		}
 
-		t.Append(v1alpha1.IoChaosAction{
+		err := t.Append(v1alpha1.IoChaosAction{
 			Type: iochaos.Spec.Action,
 			Filter: v1alpha1.Filter{
 				Path:    iochaos.Spec.Path,
@@ -108,6 +108,9 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 			MistakeSpec:      iochaos.Spec.Mistake,
 			Source:           m.Source,
 		})
+		if err != nil {
+			return err
+		}
 
 		key, err := cache.MetaNamespaceKeyFunc(&pod)
 		if err != nil {
