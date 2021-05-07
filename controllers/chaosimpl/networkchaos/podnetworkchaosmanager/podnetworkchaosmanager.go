@@ -21,9 +21,11 @@ import (
 	v1 "k8s.io/api/core/v1"
 	k8sError "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
@@ -42,13 +44,14 @@ type PodNetworkManager struct {
 	Source string
 	Log    logr.Logger
 	client.Client
+	scheme *runtime.Scheme
 
 	Key types.NamespacedName
 	T   *PodNetworkTransaction
 }
 
 // New creates a new PodNetworkManager
-func WithInit(source string, logger logr.Logger, client client.Client, key types.NamespacedName) *PodNetworkManager {
+func WithInit(source string, logger logr.Logger, client client.Client, key types.NamespacedName, scheme *runtime.Scheme) *PodNetworkManager {
 	t := &PodNetworkTransaction{}
 	t.Clear(source)
 
@@ -56,6 +59,7 @@ func WithInit(source string, logger logr.Logger, client client.Client, key types
 		Source: source,
 		Log:    logger,
 		Client: client,
+		scheme: scheme,
 
 		Key: key,
 		T:   t,
@@ -69,7 +73,7 @@ type CommitResponse struct {
 }
 
 // Commit will update all modifications to the cluster
-func (m *PodNetworkManager) Commit(ctx context.Context) error {
+func (m *PodNetworkManager) Commit(ctx context.Context, owner *v1alpha1.NetworkChaos) error {
 	m.Log.Info("running modification on pod", "key", m.Key, "modification", m.T)
 	updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
 		chaos := &v1alpha1.PodNetworkChaos{}
@@ -88,6 +92,12 @@ func (m *PodNetworkManager) Commit(ctx context.Context) error {
 			}
 
 			return nil
+		}
+
+		err = controllerutil.SetControllerReference(owner, chaos, m.scheme)
+		if err != nil {
+			m.Log.Error(err, "error while setting owner reference")
+			return err
 		}
 
 		err = m.T.Apply(chaos)

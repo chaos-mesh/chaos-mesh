@@ -27,8 +27,6 @@ const (
 )
 
 type ChaosStatus struct {
-	FailedMessage string `json:"failedMessage,omitempty"`
-
 	// Experiment records the last experiment state.
 	Experiment ExperimentStatus `json:"experiment"`
 }

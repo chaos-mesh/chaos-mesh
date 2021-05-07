@@ -19,6 +19,7 @@ import (
 
 	"github.com/go-logr/logr"
 	k8sError "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/networkchaos/podnetworkchaosmanager"
@@ -41,6 +42,7 @@ const (
 
 type Impl struct {
 	client.Client
+	scheme *runtime.Scheme
 
 	Log logr.Logger
 }
@@ -66,7 +68,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	m := podnetworkchaosmanager.WithInit(source, impl.Log, impl.Client, types.NamespacedName{
 		Namespace: pod.Namespace,
 		Name:      pod.Name,
-	})
+	}, impl.scheme)
 
 	if record.SelectorKey == "." {
 		if networkchaos.Spec.Direction == v1alpha1.To || networkchaos.Spec.Direction == v1alpha1.Both {
@@ -82,7 +84,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 				return v1alpha1.NotInjected, err
 			}
 
-			err = m.Commit(ctx)
+			err = m.Commit(ctx, networkchaos)
 			if err != nil {
 				return v1alpha1.NotInjected, err
 			}
@@ -103,7 +105,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 				return v1alpha1.NotInjected, err
 			}
 
-			err = m.Commit(ctx)
+			err = m.Commit(ctx, networkchaos)
 			if err != nil {
 				return v1alpha1.NotInjected, err
 			}
@@ -138,8 +140,8 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	m := podnetworkchaosmanager.WithInit(source, impl.Log, impl.Client, types.NamespacedName{
 		Namespace: pod.Namespace,
 		Name:      pod.Name,
-	})
-	err = m.Commit(ctx)
+	}, impl.scheme)
+	err = m.Commit(ctx, networkchaos)
 	if err != nil {
 		if err == podnetworkchaosmanager.ErrPodNotFound || err == podnetworkchaosmanager.ErrPodNotRunning {
 			return v1alpha1.NotInjected, nil
@@ -193,9 +195,10 @@ func (impl *Impl) SetDrop(ctx context.Context, m *podnetworkchaosmanager.PodNetw
 	return nil
 }
 
-func NewImpl(c client.Client, log logr.Logger) *Impl {
+func NewImpl(c client.Client, log logr.Logger, scheme *runtime.Scheme) *Impl {
 	return &Impl{
 		Client: c,
 		Log:    log.WithName("partition"),
+		scheme: scheme,
 	}
 }

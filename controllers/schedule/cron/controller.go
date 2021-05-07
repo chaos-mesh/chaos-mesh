@@ -164,7 +164,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			return schedule.Status.LastScheduleTime.Time == lastScheduleTime, nil
 		})
 		if ensureLatestError != nil {
-			r.Log.Error(ensureLatestError, "fail to ensure that the resource in cache has the latest lastScheduleTime")
+			r.Log.Error(ensureLatestError, "Fail to ensure that the resource in cache has the latest lastScheduleTime")
 			return ctrl.Result{}, nil
 		}
 	}

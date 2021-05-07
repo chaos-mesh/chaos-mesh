@@ -16,11 +16,13 @@ package common
 import (
 	"context"
 	"reflect"
+	"time"
 
 	"k8s.io/client-go/tools/record"
 
 	"github.com/go-logr/logr"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/util/retry"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -184,6 +186,23 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		}
 
 		r.Recorder.Event(obj, "Normal", "Updated", "Successfully update records of resource")
+
+		// TODO: make the interval and total time configurable
+		// The following codes ensure the Schedule in cache has the latest lastScheduleTime
+		ensureLatestError := wait.Poll(100*time.Millisecond, 2*time.Second, func() (bool, error) {
+			obj := r.Object.DeepCopyObject().(InnerObjectWithSelector)
+
+			if err := r.Client.Get(context.TODO(), req.NamespacedName, obj); err != nil {
+				r.Log.Error(err, "unable to get object")
+				return false, err
+			}
+
+			return reflect.DeepEqual(obj.GetStatus().Experiment.Records, records), nil
+		})
+		if ensureLatestError != nil {
+			r.Log.Error(ensureLatestError, "Fail to ensure that the resource in cache has the latest records")
+			return ctrl.Result{}, nil
+		}
 	}
 	return ctrl.Result{}, nil
 }

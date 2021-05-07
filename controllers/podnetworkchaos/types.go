@@ -26,10 +26,14 @@ import (
 	pbutils "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/netem"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/netem"
+	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/tools/record"
+	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -37,56 +41,111 @@ const (
 	invalidNetemSpecMsg = "invalid spec for netem action, at least one is required from delay, loss, duplicate, corrupt"
 )
 
-// Handler applys podnetworkchaos
-type Handler struct {
+// Reconciler applys podnetworkchaos
+type Reconciler struct {
 	client.Client
 	client.Reader
+	Recorder record.EventRecorder
+
 	Log                     logr.Logger
 	AllowHostNetworkTesting bool
 }
 
-// Apply flushes network configuration on pod
-func (h *Handler) Apply(ctx context.Context, chaos *v1alpha1.PodNetworkChaos) error {
-	h.Log.Info("updating network chaos", "pod", chaos.Namespace+"/"+chaos.Name, "spec", chaos.Spec)
+func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+	ctx := context.TODO()
+
+	obj := &v1alpha1.PodNetworkChaos{}
+
+	if err := r.Client.Get(ctx, req.NamespacedName, obj); err != nil {
+		if apierrors.IsNotFound(err) {
+			r.Log.Info("chaos not found")
+		} else {
+			// TODO: handle this error
+			r.Log.Error(err, "unable to get chaos")
+		}
+		return ctrl.Result{}, nil
+	}
+
+	if obj.ObjectMeta.Generation <= obj.Status.ObservedGeneration {
+		r.Log.Info("the target pod has been up to date")
+		return ctrl.Result{}, nil
+	}
+
+	r.Log.Info("updating podnetworkchaos", "pod", obj.Namespace+"/"+obj.Name, "spec", obj.Spec)
 
 	pod := &corev1.Pod{}
 
-	err := h.Client.Get(ctx, types.NamespacedName{
-		Name:      chaos.Name,
-		Namespace: chaos.Namespace,
+	err := r.Client.Get(ctx, types.NamespacedName{
+		Name:      obj.Name,
+		Namespace: obj.Namespace,
 	}, pod)
 	if err != nil {
-		h.Log.Error(err, "fail to find pod")
-		return err
+		r.Log.Error(err, "fail to find pod")
+		return ctrl.Result{}, nil
 	}
 
-	if !h.AllowHostNetworkTesting {
+	failedMessage := ""
+	observedGeneration := obj.ObjectMeta.Generation
+	defer func() {
+		if err != nil {
+			failedMessage = err.Error()
+		}
+
+		updateError := retry.RetryOnConflict(retry.DefaultBackoff, func() error {
+			obj := &v1alpha1.PodNetworkChaos{}
+
+			if err := r.Client.Get(context.TODO(), req.NamespacedName, obj); err != nil {
+				r.Log.Error(err, "unable to get chaos")
+				return err
+			}
+
+			obj.Status.FailedMessage = failedMessage
+			obj.Status.ObservedGeneration = observedGeneration
+
+			return r.Client.Update(context.TODO(), obj)
+		})
+
+		if updateError != nil {
+			r.Log.Error(updateError, "fail to update")
+			r.Recorder.Eventf(obj, "Normal", "Failed", "Failed to update status: %s", updateError.Error())
+		}
+	}()
+
+	if !r.AllowHostNetworkTesting {
 		if pod.Spec.HostNetwork {
-			err := errors.Errorf("it's dangerous to inject network chaos on a pod(%s/%s) with `hostNetwork`", pod.Namespace, pod.Name)
-			return err
+			err = errors.Errorf("It's dangerous to inject network chaos on a pod(%s/%s) with `hostNetwork`", pod.Namespace, pod.Name)
+			r.Log.Error(err, "fail to inject network chaos")
+			r.Recorder.Event(obj, "Warning", "Failed", err.Error())
+			return ctrl.Result{}, nil
 		}
 	}
 
-	err = h.SetIPSets(ctx, pod, chaos)
+	err = r.SetIPSets(ctx, pod, obj)
 	if err != nil {
-		return err
+		r.Log.Error(err, "fail to set ipsets")
+		r.Recorder.Eventf(obj, "Warning", "Failed", "Fail to set ipsets: %s", err.Error())
+		return ctrl.Result{}, nil
 	}
 
-	err = h.SetIptables(ctx, pod, chaos)
+	err = r.SetIptables(ctx, pod, obj)
 	if err != nil {
-		return err
+		r.Log.Error(err, "fail to set iptables")
+		r.Recorder.Eventf(obj, "Warning", "Failed", "Fail to set iptables: %s", err.Error())
+		return ctrl.Result{}, nil
 	}
 
-	err = h.SetTcs(ctx, pod, chaos)
+	err = r.SetTcs(ctx, pod, obj)
 	if err != nil {
-		return err
+		r.Recorder.Eventf(obj, "Warning", "Failed", "Fail to set tc: %s", err.Error())
+		return ctrl.Result{}, nil
 	}
+	r.Recorder.Event(obj, "Normal", "Updated", "Synchronize podnetworkchaos successfully")
 
-	return nil
+	return ctrl.Result{}, nil
 }
 
 // SetIPSets sets ipset on pod
-func (h *Handler) SetIPSets(ctx context.Context, pod *corev1.Pod, chaos *v1alpha1.PodNetworkChaos) error {
+func (r *Reconciler) SetIPSets(ctx context.Context, pod *corev1.Pod, chaos *v1alpha1.PodNetworkChaos) error {
 	ipsets := []*pb.IPSet{}
 	for _, ipset := range chaos.Spec.IPSets {
 		ipsets = append(ipsets, &pb.IPSet{
@@ -94,11 +153,11 @@ func (h *Handler) SetIPSets(ctx context.Context, pod *corev1.Pod, chaos *v1alpha
 			Cidrs: ipset.Cidrs,
 		})
 	}
-	return ipset.FlushIPSets(ctx, h.Client, pod, ipsets)
+	return ipset.FlushIPSets(ctx, r.Client, pod, ipsets)
 }
 
 // SetIptables sets iptables on pod
-func (h *Handler) SetIptables(ctx context.Context, pod *corev1.Pod, chaos *v1alpha1.PodNetworkChaos) error {
+func (r *Reconciler) SetIptables(ctx context.Context, pod *corev1.Pod, chaos *v1alpha1.PodNetworkChaos) error {
 	chains := []*pb.Chain{}
 	for _, chain := range chaos.Spec.Iptables {
 		var direction pb.Chain_Direction
@@ -108,7 +167,7 @@ func (h *Handler) SetIptables(ctx context.Context, pod *corev1.Pod, chaos *v1alp
 			direction = pb.Chain_OUTPUT
 		} else {
 			err := fmt.Errorf("unknown direction %s", string(chain.Direction))
-			h.Log.Error(err, "unknown direction")
+			r.Log.Error(err, "unknown direction")
 			return err
 		}
 		chains = append(chains, &pb.Chain{
@@ -118,11 +177,11 @@ func (h *Handler) SetIptables(ctx context.Context, pod *corev1.Pod, chaos *v1alp
 			Target:    "DROP",
 		})
 	}
-	return iptable.SetIptablesChains(ctx, h.Client, pod, chains)
+	return iptable.SetIptablesChains(ctx, r.Client, pod, chains)
 }
 
 // SetTcs sets traffic control related chaos on pod
-func (h *Handler) SetTcs(ctx context.Context, pod *corev1.Pod, chaos *v1alpha1.PodNetworkChaos) error {
+func (r *Reconciler) SetTcs(ctx context.Context, pod *corev1.Pod, chaos *v1alpha1.PodNetworkChaos) error {
 	tcs := []*pb.Tc{}
 	for _, tc := range chaos.Spec.TrafficControls {
 		if tc.Type == v1alpha1.Bandwidth {
@@ -150,8 +209,8 @@ func (h *Handler) SetTcs(ctx context.Context, pod *corev1.Pod, chaos *v1alpha1.P
 		}
 	}
 
-	h.Log.Info("setting tcs", "tcs", tcs)
-	return tcpkg.SetTcs(ctx, h.Client, pod, tcs)
+	r.Log.Info("setting tcs", "tcs", tcs)
+	return tcpkg.SetTcs(ctx, r.Client, pod, tcs)
 }
 
 // NetemSpec defines the interface to convert to a Netem protobuf

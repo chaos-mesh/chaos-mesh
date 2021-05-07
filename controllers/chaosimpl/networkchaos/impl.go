@@ -15,6 +15,7 @@ package networkchaos
 
 import (
 	"go.uber.org/fx"
+	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/action"
 
@@ -38,6 +39,7 @@ func NewImpl(impl Impl) *common.ChaosImplPair {
 		Name:   "networkchaos",
 		Object: &v1alpha1.NetworkChaos{},
 		Impl:   &delegate,
+		Owns:   []runtime.Object{&v1alpha1.PodNetworkChaos{}},
 	}
 }
 
