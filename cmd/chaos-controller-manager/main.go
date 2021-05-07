@@ -16,6 +16,7 @@ package main
 import (
 	"flag"
 	"net/http"
+
 	_ "net/http/pprof"
 	"os"
 	"time"
@@ -62,7 +63,10 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config/watcher"
 	wfcontrollers "github.com/chaos-mesh/chaos-mesh/pkg/workflow/controllers"
+
 	// +kubebuilder:scaffold:imports
+
+	_ "net/http/pprof"
 )
 
 var (
