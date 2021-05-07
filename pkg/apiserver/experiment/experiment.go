@@ -1179,7 +1179,7 @@ func (s *Service) batchDeleteExperiment(c *gin.Context) {
 			continue
 		}
 	}
-	if errFlag == true {
+	if errFlag {
 		c.Status(http.StatusInternalServerError)
 	} else {
 		c.JSON(http.StatusOK, StatusResponse{Status: "success"})
