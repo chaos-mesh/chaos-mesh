@@ -7825,6 +7825,9 @@ spec:
           properties:
             entry_node:
               type: string
+            start_time:
+              format: date-time
+              type: string
           type: object
       required:
       - spec

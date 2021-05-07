@@ -43,6 +43,8 @@ type WorkflowSpec struct {
 type WorkflowStatus struct {
 	// +optional
 	EntryNode *string `json:"entry_node,omitempty"`
+	// +optional
+	StartTime *metav1.Time `json:"start_time,omitempty"`
 }
 
 type TemplateType string
@@ -54,7 +56,7 @@ const (
 	TypeSuspend  TemplateType = "Suspend"
 )
 
-func IsChoasTemplateType(target TemplateType) bool {
+func IsChaosTemplateType(target TemplateType) bool {
 	return contains(allChaosTemplateType, target)
 }
 
