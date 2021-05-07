@@ -19,12 +19,12 @@ import (
 	"crypto/x509"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"time"
 
 	"google.golang.org/grpc/credentials"
 
 	"google.golang.org/grpc"
-	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 // DefaultRPCTimeout specifies default timeout of RPC between controller and chaos-operator
@@ -32,8 +32,6 @@ const DefaultRPCTimeout = 60 * time.Second
 
 // RPCTimeout specifies timeout of RPC between controller and chaos-operator
 var RPCTimeout = DefaultRPCTimeout
-
-var log = ctrl.Log.WithName("util")
 
 // CreateGrpcConnection create a grpc connection with given port and address
 func CreateGrpcConnection(address string, port int, caCertPath string, certPath string, keyPath string) (*grpc.ClientConn, error) {
@@ -56,7 +54,7 @@ func CreateGrpcConnection(address string, port int, caCertPath string, certPath 
 	}
 	options := []grpc.DialOption{grpc.WithUnaryInterceptor(TimeoutClientInterceptor)}
 	options = append(options, grpc.WithInsecure())
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", address, port), options...)
+	conn, err := grpc.Dial(net.JoinHostPort(address, fmt.Sprintf("%d", port)), options...)
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +80,7 @@ func CreateGrpcConnectionFromRaw(address string, port int, caCert []byte, cert [
 	})
 	options = append(options, grpc.WithTransportCredentials(creds))
 
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", address, port),
+	conn, err := grpc.Dial(net.JoinHostPort(address, fmt.Sprintf("%d", port)),
 		options...)
 	if err != nil {
 		return nil, err
