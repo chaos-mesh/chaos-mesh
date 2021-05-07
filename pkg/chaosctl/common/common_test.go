@@ -55,7 +55,7 @@ func TestGetChaosList(t *testing.T) {
 		},
 	}
 
-	v1alpha1.SchemeBuilder.AddToScheme(kubectlscheme.Scheme)
+	g.Expect(v1alpha1.SchemeBuilder.AddToScheme(kubectlscheme.Scheme)).To(BeNil())
 
 	client := fake.NewFakeClientWithScheme(kubectlscheme.Scheme, &chaos1, &chaos2)
 
@@ -139,8 +139,7 @@ func TestGetPods(t *testing.T) {
 	daemonObjects1, _ := utils.GenerateNPods("daemon-node1", 1, utils.PodArg{Labels: map[string]string{"app.kubernetes.io/component": "chaos-daemon"}, Nodename: "node1"})
 
 	allObjects := append(nodeObjects, daemonObjects0[0], podObjects0[0], daemonObjects1[0], podObjects1[0])
-
-	v1alpha1.SchemeBuilder.AddToScheme(kubectlscheme.Scheme)
+	g.Expect(v1alpha1.SchemeBuilder.AddToScheme(kubectlscheme.Scheme)).To(BeNil())
 	client := fake.NewFakeClientWithScheme(kubectlscheme.Scheme, allObjects...)
 
 	tests := []struct {

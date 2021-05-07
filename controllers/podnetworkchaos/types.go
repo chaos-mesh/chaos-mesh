@@ -78,11 +78,7 @@ func (h *Handler) Apply(ctx context.Context, chaos *v1alpha1.PodNetworkChaos) er
 	}
 
 	err = h.SetTcs(ctx, pod, chaos)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
 // SetIPSets sets ipset on pod

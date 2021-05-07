@@ -214,10 +214,7 @@ func (r *endpoint) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 
 	// TODO: Custom port may be required
 	err = jvm.RecoverChaos(pod.Status.PodIP, sandboxPort, jsonBytes)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 // Object would return the instance of chaos

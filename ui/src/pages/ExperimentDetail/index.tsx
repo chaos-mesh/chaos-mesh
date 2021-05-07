@@ -98,7 +98,7 @@ export default function ExperimentDetail() {
 
   const fetchEvents = () =>
     api.events
-      .events({ experimentName: detail!.yaml.metadata.name })
+      .events({ experimentName: detail!.kube_object.metadata.name })
       .then(({ data }) => setEvents(data))
       .catch(console.error)
       .finally(() => {
@@ -213,7 +213,7 @@ export default function ExperimentDetail() {
     }
   }
 
-  const handleDownloadExperiment = () => fileDownload(yaml.dump(detail!.yaml), `${detail!.name}.yaml`)
+  const handleDownloadExperiment = () => fileDownload(yaml.dump(detail!.kube_object), `${detail!.name}.yaml`)
 
   const handleUpdateExperiment = () => {
     const data = yaml.load(yamlEditor!.getValue())
@@ -331,7 +331,7 @@ export default function ExperimentDetail() {
                   </PaperTop>
                 </Box>
                 <Box flex={1}>
-                  <YAMLEditor theme={theme} data={yaml.dump(detail.yaml)} mountEditor={setYAMLEditor} />
+                  <YAMLEditor theme={theme} data={yaml.dump(detail.kube_object)} mountEditor={setYAMLEditor} />
                 </Box>
               </Box>
             )}
