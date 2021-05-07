@@ -117,9 +117,13 @@ func (r *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		r.Log.Error(err, "fail to get service")
 		return err
 	}
+
 	r.Log.Info("Cancel DNS chaos to DNS service", "ip", service.Spec.ClusterIP)
 
-	r.cancelDNSServerRules(service.Spec.ClusterIP, config.ControllerCfg.DNSServicePort, dnschaos.Name)
+	err = r.cancelDNSServerRules(service.Spec.ClusterIP, config.ControllerCfg.DNSServicePort, dnschaos.Name)
+	if err != nil {
+		return err
+	}
 
 	rd := recover.Delegate{Client: r.Client, Log: r.Log, RecoverIntf: &recoverer{r.Client, r.Log}}
 

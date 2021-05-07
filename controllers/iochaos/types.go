@@ -84,7 +84,10 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 
 		if iochaos.Spec.ContainerName != nil &&
 			len(strings.TrimSpace(*iochaos.Spec.ContainerName)) != 0 {
-			t.SetContainer(*iochaos.Spec.ContainerName)
+			err = t.SetContainer(*iochaos.Spec.ContainerName)
+			if err != nil {
+				return err
+			}
 		}
 
 		t.Append(v1alpha1.IoChaosAction{

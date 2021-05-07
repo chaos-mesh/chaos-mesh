@@ -1179,7 +1179,7 @@ func (s *Service) batchDeleteExperiment(c *gin.Context) {
 			continue
 		}
 	}
-	if errFlag == true {
+	if errFlag {
 		c.Status(http.StatusInternalServerError)
 	} else {
 		c.JSON(http.StatusOK, StatusResponse{Status: "success"})
@@ -1479,7 +1479,10 @@ func (s *Service) updateNetworkChaos(exp *core.KubeObjectDesc, kubeCli client.Cl
 	chaos.Spec = spec
 
 	var tcParameter v1alpha1.TcParameter
-	mapstructure.Decode(exp.Spec, &tcParameter)
+	err := mapstructure.Decode(exp.Spec, &tcParameter)
+	if err != nil {
+		return err
+	}
 	chaos.Spec.TcParameter = tcParameter
 
 	return kubeCli.Update(context.Background(), chaos)

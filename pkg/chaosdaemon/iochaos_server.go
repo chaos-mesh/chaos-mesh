@@ -127,7 +127,7 @@ func (s *DaemonServer) ApplyIoChaos(ctx context.Context, in *pb.ApplyIoChaosRequ
 		if kerr := s.killIoChaos(ctx, int64(cmd.Process.Pid), ct); kerr != nil {
 			log.Error(kerr, "kill toda failed", "request", in)
 		}
-		return nil, fmt.Errorf("Toda startup takes too long or an error occurs: %s", ret)
+		return nil, fmt.Errorf("toda startup takes too long or an error occurs: %s", ret)
 	}
 
 	return &pb.ApplyIoChaosResponse{
