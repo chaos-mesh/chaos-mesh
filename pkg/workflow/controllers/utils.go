@@ -55,3 +55,8 @@ func filterOutCondition(conditions []v1alpha1.WorkflowNodeCondition, except v1al
 	}
 	return newConditions
 }
+
+func WorkflowNodeFinished(status v1alpha1.WorkflowNodeStatus) bool {
+	return ConditionEqualsTo(status, v1alpha1.ConditionAccomplished, corev1.ConditionTrue) ||
+		ConditionEqualsTo(status, v1alpha1.ConditionDeadlineExceed, corev1.ConditionTrue)
+}
