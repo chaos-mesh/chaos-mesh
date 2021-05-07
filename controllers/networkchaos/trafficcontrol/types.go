@@ -290,11 +290,14 @@ func (r *endpoint) applyTc(
 				Name:      pod.Name,
 				Namespace: pod.Namespace,
 			})
-			t.Append(v1alpha1.RawTrafficControl{
+			err := t.Append(v1alpha1.RawTrafficControl{
 				Type:        tcType,
 				TcParameter: networkchaos.Spec.TcParameter,
 				Source:      m.Source,
 			})
+			if err != nil {
+				return err
+			}
 		}
 		return nil
 	}
@@ -311,12 +314,15 @@ func (r *endpoint) applyTc(
 			Namespace: pod.Namespace,
 		})
 		t.Append(dstIpset)
-		t.Append(v1alpha1.RawTrafficControl{
+		err := t.Append(v1alpha1.RawTrafficControl{
 			Type:        tcType,
 			TcParameter: networkchaos.Spec.TcParameter,
 			Source:      m.Source,
 			IPSet:       dstIpset.Name,
 		})
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

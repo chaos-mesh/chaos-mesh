@@ -68,7 +68,7 @@ go_build_cache_directory:
 	mkdir -p $(GO_BUILD_CACHE)/chaos-mesh-gobuild
 	mkdir -p $(GO_BUILD_CACHE)/chaos-mesh-gopath
 
-check: fmt vet boilerplate lint generate manifests/crd.yaml tidy
+check: fmt vet boilerplate lint generate manifests/crd.yaml tidy check-install-script
 
 # Run tests
 test: failpoint-enable generate generate-mock manifests test-utils
