@@ -70,5 +70,5 @@ func getPodIoMistake(c http.Client, port uint16) (bool, error) {
 	if strings.Contains(result, "err") {
 		return false, errors.New(result)
 	}
-	return false, errors.New("Unexpected reply from e2e server")
+	return false, errors.New("unexpected reply from e2e server")
 }
