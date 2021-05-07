@@ -19,9 +19,11 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
+	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 
 type ChaosImplPair struct {
@@ -50,7 +52,10 @@ func NewController(mgr ctrl.Manager, client client.Client, reader client.Reader,
 		// Add owning resources
 		if len(pair.Owns) > 0 {
 			for _, obj := range pair.Owns {
-				builder = builder.Owns(obj)
+				builder = builder.Watches(&source.Kind{Type: obj}, &handler.EnqueueRequestForOwner{
+					OwnerType:    pair.Object,
+					IsController: false,
+				})
 			}
 		}
 

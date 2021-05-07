@@ -24,7 +24,6 @@ import (
 const KindPodNetworkChaos = "PodNetworkChaos"
 
 // +kubebuilder:object:root=true
-
 // PodNetworkChaos is the Schema for the PodNetworkChaos API
 type PodNetworkChaos struct {
 	metav1.TypeMeta   `json:",inline"`

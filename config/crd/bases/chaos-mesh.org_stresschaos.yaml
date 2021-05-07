@@ -237,8 +237,6 @@ spec:
                   - Stop
                   type: string
               type: object
-            failedMessage:
-              type: string
             instances:
               additionalProperties:
                 description: StressInstance is an instance generates stresses

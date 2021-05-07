@@ -188,5 +188,5 @@ func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger, objs
 			lister,
 			mgr.GetEventRecorderFor("schedule-cron"),
 		})
-	return "schedule", nil
+	return "schedule-cron", nil
 }

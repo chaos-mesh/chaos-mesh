@@ -98,8 +98,6 @@ spec:
                   - Stop
                   type: string
               type: object
-            failedMessage:
-              type: string
           required:
           - experiment
           type: object
@@ -320,8 +318,6 @@ spec:
                   - Stop
                   type: string
               type: object
-            failedMessage:
-              type: string
           required:
           - experiment
           type: object
@@ -443,8 +439,6 @@ spec:
                   - Stop
                   type: string
               type: object
-            failedMessage:
-              type: string
           required:
           - experiment
           type: object
@@ -681,8 +675,6 @@ spec:
                   - Stop
                   type: string
               type: object
-            failedMessage:
-              type: string
           required:
           - experiment
           type: object
@@ -1015,8 +1007,6 @@ spec:
                   - Stop
                   type: string
               type: object
-            failedMessage:
-              type: string
           required:
           - experiment
           type: object
@@ -1260,8 +1250,6 @@ spec:
                   - Stop
                   type: string
               type: object
-            failedMessage:
-              type: string
           required:
           - experiment
           type: object
@@ -1523,8 +1511,6 @@ spec:
                   - Stop
                   type: string
               type: object
-            failedMessage:
-              type: string
           required:
           - experiment
           type: object
@@ -1965,8 +1951,13 @@ spec:
                   - Stop
                   type: string
               type: object
-            failedMessage:
-              type: string
+            instances:
+              additionalProperties:
+                format: int64
+                type: integer
+              description: Instances always specifies podnetworkchaos generation or
+                empty
+              type: object
           required:
           - experiment
           type: object
@@ -2189,8 +2180,6 @@ spec:
                   - Stop
                   type: string
               type: object
-            failedMessage:
-              type: string
           required:
           - experiment
           type: object
@@ -2622,35 +2611,12 @@ spec:
           description: Most recently observed status of the chaos experiment about
             pods
           properties:
-            experiment:
-              description: Experiment records the last experiment state.
-              properties:
-                containerRecords:
-                  description: Records are used to track the running status
-                  items:
-                    properties:
-                      id:
-                        type: string
-                      phase:
-                        type: string
-                      selectorKey:
-                        type: string
-                    required:
-                    - id
-                    - phase
-                    - selectorKey
-                    type: object
-                  type: array
-                desiredPhase:
-                  enum:
-                  - Run
-                  - Stop
-                  type: string
-              type: object
             failedMessage:
+              description: 'TODO: reconcider whether `FailedMessage` is a good way'
               type: string
-          required:
-          - experiment
+            observedGeneration:
+              format: int64
+              type: integer
           type: object
       required:
       - spec
@@ -2905,9 +2871,11 @@ spec:
                   - node-reset
                   - disk-loss
                   type: string
-                deviceName:
-                  description: The device name of the disk to detach. Needed in disk-loss.
-                  type: string
+                deviceNames:
+                  description: The device name of disks to detach. Needed in disk-loss.
+                  items:
+                    type: string
+                  type: array
                 duration:
                   description: Duration represents the duration of the chaos action.
                   type: string
@@ -4865,8 +4833,6 @@ spec:
                   - Stop
                   type: string
               type: object
-            failedMessage:
-              type: string
             instances:
               additionalProperties:
                 description: StressInstance is an instance generates stresses
@@ -5096,8 +5062,6 @@ spec:
                   - Stop
                   type: string
               type: object
-            failedMessage:
-              type: string
           required:
           - experiment
           type: object

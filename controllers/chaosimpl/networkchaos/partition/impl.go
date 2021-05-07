@@ -42,10 +42,17 @@ const (
 
 type Impl struct {
 	client.Client
+	client.Reader
+
 	scheme *runtime.Scheme
 
 	Log logr.Logger
 }
+
+const (
+	waitForApplySync   v1alpha1.Phase = "Not Injected/Wait"
+	waitForRecoverSync v1alpha1.Phase = "Injected/Wait"
+)
 
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	impl.Log.Info("partition Apply", "chaos", obj)
@@ -55,10 +62,33 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		impl.Log.Error(err, "chaos is not NetworkChaos", "chaos", obj)
 		return v1alpha1.NotInjected, err
 	}
+	if networkchaos.Status.Instances == nil {
+		networkchaos.Status.Instances = make(map[string]int64)
+	}
+
+	record := records[index]
+	phase := record.Phase
+
+	if phase == waitForApplySync {
+		podnetworkchaos := &v1alpha1.PodNetworkChaos{}
+		err := impl.Client.Get(ctx, controller.ParseNamespacedName(record.Id), podnetworkchaos)
+		if err != nil {
+			return waitForApplySync, err
+		}
+
+		if podnetworkchaos.Status.ObservedGeneration >= networkchaos.Status.Instances[record.Id] {
+			return v1alpha1.Injected, nil
+		}
+
+		if podnetworkchaos.Status.FailedMessage != "" {
+			return waitForApplySync, errors.New(podnetworkchaos.Status.FailedMessage)
+		}
+
+		return waitForApplySync, nil
+	}
 
 	var pod v1.Pod
-	record := records[index]
-	err := impl.Get(ctx, controller.ParseNamespacedName(record.Id), &pod)
+	err := impl.Client.Get(ctx, controller.ParseNamespacedName(record.Id), &pod)
 	if err != nil {
 		// TODO: handle this error
 		return v1alpha1.NotInjected, err
@@ -84,10 +114,14 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 				return v1alpha1.NotInjected, err
 			}
 
-			err = m.Commit(ctx, networkchaos)
+			generationNumber, err := m.Commit(ctx, networkchaos)
 			if err != nil {
 				return v1alpha1.NotInjected, err
 			}
+
+			// modify the custom status
+			networkchaos.Status.Instances[record.Id] = generationNumber
+			return waitForApplySync, nil
 		}
 
 		return v1alpha1.Injected, nil
@@ -105,11 +139,16 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 				return v1alpha1.NotInjected, err
 			}
 
-			err = m.Commit(ctx, networkchaos)
+			generationNumber, err := m.Commit(ctx, networkchaos)
 			if err != nil {
 				return v1alpha1.NotInjected, err
 			}
+
+			// modify the custom status
+			networkchaos.Status.Instances[record.Id] = generationNumber
+			return waitForApplySync, nil
 		}
+
 		return v1alpha1.Injected, nil
 	} else {
 		impl.Log.Info("unknown selector key", "record", record)
@@ -124,10 +163,37 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		impl.Log.Error(err, "chaos is not NetworkChaos", "chaos", obj)
 		return v1alpha1.Injected, err
 	}
+	if networkchaos.Status.Instances == nil {
+		networkchaos.Status.Instances = make(map[string]int64)
+	}
+
+	record := records[index]
+	phase := record.Phase
+
+	if phase == waitForRecoverSync {
+		podnetworkchaos := &v1alpha1.PodNetworkChaos{}
+		err := impl.Client.Get(ctx, controller.ParseNamespacedName(record.Id), podnetworkchaos)
+		if err != nil {
+			// TODO: handle this error
+			if k8sError.IsNotFound(err) {
+				return v1alpha1.NotInjected, nil
+			}
+			return waitForRecoverSync, err
+		}
+
+		if podnetworkchaos.Status.ObservedGeneration >= networkchaos.Status.Instances[record.Id] {
+			return v1alpha1.NotInjected, nil
+		}
+
+		if podnetworkchaos.Status.FailedMessage != "" {
+			return waitForRecoverSync, errors.New(podnetworkchaos.Status.FailedMessage)
+		}
+
+		return waitForRecoverSync, nil
+	}
 
 	var pod v1.Pod
-	record := records[index]
-	err := impl.Get(ctx, controller.ParseNamespacedName(record.Id), &pod)
+	err := impl.Client.Get(ctx, controller.ParseNamespacedName(record.Id), &pod)
 	if err != nil {
 		// TODO: handle this error
 		if k8sError.IsNotFound(err) {
@@ -141,7 +207,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		Namespace: pod.Namespace,
 		Name:      pod.Name,
 	}, impl.scheme)
-	err = m.Commit(ctx, networkchaos)
+	generationNumber, err := m.Commit(ctx, networkchaos)
 	if err != nil {
 		if err == podnetworkchaosmanager.ErrPodNotFound || err == podnetworkchaosmanager.ErrPodNotRunning {
 			return v1alpha1.NotInjected, nil
@@ -149,7 +215,9 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		return v1alpha1.Injected, err
 	}
 
-	return v1alpha1.NotInjected, nil
+	// Now modify the custom status and phase
+	networkchaos.Status.Instances[record.Id] = generationNumber
+	return waitForRecoverSync, nil
 }
 
 func (impl *Impl) SetDrop(ctx context.Context, m *podnetworkchaosmanager.PodNetworkManager, targets []*v1alpha1.Record, networkchaos *v1alpha1.NetworkChaos, ipSetPostFix string, chainDirection v1alpha1.ChainDirection) error {
@@ -174,7 +242,7 @@ func (impl *Impl) SetDrop(ctx context.Context, m *podnetworkchaosmanager.PodNetw
 	targetPods := []v1.Pod{}
 	for _, record := range targets {
 		var pod v1.Pod
-		err := impl.Get(ctx, controller.ParseNamespacedName(record.Id), &pod)
+		err := impl.Client.Get(ctx, controller.ParseNamespacedName(record.Id), &pod)
 		if err != nil {
 			// TODO: handle this error
 			return err
@@ -195,9 +263,10 @@ func (impl *Impl) SetDrop(ctx context.Context, m *podnetworkchaosmanager.PodNetw
 	return nil
 }
 
-func NewImpl(c client.Client, log logr.Logger, scheme *runtime.Scheme) *Impl {
+func NewImpl(c client.Client, r client.Reader, log logr.Logger, scheme *runtime.Scheme) *Impl {
 	return &Impl{
 		Client: c,
+		Reader: r,
 		Log:    log.WithName("partition"),
 		scheme: scheme,
 	}

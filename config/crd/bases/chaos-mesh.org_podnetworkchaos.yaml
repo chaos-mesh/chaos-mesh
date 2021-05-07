@@ -207,35 +207,12 @@ spec:
           description: Most recently observed status of the chaos experiment about
             pods
           properties:
-            experiment:
-              description: Experiment records the last experiment state.
-              properties:
-                containerRecords:
-                  description: Records are used to track the running status
-                  items:
-                    properties:
-                      id:
-                        type: string
-                      phase:
-                        type: string
-                      selectorKey:
-                        type: string
-                    required:
-                    - id
-                    - phase
-                    - selectorKey
-                    type: object
-                  type: array
-                desiredPhase:
-                  enum:
-                  - Run
-                  - Stop
-                  type: string
-              type: object
             failedMessage:
+              description: 'TODO: reconcider whether `FailedMessage` is a good way'
               type: string
-          required:
-          - experiment
+            observedGeneration:
+              format: int64
+              type: integer
           type: object
       required:
       - spec

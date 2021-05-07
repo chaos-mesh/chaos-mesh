@@ -25,9 +25,9 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
 )
 
 var (
@@ -73,7 +73,9 @@ type CommitResponse struct {
 }
 
 // Commit will update all modifications to the cluster
-func (m *PodNetworkManager) Commit(ctx context.Context, owner *v1alpha1.NetworkChaos) error {
+func (m *PodNetworkManager) Commit(ctx context.Context, owner *v1alpha1.NetworkChaos) (int64, error) {
+	generationNumber := int64(0)
+
 	m.Log.Info("running modification on pod", "key", m.Key, "modification", m.T)
 	updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
 		chaos := &v1alpha1.PodNetworkChaos{}
@@ -94,7 +96,7 @@ func (m *PodNetworkManager) Commit(ctx context.Context, owner *v1alpha1.NetworkC
 			return nil
 		}
 
-		err = controllerutil.SetControllerReference(owner, chaos, m.scheme)
+		err = controller.SetOwnerReference(owner, chaos, m.scheme)
 		if err != nil {
 			m.Log.Error(err, "error while setting owner reference")
 			return err
@@ -106,9 +108,14 @@ func (m *PodNetworkManager) Commit(ctx context.Context, owner *v1alpha1.NetworkC
 			return err
 		}
 
+		generationNumber = chaos.ObjectMeta.Generation + 1
 		return m.Client.Update(ctx, chaos)
 	})
-	return updateError
+	if updateError != nil {
+		return 0, updateError
+	}
+
+	return generationNumber, nil
 }
 
 func (m *PodNetworkManager) CreateNewPodNetworkChaos(ctx context.Context) error {
