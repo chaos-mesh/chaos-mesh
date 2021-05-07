@@ -214,23 +214,9 @@ func (s *DaemonServer) setFilterTcs(
 			ch.Ipsets = []string{tc.Ipset}
 		}
 
-		if len(tc.Protocol) > 0 {
-			ch.Protocol = fmt.Sprintf("--protocol %s", tc.Protocol)
-		}
-
-		if len(tc.SourcePort) > 0 {
-			ch.SourcePorts = fmt.Sprintf("--source-port %s", tc.SourcePort)
-			if strings.Contains(tc.SourcePort, ",") {
-				ch.SourcePorts = fmt.Sprintf("-m multiport --source-ports %s", tc.SourcePort)
-			}
-		}
-
-		if len(tc.EgressPort) > 0 {
-			ch.DestinationPorts = fmt.Sprintf("--destination-port %s", tc.EgressPort)
-			if strings.Contains(tc.EgressPort, ",") {
-				ch.DestinationPorts = fmt.Sprintf("-m multiport --destination-ports %s", tc.EgressPort)
-			}
-		}
+		ch.Protocol = tc.Protocol
+		ch.SourcePorts = tc.SourcePort
+		ch.DestinationPorts = tc.EgressPort
 
 		chains = append(chains, ch)
 
