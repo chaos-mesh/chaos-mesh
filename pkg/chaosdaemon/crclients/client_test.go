@@ -33,7 +33,6 @@ var _ = Describe("chaosdaemon util", func() {
 				err := mock.With("MockContainerdClient", &test.MockClient{})()
 				Expect(err).To(BeNil())
 			}()
-
 			_, err = CreateContainerRuntimeInfoClient(ContainerRuntimeContainerd)
 			Expect(err).To(BeNil())
 		})
@@ -45,7 +44,6 @@ var _ = Describe("chaosdaemon util", func() {
 				err := mock.With("NewContainerdClientError", errors.New(errorStr))()
 				Expect(err).To(BeNil())
 			}()
-
 			_, err := CreateContainerRuntimeInfoClient(ContainerRuntimeContainerd)
 			Expect(err).ToNot(BeNil())
 			Expect(fmt.Sprintf("%s", err)).To(Equal(errorStr))
