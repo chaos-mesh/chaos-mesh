@@ -50,7 +50,10 @@ var _ = Describe("docker client", func() {
 
 		It("should error on ContainerInspectError", func() {
 			errorStr := "this is a mocked error"
-			defer mock.With("ContainerInspectError", errors.New(errorStr))()
+			defer func() {
+				err := mock.With("ContainerInspectError", errors.New(errorStr))()
+				Expect(err).NotTo(BeNil())
+			}()
 			m := &test.MockClient{}
 			c := DockerClient{client: m}
 			_, err := c.GetPidFromContainerID(context.TODO(), "docker://valid-container-id")
@@ -71,7 +74,10 @@ var _ = Describe("docker client", func() {
 			errorStr := "this is a mocked error on ContainerKill"
 			m := &test.MockClient{}
 			c := DockerClient{client: m}
-			defer mock.With("ContainerKillError", errors.New(errorStr))()
+			defer func() {
+				err := mock.With("ContainerKillError", errors.New(errorStr))()
+				Expect(err).ToNot(BeNil())
+			}()
 			err := c.ContainerKillByContainerID(context.TODO(), "docker://valid-container-id")
 			Expect(err).ToNot(BeNil())
 			Expect(fmt.Sprintf("%s", err)).To(Equal(errorStr))
