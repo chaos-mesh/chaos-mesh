@@ -387,11 +387,11 @@ func (m *StatusResponse) GetMsg() string {
 
 func init() {
 	protoregistry.GlobalTypes.RegisterEnum("bpfki.FailKernRequest_FAILTYPE", FailKernRequest_FAILTYPE_name, FailKernRequest_FAILTYPE_value)
-	protoregistry.GlobalTypes.RegisterMessage((*BumpTimeRequest)(nil), "bpfki.BumpTimeRequest")
-	protoregistry.GlobalTypes.RegisterMessage((*FailKernRequest)(nil), "bpfki.FailKernRequest")
+	proto.RegisterType.RegisterMessage((*BumpTimeRequest)(nil), "bpfki.BumpTimeRequest")
+	proto.RegisterType((*FailKernRequest)(nil), "bpfki.FailKernRequest")
 	protoregistry.GlobalTypes.RegisterMessage((*FailKernRequestFrame)(nil), "bpfki.FailKernRequest.frame")
 	protoregistry.GlobalTypes.RegisterMessage((*FailSyscallRequest)(nil), "bpfki.FailSyscallRequest")
-	protoregistry.GlobalTypes.RegisterMessage((*StatusResponse)(nil), "bpfki.StatusResponse")
+	proto.RegisterType.RegisterMessage((*StatusResponse)(nil), "bpfki.StatusResponse")
 }
 
 func init() { protoregistry.GlobalFiles.RegisterFile("bpfki.proto", fileDescriptor_62eed357eb71de0e) }
