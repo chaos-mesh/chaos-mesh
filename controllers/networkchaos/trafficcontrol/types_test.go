@@ -37,7 +37,9 @@ func TestReconciler_applyNetem(t *testing.T) {
 
 	podObjects, pods := GenerateNPods("p", 1, PodArg{})
 
-	v1alpha1.SchemeBuilder.AddToScheme(scheme.Scheme)
+	err := v1alpha1.SchemeBuilder.AddToScheme(scheme.Scheme)
+
+	g.Expect(err).ToNot(HaveOccurred())
 
 	r := endpoint{
 		Context: ctx.Context{
