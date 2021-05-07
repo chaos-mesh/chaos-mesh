@@ -76,7 +76,7 @@ type Archive struct {
 // Detail represents an archive instance.
 type Detail struct {
 	Archive
-	YAML core.KubeObjectYAMLDescription `json:"yaml"`
+	KubeObject core.KubeObjectDesc `json:"kube_object"`
 }
 
 // Report defines the report of archive experiments.
@@ -136,9 +136,9 @@ func (s *Service) list(c *gin.Context) {
 // @Failure 500 {object} utils.APIError
 func (s *Service) detail(c *gin.Context) {
 	var (
-		err    error
-		yaml   core.KubeObjectYAMLDescription
-		detail Detail
+		err        error
+		kubeObject core.KubeObjectDesc
+		detail     Detail
 	)
 	uid := c.Query("uid")
 	namespace := c.Query("namespace")
@@ -169,23 +169,23 @@ func (s *Service) detail(c *gin.Context) {
 
 	switch exp.Kind {
 	case v1alpha1.KindPodChaos:
-		yaml, err = exp.ParsePodChaos()
+		kubeObject, err = exp.ParsePodChaos()
 	case v1alpha1.KindIoChaos:
-		yaml, err = exp.ParseIOChaos()
+		kubeObject, err = exp.ParseIOChaos()
 	case v1alpha1.KindNetworkChaos:
-		yaml, err = exp.ParseNetworkChaos()
+		kubeObject, err = exp.ParseNetworkChaos()
 	case v1alpha1.KindTimeChaos:
-		yaml, err = exp.ParseTimeChaos()
+		kubeObject, err = exp.ParseTimeChaos()
 	case v1alpha1.KindKernelChaos:
-		yaml, err = exp.ParseKernelChaos()
+		kubeObject, err = exp.ParseKernelChaos()
 	case v1alpha1.KindStressChaos:
-		yaml, err = exp.ParseStressChaos()
+		kubeObject, err = exp.ParseStressChaos()
 	case v1alpha1.KindDNSChaos:
-		yaml, err = exp.ParseDNSChaos()
+		kubeObject, err = exp.ParseDNSChaos()
 	case v1alpha1.KindAwsChaos:
-		yaml, err = exp.ParseAwsChaos()
+		kubeObject, err = exp.ParseAwsChaos()
 	case v1alpha1.KindGcpChaos:
-		yaml, err = exp.ParseGcpChaos()
+		kubeObject, err = exp.ParseGcpChaos()
 	default:
 		err = fmt.Errorf("kind %s is not support", exp.Kind)
 	}
@@ -205,7 +205,7 @@ func (s *Service) detail(c *gin.Context) {
 			StartTime:  exp.StartTime,
 			FinishTime: exp.FinishTime,
 		},
-		YAML: yaml,
+		KubeObject: kubeObject,
 	}
 
 	c.JSON(http.StatusOK, detail)

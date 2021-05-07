@@ -32,10 +32,7 @@ func ActiveSandbox(host string, port int) error {
 	url := fmt.Sprintf(ActiveURL, host, port)
 
 	_, err := http.Get(url)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 // InjectChaos injects jvm chaos to a java process
