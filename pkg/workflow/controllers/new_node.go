@@ -104,7 +104,11 @@ func renderNodesByTemplates(workflow *v1alpha1.Workflow, parent *v1alpha1.Workfl
 			result = append(result, &renderedNode)
 			continue
 		}
-		return nil, fmt.Errorf("workflow %s do not contains template called %s", workflow.Name, name)
+		return nil, fmt.Errorf(
+			"workflow %s do not contains template called %s",
+			workflow.Name,
+			name,
+		)
 	}
 	return result, nil
 }
