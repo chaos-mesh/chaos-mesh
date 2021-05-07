@@ -49,7 +49,7 @@ func (it *ChaosNodeReconciler) Reconcile(request reconcile.Request) (reconcile.R
 		return reconcile.Result{}, client.IgnoreNotFound(err)
 	}
 
-	if !v1alpha1.IsChoasTemplateType(node.Spec.Type) {
+	if !v1alpha1.IsChaosTemplateType(node.Spec.Type) {
 		return reconcile.Result{}, nil
 	}
 
