@@ -22,6 +22,7 @@ import (
 
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:shortName=wf
+// +kubebuilder:subresource:status
 type Workflow struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

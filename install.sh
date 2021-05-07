@@ -1194,7 +1194,7 @@ spec:
       annotations:
     spec:
       hostNetwork: ${host_network}
-      serviceAccount: chaos-daemon
+      serviceAccountName: chaos-daemon
       hostIPC: true
       hostPID: true
       priorityClassName: 
@@ -1266,7 +1266,7 @@ spec:
         app.kubernetes.io/version: v0.9.0
         app.kubernetes.io/component: chaos-dashboard
     spec:
-      serviceAccount: chaos-controller-manager
+      serviceAccountName: chaos-controller-manager
       priorityClassName: 
       containers:
         - name: chaos-dashboard
@@ -1342,7 +1342,7 @@ spec:
         rollme: "install.sh"
     spec:
       hostNetwork: ${host_network}
-      serviceAccount: chaos-controller-manager
+      serviceAccountName: chaos-controller-manager
       priorityClassName: 
       containers:
       - name: chaos-mesh
