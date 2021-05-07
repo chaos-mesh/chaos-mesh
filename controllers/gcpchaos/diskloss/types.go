@@ -75,7 +75,7 @@ func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 				break
 			}
 		}
-		if haveDisk == false {
+		if !haveDisk {
 			notFound = append(notFound, specDeviceName)
 		}
 	}
