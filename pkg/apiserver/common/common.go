@@ -36,6 +36,7 @@ import (
 
 const (
 	roleManager = "manager"
+	roleViewer  = "viewer"
 
 	serviceAccountTemplate = `kind: ServiceAccount
 apiVersion: v1
@@ -396,8 +397,13 @@ func (s *Service) getRbacConfig(c *gin.Context) {
 	}
 	if roleType == roleManager {
 		verbs = `"get", "list", "watch", "create", "delete", "patch", "update"`
-	} else {
+	} else if roleType == roleViewer {
 		verbs = `"get", "list", "watch"`
+	} else {
+		c.Status(http.StatusInternalServerError)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("roleType is neither manager nor viewer")))
+		return
+
 	}
 
 	serviceAccountName := fmt.Sprintf("account-%s-%s-%s", scope, roleType, randomStr)
