@@ -61,7 +61,8 @@ func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet, result *c
 func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha1.StressChaos, c *cm.ClientSet, result *cm.PodResult) error {
 	// get process path
 	cmd := "cat /proc/cgroups"
-	out, err := cm.ExecBypass(ctx, pod, daemon, cmd, c.KubeCli)
+	var out string
+	var err error
 	if err != nil {
 		return errors.Wrap(err, fmt.Sprintf("run command %s failed", cmd))
 	}
