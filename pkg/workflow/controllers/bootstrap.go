@@ -85,8 +85,5 @@ func BootstrapWorkflowControllers(mgr manager.Manager, logger logr.Logger) error
 				logger.WithName("workflow-chaos-node-reconciler"),
 			),
 		)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
