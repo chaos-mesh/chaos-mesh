@@ -28,6 +28,7 @@ import clsx from 'clsx'
 import { constructWorkflow } from 'lib/formikhelpers'
 import { makeStyles } from '@material-ui/core/styles'
 import { setAlert } from 'slices/globalStatus'
+import { useHistory } from 'react-router-dom'
 import { useIntl } from 'react-intl'
 import yaml from 'js-yaml'
 
@@ -93,6 +94,7 @@ export type WorkflowBasic = {
 const NewWorkflow = () => {
   const classes = useStyles()
   const intl = useIntl()
+  const history = useHistory()
 
   const state = useStoreSelector((state) => state)
   const { namespaces } = state.experiments
@@ -280,7 +282,10 @@ const NewWorkflow = () => {
       console.debug('Debug workflow:', workflow)
     }
 
-    api.workflows.newWorkflow(yaml.load(workflow!))
+    api.workflows
+      .newWorkflow(yaml.load(workflow!))
+      .then(() => history.push('/workflows'))
+      .catch(console.error)
   }
 
   return (

@@ -9,14 +9,13 @@ import { Button } from '@material-ui/core'
 import { Link } from 'react-router-dom'
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
+import Space from 'components-mui/Space'
 import T from 'components/T'
 import clsx from 'clsx'
 
 const useStyles = makeStyles((theme) => ({
   button: {
     width: `calc(100% - ${theme.spacing(3)})`,
-    marginTop: theme.spacing(3),
-    marginBottom: theme.spacing(3),
   },
 }))
 
@@ -72,47 +71,49 @@ const Welcome = () => {
 
   return (
     <Paper style={{ height: '100%' }}>
-      <PaperTop title={T('dashboard.welcome')} subtitle={T('dashboard.welcomeDesc')} />
-      <Button
-        className={clsx(classes.button, 'dashboard-tutorial')}
-        variant="contained"
-        color="primary"
-        onClick={() => setIsTourOpen(true)}
-      >
-        {T('common.tutorial')}
-      </Button>
-      <Tour
-        steps={steps}
-        isOpen={isTourOpen}
-        onRequestClose={() => setIsTourOpen(false)}
-        accentColor={theme.palette.primary.main}
-        rounded={theme.shape.borderRadius}
-        prevButton={<ArrowBackOutlinedIcon color="action" />}
-        nextButton={<ArrowForwardOutlinedIcon color="action" />}
-        showCloseButton={false}
-      />
+      <Space vertical spacing={4.5}>
+        <PaperTop title={T('dashboard.welcome')} subtitle={T('dashboard.welcomeDesc')} />
+        <Button
+          className={clsx(classes.button, 'dashboard-tutorial')}
+          variant="contained"
+          color="primary"
+          onClick={() => setIsTourOpen(true)}
+        >
+          {T('common.tutorial')}
+        </Button>
+        <Tour
+          steps={steps}
+          isOpen={isTourOpen}
+          onRequestClose={() => setIsTourOpen(false)}
+          accentColor={theme.palette.primary.main}
+          rounded={theme.shape.borderRadius}
+          prevButton={<ArrowBackOutlinedIcon color="action" />}
+          nextButton={<ArrowForwardOutlinedIcon color="action" />}
+          showCloseButton={false}
+        />
 
-      <PaperTop title={T('dashboard.veteran')} subtitle={T('dashboard.veteranDesc')} />
-      <Button
-        className={classes.button}
-        component={Link}
-        to="/workflows/new"
-        variant="contained"
-        color="primary"
-        startIcon={<AddIcon />}
-      >
-        {T('newW.title')}
-      </Button>
-      <Button
-        className={clsx(classes.button, 'dashboard-new-experiment')}
-        component={Link}
-        to="/experiments/new"
-        variant="contained"
-        color="primary"
-        startIcon={<AddIcon />}
-      >
-        {T('newE.title')}
-      </Button>
+        <PaperTop title={T('dashboard.veteran')} subtitle={T('dashboard.veteranDesc')} />
+        <Button
+          className={classes.button}
+          component={Link}
+          to="/workflows/new"
+          variant="contained"
+          color="primary"
+          startIcon={<AddIcon />}
+        >
+          {T('newW.title')}
+        </Button>
+        <Button
+          className={clsx(classes.button, 'dashboard-new-experiment')}
+          component={Link}
+          to="/experiments/new"
+          variant="contained"
+          color="primary"
+          startIcon={<AddIcon />}
+        >
+          {T('newE.title')}
+        </Button>
+      </Space>
     </Paper>
   )
 }

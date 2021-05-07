@@ -7,7 +7,7 @@ export const workflows = (params?: workflowParams) =>
     params,
   })
 
-export const newWorkflow = (data: any) => http.post('/workflows/new', data)
+export const newWorkflow = (data: any) => http.post('/workflows', data)
 
 export const detail = (ns: string, name: string) => http.get<WorkflowDetail>(`/workflows/${ns}/${name}`)
 

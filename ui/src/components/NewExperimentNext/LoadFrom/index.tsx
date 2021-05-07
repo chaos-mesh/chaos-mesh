@@ -84,7 +84,7 @@ const LoadFrom: React.FC<LoadFromProps> = ({ loadCallback }) => {
     apiRequest
       .detail(uuid)
       .then(({ data }) => {
-        fillExperiment(data.yaml)
+        fillExperiment(data.kube_object)
 
         loadCallback && loadCallback()
 
