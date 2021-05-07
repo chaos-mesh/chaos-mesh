@@ -101,22 +101,22 @@ func (iptables *iptablesClient) setIptablesChain(chain *pb.Chain) error {
 
 		if len(chain.SourcePorts) > 0 {
 			if strings.Contains(chain.SourcePorts, ",") {
-				protocolAndPort += fmt.Sprintf("-m multiport --source-ports %s", chain.SourcePorts)
+				protocolAndPort += fmt.Sprintf(" -m multiport --source-ports %s", chain.SourcePorts)
 			} else {
-				protocolAndPort += fmt.Sprintf("--source-port %s", chain.SourcePorts)
+				protocolAndPort += fmt.Sprintf(" --source-port %s", chain.SourcePorts)
 			}
 		}
 
 		if len(chain.DestinationPorts) > 0 {
 			if strings.Contains(chain.DestinationPorts, ",") {
-				protocolAndPort += fmt.Sprintf("-m multiport --destination-ports %s", chain.DestinationPorts)
+				protocolAndPort += fmt.Sprintf(" -m multiport --destination-ports %s", chain.DestinationPorts)
 			} else {
-				protocolAndPort += fmt.Sprintf("--destination-port %s", chain.DestinationPorts)
+				protocolAndPort += fmt.Sprintf(" --destination-port %s", chain.DestinationPorts)
 			}
 		}
 
 		if len(chain.TcpFlags) > 0 {
-			protocolAndPort += " --tcp-flags " + chain.TcpFlags
+			protocolAndPort += fmt.Sprintf(" --tcp-flags %s", chain.TcpFlags)
 		}
 	}
 
