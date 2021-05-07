@@ -393,7 +393,7 @@ func init() {
 	proto.RegisterType((*StatusResponse)(nil), "bpfki.StatusResponse")
 }
 
-func init() { proto.RegisterFile("bpfki.proto", fileDescriptor_62eed357eb71de0e) }
+func init() { protoregistry.GlobalFiles.RegisterFile("bpfki.proto", fileDescriptor_62eed357eb71de0e) }
 
 var fileDescriptor_62eed357eb71de0e = []byte{
 	// 518 bytes of a gzipped FileDescriptorProto
