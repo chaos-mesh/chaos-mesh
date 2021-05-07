@@ -130,7 +130,7 @@ func (s *DaemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Em
 	if len(globalTc) > 0 {
 		if err := s.setGlobalTcs(tcCli, globalTc, in.Device); err != nil {
 			log.Error(err, "error while setting global tc")
-			return &empty.Empty{}, nil
+			return &empty.Empty{}, err
 		}
 	}
 
@@ -138,7 +138,7 @@ func (s *DaemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Em
 		iptablesCli := buildIptablesClient(ctx, in.EnterNS, pid)
 		if err := s.setFilterTcs(tcCli, iptablesCli, filterTc, in.Device, len(globalTc)); err != nil {
 			log.Error(err, "error while setting filter tc")
-			return &empty.Empty{}, nil
+			return &empty.Empty{}, err
 		}
 	}
 
