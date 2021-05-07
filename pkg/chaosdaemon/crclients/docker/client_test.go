@@ -28,7 +28,11 @@ import (
 var _ = Describe("docker client", func() {
 	Context("DockerClient GetPidFromContainerID", func() {
 		It("should return the magic number 9527", func() {
-			defer mock.With("pid", int(9527))()
+			defer func() {
+				err := mock.With("pid", int(9527))()
+				Expect(err).To(BeNil())
+			}()
+
 			m := &test.MockClient{}
 			c := DockerClient{client: m}
 			pid, err := c.GetPidFromContainerID(context.TODO(), "docker://valid-container-id")
