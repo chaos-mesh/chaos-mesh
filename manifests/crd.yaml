@@ -3669,6 +3669,8 @@ spec:
     singular: workflownode
   preserveUnknownFields: false
   scope: Namespaced
+  subresources:
+    status: {}
   validation:
     openAPIV3Schema:
       properties:
@@ -5713,9 +5715,6 @@ spec:
                 - type
                 type: object
               type: array
-            expected_children_num:
-              description: ExpectedChildrenNum means the expected children to execute
-              type: integer
             finished_children:
               description: Children is necessary for representing the order when replicated
                 child template references by parent template.
@@ -5763,6 +5762,8 @@ spec:
     singular: workflow
   preserveUnknownFields: false
   scope: Namespaced
+  subresources:
+    status: {}
   validation:
     openAPIV3Schema:
       properties:
@@ -7823,6 +7824,9 @@ spec:
           description: Most recently observed status of the workflow
           properties:
             entry_node:
+              type: string
+            start_time:
+              format: date-time
               type: string
           type: object
       required:
