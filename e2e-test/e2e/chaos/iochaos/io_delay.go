@@ -336,7 +336,7 @@ func TestcaseIODelayWithWrongSpec(
 		}
 		errStr := ioChaos.Status.ChaosStatus.FailedMessage
 		klog.Infof("get chaos err: %s", errStr)
-		if strings.Contains(errStr, "Toda startup takes too long or an error occurs") {
+		if strings.Contains(errStr, "toda startup takes too long or an error occurs") {
 			return true, nil
 		}
 		return false, nil
