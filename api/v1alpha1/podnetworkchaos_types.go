@@ -146,7 +146,6 @@ type RawRuleSource struct {
 
 // PodNetworkChaosStatus defines the observed state of PodNetworkChaos
 type PodNetworkChaosStatus struct {
-	// TODO: reconcider whether `FailedMessage` is a good way
 	FailedMessage string `json:"failedMessage,omitempty"`
 
 	ObservedGeneration int64 `json:"observedGeneration,omitempty"`

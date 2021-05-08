@@ -2614,7 +2614,6 @@ spec:
             pods
           properties:
             failedMessage:
-              description: 'TODO: reconcider whether `FailedMessage` is a good way'
               type: string
             observedGeneration:
               format: int64

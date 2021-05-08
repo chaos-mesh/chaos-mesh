@@ -19,6 +19,8 @@ import (
 
 	"github.com/pkg/errors"
 
+	ctrl "sigs.k8s.io/controller-runtime"
+
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/ipset"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/iptable"
@@ -26,7 +28,6 @@ import (
 	pbutils "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/netem"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/netem"
-	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
