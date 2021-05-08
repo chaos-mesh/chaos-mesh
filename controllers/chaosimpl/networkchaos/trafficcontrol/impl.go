@@ -20,7 +20,6 @@ import (
 
 	"github.com/go-logr/logr"
 	k8sError "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/networkchaos/podnetworkchaosmanager"
@@ -50,9 +49,8 @@ const (
 
 type Impl struct {
 	client.Client
-	client.Reader
 
-	scheme *runtime.Scheme
+	builder *podnetworkchaosmanager.Builder
 
 	Log logr.Logger
 }
@@ -81,12 +79,12 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 			return waitForApplySync, err
 		}
 
-		if podnetworkchaos.Status.ObservedGeneration >= networkchaos.Status.Instances[record.Id] {
-			return v1alpha1.Injected, nil
-		}
-
 		if podnetworkchaos.Status.FailedMessage != "" {
 			return waitForApplySync, errors.New(podnetworkchaos.Status.FailedMessage)
+		}
+
+		if podnetworkchaos.Status.ObservedGeneration >= networkchaos.Status.Instances[record.Id] {
+			return v1alpha1.Injected, nil
 		}
 
 		return waitForApplySync, nil
@@ -100,10 +98,10 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	}
 
 	source := networkchaos.Namespace + "/" + networkchaos.Name
-	m := podnetworkchaosmanager.WithInit(source, impl.Log, impl.Client, types.NamespacedName{
+	m := impl.builder.WithInit(source, types.NamespacedName{
 		Namespace: pod.Namespace,
 		Name:      pod.Name,
-	}, impl.scheme)
+	})
 
 	if record.SelectorKey == "." {
 		if networkchaos.Spec.Direction == v1alpha1.To || networkchaos.Spec.Direction == v1alpha1.Both {
@@ -188,12 +186,12 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 			return waitForRecoverSync, err
 		}
 
-		if podnetworkchaos.Status.ObservedGeneration >= networkchaos.Status.Instances[record.Id] {
-			return v1alpha1.NotInjected, nil
-		}
-
 		if podnetworkchaos.Status.FailedMessage != "" {
 			return waitForRecoverSync, errors.New(podnetworkchaos.Status.FailedMessage)
+		}
+
+		if podnetworkchaos.Status.ObservedGeneration >= networkchaos.Status.Instances[record.Id] {
+			return v1alpha1.NotInjected, nil
 		}
 
 		return waitForRecoverSync, nil
@@ -211,10 +209,10 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 
 	source := networkchaos.Namespace + "/" + networkchaos.Name
 	// TODO: use the DI but not construct it manually
-	m := podnetworkchaosmanager.WithInit(source, impl.Log, impl.Client, types.NamespacedName{
+	m := impl.builder.WithInit(source, types.NamespacedName{
 		Namespace: pod.Namespace,
 		Name:      pod.Name,
-	}, impl.scheme)
+	})
 	generationNumber, err := m.Commit(ctx, networkchaos)
 	if err != nil {
 		if err == podnetworkchaosmanager.ErrPodNotFound || err == podnetworkchaosmanager.ErrPodNotRunning {
@@ -279,11 +277,10 @@ func (impl *Impl) ApplyTc(ctx context.Context, m *podnetworkchaosmanager.PodNetw
 	return nil
 }
 
-func NewImpl(c client.Client, r client.Reader, log logr.Logger, scheme *runtime.Scheme) *Impl {
+func NewImpl(c client.Client, b *podnetworkchaosmanager.Builder, log logr.Logger) *Impl {
 	return &Impl{
-		Client: c,
-		Reader: r,
-		Log:    log.WithName("trafficcontrol"),
-		scheme: scheme,
+		Client:  c,
+		builder: b,
+		Log:     log.WithName("trafficcontrol"),
 	}
 }

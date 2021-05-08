@@ -23,6 +23,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/networkchaos/partition"
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/networkchaos/podnetworkchaosmanager"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/networkchaos/trafficcontrol"
 )
 
@@ -50,4 +51,5 @@ var Module = fx.Provide(
 	},
 	trafficcontrol.NewImpl,
 	partition.NewImpl,
+	podnetworkchaosmanager.NewBuilder,
 )

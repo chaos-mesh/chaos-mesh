@@ -2420,6 +2420,8 @@ spec:
     singular: podnetworkchaos
   preserveUnknownFields: false
   scope: Namespaced
+  subresources:
+    status: {}
   validation:
     openAPIV3Schema:
       description: PodNetworkChaos is the Schema for the PodNetworkChaos API

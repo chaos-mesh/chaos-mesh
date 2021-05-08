@@ -102,7 +102,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			obj.Status.FailedMessage = failedMessage
 			obj.Status.ObservedGeneration = observedGeneration
 
-			return r.Client.Update(context.TODO(), obj)
+			return r.Client.Status().Update(context.TODO(), obj)
 		})
 
 		if updateError != nil {

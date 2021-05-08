@@ -42,28 +42,14 @@ var (
 // PodNetworkManager will save all the related podnetworkchaos
 type PodNetworkManager struct {
 	Source string
-	Log    logr.Logger
+
+	Log logr.Logger
 	client.Client
+	client.Reader
 	scheme *runtime.Scheme
 
 	Key types.NamespacedName
 	T   *PodNetworkTransaction
-}
-
-// New creates a new PodNetworkManager
-func WithInit(source string, logger logr.Logger, client client.Client, key types.NamespacedName, scheme *runtime.Scheme) *PodNetworkManager {
-	t := &PodNetworkTransaction{}
-	t.Clear(source)
-
-	return &PodNetworkManager{
-		Source: source,
-		Log:    logger,
-		Client: client,
-		scheme: scheme,
-
-		Key: key,
-		T:   t,
-	}
 }
 
 // CommitResponse is a tuple (Key, Err)
@@ -74,8 +60,6 @@ type CommitResponse struct {
 
 // Commit will update all modifications to the cluster
 func (m *PodNetworkManager) Commit(ctx context.Context, owner *v1alpha1.NetworkChaos) (int64, error) {
-	generationNumber := int64(0)
-
 	m.Log.Info("running modification on pod", "key", m.Key, "modification", m.T)
 	updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
 		chaos := &v1alpha1.PodNetworkChaos{}
@@ -108,14 +92,18 @@ func (m *PodNetworkManager) Commit(ctx context.Context, owner *v1alpha1.NetworkC
 			return err
 		}
 
-		generationNumber = chaos.ObjectMeta.Generation + 1
 		return m.Client.Update(ctx, chaos)
 	})
 	if updateError != nil {
 		return 0, updateError
 	}
 
-	return generationNumber, nil
+	chaos := &v1alpha1.PodNetworkChaos{}
+	err := m.Reader.Get(ctx, m.Key, chaos)
+	if err != nil {
+		m.Log.Error(err, "error while getting the latest generation number")
+	}
+	return chaos.GetGeneration(), nil
 }
 
 func (m *PodNetworkManager) CreateNewPodNetworkChaos(ctx context.Context) error {
