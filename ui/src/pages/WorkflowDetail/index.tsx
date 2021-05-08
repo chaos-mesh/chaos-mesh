@@ -223,7 +223,15 @@ const WorkflowDetail = () => {
                   </PaperTop>
                 </Box>
                 <Box flex={1}>
-                  <YAMLEditor theme={theme} data={yaml.dump(detail.kube_object)} mountEditor={setYAMLEditor} />
+                  <YAMLEditor
+                    theme={theme}
+                    data={yaml.dump({
+                      apiVersion: 'chaos-mesh.org/v1alpha1',
+                      kind: 'Workflow',
+                      ...detail.kube_object,
+                    })}
+                    mountEditor={setYAMLEditor}
+                  />
                 </Box>
               </Box>
             )}
