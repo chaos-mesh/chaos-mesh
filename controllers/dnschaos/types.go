@@ -17,6 +17,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net"
 	"time"
 
 	dnspb "github.com/chaos-mesh/k8s_dns_chaos/pb"
@@ -116,9 +117,13 @@ func (r *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		r.Log.Error(err, "fail to get service")
 		return err
 	}
+
 	r.Log.Info("Cancel DNS chaos to DNS service", "ip", service.Spec.ClusterIP)
 
-	r.cancelDNSServerRules(service.Spec.ClusterIP, config.ControllerCfg.DNSServicePort, dnschaos.Name)
+	err = r.cancelDNSServerRules(service.Spec.ClusterIP, config.ControllerCfg.DNSServicePort, dnschaos.Name)
+	if err != nil {
+		return err
+	}
 
 	rd := recover.Delegate{Client: r.Client, Log: r.Log, RecoverIntf: &recoverer{r.Client, r.Log}}
 
@@ -229,7 +234,7 @@ func (r *endpoint) setDNSServerRules(dnsServerIP string, port int, name string, 
 		}
 	}
 
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", dnsServerIP, port), grpc.WithInsecure())
+	conn, err := grpc.Dial(net.JoinHostPort(dnsServerIP, fmt.Sprintf("%d", port)), grpc.WithInsecure())
 	if err != nil {
 		return err
 	}
@@ -258,7 +263,7 @@ func (r *endpoint) setDNSServerRules(dnsServerIP string, port int, name string, 
 }
 
 func (r *endpoint) cancelDNSServerRules(dnsServerIP string, port int, name string) error {
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", dnsServerIP, port), grpc.WithInsecure())
+	conn, err := grpc.Dial(net.JoinHostPort(dnsServerIP, fmt.Sprintf("%d", port)), grpc.WithInsecure())
 	if err != nil {
 		return err
 	}

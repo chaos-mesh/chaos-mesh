@@ -136,7 +136,6 @@ func recover(ctx context.Context, m *chaosStateMachine, targetPhase v1alpha1.Exp
 }
 
 func resume(ctx context.Context, m *chaosStateMachine, _ v1alpha1.ExperimentPhase, now time.Time) (bool, error) {
-	startTime := now
 	duration, err := m.Chaos.GetDuration()
 	if err != nil {
 		m.Log.Error(err, "failed to get chaos duration")
@@ -167,9 +166,7 @@ func resume(ctx context.Context, m *chaosStateMachine, _ v1alpha1.ExperimentPhas
 	counter := 0
 	for {
 		if nextRecover.After(now) && nextRecover.Before(nextStart) {
-			startTime = lastStart
-
-			return apply(ctx, m, v1alpha1.ExperimentPhaseRunning, startTime)
+			return apply(ctx, m, v1alpha1.ExperimentPhaseRunning, lastStart)
 		}
 
 		if nextStart.After(now) {
@@ -190,9 +187,8 @@ func resume(ctx context.Context, m *chaosStateMachine, _ v1alpha1.ExperimentPhas
 		counter++
 		if counter > iterMax {
 			// If counter > iterMax, it means that chaos has been suspended for a long time,
-			// then directly restart chaos and set startTime to now.
-			startTime = now
-			start, recover, err = m.IterateNextTime(startTime, *duration)
+			// then directly restart chaos
+			start, recover, err = m.IterateNextTime(now, *duration)
 			if err != nil {
 				m.Log.Error(err, "failed to get the next start time and recover time")
 				return false, err
@@ -200,7 +196,7 @@ func resume(ctx context.Context, m *chaosStateMachine, _ v1alpha1.ExperimentPhas
 			nextStart = *start
 			nextRecover = *recover
 
-			return apply(ctx, m, v1alpha1.ExperimentPhaseRunning, startTime)
+			return apply(ctx, m, v1alpha1.ExperimentPhaseRunning, now)
 		}
 	}
 }
