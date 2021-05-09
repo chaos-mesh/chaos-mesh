@@ -56,10 +56,33 @@ spec:
                     properties:
                       abort:
                         type: boolean
-                      append:
-                        description: PodHttpChaosAppendActions defines possible append-actions
+                      delay:
+                        description: Delay represents the delay of the target request/response.
+                          A duration string is a possibly signed sequence of decimal
+                          numbers, each with optional fraction and a unit suffix,
+                          such as "300ms", "2h45m". Valid time units are "ns", "us"
+                          (or "µs"), "ms", "s", "m", "h".
+                        type: string
+                      patch:
+                        description: PodHttpChaosPatchActions defines possible patch-actions
                           of HttpChaos
                         properties:
+                          body:
+                            description: PodHttpChaosPatchBodyAction defines patch
+                              body action of HttpChaos
+                            properties:
+                              type:
+                                description: The patch type, only support `JSON` as
+                                  [merge patch json](https://tools.ietf.org/html/rfc7396)
+                                  currently
+                                type: string
+                              value:
+                                description: The contents of patch
+                                type: string
+                            required:
+                            - type
+                            - value
+                            type: object
                           headers:
                             items:
                               items:
@@ -73,13 +96,6 @@ spec:
                               type: array
                             type: array
                         type: object
-                      delay:
-                        description: Delay represents the delay of the target request/response.
-                          A duration string is a possibly signed sequence of decimal
-                          numbers, each with optional fraction and a unit suffix,
-                          such as "300ms", "-1.5h" or "2h45m". Valid time units are
-                          "ns", "us" (or "µs"), "ms", "s", "m", "h".
-                        type: string
                       replace:
                         description: PodHttpChaosReplaceActions defines possible replace-actions
                           of HttpChaos

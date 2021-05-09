@@ -68,25 +68,37 @@ type PodHttpChaosActions struct {
 	// Delay represents the delay of the target request/response.
 	// A duration string is a possibly signed sequence of
 	// decimal numbers, each with optional fraction and a unit suffix,
-	// such as "300ms", "-1.5h" or "2h45m".
+	// such as "300ms", "2h45m".
 	// Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
 	// +optional
 	Delay *string `json:"delay,omitempty"`
 
 	// +optional
-	Append *PodHttpChaosAppendActions `json:"append,omitempty"`
+	Replace *PodHttpChaosReplaceActions `json:"replace,omitempty"`
 
 	// +optional
-	Replace *PodHttpChaosReplaceActions `json:"replace,omitempty"`
+	Patch *PodHttpChaosPatchActions `json:"patch,omitempty"`
 }
 
-// PodHttpChaosAppendActions defines possible append-actions of HttpChaos
-type PodHttpChaosAppendActions struct {
+// PodHttpChaosPatchActions defines possible patch-actions of HttpChaos
+type PodHttpChaosPatchActions struct {
+	// +optional
+	Body *PodHttpChaosPatchBodyAction `json:"body,omitempty"`
+
 	// +optional
 	Queries [][]string `json:"queries,omitempty"`
 
 	// +optional
 	Headers [][]string `json:"headers,omitempty"`
+}
+
+// PodHttpChaosPatchBodyAction defines patch body action of HttpChaos
+type PodHttpChaosPatchBodyAction struct {
+	// The patch type, only support `JSON` as [merge patch json](https://tools.ietf.org/html/rfc7396) currently
+	Type string `json:"type"`
+
+	// The contents of patch
+	Value string `json:"value"`
 }
 
 // PodHttpChaosReplaceActions defines possible replace-actions of HttpChaos
