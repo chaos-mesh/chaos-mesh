@@ -13,11 +13,11 @@ metadata:
     app.kubernetes.io/component: chaos-dashboard
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
 spec:
-{{- if .Values.dashboard.persistentVolume.storageClass }}
-{{- if (eq "-" .Values.dashboard.persistentVolume.storageClass) }}
+{{- if .Values.dashboard.persistentVolume.storageClassName }}
+{{- if (eq "-" .Values.dashboard.persistentVolume.storageClassName) }}
   storageClassName: ""
 {{- else }}
-  storageClassName: "{{ .Values.dashboard.persistentVolume.storageClass }}"
+  storageClassName: "{{ .Values.dashboard.persistentVolume.storageClassName }}"
 {{- end }}
 {{- end }}
   accessModes:
