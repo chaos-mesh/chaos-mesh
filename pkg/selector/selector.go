@@ -359,11 +359,15 @@ func filterPodsByMode(pods []v1.Pod, mode v1alpha1.PodMode, value string) ([]v1.
 
 	switch mode {
 	case v1alpha1.OnePodMode:
+<<<<<<< HEAD
 		nBig, err := rand.Int(rand.Reader, big.NewInt(int64(len(pods))))
 		if err != nil {
 			return nil, err
 		}
 		index := nBig.Int64()
+=======
+		index := getRandomNumber(len(pods))
+>>>>>>> 30a80bb777ec2084ff56f1790367d1c9e69504d0
 		pod := pods[index]
 
 		return []v1.Pod{pod}, nil
@@ -415,11 +419,7 @@ func filterPodsByMode(pods []v1.Pod, mode v1alpha1.PodMode, value string) ([]v1.
 			return nil, fmt.Errorf("fixed percentage value of %d is invalid, Must be [0-100]", maxPercentage)
 		}
 
-		nBig, err := rand.Int(rand.Reader, big.NewInt(int64(maxPercentage)))
-		if err != nil {
-			return nil, err
-		}
-		percentage := nBig.Int64()
+		percentage := getRandomNumber(maxPercentage + 1) // + 1 because Intn works with half open interval [0,n) and we want [0,n]
 		num := int(math.Floor(float64(len(pods)) * float64(percentage) / 100))
 
 		return getFixedSubListFromPodList(pods, num), nil
@@ -537,6 +537,11 @@ func IsAllowedNamespaces(ctx context.Context, c client.Client, namespace string)
 	return false, nil
 }
 
+func getRandomNumber(max int) uint64 {
+	num, _ := rand.Int(rand.Reader, big.NewInt(int64(max)))
+	return num.Uint64()
+}
+
 // filterByNamespaceSelector filters a list of pods by a given namespace selector.
 func filterByNamespaceSelector(pods []v1.Pod, namespaces labels.Selector) ([]v1.Pod, error) {
 	// empty filter returns original list
@@ -636,11 +641,7 @@ func RandomFixedIndexes(start, end, count uint) []uint {
 	}
 
 	for i := 0; i < int(count); {
-		nBig, err := rand.Int(rand.Reader, big.NewInt(int64(end-start)))
-		if err != nil {
-			continue
-		}
-		index := uint(nBig.Int64()) + start
+		index := uint(getRandomNumber(int(end-start))) + start
 		_, exist := m[index]
 		if exist {
 			continue

@@ -17,6 +17,7 @@ import (
 	"context"
 	"crypto/rand"
 	"fmt"
+	"math/big"
 	"net/http"
 	"sort"
 	"strings"
@@ -432,15 +433,10 @@ func inSlice(v string, sl []string) bool {
 const charset = "abcdefghijklmnopqrstuvwxyz"
 
 func randomStringWithCharset(length int, charset string) string {
-	ll := len(charset)
 	b := make([]byte, length)
-	rand.Read(b) // generates len(b) random bytes
-	_, err := rand.Read(b)
-	if err != nil {
-		return ""
-	}
-	for i := 0; i < length; i++ {
-		b[i] = charset[int(b[i])%ll]
+	for i := range b {
+		num, _ := rand.Int(rand.Reader, big.NewInt(int64(len(charset))))
+		b[i] = charset[num.Int64()]
 	}
 	return string(b)
 }
