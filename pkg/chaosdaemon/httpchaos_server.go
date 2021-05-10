@@ -14,9 +14,13 @@
 package chaosdaemon
 
 import (
+	"bufio"
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 	"os"
 
 	"github.com/shirou/gopsutil/process"
@@ -27,11 +31,33 @@ import (
 )
 
 const (
-	tproxyBin    = "/usr/local/bin/tproxy"
-	rustLog      = "RUST_LOG"
-	rustLogLevel = "trace"
-	pathEnv      = "PATH"
+	tproxyBin = "/usr/local/bin/tproxy"
+	pathEnv   = "PATH"
 )
+
+type stdioTransport struct {
+	stdio *bpm.Stdio
+}
+
+func (t stdioTransport) RoundTrip(req *http.Request) (resp *http.Response, err error) {
+	t.stdio.Lock()
+	defer t.stdio.Unlock()
+
+	if t.stdio.Stdin == nil {
+		return nil, fmt.Errorf("fail to get stdin of process")
+	}
+	if t.stdio.Stdout == nil {
+		return nil, fmt.Errorf("fail to get stdout of process")
+	}
+
+	err = req.Write(t.stdio.Stdin)
+	if err != nil {
+		return
+	}
+
+	resp, err = http.ReadResponse(bufio.NewReader(t.stdio.Stdout), req)
+	return
+}
 
 func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaosRequest) (*pb.ApplyHttpChaosResponse, error) {
 	log.Info("applying http chaos", "Request", in)
@@ -42,10 +68,12 @@ func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 		}
 	}
 
-	stdin := s.backgroundProcessManager.Stdio(int(in.Instance), in.StartTime).Stdin
-	if stdin == nil {
-		return nil, fmt.Errorf("fail to get stdin of process")
+	stdio := s.backgroundProcessManager.Stdio(int(in.Instance), in.StartTime)
+	if stdio == nil {
+		return nil, fmt.Errorf("fail to get stdio of process")
 	}
+
+	transport := stdioTransport{stdio: stdio}
 
 	rules := []*v1alpha1.PodHttpChaosRule{}
 	err := json.Unmarshal([]byte(in.Rules), &rules)
@@ -69,14 +97,26 @@ func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 		return nil, err
 	}
 
-	_, err = stdin.Write([]byte(fmt.Sprintf("%s\n", string(config))))
+	req, err := http.NewRequest(http.MethodPut, "/", bytes.NewReader(config))
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := transport.RoundTrip(req)
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 
 	return &pb.ApplyHttpChaosResponse{
-		Instance:  int64(in.Instance),
-		StartTime: in.StartTime,
+		Instance:   int64(in.Instance),
+		StartTime:  in.StartTime,
+		StatusCode: int32(resp.StatusCode),
+		Error:      string(body),
 	}, nil
 }
 
@@ -86,19 +126,18 @@ func (s *DaemonServer) createHttpChaos(ctx context.Context, in *pb.ApplyHttpChao
 		log.Error(err, "error while getting PID")
 		return err
 	}
-	processBuilder := bpm.DefaultProcessBuilder(tproxyBin).
+	processBuilder := bpm.DefaultProcessBuilder(tproxyBin, "-i", "-vvv").
 		EnableLocalMnt().
 		SetIdentifier(in.ContainerId).
-		SetEnv(rustLog, rustLogLevel).
 		SetEnv(pathEnv, os.Getenv(pathEnv)).
-		SetStdin(bpm.NewConcurrentBuffer())
+		SetStdin(bpm.NewConcurrentBuffer()).
+		SetStdout(bpm.NewConcurrentBuffer())
 
 	if in.EnterNS {
 		processBuilder = processBuilder.SetNS(pid, bpm.PidNS).SetNS(pid, bpm.NetNS)
 	}
 
 	cmd := processBuilder.Build()
-	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
 	err = s.backgroundProcessManager.StartProcess(cmd)

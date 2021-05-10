@@ -63,6 +63,14 @@ func (b *ProcessBuilder) Build() *ManagedProcess {
 		command.Stdin = b.stdin
 	}
 
+	if b.stdout != nil {
+		command.Stdout = b.stdout
+	}
+
+	if b.stderr != nil {
+		command.Stderr = b.stderr
+	}
+
 	return &ManagedProcess{
 		Cmd:        command,
 		Identifier: b.identifier,

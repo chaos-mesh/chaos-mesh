@@ -68,6 +68,7 @@ type ProcessPair struct {
 
 // Stdio contains stdin, stdout and stderr
 type Stdio struct {
+	sync.Locker
 	Stdin, Stdout, Stderr io.ReadWriteCloser
 }
 
@@ -122,7 +123,7 @@ func (m *BackgroundProcessManager) StartProcess(cmd *ManagedProcess) error {
 	channel, _ := m.deathSig.LoadOrStore(pair, make(chan bool, 1))
 	deathChannel := channel.(chan bool)
 
-	stdio := new(Stdio)
+	stdio := &Stdio{Locker: &sync.Mutex{}}
 	if cmd.Stdin != nil {
 		if stdin, ok := cmd.Stdin.(io.ReadWriteCloser); ok {
 			stdio.Stdin = stdin
@@ -165,6 +166,7 @@ func (m *BackgroundProcessManager) StartProcess(cmd *ManagedProcess) error {
 		m.deathSig.Delete(pair)
 		if io, loaded := m.stdio.LoadAndDelete(pair); loaded {
 			if stdio, ok := io.(*Stdio); ok {
+				stdio.Lock()
 				if err = stdio.Stdin.Close(); err != nil {
 					log.Error(err, "stdin fails to be closed")
 				}
@@ -174,6 +176,7 @@ func (m *BackgroundProcessManager) StartProcess(cmd *ManagedProcess) error {
 				if err = stdio.Stderr.Close(); err != nil {
 					log.Error(err, "stderr fails to be closed")
 				}
+				stdio.Unlock()
 			}
 		}
 
@@ -309,6 +312,8 @@ type ProcessBuilder struct {
 
 	identifier *string
 	stdin      io.ReadWriteCloser
+	stdout     io.ReadWriteCloser
+	stderr     io.ReadWriteCloser
 
 	ctx context.Context
 }
@@ -369,6 +374,20 @@ func (b *ProcessBuilder) SetContext(ctx context.Context) *ProcessBuilder {
 // SetStdin sets stdin for process
 func (b *ProcessBuilder) SetStdin(stdin io.ReadWriteCloser) *ProcessBuilder {
 	b.stdin = stdin
+
+	return b
+}
+
+// SetStdout sets stdout for process
+func (b *ProcessBuilder) SetStdout(stdout io.ReadWriteCloser) *ProcessBuilder {
+	b.stdout = stdout
+
+	return b
+}
+
+// SetStderr sets stderr for process
+func (b *ProcessBuilder) SetStderr(stderr io.ReadWriteCloser) *ProcessBuilder {
+	b.stderr = stderr
 
 	return b
 }
