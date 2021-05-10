@@ -68,7 +68,7 @@ type ProcessPair struct {
 
 // Stdio contains stdin, stdout and stderr
 type Stdio struct {
-	Stdin io.ReadWriteCloser
+	Stdin, Stdout, Stderr io.ReadWriteCloser
 }
 
 // BackgroundProcessManager manages all background processes
@@ -122,11 +122,26 @@ func (m *BackgroundProcessManager) StartProcess(cmd *ManagedProcess) error {
 	channel, _ := m.deathSig.LoadOrStore(pair, make(chan bool, 1))
 	deathChannel := channel.(chan bool)
 
+	stdio := new(Stdio)
 	if cmd.Stdin != nil {
 		if stdin, ok := cmd.Stdin.(io.ReadWriteCloser); ok {
-			m.stdio.Store(pair, &Stdio{Stdin: stdin})
+			stdio.Stdin = stdin
 		}
 	}
+
+	if cmd.Stdout != nil {
+		if stdout, ok := cmd.Stdout.(io.ReadWriteCloser); ok {
+			stdio.Stdout = stdout
+		}
+	}
+
+	if cmd.Stderr != nil {
+		if stderr, ok := cmd.Stderr.(io.ReadWriteCloser); ok {
+			stdio.Stderr = stderr
+		}
+	}
+
+	m.stdio.Store(pair, stdio)
 
 	log := log.WithValues("pid", pid)
 
@@ -152,6 +167,12 @@ func (m *BackgroundProcessManager) StartProcess(cmd *ManagedProcess) error {
 			if stdio, ok := io.(*Stdio); ok {
 				if err = stdio.Stdin.Close(); err != nil {
 					log.Error(err, "stdin fails to be closed")
+				}
+				if err = stdio.Stdout.Close(); err != nil {
+					log.Error(err, "stdout fails to be closed")
+				}
+				if err = stdio.Stderr.Close(); err != nil {
+					log.Error(err, "stderr fails to be closed")
 				}
 			}
 		}
