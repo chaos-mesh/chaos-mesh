@@ -169,6 +169,9 @@ tidy: clean
 	@echo "go mod tidy"
 	GO111MODULE=on go mod tidy
 	git diff -U --exit-code go.mod go.sum
+	cd api/v1alpha1; GO111MODULE=on go mod tidy; git diff -U --exit-code go.mod go.sum
+	cd e2e-test; GO111MODULE=on go mod tidy; git diff -U --exit-code go.mod go.sum
+	cd e2e-test/cmd/e2e_helper; GO111MODULE=on go mod tidy; git diff -U --exit-code go.mod go.sum
 
 install.sh:
 	./hack/update_install_script.sh
