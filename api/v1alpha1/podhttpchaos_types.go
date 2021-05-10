@@ -15,22 +15,25 @@ package v1alpha1
 
 import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-// PodHttpChaosSpec defines the desired state of IoChaos
+// PodHttpChaosSpec defines the desired state of PodHttpChaos
 type PodHttpChaosSpec struct {
 	// ProxyPorts represents the target ports to be proxy of.
 	ProxyPorts []int32 `json:"proxy_ports"`
 
+	// Rules are a list of injection rule for http request
+	// +optional
+	Rules []*PodHttpChaosRule `json:"rules,omitempty"`
+}
+
+// PodHttpChaosStatus defines the actual state of PodHttpChaos
+type PodHttpChaosStatus struct {
 	// Pid represents a running tproxy process id
 	// +optional
 	Pid int64 `json:"pid,omitempty"`
 
 	// StartTime represents the start time of a tproxy process
 	// +optional
-	StartTime int64 `json:"start_time,omitempty"`
-
-	// Rules are a list of injection rule for http request
-	// +optional
-	Rules []*PodHttpChaosRule `json:"rules,omitempty"`
+	StartTime int64 `json:"startTime,omitempty"`
 }
 
 // PodHttpChaosRule defines the injection rule for http request
@@ -137,12 +140,13 @@ const KindPodHttpChaos = "PodHttpChaos"
 
 // +kubebuilder:object:root=true
 
-// PodHttpChaos is the Schema for the podiochaos API
+// PodHttpChaos is the Schema for the podhttpchaos API
 type PodHttpChaos struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec PodHttpChaosSpec `json:"spec,omitempty"`
+	Spec   PodHttpChaosSpec   `json:"spec,omitempty"`
+	Status PodHttpChaosStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true

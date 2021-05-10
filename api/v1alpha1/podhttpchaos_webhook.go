@@ -31,7 +31,7 @@ var podhttpchaoslog = logf.Log.WithName("rawpodhttp-resource")
 
 // PodHttpChaosHandler represents the implementation of podhttpchaos
 type PodHttpChaosHandler interface {
-	Apply(context.Context, *PodHttpChaos) error
+	Apply(context.Context, *PodHttpChaos) (int32, error)
 }
 
 var podHttpChaosHandler PodHttpChaosHandler
@@ -66,10 +66,9 @@ func (r *PodHttpChaosWebhookRunner) Handle(ctx context.Context, req admission.Re
 	}
 
 	if podHttpChaosHandler != nil {
-		err = podHttpChaosHandler.Apply(ctx, chaos)
+		statusCode, err := podHttpChaosHandler.Apply(ctx, chaos)
 		if err != nil {
-			// TODO: refine the http status code
-			return admission.Errored(http.StatusInternalServerError, err)
+			return admission.Errored(statusCode, err)
 		}
 	}
 

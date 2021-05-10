@@ -206,6 +206,8 @@ message ApplyHttpChaosRequest {
 message ApplyHttpChaosResponse {
   int64 instance = 1;
   int64 startTime = 2;
+  int32 statusCode = 3;
+  string error = 4;
 }
 
 

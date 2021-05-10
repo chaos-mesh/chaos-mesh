@@ -16,7 +16,9 @@ package podhttpchaos
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"net/http"
 
 	"github.com/go-logr/logr"
 	v1 "k8s.io/api/core/v1"
@@ -35,37 +37,40 @@ type Handler struct {
 	Log logr.Logger
 }
 
-// Apply flushes io configuration on pod
-func (h *Handler) Apply(ctx context.Context, chaos *v1alpha1.PodHttpChaos) error {
+// Apply flushes http chaos configuration on pod
+func (h *Handler) Apply(ctx context.Context, chaos *v1alpha1.PodHttpChaos) (status int32, err error) {
 	h.Log.Info("updating http chaos", "pod", chaos.Namespace+"/"+chaos.Name, "spec", chaos.Spec)
 
 	pod := &v1.Pod{}
+	status = http.StatusInternalServerError
 
-	err := h.Client.Get(ctx, types.NamespacedName{
+	err = h.Client.Get(ctx, types.NamespacedName{
 		Name:      chaos.Name,
 		Namespace: chaos.Namespace,
 	}, pod)
 	if err != nil {
 		h.Log.Error(err, "fail to find pod")
-		return err
+		return
 	}
 
 	pbClient, err := utils.NewChaosDaemonClient(ctx, h.Client, pod)
 	if err != nil {
-		return err
+		return
 	}
 	defer pbClient.Close()
 
 	if len(pod.Status.ContainerStatuses) == 0 {
-		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
+		err = fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
+		return
 	}
 
 	containerID := pod.Status.ContainerStatuses[0].ContainerID
 
 	rules, err := json.Marshal(chaos.Spec.Rules)
 	if err != nil {
-		return err
+		return
 	}
+
 	input := string(rules)
 	h.Log.Info("input with", "rules", input)
 
@@ -79,16 +84,22 @@ func (h *Handler) Apply(ctx context.Context, chaos *v1alpha1.PodHttpChaos) error
 		ProxyPorts:  proxyPorts,
 		ContainerId: containerID,
 
-		Instance:  chaos.Spec.Pid,
-		StartTime: chaos.Spec.StartTime,
+		Instance:  chaos.Status.Pid,
+		StartTime: chaos.Status.StartTime,
 		EnterNS:   true,
 	})
 	if err != nil {
-		return err
+		return
 	}
 
-	chaos.Spec.Pid = res.Instance
-	chaos.Spec.StartTime = res.StartTime
+	status = res.StatusCode
+	if status != http.StatusOK {
+		err = errors.New(res.Error)
+		return
+	}
+
+	chaos.Status.Pid = res.Instance
+	chaos.Status.StartTime = res.StartTime
 	chaos.OwnerReferences = []metav1.OwnerReference{
 		{
 			APIVersion: pod.APIVersion,
@@ -98,5 +109,5 @@ func (h *Handler) Apply(ctx context.Context, chaos *v1alpha1.PodHttpChaos) error
 		},
 	}
 
-	return nil
+	return
 }
