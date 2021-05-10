@@ -400,8 +400,8 @@ func (s *Service) getRbacConfig(c *gin.Context) {
 	} else if roleType == roleViewer {
 		verbs = `"get", "list", "watch"`
 	} else {
-		c.Status(http.StatusInternalServerError)
-		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("roleType is neither manager nor viewer")))
+		c.Status(http.StatusBadRequest)
+		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(fmt.Errorf("roleType is neither manager nor viewer")))
 		return
 
 	}
