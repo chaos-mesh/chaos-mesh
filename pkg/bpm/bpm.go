@@ -167,14 +167,20 @@ func (m *BackgroundProcessManager) StartProcess(cmd *ManagedProcess) error {
 		if io, loaded := m.stdio.LoadAndDelete(pair); loaded {
 			if stdio, ok := io.(*Stdio); ok {
 				stdio.Lock()
-				if err = stdio.Stdin.Close(); err != nil {
-					log.Error(err, "stdin fails to be closed")
+				if stdio.Stdin != nil {
+					if err = stdio.Stdin.Close(); err != nil {
+						log.Error(err, "stdin fails to be closed")
+					}
 				}
-				if err = stdio.Stdout.Close(); err != nil {
-					log.Error(err, "stdout fails to be closed")
+				if stdio.Stdout != nil {
+					if err = stdio.Stdout.Close(); err != nil {
+						log.Error(err, "stdout fails to be closed")
+					}
 				}
-				if err = stdio.Stderr.Close(); err != nil {
-					log.Error(err, "stderr fails to be closed")
+				if stdio.Stderr != nil {
+					if err = stdio.Stderr.Close(); err != nil {
+						log.Error(err, "stderr fails to be closed")
+					}
 				}
 				stdio.Unlock()
 			}
