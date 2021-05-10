@@ -130,8 +130,8 @@ func (s *DaemonServer) createHttpChaos(ctx context.Context, in *pb.ApplyHttpChao
 		EnableLocalMnt().
 		SetIdentifier(in.ContainerId).
 		SetEnv(pathEnv, os.Getenv(pathEnv)).
-		SetStdin(bpm.NewConcurrentBuffer()).
-		SetStdout(bpm.NewConcurrentBuffer())
+		SetStdin(bpm.NewBlockingBuffer()).
+		SetStdout(bpm.NewBlockingBuffer())
 
 	if in.EnterNS {
 		processBuilder = processBuilder.SetNS(pid, bpm.PidNS).SetNS(pid, bpm.NetNS)
