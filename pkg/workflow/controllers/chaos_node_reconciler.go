@@ -69,7 +69,6 @@ func (it *ChaosNodeReconciler) Reconcile(request reconcile.Request) (reconcile.R
 		return reconcile.Result{}, err
 	}
 
-	// TODO: sync status
 	updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
 		nodeNeedUpdate := v1alpha1.WorkflowNode{}
 		err := it.kubeClient.Get(ctx, request.NamespacedName, &nodeNeedUpdate)
