@@ -31,7 +31,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
-// Handler applys podiochaos
+// Handler applys podhttpchaos
 type Handler struct {
 	client.Client
 	Log logr.Logger
