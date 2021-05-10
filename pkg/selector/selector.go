@@ -359,15 +359,7 @@ func filterPodsByMode(pods []v1.Pod, mode v1alpha1.PodMode, value string) ([]v1.
 
 	switch mode {
 	case v1alpha1.OnePodMode:
-<<<<<<< HEAD
-		nBig, err := rand.Int(rand.Reader, big.NewInt(int64(len(pods))))
-		if err != nil {
-			return nil, err
-		}
-		index := nBig.Int64()
-=======
 		index := getRandomNumber(len(pods))
->>>>>>> 30a80bb777ec2084ff56f1790367d1c9e69504d0
 		pod := pods[index]
 
 		return []v1.Pod{pod}, nil
