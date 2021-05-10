@@ -120,8 +120,6 @@ func (s *DaemonServer) ExecStressors(ctx context.Context,
 	}, nil
 }
 
-var errFinished = "os: process already finished"
-
 func (s *DaemonServer) CancelStressors(ctx context.Context,
 	req *pb.CancelStressRequest) (*empty.Empty, error) {
 	pid, err := strconv.Atoi(req.Instance)

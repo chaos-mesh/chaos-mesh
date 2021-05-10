@@ -6,23 +6,18 @@ metadata:
   namespace: {{ .Release.Namespace | quote }}
   name: chaos-prometheus
   labels:
-    app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: prometheus
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
-      app.kubernetes.io/instance: {{ .Release.Name }}
+      {{- include "chaos-mesh.selectors" . | nindent 6 }}
       app.kubernetes.io/component: prometheus
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
-        app.kubernetes.io/instance: {{ .Release.Name }}
+        {{- include "chaos-mesh.labels" . | nindent 8 }}
         app.kubernetes.io/component: prometheus
     {{- with .Values.prometheus.podAnnotations }}
       annotations:
@@ -95,6 +90,9 @@ kind: PersistentVolumeClaim
 metadata:
   namespace: {{ .Release.Namespace | quote }}
   name: prometheus-pvc
+  labels:
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
+    app.kubernetes.io/component: prometheus
 spec:
   {{- if .Values.prometheus.volume.storageClassName }}
   storageClassName: {{ .Values.prometheus.volume.storageClassName }}

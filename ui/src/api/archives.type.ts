@@ -10,5 +10,5 @@ export interface Archive {
 }
 
 export interface ArchiveDetail extends Archive {
-  yaml: any
+  kube_object: any
 }

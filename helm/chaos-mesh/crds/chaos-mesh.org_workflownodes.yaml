@@ -259,8 +259,8 @@ spec:
                   - node-reset
                   - disk-loss
                   type: string
-                deviceName:
-                  description: The device name of the disk to detach. Needed in disk-loss.
+                deviceNames:
+                  description: The device name of disks to detach. Needed in disk-loss.
                   items:
                     type: string
                   type: array
@@ -2064,9 +2064,6 @@ spec:
                 - type
                 type: object
               type: array
-            expected_children_num:
-              description: ExpectedChildrenNum means the expected children to execute
-              type: integer
             finished_children:
               description: Children is necessary for representing the order when replicated
                 child template references by parent template.
