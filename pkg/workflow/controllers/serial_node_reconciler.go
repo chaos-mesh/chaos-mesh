@@ -16,13 +16,11 @@ package controllers
 import (
 	"context"
 	"fmt"
-	"sort"
 	"strings"
 	"time"
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/retry"
@@ -34,13 +32,19 @@ import (
 
 // SerialNodeReconciler watches on nodes which type is Serial
 type SerialNodeReconciler struct {
+	*ChildrenNodesFetcher
 	kubeClient    client.Client
 	eventRecorder record.EventRecorder
 	logger        logr.Logger
 }
 
 func NewSerialNodeReconciler(kubeClient client.Client, eventRecorder record.EventRecorder, logger logr.Logger) *SerialNodeReconciler {
-	return &SerialNodeReconciler{kubeClient: kubeClient, eventRecorder: eventRecorder, logger: logger}
+	return &SerialNodeReconciler{
+		ChildrenNodesFetcher: NewChildrenNodesFetcher(kubeClient, logger),
+		kubeClient:           kubeClient,
+		eventRecorder:        eventRecorder,
+		logger:               logger,
+	}
 }
 
 // Reconcile should be invoked by: changes on a serial node, or changes on a node which controlled by serial node.
@@ -127,6 +131,12 @@ func (it *SerialNodeReconciler) Reconcile(request reconcile.Request) (reconcile.
 			SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
 				Type:   v1alpha1.ConditionAccomplished,
 				Status: corev1.ConditionTrue,
+				Reason: "",
+			})
+		} else {
+			SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
+				Type:   v1alpha1.ConditionAccomplished,
+				Status: corev1.ConditionFalse,
 				Reason: "",
 			})
 		}
@@ -260,63 +270,4 @@ func (it *SerialNodeReconciler) syncChildrenNodes(ctx context.Context, node v1al
 		"child node", childrenNames)
 
 	return nil
-}
-
-func (it *SerialNodeReconciler) fetchChildrenNodes(ctx context.Context, node v1alpha1.WorkflowNode) (activeChildrenNodes []v1alpha1.WorkflowNode, finishedChildrenNodes []v1alpha1.WorkflowNode, err error) {
-	childrenNodes := v1alpha1.WorkflowNodeList{}
-	controlledByThisNode, err := metav1.LabelSelectorAsSelector(&metav1.LabelSelector{
-		MatchLabels: map[string]string{
-			v1alpha1.LabelControlledBy: node.Name,
-		},
-	})
-
-	if err != nil {
-		it.logger.Error(err, "failed to build label selector with filtering children workflow node controlled by current node",
-			"current node", fmt.Sprintf("%s/%s", node.Namespace, node.Name))
-		return nil, nil, err
-	}
-
-	err = it.kubeClient.List(ctx, &childrenNodes, &client.ListOptions{
-		LabelSelector: controlledByThisNode,
-	})
-
-	if err != nil {
-		it.logger.Error(err, "failed to list children workflow node controlled by current node",
-			"current node", fmt.Sprintf("%s/%s", node.Namespace, node.Name))
-		return nil, nil, err
-	}
-
-	sortedChildrenNodes := SortByCreationTimestamp(childrenNodes.Items)
-	sort.Sort(sortedChildrenNodes)
-
-	it.logger.V(4).Info("list children node", "current node",
-		"current node", fmt.Sprintf("%s/%s", node.Namespace, node.Name),
-		len(sortedChildrenNodes), "children", sortedChildrenNodes)
-
-	var activeChildren []v1alpha1.WorkflowNode
-	var finishedChildren []v1alpha1.WorkflowNode
-
-	for _, item := range sortedChildrenNodes {
-		childNode := item
-		if WorkflowNodeFinished(childNode.Status) {
-			finishedChildren = append(finishedChildren, childNode)
-		} else {
-			activeChildren = append(activeChildren, childNode)
-		}
-	}
-	return activeChildren, finishedChildren, nil
-}
-
-type SortByCreationTimestamp []v1alpha1.WorkflowNode
-
-func (it SortByCreationTimestamp) Len() int {
-	return len(it)
-}
-
-func (it SortByCreationTimestamp) Less(i, j int) bool {
-	return it[j].GetCreationTimestamp().After(it[i].GetCreationTimestamp().Time)
-}
-
-func (it SortByCreationTimestamp) Swap(i, j int) {
-	it[i], it[j] = it[j], it[i]
 }

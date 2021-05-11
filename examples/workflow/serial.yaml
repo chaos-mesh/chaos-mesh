@@ -1,7 +1,7 @@
 apiVersion: chaos-mesh.org/v1alpha1
 kind: Workflow
 metadata:
-  name: try-workflow
+  name: try-workflow-serial
 spec:
   entry: the-entry
   templates:
