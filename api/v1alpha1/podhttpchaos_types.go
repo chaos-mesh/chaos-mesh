@@ -22,7 +22,7 @@ type PodHttpChaosSpec struct {
 
 	// Rules are a list of injection rule for http request.
 	// +optional
-	Rules []*PodHttpChaosRule `json:"rules,omitempty"`
+	Rules []PodHttpChaosRule `json:"rules,omitempty"`
 }
 
 // PodHttpChaosStatus defines the actual state of PodHttpChaos.
