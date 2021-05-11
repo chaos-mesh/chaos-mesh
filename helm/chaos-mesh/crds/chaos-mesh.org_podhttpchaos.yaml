@@ -172,7 +172,7 @@ spec:
                         type: object
                     type: object
                   target:
-                    description: Traget is the object to be selected and injected,
+                    description: Target is the object to be selected and injected,
                       <Request | Response>.
                     type: string
                 required:

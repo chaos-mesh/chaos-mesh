@@ -38,7 +38,7 @@ type PodHttpChaosStatus struct {
 
 // PodHttpChaosRule defines the injection rule for http request.
 type PodHttpChaosRule struct {
-	// Traget is the object to be selected and injected, <Request | Response>.
+	// Target is the object to be selected and injected, <Request | Response>.
 	Target PodHttpChaosTarget `json:"target"`
 
 	// Selector contains the rules to select target.
@@ -76,7 +76,7 @@ type PodHttpChaosSelector struct {
 	ResponseHeaders map[string]string `json:"response_headers,omitempty"`
 }
 
-// HttpChaosAction defines possible actions of HttpChaos.
+// PodHttpChaosAction defines possible actions of HttpChaos.
 type PodHttpChaosActions struct {
 	// Abort is a rule to abort a http session.
 	// +optional
