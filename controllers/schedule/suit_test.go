@@ -1,0 +1,147 @@
+// Copyright 2019 Chaos Mesh Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package schedule
+
+import (
+	"context"
+	"fmt"
+	"os"
+	"path/filepath"
+	"testing"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-controller-manager/provider"
+	"github.com/chaos-mesh/chaos-mesh/controllers/types"
+	"github.com/go-logr/logr"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
+	"go.uber.org/fx"
+
+	"k8s.io/kubectl/pkg/scheme"
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/envtest"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+)
+
+// These tests use Ginkgo (BDD-style Go testing framework). Refer to
+// http://onsi.github.io/ginkgo/ to learn more about Ginkgo.
+
+var app *fx.App
+var k8sClient client.Client
+var testEnv *envtest.Environment
+var setupLog = ctrl.Log.WithName("setup")
+
+func TestSchedule(t *testing.T) {
+	RegisterFailHandler(Fail)
+
+	RunSpecsWithDefaultAndCustomReporters(t,
+		"Schedule suit",
+		[]Reporter{envtest.NewlineReporter{}})
+}
+
+var _ = BeforeSuite(func() {
+	logf.SetLogger(zap.LoggerTo(GinkgoWriter, true))
+	By("bootstrapping test environment")
+	t := true
+	if os.Getenv("TEST_USE_EXISTING_CLUSTER") == "true" {
+		testEnv = &envtest.Environment{
+			UseExistingCluster: &t,
+		}
+	} else {
+		testEnv = &envtest.Environment{
+			CRDDirectoryPaths: []string{filepath.Join("..", "..", "config", "crd", "bases")},
+		}
+	}
+
+	err := v1alpha1.SchemeBuilder.AddToScheme(scheme.Scheme)
+	Expect(err).NotTo(HaveOccurred())
+
+	cfg, err := testEnv.Start()
+	Expect(err).ToNot(HaveOccurred())
+	Expect(cfg).ToNot(BeNil())
+
+	k8sClient, err = client.New(cfg, client.Options{Scheme: scheme.Scheme})
+	Expect(err).ToNot(HaveOccurred())
+	Expect(k8sClient).ToNot(BeNil())
+	fmt.Println("good1")
+
+	app = fx.New(
+		fx.Options(
+			fx.Provide(
+				provider.NewOption,
+				provider.NewClient,
+				provider.NewManager,
+				provider.NewReader,
+				provider.NewLogger,
+				provider.NewAuthCli,
+				provider.NewScheme,
+			),
+			Module,
+			types.ChaosObjects,
+		),
+		fx.Invoke(Run),
+	)
+	fmt.Println("good2")
+	startCtx, cancel := context.WithTimeout(context.Background(), app.StartTimeout())
+	defer cancel()
+
+	if err := app.Start(startCtx); err != nil {
+		setupLog.Error(err, "fail to start manager")
+	}
+	Expect(err).ToNot(HaveOccurred())
+
+}, 60)
+
+var _ = AfterSuite(func() {
+	By("tearing down the test environment")
+	stopCtx, cancel := context.WithTimeout(context.Background(), app.StopTimeout())
+	defer cancel()
+
+	if err := app.Stop(stopCtx); err != nil {
+		setupLog.Error(err, "fail to stop manager")
+	}
+	err := testEnv.Stop()
+	Expect(err).ToNot(HaveOccurred())
+})
+
+type RunParams struct {
+	fx.In
+
+	Mgr    ctrl.Manager
+	Client client.Client
+	Reader client.Reader
+	Logger logr.Logger
+
+	Controllers []types.Controller `group:"controller"`
+	Objs        []types.Object     `group:"objs"`
+}
+
+func Run(params RunParams) error {
+
+	mgr := params.Mgr
+
+	fmt.Println("good3")
+	stopCh := ctrl.SetupSignalHandler()
+
+	setupLog.Info("Starting manager")
+	if err := mgr.Start(stopCh); err != nil {
+		fmt.Println(err)
+		setupLog.Error(err, "unable to start manager")
+		os.Exit(1)
+	}
+	fmt.Println("good4")
+	return nil
+}
