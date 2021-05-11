@@ -75,7 +75,7 @@ func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 
 	transport := stdioTransport{stdio: stdio}
 
-	rules := []*v1alpha1.PodHttpChaosRule{}
+	rules := []v1alpha1.PodHttpChaosRule{}
 	err := json.Unmarshal([]byte(in.Rules), &rules)
 	if err != nil {
 		log.Error(err, "error while unmarshal json bytes")
