@@ -87,6 +87,7 @@ func main() {
 				provider.NewLogger,
 				provider.NewAuthCli,
 				provider.NewScheme,
+				provider.NewConfig,
 			),
 			controllers.Module,
 			selector.Module,

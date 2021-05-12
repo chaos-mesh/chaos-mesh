@@ -1946,6 +1946,7 @@ spec:
               type: array
             time:
               format: date-time
+              nullable: true
               type: string
           type: object
       required:
