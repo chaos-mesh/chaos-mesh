@@ -19,10 +19,9 @@ import (
 
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	wfcontrollers "github.com/chaos-mesh/chaos-mesh/pkg/workflow/controllers"
@@ -249,9 +248,9 @@ func convertWorkflow(kubeWorkflow v1alpha1.Workflow) Workflow {
 		result.EndTime = kubeWorkflow.Status.EndTime.Format(time.RFC3339)
 	}
 
-	if workflowConditionEqualsTo(kubeWorkflow.Status, v1alpha1.WorkflowConditionAccomplished, corev1.ConditionTrue) {
+	if wfcontrollers.WorkflowConditionEqualsTo(kubeWorkflow.Status, v1alpha1.WorkflowConditionAccomplished, corev1.ConditionTrue) {
 		result.Status = WorkflowRunning
-	} else if workflowConditionEqualsTo(kubeWorkflow.Status, v1alpha1.WorkflowConditionScheduled, corev1.ConditionTrue) {
+	} else if wfcontrollers.WorkflowConditionEqualsTo(kubeWorkflow.Status, v1alpha1.WorkflowConditionScheduled, corev1.ConditionTrue) {
 		result.Status = WorkflowRunning
 	} else {
 		// TODO: status failed
@@ -336,21 +335,4 @@ func mappingTemplateType(templateType v1alpha1.TemplateType) (NodeType, error) {
 	} else {
 		return "", errors.Errorf("can not resolve such type called %s", templateType)
 	}
-}
-
-func getWorkflowCondition(status v1alpha1.WorkflowStatus, conditionType v1alpha1.WorkflowConditionType) *v1alpha1.WorkflowCondition {
-	for _, item := range status.Conditions {
-		if item.Type == conditionType {
-			return &item
-		}
-	}
-	return nil
-}
-
-func workflowConditionEqualsTo(status v1alpha1.WorkflowStatus, conditionType v1alpha1.WorkflowConditionType, expected corev1.ConditionStatus) bool {
-	condition := getWorkflowCondition(status, conditionType)
-	if condition == nil {
-		return false
-	}
-	return condition.Status == expected
 }
