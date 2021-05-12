@@ -80,6 +80,13 @@ type ScheduleStatus struct {
 	LastScheduleTime metav1.Time `json:"time,omitempty"`
 }
 
+func (in *Schedule) IsPaused() bool {
+	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
+		return false
+	}
+	return true
+}
+
 // +kubebuilder:object:root=true
 
 // ScheduleList contains a list of Schedule
