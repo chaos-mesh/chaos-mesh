@@ -34,7 +34,7 @@ func getRecentUnmetScheduleTime(schedule *v1alpha1.Schedule, now time.Time) (*ti
 	}
 
 	var earliestTime time.Time
-	if !schedule.Status.LastScheduleTime.IsZero() {
+	if !schedule.Status.LastScheduleTime.UTC().IsZero() {
 		earliestTime = schedule.Status.LastScheduleTime.Time
 	} else {
 		earliestTime = schedule.ObjectMeta.CreationTimestamp.Time

@@ -22,12 +22,15 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-controller-manager/provider"
+	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/utils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/go-logr/logr"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"go.uber.org/fx"
 
+	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
+	"k8s.io/client-go/rest"
 	"k8s.io/kubectl/pkg/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -41,6 +44,8 @@ import (
 
 var app *fx.App
 var k8sClient client.Client
+var lister *utils.ActiveLister
+var config *rest.Config
 var testEnv *envtest.Environment
 var setupLog = ctrl.Log.WithName("setup")
 
@@ -53,7 +58,7 @@ func TestSchedule(t *testing.T) {
 }
 
 var _ = BeforeSuite(func() {
-	logf.SetLogger(zap.LoggerTo(GinkgoWriter, true))
+	logf.SetLogger(zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)))
 	By("bootstrapping test environment")
 	t := true
 	if os.Getenv("TEST_USE_EXISTING_CLUSTER") == "true" {
@@ -69,32 +74,31 @@ var _ = BeforeSuite(func() {
 	err := v1alpha1.SchemeBuilder.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 
-	cfg, err := testEnv.Start()
+	config, err = testEnv.Start()
 	Expect(err).ToNot(HaveOccurred())
-	Expect(cfg).ToNot(BeNil())
+	Expect(config).ToNot(BeNil())
 
-	k8sClient, err = client.New(cfg, client.Options{Scheme: scheme.Scheme})
+	k8sClient, err = client.New(config, client.Options{Scheme: scheme.Scheme})
 	Expect(err).ToNot(HaveOccurred())
 	Expect(k8sClient).ToNot(BeNil())
-	fmt.Println("good1")
 
 	app = fx.New(
 		fx.Options(
 			fx.Provide(
 				provider.NewOption,
 				provider.NewClient,
-				provider.NewManager,
 				provider.NewReader,
 				provider.NewLogger,
 				provider.NewAuthCli,
 				provider.NewScheme,
+				NewTestManager,
 			),
+			fx.Supply(config),
 			Module,
 			types.ChaosObjects,
 		),
 		fx.Invoke(Run),
 	)
-	fmt.Println("good2")
 	startCtx, cancel := context.WithTimeout(context.Background(), app.StartTimeout())
 	defer cancel()
 
@@ -121,8 +125,6 @@ type RunParams struct {
 	fx.In
 
 	Mgr    ctrl.Manager
-	Client client.Client
-	Reader client.Reader
 	Logger logr.Logger
 
 	Controllers []types.Controller `group:"controller"`
@@ -130,18 +132,41 @@ type RunParams struct {
 }
 
 func Run(params RunParams) error {
-
-	mgr := params.Mgr
-
-	fmt.Println("good3")
-	stopCh := ctrl.SetupSignalHandler()
-
-	setupLog.Info("Starting manager")
-	if err := mgr.Start(stopCh); err != nil {
-		fmt.Println(err)
-		setupLog.Error(err, "unable to start manager")
-		os.Exit(1)
-	}
-	fmt.Println("good4")
+	lister = utils.NewActiveLister(k8sClient, params.Logger)
 	return nil
+}
+
+func NewTestManager(lc fx.Lifecycle, options *ctrl.Options, cfg *rest.Config) (ctrl.Manager, error) {
+	if ccfg.ControllerCfg.QPS > 0 {
+		cfg.QPS = ccfg.ControllerCfg.QPS
+	}
+	if ccfg.ControllerCfg.Burst > 0 {
+		cfg.Burst = ccfg.ControllerCfg.Burst
+	}
+	ch := make(chan struct{})
+
+	mgr, err := ctrl.NewManager(cfg, *options)
+
+	if err != nil {
+		return nil, err
+	}
+	lc.Append(fx.Hook{
+		OnStart: func(context.Context) error {
+			fmt.Println("Starting manager")
+			go func() {
+				if err := mgr.Start(ch); err != nil {
+					fmt.Println(err)
+					setupLog.Error(err, "unable to start manager")
+					os.Exit(1)
+				}
+			}()
+			return nil
+		},
+		OnStop: func(ctx context.Context) error {
+			fmt.Println("Stopping manager")
+			close(ch)
+			return nil
+		},
+	})
+	return mgr, nil
 }

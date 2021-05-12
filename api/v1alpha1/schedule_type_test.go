@@ -66,7 +66,7 @@ var _ = Describe("Schedule", func() {
 						},
 					},
 					ConcurrencyPolicy: ForbidConcurrent,
-					Type:              TypeTask,
+					Type:              TypePodChaos,
 				},
 				Status: ScheduleStatus{
 					LastScheduleTime: metav1.Time{time.Now()},
