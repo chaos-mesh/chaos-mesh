@@ -37,12 +37,24 @@ type WorkflowRepository interface {
 	Update(ctx context.Context, namespace, name string, workflow v1alpha1.Workflow) (WorkflowDetail, error)
 }
 
+type WorkflowStatus string
+
+const (
+	WorkflowRunning WorkflowStatus = "Running"
+	WorkflowSucceed WorkflowStatus = "Succeed"
+	WorkflowFailed  WorkflowStatus = "Failed"
+	WorkflowUnknown WorkflowStatus = "Unknown"
+)
+
 // Workflow defines the root structure of a workflow.
 type Workflow struct {
 	Namespace string `json:"namespace"`
 	Name      string `json:"name"`
-	Entry     string `json:"entry"` // the entry node name
-	Created   string `json:"created"`
+	// the entry node name
+	Entry   string         `json:"entry"`
+	Created string         `json:"created"`
+	EndTime string         `json:"endTime"`
+	Status  WorkflowStatus `json:"status,omitempty"`
 }
 
 type WorkflowDetail struct {
@@ -233,6 +245,19 @@ func convertWorkflow(kubeWorkflow v1alpha1.Workflow) Workflow {
 		result.Created = kubeWorkflow.Status.StartTime.Format(time.RFC3339)
 	}
 
+	if kubeWorkflow.Status.EndTime != nil {
+		result.EndTime = kubeWorkflow.Status.EndTime.Format(time.RFC3339)
+	}
+
+	if workflowConditionEqualsTo(kubeWorkflow.Status, v1alpha1.WorkflowConditionAccomplished, corev1.ConditionTrue) {
+		result.Status = WorkflowRunning
+	} else if workflowConditionEqualsTo(kubeWorkflow.Status, v1alpha1.WorkflowConditionScheduled, corev1.ConditionTrue) {
+		result.Status = WorkflowRunning
+	} else {
+		// TODO: status failed
+		result.Status = WorkflowUnknown
+	}
+
 	return result
 }
 
@@ -311,4 +336,21 @@ func mappingTemplateType(templateType v1alpha1.TemplateType) (NodeType, error) {
 	} else {
 		return "", errors.Errorf("can not resolve such type called %s", templateType)
 	}
+}
+
+func getWorkflowCondition(status v1alpha1.WorkflowStatus, conditionType v1alpha1.WorkflowConditionType) *v1alpha1.WorkflowCondition {
+	for _, item := range status.Conditions {
+		if item.Type == conditionType {
+			return &item
+		}
+	}
+	return nil
+}
+
+func workflowConditionEqualsTo(status v1alpha1.WorkflowStatus, conditionType v1alpha1.WorkflowConditionType, expected corev1.ConditionStatus) bool {
+	condition := getWorkflowCondition(status, conditionType)
+	if condition == nil {
+		return false
+	}
+	return condition.Status == expected
 }
