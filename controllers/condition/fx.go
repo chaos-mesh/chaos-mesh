@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package common
+package condition
 
 import (
 	"github.com/go-logr/logr"
@@ -20,37 +20,27 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
-	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 )
 
-type ChaosImplPair struct {
-	Name   string
-	Object InnerObjectWithSelector
-	Impl   ChaosImpl
-}
-
-type ChaosImplPairs struct {
+type Objs struct {
 	fx.In
 
-	Impls []*ChaosImplPair `group:"impl"`
+	Objs []types.Object `group:"objs"`
 }
 
-func NewController(mgr ctrl.Manager, client client.Client, reader client.Reader, logger logr.Logger, selector *selector.Selector, pairs ChaosImplPairs) (types.Controller, error) {
-	setupLog := logger.WithName("setup-common")
-	for _, pair := range pairs.Impls {
-		setupLog.Info("setting up controller", "resource-name", pair.Name)
+func NewController(mgr ctrl.Manager, client client.Client, logger logr.Logger, objs Objs) (types.Controller, error) {
+	setupLog := logger.WithName("setup-condition")
+	for _, obj := range objs.Objs {
+		setupLog.Info("setting up controller", "resource-name", obj.Name)
 
 		err := ctrl.NewControllerManagedBy(mgr).
-			For(pair.Object).
-			Named(pair.Name + "-records").
+			For(obj.Object).
+			Named(obj.Name + "-condition").
 			Complete(&Reconciler{
-				Impl:     pair.Impl,
-				Object:   pair.Object,
+				Object:   obj.Object,
 				Client:   client,
-				Reader:   reader,
-				Recorder: mgr.GetEventRecorderFor("common"),
-				Selector: selector,
-				Log:      logger.WithName("records"),
+				Recorder: mgr.GetEventRecorderFor("condition"),
+				Log:      logger.WithName("condition"),
 			})
 		if err != nil {
 			return "", err
@@ -58,5 +48,5 @@ func NewController(mgr ctrl.Manager, client client.Client, reader client.Reader,
 
 	}
 
-	return "records", nil
+	return "condition", nil
 }

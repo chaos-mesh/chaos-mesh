@@ -212,6 +212,23 @@ spec:
         status:
           description: Most recently observed status of the time chaos experiment
           properties:
+            conditions:
+              description: Conditions represents the current global condition of the
+                chaos
+              items:
+                properties:
+                  reason:
+                    type: string
+                  status:
+                    type: string
+                  type:
+                    type: string
+                required:
+                - reason
+                - status
+                - type
+                type: object
+              type: array
             experiment:
               description: Experiment records the last experiment state.
               properties:
@@ -237,8 +254,6 @@ spec:
                   - Stop
                   type: string
               type: object
-            failedMessage:
-              type: string
             instances:
               additionalProperties:
                 description: StressInstance is an instance generates stresses

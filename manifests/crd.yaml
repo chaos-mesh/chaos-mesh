@@ -73,6 +73,23 @@ spec:
         status:
           description: AwsChaosStatus represents the status of an AwsChaos
           properties:
+            conditions:
+              description: Conditions represents the current global condition of the
+                chaos
+              items:
+                properties:
+                  reason:
+                    type: string
+                  status:
+                    type: string
+                  type:
+                    type: string
+                required:
+                - reason
+                - status
+                - type
+                type: object
+              type: array
             experiment:
               description: Experiment records the last experiment state.
               properties:
@@ -98,8 +115,6 @@ spec:
                   - Stop
                   type: string
               type: object
-            failedMessage:
-              type: string
           required:
           - experiment
           type: object
@@ -295,6 +310,23 @@ spec:
           description: Most recently observed status of the chaos experiment about
             pods
           properties:
+            conditions:
+              description: Conditions represents the current global condition of the
+                chaos
+              items:
+                properties:
+                  reason:
+                    type: string
+                  status:
+                    type: string
+                  type:
+                    type: string
+                required:
+                - reason
+                - status
+                - type
+                type: object
+              type: array
             experiment:
               description: Experiment records the last experiment state.
               properties:
@@ -320,8 +352,6 @@ spec:
                   - Stop
                   type: string
               type: object
-            failedMessage:
-              type: string
           required:
           - experiment
           type: object
@@ -418,6 +448,23 @@ spec:
               items:
                 type: string
               type: array
+            conditions:
+              description: Conditions represents the current global condition of the
+                chaos
+              items:
+                properties:
+                  reason:
+                    type: string
+                  status:
+                    type: string
+                  type:
+                    type: string
+                required:
+                - reason
+                - status
+                - type
+                type: object
+              type: array
             experiment:
               description: Experiment records the last experiment state.
               properties:
@@ -443,8 +490,6 @@ spec:
                   - Stop
                   type: string
               type: object
-            failedMessage:
-              type: string
           required:
           - experiment
           type: object
@@ -656,6 +701,23 @@ spec:
           type: object
         status:
           properties:
+            conditions:
+              description: Conditions represents the current global condition of the
+                chaos
+              items:
+                properties:
+                  reason:
+                    type: string
+                  status:
+                    type: string
+                  type:
+                    type: string
+                required:
+                - reason
+                - status
+                - type
+                type: object
+              type: array
             experiment:
               description: Experiment records the last experiment state.
               properties:
@@ -681,8 +743,6 @@ spec:
                   - Stop
                   type: string
               type: object
-            failedMessage:
-              type: string
           required:
           - experiment
           type: object
@@ -990,6 +1050,23 @@ spec:
         status:
           description: IoChaosStatus defines the observed state of IoChaos
           properties:
+            conditions:
+              description: Conditions represents the current global condition of the
+                chaos
+              items:
+                properties:
+                  reason:
+                    type: string
+                  status:
+                    type: string
+                  type:
+                    type: string
+                required:
+                - reason
+                - status
+                - type
+                type: object
+              type: array
             experiment:
               description: Experiment records the last experiment state.
               properties:
@@ -1015,8 +1092,6 @@ spec:
                   - Stop
                   type: string
               type: object
-            failedMessage:
-              type: string
           required:
           - experiment
           type: object
@@ -1235,6 +1310,23 @@ spec:
         status:
           description: JVMChaosStatus defines the observed state of JVMChaos
           properties:
+            conditions:
+              description: Conditions represents the current global condition of the
+                chaos
+              items:
+                properties:
+                  reason:
+                    type: string
+                  status:
+                    type: string
+                  type:
+                    type: string
+                required:
+                - reason
+                - status
+                - type
+                type: object
+              type: array
             experiment:
               description: Experiment records the last experiment state.
               properties:
@@ -1260,8 +1352,6 @@ spec:
                   - Stop
                   type: string
               type: object
-            failedMessage:
-              type: string
           required:
           - experiment
           type: object
@@ -1498,6 +1588,23 @@ spec:
         status:
           description: Most recently observed status of the kernel chaos experiment
           properties:
+            conditions:
+              description: Conditions represents the current global condition of the
+                chaos
+              items:
+                properties:
+                  reason:
+                    type: string
+                  status:
+                    type: string
+                  type:
+                    type: string
+                required:
+                - reason
+                - status
+                - type
+                type: object
+              type: array
             experiment:
               description: Experiment records the last experiment state.
               properties:
@@ -1523,8 +1630,6 @@ spec:
                   - Stop
                   type: string
               type: object
-            failedMessage:
-              type: string
           required:
           - experiment
           type: object
@@ -1940,6 +2045,23 @@ spec:
           description: Most recently observed status of the chaos experiment about
             pods
           properties:
+            conditions:
+              description: Conditions represents the current global condition of the
+                chaos
+              items:
+                properties:
+                  reason:
+                    type: string
+                  status:
+                    type: string
+                  type:
+                    type: string
+                required:
+                - reason
+                - status
+                - type
+                type: object
+              type: array
             experiment:
               description: Experiment records the last experiment state.
               properties:
@@ -1965,8 +2087,6 @@ spec:
                   - Stop
                   type: string
               type: object
-            failedMessage:
-              type: string
           required:
           - experiment
           type: object
@@ -2164,6 +2284,23 @@ spec:
           description: Most recently observed status of the chaos experiment about
             pods
           properties:
+            conditions:
+              description: Conditions represents the current global condition of the
+                chaos
+              items:
+                properties:
+                  reason:
+                    type: string
+                  status:
+                    type: string
+                  type:
+                    type: string
+                required:
+                - reason
+                - status
+                - type
+                type: object
+              type: array
             experiment:
               description: Experiment records the last experiment state.
               properties:
@@ -2189,8 +2326,6 @@ spec:
                   - Stop
                   type: string
               type: object
-            failedMessage:
-              type: string
           required:
           - experiment
           type: object
@@ -2622,6 +2757,23 @@ spec:
           description: Most recently observed status of the chaos experiment about
             pods
           properties:
+            conditions:
+              description: Conditions represents the current global condition of the
+                chaos
+              items:
+                properties:
+                  reason:
+                    type: string
+                  status:
+                    type: string
+                  type:
+                    type: string
+                required:
+                - reason
+                - status
+                - type
+                type: object
+              type: array
             experiment:
               description: Experiment records the last experiment state.
               properties:
@@ -2647,8 +2799,6 @@ spec:
                   - Stop
                   type: string
               type: object
-            failedMessage:
-              type: string
           required:
           - experiment
           type: object
@@ -2905,9 +3055,11 @@ spec:
                   - node-reset
                   - disk-loss
                   type: string
-                deviceName:
-                  description: The device name of the disk to detach. Needed in disk-loss.
-                  type: string
+                deviceNames:
+                  description: The device name of disks to detach. Needed in disk-loss.
+                  items:
+                    type: string
+                  type: array
                 duration:
                   description: Duration represents the duration of the chaos action.
                   type: string
@@ -4840,6 +4992,23 @@ spec:
         status:
           description: Most recently observed status of the time chaos experiment
           properties:
+            conditions:
+              description: Conditions represents the current global condition of the
+                chaos
+              items:
+                properties:
+                  reason:
+                    type: string
+                  status:
+                    type: string
+                  type:
+                    type: string
+                required:
+                - reason
+                - status
+                - type
+                type: object
+              type: array
             experiment:
               description: Experiment records the last experiment state.
               properties:
@@ -4865,8 +5034,6 @@ spec:
                   - Stop
                   type: string
               type: object
-            failedMessage:
-              type: string
             instances:
               additionalProperties:
                 description: StressInstance is an instance generates stresses
@@ -5071,6 +5238,23 @@ spec:
         status:
           description: Most recently observed status of the time chaos experiment
           properties:
+            conditions:
+              description: Conditions represents the current global condition of the
+                chaos
+              items:
+                properties:
+                  reason:
+                    type: string
+                  status:
+                    type: string
+                  type:
+                    type: string
+                required:
+                - reason
+                - status
+                - type
+                type: object
+              type: array
             experiment:
               description: Experiment records the last experiment state.
               properties:
@@ -5096,8 +5280,6 @@ spec:
                   - Stop
                   type: string
               type: object
-            failedMessage:
-              type: string
           required:
           - experiment
           type: object
