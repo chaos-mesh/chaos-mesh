@@ -47,7 +47,7 @@ func NewParallelNodeReconciler(kubeClient client.Client, eventRecorder record.Ev
 	}
 }
 
-// Reconcile is extremely like the one in SerialNodeReconciler, only allows the parallel schedule
+// Reconcile is extremely like the one in SerialNodeReconciler, only allows the parallel schedule, and respawn **all** the children tasks during retry
 func (it *ParallelNodeReconciler) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	startTime := time.Now()
 	defer func() {
@@ -148,19 +148,19 @@ func (it *ParallelNodeReconciler) syncChildrenNodes(ctx context.Context, node v1
 		return err
 	}
 	existsChildrenNodes := append(activeChildrenNodes, finishedChildrenNodes...)
-	var prefixNamesOfNodes []string
 
+	var taskNamesOfNodes []string
 	for _, childNode := range existsChildrenNodes {
-		prefixNamesOfNodes = append(prefixNamesOfNodes, getTaskNameFromGeneratedName(childNode.GetName()))
+		taskNamesOfNodes = append(taskNamesOfNodes, getTaskNameFromGeneratedName(childNode.GetName()))
 	}
 
 	var tasksToStartup []string
-
-	if len(relativeComplementSet(prefixNamesOfNodes, node.Spec.Tasks)) > 0 {
+	if len(relativeComplementSet(taskNamesOfNodes, node.Spec.Tasks)) > 0 {
 		// TODO: check the specific of task and workflow nodes
 		// the definition of Spec.Tasks changed, remove all the existed nodes
 		tasksToStartup = node.Spec.Tasks
 		for _, childNode := range existsChildrenNodes {
+			// best effort deletion
 			err := it.kubeClient.Delete(ctx, &childNode)
 			if err != nil {
 				it.logger.Error(err, "failed to delete outdated child node",
@@ -170,7 +170,7 @@ func (it *ParallelNodeReconciler) syncChildrenNodes(ctx context.Context, node v1
 			}
 		}
 	} else {
-		tasksToStartup = relativeComplementSet(node.Spec.Tasks, prefixNamesOfNodes)
+		tasksToStartup = relativeComplementSet(node.Spec.Tasks, taskNamesOfNodes)
 	}
 
 	if len(tasksToStartup) == 0 {
@@ -189,7 +189,7 @@ func (it *ParallelNodeReconciler) syncChildrenNodes(ctx context.Context, node v1
 			"workflow name", node.Spec.WorkflowName)
 		return err
 	}
-	// TODO: using ordered id instead of random suffix is better, like StatefulSet, also related to the sorting
+
 	childrenNodes, err := renderNodesByTemplates(&parentWorkflow, &node, tasksToStartup...)
 	if err != nil {
 		it.logger.Error(err, "failed to render children childrenNodes",
@@ -209,7 +209,7 @@ func (it *ParallelNodeReconciler) syncChildrenNodes(ctx context.Context, node v1
 		}
 		childrenNames = append(childrenNames, childNode.Name)
 	}
-	it.logger.Info("serial node spawn new child node",
+	it.logger.Info("parallel node spawn new child node",
 		"node", fmt.Sprintf("%s/%s", node.Namespace, node.Name),
 		"child node", childrenNames)
 
