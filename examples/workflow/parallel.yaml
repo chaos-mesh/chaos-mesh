@@ -10,13 +10,8 @@ spec:
       duration: 240s
       tasks:
         - workflow-stress-chaos
-        - prefix-suspending
         - workflow-network-chaos
-        - suffix-suspending
         - workflow-pod-chaos
-    - name: prefix-suspending
-      template_type: Suspend
-      duration: 10s
     - name: workflow-network-chaos
       template_type: NetworkChaos
       duration: 20s
@@ -55,7 +50,4 @@ spec:
             workers: 1
             load: 20
             options: ["--cpu 1", "--timeout 600"]
-    - name: suffix-suspending
-      template_type: Suspend
-      duration: 5s
 
