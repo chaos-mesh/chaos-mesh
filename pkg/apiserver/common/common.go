@@ -403,7 +403,6 @@ func (s *Service) getRbacConfig(c *gin.Context) {
 		c.Status(http.StatusBadRequest)
 		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(fmt.Errorf("roleType is neither manager nor viewer")))
 		return
-
 	}
 
 	serviceAccountName := fmt.Sprintf("account-%s-%s-%s", scope, roleType, randomStr)
