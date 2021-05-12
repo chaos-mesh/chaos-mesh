@@ -153,12 +153,17 @@ func (it *WorkflowEntryReconciler) Reconcile(request reconcile.Request) (reconci
 					Status: corev1.ConditionTrue,
 					Reason: "",
 				})
+				if workflowNeedUpdate.Status.EndTime != nil {
+					now := metav1.NewTime(time.Now())
+					workflowNeedUpdate.Status.EndTime = &now
+				}
 			} else {
 				SetWorkflowCondition(&workflowNeedUpdate.Status, v1alpha1.WorkflowCondition{
 					Type:   v1alpha1.WorkflowConditionAccomplished,
 					Status: corev1.ConditionFalse,
 					Reason: "",
 				})
+				workflowNeedUpdate.Status.EndTime = nil
 			}
 		} else {
 			SetWorkflowCondition(&workflowNeedUpdate.Status, v1alpha1.WorkflowCondition{
@@ -171,6 +176,7 @@ func (it *WorkflowEntryReconciler) Reconcile(request reconcile.Request) (reconci
 				Status: corev1.ConditionFalse,
 				Reason: "",
 			})
+			workflowNeedUpdate.Status.EndTime = nil
 		}
 
 		err = it.kubeClient.Status().Update(ctx, &workflowNeedUpdate)
