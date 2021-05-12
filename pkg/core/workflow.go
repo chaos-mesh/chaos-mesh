@@ -249,13 +249,14 @@ func convertWorkflow(kubeWorkflow v1alpha1.Workflow) Workflow {
 	}
 
 	if wfcontrollers.WorkflowConditionEqualsTo(kubeWorkflow.Status, v1alpha1.WorkflowConditionAccomplished, corev1.ConditionTrue) {
-		result.Status = WorkflowRunning
+		result.Status = WorkflowSucceed
 	} else if wfcontrollers.WorkflowConditionEqualsTo(kubeWorkflow.Status, v1alpha1.WorkflowConditionScheduled, corev1.ConditionTrue) {
 		result.Status = WorkflowRunning
 	} else {
-		// TODO: status failed
 		result.Status = WorkflowUnknown
 	}
+
+	// TODO: status failed
 
 	return result
 }
@@ -316,9 +317,7 @@ func convertWorkflowNode(kubeWorkflowNode v1alpha1.WorkflowNode) (Node, error) {
 		}
 	}
 
-	// TODO: refactor this
-	if wfcontrollers.ConditionEqualsTo(kubeWorkflowNode.Status, v1alpha1.ConditionAccomplished, corev1.ConditionTrue) ||
-		wfcontrollers.ConditionEqualsTo(kubeWorkflowNode.Status, v1alpha1.ConditionDeadlineExceed, corev1.ConditionTrue) {
+	if wfcontrollers.WorkflowNodeFinished(kubeWorkflowNode.Status) {
 		result.State = NodeSucceed
 	} else {
 		result.State = NodeRunning
