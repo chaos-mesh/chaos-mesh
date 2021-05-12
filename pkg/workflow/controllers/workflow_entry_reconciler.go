@@ -153,7 +153,7 @@ func (it *WorkflowEntryReconciler) Reconcile(request reconcile.Request) (reconci
 					Status: corev1.ConditionTrue,
 					Reason: "",
 				})
-				if workflowNeedUpdate.Status.EndTime != nil {
+				if workflowNeedUpdate.Status.EndTime == nil {
 					now := metav1.NewTime(time.Now())
 					workflowNeedUpdate.Status.EndTime = &now
 				}
