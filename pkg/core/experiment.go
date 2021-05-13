@@ -98,12 +98,14 @@ type ScopeInfo struct {
 
 // SelectorInfo defines the selector options of the Experiment.
 type SelectorInfo struct {
-	NamespaceSelectors  []string                          `json:"namespace_selectors" binding:"NamespaceSelectorsValid"`
+	Namespaces  []string                          `json:"namespaces" binding:"NamespaceSelectorsValid"`
+	Nodes []string `json:"nodes,omitempty"`
+	NodeSelectors map[string]string `json:"node_selectors,omitempty"`
+	FieldSelectors      map[string]string                 `json:"field_selectors" binding:"MapSelectorsValid"`
 	LabelSelectors      map[string]string                 `json:"label_selectors" binding:"MapSelectorsValid"`
 	ExpressionSelectors []metav1.LabelSelectorRequirement `json:"expression_selectors" binding:"RequirementSelectorsValid"`
 	AnnotationSelectors map[string]string                 `json:"annotation_selectors" binding:"MapSelectorsValid"`
-	FieldSelectors      map[string]string                 `json:"field_selectors" binding:"MapSelectorsValid"`
-	PhaseSelector       []string                          `json:"phase_selectors" binding:"PhaseSelectorsValid"`
+	PodPhaseSelectors       []string                      `json:"phase_selectors" binding:"PhaseSelectorsValid"`
 
 	// Pods is a map of string keys and a set values that used to select pods.
 	// The key defines the namespace which pods belong,
@@ -112,9 +114,9 @@ type SelectorInfo struct {
 }
 
 // ParseSelector parses SelectorInfo to v1alpha1.SelectorSpec
-func (s *SelectorInfo) ParseSelector() v1alpha1.SelectorSpec {
-	selector := v1alpha1.SelectorSpec{}
-	selector.Namespaces = append(selector.Namespaces, s.NamespaceSelectors...)
+func (s *SelectorInfo) ParseSelector() v1alpha1.PodSelectorSpec {
+	selector := v1alpha1.PodSelectorSpec{}
+	selector.Namespaces = append(selector.Namespaces, s.Namespaces...)
 
 	selector.LabelSelectors = make(map[string]string)
 	for key, val := range s.LabelSelectors {
@@ -133,7 +135,7 @@ func (s *SelectorInfo) ParseSelector() v1alpha1.SelectorSpec {
 		selector.FieldSelectors[key] = val
 	}
 
-	selector.PodPhaseSelectors = append(selector.PodPhaseSelectors, s.PhaseSelector...)
+	selector.PodPhaseSelectors = append(selector.PodPhaseSelectors, s.PodPhaseSelectors...)
 
 	if s.Pods != nil {
 		selector.Pods = s.Pods
@@ -158,14 +160,13 @@ type TargetInfo struct {
 
 // SchedulerInfo defines the scheduler information.
 type SchedulerInfo struct {
-	Cron     string `json:"cron" binding:"CronValid"`
 	Duration string `json:"duration" binding:"DurationValid"`
 }
 
 // PodChaosInfo defines the basic information of pod chaos for creating a new PodChaos.
 type PodChaosInfo struct {
 	Action        string `json:"action" binding:"oneof='' 'pod-kill' 'pod-failure' 'container-kill'"`
-	ContainerName string `json:"container_name"`
+	ContainerNames []string `json:"containerNames,omitempty"`
 	GracePeriod   int64  `json:"grace_period"`
 }
 
