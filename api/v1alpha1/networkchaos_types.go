@@ -112,6 +112,9 @@ type NetworkChaosSpec struct {
 // NetworkChaosStatus defines the observed state of NetworkChaos
 type NetworkChaosStatus struct {
 	ChaosStatus `json:",inline"`
+	// Instances always specifies podnetworkchaos generation or empty
+	// +optional
+	Instances map[string]int64 `json:"instances,omitempty"`
 }
 
 // DelaySpec defines detail of a delay action
@@ -178,4 +181,8 @@ func (obj *NetworkChaos) GetSelectorSpecs() map[string]interface{} {
 		".":       &obj.Spec.PodSelector,
 		".Target": obj.Spec.Target,
 	}
+}
+
+func (obj *NetworkChaos) GetCustomStatus() interface{} {
+	return &obj.Status.Instances
 }

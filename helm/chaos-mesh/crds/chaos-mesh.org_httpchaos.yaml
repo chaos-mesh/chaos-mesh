@@ -218,8 +218,6 @@ spec:
                   - Stop
                   type: string
               type: object
-            failedMessage:
-              type: string
           required:
           - experiment
           type: object
