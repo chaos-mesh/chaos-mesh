@@ -18,7 +18,6 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 )
 
@@ -49,7 +48,7 @@ func SetOwnerReference(owner, object metav1.Object, scheme *runtime.Scheme) erro
 	fi := -1
 
 	for i, r := range existingRefs {
-		if referSameObject(ref, r) {
+		if ref.UID == r.UID {
 			fi = i
 		}
 	}
@@ -62,19 +61,4 @@ func SetOwnerReference(owner, object metav1.Object, scheme *runtime.Scheme) erro
 	// Update owner references
 	object.SetOwnerReferences(existingRefs)
 	return nil
-}
-
-// Returns true if a and b point to the same object
-func referSameObject(a, b metav1.OwnerReference) bool {
-	aGV, err := schema.ParseGroupVersion(a.APIVersion)
-	if err != nil {
-		return false
-	}
-
-	bGV, err := schema.ParseGroupVersion(b.APIVersion)
-	if err != nil {
-		return false
-	}
-
-	return aGV == bGV && a.Kind == b.Kind && a.Name == b.Name
 }

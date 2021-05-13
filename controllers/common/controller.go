@@ -149,7 +149,6 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		}
 
 		if operation == Apply {
-			operation = Apply
 			r.Log.Info("apply chaos", "id", records[index].Id)
 			record.Phase, err = r.Impl.Apply(context.TODO(), index, records, obj)
 			if record.Phase != originalPhase {

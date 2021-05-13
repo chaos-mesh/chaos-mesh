@@ -102,6 +102,7 @@ func (m *PodNetworkManager) Commit(ctx context.Context, owner *v1alpha1.NetworkC
 	err := m.Reader.Get(ctx, m.Key, chaos)
 	if err != nil {
 		m.Log.Error(err, "error while getting the latest generation number")
+		return 0, err
 	}
 	return chaos.GetGeneration(), nil
 }
