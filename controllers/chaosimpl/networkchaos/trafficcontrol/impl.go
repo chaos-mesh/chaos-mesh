@@ -59,12 +59,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	// The only possible phase to get in here is "Not Injected" or "Not Injected/Wait"
 
 	impl.Log.Info("traffic control Apply", "namespace", obj.GetObjectMeta().Namespace, "name", obj.GetObjectMeta().Name)
-	networkchaos, ok := obj.(*v1alpha1.NetworkChaos)
-	if !ok {
-		err := errors.New("chaos is not NetworkChaos")
-		impl.Log.Error(err, "chaos is not NetworkChaos", "chaos", obj)
-		return v1alpha1.NotInjected, err
-	}
+	networkchaos := obj.(*v1alpha1.NetworkChaos)
 	if networkchaos.Status.Instances == nil {
 		networkchaos.Status.Instances = make(map[string]int64)
 	}
@@ -162,12 +157,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	// The only possible phase to get in here is "Injected" or "Injected/Wait"
 
-	networkchaos, ok := obj.(*v1alpha1.NetworkChaos)
-	if !ok {
-		err := errors.New("chaos is not NetworkChaos")
-		impl.Log.Error(err, "chaos is not NetworkChaos", "chaos", obj)
-		return v1alpha1.Injected, err
-	}
+	networkchaos := obj.(*v1alpha1.NetworkChaos)
 	if networkchaos.Status.Instances == nil {
 		networkchaos.Status.Instances = make(map[string]int64)
 	}

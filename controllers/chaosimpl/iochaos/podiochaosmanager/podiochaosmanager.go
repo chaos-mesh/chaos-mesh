@@ -39,8 +39,8 @@ var (
 	ErrPodNotRunning = errors.New("pod not running")
 )
 
-// PodIoManager will save all the related podiochaos
-type PodIoManager struct {
+// PodIOManager will save all the related podiochaos
+type PodIOManager struct {
 	Source string
 
 	Log logr.Logger
@@ -49,22 +49,7 @@ type PodIoManager struct {
 	scheme *runtime.Scheme
 
 	Key types.NamespacedName
-	T   *PodIoTransaction
-}
-
-// New creates a new PodIoManager
-func WithInit(source string, logger logr.Logger, client client.Client, key types.NamespacedName) *PodIoManager {
-	t := &PodIoTransaction{}
-	t.Clear(source)
-
-	return &PodIoManager{
-		Source: source,
-		Log:    logger,
-		Client: client,
-
-		Key: key,
-		T:   t,
-	}
+	T   *PodIOTransaction
 }
 
 // CommitResponse is a tuple (Key, Err)
@@ -74,7 +59,7 @@ type CommitResponse struct {
 }
 
 // Commit will update all modifications to the cluster
-func (m *PodIoManager) Commit(ctx context.Context, owner *v1alpha1.IoChaos) (int64, error) {
+func (m *PodIOManager) Commit(ctx context.Context, owner *v1alpha1.IoChaos) (int64, error) {
 	m.Log.Info("running modification on pod", "key", m.Key, "modification", m.T)
 	updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
 		chaos := &v1alpha1.PodIoChaos{}
@@ -122,7 +107,7 @@ func (m *PodIoManager) Commit(ctx context.Context, owner *v1alpha1.IoChaos) (int
 	return chaos.GetGeneration(), nil
 }
 
-func (m *PodIoManager) CreateNewPodIOChaos(ctx context.Context) error {
+func (m *PodIOManager) CreateNewPodIOChaos(ctx context.Context) error {
 	var err error
 	chaos := &v1alpha1.PodIoChaos{}
 

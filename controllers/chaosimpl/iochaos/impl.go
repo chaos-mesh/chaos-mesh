@@ -15,6 +15,7 @@ package iochaos
 
 import (
 	"context"
+	"errors"
 
 	"go.uber.org/fx"
 
@@ -27,18 +28,53 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/iochaos/podiochaosmanager"
-	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/networkchaos/podnetworkchaosmanager"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
+const (
+	waitForApplySync   v1alpha1.Phase = "Not Injected/Wait"
+	waitForRecoverSync v1alpha1.Phase = "Injected/Wait"
+)
+
 type Impl struct {
 	client.Client
 	Log logr.Logger
+
+	builder *podiochaosmanager.Builder
 }
 
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
+	// The only possible phase to get in here is "Not Injected" or "Not Injected/Wait"
+
+	impl.Log.Info("iochaos Apply", "namespace", obj.GetObjectMeta().Namespace, "name", obj.GetObjectMeta().Name)
+	iochaos := obj.(*v1alpha1.IoChaos)
+	if iochaos.Status.Instances == nil {
+		iochaos.Status.Instances = make(map[string]int64)
+	}
+
+	record := records[index]
+	phase := record.Phase
+
+	if phase == waitForApplySync {
+		podiochaos := &v1alpha1.PodIoChaos{}
+		err := impl.Client.Get(ctx, controller.ParseNamespacedName(record.Id), podiochaos)
+		if err != nil {
+			return waitForApplySync, err
+		}
+
+		if podiochaos.Status.FailedMessage != "" {
+			return waitForApplySync, errors.New(podiochaos.Status.FailedMessage)
+		}
+
+		if podiochaos.Status.ObservedGeneration >= iochaos.Status.Instances[record.Id] {
+			return v1alpha1.Injected, nil
+		}
+
+		return waitForApplySync, nil
+	}
+
 	podId, containerName := controller.ParseNamespacedNameContainer(records[index].Id)
 	var pod v1.Pod
 	err := impl.Client.Get(ctx, podId, &pod)
@@ -46,12 +82,10 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		return v1alpha1.NotInjected, err
 	}
 
-	iochaos := obj.(*v1alpha1.IoChaos)
-
 	source := iochaos.Namespace + "/" + iochaos.Name
-	m := podiochaosmanager.WithInit(source, impl.Log, impl.Client, types.NamespacedName{
-		Name:      pod.Name,
+	m := impl.builder.WithInit(source, types.NamespacedName{
 		Namespace: pod.Namespace,
+		Name:      pod.Name,
 	})
 
 	m.T.SetVolumePath(iochaos.Spec.VolumePath)
@@ -74,15 +108,48 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		AttrOverrideSpec: iochaos.Spec.Attr,
 		Source:           m.Source,
 	})
-	err = m.Commit(ctx)
+	generationNumber, err := m.Commit(ctx, iochaos)
 	if err != nil {
 		return v1alpha1.NotInjected, err
 	}
 
-	return v1alpha1.Injected, nil
+	// modify the custom status
+	iochaos.Status.Instances[record.Id] = generationNumber
+	return waitForApplySync, nil
 }
 
 func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
+	// The only possible phase to get in here is "Injected" or "Injected/Wait"
+
+	iochaos := obj.(*v1alpha1.IoChaos)
+	if iochaos.Status.Instances == nil {
+		iochaos.Status.Instances = make(map[string]int64)
+	}
+
+	record := records[index]
+	phase := record.Phase
+	if phase == waitForRecoverSync {
+		podiochaos := &v1alpha1.PodIoChaos{}
+		err := impl.Client.Get(ctx, controller.ParseNamespacedName(record.Id), podiochaos)
+		if err != nil {
+			// TODO: handle this error
+			if k8sError.IsNotFound(err) {
+				return v1alpha1.NotInjected, nil
+			}
+			return waitForRecoverSync, err
+		}
+
+		if podiochaos.Status.FailedMessage != "" {
+			return waitForRecoverSync, errors.New(podiochaos.Status.FailedMessage)
+		}
+
+		if podiochaos.Status.ObservedGeneration >= iochaos.Status.Instances[record.Id] {
+			return v1alpha1.NotInjected, nil
+		}
+
+		return waitForRecoverSync, nil
+	}
+
 	podId, _ := controller.ParseNamespacedNameContainer(records[index].Id)
 	var pod v1.Pod
 	err := impl.Client.Get(ctx, podId, &pod)
@@ -94,32 +161,33 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		return v1alpha1.NotInjected, err
 	}
 
-	iochaos := obj.(*v1alpha1.IoChaos)
-
 	source := iochaos.Namespace + "/" + iochaos.Name
-	m := podiochaosmanager.WithInit(source, impl.Log, impl.Client, types.NamespacedName{
-		Name:      pod.Name,
+	m := impl.builder.WithInit(source, types.NamespacedName{
 		Namespace: pod.Namespace,
+		Name:      pod.Name,
 	})
 
-	err = m.Commit(ctx)
+	generationNumber, err := m.Commit(ctx, iochaos)
 	if err != nil {
-		if err == podnetworkchaosmanager.ErrPodNotFound || err == podnetworkchaosmanager.ErrPodNotRunning {
-			return v1alpha1.NotInjected, err
+		if err == podiochaosmanager.ErrPodNotFound || err == podiochaosmanager.ErrPodNotRunning {
+			return v1alpha1.NotInjected, nil
 		}
 		return v1alpha1.Injected, err
 	}
 
-	return v1alpha1.NotInjected, nil
+	// Now modify the custom status and phase
+	iochaos.Status.Instances[record.Id] = generationNumber
+	return waitForRecoverSync, nil
 }
 
-func NewImpl(c client.Client, log logr.Logger) *common.ChaosImplPair {
+func NewImpl(c client.Client, b *podiochaosmanager.Builder, log logr.Logger) *common.ChaosImplPair {
 	return &common.ChaosImplPair{
 		Name:   "iochaos",
 		Object: &v1alpha1.IoChaos{},
 		Impl: &Impl{
-			Client: c,
-			Log:    log.WithName("iochaos"),
+			Client:  c,
+			Log:     log.WithName("iochaos"),
+			builder: b,
 		},
 	}
 }
@@ -129,4 +197,5 @@ var Module = fx.Provide(
 		Group:  "impl",
 		Target: NewImpl,
 	},
+	podiochaosmanager.NewBuilder,
 )
