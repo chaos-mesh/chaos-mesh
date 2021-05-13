@@ -92,10 +92,18 @@ type IoChaosSpec struct {
 // IoChaosStatus defines the observed state of IoChaos
 type IoChaosStatus struct {
 	ChaosStatus `json:",inline"`
+
+	// Instances always specifies podnetworkchaos generation or empty
+	// +optional
+	Instances map[string]int64 `json:"instances,omitempty"`
 }
 
 func (obj *IoChaos) GetSelectorSpecs() map[string]interface{} {
 	return map[string]interface{}{
 		".": &obj.Spec.ContainerSelector,
 	}
+}
+
+func (obj *IoChaos) GetCustomStatus() interface{} {
+	return &obj.Status.Instances
 }

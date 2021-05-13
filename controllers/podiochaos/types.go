@@ -23,90 +23,139 @@ import (
 
 	"github.com/go-logr/logr"
 	v1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/tools/record"
+	"k8s.io/client-go/util/retry"
+	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
-// Handler applys podiochaos
-type Handler struct {
+// Reconciler applys podioworkchaos
+type Reconciler struct {
 	client.Client
+	client.Reader
+	Recorder record.EventRecorder
+
 	Log logr.Logger
 }
 
-// Apply flushes io configuration on pod
-func (h *Handler) Apply(ctx context.Context, chaos *v1alpha1.PodIoChaos) error {
-	h.Log.Info("updating io chaos", "pod", chaos.Namespace+"/"+chaos.Name, "spec", chaos.Spec)
+func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+	ctx := context.TODO()
+
+	obj := &v1alpha1.PodIoChaos{}
+
+	if err := r.Client.Get(ctx, req.NamespacedName, obj); err != nil {
+		if apierrors.IsNotFound(err) {
+			r.Log.Info("chaos not found")
+		} else {
+			// TODO: handle this error
+			r.Log.Error(err, "unable to get chaos")
+		}
+		return ctrl.Result{}, nil
+	}
+
+	r.Log.Info("updating io chaos", "pod", obj.Namespace+"/"+obj.Name, "spec", obj.Spec)
 
 	pod := &v1.Pod{}
 
-	err := h.Client.Get(ctx, types.NamespacedName{
-		Name:      chaos.Name,
-		Namespace: chaos.Namespace,
+	err := r.Client.Get(ctx, types.NamespacedName{
+		Name:      obj.Name,
+		Namespace: obj.Namespace,
 	}, pod)
 	if err != nil {
-		h.Log.Error(err, "fail to find pod")
-		return err
+		r.Log.Error(err, "fail to find pod")
+		return ctrl.Result{}, nil
 	}
 
-	pbClient, err := chaosdaemon.NewChaosDaemonClient(ctx, h.Client, pod)
+	failedMessage := ""
+	observedGeneration := obj.ObjectMeta.Generation
+	pid := obj.Status.Pid
+	startTime := obj.Status.StartTime
+	defer func() {
+		if err != nil {
+			failedMessage = err.Error()
+		}
+
+		updateError := retry.RetryOnConflict(retry.DefaultBackoff, func() error {
+			obj := &v1alpha1.PodIoChaos{}
+
+			if err := r.Client.Get(context.TODO(), req.NamespacedName, obj); err != nil {
+				r.Log.Error(err, "unable to get chaos")
+				return err
+			}
+
+			obj.Status.FailedMessage = failedMessage
+			obj.Status.ObservedGeneration = observedGeneration
+			obj.Status.Pid = pid
+			obj.Status.StartTime = startTime
+
+			return r.Client.Status().Update(context.TODO(), obj)
+		})
+
+		if updateError != nil {
+			r.Log.Error(updateError, "fail to update")
+			r.Recorder.Eventf(obj, "Normal", "Failed", "Failed to update status: %s", updateError.Error())
+		}
+	}()
+
+	pbClient, err := chaosdaemon.NewChaosDaemonClient(ctx, r.Client, pod)
 	if err != nil {
-		return err
+		r.Recorder.Event(obj, "Warning", "Failed", err.Error())
+		return ctrl.Result{}, nil
 	}
 	defer pbClient.Close()
 
 	if len(pod.Status.ContainerStatuses) == 0 {
-		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
+		err = fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
+		r.Recorder.Event(obj, "Warning", "Failed", err.Error())
+		return ctrl.Result{}, nil
 	}
 
 	containerID := pod.Status.ContainerStatuses[0].ContainerID
-	if chaos.Spec.Container != nil &&
-		len(strings.TrimSpace(*chaos.Spec.Container)) != 0 {
+	if obj.Spec.Container != nil &&
+		len(strings.TrimSpace(*obj.Spec.Container)) != 0 {
 		containerID = ""
 		for _, container := range pod.Status.ContainerStatuses {
-			if container.Name == *chaos.Spec.Container {
+			if container.Name == *obj.Spec.Container {
 				containerID = container.ContainerID
 				break
 			}
 		}
 		if len(containerID) == 0 {
-			return fmt.Errorf("cannot find container with name %s", *chaos.Spec.Container)
+			err = fmt.Errorf("cannot find container with name %s", *obj.Spec.Container)
+			r.Recorder.Event(obj, "Warning", "Failed", err.Error())
+			return ctrl.Result{}, nil
 		}
 	}
 
-	actions, err := json.Marshal(chaos.Spec.Actions)
+	actions, err := json.Marshal(obj.Spec.Actions)
 	if err != nil {
-		return err
+		r.Recorder.Event(obj, "Warning", "Failed", err.Error())
+		return ctrl.Result{}, nil
 	}
 	input := string(actions)
-	h.Log.Info("input with", "config", input)
+	r.Log.Info("input with", "config", input)
 
 	res, err := pbClient.ApplyIoChaos(ctx, &pb.ApplyIoChaosRequest{
 		Actions:     input,
-		Volume:      chaos.Spec.VolumeMountPath,
+		Volume:      obj.Spec.VolumeMountPath,
 		ContainerId: containerID,
 
-		Instance:  chaos.Spec.Pid,
-		StartTime: chaos.Spec.StartTime,
+		Instance:  obj.Status.Pid,
+		StartTime: obj.Status.StartTime,
 		EnterNS:   true,
 	})
 	if err != nil {
-		return err
+		r.Recorder.Event(obj, "Warning", "Failed", err.Error())
+		return ctrl.Result{}, nil
 	}
 
-	chaos.Spec.Pid = res.Instance
-	chaos.Spec.StartTime = res.StartTime
-	chaos.OwnerReferences = []metav1.OwnerReference{
-		{
-			APIVersion: pod.APIVersion,
-			Kind:       pod.Kind,
-			Name:       pod.Name,
-			UID:        pod.UID,
-		},
-	}
+	startTime = res.StartTime
+	pid = res.Instance
 
-	return nil
+	return ctrl.Result{}, nil
 }

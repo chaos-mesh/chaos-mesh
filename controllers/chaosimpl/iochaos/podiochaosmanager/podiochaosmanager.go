@@ -21,11 +21,13 @@ import (
 	v1 "k8s.io/api/core/v1"
 	k8sError "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
 )
 
 var (
@@ -40,8 +42,11 @@ var (
 // PodIoManager will save all the related podiochaos
 type PodIoManager struct {
 	Source string
-	Log    logr.Logger
+
+	Log logr.Logger
 	client.Client
+	client.Reader
+	scheme *runtime.Scheme
 
 	Key types.NamespacedName
 	T   *PodIoTransaction
@@ -69,7 +74,7 @@ type CommitResponse struct {
 }
 
 // Commit will update all modifications to the cluster
-func (m *PodIoManager) Commit(ctx context.Context) error {
+func (m *PodIoManager) Commit(ctx context.Context, owner *v1alpha1.IoChaos) (int64, error) {
 	m.Log.Info("running modification on pod", "key", m.Key, "modification", m.T)
 	updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
 		chaos := &v1alpha1.PodIoChaos{}
@@ -90,6 +95,12 @@ func (m *PodIoManager) Commit(ctx context.Context) error {
 			return nil
 		}
 
+		err = controller.SetOwnerReference(owner, chaos, m.scheme)
+		if err != nil {
+			m.Log.Error(err, "error while setting owner reference")
+			return err
+		}
+
 		err = m.T.Apply(chaos)
 		if err != nil {
 			m.Log.Error(err, "error while applying transactions", "transaction", m.T)
@@ -98,7 +109,17 @@ func (m *PodIoManager) Commit(ctx context.Context) error {
 
 		return m.Client.Update(ctx, chaos)
 	})
-	return updateError
+	if updateError != nil {
+		return 0, updateError
+	}
+
+	chaos := &v1alpha1.PodIoChaos{}
+	err := m.Reader.Get(ctx, m.Key, chaos)
+	if err != nil {
+		m.Log.Error(err, "error while getting the latest generation number")
+		return 0, err
+	}
+	return chaos.GetGeneration(), nil
 }
 
 func (m *PodIoManager) CreateNewPodIOChaos(ctx context.Context) error {
