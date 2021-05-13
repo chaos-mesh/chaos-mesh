@@ -32,6 +32,7 @@ var alwaysAllowedKind = []string{
 	v1alpha1.KindAwsChaos,
 	v1alpha1.KindPodNetworkChaos,
 	v1alpha1.KindPodIoChaos,
+	v1alpha1.KindPodHttpChaos,
 	v1alpha1.KindGcpChaos,
 	"Workflow",
 	"WorkflowNode",

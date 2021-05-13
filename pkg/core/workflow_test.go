@@ -24,7 +24,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
-func Test_conversionWorkflow(t *testing.T) {
+func Test_convertWorkflow(t *testing.T) {
 	type args struct {
 		kubeWorkflow v1alpha1.Workflow
 	}
@@ -57,14 +57,14 @@ func Test_conversionWorkflow(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := conversionWorkflow(tt.args.kubeWorkflow); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("conversionWorkflow() = %v, want %v", got, tt.want)
+			if got := convertWorkflow(tt.args.kubeWorkflow); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("convertWorkflow() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func Test_conversionWorkflowDetail(t *testing.T) {
+func Test_convertWorkflowDetail(t *testing.T) {
 	type args struct {
 		kubeWorkflow v1alpha1.Workflow
 		kubeNodes    []v1alpha1.WorkflowNode
@@ -101,25 +101,34 @@ func Test_conversionWorkflowDetail(t *testing.T) {
 				Topology: Topology{
 					Nodes: []Node{},
 				},
+				KubeObject: KubeObjectDesc{
+					Meta: KubeObjectMeta{
+						Name:      "another-fake-workflow",
+						Namespace: "another-namespace",
+					},
+					Spec: v1alpha1.WorkflowSpec{
+						Entry: "another-entry",
+					},
+				},
 			},
 		},
 		// TODO: Add test cases.
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := conversionWorkflowDetail(tt.args.kubeWorkflow, tt.args.kubeNodes)
+			got, err := convertWorkflowDetail(tt.args.kubeWorkflow, tt.args.kubeNodes)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("conversionWorkflowDetail() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("convertWorkflowDetail() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("conversionWorkflowDetail() got = %v, want %v", got, tt.want)
+				t.Errorf("convertWorkflowDetail() got = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func Test_conversionWorkflowNode(t *testing.T) {
+func Test_convertWorkflowNode(t *testing.T) {
 	type args struct {
 		kubeWorkflowNode v1alpha1.WorkflowNode
 	}
@@ -147,8 +156,8 @@ func Test_conversionWorkflowNode(t *testing.T) {
 			want: Node{
 				Name:     "fake-node-0",
 				Type:     ChaosNode,
-				Serial:   NodeSerial{[]string{}},
-				Parallel: NodeParallel{[]string{}},
+				Serial:   nil,
+				Parallel: nil,
 				Template: "fake-template-0",
 				State:    NodeRunning,
 			},
@@ -173,10 +182,10 @@ func Test_conversionWorkflowNode(t *testing.T) {
 			want: Node{
 				Name: "fake-serial-node-0",
 				Type: SerialNode,
-				Serial: NodeSerial{
+				Serial: &NodeSerial{
 					Tasks: []string{"child-0", "child-1"},
 				},
-				Parallel: NodeParallel{[]string{}},
+				Parallel: nil,
 				Template: "fake-serial-node",
 				State:    NodeRunning,
 			},
@@ -202,8 +211,8 @@ func Test_conversionWorkflowNode(t *testing.T) {
 			want: Node{
 				Name:   "parallel-node-0",
 				Type:   ParallelNode,
-				Serial: NodeSerial{[]string{}},
-				Parallel: NodeParallel{
+				Serial: nil,
+				Parallel: &NodeParallel{
 					Tasks: []string{"child-1", "child-0"},
 				},
 				Template: "parallel-node",
@@ -240,8 +249,8 @@ func Test_conversionWorkflowNode(t *testing.T) {
 			want: Node{
 				Name:     "io-chaos-0",
 				Type:     ChaosNode,
-				Serial:   NodeSerial{[]string{}},
-				Parallel: NodeParallel{[]string{}},
+				Serial:   nil,
+				Parallel: nil,
 				Template: "io-chaos",
 				State:    NodeRunning,
 			},
@@ -276,12 +285,10 @@ func Test_conversionWorkflowNode(t *testing.T) {
 				Name:  "the-entry-0",
 				Type:  SerialNode,
 				State: NodeSucceed,
-				Serial: NodeSerial{
+				Serial: &NodeSerial{
 					Tasks: []string{"unimportant-task-0"},
 				},
-				Parallel: NodeParallel{
-					Tasks: []string{},
-				},
+				Parallel: nil,
 				Template: "the-entry",
 			},
 		},
@@ -309,28 +316,24 @@ func Test_conversionWorkflowNode(t *testing.T) {
 				},
 			}},
 			want: Node{
-				Name:  "deadline-exceed-node-0",
-				Type:  ChaosNode,
-				State: NodeSucceed,
-				Serial: NodeSerial{
-					Tasks: []string{},
-				},
-				Parallel: NodeParallel{
-					Tasks: []string{},
-				},
+				Name:     "deadline-exceed-node-0",
+				Type:     ChaosNode,
+				State:    NodeSucceed,
+				Serial:   nil,
+				Parallel: nil,
 				Template: "deadline-exceed-node",
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := conversionWorkflowNode(tt.args.kubeWorkflowNode)
+			got, err := convertWorkflowNode(tt.args.kubeWorkflowNode)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("conversionWorkflowNode() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("convertWorkflowNode() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("conversionWorkflowNode() got = %v, want %v", got, tt.want)
+				t.Errorf("convertWorkflowNode() got = %v, want %v", got, tt.want)
 			}
 		})
 	}
