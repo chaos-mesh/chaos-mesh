@@ -72,7 +72,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 	source := networkchaos.Namespace + "/" + networkchaos.Name
 	m := podnetworkchaosmanager.New(source, r.Log, r.Client)
 
-	sources, err := selector.SelectAndFilterPods(ctx, r.Client, r.Reader, &networkchaos.Spec, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces)
+	sources, err := selector.SelectAndFilterPods(ctx, r.Client, r.Reader, &networkchaos.Spec, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.EnableFilterNamespace)
 	if err != nil {
 		r.Log.Error(err, "failed to select and filter source pods")
 		return err
@@ -82,7 +82,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 
 	// We should only apply filter when we specify targets
 	if networkchaos.Spec.Target != nil {
-		targets, err = selector.SelectAndFilterPods(ctx, r.Client, r.Reader, networkchaos.Spec.Target, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces)
+		targets, err = selector.SelectAndFilterPods(ctx, r.Client, r.Reader, networkchaos.Spec.Target, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.EnableFilterNamespace)
 		if err != nil {
 			r.Log.Error(err, "failed to select and filter target pods")
 			return err
@@ -290,11 +290,14 @@ func (r *endpoint) applyTc(
 				Name:      pod.Name,
 				Namespace: pod.Namespace,
 			})
-			t.Append(v1alpha1.RawTrafficControl{
+			err := t.Append(v1alpha1.RawTrafficControl{
 				Type:        tcType,
 				TcParameter: networkchaos.Spec.TcParameter,
 				Source:      m.Source,
 			})
+			if err != nil {
+				return err
+			}
 		}
 		return nil
 	}
@@ -311,12 +314,15 @@ func (r *endpoint) applyTc(
 			Namespace: pod.Namespace,
 		})
 		t.Append(dstIpset)
-		t.Append(v1alpha1.RawTrafficControl{
+		err := t.Append(v1alpha1.RawTrafficControl{
 			Type:        tcType,
 			TcParameter: networkchaos.Spec.TcParameter,
 			Source:      m.Source,
 			IPSet:       dstIpset.Name,
 		})
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

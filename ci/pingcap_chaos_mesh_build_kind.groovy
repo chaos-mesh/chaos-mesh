@@ -10,8 +10,8 @@ apiVersion: v1
 kind: Pod
 metadata:
   labels:
-    # we pretend as tidb-operator in order not to meet tidb-operator-e2e job in the same node
-    app: tidb-operator-e2e
+    # we pretend as tidb-operator in order not to meet chaos-mesh-e2e job in the same node
+    app: chaos-mesh-e2e
 spec:
   containers:
   - name: main
@@ -81,7 +81,7 @@ spec:
           - key: ci.pingcap.com
             operator: In
             values:
-            # we pretend as tidb-operator in order not to meet tidb-operator-e2e job in the same node
+            # we pretend as tidb-operator in order not to meet chaos-mesh-e2e job in the same node
             - tidb-operator
     podAntiAffinity:
       preferredDuringSchedulingIgnoredDuringExecution:
@@ -92,8 +92,8 @@ spec:
             - key: app
               operator: In
               values:
-              # we pretend as tidb-operator in order not to meet tidb-operator-e2e job in the same node
-              - tidb-operator-e2e
+              # we pretend as tidb-operator in order not to meet chaos-mesh-e2e job in the same node
+              - chaos-mesh-e2e
           topologyKey: kubernetes.io/hostname
 '''
 
@@ -229,7 +229,7 @@ def call(BUILD_BRANCH, CREDENTIALS_ID) {
 		def artifacts = "go/src/github.com/chaos-mesh/chaos-mesh/artifacts"
 		def builds = [:]
 		builds["E2E v1.12.10"] = {
-                build("v1.12", "${GLOBALS} GINKGO_NODES=6 KUBE_VERSION=v1.12.10 ./hack/e2e.sh -- --ginkgo.focus='Basic'")
+                build("v1.12", "${GLOBALS} GINKGO_NODES=6 KUBE_VERSION=v1.12.10  KIND_VERSION=0.8.1 ./hack/e2e.sh -- --ginkgo.focus='Basic'")
         }
         builds["E2E on kubernetes 1.20.4"] = {
                 build("v1.20", "${GLOBALS} GINKGO_NODES=6 KUBE_VERSION=v1.20.2 ./hack/e2e.sh -- --ginkgo.focus='Basic'")

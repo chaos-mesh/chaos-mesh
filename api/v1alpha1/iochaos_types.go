@@ -47,7 +47,7 @@ type IoChaosSpec struct {
 	// If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
 	// IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
 	// +optional
-	Value string `json:"value"`
+	Value string `json:"value,omitempty"`
 
 	// Action defines the specific pod chaos action.
 	// Supported action: latency / fault / attrOverride / mistake

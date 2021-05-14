@@ -36,6 +36,8 @@ const TotalExperiments = () => {
     TimeChaos: 0,
     StressChaos: 0,
     DNSChaos: 0,
+    AwsChaos: 0,
+    GcpChaos: 0,
   })
 
   const fetchExperiments = () => {
@@ -67,6 +69,8 @@ const TotalExperiments = () => {
       <Chaos kind="TimeChaos" data={{ sum: experiments['TimeChaos'] }} />
       <Chaos kind="StressChaos" data={{ sum: experiments['StressChaos'] }} />
       <Chaos kind="DNSChaos" data={{ sum: experiments['DNSChaos'] }} />
+      <Chaos kind="AwsChaos" data={{ sum: experiments['AwsChaos'] }} />
+      <Chaos kind="GcpChaos" data={{ sum: experiments['GcpChaos'] }} />
     </Grid>
   )
 }

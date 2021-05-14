@@ -19,12 +19,12 @@ import (
 	"crypto/x509"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"time"
 
 	"google.golang.org/grpc/credentials"
 
 	"google.golang.org/grpc"
-	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 // DefaultRPCTimeout specifies default timeout of RPC between controller and chaos-operator
@@ -33,36 +33,54 @@ const DefaultRPCTimeout = 60 * time.Second
 // RPCTimeout specifies timeout of RPC between controller and chaos-operator
 var RPCTimeout = DefaultRPCTimeout
 
-var log = ctrl.Log.WithName("util")
-
 // CreateGrpcConnection create a grpc connection with given port and address
 func CreateGrpcConnection(address string, port int, caCertPath string, certPath string, keyPath string) (*grpc.ClientConn, error) {
+	if caCertPath != "" && certPath != "" && keyPath != "" {
+		var caCert, cert, key []byte
+		var err error
+		caCert, err = ioutil.ReadFile(caCertPath)
+		if err != nil {
+			return nil, err
+		}
+		cert, err = ioutil.ReadFile(certPath)
+		if err != nil {
+			return nil, err
+		}
+		key, err = ioutil.ReadFile(keyPath)
+		if err != nil {
+			return nil, err
+		}
+		return CreateGrpcConnectionFromRaw(address, port, caCert, cert, key)
+	}
+	options := []grpc.DialOption{grpc.WithUnaryInterceptor(TimeoutClientInterceptor)}
+	options = append(options, grpc.WithInsecure())
+	conn, err := grpc.Dial(net.JoinHostPort(address, fmt.Sprintf("%d", port)), options...)
+	if err != nil {
+		return nil, err
+	}
+	return conn, nil
+}
+
+// CreateGrpcConnectionFromRaw create a grpc connection with given port and address, and use raw data instead of file path
+func CreateGrpcConnectionFromRaw(address string, port int, caCert []byte, cert []byte, key []byte) (*grpc.ClientConn, error) {
 	options := []grpc.DialOption{grpc.WithUnaryInterceptor(TimeoutClientInterceptor)}
 
-	if caCertPath != "" && certPath != "" && keyPath != "" {
-		caCert, err := ioutil.ReadFile(caCertPath)
-		if err != nil {
-			return nil, err
-		}
-		caCertPool := x509.NewCertPool()
-		caCertPool.AppendCertsFromPEM(caCert)
+	caCertPool := x509.NewCertPool()
+	caCertPool.AppendCertsFromPEM(caCert)
 
-		clientCert, err := tls.LoadX509KeyPair(certPath, keyPath)
-		if err != nil {
-			return nil, err
-		}
-
-		creds := credentials.NewTLS(&tls.Config{
-			Certificates: []tls.Certificate{clientCert},
-			RootCAs:      caCertPool,
-			ServerName:   "chaos-daemon.chaos-mesh.org",
-		})
-		options = append(options, grpc.WithTransportCredentials(creds))
-	} else {
-		options = append(options, grpc.WithInsecure())
+	clientCert, err := tls.X509KeyPair(cert, key)
+	if err != nil {
+		return nil, err
 	}
 
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", address, port),
+	creds := credentials.NewTLS(&tls.Config{
+		Certificates: []tls.Certificate{clientCert},
+		RootCAs:      caCertPool,
+		ServerName:   "chaos-daemon.chaos-mesh.org",
+	})
+	options = append(options, grpc.WithTransportCredentials(creds))
+
+	conn, err := grpc.Dial(net.JoinHostPort(address, fmt.Sprintf("%d", port)),
 		options...)
 	if err != nil {
 		return nil, err

@@ -15,15 +15,15 @@ package selector
 
 import (
 	"context"
+	"crypto/rand"
 	"errors"
 	"fmt"
 	"math"
-	"math/rand"
+	"math/big"
 	"strconv"
 	"strings"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/label"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 
@@ -41,8 +41,16 @@ import (
 
 var log = ctrl.Log.WithName("selector")
 
+const injectAnnotationKey = "chaos-mesh.org/inject"
+
+type SelectSpec interface {
+	GetSelector() v1alpha1.SelectorSpec
+	GetMode() v1alpha1.PodMode
+	GetValue() string
+}
+
 // SelectAndFilterPods returns the list of pods that filtered by selector and PodMode
-func SelectAndFilterPods(ctx context.Context, c client.Client, r client.Reader, spec v1alpha1.SelectSpec, clusterScoped bool, targetNamespace string, allowedNamespaces, ignoredNamespaces string) ([]v1.Pod, error) {
+func SelectAndFilterPods(ctx context.Context, c client.Client, r client.Reader, spec SelectSpec, clusterScoped bool, targetNamespace string, enableFilterNamespace bool) ([]v1.Pod, error) {
 	if pods := mock.On("MockSelectAndFilterPods"); pods != nil {
 		return pods.(func() []v1.Pod)(), nil
 	}
@@ -54,7 +62,7 @@ func SelectAndFilterPods(ctx context.Context, c client.Client, r client.Reader, 
 	mode := spec.GetMode()
 	value := spec.GetValue()
 
-	pods, err := SelectPods(ctx, c, r, selector, clusterScoped, targetNamespace, allowedNamespaces, ignoredNamespaces)
+	pods, err := SelectPods(ctx, c, r, selector, clusterScoped, targetNamespace, enableFilterNamespace)
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +85,7 @@ func SelectAndFilterPods(ctx context.Context, c client.Client, r client.Reader, 
 // SelectPods returns the list of pods that are available for pod chaos action.
 // It returns all pods that match the configured label, annotation and namespace selectors.
 // If pods are specifically specified by `selector.Pods`, it just returns the selector.Pods.
-func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector v1alpha1.SelectorSpec, clusterScoped bool, targetNamespace string, allowedNamespaces, ignoredNamespaces string) ([]v1.Pod, error) {
+func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector v1alpha1.SelectorSpec, clusterScoped bool, targetNamespace string, enableFilterNamespace bool) ([]v1.Pod, error) {
 	// TODO: refactor: make different selectors to replace if-else logics
 	var pods []v1.Pod
 
@@ -89,10 +97,6 @@ func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector 
 					log.Info("skip namespace because ns is out of scope within namespace scoped mode", "namespace", ns)
 					continue
 				}
-			}
-			if !config.IsAllowedNamespaces(ns, allowedNamespaces, ignoredNamespaces) {
-				log.Info("filter pod by namespaces", "namespace", ns)
-				continue
 			}
 			for _, name := range names {
 				var pod v1.Pod
@@ -199,7 +203,9 @@ func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector 
 		}
 		pods = filterPodByNode(pods, nodes)
 	}
-	pods = filterByNamespaces(pods, allowedNamespaces, ignoredNamespaces)
+	if enableFilterNamespace {
+		pods = filterByNamespaces(ctx, c, pods)
+	}
 
 	namespaceSelector, err := parseSelector(strings.Join(selector.Namespaces, ","))
 	if err != nil {
@@ -353,7 +359,7 @@ func filterPodsByMode(pods []v1.Pod, mode v1alpha1.PodMode, value string) ([]v1.
 
 	switch mode {
 	case v1alpha1.OnePodMode:
-		index := rand.Intn(len(pods))
+		index := getRandomNumber(len(pods))
 		pod := pods[index]
 
 		return []v1.Pod{pod}, nil
@@ -405,7 +411,7 @@ func filterPodsByMode(pods []v1.Pod, mode v1alpha1.PodMode, value string) ([]v1.
 			return nil, fmt.Errorf("fixed percentage value of %d is invalid, Must be [0-100]", maxPercentage)
 		}
 
-		percentage := rand.Intn(maxPercentage + 1) // + 1 because Intn works with half open interval [0,n) and we want [0,n]
+		percentage := getRandomNumber(maxPercentage + 1) // + 1 because Intn works with half open interval [0,n) and we want [0,n]
 		num := int(math.Floor(float64(len(pods)) * float64(percentage) / 100))
 
 		return getFixedSubListFromPodList(pods, num), nil
@@ -489,18 +495,43 @@ func filterByPhaseSelector(pods []v1.Pod, phases labels.Selector) ([]v1.Pod, err
 	return filteredList, nil
 }
 
-func filterByNamespaces(pods []v1.Pod, allowedNamespaces, ignoredNamespaces string) []v1.Pod {
+func filterByNamespaces(ctx context.Context, c client.Client, pods []v1.Pod) []v1.Pod {
 	var filteredList []v1.Pod
 
 	for _, pod := range pods {
-		if config.IsAllowedNamespaces(pod.Namespace, allowedNamespaces, ignoredNamespaces) {
+		ok, err := IsAllowedNamespaces(ctx, c, pod.Namespace)
+		if err != nil {
+			log.Error(err, "fail to check whether this namespace is allowed", "namespace", pod.Namespace)
+			continue
+		}
+
+		if ok {
 			filteredList = append(filteredList, pod)
 		} else {
-			log.Info("filter pod by namespaces",
-				"pod", pod.Name, "namespace", pod.Namespace)
+			log.Info("namespace is not enabled for chaos-mesh", "namespace", pod.Namespace)
 		}
 	}
 	return filteredList
+}
+
+func IsAllowedNamespaces(ctx context.Context, c client.Client, namespace string) (bool, error) {
+	ns := &v1.Namespace{}
+
+	err := c.Get(ctx, types.NamespacedName{Name: namespace}, ns)
+	if err != nil {
+		return false, err
+	}
+
+	if ns.Annotations[injectAnnotationKey] == "enabled" {
+		return true, nil
+	}
+
+	return false, nil
+}
+
+func getRandomNumber(max int) uint64 {
+	num, _ := rand.Int(rand.Reader, big.NewInt(int64(max)))
+	return num.Uint64()
 }
 
 // filterByNamespaceSelector filters a list of pods by a given namespace selector.
@@ -602,7 +633,7 @@ func RandomFixedIndexes(start, end, count uint) []uint {
 	}
 
 	for i := 0; i < int(count); {
-		index := uint(rand.Intn(int(end-start))) + start
+		index := uint(getRandomNumber(int(end-start))) + start
 
 		_, exist := m[index]
 		if exist {

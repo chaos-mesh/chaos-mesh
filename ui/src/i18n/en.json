@@ -29,6 +29,7 @@
     "steps": {
       "basic": "Basic",
       "scope": "Scope",
+      "scopeDisabled": " (No need to fill in)",
       "schedule": "Schedule"
     },
     "loadFrom": "Load from",
@@ -83,6 +84,12 @@
       },
       "dns": {
         "title": "DNS Fault"
+      },
+      "aws": {
+        "title": "AWS Fault"
+      },
+      "gcp": {
+        "title": "GCP Fault"
       }
     },
     "schedule": {
@@ -106,6 +113,7 @@
     },
     "noExperimentsFound": "No experiments found",
     "createdAt": "Created",
+    "deleteMulti": "Archive selected experiments",
     "deleteDesc": "You can still find this experiment in the archives",
     "pauseDesc": "You can restart the experiment in the same position",
     "startDesc": "The operation will take effect immediately"
@@ -134,6 +142,7 @@
     "title": "Archives",
     "single": "Archive",
     "noArchivesFound": "No archives found",
+    "deleteMulti": "Delete selected archives",
     "deleteDesc": "The Archive will be permanently deleted",
     "numberOfRuns": "Number of Runs",
     "numberOfAffectedPods": "Number of Affected Pods"
@@ -179,6 +188,7 @@
       "token": "Token",
       "tokenHelper": "Please fill the secret token",
       "tokenValidation": "The token is required",
+      "duplicateDesc": "Token name can't be duplicate",
       "deleteDesc": "The operation is irreversible"
     }
   },
@@ -190,6 +200,8 @@
     "version": "Version",
     "doc": "Documentation",
     "tutorial": "Tutorial",
+    "batchOperation": "Batch operation",
+    "selectAll": "Select all",
     "add": "Add",
     "confirm": "Confirm",
     "cancel": "Cancel",

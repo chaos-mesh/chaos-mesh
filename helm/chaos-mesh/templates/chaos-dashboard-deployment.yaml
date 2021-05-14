@@ -5,31 +5,29 @@ metadata:
   namespace: {{ .Release.Namespace | quote }}
   name: chaos-dashboard
   labels:
-    app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: chaos-dashboard
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
 spec:
   replicas: {{ .Values.dashboard.replicaCount }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
-      app.kubernetes.io/instance: {{ .Release.Name }}
+      {{- include "chaos-mesh.selectors" . | nindent 6 }}
       app.kubernetes.io/component: chaos-dashboard
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
-        app.kubernetes.io/instance: {{ .Release.Name }}
+        {{- include "chaos-mesh.labels" . | nindent 8 }}
         app.kubernetes.io/component: chaos-dashboard
     {{- with .Values.dashboard.podAnnotations }}
       annotations:
 {{ toYaml . | indent 8 }}
     {{- end }}
     spec:
+      {{- if .Values.dashboard.hostNetwork }}
+      hostNetwork: true
+      {{- end }}
       {{- if .Values.dashboard.serviceAccount }}
-      serviceAccount: {{ .Values.dashboard.serviceAccount }}
+      serviceAccountName: {{ .Values.dashboard.serviceAccount }}
       {{- end }}
       priorityClassName: {{ .Values.dashboard.priorityClassName}}
       containers:
@@ -53,14 +51,8 @@ spec:
               value: "{{ .Values.clusterScoped }}"
             - name: TARGET_NAMESPACE
               value: {{ .Values.controllerManager.targetNamespace | quote }}
-            {{- if .Values.controllerManager.allowedNamespaces }}
-            - name: ALLOWED_NAMESPACES
-              value: {{ .Values.controllerManager.allowedNamespaces }}
-            {{- end }}
-            {{- if .Values.controllerManager.ignoredNamespaces }}
-            - name: IGNORED_NAMESPACES
-              value: {{ .Values.controllerManager.ignoredNamespaces }}
-            {{- end }}
+            - name: ENABLE_FILTER_NAMESPACE
+              value: "{{ .Values.controllerManager.enableFilterNamespace }}"
             - name: SECURITY_MODE
               value: "{{ .Values.dashboard.securityMode }}"
             - name: DNS_SERVER_CREATE

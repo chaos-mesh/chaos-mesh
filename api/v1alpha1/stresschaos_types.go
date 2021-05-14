@@ -16,6 +16,7 @@ package v1alpha1
 import (
 	"fmt"
 
+	"github.com/docker/go-units"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -48,7 +49,7 @@ type StressChaosSpec struct {
 	// If `FixedPercentPodMod`, provide a number from 0-100 to specify the max % of pods the server can do chaos action.
 	// If `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the % of pods to do chaos action
 	// +optional
-	Value string `json:"value"`
+	Value string `json:"value,omitempty"`
 
 	// Selector is used to select pods that are used to inject chaos action.
 	Selector SelectorSpec `json:"selector"`
@@ -129,7 +130,19 @@ type Stressors struct {
 func (in *Stressors) Normalize() (string, error) {
 	stressors := ""
 	if in.MemoryStressor != nil {
-		stressors += fmt.Sprintf(" --bigheap %d", in.MemoryStressor.Workers)
+		stressors += fmt.Sprintf(" --vm %d --vm-keep", in.MemoryStressor.Workers)
+		if len(in.MemoryStressor.Size) != 0 {
+			if in.MemoryStressor.Size[len(in.MemoryStressor.Size)-1] != '%' {
+				size, err := units.FromHumanSize(in.MemoryStressor.Size)
+				if err != nil {
+					return "", err
+				}
+				stressors += fmt.Sprintf(" --vm-bytes %d", size)
+			} else {
+				stressors += fmt.Sprintf("--vm-bytes %s",
+					in.MemoryStressor.Size)
+			}
+		}
 
 		if in.MemoryStressor.Options != nil {
 			for _, v := range in.MemoryStressor.Options {
@@ -162,6 +175,12 @@ type Stressor struct {
 // MemoryStressor defines how to stress memory out
 type MemoryStressor struct {
 	Stressor `json:",inline" mapstructure:",squash"`
+
+	// Size specifies N bytes consumed per vm worker, default is the total available memory.
+	// One can specify the size as % of total available memory or in units of B, KB/KiB,
+	// MB/MiB, GB/GiB, TB/TiB.
+	// +optional
+	Size string `json:"size,omitempty"`
 
 	// extend stress-ng options
 	// +optional

@@ -15,12 +15,12 @@ package common
 
 import (
 	"context"
+	"crypto/rand"
 	"fmt"
-	"math/rand"
+	"math/big"
 	"net/http"
 	"sort"
 	"strings"
-	"time"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
@@ -162,7 +162,7 @@ func (s *Service) listPods(c *gin.Context) {
 		return
 	}
 	ctx := context.TODO()
-	filteredPods, err := selector.SelectPods(ctx, kubeCli, nil, exp.ParseSelector(), s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.AllowedNamespaces, s.conf.IgnoredNamespaces)
+	filteredPods, err := selector.SelectPods(ctx, kubeCli, nil, exp.ParseSelector(), s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.EnableFilterNamespace)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
@@ -290,7 +290,7 @@ func (s *Service) getLabels(c *gin.Context) {
 	exp.NamespaceSelectors = nsList
 
 	ctx := context.TODO()
-	filteredPods, err := selector.SelectPods(ctx, kubeCli, nil, exp.ParseSelector(), s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.AllowedNamespaces, s.conf.IgnoredNamespaces)
+	filteredPods, err := selector.SelectPods(ctx, kubeCli, nil, exp.ParseSelector(), s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.EnableFilterNamespace)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
@@ -342,7 +342,7 @@ func (s *Service) getAnnotations(c *gin.Context) {
 	exp.NamespaceSelectors = nsList
 
 	ctx := context.TODO()
-	filteredPods, err := selector.SelectPods(ctx, kubeCli, nil, exp.ParseSelector(), s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.AllowedNamespaces, s.conf.IgnoredNamespaces)
+	filteredPods, err := selector.SelectPods(ctx, kubeCli, nil, exp.ParseSelector(), s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.EnableFilterNamespace)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
@@ -433,10 +433,10 @@ func inSlice(v string, sl []string) bool {
 const charset = "abcdefghijklmnopqrstuvwxyz"
 
 func randomStringWithCharset(length int, charset string) string {
-	var seededRand = rand.New(rand.NewSource(time.Now().UnixNano()))
 	b := make([]byte, length)
 	for i := range b {
-		b[i] = charset[seededRand.Intn(len(charset))]
+		num, _ := rand.Int(rand.Reader, big.NewInt(int64(len(charset))))
+		b[i] = charset[num.Int64()]
 	}
 	return string(b)
 }

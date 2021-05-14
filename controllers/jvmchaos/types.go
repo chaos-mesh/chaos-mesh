@@ -55,7 +55,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 		return err
 	}
 
-	pods, err := selector.SelectAndFilterPods(ctx, r.Client, r.Reader, &jvmchaos.Spec, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces)
+	pods, err := selector.SelectAndFilterPods(ctx, r.Client, r.Reader, &jvmchaos.Spec, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.EnableFilterNamespace)
 	if err != nil {
 		r.Log.Error(err, "failed to select and generate pods")
 		return err
@@ -214,10 +214,7 @@ func (r *endpoint) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 
 	// TODO: Custom port may be required
 	err = jvm.RecoverChaos(pod.Status.PodIP, sandboxPort, jsonBytes)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 // Object would return the instance of chaos

@@ -35,8 +35,7 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `controllerManager.tolerations` |  Toleration labels for chaos-controller-manager pod assignment | `[]` |
 | `controllerManager.affinity` |  Map of chaos-controller-manager node/pod affinities | `{}` |
 | `controllerManager.podAnnotations` |  Pod annotations of chaos-controller-manager | `{}`|
-| `controllerManager.allowedNamespaces` |  A regular expression, and matching namespace will allow the chaos task to be performed | ``|
-| `controllerManager.ignoredNamespaces` |  A regular expression, and the chaos task will be ignored by a matching namespace. Configuring `allowedNamespaces` at the same time will ignore this configuration. | ``|
+| `controllerManager.enableFilterNamespace` | If enabled, only pods in the namespace annotated with `"chaos-mesh.org/inject": "enabled"` will be injected | false |
 | `chaosDaemon.image` | docker image for chaos-daemon | `pingcap/chaos-mesh:latest` |
 | `chaosDaemon.imagePullPolicy` | image pull policy | `Always` |
 | `chaosDaemon.grpcPort` | The port which grpc server listens on | `31767` |
@@ -50,6 +49,7 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `chaosDaemon.socketPath` | Specifies the container runtime socket | `/var/run/docker.sock` |
 | `chaosDaemon.tolerations` | Toleration labels for chaos-daemon pod assignment | `[]` |
 | `chaosDaemon.resources` | CPU/Memory resource requests/limits for chaosDaemon container | `requests: { cpu: "250m", memory: "512Mi" }, limits:{ cpu: "500m", memory: "1024Mi" }`  |
+| `customLabels` | Customized labels that will be tagged on all the resources of Chaos Mesh | `{}` |
 | `bpfki.create` | Enable chaos-kernel | `false` |
 | `bpfki.image` | Docker image for chaos-kernel | `pingcap/chaos-kernel:latest` |
 | `bpfki.imagePullPolicy` | Image pull policy | `Always` |

@@ -285,6 +285,138 @@ func (in *DNSChaosList) ListChaos() []*ChaosInstance {
 	return res
 }
 
+const KindGcpChaos = "GcpChaos"
+
+// IsDeleted returns whether this resource has been deleted
+func (in *GcpChaos) IsDeleted() bool {
+	return !in.DeletionTimestamp.IsZero()
+}
+
+// IsPaused returns whether this resource has been paused
+func (in *GcpChaos) IsPaused() bool {
+	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
+		return false
+	}
+	return true
+}
+
+// GetDuration would return the duration for chaos
+func (in *GcpChaos) GetDuration() (*time.Duration, error) {
+	if in.Spec.Duration == nil {
+		return nil, nil
+	}
+	duration, err := time.ParseDuration(*in.Spec.Duration)
+	if err != nil {
+		return nil, err
+	}
+	return &duration, nil
+}
+
+func (in *GcpChaos) GetNextStart() time.Time {
+	if in.Status.Scheduler.NextStart == nil {
+		return time.Time{}
+	}
+	return in.Status.Scheduler.NextStart.Time
+}
+
+func (in *GcpChaos) SetNextStart(t time.Time) {
+	if t.IsZero() {
+		in.Status.Scheduler.NextStart = nil
+		return
+	}
+
+	if in.Status.Scheduler.NextStart == nil {
+		in.Status.Scheduler.NextStart = &metav1.Time{}
+	}
+	in.Status.Scheduler.NextStart.Time = t
+}
+
+func (in *GcpChaos) GetNextRecover() time.Time {
+	if in.Status.Scheduler.NextRecover == nil {
+		return time.Time{}
+	}
+	return in.Status.Scheduler.NextRecover.Time
+}
+
+func (in *GcpChaos) SetNextRecover(t time.Time) {
+	if t.IsZero() {
+		in.Status.Scheduler.NextRecover = nil
+		return
+	}
+
+	if in.Status.Scheduler.NextRecover == nil {
+		in.Status.Scheduler.NextRecover = &metav1.Time{}
+	}
+	in.Status.Scheduler.NextRecover.Time = t
+}
+
+// GetScheduler would return the scheduler for chaos
+func (in *GcpChaos) GetScheduler() *SchedulerSpec {
+	return in.Spec.Scheduler
+}
+
+// GetChaos would return the a record for chaos
+func (in *GcpChaos) GetChaos() *ChaosInstance {
+	instance := &ChaosInstance{
+		Name:      in.Name,
+		Namespace: in.Namespace,
+		Kind:      KindGcpChaos,
+		StartTime: in.CreationTimestamp.Time,
+		Action:    "",
+		Status:    string(in.Status.Experiment.Phase),
+		UID:       string(in.UID),
+	}
+
+	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
+	if action.IsValid() {
+		instance.Action = action.String()
+	}
+	if in.Spec.Duration != nil {
+		instance.Duration = *in.Spec.Duration
+	}
+	if in.DeletionTimestamp != nil {
+		instance.EndTime = in.DeletionTimestamp.Time
+	}
+	return instance
+}
+
+// GetStatus returns the status
+func (in *GcpChaos) GetStatus() *ChaosStatus {
+	return &in.Status.ChaosStatus
+}
+
+// GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
+func (in *GcpChaos) GetSpecAndMetaString() (string, error) {
+	spec, err := json.Marshal(in.Spec)
+	if err != nil {
+		return "", err
+	}
+
+	meta := in.ObjectMeta.DeepCopy()
+	meta.SetResourceVersion("")
+	meta.SetGeneration(0)
+
+	return string(spec) + meta.String(), nil
+}
+
+// +kubebuilder:object:root=true
+
+// GcpChaosList contains a list of GcpChaos
+type GcpChaosList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []GcpChaos `json:"items"`
+}
+
+// ListChaos returns a list of chaos
+func (in *GcpChaosList) ListChaos() []*ChaosInstance {
+	res := make([]*ChaosInstance, 0, len(in.Items))
+	for _, item := range in.Items {
+		res = append(res, item.GetChaos())
+	}
+	return res
+}
+
 const KindHTTPChaos = "HTTPChaos"
 
 // IsDeleted returns whether this resource has been deleted
@@ -1355,6 +1487,12 @@ func init() {
 		ChaosList: &DNSChaosList{},
 	})
 
+	SchemeBuilder.Register(&GcpChaos{}, &GcpChaosList{})
+	all.register(KindGcpChaos, &ChaosKind{
+		Chaos:     &GcpChaos{},
+		ChaosList: &GcpChaosList{},
+	})
+
 	SchemeBuilder.Register(&HTTPChaos{}, &HTTPChaosList{})
 	all.register(KindHTTPChaos, &ChaosKind{
 		Chaos:     &HTTPChaos{},
@@ -1414,6 +1552,9 @@ func GetChaosValidator(chaosKind string) ChaosValidator {
 
 	case KindDNSChaos:
 		return &DNSChaos{}
+
+	case KindGcpChaos:
+		return &GcpChaos{}
 
 	case KindHTTPChaos:
 		return &HTTPChaos{}
