@@ -94,7 +94,7 @@ const DataTable: React.FC<DataTableProps> = ({ data, fetchData }) => {
               <TableCell>{T('workflow.entry')}</TableCell>
               <TableCell>{T('workflow.time')}</TableCell>
               <TableCell>{T('workflow.state')}</TableCell>
-              <TableCell>{T('workflow.created')}</TableCell>
+              <TableCell>{T('table.created')}</TableCell>
               <TableCell>{T('common.operation')}</TableCell>
             </TableRow>
           </TableHead>

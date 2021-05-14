@@ -87,7 +87,7 @@ const Token: React.FC<TokenProps> = ({ onSubmitCallback }) => {
         <Form>
           <TextField
             name="name"
-            label={T('settings.addToken.name')}
+            label={T('common.name')}
             validate={validateName((T('settings.addToken.nameValidation') as unknown) as string)}
             helperText={errors.name && touched.name ? errors.name : T('settings.addToken.nameHelper')}
             error={errors.name && touched.name ? true : false}

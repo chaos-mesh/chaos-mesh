@@ -111,7 +111,7 @@ const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
   const Actions = () => (
     <Space display="flex" justifyContent="end" alignItems="center">
       <Typography variant="body2">
-        {T('experiments.createdAt')}{' '}
+        {T('table.created')}{' '}
         {DateTime.fromISO(isArchive ? (e as Archive).start_time : (e as Experiment).created, {
           locale: lang,
         }).toRelative()}

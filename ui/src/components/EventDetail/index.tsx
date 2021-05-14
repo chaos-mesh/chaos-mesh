@@ -46,7 +46,7 @@ const EventDetail: React.FC<EventDetailProps> = ({ eventID }) => {
         <Table>
           <TableBody>
             <TableRow>
-              <TableCell>{T('events.event.experiment')} ID</TableCell>
+              <TableCell>{T('experiments.single')} ID</TableCell>
               <TableCell>
                 <Typography variant="body2" color="textSecondary">
                   {e.experiment_id}
@@ -55,7 +55,7 @@ const EventDetail: React.FC<EventDetailProps> = ({ eventID }) => {
             </TableRow>
 
             <TableRow>
-              <TableCell>{T('events.event.experiment')}</TableCell>
+              <TableCell>{T('experiments.single')}</TableCell>
               <TableCell>
                 <Typography variant="body2" color="textSecondary">
                   {e.experiment}
@@ -64,7 +64,7 @@ const EventDetail: React.FC<EventDetailProps> = ({ eventID }) => {
             </TableRow>
 
             <TableRow>
-              <TableCell>{T('events.event.namespace')}</TableCell>
+              <TableCell>{T('k8s.namespace')}</TableCell>
               <TableCell>
                 <Typography variant="body2" color="textSecondary">
                   {e.namespace}

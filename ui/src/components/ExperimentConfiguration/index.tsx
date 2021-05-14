@@ -102,7 +102,7 @@ const ExperimentConfiguration: React.FC<ExperimentConfigurationProps> = ({ exper
 
             {(e as ExperimentDetail).created && (
               <TableRow>
-                <TableCell>{T('experiments.createdAt')}</TableCell>
+                <TableCell>{T('table.created')}</TableCell>
                 <TableCell>
                   <Typography variant="body2" color="textSecondary">
                     {format((e as ExperimentDetail).created, lang)}

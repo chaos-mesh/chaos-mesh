@@ -61,7 +61,7 @@ const TokensTable = () => {
           <TableHead>
             <TableRow>
               <TableCell />
-              <TableCell>{T('settings.addToken.name')}</TableCell>
+              <TableCell>{T('common.name')}</TableCell>
               <TableCell>{T('settings.addToken.token')}</TableCell>
               <TableCell>{T('common.status')}</TableCell>
             </TableRow>
