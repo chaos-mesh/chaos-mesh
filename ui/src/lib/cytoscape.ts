@@ -72,6 +72,7 @@ function generateWorkflowNodes(detail: WorkflowDetail) {
           state,
         },
         classes: state,
+        grabbable: false,
       }
     }
   }
@@ -178,12 +179,10 @@ export const constructWorkflowTopology = (container: HTMLElement, detail: Workfl
     minLen: 9,
   } as any
 
-  const animateOptions = {
-    style: {
-      opacity: 1,
-    },
+  const animateOptions = (style: any) => ({
+    style,
     easing: 'ease-in-out' as 'ease-in-out',
-  }
+  })
 
   const cy = cytoscape({
     container,
@@ -200,10 +199,24 @@ export const constructWorkflowTopology = (container: HTMLElement, detail: Workfl
     })
     cy.layout(layout).run()
 
-    cy.elements().animate(animateOptions, { duration: 500 })
+    cy.elements().animate(animateOptions({ opacity: 1 }), { duration: 500 })
   }
 
   updateElements(detail)
+
+  const flashRunning = setInterval(() => {
+    const nodes = cy.$('node.Running')
+
+    if (nodes.length) {
+      console.log(1)
+      nodes
+        .animate(animateOptions({ 'background-opacity': 0.12 }), { duration: 750 })
+        .animate(animateOptions({ 'background-opacity': 1 }), { duration: 750 })
+    } else {
+      console.log(2)
+      clearInterval(flashRunning)
+    }
+  }, 2000)
 
   return { updateElements }
 }
