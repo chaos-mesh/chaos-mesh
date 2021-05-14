@@ -234,7 +234,7 @@ const Add = () => {
                     <Grid item xs={12} md={6}>
                       <TextField
                         name="name"
-                        label={T('newE.basic.name')}
+                        label={T('common.name')}
                         validate={validateName((T('newW.nameValidation') as unknown) as string)}
                         helperText={errors.name && touched.name ? errors.name : T('newW.node.nameHelper')}
                         error={errors.name && touched.name ? true : false}

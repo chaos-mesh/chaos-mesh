@@ -34,13 +34,10 @@
     },
     "loadFrom": "Load from",
     "basic": {
-      "name": "Name",
       "nameHelper": "The experiment name",
-      "namespace": "Namespace",
       "namespaceHelper": "Select the namespace"
     },
     "scope": {
-      "namespaceSelectors": "Namespace Selectors",
       "mode": "Mode",
       "modeHelper": "Select the experiment mode",
       "modeValue": "Mode Value",
@@ -48,13 +45,7 @@
       "affectedPods": "Affected Pods",
       "affectedPodsPreview": "Affected Pods Preview",
       "affectedPodsPreviewHelper": "Checking or unchecking Pods to further limit the scope of the experiment",
-      "noPodsFound": "No pods found",
-      "podsTable": {
-        "name": "Name",
-        "namespace": "Namespace",
-        "ip": "IP",
-        "state": "State"
-      }
+      "noPodsFound": "No pods found"
     },
     "target": {
       "kind": "Kind",
@@ -272,6 +263,7 @@
     "timeline": "Timeline",
     "meta": "Meta",
     "uuid": "UUID",
+    "ip": "IP address",
     "createSuccessfully": "Created successfully",
     "loadSuccessfully": "Loaded successfully",
     "deleteSuccessfully": "Deleted successfully",
@@ -300,6 +292,7 @@
     "namespace": "Namespace",
     "labels": "Labels",
     "annotations": "Annotations",
+    "namespaceSelectors": "Namespace Selectors",
     "labelSelectors": "Label Selectors",
     "annotationsSelectors": "Annotation Selectors",
     "phaseSelectors": "Phase Selectors"

@@ -44,7 +44,7 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
   const { labels, annotations, target } = state.experiments
   const pods = scope === 'scope' ? state.experiments.pods : state.experiments.networkTargetPods
   const getPods = scope === 'scope' ? getCommonPods : getNetworkTargetPods
-  const disabled = target.kind === 'AwsChaos'
+  const disabled = target.kind === 'AwsChaos' || target.kind === 'GcpChaos'
   const dispatch = useStoreDispatch()
 
   const kvSeparator = ': '
@@ -109,7 +109,7 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
       <AutocompleteMultipleField
         id={`${scope}.namespace_selectors`}
         name={`${scope}.namespace_selectors`}
-        label={T('newE.scope.namespaceSelectors')}
+        label={T('newE.k8s.namespaceSelectors')}
         helperText={
           getIn(touched, `${scope}.namespace_selectors`) && getIn(errors, `${scope}.namespace_selectors`)
             ? getIn(errors, `${scope}.namespace_selectors`)

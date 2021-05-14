@@ -15,7 +15,7 @@
       "step9": "🎉 恭喜你完成了所有的教程步骤！点击空白处即可退出。"
     },
     "veteran": "已经是熟手了",
-    "veteranDesc": "🧨 从一个新的实验开始！创建成功后，你可以返回仪表板以观察其状态。",
+    "veteranDesc": "🧨 从一个新的实验开始！创建成功后，你可以返回仪表盘以观察其状态。",
     "totalExperiments": "当前实验",
     "totalState": "当前状态",
     "predefined": "预定义",
@@ -35,13 +35,10 @@
     },
     "loadFrom": "加载自",
     "basic": {
-      "name": "名称",
       "nameHelper": "实验的名称",
-      "namespace": "命名空间",
       "namespaceHelper": "选择命名空间"
     },
     "scope": {
-      "namespaceSelectors": "命名空间选择器",
       "mode": "模式",
       "modeHelper": "选择实验模式",
       "modeValue": "模式值",
@@ -49,13 +46,7 @@
       "affectedPods": "受到实验作用的 Pod",
       "affectedPodsPreview": "预览将要受到实验作用的 Pod",
       "affectedPodsPreviewHelper": "通过勾选 Pod 来进一步限制实验的范围",
-      "noPodsFound": "未发现 Pod",
-      "podsTable": {
-        "name": "名称",
-        "namespace": "命名空间",
-        "ip": "IP 地址",
-        "state": "状态"
-      }
+      "noPodsFound": "未发现 Pod"
     },
     "target": {
       "kind": "类别",
@@ -273,6 +264,7 @@
     "timeline": "时间线",
     "meta": "元信息",
     "uuid": "UUID",
+    "ip": "IP 地址",
     "createSuccessfully": "创建成功",
     "loadSuccessfully": "加载成功",
     "deleteSuccessfully": "删除成功",
@@ -301,6 +293,7 @@
     "namespace": "命名空间",
     "labels": "标签",
     "annotations": "注解",
+    "namespaceSelectors": "命名空间选择器",
     "labelSelectors": "标签选择器",
     "annotationsSelectors": "注解选择器",
     "phaseSelectors": "阶段选择器"

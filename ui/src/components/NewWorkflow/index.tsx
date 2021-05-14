@@ -336,7 +336,7 @@ const NewWorkflow = () => {
                                 <Form>
                                   <Box display="flex" justifyContent="space-between" alignItems="center" mb={6}>
                                     <Space>
-                                      <TextField className={classes.field} name="name" label={T('newE.basic.name')} />
+                                      <TextField className={classes.field} name="name" label={T('common.name')} />
                                       <TextField
                                         className={classes.field}
                                         name="duration"
@@ -404,14 +404,14 @@ const NewWorkflow = () => {
                   <Box>
                     <TextField
                       name="name"
-                      label={T('newE.basic.name')}
+                      label={T('common.name')}
                       validate={validateName((T('newW.nameValidation') as unknown) as string)}
                       helperText={errors.name && touched.name ? errors.name : T('newW.nameHelper')}
                       error={errors.name && touched.name ? true : false}
                     />
                     <SelectField
                       name="namespace"
-                      label={T('newE.basic.namespace')}
+                      label={T('k8s.namespace')}
                       helperText={T('newE.basic.namespaceHelper')}
                     >
                       {namespaces.map((n) => (

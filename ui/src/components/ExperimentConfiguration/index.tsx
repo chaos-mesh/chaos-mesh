@@ -42,7 +42,7 @@ const ExperimentConfiguration: React.FC<ExperimentConfigurationProps> = ({ exper
         <Table size="small">
           <TableBody>
             <TableRow>
-              <TableCell>{T('newE.basic.name')}</TableCell>
+              <TableCell>{T('common.name')}</TableCell>
               <TableCell>
                 <Typography variant="body2" color="textSecondary">
                   {e.name}
@@ -83,7 +83,7 @@ const ExperimentConfiguration: React.FC<ExperimentConfigurationProps> = ({ exper
         <Table size="small">
           <TableBody>
             <TableRow>
-              <TableCell>{T('newE.basic.namespace')}</TableCell>
+              <TableCell>{T('k8s.namespace')}</TableCell>
               <TableCell>
                 <Typography variant="body2" color="textSecondary">
                   {e.namespace}

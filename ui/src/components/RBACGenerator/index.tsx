@@ -100,7 +100,7 @@ const RBACGenerator = () => {
             <Box flex={1}>
               <SelectField
                 name="namespace"
-                label={T('newE.basic.namespace')}
+                label={T('k8s.namespace')}
                 helperText={T('common.chooseNamespace')}
                 disabled={clustered}
               >

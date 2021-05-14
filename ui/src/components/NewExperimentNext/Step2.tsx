@@ -40,7 +40,7 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false }) => {
   const classes = useStyles()
 
   const { namespaces, step2, basic, target } = useStoreSelector((state) => state.experiments)
-  const scopeDisabled = target.kind === 'AwsChaos'
+  const scopeDisabled = target.kind === 'AwsChaos' || target.kind === 'GcpChaos'
   const dispatch = useStoreDispatch()
 
   const [init, setInit] = useState(basicData)
@@ -109,7 +109,7 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false }) => {
                   <TextField
                     fast
                     name="name"
-                    label={T('newE.basic.name')}
+                    label={T('common.name')}
                     helperText={errors.name && touched.name ? errors.name : T('newE.basic.nameHelper')}
                     error={errors.name && touched.name ? true : false}
                   />
@@ -131,7 +131,7 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false }) => {
                     {namespaces.length && (
                       <SelectField
                         name="namespace"
-                        label={T('newE.basic.namespace')}
+                        label={T('k8s.namespace')}
                         helperText={T('newE.basic.namespaceHelper')}
                       >
                         {namespaces.map((n) => (
