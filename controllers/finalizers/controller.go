@@ -34,6 +34,8 @@ const (
 	AnnotationCleanFinalizer = `chaos-mesh.chaos-mesh.org/cleanFinalizer`
 	// AnnotationCleanFinalizerForced value
 	AnnotationCleanFinalizerForced = `forced`
+
+	RecordFinalizer = "chaos-mesh/records"
 )
 
 // Reconciler for common chaos
@@ -81,10 +83,10 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			shouldUpdate = true
 		}
 	} else {
-		if !ContainsFinalizer(obj.(metav1.Object), "chaos-mesh/records") {
+		if !ContainsFinalizer(obj.(metav1.Object), RecordFinalizer) {
 			r.Recorder.Event(obj, "Normal", "Created", "Add finalizer \"chaos-mesh/records\"")
 			shouldUpdate = true
-			finalizers = append(obj.GetObjectMeta().Finalizers, "chaos-mesh/records")
+			finalizers = append(obj.GetObjectMeta().Finalizers, RecordFinalizer)
 		}
 	}
 

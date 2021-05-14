@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package schedule
+package desiredphase
 
 import (
 	"context"
@@ -48,11 +48,11 @@ var config *rest.Config
 var testEnv *envtest.Environment
 var setupLog = ctrl.Log.WithName("setup")
 
-func TestSchedule(t *testing.T) {
+func TestDesiredPhase(t *testing.T) {
 	RegisterFailHandler(Fail)
 
 	RunSpecsWithDefaultAndCustomReporters(t,
-		"Schedule suit",
+		"Desired Phase suit",
 		[]Reporter{envtest.NewlineReporter{}})
 }
 
@@ -91,9 +91,12 @@ var _ = BeforeSuite(func() {
 				provider.NewAuthCli,
 				provider.NewScheme,
 				test.NewTestManager,
+				fx.Annotated{
+					Group:  "controller",
+					Target: NewController,
+				},
 			),
 			fx.Supply(config),
-			Module,
 			types.ChaosObjects,
 		),
 		fx.Invoke(Run),

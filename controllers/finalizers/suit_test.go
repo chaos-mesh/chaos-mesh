@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package schedule
+package finalizers
 
 import (
 	"context"
@@ -91,9 +91,12 @@ var _ = BeforeSuite(func() {
 				provider.NewAuthCli,
 				provider.NewScheme,
 				test.NewTestManager,
+				fx.Annotated{
+					Group:  "controller",
+					Target: NewController,
+				},
 			),
 			fx.Supply(config),
-			Module,
 			types.ChaosObjects,
 		),
 		fx.Invoke(Run),
