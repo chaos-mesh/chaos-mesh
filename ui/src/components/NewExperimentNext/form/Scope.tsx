@@ -100,7 +100,6 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
         })
       )
     }
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentLabels, currentAnnotations])
 
@@ -109,7 +108,7 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
       <AutocompleteMultipleField
         id={`${scope}.namespace_selectors`}
         name={`${scope}.namespace_selectors`}
-        label={T('newE.k8s.namespaceSelectors')}
+        label={T('k8s.namespaceSelectors')}
         helperText={
           getIn(touched, `${scope}.namespace_selectors`) && getIn(errors, `${scope}.namespace_selectors`)
             ? getIn(errors, `${scope}.namespace_selectors`)

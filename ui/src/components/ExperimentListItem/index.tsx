@@ -58,6 +58,7 @@ const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
 
   const handleToggle = (e: any) => {
     e.stopPropagation()
+
     setOpen(!open)
   }
 
@@ -67,37 +68,37 @@ const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
     switch (action) {
       case 'archive':
         onSelect({
-          uuid: (e as Experiment).uid,
           title: `${intl.formatMessage({ id: 'archives.single' })} ${e.name}`,
           description: intl.formatMessage({ id: 'experiments.deleteDesc' }),
           action,
+          uuid: e.uid,
         })
 
         return
       case 'pause':
         onSelect({
-          uuid: (e as Experiment).uid,
           title: `${intl.formatMessage({ id: 'common.pause' })} ${e.name}`,
           description: intl.formatMessage({ id: 'experiments.pauseDesc' }),
           action,
+          uuid: e.uid,
         })
 
         return
       case 'start':
         onSelect({
-          uuid: (e as Experiment).uid,
           title: `${intl.formatMessage({ id: 'common.start' })} ${e.name}`,
           description: intl.formatMessage({ id: 'experiments.startDesc' }),
           action,
+          uuid: e.uid,
         })
 
         return
       case 'delete':
         onSelect({
-          uuid: (e as Experiment).uid,
           title: `${intl.formatMessage({ id: 'common.delete' })} ${e.name}`,
           description: intl.formatMessage({ id: 'archives.deleteDesc' }),
           action,
+          uuid: e.uid,
         })
 
         return
@@ -106,7 +107,7 @@ const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
     }
   }
 
-  const handleJumpTo = () => history.push(isArchive ? `/archives/${e.uid}` : `/experiments/${(e as Experiment).uid}`)
+  const handleJumpTo = () => history.push(isArchive ? `/archives/${e.uid}` : `/experiments/${e.uid}`)
 
   const Actions = () => (
     <Space display="flex" justifyContent="end" alignItems="center">

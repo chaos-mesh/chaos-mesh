@@ -1,11 +1,11 @@
 import { Box, Button, Grid, MenuItem, Step, StepLabel, Stepper, Typography } from '@material-ui/core'
-import ConfirmDialog, { ConfirmDialogHandles } from 'components-mui/ConfirmDialog'
 import { Form, Formik } from 'formik'
 import MultiNode, { MultiNodeHandles } from './MultiNode'
 import { SelectField, TextField } from 'components/FormField'
 import Suspend, { SuspendValues } from './Suspend'
 import { Template, deleteTemplate, updateTemplate } from 'slices/workflows'
 import { resetNewExperiment, setExternalExperiment } from 'slices/experiments'
+import { setAlert, setConfirm } from 'slices/globalStatus'
 import { useEffect, useRef, useState } from 'react'
 import { useStoreDispatch, useStoreSelector } from 'store'
 import { validateDuration, validateName } from 'lib/formikhelpers'
@@ -27,18 +27,9 @@ import api from 'api'
 import clsx from 'clsx'
 import { constructWorkflow } from 'lib/formikhelpers'
 import { makeStyles } from '@material-ui/core/styles'
-import { setAlert } from 'slices/globalStatus'
 import { useHistory } from 'react-router-dom'
 import { useIntl } from 'react-intl'
 import yaml from 'js-yaml'
-
-const initialSelected = {
-  name: '',
-  index: 0,
-  title: '',
-  description: '',
-  action: '',
-}
 
 const useStyles = makeStyles((theme) => ({
   stepper: {
@@ -111,8 +102,6 @@ const NewWorkflow = () => {
     duration: '',
   })
   const [yamlEditor, setYAMLEditor] = useState<Ace.Editor>()
-  const [selected, setSelected] = useState(initialSelected)
-  const confirmRef = useRef<ConfirmDialogHandles>(null)
   const multiNodeRef = useRef<MultiNodeHandles>(null)
 
   useEffect(() => {
@@ -250,27 +239,24 @@ const NewWorkflow = () => {
   const handleSelect = (name: string, index: number, action: string) => () => {
     switch (action) {
       case 'delete':
-        setSelected({
-          name,
-          index,
-          title: `${intl.formatMessage({ id: 'common.delete' })} ${name}`,
-          description: intl.formatMessage({ id: 'newW.node.deleteDesc' }),
-          action,
-        })
+        dispatch(
+          setConfirm({
+            index,
+            title: `${intl.formatMessage({ id: 'common.delete' })} ${name}`,
+            description: intl.formatMessage({ id: 'newW.node.deleteDesc' }),
+            handle: handleAction(action, index),
+          })
+        )
         break
     }
-
-    confirmRef.current!.setOpen(true)
   }
 
-  const handleAction = (action: string) => () => {
+  const handleAction = (action: string, index: number) => () => {
     switch (action) {
       case 'delete':
-        removeExperiment(selected.index)
+        removeExperiment(index)
         break
     }
-
-    confirmRef.current!.setOpen(false)
   }
 
   const onValidate = setWorkflowBasic
@@ -453,12 +439,6 @@ const NewWorkflow = () => {
           </Formik>
         </Grid>
       </Grid>
-      <ConfirmDialog
-        ref={confirmRef}
-        title={selected.title}
-        description={selected.description}
-        onConfirm={handleAction(selected.action)}
-      />
     </>
   )
 }

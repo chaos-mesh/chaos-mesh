@@ -1,5 +1,5 @@
 import { Box, Button, CircularProgress, Grow, Modal } from '@material-ui/core'
-import ConfirmDialog, { ConfirmDialogHandles } from 'components-mui/ConfirmDialog'
+import { Confirm, setAlert, setConfirm } from 'slices/globalStatus'
 import { useEffect, useRef, useState } from 'react'
 import { useHistory, useParams } from 'react-router-dom'
 import { useStoreDispatch, useStoreSelector } from 'store'
@@ -16,7 +16,6 @@ import api from 'api'
 import { constructWorkflowTopology } from 'lib/cytoscape'
 import loadable from '@loadable/component'
 import { makeStyles } from '@material-ui/core/styles'
-import { setAlert } from 'slices/globalStatus'
 import { useIntl } from 'react-intl'
 import yaml from 'js-yaml'
 
@@ -42,14 +41,6 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
-const initialSelected = {
-  namespace: '',
-  name: '',
-  title: '',
-  description: '',
-  action: '',
-}
-
 const WorkflowDetail = () => {
   const classes = useStyles()
   const intl = useIntl()
@@ -63,8 +54,6 @@ const WorkflowDetail = () => {
   const [detail, setDetail] = useState<APIWorkflowDetail>()
   const [yamlEditor, setYAMLEditor] = useState<Ace.Editor>()
   const [configOpen, setConfigOpen] = useState(false)
-  const [selected, setSelected] = useState(initialSelected)
-  const confirmRef = useRef<ConfirmDialogHandles>(null)
   const topologyRef = useRef<any>(null)
 
   const fetchWorkflowDetail = (ns: string, name: string) =>
@@ -106,13 +95,9 @@ const WorkflowDetail = () => {
   const onModalOpen = () => setConfigOpen(true)
   const onModalClose = () => setConfigOpen(false)
 
-  const handleSelect = (selected: typeof initialSelected) => () => {
-    setSelected(selected)
+  const handleSelect = (selected: Confirm) => () => dispatch(setConfirm(selected))
 
-    confirmRef.current!.setOpen(true)
-  }
-
-  const handleAction = (action: string) => () => {
+  const handleAction = (action: string, data: { namespace: string; name: string }) => () => {
     let actionFunc: any
 
     switch (action) {
@@ -124,9 +109,7 @@ const WorkflowDetail = () => {
         actionFunc = null
     }
 
-    confirmRef.current!.setOpen(false)
-
-    const { namespace, name } = selected
+    const { namespace, name } = data
 
     if (actionFunc) {
       actionFunc(namespace, name)
@@ -134,7 +117,7 @@ const WorkflowDetail = () => {
           dispatch(
             setAlert({
               type: 'success',
-              message: intl.formatMessage({ id: `common.${action}Successfully` }),
+              message: intl.formatMessage({ id: `confirm.${action}Successfully` }),
             })
           )
 
@@ -176,11 +159,9 @@ const WorkflowDetail = () => {
               size="small"
               startIcon={<DeleteOutlinedIcon />}
               onClick={handleSelect({
-                namespace,
-                name,
                 title: `${intl.formatMessage({ id: 'common.delete' })} ${name}`,
                 description: intl.formatMessage({ id: 'workflows.deleteDesc' }),
-                action: 'delete',
+                action: handleAction('delete', { namespace, name }),
               })}
             >
               {T('common.delete')}
@@ -238,13 +219,6 @@ const WorkflowDetail = () => {
           </Paper>
         </div>
       </Modal>
-
-      <ConfirmDialog
-        ref={confirmRef}
-        title={selected.title}
-        description={selected.description}
-        onConfirm={handleAction(selected.action)}
-      />
     </>
   )
 }

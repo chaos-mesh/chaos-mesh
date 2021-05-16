@@ -47,7 +47,7 @@ const Step3: React.FC<Step3Props> = ({ onSubmit }) => {
             dispatch(
               setAlert({
                 type: 'success',
-                message: intl.formatMessage({ id: 'common.createSuccessfully' }),
+                message: intl.formatMessage({ id: 'confirm.createSuccessfully' }),
               })
             )
 

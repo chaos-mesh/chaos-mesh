@@ -109,7 +109,7 @@ const Predefined = () => {
         dispatch(
           setAlert({
             type: 'success',
-            message: intl.formatMessage({ id: 'common.createSuccessfully' }),
+            message: intl.formatMessage({ id: 'confirm.createSuccessfully' }),
           })
         )
       })

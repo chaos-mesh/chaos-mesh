@@ -1,7 +1,7 @@
 import { Box, Button, Checkbox, Typography } from '@material-ui/core'
-import ConfirmDialog, { ConfirmDialogHandles } from 'components-mui/ConfirmDialog'
+import { Confirm, setAlert, setConfirm } from 'slices/globalStatus'
 import { FixedSizeList as RWList, ListChildComponentProps as RWListChildComponentProps } from 'react-window'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import AddIcon from '@material-ui/icons/Add'
 import CloseIcon from '@material-ui/icons/Close'
@@ -16,7 +16,6 @@ import Space from 'components-mui/Space'
 import T from 'components/T'
 import _groupBy from 'lodash.groupby'
 import api from 'api'
-import { setAlert } from 'slices/globalStatus'
 import { styled } from '@material-ui/core/styles'
 import { transByKind } from 'lib/byKind'
 import { useHistory } from 'react-router-dom'
@@ -32,13 +31,6 @@ const StyledCheckBox = styled(Checkbox)({
   },
 })
 
-const initialSelected = {
-  uuid: '',
-  title: '',
-  description: '',
-  action: '',
-}
-
 export default function Experiments() {
   const intl = useIntl()
   const history = useHistory()
@@ -47,11 +39,9 @@ export default function Experiments() {
 
   const [loading, setLoading] = useState(true)
   const [experiments, setExperiments] = useState<Experiment[]>([])
-  const [selected, setSelected] = useState(initialSelected)
   const [batch, setBatch] = useState<Record<uuid, boolean>>({})
   const batchLength = Object.keys(batch).length
   const isBatchEmpty = batchLength === 0
-  const confirmRef = useRef<ConfirmDialogHandles>(null)
 
   const fetchExperiments = () => {
     api.experiments
@@ -63,15 +53,17 @@ export default function Experiments() {
 
   useEffect(fetchExperiments, [])
 
-  const handleSelect = (selected: typeof initialSelected) => {
-    setSelected(selected)
+  const handleSelect = (selected: Confirm) => dispatch(setConfirm(selected))
+  const onSelect = (selected: Confirm) =>
+    dispatch(
+      setConfirm({
+        title: selected.title,
+        description: selected.description,
+        handle: handleAction(selected.action, selected.uuid),
+      })
+    )
 
-    confirmRef.current!.setOpen(true)
-  }
-
-  const handleAction = (action: string) => () => {
-    const { uuid } = selected
-
+  const handleAction = (action: string, uuid?: uuid) => () => {
     let actionFunc: any
     let arg: any
 
@@ -100,15 +92,13 @@ export default function Experiments() {
         break
     }
 
-    confirmRef.current!.setOpen(false)
-
     if (actionFunc) {
       actionFunc(arg)
         .then(() => {
           dispatch(
             setAlert({
               type: 'success',
-              message: intl.formatMessage({ id: `common.${action}Successfully` }),
+              message: intl.formatMessage({ id: `confirm.${action}Successfully` }),
             })
           )
 
@@ -133,10 +123,9 @@ export default function Experiments() {
 
   const handleBatchDelete = () =>
     handleSelect({
-      uuid: '',
       title: `${intl.formatMessage({ id: 'experiments.deleteMulti' })}`,
       description: intl.formatMessage({ id: 'experiments.deleteDesc' }),
-      action: 'archiveMulti',
+      handle: handleAction('archiveMulti'),
     })
 
   const onCheckboxChange = (uuid: uuid) => (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -157,7 +146,7 @@ export default function Experiments() {
         />
       )}
       <Box flex={1}>
-        <ExperimentListItem experiment={data[index]} onSelect={handleSelect} intl={intl} />
+        <ExperimentListItem experiment={data[index]} onSelect={onSelect} intl={intl} />
       </Box>
     </Box>
   )
@@ -211,13 +200,6 @@ export default function Experiments() {
       )}
 
       {loading && <Loading />}
-
-      <ConfirmDialog
-        ref={confirmRef}
-        title={selected.title}
-        description={selected.description}
-        onConfirm={handleAction(selected.action)}
-      />
     </>
   )
 }
