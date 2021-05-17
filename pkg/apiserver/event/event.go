@@ -22,14 +22,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 
-	//ctrl "sigs.k8s.io/controller-runtime"
-
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 )
-
-//var log = ctrl.Log.WithName("event api")
 
 // Service defines a handler service for events.
 type Service struct {

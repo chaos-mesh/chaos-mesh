@@ -18,7 +18,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
@@ -26,8 +25,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 )
-
-var log = ctrl.Log.WithName("workflow api")
 
 // StatusResponse defines a common status struct.
 type StatusResponse struct {
