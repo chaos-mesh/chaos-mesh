@@ -67,7 +67,7 @@ func NewServiceWithKubeRepo(conf *config.ChaosDashboardConfig) *Service {
 func (it *Service) listWorkflows(c *gin.Context) {
 	namespace := c.Query("namespace")
 	if len(namespace) == 0 && !it.conf.ClusterScoped &&
-		len(s.conf.TargetNamespace) != 0 {
+		len(it.conf.TargetNamespace) != 0 {
 		namespace = it.conf.TargetNamespace
 	}
 
