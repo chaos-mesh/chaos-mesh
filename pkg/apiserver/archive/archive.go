@@ -45,6 +45,7 @@ func NewService(
 	return &Service{
 		archive: archive,
 		event:   event,
+		conf:    conf,
 	}
 }
 
