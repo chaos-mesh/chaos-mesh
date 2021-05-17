@@ -42,9 +42,9 @@ type WorkflowSpec struct {
 
 type WorkflowStatus struct {
 	// +optional
-	EntryNode *string `json:"entry_node,omitempty"`
+	EntryNode *string `json:"entryNode,omitempty"`
 	// +optional
-	StartTime *metav1.Time `json:"start_time,omitempty"`
+	StartTime *metav1.Time `json:"startTime,omitempty"`
 }
 
 type TemplateType string
@@ -71,7 +71,7 @@ func contains(arr []TemplateType, target TemplateType) bool {
 
 type Template struct {
 	Name     string       `json:"name"`
-	Type     TemplateType `json:"template_type"`
+	Type     TemplateType `json:"templateType"`
 	Duration *string      `json:"duration,omitempty"`
 	Tasks    []string     `json:"tasks,omitempty"`
 	// +optional

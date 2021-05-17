@@ -1908,7 +1908,7 @@ spec:
                     items:
                       type: string
                     type: array
-                  template_type:
+                  templateType:
                     type: string
                   time_chaos:
                     description: TimeChaosSpec defines the desired state of TimeChaos
@@ -2069,7 +2069,7 @@ spec:
                     type: object
                 required:
                 - name
-                - template_type
+                - templateType
                 type: object
               type: array
           required:
@@ -2079,9 +2079,9 @@ spec:
         status:
           description: Most recently observed status of the workflow
           properties:
-            entry_node:
+            entryNode:
               type: string
-            start_time:
+            startTime:
               format: date-time
               type: string
           type: object
