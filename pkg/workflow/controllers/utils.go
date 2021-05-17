@@ -82,19 +82,19 @@ func (it SortByCreationTimestamp) Swap(i, j int) {
 	it[i], it[j] = it[j], it[i]
 }
 
-type ChildrenNodesFetcher struct {
+type ChildNodesFetcher struct {
 	kubeClient client.Client
 	logger     logr.Logger
 }
 
-func NewChildrenNodesFetcher(kubeClient client.Client, logger logr.Logger) *ChildrenNodesFetcher {
-	return &ChildrenNodesFetcher{kubeClient: kubeClient, logger: logger}
+func NewChildNodesFetcher(kubeClient client.Client, logger logr.Logger) *ChildNodesFetcher {
+	return &ChildNodesFetcher{kubeClient: kubeClient, logger: logger}
 }
 
-// fetchChildrenNodes will return children workflow nodes controlled by given node
+// fetchChildNodes will return children workflow nodes controlled by given node
 // Should only be used with Parallel and Serial Node
-func (it *ChildrenNodesFetcher) fetchChildrenNodes(ctx context.Context, node v1alpha1.WorkflowNode) (activeChildrenNodes []v1alpha1.WorkflowNode, finishedChildrenNodes []v1alpha1.WorkflowNode, err error) {
-	childrenNodes := v1alpha1.WorkflowNodeList{}
+func (it *ChildNodesFetcher) fetchChildNodes(ctx context.Context, node v1alpha1.WorkflowNode) (activeChildNodes []v1alpha1.WorkflowNode, finishedChildNodes []v1alpha1.WorkflowNode, err error) {
+	childNodes := v1alpha1.WorkflowNodeList{}
 	controlledByThisNode, err := metav1.LabelSelectorAsSelector(&metav1.LabelSelector{
 		MatchLabels: map[string]string{
 			v1alpha1.LabelControlledBy: node.Name,
@@ -107,7 +107,7 @@ func (it *ChildrenNodesFetcher) fetchChildrenNodes(ctx context.Context, node v1a
 		return nil, nil, err
 	}
 
-	err = it.kubeClient.List(ctx, &childrenNodes, &client.ListOptions{
+	err = it.kubeClient.List(ctx, &childNodes, &client.ListOptions{
 		LabelSelector: controlledByThisNode,
 	})
 
@@ -117,17 +117,17 @@ func (it *ChildrenNodesFetcher) fetchChildrenNodes(ctx context.Context, node v1a
 		return nil, nil, err
 	}
 
-	sortedChildrenNodes := SortByCreationTimestamp(childrenNodes.Items)
-	sort.Sort(sortedChildrenNodes)
+	sortedChildNodes := SortByCreationTimestamp(childNodes.Items)
+	sort.Sort(sortedChildNodes)
 
 	it.logger.V(4).Info("list children node", "current node",
 		"current node", fmt.Sprintf("%s/%s", node.Namespace, node.Name),
-		len(sortedChildrenNodes), "children", sortedChildrenNodes)
+		len(sortedChildNodes), "children", sortedChildNodes)
 
 	var activeChildren []v1alpha1.WorkflowNode
 	var finishedChildren []v1alpha1.WorkflowNode
 
-	for _, item := range sortedChildrenNodes {
+	for _, item := range sortedChildNodes {
 		childNode := item
 		if WorkflowNodeFinished(childNode.Status) {
 			finishedChildren = append(finishedChildren, childNode)

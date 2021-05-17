@@ -32,7 +32,7 @@ import (
 
 // ParallelNodeReconciler watches on nodes which type is Parallel
 type ParallelNodeReconciler struct {
-	*ChildrenNodesFetcher
+	*ChildNodesFetcher
 	kubeClient    client.Client
 	eventRecorder record.EventRecorder
 	logger        logr.Logger
@@ -40,10 +40,10 @@ type ParallelNodeReconciler struct {
 
 func NewParallelNodeReconciler(kubeClient client.Client, eventRecorder record.EventRecorder, logger logr.Logger) *ParallelNodeReconciler {
 	return &ParallelNodeReconciler{
-		ChildrenNodesFetcher: NewChildrenNodesFetcher(kubeClient, logger),
-		kubeClient:           kubeClient,
-		eventRecorder:        eventRecorder,
-		logger:               logger,
+		ChildNodesFetcher: NewChildNodesFetcher(kubeClient, logger),
+		kubeClient:        kubeClient,
+		eventRecorder:     eventRecorder,
+		logger:            logger,
 	}
 }
 
@@ -73,7 +73,7 @@ func (it *ParallelNodeReconciler) Reconcile(request reconcile.Request) (reconcil
 	it.logger.V(4).Info("resolve parallel node", "node", request)
 
 	// make effects, create/remove children nodes
-	err = it.syncChildrenNodes(ctx, node)
+	err = it.syncChildNodes(ctx, node)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
@@ -86,7 +86,7 @@ func (it *ParallelNodeReconciler) Reconcile(request reconcile.Request) (reconcil
 			return err
 		}
 
-		activeChildren, finishedChildren, err := it.fetchChildrenNodes(ctx, nodeNeedUpdate)
+		activeChildren, finishedChildren, err := it.fetchChildNodes(ctx, nodeNeedUpdate)
 		if err != nil {
 			return err
 		}
@@ -133,7 +133,7 @@ func (it *ParallelNodeReconciler) Reconcile(request reconcile.Request) (reconcil
 	return reconcile.Result{}, nil
 }
 
-func (it *ParallelNodeReconciler) syncChildrenNodes(ctx context.Context, node v1alpha1.WorkflowNode) error {
+func (it *ParallelNodeReconciler) syncChildNodes(ctx context.Context, node v1alpha1.WorkflowNode) error {
 
 	// empty parallel node
 	if len(node.Spec.Tasks) == 0 {
@@ -143,14 +143,14 @@ func (it *ParallelNodeReconciler) syncChildrenNodes(ctx context.Context, node v1
 		return nil
 	}
 
-	activeChildrenNodes, finishedChildrenNodes, err := it.fetchChildrenNodes(ctx, node)
+	activeChildNodes, finishedChildNodes, err := it.fetchChildNodes(ctx, node)
 	if err != nil {
 		return err
 	}
-	existsChildrenNodes := append(activeChildrenNodes, finishedChildrenNodes...)
+	existsChildNodes := append(activeChildNodes, finishedChildNodes...)
 
 	var taskNamesOfNodes []string
-	for _, childNode := range existsChildrenNodes {
+	for _, childNode := range existsChildNodes {
 		taskNamesOfNodes = append(taskNamesOfNodes, getTaskNameFromGeneratedName(childNode.GetName()))
 	}
 
@@ -159,7 +159,7 @@ func (it *ParallelNodeReconciler) syncChildrenNodes(ctx context.Context, node v1
 		// TODO: check the specific of task and workflow nodes
 		// the definition of Spec.Tasks changed, remove all the existed nodes
 		tasksToStartup = node.Spec.Tasks
-		for _, childNode := range existsChildrenNodes {
+		for _, childNode := range existsChildNodes {
 			// best effort deletion
 			err := it.kubeClient.Delete(ctx, &childNode)
 			if err != nil {
@@ -190,16 +190,16 @@ func (it *ParallelNodeReconciler) syncChildrenNodes(ctx context.Context, node v1
 		return err
 	}
 
-	childrenNodes, err := renderNodesByTemplates(&parentWorkflow, &node, tasksToStartup...)
+	childNodes, err := renderNodesByTemplates(&parentWorkflow, &node, tasksToStartup...)
 	if err != nil {
-		it.logger.Error(err, "failed to render children childrenNodes",
+		it.logger.Error(err, "failed to render children childNodes",
 			"node", fmt.Sprintf("%s/%s", node.Namespace, node.Name))
 		return err
 	}
 
 	// TODO: emit event
 	var childrenNames []string
-	for _, childNode := range childrenNodes {
+	for _, childNode := range childNodes {
 		err := it.kubeClient.Create(ctx, childNode)
 		if err != nil {
 			it.logger.Error(err, "failed to create child node",
