@@ -20,10 +20,9 @@ import (
 
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	wfcontrollers "github.com/chaos-mesh/chaos-mesh/pkg/workflow/controllers"
@@ -38,12 +37,24 @@ type WorkflowRepository interface {
 	Update(ctx context.Context, namespace, name string, workflow v1alpha1.Workflow) (WorkflowDetail, error)
 }
 
+type WorkflowStatus string
+
+const (
+	WorkflowRunning WorkflowStatus = "Running"
+	WorkflowSucceed WorkflowStatus = "Succeed"
+	WorkflowFailed  WorkflowStatus = "Failed"
+	WorkflowUnknown WorkflowStatus = "Unknown"
+)
+
 // Workflow defines the root structure of a workflow.
 type Workflow struct {
 	Namespace string `json:"namespace"`
 	Name      string `json:"name"`
-	Entry     string `json:"entry"` // the entry node name
-	Created   string `json:"created"`
+	// the entry node name
+	Entry   string         `json:"entry"`
+	Created string         `json:"created"`
+	EndTime string         `json:"endTime"`
+	Status  WorkflowStatus `json:"status,omitempty"`
 }
 
 type WorkflowDetail struct {
@@ -239,6 +250,20 @@ func convertWorkflow(kubeWorkflow v1alpha1.Workflow) Workflow {
 		result.Created = kubeWorkflow.Status.StartTime.Format(time.RFC3339)
 	}
 
+	if kubeWorkflow.Status.EndTime != nil {
+		result.EndTime = kubeWorkflow.Status.EndTime.Format(time.RFC3339)
+	}
+
+	if wfcontrollers.WorkflowConditionEqualsTo(kubeWorkflow.Status, v1alpha1.WorkflowConditionAccomplished, corev1.ConditionTrue) {
+		result.Status = WorkflowSucceed
+	} else if wfcontrollers.WorkflowConditionEqualsTo(kubeWorkflow.Status, v1alpha1.WorkflowConditionScheduled, corev1.ConditionTrue) {
+		result.Status = WorkflowRunning
+	} else {
+		result.Status = WorkflowUnknown
+	}
+
+	// TODO: status failed
+
 	return result
 }
 
@@ -312,9 +337,7 @@ func convertWorkflowNode(kubeWorkflowNode v1alpha1.WorkflowNode) (Node, error) {
 		}
 	}
 
-	// TODO: refactor this
-	if wfcontrollers.ConditionEqualsTo(kubeWorkflowNode.Status, v1alpha1.ConditionAccomplished, corev1.ConditionTrue) ||
-		wfcontrollers.ConditionEqualsTo(kubeWorkflowNode.Status, v1alpha1.ConditionDeadlineExceed, corev1.ConditionTrue) {
+	if wfcontrollers.WorkflowNodeFinished(kubeWorkflowNode.Status) {
 		result.State = NodeSucceed
 	} else {
 		result.State = NodeRunning

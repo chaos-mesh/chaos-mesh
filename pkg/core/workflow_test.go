@@ -52,6 +52,138 @@ func Test_convertWorkflow(t *testing.T) {
 				Namespace: "fake-namespace",
 				Name:      "fake-workflow-0",
 				Entry:     "an-entry",
+				Status:    WorkflowUnknown,
+			},
+		}, {
+			name: "running workflow",
+			args: args{
+				v1alpha1.Workflow{
+					TypeMeta: metav1.TypeMeta{},
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: "fake-namespace",
+						Name:      "fake-workflow-0",
+					},
+					Spec: v1alpha1.WorkflowSpec{
+						Entry: "an-entry",
+					},
+					Status: v1alpha1.WorkflowStatus{
+						Conditions: []v1alpha1.WorkflowCondition{
+							{
+								Type:   v1alpha1.WorkflowConditionScheduled,
+								Status: corev1.ConditionTrue,
+								Reason: "",
+							},
+						},
+					},
+				},
+			},
+			want: Workflow{
+				Namespace: "fake-namespace",
+				Name:      "fake-workflow-0",
+				Entry:     "an-entry",
+				Status:    WorkflowRunning,
+			},
+		}, {
+			name: "running workflow",
+			args: args{
+				v1alpha1.Workflow{
+					TypeMeta: metav1.TypeMeta{},
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: "fake-namespace",
+						Name:      "fake-workflow-0",
+					},
+					Spec: v1alpha1.WorkflowSpec{
+						Entry: "an-entry",
+					},
+					Status: v1alpha1.WorkflowStatus{
+						Conditions: []v1alpha1.WorkflowCondition{
+							{
+								Type:   v1alpha1.WorkflowConditionAccomplished,
+								Status: corev1.ConditionUnknown,
+								Reason: "",
+							},
+							{
+								Type:   v1alpha1.WorkflowConditionScheduled,
+								Status: corev1.ConditionTrue,
+								Reason: "",
+							},
+						},
+					},
+				},
+			},
+			want: Workflow{
+				Namespace: "fake-namespace",
+				Name:      "fake-workflow-0",
+				Entry:     "an-entry",
+				Status:    WorkflowRunning,
+			},
+		}, {
+			name: "running workflow",
+			args: args{
+				v1alpha1.Workflow{
+					TypeMeta: metav1.TypeMeta{},
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: "fake-namespace",
+						Name:      "fake-workflow-0",
+					},
+					Spec: v1alpha1.WorkflowSpec{
+						Entry: "an-entry",
+					},
+					Status: v1alpha1.WorkflowStatus{
+						Conditions: []v1alpha1.WorkflowCondition{
+							{
+								Type:   v1alpha1.WorkflowConditionAccomplished,
+								Status: corev1.ConditionFalse,
+								Reason: "",
+							},
+							{
+								Type:   v1alpha1.WorkflowConditionScheduled,
+								Status: corev1.ConditionTrue,
+								Reason: "",
+							},
+						},
+					},
+				},
+			},
+			want: Workflow{
+				Namespace: "fake-namespace",
+				Name:      "fake-workflow-0",
+				Entry:     "an-entry",
+				Status:    WorkflowRunning,
+			},
+		}, {
+			name: "succeed workflow",
+			args: args{
+				v1alpha1.Workflow{
+					TypeMeta: metav1.TypeMeta{},
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: "fake-namespace",
+						Name:      "fake-workflow-0",
+					},
+					Spec: v1alpha1.WorkflowSpec{
+						Entry: "an-entry",
+					},
+					Status: v1alpha1.WorkflowStatus{
+						Conditions: []v1alpha1.WorkflowCondition{
+							{
+								Type:   v1alpha1.WorkflowConditionAccomplished,
+								Status: corev1.ConditionTrue,
+								Reason: "",
+							},
+							{
+								Type:   v1alpha1.WorkflowConditionScheduled,
+								Status: corev1.ConditionTrue,
+								Reason: "",
+							},
+						},
+					},
+				},
+			},
+			want: Workflow{
+				Namespace: "fake-namespace",
+				Name:      "fake-workflow-0",
+				Entry:     "an-entry",
+				Status:    WorkflowSucceed,
 			},
 		},
 	}
@@ -97,6 +229,7 @@ func Test_convertWorkflowDetail(t *testing.T) {
 					Namespace: "another-namespace",
 					Name:      "another-fake-workflow",
 					Entry:     "another-entry",
+					Status:    WorkflowUnknown,
 				},
 				Topology: Topology{
 					Nodes: []Node{},
