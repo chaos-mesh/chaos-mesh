@@ -1,5 +1,5 @@
 import { Node, WorkflowDetail } from 'api/workflows.type'
-import cytoscape, { EdgeDefinition, NodeDefinition, Stylesheet } from 'cytoscape'
+import cytoscape, { EdgeDefinition, EventHandler, NodeDefinition, Stylesheet } from 'cytoscape'
 
 import _flattenDeep from 'lodash.flattendeep'
 import dagre from 'cytoscape-dagre'
@@ -160,7 +160,11 @@ function generateWorkflowEdges(nodes: RecursiveNodeDefinition[]) {
   return result
 }
 
-export const constructWorkflowTopology = (container: HTMLElement, detail: WorkflowDetail) => {
+export const constructWorkflowTopology = (
+  container: HTMLElement,
+  detail: WorkflowDetail,
+  onNodeClick: EventHandler
+) => {
   function generateElements(detail: WorkflowDetail) {
     const nodes = generateWorkflowNodes(detail)!
     const edges = generateWorkflowEdges(nodes)
@@ -192,6 +196,7 @@ export const constructWorkflowTopology = (container: HTMLElement, detail: Workfl
   })
     .pan({ x: 150, y: container.offsetHeight / 2 - 50 })
     .zoom(0.75)
+    .on('click', 'node', onNodeClick)
 
   function updateElements(detail: WorkflowDetail) {
     cy.json({
@@ -208,12 +213,10 @@ export const constructWorkflowTopology = (container: HTMLElement, detail: Workfl
     const nodes = cy.$('node.Running')
 
     if (nodes.length) {
-      console.log(1)
       nodes
         .animate(animateOptions({ 'background-opacity': 0.12 }), { duration: 750 })
         .animate(animateOptions({ 'background-opacity': 1 }), { duration: 750 })
     } else {
-      console.log(2)
       clearInterval(flashRunning)
     }
   }, 2000)

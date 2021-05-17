@@ -15,6 +15,7 @@ import React from 'react'
 import { RootState } from 'store'
 import T from 'components/T'
 import { format } from 'lib/luxon'
+import { toTitleCase } from 'lib/utils'
 import { useSelector } from 'react-redux'
 
 const TableCell = withStyles({
@@ -25,15 +26,18 @@ const TableCell = withStyles({
 
 interface ExperimentConfigurationProps {
   experimentDetail: ExperimentDetail | ArchiveDetail
+  vertical?: boolean
 }
 
-const ExperimentConfiguration: React.FC<ExperimentConfigurationProps> = ({ experimentDetail: e }) => {
+const ExperimentConfiguration: React.FC<ExperimentConfigurationProps> = ({ experimentDetail: e, vertical = false }) => {
   const { lang } = useSelector((state: RootState) => state.settings)
+
+  const action: string = e.kube_object.spec.action
 
   return (
     <Grid container>
-      <Grid item md={4}>
-        <Box mt={3} ml="16px">
+      <Grid item md={vertical ? 12 : 4}>
+        <Box mt={3} ml={3}>
           <Typography variant="subtitle2" gutterBottom>
             {T('newE.steps.basic')}
           </Typography>
@@ -64,7 +68,13 @@ const ExperimentConfiguration: React.FC<ExperimentConfigurationProps> = ({ exper
                 <TableCell>{T('newE.target.action')}</TableCell>
                 <TableCell>
                   <Typography variant="body2" color="textSecondary">
-                    {e.kube_object.spec.action}
+                    {action.includes('-')
+                      ? (function () {
+                          const split = action.split('-')
+
+                          return toTitleCase(split[0]) + ' ' + toTitleCase(split[1])
+                        })()
+                      : toTitleCase(action)}
                   </Typography>
                 </TableCell>
               </TableRow>
@@ -73,8 +83,8 @@ const ExperimentConfiguration: React.FC<ExperimentConfigurationProps> = ({ exper
         </Table>
       </Grid>
 
-      <Grid item md={4}>
-        <Box mt={3} ml="16px">
+      <Grid item md={vertical ? 12 : 4}>
+        <Box mt={3} ml={3}>
           <Typography variant="subtitle2" gutterBottom>
             {T('common.meta')}
           </Typography>
@@ -83,19 +93,19 @@ const ExperimentConfiguration: React.FC<ExperimentConfigurationProps> = ({ exper
         <Table size="small">
           <TableBody>
             <TableRow>
-              <TableCell>{T('k8s.namespace')}</TableCell>
+              <TableCell>{T('common.uuid')}</TableCell>
               <TableCell>
                 <Typography variant="body2" color="textSecondary">
-                  {e.namespace}
+                  {e.uid}
                 </Typography>
               </TableCell>
             </TableRow>
 
             <TableRow>
-              <TableCell>{T('common.uuid')}</TableCell>
+              <TableCell>{T('k8s.namespace')}</TableCell>
               <TableCell>
                 <Typography variant="body2" color="textSecondary">
-                  {e.uid}
+                  {e.namespace}
                 </Typography>
               </TableCell>
             </TableRow>
@@ -114,8 +124,8 @@ const ExperimentConfiguration: React.FC<ExperimentConfigurationProps> = ({ exper
         </Table>
       </Grid>
 
-      <Grid item md={4}>
-        <Box mt={3} ml="16px">
+      <Grid item md={vertical ? 12 : 4}>
+        <Box mt={3} ml={3}>
           <Typography variant="subtitle2" gutterBottom>
             {T('newE.steps.schedule')}
           </Typography>

@@ -277,7 +277,7 @@
     "version": "Version"
   },
   "table": {
-    "created": "Created"
+    "created": "Created at"
   },
   "confirm": {
     "archiveSuccessfully": "Archived successfully",

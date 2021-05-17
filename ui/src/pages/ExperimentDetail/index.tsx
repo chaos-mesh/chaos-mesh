@@ -288,7 +288,7 @@ export default function ExperimentDetail() {
                     startIcon={<NoteOutlinedIcon />}
                     onClick={onModalOpen}
                   >
-                    {T('common.update')}
+                    {T('common.configuration')}
                   </Button>
                 </Space>
               </PaperTop>
@@ -317,7 +317,7 @@ export default function ExperimentDetail() {
                 <Box px={3} pt={3}>
                   <PaperTop title={detail.name}>
                     <Button variant="contained" color="primary" size="small" onClick={handleUpdateExperiment}>
-                      {T('common.confirm')}
+                      {T('common.update')}
                     </Button>
                   </PaperTop>
                 </Box>

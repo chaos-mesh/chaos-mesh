@@ -20,9 +20,9 @@ export function arrToObjBySep(arr: string[], sep: string) {
   const result: any = {}
 
   arr.forEach((d) => {
-    const splited = d.split(sep)
+    const split = d.split(sep)
 
-    result[splited[0]] = splited[1]
+    result[split[0]] = split[1]
   })
 
   return result as object

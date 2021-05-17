@@ -7,6 +7,7 @@ import { useStoreDispatch, useStoreSelector } from 'store'
 import { WorkflowDetail as APIWorkflowDetail } from 'api/workflows.type'
 import { Ace } from 'ace-builds'
 import DeleteOutlinedIcon from '@material-ui/icons/DeleteOutlined'
+import { EventHandler } from 'cytoscape'
 import NoteOutlinedIcon from '@material-ui/icons/NoteOutlined'
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
@@ -53,13 +54,21 @@ const WorkflowDetail = () => {
   const [loading, setLoading] = useState(false)
   const [detail, setDetail] = useState<APIWorkflowDetail>()
   const [yamlEditor, setYAMLEditor] = useState<Ace.Editor>()
+  const [data, setData] = useState<any>()
+  const [selected, setSelected] = useState<'workflow' | 'node'>('workflow')
+  const modalTitle = selected === 'workflow' ? detail?.name : selected === 'node' ? data.name : ''
   const [configOpen, setConfigOpen] = useState(false)
   const topologyRef = useRef<any>(null)
 
   const fetchWorkflowDetail = (ns: string, name: string) =>
     api.workflows
       .detail(ns, name)
-      .then(({ data }) => setDetail(data))
+      .then(({ data }) => {
+        // TODO: remove noise in API
+        delete data.kube_object.metadata.annotations['kubectl.kubernetes.io/last-applied-configuration']
+
+        setDetail(data)
+      })
       .catch(console.error)
       .finally(() => setTimeout(() => setLoading(true), 1000))
 
@@ -85,7 +94,7 @@ const WorkflowDetail = () => {
         return
       }
 
-      const { updateElements } = constructWorkflowTopology(topologyRef.current!, detail)
+      const { updateElements } = constructWorkflowTopology(topologyRef.current!, detail, handleNodeClick)
 
       topologyRef.current = updateElements
     }
@@ -129,6 +138,28 @@ const WorkflowDetail = () => {
     }
   }
 
+  const handleOpenConfig = () => {
+    setData({
+      apiVersion: 'chaos-mesh.org/v1alpha1',
+      kind: 'Workflow',
+      ...detail?.kube_object,
+    })
+    setSelected('workflow')
+
+    onModalOpen()
+  }
+
+  const handleNodeClick: EventHandler = (e) => {
+    const node = e.target
+    const { id } = node.data()
+    const template = detail?.kube_object.spec.templates.find((t: any) => t.name === id)
+
+    setData(template)
+    setSelected('node')
+
+    onModalOpen()
+  }
+
   const handleUpdateWorkflow = () => {
     const data = yaml.load(yamlEditor!.getValue())
 
@@ -161,7 +192,7 @@ const WorkflowDetail = () => {
               onClick={handleSelect({
                 title: `${intl.formatMessage({ id: 'common.delete' })} ${name}`,
                 description: intl.formatMessage({ id: 'workflows.deleteDesc' }),
-                action: handleAction('delete', { namespace, name }),
+                handle: handleAction('delete', { namespace, name }),
               })}
             >
               {T('common.delete')}
@@ -181,9 +212,9 @@ const WorkflowDetail = () => {
                 size="small"
                 color="primary"
                 startIcon={<NoteOutlinedIcon />}
-                onClick={onModalOpen}
+                onClick={handleOpenConfig}
               >
-                {T('common.update')}
+                {T('common.configuration')}
               </Button>
             </PaperTop>
             <div ref={topologyRef} style={{ flex: 1 }} />
@@ -197,22 +228,14 @@ const WorkflowDetail = () => {
             {detail && configOpen && (
               <Box display="flex" flexDirection="column" height="100%">
                 <Box px={3} pt={3}>
-                  <PaperTop title={detail.name}>
+                  <PaperTop title={modalTitle}>
                     <Button variant="contained" color="primary" size="small" onClick={handleUpdateWorkflow}>
-                      {T('common.confirm')}
+                      {T('common.update')}
                     </Button>
                   </PaperTop>
                 </Box>
-                <Box flex={1}>
-                  <YAMLEditor
-                    theme={theme}
-                    data={yaml.dump({
-                      apiVersion: 'chaos-mesh.org/v1alpha1',
-                      kind: 'Workflow',
-                      ...detail.kube_object,
-                    })}
-                    mountEditor={setYAMLEditor}
-                  />
+                <Box display="flex" flex={1}>
+                  <YAMLEditor theme={theme} data={yaml.dump(data)} mountEditor={setYAMLEditor} />
                 </Box>
               </Box>
             )}
