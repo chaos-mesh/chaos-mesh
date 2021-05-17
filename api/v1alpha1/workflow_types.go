@@ -16,6 +16,8 @@ package v1alpha1
 import (
 	"fmt"
 
+	corev1 "k8s.io/api/core/v1"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
@@ -62,6 +64,27 @@ type WorkflowStatus struct {
 	EntryNode *string `json:"entry_node,omitempty"`
 	// +optional
 	StartTime *metav1.Time `json:"start_time,omitempty"`
+	// +optional
+	EndTime *metav1.Time `json:"end_time,omitempty"`
+
+	// Represents the latest available observations of a workflow's current state.
+	// +optional
+	// +patchMergeKey=type
+	// +patchStrategy=merge
+	Conditions []WorkflowCondition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type"`
+}
+
+type WorkflowConditionType string
+
+const (
+	WorkflowConditionAccomplished WorkflowConditionType = "Accomplished"
+	WorkflowConditionScheduled    WorkflowConditionType = "Scheduled"
+)
+
+type WorkflowCondition struct {
+	Type   WorkflowConditionType  `json:"type"`
+	Status corev1.ConditionStatus `json:"status"`
+	Reason string                 `json:"reason"`
 }
 
 type TemplateType string
