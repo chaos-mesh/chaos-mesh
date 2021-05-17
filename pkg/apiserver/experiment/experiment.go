@@ -900,8 +900,8 @@ func (s *Service) listExperiments(c *gin.Context) {
 	ns := c.Query("namespace")
 	status := c.Query("status")
 
-	if !s.conf.ClusterScoped {
-		log.Info("Overwrite namespace within namespace scoped mode", "origin", ns, "new", s.conf.TargetNamespace)
+	if len(ns) == 0 && !s.conf.ClusterScoped &&
+		len(s.conf.TargetNamespace) != 0 {
 		ns = s.conf.TargetNamespace
 	}
 
@@ -1202,7 +1202,8 @@ func (s *Service) state(c *gin.Context) {
 	}
 
 	namespace := c.Query("namespace")
-	if len(namespace) == 0 && !s.conf.ClusterScoped {
+	if len(namespace) == 0 && !s.conf.ClusterScoped &&
+		len(s.conf.TargetNamespace) != 0 {
 		namespace = s.conf.TargetNamespace
 	}
 

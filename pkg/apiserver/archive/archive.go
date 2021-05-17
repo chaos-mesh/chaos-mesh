@@ -106,7 +106,8 @@ func (s *Service) list(c *gin.Context) {
 	kind := c.Query("kind")
 	name := c.Query("name")
 	ns := c.Query("namespace")
-	if len(ns) == 0 && !s.conf.ClusterScoped {
+	if len(ns) == 0 && !s.conf.ClusterScoped &&
+		len(s.conf.TargetNamespace) != 0 {
 		ns = s.conf.TargetNamespace
 	}
 
@@ -150,7 +151,8 @@ func (s *Service) detail(c *gin.Context) {
 	)
 	uid := c.Query("uid")
 	namespace := c.Query("namespace")
-	if len(namespace) == 0 && !s.conf.ClusterScoped {
+	if len(namespace) == 0 && !s.conf.ClusterScoped &&
+		len(s.conf.TargetNamespace) != 0 {
 		namespace = s.conf.TargetNamespace
 	}
 
@@ -237,7 +239,8 @@ func (s *Service) report(c *gin.Context) {
 	)
 	uid := c.Query("uid")
 	namespace := c.Query("namespace")
-	if len(namespace) == 0 && !s.conf.ClusterScoped {
+	if len(namespace) == 0 && !s.conf.ClusterScoped &&
+		len(s.conf.TargetNamespace) != 0 {
 		namespace = s.conf.TargetNamespace
 	}
 

@@ -78,7 +78,8 @@ func Register(r *gin.RouterGroup, s *Service) {
 // @Failure 500 {object} utils.APIError
 func (s *Service) listEvents(c *gin.Context) {
 	namespace := c.Query("namespace")
-	if len(namespace) == 0 && !s.conf.ClusterScoped {
+	if len(namespace) == 0 && !s.conf.ClusterScoped &&
+		len(s.conf.TargetNamespace) != 0 {
 		namespace = s.conf.TargetNamespace
 	}
 
@@ -125,7 +126,8 @@ func (s *Service) listEvents(c *gin.Context) {
 // @Failure 500 {object} utils.APIError
 func (s *Service) listDryEvents(c *gin.Context) {
 	namespace := c.Query("namespace")
-	if len(namespace) == 0 && !s.conf.ClusterScoped {
+	if len(namespace) == 0 && !s.conf.ClusterScoped &&
+		len(s.conf.TargetNamespace) != 0 {
 		namespace = s.conf.TargetNamespace
 	}
 	filter := core.Filter{
@@ -158,7 +160,8 @@ func (s *Service) listDryEvents(c *gin.Context) {
 func (s *Service) getEvent(c *gin.Context) {
 	idStr := c.Query("id")
 	namespace := c.Query("namespace")
-	if len(namespace) == 0 && !s.conf.ClusterScoped {
+	if len(namespace) == 0 && !s.conf.ClusterScoped &&
+		len(s.conf.TargetNamespace) != 0 {
 		namespace = s.conf.TargetNamespace
 	}
 
