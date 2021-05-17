@@ -18,13 +18,16 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
+	"github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 )
+
+var log = ctrl.Log.WithName("workflow api")
 
 // StatusResponse defines a common status struct.
 type StatusResponse struct {
@@ -41,14 +44,18 @@ func Register(r *gin.RouterGroup, s *Service) {
 }
 
 // Service defines a handler service for workflows.
-type Service struct{}
-
-func NewService() *Service {
-	return &Service{}
+type Service struct {
+	conf *config.ChaosDashboardConfig
 }
 
-func NewServiceWithKubeRepo() *Service {
-	return NewService()
+func NewService(conf *config.ChaosDashboardConfig) *Service {
+	return &Service{
+		conf: conf,
+	}
+}
+
+func NewServiceWithKubeRepo(conf *config.ChaosDashboardConfig) *Service {
+	return NewService(conf)
 }
 
 // @Summary List workflows from Kubernetes cluster.
@@ -62,6 +69,10 @@ func NewServiceWithKubeRepo() *Service {
 // @Failure 500 {object} utils.APIError
 func (it *Service) listWorkflows(c *gin.Context) {
 	namespace := c.Query("namespace")
+	if len(namespace) == 0 && !it.conf.ClusterScoped {
+		namespace = it.conf.TargetNamespace
+	}
+
 	result := make([]core.Workflow, 0)
 
 	kubeClient, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)

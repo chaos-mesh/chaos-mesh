@@ -1202,6 +1202,9 @@ func (s *Service) state(c *gin.Context) {
 	}
 
 	namespace := c.Query("namespace")
+	if len(namespace) == 0 && !s.conf.ClusterScoped {
+		namespace = s.conf.TargetNamespace
+	}
 
 	states := new(ChaosState)
 

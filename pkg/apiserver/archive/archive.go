@@ -22,22 +22,28 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
+	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
+	"github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 )
+
+var log = ctrl.Log.WithName("archive api")
 
 // Service defines a handler service for archive experiments.
 type Service struct {
 	archive core.ExperimentStore
 	event   core.EventStore
+	conf    *config.ChaosDashboardConfig
 }
 
 // NewService returns an archive experiment service instance.
 func NewService(
 	archive core.ExperimentStore,
 	event core.EventStore,
+	conf *config.ChaosDashboardConfig,
 ) *Service {
 	return &Service{
 		archive: archive,
@@ -53,7 +59,9 @@ type StatusResponse struct {
 // Register mounts our HTTP handler on the mux.
 func Register(r *gin.RouterGroup, s *Service) {
 	endpoint := r.Group("/archives")
-	endpoint.Use(utils.AuthRequired)
+	endpoint.Use(func(c *gin.Context) {
+		utils.AuthRequired(c, s.conf.ClusterScoped, s.conf.TargetNamespace)
+	})
 
 	endpoint.GET("", s.list)
 	endpoint.GET("/detail", s.detail)
@@ -101,6 +109,9 @@ func (s *Service) list(c *gin.Context) {
 	kind := c.Query("kind")
 	name := c.Query("name")
 	ns := c.Query("namespace")
+	if len(ns) == 0 && !s.conf.ClusterScoped {
+		ns = s.conf.TargetNamespace
+	}
 
 	metas, err := s.archive.ListMeta(context.Background(), kind, ns, name, true)
 	if err != nil {
@@ -142,6 +153,9 @@ func (s *Service) detail(c *gin.Context) {
 	)
 	uid := c.Query("uid")
 	namespace := c.Query("namespace")
+	if len(namespace) == 0 && !s.conf.ClusterScoped {
+		namespace = s.conf.TargetNamespace
+	}
 
 	if uid == "" {
 		c.Status(http.StatusBadRequest)
@@ -226,6 +240,9 @@ func (s *Service) report(c *gin.Context) {
 	)
 	uid := c.Query("uid")
 	namespace := c.Query("namespace")
+	if len(namespace) == 0 && !s.conf.ClusterScoped {
+		namespace = s.conf.TargetNamespace
+	}
 
 	if uid == "" {
 		c.Status(http.StatusBadRequest)
