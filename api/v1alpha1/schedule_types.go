@@ -77,6 +77,7 @@ type ScheduleStatus struct {
 	Active []corev1.ObjectReference `json:"active,omitempty"`
 
 	// +optional
+	// +nullable
 	LastScheduleTime metav1.Time `json:"time,omitempty"`
 }
 
