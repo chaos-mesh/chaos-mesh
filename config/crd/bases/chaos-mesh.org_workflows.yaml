@@ -2079,6 +2079,29 @@ spec:
         status:
           description: Most recently observed status of the workflow
           properties:
+            conditions:
+              description: Represents the latest available observations of a workflow's
+                current state.
+              items:
+                properties:
+                  reason:
+                    type: string
+                  startTime:
+                    format: date-time
+                    type: string
+                  status:
+                    type: string
+                  type:
+                    type: string
+                required:
+                - reason
+                - status
+                - type
+                type: object
+              type: array
+            endTime:
+              format: date-time
+              type: string
             entryNode:
               type: string
             startTime:
