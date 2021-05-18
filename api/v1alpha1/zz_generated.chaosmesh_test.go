@@ -16,6 +16,7 @@ package v1alpha1
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/bxcodec/faker"
 	. "github.com/onsi/gomega"

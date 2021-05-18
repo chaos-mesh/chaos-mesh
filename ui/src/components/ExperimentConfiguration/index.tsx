@@ -64,7 +64,7 @@ const ExperimentConfiguration: React.FC<ExperimentConfigurationProps> = ({ exper
                 <TableCell>{T('newE.target.action')}</TableCell>
                 <TableCell>
                   <Typography variant="body2" color="textSecondary">
-                    {e.yaml.spec.action}
+                    {e.kube_object.spec.action}
                   </Typography>
                 </TableCell>
               </TableRow>
@@ -123,23 +123,22 @@ const ExperimentConfiguration: React.FC<ExperimentConfigurationProps> = ({ exper
 
         <Table size="small">
           <TableBody>
-            {e.yaml.spec.scheduler?.cron ? (
+            {e.kube_object.spec.scheduler?.cron ? (
               <>
                 <TableRow>
                   <TableCell>Cron</TableCell>
                   <TableCell>
                     <Typography variant="body2" color="textSecondary">
-                      {e.yaml.spec.scheduler.cron}
+                      {e.kube_object.spec.scheduler.cron}
                     </Typography>
                   </TableCell>
                 </TableRow>
-
-                {e.yaml.spec.duration && (
+                {e.kube_object.spec.duration && (
                   <TableRow>
                     <TableCell>{T('newE.schedule.duration')}</TableCell>
                     <TableCell>
                       <Typography variant="body2" color="textSecondary">
-                        {e.yaml.spec.duration}
+                        {e.kube_object.spec.duration}
                       </Typography>
                     </TableCell>
                   </TableRow>

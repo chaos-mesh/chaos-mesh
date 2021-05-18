@@ -160,9 +160,5 @@ func ModifyTime(pid int, deltaSec int64, deltaNsec int64, clockIdsMask uint64) e
 	}
 
 	err = program.JumpToFakeFunc(originAddr, fakeAddr)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }

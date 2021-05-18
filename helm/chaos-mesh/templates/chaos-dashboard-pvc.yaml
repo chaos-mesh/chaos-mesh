@@ -10,11 +10,11 @@ metadata:
     {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: chaos-dashboard
 spec:
-{{- if .Values.dashboard.persistentVolume.storageClass }}
-{{- if (eq "-" .Values.dashboard.persistentVolume.storageClass) }}
+{{- if .Values.dashboard.persistentVolume.storageClassName }}
+{{- if (eq "-" .Values.dashboard.persistentVolume.storageClassName) }}
   storageClassName: ""
 {{- else }}
-  storageClassName: "{{ .Values.dashboard.persistentVolume.storageClass }}"
+  storageClassName: "{{ .Values.dashboard.persistentVolume.storageClassName }}"
 {{- end }}
 {{- end }}
   accessModes:
