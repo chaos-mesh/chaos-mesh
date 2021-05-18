@@ -93,12 +93,14 @@ func main() {
 							log.Error(err, "fail to get type")
 							return err
 						}
+						if baseType.Name.Name != "Workflow" {
+							implCode += generateImpl(baseType.Name.Name)
+							testCode += generateTest(baseType.Name.Name)
 
-						implCode += generateImpl(baseType.Name.Name)
-						testCode += generateTest(baseType.Name.Name)
-						initImpl += generateInit(baseType.Name.Name)
+						}
 						workflowGenerator.AppendTypes(baseType.Name.Name)
 						workflowTestGenerator.AppendTypes(baseType.Name.Name)
+						initImpl += generateInit(baseType.Name.Name)
 						allTypes = append(allTypes, baseType.Name.Name)
 						continue out
 					}

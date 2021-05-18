@@ -23,6 +23,7 @@ import (
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:shortName=wf
 // +kubebuilder:subresource:status
+// +chaos-mesh:base
 type Workflow struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -33,6 +34,22 @@ type Workflow struct {
 	// +optional
 	// Most recently observed status of the workflow
 	Status WorkflowStatus `json:"status"`
+}
+
+func (in *Workflow) GetChaos() *ChaosInstance {
+	instance := &ChaosInstance{
+		Name:      in.Name,
+		Namespace: in.Namespace,
+		Kind:      KindTimeChaos,
+		StartTime: in.CreationTimestamp.Time,
+		Action:    "",
+		UID:       string(in.UID),
+	}
+
+	if in.DeletionTimestamp != nil {
+		instance.EndTime = in.DeletionTimestamp.Time
+	}
+	return instance
 }
 
 type WorkflowSpec struct {
