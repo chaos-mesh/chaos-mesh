@@ -8,6 +8,7 @@ import { WorkflowDetail as APIWorkflowDetail } from 'api/workflows.type'
 import { Ace } from 'ace-builds'
 import DeleteOutlinedIcon from '@material-ui/icons/DeleteOutlined'
 import { EventHandler } from 'cytoscape'
+import NodeConfiguration from 'components/NodeConfiguration'
 import NoteOutlinedIcon from '@material-ui/icons/NoteOutlined'
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
@@ -33,7 +34,7 @@ const useStyles = makeStyles((theme) => ({
     position: 'absolute',
     top: '50%',
     left: '50%',
-    width: '50vw',
+    width: '70vw',
     height: '90vh',
     transform: 'translate(-50%, -50%)',
     [theme.breakpoints.down('sm')]: {
@@ -235,6 +236,11 @@ const WorkflowDetail = () => {
                   </PaperTop>
                 </Box>
                 <Box display="flex" flex={1}>
+                  {selected === 'node' && (
+                    <Box width="50%">
+                      <NodeConfiguration template={data} />
+                    </Box>
+                  )}
                   <YAMLEditor theme={theme} data={yaml.dump(data)} mountEditor={setYAMLEditor} />
                 </Box>
               </Box>

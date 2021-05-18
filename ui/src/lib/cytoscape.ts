@@ -53,21 +53,21 @@ type RecursiveNodeDefinition = NodeDefinition | Array<string | RecursiveNodeDefi
 
 function generateWorkflowNodes(detail: WorkflowDetail) {
   const { entry, topology } = detail
-  const nodeMap = new Map(topology.nodes.map((n) => [n.template, n]))
-  const entryNode = nodeMap.get(entry)
-  const order = entryNode?.serial?.tasks
+  const nodeMap = new Map(topology.nodes.map((n) => [n.name, n]))
+  const entryNode = topology.nodes.find((n) => n.template === entry)
+  const mainTasks = entryNode?.serial?.tasks
 
   function toCytoscapeNode(node: Node): RecursiveNodeDefinition {
-    const { template, type, state } = node
+    const { name, type, state } = node
 
     if (type === 'SerialNode' && node.serial!.tasks.length) {
-      return [type, node.serial!.tasks.map((d) => toCytoscapeNode(nodeMap.get(d)!))]
+      return [type, node.serial!.tasks.map((d) => toCytoscapeNode(nodeMap.get(d.name)!))]
     } else if (type === 'ParallelNode' && node.parallel!.tasks.length) {
-      return [type, node.parallel!.tasks.map((d) => toCytoscapeNode(nodeMap.get(d)!))]
+      return [type, node.parallel!.tasks.map((d) => toCytoscapeNode(nodeMap.get(d.name)!))]
     } else {
       return {
         data: {
-          id: template,
+          id: name,
           type,
           state,
         },
@@ -77,12 +77,10 @@ function generateWorkflowNodes(detail: WorkflowDetail) {
     }
   }
 
-  if (order) {
-    return order
-      .map((d) => nodeMap.get(d))
-      .filter((d) => d !== undefined)
-      .map((d) => toCytoscapeNode(d!))
-  }
+  return mainTasks!
+    .map((d) => nodeMap.get(d.name))
+    .filter((d) => d !== undefined)
+    .map((d) => toCytoscapeNode(d!))
 }
 
 function mergeStates(source: Node['state'], target: Node['state']) {
@@ -93,69 +91,74 @@ function mergeStates(source: Node['state'], target: Node['state']) {
   return undefined
 }
 
-type RecursiveEdgeDefinition = EdgeDefinition | Array<string | RecursiveEdgeDefinition>
+function generateWorkflowEdges(result: EdgeDefinition[], nodes: RecursiveNodeDefinition[]) {
+  let first = nodes[0]
 
-function generateWorkflowEdges(nodes: RecursiveNodeDefinition[]) {
-  const result: RecursiveEdgeDefinition[] = []
+  // source != single node
+  if (Array.isArray(first)) {
+    generateWorkflowEdges(result, first[1] as RecursiveNodeDefinition[])
+  } else {
+    // source = single node
+    let source = first
 
-  nodes.forEach((n, i, arr) => {
-    if (i === nodes.length - 1) {
-      return
-    }
+    nodes.slice(1).forEach((n) => {
+      const sourceID = source.data.id!
+      const sourceState = source.data.state
 
-    // N (source) is not a single node
-    if (Array.isArray(n)) {
-      return generateWorkflowEdges(n[1] as RecursiveNodeDefinition[])
-    } else {
-      // N (source) is a single node
-      const source = n.data.id!
-      const sourceState = n.data.state
-      const target = arr[i + 1]
-
-      // The target is not a single node
-      if (Array.isArray(target)) {
+      // N (target) = single node
+      if (Array.isArray(n)) {
+        const target = n
         const type = target[0]
 
         if (type === 'SerialNode') {
+          const length = (target[1] as NodeDefinition[]).length
           const firstNode = (target[1] as NodeDefinition[])[0]
           const targetID = firstNode.data.id!
           const state = mergeStates(sourceState, firstNode.data.state)
 
           result.push({
             data: {
-              id: `${source}-to-${targetID}`,
-              source,
+              id: `${sourceID}-to-${targetID}`,
+              source: sourceID,
               target: targetID,
             },
             classes: state,
           })
+
+          source = (target[1] as NodeDefinition[])[length - 1]
+
+          generateWorkflowEdges(result, target[1] as RecursiveNodeDefinition[])
         } else if (type === 'ParallelNode') {
-          ;(target[1] as NodeDefinition[]).map((d) => {
+          ;(target[1] as NodeDefinition[]).forEach((d) => {
             const state = mergeStates(sourceState, d.data.state)
 
-            return {
+            const edge = {
               data: {
-                id: `${source}-to-${d.data.id!}`,
-                source,
+                id: `${sourceID}-to-${d.data.id!}`,
+                source: sourceID,
                 target: d.data.id!,
               },
               classes: state,
             }
+
+            result.push(edge)
           })
         }
       } else {
-        // The target is a single node
+        // N (target) != single node
         result.push({
           data: {
-            id: `${source}-to-${target.data.id!}`,
-            source,
-            target: target.data.id!,
+            id: `${sourceID}-to-${n.data.id!}`,
+            source: sourceID,
+            target: n.data.id!,
           },
-          classes: mergeStates(sourceState, target.data.state),
+          classes: mergeStates(sourceState, n.data.state),
         })
+
+        source = n
       }
-    }
-  })
+    })
+  }
 
   return result
 }
@@ -167,7 +170,7 @@ export const constructWorkflowTopology = (
 ) => {
   function generateElements(detail: WorkflowDetail) {
     const nodes = generateWorkflowNodes(detail)!
-    const edges = generateWorkflowEdges(nodes)
+    const edges = generateWorkflowEdges([], nodes)
 
     return {
       nodes: _flattenDeep(nodes).filter((d) => typeof d !== 'string') as NodeDefinition[],

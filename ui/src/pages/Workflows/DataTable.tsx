@@ -1,6 +1,8 @@
 import { Confirm, setAlert, setConfirm } from 'slices/globalStatus'
 import { IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@material-ui/core'
+import { useStoreDispatch, useStoreSelector } from 'store'
 
+import DateTime from 'lib/luxon'
 import DeleteOutlinedIcon from '@material-ui/icons/DeleteOutlined'
 import Space from 'components-mui/Space'
 import T from 'components/T'
@@ -9,7 +11,6 @@ import api from 'api'
 import { makeStyles } from '@material-ui/core/styles'
 import { useHistory } from 'react-router-dom'
 import { useIntl } from 'react-intl'
-import { useStoreDispatch } from 'store'
 
 const useStyles = makeStyles({
   tableRow: {
@@ -27,6 +28,7 @@ const DataTable: React.FC<DataTableProps> = ({ data, fetchData }) => {
   const intl = useIntl()
   const history = useHistory()
 
+  const { lang } = useStoreSelector((state) => state.settings)
   const dispatch = useStoreDispatch()
 
   const handleJumpTo = (ns: string, name: string) => () => history.push(`/workflows/${ns}/${name}`)
@@ -89,8 +91,12 @@ const DataTable: React.FC<DataTableProps> = ({ data, fetchData }) => {
                 <TableCell>{d.name}</TableCell>
                 <TableCell>{d.entry}</TableCell>
                 <TableCell></TableCell>
-                <TableCell></TableCell>
-                <TableCell></TableCell>
+                <TableCell>{d.status}</TableCell>
+                <TableCell>
+                  {DateTime.fromISO(d.created, {
+                    locale: lang,
+                  }).toRelative()}
+                </TableCell>
                 <TableCell>
                   <Space>
                     <IconButton

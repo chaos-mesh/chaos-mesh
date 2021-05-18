@@ -7,10 +7,12 @@ export interface Workflow {
   namespace: string
   entry: string
   created: string
+  endTime: string
+  status: string
 }
 
 interface MultiNode {
-  tasks: string[]
+  tasks: { name: string; template: string }[]
 }
 type SerialNode = MultiNode
 type ParallelNode = MultiNode

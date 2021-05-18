@@ -1,13 +1,4 @@
-import {
-  Box,
-  Grid,
-  TableCell as MUITableCell,
-  Table,
-  TableBody,
-  TableRow,
-  Typography,
-  withStyles,
-} from '@material-ui/core'
+import { Grid, TableCell as MUITableCell, Table, TableBody, TableRow, Typography, withStyles } from '@material-ui/core'
 
 import { ArchiveDetail } from 'api/archives.type'
 import { ExperimentDetail } from 'api/experiments.type'
@@ -26,22 +17,19 @@ const TableCell = withStyles({
 
 interface ExperimentConfigurationProps {
   experimentDetail: ExperimentDetail | ArchiveDetail
-  vertical?: boolean
 }
 
-const ExperimentConfiguration: React.FC<ExperimentConfigurationProps> = ({ experimentDetail: e, vertical = false }) => {
+const ExperimentConfiguration: React.FC<ExperimentConfigurationProps> = ({ experimentDetail: e }) => {
   const { lang } = useSelector((state: RootState) => state.settings)
 
   const action: string = e.kube_object.spec.action
 
   return (
     <Grid container>
-      <Grid item md={vertical ? 12 : 4}>
-        <Box mt={3} ml={3}>
-          <Typography variant="subtitle2" gutterBottom>
-            {T('newE.steps.basic')}
-          </Typography>
-        </Box>
+      <Grid item md={4}>
+        <Typography variant="subtitle2" gutterBottom>
+          {T('newE.steps.basic')}
+        </Typography>
 
         <Table size="small">
           <TableBody>
@@ -83,12 +71,10 @@ const ExperimentConfiguration: React.FC<ExperimentConfigurationProps> = ({ exper
         </Table>
       </Grid>
 
-      <Grid item md={vertical ? 12 : 4}>
-        <Box mt={3} ml={3}>
-          <Typography variant="subtitle2" gutterBottom>
-            {T('common.meta')}
-          </Typography>
-        </Box>
+      <Grid item md={4}>
+        <Typography variant="subtitle2" gutterBottom>
+          {T('common.meta')}
+        </Typography>
 
         <Table size="small">
           <TableBody>
@@ -124,12 +110,10 @@ const ExperimentConfiguration: React.FC<ExperimentConfigurationProps> = ({ exper
         </Table>
       </Grid>
 
-      <Grid item md={vertical ? 12 : 4}>
-        <Box mt={3} ml={3}>
-          <Typography variant="subtitle2" gutterBottom>
-            {T('newE.steps.schedule')}
-          </Typography>
-        </Box>
+      <Grid item md={4}>
+        <Typography variant="subtitle2" gutterBottom>
+          {T('newE.steps.schedule')}
+        </Typography>
 
         <Table size="small">
           <TableBody>

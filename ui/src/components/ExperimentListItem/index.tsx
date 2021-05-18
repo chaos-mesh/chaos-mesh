@@ -1,6 +1,6 @@
-import { Box, Collapse, IconButton, Typography, useMediaQuery, useTheme } from '@material-ui/core'
+import { Box, Collapse, IconButton, Typography, useMediaQuery } from '@material-ui/core'
 import React, { useState } from 'react'
-import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
+import { makeStyles, useTheme } from '@material-ui/core/styles'
 
 import { Archive } from 'api/archives.type'
 import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
@@ -15,23 +15,20 @@ import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp'
 import Paper from 'components-mui/Paper'
 import PauseCircleOutlineIcon from '@material-ui/icons/PauseCircleOutline'
 import PlayCircleOutlineIcon from '@material-ui/icons/PlayCircleOutline'
-import { RootState } from 'store'
 import Space from 'components-mui/Space'
 import T from 'components/T'
 import { truncate } from 'lib/utils'
 import { useHistory } from 'react-router-dom'
-import { useSelector } from 'react-redux'
+import { useStoreSelector } from 'store'
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      '&:hover': {
-        backgroundColor: theme.palette.action.hover,
-        cursor: 'pointer',
-      },
+const useStyles = makeStyles((theme) => ({
+  root: {
+    '&:hover': {
+      backgroundColor: theme.palette.action.hover,
+      cursor: 'pointer',
     },
-  })
-)
+  },
+}))
 
 interface ExperimentListItemProps {
   experiment: Experiment | Archive
@@ -52,7 +49,7 @@ const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
 
   const history = useHistory()
 
-  const { lang } = useSelector((state: RootState) => state.settings)
+  const { lang } = useStoreSelector((state) => state.settings)
 
   const [open, setOpen] = useState(false)
 
