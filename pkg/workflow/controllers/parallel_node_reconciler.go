@@ -155,9 +155,11 @@ func (it *ParallelNodeReconciler) syncChildNodes(ctx context.Context, node v1alp
 	}
 
 	var tasksToStartup []string
-	if len(setDifference(taskNamesOfNodes, node.Spec.Tasks)) > 0 {
-		// TODO: check the specific of task and workflow nodes
-		// the definition of Spec.Tasks changed, remove all the existed nodes
+
+	// TODO: check the specific of task and workflow nodes
+	// the definition of Spec.Tasks changed, remove all the existed nodes
+	if len(setDifference(taskNamesOfNodes, node.Spec.Tasks)) > 0 ||
+		len(setDifference(node.Spec.Tasks, taskNamesOfNodes)) > 0 {
 		tasksToStartup = node.Spec.Tasks
 		for _, childNode := range existsChildNodes {
 			// best effort deletion
@@ -169,8 +171,6 @@ func (it *ParallelNodeReconciler) syncChildNodes(ctx context.Context, node v1alp
 				)
 			}
 		}
-	} else {
-		tasksToStartup = setDifference(node.Spec.Tasks, taskNamesOfNodes)
 	}
 
 	if len(tasksToStartup) == 0 {
