@@ -155,7 +155,7 @@ func (it *ParallelNodeReconciler) syncChildNodes(ctx context.Context, node v1alp
 	}
 
 	var tasksToStartup []string
-	if len(relativeComplementSet(taskNamesOfNodes, node.Spec.Tasks)) > 0 {
+	if len(setDifference(taskNamesOfNodes, node.Spec.Tasks)) > 0 {
 		// TODO: check the specific of task and workflow nodes
 		// the definition of Spec.Tasks changed, remove all the existed nodes
 		tasksToStartup = node.Spec.Tasks
@@ -170,7 +170,7 @@ func (it *ParallelNodeReconciler) syncChildNodes(ctx context.Context, node v1alp
 			}
 		}
 	} else {
-		tasksToStartup = relativeComplementSet(node.Spec.Tasks, taskNamesOfNodes)
+		tasksToStartup = setDifference(node.Spec.Tasks, taskNamesOfNodes)
 	}
 
 	if len(tasksToStartup) == 0 {
@@ -224,8 +224,8 @@ func getTaskNameFromGeneratedName(generatedNodeName string) string {
 	return generatedNodeName[:index]
 }
 
-// relativeComplementSet return the set of elements which contained in former but not in latter
-func relativeComplementSet(former []string, latter []string) []string {
+// setDifference return the set of elements which contained in former but not in latter
+func setDifference(former []string, latter []string) []string {
 	var result []string
 	formerSet := make(map[string]struct{})
 	latterSet := make(map[string]struct{})

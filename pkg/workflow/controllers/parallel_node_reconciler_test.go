@@ -102,7 +102,7 @@ func Test_relativeComplementSet(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			got := relativeComplementSet(test.args.former, test.args.latter)
+			got := setDifference(test.args.former, test.args.latter)
 			sort.Strings(got)
 			sort.Strings(test.want)
 			if !reflect.DeepEqual(got, test.want) {
