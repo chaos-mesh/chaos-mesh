@@ -15,9 +15,9 @@ package core
 
 import (
 	"context"
+	"strings"
 	"time"
 
-	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -37,12 +37,24 @@ type WorkflowRepository interface {
 	Update(ctx context.Context, namespace, name string, workflow v1alpha1.Workflow) (WorkflowDetail, error)
 }
 
+type WorkflowStatus string
+
+const (
+	WorkflowRunning WorkflowStatus = "Running"
+	WorkflowSucceed WorkflowStatus = "Succeed"
+	WorkflowFailed  WorkflowStatus = "Failed"
+	WorkflowUnknown WorkflowStatus = "Unknown"
+)
+
 // Workflow defines the root structure of a workflow.
 type Workflow struct {
 	Namespace string `json:"namespace"`
 	Name      string `json:"name"`
-	Entry     string `json:"entry"` // the entry node name
-	Created   string `json:"created"`
+	// the entry node name
+	Entry   string         `json:"entry"`
+	Created string         `json:"created"`
+	EndTime string         `json:"endTime"`
+	Status  WorkflowStatus `json:"status,omitempty"`
 }
 
 type WorkflowDetail struct {
@@ -64,6 +76,7 @@ const (
 	NodeFailed  NodeState = "Failed"
 )
 
+// Node defines a single step of a workflow.
 type Node struct {
 	Name     string        `json:"name"`
 	Type     NodeType      `json:"type"`
@@ -73,14 +86,19 @@ type Node struct {
 	Template string        `json:"template"`
 }
 
+type NodeNameWithTemplate struct {
+	Name     string `json:"name,omitempty"`
+	Template string `json:"template,omitempty"`
+}
+
 // NodeSerial defines SerialNode's specific fields.
 type NodeSerial struct {
-	Tasks []string `json:"tasks"`
+	Tasks []NodeNameWithTemplate `json:"tasks"`
 }
 
 // NodeParallel defines ParallelNode's specific fields.
 type NodeParallel struct {
-	Tasks []string `json:"tasks"`
+	Tasks []NodeNameWithTemplate `json:"tasks"`
 }
 
 // NodeType represents the type of a workflow node.
@@ -232,6 +250,20 @@ func convertWorkflow(kubeWorkflow v1alpha1.Workflow) Workflow {
 		result.Created = kubeWorkflow.Status.StartTime.Format(time.RFC3339)
 	}
 
+	if kubeWorkflow.Status.EndTime != nil {
+		result.EndTime = kubeWorkflow.Status.EndTime.Format(time.RFC3339)
+	}
+
+	if wfcontrollers.WorkflowConditionEqualsTo(kubeWorkflow.Status, v1alpha1.WorkflowConditionAccomplished, corev1.ConditionTrue) {
+		result.Status = WorkflowSucceed
+	} else if wfcontrollers.WorkflowConditionEqualsTo(kubeWorkflow.Status, v1alpha1.WorkflowConditionScheduled, corev1.ConditionTrue) {
+		result.Status = WorkflowRunning
+	} else {
+		result.Status = WorkflowUnknown
+	}
+
+	// TODO: status failed
+
 	return result
 }
 
@@ -282,18 +314,30 @@ func convertWorkflowNode(kubeWorkflowNode v1alpha1.WorkflowNode) (Node, error) {
 	}
 
 	if kubeWorkflowNode.Spec.Type == v1alpha1.TypeSerial {
+		var nodes []string
+		for _, child := range kubeWorkflowNode.Status.FinishedChildren {
+			nodes = append(nodes, child.Name)
+		}
+		for _, child := range kubeWorkflowNode.Status.ActiveChildren {
+			nodes = append(nodes, child.Name)
+		}
 		result.Serial = &NodeSerial{
-			Tasks: kubeWorkflowNode.Spec.Tasks,
+			Tasks: composeSerialTaskAndNodes(kubeWorkflowNode.Spec.Tasks, nodes),
 		}
 	} else if kubeWorkflowNode.Spec.Type == v1alpha1.TypeParallel {
+		var nodes []string
+		for _, child := range kubeWorkflowNode.Status.FinishedChildren {
+			nodes = append(nodes, child.Name)
+		}
+		for _, child := range kubeWorkflowNode.Status.ActiveChildren {
+			nodes = append(nodes, child.Name)
+		}
 		result.Parallel = &NodeParallel{
-			Tasks: kubeWorkflowNode.Spec.Tasks,
+			Tasks: composeParallelTaskAndNodes(kubeWorkflowNode.Spec.Tasks, nodes),
 		}
 	}
 
-	// TODO: refactor this
-	if wfcontrollers.ConditionEqualsTo(kubeWorkflowNode.Status, v1alpha1.ConditionAccomplished, corev1.ConditionTrue) ||
-		wfcontrollers.ConditionEqualsTo(kubeWorkflowNode.Status, v1alpha1.ConditionDeadlineExceed, corev1.ConditionTrue) {
+	if wfcontrollers.WorkflowNodeFinished(kubeWorkflowNode.Status) {
 		result.State = NodeSucceed
 	} else {
 		result.State = NodeRunning
@@ -302,221 +346,41 @@ func convertWorkflowNode(kubeWorkflowNode v1alpha1.WorkflowNode) (Node, error) {
 	return result, nil
 }
 
-func mappingTemplateType(templateType v1alpha1.TemplateType) (NodeType, error) {
-	if v1alpha1.IsChaosTemplateType(templateType) {
-		return ChaosNode, nil
-	} else if target, ok := nodeTypeTemplateTypeMapping[templateType]; ok {
-		return target, nil
-	} else {
-		return "", errors.Errorf("can not resolve such type called %s", templateType)
+// composeSerialTaskAndNodes need nodes to be ordered with its creation time
+func composeSerialTaskAndNodes(tasks []string, nodes []string) []NodeNameWithTemplate {
+	var result []NodeNameWithTemplate
+	for _, node := range nodes {
+		// TODO: that reverse the generated name, maybe we could use WorkflowNode.TemplateName in the future
+		templateName := node[0:strings.LastIndex(node, "-")]
+		result = append(result, NodeNameWithTemplate{Name: node, Template: templateName})
 	}
-}
-
-type KubeWorkflowRepository struct {
-	kubeclient client.Client
-}
-
-func (it *KubeWorkflowRepository) CreateWorkflowWithRaw(ctx context.Context, raw KubeObjectYAMLDescription) (WorkflowDetail, error) {
-	workflow := v1alpha1.Workflow{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:        raw.Metadata.Name,
-			Namespace:   raw.Metadata.Namespace,
-			Labels:      raw.Metadata.Labels,
-			Annotations: raw.Metadata.Annotations,
-		},
-		Spec: v1alpha1.WorkflowSpec{},
-	}
-
-	err := mapstructure.Decode(raw.Spec, &workflow.Spec)
-	if err != nil {
-		return WorkflowDetail{}, err
-	}
-
-	// TODO: we need decode the inlined field again, it's better to resolve that in a common methods
-	// TODO: same issue in UpdateWorkflowWithRaw, and http api with experiments
-	for index := range workflow.Spec.Templates {
-		switch parsed := raw.Spec.(type) {
-		case map[string]interface{}:
-			switch templates := parsed["templates"].(type) {
-			case []interface{}:
-				target := v1alpha1.EmbedChaos{}
-				err := mapstructure.Decode(templates[index], &target)
-				if err != nil {
-					return WorkflowDetail{}, err
-				}
-			}
-
-		}
-	}
-
-	err = it.kubeclient.Create(ctx, &workflow)
-	if err != nil {
-		return WorkflowDetail{}, err
-	}
-	return it.GetWorkflowByNamespacedName(ctx, workflow.Namespace, workflow.Name)
-}
-
-func (it *KubeWorkflowRepository) UpdateWorkflowWithRaw(ctx context.Context, raw KubeObjectYAMLDescription) (WorkflowDetail, error) {
-	workflow := v1alpha1.Workflow{}
-
-	err := mapstructure.Decode(raw.Spec, &workflow.Spec)
-	if err != nil {
-		return WorkflowDetail{}, err
-	}
-
-	for index := range workflow.Spec.Templates {
-		switch parsed := raw.Spec.(type) {
-		case map[string]interface{}:
-			switch templates := parsed["templates"].(type) {
-			case []interface{}:
-				target := v1alpha1.EmbedChaos{}
-				err := mapstructure.Decode(templates[index], &target)
-				if err != nil {
-					return WorkflowDetail{}, err
-				}
-			}
-
-		}
-	}
-
-	err = it.kubeclient.Update(ctx, &workflow)
-	if err != nil {
-		return WorkflowDetail{}, err
-	}
-	return it.GetWorkflowByNamespacedName(ctx, workflow.Namespace, workflow.Name)
-}
-
-func NewKubeWorkflowRepository(kubeclient client.Client) *KubeWorkflowRepository {
-	return &KubeWorkflowRepository{kubeclient: kubeclient}
-}
-
-func (it *KubeWorkflowRepository) ListWorkflowWithNamespace(ctx context.Context, namespace string) ([]Workflow, error) {
-	workflowList := v1alpha1.WorkflowList{}
-	err := it.kubeclient.List(ctx, &workflowList, &client.ListOptions{
-		Namespace: namespace,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	var result []Workflow
-	for _, item := range workflowList.Items {
-		result = append(result, conversionWorkflow(item))
-	}
-
-	return result, nil
-}
-
-func (it *KubeWorkflowRepository) ListWorkflowFromAllNamespace(ctx context.Context) ([]Workflow, error) {
-	return it.ListWorkflowWithNamespace(ctx, "")
-}
-
-func (it *KubeWorkflowRepository) GetWorkflowByNamespacedName(ctx context.Context, namespace, name string) (WorkflowDetail, error) {
-	kubeWorkflow := v1alpha1.Workflow{}
-	err := it.kubeclient.Get(ctx, types.NamespacedName{
-		Namespace: namespace,
-		Name:      name,
-	}, &kubeWorkflow)
-
-	if err != nil {
-		return WorkflowDetail{}, err
-	}
-
-	workflowNodes := v1alpha1.WorkflowNodeList{}
-
-	// labeling workflow nodes, see pkg/workflow/controllers/new_node.go
-	selector, err := metav1.LabelSelectorAsSelector(&metav1.LabelSelector{
-		MatchLabels: map[string]string{
-			v1alpha1.LabelWorkflow: kubeWorkflow.Name,
-		},
-	})
-	if err != nil {
-		return WorkflowDetail{}, err
-	}
-	err = it.kubeclient.List(ctx, &workflowNodes, &client.ListOptions{
-		Namespace:     namespace,
-		LabelSelector: selector,
-	})
-	if err != nil {
-		return WorkflowDetail{}, err
-	}
-
-	return conversionWorkflowDetail(kubeWorkflow, workflowNodes.Items)
-}
-
-func (it *KubeWorkflowRepository) DeleteWorkflowByNamespacedName(ctx context.Context, namespace, name string) error {
-	kubeWorkflow := v1alpha1.Workflow{}
-	err := it.kubeclient.Get(ctx, types.NamespacedName{
-		Namespace: namespace,
-		Name:      name,
-	}, &kubeWorkflow)
-	if err != nil {
-		return err
-	}
-	return it.kubeclient.Delete(ctx, &kubeWorkflow)
-}
-
-func conversionWorkflow(kubeWorkflow v1alpha1.Workflow) Workflow {
-	result := Workflow{
-		Namespace: kubeWorkflow.Namespace,
-		Name:      kubeWorkflow.Name,
-		Entry:     kubeWorkflow.Spec.Entry,
+	for _, task := range tasks[len(nodes):] {
+		result = append(result, NodeNameWithTemplate{Template: task})
 	}
 	return result
 }
 
-func conversionWorkflowDetail(kubeWorkflow v1alpha1.Workflow, kubeNodes []v1alpha1.WorkflowNode) (WorkflowDetail, error) {
-	nodes := make([]Node, 0)
-
-	for _, item := range kubeNodes {
-		node, err := conversionWorkflowNode(item)
-		if err != nil {
-			return WorkflowDetail{}, nil
+func composeParallelTaskAndNodes(tasks []string, nodes []string) []NodeNameWithTemplate {
+	var result []NodeNameWithTemplate
+	for _, task := range tasks {
+		result = append(result, NodeNameWithTemplate{
+			Name:     "",
+			Template: task,
+		})
+	}
+	for _, node := range nodes {
+		for i, item := range result {
+			if len(item.Name) == 0 && strings.HasPrefix(node, item.Template) {
+				result[i].Name = node
+				break
+			}
 		}
-		nodes = append(nodes, node)
 	}
-
-	result := WorkflowDetail{
-		Workflow: conversionWorkflow(kubeWorkflow),
-		Topology: Topology{
-			Nodes: nodes,
-		},
-	}
-	return result, nil
-}
-
-func conversionWorkflowNode(kubeWorkflowNode v1alpha1.WorkflowNode) (Node, error) {
-	templateType, err := mappingTemplateType(kubeWorkflowNode.Spec.Type)
-	if err != nil {
-		return Node{}, err
-	}
-	result := Node{
-		Name:     kubeWorkflowNode.Name,
-		Type:     templateType,
-		Serial:   NodeSerial{Tasks: []string{}},
-		Parallel: NodeParallel{Tasks: []string{}},
-		Template: kubeWorkflowNode.Spec.TemplateName,
-	}
-
-	if kubeWorkflowNode.Spec.Type == v1alpha1.TypeSerial {
-		result.Serial.Tasks = kubeWorkflowNode.Spec.Tasks
-	} else if kubeWorkflowNode.Spec.Type == v1alpha1.TypeParallel {
-		result.Parallel.Tasks = kubeWorkflowNode.Spec.Tasks
-	}
-
-	// TODO: refactor this
-	if wfcontrollers.ConditionEqualsTo(kubeWorkflowNode.Status, v1alpha1.ConditionAccomplished, corev1.ConditionTrue) ||
-		wfcontrollers.ConditionEqualsTo(kubeWorkflowNode.Status, v1alpha1.ConditionDeadlineExceed, corev1.ConditionTrue) {
-		result.State = NodeSucceed
-	} else {
-		result.State = NodeRunning
-	}
-
-	return result, nil
+	return result
 }
 
 func mappingTemplateType(templateType v1alpha1.TemplateType) (NodeType, error) {
-	if v1alpha1.IsChoasTemplateType(templateType) {
+	if v1alpha1.IsChaosTemplateType(templateType) {
 		return ChaosNode, nil
 	} else if target, ok := nodeTypeTemplateTypeMapping[templateType]; ok {
 		return target, nil

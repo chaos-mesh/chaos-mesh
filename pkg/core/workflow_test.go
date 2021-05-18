@@ -52,6 +52,138 @@ func Test_convertWorkflow(t *testing.T) {
 				Namespace: "fake-namespace",
 				Name:      "fake-workflow-0",
 				Entry:     "an-entry",
+				Status:    WorkflowUnknown,
+			},
+		}, {
+			name: "running workflow",
+			args: args{
+				v1alpha1.Workflow{
+					TypeMeta: metav1.TypeMeta{},
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: "fake-namespace",
+						Name:      "fake-workflow-0",
+					},
+					Spec: v1alpha1.WorkflowSpec{
+						Entry: "an-entry",
+					},
+					Status: v1alpha1.WorkflowStatus{
+						Conditions: []v1alpha1.WorkflowCondition{
+							{
+								Type:   v1alpha1.WorkflowConditionScheduled,
+								Status: corev1.ConditionTrue,
+								Reason: "",
+							},
+						},
+					},
+				},
+			},
+			want: Workflow{
+				Namespace: "fake-namespace",
+				Name:      "fake-workflow-0",
+				Entry:     "an-entry",
+				Status:    WorkflowRunning,
+			},
+		}, {
+			name: "running workflow",
+			args: args{
+				v1alpha1.Workflow{
+					TypeMeta: metav1.TypeMeta{},
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: "fake-namespace",
+						Name:      "fake-workflow-0",
+					},
+					Spec: v1alpha1.WorkflowSpec{
+						Entry: "an-entry",
+					},
+					Status: v1alpha1.WorkflowStatus{
+						Conditions: []v1alpha1.WorkflowCondition{
+							{
+								Type:   v1alpha1.WorkflowConditionAccomplished,
+								Status: corev1.ConditionUnknown,
+								Reason: "",
+							},
+							{
+								Type:   v1alpha1.WorkflowConditionScheduled,
+								Status: corev1.ConditionTrue,
+								Reason: "",
+							},
+						},
+					},
+				},
+			},
+			want: Workflow{
+				Namespace: "fake-namespace",
+				Name:      "fake-workflow-0",
+				Entry:     "an-entry",
+				Status:    WorkflowRunning,
+			},
+		}, {
+			name: "running workflow",
+			args: args{
+				v1alpha1.Workflow{
+					TypeMeta: metav1.TypeMeta{},
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: "fake-namespace",
+						Name:      "fake-workflow-0",
+					},
+					Spec: v1alpha1.WorkflowSpec{
+						Entry: "an-entry",
+					},
+					Status: v1alpha1.WorkflowStatus{
+						Conditions: []v1alpha1.WorkflowCondition{
+							{
+								Type:   v1alpha1.WorkflowConditionAccomplished,
+								Status: corev1.ConditionFalse,
+								Reason: "",
+							},
+							{
+								Type:   v1alpha1.WorkflowConditionScheduled,
+								Status: corev1.ConditionTrue,
+								Reason: "",
+							},
+						},
+					},
+				},
+			},
+			want: Workflow{
+				Namespace: "fake-namespace",
+				Name:      "fake-workflow-0",
+				Entry:     "an-entry",
+				Status:    WorkflowRunning,
+			},
+		}, {
+			name: "succeed workflow",
+			args: args{
+				v1alpha1.Workflow{
+					TypeMeta: metav1.TypeMeta{},
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: "fake-namespace",
+						Name:      "fake-workflow-0",
+					},
+					Spec: v1alpha1.WorkflowSpec{
+						Entry: "an-entry",
+					},
+					Status: v1alpha1.WorkflowStatus{
+						Conditions: []v1alpha1.WorkflowCondition{
+							{
+								Type:   v1alpha1.WorkflowConditionAccomplished,
+								Status: corev1.ConditionTrue,
+								Reason: "",
+							},
+							{
+								Type:   v1alpha1.WorkflowConditionScheduled,
+								Status: corev1.ConditionTrue,
+								Reason: "",
+							},
+						},
+					},
+				},
+			},
+			want: Workflow{
+				Namespace: "fake-namespace",
+				Name:      "fake-workflow-0",
+				Entry:     "an-entry",
+				Status:    WorkflowSucceed,
 			},
 		},
 	}
@@ -97,6 +229,7 @@ func Test_convertWorkflowDetail(t *testing.T) {
 					Namespace: "another-namespace",
 					Name:      "another-fake-workflow",
 					Entry:     "another-entry",
+					Status:    WorkflowUnknown,
 				},
 				Topology: Topology{
 					Nodes: []Node{},
@@ -183,7 +316,10 @@ func Test_convertWorkflowNode(t *testing.T) {
 				Name: "fake-serial-node-0",
 				Type: SerialNode,
 				Serial: &NodeSerial{
-					Tasks: []string{"child-0", "child-1"},
+					Tasks: []NodeNameWithTemplate{
+						{Name: "", Template: "child-0"},
+						{Name: "", Template: "child-1"},
+					},
 				},
 				Parallel: nil,
 				Template: "fake-serial-node",
@@ -213,7 +349,10 @@ func Test_convertWorkflowNode(t *testing.T) {
 				Type:   ParallelNode,
 				Serial: nil,
 				Parallel: &NodeParallel{
-					Tasks: []string{"child-1", "child-0"},
+					Tasks: []NodeNameWithTemplate{
+						{Name: "", Template: "child-1"},
+						{Name: "", Template: "child-0"},
+					},
 				},
 				Template: "parallel-node",
 				State:    NodeRunning,
@@ -286,7 +425,9 @@ func Test_convertWorkflowNode(t *testing.T) {
 				Type:  SerialNode,
 				State: NodeSucceed,
 				Serial: &NodeSerial{
-					Tasks: []string{"unimportant-task-0"},
+					Tasks: []NodeNameWithTemplate{
+						{Name: "", Template: "unimportant-task-0"},
+					},
 				},
 				Parallel: nil,
 				Template: "the-entry",
@@ -334,6 +475,96 @@ func Test_convertWorkflowNode(t *testing.T) {
 			}
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("convertWorkflowNode() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_composeTaskAndNodes(t *testing.T) {
+	type args struct {
+		tasks []string
+		nodes []string
+	}
+	tests := []struct {
+		name string
+		args args
+		want []NodeNameWithTemplate
+	}{
+		{
+			name: "ordered with serial",
+			args: args{
+				tasks: []string{"node-0", "node-1", "node-0", "node-2", "node-3"},
+				nodes: []string{"node-0-instance", "node-1-instance", "node-0-another_instance"},
+			},
+			want: []NodeNameWithTemplate{
+				{
+					Name:     "node-0-instance",
+					Template: "node-0",
+				}, {
+					Name:     "node-1-instance",
+					Template: "node-1",
+				}, {
+					Name:     "node-0-another_instance",
+					Template: "node-0",
+				}, {
+					Name:     "",
+					Template: "node-2",
+				}, {
+					Name:     "",
+					Template: "node-3",
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := composeSerialTaskAndNodes(tt.args.tasks, tt.args.nodes); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("composeSerialTaskAndNodes() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_composeParallelTaskAndNodes(t *testing.T) {
+	type args struct {
+		tasks []string
+		nodes []string
+	}
+	tests := []struct {
+		name string
+		args args
+		want []NodeNameWithTemplate
+	}{
+		{
+			name: "parallel",
+			args: args{
+				tasks: []string{"node-a", "node-b", "node-a", "node-c", "node-d"},
+				nodes: []string{"node-a-instance", "node-a-another_instance", "node-d-instance"},
+			},
+			want: []NodeNameWithTemplate{
+				{
+					Name:     "node-a-instance",
+					Template: "node-a",
+				}, {
+					Name:     "",
+					Template: "node-b",
+				}, {
+					Name:     "node-a-another_instance",
+					Template: "node-a",
+				}, {
+					Name:     "",
+					Template: "node-c",
+				}, {
+					Name:     "node-d-instance",
+					Template: "node-d",
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := composeParallelTaskAndNodes(tt.args.tasks, tt.args.nodes); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("composeParallelTaskAndNodes() = %v, want %v", got, tt.want)
 			}
 		})
 	}

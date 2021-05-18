@@ -76,8 +76,7 @@ type Archive struct {
 // Detail represents an archive instance.
 type Detail struct {
 	Archive
-	YAML       core.KubeObjectYAMLDescription `json:"yaml"`
-	KubeObject core.KubeObjectDesc            `json:"kube_object"`
+	KubeObject core.KubeObjectDesc `json:"kube_object"`
 }
 
 // Report defines the report of archive experiments.

@@ -7,9 +7,10 @@ import (
 
 	"go.uber.org/fx"
 
-	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"k8s.io/client-go/rest"
 	ctrl "sigs.k8s.io/controller-runtime"
+
+	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
 )
 
 func NewTestManager(lc fx.Lifecycle, options *ctrl.Options, cfg *rest.Config) (ctrl.Manager, error) {

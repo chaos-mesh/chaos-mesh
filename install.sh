@@ -1266,13 +1266,8 @@ spec:
         app.kubernetes.io/version: v0.9.0
         app.kubernetes.io/component: chaos-dashboard
     spec:
-<<<<<<< HEAD
-      serviceAccount: chaos-controller-manager
-      priorityClassName:
-=======
       serviceAccountName: chaos-controller-manager
-      priorityClassName: 
->>>>>>> master
+      priorityClassName:
       containers:
         - name: chaos-dashboard
           image: ${DOCKER_REGISTRY_PREFIX}/pingcap/chaos-dashboard:${VERSION_TAG}
@@ -1347,13 +1342,8 @@ spec:
         rollme: "install.sh"
     spec:
       hostNetwork: ${host_network}
-<<<<<<< HEAD
-      serviceAccount: chaos-controller-manager
-      priorityClassName:
-=======
       serviceAccountName: chaos-controller-manager
-      priorityClassName: 
->>>>>>> master
+      priorityClassName:
       containers:
       - name: chaos-mesh
         image: ${DOCKER_REGISTRY_PREFIX}/pingcap/chaos-mesh:${VERSION_TAG}
