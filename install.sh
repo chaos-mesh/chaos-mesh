@@ -1194,7 +1194,7 @@ spec:
       annotations:
     spec:
       hostNetwork: ${host_network}
-      serviceAccount: chaos-daemon
+      serviceAccountName: chaos-daemon
       hostIPC: true
       hostPID: true
       priorityClassName:
@@ -1266,8 +1266,13 @@ spec:
         app.kubernetes.io/version: v0.9.0
         app.kubernetes.io/component: chaos-dashboard
     spec:
+<<<<<<< HEAD
       serviceAccount: chaos-controller-manager
       priorityClassName:
+=======
+      serviceAccountName: chaos-controller-manager
+      priorityClassName: 
+>>>>>>> master
       containers:
         - name: chaos-dashboard
           image: ${DOCKER_REGISTRY_PREFIX}/pingcap/chaos-dashboard:${VERSION_TAG}
@@ -1342,8 +1347,13 @@ spec:
         rollme: "install.sh"
     spec:
       hostNetwork: ${host_network}
+<<<<<<< HEAD
       serviceAccount: chaos-controller-manager
       priorityClassName:
+=======
+      serviceAccountName: chaos-controller-manager
+      priorityClassName: 
+>>>>>>> master
       containers:
       - name: chaos-mesh
         image: ${DOCKER_REGISTRY_PREFIX}/pingcap/chaos-mesh:${VERSION_TAG}
@@ -1606,6 +1616,25 @@ webhooks:
           - UPDATE
         resources:
           - podiochaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /mutate-chaos-mesh-org-v1alpha1-podhttpchaos
+    failurePolicy: Fail
+    name: mpodhttpchaos.kb.io
+    timeoutSeconds: 5
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - podhttpchaos
   - clientConfig:
       caBundle: "${CA_BUNDLE}"
       service:
