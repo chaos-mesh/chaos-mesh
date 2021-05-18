@@ -2214,6 +2214,8 @@ spec:
     singular: podhttpchaos
   preserveUnknownFields: false
   scope: Namespaced
+  subresources:
+    status: {}
   validation:
     openAPIV3Schema:
       description: PodHttpChaos is the Schema for the podhttpchaos API
@@ -2385,6 +2387,11 @@ spec:
         status:
           description: PodHttpChaosStatus defines the actual state of PodHttpChaos.
           properties:
+            failedMessage:
+              type: string
+            observedGeneration:
+              format: int64
+              type: integer
             pid:
               description: Pid represents a running tproxy process id.
               format: int64

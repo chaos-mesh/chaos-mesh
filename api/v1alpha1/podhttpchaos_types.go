@@ -34,6 +34,12 @@ type PodHttpChaosStatus struct {
 	// StartTime represents the start time of a tproxy process.
 	// +optional
 	StartTime int64 `json:"startTime,omitempty"`
+
+	// +optional
+	FailedMessage string `json:"failedMessage,omitempty"`
+
+	// +optional
+	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
 }
 
 // PodHttpChaosRule defines the injection rule for http request.
@@ -169,6 +175,7 @@ const KindPodHttpChaos = "PodHttpChaos"
 
 // +kubebuilder:object:root=true
 
+// +kubebuilder:subresource:status
 // PodHttpChaos is the Schema for the podhttpchaos API
 type PodHttpChaos struct {
 	metav1.TypeMeta   `json:",inline"`
