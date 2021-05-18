@@ -16,7 +16,6 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"regexp"
 	"strings"
 	"text/template"
 )
@@ -134,7 +133,7 @@ func generateEmbedChaos(typeName string) string {
 		JsonField string
 	}{
 		Type:      typeName,
-		JsonField: camelCaseToSnakeCase(typeName),
+		JsonField: lowercaseCamelCase(typeName),
 	}
 	tmpl, err := template.New("workflowTemplates").Parse(embedChaosEntryTemplate)
 	if err != nil {
@@ -152,13 +151,8 @@ func generateEmbedChaos(typeName string) string {
 	return buf.String()
 }
 
-var matchFirstCap = regexp.MustCompile("(.)([A-Z][a-z]+)")
-var matchAllCap = regexp.MustCompile("([a-z0-9])([A-Z])")
-
-func camelCaseToSnakeCase(str string) string {
-	snake := matchFirstCap.ReplaceAllString(str, "${1}_${2}")
-	snake = matchAllCap.ReplaceAllString(snake, "${1}_${2}")
-	return strings.ToLower(snake)
+func lowercaseCamelCase(str string) string {
+	return strings.ToLower(str[0:1]) + str[1:]
 }
 
 const fillingEntryTemplate = `	case Type{{.Type}}:
