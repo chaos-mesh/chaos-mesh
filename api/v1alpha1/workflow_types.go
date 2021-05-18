@@ -54,6 +54,10 @@ func (in *Workflow) GetChaos() *ChaosInstance {
 	return instance
 }
 
+func (in *Workflow) GetObjectMeta() *metav1.ObjectMeta {
+	return &in.ObjectMeta
+}
+
 type WorkflowSpec struct {
 	Entry     string     `json:"entry"`
 	Templates []Template `json:"templates"`
