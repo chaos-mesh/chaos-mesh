@@ -68,6 +68,43 @@ func WorkflowNodeFinished(status v1alpha1.WorkflowNodeStatus) bool {
 		ConditionEqualsTo(status, v1alpha1.ConditionDeadlineExceed, corev1.ConditionTrue)
 }
 
+func SetWorkflowCondition(status *v1alpha1.WorkflowStatus, condition v1alpha1.WorkflowCondition) {
+	currentCond := GetWorkflowCondition(*status, condition.Type)
+	if currentCond != nil && currentCond.Status == condition.Status && currentCond.Reason == condition.Reason {
+		return
+	}
+	newConditions := filterOutWorkflowCondition(status.Conditions, condition.Type)
+	status.Conditions = append(newConditions, condition)
+}
+
+func GetWorkflowCondition(status v1alpha1.WorkflowStatus, conditionType v1alpha1.WorkflowConditionType) *v1alpha1.WorkflowCondition {
+	for _, item := range status.Conditions {
+		if item.Type == conditionType {
+			return &item
+		}
+	}
+	return nil
+}
+
+func WorkflowConditionEqualsTo(status v1alpha1.WorkflowStatus, conditionType v1alpha1.WorkflowConditionType, expected corev1.ConditionStatus) bool {
+	condition := GetWorkflowCondition(status, conditionType)
+	if condition == nil {
+		return false
+	}
+	return condition.Status == expected
+}
+
+func filterOutWorkflowCondition(conditions []v1alpha1.WorkflowCondition, except v1alpha1.WorkflowConditionType) []v1alpha1.WorkflowCondition {
+	var newConditions []v1alpha1.WorkflowCondition
+	for _, c := range conditions {
+		if c.Type == except {
+			continue
+		}
+		newConditions = append(newConditions, c)
+	}
+	return newConditions
+}
+
 type SortByCreationTimestamp []v1alpha1.WorkflowNode
 
 func (it SortByCreationTimestamp) Len() int {

@@ -15,14 +15,14 @@ package core
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	wfcontrollers "github.com/chaos-mesh/chaos-mesh/pkg/workflow/controllers"
@@ -37,12 +37,24 @@ type WorkflowRepository interface {
 	Update(ctx context.Context, namespace, name string, workflow v1alpha1.Workflow) (WorkflowDetail, error)
 }
 
+type WorkflowStatus string
+
+const (
+	WorkflowRunning WorkflowStatus = "Running"
+	WorkflowSucceed WorkflowStatus = "Succeed"
+	WorkflowFailed  WorkflowStatus = "Failed"
+	WorkflowUnknown WorkflowStatus = "Unknown"
+)
+
 // Workflow defines the root structure of a workflow.
 type Workflow struct {
 	Namespace string `json:"namespace"`
 	Name      string `json:"name"`
-	Entry     string `json:"entry"` // the entry node name
-	Created   string `json:"created"`
+	// the entry node name
+	Entry   string         `json:"entry"`
+	Created string         `json:"created"`
+	EndTime string         `json:"endTime"`
+	Status  WorkflowStatus `json:"status,omitempty"`
 }
 
 type WorkflowDetail struct {
@@ -74,14 +86,19 @@ type Node struct {
 	Template string        `json:"template"`
 }
 
+type NodeNameWithTemplate struct {
+	Name     string `json:"name,omitempty"`
+	Template string `json:"template,omitempty"`
+}
+
 // NodeSerial defines SerialNode's specific fields.
 type NodeSerial struct {
-	Tasks []string `json:"tasks"`
+	Tasks []NodeNameWithTemplate `json:"tasks"`
 }
 
 // NodeParallel defines ParallelNode's specific fields.
 type NodeParallel struct {
-	Tasks []string `json:"tasks"`
+	Tasks []NodeNameWithTemplate `json:"tasks"`
 }
 
 // NodeType represents the type of a workflow node.
@@ -233,6 +250,20 @@ func convertWorkflow(kubeWorkflow v1alpha1.Workflow) Workflow {
 		result.Created = kubeWorkflow.Status.StartTime.Format(time.RFC3339)
 	}
 
+	if kubeWorkflow.Status.EndTime != nil {
+		result.EndTime = kubeWorkflow.Status.EndTime.Format(time.RFC3339)
+	}
+
+	if wfcontrollers.WorkflowConditionEqualsTo(kubeWorkflow.Status, v1alpha1.WorkflowConditionAccomplished, corev1.ConditionTrue) {
+		result.Status = WorkflowSucceed
+	} else if wfcontrollers.WorkflowConditionEqualsTo(kubeWorkflow.Status, v1alpha1.WorkflowConditionScheduled, corev1.ConditionTrue) {
+		result.Status = WorkflowRunning
+	} else {
+		result.Status = WorkflowUnknown
+	}
+
+	// TODO: status failed
+
 	return result
 }
 
@@ -283,24 +314,69 @@ func convertWorkflowNode(kubeWorkflowNode v1alpha1.WorkflowNode) (Node, error) {
 	}
 
 	if kubeWorkflowNode.Spec.Type == v1alpha1.TypeSerial {
+		var nodes []string
+		for _, child := range kubeWorkflowNode.Status.FinishedChildren {
+			nodes = append(nodes, child.Name)
+		}
+		for _, child := range kubeWorkflowNode.Status.ActiveChildren {
+			nodes = append(nodes, child.Name)
+		}
 		result.Serial = &NodeSerial{
-			Tasks: kubeWorkflowNode.Spec.Tasks,
+			Tasks: composeSerialTaskAndNodes(kubeWorkflowNode.Spec.Tasks, nodes),
 		}
 	} else if kubeWorkflowNode.Spec.Type == v1alpha1.TypeParallel {
+		var nodes []string
+		for _, child := range kubeWorkflowNode.Status.FinishedChildren {
+			nodes = append(nodes, child.Name)
+		}
+		for _, child := range kubeWorkflowNode.Status.ActiveChildren {
+			nodes = append(nodes, child.Name)
+		}
 		result.Parallel = &NodeParallel{
-			Tasks: kubeWorkflowNode.Spec.Tasks,
+			Tasks: composeParallelTaskAndNodes(kubeWorkflowNode.Spec.Tasks, nodes),
 		}
 	}
 
-	// TODO: refactor this
-	if wfcontrollers.ConditionEqualsTo(kubeWorkflowNode.Status, v1alpha1.ConditionAccomplished, corev1.ConditionTrue) ||
-		wfcontrollers.ConditionEqualsTo(kubeWorkflowNode.Status, v1alpha1.ConditionDeadlineExceed, corev1.ConditionTrue) {
+	if wfcontrollers.WorkflowNodeFinished(kubeWorkflowNode.Status) {
 		result.State = NodeSucceed
 	} else {
 		result.State = NodeRunning
 	}
 
 	return result, nil
+}
+
+// composeSerialTaskAndNodes need nodes to be ordered with its creation time
+func composeSerialTaskAndNodes(tasks []string, nodes []string) []NodeNameWithTemplate {
+	var result []NodeNameWithTemplate
+	for _, node := range nodes {
+		// TODO: that reverse the generated name, maybe we could use WorkflowNode.TemplateName in the future
+		templateName := node[0:strings.LastIndex(node, "-")]
+		result = append(result, NodeNameWithTemplate{Name: node, Template: templateName})
+	}
+	for _, task := range tasks[len(nodes):] {
+		result = append(result, NodeNameWithTemplate{Template: task})
+	}
+	return result
+}
+
+func composeParallelTaskAndNodes(tasks []string, nodes []string) []NodeNameWithTemplate {
+	var result []NodeNameWithTemplate
+	for _, task := range tasks {
+		result = append(result, NodeNameWithTemplate{
+			Name:     "",
+			Template: task,
+		})
+	}
+	for _, node := range nodes {
+		for i, item := range result {
+			if len(item.Name) == 0 && strings.HasPrefix(node, item.Template) {
+				result[i].Name = node
+				break
+			}
+		}
+	}
+	return result
 }
 
 func mappingTemplateType(templateType v1alpha1.TemplateType) (NodeType, error) {
