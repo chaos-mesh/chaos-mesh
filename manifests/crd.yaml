@@ -3953,6 +3953,17 @@ spec:
               - awsRegion
               - ec2Instance
               type: object
+            conditionalTasks:
+              items:
+                properties:
+                  expression:
+                    type: string
+                  task:
+                    type: string
+                required:
+                - task
+                type: object
+              type: array
             deadline:
               format: date-time
               type: string
@@ -5907,8 +5918,31 @@ spec:
               - kind
               - name
               type: object
+            conditionalBranches:
+              description: ConditionalBranches records the evaluation result of each
+                ConditionalTask
+              items:
+                properties:
+                  branches:
+                    items:
+                      properties:
+                        run:
+                          type: boolean
+                        task:
+                          type: string
+                      required:
+                      - run
+                      - task
+                      type: object
+                    type: array
+                  context:
+                    items:
+                      type: string
+                    type: array
+                type: object
+              type: array
             conditions:
-              description: Represents the latest available observations of a worklfow
+              description: Represents the latest available observations of a workflow
                 node's current state.
               items:
                 properties:
