@@ -64,7 +64,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	items := reflect.ValueOf(list).Elem().FieldByName("Items")
 	metaItems := []v1alpha1.MetaObject{}
 	for i := 0; i < items.Len(); i++ {
-		item := items.Index(i).Addr().Interface().(v1alpha1.StatefulObject)
+		item := items.Index(i).Addr().Interface().(v1alpha1.MetaObject)
 		metaItems = append(metaItems, item)
 	}
 

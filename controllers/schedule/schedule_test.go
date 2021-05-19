@@ -274,12 +274,12 @@ var _ = Describe("Schedule", func() {
 	})
 
 	Context(("Schedule workflow"), func() {
-		It(("Should be created and reconciled successfully"), func() {
+		It(("Should forbid concurrent"), func() {
 			key := types.NamespacedName{
 				Name:      "foo10",
 				Namespace: "default",
 			}
-			duration := "1000s"
+			duration := "10000s"
 			schedule := &v1alpha1.Schedule{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "foo10",
@@ -295,12 +295,12 @@ var _ = Describe("Schedule", func() {
 									Name:     "the-entry",
 									Type:     v1alpha1.TypeSerial,
 									Duration: &duration,
-									Tasks:    []string{},
+									Tasks:    nil,
 								},
 							},
 						},
 					},
-					ConcurrencyPolicy: v1alpha1.AllowConcurrent,
+					ConcurrencyPolicy: v1alpha1.ForbidConcurrent,
 					HistoryLimit:      2,
 					Type:              v1alpha1.TypeWorkflow,
 				},
@@ -309,30 +309,32 @@ var _ = Describe("Schedule", func() {
 				},
 			}
 
-			By("creating an API obj")
-			Expect(k8sClient.Create(context.TODO(), schedule)).To(Succeed())
-
-			fetched := &v1alpha1.Schedule{}
-			Expect(k8sClient.Get(context.TODO(), key, fetched)).To(Succeed())
-			Expect(fetched).To(Equal(schedule))
-
-			By("Allowing concurrency and skip deleting running chaos")
+			By("creating a schedule obj")
 			{
+				Expect(k8sClient.Create(context.TODO(), schedule)).To(Succeed())
+			}
+
+			By("disallowing concurrent")
+			{
+				time.Sleep(time.Second * 30)
 				err := wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
 					err = k8sClient.Get(context.TODO(), key, schedule)
 					if err != nil {
 						return false, err
 					}
 					ctrl.Log.Info("active chaos", "size", len(schedule.Status.Active))
-					return len(schedule.Status.Active) >= 4, nil
+					return len(schedule.Status.Active) == 1, nil
 				})
 				Expect(err).ToNot(HaveOccurred())
 			}
 
 			By("deleting the created object")
-			Expect(k8sClient.Delete(context.TODO(), schedule)).To(Succeed())
-			Expect(k8sClient.Get(context.TODO(), key, schedule)).ToNot(Succeed())
+			{
+				Expect(k8sClient.Delete(context.TODO(), schedule)).To(Succeed())
+				Expect(k8sClient.Get(context.TODO(), key, schedule)).ToNot(Succeed())
+			}
 		})
+
 		It(("Should be garbage collected successfully"), func() {
 			key := types.NamespacedName{
 				Name:      "foo11",
@@ -354,7 +356,7 @@ var _ = Describe("Schedule", func() {
 									Name:     "the-entry",
 									Type:     v1alpha1.TypeSerial,
 									Duration: &duration,
-									Tasks:    []string{},
+									Tasks:    nil,
 								},
 							},
 						},

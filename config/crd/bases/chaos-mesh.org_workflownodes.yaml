@@ -1896,6 +1896,32 @@ spec:
               type: object
             type:
               type: string
+            workflow:
+              properties:
+                entry:
+                  type: string
+                templates:
+                  items:
+                    properties:
+                      duration:
+                        type: string
+                      name:
+                        type: string
+                      tasks:
+                        items:
+                          type: string
+                        type: array
+                      template_type:
+                        type: string
+                    required:
+                    - name
+                    - template_type
+                    type: object
+                  type: array
+              required:
+              - entry
+              - templates
+              type: object
             workflow_name:
               type: string
           required:
