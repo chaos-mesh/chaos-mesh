@@ -20,6 +20,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 )
 
 type Objs struct {
@@ -38,7 +39,7 @@ func NewController(mgr ctrl.Manager, client client.Client, reader client.Reader,
 				Object:   obj.Object,
 				Client:   client,
 				Reader:   reader,
-				Recorder: mgr.GetEventRecorderFor("desiredphase"),
+				Recorder: recorder.NewRecorder(mgr, "desiredphase"),
 				Log:      logger.WithName("desiredphase"),
 			})
 		if err != nil {

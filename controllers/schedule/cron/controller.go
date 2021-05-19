@@ -22,7 +22,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/apiserver/pkg/storage/names"
-	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/retry"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -31,6 +30,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/utils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 )
 
 type Reconciler struct {
@@ -38,7 +38,7 @@ type Reconciler struct {
 	Log          logr.Logger
 	ActiveLister *utils.ActiveLister
 
-	Recorder record.EventRecorder
+	Recorder recorder.ChaosRecorder
 }
 
 var t = true
@@ -58,7 +58,10 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	r.Log.Info("calculate schedule time", "schedule", schedule.Spec.Schedule, "lastScheduleTime", schedule.Status.LastScheduleTime, "now", now)
 	missedRun, nextRun, err := getRecentUnmetScheduleTime(schedule, now)
 	if err != nil {
-		r.Recorder.Eventf(schedule, "Warning", "Failed", "Failed to get run time: %s", err.Error())
+		r.Recorder.Event(schedule, recorder.Failed{
+			Activity: "get run time",
+			Err:      err.Error(),
+		})
 		return ctrl.Result{}, nil
 	}
 	if missedRun == nil {
@@ -68,7 +71,9 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	if schedule.Spec.StartingDeadlineSeconds != nil {
 		if missedRun.Add(time.Second * time.Duration(*schedule.Spec.StartingDeadlineSeconds)).Before(now) {
-			r.Recorder.Eventf(schedule, "Warning", "MissSchedule", "Missed scheduled time to start a job: %s", missedRun.Format(time.RFC1123Z))
+			r.Recorder.Event(schedule, recorder.MissSchedule{
+				MissedRun: *missedRun,
+			})
 			return ctrl.Result{}, nil
 		}
 	}
@@ -84,7 +89,10 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	if shouldSpawn && schedule.Spec.ConcurrencyPolicy.IsForbid() {
 		list, err := r.ActiveLister.ListActiveJobs(ctx, schedule)
 		if err != nil {
-			r.Recorder.Eventf(schedule, "Warning", "Failed", "Failed to list active jobs: %s", err.Error())
+			r.Recorder.Event(schedule, recorder.Failed{
+				Activity: "list active jobs",
+				Err:      err.Error(),
+			})
 			return ctrl.Result{}, nil
 		}
 
@@ -93,7 +101,9 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			item := items.Index(i).Addr().Interface().(v1alpha1.InnerObject)
 			if !controller.IsChaosFinished(item, now) {
 				shouldSpawn = false
-				r.Recorder.Eventf(schedule, "Warning", "Forbid", "Forbid spawning new job because: %s is still running", item.GetObjectMeta().Name)
+				r.Recorder.Event(schedule, recorder.ScheduleForbid{
+					RunningName: item.GetObjectMeta().Name,
+				})
 				r.Log.Info("forbid to spawn new chaos", "running", item.GetChaos().Name)
 				break
 			}
@@ -101,11 +111,12 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	if shouldSpawn {
-		r.Recorder.Event(schedule, "Info", "Spawn", "Spawn new chaos")
-
 		newObj, meta, err := schedule.Spec.EmbedChaos.SpawnNewObject(schedule.Spec.Type)
 		if err != nil {
-			r.Recorder.Eventf(schedule, "Warning", "Failed", "Failed to generate new object: %s", err.Error())
+			r.Recorder.Event(schedule, recorder.Failed{
+				Activity: "generate new object",
+				Err:      err.Error(),
+			})
 			return ctrl.Result{}, nil
 		}
 
@@ -127,11 +138,16 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 		err = r.Create(ctx, newObj)
 		if err != nil {
-			r.Recorder.Eventf(schedule, "Warning", "Failed", "Failed to create new object: %s", err.Error())
+			r.Recorder.Event(schedule, recorder.Failed{
+				Activity: "create new object",
+				Err:      err.Error(),
+			})
 			r.Log.Error(err, "fail to create new object", "obj", newObj)
 			return ctrl.Result{}, nil
 		}
-		r.Recorder.Eventf(schedule, "Normal", "Created", "Create new object: %s", meta.GetName())
+		r.Recorder.Event(schedule, recorder.ScheduleSpawn{
+			Name: meta.GetName(),
+		})
 		r.Log.Info("create new object", "namespace", meta.GetNamespace(), "name", meta.GetName())
 
 		lastScheduleTime := now
@@ -149,11 +165,16 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		})
 		if updateError != nil {
 			r.Log.Error(updateError, "fail to update")
-			r.Recorder.Eventf(schedule, "Warning", "Failed", "Failed to update lastScheduleTime: %s", updateError.Error())
+			r.Recorder.Event(schedule, recorder.Failed{
+				Activity: "update lastScheduleTime",
+				Err:      updateError.Error(),
+			})
 			return ctrl.Result{}, nil
 		}
 
-		r.Recorder.Event(schedule, "Normal", "Updated", "Successfully update lastScheduleTime of resource")
+		r.Recorder.Event(schedule, recorder.Updated{
+			Field: "lastScheduleTime",
+		})
 
 		// TODO: make the interval and total time configurable
 		// The following codes ensure the Schedule in cache has the latest lastScheduleTime
@@ -184,7 +205,7 @@ func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger, list
 			client,
 			log.WithName("schedule-cron"),
 			lister,
-			mgr.GetEventRecorderFor("schedule-cron"),
+			recorder.NewRecorder(mgr, "schedule-cron"),
 		})
 	return "schedule-cron", nil
 }

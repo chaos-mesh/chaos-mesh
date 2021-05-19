@@ -23,7 +23,6 @@ import (
 	v1 "k8s.io/api/core/v1"
 	k8sError "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/tools/reference"
 	"k8s.io/client-go/util/retry"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -32,6 +31,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/utils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 )
 
 type Reconciler struct {
@@ -42,7 +42,7 @@ type Reconciler struct {
 
 	ActiveLister *utils.ActiveLister
 
-	Recorder record.EventRecorder
+	Recorder recorder.ChaosRecorder
 }
 
 func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
@@ -59,7 +59,10 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	list, err := r.ActiveLister.ListActiveJobs(ctx, schedule)
 	if err != nil {
-		r.Recorder.Eventf(schedule, "Warning", "Failed", "Failed to list active jobs: %s", err.Error())
+		r.Recorder.Event(schedule, recorder.Failed{
+			Activity: "list active jobs",
+			Err:      err.Error(),
+		})
 		return ctrl.Result{}, nil
 	}
 
@@ -71,7 +74,10 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		ref, err := reference.GetReference(r.scheme, item)
 		if err != nil {
 			r.Log.Error(err, "fail to get reference")
-			r.Recorder.Eventf(schedule, "Warning", "Failed", "Failed to get reference from object: %s", err.Error())
+			r.Recorder.Event(schedule, recorder.Failed{
+				Activity: "get reference from object",
+				Err:      err.Error(),
+			})
 			return ctrl.Result{}, nil
 		}
 
@@ -99,11 +105,16 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	})
 	if updateError != nil {
 		r.Log.Error(updateError, "fail to update")
-		r.Recorder.Eventf(schedule, "Normal", "Failed", "Failed to update active: %s", updateError.Error())
+		r.Recorder.Event(schedule, recorder.Failed{
+			Activity: "update active",
+			Err:      updateError.Error(),
+		})
 		return ctrl.Result{}, nil
 	}
 
-	r.Recorder.Event(schedule, "Normal", "Updated", "Successfully update active of resource")
+	r.Recorder.Event(schedule, recorder.Updated{
+		Field: "active",
+	})
 	return ctrl.Result{}, nil
 }
 
@@ -128,7 +139,7 @@ func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger, objs
 		client,
 		log.WithName("schedule-active"),
 		lister,
-		mgr.GetEventRecorderFor("schedule-active"),
+		recorder.NewRecorder(mgr, "schedule-active"),
 	})
 	return "schedule-active", nil
 }
