@@ -65,6 +65,7 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 	if err != nil {
 		return errors.Wrap(err, fmt.Sprintf("run command %s failed", cmd))
 	}
+	result.Items = append(result.Items, cm.ItemResult{Name: "cat /proc/cgroups", Value: string(out)})
 
 	cmd = "ps"
 	out, err = cm.ExecBypass(ctx, pod, daemon, cmd, c.KubeCli)

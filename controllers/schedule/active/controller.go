@@ -120,7 +120,7 @@ func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger, objs
 
 	for _, obj := range objs.Objs {
 		// TODO: support workflow
-		builder.Owns(obj.Object)
+		builder = builder.Owns(obj.Object)
 	}
 
 	builder.Complete(&Reconciler{
@@ -130,5 +130,5 @@ func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger, objs
 		lister,
 		mgr.GetEventRecorderFor("schedule-active"),
 	})
-	return "schedule", nil
+	return "schedule-active", nil
 }

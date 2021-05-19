@@ -15,7 +15,6 @@ package schedule
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -24,12 +23,14 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-controller-manager/provider"
 	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/utils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/test"
+
 	"github.com/go-logr/logr"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"go.uber.org/fx"
 
-	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
+
 	"k8s.io/client-go/rest"
 	"k8s.io/kubectl/pkg/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -91,7 +92,7 @@ var _ = BeforeSuite(func() {
 				provider.NewLogger,
 				provider.NewAuthCli,
 				provider.NewScheme,
-				NewTestManager,
+				test.NewTestManager,
 			),
 			fx.Supply(config),
 			Module,
@@ -134,39 +135,4 @@ type RunParams struct {
 func Run(params RunParams) error {
 	lister = utils.NewActiveLister(k8sClient, params.Logger)
 	return nil
-}
-
-func NewTestManager(lc fx.Lifecycle, options *ctrl.Options, cfg *rest.Config) (ctrl.Manager, error) {
-	if ccfg.ControllerCfg.QPS > 0 {
-		cfg.QPS = ccfg.ControllerCfg.QPS
-	}
-	if ccfg.ControllerCfg.Burst > 0 {
-		cfg.Burst = ccfg.ControllerCfg.Burst
-	}
-	ch := make(chan struct{})
-
-	mgr, err := ctrl.NewManager(cfg, *options)
-
-	if err != nil {
-		return nil, err
-	}
-	lc.Append(fx.Hook{
-		OnStart: func(context.Context) error {
-			fmt.Println("Starting manager")
-			go func() {
-				if err := mgr.Start(ch); err != nil {
-					fmt.Println(err)
-					setupLog.Error(err, "unable to start manager")
-					os.Exit(1)
-				}
-			}()
-			return nil
-		},
-		OnStop: func(ctx context.Context) error {
-			fmt.Println("Stopping manager")
-			close(ch)
-			return nil
-		},
-	})
-	return mgr, nil
 }

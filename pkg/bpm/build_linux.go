@@ -55,8 +55,21 @@ func (b *ProcessBuilder) Build() *ManagedProcess {
 	log.Info("build command", "command", cmd+" "+strings.Join(args, " "))
 
 	command := exec.CommandContext(b.ctx, cmd, args...)
+	command.Env = b.env
 	command.SysProcAttr = &syscall.SysProcAttr{}
 	command.SysProcAttr.Pdeathsig = syscall.SIGTERM
+
+	if b.stdin != nil {
+		command.Stdin = b.stdin
+	}
+
+	if b.stdout != nil {
+		command.Stdout = b.stdout
+	}
+
+	if b.stderr != nil {
+		command.Stderr = b.stderr
+	}
 
 	return &ManagedProcess{
 		Cmd:        command,

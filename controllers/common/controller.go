@@ -16,11 +16,14 @@ package common
 import (
 	"context"
 	"reflect"
+	"strings"
+	"time"
 
 	"k8s.io/client-go/tools/record"
 
 	"github.com/go-logr/logr"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/util/retry"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -63,6 +66,14 @@ type Reconciler struct {
 
 	Log logr.Logger
 }
+
+type Operation string
+
+const (
+	Apply   Operation = "apply"
+	Recover Operation = "recover"
+	Nothing Operation = ""
+)
 
 // Reconcile the common chaos
 func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
@@ -109,16 +120,35 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		var err error
 		r.Log.Info("iterating record", "record", record, "desiredPhase", desiredPhase)
 
-		// TODO: fix the cache invalidate problem
-		// If the common controller is running, applying and modifying records,
-		// during the same time, the desirephase controller updates the resource several
-		// times. For example, the user update and remove the pause mark.
-		// Then in the next reconcilation, the controller will found the records are not
-		// updated, and apply again.
-		// In this controller, it should at least get the latest records to keep safety.
-		if desiredPhase == v1alpha1.RunningPhase && record.Phase != v1alpha1.Injected {
-			originalPhase := record.Phase
+		// The whole running logic is a cycle:
+		// Not Injected -> Not Injected/* -> Injected -> Injected/* -> Not Injected
+		// Every steps should follow the cycle. For example, if it's in "Not Injected/*" status, and it wants to recover
+		// then it has to apply and then recover, but not recover directly.
 
+		originalPhase := record.Phase
+		operation := Nothing
+		if desiredPhase == v1alpha1.RunningPhase && originalPhase != v1alpha1.Injected {
+			// The originalPhase has three possible situations: Not Injected, Not Injedcted/* or Injected/*
+			// In the first two situations, it should apply, in the last situation, it should recover
+
+			if strings.HasPrefix(string(originalPhase), string(v1alpha1.NotInjected)) {
+				operation = Apply
+			} else {
+				operation = Recover
+			}
+		}
+		if desiredPhase == v1alpha1.StoppedPhase && originalPhase != v1alpha1.NotInjected {
+			// The originalPhase has three possible situations: Not Injedcted/*, Injected, or Injected/*
+			// In the first one situations, it should apply, in the last two situations, it should recover
+
+			if strings.HasPrefix(string(originalPhase), string(v1alpha1.NotInjected)) {
+				operation = Apply
+			} else {
+				operation = Recover
+			}
+		}
+
+		if operation == Apply {
 			r.Log.Info("apply chaos", "id", records[index].Id)
 			record.Phase, err = r.Impl.Apply(context.TODO(), index, records, obj)
 			if record.Phase != originalPhase {
@@ -132,11 +162,10 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 				continue
 			}
 
-			r.Recorder.Eventf(obj, "Normal", "Applied", "Successfully apply chaos for %s", records[index].Id)
-		}
-		if desiredPhase == v1alpha1.StoppedPhase && record.Phase != v1alpha1.NotInjected {
-			originalPhase := record.Phase
-
+			if record.Phase == v1alpha1.Injected {
+				r.Recorder.Eventf(obj, "Normal", "Applied", "Successfully apply chaos for %s", records[index].Id)
+			}
+		} else if operation == Recover {
 			r.Log.Info("recover chaos", "id", records[index].Id)
 			record.Phase, err = r.Impl.Recover(context.TODO(), index, records, obj)
 			if record.Phase != originalPhase {
@@ -150,7 +179,9 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 				continue
 			}
 
-			r.Recorder.Eventf(obj, "Normal", "Recovered", "Successfully recover chaos for %s", records[index].Id)
+			if record.Phase == v1alpha1.NotInjected {
+				r.Recorder.Eventf(obj, "Normal", "Recovered", "Successfully recover chaos for %s", records[index].Id)
+			}
 		}
 	}
 
@@ -184,6 +215,23 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		}
 
 		r.Recorder.Event(obj, "Normal", "Updated", "Successfully update records of resource")
+
+		// TODO: make the interval and total time configurable
+		// The following codes ensure the Schedule in cache has the latest lastScheduleTime
+		ensureLatestError := wait.Poll(100*time.Millisecond, 2*time.Second, func() (bool, error) {
+			obj := r.Object.DeepCopyObject().(InnerObjectWithSelector)
+
+			if err := r.Client.Get(context.TODO(), req.NamespacedName, obj); err != nil {
+				r.Log.Error(err, "unable to get object")
+				return false, err
+			}
+
+			return reflect.DeepEqual(obj.GetStatus().Experiment.Records, records), nil
+		})
+		if ensureLatestError != nil {
+			r.Log.Error(ensureLatestError, "Fail to ensure that the resource in cache has the latest records")
+			return ctrl.Result{}, nil
+		}
 	}
 	return ctrl.Result{}, nil
 }
