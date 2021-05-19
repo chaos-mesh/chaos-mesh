@@ -27,7 +27,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
-	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
 	chaosdaemonclient "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/client"
 	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
@@ -50,7 +49,7 @@ func init() {
 	_ = clientgoscheme.AddToScheme(scheme)
 
 	// Create the cache for the cached read client and registering informers
-	cache, err := cache.New(cfg, cache.Options{Scheme: scheme, Mapper: mapper, Resync: nil, Namespace: ccfg.ControllerCfg.Namespace})
+	cache, err := cache.New(cfg, cache.Options{Scheme: scheme, Mapper: mapper, Resync: nil, Namespace: config.ControllerCfg.Namespace})
 	if err != nil {
 		log.Error(err, "Failed to setup cache")
 

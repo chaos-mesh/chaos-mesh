@@ -44,6 +44,7 @@ func TestReconciler_applyNetem(t *testing.T) {
 	r := endpoint{
 		Context: ctx.Context{
 			Client:        fake.NewFakeClientWithScheme(scheme.Scheme, podObjects...),
+			Reader:        fake.NewFakeClientWithScheme(scheme.Scheme, podObjects...),
 			EventRecorder: &record.FakeRecorder{},
 			Log:           ctrl.Log.WithName("controllers").WithName("NetworkChaos"),
 		},

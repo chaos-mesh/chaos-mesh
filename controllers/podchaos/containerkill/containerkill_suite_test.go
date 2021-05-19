@@ -85,6 +85,7 @@ var _ = Describe("PodChaos", func() {
 		r := endpoint{
 			Context: ctx.Context{
 				Client:        fake.NewFakeClientWithScheme(scheme.Scheme, objs...),
+				Reader:        fake.NewFakeClientWithScheme(scheme.Scheme, objs...),
 				EventRecorder: &record.FakeRecorder{},
 				Log:           ctrl.Log.WithName("controllers").WithName("PodChaos"),
 			},

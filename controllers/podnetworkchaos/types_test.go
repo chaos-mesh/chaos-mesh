@@ -23,7 +23,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes/scheme"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
@@ -91,10 +90,9 @@ func TestHostNetworkOption(t *testing.T) {
 				Spec: v1alpha1.PodNetworkChaosSpec{},
 			}
 
-			var r client.Reader
 			h := &Handler{
 				Client:                  fake.NewFakeClientWithScheme(scheme.Scheme, objs...),
-				Reader:                  r,
+				Reader:                  fake.NewFakeClientWithScheme(scheme.Scheme, objs...),
 				Log:                     zap.New(zap.UseDevMode(true)),
 				AllowHostNetworkTesting: testCase.enableHostNetworkTesting,
 			}
