@@ -34,8 +34,6 @@ const DefaultRPCTimeout = 60 * time.Second
 // RPCTimeout specifies timeout of RPC between controller and chaos-operator
 var RPCTimeout = DefaultRPCTimeout
 
-var log = ctrl.Log.WithName("util")
-
 const ChaosDaemonServerName = "chaos-daemon.chaos-mesh.org"
 
 type TLSRaw struct {
