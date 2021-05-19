@@ -2597,6 +2597,215 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.2.5
   creationTimestamp: null
+  name: podhttpchaos.chaos-mesh.org
+spec:
+  group: chaos-mesh.org
+  names:
+    kind: PodHttpChaos
+    listKind: PodHttpChaosList
+    plural: podhttpchaos
+    singular: podhttpchaos
+  preserveUnknownFields: false
+  scope: Namespaced
+  validation:
+    openAPIV3Schema:
+      description: PodHttpChaos is the Schema for the podhttpchaos API
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          description: PodHttpChaosSpec defines the desired state of PodHttpChaos.
+          properties:
+            proxy_ports:
+              description: ProxyPorts represents the target ports to be proxy of.
+              items:
+                format: int32
+                type: integer
+              type: array
+            rules:
+              description: Rules are a list of injection rule for http request.
+              items:
+                description: PodHttpChaosRule defines the injection rule for http
+                  request.
+                properties:
+                  actions:
+                    description: Actions contains rules to inject target.
+                    properties:
+                      abort:
+                        description: Abort is a rule to abort a http session.
+                        type: boolean
+                      delay:
+                        description: Delay represents the delay of the target request/response.
+                          A duration string is a possibly unsigned sequence of decimal
+                          numbers, each with optional fraction and a unit suffix,
+                          such as "300ms", "2h45m". Valid time units are "ns", "us"
+                          (or "µs"), "ms", "s", "m", "h".
+                        type: string
+                      patch:
+                        description: Patch is a rule to patch some contents in target.
+                        properties:
+                          body:
+                            description: Body is a rule to patch message body of target.
+                            properties:
+                              type:
+                                description: Type represents the patch type, only
+                                  support `JSON` as [merge patch json](https://tools.ietf.org/html/rfc7396)
+                                  currently.
+                                type: string
+                              value:
+                                description: Value is the patch contents.
+                                type: string
+                            required:
+                            - type
+                            - value
+                            type: object
+                          headers:
+                            description: 'Headers is a rule to append http headers
+                              of target. For example: `[["Set-Cookie", "<one cookie>"],
+                              ["Set-Cookie", "<another cookie>"]]`.'
+                            items:
+                              items:
+                                type: string
+                              type: array
+                            type: array
+                          queries:
+                            description: 'Queries is a rule to append uri queries
+                              of target(Request only). For example: `[["foo", "bar"],
+                              ["foo", "unknown"]]`.'
+                            items:
+                              items:
+                                type: string
+                              type: array
+                            type: array
+                        type: object
+                      replace:
+                        description: Replace is a rule to replace some contents in
+                          target.
+                        properties:
+                          body:
+                            description: Body is a rule to replace http message body
+                              in target.
+                            format: byte
+                            type: string
+                          code:
+                            description: Code is a rule to replace http status code
+                              in response.
+                            format: int32
+                            type: integer
+                          headers:
+                            additionalProperties:
+                              type: string
+                            description: Headers is a rule to replace http headers
+                              of target. The key-value pairs represent header name
+                              and header value pairs.
+                            type: object
+                          method:
+                            description: Method is a rule to replace http method in
+                              request.
+                            type: string
+                          path:
+                            description: Path is rule to to replace uri path in http
+                              request.
+                            type: string
+                          queries:
+                            additionalProperties:
+                              type: string
+                            description: 'Queries is a rule to replace uri queries
+                              in http request. For example, with value `{ "foo": "unknown"
+                              }`, the `/?foo=bar` will be altered to `/?foo=unknown`,'
+                            type: object
+                        type: object
+                    type: object
+                  selector:
+                    description: Selector contains the rules to select target.
+                    properties:
+                      code:
+                        description: Code is a rule to select target by http status
+                          code in response.
+                        format: int32
+                        type: integer
+                      method:
+                        description: Method is a rule to select target by http method
+                          in request.
+                        type: string
+                      path:
+                        description: Path is a rule to select target by uri path in
+                          http request.
+                        type: string
+                      port:
+                        description: Port is a rule to select server listening on
+                          specific port.
+                        format: int32
+                        type: integer
+                      request_headers:
+                        additionalProperties:
+                          type: string
+                        description: RequestHeaders is a rule to select target by
+                          http headers in request. The key-value pairs represent header
+                          name and header value pairs.
+                        type: object
+                      response_headers:
+                        additionalProperties:
+                          type: string
+                        description: ResponseHeaders is a rule to select target by
+                          http headers in response. The key-value pairs represent
+                          header name and header value pairs.
+                        type: object
+                    type: object
+                  target:
+                    description: Target is the object to be selected and injected,
+                      <Request | Response>.
+                    type: string
+                required:
+                - actions
+                - selector
+                - target
+                type: object
+              type: array
+          required:
+          - proxy_ports
+          type: object
+        status:
+          description: PodHttpChaosStatus defines the actual state of PodHttpChaos.
+          properties:
+            pid:
+              description: Pid represents a running tproxy process id.
+              format: int64
+              type: integer
+            startTime:
+              description: StartTime represents the start time of a tproxy process.
+              format: int64
+              type: integer
+          type: object
+      type: object
+  version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.2.5
+  creationTimestamp: null
   name: podiochaos.chaos-mesh.org
 spec:
   group: chaos-mesh.org
@@ -3689,7 +3898,7 @@ spec:
         spec:
           description: Spec defines the behavior of a node of workflow
           properties:
-            aws_chaos:
+            awsChaos:
               description: AwsChaosSpec is the content of the specification for an
                 AwsChaos
               properties:
@@ -3744,10 +3953,7 @@ spec:
               - awsRegion
               - ec2Instance
               type: object
-            deadline:
-              format: date-time
-              type: string
-            dns_chaos:
+            dNSChaos:
               description: DNSChaosSpec defines the desired state of DNSChaos
               properties:
                 action:
@@ -3898,7 +4104,10 @@ spec:
               - mode
               - selector
               type: object
-            gcp_chaos:
+            deadline:
+              format: date-time
+              type: string
+            gcpChaos:
               description: GcpChaosSpec is the content of the specification for a
                 GcpChaos
               properties:
@@ -3950,7 +4159,7 @@ spec:
               - project
               - zone
               type: object
-            http_chaos:
+            hTTPChaos:
               properties:
                 action:
                   description: 'Action defines the specific pod chaos action. Supported
@@ -4126,7 +4335,7 @@ spec:
               - mode
               - selector
               type: object
-            io_chaos:
+            ioChaos:
               description: IoChaosSpec defines the desired state of IoChaos
               properties:
                 action:
@@ -4398,7 +4607,7 @@ spec:
               - selector
               - volumePath
               type: object
-            jvm_chaos:
+            jVMChaos:
               description: JVMChaosSpec defines the desired state of JVMChaos
               properties:
                 action:
@@ -4568,7 +4777,7 @@ spec:
               - selector
               - target
               type: object
-            kernel_chaos:
+            kernelChaos:
               description: KernelChaosSpec defines the desired state of KernelChaos
               properties:
                 duration:
@@ -4770,7 +4979,7 @@ spec:
               - mode
               - selector
               type: object
-            network_chaos:
+            networkChaos:
               description: NetworkChaosSpec defines the desired state of NetworkChaos
               properties:
                 action:
@@ -5148,7 +5357,7 @@ spec:
               - mode
               - selector
               type: object
-            pod_chaos:
+            podChaos:
               description: PodChaosSpec defines the attributes that a user creates
                 on a chaos experiment about pods.
               properties:
@@ -5308,10 +5517,10 @@ spec:
               - mode
               - selector
               type: object
-            start_time:
+            startTime:
               format: date-time
               type: string
-            stress_chaos:
+            stressChaos:
               description: StressChaosSpec defines the desired state of StressChaos
               properties:
                 containerName:
@@ -5500,9 +5709,9 @@ spec:
               items:
                 type: string
               type: array
-            template_name:
+            templateName:
               type: string
-            time_chaos:
+            timeChaos:
               description: TimeChaosSpec defines the desired state of TimeChaos
               properties:
                 clockIds:
@@ -5657,18 +5866,18 @@ spec:
               type: object
             type:
               type: string
-            workflow_name:
+            workflowName:
               type: string
           required:
-          - start_time
-          - template_name
+          - startTime
+          - templateName
           - type
-          - workflow_name
+          - workflowName
           type: object
         status:
           description: Most recently observed status of the workflow node
           properties:
-            active_children:
+            activeChildren:
               description: ActiveChildren means the created children node
               items:
                 description: LocalObjectReference contains enough information to let
@@ -5680,7 +5889,7 @@ spec:
                     type: string
                 type: object
               type: array
-            chaos_resource:
+            chaosResource:
               description: ChaosResource refs to the real chaos CR object.
               properties:
                 apiGroup:
@@ -5715,7 +5924,7 @@ spec:
                 - type
                 type: object
               type: array
-            finished_children:
+            finishedChildren:
               description: Children is necessary for representing the order when replicated
                 child template references by parent template.
               items:
@@ -5787,7 +5996,7 @@ spec:
             templates:
               items:
                 properties:
-                  aws_chaos:
+                  awsChaos:
                     description: AwsChaosSpec is the content of the specification
                       for an AwsChaos
                     properties:
@@ -5844,7 +6053,7 @@ spec:
                     - awsRegion
                     - ec2Instance
                     type: object
-                  dns_chaos:
+                  dNSChaos:
                     description: DNSChaosSpec defines the desired state of DNSChaos
                     properties:
                       action:
@@ -6002,7 +6211,7 @@ spec:
                     type: object
                   duration:
                     type: string
-                  gcp_chaos:
+                  gcpChaos:
                     description: GcpChaosSpec is the content of the specification
                       for a GcpChaos
                     properties:
@@ -6058,7 +6267,7 @@ spec:
                     - project
                     - zone
                     type: object
-                  http_chaos:
+                  hTTPChaos:
                     properties:
                       action:
                         description: 'Action defines the specific pod chaos action.
@@ -6238,7 +6447,7 @@ spec:
                     - mode
                     - selector
                     type: object
-                  io_chaos:
+                  ioChaos:
                     description: IoChaosSpec defines the desired state of IoChaos
                     properties:
                       action:
@@ -6516,7 +6725,7 @@ spec:
                     - selector
                     - volumePath
                     type: object
-                  jvm_chaos:
+                  jVMChaos:
                     description: JVMChaosSpec defines the desired state of JVMChaos
                     properties:
                       action:
@@ -6692,7 +6901,7 @@ spec:
                     - selector
                     - target
                     type: object
-                  kernel_chaos:
+                  kernelChaos:
                     description: KernelChaosSpec defines the desired state of KernelChaos
                     properties:
                       duration:
@@ -6904,7 +7113,7 @@ spec:
                     type: object
                   name:
                     type: string
-                  network_chaos:
+                  networkChaos:
                     description: NetworkChaosSpec defines the desired state of NetworkChaos
                     properties:
                       action:
@@ -7292,7 +7501,7 @@ spec:
                     - mode
                     - selector
                     type: object
-                  pod_chaos:
+                  podChaos:
                     description: PodChaosSpec defines the attributes that a user creates
                       on a chaos experiment about pods.
                     properties:
@@ -7455,7 +7664,7 @@ spec:
                     - mode
                     - selector
                     type: object
-                  stress_chaos:
+                  stressChaos:
                     description: StressChaosSpec defines the desired state of StressChaos
                     properties:
                       containerName:
@@ -7652,9 +7861,9 @@ spec:
                     items:
                       type: string
                     type: array
-                  template_type:
+                  templateType:
                     type: string
-                  time_chaos:
+                  timeChaos:
                     description: TimeChaosSpec defines the desired state of TimeChaos
                     properties:
                       clockIds:
@@ -7813,7 +8022,7 @@ spec:
                     type: object
                 required:
                 - name
-                - template_type
+                - templateType
                 type: object
               type: array
           required:
@@ -7823,9 +8032,32 @@ spec:
         status:
           description: Most recently observed status of the workflow
           properties:
-            entry_node:
+            conditions:
+              description: Represents the latest available observations of a workflow's
+                current state.
+              items:
+                properties:
+                  reason:
+                    type: string
+                  startTime:
+                    format: date-time
+                    type: string
+                  status:
+                    type: string
+                  type:
+                    type: string
+                required:
+                - reason
+                - status
+                - type
+                type: object
+              type: array
+            endTime:
+              format: date-time
               type: string
-            start_time:
+            entryNode:
+              type: string
+            startTime:
               format: date-time
               type: string
           type: object

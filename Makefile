@@ -151,7 +151,7 @@ gosec-scan: $(GOBIN)/gosec
 	$(GOENV) $< ./api/... ./controllers/... ./pkg/... || echo "*** sec-scan failed: known-issues ***"
 
 groupimports: $(GOBIN)/goimports
-	$< -w -l -local github.com/chaos-mesh/chaos-mesh .
+	$< -w -l -local github.com/chaos-mesh/chaos-mesh $$(find . -type f -name '*.go' -not -path '**/zz_generated.*.go')
 
 failpoint-enable: $(GOBIN)/failpoint-ctl
 # Converting gofail failpoints...
@@ -169,6 +169,9 @@ tidy: clean
 	@echo "go mod tidy"
 	GO111MODULE=on go mod tidy
 	git diff -U --exit-code go.mod go.sum
+	cd api/v1alpha1; GO111MODULE=on go mod tidy; git diff -U --exit-code go.mod go.sum
+	cd e2e-test; GO111MODULE=on go mod tidy; git diff -U --exit-code go.mod go.sum
+	cd e2e-test/cmd/e2e_helper; GO111MODULE=on go mod tidy; git diff -U --exit-code go.mod go.sum
 
 install.sh:
 	./hack/update_install_script.sh
@@ -373,7 +376,7 @@ yaml: manifests/crd.yaml
 # Generate Go files from Chaos Mesh proto files.
 ifeq ($(IN_DOCKER),1)
 proto:
-	for dir in pkg/chaosdaemon ; do\
+	for dir in pkg/chaosdaemon pkg/chaoskernel ; do\
 		protoc -I $$dir/pb $$dir/pb/*.proto --go_out=plugins=grpc:$$dir/pb --go_out=./$$dir/pb ;\
 	done
 else

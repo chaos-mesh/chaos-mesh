@@ -40,10 +40,10 @@ type WorkflowNode struct {
 }
 
 type WorkflowNodeSpec struct {
-	TemplateName string       `json:"template_name"`
-	WorkflowName string       `json:"workflow_name"`
+	TemplateName string       `json:"templateName"`
+	WorkflowName string       `json:"workflowName"`
 	Type         TemplateType `json:"type"`
-	StartTime    *metav1.Time `json:"start_time"`
+	StartTime    *metav1.Time `json:"startTime"`
 	// +optional
 	Deadline *metav1.Time `json:"deadline,omitempty"`
 	// +optional
@@ -56,15 +56,15 @@ type WorkflowNodeStatus struct {
 
 	// ChaosResource refs to the real chaos CR object.
 	// +optional
-	ChaosResource *corev1.TypedLocalObjectReference `json:"chaos_resource,omitempty"`
+	ChaosResource *corev1.TypedLocalObjectReference `json:"chaosResource,omitempty"`
 
 	// ActiveChildren means the created children node
 	// +optional
-	ActiveChildren []corev1.LocalObjectReference `json:"active_children,omitempty"`
+	ActiveChildren []corev1.LocalObjectReference `json:"activeChildren,omitempty"`
 
 	// Children is necessary for representing the order when replicated child template references by parent template.
 	// +optional
-	FinishedChildren []corev1.LocalObjectReference `json:"finished_children,omitempty"`
+	FinishedChildren []corev1.LocalObjectReference `json:"finishedChildren,omitempty"`
 
 	// Represents the latest available observations of a worklfow node's current state.
 	// +optional
