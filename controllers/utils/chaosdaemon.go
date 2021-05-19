@@ -18,17 +18,63 @@ import (
 
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
+	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
 	chaosdaemonclient "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/client"
 	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
 var log = ctrl.Log.WithName("controller-chaos-daemon-client-utils")
+var cachedClient client.Client
+
+func init() {
+	cfg := ctrl.GetConfigOrDie()
+
+	mapper, err := apiutil.NewDynamicRESTMapper(cfg)
+	if err != nil {
+		log.Error(err, "Failed to get API Group-Resources")
+
+		return
+	}
+
+	scheme := runtime.NewScheme()
+	_ = clientgoscheme.AddToScheme(scheme)
+
+	// Create the cache for the cached read client and registering informers
+	cache, err := cache.New(cfg, cache.Options{Scheme: scheme, Mapper: mapper, Resync: nil, Namespace: ccfg.ControllerCfg.Namespace})
+	if err != nil {
+		log.Error(err, "Failed to setup cache")
+
+		return
+	}
+	// TODO: store the channel and use it to stop
+	go cache.Start(make(chan struct{}))
+
+	c, err := client.New(cfg, client.Options{Scheme: scheme, Mapper: mapper})
+	if err != nil {
+		log.Error(err, "Failed to setup client")
+
+		return
+	}
+
+	cachedClient = &client.DelegatingClient{
+		Reader: &client.DelegatingReader{
+			CacheReader:  cache,
+			ClientReader: c,
+		},
+		Writer:       c,
+		StatusClient: c,
+	}
+}
 
 func FindDaemonIP(ctx context.Context, c client.Reader, pod *v1.Pod) (string, error) {
 	// TODO: use cached client to get the chaos-daemon
