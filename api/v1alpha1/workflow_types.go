@@ -58,6 +58,8 @@ func (in *Workflow) GetObjectMeta() *metav1.ObjectMeta {
 	return &in.ObjectMeta
 }
 
+const KindWorkflow = "Workflow"
+
 type WorkflowSpec struct {
 	Entry     string     `json:"entry"`
 	Templates []Template `json:"templates"`
@@ -127,6 +129,14 @@ type WorkflowList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []Workflow `json:"items"`
+}
+
+func (in *WorkflowList) ListChaos() []*ChaosInstance {
+	res := make([]*ChaosInstance, 0, len(in.Items))
+	for _, item := range in.Items {
+		res = append(res, item.GetChaos())
+	}
+	return res
 }
 
 func init() {

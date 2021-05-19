@@ -107,6 +107,7 @@ type StatefulObject interface {
 	GetObjectMeta() *metav1.ObjectMeta
 }
 
+// +kubebuilder:object:generate=false
 // MetaObject defines a very basic Object that can get meta
 type MetaObject interface {
 	runtime.Object

@@ -120,6 +120,10 @@ func (it *EmbedChaos) SpawnNewObject(templateType TemplateType) (runtime.Object,
 		result := TimeChaos{}
 		result.Spec = *it.TimeChaos
 		return &result, result.GetObjectMeta(), nil
+	case TypeWorkflow:
+		result := Workflow{}
+		result.Spec = *it.Workflow
+		return &result, result.GetObjectMeta(), nil
 
 	default:
 		return nil, nil, fmt.Errorf("unsupported template type %s", templateType)

@@ -91,8 +91,8 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 					continue
 				}
 			} else { // A workflow
-				if schedule.Spec.Type == TypeWorkflow {
-					workflow, ok := obj.(v1alpha1.Workflow)
+				if schedule.Spec.Type == v1alpha1.TypeWorkflow {
+					workflow, ok := obj.(*v1alpha1.Workflow)
 					if ok {
 						finished := controllers.WorkflowConditionEqualsTo(workflow.Status, v1alpha1.WorkflowConditionAccomplished, corev1.ConditionTrue)
 

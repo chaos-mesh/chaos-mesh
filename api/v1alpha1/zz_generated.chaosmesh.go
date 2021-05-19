@@ -1310,4 +1310,10 @@ func init() {
 		ChaosList: &TimeChaosList{},
 	})
 
+	SchemeBuilder.Register(&Workflow{}, &WorkflowList{})
+	all.register(KindWorkflow, &ChaosKind{
+		Chaos:     &Workflow{},
+		ChaosList: &WorkflowList{},
+	})
+
 }

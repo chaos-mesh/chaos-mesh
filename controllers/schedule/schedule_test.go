@@ -272,4 +272,126 @@ var _ = Describe("Schedule", func() {
 			}
 		})
 	})
+
+	Context(("Schedule workflow"), func() {
+		It(("Should be created and reconciled successfully"), func() {
+			key := types.NamespacedName{
+				Name:      "foo10",
+				Namespace: "default",
+			}
+			duration := "1000s"
+			schedule := &v1alpha1.Schedule{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "foo10",
+					Namespace: "default",
+				},
+				Spec: v1alpha1.ScheduleSpec{
+					Schedule: "@every 5s",
+					EmbedChaos: v1alpha1.EmbedChaos{
+						Workflow: &v1alpha1.WorkflowSpec{
+							Entry: "the-entry",
+							Templates: []v1alpha1.Template{
+								{
+									Name:     "the-entry",
+									Type:     v1alpha1.TypeSerial,
+									Duration: &duration,
+									Tasks:    []string{},
+								},
+							},
+						},
+					},
+					ConcurrencyPolicy: v1alpha1.AllowConcurrent,
+					HistoryLimit:      2,
+					Type:              v1alpha1.TypeWorkflow,
+				},
+				Status: v1alpha1.ScheduleStatus{
+					LastScheduleTime: metav1.NewTime(time.Time{}),
+				},
+			}
+
+			By("creating an API obj")
+			Expect(k8sClient.Create(context.TODO(), schedule)).To(Succeed())
+
+			fetched := &v1alpha1.Schedule{}
+			Expect(k8sClient.Get(context.TODO(), key, fetched)).To(Succeed())
+			Expect(fetched).To(Equal(schedule))
+
+			By("Allowing concurrency and skip deleting running chaos")
+			{
+				err := wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
+					err = k8sClient.Get(context.TODO(), key, schedule)
+					if err != nil {
+						return false, err
+					}
+					ctrl.Log.Info("active chaos", "size", len(schedule.Status.Active))
+					return len(schedule.Status.Active) >= 4, nil
+				})
+				Expect(err).ToNot(HaveOccurred())
+			}
+
+			By("deleting the created object")
+			Expect(k8sClient.Delete(context.TODO(), schedule)).To(Succeed())
+			Expect(k8sClient.Get(context.TODO(), key, schedule)).ToNot(Succeed())
+		})
+		It(("Should be garbage collected successfully"), func() {
+			key := types.NamespacedName{
+				Name:      "foo11",
+				Namespace: "default",
+			}
+			duration := "1s"
+			schedule := &v1alpha1.Schedule{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "foo11",
+					Namespace: "default",
+				},
+				Spec: v1alpha1.ScheduleSpec{
+					Schedule: "@every 5s",
+					EmbedChaos: v1alpha1.EmbedChaos{
+						Workflow: &v1alpha1.WorkflowSpec{
+							Entry: "the-entry",
+							Templates: []v1alpha1.Template{
+								{
+									Name:     "the-entry",
+									Type:     v1alpha1.TypeSerial,
+									Duration: &duration,
+									Tasks:    []string{},
+								},
+							},
+						},
+					},
+					ConcurrencyPolicy: v1alpha1.AllowConcurrent,
+					HistoryLimit:      2,
+					Type:              v1alpha1.TypeWorkflow,
+				},
+				Status: v1alpha1.ScheduleStatus{
+					LastScheduleTime: metav1.NewTime(time.Time{}),
+				},
+			}
+
+			By("creating a schedule obj")
+			{
+				Expect(k8sClient.Create(context.TODO(), schedule)).To(Succeed())
+			}
+
+			By("deleting outdated workflow")
+			{
+				time.Sleep(time.Minute * 1)
+				err := wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
+					err = k8sClient.Get(context.TODO(), key, schedule)
+					if err != nil {
+						return false, err
+					}
+					ctrl.Log.Info("active chaos", "size", len(schedule.Status.Active))
+					return len(schedule.Status.Active) == 2, nil
+				})
+				Expect(err).ToNot(HaveOccurred())
+			}
+
+			By("deleting the created object")
+			{
+				Expect(k8sClient.Delete(context.TODO(), schedule)).To(Succeed())
+				Expect(k8sClient.Get(context.TODO(), key, schedule)).ToNot(Succeed())
+			}
+		})
+	})
 })
