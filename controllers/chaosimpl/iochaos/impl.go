@@ -16,6 +16,7 @@ package iochaos
 import (
 	"context"
 	"errors"
+	"strings"
 
 	"go.uber.org/fx"
 
@@ -107,6 +108,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		},
 		Latency:          iochaos.Spec.Delay,
 		AttrOverrideSpec: iochaos.Spec.Attr,
+		MistakeSpec:      iochaos.Spec.Mistake,
 		Source:           m.Source,
 	})
 	generationNumber, err := m.Commit(ctx, iochaos)
@@ -173,6 +175,12 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		if err == podiochaosmanager.ErrPodNotFound || err == podiochaosmanager.ErrPodNotRunning {
 			return v1alpha1.NotInjected, nil
 		}
+
+		if k8sError.IsForbidden(err) {
+			if strings.Contains(err.Error(), "because it is being terminated") {
+				return v1alpha1.NotInjected, nil
+			}
+		}
 		return v1alpha1.Injected, err
 	}
 
@@ -190,7 +198,8 @@ func NewImpl(c client.Client, b *podiochaosmanager.Builder, log logr.Logger) *co
 			Log:     log.WithName("iochaos"),
 			builder: b,
 		},
-		Owns: []runtime.Object{&v1alpha1.PodIoChaos{}},
+		ObjectList: &v1alpha1.IoChaosList{},
+		Controlls:  []runtime.Object{&v1alpha1.PodIoChaos{}},
 	}
 }
 

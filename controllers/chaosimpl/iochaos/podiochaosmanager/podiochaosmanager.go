@@ -27,7 +27,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
 )
 
 var (
@@ -78,12 +77,6 @@ func (m *PodIOManager) Commit(ctx context.Context, owner *v1alpha1.IoChaos) (int
 			}
 
 			return nil
-		}
-
-		err = controller.SetOwnerReference(owner, chaos, m.scheme)
-		if err != nil {
-			m.Log.Error(err, "error while setting owner reference")
-			return err
 		}
 
 		err = m.T.Apply(chaos)
