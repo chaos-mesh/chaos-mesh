@@ -1194,10 +1194,10 @@ spec:
       annotations:
     spec:
       hostNetwork: ${host_network}
-      serviceAccount: chaos-daemon
+      serviceAccountName: chaos-daemon
       hostIPC: true
       hostPID: true
-      priorityClassName:
+      priorityClassName: 
       containers:
         - name: chaos-daemon
           image: ${DOCKER_REGISTRY_PREFIX}/pingcap/chaos-daemon:${VERSION_TAG}
@@ -1266,8 +1266,8 @@ spec:
         app.kubernetes.io/version: v0.9.0
         app.kubernetes.io/component: chaos-dashboard
     spec:
-      serviceAccount: chaos-controller-manager
-      priorityClassName:
+      serviceAccountName: chaos-controller-manager
+      priorityClassName: 
       containers:
         - name: chaos-dashboard
           image: ${DOCKER_REGISTRY_PREFIX}/pingcap/chaos-dashboard:${VERSION_TAG}
@@ -1342,8 +1342,8 @@ spec:
         rollme: "install.sh"
     spec:
       hostNetwork: ${host_network}
-      serviceAccount: chaos-controller-manager
-      priorityClassName:
+      serviceAccountName: chaos-controller-manager
+      priorityClassName: 
       containers:
       - name: chaos-mesh
         image: ${DOCKER_REGISTRY_PREFIX}/pingcap/chaos-mesh:${VERSION_TAG}
@@ -1592,44 +1592,6 @@ webhooks:
       service:
         name: chaos-mesh-controller-manager
         namespace: "chaos-testing"
-        path: /mutate-chaos-mesh-org-v1alpha1-podiochaos
-    failurePolicy: Fail
-    name: mpodiochaos.kb.io
-    timeoutSeconds: 5
-    rules:
-      - apiGroups:
-          - chaos-mesh.org
-        apiVersions:
-          - v1alpha1
-        operations:
-          - CREATE
-          - UPDATE
-        resources:
-          - podiochaos
-  - clientConfig:
-      caBundle: "${CA_BUNDLE}"
-      service:
-        name: chaos-mesh-controller-manager
-        namespace: "chaos-testing"
-        path: /mutate-chaos-mesh-org-v1alpha1-podnetworkchaos
-    failurePolicy: Fail
-    name: mpodnetworkchaos.kb.io
-    timeoutSeconds: 5
-    rules:
-      - apiGroups:
-          - chaos-mesh.org
-        apiVersions:
-          - v1alpha1
-        operations:
-          - CREATE
-          - UPDATE
-        resources:
-          - podnetworkchaos
-  - clientConfig:
-      caBundle: "${CA_BUNDLE}"
-      service:
-        name: chaos-mesh-controller-manager
-        namespace: "chaos-testing"
         path: /mutate-chaos-mesh-org-v1alpha1-dnschaos
     failurePolicy: Fail
     name: mdnschaos.kb.io
@@ -1828,25 +1790,6 @@ webhooks:
           - UPDATE
         resources:
           - gcpchaos
-  - clientConfig:
-      caBundle: "${CA_BUNDLE}"
-      service:
-        name: chaos-mesh-controller-manager
-        namespace: "chaos-testing"
-        path: /validate-chaos-mesh-org-v1alpha1-podnetworkchaos
-    failurePolicy: Fail
-    name: vpodnetworkchaos.kb.io
-    timeoutSeconds: 5
-    rules:
-      - apiGroups:
-          - chaos-mesh.org
-        apiVersions:
-          - v1alpha1
-        operations:
-          - CREATE
-          - UPDATE
-        resources:
-          - podnetworkchaos
   - clientConfig:
       caBundle: "${CA_BUNDLE}"
       service:

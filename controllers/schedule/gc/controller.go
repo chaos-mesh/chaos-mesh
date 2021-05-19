@@ -112,7 +112,7 @@ type Objs struct {
 func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger, objs Objs, scheme *runtime.Scheme, lister *utils.ActiveLister) (types.Controller, error) {
 	builder := ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.Schedule{}).
-		Named("schedule-active")
+		Named("schedule-gc")
 
 	for _, obj := range objs.Objs {
 		// TODO: support workflow

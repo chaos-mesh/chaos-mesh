@@ -48,7 +48,8 @@ const (
 type ChaosCondition struct {
 	Type   ChaosConditionType     `json:"type"`
 	Status corev1.ConditionStatus `json:"status"`
-	Reason string                 `json:"reason"`
+	// +optional
+	Reason string `json:"reason"`
 }
 
 type DesiredPhase string
