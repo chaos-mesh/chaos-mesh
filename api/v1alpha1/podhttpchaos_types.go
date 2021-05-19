@@ -18,7 +18,7 @@ import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 // PodHttpChaosSpec defines the desired state of PodHttpChaos.
 type PodHttpChaosSpec struct {
 	// ProxyPorts represents the target ports to be proxy of.
-	ProxyPorts []int32 `json:"proxy_ports"`
+	ProxyPorts []PodHttpChaosProxyPort `json:"proxy_ports"`
 
 	// Rules are a list of injection rule for http request.
 	// +optional
@@ -42,7 +42,16 @@ type PodHttpChaosStatus struct {
 	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
 }
 
-// PodHttpChaosRule defines the injection rule for http request.
+// PodHttpChaosRule defines the target port for http.
+type PodHttpChaosProxyPort struct {
+	// Source represents the source of current port
+	Source string `json:"source,omitempty"`
+
+	// Port represents the target port to be proxy of.
+	Port int32 `json:"port"`
+}
+
+// PodHttpChaosRule defines the injection rule for http.
 type PodHttpChaosRule struct {
 	// Source represents the source of current rules
 	Source string `json:"source,omitempty"`

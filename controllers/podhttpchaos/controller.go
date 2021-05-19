@@ -132,9 +132,13 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	r.Log.Info("input with", "rules", string(input))
 
-	proxyPorts := make([]uint32, 0, len(obj.Spec.ProxyPorts))
+	proxyPortsMap := make(map[uint32]bool)
+	proxyPorts := make([]uint32, 0)
 	for _, port := range obj.Spec.ProxyPorts {
-		proxyPorts = append(proxyPorts, uint32(port))
+		proxyPortsMap[uint32(port.Port)] = true
+	}
+	for port := range proxyPortsMap {
+		proxyPorts = append(proxyPorts, port)
 	}
 
 	res, err := pbClient.ApplyHttpChaos(ctx, &pb.ApplyHttpChaosRequest{
