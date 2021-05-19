@@ -44,12 +44,11 @@ type WorkflowSpec struct {
 
 type WorkflowStatus struct {
 	// +optional
-	EntryNode *string `json:"entry_node,omitempty"`
+	EntryNode *string `json:"entryNode,omitempty"`
 	// +optional
-	StartTime *metav1.Time `json:"start_time,omitempty"`
+	StartTime *metav1.Time `json:"startTime,omitempty"`
 	// +optional
-	EndTime *metav1.Time `json:"end_time,omitempty"`
-
+	EndTime *metav1.Time `json:"endTime,omitempty"`
 	// Represents the latest available observations of a workflow's current state.
 	// +optional
 	// +patchMergeKey=type
@@ -65,9 +64,10 @@ const (
 )
 
 type WorkflowCondition struct {
-	Type   WorkflowConditionType  `json:"type"`
-	Status corev1.ConditionStatus `json:"status"`
-	Reason string                 `json:"reason"`
+	Type      WorkflowConditionType  `json:"type"`
+	Status    corev1.ConditionStatus `json:"status"`
+	Reason    string                 `json:"reason"`
+	StartTime *metav1.Time           `json:"startTime,omitempty"`
 }
 
 type TemplateType string
@@ -94,7 +94,7 @@ func contains(arr []TemplateType, target TemplateType) bool {
 
 type Template struct {
 	Name     string       `json:"name"`
-	Type     TemplateType `json:"template_type"`
+	Type     TemplateType `json:"templateType"`
 	Duration *string      `json:"duration,omitempty"`
 	Tasks    []string     `json:"tasks,omitempty"`
 	// +optional

@@ -6,16 +6,16 @@ spec:
   entry: the-entry
   templates:
     - name: the-entry
-      template_type: Parallel
+      templateType: Parallel
       duration: 240s
       tasks:
         - workflow-stress-chaos
         - workflow-network-chaos
         - workflow-pod-chaos
     - name: workflow-network-chaos
-      template_type: NetworkChaos
+      templateType: NetworkChaos
       duration: 20s
-      network_chaos:
+      networkChaos:
         direction: to
         action: delay
         mode: all
@@ -27,9 +27,9 @@ spec:
           correlation: "25"
           jitter: "90ms"
     - name: workflow-pod-chaos
-      template_type: PodChaos
+      templateType: PodChaos
       duration: 40s
-      pod_chaos:
+      podChaos:
         action: pod-kill
         mode: one
         selector:
@@ -38,9 +38,9 @@ spec:
         scheduler:
           cron: "@every 10s"
     - name: workflow-stress-chaos
-      template_type: StressChaos
+      templateType: StressChaos
       duration: 20s
-      stress_chaos:
+      stressChaos:
         mode: one
         selector:
           labelSelectors:
