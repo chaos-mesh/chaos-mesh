@@ -150,14 +150,12 @@ func TestSelectPods(t *testing.T) {
 	}
 
 	var (
-		testCfgClusterScoped     = true
-		testCfgTargetNamespace   = ""
-		testCfgAllowedNamespaces = ""
-		testCfgIgnoredNamespaces = ""
+		testCfgClusterScoped   = true
+		testCfgTargetNamespace = ""
 	)
 
 	for _, tc := range tcs {
-		filteredPods, err := SelectPods(context.Background(), c, r, tc.selector, testCfgClusterScoped, testCfgTargetNamespace, testCfgAllowedNamespaces, testCfgIgnoredNamespaces)
+		filteredPods, err := SelectPods(context.Background(), c, r, tc.selector, testCfgClusterScoped, testCfgTargetNamespace, true)
 		g.Expect(err).ShouldNot(HaveOccurred(), tc.name)
 		g.Expect(len(filteredPods)).To(Equal(len(tc.expectedPods)), tc.name)
 	}

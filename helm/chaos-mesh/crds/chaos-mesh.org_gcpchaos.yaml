@@ -43,9 +43,11 @@ spec:
               - node-reset
               - disk-loss
               type: string
-            deviceName:
-              description: The device name of the disk to detach. Needed in disk-loss.
-              type: string
+            deviceNames:
+              description: The device name of disks to detach. Needed in disk-loss.
+              items:
+                type: string
+              type: array
             duration:
               description: Duration represents the duration of the chaos action.
               type: string
@@ -55,19 +57,6 @@ spec:
             project:
               description: Project defines the name of gcp project.
               type: string
-            scheduler:
-              description: Scheduler defines some schedule rules to control the running
-                time of the chaos experiment about time.
-              properties:
-                cron:
-                  description: "Cron defines a cron job rule. \n Some rule examples:
-                    \"0 30 * * * *\" means to \"Every hour on the half hour\" \"@hourly\"
-                    \     means to \"Every hour\" \"@every 1h30m\" means to \"Every
-                    hour thirty\" \n More rule info: https://godoc.org/github.com/robfig/cron"
-                  type: string
-              required:
-              - cron
-              type: object
             secretName:
               description: SecretName defines the name of kubernetes secret. It is
                 used for GCP credentials.
@@ -84,66 +73,34 @@ spec:
         status:
           description: GcpChaosStatus represents the status of a GcpChaos
           properties:
-            attachedDiskString:
-              description: The attached disk info string. Needed in disk-loss.
-              type: string
+            attachedDiskStrings:
+              description: The attached disk info strings. Needed in disk-loss.
+              items:
+                type: string
+              type: array
             experiment:
               description: Experiment records the last experiment state.
               properties:
-                duration:
-                  type: string
-                endTime:
-                  format: date-time
-                  type: string
-                phase:
-                  description: ExperimentPhase is the current status of chaos experiment.
-                  type: string
-                podRecords:
+                containerRecords:
+                  description: Records are used to track the running status
                   items:
-                    description: PodStatus represents information about the status
-                      of a pod in chaos experiment.
                     properties:
-                      action:
+                      id:
                         type: string
-                      hostIP:
+                      phase:
                         type: string
-                      message:
-                        description: A brief CamelCase message indicating details
-                          about the chaos action. e.g. "delete this pod" or "pause
-                          this pod duration 5m"
-                        type: string
-                      name:
-                        type: string
-                      namespace:
-                        type: string
-                      podIP:
+                      selectorKey:
                         type: string
                     required:
-                    - action
-                    - hostIP
-                    - name
-                    - namespace
-                    - podIP
+                    - id
+                    - phase
+                    - selectorKey
                     type: object
                   type: array
-                reason:
-                  type: string
-                startTime:
-                  format: date-time
-                  type: string
-              type: object
-            failedMessage:
-              type: string
-            scheduler:
-              description: ScheduleStatus is the current status of chaos scheduler.
-              properties:
-                nextRecover:
-                  description: Next time when this action will be recovered
-                  format: date-time
-                  type: string
-                nextStart:
-                  description: Next time when this action will be applied again
-                  format: date-time
+                desiredPhase:
+                  enum:
+                  - Run
+                  - Stop
                   type: string
               type: object
           required:

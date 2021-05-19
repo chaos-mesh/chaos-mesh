@@ -82,24 +82,6 @@ var _ = Describe("iochaos_webhook", func() {
 					expect: "",
 				},
 				{
-					name: "only define the Scheduler",
-					chaos: IoChaos{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: metav1.NamespaceDefault,
-							Name:      "foo4",
-						},
-						Spec: IoChaosSpec{
-							Scheduler: &SchedulerSpec{
-								Cron: "@every 10m",
-							},
-						},
-					},
-					execute: func(chaos *IoChaos) error {
-						return chaos.ValidateCreate()
-					},
-					expect: "error",
-				},
-				{
 					name: "only define the Duration",
 					chaos: IoChaos{
 						ObjectMeta: metav1.ObjectMeta{
@@ -113,7 +95,7 @@ var _ = Describe("iochaos_webhook", func() {
 					execute: func(chaos *IoChaos) error {
 						return chaos.ValidateCreate()
 					},
-					expect: "error",
+					expect: "",
 				},
 				{
 					name: "parse the duration and scheduler error",
@@ -123,8 +105,7 @@ var _ = Describe("iochaos_webhook", func() {
 							Name:      "foo6",
 						},
 						Spec: IoChaosSpec{
-							Duration:  &errorDuration,
-							Scheduler: &SchedulerSpec{Cron: "xx"},
+							Duration: &errorDuration,
 						},
 					},
 					execute: func(chaos *IoChaos) error {
@@ -140,8 +121,12 @@ var _ = Describe("iochaos_webhook", func() {
 							Name:      "foo7",
 						},
 						Spec: IoChaosSpec{
-							Value: "0",
-							Mode:  FixedPodMode,
+							ContainerSelector: ContainerSelector{
+								PodSelector: PodSelector{
+									Mode:  FixedPercentPodMode,
+									Value: "0",
+								},
+							},
 						},
 					},
 					execute: func(chaos *IoChaos) error {
@@ -157,8 +142,12 @@ var _ = Describe("iochaos_webhook", func() {
 							Name:      "foo8",
 						},
 						Spec: IoChaosSpec{
-							Value: "num",
-							Mode:  FixedPodMode,
+							ContainerSelector: ContainerSelector{
+								PodSelector: PodSelector{
+									Mode:  FixedPercentPodMode,
+									Value: "num",
+								},
+							},
 						},
 					},
 					execute: func(chaos *IoChaos) error {
@@ -174,8 +163,12 @@ var _ = Describe("iochaos_webhook", func() {
 							Name:      "foo9",
 						},
 						Spec: IoChaosSpec{
-							Value: "0",
-							Mode:  RandomMaxPercentPodMode,
+							ContainerSelector: ContainerSelector{
+								PodSelector: PodSelector{
+									Mode:  RandomMaxPercentPodMode,
+									Value: "0",
+								},
+							},
 						},
 					},
 					execute: func(chaos *IoChaos) error {
@@ -191,8 +184,12 @@ var _ = Describe("iochaos_webhook", func() {
 							Name:      "foo10",
 						},
 						Spec: IoChaosSpec{
-							Value: "num",
-							Mode:  RandomMaxPercentPodMode,
+							ContainerSelector: ContainerSelector{
+								PodSelector: PodSelector{
+									Mode:  RandomMaxPercentPodMode,
+									Value: "num",
+								},
+							},
 						},
 					},
 					execute: func(chaos *IoChaos) error {
@@ -208,8 +205,12 @@ var _ = Describe("iochaos_webhook", func() {
 							Name:      "foo11",
 						},
 						Spec: IoChaosSpec{
-							Value: "101",
-							Mode:  FixedPercentPodMode,
+							ContainerSelector: ContainerSelector{
+								PodSelector: PodSelector{
+									Mode:  FixedPercentPodMode,
+									Value: "101",
+								},
+							},
 						},
 					},
 					execute: func(chaos *IoChaos) error {
@@ -227,23 +228,6 @@ var _ = Describe("iochaos_webhook", func() {
 						Spec: IoChaosSpec{
 							Delay:  "1S",
 							Action: IoLatency,
-						},
-					},
-					execute: func(chaos *IoChaos) error {
-						return chaos.ValidateCreate()
-					},
-					expect: "error",
-				},
-				{
-					name: "parse the scheduler.cron error",
-					chaos: IoChaos{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: metav1.NamespaceDefault,
-							Name:      "foo15",
-						},
-						Spec: IoChaosSpec{
-							Duration:  &duration,
-							Scheduler: &SchedulerSpec{Cron: "xx"},
 						},
 					},
 					execute: func(chaos *IoChaos) error {

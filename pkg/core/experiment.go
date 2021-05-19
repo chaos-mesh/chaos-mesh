@@ -46,6 +46,9 @@ type ExperimentStore interface {
 	// DeleteByFinishTime deletes archives which time difference is greater than the given time from FinishTime.
 	DeleteByFinishTime(context.Context, time.Duration) error
 
+	// DeleteByUIDs deletes archives by the uid list.
+	DeleteByUIDs(context.Context, []string) error
+
 	// DeleteIncompleteExperiments deletes all incomplete experiments.
 	// If the chaos-dashboard was restarted and the experiment is completed during the restart,
 	// which means the experiment would never save the finish_time.
@@ -73,22 +76,6 @@ type ExperimentMeta struct {
 	StartTime  time.Time  `json:"start_time"`
 	FinishTime time.Time  `json:"finish_time"`
 	Archived   bool       `json:"archived"`
-}
-
-// ExperimentYAMLDescription defines the YAML structure of an experiment.
-type ExperimentYAMLDescription struct {
-	APIVersion string                 `json:"apiVersion"`
-	Kind       string                 `json:"kind"`
-	Metadata   ExperimentYAMLMetadata `json:"metadata"`
-	Spec       interface{}            `json:"spec"`
-}
-
-// ExperimentYAMLMetadata defines the metadata of YAMLDescription.
-type ExperimentYAMLMetadata struct {
-	Name        string            `json:"name"`
-	Namespace   string            `json:"namespace"`
-	Labels      map[string]string `json:"labels"`
-	Annotations map[string]string `json:"annotations"`
 }
 
 // ExperimentInfo defines a form data of Experiment from API.
@@ -124,9 +111,9 @@ type SelectorInfo struct {
 	Pods map[string][]string `json:"pods" binding:"PodsValid"`
 }
 
-// ParseSelector parses SelectorInfo to selector.PodSelectorSpec
-func (s *SelectorInfo) ParseSelector() v1alpha1.PodSelectorSpec {
-	selector := v1alpha1.PodSelectorSpec{}
+// ParseSelector parses SelectorInfo to v1alpha1.SelectorSpec
+func (s *SelectorInfo) ParseSelector() v1alpha1.SelectorSpec {
+	selector := v1alpha1.SelectorSpec{}
 	selector.Namespaces = append(selector.Namespaces, s.NamespaceSelectors...)
 
 	selector.LabelSelectors = make(map[string]string)
@@ -157,7 +144,7 @@ func (s *SelectorInfo) ParseSelector() v1alpha1.PodSelectorSpec {
 
 // TargetInfo defines the information of target objects.
 type TargetInfo struct {
-	Kind         string            `json:"kind" binding:"required,oneof=PodChaos NetworkChaos IoChaos KernelChaos TimeChaos StressChaos DNSChaos"`
+	Kind         string            `json:"kind" binding:"required,oneof=PodChaos NetworkChaos IoChaos KernelChaos TimeChaos StressChaos DNSChaos AwsChaos GcpChaos"`
 	PodChaos     *PodChaosInfo     `json:"pod_chaos,omitempty" binding:"RequiredFieldEqual=Kind:PodChaos"`
 	NetworkChaos *NetworkChaosInfo `json:"network_chaos,omitempty" binding:"RequiredFieldEqual=Kind:NetworkChaos"`
 	IOChaos      *IOChaosInfo      `json:"io_chaos,omitempty" binding:"RequiredFieldEqual=Kind:IoChaos"`
@@ -165,18 +152,21 @@ type TargetInfo struct {
 	TimeChaos    *TimeChaosInfo    `json:"time_chaos,omitempty" binding:"RequiredFieldEqual=Kind:TimeChaos"`
 	StressChaos  *StressChaosInfo  `json:"stress_chaos,omitempty" binding:"RequiredFieldEqual=Kind:StressChaos"`
 	DNSChaos     *DNSChaosInfo     `json:"dns_chaos,omitempty" binding:"RequiredFieldEqual=Kind:DNSChaos"`
+	AwsChaos     *AwsChaosInfo     `json:"aws_chaos,omitempty" binding:"RequiredFieldEqual=Kind:AwsChaos"`
+	GcpChaos     *GcpChaosInfo     `json:"gcp_chaos,omitempty" binding:"RequiredFieldEqual=Kind:GcpChaos"`
 }
 
 // SchedulerInfo defines the scheduler information.
 type SchedulerInfo struct {
+	Cron     string `json:"cron" binding:"CronValid"`
 	Duration string `json:"duration" binding:"DurationValid"`
 }
 
 // PodChaosInfo defines the basic information of pod chaos for creating a new PodChaos.
 type PodChaosInfo struct {
-	Action         string   `json:"action" binding:"oneof='' 'pod-kill' 'pod-failure' 'container-kill'"`
-	ContainerNames []string `json:"container_name"`
-	GracePeriod    int64    `json:"grace_period"`
+	Action        string `json:"action" binding:"oneof='' 'pod-kill' 'pod-failure' 'container-kill'"`
+	ContainerName string `json:"container_name"`
+	GracePeriod   int64  `json:"grace_period"`
 }
 
 // NetworkChaosInfo defines the basic information of network chaos for creating a new NetworkChaos.
@@ -194,15 +184,16 @@ type NetworkChaosInfo struct {
 
 // IOChaosInfo defines the basic information of io chaos for creating a new IOChaos.
 type IOChaosInfo struct {
-	Action         string                     `json:"action" binding:"oneof='' 'latency' 'fault' 'attrOverride'"`
-	Delay          string                     `json:"delay"`
-	Errno          uint32                     `json:"errno"`
-	Attr           *v1alpha1.AttrOverrideSpec `json:"attr"`
-	Path           string                     `json:"path"`
-	Percent        int                        `json:"percent"`
-	Methods        []v1alpha1.IoMethod        `json:"methods"`
-	VolumePath     string                     `json:"volume_path"`
-	ContainerNames []string                   `json:"container_name"`
+	Action        string                     `json:"action" binding:"oneof='' 'latency' 'fault' 'attrOverride'"`
+	Delay         string                     `json:"delay"`
+	Errno         uint32                     `json:"errno"`
+	Attr          *v1alpha1.AttrOverrideSpec `json:"attr"`
+	Mistake       *v1alpha1.MistakeSpec      `json:"mistake"`
+	Path          string                     `json:"path"`
+	Percent       int                        `json:"percent"`
+	Methods       []v1alpha1.IoMethod        `json:"methods"`
+	VolumePath    string                     `json:"volume_path"`
+	ContainerName string                     `json:"container_name"`
 }
 
 // KernelChaosInfo defines the basic information of kernel chaos for creating a new KernelChaos.
@@ -221,27 +212,48 @@ type TimeChaosInfo struct {
 type StressChaosInfo struct {
 	Stressors         *v1alpha1.Stressors `json:"stressors"`
 	StressngStressors string              `json:"stressng_stressors,omitempty"`
-	ContainerNames    []string            `json:"container_name,omitempty"`
+	ContainerName     *string             `json:"container_name,omitempty"`
 }
 
 // DNSChaosInfo defines the basic information of dns chaos for creating a new DNSChaos.
 type DNSChaosInfo struct {
 	Action             string   `json:"action" binding:"oneof='error' 'random'"`
 	DomainNamePatterns []string `json:"patterns"`
-	ContainerNames     []string `json:"container_name,omitempty"`
 }
 
-// ParsePodChaos Parse PodChaos JSON string into ExperimentYAMLDescription.
-func (e *Experiment) ParsePodChaos() (ExperimentYAMLDescription, error) {
+// AwsChaosInfo defines the basic information of aws chaos for creating a new AwsChaos.
+type AwsChaosInfo struct {
+	Action      string  `json:"action" binding:"oneof='ec2-stop' 'ec2-restart' 'detach-volume'"`
+	SecretName  *string `json:"secretName,omitempty"`
+	AwsRegion   string  `json:"awsRegion"`
+	Ec2Instance string  `json:"ec2Instance"`
+	EbsVolume   *string `json:"volumeID,omitempty"`
+	DeviceName  *string `json:"deviceName,omitempty"`
+}
+
+// GcpChaosInfo defines the basic information of aws chaos for creating a new AwsChaos.
+type GcpChaosInfo struct {
+	Action      string    `json:"action" binding:"oneof='node-stop' 'node-reset' 'disk-loss'"`
+	SecretName  *string   `json:"secretName,omitempty"`
+	Project     string    `json:"project"`
+	Zone        string    `json:"zone"`
+	Instance    string    `json:"instance"`
+	DeviceNames *[]string `json:"deviceNames,omitempty"`
+}
+
+// ParsePodChaos Parse PodChaos JSON string into KubeObjectDesc.
+func (e *Experiment) ParsePodChaos() (KubeObjectDesc, error) {
 	chaos := &v1alpha1.PodChaos{}
 	if err := json.Unmarshal([]byte(e.Experiment), &chaos); err != nil {
-		return ExperimentYAMLDescription{}, err
+		return KubeObjectDesc{}, err
 	}
 
-	return ExperimentYAMLDescription{
-		APIVersion: chaos.APIVersion,
-		Kind:       chaos.Kind,
-		Metadata: ExperimentYAMLMetadata{
+	return KubeObjectDesc{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: chaos.APIVersion,
+			Kind:       chaos.Kind,
+		},
+		Meta: KubeObjectMeta{
 			Name:        chaos.Name,
 			Namespace:   chaos.Namespace,
 			Labels:      chaos.Labels,
@@ -251,17 +263,19 @@ func (e *Experiment) ParsePodChaos() (ExperimentYAMLDescription, error) {
 	}, nil
 }
 
-// ParseNetworkChaos Parse NetworkChaos JSON string into ExperimentYAMLDescription.
-func (e *Experiment) ParseNetworkChaos() (ExperimentYAMLDescription, error) {
+// ParseNetworkChaos Parse NetworkChaos JSON string into KubeObjectDesc.
+func (e *Experiment) ParseNetworkChaos() (KubeObjectDesc, error) {
 	chaos := &v1alpha1.NetworkChaos{}
 	if err := json.Unmarshal([]byte(e.Experiment), &chaos); err != nil {
-		return ExperimentYAMLDescription{}, err
+		return KubeObjectDesc{}, err
 	}
 
-	return ExperimentYAMLDescription{
-		APIVersion: chaos.APIVersion,
-		Kind:       chaos.Kind,
-		Metadata: ExperimentYAMLMetadata{
+	return KubeObjectDesc{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: chaos.APIVersion,
+			Kind:       chaos.Kind,
+		},
+		Meta: KubeObjectMeta{
 			Name:        chaos.Name,
 			Namespace:   chaos.Namespace,
 			Labels:      chaos.Labels,
@@ -271,17 +285,19 @@ func (e *Experiment) ParseNetworkChaos() (ExperimentYAMLDescription, error) {
 	}, nil
 }
 
-// ParseIOChaos Parse IOChaos JSON string into ExperimentYAMLDescription.
-func (e *Experiment) ParseIOChaos() (ExperimentYAMLDescription, error) {
+// ParseIOChaos Parse IOChaos JSON string into KubeObjectDesc.
+func (e *Experiment) ParseIOChaos() (KubeObjectDesc, error) {
 	chaos := &v1alpha1.IoChaos{}
 	if err := json.Unmarshal([]byte(e.Experiment), &chaos); err != nil {
-		return ExperimentYAMLDescription{}, err
+		return KubeObjectDesc{}, err
 	}
 
-	return ExperimentYAMLDescription{
-		APIVersion: chaos.APIVersion,
-		Kind:       chaos.Kind,
-		Metadata: ExperimentYAMLMetadata{
+	return KubeObjectDesc{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: chaos.APIVersion,
+			Kind:       chaos.Kind,
+		},
+		Meta: KubeObjectMeta{
 			Name:        chaos.Name,
 			Namespace:   chaos.Namespace,
 			Labels:      chaos.Labels,
@@ -291,17 +307,19 @@ func (e *Experiment) ParseIOChaos() (ExperimentYAMLDescription, error) {
 	}, nil
 }
 
-// ParseTimeChaos Parse TimeChaos JSON string into ExperimentYAMLDescription.
-func (e *Experiment) ParseTimeChaos() (ExperimentYAMLDescription, error) {
+// ParseTimeChaos Parse TimeChaos JSON string into KubeObjectDesc.
+func (e *Experiment) ParseTimeChaos() (KubeObjectDesc, error) {
 	chaos := &v1alpha1.TimeChaos{}
 	if err := json.Unmarshal([]byte(e.Experiment), &chaos); err != nil {
-		return ExperimentYAMLDescription{}, err
+		return KubeObjectDesc{}, err
 	}
 
-	return ExperimentYAMLDescription{
-		APIVersion: chaos.APIVersion,
-		Kind:       chaos.Kind,
-		Metadata: ExperimentYAMLMetadata{
+	return KubeObjectDesc{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: chaos.APIVersion,
+			Kind:       chaos.Kind,
+		},
+		Meta: KubeObjectMeta{
 			Name:        chaos.Name,
 			Namespace:   chaos.Namespace,
 			Labels:      chaos.Labels,
@@ -311,17 +329,19 @@ func (e *Experiment) ParseTimeChaos() (ExperimentYAMLDescription, error) {
 	}, nil
 }
 
-// ParseKernelChaos Parse KernelChaos JSON string into ExperimentYAMLDescription.
-func (e *Experiment) ParseKernelChaos() (ExperimentYAMLDescription, error) {
+// ParseKernelChaos Parse KernelChaos JSON string into KubeObjectDesc.
+func (e *Experiment) ParseKernelChaos() (KubeObjectDesc, error) {
 	chaos := &v1alpha1.KernelChaos{}
 	if err := json.Unmarshal([]byte(e.Experiment), &chaos); err != nil {
-		return ExperimentYAMLDescription{}, err
+		return KubeObjectDesc{}, err
 	}
 
-	return ExperimentYAMLDescription{
-		APIVersion: chaos.APIVersion,
-		Kind:       chaos.Kind,
-		Metadata: ExperimentYAMLMetadata{
+	return KubeObjectDesc{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: chaos.APIVersion,
+			Kind:       chaos.Kind,
+		},
+		Meta: KubeObjectMeta{
 			Name:        chaos.Name,
 			Namespace:   chaos.Namespace,
 			Labels:      chaos.Labels,
@@ -331,17 +351,19 @@ func (e *Experiment) ParseKernelChaos() (ExperimentYAMLDescription, error) {
 	}, nil
 }
 
-// ParseStressChaos Parse StressChaos JSON string into ExperimentYAMLDescription.
-func (e *Experiment) ParseStressChaos() (ExperimentYAMLDescription, error) {
+// ParseStressChaos Parse StressChaos JSON string into KubeObjectDesc.
+func (e *Experiment) ParseStressChaos() (KubeObjectDesc, error) {
 	chaos := &v1alpha1.StressChaos{}
 	if err := json.Unmarshal([]byte(e.Experiment), &chaos); err != nil {
-		return ExperimentYAMLDescription{}, err
+		return KubeObjectDesc{}, err
 	}
 
-	return ExperimentYAMLDescription{
-		APIVersion: chaos.APIVersion,
-		Kind:       chaos.Kind,
-		Metadata: ExperimentYAMLMetadata{
+	return KubeObjectDesc{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: chaos.APIVersion,
+			Kind:       chaos.Kind,
+		},
+		Meta: KubeObjectMeta{
 			Name:        chaos.Name,
 			Namespace:   chaos.Namespace,
 			Labels:      chaos.Labels,
@@ -351,17 +373,63 @@ func (e *Experiment) ParseStressChaos() (ExperimentYAMLDescription, error) {
 	}, nil
 }
 
-// ParseDNSChaos Parse DNSChaos JSON string into ExperimentYAMLDescription.
-func (e *Experiment) ParseDNSChaos() (ExperimentYAMLDescription, error) {
+// ParseDNSChaos Parse DNSChaos JSON string into KubeObjectDesc.
+func (e *Experiment) ParseDNSChaos() (KubeObjectDesc, error) {
 	chaos := &v1alpha1.DNSChaos{}
 	if err := json.Unmarshal([]byte(e.Experiment), &chaos); err != nil {
-		return ExperimentYAMLDescription{}, err
+		return KubeObjectDesc{}, err
 	}
 
-	return ExperimentYAMLDescription{
-		APIVersion: chaos.APIVersion,
-		Kind:       chaos.Kind,
-		Metadata: ExperimentYAMLMetadata{
+	return KubeObjectDesc{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: chaos.APIVersion,
+			Kind:       chaos.Kind,
+		},
+		Meta: KubeObjectMeta{
+			Name:        chaos.Name,
+			Namespace:   chaos.Namespace,
+			Labels:      chaos.Labels,
+			Annotations: chaos.Annotations,
+		},
+		Spec: chaos.Spec,
+	}, nil
+}
+
+// ParseAwsChaos Parse AwsChaos JSON string into KubeObjectDesc.
+func (e *Experiment) ParseAwsChaos() (KubeObjectDesc, error) {
+	chaos := &v1alpha1.AwsChaos{}
+	if err := json.Unmarshal([]byte(e.Experiment), &chaos); err != nil {
+		return KubeObjectDesc{}, err
+	}
+
+	return KubeObjectDesc{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: chaos.APIVersion,
+			Kind:       chaos.Kind,
+		},
+		Meta: KubeObjectMeta{
+			Name:        chaos.Name,
+			Namespace:   chaos.Namespace,
+			Labels:      chaos.Labels,
+			Annotations: chaos.Annotations,
+		},
+		Spec: chaos.Spec,
+	}, nil
+}
+
+// ParseGcpChaos Parse GcpChaos JSON string into KubeObjectDesc.
+func (e *Experiment) ParseGcpChaos() (KubeObjectDesc, error) {
+	chaos := &v1alpha1.GcpChaos{}
+	if err := json.Unmarshal([]byte(e.Experiment), &chaos); err != nil {
+		return KubeObjectDesc{}, err
+	}
+
+	return KubeObjectDesc{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: chaos.APIVersion,
+			Kind:       chaos.Kind,
+		},
+		Meta: KubeObjectMeta{
 			Name:        chaos.Name,
 			Namespace:   chaos.Namespace,
 			Labels:      chaos.Labels,

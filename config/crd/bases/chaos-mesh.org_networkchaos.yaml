@@ -421,12 +421,14 @@ spec:
                   - Run
                   - Stop
                   type: string
-                phase:
-                  description: ExperimentPhase is the current status of chaos experiment.
-                  type: string
               type: object
-            failedMessage:
-              type: string
+            instances:
+              additionalProperties:
+                format: int64
+                type: integer
+              description: Instances always specifies podnetworkchaos generation or
+                empty
+              type: object
           required:
           - experiment
           type: object

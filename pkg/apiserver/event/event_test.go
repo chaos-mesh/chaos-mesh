@@ -57,6 +57,10 @@ func (m *MockEventService) ListByUID(context.Context, string) ([]*core.Event, er
 	panic("implement me")
 }
 
+func (m *MockEventService) ListByUIDs(context.Context, []string) ([]*core.Event, error) {
+	panic("implement me")
+}
+
 func (m *MockEventService) ListByFilter(ctx context.Context, filter core.Filter) ([]*core.Event, error) {
 	var res []*core.Event
 	var err error
@@ -151,6 +155,10 @@ func (m *MockEventService) Update(context.Context, *core.Event) error {
 }
 
 func (m *MockEventService) DeleteIncompleteEvents(context.Context) error {
+	panic("implement me")
+}
+
+func (m *MockEventService) DeleteByUIDs(context.Context, []string) error {
 	panic("implement me")
 }
 

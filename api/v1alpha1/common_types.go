@@ -27,8 +27,6 @@ const (
 )
 
 type ChaosStatus struct {
-	FailedMessage string `json:"failedMessage,omitempty"`
-
 	// Experiment records the last experiment state.
 	Experiment ExperimentStatus `json:"experiment"`
 }
@@ -75,6 +73,7 @@ type InnerObject interface {
 	IsPaused() bool
 	GetChaos() *ChaosInstance
 	GetDuration() (*time.Duration, error)
+	DurationExceeded(time.Time) (bool, time.Duration, error)
 	StatefulObject
 }
 

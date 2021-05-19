@@ -95,25 +95,6 @@ var _ = Describe("stresschaos_webhook", func() {
 					expect: "",
 				},
 				{
-					name: "only define the Scheduler",
-					chaos: StressChaos{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: metav1.NamespaceDefault,
-							Name:      "foo4",
-						},
-						Spec: StressChaosSpec{
-							Stressors: stressors,
-							Scheduler: &SchedulerSpec{
-								Cron: "@every 10m",
-							},
-						},
-					},
-					execute: func(chaos *StressChaos) error {
-						return chaos.ValidateCreate()
-					},
-					expect: "error",
-				},
-				{
 					name: "only define the Duration",
 					chaos: StressChaos{
 						ObjectMeta: metav1.ObjectMeta{
@@ -128,7 +109,7 @@ var _ = Describe("stresschaos_webhook", func() {
 					execute: func(chaos *StressChaos) error {
 						return chaos.ValidateCreate()
 					},
-					expect: "error",
+					expect: "",
 				},
 				{
 					name: "missing stressors",

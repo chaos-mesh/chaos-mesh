@@ -57,9 +57,6 @@ var _ = Describe("awschaos_webhook", func() {
 							Name:      "foo4",
 						},
 						Spec: AwsChaosSpec{
-							Scheduler: &SchedulerSpec{
-								Cron: "@every 10m",
-							},
 							Action: Ec2Stop,
 						},
 					},
@@ -106,8 +103,10 @@ var _ = Describe("awschaos_webhook", func() {
 							Name:      "foo7",
 						},
 						Spec: AwsChaosSpec{
-							Action:     DetachVolume,
-							DeviceName: &testDeviceName,
+							Action: DetachVolume,
+							AwsSelector: AwsSelector{
+								DeviceName: &testDeviceName,
+							},
 						},
 					},
 					execute: func(chaos *AwsChaos) error {
@@ -123,8 +122,10 @@ var _ = Describe("awschaos_webhook", func() {
 							Name:      "foo7",
 						},
 						Spec: AwsChaosSpec{
-							Action:    DetachVolume,
-							EbsVolume: &testEbsVolume,
+							Action: DetachVolume,
+							AwsSelector: AwsSelector{
+								EbsVolume: &testEbsVolume,
+							},
 						},
 					},
 					execute: func(chaos *AwsChaos) error {

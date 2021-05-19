@@ -16,6 +16,9 @@ package controllers
 import (
 	"go.uber.org/fx"
 
+	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos"
+	"github.com/chaos-mesh/chaos-mesh/controllers/schedule"
+
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/chaos-mesh/chaos-mesh/controllers/desiredphase"
@@ -36,4 +39,10 @@ var Module = fx.Options(
 			Group:  "controller",
 			Target: desiredphase.NewController,
 		},
-	), chaosimpl.AllImpl)
+		fx.Annotated{
+			Group:  "controller",
+			Target: podnetworkchaos.NewController,
+		},
+	),
+	schedule.Module,
+	chaosimpl.AllImpl)

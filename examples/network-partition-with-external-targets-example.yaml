@@ -15,5 +15,3 @@ spec:
     - "www.google.com"
     - "8.8.0.0/16"
   duration: "10s"
-  scheduler:
-    cron: "@every 15s"

@@ -18,6 +18,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
+	"k8s.io/client-go/rest"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -34,6 +35,10 @@ func init() {
 
 	_ = v1alpha1.AddToScheme(scheme)
 	// +kubebuilder:scaffold:scheme
+}
+
+func NewScheme() *runtime.Scheme {
+	return scheme
 }
 
 func NewOption(logger logr.Logger) *ctrl.Options {
@@ -57,9 +62,11 @@ func NewOption(logger logr.Logger) *ctrl.Options {
 	return &options
 }
 
-func NewManager(options *ctrl.Options) (ctrl.Manager, error) {
-	cfg := ctrl.GetConfigOrDie()
+func NewConfig() *rest.Config {
+	return ctrl.GetConfigOrDie()
+}
 
+func NewManager(options *ctrl.Options, cfg *rest.Config) (ctrl.Manager, error) {
 	if ccfg.ControllerCfg.QPS > 0 {
 		cfg.QPS = ccfg.ControllerCfg.QPS
 	}
@@ -70,8 +77,7 @@ func NewManager(options *ctrl.Options) (ctrl.Manager, error) {
 	return ctrl.NewManager(cfg, *options)
 }
 
-func NewAuthCli() (*authorizationv1.AuthorizationV1Client, error) {
-	cfg := ctrl.GetConfigOrDie()
+func NewAuthCli(cfg *rest.Config) (*authorizationv1.AuthorizationV1Client, error) {
 
 	if ccfg.ControllerCfg.QPS > 0 {
 		cfg.QPS = ccfg.ControllerCfg.QPS

@@ -42,13 +42,22 @@ const (
 	sourceIPSetPostFix = "src"
 )
 
+const (
+	waitForApplySync   v1alpha1.Phase = "Not Injected/Wait"
+	waitForRecoverSync v1alpha1.Phase = "Injected/Wait"
+)
+
 type Impl struct {
 	client.Client
+
+	builder *podnetworkchaosmanager.Builder
 
 	Log logr.Logger
 }
 
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
+	// The only possible phase to get in here is "Not Injected" or "Not Injected/Wait"
+
 	impl.Log.Info("traffic control Apply", "namespace", obj.GetObjectMeta().Namespace, "name", obj.GetObjectMeta().Name)
 	networkchaos, ok := obj.(*v1alpha1.NetworkChaos)
 	if !ok {
@@ -56,19 +65,42 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		impl.Log.Error(err, "chaos is not NetworkChaos", "chaos", obj)
 		return v1alpha1.NotInjected, err
 	}
+	if networkchaos.Status.Instances == nil {
+		networkchaos.Status.Instances = make(map[string]int64)
+	}
+
+	record := records[index]
+	phase := record.Phase
+
+	if phase == waitForApplySync {
+		podnetworkchaos := &v1alpha1.PodNetworkChaos{}
+		err := impl.Client.Get(ctx, controller.ParseNamespacedName(record.Id), podnetworkchaos)
+		if err != nil {
+			return waitForApplySync, err
+		}
+
+		if podnetworkchaos.Status.FailedMessage != "" {
+			return waitForApplySync, errors.New(podnetworkchaos.Status.FailedMessage)
+		}
+
+		if podnetworkchaos.Status.ObservedGeneration >= networkchaos.Status.Instances[record.Id] {
+			return v1alpha1.Injected, nil
+		}
+
+		return waitForApplySync, nil
+	}
 
 	var pod v1.Pod
-	record := records[index]
-	err := impl.Get(ctx, controller.ParseNamespacedName(record.Id), &pod)
+	err := impl.Client.Get(ctx, controller.ParseNamespacedName(record.Id), &pod)
 	if err != nil {
 		// TODO: handle this error
 		return v1alpha1.NotInjected, err
 	}
 
 	source := networkchaos.Namespace + "/" + networkchaos.Name
-	m := podnetworkchaosmanager.WithInit(source, impl.Log, impl.Client, types.NamespacedName{
-		pod.Namespace,
-		pod.Name,
+	m := impl.builder.WithInit(source, types.NamespacedName{
+		Namespace: pod.Namespace,
+		Name:      pod.Name,
 	})
 
 	if record.SelectorKey == "." {
@@ -85,10 +117,14 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 				return v1alpha1.NotInjected, err
 			}
 
-			err = m.Commit(ctx)
+			generationNumber, err := m.Commit(ctx, networkchaos)
 			if err != nil {
 				return v1alpha1.NotInjected, err
 			}
+
+			// modify the custom status
+			networkchaos.Status.Instances[record.Id] = generationNumber
+			return waitForApplySync, nil
 		}
 
 		return v1alpha1.Injected, nil
@@ -106,10 +142,14 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 				return v1alpha1.NotInjected, err
 			}
 
-			err = m.Commit(ctx)
+			generationNumber, err := m.Commit(ctx, networkchaos)
 			if err != nil {
 				return v1alpha1.NotInjected, err
 			}
+
+			// modify the custom status
+			networkchaos.Status.Instances[record.Id] = generationNumber
+			return waitForApplySync, nil
 		}
 
 		return v1alpha1.Injected, nil
@@ -120,16 +160,45 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 }
 
 func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
+	// The only possible phase to get in here is "Injected" or "Injected/Wait"
+
 	networkchaos, ok := obj.(*v1alpha1.NetworkChaos)
 	if !ok {
 		err := errors.New("chaos is not NetworkChaos")
 		impl.Log.Error(err, "chaos is not NetworkChaos", "chaos", obj)
 		return v1alpha1.Injected, err
 	}
+	if networkchaos.Status.Instances == nil {
+		networkchaos.Status.Instances = make(map[string]int64)
+	}
+
+	record := records[index]
+	phase := record.Phase
+
+	if phase == waitForRecoverSync {
+		podnetworkchaos := &v1alpha1.PodNetworkChaos{}
+		err := impl.Client.Get(ctx, controller.ParseNamespacedName(record.Id), podnetworkchaos)
+		if err != nil {
+			// TODO: handle this error
+			if k8sError.IsNotFound(err) {
+				return v1alpha1.NotInjected, nil
+			}
+			return waitForRecoverSync, err
+		}
+
+		if podnetworkchaos.Status.FailedMessage != "" {
+			return waitForRecoverSync, errors.New(podnetworkchaos.Status.FailedMessage)
+		}
+
+		if podnetworkchaos.Status.ObservedGeneration >= networkchaos.Status.Instances[record.Id] {
+			return v1alpha1.NotInjected, nil
+		}
+
+		return waitForRecoverSync, nil
+	}
 
 	var pod v1.Pod
-	record := records[index]
-	err := impl.Get(ctx, controller.ParseNamespacedName(record.Id), &pod)
+	err := impl.Client.Get(ctx, controller.ParseNamespacedName(record.Id), &pod)
 	if err != nil {
 		// TODO: handle this error
 		if k8sError.IsNotFound(err) {
@@ -139,11 +208,12 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	}
 
 	source := networkchaos.Namespace + "/" + networkchaos.Name
-	m := podnetworkchaosmanager.WithInit(source, impl.Log, impl.Client, types.NamespacedName{
-		pod.Namespace,
-		pod.Name,
+	// TODO: use the DI but not construct it manually
+	m := impl.builder.WithInit(source, types.NamespacedName{
+		Namespace: pod.Namespace,
+		Name:      pod.Name,
 	})
-	err = m.Commit(ctx)
+	generationNumber, err := m.Commit(ctx, networkchaos)
 	if err != nil {
 		if err == podnetworkchaosmanager.ErrPodNotFound || err == podnetworkchaosmanager.ErrPodNotRunning {
 			return v1alpha1.NotInjected, nil
@@ -151,7 +221,9 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		return v1alpha1.Injected, err
 	}
 
-	return v1alpha1.NotInjected, nil
+	// Now modify the custom status and phase
+	networkchaos.Status.Instances[record.Id] = generationNumber
+	return waitForRecoverSync, nil
 }
 
 func (impl *Impl) ApplyTc(ctx context.Context, m *podnetworkchaosmanager.PodNetworkManager, targets []*v1alpha1.Record, networkchaos *v1alpha1.NetworkChaos, ipSetPostFix string) error {
@@ -184,7 +256,7 @@ func (impl *Impl) ApplyTc(ctx context.Context, m *podnetworkchaosmanager.PodNetw
 	targetPods := []v1.Pod{}
 	for _, record := range targets {
 		var pod v1.Pod
-		err := impl.Get(ctx, controller.ParseNamespacedName(record.Id), &pod)
+		err := impl.Client.Get(ctx, controller.ParseNamespacedName(record.Id), &pod)
 		if err != nil {
 			// TODO: handle this error
 			return err
@@ -205,9 +277,10 @@ func (impl *Impl) ApplyTc(ctx context.Context, m *podnetworkchaosmanager.PodNetw
 	return nil
 }
 
-func NewImpl(c client.Client, log logr.Logger) *Impl {
+func NewImpl(c client.Client, b *podnetworkchaosmanager.Builder, log logr.Logger) *Impl {
 	return &Impl{
-		Client: c,
-		Log:    log.WithName("trafficcontrol"),
+		Client:  c,
+		builder: b,
+		Log:     log.WithName("trafficcontrol"),
 	}
 }

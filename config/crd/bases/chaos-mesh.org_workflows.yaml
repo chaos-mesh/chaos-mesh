@@ -18,6 +18,8 @@ spec:
     singular: workflow
   preserveUnknownFields: false
   scope: Namespaced
+  subresources:
+    status: {}
   validation:
     openAPIV3Schema:
       properties:
@@ -72,20 +74,6 @@ spec:
                         description: Endpoint indicates the endpoint of the aws server.
                           Just used it in test now.
                         type: string
-                      scheduler:
-                        description: Scheduler defines some schedule rules to control
-                          the running time of the chaos experiment about time.
-                        properties:
-                          cron:
-                            description: "Cron defines a cron job rule. \n Some rule
-                              examples: \"0 30 * * * *\" means to \"Every hour on
-                              the half hour\" \"@hourly\"      means to \"Every hour\"
-                              \"@every 1h30m\" means to \"Every hour thirty\" \n More
-                              rule info: https://godoc.org/github.com/robfig/cron"
-                            type: string
-                        required:
-                        - cron
-                        type: object
                       secretName:
                         description: SecretName defines the name of kubernetes secret.
                         type: string
@@ -108,6 +96,12 @@ spec:
                         - error
                         - random
                         type: string
+                      containerNames:
+                        description: ContainerName indicates the name of affected
+                          container. If not set, all containers will be injected
+                        items:
+                          type: string
+                        type: array
                       duration:
                         description: Duration represents the duration of the chaos
                           action
@@ -134,20 +128,6 @@ spec:
                         items:
                           type: string
                         type: array
-                      scheduler:
-                        description: Scheduler defines some schedule rules to control
-                          the running time of the chaos experiment about network.
-                        properties:
-                          cron:
-                            description: "Cron defines a cron job rule. \n Some rule
-                              examples: \"0 30 * * * *\" means to \"Every hour on
-                              the half hour\" \"@hourly\"      means to \"Every hour\"
-                              \"@every 1h30m\" means to \"Every hour thirty\" \n More
-                              rule info: https://godoc.org/github.com/robfig/cron"
-                            type: string
-                        required:
-                        - cron
-                        type: object
                       selector:
                         description: Selector is used to select pods that are used
                           to inject chaos action.
@@ -245,9 +225,9 @@ spec:
                           / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
                           provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
                           provide a number from 0-100 to specify the percent of pods
-                          the server can do chaos action. If `RandomMaxPercentPodMod`,
-                          provide a number from 0-100 to specify the max percent of
-                          pods to do chaos action
+                          the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                          a number from 0-100 to specify the max percent of pods to
+                          do chaos action
                         type: string
                     required:
                     - action
@@ -269,10 +249,12 @@ spec:
                         - node-reset
                         - disk-loss
                         type: string
-                      deviceName:
-                        description: The device name of the disk to detach. Needed
-                          in disk-loss.
-                        type: string
+                      deviceNames:
+                        description: The device name of disks to detach. Needed in
+                          disk-loss.
+                        items:
+                          type: string
+                        type: array
                       duration:
                         description: Duration represents the duration of the chaos
                           action.
@@ -283,20 +265,6 @@ spec:
                       project:
                         description: Project defines the name of gcp project.
                         type: string
-                      scheduler:
-                        description: Scheduler defines some schedule rules to control
-                          the running time of the chaos experiment about time.
-                        properties:
-                          cron:
-                            description: "Cron defines a cron job rule. \n Some rule
-                              examples: \"0 30 * * * *\" means to \"Every hour on
-                              the half hour\" \"@hourly\"      means to \"Every hour\"
-                              \"@every 1h30m\" means to \"Every hour thirty\" \n More
-                              rule info: https://godoc.org/github.com/robfig/cron"
-                            type: string
-                        required:
-                        - cron
-                        type: object
                       secretName:
                         description: SecretName defines the name of kubernetes secret.
                           It is used for GCP credentials.
@@ -370,20 +338,6 @@ spec:
                         description: 'Percent defines the percentage of injection
                           errors and provides a number from 0-100. default: 100.'
                         type: string
-                      scheduler:
-                        description: Scheduler defines some schedule rules to control
-                          the running time of the chaos experiment about pods.
-                        properties:
-                          cron:
-                            description: "Cron defines a cron job rule. \n Some rule
-                              examples: \"0 30 * * * *\" means to \"Every hour on
-                              the half hour\" \"@hourly\"      means to \"Every hour\"
-                              \"@every 1h30m\" means to \"Every hour thirty\" \n More
-                              rule info: https://godoc.org/github.com/robfig/cron"
-                            type: string
-                        required:
-                        - cron
-                        type: object
                       selector:
                         description: Selector is used to select pods that are used
                           to inject chaos action.
@@ -571,10 +525,12 @@ spec:
                             format: int32
                             type: integer
                         type: object
-                      containerName:
-                        description: ContainerName indicates the target container
-                          to inject iochaos in
-                        type: string
+                      containerNames:
+                        description: ContainerName indicates the name of affected
+                          container. If not set, all containers will be injected
+                        items:
+                          type: string
+                        type: array
                       delay:
                         description: Delay defines the value of I/O chaos action delay.
                           A delay string is a possibly signed sequence of decimal
@@ -643,20 +599,6 @@ spec:
                         description: 'Percent defines the percentage of injection
                           errors and provides a number from 0-100. default: 100.'
                         type: integer
-                      scheduler:
-                        description: Scheduler defines some schedule rules to control
-                          the running time of the chaos experiment about pods.
-                        properties:
-                          cron:
-                            description: "Cron defines a cron job rule. \n Some rule
-                              examples: \"0 30 * * * *\" means to \"Every hour on
-                              the half hour\" \"@hourly\"      means to \"Every hour\"
-                              \"@every 1h30m\" means to \"Every hour thirty\" \n More
-                              rule info: https://godoc.org/github.com/robfig/cron"
-                            type: string
-                        required:
-                        - cron
-                        type: object
                       selector:
                         description: Selector is used to select pods that are used
                           to inject chaos action.
@@ -786,6 +728,12 @@ spec:
                         - tde
                         - tpf
                         type: string
+                      containerNames:
+                        description: ContainerName indicates the name of affected
+                          container. If not set, all containers will be injected
+                        items:
+                          type: string
+                        type: array
                       duration:
                         description: Duration represents the duration of the chaos
                           action
@@ -804,21 +752,13 @@ spec:
                       mode:
                         description: 'Mode defines the mode to run chaos action. Supported
                           mode: one / all / fixed / fixed-percent / random-max-percent'
+                        enum:
+                        - one
+                        - all
+                        - fixed
+                        - fixed-percent
+                        - random-max-percent
                         type: string
-                      scheduler:
-                        description: Scheduler defines some schedule rules to control
-                          the running time of the chaos experiment about time.
-                        properties:
-                          cron:
-                            description: "Cron defines a cron job rule. \n Some rule
-                              examples: \"0 30 * * * *\" means to \"Every hour on
-                              the half hour\" \"@hourly\"      means to \"Every hour\"
-                              \"@every 1h30m\" means to \"Every hour thirty\" \n More
-                              rule info: https://godoc.org/github.com/robfig/cron"
-                            type: string
-                        required:
-                        - cron
-                        type: object
                       selector:
                         description: Selector is used to select pods that are used
                           to inject chaos action.
@@ -933,10 +873,10 @@ spec:
                         description: Value is required when the mode is set to `FixedPodMode`
                           / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
                           provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
-                          provide a number from 0-100 to specify the max % of pods
-                          the server can do chaos action. If `RandomMaxPercentPodMod`,  provide
-                          a number from 0-100 to specify the % of pods to do chaos
-                          action
+                          provide a number from 0-100 to specify the percent of pods
+                          the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                          a number from 0-100 to specify the max percent of pods to
+                          do chaos action
                         type: string
                     required:
                     - action
@@ -1034,20 +974,6 @@ spec:
                         - fixed-percent
                         - random-max-percent
                         type: string
-                      scheduler:
-                        description: Scheduler defines some schedule rules to control
-                          the running time of the chaos experiment about time.
-                        properties:
-                          cron:
-                            description: "Cron defines a cron job rule. \n Some rule
-                              examples: \"0 30 * * * *\" means to \"Every hour on
-                              the half hour\" \"@hourly\"      means to \"Every hour\"
-                              \"@every 1h30m\" means to \"Every hour thirty\" \n More
-                              rule info: https://godoc.org/github.com/robfig/cron"
-                            type: string
-                        required:
-                        - cron
-                        type: object
                       selector:
                         description: Selector is used to select pods that are used
                           to inject chaos action.
@@ -1145,7 +1071,7 @@ spec:
                           / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
                           provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
                           provide a number from 0-100 to specify the percent of pods
-                          the server can do chaos action. If `RandomMaxPercentPodMod`,  provide
+                          the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
                           a number from 0-100 to specify the max percent of pods to
                           do chaos action
                         type: string
@@ -1304,20 +1230,6 @@ spec:
                         - fixed-percent
                         - random-max-percent
                         type: string
-                      scheduler:
-                        description: Scheduler defines some schedule rules to control
-                          the running time of the chaos experiment about network.
-                        properties:
-                          cron:
-                            description: "Cron defines a cron job rule. \n Some rule
-                              examples: \"0 30 * * * *\" means to \"Every hour on
-                              the half hour\" \"@hourly\"      means to \"Every hour\"
-                              \"@every 1h30m\" means to \"Every hour thirty\" \n More
-                              rule info: https://godoc.org/github.com/robfig/cron"
-                            type: string
-                        required:
-                        - cron
-                        type: object
                       selector:
                         description: Selector is used to select pods that are used
                           to inject chaos action.
@@ -1415,17 +1327,19 @@ spec:
                           on netem and network partition action
                         properties:
                           mode:
-                            description: TargetMode defines the target selector mode
+                            description: 'Mode defines the mode to run chaos action.
+                              Supported mode: one / all / fixed / fixed-percent /
+                              random-max-percent'
                             enum:
                             - one
                             - all
                             - fixed
                             - fixed-percent
                             - random-max-percent
-                            - ""
                             type: string
                           selector:
-                            description: TargetSelector defines the target selector
+                            description: Selector is used to select pods that are
+                              used to inject chaos action.
                             properties:
                               annotationSelectors:
                                 additionalProperties:
@@ -1517,12 +1431,12 @@ spec:
                                 type: object
                             type: object
                           value:
-                            description: TargetValue is required when the mode is
-                              set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+                            description: Value is required when the mode is set to
+                              `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
                               If `FixedPodMode`, provide an integer of pods to do
                               chaos action. If `FixedPercentPodMod`, provide a number
                               from 0-100 to specify the percent of pods the server
-                              can do chaos action. If `RandomMaxPercentPodMod`,  provide
+                              can do chaos action. IF `RandomMaxPercentPodMod`,  provide
                               a number from 0-100 to specify the max percent of pods
                               to do chaos action
                             type: string
@@ -1535,7 +1449,7 @@ spec:
                           / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
                           provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
                           provide a number from 0-100 to specify the percent of pods
-                          the server can do chaos action. If `RandomMaxPercentPodMod`,  provide
+                          the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
                           a number from 0-100 to specify the max percent of pods to
                           do chaos action
                         type: string
@@ -1557,10 +1471,12 @@ spec:
                         - pod-failure
                         - container-kill
                         type: string
-                      containerName:
-                        description: ContainerName indicates the name of the container.
-                          Needed in container-kill.
-                        type: string
+                      containerNames:
+                        description: ContainerName indicates the name of affected
+                          container. If not set, all containers will be injected
+                        items:
+                          type: string
+                        type: array
                       duration:
                         description: Duration represents the duration of the chaos
                           action. It is required when the action is `PodFailureAction`.
@@ -1587,20 +1503,6 @@ spec:
                         - fixed-percent
                         - random-max-percent
                         type: string
-                      scheduler:
-                        description: Scheduler defines some schedule rules to control
-                          the running time of the chaos experiment about pods.
-                        properties:
-                          cron:
-                            description: "Cron defines a cron job rule. \n Some rule
-                              examples: \"0 30 * * * *\" means to \"Every hour on
-                              the half hour\" \"@hourly\"      means to \"Every hour\"
-                              \"@every 1h30m\" means to \"Every hour thirty\" \n More
-                              rule info: https://godoc.org/github.com/robfig/cron"
-                            type: string
-                        required:
-                        - cron
-                        type: object
                       selector:
                         description: Selector is used to select pods that are used
                           to inject chaos action.
@@ -1710,10 +1612,12 @@ spec:
                   stress_chaos:
                     description: StressChaosSpec defines the desired state of StressChaos
                     properties:
-                      containerName:
-                        description: ContainerName indicates the target container
-                          to inject stress in
-                        type: string
+                      containerNames:
+                        description: ContainerName indicates the name of affected
+                          container. If not set, all containers will be injected
+                        items:
+                          type: string
+                        type: array
                       duration:
                         description: Duration represents the duration of the chaos
                           action
@@ -1721,21 +1625,13 @@ spec:
                       mode:
                         description: 'Mode defines the mode to run chaos action. Supported
                           mode: one / all / fixed / fixed-percent / random-max-percent'
+                        enum:
+                        - one
+                        - all
+                        - fixed
+                        - fixed-percent
+                        - random-max-percent
                         type: string
-                      scheduler:
-                        description: Scheduler defines some schedule rules to control
-                          the running time of the chaos experiment about time.
-                        properties:
-                          cron:
-                            description: "Cron defines a cron job rule. \n Some rule
-                              examples: \"0 30 * * * *\" means to \"Every hour on
-                              the half hour\" \"@hourly\"      means to \"Every hour\"
-                              \"@every 1h30m\" means to \"Every hour thirty\" \n More
-                              rule info: https://godoc.org/github.com/robfig/cron"
-                            type: string
-                        required:
-                        - cron
-                        type: object
                       selector:
                         description: Selector is used to select pods that are used
                           to inject chaos action.
@@ -1891,10 +1787,10 @@ spec:
                         description: Value is required when the mode is set to `FixedPodMode`
                           / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
                           provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
-                          provide a number from 0-100 to specify the max % of pods
-                          the server can do chaos action. If `RandomMaxPercentPodMod`,  provide
-                          a number from 0-100 to specify the % of pods to do chaos
-                          action
+                          provide a number from 0-100 to specify the percent of pods
+                          the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                          a number from 0-100 to specify the max percent of pods to
+                          do chaos action
                         type: string
                     required:
                     - mode
@@ -1937,20 +1833,6 @@ spec:
                         - fixed-percent
                         - random-max-percent
                         type: string
-                      scheduler:
-                        description: Scheduler defines some schedule rules to control
-                          the running time of the chaos experiment about time.
-                        properties:
-                          cron:
-                            description: "Cron defines a cron job rule. \n Some rule
-                              examples: \"0 30 * * * *\" means to \"Every hour on
-                              the half hour\" \"@hourly\"      means to \"Every hour\"
-                              \"@every 1h30m\" means to \"Every hour thirty\" \n More
-                              rule info: https://godoc.org/github.com/robfig/cron"
-                            type: string
-                        required:
-                        - cron
-                        type: object
                       selector:
                         description: Selector is used to select pods that are used
                           to inject chaos action.
@@ -2054,7 +1936,7 @@ spec:
                           / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
                           provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
                           provide a number from 0-100 to specify the percent of pods
-                          the server can do chaos action. If `RandomMaxPercentPodMod`,  provide
+                          the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
                           a number from 0-100 to specify the max percent of pods to
                           do chaos action
                         type: string
@@ -2076,6 +1958,9 @@ spec:
           description: Most recently observed status of the workflow
           properties:
             entry_node:
+              type: string
+            start_time:
+              format: date-time
               type: string
           type: object
       required:

@@ -96,24 +96,6 @@ var _ = Describe("networkchaos_webhook", func() {
 					expect: "",
 				},
 				{
-					name: "only define the Scheduler",
-					chaos: NetworkChaos{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: metav1.NamespaceDefault,
-							Name:      "foo4",
-						},
-						Spec: NetworkChaosSpec{
-							Scheduler: &SchedulerSpec{
-								Cron: "@every 10m",
-							},
-						},
-					},
-					execute: func(chaos *NetworkChaos) error {
-						return chaos.ValidateCreate()
-					},
-					expect: "error",
-				},
-				{
 					name: "only define the Duration",
 					chaos: NetworkChaos{
 						ObjectMeta: metav1.ObjectMeta{
@@ -127,7 +109,7 @@ var _ = Describe("networkchaos_webhook", func() {
 					execute: func(chaos *NetworkChaos) error {
 						return chaos.ValidateCreate()
 					},
-					expect: "error",
+					expect: "",
 				},
 				{
 					name: "validate the delay",
@@ -265,9 +247,10 @@ var _ = Describe("networkchaos_webhook", func() {
 							Name:      "foo12",
 						},
 						Spec: NetworkChaosSpec{
-							Target: &Target{
-								TargetMode:  FixedPodMode,
-								TargetValue: "0",
+
+							Target: &PodSelector{
+								Mode:  FixedPodMode,
+								Value: "0",
 							},
 						},
 					},

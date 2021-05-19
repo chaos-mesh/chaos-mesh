@@ -9,6 +9,7 @@ resources:
 - bases/chaos-mesh.org_kernelchaos.yaml
 - bases/chaos-mesh.org_stresschaos.yaml
 - bases/chaos-mesh.org_podiochaos.yaml
+- bases/chaos-mesh.org_podhttpchaos.yaml
 - bases/chaos-mesh.org_podnetworkchaos.yaml
 - bases/chaos-mesh.org_httpchaos.yaml
 - bases/chaos-mesh.org_dnschaos.yaml
@@ -17,6 +18,7 @@ resources:
 - bases/chaos-mesh.org_gcpchaos.yaml
 - bases/chaos-mesh.org_workflows.yaml
 - bases/chaos-mesh.org_workflownodes.yaml
+- bases/chaos-mesh.org_schedules.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
 patchesStrategicMerge:

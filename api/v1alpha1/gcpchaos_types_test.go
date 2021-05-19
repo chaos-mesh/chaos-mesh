@@ -15,7 +15,6 @@ package v1alpha1
 
 import (
 	"context"
-	"time"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -78,18 +77,5 @@ var _ = Describe("GcpChaos", func() {
 			Expect(k8sClient.Get(context.TODO(), key, created)).ToNot(Succeed())
 		})
 
-		It("should set next start time successfully", func() {
-			gcpchaos := &GcpChaos{}
-			nTime := time.Now()
-			gcpchaos.SetNextStart(nTime)
-			Expect(gcpchaos.GetNextStart()).To(Equal(nTime))
-		})
-
-		It("should set recover time successfully", func() {
-			gcpchaos := &GcpChaos{}
-			nTime := time.Now()
-			gcpchaos.SetNextRecover(nTime)
-			Expect(gcpchaos.GetNextRecover()).To(Equal(nTime))
-		})
 	})
 })
