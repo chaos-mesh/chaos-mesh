@@ -29,6 +29,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug/iochaos"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug/networkchaos"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug/stresschaos"
+	"github.com/chaos-mesh/chaos-mesh/pkg/grpc"
 )
 
 type DebugOptions struct {
@@ -180,7 +181,7 @@ func (o *DebugOptions) Run(chaosType string, args []string, c *common.ClientSet)
 		return err
 	}
 	var result []common.ChaosResult
-	common.TLSFiles = common.TLSFileConfig{CaCert: o.CaCertFile, Cert: o.CertFile, Key: o.KeyFile}
+	common.TLSFiles = grpc.TLSFile{CaCert: o.CaCertFile, Cert: o.CertFile, Key: o.KeyFile}
 	common.Insecure = o.Insecure
 	for i, chaos := range chaosList {
 		var chaosResult common.ChaosResult
