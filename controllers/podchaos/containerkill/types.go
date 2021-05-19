@@ -144,7 +144,7 @@ func (r *endpoint) Object() v1alpha1.InnerObject {
 func (r *endpoint) KillContainer(ctx context.Context, pod *v1.Pod, containerID string) error {
 	r.Log.Info("Try to kill container", "namespace", pod.Namespace, "podName", pod.Name, "containerID", containerID)
 
-	pbClient, err := utils.NewChaosDaemonClient(ctx, r.Client, pod)
+	pbClient, err := utils.NewChaosDaemonClient(ctx, r.Reader, pod)
 	if err != nil {
 		return err
 	}

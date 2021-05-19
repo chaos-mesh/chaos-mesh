@@ -90,7 +90,7 @@ func (h *Handler) SetIPSets(ctx context.Context, pod *corev1.Pod, chaos *v1alpha
 			Cidrs: ipset.Cidrs,
 		})
 	}
-	return ipset.FlushIPSets(ctx, h.Client, pod, ipsets)
+	return ipset.FlushIPSets(ctx, h.Reader, pod, ipsets)
 }
 
 // SetIptables sets iptables on pod
@@ -114,7 +114,7 @@ func (h *Handler) SetIptables(ctx context.Context, pod *corev1.Pod, chaos *v1alp
 			Target:    "DROP",
 		})
 	}
-	return iptable.SetIptablesChains(ctx, h.Client, pod, chains)
+	return iptable.SetIptablesChains(ctx, h.Reader, pod, chains)
 }
 
 // SetTcs sets traffic control related chaos on pod
@@ -147,7 +147,7 @@ func (h *Handler) SetTcs(ctx context.Context, pod *corev1.Pod, chaos *v1alpha1.P
 	}
 
 	h.Log.Info("setting tcs", "tcs", tcs)
-	return tcpkg.SetTcs(ctx, h.Client, pod, tcs)
+	return tcpkg.SetTcs(ctx, h.Reader, pod, tcs)
 }
 
 // NetemSpec defines the interface to convert to a Netem protobuf

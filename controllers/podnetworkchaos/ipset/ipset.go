@@ -52,7 +52,7 @@ func GenerateIPSetName(networkchaos *v1alpha1.NetworkChaos, namePostFix string) 
 }
 
 // FlushIPSets makes grpc calls to chaosdaemon to save ipset
-func FlushIPSets(ctx context.Context, c client.Client, pod *v1.Pod, ipsets []*pb.IPSet) error {
+func FlushIPSets(ctx context.Context, c client.Reader, pod *v1.Pod, ipsets []*pb.IPSet) error {
 	pbClient, err := utils.NewChaosDaemonClient(ctx, c, pod)
 	if err != nil {
 		return err

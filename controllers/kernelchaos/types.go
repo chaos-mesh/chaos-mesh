@@ -51,6 +51,7 @@ type endpoint struct {
 
 type recoverer struct {
 	kubeclient.Client
+	kubeclient.Reader
 	Log logr.Logger
 }
 
@@ -100,7 +101,7 @@ func (r *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		return err
 	}
 
-	rd := recover.Delegate{Client: r.Client, Log: r.Log, RecoverIntf: &recoverer{r.Client, r.Log}}
+	rd := recover.Delegate{Client: r.Client, Log: r.Log, RecoverIntf: &recoverer{r.Client, r.Reader, r.Log}}
 
 	finalizers, err := rd.CleanFinalizersAndRecover(ctx, chaos, kernelchaos.Finalizers, kernelchaos.Annotations)
 	if err != nil {
@@ -117,7 +118,7 @@ func (r *recoverer) RecoverPod(ctx context.Context, pod *v1.Pod, somechaos v1alp
 	chaos, _ := somechaos.(*v1alpha1.KernelChaos)
 	r.Log.Info("try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
 
-	pbClient, err := utils.NewChaosDaemonClient(ctx, r.Client, pod)
+	pbClient, err := utils.NewChaosDaemonClient(ctx, r.Reader, pod)
 	if err != nil {
 		return err
 	}
@@ -191,7 +192,7 @@ func (r *endpoint) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1alp
 func (r *endpoint) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.KernelChaos) error {
 	r.Log.Info("Try to inject kernel on pod", "namespace", pod.Namespace, "name", pod.Name)
 
-	pbClient, err := utils.NewChaosDaemonClient(ctx, r.Client, pod)
+	pbClient, err := utils.NewChaosDaemonClient(ctx, r.Reader, pod)
 	if err != nil {
 		return err
 	}

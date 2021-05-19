@@ -25,7 +25,7 @@ import (
 )
 
 // SetTcs makes grpc call to chaosdaemon to flush traffic control rules
-func SetTcs(ctx context.Context, c client.Client, pod *v1.Pod, tcs []*pb.Tc) error {
+func SetTcs(ctx context.Context, c client.Reader, pod *v1.Pod, tcs []*pb.Tc) error {
 	pbClient, err := utils.NewChaosDaemonClient(ctx, c, pod)
 	if err != nil {
 		return err

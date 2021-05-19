@@ -34,6 +34,7 @@ import (
 // Handler applys podhttpchaos
 type Handler struct {
 	client.Client
+	client.Reader
 	Log logr.Logger
 }
 
@@ -53,7 +54,7 @@ func (h *Handler) Apply(ctx context.Context, chaos *v1alpha1.PodHttpChaos) (stat
 		return
 	}
 
-	pbClient, err := utils.NewChaosDaemonClient(ctx, h.Client, pod)
+	pbClient, err := utils.NewChaosDaemonClient(ctx, h.Reader, pod)
 	if err != nil {
 		return
 	}

@@ -141,6 +141,7 @@ func main() {
 	// webhook, because we need to get the running result synchronously in io chaos reconciler
 	v1alpha1.RegisterPodIoHandler(&podiochaos.Handler{
 		Client: mgr.GetClient(),
+		Reader: mgr.GetAPIReader(),
 		Log:    ctrl.Log.WithName("handler").WithName("PodIOChaos"),
 	})
 	if err = (&v1alpha1.PodIoChaos{}).SetupWebhookWithManager(mgr); err != nil {
@@ -152,6 +153,7 @@ func main() {
 	// webhook, because we need to get the running result synchronously in http chaos reconciler
 	v1alpha1.RegisterPodHttpHandler(&podhttpchaos.Handler{
 		Client: mgr.GetClient(),
+		Reader: mgr.GetAPIReader(),
 		Log:    ctrl.Log.WithName("handler").WithName("PodHttpChaos"),
 	})
 	if err = (&v1alpha1.PodHttpChaos{}).SetupWebhookWithManager(mgr); err != nil {

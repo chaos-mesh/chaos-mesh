@@ -27,7 +27,7 @@ import (
 )
 
 // SetIptablesChains makes grpc call to chaosdaemon to flush iptable
-func SetIptablesChains(ctx context.Context, c client.Client, pod *v1.Pod, chains []*pb.Chain) error {
+func SetIptablesChains(ctx context.Context, c client.Reader, pod *v1.Pod, chains []*pb.Chain) error {
 	pbClient, err := utils.NewChaosDaemonClient(ctx, c, pod)
 	if err != nil {
 		return err

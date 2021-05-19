@@ -33,6 +33,7 @@ import (
 // Handler applys podiochaos
 type Handler struct {
 	client.Client
+	client.Reader
 	Log logr.Logger
 }
 
@@ -51,7 +52,7 @@ func (h *Handler) Apply(ctx context.Context, chaos *v1alpha1.PodIoChaos) error {
 		return err
 	}
 
-	pbClient, err := utils.NewChaosDaemonClient(ctx, h.Client, pod)
+	pbClient, err := utils.NewChaosDaemonClient(ctx, h.Reader, pod)
 	if err != nil {
 		return err
 	}
