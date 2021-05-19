@@ -139,7 +139,7 @@ func (in *Stressors) Normalize() (string, error) {
 				}
 				stressors += fmt.Sprintf(" --vm-bytes %d", size)
 			} else {
-				stressors += fmt.Sprintf("--vm-bytes %s",
+				stressors += fmt.Sprintf(" --vm-bytes %s",
 					in.MemoryStressor.Size)
 			}
 		}
