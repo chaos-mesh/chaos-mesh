@@ -5,6 +5,7 @@ import DateTime from 'lib/luxon'
 import { Event } from 'api/events.type'
 import NotFound from 'components-mui/NotFound'
 import React from 'react'
+import Space from 'components-mui/Space'
 import T from 'components/T'
 import { iconByKind } from 'lib/byKind'
 import { makeStyles } from '@material-ui/core/styles'
@@ -23,7 +24,6 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: 'center',
     alignItems: 'center',
     height: 72,
-    margin: theme.spacing(3),
     color: 'inherit',
     borderRadius: theme.shape.borderRadius,
     textDecoration: 'none',
@@ -40,7 +40,7 @@ const Recent: React.FC<RecentProps> = ({ events }) => {
   const { lang } = useStoreSelector((state) => state.settings)
 
   return (
-    <Box>
+    <Space vertical>
       {events.reverse().map((d) => (
         <LinkBox
           key={d.id}
@@ -66,7 +66,7 @@ const Recent: React.FC<RecentProps> = ({ events }) => {
         </LinkBox>
       ))}
       {events.length === 0 && <NotFound>{T('events.noEventsFound')}</NotFound>}
-    </Box>
+    </Space>
   )
 }
 

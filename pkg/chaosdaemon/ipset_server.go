@@ -103,7 +103,7 @@ func createIPSet(ctx context.Context, enterNS bool, pid uint32, name string) err
 		output := string(out)
 		if !strings.Contains(output, ipsetExistErr) {
 			log.Error(err, "ipset create error", "command", cmd.String(), "output", output)
-			return err
+			return encodeOutputToError(out, err)
 		}
 
 		processBuilder = bpm.DefaultProcessBuilder("ipset", "flush", name).SetContext(ctx)
@@ -117,7 +117,7 @@ func createIPSet(ctx context.Context, enterNS bool, pid uint32, name string) err
 		out, err := cmd.CombinedOutput()
 		if err != nil {
 			log.Error(err, "ipset flush error", "command", cmd.String(), "output", string(out))
-			return err
+			return encodeOutputToError(out, err)
 		}
 	}
 
@@ -138,7 +138,7 @@ func addCIDRsToIPSet(ctx context.Context, enterNS bool, pid uint32, name string,
 			output := string(out)
 			if !strings.Contains(output, ipExistErr) {
 				log.Error(err, "ipset add error", "command", cmd.String(), "output", output)
-				return err
+				return encodeOutputToError(out, err)
 			}
 		}
 	}
@@ -160,7 +160,7 @@ func renameIPSet(ctx context.Context, enterNS bool, pid uint32, oldName string, 
 		output := string(out)
 		if !strings.Contains(output, ipsetNewNameExistErr) {
 			log.Error(err, "rename ipset failed", "command", cmd.String(), "output", output)
-			return err
+			return encodeOutputToError(out, err)
 		}
 
 		// swap the old ipset and the new ipset if the new ipset already exist.
@@ -174,7 +174,7 @@ func renameIPSet(ctx context.Context, enterNS bool, pid uint32, oldName string, 
 		out, err := cmd.CombinedOutput()
 		if err != nil {
 			log.Error(err, "swap ipset failed", "command", cmd.String(), "output", string(out))
-			return err
+			return encodeOutputToError(out, err)
 		}
 	}
 	return nil

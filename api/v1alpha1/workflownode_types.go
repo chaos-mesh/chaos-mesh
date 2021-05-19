@@ -18,8 +18,14 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const (
+	LabelControlledBy = "chaos-mesh.org/controlled-by"
+	LabelWorkflow     = "chaos-mesh.org/workflow"
+)
+
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:shortName=wfn
+// +kubebuilder:subresource:status
 type WorkflowNode struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -46,10 +52,6 @@ type WorkflowNodeSpec struct {
 }
 
 type WorkflowNodeStatus struct {
-
-	// ExpectedChildrenNum means the expected children to execute
-	// +optional
-	ExpectedChildrenNum *int `json:"expected_children_num,omitempty"`
 
 	// ChaosResource refs to the real chaos CR object.
 	// +optional

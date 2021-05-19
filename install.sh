@@ -904,8 +904,10 @@ metadata:
   namespace: "chaos-testing"
   name: chaos-daemon
   labels:
-    app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: v0.9.0
     app.kubernetes.io/component: chaos-daemon
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
@@ -915,8 +917,10 @@ metadata:
   namespace: "chaos-testing"
   name: chaos-controller-manager
   labels:
-    app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: v0.9.0
     app.kubernetes.io/component: controller-manager
 ---
 # Source: chaos-mesh/templates/secrets-configuration.yaml
@@ -926,8 +930,10 @@ metadata:
   name: chaos-mesh-webhook-certs
   namespace: "chaos-testing"
   labels:
-    app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: v0.9.0
     app.kubernetes.io/component: webhook-secret
 type: Opaque
 data:
@@ -942,8 +948,10 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: chaos-mesh-chaos-controller-manager-target-namespace
   labels:
-    app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: v0.9.0
     app.kubernetes.io/component: controller-manager
 rules:
   - apiGroups: [ "" ]
@@ -973,8 +981,10 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: chaos-mesh-chaos-controller-manager-cluster-level
   labels:
-    app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: v0.9.0
     app.kubernetes.io/component: controller-manager
 rules:
   - apiGroups: [ "" ]
@@ -995,8 +1005,10 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: chaos-mesh-chaos-controller-manager-cluster-level
   labels:
-    app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: v0.9.0
     app.kubernetes.io/component: controller-manager
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -1014,8 +1026,10 @@ metadata:
   name: chaos-mesh-chaos-controller-manager-target-namespace
   namespace: "chaos-testing"
   labels:
-    app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: v0.9.0
     app.kubernetes.io/component: controller-manager
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -1033,8 +1047,10 @@ metadata:
   name: chaos-mesh-chaos-controller-manager-control-plane
   namespace: "chaos-testing"
   labels:
-    app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: v0.9.0
     app.kubernetes.io/component: controller-manager
 rules:
   - apiGroups: [ "" ]
@@ -1053,8 +1069,10 @@ metadata:
   name: chaos-mesh-chaos-controller-manager-control-plane
   namespace: "chaos-testing"
   labels:
-    app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: v0.9.0
     app.kubernetes.io/component: controller-manager
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -1072,8 +1090,10 @@ metadata:
   namespace: "chaos-testing"
   name: chaos-daemon
   labels:
-    app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: v0.9.0
     app.kubernetes.io/component: chaos-daemon
 spec:
   clusterIP: None
@@ -1087,8 +1107,9 @@ spec:
       targetPort: http
       protocol: TCP
   selector:
-    app.kubernetes.io/component: chaos-daemon
+    app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/component: chaos-daemon
 ---
 # Source: chaos-mesh/templates/chaos-dashboard-deployment.yaml
 apiVersion: v1
@@ -1119,8 +1140,10 @@ metadata:
   namespace: "chaos-testing"
   name: chaos-mesh-controller-manager
   labels:
-    app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: v0.9.0
     app.kubernetes.io/component: controller-manager
 spec:
   type: ClusterIP
@@ -1138,8 +1161,9 @@ spec:
       protocol: TCP
       name: webhook
   selector:
-    app.kubernetes.io/component: controller-manager
+    app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/component: controller-manager
 ---
 # Source: chaos-mesh/templates/chaos-daemon-daemonset.yaml
 apiVersion: apps/v1
@@ -1148,9 +1172,11 @@ metadata:
   namespace: "chaos-testing"
   name: chaos-daemon
   labels:
-    app.kubernetes.io/name: chaos-mesh
-    app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/component: chaos-daemon
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: v0.9.0
 spec:
   selector:
     matchLabels:
@@ -1160,13 +1186,15 @@ spec:
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: chaos-mesh
         app.kubernetes.io/instance: chaos-mesh
+        app.kubernetes.io/name: chaos-mesh
+        app.kubernetes.io/part-of: chaos-mesh
+        app.kubernetes.io/version: v0.9.0
         app.kubernetes.io/component: chaos-daemon
       annotations:
     spec:
       hostNetwork: ${host_network}
-      serviceAccount: chaos-daemon
+      serviceAccountName: chaos-daemon
       hostIPC: true
       hostPID: true
       priorityClassName: 
@@ -1217,8 +1245,10 @@ metadata:
   namespace: "chaos-testing"
   name: chaos-dashboard
   labels:
-    app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: v0.9.0
     app.kubernetes.io/component: chaos-dashboard
 spec:
   replicas: 1
@@ -1230,11 +1260,13 @@ spec:
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: chaos-mesh
         app.kubernetes.io/instance: chaos-mesh
+        app.kubernetes.io/name: chaos-mesh
+        app.kubernetes.io/part-of: chaos-mesh
+        app.kubernetes.io/version: v0.9.0
         app.kubernetes.io/component: chaos-dashboard
     spec:
-      serviceAccount: chaos-controller-manager
+      serviceAccountName: chaos-controller-manager
       priorityClassName: 
       containers:
         - name: chaos-dashboard
@@ -1286,8 +1318,10 @@ metadata:
   namespace: "chaos-testing"
   name: chaos-controller-manager
   labels:
-    app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: v0.9.0
     app.kubernetes.io/component: controller-manager
 spec:
   replicas: 1
@@ -1299,14 +1333,16 @@ spec:
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: chaos-mesh
         app.kubernetes.io/instance: chaos-mesh
+        app.kubernetes.io/name: chaos-mesh
+        app.kubernetes.io/part-of: chaos-mesh
+        app.kubernetes.io/version: v0.9.0
         app.kubernetes.io/component: controller-manager
       annotations:
         rollme: "install.sh"
     spec:
       hostNetwork: ${host_network}
-      serviceAccount: chaos-controller-manager
+      serviceAccountName: chaos-controller-manager
       priorityClassName: 
       containers:
       - name: chaos-mesh
@@ -1376,8 +1412,10 @@ kind: MutatingWebhookConfiguration
 metadata:
   name: chaos-mesh-mutation
   labels:
-    app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: v0.9.0
     app.kubernetes.io/component: admission-webhook
 webhooks:
   - name: admission-webhook.chaos-mesh.org
@@ -1573,6 +1611,25 @@ webhooks:
       service:
         name: chaos-mesh-controller-manager
         namespace: "chaos-testing"
+        path: /mutate-chaos-mesh-org-v1alpha1-podhttpchaos
+    failurePolicy: Fail
+    name: mpodhttpchaos.kb.io
+    timeoutSeconds: 5
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - podhttpchaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
         path: /mutate-chaos-mesh-org-v1alpha1-podnetworkchaos
     failurePolicy: Fail
     name: mpodnetworkchaos.kb.io
@@ -1632,8 +1689,10 @@ kind: ValidatingWebhookConfiguration
 metadata:
   name: chaos-mesh-validation
   labels:
-    app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: v0.9.0
     app.kubernetes.io/component: admission-webhook
 webhooks:
   - clientConfig:
@@ -1852,8 +1911,10 @@ kind: ValidatingWebhookConfiguration
 metadata:
   name: validate-auth
   labels:
-    app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: v0.9.0
     app.kubernetes.io/component: admission-webhook
 webhooks:
   - clientConfig:

@@ -4,6 +4,9 @@
 nameOverride: ""
 fullnameOverride: ""
 
+# Custom labels to add
+customLabels: {}
+
 # clusterScoped is whether chaos-mesh should manage kubernetes cluster wide chaos
 # Also see rbac.create and controllerManager.serviceAccount
 clusterScoped: true
@@ -132,7 +135,7 @@ chaosDaemon:
   affinity: {}
 
 dashboard:
-  create: false
+  create: true
   hostNetwork: false
 
   replicaCount: 1
@@ -262,6 +265,8 @@ dnsServer:
 
   nodeSelector: {}
 
+  podAnnotations: {}
+
   runtime: docker
 
   name: chaos-mesh-dns-server
@@ -351,6 +356,7 @@ webhook:
     - awschaos
     - gcpchaos
     - podiochaos
+    - podhttpchaos
     - podnetworkchaos
     - dnschaos
     - jvmchaos

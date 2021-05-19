@@ -26,7 +26,6 @@ import (
 	"google.golang.org/grpc/credentials"
 
 	"google.golang.org/grpc"
-	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 // DefaultRPCTimeout specifies default timeout of RPC between controller and chaos-operator

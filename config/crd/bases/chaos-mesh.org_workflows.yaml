@@ -18,6 +18,8 @@ spec:
     singular: workflow
   preserveUnknownFields: false
   scope: Namespaced
+  subresources:
+    status: {}
   validation:
     openAPIV3Schema:
       properties:
@@ -269,10 +271,12 @@ spec:
                         - node-reset
                         - disk-loss
                         type: string
-                      deviceName:
-                        description: The device name of the disk to detach. Needed
-                          in disk-loss.
-                        type: string
+                      deviceNames:
+                        description: The device name of disks to detach. Needed in
+                          disk-loss.
+                        items:
+                          type: string
+                        type: array
                       duration:
                         description: Duration represents the duration of the chaos
                           action.
@@ -2076,6 +2080,9 @@ spec:
           description: Most recently observed status of the workflow
           properties:
             entry_node:
+              type: string
+            start_time:
+              format: date-time
               type: string
           type: object
       required:

@@ -38,7 +38,7 @@ const Other = () => {
         </TextField>
       </Box>
 
-      {/* Langauge */}
+      {/* Language */}
       <Box mb={3}>
         <TextField
           variant="outlined"
