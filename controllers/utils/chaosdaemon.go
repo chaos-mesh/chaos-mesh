@@ -86,6 +86,9 @@ func FindDaemonIP(ctx context.Context, c client.Reader, pod *v1.Pod) (string, er
 	nodeName := pod.Spec.NodeName
 	log.Info("Creating client to chaos-daemon", "node", nodeName)
 
+	if cachedClient != nil {
+		c = cachedClient
+	}
 	ns := config.ControllerCfg.Namespace
 	var endpoints v1.Endpoints
 	err := c.Get(ctx, types.NamespacedName{
