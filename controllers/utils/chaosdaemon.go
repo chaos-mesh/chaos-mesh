@@ -56,7 +56,12 @@ func init() {
 		return
 	}
 	// TODO: store the channel and use it to stop
-	go cache.Start(make(chan struct{}))
+	go func() {
+		err := cache.Start(make(chan struct{}))
+		if err != nil {
+			log.Error(err, "Failed to start cache")
+		}
+	}()
 
 	c, err := client.New(cfg, client.Options{Scheme: scheme, Mapper: mapper})
 	if err != nil {
