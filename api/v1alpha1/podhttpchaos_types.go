@@ -44,6 +44,9 @@ type PodHttpChaosStatus struct {
 
 // PodHttpChaosRule defines the injection rule for http request.
 type PodHttpChaosRule struct {
+	// Source represents the source of current rules
+	Source string `json:"source,omitempty"`
+
 	// Target is the object to be selected and injected, <Request|Response>.
 	Target PodHttpChaosTarget `json:"target"`
 

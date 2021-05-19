@@ -2442,6 +2442,9 @@ spec:
                           header name and header value pairs.
                         type: object
                     type: object
+                  source:
+                    description: Source represents the source of current rules
+                    type: string
                   target:
                     description: Target is the object to be selected and injected,
                       <Request|Response>.
