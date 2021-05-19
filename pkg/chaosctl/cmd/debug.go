@@ -180,7 +180,7 @@ func (o *DebugOptions) Run(chaosType string, args []string, c *common.ClientSet)
 	if err != nil {
 		return err
 	}
-  
+
 	var result []common.ChaosResult
 	common.TLSFiles = common.TLSFileConfig{CaCert: o.CaCertFile, Cert: o.CertFile, Key: o.KeyFile}
 	common.Insecure = o.Insecure

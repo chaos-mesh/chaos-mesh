@@ -21,6 +21,7 @@ import (
 	"k8s.io/utils/pointer"
 
 	. "github.com/onsi/ginkgo"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -139,8 +140,29 @@ func TestcaseIODelayDurationForATimePauseAndUnPause(
 	err = cli.Create(ctx, ioChaos)
 	framework.ExpectNoError(err, "error occurs while applying io chaos")
 
+	chaosKey := types.NamespacedName{
+		Namespace: ns,
+		Name:      "io-chaos",
+	}
+
 	By("waiting for assertion io chaos")
 	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
+		chaos := &v1alpha1.IoChaos{}
+		err = cli.Get(ctx, chaosKey, chaos)
+		framework.ExpectNoError(err, "get io chaos error")
+
+		for _, c := range chaos.GetStatus().Conditions {
+			if c.Type == v1alpha1.ConditionAllInjected {
+				if c.Status != corev1.ConditionTrue {
+					return false, nil
+				}
+			} else if c.Type == v1alpha1.ConditionSelected {
+				if c.Status != corev1.ConditionTrue {
+					return false, nil
+				}
+			}
+		}
+
 		dur, _ := getPodIODelay(c, port)
 
 		ms := dur.Milliseconds()
@@ -153,11 +175,6 @@ func TestcaseIODelayDurationForATimePauseAndUnPause(
 	})
 	framework.ExpectNoError(err, "io chaos doesn't work as expected")
 
-	chaosKey := types.NamespacedName{
-		Namespace: ns,
-		Name:      "io-chaos",
-	}
-
 	By("pause io delay chaos experiment")
 	// pause experiment
 	err = util.PauseChaos(ctx, cli, ioChaos)
@@ -168,10 +185,20 @@ func TestcaseIODelayDurationForATimePauseAndUnPause(
 		chaos := &v1alpha1.IoChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
 		framework.ExpectNoError(err, "get io chaos error")
-		if chaos.Status.Experiment.DesiredPhase == v1alpha1.StoppedPhase {
-			return true, nil
+
+		for _, c := range chaos.GetStatus().Conditions {
+			if c.Type == v1alpha1.ConditionAllRecovered {
+				if c.Status != corev1.ConditionTrue {
+					return false, nil
+				}
+			} else if c.Type == v1alpha1.ConditionSelected {
+				if c.Status != corev1.ConditionTrue {
+					return false, nil
+				}
+			}
 		}
-		return false, err
+
+		return true, err
 	})
 	framework.ExpectNoError(err, "check paused chaos failed")
 
@@ -199,10 +226,20 @@ func TestcaseIODelayDurationForATimePauseAndUnPause(
 		chaos := &v1alpha1.IoChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
 		framework.ExpectNoError(err, "get io chaos error")
-		if chaos.Status.Experiment.DesiredPhase == v1alpha1.RunningPhase {
-			return true, nil
+
+		for _, c := range chaos.GetStatus().Conditions {
+			if c.Type == v1alpha1.ConditionAllInjected {
+				if c.Status != corev1.ConditionTrue {
+					return false, nil
+				}
+			} else if c.Type == v1alpha1.ConditionSelected {
+				if c.Status != corev1.ConditionTrue {
+					return false, nil
+				}
+			}
 		}
-		return false, err
+
+		return true, err
 	})
 	framework.ExpectNoError(err, "check resumed chaos failed")
 

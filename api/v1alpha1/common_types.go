@@ -16,6 +16,7 @@ package v1alpha1
 import (
 	"time"
 
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -27,8 +28,28 @@ const (
 )
 
 type ChaosStatus struct {
+	// Conditions represents the current global condition of the chaos
+	// +optional
+	Conditions []ChaosCondition `json:"conditions,omitempty"`
+
 	// Experiment records the last experiment state.
 	Experiment ExperimentStatus `json:"experiment"`
+}
+
+type ChaosConditionType string
+
+const (
+	ConditionSelected     ChaosConditionType = "Selected"
+	ConditionAllInjected  ChaosConditionType = "AllInjected"
+	ConditionAllRecovered ChaosConditionType = "AllRecovered"
+	ConditionPaused       ChaosConditionType = "Paused"
+)
+
+type ChaosCondition struct {
+	Type   ChaosConditionType     `json:"type"`
+	Status corev1.ConditionStatus `json:"status"`
+	// +optional
+	Reason string `json:"reason"`
 }
 
 type DesiredPhase string

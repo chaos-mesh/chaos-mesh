@@ -19,17 +19,20 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-controller-manager/provider"
-	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/utils"
-	"github.com/chaos-mesh/chaos-mesh/controllers/types"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/test"
-
 	"github.com/go-logr/logr"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"go.uber.org/fx"
 
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-controller-manager/provider"
+	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/utils"
+	"github.com/chaos-mesh/chaos-mesh/controllers/types"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/test"
+	"github.com/go-logr/logr"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
+	"go.uber.org/fx"
 
 	"k8s.io/client-go/rest"
 	"k8s.io/kubectl/pkg/scheme"
