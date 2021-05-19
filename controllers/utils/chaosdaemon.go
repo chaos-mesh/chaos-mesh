@@ -77,12 +77,6 @@ func init() {
 }
 
 func FindDaemonIP(ctx context.Context, c client.Reader, pod *v1.Pod) (string, error) {
-	// TODO: use cached client to get the chaos-daemon
-	// It will take several steps to use the namespace scoped cached client
-	// 1. Upgrade controller-runtime to a high enough version (which supports scoped cache)
-	// 2. Create a cached client in deployment namespace to get the endpoint
-	// 3. Limit controller-manager in the target namespace
-
 	nodeName := pod.Spec.NodeName
 	log.Info("Creating client to chaos-daemon", "node", nodeName)
 
