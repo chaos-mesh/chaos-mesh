@@ -24,6 +24,7 @@ import (
 	"github.com/go-logr/logr"
 	v1 "k8s.io/api/core/v1"
 	k8sError "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -189,6 +190,7 @@ func NewImpl(c client.Client, b *podiochaosmanager.Builder, log logr.Logger) *co
 			Log:     log.WithName("iochaos"),
 			builder: b,
 		},
+		Owns: []runtime.Object{&v1alpha1.PodIoChaos{}},
 	}
 }
 
