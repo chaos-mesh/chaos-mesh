@@ -189,7 +189,6 @@ spec:
                   type:
                     type: string
                 required:
-                - reason
                 - status
                 - type
                 type: object
