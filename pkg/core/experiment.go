@@ -98,14 +98,14 @@ type ScopeInfo struct {
 
 // SelectorInfo defines the selector options of the Experiment.
 type SelectorInfo struct {
-	Namespaces  []string                          `json:"namespaces" binding:"NamespaceSelectorsValid"`
-	Nodes []string `json:"nodes,omitempty"`
-	NodeSelectors map[string]string `json:"node_selectors,omitempty"`
+	Namespaces          []string                          `json:"namespaces" binding:"NamespaceSelectorsValid"`
+	Nodes               []string                          `json:"nodes,omitempty"`
+	NodeSelectors       map[string]string                 `json:"node_selectors,omitempty"`
 	FieldSelectors      map[string]string                 `json:"field_selectors" binding:"MapSelectorsValid"`
 	LabelSelectors      map[string]string                 `json:"label_selectors" binding:"MapSelectorsValid"`
 	ExpressionSelectors []metav1.LabelSelectorRequirement `json:"expression_selectors" binding:"RequirementSelectorsValid"`
 	AnnotationSelectors map[string]string                 `json:"annotation_selectors" binding:"MapSelectorsValid"`
-	PodPhaseSelectors       []string                      `json:"phase_selectors" binding:"PhaseSelectorsValid"`
+	PodPhaseSelectors   []string                          `json:"phase_selectors" binding:"PhaseSelectorsValid"`
 
 	// Pods is a map of string keys and a set values that used to select pods.
 	// The key defines the namespace which pods belong,
@@ -165,9 +165,9 @@ type SchedulerInfo struct {
 
 // PodChaosInfo defines the basic information of pod chaos for creating a new PodChaos.
 type PodChaosInfo struct {
-	Action        string `json:"action" binding:"oneof='' 'pod-kill' 'pod-failure' 'container-kill'"`
+	Action         string   `json:"action" binding:"oneof='' 'pod-kill' 'pod-failure' 'container-kill'"`
 	ContainerNames []string `json:"containerNames,omitempty"`
-	GracePeriod   int64  `json:"grace_period"`
+	GracePeriod    int64    `json:"grace_period"`
 }
 
 // NetworkChaosInfo defines the basic information of network chaos for creating a new NetworkChaos.
