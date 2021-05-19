@@ -47,15 +47,26 @@ var _ = Describe("HTTPChaos", func() {
 				Namespace: "default",
 			}
 
+			var port int32 = 80
+			path := "/api"
+			delay := "10s"
+
 			created = &HTTPChaos{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "foo",
 					Namespace: "default",
 				},
 				Spec: HTTPChaosSpec{
-					Action: HTTPDelayAction,
 					PodSelector: PodSelector{
 						Mode: OnePodMode,
+					},
+					Target: PodHttpRequest,
+					PodHttpChaosSelector: PodHttpChaosSelector{
+						Port: &port,
+						Path: &path,
+					},
+					PodHttpChaosActions: PodHttpChaosActions{
+						Delay: &delay,
 					},
 				},
 			}

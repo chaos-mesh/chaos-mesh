@@ -175,7 +175,7 @@ spec:
                     type: object
                   target:
                     description: Target is the object to be selected and injected,
-                      <Request | Response>.
+                      <Request|Response>.
                     type: string
                 required:
                 - actions
