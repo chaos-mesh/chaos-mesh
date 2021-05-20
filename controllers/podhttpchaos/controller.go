@@ -117,11 +117,19 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	containerID := pod.Status.ContainerStatuses[0].ContainerID
 
-	var rules []v1alpha1.PodHttpChaosRule
+	rules := make([]v1alpha1.PodHttpChaosRule, 0)
+	proxyPortsMap := make(map[uint32]bool)
+	proxyPorts := make([]uint32, 0)
+
 	for _, rule := range obj.Spec.Rules {
 		// ignore source field in tproxy config
 		rule.Source = ""
 		rules = append(rules)
+		proxyPortsMap[uint32(rule.Port)] = true
+	}
+
+	for port := range proxyPortsMap {
+		proxyPorts = append(proxyPorts, port)
 	}
 
 	input, err := json.Marshal(rules)
@@ -131,15 +139,6 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	r.Log.Info("input with", "rules", string(input))
-
-	proxyPortsMap := make(map[uint32]bool)
-	proxyPorts := make([]uint32, 0)
-	for _, port := range obj.Spec.ProxyPorts {
-		proxyPortsMap[uint32(port.Port)] = true
-	}
-	for port := range proxyPortsMap {
-		proxyPorts = append(proxyPorts, port)
-	}
 
 	res, err := pbClient.ApplyHttpChaos(ctx, &pb.ApplyHttpChaosRequest{
 		Rules:       string(input),

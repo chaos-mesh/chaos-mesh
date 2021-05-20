@@ -343,8 +343,7 @@ spec:
                     request.
                   type: string
                 port:
-                  description: Port is a rule to select server listening on specific
-                    port.
+                  description: Port represents the target port to be proxy of.
                   format: int32
                   type: integer
                 replace:

@@ -44,15 +44,6 @@ func (s *Clear) Apply(chaos *v1alpha1.PodHttpChaos) error {
 		}
 	}
 	chaos.Spec.Rules = rules
-
-	ports := []v1alpha1.PodHttpChaosProxyPort{}
-	for _, port := range chaos.Spec.ProxyPorts {
-		if port.Source != s.Source {
-			ports = append(ports, port)
-		}
-	}
-	chaos.Spec.ProxyPorts = ports
-
 	return nil
 }
 

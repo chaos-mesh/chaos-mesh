@@ -561,7 +561,7 @@ spec:
               description: Path is a rule to select target by uri path in http request.
               type: string
             port:
-              description: Port is a rule to select server listening on specific port.
+              description: Port represents the target port to be proxy of.
               format: int32
               type: integer
             replace:
@@ -2306,22 +2306,6 @@ spec:
         spec:
           description: PodHttpChaosSpec defines the desired state of PodHttpChaos.
           properties:
-            proxy_ports:
-              description: ProxyPorts represents the target ports to be proxy of.
-              items:
-                description: PodHttpChaosRule defines the target port for http.
-                properties:
-                  port:
-                    description: Port represents the target port to be proxy of.
-                    format: int32
-                    type: integer
-                  source:
-                    description: Source represents the source of current port
-                    type: string
-                required:
-                - port
-                type: object
-              type: array
             rules:
               description: Rules are a list of injection rule for http request.
               items:
@@ -2415,6 +2399,10 @@ spec:
                             type: object
                         type: object
                     type: object
+                  port:
+                    description: Port represents the target port to be proxy of.
+                    format: int32
+                    type: integer
                   selector:
                     description: Selector contains the rules to select target.
                     properties:
@@ -2460,12 +2448,11 @@ spec:
                     type: string
                 required:
                 - actions
+                - port
                 - selector
                 - target
                 type: object
               type: array
-          required:
-          - proxy_ports
           type: object
         status:
           description: PodHttpChaosStatus defines the actual state of PodHttpChaos.
@@ -3276,8 +3263,7 @@ spec:
                     request.
                   type: string
                 port:
-                  description: Port is a rule to select server listening on specific
-                    port.
+                  description: Port represents the target port to be proxy of.
                   format: int32
                   type: integer
                 replace:
@@ -5792,8 +5778,7 @@ spec:
                     request.
                   type: string
                 port:
-                  description: Port is a rule to select server listening on specific
-                    port.
+                  description: Port represents the target port to be proxy of.
                   format: int32
                   type: integer
                 replace:
@@ -7859,8 +7844,7 @@ spec:
                           http request.
                         type: string
                       port:
-                        description: Port is a rule to select server listening on
-                          specific port.
+                        description: Port represents the target port to be proxy of.
                         format: int32
                         type: integer
                       replace:

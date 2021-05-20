@@ -47,7 +47,6 @@ var _ = Describe("HTTPChaos", func() {
 				Namespace: "default",
 			}
 
-			var port int32 = 80
 			path := "/api"
 			delay := "10s"
 
@@ -61,10 +60,8 @@ var _ = Describe("HTTPChaos", func() {
 						Mode: OnePodMode,
 					},
 					Target: PodHttpRequest,
-					PodHttpChaosSelector: PodHttpChaosSelector{
-						Port: &port,
-						Path: &path,
-					},
+					Port:   80,
+					Path:   &path,
 					PodHttpChaosActions: PodHttpChaosActions{
 						Delay: &delay,
 					},
