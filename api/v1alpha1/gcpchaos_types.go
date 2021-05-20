@@ -14,6 +14,8 @@
 package v1alpha1
 
 import (
+	"encoding/json"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -57,6 +59,10 @@ type GcpChaosSpec struct {
 	// +optional
 	SecretName *string `json:"secretName,omitempty"`
 
+	GcpSelector `json:",inline"`
+}
+
+type GcpSelector struct {
 	// Project defines the name of gcp project.
 	Project string `json:"project"`
 
@@ -70,6 +76,20 @@ type GcpChaosSpec struct {
 	// Needed in disk-loss.
 	// +optional
 	DeviceNames *[]string `json:"deviceNames,omitempty"`
+}
+
+func (obj *GcpChaos) GetSelectorSpecs() map[string]interface{} {
+	return map[string]interface{}{
+		".": &obj.Spec.GcpSelector,
+	}
+}
+
+func (selector *GcpSelector) Id() string {
+	// TODO: handle the error here
+	// or ignore it is enough ?
+	json, _ := json.Marshal(selector)
+
+	return string(json)
 }
 
 // GcpChaosStatus represents the status of a GcpChaos
