@@ -26,6 +26,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
+
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug/iochaos"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug/networkchaos"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug/stresschaos"
@@ -183,6 +184,7 @@ func (o *DebugOptions) Run(chaosType string, args []string, c *common.ClientSet)
 	var result []common.ChaosResult
 	common.TLSFiles = common.TLSFileConfig{CaCert: o.CaCertFile, Cert: o.CertFile, Key: o.KeyFile}
 	common.Insecure = o.Insecure
+
 	for i, chaos := range chaosList {
 		var chaosResult common.ChaosResult
 		chaosResult.Name = chaosNameList[i]
