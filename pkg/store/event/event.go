@@ -477,8 +477,13 @@ func (e *eventStore) DeleteByUIDs(_ context.Context, uids []string) error {
 	for _, et := range eventList {
 		eventIDList = append(eventIDList, et.ID)
 	}
-	if err = e.db.Model(core.PodRecord{}).Where("event_id IN (?)", eventIDList).Unscoped().Delete(core.PodRecord{}).Error; err != nil {
-		return err
+	splitNum := len(eventIDList)/100 + 1
+	splitEventIDList := splitArray(eventIDList, splitNum)
+
+	for _, etList := range splitEventIDList {
+		if err = e.db.Model(core.PodRecord{}).Where("event_id IN (?)", etList).Unscoped().Delete(core.PodRecord{}).Error; err != nil {
+			return err
+		}
 	}
 	return e.db.Where("experiment_id IN (?)", uids).Unscoped().Delete(core.Event{}).Error
 }
@@ -567,4 +572,24 @@ func constructQueryArgs(experimentName, experimentNamespace, uid, kind, startTim
 	}
 
 	return query, args
+}
+
+func splitArray(arr []uint, num int) [][]uint {
+	max := int(len(arr))
+	if max < num {
+		return nil
+	}
+	var segments = make([][]uint, 0)
+	quantity := max / num
+	end := int(0)
+	for i := int(1); i <= num; i++ {
+		point := i * quantity
+		if i != num {
+			segments = append(segments, arr[i-1+end:point])
+		} else {
+			segments = append(segments, arr[i-1+end:])
+		}
+		end = point - i
+	}
+	return segments
 }
