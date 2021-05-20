@@ -41,12 +41,17 @@ type PodHttpChaosStatus struct {
 
 // PodHttpChaosRule defines the injection rule for http.
 type PodHttpChaosRule struct {
+	PodHttpChaosBaseRule `json:",inline"`
+
 	// Source represents the source of current rules
 	Source string `json:"source,omitempty"`
 
 	// Port represents the target port to be proxy of.
 	Port int32 `json:"port"`
+}
 
+// PodHttpChaosBaseRule defines the injection rule without source and port.
+type PodHttpChaosBaseRule struct {
 	// Target is the object to be selected and injected, <Request|Response>.
 	Target PodHttpChaosTarget `json:"target"`
 

@@ -117,15 +117,13 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	containerID := pod.Status.ContainerStatuses[0].ContainerID
 
-	rules := make([]v1alpha1.PodHttpChaosRule, 0)
+	rules := make([]v1alpha1.PodHttpChaosBaseRule, 0)
 	proxyPortsMap := make(map[uint32]bool)
 	proxyPorts := make([]uint32, 0)
 
 	for _, rule := range obj.Spec.Rules {
-		// ignore source field in tproxy config
-		rule.Source = ""
-		rules = append(rules)
 		proxyPortsMap[uint32(rule.Port)] = true
+		rules = append(rules, rule.PodHttpChaosBaseRule)
 	}
 
 	for port := range proxyPortsMap {
