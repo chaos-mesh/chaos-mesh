@@ -59,13 +59,15 @@ func renderNodesByTemplates(workflow *v1alpha1.Workflow, parent *v1alpha1.Workfl
 					GenerateName: fmt.Sprintf("%s-", template.Name),
 				},
 				Spec: v1alpha1.WorkflowNodeSpec{
-					TemplateName: template.Name,
-					WorkflowName: workflow.Name,
-					Type:         template.Type,
-					StartTime:    &now,
-					Deadline:     deadline,
-					Tasks:        template.Tasks,
-					EmbedChaos:   template.EmbedChaos,
+					TemplateName:     template.Name,
+					WorkflowName:     workflow.Name,
+					Type:             template.Type,
+					StartTime:        &now,
+					Deadline:         deadline,
+					Tasks:            template.Tasks,
+					Task:             template.Task,
+					ConditionalTasks: template.ConditionalTasks,
+					EmbedChaos:       template.EmbedChaos,
 				},
 			}
 

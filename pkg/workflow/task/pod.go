@@ -11,21 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package expr
+package task
 
 import (
-	"github.com/antonmedv/expr"
-	"github.com/pkg/errors"
+	corev1 "k8s.io/api/core/v1"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
-func EvalBool(expression string, env map[string]interface{}) (bool, error) {
-	eval, err := expr.Eval(expression, env)
-	if err != nil {
-		return false, err
-	}
-	result, ok := eval.(bool)
-	if !ok {
-		return false, errors.Errorf("expression result is not boolean")
-	}
-	return result, nil
+func SpawnPodForTask(task v1alpha1.Task) (corev1.PodSpec, error) {
+
+	// RestartPolicy
+	// OwnerReference
+	// ResourceLimit
+	panic("unimplemented")
 }

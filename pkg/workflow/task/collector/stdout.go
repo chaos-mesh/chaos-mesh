@@ -11,21 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package expr
+package collector
 
-import (
-	"github.com/antonmedv/expr"
-	"github.com/pkg/errors"
-)
-
-func EvalBool(expression string, env map[string]interface{}) (bool, error) {
-	eval, err := expr.Eval(expression, env)
-	if err != nil {
-		return false, err
-	}
-	result, ok := eval.(bool)
-	if !ok {
-		return false, errors.Errorf("expression result is not boolean")
-	}
-	return result, nil
-}
+const Stdout string = "stdout"

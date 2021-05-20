@@ -11,21 +11,5 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package expr
-
-import (
-	"github.com/antonmedv/expr"
-	"github.com/pkg/errors"
-)
-
-func EvalBool(expression string, env map[string]interface{}) (bool, error) {
-	eval, err := expr.Eval(expression, env)
-	if err != nil {
-		return false, err
-	}
-	result, ok := eval.(bool)
-	if !ok {
-		return false, errors.Errorf("expression result is not boolean")
-	}
-	return result, nil
-}
+// Package task contains the tools for build an customized job and assert the condition branches
+package task

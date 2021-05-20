@@ -16,6 +16,8 @@ package v1alpha1
 import (
 	"fmt"
 
+	corev1 "k8s.io/api/core/v1"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
@@ -70,12 +72,24 @@ func contains(arr []TemplateType, target TemplateType) bool {
 }
 
 type Template struct {
-	Name     string       `json:"name"`
-	Type     TemplateType `json:"template_type"`
-	Duration *string      `json:"duration,omitempty"`
-	Tasks    []string     `json:"tasks,omitempty"`
+	Name string       `json:"name"`
+	Type TemplateType `json:"template_type"`
+	// +optional
+	Duration *string `json:"duration,omitempty"`
+	// +optional
+	Task *Task `json:"task,omitempty"`
+	// +optional
+	Tasks []string `json:"tasks,omitempty"`
+	// +optional
+	ConditionalTasks []ConditionalTask `json:"conditionalTasks,omitempty"`
 	// +optional
 	*EmbedChaos `json:",inline"`
+}
+
+type Task struct {
+	// Template describes the pods that will be created.
+	Template corev1.PodTemplateSpec `json:"template"`
+	// TODO: maybe we could specify parameters in other ways, like loading context from file
 }
 
 // +kubebuilder:object:root=true

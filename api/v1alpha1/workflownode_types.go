@@ -46,6 +46,8 @@ type WorkflowNodeSpec struct {
 	// +optional
 	Deadline *metav1.Time `json:"deadline,omitempty"`
 	// +optional
+	Task *Task `json:"task,omitempty"`
+	// +optional
 	Tasks []string `json:"tasks,omitempty"`
 	// +optional
 	ConditionalTasks []ConditionalTask `json:"conditionalTasks,omitempty"`
@@ -61,7 +63,7 @@ type WorkflowNodeStatus struct {
 
 	// ConditionalBranches records the evaluation result of each ConditionalTask
 	// +optional
-	ConditionalBranches []ConditionalBranchesStatus `json:"conditionalBranches,omitempty"`
+	ConditionalBranches *ConditionalBranchesStatus `json:"conditionalBranches,omitempty"`
 
 	// ActiveChildren means the created children node
 	// +optional
@@ -92,8 +94,8 @@ type ConditionalBranchesStatus struct {
 }
 
 type ConditionalBranch struct {
-	Task             string `json:"task"`
-	EvaluationResult bool   `json:"run"`
+	Task             string                 `json:"task"`
+	EvaluationResult corev1.ConditionStatus `json:"run"`
 }
 
 type WorkflowNodeConditionType string
