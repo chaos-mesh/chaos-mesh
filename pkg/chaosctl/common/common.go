@@ -181,7 +181,7 @@ func InitClientSet() (*ClientSet, error) {
 // GetPods returns pod list and corresponding chaos daemon
 func GetPods(ctx context.Context, chaosName string, status v1alpha1.ChaosStatus, selectorSpec v1alpha1.PodSelectorSpec, c client.Client) ([]v1.Pod, []v1.Pod, error) {
 	// get podName
-	failedMessage := ""
+	failedMessage := "" // TODO: fill in message
 	if failedMessage != "" {
 		PrettyPrint(fmt.Sprintf("chaos %s failed with: %s", chaosName, failedMessage), 0, Red)
 	}
