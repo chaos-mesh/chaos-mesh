@@ -34,6 +34,7 @@ func BootstrapWorkflowControllers(mgr manager.Manager, logger logr.Logger) error
 	}
 	err = ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.Workflow{}).
+		Owns(&v1alpha1.WorkflowNode{}).
 		Named("workflow-entry-reconciler").
 		Complete(
 			NewWorkflowEntryReconciler(

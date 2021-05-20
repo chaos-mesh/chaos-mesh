@@ -16,6 +16,7 @@ package v1alpha1
 import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 const (
@@ -39,10 +40,10 @@ type WorkflowNode struct {
 }
 
 type WorkflowNodeSpec struct {
-	TemplateName string       `json:"template_name"`
-	WorkflowName string       `json:"workflow_name"`
+	TemplateName string       `json:"templateName"`
+	WorkflowName string       `json:"workflowName"`
 	Type         TemplateType `json:"type"`
-	StartTime    *metav1.Time `json:"start_time"`
+	StartTime    *metav1.Time `json:"startTime"`
 	// +optional
 	Deadline *metav1.Time `json:"deadline,omitempty"`
 	// +optional
@@ -59,7 +60,7 @@ type WorkflowNodeStatus struct {
 
 	// ChaosResource refs to the real chaos CR object.
 	// +optional
-	ChaosResource *corev1.TypedLocalObjectReference `json:"chaos_resource,omitempty"`
+	ChaosResource *corev1.TypedLocalObjectReference `json:"chaosResource,omitempty"`
 
 	// ConditionalBranches records the evaluation result of each ConditionalTask
 	// +optional
@@ -67,11 +68,11 @@ type WorkflowNodeStatus struct {
 
 	// ActiveChildren means the created children node
 	// +optional
-	ActiveChildren []corev1.LocalObjectReference `json:"active_children,omitempty"`
+	ActiveChildren []corev1.LocalObjectReference `json:"activeChildren,omitempty"`
 
 	// Children is necessary for representing the order when replicated child template references by parent template.
 	// +optional
-	FinishedChildren []corev1.LocalObjectReference `json:"finished_children,omitempty"`
+	FinishedChildren []corev1.LocalObjectReference `json:"finishedChildren,omitempty"`
 
 	// Represents the latest available observations of a workflow node's current state.
 	// +optional
@@ -133,4 +134,21 @@ const (
 	NodeDeadlineOmitted   string = "NodeDeadlineOmitted"
 	ChaosCRCreated        string = "ChaosCRCreated"
 	ChaosCRCreateFailed   string = "ChaosCRCreateFailed"
+	ChaosCRNotExists      string = "ChaosCRNotExists"
 )
+
+// TODO: GenericChaosList/GenericChaos is very similar to ChaosList/ChaosInstance, maybe we could combine them later.
+
+// GenericChaosList only use to list GenericChaos by certain EmbedChaos
+// +kubebuilder:object:generate=false
+type GenericChaosList interface {
+	runtime.Object
+	GetItems() []GenericChaos
+}
+
+// GenericChaos could be a place holder for any kubernetes Kind
+// +kubebuilder:object:generate=false
+type GenericChaos interface {
+	runtime.Object
+	metav1.Object
+}
