@@ -12,3 +12,42 @@
 // limitations under the License.
 
 package podhttpchaosmanager
+
+import (
+	"github.com/go-logr/logr"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+)
+
+type Builder struct {
+	Log logr.Logger
+	client.Client
+	client.Reader
+	scheme *runtime.Scheme
+}
+
+func NewBuilder(logger logr.Logger, client client.Client, reader client.Reader, scheme *runtime.Scheme) *Builder {
+	return &Builder{
+		Log:    logger,
+		Client: client,
+		Reader: reader,
+		scheme: scheme,
+	}
+}
+
+func (b *Builder) WithInit(source string, key types.NamespacedName) *PodHttpManager {
+	t := &PodHttpTransaction{}
+	t.Clear(source)
+
+	return &PodHttpManager{
+		Source: source,
+		Log:    b.Log,
+		Client: b.Client,
+		Reader: b.Reader,
+		scheme: b.scheme,
+
+		Key: key,
+		T:   t,
+	}
+}
