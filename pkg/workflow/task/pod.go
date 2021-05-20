@@ -19,10 +19,33 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
-func SpawnPodForTask(task v1alpha1.Task) (corev1.PodSpec, error) {
+const (
+	PodMetadataVolumeName            = "podmetadata"
+	PodMetadataAnnotationsVolumePath = ""
+	PodMetadataMountPath             = "/var/run/chaos-mesh/"
+)
 
-	// RestartPolicy
-	// OwnerReference
-	// ResourceLimit
-	panic("unimplemented")
+func SpawnPodForTask(task v1alpha1.Task) (corev1.PodSpec, error) {
+	deepCopiedContainer := task.Container.DeepCopy()
+	if len(deepCopiedContainer.Resources.Limits) == 0 {
+		deepCopiedContainer.Resources.Limits.Cpu().SetMilli(1000)
+		deepCopiedContainer.Resources.Limits.Memory().Set(1000)
+	}
+	result := corev1.PodSpec{
+		RestartPolicy: corev1.RestartPolicyNever,
+		Volumes:       attachVolumes(task),
+		Containers: []corev1.Container{
+			*deepCopiedContainer,
+		},
+	}
+	return result, nil
+}
+
+func attachVolumes(task v1alpha1.Task) []corev1.Volume {
+	var result []corev1.Volume
+
+	// TODO: downwards API and configmaps
+
+	result = append(result, task.Volumes...)
+	return result
 }

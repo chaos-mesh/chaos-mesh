@@ -17,9 +17,9 @@ import (
 	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 )
 
 // +kubebuilder:object:root=true
@@ -107,8 +107,14 @@ type Template struct {
 }
 
 type Task struct {
-	// Template describes the pods that will be created.
-	Template corev1.PodTemplateSpec `json:"template"`
+	// Container is the main container image to run in the pod
+	Container *corev1.Container `json:"container,omitempty"`
+
+	// Volumes is a list of volumes that can be mounted by containers in a template.
+	// +patchStrategy=merge
+	// +patchMergeKey=name
+	Volumes []corev1.Volume `json:"volumes,omitempty" patchStrategy:"merge" patchMergeKey:"name"`
+
 	// TODO: maybe we could specify parameters in other ways, like loading context from file
 }
 
