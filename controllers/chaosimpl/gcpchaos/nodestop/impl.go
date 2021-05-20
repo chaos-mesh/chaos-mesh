@@ -15,9 +15,9 @@ package nodestop
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 
-	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -36,7 +36,7 @@ type Impl struct {
 	Log logr.Logger
 }
 
-func (impl *Impl) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) (v1alpha1.Phase, error) {
+func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, chaos v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	gcpchaos, ok := chaos.(*v1alpha1.GcpChaos)
 	if !ok {
 		err := errors.New("chaos is not gcpchaos")
@@ -48,8 +48,11 @@ func (impl *Impl) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.In
 		impl.Log.Error(err, "fail to get the compute service")
 		return v1alpha1.NotInjected, err
 	}
+	var selected v1alpha1.GcpSelector
+	json.Unmarshal([]byte(records[index].Id), &selected)
 	gcpchaos.Finalizers = []string{GcpFinalizer}
-	_, err = computeService.Instances.Stop(gcpchaos.Spec.Project, gcpchaos.Spec.Zone, gcpchaos.Spec.Instance).Do()
+
+	_, err = computeService.Instances.Stop(selected.Project, selected.Zone, selected.Instance).Do()
 	if err != nil {
 		gcpchaos.Finalizers = make([]string, 0)
 		impl.Log.Error(err, "fail to stop the instance")
@@ -59,7 +62,7 @@ func (impl *Impl) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.In
 	return v1alpha1.Injected, nil
 }
 
-func (impl *Impl) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) (v1alpha1.Phase, error) {
+func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Record, chaos v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	gcpchaos, ok := chaos.(*v1alpha1.GcpChaos)
 	if !ok {
 		err := errors.New("chaos is not gcpchaos")
@@ -72,7 +75,9 @@ func (impl *Impl) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1.
 		impl.Log.Error(err, "fail to get the compute service")
 		return v1alpha1.Injected, err
 	}
-	_, err = computeService.Instances.Start(gcpchaos.Spec.Project, gcpchaos.Spec.Zone, gcpchaos.Spec.Instance).Do()
+	var selected v1alpha1.GcpSelector
+	json.Unmarshal([]byte(records[index].Id), &selected)
+	_, err = computeService.Instances.Start(selected.Project, selected.Zone, selected.Instance).Do()
 	if err != nil {
 		impl.Log.Error(err, "fail to start the instance")
 		return v1alpha1.Injected, err

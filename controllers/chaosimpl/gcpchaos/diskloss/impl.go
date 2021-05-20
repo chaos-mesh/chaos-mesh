@@ -19,13 +19,14 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/gcpchaos/utils"
 	compute "google.golang.org/api/compute/v1"
-	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/gcpchaos/utils"
+
 	"github.com/go-logr/logr"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
 const (
@@ -38,7 +39,7 @@ type Impl struct {
 	Log logr.Logger
 }
 
-func (impl *Impl) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) (v1alpha1.Phase, error) {
+func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, chaos v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	gcpchaos, ok := chaos.(*v1alpha1.GcpChaos)
 	if !ok {
 		err := errors.New("chaos is not gcpchaos")
@@ -50,8 +51,9 @@ func (impl *Impl) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.In
 		impl.Log.Error(err, "fail to get the compute service")
 		return v1alpha1.NotInjected, err
 	}
-
-	instance, err := computeService.Instances.Get(gcpchaos.Spec.Project, gcpchaos.Spec.Zone, gcpchaos.Spec.Instance).Do()
+	var selected v1alpha1.GcpSelector
+	json.Unmarshal([]byte(records[index].Id), &selected)
+	instance, err := computeService.Instances.Get(selected.Project, selected.Zone, selected.Instance).Do()
 	if err != nil {
 		impl.Log.Error(err, "fail to get the instance")
 		return v1alpha1.NotInjected, err
@@ -61,7 +63,7 @@ func (impl *Impl) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.In
 		notFound   []string
 		marshalErr []string
 	)
-	for _, specDeviceName := range *gcpchaos.Spec.DeviceNames {
+	for _, specDeviceName := range *selected.DeviceNames {
 		haveDisk := false
 		for _, disk := range instance.Disks {
 			if disk.DeviceName == specDeviceName {
@@ -79,19 +81,19 @@ func (impl *Impl) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.In
 		}
 	}
 	if len(notFound) != 0 {
-		err = fmt.Errorf("instance (%s) does not have the disk (%s)", gcpchaos.Spec.Instance, notFound)
+		err = fmt.Errorf("instance (%s) does not have the disk (%s)", selected.Instance, notFound)
 		impl.Log.Error(err, "the instance does not have the disk")
 		return v1alpha1.NotInjected, err
 	}
 	if len(marshalErr) != 0 {
-		err = fmt.Errorf("instance (%s), marshal disk info error (%s)", gcpchaos.Spec.Instance, marshalErr)
+		err = fmt.Errorf("instance (%s), marshal disk info error (%s)", selected.Instance, marshalErr)
 		impl.Log.Error(err, "marshal disk info error")
 		return v1alpha1.NotInjected, err
 	}
 
 	gcpchaos.Finalizers = []string{GcpFinalizer}
-	for _, specDeviceName := range *gcpchaos.Spec.DeviceNames {
-		_, err = computeService.Instances.DetachDisk(gcpchaos.Spec.Project, gcpchaos.Spec.Zone, gcpchaos.Spec.Instance, specDeviceName).Do()
+	for _, specDeviceName := range *selected.DeviceNames {
+		_, err = computeService.Instances.DetachDisk(selected.Project, selected.Zone, selected.Instance, specDeviceName).Do()
 		if err != nil {
 			gcpchaos.Finalizers = make([]string, 0)
 			impl.Log.Error(err, "fail to detach the disk")
@@ -102,7 +104,7 @@ func (impl *Impl) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.In
 	return v1alpha1.Injected, nil
 }
 
-func (impl *Impl) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) (v1alpha1.Phase, error) {
+func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Record, chaos v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	gcpchaos, ok := chaos.(*v1alpha1.GcpChaos)
 	if !ok {
 		err := errors.New("chaos is not gcpchaos")
@@ -116,13 +118,15 @@ func (impl *Impl) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1.
 		return v1alpha1.Injected, err
 	}
 	var disk compute.AttachedDisk
+	var selected v1alpha1.GcpSelector
+	json.Unmarshal([]byte(records[index].Id), &selected)
 	for _, attachedDiskString := range gcpchaos.Status.AttachedDisksStrings {
 		err = json.Unmarshal([]byte(attachedDiskString), &disk)
 		if err != nil {
 			impl.Log.Error(err, "fail to unmarshal the disk info")
 			return v1alpha1.Injected, err
 		}
-		_, err = computeService.Instances.AttachDisk(gcpchaos.Spec.Project, gcpchaos.Spec.Zone, gcpchaos.Spec.Instance, &disk).Do()
+		_, err = computeService.Instances.AttachDisk(selected.Project, selected.Zone, selected.Instance, &disk).Do()
 		if err != nil {
 			impl.Log.Error(err, "fail to attach the disk to the instance")
 			return v1alpha1.Injected, err

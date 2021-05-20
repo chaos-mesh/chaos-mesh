@@ -15,13 +15,14 @@ package nodereset
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+
+	"github.com/go-logr/logr"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/gcpchaos/utils"
-	"github.com/go-logr/logr"
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type Impl struct {
@@ -30,7 +31,7 @@ type Impl struct {
 	Log logr.Logger
 }
 
-func (impl *Impl) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) (v1alpha1.Phase, error) {
+func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, chaos v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	gcpchaos, ok := chaos.(*v1alpha1.GcpChaos)
 	if !ok {
 		err := errors.New("chaos is not gcpchaos")
@@ -42,7 +43,9 @@ func (impl *Impl) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.In
 		impl.Log.Error(err, "fail to get the compute service")
 		return v1alpha1.NotInjected, err
 	}
-	_, err = computeService.Instances.Reset(gcpchaos.Spec.Project, gcpchaos.Spec.Zone, gcpchaos.Spec.Instance).Do()
+	var selected v1alpha1.GcpSelector
+	json.Unmarshal([]byte(records[index].Id), &selected)
+	_, err = computeService.Instances.Reset(selected.Project, selected.Zone, selected.Instance).Do()
 	if err != nil {
 		impl.Log.Error(err, "fail to reset the instance")
 		return v1alpha1.NotInjected, err
@@ -51,7 +54,7 @@ func (impl *Impl) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.In
 	return v1alpha1.Injected, nil
 }
 
-func (impl *Impl) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) (v1alpha1.Phase, error) {
+func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Record, chaos v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	return v1alpha1.NotInjected, nil
 }
 
