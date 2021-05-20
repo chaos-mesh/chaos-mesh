@@ -93,7 +93,7 @@ type IoChaosSpec struct {
 type IoChaosStatus struct {
 	ChaosStatus `json:",inline"`
 
-	// Instances always specifies podnetworkchaos generation or empty
+	// Instances always specifies podiochaos generation or empty
 	// +optional
 	Instances map[string]int64 `json:"instances,omitempty"`
 }
