@@ -24,6 +24,8 @@ import (
 
 	"google.golang.org/grpc"
 
+	"google.golang.org/grpc"
+
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
 
 	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"

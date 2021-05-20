@@ -79,7 +79,9 @@ func (ctx *reconcileContext) GetCreationTimestamp() metav1.Time {
 func (ctx *reconcileContext) CalcDesiredPhase() v1alpha1.DesiredPhase {
 	// Consider the finalizers
 	if ctx.obj.IsDeleted() {
-		ctx.Recorder.Eventf(ctx.obj, "Normal", "Deleted", "Turn into StoppedPhase")
+		if ctx.obj.GetStatus().Experiment.DesiredPhase != v1alpha1.StoppedPhase {
+			ctx.Recorder.Event(ctx.obj, "Normal", "Deleted", "Turn into StoppedPhase")
+		}
 		return v1alpha1.StoppedPhase
 	}
 
@@ -91,7 +93,9 @@ func (ctx *reconcileContext) CalcDesiredPhase() v1alpha1.DesiredPhase {
 		ctx.Log.Error(err, "failed to parse duration")
 	}
 	if durationExceeded {
-		ctx.Recorder.Eventf(ctx.obj, "Normal", "TimeUp", "Turn into StoppedPhase")
+		if ctx.obj.GetStatus().Experiment.DesiredPhase != v1alpha1.StoppedPhase {
+			ctx.Recorder.Event(ctx.obj, "Normal", "TimeUp", "Turn into StoppedPhase")
+		}
 		return v1alpha1.StoppedPhase
 	} else {
 		ctx.requeueAfter = untilStop
@@ -99,9 +103,14 @@ func (ctx *reconcileContext) CalcDesiredPhase() v1alpha1.DesiredPhase {
 
 	// Then decide the pause logic
 	if ctx.obj.IsPaused() {
-		ctx.Recorder.Eventf(ctx.obj, "Normal", "Paused", "Turn into StoppedPhase")
+		if ctx.obj.GetStatus().Experiment.DesiredPhase != v1alpha1.StoppedPhase {
+			ctx.Recorder.Event(ctx.obj, "Normal", "Paused", "Turn into StoppedPhase")
+		}
 		return v1alpha1.StoppedPhase
 	} else {
+		if ctx.obj.GetStatus().Experiment.DesiredPhase != v1alpha1.RunningPhase {
+			ctx.Recorder.Event(ctx.obj, "Normal", "", "Turn into RunningPhase")
+		}
 		return v1alpha1.RunningPhase
 	}
 }

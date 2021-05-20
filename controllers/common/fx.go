@@ -49,7 +49,7 @@ type ChaosImplPairs struct {
 }
 
 func NewController(mgr ctrl.Manager, client client.Client, reader client.Reader, logger logr.Logger, selector *selector.Selector, pairs ChaosImplPairs) (types.Controller, error) {
-	setupLog := logger.WithName("setup")
+	setupLog := logger.WithName("setup-common")
 	for _, pair := range pairs.Impls {
 		setupLog.Info("setting up controller", "resource-name", pair.Name)
 

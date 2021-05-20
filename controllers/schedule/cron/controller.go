@@ -19,7 +19,6 @@ import (
 	"time"
 
 	"github.com/go-logr/logr"
-	"go.uber.org/fx"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/apiserver/pkg/storage/names"
@@ -72,6 +71,11 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			r.Recorder.Eventf(schedule, "Warning", "MissSchedule", "Missed scheduled time to start a job: %s", missedRun.Format(time.RFC1123Z))
 			return ctrl.Result{}, nil
 		}
+	}
+
+	if schedule.IsPaused() {
+		r.Log.Info("not starting chaos as it is paused")
+		return ctrl.Result{}, nil
 	}
 
 	r.Log.Info("schedule to spawn new chaos", "missedRun", missedRun, "nextRun", nextRun)
@@ -172,13 +176,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	return ctrl.Result{}, nil
 }
 
-type Objs struct {
-	fx.In
-
-	Objs []types.Object `group:"objs"`
-}
-
-func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger, objs Objs, lister *utils.ActiveLister) (types.Controller, error) {
+func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger, lister *utils.ActiveLister) (types.Controller, error) {
 	ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.Schedule{}).
 		Named("schedule-cron").

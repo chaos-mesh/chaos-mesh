@@ -77,7 +77,15 @@ type ScheduleStatus struct {
 	Active []corev1.ObjectReference `json:"active,omitempty"`
 
 	// +optional
+	// +nullable
 	LastScheduleTime metav1.Time `json:"time,omitempty"`
+}
+
+func (in *Schedule) IsPaused() bool {
+	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
+		return false
+	}
+	return true
 }
 
 // +kubebuilder:object:root=true
