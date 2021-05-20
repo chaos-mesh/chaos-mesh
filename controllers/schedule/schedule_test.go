@@ -101,7 +101,7 @@ var _ = Describe("Schedule", func() {
 					Namespace: "default",
 				},
 				Spec: v1alpha1.ScheduleSpec{
-					Schedule: "@every 5s",
+					Schedule: "@every 1s",
 					EmbedChaos: v1alpha1.EmbedChaos{
 						TimeChaos: &v1alpha1.TimeChaosSpec{
 							TimeOffset: "100ms",
@@ -130,7 +130,7 @@ var _ = Describe("Schedule", func() {
 
 			By("Reconciling the created schedule obj")
 			{
-				err := wait.Poll(time.Second*5, time.Minute*1, func() (ok bool, err error) {
+				err := wait.Poll(time.Second*1, time.Minute*1, func() (ok bool, err error) {
 					err = k8sClient.Get(context.TODO(), key, schedule)
 					if err != nil {
 						return false, err
@@ -166,7 +166,7 @@ var _ = Describe("Schedule", func() {
 					Namespace: "default",
 				},
 				Spec: v1alpha1.ScheduleSpec{
-					Schedule: "@every 5s",
+					Schedule: "@every 2s",
 					EmbedChaos: v1alpha1.EmbedChaos{
 						TimeChaos: &v1alpha1.TimeChaosSpec{
 							TimeOffset: "100ms",
@@ -217,14 +217,14 @@ var _ = Describe("Schedule", func() {
 				Name:      "foo3",
 				Namespace: "default",
 			}
-			duration := "3s"
+			duration := "1s"
 			schedule := &v1alpha1.Schedule{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "foo3",
 					Namespace: "default",
 				},
 				Spec: v1alpha1.ScheduleSpec{
-					Schedule: "@every 5s",
+					Schedule: "@every 3s",
 					EmbedChaos: v1alpha1.EmbedChaos{
 						TimeChaos: &v1alpha1.TimeChaosSpec{
 							TimeOffset: "100ms",
@@ -253,7 +253,7 @@ var _ = Describe("Schedule", func() {
 
 			By("deleting outdated chaos")
 			{
-				time.Sleep(time.Minute * 1)
+				time.Sleep(time.Second * 10)
 				err := wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
 					err = k8sClient.Get(context.TODO(), key, schedule)
 					if err != nil {
@@ -286,7 +286,7 @@ var _ = Describe("Schedule", func() {
 					Namespace: "default",
 				},
 				Spec: v1alpha1.ScheduleSpec{
-					Schedule: "@every 5s",
+					Schedule: "@every 3s",
 					EmbedChaos: v1alpha1.EmbedChaos{
 						Workflow: &v1alpha1.WorkflowSpec{
 							Entry: "the-entry",
@@ -294,6 +294,12 @@ var _ = Describe("Schedule", func() {
 								{
 									Name:     "the-entry",
 									Type:     v1alpha1.TypeSerial,
+									Duration: &duration,
+									Tasks:    []string{"hardwork"},
+								},
+								{
+									Name:     "hardwork",
+									Type:     v1alpha1.TypeSuspend,
 									Duration: &duration,
 									Tasks:    nil,
 								},
@@ -316,7 +322,7 @@ var _ = Describe("Schedule", func() {
 
 			By("disallowing concurrent")
 			{
-				time.Sleep(time.Second * 30)
+				time.Sleep(time.Second * 10)
 				err := wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
 					err = k8sClient.Get(context.TODO(), key, schedule)
 					if err != nil {
@@ -347,7 +353,7 @@ var _ = Describe("Schedule", func() {
 					Namespace: "default",
 				},
 				Spec: v1alpha1.ScheduleSpec{
-					Schedule: "@every 5s",
+					Schedule: "@every 3s",
 					EmbedChaos: v1alpha1.EmbedChaos{
 						Workflow: &v1alpha1.WorkflowSpec{
 							Entry: "the-entry",
@@ -377,7 +383,7 @@ var _ = Describe("Schedule", func() {
 
 			By("deleting outdated workflow")
 			{
-				time.Sleep(time.Minute * 1)
+				time.Sleep(time.Second * 10)
 				err := wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
 					err = k8sClient.Get(context.TODO(), key, schedule)
 					if err != nil {

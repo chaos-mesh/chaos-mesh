@@ -32,6 +32,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/utils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
+	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/controllers"
 )
 
 type Reconciler struct {
@@ -91,12 +92,22 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 		items := reflect.ValueOf(list).Elem().FieldByName("Items")
 		for i := 0; i < items.Len(); i++ {
-			item := items.Index(i).Addr().Interface().(v1alpha1.InnerObject)
-			if !controller.IsChaosFinished(item, now) {
-				shouldSpawn = false
-				r.Recorder.Eventf(schedule, "Warning", "Forbid", "Forbid spawning new job because: %s is still running", item.GetObjectMeta().Name)
-				r.Log.Info("forbid to spawn new chaos", "running", item.GetChaos().Name)
-				break
+			if schedule.Spec.Type != v1alpha1.TypeWorkflow {
+				item := items.Index(i).Addr().Interface().(v1alpha1.InnerObject)
+				if !controller.IsChaosFinished(item, now) {
+					shouldSpawn = false
+					r.Recorder.Eventf(schedule, "Warning", "Forbid", "Forbid spawning new job because: %s is still running", item.GetObjectMeta().Name)
+					r.Log.Info("forbid to spawn new chaos", "running", item.GetChaos().Name)
+					break
+				}
+			} else {
+				workflow := items.Index(i).Addr().Interface().(*v1alpha1.Workflow)
+				if !controllers.WorkflowConditionEqualsTo(workflow.Status, v1alpha1.WorkflowConditionAccomplished, corev1.ConditionTrue) {
+					shouldSpawn = false
+					r.Recorder.Eventf(schedule, "Warning", "Forbid", "Forbid spawning new job because: %s is still running", workflow.GetObjectMeta().Name)
+					r.Log.Info("forbid to spawn new workflow", "running", workflow.GetChaos().Name)
+					break
+				}
 			}
 		}
 	}

@@ -30,10 +30,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/test"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/controllers"
-	"github.com/go-logr/logr"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
-	"go.uber.org/fx"
 
 	"k8s.io/client-go/rest"
 	"k8s.io/kubectl/pkg/scheme"

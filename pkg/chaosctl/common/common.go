@@ -24,8 +24,6 @@ import (
 
 	"google.golang.org/grpc"
 
-	"google.golang.org/grpc"
-
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
 
 	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
@@ -183,7 +181,7 @@ func InitClientSet() (*ClientSet, error) {
 // GetPods returns pod list and corresponding chaos daemon
 func GetPods(ctx context.Context, chaosName string, status v1alpha1.ChaosStatus, selectorSpec v1alpha1.PodSelectorSpec, c client.Client) ([]v1.Pod, []v1.Pod, error) {
 	// get podName
-	failedMessage := status.FailedMessage
+	failedMessage := ""
 	if failedMessage != "" {
 		PrettyPrint(fmt.Sprintf("chaos %s failed with: %s", chaosName, failedMessage), 0, Red)
 	}

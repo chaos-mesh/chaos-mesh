@@ -51,6 +51,13 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, nil
 	}
 
+	if schedule.Spec.Type == v1alpha1.TypeWorkflow {
+		if schedule.IsPaused() {
+			r.Recorder.Eventf(schedule, "Warning", "Unsupported", "a workflow schedule %s cannot be paused", schedule.GetObjectMeta().GetName())
+		}
+		return ctrl.Result{}, nil
+	}
+
 	list, err := r.ActiveLister.ListActiveJobs(ctx, schedule)
 	if err != nil {
 		r.Recorder.Eventf(schedule, "Warning", "Failed", "Failed to list active jobs: %s", err.Error())
