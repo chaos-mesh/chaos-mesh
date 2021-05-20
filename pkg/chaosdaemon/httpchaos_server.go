@@ -39,6 +39,11 @@ type stdioTransport struct {
 	stdio *bpm.Stdio
 }
 
+type TproxyConfig struct {
+	ProxyPorts []uint32                    `json:"proxy_ports"`
+	Rules      []v1alpha1.PodHttpChaosRule `json:"rules"`
+}
+
 func (t stdioTransport) RoundTrip(req *http.Request) (resp *http.Response, err error) {
 	t.stdio.Lock()
 	defer t.stdio.Unlock()
@@ -84,12 +89,9 @@ func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 
 	log.Info("the length of actions", "length", len(rules))
 
-	httpChaosSpec := v1alpha1.PodHttpChaosSpec{
-		ProxyPorts: make([]int32, 0, len(in.ProxyPorts)),
+	httpChaosSpec := TproxyConfig{
+		ProxyPorts: in.ProxyPorts,
 		Rules:      rules,
-	}
-	for _, port := range in.ProxyPorts {
-		httpChaosSpec.ProxyPorts = append(httpChaosSpec.ProxyPorts, int32(port))
 	}
 
 	config, err := json.Marshal(&httpChaosSpec)
