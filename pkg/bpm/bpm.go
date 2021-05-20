@@ -273,7 +273,10 @@ func (m *BackgroundProcessManager) Stdio(pid int, startTime int64) *Stdio {
 		// return successfully as the process has exited
 		return nil
 	}
-	if startTime != ct {
+
+	// There is a bug in calculating CreateTime in the new version of
+	// gopsutils. This is a temporary solution before the upstream fixes it.
+	if startTime-ct > 1000 || ct-startTime > 1000 {
 		log.Info("process has exited", "startTime", ct, "expectedStartTime", startTime)
 		// return successfully as the process has exited
 		return nil
