@@ -698,7 +698,10 @@ spec:
                   type: object
               type: object
             target:
-              description: Target is the object to be selected and injected, <Request|Response>.
+              description: Target is the object to be selected and injected.
+              enum:
+              - Request
+              - Response
               type: string
             value:
               description: Value is required when the mode is set to `FixedPodMode`
@@ -3404,7 +3407,10 @@ spec:
                       type: object
                   type: object
                 target:
-                  description: Target is the object to be selected and injected, <Request|Response>.
+                  description: Target is the object to be selected and injected.
+                  enum:
+                  - Request
+                  - Response
                   type: string
                 value:
                   description: Value is required when the mode is set to `FixedPodMode`
@@ -5919,7 +5925,10 @@ spec:
                       type: object
                   type: object
                 target:
-                  description: Target is the object to be selected and injected, <Request|Response>.
+                  description: Target is the object to be selected and injected.
+                  enum:
+                  - Request
+                  - Response
                   type: string
                 value:
                   description: Value is required when the mode is set to `FixedPodMode`
@@ -7991,8 +8000,10 @@ spec:
                             type: object
                         type: object
                       target:
-                        description: Target is the object to be selected and injected,
-                          <Request|Response>.
+                        description: Target is the object to be selected and injected.
+                        enum:
+                        - Request
+                        - Response
                         type: string
                       value:
                         description: Value is required when the mode is set to `FixedPodMode`

@@ -32,7 +32,8 @@ type HTTPChaos struct {
 type HTTPChaosSpec struct {
 	PodSelector `json:",inline"`
 
-	// Target is the object to be selected and injected, <Request|Response>.
+	// +kubebuilder:validation:Enum=Request;Response
+	// Target is the object to be selected and injected.
 	Target PodHttpChaosTarget `json:"target"`
 
 	PodHttpChaosActions `json:",inline"`
@@ -77,7 +78,7 @@ type HTTPChaosStatus struct {
 
 func (obj *HTTPChaos) GetSelectorSpecs() map[string]interface{} {
 	return map[string]interface{}{
-		".": obj.Spec.PodSelector,
+		".": &obj.Spec.PodSelector,
 	}
 }
 
