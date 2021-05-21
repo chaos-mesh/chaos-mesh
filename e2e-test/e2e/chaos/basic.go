@@ -225,6 +225,43 @@ var _ = ginkgo.Describe("[Basic]", func() {
 		})
 	})
 
+	// http chaos case in [HTTPChaos] context
+	ginkgo.Context("[HTTPChaos]", func() {
+
+		var (
+			err      error
+			port     uint16
+			pfCancel context.CancelFunc
+		)
+
+		ginkgo.JustBeforeEach(func() {
+			svc := fixture.NewE2EService("http", ns)
+			_, err = kubeCli.CoreV1().Services(ns).Create(svc)
+			framework.ExpectNoError(err, "create service error")
+			nd := fixture.NewHTTPTestDeployment("http-test", ns)
+			_, err = kubeCli.AppsV1().Deployments(ns).Create(nd)
+			framework.ExpectNoError(err, "create http-test deployment error")
+			err = util.WaitDeploymentReady("http-test", ns, kubeCli)
+			framework.ExpectNoError(err, "wait http-test deployment ready error")
+			_, port, pfCancel, err = portforward.ForwardOnePort(fw, ns, "svc/http", 8080)
+			framework.ExpectNoError(err, "create helper io port port-forward failed")
+		})
+
+		ginkgo.JustAfterEach(func() {
+			if pfCancel != nil {
+				pfCancel()
+			}
+		})
+
+		// http chaos case in [HTTPDelay] context
+		ginkgo.Context("[HTTPDelay]", func() {
+			ginkgo.It("[Schedule]", func() {
+				iochaostestcases.TestcaseHTTPDelayDurationForATimeThenRecover(ns, cli, c, port)
+			})
+		})
+
+	})
+
 	ginkgo.Context("[Sidecar Config]", func() {
 		var (
 			cmName      string
