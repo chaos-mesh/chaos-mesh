@@ -89,9 +89,14 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 
 	var pod v1.Pod
 	err := impl.Client.Get(ctx, controller.ParseNamespacedName(records[index].Id), &pod)
-
 	if err != nil {
-		return v1alpha1.Injected, err
+		if client.IgnoreNotFound(err) != nil {
+			return v1alpha1.Injected, err
+		} else {
+			impl.Log.Info("Target pod has been deleted", "namespace", pod.Namespace, "name", pod.Name)
+			return v1alpha1.NotInjected, nil
+		}
+
 	}
 
 	impl.Log.Info("Try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
