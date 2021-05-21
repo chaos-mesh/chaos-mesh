@@ -99,6 +99,8 @@ func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 		return nil, err
 	}
 
+	log.Info("ready to apply", "config", string(config))
+
 	req, err := http.NewRequest(http.MethodPut, "/", bytes.NewReader(config))
 	if err != nil {
 		return nil, err
