@@ -216,7 +216,7 @@ export default function ExperimentDetail() {
         dispatch(
           setAlert({
             type: 'success',
-            message: intl.formatMessage({ id: 'common.updateSuccessfully' }),
+            message: intl.formatMessage({ id: 'confirm.updateSuccessfully' }),
           })
         )
 

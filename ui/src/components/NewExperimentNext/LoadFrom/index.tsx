@@ -73,6 +73,7 @@ const LoadFrom: React.FC<LoadFromProps> = ({ loadCallback }) => {
       fillExperiment(experiment)
 
       loadCallback && loadCallback()
+      setRadio('')
 
       return
     }
@@ -87,11 +88,12 @@ const LoadFrom: React.FC<LoadFromProps> = ({ loadCallback }) => {
         fillExperiment(data.kube_object)
 
         loadCallback && loadCallback()
+        setRadio('')
 
         dispatch(
           setAlert({
             type: 'success',
-            message: intl.formatMessage({ id: 'common.loadSuccessfully' }),
+            message: intl.formatMessage({ id: 'confirm.loadSuccessfully' }),
           })
         )
       })

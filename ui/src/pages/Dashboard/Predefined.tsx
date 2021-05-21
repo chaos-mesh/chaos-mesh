@@ -126,7 +126,7 @@ const Predefined = () => {
     dispatch(
       setAlert({
         type: 'success',
-        message: intl.formatMessage({ id: 'common.deleteSuccessfully' }),
+        message: intl.formatMessage({ id: 'confirm.deleteSuccessfully' }),
       })
     )
   }

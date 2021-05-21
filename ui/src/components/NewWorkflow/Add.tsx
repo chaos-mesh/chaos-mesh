@@ -135,7 +135,7 @@ const Add = () => {
         dispatch(
           setAlert({
             type: 'success',
-            message: intl.formatMessage({ id: 'common.updateSuccessfully' }),
+            message: intl.formatMessage({ id: 'confirm.updateSuccessfully' }),
           })
         )
       } else {
@@ -235,7 +235,7 @@ const Add = () => {
                       <TextField
                         name="name"
                         label={T('common.name')}
-                        validate={validateName((T('newW.nameValidation') as unknown) as string)}
+                        validate={validateName(T('newW.nameValidation') as unknown as string)}
                         helperText={errors.name && touched.name ? errors.name : T('newW.node.nameHelper')}
                         error={errors.name && touched.name ? true : false}
                       />
@@ -244,7 +244,7 @@ const Add = () => {
                       <TextField
                         name="duration"
                         label={T('newE.schedule.duration')}
-                        validate={validateDuration((T('newW.durationValidation') as unknown) as string)}
+                        validate={validateDuration(T('newW.durationValidation') as unknown as string)}
                         helperText={
                           errors.duration && touched.duration ? errors.duration : T('newW.node.durationHelper')
                         }

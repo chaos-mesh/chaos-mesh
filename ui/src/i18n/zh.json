@@ -19,8 +19,8 @@
     "totalExperiments": "当前实验",
     "totalState": "当前状态",
     "predefined": "预定义",
-    "noPredefinedFound": "未发现预定义",
     "predefinedDesc": "📦 在这里存储自定义的实验以快速执行。",
+    "noPredefinedFound": "未发现预定义",
     "recent": "最近"
   },
   "newE": {
@@ -124,22 +124,22 @@
   "newW": {
     "title": "新的工作流",
     "node": {
-      "choose": "选择节点类型",
+      "choose": "选择任务类型",
       "single": "单一",
       "serial": "顺序",
       "parallel": "并行",
       "suspend": "暂停",
       "number": "数目",
-      "chooseChildren": "选择子节点",
-      "nameHelper": "节点的名称",
-      "nameValidation": "节点名称不能为空",
-      "durationHelper": "节点的持续时间",
-      "durationValidation": "节点持续时间不能为空",
-      "deleteDesc": "此节点将被删除",
+      "chooseChildren": "选择子任务",
+      "nameHelper": "任务的名称",
+      "nameValidation": "任务名称不能为空",
+      "durationHelper": "任务的持续时间",
+      "durationValidation": "任务持续时间不能为空",
+      "deleteDesc": "此任务将被删除",
       "submitAll": "提交所有改动"
     },
-    "serialTitle": "填写顺序节点",
-    "parallelTitle": "填写并行节点",
+    "serialTitle": "填写顺序任务",
+    "parallelTitle": "填写并行任务",
     "suspendTitle": "设置暂停",
     "nameHelper": "工作流的名称",
     "nameValidation": "工作流名称不能为空",
@@ -147,7 +147,7 @@
     "durationValidation": "工作流持续时间不能为空",
     "submit": "提交工作流",
     "messages": {
-      "m1": "请首先完成当前节点的创建"
+      "m1": "请首先完成当前任务的创建"
     }
   },
   "events": {

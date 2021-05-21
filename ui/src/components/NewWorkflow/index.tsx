@@ -1,4 +1,4 @@
-import { Box, Button, Grid, MenuItem, Step, StepLabel, Stepper, Typography } from '@material-ui/core'
+import { Box, Button, Chip, Grid, MenuItem, Step, StepLabel, Stepper, Typography } from '@material-ui/core'
 import { Form, Formik } from 'formik'
 import MultiNode, { MultiNodeHandles } from './MultiNode'
 import { SelectField, TextField } from 'components/FormField'
@@ -170,7 +170,7 @@ const NewWorkflow = () => {
       dispatch(
         setAlert({
           type: 'success',
-          message: intl.formatMessage({ id: 'common.updateSuccessfully' }),
+          message: intl.formatMessage({ id: 'confirm.updateSuccessfully' }),
         })
       )
       resetRestore()
@@ -201,36 +201,38 @@ const NewWorkflow = () => {
     dispatch(
       setAlert({
         type: 'success',
-        message: intl.formatMessage({ id: 'common.updateSuccessfully' }),
+        message: intl.formatMessage({ id: 'confirm.updateSuccessfully' }),
       })
     )
     resetRestore()
   }
 
-  const onSuspendRestoreSubmit = (stepIndex: number) => ({ name, duration }: SuspendValues) => {
-    dispatch(
-      updateTemplate({
-        ...steps[stepIndex],
-        index: stepIndex,
-        name,
-        duration,
-      })
-    )
-    dispatch(
-      setAlert({
-        type: 'success',
-        message: intl.formatMessage({ id: 'common.updateSuccessfully' }),
-      })
-    )
-    resetRestore()
-  }
+  const onSuspendRestoreSubmit =
+    (stepIndex: number) =>
+    ({ name, duration }: SuspendValues) => {
+      dispatch(
+        updateTemplate({
+          ...steps[stepIndex],
+          index: stepIndex,
+          name,
+          duration,
+        })
+      )
+      dispatch(
+        setAlert({
+          type: 'success',
+          message: intl.formatMessage({ id: 'confirm.updateSuccessfully' }),
+        })
+      )
+      resetRestore()
+    }
 
   const removeExperiment = (index: number) => {
     dispatch(deleteTemplate(index))
     dispatch(
       setAlert({
         type: 'success',
-        message: intl.formatMessage({ id: 'common.deleteSuccessfully' }),
+        message: intl.formatMessage({ id: 'confirm.deleteSuccessfully' }),
       })
     )
     resetRestore()
@@ -276,7 +278,7 @@ const NewWorkflow = () => {
 
   return (
     <>
-      <Grid container spacing={6}>
+      <Grid container spacing={9}>
         <Grid item xs={12} md={8}>
           <Space vertical spacing={6}>
             <Typography>{T('common.process')}</Typography>
@@ -308,11 +310,17 @@ const NewWorkflow = () => {
                         </Box>
                       }
                     >
-                      <Paper className={showRemove === index ? classes.removeSubmittedStep : classes.submittedStep}>
+                      <Paper
+                        padding={restoreIndex === index ? 4.5 : 3}
+                        className={showRemove === index ? classes.removeSubmittedStep : classes.submittedStep}
+                      >
                         <Box display="flex" justifyContent="space-between">
-                          <Typography component="div" variant={restoreIndex === index ? 'h6' : 'body1'}>
-                            {step.name}
-                          </Typography>
+                          <Space display="flex">
+                            <Chip label={T(`newW.node.${step.type}`)} color="primary" size="small" />
+                            <Typography component="div" variant={restoreIndex === index ? 'h6' : 'body1'}>
+                              {step.name}
+                            </Typography>
+                          </Space>
                           <UndoIcon className={classes.asButton} onClick={restoreExperiment(step.experiments, index)} />
                         </Box>
                         {restoreIndex === index && (
@@ -391,7 +399,7 @@ const NewWorkflow = () => {
                     <TextField
                       name="name"
                       label={T('common.name')}
-                      validate={validateName((T('newW.nameValidation') as unknown) as string)}
+                      validate={validateName(T('newW.nameValidation') as unknown as string)}
                       helperText={errors.name && touched.name ? errors.name : T('newW.nameHelper')}
                       error={errors.name && touched.name ? true : false}
                     />
@@ -409,7 +417,7 @@ const NewWorkflow = () => {
                     <TextField
                       name="duration"
                       label={T('newE.schedule.duration')}
-                      validate={validateDuration((T('newW.durationValidation') as unknown) as string)}
+                      validate={validateDuration(T('newW.durationValidation') as unknown as string)}
                       helperText={errors.duration && touched.duration ? errors.duration : T('newW.durationHelper')}
                       error={errors.duration && touched.duration ? true : false}
                     />

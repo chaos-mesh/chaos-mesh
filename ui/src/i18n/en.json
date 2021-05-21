@@ -20,6 +20,7 @@
     "totalState": "Total State",
     "predefined": "Predefined",
     "predefinedDesc": "📦 Store custom experiments here for quick execution.",
+    "noPredefinedFound": "No predefined found",
     "recent": "Recent"
   },
   "newE": {
@@ -124,18 +125,18 @@
   "newW": {
     "title": "New Workflow",
     "node": {
-      "choose": "Choose node type",
+      "choose": "Choose task type",
       "single": "Single",
       "serial": "Serial",
       "parallel": "Parallel",
       "suspend": "Suspend",
       "number": "Number",
-      "chooseChildren": "Choose child node",
-      "nameHelper": "The node name",
-      "nameValidation": "The node name is required",
-      "durationHelper": "The node duration",
-      "durationValidation": "The node duration is required",
-      "deleteDesc": "This node will be deleted",
+      "chooseChildren": "Choose child task",
+      "nameHelper": "The task name",
+      "nameValidation": "The task name is required",
+      "durationHelper": "The task duration",
+      "durationValidation": "The task duration is required",
+      "deleteDesc": "This task will be deleted",
       "submitAll": "Submit All"
     },
     "serialTitle": "Set serial",

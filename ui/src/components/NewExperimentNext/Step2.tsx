@@ -4,7 +4,7 @@ import { LabelField, SelectField, TextField } from 'components/FormField'
 import basicData, { schema } from './data/basic'
 import { createStyles, makeStyles } from '@material-ui/core/styles'
 import { setBasic, setStep2 } from 'slices/experiments'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
 import AdvancedOptions from 'components/AdvancedOptions'
@@ -43,14 +43,15 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false }) => {
   const scopeDisabled = target.kind === 'AwsChaos' || target.kind === 'GcpChaos'
   const dispatch = useStoreDispatch()
 
-  const [init, setInit] = useState(basicData)
+  const originalInit = useMemo(() => (inWorkflow ? { ...basicData, duration: '' } : basicData), [inWorkflow])
+  const [init, setInit] = useState(originalInit)
 
   useEffect(() => {
     setInit({
-      ...basicData,
+      ...originalInit,
       ...basic,
     })
-  }, [basic])
+  }, [originalInit, basic])
 
   const handleOnSubmitStep2 = (values: Record<string, any>) => {
     if (process.env.NODE_ENV === 'development') {
@@ -79,7 +80,7 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false }) => {
       <Box position="relative" hidden={step2}>
         <Formik
           enableReinitialize
-          initialValues={inWorkflow ? { ...init, duration: '' } : init}
+          initialValues={init}
           validationSchema={
             inWorkflow
               ? schema.shape({
