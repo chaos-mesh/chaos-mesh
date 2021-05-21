@@ -10,7 +10,6 @@ import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
 import { RootState } from 'store'
 import T from 'components/T'
-import TimelineOutlinedIcon from '@material-ui/icons/TimelineOutlined'
 import api from 'api'
 import genEventsChart from 'lib/d3/eventsChart'
 import { useIntl } from 'react-intl'
@@ -37,19 +36,15 @@ export default function Events() {
   const chartRef = useRef<HTMLDivElement>(null)
   const eventsTableRef = useRef<EventsTableHandles>(null)
 
-  const [loading, setLoading] = useState(false)
-  const [events, setEvents] = useState<Event[] | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [events, setEvents] = useState<Event[]>([])
 
   const fetchEvents = () => {
-    setLoading(true)
-
     api.events
       .events()
       .then(({ data }) => setEvents(data))
       .catch(console.error)
-      .finally(() => {
-        setLoading(false)
-      })
+      .finally(() => setLoading(false))
   }
 
   useEffect(fetchEvents, [])
@@ -86,12 +81,9 @@ export default function Events() {
         </Grow>
       )}
 
-      {!loading && events && events.length === 0 && (
-        <NotFound textAlign="center">
-          <Box mb={3}>
-            <TimelineOutlinedIcon fontSize="large" />
-          </Box>
-          <Typography variant="h6">{T('events.noEventsFound')}</Typography>
+      {!loading && events.length === 0 && (
+        <NotFound illustrated textAlign="center">
+          <Typography>{T('events.noEventsFound')}</Typography>
         </NotFound>
       )}
 

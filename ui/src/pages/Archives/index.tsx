@@ -51,6 +51,14 @@ export default function Archives() {
   useEffect(fetchArchives, [])
 
   const handleSelect = (selected: Confirm) => dispatch(setConfirm(selected))
+  const onSelect = (selected: Confirm) =>
+    dispatch(
+      setConfirm({
+        title: selected.title,
+        description: selected.description,
+        handle: handleAction(selected.action, selected.uuid),
+      })
+    )
 
   const handleAction = (action: string, uuid?: uuid) => () => {
     let actionFunc: any
@@ -125,7 +133,7 @@ export default function Archives() {
         />
       )}
       <Box flex={1}>
-        <ExperimentListItem experiment={data[index]} isArchive onSelect={handleSelect} intl={intl} />
+        <ExperimentListItem experiment={data[index]} isArchive onSelect={onSelect} intl={intl} />
       </Box>
     </Box>
   )
