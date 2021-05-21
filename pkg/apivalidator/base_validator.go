@@ -39,7 +39,7 @@ func NameValid(fl validator.FieldLevel) bool {
 	return true
 }
 
-var namePattern = regexp.MustCompile("^[-.\\w]*$")
+var namePattern = regexp.MustCompile(`^[-.\w]*$`)
 
 // checkName can be used to check resource names.
 func checkName(name string) bool {

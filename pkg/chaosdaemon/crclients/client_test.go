@@ -29,15 +29,21 @@ var _ = Describe("chaosdaemon util", func() {
 		It("should work", func() {
 			_, err := CreateContainerRuntimeInfoClient(ContainerRuntimeDocker)
 			Expect(err).To(BeNil())
-
-			defer mock.With("MockContainerdClient", &test.MockClient{})()
+			defer func() {
+				err := mock.With("MockContainerdClient", &test.MockClient{})()
+				Expect(err).To(BeNil())
+			}()
 			_, err = CreateContainerRuntimeInfoClient(ContainerRuntimeContainerd)
 			Expect(err).To(BeNil())
 		})
 
 		It("should error on newContaineredClient", func() {
 			errorStr := "this is a mocked error"
-			defer mock.With("NewContainerdClientError", errors.New(errorStr))()
+
+			defer func() {
+				err := mock.With("NewContainerdClientError", errors.New(errorStr))()
+				Expect(err).To(BeNil())
+			}()
 			_, err := CreateContainerRuntimeInfoClient(ContainerRuntimeContainerd)
 			Expect(err).ToNot(BeNil())
 			Expect(fmt.Sprintf("%s", err)).To(Equal(errorStr))
