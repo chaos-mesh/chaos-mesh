@@ -26,10 +26,6 @@ import (
 	"github.com/go-logr/logr"
 )
 
-const (
-	GcpFinalizer = "gcp-finalizer"
-)
-
 type Impl struct {
 	client.Client
 
@@ -50,11 +46,9 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	}
 	var selected v1alpha1.GcpSelector
 	json.Unmarshal([]byte(records[index].Id), &selected)
-	gcpchaos.Finalizers = []string{GcpFinalizer}
 
 	_, err = computeService.Instances.Stop(selected.Project, selected.Zone, selected.Instance).Do()
 	if err != nil {
-		gcpchaos.Finalizers = make([]string, 0)
 		impl.Log.Error(err, "fail to stop the instance")
 		return v1alpha1.NotInjected, err
 	}
@@ -69,7 +63,6 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		impl.Log.Error(err, "chaos is not GcpChaos", "chaos", chaos)
 		return v1alpha1.Injected, err
 	}
-	gcpchaos.Finalizers = make([]string, 0)
 	computeService, err := utils.GetComputeService(ctx, impl.Client, gcpchaos)
 	if err != nil {
 		impl.Log.Error(err, "fail to get the compute service")
