@@ -66,7 +66,8 @@ const WorkflowDetail = () => {
       .detail(ns, name)
       .then(({ data }) => {
         // TODO: remove noise in API
-        delete data.kube_object.metadata.annotations['kubectl.kubernetes.io/last-applied-configuration']
+        data.kube_object.metadata.annotations &&
+          delete data.kube_object.metadata.annotations['kubectl.kubernetes.io/last-applied-configuration']
 
         setDetail(data)
 
