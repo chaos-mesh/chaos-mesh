@@ -1,25 +1,25 @@
 import { Button, Checkbox, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@material-ui/core'
 import { setConfirm, setTokenName, setTokens } from 'slices/globalStatus'
+import { useStoreDispatch, useStoreSelector } from 'store'
 
 import LS from 'lib/localStorage'
 import PaperContainer from 'components-mui/PaperContainer'
-import { RootState } from 'store'
 import T from 'components/T'
 import { TokenFormValues } from 'components/Token'
 import api from 'api'
+import { useHistory } from 'react-router-dom'
 import { useIntl } from 'react-intl'
-import { useSelector } from 'react-redux'
-import { useStoreDispatch } from 'store'
 
 const TokensTable = () => {
   const intl = useIntl()
+  const history = useHistory()
 
-  const { tokens, tokenName } = useSelector((state: RootState) => state.globalStatus)
+  const { tokens, tokenName } = useStoreSelector((state) => state.globalStatus)
   const dispatch = useStoreDispatch()
 
-  const handleUseToken = (_token: TokenFormValues) => () => {
-    dispatch(setTokenName(_token.name))
-    api.auth.token(_token.token)
+  const handleUseToken = (token: TokenFormValues) => () => {
+    dispatch(setTokenName(token.name))
+    api.auth.token(token.token)
   }
 
   const handleRemoveToken = (token: TokenFormValues) => () =>
@@ -35,16 +35,18 @@ const TokensTable = () => {
     const current = tokens.filter(({ name }) => name !== n)
 
     if (current.length) {
+      confirmRef.current!.setOpen(false)
+
       dispatch(setTokens(current))
 
       if (n === tokenName) {
         api.auth.resetToken()
-        dispatch(setTokenName(''))
+        handleUseToken(current[0])()
       }
     } else {
       LS.remove('token')
       LS.remove('token-name')
-      window.location.reload()
+      history.go(0)
     }
   }
 

@@ -1,11 +1,11 @@
 import { Box, Button, Link, Typography } from '@material-ui/core'
 import { useEffect, useState } from 'react'
-import { useHistory, useLocation } from 'react-router-dom'
 
 import ConfirmDialog from 'components-mui/ConfirmDialog'
 import RBACGenerator from 'components/RBACGenerator'
 import T from 'components/T'
 import Token from 'components/Token'
+import { useHistory } from 'react-router-dom'
 
 interface AuthProps {
   open: boolean
@@ -14,7 +14,6 @@ interface AuthProps {
 
 const Auth: React.FC<AuthProps> = ({ open, setOpen }) => {
   const history = useHistory()
-  const { pathname } = useLocation()
 
   const [tokenGenOpen, setTokenGenOpen] = useState(false)
 
@@ -22,12 +21,7 @@ const Auth: React.FC<AuthProps> = ({ open, setOpen }) => {
     setOpen(open)
   }, [open, setOpen])
 
-  const handleSubmitCallback = () => {
-    setOpen(false)
-
-    history.replace('/authed')
-    setTimeout(() => history.replace(pathname))
-  }
+  const handleSubmitCallback = () => history.go(0)
 
   return (
     <ConfirmDialog
