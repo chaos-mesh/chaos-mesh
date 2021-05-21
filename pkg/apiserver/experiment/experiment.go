@@ -1125,6 +1125,12 @@ func (s *Service) batchDeleteExperiment(c *gin.Context) {
 	uidSlice = strings.Split(uids, ",")
 	errFlag = false
 
+	if len(uidSlice) > 100 {
+		c.Status(http.StatusBadRequest)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("too many uids, please reduce the number of uids")))
+		return
+	}
+
 	for _, uid := range uidSlice {
 		if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
 			if gorm.IsRecordNotFoundError(err) {

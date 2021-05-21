@@ -33,6 +33,7 @@ func BootstrapWorkflowControllers(mgr manager.Manager, logger logr.Logger) error
 	}
 	err = ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.Workflow{}).
+		Owns(&v1alpha1.WorkflowNode{}).
 		Named("workflow-entry-reconciler").
 		Complete(
 			NewWorkflowEntryReconciler(
@@ -61,6 +62,22 @@ func BootstrapWorkflowControllers(mgr manager.Manager, logger logr.Logger) error
 	if err != nil {
 		return err
 	}
+
+	err = ctrl.NewControllerManagedBy(mgr).
+		For(&v1alpha1.WorkflowNode{}).
+		Owns(&v1alpha1.WorkflowNode{}).
+		Named("workflow-parallel-node-reconciler").
+		Complete(
+			NewParallelNodeReconciler(
+				noCacheClient,
+				mgr.GetEventRecorderFor("workflow-parallel-node-reconciler"),
+				logger.WithName("workflow-parallel-node-reconciler"),
+			),
+		)
+	if err != nil {
+		return err
+	}
+
 	err = ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.WorkflowNode{}).
 		Named("workflow-deadline-reconciler").
