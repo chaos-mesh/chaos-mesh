@@ -76,7 +76,7 @@ const DataTable: React.FC<DataTableProps> = ({ data, fetchData }) => {
           <TableRow>
             <TableCell>{T('common.name')}</TableCell>
             <TableCell>{T('workflow.entry')}</TableCell>
-            <TableCell>{T('workflow.time')}</TableCell>
+            {/* <TableCell>{T('workflow.time')}</TableCell> */}
             <TableCell>{T('workflow.state')}</TableCell>
             <TableCell>{T('table.created')}</TableCell>
             <TableCell>{T('common.operation')}</TableCell>
@@ -90,7 +90,7 @@ const DataTable: React.FC<DataTableProps> = ({ data, fetchData }) => {
               <TableRow key={key} className={classes.tableRow} hover onClick={handleJumpTo(d.namespace, d.name)}>
                 <TableCell>{d.name}</TableCell>
                 <TableCell>{d.entry}</TableCell>
-                <TableCell></TableCell>
+                {/* <TableCell></TableCell> */}
                 <TableCell>{d.status}</TableCell>
                 <TableCell>
                   {DateTime.fromISO(d.created, {

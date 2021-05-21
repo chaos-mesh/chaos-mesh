@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Grow, Modal } from '@material-ui/core'
+import { Box, Button, Grow, Modal } from '@material-ui/core'
 import { Confirm, setAlert, setConfirm } from 'slices/globalStatus'
 import { useEffect, useRef, useState } from 'react'
 import { useHistory, useParams } from 'react-router-dom'
@@ -34,7 +34,7 @@ const useStyles = makeStyles((theme) => ({
     position: 'absolute',
     top: '50%',
     left: '50%',
-    width: '70vw',
+    width: '50vw',
     height: '90vh',
     transform: 'translate(-50%, -50%)',
     [theme.breakpoints.down('sm')]: {
@@ -52,7 +52,6 @@ const WorkflowDetail = () => {
   const { theme } = useStoreSelector((state) => state.settings)
   const dispatch = useStoreDispatch()
 
-  const [loading, setLoading] = useState(false)
   const [detail, setDetail] = useState<APIWorkflowDetail>()
   const [yamlEditor, setYAMLEditor] = useState<Ace.Editor>()
   const [data, setData] = useState<any>()
@@ -60,6 +59,7 @@ const WorkflowDetail = () => {
   const modalTitle = selected === 'workflow' ? detail?.name : selected === 'node' ? data.name : ''
   const [configOpen, setConfigOpen] = useState(false)
   const topologyRef = useRef<any>(null)
+  const intervalIDRef = useRef<number>()
 
   const fetchWorkflowDetail = (ns: string, name: string) =>
     api.workflows
@@ -69,20 +69,22 @@ const WorkflowDetail = () => {
         delete data.kube_object.metadata.annotations['kubectl.kubernetes.io/last-applied-configuration']
 
         setDetail(data)
+
+        // Clear interval after workflow succeed
+        if (data.status === 'Succeed') {
+          clearInterval(intervalIDRef.current)
+        }
       })
       .catch(console.error)
-      .finally(() => setTimeout(() => setLoading(true), 1000))
 
   useEffect(() => {
     fetchWorkflowDetail(namespace, name)
 
-    const id = setInterval(() => {
-      setLoading(false)
-
+    intervalIDRef.current = window.setInterval(() => {
       fetchWorkflowDetail(namespace, name)
     }, 6000)
 
-    return () => clearInterval(id)
+    return () => clearInterval(intervalIDRef.current)
   }, [namespace, name])
 
   useEffect(() => {
@@ -152,8 +154,8 @@ const WorkflowDetail = () => {
 
   const handleNodeClick: EventHandler = (e) => {
     const node = e.target
-    const { id } = node.data()
-    const template = detail?.kube_object.spec.templates.find((t: any) => t.name === id)
+    const { template: nodeTemplate } = node.data()
+    const template = detail?.kube_object.spec.templates.find((t: any) => t.name === nodeTemplate)
 
     setData(template)
     setSelected('node')
@@ -162,7 +164,24 @@ const WorkflowDetail = () => {
   }
 
   const handleUpdateWorkflow = () => {
-    const data = yaml.load(yamlEditor!.getValue())
+    let data = yaml.load(yamlEditor!.getValue())
+
+    if (selected === 'node') {
+      const kubeObject = detail?.kube_object
+      kubeObject.spec.templates = kubeObject.spec.templates.map((t: any) => {
+        if (t.name === (data as any).name) {
+          return data
+        }
+
+        return t
+      })
+
+      data = {
+        apiVersion: 'chaos-mesh.org/v1alpha1',
+        kind: 'Workflow',
+        ...kubeObject,
+      }
+    }
 
     api.workflows
       .update(namespace, name, data)
@@ -172,7 +191,7 @@ const WorkflowDetail = () => {
         dispatch(
           setAlert({
             type: 'success',
-            message: intl.formatMessage({ id: `common.updateSuccessfully` }),
+            message: intl.formatMessage({ id: `confirm.updateSuccessfully` }),
           })
         )
 
@@ -204,7 +223,6 @@ const WorkflowDetail = () => {
               title={
                 <Space spacing={1.5} display="flex" alignItems="center">
                   <Box>{T('workflow.topology')}</Box>
-                  {loading && <CircularProgress size={15} />}
                 </Space>
               }
             >
@@ -225,7 +243,11 @@ const WorkflowDetail = () => {
 
       <Modal open={configOpen} onClose={onModalClose}>
         <div>
-          <Paper className={classes.configPaper} padding={0}>
+          <Paper
+            className={classes.configPaper}
+            style={{ width: selected === 'workflow' ? '50vw' : selected === 'node' ? '70vw' : '50vw' }}
+            padding={0}
+          >
             {detail && configOpen && (
               <Box display="flex" flexDirection="column" height="100%">
                 <Box px={3} pt={3}>

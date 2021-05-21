@@ -1,7 +1,7 @@
 import { AutocompleteMultipleField, SelectField, TextField } from 'components/FormField'
 import { Box, InputAdornment, MenuItem, Typography } from '@material-ui/core'
 import React, { useEffect, useMemo } from 'react'
-import { arrToObjBySep, joinObjKVs, toTitleCase } from 'lib/utils'
+import { arrToObjBySep, objToArrBySep, toTitleCase } from 'lib/utils'
 import {
   getAnnotations,
   getCommonPodsByNamespaces as getCommonPods,
@@ -48,12 +48,12 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
   const dispatch = useStoreDispatch()
 
   const kvSeparator = ': '
-  const labelKVs = useMemo(() => joinObjKVs(labels, kvSeparator), [labels])
-  const annotationKVs = useMemo(() => joinObjKVs(annotations, kvSeparator), [annotations])
+  const labelKVs = useMemo(() => objToArrBySep(labels, kvSeparator), [labels])
+  const annotationKVs = useMemo(() => objToArrBySep(annotations, kvSeparator), [annotations])
 
   const handleChangeIncludeAll = (id: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const lastValues = getIn(values, id)
-    const currentValues = (e.target.value as unknown) as string[]
+    const currentValues = e.target.value as unknown as string[]
 
     if (!lastValues.includes('all') && currentValues.includes('all')) {
       e.target.value = ['all'] as any

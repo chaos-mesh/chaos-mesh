@@ -47,6 +47,13 @@ const workflowStyle: Stylesheet[] = [
       'line-color': theme.palette.success.main,
     },
   },
+  {
+    selector: 'edge.bezier',
+    style: {
+      'curve-style': 'bezier',
+      'control-point-step-size': 40,
+    },
+  },
 ]
 
 type RecursiveNodeDefinition = NodeDefinition | Array<string | RecursiveNodeDefinition>
@@ -58,18 +65,23 @@ function generateWorkflowNodes(detail: WorkflowDetail) {
   const mainTasks = entryNode?.serial?.tasks
 
   function toCytoscapeNode(node: Node): RecursiveNodeDefinition {
-    const { name, type, state } = node
+    const { name, type, state, template } = node
 
     if (type === 'SerialNode' && node.serial!.tasks.length) {
-      return [type, node.serial!.tasks.map((d) => toCytoscapeNode(nodeMap.get(d.name)!))]
+      return [
+        type,
+        node.serial!.tasks.filter((d) => d.name).map((d) => toCytoscapeNode(nodeMap.get(d.name)!)),
+        node.name,
+      ]
     } else if (type === 'ParallelNode' && node.parallel!.tasks.length) {
-      return [type, node.parallel!.tasks.map((d) => toCytoscapeNode(nodeMap.get(d.name)!))]
+      return [type, node.parallel!.tasks.map((d) => toCytoscapeNode(nodeMap.get(d.name)!)), node.name]
     } else {
       return {
         data: {
           id: name,
           type,
           state,
+          template,
         },
         classes: state,
         grabbable: false,
@@ -83,84 +95,106 @@ function generateWorkflowNodes(detail: WorkflowDetail) {
     .map((d) => toCytoscapeNode(d!))
 }
 
-function mergeStates(source: Node['state'], target: Node['state']) {
-  if (source === 'Succeed' && target === 'Succeed') {
+function mergeStates(nodes: NodeDefinition[]) {
+  if (nodes.every((n) => n.data.state === 'Succeed')) {
     return 'Succeed'
   }
 
   return undefined
 }
 
+function connectSerial(edges: EdgeDefinition[], id: string, serial: RecursiveNodeDefinition[]) {
+  const length = serial.length
+  const first = serial[0]
+  const last = serial[length - 1]
+
+  if (!Array.isArray(first) && !Array.isArray(last)) {
+    edges.push({
+      data: {
+        id,
+        source: first.data.id!,
+        target: last.data.id!,
+      },
+      classes: 'bezier',
+    })
+  }
+}
+
 function generateWorkflowEdges(result: EdgeDefinition[], nodes: RecursiveNodeDefinition[]) {
-  let first = nodes[0]
+  let source = nodes[0] as NodeDefinition
 
   // source != single node
-  if (Array.isArray(first)) {
-    generateWorkflowEdges(result, first[1] as RecursiveNodeDefinition[])
+  if (Array.isArray(source)) {
+    const type = source[0]
+
+    if (type === 'SerialNode') {
+      generateWorkflowEdges(result, [...source[1], ...nodes.slice(1)])
+
+      // connectSerial(result, source[2], source[1])
+    } else if (type === 'ParallelNode') {
+      ;(source[1] as NodeDefinition[]).forEach((d) => {
+        generateWorkflowEdges(result, [d, nodes[1]])
+      })
+
+      generateWorkflowEdges(result, nodes.slice(1))
+    }
   } else {
     // source = single node
-    let source = first
+    const nodes_ = nodes.slice(1)
 
-    nodes.slice(1).forEach((n) => {
+    for (let i = 0; i < nodes_.length; i++) {
       const sourceID = source.data.id!
-      const sourceState = source.data.state
+      const n = nodes_[i]
 
-      // N (target) = single node
+      // N (target) != single node
       if (Array.isArray(n)) {
         const target = n
         const type = target[0]
 
         if (type === 'SerialNode') {
-          const length = (target[1] as NodeDefinition[]).length
-          const firstNode = (target[1] as NodeDefinition[])[0]
-          const targetID = firstNode.data.id!
-          const state = mergeStates(sourceState, firstNode.data.state)
+          generateWorkflowEdges(result, [source, ...(target[1] as RecursiveNodeDefinition[]), ...nodes.slice(i + 2)])
 
-          result.push({
-            data: {
-              id: `${sourceID}-to-${targetID}`,
-              source: sourceID,
-              target: targetID,
-            },
-            classes: state,
-          })
+          // connectSerial(result, target[2] as string, target[1] as NodeDefinition[])
 
-          source = (target[1] as NodeDefinition[])[length - 1]
-
-          generateWorkflowEdges(result, target[1] as RecursiveNodeDefinition[])
+          break
         } else if (type === 'ParallelNode') {
+          const connection = {
+            data: {
+              id: `parallel-connection-${i}`,
+            },
+            style: {
+              label: '',
+            },
+            grabbable: false,
+          }
+
+          // eslint-disable-next-line no-loop-func
           ;(target[1] as NodeDefinition[]).forEach((d) => {
-            const state = mergeStates(sourceState, d.data.state)
-
-            const edge = {
-              data: {
-                id: `${sourceID}-to-${d.data.id!}`,
-                source: sourceID,
-                target: d.data.id!,
-              },
-              classes: state,
-            }
-
-            result.push(edge)
+            generateWorkflowEdges(result, [source, d])
+            generateWorkflowEdges(result, [d, connection])
           })
+
+          generateWorkflowEdges(result, [connection, ...nodes.slice(i + 2)])
+
+          nodes.push(connection)
+
+          break
         }
       } else {
-        // N (target) != single node
+        // N (target) = single node
         result.push({
           data: {
             id: `${sourceID}-to-${n.data.id!}`,
             source: sourceID,
             target: n.data.id!,
           },
-          classes: mergeStates(sourceState, n.data.state),
+          classes: mergeStates([source, n]),
         })
 
         source = n
       }
-    })
+    }
   }
-
-  return result
 }
 
 export const constructWorkflowTopology = (
@@ -170,11 +204,12 @@ export const constructWorkflowTopology = (
 ) => {
   function generateElements(detail: WorkflowDetail) {
     const nodes = generateWorkflowNodes(detail)!
-    const edges = generateWorkflowEdges([], nodes)
+    const edges = [] as EdgeDefinition[]
+    generateWorkflowEdges(edges, nodes)
 
     return {
       nodes: _flattenDeep(nodes).filter((d) => typeof d !== 'string') as NodeDefinition[],
-      edges: edges as EdgeDefinition[],
+      edges: edges,
     }
   }
 
@@ -201,9 +236,24 @@ export const constructWorkflowTopology = (
     .zoom(0.75)
     .on('click', 'node', onNodeClick)
 
+  let flashRunning: number
   function updateElements(detail: WorkflowDetail) {
+    clearInterval(flashRunning)
+    flashRunning = window.setInterval(() => {
+      const nodes = cy.$('node.Running')
+
+      if (nodes.length) {
+        nodes
+          .animate(animateOptions({ 'background-opacity': 0.12 }), { duration: 750 })
+          .animate(animateOptions({ 'background-opacity': 1 }), { duration: 750 })
+      } else {
+        clearInterval(flashRunning)
+      }
+    }, 2000)
+
+    const elements = generateElements(detail)
     cy.json({
-      elements: generateElements(detail),
+      elements,
     })
     cy.layout(layout).run()
 
@@ -211,18 +261,6 @@ export const constructWorkflowTopology = (
   }
 
   updateElements(detail)
-
-  const flashRunning = setInterval(() => {
-    const nodes = cy.$('node.Running')
-
-    if (nodes.length) {
-      nodes
-        .animate(animateOptions({ 'background-opacity': 0.12 }), { duration: 750 })
-        .animate(animateOptions({ 'background-opacity': 1 }), { duration: 750 })
-    } else {
-      clearInterval(flashRunning)
-    }
-  }, 2000)
 
   return { updateElements }
 }
