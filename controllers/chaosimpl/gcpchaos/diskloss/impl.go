@@ -29,10 +29,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
-const (
-	GcpFinalizer = "gcp-finalizer"
-)
-
 type Impl struct {
 	client.Client
 
@@ -91,11 +87,9 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		return v1alpha1.NotInjected, err
 	}
 
-	gcpchaos.Finalizers = []string{GcpFinalizer}
 	for _, specDeviceName := range *selected.DeviceNames {
 		_, err = computeService.Instances.DetachDisk(selected.Project, selected.Zone, selected.Instance, specDeviceName).Do()
 		if err != nil {
-			gcpchaos.Finalizers = make([]string, 0)
 			impl.Log.Error(err, "fail to detach the disk")
 			return v1alpha1.NotInjected, err
 		}
@@ -111,7 +105,6 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		impl.Log.Error(err, "chaos is not GcpChaos", "chaos", chaos)
 		return v1alpha1.Injected, err
 	}
-	gcpchaos.Finalizers = make([]string, 0)
 	computeService, err := utils.GetComputeService(ctx, impl.Client, gcpchaos)
 	if err != nil {
 		impl.Log.Error(err, "fail to get the compute service")
