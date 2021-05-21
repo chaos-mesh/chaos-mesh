@@ -16,6 +16,7 @@ package v1alpha1
 import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 const (
@@ -107,4 +108,21 @@ const (
 	NodeDeadlineOmitted   string = "NodeDeadlineOmitted"
 	ChaosCRCreated        string = "ChaosCRCreated"
 	ChaosCRCreateFailed   string = "ChaosCRCreateFailed"
+	ChaosCRNotExists      string = "ChaosCRNotExists"
 )
+
+// TODO: GenericChaosList/GenericChaos is very similar to ChaosList/ChaosInstance, maybe we could combine them later.
+
+// GenericChaosList only use to list GenericChaos by certain EmbedChaos
+// +kubebuilder:object:generate=false
+type GenericChaosList interface {
+	runtime.Object
+	GetItems() []GenericChaos
+}
+
+// GenericChaos could be a place holder for any kubernetes Kind
+// +kubebuilder:object:generate=false
+type GenericChaos interface {
+	runtime.Object
+	metav1.Object
+}
