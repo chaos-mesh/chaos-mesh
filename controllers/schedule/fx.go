@@ -19,6 +19,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/active"
 	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/cron"
 	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/gc"
+	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/pause"
 	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/utils"
 )
 
@@ -34,6 +35,11 @@ var Module = fx.Provide(
 	fx.Annotated{
 		Group:  "controller",
 		Target: gc.NewController,
+	},
+
+	fx.Annotated{
+		Group:  "controller",
+		Target: pause.NewController,
 	},
 	utils.NewActiveLister,
 )

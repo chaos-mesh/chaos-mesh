@@ -16,8 +16,12 @@ package common
 import (
 	"github.com/go-logr/logr"
 	"go.uber.org/fx"
+	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
+
+	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
@@ -27,6 +31,8 @@ type ChaosImplPair struct {
 	Name   string
 	Object InnerObjectWithSelector
 	Impl   ChaosImpl
+
+	Owns []runtime.Object
 }
 
 type ChaosImplPairs struct {
@@ -36,22 +42,33 @@ type ChaosImplPairs struct {
 }
 
 func NewController(mgr ctrl.Manager, client client.Client, reader client.Reader, logger logr.Logger, selector *selector.Selector, pairs ChaosImplPairs) (types.Controller, error) {
-	setupLog := logger.WithName("setup")
+	setupLog := logger.WithName("setup-common")
 	for _, pair := range pairs.Impls {
 		setupLog.Info("setting up controller", "resource-name", pair.Name)
 
-		err := ctrl.NewControllerManagedBy(mgr).
+		builder := ctrl.NewControllerManagedBy(mgr).
 			For(pair.Object).
-			Named(pair.Name + "-records").
-			Complete(&Reconciler{
-				Impl:     pair.Impl,
-				Object:   pair.Object,
-				Client:   client,
-				Reader:   reader,
-				Recorder: mgr.GetEventRecorderFor("common"),
-				Selector: selector,
-				Log:      logger.WithName("records"),
-			})
+			Named(pair.Name + "-records")
+
+		// Add owning resources
+		if len(pair.Owns) > 0 {
+			for _, obj := range pair.Owns {
+				builder = builder.Watches(&source.Kind{Type: obj}, &handler.EnqueueRequestForOwner{
+					OwnerType:    pair.Object,
+					IsController: false,
+				})
+			}
+		}
+
+		err := builder.Complete(&Reconciler{
+			Impl:     pair.Impl,
+			Object:   pair.Object,
+			Client:   client,
+			Reader:   reader,
+			Recorder: mgr.GetEventRecorderFor("common"),
+			Selector: selector,
+			Log:      logger.WithName("records"),
+		})
 		if err != nil {
 			return "", err
 		}

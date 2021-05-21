@@ -355,10 +355,9 @@ webhook:
     - stresschaos
     - awschaos
     - gcpchaos
-    - podiochaos
-    - podnetworkchaos
     - dnschaos
     - jvmchaos
+    - podiochaos
 
 bpfki:
   create: false

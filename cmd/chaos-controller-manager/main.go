@@ -44,7 +44,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podiochaos"
-	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos"
 	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
 
@@ -87,6 +86,7 @@ func main() {
 				provider.NewLogger,
 				provider.NewAuthCli,
 				provider.NewScheme,
+				provider.NewConfig,
 			),
 			controllers.Module,
 			selector.Module,
@@ -115,7 +115,6 @@ func Run(params RunParams) error {
 	mgr := params.Mgr
 	logger := params.Logger
 	client := params.Client
-	reader := params.Reader
 	authCli := params.AuthCli
 
 	var err error
@@ -135,19 +134,6 @@ func Run(params RunParams) error {
 		Log:    logger.WithName("handler").WithName("PodIOChaos"),
 	})
 	err = (&v1alpha1.PodIoChaos{}).SetupWebhookWithManager(mgr)
-	if err != nil {
-		return err
-	}
-
-	// We only setup webhook for podnetworkchaos, and the logic of applying chaos are in the validation
-	// webhook, because we need to get the running result synchronously in network chaos reconciler
-	v1alpha1.RegisterRawPodNetworkHandler(&podnetworkchaos.Handler{
-		Client:                  client,
-		Reader:                  reader,
-		Log:                     logger.WithName("handler").WithName("PodNetworkChaos"),
-		AllowHostNetworkTesting: ccfg.ControllerCfg.AllowHostNetworkTesting,
-	})
-	err = (&v1alpha1.PodNetworkChaos{}).SetupWebhookWithManager(mgr)
 	if err != nil {
 		return err
 	}

@@ -24,7 +24,7 @@ import (
 const KindPodNetworkChaos = "PodNetworkChaos"
 
 // +kubebuilder:object:root=true
-
+// +kubebuilder:subresource:status
 // PodNetworkChaos is the Schema for the PodNetworkChaos API
 type PodNetworkChaos struct {
 	metav1.TypeMeta   `json:",inline"`
@@ -146,7 +146,9 @@ type RawRuleSource struct {
 
 // PodNetworkChaosStatus defines the observed state of PodNetworkChaos
 type PodNetworkChaosStatus struct {
-	ChaosStatus `json:",inline"`
+	FailedMessage string `json:"failedMessage,omitempty"`
+
+	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
 }
 
 // +kubebuilder:object:root=true
@@ -156,11 +158,6 @@ type PodNetworkChaosList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []PodNetworkChaos `json:"items"`
-}
-
-// GetStatus returns the status of chaos
-func (in *PodNetworkChaos) GetStatus() *ChaosStatus {
-	return &in.Status.ChaosStatus
 }
 
 func init() {

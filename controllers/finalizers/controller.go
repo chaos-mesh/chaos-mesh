@@ -24,6 +24,8 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
@@ -32,6 +34,8 @@ const (
 	AnnotationCleanFinalizer = `chaos-mesh.chaos-mesh.org/cleanFinalizer`
 	// AnnotationCleanFinalizerForced value
 	AnnotationCleanFinalizerForced = `forced`
+
+	RecordFinalizer = "chaos-mesh/records"
 )
 
 // Reconciler for common chaos
@@ -79,10 +83,10 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			shouldUpdate = true
 		}
 	} else {
-		if len(finalizers) == 0 || finalizers[0] != "chaos-mesh/records" {
+		if !ContainsFinalizer(obj.(metav1.Object), RecordFinalizer) {
 			r.Recorder.Event(obj, "Normal", "Created", "Add finalizer \"chaos-mesh/records\"")
 			shouldUpdate = true
-			finalizers = []string{"chaos-mesh/records"}
+			finalizers = append(obj.GetObjectMeta().Finalizers, RecordFinalizer)
 		}
 	}
 
@@ -108,4 +112,15 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		r.Recorder.Event(obj, "Normal", "Updated", "Successfully update finalizer of resource")
 	}
 	return ctrl.Result{}, nil
+}
+
+// ContainsFinalizer checks an Object that the provided finalizer is present.
+func ContainsFinalizer(o metav1.Object, finalizer string) bool {
+	f := o.GetFinalizers()
+	for _, e := range f {
+		if e == finalizer {
+			return true
+		}
+	}
+	return false
 }

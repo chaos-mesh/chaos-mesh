@@ -74,10 +74,13 @@ func (it *WorkflowEntryReconciler) Reconcile(request reconcile.Request) (reconci
 			if err != nil {
 				return err
 			}
-			workflowNeedUpdate.Status.EntryNode = &entryNode.Name
+			workflowNeedUpdate.Status = v1alpha1.WorkflowStatus{
+				EntryNode: &entryNode.Name,
+				StartTime: &workflow.CreationTimestamp,
+			}
 
 			// TODO: add metav1.FinalizerDeleteDependents for workflowNeedUpdate's finalizer in webhook
-			err = it.kubeClient.Update(ctx, &workflowNeedUpdate)
+			err = it.kubeClient.Status().Update(ctx, &workflowNeedUpdate)
 			if err != nil {
 				it.logger.Error(err, "failed to update workflowNeedUpdate status")
 				return err
@@ -88,7 +91,6 @@ func (it *WorkflowEntryReconciler) Reconcile(request reconcile.Request) (reconci
 		if updateError != nil {
 			return reconcile.Result{}, updateError
 		}
-
 	}
 	return reconcile.Result{}, nil
 }

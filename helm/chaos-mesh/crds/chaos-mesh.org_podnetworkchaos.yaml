@@ -16,6 +16,8 @@ spec:
     singular: podnetworkchaos
   preserveUnknownFields: false
   scope: Namespaced
+  subresources:
+    status: {}
   validation:
     openAPIV3Schema:
       description: PodNetworkChaos is the Schema for the PodNetworkChaos API
@@ -207,35 +209,11 @@ spec:
           description: Most recently observed status of the chaos experiment about
             pods
           properties:
-            experiment:
-              description: Experiment records the last experiment state.
-              properties:
-                containerRecords:
-                  description: Records are used to track the running status
-                  items:
-                    properties:
-                      id:
-                        type: string
-                      phase:
-                        type: string
-                      selectorKey:
-                        type: string
-                    required:
-                    - id
-                    - phase
-                    - selectorKey
-                    type: object
-                  type: array
-                desiredPhase:
-                  enum:
-                  - Run
-                  - Stop
-                  type: string
-              type: object
             failedMessage:
               type: string
-          required:
-          - experiment
+            observedGeneration:
+              format: int64
+              type: integer
           type: object
       required:
       - spec

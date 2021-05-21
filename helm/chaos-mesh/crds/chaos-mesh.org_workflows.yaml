@@ -18,6 +18,8 @@ spec:
     singular: workflow
   preserveUnknownFields: false
   scope: Namespaced
+  subresources:
+    status: {}
   validation:
     openAPIV3Schema:
       properties:
@@ -1956,6 +1958,9 @@ spec:
           description: Most recently observed status of the workflow
           properties:
             entry_node:
+              type: string
+            start_time:
+              format: date-time
               type: string
           type: object
       required:

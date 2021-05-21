@@ -78,6 +78,22 @@ spec:
               items:
                 type: string
               type: array
+            conditions:
+              description: Conditions represents the current global condition of the
+                chaos
+              items:
+                properties:
+                  reason:
+                    type: string
+                  status:
+                    type: string
+                  type:
+                    type: string
+                required:
+                - status
+                - type
+                type: object
+              type: array
             experiment:
               description: Experiment records the last experiment state.
               properties:
@@ -103,8 +119,6 @@ spec:
                   - Stop
                   type: string
               type: object
-            failedMessage:
-              type: string
           required:
           - experiment
           type: object
