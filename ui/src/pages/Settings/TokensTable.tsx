@@ -1,5 +1,5 @@
 import { Button, Checkbox, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@material-ui/core'
-import { setConfirm, setTokenName, setTokens } from 'slices/globalStatus'
+import { setConfirm, setConfirmOpen, setTokenName, setTokens } from 'slices/globalStatus'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
 import LS from 'lib/localStorage'
@@ -35,7 +35,7 @@ const TokensTable = () => {
     const current = tokens.filter(({ name }) => name !== n)
 
     if (current.length) {
-      confirmRef.current!.setOpen(false)
+      dispatch(setConfirmOpen(false))
 
       dispatch(setTokens(current))
 
