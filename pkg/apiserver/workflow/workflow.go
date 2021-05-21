@@ -22,10 +22,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
-<<<<<<< HEAD
-	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
-=======
->>>>>>> upstream/nirvana
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 )
 

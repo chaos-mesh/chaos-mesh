@@ -98,11 +98,11 @@ type Schedule struct {
 // Detail represents an experiment instance.
 type Detail struct {
 	Schedule
-	YAML core.KubeObjectYAMLDescription `json:"yaml"`
+	YAML core.KubeObjectDesc `json:"kube_object"`
 }
 
 type createExperimentFunc func(*core.ExperimentInfo, client.Client) error
-type updateExperimentFunc func(*core.KubeObjectYAMLDescription, client.Client) error
+type updateExperimentFunc func(*core.KubeObjectDesc, client.Client) error
 
 // StatusResponse defines a common status struct.
 type StatusResponse struct {

@@ -17,8 +17,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"time"
-
 	"github.com/go-logr/logr"
 	"github.com/jinzhu/gorm"
 
@@ -80,10 +78,6 @@ func (r *ChaosCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		// ignore error here
 	}
 
-	if err := r.recordEvent(req, obj); err != nil {
-		r.Log.Error(err, "failed to record event")
-	}
-
 	return ctrl.Result{}, nil
 }
 
@@ -94,80 +88,6 @@ func (r *ChaosCollector) Setup(mgr ctrl.Manager, apiType runtime.Object) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(apiType).
 		Complete(r)
-}
-
-func (r *ChaosCollector) recordEvent(req ctrl.Request, obj v1alpha1.InnerObject) error {
-	var (
-		chaosMeta metav1.Object
-		ok        bool
-	)
-
-	if chaosMeta, ok = obj.(metav1.Object); !ok {
-		return errors.New("failed to get chaos meta information")
-	}
-
-	UID := chaosMeta.GetUID()
-	status := obj.GetStatus()
-	kind := obj.GetObjectKind().GroupVersionKind().Kind
-
-	switch status.Experiment.Phase {
-	case v1alpha1.ExperimentPhaseRunning:
-		return r.createEvent(req, kind, status, string(UID))
-	case v1alpha1.ExperimentPhaseFinished, v1alpha1.ExperimentPhasePaused, v1alpha1.ExperimentPhaseWaiting:
-		return r.updateOrCreateEvent(req, kind, status, string(UID))
-	}
-
-	return nil
-}
-
-func (r *ChaosCollector) createEvent(req ctrl.Request, kind string, status *v1alpha1.ChaosStatus, UID string) error {
-	now := time.Now()
-
-	event := &core.Event{
-		Experiment:   req.Name,
-		Namespace:    req.Namespace,
-		Kind:         kind,
-		StartTime:    &now,
-		ExperimentID: UID,
-		// TODO: add state for each event
-		Message: status.FailedMessage,
-	}
-
-	if _, err := r.event.FindByExperimentAndStartTime(
-		context.Background(), event.Experiment, event.Namespace, event.StartTime); err == nil {
-		r.Log.Info("event has been created")
-		return nil
-	}
-
-	if err := r.event.Create(context.Background(), event); err != nil {
-		r.Log.Error(err, "failed to store event", "event", event)
-		return err
-	}
-
-	return nil
-}
-
-func (r *ChaosCollector) updateOrCreateEvent(req ctrl.Request, kind string, status *v1alpha1.ChaosStatus, UID string) error {
-	event := &core.Event{
-		Experiment:   req.Name,
-		Namespace:    req.Namespace,
-		Kind:         kind,
-		ExperimentID: UID,
-	}
-
-	if _, err := r.event.FindByExperimentAndStartTime(
-		context.Background(), event.Experiment, event.Namespace, event.StartTime); err != nil && gorm.IsRecordNotFoundError(err) {
-		if err := r.createEvent(req, kind, status, UID); err != nil {
-			return err
-		}
-	}
-
-	if err := r.event.Update(context.Background(), event); err != nil {
-		r.Log.Error(err, "failed to update event", "event", event)
-		return err
-	}
-
-	return nil
 }
 
 func (r *ChaosCollector) setUnarchivedExperiment(req ctrl.Request, obj v1alpha1.InnerObject) error {

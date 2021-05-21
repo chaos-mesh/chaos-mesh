@@ -18,7 +18,7 @@ import (
 	"time"
 
 	"github.com/mitchellh/mapstructure"
-	"github.com/pkg/errors"
+	//"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -268,14 +268,14 @@ func convertWorkflowDetail(kubeWorkflow v1alpha1.Workflow, kubeNodes []v1alpha1.
 }
 
 func convertWorkflowNode(kubeWorkflowNode v1alpha1.WorkflowNode) (Node, error) {
-	templateType, err := mappingTemplateType(kubeWorkflowNode.Spec.Type)
-	if err != nil {
-		return Node{}, err
-	}
+	//templateType, err := mappingTemplateType(kubeWorkflowNode.Spec.Type)
+	//if err != nil {
+	//	return Node{}, err
+	//}
 
 	result := Node{
 		Name:     kubeWorkflowNode.Name,
-		Type:     templateType,
+		//Type:     templateType,
 		Serial:   nil,
 		Parallel: nil,
 		Template: kubeWorkflowNode.Spec.TemplateName,
@@ -302,27 +302,13 @@ func convertWorkflowNode(kubeWorkflowNode v1alpha1.WorkflowNode) (Node, error) {
 	return result, nil
 }
 
-func mappingTemplateType(templateType v1alpha1.TemplateType) (NodeType, error) {
-	if v1alpha1.IsChaosTemplateType(templateType) {
-		return ChaosNode, nil
-	} else if target, ok := nodeTypeTemplateTypeMapping[templateType]; ok {
-		return target, nil
-	} else {
-		return "", errors.Errorf("can not resolve such type called %s", templateType)
-	}
-}
-
-type KubeWorkflowRepository struct {
-	kubeclient client.Client
-}
-
-func (it *KubeWorkflowRepository) CreateWorkflowWithRaw(ctx context.Context, raw KubeObjectYAMLDescription) (WorkflowDetail, error) {
+func (it *KubeWorkflowRepository) CreateWorkflowWithRaw(ctx context.Context, raw KubeObjectDesc) (WorkflowDetail, error) {
 	workflow := v1alpha1.Workflow{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        raw.Metadata.Name,
-			Namespace:   raw.Metadata.Namespace,
-			Labels:      raw.Metadata.Labels,
-			Annotations: raw.Metadata.Annotations,
+			Name:        raw.Meta.Name,
+			Namespace:   raw.Meta.Namespace,
+			Labels:      raw.Meta.Labels,
+			Annotations: raw.Meta.Annotations,
 		},
 		Spec: v1alpha1.WorkflowSpec{},
 	}
@@ -356,7 +342,7 @@ func (it *KubeWorkflowRepository) CreateWorkflowWithRaw(ctx context.Context, raw
 	return it.GetWorkflowByNamespacedName(ctx, workflow.Namespace, workflow.Name)
 }
 
-func (it *KubeWorkflowRepository) UpdateWorkflowWithRaw(ctx context.Context, raw KubeObjectYAMLDescription) (WorkflowDetail, error) {
+func (it *KubeWorkflowRepository) UpdateWorkflowWithRaw(ctx context.Context, raw KubeObjectDesc) (WorkflowDetail, error) {
 	workflow := v1alpha1.Workflow{}
 
 	err := mapstructure.Decode(raw.Spec, &workflow.Spec)
@@ -384,10 +370,6 @@ func (it *KubeWorkflowRepository) UpdateWorkflowWithRaw(ctx context.Context, raw
 		return WorkflowDetail{}, err
 	}
 	return it.GetWorkflowByNamespacedName(ctx, workflow.Namespace, workflow.Name)
-}
-
-func NewKubeWorkflowRepository(kubeclient client.Client) *KubeWorkflowRepository {
-	return &KubeWorkflowRepository{kubeclient: kubeclient}
 }
 
 func (it *KubeWorkflowRepository) ListWorkflowWithNamespace(ctx context.Context, namespace string) ([]Workflow, error) {
@@ -486,15 +468,15 @@ func conversionWorkflowDetail(kubeWorkflow v1alpha1.Workflow, kubeNodes []v1alph
 }
 
 func conversionWorkflowNode(kubeWorkflowNode v1alpha1.WorkflowNode) (Node, error) {
-	templateType, err := mappingTemplateType(kubeWorkflowNode.Spec.Type)
-	if err != nil {
-		return Node{}, err
-	}
+	//templateType, err := mappingTemplateType(kubeWorkflowNode.Spec.Type)
+	//if err != nil {
+	//	return Node{}, err
+	//}
 	result := Node{
 		Name:     kubeWorkflowNode.Name,
-		Type:     templateType,
-		Serial:   NodeSerial{Tasks: []string{}},
-		Parallel: NodeParallel{Tasks: []string{}},
+		//Type:     templateType,
+		//Serial:   NodeSerial{Tasks: []string{}},
+		//Parallel: NodeParallel{Tasks: []string{}},
 		Template: kubeWorkflowNode.Spec.TemplateName,
 	}
 
@@ -514,13 +496,13 @@ func conversionWorkflowNode(kubeWorkflowNode v1alpha1.WorkflowNode) (Node, error
 
 	return result, nil
 }
-
-func mappingTemplateType(templateType v1alpha1.TemplateType) (NodeType, error) {
-	if v1alpha1.IsChoasTemplateType(templateType) {
-		return ChaosNode, nil
-	} else if target, ok := nodeTypeTemplateTypeMapping[templateType]; ok {
-		return target, nil
-	} else {
-		return "", errors.Errorf("can not resolve such type called %s", templateType)
-	}
-}
+//
+//func mappingTemplateType(templateType v1alpha1.TemplateType) (NodeType, error) {
+//	if v1alpha1.IsChoasTemplateType(templateType) {
+//		return ChaosNode, nil
+//	} else if target, ok := nodeTypeTemplateTypeMapping[templateType]; ok {
+//		return target, nil
+//	} else {
+//		return "", errors.Errorf("can not resolve such type called %s", templateType)
+//	}
+//}

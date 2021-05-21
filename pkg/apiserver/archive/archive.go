@@ -76,7 +76,6 @@ type Archive struct {
 // Detail represents an archive instance.
 type Detail struct {
 	Archive
-	YAML       core.KubeObjectYAMLDescription `json:"yaml"`
 	KubeObject core.KubeObjectDesc            `json:"kube_object"`
 }
 

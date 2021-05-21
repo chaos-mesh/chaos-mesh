@@ -19,13 +19,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-	"sync"
 	"time"
-
-	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
-	"github.com/mitchellh/mapstructure"
-	"golang.org/x/sync/errgroup"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/finalizers"
@@ -33,6 +27,9 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
 	dashboardconfig "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
+	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
+	"github.com/mitchellh/mapstructure"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -45,15 +42,6 @@ import (
 )
 
 var log = ctrl.Log.WithName("experiment api")
-
-// ChaosState defines the number of chaos experiments of each phase
-type ChaosState struct {
-	Running  int `json:"Running"`
-	Waiting  int `json:"Waiting"`
-	Paused   int `json:"Paused"`
-	Failed   int `json:"Failed"`
-	Finished int `json:"Finished"`
-}
 
 // Service defines a handler service for experiments.
 type Service struct {
@@ -90,7 +78,6 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint.PUT("/update", s.updateExperiment)
 	endpoint.PUT("/pause/:uid", s.pauseExperiment)
 	endpoint.PUT("/start/:uid", s.startExperiment)
-	endpoint.GET("/state", s.state)
 }
 
 // Base represents the base info of an experiment.
@@ -489,7 +476,6 @@ func (s *Service) getPodChaosDetail(namespace string, name string, kubeCli clien
 			UID:           chaos.GetChaos().UID,
 			Created:       chaos.GetChaos().StartTime.Format(time.RFC3339),
 			Status:        chaos.GetChaos().Status,
-			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
@@ -534,7 +520,6 @@ func (s *Service) getIoChaosDetail(namespace string, name string, kubeCli client
 			UID:           chaos.GetChaos().UID,
 			Created:       chaos.GetChaos().StartTime.Format(time.RFC3339),
 			Status:        chaos.GetChaos().Status,
-			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
@@ -579,7 +564,6 @@ func (s *Service) getNetworkChaosDetail(namespace string, name string, kubeCli c
 			UID:           chaos.GetChaos().UID,
 			Created:       chaos.GetChaos().StartTime.Format(time.RFC3339),
 			Status:        chaos.GetChaos().Status,
-			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
@@ -624,7 +608,6 @@ func (s *Service) getTimeChaosDetail(namespace string, name string, kubeCli clie
 			Created:       chaos.GetChaos().StartTime.Format(time.RFC3339),
 			Status:        chaos.GetChaos().Status,
 			UID:           chaos.GetChaos().UID,
-			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
@@ -669,7 +652,6 @@ func (s *Service) getKernelChaosDetail(namespace string, name string, kubeCli cl
 			Created:       chaos.GetChaos().StartTime.Format(time.RFC3339),
 			Status:        chaos.GetChaos().Status,
 			UID:           chaos.GetChaos().UID,
-			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
@@ -714,7 +696,6 @@ func (s *Service) getStressChaosDetail(namespace string, name string, kubeCli cl
 			Created:       chaos.GetChaos().StartTime.Format(time.RFC3339),
 			Status:        chaos.GetChaos().Status,
 			UID:           chaos.GetChaos().UID,
-			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
@@ -759,7 +740,6 @@ func (s *Service) getDNSChaosDetail(namespace string, name string, kubeCli clien
 			Created:       chaos.GetChaos().StartTime.Format(time.RFC3339),
 			Status:        chaos.GetChaos().Status,
 			UID:           chaos.GetChaos().UID,
-			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
@@ -804,7 +784,6 @@ func (s *Service) getAwsChaosDetail(namespace string, name string, kubeCli clien
 			Created:       chaos.GetChaos().StartTime.Format(time.RFC3339),
 			Status:        chaos.GetChaos().Status,
 			UID:           chaos.GetChaos().UID,
-			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
@@ -849,7 +828,6 @@ func (s *Service) getGcpChaosDetail(namespace string, name string, kubeCli clien
 			Created:       chaos.GetChaos().StartTime.Format(time.RFC3339),
 			Status:        chaos.GetChaos().Status,
 			UID:           chaos.GetChaos().UID,
-			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
@@ -1174,70 +1152,6 @@ func (s *Service) batchDeleteExperiment(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusOK, StatusResponse{Status: "success"})
 	}
-}
-
-// @Summary Get chaos experiments state from Kubernetes cluster.
-// @Description Get chaos experiments state from Kubernetes cluster.
-// @Tags experiments
-// @Produce json
-// @Param namespace query string false "namespace"
-// @Success 200 {object} ChaosState
-// @Router /experiments/state [get]
-// @Failure 500 {object} utils.APIError
-func (s *Service) state(c *gin.Context) {
-	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
-	if err != nil {
-		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
-		return
-	}
-
-	namespace := c.Query("namespace")
-
-	states := new(ChaosState)
-
-	g, ctx := errgroup.WithContext(context.Background())
-	m := &sync.Mutex{}
-	kinds := v1alpha1.AllKinds()
-
-	var listOptions []client.ListOption
-	if !s.conf.ClusterScoped {
-		listOptions = append(listOptions, &client.ListOptions{Namespace: s.conf.TargetNamespace})
-	} else if len(namespace) != 0 {
-		listOptions = append(listOptions, &client.ListOptions{Namespace: namespace})
-	}
-
-	for index := range kinds {
-		list := kinds[index]
-		g.Go(func() error {
-			if err := kubeCli.List(ctx, list.ChaosList, listOptions...); err != nil {
-				return err
-			}
-			m.Lock()
-			//for _, chaos := range list.ListChaos() {
-			//	switch chaos.Status {
-			//	case string(v1alpha1.ExperimentPhaseRunning):
-			//		states.Running++
-			//	case string(v1alpha1.ExperimentPhaseWaiting):
-			//		states.Waiting++
-			//	case string(v1alpha1.ExperimentPhasePaused):
-			//		states.Paused++
-			//	case string(v1alpha1.ExperimentPhaseFailed):
-			//		states.Failed++
-			//	case string(v1alpha1.ExperimentPhaseFinished):
-			//		states.Finished++
-			//	}
-			//}
-			m.Unlock()
-			return nil
-		})
-	}
-	if err := g.Wait(); err != nil {
-		c.Status(http.StatusInternalServerError)
-		utils.SetErrorForGinCtx(c, err)
-		return
-	}
-
-	c.JSON(http.StatusOK, states)
 }
 
 // @Summary Pause a chaos experiment.

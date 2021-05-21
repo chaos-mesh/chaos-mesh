@@ -20,7 +20,7 @@ import (
 
 	"github.com/jinzhu/gorm"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/config"
+	"github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 )
