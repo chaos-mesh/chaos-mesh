@@ -231,13 +231,13 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
           const experiment = t.experiments[0]
           const basic = experiment.basic
           const kind = experiment.target.kind
-          const spec = toCamelCase(kind)
+          const spec = _snakecase(kind)
 
           realTemplates.push({
             name: t.name,
             templateType: kind,
             duration: experiment.basic.duration,
-            [spec]: {
+            [toCamelCase(kind)]: {
               ...scopeToYAMLJSON(basic.scope),
               ...experiment.target[spec],
             },
@@ -249,14 +249,14 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
             const basic = d.basic
             const name = basic.name
             const kind = d.target.kind
-            const spec = toCamelCase(kind)
+            const spec = _snakecase(kind)
 
             if (!realTemplates.some((t) => t.name === name)) {
               realTemplates.push({
                 name,
                 templateType: kind,
                 duration: d.basic.duration,
-                [spec]: {
+                [toCamelCase(kind)]: {
                   ...scopeToYAMLJSON(basic.scope),
                   ...d.target[spec],
                 },
