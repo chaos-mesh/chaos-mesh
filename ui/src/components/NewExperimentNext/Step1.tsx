@@ -122,7 +122,7 @@ const Step1 = () => {
       </Box>
       <Box hidden={step1}>
         <Box overflow="hidden">
-          <GridList className={classes.gridList} cols={isDesktopScreen ? 1.5 : 3.5} spacing={9} cellHeight="auto">
+          <GridList className={classes.gridList} cols={isDesktopScreen ? 2.5 : 3.5} spacing={9} cellHeight="auto">
             {targetDataEntries.map(([key]) => (
               <GridListTile key={key}>
                 <Card
@@ -149,7 +149,7 @@ const Step1 = () => {
               <Divider />
             </Box>
             {targetData[kind].categories ? (
-              <GridList className={classes.gridList} cols={isDesktopScreen ? 2.5 : 4.5} spacing={9} cellHeight="auto">
+              <GridList className={classes.gridList} cols={isDesktopScreen ? 2.5 : 3.5} spacing={9} cellHeight="auto">
                 {targetData[kind].categories!.map((d: any) => (
                   <GridListTile key={d.key}>
                     <Card

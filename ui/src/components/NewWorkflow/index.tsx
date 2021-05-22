@@ -315,7 +315,7 @@ const NewWorkflow = () => {
                         className={showRemove === index ? classes.removeSubmittedStep : classes.submittedStep}
                       >
                         <Box display="flex" justifyContent="space-between">
-                          <Space display="flex">
+                          <Space display="flex" alignItems="center">
                             <Chip label={T(`newW.node.${step.type}`)} color="primary" size="small" />
                             <Typography component="div" variant={restoreIndex === index ? 'h6' : 'body1'}>
                               {step.name}

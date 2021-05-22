@@ -1,9 +1,9 @@
 import { CallchainFrame, Experiment, ExperimentScope } from 'components/NewExperiment/types'
+import { arrToObjBySep, toCamelCase } from './utils'
 
 import { Template } from 'slices/workflows'
 import { WorkflowBasic } from 'components/NewWorkflow'
 import _snakecase from 'lodash.snakecase'
-import { arrToObjBySep } from './utils'
 import basic from 'components/NewExperimentNext/data/basic'
 import snakeCaseKeys from 'snakecase-keys'
 import yaml from 'js-yaml'
@@ -30,7 +30,7 @@ export function parseSubmit(e: Experiment) {
   function helper2(scope: ExperimentScope) {
     scope.label_selectors = helper1(scope.label_selectors as string[])
     scope.annotation_selectors = helper1(scope.annotation_selectors as string[])
-    scope.pods = ((scope.pods as unknown) as string[]).reduce((acc, d) => {
+    scope.pods = (scope.pods as unknown as string[]).reduce((acc, d) => {
       const [namespace, name] = d.split(':')
       if (acc.hasOwnProperty(namespace)) {
         acc[namespace].push(name)
@@ -231,11 +231,11 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
           const experiment = t.experiments[0]
           const basic = experiment.basic
           const kind = experiment.target.kind
-          const spec = _snakecase(kind)
+          const spec = toCamelCase(kind)
 
           realTemplates.push({
             name: t.name,
-            template_type: kind,
+            templateType: kind,
             duration: experiment.basic.duration,
             [spec]: {
               ...scopeToYAMLJSON(basic.scope),
@@ -249,12 +249,12 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
             const basic = d.basic
             const name = basic.name
             const kind = d.target.kind
-            const spec = _snakecase(kind)
+            const spec = toCamelCase(kind)
 
             if (!realTemplates.some((t) => t.name === name)) {
               realTemplates.push({
                 name,
-                template_type: kind,
+                templateType: kind,
                 duration: d.basic.duration,
                 [spec]: {
                   ...scopeToYAMLJSON(basic.scope),
@@ -266,7 +266,7 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
 
           realTemplates.push({
             name: t.name,
-            template_type: 'Serial',
+            templateType: 'Serial',
             duration: t.duration,
             tasks: t.experiments.map((d) => d.basic.name),
           })
@@ -277,7 +277,7 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
         case 'suspend':
           realTemplates.push({
             name: t.name,
-            template_type: 'Suspend',
+            templateType: 'Suspend',
             duration: t.duration,
           })
 
@@ -300,7 +300,7 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
         templates: [
           {
             name: 'entry',
-            template_type: 'Serial',
+            templateType: 'Serial',
             duration,
             tasks,
           },
