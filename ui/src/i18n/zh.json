@@ -85,10 +85,8 @@
       }
     },
     "schedule": {
-      "tooltip": "Chaos Mesh 使用 {cronv3} 来定义计划。参考其文档以获取更详细的信息。",
       "continuous": "持续运行",
       "mustBeScheduled": "所选实验必须按计划执行",
-      "cronHelper": "使用 {crontabguru} 来帮助生成 cron job 并确认它将在何时运行",
       "duration": "持续时间",
       "durationHelper": "实验的持续时间"
     },
@@ -114,12 +112,6 @@
     "title": "工作流",
     "noWorkflowsFound": "未发现工作流",
     "deleteDesc": "此工作流将被永久删除"
-  },
-  "workflow": {
-    "entry": "入口",
-    "time": "时间",
-    "state": "状态",
-    "topology": "拓扑"
   },
   "newW": {
     "title": "新的工作流",
@@ -149,6 +141,15 @@
     "messages": {
       "m1": "请首先完成当前任务的创建"
     }
+  },
+  "workflow": {
+    "entry": "入口",
+    "time": "时间",
+    "state": "状态",
+    "topology": "拓扑"
+  },
+  "schedules": {
+    "title": "计划"
   },
   "events": {
     "title": "事件",

@@ -29,10 +29,6 @@ const useStyles = makeStyles((theme) => ({
       paddingLeft: '9px !important',
       paddingRight: '15px !important',
     },
-    [theme.breakpoints.down('xs')]: {
-      flex: 2,
-      minWidth: 'unset',
-    },
   },
   tooltip: {
     marginBottom: 0,

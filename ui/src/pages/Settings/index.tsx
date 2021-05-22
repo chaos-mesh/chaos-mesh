@@ -28,22 +28,22 @@ const Settings = () => {
                 <Token />
                 <Box mb={6} />
                 <TokensTable />
-                <Box mt={12} />
+                <Box mt={6} />
               </>
             )}
 
             <PaperTop title={T('experiments.title')} />
             <Experiments />
 
-            <Box mt={12} />
+            <Box mt={6} />
 
             <PaperTop title={T('common.other')} />
             <Other />
 
-            <Box mt={12} />
+            <Box mt={6} />
 
             <PaperTop title={T('common.version')} />
-            <Box my={3}>
+            <Box mt={3}>
               <img style={{ height: 36 }} src={theme === 'light' ? logo : logoWhite} alt="Chaos Mesh" />
               <Box mt={1.5}>
                 <Typography variant="body2" color="textSecondary">

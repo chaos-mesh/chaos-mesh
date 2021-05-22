@@ -15,10 +15,6 @@ import { useEffect } from 'react'
 const useStyles = makeStyles((theme) => ({
   namespace: {
     minWidth: 180,
-    [theme.breakpoints.down('xs')]: {
-      flex: 1,
-      minWidth: 'unset',
-    },
   },
 }))
 

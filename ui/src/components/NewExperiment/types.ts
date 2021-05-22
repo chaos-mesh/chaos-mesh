@@ -11,7 +11,7 @@ export interface ExperimentTargetPod {
 }
 
 export interface ExperimentScope {
-  namespace_selectors: string[]
+  namespaces: string[]
   label_selectors: object | string[]
   annotation_selectors: object | string[]
   phase_selectors: string[]

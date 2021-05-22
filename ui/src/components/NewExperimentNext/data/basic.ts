@@ -6,7 +6,7 @@ const data = {
   labels: [],
   annotations: [],
   scope: {
-    namespace_selectors: [],
+    namespaces: [],
     label_selectors: [],
     annotation_selectors: [],
     phase_selectors: ['all'],
@@ -15,7 +15,6 @@ const data = {
     pods: [],
   },
   scheduler: {
-    cron: '',
     duration: '',
   },
 }
@@ -23,7 +22,7 @@ const data = {
 export const schema: Yup.ObjectSchema = Yup.object({
   name: Yup.string().required('The experiment name is required'),
   scope: Yup.object({
-    namespace_selectors: Yup.array().min(1, 'The namespace selectors is required'),
+    namespaces: Yup.array().min(1, 'The namespace selectors is required'),
   }),
 })
 

@@ -94,7 +94,7 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false }) => {
           {({ errors, touched }) => (
             <Form>
               <Grid container spacing={6}>
-                <Grid item xs={12} md={6}>
+                <Grid item xs={6}>
                   <Box mb={3}>
                     <Typography color={scopeDisabled ? 'textSecondary' : undefined}>
                       {T('newE.steps.scope')}
@@ -103,7 +103,7 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false }) => {
                   </Box>
                   {namespaces.length ? <Scope namespaces={namespaces} /> : <SkeletonN n={6} />}
                 </Grid>
-                <Grid item xs={12} md={6}>
+                <Grid item xs={6}>
                   <Box mb={3}>
                     <Typography>{T('newE.steps.basic')}</Typography>
                   </Box>

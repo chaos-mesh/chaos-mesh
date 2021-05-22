@@ -12,7 +12,7 @@ interface ChaosProps {
 }
 
 const Chaos: React.FC<ChaosProps> = ({ kind, data }) => (
-  <Grid item xs={12} md={4}>
+  <Grid item xs={4}>
     <Box display="flex" alignItems="center" py={4.5}>
       <Box display="flex" justifyContent="center" alignItems="center" flex={1}>
         {iconByKind(kind)}

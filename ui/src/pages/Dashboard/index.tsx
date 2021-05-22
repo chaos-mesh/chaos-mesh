@@ -20,14 +20,6 @@ const useStyles = makeStyles((theme) => ({
     position: 'relative',
     height: 300,
   },
-  totalExperiments: {
-    display: 'flex',
-    alignItems: 'center',
-    [theme.breakpoints.down('sm')]: {
-      alignItems: 'unset',
-      overflowY: 'scroll',
-    },
-  },
 }))
 
 export default function Dashboard() {
@@ -54,7 +46,7 @@ export default function Dashboard() {
     <>
       <Grow in={true} style={{ transformOrigin: '0 0 0' }}>
         <Grid container spacing={6}>
-          <Grid item xs={12} md={12} lg={3}>
+          <Grid item xs={12} lg={3}>
             <Welcome />
           </Grid>
 
@@ -62,13 +54,13 @@ export default function Dashboard() {
             <Paper>
               <PaperTop title={T('dashboard.totalExperiments')} />
 
-              <Box className={clsx(classes.container, classes.totalExperiments)}>
+              <Box className={clsx(classes.container)}>
                 <TotalExperiments />
               </Box>
             </Paper>
           </Grid>
 
-          <Grid item xs={12} md={12} lg={3}>
+          <Grid item xs={12} lg={3}>
             <Paper>
               <PaperTop title={T('dashboard.totalState')} />
 
@@ -76,7 +68,7 @@ export default function Dashboard() {
             </Paper>
           </Grid>
 
-          <Grid container item xs={12} md={12} lg={9}>
+          <Grid container item xs={12} lg={9}>
             <Grid item xs={12}>
               <Paper>
                 <PaperTop title={T('common.timeline')} />
@@ -96,7 +88,7 @@ export default function Dashboard() {
             </Grid>
           </Grid>
 
-          <Grid item xs={12} md={12} lg={3}>
+          <Grid item xs={12} lg={3}>
             <Paper style={{ position: 'relative', height: '100%' }}>
               <PaperTop title={T('dashboard.recent')} />
 

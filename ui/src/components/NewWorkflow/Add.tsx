@@ -25,15 +25,6 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     alignItems: 'center',
     flexWrap: 'wrap',
-    [theme.breakpoints.down('xs')]: {
-      justifyContent: 'unset',
-      '& > *': {
-        marginBottom: theme.spacing(3),
-        '&:last-child': {
-          marginBottom: 0,
-        },
-      },
-    },
   },
   field: {
     width: 180,

@@ -85,10 +85,8 @@
       }
     },
     "schedule": {
-      "tooltip": "Chaos Mesh use {cronv3} to define the schedule. View its doc for more details.",
       "continuous": "Run continuously",
       "mustBeScheduled": "The chosen action must be scheduled",
-      "cronHelper": "Use {crontabguru} to help generate the cron job and confirm what time it will run",
       "duration": "Duration",
       "durationHelper": "The experiment duration"
     },
@@ -115,12 +113,6 @@
     "title": "Workflows",
     "noWorkflowsFound": "No workflows found",
     "deleteDesc": "This workflow will be permanently deleted"
-  },
-  "workflow": {
-    "entry": "Entry",
-    "time": "Time",
-    "state": "State",
-    "topology": "Topology"
   },
   "newW": {
     "title": "New Workflow",
@@ -150,6 +142,15 @@
     "messages": {
       "m1": "Please complete the creation of the current node first"
     }
+  },
+  "workflow": {
+    "entry": "Entry",
+    "time": "Time",
+    "state": "State",
+    "topology": "Topology"
+  },
+  "schedules": {
+    "title": "Schedules"
   },
   "events": {
     "title": "Events",

@@ -13,7 +13,6 @@ import ContentContainer from 'components-mui/ContentContainer'
 import { IntlProvider } from 'react-intl'
 import LS from 'lib/localStorage'
 import Loading from 'components-mui/Loading'
-import MobileNavigation from './MobileNavigation'
 import Navbar from './Navbar'
 import Sidebar from './Sidebar'
 import api from 'api'
@@ -37,9 +36,8 @@ const useStyles = makeStyles((theme) => ({
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
     }),
-    [theme.breakpoints.down('xs')]: {
-      width: '100%',
-      marginLeft: 0,
+    [theme.breakpoints.down('sm')]: {
+      minWidth: theme.breakpoints.values.md,
     },
   },
   rootShift: {
@@ -67,7 +65,6 @@ const useStyles = makeStyles((theme) => ({
 const TopContainer = () => {
   const theme = useTheme()
   const isTabletScreen = useMediaQuery(theme.breakpoints.down('sm'))
-  const isMobileScreen = useMediaQuery(theme.breakpoints.down('xs'))
   const classes = useStyles()
 
   const { pathname } = useLocation()
@@ -159,7 +156,7 @@ const TopContainer = () => {
         <CssBaseline />
 
         <Box className={openDrawer ? classes.rootShift : classes.root}>
-          {!isMobileScreen && <Sidebar open={openDrawer} />}
+          <Sidebar open={openDrawer} />
           <Paper className={classes.main} component="main" elevation={0}>
             <Box className={classes.switchContent}>
               <ContentContainer>
@@ -176,13 +173,6 @@ const TopContainer = () => {
                 )}
               </ContentContainer>
             </Box>
-
-            {isMobileScreen && (
-              <>
-                <div className={classes.toolbar} />
-                <MobileNavigation />
-              </>
-            )}
 
             <Auth open={authOpen} setOpen={setAuthOpen} />
 

@@ -7,6 +7,7 @@ import Experiments from 'pages/Experiments'
 import NewExperiment from 'pages/Experiments/New'
 import NewWorkflow from 'components/NewWorkflow'
 import { RouteProps } from 'react-router'
+import Schedules from 'pages/Schedules'
 import Settings from 'pages/Settings'
 import Swagger from 'pages/Swagger'
 import WorkflowDetail from 'pages/WorkflowDetail'
@@ -43,6 +44,11 @@ const routes: RouteProps[] = [
   {
     component: WorkflowDetail,
     path: '/workflows/:namespace/:name',
+  },
+  {
+    component: Schedules,
+    path: '/schedules',
+    exact: true,
   },
   {
     component: Events,

@@ -1,6 +1,4 @@
-import { Box, Collapse, IconButton, Typography, useMediaQuery } from '@material-ui/core'
-import React, { useState } from 'react'
-import { makeStyles, useTheme } from '@material-ui/core/styles'
+import { Box, IconButton, Typography } from '@material-ui/core'
 
 import { Archive } from 'api/archives.type'
 import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
@@ -10,14 +8,12 @@ import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline'
 import { Experiment } from 'api/experiments.type'
 import ExperimentStatus from 'components/ExperimentStatus'
 import { IntlShape } from 'react-intl'
-import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown'
-import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp'
 import Paper from 'components-mui/Paper'
 import PauseCircleOutlineIcon from '@material-ui/icons/PauseCircleOutline'
 import PlayCircleOutlineIcon from '@material-ui/icons/PlayCircleOutline'
 import Space from 'components-mui/Space'
 import T from 'components/T'
-import { truncate } from 'lib/utils'
+import { makeStyles } from '@material-ui/core/styles'
 import { useHistory } from 'react-router-dom'
 import { useStoreSelector } from 'store'
 
@@ -43,21 +39,11 @@ const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
   onSelect,
   intl,
 }) => {
-  const theme = useTheme()
-  const isTabletScreen = useMediaQuery(theme.breakpoints.down('sm'))
   const classes = useStyles()
 
   const history = useHistory()
 
   const { lang } = useStoreSelector((state) => state.settings)
-
-  const [open, setOpen] = useState(false)
-
-  const handleToggle = (e: any) => {
-    e.stopPropagation()
-
-    setOpen(!open)
-  }
 
   const handleAction = (action: string) => (event: React.MouseEvent<HTMLSpanElement>) => {
     event.stopPropagation()
@@ -177,33 +163,11 @@ const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
             ))}
           <Typography variant="body1" component="div">
             {e.name}
-            {isTabletScreen && (
-              <Typography variant="body2" color="textSecondary" title={e.uid}>
-                {truncate(e.uid)}
-              </Typography>
-            )}
           </Typography>
-          {!isTabletScreen && (
-            <Typography variant="body2" color="textSecondary" title={e.uid}>
-              {truncate(e.uid)}
-            </Typography>
-          )}
         </Space>
-        {isTabletScreen ? (
-          <IconButton aria-label="Expand row" size="small" onClick={handleToggle}>
-            {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-          </IconButton>
-        ) : (
-          <Actions />
-        )}
+
+        <Actions />
       </Box>
-      {isTabletScreen && (
-        <Collapse in={open} timeout="auto">
-          <Box p={3}>
-            <Actions />
-          </Box>
-        </Collapse>
-      )}
     </Paper>
   )
 }

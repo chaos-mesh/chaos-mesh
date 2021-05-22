@@ -8,6 +8,7 @@ import HttpOutlinedIcon from '@material-ui/icons/HttpOutlined'
 import MenuBookOutlinedIcon from '@material-ui/icons/MenuBookOutlined'
 import { NavLink } from 'react-router-dom'
 import React from 'react'
+import ScheduleIcon from '@material-ui/icons/Schedule'
 import SettingsOutlinedIcon from '@material-ui/icons/SettingsOutlined'
 import StorageOutlinedIcon from '@material-ui/icons/StorageOutlined'
 import T from 'components/T'
@@ -56,9 +57,6 @@ const useStyles = makeStyles((theme) => {
         duration: theme.transitions.duration.leavingScreen,
       }),
       overflowX: 'hidden',
-      [theme.breakpoints.down('xs')]: {
-        display: 'none',
-      },
     },
     toolbar: {
       minHeight: 56,
@@ -101,6 +99,10 @@ const listItems = [
   {
     icon: <AccountTreeOutlinedIcon />,
     text: 'workflows',
+  },
+  {
+    icon: <ScheduleIcon />,
+    text: 'schedules',
   },
   {
     icon: <StorageOutlinedIcon />,

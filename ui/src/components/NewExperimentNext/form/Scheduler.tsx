@@ -1,27 +1,14 @@
-import { Box, FormControlLabel, Link, Switch, Typography } from '@material-ui/core'
+import { Box, FormControlLabel, Switch, Typography } from '@material-ui/core'
 import { FormikErrors, FormikTouched, getIn } from 'formik'
 import React, { useEffect, useState } from 'react'
 
-import { FormattedMessage } from 'react-intl'
-import HelpOutlineIcon from '@material-ui/icons/HelpOutline'
 import { RootState } from 'store'
 import T from 'components/T'
 import { TextField } from 'components/FormField'
-import Tooltip from 'components-mui/Tooltip'
 import { useSelector } from 'react-redux'
 import { validateDuration } from 'lib/formikhelpers'
 
 const mustBeScheduled = ['pod-kill', 'container-kill']
-
-function validateCron(value: string) {
-  let error
-
-  if (value === '') {
-    error = 'The cron is required'
-  }
-
-  return error
-}
 
 interface SchedulerProps {
   errors: FormikErrors<Record<string, any>>
@@ -61,28 +48,7 @@ const Scheduler: React.FC<SchedulerProps> = ({ errors, touched }) => {
   return (
     <>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography style={{ display: 'flex', alignItems: 'center' }}>
-          {T('newE.steps.schedule')}
-          <Tooltip
-            title={
-              <Typography variant="body2">
-                <FormattedMessage
-                  id="newE.schedule.tooltip"
-                  values={{
-                    cronv3: (
-                      <Link href="https://pkg.go.dev/github.com/robfig/cron/v3" target="_blank">
-                        https://pkg.go.dev/github.com/robfig/cron/v3
-                      </Link>
-                    ),
-                  }}
-                />
-              </Typography>
-            }
-            interactive
-          >
-            <HelpOutlineIcon fontSize="small" />
-          </Tooltip>
-        </Typography>
+        <Typography>{T('newE.steps.schedule')}</Typography>
         <Box>
           <FormControlLabel
             style={{ marginRight: 0 }}
@@ -99,47 +65,19 @@ const Scheduler: React.FC<SchedulerProps> = ({ errors, touched }) => {
         </Box>
       </Box>
 
-      {!continuous && (
-        <Box>
-          <TextField
-            fast
-            name="scheduler.cron"
-            label="Cron"
-            validate={validateCron}
-            helperText={
-              getIn(errors, 'scheduler.cron') && getIn(touched, 'scheduler.cron') ? (
-                getIn(errors, 'scheduler.cron')
-              ) : (
-                <FormattedMessage
-                  id="newE.schedule.cronHelper"
-                  values={{
-                    crontabguru: (
-                      <Link href="https://crontab.guru/" target="_blank" underline="always">
-                        https://crontab.guru/
-                      </Link>
-                    ),
-                  }}
-                />
-              )
-            }
-            error={getIn(errors, 'scheduler.cron') && getIn(touched, 'scheduler.cron') ? true : false}
-          />
-
-          {!scheduled && (
-            <TextField
-              fast
-              name="scheduler.duration"
-              label={T('newE.schedule.duration')}
-              validate={validateDuration()}
-              helperText={
-                getIn(errors, 'scheduler.duration') && getIn(touched, 'scheduler.duration')
-                  ? getIn(errors, 'scheduler.duration')
-                  : T('newE.schedule.durationHelper')
-              }
-              error={getIn(errors, 'scheduler.duration') && getIn(touched, 'scheduler.duration') ? true : false}
-            />
-          )}
-        </Box>
+      {!continuous && !scheduled && (
+        <TextField
+          fast
+          name="scheduler.duration"
+          label={T('newE.schedule.duration')}
+          validate={validateDuration()}
+          helperText={
+            getIn(errors, 'scheduler.duration') && getIn(touched, 'scheduler.duration')
+              ? getIn(errors, 'scheduler.duration')
+              : T('newE.schedule.durationHelper')
+          }
+          error={getIn(errors, 'scheduler.duration') && getIn(touched, 'scheduler.duration') ? true : false}
+        />
       )}
     </>
   )
