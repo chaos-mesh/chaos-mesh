@@ -220,6 +220,7 @@ type StressChaosInfo struct {
 type DNSChaosInfo struct {
 	Action             string   `json:"action" binding:"oneof='error' 'random'"`
 	DomainNamePatterns []string `json:"patterns"`
+	ContainerNames     []string `json:"container_names,omitempty"`
 }
 
 // AwsChaosInfo defines the basic information of aws chaos for creating a new AwsChaos.

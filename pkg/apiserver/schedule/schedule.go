@@ -15,20 +15,16 @@ package schedule
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	"github.com/mitchellh/mapstructure"
-	"golang.org/x/sync/errgroup"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/finalizers"
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
 	dashboardconfig "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
@@ -49,9 +45,9 @@ var log = ctrl.Log.WithName("schedule api")
 // Service defines a handler service for experiments.
 type Service struct {
 	schedule core.ScheduleStore
-	event   core.EventStore
-	conf    *dashboardconfig.ChaosDashboardConfig
-	scheme  *runtime.Scheme
+	event    core.EventStore
+	conf     *dashboardconfig.ChaosDashboardConfig
+	scheme   *runtime.Scheme
 }
 
 // NewService returns an experiment service instance.
@@ -63,9 +59,9 @@ func NewService(
 ) *Service {
 	return &Service{
 		schedule: schedule,
-		event:   event,
-		conf:    conf,
-		scheme:  scheme,
+		event:    event,
+		conf:     conf,
+		scheme:   scheme,
 	}
 }
 
@@ -91,8 +87,8 @@ type Base struct {
 // Schedule defines the basic information of a Schedule object
 type Schedule struct {
 	Base
-	UID           string `json:"uid"`
-	Created       string `json:"created"`
+	UID     string `json:"uid"`
+	Created string `json:"created"`
 }
 
 // Detail represents an experiment instance.

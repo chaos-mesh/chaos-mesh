@@ -30,7 +30,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver"
 	"github.com/chaos-mesh/chaos-mesh/pkg/collector"
-	"github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
+	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
 	"github.com/chaos-mesh/chaos-mesh/pkg/store"
 	"github.com/chaos-mesh/chaos-mesh/pkg/store/dbstore"
 	"github.com/chaos-mesh/chaos-mesh/pkg/ttlcontroller"

@@ -274,7 +274,7 @@ func convertWorkflowNode(kubeWorkflowNode v1alpha1.WorkflowNode) (Node, error) {
 	//}
 
 	result := Node{
-		Name:     kubeWorkflowNode.Name,
+		Name: kubeWorkflowNode.Name,
 		//Type:     templateType,
 		Serial:   nil,
 		Parallel: nil,
@@ -473,7 +473,7 @@ func conversionWorkflowNode(kubeWorkflowNode v1alpha1.WorkflowNode) (Node, error
 	//	return Node{}, err
 	//}
 	result := Node{
-		Name:     kubeWorkflowNode.Name,
+		Name: kubeWorkflowNode.Name,
 		//Type:     templateType,
 		//Serial:   NodeSerial{Tasks: []string{}},
 		//Parallel: NodeParallel{Tasks: []string{}},
@@ -496,6 +496,7 @@ func conversionWorkflowNode(kubeWorkflowNode v1alpha1.WorkflowNode) (Node, error
 
 	return result, nil
 }
+
 //
 //func mappingTemplateType(templateType v1alpha1.TemplateType) (NodeType, error) {
 //	if v1alpha1.IsChoasTemplateType(templateType) {

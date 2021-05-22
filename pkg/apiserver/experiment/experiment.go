@@ -21,15 +21,16 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
+	"github.com/mitchellh/mapstructure"
+
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/finalizers"
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
 	dashboardconfig "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
-	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
-	"github.com/mitchellh/mapstructure"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -171,15 +172,15 @@ func (s *Service) createPodChaos(exp *core.ExperimentInfo, kubeCli client.Client
 		},
 		Spec: v1alpha1.PodChaosSpec{
 			ContainerSelector: v1alpha1.ContainerSelector{
-				PodSelector:    v1alpha1.PodSelector{
+				PodSelector: v1alpha1.PodSelector{
 					Selector: exp.Scope.ParseSelector(),
 					Mode:     v1alpha1.PodMode(exp.Scope.Mode),
 					Value:    exp.Scope.Value,
-					},
-				ContainerNames: exp.Target.PodChaos.ContainerNames,
 				},
-			Action:            v1alpha1.PodChaosAction(exp.Target.PodChaos.Action),
-			GracePeriod:       exp.Target.PodChaos.GracePeriod,
+				ContainerNames: exp.Target.PodChaos.ContainerNames,
+			},
+			Action:      v1alpha1.PodChaosAction(exp.Target.PodChaos.Action),
+			GracePeriod: exp.Target.PodChaos.GracePeriod,
 		},
 	}
 
@@ -199,13 +200,13 @@ func (s *Service) createNetworkChaos(exp *core.ExperimentInfo, kubeCli client.Cl
 			Annotations: exp.Annotations,
 		},
 		Spec: v1alpha1.NetworkChaosSpec{
-			PodSelector:     v1alpha1.PodSelector{
+			PodSelector: v1alpha1.PodSelector{
 				Selector: exp.Scope.ParseSelector(),
 				Mode:     v1alpha1.PodMode(exp.Scope.Mode),
 				Value:    exp.Scope.Value,
-				},
-			Action:          v1alpha1.NetworkChaosAction(exp.Target.NetworkChaos.Action),
-			TcParameter:     v1alpha1.TcParameter{
+			},
+			Action: v1alpha1.NetworkChaosAction(exp.Target.NetworkChaos.Action),
+			TcParameter: v1alpha1.TcParameter{
 				Delay:     exp.Target.NetworkChaos.Delay,
 				Loss:      exp.Target.NetworkChaos.Loss,
 				Duplicate: exp.Target.NetworkChaos.Duplicate,
@@ -215,7 +216,6 @@ func (s *Service) createNetworkChaos(exp *core.ExperimentInfo, kubeCli client.Cl
 			Direction:       v1alpha1.Direction(exp.Target.NetworkChaos.Direction),
 			ExternalTargets: exp.Target.NetworkChaos.ExternalTargets,
 		},
-
 	}
 
 	if exp.Target.NetworkChaos.TargetScope != nil {
@@ -243,22 +243,22 @@ func (s *Service) createIOChaos(exp *core.ExperimentInfo, kubeCli client.Client)
 		},
 		Spec: v1alpha1.IoChaosSpec{
 			ContainerSelector: v1alpha1.ContainerSelector{
-				PodSelector:    v1alpha1.PodSelector{
+				PodSelector: v1alpha1.PodSelector{
 					Selector: exp.Scope.ParseSelector(),
 					Mode:     v1alpha1.PodMode(exp.Scope.Mode),
 					Value:    exp.Scope.Value,
 				},
-				ContainerNames: exp.Target.PodChaos.ContainerNames,
+				ContainerNames: []string{exp.Target.IOChaos.ContainerName},
 			},
-			Action:            v1alpha1.IoChaosType(exp.Target.IOChaos.Action),
-			Delay:             exp.Target.IOChaos.Delay,
-			Errno:             exp.Target.IOChaos.Errno,
-			Attr:              exp.Target.IOChaos.Attr,
-			Mistake:           exp.Target.IOChaos.Mistake,
-			Path:              exp.Target.IOChaos.Path,
-			Methods:           exp.Target.IOChaos.Methods,
-			Percent:           exp.Target.IOChaos.Percent,
-			VolumePath:        exp.Target.IOChaos.VolumePath,
+			Action:     v1alpha1.IoChaosType(exp.Target.IOChaos.Action),
+			Delay:      exp.Target.IOChaos.Delay,
+			Errno:      exp.Target.IOChaos.Errno,
+			Attr:       exp.Target.IOChaos.Attr,
+			Mistake:    exp.Target.IOChaos.Mistake,
+			Path:       exp.Target.IOChaos.Path,
+			Methods:    exp.Target.IOChaos.Methods,
+			Percent:    exp.Target.IOChaos.Percent,
+			VolumePath: exp.Target.IOChaos.VolumePath,
 		},
 	}
 
@@ -279,15 +279,15 @@ func (s *Service) createTimeChaos(exp *core.ExperimentInfo, kubeCli client.Clien
 		},
 		Spec: v1alpha1.TimeChaosSpec{
 			ContainerSelector: v1alpha1.ContainerSelector{
-				PodSelector:    v1alpha1.PodSelector{
+				PodSelector: v1alpha1.PodSelector{
 					Selector: exp.Scope.ParseSelector(),
 					Mode:     v1alpha1.PodMode(exp.Scope.Mode),
 					Value:    exp.Scope.Value,
 				},
-				ContainerNames: exp.Target.PodChaos.ContainerNames,
+				ContainerNames: exp.Target.TimeChaos.ContainerNames,
 			},
-			TimeOffset:        exp.Target.TimeChaos.TimeOffset,
-			ClockIds:          exp.Target.TimeChaos.ClockIDs,
+			TimeOffset: exp.Target.TimeChaos.TimeOffset,
+			ClockIds:   exp.Target.TimeChaos.ClockIDs,
 		},
 	}
 
@@ -307,7 +307,7 @@ func (s *Service) createKernelChaos(exp *core.ExperimentInfo, kubeCli client.Cli
 			Annotations: exp.Annotations,
 		},
 		Spec: v1alpha1.KernelChaosSpec{
-			PodSelector:     v1alpha1.PodSelector{
+			PodSelector: v1alpha1.PodSelector{
 				Selector: exp.Scope.ParseSelector(),
 				Mode:     v1alpha1.PodMode(exp.Scope.Mode),
 				Value:    exp.Scope.Value,
@@ -348,17 +348,16 @@ func (s *Service) createStressChaos(exp *core.ExperimentInfo, kubeCli client.Cli
 		},
 		Spec: v1alpha1.StressChaosSpec{
 			ContainerSelector: v1alpha1.ContainerSelector{
-				PodSelector:    v1alpha1.PodSelector{
+				PodSelector: v1alpha1.PodSelector{
 					Selector: exp.Scope.ParseSelector(),
 					Mode:     v1alpha1.PodMode(exp.Scope.Mode),
 					Value:    exp.Scope.Value,
 				},
-				ContainerNames: exp.Target.PodChaos.ContainerNames,
+				ContainerNames: []string{*exp.Target.StressChaos.ContainerName},
 			},
 			Stressors:         stressors,
 			StressngStressors: exp.Target.StressChaos.StressngStressors,
 		},
-
 	}
 
 	if exp.Scheduler.Duration != "" {
@@ -377,14 +376,14 @@ func (s *Service) createDNSChaos(exp *core.ExperimentInfo, kubeCli client.Client
 			Annotations: exp.Annotations,
 		},
 		Spec: v1alpha1.DNSChaosSpec{
-			Action:             v1alpha1.DNSChaosAction(exp.Target.DNSChaos.Action),
+			Action: v1alpha1.DNSChaosAction(exp.Target.DNSChaos.Action),
 			ContainerSelector: v1alpha1.ContainerSelector{
-				PodSelector:    v1alpha1.PodSelector{
+				PodSelector: v1alpha1.PodSelector{
 					Selector: exp.Scope.ParseSelector(),
 					Mode:     v1alpha1.PodMode(exp.Scope.Mode),
 					Value:    exp.Scope.Value,
 				},
-				ContainerNames: exp.Target.PodChaos.ContainerNames,
+				ContainerNames: exp.Target.DNSChaos.ContainerNames,
 			},
 			DomainNamePatterns: exp.Target.DNSChaos.DomainNamePatterns,
 		},
@@ -406,8 +405,8 @@ func (s *Service) createAwsChaos(exp *core.ExperimentInfo, kubeCli client.Client
 			Annotations: exp.Annotations,
 		},
 		Spec: v1alpha1.AwsChaosSpec{
-			Action:      v1alpha1.AwsChaosAction(exp.Target.AwsChaos.Action),
-			SecretName:  exp.Target.AwsChaos.SecretName,
+			Action:     v1alpha1.AwsChaosAction(exp.Target.AwsChaos.Action),
+			SecretName: exp.Target.AwsChaos.SecretName,
 			AwsSelector: v1alpha1.AwsSelector{
 				AwsRegion:   exp.Target.AwsChaos.AwsRegion,
 				Ec2Instance: exp.Target.AwsChaos.Ec2Instance,
@@ -473,9 +472,9 @@ func (s *Service) getPodChaosDetail(namespace string, name string, kubeCli clien
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
-			UID:           chaos.GetChaos().UID,
-			Created:       chaos.GetChaos().StartTime.Format(time.RFC3339),
-			Status:        chaos.GetChaos().Status,
+			UID:     chaos.GetChaos().UID,
+			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
+			Status:  chaos.GetChaos().Status,
 		},
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
@@ -517,9 +516,9 @@ func (s *Service) getIoChaosDetail(namespace string, name string, kubeCli client
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
-			UID:           chaos.GetChaos().UID,
-			Created:       chaos.GetChaos().StartTime.Format(time.RFC3339),
-			Status:        chaos.GetChaos().Status,
+			UID:     chaos.GetChaos().UID,
+			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
+			Status:  chaos.GetChaos().Status,
 		},
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
@@ -561,9 +560,9 @@ func (s *Service) getNetworkChaosDetail(namespace string, name string, kubeCli c
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
-			UID:           chaos.GetChaos().UID,
-			Created:       chaos.GetChaos().StartTime.Format(time.RFC3339),
-			Status:        chaos.GetChaos().Status,
+			UID:     chaos.GetChaos().UID,
+			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
+			Status:  chaos.GetChaos().Status,
 		},
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
@@ -605,9 +604,9 @@ func (s *Service) getTimeChaosDetail(namespace string, name string, kubeCli clie
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
-			Created:       chaos.GetChaos().StartTime.Format(time.RFC3339),
-			Status:        chaos.GetChaos().Status,
-			UID:           chaos.GetChaos().UID,
+			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
+			Status:  chaos.GetChaos().Status,
+			UID:     chaos.GetChaos().UID,
 		},
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
@@ -649,9 +648,9 @@ func (s *Service) getKernelChaosDetail(namespace string, name string, kubeCli cl
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
-			Created:       chaos.GetChaos().StartTime.Format(time.RFC3339),
-			Status:        chaos.GetChaos().Status,
-			UID:           chaos.GetChaos().UID,
+			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
+			Status:  chaos.GetChaos().Status,
+			UID:     chaos.GetChaos().UID,
 		},
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
@@ -693,9 +692,9 @@ func (s *Service) getStressChaosDetail(namespace string, name string, kubeCli cl
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
-			Created:       chaos.GetChaos().StartTime.Format(time.RFC3339),
-			Status:        chaos.GetChaos().Status,
-			UID:           chaos.GetChaos().UID,
+			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
+			Status:  chaos.GetChaos().Status,
+			UID:     chaos.GetChaos().UID,
 		},
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
@@ -737,9 +736,9 @@ func (s *Service) getDNSChaosDetail(namespace string, name string, kubeCli clien
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
-			Created:       chaos.GetChaos().StartTime.Format(time.RFC3339),
-			Status:        chaos.GetChaos().Status,
-			UID:           chaos.GetChaos().UID,
+			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
+			Status:  chaos.GetChaos().Status,
+			UID:     chaos.GetChaos().UID,
 		},
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
@@ -781,9 +780,9 @@ func (s *Service) getAwsChaosDetail(namespace string, name string, kubeCli clien
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
-			Created:       chaos.GetChaos().StartTime.Format(time.RFC3339),
-			Status:        chaos.GetChaos().Status,
-			UID:           chaos.GetChaos().UID,
+			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
+			Status:  chaos.GetChaos().Status,
+			UID:     chaos.GetChaos().UID,
 		},
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
@@ -825,9 +824,9 @@ func (s *Service) getGcpChaosDetail(namespace string, name string, kubeCli clien
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
-			Created:       chaos.GetChaos().StartTime.Format(time.RFC3339),
-			Status:        chaos.GetChaos().Status,
-			UID:           chaos.GetChaos().UID,
+			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
+			Status:  chaos.GetChaos().Status,
+			UID:     chaos.GetChaos().UID,
 		},
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
