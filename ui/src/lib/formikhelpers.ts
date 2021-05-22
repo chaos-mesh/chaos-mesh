@@ -197,20 +197,20 @@ export const validateDuration = (i18n?: string) => validate('The duration is req
 
 function scopeToYAMLJSON(scope: ExperimentScope) {
   const result = {
-    selectors: {} as any,
+    selector: {} as any,
     mode: scope.mode,
   }
 
   if (scope.namespace_selectors.length) {
-    result.selectors.namespaces = scope.namespace_selectors
+    result.selector.namespaces = scope.namespace_selectors
   }
 
   if ((scope.label_selectors as string[]).length) {
-    result.selectors.labelSelectors = arrToObjBySep(scope.label_selectors as string[], ': ')
+    result.selector.labelSelectors = arrToObjBySep(scope.label_selectors as string[], ': ')
   }
 
   if ((scope.annotation_selectors as string[]).length) {
-    result.selectors.annotationSelectors = arrToObjBySep(scope.annotation_selectors as string[], ': ')
+    result.selector.annotationSelectors = arrToObjBySep(scope.annotation_selectors as string[], ': ')
   }
 
   return result
@@ -240,6 +240,7 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
             [toCamelCase(kind)]: {
               ...scopeToYAMLJSON(basic.scope),
               ...experiment.target[spec],
+              scheduler: basic.scheduler,
             },
           })
 
@@ -259,6 +260,7 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
                 [toCamelCase(kind)]: {
                   ...scopeToYAMLJSON(basic.scope),
                   ...d.target[spec],
+                  scheduler: basic.scheduler,
                 },
               })
             }
@@ -273,6 +275,33 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
 
           break
         case 'parallel':
+          t.experiments.forEach((d) => {
+            const basic = d.basic
+            const name = basic.name
+            const kind = d.target.kind
+            const spec = _snakecase(kind)
+
+            if (!realTemplates.some((t) => t.name === name)) {
+              realTemplates.push({
+                name,
+                templateType: kind,
+                duration: d.basic.duration,
+                [toCamelCase(kind)]: {
+                  ...scopeToYAMLJSON(basic.scope),
+                  ...d.target[spec],
+                  scheduler: basic.scheduler,
+                },
+              })
+            }
+          })
+
+          realTemplates.push({
+            name: t.name,
+            templateType: 'Parallel',
+            duration: t.duration,
+            tasks: t.experiments.map((d) => d.basic.name),
+          })
+
           break
         case 'suspend':
           realTemplates.push({

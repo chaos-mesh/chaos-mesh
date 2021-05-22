@@ -133,7 +133,9 @@ function generateWorkflowEdges(result: EdgeDefinition[], nodes: RecursiveNodeDef
       // connectSerial(result, source[2], source[1])
     } else if (type === 'ParallelNode') {
       ;(source[1] as NodeDefinition[]).forEach((d) => {
-        generateWorkflowEdges(result, [d, nodes[1]])
+        if (nodes.length > 1) {
+          generateWorkflowEdges(result, [d, nodes[1]])
+        }
       })
 
       generateWorkflowEdges(result, nodes.slice(1))

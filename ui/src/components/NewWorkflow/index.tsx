@@ -3,7 +3,7 @@ import { Form, Formik } from 'formik'
 import MultiNode, { MultiNodeHandles } from './MultiNode'
 import { SelectField, TextField } from 'components/FormField'
 import Suspend, { SuspendValues } from './Suspend'
-import { Template, deleteTemplate, updateTemplate } from 'slices/workflows'
+import { Template, deleteTemplate, resetWorkflow, updateTemplate } from 'slices/workflows'
 import { resetNewExperiment, setExternalExperiment } from 'slices/experiments'
 import { setAlert, setConfirm } from 'slices/globalStatus'
 import { useEffect, useRef, useState } from 'react'
@@ -272,7 +272,11 @@ const NewWorkflow = () => {
 
     api.workflows
       .newWorkflow(yaml.load(workflow!))
-      .then(() => history.push('/workflows'))
+      .then(() => {
+        dispatch(resetWorkflow())
+
+        history.push('/workflows')
+      })
       .catch(console.error)
   }
 

@@ -38,9 +38,12 @@ const workflowsSlice = createSlice({
 
       state.templates = templates.filter((_, i) => i !== index)
     },
+    resetWorkflow(state) {
+      state.templates = []
+    },
   },
 })
 
-export const { setTemplate, updateTemplate, deleteTemplate } = workflowsSlice.actions
+export const { setTemplate, updateTemplate, deleteTemplate, resetWorkflow } = workflowsSlice.actions
 
 export default workflowsSlice.reducer
