@@ -166,7 +166,7 @@ type SchedulerInfo struct {
 // PodChaosInfo defines the basic information of pod chaos for creating a new PodChaos.
 type PodChaosInfo struct {
 	Action         string   `json:"action" binding:"oneof='' 'pod-kill' 'pod-failure' 'container-kill'"`
-	ContainerNames []string `json:"containerNames,omitempty"`
+	ContainerNames []string `json:"container_names,omitempty"`
 	GracePeriod    int64    `json:"grace_period"`
 }
 
