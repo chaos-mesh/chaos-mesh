@@ -84,11 +84,17 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 				}
 
 				if !durationExceeded {
-					r.Recorder.Eventf(schedule, "Warning", "Skip", "Skip removing history: %s is still running", innerObj.GetChaos().Name)
-					continue
-				} else {
-					if requeuAfter > untilStop {
-						requeuAfter = untilStop
+					if untilStop != 0 {
+						if requeuAfter == 0 || requeuAfter > untilStop {
+							requeuAfter = untilStop
+						}
+
+						r.Recorder.Eventf(schedule, "Warning", "Skip", "Skip removing history: %s is still running", innerObj.GetChaos().Name)
+						continue
+					} else {
+						// duration is not Exceeded, but untilStop is 0
+						// which means the current object is one-shot (like PodKill)
+						// do nothing
 					}
 				}
 			}

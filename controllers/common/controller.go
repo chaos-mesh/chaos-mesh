@@ -116,6 +116,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		// TODO: dynamic upgrade the records when some of these pods/containers stopped
 	}
 
+	needRetry := false
 	for index, record := range records {
 		var err error
 		r.Log.Info("iterating record", "record", record, "desiredPhase", desiredPhase)
@@ -159,6 +160,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 				// but the retry shouldn't block other resource process
 				r.Log.Error(err, "fail to apply chaos")
 				r.Recorder.Eventf(obj, "Warning", "Failed", "Failed to apply chaos: %s", err.Error())
+				needRetry = true
 				continue
 			}
 
@@ -176,6 +178,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 				// but the retry shouldn't block other resource process
 				r.Log.Error(err, "fail to recover chaos")
 				r.Recorder.Eventf(obj, "Warning", "Failed", "Failed to recover chaos: %s", err.Error())
+				needRetry = true
 				continue
 			}
 
@@ -211,7 +214,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		if updateError != nil {
 			r.Log.Error(updateError, "fail to update")
 			r.Recorder.Eventf(obj, "Normal", "Failed", "Failed to update records: %s", updateError.Error())
-			return ctrl.Result{}, nil
+			return ctrl.Result{Requeue: true}, nil
 		}
 
 		r.Recorder.Event(obj, "Normal", "Updated", "Successfully update records of resource")
@@ -230,8 +233,8 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		})
 		if ensureLatestError != nil {
 			r.Log.Error(ensureLatestError, "Fail to ensure that the resource in cache has the latest records")
-			return ctrl.Result{}, nil
+			return ctrl.Result{Requeue: needRetry}, nil
 		}
 	}
-	return ctrl.Result{}, nil
+	return ctrl.Result{Requeue: needRetry}, nil
 }

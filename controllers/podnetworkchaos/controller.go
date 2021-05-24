@@ -67,8 +67,8 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, nil
 	}
 
-	if obj.ObjectMeta.Generation <= obj.Status.ObservedGeneration {
-		r.Log.Info("the target pod has been up to date")
+	if obj.ObjectMeta.Generation <= obj.Status.ObservedGeneration && obj.Status.FailedMessage == "" {
+		r.Log.Info("the target pod has been up to date", "pod", obj.Namespace+"/"+obj.Name)
 		return ctrl.Result{}, nil
 	}
 
@@ -125,20 +125,20 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	if err != nil {
 		r.Log.Error(err, "fail to set ipsets")
 		r.Recorder.Eventf(obj, "Warning", "Failed", "Fail to set ipsets: %s", err.Error())
-		return ctrl.Result{}, nil
+		return ctrl.Result{Requeue: true}, nil
 	}
 
 	err = r.SetIptables(ctx, pod, obj)
 	if err != nil {
 		r.Log.Error(err, "fail to set iptables")
 		r.Recorder.Eventf(obj, "Warning", "Failed", "Fail to set iptables: %s", err.Error())
-		return ctrl.Result{}, nil
+		return ctrl.Result{Requeue: true}, nil
 	}
 
 	err = r.SetTcs(ctx, pod, obj)
 	if err != nil {
 		r.Recorder.Eventf(obj, "Warning", "Failed", "Fail to set tc: %s", err.Error())
-		return ctrl.Result{}, nil
+		return ctrl.Result{Requeue: true}, nil
 	}
 	r.Recorder.Event(obj, "Normal", "Updated", "Synchronize podnetworkchaos successfully")
 
