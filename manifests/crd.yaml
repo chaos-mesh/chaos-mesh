@@ -3898,7 +3898,7 @@ spec:
         spec:
           description: Spec defines the behavior of a node of workflow
           properties:
-            aws_chaos:
+            awsChaos:
               description: AwsChaosSpec is the content of the specification for an
                 AwsChaos
               properties:
@@ -3953,10 +3953,7 @@ spec:
               - awsRegion
               - ec2Instance
               type: object
-            deadline:
-              format: date-time
-              type: string
-            dns_chaos:
+            dNSChaos:
               description: DNSChaosSpec defines the desired state of DNSChaos
               properties:
                 action:
@@ -4107,7 +4104,10 @@ spec:
               - mode
               - selector
               type: object
-            gcp_chaos:
+            deadline:
+              format: date-time
+              type: string
+            gcpChaos:
               description: GcpChaosSpec is the content of the specification for a
                 GcpChaos
               properties:
@@ -4159,7 +4159,7 @@ spec:
               - project
               - zone
               type: object
-            http_chaos:
+            hTTPChaos:
               properties:
                 action:
                   description: 'Action defines the specific pod chaos action. Supported
@@ -4335,7 +4335,7 @@ spec:
               - mode
               - selector
               type: object
-            io_chaos:
+            ioChaos:
               description: IoChaosSpec defines the desired state of IoChaos
               properties:
                 action:
@@ -4607,7 +4607,7 @@ spec:
               - selector
               - volumePath
               type: object
-            jvm_chaos:
+            jVMChaos:
               description: JVMChaosSpec defines the desired state of JVMChaos
               properties:
                 action:
@@ -4777,7 +4777,7 @@ spec:
               - selector
               - target
               type: object
-            kernel_chaos:
+            kernelChaos:
               description: KernelChaosSpec defines the desired state of KernelChaos
               properties:
                 duration:
@@ -4979,7 +4979,7 @@ spec:
               - mode
               - selector
               type: object
-            network_chaos:
+            networkChaos:
               description: NetworkChaosSpec defines the desired state of NetworkChaos
               properties:
                 action:
@@ -5357,7 +5357,7 @@ spec:
               - mode
               - selector
               type: object
-            pod_chaos:
+            podChaos:
               description: PodChaosSpec defines the attributes that a user creates
                 on a chaos experiment about pods.
               properties:
@@ -5517,10 +5517,10 @@ spec:
               - mode
               - selector
               type: object
-            start_time:
+            startTime:
               format: date-time
               type: string
-            stress_chaos:
+            stressChaos:
               description: StressChaosSpec defines the desired state of StressChaos
               properties:
                 containerName:
@@ -5709,9 +5709,9 @@ spec:
               items:
                 type: string
               type: array
-            template_name:
+            templateName:
               type: string
-            time_chaos:
+            timeChaos:
               description: TimeChaosSpec defines the desired state of TimeChaos
               properties:
                 clockIds:
@@ -5866,18 +5866,18 @@ spec:
               type: object
             type:
               type: string
-            workflow_name:
+            workflowName:
               type: string
           required:
-          - start_time
-          - template_name
+          - startTime
+          - templateName
           - type
-          - workflow_name
+          - workflowName
           type: object
         status:
           description: Most recently observed status of the workflow node
           properties:
-            active_children:
+            activeChildren:
               description: ActiveChildren means the created children node
               items:
                 description: LocalObjectReference contains enough information to let
@@ -5889,7 +5889,7 @@ spec:
                     type: string
                 type: object
               type: array
-            chaos_resource:
+            chaosResource:
               description: ChaosResource refs to the real chaos CR object.
               properties:
                 apiGroup:
@@ -5924,7 +5924,7 @@ spec:
                 - type
                 type: object
               type: array
-            finished_children:
+            finishedChildren:
               description: Children is necessary for representing the order when replicated
                 child template references by parent template.
               items:
@@ -5996,7 +5996,7 @@ spec:
             templates:
               items:
                 properties:
-                  aws_chaos:
+                  awsChaos:
                     description: AwsChaosSpec is the content of the specification
                       for an AwsChaos
                     properties:
@@ -6053,7 +6053,7 @@ spec:
                     - awsRegion
                     - ec2Instance
                     type: object
-                  dns_chaos:
+                  dNSChaos:
                     description: DNSChaosSpec defines the desired state of DNSChaos
                     properties:
                       action:
@@ -6211,7 +6211,7 @@ spec:
                     type: object
                   duration:
                     type: string
-                  gcp_chaos:
+                  gcpChaos:
                     description: GcpChaosSpec is the content of the specification
                       for a GcpChaos
                     properties:
@@ -6267,7 +6267,7 @@ spec:
                     - project
                     - zone
                     type: object
-                  http_chaos:
+                  hTTPChaos:
                     properties:
                       action:
                         description: 'Action defines the specific pod chaos action.
@@ -6447,7 +6447,7 @@ spec:
                     - mode
                     - selector
                     type: object
-                  io_chaos:
+                  ioChaos:
                     description: IoChaosSpec defines the desired state of IoChaos
                     properties:
                       action:
@@ -6725,7 +6725,7 @@ spec:
                     - selector
                     - volumePath
                     type: object
-                  jvm_chaos:
+                  jVMChaos:
                     description: JVMChaosSpec defines the desired state of JVMChaos
                     properties:
                       action:
@@ -6901,7 +6901,7 @@ spec:
                     - selector
                     - target
                     type: object
-                  kernel_chaos:
+                  kernelChaos:
                     description: KernelChaosSpec defines the desired state of KernelChaos
                     properties:
                       duration:
@@ -7113,7 +7113,7 @@ spec:
                     type: object
                   name:
                     type: string
-                  network_chaos:
+                  networkChaos:
                     description: NetworkChaosSpec defines the desired state of NetworkChaos
                     properties:
                       action:
@@ -7501,7 +7501,7 @@ spec:
                     - mode
                     - selector
                     type: object
-                  pod_chaos:
+                  podChaos:
                     description: PodChaosSpec defines the attributes that a user creates
                       on a chaos experiment about pods.
                     properties:
@@ -7664,7 +7664,7 @@ spec:
                     - mode
                     - selector
                     type: object
-                  stress_chaos:
+                  stressChaos:
                     description: StressChaosSpec defines the desired state of StressChaos
                     properties:
                       containerName:
@@ -7861,9 +7861,9 @@ spec:
                     items:
                       type: string
                     type: array
-                  template_type:
+                  templateType:
                     type: string
-                  time_chaos:
+                  timeChaos:
                     description: TimeChaosSpec defines the desired state of TimeChaos
                     properties:
                       clockIds:
@@ -8022,7 +8022,7 @@ spec:
                     type: object
                 required:
                 - name
-                - template_type
+                - templateType
                 type: object
               type: array
           required:
@@ -8032,9 +8032,32 @@ spec:
         status:
           description: Most recently observed status of the workflow
           properties:
-            entry_node:
+            conditions:
+              description: Represents the latest available observations of a workflow's
+                current state.
+              items:
+                properties:
+                  reason:
+                    type: string
+                  startTime:
+                    format: date-time
+                    type: string
+                  status:
+                    type: string
+                  type:
+                    type: string
+                required:
+                - reason
+                - status
+                - type
+                type: object
+              type: array
+            endTime:
+              format: date-time
               type: string
-            start_time:
+            entryNode:
+              type: string
+            startTime:
               format: date-time
               type: string
           type: object

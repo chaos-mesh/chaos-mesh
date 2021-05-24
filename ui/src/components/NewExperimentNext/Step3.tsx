@@ -1,11 +1,11 @@
-import { Box, Button, Typography } from '@material-ui/core'
+import { Box, Typography } from '@material-ui/core'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
 import DoneAllIcon from '@material-ui/icons/DoneAll'
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
-import PublishIcon from '@material-ui/icons/Publish'
 import React from 'react'
+import { Submit } from 'components/FormField'
 import T from 'components/T'
 import api from 'api'
 import { parseSubmit } from 'lib/formikhelpers'
@@ -14,7 +14,11 @@ import { setAlert } from 'slices/globalStatus'
 import { useHistory } from 'react-router-dom'
 import { useIntl } from 'react-intl'
 
-const Step3 = () => {
+interface Step3Props {
+  onSubmit?: (experiment: { target: any; basic: any }) => void
+}
+
+const Step3: React.FC<Step3Props> = ({ onSubmit }) => {
   const state = useStoreSelector((state) => state)
   const { step1, step2, basic, target } = state.experiments
   const { debugMode } = state.settings
@@ -34,21 +38,25 @@ const Step3 = () => {
     }
 
     if (!debugMode) {
-      api.experiments
-        .newExperiment(parsedValues)
-        .then(() => {
-          dispatch(
-            setAlert({
-              type: 'success',
-              message: intl.formatMessage({ id: 'common.createSuccessfully' }),
-            })
-          )
+      if (onSubmit) {
+        onSubmit({ target, basic })
+      } else {
+        api.experiments
+          .newExperiment(parsedValues)
+          .then(() => {
+            dispatch(
+              setAlert({
+                type: 'success',
+                message: intl.formatMessage({ id: 'confirm.createSuccessfully' }),
+              })
+            )
 
-          dispatch(resetNewExperiment())
+            dispatch(resetNewExperiment())
 
-          history.push('/experiments')
-        })
-        .catch(console.error)
+            history.push('/experiments')
+          })
+          .catch(console.error)
+      }
     }
   }
 
@@ -57,14 +65,10 @@ const Step3 = () => {
       {step1 && step2 && (
         <Paper>
           <PaperTop title={T('common.submit')} />
-          <Box p={6} textAlign="center">
+          <Box textAlign="center">
             <DoneAllIcon fontSize="large" />
             <Typography>{T('newE.complete')}</Typography>
-            <Box mt={6} textAlign="right">
-              <Button variant="contained" color="primary" startIcon={<PublishIcon />} onClick={submitExperiment}>
-                {T('common.submit')}
-              </Button>
-            </Box>
+            <Submit onClick={submitExperiment} />
           </Box>
         </Paper>
       )}

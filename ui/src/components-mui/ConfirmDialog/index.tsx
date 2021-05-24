@@ -7,44 +7,36 @@ import {
   DialogProps,
   DialogTitle,
 } from '@material-ui/core'
-import React, { useImperativeHandle, useState } from 'react'
 
 import T from 'components/T'
 
-export interface ConfirmDialogHandles {
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>
-}
-
 interface ConfirmDialogProps {
+  open: boolean
+  close?: () => void
   title: string | JSX.Element
   description?: string
   onConfirm?: () => void
   dialogProps?: Omit<DialogProps, 'open'>
 }
 
-const ConfirmDialog: React.ForwardRefRenderFunction<
-  ConfirmDialogHandles,
-  React.PropsWithChildren<ConfirmDialogProps>
-> = ({ title, description, onConfirm, children, dialogProps }, ref) => {
-  const [open, setOpen] = useState(false)
-
-  // Methods exposed to the parent
-  useImperativeHandle(ref, () => ({
-    setOpen,
-  }))
-
-  const handleClose = () => setOpen(false)
-
+const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
+  open,
+  close,
+  title,
+  description,
+  onConfirm,
+  children,
+  dialogProps,
+}) => {
   const handleConfirm = () => {
     typeof onConfirm === 'function' && onConfirm()
-
-    handleClose()
+    typeof close === 'function' && close()
   }
 
   return (
     <Dialog
       open={open}
-      onClose={handleClose}
+      onClose={close}
       aria-labelledby="dialog-title"
       aria-describedby="dialog-description"
       PaperProps={{ style: { minWidth: 300 } }}
@@ -56,7 +48,7 @@ const ConfirmDialog: React.ForwardRefRenderFunction<
       </DialogContent>
       {onConfirm && (
         <DialogActions>
-          <Button size="small" onClick={handleClose}>
+          <Button size="small" onClick={close}>
             {T('common.cancel')}
           </Button>
           <Button variant="contained" color="primary" size="small" autoFocus disableFocusRipple onClick={handleConfirm}>
@@ -68,4 +60,4 @@ const ConfirmDialog: React.ForwardRefRenderFunction<
   )
 }
 
-export default React.forwardRef(ConfirmDialog)
+export default ConfirmDialog
