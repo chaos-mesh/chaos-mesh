@@ -40,6 +40,7 @@ import (
 
 	// testcases
 	dnschaostestcases "github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/chaos/dnschaos"
+	httpchaostestcases "github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/chaos/httpchaos"
 	iochaostestcases "github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/chaos/iochaos"
 	networkchaostestcases "github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/chaos/networkchaos"
 	podchaostestcases "github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/chaos/podchaos"
@@ -256,7 +257,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 		// http chaos case in [HTTPDelay] context
 		ginkgo.Context("[HTTPDelay]", func() {
 			ginkgo.It("[Schedule]", func() {
-				iochaostestcases.TestcaseHTTPDelayDurationForATimeThenRecover(ns, cli, c, port)
+				httpchaostestcases.TestcaseHttpDelayDurationForATimeThenRecover(ns, cli, c, port)
 			})
 		})
 

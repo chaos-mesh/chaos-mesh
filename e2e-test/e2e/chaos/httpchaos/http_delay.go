@@ -42,6 +42,9 @@ func TestcaseHttpDelayDurationForATimeThenRecover(
 	err := util.WaitE2EHelperReady(c, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 	By("create http delay chaos CRD objects")
+
+	delay := "1s"
+
 	httpChaos := &v1alpha1.HTTPChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "http-chaos",
@@ -55,7 +58,10 @@ func TestcaseHttpDelayDurationForATimeThenRecover(
 				},
 				Mode: v1alpha1.OnePodMode,
 			},
-			Delay: time.Second,
+			Target: "Request",
+			PodHttpChaosActions: v1alpha1.PodHttpChaosActions{
+				Delay: &delay,
+			},
 		},
 	}
 	err = cli.Create(ctx, httpChaos)
