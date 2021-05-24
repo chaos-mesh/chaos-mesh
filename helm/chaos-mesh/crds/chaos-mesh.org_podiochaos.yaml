@@ -16,6 +16,8 @@ spec:
     singular: podiochaos
   preserveUnknownFields: false
   scope: Namespaced
+  subresources:
+    status: {}
   validation:
     openAPIV3Schema:
       description: PodIoChaos is the Schema for the podiochaos API
@@ -176,14 +178,6 @@ spec:
               description: 'TODO: support multiple different container to inject in
                 one pod'
               type: string
-            pid:
-              description: Pid represents a running toda process id
-              format: int64
-              type: integer
-            startTime:
-              description: StartTime represents the start time of a toda process
-              format: int64
-              type: integer
             volumeMountPath:
               description: 'VolumeMountPath represents the target mount path It must
                 be a root of mount path now. TODO: search the mount parent of any
@@ -192,6 +186,22 @@ spec:
               type: string
           required:
           - volumeMountPath
+          type: object
+        status:
+          properties:
+            failedMessage:
+              type: string
+            observedGeneration:
+              format: int64
+              type: integer
+            pid:
+              description: Pid represents a running toda process id
+              format: int64
+              type: integer
+            startTime:
+              description: StartTime represents the start time of a toda process
+              format: int64
+              type: integer
           type: object
       type: object
   version: v1alpha1
