@@ -3,7 +3,9 @@ import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux'
 
 import rootReducer from 'reducers'
 
-const middlewares = [...getDefaultMiddleware()]
+const middlewares = getDefaultMiddleware({
+  serializableCheck: false, // warn: in order to use the global ConfirmDialog, disable the serializableCheck check
+})
 
 const genStore = () => {
   if (process.env.NODE_ENV === 'development') {

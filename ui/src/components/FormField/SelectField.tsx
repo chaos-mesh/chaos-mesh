@@ -7,7 +7,7 @@ import clsx from 'clsx'
 import { makeStyles } from '@material-ui/core/styles'
 
 const useStyles = makeStyles({
-  muiSelectRoot: {
+  root: {
     '& .MuiSelect-root': {
       padding: 6,
       paddingTop: 8,
@@ -47,20 +47,20 @@ const SelectField: React.FC<TextFieldProps & { multiple?: boolean }> = ({ multip
       : undefined,
   }
 
-  return (
-    <Box mb={3}>
-      <Field
-        {...props}
-        as={TextField}
-        className={clsx(multiple && classes.muiSelectRoot, props.className)}
-        variant="outlined"
-        select
-        margin="dense"
-        fullWidth
-        SelectProps={SelectProps}
-      />
-    </Box>
+  const rendered = (
+    <Field
+      {...props}
+      className={clsx(multiple && classes.root, props.className)}
+      as={TextField}
+      variant="outlined"
+      select
+      margin="dense"
+      fullWidth
+      SelectProps={SelectProps}
+    />
   )
+
+  return rendered
 }
 
 export default SelectField
