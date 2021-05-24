@@ -25,6 +25,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 	pkgmock "github.com/chaos-mesh/chaos-mesh/pkg/mock"
 
@@ -281,6 +282,9 @@ var _ = Describe("event", func() {
 		s := Service{
 			archive: mockExpStore,
 			event:   nil,
+			conf: &config.ChaosDashboardConfig{
+				ClusterScoped: true,
+			},
 		}
 		router = gin.Default()
 		r := router.Group("/api")

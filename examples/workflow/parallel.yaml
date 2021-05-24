@@ -1,22 +1,17 @@
 apiVersion: chaos-mesh.org/v1alpha1
 kind: Workflow
 metadata:
-  name: try-workflow
+  name: try-workflow-parallel
 spec:
   entry: the-entry
   templates:
     - name: the-entry
-      templateType: Serial
+      templateType: Parallel
       duration: 240s
       tasks:
         - workflow-stress-chaos
-        - prefix-suspending
         - workflow-network-chaos
-        - suffix-suspending
         - workflow-pod-chaos
-    - name: prefix-suspending
-      templateType: Suspend
-      duration: 10s
     - name: workflow-network-chaos
       templateType: NetworkChaos
       duration: 20s
@@ -55,7 +50,4 @@ spec:
             workers: 1
             load: 20
             options: ["--cpu 1", "--timeout 600"]
-    - name: suffix-suspending
-      templateType: Suspend
-      duration: 5s
 
