@@ -29,6 +29,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/utils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
 )
 
 type Reconciler struct {
@@ -93,7 +94,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 }
 
 func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger, lister *utils.ActiveLister) (types.Controller, error) {
-	ctrl.NewControllerManagedBy(mgr).
+	builder.Default(mgr).
 		For(&v1alpha1.Schedule{}).
 		Named("schedule-pause").
 		Complete(&Reconciler{

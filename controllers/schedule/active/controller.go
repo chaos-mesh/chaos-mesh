@@ -32,6 +32,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/utils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
 )
 
 type Reconciler struct {
@@ -114,7 +115,7 @@ type Objs struct {
 }
 
 func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger, objs Objs, scheme *runtime.Scheme, lister *utils.ActiveLister) (types.Controller, error) {
-	builder := ctrl.NewControllerManagedBy(mgr).
+	builder := builder.Default(mgr).
 		For(&v1alpha1.Schedule{}).
 		Named("schedule-active")
 
