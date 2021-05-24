@@ -17,35 +17,37 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"sort"
-	"strings"
 	"time"
 
+	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/client-go/util/retry"
-
-	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/task"
-	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/task/collector"
-
-	"github.com/go-logr/logr"
 	"k8s.io/client-go/tools/record"
+	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/task"
+	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/task/collector"
 )
 
 type TaskReconciler struct {
+	*ChildNodesFetcher
 	kubeClient    client.Client
 	eventRecorder record.EventRecorder
 	logger        logr.Logger
 }
 
 func NewTaskReconciler(kubeClient client.Client, eventRecorder record.EventRecorder, logger logr.Logger) *TaskReconciler {
-	return &TaskReconciler{kubeClient: kubeClient, eventRecorder: eventRecorder, logger: logger}
+	return &TaskReconciler{
+		ChildNodesFetcher: NewChildNodesFetcher(kubeClient, logger),
+		kubeClient:        kubeClient,
+		eventRecorder:     eventRecorder,
+		logger:            logger,
+	}
 }
 
 func (it *TaskReconciler) Reconcile(request reconcile.Request) (reconcile.Result, error) {
@@ -349,14 +351,6 @@ func (it *TaskReconciler) FetchPodControlledByThisWorkflowNode(ctx context.Conte
 	return childPods.Items, nil
 }
 
-func getTaskNameFromGeneratedName(generatedNodeName string) string {
-	index := strings.LastIndex(generatedNodeName, "-")
-	if index < 0 {
-		return generatedNodeName
-	}
-	return generatedNodeName[:index]
-}
-
 func (it *TaskReconciler) SpawnTaskPod(ctx context.Context, node *v1alpha1.WorkflowNode, workflow *v1alpha1.Workflow) error {
 	if node.Spec.Task == nil {
 		return errors.Errorf("node %s/%s does not contains spec of Task", node.Namespace, node.Name)
@@ -389,69 +383,4 @@ func (it *TaskReconciler) SpawnTaskPod(ctx context.Context, node *v1alpha1.Workf
 		Spec: podSpec,
 	}
 	return it.kubeClient.Create(ctx, &taskPod)
-}
-
-func (it *TaskReconciler) fetchChildNodes(ctx context.Context, node v1alpha1.WorkflowNode) (activeChildrenNodes []v1alpha1.WorkflowNode, finishedChildrenNodes []v1alpha1.WorkflowNode, err error) {
-	childrenNodes := v1alpha1.WorkflowNodeList{}
-	controlledByThisNode, err := metav1.LabelSelectorAsSelector(&metav1.LabelSelector{
-		MatchLabels: map[string]string{
-			v1alpha1.LabelControlledBy: node.Name,
-		},
-	})
-
-	if err != nil {
-		it.logger.Error(err, "failed to build label selector with filtering children workflow node controlled by current node",
-			"current node", fmt.Sprintf("%s/%s", node.Namespace, node.Name))
-		return nil, nil, err
-	}
-
-	err = it.kubeClient.List(ctx, &childrenNodes, &client.ListOptions{
-		LabelSelector: controlledByThisNode,
-	})
-
-	if err != nil {
-		it.logger.Error(err, "failed to list children workflow node controlled by current node",
-			"current node", fmt.Sprintf("%s/%s", node.Namespace, node.Name))
-		return nil, nil, err
-	}
-
-	sortedChildrenNodes := SortByCreationTimestamp(childrenNodes.Items)
-	sort.Sort(sortedChildrenNodes)
-
-	it.logger.V(4).Info("list children node", "current node",
-		"current node", fmt.Sprintf("%s/%s", node.Namespace, node.Name),
-		len(sortedChildrenNodes), "children", sortedChildrenNodes)
-
-	var activeChildren []v1alpha1.WorkflowNode
-	var finishedChildren []v1alpha1.WorkflowNode
-
-	for _, item := range sortedChildrenNodes {
-		childNode := item
-		if WorkflowNodeFinished(childNode.Status) {
-			finishedChildren = append(finishedChildren, childNode)
-		} else {
-			activeChildren = append(activeChildren, childNode)
-		}
-	}
-	return activeChildren, finishedChildren, nil
-}
-
-// setDifference return the set of elements which contained in former but not in latter
-func setDifference(former []string, latter []string) []string {
-	var result []string
-	formerSet := make(map[string]struct{})
-	latterSet := make(map[string]struct{})
-
-	for _, item := range former {
-		formerSet[item] = struct{}{}
-	}
-	for _, item := range latter {
-		latterSet[item] = struct{}{}
-	}
-	for k := range formerSet {
-		if _, ok := latterSet[k]; !ok {
-			result = append(result, k)
-		}
-	}
-	return result
 }
