@@ -28,12 +28,16 @@ type ExitCodeCollector struct {
 func (it *ExitCodeCollector) CollectContext() (env map[string]interface{}, err error) {
 
 	var targetContainerStatus corev1.ContainerStatus
-
+	found := false
 	for _, containerStatus := range it.pod.Status.ContainerStatuses {
 		if containerStatus.Name == it.containerName {
 			targetContainerStatus = containerStatus
+			found = true
 			break
 		}
+	}
+
+	if !found {
 		return nil, errors.Errorf("no such contaienr called %s in pod %s/%s", it.containerName, it.pod.Namespace, it.pod.Name)
 	}
 
