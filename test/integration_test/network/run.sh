@@ -54,7 +54,7 @@ done
 
 # about half of the latency should be greater than 10ms
 if [[ "$high_latency_num" -lt "3" ]] || [[ "$high_latency_num" -gt "6" ]]; then
-    echo "the chaos dosen't work as expect"
+    echo "the chaos doesn't work as expect"
     exit 1
 fi
 
