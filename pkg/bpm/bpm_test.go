@@ -22,7 +22,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/shirou/gopsutil/process"
-	"sigs.k8s.io/controller-runtime/pkg/envtest"
+	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 )
 
 func TestBpm(t *testing.T) {
@@ -30,7 +30,7 @@ func TestBpm(t *testing.T) {
 
 	RunSpecsWithDefaultAndCustomReporters(t,
 		"Background Process Manager Suite",
-		[]Reporter{envtest.NewlineReporter{}})
+		[]Reporter{printer.NewlineReporter{}})
 }
 
 func RandomeIdentifier() string {

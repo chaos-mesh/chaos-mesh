@@ -17,12 +17,13 @@ import (
 	"os"
 	"testing"
 
+	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
+
 	"github.com/go-logr/zapr"
 	"go.uber.org/zap"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"sigs.k8s.io/controller-runtime/pkg/envtest"
 
 	"github.com/chaos-mesh/chaos-mesh/test/pkg/timer"
 )
@@ -32,7 +33,7 @@ func TestModifyTime(t *testing.T) {
 
 	RunSpecsWithDefaultAndCustomReporters(t,
 		"Time Suit",
-		[]Reporter{envtest.NewlineReporter{}})
+		[]Reporter{printer.NewlineReporter{}})
 }
 
 var _ = BeforeSuite(func(done Done) {

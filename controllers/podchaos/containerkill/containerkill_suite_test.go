@@ -18,6 +18,8 @@ import (
 	"errors"
 	"testing"
 
+	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -27,7 +29,6 @@ import (
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
-	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
@@ -43,7 +44,7 @@ func TestContainerKill(t *testing.T) {
 
 	RunSpecsWithDefaultAndCustomReporters(t,
 		"ContainerKill Suite",
-		[]Reporter{envtest.NewlineReporter{}})
+		[]Reporter{printer.NewlineReporter{}})
 }
 
 var _ = BeforeSuite(func(done Done) {
