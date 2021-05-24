@@ -343,7 +343,7 @@ docker-push-chaos-kernel:
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-kernel:${IMAGE_TAG}"
 
 $(GOBIN)/controller-gen:
-	$(GO) get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.2.5
+	$(GO) install sigs.k8s.io/controller-tools/cmd/controller-gen
 $(GOBIN)/revive:
 	$(GO) get github.com/mgechev/revive@v1.0.2-0.20200225072153-6219ca02fffb
 $(GOBIN)/failpoint-ctl:
