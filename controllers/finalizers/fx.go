@@ -38,7 +38,7 @@ func NewController(mgr ctrl.Manager, client client.Client, reader client.Reader,
 				Object:   obj.Object,
 				Client:   client,
 				Reader:   reader,
-				Recorder: recorder.NewRecorder(mgr, "finalizer"),
+				Recorder: recorder.NewRecorder(mgr, "finalizer", logger),
 				Log:      logger.WithName("finalizers"),
 			})
 		if err != nil {

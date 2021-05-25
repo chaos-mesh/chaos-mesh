@@ -104,7 +104,7 @@ func NewController(mgr ctrl.Manager, client client.Client, reader client.Reader,
 			Object:   pair.Object,
 			Client:   client,
 			Reader:   reader,
-			Recorder: recorder.NewRecorder(mgr, "common"),
+			Recorder: recorder.NewRecorder(mgr, "common", logger),
 			Selector: selector,
 			Log:      logger.WithName("records"),
 		})

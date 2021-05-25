@@ -49,6 +49,22 @@ func (r Recovered) Message() string {
 	return fmt.Sprintf("Successfully recover chaos for %s", r.Id)
 }
 
+type NotSupported struct {
+	Activity string
+}
+
+func (r NotSupported) Type() string {
+	return "Warning"
+}
+
+func (r NotSupported) Reason() string {
+	return "NotSupported"
+}
+
+func (r NotSupported) Message() string {
+	return fmt.Sprintf("%s is not supported", r.Activity)
+}
+
 func init() {
-	register(Applied{}, Recovered{})
+	register(Applied{}, Recovered{}, NotSupported{})
 }

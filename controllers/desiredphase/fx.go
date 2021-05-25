@@ -39,7 +39,7 @@ func NewController(mgr ctrl.Manager, client client.Client, reader client.Reader,
 				Object:   obj.Object,
 				Client:   client,
 				Reader:   reader,
-				Recorder: recorder.NewRecorder(mgr, "desiredphase"),
+				Recorder: recorder.NewRecorder(mgr, "desiredphase", logger),
 				Log:      logger.WithName("desiredphase"),
 			})
 		if err != nil {

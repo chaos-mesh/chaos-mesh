@@ -16,6 +16,8 @@ package v1alpha1
 import (
 	"fmt"
 
+	corev1 "k8s.io/api/core/v1"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
@@ -23,6 +25,7 @@ import (
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:shortName=wf
 // +kubebuilder:subresource:status
+// +chaos-mesh:base
 type Workflow struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -35,6 +38,28 @@ type Workflow struct {
 	Status WorkflowStatus `json:"status"`
 }
 
+func (in *Workflow) GetChaos() *ChaosInstance {
+	instance := &ChaosInstance{
+		Name:      in.Name,
+		Namespace: in.Namespace,
+		Kind:      KindTimeChaos,
+		StartTime: in.CreationTimestamp.Time,
+		Action:    "",
+		UID:       string(in.UID),
+	}
+
+	if in.DeletionTimestamp != nil {
+		instance.EndTime = in.DeletionTimestamp.Time
+	}
+	return instance
+}
+
+func (in *Workflow) GetObjectMeta() *metav1.ObjectMeta {
+	return &in.ObjectMeta
+}
+
+const KindWorkflow = "Workflow"
+
 type WorkflowSpec struct {
 	Entry     string     `json:"entry"`
 	Templates []Template `json:"templates"`
@@ -45,6 +70,27 @@ type WorkflowStatus struct {
 	EntryNode *string `json:"entry_node,omitempty"`
 	// +optional
 	StartTime *metav1.Time `json:"start_time,omitempty"`
+	// +optional
+	EndTime *metav1.Time `json:"end_time,omitempty"`
+
+	// Represents the latest available observations of a workflow's current state.
+	// +optional
+	// +patchMergeKey=type
+	// +patchStrategy=merge
+	Conditions []WorkflowCondition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type"`
+}
+
+type WorkflowConditionType string
+
+const (
+	WorkflowConditionAccomplished WorkflowConditionType = "Accomplished"
+	WorkflowConditionScheduled    WorkflowConditionType = "Scheduled"
+)
+
+type WorkflowCondition struct {
+	Type   WorkflowConditionType  `json:"type"`
+	Status corev1.ConditionStatus `json:"status"`
+	Reason string                 `json:"reason"`
 }
 
 type TemplateType string
@@ -83,6 +129,14 @@ type WorkflowList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []Workflow `json:"items"`
+}
+
+func (in *WorkflowList) ListChaos() []*ChaosInstance {
+	res := make([]*ChaosInstance, 0, len(in.Items))
+	for _, item := range in.Items {
+		res = append(res, item.GetChaos())
+	}
+	return res
 }
 
 func init() {

@@ -133,13 +133,14 @@ func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger, objs
 		// TODO: support workflow
 		builder = builder.Owns(obj.Object)
 	}
+	builder = builder.Owns(&v1alpha1.Workflow{})
 
 	builder.Complete(&Reconciler{
 		scheme,
 		client,
 		log.WithName("schedule-active"),
 		lister,
-		recorder.NewRecorder(mgr, "schedule-active"),
+		recorder.NewRecorder(mgr, "schedule-active", log),
 	})
 	return "schedule-active", nil
 }

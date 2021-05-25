@@ -52,6 +52,15 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, nil
 	}
 
+	if schedule.Spec.Type == v1alpha1.ScheduleTypeWorkflow {
+		if schedule.IsPaused() {
+			r.Recorder.Event(schedule, recorder.NotSupported{
+				Activity: "pausing a workflow schedule",
+			})
+		}
+		return ctrl.Result{}, nil
+	}
+
 	list, err := r.ActiveLister.ListActiveJobs(ctx, schedule)
 	if err != nil {
 		r.Recorder.Event(schedule, recorder.Failed{
@@ -107,7 +116,7 @@ func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger, list
 			client,
 			log.WithName("schedule-pause"),
 			lister,
-			recorder.NewRecorder(mgr, "schedule-pause"),
+			recorder.NewRecorder(mgr, "schedule-pause", log),
 		})
 	return "schedule-pause", nil
 }

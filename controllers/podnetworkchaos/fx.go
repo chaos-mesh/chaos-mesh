@@ -45,7 +45,7 @@ func NewController(mgr ctrl.Manager, client client.Client, reader client.Reader,
 			Client:   client,
 			Reader:   reader,
 			Log:      logger.WithName("podnetworkchaos"),
-			Recorder: recorder.NewRecorder(mgr, "podnetworkchaos"),
+			Recorder: recorder.NewRecorder(mgr, "podnetworkchaos", logger),
 
 			// TODO:
 			AllowHostNetworkTesting: config.ControllerCfg.AllowHostNetworkTesting,

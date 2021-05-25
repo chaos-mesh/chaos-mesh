@@ -19,6 +19,7 @@ import (
 	"time"
 
 	"github.com/go-logr/logr"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/apiserver/pkg/storage/names"
@@ -31,6 +32,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
+	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/controllers"
 )
 
 type Reconciler struct {
@@ -71,7 +73,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	if schedule.Spec.StartingDeadlineSeconds != nil {
 		if missedRun.Add(time.Second * time.Duration(*schedule.Spec.StartingDeadlineSeconds)).Before(now) {
-			r.Recorder.Event(schedule, recorder.MissSchedule{
+			r.Recorder.Event(schedule, recorder.MissedSchedule{
 				MissedRun: *missedRun,
 			})
 			return ctrl.Result{}, nil
@@ -98,20 +100,32 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 		items := reflect.ValueOf(list).Elem().FieldByName("Items")
 		for i := 0; i < items.Len(); i++ {
-			item := items.Index(i).Addr().Interface().(v1alpha1.InnerObject)
-			if !controller.IsChaosFinished(item, now) {
-				shouldSpawn = false
-				r.Recorder.Event(schedule, recorder.ScheduleForbid{
-					RunningName: item.GetObjectMeta().Name,
-				})
-				r.Log.Info("forbid to spawn new chaos", "running", item.GetChaos().Name)
-				break
+			if schedule.Spec.Type != v1alpha1.ScheduleTypeWorkflow {
+				item := items.Index(i).Addr().Interface().(v1alpha1.InnerObject)
+				if !controller.IsChaosFinished(item, now) {
+					shouldSpawn = false
+					r.Recorder.Event(schedule, recorder.ScheduleForbid{
+						RunningName: item.GetObjectMeta().Name,
+					})
+					r.Log.Info("forbid to spawn new chaos", "running", item.GetChaos().Name)
+					break
+				}
+			} else {
+				workflow := items.Index(i).Addr().Interface().(*v1alpha1.Workflow)
+				if !controllers.WorkflowConditionEqualsTo(workflow.Status, v1alpha1.WorkflowConditionAccomplished, corev1.ConditionTrue) {
+					shouldSpawn = false
+					r.Recorder.Event(schedule, recorder.ScheduleForbid{
+						RunningName: workflow.GetObjectMeta().Name,
+					})
+					r.Log.Info("forbid to spawn new workflow", "running", workflow.GetChaos().Name)
+					break
+				}
 			}
 		}
 	}
 
 	if shouldSpawn {
-		newObj, meta, err := schedule.Spec.EmbedChaos.SpawnNewObject(schedule.Spec.Type)
+		newObj, meta, err := schedule.Spec.ScheduleItem.SpawnNewObject(schedule.Spec.Type)
 		if err != nil {
 			r.Recorder.Event(schedule, recorder.Failed{
 				Activity: "generate new object",
@@ -205,7 +219,7 @@ func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger, list
 			client,
 			log.WithName("schedule-cron"),
 			lister,
-			recorder.NewRecorder(mgr, "schedule-cron"),
+			recorder.NewRecorder(mgr, "schedule-cron", log),
 		})
 	return "schedule-cron", nil
 }

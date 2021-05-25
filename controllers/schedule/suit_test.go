@@ -29,6 +29,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/utils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/test"
+	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/controllers"
 
 	"k8s.io/client-go/rest"
 	"k8s.io/kubectl/pkg/scheme"
@@ -133,5 +134,9 @@ type RunParams struct {
 
 func Run(params RunParams) error {
 	lister = utils.NewActiveLister(k8sClient, params.Logger)
+	err := controllers.BootstrapWorkflowControllers(params.Mgr, params.Logger)
+	if err != nil {
+		return err
+	}
 	return nil
 }

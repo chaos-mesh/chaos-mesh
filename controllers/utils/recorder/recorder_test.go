@@ -43,6 +43,7 @@ func TestGenerateAnnotations(t *testing.T) {
 		{map[string]string{"chaos-mesh.org/type": "started"}, Started{}},
 
 		{map[string]string{"chaos-mesh.org/activity": "test1", "chaos-mesh.org/err": "test2", "chaos-mesh.org/type": "failed"}, Failed{"test1", "test2"}},
+		{map[string]string{"chaos-mesh.org/type": "not-supported", "chaos-mesh.org/activity": "pausing a workflow schedule"}, NotSupported{Activity: "pausing a workflow schedule"}},
 
 		{map[string]string{"chaos-mesh.org/type": "finalizer-inited"}, FinalizerInited{}},
 		{map[string]string{"chaos-mesh.org/type": "finalizer-removed"}, FinalizerRemoved{}},
