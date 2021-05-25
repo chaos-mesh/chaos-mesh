@@ -67,6 +67,7 @@ func TestcaseHttpDelayDurationForATimeThenRecover(
 	}
 	err = cli.Create(ctx, httpChaos)
 	framework.ExpectNoError(err, "create http chaos error")
+	time.Sleep(time.Second)
 	By("waiting for assertion HTTP delay")
 	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
 		resp, dur, err := getPodHttpDelay(c, port)

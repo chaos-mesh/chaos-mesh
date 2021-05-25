@@ -49,5 +49,6 @@ func getPodHttpDelay(c http.Client, port uint16) (*http.Response, time.Duration,
 	if err != nil {
 		return nil, 0, err
 	}
+
 	return resp, time.Now().Sub(start), nil
 }
