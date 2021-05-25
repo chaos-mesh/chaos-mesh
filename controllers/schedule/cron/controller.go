@@ -19,6 +19,7 @@ import (
 	"time"
 
 	"github.com/go-logr/logr"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/apiserver/pkg/storage/names"
@@ -32,6 +33,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
+	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/controllers"
 )
 
 type Reconciler struct {
@@ -91,20 +93,30 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 		items := reflect.ValueOf(list).Elem().FieldByName("Items")
 		for i := 0; i < items.Len(); i++ {
-			item := items.Index(i).Addr().Interface().(v1alpha1.InnerObject)
-			if !controller.IsChaosFinished(item, now) {
-				shouldSpawn = false
-				r.Recorder.Eventf(schedule, "Warning", "Forbid", "Forbid spawning new job because: %s is still running", item.GetObjectMeta().Name)
-				r.Log.Info("forbid to spawn new chaos", "running", item.GetChaos().Name)
-				break
+			if schedule.Spec.Type != v1alpha1.ScheduleTypeWorkflow {
+				item := items.Index(i).Addr().Interface().(v1alpha1.InnerObject)
+				if !controller.IsChaosFinished(item, now) {
+					shouldSpawn = false
+					r.Recorder.Eventf(schedule, "Warning", "Forbid", "Forbid spawning new job because: %s is still running", item.GetObjectMeta().Name)
+					r.Log.Info("forbid to spawn new chaos", "running", item.GetChaos().Name)
+					break
+				}
+			} else {
+				workflow := items.Index(i).Addr().Interface().(*v1alpha1.Workflow)
+				if !controllers.WorkflowConditionEqualsTo(workflow.Status, v1alpha1.WorkflowConditionAccomplished, corev1.ConditionTrue) {
+					shouldSpawn = false
+					r.Recorder.Eventf(schedule, "Warning", "Forbid", "Forbid spawning new job because: %s is still running", workflow.GetObjectMeta().Name)
+					r.Log.Info("forbid to spawn new workflow", "running", workflow.GetChaos().Name)
+					break
+				}
 			}
 		}
 	}
 
 	if shouldSpawn {
-		r.Recorder.Event(schedule, "Info", "Spawn", "Spawn new chaos")
+		r.Recorder.Event(schedule, corev1.EventTypeNormal, "Spawn", "Spawn new chaos")
 
-		newObj, meta, err := schedule.Spec.EmbedChaos.SpawnNewObject(schedule.Spec.Type)
+		newObj, meta, err := schedule.Spec.ScheduleItem.SpawnNewObject(schedule.Spec.Type)
 		if err != nil {
 			r.Recorder.Eventf(schedule, "Warning", "Failed", "Failed to generate new object: %s", err.Error())
 			return ctrl.Result{}, nil
