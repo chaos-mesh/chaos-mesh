@@ -126,6 +126,10 @@ func (it *TaskReconciler) Reconcile(request reconcile.Request) (reconcile.Result
 			defaultCollector := collector.DefaultCollector()
 			evaluator := task.NewEvaluator(it.logger, it.kubeClient)
 
+			if nodeNeedUpdate.Status.ConditionalBranches == nil {
+				nodeNeedUpdate.Status.ConditionalBranches = &v1alpha1.ConditionalBranchesStatus{}
+			}
+
 			evaluateConditionBranches, env, err := evaluator.EvaluateConditionBranches(nodeNeedUpdate.Spec.ConditionalTasks, defaultCollector)
 			if err != nil {
 				it.logger.Error(err, "failed to evaluate expression and  fetch env from task",
@@ -149,8 +153,10 @@ func (it *TaskReconciler) Reconcile(request reconcile.Request) (reconcile.Result
 			err = it.kubeClient.Status().Update(ctx, &nodeNeedUpdate)
 			return err
 		})
-		it.logger.Error(updateError, "failed to update the condition status of task",
-			"task", request)
+		if client.IgnoreNotFound(updateError) != nil {
+			it.logger.Error(updateError, "failed to update the condition status of task",
+				"task", request)
+		}
 	} else {
 		// task pod is still running or not exists
 		updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
@@ -161,6 +167,11 @@ func (it *TaskReconciler) Reconcile(request reconcile.Request) (reconcile.Result
 			}
 			// TODO: update related condition
 			var branches []v1alpha1.ConditionalBranch
+
+			if nodeNeedUpdate.Status.ConditionalBranches == nil {
+				nodeNeedUpdate.Status.ConditionalBranches = &v1alpha1.ConditionalBranchesStatus{}
+			}
+
 			for _, conditionalTask := range nodeNeedUpdate.Spec.ConditionalTasks {
 				branch := v1alpha1.ConditionalBranch{
 					Task:             conditionalTask.Task,
@@ -174,8 +185,12 @@ func (it *TaskReconciler) Reconcile(request reconcile.Request) (reconcile.Result
 			err = it.kubeClient.Status().Update(ctx, &nodeNeedUpdate)
 			return err
 		})
-		it.logger.Error(updateError, "failed to update the condition status of task",
-			"task", request)
+
+		if client.IgnoreNotFound(updateError) != nil {
+			it.logger.Error(updateError, "failed to update the condition status of task",
+				"task", request)
+		}
+
 	}
 
 	// update the status about children nodes
