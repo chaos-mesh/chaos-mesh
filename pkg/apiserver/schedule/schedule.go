@@ -95,7 +95,6 @@ type Detail struct {
 }
 
 type parseScheduleFunc func(*core.ScheduleInfo) v1alpha1.EmbedChaos
-type updateExperimentFunc func(*core.KubeObjectDesc, client.Client) error
 
 // StatusResponse defines a common status struct.
 type StatusResponse struct {
