@@ -22,8 +22,8 @@ import (
 	"github.com/iancoleman/strcase"
 )
 
-var InvalidType = errors.New("invalid type of fields")
-var UknownType = errors.New("uknown type of fields")
+var ErrInvalidType = errors.New("invalid type of fields")
+var ErrUknownType = errors.New("uknown type of fields")
 
 var annotationPrefix = "chaos-mesh.org/"
 
@@ -42,7 +42,7 @@ func generateAnnotations(e ChaosEvent) (map[string]string, error) {
 		field := val.Field(index)
 		switch field.Kind() {
 		case reflect.Invalid:
-			return nil, InvalidType
+			return nil, ErrInvalidType
 		case reflect.String:
 			annotations[key] = field.String()
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
@@ -56,7 +56,7 @@ func generateAnnotations(e ChaosEvent) (map[string]string, error) {
 
 				annotations[key] = string(text)
 			} else {
-				return nil, InvalidType
+				return nil, ErrInvalidType
 			}
 		}
 	}
@@ -72,7 +72,7 @@ func FromAnnotations(annotations map[string]string) (ChaosEvent, error) {
 	ev := allEvents[typeName]
 
 	if ev == nil {
-		return nil, UknownType
+		return nil, ErrUknownType
 	}
 
 	val := reflect.ValueOf(ev)
@@ -85,7 +85,7 @@ func FromAnnotations(annotations map[string]string) (ChaosEvent, error) {
 		field := newEmptyValue.Field(index)
 		switch field.Kind() {
 		case reflect.Invalid:
-			return nil, InvalidType
+			return nil, ErrInvalidType
 		case reflect.String:
 			field.SetString(annotations[key])
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
@@ -106,7 +106,7 @@ func FromAnnotations(annotations map[string]string) (ChaosEvent, error) {
 					return nil, err
 				}
 			} else {
-				return nil, InvalidType
+				return nil, ErrInvalidType
 			}
 		}
 	}
