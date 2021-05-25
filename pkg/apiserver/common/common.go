@@ -397,8 +397,12 @@ func (s *Service) getRbacConfig(c *gin.Context) {
 	}
 	if roleType == roleManager {
 		verbs = `"get", "list", "watch", "create", "delete", "patch", "update"`
-	} else {
+	} else if roleType == roleViewer {
 		verbs = `"get", "list", "watch"`
+	} else {
+		c.Status(http.StatusBadRequest)
+		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(fmt.Errorf("roleType is neither manager nor viewer")))
+		return
 	}
 
 	serviceAccountName := fmt.Sprintf("account-%s-%s-%s", scope, roleType, randomStr)
