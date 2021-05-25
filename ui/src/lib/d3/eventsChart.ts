@@ -6,6 +6,7 @@ import { Event } from 'api/events.type'
 import { IntlShape } from 'react-intl'
 import { Theme } from 'slices/settings'
 import _debounce from 'lodash.debounce'
+import { truncate } from '../utils'
 import wrapText from './wrapText'
 
 /**
@@ -57,9 +58,14 @@ export default function gen({
 
   const margin = {
     top: 0,
-    right: enableLegends && document.documentElement.offsetWidth > 768 ? 150 : 0,
+    right: 0,
     bottom: 30,
     left: 0,
+  }
+  updateMargin()
+
+  function updateMargin() {
+    margin.right = enableLegends && document.documentElement.offsetWidth > 768 ? 150 : 0
   }
 
   const halfHourLater = (events.length ? DateTime.fromISO(events[events.length - 1].start_time) : now()).plus({
@@ -134,7 +140,7 @@ export default function gen({
   const timelines = svg
     .append('g')
     .attr('transform', `translate(${margin.left}, ${margin.top})`)
-    .attr('stroke-opacity', 0.6)
+    .attr('stroke-opacity', 0.24)
     .selectAll()
     .data(allUniqueUUIDs)
     .join('line')
@@ -189,7 +195,8 @@ export default function gen({
     legends
       .insert('div')
       .attr('class', 'experiment')
-      .text((d) => d.name)
+      .attr('title', (d) => d.name)
+      .text((d) => truncate(d.name))
   }
 
   const tooltip = d3
@@ -292,6 +299,8 @@ export default function gen({
     function reGen() {
       const newWidth = root.offsetWidth
       width = newWidth
+
+      updateMargin()
 
       svg.attr('width', width).call(zoom.transform, d3.zoomIdentity)
       gXAxis.call(xAxis.scale(x.range([margin.left, width - margin.right])))

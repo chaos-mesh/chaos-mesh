@@ -9,9 +9,18 @@ export interface Alert {
   message: string
 }
 
+export interface Confirm {
+  title: string
+  description: string
+  handle?: () => void
+  [key: string]: any
+}
+
 const initialState: {
   alert: Alert
   alertOpen: boolean
+  confirm: Confirm
+  confirmOpen: boolean // control global confirm dialog
   namespace: string
   securityMode: boolean
   dnsServerCreate: boolean
@@ -24,6 +33,11 @@ const initialState: {
     message: '',
   },
   alertOpen: false,
+  confirm: {
+    title: '',
+    description: '',
+  },
+  confirmOpen: false,
   namespace: 'All',
   securityMode: true,
   dnsServerCreate: false,
@@ -42,6 +56,13 @@ const globalStatusSlice = createSlice({
     },
     setAlertOpen(state, action: PayloadAction<boolean>) {
       state.alertOpen = action.payload
+    },
+    setConfirm(state, action: PayloadAction<Confirm>) {
+      state.confirm = action.payload
+      state.confirmOpen = true
+    },
+    setConfirmOpen(state, action: PayloadAction<boolean>) {
+      state.confirmOpen = action.payload
     },
     setNameSpace(state, action: PayloadAction<string>) {
       const ns = action.payload
@@ -72,6 +93,15 @@ const globalStatusSlice = createSlice({
   },
 })
 
-export const { setAlert, setAlertOpen, setNameSpace, setConfig, setTokens, setTokenName } = globalStatusSlice.actions
+export const {
+  setAlert,
+  setAlertOpen,
+  setConfirm,
+  setConfirmOpen,
+  setNameSpace,
+  setConfig,
+  setTokens,
+  setTokenName,
+} = globalStatusSlice.actions
 
 export default globalStatusSlice.reducer
