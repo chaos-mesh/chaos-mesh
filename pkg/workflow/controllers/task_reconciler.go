@@ -303,6 +303,9 @@ func (it *TaskReconciler) syncChildNodes(ctx context.Context, evaluatedNode v1al
 				)
 			}
 		}
+	} else {
+		// exactly same, NOOP
+		return nil
 	}
 
 	parentWorkflow := v1alpha1.Workflow{}
