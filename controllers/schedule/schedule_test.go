@@ -54,7 +54,7 @@ var _ = Describe("Schedule", func() {
 				},
 				Spec: v1alpha1.ScheduleSpec{
 					Schedule: "@every 10s",
-					EmbedChaos: v1alpha1.EmbedChaos{
+					ScheduleItem: v1alpha1.ScheduleItem{
 						TimeChaos: &v1alpha1.TimeChaosSpec{
 							TimeOffset: "100ms",
 							ClockIds:   []string{"CLOCK_REALTIME"},
@@ -68,7 +68,7 @@ var _ = Describe("Schedule", func() {
 					},
 					ConcurrencyPolicy: v1alpha1.ForbidConcurrent,
 					HistoryLimit:      5,
-					Type:              v1alpha1.TypeTimeChaos,
+					Type:              v1alpha1.ScheduleTypeTimeChaos,
 				},
 				Status: v1alpha1.ScheduleStatus{
 					LastScheduleTime: metav1.NewTime(time.Time{}),
@@ -101,8 +101,8 @@ var _ = Describe("Schedule", func() {
 					Namespace: "default",
 				},
 				Spec: v1alpha1.ScheduleSpec{
-					Schedule: "@every 5s",
-					EmbedChaos: v1alpha1.EmbedChaos{
+					Schedule: "@every 1s",
+					ScheduleItem: v1alpha1.ScheduleItem{
 						TimeChaos: &v1alpha1.TimeChaosSpec{
 							TimeOffset: "100ms",
 							ClockIds:   []string{"CLOCK_REALTIME"},
@@ -116,7 +116,7 @@ var _ = Describe("Schedule", func() {
 					},
 					ConcurrencyPolicy: v1alpha1.ForbidConcurrent,
 					HistoryLimit:      2,
-					Type:              v1alpha1.TypeTimeChaos,
+					Type:              v1alpha1.ScheduleTypeTimeChaos,
 				},
 				Status: v1alpha1.ScheduleStatus{
 					LastScheduleTime: metav1.NewTime(time.Now()),
@@ -130,7 +130,7 @@ var _ = Describe("Schedule", func() {
 
 			By("Reconciling the created schedule obj")
 			{
-				err := wait.Poll(time.Second*5, time.Minute*1, func() (ok bool, err error) {
+				err := wait.Poll(time.Second*1, time.Minute*1, func() (ok bool, err error) {
 					err = k8sClient.Get(context.TODO(), key, schedule)
 					if err != nil {
 						return false, err
@@ -166,8 +166,8 @@ var _ = Describe("Schedule", func() {
 					Namespace: "default",
 				},
 				Spec: v1alpha1.ScheduleSpec{
-					Schedule: "@every 5s",
-					EmbedChaos: v1alpha1.EmbedChaos{
+					Schedule: "@every 2s",
+					ScheduleItem: v1alpha1.ScheduleItem{
 						TimeChaos: &v1alpha1.TimeChaosSpec{
 							TimeOffset: "100ms",
 							ClockIds:   []string{"CLOCK_REALTIME"},
@@ -181,7 +181,7 @@ var _ = Describe("Schedule", func() {
 					},
 					ConcurrencyPolicy: v1alpha1.AllowConcurrent,
 					HistoryLimit:      2,
-					Type:              v1alpha1.TypeTimeChaos,
+					Type:              v1alpha1.ScheduleTypeTimeChaos,
 				},
 				Status: v1alpha1.ScheduleStatus{
 					LastScheduleTime: metav1.NewTime(time.Now()),
@@ -217,15 +217,15 @@ var _ = Describe("Schedule", func() {
 				Name:      "foo3",
 				Namespace: "default",
 			}
-			duration := "3s"
+			duration := "1s"
 			schedule := &v1alpha1.Schedule{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "foo3",
 					Namespace: "default",
 				},
 				Spec: v1alpha1.ScheduleSpec{
-					Schedule: "@every 5s",
-					EmbedChaos: v1alpha1.EmbedChaos{
+					Schedule: "@every 3s",
+					ScheduleItem: v1alpha1.ScheduleItem{
 						TimeChaos: &v1alpha1.TimeChaosSpec{
 							TimeOffset: "100ms",
 							ClockIds:   []string{"CLOCK_REALTIME"},
@@ -239,7 +239,7 @@ var _ = Describe("Schedule", func() {
 					},
 					ConcurrencyPolicy: v1alpha1.AllowConcurrent,
 					HistoryLimit:      2,
-					Type:              v1alpha1.TypeTimeChaos,
+					Type:              v1alpha1.ScheduleTypeTimeChaos,
 				},
 				Status: v1alpha1.ScheduleStatus{
 					LastScheduleTime: metav1.NewTime(time.Now()),
@@ -253,7 +253,137 @@ var _ = Describe("Schedule", func() {
 
 			By("deleting outdated chaos")
 			{
-				time.Sleep(time.Minute * 1)
+				time.Sleep(time.Second * 10)
+				err := wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
+					err = k8sClient.Get(context.TODO(), key, schedule)
+					if err != nil {
+						return false, err
+					}
+					ctrl.Log.Info("active chaos", "size", len(schedule.Status.Active))
+					return len(schedule.Status.Active) == 2, nil
+				})
+				Expect(err).ToNot(HaveOccurred())
+			}
+
+			By("deleting the created object")
+			{
+				Expect(k8sClient.Delete(context.TODO(), schedule)).To(Succeed())
+				Expect(k8sClient.Get(context.TODO(), key, schedule)).ToNot(Succeed())
+			}
+		})
+	})
+
+	Context(("Schedule workflow"), func() {
+		It(("Should forbid concurrent"), func() {
+			key := types.NamespacedName{
+				Name:      "foo10",
+				Namespace: "default",
+			}
+			duration := "10000s"
+			schedule := &v1alpha1.Schedule{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "foo10",
+					Namespace: "default",
+				},
+				Spec: v1alpha1.ScheduleSpec{
+					Schedule: "@every 3s",
+					ScheduleItem: v1alpha1.ScheduleItem{
+						Workflow: &v1alpha1.WorkflowSpec{
+							Entry: "the-entry",
+							Templates: []v1alpha1.Template{
+								{
+									Name:     "the-entry",
+									Type:     v1alpha1.TypeSerial,
+									Duration: &duration,
+									Tasks:    []string{"hardwork"},
+								},
+								{
+									Name:     "hardwork",
+									Type:     v1alpha1.TypeSuspend,
+									Duration: &duration,
+									Tasks:    nil,
+								},
+							},
+						},
+					},
+					ConcurrencyPolicy: v1alpha1.ForbidConcurrent,
+					HistoryLimit:      2,
+					Type:              v1alpha1.ScheduleTypeWorkflow,
+				},
+				Status: v1alpha1.ScheduleStatus{
+					LastScheduleTime: metav1.NewTime(time.Time{}),
+				},
+			}
+
+			By("creating a schedule obj")
+			{
+				Expect(k8sClient.Create(context.TODO(), schedule)).To(Succeed())
+			}
+
+			By("disallowing concurrent")
+			{
+				time.Sleep(time.Second * 10)
+				err := wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
+					err = k8sClient.Get(context.TODO(), key, schedule)
+					if err != nil {
+						return false, err
+					}
+					ctrl.Log.Info("active chaos", "size", len(schedule.Status.Active))
+					return len(schedule.Status.Active) == 1, nil
+				})
+				Expect(err).ToNot(HaveOccurred())
+			}
+
+			By("deleting the created object")
+			{
+				Expect(k8sClient.Delete(context.TODO(), schedule)).To(Succeed())
+				Expect(k8sClient.Get(context.TODO(), key, schedule)).ToNot(Succeed())
+			}
+		})
+
+		It(("Should be garbage collected successfully"), func() {
+			key := types.NamespacedName{
+				Name:      "foo11",
+				Namespace: "default",
+			}
+			duration := "1s"
+			schedule := &v1alpha1.Schedule{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "foo11",
+					Namespace: "default",
+				},
+				Spec: v1alpha1.ScheduleSpec{
+					Schedule: "@every 3s",
+					ScheduleItem: v1alpha1.ScheduleItem{
+						Workflow: &v1alpha1.WorkflowSpec{
+							Entry: "the-entry",
+							Templates: []v1alpha1.Template{
+								{
+									Name:     "the-entry",
+									Type:     v1alpha1.TypeSerial,
+									Duration: &duration,
+									Tasks:    nil,
+								},
+							},
+						},
+					},
+					ConcurrencyPolicy: v1alpha1.AllowConcurrent,
+					HistoryLimit:      2,
+					Type:              v1alpha1.ScheduleTypeWorkflow,
+				},
+				Status: v1alpha1.ScheduleStatus{
+					LastScheduleTime: metav1.NewTime(time.Time{}),
+				},
+			}
+
+			By("creating a schedule obj")
+			{
+				Expect(k8sClient.Create(context.TODO(), schedule)).To(Succeed())
+			}
+
+			By("deleting outdated workflow")
+			{
+				time.Sleep(time.Second * 10)
 				err := wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
 					err = k8sClient.Get(context.TODO(), key, schedule)
 					if err != nil {
