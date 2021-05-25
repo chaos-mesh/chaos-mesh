@@ -1,9 +1,14 @@
 import { Box, Button, Divider, Grid, MenuItem, Typography } from '@material-ui/core'
 import { Form, Formik } from 'formik'
 import { LabelField, SelectField, TextField } from 'components/FormField'
+import {
+  Fields as ScheduleSpecificFields,
+  data as scheduleSpecificData,
+  schema as scheduleSpecificSchema,
+} from 'components/Schedule/types'
 import basicData, { schema } from './data/basic'
 import { createStyles, makeStyles } from '@material-ui/core/styles'
-import { setBasic, setStep2 } from 'slices/experiments'
+import { setBasic, setScheduleSpecific, setStep2 } from 'slices/experiments'
 import { useEffect, useMemo, useState } from 'react'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
@@ -32,30 +37,69 @@ const useStyles = makeStyles((theme) =>
   })
 )
 
-interface Step2Props {
-  inWorkflow?: boolean
+function isInstant(target: any) {
+  if (
+    target.kind === 'PodChaos' &&
+    (target.pod_chaos.action === 'pod-kill' || target.pod_chaos.action === 'container-kill')
+  ) {
+    return true
+  }
+
+  return false
 }
 
-const Step2: React.FC<Step2Props> = ({ inWorkflow = false }) => {
+interface Step2Props {
+  inWorkflow?: boolean
+  inSchedule?: boolean
+}
+
+const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false }) => {
   const classes = useStyles()
 
-  const { namespaces, step2, basic, target } = useStoreSelector((state) => state.experiments)
+  const { namespaces, step2, basic, target, scheduleSpecific } = useStoreSelector((state) => state.experiments)
   const scopeDisabled = target.kind === 'AwsChaos' || target.kind === 'GcpChaos'
   const dispatch = useStoreDispatch()
 
-  const originalInit = useMemo(() => (inWorkflow ? { ...basicData, duration: '' } : basicData), [inWorkflow])
+  const originalInit = useMemo(
+    () =>
+      inWorkflow
+        ? { ...basicData, scheduler: undefined, duration: '' }
+        : inSchedule
+        ? { ...basicData, ...scheduleSpecificData }
+        : basicData,
+    [inWorkflow, inSchedule]
+  )
   const [init, setInit] = useState(originalInit)
 
   useEffect(() => {
     setInit({
       ...originalInit,
       ...basic,
+      ...scheduleSpecific,
     })
-  }, [originalInit, basic])
+  }, [originalInit, basic, scheduleSpecific])
 
   const handleOnSubmitStep2 = (values: Record<string, any>) => {
     if (process.env.NODE_ENV === 'development') {
       console.debug('Debug handleSubmitStep2', values)
+    }
+
+    if (inSchedule) {
+      dispatch(
+        setScheduleSpecific({
+          duration: values.duration,
+          schedule: values.schedule,
+          starting_deadline_seconds: values.starting_deadline_seconds,
+          concurrency_policy: values.concurrency_policy,
+          history_limit: values.history_limit,
+        })
+      )
+
+      delete values.duration
+      delete values.schedule
+      delete values.starting_deadline_seconds
+      delete values.concurrency_policy
+      delete values.history_limit
     }
 
     dispatch(setBasic(values))
@@ -73,7 +117,7 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false }) => {
               <CheckIcon className={classes.submitIcon} />
             </Box>
           )}
-          <Typography>{T('newE.titleStep2')}</Typography>
+          <Typography>{T(`${inSchedule ? 'newS' : 'newE'}.titleStep2`)}</Typography>
         </Box>
         {step2 && <UndoIcon className={classes.asButton} onClick={handleUndo} />}
       </Box>
@@ -86,6 +130,8 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false }) => {
               ? schema.shape({
                   duration: yupString().required('The duration is required'),
                 })
+              : inSchedule
+              ? schema.shape(scheduleSpecificSchema)
               : schema
           }
           validateOnChange={false}
@@ -111,7 +157,9 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false }) => {
                     fast
                     name="name"
                     label={T('common.name')}
-                    helperText={errors.name && touched.name ? errors.name : T('newE.basic.nameHelper')}
+                    helperText={
+                      errors.name && touched.name ? errors.name : T(`${inSchedule ? 'newS' : 'newE'}.basic.nameHelper`)
+                    }
                     error={errors.name && touched.name ? true : false}
                   />
                   {inWorkflow && (
@@ -122,12 +170,12 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false }) => {
                       helperText={
                         (errors as any).duration && (touched as any).duration
                           ? (errors as any).duration
-                          : T('newW.node.durationHelper')
+                          : T(`${inWorkflow ? 'newW.node' : 'newS.basic'}.durationHelper`)
                       }
                       error={(errors as any).duration && (touched as any).duration ? true : false}
                     />
                   )}
-
+                  {inSchedule && <ScheduleSpecificFields errors={errors} touched={touched} />}
                   <AdvancedOptions>
                     {namespaces.length && (
                       <SelectField
@@ -145,10 +193,14 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false }) => {
                     <LabelField name="labels" label={T('k8s.labels')} isKV />
                     <LabelField name="annotations" label={T('k8s.annotations')} isKV />
                   </AdvancedOptions>
-                  <Box my={3}>
-                    <Divider />
-                  </Box>
-                  <Scheduler errors={errors} touched={touched} />
+                  {!inWorkflow && !isInstant(target) && (
+                    <>
+                      <Box my={3}>
+                        <Divider />
+                      </Box>
+                      <Scheduler errors={errors} touched={touched} inSchedule={inSchedule} />
+                    </>
+                  )}
                   <Box mt={6} textAlign="right">
                     <Button type="submit" variant="contained" color="primary" startIcon={<PublishIcon />}>
                       {T('common.submit')}

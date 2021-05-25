@@ -1,15 +1,11 @@
-import { Box, Button } from '@material-ui/core'
 import { Form, Formik, getIn } from 'formik'
-import { LabelField, TextField } from 'components/FormField'
+import { LabelField, Submit, TextField } from 'components/FormField'
 import React, { useEffect, useState } from 'react'
 
 import AdvancedOptions from 'components/AdvancedOptions'
-import PublishIcon from '@material-ui/icons/Publish'
-import { RootState } from 'store'
-import T from 'components/T'
 import { Typography } from '@material-ui/core'
 import targetData from '../data/target'
-import { useSelector } from 'react-redux'
+import { useStoreSelector } from 'store'
 
 const validate = (values: any) => {
   let errors = {}
@@ -39,7 +35,7 @@ interface StressProps {
 }
 
 const Stress: React.FC<StressProps> = ({ onSubmit }) => {
-  const { target } = useSelector((state: RootState) => state.experiments)
+  const { target } = useStoreSelector((state) => state.experiments)
 
   const initialValues = targetData.StressChaos.spec!
 
@@ -104,11 +100,7 @@ const Stress: React.FC<StressProps> = ({ onSubmit }) => {
             />
           </AdvancedOptions>
 
-          <Box mt={6} textAlign="right">
-            <Button type="submit" variant="contained" color="primary" startIcon={<PublishIcon />}>
-              {T('common.submit')}
-            </Button>
-          </Box>
+          <Submit />
         </Form>
       )}
     </Formik>

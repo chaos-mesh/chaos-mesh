@@ -103,7 +103,6 @@ export function yamlToExperiment(yamlObj: any): any {
         value: spec.value?.toString() ?? '',
       },
       scheduler: {
-        cron: spec.scheduler?.cron ?? '',
         duration: spec.duration ?? '',
       },
     },

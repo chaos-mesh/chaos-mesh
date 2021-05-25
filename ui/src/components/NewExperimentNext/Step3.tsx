@@ -19,13 +19,13 @@ interface Step3Props {
 }
 
 const Step3: React.FC<Step3Props> = ({ onSubmit }) => {
+  const history = useHistory()
+  const intl = useIntl()
+
   const state = useStoreSelector((state) => state)
   const { step1, step2, basic, target } = state.experiments
   const { debugMode } = state.settings
   const dispatch = useStoreDispatch()
-
-  const history = useHistory()
-  const intl = useIntl()
 
   const submitExperiment = () => {
     const parsedValues = parseSubmit({

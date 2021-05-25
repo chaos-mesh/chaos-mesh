@@ -31,7 +31,7 @@
       "basic": "基本信息",
       "scope": "范围",
       "scopeDisabled": "（无需填写）",
-      "schedule": "计划"
+      "run": "运行"
     },
     "loadFrom": "加载自",
     "basic": {
@@ -84,9 +84,8 @@
         "title": "GCP 故障"
       }
     },
-    "schedule": {
+    "run": {
       "continuous": "持续运行",
-      "mustBeScheduled": "所选实验必须按计划执行",
       "duration": "持续时间",
       "durationHelper": "实验的持续时间"
     },
@@ -115,6 +114,7 @@
   },
   "newW": {
     "title": "新的工作流",
+    "titleBasic": "工作流信息",
     "node": {
       "choose": "选择任务类型",
       "single": "单一",
@@ -149,7 +149,25 @@
     "topology": "拓扑"
   },
   "schedules": {
-    "title": "计划"
+    "title": "计划",
+    "single": "计划"
+  },
+  "newS": {
+    "title": "新的计划",
+    "titleStep2": "填写计划信息",
+    "basic": {
+      "nameHelper": "计划的名称",
+      "scheduleHelper": "定义计划",
+      "durationHelper": "计划的持续时间",
+      "startingDeadlineSeconds": "实验过期时间",
+      "startingDeadlineSecondsHelper": "设置以忽略长时间未运行的实验",
+      "concurrencyPolicy": "并发策略",
+      "concurrencyPolicyHelper": "是否允许实验同时运行",
+      "forbid": "禁止",
+      "allow": "允许",
+      "historyLimit": "历史限制",
+      "historyLimitHelper": "最大实验记录数"
+    }
   },
   "events": {
     "title": "事件",

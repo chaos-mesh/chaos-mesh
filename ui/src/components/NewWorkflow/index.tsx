@@ -56,7 +56,7 @@ const useStyles = makeStyles((theme) => ({
   leftSticky: {
     position: 'sticky',
     top: 0,
-    height: `calc(100vh - 56px - ${theme.spacing(12)})`,
+    height: `calc(100vh - 56px - ${theme.spacing(9)})`,
   },
   field: {
     width: 180,
@@ -397,8 +397,8 @@ const NewWorkflow = () => {
           >
             {({ errors, touched }) => (
               <Form style={{ height: '100%' }}>
-                <Space display="flex" flexDirection="column" height="100%" vertical spacing={6}>
-                  <Typography>{T('common.preview')}</Typography>
+                <Space display="flex" flexDirection="column" height="100%" vertical>
+                  <Typography>{T('newW.titleBasic')}</Typography>
                   <Box>
                     <TextField
                       name="name"
@@ -426,6 +426,7 @@ const NewWorkflow = () => {
                       error={errors.duration && touched.duration ? true : false}
                     />
                   </Box>
+                  <Typography>{T('common.preview')}</Typography>
                   <Box flex={1}>
                     <Paper style={{ height: '100%' }} padding={0}>
                       <YAMLEditor

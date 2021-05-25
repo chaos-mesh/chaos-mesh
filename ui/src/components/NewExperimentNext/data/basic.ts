@@ -20,7 +20,7 @@ const data = {
 }
 
 export const schema: Yup.ObjectSchema = Yup.object({
-  name: Yup.string().required('The experiment name is required'),
+  name: Yup.string().required('The name is required'),
   scope: Yup.object({
     namespaces: Yup.array().min(1, 'The namespace selectors is required'),
   }),

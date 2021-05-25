@@ -31,7 +31,7 @@
       "basic": "Basic",
       "scope": "Scope",
       "scopeDisabled": " (No need to fill in)",
-      "schedule": "Schedule"
+      "run": "Run"
     },
     "loadFrom": "Load from",
     "basic": {
@@ -84,9 +84,8 @@
         "title": "GCP Fault"
       }
     },
-    "schedule": {
+    "run": {
       "continuous": "Run continuously",
-      "mustBeScheduled": "The chosen action must be scheduled",
       "duration": "Duration",
       "durationHelper": "The experiment duration"
     },
@@ -116,6 +115,7 @@
   },
   "newW": {
     "title": "New Workflow",
+    "titleBasic": "Workflow info",
     "node": {
       "choose": "Choose task type",
       "single": "Single",
@@ -150,7 +150,25 @@
     "topology": "Topology"
   },
   "schedules": {
-    "title": "Schedules"
+    "title": "Schedules",
+    "single": "Schedule"
+  },
+  "newS": {
+    "title": "New Schedule",
+    "titleStep2": "Fill the schedule info",
+    "basic": {
+      "nameHelper": "The schedule name",
+      "scheduleHelper": "Define the schedule",
+      "durationHelper": "The schedule duration",
+      "startingDeadlineSeconds": "Experiment expiration time",
+      "startingDeadlineSecondsHelper": "Set to ignore experiments that haven’t been running for a long time",
+      "concurrencyPolicy": "Concurrency Policy",
+      "concurrencyPolicyHelper": "Whether to allow experiments to run at the same time",
+      "forbid": "Forbid",
+      "allow": "Allow",
+      "historyLimit": "History Limit",
+      "historyLimitHelper": "Maximum number of experiment records"
+    }
   },
   "events": {
     "title": "Events",

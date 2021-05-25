@@ -5,6 +5,7 @@ import Events from 'pages/Events'
 import ExperimentDetail from 'pages/ExperimentDetail'
 import Experiments from 'pages/Experiments'
 import NewExperiment from 'pages/Experiments/New'
+import NewSchedule from 'pages/Schedules/New'
 import NewWorkflow from 'components/NewWorkflow'
 import { RouteProps } from 'react-router'
 import Schedules from 'pages/Schedules'
@@ -49,6 +50,10 @@ const routes: RouteProps[] = [
     component: Schedules,
     path: '/schedules',
     exact: true,
+  },
+  {
+    component: NewSchedule,
+    path: '/schedules/new',
   },
   {
     component: Events,

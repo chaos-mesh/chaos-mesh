@@ -1,24 +1,21 @@
 import { Box, Button, Divider, InputAdornment, MenuItem, Typography } from '@material-ui/core'
 import { Form, Formik } from 'formik'
-import { LabelField, SelectField, TextField } from 'components/FormField'
+import { LabelField, SelectField, Submit, TextField } from 'components/FormField'
 import React, { useEffect, useState } from 'react'
 
 import AddIcon from '@material-ui/icons/Add'
 import Paper from 'components-mui/Paper'
-import PaperTop from 'components-mui/PaperTop'
-import PublishIcon from '@material-ui/icons/Publish'
 import RemoveIcon from '@material-ui/icons/Remove'
-import { RootState } from 'store'
-import T from 'components/T'
+import Space from 'components-mui/Space'
 import targetData from '../data/target'
-import { useSelector } from 'react-redux'
+import { useStoreSelector } from 'store'
 
 interface KernelProps {
   onSubmit: (values: Record<string, any>) => void
 }
 
 const Kernel: React.FC<KernelProps> = ({ onSubmit }) => {
-  const { target } = useSelector((state: RootState) => state.experiments)
+  const { target } = useStoreSelector((state) => state.experiments)
 
   const initialValues = targetData.KernelChaos.spec!
 
@@ -61,34 +58,37 @@ const Kernel: React.FC<KernelProps> = ({ onSubmit }) => {
         return (
           <Form>
             <Paper>
-              <PaperTop title="Callchain">
+              <Box display="flex" justifyContent="space-between" alignItems="center">
+                <Typography component="div">Callchain</Typography>
                 <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={addFrame}>
                   Add
                 </Button>
-              </PaperTop>
-              <Box>
-                {callchain.map((_: any, i: number) => (
-                  <Box key={'frame' + i} p={3}>
-                    <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-                      <Typography variant="body2" gutterBottom>
-                        Frame {i + 1}
-                      </Typography>
-                      <Button
-                        variant="contained"
-                        color="secondary"
-                        size="small"
-                        startIcon={<RemoveIcon />}
-                        onClick={removeFrame(i)}
-                      >
-                        Remove
-                      </Button>
-                    </Box>
-                    <TextField name={`fail_kern_request.callchain[${i}].funcname`} label="funcname" />
-                    <TextField name={`fail_kern_request.callchain[${i}].parameters`} label="parameters" />
-                    <TextField name={`fail_kern_request.callchain[${i}].predicate`} label="predicate" />
-                  </Box>
-                ))}
               </Box>
+              {callchain.length > 0 && (
+                <Space vertical mt={6}>
+                  {callchain.map((_: any, i: number) => (
+                    <Box key={'frame' + i}>
+                      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+                        <Typography variant="body2" gutterBottom>
+                          Frame {i + 1}
+                        </Typography>
+                        <Button
+                          variant="outlined"
+                          color="secondary"
+                          size="small"
+                          startIcon={<RemoveIcon />}
+                          onClick={removeFrame(i)}
+                        >
+                          Remove
+                        </Button>
+                      </Box>
+                      <TextField name={`fail_kern_request.callchain[${i}].funcname`} label="funcname" />
+                      <TextField name={`fail_kern_request.callchain[${i}].parameters`} label="parameters" />
+                      <TextField name={`fail_kern_request.callchain[${i}].predicate`} label="predicate" />
+                    </Box>
+                  ))}
+                </Space>
+              )}
             </Paper>
             <Box my={6}>
               <Divider />
@@ -119,11 +119,7 @@ const Kernel: React.FC<KernelProps> = ({ onSubmit }) => {
             />
             <TextField type="number" name="fail_kern_request.times" helperText="The max times of failures" />
 
-            <Box mt={6} textAlign="right">
-              <Button type="submit" variant="contained" color="primary" startIcon={<PublishIcon />}>
-                {T('common.submit')}
-              </Button>
-            </Box>
+            <Submit />
           </Form>
         )
       }}

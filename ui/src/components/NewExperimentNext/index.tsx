@@ -19,10 +19,11 @@ interface NewExperimentProps {
   onSubmit?: (experiment: { target: any; basic: any }) => void
   loadFrom?: boolean
   inWorkflow?: boolean
+  inSchedule?: boolean
 }
 
 const NewExperiment: React.ForwardRefRenderFunction<NewExperimentHandles, NewExperimentProps> = (
-  { initPanel = 'initial', onSubmit, loadFrom = true, inWorkflow = false },
+  { initPanel = 'initial', onSubmit, loadFrom = true, inWorkflow = false, inSchedule = false },
   ref
 ) => {
   const [showNewPanel, setShowNewPanel] = useState<PanelType>(initPanel)
@@ -43,7 +44,7 @@ const NewExperiment: React.ForwardRefRenderFunction<NewExperimentHandles, NewExp
               color={showNewPanel === 'initial' ? 'primary' : 'inherit'}
               onClick={() => setShowNewPanel('initial')}
             >
-              {T('newE.title')}
+              {T(`${inSchedule ? 'newS' : 'newE'}.title`)}
             </Link>
             <Link
               href="#"
@@ -58,13 +59,13 @@ const NewExperiment: React.ForwardRefRenderFunction<NewExperimentHandles, NewExp
       {showNewPanel === 'initial' && (
         <Space spacing={6} vertical>
           <Step1 />
-          <Step2 inWorkflow={inWorkflow} />
+          <Step2 inWorkflow={inWorkflow} inSchedule={inSchedule} />
           <Step3 onSubmit={onSubmit ? onSubmit : undefined} />
         </Space>
       )}
       {loadFrom && (
         <Box style={{ display: showNewPanel === 'existing' ? 'initial' : 'none' }}>
-          <LoadFrom loadCallback={loadCallback} />
+          <LoadFrom loadCallback={loadCallback} inSchedule={inSchedule} />
         </Box>
       )}
     </>

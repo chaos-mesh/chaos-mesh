@@ -7,7 +7,7 @@ export interface ExperimentBasic {
 
 export interface ExperimentTargetPod {
   action: 'pod-failure' | 'pod-kill' | 'container-kill'
-  container_name?: string
+  container_names?: string[]
 }
 
 export interface ExperimentScope {
@@ -134,7 +134,6 @@ export interface ExperimentTarget {
 }
 
 export interface ExperimentSchedule {
-  cron: string
   duration: string
 }
 

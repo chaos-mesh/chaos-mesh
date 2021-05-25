@@ -117,33 +117,14 @@ const ExperimentConfiguration: React.FC<ExperimentConfigurationProps> = ({ exper
 
         <Table size="small">
           <TableBody>
-            {e.kube_object.spec.scheduler?.cron ? (
-              <>
-                <TableRow>
-                  <TableCell>Cron</TableCell>
-                  <TableCell>
-                    <Typography variant="body2" color="textSecondary">
-                      {e.kube_object.spec.scheduler.cron}
-                    </Typography>
-                  </TableCell>
-                </TableRow>
-
-                {e.kube_object.spec.duration && (
-                  <TableRow>
-                    <TableCell>{T('newE.schedule.duration')}</TableCell>
-                    <TableCell>
-                      <Typography variant="body2" color="textSecondary">
-                        {e.kube_object.spec.duration}
-                      </Typography>
-                    </TableCell>
-                  </TableRow>
-                )}
-              </>
-            ) : (
-              <TableRow>
-                <TableCell>{T('newE.schedule.continuous')}</TableCell>
-              </TableRow>
-            )}
+            <TableRow>
+              <TableCell>{T('newE.schedule.duration')}</TableCell>
+              <TableCell>
+                <Typography variant="body2" color="textSecondary">
+                  {e.kube_object.spec.duration ? e.kube_object.spec.duration : T('newE.schedule.continuous')}
+                </Typography>
+              </TableCell>
+            </TableRow>
           </TableBody>
         </Table>
       </Grid>

@@ -19,9 +19,10 @@ import { yamlToExperiment } from 'lib/formikhelpers'
 
 interface LoadFromProps {
   loadCallback?: () => void
+  inSchedule?: boolean
 }
 
-const LoadFrom: React.FC<LoadFromProps> = ({ loadCallback }) => {
+const LoadFrom: React.FC<LoadFromProps> = ({ loadCallback, inSchedule = false }) => {
   const intl = useIntl()
 
   const dispatch = useStoreDispatch()
