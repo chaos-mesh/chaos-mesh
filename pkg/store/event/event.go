@@ -349,14 +349,6 @@ func (e *eventStore) DeleteByUID(_ context.Context, uid string) error {
 
 // DeleteByUIDs deletes events by the uid list of the experiment.
 func (e *eventStore) DeleteByUIDs(_ context.Context, uids []string) error {
-	eventList, err := e.ListByUIDs(context.Background(), uids)
-	if err != nil {
-		return err
-	}
-	eventIDList := make([]uint, len(eventList))
-	for _, et := range eventList {
-		eventIDList = append(eventIDList, et.ID)
-	}
 	return e.db.Where("experiment_id IN (?)", uids).Unscoped().Delete(core.Event{}).Error
 }
 
