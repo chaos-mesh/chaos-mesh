@@ -22,8 +22,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/shirou/gopsutil/process"
-
 	jrpc "github.com/ethereum/go-ethereum/rpc"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -92,18 +90,11 @@ func (s *DaemonServer) ApplyIoChaos(ctx context.Context, in *pb.ApplyIoChaosRequ
 	cmd.Stdin = caller
 	cmd.Stdout = io.MultiWriter(receiver, os.Stdout)
 	cmd.Stderr = os.Stderr
-	err = s.backgroundProcessManager.StartProcess(cmd)
+	procState, err := s.backgroundProcessManager.StartProcess(cmd)
 	if err != nil {
-		log.Error(err, "bpm failed")
 		return nil, err
 	}
 	var ret string
-
-	procState, err := process.NewProcess(int32(cmd.Process.Pid))
-	if err != nil {
-		log.Error(err, "new process failed")
-		return nil, err
-	}
 	ct, err := procState.CreateTime()
 	if err != nil {
 		log.Error(err, "get create time failed")

@@ -70,10 +70,8 @@ func TestcaseHttpDelayDurationForATimeThenRecover(
 	err = cli.Create(ctx, httpChaos)
 	framework.ExpectNoError(err, "create http chaos error")
 
-	time.Sleep(10 * time.Second)
-
 	By("waiting for assertion HTTP delay")
-	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
 		resp, dur, err := getPodHttpDelay(c, port)
 		if err != nil {
 			return false, err
@@ -94,10 +92,8 @@ func TestcaseHttpDelayDurationForATimeThenRecover(
 	err = cli.Delete(ctx, httpChaos)
 	framework.ExpectNoError(err, "failed to delete http chaos")
 
-	time.Sleep(10 * time.Second)
-
 	By("waiting for assertion recovering")
-	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
 		resp, dur, err := getPodHttpDelay(c, port)
 		if err != nil {
 			return false, err
@@ -153,15 +149,13 @@ func TestcaseHttpDelayDurationForATimePauseAndUnPause(
 	err = cli.Create(ctx, httpChaos)
 	framework.ExpectNoError(err, "error occurs while applying http chaos")
 
-	time.Sleep(10 * time.Second)
-
 	chaosKey := types.NamespacedName{
 		Namespace: ns,
 		Name:      "http-chaos",
 	}
 
 	By("waiting for assertion http chaos")
-	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
 		chaos := &v1alpha1.HTTPChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
 		framework.ExpectNoError(err, "get http chaos error")
@@ -195,10 +189,8 @@ func TestcaseHttpDelayDurationForATimePauseAndUnPause(
 	err = util.PauseChaos(ctx, cli, httpChaos)
 	framework.ExpectNoError(err, "pause chaos error")
 
-	time.Sleep(10 * time.Second)
-
 	By("waiting for assertion about pause")
-	err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
+	err = wait.Poll(1*time.Second, 1*time.Minute, func() (done bool, err error) {
 		chaos := &v1alpha1.HTTPChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
 		framework.ExpectNoError(err, "get http chaos error")
@@ -220,7 +212,7 @@ func TestcaseHttpDelayDurationForATimePauseAndUnPause(
 	framework.ExpectNoError(err, "check paused chaos failed")
 
 	// wait 1 min to check whether io delay still exists
-	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
 		_, dur, _ := getPodHttpDelay(c, port)
 
 		s := dur.Seconds()
@@ -239,7 +231,7 @@ func TestcaseHttpDelayDurationForATimePauseAndUnPause(
 	framework.ExpectNoError(err, "resume chaos error")
 
 	By("assert that http delay is effective again")
-	err = wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
+	err = wait.Poll(1*time.Second, 1*time.Minute, func() (done bool, err error) {
 		chaos := &v1alpha1.HTTPChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
 		framework.ExpectNoError(err, "get http chaos error")
@@ -260,9 +252,7 @@ func TestcaseHttpDelayDurationForATimePauseAndUnPause(
 	})
 	framework.ExpectNoError(err, "check resumed chaos failed")
 
-	time.Sleep(5 * time.Minute)
-
-	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
 		_, dur, _ := getPodHttpDelay(c, port)
 
 		s := dur.Seconds()

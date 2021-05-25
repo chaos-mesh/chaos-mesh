@@ -23,8 +23,6 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/shirou/gopsutil/process"
-
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
@@ -144,14 +142,8 @@ func (s *DaemonServer) createHttpChaos(ctx context.Context, in *pb.ApplyHttpChao
 	cmd := processBuilder.Build()
 	cmd.Stderr = os.Stderr
 
-	err = s.backgroundProcessManager.StartProcess(cmd)
+	procState, err := s.backgroundProcessManager.StartProcess(cmd)
 	if err != nil {
-		return err
-	}
-
-	procState, err := process.NewProcess(int32(cmd.Process.Pid))
-	if err != nil {
-		log.Error(err, "new process failed")
 		return err
 	}
 	ct, err := procState.CreateTime()
