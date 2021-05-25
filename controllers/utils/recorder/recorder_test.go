@@ -31,6 +31,7 @@ func TestGenerateAnnotations(t *testing.T) {
 
 	missedRun, _ := time.Parse(time.RFC3339Nano, "2021-05-19T18:36:06Z")
 	testCases := []casePair{
+		{map[string]string{"chaos-mesh.org/id": "", "chaos-mesh.org/type": "applied"}, Applied{}},
 		{map[string]string{"chaos-mesh.org/id": "test", "chaos-mesh.org/type": "applied"}, Applied{"test"}},
 		{map[string]string{"chaos-mesh.org/id": "test", "chaos-mesh.org/type": "recovered"}, Recovered{"test"}},
 
