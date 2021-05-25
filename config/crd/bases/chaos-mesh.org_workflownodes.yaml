@@ -1896,7 +1896,6 @@ spec:
               type: object
             type:
               type: string
-            workflow: {}
             workflow_name:
               type: string
           required:

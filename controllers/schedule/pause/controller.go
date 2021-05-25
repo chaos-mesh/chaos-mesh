@@ -51,7 +51,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, nil
 	}
 
-	if schedule.Spec.Type == v1alpha1.TypeWorkflow {
+	if schedule.Spec.Type == v1alpha1.ScheduleTypeWorkflow {
 		if schedule.IsPaused() {
 			r.Recorder.Eventf(schedule, "Warning", "Unsupported", "a workflow schedule %s cannot be paused", schedule.GetObjectMeta().GetName())
 		}

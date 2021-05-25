@@ -92,7 +92,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 		items := reflect.ValueOf(list).Elem().FieldByName("Items")
 		for i := 0; i < items.Len(); i++ {
-			if schedule.Spec.Type != v1alpha1.TypeWorkflow {
+			if schedule.Spec.Type != v1alpha1.ScheduleTypeWorkflow {
 				item := items.Index(i).Addr().Interface().(v1alpha1.InnerObject)
 				if !controller.IsChaosFinished(item, now) {
 					shouldSpawn = false
@@ -115,7 +115,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	if shouldSpawn {
 		r.Recorder.Event(schedule, corev1.EventTypeNormal, "Spawn", "Spawn new chaos")
 
-		newObj, meta, err := schedule.Spec.EmbedChaos.SpawnNewObject(schedule.Spec.Type)
+		newObj, meta, err := schedule.Spec.ScheduleItem.SpawnNewObject(schedule.Spec.Type)
 		if err != nil {
 			r.Recorder.Eventf(schedule, "Warning", "Failed", "Failed to generate new object: %s", err.Error())
 			return ctrl.Result{}, nil

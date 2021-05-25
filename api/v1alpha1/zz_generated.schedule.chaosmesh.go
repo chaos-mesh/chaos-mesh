@@ -22,36 +22,38 @@ import (
 
 
 const (
-	TypeAwsChaos TemplateType = "AwsChaos"
-	TypeDNSChaos TemplateType = "DNSChaos"
-	TypeGcpChaos TemplateType = "GcpChaos"
-	TypeHTTPChaos TemplateType = "HTTPChaos"
-	TypeIoChaos TemplateType = "IoChaos"
-	TypeJVMChaos TemplateType = "JVMChaos"
-	TypeKernelChaos TemplateType = "KernelChaos"
-	TypeNetworkChaos TemplateType = "NetworkChaos"
-	TypePodChaos TemplateType = "PodChaos"
-	TypeStressChaos TemplateType = "StressChaos"
-	TypeTimeChaos TemplateType = "TimeChaos"
+	ScheduleTypeAwsChaos ScheduleTemplateType = "AwsChaos"
+	ScheduleTypeDNSChaos ScheduleTemplateType = "DNSChaos"
+	ScheduleTypeGcpChaos ScheduleTemplateType = "GcpChaos"
+	ScheduleTypeHTTPChaos ScheduleTemplateType = "HTTPChaos"
+	ScheduleTypeIoChaos ScheduleTemplateType = "IoChaos"
+	ScheduleTypeJVMChaos ScheduleTemplateType = "JVMChaos"
+	ScheduleTypeKernelChaos ScheduleTemplateType = "KernelChaos"
+	ScheduleTypeNetworkChaos ScheduleTemplateType = "NetworkChaos"
+	ScheduleTypePodChaos ScheduleTemplateType = "PodChaos"
+	ScheduleTypeStressChaos ScheduleTemplateType = "StressChaos"
+	ScheduleTypeTimeChaos ScheduleTemplateType = "TimeChaos"
+	ScheduleTypeWorkflow ScheduleTemplateType = "Workflow"
 
 )
 
-var allChaosTemplateType = []TemplateType{
-	TypeAwsChaos,
-	TypeDNSChaos,
-	TypeGcpChaos,
-	TypeHTTPChaos,
-	TypeIoChaos,
-	TypeJVMChaos,
-	TypeKernelChaos,
-	TypeNetworkChaos,
-	TypePodChaos,
-	TypeStressChaos,
-	TypeTimeChaos,
+var allScheduleTemplateType = []ScheduleTemplateType{
+	ScheduleTypeAwsChaos,
+	ScheduleTypeDNSChaos,
+	ScheduleTypeGcpChaos,
+	ScheduleTypeHTTPChaos,
+	ScheduleTypeIoChaos,
+	ScheduleTypeJVMChaos,
+	ScheduleTypeKernelChaos,
+	ScheduleTypeNetworkChaos,
+	ScheduleTypePodChaos,
+	ScheduleTypeStressChaos,
+	ScheduleTypeTimeChaos,
+	ScheduleTypeWorkflow,
 
 }
 
-type EmbedChaos struct {
+type ScheduleItem struct {
 	// +optional
 	AwsChaos *AwsChaosSpec `json:"aws_chaos,omitempty"`
 	// +optional
@@ -74,55 +76,61 @@ type EmbedChaos struct {
 	StressChaos *StressChaosSpec `json:"stress_chaos,omitempty"`
 	// +optional
 	TimeChaos *TimeChaosSpec `json:"time_chaos,omitempty"`
+	// +optional
+	Workflow *WorkflowSpec `json:"workflow,omitempty"`
 
 }
 
-func (it *EmbedChaos) SpawnNewObject(templateType TemplateType) (runtime.Object, metav1.Object, error) {
+func (it *ScheduleItem) SpawnNewObject(templateType ScheduleTemplateType) (runtime.Object, metav1.Object, error) {
 
 	switch templateType {
-	case TypeAwsChaos:
+	case ScheduleTypeAwsChaos:
 		result := AwsChaos{}
 		result.Spec = *it.AwsChaos
 		return &result, result.GetObjectMeta(), nil
-	case TypeDNSChaos:
+	case ScheduleTypeDNSChaos:
 		result := DNSChaos{}
 		result.Spec = *it.DNSChaos
 		return &result, result.GetObjectMeta(), nil
-	case TypeGcpChaos:
+	case ScheduleTypeGcpChaos:
 		result := GcpChaos{}
 		result.Spec = *it.GcpChaos
 		return &result, result.GetObjectMeta(), nil
-	case TypeHTTPChaos:
+	case ScheduleTypeHTTPChaos:
 		result := HTTPChaos{}
 		result.Spec = *it.HTTPChaos
 		return &result, result.GetObjectMeta(), nil
-	case TypeIoChaos:
+	case ScheduleTypeIoChaos:
 		result := IoChaos{}
 		result.Spec = *it.IoChaos
 		return &result, result.GetObjectMeta(), nil
-	case TypeJVMChaos:
+	case ScheduleTypeJVMChaos:
 		result := JVMChaos{}
 		result.Spec = *it.JVMChaos
 		return &result, result.GetObjectMeta(), nil
-	case TypeKernelChaos:
+	case ScheduleTypeKernelChaos:
 		result := KernelChaos{}
 		result.Spec = *it.KernelChaos
 		return &result, result.GetObjectMeta(), nil
-	case TypeNetworkChaos:
+	case ScheduleTypeNetworkChaos:
 		result := NetworkChaos{}
 		result.Spec = *it.NetworkChaos
 		return &result, result.GetObjectMeta(), nil
-	case TypePodChaos:
+	case ScheduleTypePodChaos:
 		result := PodChaos{}
 		result.Spec = *it.PodChaos
 		return &result, result.GetObjectMeta(), nil
-	case TypeStressChaos:
+	case ScheduleTypeStressChaos:
 		result := StressChaos{}
 		result.Spec = *it.StressChaos
 		return &result, result.GetObjectMeta(), nil
-	case TypeTimeChaos:
+	case ScheduleTypeTimeChaos:
 		result := TimeChaos{}
 		result.Spec = *it.TimeChaos
+		return &result, result.GetObjectMeta(), nil
+	case ScheduleTypeWorkflow:
+		result := Workflow{}
+		result.Spec = *it.Workflow
 		return &result, result.GetObjectMeta(), nil
 
 	default:
@@ -131,3 +139,4 @@ func (it *EmbedChaos) SpawnNewObject(templateType TemplateType) (runtime.Object,
 
 	return nil, &metav1.ObjectMeta{}, nil
 }
+

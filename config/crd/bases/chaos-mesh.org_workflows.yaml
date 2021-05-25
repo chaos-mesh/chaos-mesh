@@ -1945,7 +1945,6 @@ spec:
                     - selector
                     - timeOffset
                     type: object
-                  workflow: {}
                 required:
                 - name
                 - template_type

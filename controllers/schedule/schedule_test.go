@@ -54,7 +54,7 @@ var _ = Describe("Schedule", func() {
 				},
 				Spec: v1alpha1.ScheduleSpec{
 					Schedule: "@every 10s",
-					EmbedChaos: v1alpha1.EmbedChaos{
+					ScheduleItem: v1alpha1.ScheduleItem{
 						TimeChaos: &v1alpha1.TimeChaosSpec{
 							TimeOffset: "100ms",
 							ClockIds:   []string{"CLOCK_REALTIME"},
@@ -68,7 +68,7 @@ var _ = Describe("Schedule", func() {
 					},
 					ConcurrencyPolicy: v1alpha1.ForbidConcurrent,
 					HistoryLimit:      5,
-					Type:              v1alpha1.TypeTimeChaos,
+					Type:              v1alpha1.ScheduleTypeTimeChaos,
 				},
 				Status: v1alpha1.ScheduleStatus{
 					LastScheduleTime: metav1.NewTime(time.Time{}),
@@ -102,7 +102,7 @@ var _ = Describe("Schedule", func() {
 				},
 				Spec: v1alpha1.ScheduleSpec{
 					Schedule: "@every 1s",
-					EmbedChaos: v1alpha1.EmbedChaos{
+					ScheduleItem: v1alpha1.ScheduleItem{
 						TimeChaos: &v1alpha1.TimeChaosSpec{
 							TimeOffset: "100ms",
 							ClockIds:   []string{"CLOCK_REALTIME"},
@@ -116,7 +116,7 @@ var _ = Describe("Schedule", func() {
 					},
 					ConcurrencyPolicy: v1alpha1.ForbidConcurrent,
 					HistoryLimit:      2,
-					Type:              v1alpha1.TypeTimeChaos,
+					Type:              v1alpha1.ScheduleTypeTimeChaos,
 				},
 				Status: v1alpha1.ScheduleStatus{
 					LastScheduleTime: metav1.NewTime(time.Now()),
@@ -167,7 +167,7 @@ var _ = Describe("Schedule", func() {
 				},
 				Spec: v1alpha1.ScheduleSpec{
 					Schedule: "@every 2s",
-					EmbedChaos: v1alpha1.EmbedChaos{
+					ScheduleItem: v1alpha1.ScheduleItem{
 						TimeChaos: &v1alpha1.TimeChaosSpec{
 							TimeOffset: "100ms",
 							ClockIds:   []string{"CLOCK_REALTIME"},
@@ -181,7 +181,7 @@ var _ = Describe("Schedule", func() {
 					},
 					ConcurrencyPolicy: v1alpha1.AllowConcurrent,
 					HistoryLimit:      2,
-					Type:              v1alpha1.TypeTimeChaos,
+					Type:              v1alpha1.ScheduleTypeTimeChaos,
 				},
 				Status: v1alpha1.ScheduleStatus{
 					LastScheduleTime: metav1.NewTime(time.Now()),
@@ -225,7 +225,7 @@ var _ = Describe("Schedule", func() {
 				},
 				Spec: v1alpha1.ScheduleSpec{
 					Schedule: "@every 3s",
-					EmbedChaos: v1alpha1.EmbedChaos{
+					ScheduleItem: v1alpha1.ScheduleItem{
 						TimeChaos: &v1alpha1.TimeChaosSpec{
 							TimeOffset: "100ms",
 							ClockIds:   []string{"CLOCK_REALTIME"},
@@ -239,7 +239,7 @@ var _ = Describe("Schedule", func() {
 					},
 					ConcurrencyPolicy: v1alpha1.AllowConcurrent,
 					HistoryLimit:      2,
-					Type:              v1alpha1.TypeTimeChaos,
+					Type:              v1alpha1.ScheduleTypeTimeChaos,
 				},
 				Status: v1alpha1.ScheduleStatus{
 					LastScheduleTime: metav1.NewTime(time.Now()),
@@ -287,7 +287,7 @@ var _ = Describe("Schedule", func() {
 				},
 				Spec: v1alpha1.ScheduleSpec{
 					Schedule: "@every 3s",
-					EmbedChaos: v1alpha1.EmbedChaos{
+					ScheduleItem: v1alpha1.ScheduleItem{
 						Workflow: &v1alpha1.WorkflowSpec{
 							Entry: "the-entry",
 							Templates: []v1alpha1.Template{
@@ -308,7 +308,7 @@ var _ = Describe("Schedule", func() {
 					},
 					ConcurrencyPolicy: v1alpha1.ForbidConcurrent,
 					HistoryLimit:      2,
-					Type:              v1alpha1.TypeWorkflow,
+					Type:              v1alpha1.ScheduleTypeWorkflow,
 				},
 				Status: v1alpha1.ScheduleStatus{
 					LastScheduleTime: metav1.NewTime(time.Time{}),
@@ -354,7 +354,7 @@ var _ = Describe("Schedule", func() {
 				},
 				Spec: v1alpha1.ScheduleSpec{
 					Schedule: "@every 3s",
-					EmbedChaos: v1alpha1.EmbedChaos{
+					ScheduleItem: v1alpha1.ScheduleItem{
 						Workflow: &v1alpha1.WorkflowSpec{
 							Entry: "the-entry",
 							Templates: []v1alpha1.Template{
@@ -369,7 +369,7 @@ var _ = Describe("Schedule", func() {
 					},
 					ConcurrencyPolicy: v1alpha1.AllowConcurrent,
 					HistoryLimit:      2,
-					Type:              v1alpha1.TypeWorkflow,
+					Type:              v1alpha1.ScheduleTypeWorkflow,
 				},
 				Status: v1alpha1.ScheduleStatus{
 					LastScheduleTime: metav1.NewTime(time.Time{}),

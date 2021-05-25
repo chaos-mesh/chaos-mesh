@@ -92,7 +92,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 					continue
 				}
 			} else { // A workflow
-				if schedule.Spec.Type == v1alpha1.TypeWorkflow {
+				if schedule.Spec.Type == v1alpha1.ScheduleTypeWorkflow {
 					workflow, ok := obj.(*v1alpha1.Workflow)
 					if ok {
 						finished := controllers.WorkflowConditionEqualsTo(workflow.Status, v1alpha1.WorkflowConditionAccomplished, corev1.ConditionTrue)
@@ -119,7 +119,8 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 type Objs struct {
 	fx.In
 
-	Objs []types.Object `group:"objs"`
+	ScheduleObjs []types.Object `group:"schedule"`
+	Objs         []types.Object `group:"objs"`
 }
 
 func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger, objs Objs, scheme *runtime.Scheme, lister *utils.ActiveLister) (types.Controller, error) {
@@ -131,6 +132,8 @@ func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger, objs
 		// TODO: support workflow
 		builder.Owns(obj.Object)
 	}
+
+	builder = builder.Owns(&v1alpha1.Workflow{})
 
 	builder.Complete(&Reconciler{
 		client,
