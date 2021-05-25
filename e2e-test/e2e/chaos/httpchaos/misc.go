@@ -43,11 +43,11 @@ func getPodHttpNoBody(c http.Client, port uint16) (*http.Response, error) {
 }
 
 // get pod http delay
-func getPodHttpDelay(c http.Client, port uint16) (time.Duration, error) {
+func getPodHttpDelay(c http.Client, port uint16) (*http.Response, time.Duration, error) {
 	start := time.Now()
-	_, err := getPodHttpNoBody(c, port)
+	resp, err := getPodHttpNoBody(c, port)
 	if err != nil {
-		return 0, err
+		return nil, 0, err
 	}
-	return time.Now().Sub(start), nil
+	return resp, time.Now().Sub(start), nil
 }

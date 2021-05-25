@@ -58,6 +58,7 @@ func TestcaseHttpDelayDurationForATimeThenRecover(
 				},
 				Mode: v1alpha1.OnePodMode,
 			},
+			Port:   8080,
 			Target: "Request",
 			PodHttpChaosActions: v1alpha1.PodHttpChaosActions{
 				Delay: &delay,
@@ -68,9 +69,12 @@ func TestcaseHttpDelayDurationForATimeThenRecover(
 	framework.ExpectNoError(err, "create http chaos error")
 	By("waiting for assertion HTTP delay")
 	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
-		dur, _ := getPodHttpDelay(c, port)
+		resp, dur, err := getPodHttpDelay(c, port)
+		if err != nil {
+			return false, err
+		}
 		second := dur.Seconds()
-		klog.Infof("get http delay %fs", second)
+		klog.Infof("Status(%d): get http delay %fs", resp.StatusCode, second)
 		// IO Delay >= 1s
 		if second >= 1 {
 			return true, nil
@@ -86,9 +90,12 @@ func TestcaseHttpDelayDurationForATimeThenRecover(
 	framework.ExpectNoError(err, "failed to delete http chaos")
 	By("waiting for assertion recovering")
 	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
-		dur, _ := getPodHttpDelay(c, port)
+		resp, dur, err := getPodHttpDelay(c, port)
+		if err != nil {
+			return false, err
+		}
 		second := dur.Seconds()
-		klog.Infof("get http delay %fs", second)
+		klog.Infof("Status(%d): get http delay %fs", resp.StatusCode, second)
 		// IO Delay shouldn't longer than 1s
 		if second >= 1 {
 			return false, nil
