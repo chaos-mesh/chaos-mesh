@@ -27,14 +27,6 @@ type PodIoChaosSpec struct {
 	// +optional
 	Container *string `json:"container,omitempty"`
 
-	// Pid represents a running toda process id
-	// +optional
-	Pid int64 `json:"pid,omitempty"`
-
-	// StartTime represents the start time of a toda process
-	// +optional
-	StartTime int64 `json:"startTime,omitempty"`
-
 	// Actions are a list of IoChaos actions
 	// +optional
 	Actions []IoChaosAction `json:"actions,omitempty"`
@@ -220,13 +212,33 @@ const (
 const KindPodIoChaos = "PodIoChaos"
 
 // +kubebuilder:object:root=true
-
+// +kubebuilder:subresource:status
 // PodIoChaos is the Schema for the podiochaos API
 type PodIoChaos struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	Spec PodIoChaosSpec `json:"spec,omitempty"`
+
+	//+optional
+	Status PodIoChaosStatus `json:"status,omitempty"`
+}
+
+type PodIoChaosStatus struct {
+
+	// Pid represents a running toda process id
+	// +optional
+	Pid int64 `json:"pid,omitempty"`
+
+	// StartTime represents the start time of a toda process
+	// +optional
+	StartTime int64 `json:"startTime,omitempty"`
+
+	// +optional
+	FailedMessage string `json:"failedMessage,omitempty"`
+
+	// +optional
+	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
 }
 
 // +kubebuilder:object:root=true

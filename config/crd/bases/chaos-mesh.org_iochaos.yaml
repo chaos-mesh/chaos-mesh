@@ -332,6 +332,12 @@ spec:
                   - Stop
                   type: string
               type: object
+            instances:
+              additionalProperties:
+                format: int64
+                type: integer
+              description: Instances always specifies podiochaos generation or empty
+              type: object
           required:
           - experiment
           type: object
