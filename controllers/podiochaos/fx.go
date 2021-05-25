@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package podnetworkchaos
+package podiochaos
 
 import (
 	"reflect"
@@ -23,20 +23,18 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/config"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 )
 
 func NewController(mgr ctrl.Manager, client client.Client, reader client.Reader, logger logr.Logger) (types.Controller, error) {
 	err := ctrl.NewControllerManagedBy(mgr).
-		For(&v1alpha1.PodNetworkChaos{}).
-		Named("podnetworkchaos").
+		For(&v1alpha1.PodIoChaos{}).
+		Named("podiochaos").
 		WithEventFilter(predicate.Funcs{
 			UpdateFunc: func(e event.UpdateEvent) bool {
-				oldObj := e.ObjectOld.(*v1alpha1.PodNetworkChaos)
-				newObj := e.ObjectNew.(*v1alpha1.PodNetworkChaos)
+				oldObj := e.ObjectOld.(*v1alpha1.PodIoChaos)
+				newObj := e.ObjectNew.(*v1alpha1.PodIoChaos)
 
 				return !reflect.DeepEqual(oldObj.Spec, newObj.Spec)
 			},
@@ -44,15 +42,12 @@ func NewController(mgr ctrl.Manager, client client.Client, reader client.Reader,
 		Complete(&Reconciler{
 			Client:   client,
 			Reader:   reader,
-			Log:      logger.WithName("podnetworkchaos"),
-			Recorder: recorder.NewRecorder(mgr, "podnetworkchaos", logger),
-
-			// TODO:
-			AllowHostNetworkTesting: config.ControllerCfg.AllowHostNetworkTesting,
+			Log:      logger.WithName("podiochaos"),
+			Recorder: mgr.GetEventRecorderFor("podiochaos"),
 		})
 	if err != nil {
 		return "", err
 	}
 
-	return "podnetworkchaos", nil
+	return "podiochaos", nil
 }

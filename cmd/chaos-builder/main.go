@@ -39,10 +39,13 @@ func main() {
 
 	testCode := boilerplate + testImport
 	initImpl := ""
+	scheduleImpl := ""
 	allTypes := make([]string, 0, 10)
 
 	workflowGenerator := newWorkflowCodeGenerator(nil)
 	workflowTestGenerator := newWorkflowTestCodeGenerator(nil)
+
+	scheduleGenerator := newScheduleCodeGenerator(nil)
 
 	filepath.Walk("./api/v1alpha1", func(path string, info os.FileInfo, err error) error {
 		log := log.WithValues("file", path)
@@ -93,12 +96,15 @@ func main() {
 							log.Error(err, "fail to get type")
 							return err
 						}
-
-						implCode += generateImpl(baseType.Name.Name)
-						testCode += generateTest(baseType.Name.Name)
-						initImpl += generateInit(baseType.Name.Name)
-						workflowGenerator.AppendTypes(baseType.Name.Name)
-						workflowTestGenerator.AppendTypes(baseType.Name.Name)
+						if baseType.Name.Name != "Workflow" {
+							implCode += generateImpl(baseType.Name.Name)
+							testCode += generateTest(baseType.Name.Name)
+							initImpl += generateInit(baseType.Name.Name)
+							workflowGenerator.AppendTypes(baseType.Name.Name)
+							workflowTestGenerator.AppendTypes(baseType.Name.Name)
+						}
+						scheduleImpl += generateScheduleRegister(baseType.Name.Name)
+						scheduleGenerator.AppendTypes(baseType.Name.Name)
 						allTypes = append(allTypes, baseType.Name.Name)
 						continue out
 					}
@@ -112,8 +118,9 @@ func main() {
 	implCode += fmt.Sprintf(`
 func init() {
 %s
+%s
 }
-`, initImpl)
+`, initImpl, scheduleImpl)
 	file, err := os.Create("./api/v1alpha1/zz_generated.chaosmesh.go")
 	if err != nil {
 		log.Error(err, "fail to create file")
@@ -142,5 +149,12 @@ func init() {
 		os.Exit(1)
 	}
 	fmt.Fprint(file, workflowTestGenerator.Render())
+
+	file, err = os.Create("./api/v1alpha1/zz_generated.schedule.chaosmesh.go")
+	if err != nil {
+		log.Error(err, "fail to create file")
+		os.Exit(1)
+	}
+	fmt.Fprint(file, scheduleGenerator.Render())
 
 }

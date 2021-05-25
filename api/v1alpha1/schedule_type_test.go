@@ -55,7 +55,7 @@ var _ = Describe("Schedule", func() {
 				},
 				Spec: ScheduleSpec{
 					Schedule: "* * * * 1",
-					EmbedChaos: EmbedChaos{
+					ScheduleItem: ScheduleItem{
 						PodChaos: &PodChaosSpec{
 							Action: PodKillAction,
 							ContainerSelector: ContainerSelector{
@@ -66,7 +66,7 @@ var _ = Describe("Schedule", func() {
 						},
 					},
 					ConcurrencyPolicy: ForbidConcurrent,
-					Type:              TypePodChaos,
+					Type:              ScheduleTypePodChaos,
 				},
 				Status: ScheduleStatus{
 					LastScheduleTime: metav1.Time{time.Now()},

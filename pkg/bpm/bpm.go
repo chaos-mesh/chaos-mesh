@@ -216,7 +216,10 @@ func (m *BackgroundProcessManager) KillBackgroundProcess(ctx context.Context, pi
 		// return successfully as the process has exited
 		return nil
 	}
-	if startTime != ct {
+
+	// There is a bug in calculating CreateTime in the new version of
+	// gopsutils. This is a temporary solution before the upstream fixes it.
+	if startTime-ct > 1000 || ct-startTime > 1000 {
 		log.Info("process has already been killed", "startTime", ct, "expectedStartTime", startTime)
 		// return successfully as the process has exited
 		return nil
@@ -243,7 +246,7 @@ func (m *BackgroundProcessManager) KillBackgroundProcess(ctx context.Context, pi
 
 	pair := ProcessPair{
 		Pid:        pid,
-		CreateTime: ct,
+		CreateTime: startTime,
 	}
 	channel, ok := m.deathSig.Load(pair)
 	if ok {

@@ -14,16 +14,23 @@
 package common
 
 import (
+	"context"
+	"reflect"
+
 	"github.com/go-logr/logr"
 	"go.uber.org/fx"
 	"k8s.io/apimachinery/pkg/runtime"
+	k8sTypes "k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 )
 
@@ -32,7 +39,8 @@ type ChaosImplPair struct {
 	Object InnerObjectWithSelector
 	Impl   ChaosImpl
 
-	Owns []runtime.Object
+	ObjectList runtime.Object
+	Controlls  []runtime.Object
 }
 
 type ChaosImplPairs struct {
@@ -51,11 +59,42 @@ func NewController(mgr ctrl.Manager, client client.Client, reader client.Reader,
 			Named(pair.Name + "-records")
 
 		// Add owning resources
-		if len(pair.Owns) > 0 {
-			for _, obj := range pair.Owns {
-				builder = builder.Watches(&source.Kind{Type: obj}, &handler.EnqueueRequestForOwner{
-					OwnerType:    pair.Object,
-					IsController: false,
+		if len(pair.Controlls) > 0 {
+			pair := pair
+			for _, obj := range pair.Controlls {
+				builder = builder.Watches(&source.Kind{Type: obj}, &handler.EnqueueRequestsFromMapFunc{
+					ToRequests: handler.ToRequestsFunc(func(obj handler.MapObject) []reconcile.Request {
+						reqs := []reconcile.Request{}
+						objName := k8sTypes.NamespacedName{
+							Namespace: obj.Meta.GetNamespace(),
+							Name:      obj.Meta.GetName(),
+						}
+
+						list := pair.ObjectList.DeepCopyObject()
+						err := client.List(context.TODO(), list)
+						if err != nil {
+							setupLog.Error(err, "fail to list object")
+						}
+
+						items := reflect.ValueOf(list).Elem().FieldByName("Items")
+						for i := 0; i < items.Len(); i++ {
+							item := items.Index(i).Addr().Interface().(InnerObjectWithSelector)
+							for _, record := range item.GetStatus().Experiment.Records {
+								if controller.ParseNamespacedName(record.Id) == objName {
+									id := k8sTypes.NamespacedName{
+										Namespace: item.GetObjectMeta().Namespace,
+										Name:      item.GetObjectMeta().Name,
+									}
+									setupLog.Info("mapping requests", "source", objName, "target", id)
+									reqs = append(reqs, reconcile.Request{
+										NamespacedName: id,
+									})
+								}
+							}
+						}
+
+						return reqs
+					}),
 				})
 			}
 		}
@@ -65,7 +104,7 @@ func NewController(mgr ctrl.Manager, client client.Client, reader client.Reader,
 			Object:   pair.Object,
 			Client:   client,
 			Reader:   reader,
-			Recorder: mgr.GetEventRecorderFor("common"),
+			Recorder: recorder.NewRecorder(mgr, "common", logger),
 			Selector: selector,
 			Log:      logger.WithName("records"),
 		})

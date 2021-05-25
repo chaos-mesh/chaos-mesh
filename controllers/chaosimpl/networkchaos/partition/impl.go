@@ -16,6 +16,7 @@ package partition
 import (
 	"context"
 	"errors"
+	"strings"
 
 	"github.com/go-logr/logr"
 	k8sError "k8s.io/apimachinery/pkg/api/errors"
@@ -209,6 +210,12 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	if err != nil {
 		if err == podnetworkchaosmanager.ErrPodNotFound || err == podnetworkchaosmanager.ErrPodNotRunning {
 			return v1alpha1.NotInjected, nil
+		}
+
+		if k8sError.IsForbidden(err) {
+			if strings.Contains(err.Error(), "because it is being terminated") {
+				return v1alpha1.NotInjected, nil
+			}
 		}
 		return v1alpha1.Injected, err
 	}
