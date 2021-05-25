@@ -15,7 +15,6 @@ package recorder
 
 import (
 	"fmt"
-	"strings"
 )
 
 type Updated struct {
@@ -32,18 +31,6 @@ func (u Updated) Reason() string {
 
 func (u Updated) Message() string {
 	return fmt.Sprintf("Successfully update %s of resource", u.Field)
-}
-
-func (u Updated) Parse(message string) ChaosEvent {
-	prefix := "Successfully update "
-	suffix := " of resource"
-	if strings.HasPrefix(message, prefix) && strings.HasSuffix(message, suffix) {
-		return Updated{
-			Field: strings.TrimSuffix(strings.TrimPrefix(message, prefix), suffix),
-		}
-	}
-
-	return nil
 }
 
 func init() {

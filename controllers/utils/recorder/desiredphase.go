@@ -28,14 +28,6 @@ func (d Deleted) Message() string {
 	return "Experiment has been deleted"
 }
 
-func (d Deleted) Parse(message string) ChaosEvent {
-	if message == "Experiment has been deleted" {
-		return Deleted{}
-	}
-
-	return nil
-}
-
 type TimeUp struct {
 }
 
@@ -49,14 +41,6 @@ func (t TimeUp) Reason() string {
 
 func (t TimeUp) Message() string {
 	return "Time up according to the duration"
-}
-
-func (t TimeUp) Parse(message string) ChaosEvent {
-	if message == "Time up according to the duration" {
-		return TimeUp{}
-	}
-
-	return nil
 }
 
 type Paused struct {
@@ -74,14 +58,6 @@ func (p Paused) Message() string {
 	return "Experiment has been paused"
 }
 
-func (p Paused) Parse(message string) ChaosEvent {
-	if message == "Experiment has been paused" {
-		return Paused{}
-	}
-
-	return nil
-}
-
 type Started struct {
 }
 
@@ -95,14 +71,6 @@ func (p Started) Reason() string {
 
 func (p Started) Message() string {
 	return "Experiment has started"
-}
-
-func (p Started) Parse(message string) ChaosEvent {
-	if message == "Experiment has started" {
-		return Started{}
-	}
-
-	return nil
 }
 
 func init() {

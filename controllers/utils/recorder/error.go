@@ -15,7 +15,6 @@ package recorder
 
 import (
 	"fmt"
-	"strings"
 )
 
 type Failed struct {
@@ -34,19 +33,6 @@ func (f Failed) Reason() string {
 
 func (f Failed) Message() string {
 	return fmt.Sprintf("Failed to %s: %s", f.Activity, f.Err)
-}
-
-func (f Failed) Parse(message string) ChaosEvent {
-	prefix := "Failed to "
-	if strings.HasPrefix(message, prefix) {
-		twoparts := strings.Split(strings.TrimPrefix(message, prefix), ": ")
-		return Failed{
-			Activity: twoparts[0],
-			Err:      twoparts[1],
-		}
-	}
-
-	return nil
 }
 
 func init() {

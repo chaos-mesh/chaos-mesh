@@ -14,11 +14,54 @@
 package recorder
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
 	. "github.com/onsi/gomega"
 )
+
+func TestGenerateAnnotations(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	type casePair struct {
+		annotations map[string]string
+		ev          ChaosEvent
+	}
+
+	missedRun, _ := time.Parse(time.RFC3339Nano, "2021-05-19T18:36:06Z")
+	testCases := []casePair{
+		{map[string]string{"chaos-mesh.org/id": "test", "chaos-mesh.org/type": "applied"}, Applied{"test"}},
+		{map[string]string{"chaos-mesh.org/id": "test", "chaos-mesh.org/type": "recovered"}, Recovered{"test"}},
+
+		{map[string]string{"chaos-mesh.org/field": "test", "chaos-mesh.org/type": "updated"}, Updated{"test"}},
+
+		{map[string]string{"chaos-mesh.org/type": "deleted"}, Deleted{}},
+		{map[string]string{"chaos-mesh.org/type": "time-up"}, TimeUp{}},
+		{map[string]string{"chaos-mesh.org/type": "paused"}, Paused{}},
+		{map[string]string{"chaos-mesh.org/type": "started"}, Started{}},
+
+		{map[string]string{"chaos-mesh.org/activity": "test1", "chaos-mesh.org/err": "test2", "chaos-mesh.org/type": "failed"}, Failed{"test1", "test2"}},
+
+		{map[string]string{"chaos-mesh.org/type": "finalizer-inited"}, FinalizerInited{}},
+		{map[string]string{"chaos-mesh.org/type": "finalizer-removed"}, FinalizerRemoved{}},
+
+		{map[string]string{"chaos-mesh.org/missed-run": "2021-05-19T18:36:06Z", "chaos-mesh.org/type": "missed-schedule"}, MissedSchedule{MissedRun: missedRun}},
+		{map[string]string{"chaos-mesh.org/name": "test", "chaos-mesh.org/type": "schedule-spawn"}, ScheduleSpawn{Name: "test"}},
+		{map[string]string{"chaos-mesh.org/running-name": "test", "chaos-mesh.org/type": "schedule-forbid"}, ScheduleForbid{RunningName: "test"}},
+		{map[string]string{"chaos-mesh.org/running-name": "test", "chaos-mesh.org/type": "schedule-skip-remove-history"}, ScheduleSkipRemoveHistory{RunningName: "test"}},
+	}
+
+	for _, c := range testCases {
+		g.Expect(generateAnnotations(c.ev)).To(Equal(c.annotations))
+
+		ev, err := FromAnnotations(c.annotations)
+		if err != nil {
+			fmt.Printf("fail")
+		}
+		g.Expect(ev).To(Equal(c.ev))
+	}
+}
 
 func TestParse(t *testing.T) {
 	g := NewGomegaWithT(t)
@@ -45,7 +88,7 @@ func TestParse(t *testing.T) {
 		{"Finalizer has been inited", FinalizerInited{}},
 		{"Finalizer has been removed", FinalizerRemoved{}},
 
-		{"Missed scheduled time to start a job: Wed, 19 May 2021 18:36:06 +0000", MissSchedule{MissedRun: missedRun}},
+		{"Missed scheduled time to start a job: Wed, 19 May 2021 18:36:06 +0000", MissedSchedule{MissedRun: missedRun}},
 		{"Create new object: test", ScheduleSpawn{Name: "test"}},
 		{"Forbid spawning new job because: test is still running", ScheduleForbid{RunningName: "test"}},
 		{"Skip removing history: test is still running", ScheduleSkipRemoveHistory{RunningName: "test"}},
@@ -53,7 +96,5 @@ func TestParse(t *testing.T) {
 
 	for _, c := range testCases {
 		g.Expect(c.ev.Message()).To(Equal(c.message))
-
-		g.Expect(Parse(c.message)).To(Equal(c.ev))
 	}
 }

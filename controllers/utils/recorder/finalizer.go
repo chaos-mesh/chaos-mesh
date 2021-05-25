@@ -51,14 +51,6 @@ func (p FinalizerRemoved) Message() string {
 	return "Finalizer has been removed"
 }
 
-func (p FinalizerRemoved) Parse(message string) ChaosEvent {
-	if message == "Finalizer has been removed" {
-		return FinalizerRemoved{}
-	}
-
-	return nil
-}
-
 func init() {
 	register(FinalizerInited{}, FinalizerRemoved{})
 }

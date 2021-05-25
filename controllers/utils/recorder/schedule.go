@@ -15,38 +15,23 @@ package recorder
 
 import (
 	"fmt"
-	"strings"
 	"time"
 )
 
-type MissSchedule struct {
+type MissedSchedule struct {
 	MissedRun time.Time
 }
 
-func (m MissSchedule) Type() string {
+func (m MissedSchedule) Type() string {
 	return "Warning"
 }
 
-func (m MissSchedule) Reason() string {
+func (m MissedSchedule) Reason() string {
 	return "MissSchedule"
 }
 
-func (m MissSchedule) Message() string {
+func (m MissedSchedule) Message() string {
 	return fmt.Sprintf("Missed scheduled time to start a job: %s", m.MissedRun.Format(time.RFC1123Z))
-}
-
-func (m MissSchedule) Parse(message string) ChaosEvent {
-	prefix := "Missed scheduled time to start a job: "
-	if strings.HasPrefix(message, prefix) {
-		missedRun, err := time.Parse(time.RFC1123Z, strings.TrimPrefix(message, prefix))
-		if err == nil {
-			return MissSchedule{
-				MissedRun: missedRun,
-			}
-		}
-	}
-
-	return nil
 }
 
 type ScheduleSpawn struct {
@@ -65,17 +50,6 @@ func (s ScheduleSpawn) Message() string {
 	return fmt.Sprintf("Create new object: %s", s.Name)
 }
 
-func (m ScheduleSpawn) Parse(message string) ChaosEvent {
-	prefix := "Create new object: "
-	if strings.HasPrefix(message, prefix) {
-		return ScheduleSpawn{
-			Name: strings.TrimPrefix(message, prefix),
-		}
-	}
-
-	return nil
-}
-
 type ScheduleForbid struct {
 	RunningName string
 }
@@ -90,18 +64,6 @@ func (s ScheduleForbid) Reason() string {
 
 func (s ScheduleForbid) Message() string {
 	return fmt.Sprintf("Forbid spawning new job because: %s is still running", s.RunningName)
-}
-
-func (m ScheduleForbid) Parse(message string) ChaosEvent {
-	prefix := "Forbid spawning new job because: "
-	suffix := " is still running"
-	if strings.HasPrefix(message, prefix) && strings.HasSuffix(message, suffix) {
-		return ScheduleForbid{
-			RunningName: strings.TrimSuffix(strings.TrimPrefix(message, prefix), suffix),
-		}
-	}
-
-	return nil
 }
 
 type ScheduleSkipRemoveHistory struct {
@@ -120,18 +82,6 @@ func (s ScheduleSkipRemoveHistory) Message() string {
 	return fmt.Sprintf("Skip removing history: %s is still running", s.RunningName)
 }
 
-func (m ScheduleSkipRemoveHistory) Parse(message string) ChaosEvent {
-	prefix := "Skip removing history: "
-	suffix := " is still running"
-	if strings.HasPrefix(message, prefix) && strings.HasSuffix(message, suffix) {
-		return ScheduleSkipRemoveHistory{
-			RunningName: strings.TrimSuffix(strings.TrimPrefix(message, prefix), suffix),
-		}
-	}
-
-	return nil
-}
-
 func init() {
-	register(MissSchedule{}, ScheduleSpawn{}, ScheduleForbid{}, ScheduleSkipRemoveHistory{})
+	register(MissedSchedule{}, ScheduleSpawn{}, ScheduleForbid{}, ScheduleSkipRemoveHistory{})
 }

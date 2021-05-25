@@ -14,6 +14,10 @@
 package recorder
 
 import (
+	"reflect"
+
+	"github.com/go-logr/logr"
+	"github.com/iancoleman/strcase"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -21,42 +25,38 @@ import (
 
 type ChaosRecorder struct {
 	recorder record.EventRecorder
+	log      logr.Logger
 }
 
 func (r *ChaosRecorder) Event(object runtime.Object, ev ChaosEvent) {
-	r.recorder.Event(object, ev.Type(), ev.Reason(), ev.Message())
+	annotations, err := generateAnnotations(ev)
+	if err != nil {
+		r.log.Error(err, "event", ev)
+	}
+
+	r.recorder.AnnotatedEventf(object, annotations, ev.Type(), ev.Reason(), ev.Message())
 }
 
 type ChaosEvent interface {
 	Type() string
 	Reason() string
 	Message() string
-
-	// Parse will return a `ChaosEvent` if the `message` has corresponding
-	// format. But will return a `nil` when it doesn't.
-	Parse(message string) ChaosEvent
 }
 
-var allEvents = []ChaosEvent{}
+var allEvents = make(map[string]ChaosEvent)
 
 func register(ev ...ChaosEvent) {
-	allEvents = append(allEvents, ev...)
-}
+	for _, ev := range ev {
+		val := reflect.ValueOf(ev)
+		val = reflect.Indirect(val)
 
-// Parse will iterate over all the registered event,
-// return `nil` if there is no suitable event.
-func Parse(message string) ChaosEvent {
-	for _, ev := range allEvents {
-		ev := ev.Parse(message)
-		if ev != nil {
-			return ev
-		}
+		allEvents[strcase.ToKebab(val.Type().Name())] = ev
 	}
-	return nil
 }
 
-func NewRecorder(mgr ctrl.Manager, name string) ChaosRecorder {
+func NewRecorder(mgr ctrl.Manager, name string, logger logr.Logger) ChaosRecorder {
 	return ChaosRecorder{
 		mgr.GetEventRecorderFor(name),
+		logger.WithName("event-recorder" + name),
 	}
 }
