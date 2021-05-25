@@ -24,7 +24,6 @@ import (
 
 	"github.com/go-logr/logr"
 	"go.uber.org/fx"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-controller-manager/provider"
 	"github.com/chaos-mesh/chaos-mesh/controllers"
@@ -43,7 +42,6 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
-	"github.com/chaos-mesh/chaos-mesh/controllers/podiochaos"
 	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
 
@@ -102,8 +100,6 @@ type RunParams struct {
 	fx.In
 
 	Mgr     ctrl.Manager
-	Client  client.Client
-	Reader  client.Reader
 	Logger  logr.Logger
 	AuthCli *authorizationv1.AuthorizationV1Client
 
@@ -113,8 +109,6 @@ type RunParams struct {
 
 func Run(params RunParams) error {
 	mgr := params.Mgr
-	logger := params.Logger
-	client := params.Client
 	authCli := params.AuthCli
 
 	var err error
@@ -127,12 +121,6 @@ func Run(params RunParams) error {
 		}
 	}
 
-	// We only setup webhook for podiochaos, and the logic of applying chaos are in the mutation
-	// webhook, because we need to get the running result synchronously in io chaos reconciler
-	v1alpha1.RegisterPodIoHandler(&podiochaos.Handler{
-		Client: client,
-		Log:    logger.WithName("handler").WithName("PodIOChaos"),
-	})
 	err = (&v1alpha1.PodIoChaos{}).SetupWebhookWithManager(mgr)
 	if err != nil {
 		return err
