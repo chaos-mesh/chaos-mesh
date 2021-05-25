@@ -63,7 +63,8 @@ func (t stdioTransport) RoundTrip(req *http.Request) (resp *http.Response, err e
 }
 
 func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaosRequest) (*pb.ApplyHttpChaosResponse, error) {
-	log.Info("applying http chaos", "Request", in)
+	log.WithValues("Request", in)
+	log.Info("applying http chaos")
 
 	if in.Instance == 0 {
 		if err := s.createHttpChaos(ctx, in); err != nil {
@@ -108,6 +109,8 @@ func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 	if err != nil {
 		return nil, err
 	}
+
+	log.Info("http chaos applied")
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
