@@ -32,6 +32,8 @@ type ChaosEvent interface {
 	Reason() string
 	Message() string
 
+	// Parse will return a `ChaosEvent` if the `message` has corresponding
+	// format. But will return a `nil` when it doesn't.
 	Parse(message string) ChaosEvent
 }
 
@@ -41,6 +43,8 @@ func register(ev ...ChaosEvent) {
 	allEvents = append(allEvents, ev...)
 }
 
+// Parse will iterate over all the registered event,
+// return `nil` if there is no suitable event.
 func Parse(message string) ChaosEvent {
 	for _, ev := range allEvents {
 		ev := ev.Parse(message)
