@@ -18,8 +18,6 @@ import (
 	"errors"
 	"testing"
 
-	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
-
 	"k8s.io/client-go/kubernetes/scheme"
 
 	. "github.com/onsi/ginkgo"
@@ -30,6 +28,7 @@ import (
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
@@ -45,7 +44,7 @@ func TestTimechaos(t *testing.T) {
 
 	RunSpecsWithDefaultAndCustomReporters(t,
 		"TimeChaos Suite",
-		[]Reporter{printer.NewlineReporter{}})
+		[]Reporter{envtest.NewlineReporter{}})
 }
 
 var _ = BeforeSuite(func(done Done) {

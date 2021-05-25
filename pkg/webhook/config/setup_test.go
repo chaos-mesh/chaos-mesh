@@ -16,10 +16,10 @@ package config
 import (
 	"testing"
 
-	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
+	"sigs.k8s.io/controller-runtime/pkg/envtest"
 )
 
 func TestAPIs(t *testing.T) {
@@ -27,5 +27,5 @@ func TestAPIs(t *testing.T) {
 
 	RunSpecsWithDefaultAndCustomReporters(t,
 		"webhook config",
-		[]Reporter{printer.NewlineReporter{}})
+		[]Reporter{envtest.NewlineReporter{}})
 }

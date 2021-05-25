@@ -16,10 +16,9 @@ package config
 import (
 	"testing"
 
-	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"sigs.k8s.io/controller-runtime/pkg/envtest"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config/watcher"
@@ -30,7 +29,7 @@ func TestValidations(t *testing.T) {
 
 	RunSpecsWithDefaultAndCustomReporters(t,
 		"Namespace scoped",
-		[]Reporter{printer.NewlineReporter{}})
+		[]Reporter{envtest.NewlineReporter{}})
 }
 
 var _ = Describe("Namespace-scoped Chaos", func() {

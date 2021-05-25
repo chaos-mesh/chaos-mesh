@@ -16,10 +16,10 @@ package watcher
 import (
 	"testing"
 
-	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
+	"sigs.k8s.io/controller-runtime/pkg/envtest"
 
 	"k8s.io/client-go/rest"
 )
@@ -29,7 +29,7 @@ func TestAPIs(t *testing.T) {
 
 	RunSpecsWithDefaultAndCustomReporters(t,
 		"webhook config watcher",
-		[]Reporter{printer.NewlineReporter{}})
+		[]Reporter{envtest.NewlineReporter{}})
 }
 
 func MockClusterConfig() (*rest.Config, error) {

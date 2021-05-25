@@ -24,8 +24,6 @@ import (
 	"time"
 	"unsafe"
 
-	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
-
 	"github.com/go-logr/zapr"
 	"go.uber.org/zap"
 
@@ -33,6 +31,7 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"sigs.k8s.io/controller-runtime/pkg/envtest"
 )
 
 func TestPTrace(t *testing.T) {
@@ -40,7 +39,7 @@ func TestPTrace(t *testing.T) {
 
 	RunSpecsWithDefaultAndCustomReporters(t,
 		"PTrace Suit",
-		[]Reporter{printer.NewlineReporter{}})
+		[]Reporter{envtest.NewlineReporter{}})
 }
 
 var _ = BeforeSuite(func(done Done) {
