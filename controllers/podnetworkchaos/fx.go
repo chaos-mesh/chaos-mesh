@@ -24,6 +24,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 )
@@ -44,7 +45,7 @@ func NewController(mgr ctrl.Manager, client client.Client, reader client.Reader,
 			Client:   client,
 			Reader:   reader,
 			Log:      logger.WithName("podnetworkchaos"),
-			Recorder: mgr.GetEventRecorderFor("podnetworkchaos"),
+			Recorder: recorder.NewRecorder(mgr, "podnetworkchaos", logger),
 
 			// TODO:
 			AllowHostNetworkTesting: config.ControllerCfg.AllowHostNetworkTesting,

@@ -30,6 +30,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 )
 
@@ -103,7 +104,7 @@ func NewController(mgr ctrl.Manager, client client.Client, reader client.Reader,
 			Object:   pair.Object,
 			Client:   client,
 			Reader:   reader,
-			Recorder: mgr.GetEventRecorderFor("common"),
+			Recorder: recorder.NewRecorder(mgr, "common", logger),
 			Selector: selector,
 			Log:      logger.WithName("records"),
 		})
