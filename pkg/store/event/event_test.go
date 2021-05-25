@@ -40,8 +40,6 @@ var _ = Describe("event", func() {
 	var (
 		es         *eventStore
 		mock       sqlmock.Sqlmock
-		podRecord0 *core.PodRecord
-		podRecord1 *core.PodRecord
 		event0     *core.Event
 		event1     *core.Event
 		timeNow    time.Time
@@ -61,30 +59,6 @@ var _ = Describe("event", func() {
 		timeNow = time.Now()
 		oneMinute, _ := time.ParseDuration("1m")
 		timeAfter := timeNow.Add(oneMinute)
-		podRecord0 = &core.PodRecord{
-			ID:        0,
-			CreatedAt: timeNow,
-			UpdatedAt: timeNow,
-			DeletedAt: &timeNow,
-			EventID:   0,
-			PodIP:     "testIP",
-			PodName:   "testName",
-			Namespace: "testNamespace",
-			Message:   "testMessage",
-			Action:    "testAction",
-		}
-		podRecord1 = &core.PodRecord{
-			ID:        1,
-			CreatedAt: timeNow,
-			UpdatedAt: timeNow,
-			DeletedAt: &timeNow,
-			EventID:   1,
-			PodIP:     "testIP",
-			PodName:   "testName",
-			Namespace: "testNamespace",
-			Message:   "testMessage",
-			Action:    "testAction",
-		}
 		event0 = &core.Event{
 			ID:           0,
 			CreatedAt:    timeNow,
@@ -97,7 +71,6 @@ var _ = Describe("event", func() {
 			StartTime:    &timeNow,
 			FinishTime:   &timeNow,
 			Duration:     "10s",
-			Pods:         []*core.PodRecord{podRecord0},
 			ExperimentID: "testID0",
 		}
 		event1 = &core.Event{
@@ -112,7 +85,6 @@ var _ = Describe("event", func() {
 			StartTime:    &timeAfter,
 			FinishTime:   &timeAfter,
 			Duration:     "10s",
-			Pods:         []*core.PodRecord{podRecord1},
 			ExperimentID: "testID1",
 		}
 	})
@@ -120,34 +92,6 @@ var _ = Describe("event", func() {
 	AfterEach(func() {
 		err := mock.ExpectationsWereMet()
 		Expect(err).ShouldNot(HaveOccurred())
-	})
-
-	Context("findPodRecordsByEventID", func() {
-		It("found", func() {
-			mockedRow := []*sqlmock.Rows{
-				sqlmock.NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "event_id", "pod_ip", "pod_name",
-					"namespace", "message", "action"}).
-					AddRow(podRecord0.ID, podRecord0.CreatedAt, podRecord0.UpdatedAt, podRecord0.DeletedAt, podRecord0.EventID,
-						podRecord0.PodIP, podRecord0.PodName, podRecord0.Namespace, podRecord0.Message, podRecord0.Action),
-				sqlmock.NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "event_id", "pod_ip", "pod_name",
-					"namespace", "message", "action"}).
-					AddRow(podRecord1.ID, podRecord1.CreatedAt, podRecord1.UpdatedAt, podRecord1.DeletedAt, podRecord1.EventID,
-						podRecord1.PodIP, podRecord1.PodName, podRecord1.Namespace, podRecord1.Message, podRecord1.Action),
-			}
-			sqlSelect := `SELECT * FROM "pod_records" WHERE "pod_records"."deleted_at" IS NULL AND ((event_id = ?))`
-			mock.ExpectQuery(regexp.QuoteMeta(sqlSelect)).WithArgs(podRecord0.EventID).WillReturnRows(mockedRow[0])
-
-			podRecords, err := es.findPodRecordsByEventID(context.TODO(), podRecord0.EventID)
-			Expect(err).ShouldNot(HaveOccurred())
-			Expect(podRecords[0]).Should(Equal(podRecord0))
-		})
-
-		It("not found", func() {
-			mock.ExpectQuery(`.+`).WillReturnRows(sqlmock.NewRows(nil))
-			podRecords, err := es.findPodRecordsByEventID(context.TODO(), 1)
-			Expect(len(podRecords)).Should(Equal(0))
-			Expect(err).ShouldNot(HaveOccurred())
-		})
 	})
 
 	Context("min", func() {
@@ -175,15 +119,6 @@ var _ = Describe("event", func() {
 					event0.Kind, event0.Message, event0.StartTime, event0.FinishTime, event0.Duration, event0.ExperimentID)
 			sqlSelect := `SELECT * FROM "events"`
 			mock.ExpectQuery(regexp.QuoteMeta(sqlSelect)).WillReturnRows(rows)
-
-			rows = sqlmock.
-				NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "event_id", "pod_ip", "pod_name",
-					"namespace", "message", "action"}).
-				AddRow(podRecord0.ID, podRecord0.CreatedAt, podRecord0.UpdatedAt, podRecord0.DeletedAt, podRecord0.EventID,
-					podRecord0.PodIP, podRecord0.PodName, podRecord0.Namespace, podRecord0.Message, podRecord0.Action)
-
-			sqlSelect = `SELECT * FROM "pod_records" WHERE "pod_records"."deleted_at" IS NULL AND ((event_id = ?))`
-			mock.ExpectQuery(regexp.QuoteMeta(sqlSelect)).WithArgs(podRecord0.EventID).WillReturnRows(rows)
 
 			events, err := es.List(context.TODO())
 			Expect(err).ShouldNot(HaveOccurred())
@@ -214,15 +149,6 @@ var _ = Describe("event", func() {
 			sqlSelect := `SELECT * FROM "events" WHERE "events"."deleted_at" IS NULL AND ((experiment_id = ?))`
 			mock.ExpectQuery(regexp.QuoteMeta(sqlSelect)).WithArgs(event0.ExperimentID).WillReturnRows(mockedRow[0])
 
-			rows := sqlmock.
-				NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "event_id", "pod_ip", "pod_name",
-					"namespace", "message", "action"}).
-				AddRow(podRecord0.ID, podRecord0.CreatedAt, podRecord0.UpdatedAt, podRecord0.DeletedAt, podRecord0.EventID,
-					podRecord0.PodIP, podRecord0.PodName, podRecord0.Namespace, podRecord0.Message, podRecord0.Action)
-
-			sqlSelect = `SELECT * FROM "pod_records" WHERE "pod_records"."deleted_at" IS NULL AND ((event_id = ?))`
-			mock.ExpectQuery(regexp.QuoteMeta(sqlSelect)).WithArgs(podRecord0.EventID).WillReturnRows(rows)
-
 			events, err := es.ListByUID(context.TODO(), event0.ExperimentID)
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(events[0]).Should(Equal(event0))
@@ -252,15 +178,6 @@ var _ = Describe("event", func() {
 			sqlSelect := `SELECT * FROM "events" WHERE "events"."deleted_at" IS NULL AND ((namespace = ? and experiment = ? ))`
 			mock.ExpectQuery(regexp.QuoteMeta(sqlSelect)).WithArgs(event0.Namespace, event0.Experiment).WillReturnRows(mockedRow[0])
 
-			rows := sqlmock.
-				NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "event_id", "pod_ip", "pod_name",
-					"namespace", "message", "action"}).
-				AddRow(podRecord0.ID, podRecord0.CreatedAt, podRecord0.UpdatedAt, podRecord0.DeletedAt, podRecord0.EventID,
-					podRecord0.PodIP, podRecord0.PodName, podRecord0.Namespace, podRecord0.Message, podRecord0.Action)
-
-			sqlSelect = `SELECT * FROM "pod_records" WHERE "pod_records"."deleted_at" IS NULL AND ((event_id = ?))`
-			mock.ExpectQuery(regexp.QuoteMeta(sqlSelect)).WithArgs(podRecord0.EventID).WillReturnRows(rows)
-
 			events, err := es.ListByExperiment(context.TODO(), event0.Namespace, event0.Experiment)
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(events[0]).Should(Equal(event0))
@@ -277,31 +194,13 @@ var _ = Describe("event", func() {
 	Context("listByNamesoace", func() {
 		It("found", func() {
 			rows := sqlmock.
-				NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "event_id", "pod_ip", "pod_name",
-					"namespace", "message", "action"}).
-				AddRow(podRecord0.ID, podRecord0.CreatedAt, podRecord0.UpdatedAt, podRecord0.DeletedAt, podRecord0.EventID,
-					podRecord0.PodIP, podRecord0.PodName, podRecord0.Namespace, podRecord0.Message, podRecord0.Action)
-
-			sqlSelect := `SELECT * FROM "pod_records" WHERE "pod_records"."deleted_at" IS NULL AND (("pod_records"."namespace" = ?))`
-			mock.ExpectQuery(regexp.QuoteMeta(sqlSelect)).WithArgs(event0.Namespace).WillReturnRows(rows)
-
-			rows = sqlmock.
 				NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "experiment", "namespace", "kind",
 					"message", "start_time", "finish_time", "duration", "experiment_id"}).
 				AddRow(event0.ID, event0.CreatedAt, event0.UpdatedAt, event0.DeletedAt, event0.Experiment, event0.Namespace,
 					event0.Kind, event0.Message, event0.StartTime, event0.FinishTime, event0.Duration, event0.ExperimentID)
 
-			sqlSelect = `SELECT * FROM "events" WHERE "events"."deleted_at" IS NULL AND ((id = ?)) ORDER BY "events"."id" ASC LIMIT 1`
+			sqlSelect := `SELECT * FROM "events" WHERE "events"."deleted_at" IS NULL AND ((id = ?)) ORDER BY "events"."id" ASC LIMIT 1`
 			mock.ExpectQuery(regexp.QuoteMeta(sqlSelect)).WithArgs(event0.ID).WillReturnRows(rows)
-
-			rows = sqlmock.
-				NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "event_id", "pod_ip", "pod_name",
-					"namespace", "message", "action"}).
-				AddRow(podRecord0.ID, podRecord0.CreatedAt, podRecord0.UpdatedAt, podRecord0.DeletedAt, podRecord0.EventID,
-					podRecord0.PodIP, podRecord0.PodName, podRecord0.Namespace, podRecord0.Message, podRecord0.Action)
-
-			sqlSelect = `SELECT * FROM "pod_records" WHERE "pod_records"."deleted_at" IS NULL AND ((event_id = ?))`
-			mock.ExpectQuery(regexp.QuoteMeta(sqlSelect)).WithArgs(podRecord0.EventID).WillReturnRows(rows)
 
 			events, err := es.ListByNamespace(context.TODO(), event0.Namespace)
 			Expect(err).ShouldNot(HaveOccurred())
@@ -311,48 +210,6 @@ var _ = Describe("event", func() {
 		It("not found", func() {
 			mock.ExpectQuery(`.+`).WillReturnRows(sqlmock.NewRows(nil))
 			events, err := es.ListByNamespace(context.TODO(), "testNamespaceNotFound")
-			Expect(err).ShouldNot(HaveOccurred())
-			Expect(len(events)).Should(Equal(0))
-		})
-	})
-
-	Context("listByPod", func() {
-		It("found", func() {
-			rows := sqlmock.
-				NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "event_id", "pod_ip", "pod_name",
-					"namespace", "message", "action"}).
-				AddRow(podRecord0.ID, podRecord0.CreatedAt, podRecord0.UpdatedAt, podRecord0.DeletedAt, podRecord0.EventID,
-					podRecord0.PodIP, podRecord0.PodName, podRecord0.Namespace, podRecord0.Message, podRecord0.Action)
-
-			sqlSelect := `SELECT * FROM "pod_records" WHERE "pod_records"."deleted_at" IS NULL AND (("pod_records"."pod_name" = ?) AND ("pod_records"."namespace" = ?))`
-			mock.ExpectQuery(regexp.QuoteMeta(sqlSelect)).WithArgs(podRecord0.PodName, podRecord0.Namespace).WillReturnRows(rows)
-
-			rows = sqlmock.
-				NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "experiment", "namespace", "kind",
-					"message", "start_time", "finish_time", "duration", "experiment_id"}).
-				AddRow(event0.ID, event0.CreatedAt, event0.UpdatedAt, event0.DeletedAt, event0.Experiment, event0.Namespace,
-					event0.Kind, event0.Message, event0.StartTime, event0.FinishTime, event0.Duration, event0.ExperimentID)
-
-			sqlSelect = `SELECT * FROM "events" WHERE "events"."deleted_at" IS NULL AND ((id = ?)) ORDER BY "events"."id" ASC LIMIT 1`
-			mock.ExpectQuery(regexp.QuoteMeta(sqlSelect)).WithArgs(event0.ID).WillReturnRows(rows)
-
-			rows = sqlmock.
-				NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "event_id", "pod_ip", "pod_name",
-					"namespace", "message", "action"}).
-				AddRow(podRecord0.ID, podRecord0.CreatedAt, podRecord0.UpdatedAt, podRecord0.DeletedAt, podRecord0.EventID,
-					podRecord0.PodIP, podRecord0.PodName, podRecord0.Namespace, podRecord0.Message, podRecord0.Action)
-
-			sqlSelect = `SELECT * FROM "pod_records" WHERE "pod_records"."deleted_at" IS NULL AND ((event_id = ?))`
-			mock.ExpectQuery(regexp.QuoteMeta(sqlSelect)).WithArgs(podRecord0.EventID).WillReturnRows(rows)
-
-			events, err := es.ListByPod(context.TODO(), podRecord0.Namespace, podRecord0.PodName)
-			Expect(err).ShouldNot(HaveOccurred())
-			Expect(events[0]).Should(Equal(event0))
-		})
-
-		It("not found", func() {
-			mock.ExpectQuery(`.+`).WillReturnRows(sqlmock.NewRows(nil))
-			events, err := es.ListByPod(context.TODO(), "testNamespaceNotFound", "testnameNotFound")
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(len(events)).Should(Equal(0))
 		})
@@ -373,15 +230,6 @@ var _ = Describe("event", func() {
 
 			sqlSelect := `SELECT * FROM "events" WHERE "events"."deleted_at" IS NULL AND ((id = ?))`
 			mock.ExpectQuery(regexp.QuoteMeta(sqlSelect)).WithArgs(event0.ID).WillReturnRows(mockedRow[0])
-
-			rows := sqlmock.
-				NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "event_id", "pod_ip", "pod_name",
-					"namespace", "message", "action"}).
-				AddRow(podRecord0.ID, podRecord0.CreatedAt, podRecord0.UpdatedAt, podRecord0.DeletedAt, podRecord0.EventID,
-					podRecord0.PodIP, podRecord0.PodName, podRecord0.Namespace, podRecord0.Message, podRecord0.Action)
-
-			sqlSelect = `SELECT * FROM "pod_records" WHERE "pod_records"."deleted_at" IS NULL AND ((event_id = ?))`
-			mock.ExpectQuery(regexp.QuoteMeta(sqlSelect)).WithArgs(podRecord0.EventID).WillReturnRows(rows)
 
 			event, err := es.Find(context.TODO(), event0.ID)
 			Expect(err).ShouldNot(HaveOccurred())
@@ -410,15 +258,6 @@ var _ = Describe("event", func() {
 
 			sqlSelect := `SELECT * FROM "events" WHERE "events"."deleted_at" IS NULL AND ((namespace = ? and experiment = ? and start_time = ?)) ORDER BY "events"."id" ASC LIMIT 1`
 			mock.ExpectQuery(regexp.QuoteMeta(sqlSelect)).WithArgs(event0.Namespace, event0.Experiment, event0.StartTime).WillReturnRows(mockedRow[0])
-
-			rows := sqlmock.
-				NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "event_id", "pod_ip", "pod_name",
-					"namespace", "message", "action"}).
-				AddRow(podRecord0.ID, podRecord0.CreatedAt, podRecord0.UpdatedAt, podRecord0.DeletedAt, podRecord0.EventID,
-					podRecord0.PodIP, podRecord0.PodName, podRecord0.Namespace, podRecord0.Message, podRecord0.Action)
-
-			sqlSelect = `SELECT * FROM "pod_records" WHERE "pod_records"."deleted_at" IS NULL AND ((event_id = ?))`
-			mock.ExpectQuery(regexp.QuoteMeta(sqlSelect)).WithArgs(podRecord0.EventID).WillReturnRows(rows)
 
 			event, err := es.FindByExperimentAndStartTime(context.TODO(), event0.Experiment, event0.Namespace, event0.StartTime)
 			Expect(err).ShouldNot(HaveOccurred())
@@ -470,15 +309,6 @@ var _ = Describe("event", func() {
 			sqlSelect := `SELECT * FROM "events"`
 			mock.ExpectQuery(regexp.QuoteMeta(sqlSelect)).WillReturnRows(rows)
 
-			rows = sqlmock.
-				NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "event_id", "pod_ip", "pod_name",
-					"namespace", "message", "action"}).
-				AddRow(podRecord0.ID, podRecord0.CreatedAt, podRecord0.UpdatedAt, podRecord0.DeletedAt, podRecord0.EventID,
-					podRecord0.PodIP, podRecord0.PodName, podRecord0.Namespace, podRecord0.Message, podRecord0.Action)
-
-			sqlSelect = `SELECT * FROM "pod_records" WHERE "pod_records"."deleted_at" IS NULL AND ((event_id = ?))`
-			mock.ExpectQuery(regexp.QuoteMeta(sqlSelect)).WithArgs(podRecord0.EventID).WillReturnRows(rows)
-
 			filter := core.Filter{}
 			events, err := es.ListByFilter(context.TODO(), filter)
 			Expect(err).ShouldNot(HaveOccurred())
@@ -491,32 +321,15 @@ var _ = Describe("event", func() {
 				PodNamespace: "testNamespace",
 				LimitStr:     "1",
 			}
+
 			rows := sqlmock.
-				NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "event_id", "pod_ip", "pod_name",
-					"namespace", "message", "action"}).
-				AddRow(podRecord0.ID, podRecord0.CreatedAt, podRecord0.UpdatedAt, podRecord0.DeletedAt, podRecord0.EventID,
-					podRecord0.PodIP, podRecord0.PodName, podRecord0.Namespace, podRecord0.Message, podRecord0.Action)
-
-			sqlSelect := `SELECT * FROM "pod_records" WHERE "pod_records"."deleted_at" IS NULL AND (("pod_records"."pod_name" = ?) AND ("pod_records"."namespace" = ?))`
-			mock.ExpectQuery(regexp.QuoteMeta(sqlSelect)).WithArgs(podRecord0.PodName, podRecord0.Namespace).WillReturnRows(rows)
-
-			rows = sqlmock.
 				NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "experiment", "namespace", "kind",
 					"message", "start_time", "finish_time", "duration", "experiment_id"}).
 				AddRow(event0.ID, event0.CreatedAt, event0.UpdatedAt, event0.DeletedAt, event0.Experiment, event0.Namespace,
 					event0.Kind, event0.Message, event0.StartTime, event0.FinishTime, event0.Duration, event0.ExperimentID)
 
-			sqlSelect = `SELECT * FROM "events" WHERE "events"."deleted_at" IS NULL AND ((id = ?)) ORDER BY "events"."id" ASC LIMIT 1`
+			sqlSelect := `SELECT * FROM "events" WHERE "events"."deleted_at" IS NULL AND ((id = ?)) ORDER BY "events"."id" ASC LIMIT 1`
 			mock.ExpectQuery(regexp.QuoteMeta(sqlSelect)).WithArgs(event0.ID).WillReturnRows(rows)
-
-			rows = sqlmock.
-				NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "event_id", "pod_ip", "pod_name",
-					"namespace", "message", "action"}).
-				AddRow(podRecord0.ID, podRecord0.CreatedAt, podRecord0.UpdatedAt, podRecord0.DeletedAt, podRecord0.EventID,
-					podRecord0.PodIP, podRecord0.PodName, podRecord0.Namespace, podRecord0.Message, podRecord0.Action)
-
-			sqlSelect = `SELECT * FROM "pod_records" WHERE "pod_records"."deleted_at" IS NULL AND ((event_id = ?))`
-			mock.ExpectQuery(regexp.QuoteMeta(sqlSelect)).WithArgs(podRecord0.EventID).WillReturnRows(rows)
 
 			events, err := es.ListByFilter(context.TODO(), filter)
 			Expect(err).ShouldNot(HaveOccurred())
@@ -529,31 +342,13 @@ var _ = Describe("event", func() {
 				LimitStr:     "1",
 			}
 			rows := sqlmock.
-				NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "event_id", "pod_ip", "pod_name",
-					"namespace", "message", "action"}).
-				AddRow(podRecord0.ID, podRecord0.CreatedAt, podRecord0.UpdatedAt, podRecord0.DeletedAt, podRecord0.EventID,
-					podRecord0.PodIP, podRecord0.PodName, podRecord0.Namespace, podRecord0.Message, podRecord0.Action)
-
-			sqlSelect := `SELECT * FROM "pod_records" WHERE "pod_records"."deleted_at" IS NULL AND (("pod_records"."namespace" = ?))`
-			mock.ExpectQuery(regexp.QuoteMeta(sqlSelect)).WithArgs(event0.Namespace).WillReturnRows(rows)
-
-			rows = sqlmock.
 				NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "experiment", "namespace", "kind",
 					"message", "start_time", "finish_time", "duration", "experiment_id"}).
 				AddRow(event0.ID, event0.CreatedAt, event0.UpdatedAt, event0.DeletedAt, event0.Experiment, event0.Namespace,
 					event0.Kind, event0.Message, event0.StartTime, event0.FinishTime, event0.Duration, event0.ExperimentID)
 
-			sqlSelect = `SELECT * FROM "events" WHERE "events"."deleted_at" IS NULL AND ((id = ?)) ORDER BY "events"."id" ASC LIMIT 1`
+			sqlSelect := `SELECT * FROM "events" WHERE "events"."deleted_at" IS NULL AND ((id = ?)) ORDER BY "events"."id" ASC LIMIT 1`
 			mock.ExpectQuery(regexp.QuoteMeta(sqlSelect)).WithArgs(event0.ID).WillReturnRows(rows)
-
-			rows = sqlmock.
-				NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "event_id", "pod_ip", "pod_name",
-					"namespace", "message", "action"}).
-				AddRow(podRecord0.ID, podRecord0.CreatedAt, podRecord0.UpdatedAt, podRecord0.DeletedAt, podRecord0.EventID,
-					podRecord0.PodIP, podRecord0.PodName, podRecord0.Namespace, podRecord0.Message, podRecord0.Action)
-
-			sqlSelect = `SELECT * FROM "pod_records" WHERE "pod_records"."deleted_at" IS NULL AND ((event_id = ?))`
-			mock.ExpectQuery(regexp.QuoteMeta(sqlSelect)).WithArgs(podRecord0.EventID).WillReturnRows(rows)
 
 			events, err := es.ListByFilter(context.TODO(), filter)
 			Expect(err).ShouldNot(HaveOccurred())
@@ -567,32 +362,13 @@ var _ = Describe("event", func() {
 				LimitStr:       "1",
 			}
 			rows := sqlmock.
-				NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "event_id", "pod_ip", "pod_name",
-					"namespace", "message", "action"}).
-				AddRow(podRecord0.ID, podRecord0.CreatedAt, podRecord0.UpdatedAt, podRecord0.DeletedAt, podRecord0.EventID,
-					podRecord0.PodIP, podRecord0.PodName, podRecord0.Namespace, podRecord0.Message, podRecord0.Action)
-
-			sqlSelect := `SELECT * FROM "pod_records" WHERE "pod_records"."deleted_at" IS NULL AND (("pod_records"."namespace" = ?))`
-			mock.ExpectQuery(regexp.QuoteMeta(sqlSelect)).WithArgs(event0.Namespace).WillReturnRows(rows)
-
-			rows = sqlmock.
 				NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "experiment", "namespace", "kind",
 					"message", "start_time", "finish_time", "duration", "experiment_id"}).
 				AddRow(event0.ID, event0.CreatedAt, event0.UpdatedAt, event0.DeletedAt, event0.Experiment, event0.Namespace,
 					event0.Kind, event0.Message, event0.StartTime, event0.FinishTime, event0.Duration, event0.ExperimentID)
 
-			sqlSelect = `SELECT * FROM "events" WHERE "events"."deleted_at" IS NULL AND ((id = ?)) ORDER BY "events"."id" ASC LIMIT 1`
+			sqlSelect := `SELECT * FROM "events" WHERE "events"."deleted_at" IS NULL AND ((id = ?)) ORDER BY "events"."id" ASC LIMIT 1`
 			mock.ExpectQuery(regexp.QuoteMeta(sqlSelect)).WithArgs(event0.ID).WillReturnRows(rows)
-
-			rows = sqlmock.
-				NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "event_id", "pod_ip", "pod_name",
-					"namespace", "message", "action"}).
-				AddRow(podRecord0.ID, podRecord0.CreatedAt, podRecord0.UpdatedAt, podRecord0.DeletedAt, podRecord0.EventID,
-					podRecord0.PodIP, podRecord0.PodName, podRecord0.Namespace, podRecord0.Message, podRecord0.Action)
-
-			sqlSelect = `SELECT * FROM "pod_records" WHERE "pod_records"."deleted_at" IS NULL AND ((event_id = ?))`
-			mock.ExpectQuery(regexp.QuoteMeta(sqlSelect)).WithArgs(podRecord0.EventID).WillReturnRows(rows)
-
 			events, err := es.ListByFilter(context.TODO(), filter)
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(len(events)).Should(Equal(0))
@@ -605,32 +381,13 @@ var _ = Describe("event", func() {
 				LimitStr:            "1",
 			}
 			rows := sqlmock.
-				NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "event_id", "pod_ip", "pod_name",
-					"namespace", "message", "action"}).
-				AddRow(podRecord0.ID, podRecord0.CreatedAt, podRecord0.UpdatedAt, podRecord0.DeletedAt, podRecord0.EventID,
-					podRecord0.PodIP, podRecord0.PodName, podRecord0.Namespace, podRecord0.Message, podRecord0.Action)
-
-			sqlSelect := `SELECT * FROM "pod_records" WHERE "pod_records"."deleted_at" IS NULL AND (("pod_records"."namespace" = ?))`
-			mock.ExpectQuery(regexp.QuoteMeta(sqlSelect)).WithArgs(event0.Namespace).WillReturnRows(rows)
-
-			rows = sqlmock.
 				NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "experiment", "namespace", "kind",
 					"message", "start_time", "finish_time", "duration", "experiment_id"}).
 				AddRow(event0.ID, event0.CreatedAt, event0.UpdatedAt, event0.DeletedAt, event0.Experiment, event0.Namespace,
 					event0.Kind, event0.Message, event0.StartTime, event0.FinishTime, event0.Duration, event0.ExperimentID)
 
-			sqlSelect = `SELECT * FROM "events" WHERE "events"."deleted_at" IS NULL AND ((id = ?)) ORDER BY "events"."id" ASC LIMIT 1`
+			sqlSelect := `SELECT * FROM "events" WHERE "events"."deleted_at" IS NULL AND ((id = ?)) ORDER BY "events"."id" ASC LIMIT 1`
 			mock.ExpectQuery(regexp.QuoteMeta(sqlSelect)).WithArgs(event0.ID).WillReturnRows(rows)
-
-			rows = sqlmock.
-				NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "event_id", "pod_ip", "pod_name",
-					"namespace", "message", "action"}).
-				AddRow(podRecord0.ID, podRecord0.CreatedAt, podRecord0.UpdatedAt, podRecord0.DeletedAt, podRecord0.EventID,
-					podRecord0.PodIP, podRecord0.PodName, podRecord0.Namespace, podRecord0.Message, podRecord0.Action)
-
-			sqlSelect = `SELECT * FROM "pod_records" WHERE "pod_records"."deleted_at" IS NULL AND ((event_id = ?))`
-			mock.ExpectQuery(regexp.QuoteMeta(sqlSelect)).WithArgs(podRecord0.EventID).WillReturnRows(rows)
-
 			events, err := es.ListByFilter(context.TODO(), filter)
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(len(events)).Should(Equal(0))
@@ -643,31 +400,13 @@ var _ = Describe("event", func() {
 				LimitStr:     "1",
 			}
 			rows := sqlmock.
-				NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "event_id", "pod_ip", "pod_name",
-					"namespace", "message", "action"}).
-				AddRow(podRecord0.ID, podRecord0.CreatedAt, podRecord0.UpdatedAt, podRecord0.DeletedAt, podRecord0.EventID,
-					podRecord0.PodIP, podRecord0.PodName, podRecord0.Namespace, podRecord0.Message, podRecord0.Action)
-
-			sqlSelect := `SELECT * FROM "pod_records" WHERE "pod_records"."deleted_at" IS NULL AND (("pod_records"."namespace" = ?))`
-			mock.ExpectQuery(regexp.QuoteMeta(sqlSelect)).WithArgs(event0.Namespace).WillReturnRows(rows)
-
-			rows = sqlmock.
 				NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "experiment", "namespace", "kind",
 					"message", "start_time", "finish_time", "duration", "experiment_id"}).
 				AddRow(event0.ID, event0.CreatedAt, event0.UpdatedAt, event0.DeletedAt, event0.Experiment, event0.Namespace,
 					event0.Kind, event0.Message, event0.StartTime, event0.FinishTime, event0.Duration, event0.ExperimentID)
 
-			sqlSelect = `SELECT * FROM "events" WHERE "events"."deleted_at" IS NULL AND ((id = ?)) ORDER BY "events"."id" ASC LIMIT 1`
+			sqlSelect := `SELECT * FROM "events" WHERE "events"."deleted_at" IS NULL AND ((id = ?)) ORDER BY "events"."id" ASC LIMIT 1`
 			mock.ExpectQuery(regexp.QuoteMeta(sqlSelect)).WithArgs(event0.ID).WillReturnRows(rows)
-
-			rows = sqlmock.
-				NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "event_id", "pod_ip", "pod_name",
-					"namespace", "message", "action"}).
-				AddRow(podRecord0.ID, podRecord0.CreatedAt, podRecord0.UpdatedAt, podRecord0.DeletedAt, podRecord0.EventID,
-					podRecord0.PodIP, podRecord0.PodName, podRecord0.Namespace, podRecord0.Message, podRecord0.Action)
-
-			sqlSelect = `SELECT * FROM "pod_records" WHERE "pod_records"."deleted_at" IS NULL AND ((event_id = ?))`
-			mock.ExpectQuery(regexp.QuoteMeta(sqlSelect)).WithArgs(podRecord0.EventID).WillReturnRows(rows)
 
 			events, err := es.ListByFilter(context.TODO(), filter)
 			Expect(err).ShouldNot(HaveOccurred())
@@ -681,31 +420,13 @@ var _ = Describe("event", func() {
 				LimitStr:     "1",
 			}
 			rows := sqlmock.
-				NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "event_id", "pod_ip", "pod_name",
-					"namespace", "message", "action"}).
-				AddRow(podRecord0.ID, podRecord0.CreatedAt, podRecord0.UpdatedAt, podRecord0.DeletedAt, podRecord0.EventID,
-					podRecord0.PodIP, podRecord0.PodName, podRecord0.Namespace, podRecord0.Message, podRecord0.Action)
-
-			sqlSelect := `SELECT * FROM "pod_records" WHERE "pod_records"."deleted_at" IS NULL AND (("pod_records"."namespace" = ?))`
-			mock.ExpectQuery(regexp.QuoteMeta(sqlSelect)).WithArgs(event0.Namespace).WillReturnRows(rows)
-
-			rows = sqlmock.
 				NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "experiment", "namespace", "kind",
 					"message", "start_time", "finish_time", "duration", "experiment_id"}).
 				AddRow(event0.ID, event0.CreatedAt, event0.UpdatedAt, event0.DeletedAt, event0.Experiment, event0.Namespace,
 					event0.Kind, event0.Message, event0.StartTime, event0.FinishTime, event0.Duration, event0.ExperimentID)
 
-			sqlSelect = `SELECT * FROM "events" WHERE "events"."deleted_at" IS NULL AND ((id = ?)) ORDER BY "events"."id" ASC LIMIT 1`
+			sqlSelect := `SELECT * FROM "events" WHERE "events"."deleted_at" IS NULL AND ((id = ?)) ORDER BY "events"."id" ASC LIMIT 1`
 			mock.ExpectQuery(regexp.QuoteMeta(sqlSelect)).WithArgs(event0.ID).WillReturnRows(rows)
-
-			rows = sqlmock.
-				NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "event_id", "pod_ip", "pod_name",
-					"namespace", "message", "action"}).
-				AddRow(podRecord0.ID, podRecord0.CreatedAt, podRecord0.UpdatedAt, podRecord0.DeletedAt, podRecord0.EventID,
-					podRecord0.PodIP, podRecord0.PodName, podRecord0.Namespace, podRecord0.Message, podRecord0.Action)
-
-			sqlSelect = `SELECT * FROM "pod_records" WHERE "pod_records"."deleted_at" IS NULL AND ((event_id = ?))`
-			mock.ExpectQuery(regexp.QuoteMeta(sqlSelect)).WithArgs(podRecord0.EventID).WillReturnRows(rows)
 
 			events, err := es.ListByFilter(context.TODO(), filter)
 			Expect(err).ShouldNot(HaveOccurred())

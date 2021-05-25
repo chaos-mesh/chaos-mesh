@@ -48,10 +48,10 @@ type ScheduleStore struct {
 }
 
 // ListMeta implements the core.ScheduleStore.ListMeta method.
-func (e *ScheduleStore) ListMeta(_ context.Context, kind, namespace, name string, archived bool) ([]*core.ScheduleMeta, error) {
+func (e *ScheduleStore) ListMeta(_ context.Context, namespace, name string, archived bool) ([]*core.ScheduleMeta, error) {
 	db := e.db.Table("schedules")
 	sches := make([]*core.ScheduleMeta, 0)
-	query, args := constructQueryArgs(kind, namespace, name, "")
+	query, args := constructQueryArgs("", namespace, name, "")
 
 	if err := db.Where(query, args).Where(query, args).Where("archived = ?", archived).Find(&sches).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
 		return nil, err
@@ -107,7 +107,7 @@ func (e *ScheduleStore) Delete(_ context.Context, exp *core.Schedule) error {
 
 // DeleteByFinishTime deletes schedules whose time difference is greater than the given time from FinishTime.
 func (e *ScheduleStore) DeleteByFinishTime(_ context.Context, ttl time.Duration) error {
-	sches, err := e.ListMeta(context.Background(), "", "", "", true)
+	sches, err := e.ListMeta(context.Background(),  "", "", true)
 	if err != nil {
 		return err
 	}

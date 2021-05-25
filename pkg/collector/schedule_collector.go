@@ -47,33 +47,27 @@ func (r *ScheduleCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 	ctx := context.Background()
 
-	obj, ok := r.apiType.DeepCopyObject().(v1alpha1.InnerObject)
-	if !ok {
-		r.Log.Error(nil, "it's not a stateful object")
-		return ctrl.Result{}, nil
-	}
-
-	err := r.Get(ctx, req.NamespacedName, obj)
+	schedule := &v1alpha1.Schedule{}
+	err := r.Get(ctx, req.NamespacedName, schedule)
 	if apierrors.IsNotFound(err) {
 		if err = r.archiveSchedule(req.Namespace, req.Name); err != nil {
 			r.Log.Error(err, "failed to archive experiment")
 		}
 		return ctrl.Result{}, nil
 	}
-
 	if err != nil {
-		r.Log.Error(err, "failed to get chaos object", "request", req.NamespacedName)
+		r.Log.Error(err, "failed to get schedule object", "request", req.NamespacedName)
 		return ctrl.Result{}, nil
 	}
 
-	if obj.IsDeleted() {
+	if !schedule.DeletionTimestamp.IsZero() {
 		if err = r.archiveSchedule(req.Namespace, req.Name); err != nil {
 			r.Log.Error(err, "failed to archive experiment")
 		}
 		return ctrl.Result{}, nil
 	}
 
-	if err := r.setUnarchivedSchedule(req, obj); err != nil {
+	if err := r.setUnarchivedSchedule(req, *schedule); err != nil {
 		r.Log.Error(err, "failed to archive experiment")
 		// ignore error here
 	}
@@ -90,21 +84,12 @@ func (r *ScheduleCollector) Setup(mgr ctrl.Manager, apiType runtime.Object) erro
 		Complete(r)
 }
 
-func (r *ScheduleCollector) setUnarchivedSchedule(req ctrl.Request, obj v1alpha1.InnerObject) error {
-	ctx := context.Background()
-
-	schedule := &v1alpha1.Schedule{}
-	err := r.Get(ctx, req.NamespacedName, schedule)
-	if err != nil {
-		r.Log.Error(err, "unable to get schedule")
-		return nil
-	}
-
+func (r *ScheduleCollector) setUnarchivedSchedule(req ctrl.Request, schedule v1alpha1.Schedule) error {
 	archive := &core.Schedule{
 		ScheduleMeta: core.ScheduleMeta{
 			Namespace: req.Namespace,
 			Name:      req.Name,
-			Kind:      obj.GetObjectKind().GroupVersionKind().Kind,
+			Kind:      schedule.Kind,
 			UID:       string(schedule.UID),
 			Archived:  false,
 		},

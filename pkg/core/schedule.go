@@ -23,7 +23,7 @@ import (
 // ScheduleStore defines operations for working with schedules.
 type ScheduleStore interface {
 	// ListMeta returns schedule metadata list from the datastore.
-	ListMeta(ctx context.Context, kind, namespace, name string, archived bool) ([]*ScheduleMeta, error)
+	ListMeta(ctx context.Context, namespace, name string, archived bool) ([]*ScheduleMeta, error)
 
 	// FindByUID returns a schedule by UID.
 	FindByUID(ctx context.Context, UID string) (*Schedule, error)
