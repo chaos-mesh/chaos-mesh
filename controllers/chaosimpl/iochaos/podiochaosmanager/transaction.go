@@ -19,12 +19,12 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
-// PodIoTransaction represents a modification on podnetwork
-type PodIoTransaction struct {
+// PodIOTransaction represents a modification on podnetwork
+type PodIOTransaction struct {
 	Steps []Step
 }
 
-// Step represents a step of PodIoTransaction
+// Step represents a step of PodIOTransaction
 type Step interface {
 	// Apply will apply an action on podnetworkchaos
 	Apply(chaos *v1alpha1.PodIoChaos) error
@@ -90,14 +90,14 @@ func (s *SetVolumePath) Apply(chaos *v1alpha1.PodIoChaos) error {
 }
 
 // Clear will clear all related items in podnetworkchaos
-func (t *PodIoTransaction) Clear(source string) {
+func (t *PodIOTransaction) Clear(source string) {
 	t.Steps = append(t.Steps, &Clear{
 		Source: source,
 	})
 }
 
 // Append adds an item to corresponding list in podnetworkchaos
-func (t *PodIoTransaction) Append(item interface{}) error {
+func (t *PodIOTransaction) Append(item interface{}) error {
 	switch item.(type) {
 	case v1alpha1.IoChaosAction:
 		t.Steps = append(t.Steps, &Append{
@@ -110,7 +110,7 @@ func (t *PodIoTransaction) Append(item interface{}) error {
 }
 
 // SetVolumePath sets the volumePath field of podiochaos
-func (t *PodIoTransaction) SetVolumePath(path string) error {
+func (t *PodIOTransaction) SetVolumePath(path string) error {
 	t.Steps = append(t.Steps, &SetVolumePath{
 		Path: path,
 	})
@@ -118,7 +118,7 @@ func (t *PodIoTransaction) SetVolumePath(path string) error {
 	return nil
 }
 
-func (t *PodIoTransaction) SetContainer(container string) error {
+func (t *PodIOTransaction) SetContainer(container string) error {
 	t.Steps = append(t.Steps, &SetContainer{
 		Container: container,
 	})
@@ -127,7 +127,7 @@ func (t *PodIoTransaction) SetContainer(container string) error {
 }
 
 // Apply runs every step on the chaos
-func (t *PodIoTransaction) Apply(chaos *v1alpha1.PodIoChaos) error {
+func (t *PodIOTransaction) Apply(chaos *v1alpha1.PodIoChaos) error {
 	for _, s := range t.Steps {
 		err := s.Apply(chaos)
 		if err != nil {

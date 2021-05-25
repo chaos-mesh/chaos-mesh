@@ -291,6 +291,22 @@ spec:
         status:
           description: IoChaosStatus defines the observed state of IoChaos
           properties:
+            conditions:
+              description: Conditions represents the current global condition of the
+                chaos
+              items:
+                properties:
+                  reason:
+                    type: string
+                  status:
+                    type: string
+                  type:
+                    type: string
+                required:
+                - status
+                - type
+                type: object
+              type: array
             experiment:
               description: Experiment records the last experiment state.
               properties:
@@ -315,6 +331,13 @@ spec:
                   - Run
                   - Stop
                   type: string
+              type: object
+            instances:
+              additionalProperties:
+                format: int64
+                type: integer
+              description: Instances always specifies podnetworkchaos generation or
+                empty
               type: object
           required:
           - experiment

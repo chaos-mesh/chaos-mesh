@@ -73,6 +73,22 @@ spec:
         status:
           description: AwsChaosStatus represents the status of an AwsChaos
           properties:
+            conditions:
+              description: Conditions represents the current global condition of the
+                chaos
+              items:
+                properties:
+                  reason:
+                    type: string
+                  status:
+                    type: string
+                  type:
+                    type: string
+                required:
+                - status
+                - type
+                type: object
+              type: array
             experiment:
               description: Experiment records the last experiment state.
               properties:
@@ -293,6 +309,22 @@ spec:
           description: Most recently observed status of the chaos experiment about
             pods
           properties:
+            conditions:
+              description: Conditions represents the current global condition of the
+                chaos
+              items:
+                properties:
+                  reason:
+                    type: string
+                  status:
+                    type: string
+                  type:
+                    type: string
+                required:
+                - status
+                - type
+                type: object
+              type: array
             experiment:
               description: Experiment records the last experiment state.
               properties:
@@ -413,6 +445,22 @@ spec:
               description: The attached disk info strings. Needed in disk-loss.
               items:
                 type: string
+              type: array
+            conditions:
+              description: Conditions represents the current global condition of the
+                chaos
+              items:
+                properties:
+                  reason:
+                    type: string
+                  status:
+                    type: string
+                  type:
+                    type: string
+                required:
+                - status
+                - type
+                type: object
               type: array
             experiment:
               description: Experiment records the last experiment state.
@@ -650,6 +698,22 @@ spec:
           type: object
         status:
           properties:
+            conditions:
+              description: Conditions represents the current global condition of the
+                chaos
+              items:
+                properties:
+                  reason:
+                    type: string
+                  status:
+                    type: string
+                  type:
+                    type: string
+                required:
+                - status
+                - type
+                type: object
+              type: array
             experiment:
               description: Experiment records the last experiment state.
               properties:
@@ -982,6 +1046,22 @@ spec:
         status:
           description: IoChaosStatus defines the observed state of IoChaos
           properties:
+            conditions:
+              description: Conditions represents the current global condition of the
+                chaos
+              items:
+                properties:
+                  reason:
+                    type: string
+                  status:
+                    type: string
+                  type:
+                    type: string
+                required:
+                - status
+                - type
+                type: object
+              type: array
             experiment:
               description: Experiment records the last experiment state.
               properties:
@@ -1006,6 +1086,13 @@ spec:
                   - Run
                   - Stop
                   type: string
+              type: object
+            instances:
+              additionalProperties:
+                format: int64
+                type: integer
+              description: Instances always specifies podnetworkchaos generation or
+                empty
               type: object
           required:
           - experiment
@@ -1225,6 +1312,22 @@ spec:
         status:
           description: JVMChaosStatus defines the observed state of JVMChaos
           properties:
+            conditions:
+              description: Conditions represents the current global condition of the
+                chaos
+              items:
+                properties:
+                  reason:
+                    type: string
+                  status:
+                    type: string
+                  type:
+                    type: string
+                required:
+                - status
+                - type
+                type: object
+              type: array
             experiment:
               description: Experiment records the last experiment state.
               properties:
@@ -1486,6 +1589,22 @@ spec:
         status:
           description: Most recently observed status of the kernel chaos experiment
           properties:
+            conditions:
+              description: Conditions represents the current global condition of the
+                chaos
+              items:
+                properties:
+                  reason:
+                    type: string
+                  status:
+                    type: string
+                  type:
+                    type: string
+                required:
+                - status
+                - type
+                type: object
+              type: array
             experiment:
               description: Experiment records the last experiment state.
               properties:
@@ -1926,6 +2045,22 @@ spec:
           description: Most recently observed status of the chaos experiment about
             pods
           properties:
+            conditions:
+              description: Conditions represents the current global condition of the
+                chaos
+              items:
+                properties:
+                  reason:
+                    type: string
+                  status:
+                    type: string
+                  type:
+                    type: string
+                required:
+                - status
+                - type
+                type: object
+              type: array
             experiment:
               description: Experiment records the last experiment state.
               properties:
@@ -2155,6 +2290,22 @@ spec:
           description: Most recently observed status of the chaos experiment about
             pods
           properties:
+            conditions:
+              description: Conditions represents the current global condition of the
+                chaos
+              items:
+                properties:
+                  reason:
+                    type: string
+                  status:
+                    type: string
+                  type:
+                    type: string
+                required:
+                - status
+                - type
+                type: object
+              type: array
             experiment:
               description: Experiment records the last experiment state.
               properties:
@@ -2423,6 +2574,8 @@ spec:
     singular: podiochaos
   preserveUnknownFields: false
   scope: Namespaced
+  subresources:
+    status: {}
   validation:
     openAPIV3Schema:
       description: PodIoChaos is the Schema for the podiochaos API
@@ -2583,14 +2736,6 @@ spec:
               description: 'TODO: support multiple different container to inject in
                 one pod'
               type: string
-            pid:
-              description: Pid represents a running toda process id
-              format: int64
-              type: integer
-            startTime:
-              description: StartTime represents the start time of a toda process
-              format: int64
-              type: integer
             volumeMountPath:
               description: 'VolumeMountPath represents the target mount path It must
                 be a root of mount path now. TODO: search the mount parent of any
@@ -2599,6 +2744,22 @@ spec:
               type: string
           required:
           - volumeMountPath
+          type: object
+        status:
+          properties:
+            failedMessage:
+              type: string
+            observedGeneration:
+              format: int64
+              type: integer
+            pid:
+              description: Pid represents a running toda process id
+              format: int64
+              type: integer
+            startTime:
+              description: StartTime represents the start time of a toda process
+              format: int64
+              type: integer
           type: object
       type: object
   version: v1alpha1
@@ -5019,6 +5180,22 @@ spec:
         status:
           description: Most recently observed status of the time chaos experiment
           properties:
+            conditions:
+              description: Conditions represents the current global condition of the
+                chaos
+              items:
+                properties:
+                  reason:
+                    type: string
+                  status:
+                    type: string
+                  type:
+                    type: string
+                required:
+                - status
+                - type
+                type: object
+              type: array
             experiment:
               description: Experiment records the last experiment state.
               properties:
@@ -5248,6 +5425,22 @@ spec:
         status:
           description: Most recently observed status of the time chaos experiment
           properties:
+            conditions:
+              description: Conditions represents the current global condition of the
+                chaos
+              items:
+                properties:
+                  reason:
+                    type: string
+                  status:
+                    type: string
+                  type:
+                    type: string
+                required:
+                - status
+                - type
+                type: object
+              type: array
             experiment:
               description: Experiment records the last experiment state.
               properties:

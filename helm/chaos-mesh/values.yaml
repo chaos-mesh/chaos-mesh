@@ -357,6 +357,7 @@ webhook:
     - gcpchaos
     - dnschaos
     - jvmchaos
+    - podiochaos
 
 bpfki:
   create: false

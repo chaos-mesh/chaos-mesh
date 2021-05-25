@@ -37,10 +37,11 @@ type Impl struct {
 func NewImpl(impl Impl) *common.ChaosImplPair {
 	delegate := action.New(&impl)
 	return &common.ChaosImplPair{
-		Name:   "networkchaos",
-		Object: &v1alpha1.NetworkChaos{},
-		Impl:   &delegate,
-		Owns:   []runtime.Object{&v1alpha1.PodNetworkChaos{}},
+		Name:       "networkchaos",
+		Object:     &v1alpha1.NetworkChaos{},
+		Impl:       &delegate,
+		ObjectList: &v1alpha1.NetworkChaosList{},
+		Controlls:  []runtime.Object{&v1alpha1.PodNetworkChaos{}},
 	}
 }
 
