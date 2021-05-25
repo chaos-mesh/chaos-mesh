@@ -96,19 +96,19 @@ func (r *ScheduleCollector) setUnarchivedSchedule(req ctrl.Request, schedule v1a
 	}
 
 	switch schedule.Spec.Type {
-	case v1alpha1.TypePodChaos:
+	case v1alpha1.ScheduleTypePodChaos:
 		archive.Action = string(schedule.Spec.PodChaos.Action)
-	case v1alpha1.TypeNetworkChaos:
+	case v1alpha1.ScheduleTypeNetworkChaos:
 		archive.Action = string(schedule.Spec.NetworkChaos.Action)
-	case v1alpha1.TypeIoChaos:
+	case v1alpha1.ScheduleTypeIoChaos:
 		archive.Action = string(schedule.Spec.IoChaos.Action)
-	case v1alpha1.TypeTimeChaos, v1alpha1.TypeKernelChaos, v1alpha1.TypeStressChaos:
+	case v1alpha1.ScheduleTypeTimeChaos, v1alpha1.ScheduleTypeKernelChaos, v1alpha1.ScheduleTypeStressChaos:
 		archive.Action = ""
-	case v1alpha1.TypeDNSChaos:
+	case v1alpha1.ScheduleTypeDNSChaos:
 		archive.Action = string(schedule.Spec.DNSChaos.Action)
-	case v1alpha1.TypeAwsChaos:
+	case v1alpha1.ScheduleTypeAwsChaos:
 		archive.Action = string(schedule.Spec.AwsChaos.Action)
-	case v1alpha1.TypeGcpChaos:
+	case v1alpha1.ScheduleTypeGcpChaos:
 		archive.Action = string(schedule.Spec.GcpChaos.Action)
 	default:
 		return errors.New("unsupported chaos type " + string(schedule.Spec.Type))

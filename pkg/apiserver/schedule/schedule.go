@@ -94,7 +94,7 @@ type Detail struct {
 	YAML core.KubeObjectDesc `json:"kube_object"`
 }
 
-type parseScheduleFunc func(*core.ScheduleInfo) v1alpha1.EmbedChaos
+type parseScheduleFunc func(*core.ScheduleInfo) v1alpha1.ScheduleItem
 
 // StatusResponse defines a common status struct.
 type StatusResponse struct {
@@ -135,7 +135,7 @@ func (s *Service) createSchedule(c *gin.Context) {
 			Schedule:                exp.Schedule,
 			ConcurrencyPolicy:       exp.ConcurrencyPolicy,
 			HistoryLimit:            exp.HistoryLimit,
-			Type:                    v1alpha1.TemplateType(exp.Target.Kind),
+			Type:                    v1alpha1.ScheduleTemplateType(exp.Target.Kind),
 		},
 	}
 	if exp.StartingDeadlineSeconds != nil {
@@ -161,7 +161,7 @@ func (s *Service) createSchedule(c *gin.Context) {
 		return
 	}
 	embedChaos := f(exp)
-	sch.Spec.EmbedChaos = embedChaos
+	sch.Spec.ScheduleItem = embedChaos
 
 	if err := kubeCli.Create(context.Background(), sch); err != nil {
 		c.Status(http.StatusInternalServerError)
@@ -172,7 +172,7 @@ func (s *Service) createSchedule(c *gin.Context) {
 	c.JSON(http.StatusOK, exp)
 }
 
-func parsePodChaos(exp *core.ScheduleInfo) v1alpha1.EmbedChaos {
+func parsePodChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	chaos := &v1alpha1.PodChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        exp.Name,
@@ -198,12 +198,12 @@ func parsePodChaos(exp *core.ScheduleInfo) v1alpha1.EmbedChaos {
 		chaos.Spec.Duration = &exp.Duration
 	}
 
-	return v1alpha1.EmbedChaos{
+	return v1alpha1.ScheduleItem{
 		PodChaos: &chaos.Spec,
 	}
 }
 
-func parseNetworkChaos (exp *core.ScheduleInfo) v1alpha1.EmbedChaos {
+func parseNetworkChaos (exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	chaos := &v1alpha1.NetworkChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        exp.Name,
@@ -242,12 +242,12 @@ func parseNetworkChaos (exp *core.ScheduleInfo) v1alpha1.EmbedChaos {
 		chaos.Spec.Duration = &exp.Duration
 	}
 
-	return v1alpha1.EmbedChaos{
+	return v1alpha1.ScheduleItem{
 		NetworkChaos: &chaos.Spec,
 	}
 }
 
-func parseIOChaos (exp *core.ScheduleInfo) v1alpha1.EmbedChaos {
+func parseIOChaos (exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	chaos := &v1alpha1.IoChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        exp.Name,
@@ -280,12 +280,12 @@ func parseIOChaos (exp *core.ScheduleInfo) v1alpha1.EmbedChaos {
 		chaos.Spec.Duration = &exp.Duration
 	}
 
-	return v1alpha1.EmbedChaos{
+	return v1alpha1.ScheduleItem{
 		IoChaos: &chaos.Spec,
 	}
 }
 
-func parseTimeChaos (exp *core.ScheduleInfo) v1alpha1.EmbedChaos {
+func parseTimeChaos (exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	chaos := &v1alpha1.TimeChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        exp.Name,
@@ -311,12 +311,12 @@ func parseTimeChaos (exp *core.ScheduleInfo) v1alpha1.EmbedChaos {
 		chaos.Spec.Duration = &exp.Duration
 	}
 
-	return v1alpha1.EmbedChaos{
+	return v1alpha1.ScheduleItem{
 		TimeChaos: &chaos.Spec,
 	}
 }
 
-func parseKernelChaos (exp *core.ScheduleInfo) v1alpha1.EmbedChaos {
+func parseKernelChaos (exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	chaos := &v1alpha1.KernelChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        exp.Name,
@@ -338,12 +338,12 @@ func parseKernelChaos (exp *core.ScheduleInfo) v1alpha1.EmbedChaos {
 		chaos.Spec.Duration = &exp.Duration
 	}
 
-	return v1alpha1.EmbedChaos{
+	return v1alpha1.ScheduleItem{
 		KernelChaos: &chaos.Spec,
 	}
 }
 
-func parseStressChaos (exp *core.ScheduleInfo) v1alpha1.EmbedChaos {
+func parseStressChaos (exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	var stressors *v1alpha1.Stressors
 
 	// Error checking
@@ -384,12 +384,12 @@ func parseStressChaos (exp *core.ScheduleInfo) v1alpha1.EmbedChaos {
 		chaos.Spec.Duration = &exp.Duration
 	}
 
-	return v1alpha1.EmbedChaos{
+	return v1alpha1.ScheduleItem{
 		StressChaos: &chaos.Spec,
 	}
 }
 
-func parseDNSChaos (exp *core.ScheduleInfo) v1alpha1.EmbedChaos {
+func parseDNSChaos (exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	chaos := &v1alpha1.DNSChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        exp.Name,
@@ -415,12 +415,12 @@ func parseDNSChaos (exp *core.ScheduleInfo) v1alpha1.EmbedChaos {
 		chaos.Spec.Duration = &exp.Duration
 	}
 
-	return v1alpha1.EmbedChaos{
+	return v1alpha1.ScheduleItem{
 		DNSChaos: &chaos.Spec,
 	}
 }
 
-func parseAwsChaos (exp *core.ScheduleInfo) v1alpha1.EmbedChaos {
+func parseAwsChaos (exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	chaos := &v1alpha1.AwsChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        exp.Name,
@@ -444,12 +444,12 @@ func parseAwsChaos (exp *core.ScheduleInfo) v1alpha1.EmbedChaos {
 		chaos.Spec.Duration = &exp.Duration
 	}
 
-	return v1alpha1.EmbedChaos{
+	return v1alpha1.ScheduleItem{
 		AwsChaos: &chaos.Spec,
 	}
 }
 
-func parseGcpChaos (exp *core.ScheduleInfo) v1alpha1.EmbedChaos {
+func parseGcpChaos (exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	chaos := &v1alpha1.GcpChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        exp.Name,
@@ -471,7 +471,7 @@ func parseGcpChaos (exp *core.ScheduleInfo) v1alpha1.EmbedChaos {
 		chaos.Spec.Duration = &exp.Duration
 	}
 
-	return v1alpha1.EmbedChaos{
+	return v1alpha1.ScheduleItem{
 		GcpChaos: &chaos.Spec,
 	}
 }
