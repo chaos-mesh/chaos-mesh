@@ -1,7 +1,7 @@
 apiVersion: chaos-mesh.org/v1alpha1
 kind: Workflow
 metadata:
-  name: try-workflow-parallel
+  name: try-workflow-custom-task
 spec:
   entry: the-entry
   templates:
@@ -17,7 +17,7 @@ spec:
             - exit 1
       conditionalTasks:
         - task: workflow-stress-chaos
-          expression: "exitCode == 0"
+          expression: "exitCode == 1"
         - task: workflow-network-chaos
           expression: "exitCode == 0"
         - task: workflow-pod-chaos

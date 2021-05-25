@@ -20,7 +20,6 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/expr"
-	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/task/collector"
 )
 
 type Evaluator struct {
@@ -32,19 +31,16 @@ func NewEvaluator(logger logr.Logger, kubeclient client.Client) *Evaluator {
 	return &Evaluator{logger: logger, kubeclient: kubeclient}
 }
 
-func (it *Evaluator) EvaluateConditionBranches(tasks []v1alpha1.ConditionalTask, collector collector.Collector) (branches []v1alpha1.ConditionalBranch, resultEnv map[string]interface{}, err error) {
-	env, err := collector.CollectContext()
-	if err != nil {
-		return nil, nil, err
-	}
+func (it *Evaluator) EvaluateConditionBranches(tasks []v1alpha1.ConditionalTask, resultEnv map[string]interface{}) (branches []v1alpha1.ConditionalBranch, err error) {
+
 	var result []v1alpha1.ConditionalBranch
 	for _, task := range tasks {
-		it.logger.V(4).Info("evaluate for expression", "expression", task.Expression, "env", env)
+		it.logger.V(4).Info("evaluate for expression", "expression", task.Expression, "env", resultEnv)
 		var evalResult corev1.ConditionStatus
-		eval, err := expr.EvalBool(task.Expression, env)
+		eval, err := expr.EvalBool(task.Expression, resultEnv)
 
 		if err != nil {
-			it.logger.Error(err, "failed to evaluate expression", "expression", task.Expression, "env", env)
+			it.logger.Error(err, "failed to evaluate expression", "expression", task.Expression, "env", resultEnv)
 			evalResult = corev1.ConditionUnknown
 		} else {
 			if eval {
@@ -59,5 +55,5 @@ func (it *Evaluator) EvaluateConditionBranches(tasks []v1alpha1.ConditionalTask,
 			EvaluationResult: evalResult,
 		})
 	}
-	return result, env, nil
+	return result, nil
 }

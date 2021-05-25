@@ -13,4 +13,13 @@
 
 package collector
 
+import "context"
+
 const Stdout string = "stdout"
+
+type StdoutCollector struct {
+}
+
+func (it *StdoutCollector) CollectContext(ctx context.Context) (env map[string]interface{}, err error) {
+	panic("implement me")
+}

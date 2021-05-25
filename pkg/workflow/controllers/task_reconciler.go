@@ -123,18 +123,26 @@ func (it *TaskReconciler) Reconcile(request reconcile.Request) (reconcile.Result
 			}
 
 			// TODO: update related condition
-			defaultCollector := collector.DefaultCollector()
+			defaultCollector := collector.DefaultCollector(it.kubeClient, pods[0].Namespace, pods[0].Name, nodeNeedUpdate.Spec.Task.Container.Name)
 			evaluator := task.NewEvaluator(it.logger, it.kubeClient)
 
 			if nodeNeedUpdate.Status.ConditionalBranches == nil {
 				nodeNeedUpdate.Status.ConditionalBranches = &v1alpha1.ConditionalBranchesStatus{}
 			}
 
-			evaluateConditionBranches, env, err := evaluator.EvaluateConditionBranches(nodeNeedUpdate.Spec.ConditionalTasks, defaultCollector)
+			env, err := defaultCollector.CollectContext(ctx)
 			if err != nil {
-				it.logger.Error(err, "failed to evaluate expression and  fetch env from task",
+				it.logger.Error(err, "failed to fetch env from task",
 					"task", fmt.Sprintf("%s/%s", nodeNeedUpdate.Namespace, nodeNeedUpdate.Name),
 				)
+				return err
+			}
+			evaluateConditionBranches, err := evaluator.EvaluateConditionBranches(nodeNeedUpdate.Spec.ConditionalTasks, env)
+			if err != nil {
+				it.logger.Error(err, "failed to evaluate expression",
+					"task", fmt.Sprintf("%s/%s", nodeNeedUpdate.Namespace, nodeNeedUpdate.Name),
+				)
+				return err
 			}
 
 			if env != nil {

@@ -13,26 +13,31 @@
 
 package collector
 
+import (
+	"context"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+)
+
 // Collector is a set of tools for collecting parameters/context from user defined task
 type Collector interface {
-	CollectContext() (env map[string]interface{}, err error)
+	CollectContext(ctx context.Context) (env map[string]interface{}, err error)
 }
 
 type ComposeCollector struct {
 	collectors []Collector
 }
 
-func (it *ComposeCollector) CollectContext() (env map[string]interface{}, err error) {
+func (it *ComposeCollector) CollectContext(ctx context.Context) (env map[string]interface{}, err error) {
 	if len(it.collectors) == 0 {
 		return nil, nil
 	}
 	if len(it.collectors) == 1 {
-		return it.collectors[0].CollectContext()
+		return it.collectors[0].CollectContext(ctx)
 	}
 
 	result := make(map[string]interface{})
 	for _, collector := range it.collectors {
-		temp, err := collector.CollectContext()
+		temp, err := collector.CollectContext(ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -52,8 +57,8 @@ func mapExtend(origin map[string]interface{}, another map[string]interface{}) {
 	}
 }
 
-func DefaultCollector() Collector {
+func DefaultCollector(kubeClient client.Client, namespace, podName, containerName string) Collector {
 	return &ComposeCollector{collectors: []Collector{
-		// TODO: exit code collector and stdout collector
+		NewExitCodeCollector(kubeClient, namespace, podName, containerName),
 	}}
 }
