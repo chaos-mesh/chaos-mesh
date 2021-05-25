@@ -77,23 +77,48 @@ require (
 	golang.org/x/net v0.0.0-20200320220750-118fecf932d8 // indirect
 	golang.org/x/sync v0.0.0-20201207232520-09787c993a3a
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0
-	golang.org/x/tools v0.0.0-20200309202150-20ab64c0d93f
+	golang.org/x/tools v0.0.0-20200616195046-dc31b401abb5
 	golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543
 	google.golang.org/api v0.13.0
 	google.golang.org/grpc v1.27.0
 	google.golang.org/protobuf v1.23.0
 	honnef.co/go/tools v0.0.1-2020.1.3 // indirect
-	k8s.io/api v0.17.0
-	k8s.io/apimachinery v0.17.0
+	k8s.io/api v0.18.2
+	k8s.io/apimachinery v0.18.2
 	k8s.io/cli-runtime v0.17.0
-	k8s.io/client-go v0.17.0
+	k8s.io/client-go v0.18.2
 	k8s.io/klog v1.0.0
 	k8s.io/kubectl v0.17.0
 	sigs.k8s.io/controller-runtime v0.4.0
-	sigs.k8s.io/controller-tools v0.2.5
-	sigs.k8s.io/yaml v1.2.0 // indirect
+	sigs.k8s.io/controller-tools v0.4.1
 )
 
-replace github.com/chaos-mesh/chaos-mesh/api/v1alpha1 => ./api/v1alpha1
+replace (
+	github.com/chaos-mesh/chaos-mesh/api/v1alpha1 => ./api/v1alpha1
+	k8s.io/api => k8s.io/api v0.17.0
+	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.17.0
+	k8s.io/apimachinery => k8s.io/apimachinery v0.17.0
+	k8s.io/apiserver => k8s.io/apiserver v0.17.0
+	k8s.io/cli-runtime => k8s.io/cli-runtime v0.17.0
+	k8s.io/client-go => k8s.io/client-go v0.17.0
+	k8s.io/cloud-provider => k8s.io/cloud-provider v0.17.0
+	k8s.io/cluster-bootstrap => k8s.io/cluster-bootstrap v0.17.0
+	k8s.io/code-generator => k8s.io/code-generator v0.17.0
+	k8s.io/component-base => k8s.io/component-base v0.17.0
+	k8s.io/cri-api => k8s.io/cri-api v0.17.0
+	k8s.io/csi-translation-lib => k8s.io/csi-translation-lib v0.17.0
+	k8s.io/kube-aggregator => k8s.io/kube-aggregator v0.17.0
+	k8s.io/kube-controller-manager => k8s.io/kube-controller-manager v0.17.0
+	k8s.io/kube-proxy => k8s.io/kube-proxy v0.17.0
+	k8s.io/kube-scheduler => k8s.io/kube-scheduler v0.17.0
+	k8s.io/kubectl => k8s.io/kubectl v0.17.0
+	k8s.io/kubelet => k8s.io/kubelet v0.17.0
+	k8s.io/legacy-cloud-providers => k8s.io/legacy-cloud-providers v0.17.0
+	k8s.io/metrics => k8s.io/metrics v0.17.0
+	k8s.io/node-api => k8s.io/node-api v0.17.0
+	k8s.io/sample-apiserver => k8s.io/sample-apiserver v0.17.0
+	k8s.io/sample-cli-plugin => k8s.io/sample-cli-plugin v0.17.0
+	k8s.io/sample-controller => k8s.io/sample-controller v0.17.0
+)
 
 go 1.15
