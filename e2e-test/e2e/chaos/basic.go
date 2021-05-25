@@ -259,6 +259,9 @@ var _ = ginkgo.Describe("[Basic]", func() {
 			ginkgo.It("[Schedule]", func() {
 				httpchaostestcases.TestcaseHttpDelayDurationForATimeThenRecover(ns, cli, c, port)
 			})
+			ginkgo.It("[Pause]", func() {
+				httpchaostestcases.TestcaseHttpDelayDurationForATimePauseAndUnPause(ns, cli, c, port)
+			})
 		})
 
 	})
