@@ -18,19 +18,18 @@ import (
 	"errors"
 	"strings"
 
-	"go.uber.org/fx"
-
-	"github.com/chaos-mesh/chaos-mesh/controllers/common"
-
 	"github.com/go-logr/logr"
+	"go.uber.org/fx"
 	v1 "k8s.io/api/core/v1"
 	k8sError "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/httpchaos/podhttpchaosmanager"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/iochaos/podiochaosmanager"
+	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
 )
 
@@ -133,6 +132,13 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 			if k8sError.IsNotFound(err) {
 				return v1alpha1.NotInjected, nil
 			}
+
+			if k8sError.IsForbidden(err) {
+				if strings.Contains(err.Error(), "because it is being terminated") {
+					return v1alpha1.NotInjected, nil
+				}
+			}
+
 			return waitForRecoverSync, err
 		}
 
@@ -192,6 +198,8 @@ func NewImpl(c client.Client, b *podhttpchaosmanager.Builder, log logr.Logger) *
 			Log:     log.WithName("httpchaos"),
 			builder: b,
 		},
+		ObjectList: &v1alpha1.HTTPChaosList{},
+		Controlls:  []runtime.Object{&v1alpha1.PodHttpChaos{}},
 	}
 }
 
