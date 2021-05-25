@@ -15,7 +15,6 @@ package recorder
 
 import (
 	"fmt"
-	"strings"
 )
 
 type Applied struct {
@@ -34,17 +33,6 @@ func (a Applied) Message() string {
 	return fmt.Sprintf("Successfully apply chaos for %s", a.Id)
 }
 
-func (a Applied) Parse(message string) ChaosEvent {
-	prefix := "Successfully apply chaos for "
-	if strings.HasPrefix(message, prefix) {
-		return Applied{
-			Id: strings.TrimPrefix(message, prefix),
-		}
-	}
-
-	return nil
-}
-
 type Recovered struct {
 	Id string
 }
@@ -59,17 +47,6 @@ func (r Recovered) Reason() string {
 
 func (r Recovered) Message() string {
 	return fmt.Sprintf("Successfully recover chaos for %s", r.Id)
-}
-
-func (r Recovered) Parse(message string) ChaosEvent {
-	prefix := "Successfully recover chaos for "
-	if strings.HasPrefix(message, prefix) {
-		return Recovered{
-			Id: strings.TrimPrefix(message, prefix),
-		}
-	}
-
-	return nil
 }
 
 func init() {

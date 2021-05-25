@@ -28,14 +28,6 @@ func (p FinalizerInited) Message() string {
 	return "Finalizer has been inited"
 }
 
-func (p FinalizerInited) Parse(message string) ChaosEvent {
-	if message == "Finalizer has been inited" {
-		return FinalizerInited{}
-	}
-
-	return nil
-}
-
 type FinalizerRemoved struct {
 }
 
