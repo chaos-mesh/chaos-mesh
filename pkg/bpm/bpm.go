@@ -287,7 +287,7 @@ func (m *BackgroundProcessManager) Stdio(pid int, startTime int64) *Stdio {
 
 	pair := ProcessPair{
 		Pid:        pid,
-		CreateTime: ct,
+		CreateTime: startTime,
 	}
 
 	io, ok := m.stdio.Load(pair)

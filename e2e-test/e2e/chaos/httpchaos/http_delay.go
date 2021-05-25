@@ -260,7 +260,7 @@ func TestcaseHttpDelayDurationForATimePauseAndUnPause(
 	})
 	framework.ExpectNoError(err, "check resumed chaos failed")
 
-	time.Sleep(5 * time.Minute)
+	time.Sleep(10 * time.Second)
 
 	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
 		_, dur, _ := getPodHttpDelay(c, port)
