@@ -46,7 +46,8 @@ type Server struct {
 // NewServer returns a CollectorServer and Client.
 func NewServer(
 	conf *config.ChaosDashboardConfig,
-	archive core.ExperimentStore,
+	experimentArchive core.ExperimentStore,
+	scheduleArchive core.ScheduleStore,
 	event core.EventStore,
 ) (*Server, client.Client, client.Reader, *runtime.Scheme) {
 	s := &Server{}
@@ -93,12 +94,22 @@ func NewServer(
 		if err = (&ChaosCollector{
 			Client:  s.Manager.GetClient(),
 			Log:     ctrl.Log.WithName("collector").WithName(kind),
-			archive: archive,
+			archive: experimentArchive,
 			event:   event,
 		}).Setup(s.Manager, chaosKind.Chaos); err != nil {
 			log.Error(err, "unable to create collector", "collector", kind)
 			os.Exit(1)
 		}
+	}
+
+	if err = (&ScheduleCollector{
+		Client:  s.Manager.GetClient(),
+		Log:     ctrl.Log.WithName("collector").WithName(v1alpha1.KindSchedule),
+		archive: scheduleArchive,
+		event:   event,
+	}).Setup(s.Manager, &v1alpha1.Schedule{}); err != nil {
+		log.Error(err, "unable to create collector", "collector", v1alpha1.KindSchedule)
+		os.Exit(1)
 	}
 
 	return s, s.Manager.GetClient(), s.Manager.GetAPIReader(), s.Manager.GetScheme()

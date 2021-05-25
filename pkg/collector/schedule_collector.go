@@ -37,6 +37,7 @@ type ScheduleCollector struct {
 	Log     logr.Logger
 	apiType runtime.Object
 	archive core.ScheduleStore
+	event   core.EventStore
 }
 
 // Reconcile reconciles a Schedule collector.
@@ -91,58 +92,61 @@ func (r *ScheduleCollector) Setup(mgr ctrl.Manager, apiType runtime.Object) erro
 }
 
 func (r *ScheduleCollector) setUnarchivedSchedule(req ctrl.Request, obj v1alpha1.InnerObject) error {
-	var (
-		chaosMeta metav1.Object
-		ok        bool
-	)
+	ctx := context.Background()
 
-	if chaosMeta, ok = obj.(metav1.Object); !ok {
-		r.Log.Error(nil, "failed to get chaos meta information")
+	schedule := &v1alpha1.Schedule{}
+	err := r.Get(ctx, req.NamespacedName, schedule)
+	if err != nil {
+		r.Log.Error(err, "unable to get schedule")
+		return nil
 	}
-	UID := string(chaosMeta.GetUID())
 
-	archive := &core.Experiment{
-		ExperimentMeta: core.ExperimentMeta{
+	archive := &core.Schedule{
+		ScheduleMeta: core.ScheduleMeta{
 			Namespace: req.Namespace,
 			Name:      req.Name,
 			Kind:      obj.GetObjectKind().GroupVersionKind().Kind,
-			UID:       UID,
+			UID:       string(schedule.UID),
 			Archived:  false,
 		},
 	}
 
-	switch chaos := obj.(type) {
-	case *v1alpha1.PodChaos:
-		archive.Action = string(chaos.Spec.Action)
-	case *v1alpha1.NetworkChaos:
-		archive.Action = string(chaos.Spec.Action)
-	case *v1alpha1.IoChaos:
-		archive.Action = string(chaos.Spec.Action)
-	case *v1alpha1.TimeChaos, *v1alpha1.KernelChaos, *v1alpha1.StressChaos:
+	switch schedule.Spec.Type {
+	case v1alpha1.TypePodChaos:
+		archive.Action = string(schedule.Spec.PodChaos.Action)
+	case v1alpha1.TypeNetworkChaos:
+		archive.Action = string(schedule.Spec.NetworkChaos.Action)
+	case v1alpha1.TypeIoChaos:
+		archive.Action = string(schedule.Spec.IoChaos.Action)
+	case v1alpha1.TypeTimeChaos, v1alpha1.TypeKernelChaos, v1alpha1.TypeStressChaos:
 		archive.Action = ""
-	case *v1alpha1.DNSChaos:
-		archive.Action = string(chaos.Spec.Action)
+	case v1alpha1.TypeDNSChaos:
+		archive.Action = string(schedule.Spec.DNSChaos.Action)
+	case v1alpha1.TypeAwsChaos:
+		archive.Action = string(schedule.Spec.AwsChaos.Action)
+	case v1alpha1.TypeGcpChaos:
+		archive.Action = string(schedule.Spec.GcpChaos.Action)
 	default:
-		return errors.New("unsupported chaos type " + archive.Kind)
+		return errors.New("unsupported chaos type " + string(schedule.Spec.Type))
 	}
 
-	archive.StartTime = chaosMeta.GetCreationTimestamp().Time
-	if chaosMeta.GetDeletionTimestamp() != nil {
-		archive.FinishTime = chaosMeta.GetDeletionTimestamp().Time
+	archive.StartTime = schedule.GetCreationTimestamp().Time
+	if schedule.GetDeletionTimestamp() != nil {
+		archive.FinishTime = schedule.GetDeletionTimestamp().Time
 	}
 
-	data, err := json.Marshal(chaosMeta)
+	data, err := json.Marshal(schedule)
 	if err != nil {
-		r.Log.Error(err, "failed to marshal chaos", "kind", archive.Kind,
+		r.Log.Error(err, "failed to marshal schedule", "kind", archive.Kind,
 			"namespace", archive.Namespace, "name", archive.Name)
 		return err
 	}
 
-	archive.Experiment = string(data)
+	archive.Schedule = string(data)
 
-	find, err := r.archive.FindByUID(context.Background(), UID)
+	find, err := r.archive.FindByUID(context.Background(), string(schedule.UID))
 	if err != nil && !gorm.IsRecordNotFoundError(err) {
-		r.Log.Error(err, "failed to find experiment", "UID", UID)
+		r.Log.Error(err, "failed to find schedule", "UID", schedule.UID)
 		return err
 	}
 
@@ -153,7 +157,7 @@ func (r *ScheduleCollector) setUnarchivedSchedule(req ctrl.Request, obj v1alpha1
 	}
 
 	if err := r.archive.Set(context.Background(), archive); err != nil {
-		r.Log.Error(err, "failed to update experiment", "archive", archive)
+		r.Log.Error(err, "failed to update schedule", "archive", archive)
 		return err
 	}
 
@@ -162,7 +166,7 @@ func (r *ScheduleCollector) setUnarchivedSchedule(req ctrl.Request, obj v1alpha1
 
 func (r *ScheduleCollector) archiveSchedule(ns, name string) error {
 	if err := r.archive.Archive(context.Background(), ns, name); err != nil {
-		r.Log.Error(err, "failed to archive experiment", "namespace", ns, "name", name)
+		r.Log.Error(err, "failed to archive schedule", "namespace", ns, "name", name)
 		return err
 	}
 

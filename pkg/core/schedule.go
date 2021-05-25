@@ -22,23 +22,23 @@ import (
 
 // ScheduleStore defines operations for working with schedules.
 type ScheduleStore interface {
-	// ListMeta returns experiment metadata list from the datastore.
-	ListMeta(ctx context.Context, kind, namespace, name string, archived bool) ([]*ExperimentMeta, error)
+	// ListMeta returns schedule metadata list from the datastore.
+	ListMeta(ctx context.Context, kind, namespace, name string, archived bool) ([]*ScheduleMeta, error)
 
-	// FindByUID returns an experiment by UID.
-	FindByUID(ctx context.Context, UID string) (*Experiment, error)
+	// FindByUID returns a schedule by UID.
+	FindByUID(ctx context.Context, UID string) (*Schedule, error)
 
-	// FindMetaByUID returns an experiment metadata by UID.
-	FindMetaByUID(context.Context, string) (*ExperimentMeta, error)
+	// FindMetaByUID returns a schedule metadata by UID.
+	FindMetaByUID(context.Context, string) (*ScheduleMeta, error)
 
-	// Set saves the experiment to datastore.
-	Set(context.Context, *Experiment) error
+	// Set saves the schedule to datastore.
+	Set(context.Context, *Schedule) error
 
-	// Archive archives experiments which "archived" field is false.
+	// Archive archives schedules which "archived" field is false.
 	Archive(ctx context.Context, namespace, name string) error
 
 	// Delete deletes the archive from the datastore.
-	Delete(context.Context, *Experiment) error
+	Delete(context.Context, *Schedule) error
 
 	// DeleteByFinishTime deletes archives which time difference is greater than the given time from FinishTime.
 	DeleteByFinishTime(context.Context, time.Duration) error
@@ -46,11 +46,11 @@ type ScheduleStore interface {
 	// DeleteByUIDs deletes archives by the uid list.
 	DeleteByUIDs(context.Context, []string) error
 
-	// DeleteIncompleteExperiments deletes all incomplete experiments.
-	// If the chaos-dashboard was restarted and the experiment is completed during the restart,
-	// which means the experiment would never save the finish_time.
-	// DeleteIncompleteExperiments can be used to delete all incomplete experiments to avoid this case.
-	DeleteIncompleteExperiments(context.Context) error
+	// DeleteIncompleteSchedules deletes all incomplete schedules.
+	// If the chaos-dashboard was restarted and the schedule is completed during the restart,
+	// which means the schedule would never save the finish_time.
+	// DeleteIncompleteSchedules can be used to delete all incomplete schedules to avoid this case.
+	DeleteIncompleteSchedules(context.Context) error
 }
 
 // Schedule represents a schedule instance. Use in db.
