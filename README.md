@@ -87,7 +87,7 @@ Please reach out for bugs, feature requests, and other issues via:
 
 ### Community meeting
 
-On the fourth Friday of every month (unless otherwise specified), the Chaos Mesh community holds a monthly meeting by video conference to discuss the status of Chaos Mesh.
+On the fourth Thursday of every month (unless otherwise specified), the Chaos Mesh community holds a monthly meeting by video conference to discuss the status of Chaos Mesh.
 
 **Quick links:**
 
@@ -109,12 +109,13 @@ On the fourth Friday of every month (unless otherwise specified), the Chaos Mesh
 - Anurag Paliwal
   - [Securing tenant services while using chaos mesh using OPA](https://anuragpaliwal-93749.medium.com/securing-tenant-services-while-using-chaos-mesh-using-opa-3ae80c7f4b85)
   - [Securing namespaces using restrict authorization feature in chaos mesh](https://anuragpaliwal-93749.medium.com/securing-namespaces-using-restrict-authorization-feature-in-chaos-mesh-2e110c3e0fb7)
+- Pavan Kumar: [Chaos Engineering in Kubernetes using Chaos Mesh](https://link.medium.com/1V90dEknugb)
 
 ### Community talks
 
 - Twain Taylor: [Chaos Mesh Simplifies & Organizes Chaos Engineering For Kubernetes](https://youtu.be/shbrjAY86ZQ)
 - Saiyam Pathak
-  - [Let's explore chaos mesh](https://www.twitch.tv/videos/1021237563)
+  - [Let's explore chaos mesh](https://youtu.be/kMbTYItsTTI)
   - [Chaos Mesh - Chaos Engineering for Kubernetes](https://youtu.be/HAU_cjW1bMw)
 
 ## Media coverage
