@@ -18,17 +18,23 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/iancoleman/strcase"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
-type ChaosRecorder struct {
+type ChaosRecorder interface {
+	Event(object runtime.Object, ev ChaosEvent)
+}
+
+type chaosRecorder struct {
 	recorder record.EventRecorder
 	log      logr.Logger
 }
 
-func (r *ChaosRecorder) Event(object runtime.Object, ev ChaosEvent) {
+func (r *chaosRecorder) Event(object runtime.Object, ev ChaosEvent) {
 	annotations, err := generateAnnotations(ev)
 	if err != nil {
 		r.log.Error(err, "event", ev)
@@ -55,8 +61,32 @@ func register(ev ...ChaosEvent) {
 }
 
 func NewRecorder(mgr ctrl.Manager, name string, logger logr.Logger) ChaosRecorder {
-	return ChaosRecorder{
+	return &chaosRecorder{
 		mgr.GetEventRecorderFor(name),
 		logger.WithName("event-recorder" + name),
+	}
+}
+
+type debugRecorder struct {
+	Events map[types.NamespacedName][]ChaosEvent
+}
+
+func (d *debugRecorder) Event(object runtime.Object, ev ChaosEvent) {
+	obj := object.(metav1.Object)
+	id := types.NamespacedName{
+		Namespace: obj.GetNamespace(),
+		Name:      obj.GetName(),
+	}
+
+	if d.Events[id] == nil {
+		d.Events[id] = []ChaosEvent{}
+	}
+
+	d.Events[id] = append(d.Events[id], ev)
+}
+
+func NewDebugRecorder() *debugRecorder {
+	return &debugRecorder{
+		Events: make(map[types.NamespacedName][]ChaosEvent),
 	}
 }
