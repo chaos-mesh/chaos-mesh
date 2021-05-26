@@ -16,12 +16,11 @@ package apiserver
 import (
 	"go.uber.org/fx"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/schedule"
-
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/archive"
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/common"
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/event"
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/experiment"
+	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/schedule"
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/workflow"
 )
 
