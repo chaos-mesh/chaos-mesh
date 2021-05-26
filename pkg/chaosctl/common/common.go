@@ -366,35 +366,6 @@ func Log(pod v1.Pod, tail int64, c *kubernetes.Clientset) (string, error) {
 	return buf.String(), nil
 }
 
-func checkConnForCtrlAndDaemon(ctx context.Context, daemons []v1.Pod, c *ClientSet) error {
-	ctrlSelector := v1alpha1.PodSelectorSpec{
-		LabelSelectors: map[string]string{"app.kubernetes.io/component": "controller-manager"},
-	}
-	ctrlMgrs, err := pod.SelectPods(ctx, c.CtrlCli, c.CtrlCli, ctrlSelector, ctrlconfig.ControllerCfg.ClusterScoped, ctrlconfig.ControllerCfg.TargetNamespace, false)
-	if err != nil {
-		return errors.Wrapf(err, "failed to select pod for controller-manager")
-	}
-	if len(ctrlMgrs) == 0 {
-		return fmt.Errorf("could not found controller manager")
-	}
-	for _, daemon := range daemons {
-		daemonIP := daemon.Status.PodIP
-		cmd := fmt.Sprintf("ping -c 1 %s > /dev/null; echo $?", daemonIP)
-		out, err := Exec(ctx, ctrlMgrs[0], cmd, c.KubeCli)
-		if err != nil {
-			return errors.Wrapf(err, "run command %s failed", cmd)
-		}
-		if string(out) == "0" {
-			PrettyPrint(fmt.Sprintf("Connection between Controller-Manager and Daemon %s (ip address: %s) works well", daemon.Name, daemonIP), 0, Green)
-		} else {
-			PrettyPrint(fmt.Sprintf(`Connection between Controller-Manager and Daemon %s (ip address: %s) is blocked.
-Please check network policy / firewall, or see FAQ on website`, daemon.Name, daemonIP), 0, Red)
-		}
-
-	}
-	return nil
-}
-
 // ConnectToLocalChaosDaemon would connect to ChaosDaemon run in localhost
 func ConnectToLocalChaosDaemon(port int) (daemonClient.ChaosDaemonClientInterface, error) {
 	if cli := mock.On("MockChaosDaemonClient"); cli != nil {
