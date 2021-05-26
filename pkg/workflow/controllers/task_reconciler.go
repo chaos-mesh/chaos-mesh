@@ -17,6 +17,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"k8s.io/client-go/rest"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -37,14 +38,16 @@ import (
 type TaskReconciler struct {
 	*ChildNodesFetcher
 	kubeClient    client.Client
+	restConfig    *rest.Config
 	eventRecorder record.EventRecorder
 	logger        logr.Logger
 }
 
-func NewTaskReconciler(kubeClient client.Client, eventRecorder record.EventRecorder, logger logr.Logger) *TaskReconciler {
+func NewTaskReconciler(kubeClient client.Client, restConfig *rest.Config, eventRecorder record.EventRecorder, logger logr.Logger) *TaskReconciler {
 	return &TaskReconciler{
 		ChildNodesFetcher: NewChildNodesFetcher(kubeClient, logger),
 		kubeClient:        kubeClient,
+		restConfig:        restConfig,
 		eventRecorder:     eventRecorder,
 		logger:            logger,
 	}
@@ -114,56 +117,57 @@ func (it *TaskReconciler) Reconcile(request reconcile.Request) (reconcile.Result
 
 	// update the status about conditional tasks
 	if len(pods) > 0 && (pods[0].Status.Phase == corev1.PodFailed || pods[0].Status.Phase == corev1.PodSucceeded) {
-		// task pod is terminated
-		updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-			nodeNeedUpdate := v1alpha1.WorkflowNode{}
-			err := it.kubeClient.Get(ctx, request.NamespacedName, &nodeNeedUpdate)
-			if err != nil {
-				return err
-			}
-
-			// TODO: update related condition
-			defaultCollector := collector.DefaultCollector(it.kubeClient, pods[0].Namespace, pods[0].Name, nodeNeedUpdate.Spec.Task.Container.Name)
-			evaluator := task.NewEvaluator(it.logger, it.kubeClient)
-
-			if nodeNeedUpdate.Status.ConditionalBranches == nil {
-				nodeNeedUpdate.Status.ConditionalBranches = &v1alpha1.ConditionalBranchesStatus{}
-			}
-
-			env, err := defaultCollector.CollectContext(ctx)
-			if err != nil {
-				it.logger.Error(err, "failed to fetch env from task",
-					"task", fmt.Sprintf("%s/%s", nodeNeedUpdate.Namespace, nodeNeedUpdate.Name),
-				)
-				return err
-			}
-			evaluateConditionBranches, err := evaluator.EvaluateConditionBranches(nodeNeedUpdate.Spec.ConditionalTasks, env)
-			if err != nil {
-				it.logger.Error(err, "failed to evaluate expression",
-					"task", fmt.Sprintf("%s/%s", nodeNeedUpdate.Namespace, nodeNeedUpdate.Name),
-				)
-				return err
-			}
-
-			if env != nil {
-				jsonString, err := json.Marshal(env)
+		if !conditionalBranchesEvaluated(node) {
+			// task pod is terminated
+			updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+				nodeNeedUpdate := v1alpha1.WorkflowNode{}
+				err := it.kubeClient.Get(ctx, request.NamespacedName, &nodeNeedUpdate)
 				if err != nil {
-					it.logger.Error(err, "failed to convert env to json",
-						"task", fmt.Sprintf("%s/%s", nodeNeedUpdate.Namespace, nodeNeedUpdate.Name),
-						"env", env)
-				} else {
-					nodeNeedUpdate.Status.ConditionalBranches.Context = []string{string(jsonString)}
+					return err
 				}
+
+				if nodeNeedUpdate.Status.ConditionalBranches == nil {
+					nodeNeedUpdate.Status.ConditionalBranches = &v1alpha1.ConditionalBranchesStatus{}
+				}
+
+				// TODO: update related condition
+				defaultCollector := collector.DefaultCollector(it.kubeClient, it.restConfig, pods[0].Namespace, pods[0].Name, nodeNeedUpdate.Spec.Task.Container.Name)
+				env, err := defaultCollector.CollectContext(ctx)
+				if err != nil {
+					it.logger.Error(err, "failed to fetch env from task",
+						"task", fmt.Sprintf("%s/%s", nodeNeedUpdate.Namespace, nodeNeedUpdate.Name),
+					)
+					return err
+				}
+				if env != nil {
+					jsonString, err := json.Marshal(env)
+					if err != nil {
+						it.logger.Error(err, "failed to convert env to json",
+							"task", fmt.Sprintf("%s/%s", nodeNeedUpdate.Namespace, nodeNeedUpdate.Name),
+							"env", env)
+					} else {
+						nodeNeedUpdate.Status.ConditionalBranches.Context = []string{string(jsonString)}
+					}
+				}
+
+				evaluator := task.NewEvaluator(it.logger, it.kubeClient)
+				evaluateConditionBranches, err := evaluator.EvaluateConditionBranches(nodeNeedUpdate.Spec.ConditionalTasks, env)
+				if err != nil {
+					it.logger.Error(err, "failed to evaluate expression",
+						"task", fmt.Sprintf("%s/%s", nodeNeedUpdate.Namespace, nodeNeedUpdate.Name),
+					)
+					return err
+				}
+
+				nodeNeedUpdate.Status.ConditionalBranches.Branches = evaluateConditionBranches
+
+				err = it.kubeClient.Status().Update(ctx, &nodeNeedUpdate)
+				return err
+			})
+			if client.IgnoreNotFound(updateError) != nil {
+				it.logger.Error(updateError, "failed to update the condition status of task",
+					"task", request)
 			}
-
-			nodeNeedUpdate.Status.ConditionalBranches.Branches = evaluateConditionBranches
-
-			err = it.kubeClient.Status().Update(ctx, &nodeNeedUpdate)
-			return err
-		})
-		if client.IgnoreNotFound(updateError) != nil {
-			it.logger.Error(updateError, "failed to update the condition status of task",
-				"task", request)
 		}
 	} else {
 		// task pod is still running or not exists
@@ -195,7 +199,7 @@ func (it *TaskReconciler) Reconcile(request reconcile.Request) (reconcile.Result
 		})
 
 		if client.IgnoreNotFound(updateError) != nil {
-			it.logger.Error(updateError, "failed to update the condition status of task",
+			it.logger.Error(updateError, "k failed to update the condition status of task",
 				"task", request)
 		}
 
@@ -250,7 +254,8 @@ func (it *TaskReconciler) Reconcile(request reconcile.Request) (reconcile.Result
 		}
 
 		// TODO: also check the consistent between spec in task and the spec in child node
-		if len(finishedChildren) == len(tasks) {
+
+		if conditionalBranchesEvaluated(nodeNeedUpdate) && len(finishedChildren) == len(tasks) {
 			SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
 				Type:   v1alpha1.ConditionAccomplished,
 				Status: corev1.ConditionTrue,
@@ -353,6 +358,7 @@ func (it *TaskReconciler) syncChildNodes(ctx context.Context, evaluatedNode v1al
 
 	return nil
 }
+
 func (it *TaskReconciler) FetchPodControlledByThisWorkflowNode(ctx context.Context, node v1alpha1.WorkflowNode) ([]corev1.Pod, error) {
 	controlledByThisNode, err := metav1.LabelSelectorAsSelector(&metav1.LabelSelector{
 		MatchLabels: map[string]string{
@@ -409,4 +415,19 @@ func (it *TaskReconciler) SpawnTaskPod(ctx context.Context, node *v1alpha1.Workf
 		Spec: podSpec,
 	}
 	return it.kubeClient.Create(ctx, &taskPod)
+}
+
+func conditionalBranchesEvaluated(node v1alpha1.WorkflowNode) bool {
+	if node.Status.ConditionalBranches == nil {
+		return false
+	}
+	if len(node.Spec.ConditionalTasks) != len(node.Status.ConditionalBranches.Branches) {
+		return false
+	}
+	for _, branch := range node.Status.ConditionalBranches.Branches {
+		if branch.EvaluationResult == corev1.ConditionUnknown {
+			return false
+		}
+	}
+	return true
 }

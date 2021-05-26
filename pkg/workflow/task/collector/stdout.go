@@ -13,13 +13,45 @@
 
 package collector
 
-import "context"
+import (
+	"context"
+	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
+	"strings"
+)
 
 const Stdout string = "stdout"
 
 type StdoutCollector struct {
+	restConfig    *rest.Config
+	namespace     string
+	podName       string
+	containerName string
+}
+
+func NewStdoutCollector(restConfig *rest.Config, namespace string, podName string, containerName string) *StdoutCollector {
+	return &StdoutCollector{restConfig: restConfig, namespace: namespace, podName: podName, containerName: containerName}
 }
 
 func (it *StdoutCollector) CollectContext(ctx context.Context) (env map[string]interface{}, err error) {
-	panic("implement me")
+	client, err := kubernetes.NewForConfig(it.restConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	request := client.CoreV1().Pods(it.namespace).GetLogs(it.podName, &v1.PodLogOptions{
+		TypeMeta:  metav1.TypeMeta{},
+		Container: it.containerName,
+	}).Context(ctx)
+
+	var stdout string
+	if bytes, err := request.Do().Raw(); err != nil {
+		return nil, err
+	} else {
+		stdout = strings.TrimSpace(string(bytes))
+	}
+
+	return map[string]interface{}{Stdout: stdout}, nil
 }

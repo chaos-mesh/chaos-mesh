@@ -15,6 +15,7 @@ package collector
 
 import (
 	"context"
+	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -57,8 +58,9 @@ func mapExtend(origin map[string]interface{}, another map[string]interface{}) {
 	}
 }
 
-func DefaultCollector(kubeClient client.Client, namespace, podName, containerName string) Collector {
+func DefaultCollector(kubeClient client.Client, restConfig *rest.Config, namespace, podName, containerName string) Collector {
 	return &ComposeCollector{collectors: []Collector{
 		NewExitCodeCollector(kubeClient, namespace, podName, containerName),
+		NewStdoutCollector(restConfig, namespace, podName, containerName),
 	}}
 }

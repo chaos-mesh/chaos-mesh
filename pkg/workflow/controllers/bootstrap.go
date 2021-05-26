@@ -14,17 +14,15 @@
 package controllers
 
 import (
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
-
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
 func BootstrapWorkflowControllers(mgr manager.Manager, logger logr.Logger) error {
-
 	noCacheClient, err := client.New(mgr.GetConfig(), client.Options{
 		Scheme: mgr.GetScheme(),
 		Mapper: mgr.GetRESTMapper(),
@@ -112,6 +110,7 @@ func BootstrapWorkflowControllers(mgr manager.Manager, logger logr.Logger) error
 		Named("workflow-task-reconciler").
 		Complete(NewTaskReconciler(
 			noCacheClient,
+			mgr.GetConfig(),
 			mgr.GetEventRecorderFor("workflow-task-reconciler"),
 			logger.WithName("workflow-task-reconciler"),
 		))
