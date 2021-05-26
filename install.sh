@@ -963,6 +963,18 @@ rules:
   - apiGroups:
       - ""
     resources:
+      - pods
+    verbs:
+      - "create"
+  - apiGroups:
+      - ""
+    resources:
+      - "pods/log"
+    verbs:
+      - "get"
+  - apiGroups:
+      - ""
+    resources:
       - events
     verbs:
       - patch
