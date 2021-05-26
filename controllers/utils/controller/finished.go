@@ -20,6 +20,11 @@ import (
 )
 
 func IsChaosFinished(obj v1alpha1.InnerObject, now time.Time) bool {
+	finished, _ := IsChaosFinishedWithUntilStop(obj, now)
+	return finished
+}
+
+func IsChaosFinishedWithUntilStop(obj v1alpha1.InnerObject, now time.Time) (bool, time.Duration) {
 	status := obj.GetStatus()
 
 	finished := true
@@ -33,14 +38,14 @@ func IsChaosFinished(obj v1alpha1.InnerObject, now time.Time) bool {
 
 	durationExceeded, untilStop, err := obj.DurationExceeded(time.Now())
 	if err != nil {
-		return finished
+		return finished, untilStop
 	}
 	if durationExceeded {
-		return finished
+		return finished, untilStop
 	}
 
 	if untilStop != 0 {
-		return false
+		return false, untilStop
 	}
 
 	// duration is not Exceeded, but untilStop is 0
@@ -52,5 +57,5 @@ func IsChaosFinished(obj v1alpha1.InnerObject, now time.Time) bool {
 			finished = false
 		}
 	}
-	return finished
+	return finished, untilStop
 }

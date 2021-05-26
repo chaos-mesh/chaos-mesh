@@ -32,6 +32,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/utils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/controllers"
 )
@@ -84,12 +85,9 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		for _, obj := range metaItems[0:exceededHistory] {
 			innerObj, ok := obj.(v1alpha1.InnerObject)
 			if ok { // This is a chaos
-				durationExceeded, untilStop, err := innerObj.DurationExceeded(time.Now())
-				if err != nil {
-					r.Log.Error(err, "failed to parse duration")
-				}
+				finished, untilStop := controller.IsChaosFinishedWithUntilStop(innerObj, time.Now())
 
-				if !durationExceeded {
+				if !finished {
 					if untilStop != 0 {
 						if requeuAfter == 0 || requeuAfter > untilStop {
 							requeuAfter = untilStop
@@ -100,11 +98,9 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 						})
 						continue
 					} else {
-						// duration is not Exceeded, but untilStop is 0
-						// which means the current object is one-shot (like PodKill)
-						// do nothing
+						// hasn't finished, but untilStop is 0
+						r.Log.Info("untilStop is 0 when the chaos has not finished")
 					}
-					continue
 				}
 			} else { // A workflow
 				if schedule.Spec.Type == v1alpha1.ScheduleTypeWorkflow {
