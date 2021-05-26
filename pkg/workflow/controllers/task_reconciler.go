@@ -17,8 +17,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"k8s.io/client-go/rest"
 	"time"
+
+	"k8s.io/client-go/rest"
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"

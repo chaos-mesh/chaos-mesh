@@ -15,11 +15,12 @@ package collector
 
 import (
 	"context"
+	"strings"
+
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-	"strings"
 )
 
 const Stdout string = "stdout"
@@ -46,12 +47,11 @@ func (it *StdoutCollector) CollectContext(ctx context.Context) (env map[string]i
 		Container: it.containerName,
 	}).Context(ctx)
 
-	var stdout string
-	if bytes, err := request.Do().Raw(); err != nil {
+	var bytes []byte
+	if bytes, err = request.Do().Raw(); err != nil {
 		return nil, err
-	} else {
-		stdout = strings.TrimSpace(string(bytes))
 	}
+	stdout := strings.TrimSpace(string(bytes))
 
 	return map[string]interface{}{Stdout: stdout}, nil
 }
