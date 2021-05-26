@@ -21,6 +21,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 )
 
 type Objs struct {
@@ -38,7 +39,7 @@ func NewController(mgr ctrl.Manager, client client.Client, reader client.Reader,
 				Object:   obj.Object,
 				Client:   client,
 				Reader:   reader,
-				Recorder: mgr.GetEventRecorderFor("finalizer"),
+				Recorder: recorder.NewRecorder(mgr, "finalizer", logger),
 				Log:      logger.WithName("finalizers"),
 			})
 		if err != nil {

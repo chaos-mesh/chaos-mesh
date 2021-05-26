@@ -17,8 +17,6 @@ import (
 	"context"
 	"time"
 
-	"k8s.io/client-go/tools/record"
-
 	"github.com/go-logr/logr"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -27,6 +25,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 )
 
 // Reconciler for common chaos
@@ -38,7 +37,7 @@ type Reconciler struct {
 	client.Client
 	client.Reader
 
-	Recorder record.EventRecorder
+	Recorder recorder.ChaosRecorder
 	Log      logr.Logger
 }
 
@@ -76,13 +75,15 @@ func (ctx *reconcileContext) GetCreationTimestamp() metav1.Time {
 	return ctx.obj.GetObjectMeta().CreationTimestamp
 }
 
-func (ctx *reconcileContext) CalcDesiredPhase() v1alpha1.DesiredPhase {
+func (ctx *reconcileContext) CalcDesiredPhase() (v1alpha1.DesiredPhase, []recorder.ChaosEvent) {
+	events := []recorder.ChaosEvent{}
+
 	// Consider the finalizers
 	if ctx.obj.IsDeleted() {
 		if ctx.obj.GetStatus().Experiment.DesiredPhase != v1alpha1.StoppedPhase {
-			ctx.Recorder.Event(ctx.obj, "Normal", "Deleted", "Turn into StoppedPhase")
+			events = append(events, recorder.Deleted{})
 		}
-		return v1alpha1.StoppedPhase
+		return v1alpha1.StoppedPhase, events
 	}
 
 	// Consider the duration
@@ -94,9 +95,9 @@ func (ctx *reconcileContext) CalcDesiredPhase() v1alpha1.DesiredPhase {
 	}
 	if durationExceeded {
 		if ctx.obj.GetStatus().Experiment.DesiredPhase != v1alpha1.StoppedPhase {
-			ctx.Recorder.Event(ctx.obj, "Normal", "TimeUp", "Turn into StoppedPhase")
+			events = append(events, recorder.TimeUp{})
 		}
-		return v1alpha1.StoppedPhase
+		return v1alpha1.StoppedPhase, events
 	} else {
 		ctx.requeueAfter = untilStop
 	}
@@ -104,22 +105,26 @@ func (ctx *reconcileContext) CalcDesiredPhase() v1alpha1.DesiredPhase {
 	// Then decide the pause logic
 	if ctx.obj.IsPaused() {
 		if ctx.obj.GetStatus().Experiment.DesiredPhase != v1alpha1.StoppedPhase {
-			ctx.Recorder.Event(ctx.obj, "Normal", "Paused", "Turn into StoppedPhase")
+			events = append(events, recorder.Paused{})
 		}
-		return v1alpha1.StoppedPhase
+		return v1alpha1.StoppedPhase, events
 	} else {
 		if ctx.obj.GetStatus().Experiment.DesiredPhase != v1alpha1.RunningPhase {
-			ctx.Recorder.Event(ctx.obj, "Normal", "", "Turn into RunningPhase")
+			events = append(events, recorder.Started{})
 		}
-		return v1alpha1.RunningPhase
+		return v1alpha1.RunningPhase, events
 	}
 }
 
 func (ctx *reconcileContext) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	desiredPhase := ctx.CalcDesiredPhase()
+	desiredPhase, events := ctx.CalcDesiredPhase()
 
 	ctx.Log.Info("modify desiredPhase", "desiredPhase", desiredPhase)
 	if ctx.obj.GetStatus().Experiment.DesiredPhase != desiredPhase {
+		for _, ev := range events {
+			ctx.Recorder.Event(ctx.obj, ev)
+		}
+
 		updateError := retry.RetryOnConflict(retry.DefaultBackoff, func() error {
 			obj := ctx.Object.DeepCopyObject().(v1alpha1.InnerObject)
 
@@ -138,11 +143,16 @@ func (ctx *reconcileContext) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		})
 		if updateError != nil {
 			ctx.Log.Error(updateError, "fail to update")
-			ctx.Recorder.Eventf(ctx.obj, "Normal", "Failed", "Failed to update desiredphase: %s", updateError.Error())
+			ctx.Recorder.Event(ctx.obj, recorder.Failed{
+				Activity: "update desiredphase",
+				Err:      updateError.Error(),
+			})
 			return ctrl.Result{}, nil
 		}
 
-		ctx.Recorder.Event(ctx.obj, "Normal", "Updated", "Successfully update desiredPhase of resource")
+		ctx.Recorder.Event(ctx.obj, recorder.Updated{
+			Field: "desiredPhase",
+		})
 	}
 	return ctrl.Result{RequeueAfter: ctx.requeueAfter}, nil
 }
