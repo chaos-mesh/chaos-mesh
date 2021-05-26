@@ -43,6 +43,11 @@ var _ = Describe("StressChaos", func() {
 					Namespace: "default",
 				},
 				Spec: StressChaosSpec{
+					ContainerSelector: ContainerSelector{
+						PodSelector: PodSelector{
+							Mode: OnePodMode,
+						},
+					},
 					Stressors: &Stressors{MemoryStressor: &MemoryStressor{Stressor: Stressor{Workers: 1}}},
 				},
 			}

@@ -39,7 +39,6 @@ var _ = Describe("timechaos_webhook", func() {
 				execute func(chaos *TimeChaos) error
 				expect  string
 			}
-			duration := "400s"
 			tcs := []TestCase{
 				{
 					name: "simple ValidateCreate",
@@ -80,23 +79,6 @@ var _ = Describe("timechaos_webhook", func() {
 					},
 					execute: func(chaos *TimeChaos) error {
 						return chaos.ValidateDelete()
-					},
-					expect: "",
-				},
-				{
-					name: "only define the Duration",
-					chaos: TimeChaos{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: metav1.NamespaceDefault,
-							Name:      "foo5",
-						},
-						Spec: TimeChaosSpec{
-							Duration:   &duration,
-							TimeOffset: "1s",
-						},
-					},
-					execute: func(chaos *TimeChaos) error {
-						return chaos.ValidateCreate()
 					},
 					expect: "",
 				},

@@ -54,7 +54,6 @@ var _ = Describe("networkchaos_webhook", func() {
 				execute func(chaos *NetworkChaos) error
 				expect  string
 			}
-			duration := "400s"
 			tcs := []TestCase{
 				{
 					name: "simple ValidateCreate",
@@ -92,22 +91,6 @@ var _ = Describe("networkchaos_webhook", func() {
 					},
 					execute: func(chaos *NetworkChaos) error {
 						return chaos.ValidateDelete()
-					},
-					expect: "",
-				},
-				{
-					name: "only define the Duration",
-					chaos: NetworkChaos{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: metav1.NamespaceDefault,
-							Name:      "foo5",
-						},
-						Spec: NetworkChaosSpec{
-							Duration: &duration,
-						},
-					},
-					execute: func(chaos *NetworkChaos) error {
-						return chaos.ValidateCreate()
 					},
 					expect: "",
 				},
@@ -247,7 +230,6 @@ var _ = Describe("networkchaos_webhook", func() {
 							Name:      "foo12",
 						},
 						Spec: NetworkChaosSpec{
-
 							Target: &PodSelector{
 								Mode:  FixedPodMode,
 								Value: "0",

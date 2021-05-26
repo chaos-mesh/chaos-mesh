@@ -38,7 +38,6 @@ var _ = Describe("kernelchaos_webhook", func() {
 				execute func(chaos *KernelChaos) error
 				expect  string
 			}
-			duration := "400s"
 			tcs := []TestCase{
 				{
 					name: "simple ValidateCreate",
@@ -76,22 +75,6 @@ var _ = Describe("kernelchaos_webhook", func() {
 					},
 					execute: func(chaos *KernelChaos) error {
 						return chaos.ValidateDelete()
-					},
-					expect: "",
-				},
-				{
-					name: "only define the Duration",
-					chaos: KernelChaos{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: metav1.NamespaceDefault,
-							Name:      "foo5",
-						},
-						Spec: KernelChaosSpec{
-							Duration: &duration,
-						},
-					},
-					execute: func(chaos *KernelChaos) error {
-						return chaos.ValidateCreate()
 					},
 					expect: "",
 				},
