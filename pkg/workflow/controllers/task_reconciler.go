@@ -212,67 +212,71 @@ func (it *TaskReconciler) Reconcile(request reconcile.Request) (reconcile.Result
 	if err != nil {
 		return reconcile.Result{}, err
 	}
+	if conditionalBranchesEvaluated(evaluatedNode) {
+		err = it.syncChildNodes(ctx, evaluatedNode)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
 
-	err = it.syncChildNodes(ctx, evaluatedNode)
-	if err != nil {
-		return reconcile.Result{}, err
+		// update the status of children workflow nodes
+		updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+			nodeNeedUpdate := v1alpha1.WorkflowNode{}
+			err := it.kubeClient.Get(ctx, request.NamespacedName, &nodeNeedUpdate)
+			if err != nil {
+				return err
+			}
+			var tasks []string
+			for _, branch := range evaluatedNode.Status.ConditionalBranches.Branches {
+				if branch.EvaluationResult == corev1.ConditionTrue {
+					tasks = append(tasks, branch.Task)
+				}
+			}
+
+			activeChildren, finishedChildren, err := it.fetchChildNodes(ctx, nodeNeedUpdate)
+			if err != nil {
+				return err
+			}
+
+			nodeNeedUpdate.Status.FinishedChildren = nil
+			for _, finishedChild := range finishedChildren {
+				nodeNeedUpdate.Status.FinishedChildren = append(nodeNeedUpdate.Status.FinishedChildren,
+					corev1.LocalObjectReference{
+						Name: finishedChild.Name,
+					})
+			}
+
+			nodeNeedUpdate.Status.ActiveChildren = nil
+			for _, activeChild := range activeChildren {
+				nodeNeedUpdate.Status.ActiveChildren = append(nodeNeedUpdate.Status.ActiveChildren,
+					corev1.LocalObjectReference{
+						Name: activeChild.Name,
+					})
+			}
+
+			// TODO: also check the consistent between spec in task and the spec in child node
+
+			if conditionalBranchesEvaluated(nodeNeedUpdate) && len(finishedChildren) == len(tasks) {
+				SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
+					Type:   v1alpha1.ConditionAccomplished,
+					Status: corev1.ConditionTrue,
+					Reason: "",
+				})
+			} else {
+				SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
+					Type:   v1alpha1.ConditionAccomplished,
+					Status: corev1.ConditionFalse,
+					Reason: "",
+				})
+			}
+
+			return it.kubeClient.Status().Update(ctx, &nodeNeedUpdate)
+		})
+
+		return reconcile.Result{}, client.IgnoreNotFound(updateError)
 	}
 
-	// update the status of children workflow nodes
-	updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		nodeNeedUpdate := v1alpha1.WorkflowNode{}
-		err := it.kubeClient.Get(ctx, request.NamespacedName, &nodeNeedUpdate)
-		if err != nil {
-			return err
-		}
-		var tasks []string
-		for _, branch := range evaluatedNode.Status.ConditionalBranches.Branches {
-			if branch.EvaluationResult == corev1.ConditionTrue {
-				tasks = append(tasks, branch.Task)
-			}
-		}
+	return reconcile.Result{}, nil
 
-		activeChildren, finishedChildren, err := it.fetchChildNodes(ctx, nodeNeedUpdate)
-		if err != nil {
-			return err
-		}
-
-		nodeNeedUpdate.Status.FinishedChildren = nil
-		for _, finishedChild := range finishedChildren {
-			nodeNeedUpdate.Status.FinishedChildren = append(nodeNeedUpdate.Status.FinishedChildren,
-				corev1.LocalObjectReference{
-					Name: finishedChild.Name,
-				})
-		}
-
-		nodeNeedUpdate.Status.ActiveChildren = nil
-		for _, activeChild := range activeChildren {
-			nodeNeedUpdate.Status.ActiveChildren = append(nodeNeedUpdate.Status.ActiveChildren,
-				corev1.LocalObjectReference{
-					Name: activeChild.Name,
-				})
-		}
-
-		// TODO: also check the consistent between spec in task and the spec in child node
-
-		if conditionalBranchesEvaluated(nodeNeedUpdate) && len(finishedChildren) == len(tasks) {
-			SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
-				Type:   v1alpha1.ConditionAccomplished,
-				Status: corev1.ConditionTrue,
-				Reason: "",
-			})
-		} else {
-			SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
-				Type:   v1alpha1.ConditionAccomplished,
-				Status: corev1.ConditionFalse,
-				Reason: "",
-			})
-		}
-
-		return it.kubeClient.Status().Update(ctx, &nodeNeedUpdate)
-	})
-
-	return reconcile.Result{}, client.IgnoreNotFound(updateError)
 }
 
 func (it *TaskReconciler) syncChildNodes(ctx context.Context, evaluatedNode v1alpha1.WorkflowNode) error {
