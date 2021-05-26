@@ -14,6 +14,7 @@
 package apiserver
 
 import (
+	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/schedule"
 	"go.uber.org/fx"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/archive"
@@ -32,6 +33,7 @@ var handlerModule = fx.Options(
 		archive.NewService,
 		archiveschedule.NewService,
 		workflow.NewServiceWithKubeRepo,
+		schedule.NewService,
 	),
 	fx.Invoke(
 		common.Register,
@@ -40,5 +42,6 @@ var handlerModule = fx.Options(
 		archive.Register,
 		archiveschedule.Register,
 		workflow.Register,
+		schedule.Register,
 	),
 )
