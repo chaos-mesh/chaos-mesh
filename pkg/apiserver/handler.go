@@ -14,8 +14,9 @@
 package apiserver
 
 import (
-	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/schedule"
 	"go.uber.org/fx"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/schedule"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/archive"
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/common"

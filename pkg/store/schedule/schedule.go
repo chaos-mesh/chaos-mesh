@@ -107,7 +107,7 @@ func (e *ScheduleStore) Delete(_ context.Context, exp *core.Schedule) error {
 
 // DeleteByFinishTime deletes schedules whose time difference is greater than the given time from FinishTime.
 func (e *ScheduleStore) DeleteByFinishTime(_ context.Context, ttl time.Duration) error {
-	sches, err := e.ListMeta(context.Background(),  "", "", true)
+	sches, err := e.ListMeta(context.Background(), "", "", true)
 	if err != nil {
 		return err
 	}

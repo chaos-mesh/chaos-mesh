@@ -38,11 +38,11 @@ func TestEvent(t *testing.T) {
 
 var _ = Describe("event", func() {
 	var (
-		es         *eventStore
-		mock       sqlmock.Sqlmock
-		event0     *core.Event
-		event1     *core.Event
-		timeNow    time.Time
+		es      *eventStore
+		mock    sqlmock.Sqlmock
+		event0  *core.Event
+		event1  *core.Event
+		timeNow time.Time
 	)
 
 	BeforeEach(func() {

@@ -33,9 +33,9 @@ import (
 
 // Service defines a handler service for archive experiments.
 type Service struct {
-	archive core.ExperimentStore
+	archive         core.ExperimentStore
 	archiveSchedule core.ScheduleStore
-	event   core.EventStore
+	event           core.EventStore
 }
 
 // NewService returns an archive experiment service instance.
@@ -45,9 +45,9 @@ func NewService(
 	event core.EventStore,
 ) *Service {
 	return &Service{
-		archive: archive,
+		archive:         archive,
 		archiveSchedule: archiveSchedule,
-		event:   event,
+		event:           event,
 	}
 }
 
@@ -90,16 +90,14 @@ type Detail struct {
 }
 
 func (s *Service) test1(c *gin.Context) {
-	uid:= c.Param("uid")
+	uid := c.Param("uid")
 	c.JSON(http.StatusOK, uid)
 }
 
 func (s *Service) test2(c *gin.Context) {
-	uid:= c.Param("uid")
+	uid := c.Param("uid")
 	c.JSON(http.StatusOK, uid)
 }
-
-
 
 // @Summary Get archived chaos experiments.
 // @Description Get archived chaos experiments.
@@ -348,8 +346,8 @@ func (s *Service) listSchedule(c *gin.Context) {
 // @Failure 500 {object} utils.APIError
 func (s *Service) detailSchedule(c *gin.Context) {
 	var (
-		err        error
-		detail     Detail
+		err    error
+		detail Detail
 	)
 	uid := c.Param("uid")
 

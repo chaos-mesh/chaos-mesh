@@ -15,10 +15,11 @@ package schedule
 
 import (
 	"context"
-	"github.com/mitchellh/mapstructure"
-	"k8s.io/client-go/util/retry"
 	"net/http"
 	"time"
+
+	"github.com/mitchellh/mapstructure"
+	"k8s.io/client-go/util/retry"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -132,10 +133,10 @@ func (s *Service) createSchedule(c *gin.Context) {
 			Annotations: exp.Annotations,
 		},
 		Spec: v1alpha1.ScheduleSpec{
-			Schedule:                exp.Schedule,
-			ConcurrencyPolicy:       exp.ConcurrencyPolicy,
-			HistoryLimit:            exp.HistoryLimit,
-			Type:                    v1alpha1.ScheduleTemplateType(exp.Target.Kind),
+			Schedule:          exp.Schedule,
+			ConcurrencyPolicy: exp.ConcurrencyPolicy,
+			HistoryLimit:      exp.HistoryLimit,
+			Type:              v1alpha1.ScheduleTemplateType(exp.Target.Kind),
 		},
 	}
 	if exp.StartingDeadlineSeconds != nil {
@@ -203,7 +204,7 @@ func parsePodChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	}
 }
 
-func parseNetworkChaos (exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
+func parseNetworkChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	chaos := &v1alpha1.NetworkChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        exp.Name,
@@ -247,7 +248,7 @@ func parseNetworkChaos (exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	}
 }
 
-func parseIOChaos (exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
+func parseIOChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	chaos := &v1alpha1.IoChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        exp.Name,
@@ -285,7 +286,7 @@ func parseIOChaos (exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	}
 }
 
-func parseTimeChaos (exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
+func parseTimeChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	chaos := &v1alpha1.TimeChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        exp.Name,
@@ -316,7 +317,7 @@ func parseTimeChaos (exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	}
 }
 
-func parseKernelChaos (exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
+func parseKernelChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	chaos := &v1alpha1.KernelChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        exp.Name,
@@ -343,7 +344,7 @@ func parseKernelChaos (exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	}
 }
 
-func parseStressChaos (exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
+func parseStressChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	var stressors *v1alpha1.Stressors
 
 	// Error checking
@@ -389,7 +390,7 @@ func parseStressChaos (exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	}
 }
 
-func parseDNSChaos (exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
+func parseDNSChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	chaos := &v1alpha1.DNSChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        exp.Name,
@@ -420,7 +421,7 @@ func parseDNSChaos (exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	}
 }
 
-func parseAwsChaos (exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
+func parseAwsChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	chaos := &v1alpha1.AwsChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        exp.Name,
@@ -449,7 +450,7 @@ func parseAwsChaos (exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	}
 }
 
-func parseGcpChaos (exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
+func parseGcpChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	chaos := &v1alpha1.GcpChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        exp.Name,
@@ -502,7 +503,7 @@ func (s *Service) listSchedules(c *gin.Context) {
 
 	ScheduleList := v1alpha1.ScheduleList{}
 	sches := make([]*Schedule, 0)
-	if err:= kubeCli.List(context.Background(), &ScheduleList, &client.ListOptions{Namespace: ns}); err != nil {
+	if err := kubeCli.List(context.Background(), &ScheduleList, &client.ListOptions{Namespace: ns}); err != nil {
 		c.Status(http.StatusInternalServerError)
 		utils.SetErrorForGinCtx(c, err)
 		return
@@ -511,8 +512,8 @@ func (s *Service) listSchedules(c *gin.Context) {
 		if name != "" && schedule.Name != name {
 			continue
 		}
-		sches = append (sches, &Schedule{
-			Base:    Base{
+		sches = append(sches, &Schedule{
+			Base: Base{
 				Type:      string(schedule.Spec.Type),
 				Namespace: schedule.Namespace,
 				Name:      schedule.Name,
@@ -579,7 +580,7 @@ func (s *Service) getScheduleDetail(c *gin.Context) {
 
 	schDetail = Detail{
 		Schedule: Schedule{
-			Base:    Base{
+			Base: Base{
 				Type:      string(schedule.Spec.Type),
 				Namespace: schedule.Namespace,
 				Name:      schedule.Name,
@@ -587,18 +588,18 @@ func (s *Service) getScheduleDetail(c *gin.Context) {
 			UID:     string(schedule.UID),
 			Created: schedule.CreationTimestamp.Format(time.RFC3339),
 		},
-		YAML:     core.KubeObjectDesc{
+		YAML: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
 				Kind:       gvk.Kind,
 				APIVersion: gvk.GroupVersion().String(),
 			},
-			Meta:     core.KubeObjectMeta{
+			Meta: core.KubeObjectMeta{
 				Name:        schedule.Name,
 				Namespace:   schedule.Namespace,
 				Labels:      schedule.Labels,
 				Annotations: schedule.Annotations,
 			},
-			Spec:     schedule.Spec,
+			Spec: schedule.Spec,
 		},
 	}
 
@@ -618,7 +619,7 @@ func (s *Service) getScheduleDetail(c *gin.Context) {
 // @Router /experiments/{uid} [delete]
 func (s *Service) deleteSchedule(c *gin.Context) {
 	var (
-		exp       *core.Schedule
+		exp *core.Schedule
 	)
 
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
