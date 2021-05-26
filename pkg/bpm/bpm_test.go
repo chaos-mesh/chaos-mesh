@@ -16,22 +16,12 @@ package bpm
 import (
 	"context"
 	"math/rand"
-	"testing"
 	"time"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/shirou/gopsutil/process"
-	"sigs.k8s.io/controller-runtime/pkg/envtest"
 )
-
-func TestBpm(t *testing.T) {
-	RegisterFailHandler(Fail)
-
-	RunSpecsWithDefaultAndCustomReporters(t,
-		"Background Process Manager Suite",
-		[]Reporter{envtest.NewlineReporter{}})
-}
 
 func RandomeIdentifier() string {
 	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")

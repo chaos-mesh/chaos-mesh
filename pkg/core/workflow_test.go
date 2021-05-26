@@ -367,7 +367,11 @@ func Test_convertWorkflowNode(t *testing.T) {
 						Type:         v1alpha1.TypeIoChaos,
 						EmbedChaos: &v1alpha1.EmbedChaos{
 							IoChaos: &v1alpha1.IoChaosSpec{
-								Mode:       v1alpha1.OnePodMode,
+								ContainerSelector: v1alpha1.ContainerSelector{
+									PodSelector: v1alpha1.PodSelector{
+										Mode: v1alpha1.OnePodMode,
+									},
+								},
 								Action:     "delay",
 								Delay:      "100ms",
 								Path:       "/fake/path",

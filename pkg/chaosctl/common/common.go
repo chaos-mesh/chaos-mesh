@@ -366,16 +366,6 @@ func Log(pod v1.Pod, tail int64, c *kubernetes.Clientset) (string, error) {
 	return buf.String(), nil
 }
 
-// CheckFailedMessage provide debug info and suggestions from failed message
-func CheckFailedMessage(ctx context.Context, failedMessage string, daemons []v1.Pod, c *ClientSet) error {
-	if strings.Contains(failedMessage, "rpc error: code = Unavailable desc = connection error") || strings.Contains(failedMessage, "connect: connection refused") {
-		if err := checkConnForCtrlAndDaemon(ctx, daemons, c); err != nil {
-			return fmt.Errorf("error occurs when check failed message: %s", err)
-		}
-	}
-	return nil
-}
-
 func checkConnForCtrlAndDaemon(ctx context.Context, daemons []v1.Pod, c *ClientSet) error {
 	ctrlSelector := v1alpha1.PodSelectorSpec{
 		LabelSelectors: map[string]string{"app.kubernetes.io/component": "controller-manager"},
