@@ -89,16 +89,6 @@ type Detail struct {
 	KubeObject core.KubeObjectDesc `json:"kube_object"`
 }
 
-func (s *Service) test1(c *gin.Context) {
-	uid := c.Param("uid")
-	c.JSON(http.StatusOK, uid)
-}
-
-func (s *Service) test2(c *gin.Context) {
-	uid := c.Param("uid")
-	c.JSON(http.StatusOK, uid)
-}
-
 // @Summary Get archived chaos experiments.
 // @Description Get archived chaos experiments.
 // @Tags archives
