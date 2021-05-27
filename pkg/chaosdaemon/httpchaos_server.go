@@ -131,7 +131,7 @@ func (s *DaemonServer) createHttpChaos(ctx context.Context, in *pb.ApplyHttpChao
 		log.Error(err, "error while getting PID")
 		return err
 	}
-	processBuilder := bpm.DefaultProcessBuilder(tproxyBin, "-i", "-vvv").
+	processBuilder := bpm.DefaultProcessBuilder(tproxyBin, "-i", "-vv").
 		EnableLocalMnt().
 		SetIdentifier(in.ContainerId).
 		SetEnv(pathEnv, os.Getenv(pathEnv)).
