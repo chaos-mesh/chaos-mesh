@@ -82,7 +82,6 @@ func TestDesiredPhaseBasic(k8sClient client.Client) {
 	By("deleting the created object")
 	{
 		Expect(k8sClient.Delete(context.TODO(), chaos)).To(Succeed())
-		Expect(k8sClient.Get(context.TODO(), key, chaos)).ToNot(Succeed())
 	}
 }
 func TestDesiredPhasePause(k8sClient client.Client) {
@@ -169,6 +168,5 @@ func TestDesiredPhasePause(k8sClient client.Client) {
 	By("deleting the created object")
 	{
 		Expect(k8sClient.Delete(context.TODO(), chaos)).To(Succeed())
-		Expect(k8sClient.Get(context.TODO(), key, chaos)).ToNot(Succeed())
 	}
 }

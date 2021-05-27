@@ -20,24 +20,18 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/go-logr/logr"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"go.uber.org/fx"
 	"k8s.io/client-go/rest"
 	"k8s.io/kubectl/pkg/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
-	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/utils"
-	"github.com/chaos-mesh/chaos-mesh/controllers/types"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/test"
-	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/controllers"
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to
@@ -53,13 +47,8 @@ func TestControllers(t *testing.T) {
 	RegisterFailHandler(Fail)
 
 	RunSpecsWithDefaultAndCustomReporters(t,
-<<<<<<< HEAD:controllers/schedule/suit_test.go
-		"Schedule suit",
-		[]Reporter{printer.NewlineReporter{}})
-=======
 		"controller test suit",
-		[]Reporter{envtest.NewlineReporter{}})
->>>>>>> 3ba000f6 (Make it runnable):controllers/suit_test.go
+		[]Reporter{})
 }
 
 var _ = SynchronizedBeforeSuite(func() []byte {
@@ -83,30 +72,12 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 	enc.Encode(config)
 	Expect(err).ToNot(HaveOccurred())
 
-<<<<<<< HEAD:controllers/schedule/suit_test.go
-	app = fx.New(
-		fx.Options(
-			test.Module,
-			fx.Supply(config),
-			Module,
-			types.ChaosObjects,
-		),
-		fx.Invoke(Run),
-	)
-	startCtx, cancel := context.WithTimeout(context.Background(), app.StartTimeout())
-	defer cancel()
-
-	if err := app.Start(startCtx); err != nil {
-		setupLog.Error(err, "fail to start manager")
-	}
-=======
 	return data.Bytes()
 }, func(confBytes []byte) {
 	data := bytes.NewBuffer(confBytes)
 	dec := gob.NewDecoder(data)
 	var gotConfig rest.Config
 	err := dec.Decode(&gotConfig)
->>>>>>> 3ba000f6 (Make it runnable):controllers/suit_test.go
 	Expect(err).ToNot(HaveOccurred())
 	config = &gotConfig
 	logf.SetLogger(zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)))
@@ -125,19 +96,3 @@ var _ = SynchronizedAfterSuite(func() {}, func() {
 	err := testEnv.Stop()
 	Expect(err).ToNot(HaveOccurred())
 }, 60)
-
-type RunParams struct {
-	fx.In
-
-	Mgr    ctrl.Manager
-	Logger logr.Logger
-
-	Controllers []types.Controller `group:"controller"`
-	Objs        []types.Object     `group:"objs"`
-}
-
-func Run(params RunParams) error {
-	lister = utils.NewActiveLister(k8sClient, params.Logger)
-	err := controllers.BootstrapWorkflowControllers(params.Mgr, params.Logger)
-	return err
-}

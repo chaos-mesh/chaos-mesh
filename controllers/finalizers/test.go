@@ -32,13 +32,13 @@ import (
 
 func TestAddDefaultFinalizer(k8sClient client.Client) {
 	key := types.NamespacedName{
-		Name:      "foo1",
+		Name:      "foo3",
 		Namespace: "default",
 	}
 	duration := "1000s"
 	chaos := &v1alpha1.TimeChaos{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "foo1",
+			Name:      "foo3",
 			Namespace: "default",
 		},
 		Spec: v1alpha1.TimeChaosSpec{
