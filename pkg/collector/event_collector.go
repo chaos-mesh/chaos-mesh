@@ -60,11 +60,22 @@ func (r *EventCollector) Setup(mgr ctrl.Manager, apiType runtime.Object) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(apiType).
 		WithEventFilter(predicate.Funcs{
-			UpdateFunc: func(e event.UpdateEvent) bool {
-				oldObj := e.ObjectOld.(*v1alpha1.PodIoChaos)
-				newObj := e.ObjectNew.(*v1alpha1.PodIoChaos)
-
-				return !reflect.DeepEqual(oldObj.Spec, newObj.Spec)
+			CreateFunc: func(e event.CreateEvent) bool {
+				event, ok := e.Object.(*v1.Event)
+				if !ok {
+					return false
+				}
+				flag := false
+				for kind, _ := range v1alpha1.AllKinds() {
+					if event.InvolvedObject.Kind == kind {
+						flag = true
+						break
+					}
+				}
+				if event.InvolvedObject.Kind == v1alpha1.KindSchedule {
+					flag = true
+				}
+				return flag
 			},
 		}).
 		Complete(r)

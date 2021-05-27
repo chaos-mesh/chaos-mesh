@@ -17,7 +17,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-
 	"github.com/go-logr/logr"
 	"github.com/jinzhu/gorm"
 
@@ -41,6 +40,11 @@ type ChaosCollector struct {
 
 // Reconcile reconciles a chaos collector.
 func (r *ChaosCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+	var (
+		chaosMeta metav1.Object
+		ok        bool
+	)
+
 	if r.apiType == nil {
 		r.Log.Error(nil, "apiType has not been initialized")
 		return ctrl.Result{}, nil
@@ -55,6 +59,12 @@ func (r *ChaosCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	err := r.Get(ctx, req.NamespacedName, obj)
 	if apierrors.IsNotFound(err) {
+		if chaosMeta, ok = obj.(metav1.Object); !ok {
+			r.Log.Error(nil, "failed to get chaos meta information")
+		}
+		if chaosMeta.GetLabels()["managed-by"] != "" {
+			return ctrl.Result{}, nil
+		}
 		if err = r.archiveExperiment(req.Namespace, req.Name); err != nil {
 			r.Log.Error(err, "failed to archive experiment")
 		}
@@ -63,6 +73,13 @@ func (r *ChaosCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	if err != nil {
 		r.Log.Error(err, "failed to get chaos object", "request", req.NamespacedName)
+		return ctrl.Result{}, nil
+	}
+
+	if chaosMeta, ok = obj.(metav1.Object); !ok {
+		r.Log.Error(nil, "failed to get chaos meta information")
+	}
+	if chaosMeta.GetLabels()["managed-by"] != "" {
 		return ctrl.Result{}, nil
 	}
 
