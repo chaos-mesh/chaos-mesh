@@ -73,7 +73,7 @@ check: fmt vet boilerplate lint generate manifests/crd.yaml tidy check-install-s
 # Run tests
 test: failpoint-enable generate generate-mock manifests test-utils
 	rm -rf cover.* cover
-	$(GOTEST) $$($(PACKAGE_LIST)) -coverprofile cover.out.tmp
+	$(GOTEST) -p 1 $$($(PACKAGE_LIST)) -coverprofile cover.out.tmp
 	cat cover.out.tmp | grep -v "_generated.deepcopy.go" > cover.out
 	@$(FAILPOINT_DISABLE)
 
