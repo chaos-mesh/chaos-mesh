@@ -1,26 +1,74 @@
-import { Box, Grid } from '@material-ui/core'
+import { Box, Breadcrumbs, Link } from '@material-ui/core'
+import React, { useImperativeHandle, useState } from 'react'
 
 import LoadFrom from './LoadFrom'
-import React from 'react'
+import Space from 'components-mui/Space'
 import Step1 from './Step1'
 import Step2 from './Step2'
 import Step3 from './Step3'
+import T from 'components/T'
 
-const NewExperiment = () => (
-  <Grid container spacing={6}>
-    <Grid item xs={12} md={8}>
-      <Step1 />
-      <Box mt={6}>
-        <Step2 />
-      </Box>
-      <Box mt={6}>
-        <Step3 />
-      </Box>
-    </Grid>
-    <Grid item xs={12} md={4}>
-      <LoadFrom />
-    </Grid>
-  </Grid>
-)
+type PanelType = 'initial' | 'existing'
 
-export default NewExperiment
+export interface NewExperimentHandles {
+  setShowNewPanel: React.Dispatch<React.SetStateAction<PanelType>>
+}
+
+interface NewExperimentProps {
+  initPanel?: PanelType
+  onSubmit?: (experiment: { target: any; basic: any }) => void
+  loadFrom?: boolean
+  inWorkflow?: boolean
+}
+
+const NewExperiment: React.ForwardRefRenderFunction<NewExperimentHandles, NewExperimentProps> = (
+  { initPanel = 'initial', onSubmit, loadFrom = true, inWorkflow = false },
+  ref
+) => {
+  const [showNewPanel, setShowNewPanel] = useState<PanelType>(initPanel)
+
+  useImperativeHandle(ref, () => ({
+    setShowNewPanel,
+  }))
+
+  const loadCallback = () => setShowNewPanel('initial')
+
+  return (
+    <>
+      {loadFrom && (
+        <Box mb={6}>
+          <Breadcrumbs aria-label="breadcrumb">
+            <Link
+              href="#"
+              color={showNewPanel === 'initial' ? 'primary' : 'inherit'}
+              onClick={() => setShowNewPanel('initial')}
+            >
+              {T('newE.title')}
+            </Link>
+            <Link
+              href="#"
+              color={showNewPanel === 'existing' ? 'primary' : 'inherit'}
+              onClick={() => setShowNewPanel('existing')}
+            >
+              {T('newE.loadFrom')}
+            </Link>
+          </Breadcrumbs>
+        </Box>
+      )}
+      {showNewPanel === 'initial' && (
+        <Space spacing={6} vertical>
+          <Step1 />
+          <Step2 inWorkflow={inWorkflow} />
+          <Step3 onSubmit={onSubmit ? onSubmit : undefined} />
+        </Space>
+      )}
+      {loadFrom && (
+        <Box style={{ display: showNewPanel === 'existing' ? 'initial' : 'none' }}>
+          <LoadFrom loadCallback={loadCallback} />
+        </Box>
+      )}
+    </>
+  )
+}
+
+export default React.forwardRef(NewExperiment)

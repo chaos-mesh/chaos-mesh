@@ -62,10 +62,10 @@ const ScopePodsTable: React.FC<ScopePodsTableProps> = ({ scope = 'scope', pods }
         <TableHead>
           <TableRow>
             <TableCell />
-            <TableCell>{T('newE.scope.podsTable.name')}</TableCell>
-            <TableCell>{T('newE.scope.podsTable.namespace')}</TableCell>
-            <TableCell>{T('newE.scope.podsTable.ip')}</TableCell>
-            <TableCell>{T('newE.scope.podsTable.state')}</TableCell>
+            <TableCell>{T('common.name')}</TableCell>
+            <TableCell>{T('k8s.namespace')}</TableCell>
+            <TableCell>{T('common.ip')}</TableCell>
+            <TableCell>{T('common.status')}</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>

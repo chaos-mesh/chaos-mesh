@@ -83,6 +83,8 @@ const experimentsSlice = createSlice({
       state.basic = basic
     },
     resetNewExperiment(state) {
+      state.pods = []
+      state.networkTargetPods = []
       state.fromExternal = false
       state.step1 = false
       state.step2 = false
