@@ -336,8 +336,7 @@ spec:
               additionalProperties:
                 format: int64
                 type: integer
-              description: Instances always specifies podnetworkchaos generation or
-                empty
+              description: Instances always specifies podiochaos generation or empty
               type: object
           required:
           - experiment
