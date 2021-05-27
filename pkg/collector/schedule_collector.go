@@ -36,7 +36,6 @@ type ScheduleCollector struct {
 	Log     logr.Logger
 	apiType runtime.Object
 	archive core.ScheduleStore
-	event   core.EventStore
 }
 
 // Reconcile reconciles a Schedule collector.

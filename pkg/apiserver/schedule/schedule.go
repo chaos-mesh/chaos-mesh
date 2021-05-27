@@ -15,7 +15,9 @@ package schedule
 
 import (
 	"context"
+	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/mitchellh/mapstructure"
@@ -73,6 +75,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint.POST("/", s.createSchedule)
 	endpoint.PUT("/", s.updateSchedule)
 	endpoint.DELETE("/:uid", s.deleteSchedule)
+	endpoint.DELETE("/", s.batchDeleteSchedule)
 }
 
 // Base represents the base info of an experiment.
@@ -728,4 +731,81 @@ func (s *Service) updateScheduleFun(exp *core.KubeObjectDesc, kubeCli client.Cli
 	sch.Spec = spec
 
 	return kubeCli.Update(context.Background(), sch)
+}
+
+// @Summary Delete the specified schedule experiment.
+// @Description Delete the specified schedule experiment.
+// @Tags schedules
+// @Produce json
+// @Param uids query string true "uids"
+// @Success 200 {object} StatusResponse
+// @Failure 400 {object} utils.APIError
+// @Failure 404 {object} utils.APIError
+// @Failure 500 {object} utils.APIError
+// @Router /schedules [delete]
+func (s *Service) batchDeleteSchedule(c *gin.Context) {
+	var (
+		exp       *core.Schedule
+		errFlag   bool
+		uidSlice  []string
+	)
+
+	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
+	if err != nil {
+		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		return
+	}
+
+	uids := c.Query("uids")
+	if uids == "" {
+		c.Status(http.StatusBadRequest)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("uids cannot be empty")))
+		return
+	}
+	uidSlice = strings.Split(uids, ",")
+	errFlag = false
+
+	for _, uid := range uidSlice {
+		if exp, err = s.schedule.FindByUID(context.Background(), uid); err != nil {
+			if gorm.IsRecordNotFoundError(err) {
+				_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("delete experiment uid (%s) error, because the experiment is not found", uid)))
+			} else {
+				_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("delete experiment uid (%s) error, because %s", uid, err.Error())))
+			}
+			errFlag = true
+			continue
+		}
+
+		ns := exp.Namespace
+		name := exp.Name
+
+		ctx := context.TODO()
+		scheduleKey := types.NamespacedName{Namespace: ns, Name: name}
+		schedule := &v1alpha1.Schedule{}
+
+		if err := kubeCli.Get(ctx, scheduleKey, schedule); err != nil {
+			if apierrors.IsNotFound(err) {
+				_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("delete experiment uid (%s) error, because the chaos is not found", uid)))
+			} else {
+				_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("delete experiment uid (%s) error, because %s", uid, err.Error())))
+			}
+			errFlag = true
+			continue
+		}
+
+		if err := kubeCli.Delete(ctx, schedule, &client.DeleteOptions{}); err != nil {
+			if apierrors.IsNotFound(err) {
+				_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("delete experiment uid (%s) error, because the chaos is not found", uid)))
+			} else {
+				_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("delete experiment uid (%s) error, because %s", uid, err.Error())))
+			}
+			errFlag = true
+			continue
+		}
+	}
+	if errFlag {
+		c.Status(http.StatusInternalServerError)
+	} else {
+		c.JSON(http.StatusOK, StatusResponse{Status: "success"})
+	}
 }

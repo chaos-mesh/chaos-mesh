@@ -14,6 +14,7 @@
 package collector
 
 import (
+	v1 "k8s.io/api/core/v1"
 	"os"
 
 	"k8s.io/apimachinery/pkg/runtime"
@@ -95,7 +96,6 @@ func NewServer(
 			Client:  s.Manager.GetClient(),
 			Log:     ctrl.Log.WithName("collector").WithName(kind),
 			archive: experimentArchive,
-			event:   event,
 		}).Setup(s.Manager, chaosKind.Chaos); err != nil {
 			log.Error(err, "unable to create collector", "collector", kind)
 			os.Exit(1)
@@ -104,10 +104,18 @@ func NewServer(
 
 	if err = (&ScheduleCollector{
 		Client:  s.Manager.GetClient(),
-		Log:     ctrl.Log.WithName("collector").WithName(v1alpha1.KindSchedule),
+		Log:     ctrl.Log.WithName("schedule-collector").WithName(v1alpha1.KindSchedule),
 		archive: scheduleArchive,
-		event:   event,
 	}).Setup(s.Manager, &v1alpha1.Schedule{}); err != nil {
+		log.Error(err, "unable to create collector", "collector", v1alpha1.KindSchedule)
+		os.Exit(1)
+	}
+
+	if err = (&EventCollector{
+		Client:  s.Manager.GetClient(),
+		Log:     ctrl.Log.WithName("event-collector").WithName("Event"),
+		event:   event,
+	}).Setup(s.Manager, &v1.Event{}); err != nil {
 		log.Error(err, "unable to create collector", "collector", v1alpha1.KindSchedule)
 		os.Exit(1)
 	}
