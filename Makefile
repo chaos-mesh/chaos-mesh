@@ -145,7 +145,7 @@ config: $(GOBIN)/controller-gen
 
 # Run go fmt against code
 fmt: groupimports
-	$(CGO) fmt ./...
+	$(CGO) fmt $$(go list ./... | grep -v 'zz_generated.*.go')
 
 gosec-scan: $(GOBIN)/gosec
 	$(GOENV) $< ./api/... ./controllers/... ./pkg/... || echo "*** sec-scan failed: known-issues ***"
