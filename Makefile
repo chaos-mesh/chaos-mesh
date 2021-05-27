@@ -71,7 +71,7 @@ go_build_cache_directory:
 check: fmt vet boilerplate lint generate yaml tidy check-install-script
 
 # Run tests
-test: failpoint-enable generate generate-mock manifests test-utils
+test: ensure-kubebuilder failpoint-enable generate generate-mock manifests test-utils
 	rm -rf cover.* cover
 	$(GOTEST) $$($(PACKAGE_LIST)) -coverprofile cover.out.tmp
 	cat cover.out.tmp | grep -v "_generated.deepcopy.go" > cover.out
