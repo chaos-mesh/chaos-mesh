@@ -6,6 +6,7 @@ on:
     paths:
       - install.sh
       - manifests/crd.yaml
+      - manifests/crd-v1beta1.yaml
       - examples/web-show/deploy.sh
       - pkg/chaosctl/**
       - cmd/chaosctl/**
