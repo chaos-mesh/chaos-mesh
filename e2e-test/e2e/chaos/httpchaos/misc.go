@@ -25,8 +25,11 @@ func getPodHttp(c http.Client, port uint16, secret, body string) (*http.Response
 	if err != nil {
 		return nil, err
 	}
-	request.Header.Set("Secret", secret)
-	resp, err := c.Do(request)
+	request.Header.Set("Secret", time.Now().Format(time.RFC3339))
+	client := &http.Client{
+		Transport: &http.Transport{},
+	}
+	resp, err := client.Do(request)
 	return resp, err
 }
 

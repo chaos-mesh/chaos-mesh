@@ -294,6 +294,6 @@ func (s *server) httpEcho(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "fail to copy body between request and response", http.StatusInternalServerError)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Secret", secret)
+	w.WriteHeader(http.StatusOK)
 }
