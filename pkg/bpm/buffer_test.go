@@ -21,10 +21,11 @@ import (
 	"testing"
 	"time"
 
+	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"go.uber.org/zap/buffer"
-	"sigs.k8s.io/controller-runtime/pkg/envtest"
 )
 
 func TestConcurrentBuffer(t *testing.T) {
@@ -32,7 +33,7 @@ func TestConcurrentBuffer(t *testing.T) {
 
 	RunSpecsWithDefaultAndCustomReporters(t,
 		"Concurrent Buffer Suite",
-		[]Reporter{envtest.NewlineReporter{}})
+		[]Reporter{printer.NewlineReporter{}})
 }
 
 var _ = Describe("concurrent buffer", func() {

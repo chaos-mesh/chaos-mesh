@@ -23,7 +23,7 @@ import (
 	. "github.com/onsi/gomega"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/envtest"
+	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
@@ -35,7 +35,7 @@ func TestRouter(t *testing.T) {
 
 	RunSpecsWithDefaultAndCustomReporters(t,
 		"Router Suit",
-		[]Reporter{envtest.NewlineReporter{}})
+		[]Reporter{printer.NewlineReporter{}})
 }
 
 var _ = BeforeSuite(func(done Done) {
