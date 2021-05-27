@@ -279,7 +279,7 @@ e2e-test/image/e2e/bin/ginkgo:
 	cd e2e-test && $(GO) build -ldflags "$(LDFLAGS)" -tags "${BUILD_TAGS}" -o image/e2e/bin/ginkgo github.com/onsi/ginkgo/ginkgo
 
 CLEAN_TARGETS+=e2e-test/image/e2e/bin/e2e.test
-e2e-test/image/e2e/bin/e2e.test: e2e-test/**/*.go
+e2e-test/image/e2e/bin/e2e.test: e2e-test/e2e/**/*.go
 	cd e2e-test && $(GO) test -c  -o ./image/e2e/bin/e2e.test ./e2e
 
 e2e-test/image/e2e/manifests: manifests
