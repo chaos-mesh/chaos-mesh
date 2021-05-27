@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package finalizers
+package controllers
 
 import (
-	"context"
+	"bytes"
+	"encoding/gob"
 	"os"
 	"path/filepath"
 	"testing"
@@ -25,10 +26,9 @@ import (
 	"go.uber.org/fx"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-controller-manager/provider"
 	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/utils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/test"
+	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/controllers"
 
 	"k8s.io/client-go/rest"
 	"k8s.io/kubectl/pkg/scheme"
@@ -42,24 +42,21 @@ import (
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to
 // http://onsi.github.io/ginkgo/ to learn more about Ginkgo.
 
-var app *fx.App
 var k8sClient client.Client
 var lister *utils.ActiveLister
 var config *rest.Config
 var testEnv *envtest.Environment
 var setupLog = ctrl.Log.WithName("setup")
 
-func TestSchedule(t *testing.T) {
+func TestControllers(t *testing.T) {
 	RegisterFailHandler(Fail)
 
 	RunSpecsWithDefaultAndCustomReporters(t,
-		"Schedule suit",
+		"controller test suit",
 		[]Reporter{envtest.NewlineReporter{}})
 }
 
-var _ = BeforeSuite(func() {
-	logf.SetLogger(zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)))
-	By("bootstrapping test environment")
+var _ = SynchronizedBeforeSuite(func() []byte {
 	t := true
 	if os.Getenv("TEST_USE_EXISTING_CLUSTER") == "true" {
 		testEnv = &envtest.Environment{
@@ -67,62 +64,43 @@ var _ = BeforeSuite(func() {
 		}
 	} else {
 		testEnv = &envtest.Environment{
-			CRDDirectoryPaths: []string{filepath.Join("..", "..", "config", "crd", "bases")},
+			CRDDirectoryPaths: []string{filepath.Join("..", "config", "crd", "bases")},
 		}
 	}
 
-	err := v1alpha1.SchemeBuilder.AddToScheme(scheme.Scheme)
-	Expect(err).NotTo(HaveOccurred())
-
-	config, err = testEnv.Start()
+	config, err := testEnv.Start()
 	Expect(err).ToNot(HaveOccurred())
 	Expect(config).ToNot(BeNil())
+
+	var data bytes.Buffer
+	enc := gob.NewEncoder(&data)
+	enc.Encode(config)
+	Expect(err).ToNot(HaveOccurred())
+
+	return data.Bytes()
+}, func(confBytes []byte) {
+	data := bytes.NewBuffer(confBytes)
+	dec := gob.NewDecoder(data)
+	var gotConfig rest.Config
+	err := dec.Decode(&gotConfig)
+	Expect(err).ToNot(HaveOccurred())
+	config = &gotConfig
+	logf.SetLogger(zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)))
+	By("bootstrapping test environment")
+
+	err = v1alpha1.SchemeBuilder.AddToScheme(scheme.Scheme)
+	Expect(err).ToNot(HaveOccurred())
 
 	k8sClient, err = client.New(config, client.Options{Scheme: scheme.Scheme})
 	Expect(err).ToNot(HaveOccurred())
 	Expect(k8sClient).ToNot(BeNil())
-
-	app = fx.New(
-		fx.Options(
-			fx.Provide(
-				provider.NewOption,
-				provider.NewClient,
-				provider.NewReader,
-				provider.NewLogger,
-				provider.NewAuthCli,
-				provider.NewScheme,
-				test.NewTestManager,
-				fx.Annotated{
-					Group:  "controller",
-					Target: NewController,
-				},
-			),
-			fx.Supply(config),
-			types.ChaosObjects,
-		),
-		fx.Invoke(Run),
-	)
-	startCtx, cancel := context.WithTimeout(context.Background(), app.StartTimeout())
-	defer cancel()
-
-	if err := app.Start(startCtx); err != nil {
-		setupLog.Error(err, "fail to start manager")
-	}
-	Expect(err).ToNot(HaveOccurred())
-
 }, 60)
 
-var _ = AfterSuite(func() {
+var _ = SynchronizedAfterSuite(func() {}, func() {
 	By("tearing down the test environment")
-	stopCtx, cancel := context.WithTimeout(context.Background(), app.StopTimeout())
-	defer cancel()
-
-	if err := app.Stop(stopCtx); err != nil {
-		setupLog.Error(err, "fail to stop manager")
-	}
 	err := testEnv.Stop()
 	Expect(err).ToNot(HaveOccurred())
-})
+}, 60)
 
 type RunParams struct {
 	fx.In
@@ -136,5 +114,6 @@ type RunParams struct {
 
 func Run(params RunParams) error {
 	lister = utils.NewActiveLister(k8sClient, params.Logger)
-	return nil
+	err := controllers.BootstrapWorkflowControllers(params.Mgr, params.Logger)
+	return err
 }
