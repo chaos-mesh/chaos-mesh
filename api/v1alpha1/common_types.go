@@ -108,6 +108,13 @@ type StatefulObject interface {
 }
 
 // +kubebuilder:object:generate=false
+// MetaObject defines a very basic Object that can get meta
+type MetaObject interface {
+	runtime.Object
+	GetObjectMeta() *metav1.ObjectMeta
+}
+
+// +kubebuilder:object:generate=false
 
 // ChaosInstance defines some common attribute for a chaos
 type ChaosInstance struct {

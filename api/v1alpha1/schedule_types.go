@@ -66,9 +66,9 @@ type ScheduleSpec struct {
 	HistoryLimit int `json:"historyLimit,omitempty"`
 
 	// TODO: use a custom type, as `TemplateType` contains other possible values
-	Type TemplateType `json:"type"`
-	// TODO: support Workflow
-	EmbedChaos `json:",inline"`
+	Type ScheduleTemplateType `json:"type"`
+
+	ScheduleItem `json:",inline"`
 }
 
 // ScheduleStatus is the status of a schedule object
@@ -80,6 +80,8 @@ type ScheduleStatus struct {
 	// +nullable
 	LastScheduleTime metav1.Time `json:"time,omitempty"`
 }
+
+type ScheduleTemplateType string
 
 func (in *Schedule) IsPaused() bool {
 	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
