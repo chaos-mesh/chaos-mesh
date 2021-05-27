@@ -1,13 +1,12 @@
-import { AutocompleteMultipleField, LabelField, SelectField, TextField } from 'components/FormField'
-import { Box, Button, MenuItem } from '@material-ui/core'
+import { AutocompleteMultipleField, LabelField, SelectField, Submit, TextField } from 'components/FormField'
 import { Form, Formik, FormikErrors, FormikTouched, getIn } from 'formik'
 import { Kind, Spec } from '../data/target'
 import React, { useEffect, useState } from 'react'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
 import AdvancedOptions from 'components/AdvancedOptions'
+import { MenuItem } from '@material-ui/core'
 import { ObjectSchema } from 'yup'
-import PublishIcon from '@material-ui/icons/Publish'
 import Scope from './Scope'
 import T from 'components/T'
 import _snakecase from 'lodash.snakecase'
@@ -179,11 +178,7 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ kind, data, validatio
                 )}
               </AdvancedOptions>
             )}
-            <Box mt={6} textAlign="right">
-              <Button type="submit" variant="contained" color="primary" startIcon={<PublishIcon />}>
-                {T('common.submit')}
-              </Button>
-            </Box>
+            <Submit />
           </Form>
         )
       }}

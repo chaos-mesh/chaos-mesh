@@ -16,13 +16,11 @@ package controllers
 import (
 	"context"
 	"fmt"
-	"sort"
 	"strings"
 	"time"
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/retry"
@@ -34,13 +32,19 @@ import (
 
 // SerialNodeReconciler watches on nodes which type is Serial
 type SerialNodeReconciler struct {
+	*ChildNodesFetcher
 	kubeClient    client.Client
 	eventRecorder record.EventRecorder
 	logger        logr.Logger
 }
 
 func NewSerialNodeReconciler(kubeClient client.Client, eventRecorder record.EventRecorder, logger logr.Logger) *SerialNodeReconciler {
-	return &SerialNodeReconciler{kubeClient: kubeClient, eventRecorder: eventRecorder, logger: logger}
+	return &SerialNodeReconciler{
+		ChildNodesFetcher: NewChildNodesFetcher(kubeClient, logger),
+		kubeClient:        kubeClient,
+		eventRecorder:     eventRecorder,
+		logger:            logger,
+	}
 }
 
 // Reconcile should be invoked by: changes on a serial node, or changes on a node which controlled by serial node.
@@ -84,7 +88,7 @@ func (it *SerialNodeReconciler) Reconcile(request reconcile.Request) (reconcile.
 	it.logger.V(4).Info("resolve serial node", "node", request)
 
 	// make effects, create/remove children nodes
-	err = it.syncChildrenNodes(ctx, node)
+	err = it.syncChildNodes(ctx, node)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
@@ -97,7 +101,7 @@ func (it *SerialNodeReconciler) Reconcile(request reconcile.Request) (reconcile.
 			return err
 		}
 
-		activeChildren, finishedChildren, err := it.fetchChildrenNodes(ctx, nodeNeedUpdate)
+		activeChildren, finishedChildren, err := it.fetchChildNodes(ctx, nodeNeedUpdate)
 		if err != nil {
 			return err
 		}
@@ -129,6 +133,12 @@ func (it *SerialNodeReconciler) Reconcile(request reconcile.Request) (reconcile.
 				Status: corev1.ConditionTrue,
 				Reason: "",
 			})
+		} else {
+			SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
+				Type:   v1alpha1.ConditionAccomplished,
+				Status: corev1.ConditionFalse,
+				Reason: "",
+			})
 		}
 
 		return it.kubeClient.Status().Update(ctx, &nodeNeedUpdate)
@@ -142,12 +152,12 @@ func (it *SerialNodeReconciler) Reconcile(request reconcile.Request) (reconcile.
 	return reconcile.Result{}, nil
 }
 
-// syncChildrenNodes reconciles the children nodes to following the desired states.
+// syncChildNodes reconciles the children nodes to following the desired states.
 // It does the first 2 steps mentioned in Reconcile.
 //
 // Notice again: we SHOULD NOT decide the operation based on v1alpha1.WorkflowNodeStatus, please
 // use kubeClient to fetch information from real world.
-func (it *SerialNodeReconciler) syncChildrenNodes(ctx context.Context, node v1alpha1.WorkflowNode) error {
+func (it *SerialNodeReconciler) syncChildNodes(ctx context.Context, node v1alpha1.WorkflowNode) error {
 
 	// empty serial node
 	if len(node.Spec.Tasks) == 0 {
@@ -157,12 +167,12 @@ func (it *SerialNodeReconciler) syncChildrenNodes(ctx context.Context, node v1al
 		return nil
 	}
 
-	activeChildrenNodes, finishedChildrenNodes, err := it.fetchChildrenNodes(ctx, node)
+	activeChildNodes, finishedChildNodes, err := it.fetchChildNodes(ctx, node)
 	if err != nil {
 		return err
 	}
 	var taskToStartup string
-	if len(activeChildrenNodes) == 0 {
+	if len(activeChildNodes) == 0 {
 		// no active children, trying to spawn a new one
 		for index, task := range node.Spec.Tasks {
 			// Walking through on the Spec.Tasks, each one of task SHOULD has one corresponding workflow node;
@@ -173,20 +183,20 @@ func (it *SerialNodeReconciler) syncChildrenNodes(ctx context.Context, node v1al
 			// One serial node have three children nodes: A, B, C, and all of them have finished.
 			// Then user updates the Spec.Tasks[B], the expected behavior is workflow node B and C will be
 			// deleted, then create a new node that refs to B, no effects on A.
-			if index < len(finishedChildrenNodes) {
+			if index < len(finishedChildNodes) {
 				// TODO: if the definition/spec of task changed, we should also respawn the node
 				// child node start with task name
 
 				// TODO: maybe the changes on Spec.Tasks should be concerned each time, not only during spawning
 				// new instances, for shutdown outdated nodes **instantly**
 
-				if strings.HasPrefix(task, finishedChildrenNodes[index].Name) {
+				if strings.HasPrefix(task, finishedChildNodes[index].Name) {
 					// TODO: emit event
 					taskToStartup = task
 
-					// TODO: nodes to delete should be all other unrecognized children nodes, include not contained in finishedChildrenNodes
+					// TODO: nodes to delete should be all other unrecognized children nodes, include not contained in finishedChildNodes
 					// delete that related nodes with best-effort pattern
-					nodesToDelete := finishedChildrenNodes[index:]
+					nodesToDelete := finishedChildNodes[index:]
 					for _, refToDelete := range nodesToDelete {
 						nodeToDelete := v1alpha1.WorkflowNode{}
 						err := it.kubeClient.Get(ctx, types.NamespacedName{
@@ -216,7 +226,7 @@ func (it *SerialNodeReconciler) syncChildrenNodes(ctx context.Context, node v1al
 	} else {
 		it.logger.V(4).Info("serial node has active child/children, skip scheduling",
 			"node", fmt.Sprintf("%s/%s", node.Namespace, node.Name),
-			"active children", activeChildrenNodes)
+			"active children", activeChildNodes)
 	}
 
 	if len(taskToStartup) == 0 {
@@ -236,16 +246,16 @@ func (it *SerialNodeReconciler) syncChildrenNodes(ctx context.Context, node v1al
 		return err
 	}
 	// TODO: using ordered id instead of random suffix is better, like StatefulSet, also related to the sorting
-	childrenNodes, err := renderNodesByTemplates(&parentWorkflow, &node, taskToStartup)
+	childNodes, err := renderNodesByTemplates(&parentWorkflow, &node, taskToStartup)
 	if err != nil {
-		it.logger.Error(err, "failed to render children childrenNodes",
+		it.logger.Error(err, "failed to render children childNodes",
 			"node", fmt.Sprintf("%s/%s", node.Namespace, node.Name))
 		return err
 	}
 
 	// TODO: emit event
 	var childrenNames []string
-	for _, childNode := range childrenNodes {
+	for _, childNode := range childNodes {
 		err := it.kubeClient.Create(ctx, childNode)
 		if err != nil {
 			it.logger.Error(err, "failed to create child node",
@@ -260,63 +270,4 @@ func (it *SerialNodeReconciler) syncChildrenNodes(ctx context.Context, node v1al
 		"child node", childrenNames)
 
 	return nil
-}
-
-func (it *SerialNodeReconciler) fetchChildrenNodes(ctx context.Context, node v1alpha1.WorkflowNode) (activeChildrenNodes []v1alpha1.WorkflowNode, finishedChildrenNodes []v1alpha1.WorkflowNode, err error) {
-	childrenNodes := v1alpha1.WorkflowNodeList{}
-	controlledByThisNode, err := metav1.LabelSelectorAsSelector(&metav1.LabelSelector{
-		MatchLabels: map[string]string{
-			v1alpha1.LabelControlledBy: node.Name,
-		},
-	})
-
-	if err != nil {
-		it.logger.Error(err, "failed to build label selector with filtering children workflow node controlled by current node",
-			"current node", fmt.Sprintf("%s/%s", node.Namespace, node.Name))
-		return nil, nil, err
-	}
-
-	err = it.kubeClient.List(ctx, &childrenNodes, &client.ListOptions{
-		LabelSelector: controlledByThisNode,
-	})
-
-	if err != nil {
-		it.logger.Error(err, "failed to list children workflow node controlled by current node",
-			"current node", fmt.Sprintf("%s/%s", node.Namespace, node.Name))
-		return nil, nil, err
-	}
-
-	sortedChildrenNodes := SortByCreationTimestamp(childrenNodes.Items)
-	sort.Sort(sortedChildrenNodes)
-
-	it.logger.V(4).Info("list children node", "current node",
-		"current node", fmt.Sprintf("%s/%s", node.Namespace, node.Name),
-		len(sortedChildrenNodes), "children", sortedChildrenNodes)
-
-	var activeChildren []v1alpha1.WorkflowNode
-	var finishedChildren []v1alpha1.WorkflowNode
-
-	for _, item := range sortedChildrenNodes {
-		childNode := item
-		if WorkflowNodeFinished(childNode.Status) {
-			finishedChildren = append(finishedChildren, childNode)
-		} else {
-			activeChildren = append(activeChildren, childNode)
-		}
-	}
-	return activeChildren, finishedChildren, nil
-}
-
-type SortByCreationTimestamp []v1alpha1.WorkflowNode
-
-func (it SortByCreationTimestamp) Len() int {
-	return len(it)
-}
-
-func (it SortByCreationTimestamp) Less(i, j int) bool {
-	return it[j].GetCreationTimestamp().After(it[i].GetCreationTimestamp().Time)
-}
-
-func (it SortByCreationTimestamp) Swap(i, j int) {
-	it[i], it[j] = it[j], it[i]
 }

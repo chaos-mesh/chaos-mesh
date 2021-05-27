@@ -47,7 +47,7 @@ echo "Checking chaosctl function"
 ./chaosctl logs 1>/dev/null
 status=$(./chaosctl debug -i networkchaos web-show-network-delay | grep "Execute as expected")
 if [[ -z "$status" ]]; then
-    ./chaosctl debug -i networkchaos web-show-network-delay -v 7
+    ./chaosctl debug -i networkchaos web-show-network-delay
     echo "Chaos is not running as expected"
     code=1
 fi

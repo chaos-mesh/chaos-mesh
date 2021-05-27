@@ -9,9 +9,9 @@ const AffectedPods: React.FC<{ pods: EventPod[] }> = ({ pods }) => (
     <Table size="small">
       <TableHead>
         <TableRow>
-          <TableCell>{T('events.event.pod.ip')}</TableCell>
-          <TableCell>{T('events.event.pod.name')}</TableCell>
-          <TableCell>{T('events.event.pod.namespace')}</TableCell>
+          <TableCell>{T('common.ip')}</TableCell>
+          <TableCell>{T('common.name')}</TableCell>
+          <TableCell>{T('k8s.namespace')}</TableCell>
           <TableCell>{T('events.event.pod.action')}</TableCell>
           <TableCell>{T('events.event.pod.message')}</TableCell>
         </TableRow>

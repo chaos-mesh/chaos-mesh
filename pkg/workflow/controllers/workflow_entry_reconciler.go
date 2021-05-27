@@ -179,6 +179,11 @@ func (it *WorkflowEntryReconciler) Reconcile(request reconcile.Request) (reconci
 			workflowNeedUpdate.Status.EndTime = nil
 		}
 
+		if workflowNeedUpdate.Status.StartTime == nil {
+			tmp := metav1.NewTime(startTime)
+			workflowNeedUpdate.Status.StartTime = &tmp
+		}
+
 		err = it.kubeClient.Status().Update(ctx, &workflowNeedUpdate)
 		if err != nil {
 			it.logger.Error(err, "failed to update workflowNeedUpdate status")
