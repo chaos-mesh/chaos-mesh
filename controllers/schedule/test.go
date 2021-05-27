@@ -33,13 +33,13 @@ import (
 
 func TestScheduleBasic(k8sClient client.Client) {
 	key := types.NamespacedName{
-		Name:      "foo0",
+		Name:      "foo21",
 		Namespace: "default",
 	}
 	duration := "100m"
 	schedule := &v1alpha1.Schedule{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "foo0",
+			Name:      "foo21",
 			Namespace: "default",
 		},
 		Spec: v1alpha1.ScheduleSpec{
@@ -74,18 +74,17 @@ func TestScheduleBasic(k8sClient client.Client) {
 
 	By("deleting the created object")
 	Expect(k8sClient.Delete(context.TODO(), schedule)).To(Succeed())
-	Expect(k8sClient.Get(context.TODO(), key, schedule)).ToNot(Succeed())
 }
 
 func TestScheduleChaos(k8sClient client.Client) {
 	key := types.NamespacedName{
-		Name:      "foo1",
+		Name:      "foo22",
 		Namespace: "default",
 	}
 	duration := "100s"
 	schedule := &v1alpha1.Schedule{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "foo1",
+			Name:      "foo22",
 			Namespace: "default",
 		},
 		Spec: v1alpha1.ScheduleSpec{
@@ -139,18 +138,17 @@ func TestScheduleChaos(k8sClient client.Client) {
 	By("deleting the created object")
 	{
 		Expect(k8sClient.Delete(context.TODO(), schedule)).To(Succeed())
-		Expect(k8sClient.Get(context.TODO(), key, schedule)).ToNot(Succeed())
 	}
 }
 func TestScheduleConcurrentChaos(k8sClient client.Client) {
 	key := types.NamespacedName{
-		Name:      "foo2",
+		Name:      "foo23",
 		Namespace: "default",
 	}
 	duration := "100s"
 	schedule := &v1alpha1.Schedule{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "foo2",
+			Name:      "foo23",
 			Namespace: "default",
 		},
 		Spec: v1alpha1.ScheduleSpec{
@@ -197,18 +195,17 @@ func TestScheduleConcurrentChaos(k8sClient client.Client) {
 	By("deleting the created object")
 	{
 		Expect(k8sClient.Delete(context.TODO(), schedule)).To(Succeed())
-		Expect(k8sClient.Get(context.TODO(), key, schedule)).ToNot(Succeed())
 	}
 }
 func TestScheduleGC(k8sClient client.Client) {
 	key := types.NamespacedName{
-		Name:      "foo3",
+		Name:      "foo24",
 		Namespace: "default",
 	}
 	duration := "1s"
 	schedule := &v1alpha1.Schedule{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "foo3",
+			Name:      "foo24",
 			Namespace: "default",
 		},
 		Spec: v1alpha1.ScheduleSpec{
@@ -256,19 +253,18 @@ func TestScheduleGC(k8sClient client.Client) {
 	By("deleting the created object")
 	{
 		Expect(k8sClient.Delete(context.TODO(), schedule)).To(Succeed())
-		Expect(k8sClient.Get(context.TODO(), key, schedule)).ToNot(Succeed())
 	}
 }
 
 func TestScheduleWorkflow(k8sClient client.Client) {
 	key := types.NamespacedName{
-		Name:      "foo10",
+		Name:      "foo25",
 		Namespace: "default",
 	}
 	duration := "10000s"
 	schedule := &v1alpha1.Schedule{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "foo10",
+			Name:      "foo25",
 			Namespace: "default",
 		},
 		Spec: v1alpha1.ScheduleSpec{
@@ -323,19 +319,18 @@ func TestScheduleWorkflow(k8sClient client.Client) {
 	By("deleting the created object")
 	{
 		Expect(k8sClient.Delete(context.TODO(), schedule)).To(Succeed())
-		Expect(k8sClient.Get(context.TODO(), key, schedule)).ToNot(Succeed())
 	}
 }
 
 func TestScheduleWorkflowGC(k8sClient client.Client) {
 	key := types.NamespacedName{
-		Name:      "foo11",
+		Name:      "foo26",
 		Namespace: "default",
 	}
 	duration := "1s"
 	schedule := &v1alpha1.Schedule{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "foo11",
+			Name:      "foo26",
 			Namespace: "default",
 		},
 		Spec: v1alpha1.ScheduleSpec{
@@ -384,6 +379,5 @@ func TestScheduleWorkflowGC(k8sClient client.Client) {
 	By("deleting the created object")
 	{
 		Expect(k8sClient.Delete(context.TODO(), schedule)).To(Succeed())
-		Expect(k8sClient.Get(context.TODO(), key, schedule)).ToNot(Succeed())
 	}
 }

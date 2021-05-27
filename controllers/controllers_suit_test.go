@@ -15,24 +15,20 @@ package controllers
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-controller-manager/provider"
 	"github.com/chaos-mesh/chaos-mesh/controllers/desiredphase"
 	"github.com/chaos-mesh/chaos-mesh/controllers/finalizers"
 	"github.com/chaos-mesh/chaos-mesh/controllers/schedule"
+	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/utils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/test"
+	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/controllers"
 	"github.com/go-logr/logr"
 	"github.com/onsi/ginkgo"
-	ginkgoConfig "github.com/onsi/ginkgo/config"
 	"go.uber.org/fx"
-	"k8s.io/apimachinery/pkg/runtime"
-	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -44,7 +40,7 @@ var _ = ginkgo.Describe("[Controllers]", func() {
 			app = startNewAppWithGivenOptions(fx.Provide(fx.Annotated{
 				Group:  "controller",
 				Target: desiredphase.NewController,
-			}))
+			}), Run)
 		})
 
 		ginkgo.JustAfterEach(func() {
@@ -58,8 +54,6 @@ var _ = ginkgo.Describe("[Controllers]", func() {
 		Context("Setting phase", func() {
 			It("should set phase", func() {
 				desiredphase.TestDesiredPhaseBasic(k8sClient)
-			})
-			It("should set phase due to pause", func() {
 				desiredphase.TestDesiredPhasePause(k8sClient)
 			})
 		})
@@ -70,7 +64,7 @@ var _ = ginkgo.Describe("[Controllers]", func() {
 			app = startNewAppWithGivenOptions(fx.Provide(fx.Annotated{
 				Group:  "controller",
 				Target: finalizers.NewController,
-			}))
+			}), Run)
 		})
 
 		ginkgo.JustAfterEach(func() {
@@ -90,7 +84,8 @@ var _ = ginkgo.Describe("[Controllers]", func() {
 	ginkgo.Context("[Schedule]", func() {
 		var app *fx.App
 		ginkgo.JustBeforeEach(func() {
-			app = startNewAppWithGivenOptions(schedule.Module)
+			app = startNewAppWithGivenOptions(schedule.Module, RunWithWorkflow)
+
 		})
 
 		ginkgo.JustAfterEach(func() {
@@ -101,40 +96,22 @@ var _ = ginkgo.Describe("[Controllers]", func() {
 				setupLog.Error(err, "fail to stop manager")
 			}
 		})
-		Context("Basic", func() {
-			It(("Should be created and deleted successfully"), func() {
-				schedule.TestScheduleBasic(k8sClient)
-			})
-		})
-		Context("Common chaos", func() {
-			It("should create non-concurrent chaos", func() {
-				schedule.TestScheduleChaos(k8sClient)
-
-			})
-			It("should create concurrent chaos", func() {
-				schedule.TestScheduleConcurrentChaos(k8sClient)
-
-			})
-			It("should collect garbage", func() {
-				schedule.TestScheduleGC(k8sClient)
-			})
-		})
-		Context("workflow", func() {
-			It("should create non-concurrent workflow", func() {
-				schedule.TestScheduleWorkflow(k8sClient)
-			})
-			It("should collect garbage", func() {
-				schedule.TestScheduleWorkflowGC(k8sClient)
-			})
+		It(("Should work fine"), func() {
+			schedule.TestScheduleBasic(k8sClient)
+			schedule.TestScheduleChaos(k8sClient)
+			schedule.TestScheduleConcurrentChaos(k8sClient)
+			schedule.TestScheduleGC(k8sClient)
+			schedule.TestScheduleWorkflow(k8sClient)
+			schedule.TestScheduleWorkflowGC(k8sClient)
 		})
 	})
 })
 
-func startNewAppWithGivenOptions(options fx.Option) *fx.App {
+func startNewAppWithGivenOptions(options fx.Option, Run func(RunParams) error) *fx.App {
 	app := fx.New(
 		fx.Options(
 			fx.Provide(
-				NewTestOption,
+				test.NewTestOption,
 				provider.NewClient,
 				provider.NewReader,
 				provider.NewLogger,
@@ -158,28 +135,23 @@ func startNewAppWithGivenOptions(options fx.Option) *fx.App {
 	return app
 }
 
-func NewTestOption(logger logr.Logger) *ctrl.Options {
-	setupLog := logger.WithName("setup")
-	scheme := runtime.NewScheme()
+type RunParams struct {
+	fx.In
 
-	clientgoscheme.AddToScheme(scheme)
+	Mgr    ctrl.Manager
+	Logger logr.Logger
 
-	v1alpha1.AddToScheme(scheme)
-	fmt.Println("Bind to port:", 9443+ginkgoConfig.GinkgoConfig.ParallelNode)
-	options := ctrl.Options{
-		Scheme:             scheme,
-		MetricsBindAddress: ":" + fmt.Sprint(10080+ginkgoConfig.GinkgoConfig.ParallelNode),
-		LeaderElection:     ccfg.ControllerCfg.EnableLeaderElection,
-		Port:               9443 + ginkgoConfig.GinkgoConfig.ParallelNode,
-	}
+	Controllers []types.Controller `group:"controller"`
+	Objs        []types.Object     `group:"objs"`
+}
 
-	if ccfg.ControllerCfg.ClusterScoped {
-		setupLog.Info("Chaos controller manager is running in cluster scoped mode.")
-		// will not specific a certain namespace
-	} else {
-		setupLog.Info("Chaos controller manager is running in namespace scoped mode.", "targetNamespace", ccfg.ControllerCfg.TargetNamespace)
-		options.Namespace = ccfg.ControllerCfg.TargetNamespace
-	}
+func Run(params RunParams) error {
+	lister = utils.NewActiveLister(k8sClient, params.Logger)
+	return nil
+}
 
-	return &options
+func RunWithWorkflow(params RunParams) error {
+	lister = utils.NewActiveLister(k8sClient, params.Logger)
+	err := controllers.BootstrapWorkflowControllers(params.Mgr, params.Logger)
+	return err
 }
