@@ -42,7 +42,7 @@ const Workflows = () => {
 
       {!loading && workflows.length === 0 && (
         <NotFound illustrated textAlign="center">
-          <Typography>{T('workflows.noWorkflowsFound')}</Typography>
+          <Typography>{T('workflows.notFound')}</Typography>
         </NotFound>
       )}
 

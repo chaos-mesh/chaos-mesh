@@ -101,7 +101,7 @@
       "waiting": "等待中",
       "finished": "完成"
     },
-    "noExperimentsFound": "未发现实验",
+    "notFound": "未发现实验",
     "deleteMulti": "归档所选实验",
     "deleteDesc": "你仍然可以在归档中找到此实验",
     "pauseDesc": "你可以在同一位置重启这个实验",
@@ -109,7 +109,7 @@
   },
   "workflows": {
     "title": "工作流",
-    "noWorkflowsFound": "未发现工作流",
+    "notFound": "未发现工作流",
     "deleteDesc": "此工作流将被永久删除"
   },
   "newW": {
@@ -150,7 +150,9 @@
   },
   "schedules": {
     "title": "计划",
-    "single": "计划"
+    "single": "计划",
+    "notFound": "未发现计划",
+    "deleteDesc": "你仍然可以在归档中找到此计划"
   },
   "newS": {
     "title": "新的计划",
@@ -158,7 +160,6 @@
     "basic": {
       "nameHelper": "计划的名称",
       "scheduleHelper": "定义计划",
-      "durationHelper": "计划的持续时间",
       "startingDeadlineSeconds": "实验过期时间",
       "startingDeadlineSecondsHelper": "设置以忽略长时间未运行的实验",
       "concurrencyPolicy": "并发策略",
@@ -171,7 +172,7 @@
   },
   "events": {
     "title": "事件",
-    "noEventsFound": "未发现事件",
+    "notFound": "未发现事件",
     "eventsPerPage": "每页事件数",
     "event": {
       "experiment": "实验",
@@ -189,7 +190,7 @@
   "archives": {
     "title": "归档",
     "single": "归档",
-    "noArchivesFound": "未发现归档",
+    "notFound": "未发现归档",
     "deleteMulti": "删除所选归档",
     "deleteDesc": "归档将被永久删除",
     "numberOfRuns": "运行次数",

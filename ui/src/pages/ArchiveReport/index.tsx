@@ -7,8 +7,8 @@ import { ArchiveDetail } from 'api/archives.type'
 import ArchiveDuration from 'components/ArchiveDuration'
 import ArchiveNumberOf from 'components/ArchiveNumberOf'
 import EventsTable from 'components/EventsTable'
-import ExperimentConfiguration from 'components/ExperimentConfiguration'
 import Loading from 'components-mui/Loading'
+import ObjectConfiguration from 'components/ObjectConfiguration'
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
 import T from 'components/T'
@@ -72,7 +72,7 @@ const ArchiveReport: React.FC = () => {
               <Grid item xs={12}>
                 <Paper>
                   <PaperTop title={T('common.configuration')} />
-                  <ExperimentConfiguration experimentDetail={detail} />
+                  <ObjectConfiguration config={detail} />
                 </Paper>
               </Grid>
 

@@ -15,11 +15,10 @@ import {
 import Check from '@material-ui/icons/Check'
 import Paper from 'components-mui/Paper'
 import React from 'react'
-import { RootState } from 'store'
 import T from 'components/T'
 import clsx from 'clsx'
 import { format } from 'lib/luxon'
-import { useSelector } from 'react-redux'
+import { useStoreSelector } from 'store'
 
 const QontoConnector = withStyles((theme) => ({
   alternativeLabel: {
@@ -82,7 +81,7 @@ function QontoStepIcon(props: StepIconProps) {
 }
 
 const ArchiveDuration: React.FC<{ start: string; end: string }> = ({ start, end }) => {
-  const { lang } = useSelector((state: RootState) => state.settings)
+  const { lang } = useStoreSelector((state) => state.settings)
 
   const steps = [format(start, lang), format(end, lang)]
 

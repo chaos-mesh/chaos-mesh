@@ -101,7 +101,7 @@
       "waiting": "Waiting",
       "finished": "Finished"
     },
-    "noExperimentsFound": "No experiments found",
+    "notFound": "No experiments found",
     "createdAt": "Created",
     "deleteMulti": "Archive selected experiments",
     "deleteDesc": "You can still find this experiment in the archives",
@@ -110,7 +110,7 @@
   },
   "workflows": {
     "title": "Workflows",
-    "noWorkflowsFound": "No workflows found",
+    "notFound": "No workflows found",
     "deleteDesc": "This workflow will be permanently deleted"
   },
   "newW": {
@@ -151,7 +151,9 @@
   },
   "schedules": {
     "title": "Schedules",
-    "single": "Schedule"
+    "single": "Schedule",
+    "notFound": "No schedules found",
+    "deleteDesc": "You can still find this schedule in the archives"
   },
   "newS": {
     "title": "New Schedule",
@@ -159,7 +161,6 @@
     "basic": {
       "nameHelper": "The schedule name",
       "scheduleHelper": "Define the schedule",
-      "durationHelper": "The schedule duration",
       "startingDeadlineSeconds": "Experiment expiration time",
       "startingDeadlineSecondsHelper": "Set to ignore experiments that haven’t been running for a long time",
       "concurrencyPolicy": "Concurrency Policy",
@@ -172,7 +173,7 @@
   },
   "events": {
     "title": "Events",
-    "noEventsFound": "No events found",
+    "notFound": "No events found",
     "eventsPerPage": "Events per page",
     "event": {
       "experiment": "Experiment",
@@ -190,7 +191,7 @@
   "archives": {
     "title": "Archives",
     "single": "Archive",
-    "noArchivesFound": "No archives found",
+    "notFound": "No archives found",
     "deleteMulti": "Delete selected archives",
     "deleteDesc": "The Archive will be permanently deleted",
     "numberOfRuns": "Number of Runs",

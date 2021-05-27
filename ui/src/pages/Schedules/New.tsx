@@ -4,6 +4,7 @@ import { useStoreDispatch, useStoreSelector } from 'store'
 import { Grid } from '@material-ui/core'
 import NewExperiment from 'components/NewExperimentNext'
 import api from 'api'
+import { parseSubmit } from 'lib/formikhelpers'
 import { setAlert } from 'slices/globalStatus'
 import { useHistory } from 'react-router-dom'
 import { useIntl } from 'react-intl'
@@ -16,9 +17,16 @@ const New = () => {
   const dispatch = useStoreDispatch()
 
   const onSubmit = ({ target, basic }: any) => {
-    const data = {
+    const parsedValues = parseSubmit({
       ...basic,
       target,
+    })
+    const duration = parsedValues.scheduler.duration
+    delete (parsedValues as any).scheduler
+
+    const data = {
+      ...parsedValues,
+      duration,
       ...scheduleSpecific,
     }
 

@@ -1,15 +1,16 @@
-import { Box, Button, Checkbox, Typography } from '@material-ui/core'
+import { Box, Breadcrumbs, Button, Checkbox, LinkProps, Link as MUILink, Typography } from '@material-ui/core'
 import { Confirm, setAlert, setConfirm } from 'slices/globalStatus'
+import { Link, useParams } from 'react-router-dom'
 import { FixedSizeList as RWList, ListChildComponentProps as RWListChildComponentProps } from 'react-window'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import { Archive } from 'api/archives.type'
 import CloseIcon from '@material-ui/icons/Close'
 import DeleteOutlinedIcon from '@material-ui/icons/DeleteOutlined'
-import ExperimentListItem from 'components/ExperimentListItem'
 import FilterListIcon from '@material-ui/icons/FilterList'
 import Loading from 'components-mui/Loading'
 import NotFound from 'components-mui/NotFound'
+import ObjectListItem from 'components/ObjectListItem'
 import PlaylistAddCheckIcon from '@material-ui/icons/PlaylistAddCheck'
 import Space from 'components-mui/Space'
 import T from 'components/T'
@@ -31,6 +32,7 @@ const StyledCheckBox = styled(Checkbox)({
 
 export default function Archives() {
   const intl = useIntl()
+  const { type } = useParams<{ type: 'workflows' | 'schedules' | 'experiments' }>()
 
   const dispatch = useStoreDispatch()
 
@@ -40,15 +42,29 @@ export default function Archives() {
   const batchLength = Object.keys(batch).length
   const isBatchEmpty = batchLength === 0
 
-  const fetchArchives = () => {
-    api.archives
-      .archives()
-      .then(({ data }) => setArchives(data))
+  const fetchArchives = useCallback(() => {
+    let request
+    switch (type) {
+      case 'schedules':
+        request = api.schedules.archives
+        break
+      case 'experiments':
+      default:
+        request = api.archives.archives
+        break
+    }
+
+    request()
+      .then(({ data }) => {
+        data.map((d) => (d.created = d.start_time))
+
+        setArchives(data)
+      })
       .catch(console.error)
       .finally(() => setLoading(false))
-  }
+  }, [type])
 
-  useEffect(fetchArchives, [])
+  useEffect(fetchArchives, [fetchArchives])
 
   const handleSelect = (selected: Confirm) => dispatch(setConfirm(selected))
   const onSelect = (selected: Confirm) =>
@@ -122,6 +138,16 @@ export default function Archives() {
     })
   }
 
+  const ActiveLink = ({ href, children }: LinkProps) => (
+    <MUILink
+      component={Link}
+      color={type === href ? 'primary' : type === undefined && href === 'experiments' ? 'primary' : 'inherit'}
+      to={`/archives/${href}`}
+    >
+      {children}
+    </MUILink>
+  )
+
   const Row = ({ data, index, style }: RWListChildComponentProps) => (
     <Box display="flex" alignItems="center" mb={3} style={style}>
       {!isBatchEmpty && (
@@ -133,14 +159,20 @@ export default function Archives() {
         />
       )}
       <Box flex={1}>
-        <ExperimentListItem experiment={data[index]} isArchive onSelect={onSelect} intl={intl} />
+        <ObjectListItem type="archive" data={data[index]} onSelect={onSelect} />
       </Box>
     </Box>
   )
 
   return (
     <>
-      <Space mb={6}>
+      <Breadcrumbs aria-label="breadcrumb">
+        <ActiveLink href="workflows">{T('workflows.title')}</ActiveLink>
+        <ActiveLink href="schedules">{T('schedules.title')}</ActiveLink>
+        <ActiveLink href="experiments">{T('experiments.title')}</ActiveLink>
+      </Breadcrumbs>
+
+      <Space my={6}>
         <Button
           variant="outlined"
           startIcon={isBatchEmpty ? <FilterListIcon /> : <CloseIcon />}
@@ -179,7 +211,7 @@ export default function Archives() {
 
       {!loading && archives.length === 0 && (
         <NotFound illustrated textAlign="center">
-          <Typography>{T('archives.noArchivesFound')}</Typography>
+          <Typography>{T('archives.notFound')}</Typography>
         </NotFound>
       )}
 

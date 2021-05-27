@@ -1,13 +1,12 @@
 import { Box, Checkbox, FormControl, FormControlLabel, FormHelperText, Typography } from '@material-ui/core'
-import { RootState, useStoreDispatch } from 'store'
 import { setDebugMode, setEnableKubeSystemNS } from 'slices/settings'
+import { useStoreDispatch, useStoreSelector } from 'store'
 
 import React from 'react'
 import T from 'components/T'
-import { useSelector } from 'react-redux'
 
 const Experiments = () => {
-  const { settings } = useSelector((state: RootState) => state)
+  const { settings } = useStoreSelector((state) => state)
   const { debugMode, enableKubeSystemNS } = settings
   const dispatch = useStoreDispatch()
 

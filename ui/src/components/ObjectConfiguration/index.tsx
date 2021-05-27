@@ -3,11 +3,10 @@ import { Grid, TableCell as MUITableCell, Table, TableBody, TableRow, Typography
 import { ArchiveDetail } from 'api/archives.type'
 import { ExperimentDetail } from 'api/experiments.type'
 import React from 'react'
-import { RootState } from 'store'
 import T from 'components/T'
 import { format } from 'lib/luxon'
 import { toTitleCase } from 'lib/utils'
-import { useSelector } from 'react-redux'
+import { useStoreSelector } from 'store'
 
 const TableCell = withStyles({
   root: {
@@ -15,14 +14,14 @@ const TableCell = withStyles({
   },
 })(MUITableCell)
 
-interface ExperimentConfigurationProps {
-  experimentDetail: ExperimentDetail | ArchiveDetail
+interface ObjectConfigurationProps {
+  config: ExperimentDetail | ArchiveDetail
 }
 
-const ExperimentConfiguration: React.FC<ExperimentConfigurationProps> = ({ experimentDetail: e }) => {
-  const { lang } = useSelector((state: RootState) => state.settings)
+const ObjectConfiguration: React.FC<ObjectConfigurationProps> = ({ config }) => {
+  const { lang } = useStoreSelector((state) => state.settings)
 
-  const action: string = e.kube_object.spec.action
+  const action: string = config.kube_object.spec.action
 
   return (
     <Grid container>
@@ -37,7 +36,7 @@ const ExperimentConfiguration: React.FC<ExperimentConfigurationProps> = ({ exper
               <TableCell>{T('common.name')}</TableCell>
               <TableCell>
                 <Typography variant="body2" color="textSecondary">
-                  {e.name}
+                  {config.name}
                 </Typography>
               </TableCell>
             </TableRow>
@@ -46,12 +45,12 @@ const ExperimentConfiguration: React.FC<ExperimentConfigurationProps> = ({ exper
               <TableCell>{T('newE.target.kind')}</TableCell>
               <TableCell>
                 <Typography variant="body2" color="textSecondary">
-                  {e.kind}
+                  {config.kind}
                 </Typography>
               </TableCell>
             </TableRow>
 
-            {['PodChaos', 'NetworkChaos', 'IoChaos'].includes(e.kind) && (
+            {['PodChaos', 'NetworkChaos', 'IoChaos'].includes(config.kind) && (
               <TableRow>
                 <TableCell>{T('newE.target.action')}</TableCell>
                 <TableCell>
@@ -82,7 +81,7 @@ const ExperimentConfiguration: React.FC<ExperimentConfigurationProps> = ({ exper
               <TableCell>{T('common.uuid')}</TableCell>
               <TableCell>
                 <Typography variant="body2" color="textSecondary">
-                  {e.uid}
+                  {config.uid}
                 </Typography>
               </TableCell>
             </TableRow>
@@ -91,17 +90,17 @@ const ExperimentConfiguration: React.FC<ExperimentConfigurationProps> = ({ exper
               <TableCell>{T('k8s.namespace')}</TableCell>
               <TableCell>
                 <Typography variant="body2" color="textSecondary">
-                  {e.namespace}
+                  {config.namespace}
                 </Typography>
               </TableCell>
             </TableRow>
 
-            {(e as ExperimentDetail).created && (
+            {(config as ExperimentDetail).created && (
               <TableRow>
                 <TableCell>{T('table.created')}</TableCell>
                 <TableCell>
                   <Typography variant="body2" color="textSecondary">
-                    {format((e as ExperimentDetail).created, lang)}
+                    {format((config as ExperimentDetail).created, lang)}
                   </Typography>
                 </TableCell>
               </TableRow>
@@ -112,16 +111,16 @@ const ExperimentConfiguration: React.FC<ExperimentConfigurationProps> = ({ exper
 
       <Grid item md={4}>
         <Typography variant="subtitle2" gutterBottom>
-          {T('newE.steps.schedule')}
+          {T('newE.steps.run')}
         </Typography>
 
         <Table size="small">
           <TableBody>
             <TableRow>
-              <TableCell>{T('newE.schedule.duration')}</TableCell>
+              <TableCell>{T('newE.run.duration')}</TableCell>
               <TableCell>
                 <Typography variant="body2" color="textSecondary">
-                  {e.kube_object.spec.duration ? e.kube_object.spec.duration : T('newE.schedule.continuous')}
+                  {config.kube_object.spec.duration ? config.kube_object.spec.duration : T('newE.run.continuous')}
                 </Typography>
               </TableCell>
             </TableRow>
@@ -132,4 +131,4 @@ const ExperimentConfiguration: React.FC<ExperimentConfigurationProps> = ({ exper
   )
 }
 
-export default ExperimentConfiguration
+export default ObjectConfiguration

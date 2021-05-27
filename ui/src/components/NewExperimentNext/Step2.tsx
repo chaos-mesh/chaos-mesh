@@ -87,7 +87,6 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false })
     if (inSchedule) {
       dispatch(
         setScheduleSpecific({
-          duration: values.duration,
           schedule: values.schedule,
           starting_deadline_seconds: values.starting_deadline_seconds,
           concurrency_policy: values.concurrency_policy,
@@ -95,7 +94,6 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false })
         })
       )
 
-      delete values.duration
       delete values.schedule
       delete values.starting_deadline_seconds
       delete values.concurrency_policy

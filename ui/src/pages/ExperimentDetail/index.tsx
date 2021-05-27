@@ -10,10 +10,10 @@ import Alert from '@material-ui/lab/Alert'
 import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
 import CloudDownloadOutlinedIcon from '@material-ui/icons/CloudDownloadOutlined'
 import { Event } from 'api/events.type'
-import ExperimentConfiguration from 'components/ExperimentConfiguration'
 import { ExperimentDetail as ExperimentDetailType } from 'api/experiments.type'
 import Loading from 'components-mui/Loading'
 import NoteOutlinedIcon from '@material-ui/icons/NoteOutlined'
+import ObjectConfiguration from 'components/ObjectConfiguration'
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
 import PauseCircleOutlineIcon from '@material-ui/icons/PauseCircleOutline'
@@ -292,7 +292,7 @@ export default function ExperimentDetail() {
                   </Button>
                 </Space>
               </PaperTop>
-              {detail && <ExperimentConfiguration experimentDetail={detail} />}
+              {detail && <ObjectConfiguration config={detail} />}
             </Paper>
           </Grid>
 

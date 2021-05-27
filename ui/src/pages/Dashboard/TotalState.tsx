@@ -82,7 +82,7 @@ const TotalState: React.FC<TotalStateProps> = (props) => {
           activeOuterRadiusOffset={2}
         />
       ) : (
-        <NotFound>{T('experiments.noExperimentsFound')}</NotFound>
+        <NotFound>{T('experiments.notFound')}</NotFound>
       )}
     </div>
   )

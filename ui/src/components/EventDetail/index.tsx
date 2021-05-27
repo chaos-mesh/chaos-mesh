@@ -4,13 +4,12 @@ import React, { useEffect, useState } from 'react'
 import AffectedPods from 'components/AffectedPods'
 import { Event } from 'api/events.type'
 import Loading from 'components-mui/Loading'
-import { RootState } from 'store'
 import StateLabel from 'components-mui/StateLabel'
 import { StateOfExperimentsEnum } from 'api/experiments.type'
 import T from 'components/T'
 import api from 'api'
 import { format } from 'lib/luxon'
-import { useSelector } from 'react-redux'
+import { useStoreSelector } from 'store'
 
 const TableCell = withStyles({
   root: {
@@ -23,7 +22,7 @@ interface EventDetailProps {
 }
 
 const EventDetail: React.FC<EventDetailProps> = ({ eventID }) => {
-  const { lang } = useSelector((state: RootState) => state.settings)
+  const { lang } = useStoreSelector((state) => state.settings)
 
   const [loading, setLoading] = useState(false)
   const [e, setEvent] = useState<Event>()

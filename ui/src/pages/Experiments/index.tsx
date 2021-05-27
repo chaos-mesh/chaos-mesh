@@ -7,10 +7,10 @@ import AddIcon from '@material-ui/icons/Add'
 import CloseIcon from '@material-ui/icons/Close'
 import DeleteOutlinedIcon from '@material-ui/icons/DeleteOutlined'
 import { Experiment } from 'api/experiments.type'
-import ExperimentListItem from 'components/ExperimentListItem'
 import FilterListIcon from '@material-ui/icons/FilterList'
 import Loading from 'components-mui/Loading'
 import NotFound from 'components-mui/NotFound'
+import ObjectListItem from 'components/ObjectListItem'
 import PlaylistAddCheckIcon from '@material-ui/icons/PlaylistAddCheck'
 import Space from 'components-mui/Space'
 import T from 'components/T'
@@ -146,7 +146,7 @@ export default function Experiments() {
         />
       )}
       <Box flex={1}>
-        <ExperimentListItem experiment={data[index]} onSelect={onSelect} intl={intl} />
+        <ObjectListItem data={data[index]} onSelect={onSelect} />
       </Box>
     </Box>
   )
@@ -195,7 +195,7 @@ export default function Experiments() {
 
       {!loading && experiments.length === 0 && (
         <NotFound illustrated textAlign="center">
-          <Typography>{T('experiments.noExperimentsFound')}</Typography>
+          <Typography>{T('experiments.notFound')}</Typography>
         </NotFound>
       )}
 

@@ -1,10 +1,7 @@
-import { ExperimentKind } from '../components/NewExperiment/types'
+import { Experiment } from './experiments.type'
 
-export interface Archive {
-  uid: uuid
-  kind: ExperimentKind
-  namespace: string
-  name: string
+// TODO: unify field names
+export type Archive = Omit<Experiment, 'status' | 'events'> & {
   start_time: string
   finish_time: string
 }

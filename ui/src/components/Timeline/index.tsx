@@ -40,7 +40,7 @@ const Timeline: React.FC<TimelineProps> = ({ events, ...rest }) => {
 
   return (
     <div ref={chartRef} {...rest}>
-      {events?.length === 0 && <NotFound>{T('events.noEventsFound')}</NotFound>}
+      {events?.length === 0 && <NotFound>{T('events.notFound')}</NotFound>}
     </div>
   )
 }

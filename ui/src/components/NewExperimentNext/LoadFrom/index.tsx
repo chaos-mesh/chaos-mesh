@@ -120,7 +120,7 @@ const LoadFrom: React.FC<LoadFromProps> = ({ loadCallback, inSchedule = false })
             ))}
           </Box>
         ) : experiments?.length === 0 ? (
-          <Typography variant="body2">{T('experiments.noExperimentsFound')}</Typography>
+          <Typography variant="body2">{T('experiments.notFound')}</Typography>
         ) : (
           <SkeletonN n={3} />
         )}

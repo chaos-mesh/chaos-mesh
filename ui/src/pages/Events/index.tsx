@@ -8,12 +8,11 @@ import Loading from 'components-mui/Loading'
 import NotFound from 'components-mui/NotFound'
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
-import { RootState } from 'store'
 import T from 'components/T'
 import api from 'api'
 import genEventsChart from 'lib/d3/eventsChart'
 import { useIntl } from 'react-intl'
-import { useSelector } from 'react-redux'
+import { useStoreSelector } from 'store'
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -31,7 +30,7 @@ export default function Events() {
 
   const intl = useIntl()
 
-  const { theme } = useSelector((state: RootState) => state.settings)
+  const { theme } = useStoreSelector((state) => state.settings)
 
   const chartRef = useRef<HTMLDivElement>(null)
   const eventsTableRef = useRef<EventsTableHandles>(null)
@@ -83,7 +82,7 @@ export default function Events() {
 
       {!loading && events.length === 0 && (
         <NotFound illustrated textAlign="center">
-          <Typography>{T('events.noEventsFound')}</Typography>
+          <Typography>{T('events.notFound')}</Typography>
         </NotFound>
       )}
 

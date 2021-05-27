@@ -7,7 +7,6 @@ import { MenuItem } from '@material-ui/core'
 import T from 'components/T'
 
 export interface ScheduleSpecific {
-  duration?: string
   schedule: string
   starting_deadline_seconds?: number
   concurrency_policy?: 'Forbid' | 'Allow'
@@ -15,7 +14,6 @@ export interface ScheduleSpecific {
 }
 
 export const data: ScheduleSpecific = {
-  duration: '',
   schedule: '',
   starting_deadline_seconds: 0,
   concurrency_policy: 'Forbid',
@@ -30,13 +28,6 @@ export const Fields = ({ errors, touched }: Pick<FormikProps<FormikValues>, 'err
       label={T('schedules.single')}
       helperText={errors.schedule && touched.schedule ? errors.schedule : T('newS.basic.scheduleHelper')}
       error={errors.schedule && touched.schedule ? true : false}
-    />
-    <TextField
-      fast
-      name="duration"
-      label={T('newE.run.duration')}
-      helperText={errors.duration && touched.duration ? errors.duration : T('newS.basic.durationHelper')}
-      error={errors.duration && touched.duration ? true : false}
     />
     <TextField
       fast
@@ -78,7 +69,6 @@ export const Fields = ({ errors, touched }: Pick<FormikProps<FormikValues>, 'err
 
 export const schema = {
   schedule: Yup.string().required('The schedule is required'),
-  duration: Yup.string().required('The duration is required'),
   starting_deadline_seconds: Yup.number().min(0, 'The startingDeadlineSeconds is at least 0'),
   history_limit: Yup.number().min(1, 'The historyLimit is at least 1'),
 }

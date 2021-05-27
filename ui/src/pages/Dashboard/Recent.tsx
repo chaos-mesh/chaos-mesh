@@ -65,7 +65,7 @@ const Recent: React.FC<RecentProps> = ({ events }) => {
           </Box>
         </LinkBox>
       ))}
-      {events.length === 0 && <NotFound>{T('events.noEventsFound')}</NotFound>}
+      {events.length === 0 && <NotFound>{T('events.notFound')}</NotFound>}
     </Space>
   )
 }

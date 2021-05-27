@@ -7,14 +7,15 @@ import DeleteOutlinedIcon from '@material-ui/icons/DeleteOutlined'
 import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline'
 import { Experiment } from 'api/experiments.type'
 import ExperimentStatus from 'components/ExperimentStatus'
-import { IntlShape } from 'react-intl'
 import Paper from 'components-mui/Paper'
 import PauseCircleOutlineIcon from '@material-ui/icons/PauseCircleOutline'
 import PlayCircleOutlineIcon from '@material-ui/icons/PlayCircleOutline'
+import { Schedule } from 'api/schedules.type'
 import Space from 'components-mui/Space'
 import T from 'components/T'
 import { makeStyles } from '@material-ui/core/styles'
 import { useHistory } from 'react-router-dom'
+import { useIntl } from 'react-intl'
 import { useStoreSelector } from 'store'
 
 const useStyles = makeStyles((theme) => ({
@@ -26,22 +27,18 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
-interface ExperimentListItemProps {
-  experiment: Experiment | Archive
-  isArchive?: boolean
+interface ObjectListItemProps {
+  type?: 'schedule' | 'experiment' | 'archive'
+  archive?: 'workflow' | 'schedule' | 'experiment'
+  data: Schedule | Experiment | Archive
   onSelect: (info: { uuid: uuid; title: string; description: string; action: string }) => void
-  intl: IntlShape
 }
 
-const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
-  experiment: e,
-  isArchive = false,
-  onSelect,
-  intl,
-}) => {
+const ObjectListItem: React.FC<ObjectListItemProps> = ({ data, type = 'experiment', archive, onSelect }) => {
   const classes = useStyles()
 
   const history = useHistory()
+  const intl = useIntl()
 
   const { lang } = useStoreSelector((state) => state.settings)
 
@@ -51,37 +48,37 @@ const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
     switch (action) {
       case 'archive':
         onSelect({
-          title: `${intl.formatMessage({ id: 'archives.single' })} ${e.name}`,
-          description: intl.formatMessage({ id: 'experiments.deleteDesc' }),
+          title: `${intl.formatMessage({ id: 'archives.single' })} ${data.name}`,
+          description: intl.formatMessage({ id: `${type}s.deleteDesc` }),
           action,
-          uuid: e.uid,
+          uuid: data.uid,
         })
 
         return
       case 'pause':
         onSelect({
-          title: `${intl.formatMessage({ id: 'common.pause' })} ${e.name}`,
+          title: `${intl.formatMessage({ id: 'common.pause' })} ${data.name}`,
           description: intl.formatMessage({ id: 'experiments.pauseDesc' }),
           action,
-          uuid: e.uid,
+          uuid: data.uid,
         })
 
         return
       case 'start':
         onSelect({
-          title: `${intl.formatMessage({ id: 'common.start' })} ${e.name}`,
+          title: `${intl.formatMessage({ id: 'common.start' })} ${data.name}`,
           description: intl.formatMessage({ id: 'experiments.startDesc' }),
           action,
-          uuid: e.uid,
+          uuid: data.uid,
         })
 
         return
       case 'delete':
         onSelect({
-          title: `${intl.formatMessage({ id: 'common.delete' })} ${e.name}`,
+          title: `${intl.formatMessage({ id: 'common.delete' })} ${data.name}`,
           description: intl.formatMessage({ id: 'archives.deleteDesc' }),
           action,
-          uuid: e.uid,
+          uuid: data.uid,
         })
 
         return
@@ -90,30 +87,31 @@ const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
     }
   }
 
-  const handleJumpTo = () => history.push(isArchive ? `/archives/${e.uid}` : `/experiments/${e.uid}`)
+  const handleJumpTo = () => {
+    let prefix
+    switch (type) {
+      case 'schedule':
+      case 'experiment':
+        prefix = `${type}s`
+        break
+      case 'archive':
+        prefix = `${type}s/${archive!}s`
+    }
+
+    history.push(`/${prefix}/${data.uid}`)
+  }
 
   const Actions = () => (
     <Space display="flex" justifyContent="end" alignItems="center">
       <Typography variant="body2">
         {T('table.created')}{' '}
-        {DateTime.fromISO(isArchive ? (e as Archive).start_time : (e as Experiment).created, {
+        {DateTime.fromISO(data.created, {
           locale: lang,
         }).toRelative()}
       </Typography>
-      {isArchive ? (
-        <IconButton
-          color="primary"
-          title={intl.formatMessage({ id: 'common.delete' })}
-          aria-label={intl.formatMessage({ id: 'common.delete' })}
-          component="span"
-          size="small"
-          onClick={handleAction('delete')}
-        >
-          <DeleteOutlinedIcon />
-        </IconButton>
-      ) : (
+      {type === 'experiment' && (
         <>
-          {(e as Experiment).status === 'Paused' ? (
+          {(data as Experiment).status === 'Paused' ? (
             <IconButton
               color="primary"
               title={intl.formatMessage({ id: 'common.start' })}
@@ -136,17 +134,31 @@ const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
               <PauseCircleOutlineIcon />
             </IconButton>
           )}
-          <IconButton
-            color="primary"
-            title={intl.formatMessage({ id: 'archives.single' })}
-            aria-label={intl.formatMessage({ id: 'archives.single' })}
-            component="span"
-            size="small"
-            onClick={handleAction('archive')}
-          >
-            <ArchiveOutlinedIcon />
-          </IconButton>
         </>
+      )}
+      {type !== 'archive' && (
+        <IconButton
+          color="primary"
+          title={intl.formatMessage({ id: 'archives.single' })}
+          aria-label={intl.formatMessage({ id: 'archives.single' })}
+          component="span"
+          size="small"
+          onClick={handleAction('archive')}
+        >
+          <ArchiveOutlinedIcon />
+        </IconButton>
+      )}
+      {type === 'archive' && (
+        <IconButton
+          color="primary"
+          title={intl.formatMessage({ id: 'common.delete' })}
+          aria-label={intl.formatMessage({ id: 'common.delete' })}
+          component="span"
+          size="small"
+          onClick={handleAction('delete')}
+        >
+          <DeleteOutlinedIcon />
+        </IconButton>
       )}
     </Space>
   )
@@ -155,14 +167,14 @@ const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
     <Paper padding={0} className={classes.root} onClick={handleJumpTo}>
       <Box display="flex" justifyContent="space-between" alignItems="center" p={3}>
         <Space display="flex" alignItems="center">
-          {!isArchive &&
-            ((e as Experiment).status === 'Failed' ? (
+          {type === 'experiment' &&
+            ((data as Experiment).status === 'Failed' ? (
               <ErrorOutlineIcon color="error" />
             ) : (
-              <ExperimentStatus status={(e as Experiment).status} />
+              <ExperimentStatus status={(data as Experiment).status} />
             ))}
           <Typography variant="body1" component="div">
-            {e.name}
+            {data.name}
           </Typography>
         </Space>
 
@@ -172,4 +184,4 @@ const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
   )
 }
 
-export default ExperimentListItem
+export default ObjectListItem
