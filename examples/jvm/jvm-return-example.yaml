@@ -15,6 +15,3 @@ spec:
   selector:
     labelSelectors:
       app: springboot-jvmchaos-demo
-  duration: "50s"
-  scheduler:
-    cron: "@every 1m"
