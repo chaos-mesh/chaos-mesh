@@ -106,4 +106,12 @@ var ChaosObjects = fx.Supply(
 			Object: &v1alpha1.TimeChaos{},
 		},
 	},
+
+	fx.Annotated{
+		Group: "objs",
+		Target: Object{
+			Name:   "gcpchaos",
+			Object: &v1alpha1.GcpChaos{},
+		},
+	},
 )
