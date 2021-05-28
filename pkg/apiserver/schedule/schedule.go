@@ -745,9 +745,9 @@ func (s *Service) updateScheduleFun(exp *core.KubeObjectDesc, kubeCli client.Cli
 // @Router /schedules [delete]
 func (s *Service) batchDeleteSchedule(c *gin.Context) {
 	var (
-		exp       *core.Schedule
-		errFlag   bool
-		uidSlice  []string
+		exp      *core.Schedule
+		errFlag  bool
+		uidSlice []string
 	)
 
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)

@@ -28,8 +28,8 @@ import (
 
 // Service defines a handler service for events.
 type Service struct {
-	conf    *config.ChaosDashboardConfig
-	event   core.EventStore
+	conf  *config.ChaosDashboardConfig
+	event core.EventStore
 }
 
 // NewService return an event service instance.
@@ -38,8 +38,8 @@ func NewService(
 	event core.EventStore,
 ) *Service {
 	return &Service{
-		conf:    conf,
-		event:   event,
+		conf:  conf,
+		event: event,
 	}
 }
 

@@ -15,9 +15,11 @@ package collector
 
 import (
 	"context"
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+
 	"github.com/go-logr/logr"
 	"sigs.k8s.io/controller-runtime/pkg/event"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 
@@ -52,14 +54,14 @@ func (r *EventCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	et := core.Event{
-		CreatedAt:     event.CreationTimestamp.Time,
-		Kind:          event.InvolvedObject.Kind,
-		Type:          event.Type,
-		Reason:        event.Reason,
-		Message:       event.Message,
-		Name:          event.InvolvedObject.Name,
-		Namespace:     event.InvolvedObject.Namespace,
-		ExperimentID:  string(event.InvolvedObject.UID),
+		CreatedAt:    event.CreationTimestamp.Time,
+		Kind:         event.InvolvedObject.Kind,
+		Type:         event.Type,
+		Reason:       event.Reason,
+		Message:      event.Message,
+		Name:         event.InvolvedObject.Name,
+		Namespace:    event.InvolvedObject.Namespace,
+		ExperimentID: string(event.InvolvedObject.UID),
 	}
 	if err := r.event.Create(context.Background(), &et); err != nil {
 		r.Log.Error(err, "failed to save event", "event", et)

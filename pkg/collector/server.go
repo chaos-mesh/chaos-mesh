@@ -14,8 +14,9 @@
 package collector
 
 import (
-	v1 "k8s.io/api/core/v1"
 	"os"
+
+	v1 "k8s.io/api/core/v1"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -112,9 +113,9 @@ func NewServer(
 	}
 
 	if err = (&EventCollector{
-		Client:  s.Manager.GetClient(),
-		Log:     ctrl.Log.WithName("event-collector").WithName("Event"),
-		event:   event,
+		Client: s.Manager.GetClient(),
+		Log:    ctrl.Log.WithName("event-collector").WithName("Event"),
+		event:  event,
 	}).Setup(s.Manager, &v1.Event{}); err != nil {
 		log.Error(err, "unable to create collector", "collector", v1alpha1.KindSchedule)
 		os.Exit(1)

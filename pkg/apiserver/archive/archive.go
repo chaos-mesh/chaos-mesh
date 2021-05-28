@@ -28,7 +28,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
-	"github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
+	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 )
 
@@ -37,7 +37,7 @@ type Service struct {
 	archive         core.ExperimentStore
 	archiveSchedule core.ScheduleStore
 	event           core.EventStore
-	conf   		*config.ChaosDashboardConfig
+	conf            *config.ChaosDashboardConfig
 }
 
 // NewService returns an archive experiment service instance.
@@ -51,7 +51,7 @@ func NewService(
 		archive:         archive,
 		archiveSchedule: archiveSchedule,
 		event:           event,
-		conf:		 conf,
+		conf:            conf,
 	}
 }
 
