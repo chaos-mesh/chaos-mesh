@@ -184,7 +184,7 @@ const TopContainer = () => {
               </>
             )}
 
-            <Auth open={authOpen} />
+            <Auth open={authOpen} setOpen={setAuthOpen} />
 
             <Portal>
               <Snackbar
