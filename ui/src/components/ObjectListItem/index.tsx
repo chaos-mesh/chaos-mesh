@@ -88,17 +88,18 @@ const ObjectListItem: React.FC<ObjectListItemProps> = ({ data, type = 'experimen
   }
 
   const handleJumpTo = () => {
-    let prefix
+    let path
     switch (type) {
       case 'schedule':
       case 'experiment':
-        prefix = `${type}s`
+        path = `/${type}s/${data.uid}`
         break
       case 'archive':
-        prefix = `${type}s/${archive!}s`
+        path = `/archives/${data.uid}?kind=${archive!}`
+        break
     }
 
-    history.push(`/${prefix}/${data.uid}`)
+    history.push(path)
   }
 
   const Actions = () => (
@@ -116,7 +117,6 @@ const ObjectListItem: React.FC<ObjectListItemProps> = ({ data, type = 'experimen
               color="primary"
               title={intl.formatMessage({ id: 'common.start' })}
               aria-label={intl.formatMessage({ id: 'common.start' })}
-              component="span"
               size="small"
               onClick={handleAction('start')}
             >
@@ -127,7 +127,6 @@ const ObjectListItem: React.FC<ObjectListItemProps> = ({ data, type = 'experimen
               color="primary"
               title={intl.formatMessage({ id: 'common.pause' })}
               aria-label={intl.formatMessage({ id: 'common.pause' })}
-              component="span"
               size="small"
               onClick={handleAction('pause')}
             >
@@ -141,7 +140,6 @@ const ObjectListItem: React.FC<ObjectListItemProps> = ({ data, type = 'experimen
           color="primary"
           title={intl.formatMessage({ id: 'archives.single' })}
           aria-label={intl.formatMessage({ id: 'archives.single' })}
-          component="span"
           size="small"
           onClick={handleAction('archive')}
         >
@@ -153,7 +151,6 @@ const ObjectListItem: React.FC<ObjectListItemProps> = ({ data, type = 'experimen
           color="primary"
           title={intl.formatMessage({ id: 'common.delete' })}
           aria-label={intl.formatMessage({ id: 'common.delete' })}
-          component="span"
           size="small"
           onClick={handleAction('delete')}
         >

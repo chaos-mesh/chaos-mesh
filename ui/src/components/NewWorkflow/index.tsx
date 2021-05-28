@@ -1,4 +1,16 @@
-import { Box, Button, Chip, Grid, MenuItem, Step, StepLabel, Stepper, Typography } from '@material-ui/core'
+import {
+  Box,
+  Button,
+  Chip,
+  Grid,
+  IconButton,
+  ListItemIcon,
+  MenuItem,
+  Step,
+  StepLabel,
+  Stepper,
+  Typography,
+} from '@material-ui/core'
 import { Form, Formik } from 'formik'
 import MultiNode, { MultiNodeHandles } from './MultiNode'
 import { SelectField, TextField } from 'components/FormField'
@@ -13,10 +25,11 @@ import { validateDuration, validateName } from 'lib/formikhelpers'
 import { Ace } from 'ace-builds'
 import Add from './Add'
 import CheckIcon from '@material-ui/icons/Check'
+import Menu from 'components-mui/Menu'
 import NewExperiment from 'components/NewExperimentNext'
 import Paper from 'components-mui/Paper'
 import PublishIcon from '@material-ui/icons/Publish'
-import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline'
+import RemoveIcon from '@material-ui/icons/Remove'
 import Space from 'components-mui/Space'
 import T from 'components/T'
 import UndoIcon from '@material-ui/icons/Undo'
@@ -24,7 +37,6 @@ import YAMLEditor from 'components/YAMLEditor'
 import _isEmpty from 'lodash.isempty'
 import _snakecase from 'lodash.snakecase'
 import api from 'api'
-import clsx from 'clsx'
 import { constructWorkflow } from 'lib/formikhelpers'
 import { makeStyles } from '@material-ui/core/styles'
 import { useHistory } from 'react-router-dom'
@@ -33,6 +45,7 @@ import yaml from 'js-yaml'
 
 const useStyles = makeStyles((theme) => ({
   stepper: {
+    marginTop: '-' + theme.spacing(1),
     padding: 0,
   },
   primary: {
@@ -46,12 +59,6 @@ const useStyles = makeStyles((theme) => ({
   },
   submittedStep: {
     borderColor: theme.palette.success.main,
-  },
-  removeSubmittedStep: {
-    borderColor: theme.palette.error.main,
-  },
-  asButton: {
-    cursor: 'pointer',
   },
   leftSticky: {
     position: 'sticky',
@@ -95,7 +102,6 @@ const NewWorkflow = () => {
 
   const [steps, setSteps] = useState<IStep[]>([])
   const [restoreIndex, setRestoreIndex] = useState(-1)
-  const [showRemove, setShowRemove] = useState(-1)
   const [workflowBasic, setWorkflowBasic] = useState<WorkflowBasic>({
     name: '',
     namespace: '',
@@ -290,34 +296,8 @@ const NewWorkflow = () => {
               {steps.length > 0 &&
                 steps.map((step, index) => (
                   <Step key={step.type + index}>
-                    <StepLabel
-                      icon={
-                        <Box
-                          position="relative"
-                          display="flex"
-                          alignItems="center"
-                          onMouseEnter={() => setShowRemove(index)}
-                          onMouseLeave={() => setShowRemove(-1)}
-                        >
-                          <CheckIcon
-                            className={classes.success}
-                            style={{ visibility: showRemove === index ? 'hidden' : 'unset' }}
-                          />
-                          {showRemove === index && (
-                            <Box position="absolute" top={0} title={intl.formatMessage({ id: 'common.delete' })}>
-                              <RemoveCircleOutlineIcon
-                                className={clsx(classes.error, classes.asButton)}
-                                onClick={handleSelect(step.name, index, 'delete')}
-                              />
-                            </Box>
-                          )}
-                        </Box>
-                      }
-                    >
-                      <Paper
-                        padding={restoreIndex === index ? 4.5 : 3}
-                        className={showRemove === index ? classes.removeSubmittedStep : classes.submittedStep}
-                      >
+                    <StepLabel icon={<CheckIcon className={classes.success} />}>
+                      <Paper padding={restoreIndex === index ? 4.5 : 3} className={classes.submittedStep}>
                         <Box display="flex" justifyContent="space-between">
                           <Space display="flex" alignItems="center">
                             <Chip label={T(`newW.node.${step.type}`)} color="primary" size="small" />
@@ -325,7 +305,19 @@ const NewWorkflow = () => {
                               {step.name}
                             </Typography>
                           </Space>
-                          <UndoIcon className={classes.asButton} onClick={restoreExperiment(step.experiments, index)} />
+                          <Space display="flex">
+                            <IconButton size="small" onClick={restoreExperiment(step.experiments, index)}>
+                              <UndoIcon />
+                            </IconButton>
+                            <Menu>
+                              <MenuItem dense onClick={handleSelect(step.name, index, 'delete')}>
+                                <ListItemIcon>
+                                  <RemoveIcon fontSize="small" />
+                                </ListItemIcon>
+                                <Typography variant="inherit">{T('common.delete')}</Typography>
+                              </MenuItem>
+                            </Menu>
+                          </Space>
                         </Box>
                         {restoreIndex === index && (
                           <Box mt={6}>
@@ -338,7 +330,7 @@ const NewWorkflow = () => {
                                       <TextField
                                         className={classes.field}
                                         name="duration"
-                                        label={T('newE.schedule.duration')}
+                                        label={T('newE.run.duration')}
                                       />
                                     </Space>
                                     <Space display="flex">
@@ -420,7 +412,7 @@ const NewWorkflow = () => {
                     </SelectField>
                     <TextField
                       name="duration"
-                      label={T('newE.schedule.duration')}
+                      label={T('newE.run.duration')}
                       validate={validateDuration(T('newW.durationValidation') as unknown as string)}
                       helperText={errors.duration && touched.duration ? errors.duration : T('newW.durationHelper')}
                       error={errors.duration && touched.duration ? true : false}

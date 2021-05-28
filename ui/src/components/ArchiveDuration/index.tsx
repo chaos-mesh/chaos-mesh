@@ -88,7 +88,7 @@ const ArchiveDuration: React.FC<{ start: string; end: string }> = ({ start, end 
   return (
     <Paper>
       <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" height="100px" my={6}>
-        <Typography variant="overline">{T('newE.schedule.duration')}</Typography>
+        <Typography variant="overline">{T('newE.run.duration')}</Typography>
         <Box width="100%" mt={6}>
           <Stepper alternativeLabel activeStep={1} connector={<QontoConnector />} style={{ padding: 0 }}>
             {steps.map((label) => (

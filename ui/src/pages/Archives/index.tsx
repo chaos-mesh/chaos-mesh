@@ -1,6 +1,5 @@
 import { Box, Breadcrumbs, Button, Checkbox, LinkProps, Link as MUILink, Typography } from '@material-ui/core'
 import { Confirm, setAlert, setConfirm } from 'slices/globalStatus'
-import { Link, useParams } from 'react-router-dom'
 import { FixedSizeList as RWList, ListChildComponentProps as RWListChildComponentProps } from 'react-window'
 import { useCallback, useEffect, useState } from 'react'
 
@@ -8,6 +7,7 @@ import { Archive } from 'api/archives.type'
 import CloseIcon from '@material-ui/icons/Close'
 import DeleteOutlinedIcon from '@material-ui/icons/DeleteOutlined'
 import FilterListIcon from '@material-ui/icons/FilterList'
+import { Link } from 'react-router-dom'
 import Loading from 'components-mui/Loading'
 import NotFound from 'components-mui/NotFound'
 import ObjectListItem from 'components/ObjectListItem'
@@ -19,6 +19,7 @@ import api from 'api'
 import { styled } from '@material-ui/core/styles'
 import { transByKind } from 'lib/byKind'
 import { useIntl } from 'react-intl'
+import { useQuery } from 'lib/hooks'
 import { useStoreDispatch } from 'store'
 
 const StyledCheckBox = styled(Checkbox)({
@@ -32,7 +33,8 @@ const StyledCheckBox = styled(Checkbox)({
 
 export default function Archives() {
   const intl = useIntl()
-  const { type } = useParams<{ type: 'workflows' | 'schedules' | 'experiments' }>()
+  const query = useQuery()
+  let kind = query.get('kind') || 'experiment'
 
   const dispatch = useStoreDispatch()
 
@@ -44,11 +46,11 @@ export default function Archives() {
 
   const fetchArchives = useCallback(() => {
     let request
-    switch (type) {
-      case 'schedules':
+    switch (kind) {
+      case 'schedule':
         request = api.schedules.archives
         break
-      case 'experiments':
+      case 'experiment':
       default:
         request = api.archives.archives
         break
@@ -62,7 +64,7 @@ export default function Archives() {
       })
       .catch(console.error)
       .finally(() => setLoading(false))
-  }, [type])
+  }, [kind])
 
   useEffect(fetchArchives, [fetchArchives])
 
@@ -141,8 +143,8 @@ export default function Archives() {
   const ActiveLink = ({ href, children }: LinkProps) => (
     <MUILink
       component={Link}
-      color={type === href ? 'primary' : type === undefined && href === 'experiments' ? 'primary' : 'inherit'}
-      to={`/archives/${href}`}
+      color={kind === href ? 'primary' : kind === undefined && href === 'experiment' ? 'primary' : 'inherit'}
+      to={`/archives?kind=${href}`}
     >
       {children}
     </MUILink>
@@ -159,7 +161,7 @@ export default function Archives() {
         />
       )}
       <Box flex={1}>
-        <ObjectListItem type="archive" data={data[index]} onSelect={onSelect} />
+        <ObjectListItem type="archive" archive={kind as any} data={data[index]} onSelect={onSelect} />
       </Box>
     </Box>
   )
@@ -167,9 +169,9 @@ export default function Archives() {
   return (
     <>
       <Breadcrumbs aria-label="breadcrumb">
-        <ActiveLink href="workflows">{T('workflows.title')}</ActiveLink>
-        <ActiveLink href="schedules">{T('schedules.title')}</ActiveLink>
-        <ActiveLink href="experiments">{T('experiments.title')}</ActiveLink>
+        <ActiveLink href="workflow">{T('workflows.title')}</ActiveLink>
+        <ActiveLink href="schedule">{T('schedules.title')}</ActiveLink>
+        <ActiveLink href="experiment">{T('experiments.title')}</ActiveLink>
       </Breadcrumbs>
 
       <Space my={6}>

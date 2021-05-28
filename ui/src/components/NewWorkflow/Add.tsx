@@ -234,7 +234,7 @@ const Add = () => {
                     <Grid item xs={12} md={6}>
                       <TextField
                         name="duration"
-                        label={T('newE.schedule.duration')}
+                        label={T('newE.run.duration')}
                         validate={validateDuration(T('newW.durationValidation') as unknown as string)}
                         helperText={
                           errors.duration && touched.duration ? errors.duration : T('newW.node.durationHelper')

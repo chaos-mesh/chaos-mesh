@@ -66,12 +66,8 @@ const routes: RouteProps[] = [
     exact: true,
   },
   {
-    component: Archives,
-    path: '/archives/:type',
-  },
-  {
     component: ArchiveReport,
-    path: '/archives/:type/:uuid',
+    path: '/archives/:uuid',
   },
   {
     component: Settings,

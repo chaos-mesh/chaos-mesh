@@ -164,7 +164,7 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false })
                     <TextField
                       fast
                       name="duration"
-                      label={T('newE.schedule.duration')}
+                      label={T('newE.run.duration')}
                       helperText={
                         (errors as any).duration && (touched as any).duration
                           ? (errors as any).duration

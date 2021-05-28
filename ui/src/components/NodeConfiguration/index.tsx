@@ -49,7 +49,7 @@ const Common = ({ template: t }: NodeConfigurationProps) => (
       </TableCell>
     </TableRow>
     <TableRow>
-      <TableCell>{T('newE.schedule.duration')}</TableCell>
+      <TableCell>{T('newE.run.duration')}</TableCell>
       <TableCell>
         <Typography variant="body2" color="textSecondary">
           {t.duration}
