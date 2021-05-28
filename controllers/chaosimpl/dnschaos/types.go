@@ -16,6 +16,7 @@ package dnschaos
 import (
 	"context"
 	"fmt"
+	"net"
 	"time"
 
 	"go.uber.org/fx"
@@ -89,7 +90,7 @@ func (impl *Impl) setDNSServerRules(dnsServerIP string, port int, name string, p
 		Namespace: pod.Namespace,
 	}
 
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", dnsServerIP, port), grpc.WithInsecure())
+	conn, err := grpc.Dial(net.JoinHostPort(dnsServerIP, fmt.Sprintf("%d", port)), grpc.WithInsecure())
 	if err != nil {
 		return err
 	}
@@ -167,7 +168,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 }
 
 func (impl *Impl) cancelDNSServerRules(dnsServerIP string, port int, name string) error {
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", dnsServerIP, port), grpc.WithInsecure())
+	conn, err := grpc.Dial(net.JoinHostPort(dnsServerIP, fmt.Sprintf("%d", port)), grpc.WithInsecure())
 	if err != nil {
 		return err
 	}
