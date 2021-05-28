@@ -46,6 +46,14 @@ var ChaosObjects = fx.Supply(
 	fx.Annotated{
 		Group: "objs",
 		Target: Object{
+			Name:   "httpchaos",
+			Object: &v1alpha1.HTTPChaos{},
+		},
+	},
+
+	fx.Annotated{
+		Group: "objs",
+		Target: Object{
 			Name:   "iochaos",
 			Object: &v1alpha1.IoChaos{},
 		},

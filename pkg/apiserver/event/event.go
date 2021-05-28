@@ -50,7 +50,9 @@ func NewService(
 // Register mounts our HTTP handler on the mux.
 func Register(r *gin.RouterGroup, s *Service) {
 	endpoint := r.Group("/events")
-	endpoint.Use(utils.AuthRequired)
+	endpoint.Use(func(c *gin.Context) {
+		utils.AuthRequired(c, s.conf.ClusterScoped, s.conf.TargetNamespace)
+	})
 
 	// TODO: add more api handlers
 	endpoint.GET("", s.listEvents)
@@ -75,13 +77,19 @@ func Register(r *gin.RouterGroup, s *Service) {
 // @Router /events [get]
 // @Failure 500 {object} utils.APIError
 func (s *Service) listEvents(c *gin.Context) {
+	namespace := c.Query("namespace")
+	if len(namespace) == 0 && !s.conf.ClusterScoped &&
+		len(s.conf.TargetNamespace) != 0 {
+		namespace = s.conf.TargetNamespace
+	}
+
 	filter := core.Filter{
 		PodName:             c.Query("podName"),
 		PodNamespace:        c.Query("podNamespace"),
 		StartTimeStr:        c.Query("startTime"),
 		FinishTimeStr:       c.Query("finishTime"),
 		ExperimentName:      c.Query("experimentName"),
-		ExperimentNamespace: c.Query("namespace"),
+		ExperimentNamespace: namespace,
 		UID:                 c.Query("uid"),
 		Kind:                c.Query("kind"),
 		LimitStr:            c.Query("limit"),
@@ -117,11 +125,16 @@ func (s *Service) listEvents(c *gin.Context) {
 // @Router /events/dry [get]
 // @Failure 500 {object} utils.APIError
 func (s *Service) listDryEvents(c *gin.Context) {
+	namespace := c.Query("namespace")
+	if len(namespace) == 0 && !s.conf.ClusterScoped &&
+		len(s.conf.TargetNamespace) != 0 {
+		namespace = s.conf.TargetNamespace
+	}
 	filter := core.Filter{
 		StartTimeStr:        c.Query("startTime"),
 		FinishTimeStr:       c.Query("finishTime"),
 		ExperimentName:      c.Query("experimentName"),
-		ExperimentNamespace: c.Query("namespace"),
+		ExperimentNamespace: namespace,
 		Kind:                c.Query("kind"),
 		LimitStr:            c.Query("limit"),
 	}
@@ -147,6 +160,10 @@ func (s *Service) listDryEvents(c *gin.Context) {
 func (s *Service) getEvent(c *gin.Context) {
 	idStr := c.Query("id")
 	namespace := c.Query("namespace")
+	if len(namespace) == 0 && !s.conf.ClusterScoped &&
+		len(s.conf.TargetNamespace) != 0 {
+		namespace = s.conf.TargetNamespace
+	}
 
 	if idStr == "" {
 		c.Status(http.StatusBadRequest)

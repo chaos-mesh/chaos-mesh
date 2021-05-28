@@ -34,48 +34,26 @@ spec:
           type: object
         spec:
           properties:
-            action:
-              description: 'Action defines the specific pod chaos action. Supported
-                action: delay | abort | mixed Default action: delay'
-              enum:
-              - delay
-              - abort
-              - mixed
+            abort:
+              description: Abort is a rule to abort a http session.
+              type: boolean
+            code:
+              description: Code is a rule to select target by http status code in
+                response.
+              format: int32
+              type: integer
+            delay:
+              description: Delay represents the delay of the target request/response.
+                A duration string is a possibly unsigned sequence of decimal numbers,
+                each with optional fraction and a unit suffix, such as "300ms", "2h45m".
+                Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
               type: string
             duration:
-              description: Duration represents the duration of the chaos action. It
-                is required when the action is `PodFailureAction`. A duration string
-                is a possibly signed sequence of decimal numbers, each with optional
-                fraction and a unit suffix, such as "300ms", "-1.5h" or "2h45m". Valid
-                time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+              description: Duration represents the duration of the chaos action.
               type: string
-            headers:
-              description: Specifies how the header match will be performed to route
-                the request.
-              items:
-                properties:
-                  exact_match:
-                    type: string
-                  invert_match:
-                    type: string
-                  name:
-                    type: string
-                  prefix_match:
-                    type: string
-                  present_match:
-                    type: string
-                  range_match:
-                    type: string
-                  regex_match:
-                    type: string
-                  safe_regex_match:
-                    type: string
-                  suffix_match:
-                    type: string
-                required:
-                - name
-                type: object
-              type: array
+            method:
+              description: Method is a rule to select target by http method in request.
+              type: string
             mode:
               description: 'Mode defines the mode to run chaos action. Supported mode:
                 one / all / fixed / fixed-percent / random-max-percent'
@@ -86,10 +64,94 @@ spec:
               - fixed-percent
               - random-max-percent
               type: string
-            percent:
-              description: 'Percent defines the percentage of injection errors and
-                provides a number from 0-100. default: 100.'
+            patch:
+              description: Patch is a rule to patch some contents in target.
+              properties:
+                body:
+                  description: Body is a rule to patch message body of target.
+                  properties:
+                    type:
+                      description: Type represents the patch type, only support `JSON`
+                        as [merge patch json](https://tools.ietf.org/html/rfc7396)
+                        currently.
+                      type: string
+                    value:
+                      description: Value is the patch contents.
+                      type: string
+                  required:
+                  - type
+                  - value
+                  type: object
+                headers:
+                  description: 'Headers is a rule to append http headers of target.
+                    For example: `[["Set-Cookie", "<one cookie>"], ["Set-Cookie",
+                    "<another cookie>"]]`.'
+                  items:
+                    items:
+                      type: string
+                    type: array
+                  type: array
+                queries:
+                  description: 'Queries is a rule to append uri queries of target(Request
+                    only). For example: `[["foo", "bar"], ["foo", "unknown"]]`.'
+                  items:
+                    items:
+                      type: string
+                    type: array
+                  type: array
+              type: object
+            path:
+              description: Path is a rule to select target by uri path in http request.
               type: string
+            port:
+              description: Port represents the target port to be proxy of.
+              format: int32
+              type: integer
+            replace:
+              description: Replace is a rule to replace some contents in target.
+              properties:
+                body:
+                  description: Body is a rule to replace http message body in target.
+                  format: byte
+                  type: string
+                code:
+                  description: Code is a rule to replace http status code in response.
+                  format: int32
+                  type: integer
+                headers:
+                  additionalProperties:
+                    type: string
+                  description: Headers is a rule to replace http headers of target.
+                    The key-value pairs represent header name and header value pairs.
+                  type: object
+                method:
+                  description: Method is a rule to replace http method in request.
+                  type: string
+                path:
+                  description: Path is rule to to replace uri path in http request.
+                  type: string
+                queries:
+                  additionalProperties:
+                    type: string
+                  description: 'Queries is a rule to replace uri queries in http request.
+                    For example, with value `{ "foo": "unknown" }`, the `/?foo=bar`
+                    will be altered to `/?foo=unknown`,'
+                  type: object
+              type: object
+            request_headers:
+              additionalProperties:
+                type: string
+              description: RequestHeaders is a rule to select target by http headers
+                in request. The key-value pairs represent header name and header value
+                pairs.
+              type: object
+            response_headers:
+              additionalProperties:
+                type: string
+              description: ResponseHeaders is a rule to select target by http headers
+                in response. The key-value pairs represent header name and header
+                value pairs.
+              type: object
             selector:
               description: Selector is used to select pods that are used to inject
                 chaos action.
@@ -178,6 +240,12 @@ spec:
                     belong, and the each values is a set of pod names.
                   type: object
               type: object
+            target:
+              description: Target is the object to be selected and injected.
+              enum:
+              - Request
+              - Response
+              type: string
             value:
               description: Value is required when the mode is set to `FixedPodMode`
                 / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
@@ -187,9 +255,9 @@ spec:
                 from 0-100 to specify the max percent of pods to do chaos action
               type: string
           required:
-          - action
           - mode
           - selector
+          - target
           type: object
         status:
           properties:
@@ -233,6 +301,12 @@ spec:
                   - Run
                   - Stop
                   type: string
+              type: object
+            instances:
+              additionalProperties:
+                format: int64
+                type: integer
+              description: Instances always specifies podhttpchaos generation or empty
               type: object
           required:
           - experiment

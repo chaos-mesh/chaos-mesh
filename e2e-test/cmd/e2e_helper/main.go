@@ -72,6 +72,7 @@ func newServer(dataDir string) *server {
 	s.mux.HandleFunc("/network/ping", s.networkPingTest)
 	s.mux.HandleFunc("/dns", s.dnsTest)
 	s.mux.HandleFunc("/stress", s.stressCondition)
+	s.mux.HandleFunc("/http", s.httpEcho)
 	return s
 }
 
@@ -279,4 +280,20 @@ func (s *server) stressCondition(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Write(response)
+}
+
+func (s *server) httpEcho(w http.ResponseWriter, r *http.Request) {
+	secret := r.Header.Get("Secret")
+	if secret == "" {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
+	defer r.Body.Close()
+	_, err := io.Copy(w, r.Body)
+	if err != nil {
+		http.Error(w, "fail to copy body between request and response", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Secret", secret)
+	w.WriteHeader(http.StatusOK)
 }

@@ -118,6 +118,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		// TODO: dynamic upgrade the records when some of these pods/containers stopped
 	}
 
+	needRetry := false
 	for index, record := range records {
 		var err error
 		r.Log.Info("iterating record", "record", record, "desiredPhase", desiredPhase)
@@ -164,6 +165,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 					Activity: "apply chaos",
 					Err:      err.Error(),
 				})
+				needRetry = true
 				continue
 			}
 
@@ -186,6 +188,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 					Activity: "recover chaos",
 					Err:      err.Error(),
 				})
+				needRetry = true
 				continue
 			}
 
@@ -226,7 +229,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 				Activity: "update records",
 				Err:      updateError.Error(),
 			})
-			return ctrl.Result{}, nil
+			return ctrl.Result{Requeue: true}, nil
 		}
 
 		r.Recorder.Event(obj, recorder.Updated{
@@ -247,8 +250,8 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		})
 		if ensureLatestError != nil {
 			r.Log.Error(ensureLatestError, "Fail to ensure that the resource in cache has the latest records")
-			return ctrl.Result{}, nil
+			return ctrl.Result{Requeue: needRetry}, nil
 		}
 	}
-	return ctrl.Result{}, nil
+	return ctrl.Result{Requeue: needRetry}, nil
 }

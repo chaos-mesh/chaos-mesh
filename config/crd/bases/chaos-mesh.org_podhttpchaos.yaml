@@ -16,6 +16,8 @@ spec:
     singular: podhttpchaos
   preserveUnknownFields: false
   scope: Namespaced
+  subresources:
+    status: {}
   validation:
     openAPIV3Schema:
       description: PodHttpChaos is the Schema for the podhttpchaos API
@@ -35,17 +37,10 @@ spec:
         spec:
           description: PodHttpChaosSpec defines the desired state of PodHttpChaos.
           properties:
-            proxy_ports:
-              description: ProxyPorts represents the target ports to be proxy of.
-              items:
-                format: int32
-                type: integer
-              type: array
             rules:
               description: Rules are a list of injection rule for http request.
               items:
-                description: PodHttpChaosRule defines the injection rule for http
-                  request.
+                description: PodHttpChaosRule defines the injection rule for http.
                 properties:
                   actions:
                     description: Actions contains rules to inject target.
@@ -135,6 +130,10 @@ spec:
                             type: object
                         type: object
                     type: object
+                  port:
+                    description: Port represents the target port to be proxy of.
+                    format: int32
+                    type: integer
                   selector:
                     description: Selector contains the rules to select target.
                     properties:
@@ -171,22 +170,29 @@ spec:
                           header name and header value pairs.
                         type: object
                     type: object
+                  source:
+                    description: Source represents the source of current rules
+                    type: string
                   target:
                     description: Target is the object to be selected and injected,
-                      <Request | Response>.
+                      <Request|Response>.
                     type: string
                 required:
                 - actions
+                - port
                 - selector
                 - target
                 type: object
               type: array
-          required:
-          - proxy_ports
           type: object
         status:
           description: PodHttpChaosStatus defines the actual state of PodHttpChaos.
           properties:
+            failedMessage:
+              type: string
+            observedGeneration:
+              format: int64
+              type: integer
             pid:
               description: Pid represents a running tproxy process id.
               format: int64

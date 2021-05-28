@@ -1,6 +1,6 @@
-import { Box, Collapse, IconButton, Typography, useMediaQuery, useTheme } from '@material-ui/core'
+import { Box, Collapse, IconButton, Typography, useMediaQuery } from '@material-ui/core'
 import React, { useState } from 'react'
-import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
+import { makeStyles, useTheme } from '@material-ui/core/styles'
 
 import { Archive } from 'api/archives.type'
 import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
@@ -15,23 +15,20 @@ import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp'
 import Paper from 'components-mui/Paper'
 import PauseCircleOutlineIcon from '@material-ui/icons/PauseCircleOutline'
 import PlayCircleOutlineIcon from '@material-ui/icons/PlayCircleOutline'
-import { RootState } from 'store'
 import Space from 'components-mui/Space'
 import T from 'components/T'
 import { truncate } from 'lib/utils'
 import { useHistory } from 'react-router-dom'
-import { useSelector } from 'react-redux'
+import { useStoreSelector } from 'store'
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      '&:hover': {
-        backgroundColor: theme.palette.action.hover,
-        cursor: 'pointer',
-      },
+const useStyles = makeStyles((theme) => ({
+  root: {
+    '&:hover': {
+      backgroundColor: theme.palette.action.hover,
+      cursor: 'pointer',
     },
-  })
-)
+  },
+}))
 
 interface ExperimentListItemProps {
   experiment: Experiment | Archive
@@ -52,12 +49,13 @@ const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
 
   const history = useHistory()
 
-  const { lang } = useSelector((state: RootState) => state.settings)
+  const { lang } = useStoreSelector((state) => state.settings)
 
   const [open, setOpen] = useState(false)
 
   const handleToggle = (e: any) => {
     e.stopPropagation()
+
     setOpen(!open)
   }
 
@@ -67,37 +65,37 @@ const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
     switch (action) {
       case 'archive':
         onSelect({
-          uuid: (e as Experiment).uid,
           title: `${intl.formatMessage({ id: 'archives.single' })} ${e.name}`,
           description: intl.formatMessage({ id: 'experiments.deleteDesc' }),
           action,
+          uuid: e.uid,
         })
 
         return
       case 'pause':
         onSelect({
-          uuid: (e as Experiment).uid,
           title: `${intl.formatMessage({ id: 'common.pause' })} ${e.name}`,
           description: intl.formatMessage({ id: 'experiments.pauseDesc' }),
           action,
+          uuid: e.uid,
         })
 
         return
       case 'start':
         onSelect({
-          uuid: (e as Experiment).uid,
           title: `${intl.formatMessage({ id: 'common.start' })} ${e.name}`,
           description: intl.formatMessage({ id: 'experiments.startDesc' }),
           action,
+          uuid: e.uid,
         })
 
         return
       case 'delete':
         onSelect({
-          uuid: (e as Experiment).uid,
           title: `${intl.formatMessage({ id: 'common.delete' })} ${e.name}`,
           description: intl.formatMessage({ id: 'archives.deleteDesc' }),
           action,
+          uuid: e.uid,
         })
 
         return
@@ -106,12 +104,12 @@ const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
     }
   }
 
-  const handleJumpTo = () => history.push(isArchive ? `/archives/${e.uid}` : `/experiments/${(e as Experiment).uid}`)
+  const handleJumpTo = () => history.push(isArchive ? `/archives/${e.uid}` : `/experiments/${e.uid}`)
 
   const Actions = () => (
     <Space display="flex" justifyContent="end" alignItems="center">
       <Typography variant="body2">
-        {T('experiments.createdAt')}{' '}
+        {T('table.created')}{' '}
         {DateTime.fromISO(isArchive ? (e as Archive).start_time : (e as Experiment).created, {
           locale: lang,
         }).toRelative()}

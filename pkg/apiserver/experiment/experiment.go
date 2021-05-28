@@ -867,8 +867,8 @@ func (s *Service) listExperiments(c *gin.Context) {
 	ns := c.Query("namespace")
 	status := c.Query("status")
 
-	if !s.conf.ClusterScoped {
-		log.Info("Overwrite namespace within namespace scoped mode", "origin", ns, "new", s.conf.TargetNamespace)
+	if len(ns) == 0 && !s.conf.ClusterScoped &&
+		len(s.conf.TargetNamespace) != 0 {
 		ns = s.conf.TargetNamespace
 	}
 
@@ -1091,6 +1091,12 @@ func (s *Service) batchDeleteExperiment(c *gin.Context) {
 	force := c.DefaultQuery("force", "false")
 	uidSlice = strings.Split(uids, ",")
 	errFlag = false
+
+	if len(uidSlice) > 100 {
+		c.Status(http.StatusBadRequest)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("too many uids, please reduce the number of uids")))
+		return
+	}
 
 	for _, uid := range uidSlice {
 		if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
