@@ -105,7 +105,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	pbClient, err := chaosdaemon.NewChaosDaemonClient(ctx, r.Client, pod)
 	if err != nil {
 		r.Recorder.Event(obj, "Warning", "Failed", err.Error())
-		return ctrl.Result{}, nil
+		return ctrl.Result{Requeue: true}, nil
 	}
 	defer pbClient.Close()
 
@@ -149,13 +149,13 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	})
 	if err != nil {
 		r.Recorder.Event(obj, "Warning", "Failed", err.Error())
-		return ctrl.Result{}, nil
+		return ctrl.Result{Requeue: true}, nil
 	}
 
 	if res.StatusCode != http.StatusOK {
 		err = fmt.Errorf("status(%d), apply fail: %s", res.StatusCode, res.Error)
 		r.Recorder.Event(obj, "Warning", "Failed", err.Error())
-		return ctrl.Result{}, nil
+		return ctrl.Result{Requeue: true}, nil
 	}
 
 	pid = res.Instance
