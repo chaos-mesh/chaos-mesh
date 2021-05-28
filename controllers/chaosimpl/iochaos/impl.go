@@ -63,18 +63,14 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		podiochaos := &v1alpha1.PodIoChaos{}
 		err := impl.Client.Get(ctx, controller.ParseNamespacedName(record.Id), podiochaos)
 		if err != nil {
-			if err != nil {
-				if k8sError.IsNotFound(err) {
+			if k8sError.IsNotFound(err) {
+				return v1alpha1.NotInjected, nil
+			}
+
+			if k8sError.IsForbidden(err) {
+				if strings.Contains(err.Error(), "because it is being terminated") {
 					return v1alpha1.NotInjected, nil
 				}
-
-				if k8sError.IsForbidden(err) {
-					if strings.Contains(err.Error(), "because it is being terminated") {
-						return v1alpha1.NotInjected, nil
-					}
-				}
-
-				return waitForApplySync, err
 			}
 
 			return waitForApplySync, err
