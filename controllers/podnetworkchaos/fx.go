@@ -24,13 +24,14 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 )
 
 func NewController(mgr ctrl.Manager, client client.Client, reader client.Reader, logger logr.Logger) (types.Controller, error) {
-	err := ctrl.NewControllerManagedBy(mgr).
+	err := builder.Default(mgr).
 		For(&v1alpha1.PodNetworkChaos{}).
 		Named("podnetworkchaos").
 		WithEventFilter(predicate.Funcs{

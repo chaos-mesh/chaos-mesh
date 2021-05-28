@@ -67,8 +67,8 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, nil
 	}
 
-	if obj.ObjectMeta.Generation <= obj.Status.ObservedGeneration {
-		r.Log.Info("the target pod has been up to date")
+	if obj.ObjectMeta.Generation <= obj.Status.ObservedGeneration && obj.Status.FailedMessage == "" {
+		r.Log.Info("the target pod has been up to date", "pod", obj.Namespace+"/"+obj.Name)
 		return ctrl.Result{}, nil
 	}
 
@@ -138,7 +138,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			Activity: "set ipsets",
 			Err:      err.Error(),
 		})
-		return ctrl.Result{}, nil
+		return ctrl.Result{Requeue: true}, nil
 	}
 
 	err = r.SetIptables(ctx, pod, obj)
@@ -148,7 +148,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			Activity: "set iptables",
 			Err:      err.Error(),
 		})
-		return ctrl.Result{}, nil
+		return ctrl.Result{Requeue: true}, nil
 	}
 
 	err = r.SetTcs(ctx, pod, obj)
@@ -157,7 +157,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			Activity: "set tc",
 			Err:      err.Error(),
 		})
-		return ctrl.Result{}, nil
+		return ctrl.Result{Requeue: true}, nil
 	}
 
 	return ctrl.Result{}, nil
