@@ -437,7 +437,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 		})
 
 		ginkgo.It("[WorkflowSerial]", func() {
-			workflowtestcases.TestcaseWorkflowSerial(ns,kubeCli, cli, c, port, map[string]string{
+			workflowtestcases.TestcaseWorkflowSerial(ns, kubeCli, cli, c, port, map[string]string{
 				"app": "timer",
 			})
 		})

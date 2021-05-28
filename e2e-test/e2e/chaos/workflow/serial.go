@@ -16,10 +16,9 @@ package workflow
 import (
 	"context"
 	"fmt"
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/chaos/timechaos"
-	"github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/util"
-	"github.com/chaos-mesh/chaos-mesh/e2e-test/pkg/fixture"
+	"net/http"
+	"time"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
@@ -27,9 +26,12 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/kubernetes/test/e2e/framework"
-	"net/http"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"time"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/chaos/timechaos"
+	"github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/util"
+	"github.com/chaos-mesh/chaos-mesh/e2e-test/pkg/fixture"
 )
 
 func TestcaseWorkflowSerial(
