@@ -95,14 +95,28 @@ func (iptables *iptablesClient) setIptablesChain(chain *pb.Chain) error {
 		return fmt.Errorf("unknown chain direction %d", chain.Direction)
 	}
 
-	protocolAndPort := chain.Protocol
-	if len(protocolAndPort) > 0 {
+	protocolAndPort := ""
+	if len(chain.Protocol) > 0 {
+		protocolAndPort += fmt.Sprintf("--protocol %s", chain.Protocol)
+
 		if len(chain.SourcePorts) > 0 {
-			protocolAndPort += " " + chain.SourcePorts
+			if strings.Contains(chain.SourcePorts, ",") {
+				protocolAndPort += fmt.Sprintf(" -m multiport --source-ports %s", chain.SourcePorts)
+			} else {
+				protocolAndPort += fmt.Sprintf(" --source-port %s", chain.SourcePorts)
+			}
 		}
 
 		if len(chain.DestinationPorts) > 0 {
-			protocolAndPort += " " + chain.DestinationPorts
+			if strings.Contains(chain.DestinationPorts, ",") {
+				protocolAndPort += fmt.Sprintf(" -m multiport --destination-ports %s", chain.DestinationPorts)
+			} else {
+				protocolAndPort += fmt.Sprintf(" --destination-port %s", chain.DestinationPorts)
+			}
+		}
+
+		if len(chain.TcpFlags) > 0 {
+			protocolAndPort += fmt.Sprintf(" --tcp-flags %s", chain.TcpFlags)
 		}
 	}
 

@@ -90,7 +90,7 @@ const (
 const ChaosDaemonClientCert = "chaos-mesh-daemon-client-certs"
 const ChaosDaemonNamespace = "chaos-testing"
 
-var TLSFiles TLSFileConfig
+var TLSFiles grpcUtils.TLSFile
 var Insecure bool
 
 type ItemResult struct {
@@ -383,23 +383,26 @@ func ConnectToLocalChaosDaemon(port int) (daemonClient.ChaosDaemonClientInterfac
 }
 
 func getGrpcClient(port int) (*grpc.ClientConn, error) {
+	builder := grpcUtils.Builder("localhost", port)
 	if Insecure {
-		return grpcUtils.CreateGrpcConnection("localhost", port, "", "", "")
-	}
-	if TLSFiles.CaCert == "" || TLSFiles.Cert == "" || TLSFiles.Key == "" {
-		PrettyPrint("TLS Files are not complete, fall back to use secrets.", 0, Green)
-		config, err := getTLSConfigFromSecrets()
-		if err != nil {
-			return nil, err
+		builder.Insecure()
+	} else {
+		if TLSFiles.CaCert == "" || TLSFiles.Cert == "" || TLSFiles.Key == "" {
+			PrettyPrint("TLS Files are not complete, fall back to use secrets.", 0, Green)
+			config, err := getTLSConfigFromSecrets()
+			if err != nil {
+				return nil, err
+			}
+			builder.TLSFromRaw(config.CaCert, config.Cert, config.Key)
+		} else {
+			PrettyPrint("Using TLS Files.", 0, Green)
+			builder.TLSFromFile(TLSFiles.CaCert, TLSFiles.Cert, TLSFiles.Key)
 		}
-		return grpcUtils.CreateGrpcConnectionFromRaw("localhost", port, config.caCert, config.cert, config.key)
 	}
-	PrettyPrint("Using TLS Files.", 0, Green)
-	return grpcUtils.CreateGrpcConnection("localhost", port, TLSFiles.CaCert, TLSFiles.Cert, TLSFiles.Key)
+	return builder.Build()
 }
 
-func getTLSConfigFromSecrets() (*rawTLSConfig, error) {
-	var cfg rawTLSConfig
+func getTLSConfigFromSecrets() (*grpcUtils.TLSRaw, error) {
 	restconfig, err := config.GetConfig()
 	if err != nil {
 		return nil, err
@@ -412,19 +415,10 @@ func getTLSConfigFromSecrets() (*rawTLSConfig, error) {
 	if err != nil {
 		return nil, err
 	}
-	cfg.caCert = secret.Data["ca.crt"]
-	cfg.cert = secret.Data["tls.crt"]
-	cfg.key = secret.Data["tls.key"]
+	cfg := grpcUtils.TLSRaw{
+		CaCert: secret.Data["ca.crt"],
+		Cert:   secret.Data["tls.crt"],
+		Key:    secret.Data["tls.key"],
+	}
 	return &cfg, nil
-}
-
-type rawTLSConfig struct {
-	caCert []byte
-	cert   []byte
-	key    []byte
-}
-type TLSFileConfig struct {
-	CaCert string
-	Cert   string
-	Key    string
 }

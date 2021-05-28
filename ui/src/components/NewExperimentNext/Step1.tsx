@@ -1,14 +1,13 @@
 import { Box, Card, Divider, GridList, GridListTile, Typography, useMediaQuery, useTheme } from '@material-ui/core'
-import React, { useEffect, useState } from 'react'
 import { iconByKind, transByKind } from 'lib/byKind'
-import { setStep1, setTarget as setTargetToStore } from 'slices/experiments'
+import { setKindAction as setKindActionToStore, setStep1, setTarget as setTargetToStore } from 'slices/experiments'
 import targetData, { Kind, Target, schema } from './data/target'
+import { useEffect, useState } from 'react'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
-import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline'
+import CheckIcon from '@material-ui/icons/Check'
 import Kernel from './form/Kernel'
 import Paper from 'components-mui/Paper'
-import PaperTop from 'components-mui/PaperTop'
 import RadioButtonCheckedOutlinedIcon from '@material-ui/icons/RadioButtonCheckedOutlined'
 import RadioButtonUncheckedOutlinedIcon from '@material-ui/icons/RadioButtonUncheckedOutlined'
 import Stress from './form/Stress'
@@ -68,8 +67,7 @@ const Step1 = () => {
   const dispatch = useStoreDispatch()
 
   const [kindAction, setKindAction] = useState<[Kind | '', string]>([_kind, _action])
-  const kind = kindAction[0]
-  const action = kindAction[1]
+  const [kind, action] = kindAction
 
   useEffect(() => {
     setKindAction([_kind, _action])
@@ -77,18 +75,26 @@ const Step1 = () => {
 
   const handleSelectTarget = (key: Kind) => () => setKindAction([key, ''])
 
-  const handleSelectAction = (action: string) => () => {
-    if (submitDirectly.includes(action)) {
-      handleSubmitStep1(targetData[kind as Kind].categories!.filter(({ key }) => key === action)[0].spec)
-    }
+  const handleSelectAction = (newAction: string) => () => {
+    dispatch(setKindActionToStore([kind, newAction]))
 
-    setKindAction([kind, action])
+    if (submitDirectly.includes(newAction)) {
+      handleSubmitStep1({ action: newAction })
+    }
   }
 
   const handleSubmitStep1 = (values: Record<string, any>) => {
     const result = {
       kind,
-      [_snakecase(kind)]: values,
+      [_snakecase(kind)]:
+        submitDirectly.includes(values.action) && Object.keys(values).length === 1
+          ? values
+          : action
+          ? {
+              ...values,
+              action,
+            }
+          : values,
     }
 
     if (process.env.NODE_ENV === 'development') {
@@ -103,27 +109,20 @@ const Step1 = () => {
 
   return (
     <Paper className={step1 ? classes.submit : ''}>
-      <PaperTop
-        title={
-          <Box display="flex">
-            {step1 && (
-              <Box display="flex" alignItems="center" mr={3}>
-                <CheckCircleOutlineIcon className={classes.submitIcon} />
-              </Box>
-            )}
-            {T('newE.titleStep1')}
-          </Box>
-        }
-      >
-        {step1 && (
-          <Box display="flex" alignItems="center">
-            <UndoIcon className={classes.asButton} onClick={handleUndo} />
-          </Box>
-        )}
-      </PaperTop>
+      <Box display="flex" justifyContent="space-between" mb={step1 ? 0 : 6}>
+        <Box display="flex" alignItems="center">
+          {step1 && (
+            <Box display="flex" mr={3}>
+              <CheckIcon className={classes.submitIcon} />
+            </Box>
+          )}
+          <Typography>{T('newE.titleStep1')}</Typography>
+        </Box>
+        {step1 && <UndoIcon className={classes.asButton} onClick={handleUndo} />}
+      </Box>
       <Box hidden={step1}>
-        <Box p={3} overflow="hidden">
-          <GridList className={classes.gridList} cols={isDesktopScreen ? 1.5 : 3.5} spacing={9} cellHeight="auto">
+        <Box overflow="hidden">
+          <GridList className={classes.gridList} cols={isDesktopScreen ? 2.5 : 3.5} spacing={9} cellHeight="auto">
             {targetDataEntries.map(([key]) => (
               <GridListTile key={key}>
                 <Card
@@ -135,7 +134,7 @@ const Step1 = () => {
                     <Box display="flex" justifyContent="center" flex={1}>
                       {iconByKind(key)}
                     </Box>
-                    <Box display="flex" justifyContent="center" flex={2} px={1.5} textAlign="center">
+                    <Box display="flex" justifyContent="center" flex={1.5} textAlign="center">
                       <Typography variant="button">{transByKind(key)}</Typography>
                     </Box>
                   </Box>
@@ -145,12 +144,12 @@ const Step1 = () => {
           </GridList>
         </Box>
         {kind && (
-          <Box p={3} overflow="hidden">
-            <Box mb={6}>
+          <Box overflow="hidden">
+            <Box my={6}>
               <Divider />
             </Box>
             {targetData[kind].categories ? (
-              <GridList className={classes.gridList} cols={isDesktopScreen ? 2.5 : 4.5} spacing={9} cellHeight="auto">
+              <GridList className={classes.gridList} cols={isDesktopScreen ? 2.5 : 3.5} spacing={9} cellHeight="auto">
                 {targetData[kind].categories!.map((d: any) => (
                   <GridListTile key={d.key}>
                     <Card

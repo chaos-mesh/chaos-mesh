@@ -37,7 +37,7 @@ SHELL    := bash
 PACKAGE_LIST := echo $$(go list ./... | grep -vE "chaos-mesh/test|pkg/ptrace|zz_generated|vendor") github.com/chaos-mesh/chaos-mesh/api/v1alpha1
 
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
-CRD_OPTIONS ?= "crd:trivialVersions=true,preserveUnknownFields=false"
+CRD_OPTIONS ?= "crd:trivialVersions=true,preserveUnknownFields=false,crdVersions=v1beta1"
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
@@ -145,7 +145,7 @@ config: $(GOBIN)/controller-gen
 
 # Run go fmt against code
 fmt: groupimports
-	$(CGO) fmt ./...
+	$(CGO) fmt $$(go list ./... | grep -v 'zz_generated.*.go')
 
 gosec-scan: $(GOBIN)/gosec
 	$(GOENV) $< ./api/... ./controllers/... ./pkg/... || echo "*** sec-scan failed: known-issues ***"
@@ -279,7 +279,7 @@ e2e-test/image/e2e/bin/ginkgo:
 	cd e2e-test && $(GO) build -ldflags "$(LDFLAGS)" -tags "${BUILD_TAGS}" -o image/e2e/bin/ginkgo github.com/onsi/ginkgo/ginkgo
 
 CLEAN_TARGETS+=e2e-test/image/e2e/bin/e2e.test
-e2e-test/image/e2e/bin/e2e.test:
+e2e-test/image/e2e/bin/e2e.test: e2e-test/e2e/**/*.go
 	cd e2e-test && $(GO) test -c  -o ./image/e2e/bin/e2e.test ./e2e
 
 e2e-test/image/e2e/manifests: manifests
@@ -343,7 +343,7 @@ docker-push-chaos-kernel:
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-kernel:${IMAGE_TAG}"
 
 $(GOBIN)/controller-gen:
-	$(GO) get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.2.5
+	$(GO) get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.4.1
 $(GOBIN)/revive:
 	$(GO) get github.com/mgechev/revive@v1.0.2-0.20200225072153-6219ca02fffb
 $(GOBIN)/failpoint-ctl:
