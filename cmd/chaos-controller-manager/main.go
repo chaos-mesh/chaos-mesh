@@ -52,6 +52,7 @@ import (
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/podchaos/containerkill"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/podchaos/podfailure"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/podchaos/podkill"
+	"github.com/chaos-mesh/chaos-mesh/controllers/podhttpchaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podiochaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/stresschaos"
@@ -144,6 +145,17 @@ func main() {
 	})
 	if err = (&v1alpha1.PodIoChaos{}).SetupWebhookWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create webhook", "webhook", "PodIOChaos")
+		os.Exit(1)
+	}
+
+	// We only setup webhook for podhttpchaos, and the logic of applying chaos are in the mutation
+	// webhook, because we need to get the running result synchronously in http chaos reconciler
+	v1alpha1.RegisterPodHttpHandler(&podhttpchaos.Handler{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("handler").WithName("PodHttpChaos"),
+	})
+	if err = (&v1alpha1.PodHttpChaos{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "PodHttpChaos")
 		os.Exit(1)
 	}
 

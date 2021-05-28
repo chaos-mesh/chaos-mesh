@@ -81,6 +81,9 @@ func ModifyTime(pid int, deltaSec int64, deltaNsec int64, clockIdsMask uint64) e
 	}
 
 	runtime.LockOSThread()
+	defer func() {
+		runtime.UnlockOSThread()
+	}()
 
 	program, err := ptrace.Trace(pid)
 	if err != nil {
@@ -91,8 +94,6 @@ func ModifyTime(pid int, deltaSec int64, deltaNsec int64, clockIdsMask uint64) e
 		if err != nil {
 			log.Error(err, "fail to detach program", "pid", program.Pid())
 		}
-
-		runtime.UnlockOSThread()
 	}()
 
 	var vdsoEntry *mapreader.Entry
@@ -160,9 +161,5 @@ func ModifyTime(pid int, deltaSec int64, deltaNsec int64, clockIdsMask uint64) e
 	}
 
 	err = program.JumpToFakeFunc(originAddr, fakeAddr)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }

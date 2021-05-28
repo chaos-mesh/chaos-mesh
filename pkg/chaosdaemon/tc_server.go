@@ -130,7 +130,7 @@ func (s *DaemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Em
 	if len(globalTc) > 0 {
 		if err := s.setGlobalTcs(tcCli, globalTc, in.Device); err != nil {
 			log.Error(err, "error while setting global tc")
-			return &empty.Empty{}, nil
+			return &empty.Empty{}, err
 		}
 	}
 
@@ -138,7 +138,7 @@ func (s *DaemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Em
 		iptablesCli := buildIptablesClient(ctx, in.EnterNS, pid)
 		if err := s.setFilterTcs(tcCli, iptablesCli, filterTc, in.Device, len(globalTc)); err != nil {
 			log.Error(err, "error while setting filter tc")
-			return &empty.Empty{}, nil
+			return &empty.Empty{}, err
 		}
 	}
 
@@ -214,23 +214,9 @@ func (s *DaemonServer) setFilterTcs(
 			ch.Ipsets = []string{tc.Ipset}
 		}
 
-		if len(tc.Protocol) > 0 {
-			ch.Protocol = fmt.Sprintf("--protocol %s", tc.Protocol)
-		}
-
-		if len(tc.SourcePort) > 0 {
-			ch.SourcePorts = fmt.Sprintf("--source-port %s", tc.SourcePort)
-			if strings.Contains(tc.SourcePort, ",") {
-				ch.SourcePorts = fmt.Sprintf("-m multiport --source-ports %s", tc.SourcePort)
-			}
-		}
-
-		if len(tc.EgressPort) > 0 {
-			ch.DestinationPorts = fmt.Sprintf("--destination-port %s", tc.EgressPort)
-			if strings.Contains(tc.EgressPort, ",") {
-				ch.DestinationPorts = fmt.Sprintf("-m multiport --destination-ports %s", tc.EgressPort)
-			}
-		}
+		ch.Protocol = tc.Protocol
+		ch.SourcePorts = tc.SourcePort
+		ch.DestinationPorts = tc.EgressPort
 
 		chains = append(chains, ch)
 
@@ -360,24 +346,6 @@ func (c *tcClient) addTbf(device string, parent string, handle string, tbf *pb.T
 
 	args := fmt.Sprintf("qdisc add dev %s %s %s tbf %s", device, parent, handle, convertTbfToArgs(tbf))
 	processBuilder := bpm.DefaultProcessBuilder("tc", strings.Split(args, " ")...).SetContext(c.ctx)
-	if c.enterNS {
-		processBuilder = processBuilder.SetNS(c.pid, bpm.NetNS)
-	}
-	cmd := processBuilder.Build()
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		return encodeOutputToError(output, err)
-	}
-	return nil
-}
-
-func (c *tcClient) addFilter(device string, parent string, classid string, ipset string) error {
-	log.Info("adding filter", "parent", parent, "classid", classid, "ipset", ipset)
-
-	args := strings.Split(fmt.Sprintf("filter add dev %s %s basic match", device, parent), " ")
-	args = append(args, fmt.Sprintf("ipset(%s dst)", ipset))
-	args = append(args, strings.Split(classid, " ")...)
-	processBuilder := bpm.DefaultProcessBuilder("tc", args...).SetContext(c.ctx)
 	if c.enterNS {
 		processBuilder = processBuilder.SetNS(c.pid, bpm.NetNS)
 	}

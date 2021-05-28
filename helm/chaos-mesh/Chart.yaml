@@ -6,7 +6,7 @@ icon: https://raw.githubusercontent.com/pingcap/chaos-mesh/master/static/logo.sv
 sources:
   - https://github.com/pingcap/chaos-mesh
 name: chaos-mesh
-version: v0.2.0
+version: v0.2.1
 keywords:
   - chaos-engineering
   - resiliency

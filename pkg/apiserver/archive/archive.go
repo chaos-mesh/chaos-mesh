@@ -25,6 +25,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
+	"github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 )
 
@@ -32,16 +33,19 @@ import (
 type Service struct {
 	archive core.ExperimentStore
 	event   core.EventStore
+	conf    *config.ChaosDashboardConfig
 }
 
 // NewService returns an archive experiment service instance.
 func NewService(
 	archive core.ExperimentStore,
 	event core.EventStore,
+	conf *config.ChaosDashboardConfig,
 ) *Service {
 	return &Service{
 		archive: archive,
 		event:   event,
+		conf:    conf,
 	}
 }
 
@@ -53,7 +57,9 @@ type StatusResponse struct {
 // Register mounts our HTTP handler on the mux.
 func Register(r *gin.RouterGroup, s *Service) {
 	endpoint := r.Group("/archives")
-	endpoint.Use(utils.AuthRequired)
+	endpoint.Use(func(c *gin.Context) {
+		utils.AuthRequired(c, s.conf.ClusterScoped, s.conf.TargetNamespace)
+	})
 
 	endpoint.GET("", s.list)
 	endpoint.GET("/detail", s.detail)
@@ -76,7 +82,7 @@ type Archive struct {
 // Detail represents an archive instance.
 type Detail struct {
 	Archive
-	YAML core.KubeObjectYAMLDescription `json:"yaml"`
+	KubeObject core.KubeObjectDesc `json:"kube_object"`
 }
 
 // Report defines the report of archive experiments.
@@ -101,6 +107,10 @@ func (s *Service) list(c *gin.Context) {
 	kind := c.Query("kind")
 	name := c.Query("name")
 	ns := c.Query("namespace")
+	if len(ns) == 0 && !s.conf.ClusterScoped &&
+		len(s.conf.TargetNamespace) != 0 {
+		ns = s.conf.TargetNamespace
+	}
 
 	metas, err := s.archive.ListMeta(context.Background(), kind, ns, name, true)
 	if err != nil {
@@ -136,12 +146,16 @@ func (s *Service) list(c *gin.Context) {
 // @Failure 500 {object} utils.APIError
 func (s *Service) detail(c *gin.Context) {
 	var (
-		err    error
-		yaml   core.KubeObjectYAMLDescription
-		detail Detail
+		err        error
+		kubeObject core.KubeObjectDesc
+		detail     Detail
 	)
 	uid := c.Query("uid")
 	namespace := c.Query("namespace")
+	if len(namespace) == 0 && !s.conf.ClusterScoped &&
+		len(s.conf.TargetNamespace) != 0 {
+		namespace = s.conf.TargetNamespace
+	}
 
 	if uid == "" {
 		c.Status(http.StatusBadRequest)
@@ -169,21 +183,23 @@ func (s *Service) detail(c *gin.Context) {
 
 	switch exp.Kind {
 	case v1alpha1.KindPodChaos:
-		yaml, err = exp.ParsePodChaos()
+		kubeObject, err = exp.ParsePodChaos()
 	case v1alpha1.KindIoChaos:
-		yaml, err = exp.ParseIOChaos()
+		kubeObject, err = exp.ParseIOChaos()
 	case v1alpha1.KindNetworkChaos:
-		yaml, err = exp.ParseNetworkChaos()
+		kubeObject, err = exp.ParseNetworkChaos()
 	case v1alpha1.KindTimeChaos:
-		yaml, err = exp.ParseTimeChaos()
+		kubeObject, err = exp.ParseTimeChaos()
 	case v1alpha1.KindKernelChaos:
-		yaml, err = exp.ParseKernelChaos()
+		kubeObject, err = exp.ParseKernelChaos()
 	case v1alpha1.KindStressChaos:
-		yaml, err = exp.ParseStressChaos()
+		kubeObject, err = exp.ParseStressChaos()
 	case v1alpha1.KindDNSChaos:
-		yaml, err = exp.ParseDNSChaos()
+		kubeObject, err = exp.ParseDNSChaos()
 	case v1alpha1.KindAwsChaos:
-		yaml, err = exp.ParseAwsChaos()
+		kubeObject, err = exp.ParseAwsChaos()
+	case v1alpha1.KindGcpChaos:
+		kubeObject, err = exp.ParseGcpChaos()
 	default:
 		err = fmt.Errorf("kind %s is not support", exp.Kind)
 	}
@@ -203,7 +219,7 @@ func (s *Service) detail(c *gin.Context) {
 			StartTime:  exp.StartTime,
 			FinishTime: exp.FinishTime,
 		},
-		YAML: yaml,
+		KubeObject: kubeObject,
 	}
 
 	c.JSON(http.StatusOK, detail)
@@ -224,6 +240,10 @@ func (s *Service) report(c *gin.Context) {
 	)
 	uid := c.Query("uid")
 	namespace := c.Query("namespace")
+	if len(namespace) == 0 && !s.conf.ClusterScoped &&
+		len(s.conf.TargetNamespace) != 0 {
+		namespace = s.conf.TargetNamespace
+	}
 
 	if uid == "" {
 		c.Status(http.StatusBadRequest)

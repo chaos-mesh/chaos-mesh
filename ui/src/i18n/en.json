@@ -20,10 +20,11 @@
     "totalState": "Total State",
     "predefined": "Predefined",
     "predefinedDesc": "📦 Store custom experiments here for quick execution.",
+    "noPredefinedFound": "No predefined found",
     "recent": "Recent"
   },
   "newE": {
-    "title": "New Experiment",
+    "title": "New experiment",
     "titleStep1": "Choose a Target",
     "titleStep2": "Fill the experiment info",
     "steps": {
@@ -34,13 +35,10 @@
     },
     "loadFrom": "Load from",
     "basic": {
-      "name": "Name",
       "nameHelper": "The experiment name",
-      "namespace": "Namespace",
-      "namespaceHelper": "Select the experiment's namespace"
+      "namespaceHelper": "Select the namespace"
     },
     "scope": {
-      "namespaceSelectors": "Namespace Selectors",
       "mode": "Mode",
       "modeHelper": "Select the experiment mode",
       "modeValue": "Mode Value",
@@ -48,13 +46,7 @@
       "affectedPods": "Affected Pods",
       "affectedPodsPreview": "Affected Pods Preview",
       "affectedPodsPreviewHelper": "Checking or unchecking Pods to further limit the scope of the experiment",
-      "noPodsFound": "No pods found",
-      "podsTable": {
-        "name": "Name",
-        "namespace": "Namespace",
-        "ip": "IP",
-        "state": "State"
-      }
+      "noPodsFound": "No pods found"
     },
     "target": {
       "kind": "Kind",
@@ -87,6 +79,9 @@
       },
       "aws": {
         "title": "AWS Fault"
+      },
+      "gcp": {
+        "title": "GCP Fault"
       }
     },
     "schedule": {
@@ -101,6 +96,7 @@
   },
   "experiments": {
     "title": "Experiments",
+    "single": "Experiment",
     "state": {
       "running": "Running",
       "paused": "Paused",
@@ -115,6 +111,46 @@
     "pauseDesc": "You can restart the experiment in the same position",
     "startDesc": "The operation will take effect immediately"
   },
+  "workflows": {
+    "title": "Workflows",
+    "noWorkflowsFound": "No workflows found",
+    "deleteDesc": "This workflow will be permanently deleted"
+  },
+  "workflow": {
+    "entry": "Entry",
+    "time": "Time",
+    "state": "State",
+    "topology": "Topology"
+  },
+  "newW": {
+    "title": "New Workflow",
+    "node": {
+      "choose": "Choose task type",
+      "single": "Single",
+      "serial": "Serial",
+      "parallel": "Parallel",
+      "suspend": "Suspend",
+      "number": "Number",
+      "chooseChildren": "Choose child task",
+      "nameHelper": "The task name",
+      "nameValidation": "The task name is required",
+      "durationHelper": "The task duration",
+      "durationValidation": "The task duration is required",
+      "deleteDesc": "This task will be deleted",
+      "submitAll": "Submit All"
+    },
+    "serialTitle": "Set serial",
+    "parallelTitle": "Set parallel",
+    "suspendTitle": "Set suspend",
+    "nameHelper": "The workflow name",
+    "nameValidation": "The workflow name is required",
+    "durationHelper": "The workflow duration",
+    "durationValidation": "The workflow duration is required",
+    "submit": "Submit workflow",
+    "messages": {
+      "m1": "Please complete the creation of the current node first"
+    }
+  },
   "events": {
     "title": "Events",
     "noEventsFound": "No events found",
@@ -127,9 +163,6 @@
       "started": "Started",
       "ended": "Ended",
       "pod": {
-        "ip": "IP",
-        "name": "Name",
-        "namespace": "Namespace",
         "action": "Action",
         "message": "Message"
       }
@@ -179,7 +212,6 @@
       "role": "Role",
       "roleHelper": "Choose role",
       "title": "Add Token",
-      "name": "Name",
       "nameHelper": "Please fill the token name",
       "nameValidation": "The token name is required",
       "token": "Token",
@@ -191,48 +223,6 @@
   },
   "swagger": {
     "title": "Swagger API"
-  },
-  "common": {
-    "other": "Other",
-    "version": "Version",
-    "doc": "Documentation",
-    "tutorial": "Tutorial",
-    "batchOperation": "Batch operation",
-    "selectAll": "Select all",
-    "add": "Add",
-    "confirm": "Confirm",
-    "cancel": "Cancel",
-    "copy": "Copy",
-    "copied": "Copied!",
-    "close": "Close",
-    "submit": "Submit",
-    "upload": "Upload",
-    "download": "Download",
-    "detail": "Detail",
-    "start": "Start",
-    "pause": "Pause",
-    "update": "Update",
-    "delete": "Delete",
-    "status": "Status",
-    "use": "Use",
-    "using": "Using",
-    "configuration": "Configuration",
-    "noOptions": "No options",
-    "multiOptions": "Support mutiple options",
-    "advancedOptions": "Advanced Options",
-    "isKVHelperText": "Type key:value and end with a space to generate a key/value pair",
-    "timeline": "Timeline",
-    "meta": "Meta",
-    "uuid": "UUID",
-    "createSuccessfully": "Created successfully",
-    "loadSuccessfully": "Loaded successfully",
-    "deleteSuccessfully": "Deleted successfully",
-    "archiveSuccessfully": "Archived successfully",
-    "startSuccessfully": "Started successfully",
-    "pauseSuccessfully": "Paused successfully",
-    "updateSuccessfully": "Updated successfully",
-    "submitSuccessfully": "Submitted successfully",
-    "chooseNamespace": "Choose namespace"
   },
   "search": {
     "placeholder": "Search",
@@ -248,9 +238,63 @@
       "noResult": "No result"
     }
   },
+  "common": {
+    "add": "Add",
+    "advancedOptions": "Advanced Options",
+    "batchOperation": "Batch operation",
+    "cancel": "Cancel",
+    "chooseNamespace": "Choose namespace",
+    "close": "Close",
+    "configuration": "Configuration",
+    "confirm": "Confirm",
+    "copied": "Copied!",
+    "copy": "Copy",
+    "delete": "Delete",
+    "detail": "Detail",
+    "doc": "Documentation",
+    "download": "Download",
+    "ip": "IP address",
+    "isKVHelperText": "Type key:value and end with a space to generate a key/value pair",
+    "meta": "Meta",
+    "multiOptions": "Support mutiple options",
+    "name": "Name",
+    "noOptions": "No options",
+    "operation": "Operation",
+    "other": "Other",
+    "pause": "Pause",
+    "preview": "Preview",
+    "process": "Process",
+    "selectAll": "Select all",
+    "start": "Start",
+    "status": "Status",
+    "submit": "Submit",
+    "timeline": "Timeline",
+    "tutorial": "Tutorial",
+    "update": "Update",
+    "upload": "Upload",
+    "use": "Use",
+    "using": "Using",
+    "uuid": "UUID",
+    "version": "Version"
+  },
+  "table": {
+    "created": "Created at"
+  },
+  "confirm": {
+    "archiveSuccessfully": "Archived successfully",
+    "createSuccessfully": "Created successfully",
+    "deleteSuccessfully": "Deleted successfully",
+    "loadSuccessfully": "Loaded successfully",
+    "pauseSuccessfully": "Paused successfully",
+    "updateSuccessfully": "Updated successfully",
+    "startSuccessfully": "Started successfully",
+    "submitSuccessfully": "Submitted successfully"
+  },
   "k8s": {
+    "namespace": "Namespace",
     "labels": "Labels",
     "annotations": "Annotations",
+    "namespaceSelectors": "Namespace Selectors",
     "labelSelectors": "Label Selectors",
     "annotationsSelectors": "Annotation Selectors",
     "phaseSelectors": "Phase Selectors"

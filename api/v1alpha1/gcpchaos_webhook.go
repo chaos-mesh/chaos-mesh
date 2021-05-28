@@ -111,7 +111,7 @@ func (in *GcpChaosSpec) validateDeviceName(containerField *field.Path) field.Err
 	allErrs := field.ErrorList{}
 	if in.Action == DiskLoss {
 		if in.DeviceNames == nil {
-			err := fmt.Errorf("the name of device should not be empty on %s action", in.Action)
+			err := fmt.Errorf("at least one device name is required on %s action", in.Action)
 			allErrs = append(allErrs, field.Invalid(containerField, in.DeviceNames, err.Error()))
 		}
 	}

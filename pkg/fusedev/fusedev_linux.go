@@ -68,9 +68,5 @@ func GrantAccess() error {
 	// 10, 229 according to https://www.kernel.org/doc/Documentation/admin-guide/devices.txt
 	content := "c 10:229 rwm"
 	_, err = f.WriteString(content)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }

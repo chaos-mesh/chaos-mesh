@@ -29,4 +29,4 @@ const YAMLEditor: React.FC<YAMLEditorProps> = ({ theme, data, mountEditor }) => 
   )
 }
 
-export default YAMLEditor
+export default React.memo(YAMLEditor)

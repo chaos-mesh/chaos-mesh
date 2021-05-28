@@ -1,7 +1,6 @@
 import { Box, Button, Grid, Grow, Modal } from '@material-ui/core'
-import ConfirmDialog, { ConfirmDialogHandles } from 'components-mui/ConfirmDialog'
 import EventsTable, { EventsTableHandles } from 'components/EventsTable'
-import { createStyles, makeStyles } from '@material-ui/core/styles'
+import { setAlert, setConfirm } from 'slices/globalStatus'
 import { useEffect, useRef, useState } from 'react'
 import { useHistory, useParams } from 'react-router-dom'
 import { useStoreDispatch, useStoreSelector } from 'store'
@@ -25,46 +24,37 @@ import api from 'api'
 import fileDownload from 'js-file-download'
 import genEventsChart from 'lib/d3/eventsChart'
 import loadable from '@loadable/component'
-import { setAlert } from 'slices/globalStatus'
+import { makeStyles } from '@material-ui/core/styles'
 import { useIntl } from 'react-intl'
 import { usePrevious } from 'lib/hooks'
 import yaml from 'js-yaml'
 
 const YAMLEditor = loadable(() => import('components/YAMLEditor'))
 
-const useStyles = makeStyles((theme) =>
-  createStyles({
-    eventsChart: {
-      height: 150,
-      margin: theme.spacing(3),
+const useStyles = makeStyles((theme) => ({
+  eventsChart: {
+    height: 150,
+  },
+  eventDetailPaper: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    overflowY: 'scroll',
+  },
+  configPaper: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    width: '50vw',
+    height: '90vh',
+    transform: 'translate(-50%, -50%)',
+    [theme.breakpoints.down('sm')]: {
+      width: '90vw',
     },
-    eventDetailPaper: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      width: '100%',
-      height: '100%',
-      overflowY: 'scroll',
-    },
-    configPaper: {
-      position: 'absolute',
-      top: '50%',
-      left: '50%',
-      width: '50vw',
-      height: '90vh',
-      transform: 'translate(-50%, -50%)',
-      [theme.breakpoints.down('sm')]: {
-        width: '90vw',
-      },
-    },
-  })
-)
-
-const initialSelected = {
-  title: '',
-  description: '',
-  action: '',
-}
+  },
+}))
 
 export default function ExperimentDetail() {
   const classes = useStyles()
@@ -79,7 +69,6 @@ export default function ExperimentDetail() {
 
   const chartRef = useRef<HTMLDivElement>(null)
   const eventsTableRef = useRef<EventsTableHandles>(null)
-  const confirmRef = useRef<ConfirmDialogHandles>(null)
 
   const [loading, setLoading] = useState(true)
   const [detail, setDetail] = useState<ExperimentDetailType>()
@@ -87,7 +76,6 @@ export default function ExperimentDetail() {
   const prevEvents = usePrevious(events)
   const [yamlEditor, setYAMLEditor] = useState<Ace.Editor>()
   const [configOpen, setConfigOpen] = useState(false)
-  const [selected, setSelected] = useState(initialSelected)
 
   const fetchExperimentDetail = () => {
     api.experiments
@@ -98,7 +86,7 @@ export default function ExperimentDetail() {
 
   const fetchEvents = () =>
     api.events
-      .events({ experimentName: detail!.yaml.metadata.name })
+      .events({ experimentName: detail!.kube_object.metadata.name })
       .then(({ data }) => setEvents(data))
       .catch(console.error)
       .finally(() => {
@@ -138,38 +126,42 @@ export default function ExperimentDetail() {
   const onModalOpen = () => setConfigOpen(true)
   const onModalClose = () => setConfigOpen(false)
 
-  const handleAction = (action: string) => () => {
+  const handleSelect = (action: string) => () => {
     switch (action) {
       case 'archive':
-        setSelected({
-          title: `${intl.formatMessage({ id: 'archives.single' })} ${detail!.name}`,
-          description: intl.formatMessage({ id: 'experiments.deleteDesc' }),
-          action: 'archive',
-        })
+        dispatch(
+          setConfirm({
+            title: `${intl.formatMessage({ id: 'archives.single' })} ${detail!.name}`,
+            description: intl.formatMessage({ id: 'experiments.deleteDesc' }),
+            handle: handleAction('archive'),
+          })
+        )
 
         break
       case 'pause':
-        setSelected({
-          title: `${intl.formatMessage({ id: 'common.pause' })} ${detail!.name}`,
-          description: intl.formatMessage({ id: 'experiments.pauseDesc' }),
-          action: 'pause',
-        })
+        dispatch(
+          setConfirm({
+            title: `${intl.formatMessage({ id: 'common.pause' })} ${detail!.name}`,
+            description: intl.formatMessage({ id: 'experiments.pauseDesc' }),
+            handle: handleAction('pause'),
+          })
+        )
 
         break
       case 'start':
-        setSelected({
-          title: `${intl.formatMessage({ id: 'common.start' })} ${detail!.name}`,
-          description: intl.formatMessage({ id: 'experiments.startDesc' }),
-          action: 'start',
-        })
+        dispatch(
+          setConfirm({
+            title: `${intl.formatMessage({ id: 'common.start' })} ${detail!.name}`,
+            description: intl.formatMessage({ id: 'experiments.startDesc' }),
+            handle: handleAction('start'),
+          })
+        )
 
         break
     }
-
-    confirmRef.current!.setOpen(true)
   }
 
-  const handleExperiment = (action: string) => () => {
+  const handleAction = (action: string) => () => {
     let actionFunc: any
 
     switch (action) {
@@ -189,15 +181,13 @@ export default function ExperimentDetail() {
         actionFunc = null
     }
 
-    confirmRef.current!.setOpen(false)
-
     if (actionFunc) {
       actionFunc(uuid)
         .then(() => {
           dispatch(
             setAlert({
               type: 'success',
-              message: intl.formatMessage({ id: `common.${action}Successfully` }),
+              message: intl.formatMessage({ id: `confirm.${action}Successfully` }),
             })
           )
 
@@ -213,7 +203,7 @@ export default function ExperimentDetail() {
     }
   }
 
-  const handleDownloadExperiment = () => fileDownload(yaml.dump(detail!.yaml), `${detail!.name}.yaml`)
+  const handleDownloadExperiment = () => fileDownload(yaml.dump(detail!.kube_object), `${detail!.name}.yaml`)
 
   const handleUpdateExperiment = () => {
     const data = yaml.load(yamlEditor!.getValue())
@@ -221,11 +211,12 @@ export default function ExperimentDetail() {
     api.experiments
       .update(data)
       .then(() => {
-        setConfigOpen(false)
+        onModalClose()
+
         dispatch(
           setAlert({
             type: 'success',
-            message: intl.formatMessage({ id: 'common.updateSuccessfully' }),
+            message: intl.formatMessage({ id: 'confirm.updateSuccessfully' }),
           })
         )
 
@@ -244,7 +235,7 @@ export default function ExperimentDetail() {
                 variant="outlined"
                 size="small"
                 startIcon={<ArchiveOutlinedIcon />}
-                onClick={handleAction('archive')}
+                onClick={handleSelect('archive')}
               >
                 {T('archives.single')}
               </Button>
@@ -253,7 +244,7 @@ export default function ExperimentDetail() {
                   variant="outlined"
                   size="small"
                   startIcon={<PlayCircleOutlineIcon />}
-                  onClick={handleAction('start')}
+                  onClick={handleSelect('start')}
                 >
                   {T('common.start')}
                 </Button>
@@ -262,7 +253,7 @@ export default function ExperimentDetail() {
                   variant="outlined"
                   size="small"
                   startIcon={<PauseCircleOutlineIcon />}
-                  onClick={handleAction('pause')}
+                  onClick={handleSelect('pause')}
                 >
                   {T('common.pause')}
                 </Button>
@@ -297,7 +288,7 @@ export default function ExperimentDetail() {
                     startIcon={<NoteOutlinedIcon />}
                     onClick={onModalOpen}
                   >
-                    {T('common.update')}
+                    {T('common.configuration')}
                   </Button>
                 </Space>
               </PaperTop>
@@ -326,25 +317,18 @@ export default function ExperimentDetail() {
                 <Box px={3} pt={3}>
                   <PaperTop title={detail.name}>
                     <Button variant="contained" color="primary" size="small" onClick={handleUpdateExperiment}>
-                      {T('common.confirm')}
+                      {T('common.update')}
                     </Button>
                   </PaperTop>
                 </Box>
                 <Box flex={1}>
-                  <YAMLEditor theme={theme} data={yaml.dump(detail.yaml)} mountEditor={setYAMLEditor} />
+                  <YAMLEditor theme={theme} data={yaml.dump(detail.kube_object)} mountEditor={setYAMLEditor} />
                 </Box>
               </Box>
             )}
           </Paper>
         </div>
       </Modal>
-
-      <ConfirmDialog
-        ref={confirmRef}
-        title={selected.title}
-        description={selected.description}
-        onConfirm={handleExperiment(selected.action)}
-      />
 
       {loading && <Loading />}
     </>

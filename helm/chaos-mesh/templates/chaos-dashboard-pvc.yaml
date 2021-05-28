@@ -7,17 +7,14 @@ metadata:
   namespace: {{ .Release.Namespace | quote }}
   name: {{ template "chaos-mesh.name" . }}-chaos-dashboard
   labels:
-    app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: chaos-dashboard
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
 spec:
-{{- if .Values.dashboard.persistentVolume.storageClass }}
-{{- if (eq "-" .Values.dashboard.persistentVolume.storageClass) }}
+{{- if .Values.dashboard.persistentVolume.storageClassName }}
+{{- if (eq "-" .Values.dashboard.persistentVolume.storageClassName) }}
   storageClassName: ""
 {{- else }}
-  storageClassName: "{{ .Values.dashboard.persistentVolume.storageClass }}"
+  storageClassName: "{{ .Values.dashboard.persistentVolume.storageClassName }}"
 {{- end }}
 {{- end }}
   accessModes:

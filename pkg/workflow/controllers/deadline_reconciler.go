@@ -74,7 +74,7 @@ func (it *DeadlineReconciler) Reconcile(request reconcile.Request) (reconcile.Re
 				Status: corev1.ConditionTrue,
 				Reason: reason,
 			})
-			return it.kubeClient.Update(ctx, &nodeNeedUpdate)
+			return it.kubeClient.Status().Update(ctx, &nodeNeedUpdate)
 		})
 
 		if updateError != nil {
@@ -93,7 +93,7 @@ func (it *DeadlineReconciler) Reconcile(request reconcile.Request) (reconcile.Re
 				Status: corev1.ConditionFalse,
 				Reason: v1alpha1.NodeDeadlineNotExceed,
 			})
-			return it.kubeClient.Update(ctx, &nodeNeedUpdate)
+			return it.kubeClient.Status().Update(ctx, &nodeNeedUpdate)
 		})
 
 		if updateError != nil {
