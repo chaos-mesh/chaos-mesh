@@ -80,7 +80,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 
 // Base represents the base info of an experiment.
 type Base struct {
-	Type      string `json:"type"`
+	Kind      string `json:"kind"`
 	Namespace string `json:"namespace"`
 	Name      string `json:"name"`
 }
@@ -517,7 +517,7 @@ func (s *Service) listSchedules(c *gin.Context) {
 		}
 		sches = append(sches, &Schedule{
 			Base: Base{
-				Type:      string(schedule.Spec.Type),
+				Kind:      string(schedule.Spec.Type),
 				Namespace: schedule.Namespace,
 				Name:      schedule.Name,
 			},
@@ -584,7 +584,7 @@ func (s *Service) getScheduleDetail(c *gin.Context) {
 	schDetail = Detail{
 		Schedule: Schedule{
 			Base: Base{
-				Type:      string(schedule.Spec.Type),
+				Kind:      string(schedule.Spec.Type),
 				Namespace: schedule.Namespace,
 				Name:      schedule.Name,
 			},
