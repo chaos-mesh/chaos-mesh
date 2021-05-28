@@ -19,8 +19,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/chaos-mesh/chaos-mesh/controllers/common"
-
 	authv1 "k8s.io/api/authorization/v1"
 	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -28,6 +26,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 )
 
 var alwaysAllowedKind = []string{
@@ -93,21 +92,20 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 
 	kind, ok := v1alpha1.AllKinds()[requestKind]
 	if !ok {
-		return admission.Errored(http.StatusBadRequest, fmt.Errorf("unknown kind %s", requestKind))
+		err := fmt.Errorf("kind %s is not support", requestKind)
+		return admission.Errored(http.StatusBadRequest, err)
 	}
-	obj, ok := kind.Chaos.DeepCopyObject().(common.InnerObjectWithSelector)
-	if !ok {
-		// TODO: check whether it should be allowed when a resource (like workflow, schedule) without selector is created
-		return admission.Allowed("")
+	chaos := kind.Chaos.DeepCopyObject().(common.InnerObjectWithSelector)
+	if chaos == nil {
+		err := fmt.Errorf("kind %s is not support", requestKind)
+		return admission.Errored(http.StatusBadRequest, err)
 	}
-	err := v.decoder.Decode(req, obj)
+
+	err := v.decoder.Decode(req, chaos)
 	if err != nil {
 		return admission.Errored(http.StatusBadRequest, err)
 	}
-	specs := obj.GetSelectorSpecs()
-	if specs == nil {
-		return admission.Allowed("")
-	}
+	specs := chaos.GetSelectorSpecs()
 
 	requireClusterPrivileges := false
 	affectedNamespaces := make(map[string]struct{})
