@@ -22,7 +22,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
+	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 	pkgmock "github.com/chaos-mesh/chaos-mesh/pkg/mock"
 
@@ -237,4 +237,3 @@ var _ = Describe("event", func() {
 		})
 	})
 })
-

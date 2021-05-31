@@ -38,11 +38,11 @@ func TestEvent(t *testing.T) {
 
 var _ = Describe("event", func() {
 	var (
-		es         *eventStore
-		mock       sqlmock.Sqlmock
-		event0     *core.Event
-		event1     *core.Event
-		timeNow    time.Time
+		es      *eventStore
+		mock    sqlmock.Sqlmock
+		event0  *core.Event
+		event1  *core.Event
+		timeNow time.Time
 	)
 
 	BeforeEach(func() {
@@ -172,7 +172,6 @@ var _ = Describe("event", func() {
 			sqlSelect := `SELECT * FROM "events" WHERE (namespace = ? and name = ? and kind = ?)`
 			mock.ExpectQuery(regexp.QuoteMeta(sqlSelect)).WithArgs(event0.Namespace, event0.Name, event0.Kind).WillReturnRows(mockedRow[0])
 
-
 			events, err := es.ListByExperiment(context.TODO(), event0.Namespace, event0.Name, event0.Kind)
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(events[0]).Should(Equal(event0))
@@ -256,7 +255,7 @@ func TestConstructQueryArgs(t *testing.T) {
 		ns            string
 		name          string
 		uid           string
-		createTime     string
+		createTime    string
 		expectedQuery string
 		expectedArgs  []string
 	}{
@@ -265,7 +264,7 @@ func TestConstructQueryArgs(t *testing.T) {
 			ns:            "",
 			uid:           "",
 			kind:          "",
-			createTime:     "",
+			createTime:    "",
 			expectedQuery: "",
 			expectedArgs:  []string{},
 		},
@@ -274,7 +273,7 @@ func TestConstructQueryArgs(t *testing.T) {
 			ns:            "",
 			uid:           "",
 			kind:          "",
-			createTime:     "",
+			createTime:    "",
 			expectedQuery: "name = ?",
 			expectedArgs:  []string{"testName"},
 		},
@@ -283,7 +282,7 @@ func TestConstructQueryArgs(t *testing.T) {
 			ns:            "testNamespace",
 			uid:           "",
 			kind:          "",
-			createTime:     "",
+			createTime:    "",
 			expectedQuery: "namespace = ?",
 			expectedArgs:  []string{"testNamespace"},
 		},
@@ -292,7 +291,7 @@ func TestConstructQueryArgs(t *testing.T) {
 			ns:            "",
 			uid:           "testUID",
 			kind:          "",
-			createTime:     "",
+			createTime:    "",
 			expectedQuery: "experiment_id = ?",
 			expectedArgs:  []string{"testUID"},
 		},
@@ -301,7 +300,7 @@ func TestConstructQueryArgs(t *testing.T) {
 			ns:            "",
 			uid:           "",
 			kind:          "testKind",
-			createTime:     "",
+			createTime:    "",
 			expectedQuery: "kind = ?",
 			expectedArgs:  []string{"testKind"},
 		},
@@ -310,7 +309,7 @@ func TestConstructQueryArgs(t *testing.T) {
 			ns:            "",
 			uid:           "",
 			kind:          "",
-			createTime:     "20200101",
+			createTime:    "20200101",
 			expectedQuery: "created_at >= ?",
 			expectedArgs:  []string{"20200101"},
 		},
@@ -319,7 +318,7 @@ func TestConstructQueryArgs(t *testing.T) {
 			ns:            "testNamespace",
 			uid:           "",
 			kind:          "",
-			createTime:     "",
+			createTime:    "",
 			expectedQuery: "name = ? AND namespace = ?",
 			expectedArgs:  []string{"testName", "testNamespace"},
 		},
@@ -328,7 +327,7 @@ func TestConstructQueryArgs(t *testing.T) {
 			ns:            "testNamespace",
 			uid:           "testUID",
 			kind:          "",
-			createTime:     "",
+			createTime:    "",
 			expectedQuery: "name = ? AND namespace = ? AND experiment_id = ?",
 			expectedArgs:  []string{"testName", "testNamespace", "testUID"},
 		},
@@ -337,7 +336,7 @@ func TestConstructQueryArgs(t *testing.T) {
 			ns:            "testNamespace",
 			uid:           "testUID",
 			kind:          "testKind",
-			createTime:     "",
+			createTime:    "",
 			expectedQuery: "name = ? AND namespace = ? AND experiment_id = ? AND kind = ?",
 			expectedArgs:  []string{"testName", "testNamespace", "testUID", "testKind"},
 		},
@@ -346,7 +345,7 @@ func TestConstructQueryArgs(t *testing.T) {
 			ns:            "testNamespace",
 			uid:           "testUID",
 			kind:          "testKind",
-			createTime:     "20200101",
+			createTime:    "20200101",
 			expectedQuery: "name = ? AND namespace = ? AND experiment_id = ? AND kind = ? AND created_at >= ?",
 			expectedArgs:  []string{"testName", "testNamespace", "testUID", "testKind", "20200101"},
 		},
@@ -355,7 +354,7 @@ func TestConstructQueryArgs(t *testing.T) {
 			ns:            "testNamespace",
 			uid:           "testUID",
 			kind:          "testKind",
-			createTime:     "20200101",
+			createTime:    "20200101",
 			expectedQuery: "name = ? AND namespace = ? AND experiment_id = ? AND kind = ? AND created_at >= ?",
 			expectedArgs:  []string{"testName", "testNamespace", "testUID", "testKind", "20200101"},
 		},
@@ -375,4 +374,3 @@ func TestConstructQueryArgs(t *testing.T) {
 		}
 	}
 }
-

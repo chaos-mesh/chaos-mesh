@@ -25,7 +25,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
+	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 	pkgmock "github.com/chaos-mesh/chaos-mesh/pkg/mock"
 
@@ -324,7 +324,7 @@ func (m *MockScheduleStore) FindByUID(ctx context.Context, UID string) (*core.Sc
 				FinishTime: time.Time{},
 				Archived:   true,
 			},
-			Schedule:    string(jsonStr),
+			Schedule: string(jsonStr),
 		}
 	case "testErrRecordNotFound":
 		err = gorm.ErrRecordNotFound
@@ -371,9 +371,9 @@ var _ = Describe("event", func() {
 		mockSchStore := new(MockScheduleStore)
 
 		s := Service{
-			archive: mockExpStore,
+			archive:         mockExpStore,
 			archiveSchedule: mockSchStore,
-			event:   nil,
+			event:           nil,
 			conf: &config.ChaosDashboardConfig{
 				ClusterScoped: true,
 			},
