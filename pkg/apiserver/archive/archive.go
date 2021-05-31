@@ -309,7 +309,7 @@ func (s *Service) batchDelete(c *gin.Context) {
 // @Produce json
 // @Param namespace query string false "namespace"
 // @Param name query string false "name"
-// @Success 200 {array} ArchiveSchedules
+// @Success 200 {array} Archive
 // @Router /archives/schedules [get]
 // @Failure 500 {object} utils.APIError
 func (s *Service) listSchedule(c *gin.Context) {
