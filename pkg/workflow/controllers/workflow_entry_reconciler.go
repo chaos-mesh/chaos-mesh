@@ -71,7 +71,7 @@ func (it *WorkflowEntryReconciler) Reconcile(request reconcile.Request) (reconci
 			// Not scheduled yet, spawn the entry workflow node
 			spawnedEntryNode, err := it.spawnEntryNode(ctx, workflow)
 			if err != nil {
-				it.eventRecorder.Event(&workflow, recorder.WorkflowInvalidEntry{
+				it.eventRecorder.Event(&workflow, recorder.InvalidEntry{
 					EntryTemplate: workflow.Spec.Entry,
 				})
 				it.logger.Error(err, "failed to spawn new entry node of workflow",
@@ -85,7 +85,7 @@ func (it *WorkflowEntryReconciler) Reconcile(request reconcile.Request) (reconci
 				"workflow", request.NamespacedName,
 				"entry node", fmt.Sprintf("%s/%s", spawnedEntryNode.Namespace, spawnedEntryNode.Name),
 			)
-			it.eventRecorder.Event(&workflow, recorder.WorkflowEntryCreated{Entry: spawnedEntryNode.Name})
+			it.eventRecorder.Event(&workflow, recorder.EntryCreated{Entry: spawnedEntryNode.Name})
 		}()
 	}
 

@@ -17,36 +17,57 @@ import (
 	"fmt"
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
+	"strings"
 )
 
-type WorkflowInvalidEntry struct {
+type InvalidEntry struct {
 	EntryTemplate string
 }
 
-func (it WorkflowInvalidEntry) Type() string {
+func (it InvalidEntry) Type() string {
 	return corev1.EventTypeWarning
 }
 
-func (it WorkflowInvalidEntry) Reason() string {
+func (it InvalidEntry) Reason() string {
 	return v1alpha1.InvalidEntry
 }
 
-func (it WorkflowInvalidEntry) Message() string {
+func (it InvalidEntry) Message() string {
 	return fmt.Sprintf("failed to spawn new entry node of workflow, entry: %s", it.EntryTemplate)
 }
 
-type WorkflowEntryCreated struct {
+type EntryCreated struct {
 	Entry string
 }
 
-func (it WorkflowEntryCreated) Type() string {
+func (it EntryCreated) Type() string {
 	return corev1.EventTypeNormal
 }
 
-func (it WorkflowEntryCreated) Reason() string {
+func (it EntryCreated) Reason() string {
 	return v1alpha1.EntryCreated
 }
 
-func (it WorkflowEntryCreated) Message() string {
+func (it EntryCreated) Message() string {
 	return fmt.Sprintf("entry node created, entry node %s", it.Entry)
+}
+
+type NodesCreated struct {
+	ChildNodes []string
+}
+
+func (it NodesCreated) Type() string {
+	return corev1.EventTypeNormal
+}
+
+func (it NodesCreated) Reason() string {
+	return v1alpha1.NodesCreated
+}
+
+func (it NodesCreated) Message() string {
+	return fmt.Sprintf("child nodes created, %s", strings.Join(it.ChildNodes, ","))
+}
+
+func init() {
+	register(InvalidEntry{}, EntryCreated{}, NodesCreated{})
 }

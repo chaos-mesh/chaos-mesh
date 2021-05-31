@@ -14,6 +14,7 @@
 package controllers
 
 import (
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 	"github.com/go-logr/logr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -23,7 +24,6 @@ import (
 )
 
 func BootstrapWorkflowControllers(mgr manager.Manager, logger logr.Logger) error {
-
 	noCacheClient, err := client.New(mgr.GetConfig(), client.Options{
 		Scheme: mgr.GetScheme(),
 		Mapper: mgr.GetRESTMapper(),
@@ -38,7 +38,7 @@ func BootstrapWorkflowControllers(mgr manager.Manager, logger logr.Logger) error
 		Complete(
 			NewWorkflowEntryReconciler(
 				mgr.GetClient(),
-				mgr.GetEventRecorderFor("workflow-entry-reconciler"),
+				recorder.NewRecorder(mgr, "workflow-entry-reconciler", logger.WithName("workflow-entry-reconciler")),
 				logger.WithName("workflow-entry-reconciler"),
 			),
 		)
@@ -55,7 +55,7 @@ func BootstrapWorkflowControllers(mgr manager.Manager, logger logr.Logger) error
 		Complete(
 			NewSerialNodeReconciler(
 				noCacheClient,
-				mgr.GetEventRecorderFor("workflow-serial-node-reconciler"),
+				recorder.NewRecorder(mgr, "workflow-serial-node-reconciler", logger.WithName("workflow-serial-node-reconciler")),
 				logger.WithName("workflow-serial-node-reconciler"),
 			),
 		)
