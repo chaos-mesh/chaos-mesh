@@ -20,14 +20,14 @@ interface ConfirmDialogProps {
 }
 
 const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
-                                                       open,
-                                                       close,
-                                                       title,
-                                                       description,
-                                                       onConfirm,
-                                                       children,
-                                                       dialogProps,
-                                                     }) => {
+  open,
+  close,
+  title,
+  description,
+  onConfirm,
+  children,
+  dialogProps,
+}) => {
   const handleConfirm = () => {
     typeof onConfirm === 'function' && onConfirm()
     typeof close === 'function' && close()

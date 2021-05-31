@@ -255,3 +255,23 @@ func constructQueryArgs(experimentName, experimentNamespace, uid, kind, createTi
 
 	return query, args
 }
+
+func splitArray(arr []uint, num int) [][]uint {
+	max := int(len(arr))
+	if max < num {
+		return nil
+	}
+	var segments = make([][]uint, 0)
+	quantity := max / num
+	end := int(0)
+	for i := int(1); i <= num; i++ {
+		point := i * quantity
+		if i != num {
+			segments = append(segments, arr[i-1+end:point])
+		} else {
+			segments = append(segments, arr[i-1+end:])
+		}
+		end = point - i
+	}
+	return segments
+}

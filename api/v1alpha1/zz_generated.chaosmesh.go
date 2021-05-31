@@ -128,7 +128,7 @@ func (in *AwsChaos) DurationExceeded(now time.Time) (bool, time.Duration, error)
 
 		return false, stopTime.Sub(now), nil
 	}
-		
+
 	return false, 0, nil
 }
 
@@ -239,7 +239,7 @@ func (in *DNSChaos) DurationExceeded(now time.Time) (bool, time.Duration, error)
 
 		return false, stopTime.Sub(now), nil
 	}
-		
+
 	return false, 0, nil
 }
 
@@ -350,7 +350,7 @@ func (in *GcpChaos) DurationExceeded(now time.Time) (bool, time.Duration, error)
 
 		return false, stopTime.Sub(now), nil
 	}
-		
+
 	return false, 0, nil
 }
 
@@ -461,7 +461,7 @@ func (in *HTTPChaos) DurationExceeded(now time.Time) (bool, time.Duration, error
 
 		return false, stopTime.Sub(now), nil
 	}
-		
+
 	return false, 0, nil
 }
 
@@ -572,7 +572,7 @@ func (in *IoChaos) DurationExceeded(now time.Time) (bool, time.Duration, error) 
 
 		return false, stopTime.Sub(now), nil
 	}
-		
+
 	return false, 0, nil
 }
 
@@ -683,7 +683,7 @@ func (in *JVMChaos) DurationExceeded(now time.Time) (bool, time.Duration, error)
 
 		return false, stopTime.Sub(now), nil
 	}
-		
+
 	return false, 0, nil
 }
 
@@ -794,7 +794,7 @@ func (in *KernelChaos) DurationExceeded(now time.Time) (bool, time.Duration, err
 
 		return false, stopTime.Sub(now), nil
 	}
-		
+
 	return false, 0, nil
 }
 
@@ -905,7 +905,7 @@ func (in *NetworkChaos) DurationExceeded(now time.Time) (bool, time.Duration, er
 
 		return false, stopTime.Sub(now), nil
 	}
-		
+
 	return false, 0, nil
 }
 
@@ -1016,7 +1016,7 @@ func (in *PodChaos) DurationExceeded(now time.Time) (bool, time.Duration, error)
 
 		return false, stopTime.Sub(now), nil
 	}
-		
+
 	return false, 0, nil
 }
 
@@ -1127,7 +1127,7 @@ func (in *StressChaos) DurationExceeded(now time.Time) (bool, time.Duration, err
 
 		return false, stopTime.Sub(now), nil
 	}
-		
+
 	return false, 0, nil
 }
 
@@ -1238,7 +1238,7 @@ func (in *TimeChaos) DurationExceeded(now time.Time) (bool, time.Duration, error
 
 		return false, stopTime.Sub(now), nil
 	}
-		
+
 	return false, 0, nil
 }
 

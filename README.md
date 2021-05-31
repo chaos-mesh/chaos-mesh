@@ -1,7 +1,7 @@
 <img src="static/logo.svg" alt="chaos-mesh-logo" width="450"/>
 
 <!-- markdown-link-check-disable -->
-[![Build Status](https://internal.pingcap.net/idc-jenkins/job/build_chaos_mesh_master/badge/icon)](https://internal.pingcap.net/idc-jenkins/view/chaos-mesh/job/build_chaos_mesh_master/)
+[![Build Status](https://ci.pingcap.net/view/chaos-mesh/job/build_chaos_mesh_master/badge/icon)](https://ci.pingcap.net/view/chaos-mesh/job/build_chaos_mesh_master/)
 [![codecov](https://codecov.io/gh/chaos-mesh/chaos-mesh/branch/master/graph/badge.svg)](https://codecov.io/gh/chaos-mesh/chaos-mesh)
 [![LICENSE](https://img.shields.io/github/license/pingcap/chaos-mesh.svg)](https://github.com/chaos-mesh/chaos-mesh/blob/master/LICENSE)
 [![Language](https://img.shields.io/badge/Language-Go-blue.svg)](https://golang.org/)
