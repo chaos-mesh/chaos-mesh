@@ -23,8 +23,9 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"go.etcd.io/etcd/client"
+
 	v1 "k8s.io/api/core/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
