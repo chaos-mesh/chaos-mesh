@@ -45,7 +45,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	record := records[index]
 
 	log := impl.Log.WithValues("chaos", kernelChaos, "record", record)
-	podId, _ := controller.ParseNamespacedNameContainer(record.Id)
+	podId := controller.ParseNamespacedName(record.Id)
 	var pod v1.Pod
 	err := impl.Client.Get(ctx, podId, &pod)
 	if err != nil {
@@ -60,7 +60,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	log = log.WithValues("pod", pod)
 
 	if err = impl.applyPod(ctx, &pod, kernelChaos); err != nil {
-		impl.Log.Error(err, "failed to apply chaos on pod")
+		log.Error(err, "failed to apply chaos on pod")
 		return v1alpha1.NotInjected, err
 	}
 
@@ -73,7 +73,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	record := records[index]
 
 	log := impl.Log.WithValues("chaos", kernelChaos, "record", record)
-	podId, _ := controller.ParseNamespacedNameContainer(record.Id)
+	podId := controller.ParseNamespacedName(record.Id)
 	var pod v1.Pod
 	err := impl.Client.Get(ctx, podId, &pod)
 	if err != nil {
@@ -88,7 +88,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	log = log.WithValues("pod", pod)
 
 	if err = impl.recoverPod(ctx, &pod, kernelChaos); err != nil {
-		impl.Log.Error(err, "failed to recover chaos on pod")
+		log.Error(err, "failed to recover chaos on pod")
 		return v1alpha1.Injected, err
 	}
 
@@ -206,13 +206,10 @@ func CreateBPFKIConnection(ctx context.Context, c client.Client, pod *v1.Pod) (*
 	if err != nil {
 		return nil, err
 	}
-	return grpcUtils.CreateGrpcConnection(
-		daemonIP,
-		config.ControllerCfg.BPFKIPort,
-		config.ControllerCfg.TLSConfig.ChaosMeshCACert,
-		config.ControllerCfg.TLSConfig.ChaosDaemonClientCert,
-		config.ControllerCfg.TLSConfig.ChaosDaemonClientKey,
-	)
+	builder := grpcUtils.Builder(daemonIP, config.ControllerCfg.BPFKIPort).
+		WithDefaultTimeout().
+		Insecure()
+	return builder.Build()
 }
 
 func NewImpl(c client.Client, log logr.Logger) *common.ChaosImplPair {
