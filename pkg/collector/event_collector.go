@@ -83,11 +83,10 @@ func (r *EventCollector) Setup(mgr ctrl.Manager, apiType runtime.Object) error {
 					return false
 				}
 				flag := false
-				for kind, _ := range v1alpha1.AllKinds() {
-					if event.InvolvedObject.Kind == kind {
-						flag = true
-						break
-					}
+
+				_, ok = v1alpha1.AllKinds()[event.InvolvedObject.Kind]
+				if ok {
+					flag = true
 				}
 				if event.InvolvedObject.Kind == v1alpha1.KindSchedule {
 					flag = true

@@ -98,9 +98,9 @@ func (ctx *reconcileContext) CalcDesiredPhase() (v1alpha1.DesiredPhase, []record
 			events = append(events, recorder.TimeUp{})
 		}
 		return v1alpha1.StoppedPhase, events
-	} else {
-		ctx.requeueAfter = untilStop
 	}
+
+	ctx.requeueAfter = untilStop
 
 	// Then decide the pause logic
 	if ctx.obj.IsPaused() {
@@ -108,12 +108,12 @@ func (ctx *reconcileContext) CalcDesiredPhase() (v1alpha1.DesiredPhase, []record
 			events = append(events, recorder.Paused{})
 		}
 		return v1alpha1.StoppedPhase, events
-	} else {
-		if ctx.obj.GetStatus().Experiment.DesiredPhase != v1alpha1.RunningPhase {
-			events = append(events, recorder.Started{})
-		}
-		return v1alpha1.RunningPhase, events
 	}
+
+	if ctx.obj.GetStatus().Experiment.DesiredPhase != v1alpha1.RunningPhase {
+		events = append(events, recorder.Started{})
+	}
+	return v1alpha1.RunningPhase, events
 }
 
 func (ctx *reconcileContext) Reconcile(req ctrl.Request) (ctrl.Result, error) {
@@ -137,9 +137,9 @@ func (ctx *reconcileContext) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 				obj.GetStatus().Experiment.DesiredPhase = desiredPhase
 				ctx.Log.Info("update object", "namespace", obj.GetObjectMeta().GetNamespace(), "name", obj.GetObjectMeta().GetName())
 				return ctx.Client.Update(context.TODO(), obj)
-			} else {
-				return nil
 			}
+
+			return nil
 		})
 		if updateError != nil {
 			ctx.Log.Error(updateError, "fail to update")

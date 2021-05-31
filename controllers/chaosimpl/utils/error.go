@@ -35,9 +35,9 @@ func NewFailToFindContainer(namespace string, name string, containerName string,
 func (e *failToFindContainer) Error() string {
 	if e.err == nil {
 		return fmt.Sprintf("fail to find container %s on pod %s/%s", e.containerName, e.namespace, e.name)
-	} else {
-		return e.err.Error()
 	}
+
+	return e.err.Error()
 }
 
 func IsFailToGet(e error) bool {

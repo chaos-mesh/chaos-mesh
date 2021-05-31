@@ -62,7 +62,7 @@ var _ = Describe("background process manager", func() {
 	Context("normally exited process", func() {
 		It("should work", func() {
 			cmd := DefaultProcessBuilder("sleep", "2").Build()
-			err := m.StartProcess(cmd)
+			_, err := m.StartProcess(cmd)
 			Expect(err).To(BeNil())
 
 			WaitProcess(&m, cmd, time.Second*5)
@@ -74,14 +74,14 @@ var _ = Describe("background process manager", func() {
 			cmd := DefaultProcessBuilder("sleep", "2").
 				SetIdentifier(identifier).
 				Build()
-			err := m.StartProcess(cmd)
+			_, err := m.StartProcess(cmd)
 			Expect(err).To(BeNil())
 
 			startTime := time.Now()
 			cmd2 := DefaultProcessBuilder("sleep", "2").
 				SetIdentifier(identifier).
 				Build()
-			err = m.StartProcess(cmd2)
+			_, err = m.StartProcess(cmd2)
 			costedTime := time.Since(startTime)
 			Expect(err).To(BeNil())
 			Expect(costedTime.Seconds()).Should(BeNumerically(">", 1.9))
@@ -96,7 +96,7 @@ var _ = Describe("background process manager", func() {
 	Context("kill process", func() {
 		It("should work", func() {
 			cmd := DefaultProcessBuilder("sleep", "2").Build()
-			err := m.StartProcess(cmd)
+			_, err := m.StartProcess(cmd)
 			Expect(err).To(BeNil())
 
 			pid := cmd.Process.Pid
@@ -118,7 +118,7 @@ var _ = Describe("background process manager", func() {
 			cmd := DefaultProcessBuilder("sleep", "2").
 				SetIdentifier(identifier).
 				Build()
-			err := m.StartProcess(cmd)
+			_, err := m.StartProcess(cmd)
 			Expect(err).To(BeNil())
 
 			pid := cmd.Process.Pid
@@ -139,7 +139,7 @@ var _ = Describe("background process manager", func() {
 			}()
 
 			startTime := time.Now()
-			err = m.StartProcess(cmd2)
+			_, err = m.StartProcess(cmd2)
 			costedTime := time.Since(startTime)
 			Expect(err).To(BeNil())
 			Expect(costedTime.Seconds()).Should(And(BeNumerically("<", 2), BeNumerically(">", 1)))

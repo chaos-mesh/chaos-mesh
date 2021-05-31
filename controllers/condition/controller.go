@@ -128,9 +128,9 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 			obj.GetStatus().Conditions = conditions
 			return r.Client.Update(context.TODO(), obj)
-		} else {
-			return nil
 		}
+
+		return nil
 	})
 
 	if updateError != nil {
