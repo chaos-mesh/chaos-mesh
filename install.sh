@@ -967,6 +967,9 @@ rules:
     verbs:
       - patch
       - create
+      - watch
+      - list
+      - get
   - apiGroups: [ "" ]
     resources: [ "configmaps" ]
     verbs: [ "*" ]

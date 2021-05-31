@@ -18,6 +18,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/store/event"
 	"github.com/chaos-mesh/chaos-mesh/pkg/store/experiment"
+	"github.com/chaos-mesh/chaos-mesh/pkg/store/schedule"
 )
 
 // Module includes the providers provided by store.
@@ -25,6 +26,8 @@ var Module = fx.Options(
 	fx.Provide(
 		experiment.NewStore,
 		event.NewStore,
+		schedule.NewStore,
 	),
 	fx.Invoke(experiment.DeleteIncompleteExperiments),
+	fx.Invoke(schedule.DeleteIncompleteSchedules),
 )
