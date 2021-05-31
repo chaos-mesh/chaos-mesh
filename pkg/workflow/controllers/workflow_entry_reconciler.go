@@ -16,6 +16,7 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 	"sort"
 	"time"
 
@@ -23,7 +24,6 @@ import (
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -34,11 +34,11 @@ import (
 // WorkflowEntryReconciler watches on Workflow, creates new Entry Node for created Workflow.
 type WorkflowEntryReconciler struct {
 	kubeClient    client.Client
-	eventRecorder record.EventRecorder
+	eventRecorder recorder.ChaosRecorder
 	logger        logr.Logger
 }
 
-func NewWorkflowEntryReconciler(kubeClient client.Client, eventRecorder record.EventRecorder, logger logr.Logger) *WorkflowEntryReconciler {
+func NewWorkflowEntryReconciler(kubeClient client.Client, eventRecorder recorder.ChaosRecorder, logger logr.Logger) *WorkflowEntryReconciler {
 	return &WorkflowEntryReconciler{kubeClient: kubeClient, eventRecorder: eventRecorder, logger: logger}
 }
 
@@ -71,9 +71,12 @@ func (it *WorkflowEntryReconciler) Reconcile(request reconcile.Request) (reconci
 			// Not scheduled yet, spawn the entry workflow node
 			spawnedEntryNode, err := it.spawnEntryNode(ctx, workflow)
 			if err != nil {
-				it.eventRecorder.Event(&workflow, corev1.EventTypeWarning, v1alpha1.InvalidEntry, "can not find workflow's entry template")
+				it.eventRecorder.Event(&workflow, recorder.WorkflowInvalidEntry{
+					EntryTemplate: workflow.Spec.Entry,
+				})
 				it.logger.Error(err, "failed to spawn new entry node of workflow",
-					"workflow", request.NamespacedName)
+					"workflow", request.NamespacedName,
+					"entry", workflow.Spec.Entry)
 				// failed to spawn new entry, but will not break the reconcile, continue to sync status
 				return
 			}
@@ -82,7 +85,7 @@ func (it *WorkflowEntryReconciler) Reconcile(request reconcile.Request) (reconci
 				"workflow", request.NamespacedName,
 				"entry node", fmt.Sprintf("%s/%s", spawnedEntryNode.Namespace, spawnedEntryNode.Name),
 			)
-			it.eventRecorder.Event(&workflow, corev1.EventTypeNormal, v1alpha1.EntryCreated, "Entry node created")
+			it.eventRecorder.Event(&workflow, recorder.WorkflowEntryCreated{Entry: spawnedEntryNode.Name})
 		}()
 	}
 
