@@ -14,7 +14,10 @@
 package v1alpha1
 
 import (
+	"fmt"
+
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/util/validation/field"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 )
@@ -59,5 +62,23 @@ func (in *PodChaos) ValidateDelete() error {
 
 // Validate validates chaos object
 func (in *PodChaos) Validate() error {
+	specField := field.NewPath("spec")
+	allErrs := in.Spec.validateContainerName(specField.Child("containerName"))
+
+	if len(allErrs) > 0 {
+		return fmt.Errorf(allErrs.ToAggregate().Error())
+	}
 	return nil
+}
+
+// validateContainerName validates the ContainerName
+func (in *PodChaosSpec) validateContainerName(containerField *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+	if in.Action == ContainerKillAction {
+		if len(in.ContainerSelector.ContainerNames) == 0 {
+			err := fmt.Errorf("the name of container should not be empty on %s action", in.Action)
+			allErrs = append(allErrs, field.Invalid(containerField, in.ContainerNames, err.Error()))
+		}
+	}
+	return allErrs
 }

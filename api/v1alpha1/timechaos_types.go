@@ -69,8 +69,8 @@ type TimeChaosStatus struct {
 	ChaosStatus `json:",inline"`
 }
 
-func (obj *TimeChaos) GetSelectorSpecs() map[string]interface{} {
+func (in *TimeChaos) GetSelectorSpecs() map[string]interface{} {
 	return map[string]interface{}{
-		".": &obj.Spec.ContainerSelector,
+		".": &in.Spec.ContainerSelector,
 	}
 }

@@ -29,7 +29,6 @@ var _ = Describe("awschaos_webhook", func() {
 				execute func(chaos *AwsChaos) error
 				expect  string
 			}
-			duration := "400s"
 			testDeviceName := "testDeviceName"
 			testEbsVolume := "testEbsVolume"
 			tcs := []TestCase{
@@ -42,39 +41,6 @@ var _ = Describe("awschaos_webhook", func() {
 						},
 						Spec: AwsChaosSpec{
 							Action: DetachVolume,
-						},
-					},
-					execute: func(chaos *AwsChaos) error {
-						return chaos.ValidateCreate()
-					},
-					expect: "error",
-				},
-				{
-					name: "only define the Scheduler and execute Ec2Stop",
-					chaos: AwsChaos{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: metav1.NamespaceDefault,
-							Name:      "foo4",
-						},
-						Spec: AwsChaosSpec{
-							Action: Ec2Stop,
-						},
-					},
-					execute: func(chaos *AwsChaos) error {
-						return chaos.ValidateCreate()
-					},
-					expect: "error",
-				},
-				{
-					name: "only define the Duration and execute Ec2Stop",
-					chaos: AwsChaos{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: metav1.NamespaceDefault,
-							Name:      "foo5",
-						},
-						Spec: AwsChaosSpec{
-							Action:   Ec2Stop,
-							Duration: &duration,
 						},
 					},
 					execute: func(chaos *AwsChaos) error {

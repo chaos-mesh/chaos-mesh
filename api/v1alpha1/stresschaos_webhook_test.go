@@ -39,7 +39,6 @@ var _ = Describe("stresschaos_webhook", func() {
 				execute func(chaos *StressChaos) error
 				expect  string
 			}
-			duration := "400s"
 			stressors := &Stressors{
 				MemoryStressor: &MemoryStressor{
 					Stressor: Stressor{Workers: 1},
@@ -91,23 +90,6 @@ var _ = Describe("stresschaos_webhook", func() {
 					},
 					execute: func(chaos *StressChaos) error {
 						return chaos.ValidateDelete()
-					},
-					expect: "",
-				},
-				{
-					name: "only define the Duration",
-					chaos: StressChaos{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: metav1.NamespaceDefault,
-							Name:      "foo5",
-						},
-						Spec: StressChaosSpec{
-							Stressors: stressors,
-							Duration:  &duration,
-						},
-					},
-					execute: func(chaos *StressChaos) error {
-						return chaos.ValidateCreate()
 					},
 					expect: "",
 				},

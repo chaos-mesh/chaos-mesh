@@ -97,10 +97,10 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 							RunningName: innerObj.GetChaos().Name,
 						})
 						continue
-					} else {
-						// hasn't finished, but untilStop is 0
-						r.Log.Info("untilStop is 0 when the chaos has not finished")
 					}
+
+					// hasn't finished, but untilStop is 0
+					r.Log.Info("untilStop is 0 when the chaos has not finished")
 				}
 			} else { // A workflow
 				if schedule.Spec.Type == v1alpha1.ScheduleTypeWorkflow {

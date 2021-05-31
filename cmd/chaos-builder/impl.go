@@ -132,12 +132,12 @@ func (in *{{.Type}}) DurationExceeded(now time.Time) (bool, time.Duration, error
 		stopTime := in.GetCreationTimestamp().Add(*duration)
 		if stopTime.Before(now) {
 			return true, 0, nil
-		} else {
-			return false, stopTime.Sub(now), nil
 		}
-	} else {
-		return false, 0, nil
+
+		return false, stopTime.Sub(now), nil
 	}
+
+	return false, 0, nil
 }
 `
 
