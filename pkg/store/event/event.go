@@ -109,7 +109,7 @@ func (e *eventStore) ListByExperiment(_ context.Context, namespace string, exper
 	var resList []core.Event
 
 	if err := e.db.Where(
-		"namespace = ? and experiment = ? and kind = ?",
+		"namespace = ? and name = ? and kind = ?",
 		namespace, experiment, kind).
 		Find(&resList).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
 		return nil, err
@@ -221,7 +221,7 @@ func constructQueryArgs(experimentName, experimentNamespace, uid, kind, createTi
 	args := make([]interface{}, 0)
 	query := ""
 	if experimentName != "" {
-		query += "experiment = ?"
+		query += "name = ?"
 		args = append(args, experimentName)
 	}
 	if experimentNamespace != "" {
