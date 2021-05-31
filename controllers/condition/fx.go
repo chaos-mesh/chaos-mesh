@@ -20,6 +20,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
 )
 
 type Objs struct {
@@ -33,7 +34,7 @@ func NewController(mgr ctrl.Manager, client client.Client, logger logr.Logger, o
 	for _, obj := range objs.Objs {
 		setupLog.Info("setting up controller", "resource-name", obj.Name)
 
-		err := ctrl.NewControllerManagedBy(mgr).
+		err := builder.Default(mgr).
 			For(obj.Object).
 			Named(obj.Name + "-condition").
 			Complete(&Reconciler{

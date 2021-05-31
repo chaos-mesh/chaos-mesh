@@ -50,7 +50,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
-const Predefined = React.memo(() => {
+const Predefined = () => {
   const classes = useStyles()
 
   const intl = useIntl()
@@ -109,7 +109,7 @@ const Predefined = React.memo(() => {
         dispatch(
           setAlert({
             type: 'success',
-            message: intl.formatMessage({ id: 'common.createSuccessfully' }),
+            message: intl.formatMessage({ id: 'confirm.createSuccessfully' }),
           })
         )
       })
@@ -126,7 +126,7 @@ const Predefined = React.memo(() => {
     dispatch(
       setAlert({
         type: 'success',
-        message: intl.formatMessage({ id: 'common.deleteSuccessfully' }),
+        message: intl.formatMessage({ id: 'confirm.deleteSuccessfully' }),
       })
     )
   }
@@ -178,6 +178,6 @@ const Predefined = React.memo(() => {
       </Modal>
     </>
   )
-})
+}
 
 export default Predefined

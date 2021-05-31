@@ -1,4 +1,4 @@
-import { Box, Chip, TextField, TextFieldProps } from '@material-ui/core'
+import { Chip, TextField, TextFieldProps } from '@material-ui/core'
 import { getIn, useFormikContext } from 'formik'
 
 import Autocomplete from '@material-ui/lab/Autocomplete'
@@ -32,40 +32,25 @@ const AutocompleteMultipleField: React.FC<AutocompleteMultipleFieldProps & TextF
   const onDelete = (val: string) => () => setLabels(labels.filter((d) => d !== val))
 
   return (
-    <Box mb={3}>
-      <Autocomplete
-        multiple
-        options={!props.disabled ? options : []}
-        noOptionsText={T('common.noOptions')}
-        value={labels}
-        onChange={onChange}
-        renderTags={(value: string[], getTagProps) =>
-          value.map((val: string, index: number) => (
-            <Chip
-              {...getTagProps({ index })}
-              style={{ height: 24 }}
-              label={val}
-              color="primary"
-              onDelete={onDelete(val)}
-            />
-          ))
-        }
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            {...props}
-            variant="outlined"
-            margin="dense"
-            fullWidth
-            InputProps={{
-              ...params.InputProps,
-              ...props.InputProps,
-              style: { paddingTop: 8 },
-            }}
+    <Autocomplete
+      multiple
+      options={!props.disabled ? options : []}
+      noOptionsText={T('common.noOptions')}
+      value={labels}
+      onChange={onChange}
+      renderTags={(value: string[], getTagProps) =>
+        value.map((val: string, index: number) => (
+          <Chip
+            {...getTagProps({ index })}
+            style={{ height: 24 }}
+            label={val}
+            color="primary"
+            onDelete={onDelete(val)}
           />
-        )}
-      />
-    </Box>
+        ))
+      }
+      renderInput={(params) => <TextField {...params} {...props} variant="outlined" margin="dense" fullWidth />}
+    />
   )
 }
 

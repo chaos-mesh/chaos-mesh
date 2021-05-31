@@ -22,6 +22,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 	pkgmock "github.com/chaos-mesh/chaos-mesh/pkg/mock"
 
@@ -187,7 +188,9 @@ var _ = Describe("event", func() {
 		mockes := new(MockEventService)
 
 		s := Service{
-			conf:    nil,
+			conf: &config.ChaosDashboardConfig{
+				ClusterScoped: true,
+			},
 			archive: nil,
 			event:   mockes,
 		}
