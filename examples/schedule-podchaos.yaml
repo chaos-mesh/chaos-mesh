@@ -6,7 +6,8 @@ spec:
   schedule: "@every 5s"
   type: "PodChaos"
   historyLimit: 5
-  pod_chaos:
+  concurrencyPolicy: Forbid
+  podChaos:
     action: "pod-kill"
     mode: one
     selector:
