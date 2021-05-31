@@ -303,7 +303,35 @@ func (m *MockScheduleStore) ListMeta(ctx context.Context, namespace, name string
 }
 
 func (m *MockScheduleStore) FindByUID(ctx context.Context, UID string) (*core.Schedule, error) {
-	panic("implement me")
+	var res *core.Schedule
+	var err error
+	switch UID {
+	case "testPodChaos":
+		sch := v1alpha1.Schedule{}
+		jsonStr, _ := json.Marshal(sch)
+		res = &core.Schedule{
+			ScheduleMeta: core.ScheduleMeta{
+				ID:         0,
+				CreatedAt:  time.Time{},
+				UpdatedAt:  time.Time{},
+				DeletedAt:  nil,
+				UID:        UID,
+				Kind:       v1alpha1.KindPodChaos,
+				Name:       "testName",
+				Namespace:  "testNamespace",
+				Action:     "testAction",
+				StartTime:  time.Time{},
+				FinishTime: time.Time{},
+				Archived:   true,
+			},
+			Schedule:    string(jsonStr),
+		}
+	case "testErrRecordNotFound":
+		err = gorm.ErrRecordNotFound
+	default:
+		err = fmt.Errorf("test err")
+	}
+	return res, err
 }
 
 func (m *MockScheduleStore) FindMetaByUID(context.Context, string) (*core.ScheduleMeta, error) {
@@ -636,7 +664,7 @@ var _ = Describe("event", func() {
 		})
 	})
 
-	Context("List", func() {
+	Context("ListSchedule", func() {
 		It("success", func() {
 			response := []Archive{
 				Archive{
@@ -661,6 +689,64 @@ var _ = Describe("event", func() {
 		It("test err", func() {
 			rr := httptest.NewRecorder()
 			request, _ := http.NewRequest(http.MethodGet, "/api/archives/schedules", nil)
+			router.ServeHTTP(rr, request)
+			Expect(rr.Code).Should(Equal(http.StatusInternalServerError))
+		})
+	})
+
+	Context("DetailSchedule", func() {
+		It("empty uid", func() {
+			rr := httptest.NewRecorder()
+			request, _ := http.NewRequest(http.MethodGet, "/api/archives/detail", nil)
+			router.ServeHTTP(rr, request)
+			Expect(rr.Code).Should(Equal(http.StatusBadRequest))
+		})
+
+		It("testPodChaos", func() {
+			sch := &v1alpha1.Schedule{}
+			response := Detail{
+				Archive: Archive{
+					UID:        "testPodChaos",
+					Kind:       v1alpha1.KindPodChaos,
+					Namespace:  "testNamespace",
+					Name:       "testName",
+					Action:     "testAction",
+					StartTime:  time.Time{},
+					FinishTime: time.Time{},
+				},
+				KubeObject: core.KubeObjectDesc{
+					TypeMeta: metav1.TypeMeta{
+						APIVersion: "",
+						Kind:       "",
+					},
+					Meta: core.KubeObjectMeta{
+						Name:        "",
+						Namespace:   "",
+						Labels:      nil,
+						Annotations: nil,
+					},
+					Spec: sch.Spec,
+				},
+			}
+			rr := httptest.NewRecorder()
+			request, _ := http.NewRequest(http.MethodGet, "/api/archives/schedules/testPodChaos", nil)
+			router.ServeHTTP(rr, request)
+			Expect(rr.Code).Should(Equal(http.StatusOK))
+			responseBody, err := json.Marshal(response)
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(rr.Body.Bytes()).Should(Equal(responseBody))
+		})
+
+		It("testErrRecordNotFound", func() {
+			rr := httptest.NewRecorder()
+			request, _ := http.NewRequest(http.MethodGet, "/api/archives/schedules/testErrRecordNotFound", nil)
+			router.ServeHTTP(rr, request)
+			Expect(rr.Code).Should(Equal(http.StatusInternalServerError))
+		})
+
+		It("test err", func() {
+			rr := httptest.NewRecorder()
+			request, _ := http.NewRequest(http.MethodGet, "/api/archives/schedules/testErr", nil)
 			router.ServeHTTP(rr, request)
 			Expect(rr.Code).Should(Equal(http.StatusInternalServerError))
 		})
