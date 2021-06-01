@@ -34,31 +34,18 @@ type metadata struct {
 	Type string
 }
 
-const codeHeader = `// Copyright 2020 Chaos Mesh Authors.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
-package v1alpha1
-`
-
 func main() {
-	implCode := codeHeader + implImport
+	implCode := boilerplate + implImport
 
-	testCode := codeHeader + testImport
+	testCode := boilerplate + testImport
 	initImpl := ""
+	scheduleImpl := ""
 	allTypes := make([]string, 0, 10)
 
 	workflowGenerator := newWorkflowCodeGenerator(nil)
 	workflowTestGenerator := newWorkflowTestCodeGenerator(nil)
+
+	scheduleGenerator := newScheduleCodeGenerator(nil)
 
 	filepath.Walk("./api/v1alpha1", func(path string, info os.FileInfo, err error) error {
 		log := log.WithValues("file", path)
@@ -109,12 +96,15 @@ func main() {
 							log.Error(err, "fail to get type")
 							return err
 						}
-
-						implCode += generateImpl(baseType.Name.Name)
-						testCode += generateTest(baseType.Name.Name)
-						initImpl += generateInit(baseType.Name.Name)
-						workflowGenerator.AppendTypes(baseType.Name.Name)
-						workflowTestGenerator.AppendTypes(baseType.Name.Name)
+						if baseType.Name.Name != "Workflow" {
+							implCode += generateImpl(baseType.Name.Name)
+							testCode += generateTest(baseType.Name.Name)
+							initImpl += generateInit(baseType.Name.Name)
+							workflowGenerator.AppendTypes(baseType.Name.Name)
+							workflowTestGenerator.AppendTypes(baseType.Name.Name)
+						}
+						scheduleImpl += generateScheduleRegister(baseType.Name.Name)
+						scheduleGenerator.AppendTypes(baseType.Name.Name)
 						allTypes = append(allTypes, baseType.Name.Name)
 						continue out
 					}
@@ -125,20 +115,18 @@ func main() {
 		return nil
 	})
 
-	validatorCode := generateGetChaosValidatorFunc(allTypes)
-
 	implCode += fmt.Sprintf(`
 func init() {
 %s
+%s
 }
-`, initImpl)
+`, initImpl, scheduleImpl)
 	file, err := os.Create("./api/v1alpha1/zz_generated.chaosmesh.go")
 	if err != nil {
 		log.Error(err, "fail to create file")
 		os.Exit(1)
 	}
 	fmt.Fprint(file, implCode)
-	fmt.Fprint(file, validatorCode)
 
 	testCode += testInit
 	file, err = os.Create("./api/v1alpha1/zz_generated.chaosmesh_test.go")
@@ -161,5 +149,12 @@ func init() {
 		os.Exit(1)
 	}
 	fmt.Fprint(file, workflowTestGenerator.Render())
+
+	file, err = os.Create("./api/v1alpha1/zz_generated.schedule.chaosmesh.go")
+	if err != nil {
+		log.Error(err, "fail to create file")
+		os.Exit(1)
+	}
+	fmt.Fprint(file, scheduleGenerator.Render())
 
 }

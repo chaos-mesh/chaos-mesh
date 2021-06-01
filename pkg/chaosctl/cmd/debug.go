@@ -183,6 +183,7 @@ func (o *DebugOptions) Run(chaosType string, args []string, c *common.ClientSet)
 	var result []common.ChaosResult
 	common.TLSFiles = grpc.TLSFile{CaCert: o.CaCertFile, Cert: o.CertFile, Key: o.KeyFile}
 	common.Insecure = o.Insecure
+
 	for i, chaos := range chaosList {
 		var chaosResult common.ChaosResult
 		chaosResult.Name = chaosNameList[i]

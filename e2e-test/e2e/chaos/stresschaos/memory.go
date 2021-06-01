@@ -53,7 +53,7 @@ func TestcaseMemoryStressInjectionOnceThenRecover(
 		if conditions[0].MemoryUsage-conditions[1].MemoryUsage > allowedJitter {
 			return true, nil
 		}
-		By(fmt.Sprintf("get Memory: [%d, %d]", conditions[0].MemoryUsage, conditions[1].MemoryUsage))
+		framework.Logf("get Memory: [%d, %d]", conditions[0].MemoryUsage, conditions[1].MemoryUsage)
 		return false, nil
 	})
 	framework.ExpectNoError(err, "memory stress failed")

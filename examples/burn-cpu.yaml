@@ -8,12 +8,10 @@ spec:
   selector:
     labelSelectors:
       "app.kubernetes.io/component": "tikv"
-  stressors: 
-    cpu: 
+  stressors:
+    cpu:
       workers: 1
       load: 100
       options: ["--cpu 2", "--timeout 600", "--hdd 1"]
   duration: "30s"
-  scheduler:
-    cron: "@every 2m"
 

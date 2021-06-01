@@ -110,16 +110,15 @@ func makeNetworkPartitionChaos(
 	fromPodMode, toPodMode v1alpha1.PodMode,
 	direction v1alpha1.Direction,
 	duration *string,
-	schedulerSpec *v1alpha1.SchedulerSpec,
 ) *v1alpha1.NetworkChaos {
-	var target *v1alpha1.Target
+	var target *v1alpha1.PodSelector
 	if toLabelSelectors != nil {
-		target = &v1alpha1.Target{
-			TargetSelector: v1alpha1.SelectorSpec{
+		target = &v1alpha1.PodSelector{
+			Selector: v1alpha1.PodSelectorSpec{
 				Namespaces:     []string{namespace},
 				LabelSelectors: toLabelSelectors,
 			},
-			TargetMode: toPodMode,
+			Mode: toPodMode,
 		}
 	}
 
@@ -129,16 +128,17 @@ func makeNetworkPartitionChaos(
 			Namespace: namespace,
 		},
 		Spec: v1alpha1.NetworkChaosSpec{
-			Action: v1alpha1.PartitionAction,
-			Selector: v1alpha1.SelectorSpec{
-				Namespaces:     []string{namespace},
-				LabelSelectors: fromLabelSelectors,
-			},
-			Mode:      fromPodMode,
+			Action:    v1alpha1.PartitionAction,
 			Direction: direction,
 			Target:    target,
 			Duration:  duration,
-			Scheduler: schedulerSpec,
+			PodSelector: v1alpha1.PodSelector{
+				Selector: v1alpha1.PodSelectorSpec{
+					Namespaces:     []string{namespace},
+					LabelSelectors: fromLabelSelectors,
+				},
+				Mode: fromPodMode,
+			},
 		},
 	}
 }
@@ -146,16 +146,15 @@ func makeNetworkPartitionChaos(
 func makeNetworkDelayChaos(
 	namespace, name string, fromLabelSelectors, toLabelSelectors map[string]string,
 	fromPodMode, toPodMode v1alpha1.PodMode, direction v1alpha1.Direction, tcparam v1alpha1.TcParameter, duration *string,
-	schedulerSpec *v1alpha1.SchedulerSpec,
 ) *v1alpha1.NetworkChaos {
-	var target *v1alpha1.Target
+	var target *v1alpha1.PodSelector
 	if toLabelSelectors != nil {
-		target = &v1alpha1.Target{
-			TargetSelector: v1alpha1.SelectorSpec{
+		target = &v1alpha1.PodSelector{
+			Selector: v1alpha1.PodSelectorSpec{
 				Namespaces:     []string{namespace},
 				LabelSelectors: toLabelSelectors,
 			},
-			TargetMode: toPodMode,
+			Mode: toPodMode,
 		}
 	}
 
@@ -165,17 +164,18 @@ func makeNetworkDelayChaos(
 			Namespace: namespace,
 		},
 		Spec: v1alpha1.NetworkChaosSpec{
-			Action: v1alpha1.DelayAction,
-			Selector: v1alpha1.SelectorSpec{
-				Namespaces:     []string{namespace},
-				LabelSelectors: fromLabelSelectors,
-			},
-			Mode:        fromPodMode,
+			Action:      v1alpha1.DelayAction,
 			TcParameter: tcparam,
 			Duration:    duration,
-			Scheduler:   schedulerSpec,
 			Target:      target,
 			Direction:   direction,
+			PodSelector: v1alpha1.PodSelector{
+				Selector: v1alpha1.PodSelectorSpec{
+					Namespaces:     []string{namespace},
+					LabelSelectors: fromLabelSelectors,
+				},
+				Mode: fromPodMode,
+			},
 		},
 	}
 }

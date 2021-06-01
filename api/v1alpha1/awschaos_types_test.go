@@ -15,7 +15,6 @@ package v1alpha1
 
 import (
 	"context"
-	"time"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -56,9 +55,11 @@ var _ = Describe("AwsChaos", func() {
 					Namespace: "default",
 				},
 				Spec: AwsChaosSpec{
-					Action:      Ec2Stop,
-					Ec2Instance: testInstance,
-					SecretName:  &testSecretName,
+					Action: Ec2Stop,
+					AwsSelector: AwsSelector{
+						Ec2Instance: testInstance,
+					},
+					SecretName: &testSecretName,
 				},
 			}
 
@@ -72,20 +73,6 @@ var _ = Describe("AwsChaos", func() {
 			By("deleting the created object")
 			Expect(k8sClient.Delete(context.TODO(), created)).To(Succeed())
 			Expect(k8sClient.Get(context.TODO(), key, created)).ToNot(Succeed())
-		})
-
-		It("should set next start time successfully", func() {
-			awschaos := &AwsChaos{}
-			nTime := time.Now()
-			awschaos.SetNextStart(nTime)
-			Expect(awschaos.GetNextStart()).To(Equal(nTime))
-		})
-
-		It("should set recover time successfully", func() {
-			awschaos := &AwsChaos{}
-			nTime := time.Now()
-			awschaos.SetNextRecover(nTime)
-			Expect(awschaos.GetNextRecover()).To(Equal(nTime))
 		})
 	})
 })

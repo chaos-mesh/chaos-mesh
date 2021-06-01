@@ -112,7 +112,7 @@ func (it *EmbedChaos) SpawnNewList(templateType TemplateType) (GenericChaosList,
 
 %s
 `,
-		codeHeader,
+		boilerplate,
 		imports,
 		workflowTemplateTypesEntries,
 		allChaosTemplateTypeEntries,

@@ -29,7 +29,7 @@ var _ = Describe("kernelchaos_webhook", func() {
 			Expect(kernelchaos.Spec.Selector.Namespaces[0]).To(Equal(metav1.NamespaceDefault))
 		})
 	})
-	Context("ChaosValidator of kernelchaos", func() {
+	Context("webhook.Validator of kernelchaos", func() {
 		It("Validate", func() {
 
 			type TestCase struct {
@@ -38,7 +38,6 @@ var _ = Describe("kernelchaos_webhook", func() {
 				execute func(chaos *KernelChaos) error
 				expect  string
 			}
-			duration := "400s"
 			tcs := []TestCase{
 				{
 					name: "simple ValidateCreate",
@@ -78,40 +77,6 @@ var _ = Describe("kernelchaos_webhook", func() {
 						return chaos.ValidateDelete()
 					},
 					expect: "",
-				},
-				{
-					name: "only define the Scheduler",
-					chaos: KernelChaos{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: metav1.NamespaceDefault,
-							Name:      "foo4",
-						},
-						Spec: KernelChaosSpec{
-							Scheduler: &SchedulerSpec{
-								Cron: "@every 10m",
-							},
-						},
-					},
-					execute: func(chaos *KernelChaos) error {
-						return chaos.ValidateCreate()
-					},
-					expect: "error",
-				},
-				{
-					name: "only define the Duration",
-					chaos: KernelChaos{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: metav1.NamespaceDefault,
-							Name:      "foo5",
-						},
-						Spec: KernelChaosSpec{
-							Duration: &duration,
-						},
-					},
-					execute: func(chaos *KernelChaos) error {
-						return chaos.ValidateCreate()
-					},
-					expect: "error",
 				},
 			}
 
