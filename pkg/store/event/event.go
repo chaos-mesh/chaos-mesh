@@ -72,7 +72,7 @@ func (e *eventStore) ListByUID(_ context.Context, uid string) ([]*core.Event, er
 	eventList := make([]*core.Event, 0)
 
 	if err := e.db.Where(
-		"experiment_id = ?", uid).
+		"object_id = ?", uid).
 		Find(&resList).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
 		return nil, err
 	}
@@ -91,7 +91,7 @@ func (e *eventStore) ListByUIDs(_ context.Context, uids []string) ([]*core.Event
 	eventList := make([]*core.Event, 0)
 
 	if err := e.db.Table("events").Where(
-		"experiment_id IN (?)", uids).
+		"object_id IN (?)", uids).
 		Find(&resList).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
 		return nil, err
 	}
@@ -204,13 +204,13 @@ func (e *eventStore) DeleteByUID(_ context.Context, uid string) error {
 	if err != nil {
 		return err
 	}
-	return e.db.Where("experiment_id = ?", uid).Unscoped().
+	return e.db.Where("object_id = ?", uid).Unscoped().
 		Delete(core.Event{}).Error
 }
 
 // DeleteByUIDs deletes events by the uid list of the experiment.
 func (e *eventStore) DeleteByUIDs(_ context.Context, uids []string) error {
-	return e.db.Where("experiment_id IN (?)", uids).Unscoped().Delete(core.Event{}).Error
+	return e.db.Where("object_id IN (?)", uids).Unscoped().Delete(core.Event{}).Error
 }
 
 func constructQueryArgs(experimentName, experimentNamespace, uid, kind, createTime string) (string, []interface{}) {
@@ -230,9 +230,9 @@ func constructQueryArgs(experimentName, experimentNamespace, uid, kind, createTi
 	}
 	if uid != "" {
 		if len(args) > 0 {
-			query += " AND experiment_id = ?"
+			query += " AND object_id = ?"
 		} else {
-			query += "experiment_id = ?"
+			query += "object_id = ?"
 		}
 		args = append(args, uid)
 	}
