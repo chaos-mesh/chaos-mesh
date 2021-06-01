@@ -92,10 +92,10 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	if err != nil {
 		if client.IgnoreNotFound(err) != nil {
 			return v1alpha1.Injected, err
-		} else {
-			impl.Log.Info("Target pod has been deleted", "namespace", pod.Namespace, "name", pod.Name)
-			return v1alpha1.NotInjected, nil
 		}
+
+		impl.Log.Info("Target pod has been deleted", "namespace", pod.Namespace, "name", pod.Name)
+		return v1alpha1.NotInjected, nil
 
 	}
 

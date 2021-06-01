@@ -138,11 +138,7 @@ func (e *eventStore) Find(_ context.Context, id uint) (*core.Event, error) {
 
 // Create persists a new event to the datastore.
 func (e *eventStore) Create(_ context.Context, et *core.Event) error {
-	if err := e.db.Create(et).Error; err != nil {
-		return err
-	}
-
-	return nil
+	return e.db.Create(et).Error
 }
 
 // ListByFilter returns an event list by experimentName, experimentNamespace, uid, kind, creatTime.
@@ -207,8 +203,7 @@ func (e *eventStore) DeleteByUID(_ context.Context, uid string) error {
 	_, err := e.ListByUID(context.Background(), uid)
 	if err != nil {
 		return err
-	}
-	return e.db.Where("object_id = ?", uid).Unscoped().
+	}return e.db.Where("object_id = ?", uid).Unscoped().
 		Delete(core.Event{}).Error
 }
 

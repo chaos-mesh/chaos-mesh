@@ -18,22 +18,12 @@ import (
 	"io"
 	"strings"
 	"sync"
-	"testing"
 	"time"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"go.uber.org/zap/buffer"
-	"sigs.k8s.io/controller-runtime/pkg/envtest"
 )
-
-func TestConcurrentBuffer(t *testing.T) {
-	RegisterFailHandler(Fail)
-
-	RunSpecsWithDefaultAndCustomReporters(t,
-		"Concurrent Buffer Suite",
-		[]Reporter{envtest.NewlineReporter{}})
-}
 
 var _ = Describe("concurrent buffer", func() {
 	var testLines = map[string]bool{

@@ -140,7 +140,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	actions, err := json.Marshal(obj.Spec.Actions)
 	if err != nil {
 		r.Recorder.Event(obj, "Warning", "Failed", err.Error())
-		return ctrl.Result{}, nil
+		return ctrl.Result{Requeue: true}, nil
 	}
 	input := string(actions)
 	r.Log.Info("input with", "config", input)

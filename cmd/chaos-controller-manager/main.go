@@ -40,7 +40,6 @@ import (
 
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
 	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
@@ -119,11 +118,6 @@ func Run(params RunParams) error {
 		if err != nil {
 			return err
 		}
-	}
-
-	err = (&v1alpha1.PodIoChaos{}).SetupWebhookWithManager(mgr)
-	if err != nil {
-		return err
 	}
 
 	// Init metrics collector

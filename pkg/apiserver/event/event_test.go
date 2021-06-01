@@ -68,6 +68,7 @@ func (m *MockEventService) ListByFilter(ctx context.Context, filter core.Filter)
 			Name:         "testName",
 			Namespace:    "testNamespace",
 			ObjectID: "testUID",
+			ExperimentID: "testUID",
 		}
 		res = append(res, event)
 	} else {

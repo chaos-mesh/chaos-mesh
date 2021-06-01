@@ -11,20 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package v1alpha1
+package bpm
 
 import (
+	"testing"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/controller-runtime/pkg/envtest"
 )
 
-var _ = Describe("common_webhook", func() {
-	Context("Defaulter", func() {
-		It("set default namespace selector", func() {
-			selector := &PodSelectorSpec{}
-			selector.DefaultNamespace(metav1.NamespaceDefault)
-			Expect(selector.Namespaces[0]).To(Equal(metav1.NamespaceDefault))
-		})
-	})
-})
+func TestSuite(t *testing.T) {
+	RegisterFailHandler(Fail)
+
+	RunSpecsWithDefaultAndCustomReporters(t,
+		"Background Process Manager Suite",
+		[]Reporter{envtest.NewlineReporter{}})
+}

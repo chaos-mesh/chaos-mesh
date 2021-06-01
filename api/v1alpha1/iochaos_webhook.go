@@ -74,6 +74,8 @@ func (in *IoChaos) Validate() error {
 	specField := field.NewPath("spec")
 	allErrs := in.Spec.validateDelay(specField.Child("delay"))
 	allErrs = append(allErrs, in.Spec.validateErrno(specField.Child("errno"))...)
+	allErrs = append(allErrs, validateDuration(in, specField)...)
+	allErrs = append(allErrs, validatePodSelector(in.Spec.PodSelector.Value, in.Spec.PodSelector.Mode, specField.Child("value"))...)
 	allErrs = append(allErrs, in.Spec.validatePercent(specField.Child("percent"))...)
 
 	if len(allErrs) > 0 {
