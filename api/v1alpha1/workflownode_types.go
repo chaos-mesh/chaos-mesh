@@ -102,7 +102,7 @@ func init() {
 const (
 	EntryCreated          string = "EntryCreated"
 	InvalidEntry          string = "InvalidEntry"
-	NodesCreated           string = "NodesCreated"
+	NodesCreated          string = "NodesCreated"
 	NodeAccomplished      string = "NodeAccomplished"
 	NodeDeadlineExceed    string = "NodeDeadlineExceed"
 	NodeDeadlineNotExceed string = "NodeDeadlineNotExceed"
