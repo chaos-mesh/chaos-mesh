@@ -39,6 +39,10 @@ const (
 	Ec2Restart AwsChaosAction = "ec2-restart"
 	// DetachVolume represents the chaos action of detaching the volume of ec2.
 	DetachVolume AwsChaosAction = "detach-volume"
+	// AwsssmChaos represents the chaos action of injecting chaos mentioned in awsssmchaosrunner.
+	AwsssmChaos AwsChaosAction = "awsssm-chaos"
+
+
 )
 
 // AwsChaosSpec is the content of the specification for an AwsChaos
@@ -66,6 +70,11 @@ type AwsChaosSpec struct {
 
 	// Ec2Instance indicates the ID of the ec2 instance.
 	Ec2Instance string `json:"ec2Instance"`
+
+	// AttackConfiguration indicates the name of the attack.
+	// Needed in attack-configuration.
+	// +optional
+	AttackConfiguration string `json:"attackConfiguration"`
 
 	// EbsVolume indicates the ID of the EBS volume.
 	// Needed in detach-volume.
