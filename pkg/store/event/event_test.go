@@ -292,7 +292,7 @@ func TestConstructQueryArgs(t *testing.T) {
 			uid:           "testUID",
 			kind:          "",
 			createTime:    "",
-			expectedQuery: "experiment_id = ?",
+			expectedQuery: "object_id = ?",
 			expectedArgs:  []string{"testUID"},
 		},
 		{
