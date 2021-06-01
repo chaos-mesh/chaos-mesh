@@ -69,7 +69,7 @@ func (oa *operatorAction) DeployOperator(info OperatorConfig) error {
 		return fmt.Errorf("failed to create namespace chaos-testing: %v %s", err, string(output))
 	}
 	klog.Infof("deploying chaos-mesh:%v", info.ReleaseName)
-	cmd = fmt.Sprintf(`helm install %s %s --namespace %s --set %s`,
+	cmd = fmt.Sprintf(`helm install %s %s --namespace %s --set %s --skip-crds`,
 		info.ReleaseName,
 		oa.operatorChartPath(info.Tag),
 		info.Namespace,
