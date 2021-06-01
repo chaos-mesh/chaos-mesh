@@ -19,7 +19,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/goccy/go-yaml"
+	"gopkg.in/yaml.v2"
 )
 
 type Item struct {
@@ -50,14 +50,27 @@ func main() {
 		os.Exit(1)
 	}
 	{
-		schedule, find := old.Spec.ToMap()["scheduler"]
+		var schedule yaml.MapSlice
+		var find bool
+		for _, item := range old.Spec {
+			if item.Key == "scheduler" {
+				schedule = item.Value.(yaml.MapSlice)
+				find = true
+			}
+		}
 		if !find {
 			new = old
 		} else {
+			var cron string
+			for _, item := range schedule {
+				if item.Key == "cron" {
+					cron = item.Value.(string)
+				}
+			}
 			new.ApiVersion = old.ApiVersion
 			new.Metadata = old.Metadata
 			new.Kind = "Schedule"
-			new.Spec = append(new.Spec, yaml.MapItem{Key: "schedule", Value: schedule.(map[string]interface{})["cron"]})
+			new.Spec = append(new.Spec, yaml.MapItem{Key: "schedule", Value: cron})
 			new.Spec = append(new.Spec, yaml.MapItem{Key: "type", Value: old.Kind})
 			new.Spec = append(new.Spec, yaml.MapItem{Key: "historyLimit", Value: 5})
 			new.Spec = append(new.Spec, yaml.MapItem{Key: "concurrencyPolicy", Value: "Forbid"})
