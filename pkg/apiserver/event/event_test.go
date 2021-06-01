@@ -59,16 +59,15 @@ func (m *MockEventService) ListByFilter(ctx context.Context, filter core.Filter)
 	var err error
 	if filter.UID == "testUID" {
 		event := &core.Event{
-			ID:           0,
-			CreatedAt:    time.Time{},
-			Kind:         "testKind",
-			Type:         "testType",
-			Reason:       "testRaason",
-			Message:      "testMessage",
-			Name:         "testName",
-			Namespace:    "testNamespace",
-			ObjectID:     "testUID",
-			ExperimentID: "testUID",
+			ID:        0,
+			CreatedAt: time.Time{},
+			Kind:      "testKind",
+			Type:      "testType",
+			Reason:    "testRaason",
+			Message:   "testMessage",
+			Name:      "testName",
+			Namespace: "testNamespace",
+			ObjectID:  "testUID",
 		}
 		res = append(res, event)
 	} else {
