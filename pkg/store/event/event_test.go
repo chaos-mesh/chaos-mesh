@@ -59,26 +59,26 @@ var _ = Describe("event", func() {
 		timeNow = time.Now()
 
 		event0 = &core.Event{
-			ID:           0,
-			CreatedAt:    timeNow,
-			Kind:         "testKind",
-			Type:         "testType",
-			Reason:       "testRaason",
-			Message:      "testMessage",
-			Name:         "testName",
-			Namespace:    "testNamespace",
-			ObjectID: "testID0",
+			ID:        0,
+			CreatedAt: timeNow,
+			Kind:      "testKind",
+			Type:      "testType",
+			Reason:    "testRaason",
+			Message:   "testMessage",
+			Name:      "testName",
+			Namespace: "testNamespace",
+			ObjectID:  "testID0",
 		}
 		event1 = &core.Event{
-			ID:           1,
-			CreatedAt:    timeNow,
-			Kind:         "testKind",
-			Type:         "testType",
-			Reason:       "testRaason",
-			Message:      "testMessage",
-			Name:         "testName",
-			Namespace:    "testNamespace",
-			ObjectID: "testID1",
+			ID:        1,
+			CreatedAt: timeNow,
+			Kind:      "testKind",
+			Type:      "testType",
+			Reason:    "testRaason",
+			Message:   "testMessage",
+			Name:      "testName",
+			Namespace: "testNamespace",
+			ObjectID:  "testID1",
 		}
 	})
 

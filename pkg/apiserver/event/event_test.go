@@ -67,7 +67,7 @@ func (m *MockEventService) ListByFilter(ctx context.Context, filter core.Filter)
 			Message:      "testMessage",
 			Name:         "testName",
 			Namespace:    "testNamespace",
-			ObjectID: "testUID",
+			ObjectID:     "testUID",
 			ExperimentID: "testUID",
 		}
 		res = append(res, event)
@@ -82,15 +82,15 @@ func (m *MockEventService) Find(_ context.Context, id uint) (*core.Event, error)
 	var err error
 	if id == 0 {
 		res = &core.Event{
-			ID:           0,
-			CreatedAt:    time.Time{},
-			Kind:         "testKind",
-			Type:         "testType",
-			Reason:       "testRaason",
-			Message:      "testMessage",
-			Name:         "testName",
-			Namespace:    "testNamespace",
-			ObjectID: "testUID",
+			ID:        0,
+			CreatedAt: time.Time{},
+			Kind:      "testKind",
+			Type:      "testType",
+			Reason:    "testRaason",
+			Message:   "testMessage",
+			Name:      "testName",
+			Namespace: "testNamespace",
+			ObjectID:  "testUID",
 		}
 	} else {
 		if id == 1 {
@@ -159,15 +159,15 @@ var _ = Describe("event", func() {
 		It("success", func() {
 			response := []*core.Event{
 				&core.Event{
-					ID:           0,
-					CreatedAt:    time.Time{},
-					Kind:         "testKind",
-					Type:         "testType",
-					Reason:       "testRaason",
-					Message:      "testMessage",
-					Name:         "testName",
-					Namespace:    "testNamespace",
-					ObjectID: "testUID",
+					ID:        0,
+					CreatedAt: time.Time{},
+					Kind:      "testKind",
+					Type:      "testType",
+					Reason:    "testRaason",
+					Message:   "testMessage",
+					Name:      "testName",
+					Namespace: "testNamespace",
+					ObjectID:  "testUID",
 				},
 			}
 			rr := httptest.NewRecorder()
@@ -190,15 +190,15 @@ var _ = Describe("event", func() {
 	Context("GetEvent", func() {
 		It("success", func() {
 			response := &core.Event{
-				ID:           0,
-				CreatedAt:    time.Time{},
-				Kind:         "testKind",
-				Type:         "testType",
-				Reason:       "testRaason",
-				Message:      "testMessage",
-				Name:         "testName",
-				Namespace:    "testNamespace",
-				ObjectID: "testUID",
+				ID:        0,
+				CreatedAt: time.Time{},
+				Kind:      "testKind",
+				Type:      "testType",
+				Reason:    "testRaason",
+				Message:   "testMessage",
+				Name:      "testName",
+				Namespace: "testNamespace",
+				ObjectID:  "testUID",
 			}
 			rr := httptest.NewRecorder()
 			request, _ := http.NewRequest(http.MethodGet, "/api/events/get?id=0", nil)

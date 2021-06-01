@@ -203,7 +203,8 @@ func (e *eventStore) DeleteByUID(_ context.Context, uid string) error {
 	_, err := e.ListByUID(context.Background(), uid)
 	if err != nil {
 		return err
-	}return e.db.Where("object_id = ?", uid).Unscoped().
+	}
+	return e.db.Where("object_id = ?", uid).Unscoped().
 		Delete(core.Event{}).Error
 }
 
