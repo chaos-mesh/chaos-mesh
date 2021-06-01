@@ -25,11 +25,10 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/test"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/controllers"
 	"github.com/go-logr/logr"
-	"github.com/onsi/ginkgo"
 	"go.uber.org/fx"
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	. "github.com/onsi/ginkgo"
+	"github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
@@ -51,8 +50,8 @@ var _ = ginkgo.Describe("[Controllers]", func() {
 				setupLog.Error(err, "fail to stop manager")
 			}
 		})
-		Context("Setting phase", func() {
-			It("should set phase", func() {
+		ginkgo.Context("Setting phase", func() {
+			ginkgo.It("should set phase", func() {
 				desiredphase.TestDesiredPhaseBasic(k8sClient)
 				desiredphase.TestDesiredPhasePause(k8sClient)
 			})
@@ -75,8 +74,8 @@ var _ = ginkgo.Describe("[Controllers]", func() {
 				setupLog.Error(err, "fail to stop manager")
 			}
 		})
-		Context("Add finalizer", func() {
-			It("should add default finalizer", func() {
+		ginkgo.Context("Add finalizer", func() {
+			ginkgo.It("should add default finalizer", func() {
 				finalizers.TestAddDefaultFinalizer(k8sClient)
 			})
 		})
@@ -96,7 +95,7 @@ var _ = ginkgo.Describe("[Controllers]", func() {
 				setupLog.Error(err, "fail to stop manager")
 			}
 		})
-		It(("Should work fine"), func() {
+		ginkgo.It(("Should work fine"), func() {
 			schedule.TestScheduleBasic(k8sClient)
 			schedule.TestScheduleChaos(k8sClient)
 			schedule.TestScheduleConcurrentChaos(k8sClient)
