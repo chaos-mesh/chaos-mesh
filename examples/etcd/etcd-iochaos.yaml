@@ -1,18 +1,20 @@
 apiVersion: chaos-mesh.org/v1alpha1
-kind: IOChaos
+kind: Schedule
 metadata:
   name: io-delay-example
 spec:
-  action: latency
-  mode: one
-  path: "/var/run/etcd/**/*"
-  selector:
-    labelSelectors:
-      app: etcd
-  volumePath: /var/run/etcd
-  delay: "100ms"
-  percent: 50
-  duration: "400s"
-  scheduler:
-    cron: "@every 10m"
-
+  schedule: '@every 10m'
+  type: IoChaos
+  historyLimit: 5
+  concurrencyPolicy: Forbid
+  io_chaos:
+    action: latency
+    mode: one
+    path: /var/run/etcd/**/*
+    selector:
+      labelSelectors:
+        app: etcd
+    volumePath: /var/run/etcd
+    delay: 100ms
+    percent: 50
+    duration: 400s

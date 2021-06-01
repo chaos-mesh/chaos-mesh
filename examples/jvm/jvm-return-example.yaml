@@ -1,21 +1,23 @@
 apiVersion: chaos-mesh.org/v1alpha1
-kind: JVMChaos
+kind: Schedule
 metadata:
   name: jvm-return-example
   namespace: app
 spec:
-  action: return
-  target: jvm
-  flags:
-    value: "hello chaos mesh!"
-  matchers:
-    classname: "org.chaosmesh.jvm.Application"
-    methodname: "hello"
-  mode: one
-  selector:
-    labelSelectors:
-      app: springboot-jvmchaos-demo
-<<<<<<< HEAD
-=======
-  duration: "50s"
->>>>>>> 215931075a6348c8705b6c68d4b5bb28f34164c2
+  schedule: '@every 1m'
+  type: JVMChaos
+  historyLimit: 5
+  concurrencyPolicy: Forbid
+  jvm_chaos:
+    action: return
+    target: jvm
+    flags:
+      value: hello chaos mesh!
+    matchers:
+      classname: org.chaosmesh.jvm.Application
+      methodname: hello
+    mode: one
+    selector:
+      labelSelectors:
+        app: springboot-jvmchaos-demo
+    duration: 50s
