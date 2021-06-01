@@ -99,6 +99,21 @@ func (it ChaosCustomResourceCreateFailed) Message() string {
 	return "failed to create chaos CR"
 }
 
+type DeadlineExceed struct {
+}
+
+func (it DeadlineExceed) Type() string {
+	return corev1.EventTypeNormal
+}
+
+func (it DeadlineExceed) Reason() string {
+	return v1alpha1.NodeDeadlineExceed
+}
+
+func (it DeadlineExceed) Message() string {
+	return "deadline exceed"
+}
+
 func init() {
 	register(
 		InvalidEntry{},
@@ -106,5 +121,6 @@ func init() {
 		NodesCreated{},
 		ChaosCustomResourceCreated{},
 		ChaosCustomResourceCreateFailed{},
+		DeadlineExceed{},
 	)
 }

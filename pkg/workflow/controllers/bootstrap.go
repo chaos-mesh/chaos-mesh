@@ -84,7 +84,7 @@ func BootstrapWorkflowControllers(mgr manager.Manager, logger logr.Logger) error
 		Complete(
 			NewDeadlineReconciler(
 				mgr.GetClient(),
-				mgr.GetEventRecorderFor("workflow-deadline-reconciler"),
+				recorder.NewRecorder(mgr, "workflow-deadline-reconciler", logger.WithName("workflow-deadline-reconciler")),
 				logger.WithName("workflow-deadline-reconciler"),
 			),
 		)
