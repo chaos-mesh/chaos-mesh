@@ -98,7 +98,7 @@ func BootstrapWorkflowControllers(mgr manager.Manager, logger logr.Logger) error
 		Complete(
 			NewChaosNodeReconciler(
 				mgr.GetClient(),
-				mgr.GetEventRecorderFor("workflow-chaos-node-reconciler"),
+				recorder.NewRecorder(mgr, "workflow-chaos-node-reconciler", logger.WithName("workflow-chaos-node-reconciler")),
 				logger.WithName("workflow-chaos-node-reconciler"),
 			),
 		)

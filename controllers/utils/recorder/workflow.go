@@ -68,6 +68,43 @@ func (it NodesCreated) Message() string {
 	return fmt.Sprintf("child nodes created, %s", strings.Join(it.ChildNodes, ","))
 }
 
+type ChaosCustomResourceCreated struct {
+	Name string
+}
+
+func (it ChaosCustomResourceCreated) Type() string {
+	return corev1.EventTypeNormal
+}
+
+func (it ChaosCustomResourceCreated) Reason() string {
+	return v1alpha1.ChaosCRCreated
+}
+
+func (it ChaosCustomResourceCreated) Message() string {
+	return fmt.Sprintf("chaos CR %s created", it.Name)
+}
+
+type ChaosCustomResourceCreateFailed struct {
+}
+
+func (it ChaosCustomResourceCreateFailed) Type() string {
+	return corev1.EventTypeWarning
+}
+
+func (it ChaosCustomResourceCreateFailed) Reason() string {
+	return v1alpha1.ChaosCRCreateFailed
+}
+
+func (it ChaosCustomResourceCreateFailed) Message() string {
+	return "failed to create chaos CR"
+}
+
 func init() {
-	register(InvalidEntry{}, EntryCreated{}, NodesCreated{})
+	register(
+		InvalidEntry{},
+		EntryCreated{},
+		NodesCreated{},
+		ChaosCustomResourceCreated{},
+		ChaosCustomResourceCreateFailed{},
+	)
 }
