@@ -20,6 +20,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 )
 
 type Objs struct {
@@ -31,14 +33,14 @@ type Objs struct {
 func NewController(mgr ctrl.Manager, client client.Client, reader client.Reader, logger logr.Logger, pairs Objs) (types.Controller, error) {
 	for _, obj := range pairs.Objs {
 
-		err := ctrl.NewControllerManagedBy(mgr).
+		err := builder.Default(mgr).
 			For(obj.Object).
 			Named(obj.Name + "-desiredphase").
 			Complete(&Reconciler{
 				Object:   obj.Object,
 				Client:   client,
 				Reader:   reader,
-				Recorder: mgr.GetEventRecorderFor("desiredphase"),
+				Recorder: recorder.NewRecorder(mgr, "desiredphase", logger),
 				Log:      logger.WithName("desiredphase"),
 			})
 		if err != nil {

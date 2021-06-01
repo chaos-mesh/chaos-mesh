@@ -38,7 +38,6 @@ var _ = Describe("iochaos_webhook", func() {
 				execute func(chaos *IoChaos) error
 				expect  string
 			}
-			duration := "400s"
 			errorDuration := "400S"
 
 			tcs := []TestCase{
@@ -82,23 +81,7 @@ var _ = Describe("iochaos_webhook", func() {
 					expect: "",
 				},
 				{
-					name: "only define the Duration",
-					chaos: IoChaos{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: metav1.NamespaceDefault,
-							Name:      "foo5",
-						},
-						Spec: IoChaosSpec{
-							Duration: &duration,
-						},
-					},
-					execute: func(chaos *IoChaos) error {
-						return chaos.ValidateCreate()
-					},
-					expect: "",
-				},
-				{
-					name: "parse the duration and scheduler error",
+					name: "parse the duration error",
 					chaos: IoChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
@@ -123,8 +106,8 @@ var _ = Describe("iochaos_webhook", func() {
 						Spec: IoChaosSpec{
 							ContainerSelector: ContainerSelector{
 								PodSelector: PodSelector{
-									Mode:  FixedPercentPodMode,
 									Value: "0",
+									Mode:  FixedPodMode,
 								},
 							},
 						},
@@ -144,8 +127,8 @@ var _ = Describe("iochaos_webhook", func() {
 						Spec: IoChaosSpec{
 							ContainerSelector: ContainerSelector{
 								PodSelector: PodSelector{
-									Mode:  FixedPercentPodMode,
 									Value: "num",
+									Mode:  FixedPodMode,
 								},
 							},
 						},
@@ -165,8 +148,8 @@ var _ = Describe("iochaos_webhook", func() {
 						Spec: IoChaosSpec{
 							ContainerSelector: ContainerSelector{
 								PodSelector: PodSelector{
-									Mode:  RandomMaxPercentPodMode,
 									Value: "0",
+									Mode:  RandomMaxPercentPodMode,
 								},
 							},
 						},
@@ -186,8 +169,8 @@ var _ = Describe("iochaos_webhook", func() {
 						Spec: IoChaosSpec{
 							ContainerSelector: ContainerSelector{
 								PodSelector: PodSelector{
-									Mode:  RandomMaxPercentPodMode,
 									Value: "num",
+									Mode:  RandomMaxPercentPodMode,
 								},
 							},
 						},
@@ -207,8 +190,8 @@ var _ = Describe("iochaos_webhook", func() {
 						Spec: IoChaosSpec{
 							ContainerSelector: ContainerSelector{
 								PodSelector: PodSelector{
-									Mode:  FixedPercentPodMode,
 									Value: "101",
+									Mode:  FixedPercentPodMode,
 								},
 							},
 						},

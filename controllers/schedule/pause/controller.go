@@ -15,13 +15,13 @@ package pause
 
 import (
 	"context"
+	"fmt"
 	"reflect"
 	"strconv"
 
 	"github.com/go-logr/logr"
 	k8sError "k8s.io/apimachinery/pkg/api/errors"
 	k8sTypes "k8s.io/apimachinery/pkg/types"
-	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/retry"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -29,6 +29,8 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/utils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 )
 
 type Reconciler struct {
@@ -36,7 +38,7 @@ type Reconciler struct {
 	Log          logr.Logger
 	ActiveLister *utils.ActiveLister
 
-	Recorder record.EventRecorder
+	Recorder recorder.ChaosRecorder
 }
 
 func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
@@ -53,14 +55,19 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	if schedule.Spec.Type == v1alpha1.ScheduleTypeWorkflow {
 		if schedule.IsPaused() {
-			r.Recorder.Eventf(schedule, "Warning", "Unsupported", "a workflow schedule %s cannot be paused", schedule.GetObjectMeta().GetName())
+			r.Recorder.Event(schedule, recorder.NotSupported{
+				Activity: "pausing a workflow schedule",
+			})
 		}
 		return ctrl.Result{}, nil
 	}
 
 	list, err := r.ActiveLister.ListActiveJobs(ctx, schedule)
 	if err != nil {
-		r.Recorder.Eventf(schedule, "Warning", "Failed", "Failed to list active jobs: %s", err.Error())
+		r.Recorder.Event(schedule, recorder.Failed{
+			Activity: "list active jobs",
+			Err:      err.Error(),
+		})
 		return ctrl.Result{}, nil
 	}
 
@@ -90,7 +97,10 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			})
 			if updateError != nil {
 				r.Log.Error(updateError, "fail to update")
-				r.Recorder.Eventf(schedule, "Warning", "Failed", "Failed to set pause to %s for %s", pause, key)
+				r.Recorder.Event(schedule, recorder.Failed{
+					Activity: fmt.Sprintf("set pause to %s for %s", pause, key),
+					Err:      updateError.Error(),
+				})
 				return ctrl.Result{}, nil
 			}
 		}
@@ -100,14 +110,14 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 }
 
 func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger, lister *utils.ActiveLister) (types.Controller, error) {
-	ctrl.NewControllerManagedBy(mgr).
+	builder.Default(mgr).
 		For(&v1alpha1.Schedule{}).
 		Named("schedule-pause").
 		Complete(&Reconciler{
 			client,
 			log.WithName("schedule-pause"),
 			lister,
-			mgr.GetEventRecorderFor("schedule-pause"),
+			recorder.NewRecorder(mgr, "schedule-pause", log),
 		})
 	return "schedule-pause", nil
 }

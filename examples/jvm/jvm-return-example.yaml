@@ -21,3 +21,4 @@ spec:
       labelSelectors:
         app: springboot-jvmchaos-demo
     duration: 50s
+    

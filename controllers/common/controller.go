@@ -19,8 +19,6 @@ import (
 	"strings"
 	"time"
 
-	"k8s.io/client-go/tools/record"
-
 	"github.com/go-logr/logr"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -29,6 +27,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 )
 
@@ -60,7 +59,7 @@ type Reconciler struct {
 	client.Client
 	client.Reader
 
-	Recorder record.EventRecorder
+	Recorder recorder.ChaosRecorder
 
 	Selector *selector.Selector
 
@@ -100,7 +99,10 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			targets, err := r.Selector.Select(context.TODO(), sel)
 			if err != nil {
 				r.Log.Error(err, "fail to select")
-				r.Recorder.Eventf(obj, "Warning", "Failed", "Failed to select targets: %s", err.Error())
+				r.Recorder.Event(obj, recorder.Failed{
+					Activity: "select targets",
+					Err:      err.Error(),
+				})
 				return ctrl.Result{}, nil
 			}
 
@@ -116,6 +118,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		// TODO: dynamic upgrade the records when some of these pods/containers stopped
 	}
 
+	needRetry := false
 	for index, record := range records {
 		var err error
 		r.Log.Info("iterating record", "record", record, "desiredPhase", desiredPhase)
@@ -158,12 +161,18 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 				// TODO: add backoff and retry mechanism
 				// but the retry shouldn't block other resource process
 				r.Log.Error(err, "fail to apply chaos")
-				r.Recorder.Eventf(obj, "Warning", "Failed", "Failed to apply chaos: %s", err.Error())
+				r.Recorder.Event(obj, recorder.Failed{
+					Activity: "apply chaos",
+					Err:      err.Error(),
+				})
+				needRetry = true
 				continue
 			}
 
 			if record.Phase == v1alpha1.Injected {
-				r.Recorder.Eventf(obj, "Normal", "Applied", "Successfully apply chaos for %s", records[index].Id)
+				r.Recorder.Event(obj, recorder.Applied{
+					Id: records[index].Id,
+				})
 			}
 		} else if operation == Recover {
 			r.Log.Info("recover chaos", "id", records[index].Id)
@@ -175,12 +184,18 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 				// TODO: add backoff and retry mechanism
 				// but the retry shouldn't block other resource process
 				r.Log.Error(err, "fail to recover chaos")
-				r.Recorder.Eventf(obj, "Warning", "Failed", "Failed to recover chaos: %s", err.Error())
+				r.Recorder.Event(obj, recorder.Failed{
+					Activity: "recover chaos",
+					Err:      err.Error(),
+				})
+				needRetry = true
 				continue
 			}
 
 			if record.Phase == v1alpha1.NotInjected {
-				r.Recorder.Eventf(obj, "Normal", "Recovered", "Successfully recover chaos for %s", records[index].Id)
+				r.Recorder.Event(obj, recorder.Recovered{
+					Id: records[index].Id,
+				})
 			}
 		}
 	}
@@ -210,11 +225,16 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		})
 		if updateError != nil {
 			r.Log.Error(updateError, "fail to update")
-			r.Recorder.Eventf(obj, "Normal", "Failed", "Failed to update records: %s", updateError.Error())
-			return ctrl.Result{}, nil
+			r.Recorder.Event(obj, recorder.Failed{
+				Activity: "update records",
+				Err:      updateError.Error(),
+			})
+			return ctrl.Result{Requeue: true}, nil
 		}
 
-		r.Recorder.Event(obj, "Normal", "Updated", "Successfully update records of resource")
+		r.Recorder.Event(obj, recorder.Updated{
+			Field: "records",
+		})
 
 		// TODO: make the interval and total time configurable
 		// The following codes ensure the Schedule in cache has the latest lastScheduleTime
@@ -230,8 +250,8 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		})
 		if ensureLatestError != nil {
 			r.Log.Error(ensureLatestError, "Fail to ensure that the resource in cache has the latest records")
-			return ctrl.Result{}, nil
+			return ctrl.Result{Requeue: needRetry}, nil
 		}
 	}
-	return ctrl.Result{}, nil
+	return ctrl.Result{Requeue: needRetry}, nil
 }

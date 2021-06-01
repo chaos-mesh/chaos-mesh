@@ -38,7 +38,6 @@ var _ = Describe("podchaos_webhook", func() {
 				execute func(chaos *PodChaos) error
 				expect  string
 			}
-			duration := "400s"
 			tcs := []TestCase{
 				{
 					name: "simple ValidateCreate for ContainerKillAction",
@@ -57,22 +56,6 @@ var _ = Describe("podchaos_webhook", func() {
 					expect: "error",
 				},
 				{
-					name: "simple ValidateUpdate for PodKillAction",
-					chaos: PodChaos{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: metav1.NamespaceDefault,
-							Name:      "foo2",
-						},
-						Spec: PodChaosSpec{
-							Action: PodKillAction,
-						},
-					},
-					execute: func(chaos *PodChaos) error {
-						return chaos.ValidateUpdate(chaos)
-					},
-					expect: "error",
-				},
-				{
 					name: "simple ValidateDelete",
 					chaos: PodChaos{
 						ObjectMeta: metav1.ObjectMeta{
@@ -84,36 +67,6 @@ var _ = Describe("podchaos_webhook", func() {
 						return chaos.ValidateDelete()
 					},
 					expect: "",
-				},
-				{
-					name: "only define the Duration and execute PodFailureAction",
-					chaos: PodChaos{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: metav1.NamespaceDefault,
-							Name:      "foo5",
-						},
-						Spec: PodChaosSpec{
-							Action:   PodFailureAction,
-							Duration: &duration,
-						},
-					},
-					execute: func(chaos *PodChaos) error {
-						return chaos.ValidateCreate()
-					},
-					expect: "",
-				},
-				{
-					name: "unknow action",
-					chaos: PodChaos{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: metav1.NamespaceDefault,
-							Name:      "foo6",
-						},
-					},
-					execute: func(chaos *PodChaos) error {
-						return chaos.ValidateCreate()
-					},
-					expect: "error",
 				},
 				{
 					name: "validate the ContainerName",

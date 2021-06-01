@@ -47,15 +47,23 @@ var _ = Describe("HTTPChaos", func() {
 				Namespace: "default",
 			}
 
+			path := "/api"
+			delay := "10s"
+
 			created = &HTTPChaos{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "foo",
 					Namespace: "default",
 				},
 				Spec: HTTPChaosSpec{
-					Action: HTTPDelayAction,
 					PodSelector: PodSelector{
 						Mode: OnePodMode,
+					},
+					Target: PodHttpRequest,
+					Port:   80,
+					Path:   &path,
+					PodHttpChaosActions: PodHttpChaosActions{
+						Delay: &delay,
 					},
 				},
 			}
@@ -71,6 +79,5 @@ var _ = Describe("HTTPChaos", func() {
 			Expect(k8sClient.Delete(context.TODO(), created)).To(Succeed())
 			Expect(k8sClient.Get(context.TODO(), key, created)).ToNot(Succeed())
 		})
-
 	})
 })

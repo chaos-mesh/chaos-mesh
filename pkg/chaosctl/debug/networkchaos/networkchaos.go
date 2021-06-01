@@ -46,10 +46,6 @@ func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet, result *c
 		return err
 	}
 
-	if err := cm.CheckFailedMessage(ctx, chaosStatus.FailedMessage, daemons, c); err != nil {
-		return err
-	}
-
 	for i := range pods {
 		podName := pods[i].Name
 		podResult := cm.PodResult{Name: podName}

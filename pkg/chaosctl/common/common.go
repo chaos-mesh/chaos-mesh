@@ -90,7 +90,7 @@ const (
 const ChaosDaemonClientCert = "chaos-mesh-daemon-client-certs"
 const ChaosDaemonNamespace = "chaos-testing"
 
-var TLSFiles TLSFileConfig
+var TLSFiles grpcUtils.TLSFile
 var Insecure bool
 
 type ItemResult struct {
@@ -366,45 +366,6 @@ func Log(pod v1.Pod, tail int64, c *kubernetes.Clientset) (string, error) {
 	return buf.String(), nil
 }
 
-// CheckFailedMessage provide debug info and suggestions from failed message
-func CheckFailedMessage(ctx context.Context, failedMessage string, daemons []v1.Pod, c *ClientSet) error {
-	if strings.Contains(failedMessage, "rpc error: code = Unavailable desc = connection error") || strings.Contains(failedMessage, "connect: connection refused") {
-		if err := checkConnForCtrlAndDaemon(ctx, daemons, c); err != nil {
-			return fmt.Errorf("error occurs when check failed message: %s", err)
-		}
-	}
-	return nil
-}
-
-func checkConnForCtrlAndDaemon(ctx context.Context, daemons []v1.Pod, c *ClientSet) error {
-	ctrlSelector := v1alpha1.PodSelectorSpec{
-		LabelSelectors: map[string]string{"app.kubernetes.io/component": "controller-manager"},
-	}
-	ctrlMgrs, err := pod.SelectPods(ctx, c.CtrlCli, c.CtrlCli, ctrlSelector, ctrlconfig.ControllerCfg.ClusterScoped, ctrlconfig.ControllerCfg.TargetNamespace, false)
-	if err != nil {
-		return errors.Wrapf(err, "failed to select pod for controller-manager")
-	}
-	if len(ctrlMgrs) == 0 {
-		return fmt.Errorf("could not found controller manager")
-	}
-	for _, daemon := range daemons {
-		daemonIP := daemon.Status.PodIP
-		cmd := fmt.Sprintf("ping -c 1 %s > /dev/null; echo $?", daemonIP)
-		out, err := Exec(ctx, ctrlMgrs[0], cmd, c.KubeCli)
-		if err != nil {
-			return errors.Wrapf(err, "run command %s failed", cmd)
-		}
-		if string(out) == "0" {
-			PrettyPrint(fmt.Sprintf("Connection between Controller-Manager and Daemon %s (ip address: %s) works well", daemon.Name, daemonIP), 0, Green)
-		} else {
-			PrettyPrint(fmt.Sprintf(`Connection between Controller-Manager and Daemon %s (ip address: %s) is blocked.
-Please check network policy / firewall, or see FAQ on website`, daemon.Name, daemonIP), 0, Red)
-		}
-
-	}
-	return nil
-}
-
 // ConnectToLocalChaosDaemon would connect to ChaosDaemon run in localhost
 func ConnectToLocalChaosDaemon(port int) (daemonClient.ChaosDaemonClientInterface, error) {
 	if cli := mock.On("MockChaosDaemonClient"); cli != nil {
@@ -422,23 +383,26 @@ func ConnectToLocalChaosDaemon(port int) (daemonClient.ChaosDaemonClientInterfac
 }
 
 func getGrpcClient(port int) (*grpc.ClientConn, error) {
+	builder := grpcUtils.Builder("localhost", port)
 	if Insecure {
-		return grpcUtils.CreateGrpcConnection("localhost", port, "", "", "")
-	}
-	if TLSFiles.CaCert == "" || TLSFiles.Cert == "" || TLSFiles.Key == "" {
-		PrettyPrint("TLS Files are not complete, fall back to use secrets.", 0, Green)
-		config, err := getTLSConfigFromSecrets()
-		if err != nil {
-			return nil, err
+		builder.Insecure()
+	} else {
+		if TLSFiles.CaCert == "" || TLSFiles.Cert == "" || TLSFiles.Key == "" {
+			PrettyPrint("TLS Files are not complete, fall back to use secrets.", 0, Green)
+			config, err := getTLSConfigFromSecrets()
+			if err != nil {
+				return nil, err
+			}
+			builder.TLSFromRaw(config.CaCert, config.Cert, config.Key)
+		} else {
+			PrettyPrint("Using TLS Files.", 0, Green)
+			builder.TLSFromFile(TLSFiles.CaCert, TLSFiles.Cert, TLSFiles.Key)
 		}
-		return grpcUtils.CreateGrpcConnectionFromRaw("localhost", port, config.caCert, config.cert, config.key)
 	}
-	PrettyPrint("Using TLS Files.", 0, Green)
-	return grpcUtils.CreateGrpcConnection("localhost", port, TLSFiles.CaCert, TLSFiles.Cert, TLSFiles.Key)
+	return builder.Build()
 }
 
-func getTLSConfigFromSecrets() (*rawTLSConfig, error) {
-	var cfg rawTLSConfig
+func getTLSConfigFromSecrets() (*grpcUtils.TLSRaw, error) {
 	restconfig, err := config.GetConfig()
 	if err != nil {
 		return nil, err
@@ -451,19 +415,10 @@ func getTLSConfigFromSecrets() (*rawTLSConfig, error) {
 	if err != nil {
 		return nil, err
 	}
-	cfg.caCert = secret.Data["ca.crt"]
-	cfg.cert = secret.Data["tls.crt"]
-	cfg.key = secret.Data["tls.key"]
+	cfg := grpcUtils.TLSRaw{
+		CaCert: secret.Data["ca.crt"],
+		Cert:   secret.Data["tls.crt"],
+		Key:    secret.Data["tls.key"],
+	}
 	return &cfg, nil
-}
-
-type rawTLSConfig struct {
-	caCert []byte
-	cert   []byte
-	key    []byte
-}
-type TLSFileConfig struct {
-	CaCert string
-	Cert   string
-	Key    string
 }

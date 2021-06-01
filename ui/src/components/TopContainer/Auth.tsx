@@ -1,40 +1,31 @@
 import { Box, Button, Link, Typography } from '@material-ui/core'
-import ConfirmDialog, { ConfirmDialogHandles } from 'components-mui/ConfirmDialog'
-import { useEffect, useRef } from 'react'
-import { useHistory, useLocation } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 
+import ConfirmDialog from 'components-mui/ConfirmDialog'
 import RBACGenerator from 'components/RBACGenerator'
 import T from 'components/T'
 import Token from 'components/Token'
+import { useHistory } from 'react-router-dom'
 
 interface AuthProps {
   open: boolean
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-const Auth: React.FC<AuthProps> = ({ open }) => {
+const Auth: React.FC<AuthProps> = ({ open, setOpen }) => {
   const history = useHistory()
-  const { pathname } = useLocation()
 
-  const confirmRef = useRef<ConfirmDialogHandles>(null)
-  const confirmRefRBAC = useRef<ConfirmDialogHandles>(null)
+  const [tokenGenOpen, setTokenGenOpen] = useState(false)
 
   useEffect(() => {
-    confirmRef.current!.setOpen(open)
-  }, [open])
+    setOpen(open)
+  }, [open, setOpen])
 
-  const handleSubmitCallback = () => {
-    confirmRef.current!.setOpen(false)
-
-    history.replace('/authed')
-    setTimeout(() => history.replace(pathname))
-  }
-
-  const openGenerator = () => confirmRefRBAC.current!.setOpen(true)
-  const closeGenerator = () => confirmRefRBAC.current!.setOpen(false)
+  const handleSubmitCallback = () => history.go(0)
 
   return (
     <ConfirmDialog
-      ref={confirmRef}
+      open={open}
       title={T('settings.addToken.prompt')}
       dialogProps={{
         disableBackdropClick: true,
@@ -47,14 +38,14 @@ const Auth: React.FC<AuthProps> = ({ open }) => {
       <Box mb={3}>
         <Typography variant="body2" color="textSecondary">
           {T('settings.addToken.prompt2')}{' '}
-          <Link style={{ cursor: 'pointer' }} onClick={openGenerator}>
+          <Link style={{ cursor: 'pointer' }} onClick={() => setTokenGenOpen(true)}>
             {T('settings.addToken.prompt3')}
           </Link>
         </Typography>
       </Box>
       <Token onSubmitCallback={handleSubmitCallback} />
       <ConfirmDialog
-        ref={confirmRefRBAC}
+        open={tokenGenOpen}
         title={T('settings.addToken.generator')}
         dialogProps={{
           PaperProps: {
@@ -64,7 +55,7 @@ const Auth: React.FC<AuthProps> = ({ open }) => {
       >
         <RBACGenerator />
         <Box textAlign="right">
-          <Button onClick={closeGenerator}>{T('common.close')}</Button>
+          <Button onClick={() => setTokenGenOpen(false)}>{T('common.close')}</Button>
         </Box>
       </ConfirmDialog>
     </ConfirmDialog>

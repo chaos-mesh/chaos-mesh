@@ -55,27 +55,27 @@ var allScheduleTemplateType = []ScheduleTemplateType{
 
 type ScheduleItem struct {
 	// +optional
-	AwsChaos *AwsChaosSpec `json:"aws_chaos,omitempty"`
+	AwsChaos *AwsChaosSpec `json:"awsChaos,omitempty"`
 	// +optional
-	DNSChaos *DNSChaosSpec `json:"dns_chaos,omitempty"`
+	DNSChaos *DNSChaosSpec `json:"dNSChaos,omitempty"`
 	// +optional
-	GcpChaos *GcpChaosSpec `json:"gcp_chaos,omitempty"`
+	GcpChaos *GcpChaosSpec `json:"gcpChaos,omitempty"`
 	// +optional
-	HTTPChaos *HTTPChaosSpec `json:"http_chaos,omitempty"`
+	HTTPChaos *HTTPChaosSpec `json:"hTTPChaos,omitempty"`
 	// +optional
-	IoChaos *IoChaosSpec `json:"io_chaos,omitempty"`
+	IoChaos *IoChaosSpec `json:"ioChaos,omitempty"`
 	// +optional
-	JVMChaos *JVMChaosSpec `json:"jvm_chaos,omitempty"`
+	JVMChaos *JVMChaosSpec `json:"jVMChaos,omitempty"`
 	// +optional
-	KernelChaos *KernelChaosSpec `json:"kernel_chaos,omitempty"`
+	KernelChaos *KernelChaosSpec `json:"kernelChaos,omitempty"`
 	// +optional
-	NetworkChaos *NetworkChaosSpec `json:"network_chaos,omitempty"`
+	NetworkChaos *NetworkChaosSpec `json:"networkChaos,omitempty"`
 	// +optional
-	PodChaos *PodChaosSpec `json:"pod_chaos,omitempty"`
+	PodChaos *PodChaosSpec `json:"podChaos,omitempty"`
 	// +optional
-	StressChaos *StressChaosSpec `json:"stress_chaos,omitempty"`
+	StressChaos *StressChaosSpec `json:"stressChaos,omitempty"`
 	// +optional
-	TimeChaos *TimeChaosSpec `json:"time_chaos,omitempty"`
+	TimeChaos *TimeChaosSpec `json:"timeChaos,omitempty"`
 	// +optional
 	Workflow *WorkflowSpec `json:"workflow,omitempty"`
 

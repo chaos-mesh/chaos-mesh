@@ -16,8 +16,6 @@ package finalizers
 import (
 	"context"
 
-	"k8s.io/client-go/tools/record"
-
 	"github.com/go-logr/logr"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/client-go/util/retry"
@@ -27,6 +25,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 )
 
 const (
@@ -47,7 +46,7 @@ type Reconciler struct {
 	client.Client
 	client.Reader
 
-	Recorder record.EventRecorder
+	Recorder recorder.ChaosRecorder
 
 	Log logr.Logger
 }
@@ -78,13 +77,13 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		}
 
 		if obj.GetObjectMeta().Annotations[AnnotationCleanFinalizer] == AnnotationCleanFinalizerForced || (resumed && len(finalizers) != 0) {
-			r.Recorder.Event(obj, "Normal", "AllRecovered", "All records are recovered")
+			r.Recorder.Event(obj, recorder.FinalizerRemoved{})
 			finalizers = []string{}
 			shouldUpdate = true
 		}
 	} else {
 		if !ContainsFinalizer(obj.(metav1.Object), RecordFinalizer) {
-			r.Recorder.Event(obj, "Normal", "Created", "Add finalizer \"chaos-mesh/records\"")
+			r.Recorder.Event(obj, recorder.FinalizerInited{})
 			shouldUpdate = true
 			finalizers = append(obj.GetObjectMeta().Finalizers, RecordFinalizer)
 		}
@@ -105,11 +104,16 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		if updateError != nil {
 			// TODO: handle this error
 			r.Log.Error(updateError, "fail to update")
-			r.Recorder.Eventf(obj, "Normal", "Failed", "Failed to update finalizer: %s", updateError.Error())
+			r.Recorder.Event(obj, recorder.Failed{
+				Activity: "update finalizer",
+				Err:      "updateError.Error()",
+			})
 			return ctrl.Result{}, nil
 		}
 
-		r.Recorder.Event(obj, "Normal", "Updated", "Successfully update finalizer of resource")
+		r.Recorder.Event(obj, recorder.Updated{
+			Field: "finalizer",
+		})
 	}
 	return ctrl.Result{}, nil
 }

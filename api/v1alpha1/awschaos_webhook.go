@@ -62,6 +62,7 @@ func (in *AwsChaos) ValidateDelete() error {
 func (in *AwsChaos) Validate() error {
 	specField := field.NewPath("spec")
 	allErrs := in.Spec.validateEbsVolume(specField.Child("volumeID"))
+	allErrs = append(allErrs, in.validateAction(specField)...)
 	allErrs = append(allErrs, in.Spec.validateDeviceName(specField.Child("deviceName"))...)
 
 	if len(allErrs) > 0 {
@@ -90,6 +91,23 @@ func (in *AwsChaosSpec) validateDeviceName(containerField *field.Path) field.Err
 			err := fmt.Errorf("the name of device should not be empty on %s action", in.Action)
 			allErrs = append(allErrs, field.Invalid(containerField, in.DeviceName, err.Error()))
 		}
+	}
+	return allErrs
+}
+
+// ValidateScheduler validates the scheduler and duration
+func (in *AwsChaos) validateAction(spec *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+
+	switch in.Spec.Action {
+	case Ec2Stop, DetachVolume:
+	case Ec2Restart:
+	default:
+		err := fmt.Errorf("awschaos[%s/%s] have unknown action type", in.Namespace, in.Name)
+		log.Error(err, "Wrong AwsChaos Action type")
+
+		actionField := spec.Child("action")
+		allErrs = append(allErrs, field.Invalid(actionField, in.Spec.Action, err.Error()))
 	}
 	return allErrs
 }

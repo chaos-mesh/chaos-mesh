@@ -15,6 +15,7 @@ package gc
 
 import (
 	"context"
+	"fmt"
 	"reflect"
 	"sort"
 	"time"
@@ -24,20 +25,22 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	k8sError "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/utils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/controllers"
 )
 
 type Reconciler struct {
 	client.Client
 	Log      logr.Logger
-	Recorder record.EventRecorder
+	Recorder recorder.ChaosRecorder
 
 	ActiveLister *utils.ActiveLister
 }
@@ -58,7 +61,10 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	list, err := r.ActiveLister.ListActiveJobs(ctx, schedule)
 	if err != nil {
-		r.Recorder.Eventf(schedule, "Warning", "Failed", "Failed to list active jobs: %s", err.Error())
+		r.Recorder.Event(schedule, recorder.Failed{
+			Activity: "list active jobs",
+			Err:      err.Error(),
+		})
 		return ctrl.Result{}, nil
 	}
 
@@ -79,17 +85,22 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		for _, obj := range metaItems[0:exceededHistory] {
 			innerObj, ok := obj.(v1alpha1.InnerObject)
 			if ok { // This is a chaos
-				durationExceeded, untilStop, err := innerObj.DurationExceeded(time.Now())
-				if err != nil {
-					r.Log.Error(err, "failed to parse duration")
-				}
+				finished, untilStop := controller.IsChaosFinishedWithUntilStop(innerObj, time.Now())
 
-				if !durationExceeded {
-					r.Recorder.Eventf(schedule, "Warning", "Skip", "Skip removing history: %s is still running", innerObj.GetChaos().Name)
-					if requeuAfter > untilStop {
-						requeuAfter = untilStop
+				if !finished {
+					if untilStop != 0 {
+						if requeuAfter == 0 || requeuAfter > untilStop {
+							requeuAfter = untilStop
+						}
+
+						r.Recorder.Event(schedule, recorder.ScheduleSkipRemoveHistory{
+							RunningName: innerObj.GetChaos().Name,
+						})
+						continue
 					}
-					continue
+
+					// hasn't finished, but untilStop is 0
+					r.Log.Info("untilStop is 0 when the chaos has not finished")
 				}
 			} else { // A workflow
 				if schedule.Spec.Type == v1alpha1.ScheduleTypeWorkflow {
@@ -98,7 +109,9 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 						finished := controllers.WorkflowConditionEqualsTo(workflow.Status, v1alpha1.WorkflowConditionAccomplished, corev1.ConditionTrue)
 
 						if !finished {
-							r.Recorder.Eventf(schedule, "Warning", "Skip", "Skip removing history: %s is still running", workflow.Name)
+							r.Recorder.Event(schedule, recorder.ScheduleSkipRemoveHistory{
+								RunningName: workflow.Name,
+							})
 							continue
 						}
 					}
@@ -106,7 +119,10 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			}
 			err := r.Client.Delete(ctx, obj)
 			if err != nil && !k8sError.IsNotFound(err) {
-				r.Recorder.Eventf(schedule, "Warning", "Failed", "Failed to delete: %s/%s", obj.GetObjectMeta().Namespace, obj.GetObjectMeta().Name)
+				r.Recorder.Event(schedule, recorder.Failed{
+					Activity: fmt.Sprintf("delete %s/%s", obj.GetObjectMeta().Namespace, obj.GetObjectMeta().Name),
+					Err:      err.Error(),
+				})
 			}
 		}
 	}
@@ -124,7 +140,7 @@ type Objs struct {
 }
 
 func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger, objs Objs, scheme *runtime.Scheme, lister *utils.ActiveLister) (types.Controller, error) {
-	builder := ctrl.NewControllerManagedBy(mgr).
+	builder := builder.Default(mgr).
 		For(&v1alpha1.Schedule{}).
 		Named("schedule-gc")
 
@@ -138,7 +154,7 @@ func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger, objs
 	builder.Complete(&Reconciler{
 		client,
 		log.WithName("schedule-gc"),
-		mgr.GetEventRecorderFor("schedule-gc"),
+		recorder.NewRecorder(mgr, "schedule-gc", log),
 		lister,
 	})
 	return "schedule-gc", nil

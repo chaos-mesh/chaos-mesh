@@ -25,6 +25,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/ipset"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/iptable"
 	tcpkg "github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/tc"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 	pbutils "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/netem"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/netem"
@@ -33,7 +34,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -46,7 +46,7 @@ const (
 type Reconciler struct {
 	client.Client
 	client.Reader
-	Recorder record.EventRecorder
+	Recorder recorder.ChaosRecorder
 
 	Log                     logr.Logger
 	AllowHostNetworkTesting bool
@@ -67,8 +67,8 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, nil
 	}
 
-	if obj.ObjectMeta.Generation <= obj.Status.ObservedGeneration {
-		r.Log.Info("the target pod has been up to date")
+	if obj.ObjectMeta.Generation <= obj.Status.ObservedGeneration && obj.Status.FailedMessage == "" {
+		r.Log.Info("the target pod has been up to date", "pod", obj.Namespace+"/"+obj.Name)
 		return ctrl.Result{}, nil
 	}
 
@@ -108,15 +108,25 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 		if updateError != nil {
 			r.Log.Error(updateError, "fail to update")
-			r.Recorder.Eventf(obj, "Normal", "Failed", "Failed to update status: %s", updateError.Error())
+			r.Recorder.Event(obj, recorder.Failed{
+				Activity: "update status",
+				Err:      updateError.Error(),
+			})
 		}
+
+		r.Recorder.Event(obj, recorder.Updated{
+			Field: "ObservedGeneration and FailedMessage",
+		})
 	}()
 
 	if !r.AllowHostNetworkTesting {
 		if pod.Spec.HostNetwork {
 			err = errors.Errorf("It's dangerous to inject network chaos on a pod(%s/%s) with `hostNetwork`", pod.Namespace, pod.Name)
 			r.Log.Error(err, "fail to inject network chaos")
-			r.Recorder.Event(obj, "Warning", "Failed", err.Error())
+			r.Recorder.Event(obj, recorder.Failed{
+				Activity: "inject network chaos",
+				Err:      err.Error(),
+			})
 			return ctrl.Result{}, nil
 		}
 	}
@@ -124,23 +134,31 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	err = r.SetIPSets(ctx, pod, obj)
 	if err != nil {
 		r.Log.Error(err, "fail to set ipsets")
-		r.Recorder.Eventf(obj, "Warning", "Failed", "Fail to set ipsets: %s", err.Error())
-		return ctrl.Result{}, nil
+		r.Recorder.Event(obj, recorder.Failed{
+			Activity: "set ipsets",
+			Err:      err.Error(),
+		})
+		return ctrl.Result{Requeue: true}, nil
 	}
 
 	err = r.SetIptables(ctx, pod, obj)
 	if err != nil {
 		r.Log.Error(err, "fail to set iptables")
-		r.Recorder.Eventf(obj, "Warning", "Failed", "Fail to set iptables: %s", err.Error())
-		return ctrl.Result{}, nil
+		r.Recorder.Event(obj, recorder.Failed{
+			Activity: "set iptables",
+			Err:      err.Error(),
+		})
+		return ctrl.Result{Requeue: true}, nil
 	}
 
 	err = r.SetTcs(ctx, pod, obj)
 	if err != nil {
-		r.Recorder.Eventf(obj, "Warning", "Failed", "Fail to set tc: %s", err.Error())
-		return ctrl.Result{}, nil
+		r.Recorder.Event(obj, recorder.Failed{
+			Activity: "set tc",
+			Err:      err.Error(),
+		})
+		return ctrl.Result{Requeue: true}, nil
 	}
-	r.Recorder.Event(obj, "Normal", "Updated", "Synchronize podnetworkchaos successfully")
 
 	return ctrl.Result{}, nil
 }

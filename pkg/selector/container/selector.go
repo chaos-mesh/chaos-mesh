@@ -80,9 +80,9 @@ func New(c client.Client, r client.Reader) *SelectImpl {
 		c,
 		r,
 		pod.Option{
-			config.ControllerCfg.ClusterScoped,
-			config.ControllerCfg.TargetNamespace,
-			config.ControllerCfg.EnableFilterNamespace,
+			ClusterScoped:         config.ControllerCfg.ClusterScoped,
+			TargetNamespace:       config.ControllerCfg.TargetNamespace,
+			EnableFilterNamespace: config.ControllerCfg.EnableFilterNamespace,
 		},
 	}
 }

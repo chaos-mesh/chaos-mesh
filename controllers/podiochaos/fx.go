@@ -25,10 +25,11 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
 )
 
 func NewController(mgr ctrl.Manager, client client.Client, reader client.Reader, logger logr.Logger) (types.Controller, error) {
-	err := ctrl.NewControllerManagedBy(mgr).
+	err := builder.Default(mgr).
 		For(&v1alpha1.PodIoChaos{}).
 		Named("podiochaos").
 		WithEventFilter(predicate.Funcs{

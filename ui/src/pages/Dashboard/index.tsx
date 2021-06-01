@@ -81,9 +81,7 @@ export default function Dashboard() {
               <Paper>
                 <PaperTop title={T('common.timeline')} />
 
-                <Box m={3}>
-                  <Timeline events={events} className={classes.container} />
-                </Box>
+                <Timeline events={events} className={classes.container} />
               </Paper>
             </Grid>
 
@@ -92,9 +90,7 @@ export default function Dashboard() {
                 <Paper>
                   <PaperTop title={T('dashboard.predefined')} subtitle={T('dashboard.predefinedDesc')} />
 
-                  <Box m={3}>
-                    <Predefined />
-                  </Box>
+                  <Predefined />
                 </Paper>
               </Box>
             </Grid>
