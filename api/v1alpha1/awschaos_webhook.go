@@ -15,6 +15,7 @@ package v1alpha1
 
 import (
 	"fmt"
+	"reflect"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
@@ -47,6 +48,9 @@ func (in *AwsChaos) ValidateCreate() error {
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
 func (in *AwsChaos) ValidateUpdate(old runtime.Object) error {
 	awschaoslog.Info("validate update", "name", in.Name)
+	if !reflect.DeepEqual(in.Spec, old.(*AwsChaos).Spec) {
+		return fmt.Errorf("Cannot update chaos spec")
+	}
 	return in.Validate()
 }
 
