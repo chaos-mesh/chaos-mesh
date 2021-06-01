@@ -73,4 +73,3 @@ type Filter struct {
 	Kind                string
 	LimitStr            string
 }
-

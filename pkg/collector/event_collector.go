@@ -95,4 +95,3 @@ func (r *EventCollector) Setup(mgr ctrl.Manager, apiType runtime.Object) error {
 		}).
 		Complete(r)
 }
-

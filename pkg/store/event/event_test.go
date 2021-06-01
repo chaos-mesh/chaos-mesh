@@ -374,4 +374,3 @@ func TestConstructQueryArgs(t *testing.T) {
 		}
 	}
 }
-
