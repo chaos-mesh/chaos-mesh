@@ -355,9 +355,6 @@ webhook:
     - stresschaos
     - awschaos
     - gcpchaos
-    - podiochaos
-    - podhttpchaos
-    - podnetworkchaos
     - dnschaos
     - jvmchaos
 

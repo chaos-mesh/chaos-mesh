@@ -42,7 +42,7 @@ func AuthRequired(c *gin.Context, clusterScoped bool, targetNamespace string) {
 
 	verb := "list"
 	if c.Request.Method != http.MethodGet {
-		// patch is used to indicate delete, create, patch, delete and other write operations
+		// patch is used to indicate finalizers, create, patch, finalizers and other write operations
 		verb = "patch"
 	}
 

@@ -30,7 +30,7 @@ var _ = Describe("timechaos_webhook", func() {
 			Expect(timechaos.Spec.ClockIds[0]).To(Equal("CLOCK_REALTIME"))
 		})
 	})
-	Context("ChaosValidator of timechaos", func() {
+	Context("webhook.Validator of timechaos", func() {
 		It("Validate", func() {
 
 			type TestCase struct {
@@ -39,7 +39,6 @@ var _ = Describe("timechaos_webhook", func() {
 				execute func(chaos *TimeChaos) error
 				expect  string
 			}
-			duration := "400s"
 			tcs := []TestCase{
 				{
 					name: "simple ValidateCreate",
@@ -82,42 +81,6 @@ var _ = Describe("timechaos_webhook", func() {
 						return chaos.ValidateDelete()
 					},
 					expect: "",
-				},
-				{
-					name: "only define the Scheduler",
-					chaos: TimeChaos{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: metav1.NamespaceDefault,
-							Name:      "foo4",
-						},
-						Spec: TimeChaosSpec{
-							Scheduler: &SchedulerSpec{
-								Cron: "@every 10m",
-							},
-							TimeOffset: "1s",
-						},
-					},
-					execute: func(chaos *TimeChaos) error {
-						return chaos.ValidateCreate()
-					},
-					expect: "error",
-				},
-				{
-					name: "only define the Duration",
-					chaos: TimeChaos{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: metav1.NamespaceDefault,
-							Name:      "foo5",
-						},
-						Spec: TimeChaosSpec{
-							Duration:   &duration,
-							TimeOffset: "1s",
-						},
-					},
-					execute: func(chaos *TimeChaos) error {
-						return chaos.ValidateCreate()
-					},
-					expect: "error",
 				},
 				{
 					name: "validate the timeOffset",

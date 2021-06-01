@@ -9,5 +9,3 @@ spec:
   selector:
     labelSelectors:
       "app.kubernetes.io/component": "tikv"
-  scheduler:
-    cron: "@every 1m"

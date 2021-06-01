@@ -1,0 +1,12 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: AwsChaos
+metadata:
+  name: aws-ec2-stop
+  namespace: chaos-testing
+spec:
+  action: ec2-stop
+  secretName: "cloud-key-secret"
+  awsRegion: "us-east-1"
+  ec2Instance: "i-c849713a387c4feb7"
+  endpoint: "http://192.168.39.13:31566"
+  duration: "5s"
