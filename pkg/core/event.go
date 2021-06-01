@@ -61,7 +61,7 @@ type Event struct {
 	Message      string    `json:"message"`
 	Name         string    `json:"name"`
 	Namespace    string    `json:"namespace"`
-	ExperimentID string    `gorm:"index:experiment_id" json:"experiment_id"`
+	ObjectID     string    `gorm:"index:object_id" json:"object_id"`
 }
 
 // Filter represents the filter to list events

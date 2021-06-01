@@ -15,7 +15,6 @@ package collector
 
 import (
 	"context"
-
 	"github.com/go-logr/logr"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 
@@ -61,7 +60,7 @@ func (r *EventCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		Message:      event.Message,
 		Name:         event.InvolvedObject.Name,
 		Namespace:    event.InvolvedObject.Namespace,
-		ExperimentID: string(event.InvolvedObject.UID),
+		ObjectID: string(event.InvolvedObject.UID),
 	}
 	if err := r.event.Create(context.Background(), &et); err != nil {
 		r.Log.Error(err, "failed to save event", "event", et)

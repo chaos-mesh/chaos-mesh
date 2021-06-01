@@ -67,7 +67,7 @@ var _ = Describe("event", func() {
 			Message:      "testMessage",
 			Name:         "testName",
 			Namespace:    "testNamespace",
-			ExperimentID: "testID0",
+			ObjectID: "testID0",
 		}
 		event1 = &core.Event{
 			ID:           1,
@@ -78,7 +78,7 @@ var _ = Describe("event", func() {
 			Message:      "testMessage",
 			Name:         "testName",
 			Namespace:    "testNamespace",
-			ExperimentID: "testID1",
+			ObjectID: "testID1",
 		}
 	})
 
@@ -107,9 +107,9 @@ var _ = Describe("event", func() {
 		It("found", func() {
 			rows := sqlmock.
 				NewRows([]string{"id", "created_at", "kind", "type", "reason", "message", "name",
-					"namespace", "experiment_id"}).
+					"namespace", "object_id"}).
 				AddRow(event0.ID, event0.CreatedAt, event0.Kind, event0.Type, event0.Reason,
-					event0.Message, event0.Name, event0.Namespace, event0.ExperimentID)
+					event0.Message, event0.Name, event0.Namespace, event0.ObjectID)
 
 			sqlSelect := `SELECT * FROM "events"`
 			mock.ExpectQuery(regexp.QuoteMeta(sqlSelect)).WillReturnRows(rows)
@@ -131,19 +131,19 @@ var _ = Describe("event", func() {
 		It("found", func() {
 			mockedRow := []*sqlmock.Rows{
 				sqlmock.NewRows([]string{"id", "created_at", "kind", "type", "reason", "message", "name",
-					"namespace", "experiment_id"}).
+					"namespace", "object_id"}).
 					AddRow(event0.ID, event0.CreatedAt, event0.Kind, event0.Type, event0.Reason,
-						event0.Message, event0.Name, event0.Namespace, event0.ExperimentID),
+						event0.Message, event0.Name, event0.Namespace, event0.ObjectID),
 				sqlmock.NewRows([]string{"id", "created_at", "kind", "type", "reason", "message", "name",
-					"namespace", "experiment_id"}).
+					"namespace", "object_id"}).
 					AddRow(event1.ID, event1.CreatedAt, event1.Kind, event1.Type, event1.Reason,
-						event1.Message, event1.Name, event1.Namespace, event1.ExperimentID),
+						event1.Message, event1.Name, event1.Namespace, event1.ObjectID),
 			}
 
-			sqlSelect := `SELECT * FROM "events" WHERE (experiment_id = ?)`
-			mock.ExpectQuery(regexp.QuoteMeta(sqlSelect)).WithArgs(event0.ExperimentID).WillReturnRows(mockedRow[0])
+			sqlSelect := `SELECT * FROM "events" WHERE (object_id = ?)`
+			mock.ExpectQuery(regexp.QuoteMeta(sqlSelect)).WithArgs(event0.ObjectID).WillReturnRows(mockedRow[0])
 
-			events, err := es.ListByUID(context.TODO(), event0.ExperimentID)
+			events, err := es.ListByUID(context.TODO(), event0.ObjectID)
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(events[0]).Should(Equal(event0))
 		})
@@ -160,13 +160,13 @@ var _ = Describe("event", func() {
 		It("found", func() {
 			mockedRow := []*sqlmock.Rows{
 				sqlmock.NewRows([]string{"id", "created_at", "kind", "type", "reason", "message", "name",
-					"namespace", "experiment_id"}).
+					"namespace", "object_id"}).
 					AddRow(event0.ID, event0.CreatedAt, event0.Kind, event0.Type, event0.Reason,
-						event0.Message, event0.Name, event0.Namespace, event0.ExperimentID),
+						event0.Message, event0.Name, event0.Namespace, event0.ObjectID),
 				sqlmock.NewRows([]string{"id", "created_at", "kind", "type", "reason", "message", "name",
-					"namespace", "experiment_id"}).
+					"namespace", "object_id"}).
 					AddRow(event1.ID, event1.CreatedAt, event1.Kind, event1.Type, event1.Reason,
-						event1.Message, event1.Name, event1.Namespace, event1.ExperimentID),
+						event1.Message, event1.Name, event1.Namespace, event1.ObjectID),
 			}
 
 			sqlSelect := `SELECT * FROM "events" WHERE (namespace = ? and name = ? and kind = ?)`
@@ -189,13 +189,13 @@ var _ = Describe("event", func() {
 		It("found", func() {
 			mockedRow := []*sqlmock.Rows{
 				sqlmock.NewRows([]string{"id", "created_at", "kind", "type", "reason", "message", "name",
-					"namespace", "experiment_id"}).
+					"namespace", "object_id"}).
 					AddRow(event0.ID, event0.CreatedAt, event0.Kind, event0.Type, event0.Reason,
-						event0.Message, event0.Name, event0.Namespace, event0.ExperimentID),
+						event0.Message, event0.Name, event0.Namespace, event0.ObjectID),
 				sqlmock.NewRows([]string{"id", "created_at", "kind", "type", "reason", "message", "name",
-					"namespace", "experiment_id"}).
+					"namespace", "object_id"}).
 					AddRow(event1.ID, event1.CreatedAt, event1.Kind, event1.Type, event1.Reason,
-						event1.Message, event1.Name, event1.Namespace, event1.ExperimentID),
+						event1.Message, event1.Name, event1.Namespace, event1.ObjectID),
 			}
 
 			sqlSelect := `SELECT * FROM "events" WHERE (id = ?)`
@@ -235,9 +235,9 @@ var _ = Describe("event", func() {
 		It("empty args", func() {
 			rows := sqlmock.
 				NewRows([]string{"id", "created_at", "kind", "type", "reason", "message", "name",
-					"namespace", "experiment_id"}).
+					"namespace", "object_id"}).
 				AddRow(event0.ID, event0.CreatedAt, event0.Kind, event0.Type, event0.Reason,
-					event0.Message, event0.Name, event0.Namespace, event0.ExperimentID)
+					event0.Message, event0.Name, event0.Namespace, event0.ObjectID)
 			sqlSelect := `SELECT * FROM "events"`
 			mock.ExpectQuery(regexp.QuoteMeta(sqlSelect)).WillReturnRows(rows)
 
@@ -328,7 +328,7 @@ func TestConstructQueryArgs(t *testing.T) {
 			uid:           "testUID",
 			kind:          "",
 			createTime:    "",
-			expectedQuery: "name = ? AND namespace = ? AND experiment_id = ?",
+			expectedQuery: "name = ? AND namespace = ? AND object_id = ?",
 			expectedArgs:  []string{"testName", "testNamespace", "testUID"},
 		},
 		{
@@ -337,7 +337,7 @@ func TestConstructQueryArgs(t *testing.T) {
 			uid:           "testUID",
 			kind:          "testKind",
 			createTime:    "",
-			expectedQuery: "name = ? AND namespace = ? AND experiment_id = ? AND kind = ?",
+			expectedQuery: "name = ? AND namespace = ? AND object_id = ? AND kind = ?",
 			expectedArgs:  []string{"testName", "testNamespace", "testUID", "testKind"},
 		},
 		{
@@ -346,7 +346,7 @@ func TestConstructQueryArgs(t *testing.T) {
 			uid:           "testUID",
 			kind:          "testKind",
 			createTime:    "20200101",
-			expectedQuery: "name = ? AND namespace = ? AND experiment_id = ? AND kind = ? AND created_at >= ?",
+			expectedQuery: "name = ? AND namespace = ? AND object_id = ? AND kind = ? AND created_at >= ?",
 			expectedArgs:  []string{"testName", "testNamespace", "testUID", "testKind", "20200101"},
 		},
 		{
@@ -355,7 +355,7 @@ func TestConstructQueryArgs(t *testing.T) {
 			uid:           "testUID",
 			kind:          "testKind",
 			createTime:    "20200101",
-			expectedQuery: "name = ? AND namespace = ? AND experiment_id = ? AND kind = ? AND created_at >= ?",
+			expectedQuery: "name = ? AND namespace = ? AND object_id = ? AND kind = ? AND created_at >= ?",
 			expectedArgs:  []string{"testName", "testNamespace", "testUID", "testKind", "20200101"},
 		},
 	}

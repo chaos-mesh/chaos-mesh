@@ -67,7 +67,7 @@ func (m *MockEventService) ListByFilter(ctx context.Context, filter core.Filter)
 			Message:      "testMessage",
 			Name:         "testName",
 			Namespace:    "testNamespace",
-			ExperimentID: "testUID",
+			ObjectID: "testUID",
 		}
 		res = append(res, event)
 	} else {
@@ -89,7 +89,7 @@ func (m *MockEventService) Find(_ context.Context, id uint) (*core.Event, error)
 			Message:      "testMessage",
 			Name:         "testName",
 			Namespace:    "testNamespace",
-			ExperimentID: "testUID",
+			ObjectID: "testUID",
 		}
 	} else {
 		if id == 1 {
@@ -166,7 +166,7 @@ var _ = Describe("event", func() {
 					Message:      "testMessage",
 					Name:         "testName",
 					Namespace:    "testNamespace",
-					ExperimentID: "testUID",
+					ObjectID: "testUID",
 				},
 			}
 			rr := httptest.NewRecorder()
@@ -197,7 +197,7 @@ var _ = Describe("event", func() {
 				Message:      "testMessage",
 				Name:         "testName",
 				Namespace:    "testNamespace",
-				ExperimentID: "testUID",
+				ObjectID: "testUID",
 			}
 			rr := httptest.NewRecorder()
 			request, _ := http.NewRequest(http.MethodGet, "/api/events/get?id=0", nil)
