@@ -54,14 +54,14 @@ func (r *EventCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	et := core.Event{
-		CreatedAt:    event.CreationTimestamp.Time,
-		Kind:         event.InvolvedObject.Kind,
-		Type:         event.Type,
-		Reason:       event.Reason,
-		Message:      event.Message,
-		Name:         event.InvolvedObject.Name,
-		Namespace:    event.InvolvedObject.Namespace,
-		ExperimentID: string(event.InvolvedObject.UID),
+		CreatedAt: event.CreationTimestamp.Time,
+		Kind:      event.InvolvedObject.Kind,
+		Type:      event.Type,
+		Reason:    event.Reason,
+		Message:   event.Message,
+		Name:      event.InvolvedObject.Name,
+		Namespace: event.InvolvedObject.Namespace,
+		ObjectID:  string(event.InvolvedObject.UID),
 	}
 	if err := r.event.Create(context.Background(), &et); err != nil {
 		r.Log.Error(err, "failed to save event", "event", et)
@@ -83,7 +83,6 @@ func (r *EventCollector) Setup(mgr ctrl.Manager, apiType runtime.Object) error {
 					return false
 				}
 				flag := false
-
 				_, ok = v1alpha1.AllKinds()[event.InvolvedObject.Kind]
 				if ok {
 					flag = true

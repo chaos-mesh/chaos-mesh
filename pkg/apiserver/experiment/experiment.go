@@ -92,7 +92,7 @@ type Base struct {
 type Experiment struct {
 	Base
 	UID           string `json:"uid"`
-	Created       string `json:"created"`
+	Created       string `json:"created_at"`
 	Status        string `json:"status"`
 	FailedMessage string `json:"failed_message,omitempty"`
 }
