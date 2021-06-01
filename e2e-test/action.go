@@ -112,9 +112,9 @@ func (oa *operatorAction) DeployOperator(info OperatorConfig) error {
 
 func (oa *operatorAction) InstallCRD(info OperatorConfig) error {
 	klog.Infof("deploying chaos-mesh crd :%v", info.ReleaseName)
-	if oa.apiextensionsV1Available(){
+	if oa.apiextensionsV1Available() {
 		oa.runKubectlOrDie("apply", "-f", oa.manifestPath("e2e/crd.yaml"), "--validate=false")
-	}else {
+	} else {
 		oa.runKubectlOrDie("apply", "-f", oa.manifestPath("e2e/crd-v1beta1.yaml"), "--validate=false")
 	}
 	e2eutil.WaitForCRDsEstablished(oa.apiExtCli, labels.Everything())
