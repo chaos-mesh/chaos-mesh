@@ -70,7 +70,7 @@ func BootstrapWorkflowControllers(mgr manager.Manager, logger logr.Logger) error
 		Complete(
 			NewParallelNodeReconciler(
 				noCacheClient,
-				mgr.GetEventRecorderFor("workflow-parallel-node-reconciler"),
+				recorder.NewRecorder(mgr, "workflow-parallel-node-reconciler", logger.WithName("workflow-parallel-node-reconciler")),
 				logger.WithName("workflow-parallel-node-reconciler"),
 			),
 		)
