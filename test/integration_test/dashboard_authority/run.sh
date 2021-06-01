@@ -107,21 +107,21 @@ REQUEST CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@] "GET" "/api/experiments?namespace=d
 
 echo "***** get details of chaos experiments *****"
 
-echo "all token can view the experiments under namespace busybox"
-REQUEST BUSYBOX_VIEW_TOKEN_LIST[@] "GET" "/api/experiments/detail/${EXP_UID}?namespace=busybox" "exp_detail.out" "Running"
+# echo "all token can view the experiments under namespace busybox"
+# REQUEST BUSYBOX_VIEW_TOKEN_LIST[@] "GET" "/api/experiments/detail/${EXP_UID}?namespace=busybox" "exp_detail.out" "Running"
 
 
-echo "***** get state of chaos experiments *****"
+# echo "***** get state of chaos experiments *****"
 
-echo "all token can get the state of experiments under namespace busybox"
-REQUEST BUSYBOX_VIEW_TOKEN_LIST[@] "GET" "/api/experiments/state?namespace=busybox" "exp_state.out" "Running"
+# echo "all token can get the state of experiments under namespace busybox"
+# REQUEST BUSYBOX_VIEW_TOKEN_LIST[@] "GET" "/api/experiments/state?namespace=busybox" "exp_state.out" "Running"
 
-echo "cluster manager and viewer can get the state of experiments in the cluster"
-REQUEST CLUSTER_VIEW_TOKEN_LIST[@] "GET" "/api/experiments/state" "exp_state.out" "Running"
+# echo "cluster manager and viewer can get the state of experiments in the cluster"
+# REQUEST CLUSTER_VIEW_TOKEN_LIST[@] "GET" "/api/experiments/state" "exp_state.out" "Running"
 
-echo "busybox manager and viewer is forbidden to get the state of experiments in the cluster or other namespace"
-REQUEST CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@] "GET" "/api/experiments/state" "exp_state.out" "is forbidden"
-REQUEST CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@] "GET" "/api/experiments/state?namespace=default" "exp_state.out" "is forbidden"
+# echo "busybox manager and viewer is forbidden to get the state of experiments in the cluster or other namespace"
+# REQUEST CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@] "GET" "/api/experiments/state" "exp_state.out" "is forbidden"
+# REQUEST CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@] "GET" "/api/experiments/state?namespace=default" "exp_state.out" "is forbidden"
 
 
 echo "***** pause chaos experiments *****"
