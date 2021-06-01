@@ -89,7 +89,7 @@ type Base struct {
 type Schedule struct {
 	Base
 	UID     string `json:"uid"`
-	Created string `json:"created"`
+	Created string `json:"created_at"`
 }
 
 // Detail represents an experiment instance.
