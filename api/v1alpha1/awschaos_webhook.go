@@ -36,7 +36,7 @@ func (in *AwsChaos) Default() {
 
 // +kubebuilder:webhook:verbs=create;update,path=/validate-chaos-mesh-org-v1alpha1-awschaos,mutating=false,failurePolicy=fail,groups=chaos-mesh.org,resources=awschaos,versions=v1alpha1,name=vawschaos.kb.io
 
-var _ ChaosValidator = &AwsChaos{}
+var _ webhook.Validator = &AwsChaos{}
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
 func (in *AwsChaos) ValidateCreate() error {
@@ -61,49 +61,13 @@ func (in *AwsChaos) ValidateDelete() error {
 // Validate validates chaos object
 func (in *AwsChaos) Validate() error {
 	specField := field.NewPath("spec")
-	allErrs := in.ValidateScheduler(specField)
-	allErrs = append(allErrs, in.ValidatePodMode(specField)...)
-	allErrs = append(allErrs, in.Spec.validateEbsVolume(specField.Child("volumeID"))...)
+	allErrs := in.Spec.validateEbsVolume(specField.Child("volumeID"))
+	allErrs = append(allErrs, in.validateAction(specField)...)
 	allErrs = append(allErrs, in.Spec.validateDeviceName(specField.Child("deviceName"))...)
 
 	if len(allErrs) > 0 {
 		return fmt.Errorf(allErrs.ToAggregate().Error())
 	}
-	return nil
-}
-
-// ValidateScheduler validates the scheduler and duration
-func (in *AwsChaos) ValidateScheduler(spec *field.Path) field.ErrorList {
-	allErrs := field.ErrorList{}
-	schedulerField := spec.Child("scheduler")
-
-	switch in.Spec.Action {
-	case Ec2Stop, DetachVolume:
-		allErrs = append(allErrs, ValidateScheduler(in, spec)...)
-	case Ec2Restart:
-		// We choose to ignore the Duration property even user define it
-		if in.Spec.Scheduler != nil {
-			_, err := ParseCron(in.Spec.Scheduler.Cron, schedulerField.Child("cron"))
-			allErrs = append(allErrs, err...)
-		}
-	default:
-		err := fmt.Errorf("awschaos[%s/%s] have unknown action type", in.Namespace, in.Name)
-		log.Error(err, "Wrong AwsChaos Action type")
-
-		actionField := spec.Child("action")
-		allErrs = append(allErrs, field.Invalid(actionField, in.Spec.Action, err.Error()))
-	}
-	return allErrs
-}
-
-// ValidatePodMode validates the value with podmode
-func (in *AwsChaos) ValidatePodMode(spec *field.Path) field.ErrorList {
-	// Because aws chaos does not need a pod mode, so return nil here.
-	return nil
-}
-
-// SelectSpec returns the selector config for authority validate
-func (in *AwsChaos) GetSelectSpec() []SelectSpec {
 	return nil
 }
 
@@ -127,6 +91,23 @@ func (in *AwsChaosSpec) validateDeviceName(containerField *field.Path) field.Err
 			err := fmt.Errorf("the name of device should not be empty on %s action", in.Action)
 			allErrs = append(allErrs, field.Invalid(containerField, in.DeviceName, err.Error()))
 		}
+	}
+	return allErrs
+}
+
+// ValidateScheduler validates the scheduler and duration
+func (in *AwsChaos) validateAction(spec *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+
+	switch in.Spec.Action {
+	case Ec2Stop, DetachVolume:
+	case Ec2Restart:
+	default:
+		err := fmt.Errorf("awschaos[%s/%s] have unknown action type", in.Namespace, in.Name)
+		log.Error(err, "Wrong AwsChaos Action type")
+
+		actionField := spec.Child("action")
+		allErrs = append(allErrs, field.Invalid(actionField, in.Spec.Action, err.Error()))
 	}
 	return allErrs
 }

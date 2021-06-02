@@ -17,6 +17,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
+
 	v1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -24,7 +26,6 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/netutils"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
@@ -32,7 +33,7 @@ var log = ctrl.Log.WithName("iptable")
 
 // SetIptablesChains makes grpc call to chaosdaemon to flush iptable
 func SetIptablesChains(ctx context.Context, c client.Client, pod *v1.Pod, chains []*pb.Chain) error {
-	pbClient, err := utils.NewChaosDaemonClient(ctx, c, pod)
+	pbClient, err := chaosdaemon.NewChaosDaemonClient(ctx, c, pod)
 	if err != nil {
 		return err
 	}

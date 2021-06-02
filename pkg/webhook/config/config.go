@@ -50,7 +50,7 @@ type ExecAction struct {
 type InjectionConfig struct {
 	Name string
 	// Selector is used to select pods that are used to inject sidecar.
-	Selector *v1alpha1.SelectorSpec
+	Selector *v1alpha1.PodSelectorSpec
 
 	Containers            []corev1.Container   `json:"containers"`
 	Volumes               []corev1.Volume      `json:"volumes"`
@@ -82,7 +82,7 @@ type TemplateArgs struct {
 	Template  string            `yaml:"template"`
 	Arguments map[string]string `yaml:"arguments"`
 	// Selector is used to select pods that are used to inject sidecar.
-	Selector *v1alpha1.SelectorSpec `json:"selector,omitempty"`
+	Selector *v1alpha1.PodSelectorSpec `json:"selector,omitempty"`
 }
 
 // NewConfigWatcherConf creates a configuration for watcher

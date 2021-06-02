@@ -3,8 +3,8 @@ module github.com/chaos-mesh/chaos-mesh/e2e-test
 require (
 	github.com/chaos-mesh/chaos-mesh v0.0.0-00010101000000-000000000000
 	github.com/chaos-mesh/chaos-mesh/api/v1alpha1 v0.0.0
-	github.com/onsi/ginkgo v1.12.1
-	github.com/onsi/gomega v1.9.0
+	github.com/onsi/ginkgo v1.14.0
+	github.com/onsi/gomega v1.10.1
 	k8s.io/api v0.18.2
 	k8s.io/apiextensions-apiserver v0.18.2
 	k8s.io/apimachinery v0.18.2

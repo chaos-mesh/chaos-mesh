@@ -49,7 +49,7 @@ func (in *StressChaos) Default() {
 
 // +kubebuilder:webhook:verbs=create;update,path=/validate-chaos-mesh-org-v1alpha1-stresschaos,mutating=false,failurePolicy=fail,groups=chaos-mesh.org,resources=stresschaos,versions=v1alpha1,name=vstresschaos.kb.io
 
-var _ ChaosValidator = &StressChaos{}
+var _ webhook.Validator = &StressChaos{}
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
 func (in *StressChaos) ValidateCreate() error {
@@ -75,27 +75,10 @@ func (in *StressChaos) ValidateDelete() error {
 func (in *StressChaos) Validate() error {
 	root := field.NewPath("stresschaos")
 	errs := in.Spec.Validate(root)
-	errs = append(errs, in.ValidatePodMode(root)...)
-	errs = append(errs, in.ValidateScheduler(root.Child("spec"))...)
 	if len(errs) > 0 {
 		return fmt.Errorf(errs.ToAggregate().Error())
 	}
 	return nil
-}
-
-// ValidatePodMode validates the value with podmode
-func (in *StressChaos) ValidatePodMode(spec *field.Path) field.ErrorList {
-	return ValidatePodMode(in.Spec.Value, in.Spec.Mode, spec.Child("value"))
-}
-
-// ValidateScheduler validates whether scheduler is well defined
-func (in *StressChaos) ValidateScheduler(spec *field.Path) field.ErrorList {
-	return ValidateScheduler(in, spec)
-}
-
-// SelectSpec returns the selector config for authority validate
-func (in *StressChaos) GetSelectSpec() []SelectSpec {
-	return []SelectSpec{&in.Spec}
 }
 
 // Validate validates the scheduler and duration

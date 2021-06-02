@@ -30,6 +30,8 @@ for ((k=0; k<30; k++)); do
 done
 
 kubectl port-forward svc/localstack 4566:4566 &
+# kill child process
+trap 'kill $(jobs -p)' EXIT
 
 NODE_PORT=$(kubectl get --namespace default -o jsonpath="{.spec.ports[0].nodePort}" services localstack)
 NODE_IP=$(kubectl get nodes --namespace default -o jsonpath="{.items[0].status.addresses[0].address}")
@@ -82,5 +84,3 @@ fi
 # clean
 kubectl delete -f aws_chaos.yaml
 helm uninstall localstack
-# kill child process
-trap 'kill $(jobs -p)' EXIT

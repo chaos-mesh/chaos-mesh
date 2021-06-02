@@ -49,18 +49,19 @@ func TestcasePodKillOnceThenDelete(ns string, kubeCli kubernetes.Interface, cli 
 			Namespace: ns,
 		},
 		Spec: v1alpha1.PodChaosSpec{
-			Selector: v1alpha1.SelectorSpec{
-				Namespaces: []string{
-					ns,
-				},
-				LabelSelectors: map[string]string{
-					"app": "nginx",
-				},
-			},
 			Action: v1alpha1.PodKillAction,
-			Mode:   v1alpha1.OnePodMode,
-			Scheduler: &v1alpha1.SchedulerSpec{
-				Cron: "@every 10s",
+			ContainerSelector: v1alpha1.ContainerSelector{
+				PodSelector: v1alpha1.PodSelector{
+					Selector: v1alpha1.PodSelectorSpec{
+						Namespaces: []string{
+							ns,
+						},
+						LabelSelectors: map[string]string{
+							"app": "nginx",
+						},
+					},
+					Mode: v1alpha1.OnePodMode,
+				},
 			},
 		},
 	}
@@ -103,15 +104,20 @@ func TestcasePodKillPauseThenUnPause(ns string, kubeCli kubernetes.Interface, cl
 			Namespace: ns,
 		},
 		Spec: v1alpha1.PodChaosSpec{
-			Selector: v1alpha1.SelectorSpec{
-				Namespaces:     []string{ns},
-				LabelSelectors: map[string]string{"app": "nginx"},
-			},
 			Action:   v1alpha1.PodKillAction,
-			Mode:     v1alpha1.OnePodMode,
 			Duration: pointer.StringPtr("9m"),
-			Scheduler: &v1alpha1.SchedulerSpec{
-				Cron: "@every 10m",
+			ContainerSelector: v1alpha1.ContainerSelector{
+				PodSelector: v1alpha1.PodSelector{
+					Selector: v1alpha1.PodSelectorSpec{
+						Namespaces: []string{
+							ns,
+						},
+						LabelSelectors: map[string]string{
+							"app": "nginx",
+						},
+					},
+					Mode: v1alpha1.OnePodMode,
+				},
 			},
 		},
 	}
@@ -139,7 +145,7 @@ func TestcasePodKillPauseThenUnPause(ns string, kubeCli kubernetes.Interface, cl
 		chaos := &v1alpha1.PodChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
 		framework.ExpectNoError(err, "get pod chaos error")
-		if chaos.Status.Experiment.Phase == v1alpha1.ExperimentPhasePaused {
+		if chaos.Status.Experiment.DesiredPhase == v1alpha1.StoppedPhase {
 			return true, nil
 		}
 		return false, err
@@ -156,28 +162,5 @@ func TestcasePodKillPauseThenUnPause(ns string, kubeCli kubernetes.Interface, cl
 	})
 	framework.ExpectError(err, "wait pod not killed failed")
 	framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
-
-	// resume experiment
-	err = util.UnPauseChaos(ctx, cli, podKillChaos)
-	framework.ExpectNoError(err, "resume chaos error")
-
-	err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
-		chaos := &v1alpha1.PodChaos{}
-		err = cli.Get(ctx, chaosKey, chaos)
-		framework.ExpectNoError(err, "get pod chaos error")
-		if chaos.Status.Experiment.Phase == v1alpha1.ExperimentPhaseRunning {
-			return true, nil
-		}
-		return false, err
-	})
-	framework.ExpectNoError(err, "check resumed chaos failed")
-
-	// some pod is killed by resumed experiment
-	err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
-		newPods, err = kubeCli.CoreV1().Pods(ns).List(listOption)
-		framework.ExpectNoError(err, "get nginx pods error")
-		return !fixture.HaveSameUIDs(pods.Items, newPods.Items), nil
-	})
-	framework.ExpectNoError(err, "wait pod killed failed")
 
 }

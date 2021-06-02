@@ -18,6 +18,7 @@ resources:
 - bases/chaos-mesh.org_gcpchaos.yaml
 - bases/chaos-mesh.org_workflows.yaml
 - bases/chaos-mesh.org_workflownodes.yaml
+- bases/chaos-mesh.org_schedules.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
 patchesStrategicMerge:
