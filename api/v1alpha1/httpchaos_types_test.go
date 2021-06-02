@@ -79,6 +79,5 @@ var _ = Describe("HTTPChaos", func() {
 			Expect(k8sClient.Delete(context.TODO(), created)).To(Succeed())
 			Expect(k8sClient.Get(context.TODO(), key, created)).ToNot(Succeed())
 		})
-
 	})
 })

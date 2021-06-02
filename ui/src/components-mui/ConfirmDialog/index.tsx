@@ -7,13 +7,8 @@ import {
   DialogProps,
   DialogTitle,
 } from '@material-ui/core'
-import React, { useImperativeHandle, useState } from 'react'
 
 import T from 'components/T'
-
-export interface ConfirmDialogHandles {
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>
-}
 
 interface ConfirmDialogProps {
   open: boolean
@@ -65,4 +60,4 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   )
 }
 
-export default React.forwardRef(ConfirmDialog)
+export default ConfirmDialog

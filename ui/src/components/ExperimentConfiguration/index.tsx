@@ -127,6 +127,7 @@ const ExperimentConfiguration: React.FC<ExperimentConfigurationProps> = ({ exper
                     </Typography>
                   </TableCell>
                 </TableRow>
+
                 {e.kube_object.spec.duration && (
                   <TableRow>
                     <TableCell>{T('newE.schedule.duration')}</TableCell>

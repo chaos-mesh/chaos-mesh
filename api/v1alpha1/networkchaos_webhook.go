@@ -100,6 +100,7 @@ func (in *NetworkChaos) Validate() error {
 	specField := field.NewPath("spec")
 	var allErrs field.ErrorList
 
+	allErrs = append(allErrs, in.validateTargets(specField.Child("target"))...)
 	if in.Spec.Delay != nil {
 		allErrs = append(allErrs, in.Spec.Delay.validateDelay(specField.Child("delay"))...)
 	}
@@ -114,6 +115,9 @@ func (in *NetworkChaos) Validate() error {
 	}
 	if in.Spec.Bandwidth != nil {
 		allErrs = append(allErrs, in.Spec.Bandwidth.validateBandwidth(specField.Child("bandwidth"))...)
+	}
+	if in.Spec.Target != nil {
+		allErrs = append(allErrs, in.validateTargetPodSelector(specField.Child("target"))...)
 	}
 
 	if len(allErrs) > 0 {
@@ -267,4 +271,46 @@ func ConvertUnitToBytes(nu string) (uint64, error) {
 	}
 
 	return 0, errors.New("invalid unit")
+}
+
+// validateTarget validates the target
+func (in *NetworkChaos) validateTargetPodSelector(target *field.Path) field.ErrorList {
+	modes := []PodMode{OnePodMode, AllPodMode, FixedPodMode, FixedPercentPodMode, RandomMaxPercentPodMode}
+
+	for _, mode := range modes {
+		if in.Spec.Target.Mode == mode {
+			return validatePodSelector(in.Spec.Target.Value, in.Spec.Target.Mode, target.Child("value"))
+		}
+	}
+
+	return field.ErrorList{field.Invalid(target.Child("mode"), in.Spec.Target.Mode,
+		fmt.Sprintf("mode %s not supported", in.Spec.Target.Mode))}
+}
+
+// ValidateTargets validates externalTargets and Targets
+func (in *NetworkChaos) validateTargets(target *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+
+	if (in.Spec.Direction == From || in.Spec.Direction == Both) &&
+		in.Spec.ExternalTargets != nil && in.Spec.Action != PartitionAction {
+		allErrs = append(allErrs,
+			field.Invalid(target.Child("direction"), in.Spec.Direction,
+				"external targets cannot be used with `from` and `both` direction in netem action yet"))
+	}
+
+	if (in.Spec.Direction == From || in.Spec.Direction == Both) && in.Spec.Target == nil {
+		if in.Spec.Action != PartitionAction {
+			allErrs = append(allErrs,
+				field.Invalid(target.Child("direction"), in.Spec.Direction,
+					"`from` and `both` direction cannot be used when targets is empty in netem action"))
+		} else if in.Spec.ExternalTargets == nil {
+			allErrs = append(allErrs,
+				field.Invalid(target.Child("direction"), in.Spec.Direction,
+					"`from` and `both` direction cannot be used when targets and external targets are both empty"))
+		}
+	}
+
+	// TODO: validate externalTargets are in ip or domain form
+
+	return allErrs
 }

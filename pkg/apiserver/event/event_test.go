@@ -22,7 +22,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/config"
+	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 	pkgmock "github.com/chaos-mesh/chaos-mesh/pkg/mock"
 
@@ -42,15 +42,7 @@ func (m *MockEventService) List(context.Context) ([]*core.Event, error) {
 	panic("implement me")
 }
 
-func (m *MockEventService) ListByExperiment(context.Context, string, string) ([]*core.Event, error) {
-	panic("implement me")
-}
-
-func (m *MockEventService) ListByNamespace(context.Context, string) ([]*core.Event, error) {
-	panic("implement me")
-}
-
-func (m *MockEventService) ListByPod(context.Context, string, string) ([]*core.Event, error) {
+func (m *MockEventService) ListByExperiment(context.Context, string, string, string) ([]*core.Event, error) {
 	panic("implement me")
 }
 
@@ -67,45 +59,15 @@ func (m *MockEventService) ListByFilter(ctx context.Context, filter core.Filter)
 	var err error
 	if filter.UID == "testUID" {
 		event := &core.Event{
-			ID:           0,
-			CreatedAt:    time.Time{},
-			UpdatedAt:    time.Time{},
-			DeletedAt:    nil,
-			Experiment:   "testExperiment",
-			Namespace:    "testNamespace",
-			Kind:         "testKind",
-			Message:      "test",
-			StartTime:    nil,
-			FinishTime:   nil,
-			Duration:     "1m",
-			Pods:         nil,
-			ExperimentID: "testUID",
-		}
-		res = append(res, event)
-	} else {
-		err = fmt.Errorf("test err")
-	}
-	return res, err
-}
-
-func (m *MockEventService) DryListByFilter(_ context.Context, filter core.Filter) ([]*core.Event, error) {
-	var res []*core.Event
-	var err error
-	if filter.Kind == "testKind" {
-		event := &core.Event{
-			ID:           0,
-			CreatedAt:    time.Time{},
-			UpdatedAt:    time.Time{},
-			DeletedAt:    nil,
-			Experiment:   "testExperiment",
-			Namespace:    "testNamespace",
-			Kind:         "testKind",
-			Message:      "test",
-			StartTime:    nil,
-			FinishTime:   nil,
-			Duration:     "1m",
-			Pods:         nil,
-			ExperimentID: "testUID",
+			ID:        0,
+			CreatedAt: time.Time{},
+			Kind:      "testKind",
+			Type:      "testType",
+			Reason:    "testRaason",
+			Message:   "testMessage",
+			Name:      "testName",
+			Namespace: "testNamespace",
+			ObjectID:  "testUID",
 		}
 		res = append(res, event)
 	} else {
@@ -119,19 +81,15 @@ func (m *MockEventService) Find(_ context.Context, id uint) (*core.Event, error)
 	var err error
 	if id == 0 {
 		res = &core.Event{
-			ID:           0,
-			CreatedAt:    time.Time{},
-			UpdatedAt:    time.Time{},
-			DeletedAt:    nil,
-			Experiment:   "testExperiment",
-			Namespace:    "testNamespace",
-			Kind:         "testKind",
-			Message:      "test",
-			StartTime:    nil,
-			FinishTime:   nil,
-			Duration:     "1m",
-			Pods:         nil,
-			ExperimentID: "testUID",
+			ID:        0,
+			CreatedAt: time.Time{},
+			Kind:      "testKind",
+			Type:      "testType",
+			Reason:    "testRaason",
+			Message:   "testMessage",
+			Name:      "testName",
+			Namespace: "testNamespace",
+			ObjectID:  "testUID",
 		}
 	} else {
 		if id == 1 {
@@ -143,19 +101,7 @@ func (m *MockEventService) Find(_ context.Context, id uint) (*core.Event, error)
 	return res, err
 }
 
-func (m *MockEventService) FindByExperimentAndStartTime(context.Context, string, string, *time.Time) (*core.Event, error) {
-	panic("implement me")
-}
-
 func (m *MockEventService) Create(context.Context, *core.Event) error {
-	panic("implement me")
-}
-
-func (m *MockEventService) Update(context.Context, *core.Event) error {
-	panic("implement me")
-}
-
-func (m *MockEventService) DeleteIncompleteEvents(context.Context) error {
 	panic("implement me")
 }
 
@@ -163,15 +109,11 @@ func (m *MockEventService) DeleteByUIDs(context.Context, []string) error {
 	panic("implement me")
 }
 
-func (m *MockEventService) DeleteByFinishTime(context.Context, time.Duration) error {
+func (m *MockEventService) DeleteByCreateTime(context.Context, time.Duration) error {
 	panic("implement me")
 }
 
 func (m *MockEventService) DeleteByUID(context.Context, string) error {
-	panic("implement me")
-}
-
-func (m *MockEventService) UpdateIncompleteEvents(context.Context, string, string) error {
 	panic("implement me")
 }
 
@@ -187,18 +129,16 @@ var _ = Describe("event", func() {
 
 		mockes := new(MockEventService)
 
-		s := Service{
+		var s = Service{
 			conf: &config.ChaosDashboardConfig{
 				ClusterScoped: true,
 			},
-			archive: nil,
-			event:   mockes,
+			event: mockes,
 		}
 		router = gin.Default()
 		r := router.Group("/api")
 		endpoint := r.Group("/events")
 		endpoint.GET("", s.listEvents)
-		endpoint.GET("/dry", s.listDryEvents)
 		endpoint.GET("/get", s.getEvent)
 	})
 
@@ -218,19 +158,15 @@ var _ = Describe("event", func() {
 		It("success", func() {
 			response := []*core.Event{
 				&core.Event{
-					ID:           0,
-					CreatedAt:    time.Time{},
-					UpdatedAt:    time.Time{},
-					DeletedAt:    nil,
-					Experiment:   "testExperiment",
-					Namespace:    "testNamespace",
-					Kind:         "testKind",
-					Message:      "test",
-					StartTime:    nil,
-					FinishTime:   nil,
-					Duration:     "1m",
-					Pods:         nil,
-					ExperimentID: "testUID",
+					ID:        0,
+					CreatedAt: time.Time{},
+					Kind:      "testKind",
+					Type:      "testType",
+					Reason:    "testRaason",
+					Message:   "testMessage",
+					Name:      "testName",
+					Namespace: "testNamespace",
+					ObjectID:  "testUID",
 				},
 			}
 			rr := httptest.NewRecorder()
@@ -250,58 +186,18 @@ var _ = Describe("event", func() {
 		})
 	})
 
-	Context("ListDryEvents", func() {
-		It("success", func() {
-			response := []*core.Event{
-				&core.Event{
-					ID:           0,
-					CreatedAt:    time.Time{},
-					UpdatedAt:    time.Time{},
-					DeletedAt:    nil,
-					Experiment:   "testExperiment",
-					Namespace:    "testNamespace",
-					Kind:         "testKind",
-					Message:      "test",
-					StartTime:    nil,
-					FinishTime:   nil,
-					Duration:     "1m",
-					Pods:         nil,
-					ExperimentID: "testUID",
-				},
-			}
-			rr := httptest.NewRecorder()
-			request, _ := http.NewRequest(http.MethodGet, "/api/events/dry?kind=testKind", nil)
-			router.ServeHTTP(rr, request)
-			Expect(rr.Code).Should(Equal(http.StatusOK))
-			responseBody, err := json.Marshal(response)
-			Expect(err).ShouldNot(HaveOccurred())
-			Expect(rr.Body.Bytes()).Should(Equal(responseBody))
-		})
-
-		It("test err", func() {
-			rr := httptest.NewRecorder()
-			request, _ := http.NewRequest(http.MethodGet, "/api/events/dry?kind=err", nil)
-			router.ServeHTTP(rr, request)
-			Expect(rr.Code).Should(Equal(http.StatusInternalServerError))
-		})
-	})
-
 	Context("GetEvent", func() {
 		It("success", func() {
 			response := &core.Event{
-				ID:           0,
-				CreatedAt:    time.Time{},
-				UpdatedAt:    time.Time{},
-				DeletedAt:    nil,
-				Experiment:   "testExperiment",
-				Namespace:    "testNamespace",
-				Kind:         "testKind",
-				Message:      "test",
-				StartTime:    nil,
-				FinishTime:   nil,
-				Duration:     "1m",
-				Pods:         nil,
-				ExperimentID: "testUID",
+				ID:        0,
+				CreatedAt: time.Time{},
+				Kind:      "testKind",
+				Type:      "testType",
+				Reason:    "testRaason",
+				Message:   "testMessage",
+				Name:      "testName",
+				Namespace: "testNamespace",
+				ObjectID:  "testUID",
 			}
 			rr := httptest.NewRecorder()
 			request, _ := http.NewRequest(http.MethodGet, "/api/events/get?id=0", nil)

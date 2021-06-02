@@ -55,9 +55,11 @@ var _ = Describe("AwsChaos", func() {
 					Namespace: "default",
 				},
 				Spec: AwsChaosSpec{
-					Action:      Ec2Stop,
-					AwsSelector: AwsSelector{Ec2Instance: testInstance},
-					SecretName:  &testSecretName,
+					Action: Ec2Stop,
+					AwsSelector: AwsSelector{
+						Ec2Instance: testInstance,
+					},
+					SecretName: &testSecretName,
 				},
 			}
 

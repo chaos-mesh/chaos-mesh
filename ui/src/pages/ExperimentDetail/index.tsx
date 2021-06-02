@@ -56,12 +56,6 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
-const initialSelected = {
-  title: '',
-  description: '',
-  action: '',
-}
-
 export default function ExperimentDetail() {
   const classes = useStyles()
 
@@ -75,7 +69,6 @@ export default function ExperimentDetail() {
 
   const chartRef = useRef<HTMLDivElement>(null)
   const eventsTableRef = useRef<EventsTableHandles>(null)
-  const confirmRef = useRef<ConfirmDialogHandles>(null)
 
   const [loading, setLoading] = useState(true)
   const [detail, setDetail] = useState<ExperimentDetailType>()

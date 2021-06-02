@@ -14,7 +14,10 @@
 package v1alpha1
 
 import (
+	"fmt"
+
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/util/validation/field"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 )
@@ -59,5 +62,12 @@ func (in *KernelChaos) ValidateDelete() error {
 
 // Validate validates chaos object
 func (in *KernelChaos) Validate() error {
+	specField := field.NewPath("spec")
+
+	allErrs := validatePodSelector(in.Spec.PodSelector.Value, in.Spec.PodSelector.Mode, specField.Child("value"))
+	if len(allErrs) > 0 {
+		return fmt.Errorf(allErrs.ToAggregate().Error())
+	}
+
 	return nil
 }
