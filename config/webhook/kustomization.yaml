@@ -1,0 +1,5 @@
+resources:
+- manifests.yaml
+
+configurations:
+- kustomizeconfig.yaml

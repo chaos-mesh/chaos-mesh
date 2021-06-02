@@ -1,0 +1,168 @@
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  name: manager-role
+rules:
+- apiGroups:
+  - chaos-mesh.org
+  resources:
+  - dnschaos
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - chaos-mesh.org
+  resources:
+  - dnschaos/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - chaos-mesh.org
+  resources:
+  - httpchaos
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - chaos-mesh.org
+  resources:
+  - httpchaos/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - chaos-mesh.org
+  resources:
+  - iochaos
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - chaos-mesh.org
+  resources:
+  - iochaos/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - chaos-mesh.org
+  resources:
+  - kernelchaos
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - chaos-mesh.org
+  resources:
+  - kernelchaos/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - chaos-mesh.org
+  resources:
+  - networkchaos
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - chaos-mesh.org
+  resources:
+  - networkchaos/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - chaos-mesh.org
+  resources:
+  - podchaos
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - chaos-mesh.org
+  resources:
+  - podchaos/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - chaos-mesh.org
+  resources:
+  - stresschaos
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - chaos-mesh.org
+  resources:
+  - stresschaos/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - chaos-mesh.org
+  resources:
+  - timechaos
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - chaos-mesh.org
+  resources:
+  - timechaos/status
+  verbs:
+  - get
+  - patch
+  - update
