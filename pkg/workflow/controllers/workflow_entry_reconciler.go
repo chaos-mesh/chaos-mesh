@@ -16,19 +16,18 @@ package controllers
 import (
 	"context"
 	"fmt"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 	"sort"
 	"time"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 )
 
 // WorkflowEntryReconciler watches on Workflow, creates new Entry Node for created Workflow.

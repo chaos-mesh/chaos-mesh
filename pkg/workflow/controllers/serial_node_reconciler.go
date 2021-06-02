@@ -16,7 +16,6 @@ package controllers
 import (
 	"context"
 	"fmt"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 	"strings"
 	"time"
 
@@ -28,6 +27,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 )
 
 // SerialNodeReconciler watches on nodes which type is Serial

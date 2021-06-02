@@ -15,9 +15,11 @@ package recorder
 
 import (
 	"fmt"
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	corev1 "k8s.io/api/core/v1"
 	"strings"
+
+	corev1 "k8s.io/api/core/v1"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
 type InvalidEntry struct {
