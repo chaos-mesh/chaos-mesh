@@ -54,7 +54,6 @@ type Service struct {
 	event   core.EventStore
 	conf    *dashboardconfig.ChaosDashboardConfig
 	scheme  *runtime.Scheme
-	cli     client.Client
 }
 
 // NewService returns an experiment service instance.
@@ -63,14 +62,12 @@ func NewService(
 	event core.EventStore,
 	conf *dashboardconfig.ChaosDashboardConfig,
 	scheme *runtime.Scheme,
-	cli client.Client,
 ) *Service {
 	return &Service{
 		archive: archive,
 		event:   event,
 		conf:    conf,
 		scheme:  scheme,
-		cli:     cli,
 	}
 }
 
@@ -1353,12 +1350,11 @@ func (s *Service) state(c *gin.Context) {
 		state string
 		err   error
 	)
-	//kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
-	//if err != nil {
-	//	_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
-	//	return
-	//}
-	kubeCli := s.cli
+	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
+	if err != nil {
+		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		return
+	}
 
 	namespace := c.Query("namespace")
 	if len(namespace) == 0 && !s.conf.ClusterScoped &&
