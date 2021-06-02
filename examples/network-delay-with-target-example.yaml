@@ -25,5 +25,3 @@ spec:
         "app.kubernetes.io/component": "pool"
     mode: one
   duration: "10s"
-  scheduler:
-    cron: "@every 15s"

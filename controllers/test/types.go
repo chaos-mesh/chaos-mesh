@@ -80,6 +80,10 @@ func (c *MockChaosDaemonClient) ApplyIoChaos(ctx context.Context, in *chaosdaemo
 	return nil, mockError("ApplyIoChaos")
 }
 
+func (c *MockChaosDaemonClient) ApplyHttpChaos(ctx context.Context, in *chaosdaemon.ApplyHttpChaosRequest, opts ...grpc.CallOption) (*chaosdaemon.ApplyHttpChaosResponse, error) {
+	return nil, mockError("ApplyHttpChaos")
+}
+
 func (c *MockChaosDaemonClient) SetDNSServer(ctx context.Context, in *chaosdaemon.SetDNSServerRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
 	return nil, mockError("SetDNSServer")
 }

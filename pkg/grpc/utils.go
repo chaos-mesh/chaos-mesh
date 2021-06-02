@@ -19,12 +19,13 @@ import (
 	"crypto/x509"
 	"fmt"
 	"io/ioutil"
+	"net"
+	"strconv"
 	"time"
 
 	"google.golang.org/grpc/credentials"
 
 	"google.golang.org/grpc"
-	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 // DefaultRPCTimeout specifies default timeout of RPC between controller and chaos-operator
@@ -33,44 +34,44 @@ const DefaultRPCTimeout = 60 * time.Second
 // RPCTimeout specifies timeout of RPC between controller and chaos-operator
 var RPCTimeout = DefaultRPCTimeout
 
-var log = ctrl.Log.WithName("util")
+const ChaosDaemonServerName = "chaos-daemon.chaos-mesh.org"
 
-// CreateGrpcConnection create a grpc connection with given port and address
-func CreateGrpcConnection(address string, port int, caCertPath string, certPath string, keyPath string) (*grpc.ClientConn, error) {
-	if caCertPath != "" && certPath != "" && keyPath != "" {
-		var caCert, cert, key []byte
-		var err error
-		caCert, err = ioutil.ReadFile(caCertPath)
-		if err != nil {
-			return nil, err
-		}
-		cert, err = ioutil.ReadFile(certPath)
-		if err != nil {
-			return nil, err
-		}
-		key, err = ioutil.ReadFile(keyPath)
-		if err != nil {
-			return nil, err
-		}
-		return CreateGrpcConnectionFromRaw(address, port, caCert, cert, key)
-	}
-	options := []grpc.DialOption{grpc.WithUnaryInterceptor(TimeoutClientInterceptor)}
-	options = append(options, grpc.WithInsecure())
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", address, port), options...)
+type TLSRaw struct {
+	CaCert []byte
+	Cert   []byte
+	Key    []byte
+}
+
+type TLSFile struct {
+	CaCert string
+	Cert   string
+	Key    string
+}
+
+type FileProvider struct {
+	file TLSFile
+}
+
+type RawProvider struct {
+	raw TLSRaw
+}
+
+type InsecureProvider struct {
+}
+
+type CredentialProvider interface {
+	getCredentialOption() (grpc.DialOption, error)
+}
+
+func (it *FileProvider) getCredentialOption() (grpc.DialOption, error) {
+	caCert, err := ioutil.ReadFile(it.file.CaCert)
 	if err != nil {
 		return nil, err
 	}
-	return conn, nil
-}
-
-// CreateGrpcConnectionFromRaw create a grpc connection with given port and address, and use raw data instead of file path
-func CreateGrpcConnectionFromRaw(address string, port int, caCert []byte, cert []byte, key []byte) (*grpc.ClientConn, error) {
-	options := []grpc.DialOption{grpc.WithUnaryInterceptor(TimeoutClientInterceptor)}
-
 	caCertPool := x509.NewCertPool()
 	caCertPool.AppendCertsFromPEM(caCert)
 
-	clientCert, err := tls.X509KeyPair(cert, key)
+	clientCert, err := tls.LoadX509KeyPair(it.file.Cert, it.file.Key)
 	if err != nil {
 		return nil, err
 	}
@@ -78,24 +79,102 @@ func CreateGrpcConnectionFromRaw(address string, port int, caCert []byte, cert [
 	creds := credentials.NewTLS(&tls.Config{
 		Certificates: []tls.Certificate{clientCert},
 		RootCAs:      caCertPool,
-		ServerName:   "chaos-daemon.chaos-mesh.org",
+		ServerName:   ChaosDaemonServerName,
 	})
-	options = append(options, grpc.WithTransportCredentials(creds))
+	return grpc.WithTransportCredentials(creds), nil
+}
 
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", address, port),
-		options...)
+func (it *RawProvider) getCredentialOption() (grpc.DialOption, error) {
+	caCertPool := x509.NewCertPool()
+	caCertPool.AppendCertsFromPEM(it.raw.CaCert)
+
+	clientCert, err := tls.X509KeyPair(it.raw.Cert, it.raw.Key)
 	if err != nil {
 		return nil, err
 	}
-	return conn, nil
+
+	creds := credentials.NewTLS(&tls.Config{
+		Certificates: []tls.Certificate{clientCert},
+		RootCAs:      caCertPool,
+		ServerName:   ChaosDaemonServerName,
+	})
+	return grpc.WithTransportCredentials(creds), nil
+}
+
+func (it *InsecureProvider) getCredentialOption() (grpc.DialOption, error) {
+	return grpc.WithInsecure(), nil
+}
+
+type GrpcBuilder struct {
+	options            []grpc.DialOption
+	credentialProvider CredentialProvider
+	address            string
+	port               int
+}
+
+func Builder(address string, port int) *GrpcBuilder {
+	return &GrpcBuilder{options: []grpc.DialOption{}, address: address, port: port}
+}
+
+func (it *GrpcBuilder) WithDefaultTimeout() *GrpcBuilder {
+	it.options = append(it.options, grpc.WithUnaryInterceptor(TimeoutClientInterceptor(DefaultRPCTimeout)))
+	return it
+}
+
+func (it *GrpcBuilder) WithTimeout(timeout time.Duration) *GrpcBuilder {
+	it.options = append(it.options, grpc.WithUnaryInterceptor(TimeoutClientInterceptor(timeout)))
+	return it
+}
+
+func (it *GrpcBuilder) Insecure() *GrpcBuilder {
+	it.credentialProvider = &InsecureProvider{}
+	return it
+}
+
+func (it *GrpcBuilder) TLSFromRaw(caCert []byte, cert []byte, key []byte) *GrpcBuilder {
+	it.credentialProvider = &RawProvider{
+		raw: TLSRaw{
+			CaCert: caCert,
+			Cert:   cert,
+			Key:    key,
+		},
+	}
+
+	return it
+}
+
+func (it *GrpcBuilder) TLSFromFile(caCertPath string, certPath string, keyPath string) *GrpcBuilder {
+	it.credentialProvider = &FileProvider{
+		file: TLSFile{
+			CaCert: caCertPath,
+			Cert:   certPath,
+			Key:    keyPath,
+		},
+	}
+	return it
+}
+
+func (it *GrpcBuilder) Build() (*grpc.ClientConn, error) {
+	if it.credentialProvider == nil {
+		return nil, fmt.Errorf("an authorization method must be specified")
+	}
+	option, err := it.credentialProvider.getCredentialOption()
+	if err != nil {
+		return nil, err
+	}
+	it.options = append(it.options, option)
+	return grpc.Dial(net.JoinHostPort(it.address, strconv.Itoa(it.port)), it.options...)
 }
 
 // TimeoutClientInterceptor wraps the RPC with a timeout.
-func TimeoutClientInterceptor(ctx context.Context, method string, req, reply interface{},
-	cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
-	ctx, cancel := context.WithTimeout(ctx, RPCTimeout)
-	defer cancel()
-	return invoker(ctx, method, req, reply, cc, opts...)
+func TimeoutClientInterceptor(timeout time.Duration) func(context.Context, string, interface{}, interface{},
+	*grpc.ClientConn, grpc.UnaryInvoker, ...grpc.CallOption) error {
+	return func(ctx context.Context, method string, req, reply interface{},
+		cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+		ctx, cancel := context.WithTimeout(ctx, timeout)
+		defer cancel()
+		return invoker(ctx, method, req, reply, cc, opts...)
+	}
 }
 
 // TimeoutServerInterceptor ensures the context is intact before handling over the

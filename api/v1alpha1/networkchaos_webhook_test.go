@@ -45,7 +45,7 @@ var _ = Describe("networkchaos_webhook", func() {
 			Expect(networkchaos.Spec.Delay.Jitter).To(Equal(DefaultJitter))
 		})
 	})
-	Context("ChaosValidator of networkchaos", func() {
+	Context("webhook.Validator of networkchaos", func() {
 		It("Validate", func() {
 
 			type TestCase struct {
@@ -54,7 +54,6 @@ var _ = Describe("networkchaos_webhook", func() {
 				execute func(chaos *NetworkChaos) error
 				expect  string
 			}
-			duration := "400s"
 			tcs := []TestCase{
 				{
 					name: "simple ValidateCreate",
@@ -94,40 +93,6 @@ var _ = Describe("networkchaos_webhook", func() {
 						return chaos.ValidateDelete()
 					},
 					expect: "",
-				},
-				{
-					name: "only define the Scheduler",
-					chaos: NetworkChaos{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: metav1.NamespaceDefault,
-							Name:      "foo4",
-						},
-						Spec: NetworkChaosSpec{
-							Scheduler: &SchedulerSpec{
-								Cron: "@every 10m",
-							},
-						},
-					},
-					execute: func(chaos *NetworkChaos) error {
-						return chaos.ValidateCreate()
-					},
-					expect: "error",
-				},
-				{
-					name: "only define the Duration",
-					chaos: NetworkChaos{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: metav1.NamespaceDefault,
-							Name:      "foo5",
-						},
-						Spec: NetworkChaosSpec{
-							Duration: &duration,
-						},
-					},
-					execute: func(chaos *NetworkChaos) error {
-						return chaos.ValidateCreate()
-					},
-					expect: "error",
 				},
 				{
 					name: "validate the delay",
@@ -265,9 +230,9 @@ var _ = Describe("networkchaos_webhook", func() {
 							Name:      "foo12",
 						},
 						Spec: NetworkChaosSpec{
-							Target: &Target{
-								TargetMode:  FixedPodMode,
-								TargetValue: "0",
+							Target: &PodSelector{
+								Mode:  FixedPodMode,
+								Value: "0",
 							},
 						},
 					},

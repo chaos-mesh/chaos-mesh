@@ -1,14 +1,17 @@
-import { Box, Paper as MUIPaper, PaperProps as MUIPaperProps } from '@material-ui/core'
+import { Box, BoxProps, Paper as MUIPaper, PaperProps as MUIPaperProps } from '@material-ui/core'
 
 import React from 'react'
 
 interface PaperProps extends MUIPaperProps {
-  padding?: boolean
+  padding?: number
+  boxProps?: BoxProps
 }
 
-const Paper: React.FC<PaperProps> = ({ padding = true, children, ...rest }) => (
+const Paper: React.FC<PaperProps> = ({ padding = 4.5, boxProps, children, ...rest }) => (
   <MUIPaper {...rest} variant="outlined">
-    {padding ? <Box p={3}>{children}</Box> : children}
+    <Box height="100%" p={padding} {...boxProps}>
+      {children}
+    </Box>
   </MUIPaper>
 )
 

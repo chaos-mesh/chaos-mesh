@@ -15,11 +15,12 @@
       "step9": "🎉 恭喜你完成了所有的教程步骤！点击空白处即可退出。"
     },
     "veteran": "已经是熟手了",
-    "veteranDesc": "🧨 从一个新的实验开始！创建成功后，你可以返回仪表板以观察其状态。",
+    "veteranDesc": "🧨 从一个新的实验开始！创建成功后，你可以返回仪表盘以观察其状态。",
     "totalExperiments": "当前实验",
     "totalState": "当前状态",
     "predefined": "预定义",
     "predefinedDesc": "📦 在这里存储自定义的实验以快速执行。",
+    "noPredefinedFound": "未发现预定义",
     "recent": "最近"
   },
   "newE": {
@@ -34,13 +35,10 @@
     },
     "loadFrom": "加载自",
     "basic": {
-      "name": "名称",
       "nameHelper": "实验的名称",
-      "namespace": "命名空间",
-      "namespaceHelper": "选择实验的命名空间"
+      "namespaceHelper": "选择命名空间"
     },
     "scope": {
-      "namespaceSelectors": "命名空间选择器",
       "mode": "模式",
       "modeHelper": "选择实验模式",
       "modeValue": "模式值",
@@ -48,13 +46,7 @@
       "affectedPods": "受到实验作用的 Pod",
       "affectedPodsPreview": "预览将要受到实验作用的 Pod",
       "affectedPodsPreviewHelper": "通过勾选 Pod 来进一步限制实验的范围",
-      "noPodsFound": "未发现 Pod",
-      "podsTable": {
-        "name": "名称",
-        "namespace": "命名空间",
-        "ip": "IP 地址",
-        "state": "状态"
-      }
+      "noPodsFound": "未发现 Pod"
     },
     "target": {
       "kind": "类别",
@@ -87,6 +79,9 @@
       },
       "aws": {
         "title": "AWS 故障"
+      },
+      "gcp": {
+        "title": "GCP 故障"
       }
     },
     "schedule": {
@@ -101,6 +96,7 @@
   },
   "experiments": {
     "title": "实验",
+    "single": "实验",
     "state": {
       "running": "运行中",
       "paused": "暂停",
@@ -109,10 +105,50 @@
       "finished": "完成"
     },
     "noExperimentsFound": "未发现实验",
-    "createdAt": "创建于",
+    "deleteMulti": "归档所选实验",
     "deleteDesc": "你仍然可以在归档中找到此实验",
     "pauseDesc": "你可以在同一位置重启这个实验",
     "startDesc": "此操作将立即生效"
+  },
+  "workflows": {
+    "title": "工作流",
+    "noWorkflowsFound": "未发现工作流",
+    "deleteDesc": "此工作流将被永久删除"
+  },
+  "workflow": {
+    "entry": "入口",
+    "time": "时间",
+    "state": "状态",
+    "topology": "拓扑"
+  },
+  "newW": {
+    "title": "新的工作流",
+    "node": {
+      "choose": "选择任务类型",
+      "single": "单一",
+      "serial": "顺序",
+      "parallel": "并行",
+      "suspend": "暂停",
+      "number": "数目",
+      "chooseChildren": "选择子任务",
+      "nameHelper": "任务的名称",
+      "nameValidation": "任务名称不能为空",
+      "durationHelper": "任务的持续时间",
+      "durationValidation": "任务持续时间不能为空",
+      "deleteDesc": "此任务将被删除",
+      "submitAll": "提交所有改动"
+    },
+    "serialTitle": "填写顺序任务",
+    "parallelTitle": "填写并行任务",
+    "suspendTitle": "设置暂停",
+    "nameHelper": "工作流的名称",
+    "nameValidation": "工作流名称不能为空",
+    "durationHelper": "工作流的持续时间",
+    "durationValidation": "工作流持续时间不能为空",
+    "submit": "提交工作流",
+    "messages": {
+      "m1": "请首先完成当前任务的创建"
+    }
   },
   "events": {
     "title": "事件",
@@ -126,9 +162,6 @@
       "started": "开始时间",
       "ended": "结束时间",
       "pod": {
-        "ip": "IP",
-        "name": "名称",
-        "namespace": "命名空间",
         "action": "行为",
         "message": "信息"
       }
@@ -138,6 +171,7 @@
     "title": "归档",
     "single": "归档",
     "noArchivesFound": "未发现归档",
+    "deleteMulti": "删除所选归档",
     "deleteDesc": "归档将被永久删除",
     "numberOfRuns": "运行次数",
     "numberOfAffectedPods": "受到实验作用的 Pod 数目"
@@ -177,7 +211,6 @@
       "role": "角色",
       "roleHelper": "选择角色",
       "title": "添加令牌",
-      "name": "名称",
       "nameHelper": "请输入令牌名称",
       "nameValidation": "令牌名称不能为空",
       "token": "令牌",
@@ -189,46 +222,6 @@
   },
   "swagger": {
     "title": "Swagger API"
-  },
-  "common": {
-    "other": "其他",
-    "version": "版本",
-    "doc": "文档",
-    "tutorial": "教程",
-    "add": "添加",
-    "confirm": "确认",
-    "cancel": "取消",
-    "copy": "复制",
-    "copied": "已复制！",
-    "close": "关闭",
-    "submit": "提交",
-    "upload": "上传",
-    "download": "下载",
-    "detail": "详情",
-    "start": "启动",
-    "pause": "暂停",
-    "update": "更新",
-    "delete": "删除",
-    "status": "状态",
-    "use": "使用",
-    "using": "使用中",
-    "configuration": "配置",
-    "noOptions": "无选项",
-    "multiOptions": "支持多选",
-    "advancedOptions": "高级选项",
-    "isKVHelperText": "键入 key:value 并以空格结尾来创建一个键值对",
-    "timeline": "时间线",
-    "meta": "元信息",
-    "uuid": "UUID",
-    "createSuccessfully": "创建成功",
-    "loadSuccessfully": "加载成功",
-    "deleteSuccessfully": "删除成功",
-    "archiveSuccessfully": "归档成功",
-    "startSuccessfully": "启动成功",
-    "pauseSuccessfully": "暂停成功",
-    "updateSuccessfully": "更新成功",
-    "submitSuccessfully": "提交成功",
-    "chooseNamespace": "选择命名空间"
   },
   "search": {
     "placeholder": "搜索",
@@ -244,9 +237,63 @@
       "noResult": "没有结果"
     }
   },
+  "common": {
+    "add": "添加",
+    "advancedOptions": "高级选项",
+    "batchOperation": "批量操作",
+    "cancel": "取消",
+    "chooseNamespace": "选择命名空间",
+    "close": "关闭",
+    "configuration": "配置",
+    "confirm": "确认",
+    "copied": "已复制！",
+    "copy": "复制",
+    "delete": "删除",
+    "detail": "详情",
+    "doc": "文档",
+    "download": "下载",
+    "ip": "IP 地址",
+    "isKVHelperText": "键入 key:value 并以空格结尾来创建一个键值对",
+    "meta": "元信息",
+    "multiOptions": "支持多选",
+    "name": "名称",
+    "noOptions": "无选项",
+    "operation": "操作",
+    "other": "其他",
+    "pause": "暂停",
+    "preview": "预览",
+    "process": "流程",
+    "selectAll": "全选",
+    "start": "启动",
+    "status": "状态",
+    "submit": "提交",
+    "timeline": "时间线",
+    "tutorial": "教程",
+    "update": "更新",
+    "upload": "上传",
+    "use": "使用",
+    "using": "使用中",
+    "uuid": "UUID",
+    "version": "版本"
+  },
+  "table": {
+    "created": "创建于"
+  },
+  "confirm": {
+    "archiveSuccessfully": "归档成功",
+    "createSuccessfully": "创建成功",
+    "deleteSuccessfully": "删除成功",
+    "loadSuccessfully": "加载成功",
+    "pauseSuccessfully": "暂停成功",
+    "updateSuccessfully": "更新成功",
+    "startSuccessfully": "启动成功",
+    "submitSuccessfully": "提交成功"
+  },
   "k8s": {
+    "namespace": "命名空间",
     "labels": "标签",
     "annotations": "注解",
+    "namespaceSelectors": "命名空间选择器",
     "labelSelectors": "标签选择器",
     "annotationsSelectors": "注解选择器",
     "phaseSelectors": "阶段选择器"

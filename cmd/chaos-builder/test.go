@@ -22,7 +22,6 @@ const testImport = `
 import (
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/bxcodec/faker"
 	. "github.com/onsi/gomega"
@@ -69,61 +68,6 @@ func Test{{.Type}}GetDuration(t *testing.T) {
 	g.Expect(err).To(BeNil())
 
 	chaos.GetDuration()
-}
-
-func Test{{.Type}}GetNextStart(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &{{.Type}}{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.GetNextStart()
-}
-
-func Test{{.Type}}SetNextStart(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &{{.Type}}{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.SetNextStart(time.Now())
-}
-
-func Test{{.Type}}GetNextRecover(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &{{.Type}}{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.GetNextRecover()
-}
-
-func Test{{.Type}}SetNextRecover(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &{{.Type}}{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.SetNextRecover(time.Now())
-}
-
-func Test{{.Type}}GetScheduler(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &{{.Type}}{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.GetScheduler()
 }
 
 func Test{{.Type}}GetChaos(t *testing.T) {

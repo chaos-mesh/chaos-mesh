@@ -4,22 +4,17 @@ metadata:
   namespace: {{ .Release.Namespace | quote }}
   name: chaos-daemon
   labels:
-    app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/component: chaos-daemon
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
 spec:
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
-      app.kubernetes.io/instance: {{ .Release.Name }}
+      {{- include "chaos-mesh.selectors" . | nindent 6 }}
       app.kubernetes.io/component: chaos-daemon
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
-        app.kubernetes.io/instance: {{ .Release.Name }}
+        {{- include "chaos-mesh.labels" . | nindent 8 }}
         app.kubernetes.io/component: chaos-daemon
       annotations:
         {{- if .Values.dashboard.securityMode }}
@@ -33,7 +28,7 @@ spec:
       hostNetwork: true
   {{- end }}
   {{- if .Values.chaosDaemon.serviceAccount }}
-      serviceAccount: {{ .Values.chaosDaemon.serviceAccount }}
+      serviceAccountName: {{ .Values.chaosDaemon.serviceAccount }}
   {{- end }}
       hostIPC: true
       hostPID: true

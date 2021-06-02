@@ -15,6 +15,7 @@ package apiserver
 
 import (
 	"fmt"
+	"net"
 	"net/http"
 
 	"go.uber.org/fx"
@@ -26,7 +27,7 @@ import (
 
 	apiutils "github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/apivalidator"
-	"github.com/chaos-mesh/chaos-mesh/pkg/config"
+	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
 	"github.com/chaos-mesh/chaos-mesh/pkg/swaggerserver"
 	"github.com/chaos-mesh/chaos-mesh/pkg/uiserver"
 )
@@ -44,7 +45,7 @@ var (
 )
 
 func serverRegister(r *gin.Engine, conf *config.ChaosDashboardConfig) {
-	listenAddr := fmt.Sprintf("%s:%d", conf.ListenHost, conf.ListenPort)
+	listenAddr := net.JoinHostPort(conf.ListenHost, fmt.Sprintf("%d", conf.ListenPort))
 
 	go r.Run(listenAddr)
 }

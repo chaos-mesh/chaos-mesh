@@ -26,10 +26,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
-	cm "github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug/iochaos"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug/networkchaos"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug/stresschaos"
+	"github.com/chaos-mesh/chaos-mesh/pkg/grpc"
 )
 
 type DebugOptions struct {
@@ -73,7 +73,7 @@ Examples:
 		Short: `Print the debug information for certain network chaos`,
 		Long:  `Print the debug information for certain network chaos`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			clientset, err := cm.InitClientSet()
+			clientset, err := common.InitClientSet()
 			if err != nil {
 				return err
 			}
@@ -82,7 +82,7 @@ Examples:
 		SilenceErrors: true,
 		SilenceUsage:  true,
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			clientset, err := cm.InitClientSet()
+			clientset, err := common.InitClientSet()
 			if err != nil {
 				return nil, cobra.ShellCompDirectiveDefault
 			}
@@ -98,7 +98,7 @@ Examples:
 		Short: `Print the debug information for certain stress chaos`,
 		Long:  `Print the debug information for certain stress chaos`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			clientset, err := cm.InitClientSet()
+			clientset, err := common.InitClientSet()
 			if err != nil {
 				return err
 			}
@@ -107,7 +107,7 @@ Examples:
 		SilenceErrors: true,
 		SilenceUsage:  true,
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			clientset, err := cm.InitClientSet()
+			clientset, err := common.InitClientSet()
 			if err != nil {
 				return nil, cobra.ShellCompDirectiveDefault
 			}
@@ -123,7 +123,7 @@ Examples:
 		Short: `Print the debug information for certain io chaos`,
 		Long:  `Print the debug information for certain io chaos`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			clientset, err := cm.InitClientSet()
+			clientset, err := common.InitClientSet()
 			if err != nil {
 				return err
 			}
@@ -133,7 +133,7 @@ Examples:
 		SilenceErrors: true,
 		SilenceUsage:  true,
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			clientset, err := cm.InitClientSet()
+			clientset, err := common.InitClientSet()
 			if err != nil {
 				return nil, cobra.ShellCompDirectiveDefault
 			}
@@ -154,7 +154,7 @@ Examples:
 	debugCmd.PersistentFlags().StringVar(&o.KeyFile, "key", "", "file path to key file")
 	debugCmd.PersistentFlags().BoolVarP(&o.Insecure, "insecure", "i", false, "Insecure mode will use unauthorized grpc")
 	err := debugCmd.RegisterFlagCompletionFunc("namespace", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		clientset, err := cm.InitClientSet()
+		clientset, err := common.InitClientSet()
 		if err != nil {
 			return nil, cobra.ShellCompDirectiveDefault
 		}
@@ -164,7 +164,7 @@ Examples:
 }
 
 // Run debug
-func (o *DebugOptions) Run(chaosType string, args []string, c *cm.ClientSet) error {
+func (o *DebugOptions) Run(chaosType string, args []string, c *common.ClientSet) error {
 	if len(args) > 1 {
 		return fmt.Errorf("only one chaos could be specified")
 	}
@@ -176,15 +176,16 @@ func (o *DebugOptions) Run(chaosType string, args []string, c *cm.ClientSet) err
 		chaosName = args[0]
 	}
 
-	chaosList, chaosNameList, err := cm.GetChaosList(ctx, chaosType, chaosName, o.namespace, c.CtrlCli)
+	chaosList, chaosNameList, err := common.GetChaosList(ctx, chaosType, chaosName, o.namespace, c.CtrlCli)
 	if err != nil {
 		return err
 	}
-	var result []cm.ChaosResult
-	common.TLSFiles = common.TLSFileConfig{CaCert: o.CaCertFile, Cert: o.CertFile, Key: o.KeyFile}
+	var result []common.ChaosResult
+	common.TLSFiles = grpc.TLSFile{CaCert: o.CaCertFile, Cert: o.CertFile, Key: o.KeyFile}
 	common.Insecure = o.Insecure
+
 	for i, chaos := range chaosList {
-		var chaosResult cm.ChaosResult
+		var chaosResult common.ChaosResult
 		chaosResult.Name = chaosNameList[i]
 
 		var err error
@@ -200,11 +201,11 @@ func (o *DebugOptions) Run(chaosType string, args []string, c *cm.ClientSet) err
 		}
 		result = append(result, chaosResult)
 		if err != nil {
-			cm.PrintResult(result)
+			common.PrintResult(result)
 			return err
 		}
 	}
-	cm.PrintResult(result)
+	common.PrintResult(result)
 	return nil
 }
 
@@ -225,7 +226,7 @@ func listNamespace(toComplete string, c *kubernetes.Clientset) ([]string, cobra.
 func listChaos(chaosType string, namespace string, toComplete string, c client.Client) ([]string, cobra.ShellCompDirective) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	_, chaosList, err := cm.GetChaosList(ctx, chaosType, "", namespace, c)
+	_, chaosList, err := common.GetChaosList(ctx, chaosType, "", namespace, c)
 	if err != nil {
 		return nil, cobra.ShellCompDirectiveDefault
 	}

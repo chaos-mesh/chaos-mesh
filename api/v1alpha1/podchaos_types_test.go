@@ -15,7 +15,6 @@ package v1alpha1
 
 import (
 	"context"
-	"time"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -55,7 +54,11 @@ var _ = Describe("PodChaos", func() {
 				},
 				Spec: PodChaosSpec{
 					Action: PodKillAction,
-					Mode:   OnePodMode,
+					ContainerSelector: ContainerSelector{
+						PodSelector: PodSelector{
+							Mode: OnePodMode,
+						},
+					},
 				},
 			}
 
@@ -69,20 +72,6 @@ var _ = Describe("PodChaos", func() {
 			By("deleting the created object")
 			Expect(k8sClient.Delete(context.TODO(), created)).To(Succeed())
 			Expect(k8sClient.Get(context.TODO(), key, created)).ToNot(Succeed())
-		})
-
-		It("should set next start time successfully", func() {
-			podchaos := &PodChaos{}
-			nTime := time.Now()
-			podchaos.SetNextStart(nTime)
-			Expect(podchaos.GetNextStart()).To(Equal(nTime))
-		})
-
-		It("should set recover time successfully", func() {
-			podchaos := &PodChaos{}
-			nTime := time.Now()
-			podchaos.SetNextRecover(nTime)
-			Expect(podchaos.GetNextRecover()).To(Equal(nTime))
 		})
 	})
 })

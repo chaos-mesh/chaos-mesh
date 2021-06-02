@@ -53,10 +53,6 @@ type GcpChaosSpec struct {
 	// +optional
 	Duration *string `json:"duration,omitempty"`
 
-	// Scheduler defines some schedule rules to control the running time of the chaos experiment about time.
-	// +optional
-	Scheduler *SchedulerSpec `json:"scheduler,omitempty"`
-
 	// SecretName defines the name of kubernetes secret. It is used for GCP credentials.
 	// +optional
 	SecretName *string `json:"secretName,omitempty"`
@@ -70,17 +66,17 @@ type GcpChaosSpec struct {
 	// Instance defines the name of the instance
 	Instance string `json:"instance"`
 
-	// The device name of the disk to detach.
+	// The device name of disks to detach.
 	// Needed in disk-loss.
 	// +optional
-	DeviceName *string `json:"deviceName,omitempty"`
+	DeviceNames *[]string `json:"deviceNames,omitempty"`
 }
 
 // GcpChaosStatus represents the status of a GcpChaos
 type GcpChaosStatus struct {
 	ChaosStatus `json:",inline"`
 
-	// The attached disk info string.
+	// The attached disk info strings.
 	// Needed in disk-loss.
-	AttachedDiskString string `json:"attachedDiskString,omitempty"`
+	AttachedDisksStrings []string `json:"attachedDiskStrings,omitempty"`
 }

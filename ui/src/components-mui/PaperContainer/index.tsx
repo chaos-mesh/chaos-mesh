@@ -13,7 +13,7 @@ import React from 'react'
  * @param {React.ReactNode} { children }
  */
 const PaperContainer: React.FC = ({ children }) => (
-  <Paper padding={false} style={{ maxHeight: 768, overflow: 'scroll' }}>
+  <Paper padding={0} style={{ maxHeight: 768, overflow: 'scroll' }}>
     {children}
   </Paper>
 )

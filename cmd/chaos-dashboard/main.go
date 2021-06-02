@@ -30,7 +30,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver"
 	"github.com/chaos-mesh/chaos-mesh/pkg/collector"
-	"github.com/chaos-mesh/chaos-mesh/pkg/config"
+	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
 	"github.com/chaos-mesh/chaos-mesh/pkg/store"
 	"github.com/chaos-mesh/chaos-mesh/pkg/store/dbstore"
 	"github.com/chaos-mesh/chaos-mesh/pkg/ttlcontroller"
@@ -46,7 +46,7 @@ var (
 )
 
 // @title Chaos Mesh Dashboard API
-// @version 1.0
+// @version 1.2
 // @description Swagger docs for Chaos Mesh Dashboard. If you encounter any problems with API, please click on the issues link below to report bugs or questions.
 
 // @contact.name Issues

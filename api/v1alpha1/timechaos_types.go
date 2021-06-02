@@ -35,20 +35,7 @@ type TimeChaos struct {
 
 // TimeChaosSpec defines the desired state of TimeChaos
 type TimeChaosSpec struct {
-	// Mode defines the mode to run chaos action.
-	// Supported mode: one / all / fixed / fixed-percent / random-max-percent
-	// +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
-	Mode PodMode `json:"mode"`
-
-	// Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
-	// If `FixedPodMode`, provide an integer of pods to do chaos action.
-	// If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
-	// If `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
-	// +optional
-	Value string `json:"value"`
-
-	// Selector is used to select pods that are used to inject chaos action.
-	Selector SelectorSpec `json:"selector"`
+	ContainerSelector `json:",inline"`
 
 	// TimeOffset defines the delta time of injected program. It's a possibly signed sequence of decimal numbers, such as
 	// "300ms", "-1.5h" or "2h45m". Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
@@ -61,16 +48,8 @@ type TimeChaosSpec struct {
 	// Default value is ["CLOCK_REALTIME"]
 	ClockIds []string `json:"clockIds,omitempty"`
 
-	// ContainerName indicates the name of affected container.
-	// If not set, all containers will be injected
-	// +optional
-	ContainerNames []string `json:"containerNames,omitempty"`
-
 	// Duration represents the duration of the chaos action
 	Duration *string `json:"duration,omitempty"`
-
-	// Scheduler defines some schedule rules to control the running time of the chaos experiment about time.
-	Scheduler *SchedulerSpec `json:"scheduler,omitempty"`
 }
 
 // SetDefaultValue will set default value for empty fields
@@ -85,22 +64,13 @@ func (in *TimeChaosSpec) DefaultClockIds() {
 	}
 }
 
-// GetSelector is a getter for Selector (for implementing SelectSpec)
-func (in *TimeChaosSpec) GetSelector() SelectorSpec {
-	return in.Selector
-}
-
-// GetMode is a getter for Mode (for implementing SelectSpec)
-func (in *TimeChaosSpec) GetMode() PodMode {
-	return in.Mode
-}
-
-// GetValue is a getter for Value (for implementing SelectSpec)
-func (in *TimeChaosSpec) GetValue() string {
-	return in.Value
-}
-
 // TimeChaosStatus defines the observed state of TimeChaos
 type TimeChaosStatus struct {
 	ChaosStatus `json:",inline"`
+}
+
+func (in *TimeChaos) GetSelectorSpecs() map[string]interface{} {
+	return map[string]interface{}{
+		".": &in.Spec.ContainerSelector,
+	}
 }
