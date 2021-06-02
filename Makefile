@@ -73,7 +73,7 @@ check: fmt vet boilerplate lint generate yaml tidy check-install-script
 # Run tests
 test: ensure-kubebuilder failpoint-enable generate generate-mock manifests test-utils
 	rm -rf cover.* cover
-	$(GOTEST) $$($(PACKAGE_LIST)) -coverprofile cover.out.tmp
+	$(GOTEST) -p 1 $$($(PACKAGE_LIST)) -coverprofile cover.out.tmp
 	cat cover.out.tmp | grep -v "_generated.deepcopy.go" > cover.out
 	@$(FAILPOINT_DISABLE)
 
@@ -144,7 +144,7 @@ config: $(GOBIN)/controller-gen
 
 # Run go fmt against code
 fmt: groupimports
-	$(CGO) fmt ./...
+	$(CGO) fmt $$(go list ./... | grep -v 'zz_generated.*.go')
 
 gosec-scan: $(GOBIN)/gosec
 	$(GOENV) $< ./api/... ./controllers/... ./pkg/... || echo "*** sec-scan failed: known-issues ***"
@@ -278,7 +278,7 @@ e2e-test/image/e2e/bin/ginkgo:
 	cd e2e-test && $(GO) build -ldflags "$(LDFLAGS)" -tags "${BUILD_TAGS}" -o image/e2e/bin/ginkgo github.com/onsi/ginkgo/ginkgo
 
 CLEAN_TARGETS+=e2e-test/image/e2e/bin/e2e.test
-e2e-test/image/e2e/bin/e2e.test:
+e2e-test/image/e2e/bin/e2e.test: e2e-test/e2e/**/*.go
 	cd e2e-test && $(GO) test -c  -o ./image/e2e/bin/e2e.test ./e2e
 
 e2e-test/image/e2e/manifests: manifests

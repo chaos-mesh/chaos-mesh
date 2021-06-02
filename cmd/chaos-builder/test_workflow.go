@@ -48,7 +48,7 @@ func (it *workflowTestCodeGenerator) Render() string {
 %s
 %s
 `,
-		codeHeader,
+		boilerplate,
 		imports,
 		testMethods,
 	)

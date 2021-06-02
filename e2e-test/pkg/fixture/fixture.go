@@ -281,6 +281,44 @@ func NewIOTestDeployment(name, namespace string) *appsv1.Deployment {
 	}
 }
 
+// NewHTTPTestDeployment creates a deployment for e2e test
+func NewHTTPTestDeployment(name, namespace string) *appsv1.Deployment {
+	return &appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app": "http",
+			},
+		},
+		Spec: appsv1.DeploymentSpec{
+			Replicas: pointer.Int32Ptr(1),
+			Selector: &metav1.LabelSelector{
+				MatchLabels: map[string]string{
+					"app": "http",
+				},
+			},
+			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: map[string]string{
+						"app": "http",
+					},
+				},
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Image:           config.TestConfig.E2EImage,
+							ImagePullPolicy: corev1.PullIfNotPresent,
+							Name:            "http",
+							Command:         []string{"/bin/test"},
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
 // NewE2EService creates a service for the E2E helper deployment
 func NewE2EService(name, namespace string) *corev1.Service {
 	return &corev1.Service{

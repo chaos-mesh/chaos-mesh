@@ -16,5 +16,3 @@ spec:
     peakrate: 1000000
     minburst: 1000000
   duration: "10s"
-  scheduler:
-    cron: "@every 15s"

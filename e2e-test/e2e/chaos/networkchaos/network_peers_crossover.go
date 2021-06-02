@@ -73,7 +73,6 @@ func TestcasePeersCrossover(
 		v1alpha1.Both,
 		testDelayTcParam,
 		nil,
-		nil,
 	)
 	// that's important
 	networkDelay.Spec.Direction = v1alpha1.Both
