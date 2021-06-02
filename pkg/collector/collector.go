@@ -43,8 +43,8 @@ type ChaosCollector struct {
 // Reconcile reconciles a chaos collector.
 func (r *ChaosCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	var (
-		chaosMeta metav1.Object
-		ok        bool
+		chaosMeta  metav1.Object
+		ok         bool
 		manageFlag bool
 	)
 
