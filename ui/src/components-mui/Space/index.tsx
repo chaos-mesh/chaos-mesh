@@ -1,5 +1,7 @@
 import { Box, BoxProps } from '@material-ui/core'
-import { Theme, styled } from '@material-ui/core/styles'
+
+import { Theme } from '@material-ui/core/styles'
+import { styled } from '@material-ui/styles'
 
 interface SpaceProps {
   spacing?: number

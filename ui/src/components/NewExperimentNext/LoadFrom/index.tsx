@@ -142,7 +142,7 @@ const LoadFrom: React.FC<LoadFromProps> = ({ loadCallback, inSchedule = false })
             ))}
           </Box>
         ) : archives?.length === 0 ? (
-          <Typography variant="body2">{T('archives.noArchivesFound')}</Typography>
+          <Typography variant="body2">{T('archives.notFound')}</Typography>
         ) : (
           <SkeletonN n={3} />
         )}

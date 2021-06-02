@@ -1,16 +1,5 @@
-import {
-  Box,
-  Step,
-  StepConnector,
-  StepIconProps,
-  StepLabel,
-  Stepper,
-  Theme,
-  Typography,
-  createStyles,
-  makeStyles,
-  withStyles,
-} from '@material-ui/core'
+import { Box, Step, StepConnector, StepIconProps, StepLabel, Stepper, Typography } from '@material-ui/core'
+import { makeStyles, withStyles } from '@material-ui/styles'
 
 import Check from '@material-ui/icons/Check'
 import Paper from 'components-mui/Paper'
@@ -41,29 +30,27 @@ const QontoConnector = withStyles((theme) => ({
   },
 }))(StepConnector)
 
-const useQontoStepIconStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      color: '#eaeaf0',
-      display: 'flex',
-      height: 22,
-      alignItems: 'center',
-    },
-    active: {
-      color: theme.palette.primary.main,
-    },
-    circle: {
-      width: 8,
-      height: 8,
-      borderRadius: '50%',
-      backgroundColor: 'currentColor',
-    },
-    completed: {
-      color: theme.palette.primary.main,
-      fontSize: theme.typography.h6.fontSize,
-    },
-  })
-)
+const useQontoStepIconStyles = makeStyles((theme) => ({
+  root: {
+    color: '#eaeaf0',
+    display: 'flex',
+    height: 22,
+    alignItems: 'center',
+  },
+  active: {
+    color: theme.palette.primary.main,
+  },
+  circle: {
+    width: 8,
+    height: 8,
+    borderRadius: '50%',
+    backgroundColor: 'currentColor',
+  },
+  completed: {
+    color: theme.palette.primary.main,
+    fontSize: theme.typography.h6.fontSize,
+  },
+}))
 
 function QontoStepIcon(props: StepIconProps) {
   const classes = useQontoStepIconStyles()

@@ -28,7 +28,6 @@ const Auth: React.FC<AuthProps> = ({ open, setOpen }) => {
       open={open}
       title={T('settings.addToken.prompt')}
       dialogProps={{
-        disableBackdropClick: true,
         disableEscapeKeyDown: true,
         PaperProps: {
           style: { width: 512 },

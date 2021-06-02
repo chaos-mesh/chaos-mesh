@@ -1,7 +1,6 @@
-import { TableCell as MUITableCell, Table, TableBody, TableRow, Typography, withStyles } from '@material-ui/core'
+import { TableCell as MUITableCell, Table, TableBody, TableRow, Typography } from '@material-ui/core'
 import React, { useEffect, useState } from 'react'
 
-import AffectedPods from 'components/AffectedPods'
 import { Event } from 'api/events.type'
 import Loading from 'components-mui/Loading'
 import StateLabel from 'components-mui/StateLabel'
@@ -10,6 +9,7 @@ import T from 'components/T'
 import api from 'api'
 import { format } from 'lib/luxon'
 import { useStoreSelector } from 'store'
+import { withStyles } from '@material-ui/styles'
 
 const TableCell = withStyles({
   root: {
@@ -48,7 +48,7 @@ const EventDetail: React.FC<EventDetailProps> = ({ eventID }) => {
               <TableCell>{T('experiments.single')} ID</TableCell>
               <TableCell>
                 <Typography variant="body2" color="textSecondary">
-                  {e.experiment_id}
+                  {e.object_id}
                 </Typography>
               </TableCell>
             </TableRow>
@@ -57,7 +57,7 @@ const EventDetail: React.FC<EventDetailProps> = ({ eventID }) => {
               <TableCell>{T('experiments.single')}</TableCell>
               <TableCell>
                 <Typography variant="body2" color="textSecondary">
-                  {e.experiment}
+                  {/* {e.experiment} */}
                 </Typography>
               </TableCell>
             </TableRow>
@@ -84,7 +84,7 @@ const EventDetail: React.FC<EventDetailProps> = ({ eventID }) => {
               <TableCell>{T('events.event.started')}</TableCell>
               <TableCell>
                 <Typography variant="body2" color="textSecondary">
-                  {format(e.start_time, lang)}
+                  {/* {format(e.start_time, lang)} */}
                 </Typography>
               </TableCell>
             </TableRow>
@@ -93,20 +93,18 @@ const EventDetail: React.FC<EventDetailProps> = ({ eventID }) => {
               <TableCell>{T('events.event.ended')}</TableCell>
               <TableCell>
                 <Typography variant="body2" color="textSecondary">
-                  {e.finish_time ? (
+                  {/* {e.finish_time ? (
                     format(e.finish_time, lang)
                   ) : (
                     <StateLabel state={StateOfExperimentsEnum.Running}>{T('experiments.state.running')}</StateLabel>
-                  )}
+                  )} */}
                 </Typography>
               </TableCell>
             </TableRow>
 
             <TableRow>
               <TableCell>{T('newE.scope.affectedPods')}</TableCell>
-              <TableCell>
-                <AffectedPods pods={e.pods!} />
-              </TableCell>
+              <TableCell>{/* <AffectedPods pods={e.pods!} /> */}</TableCell>
             </TableRow>
           </TableBody>
         </Table>

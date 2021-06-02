@@ -28,7 +28,7 @@ import PaperTop from 'components-mui/PaperTop'
 import StateLabel from 'components-mui/StateLabel'
 import { StateOfExperimentsEnum } from 'api/experiments.type'
 import T from 'components/T'
-import { makeStyles } from '@material-ui/core/styles'
+import { makeStyles } from '@material-ui/styles'
 import { useIntl } from 'react-intl'
 import { useQuery } from 'lib/hooks'
 
@@ -90,12 +90,12 @@ type SortedEvent = Omit<Event, 'pods'>
 type SortedEventWithPods = Event
 
 const headCells: { id: keyof SortedEvent; label: string }[] = [
-  { id: 'experiment', label: 'experiment' },
-  { id: 'experiment_id', label: 'uuid' },
+  // { id: 'experiment', label: 'experiment' },
+  { id: 'object_id', label: 'uuid' },
   { id: 'namespace', label: 'namespace' },
   { id: 'kind', label: 'kind' },
-  { id: 'start_time', label: 'started' },
-  { id: 'finish_time', label: 'ended' },
+  // { id: 'start_time', label: 'started' },
+  // { id: 'finish_time', label: 'ended' },
 ]
 
 interface EventsTableHeadProps {
@@ -175,18 +175,18 @@ interface EventsTableRowProps {
 
 const EventsTableRow: React.FC<EventsTableRowProps> = ({ event: e, onSelectEvent }) => (
   <TableRow hover>
-    <TableCell>{e.experiment}</TableCell>
-    <TableCell>{e.experiment_id}</TableCell>
+    {/* <TableCell>{e.experiment}</TableCell> */}
+    <TableCell>{e.object_id}</TableCell>
     <TableCell>{e.namespace}</TableCell>
     <TableCell>{e.kind}</TableCell>
-    <TableCell>{format(e.start_time)}</TableCell>
-    <TableCell>
+    {/* <TableCell>{format(e.start_time)}</TableCell> */}
+    {/* <TableCell>
       {e.finish_time ? (
         format(e.finish_time)
       ) : (
         <StateLabel state={StateOfExperimentsEnum.Running}>{T('experiments.state.running')}</StateLabel>
       )}
-    </TableCell>
+    </TableCell> */}
     <TableCell>
       <Button variant="outlined" size="small" color="primary" onClick={onSelectEvent(e)}>
         {T('common.detail')}
@@ -219,7 +219,7 @@ const EventsTable: React.ForwardRefRenderFunction<EventsTableHandles, EventsTabl
 
   const [events] = useState(allEvents)
   const [order, setOrder] = useState<Order>('desc')
-  const [orderBy, setOrderBy] = useState<keyof SortedEvent>('start_time')
+  const [orderBy, setOrderBy] = useState<keyof SortedEvent>('created_at')
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(7)
 
@@ -241,9 +241,9 @@ const EventsTable: React.ForwardRefRenderFunction<EventsTableHandles, EventsTabl
     setOrderBy(k)
   }
 
-  const handleChangePage = (_: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => setPage(newPage)
+  const handlePageChange = (_: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => setPage(newPage)
 
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleRowsPerPageChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setRowsPerPage(parseInt(event.target.value))
     setPage(0)
   }
@@ -272,8 +272,8 @@ const EventsTable: React.ForwardRefRenderFunction<EventsTableHandles, EventsTabl
                   page={page}
                   rowsPerPageOptions={[7, 15, 25]}
                   rowsPerPage={rowsPerPage}
-                  onChangePage={handleChangePage}
-                  onChangeRowsPerPage={handleChangeRowsPerPage}
+                  onPageChange={handlePageChange}
+                  onRowsPerPageChange={handleRowsPerPageChange}
                   ActionsComponent={TablePaginationActions as any}
                   labelDisplayedRows={({ from, to, count }) => `${from} - ${to} of ${count}`}
                   labelRowsPerPage={intl.formatMessage({ id: 'events.eventsPerPage' })}

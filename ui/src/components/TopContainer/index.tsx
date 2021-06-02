@@ -1,8 +1,6 @@
 import { Box, CssBaseline, Paper, Portal, Snackbar, useMediaQuery, useTheme } from '@material-ui/core'
 import React, { useEffect, useMemo, useState } from 'react'
 import { Redirect, Route, Switch } from 'react-router-dom'
-import { ThemeProvider, makeStyles } from '@material-ui/core/styles'
-import customTheme, { darkTheme as customDarkTheme } from 'theme'
 import { drawerCloseWidth, drawerWidth } from './Sidebar'
 import { setAlertOpen, setConfig, setConfirmOpen, setNameSpace, setTokenName, setTokens } from 'slices/globalStatus'
 import { useStoreDispatch, useStoreSelector } from 'store'
@@ -19,6 +17,7 @@ import api from 'api'
 import flat from 'flat'
 import insertCommonStyle from 'lib/d3/insertCommonStyle'
 import loadable from '@loadable/component'
+import { makeStyles } from '@material-ui/styles'
 import messages from 'i18n/messages'
 import routes from 'routes'
 import { setNavigationBreadcrumbs } from 'slices/navigation'
@@ -49,13 +48,11 @@ const useStyles = makeStyles((theme) => ({
     }),
   },
   main: {
-    position: 'relative',
     display: 'flex',
     flexDirection: 'column',
     minHeight: '100vh',
     zIndex: 1,
   },
-  toolbar: theme.mixins.toolbar,
   switchContent: {
     display: 'flex',
     flex: 1,
@@ -64,17 +61,16 @@ const useStyles = makeStyles((theme) => ({
 
 const TopContainer = () => {
   const theme = useTheme()
-  const isTabletScreen = useMediaQuery(theme.breakpoints.down('sm'))
+  const isTabletScreen = useMediaQuery(theme.breakpoints.down('md'))
   const classes = useStyles()
 
   const { pathname } = useLocation()
 
   const { settings, globalStatus, navigation } = useStoreSelector((state) => state)
-  const { theme: settingsTheme, lang } = settings
+  const { lang } = settings
   const { alert, alertOpen, confirm, confirmOpen } = globalStatus
   const { breadcrumbs } = navigation
 
-  const globalTheme = useMemo(() => (settingsTheme === 'light' ? customTheme : customDarkTheme), [settingsTheme])
   const intlMessages = useMemo<Record<string, string>>(() => flat(messages[lang]), [lang])
 
   const dispatch = useStoreDispatch()
@@ -151,60 +147,58 @@ const TopContainer = () => {
   }, [isTabletScreen])
 
   return (
-    <ThemeProvider theme={globalTheme}>
-      <IntlProvider messages={intlMessages} locale={lang} defaultLocale="en">
-        <CssBaseline />
+    <IntlProvider messages={intlMessages} locale={lang} defaultLocale="en">
+      <CssBaseline />
 
-        <Box className={openDrawer ? classes.rootShift : classes.root}>
-          <Sidebar open={openDrawer} />
-          <Paper className={classes.main} component="main" elevation={0}>
-            <Box className={classes.switchContent}>
-              <ContentContainer>
-                <Navbar openDrawer={openDrawer} handleDrawerToggle={handleDrawerToggle} breadcrumbs={breadcrumbs} />
+      <Box className={openDrawer ? classes.rootShift : classes.root}>
+        <Sidebar open={openDrawer} />
+        <Paper className={classes.main} component="main" elevation={0}>
+          <Box className={classes.switchContent}>
+            <ContentContainer>
+              <Navbar openDrawer={openDrawer} handleDrawerToggle={handleDrawerToggle} breadcrumbs={breadcrumbs} />
 
-                {loading ? (
-                  <Loading />
-                ) : (
-                  <Switch>
-                    <Redirect path="/" to="/dashboard" exact />
-                    {!authOpen && routes.map((route) => <Route key={route.path as string} {...route} />)}
-                    <Redirect to="/dashboard" />
-                  </Switch>
-                )}
-              </ContentContainer>
-            </Box>
+              {loading ? (
+                <Loading />
+              ) : (
+                <Switch>
+                  <Redirect path="/" to="/dashboard" exact />
+                  {!authOpen && routes.map((route) => <Route key={route.path as string} {...route} />)}
+                  <Redirect to="/dashboard" />
+                </Switch>
+              )}
+            </ContentContainer>
+          </Box>
+        </Paper>
+      </Box>
 
-            <Auth open={authOpen} setOpen={setAuthOpen} />
+      <Auth open={authOpen} setOpen={setAuthOpen} />
 
-            <Portal>
-              <Snackbar
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'center',
-                }}
-                autoHideDuration={3000}
-                open={alertOpen}
-                onClose={handleSnackClose}
-              >
-                <Alert severity={alert.type} onClose={handleSnackClose}>
-                  {alert.message}
-                </Alert>
-              </Snackbar>
-            </Portal>
+      <Portal>
+        <Snackbar
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'center',
+          }}
+          autoHideDuration={3000}
+          open={alertOpen}
+          onClose={handleSnackClose}
+        >
+          <Alert severity={alert.type} onClose={handleSnackClose}>
+            {alert.message}
+          </Alert>
+        </Snackbar>
+      </Portal>
 
-            <Portal>
-              <ConfirmDialog
-                open={confirmOpen}
-                close={handleConfirmClose}
-                title={confirm.title}
-                description={confirm.description}
-                onConfirm={confirm.handle}
-              />
-            </Portal>
-          </Paper>
-        </Box>
-      </IntlProvider>
-    </ThemeProvider>
+      <Portal>
+        <ConfirmDialog
+          open={confirmOpen}
+          close={handleConfirmClose}
+          title={confirm.title}
+          description={confirm.description}
+          onConfirm={confirm.handle}
+        />
+      </Portal>
+    </IntlProvider>
   )
 }
 

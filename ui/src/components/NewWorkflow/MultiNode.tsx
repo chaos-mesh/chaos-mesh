@@ -4,7 +4,7 @@ import React, { useImperativeHandle, useState } from 'react'
 import Space from 'components-mui/Space'
 import T from 'components/T'
 import clsx from 'clsx'
-import { makeStyles } from '@material-ui/core/styles'
+import { makeStyles } from '@material-ui/styles'
 
 const useStyles = makeStyles((theme) => ({
   avatar: {

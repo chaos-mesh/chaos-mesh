@@ -1,4 +1,4 @@
-import { Box, BoxProps, LinearProgress, Typography } from '@material-ui/core'
+import { Box, BoxProps, Typography } from '@material-ui/core'
 import { Link, LinkProps } from 'react-router-dom'
 
 import DateTime from 'lib/luxon'
@@ -8,7 +8,7 @@ import React from 'react'
 import Space from 'components-mui/Space'
 import T from 'components/T'
 import { iconByKind } from 'lib/byKind'
-import { makeStyles } from '@material-ui/core/styles'
+import { makeStyles } from '@material-ui/styles'
 import { truncate } from 'lib/utils'
 import { useStoreSelector } from 'store'
 
@@ -42,26 +42,15 @@ const Recent: React.FC<RecentProps> = ({ events }) => {
   return (
     <Space vertical>
       {events.reverse().map((d) => (
-        <LinkBox
-          key={d.id}
-          className={classes.event}
-          component={Link}
-          to={`/events?event_id=${d.id}`}
-          title={d.experiment}
-        >
+        <LinkBox key={d.id} className={classes.event} component={Link} to={`/events?event_id=${d.id}`} title={d.name}>
           <Box display="flex" justifyContent="center" flex={1}>
             {iconByKind(d.kind as any, 'small')}
           </Box>
           <Box display="flex" flexDirection="column" justifyContent="center" flex={2} px={1.5}>
-            <Typography gutterBottom>{truncate(d.experiment)}</Typography>
-            <LinearProgress
-              variant={d.finish_time ? 'determinate' : 'indeterminate'}
-              value={d.finish_time ? 100 : undefined}
-              style={{ width: '100%' }}
-            />
+            <Typography>{truncate(d.name)}</Typography>
           </Box>
           <Box display="flex" justifyContent="center" flex={2}>
-            {DateTime.fromISO(d.start_time, { locale: lang }).toRelative()}
+            {DateTime.fromISO(d.created_at, { locale: lang }).toRelative()}
           </Box>
         </LinkBox>
       ))}

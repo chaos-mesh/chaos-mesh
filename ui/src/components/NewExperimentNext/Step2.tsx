@@ -7,7 +7,6 @@ import {
   schema as scheduleSpecificSchema,
 } from 'components/Schedule/types'
 import basicData, { schema } from './data/basic'
-import { createStyles, makeStyles } from '@material-ui/core/styles'
 import { setBasic, setScheduleSpecific, setStep2 } from 'slices/experiments'
 import { useEffect, useMemo, useState } from 'react'
 import { useStoreDispatch, useStoreSelector } from 'store'
@@ -21,21 +20,20 @@ import Scope from './form/Scope'
 import SkeletonN from 'components-mui/SkeletonN'
 import T from 'components/T'
 import UndoIcon from '@material-ui/icons/Undo'
+import { makeStyles } from '@material-ui/styles'
 import { string as yupString } from 'yup'
 
-const useStyles = makeStyles((theme) =>
-  createStyles({
-    submit: {
-      borderColor: theme.palette.success.main,
-    },
-    submitIcon: {
-      color: theme.palette.success.main,
-    },
-    asButton: {
-      cursor: 'pointer',
-    },
-  })
-)
+const useStyles = makeStyles((theme) => ({
+  submit: {
+    borderColor: theme.palette.success.main,
+  },
+  submitIcon: {
+    color: theme.palette.success.main,
+  },
+  asButton: {
+    cursor: 'pointer',
+  },
+}))
 
 function isInstant(target: any) {
   if (

@@ -126,19 +126,9 @@ function searchEvents(data: SearchData['events'], tokens: Token[]) {
     const val = t.value.toLowerCase()
 
     if (t.type === 'keyword') {
-      switch (t.keyword) {
-        case 'pod':
-          filtered = filtered.filter((d) => d.pods?.some((pod) => pod.pod_name.toLowerCase().includes(val)))
-          break
-        case 'ip':
-          filtered = filtered.filter((d) => d.pods?.some((pod) => pod.pod_ip.includes(val)))
-          break
-        default:
-          filtered = searchCommon(filtered, t.keyword, val)
-          break
-      }
+      filtered = searchCommon(filtered, t.keyword, val)
     } else if (t.type === 'content') {
-      filtered = filtered.filter((d) => d.experiment.toLowerCase().includes(val))
+      filtered = filtered.filter((d) => d.name.toLowerCase().includes(val))
     }
   })
 

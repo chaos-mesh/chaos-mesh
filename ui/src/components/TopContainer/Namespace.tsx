@@ -8,7 +8,7 @@ import { TextField } from '@material-ui/core'
 import api from 'api'
 import clsx from 'clsx'
 import { getNamespaces } from 'slices/experiments'
-import { makeStyles } from '@material-ui/core/styles'
+import { makeStyles } from '@material-ui/styles'
 import { setNameSpace } from 'slices/globalStatus'
 import { useEffect } from 'react'
 

@@ -1,5 +1,5 @@
 import { Box, Button, Grid, Grow, Modal } from '@material-ui/core'
-import EventsTable, { EventsTableHandles } from 'components/EventsTable'
+// import EventsTable, { EventsTableHandles } from 'components/EventsTable'
 import { setAlert, setConfirm } from 'slices/globalStatus'
 import { useEffect, useRef, useState } from 'react'
 import { useHistory, useParams } from 'react-router-dom'
@@ -24,7 +24,7 @@ import api from 'api'
 import fileDownload from 'js-file-download'
 import genEventsChart from 'lib/d3/eventsChart'
 import loadable from '@loadable/component'
-import { makeStyles } from '@material-ui/core/styles'
+import { makeStyles } from '@material-ui/styles'
 import { useIntl } from 'react-intl'
 import { usePrevious } from 'lib/hooks'
 import yaml from 'js-yaml'
@@ -68,7 +68,7 @@ export default function ExperimentDetail() {
   const dispatch = useStoreDispatch()
 
   const chartRef = useRef<HTMLDivElement>(null)
-  const eventsTableRef = useRef<EventsTableHandles>(null)
+  // const eventsTableRef = useRef<EventsTableHandles>(null)
 
   const [loading, setLoading] = useState(true)
   const [detail, setDetail] = useState<ExperimentDetailType>()
@@ -86,7 +86,7 @@ export default function ExperimentDetail() {
 
   const fetchEvents = () =>
     api.events
-      .events({ experimentName: detail!.kube_object.metadata.name })
+      .events({ uid: uuid })
       .then(({ data }) => setEvents(data))
       .catch(console.error)
       .finally(() => {
@@ -105,23 +105,23 @@ export default function ExperimentDetail() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [detail])
 
-  useEffect(() => {
-    if (prevEvents !== events && prevEvents?.length !== events?.length && events) {
-      const chart = chartRef.current!
+  // useEffect(() => {
+  //   if (prevEvents !== events && prevEvents?.length !== events?.length && events) {
+  //     const chart = chartRef.current!
 
-      genEventsChart({
-        root: chart,
-        events,
-        intl,
-        theme,
-        options: {
-          enableLegends: false,
-          onSelectEvent: eventsTableRef.current!.onSelectEvent,
-        },
-      })
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [events])
+  //     genEventsChart({
+  //       root: chart,
+  //       events,
+  //       intl,
+  //       theme,
+  //       options: {
+  //         enableLegends: false,
+  //         onSelectEvent: eventsTableRef.current!.onSelectEvent,
+  //       },
+  //     })
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [events])
 
   const onModalOpen = () => setConfigOpen(true)
   const onModalClose = () => setConfigOpen(false)
@@ -297,14 +297,14 @@ export default function ExperimentDetail() {
           </Grid>
 
           <Grid item xs={12}>
-            <Paper>
+            {/* <Paper>
               <PaperTop title={T('common.timeline')} />
               <div ref={chartRef} className={classes.eventsChart} />
-            </Paper>
+            </Paper> */}
           </Grid>
 
           <Grid item xs={12}>
-            {events && <EventsTable ref={eventsTableRef} events={events} />}
+            {/* {events && <EventsTable ref={eventsTableRef} events={events} />} */}
           </Grid>
         </Grid>
       </Grow>

@@ -1,12 +1,11 @@
-import { Event, EventPod } from 'api/events.type'
 import { Grid, Grow } from '@material-ui/core'
 import React, { useEffect, useMemo, useState } from 'react'
 
-import AffectedPods from 'components/AffectedPods'
 import { ArchiveDetail } from 'api/archives.type'
 import ArchiveDuration from 'components/ArchiveDuration'
 import ArchiveNumberOf from 'components/ArchiveNumberOf'
-import EventsTable from 'components/EventsTable'
+import { Event } from 'api/events.type'
+// import EventsTable from 'components/EventsTable'
 import Loading from 'components-mui/Loading'
 import ObjectConfiguration from 'components/ObjectConfiguration'
 import Paper from 'components-mui/Paper'
@@ -23,24 +22,24 @@ const ArchiveReport: React.FC = () => {
   const [report, setReport] = useState<{ events: Event[] }>({ events: [] })
 
   const events = report.events
-  const affectedPods = useMemo(
-    () =>
-      [
-        ...new Set(
-          events
-            .reduce<EventPod[]>((acc, e) => acc.concat(e.pods!), [])
-            .map((d) => ({
-              pod_ip: d.pod_ip,
-              pod_name: d.pod_name,
-              namespace: d.namespace,
-              action: d.action,
-              message: d.message,
-            }))
-            .map((d) => JSON.stringify(d))
-        ),
-      ].map((d) => JSON.parse(d)),
-    [events]
-  )
+  // const affectedPods = useMemo(
+  //   () =>
+  //     [
+  //       ...new Set(
+  //         events
+  //           .reduce<EventPod[]>((acc, e) => acc.concat(e.pods!), [])
+  //           .map((d) => ({
+  //             pod_ip: d.pod_ip,
+  //             pod_name: d.pod_name,
+  //             namespace: d.namespace,
+  //             action: d.action,
+  //             message: d.message,
+  //           }))
+  //           .map((d) => JSON.stringify(d))
+  //       ),
+  //     ].map((d) => JSON.parse(d)),
+  //   [events]
+  // )
 
   const fetchDetail = () => api.archives.detail(uuid).then(({ data }) => setDetail(data))
   const fetchReport = () => api.archives.report(uuid).then(({ data }) => setReport(data))
@@ -62,7 +61,7 @@ const ArchiveReport: React.FC = () => {
                 <ArchiveNumberOf title={T('archives.numberOfRuns')} num={events.length} />
               </Grid>
               <Grid item xs={6} sm={6} md={3}>
-                <ArchiveNumberOf title={T('archives.numberOfAffectedPods')} num={affectedPods.length} />
+                {/* <ArchiveNumberOf title={T('archives.numberOfAffectedPods')} num={affectedPods.length} /> */}
               </Grid>
 
               <Grid item xs={12} md={6}>
@@ -79,12 +78,12 @@ const ArchiveReport: React.FC = () => {
               <Grid item xs={12}>
                 <Paper>
                   <PaperTop title={T('newE.scope.affectedPods')} />
-                  <AffectedPods pods={affectedPods} />
+                  {/* <AffectedPods pods={affectedPods} /> */}
                 </Paper>
               </Grid>
 
               <Grid item xs={12}>
-                {events.length > 0 && <EventsTable events={events} />}
+                {/* {events.length > 0 && <EventsTable events={events} />} */}
               </Grid>
             </>
           )}

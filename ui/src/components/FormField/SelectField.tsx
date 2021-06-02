@@ -4,7 +4,7 @@ import { Field, getIn, useFormikContext } from 'formik'
 import { Experiment } from 'components/NewExperiment/types'
 import React from 'react'
 import clsx from 'clsx'
-import { makeStyles } from '@material-ui/core/styles'
+import { makeStyles } from '@material-ui/styles'
 
 const useStyles = makeStyles({
   root: {

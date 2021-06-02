@@ -17,7 +17,7 @@ import T from 'components/T'
 import api from 'api'
 import { constructWorkflowTopology } from 'lib/cytoscape'
 import loadable from '@loadable/component'
-import { makeStyles } from '@material-ui/core/styles'
+import { makeStyles } from '@material-ui/styles'
 import { useIntl } from 'react-intl'
 import yaml from 'js-yaml'
 

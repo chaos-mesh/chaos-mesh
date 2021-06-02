@@ -1,8 +1,7 @@
-import { Box, Chip, CircularProgress, InputAdornment, TextField, Typography } from '@material-ui/core'
+import { Autocomplete, Box, Chip, CircularProgress, InputAdornment, TextField, Typography } from '@material-ui/core'
 import React, { useMemo, useState } from 'react'
 
 import { Archive } from 'api/archives.type'
-import Autocomplete from '@material-ui/lab/Autocomplete'
 import { Event } from 'api/events.type'
 import { Experiment } from 'api/experiments.type'
 import FingerprintIcon from '@material-ui/icons/Fingerprint'
@@ -16,7 +15,7 @@ import _debounce from 'lodash.debounce'
 import api from 'api'
 import clsx from 'clsx'
 import { format } from 'lib/luxon'
-import { makeStyles } from '@material-ui/core/styles'
+import { makeStyles } from '@material-ui/styles'
 import search from 'lib/search'
 import { truncate } from 'lib/utils'
 import { useHistory } from 'react-router-dom'
@@ -86,14 +85,14 @@ const Search: React.FC = () => {
   const groupBy = (option: Option) =>
     (option as Experiment).status
       ? intl.formatMessage({ id: 'experiments.title' })
-      : (option as Event).experiment
+      : (option as Event).name
       ? intl.formatMessage({ id: 'events.title' })
       : intl.formatMessage({ id: 'archives.title' })
 
-  const getOptionLabel = (option: Option) => (option as Event).experiment || (option as any).name
+  const getOptionLabel = (option: Option) => (option as Event).name || (option as any).name
 
-  const renderOption = (option: Option) => {
-    const type = (option as Experiment).status ? 'experiment' : (option as Event).experiment ? 'event' : 'archive'
+  const renderOption = (_: any, option: Option) => {
+    const type = (option as Experiment).status ? 'experiment' : (option as Event).name ? 'event' : 'archive'
     let link = ''
     let name = ''
     let uid = (option as Experiment).uid
@@ -109,8 +108,8 @@ const Search: React.FC = () => {
         break
       case 'event':
         link = `/${type}s?event_id=${(option as Event).id}`
-        name = (option as Event).experiment
-        time = (option as Event).start_time
+        name = (option as Event).name
+        time = (option as Event).created_at
         break
       default:
         break
@@ -197,12 +196,9 @@ const Search: React.FC = () => {
                         <ul className={classes.tooltip}>
                           <li>{T('search.tip.namespace')}</li>
                           <li>{T('search.tip.kind')}</li>
-                          <li>{T('search.tip.pod')}</li>
-                          <li>{T('search.tip.ip')}</li>
                         </ul>
                       </Typography>
                     }
-                    interactive
                   >
                     <HelpOutlineIcon fontSize="small" />
                   </Tooltip>

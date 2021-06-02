@@ -1,4 +1,4 @@
-import { Grid, TableCell as MUITableCell, Table, TableBody, TableRow, Typography, withStyles } from '@material-ui/core'
+import { Grid, TableCell as MUITableCell, Table, TableBody, TableRow, Typography } from '@material-ui/core'
 
 import { ArchiveDetail } from 'api/archives.type'
 import { ExperimentDetail } from 'api/experiments.type'
@@ -7,6 +7,7 @@ import T from 'components/T'
 import { format } from 'lib/luxon'
 import { toTitleCase } from 'lib/utils'
 import { useStoreSelector } from 'store'
+import { withStyles } from '@material-ui/styles'
 
 const TableCell = withStyles({
   root: {

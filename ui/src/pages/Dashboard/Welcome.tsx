@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import Tour, { ReactourStep } from 'reactour'
-import { makeStyles, useTheme } from '@material-ui/core/styles'
 
 import AddIcon from '@material-ui/icons/Add'
 import ArrowBackOutlinedIcon from '@material-ui/icons/ArrowBackOutlined'
@@ -12,6 +11,8 @@ import PaperTop from 'components-mui/PaperTop'
 import Space from 'components-mui/Space'
 import T from 'components/T'
 import clsx from 'clsx'
+import { makeStyles } from '@material-ui/styles'
+import { useTheme } from '@material-ui/core/styles'
 
 const useStyles = makeStyles((theme) => ({
   button: {
@@ -86,7 +87,7 @@ const Welcome = () => {
           isOpen={isTourOpen}
           onRequestClose={() => setIsTourOpen(false)}
           accentColor={theme.palette.primary.main}
-          rounded={theme.shape.borderRadius}
+          rounded={theme.shape.borderRadius as number}
           prevButton={<ArrowBackOutlinedIcon color="action" />}
           nextButton={<ArrowForwardOutlinedIcon color="action" />}
           showCloseButton={false}

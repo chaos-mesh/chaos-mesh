@@ -8,12 +8,11 @@ import React from 'react'
 import Search from 'components/Search'
 import Space from 'components-mui/Space'
 import T from 'components/T'
-import { makeStyles } from '@material-ui/core/styles'
+import { makeStyles } from '@material-ui/styles'
 
 const useStyles = makeStyles((theme) => ({
   toolbar: {
-    margin: theme.spacing(6),
-    marginBottom: 0,
+    marginBottom: theme.spacing(6),
   },
   appBar: {
     position: 'absolute',
@@ -21,22 +20,15 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(6),
   },
   menuButton: {
-    [theme.breakpoints.down('sm')]: {
+    [theme.breakpoints.down('md')]: {
       display: 'none',
     },
   },
   nav: {
     color: 'inherit',
-    [theme.breakpoints.down('xs')]: {
-      display: 'none',
-    },
   },
   navRight: {
     display: 'flex',
-    alignItems: 'center',
-    [theme.breakpoints.down('xs')]: {
-      width: '100%',
-    },
   },
 }))
 

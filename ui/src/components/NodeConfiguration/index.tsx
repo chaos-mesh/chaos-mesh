@@ -12,7 +12,7 @@ import { objToArrBySep, toCamelCase, toTitleCase } from 'lib/utils'
 
 import PaperTop from 'components-mui/PaperTop'
 import T from 'components/T'
-import { withStyles } from '@material-ui/core/styles'
+import { withStyles } from '@material-ui/styles'
 
 const TableCell = withStyles({
   root: {

@@ -68,16 +68,16 @@ export default function gen({
     margin.right = enableLegends && document.documentElement.offsetWidth > 768 ? 150 : 0
   }
 
-  const halfHourLater = (events.length ? DateTime.fromISO(events[events.length - 1].start_time) : now()).plus({
+  const halfHourLater = (events.length ? DateTime.fromISO(events[events.length - 1].created_at) : now()).plus({
     hours: 0.5,
   })
 
   const colorPalette = d3
     .scaleOrdinal<string, string>()
     .range(d3.schemeTableau10)
-    .domain(events.map((d) => d.experiment_id))
+    .domain(events.map((d) => d.object_id))
 
-  const allUniqueExperiments = [...new Set(events.map((d) => d.experiment + '/' + d.experiment_id))].map((d) => {
+  const allUniqueExperiments = [...new Set(events.map((d) => d.name + '/' + d.object_id))].map((d) => {
     const [name, uuid] = d.split('/')
 
     return {
@@ -174,7 +174,7 @@ export default function gen({
       .enter()
       .append('div')
       .on('click', function (_, d) {
-        const _events = events.filter((e) => e.experiment_id === d.uuid)
+        const _events = events.filter((e) => e.object_id === d.uuid)
         const event = _events[_events.length - 1]
 
         svg
@@ -185,7 +185,7 @@ export default function gen({
             d3.zoomIdentity
               .translate((width - margin.left - margin.right) / 2, 0)
               .scale(3)
-              .translate(-x(DateTime.fromISO(event.start_time)), 0)
+              .translate(-x(DateTime.fromISO(event.created_at)), 0)
           )
       })
     legends
@@ -204,30 +204,12 @@ export default function gen({
     .attr('class', `chaos-event-tooltip${theme === 'light' ? '' : ' dark'}`)
 
   function genTooltipContent(d: Event) {
-    return `<b>${intl.formatMessage({ id: 'events.event.experiment' })}: ${d.experiment}</b>
-            <br />
-            <b>
-              ${intl.formatMessage({ id: 'common.status' })}:
-              ${
-                d.finish_time
-                  ? intl.formatMessage({ id: 'experiments.state.finished' })
-                  : intl.formatMessage({ id: 'experiments.state.running' })
-              }
-            </b>
-            <br />
+    return `<b>${intl.formatMessage({ id: 'events.event.experiment' })}: ${d.name}</b>
             <br />
             <span class="secondary">
-              ${intl.formatMessage({ id: 'events.event.started' })}: ${format(d.start_time)}
+              ${intl.formatMessage({ id: 'events.event.started' })}: ${format(d.created_at)}
             </span>
-            <br />
-            ${
-              d.finish_time
-                ? `
-                  <span class="secondary">
-                    ${intl.formatMessage({ id: 'events.event.ended' })}: ${format(d.finish_time)}
-                  </span>`
-                : ''
-            }`
+            `
   }
 
   if (enableLegends) {
@@ -246,7 +228,7 @@ export default function gen({
       .selectAll('circle')
       .data(events)
       .join((enter) => {
-        const newCx = (d: Event) => newX(DateTime.fromISO(d.start_time))
+        const newCx = (d: Event) => newX(DateTime.fromISO(d.created_at))
 
         return enter
           .append('circle')
@@ -254,8 +236,8 @@ export default function gen({
           .attr('cx', (d) => newCx(d) + 30)
           .call((enter) => enter.transition().duration(750).attr('opacity', 1).attr('cx', newCx))
       })
-      .attr('cy', (d) => y(d.experiment_id)! + y.bandwidth() / 2 + margin.top)
-      .attr('fill', (d) => colorPalette(d.experiment_id))
+      .attr('cy', (d) => y(d.object_id)! + y.bandwidth() / 2 + margin.top)
+      .attr('fill', (d) => colorPalette(d.object_id))
       .attr('r', 4)
       .style('cursor', 'pointer')
       .on('click', (_, d) => {
@@ -290,7 +272,7 @@ export default function gen({
 
       gXAxis.call(xAxis.scale(newX))
       gXAxis.selectAll('.tick text').call(wrapText, 30)
-      circles.attr('cx', (d) => newX(DateTime.fromISO(d.start_time))!)
+      circles.attr('cx', (d) => newX(DateTime.fromISO(d.created_at))!)
     }
 
     zoom = d3.zoom<SVGSVGElement, unknown>().scaleExtent([0.1, 6]).on('zoom', zoomed)
@@ -307,7 +289,7 @@ export default function gen({
       gXAxis.selectAll('.tick text').call(wrapText, 30)
       gYAxisRight.attr('transform', `translate(${width - margin.right + 0.5}, ${margin.top})`)
       timelines.attr('x2', width - margin.right - margin.left)
-      circles.attr('cx', (d) => x(DateTime.fromISO(d.start_time)))
+      circles.attr('cx', (d) => x(DateTime.fromISO(d.created_at)))
     }
 
     d3.select(window).on('resize', _debounce(reGen, 250))

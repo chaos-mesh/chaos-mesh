@@ -24,7 +24,7 @@ const Scheduler: React.FC<SchedulerProps> = ({ errors, touched, inSchedule = fal
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fromExternal])
 
-  const handleChecked = (_: React.ChangeEvent<HTMLInputElement>, checked: boolean) => setContinuous(checked)
+  const handleChecked = (e: React.ChangeEvent<HTMLInputElement>) => setContinuous(e.target.checked)
 
   return (
     <>

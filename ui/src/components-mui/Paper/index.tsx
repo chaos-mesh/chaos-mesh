@@ -9,7 +9,7 @@ interface PaperProps extends MUIPaperProps {
 
 const Paper: React.FC<PaperProps> = ({ padding = 4.5, boxProps, children, ...rest }) => (
   <MUIPaper {...rest} variant="outlined">
-    <Box height="100%" p={padding} {...boxProps}>
+    <Box position="relative" height="100%" p={padding} {...boxProps}>
       {children}
     </Box>
   </MUIPaper>

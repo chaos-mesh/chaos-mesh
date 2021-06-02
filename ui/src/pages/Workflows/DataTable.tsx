@@ -8,7 +8,7 @@ import Space from 'components-mui/Space'
 import T from 'components/T'
 import { Workflow } from 'api/workflows.type'
 import api from 'api'
-import { makeStyles } from '@material-ui/core/styles'
+import { makeStyles } from '@material-ui/styles'
 import { useHistory } from 'react-router-dom'
 import { useIntl } from 'react-intl'
 

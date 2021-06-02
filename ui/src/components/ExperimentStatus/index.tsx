@@ -1,33 +1,31 @@
 import { Box, CircularProgress } from '@material-ui/core'
-import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 
 import CloseIcon from '@material-ui/icons/Close'
 import DoneIcon from '@material-ui/icons/Done'
 import React from 'react'
 import { StateOfExperiments } from 'api/experiments.type'
+import { makeStyles } from '@material-ui/styles'
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      position: 'relative',
-      display: 'flex',
-      alignItems: 'center',
-    },
-    success: {
-      color: theme.palette.success.main,
-    },
-    error: {
-      color: theme.palette.error.main,
-    },
-    bottom: {
-      color: theme.palette.grey[theme.palette.type === 'light' ? 200 : 700],
-    },
-    top: {
-      position: 'absolute',
-      left: 0,
-    },
-  })
-)
+const useStyles = makeStyles((theme) => ({
+  root: {
+    position: 'relative',
+    display: 'flex',
+    alignItems: 'center',
+  },
+  success: {
+    color: theme.palette.success.main,
+  },
+  error: {
+    color: theme.palette.error.main,
+  },
+  bottom: {
+    color: theme.palette.grey[theme.palette.mode === 'light' ? 200 : 700],
+  },
+  top: {
+    position: 'absolute',
+    left: 0,
+  },
+}))
 
 interface ExperimentEventsPreviewProps {
   status: keyof StateOfExperiments
