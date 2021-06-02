@@ -60,6 +60,7 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `dashboard.priorityClassName` | Custom priorityClassName for using pod priorities | `` |
 | `dashboard.image` | Docker image for chaos-dashboard | `pingcap/chaos-dashboard:latest` |
 | `dashboard.imagePullPolicy` | Image pull policy | `Always` |
+| `controllerManager.hostNetwork` | running chaos-controller-manager on host network | `false` |
 | `dashboard.nodeSelector` | Node labels for chaos-dashboard  pod assignment | `{}` |
 | `dashboard.tolerations` | Toleration labels for chaos-dashboard pod assignment | `[]` |
 | `dashboard.affinity` | Map of chaos-dashboard node/pod affinities | `{}` |
