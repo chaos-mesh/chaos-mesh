@@ -59,10 +59,10 @@ func Register(r *gin.RouterGroup, s *Service) {
 // @Description Get the list of events from db.
 // @Tags events
 // @Produce json
-// @Param createTime query string false "The create time of events"
-// @Param experimentName query string false "The name of the experiment"
-// @Param experimentNamespace query string false "The namespace of the experiment"
-// @Param uid query string false "The UID of the experiment"
+// @Param created_at query string false "The create time of events"
+// @Param name query string false "The name of the object"
+// @Param namespace query string false "The namespace of the object"
+// @Param object_id query string false "The UID of the object"
 // @Param kind query string false "kind" Enums(PodChaos, IoChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos, AwsChaos, GcpChaos, DNSChaos, Schedule)
 // @Param limit query string false "The max length of events list"
 // @Success 200 {array} core.Event
@@ -76,12 +76,12 @@ func (s *Service) listEvents(c *gin.Context) {
 	}
 
 	filter := core.Filter{
-		CreateTimeStr:       c.Query("createTime"),
-		ExperimentName:      c.Query("experimentName"),
-		ExperimentNamespace: namespace,
-		UID:                 c.Query("uid"),
-		Kind:                c.Query("kind"),
-		LimitStr:            c.Query("limit"),
+		CreateTimeStr: c.Query("created_at"),
+		Name:          c.Query("name"),
+		Namespace:     namespace,
+		ObjectID:      c.Query("object_id"),
+		Kind:          c.Query("kind"),
+		LimitStr:      c.Query("limit"),
 	}
 
 	eventList, err := s.event.ListByFilter(context.Background(), filter)

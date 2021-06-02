@@ -57,13 +57,13 @@ func (m *MockEventService) ListByUIDs(context.Context, []string) ([]*core.Event,
 func (m *MockEventService) ListByFilter(ctx context.Context, filter core.Filter) ([]*core.Event, error) {
 	var res []*core.Event
 	var err error
-	if filter.UID == "testUID" {
+	if filter.ObjectID == "testUID" {
 		event := &core.Event{
 			ID:        0,
 			CreatedAt: time.Time{},
 			Kind:      "testKind",
 			Type:      "testType",
-			Reason:    "testRaason",
+			Reason:    "testReason",
 			Message:   "testMessage",
 			Name:      "testName",
 			Namespace: "testNamespace",
@@ -85,7 +85,7 @@ func (m *MockEventService) Find(_ context.Context, id uint) (*core.Event, error)
 			CreatedAt: time.Time{},
 			Kind:      "testKind",
 			Type:      "testType",
-			Reason:    "testRaason",
+			Reason:    "testReason",
 			Message:   "testMessage",
 			Name:      "testName",
 			Namespace: "testNamespace",
@@ -148,13 +148,6 @@ var _ = Describe("event", func() {
 	})
 
 	Context("ListEvents", func() {
-		It("empty podNamespace", func() {
-			rr := httptest.NewRecorder()
-			request, _ := http.NewRequest(http.MethodGet, "/api/events?podName=testpodNamespace", nil)
-			router.ServeHTTP(rr, request)
-			Expect(rr.Code).Should(Equal(http.StatusInternalServerError))
-		})
-
 		It("success", func() {
 			response := []*core.Event{
 				&core.Event{
@@ -162,7 +155,7 @@ var _ = Describe("event", func() {
 					CreatedAt: time.Time{},
 					Kind:      "testKind",
 					Type:      "testType",
-					Reason:    "testRaason",
+					Reason:    "testReason",
 					Message:   "testMessage",
 					Name:      "testName",
 					Namespace: "testNamespace",
@@ -170,7 +163,7 @@ var _ = Describe("event", func() {
 				},
 			}
 			rr := httptest.NewRecorder()
-			request, _ := http.NewRequest(http.MethodGet, "/api/events?uid=testUID", nil)
+			request, _ := http.NewRequest(http.MethodGet, "/api/events?object_id=testUID", nil)
 			router.ServeHTTP(rr, request)
 			Expect(rr.Code).Should(Equal(http.StatusOK))
 			responseBody, err := json.Marshal(response)
@@ -180,7 +173,7 @@ var _ = Describe("event", func() {
 
 		It("test err", func() {
 			rr := httptest.NewRecorder()
-			request, _ := http.NewRequest(http.MethodGet, "/api/events?uid=err", nil)
+			request, _ := http.NewRequest(http.MethodGet, "/api/events?object_id=err", nil)
 			router.ServeHTTP(rr, request)
 			Expect(rr.Code).Should(Equal(http.StatusInternalServerError))
 		})
@@ -193,7 +186,7 @@ var _ = Describe("event", func() {
 				CreatedAt: time.Time{},
 				Kind:      "testKind",
 				Type:      "testType",
-				Reason:    "testRaason",
+				Reason:    "testReason",
 				Message:   "testMessage",
 				Name:      "testName",
 				Namespace: "testNamespace",
