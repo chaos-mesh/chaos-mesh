@@ -1,8 +1,0 @@
-namePrefix: chaos-mesh-
-
-bases:
-- ../crd
-#- ../webhook
-# TODO: Use kustomize to generate webhook
-
-vars:
