@@ -36,9 +36,8 @@ import (
 	"unsafe"
 
 	"github.com/go-logr/logr"
-	ctrl "sigs.k8s.io/controller-runtime"
-
 	"github.com/pkg/errors"
+	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/mapreader"
 )

@@ -25,7 +25,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"

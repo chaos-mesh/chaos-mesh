@@ -20,10 +20,9 @@ import (
 	"github.com/golang/protobuf/ptypes/empty"
 	"google.golang.org/grpc"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/client"
 	chaosdaemon "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
-
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/client"
 )
 
 // Assert *MockChaosDaemonClient implements chaosdaemon.ChaosDaemonClientInterface.
