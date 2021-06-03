@@ -49,7 +49,7 @@ func (in *HTTPChaos) ValidateCreate() error {
 func (in *HTTPChaos) ValidateUpdate(old runtime.Object) error {
 	httpchaoslog.Info("validate update", "name", in.Name)
 	if !reflect.DeepEqual(in.Spec, old.(*HTTPChaos).Spec) {
-		return fmt.Errorf("Cannot update chaos spec")
+		return ErrCanNotUpdateChaos
 	}
 	return in.Validate()
 }

@@ -49,7 +49,7 @@ func (in *GcpChaos) ValidateCreate() error {
 func (in *GcpChaos) ValidateUpdate(old runtime.Object) error {
 	gcpchaoslog.Info("validate update", "name", in.Name)
 	if !reflect.DeepEqual(in.Spec, old.(*GcpChaos).Spec) {
-		return fmt.Errorf("Cannot update chaos spec")
+		return ErrCanNotUpdateChaos
 	}
 	return in.Validate()
 }

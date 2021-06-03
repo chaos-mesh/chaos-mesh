@@ -86,7 +86,7 @@ func (in *NetworkChaos) ValidateCreate() error {
 func (in *NetworkChaos) ValidateUpdate(old runtime.Object) error {
 	networkchaoslog.Info("validate update", "name", in.Name)
 	if !reflect.DeepEqual(in.Spec, old.(*NetworkChaos).Spec) {
-		return fmt.Errorf("Cannot update chaos spec")
+		return ErrCanNotUpdateChaos
 	}
 	return in.Validate()
 }

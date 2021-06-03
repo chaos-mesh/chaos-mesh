@@ -60,7 +60,7 @@ func (in *IoChaos) ValidateCreate() error {
 func (in *IoChaos) ValidateUpdate(old runtime.Object) error {
 	iochaoslog.Info("validate update", "name", in.Name)
 	if !reflect.DeepEqual(in.Spec, old.(*IoChaos).Spec) {
-		return fmt.Errorf("Cannot update chaos spec")
+		return ErrCanNotUpdateChaos
 	}
 	return in.Validate()
 }

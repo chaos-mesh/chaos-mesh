@@ -51,7 +51,7 @@ func (in *KernelChaos) ValidateCreate() error {
 func (in *KernelChaos) ValidateUpdate(old runtime.Object) error {
 	kernelchaoslog.Info("validate update", "name", in.Name)
 	if !reflect.DeepEqual(in.Spec, old.(*KernelChaos).Spec) {
-		return fmt.Errorf("Cannot update chaos spec")
+		return ErrCanNotUpdateChaos
 	}
 	return in.Validate()
 }

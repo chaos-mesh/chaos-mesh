@@ -62,7 +62,7 @@ func (in *StressChaos) ValidateCreate() error {
 func (in *StressChaos) ValidateUpdate(old runtime.Object) error {
 	stressChaosLog.Info("validate update", "name", in.Name)
 	if !reflect.DeepEqual(in.Spec, old.(*StressChaos).Spec) {
-		return fmt.Errorf("Cannot update chaos spec")
+		return ErrCanNotUpdateChaos
 	}
 	return in.Validate()
 }

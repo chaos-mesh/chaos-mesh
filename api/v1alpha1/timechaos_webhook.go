@@ -53,7 +53,7 @@ func (in *TimeChaos) ValidateCreate() error {
 func (in *TimeChaos) ValidateUpdate(old runtime.Object) error {
 	timechaoslog.Info("validate update", "name", in.Name)
 	if !reflect.DeepEqual(in.Spec, old.(*TimeChaos).Spec) {
-		return fmt.Errorf("Cannot update chaos spec")
+		return ErrCanNotUpdateChaos
 	}
 	return in.Validate()
 }
