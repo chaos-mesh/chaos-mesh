@@ -25,6 +25,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/podiochaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/schedule"
+	wfcontrollers "github.com/chaos-mesh/chaos-mesh/pkg/workflow/controllers"
 )
 
 var Module = fx.Options(
@@ -58,5 +59,6 @@ var Module = fx.Options(
 			Target: podiochaos.NewController,
 		},
 	),
+	fx.Invoke(wfcontrollers.BootstrapWorkflowControllers),
 	schedule.Module,
 	chaosimpl.AllImpl)
