@@ -38,15 +38,14 @@ spec:
   delay:
     latency: "10ms"
   duration: "30s" # duration for the injected chaos experiment
-  scheduler: # scheduler rules for the running time of the chaos experiments about pods.
-    cron: "@every 60s"
 EOF
 kubectl apply -f delay.yaml
 
 echo "Checking chaosctl function"
 ./chaosctl logs 1>/dev/null
-status=$(./chaosctl debug networkchaos web-show-network-delay | grep "Execute as expected")
+status=$(./chaosctl debug -i networkchaos web-show-network-delay | grep "Execute as expected")
 if [[ -z "$status" ]]; then
+    ./chaosctl debug -i networkchaos web-show-network-delay
     echo "Chaos is not running as expected"
     code=1
 fi

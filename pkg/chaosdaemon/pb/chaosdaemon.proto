@@ -20,7 +20,9 @@ service ChaosDaemon {
   rpc ExecStressors (ExecStressRequest) returns (ExecStressResponse) {}
   rpc CancelStressors (CancelStressRequest) returns (google.protobuf.Empty) {}
 
-  rpc ApplyIoChaos(ApplyIoChaosRequest) returns (ApplyIoChaosResponse) {}
+  rpc ApplyIOChaos(ApplyIOChaosRequest) returns (ApplyIOChaosResponse) {}
+
+  rpc ApplyHttpChaos(ApplyHttpChaosRequest) returns (ApplyHttpChaosResponse) {}
 
   rpc SetDNSServer (SetDNSServerRequest) returns (google.protobuf.Empty) {}
 }
@@ -138,6 +140,7 @@ message Chain {
   string protocol = 5;
   string source_ports = 6;
   string destination_ports = 7;
+  string tcp_flags = 8;
 }
 
 message TimeRequest {
@@ -176,7 +179,7 @@ message CancelStressRequest {
   int64 startTime = 2;
 }
 
-message ApplyIoChaosRequest {
+message ApplyIOChaosRequest {
   string actions = 1;
   string volume = 2;
   string container_id = 3;
@@ -186,10 +189,28 @@ message ApplyIoChaosRequest {
   bool enterNS = 6;
 }
 
-message ApplyIoChaosResponse {
+message ApplyIOChaosResponse {
   int64 instance = 1;
   int64 startTime = 2;
 }
+
+message ApplyHttpChaosRequest {
+  string rules = 1;
+  repeated uint32 proxy_ports = 2;
+  string container_id = 3;
+
+  int64 instance = 4;
+  int64 startTime = 5;
+  bool enterNS = 6;
+}
+
+message ApplyHttpChaosResponse {
+  int64 instance = 1;
+  int64 startTime = 2;
+  int32 statusCode = 3;
+  string error = 4;
+}
+
 
 message TcsRequest {
   repeated Tc tcs = 1;

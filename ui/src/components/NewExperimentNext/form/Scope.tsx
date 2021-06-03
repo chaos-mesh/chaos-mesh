@@ -1,7 +1,7 @@
 import { AutocompleteMultipleField, SelectField, TextField } from 'components/FormField'
 import { Box, InputAdornment, MenuItem, Typography } from '@material-ui/core'
-import React, { useEffect, useMemo, useRef } from 'react'
-import { arrToObjBySep, joinObjKVs, toTitleCase } from 'lib/utils'
+import React, { useEffect, useMemo } from 'react'
+import { arrToObjBySep, objToArrBySep, toTitleCase } from 'lib/utils'
 import {
   getAnnotations,
   getCommonPodsByNamespaces as getCommonPods,
@@ -41,20 +41,19 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
 
   const state = useStoreSelector((state) => state)
   const { enableKubeSystemNS } = state.settings
-  const { labels, annotations } = state.experiments
+  const { labels, annotations, target } = state.experiments
   const pods = scope === 'scope' ? state.experiments.pods : state.experiments.networkTargetPods
   const getPods = scope === 'scope' ? getCommonPods : getNetworkTargetPods
+  const disabled = target.kind === 'AwsChaos' || target.kind === 'GcpChaos'
   const dispatch = useStoreDispatch()
 
   const kvSeparator = ': '
-  const labelKVs = useMemo(() => joinObjKVs(labels, kvSeparator), [labels])
-  const annotationKVs = useMemo(() => joinObjKVs(annotations, kvSeparator), [annotations])
-
-  const firstRender = useRef(true)
+  const labelKVs = useMemo(() => objToArrBySep(labels, kvSeparator), [labels])
+  const annotationKVs = useMemo(() => objToArrBySep(annotations, kvSeparator), [annotations])
 
   const handleChangeIncludeAll = (id: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const lastValues = getIn(values, id)
-    const currentValues = (e.target.value as unknown) as string[]
+    const currentValues = e.target.value as unknown as string[]
 
     if (!lastValues.includes('all') && currentValues.includes('all')) {
       e.target.value = ['all'] as any
@@ -92,29 +91,24 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
   }, [currentNamespaces, getPods, dispatch])
 
   useEffect(() => {
-    if (firstRender.current) {
-      firstRender.current = false
-
-      return
+    if (currentLabels.length || currentAnnotations.length) {
+      dispatch(
+        getPods({
+          namespace_selectors: currentNamespaces,
+          label_selectors: arrToObjBySep(currentLabels, kvSeparator),
+          annotation_selectors: arrToObjBySep(currentAnnotations, kvSeparator),
+        })
+      )
     }
-
-    dispatch(
-      getPods({
-        namespace_selectors: currentNamespaces,
-        label_selectors: arrToObjBySep(currentLabels, kvSeparator),
-        annotation_selectors: arrToObjBySep(currentAnnotations, kvSeparator),
-      })
-    )
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [firstRender, currentLabels, currentAnnotations])
+  }, [currentLabels, currentAnnotations])
 
   return (
     <>
       <AutocompleteMultipleField
         id={`${scope}.namespace_selectors`}
         name={`${scope}.namespace_selectors`}
-        label={T('newE.scope.namespaceSelectors')}
+        label={T('k8s.namespaceSelectors')}
         helperText={
           getIn(touched, `${scope}.namespace_selectors`) && getIn(errors, `${scope}.namespace_selectors`)
             ? getIn(errors, `${scope}.namespace_selectors`)
@@ -124,6 +118,7 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
         error={
           getIn(errors, `${scope}.namespace_selectors`) && getIn(touched, `${scope}.namespace_selectors`) ? true : false
         }
+        disabled={disabled}
       />
 
       <AutocompleteMultipleField
@@ -132,6 +127,7 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
         label={T('k8s.labelSelectors')}
         helperText={T('common.multiOptions')}
         options={labelKVs}
+        disabled={disabled}
       />
 
       <AdvancedOptions>
@@ -141,6 +137,7 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
           label={T('k8s.annotationsSelectors')}
           helperText={T('common.multiOptions')}
           options={annotationKVs}
+          disabled={disabled}
         />
 
         <SelectField
@@ -148,6 +145,7 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
           name={`${scope}.mode`}
           label={T('newE.scope.mode')}
           helperText={T('newE.scope.modeHelper')}
+          disabled={disabled}
         >
           <MenuItem value="all">All</MenuItem>
           {modes.map((option) => (
@@ -168,6 +166,7 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
                 <InputAdornment position="end">%</InputAdornment>
               ),
             }}
+            disabled={disabled}
           />
         )}
 
@@ -178,6 +177,7 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
           helperText={T('common.multiOptions')}
           multiple
           onChange={handleChangeIncludeAll(`${scope}.phase_selectors`)}
+          disabled={disabled}
         >
           {phases.map((option: string) => (
             <MenuItem key={option} value={option}>
@@ -187,7 +187,7 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
         </SelectField>
       </AdvancedOptions>
 
-      <Box mb={3}>
+      <Box my={3}>
         <Typography>{podsPreviewTitle || T('newE.scope.affectedPodsPreview')}</Typography>
         <Typography variant="subtitle2" color="textSecondary">
           {podsPreviewDesc || T('newE.scope.affectedPodsPreviewHelper')}

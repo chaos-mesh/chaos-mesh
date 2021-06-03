@@ -1,23 +1,14 @@
 import { Box, Button } from '@material-ui/core'
 import { Form, Formik, FormikHelpers } from 'formik'
+import { setAlert, setTokenName, setTokens } from 'slices/globalStatus'
+import { useStoreDispatch, useStoreSelector } from 'store'
 
-import LS from 'lib/localStorage'
 import React from 'react'
 import T from 'components/T'
 import { TextField } from 'components/FormField'
 import api from 'api'
-import { setTokens } from 'slices/globalStatus'
-import { useStoreDispatch } from 'store'
-
-function validateName(value: string) {
-  let error
-
-  if (value === '') {
-    error = (T('settings.addToken.nameValidation') as unknown) as string
-  }
-
-  return error
-}
+import { useIntl } from 'react-intl'
+import { validateName } from 'lib/formikhelpers'
 
 function validateToken(value: string) {
   let error
@@ -39,22 +30,28 @@ interface TokenProps {
 }
 
 const Token: React.FC<TokenProps> = ({ onSubmitCallback }) => {
+  const intl = useIntl()
+
+  const { tokens } = useStoreSelector((state) => state.globalStatus)
   const dispatch = useStoreDispatch()
 
   const saveToken = (values: TokenFormValues) => {
-    let tokens = []
-    const previous = LS.get('token')
-
-    if (previous) {
-      tokens = JSON.parse(previous)
-    }
-
-    tokens.push(values)
-
-    dispatch(setTokens(tokens))
+    dispatch(setTokens([...tokens, values]))
+    dispatch(setTokenName(values.name))
   }
 
   const submitToken = (values: TokenFormValues, { setFieldError, resetForm }: FormikHelpers<TokenFormValues>) => {
+    if (tokens.some((token) => token.name === values.name)) {
+      dispatch(
+        setAlert({
+          type: 'warning',
+          message: intl.formatMessage({ id: 'settings.addToken.duplicateDesc' }),
+        })
+      )
+
+      return
+    }
+
     api.auth.token(values.token)
 
     function restSteps() {
@@ -90,8 +87,8 @@ const Token: React.FC<TokenProps> = ({ onSubmitCallback }) => {
         <Form>
           <TextField
             name="name"
-            label={T('settings.addToken.name')}
-            validate={validateName}
+            label={T('common.name')}
+            validate={validateName((T('settings.addToken.nameValidation') as unknown) as string)}
             helperText={errors.name && touched.name ? errors.name : T('settings.addToken.nameHelper')}
             error={errors.name && touched.name ? true : false}
           />

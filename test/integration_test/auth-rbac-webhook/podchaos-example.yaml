@@ -1,0 +1,10 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: PodChaos
+metadata:
+  name: pod-kill-example
+spec:
+  action: pod-kill
+  mode: one
+  selector:
+    labelSelectors:
+      "app.kubernetes.io/component": "no-applications-were-harmed"

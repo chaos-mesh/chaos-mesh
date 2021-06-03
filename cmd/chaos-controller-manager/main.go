@@ -20,72 +20,37 @@ import (
 	"os"
 	"time"
 
+	"github.com/go-logr/logr"
+	"go.uber.org/fx"
 	"golang.org/x/time/rate"
-	"k8s.io/apimachinery/pkg/runtime"
-	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-	"k8s.io/client-go/rest"
 	"k8s.io/client-go/util/workqueue"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	controllermetrics "sigs.k8s.io/controller-runtime/pkg/metrics"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	apiWebhook "github.com/chaos-mesh/chaos-mesh/api/webhook"
-	_ "github.com/chaos-mesh/chaos-mesh/controllers/awschaos/detachvolume"
-	_ "github.com/chaos-mesh/chaos-mesh/controllers/awschaos/ec2restart"
-	_ "github.com/chaos-mesh/chaos-mesh/controllers/awschaos/ec2stop"
+	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-controller-manager/provider"
+	"github.com/chaos-mesh/chaos-mesh/controllers"
 	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
-	_ "github.com/chaos-mesh/chaos-mesh/controllers/dnschaos"
-	_ "github.com/chaos-mesh/chaos-mesh/controllers/gcpchaos/diskloss"
-	_ "github.com/chaos-mesh/chaos-mesh/controllers/gcpchaos/nodereset"
-	_ "github.com/chaos-mesh/chaos-mesh/controllers/gcpchaos/nodestop"
-	_ "github.com/chaos-mesh/chaos-mesh/controllers/httpchaos"
-	_ "github.com/chaos-mesh/chaos-mesh/controllers/iochaos"
-	_ "github.com/chaos-mesh/chaos-mesh/controllers/jvmchaos"
-	_ "github.com/chaos-mesh/chaos-mesh/controllers/kernelchaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/metrics"
-	_ "github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/partition"
-	_ "github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/trafficcontrol"
-	_ "github.com/chaos-mesh/chaos-mesh/controllers/podchaos/containerkill"
-	_ "github.com/chaos-mesh/chaos-mesh/controllers/podchaos/podfailure"
-	_ "github.com/chaos-mesh/chaos-mesh/controllers/podchaos/podkill"
-	"github.com/chaos-mesh/chaos-mesh/controllers/podiochaos"
-	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos"
-	_ "github.com/chaos-mesh/chaos-mesh/controllers/stresschaos"
-	_ "github.com/chaos-mesh/chaos-mesh/controllers/timechaos"
+	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
-	"github.com/chaos-mesh/chaos-mesh/pkg/router"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config/watcher"
-	wfcontrollers "github.com/chaos-mesh/chaos-mesh/pkg/workflow/controllers"
-	// +kubebuilder:scaffold:imports
 )
 
 var (
-	scheme   = runtime.NewScheme()
-	setupLog = ctrl.Log.WithName("setup")
+	printVersion bool
+	setupLog     = ctrl.Log.WithName("setup")
 )
-
-var (
-	printVersion                   bool
-	restConfigQPS, restConfigBurst int
-)
-
-func init() {
-	_ = clientgoscheme.AddToScheme(scheme)
-
-	_ = v1alpha1.AddToScheme(scheme)
-	// +kubebuilder:scaffold:scheme
-}
 
 func parseFlags() {
 	flag.BoolVar(&printVersion, "version", false, "print version information and exit")
-	flag.IntVar(&restConfigQPS, "rest-config-qps", 30, "QPS of rest config.")
-	flag.IntVar(&restConfigBurst, "rest-config-burst", 50, "burst of rest config.")
 	flag.Parse()
 }
 
@@ -98,73 +63,53 @@ func main() {
 
 	// set RPCTimeout config
 	grpcUtils.RPCTimeout = ccfg.ControllerCfg.RPCTimeout
-
 	ctrl.SetLogger(zap.New(zap.UseDevMode(true)))
 
-	options := ctrl.Options{
-		Scheme:             scheme,
-		MetricsBindAddress: ccfg.ControllerCfg.MetricsAddr,
-		LeaderElection:     ccfg.ControllerCfg.EnableLeaderElection,
-		Port:               9443,
-	}
+	app := fx.New(
+		fx.Options(
+			fx.Provide(
+				provider.NewOption,
+				provider.NewClient,
+				provider.NewManager,
+				provider.NewReader,
+				provider.NewLogger,
+				provider.NewAuthCli,
+				provider.NewScheme,
+				provider.NewConfig,
+			),
+			controllers.Module,
+			selector.Module,
+			types.ChaosObjects,
+		),
+		fx.Invoke(Run),
+	)
 
-	if ccfg.ControllerCfg.ClusterScoped {
-		setupLog.Info("Chaos controller manager is running in cluster scoped mode.")
-		// will not specific a certain namespace
-	} else {
-		setupLog.Info("Chaos controller manager is running in namespace scoped mode.", "targetNamespace", ccfg.ControllerCfg.TargetNamespace)
-		options.Namespace = ccfg.ControllerCfg.TargetNamespace
-	}
+	app.Run()
+}
 
-	cfg := ctrl.GetConfigOrDie()
-	setRestConfig(cfg)
-	mgr, err := ctrl.NewManager(cfg, options)
-	if err != nil {
-		setupLog.Error(err, "unable to start manager")
-		os.Exit(1)
-	}
+type RunParams struct {
+	fx.In
 
-	authCli, err := authorizationv1.NewForConfig(cfg)
-	if err != nil {
-		setupLog.Error(err, "unable to get authorization client")
-		os.Exit(1)
-	}
+	Mgr     ctrl.Manager
+	Logger  logr.Logger
+	AuthCli *authorizationv1.AuthorizationV1Client
 
-	err = router.SetupWithManagerAndConfigs(mgr, ccfg.ControllerCfg)
-	if err != nil {
-		setupLog.Error(err, "fail to setup with manager")
-		os.Exit(1)
-	}
+	Controllers []types.Controller `group:"controller"`
+	Objs        []types.Object     `group:"objs"`
+}
 
-	// We only setup webhook for podiochaos, and the logic of applying chaos are in the mutation
-	// webhook, because we need to get the running result synchronously in io chaos reconciler
-	v1alpha1.RegisterPodIoHandler(&podiochaos.Handler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("handler").WithName("PodIOChaos"),
-	})
-	if err = (&v1alpha1.PodIoChaos{}).SetupWebhookWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create webhook", "webhook", "PodIOChaos")
-		os.Exit(1)
-	}
+func Run(params RunParams) error {
+	mgr := params.Mgr
+	authCli := params.AuthCli
 
-	// We only setup webhook for podnetworkchaos, and the logic of applying chaos are in the validation
-	// webhook, because we need to get the running result synchronously in network chaos reconciler
-	v1alpha1.RegisterRawPodNetworkHandler(&podnetworkchaos.Handler{
-		Client:                  mgr.GetClient(),
-		Reader:                  mgr.GetAPIReader(),
-		Log:                     ctrl.Log.WithName("handler").WithName("PodNetworkChaos"),
-		AllowHostNetworkTesting: ccfg.ControllerCfg.AllowHostNetworkTesting,
-	})
-	if err = (&v1alpha1.PodNetworkChaos{}).SetupWebhookWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create webhook", "webhook", "PodNetworkChaos")
-		os.Exit(1)
-	}
-
-	// workflow stuff
-	err = wfcontrollers.BootstrapWorkflowControllers(mgr, ctrl.Log)
-	if err != nil {
-		setupLog.Error(err, "failed to setup bootstrap controllers")
-		os.Exit(1)
+	var err error
+	for _, obj := range params.Objs {
+		err = ctrl.NewWebhookManagedBy(mgr).
+			For(obj.Object).
+			Complete()
+		if err != nil {
+			return err
+		}
 	}
 
 	// Init metrics collector
@@ -204,29 +149,19 @@ func main() {
 			Metrics:       metricsCollector,
 		}},
 	)
-
 	hookServer.Register("/validate-auth", &webhook.Admission{
 		Handler: apiWebhook.NewAuthValidator(ccfg.ControllerCfg.SecurityMode, mgr.GetClient(), mgr.GetAPIReader(), authCli,
 			ccfg.ControllerCfg.ClusterScoped, ccfg.ControllerCfg.TargetNamespace, ccfg.ControllerCfg.EnableFilterNamespace),
 	},
 	)
 
-	// +kubebuilder:scaffold:builder
-
 	setupLog.Info("Starting manager")
 	if err := mgr.Start(stopCh); err != nil {
 		setupLog.Error(err, "unable to start manager")
 		os.Exit(1)
 	}
-}
 
-func setRestConfig(c *rest.Config) {
-	if restConfigQPS > 0 {
-		c.QPS = float32(restConfigQPS)
-	}
-	if restConfigBurst > 0 {
-		c.Burst = restConfigBurst
-	}
+	return nil
 }
 
 func setupWatchQueue(stopCh <-chan struct{}, configWatcher *watcher.K8sConfigMapWatcher) workqueue.Interface {

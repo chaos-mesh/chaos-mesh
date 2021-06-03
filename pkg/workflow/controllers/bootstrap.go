@@ -33,6 +33,7 @@ func BootstrapWorkflowControllers(mgr manager.Manager, logger logr.Logger) error
 	}
 	err = ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.Workflow{}).
+		Owns(&v1alpha1.WorkflowNode{}).
 		Named("workflow-entry-reconciler").
 		Complete(
 			NewWorkflowEntryReconciler(
@@ -49,6 +50,7 @@ func BootstrapWorkflowControllers(mgr manager.Manager, logger logr.Logger) error
 	// TODO: maybe we could use select with labelSelector as instead
 	err = ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.WorkflowNode{}).
+		Owns(&v1alpha1.WorkflowNode{}).
 		Named("workflow-serial-node-reconciler").
 		Complete(
 			NewSerialNodeReconciler(
@@ -60,19 +62,22 @@ func BootstrapWorkflowControllers(mgr manager.Manager, logger logr.Logger) error
 	if err != nil {
 		return err
 	}
+
 	err = ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.WorkflowNode{}).
-		Named("workflow-accomplish-watcher").
+		Owns(&v1alpha1.WorkflowNode{}).
+		Named("workflow-parallel-node-reconciler").
 		Complete(
-			NewAccomplishWatcher(
-				mgr.GetClient(),
-				mgr.GetEventRecorderFor("workflow-accomplish-watcher"),
-				logger.WithName("workflow-accomplish-watcher"),
+			NewParallelNodeReconciler(
+				noCacheClient,
+				mgr.GetEventRecorderFor("workflow-parallel-node-reconciler"),
+				logger.WithName("workflow-parallel-node-reconciler"),
 			),
 		)
 	if err != nil {
 		return err
 	}
+
 	err = ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.WorkflowNode{}).
 		Named("workflow-deadline-reconciler").
@@ -97,8 +102,5 @@ func BootstrapWorkflowControllers(mgr manager.Manager, logger logr.Logger) error
 				logger.WithName("workflow-chaos-node-reconciler"),
 			),
 		)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }

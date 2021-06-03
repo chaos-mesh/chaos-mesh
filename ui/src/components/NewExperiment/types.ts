@@ -115,11 +115,13 @@ export interface ExperimentTargetStress {
 export type ExperimentKind =
   | 'PodChaos'
   | 'NetworkChaos'
-  | 'IoChaos'
+  | 'IOChaos'
   | 'KernelChaos'
   | 'TimeChaos'
   | 'StressChaos'
   | 'DNSChaos'
+  | 'AwsChaos'
+  | 'GcpChaos'
 
 export interface ExperimentTarget {
   kind: ExperimentKind

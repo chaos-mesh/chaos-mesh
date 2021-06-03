@@ -7,8 +7,10 @@ spec:
   action: delay
   mode: one
   selector:
+    namespaces:
+      - web
     labelSelectors:
-      "app.kubernetes.io/component": "tikv"
+      "app.kubernetes.io/component": "web-app"
   delay:
     latency: "90ms"
     correlation: "25"
@@ -16,9 +18,10 @@ spec:
   direction: to
   target:
     selector:
+      namespaces:
+        - db
+        - storage
       labelSelectors:
-        "app.kubernetes.io/component": "tikv"
+        "app.kubernetes.io/component": "pool"
     mode: one
   duration: "10s"
-  scheduler:
-    cron: "@every 15s"

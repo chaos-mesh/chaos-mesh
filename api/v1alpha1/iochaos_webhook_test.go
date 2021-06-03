@@ -22,231 +22,198 @@ import (
 var _ = Describe("iochaos_webhook", func() {
 	Context("Defaulter", func() {
 		It("set default namespace selector", func() {
-			iochaos := &IoChaos{
+			iochaos := &IOChaos{
 				ObjectMeta: metav1.ObjectMeta{Namespace: metav1.NamespaceDefault},
 			}
 			iochaos.Default()
 			Expect(iochaos.Spec.Selector.Namespaces[0]).To(Equal(metav1.NamespaceDefault))
 		})
 	})
-	Context("ChaosValidator of iochaos", func() {
+	Context("webhook.Validator of iochaos", func() {
 		It("Validate", func() {
 
 			type TestCase struct {
 				name    string
-				chaos   IoChaos
-				execute func(chaos *IoChaos) error
+				chaos   IOChaos
+				execute func(chaos *IOChaos) error
 				expect  string
 			}
-			duration := "400s"
 			errorDuration := "400S"
 
 			tcs := []TestCase{
 				{
 					name: "simple ValidateCreate",
-					chaos: IoChaos{
+					chaos: IOChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
 							Name:      "foo1",
 						},
 					},
-					execute: func(chaos *IoChaos) error {
+					execute: func(chaos *IOChaos) error {
 						return chaos.ValidateCreate()
 					},
 					expect: "",
 				},
 				{
 					name: "simple ValidateUpdate",
-					chaos: IoChaos{
+					chaos: IOChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
 							Name:      "foo2",
 						},
 					},
-					execute: func(chaos *IoChaos) error {
+					execute: func(chaos *IOChaos) error {
 						return chaos.ValidateUpdate(chaos)
 					},
 					expect: "",
 				},
 				{
 					name: "simple ValidateDelete",
-					chaos: IoChaos{
+					chaos: IOChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
 							Name:      "foo3",
 						},
 					},
-					execute: func(chaos *IoChaos) error {
+					execute: func(chaos *IOChaos) error {
 						return chaos.ValidateDelete()
 					},
 					expect: "",
 				},
 				{
-					name: "only define the Scheduler",
-					chaos: IoChaos{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: metav1.NamespaceDefault,
-							Name:      "foo4",
-						},
-						Spec: IoChaosSpec{
-							Scheduler: &SchedulerSpec{
-								Cron: "@every 10m",
-							},
-						},
-					},
-					execute: func(chaos *IoChaos) error {
-						return chaos.ValidateCreate()
-					},
-					expect: "error",
-				},
-				{
-					name: "only define the Duration",
-					chaos: IoChaos{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: metav1.NamespaceDefault,
-							Name:      "foo5",
-						},
-						Spec: IoChaosSpec{
-							Duration: &duration,
-						},
-					},
-					execute: func(chaos *IoChaos) error {
-						return chaos.ValidateCreate()
-					},
-					expect: "error",
-				},
-				{
-					name: "parse the duration and scheduler error",
-					chaos: IoChaos{
+					name: "parse the duration error",
+					chaos: IOChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
 							Name:      "foo6",
 						},
-						Spec: IoChaosSpec{
-							Duration:  &errorDuration,
-							Scheduler: &SchedulerSpec{Cron: "xx"},
+						Spec: IOChaosSpec{
+							Duration: &errorDuration,
 						},
 					},
-					execute: func(chaos *IoChaos) error {
+					execute: func(chaos *IOChaos) error {
 						return chaos.ValidateCreate()
 					},
 					expect: "error",
 				},
 				{
 					name: "validate value with FixedPercentPodMode",
-					chaos: IoChaos{
+					chaos: IOChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
 							Name:      "foo7",
 						},
-						Spec: IoChaosSpec{
-							Value: "0",
-							Mode:  FixedPodMode,
+						Spec: IOChaosSpec{
+							ContainerSelector: ContainerSelector{
+								PodSelector: PodSelector{
+									Value: "0",
+									Mode:  FixedPodMode,
+								},
+							},
 						},
 					},
-					execute: func(chaos *IoChaos) error {
+					execute: func(chaos *IOChaos) error {
 						return chaos.ValidateCreate()
 					},
 					expect: "error",
 				},
 				{
 					name: "validate value with FixedPercentPodMode, parse value error",
-					chaos: IoChaos{
+					chaos: IOChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
 							Name:      "foo8",
 						},
-						Spec: IoChaosSpec{
-							Value: "num",
-							Mode:  FixedPodMode,
+						Spec: IOChaosSpec{
+							ContainerSelector: ContainerSelector{
+								PodSelector: PodSelector{
+									Value: "num",
+									Mode:  FixedPodMode,
+								},
+							},
 						},
 					},
-					execute: func(chaos *IoChaos) error {
+					execute: func(chaos *IOChaos) error {
 						return chaos.ValidateCreate()
 					},
 					expect: "error",
 				},
 				{
 					name: "validate value with RandomMaxPercentPodMode",
-					chaos: IoChaos{
+					chaos: IOChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
 							Name:      "foo9",
 						},
-						Spec: IoChaosSpec{
-							Value: "0",
-							Mode:  RandomMaxPercentPodMode,
+						Spec: IOChaosSpec{
+							ContainerSelector: ContainerSelector{
+								PodSelector: PodSelector{
+									Value: "0",
+									Mode:  RandomMaxPercentPodMode,
+								},
+							},
 						},
 					},
-					execute: func(chaos *IoChaos) error {
+					execute: func(chaos *IOChaos) error {
 						return chaos.ValidateCreate()
 					},
 					expect: "error",
 				},
 				{
 					name: "validate value with RandomMaxPercentPodMode ,parse value error",
-					chaos: IoChaos{
+					chaos: IOChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
 							Name:      "foo10",
 						},
-						Spec: IoChaosSpec{
-							Value: "num",
-							Mode:  RandomMaxPercentPodMode,
+						Spec: IOChaosSpec{
+							ContainerSelector: ContainerSelector{
+								PodSelector: PodSelector{
+									Value: "num",
+									Mode:  RandomMaxPercentPodMode,
+								},
+							},
 						},
 					},
-					execute: func(chaos *IoChaos) error {
+					execute: func(chaos *IOChaos) error {
 						return chaos.ValidateCreate()
 					},
 					expect: "error",
 				},
 				{
 					name: "validate value with FixedPercentPodMode",
-					chaos: IoChaos{
+					chaos: IOChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
 							Name:      "foo11",
 						},
-						Spec: IoChaosSpec{
-							Value: "101",
-							Mode:  FixedPercentPodMode,
+						Spec: IOChaosSpec{
+							ContainerSelector: ContainerSelector{
+								PodSelector: PodSelector{
+									Value: "101",
+									Mode:  FixedPercentPodMode,
+								},
+							},
 						},
 					},
-					execute: func(chaos *IoChaos) error {
+					execute: func(chaos *IOChaos) error {
 						return chaos.ValidateCreate()
 					},
 					expect: "error",
 				},
 				{
 					name: "validate delay",
-					chaos: IoChaos{
+					chaos: IOChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
 							Name:      "foo12",
 						},
-						Spec: IoChaosSpec{
+						Spec: IOChaosSpec{
 							Delay:  "1S",
 							Action: IoLatency,
 						},
 					},
-					execute: func(chaos *IoChaos) error {
-						return chaos.ValidateCreate()
-					},
-					expect: "error",
-				},
-				{
-					name: "parse the scheduler.cron error",
-					chaos: IoChaos{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: metav1.NamespaceDefault,
-							Name:      "foo15",
-						},
-						Spec: IoChaosSpec{
-							Duration:  &duration,
-							Scheduler: &SchedulerSpec{Cron: "xx"},
-						},
-					},
-					execute: func(chaos *IoChaos) error {
+					execute: func(chaos *IOChaos) error {
 						return chaos.ValidateCreate()
 					},
 					expect: "error",

@@ -1,5 +1,5 @@
 apiVersion: chaos-mesh.org/v1alpha1
-kind: IoChaos
+kind: IOChaos
 metadata:
   name: io-attr-example
   namespace: chaos-testing
@@ -15,5 +15,3 @@ spec:
     perm: 72
   percent: 10
   duration: "400s"
-  scheduler:
-    cron: "@every 10m"

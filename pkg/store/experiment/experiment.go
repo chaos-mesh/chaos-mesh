@@ -18,11 +18,10 @@ import (
 	"time"
 
 	"github.com/jinzhu/gorm"
+	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 	"github.com/chaos-mesh/chaos-mesh/pkg/store/dbstore"
-
-	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 var log = ctrl.Log.WithName("store/experiment")
@@ -122,6 +121,11 @@ func (e *experimentStore) DeleteByFinishTime(_ context.Context, ttl time.Duratio
 	}
 
 	return nil
+}
+
+// DeleteByUIDs deletes archives by the uid list.
+func (e *experimentStore) DeleteByUIDs(_ context.Context, uids []string) error {
+	return e.db.Table("experiments").Where("uid IN (?)", uids).Unscoped().Delete(core.Experiment{}).Error
 }
 
 // DeleteIncompleteExperiments implements the core.ExperimentStore.DeleteIncompleteExperiments method.

@@ -23,36 +23,23 @@ import (
 // +kubebuilder:object:root=true
 // +chaos-mesh:base
 
-// IoChaos is the Schema for the iochaos API
-type IoChaos struct {
+// IOChaos is the Schema for the iochaos API
+type IOChaos struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   IoChaosSpec   `json:"spec,omitempty"`
-	Status IoChaosStatus `json:"status,omitempty"`
+	Spec   IOChaosSpec   `json:"spec,omitempty"`
+	Status IOChaosStatus `json:"status,omitempty"`
 }
 
-// IoChaosSpec defines the desired state of IoChaos
-type IoChaosSpec struct {
-	// Selector is used to select pods that are used to inject chaos action.
-	Selector SelectorSpec `json:"selector"`
-
-	// Mode defines the mode to run chaos action.
-	// Supported mode: one / all / fixed / fixed-percent / random-max-percent
-	// +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
-	Mode PodMode `json:"mode"`
-
-	// Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
-	// If `FixedPodMode`, provide an integer of pods to do chaos action.
-	// If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
-	// IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
-	// +optional
-	Value string `json:"value"`
+// IOChaosSpec defines the desired state of IOChaos
+type IOChaosSpec struct {
+	ContainerSelector `json:",inline"`
 
 	// Action defines the specific pod chaos action.
 	// Supported action: latency / fault / attrOverride / mistake
 	// +kubebuilder:validation:Enum=latency;fault;attrOverride;mistake
-	Action IoChaosType `json:"action"`
+	Action IOChaosType `json:"action"`
 
 	// Delay defines the value of I/O chaos action delay.
 	// A delay string is a possibly signed sequence of
@@ -92,14 +79,6 @@ type IoChaosSpec struct {
 	// VolumePath represents the mount path of injected volume
 	VolumePath string `json:"volumePath"`
 
-	// ContainerName indicates the target container to inject iochaos in
-	// +optional
-	ContainerName *string `json:"containerName,omitempty"`
-
-	// Scheduler defines some schedule rules to
-	// control the running time of the chaos experiment about pods.
-	Scheduler *SchedulerSpec `json:"scheduler,omitempty"`
-
 	// Duration represents the duration of the chaos action.
 	// It is required when the action is `PodFailureAction`.
 	// A duration string is a possibly signed sequence of
@@ -110,19 +89,21 @@ type IoChaosSpec struct {
 	Duration *string `json:"duration,omitempty"`
 }
 
-func (in *IoChaosSpec) GetSelector() SelectorSpec {
-	return in.Selector
-}
-
-func (in *IoChaosSpec) GetMode() PodMode {
-	return in.Mode
-}
-
-func (in *IoChaosSpec) GetValue() string {
-	return in.Value
-}
-
-// IoChaosStatus defines the observed state of IoChaos
-type IoChaosStatus struct {
+// IOChaosStatus defines the observed state of IOChaos
+type IOChaosStatus struct {
 	ChaosStatus `json:",inline"`
+
+	// Instances always specifies podiochaos generation or empty
+	// +optional
+	Instances map[string]int64 `json:"instances,omitempty"`
+}
+
+func (obj *IOChaos) GetSelectorSpecs() map[string]interface{} {
+	return map[string]interface{}{
+		".": &obj.Spec.ContainerSelector,
+	}
+}
+
+func (obj *IOChaos) GetCustomStatus() interface{} {
+	return &obj.Status.Instances
 }

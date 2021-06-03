@@ -20,7 +20,7 @@ const (
 	Serial       TemplateType = "Serial"
 	Parallel     TemplateType = "Parallel"
 	Suspend      TemplateType = "Suspend"
-	IoChaos      TemplateType = "IoChaos"
+	IOChaos      TemplateType = "IOChaos"
 	NetworkChaos TemplateType = "NetworkChaos"
 	StressChaos  TemplateType = "StressChaos"
 	PodChaos     TemplateType = "PodChaos"

@@ -65,3 +65,13 @@ type ChaosKind struct {
 	Chaos runtime.Object
 	ChaosList
 }
+
+// AllKinds returns all chaos kinds.
+func AllScheduleItemKinds() map[string]*ChaosKind {
+	return allScheduleItem.clone()
+}
+
+// all is a ChaosKindMap instance.
+var allScheduleItem = &chaosKindMap{
+	kinds: make(map[string]*ChaosKind),
+}

@@ -22,7 +22,6 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-
 	"google.golang.org/grpc/grpclog"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -39,21 +38,20 @@ func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet, result *c
 		return fmt.Errorf("chaos is not network")
 	}
 	chaosStatus := networkChaos.Status.ChaosStatus
-	chaosSelector := networkChaos.Spec.GetSelector()
+	chaosSelector := networkChaos.Spec.Selector
 
 	pods, daemons, err := cm.GetPods(ctx, networkChaos.GetName(), chaosStatus, chaosSelector, c.CtrlCli)
 	if err != nil {
 		return err
 	}
 
-	if err := cm.CheckFailedMessage(ctx, chaosStatus.FailedMessage, daemons, c); err != nil {
-		return err
-	}
-
 	for i := range pods {
 		podName := pods[i].Name
 		podResult := cm.PodResult{Name: podName}
-		_ = debugEachPod(ctx, pods[i], daemons[i], networkChaos, c, &podResult)
+		err = debugEachPod(ctx, pods[i], daemons[i], networkChaos, c, &podResult)
+		if err != nil {
+			fmt.Println(err)
+		}
 		result.Pods = append(result.Pods, podResult)
 		// TODO: V(4) log when err != nil, wait for #1433
 	}
@@ -116,7 +114,7 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 				if numCurrent == numExpect {
 					continue
 				}
-				// alphabetic charactors
+				// alphabetic characters
 				alpCurrent := regexp.MustCompile("[[:alpha:]]+").FindString(itemCurrent)
 				alpExpect := regexp.MustCompile("[[:alpha:]]+").FindString(itemExpect)
 				if alpCurrent == alpExpect {

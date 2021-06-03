@@ -15,23 +15,23 @@ package common
 
 import (
 	"context"
+	"crypto/rand"
 	"fmt"
-	"math/rand"
+	"math/big"
 	"net/http"
 	"sort"
 	"strings"
-	"time"
-
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
-	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
-	"github.com/chaos-mesh/chaos-mesh/pkg/config"
-	"github.com/chaos-mesh/chaos-mesh/pkg/core"
-	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 
 	"github.com/gin-gonic/gin"
 	v1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
+	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
+	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
+	"github.com/chaos-mesh/chaos-mesh/pkg/core"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
 )
 
 const (
@@ -162,7 +162,7 @@ func (s *Service) listPods(c *gin.Context) {
 		return
 	}
 	ctx := context.TODO()
-	filteredPods, err := selector.SelectPods(ctx, kubeCli, nil, exp.ParseSelector(), s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.EnableFilterNamespace)
+	filteredPods, err := pod.SelectPods(ctx, kubeCli, nil, exp.ParseSelector(), s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.EnableFilterNamespace)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
@@ -287,10 +287,10 @@ func (s *Service) getLabels(c *gin.Context) {
 
 	exp := &core.SelectorInfo{}
 	nsList := strings.Split(podNamespaceList, ",")
-	exp.NamespaceSelectors = nsList
+	exp.Namespaces = nsList
 
 	ctx := context.TODO()
-	filteredPods, err := selector.SelectPods(ctx, kubeCli, nil, exp.ParseSelector(), s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.EnableFilterNamespace)
+	filteredPods, err := pod.SelectPods(ctx, kubeCli, nil, exp.ParseSelector(), s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.EnableFilterNamespace)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
@@ -339,10 +339,10 @@ func (s *Service) getAnnotations(c *gin.Context) {
 
 	exp := &core.SelectorInfo{}
 	nsList := strings.Split(podNamespaceList, ",")
-	exp.NamespaceSelectors = nsList
+	exp.Namespaces = nsList
 
 	ctx := context.TODO()
-	filteredPods, err := selector.SelectPods(ctx, kubeCli, nil, exp.ParseSelector(), s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.EnableFilterNamespace)
+	filteredPods, err := pod.SelectPods(ctx, kubeCli, nil, exp.ParseSelector(), s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.EnableFilterNamespace)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
@@ -397,8 +397,12 @@ func (s *Service) getRbacConfig(c *gin.Context) {
 	}
 	if roleType == roleManager {
 		verbs = `"get", "list", "watch", "create", "delete", "patch", "update"`
-	} else {
+	} else if roleType == roleViewer {
 		verbs = `"get", "list", "watch"`
+	} else {
+		c.Status(http.StatusBadRequest)
+		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(fmt.Errorf("roleType is neither manager nor viewer")))
+		return
 	}
 
 	serviceAccountName := fmt.Sprintf("account-%s-%s-%s", scope, roleType, randomStr)
@@ -433,10 +437,10 @@ func inSlice(v string, sl []string) bool {
 const charset = "abcdefghijklmnopqrstuvwxyz"
 
 func randomStringWithCharset(length int, charset string) string {
-	var seededRand = rand.New(rand.NewSource(time.Now().UnixNano()))
 	b := make([]byte, length)
 	for i := range b {
-		b[i] = charset[seededRand.Intn(len(charset))]
+		num, _ := rand.Int(rand.Reader, big.NewInt(int64(len(charset))))
+		b[i] = charset[num.Int64()]
 	}
 	return string(b)
 }

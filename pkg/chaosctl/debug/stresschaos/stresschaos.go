@@ -20,9 +20,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/pkg/errors"
-
 	"code.cloudfoundry.org/bytefmt"
+	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 
@@ -37,14 +36,10 @@ func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet, result *c
 		return fmt.Errorf("chaos is not stresschaos")
 	}
 	chaosStatus := stressChaos.Status.ChaosStatus
-	chaosSelector := stressChaos.Spec.GetSelector()
+	chaosSelector := stressChaos.Spec.Selector
 
 	pods, daemons, err := cm.GetPods(ctx, stressChaos.GetName(), chaosStatus, chaosSelector, c.CtrlCli)
 	if err != nil {
-		return err
-	}
-
-	if err := cm.CheckFailedMessage(ctx, chaosStatus.FailedMessage, daemons, c); err != nil {
 		return err
 	}
 
@@ -65,6 +60,7 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 	if err != nil {
 		return errors.Wrap(err, fmt.Sprintf("run command %s failed", cmd))
 	}
+	result.Items = append(result.Items, cm.ItemResult{Name: "cat /proc/cgroups", Value: string(out)})
 
 	cmd = "ps"
 	out, err = cm.ExecBypass(ctx, pod, daemon, cmd, c.KubeCli)

@@ -20,10 +20,9 @@ import (
 	"github.com/golang/protobuf/ptypes/empty"
 	"google.golang.org/grpc"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/client"
 	chaosdaemon "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
-
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/client"
 )
 
 // Assert *MockChaosDaemonClient implements chaosdaemon.ChaosDaemonClientInterface.
@@ -76,8 +75,12 @@ func (c *MockChaosDaemonClient) ContainerKill(ctx context.Context, in *chaosdaem
 	return nil, mockError("ContainerKill")
 }
 
-func (c *MockChaosDaemonClient) ApplyIoChaos(ctx context.Context, in *chaosdaemon.ApplyIoChaosRequest, opts ...grpc.CallOption) (*chaosdaemon.ApplyIoChaosResponse, error) {
-	return nil, mockError("ApplyIoChaos")
+func (c *MockChaosDaemonClient) ApplyIOChaos(ctx context.Context, in *chaosdaemon.ApplyIOChaosRequest, opts ...grpc.CallOption) (*chaosdaemon.ApplyIOChaosResponse, error) {
+	return nil, mockError("ApplyIOChaos")
+}
+
+func (c *MockChaosDaemonClient) ApplyHttpChaos(ctx context.Context, in *chaosdaemon.ApplyHttpChaosRequest, opts ...grpc.CallOption) (*chaosdaemon.ApplyHttpChaosResponse, error) {
+	return nil, mockError("ApplyHttpChaos")
 }
 
 func (c *MockChaosDaemonClient) SetDNSServer(ctx context.Context, in *chaosdaemon.SetDNSServerRequest, opts ...grpc.CallOption) (*empty.Empty, error) {

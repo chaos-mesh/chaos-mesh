@@ -1,4 +1,4 @@
-import { TableCell as MUITableCell, Paper, Table, TableBody, TableRow, Typography, withStyles } from '@material-ui/core'
+import { TableCell as MUITableCell, Table, TableBody, TableRow, Typography, withStyles } from '@material-ui/core'
 import React, { useEffect, useState } from 'react'
 
 import AffectedPods from 'components/AffectedPods'
@@ -46,7 +46,7 @@ const EventDetail: React.FC<EventDetailProps> = ({ eventID }) => {
         <Table>
           <TableBody>
             <TableRow>
-              <TableCell>{T('events.event.experiment')} ID</TableCell>
+              <TableCell>{T('experiments.single')} ID</TableCell>
               <TableCell>
                 <Typography variant="body2" color="textSecondary">
                   {e.experiment_id}
@@ -55,7 +55,7 @@ const EventDetail: React.FC<EventDetailProps> = ({ eventID }) => {
             </TableRow>
 
             <TableRow>
-              <TableCell>{T('events.event.experiment')}</TableCell>
+              <TableCell>{T('experiments.single')}</TableCell>
               <TableCell>
                 <Typography variant="body2" color="textSecondary">
                   {e.experiment}
@@ -64,7 +64,7 @@ const EventDetail: React.FC<EventDetailProps> = ({ eventID }) => {
             </TableRow>
 
             <TableRow>
-              <TableCell>{T('events.event.namespace')}</TableCell>
+              <TableCell>{T('k8s.namespace')}</TableCell>
               <TableCell>
                 <Typography variant="body2" color="textSecondary">
                   {e.namespace}
@@ -106,9 +106,7 @@ const EventDetail: React.FC<EventDetailProps> = ({ eventID }) => {
             <TableRow>
               <TableCell>{T('newE.scope.affectedPods')}</TableCell>
               <TableCell>
-                <Paper variant="outlined">
-                  <AffectedPods pods={e.pods!} />
-                </Paper>
+                <AffectedPods pods={e.pods!} />
               </TableCell>
             </TableRow>
           </TableBody>

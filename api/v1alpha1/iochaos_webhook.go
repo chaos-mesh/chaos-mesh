@@ -27,8 +27,8 @@ import (
 // log is for logging in this package.
 var iochaoslog = logf.Log.WithName("iochaos-resource")
 
-// SetupWebhookWithManager setup IoChaos's webhook with manager
-func (in *IoChaos) SetupWebhookWithManager(mgr ctrl.Manager) error {
+// SetupWebhookWithManager setup IOChaos's webhook with manager
+func (in *IOChaos) SetupWebhookWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewWebhookManagedBy(mgr).
 		For(in).
 		Complete()
@@ -36,10 +36,10 @@ func (in *IoChaos) SetupWebhookWithManager(mgr ctrl.Manager) error {
 
 // +kubebuilder:webhook:path=/mutate-chaos-mesh-org-v1alpha1-iochaos,mutating=true,failurePolicy=fail,groups=chaos-mesh.org,resources=iochaos,verbs=create;update,versions=v1alpha1,name=miochaos.kb.io
 
-var _ webhook.Defaulter = &IoChaos{}
+var _ webhook.Defaulter = &IOChaos{}
 
 // Default implements webhook.Defaulter so a webhook will be registered for the type
-func (in *IoChaos) Default() {
+func (in *IOChaos) Default() {
 	iochaoslog.Info("default", "name", in.Name)
 
 	in.Spec.Selector.DefaultNamespace(in.GetNamespace())
@@ -47,22 +47,22 @@ func (in *IoChaos) Default() {
 
 // +kubebuilder:webhook:verbs=create;update,path=/validate-chaos-mesh-org-v1alpha1-iochaos,mutating=false,failurePolicy=fail,groups=chaos-mesh.org,resources=iochaos,versions=v1alpha1,name=viochaos.kb.io
 
-var _ ChaosValidator = &IoChaos{}
+var _ webhook.Validator = &IOChaos{}
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
-func (in *IoChaos) ValidateCreate() error {
+func (in *IOChaos) ValidateCreate() error {
 	iochaoslog.Info("validate create", "name", in.Name)
 	return in.Validate()
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
-func (in *IoChaos) ValidateUpdate(old runtime.Object) error {
+func (in *IOChaos) ValidateUpdate(old runtime.Object) error {
 	iochaoslog.Info("validate update", "name", in.Name)
 	return in.Validate()
 }
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type
-func (in *IoChaos) ValidateDelete() error {
+func (in *IOChaos) ValidateDelete() error {
 	iochaoslog.Info("validate delete", "name", in.Name)
 
 	// Nothing to do?
@@ -70,14 +70,13 @@ func (in *IoChaos) ValidateDelete() error {
 }
 
 // Validate validates chaos object
-func (in *IoChaos) Validate() error {
+func (in *IOChaos) Validate() error {
 	specField := field.NewPath("spec")
-	allErrs := in.ValidateScheduler(specField)
-	allErrs = append(allErrs, in.ValidatePodMode(specField)...)
-	allErrs = append(allErrs, in.Spec.validateDelay(specField.Child("delay"))...)
+	allErrs := in.Spec.validateDelay(specField.Child("delay"))
 	allErrs = append(allErrs, in.Spec.validateErrno(specField.Child("errno"))...)
+	allErrs = append(allErrs, validateDuration(in, specField)...)
+	allErrs = append(allErrs, validatePodSelector(in.Spec.PodSelector.Value, in.Spec.PodSelector.Mode, specField.Child("value"))...)
 	allErrs = append(allErrs, in.Spec.validatePercent(specField.Child("percent"))...)
-	allErrs = append(allErrs, in.Spec.validateMistake(specField.Child("mistake"))...)
 
 	if len(allErrs) > 0 {
 		return fmt.Errorf(allErrs.ToAggregate().Error())
@@ -85,22 +84,7 @@ func (in *IoChaos) Validate() error {
 	return nil
 }
 
-// ValidateScheduler validates the scheduler and duration
-func (in *IoChaos) ValidateScheduler(spec *field.Path) field.ErrorList {
-	return ValidateScheduler(in, spec)
-}
-
-// ValidatePodMode validates the value with podmode
-func (in *IoChaos) ValidatePodMode(spec *field.Path) field.ErrorList {
-	return ValidatePodMode(in.Spec.Value, in.Spec.Mode, spec.Child("value"))
-}
-
-// SelectSpec returns the selector config for authority validate
-func (in *IoChaos) GetSelectSpec() []SelectSpec {
-	return []SelectSpec{&in.Spec}
-}
-
-func (in *IoChaosSpec) validateDelay(delay *field.Path) field.ErrorList {
+func (in *IOChaosSpec) validateDelay(delay *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 	if in.Action == IoLatency {
 		_, err := time.ParseDuration(in.Delay)
@@ -112,7 +96,7 @@ func (in *IoChaosSpec) validateDelay(delay *field.Path) field.ErrorList {
 	return allErrs
 }
 
-func (in *IoChaosSpec) validateErrno(errno *field.Path) field.ErrorList {
+func (in *IOChaosSpec) validateErrno(errno *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 	if in.Action == IoFaults {
 		if in.Errno == 0 {
@@ -123,18 +107,12 @@ func (in *IoChaosSpec) validateErrno(errno *field.Path) field.ErrorList {
 	return allErrs
 }
 
-func (in *IoChaosSpec) validatePercent(percentField *field.Path) field.ErrorList {
+func (in *IOChaosSpec) validatePercent(percentField *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 	if in.Percent > 100 || in.Percent < 0 {
 		allErrs = append(allErrs, field.Invalid(percentField, in.Percent,
 			"percent field should be in 0-100"))
 	}
 
-	return allErrs
-}
-
-// Doing nothing now, but keep it here for future use
-func (in *IoChaosSpec) validateMistake(mistakeField *field.Path) field.ErrorList {
-	allErrs := field.ErrorList{}
 	return allErrs
 }

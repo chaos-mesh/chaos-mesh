@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// +build cgo
+
 package ptrace
 
 /*
@@ -34,9 +36,8 @@ import (
 	"unsafe"
 
 	"github.com/go-logr/logr"
-	ctrl "sigs.k8s.io/controller-runtime"
-
 	"github.com/pkg/errors"
+	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/mapreader"
 )
@@ -471,11 +472,7 @@ func (p *TracedProgram) WriteUint64ToAddr(addr uint64, value uint64) error {
 	valueSlice := make([]byte, 8)
 	binary.LittleEndian.PutUint64(valueSlice, value)
 	err := p.WriteSlice(addr, valueSlice)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
 // JumpToFakeFunc writes jmp instruction to jump to fake function

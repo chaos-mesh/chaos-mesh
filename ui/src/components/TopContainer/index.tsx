@@ -4,11 +4,11 @@ import { Redirect, Route, Switch } from 'react-router-dom'
 import { ThemeProvider, makeStyles } from '@material-ui/core/styles'
 import customTheme, { darkTheme as customDarkTheme } from 'theme'
 import { drawerCloseWidth, drawerWidth } from './Sidebar'
-import { setAlertOpen, setConfig, setNameSpace, setTokenName, setTokens } from 'slices/globalStatus'
+import { setAlertOpen, setConfig, setConfirmOpen, setNameSpace, setTokenName, setTokens } from 'slices/globalStatus'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
 import Alert from '@material-ui/lab/Alert'
-import Auth from './Auth'
+import ConfirmDialog from 'components-mui/ConfirmDialog'
 import ContentContainer from 'components-mui/ContentContainer'
 import { IntlProvider } from 'react-intl'
 import LS from 'lib/localStorage'
@@ -19,10 +19,13 @@ import Sidebar from './Sidebar'
 import api from 'api'
 import flat from 'flat'
 import insertCommonStyle from 'lib/d3/insertCommonStyle'
+import loadable from '@loadable/component'
 import messages from 'i18n/messages'
 import routes from 'routes'
 import { setNavigationBreadcrumbs } from 'slices/navigation'
 import { useLocation } from 'react-router-dom'
+
+const Auth = loadable(() => import('./Auth'))
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -71,7 +74,7 @@ const TopContainer = () => {
 
   const { settings, globalStatus, navigation } = useStoreSelector((state) => state)
   const { theme: settingsTheme, lang } = settings
-  const { alert, alertOpen } = globalStatus
+  const { alert, alertOpen, confirm, confirmOpen } = globalStatus
   const { breadcrumbs } = navigation
 
   const globalTheme = useMemo(() => (settingsTheme === 'light' ? customTheme : customDarkTheme), [settingsTheme])
@@ -79,6 +82,7 @@ const TopContainer = () => {
 
   const dispatch = useStoreDispatch()
   const handleSnackClose = () => dispatch(setAlertOpen(false))
+  const handleConfirmClose = () => dispatch(setConfirmOpen(false))
 
   // Sidebar related
   const miniSidebar = LS.get('mini-sidebar') === 'y'
@@ -188,7 +192,7 @@ const TopContainer = () => {
                   vertical: 'bottom',
                   horizontal: 'center',
                 }}
-                autoHideDuration={9000}
+                autoHideDuration={3000}
                 open={alertOpen}
                 onClose={handleSnackClose}
               >
@@ -196,6 +200,16 @@ const TopContainer = () => {
                   {alert.message}
                 </Alert>
               </Snackbar>
+            </Portal>
+
+            <Portal>
+              <ConfirmDialog
+                open={confirmOpen}
+                close={handleConfirmClose}
+                title={confirm.title}
+                description={confirm.description}
+                onConfirm={confirm.handle}
+              />
             </Portal>
           </Paper>
         </Box>

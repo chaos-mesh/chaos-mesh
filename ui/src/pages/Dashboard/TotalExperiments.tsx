@@ -31,11 +31,13 @@ const TotalExperiments = () => {
   const [experiments, setExperiments] = useState<Record<ExperimentKind, number>>({
     PodChaos: 0,
     NetworkChaos: 0,
-    IoChaos: 0,
+    IOChaos: 0,
     KernelChaos: 0,
     TimeChaos: 0,
     StressChaos: 0,
     DNSChaos: 0,
+    AwsChaos: 0,
+    GcpChaos: 0,
   })
 
   const fetchExperiments = () => {
@@ -62,11 +64,13 @@ const TotalExperiments = () => {
     <Grid container>
       <Chaos kind="PodChaos" data={{ sum: experiments['PodChaos'] }} />
       <Chaos kind="NetworkChaos" data={{ sum: experiments['NetworkChaos'] }} />
-      <Chaos kind="IoChaos" data={{ sum: experiments['IoChaos'] }} />
+      <Chaos kind="IOChaos" data={{ sum: experiments['IOChaos'] }} />
       <Chaos kind="KernelChaos" data={{ sum: experiments['KernelChaos'] }} />
       <Chaos kind="TimeChaos" data={{ sum: experiments['TimeChaos'] }} />
       <Chaos kind="StressChaos" data={{ sum: experiments['StressChaos'] }} />
       <Chaos kind="DNSChaos" data={{ sum: experiments['DNSChaos'] }} />
+      <Chaos kind="AwsChaos" data={{ sum: experiments['AwsChaos'] }} />
+      <Chaos kind="GcpChaos" data={{ sum: experiments['GcpChaos'] }} />
     </Grid>
   )
 }

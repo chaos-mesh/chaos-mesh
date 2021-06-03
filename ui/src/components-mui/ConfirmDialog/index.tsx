@@ -8,12 +8,11 @@ import {
   DialogTitle,
 } from '@material-ui/core'
 
-import React from 'react'
 import T from 'components/T'
 
 interface ConfirmDialogProps {
   open: boolean
-  setOpen: (open: boolean) => void
+  close?: () => void
   title: string | JSX.Element
   description?: string
   onConfirm?: () => void
@@ -22,24 +21,22 @@ interface ConfirmDialogProps {
 
 const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   open,
-  setOpen,
+  close,
   title,
   description,
   onConfirm,
   children,
   dialogProps,
 }) => {
-  const handleClose = () => setOpen(false)
-
   const handleConfirm = () => {
     typeof onConfirm === 'function' && onConfirm()
-    handleClose()
+    typeof close === 'function' && close()
   }
 
   return (
     <Dialog
       open={open}
-      onClose={handleClose}
+      onClose={close}
       aria-labelledby="dialog-title"
       aria-describedby="dialog-description"
       PaperProps={{ style: { minWidth: 300 } }}
@@ -51,7 +48,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
       </DialogContent>
       {onConfirm && (
         <DialogActions>
-          <Button size="small" onClick={handleClose}>
+          <Button size="small" onClick={close}>
             {T('common.cancel')}
           </Button>
           <Button variant="contained" color="primary" size="small" autoFocus disableFocusRipple onClick={handleConfirm}>

@@ -23,7 +23,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
-func AuthRequired(c *gin.Context) {
+func AuthRequired(c *gin.Context, clusterScoped bool, targetNamespace string) {
 	if mockResult := mock.On("MockAuthRequired"); mockResult != nil {
 		c.Next()
 		return
@@ -36,9 +36,13 @@ func AuthRequired(c *gin.Context) {
 	}
 
 	namespace := c.Query("namespace")
+	if len(namespace) == 0 && !clusterScoped {
+		namespace = targetNamespace
+	}
+
 	verb := "list"
 	if c.Request.Method != http.MethodGet {
-		// patch is used to indicate delete, create, patch, delete and other write operations
+		// patch is used to indicate finalizers, create, patch, finalizers and other write operations
 		verb = "patch"
 	}
 

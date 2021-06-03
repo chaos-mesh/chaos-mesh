@@ -54,7 +54,7 @@ func (s *DaemonServer) SetDNSServer(ctx context.Context,
 		output, err := cmd.CombinedOutput()
 		if err != nil {
 			log.Error(err, "execute command error", "command", cmd.String(), "output", output)
-			return nil, err
+			return nil, encodeOutputToError(output, err)
 		}
 		if len(output) != 0 {
 			log.Info("command output", "output", string(output))
@@ -71,7 +71,7 @@ func (s *DaemonServer) SetDNSServer(ctx context.Context,
 		output, err = cmd.CombinedOutput()
 		if err != nil {
 			log.Error(err, "execute command error", "command", cmd.String(), "output", output)
-			return nil, err
+			return nil, encodeOutputToError(output, err)
 		}
 		if len(output) != 0 {
 			log.Info("command output", "output", string(output))
@@ -87,7 +87,7 @@ func (s *DaemonServer) SetDNSServer(ctx context.Context,
 		output, err := cmd.CombinedOutput()
 		if err != nil {
 			log.Error(err, "execute command error", "command", cmd.String(), "output", output)
-			return nil, err
+			return nil, encodeOutputToError(output, err)
 		}
 		if len(output) != 0 {
 			log.Info("command output", "output", string(output))
