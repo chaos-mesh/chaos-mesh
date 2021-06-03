@@ -48,8 +48,10 @@ func (r *EventCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	event := &v1.Event{}
 	err := r.Get(ctx, req.NamespacedName, event)
-	if err != nil && !apierrors.IsNotFound(err) {
-		r.Log.Error(err, "unable to get event")
+	if err != nil {
+		if !apierrors.IsNotFound(err) {
+			r.Log.Error(err, "unable to get event")
+		}
 		return ctrl.Result{}, nil
 	}
 

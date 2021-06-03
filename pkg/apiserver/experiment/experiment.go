@@ -484,7 +484,7 @@ func (s *Service) getPodChaosDetail(namespace string, name string, kubeCli clien
 			},
 			UID:     chaos.GetChaos().UID,
 			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
-			Status:  v1alpha1.GetChaosState(chaos.Status.Conditions),
+			Status:  string(v1alpha1.GetChaosState(chaos.Status.Conditions)),
 		},
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
@@ -528,7 +528,7 @@ func (s *Service) getIoChaosDetail(namespace string, name string, kubeCli client
 			},
 			UID:     chaos.GetChaos().UID,
 			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
-			Status:  v1alpha1.GetChaosState(chaos.Status.Conditions),
+			Status:  string(v1alpha1.GetChaosState(chaos.Status.Conditions)),
 		},
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
@@ -572,7 +572,7 @@ func (s *Service) getNetworkChaosDetail(namespace string, name string, kubeCli c
 			},
 			UID:     chaos.GetChaos().UID,
 			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
-			Status:  v1alpha1.GetChaosState(chaos.Status.Conditions),
+			Status:  string(v1alpha1.GetChaosState(chaos.Status.Conditions)),
 		},
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
@@ -615,7 +615,7 @@ func (s *Service) getTimeChaosDetail(namespace string, name string, kubeCli clie
 				Name:      chaos.Name,
 			},
 			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
-			Status:  v1alpha1.GetChaosState(chaos.Status.Conditions),
+			Status:  string(v1alpha1.GetChaosState(chaos.Status.Conditions)),
 			UID:     chaos.GetChaos().UID,
 		},
 		KubeObject: core.KubeObjectDesc{
@@ -659,7 +659,7 @@ func (s *Service) getKernelChaosDetail(namespace string, name string, kubeCli cl
 				Name:      chaos.Name,
 			},
 			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
-			Status:  v1alpha1.GetChaosState(chaos.Status.Conditions),
+			Status:  string(v1alpha1.GetChaosState(chaos.Status.Conditions)),
 			UID:     chaos.GetChaos().UID,
 		},
 		KubeObject: core.KubeObjectDesc{
@@ -703,7 +703,7 @@ func (s *Service) getStressChaosDetail(namespace string, name string, kubeCli cl
 				Name:      chaos.Name,
 			},
 			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
-			Status:  v1alpha1.GetChaosState(chaos.Status.Conditions),
+			Status:  string(v1alpha1.GetChaosState(chaos.Status.Conditions)),
 			UID:     chaos.GetChaos().UID,
 		},
 		KubeObject: core.KubeObjectDesc{
@@ -747,7 +747,7 @@ func (s *Service) getDNSChaosDetail(namespace string, name string, kubeCli clien
 				Name:      chaos.Name,
 			},
 			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
-			Status:  v1alpha1.GetChaosState(chaos.Status.Conditions),
+			Status:  string(v1alpha1.GetChaosState(chaos.Status.Conditions)),
 			UID:     chaos.GetChaos().UID,
 		},
 		KubeObject: core.KubeObjectDesc{
@@ -791,7 +791,7 @@ func (s *Service) getAwsChaosDetail(namespace string, name string, kubeCli clien
 				Name:      chaos.Name,
 			},
 			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
-			Status:  v1alpha1.GetChaosState(chaos.Status.Conditions),
+			Status:  string(v1alpha1.GetChaosState(chaos.Status.Conditions)),
 			UID:     chaos.GetChaos().UID,
 		},
 		KubeObject: core.KubeObjectDesc{
@@ -835,7 +835,7 @@ func (s *Service) getGcpChaosDetail(namespace string, name string, kubeCli clien
 				Name:      chaos.Name,
 			},
 			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
-			Status:  v1alpha1.GetChaosState(chaos.Status.Conditions),
+			Status:  string(v1alpha1.GetChaosState(chaos.Status.Conditions)),
 			UID:     chaos.GetChaos().UID,
 		},
 		KubeObject: core.KubeObjectDesc{
@@ -903,7 +903,7 @@ func (s *Service) listExperiments(c *gin.Context) {
 					Kind:      chaos.Kind,
 				},
 				Created: chaos.StartTime.Format(time.RFC3339),
-				Status:  status,
+				Status:  string(status),
 				UID:     chaos.UID,
 			})
 		}

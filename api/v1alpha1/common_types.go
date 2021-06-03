@@ -52,11 +52,13 @@ type ChaosCondition struct {
 	Reason string `json:"reason"`
 }
 
+type ChaosStatusString string
+
 const (
-	Injecting string = "injecting"
-	Running   string = "running"
-	Finished  string = "finished"
-	Paused    string = "paused"
+	Injecting ChaosStatusString = "injecting"
+	Running   ChaosStatusString = "running"
+	Finished  ChaosStatusString = "finished"
+	Paused    ChaosStatusString = "paused"
 )
 
 type DesiredPhase string
@@ -144,7 +146,7 @@ type ChaosList interface {
 	ListChaos() []*ChaosInstance
 }
 
-func GetChaosState(condition []ChaosCondition) string {
+func GetChaosState(condition []ChaosCondition) ChaosStatusString {
 	selected := false
 	allInjected := false
 	for _, c := range condition {
