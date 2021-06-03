@@ -345,7 +345,7 @@ const data: Record<Kind, Target> = {
     ],
   },
   // IO Injection
-  IoChaos: {
+  IOChaos: {
     categories: [
       {
         name: 'Latency',
@@ -610,7 +610,7 @@ export const schema: Partial<Record<Kind, Record<string, Yup.ObjectSchema>>> = {
       target_scope: targetScopeSchema,
     }),
   },
-  IoChaos: {
+  IOChaos: {
     latency: Yup.object({
       delay: Yup.string().required('The delay is required'),
     }),
