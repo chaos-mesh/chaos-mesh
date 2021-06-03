@@ -25,6 +25,7 @@ const KindPodNetworkChaos = "PodNetworkChaos"
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
+
 // PodNetworkChaos is the Schema for the PodNetworkChaos API
 type PodNetworkChaos struct {
 	metav1.TypeMeta   `json:",inline"`

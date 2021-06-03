@@ -19,7 +19,6 @@ import (
 	"os"
 
 	"go.uber.org/fx"
-
 	"k8s.io/client-go/rest"
 	ctrl "sigs.k8s.io/controller-runtime"
 
