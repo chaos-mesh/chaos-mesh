@@ -51,7 +51,7 @@ func (in *PodChaos) ValidateCreate() error {
 func (in *PodChaos) ValidateUpdate(old runtime.Object) error {
 	podchaoslog.Info("validate update", "name", in.Name)
 	if !reflect.DeepEqual(in.Spec, old.(*PodChaos).Spec) {
-		return fmt.Errorf("Cannot update chaos spec")
+		return ErrCanNotUpdateChaos
 	}
 	return in.Validate()
 }

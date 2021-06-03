@@ -53,7 +53,7 @@ func (in *JVMChaos) ValidateCreate() error {
 func (in *JVMChaos) ValidateUpdate(old runtime.Object) error {
 	jvmchaoslog.Info("validate update", "name", in.Name)
 	if !reflect.DeepEqual(in.Spec, old.(*JVMChaos).Spec) {
-		return fmt.Errorf("Cannot update chaos spec")
+		return ErrCanNotUpdateChaos
 	}
 	return in.Validate()
 }

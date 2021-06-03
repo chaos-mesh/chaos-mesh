@@ -51,7 +51,7 @@ func (in *DNSChaos) ValidateCreate() error {
 func (in *DNSChaos) ValidateUpdate(old runtime.Object) error {
 	dnschaoslog.Info("validate update", "name", in.Name)
 	if !reflect.DeepEqual(in.Spec, old.(*DNSChaos).Spec) {
-		return fmt.Errorf("Cannot update chaos spec")
+		return ErrCanNotUpdateChaos
 	}
 	return in.Validate()
 }
