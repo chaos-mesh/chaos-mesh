@@ -15,15 +15,16 @@ package provider
 
 import (
 	"github.com/go-logr/logr"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
+
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 	"k8s.io/client-go/rest"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
 )
 
 var (
