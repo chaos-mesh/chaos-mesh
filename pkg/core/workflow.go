@@ -55,6 +55,7 @@ type Workflow struct {
 	Created string         `json:"created"`
 	EndTime string         `json:"endTime"`
 	Status  WorkflowStatus `json:"status,omitempty"`
+	UID     string         `json:"uid"`
 }
 
 type WorkflowDetail struct {
@@ -244,6 +245,7 @@ func convertWorkflow(kubeWorkflow v1alpha1.Workflow) Workflow {
 		Namespace: kubeWorkflow.Namespace,
 		Name:      kubeWorkflow.Name,
 		Entry:     kubeWorkflow.Spec.Entry,
+		UID:       string(kubeWorkflow.UID),
 	}
 
 	if kubeWorkflow.Status.StartTime != nil {
