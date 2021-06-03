@@ -26,10 +26,10 @@ import (
 // These tests are written in BDD-style using Ginkgo framework. Refer to
 // http://onsi.github.io/ginkgo to learn more.
 
-var _ = Describe("IoChaos", func() {
+var _ = Describe("IOChaos", func() {
 	var (
 		key              types.NamespacedName
-		created, fetched *IoChaos
+		created, fetched *IOChaos
 	)
 
 	BeforeEach(func() {
@@ -47,12 +47,12 @@ var _ = Describe("IoChaos", func() {
 				Namespace: "default",
 			}
 
-			created = &IoChaos{
+			created = &IOChaos{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "foo",
 					Namespace: "default",
 				},
-				Spec: IoChaosSpec{
+				Spec: IOChaosSpec{
 					Action: IoLatency,
 					ContainerSelector: ContainerSelector{
 						PodSelector: PodSelector{
@@ -65,7 +65,7 @@ var _ = Describe("IoChaos", func() {
 			By("creating an API obj")
 			Expect(k8sClient.Create(context.TODO(), created)).To(Succeed())
 
-			fetched = &IoChaos{}
+			fetched = &IOChaos{}
 			Expect(k8sClient.Get(context.TODO(), key, fetched)).To(Succeed())
 			Expect(fetched).To(Equal(created))
 

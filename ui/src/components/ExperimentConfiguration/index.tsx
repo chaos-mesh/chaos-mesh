@@ -51,7 +51,7 @@ const ExperimentConfiguration: React.FC<ExperimentConfigurationProps> = ({ exper
               </TableCell>
             </TableRow>
 
-            {['PodChaos', 'NetworkChaos', 'IoChaos'].includes(e.kind) && (
+            {['PodChaos', 'NetworkChaos', 'IOChaos'].includes(e.kind) && (
               <TableRow>
                 <TableCell>{T('newE.target.action')}</TableCell>
                 <TableCell>

@@ -24,16 +24,6 @@ import (
 	"strings"
 
 	"go.uber.org/fx"
-
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-
-	"github.com/chaos-mesh/chaos-mesh/controllers/config"
-	"github.com/chaos-mesh/chaos-mesh/pkg/label"
-	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
-
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-
 	v1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -41,6 +31,13 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/apimachinery/pkg/types"
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/config"
+	"github.com/chaos-mesh/chaos-mesh/pkg/label"
+	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
 var log = ctrl.Log.WithName("selector")

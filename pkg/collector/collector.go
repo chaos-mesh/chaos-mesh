@@ -20,15 +20,14 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/jinzhu/gorm"
-
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/pkg/core"
-
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 )
 
 // ChaosCollector represents a collector for Chaos Object.
@@ -134,7 +133,7 @@ func (r *ChaosCollector) setUnarchivedExperiment(req ctrl.Request, obj v1alpha1.
 		archive.Action = string(chaos.Spec.Action)
 	case *v1alpha1.NetworkChaos:
 		archive.Action = string(chaos.Spec.Action)
-	case *v1alpha1.IoChaos:
+	case *v1alpha1.IOChaos:
 		archive.Action = string(chaos.Spec.Action)
 	case *v1alpha1.TimeChaos, *v1alpha1.KernelChaos, *v1alpha1.StressChaos:
 		archive.Action = ""

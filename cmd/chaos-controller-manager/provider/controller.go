@@ -16,6 +16,11 @@ package provider
 import (
 	"github.com/go-logr/logr"
 	"go.uber.org/fx"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/config"
+	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
+
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
@@ -24,10 +29,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
-
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/config"
-	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
 )
 
 var (

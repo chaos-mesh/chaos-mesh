@@ -14,10 +14,9 @@
 package common
 
 import (
-	"sigs.k8s.io/controller-runtime/pkg/client/config"
-
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	"k8s.io/client-go/rest"
+	"sigs.k8s.io/controller-runtime/pkg/client/config"
 )
 
 // CommonRestClientGetter is used for non-e2e test environment.

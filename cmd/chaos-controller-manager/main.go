@@ -20,36 +20,28 @@ import (
 	"os"
 	"time"
 
-	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
-
 	"github.com/go-logr/logr"
 	"go.uber.org/fx"
-
-	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-controller-manager/provider"
-	"github.com/chaos-mesh/chaos-mesh/controllers"
-	"github.com/chaos-mesh/chaos-mesh/controllers/types"
-	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
-
 	"golang.org/x/time/rate"
-	"k8s.io/client-go/util/workqueue"
-	"sigs.k8s.io/controller-runtime/pkg/webhook"
-
-	"github.com/chaos-mesh/chaos-mesh/controllers/metrics"
-	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
-	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config/watcher"
-
+	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-
-	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
-	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
-	"github.com/chaos-mesh/chaos-mesh/pkg/version"
-
+	"k8s.io/client-go/util/workqueue"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	controllermetrics "sigs.k8s.io/controller-runtime/pkg/metrics"
+	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
 	apiWebhook "github.com/chaos-mesh/chaos-mesh/api/webhook"
-	// +kubebuilder:scaffold:imports
+	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-controller-manager/provider"
+	"github.com/chaos-mesh/chaos-mesh/controllers"
+	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
+	"github.com/chaos-mesh/chaos-mesh/controllers/metrics"
+	"github.com/chaos-mesh/chaos-mesh/controllers/types"
+	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
+	"github.com/chaos-mesh/chaos-mesh/pkg/version"
+	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
+	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config/watcher"
 )
 
 var (
