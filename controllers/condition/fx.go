@@ -16,6 +16,7 @@ package condition
 import (
 	"github.com/go-logr/logr"
 	"go.uber.org/fx"
+
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 

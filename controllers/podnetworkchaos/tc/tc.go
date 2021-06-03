@@ -17,13 +17,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
-
 	v1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
