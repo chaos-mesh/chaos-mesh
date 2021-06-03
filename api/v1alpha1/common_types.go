@@ -125,7 +125,7 @@ type ChaosInstance struct {
 	EndTime   time.Time
 	Action    string
 	Duration  string
-	Status    string
+	Status    ChaosStatus
 	UID       string
 }
 
