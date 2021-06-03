@@ -19,25 +19,20 @@ import (
 	"net"
 	"time"
 
-	"go.uber.org/fx"
-
-	"github.com/chaos-mesh/chaos-mesh/controllers/common"
-
-	"sigs.k8s.io/controller-runtime/pkg/client"
-
-	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/utils"
-
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
-	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
-
 	dnspb "github.com/chaos-mesh/k8s_dns_chaos/pb"
 	"github.com/go-logr/logr"
+	"go.uber.org/fx"
 	"google.golang.org/grpc"
 	v1 "k8s.io/api/core/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/utils"
+	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
 )
 
 type Impl struct {

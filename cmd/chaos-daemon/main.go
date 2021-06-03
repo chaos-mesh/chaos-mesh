@@ -18,13 +18,12 @@ import (
 	"os"
 
 	"github.com/prometheus/client_golang/prometheus"
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon"
 	"github.com/chaos-mesh/chaos-mesh/pkg/fusedev"
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
-
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
 
 var (
