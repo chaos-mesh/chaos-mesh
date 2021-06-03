@@ -44,7 +44,6 @@ type Reconciler struct {
 
 	// Client is used to operate on the Kubernetes cluster
 	client.Client
-	client.Reader
 
 	Recorder recorder.ChaosRecorder
 

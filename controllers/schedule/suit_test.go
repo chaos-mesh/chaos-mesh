@@ -85,13 +85,8 @@ var _ = BeforeSuite(func() {
 
 	app = fx.New(
 		fx.Options(
+			provider.Module,
 			fx.Provide(
-				provider.NewOption,
-				provider.NewClient,
-				provider.NewReader,
-				provider.NewLogger,
-				provider.NewAuthCli,
-				provider.NewScheme,
 				test.NewTestManager,
 			),
 			fx.Supply(config),

@@ -15,14 +15,18 @@ package provider
 
 import (
 	"github.com/go-logr/logr"
+	"go.uber.org/fx"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 	"k8s.io/client-go/rest"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
 )
 
@@ -97,6 +101,88 @@ func NewLogger() logr.Logger {
 	return ctrl.Log
 }
 
-func NewReader(mgr ctrl.Manager) client.Reader {
-	return mgr.GetAPIReader()
+type noCacheReader struct {
+	fx.Out
+
+	client.Reader `name:"no-cache"`
 }
+
+func NewNoCacheReader(mgr ctrl.Manager) noCacheReader {
+	return noCacheReader{
+		Reader: mgr.GetAPIReader(),
+	}
+}
+
+type globalCacheReader struct {
+	fx.Out
+
+	client.Reader `name:"global-cache"`
+}
+
+func NewGlobalCacheReader(mgr ctrl.Manager) globalCacheReader {
+	return globalCacheReader{
+		Reader: mgr.GetClient(),
+	}
+}
+
+type controlPlaneCacheReader struct {
+	fx.Out
+
+	client.Reader `name:"control-plane-cache"`
+}
+
+func NewControlPlaneCacheReader(logger logr.Logger) (controlPlaneCacheReader, error) {
+	cfg := ctrl.GetConfigOrDie()
+
+	mapper, err := apiutil.NewDynamicRESTMapper(cfg)
+	if err != nil {
+		return controlPlaneCacheReader{}, err
+	}
+
+	scheme := runtime.NewScheme()
+	_ = clientgoscheme.AddToScheme(scheme)
+
+	// Create the cache for the cached read client and registering informers
+	cache, err := cache.New(cfg, cache.Options{Scheme: scheme, Mapper: mapper, Resync: nil, Namespace: config.ControllerCfg.Namespace})
+	if err != nil {
+		return controlPlaneCacheReader{}, err
+	}
+	// TODO: store the channel and use it to stop
+	go func() {
+		err := cache.Start(make(chan struct{}))
+		if err != nil {
+			logger.Error(err, "fail to start cached client")
+		}
+	}()
+
+	c, err := client.New(cfg, client.Options{Scheme: scheme, Mapper: mapper})
+	if err != nil {
+		return controlPlaneCacheReader{}, err
+	}
+
+	cachedClient := &client.DelegatingClient{
+		Reader: &client.DelegatingReader{
+			CacheReader:  cache,
+			ClientReader: c,
+		},
+		Writer:       c,
+		StatusClient: c,
+	}
+
+	return controlPlaneCacheReader{
+		Reader: cachedClient,
+	}, nil
+}
+
+var Module = fx.Provide(
+	NewOption,
+	NewClient,
+	NewManager,
+	NewLogger,
+	NewAuthCli,
+	NewScheme,
+	NewConfig,
+	NewNoCacheReader,
+	NewGlobalCacheReader,
+	NewControlPlaneCacheReader,
+)

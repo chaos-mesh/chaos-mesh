@@ -955,10 +955,7 @@ metadata:
     app.kubernetes.io/component: controller-manager
 rules:
   - apiGroups: [ "" ]
-    resources: [ "endpoints" ]
-    verbs: [ "get", "list", "watch" ]
-  - apiGroups: [ "" ]
-    resources: [ "pods", "secrets" ]
+    resources: [ "pods", "secrets"]
     verbs: [ "get", "list", "watch", "delete", "update" ]
   - apiGroups:
       - ""
@@ -1057,7 +1054,7 @@ metadata:
     app.kubernetes.io/component: controller-manager
 rules:
   - apiGroups: [ "" ]
-    resources: [ "configmaps", "services" ]
+    resources: [ "configmaps", "services", "endpoints" ]
     verbs: [ "get", "list", "watch" ]
   - apiGroups: [ "authorization.k8s.io" ]
     resources:

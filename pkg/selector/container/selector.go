@@ -16,6 +16,8 @@ package container
 import (
 	"context"
 
+	"go.uber.org/fx"
+
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 
 	v1 "k8s.io/api/core/v1"
@@ -75,10 +77,17 @@ func (impl *SelectImpl) Select(ctx context.Context, cs *v1alpha1.ContainerSelect
 	return result, nil
 }
 
-func New(c client.Client, r client.Reader) *SelectImpl {
+type Params struct {
+	fx.In
+
+	Client client.Client
+	Reader client.Reader `name:"no-cache"`
+}
+
+func New(params Params) *SelectImpl {
 	return &SelectImpl{
-		c,
-		r,
+		params.Client,
+		params.Reader,
 		pod.Option{
 			ClusterScoped:         config.ControllerCfg.ClusterScoped,
 			TargetNamespace:       config.ControllerCfg.TargetNamespace,

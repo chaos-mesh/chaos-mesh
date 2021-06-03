@@ -52,7 +52,6 @@ var authLog = ctrl.Log.WithName("validate-auth")
 type AuthValidator struct {
 	enabled bool
 	client  client.Client
-	reader  client.Reader
 	authCli *authorizationv1.AuthorizationV1Client
 
 	decoder *admission.Decoder
@@ -63,12 +62,11 @@ type AuthValidator struct {
 }
 
 // NewAuthValidator returns a new AuthValidator
-func NewAuthValidator(enabled bool, client client.Client, reader client.Reader, authCli *authorizationv1.AuthorizationV1Client,
+func NewAuthValidator(enabled bool, client client.Client, authCli *authorizationv1.AuthorizationV1Client,
 	clusterScoped bool, targetNamespace string, enableFilterNamespace bool) *AuthValidator {
 	return &AuthValidator{
 		enabled:               enabled,
 		client:                client,
-		reader:                reader,
 		authCli:               authCli,
 		clusterScoped:         clusterScoped,
 		targetNamespace:       targetNamespace,

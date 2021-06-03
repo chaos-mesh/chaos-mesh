@@ -33,11 +33,12 @@ import (
 
 type Impl struct {
 	client.Client
-	Log logr.Logger
+	Log     logr.Logger
+	decoder *utils.ContianerRecordDecoder
 }
 
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
-	decodedContainer, err := utils.DecodeContainerRecord(ctx, records[index], impl.Client)
+	decodedContainer, err := impl.decoder.DecodeContainerRecord(ctx, records[index])
 	pbClient := decodedContainer.PbClient
 	containerId := decodedContainer.ContainerId
 	if pbClient != nil {
@@ -75,7 +76,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 }
 
 func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
-	decodedContainer, err := utils.DecodeContainerRecord(ctx, records[index], impl.Client)
+	decodedContainer, err := impl.decoder.DecodeContainerRecord(ctx, records[index])
 	pbClient := decodedContainer.PbClient
 	containerId := decodedContainer.ContainerId
 	if pbClient != nil {
@@ -107,13 +108,14 @@ func secAndNSecFromDuration(duration time.Duration) (sec int64, nsec int64) {
 	return
 }
 
-func NewImpl(c client.Client, log logr.Logger) *common.ChaosImplPair {
+func NewImpl(c client.Client, log logr.Logger, decoder *utils.ContianerRecordDecoder) *common.ChaosImplPair {
 	return &common.ChaosImplPair{
 		Name:   "timechaos",
 		Object: &v1alpha1.TimeChaos{},
 		Impl: &Impl{
-			Client: c,
-			Log:    log.WithName("timechaos"),
+			Client:  c,
+			Log:     log.WithName("timechaos"),
+			decoder: decoder,
 		},
 	}
 }

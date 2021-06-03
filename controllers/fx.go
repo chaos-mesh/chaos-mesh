@@ -21,6 +21,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/podiochaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/schedule"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
@@ -58,6 +59,8 @@ var Module = fx.Options(
 			Group:  "controller",
 			Target: podiochaos.NewController,
 		},
+
+		chaosdaemon.New,
 	),
 	schedule.Module,
 	chaosimpl.AllImpl)
