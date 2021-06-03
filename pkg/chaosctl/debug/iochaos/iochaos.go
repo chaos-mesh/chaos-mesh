@@ -27,7 +27,7 @@ import (
 
 // Debug get chaos debug information
 func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet, result *cm.ChaosResult) error {
-	ioChaos, ok := chaos.(*v1alpha1.IoChaos)
+	ioChaos, ok := chaos.(*v1alpha1.IOChaos)
 	if !ok {
 		return fmt.Errorf("chaos is not iochaos")
 	}
@@ -49,7 +49,7 @@ func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet, result *c
 	return nil
 }
 
-func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha1.IoChaos, c *cm.ClientSet, result *cm.PodResult) error {
+func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha1.IOChaos, c *cm.ClientSet, result *cm.PodResult) error {
 	// print out debug info
 	cmd := "cat /proc/mounts"
 	out, err := cm.ExecBypass(ctx, pod, daemon, cmd, c.KubeCli)

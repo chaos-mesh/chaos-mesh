@@ -99,8 +99,8 @@ func (m *MockExperimentStore) FindByUID(ctx context.Context, UID string) (*core.
 			},
 			Experiment: string(jsonStr),
 		}
-	case "testIoChaos":
-		chaos := v1alpha1.IoChaos{}
+	case "testIOChaos":
+		chaos := v1alpha1.IOChaos{}
 		jsonStr, _ := json.Marshal(chaos)
 		res = &core.Experiment{
 			ExperimentMeta: core.ExperimentMeta{
@@ -109,7 +109,7 @@ func (m *MockExperimentStore) FindByUID(ctx context.Context, UID string) (*core.
 				UpdatedAt:  time.Time{},
 				DeletedAt:  nil,
 				UID:        UID,
-				Kind:       v1alpha1.KindIoChaos,
+				Kind:       v1alpha1.KindIOChaos,
 				Name:       "testName",
 				Namespace:  "testNamespace",
 				Action:     "testAction",
@@ -466,12 +466,12 @@ var _ = Describe("event", func() {
 			Expect(rr.Body.Bytes()).Should(Equal(responseBody))
 		})
 
-		It("testIoChaos", func() {
-			chaos := &v1alpha1.IoChaos{}
+		It("testIOChaos", func() {
+			chaos := &v1alpha1.IOChaos{}
 			response := Detail{
 				Archive: Archive{
-					UID:        "testIoChaos",
-					Kind:       v1alpha1.KindIoChaos,
+					UID:        "testIOChaos",
+					Kind:       v1alpha1.KindIOChaos,
 					Namespace:  "testNamespace",
 					Name:       "testName",
 					Action:     "testAction",
@@ -493,7 +493,7 @@ var _ = Describe("event", func() {
 				},
 			}
 			rr := httptest.NewRecorder()
-			request, _ := http.NewRequest(http.MethodGet, "/api/archives/detail?uid=testIoChaos", nil)
+			request, _ := http.NewRequest(http.MethodGet, "/api/archives/detail?uid=testIOChaos", nil)
 			router.ServeHTTP(rr, request)
 			Expect(rr.Code).Should(Equal(http.StatusOK))
 			responseBody, err := json.Marshal(response)
