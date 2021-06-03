@@ -22,15 +22,9 @@ import (
 	"regexp"
 	"strings"
 
-	"google.golang.org/grpc"
-
-	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
-
-	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
-	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
-
 	"github.com/fatih/color"
 	"github.com/pkg/errors"
+	"google.golang.org/grpc"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -43,7 +37,10 @@ import (
 	ctrlconfig "github.com/chaos-mesh/chaos-mesh/controllers/config"
 	daemonClient "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/client"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
+	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 	"github.com/chaos-mesh/chaos-mesh/pkg/portforward"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
 )
 
 type Color string
