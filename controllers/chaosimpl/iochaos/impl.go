@@ -48,7 +48,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	// The only possible phase to get in here is "Not Injected" or "Not Injected/Wait"
 
 	impl.Log.Info("iochaos Apply", "namespace", obj.GetObjectMeta().Namespace, "name", obj.GetObjectMeta().Name)
-	iochaos := obj.(*v1alpha1.IoChaos)
+	iochaos := obj.(*v1alpha1.IOChaos)
 	if iochaos.Status.Instances == nil {
 		iochaos.Status.Instances = make(map[string]int64)
 	}
@@ -57,7 +57,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	phase := record.Phase
 
 	if phase == waitForApplySync {
-		podiochaos := &v1alpha1.PodIoChaos{}
+		podiochaos := &v1alpha1.PodIOChaos{}
 		err := impl.Client.Get(ctx, controller.ParseNamespacedName(record.Id), podiochaos)
 		if err != nil {
 			if k8sError.IsNotFound(err) {
@@ -100,7 +100,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	m.T.SetVolumePath(iochaos.Spec.VolumePath)
 	m.T.SetContainer(containerName)
 
-	m.T.Append(v1alpha1.IoChaosAction{
+	m.T.Append(v1alpha1.IOChaosAction{
 		Type: iochaos.Spec.Action,
 		Filter: v1alpha1.Filter{
 			Path:    iochaos.Spec.Path,
@@ -131,7 +131,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	// The only possible phase to get in here is "Injected" or "Injected/Wait"
 
-	iochaos := obj.(*v1alpha1.IoChaos)
+	iochaos := obj.(*v1alpha1.IOChaos)
 	if iochaos.Status.Instances == nil {
 		iochaos.Status.Instances = make(map[string]int64)
 	}
@@ -139,7 +139,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	record := records[index]
 	phase := record.Phase
 	if phase == waitForRecoverSync {
-		podiochaos := &v1alpha1.PodIoChaos{}
+		podiochaos := &v1alpha1.PodIOChaos{}
 		err := impl.Client.Get(ctx, controller.ParseNamespacedName(record.Id), podiochaos)
 		if err != nil {
 			// TODO: handle this error
@@ -199,14 +199,14 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 func NewImpl(c client.Client, b *podiochaosmanager.Builder, log logr.Logger) *common.ChaosImplPair {
 	return &common.ChaosImplPair{
 		Name:   "iochaos",
-		Object: &v1alpha1.IoChaos{},
+		Object: &v1alpha1.IOChaos{},
 		Impl: &Impl{
 			Client:  c,
 			Log:     log.WithName("iochaos"),
 			builder: b,
 		},
-		ObjectList: &v1alpha1.IoChaosList{},
-		Controlls:  []runtime.Object{&v1alpha1.PodIoChaos{}},
+		ObjectList: &v1alpha1.IOChaosList{},
+		Controlls:  []runtime.Object{&v1alpha1.PodIOChaos{}},
 	}
 }
 

@@ -55,7 +55,7 @@ var ChaosObjects = fx.Supply(
 		Group: "objs",
 		Target: Object{
 			Name:   "iochaos",
-			Object: &v1alpha1.IoChaos{},
+			Object: &v1alpha1.IOChaos{},
 		},
 	},
 

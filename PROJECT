@@ -10,7 +10,7 @@ resources:
   kind: NetworkChaos
 - group: chaosmesh
   version: v1alpha1
-  kind: IoChaos
+  kind: IOChaos
 - group: chaosmesh
   version: v1alpha1
   kind: TimeChaos

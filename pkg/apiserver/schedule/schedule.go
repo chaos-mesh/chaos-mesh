@@ -147,7 +147,7 @@ func (s *Service) createSchedule(c *gin.Context) {
 	parseFuncs := map[string]parseScheduleFunc{
 		v1alpha1.KindPodChaos:     parsePodChaos,
 		v1alpha1.KindNetworkChaos: parseNetworkChaos,
-		v1alpha1.KindIoChaos:      parseIOChaos,
+		v1alpha1.KindIOChaos:      parseIOChaos,
 		v1alpha1.KindStressChaos:  parseStressChaos,
 		v1alpha1.KindTimeChaos:    parseTimeChaos,
 		v1alpha1.KindKernelChaos:  parseKernelChaos,
@@ -250,14 +250,14 @@ func parseNetworkChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 }
 
 func parseIOChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
-	chaos := &v1alpha1.IoChaos{
+	chaos := &v1alpha1.IOChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        exp.Name,
 			Namespace:   exp.Namespace,
 			Labels:      exp.Labels,
 			Annotations: exp.Annotations,
 		},
-		Spec: v1alpha1.IoChaosSpec{
+		Spec: v1alpha1.IOChaosSpec{
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{
 					Selector: exp.Scope.ParseSelector(),
@@ -266,7 +266,7 @@ func parseIOChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 				},
 				ContainerNames: exp.Target.PodChaos.ContainerNames,
 			},
-			Action:     v1alpha1.IoChaosType(exp.Target.IOChaos.Action),
+			Action:     v1alpha1.IOChaosType(exp.Target.IOChaos.Action),
 			Delay:      exp.Target.IOChaos.Delay,
 			Errno:      exp.Target.IOChaos.Errno,
 			Attr:       exp.Target.IOChaos.Attr,
@@ -283,7 +283,7 @@ func parseIOChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	}
 
 	return v1alpha1.ScheduleItem{
-		IoChaos: &chaos.Spec,
+		IOChaos: &chaos.Spec,
 	}
 }
 
