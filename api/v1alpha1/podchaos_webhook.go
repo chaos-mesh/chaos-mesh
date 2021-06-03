@@ -38,7 +38,7 @@ func (in *PodChaos) Default() {
 
 // +kubebuilder:webhook:verbs=create;update,path=/validate-chaos-mesh-org-v1alpha1-podchaos,mutating=false,failurePolicy=fail,groups=chaos-mesh.org,resources=podchaos,versions=v1alpha1,name=vpodchaos.kb.io
 
-var _ ChaosValidator = &PodChaos{}
+var _ webhook.Validator = &PodChaos{}
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
 func (in *PodChaos) ValidateCreate() error {
@@ -63,9 +63,7 @@ func (in *PodChaos) ValidateDelete() error {
 // Validate validates chaos object
 func (in *PodChaos) Validate() error {
 	specField := field.NewPath("spec")
-	allErrs := in.ValidateScheduler(specField)
-	allErrs = append(allErrs, in.ValidatePodMode(specField)...)
-	allErrs = append(allErrs, in.Spec.validateContainerName(specField.Child("containerName"))...)
+	allErrs := in.Spec.validateContainerName(specField.Child("containerName"))
 
 	if len(allErrs) > 0 {
 		return fmt.Errorf(allErrs.ToAggregate().Error())
@@ -73,57 +71,13 @@ func (in *PodChaos) Validate() error {
 	return nil
 }
 
-// ValidateScheduler validates the scheduler and duration
-func (in *PodChaos) ValidateScheduler(spec *field.Path) field.ErrorList {
-	allErrs := field.ErrorList{}
-	schedulerField := spec.Child("scheduler")
-
-	switch in.Spec.Action {
-	case PodFailureAction:
-		allErrs = append(allErrs, ValidateScheduler(in, spec)...)
-	case PodKillAction:
-		// We choose to ignore the Duration property even user define it
-		if in.Spec.Scheduler == nil {
-			allErrs = append(allErrs, field.Invalid(schedulerField, in.Spec.Scheduler, ValidatePodchaosSchedulerError))
-		} else {
-			_, err := ParseCron(in.Spec.Scheduler.Cron, schedulerField.Child("cron"))
-			allErrs = append(allErrs, err...)
-		}
-	case ContainerKillAction:
-		// We choose to ignore the Duration property even user define it
-		if in.Spec.Scheduler == nil {
-			allErrs = append(allErrs, field.Invalid(schedulerField, in.Spec.Scheduler, ValidatePodchaosSchedulerError))
-		} else {
-			_, err := ParseCron(in.Spec.Scheduler.Cron, schedulerField.Child("cron"))
-			allErrs = append(allErrs, err...)
-		}
-	default:
-		err := fmt.Errorf("podchaos[%s/%s] have unknown action type", in.Namespace, in.Name)
-		log.Error(err, "Wrong PodChaos Action type")
-
-		actionField := spec.Child("action")
-		allErrs = append(allErrs, field.Invalid(actionField, in.Spec.Action, err.Error()))
-	}
-	return allErrs
-}
-
-// ValidatePodMode validates the value with podmode
-func (in *PodChaos) ValidatePodMode(spec *field.Path) field.ErrorList {
-	return ValidatePodMode(in.Spec.Value, in.Spec.Mode, spec.Child("value"))
-}
-
-// SelectSpec returns the selector config for authority validate
-func (in *PodChaos) GetSelectSpec() []SelectSpec {
-	return []SelectSpec{&in.Spec}
-}
-
 // validateContainerName validates the ContainerName
 func (in *PodChaosSpec) validateContainerName(containerField *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 	if in.Action == ContainerKillAction {
-		if in.ContainerName == "" {
+		if len(in.ContainerSelector.ContainerNames) == 0 {
 			err := fmt.Errorf("the name of container should not be empty on %s action", in.Action)
-			allErrs = append(allErrs, field.Invalid(containerField, in.ContainerName, err.Error()))
+			allErrs = append(allErrs, field.Invalid(containerField, in.ContainerNames, err.Error()))
 		}
 	}
 	return allErrs

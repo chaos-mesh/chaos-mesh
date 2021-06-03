@@ -15,7 +15,6 @@ package v1alpha1
 
 import (
 	"context"
-	"time"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -54,8 +53,12 @@ var _ = Describe("DNSChaos", func() {
 					Namespace: "default",
 				},
 				Spec: DNSChaosSpec{
-					Action:             ErrorAction,
-					Mode:               OnePodMode,
+					Action: ErrorAction,
+					ContainerSelector: ContainerSelector{
+						PodSelector: PodSelector{
+							Mode: OnePodMode,
+						},
+					},
 					DomainNamePatterns: []string{},
 				},
 			}
@@ -70,20 +73,6 @@ var _ = Describe("DNSChaos", func() {
 			By("deleting the created object")
 			Expect(k8sClient.Delete(context.TODO(), created)).To(Succeed())
 			Expect(k8sClient.Get(context.TODO(), key, created)).ToNot(Succeed())
-		})
-
-		It("should set next start time successfully", func() {
-			dnschaos := &DNSChaos{}
-			nTime := time.Now()
-			dnschaos.SetNextStart(nTime)
-			Expect(dnschaos.GetNextStart()).To(Equal(nTime))
-		})
-
-		It("should set recover time successfully", func() {
-			dnschaos := &DNSChaos{}
-			nTime := time.Now()
-			dnschaos.SetNextRecover(nTime)
-			Expect(dnschaos.GetNextRecover()).To(Equal(nTime))
 		})
 	})
 })

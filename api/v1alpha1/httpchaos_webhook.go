@@ -36,7 +36,7 @@ func (in *HTTPChaos) Default() {
 
 // +kubebuilder:webhook:verbs=create;update,path=/validate-chaos-mesh-org-v1alpha1-httpchaos,mutating=false,failurePolicy=fail,groups=chaos-mesh.org,resources=httpchaos,versions=v1alpha1,name=vhttpchaos.kb.io
 
-var _ ChaosValidator = &HTTPChaos{}
+var _ webhook.Validator = &HTTPChaos{}
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
 func (in *HTTPChaos) ValidateCreate() error {
@@ -61,26 +61,11 @@ func (in *HTTPChaos) ValidateDelete() error {
 // Validate validates chaos object
 func (in *HTTPChaos) Validate() error {
 	specField := field.NewPath("spec")
-	allErrs := in.ValidateScheduler(specField)
-	allErrs = append(allErrs, in.ValidatePodMode(specField)...)
 
+	allErrs := validatePodSelector(in.Spec.PodSelector.Value, in.Spec.PodSelector.Mode, specField.Child("value"))
 	if len(allErrs) > 0 {
 		return fmt.Errorf(allErrs.ToAggregate().Error())
 	}
+
 	return nil
-}
-
-// ValidateScheduler validates the scheduler and duration
-func (in *HTTPChaos) ValidateScheduler(spec *field.Path) field.ErrorList {
-	return ValidateScheduler(in, spec)
-}
-
-// ValidatePodMode validates the value with podmode
-func (in *HTTPChaos) ValidatePodMode(spec *field.Path) field.ErrorList {
-	return ValidatePodMode(in.Spec.Value, in.Spec.Mode, spec.Child("value"))
-}
-
-// SelectSpec returns the selector config for authority validate
-func (in *HTTPChaos) GetSelectSpec() []SelectSpec {
-	return []SelectSpec{&in.Spec}
 }

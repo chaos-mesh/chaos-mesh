@@ -40,19 +40,7 @@ type StressChaos struct {
 
 // StressChaosSpec defines the desired state of StressChaos
 type StressChaosSpec struct {
-	// Mode defines the mode to run chaos action.
-	// Supported mode: one / all / fixed / fixed-percent / random-max-percent
-	Mode PodMode `json:"mode"`
-
-	// Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
-	// If `FixedPodMode`, provide an integer of pods to do chaos action.
-	// If `FixedPercentPodMod`, provide a number from 0-100 to specify the max % of pods the server can do chaos action.
-	// If `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the % of pods to do chaos action
-	// +optional
-	Value string `json:"value,omitempty"`
-
-	// Selector is used to select pods that are used to inject chaos action.
-	Selector SelectorSpec `json:"selector"`
+	ContainerSelector `json:",inline"`
 
 	// Stressors defines plenty of stressors supported to stress system components out.
 	// You can use one or more of them to make up various kinds of stresses. At least
@@ -69,32 +57,9 @@ type StressChaosSpec struct {
 	// +optional
 	StressngStressors string `json:"stressngStressors,omitempty"`
 
-	// ContainerName indicates the target container to inject stress in
-	// +optional
-	ContainerName *string `json:"containerName,omitempty"`
-
 	// Duration represents the duration of the chaos action
 	// +optional
 	Duration *string `json:"duration,omitempty"`
-
-	// Scheduler defines some schedule rules to control the running time of the chaos experiment about time.
-	// +optional
-	Scheduler *SchedulerSpec `json:"scheduler,omitempty"`
-}
-
-// GetSelector is a getter for Selector (for implementing SelectSpec)
-func (in *StressChaosSpec) GetSelector() SelectorSpec {
-	return in.Selector
-}
-
-// GetMode is a getter for Mode (for implementing SelectSpec)
-func (in *StressChaosSpec) GetMode() PodMode {
-	return in.Mode
-}
-
-// GetValue is a getter for Value (for implementing SelectSpec)
-func (in *StressChaosSpec) GetValue() string {
-	return in.Value
 }
 
 // StressChaosStatus defines the observed state of StressChaos
@@ -198,4 +163,14 @@ type CPUStressor struct {
 	// extend stress-ng options
 	// +optional
 	Options []string `json:"options,omitempty"`
+}
+
+func (obj *StressChaos) GetSelectorSpecs() map[string]interface{} {
+	return map[string]interface{}{
+		".": &obj.Spec.ContainerSelector,
+	}
+}
+
+func (obj *StressChaos) GetCustomStatus() interface{} {
+	return &obj.Status.Instances
 }

@@ -13,5 +13,3 @@ spec:
     corrupt: "40"
     correlation: "25"
   duration: "10s"
-  scheduler:
-    cron: "@every 15s"

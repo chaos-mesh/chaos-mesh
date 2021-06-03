@@ -18,7 +18,6 @@ import (
 	"fmt"
 
 	"github.com/pkg/errors"
-
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 
@@ -33,14 +32,10 @@ func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet, result *c
 		return fmt.Errorf("chaos is not iochaos")
 	}
 	chaosStatus := ioChaos.Status.ChaosStatus
-	chaosSelector := ioChaos.Spec.GetSelector()
+	chaosSelector := ioChaos.Spec.Selector
 
 	pods, daemons, err := cm.GetPods(ctx, ioChaos.GetName(), chaosStatus, chaosSelector, c.CtrlCli)
 	if err != nil {
-		return err
-	}
-
-	if err := cm.CheckFailedMessage(ctx, chaosStatus.FailedMessage, daemons, c); err != nil {
 		return err
 	}
 

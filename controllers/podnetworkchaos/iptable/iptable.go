@@ -22,13 +22,13 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/netutils"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
 // SetIptablesChains makes grpc call to chaosdaemon to flush iptable
 func SetIptablesChains(ctx context.Context, c client.Client, pod *v1.Pod, chains []*pb.Chain) error {
-	pbClient, err := utils.NewChaosDaemonClient(ctx, c, pod)
+	pbClient, err := chaosdaemon.NewChaosDaemonClient(ctx, c, pod)
 	if err != nil {
 		return err
 	}

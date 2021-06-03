@@ -23,7 +23,6 @@ import (
 	"syscall"
 
 	"github.com/shirou/gopsutil/process"
-
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
@@ -89,7 +88,7 @@ func NewBackgroundProcessManager() BackgroundProcessManager {
 }
 
 // StartProcess manages a process in manager
-func (m *BackgroundProcessManager) StartProcess(cmd *ManagedProcess) error {
+func (m *BackgroundProcessManager) StartProcess(cmd *ManagedProcess) (*process.Process, error) {
 	var identifierLock *sync.Mutex
 	if cmd.Identifier != nil {
 		lock, _ := m.identifiers.LoadOrStore(*cmd.Identifier, &sync.Mutex{})
@@ -102,17 +101,17 @@ func (m *BackgroundProcessManager) StartProcess(cmd *ManagedProcess) error {
 	err := cmd.Start()
 	if err != nil {
 		log.Error(err, "fail to start process")
-		return err
+		return nil, err
 	}
 
 	pid := cmd.Process.Pid
 	procState, err := process.NewProcess(int32(cmd.Process.Pid))
 	if err != nil {
-		return err
+		return nil, err
 	}
 	ct, err := procState.CreateTime()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	pair := ProcessPair{
@@ -192,7 +191,7 @@ func (m *BackgroundProcessManager) StartProcess(cmd *ManagedProcess) error {
 		}
 	}()
 
-	return nil
+	return procState, nil
 }
 
 // KillBackgroundProcess sends SIGTERM to process
@@ -216,7 +215,10 @@ func (m *BackgroundProcessManager) KillBackgroundProcess(ctx context.Context, pi
 		// return successfully as the process has exited
 		return nil
 	}
-	if startTime != ct {
+
+	// There is a bug in calculating CreateTime in the new version of
+	// gopsutils. This is a temporary solution before the upstream fixes it.
+	if startTime-ct > 1000 || ct-startTime > 1000 {
 		log.Info("process has already been killed", "startTime", ct, "expectedStartTime", startTime)
 		// return successfully as the process has exited
 		return nil
@@ -243,7 +245,7 @@ func (m *BackgroundProcessManager) KillBackgroundProcess(ctx context.Context, pi
 
 	pair := ProcessPair{
 		Pid:        pid,
-		CreateTime: ct,
+		CreateTime: startTime,
 	}
 	channel, ok := m.deathSig.Load(pair)
 	if ok {
@@ -264,6 +266,7 @@ func (m *BackgroundProcessManager) Stdio(pid int, startTime int64) *Stdio {
 
 	procState, err := process.NewProcess(int32(pid))
 	if err != nil {
+		log.Info("fail to get process information", "pid", pid)
 		// return successfully as the process has exited
 		return nil
 	}
@@ -273,7 +276,10 @@ func (m *BackgroundProcessManager) Stdio(pid int, startTime int64) *Stdio {
 		// return successfully as the process has exited
 		return nil
 	}
-	if startTime != ct {
+
+	// There is a bug in calculating CreateTime in the new version of
+	// gopsutils. This is a temporary solution before the upstream fixes it.
+	if startTime-ct > 1000 || ct-startTime > 1000 {
 		log.Info("process has exited", "startTime", ct, "expectedStartTime", startTime)
 		// return successfully as the process has exited
 		return nil
@@ -281,11 +287,12 @@ func (m *BackgroundProcessManager) Stdio(pid int, startTime int64) *Stdio {
 
 	pair := ProcessPair{
 		Pid:        pid,
-		CreateTime: ct,
+		CreateTime: startTime,
 	}
 
 	io, ok := m.stdio.Load(pair)
 	if !ok {
+		log.Info("fail to load with pair", "pair", pair)
 		// stdio is not stored
 		return nil
 	}

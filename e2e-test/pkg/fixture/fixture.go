@@ -16,10 +16,9 @@ package fixture
 import (
 	"sort"
 
-	"k8s.io/apimachinery/pkg/api/resource"
-
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/utils/pointer"
@@ -273,6 +272,44 @@ func NewIOTestDeployment(name, namespace string) *appsv1.Deployment {
 							VolumeSource: corev1.VolumeSource{
 								EmptyDir: &corev1.EmptyDirVolumeSource{},
 							},
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+// NewHTTPTestDeployment creates a deployment for e2e test
+func NewHTTPTestDeployment(name, namespace string) *appsv1.Deployment {
+	return &appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app": "http",
+			},
+		},
+		Spec: appsv1.DeploymentSpec{
+			Replicas: pointer.Int32Ptr(1),
+			Selector: &metav1.LabelSelector{
+				MatchLabels: map[string]string{
+					"app": "http",
+				},
+			},
+			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: map[string]string{
+						"app": "http",
+					},
+				},
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Image:           config.TestConfig.E2EImage,
+							ImagePullPolicy: corev1.PullIfNotPresent,
+							Name:            "http",
+							Command:         []string{"/bin/test"},
 						},
 					},
 				},

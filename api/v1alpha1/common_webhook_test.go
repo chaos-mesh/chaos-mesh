@@ -22,7 +22,7 @@ import (
 var _ = Describe("common_webhook", func() {
 	Context("Defaulter", func() {
 		It("set default namespace selector", func() {
-			selector := &SelectorSpec{}
+			selector := &PodSelectorSpec{}
 			selector.DefaultNamespace(metav1.NamespaceDefault)
 			Expect(selector.Namespaces[0]).To(Equal(metav1.NamespaceDefault))
 		})

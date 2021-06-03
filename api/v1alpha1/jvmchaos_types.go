@@ -19,27 +19,11 @@ import (
 
 // JVMChaosSpec defines the desired state of JVMChaos
 type JVMChaosSpec struct {
-	// Mode defines the mode to run chaos action.
-	// Supported mode: one / all / fixed / fixed-percent / random-max-percent
-	Mode PodMode `json:"mode"`
-
-	// Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
-	// If `FixedPodMode`, provide an integer of pods to do chaos action.
-	// If `FixedPercentPodMod`, provide a number from 0-100 to specify the max % of pods the server can do chaos action.
-	// If `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the % of pods to do chaos action
-	// +optional
-	Value string `json:"value"`
-
-	// Selector is used to select pods that are used to inject chaos action.
-	Selector SelectorSpec `json:"selector"`
+	ContainerSelector `json:",inline"`
 
 	// Duration represents the duration of the chaos action
 	// +optional
 	Duration *string `json:"duration,omitempty"`
-
-	// Scheduler defines some schedule rules to control the running time of the chaos experiment about time.
-	// +optional
-	Scheduler *SchedulerSpec `json:"scheduler,omitempty"`
 
 	// Action defines the specific jvm chaos action.
 	// Supported action: delay;return;script;cfl;oom;ccf;tce;cpf;tde;tpf
@@ -54,21 +38,6 @@ type JVMChaosSpec struct {
 	// Supported target: servlet;psql;jvm;jedis;http;dubbo;rocketmq;tars;mysql;druid;redisson;rabbitmq;mongodb
 	// +kubebuilder:validation:Enum=servlet;psql;jvm;jedis;http;dubbo;rocketmq;tars;mysql;druid;redisson;rabbitmq;mongodb
 	Target JVMChaosTarget `json:"target"`
-}
-
-// GetSelector is a getter for Selector (for implementing SelectSpec)
-func (in *JVMChaosSpec) GetSelector() SelectorSpec {
-	return in.Selector
-}
-
-// GetMode is a getter for Mode (for implementing SelectSpec)
-func (in *JVMChaosSpec) GetMode() PodMode {
-	return in.Mode
-}
-
-// GetValue is a getter for Value (for implementing SelectSpec)
-func (in *JVMChaosSpec) GetValue() string {
-	return in.Value
 }
 
 type JVMChaosTarget string
@@ -182,4 +151,10 @@ type JVMChaos struct {
 
 func init() {
 	SchemeBuilder.Register(&JVMChaos{}, &JVMChaosList{})
+}
+
+func (obj *JVMChaos) GetSelectorSpecs() map[string]interface{} {
+	return map[string]interface{}{
+		".": &obj.Spec.PodSelector,
+	}
 }
