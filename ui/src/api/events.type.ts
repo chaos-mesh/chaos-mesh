@@ -13,6 +13,7 @@ export interface Event {
   namespace: string
   kind: ExperimentKind | 'Schedule'
   type: 'Normal' | 'Warning'
+  reason: string
   created_at: string
   message: string
 }

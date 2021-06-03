@@ -5,7 +5,6 @@ import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
 import DashboardOutlinedIcon from '@material-ui/icons/DashboardOutlined'
 import ExperimentIcon from 'components-mui/Icons/Experiment'
 import GitHubIcon from '@material-ui/icons/GitHub'
-import HttpOutlinedIcon from '@material-ui/icons/HttpOutlined'
 import MenuBookOutlinedIcon from '@material-ui/icons/MenuBookOutlined'
 import { NavLink } from 'react-router-dom'
 import React from 'react'
@@ -61,8 +60,8 @@ const useStyles = makeStyles((theme) => {
     toolbar: {
       minHeight: 56,
       display: 'flex',
-      alignItems: 'center',
       justifyContent: 'center',
+      alignItems: 'center',
       marginTop: theme.spacing(6),
     },
     logo: {
@@ -172,13 +171,6 @@ const Sidebar: React.FC<SidebarProps> = ({ open }) => {
         </Box>
 
         <List className={classes.list}>
-          <ListItem className={classes.listItem} component={NavLink} to="/swagger" button>
-            <ListItemIcon className={classes.listItemIcon}>
-              <HttpOutlinedIcon />
-            </ListItemIcon>
-            <ListItemText primary="Swagger API" />
-          </ListItem>
-
           <ListItem
             className={classes.listItem}
             component="a"

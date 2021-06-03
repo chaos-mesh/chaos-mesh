@@ -105,14 +105,13 @@ const LabelField: React.FC<LabelFieldProps & TextFieldProps> = ({ isKV = false, 
         <TextField
           {...params}
           {...props}
-          variant="outlined"
-          margin="dense"
+          size="small"
           fullWidth
           helperText={error !== '' ? error : isKV ? T('common.isKVHelperText') : props.helperText}
+          error={error !== ''}
           onChange={onInputChange}
           onKeyDown={onKeyDown}
           onBlur={processText}
-          error={error !== ''}
         />
       )}
     />

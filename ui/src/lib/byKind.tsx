@@ -7,14 +7,18 @@ import { ReactComponent as GCPIcon } from 'images/chaos/gcp.svg'
 import { ReactComponent as LinuxKernelIcon } from 'images/chaos/kernel.svg'
 import { ReactComponent as NetworkIcon } from 'images/chaos/network.svg'
 import { ReactComponent as PodLifecycleIcon } from 'images/chaos/pod.svg'
+import ScheduleIcon from '@material-ui/icons/Schedule'
 import { ReactComponent as StressIcon } from 'images/chaos/stress.svg'
 import { SvgIcon } from '@material-ui/core'
 import T from 'components/T'
 
-export function iconByKind(kind: ExperimentKind, size: 'small' | 'large' = 'large') {
+export function iconByKind(kind: ExperimentKind | 'Schedule', size: 'small' | 'large' = 'large') {
   let icon
 
   switch (kind) {
+    case 'Schedule':
+      icon = <ScheduleIcon />
+      break
     case 'PodChaos':
       icon = <PodLifecycleIcon />
       break
@@ -44,28 +48,9 @@ export function iconByKind(kind: ExperimentKind, size: 'small' | 'large' = 'larg
       break
   }
 
-  return <SvgIcon fontSize={size}>{icon}</SvgIcon>
+  return kind !== 'Schedule' ? <SvgIcon fontSize={size}>{icon}</SvgIcon> : icon
 }
 
 export function transByKind(kind: ExperimentKind) {
-  switch (kind) {
-    case 'PodChaos':
-      return T('newE.target.pod.title')
-    case 'NetworkChaos':
-      return T('newE.target.network.title')
-    case 'IoChaos':
-      return T('newE.target.io.title')
-    case 'KernelChaos':
-      return T('newE.target.kernel.title')
-    case 'TimeChaos':
-      return T('newE.target.time.title')
-    case 'StressChaos':
-      return T('newE.target.stress.title')
-    case 'DNSChaos':
-      return T('newE.target.dns.title')
-    case 'AwsChaos':
-      return T('newE.target.aws.title')
-    case 'GcpChaos':
-      return T('newE.target.gcp.title')
-  }
+  return T(`newE.target.${kind.replace('Chaos', '').toLowerCase()}.title`)
 }

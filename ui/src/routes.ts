@@ -10,7 +10,6 @@ import NewWorkflow from 'components/NewWorkflow'
 import { RouteProps } from 'react-router'
 import Schedules from 'pages/Schedules'
 import Settings from 'pages/Settings'
-import Swagger from 'pages/Swagger'
 import WorkflowDetail from 'pages/WorkflowDetail'
 import Workflows from 'pages/Workflows'
 
@@ -72,11 +71,6 @@ const routes: RouteProps[] = [
   {
     component: Settings,
     path: '/settings',
-    exact: true,
-  },
-  {
-    component: Swagger,
-    path: '/swagger',
     exact: true,
   },
 ]

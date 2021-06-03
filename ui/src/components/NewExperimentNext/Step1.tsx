@@ -124,7 +124,7 @@ const Step1 = () => {
               variant="outlined"
               onClick={handleSelectTarget(key)}
             >
-              <Box display="flex" justifyContent="center" alignItems="center" width={270} height={75}>
+              <Box display="flex" justifyContent="center" alignItems="center" width={280} height={75}>
                 <Box display="flex" justifyContent="center" flex={1}>
                   {iconByKind(key)}
                 </Box>
@@ -149,7 +149,7 @@ const Step1 = () => {
                     variant="outlined"
                     onClick={handleSelectAction(d.key)}
                   >
-                    <Box display="flex" justifyContent="center" alignItems="center" width={180} height={50}>
+                    <Box display="flex" justifyContent="center" alignItems="center" width={210} height={50}>
                       <Box display="flex" justifyContent="center" alignItems="center" flex={0.5}>
                         {action === d.key ? <RadioButtonCheckedOutlinedIcon /> : <RadioButtonUncheckedOutlinedIcon />}
                       </Box>

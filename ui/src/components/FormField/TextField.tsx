@@ -8,9 +8,9 @@ const TextField: React.FC<TextFieldProps & { validate?: FieldValidator; fast?: b
   ...rest
 }) => {
   const rendered = fast ? (
-    <FastField {...rest} as={MUITextField} variant="outlined" margin="dense" fullWidth />
+    <FastField {...rest} as={MUITextField} size="small" fullWidth />
   ) : (
-    <Field {...rest} as={MUITextField} variant="outlined" margin="dense" fullWidth />
+    <Field {...rest} as={MUITextField} size="small" fullWidth />
   )
 
   return rendered

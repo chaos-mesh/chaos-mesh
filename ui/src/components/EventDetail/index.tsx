@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react'
 
 import { Event } from 'api/events.type'
 import Loading from 'components-mui/Loading'
-import StateLabel from 'components-mui/StateLabel'
 import { StateOfExperimentsEnum } from 'api/experiments.type'
 import T from 'components/T'
 import api from 'api'

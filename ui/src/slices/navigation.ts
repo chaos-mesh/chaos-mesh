@@ -35,7 +35,7 @@ const navigationSlice = createSlice({
       if (breadcrumbs[0].name) {
         state.breadcrumbs = breadcrumbs
 
-        document.title = toTitleCase(breadcrumbs.map((b) => b.name).join(' / ') + ' | Chaos Mesh Dashboard')
+        document.title = toTitleCase(breadcrumbs.map((b) => b.name).join(' | ') + ' | Chaos Mesh Dashboard')
       }
     },
   },

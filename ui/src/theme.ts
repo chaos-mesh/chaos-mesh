@@ -10,6 +10,9 @@ const common: ThemeOptions = {
     primary: {
       main: '#172d72',
     },
+    background: {
+      default: '#fafafa',
+    },
   },
   spacing: (factor: number) => `${0.25 * factor}rem`,
 }
@@ -23,6 +26,10 @@ export const darkTheme = responsiveFontSizes(
       mode: 'dark',
       primary: {
         main: '#9db0eb',
+      },
+      background: {
+        paper: '#424242',
+        default: '#303030',
       },
     },
   })

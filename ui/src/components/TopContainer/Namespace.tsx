@@ -48,15 +48,7 @@ const ControlBar = () => {
       options={['All', ...namespaces]}
       onChange={handleSelectGlobalNamespace}
       disableClearable={true}
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          variant="outlined"
-          size="small"
-          label={T('common.chooseNamespace')}
-          aria-label="Choose namespace"
-        />
-      )}
+      renderInput={(params) => <TextField {...params} size="small" label={T('common.chooseNamespace')} />}
       PaperComponent={(props) => <Paper {...props} padding={0} />}
     />
   )

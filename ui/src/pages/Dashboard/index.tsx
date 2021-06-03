@@ -3,16 +3,15 @@ import React, { useEffect, useState } from 'react'
 
 import AccountTreeOutlinedIcon from '@material-ui/icons/AccountTreeOutlined'
 import { Event } from 'api/events.type'
+import EventsTimeline from 'components/EventsTimeline'
 import { Experiment } from 'api/experiments.type'
 import ExperimentIcon from 'components-mui/Icons/Experiment'
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
 import Predefined from './Predefined'
-import Recent from './Recent'
 import { Schedule } from 'api/schedules.type'
 import ScheduleIcon from '@material-ui/icons/Schedule'
 import T from 'components/T'
-import TotalExperiments from './TotalExperiments'
 import TotalState from './TotalState'
 import Welcome from './Welcome'
 import { Workflow } from 'api/workflows.type'
@@ -22,7 +21,7 @@ import { makeStyles } from '@material-ui/styles'
 const useStyles = makeStyles(() => ({
   totalState: {
     position: 'relative',
-    height: 300,
+    height: 450,
   },
 }))
 
@@ -63,7 +62,7 @@ export default function Dashboard() {
     const fetchExperiments = api.experiments.experiments()
     const fetchSchedules = api.schedules.schedules()
     const fetchWorkflows = api.workflows.workflows()
-    const fetchEvents = api.events.events()
+    const fetchEvents = api.events.events({ limit: 6 })
     const fetchAll = () => {
       Promise.all([fetchSchedules, fetchWorkflows, fetchExperiments, fetchEvents])
         .then((data) =>
@@ -130,7 +129,7 @@ export default function Dashboard() {
           <Grid item xs={12}>
             <Paper>
               <PaperTop title={T('dashboard.recent')} />
-              <Recent events={data.events.slice(-6)} />
+              <EventsTimeline events={data.events} />
             </Paper>
           </Grid>
         </Grid>

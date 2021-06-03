@@ -13,6 +13,7 @@ import { useStoreDispatch, useStoreSelector } from 'store'
 
 import AdvancedOptions from 'components/AdvancedOptions'
 import ScopePodsTable from './ScopePodsTable'
+import Space from 'components-mui/Space'
 import T from 'components/T'
 
 interface ScopeStepProps {
@@ -104,7 +105,7 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
   }, [currentLabels, currentAnnotations])
 
   return (
-    <>
+    <Space vertical>
       <AutocompleteMultipleField
         id={`${scope}.namespaces`}
         name={`${scope}.namespaces`}
@@ -197,7 +198,7 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
       ) : (
         <Typography variant="subtitle2">{T('newE.scope.noPodsFound')}</Typography>
       )}
-    </>
+    </Space>
   )
 }
 

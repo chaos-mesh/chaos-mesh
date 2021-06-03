@@ -91,7 +91,7 @@ const Schedules = () => {
       </Space>
 
       {schedules.length > 0 &&
-        Object.entries(_groupBy(schedules, 'type')).map(([type, schedulesByType]) => (
+        Object.entries(_groupBy(schedules, 'kind')).map(([type, schedulesByType]) => (
           <Box key={type} mb={6}>
             <Typography variant="overline">{transByKind(type as any)}</Typography>
             <RWList

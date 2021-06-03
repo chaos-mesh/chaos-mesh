@@ -18,6 +18,7 @@ import PublishIcon from '@material-ui/icons/Publish'
 import Scheduler from './form/Scheduler'
 import Scope from './form/Scope'
 import SkeletonN from 'components-mui/SkeletonN'
+import Space from 'components-mui/Space'
 import T from 'components/T'
 import UndoIcon from '@material-ui/icons/Undo'
 import { makeStyles } from '@material-ui/styles'
@@ -146,32 +147,34 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false })
                   {namespaces.length ? <Scope namespaces={namespaces} /> : <SkeletonN n={6} />}
                 </Grid>
                 <Grid item xs={6}>
-                  <Box mb={3}>
+                  <Space vertical>
                     <Typography>{T('newE.steps.basic')}</Typography>
-                  </Box>
-                  <TextField
-                    fast
-                    name="name"
-                    label={T('common.name')}
-                    helperText={
-                      errors.name && touched.name ? errors.name : T(`${inSchedule ? 'newS' : 'newE'}.basic.nameHelper`)
-                    }
-                    error={errors.name && touched.name ? true : false}
-                  />
-                  {inWorkflow && (
                     <TextField
                       fast
-                      name="duration"
-                      label={T('newE.run.duration')}
+                      name="name"
+                      label={T('common.name')}
                       helperText={
-                        (errors as any).duration && (touched as any).duration
-                          ? (errors as any).duration
-                          : T(`${inWorkflow ? 'newW.node' : 'newS.basic'}.durationHelper`)
+                        errors.name && touched.name
+                          ? errors.name
+                          : T(`${inSchedule ? 'newS' : 'newE'}.basic.nameHelper`)
                       }
-                      error={(errors as any).duration && (touched as any).duration ? true : false}
+                      error={errors.name && touched.name ? true : false}
                     />
-                  )}
-                  {inSchedule && <ScheduleSpecificFields errors={errors} touched={touched} />}
+                    {inWorkflow && (
+                      <TextField
+                        fast
+                        name="duration"
+                        label={T('newE.run.duration')}
+                        helperText={
+                          (errors as any).duration && (touched as any).duration
+                            ? (errors as any).duration
+                            : T(`${inWorkflow ? 'newW.node' : 'newS.basic'}.durationHelper`)
+                        }
+                        error={(errors as any).duration && (touched as any).duration ? true : false}
+                      />
+                    )}
+                    {inSchedule && <ScheduleSpecificFields errors={errors} touched={touched} />}
+                  </Space>
                   <AdvancedOptions>
                     {namespaces.length && (
                       <SelectField

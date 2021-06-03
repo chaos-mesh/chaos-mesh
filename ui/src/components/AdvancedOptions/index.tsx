@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown'
 import ArrowDropUpIcon from '@material-ui/icons/ArrowDropUp'
+import Space from 'components-mui/Space'
 import T from 'components/T'
 
 interface AdvancedOptionsProps {
@@ -38,7 +39,9 @@ const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
           {title ? title : T('common.advancedOptions')}
         </Button>
       </Box>
-      <Box hidden={!open}>{children}</Box>
+      <Space vertical hidden={!open}>
+        {children}
+      </Space>
     </Box>
   )
 }
