@@ -22,7 +22,7 @@ import (
 var _ = Describe("iochaos_webhook", func() {
 	Context("Defaulter", func() {
 		It("set default namespace selector", func() {
-			iochaos := &IoChaos{
+			iochaos := &IOChaos{
 				ObjectMeta: metav1.ObjectMeta{Namespace: metav1.NamespaceDefault},
 			}
 			iochaos.Default()
@@ -34,8 +34,8 @@ var _ = Describe("iochaos_webhook", func() {
 
 			type TestCase struct {
 				name    string
-				chaos   IoChaos
-				execute func(chaos *IoChaos) error
+				chaos   IOChaos
+				execute func(chaos *IOChaos) error
 				expect  string
 			}
 			errorDuration := "400S"
@@ -43,67 +43,67 @@ var _ = Describe("iochaos_webhook", func() {
 			tcs := []TestCase{
 				{
 					name: "simple ValidateCreate",
-					chaos: IoChaos{
+					chaos: IOChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
 							Name:      "foo1",
 						},
 					},
-					execute: func(chaos *IoChaos) error {
+					execute: func(chaos *IOChaos) error {
 						return chaos.ValidateCreate()
 					},
 					expect: "",
 				},
 				{
 					name: "simple ValidateUpdate",
-					chaos: IoChaos{
+					chaos: IOChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
 							Name:      "foo2",
 						},
 					},
-					execute: func(chaos *IoChaos) error {
+					execute: func(chaos *IOChaos) error {
 						return chaos.ValidateUpdate(chaos)
 					},
 					expect: "",
 				},
 				{
 					name: "simple ValidateDelete",
-					chaos: IoChaos{
+					chaos: IOChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
 							Name:      "foo3",
 						},
 					},
-					execute: func(chaos *IoChaos) error {
+					execute: func(chaos *IOChaos) error {
 						return chaos.ValidateDelete()
 					},
 					expect: "",
 				},
 				{
 					name: "parse the duration error",
-					chaos: IoChaos{
+					chaos: IOChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
 							Name:      "foo6",
 						},
-						Spec: IoChaosSpec{
+						Spec: IOChaosSpec{
 							Duration: &errorDuration,
 						},
 					},
-					execute: func(chaos *IoChaos) error {
+					execute: func(chaos *IOChaos) error {
 						return chaos.ValidateCreate()
 					},
 					expect: "error",
 				},
 				{
 					name: "validate value with FixedPercentPodMode",
-					chaos: IoChaos{
+					chaos: IOChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
 							Name:      "foo7",
 						},
-						Spec: IoChaosSpec{
+						Spec: IOChaosSpec{
 							ContainerSelector: ContainerSelector{
 								PodSelector: PodSelector{
 									Value: "0",
@@ -112,19 +112,19 @@ var _ = Describe("iochaos_webhook", func() {
 							},
 						},
 					},
-					execute: func(chaos *IoChaos) error {
+					execute: func(chaos *IOChaos) error {
 						return chaos.ValidateCreate()
 					},
 					expect: "error",
 				},
 				{
 					name: "validate value with FixedPercentPodMode, parse value error",
-					chaos: IoChaos{
+					chaos: IOChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
 							Name:      "foo8",
 						},
-						Spec: IoChaosSpec{
+						Spec: IOChaosSpec{
 							ContainerSelector: ContainerSelector{
 								PodSelector: PodSelector{
 									Value: "num",
@@ -133,19 +133,19 @@ var _ = Describe("iochaos_webhook", func() {
 							},
 						},
 					},
-					execute: func(chaos *IoChaos) error {
+					execute: func(chaos *IOChaos) error {
 						return chaos.ValidateCreate()
 					},
 					expect: "error",
 				},
 				{
 					name: "validate value with RandomMaxPercentPodMode",
-					chaos: IoChaos{
+					chaos: IOChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
 							Name:      "foo9",
 						},
-						Spec: IoChaosSpec{
+						Spec: IOChaosSpec{
 							ContainerSelector: ContainerSelector{
 								PodSelector: PodSelector{
 									Value: "0",
@@ -154,19 +154,19 @@ var _ = Describe("iochaos_webhook", func() {
 							},
 						},
 					},
-					execute: func(chaos *IoChaos) error {
+					execute: func(chaos *IOChaos) error {
 						return chaos.ValidateCreate()
 					},
 					expect: "error",
 				},
 				{
 					name: "validate value with RandomMaxPercentPodMode ,parse value error",
-					chaos: IoChaos{
+					chaos: IOChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
 							Name:      "foo10",
 						},
-						Spec: IoChaosSpec{
+						Spec: IOChaosSpec{
 							ContainerSelector: ContainerSelector{
 								PodSelector: PodSelector{
 									Value: "num",
@@ -175,19 +175,19 @@ var _ = Describe("iochaos_webhook", func() {
 							},
 						},
 					},
-					execute: func(chaos *IoChaos) error {
+					execute: func(chaos *IOChaos) error {
 						return chaos.ValidateCreate()
 					},
 					expect: "error",
 				},
 				{
 					name: "validate value with FixedPercentPodMode",
-					chaos: IoChaos{
+					chaos: IOChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
 							Name:      "foo11",
 						},
-						Spec: IoChaosSpec{
+						Spec: IOChaosSpec{
 							ContainerSelector: ContainerSelector{
 								PodSelector: PodSelector{
 									Value: "101",
@@ -196,24 +196,24 @@ var _ = Describe("iochaos_webhook", func() {
 							},
 						},
 					},
-					execute: func(chaos *IoChaos) error {
+					execute: func(chaos *IOChaos) error {
 						return chaos.ValidateCreate()
 					},
 					expect: "error",
 				},
 				{
 					name: "validate delay",
-					chaos: IoChaos{
+					chaos: IOChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
 							Name:      "foo12",
 						},
-						Spec: IoChaosSpec{
+						Spec: IOChaosSpec{
 							Delay:  "1S",
 							Action: IoLatency,
 						},
 					},
-					execute: func(chaos *IoChaos) error {
+					execute: func(chaos *IOChaos) error {
 						return chaos.ValidateCreate()
 					},
 					expect: "error",

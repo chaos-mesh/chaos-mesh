@@ -136,7 +136,7 @@ func (s *Service) createExperiment(c *gin.Context) {
 	createFuncs := map[string]createExperimentFunc{
 		v1alpha1.KindPodChaos:     s.createPodChaos,
 		v1alpha1.KindNetworkChaos: s.createNetworkChaos,
-		v1alpha1.KindIoChaos:      s.createIOChaos,
+		v1alpha1.KindIOChaos:      s.createIOChaos,
 		v1alpha1.KindStressChaos:  s.createStressChaos,
 		v1alpha1.KindTimeChaos:    s.createTimeChaos,
 		v1alpha1.KindKernelChaos:  s.createKernelChaos,
@@ -233,14 +233,14 @@ func (s *Service) createNetworkChaos(exp *core.ExperimentInfo, kubeCli client.Cl
 }
 
 func (s *Service) createIOChaos(exp *core.ExperimentInfo, kubeCli client.Client) error {
-	chaos := &v1alpha1.IoChaos{
+	chaos := &v1alpha1.IOChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        exp.Name,
 			Namespace:   exp.Namespace,
 			Labels:      exp.Labels,
 			Annotations: exp.Annotations,
 		},
-		Spec: v1alpha1.IoChaosSpec{
+		Spec: v1alpha1.IOChaosSpec{
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{
 					Selector: exp.Scope.ParseSelector(),
@@ -249,7 +249,7 @@ func (s *Service) createIOChaos(exp *core.ExperimentInfo, kubeCli client.Client)
 				},
 				ContainerNames: []string{exp.Target.IOChaos.ContainerName},
 			},
-			Action:     v1alpha1.IoChaosType(exp.Target.IOChaos.Action),
+			Action:     v1alpha1.IOChaosType(exp.Target.IOChaos.Action),
 			Delay:      exp.Target.IOChaos.Delay,
 			Errno:      exp.Target.IOChaos.Errno,
 			Attr:       exp.Target.IOChaos.Attr,
@@ -491,8 +491,8 @@ func (s *Service) getPodChaosDetail(namespace string, name string, kubeCli clien
 	}, nil
 }
 
-func (s *Service) getIoChaosDetail(namespace string, name string, kubeCli client.Client) (Detail, error) {
-	chaos := &v1alpha1.IoChaos{}
+func (s *Service) getIOChaosDetail(namespace string, name string, kubeCli client.Client) (Detail, error) {
+	chaos := &v1alpha1.IOChaos{}
 
 	chaosKey := types.NamespacedName{Namespace: namespace, Name: name}
 	if err := kubeCli.Get(context.Background(), chaosKey, chaos); err != nil {
@@ -849,7 +849,7 @@ func (s *Service) getGcpChaosDetail(namespace string, name string, kubeCli clien
 // @Produce json
 // @Param namespace query string false "namespace"
 // @Param name query string false "name"
-// @Param kind query string false "kind" Enums(PodChaos, IoChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos)
+// @Param kind query string false "kind" Enums(PodChaos, IOChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos)
 // @Param status query string false "status" Enums(Running, Paused, Failed, Finished)
 // @Success 200 {array} Experiment
 // @Router /experiments [get]
@@ -944,8 +944,8 @@ func (s *Service) getExperimentDetail(c *gin.Context) {
 	switch kind {
 	case v1alpha1.KindPodChaos:
 		expDetail, err = s.getPodChaosDetail(ns, name, kubeCli)
-	case v1alpha1.KindIoChaos:
-		expDetail, err = s.getIoChaosDetail(ns, name, kubeCli)
+	case v1alpha1.KindIOChaos:
+		expDetail, err = s.getIOChaosDetail(ns, name, kubeCli)
 	case v1alpha1.KindNetworkChaos:
 		expDetail, err = s.getNetworkChaosDetail(ns, name, kubeCli)
 	case v1alpha1.KindTimeChaos:
@@ -1320,7 +1320,7 @@ func (s *Service) updateExperiment(c *gin.Context) {
 	updateFuncs := map[string]updateExperimentFunc{
 		v1alpha1.KindPodChaos:     s.updatePodChaos,
 		v1alpha1.KindNetworkChaos: s.updateNetworkChaos,
-		v1alpha1.KindIoChaos:      s.updateIOChaos,
+		v1alpha1.KindIOChaos:      s.updateIOChaos,
 		v1alpha1.KindStressChaos:  s.updateStressChaos,
 		v1alpha1.KindTimeChaos:    s.updateTimeChaos,
 		v1alpha1.KindKernelChaos:  s.updateKernelChaos,
@@ -1397,7 +1397,7 @@ func (s *Service) updateNetworkChaos(exp *core.KubeObjectDesc, kubeCli client.Cl
 }
 
 func (s *Service) updateIOChaos(exp *core.KubeObjectDesc, kubeCli client.Client) error {
-	chaos := &v1alpha1.IoChaos{}
+	chaos := &v1alpha1.IOChaos{}
 	meta := &exp.Meta
 	key := types.NamespacedName{Namespace: meta.Namespace, Name: meta.Name}
 
@@ -1408,7 +1408,7 @@ func (s *Service) updateIOChaos(exp *core.KubeObjectDesc, kubeCli client.Client)
 	chaos.SetLabels(meta.Labels)
 	chaos.SetAnnotations(meta.Annotations)
 
-	var spec v1alpha1.IoChaosSpec
+	var spec v1alpha1.IOChaosSpec
 	mapstructure.Decode(exp.Spec, &spec)
 	chaos.Spec = spec
 
