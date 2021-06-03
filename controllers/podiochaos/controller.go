@@ -46,7 +46,7 @@ type Reconciler struct {
 func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ctx := context.TODO()
 
-	obj := &v1alpha1.PodIoChaos{}
+	obj := &v1alpha1.PodIOChaos{}
 
 	if err := r.Client.Get(ctx, req.NamespacedName, obj); err != nil {
 		if apierrors.IsNotFound(err) {
@@ -86,7 +86,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		}
 
 		updateError := retry.RetryOnConflict(retry.DefaultBackoff, func() error {
-			obj := &v1alpha1.PodIoChaos{}
+			obj := &v1alpha1.PodIOChaos{}
 
 			if err := r.Client.Get(context.TODO(), req.NamespacedName, obj); err != nil {
 				r.Log.Error(err, "unable to get chaos")
@@ -145,7 +145,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	input := string(actions)
 	r.Log.Info("input with", "config", input)
 
-	res, err := pbClient.ApplyIoChaos(ctx, &pb.ApplyIoChaosRequest{
+	res, err := pbClient.ApplyIOChaos(ctx, &pb.ApplyIOChaosRequest{
 		Actions:     input,
 		Volume:      obj.Spec.VolumeMountPath,
 		ContainerId: containerID,

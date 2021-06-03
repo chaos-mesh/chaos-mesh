@@ -101,7 +101,7 @@ type Detail struct {
 // @Produce json
 // @Param namespace query string false "namespace"
 // @Param name query string false "name"
-// @Param kind query string false "kind" Enums(PodChaos, IoChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos)
+// @Param kind query string false "kind" Enums(PodChaos, IOChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos)
 // @Success 200 {array} Archive
 // @Router /archives [get]
 // @Failure 500 {object} utils.APIError
@@ -186,7 +186,7 @@ func (s *Service) detail(c *gin.Context) {
 	switch exp.Kind {
 	case v1alpha1.KindPodChaos:
 		kubeObject, err = exp.ParsePodChaos()
-	case v1alpha1.KindIoChaos:
+	case v1alpha1.KindIOChaos:
 		kubeObject, err = exp.ParseIOChaos()
 	case v1alpha1.KindNetworkChaos:
 		kubeObject, err = exp.ParseNetworkChaos()
