@@ -52,6 +52,13 @@ type ChaosCondition struct {
 	Reason string `json:"reason"`
 }
 
+const (
+	Injecting string = "injecting"
+	Running   string = "running"
+	Finished  string = "finished"
+	Paused    string = "paused"
+)
+
 type DesiredPhase string
 
 const (
@@ -135,4 +142,31 @@ type ChaosInstance struct {
 type ChaosList interface {
 	runtime.Object
 	ListChaos() []*ChaosInstance
+}
+
+func GetChaosState(condition []ChaosCondition) string {
+	selected := false
+	allInjected := false
+	for _, c := range condition {
+		if c.Type == ConditionPaused {
+			if c.Status == corev1.ConditionTrue {
+				return Paused
+			}
+		}
+		if c.Type == ConditionAllRecovered {
+			if c.Status == corev1.ConditionTrue {
+				return Finished
+			}
+		}
+		if c.Type == ConditionSelected && c.Status == corev1.ConditionTrue {
+			selected = true
+		}
+		if c.Type == ConditionAllInjected && c.Status == corev1.ConditionTrue {
+			allInjected = true
+		}
+	}
+	if selected && allInjected {
+		return Running
+	}
+	return Injecting
 }

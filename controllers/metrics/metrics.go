@@ -21,7 +21,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/experiment"
 )
 
 var log = ctrl.Log.WithName("metrics-collector")
@@ -128,7 +127,7 @@ func (c *ChaosCollector) collect() {
 				// There is only 4 supported phases
 				expCache[chaos.Namespace] = make(map[string]int, 4)
 			}
-			expCache[chaos.Namespace][experiment.GetChaosState(chaos.Status.Conditions)]++
+			expCache[chaos.Namespace][v1alpha1.GetChaosState(chaos.Status.Conditions)]++
 		}
 
 		for ns, v := range expCache {
