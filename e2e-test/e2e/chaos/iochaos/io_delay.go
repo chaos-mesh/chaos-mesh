@@ -45,12 +45,12 @@ func TestcaseIODelayDurationForATimeThenRecover(
 	err := util.WaitE2EHelperReady(c, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 	By("create IO delay chaos CRD objects")
-	ioChaos := &v1alpha1.IoChaos{
+	ioChaos := &v1alpha1.IOChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "io-chaos",
 			Namespace: ns,
 		},
-		Spec: v1alpha1.IoChaosSpec{
+		Spec: v1alpha1.IOChaosSpec{
 			Action:     v1alpha1.IoLatency,
 			VolumePath: "/var/run/data",
 			Path:       "/var/run/data/*",
@@ -114,12 +114,12 @@ func TestcaseIODelayDurationForATimePauseAndUnPause(
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
 	By("create io chaos crd object")
-	ioChaos := &v1alpha1.IoChaos{
+	ioChaos := &v1alpha1.IOChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "io-chaos",
 			Namespace: ns,
 		},
-		Spec: v1alpha1.IoChaosSpec{
+		Spec: v1alpha1.IOChaosSpec{
 			Action:     v1alpha1.IoLatency,
 			VolumePath: "/var/run/data",
 			Path:       "/var/run/data/*",
@@ -146,7 +146,7 @@ func TestcaseIODelayDurationForATimePauseAndUnPause(
 
 	By("waiting for assertion io chaos")
 	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
-		chaos := &v1alpha1.IoChaos{}
+		chaos := &v1alpha1.IOChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
 		framework.ExpectNoError(err, "get io chaos error")
 
@@ -181,7 +181,7 @@ func TestcaseIODelayDurationForATimePauseAndUnPause(
 
 	By("waiting for assertion about pause")
 	err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
-		chaos := &v1alpha1.IoChaos{}
+		chaos := &v1alpha1.IOChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
 		framework.ExpectNoError(err, "get io chaos error")
 
@@ -222,7 +222,7 @@ func TestcaseIODelayDurationForATimePauseAndUnPause(
 
 	By("assert that io delay is effective again")
 	err = wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
-		chaos := &v1alpha1.IoChaos{}
+		chaos := &v1alpha1.IOChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
 		framework.ExpectNoError(err, "get io chaos error")
 
@@ -271,12 +271,12 @@ func TestcaseIODelayWithSpecifiedContainer(
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
 	containerName := "io"
-	ioChaos := &v1alpha1.IoChaos{
+	ioChaos := &v1alpha1.IOChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "io-chaos",
 			Namespace: ns,
 		},
-		Spec: v1alpha1.IoChaosSpec{
+		Spec: v1alpha1.IOChaosSpec{
 			Action:     v1alpha1.IoLatency,
 			VolumePath: "/var/run/data",
 			Path:       "/var/run/data/*",
@@ -341,12 +341,12 @@ func TestcaseIODelayWithWrongSpec(
 	err := util.WaitE2EHelperReady(c, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 	By("create IO delay chaos CRD objects")
-	ioChaos := &v1alpha1.IoChaos{
+	ioChaos := &v1alpha1.IOChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "io-chaos",
 			Namespace: ns,
 		},
-		Spec: v1alpha1.IoChaosSpec{
+		Spec: v1alpha1.IOChaosSpec{
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{
 					Selector: v1alpha1.PodSelectorSpec{

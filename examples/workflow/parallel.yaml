@@ -35,8 +35,6 @@ spec:
         selector:
           labelSelectors:
             "app": "hello-kubernetes"
-        scheduler:
-          cron: "@every 10s"
     - name: workflow-stress-chaos
       templateType: StressChaos
       duration: 20s

@@ -22,7 +22,7 @@ import (
 
 // struct workflowCodeGenerator will render content of one file contains code blocks that required by workflow
 type workflowCodeGenerator struct {
-	// name of each Kind of chaos, for example: PodChaos, IoChaos, DNSChaos
+	// name of each Kind of chaos, for example: PodChaos, IOChaos, DNSChaos
 	chaosTypes []string
 }
 
