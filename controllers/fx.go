@@ -16,16 +16,15 @@ package controllers
 import (
 	"go.uber.org/fx"
 
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl"
+	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/chaos-mesh/chaos-mesh/controllers/condition"
+	"github.com/chaos-mesh/chaos-mesh/controllers/desiredphase"
+	"github.com/chaos-mesh/chaos-mesh/controllers/finalizers"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podhttpchaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podiochaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/schedule"
-
-	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common"
-	"github.com/chaos-mesh/chaos-mesh/controllers/desiredphase"
-	"github.com/chaos-mesh/chaos-mesh/controllers/finalizers"
 )
 
 var Module = fx.Options(
