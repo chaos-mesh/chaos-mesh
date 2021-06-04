@@ -85,6 +85,7 @@ type Node struct {
 	Serial   *NodeSerial   `json:"serial,omitempty"`
 	Parallel *NodeParallel `json:"parallel,omitempty"`
 	Template string        `json:"template"`
+	UID      string        `json:"uid"`
 }
 
 type NodeNameWithTemplate struct {
@@ -313,6 +314,7 @@ func convertWorkflowNode(kubeWorkflowNode v1alpha1.WorkflowNode) (Node, error) {
 		Serial:   nil,
 		Parallel: nil,
 		Template: kubeWorkflowNode.Spec.TemplateName,
+		UID:      string(kubeWorkflowNode.UID),
 	}
 
 	if kubeWorkflowNode.Spec.Type == v1alpha1.TypeSerial {
