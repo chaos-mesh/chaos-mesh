@@ -18,14 +18,12 @@ import { useHistory, useLocation } from 'react-router-dom'
 
 import CloseIcon from '@material-ui/icons/Close'
 import { Event } from 'api/events.type'
-import EventDetail from 'components/EventDetail'
 import FirstPageIcon from '@material-ui/icons/FirstPage'
 import KeyboardArrowLeftIcon from '@material-ui/icons/KeyboardArrowLeft'
 import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight'
 import LastPageIcon from '@material-ui/icons/LastPage'
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
-import { StateOfExperimentsEnum } from 'api/experiments.type'
 import T from 'components/T'
 import { makeStyles } from '@material-ui/styles'
 import { useIntl } from 'react-intl'
@@ -292,7 +290,6 @@ const EventsTable: React.ForwardRefRenderFunction<EventsTableHandles, EventsTabl
           <PaperTop title={T('common.detail')}>
             <CloseIcon className={classes.asButton} onClick={closeEventDetail} />
           </PaperTop>
-          <EventDetail eventID={eventID} />
         </Paper>
       )}
     </Box>

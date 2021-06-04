@@ -84,7 +84,7 @@ const LoadFrom: React.FC<LoadFromProps> = ({ loadCallback, inSchedule = false })
     setRadio(e.target.value)
 
     apiRequest
-      .detail(uuid)
+      .single(uuid)
       .then(({ data }) => {
         fillExperiment(data.kube_object)
 

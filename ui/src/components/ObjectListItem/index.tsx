@@ -4,7 +4,6 @@ import { Archive } from 'api/archives.type'
 import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
 import DateTime from 'lib/luxon'
 import DeleteOutlinedIcon from '@material-ui/icons/DeleteOutlined'
-import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline'
 import { Experiment } from 'api/experiments.type'
 import ExperimentStatus from 'components/ExperimentStatus'
 import Paper from 'components-mui/Paper'
@@ -106,13 +105,13 @@ const ObjectListItem: React.FC<ObjectListItemProps> = ({ data, type = 'experimen
     <Space display="flex" justifyContent="end" alignItems="center">
       <Typography variant="body2">
         {T('table.created')}{' '}
-        {DateTime.fromISO(data.created, {
+        {DateTime.fromISO(data.created_at, {
           locale: lang,
         }).toRelative()}
       </Typography>
       {type === 'experiment' && (
         <>
-          {(data as Experiment).status === 'Paused' ? (
+          {(data as Experiment).status === 'paused' ? (
             <IconButton
               color="primary"
               title={intl.formatMessage({ id: 'common.start' })}
@@ -164,12 +163,7 @@ const ObjectListItem: React.FC<ObjectListItemProps> = ({ data, type = 'experimen
     <Paper padding={0} className={classes.root} onClick={handleJumpTo}>
       <Box display="flex" justifyContent="space-between" alignItems="center" p={3}>
         <Space display="flex" alignItems="center">
-          {type === 'experiment' &&
-            ((data as Experiment).status === 'Failed' ? (
-              <ErrorOutlineIcon color="error" />
-            ) : (
-              <ExperimentStatus status={(data as Experiment).status} />
-            ))}
+          {type === 'experiment' && <ExperimentStatus status={(data as Experiment).status} />}
           <Typography variant="body1" component="div">
             {data.name}
           </Typography>

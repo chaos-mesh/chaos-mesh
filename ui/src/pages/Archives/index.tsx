@@ -58,8 +58,6 @@ export default function Archives() {
 
     request()
       .then(({ data }) => {
-        data.map((d) => (d.created = d.start_time))
-
         setArchives(data)
       })
       .catch(console.error)

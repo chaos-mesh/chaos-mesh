@@ -98,11 +98,10 @@
     "title": "实验",
     "single": "实验",
     "state": {
+      "injecting": "注入中",
       "running": "运行中",
-      "paused": "暂停",
-      "failed": "失败",
-      "waiting": "等待中",
-      "finished": "完成"
+      "finished": "完成",
+      "paused": "暂停"
     },
     "notFound": "未发现实验",
     "deleteMulti": "归档所选实验",
@@ -269,6 +268,7 @@
     "confirm": "确认",
     "copied": "已复制！",
     "copy": "复制",
+    "definition": "定义",
     "delete": "删除",
     "detail": "详情",
     "doc": "文档",

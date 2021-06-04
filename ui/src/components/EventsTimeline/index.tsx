@@ -1,4 +1,4 @@
-import { Badge, Box, Typography } from '@material-ui/core'
+import { Box, Typography } from '@material-ui/core'
 
 import DateTime from 'lib/luxon'
 import { Event } from 'api/events.type'
@@ -36,9 +36,7 @@ const EventsTimeline: React.FC<EventsTimelineProps> = ({ events }) => {
           <TimelineOppositeContent style={{ flex: 0.001, padding: 0 }} />
           <TimelineSeparator>
             <TimelineConnector sx={{ py: 3 }} />
-            <Badge badgeContent={e.id}>
-              <TimelineDot color="primary">{iconByKind(e.kind, 'small')}</TimelineDot>
-            </Badge>
+            <TimelineDot color="primary">{iconByKind(e.kind, 'small')}</TimelineDot>
           </TimelineSeparator>
           <TimelineContent>
             <Box display="flex" justifyContent="space-between" mt={6}>

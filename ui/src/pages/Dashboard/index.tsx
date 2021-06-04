@@ -18,12 +18,12 @@ import { Workflow } from 'api/workflows.type'
 import api from 'api'
 import { makeStyles } from '@material-ui/styles'
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles({
   totalState: {
     position: 'relative',
-    height: 450,
+    height: 300,
   },
-}))
+})
 
 const NumPanel: React.FC<{ title: JSX.Element; num: number; background: JSX.Element }> = ({
   title,
@@ -78,9 +78,9 @@ export default function Dashboard() {
 
     fetchAll()
 
-    // const id = setInterval(fetchEvents, 15000)
+    const id = setInterval(fetchAll, 12000)
 
-    // return () => clearInterval(id)
+    return () => clearInterval(id)
   }, [])
 
   return (

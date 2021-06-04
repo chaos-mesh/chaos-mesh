@@ -1,7 +1,6 @@
 import { Box, Button, Grid, Grow, Modal } from '@material-ui/core'
-// import EventsTable, { EventsTableHandles } from 'components/EventsTable'
 import { setAlert, setConfirm } from 'slices/globalStatus'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useHistory, useParams } from 'react-router-dom'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
@@ -10,14 +9,15 @@ import Alert from '@material-ui/lab/Alert'
 import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
 import CloudDownloadOutlinedIcon from '@material-ui/icons/CloudDownloadOutlined'
 import { Event } from 'api/events.type'
-import { ExperimentDetail as ExperimentDetailType } from 'api/experiments.type'
+import EventsTimeline from 'components/EventsTimeline'
+import { ExperimentSingle } from 'api/experiments.type'
 import Loading from 'components-mui/Loading'
-import NoteOutlinedIcon from '@material-ui/icons/NoteOutlined'
 import ObjectConfiguration from 'components/ObjectConfiguration'
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
 import PauseCircleOutlineIcon from '@material-ui/icons/PauseCircleOutline'
 import PlayCircleOutlineIcon from '@material-ui/icons/PlayCircleOutline'
+import PublishIcon from '@material-ui/icons/Publish'
 import Space from 'components-mui/Space'
 import T from 'components/T'
 import api from 'api'
@@ -32,78 +32,59 @@ import yaml from 'js-yaml'
 const YAMLEditor = loadable(() => import('components/YAMLEditor'))
 
 const useStyles = makeStyles((theme) => ({
-  eventsChart: {
-    height: 150,
-  },
-  eventDetailPaper: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    overflowY: 'scroll',
-  },
-  configPaper: {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    width: '50vw',
-    height: '90vh',
-    transform: 'translate(-50%, -50%)',
-    [theme.breakpoints.down('sm')]: {
-      width: '90vw',
-    },
+  yamlEditorWrapper: {
+    flex: 1,
+    width: `calc(100% + ${theme.spacing(9)})`,
+    marginLeft: theme.spacing(-4.5),
   },
 }))
 
-export default function ExperimentDetail() {
+export default function Single() {
   const classes = useStyles()
 
-  const intl = useIntl()
-
   const history = useHistory()
-  const { uuid } = useParams<{ uuid: string }>()
+  const { uuid } = useParams<{ uuid: uuid }>()
+
+  const intl = useIntl()
 
   const { theme } = useStoreSelector((state) => state.settings)
   const dispatch = useStoreDispatch()
 
-  const chartRef = useRef<HTMLDivElement>(null)
-  // const eventsTableRef = useRef<EventsTableHandles>(null)
+  // const chartRef = useRef<HTMLDivElement>(null)
 
   const [loading, setLoading] = useState(true)
-  const [detail, setDetail] = useState<ExperimentDetailType>()
-  const [events, setEvents] = useState<Event[]>()
+  const [single, setSingle] = useState<ExperimentSingle>()
+  const [events, setEvents] = useState<Event[]>([])
   const prevEvents = usePrevious(events)
   const [yamlEditor, setYAMLEditor] = useState<Ace.Editor>()
-  const [configOpen, setConfigOpen] = useState(false)
 
-  const fetchExperimentDetail = () => {
+  const fetchExperiment = () => {
     api.experiments
-      .detail(uuid)
-      .then(({ data }) => setDetail(data))
+      .single(uuid)
+      .then(({ data }) => setSingle(data))
       .catch(console.error)
   }
 
-  const fetchEvents = () =>
-    api.events
-      .events({ uid: uuid })
-      .then(({ data }) => setEvents(data))
-      .catch(console.error)
-      .finally(() => {
-        setLoading(false)
-      })
-
   useEffect(() => {
-    fetchExperimentDetail()
+    fetchExperiment()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
-    if (detail) {
+    const fetchEvents = () => {
+      api.events
+        .events({ object_id: uuid, limit: 999 })
+        .then(({ data }) => setEvents(data))
+        .catch(console.error)
+        .finally(() => {
+          setLoading(false)
+        })
+    }
+
+    if (single) {
       fetchEvents()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [detail])
+  }, [uuid, single])
 
   // useEffect(() => {
   //   if (prevEvents !== events && prevEvents?.length !== events?.length && events) {
@@ -123,15 +104,12 @@ export default function ExperimentDetail() {
   //   // eslint-disable-next-line react-hooks/exhaustive-deps
   // }, [events])
 
-  const onModalOpen = () => setConfigOpen(true)
-  const onModalClose = () => setConfigOpen(false)
-
   const handleSelect = (action: string) => () => {
     switch (action) {
       case 'archive':
         dispatch(
           setConfirm({
-            title: `${intl.formatMessage({ id: 'archives.single' })} ${detail!.name}`,
+            title: `${intl.formatMessage({ id: 'archives.single' })} ${single!.name}`,
             description: intl.formatMessage({ id: 'experiments.deleteDesc' }),
             handle: handleAction('archive'),
           })
@@ -141,7 +119,7 @@ export default function ExperimentDetail() {
       case 'pause':
         dispatch(
           setConfirm({
-            title: `${intl.formatMessage({ id: 'common.pause' })} ${detail!.name}`,
+            title: `${intl.formatMessage({ id: 'common.pause' })} ${single!.name}`,
             description: intl.formatMessage({ id: 'experiments.pauseDesc' }),
             handle: handleAction('pause'),
           })
@@ -151,7 +129,7 @@ export default function ExperimentDetail() {
       case 'start':
         dispatch(
           setConfirm({
-            title: `${intl.formatMessage({ id: 'common.start' })} ${detail!.name}`,
+            title: `${intl.formatMessage({ id: 'common.start' })} ${single!.name}`,
             description: intl.formatMessage({ id: 'experiments.startDesc' }),
             handle: handleAction('start'),
           })
@@ -196,14 +174,14 @@ export default function ExperimentDetail() {
           }
 
           if (action === 'pause' || action === 'start') {
-            setTimeout(fetchExperimentDetail, 300)
+            setTimeout(fetchExperiment, 300)
           }
         })
         .catch(console.error)
     }
   }
 
-  const handleDownloadExperiment = () => fileDownload(yaml.dump(detail!.kube_object), `${detail!.name}.yaml`)
+  const handleDownloadExperiment = () => fileDownload(yaml.dump(single!.kube_object), `${single!.name}.yaml`)
 
   const handleUpdateExperiment = () => {
     const data = yaml.load(yamlEditor!.getValue())
@@ -211,8 +189,6 @@ export default function ExperimentDetail() {
     api.experiments
       .update(data)
       .then(() => {
-        onModalClose()
-
         dispatch(
           setAlert({
             type: 'success',
@@ -220,7 +196,7 @@ export default function ExperimentDetail() {
           })
         )
 
-        fetchExperimentDetail()
+        fetchExperiment()
       })
       .catch(console.error)
   }
@@ -228,8 +204,8 @@ export default function ExperimentDetail() {
   return (
     <>
       <Grow in={!loading} style={{ transformOrigin: '0 0 0' }}>
-        <Grid container spacing={6}>
-          <Grid item xs={12}>
+        <div>
+          <Space spacing={6} vertical>
             <Space>
               <Button
                 variant="outlined"
@@ -239,7 +215,7 @@ export default function ExperimentDetail() {
               >
                 {T('archives.single')}
               </Button>
-              {detail?.status === 'Paused' ? (
+              {single?.status === 'paused' ? (
                 <Button
                   variant="outlined"
                   size="small"
@@ -259,76 +235,63 @@ export default function ExperimentDetail() {
                 </Button>
               )}
             </Space>
-          </Grid>
 
-          {detail?.failed_message && (
-            <Grid item xs={12}>
+            {single?.failed_message && (
               <Alert severity="error">
-                An error occurred: <b>{detail.failed_message}</b>
+                An error occurred: <b>{single.failed_message}</b>
               </Alert>
-            </Grid>
-          )}
-
-          <Grid item xs={12}>
-            <Paper>
-              <PaperTop title={T('common.configuration')}>
-                <Space>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    startIcon={<CloudDownloadOutlinedIcon />}
-                    onClick={handleDownloadExperiment}
-                  >
-                    {T('common.download')}
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    color="primary"
-                    startIcon={<NoteOutlinedIcon />}
-                    onClick={onModalOpen}
-                  >
-                    {T('common.configuration')}
-                  </Button>
-                </Space>
-              </PaperTop>
-              {detail && <ObjectConfiguration config={detail} />}
-            </Paper>
-          </Grid>
-
-          <Grid item xs={12}>
-            {/* <Paper>
-              <PaperTop title={T('common.timeline')} />
-              <div ref={chartRef} className={classes.eventsChart} />
-            </Paper> */}
-          </Grid>
-
-          <Grid item xs={12}>
-            {/* {events && <EventsTable ref={eventsTableRef} events={events} />} */}
-          </Grid>
-        </Grid>
-      </Grow>
-
-      <Modal open={configOpen} onClose={onModalClose}>
-        <div>
-          <Paper className={classes.configPaper} padding={0}>
-            {detail && configOpen && (
-              <Box display="flex" flexDirection="column" height="100%">
-                <Box px={3} pt={3}>
-                  <PaperTop title={detail.name}>
-                    <Button variant="contained" color="primary" size="small" onClick={handleUpdateExperiment}>
-                      {T('common.update')}
-                    </Button>
-                  </PaperTop>
-                </Box>
-                <Box flex={1}>
-                  <YAMLEditor theme={theme} data={yaml.dump(detail.kube_object)} mountEditor={setYAMLEditor} />
-                </Box>
-              </Box>
             )}
-          </Paper>
+
+            <Paper>
+              <PaperTop title={T('common.configuration')}></PaperTop>
+              {single && <ObjectConfiguration config={single} />}
+            </Paper>
+
+            <Grid container spacing={6}>
+              <Grid item xs={12} lg={6}>
+                <Paper boxProps={{ display: 'flex', flexDirection: 'column' }} style={{ height: 600 }}>
+                  <PaperTop title={T('events.title')} />
+                  <Box flex={1} overflow="scroll">
+                    <EventsTimeline events={events} />
+                  </Box>
+                </Paper>
+              </Grid>
+              <Grid item xs={12} lg={6}>
+                <Paper boxProps={{ pb: 0 }} style={{ height: 600 }}>
+                  {single && (
+                    <Box display="flex" flexDirection="column" height="100%">
+                      <PaperTop title={T('common.definition')}>
+                        <Space>
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            startIcon={<CloudDownloadOutlinedIcon />}
+                            onClick={handleDownloadExperiment}
+                          >
+                            {T('common.download')}
+                          </Button>
+                          <Button
+                            variant="outlined"
+                            color="primary"
+                            size="small"
+                            startIcon={<PublishIcon />}
+                            onClick={handleUpdateExperiment}
+                          >
+                            {T('common.update')}
+                          </Button>
+                        </Space>
+                      </PaperTop>
+                      <Box className={classes.yamlEditorWrapper}>
+                        <YAMLEditor theme={theme} data={yaml.dump(single.kube_object)} mountEditor={setYAMLEditor} />
+                      </Box>
+                    </Box>
+                  )}
+                </Paper>
+              </Grid>
+            </Grid>
+          </Space>
         </div>
-      </Modal>
+      </Grow>
 
       {loading && <Loading />}
     </>

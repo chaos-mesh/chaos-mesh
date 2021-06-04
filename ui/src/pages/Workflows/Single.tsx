@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from 'react'
 import { useHistory, useParams } from 'react-router-dom'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
-import { WorkflowDetail as APIWorkflowDetail } from 'api/workflows.type'
 import { Ace } from 'ace-builds'
 import DeleteOutlinedIcon from '@material-ui/icons/DeleteOutlined'
 import { EventHandler } from 'cytoscape'
@@ -14,6 +13,7 @@ import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
 import Space from 'components-mui/Space'
 import T from 'components/T'
+import { WorkflowSingle } from 'api/workflows.type'
 import api from 'api'
 import { constructWorkflowTopology } from 'lib/cytoscape'
 import loadable from '@loadable/component'
@@ -43,7 +43,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
-const WorkflowDetail = () => {
+const Single = () => {
   const classes = useStyles()
   const intl = useIntl()
   const history = useHistory()
@@ -52,7 +52,7 @@ const WorkflowDetail = () => {
   const { theme } = useStoreSelector((state) => state.settings)
   const dispatch = useStoreDispatch()
 
-  const [detail, setDetail] = useState<APIWorkflowDetail>()
+  const [detail, setDetail] = useState<WorkflowSingle>()
   const [yamlEditor, setYAMLEditor] = useState<Ace.Editor>()
   const [data, setData] = useState<any>()
   const [selected, setSelected] = useState<'workflow' | 'node'>('workflow')
@@ -275,4 +275,4 @@ const WorkflowDetail = () => {
   )
 }
 
-export default WorkflowDetail
+export default Single

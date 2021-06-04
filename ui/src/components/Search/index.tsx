@@ -103,13 +103,13 @@ const Search: React.FC = () => {
       case 'experiment':
       case 'archive':
         link = `/${type}s/${(option as Experiment).uid}`
-        name = (option as Experiment).name
-        time = (option as Experiment).created
+        name = option.name
+        time = option.created_at
         break
       case 'event':
         link = `/${type}s?event_id=${(option as Event).id}`
-        name = (option as Event).name
-        time = (option as Event).created_at
+        name = option.name
+        time = option.created_at
         break
       default:
         break

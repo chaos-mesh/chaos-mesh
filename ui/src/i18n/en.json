@@ -98,11 +98,10 @@
     "title": "Experiments",
     "single": "Experiment",
     "state": {
+      "injecting": "Injecting",
       "running": "Running",
-      "paused": "Paused",
-      "failed": "Failed",
-      "waiting": "Waiting",
-      "finished": "Finished"
+      "finished": "Finished",
+      "paused": "Paused"
     },
     "notFound": "No experiments found",
     "createdAt": "Created",
@@ -270,6 +269,7 @@
     "confirm": "Confirm",
     "copied": "Copied!",
     "copy": "Copy",
+    "definition": "Definition",
     "delete": "Delete",
     "detail": "Detail",
     "doc": "Documentation",

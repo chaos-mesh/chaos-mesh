@@ -1,7 +1,7 @@
 import { ExperimentKind } from '../components/NewExperiment/types'
 
 export interface EventsParams {
-  uid?: uuid
+  object_id?: uuid
   namespace?: string
   limit?: number
 }
@@ -9,8 +9,8 @@ export interface EventsParams {
 export interface Event {
   id: number
   object_id: uuid
-  name: string
   namespace: string
+  name: string
   kind: ExperimentKind | 'Schedule'
   type: 'Normal' | 'Warning'
   reason: string

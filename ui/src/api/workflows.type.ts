@@ -26,7 +26,7 @@ export interface Node {
   parallel?: ParallelNode
 }
 
-export interface WorkflowDetail extends Workflow {
+export interface WorkflowSingle extends Workflow {
   topology: {
     nodes: Node[]
   }

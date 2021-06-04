@@ -13,6 +13,7 @@ import { useTheme } from '@material-ui/core/styles'
 
 interface SingleData {
   id: keyof StateOfExperiments
+  label: string
   value: number
 }
 
@@ -26,15 +27,8 @@ const TotalState: React.FC<TotalStateProps> = (props) => {
 
   const [s, setS] = useState<SingleData[]>([])
 
-  const fetchState = () => {
-    api.experiments
-      .state()
-      .then((resp) => setS(Object.entries(resp.data).map(([k, v]) => ({ id: k as any, value: v === 0 ? 0.01 : v }))))
-      .catch(console.error)
-  }
-
   const arcLinkLabel: PropertyAccessor<ComputedDatum<SingleData>, string> = (d) =>
-    d.value + ' ' + intl.formatMessage({ id: `experiments.state.${d.id.toString().toLowerCase()}` })
+    d.value + ' ' + intl.formatMessage({ id: `experiments.state.${d.id}` })
 
   const tooltip = ({ datum }: PieTooltipProps<SingleData>) => (
     <Box
@@ -43,20 +37,33 @@ const TotalState: React.FC<TotalStateProps> = (props) => {
       p={1.5}
       style={{ background: theme.palette.background.default, fontSize: theme.typography.caption.fontSize }}
     >
-      <Box mr={1.5} style={{ width: 12, height: 12, background: datum.color, borderRadius: 50 }} />
-      {(datum.value < 1 ? 0 : datum.value) +
-        ' ' +
-        intl.formatMessage({ id: `experiments.state.${datum.id.toString().toLowerCase()}` })}
+      <Box mr={1.5} style={{ width: 12, height: 12, background: datum.color }} />
+      {(datum.value < 1 ? 0 : datum.value) + ' ' + intl.formatMessage({ id: `experiments.state.${datum.id}` })}
     </Box>
   )
 
   useEffect(() => {
+    const fetchState = () => {
+      api.experiments
+        .state()
+        .then((resp) =>
+          setS(
+            (Object.entries(resp.data) as [keyof StateOfExperiments, number][]).map(([k, v]) => ({
+              id: k,
+              label: intl.formatMessage({ id: `experiments.state.${k}` }),
+              value: v === 0 ? 0.01 : v,
+            }))
+          )
+        )
+        .catch(console.error)
+    }
+
     fetchState()
 
-    const id = setInterval(fetchState, 15000)
+    const id = setInterval(fetchState, 12000)
 
     return () => clearInterval(id)
-  }, [])
+  }, [intl])
 
   return (
     <div className={props.className}>
@@ -80,6 +87,14 @@ const TotalState: React.FC<TotalStateProps> = (props) => {
           tooltip={tooltip}
           activeInnerRadiusOffset={2}
           activeOuterRadiusOffset={2}
+          legends={[
+            {
+              anchor: 'top-left',
+              direction: 'column',
+              itemWidth: 100,
+              itemHeight: 25,
+            },
+          ]}
         />
       ) : (
         <NotFound>{T('experiments.notFound')}</NotFound>

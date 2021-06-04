@@ -1,16 +1,17 @@
-import ArchiveReport from 'pages/ArchiveReport'
+import Archive from 'pages/Archives/Single'
 import Archives from 'pages/Archives'
 import Dashboard from 'pages/Dashboard'
 import Events from 'pages/Events'
-import ExperimentDetail from 'pages/ExperimentDetail'
+import Experiment from 'pages/Experiments/Single'
 import Experiments from 'pages/Experiments'
 import NewExperiment from 'pages/Experiments/New'
 import NewSchedule from 'pages/Schedules/New'
 import NewWorkflow from 'components/NewWorkflow'
 import { RouteProps } from 'react-router'
+import Schedule from 'pages/Schedules/Single'
 import Schedules from 'pages/Schedules'
 import Settings from 'pages/Settings'
-import WorkflowDetail from 'pages/WorkflowDetail'
+import Workflow from 'pages/Workflows/Single'
 import Workflows from 'pages/Workflows'
 
 const routes: RouteProps[] = [
@@ -29,7 +30,7 @@ const routes: RouteProps[] = [
     path: '/experiments/new',
   },
   {
-    component: ExperimentDetail,
+    component: Experiment,
     path: '/experiments/:uuid',
   },
   {
@@ -42,7 +43,7 @@ const routes: RouteProps[] = [
     path: '/workflows/new',
   },
   {
-    component: WorkflowDetail,
+    component: Workflow,
     path: '/workflows/:namespace/:name',
   },
   {
@@ -55,6 +56,10 @@ const routes: RouteProps[] = [
     path: '/schedules/new',
   },
   {
+    component: Schedule,
+    path: '/schedules/:uuid',
+  },
+  {
     component: Events,
     path: '/events',
     exact: true,
@@ -65,7 +70,7 @@ const routes: RouteProps[] = [
     exact: true,
   },
   {
-    component: ArchiveReport,
+    component: Archive,
     path: '/archives/:uuid',
   },
   {

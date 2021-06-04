@@ -1,7 +1,7 @@
 import { Grid, TableCell as MUITableCell, Table, TableBody, TableRow, Typography } from '@material-ui/core'
 
 import { ArchiveDetail } from 'api/archives.type'
-import { ExperimentDetail } from 'api/experiments.type'
+import { ExperimentSingle } from 'api/experiments.type'
 import React from 'react'
 import T from 'components/T'
 import { format } from 'lib/luxon'
@@ -16,7 +16,7 @@ const TableCell = withStyles({
 })(MUITableCell)
 
 interface ObjectConfigurationProps {
-  config: ExperimentDetail | ArchiveDetail
+  config: ExperimentSingle | ArchiveDetail
 }
 
 const ObjectConfiguration: React.FC<ObjectConfigurationProps> = ({ config }) => {
@@ -96,12 +96,12 @@ const ObjectConfiguration: React.FC<ObjectConfigurationProps> = ({ config }) => 
               </TableCell>
             </TableRow>
 
-            {(config as ExperimentDetail).created && (
+            {config.created_at && (
               <TableRow>
                 <TableCell>{T('table.created')}</TableCell>
                 <TableCell>
                   <Typography variant="body2" color="textSecondary">
-                    {format((config as ExperimentDetail).created, lang)}
+                    {format(config.created_at, lang)}
                   </Typography>
                 </TableCell>
               </TableRow>

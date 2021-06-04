@@ -7,7 +7,6 @@ const useStyles = makeStyles((theme) => ({
   root: {
     display: 'flex',
     justifyContent: 'space-between',
-    alignItems: 'center',
     width: '100%',
     marginBottom: theme.spacing(3),
   },
