@@ -15,6 +15,7 @@ package v1alpha1
 
 import (
 	"fmt"
+	"reflect"
 	"time"
 
 	"k8s.io/apimachinery/pkg/runtime"
@@ -51,6 +52,9 @@ func (in *TimeChaos) ValidateCreate() error {
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
 func (in *TimeChaos) ValidateUpdate(old runtime.Object) error {
 	timechaoslog.Info("validate update", "name", in.Name)
+	if !reflect.DeepEqual(in.Spec, old.(*TimeChaos).Spec) {
+		return ErrCanNotUpdateChaos
+	}
 	return in.Validate()
 }
 

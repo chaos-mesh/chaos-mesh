@@ -15,6 +15,7 @@ package v1alpha1
 
 import (
 	"fmt"
+	"reflect"
 	"strconv"
 
 	"k8s.io/apimachinery/pkg/runtime"
@@ -51,7 +52,9 @@ func (in *JVMChaos) ValidateCreate() error {
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
 func (in *JVMChaos) ValidateUpdate(old runtime.Object) error {
 	jvmchaoslog.Info("validate update", "name", in.Name)
-
+	if !reflect.DeepEqual(in.Spec, old.(*JVMChaos).Spec) {
+		return ErrCanNotUpdateChaos
+	}
 	return in.Validate()
 }
 
