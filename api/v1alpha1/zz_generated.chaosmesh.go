@@ -62,6 +62,7 @@ func (in *AwsChaos) GetChaos() *ChaosInstance {
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
 		UID:       string(in.UID),
+		Status:    in.Status.ChaosStatus,
 	}
 
 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
@@ -128,7 +129,7 @@ func (in *AwsChaos) DurationExceeded(now time.Time) (bool, time.Duration, error)
 
 		return false, stopTime.Sub(now), nil
 	}
-		
+
 	return false, 0, nil
 }
 
@@ -173,6 +174,7 @@ func (in *DNSChaos) GetChaos() *ChaosInstance {
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
 		UID:       string(in.UID),
+		Status:    in.Status.ChaosStatus,
 	}
 
 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
@@ -239,7 +241,7 @@ func (in *DNSChaos) DurationExceeded(now time.Time) (bool, time.Duration, error)
 
 		return false, stopTime.Sub(now), nil
 	}
-		
+
 	return false, 0, nil
 }
 
@@ -284,6 +286,7 @@ func (in *GcpChaos) GetChaos() *ChaosInstance {
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
 		UID:       string(in.UID),
+		Status:    in.Status.ChaosStatus,
 	}
 
 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
@@ -350,7 +353,7 @@ func (in *GcpChaos) DurationExceeded(now time.Time) (bool, time.Duration, error)
 
 		return false, stopTime.Sub(now), nil
 	}
-		
+
 	return false, 0, nil
 }
 
@@ -395,6 +398,7 @@ func (in *HTTPChaos) GetChaos() *ChaosInstance {
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
 		UID:       string(in.UID),
+		Status:    in.Status.ChaosStatus,
 	}
 
 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
@@ -461,19 +465,19 @@ func (in *HTTPChaos) DurationExceeded(now time.Time) (bool, time.Duration, error
 
 		return false, stopTime.Sub(now), nil
 	}
-		
+
 	return false, 0, nil
 }
 
-const KindIoChaos = "IoChaos"
+const KindIOChaos = "IOChaos"
 
 // IsDeleted returns whether this resource has been deleted
-func (in *IoChaos) IsDeleted() bool {
+func (in *IOChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
 // IsPaused returns whether this resource has been paused
-func (in *IoChaos) IsPaused() bool {
+func (in *IOChaos) IsPaused() bool {
 	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
 		return false
 	}
@@ -481,12 +485,12 @@ func (in *IoChaos) IsPaused() bool {
 }
 
 // GetObjectMeta would return the ObjectMeta for chaos
-func (in *IoChaos) GetObjectMeta() *metav1.ObjectMeta {
+func (in *IOChaos) GetObjectMeta() *metav1.ObjectMeta {
 	return &in.ObjectMeta
 }
 
 // GetDuration would return the duration for chaos
-func (in *IoChaos) GetDuration() (*time.Duration, error) {
+func (in *IOChaos) GetDuration() (*time.Duration, error) {
 	if in.Spec.Duration == nil {
 		return nil, nil
 	}
@@ -498,14 +502,15 @@ func (in *IoChaos) GetDuration() (*time.Duration, error) {
 }
 
 // GetChaos would return the a record for chaos
-func (in *IoChaos) GetChaos() *ChaosInstance {
+func (in *IOChaos) GetChaos() *ChaosInstance {
 	instance := &ChaosInstance{
 		Name:      in.Name,
 		Namespace: in.Namespace,
-		Kind:      KindIoChaos,
+		Kind:      KindIOChaos,
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
 		UID:       string(in.UID),
+		Status:    in.Status.ChaosStatus,
 	}
 
 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
@@ -522,12 +527,12 @@ func (in *IoChaos) GetChaos() *ChaosInstance {
 }
 
 // GetStatus returns the status
-func (in *IoChaos) GetStatus() *ChaosStatus {
+func (in *IOChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
 }
 
 // GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
-func (in *IoChaos) GetSpecAndMetaString() (string, error) {
+func (in *IOChaos) GetSpecAndMetaString() (string, error) {
 	spec, err := json.Marshal(in.Spec)
 	if err != nil {
 		return "", err
@@ -542,15 +547,15 @@ func (in *IoChaos) GetSpecAndMetaString() (string, error) {
 
 // +kubebuilder:object:root=true
 
-// IoChaosList contains a list of IoChaos
-type IoChaosList struct {
+// IOChaosList contains a list of IOChaos
+type IOChaosList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []IoChaos `json:"items"`
+	Items           []IOChaos `json:"items"`
 }
 
 // ListChaos returns a list of chaos
-func (in *IoChaosList) ListChaos() []*ChaosInstance {
+func (in *IOChaosList) ListChaos() []*ChaosInstance {
 	res := make([]*ChaosInstance, 0, len(in.Items))
 	for _, item := range in.Items {
 		res = append(res, item.GetChaos())
@@ -558,7 +563,7 @@ func (in *IoChaosList) ListChaos() []*ChaosInstance {
 	return res
 }
 
-func (in *IoChaos) DurationExceeded(now time.Time) (bool, time.Duration, error) {
+func (in *IOChaos) DurationExceeded(now time.Time) (bool, time.Duration, error) {
 	duration, err := in.GetDuration()
 	if err != nil {
 		return false, 0, err
@@ -572,7 +577,7 @@ func (in *IoChaos) DurationExceeded(now time.Time) (bool, time.Duration, error) 
 
 		return false, stopTime.Sub(now), nil
 	}
-		
+
 	return false, 0, nil
 }
 
@@ -617,6 +622,7 @@ func (in *JVMChaos) GetChaos() *ChaosInstance {
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
 		UID:       string(in.UID),
+		Status:    in.Status.ChaosStatus,
 	}
 
 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
@@ -683,7 +689,7 @@ func (in *JVMChaos) DurationExceeded(now time.Time) (bool, time.Duration, error)
 
 		return false, stopTime.Sub(now), nil
 	}
-		
+
 	return false, 0, nil
 }
 
@@ -728,6 +734,7 @@ func (in *KernelChaos) GetChaos() *ChaosInstance {
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
 		UID:       string(in.UID),
+		Status:    in.Status.ChaosStatus,
 	}
 
 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
@@ -794,7 +801,7 @@ func (in *KernelChaos) DurationExceeded(now time.Time) (bool, time.Duration, err
 
 		return false, stopTime.Sub(now), nil
 	}
-		
+
 	return false, 0, nil
 }
 
@@ -839,6 +846,7 @@ func (in *NetworkChaos) GetChaos() *ChaosInstance {
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
 		UID:       string(in.UID),
+		Status:    in.Status.ChaosStatus,
 	}
 
 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
@@ -905,7 +913,7 @@ func (in *NetworkChaos) DurationExceeded(now time.Time) (bool, time.Duration, er
 
 		return false, stopTime.Sub(now), nil
 	}
-		
+
 	return false, 0, nil
 }
 
@@ -950,6 +958,7 @@ func (in *PodChaos) GetChaos() *ChaosInstance {
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
 		UID:       string(in.UID),
+		Status:    in.Status.ChaosStatus,
 	}
 
 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
@@ -1016,7 +1025,7 @@ func (in *PodChaos) DurationExceeded(now time.Time) (bool, time.Duration, error)
 
 		return false, stopTime.Sub(now), nil
 	}
-		
+
 	return false, 0, nil
 }
 
@@ -1061,6 +1070,7 @@ func (in *StressChaos) GetChaos() *ChaosInstance {
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
 		UID:       string(in.UID),
+		Status:    in.Status.ChaosStatus,
 	}
 
 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
@@ -1127,7 +1137,7 @@ func (in *StressChaos) DurationExceeded(now time.Time) (bool, time.Duration, err
 
 		return false, stopTime.Sub(now), nil
 	}
-		
+
 	return false, 0, nil
 }
 
@@ -1172,6 +1182,7 @@ func (in *TimeChaos) GetChaos() *ChaosInstance {
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
 		UID:       string(in.UID),
+		Status:    in.Status.ChaosStatus,
 	}
 
 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
@@ -1238,7 +1249,7 @@ func (in *TimeChaos) DurationExceeded(now time.Time) (bool, time.Duration, error
 
 		return false, stopTime.Sub(now), nil
 	}
-		
+
 	return false, 0, nil
 }
 
@@ -1268,10 +1279,10 @@ func init() {
 		ChaosList: &HTTPChaosList{},
 	})
 
-	SchemeBuilder.Register(&IoChaos{}, &IoChaosList{})
-	all.register(KindIoChaos, &ChaosKind{
-		Chaos:     &IoChaos{},
-		ChaosList: &IoChaosList{},
+	SchemeBuilder.Register(&IOChaos{}, &IOChaosList{})
+	all.register(KindIOChaos, &ChaosKind{
+		Chaos:     &IOChaos{},
+		ChaosList: &IOChaosList{},
 	})
 
 	SchemeBuilder.Register(&JVMChaos{}, &JVMChaosList{})
@@ -1331,9 +1342,9 @@ func init() {
 		ChaosList: &HTTPChaosList{},
 	})
 
-	allScheduleItem.register(KindIoChaos, &ChaosKind{
-		Chaos:     &IoChaos{},
-		ChaosList: &IoChaosList{},
+	allScheduleItem.register(KindIOChaos, &ChaosKind{
+		Chaos:     &IOChaos{},
+		ChaosList: &IOChaosList{},
 	})
 
 	allScheduleItem.register(KindJVMChaos, &ChaosKind{

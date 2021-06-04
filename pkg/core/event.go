@@ -53,23 +53,23 @@ type EventStore interface {
 
 // Event represents an event instance.
 type Event struct {
-	ID           uint      `gorm:"primary_key" json:"id"`
-	CreatedAt    time.Time `json:"created_at"`
-	Kind         string    `json:"kind"`
-	Type         string    `json:"type"`
-	Reason       string    `json:"reason"`
-	Message      string    `json:"message"`
-	Name         string    `json:"name"`
-	Namespace    string    `json:"namespace"`
-	ExperimentID string    `gorm:"index:experiment_id" json:"experiment_id"`
+	ID        uint      `gorm:"primary_key" json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	Kind      string    `json:"kind"`
+	Type      string    `json:"type"`
+	Reason    string    `json:"reason"`
+	Message   string    `json:"message"`
+	Name      string    `json:"name"`
+	Namespace string    `json:"namespace"`
+	ObjectID  string    `gorm:"index:object_id" json:"object_id"`
 }
 
 // Filter represents the filter to list events
 type Filter struct {
-	CreateTimeStr       string
-	ExperimentName      string
-	ExperimentNamespace string
-	UID                 string
-	Kind                string
-	LimitStr            string
+	CreateTimeStr string
+	Name          string
+	Namespace     string
+	ObjectID      string
+	Kind          string
+	LimitStr      string
 }

@@ -21,11 +21,10 @@ import (
 	"time"
 
 	"github.com/jinzhu/gorm"
+	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 	"github.com/chaos-mesh/chaos-mesh/pkg/store/dbstore"
-
-	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 var log = ctrl.Log.WithName("store/event")
@@ -72,7 +71,7 @@ func (e *eventStore) ListByUID(_ context.Context, uid string) ([]*core.Event, er
 	eventList := make([]*core.Event, 0)
 
 	if err := e.db.Where(
-		"experiment_id = ?", uid).
+		"object_id = ?", uid).
 		Find(&resList).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
 		return nil, err
 	}
@@ -91,7 +90,7 @@ func (e *eventStore) ListByUIDs(_ context.Context, uids []string) ([]*core.Event
 	eventList := make([]*core.Event, 0)
 
 	if err := e.db.Table("events").Where(
-		"experiment_id IN (?)", uids).
+		"object_id IN (?)", uids).
 		Find(&resList).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
 		return nil, err
 	}
@@ -163,7 +162,7 @@ func (e *eventStore) ListByFilter(_ context.Context, filter core.Filter) ([]*cor
 		}
 	}
 
-	query, args := constructQueryArgs(filter.ExperimentName, filter.ExperimentNamespace, filter.UID, filter.Kind, filter.CreateTimeStr)
+	query, args := constructQueryArgs(filter.Name, filter.Namespace, filter.ObjectID, filter.Kind, filter.CreateTimeStr)
 	// List all events
 	if len(args) == 0 {
 		db = e.db
@@ -200,17 +199,13 @@ func (e *eventStore) DeleteByCreateTime(_ context.Context, ttl time.Duration) er
 
 // DeleteByUID deletes events by the uid of the experiment.
 func (e *eventStore) DeleteByUID(_ context.Context, uid string) error {
-	_, err := e.ListByUID(context.Background(), uid)
-	if err != nil {
-		return err
-	}
-	return e.db.Where("experiment_id = ?", uid).Unscoped().
+	return e.db.Where("object_id = ?", uid).Unscoped().
 		Delete(core.Event{}).Error
 }
 
 // DeleteByUIDs deletes events by the uid list of the experiment.
 func (e *eventStore) DeleteByUIDs(_ context.Context, uids []string) error {
-	return e.db.Where("experiment_id IN (?)", uids).Unscoped().Delete(core.Event{}).Error
+	return e.db.Where("object_id IN (?)", uids).Unscoped().Delete(core.Event{}).Error
 }
 
 func constructQueryArgs(experimentName, experimentNamespace, uid, kind, createTime string) (string, []interface{}) {
@@ -230,9 +225,9 @@ func constructQueryArgs(experimentName, experimentNamespace, uid, kind, createTi
 	}
 	if uid != "" {
 		if len(args) > 0 {
-			query += " AND experiment_id = ?"
+			query += " AND object_id = ?"
 		} else {
-			query += "experiment_id = ?"
+			query += "object_id = ?"
 		}
 		args = append(args, uid)
 	}
@@ -254,4 +249,24 @@ func constructQueryArgs(experimentName, experimentNamespace, uid, kind, createTi
 	}
 
 	return query, args
+}
+
+func splitArray(arr []uint, num int) [][]uint {
+	max := int(len(arr))
+	if max < num {
+		return nil
+	}
+	var segments = make([][]uint, 0)
+	quantity := max / num
+	end := int(0)
+	for i := int(1); i <= num; i++ {
+		point := i * quantity
+		if i != num {
+			segments = append(segments, arr[i-1+end:point])
+		} else {
+			segments = append(segments, arr[i-1+end:])
+		}
+		end = point - i
+	}
+	return segments
 }

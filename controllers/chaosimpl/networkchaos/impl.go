@@ -17,14 +17,12 @@ import (
 	"go.uber.org/fx"
 	"k8s.io/apimachinery/pkg/runtime"
 
-	"github.com/chaos-mesh/chaos-mesh/controllers/action"
-
-	"github.com/chaos-mesh/chaos-mesh/controllers/common"
-
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/action"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/networkchaos/partition"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/networkchaos/podnetworkchaosmanager"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/networkchaos/trafficcontrol"
+	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 )
 
 type Impl struct {

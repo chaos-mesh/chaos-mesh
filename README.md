@@ -1,7 +1,7 @@
 <img src="static/logo.svg" alt="chaos-mesh-logo" width="450"/>
 
 <!-- markdown-link-check-disable -->
-[![Build Status](https://internal.pingcap.net/idc-jenkins/job/build_chaos_mesh_master/badge/icon)](https://internal.pingcap.net/idc-jenkins/view/chaos-mesh/job/build_chaos_mesh_master/)
+[![Build Status](https://ci.pingcap.net/view/chaos-mesh/job/build_chaos_mesh_master/badge/icon)](https://ci.pingcap.net/view/chaos-mesh/job/build_chaos_mesh_master/)
 [![codecov](https://codecov.io/gh/chaos-mesh/chaos-mesh/branch/master/graph/badge.svg)](https://codecov.io/gh/chaos-mesh/chaos-mesh)
 [![LICENSE](https://img.shields.io/github/license/pingcap/chaos-mesh.svg)](https://github.com/chaos-mesh/chaos-mesh/blob/master/LICENSE)
 [![Language](https://img.shields.io/badge/Language-Go-blue.svg)](https://golang.org/)
@@ -34,7 +34,7 @@ Chaos Operator injects chaos into the applications and Kubernetes infrastructure
 ![Chaos Operator](./static/chaos-mesh.svg)
 
 Chaos Operator uses [Custom Resource Definition (CRD)](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/) to define chaos objects.
-The current implementation supports a few types of CRD objects for fault injection, namely DNSChaos, PodChaos, PodIoChaos, PodNetworkChaos, NetworkChaos, IoChaos, TimeChaos, StressChaos, and KernelChaos, which correspond to the following major actions (experiments):
+The current implementation supports a few types of CRD objects for fault injection, namely DNSChaos, PodChaos, PodIOChaos, PodNetworkChaos, NetworkChaos, IOChaos, TimeChaos, StressChaos, and KernelChaos, which correspond to the following major actions (experiments):
 
 - pod-kill: The selected pod is killed (ReplicaSet or something similar may be needed to ensure the pod will be restarted).
 - pod-failure: The selected pod will be unavailable in a specified period of time.

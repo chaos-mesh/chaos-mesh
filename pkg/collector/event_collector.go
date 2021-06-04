@@ -17,17 +17,17 @@ import (
 	"context"
 
 	"github.com/go-logr/logr"
-	"sigs.k8s.io/controller-runtime/pkg/event"
-
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-
-	"github.com/chaos-mesh/chaos-mesh/pkg/core"
-
 	v1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 )
 
 // EventCollector represents a collector for Event Object.
@@ -49,19 +49,38 @@ func (r *EventCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	event := &v1.Event{}
 	err := r.Get(ctx, req.NamespacedName, event)
 	if err != nil {
-		r.Log.Error(err, "unable to get event")
+		if !apierrors.IsNotFound(err) {
+			r.Log.Error(err, "unable to get event")
+		}
 		return ctrl.Result{}, nil
 	}
 
+	chaosKind, ok := v1alpha1.AllKinds()[event.InvolvedObject.Kind]
+	if ok {
+		if err = r.Get(ctx, types.NamespacedName{
+			Namespace: event.InvolvedObject.Namespace,
+			Name:      event.InvolvedObject.Name,
+		}, chaosKind.Chaos); err != nil {
+			return ctrl.Result{}, nil
+		}
+	} else {
+		if err = r.Get(ctx, types.NamespacedName{
+			Namespace: event.InvolvedObject.Namespace,
+			Name:      event.InvolvedObject.Name,
+		}, &v1alpha1.Schedule{}); err != nil {
+			return ctrl.Result{}, nil
+		}
+	}
+
 	et := core.Event{
-		CreatedAt:    event.CreationTimestamp.Time,
-		Kind:         event.InvolvedObject.Kind,
-		Type:         event.Type,
-		Reason:       event.Reason,
-		Message:      event.Message,
-		Name:         event.InvolvedObject.Name,
-		Namespace:    event.InvolvedObject.Namespace,
-		ExperimentID: string(event.InvolvedObject.UID),
+		CreatedAt: event.CreationTimestamp.Time,
+		Kind:      event.InvolvedObject.Kind,
+		Type:      event.Type,
+		Reason:    event.Reason,
+		Message:   event.Message,
+		Name:      event.InvolvedObject.Name,
+		Namespace: event.InvolvedObject.Namespace,
+		ObjectID:  string(event.InvolvedObject.UID),
 	}
 	if err := r.event.Create(context.Background(), &et); err != nil {
 		r.Log.Error(err, "failed to save event", "event", et)
@@ -83,7 +102,6 @@ func (r *EventCollector) Setup(mgr ctrl.Manager, apiType runtime.Object) error {
 					return false
 				}
 				flag := false
-
 				_, ok = v1alpha1.AllKinds()[event.InvolvedObject.Kind]
 				if ok {
 					flag = true
@@ -92,6 +110,16 @@ func (r *EventCollector) Setup(mgr ctrl.Manager, apiType runtime.Object) error {
 					flag = true
 				}
 				return flag
+
+			},
+			DeleteFunc: func(e event.DeleteEvent) bool {
+				return false
+			},
+			UpdateFunc: func(e event.UpdateEvent) bool {
+				return false
+			},
+			GenericFunc: func(e event.GenericEvent) bool {
+				return false
 			},
 		}).
 		Complete(r)

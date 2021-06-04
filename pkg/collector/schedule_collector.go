@@ -20,14 +20,13 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/jinzhu/gorm"
-
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/pkg/core"
-
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 )
 
 // ScheduleCollector represents a collector for Schedule Object.
@@ -99,8 +98,8 @@ func (r *ScheduleCollector) setUnarchivedSchedule(req ctrl.Request, schedule v1a
 		archive.Action = string(schedule.Spec.ScheduleItem.PodChaos.Action)
 	case v1alpha1.ScheduleTypeNetworkChaos:
 		archive.Action = string(schedule.Spec.ScheduleItem.NetworkChaos.Action)
-	case v1alpha1.ScheduleTypeIoChaos:
-		archive.Action = string(schedule.Spec.ScheduleItem.IoChaos.Action)
+	case v1alpha1.ScheduleTypeIOChaos:
+		archive.Action = string(schedule.Spec.ScheduleItem.IOChaos.Action)
 	case v1alpha1.ScheduleTypeTimeChaos, v1alpha1.ScheduleTypeKernelChaos, v1alpha1.ScheduleTypeStressChaos:
 		archive.Action = ""
 	case v1alpha1.ScheduleTypeDNSChaos:
