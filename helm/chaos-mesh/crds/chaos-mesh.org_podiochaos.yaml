@@ -10,8 +10,8 @@ metadata:
 spec:
   group: chaos-mesh.org
   names:
-    kind: PodIoChaos
-    listKind: PodIoChaosList
+    kind: PodIOChaos
+    listKind: PodIOChaosList
     plural: podiochaos
     singular: podiochaos
   scope: Namespaced
@@ -19,7 +19,7 @@ spec:
   - name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: PodIoChaos is the Schema for the podiochaos API
+        description: PodIOChaos is the Schema for the podiochaos API
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
@@ -30,12 +30,12 @@ spec:
           metadata:
             type: object
           spec:
-            description: PodIoChaosSpec defines the desired state of IoChaos
+            description: PodIOChaosSpec defines the desired state of IOChaos
             properties:
               actions:
-                description: Actions are a list of IoChaos actions
+                description: Actions are a list of IOChaos actions
                 items:
-                  description: IoChaosAction defines an possible action of IoChaos
+                  description: IOChaosAction defines an possible action of IOChaos
                   properties:
                     atime:
                       description: Timespec represents a time
@@ -153,7 +153,7 @@ spec:
                       description: Source represents the source of current rules
                       type: string
                     type:
-                      description: IoChaosType represents the type of an IoChaos Action
+                      description: IOChaosType represents the type of an IOChaos Action
                       type: string
                     uid:
                       format: int32

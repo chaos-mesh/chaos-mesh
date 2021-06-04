@@ -1665,7 +1665,7 @@ func (x *CancelStressRequest) GetStartTime() int64 {
 	return 0
 }
 
-type ApplyIoChaosRequest struct {
+type ApplyIOChaosRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -1678,8 +1678,8 @@ type ApplyIoChaosRequest struct {
 	EnterNS     bool   `protobuf:"varint,6,opt,name=enterNS,proto3" json:"enterNS,omitempty"`
 }
 
-func (x *ApplyIoChaosRequest) Reset() {
-	*x = ApplyIoChaosRequest{}
+func (x *ApplyIOChaosRequest) Reset() {
+	*x = ApplyIOChaosRequest{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_chaosdaemon_proto_msgTypes[22]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -1687,13 +1687,13 @@ func (x *ApplyIoChaosRequest) Reset() {
 	}
 }
 
-func (x *ApplyIoChaosRequest) String() string {
+func (x *ApplyIOChaosRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ApplyIoChaosRequest) ProtoMessage() {}
+func (*ApplyIOChaosRequest) ProtoMessage() {}
 
-func (x *ApplyIoChaosRequest) ProtoReflect() protoreflect.Message {
+func (x *ApplyIOChaosRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_chaosdaemon_proto_msgTypes[22]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -1705,54 +1705,54 @@ func (x *ApplyIoChaosRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ApplyIoChaosRequest.ProtoReflect.Descriptor instead.
-func (*ApplyIoChaosRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use ApplyIOChaosRequest.ProtoReflect.Descriptor instead.
+func (*ApplyIOChaosRequest) Descriptor() ([]byte, []int) {
 	return file_chaosdaemon_proto_rawDescGZIP(), []int{22}
 }
 
-func (x *ApplyIoChaosRequest) GetActions() string {
+func (x *ApplyIOChaosRequest) GetActions() string {
 	if x != nil {
 		return x.Actions
 	}
 	return ""
 }
 
-func (x *ApplyIoChaosRequest) GetVolume() string {
+func (x *ApplyIOChaosRequest) GetVolume() string {
 	if x != nil {
 		return x.Volume
 	}
 	return ""
 }
 
-func (x *ApplyIoChaosRequest) GetContainerId() string {
+func (x *ApplyIOChaosRequest) GetContainerId() string {
 	if x != nil {
 		return x.ContainerId
 	}
 	return ""
 }
 
-func (x *ApplyIoChaosRequest) GetInstance() int64 {
+func (x *ApplyIOChaosRequest) GetInstance() int64 {
 	if x != nil {
 		return x.Instance
 	}
 	return 0
 }
 
-func (x *ApplyIoChaosRequest) GetStartTime() int64 {
+func (x *ApplyIOChaosRequest) GetStartTime() int64 {
 	if x != nil {
 		return x.StartTime
 	}
 	return 0
 }
 
-func (x *ApplyIoChaosRequest) GetEnterNS() bool {
+func (x *ApplyIOChaosRequest) GetEnterNS() bool {
 	if x != nil {
 		return x.EnterNS
 	}
 	return false
 }
 
-type ApplyIoChaosResponse struct {
+type ApplyIOChaosResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -1761,8 +1761,8 @@ type ApplyIoChaosResponse struct {
 	StartTime int64 `protobuf:"varint,2,opt,name=startTime,proto3" json:"startTime,omitempty"`
 }
 
-func (x *ApplyIoChaosResponse) Reset() {
-	*x = ApplyIoChaosResponse{}
+func (x *ApplyIOChaosResponse) Reset() {
+	*x = ApplyIOChaosResponse{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_chaosdaemon_proto_msgTypes[23]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -1770,13 +1770,13 @@ func (x *ApplyIoChaosResponse) Reset() {
 	}
 }
 
-func (x *ApplyIoChaosResponse) String() string {
+func (x *ApplyIOChaosResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ApplyIoChaosResponse) ProtoMessage() {}
+func (*ApplyIOChaosResponse) ProtoMessage() {}
 
-func (x *ApplyIoChaosResponse) ProtoReflect() protoreflect.Message {
+func (x *ApplyIOChaosResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_chaosdaemon_proto_msgTypes[23]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -1788,19 +1788,19 @@ func (x *ApplyIoChaosResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ApplyIoChaosResponse.ProtoReflect.Descriptor instead.
-func (*ApplyIoChaosResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use ApplyIOChaosResponse.ProtoReflect.Descriptor instead.
+func (*ApplyIOChaosResponse) Descriptor() ([]byte, []int) {
 	return file_chaosdaemon_proto_rawDescGZIP(), []int{23}
 }
 
-func (x *ApplyIoChaosResponse) GetInstance() int64 {
+func (x *ApplyIOChaosResponse) GetInstance() int64 {
 	if x != nil {
 		return x.Instance
 	}
 	return 0
 }
 
-func (x *ApplyIoChaosResponse) GetStartTime() int64 {
+func (x *ApplyIOChaosResponse) GetStartTime() int64 {
 	if x != nil {
 		return x.StartTime
 	}
@@ -2544,8 +2544,8 @@ var file_chaosdaemon_proto_goTypes = []interface{}{
 	(*ExecStressRequest)(nil),      // 23: pb.ExecStressRequest
 	(*ExecStressResponse)(nil),     // 24: pb.ExecStressResponse
 	(*CancelStressRequest)(nil),    // 25: pb.CancelStressRequest
-	(*ApplyIoChaosRequest)(nil),    // 26: pb.ApplyIoChaosRequest
-	(*ApplyIoChaosResponse)(nil),   // 27: pb.ApplyIoChaosResponse
+	(*ApplyIOChaosRequest)(nil),    // 26: pb.ApplyIOChaosRequest
+	(*ApplyIOChaosResponse)(nil),   // 27: pb.ApplyIOChaosResponse
 	(*ApplyHttpChaosRequest)(nil),  // 28: pb.ApplyHttpChaosRequest
 	(*ApplyHttpChaosResponse)(nil), // 29: pb.ApplyHttpChaosResponse
 	(*TcsRequest)(nil),             // 30: pb.TcsRequest
@@ -2587,7 +2587,7 @@ var file_chaosdaemon_proto_depIdxs = []int32{
 	5,  // 30: pb.ChaosDaemon.ContainerGetPid:input_type -> pb.ContainerRequest
 	23, // 31: pb.ChaosDaemon.ExecStressors:input_type -> pb.ExecStressRequest
 	25, // 32: pb.ChaosDaemon.CancelStressors:input_type -> pb.CancelStressRequest
-	26, // 33: pb.ChaosDaemon.ApplyIoChaos:input_type -> pb.ApplyIoChaosRequest
+	26, // 33: pb.ChaosDaemon.ApplyIOChaos:input_type -> pb.ApplyIOChaosRequest
 	28, // 34: pb.ChaosDaemon.ApplyHttpChaos:input_type -> pb.ApplyHttpChaosRequest
 	32, // 35: pb.ChaosDaemon.SetDNSServer:input_type -> pb.SetDNSServerRequest
 	33, // 36: pb.ChaosDaemon.SetTcs:output_type -> google.protobuf.Empty
@@ -2599,7 +2599,7 @@ var file_chaosdaemon_proto_depIdxs = []int32{
 	6,  // 42: pb.ChaosDaemon.ContainerGetPid:output_type -> pb.ContainerResponse
 	24, // 43: pb.ChaosDaemon.ExecStressors:output_type -> pb.ExecStressResponse
 	33, // 44: pb.ChaosDaemon.CancelStressors:output_type -> google.protobuf.Empty
-	27, // 45: pb.ChaosDaemon.ApplyIoChaos:output_type -> pb.ApplyIoChaosResponse
+	27, // 45: pb.ChaosDaemon.ApplyIOChaos:output_type -> pb.ApplyIOChaosResponse
 	29, // 46: pb.ChaosDaemon.ApplyHttpChaos:output_type -> pb.ApplyHttpChaosResponse
 	33, // 47: pb.ChaosDaemon.SetDNSServer:output_type -> google.protobuf.Empty
 	36, // [36:48] is the sub-list for method output_type
@@ -2880,7 +2880,7 @@ func file_chaosdaemon_proto_init() {
 			}
 		}
 		file_chaosdaemon_proto_msgTypes[22].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ApplyIoChaosRequest); i {
+			switch v := v.(*ApplyIOChaosRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2892,7 +2892,7 @@ func file_chaosdaemon_proto_init() {
 			}
 		}
 		file_chaosdaemon_proto_msgTypes[23].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ApplyIoChaosResponse); i {
+			switch v := v.(*ApplyIOChaosResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3006,7 +3006,7 @@ type ChaosDaemonClient interface {
 	ContainerGetPid(ctx context.Context, in *ContainerRequest, opts ...grpc.CallOption) (*ContainerResponse, error)
 	ExecStressors(ctx context.Context, in *ExecStressRequest, opts ...grpc.CallOption) (*ExecStressResponse, error)
 	CancelStressors(ctx context.Context, in *CancelStressRequest, opts ...grpc.CallOption) (*empty.Empty, error)
-	ApplyIoChaos(ctx context.Context, in *ApplyIoChaosRequest, opts ...grpc.CallOption) (*ApplyIoChaosResponse, error)
+	ApplyIOChaos(ctx context.Context, in *ApplyIOChaosRequest, opts ...grpc.CallOption) (*ApplyIOChaosResponse, error)
 	ApplyHttpChaos(ctx context.Context, in *ApplyHttpChaosRequest, opts ...grpc.CallOption) (*ApplyHttpChaosResponse, error)
 	SetDNSServer(ctx context.Context, in *SetDNSServerRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 }
@@ -3100,9 +3100,9 @@ func (c *chaosDaemonClient) CancelStressors(ctx context.Context, in *CancelStres
 	return out, nil
 }
 
-func (c *chaosDaemonClient) ApplyIoChaos(ctx context.Context, in *ApplyIoChaosRequest, opts ...grpc.CallOption) (*ApplyIoChaosResponse, error) {
-	out := new(ApplyIoChaosResponse)
-	err := c.cc.Invoke(ctx, "/pb.ChaosDaemon/ApplyIoChaos", in, out, opts...)
+func (c *chaosDaemonClient) ApplyIOChaos(ctx context.Context, in *ApplyIOChaosRequest, opts ...grpc.CallOption) (*ApplyIOChaosResponse, error) {
+	out := new(ApplyIOChaosResponse)
+	err := c.cc.Invoke(ctx, "/pb.ChaosDaemon/ApplyIOChaos", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -3138,7 +3138,7 @@ type ChaosDaemonServer interface {
 	ContainerGetPid(context.Context, *ContainerRequest) (*ContainerResponse, error)
 	ExecStressors(context.Context, *ExecStressRequest) (*ExecStressResponse, error)
 	CancelStressors(context.Context, *CancelStressRequest) (*empty.Empty, error)
-	ApplyIoChaos(context.Context, *ApplyIoChaosRequest) (*ApplyIoChaosResponse, error)
+	ApplyIOChaos(context.Context, *ApplyIOChaosRequest) (*ApplyIOChaosResponse, error)
 	ApplyHttpChaos(context.Context, *ApplyHttpChaosRequest) (*ApplyHttpChaosResponse, error)
 	SetDNSServer(context.Context, *SetDNSServerRequest) (*empty.Empty, error)
 }
@@ -3174,8 +3174,8 @@ func (*UnimplementedChaosDaemonServer) ExecStressors(context.Context, *ExecStres
 func (*UnimplementedChaosDaemonServer) CancelStressors(context.Context, *CancelStressRequest) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CancelStressors not implemented")
 }
-func (*UnimplementedChaosDaemonServer) ApplyIoChaos(context.Context, *ApplyIoChaosRequest) (*ApplyIoChaosResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ApplyIoChaos not implemented")
+func (*UnimplementedChaosDaemonServer) ApplyIOChaos(context.Context, *ApplyIOChaosRequest) (*ApplyIOChaosResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ApplyIOChaos not implemented")
 }
 func (*UnimplementedChaosDaemonServer) ApplyHttpChaos(context.Context, *ApplyHttpChaosRequest) (*ApplyHttpChaosResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ApplyHttpChaos not implemented")
@@ -3350,20 +3350,20 @@ func _ChaosDaemon_CancelStressors_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ChaosDaemon_ApplyIoChaos_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ApplyIoChaosRequest)
+func _ChaosDaemon_ApplyIOChaos_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ApplyIOChaosRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ChaosDaemonServer).ApplyIoChaos(ctx, in)
+		return srv.(ChaosDaemonServer).ApplyIOChaos(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/pb.ChaosDaemon/ApplyIoChaos",
+		FullMethod: "/pb.ChaosDaemon/ApplyIOChaos",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ChaosDaemonServer).ApplyIoChaos(ctx, req.(*ApplyIoChaosRequest))
+		return srv.(ChaosDaemonServer).ApplyIOChaos(ctx, req.(*ApplyIOChaosRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -3445,8 +3445,8 @@ var _ChaosDaemon_serviceDesc = grpc.ServiceDesc{
 			Handler:    _ChaosDaemon_CancelStressors_Handler,
 		},
 		{
-			MethodName: "ApplyIoChaos",
-			Handler:    _ChaosDaemon_ApplyIoChaos_Handler,
+			MethodName: "ApplyIOChaos",
+			Handler:    _ChaosDaemon_ApplyIOChaos_Handler,
 		},
 		{
 			MethodName: "ApplyHttpChaos",

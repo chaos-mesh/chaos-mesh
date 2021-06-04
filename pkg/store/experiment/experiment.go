@@ -18,11 +18,10 @@ import (
 	"time"
 
 	"github.com/jinzhu/gorm"
+	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 	"github.com/chaos-mesh/chaos-mesh/pkg/store/dbstore"
-
-	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 var log = ctrl.Log.WithName("store/experiment")
@@ -131,7 +130,7 @@ func (e *experimentStore) DeleteByUIDs(_ context.Context, uids []string) error {
 
 // DeleteIncompleteExperiments implements the core.ExperimentStore.DeleteIncompleteExperiments method.
 func (e *experimentStore) DeleteIncompleteExperiments(_ context.Context) error {
-	return e.db.Where("finish_time IS NULL").Unscoped().Delete(core.Event{}).Error
+	return e.db.Where("finish_time IS NULL").Unscoped().Delete(core.Experiment{}).Error
 }
 
 func constructQueryArgs(kind, ns, name, uid string) (string, []string) {

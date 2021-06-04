@@ -402,8 +402,8 @@ spec:
                       - selector
                       - target
                       type: object
-                    ioChaos:
-                      description: IoChaosSpec defines the desired state of IoChaos
+                    iOChaos:
+                      description: IOChaosSpec defines the desired state of IOChaos
                       properties:
                         action:
                           description: 'Action defines the specific pod chaos action. Supported action: latency / fault / attrOverride / mistake'

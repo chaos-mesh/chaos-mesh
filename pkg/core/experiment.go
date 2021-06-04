@@ -146,10 +146,10 @@ func (s *SelectorInfo) ParseSelector() v1alpha1.PodSelectorSpec {
 
 // TargetInfo defines the information of target objects.
 type TargetInfo struct {
-	Kind         string            `json:"kind" binding:"required,oneof=PodChaos NetworkChaos IoChaos KernelChaos TimeChaos StressChaos DNSChaos AwsChaos GcpChaos"`
+	Kind         string            `json:"kind" binding:"required,oneof=PodChaos NetworkChaos IOChaos KernelChaos TimeChaos StressChaos DNSChaos AwsChaos GcpChaos"`
 	PodChaos     *PodChaosInfo     `json:"pod_chaos,omitempty" binding:"RequiredFieldEqual=Kind:PodChaos"`
 	NetworkChaos *NetworkChaosInfo `json:"network_chaos,omitempty" binding:"RequiredFieldEqual=Kind:NetworkChaos"`
-	IOChaos      *IOChaosInfo      `json:"io_chaos,omitempty" binding:"RequiredFieldEqual=Kind:IoChaos"`
+	IOChaos      *IOChaosInfo      `json:"io_chaos,omitempty" binding:"RequiredFieldEqual=Kind:IOChaos"`
 	KernelChaos  *KernelChaosInfo  `json:"kernel_chaos,omitempty" binding:"RequiredFieldEqual=Kind:KernelChaos"`
 	TimeChaos    *TimeChaosInfo    `json:"time_chaos,omitempty" binding:"RequiredFieldEqual=Kind:TimeChaos"`
 	StressChaos  *StressChaosInfo  `json:"stress_chaos,omitempty" binding:"RequiredFieldEqual=Kind:StressChaos"`
@@ -289,7 +289,7 @@ func (e *Experiment) ParseNetworkChaos() (KubeObjectDesc, error) {
 
 // ParseIOChaos Parse IOChaos JSON string into KubeObjectDesc.
 func (e *Experiment) ParseIOChaos() (KubeObjectDesc, error) {
-	chaos := &v1alpha1.IoChaos{}
+	chaos := &v1alpha1.IOChaos{}
 	if err := json.Unmarshal([]byte(e.Experiment), &chaos); err != nil {
 		return KubeObjectDesc{}, err
 	}

@@ -70,6 +70,7 @@ func (in *{{.Type}}) GetChaos() *ChaosInstance {
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
 		UID:       string(in.UID),
+		Status:    in.Status.ChaosStatus,
 	}
 
 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")

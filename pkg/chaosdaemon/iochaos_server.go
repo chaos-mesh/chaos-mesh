@@ -33,17 +33,17 @@ const (
 	todaBin = "/usr/local/bin/toda"
 )
 
-func (s *DaemonServer) ApplyIoChaos(ctx context.Context, in *pb.ApplyIoChaosRequest) (*pb.ApplyIoChaosResponse, error) {
+func (s *DaemonServer) ApplyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequest) (*pb.ApplyIOChaosResponse, error) {
 	log.Info("applying io chaos", "Request", in)
 
 	if in.Instance != 0 {
-		err := s.killIoChaos(ctx, in.Instance, in.StartTime)
+		err := s.killIOChaos(ctx, in.Instance, in.StartTime)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	actions := []v1alpha1.IoChaosAction{}
+	actions := []v1alpha1.IOChaosAction{}
 	err := json.Unmarshal([]byte(in.Actions), &actions)
 	if err != nil {
 		log.Error(err, "error while unmarshal json bytes")
@@ -52,7 +52,7 @@ func (s *DaemonServer) ApplyIoChaos(ctx context.Context, in *pb.ApplyIoChaosRequ
 
 	log.Info("the length of actions", "length", len(actions))
 	if len(actions) == 0 {
-		return &pb.ApplyIoChaosResponse{
+		return &pb.ApplyIOChaosResponse{
 			Instance:  0,
 			StartTime: 0,
 		}, nil
@@ -115,19 +115,19 @@ func (s *DaemonServer) ApplyIoChaos(ctx context.Context, in *pb.ApplyIoChaosRequ
 		log.Info("Starting toda takes too long or encounter an error")
 		caller.Close()
 		receiver.Close()
-		if kerr := s.killIoChaos(ctx, int64(cmd.Process.Pid), ct); kerr != nil {
+		if kerr := s.killIOChaos(ctx, int64(cmd.Process.Pid), ct); kerr != nil {
 			log.Error(kerr, "kill toda failed", "request", in)
 		}
 		return nil, fmt.Errorf("toda startup takes too long or an error occurs: %s", ret)
 	}
 
-	return &pb.ApplyIoChaosResponse{
+	return &pb.ApplyIOChaosResponse{
 		Instance:  int64(cmd.Process.Pid),
 		StartTime: ct,
 	}, nil
 }
 
-func (s *DaemonServer) killIoChaos(ctx context.Context, pid int64, startTime int64) error {
+func (s *DaemonServer) killIOChaos(ctx context.Context, pid int64, startTime int64) error {
 	log.Info("killing toda", "pid", pid)
 
 	err := s.backgroundProcessManager.KillBackgroundProcess(ctx, int(pid), startTime)

@@ -46,7 +46,7 @@ func generateScheduleRegister(name string) string {
 }
 
 type scheduleCodeGenerator struct {
-	// name of each Kind of chaos, for example: PodChaos, IoChaos, DNSChaos
+	// name of each Kind of chaos, for example: PodChaos, IOChaos, DNSChaos
 	chaosTypes []string
 }
 

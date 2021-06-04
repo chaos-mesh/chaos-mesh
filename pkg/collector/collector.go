@@ -20,15 +20,14 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/jinzhu/gorm"
-
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/pkg/core"
-
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 )
 
 // ChaosCollector represents a collector for Chaos Object.
@@ -37,13 +36,15 @@ type ChaosCollector struct {
 	Log     logr.Logger
 	apiType runtime.Object
 	archive core.ExperimentStore
+	event   core.EventStore
 }
 
 // Reconcile reconciles a chaos collector.
 func (r *ChaosCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	var (
-		chaosMeta metav1.Object
-		ok        bool
+		chaosMeta  metav1.Object
+		ok         bool
+		manageFlag bool
 	)
 
 	if r.apiType == nil {
@@ -51,6 +52,7 @@ func (r *ChaosCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, nil
 	}
 	ctx := context.Background()
+	manageFlag = false
 
 	obj, ok := r.apiType.DeepCopyObject().(v1alpha1.InnerObject)
 	if !ok {
@@ -64,10 +66,16 @@ func (r *ChaosCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			r.Log.Error(nil, "failed to get chaos meta information")
 		}
 		if chaosMeta.GetLabels()["managed-by"] != "" {
-			return ctrl.Result{}, nil
+			manageFlag = true
 		}
-		if err = r.archiveExperiment(req.Namespace, req.Name); err != nil {
-			r.Log.Error(err, "failed to archive experiment")
+		if !manageFlag {
+			if err = r.archiveExperiment(req.Namespace, req.Name); err != nil {
+				r.Log.Error(err, "failed to archive experiment")
+			}
+		} else {
+			if err = r.event.DeleteByUID(ctx, string(chaosMeta.GetUID())); err != nil {
+				r.Log.Error(err, "failed to delete experiment related events")
+			}
 		}
 		return ctrl.Result{}, nil
 	}
@@ -80,13 +88,20 @@ func (r *ChaosCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	if chaosMeta, ok = obj.(metav1.Object); !ok {
 		r.Log.Error(nil, "failed to get chaos meta information")
 	}
+
 	if chaosMeta.GetLabels()["managed-by"] != "" {
-		return ctrl.Result{}, nil
+		manageFlag = true
 	}
 
 	if obj.IsDeleted() {
-		if err = r.archiveExperiment(req.Namespace, req.Name); err != nil {
-			r.Log.Error(err, "failed to archive experiment")
+		if !manageFlag {
+			if err = r.archiveExperiment(req.Namespace, req.Name); err != nil {
+				r.Log.Error(err, "failed to archive experiment")
+			}
+		} else {
+			if err = r.event.DeleteByUID(ctx, string(chaosMeta.GetUID())); err != nil {
+				r.Log.Error(err, "failed to delete experiment related events")
+			}
 		}
 		return ctrl.Result{}, nil
 	}
@@ -134,7 +149,7 @@ func (r *ChaosCollector) setUnarchivedExperiment(req ctrl.Request, obj v1alpha1.
 		archive.Action = string(chaos.Spec.Action)
 	case *v1alpha1.NetworkChaos:
 		archive.Action = string(chaos.Spec.Action)
-	case *v1alpha1.IoChaos:
+	case *v1alpha1.IOChaos:
 		archive.Action = string(chaos.Spec.Action)
 	case *v1alpha1.TimeChaos, *v1alpha1.KernelChaos, *v1alpha1.StressChaos:
 		archive.Action = ""
