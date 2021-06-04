@@ -16,9 +16,10 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"github.com/iancoleman/strcase"
 	"strings"
 	"text/template"
+
+	"github.com/iancoleman/strcase"
 )
 
 // struct workflowCodeGenerator will render content of one file contains code blocks that required by workflow
