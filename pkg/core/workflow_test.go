@@ -370,9 +370,9 @@ func Test_convertWorkflowNode(t *testing.T) {
 					Spec: v1alpha1.WorkflowNodeSpec{
 						TemplateName: "io-chaos",
 						WorkflowName: "another-workflow-0",
-						Type:         v1alpha1.TypeIoChaos,
+						Type:         v1alpha1.TypeIOChaos,
 						EmbedChaos: &v1alpha1.EmbedChaos{
-							IoChaos: &v1alpha1.IoChaosSpec{
+							IOChaos: &v1alpha1.IOChaosSpec{
 								ContainerSelector: v1alpha1.ContainerSelector{
 									PodSelector: v1alpha1.PodSelector{
 										Mode: v1alpha1.OnePodMode,

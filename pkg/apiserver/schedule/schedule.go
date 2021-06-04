@@ -17,6 +17,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"reflect"
 	"strings"
 	"time"
 
@@ -93,7 +94,8 @@ type Schedule struct {
 // Detail represents an experiment instance.
 type Detail struct {
 	Schedule
-	YAML core.KubeObjectDesc `json:"kube_object"`
+	YAML           core.KubeObjectDesc `json:"kube_object"`
+	ExperimentUIDs []string            `json:"experiment_uids"`
 }
 
 type parseScheduleFunc func(*core.ScheduleInfo) v1alpha1.ScheduleItem
@@ -147,7 +149,7 @@ func (s *Service) createSchedule(c *gin.Context) {
 	parseFuncs := map[string]parseScheduleFunc{
 		v1alpha1.KindPodChaos:     parsePodChaos,
 		v1alpha1.KindNetworkChaos: parseNetworkChaos,
-		v1alpha1.KindIoChaos:      parseIOChaos,
+		v1alpha1.KindIOChaos:      parseIOChaos,
 		v1alpha1.KindStressChaos:  parseStressChaos,
 		v1alpha1.KindTimeChaos:    parseTimeChaos,
 		v1alpha1.KindKernelChaos:  parseKernelChaos,
@@ -250,14 +252,14 @@ func parseNetworkChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 }
 
 func parseIOChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
-	chaos := &v1alpha1.IoChaos{
+	chaos := &v1alpha1.IOChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        exp.Name,
 			Namespace:   exp.Namespace,
 			Labels:      exp.Labels,
 			Annotations: exp.Annotations,
 		},
-		Spec: v1alpha1.IoChaosSpec{
+		Spec: v1alpha1.IOChaosSpec{
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{
 					Selector: exp.Scope.ParseSelector(),
@@ -266,7 +268,7 @@ func parseIOChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 				},
 				ContainerNames: exp.Target.PodChaos.ContainerNames,
 			},
-			Action:     v1alpha1.IoChaosType(exp.Target.IOChaos.Action),
+			Action:     v1alpha1.IOChaosType(exp.Target.IOChaos.Action),
 			Delay:      exp.Target.IOChaos.Delay,
 			Errno:      exp.Target.IOChaos.Errno,
 			Attr:       exp.Target.IOChaos.Attr,
@@ -283,7 +285,7 @@ func parseIOChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	}
 
 	return v1alpha1.ScheduleItem{
-		IoChaos: &chaos.Spec,
+		IOChaos: &chaos.Spec,
 	}
 }
 
@@ -579,6 +581,31 @@ func (s *Service) getScheduleDetail(c *gin.Context) {
 		return
 	}
 
+	UIDList := make([]string, 0)
+	kind, ok := v1alpha1.AllScheduleItemKinds()[string(schedule.Spec.Type)]
+	if !ok {
+		c.Status(http.StatusInternalServerError)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		return
+	}
+	list := kind.ChaosList.DeepCopyObject()
+	err = kubeCli.List(context.Background(), list, client.MatchingLabels{"managed-by": schedule.Name})
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		return
+	}
+	items := reflect.ValueOf(list).Elem().FieldByName("Items")
+	for i := 0; i < items.Len(); i++ {
+		if schedule.Spec.Type != v1alpha1.ScheduleTypeWorkflow {
+			item := items.Index(i).Addr().Interface().(v1alpha1.InnerObject)
+			UIDList = append(UIDList, item.GetChaos().UID)
+		} else {
+			workflow := items.Index(i).Addr().Interface().(*v1alpha1.Workflow)
+			UIDList = append(UIDList, string(workflow.UID))
+		}
+	}
+
 	schDetail = Detail{
 		Schedule: Schedule{
 			Base: Base{
@@ -602,6 +629,7 @@ func (s *Service) getScheduleDetail(c *gin.Context) {
 			},
 			Spec: schedule.Spec,
 		},
+		ExperimentUIDs: UIDList,
 	}
 
 	c.JSON(http.StatusOK, schDetail)

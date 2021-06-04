@@ -15,8 +15,8 @@ package v1alpha1
 
 import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-// PodIoChaosSpec defines the desired state of IoChaos
-type PodIoChaosSpec struct {
+// PodIOChaosSpec defines the desired state of IOChaos
+type PodIOChaosSpec struct {
 	// VolumeMountPath represents the target mount path
 	// It must be a root of mount path now.
 	// TODO: search the mount parent of any path automatically.
@@ -27,14 +27,14 @@ type PodIoChaosSpec struct {
 	// +optional
 	Container *string `json:"container,omitempty"`
 
-	// Actions are a list of IoChaos actions
+	// Actions are a list of IOChaos actions
 	// +optional
-	Actions []IoChaosAction `json:"actions,omitempty"`
+	Actions []IOChaosAction `json:"actions,omitempty"`
 }
 
-// IoChaosAction defines an possible action of IoChaos
-type IoChaosAction struct {
-	Type IoChaosType `json:"type"`
+// IOChaosAction defines an possible action of IOChaos
+type IOChaosAction struct {
+	Type IOChaosType `json:"type"`
 
 	Filter `json:",inline"`
 
@@ -58,25 +58,25 @@ type IoChaosAction struct {
 	Source string `json:"source,omitempty"`
 }
 
-// IoChaosType represents the type of an IoChaos Action
-type IoChaosType string
+// IOChaosType represents the type of an IOChaos Action
+type IOChaosType string
 
 const (
 	// IoLatency represents injecting latency for io operation
-	IoLatency IoChaosType = "latency"
+	IoLatency IOChaosType = "latency"
 
 	// IoFaults represents injecting faults for io operation
-	IoFaults IoChaosType = "fault"
+	IoFaults IOChaosType = "fault"
 
 	// IoAttrOverride represents replacing attribution for io operation
-	IoAttrOverride IoChaosType = "attrOverride"
+	IoAttrOverride IOChaosType = "attrOverride"
 
 	// IoMistake represents injecting incorrect read or write for io operation
-	IoMistake IoChaosType = "mistake"
+	IoMistake IOChaosType = "mistake"
 )
 
-// Filter represents a filter of IoChaos action, which will define the
-// scope of an IoChaosAction
+// Filter represents a filter of IOChaos action, which will define the
+// scope of an IOChaosAction
 type Filter struct {
 	// Path represents a glob of injecting path
 	Path string `json:"path"`
@@ -208,23 +208,23 @@ const (
 	Bmap        IoMethod = "bmap"
 )
 
-// KindPodIoChaos is the kind for pod io chaos
-const KindPodIoChaos = "PodIoChaos"
+// KindPodIOChaos is the kind for pod io chaos
+const KindPodIOChaos = "PodIOChaos"
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// PodIoChaos is the Schema for the podiochaos API
-type PodIoChaos struct {
+// PodIOChaos is the Schema for the podiochaos API
+type PodIOChaos struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec PodIoChaosSpec `json:"spec,omitempty"`
+	Spec PodIOChaosSpec `json:"spec,omitempty"`
 
 	//+optional
-	Status PodIoChaosStatus `json:"status,omitempty"`
+	Status PodIOChaosStatus `json:"status,omitempty"`
 }
 
-type PodIoChaosStatus struct {
+type PodIOChaosStatus struct {
 
 	// Pid represents a running toda process id
 	// +optional
@@ -243,13 +243,13 @@ type PodIoChaosStatus struct {
 
 // +kubebuilder:object:root=true
 
-// PodIoChaosList contains a list of PodIoChaos
-type PodIoChaosList struct {
+// PodIOChaosList contains a list of PodIOChaos
+type PodIOChaosList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []PodIoChaos `json:"items"`
+	Items           []PodIOChaos `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&PodIoChaos{}, &PodIoChaosList{})
+	SchemeBuilder.Register(&PodIOChaos{}, &PodIOChaosList{})
 }

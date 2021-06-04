@@ -98,8 +98,8 @@ func (r *ScheduleCollector) setUnarchivedSchedule(req ctrl.Request, schedule v1a
 		archive.Action = string(schedule.Spec.ScheduleItem.PodChaos.Action)
 	case v1alpha1.ScheduleTypeNetworkChaos:
 		archive.Action = string(schedule.Spec.ScheduleItem.NetworkChaos.Action)
-	case v1alpha1.ScheduleTypeIoChaos:
-		archive.Action = string(schedule.Spec.ScheduleItem.IoChaos.Action)
+	case v1alpha1.ScheduleTypeIOChaos:
+		archive.Action = string(schedule.Spec.ScheduleItem.IOChaos.Action)
 	case v1alpha1.ScheduleTypeTimeChaos, v1alpha1.ScheduleTypeKernelChaos, v1alpha1.ScheduleTypeStressChaos:
 		archive.Action = ""
 	case v1alpha1.ScheduleTypeDNSChaos:
