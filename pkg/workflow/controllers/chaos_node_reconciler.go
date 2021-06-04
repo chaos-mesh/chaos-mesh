@@ -64,9 +64,16 @@ func (it *ChaosNodeReconciler) Reconcile(request reconcile.Request) (reconcile.R
 
 	it.logger.V(4).Info("resolve chaos node", "node", request)
 
-	err = it.syncChaosResources(ctx, node)
-	if err != nil {
-		return reconcile.Result{}, err
+	if node.Spec.Schedule != nil {
+		err := it.syncSchedule(ctx, node)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+	} else {
+		err = it.syncChaosResources(ctx, node)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
 	}
 
 	updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
@@ -76,6 +83,11 @@ func (it *ChaosNodeReconciler) Reconcile(request reconcile.Request) (reconcile.R
 			return client.IgnoreNotFound(err)
 		}
 
+		if node.Spec.Schedule != nil {
+			// sync status with schedule
+		}
+
+		// sync status with chaos CustomResource
 		chaosList, err := it.fetchChildrenChaosCustomResource(ctx, nodeNeedUpdate)
 		if err != nil {
 			return client.IgnoreNotFound(err)
@@ -116,6 +128,60 @@ func (it *ChaosNodeReconciler) Reconcile(request reconcile.Request) (reconcile.R
 	return reconcile.Result{}, updateError
 }
 
+func (it *ChaosNodeReconciler) syncSchedule(ctx context.Context, node v1alpha1.WorkflowNode) error {
+	scheduleList, err := it.fetchChildrenSchedule(ctx, node)
+	if err != nil {
+		return err
+	}
+	if WorkflowNodeFinished(node.Status) {
+		// make the number of schedule to 0
+		for _, item := range scheduleList {
+			item := item
+			err := it.kubeClient.Delete(ctx, &item)
+			if client.IgnoreNotFound(err) != nil {
+				it.logger.Error(err, "failed to delete schedule CR for workflow chaos node",
+					"namespace", node.Namespace,
+					"chaos node", node.Name,
+					"schedule CR name", item.GetName(),
+				)
+			}
+		}
+		return nil
+	}
+	if len(scheduleList) == 0 {
+		return it.createChaos(ctx, node)
+	} else if len(scheduleList) > 1 {
+		// need cleanup
+
+		var scheduleCrToRemove []string
+		for _, item := range scheduleList[1:] {
+			scheduleCrToRemove = append(scheduleCrToRemove, item.GetName())
+		}
+
+		it.logger.Info("removing duplicated schedule custom resource",
+			"chaos node", fmt.Sprintf("%s/%s", node.Namespace, node.Name),
+			"schedule cr to remove", scheduleCrToRemove,
+		)
+
+		for _, item := range scheduleList[1:] {
+			// best efforts deletion
+			item := item
+			err := it.kubeClient.Delete(ctx, &item)
+			if client.IgnoreNotFound(err) != nil {
+				it.logger.Error(err, "failed to delete schedule CR for workflow chaos node",
+					"namespace", node.Namespace,
+					"chaos node", node.Name,
+					"schedule CR name", item.GetName(),
+				)
+			}
+		}
+	} else {
+		it.logger.V(4).Info("do not need spawn or remove schedule CR")
+	}
+	return nil
+
+}
+
 func (it *ChaosNodeReconciler) syncChaosResources(ctx context.Context, node v1alpha1.WorkflowNode) error {
 
 	chaosList, err := it.fetchChildrenChaosCustomResource(ctx, node)
@@ -138,40 +204,40 @@ func (it *ChaosNodeReconciler) syncChaosResources(ctx context.Context, node v1al
 				)
 			}
 		}
-	} else {
-		// make the number of chaos resource to 1
-		if len(chaosList) == 0 {
-			return it.createChaos(ctx, node)
-		} else if len(chaosList) > 1 {
+		return nil
+	}
+	// make the number of chaos resource to 1
+	if len(chaosList) == 0 {
+		return it.createChaos(ctx, node)
+	} else if len(chaosList) > 1 {
 
-			var chaosCrToRemove []string
-			for _, item := range chaosList[1:] {
-				chaosCrToRemove = append(chaosCrToRemove, item.GetName())
-			}
-
-			it.logger.Info("removing duplicated chaos custom resource",
-				"chaos node", fmt.Sprintf("%s/%s", node.Namespace, node.Name),
-				"chaos cr to remove", chaosCrToRemove,
-			)
-
-			for _, item := range chaosList[1:] {
-				// best efforts deletion
-				item := item
-				err := it.kubeClient.Delete(ctx, item)
-				if client.IgnoreNotFound(err) != nil {
-					it.logger.Error(err, "failed to delete chaos CR for workflow chaos node",
-						"namespace", node.Namespace,
-						"chaos node", node.Name,
-						"chaos CR name", item.GetName(),
-					)
-				}
-			}
-		} else {
-			it.logger.V(4).Info("do not need spawn or remove chaos CR")
+		var chaosCrToRemove []string
+		for _, item := range chaosList[1:] {
+			chaosCrToRemove = append(chaosCrToRemove, item.GetName())
 		}
 
-		// TODO: also respawn the chaos resource if Spec changed in workflow
+		it.logger.Info("removing duplicated chaos custom resource",
+			"chaos node", fmt.Sprintf("%s/%s", node.Namespace, node.Name),
+			"chaos cr to remove", chaosCrToRemove,
+		)
+
+		for _, item := range chaosList[1:] {
+			// best efforts deletion
+			item := item
+			err := it.kubeClient.Delete(ctx, item)
+			if client.IgnoreNotFound(err) != nil {
+				it.logger.Error(err, "failed to delete chaos CR for workflow chaos node",
+					"namespace", node.Namespace,
+					"chaos node", node.Name,
+					"chaos CR name", item.GetName(),
+				)
+			}
+		}
+	} else {
+		it.logger.V(4).Info("do not need spawn or remove chaos CR")
 	}
+
+	// TODO: also respawn the chaos resource if Spec changed in workflow
 
 	return nil
 }
@@ -229,8 +295,65 @@ func (it *ChaosNodeReconciler) fetchChildrenChaosCustomResource(ctx context.Cont
 	err = it.kubeClient.List(ctx, genericChaosList, &client.ListOptions{
 		LabelSelector: controlledByThisNode,
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	var sorted SortGenericChaosByCreationTimestamp = genericChaosList.GetItems()
+	sort.Sort(sorted)
+	return sorted, err
+}
+
+func (it ChaosNodeReconciler) createSchedule(ctx context.Context, node v1alpha1.WorkflowNode) error {
+	scheduleToCreate := v1alpha1.Schedule{
+		TypeMeta: metav1.TypeMeta{},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace:    node.Namespace,
+			GenerateName: fmt.Sprintf("%s-", node.Name),
+			OwnerReferences: []metav1.OwnerReference{
+				{
+					APIVersion:         node.APIVersion,
+					Kind:               node.Kind,
+					Name:               node.Name,
+					UID:                node.UID,
+					Controller:         &isController,
+					BlockOwnerDeletion: &blockOwnerDeletion,
+				},
+			},
+		},
+		Spec: *node.Spec.Schedule,
+	}
+	err := it.kubeClient.Create(ctx, &scheduleToCreate)
+	if err != nil {
+		it.eventRecorder.Event(&node, corev1.EventTypeWarning, v1alpha1.ChaosCRCreateFailed, "Failed to create schedule CR")
+		it.logger.Error(err, "failed to create schedule CR")
+		return nil
+	}
+	it.logger.Info("schedule CR created", "namespace", scheduleToCreate.GetNamespace(), "name", scheduleToCreate.GetName())
+	it.eventRecorder.Event(&node, corev1.EventTypeNormal, v1alpha1.ChaosCRCreated, fmt.Sprintf("chedule CR %s/%s created", scheduleToCreate.GetNamespace(), scheduleToCreate.GetName()))
+	return nil
+
+}
+
+func (it *ChaosNodeReconciler) fetchChildrenSchedule(ctx context.Context, node v1alpha1.WorkflowNode) ([]v1alpha1.Schedule, error) {
+	var scheduleList v1alpha1.ScheduleList
+	controlledByThisNode, err := metav1.LabelSelectorAsSelector(&metav1.LabelSelector{
+		MatchLabels: map[string]string{
+			v1alpha1.LabelControlledBy: node.Name,
+		},
+	})
+	if err != nil {
+		it.logger.Error(err, "failed to build label selector with filtering children workflow node controlled by current node",
+			"current node", fmt.Sprintf("%s/%s", node.Namespace, node.Name))
+		return nil, err
+	}
+	err = it.kubeClient.List(ctx, &scheduleList, &client.ListOptions{
+		LabelSelector: controlledByThisNode,
+	})
+	if err != nil {
+		return nil, err
+	}
+	var sorted SortScheduleByCreationTimestamp = scheduleList.Items
 	sort.Sort(sorted)
 	return sorted, err
 }
@@ -246,5 +369,19 @@ func (it SortGenericChaosByCreationTimestamp) Less(i, j int) bool {
 }
 
 func (it SortGenericChaosByCreationTimestamp) Swap(i, j int) {
+	it[i], it[j] = it[j], it[i]
+}
+
+type SortScheduleByCreationTimestamp []v1alpha1.Schedule
+
+func (it SortScheduleByCreationTimestamp) Len() int {
+	return len(it)
+}
+
+func (it SortScheduleByCreationTimestamp) Less(i, j int) bool {
+	return it[j].GetCreationTimestamp().After(it[i].GetCreationTimestamp().Time)
+}
+
+func (it SortScheduleByCreationTimestamp) Swap(i, j int) {
 	it[i], it[j] = it[j], it[i]
 }
