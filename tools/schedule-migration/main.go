@@ -98,5 +98,5 @@ func main() {
 
 func getKeyName(name string) string {
 	s := strings.ToLower(name)
-	return strings.ReplaceAll(s, "chaos", "_chaos")
+	return strings.ReplaceAll(s, "chaos", "Chaos")
 }

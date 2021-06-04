@@ -7,7 +7,7 @@ spec:
   type: IoChaos
   historyLimit: 5
   concurrencyPolicy: Forbid
-  io_chaos:
+  ioChaos:
     action: latency
     mode: one
     path: /var/run/etcd/**/*

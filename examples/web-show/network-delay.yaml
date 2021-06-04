@@ -7,7 +7,7 @@ spec:
   type: NetworkChaos
   historyLimit: 5
   concurrencyPolicy: Forbid
-  network_chaos:
+  networkChaos:
     action: delay
     mode: one
     selector:

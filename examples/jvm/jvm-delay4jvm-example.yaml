@@ -8,7 +8,7 @@ spec:
   type: JVMChaos
   historyLimit: 5
   concurrencyPolicy: Forbid
-  jvm_chaos:
+  jvmChaos:
     action: delay
     target: jvm
     flags:

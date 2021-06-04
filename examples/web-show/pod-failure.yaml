@@ -7,7 +7,7 @@ spec:
   type: PodChaos
   historyLimit: 5
   concurrencyPolicy: Forbid
-  pod_chaos:
+  podChaos:
     action: pod-failure
     mode: one
     duration: 30s
