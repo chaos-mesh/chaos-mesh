@@ -19,7 +19,6 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
-	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -51,17 +50,17 @@ func NewOption(logger logr.Logger) *ctrl.Options {
 
 	options := ctrl.Options{
 		Scheme:             scheme,
-		MetricsBindAddress: ccfg.ControllerCfg.MetricsAddr,
-		LeaderElection:     ccfg.ControllerCfg.EnableLeaderElection,
+		MetricsBindAddress: config.ControllerCfg.MetricsAddr,
+		LeaderElection:     config.ControllerCfg.EnableLeaderElection,
 		Port:               9443,
 	}
 
-	if ccfg.ControllerCfg.ClusterScoped {
+	if config.ControllerCfg.ClusterScoped {
 		setupLog.Info("Chaos controller manager is running in cluster scoped mode.")
 		// will not specific a certain namespace
 	} else {
-		setupLog.Info("Chaos controller manager is running in namespace scoped mode.", "targetNamespace", ccfg.ControllerCfg.TargetNamespace)
-		options.Namespace = ccfg.ControllerCfg.TargetNamespace
+		setupLog.Info("Chaos controller manager is running in namespace scoped mode.", "targetNamespace", config.ControllerCfg.TargetNamespace)
+		options.Namespace = config.ControllerCfg.TargetNamespace
 	}
 
 	return &options
@@ -72,11 +71,11 @@ func NewConfig() *rest.Config {
 }
 
 func NewManager(options *ctrl.Options, cfg *rest.Config) (ctrl.Manager, error) {
-	if ccfg.ControllerCfg.QPS > 0 {
-		cfg.QPS = ccfg.ControllerCfg.QPS
+	if config.ControllerCfg.QPS > 0 {
+		cfg.QPS = config.ControllerCfg.QPS
 	}
-	if ccfg.ControllerCfg.Burst > 0 {
-		cfg.Burst = ccfg.ControllerCfg.Burst
+	if config.ControllerCfg.Burst > 0 {
+		cfg.Burst = config.ControllerCfg.Burst
 	}
 
 	return ctrl.NewManager(cfg, *options)
@@ -84,11 +83,11 @@ func NewManager(options *ctrl.Options, cfg *rest.Config) (ctrl.Manager, error) {
 
 func NewAuthCli(cfg *rest.Config) (*authorizationv1.AuthorizationV1Client, error) {
 
-	if ccfg.ControllerCfg.QPS > 0 {
-		cfg.QPS = ccfg.ControllerCfg.QPS
+	if config.ControllerCfg.QPS > 0 {
+		cfg.QPS = config.ControllerCfg.QPS
 	}
-	if ccfg.ControllerCfg.Burst > 0 {
-		cfg.Burst = ccfg.ControllerCfg.Burst
+	if config.ControllerCfg.Burst > 0 {
+		cfg.Burst = config.ControllerCfg.Burst
 	}
 
 	return authorizationv1.NewForConfig(cfg)
