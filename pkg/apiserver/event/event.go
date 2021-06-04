@@ -63,7 +63,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 // @Param name query string false "The name of the object"
 // @Param namespace query string false "The namespace of the object"
 // @Param object_id query string false "The UID of the object"
-// @Param kind query string false "kind" Enums(PodChaos, IoChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos, AwsChaos, GcpChaos, DNSChaos, Schedule)
+// @Param kind query string false "kind" Enums(PodChaos, IOChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos, AwsChaos, GcpChaos, DNSChaos, Schedule)
 // @Param limit query string false "The max length of events list"
 // @Success 200 {array} core.Event
 // @Router /events [get]
