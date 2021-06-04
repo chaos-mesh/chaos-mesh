@@ -33,9 +33,6 @@ var _ webhook.Defaulter = &Schedule{}
 // Default implements webhook.Defaulter so a webhook will be registered for the type
 func (in *Schedule) Default() {
 	schedulelog.Info("default", "name", in.Name)
-
-	in.Spec.Selector.DefaultNamespace(in.GetNamespace())
-	in.Spec.DefaultClockIds()
 }
 
 // +kubebuilder:webhook:verbs=create;update,path=/validate-chaos-mesh-org-v1alpha1-schedule,mutating=false,failurePolicy=fail,groups=chaos-mesh.org,resources=schedule,versions=v1alpha1,name=vschedule.kb.io
@@ -77,7 +74,7 @@ func (in *ScheduleSpec) validateSchedule(schedule *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 	_, err := cron.ParseStandard(in.Schedule)
 	if err != nil {
-		append(allErrs, field.Invalid(schedule,
+		allErrs = append(allErrs, field.Invalid(schedule,
 			in.Schedule,
 			fmt.Sprintf("parse schedule field error:%s", err)))
 	}
@@ -90,25 +87,25 @@ func (in *ScheduleSpec) validateChaos(chaos *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 	switch in.Type {
 	case ScheduleTypeAwsChaos:
-		append(allErrs, in.ScheduleItem.AwsChaos.validateEbsVolume(chaos)...)
-		append(allErrs, in.ScheduleItem.AwsChaos.validateDeviceName(chaos)...)
+		allErrs = append(allErrs, in.ScheduleItem.AwsChaos.validateEbsVolume(chaos)...)
+		allErrs = append(allErrs, in.ScheduleItem.AwsChaos.validateDeviceName(chaos)...)
 	case ScheduleTypeDNSChaos:
 	case ScheduleTypeGcpChaos:
-		append(allErrs, in.ScheduleItem.GcpChaos.validateDeviceName(chaos)...)
+		allErrs = append(allErrs, in.ScheduleItem.GcpChaos.validateDeviceName(chaos)...)
 	case ScheduleTypeHTTPChaos:
 	case ScheduleTypeIOChaos:
-		append(allErrs, in.ScheduleItemIOChaos.validateDelay(chaos)...)
-		append(allErrs, in.ScheduleItemIOChaos.validateErrno(chaos)...)
-		append(allErrs, in.ScheduleItemIOChaos.validatePercent(chaos)...)
+		allErrs = append(allErrs, in.ScheduleItem.IOChaos.validateDelay(chaos)...)
+		allErrs = append(allErrs, in.ScheduleItem.IOChaos.validateErrno(chaos)...)
+		allErrs = append(allErrs, in.ScheduleItem.IOChaos.validatePercent(chaos)...)
 	case ScheduleTypeJVMChaos:
 	case ScheduleTypeKernelChaos:
 	case ScheduleTypeNetworkChaos:
 	case ScheduleTypePodChaos:
-		append(allErrs, in.ScheduleItem.PodChaos.validateContainerName(chaos)...)
+		allErrs = append(allErrs, in.ScheduleItem.PodChaos.validateContainerName(chaos)...)
 	case ScheduleTypeStressChaos:
-		append(allErrs, in.ScheduleItem.StressChaos.Validate(chaos)...)
+		allErrs = append(allErrs, in.ScheduleItem.StressChaos.Validate(chaos)...)
 	case ScheduleTypeTimeChaos:
-		append(allErrs, in.ScheduleItem.TimeChaos.validateTimeOffset(chaos)...)
+		allErrs = append(allErrs, in.ScheduleItem.TimeChaos.validateTimeOffset(chaos)...)
 	case ScheduleTypeWorkflow:
 	}
 	return allErrs
