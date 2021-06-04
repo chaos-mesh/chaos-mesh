@@ -4,7 +4,7 @@ metadata:
   name: io-delay-example
 spec:
   schedule: '@every 10m'
-  type: IoChaos
+  type: IOChaos
   historyLimit: 5
   concurrencyPolicy: Forbid
   ioChaos:
