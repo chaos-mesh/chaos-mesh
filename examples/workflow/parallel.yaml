@@ -9,8 +9,8 @@ spec:
       templateType: Parallel
       duration: 240s
       tasks:
-        - workflow-stress-chaos
-        - workflow-network-chaos
+#        - workflow-stress-chaos
+#        - workflow-network-chaos
         - workflow-pod-chaos
     - name: workflow-network-chaos
       templateType: NetworkChaos
@@ -27,14 +27,18 @@ spec:
           correlation: "25"
           jitter: "90ms"
     - name: workflow-pod-chaos
-      templateType: PodChaos
+      templateType: Schedule
       duration: 40s
-      podChaos:
-        action: pod-kill
-        mode: one
-        selector:
-          labelSelectors:
-            "app": "hello-kubernetes"
+      schedule:
+        schedule: "@every 2s"
+        concurrencyPolicy: Allow
+        type: PodChaos
+        podChaos:
+          action: pod-kill
+          mode: one
+          selector:
+            labelSelectors:
+              "app": "hello-kubernetes"
     - name: workflow-stress-chaos
       templateType: StressChaos
       duration: 20s

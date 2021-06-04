@@ -37,6 +37,7 @@ const (
 )
 
 var allChaosTemplateType = []TemplateType{
+	TypeSchedule,
 	TypeAwsChaos,
 	TypeDNSChaos,
 	TypeGcpChaos,

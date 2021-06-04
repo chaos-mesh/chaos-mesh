@@ -64,7 +64,7 @@ func (it *ChaosNodeReconciler) Reconcile(request reconcile.Request) (reconcile.R
 
 	it.logger.V(4).Info("resolve chaos node", "node", request)
 
-	if node.Spec.Schedule != nil {
+	if node.Spec.Type == v1alpha1.TypeSchedule {
 		err := it.syncSchedule(ctx, node)
 		if err != nil {
 			return reconcile.Result{}, err
@@ -83,8 +83,42 @@ func (it *ChaosNodeReconciler) Reconcile(request reconcile.Request) (reconcile.R
 			return client.IgnoreNotFound(err)
 		}
 
-		if node.Spec.Schedule != nil {
+		if node.Spec.Type == v1alpha1.TypeSchedule {
 			// sync status with schedule
+			scheduleList, err := it.fetchChildrenSchedule(ctx, nodeNeedUpdate)
+			if err != nil {
+				return client.IgnoreNotFound(err)
+			}
+			if len(scheduleList) > 1 {
+				it.logger.Info("the number of schedule custom resource affected by chaos node is more than 1",
+					"chaos node", fmt.Sprintf("%s/%s", node.Namespace, node.Name),
+					"schedule custom resources", scheduleList,
+				)
+			}
+			if len(scheduleList) > 0 {
+				scheduleObject := scheduleList[0]
+				group := scheduleObject.GetObjectKind().GroupVersionKind().Group
+				chaosRef := corev1.TypedLocalObjectReference{
+					APIGroup: &group,
+					Kind:     scheduleObject.GetObjectKind().GroupVersionKind().Kind,
+					Name:     scheduleObject.GetName(),
+				}
+				nodeNeedUpdate.Status.ChaosResource = &chaosRef
+				SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
+					Type:   v1alpha1.ConditionChaosInjected,
+					Status: corev1.ConditionTrue,
+					Reason: v1alpha1.ChaosCRCreated,
+				})
+			} else {
+				nodeNeedUpdate.Status.ChaosResource = nil
+				SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
+					Type:   v1alpha1.ConditionChaosInjected,
+					Status: corev1.ConditionFalse,
+					Reason: v1alpha1.ChaosCRNotExists,
+				})
+			}
+
+			return client.IgnoreNotFound(it.kubeClient.Status().Update(ctx, &nodeNeedUpdate))
 		}
 
 		// sync status with chaos CustomResource
@@ -95,7 +129,7 @@ func (it *ChaosNodeReconciler) Reconcile(request reconcile.Request) (reconcile.R
 		if len(chaosList) > 1 {
 			it.logger.Info("the number of chaos custom resource affected by chaos node is more than 1",
 				"chaos node", fmt.Sprintf("%s/%s", node.Namespace, node.Name),
-				"chaos custom resources",
+				"chaos custom resources", chaosList,
 			)
 		}
 
@@ -149,7 +183,7 @@ func (it *ChaosNodeReconciler) syncSchedule(ctx context.Context, node v1alpha1.W
 		return nil
 	}
 	if len(scheduleList) == 0 {
-		return it.createChaos(ctx, node)
+		return it.createSchedule(ctx, node)
 	} else if len(scheduleList) > 1 {
 		// need cleanup
 
@@ -305,11 +339,18 @@ func (it *ChaosNodeReconciler) fetchChildrenChaosCustomResource(ctx context.Cont
 }
 
 func (it ChaosNodeReconciler) createSchedule(ctx context.Context, node v1alpha1.WorkflowNode) error {
+	if node.Spec.Schedule == nil {
+		return fmt.Errorf("invalid workfow node, the spec of schedule is nil")
+	}
 	scheduleToCreate := v1alpha1.Schedule{
 		TypeMeta: metav1.TypeMeta{},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace:    node.Namespace,
 			GenerateName: fmt.Sprintf("%s-", node.Name),
+			Labels: map[string]string{
+				v1alpha1.LabelControlledBy: node.Name,
+				v1alpha1.LabelWorkflow:     node.Spec.WorkflowName,
+			},
 			OwnerReferences: []metav1.OwnerReference{
 				{
 					APIVersion:         node.APIVersion,
