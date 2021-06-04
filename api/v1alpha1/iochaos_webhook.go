@@ -59,7 +59,7 @@ func (in *IOChaos) ValidateCreate() error {
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
 func (in *IOChaos) ValidateUpdate(old runtime.Object) error {
 	iochaoslog.Info("validate update", "name", in.Name)
-	if !reflect.DeepEqual(in.Spec, old.(*IoChaos).Spec) {
+	if !reflect.DeepEqual(in.Spec, old.(*IOChaos).Spec) {
 		return ErrCanNotUpdateChaos
 	}
 	return in.Validate()
