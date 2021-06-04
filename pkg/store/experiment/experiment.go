@@ -130,7 +130,7 @@ func (e *experimentStore) DeleteByUIDs(_ context.Context, uids []string) error {
 
 // DeleteIncompleteExperiments implements the core.ExperimentStore.DeleteIncompleteExperiments method.
 func (e *experimentStore) DeleteIncompleteExperiments(_ context.Context) error {
-	return e.db.Where("finish_time IS NULL").Unscoped().Delete(core.Event{}).Error
+	return e.db.Where("finish_time IS NULL").Unscoped().Delete(core.Experiment{}).Error
 }
 
 func constructQueryArgs(kind, ns, name, uid string) (string, []string) {
