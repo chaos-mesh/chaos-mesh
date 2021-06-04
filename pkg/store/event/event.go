@@ -162,7 +162,7 @@ func (e *eventStore) ListByFilter(_ context.Context, filter core.Filter) ([]*cor
 		}
 	}
 
-	query, args := constructQueryArgs(filter.ExperimentName, filter.ExperimentNamespace, filter.UID, filter.Kind, filter.CreateTimeStr)
+	query, args := constructQueryArgs(filter.Name, filter.Namespace, filter.ObjectID, filter.Kind, filter.CreateTimeStr)
 	// List all events
 	if len(args) == 0 {
 		db = e.db
@@ -199,10 +199,6 @@ func (e *eventStore) DeleteByCreateTime(_ context.Context, ttl time.Duration) er
 
 // DeleteByUID deletes events by the uid of the experiment.
 func (e *eventStore) DeleteByUID(_ context.Context, uid string) error {
-	_, err := e.ListByUID(context.Background(), uid)
-	if err != nil {
-		return err
-	}
 	return e.db.Where("object_id = ?", uid).Unscoped().
 		Delete(core.Event{}).Error
 }
