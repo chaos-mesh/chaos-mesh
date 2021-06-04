@@ -22,7 +22,6 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-
 	"google.golang.org/grpc/grpclog"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -39,14 +38,10 @@ func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet, result *c
 		return fmt.Errorf("chaos is not network")
 	}
 	chaosStatus := networkChaos.Status.ChaosStatus
-	chaosSelector := networkChaos.Spec.GetSelector()
+	chaosSelector := networkChaos.Spec.Selector
 
 	pods, daemons, err := cm.GetPods(ctx, networkChaos.GetName(), chaosStatus, chaosSelector, c.CtrlCli)
 	if err != nil {
-		return err
-	}
-
-	if err := cm.CheckFailedMessage(ctx, chaosStatus.FailedMessage, daemons, c); err != nil {
 		return err
 	}
 

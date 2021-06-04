@@ -58,16 +58,20 @@ func TestcasePodFailureOnceThenDelete(ns string, kubeCli kubernetes.Interface, c
 			Namespace: ns,
 		},
 		Spec: v1alpha1.PodChaosSpec{
-			Selector: v1alpha1.SelectorSpec{
-				Namespaces: []string{
-					ns,
-				},
-				LabelSelectors: map[string]string{
-					"app": appName,
+			Action: v1alpha1.PodFailureAction,
+			ContainerSelector: v1alpha1.ContainerSelector{
+				PodSelector: v1alpha1.PodSelector{
+					Selector: v1alpha1.PodSelectorSpec{
+						Namespaces: []string{
+							ns,
+						},
+						LabelSelectors: map[string]string{
+							"app": appName,
+						},
+					},
+					Mode: v1alpha1.OnePodMode,
 				},
 			},
-			Action: v1alpha1.PodFailureAction,
-			Mode:   v1alpha1.OnePodMode,
 		},
 	}
 
@@ -143,15 +147,20 @@ func TestcasePodFailurePauseThenUnPause(ns string, kubeCli kubernetes.Interface,
 			Namespace: ns,
 		},
 		Spec: v1alpha1.PodChaosSpec{
-			Selector: v1alpha1.SelectorSpec{
-				Namespaces:     []string{ns},
-				LabelSelectors: map[string]string{"app": appName},
-			},
 			Action:   v1alpha1.PodFailureAction,
-			Mode:     v1alpha1.OnePodMode,
 			Duration: pointer.StringPtr("9m"),
-			Scheduler: &v1alpha1.SchedulerSpec{
-				Cron: "@every 10m",
+			ContainerSelector: v1alpha1.ContainerSelector{
+				PodSelector: v1alpha1.PodSelector{
+					Selector: v1alpha1.PodSelectorSpec{
+						Namespaces: []string{
+							ns,
+						},
+						LabelSelectors: map[string]string{
+							"app": appName,
+						},
+					},
+					Mode: v1alpha1.OnePodMode,
+				},
 			},
 		},
 	}
@@ -189,7 +198,7 @@ func TestcasePodFailurePauseThenUnPause(ns string, kubeCli kubernetes.Interface,
 		chaos := &v1alpha1.PodChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
 		framework.ExpectNoError(err, "get pod chaos error")
-		if chaos.Status.Experiment.Phase == v1alpha1.ExperimentPhasePaused {
+		if chaos.Status.Experiment.DesiredPhase == v1alpha1.StoppedPhase {
 			return true, nil
 		}
 		return false, err
@@ -222,7 +231,7 @@ func TestcasePodFailurePauseThenUnPause(ns string, kubeCli kubernetes.Interface,
 		chaos := &v1alpha1.PodChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
 		framework.ExpectNoError(err, "get pod chaos error")
-		if chaos.Status.Experiment.Phase == v1alpha1.ExperimentPhaseRunning {
+		if chaos.Status.Experiment.DesiredPhase == v1alpha1.RunningPhase {
 			return true, nil
 		}
 		return false, err

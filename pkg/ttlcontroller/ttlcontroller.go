@@ -69,6 +69,6 @@ func Register(c *Controller, controllerRuntimeStopCh <-chan struct{}) {
 // function in order to delete the events and archives.
 func (c *Controller) runWorker() {
 	log.Info("deleting expired data from the database")
-	c.event.DeleteByFinishTime(context.Background(), c.ttlconfig.EventTTL)
+	c.event.DeleteByCreateTime(context.Background(), c.ttlconfig.EventTTL)
 	c.experiment.DeleteByFinishTime(context.Background(), c.ttlconfig.ArchiveExperimentTTL)
 }

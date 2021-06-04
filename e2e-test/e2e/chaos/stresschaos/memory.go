@@ -33,6 +33,11 @@ func TestcaseMemoryStressInjectionOnceThenRecover(
 	ports []uint16,
 	c http.Client,
 ) {
+	// it will raise two pod: stress-peer-0 and stress-peer-1, and we only inject StressChaos into stress-peer-0
+
+	// approximate equality within 5 MBytes (10% of injected 50M memory chaos)
+	const allowedJitter = 5 * 1024 * 1024
+
 	ctx := context.Background()
 	By("create memory stress chaos CRD objects")
 	memoryStressChaos := makeMemoryStressChaos(ns, "memory-stress", ns, "stress-peer-0", "50M", 1)
@@ -45,10 +50,10 @@ func TestcaseMemoryStressInjectionOnceThenRecover(
 		if err != nil {
 			return false, err
 		}
-		if conditions[0].MemoryUsage-conditions[1].MemoryUsage > 50*1024*1024*0.9 {
+		if conditions[0].MemoryUsage-conditions[1].MemoryUsage > allowedJitter {
 			return true, nil
 		}
-		By(fmt.Sprintf("get Memory: [%d, %d]", conditions[0].MemoryUsage, conditions[1].MemoryUsage))
+		framework.Logf("get Memory: [%d, %d]", conditions[0].MemoryUsage, conditions[1].MemoryUsage)
 		return false, nil
 	})
 	framework.ExpectNoError(err, "memory stress failed")
@@ -59,13 +64,13 @@ func TestcaseMemoryStressInjectionOnceThenRecover(
 	By("waiting for assertion recovering")
 	err = wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
 		conditions, err := probeStressCondition(c, peers, ports)
+		By(fmt.Sprintf("get Memory: [%d, %d]", conditions[0].MemoryUsage, conditions[1].MemoryUsage))
 		if err != nil {
 			return false, err
 		}
-		if conditions[0].MemoryUsage < conditions[1].MemoryUsage+1*1024*1024 {
+		if conditions[0].MemoryUsage < conditions[1].MemoryUsage+allowedJitter {
 			return true, nil
 		}
-		By(fmt.Sprintf("get Memory: [%d, %d]", conditions[0].MemoryUsage, conditions[1].MemoryUsage))
 		return false, nil
 	})
 	framework.ExpectNoError(err, "fail to recover from memory stress")

@@ -10,5 +10,3 @@ spec:
   ec2Instance: "instance-id-placeholder"
   endpoint: "endpoint-placeholder"
   duration: "5s"
-  scheduler:
-    cron: "@every 10s"

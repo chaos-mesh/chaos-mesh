@@ -22,22 +22,26 @@ import (
 	"testing"
 	"time"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/pkg/config"
-	"github.com/chaos-mesh/chaos-mesh/pkg/core"
-	pkgmock "github.com/chaos-mesh/chaos-mesh/pkg/mock"
-
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/mock"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
+	"github.com/chaos-mesh/chaos-mesh/pkg/core"
+	pkgmock "github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
 // MockExperimentStore is a mock type for ExperimentStore
 type MockExperimentStore struct {
+	mock.Mock
+}
+
+// MockScheduleStore is a mock type for ScheduleStore
+type MockScheduleStore struct {
 	mock.Mock
 }
 
@@ -95,8 +99,8 @@ func (m *MockExperimentStore) FindByUID(ctx context.Context, UID string) (*core.
 			},
 			Experiment: string(jsonStr),
 		}
-	case "testIoChaos":
-		chaos := v1alpha1.IoChaos{}
+	case "testIOChaos":
+		chaos := v1alpha1.IOChaos{}
 		jsonStr, _ := json.Marshal(chaos)
 		res = &core.Experiment{
 			ExperimentMeta: core.ExperimentMeta{
@@ -105,7 +109,7 @@ func (m *MockExperimentStore) FindByUID(ctx context.Context, UID string) (*core.
 				UpdatedAt:  time.Time{},
 				DeletedAt:  nil,
 				UID:        UID,
-				Kind:       v1alpha1.KindIoChaos,
+				Kind:       v1alpha1.KindIOChaos,
 				Name:       "testName",
 				Namespace:  "testNamespace",
 				Action:     "testAction",
@@ -272,16 +276,103 @@ func (m *MockExperimentStore) DeleteByUIDs(context.Context, []string) error {
 	panic("implement me")
 }
 
+func (m *MockScheduleStore) ListMeta(ctx context.Context, namespace, name string, archived bool) ([]*core.ScheduleMeta, error) {
+	var res []*core.ScheduleMeta
+	var err error
+	if name == "testScheduleName" {
+		schMeta := &core.ScheduleMeta{
+			ID:         0,
+			CreatedAt:  time.Time{},
+			UpdatedAt:  time.Time{},
+			DeletedAt:  nil,
+			UID:        "testUID",
+			Kind:       "testKind",
+			Name:       "testScheduleName",
+			Namespace:  "testNamespace",
+			Action:     "testAction",
+			StartTime:  time.Time{},
+			FinishTime: time.Time{},
+			Archived:   true,
+		}
+		res = append(res, schMeta)
+	} else {
+		err = fmt.Errorf("test err")
+	}
+	return res, err
+}
+
+func (m *MockScheduleStore) FindByUID(ctx context.Context, UID string) (*core.Schedule, error) {
+	var res *core.Schedule
+	var err error
+	switch UID {
+	case "testPodChaos":
+		sch := v1alpha1.Schedule{}
+		jsonStr, _ := json.Marshal(sch)
+		res = &core.Schedule{
+			ScheduleMeta: core.ScheduleMeta{
+				ID:         0,
+				CreatedAt:  time.Time{},
+				UpdatedAt:  time.Time{},
+				DeletedAt:  nil,
+				UID:        UID,
+				Kind:       v1alpha1.KindPodChaos,
+				Name:       "testName",
+				Namespace:  "testNamespace",
+				Action:     "testAction",
+				StartTime:  time.Time{},
+				FinishTime: time.Time{},
+				Archived:   true,
+			},
+			Schedule: string(jsonStr),
+		}
+	case "testErrRecordNotFound":
+		err = gorm.ErrRecordNotFound
+	default:
+		err = fmt.Errorf("test err")
+	}
+	return res, err
+}
+
+func (m *MockScheduleStore) FindMetaByUID(context.Context, string) (*core.ScheduleMeta, error) {
+	panic("implement me")
+}
+
+func (m *MockScheduleStore) Set(context.Context, *core.Schedule) error {
+	panic("implement me")
+}
+
+func (m *MockScheduleStore) Archive(ctx context.Context, namespace, name string) error {
+	panic("implement me")
+}
+
+func (m *MockScheduleStore) Delete(context.Context, *core.Schedule) error {
+	panic("implement me")
+}
+
+func (m *MockScheduleStore) DeleteByFinishTime(context.Context, time.Duration) error {
+	panic("implement me")
+}
+
+func (m *MockScheduleStore) DeleteByUIDs(context.Context, []string) error {
+	panic("implement me")
+}
+
+func (m *MockScheduleStore) DeleteIncompleteSchedules(context.Context) error {
+	panic("implement me")
+}
+
 var _ = Describe("event", func() {
 	var router *gin.Engine
 	BeforeEach(func() {
 		pkgmock.With("MockAuthRequired", true)
 
 		mockExpStore := new(MockExperimentStore)
+		mockSchStore := new(MockScheduleStore)
 
 		s := Service{
-			archive: mockExpStore,
-			event:   nil,
+			archive:         mockExpStore,
+			archiveSchedule: mockSchStore,
+			event:           nil,
 			conf: &config.ChaosDashboardConfig{
 				ClusterScoped: true,
 			},
@@ -292,7 +383,9 @@ var _ = Describe("event", func() {
 
 		endpoint.GET("", s.list)
 		endpoint.GET("/detail", s.detail)
-		endpoint.GET("/report", s.report)
+
+		endpoint.GET("/schedules", s.listSchedule)
+		endpoint.GET("/schedules/:uid", s.detailSchedule)
 	})
 
 	AfterEach(func() {
@@ -373,12 +466,12 @@ var _ = Describe("event", func() {
 			Expect(rr.Body.Bytes()).Should(Equal(responseBody))
 		})
 
-		It("testIoChaos", func() {
-			chaos := &v1alpha1.IoChaos{}
+		It("testIOChaos", func() {
+			chaos := &v1alpha1.IOChaos{}
 			response := Detail{
 				Archive: Archive{
-					UID:        "testIoChaos",
-					Kind:       v1alpha1.KindIoChaos,
+					UID:        "testIOChaos",
+					Kind:       v1alpha1.KindIOChaos,
 					Namespace:  "testNamespace",
 					Name:       "testName",
 					Action:     "testAction",
@@ -400,7 +493,7 @@ var _ = Describe("event", func() {
 				},
 			}
 			rr := httptest.NewRecorder()
-			request, _ := http.NewRequest(http.MethodGet, "/api/archives/detail?uid=testIoChaos", nil)
+			request, _ := http.NewRequest(http.MethodGet, "/api/archives/detail?uid=testIOChaos", nil)
 			router.ServeHTTP(rr, request)
 			Expect(rr.Code).Should(Equal(http.StatusOK))
 			responseBody, err := json.Marshal(response)
@@ -570,31 +663,89 @@ var _ = Describe("event", func() {
 		})
 	})
 
-	Context("Report", func() {
+	Context("ListSchedule", func() {
+		It("success", func() {
+			response := []Archive{
+				Archive{
+					UID:        "testUID",
+					Kind:       "testKind",
+					Namespace:  "testNamespace",
+					Name:       "testScheduleName",
+					Action:     "testAction",
+					StartTime:  time.Time{},
+					FinishTime: time.Time{},
+				},
+			}
+			rr := httptest.NewRecorder()
+			request, _ := http.NewRequest(http.MethodGet, "/api/archives/schedules?name=testScheduleName", nil)
+			router.ServeHTTP(rr, request)
+			Expect(rr.Code).Should(Equal(http.StatusOK))
+			responseBody, err := json.Marshal(response)
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(rr.Body.Bytes()).Should(Equal(responseBody))
+		})
+
+		It("test err", func() {
+			rr := httptest.NewRecorder()
+			request, _ := http.NewRequest(http.MethodGet, "/api/archives/schedules", nil)
+			router.ServeHTTP(rr, request)
+			Expect(rr.Code).Should(Equal(http.StatusInternalServerError))
+		})
+	})
+
+	Context("DetailSchedule", func() {
 		It("empty uid", func() {
 			rr := httptest.NewRecorder()
-			request, _ := http.NewRequest(http.MethodGet, "/api/archives/report", nil)
+			request, _ := http.NewRequest(http.MethodGet, "/api/archives/detail", nil)
 			router.ServeHTTP(rr, request)
 			Expect(rr.Code).Should(Equal(http.StatusBadRequest))
 		})
 
+		It("testPodChaos", func() {
+			sch := &v1alpha1.Schedule{}
+			response := Detail{
+				Archive: Archive{
+					UID:        "testPodChaos",
+					Kind:       v1alpha1.KindPodChaos,
+					Namespace:  "testNamespace",
+					Name:       "testName",
+					Action:     "testAction",
+					StartTime:  time.Time{},
+					FinishTime: time.Time{},
+				},
+				KubeObject: core.KubeObjectDesc{
+					TypeMeta: metav1.TypeMeta{
+						APIVersion: "",
+						Kind:       "",
+					},
+					Meta: core.KubeObjectMeta{
+						Name:        "",
+						Namespace:   "",
+						Labels:      nil,
+						Annotations: nil,
+					},
+					Spec: sch.Spec,
+				},
+			}
+			rr := httptest.NewRecorder()
+			request, _ := http.NewRequest(http.MethodGet, "/api/archives/schedules/testPodChaos", nil)
+			router.ServeHTTP(rr, request)
+			Expect(rr.Code).Should(Equal(http.StatusOK))
+			responseBody, err := json.Marshal(response)
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(rr.Body.Bytes()).Should(Equal(responseBody))
+		})
+
 		It("testErrRecordNotFound", func() {
 			rr := httptest.NewRecorder()
-			request, _ := http.NewRequest(http.MethodGet, "/api/archives/report?uid=testErrRecordNotFound", nil)
+			request, _ := http.NewRequest(http.MethodGet, "/api/archives/schedules/testErrRecordNotFound", nil)
 			router.ServeHTTP(rr, request)
 			Expect(rr.Code).Should(Equal(http.StatusInternalServerError))
 		})
 
 		It("test err", func() {
 			rr := httptest.NewRecorder()
-			request, _ := http.NewRequest(http.MethodGet, "/api/archives/report?uid=testErr", nil)
-			router.ServeHTTP(rr, request)
-			Expect(rr.Code).Should(Equal(http.StatusInternalServerError))
-		})
-
-		It("testUID", func() {
-			rr := httptest.NewRecorder()
-			request, _ := http.NewRequest(http.MethodGet, "/api/archives/report?uid=testUID", nil)
+			request, _ := http.NewRequest(http.MethodGet, "/api/archives/schedules/testErr", nil)
 			router.ServeHTTP(rr, request)
 			Expect(rr.Code).Should(Equal(http.StatusInternalServerError))
 		})

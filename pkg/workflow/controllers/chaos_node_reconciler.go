@@ -196,6 +196,7 @@ func (it *ChaosNodeReconciler) createChaos(ctx context.Context, node v1alpha1.Wo
 	}))
 	meta.SetLabels(map[string]string{
 		v1alpha1.LabelControlledBy: node.Name,
+		v1alpha1.LabelWorkflow:     node.Spec.WorkflowName,
 	})
 
 	err = it.kubeClient.Create(ctx, chaosObject)

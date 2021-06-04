@@ -15,7 +15,6 @@ package v1alpha1
 
 import (
 	"context"
-	"time"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -48,14 +47,24 @@ var _ = Describe("HTTPChaos", func() {
 				Namespace: "default",
 			}
 
+			path := "/api"
+			delay := "10s"
+
 			created = &HTTPChaos{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "foo",
 					Namespace: "default",
 				},
 				Spec: HTTPChaosSpec{
-					Action: HTTPDelayAction,
-					Mode:   OnePodMode,
+					PodSelector: PodSelector{
+						Mode: OnePodMode,
+					},
+					Target: PodHttpRequest,
+					Port:   80,
+					Path:   &path,
+					PodHttpChaosActions: PodHttpChaosActions{
+						Delay: &delay,
+					},
 				},
 			}
 
@@ -69,20 +78,6 @@ var _ = Describe("HTTPChaos", func() {
 			By("deleting the created object")
 			Expect(k8sClient.Delete(context.TODO(), created)).To(Succeed())
 			Expect(k8sClient.Get(context.TODO(), key, created)).ToNot(Succeed())
-		})
-
-		It("should set next start time successfully", func() {
-			httpChaos := &HTTPChaos{}
-			nTime := time.Now()
-			httpChaos.SetNextStart(nTime)
-			Expect(httpChaos.GetNextStart()).To(Equal(nTime))
-		})
-
-		It("should set recover time successfully", func() {
-			httpChaos := &HTTPChaos{}
-			nTime := time.Now()
-			httpChaos.SetNextRecover(nTime)
-			Expect(httpChaos.GetNextRecover()).To(Equal(nTime))
 		})
 	})
 })

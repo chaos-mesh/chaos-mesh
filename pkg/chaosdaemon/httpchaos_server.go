@@ -23,8 +23,6 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/shirou/gopsutil/process"
-
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
@@ -37,6 +35,11 @@ const (
 
 type stdioTransport struct {
 	stdio *bpm.Stdio
+}
+
+type tproxyConfig struct {
+	ProxyPorts []uint32                        `json:"proxy_ports"`
+	Rules      []v1alpha1.PodHttpChaosBaseRule `json:"rules"`
 }
 
 func (t stdioTransport) RoundTrip(req *http.Request) (resp *http.Response, err error) {
@@ -60,7 +63,8 @@ func (t stdioTransport) RoundTrip(req *http.Request) (resp *http.Response, err e
 }
 
 func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaosRequest) (*pb.ApplyHttpChaosResponse, error) {
-	log.Info("applying http chaos", "Request", in)
+	log := log.WithValues("Request", in)
+	log.Info("applying http chaos")
 
 	if in.Instance == 0 {
 		if err := s.createHttpChaos(ctx, in); err != nil {
@@ -75,7 +79,7 @@ func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 
 	transport := stdioTransport{stdio: stdio}
 
-	rules := []v1alpha1.PodHttpChaosRule{}
+	rules := []v1alpha1.PodHttpChaosBaseRule{}
 	err := json.Unmarshal([]byte(in.Rules), &rules)
 	if err != nil {
 		log.Error(err, "error while unmarshal json bytes")
@@ -84,18 +88,17 @@ func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 
 	log.Info("the length of actions", "length", len(rules))
 
-	httpChaosSpec := v1alpha1.PodHttpChaosSpec{
-		ProxyPorts: make([]int32, 0, len(in.ProxyPorts)),
+	httpChaosSpec := tproxyConfig{
+		ProxyPorts: append([]uint32{}, in.ProxyPorts...),
 		Rules:      rules,
-	}
-	for _, port := range in.ProxyPorts {
-		httpChaosSpec.ProxyPorts = append(httpChaosSpec.ProxyPorts, int32(port))
 	}
 
 	config, err := json.Marshal(&httpChaosSpec)
 	if err != nil {
 		return nil, err
 	}
+
+	log.Info("ready to apply", "config", string(config))
 
 	req, err := http.NewRequest(http.MethodPut, "/", bytes.NewReader(config))
 	if err != nil {
@@ -106,6 +109,8 @@ func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 	if err != nil {
 		return nil, err
 	}
+
+	log.Info("http chaos applied")
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
@@ -126,7 +131,7 @@ func (s *DaemonServer) createHttpChaos(ctx context.Context, in *pb.ApplyHttpChao
 		log.Error(err, "error while getting PID")
 		return err
 	}
-	processBuilder := bpm.DefaultProcessBuilder(tproxyBin, "-i", "-vvv").
+	processBuilder := bpm.DefaultProcessBuilder(tproxyBin, "-i", "-vv").
 		EnableLocalMnt().
 		SetIdentifier(in.ContainerId).
 		SetEnv(pathEnv, os.Getenv(pathEnv)).
@@ -140,14 +145,8 @@ func (s *DaemonServer) createHttpChaos(ctx context.Context, in *pb.ApplyHttpChao
 	cmd := processBuilder.Build()
 	cmd.Stderr = os.Stderr
 
-	err = s.backgroundProcessManager.StartProcess(cmd)
+	procState, err := s.backgroundProcessManager.StartProcess(cmd)
 	if err != nil {
-		return err
-	}
-
-	procState, err := process.NewProcess(int32(cmd.Process.Pid))
-	if err != nil {
-		log.Error(err, "new process failed")
 		return err
 	}
 	ct, err := procState.CreateTime()

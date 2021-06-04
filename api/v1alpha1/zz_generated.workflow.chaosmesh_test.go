@@ -1,4 +1,4 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -51,10 +51,10 @@ func TestChaosKindMapShouldContainsHTTPChaos(t *testing.T) {
 	_, ok := all.kinds[string(requiredType)]
 	g.Expect(ok).To(Equal(true), "all kinds map should contains this type", requiredType)
 }
-func TestChaosKindMapShouldContainsIoChaos(t *testing.T) {
+func TestChaosKindMapShouldContainsIOChaos(t *testing.T) {
 	g := NewGomegaWithT(t)
 	var requiredType TemplateType
-	requiredType = TypeIoChaos
+	requiredType = TypeIOChaos
 
 	_, ok := all.kinds[string(requiredType)]
 	g.Expect(ok).To(Equal(true), "all kinds map should contains this type", requiredType)

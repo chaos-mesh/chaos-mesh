@@ -38,6 +38,11 @@ type ChaosControllerConfig struct {
 
 	TLSConfig
 
+	// The QPS config for kubernetes client
+	QPS float32 `envconfig:"QPS" default:"30"`
+	// The Burst config for kubernetes client
+	Burst int `envconfig:"BURST" default:"50"`
+
 	// BPFKIPort is the port which BFFKI grpc server listens on
 	BPFKIPort int `envconfig:"BPFKI_PORT" default:"50051"`
 	// MetricsAddr is the address the metric endpoint binds to

@@ -28,7 +28,6 @@ import (
 	"github.com/containerd/cgroups"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/pkg/errors"
-	"github.com/shirou/gopsutil/process"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
@@ -72,16 +71,11 @@ func (s *DaemonServer) ExecStressors(ctx context.Context,
 	}
 	cmd := processBuilder.Build()
 
-	err = s.backgroundProcessManager.StartProcess(cmd)
+	procState, err := s.backgroundProcessManager.StartProcess(cmd)
 	if err != nil {
 		return nil, err
 	}
 	log.Info("Start process successfully")
-
-	procState, err := process.NewProcess(int32(cmd.Process.Pid))
-	if err != nil {
-		return nil, err
-	}
 	ct, err := procState.CreateTime()
 	if err != nil {
 		return nil, err
