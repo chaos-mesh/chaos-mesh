@@ -1,9 +1,7 @@
 import { Grid, Grow } from '@material-ui/core'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
-import { ArchiveDetail } from 'api/archives.type'
-import { Event } from 'api/events.type'
-// import EventsTable from 'components/EventsTable'
+import { ArchiveSingle } from 'api/archives.type'
 import Loading from 'components-mui/Loading'
 import ObjectConfiguration from 'components/ObjectConfiguration'
 import Paper from 'components-mui/Paper'
@@ -16,7 +14,7 @@ const Single = () => {
   const { uuid } = useParams<{ uuid: string }>()
 
   const [loading, setLoading] = useState(true)
-  const [detail, setDetail] = useState<ArchiveDetail>()
+  const [detail, setDetail] = useState<ArchiveSingle>()
 
   const fetchDetail = () => api.archives.single(uuid).then(({ data }) => setDetail(data))
 
@@ -42,13 +40,6 @@ const Single = () => {
                 <Paper>
                   <PaperTop title={T('common.configuration')} />
                   <ObjectConfiguration config={detail} />
-                </Paper>
-              </Grid>
-
-              <Grid item xs={12}>
-                <Paper>
-                  <PaperTop title={T('newE.scope.affectedPods')} />
-                  {/* <AffectedPods pods={affectedPods} /> */}
                 </Paper>
               </Grid>
 

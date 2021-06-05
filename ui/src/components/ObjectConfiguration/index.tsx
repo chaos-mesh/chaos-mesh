@@ -1,6 +1,6 @@
 import { Grid, TableCell as MUITableCell, Table, TableBody, TableRow, Typography } from '@material-ui/core'
 
-import { ArchiveDetail } from 'api/archives.type'
+import { ArchiveSingle } from 'api/archives.type'
 import { ExperimentSingle } from 'api/experiments.type'
 import React from 'react'
 import T from 'components/T'
@@ -16,7 +16,7 @@ const TableCell = withStyles({
 })(MUITableCell)
 
 interface ObjectConfigurationProps {
-  config: ExperimentSingle | ArchiveDetail
+  config: ExperimentSingle | ArchiveSingle
 }
 
 const ObjectConfiguration: React.FC<ObjectConfigurationProps> = ({ config }) => {

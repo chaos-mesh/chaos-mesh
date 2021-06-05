@@ -299,13 +299,13 @@ const NewWorkflow = () => {
                     <StepLabel icon={<CheckIcon className={classes.success} />}>
                       <Paper padding={restoreIndex === index ? 4.5 : 3} className={classes.submittedStep}>
                         <Box display="flex" justifyContent="space-between">
-                          <Space display="flex" alignItems="center">
+                          <Space alignItems="center">
                             <Chip label={T(`newW.node.${step.type}`)} color="primary" size="small" />
                             <Typography component="div" variant={restoreIndex === index ? 'h6' : 'body1'}>
                               {step.name}
                             </Typography>
                           </Space>
-                          <Space display="flex">
+                          <Space>
                             <IconButton size="small" onClick={restoreExperiment(step.experiments, index)}>
                               <UndoIcon />
                             </IconButton>
@@ -333,7 +333,7 @@ const NewWorkflow = () => {
                                         label={T('newE.run.duration')}
                                       />
                                     </Space>
-                                    <Space display="flex">
+                                    <Space>
                                       <MultiNode
                                         ref={multiNodeRef}
                                         count={step.experiments.length}
@@ -389,7 +389,7 @@ const NewWorkflow = () => {
           >
             {({ errors, touched }) => (
               <Form style={{ height: '100%' }}>
-                <Space display="flex" flexDirection="column" height="100%" vertical>
+                <Space flexDirection="column" height="100%" vertical>
                   <Typography>{T('newW.titleBasic')}</Typography>
                   <Box>
                     <TextField

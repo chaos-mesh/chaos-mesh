@@ -60,7 +60,7 @@ const MultiNode: React.ForwardRefRenderFunction<MultiNodeHandles, MultiNodeProps
   }
 
   return (
-    <Space display="flex" alignItems="center">
+    <Space alignItems="center">
       <Typography>{T(`newW.node.chooseChildren`)}</Typography>
       {Array(count)
         .fill(0)

@@ -7,6 +7,7 @@ export interface EventsParams {
 }
 
 export interface Event {
+  is: 'event'
   id: number
   object_id: uuid
   namespace: string

@@ -1,4 +1,3 @@
-import { Event } from './events.type'
 import { ExperimentKind } from 'components/NewExperiment/types'
 
 export interface StateOfExperiments {
@@ -9,6 +8,7 @@ export interface StateOfExperiments {
 }
 
 export interface Experiment {
+  is: 'experiment'
   uid: uuid
   kind: ExperimentKind
   namespace: string
@@ -16,7 +16,6 @@ export interface Experiment {
   created_at: string
   // FIXME: support keyof in ts-interface-builder
   status: 'injecting' | 'running' | 'finished' | 'paused'
-  events?: Event[]
 }
 
 export interface ExperimentSingle extends Experiment {

@@ -116,7 +116,7 @@ const Step1 = () => {
         {step1 && <UndoIcon className={classes.asButton} onClick={handleUndo} />}
       </Box>
       <Box hidden={step1}>
-        <Space display="flex" flexWrap="wrap">
+        <Space flexWrap="wrap">
           {targetDataEntries.map(([key]) => (
             <Card
               key={key}
@@ -141,7 +141,7 @@ const Step1 = () => {
               <Divider />
             </Box>
             {targetData[kind].categories ? (
-              <Space display="flex" flexWrap="wrap">
+              <Space flexWrap="wrap">
                 {targetData[kind].categories!.map((d: any) => (
                   <Card
                     key={d.key}

@@ -1,8 +1,9 @@
 import { Experiment } from './experiments.type'
 
-// TODO: unify field names
-export type Archive = Omit<Experiment, 'status' | 'events'>
+type Common = Omit<Experiment, 'is' | 'status'>
 
-export interface ArchiveDetail extends Archive {
+export type Archive = { is: 'archive' } & Common
+
+export interface ArchiveSingle extends Common {
   kube_object: any
 }

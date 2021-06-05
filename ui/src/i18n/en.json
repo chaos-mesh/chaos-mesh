@@ -178,16 +178,11 @@
     "notFound": "No events found",
     "eventsPerPage": "Events per page",
     "event": {
-      "experiment": "Experiment",
       "uuid": "UUID",
       "namespace": "Namespace",
+      "name": "名称",
       "kind": "Kind",
-      "started": "Started",
-      "ended": "Ended",
-      "pod": {
-        "action": "Action",
-        "message": "Message"
-      }
+      "started": "Started"
     }
   },
   "archives": {

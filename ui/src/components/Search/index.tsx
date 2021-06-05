@@ -1,4 +1,13 @@
-import { Autocomplete, Box, Chip, CircularProgress, InputAdornment, TextField, Typography } from '@material-ui/core'
+import {
+  Autocomplete,
+  Box,
+  ChipProps,
+  CircularProgress,
+  InputAdornment,
+  Chip as MUIChip,
+  TextField,
+  Typography,
+} from '@material-ui/core'
 import React, { useMemo, useState } from 'react'
 
 import { Archive } from 'api/archives.type'
@@ -20,6 +29,8 @@ import search from 'lib/search'
 import { truncate } from 'lib/utils'
 import { useHistory } from 'react-router-dom'
 import { useIntl } from 'react-intl'
+
+const Chip = (props: ChipProps) => <MUIChip {...props} variant="outlined" size="small" />
 
 const useStyles = makeStyles((theme) => ({
   search: {
@@ -64,12 +75,13 @@ const Search: React.FC = () => {
         setNoResult(false)
         setOpen(true)
 
-        const [experiments, events, archives] = (
-          await Promise.all([api.experiments.experiments(), api.events.events(), api.archives.archives()])
-        ).map((d) => d.data)
+        const [experiments, events, archives] = [
+          (await api.experiments.experiments()).data.map((d) => ({ ...d, is: 'experiment' as 'experiment' })),
+          (await api.events.events({ limit: 6 })).data.map((d) => ({ ...d, is: 'event' as 'event' })),
+          (await api.archives.archives()).data.map((d) => ({ ...d, is: 'archive' as 'archive' })),
+        ]
 
-        const result = search({ experiments, events, archives } as any, s)
-        result.events = result.events.reverse().slice(0, 5)
+        const result = search({ experiments, events, archives }, s)
         const newOptions = [...result.experiments, ...result.events, ...result.archives]
 
         setOptions(newOptions)
@@ -80,37 +92,32 @@ const Search: React.FC = () => {
     []
   )
 
-  const filterOptions = (options: any) => options
-
   const groupBy = (option: Option) =>
-    (option as Experiment).status
+    option.is === 'experiment'
       ? intl.formatMessage({ id: 'experiments.title' })
-      : (option as Event).name
+      : option.is === 'event'
       ? intl.formatMessage({ id: 'events.title' })
       : intl.formatMessage({ id: 'archives.title' })
 
-  const getOptionLabel = (option: Option) => (option as Event).name || (option as any).name
+  const getOptionLabel = (option: Option) => option.name
 
   const renderOption = (_: any, option: Option) => {
-    const type = (option as Experiment).status ? 'experiment' : (option as Event).name ? 'event' : 'archive'
-    let link = ''
-    let name = ''
+    const type = option.is
+
     let uid = (option as Experiment).uid
-    let kind = (option as Experiment).kind
-    let time = ''
+    let name = option.name
+    const kind = (option as Experiment).kind
+    const time = option.created_at
+    let link = ''
 
     switch (type) {
       case 'experiment':
-      case 'archive':
         link = `/${type}s/${(option as Experiment).uid}`
-        name = option.name
-        time = option.created_at
         break
       case 'event':
-        link = `/${type}s?event_id=${(option as Event).id}`
-        name = option.name
-        time = option.created_at
+        link = `/${type}s?id=${(option as Event).id}`
         break
+      case 'archive':
       default:
         break
     }
@@ -123,30 +130,19 @@ const Search: React.FC = () => {
     }
 
     return (
-      <Box onClick={onClick}>
-        <Typography gutterBottom>{name}</Typography>
-        <Box className={classes.chipContainer}>
+      <Box pl={6} pb={3} onClick={onClick}>
+        <Typography variant="subtitle1" gutterBottom>
+          {name}
+        </Typography>
+        <div className={classes.chipContainer}>
           {type !== 'event' ? (
-            <Chip
-              variant="outlined"
-              color="primary"
-              size="small"
-              icon={<FingerprintIcon />}
-              label={truncate(uid)}
-              title={uid}
-            />
+            <Chip color="primary" icon={<FingerprintIcon />} label={truncate(uid)} title={uid} />
           ) : (
-            <Chip
-              variant="outlined"
-              color="primary"
-              size="small"
-              icon={<FingerprintIcon />}
-              label={(option as Event).id}
-            />
+            <Chip color="primary" icon={<FingerprintIcon />} label={(option as Event).id} />
           )}
-          <Chip variant="outlined" size="small" label={kind} />
-          {type !== 'archive' && <Chip variant="outlined" size="small" icon={<ScheduleIcon />} label={format(time)} />}
-        </Box>
+          <Chip label={kind} />
+          {type !== 'archive' && <Chip icon={<ScheduleIcon />} label={format(time)} />}
+        </div>
       </Box>
     )
   }
@@ -166,7 +162,6 @@ const Search: React.FC = () => {
       loading={loading}
       loadingText={noResult ? T('search.result.noResult') : T('search.result.acquiring')}
       options={options}
-      filterOptions={filterOptions}
       groupBy={groupBy}
       getOptionLabel={getOptionLabel}
       renderOption={renderOption}
@@ -174,7 +169,6 @@ const Search: React.FC = () => {
       renderInput={(params) => (
         <TextField
           {...params}
-          variant="outlined"
           size="small"
           label={T('search.placeholder')}
           aria-label="Search"

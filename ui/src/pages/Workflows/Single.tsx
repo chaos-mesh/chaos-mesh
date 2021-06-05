@@ -204,7 +204,7 @@ const Single = () => {
   return (
     <>
       <Grow in={true} style={{ transformOrigin: '0 0 0' }}>
-        <Space display="flex" flexDirection="column" className={classes.root} vertical spacing={6}>
+        <Space flexDirection="column" className={classes.root} vertical spacing={6}>
           <Space>
             <Button
               variant="outlined"

@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Grow, Modal } from '@material-ui/core'
+import { Box, Button, Grid, Grow } from '@material-ui/core'
 import { setAlert, setConfirm } from 'slices/globalStatus'
 import { useEffect, useState } from 'react'
 import { useHistory, useParams } from 'react-router-dom'
@@ -22,11 +22,9 @@ import Space from 'components-mui/Space'
 import T from 'components/T'
 import api from 'api'
 import fileDownload from 'js-file-download'
-import genEventsChart from 'lib/d3/eventsChart'
 import loadable from '@loadable/component'
 import { makeStyles } from '@material-ui/styles'
 import { useIntl } from 'react-intl'
-import { usePrevious } from 'lib/hooks'
 import yaml from 'js-yaml'
 
 const YAMLEditor = loadable(() => import('components/YAMLEditor'))
@@ -50,12 +48,9 @@ export default function Single() {
   const { theme } = useStoreSelector((state) => state.settings)
   const dispatch = useStoreDispatch()
 
-  // const chartRef = useRef<HTMLDivElement>(null)
-
   const [loading, setLoading] = useState(true)
   const [single, setSingle] = useState<ExperimentSingle>()
   const [events, setEvents] = useState<Event[]>([])
-  const prevEvents = usePrevious(events)
   const [yamlEditor, setYAMLEditor] = useState<Ace.Editor>()
 
   const fetchExperiment = () => {
@@ -85,24 +80,6 @@ export default function Single() {
       fetchEvents()
     }
   }, [uuid, single])
-
-  // useEffect(() => {
-  //   if (prevEvents !== events && prevEvents?.length !== events?.length && events) {
-  //     const chart = chartRef.current!
-
-  //     genEventsChart({
-  //       root: chart,
-  //       events,
-  //       intl,
-  //       theme,
-  //       options: {
-  //         enableLegends: false,
-  //         onSelectEvent: eventsTableRef.current!.onSelectEvent,
-  //       },
-  //     })
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [events])
 
   const handleSelect = (action: string) => () => {
     switch (action) {

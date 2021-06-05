@@ -102,7 +102,7 @@ const ObjectListItem: React.FC<ObjectListItemProps> = ({ data, type = 'experimen
   }
 
   const Actions = () => (
-    <Space display="flex" justifyContent="end" alignItems="center">
+    <Space justifyContent="end" alignItems="center">
       <Typography variant="body2">
         {T('table.created')}{' '}
         {DateTime.fromISO(data.created_at, {
@@ -162,7 +162,7 @@ const ObjectListItem: React.FC<ObjectListItemProps> = ({ data, type = 'experimen
   return (
     <Paper padding={0} className={classes.root} onClick={handleJumpTo}>
       <Box display="flex" justifyContent="space-between" alignItems="center" p={3}>
-        <Space display="flex" alignItems="center">
+        <Space alignItems="center">
           {type === 'experiment' && <ExperimentStatus status={(data as Experiment).status} />}
           <Typography variant="body1" component="div">
             {data.name}

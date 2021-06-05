@@ -1,4 +1,4 @@
-import { Experiment as ExperimentReponse, ExperimentSingle, StateOfExperiments } from './experiments.type'
+import { Experiment as ExperimentResponse, ExperimentSingle, StateOfExperiments } from './experiments.type'
 
 import { Experiment } from 'components/NewExperiment/types'
 import http from './http'
@@ -13,7 +13,7 @@ export const state = (namespace = null) =>
 export const newExperiment = (data: Experiment) => http.post('/experiments/new', data)
 
 export const experiments = (namespace = null, name = null, kind = null, status = null) =>
-  http.get<ExperimentReponse[]>('/experiments', {
+  http.get<ExperimentResponse[]>('/experiments', {
     params: {
       namespace,
       name,

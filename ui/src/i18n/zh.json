@@ -177,16 +177,11 @@
     "notFound": "未发现事件",
     "eventsPerPage": "每页事件数",
     "event": {
-      "experiment": "实验",
       "uuid": "UUID",
       "namespace": "命名空间",
+      "name": "名称",
       "kind": "类别",
-      "started": "开始时间",
-      "ended": "结束时间",
-      "pod": {
-        "action": "行为",
-        "message": "信息"
-      }
+      "started": "开始时间"
     }
   },
   "archives": {
