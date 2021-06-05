@@ -185,6 +185,42 @@ func Test_convertWorkflow(t *testing.T) {
 				Entry:     "an-entry",
 				Status:    WorkflowSucceed,
 			},
+		}, {
+			name: "converting UID",
+			args: args{
+				v1alpha1.Workflow{
+					TypeMeta: metav1.TypeMeta{},
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: "fake-namespace",
+						Name:      "fake-workflow-0",
+						UID:       "uid-of-workflow",
+					},
+					Spec: v1alpha1.WorkflowSpec{
+						Entry: "an-entry",
+					},
+					Status: v1alpha1.WorkflowStatus{
+						Conditions: []v1alpha1.WorkflowCondition{
+							{
+								Type:   v1alpha1.WorkflowConditionAccomplished,
+								Status: corev1.ConditionTrue,
+								Reason: "",
+							},
+							{
+								Type:   v1alpha1.WorkflowConditionScheduled,
+								Status: corev1.ConditionTrue,
+								Reason: "",
+							},
+						},
+					},
+				},
+			},
+			want: Workflow{
+				Namespace: "fake-namespace",
+				Name:      "fake-workflow-0",
+				Entry:     "an-entry",
+				Status:    WorkflowSucceed,
+				UID:       "uid-of-workflow",
+			},
 		},
 	}
 	for _, tt := range tests {
@@ -467,6 +503,46 @@ func Test_convertWorkflowNode(t *testing.T) {
 				Serial:   nil,
 				Parallel: nil,
 				Template: "deadline-exceed-node",
+			},
+		}, {
+			name: "appending uid",
+			args: args{
+				kubeWorkflowNode: v1alpha1.WorkflowNode{
+					TypeMeta: metav1.TypeMeta{},
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: "fake-namespace",
+						Name:      "the-entry-0",
+						UID:       "uid-of-workflow-node",
+					},
+					Spec: v1alpha1.WorkflowNodeSpec{
+						TemplateName: "the-entry",
+						WorkflowName: "fake-workflow-0",
+						Type:         v1alpha1.TypeSerial,
+						Tasks:        []string{"unimportant-task-0"},
+					},
+					Status: v1alpha1.WorkflowNodeStatus{
+						Conditions: []v1alpha1.WorkflowNodeCondition{
+							{
+								Type:   v1alpha1.ConditionAccomplished,
+								Status: corev1.ConditionTrue,
+								Reason: "unit test mocked true",
+							},
+						},
+					},
+				},
+			},
+			want: Node{
+				Name:  "the-entry-0",
+				Type:  SerialNode,
+				State: NodeSucceed,
+				Serial: &NodeSerial{
+					Tasks: []NodeNameWithTemplate{
+						{Name: "", Template: "unimportant-task-0"},
+					},
+				},
+				Parallel: nil,
+				Template: "the-entry",
+				UID:      "uid-of-workflow-node",
 			},
 		},
 	}
