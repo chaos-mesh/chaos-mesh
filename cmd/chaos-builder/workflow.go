@@ -18,6 +18,8 @@ import (
 	"fmt"
 	"strings"
 	"text/template"
+
+	"github.com/iancoleman/strcase"
 )
 
 // struct workflowCodeGenerator will render content of one file contains code blocks that required by workflow
@@ -177,7 +179,13 @@ func generateEmbedChaos(typeName string) string {
 }
 
 func lowercaseCamelCase(str string) string {
-	return strings.ToLower(str[0:1]) + str[1:]
+	// here are some name thing issue about the acronyms, we used ALLCAP name in chaos kind, like DNSChaos or JVMChaos,
+	// library could not resolve that well, so we just manually do it.
+	if strings.Contains(str, "Chaos") {
+		position := strings.Index(str, "Chaos")
+		return strings.ToLower(str[:position]) + str[position:]
+	}
+	return strcase.ToLowerCamel(str)
 }
 
 const spawnObjectEntryTemplate = `	case Type{{.Type}}:

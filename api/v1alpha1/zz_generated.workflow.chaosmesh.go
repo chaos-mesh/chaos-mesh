@@ -56,15 +56,15 @@ type EmbedChaos struct {
 	// +optional
 	AwsChaos *AwsChaosSpec `json:"awsChaos,omitempty"`
 	// +optional
-	DNSChaos *DNSChaosSpec `json:"dNSChaos,omitempty"`
+	DNSChaos *DNSChaosSpec `json:"dnsChaos,omitempty"`
 	// +optional
 	GcpChaos *GcpChaosSpec `json:"gcpChaos,omitempty"`
 	// +optional
-	HTTPChaos *HTTPChaosSpec `json:"hTTPChaos,omitempty"`
+	HTTPChaos *HTTPChaosSpec `json:"httpChaos,omitempty"`
 	// +optional
-	IOChaos *IOChaosSpec `json:"iOChaos,omitempty"`
+	IOChaos *IOChaosSpec `json:"ioChaos,omitempty"`
 	// +optional
-	JVMChaos *JVMChaosSpec `json:"jVMChaos,omitempty"`
+	JVMChaos *JVMChaosSpec `json:"jvmChaos,omitempty"`
 	// +optional
 	KernelChaos *KernelChaosSpec `json:"kernelChaos,omitempty"`
 	// +optional

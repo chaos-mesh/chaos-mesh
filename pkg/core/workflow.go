@@ -55,6 +55,7 @@ type Workflow struct {
 	Created string         `json:"created"`
 	EndTime string         `json:"endTime"`
 	Status  WorkflowStatus `json:"status,omitempty"`
+	UID     string         `json:"uid"`
 }
 
 type WorkflowDetail struct {
@@ -84,6 +85,7 @@ type Node struct {
 	Serial   *NodeSerial   `json:"serial,omitempty"`
 	Parallel *NodeParallel `json:"parallel,omitempty"`
 	Template string        `json:"template"`
+	UID      string        `json:"uid"`
 }
 
 type NodeNameWithTemplate struct {
@@ -244,6 +246,7 @@ func convertWorkflow(kubeWorkflow v1alpha1.Workflow) Workflow {
 		Namespace: kubeWorkflow.Namespace,
 		Name:      kubeWorkflow.Name,
 		Entry:     kubeWorkflow.Spec.Entry,
+		UID:       string(kubeWorkflow.UID),
 	}
 
 	if kubeWorkflow.Status.StartTime != nil {
@@ -311,6 +314,7 @@ func convertWorkflowNode(kubeWorkflowNode v1alpha1.WorkflowNode) (Node, error) {
 		Serial:   nil,
 		Parallel: nil,
 		Template: kubeWorkflowNode.Spec.TemplateName,
+		UID:      string(kubeWorkflowNode.UID),
 	}
 
 	if kubeWorkflowNode.Spec.Type == v1alpha1.TypeSerial {
