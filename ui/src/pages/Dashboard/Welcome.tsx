@@ -78,7 +78,7 @@ const Welcome = () => {
     <Grid container spacing={6}>
       <Grid item xs={6}>
         <Paper style={{ height: '100%' }}>
-          <Space vertical className={classes.space}>
+          <Space className={classes.space}>
             <PaperTop title={T('dashboard.tutorial.title')} subtitle={T('dashboard.tutorial.desc')} />
             <Button
               className="dashboard-tutorial"
@@ -116,7 +116,7 @@ const Welcome = () => {
       </Grid>
       <Grid item xs={6}>
         <Paper style={{ height: '100%' }}>
-          <Space vertical className={classes.space}>
+          <Space className={classes.space}>
             <PaperTop title={T('dashboard.startAWorkflow')} subtitle={T('dashboard.startAWorkflowDesc')} />
             <Button
               component={Link}

@@ -44,22 +44,6 @@ import { useIntl } from 'react-intl'
 import yaml from 'js-yaml'
 
 const useStyles = makeStyles((theme) => ({
-  stepper: {
-    marginTop: '-' + theme.spacing(1),
-    padding: 0,
-  },
-  primary: {
-    color: theme.palette.primary.main,
-  },
-  success: {
-    color: theme.palette.success.main,
-  },
-  error: {
-    color: theme.palette.error.main,
-  },
-  submittedStep: {
-    borderColor: theme.palette.success.main,
-  },
   leftSticky: {
     position: 'sticky',
     top: 0,
@@ -290,22 +274,22 @@ const NewWorkflow = () => {
     <>
       <Grid container spacing={9}>
         <Grid item xs={12} md={8}>
-          <Space vertical spacing={6}>
+          <Space spacing={6}>
             <Typography>{T('common.process')}</Typography>
-            <Stepper className={classes.stepper} orientation="vertical">
+            <Stepper orientation="vertical" sx={{ mt: -1, p: 0 }}>
               {steps.length > 0 &&
                 steps.map((step, index) => (
                   <Step key={step.type + index}>
-                    <StepLabel icon={<CheckIcon className={classes.success} />}>
-                      <Paper padding={restoreIndex === index ? 4.5 : 3} className={classes.submittedStep}>
+                    <StepLabel icon={<CheckIcon sx={{ color: 'success.main' }} />}>
+                      <Paper sx={{ p: restoreIndex === index ? 4.5 : 3, borderColor: 'success.main' }}>
                         <Box display="flex" justifyContent="space-between">
-                          <Space alignItems="center">
+                          <Space direction="row" alignItems="center">
                             <Chip label={T(`newW.node.${step.type}`)} color="primary" size="small" />
                             <Typography component="div" variant={restoreIndex === index ? 'h6' : 'body1'}>
                               {step.name}
                             </Typography>
                           </Space>
-                          <Space>
+                          <Space direction="row">
                             <IconButton size="small" onClick={restoreExperiment(step.experiments, index)}>
                               <UndoIcon />
                             </IconButton>
@@ -389,7 +373,7 @@ const NewWorkflow = () => {
           >
             {({ errors, touched }) => (
               <Form style={{ height: '100%' }}>
-                <Space flexDirection="column" height="100%" vertical>
+                <Space height="100%">
                   <Typography>{T('newW.titleBasic')}</Typography>
                   <Box>
                     <TextField
@@ -420,7 +404,7 @@ const NewWorkflow = () => {
                   </Box>
                   <Typography>{T('common.preview')}</Typography>
                   <Box flex={1}>
-                    <Paper style={{ height: '100%' }} padding={0}>
+                    <Paper sx={{ p: 0 }}>
                       <YAMLEditor
                         theme={theme}
                         data={constructWorkflow(workflowBasic, Object.values(templates))}

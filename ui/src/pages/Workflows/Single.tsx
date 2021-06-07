@@ -27,15 +27,13 @@ const useStyles = makeStyles((theme) => ({
   root: {
     height: `calc(100vh - 56px - ${theme.spacing(18)})`,
   },
-  topology: {
-    flex: 1,
-  },
   configPaper: {
     position: 'absolute',
     top: '50%',
     left: '50%',
     width: '50vw',
     height: '90vh',
+    padding: 0,
     transform: 'translate(-50%, -50%)',
     [theme.breakpoints.down('sm')]: {
       width: '90vw',
@@ -204,7 +202,7 @@ const Single = () => {
   return (
     <>
       <Grow in={true} style={{ transformOrigin: '0 0 0' }}>
-        <Space flexDirection="column" className={classes.root} vertical spacing={6}>
+        <Space spacing={6} className={classes.root}>
           <Space>
             <Button
               variant="outlined"
@@ -219,7 +217,7 @@ const Single = () => {
               {T('common.delete')}
             </Button>
           </Space>
-          <Paper className={classes.topology} boxProps={{ display: 'flex', flexDirection: 'column' }}>
+          <Paper sx={{ flex: 1 }}>
             <PaperTop
               title={
                 <Space spacing={1.5} display="flex" alignItems="center">
@@ -246,8 +244,7 @@ const Single = () => {
         <div>
           <Paper
             className={classes.configPaper}
-            style={{ width: selected === 'workflow' ? '50vw' : selected === 'node' ? '70vw' : '50vw' }}
-            padding={0}
+            sx={{ width: selected === 'workflow' ? '50vw' : selected === 'node' ? '70vw' : '50vw' }}
           >
             {detail && configOpen && (
               <Box display="flex" flexDirection="column" height="100%">

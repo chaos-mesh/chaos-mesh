@@ -24,14 +24,14 @@ const Settings = () => {
         <Grid item sm={12} md={8}>
           <Paper>
             {securityMode && (
-              <Space vertical>
+              <Space>
                 <PaperTop title={T('settings.addToken.title')} />
                 <Token />
                 <TokensTable />
               </Space>
             )}
 
-            <Space vertical>
+            <Space>
               <PaperTop title={T('experiments.title')} />
               <Experiments />
 

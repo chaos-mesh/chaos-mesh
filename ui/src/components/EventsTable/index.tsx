@@ -21,6 +21,7 @@ import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight'
 import LastPageIcon from '@material-ui/icons/LastPage'
 import Paper from 'components-mui/Paper'
 import T from 'components/T'
+import { truncate } from 'lib/utils'
 import { useIntl } from 'react-intl'
 
 function descendingComparator<T extends Record<string, any>>(a: T, b: T, orderBy: string) {
@@ -72,6 +73,7 @@ const headCells: { id: keyof SortedEvent; label: string }[] = [
   { id: 'name', label: 'name' },
   { id: 'kind', label: 'kind' },
   { id: 'created_at', label: 'started' },
+  { id: 'message', label: 'message' },
 ]
 
 interface EventsTableHeadProps {
@@ -80,7 +82,7 @@ interface EventsTableHeadProps {
   onSort: (e: React.MouseEvent<unknown>, k: keyof SortedEvent) => void
 }
 
-const EventsTableHead: React.FC<EventsTableHeadProps> = ({ order, orderBy, onSort }) => {
+const Head: React.FC<EventsTableHeadProps> = ({ order, orderBy, onSort }) => {
   const handleSortEvents = (k: keyof SortedEvent) => (e: React.MouseEvent<unknown>) => onSort(e, k)
 
   return (
@@ -101,6 +103,21 @@ const EventsTableHead: React.FC<EventsTableHeadProps> = ({ order, orderBy, onSor
     </TableHead>
   )
 }
+
+interface EventsTableRowProps {
+  event: SortedEventWithPods
+}
+
+const Row: React.FC<EventsTableRowProps> = ({ event: e }) => (
+  <TableRow hover>
+    <TableCell>{truncate(e.object_id)}</TableCell>
+    <TableCell>{e.namespace}</TableCell>
+    <TableCell>{e.name}</TableCell>
+    <TableCell>{e.kind}</TableCell>
+    <TableCell>{format(e.created_at)}</TableCell>
+    <TableCell>{e.message}</TableCell>
+  </TableRow>
+)
 
 interface TablePaginationActionsProps {
   count: number
@@ -142,20 +159,6 @@ const TablePaginationActions: React.FC<TablePaginationActionsProps> = ({ count, 
   )
 }
 
-interface EventsTableRowProps {
-  event: SortedEventWithPods
-}
-
-const EventsTableRow: React.FC<EventsTableRowProps> = ({ event: e }) => (
-  <TableRow hover>
-    <TableCell>{e.object_id}</TableCell>
-    <TableCell>{e.namespace}</TableCell>
-    <TableCell>{e.name}</TableCell>
-    <TableCell>{e.kind}</TableCell>
-    <TableCell>{format(e.created_at)}</TableCell>
-  </TableRow>
-)
-
 interface EventsTableProps {
   events: Event[]
 }
@@ -184,15 +187,15 @@ const EventsTable: React.FC<EventsTableProps> = ({ events: allEvents }) => {
   }
 
   return (
-    <TableContainer component={(props) => <Paper {...props} padding={0} />}>
+    <TableContainer component={(props) => <Paper {...props} sx={{ p: 0 }} />}>
       <Table stickyHeader>
-        <EventsTableHead order={order} orderBy={orderBy} onSort={handleSortEvents} />
+        <Head order={order} orderBy={orderBy} onSort={handleSortEvents} />
 
         <TableBody>
           {events &&
             stableSort<SortedEvent>(events, getComparator(order, orderBy))
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((e) => <EventsTableRow key={e.id} event={e as SortedEventWithPods} />)}
+              .map((e) => <Row key={e.id} event={e as SortedEventWithPods} />)}
         </TableBody>
 
         <TableFooter>

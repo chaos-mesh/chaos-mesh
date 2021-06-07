@@ -181,7 +181,8 @@
       "namespace": "命名空间",
       "name": "名称",
       "kind": "类别",
-      "started": "开始时间"
+      "started": "开始时间",
+      "message": "信息"
     }
   },
   "archives": {

@@ -39,9 +39,7 @@ const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
           {title ? title : T('common.advancedOptions')}
         </Button>
       </Box>
-      <Space vertical hidden={!open}>
-        {children}
-      </Space>
+      <Space sx={{ display: open ? 'unset' : 'none' }}>{children}</Space>
     </Box>
   )
 }

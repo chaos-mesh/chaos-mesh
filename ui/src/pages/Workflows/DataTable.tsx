@@ -98,7 +98,7 @@ const DataTable: React.FC<DataTableProps> = ({ data, fetchData }) => {
                   }).toRelative()}
                 </TableCell>
                 <TableCell>
-                  <Space>
+                  <Space direction="row">
                     <IconButton
                       color="primary"
                       title={intl.formatMessage({ id: 'common.delete' })}

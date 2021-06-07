@@ -12,19 +12,9 @@ import PlayCircleOutlineIcon from '@material-ui/icons/PlayCircleOutline'
 import { Schedule } from 'api/schedules.type'
 import Space from 'components-mui/Space'
 import T from 'components/T'
-import { makeStyles } from '@material-ui/styles'
 import { useHistory } from 'react-router-dom'
 import { useIntl } from 'react-intl'
 import { useStoreSelector } from 'store'
-
-const useStyles = makeStyles((theme) => ({
-  root: {
-    '&:hover': {
-      backgroundColor: theme.palette.action.hover,
-      cursor: 'pointer',
-    },
-  },
-}))
 
 interface ObjectListItemProps {
   type?: 'schedule' | 'experiment' | 'archive'
@@ -34,8 +24,6 @@ interface ObjectListItemProps {
 }
 
 const ObjectListItem: React.FC<ObjectListItemProps> = ({ data, type = 'experiment', archive, onSelect }) => {
-  const classes = useStyles()
-
   const history = useHistory()
   const intl = useIntl()
 
@@ -102,7 +90,7 @@ const ObjectListItem: React.FC<ObjectListItemProps> = ({ data, type = 'experimen
   }
 
   const Actions = () => (
-    <Space justifyContent="end" alignItems="center">
+    <Space direction="row" justifyContent="end" alignItems="center">
       <Typography variant="body2">
         {T('table.created')}{' '}
         {DateTime.fromISO(data.created_at, {
@@ -160,11 +148,20 @@ const ObjectListItem: React.FC<ObjectListItemProps> = ({ data, type = 'experimen
   )
 
   return (
-    <Paper padding={0} className={classes.root} onClick={handleJumpTo}>
+    <Paper
+      sx={{
+        p: 0,
+        ':hover': {
+          bgcolor: 'action.hover',
+          cursor: 'pointer',
+        },
+      }}
+      onClick={handleJumpTo}
+    >
       <Box display="flex" justifyContent="space-between" alignItems="center" p={3}>
-        <Space alignItems="center">
+        <Space direction="row" alignItems="center">
           {type === 'experiment' && <ExperimentStatus status={(data as Experiment).status} />}
-          <Typography variant="body1" component="div">
+          <Typography component="div" variant="body1">
             {data.name}
           </Typography>
         </Space>

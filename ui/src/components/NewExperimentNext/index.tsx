@@ -35,40 +35,38 @@ const NewExperiment: React.ForwardRefRenderFunction<NewExperimentHandles, NewExp
   const loadCallback = () => setShowNewPanel('initial')
 
   return (
-    <>
+    <Space spacing={6}>
       {loadFrom && (
-        <Box mb={6}>
-          <Breadcrumbs aria-label="breadcrumb">
-            <Link
-              href="#"
-              color={showNewPanel === 'initial' ? 'primary' : 'inherit'}
-              onClick={() => setShowNewPanel('initial')}
-            >
-              {T(`${inSchedule ? 'newS' : 'newE'}.title`)}
-            </Link>
-            <Link
-              href="#"
-              color={showNewPanel === 'existing' ? 'primary' : 'inherit'}
-              onClick={() => setShowNewPanel('existing')}
-            >
-              {T('newE.loadFrom')}
-            </Link>
-          </Breadcrumbs>
-        </Box>
+        <Breadcrumbs aria-label="breadcrumb">
+          <Link
+            href="#"
+            color={showNewPanel === 'initial' ? 'primary' : 'inherit'}
+            onClick={() => setShowNewPanel('initial')}
+          >
+            {T(`${inSchedule ? 'newS' : 'newE'}.title`)}
+          </Link>
+          <Link
+            href="#"
+            color={showNewPanel === 'existing' ? 'primary' : 'inherit'}
+            onClick={() => setShowNewPanel('existing')}
+          >
+            {T('newE.loadFrom')}
+          </Link>
+        </Breadcrumbs>
       )}
       {showNewPanel === 'initial' && (
-        <Space spacing={6} vertical>
+        <>
           <Step1 />
           <Step2 inWorkflow={inWorkflow} inSchedule={inSchedule} />
           <Step3 onSubmit={onSubmit ? onSubmit : undefined} />
-        </Space>
+        </>
       )}
       {loadFrom && (
         <Box style={{ display: showNewPanel === 'existing' ? 'initial' : 'none' }}>
           <LoadFrom loadCallback={loadCallback} inSchedule={inSchedule} />
         </Box>
       )}
-    </>
+    </Space>
   )
 }
 

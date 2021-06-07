@@ -105,7 +105,7 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
   }, [currentLabels, currentAnnotations])
 
   return (
-    <Space vertical>
+    <Space>
       <AutocompleteMultipleField
         id={`${scope}.namespaces`}
         name={`${scope}.namespaces`}

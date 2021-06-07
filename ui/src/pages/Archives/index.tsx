@@ -172,7 +172,7 @@ export default function Archives() {
         <ActiveLink href="experiment">{T('experiments.title')}</ActiveLink>
       </Breadcrumbs>
 
-      <Space my={6}>
+      <Space direction="row" my={6}>
         <Button
           variant="outlined"
           startIcon={isBatchEmpty ? <FilterListIcon /> : <CloseIcon />}

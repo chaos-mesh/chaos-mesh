@@ -65,7 +65,7 @@ const Kernel: React.FC<KernelProps> = ({ onSubmit }) => {
                 </Button>
               </Box>
               {callchain.length > 0 && (
-                <Space vertical mt={6}>
+                <Space mt={6}>
                   {callchain.map((_: any, i: number) => (
                     <Box key={'frame' + i}>
                       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>

@@ -30,7 +30,7 @@ const NumPanel: React.FC<{ title: JSX.Element; num: number; background: JSX.Elem
   num,
   background,
 }) => (
-  <Paper boxProps={{ overflow: 'hidden' }}>
+  <Paper sx={{ overflow: 'hidden' }}>
     <PaperTop title={title} />
     <Box mt={6}>
       <Typography component="div" variant="h4">

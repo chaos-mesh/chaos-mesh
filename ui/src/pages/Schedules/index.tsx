@@ -84,7 +84,7 @@ const Schedules = () => {
 
   return (
     <>
-      <Space mb={6}>
+      <Space direction="row" mb={6}>
         <Button variant="outlined" startIcon={<AddIcon />} onClick={() => history.push('/schedules/new')}>
           {T('newS.title')}
         </Button>

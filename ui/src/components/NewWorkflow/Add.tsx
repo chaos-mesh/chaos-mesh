@@ -21,11 +21,6 @@ import { useIntl } from 'react-intl'
 import { useStoreDispatch } from 'store'
 
 const useStyles = makeStyles((theme) => ({
-  fields: {
-    display: 'flex',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-  },
   field: {
     width: 180,
     marginTop: 0,
@@ -197,7 +192,7 @@ const Add = () => {
         {({ values, errors, touched }) => (
           <Form>
             <StepLabel icon={<AddCircleIcon color="primary" />}>
-              <Space className={classes.fields}>
+              <Space direction="row">
                 <SelectField className={classes.field} name="type" label={T('newW.node.choose')}>
                   {types.map((d) => (
                     <MenuItem key={d} value={d}>
@@ -222,7 +217,7 @@ const Add = () => {
                 <Paper>
                   <PaperTop title={T(`newW.${values.type}Title`)} />
                   <Grid container spacing={6}>
-                    <Grid item xs={12} md={6}>
+                    <Grid item xs={6}>
                       <TextField
                         name="name"
                         label={T('common.name')}
@@ -231,7 +226,7 @@ const Add = () => {
                         error={errors.name && touched.name ? true : false}
                       />
                     </Grid>
-                    <Grid item xs={12} md={6}>
+                    <Grid item xs={6}>
                       <TextField
                         name="duration"
                         label={T('newE.run.duration')}
@@ -243,7 +238,7 @@ const Add = () => {
                       />
                     </Grid>
                   </Grid>
-                  <Box display="flex" justifyContent="space-between" alignItems="center">
+                  <Box display="flex" justifyContent="space-between" alignItems="center" mt={6}>
                     <MultiNode ref={multiNodeRef} count={num} setCurrentCallback={setCurrentCallback} />
                     <Submit mt={0} disabled={experiments.length !== num} />
                   </Box>

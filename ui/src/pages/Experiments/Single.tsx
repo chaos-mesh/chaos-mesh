@@ -182,7 +182,7 @@ export default function Single() {
     <>
       <Grow in={!loading} style={{ transformOrigin: '0 0 0' }}>
         <div>
-          <Space spacing={6} vertical>
+          <Space spacing={6}>
             <Space>
               <Button
                 variant="outlined"
@@ -226,7 +226,7 @@ export default function Single() {
 
             <Grid container spacing={6}>
               <Grid item xs={12} lg={6}>
-                <Paper boxProps={{ display: 'flex', flexDirection: 'column' }} style={{ height: 600 }}>
+                <Paper sx={{ height: 600 }}>
                   <PaperTop title={T('events.title')} />
                   <Box flex={1} overflow="scroll">
                     <EventsTimeline events={events} />
@@ -234,7 +234,7 @@ export default function Single() {
                 </Paper>
               </Grid>
               <Grid item xs={12} lg={6}>
-                <Paper boxProps={{ pb: 0 }} style={{ height: 600 }}>
+                <Paper sx={{ height: 600, pb: 0 }}>
                   {single && (
                     <Box display="flex" flexDirection="column" height="100%">
                       <PaperTop title={T('common.definition')}>

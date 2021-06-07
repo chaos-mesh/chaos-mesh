@@ -27,9 +27,6 @@ const useStyles = makeStyles((theme) => ({
   nav: {
     color: 'inherit',
   },
-  navRight: {
-    display: 'flex',
-  },
 }))
 
 function hasLocalBreadcrumb(b: string) {
@@ -77,7 +74,7 @@ const Navbar: React.FC<HeaderProps> = ({ openDrawer, handleDrawerToggle, breadcr
                 </Typography>
               </Breadcrumbs>
             )}
-            <Space className={classes.navRight}>
+            <Space direction="row">
               <Search />
               <Namespace />
             </Space>

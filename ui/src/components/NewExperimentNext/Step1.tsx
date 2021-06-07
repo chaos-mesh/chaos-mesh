@@ -10,7 +10,6 @@ import Kernel from './form/Kernel'
 import Paper from 'components-mui/Paper'
 import RadioButtonCheckedOutlinedIcon from '@material-ui/icons/RadioButtonCheckedOutlined'
 import RadioButtonUncheckedOutlinedIcon from '@material-ui/icons/RadioButtonUncheckedOutlined'
-import Space from 'components-mui/Space'
 import Stress from './form/Stress'
 import T from 'components/T'
 import TargetGenerated from './form/TargetGenerated'
@@ -29,6 +28,7 @@ const useStyles = makeStyles((theme) => {
     card: {
       cursor: 'pointer',
       marginTop: theme.spacing(3),
+      marginRight: theme.spacing(3),
       '&:hover': cardActive,
     },
     cardActive,
@@ -116,7 +116,7 @@ const Step1 = () => {
         {step1 && <UndoIcon className={classes.asButton} onClick={handleUndo} />}
       </Box>
       <Box hidden={step1}>
-        <Space flexWrap="wrap">
+        <Box display="flex" flexWrap="wrap">
           {targetDataEntries.map(([key]) => (
             <Card
               key={key}
@@ -134,14 +134,14 @@ const Step1 = () => {
               </Box>
             </Card>
           ))}
-        </Space>
+        </Box>
         {kind && (
           <Box overflow="hidden">
             <Box mt={6} mb={3}>
               <Divider />
             </Box>
             {targetData[kind].categories ? (
-              <Space flexWrap="wrap">
+              <Box display="flex" flexWrap="wrap">
                 {targetData[kind].categories!.map((d: any) => (
                   <Card
                     key={d.key}
@@ -159,7 +159,7 @@ const Step1 = () => {
                     </Box>
                   </Card>
                 ))}
-              </Space>
+              </Box>
             ) : kind === 'KernelChaos' ? (
               <Box mt={6}>
                 <Kernel onSubmit={handleSubmitStep1} />

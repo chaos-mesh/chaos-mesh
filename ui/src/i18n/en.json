@@ -182,7 +182,8 @@
       "namespace": "Namespace",
       "name": "名称",
       "kind": "Kind",
-      "started": "Started"
+      "started": "Started",
+      "message": "Message"
     }
   },
   "archives": {

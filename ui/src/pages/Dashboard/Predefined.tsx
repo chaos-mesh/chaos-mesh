@@ -22,11 +22,6 @@ import yaml from 'js-yaml'
 const YAMLEditor = loadable(() => import('components/YAMLEditor'))
 
 const useStyles = makeStyles((theme) => ({
-  container: {
-    display: 'flex',
-    height: 88,
-    overflowX: 'scroll',
-  },
   card: {
     flex: '0 0 240px',
     cursor: 'pointer',
@@ -43,6 +38,7 @@ const useStyles = makeStyles((theme) => ({
     left: '50%',
     width: '50vw',
     height: '90vh',
+    padding: 0,
     transform: 'translate(-50%, -50%)',
     [theme.breakpoints.down('sm')]: {
       width: '90vw',
@@ -133,7 +129,7 @@ const Predefined = () => {
 
   return (
     <>
-      <Space className={classes.container}>
+      <Space direction="row" sx={{ height: 88, overflowX: 'scroll' }}>
         <YAML
           callback={saveExperiment}
           buttonProps={{ className: clsx(classes.card, classes.addCard, 'predefined-upload') }}
@@ -153,7 +149,7 @@ const Predefined = () => {
       </Space>
       <Modal open={editorOpen} onClose={onModalClose}>
         <div>
-          <Paper className={classes.editorPaperWrapper} padding={0}>
+          <Paper className={classes.editorPaperWrapper}>
             {experiment && (
               <Box display="flex" flexDirection="column" height="100%">
                 <Box px={3} pt={3}>

@@ -147,7 +147,7 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false })
                   {namespaces.length ? <Scope namespaces={namespaces} /> : <SkeletonN n={6} />}
                 </Grid>
                 <Grid item xs={6}>
-                  <Space vertical>
+                  <Space>
                     <Typography>{T('newE.steps.basic')}</Typography>
                     <TextField
                       fast
