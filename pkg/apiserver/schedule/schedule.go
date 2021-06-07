@@ -112,7 +112,7 @@ type pauseFlag bool
 
 const (
 	PauseSchedule pauseFlag = true
-	StartSchedule   pauseFlag = false
+	StartSchedule pauseFlag = false
 )
 
 // @Summary Create a new schedule experiment.
@@ -912,10 +912,10 @@ func (s *Service) startSchedule(c *gin.Context) {
 	c.JSON(http.StatusOK, StatusResponse{Status: "success"})
 }
 
-func (s *Service) pauseOrStartSchedule (uid string, flag pauseFlag, kubeCli client.Client) error {
+func (s *Service) pauseOrStartSchedule(uid string, flag pauseFlag, kubeCli client.Client) error {
 	var (
-		err error
-		schedule *core.Schedule
+		err             error
+		schedule        *core.Schedule
 		pauseAnnotation string
 	)
 
