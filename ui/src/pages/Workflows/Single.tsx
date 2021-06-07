@@ -202,42 +202,44 @@ const Single = () => {
   return (
     <>
       <Grow in={true} style={{ transformOrigin: '0 0 0' }}>
-        <Space spacing={6} className={classes.root}>
-          <Space>
-            <Button
-              variant="outlined"
-              size="small"
-              startIcon={<DeleteOutlinedIcon />}
-              onClick={handleSelect({
-                title: `${intl.formatMessage({ id: 'common.delete' })} ${name}`,
-                description: intl.formatMessage({ id: 'workflows.deleteDesc' }),
-                handle: handleAction('delete', { namespace, name }),
-              })}
-            >
-              {T('common.delete')}
-            </Button>
-          </Space>
-          <Paper sx={{ flex: 1 }}>
-            <PaperTop
-              title={
-                <Space spacing={1.5} display="flex" alignItems="center">
-                  <Box>{T('workflow.topology')}</Box>
-                </Space>
-              }
-            >
+        <div>
+          <Space spacing={6} className={classes.root}>
+            <Space direction="row">
               <Button
                 variant="outlined"
                 size="small"
-                color="primary"
-                startIcon={<NoteOutlinedIcon />}
-                onClick={handleOpenConfig}
+                startIcon={<DeleteOutlinedIcon />}
+                onClick={handleSelect({
+                  title: `${intl.formatMessage({ id: 'common.delete' })} ${name}`,
+                  description: intl.formatMessage({ id: 'workflows.deleteDesc' }),
+                  handle: handleAction('delete', { namespace, name }),
+                })}
               >
-                {T('common.configuration')}
+                {T('common.delete')}
               </Button>
-            </PaperTop>
-            <div ref={topologyRef} style={{ flex: 1 }} />
-          </Paper>
-        </Space>
+            </Space>
+            <Paper sx={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+              <PaperTop
+                title={
+                  <Space spacing={1.5} alignItems="center">
+                    <Box>{T('workflow.topology')}</Box>
+                  </Space>
+                }
+              >
+                <Button
+                  variant="outlined"
+                  size="small"
+                  color="primary"
+                  startIcon={<NoteOutlinedIcon />}
+                  onClick={handleOpenConfig}
+                >
+                  {T('common.configuration')}
+                </Button>
+              </PaperTop>
+              <div ref={topologyRef} style={{ flex: 1 }} />
+            </Paper>
+          </Space>
+        </div>
       </Grow>
 
       <Modal open={configOpen} onClose={onModalClose}>
