@@ -108,6 +108,13 @@ type StatusResponse struct {
 	Status string `json:"status"`
 }
 
+type pauseFlag bool
+
+const (
+	PauseSchedule pauseFlag = true
+	StartSchedule   pauseFlag = false
+)
+
 // @Summary Create a new schedule experiment.
 // @Description Create a new schedule experiment.
 // @Tags schedules
@@ -839,8 +846,8 @@ func (s *Service) batchDeleteSchedule(c *gin.Context) {
 	}
 }
 
-// @Summary Pause a schedule experiment.
-// @Description Pause a schedule experiment.
+// @Summary Pause a schedule object.
+// @Description Pause a schedule object.
 // @Tags schedules
 // @Produce json
 // @Param uid path string true "uid"
@@ -850,8 +857,6 @@ func (s *Service) batchDeleteSchedule(c *gin.Context) {
 // @Failure 500 {object} utils.APIError
 // @Router /schedules/pause/{uid} [put]
 func (s *Service) pauseSchedule(c *gin.Context) {
-	var schedule *core.Schedule
-
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
 		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
@@ -859,30 +864,12 @@ func (s *Service) pauseSchedule(c *gin.Context) {
 	}
 
 	uid := c.Param("uid")
-	if schedule, err = s.schedule.FindByUID(context.Background(), uid); err != nil {
-		if gorm.IsRecordNotFoundError(err) {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInvalidRequest.New("the schedule is not found"))
-		} else {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
-		}
-		return
-	}
+	err = s.pauseOrStartSchedule(uid, PauseSchedule, kubeCli)
 
-	exp := &Base{
-		Name:      schedule.Name,
-		Namespace: schedule.Namespace,
-	}
-
-	annotations := map[string]string{
-		v1alpha1.PauseAnnotationKey: "true",
-	}
-	if err := s.patchSchedule(exp, annotations, kubeCli); err != nil {
-		if apierrors.IsNotFound(err) {
+	if err != nil {
+		if gorm.IsRecordNotFoundError(err) || apierrors.IsNotFound(err) {
 			c.Status(http.StatusNotFound)
-			_ = c.Error(utils.ErrNotFound.WrapWithNoMessage(err))
-			return
+			_ = c.Error(utils.ErrInvalidRequest.New("the schedule is not found"))
 		}
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
@@ -892,8 +879,8 @@ func (s *Service) pauseSchedule(c *gin.Context) {
 	c.JSON(http.StatusOK, StatusResponse{Status: "success"})
 }
 
-// @Summary Start a schedule experiment.
-// @Description Start a schedule experiment.
+// @Summary Start a schedule object.
+// @Description Start a schedule object.
 // @Tags schedules
 // @Produce json
 // @Param uid path string true "uid"
@@ -903,8 +890,6 @@ func (s *Service) pauseSchedule(c *gin.Context) {
 // @Failure 500 {object} utils.APIError
 // @Router /schedules/start/{uid} [put]
 func (s *Service) startSchedule(c *gin.Context) {
-	var schedule *core.Schedule
-
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
 		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
@@ -912,31 +897,12 @@ func (s *Service) startSchedule(c *gin.Context) {
 	}
 
 	uid := c.Param("uid")
-	if schedule, err = s.schedule.FindByUID(context.Background(), uid); err != nil {
-		if gorm.IsRecordNotFoundError(err) {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInvalidRequest.New("the experiment is not found"))
-		} else {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
-		}
-		return
-	}
+	err = s.pauseOrStartSchedule(uid, StartSchedule, kubeCli)
 
-	exp := &Base{
-		Name:      schedule.Name,
-		Namespace: schedule.Namespace,
-	}
-
-	annotations := map[string]string{
-		v1alpha1.PauseAnnotationKey: "false",
-	}
-
-	if err := s.patchSchedule(exp, annotations, kubeCli); err != nil {
-		if apierrors.IsNotFound(err) {
+	if err != nil {
+		if gorm.IsRecordNotFoundError(err) || apierrors.IsNotFound(err) {
 			c.Status(http.StatusNotFound)
-			_ = c.Error(utils.ErrNotFound.WrapWithNoMessage(err))
-			return
+			_ = c.Error(utils.ErrInvalidRequest.New("the schedule is not found"))
 		}
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
@@ -944,6 +910,35 @@ func (s *Service) startSchedule(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, StatusResponse{Status: "success"})
+}
+
+func (s *Service) pauseOrStartSchedule (uid string, flag pauseFlag, kubeCli client.Client) error {
+	var (
+		err error
+		schedule *core.Schedule
+		pauseAnnotation string
+	)
+
+	if schedule, err = s.schedule.FindByUID(context.Background(), uid); err != nil {
+		return err
+	}
+
+	exp := &Base{
+		Name:      schedule.Name,
+		Namespace: schedule.Namespace,
+	}
+
+	if flag == PauseSchedule {
+		pauseAnnotation = "true"
+	} else {
+		pauseAnnotation = "false"
+	}
+
+	annotations := map[string]string{
+		v1alpha1.PauseAnnotationKey: pauseAnnotation,
+	}
+
+	return s.patchSchedule(exp, annotations, kubeCli)
 }
 
 func (s *Service) patchSchedule(exp *Base, annotations map[string]string, kubeCli client.Client) error {
