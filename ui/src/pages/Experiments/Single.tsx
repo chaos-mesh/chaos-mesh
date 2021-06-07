@@ -224,8 +224,8 @@ export default function Single() {
               {single && <ObjectConfiguration config={single} />}
             </Paper>
 
-            <Grid container spacing={6}>
-              <Grid item xs={12} lg={6}>
+            <Grid container>
+              <Grid item xs={12} lg={6} sx={{ pr: 3 }}>
                 <Paper sx={{ height: 600, overflow: 'scroll' }}>
                   <PaperTop title={T('events.title')} />
                   <Box flex={1}>
@@ -233,7 +233,7 @@ export default function Single() {
                   </Box>
                 </Paper>
               </Grid>
-              <Grid item xs={12} lg={6}>
+              <Grid item xs={12} lg={6} sx={{ pl: 3 }}>
                 <Paper sx={{ height: 600, pb: 0 }}>
                   {single && (
                     <Box display="flex" flexDirection="column" height="100%">

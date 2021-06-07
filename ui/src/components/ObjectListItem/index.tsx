@@ -97,31 +97,28 @@ const ObjectListItem: React.FC<ObjectListItemProps> = ({ data, type = 'experimen
           locale: lang,
         }).toRelative()}
       </Typography>
-      {type === 'experiment' && (
-        <>
-          {(data as Experiment).status === 'paused' ? (
-            <IconButton
-              color="primary"
-              title={intl.formatMessage({ id: 'common.start' })}
-              aria-label={intl.formatMessage({ id: 'common.start' })}
-              size="small"
-              onClick={handleAction('start')}
-            >
-              <PlayCircleOutlineIcon />
-            </IconButton>
-          ) : (
-            <IconButton
-              color="primary"
-              title={intl.formatMessage({ id: 'common.pause' })}
-              aria-label={intl.formatMessage({ id: 'common.pause' })}
-              size="small"
-              onClick={handleAction('pause')}
-            >
-              <PauseCircleOutlineIcon />
-            </IconButton>
-          )}
-        </>
-      )}
+      {type === 'experiment' &&
+        ((data as Experiment).status === 'paused' ? (
+          <IconButton
+            color="primary"
+            title={intl.formatMessage({ id: 'common.start' })}
+            aria-label={intl.formatMessage({ id: 'common.start' })}
+            size="small"
+            onClick={handleAction('start')}
+          >
+            <PlayCircleOutlineIcon />
+          </IconButton>
+        ) : (data as Experiment).status !== 'finished' ? (
+          <IconButton
+            color="primary"
+            title={intl.formatMessage({ id: 'common.pause' })}
+            aria-label={intl.formatMessage({ id: 'common.pause' })}
+            size="small"
+            onClick={handleAction('pause')}
+          >
+            <PauseCircleOutlineIcon />
+          </IconButton>
+        ) : null)}
       {type !== 'archive' && (
         <IconButton
           color="primary"

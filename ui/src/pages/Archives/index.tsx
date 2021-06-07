@@ -87,7 +87,7 @@ export default function Archives() {
 
         break
       case 'deleteMulti':
-        action = 'archive'
+        action = 'delete'
         actionFunc = api.archives.delMulti
         arg = Object.keys(batch)
         setBatch({})

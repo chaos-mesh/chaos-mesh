@@ -1,7 +1,7 @@
 import { Box, Button, Checkbox, Typography } from '@material-ui/core'
 import { Confirm, setAlert, setConfirm } from 'slices/globalStatus'
 import { FixedSizeList as RWList, ListChildComponentProps as RWListChildComponentProps } from 'react-window'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import AddIcon from '@material-ui/icons/Add'
 import CloseIcon from '@material-ui/icons/Close'
@@ -39,6 +39,7 @@ export default function Experiments() {
 
   const [loading, setLoading] = useState(true)
   const [experiments, setExperiments] = useState<Experiment[]>([])
+  const intervalID = useRef(0)
   const [batch, setBatch] = useState<Record<uuid, boolean>>({})
   const batchLength = Object.keys(batch).length
   const isBatchEmpty = batchLength === 0
@@ -46,12 +47,24 @@ export default function Experiments() {
   const fetchExperiments = () => {
     api.experiments
       .experiments()
-      .then(({ data }) => setExperiments(data))
+      .then(({ data }) => {
+        setExperiments(data)
+
+        if (data.every((d) => d.status === 'finished')) {
+          clearInterval(intervalID.current)
+        }
+      })
       .catch(console.error)
       .finally(() => setLoading(false))
   }
 
-  useEffect(fetchExperiments, [])
+  useEffect(() => {
+    fetchExperiments()
+
+    intervalID.current = window.setInterval(fetchExperiments, 6000)
+
+    return () => clearInterval(intervalID.current)
+  }, [])
 
   const handleSelect = (selected: Confirm) => dispatch(setConfirm(selected))
   const onSelect = (selected: Confirm) =>

@@ -23,15 +23,15 @@ const Settings = () => {
       <Grid container>
         <Grid item sm={12} md={8}>
           <Paper>
-            {securityMode && (
-              <Space>
-                <PaperTop title={T('settings.addToken.title')} />
-                <Token />
-                <TokensTable />
-              </Space>
-            )}
-
             <Space>
+              {securityMode && (
+                <>
+                  <PaperTop title={T('settings.addToken.title')} />
+                  <Token />
+                  <TokensTable />
+                </>
+              )}
+
               <PaperTop title={T('experiments.title')} />
               <Experiments />
 
@@ -39,7 +39,7 @@ const Settings = () => {
               <Other />
 
               <PaperTop title={T('common.version')} />
-              <img style={{ height: 48 }} src={theme === 'light' ? logo : logoWhite} alt="Chaos Mesh" />
+              <img src={theme === 'light' ? logo : logoWhite} alt="Chaos Mesh" style={{ width: 192 }} />
               <Typography variant="body2" color="textSecondary">
                 Git Version: {version}
               </Typography>
