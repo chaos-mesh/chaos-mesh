@@ -23,23 +23,23 @@ import (
 // +kubebuilder:object:root=true
 // +chaos-mesh:base
 
-// IoChaos is the Schema for the iochaos API
-type IoChaos struct {
+// IOChaos is the Schema for the iochaos API
+type IOChaos struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   IoChaosSpec   `json:"spec,omitempty"`
-	Status IoChaosStatus `json:"status,omitempty"`
+	Spec   IOChaosSpec   `json:"spec,omitempty"`
+	Status IOChaosStatus `json:"status,omitempty"`
 }
 
-// IoChaosSpec defines the desired state of IoChaos
-type IoChaosSpec struct {
+// IOChaosSpec defines the desired state of IOChaos
+type IOChaosSpec struct {
 	ContainerSelector `json:",inline"`
 
 	// Action defines the specific pod chaos action.
 	// Supported action: latency / fault / attrOverride / mistake
 	// +kubebuilder:validation:Enum=latency;fault;attrOverride;mistake
-	Action IoChaosType `json:"action"`
+	Action IOChaosType `json:"action"`
 
 	// Delay defines the value of I/O chaos action delay.
 	// A delay string is a possibly signed sequence of
@@ -89,8 +89,8 @@ type IoChaosSpec struct {
 	Duration *string `json:"duration,omitempty"`
 }
 
-// IoChaosStatus defines the observed state of IoChaos
-type IoChaosStatus struct {
+// IOChaosStatus defines the observed state of IOChaos
+type IOChaosStatus struct {
 	ChaosStatus `json:",inline"`
 
 	// Instances always specifies podiochaos generation or empty
@@ -98,12 +98,12 @@ type IoChaosStatus struct {
 	Instances map[string]int64 `json:"instances,omitempty"`
 }
 
-func (obj *IoChaos) GetSelectorSpecs() map[string]interface{} {
+func (obj *IOChaos) GetSelectorSpecs() map[string]interface{} {
 	return map[string]interface{}{
 		".": &obj.Spec.ContainerSelector,
 	}
 }
 
-func (obj *IoChaos) GetCustomStatus() interface{} {
+func (obj *IOChaos) GetCustomStatus() interface{} {
 	return &obj.Status.Instances
 }

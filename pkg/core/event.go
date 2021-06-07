@@ -66,10 +66,10 @@ type Event struct {
 
 // Filter represents the filter to list events
 type Filter struct {
-	CreateTimeStr       string
-	ExperimentName      string
-	ExperimentNamespace string
-	UID                 string
-	Kind                string
-	LimitStr            string
+	CreateTimeStr string
+	Name          string
+	Namespace     string
+	ObjectID      string
+	Kind          string
+	LimitStr      string
 }

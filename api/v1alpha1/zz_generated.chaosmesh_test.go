@@ -317,10 +317,10 @@ func TestHTTPChaosListChaos(t *testing.T) {
 	chaos.ListChaos()
 }
 
-func TestIoChaosIsDeleted(t *testing.T) {
+func TestIOChaosIsDeleted(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	chaos := &IoChaos{}
+	chaos := &IOChaos{}
 	err := faker.FakeData(chaos)
 
 	g.Expect(err).To(BeNil())
@@ -328,10 +328,10 @@ func TestIoChaosIsDeleted(t *testing.T) {
 	chaos.IsDeleted()
 }
 
-func TestIoChaosIsIsPaused(t *testing.T) {
+func TestIOChaosIsIsPaused(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	chaos := &IoChaos{}
+	chaos := &IOChaos{}
 	err := faker.FakeData(chaos)
 
 	g.Expect(err).To(BeNil())
@@ -339,10 +339,10 @@ func TestIoChaosIsIsPaused(t *testing.T) {
 	chaos.IsPaused()
 }
 
-func TestIoChaosGetDuration(t *testing.T) {
+func TestIOChaosGetDuration(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	chaos := &IoChaos{}
+	chaos := &IOChaos{}
 	err := faker.FakeData(chaos)
 
 	g.Expect(err).To(BeNil())
@@ -350,10 +350,10 @@ func TestIoChaosGetDuration(t *testing.T) {
 	chaos.GetDuration()
 }
 
-func TestIoChaosGetChaos(t *testing.T) {
+func TestIOChaosGetChaos(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	chaos := &IoChaos{}
+	chaos := &IOChaos{}
 	err := faker.FakeData(chaos)
 
 	g.Expect(err).To(BeNil())
@@ -361,10 +361,10 @@ func TestIoChaosGetChaos(t *testing.T) {
 	chaos.GetChaos()
 }
 
-func TestIoChaosGetStatus(t *testing.T) {
+func TestIOChaosGetStatus(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	chaos := &IoChaos{}
+	chaos := &IOChaos{}
 	err := faker.FakeData(chaos)
 
 	g.Expect(err).To(BeNil())
@@ -372,18 +372,18 @@ func TestIoChaosGetStatus(t *testing.T) {
 	chaos.GetStatus()
 }
 
-func TestIoChaosGetSpecAndMetaString(t *testing.T) {
+func TestIOChaosGetSpecAndMetaString(t *testing.T) {
 	g := NewGomegaWithT(t)
-	chaos := &IoChaos{}
+	chaos := &IOChaos{}
 	err := faker.FakeData(chaos)
 	g.Expect(err).To(BeNil())
 	chaos.GetSpecAndMetaString()
 }
 
-func TestIoChaosListChaos(t *testing.T) {
+func TestIOChaosListChaos(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	chaos := &IoChaosList{}
+	chaos := &IOChaosList{}
 	err := faker.FakeData(chaos)
 
 	g.Expect(err).To(BeNil())
