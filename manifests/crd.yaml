@@ -843,15 +843,15 @@ metadata:
 spec:
   group: chaos-mesh.org
   names:
-    kind: IoChaos
-    listKind: IoChaosList
+    kind: IOChaos
+    listKind: IOChaosList
     plural: iochaos
     singular: iochaos
   preserveUnknownFields: false
   scope: Namespaced
   validation:
     openAPIV3Schema:
-      description: IoChaos is the Schema for the iochaos API
+      description: IOChaos is the Schema for the iochaos API
       properties:
         apiVersion:
           description: 'APIVersion defines the versioned schema of this representation
@@ -866,7 +866,7 @@ spec:
         metadata:
           type: object
         spec:
-          description: IoChaosSpec defines the desired state of IoChaos
+          description: IOChaosSpec defines the desired state of IOChaos
           properties:
             action:
               description: 'Action defines the specific pod chaos action. Supported
@@ -1122,7 +1122,7 @@ spec:
           - volumePath
           type: object
         status:
-          description: IoChaosStatus defines the observed state of IoChaos
+          description: IOChaosStatus defines the observed state of IOChaos
           properties:
             conditions:
               description: Conditions represents the current global condition of the
@@ -2651,8 +2651,8 @@ metadata:
 spec:
   group: chaos-mesh.org
   names:
-    kind: PodIoChaos
-    listKind: PodIoChaosList
+    kind: PodIOChaos
+    listKind: PodIOChaosList
     plural: podiochaos
     singular: podiochaos
   preserveUnknownFields: false
@@ -2661,7 +2661,7 @@ spec:
     status: {}
   validation:
     openAPIV3Schema:
-      description: PodIoChaos is the Schema for the podiochaos API
+      description: PodIOChaos is the Schema for the podiochaos API
       properties:
         apiVersion:
           description: 'APIVersion defines the versioned schema of this representation
@@ -2676,12 +2676,12 @@ spec:
         metadata:
           type: object
         spec:
-          description: PodIoChaosSpec defines the desired state of IoChaos
+          description: PodIOChaosSpec defines the desired state of IOChaos
           properties:
             actions:
-              description: Actions are a list of IoChaos actions
+              description: Actions are a list of IOChaos actions
               items:
-                description: IoChaosAction defines an possible action of IoChaos
+                description: IOChaosAction defines an possible action of IOChaos
                 properties:
                   atime:
                     description: Timespec represents a time
@@ -2804,7 +2804,7 @@ spec:
                     description: Source represents the source of current rules
                     type: string
                   type:
-                    description: IoChaosType represents the type of an IoChaos Action
+                    description: IOChaosType represents the type of an IOChaos Action
                     type: string
                   uid:
                     format: int32
@@ -3169,7 +3169,7 @@ spec:
               - Forbid
               - Allow
               type: string
-            dNSChaos:
+            dnsChaos:
               description: DNSChaosSpec defines the desired state of DNSChaos
               properties:
                 action:
@@ -3352,7 +3352,10 @@ spec:
               - project
               - zone
               type: object
-            hTTPChaos:
+            historyLimit:
+              minimum: 1
+              type: integer
+            httpChaos:
               properties:
                 abort:
                   description: Abort is a rule to abort a http session.
@@ -3587,11 +3590,8 @@ spec:
               - selector
               - target
               type: object
-            historyLimit:
-              minimum: 1
-              type: integer
             ioChaos:
-              description: IoChaosSpec defines the desired state of IoChaos
+              description: IOChaosSpec defines the desired state of IOChaos
               properties:
                 action:
                   description: 'Action defines the specific pod chaos action. Supported
@@ -3851,7 +3851,7 @@ spec:
               - selector
               - volumePath
               type: object
-            jVMChaos:
+            jvmChaos:
               description: JVMChaosSpec defines the desired state of JVMChaos
               properties:
                 action:
@@ -5108,7 +5108,7 @@ spec:
                         - awsRegion
                         - ec2Instance
                         type: object
-                      dNSChaos:
+                      dnsChaos:
                         description: DNSChaosSpec defines the desired state of DNSChaos
                         properties:
                           action:
@@ -5304,7 +5304,7 @@ spec:
                         - project
                         - zone
                         type: object
-                      hTTPChaos:
+                      httpChaos:
                         properties:
                           abort:
                             description: Abort is a rule to abort a http session.
@@ -5555,7 +5555,7 @@ spec:
                         - target
                         type: object
                       ioChaos:
-                        description: IoChaosSpec defines the desired state of IoChaos
+                        description: IOChaosSpec defines the desired state of IOChaos
                         properties:
                           action:
                             description: 'Action defines the specific pod chaos action.
@@ -5823,7 +5823,7 @@ spec:
                         - selector
                         - volumePath
                         type: object
-                      jVMChaos:
+                      jvmChaos:
                         description: JVMChaosSpec defines the desired state of JVMChaos
                         properties:
                           action:
@@ -7766,7 +7766,10 @@ spec:
               - awsRegion
               - ec2Instance
               type: object
-            dNSChaos:
+            deadline:
+              format: date-time
+              type: string
+            dnsChaos:
               description: DNSChaosSpec defines the desired state of DNSChaos
               properties:
                 action:
@@ -7910,9 +7913,6 @@ spec:
               - mode
               - selector
               type: object
-            deadline:
-              format: date-time
-              type: string
             gcpChaos:
               description: GcpChaosSpec is the content of the specification for a
                 GcpChaos
@@ -7952,7 +7952,7 @@ spec:
               - project
               - zone
               type: object
-            hTTPChaos:
+            httpChaos:
               properties:
                 abort:
                   description: Abort is a rule to abort a http session.
@@ -8188,7 +8188,7 @@ spec:
               - target
               type: object
             ioChaos:
-              description: IoChaosSpec defines the desired state of IoChaos
+              description: IOChaosSpec defines the desired state of IOChaos
               properties:
                 action:
                   description: 'Action defines the specific pod chaos action. Supported
@@ -8448,7 +8448,7 @@ spec:
               - selector
               - volumePath
               type: object
-            jVMChaos:
+            jvmChaos:
               description: JVMChaosSpec defines the desired state of JVMChaos
               properties:
                 action:
@@ -9831,7 +9831,7 @@ spec:
                     - awsRegion
                     - ec2Instance
                     type: object
-                  dNSChaos:
+                  dnsChaos:
                     description: DNSChaosSpec defines the desired state of DNSChaos
                     properties:
                       action:
@@ -10023,7 +10023,7 @@ spec:
                     - project
                     - zone
                     type: object
-                  hTTPChaos:
+                  httpChaos:
                     properties:
                       abort:
                         description: Abort is a rule to abort a http session.
@@ -10267,7 +10267,7 @@ spec:
                     - target
                     type: object
                   ioChaos:
-                    description: IoChaosSpec defines the desired state of IoChaos
+                    description: IOChaosSpec defines the desired state of IOChaos
                     properties:
                       action:
                         description: 'Action defines the specific pod chaos action.
@@ -10532,7 +10532,7 @@ spec:
                     - selector
                     - volumePath
                     type: object
-                  jVMChaos:
+                  jvmChaos:
                     description: JVMChaosSpec defines the desired state of JVMChaos
                     properties:
                       action:

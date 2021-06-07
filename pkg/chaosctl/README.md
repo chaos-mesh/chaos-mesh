@@ -57,6 +57,6 @@ The `DEBUG_INFO` of each supported chaos would be:
 3. `cat /proc/${stress-ng_PID}/cgroup`
 4. the actual `cpu`/`memory` limit, compared with the set value
 
-​	IoChaos:
+​	IOChaos:
 1. `cat /proc/mounts` of target pod
 2. `ls -l /proc/${PID}/fd`

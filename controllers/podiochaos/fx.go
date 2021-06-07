@@ -23,19 +23,18 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
 )
 
 func NewController(mgr ctrl.Manager, client client.Client, reader client.Reader, logger logr.Logger) (types.Controller, error) {
 	err := builder.Default(mgr).
-		For(&v1alpha1.PodIoChaos{}).
+		For(&v1alpha1.PodIOChaos{}).
 		Named("podiochaos").
 		WithEventFilter(predicate.Funcs{
 			UpdateFunc: func(e event.UpdateEvent) bool {
-				oldObj := e.ObjectOld.(*v1alpha1.PodIoChaos)
-				newObj := e.ObjectNew.(*v1alpha1.PodIoChaos)
+				oldObj := e.ObjectOld.(*v1alpha1.PodIOChaos)
+				newObj := e.ObjectNew.(*v1alpha1.PodIOChaos)
 
 				return !reflect.DeepEqual(oldObj.Spec, newObj.Spec)
 			},

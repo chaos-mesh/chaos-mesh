@@ -14,16 +14,14 @@
 package podchaos
 
 import (
-	"github.com/chaos-mesh/chaos-mesh/controllers/action"
-
 	"go.uber.org/fx"
 
-	"github.com/chaos-mesh/chaos-mesh/controllers/common"
-
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/action"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/podchaos/containerkill"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/podchaos/podfailure"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/podchaos/podkill"
+	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 )
 
 type Impl struct {

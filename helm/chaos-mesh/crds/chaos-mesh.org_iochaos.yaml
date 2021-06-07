@@ -10,15 +10,15 @@ metadata:
 spec:
   group: chaos-mesh.org
   names:
-    kind: IoChaos
-    listKind: IoChaosList
+    kind: IOChaos
+    listKind: IOChaosList
     plural: iochaos
     singular: iochaos
   preserveUnknownFields: false
   scope: Namespaced
   validation:
     openAPIV3Schema:
-      description: IoChaos is the Schema for the iochaos API
+      description: IOChaos is the Schema for the iochaos API
       properties:
         apiVersion:
           description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
@@ -29,7 +29,7 @@ spec:
         metadata:
           type: object
         spec:
-          description: IoChaosSpec defines the desired state of IoChaos
+          description: IOChaosSpec defines the desired state of IOChaos
           properties:
             action:
               description: 'Action defines the specific pod chaos action. Supported action: latency / fault / attrOverride / mistake'
@@ -243,7 +243,7 @@ spec:
           - volumePath
           type: object
         status:
-          description: IoChaosStatus defines the observed state of IoChaos
+          description: IOChaosStatus defines the observed state of IOChaos
           properties:
             conditions:
               description: Conditions represents the current global condition of the chaos

@@ -26,7 +26,7 @@ const (
 	ScheduleTypeDNSChaos ScheduleTemplateType = "DNSChaos"
 	ScheduleTypeGcpChaos ScheduleTemplateType = "GcpChaos"
 	ScheduleTypeHTTPChaos ScheduleTemplateType = "HTTPChaos"
-	ScheduleTypeIoChaos ScheduleTemplateType = "IoChaos"
+	ScheduleTypeIOChaos ScheduleTemplateType = "IOChaos"
 	ScheduleTypeJVMChaos ScheduleTemplateType = "JVMChaos"
 	ScheduleTypeKernelChaos ScheduleTemplateType = "KernelChaos"
 	ScheduleTypeNetworkChaos ScheduleTemplateType = "NetworkChaos"
@@ -42,7 +42,7 @@ var allScheduleTemplateType = []ScheduleTemplateType{
 	ScheduleTypeDNSChaos,
 	ScheduleTypeGcpChaos,
 	ScheduleTypeHTTPChaos,
-	ScheduleTypeIoChaos,
+	ScheduleTypeIOChaos,
 	ScheduleTypeJVMChaos,
 	ScheduleTypeKernelChaos,
 	ScheduleTypeNetworkChaos,
@@ -57,15 +57,15 @@ type ScheduleItem struct {
 	// +optional
 	AwsChaos *AwsChaosSpec `json:"awsChaos,omitempty"`
 	// +optional
-	DNSChaos *DNSChaosSpec `json:"dNSChaos,omitempty"`
+	DNSChaos *DNSChaosSpec `json:"dnsChaos,omitempty"`
 	// +optional
 	GcpChaos *GcpChaosSpec `json:"gcpChaos,omitempty"`
 	// +optional
-	HTTPChaos *HTTPChaosSpec `json:"hTTPChaos,omitempty"`
+	HTTPChaos *HTTPChaosSpec `json:"httpChaos,omitempty"`
 	// +optional
-	IoChaos *IoChaosSpec `json:"ioChaos,omitempty"`
+	IOChaos *IOChaosSpec `json:"ioChaos,omitempty"`
 	// +optional
-	JVMChaos *JVMChaosSpec `json:"jVMChaos,omitempty"`
+	JVMChaos *JVMChaosSpec `json:"jvmChaos,omitempty"`
 	// +optional
 	KernelChaos *KernelChaosSpec `json:"kernelChaos,omitempty"`
 	// +optional
@@ -100,9 +100,9 @@ func (it *ScheduleItem) SpawnNewObject(templateType ScheduleTemplateType) (runti
 		result := HTTPChaos{}
 		result.Spec = *it.HTTPChaos
 		return &result, result.GetObjectMeta(), nil
-	case ScheduleTypeIoChaos:
-		result := IoChaos{}
-		result.Spec = *it.IoChaos
+	case ScheduleTypeIOChaos:
+		result := IOChaos{}
+		result.Spec = *it.IOChaos
 		return &result, result.GetObjectMeta(), nil
 	case ScheduleTypeJVMChaos:
 		result := JVMChaos{}
