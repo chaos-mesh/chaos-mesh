@@ -141,7 +141,7 @@ func Run(params RunParams) error {
 		}},
 	)
 	hookServer.Register("/validate-auth", &webhook.Admission{
-		Handler: apiWebhook.NewAuthValidator(ccfg.ControllerCfg.SecurityMode, mgr.GetClient(), authCli,
+		Handler: apiWebhook.NewAuthValidator(ccfg.ControllerCfg.SecurityMode, authCli,
 			ccfg.ControllerCfg.ClusterScoped, ccfg.ControllerCfg.TargetNamespace, ccfg.ControllerCfg.EnableFilterNamespace),
 	},
 	)
