@@ -79,13 +79,11 @@ func Register(r *gin.RouterGroup, s *Service) {
 
 // Archive defines the basic information of an archive.
 type Archive struct {
-	UID        string    `json:"uid"`
-	Kind       string    `json:"kind"`
-	Namespace  string    `json:"namespace"`
-	Name       string    `json:"name"`
-	Action     string    `json:"action"`
-	StartTime  time.Time `json:"start_time"`
-	FinishTime time.Time `json:"finish_time"`
+	UID       string    `json:"uid"`
+	Kind      string    `json:"kind"`
+	Namespace string    `json:"namespace"`
+	Name      string    `json:"name"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 // Detail represents an archive instance.
@@ -124,13 +122,11 @@ func (s *Service) list(c *gin.Context) {
 
 	for _, meta := range metas {
 		archives = append(archives, Archive{
-			UID:        meta.UID,
-			Kind:       meta.Kind,
-			Namespace:  meta.Namespace,
-			Name:       meta.Name,
-			Action:     meta.Action,
-			StartTime:  meta.StartTime,
-			FinishTime: meta.FinishTime,
+			UID:       meta.UID,
+			Kind:      meta.Kind,
+			Namespace: meta.Namespace,
+			Name:      meta.Name,
+			CreatedAt: meta.StartTime,
 		})
 	}
 
@@ -212,13 +208,11 @@ func (s *Service) detail(c *gin.Context) {
 
 	detail = Detail{
 		Archive: Archive{
-			UID:        exp.UID,
-			Kind:       exp.Kind,
-			Name:       exp.Name,
-			Namespace:  exp.Namespace,
-			Action:     exp.Action,
-			StartTime:  exp.StartTime,
-			FinishTime: exp.FinishTime,
+			UID:       exp.UID,
+			Kind:      exp.Kind,
+			Name:      exp.Name,
+			Namespace: exp.Namespace,
+			CreatedAt: exp.StartTime,
 		},
 		KubeObject: kubeObject,
 	}
@@ -326,13 +320,11 @@ func (s *Service) listSchedule(c *gin.Context) {
 
 	for _, meta := range metas {
 		archives = append(archives, Archive{
-			UID:        meta.UID,
-			Kind:       meta.Kind,
-			Namespace:  meta.Namespace,
-			Name:       meta.Name,
-			Action:     meta.Action,
-			StartTime:  meta.StartTime,
-			FinishTime: meta.FinishTime,
+			UID:       meta.UID,
+			Kind:      meta.Kind,
+			Namespace: meta.Namespace,
+			Name:      meta.Name,
+			CreatedAt: meta.StartTime,
 		})
 	}
 
@@ -381,13 +373,11 @@ func (s *Service) detailSchedule(c *gin.Context) {
 
 	detail = Detail{
 		Archive: Archive{
-			UID:        exp.UID,
-			Kind:       exp.Kind,
-			Name:       exp.Name,
-			Namespace:  exp.Namespace,
-			Action:     exp.Action,
-			StartTime:  exp.StartTime,
-			FinishTime: exp.FinishTime,
+			UID:       exp.UID,
+			Kind:      exp.Kind,
+			Name:      exp.Name,
+			Namespace: exp.Namespace,
+			CreatedAt: exp.StartTime,
 		},
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
