@@ -14,5 +14,3 @@ spec:
     namespaces:
       - busybox
   duration: "50s"
-  scheduler:
-    cron: "@every 100s"

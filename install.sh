@@ -244,7 +244,11 @@ main() {
     fi
 
     if [ "${crd}" == "" ]; then
-        crd="https://mirrors.chaos-mesh.org/${cm_version}/crd.yaml"
+        if kubectl api-versions | grep -q -w apiextensions.k8s.io/v1 ; then
+            crd="https://mirrors.chaos-mesh.org/${cm_version}/crd.yaml"
+        else
+            crd="https://mirrors.chaos-mesh.org/${cm_version}/crd-v1beta1.yaml"
+        fi
     fi
     if $template; then
         ensure gen_crd_manifests "${crd}"
@@ -979,6 +983,9 @@ rules:
     verbs:
       - patch
       - create
+      - watch
+      - list
+      - get
   - apiGroups: [ "" ]
     resources: [ "configmaps" ]
     verbs: [ "*" ]
@@ -1604,63 +1611,6 @@ webhooks:
       service:
         name: chaos-mesh-controller-manager
         namespace: "chaos-testing"
-        path: /mutate-chaos-mesh-org-v1alpha1-podiochaos
-    failurePolicy: Fail
-    name: mpodiochaos.kb.io
-    timeoutSeconds: 5
-    rules:
-      - apiGroups:
-          - chaos-mesh.org
-        apiVersions:
-          - v1alpha1
-        operations:
-          - CREATE
-          - UPDATE
-        resources:
-          - podiochaos
-  - clientConfig:
-      caBundle: "${CA_BUNDLE}"
-      service:
-        name: chaos-mesh-controller-manager
-        namespace: "chaos-testing"
-        path: /mutate-chaos-mesh-org-v1alpha1-podhttpchaos
-    failurePolicy: Fail
-    name: mpodhttpchaos.kb.io
-    timeoutSeconds: 5
-    rules:
-      - apiGroups:
-          - chaos-mesh.org
-        apiVersions:
-          - v1alpha1
-        operations:
-          - CREATE
-          - UPDATE
-        resources:
-          - podhttpchaos
-  - clientConfig:
-      caBundle: "${CA_BUNDLE}"
-      service:
-        name: chaos-mesh-controller-manager
-        namespace: "chaos-testing"
-        path: /mutate-chaos-mesh-org-v1alpha1-podnetworkchaos
-    failurePolicy: Fail
-    name: mpodnetworkchaos.kb.io
-    timeoutSeconds: 5
-    rules:
-      - apiGroups:
-          - chaos-mesh.org
-        apiVersions:
-          - v1alpha1
-        operations:
-          - CREATE
-          - UPDATE
-        resources:
-          - podnetworkchaos
-  - clientConfig:
-      caBundle: "${CA_BUNDLE}"
-      service:
-        name: chaos-mesh-controller-manager
-        namespace: "chaos-testing"
         path: /mutate-chaos-mesh-org-v1alpha1-dnschaos
     failurePolicy: Fail
     name: mdnschaos.kb.io
@@ -1859,25 +1809,6 @@ webhooks:
           - UPDATE
         resources:
           - gcpchaos
-  - clientConfig:
-      caBundle: "${CA_BUNDLE}"
-      service:
-        name: chaos-mesh-controller-manager
-        namespace: "chaos-testing"
-        path: /validate-chaos-mesh-org-v1alpha1-podnetworkchaos
-    failurePolicy: Fail
-    name: vpodnetworkchaos.kb.io
-    timeoutSeconds: 5
-    rules:
-      - apiGroups:
-          - chaos-mesh.org
-        apiVersions:
-          - v1alpha1
-        operations:
-          - CREATE
-          - UPDATE
-        resources:
-          - podnetworkchaos
   - clientConfig:
       caBundle: "${CA_BUNDLE}"
       service:

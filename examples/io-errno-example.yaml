@@ -1,5 +1,5 @@
 apiVersion: chaos-mesh.org/v1alpha1
-kind: IoChaos
+kind: IOChaos
 metadata:
   name: io-errno-example
   namespace: chaos-testing
@@ -14,5 +14,3 @@ spec:
   errno: 5
   percent: 50
   duration: "400s"
-  scheduler:
-    cron: "@every 10m"

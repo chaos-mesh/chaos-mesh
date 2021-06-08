@@ -24,7 +24,6 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/klog"
 	"k8s.io/kubernetes/test/e2e/framework"
-	"k8s.io/utils/pointer"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -41,28 +40,28 @@ func TestcaseIOErrorDurationForATimeThenRecover(
 	err := util.WaitE2EHelperReady(c, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
-	ioChaos := &v1alpha1.IoChaos{
+	ioChaos := &v1alpha1.IOChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "io-chaos",
 			Namespace: ns,
 		},
-		Spec: v1alpha1.IoChaosSpec{
-			Selector: v1alpha1.SelectorSpec{
-				Namespaces:     []string{ns},
-				LabelSelectors: map[string]string{"app": "io"},
-			},
+		Spec: v1alpha1.IOChaosSpec{
 			Action:     v1alpha1.IoFaults,
-			Mode:       v1alpha1.OnePodMode,
 			VolumePath: "/var/run/data",
 			Path:       "/var/run/data/*",
 			Percent:    100,
 			// errno 5 is EIO -> I/O error
 			Errno: 5,
 			// only inject write method
-			Methods:  []v1alpha1.IoMethod{v1alpha1.Write},
-			Duration: pointer.StringPtr("9m"),
-			Scheduler: &v1alpha1.SchedulerSpec{
-				Cron: "@every 10m",
+			Methods: []v1alpha1.IoMethod{v1alpha1.Write},
+			ContainerSelector: v1alpha1.ContainerSelector{
+				PodSelector: v1alpha1.PodSelector{
+					Selector: v1alpha1.PodSelectorSpec{
+						Namespaces:     []string{ns},
+						LabelSelectors: map[string]string{"app": "io"},
+					},
+					Mode: v1alpha1.OnePodMode,
+				},
 			},
 		},
 	}
@@ -106,28 +105,28 @@ func TestcaseIOErrorDurationForATimePauseAndUnPause(
 	err := util.WaitE2EHelperReady(c, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
-	ioChaos := &v1alpha1.IoChaos{
+	ioChaos := &v1alpha1.IOChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "io-chaos",
 			Namespace: ns,
 		},
-		Spec: v1alpha1.IoChaosSpec{
-			Selector: v1alpha1.SelectorSpec{
-				Namespaces:     []string{ns},
-				LabelSelectors: map[string]string{"app": "io"},
-			},
+		Spec: v1alpha1.IOChaosSpec{
 			Action:     v1alpha1.IoFaults,
-			Mode:       v1alpha1.OnePodMode,
 			VolumePath: "/var/run/data",
 			Path:       "/var/run/data/*",
 			Percent:    100,
 			// errno 5 is EIO -> I/O error
 			Errno: 5,
 			// only inject write method
-			Methods:  []v1alpha1.IoMethod{v1alpha1.Write},
-			Duration: pointer.StringPtr("9m"),
-			Scheduler: &v1alpha1.SchedulerSpec{
-				Cron: "@every 10m",
+			Methods: []v1alpha1.IoMethod{v1alpha1.Write},
+			ContainerSelector: v1alpha1.ContainerSelector{
+				PodSelector: v1alpha1.PodSelector{
+					Selector: v1alpha1.PodSelectorSpec{
+						Namespaces:     []string{ns},
+						LabelSelectors: map[string]string{"app": "io"},
+					},
+					Mode: v1alpha1.OnePodMode,
+				},
 			},
 		},
 	}
@@ -158,10 +157,10 @@ func TestcaseIOErrorDurationForATimePauseAndUnPause(
 	klog.Info("pause iochaos")
 
 	err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
-		chaos := &v1alpha1.IoChaos{}
+		chaos := &v1alpha1.IOChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
 		framework.ExpectNoError(err, "get io chaos error")
-		if chaos.Status.Experiment.Phase == v1alpha1.ExperimentPhasePaused {
+		if chaos.Status.Experiment.DesiredPhase == v1alpha1.StoppedPhase {
 			return true, nil
 		}
 		return false, err
@@ -184,10 +183,10 @@ func TestcaseIOErrorDurationForATimePauseAndUnPause(
 	framework.ExpectNoError(err, "resume chaos error")
 
 	err = wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
-		chaos := &v1alpha1.IoChaos{}
+		chaos := &v1alpha1.IOChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
 		framework.ExpectNoError(err, "get io chaos error")
-		if chaos.Status.Experiment.Phase == v1alpha1.ExperimentPhaseRunning {
+		if chaos.Status.Experiment.DesiredPhase == v1alpha1.RunningPhase {
 			return true, nil
 		}
 		return false, err
@@ -220,29 +219,29 @@ func TestcaseIOErrorWithSpecifiedContainer(
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
 	containerName := "io"
-	ioChaos := &v1alpha1.IoChaos{
+	ioChaos := &v1alpha1.IOChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "io-chaos",
 			Namespace: ns,
 		},
-		Spec: v1alpha1.IoChaosSpec{
-			Selector: v1alpha1.SelectorSpec{
-				Namespaces:     []string{ns},
-				LabelSelectors: map[string]string{"app": "io"},
-			},
+		Spec: v1alpha1.IOChaosSpec{
 			Action:     v1alpha1.IoFaults,
-			Mode:       v1alpha1.OnePodMode,
 			VolumePath: "/var/run/data",
 			Path:       "/var/run/data/*",
 			Percent:    100,
 			// errno 5 is EIO -> I/O error
 			Errno: 5,
 			// only inject write method
-			ContainerName: &containerName,
-			Methods:       []v1alpha1.IoMethod{v1alpha1.Write},
-			Duration:      pointer.StringPtr("9m"),
-			Scheduler: &v1alpha1.SchedulerSpec{
-				Cron: "@every 10m",
+			Methods: []v1alpha1.IoMethod{v1alpha1.Write},
+			ContainerSelector: v1alpha1.ContainerSelector{
+				PodSelector: v1alpha1.PodSelector{
+					Selector: v1alpha1.PodSelectorSpec{
+						Namespaces:     []string{ns},
+						LabelSelectors: map[string]string{"app": "io"},
+					},
+					Mode: v1alpha1.OnePodMode,
+				},
+				ContainerNames: []string{containerName},
 			},
 		},
 	}

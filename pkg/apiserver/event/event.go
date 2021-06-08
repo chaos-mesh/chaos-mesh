@@ -15,7 +15,6 @@ package event
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -23,27 +22,24 @@ import (
 	"github.com/jinzhu/gorm"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
-	"github.com/chaos-mesh/chaos-mesh/pkg/config"
+	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 )
 
 // Service defines a handler service for events.
 type Service struct {
-	conf    *config.ChaosDashboardConfig
-	archive core.ExperimentStore
-	event   core.EventStore
+	conf  *config.ChaosDashboardConfig
+	event core.EventStore
 }
 
 // NewService return an event service instance.
 func NewService(
 	conf *config.ChaosDashboardConfig,
-	archive core.ExperimentStore,
 	event core.EventStore,
 ) *Service {
 	return &Service{
-		conf:    conf,
-		archive: archive,
-		event:   event,
+		conf:  conf,
+		event: event,
 	}
 }
 
@@ -56,7 +52,6 @@ func Register(r *gin.RouterGroup, s *Service) {
 
 	// TODO: add more api handlers
 	endpoint.GET("", s.listEvents)
-	endpoint.GET("/dry", s.listDryEvents)
 	endpoint.GET("/get", s.getEvent)
 }
 
@@ -64,14 +59,11 @@ func Register(r *gin.RouterGroup, s *Service) {
 // @Description Get the list of events from db.
 // @Tags events
 // @Produce json
-// @Param podName query string false "The pod's name"
-// @Param podNamespace query string false "The pod's namespace"
-// @Param startTime query string false "The start time of events"
-// @Param endTime query string false "The end time of events"
-// @Param experimentName query string false "The name of the experiment"
-// @Param experimentNamespace query string false "The namespace of the experiment"
-// @Param uid query string false "The UID of the experiment"
-// @Param kind query string false "kind" Enums(PodChaos, IoChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos)
+// @Param created_at query string false "The create time of events"
+// @Param name query string false "The name of the object"
+// @Param namespace query string false "The namespace of the object"
+// @Param object_id query string false "The UID of the object"
+// @Param kind query string false "kind" Enums(PodChaos, IOChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos, AwsChaos, GcpChaos, DNSChaos, Schedule)
 // @Param limit query string false "The max length of events list"
 // @Success 200 {array} core.Event
 // @Router /events [get]
@@ -84,62 +76,15 @@ func (s *Service) listEvents(c *gin.Context) {
 	}
 
 	filter := core.Filter{
-		PodName:             c.Query("podName"),
-		PodNamespace:        c.Query("podNamespace"),
-		StartTimeStr:        c.Query("startTime"),
-		FinishTimeStr:       c.Query("finishTime"),
-		ExperimentName:      c.Query("experimentName"),
-		ExperimentNamespace: namespace,
-		UID:                 c.Query("uid"),
-		Kind:                c.Query("kind"),
-		LimitStr:            c.Query("limit"),
-	}
-
-	if filter.PodName != "" && filter.PodNamespace == "" {
-		c.Status(http.StatusInternalServerError)
-		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("when podName is not empty, podNamespace cannot be empty")))
-		return
+		CreateTimeStr: c.Query("created_at"),
+		Name:          c.Query("name"),
+		Namespace:     namespace,
+		ObjectID:      c.Query("object_id"),
+		Kind:          c.Query("kind"),
+		LimitStr:      c.Query("limit"),
 	}
 
 	eventList, err := s.event.ListByFilter(context.Background(), filter)
-	if err != nil {
-		c.Status(http.StatusInternalServerError)
-		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
-		return
-	}
-
-	c.JSON(http.StatusOK, eventList)
-}
-
-// @Summary Get the list of events without pod records from db.
-// @Description Get the list of events without pod records from db.
-// @Tags events
-// @Produce json
-// @Param startTime query string false "The start time of events"
-// @Param endTime query string false "The end time of events"
-// @Param experimentName query string false "The name of the experiment"
-// @Param experimentNamespace query string false "The namespace of the experiment"
-// @Param kind query string false "kind" Enums(PodChaos, IoChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos)
-// @Param limit query string false "The max length of events list"
-// @Success 200 {array} core.Event
-// @Router /events/dry [get]
-// @Failure 500 {object} utils.APIError
-func (s *Service) listDryEvents(c *gin.Context) {
-	namespace := c.Query("namespace")
-	if len(namespace) == 0 && !s.conf.ClusterScoped &&
-		len(s.conf.TargetNamespace) != 0 {
-		namespace = s.conf.TargetNamespace
-	}
-	filter := core.Filter{
-		StartTimeStr:        c.Query("startTime"),
-		FinishTimeStr:       c.Query("finishTime"),
-		ExperimentName:      c.Query("experimentName"),
-		ExperimentNamespace: namespace,
-		Kind:                c.Query("kind"),
-		LimitStr:            c.Query("limit"),
-	}
-
-	eventList, err := s.event.DryListByFilter(context.Background(), filter)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))

@@ -22,7 +22,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
-	"github.com/chaos-mesh/chaos-mesh/pkg/config"
+	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 )
 
@@ -126,7 +126,6 @@ func (it *Service) getWorkflowDetail(c *gin.Context) {
 		utils.SetErrorForGinCtx(c, err)
 		return
 	}
-
 	c.JSON(http.StatusOK, result)
 }
 
@@ -161,7 +160,6 @@ func (it *Service) createWorkflow(c *gin.Context) {
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
 		return
 	}
-
 	c.JSON(http.StatusOK, result)
 }
 
@@ -193,7 +191,6 @@ func (it *Service) deleteWorkflow(c *gin.Context) {
 		utils.SetErrorForGinCtx(c, err)
 		return
 	}
-
 	c.JSON(http.StatusOK, StatusResponse{Status: "success"})
 }
 
@@ -214,7 +211,6 @@ func (it *Service) updateWorkflow(c *gin.Context) {
 		_ = c.Error(utils.ErrInternalServer.Wrap(err, "failed to parse request body"))
 		return
 	}
-
 	// validate the consistent with path parameter and request body of namespace and name
 	namespace := c.Param("namespace")
 	name := c.Param("name")

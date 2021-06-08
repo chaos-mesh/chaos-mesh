@@ -20,13 +20,17 @@ import (
 	v1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils"
+	ctrl "sigs.k8s.io/controller-runtime"
+
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
+var log = ctrl.Log.WithName("tc")
+
 // SetTcs makes grpc call to chaosdaemon to flush traffic control rules
 func SetTcs(ctx context.Context, c client.Client, pod *v1.Pod, tcs []*pb.Tc) error {
-	pbClient, err := utils.NewChaosDaemonClient(ctx, c, pod)
+	pbClient, err := chaosdaemon.NewChaosDaemonClient(ctx, c, pod)
 	if err != nil {
 		return err
 	}
@@ -36,14 +40,27 @@ func SetTcs(ctx context.Context, c client.Client, pod *v1.Pod, tcs []*pb.Tc) err
 		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
 	}
 
-	containerID := pod.Status.ContainerStatuses[0].ContainerID
+	log.Info("Settings Tcs...")
+	for _, containerStatus := range pod.Status.ContainerStatuses {
+		containerName := containerStatus.Name
+		containerID := containerStatus.ContainerID
+		log.Info("attempting to set tcs", "containerName", containerName, "containerID", containerID)
 
-	_, err = pbClient.SetTcs(ctx, &pb.TcsRequest{
-		Tcs:         tcs,
-		ContainerId: containerID,
-		// Prevent tcs is empty, used to clean up tc rules
-		Device:  "eth0",
-		EnterNS: true,
-	})
-	return err
+		_, err = pbClient.SetTcs(ctx, &pb.TcsRequest{
+			Tcs:         tcs,
+			ContainerId: containerID,
+			// Prevent tcs is empty, used to clean up tc rules
+			Device:  "eth0",
+			EnterNS: true,
+		})
+
+		if err != nil {
+			log.Error(err, fmt.Sprintf("error while setting tcs for container %s, id %s", containerName, containerID))
+		} else {
+			log.Info("Successfully set tcs")
+			return nil
+		}
+	}
+
+	return fmt.Errorf("unable to set tcs for pod %s", pod.Name)
 }

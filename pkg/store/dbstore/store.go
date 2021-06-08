@@ -16,13 +16,11 @@ package dbstore
 import (
 	"context"
 
-	"go.uber.org/fx"
-
 	"github.com/jinzhu/gorm"
-
-	"github.com/chaos-mesh/chaos-mesh/pkg/config"
-
+	"go.uber.org/fx"
 	ctrl "sigs.k8s.io/controller-runtime"
+
+	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
 )
 
 var (

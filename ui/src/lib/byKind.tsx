@@ -21,7 +21,7 @@ export function iconByKind(kind: ExperimentKind, size: 'small' | 'large' = 'larg
     case 'NetworkChaos':
       icon = <NetworkIcon />
       break
-    case 'IoChaos':
+    case 'IOChaos':
       icon = <FileSystemIOIcon />
       break
     case 'KernelChaos':
@@ -53,7 +53,7 @@ export function transByKind(kind: ExperimentKind) {
       return T('newE.target.pod.title')
     case 'NetworkChaos':
       return T('newE.target.network.title')
-    case 'IoChaos':
+    case 'IOChaos':
       return T('newE.target.io.title')
     case 'KernelChaos':
       return T('newE.target.kernel.title')

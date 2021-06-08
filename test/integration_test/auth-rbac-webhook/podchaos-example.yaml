@@ -8,5 +8,3 @@ spec:
   selector:
     labelSelectors:
       "app.kubernetes.io/component": "no-applications-were-harmed"
-  scheduler:
-    cron: "@every 1m"

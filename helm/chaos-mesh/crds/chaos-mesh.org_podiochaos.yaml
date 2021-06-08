@@ -10,8 +10,8 @@ metadata:
 spec:
   group: chaos-mesh.org
   names:
-    kind: PodIoChaos
-    listKind: PodIoChaosList
+    kind: PodIOChaos
+    listKind: PodIOChaosList
     plural: podiochaos
     singular: podiochaos
   scope: Namespaced
@@ -19,27 +19,23 @@ spec:
   - name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: PodIoChaos is the Schema for the podiochaos API
+        description: PodIOChaos is the Schema for the podiochaos API
         properties:
           apiVersion:
-            description: 'APIVersion defines the versioned schema of this representation
-              of an object. Servers should convert recognized schemas to the latest
-              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
             type: string
           kind:
-            description: 'Kind is a string value representing the REST resource this
-              object represents. Servers may infer this from the endpoint the client
-              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
             type: string
           metadata:
             type: object
           spec:
-            description: PodIoChaosSpec defines the desired state of IoChaos
+            description: PodIOChaosSpec defines the desired state of IOChaos
             properties:
               actions:
-                description: Actions are a list of IoChaos actions
+                description: Actions are a list of IOChaos actions
                 items:
-                  description: IoChaosAction defines an possible action of IoChaos
+                  description: IOChaosAction defines an possible action of IOChaos
                   properties:
                     atime:
                       description: Timespec represents a time
@@ -73,8 +69,7 @@ spec:
                     faults:
                       description: Faults represents the fault to inject
                       items:
-                        description: IoFault represents the fault to inject and their
-                          weight
+                        description: IoFault represents the fault to inject and their weight
                         properties:
                           errno:
                             format: int32
@@ -100,8 +95,7 @@ spec:
                       description: Latency represents the latency to inject
                       type: string
                     methods:
-                      description: Methods represents the method that the action will
-                        inject in
+                      description: Methods represents the method that the action will inject in
                       items:
                         type: string
                       type: array
@@ -109,8 +103,7 @@ spec:
                       description: MistakeSpec represents the mistake to inject
                       properties:
                         filling:
-                          description: Filling determines what is filled in the miskate
-                            data.
+                          description: Filling determines what is filled in the miskate data.
                           enum:
                           - zero
                           - random
@@ -121,8 +114,7 @@ spec:
                           minimum: 1
                           type: integer
                         maxOccurrences:
-                          description: There will be [1, MaxOccurrences] segments
-                            of wrong data.
+                          description: There will be [1, MaxOccurrences] segments of wrong data.
                           format: int64
                           minimum: 1
                           type: integer
@@ -147,8 +139,7 @@ spec:
                       description: Path represents a glob of injecting path
                       type: string
                     percent:
-                      description: Percent represents the percent probability of injecting
-                        this action
+                      description: Percent represents the percent probability of injecting this action
                       type: integer
                     perm:
                       type: integer
@@ -162,7 +153,7 @@ spec:
                       description: Source represents the source of current rules
                       type: string
                     type:
-                      description: IoChaosType represents the type of an IoChaos Action
+                      description: IOChaosType represents the type of an IOChaos Action
                       type: string
                     uid:
                       format: int32
@@ -174,9 +165,21 @@ spec:
                   type: object
                 type: array
               container:
-                description: 'TODO: support multiple different container to inject
-                  in one pod'
+                description: 'TODO: support multiple different container to inject in one pod'
                 type: string
+              volumeMountPath:
+                description: 'VolumeMountPath represents the target mount path It must be a root of mount path now. TODO: search the mount parent of any path automatically. TODO: support multiple different volume mount path in one pod'
+                type: string
+            required:
+            - volumeMountPath
+            type: object
+          status:
+            properties:
+              failedMessage:
+                type: string
+              observedGeneration:
+                format: int64
+                type: integer
               pid:
                 description: Pid represents a running toda process id
                 format: int64
@@ -185,18 +188,12 @@ spec:
                 description: StartTime represents the start time of a toda process
                 format: int64
                 type: integer
-              volumeMountPath:
-                description: 'VolumeMountPath represents the target mount path It
-                  must be a root of mount path now. TODO: search the mount parent
-                  of any path automatically. TODO: support multiple different volume
-                  mount path in one pod'
-                type: string
-            required:
-            - volumeMountPath
             type: object
         type: object
     served: true
     storage: true
+    subresources:
+      status: {}
 status:
   acceptedNames:
     kind: ""

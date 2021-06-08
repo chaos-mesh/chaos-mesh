@@ -20,9 +20,8 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/kubernetes/test/e2e/framework"
-
 	"k8s.io/apimachinery/pkg/util/wait"
+	"k8s.io/kubernetes/test/e2e/framework"
 	"k8s.io/utils/pointer"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -78,10 +77,7 @@ func TestcaseNetworkDelay(
 				Correlation: "25",
 			},
 		}
-		testDelayDuration      = pointer.StringPtr("9m")
-		testDelaySchedulerSpec = &v1alpha1.SchedulerSpec{
-			Cron: "@every 10m",
-		}
+		testDelayDuration = pointer.StringPtr("9m")
 	)
 
 	By("normal delay chaos")
@@ -94,7 +90,6 @@ func TestcaseNetworkDelay(
 		v1alpha1.To,
 		testDelayTcParam,
 		testDelayDuration,
-		testDelaySchedulerSpec,
 	)
 	By("Injecting delay for 0")
 	err := cli.Create(ctx, networkDelay.DeepCopy())
@@ -135,7 +130,6 @@ func TestcaseNetworkDelay(
 		v1alpha1.To,
 		testDelayTcParam,
 		testDelayDuration,
-		testDelaySchedulerSpec,
 	)
 
 	By("Injecting delay for 0 -> 1")
@@ -176,7 +170,6 @@ func TestcaseNetworkDelay(
 		v1alpha1.To,
 		testDelayTcParam,
 		testDelayDuration,
-		testDelaySchedulerSpec,
 	)
 	By("Injecting delay for 0 -> even partition")
 	err = cli.Create(ctx, evenNetworkDelay.DeepCopy())
@@ -241,7 +234,6 @@ func TestcaseNetworkDelay(
 		v1alpha1.To,
 		testDelayTcParamEvenMoreComplicate,
 		testDelayDuration,
-		testDelaySchedulerSpec,
 	)
 	By("Injecting complicate chaos for 0")
 	err = cli.Create(ctx, complicateNetem.DeepCopy())
@@ -279,7 +271,6 @@ func TestcaseNetworkDelay(
 		v1alpha1.Both,
 		testDelayTcParam,
 		testDelayDuration,
-		testDelaySchedulerSpec,
 	)
 	By("Injecting both direction chaos for 0")
 	err = cli.Create(ctx, bothDirectionNetem.DeepCopy())
