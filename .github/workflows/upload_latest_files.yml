@@ -6,11 +6,13 @@
 #     paths:
 #       - install.sh
 #       - manifests/crd.yaml
+#       - manifests/crd-v1beta1.yaml
 #       - examples/web-show/deploy.sh
 #       - pkg/chaosctl/**
 #       - cmd/chaosctl/**
 # jobs:
 #   run:
+#     if: github.repository_owner == 'chaos-mesh'
 #     name: Upload
 #     runs-on: ubuntu-latest
 #     steps:
