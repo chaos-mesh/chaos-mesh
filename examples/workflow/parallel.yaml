@@ -9,8 +9,8 @@ spec:
       templateType: Parallel
       duration: 240s
       tasks:
-#        - workflow-stress-chaos
-#        - workflow-network-chaos
+        - workflow-stress-chaos
+        - workflow-network-chaos
         - workflow-pod-chaos
     - name: workflow-network-chaos
       templateType: NetworkChaos
