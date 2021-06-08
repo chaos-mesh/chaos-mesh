@@ -371,7 +371,7 @@ func (it ChaosNodeReconciler) createSchedule(ctx context.Context, node v1alpha1.
 		return nil
 	}
 	it.logger.Info("schedule CR created", "namespace", scheduleToCreate.GetNamespace(), "name", scheduleToCreate.GetName())
-	it.eventRecorder.Event(&node, corev1.EventTypeNormal, v1alpha1.ChaosCRCreated, fmt.Sprintf("chedule CR %s/%s created", scheduleToCreate.GetNamespace(), scheduleToCreate.GetName()))
+	it.eventRecorder.Event(&node, corev1.EventTypeNormal, v1alpha1.ChaosCRCreated, fmt.Sprintf("schedule CR %s/%s created", scheduleToCreate.GetNamespace(), scheduleToCreate.GetName()))
 	return nil
 
 }
