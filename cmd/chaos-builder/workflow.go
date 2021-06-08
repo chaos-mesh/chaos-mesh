@@ -83,6 +83,7 @@ const (
 )
 
 var allChaosTemplateType = []TemplateType{
+	TypeSchedule,
 %s
 }
 
