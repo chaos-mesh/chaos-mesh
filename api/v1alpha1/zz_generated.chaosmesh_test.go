@@ -51,7 +51,7 @@ func TestAwsChaosGetDuration(t *testing.T) {
 
 	g.Expect(err).To(BeNil())
 
-	chaos.GetDuration()
+	chaos.Spec.GetDuration()
 }
 
 func TestAwsChaosGetChaos(t *testing.T) {
@@ -125,7 +125,7 @@ func TestDNSChaosGetDuration(t *testing.T) {
 
 	g.Expect(err).To(BeNil())
 
-	chaos.GetDuration()
+	chaos.Spec.GetDuration()
 }
 
 func TestDNSChaosGetChaos(t *testing.T) {
@@ -199,7 +199,7 @@ func TestGcpChaosGetDuration(t *testing.T) {
 
 	g.Expect(err).To(BeNil())
 
-	chaos.GetDuration()
+	chaos.Spec.GetDuration()
 }
 
 func TestGcpChaosGetChaos(t *testing.T) {
@@ -273,7 +273,7 @@ func TestHTTPChaosGetDuration(t *testing.T) {
 
 	g.Expect(err).To(BeNil())
 
-	chaos.GetDuration()
+	chaos.Spec.GetDuration()
 }
 
 func TestHTTPChaosGetChaos(t *testing.T) {
@@ -347,7 +347,7 @@ func TestIOChaosGetDuration(t *testing.T) {
 
 	g.Expect(err).To(BeNil())
 
-	chaos.GetDuration()
+	chaos.Spec.GetDuration()
 }
 
 func TestIOChaosGetChaos(t *testing.T) {
@@ -421,7 +421,7 @@ func TestJVMChaosGetDuration(t *testing.T) {
 
 	g.Expect(err).To(BeNil())
 
-	chaos.GetDuration()
+	chaos.Spec.GetDuration()
 }
 
 func TestJVMChaosGetChaos(t *testing.T) {
@@ -495,7 +495,7 @@ func TestKernelChaosGetDuration(t *testing.T) {
 
 	g.Expect(err).To(BeNil())
 
-	chaos.GetDuration()
+	chaos.Spec.GetDuration()
 }
 
 func TestKernelChaosGetChaos(t *testing.T) {
@@ -569,7 +569,7 @@ func TestNetworkChaosGetDuration(t *testing.T) {
 
 	g.Expect(err).To(BeNil())
 
-	chaos.GetDuration()
+	chaos.Spec.GetDuration()
 }
 
 func TestNetworkChaosGetChaos(t *testing.T) {
@@ -643,7 +643,7 @@ func TestPodChaosGetDuration(t *testing.T) {
 
 	g.Expect(err).To(BeNil())
 
-	chaos.GetDuration()
+	chaos.Spec.GetDuration()
 }
 
 func TestPodChaosGetChaos(t *testing.T) {
@@ -717,7 +717,7 @@ func TestStressChaosGetDuration(t *testing.T) {
 
 	g.Expect(err).To(BeNil())
 
-	chaos.GetDuration()
+	chaos.Spec.GetDuration()
 }
 
 func TestStressChaosGetChaos(t *testing.T) {
@@ -791,7 +791,7 @@ func TestTimeChaosGetDuration(t *testing.T) {
 
 	g.Expect(err).To(BeNil())
 
-	chaos.GetDuration()
+	chaos.Spec.GetDuration()
 }
 
 func TestTimeChaosGetChaos(t *testing.T) {
