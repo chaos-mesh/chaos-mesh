@@ -36,8 +36,8 @@ SHELL    := bash
 
 PACKAGE_LIST := echo $$(go list ./... | grep -vE "chaos-mesh/test|pkg/ptrace|zz_generated|vendor") github.com/chaos-mesh/chaos-mesh/api/v1alpha1
 
-# Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
-CRD_OPTIONS ?= "crd:trivialVersions=true,preserveUnknownFields=false,crdVersions=v1beta1"
+# no version conversion
+CRD_OPTIONS ?= "crd:trivialVersions=true,preserveUnknownFields=false,crdVersions=v1"
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
@@ -63,15 +63,15 @@ endif
 
 CLEAN_TARGETS :=
 
-all: manifests/crd.yaml image
+all: yaml image
 go_build_cache_directory:
 	mkdir -p $(GO_BUILD_CACHE)/chaos-mesh-gobuild
 	mkdir -p $(GO_BUILD_CACHE)/chaos-mesh-gopath
 
-check: fmt vet boilerplate lint generate manifests/crd.yaml tidy check-install-script
+check: fmt vet boilerplate lint generate yaml tidy check-install-script
 
 # Run tests
-test: failpoint-enable generate generate-mock manifests test-utils
+test: ensure-kubebuilder failpoint-enable generate generate-mock manifests test-utils
 	rm -rf cover.* cover
 	$(GOTEST) -p 1 $$($(PACKAGE_LIST)) -coverprofile cover.out.tmp
 	cat cover.out.tmp | grep -v "_generated.deepcopy.go" > cover.out
@@ -134,7 +134,6 @@ run: generate fmt vet manifests
 NAMESPACE ?= chaos-testing
 # Install CRDs into a cluster
 install: manifests
-	$(KUBECTL_BIN) apply -f manifests/crd.yaml
 	$(HELM_BIN) upgrade --install chaos-mesh helm/chaos-mesh --namespace=${NAMESPACE} --set registry=${DOCKER_REGISTRY} --set dnsServer.create=true --set dashboard.create=true;
 
 # Generate manifests e.g. CRD, RBAC etc.
@@ -371,7 +370,14 @@ generate: $(GOBIN)/controller-gen chaos-build
 manifests/crd.yaml: config ensure-kustomize
 	$(KUSTOMIZE_BIN) build config/default > manifests/crd.yaml
 
-yaml: manifests/crd.yaml
+manifests/crd-v1beta1.yaml: ensure-kustomize
+	rm -rf output/config-v1beta1
+	cp -r ./config ./output/config-v1beta1
+	cd ./api/v1alpha1 ;\
+		$(GOBIN)/controller-gen "crd:trivialVersions=true,preserveUnknownFields=false,crdVersions=v1beta1" rbac:roleName=manager-role paths="./..." output:crd:artifacts:config=../../output/config-v1beta1/crd/bases ;
+	$(KUSTOMIZE_BIN) build output/config-v1beta1/default > manifests/crd-v1beta1.yaml
+
+yaml: manifests/crd.yaml manifests/crd-v1beta1.yaml
 
 # Generate Go files from Chaos Mesh proto files.
 ifeq ($(IN_DOCKER),1)
