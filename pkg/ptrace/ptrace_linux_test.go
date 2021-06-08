@@ -25,13 +25,12 @@ import (
 	"unsafe"
 
 	"github.com/go-logr/zapr"
-	"go.uber.org/zap"
-
-	"github.com/chaos-mesh/chaos-mesh/test/pkg/timer"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"sigs.k8s.io/controller-runtime/pkg/envtest"
+	"go.uber.org/zap"
+	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
+
+	"github.com/chaos-mesh/chaos-mesh/test/pkg/timer"
 )
 
 func TestPTrace(t *testing.T) {
@@ -39,7 +38,7 @@ func TestPTrace(t *testing.T) {
 
 	RunSpecsWithDefaultAndCustomReporters(t,
 		"PTrace Suit",
-		[]Reporter{envtest.NewlineReporter{}})
+		[]Reporter{printer.NewlineReporter{}})
 }
 
 var _ = BeforeSuite(func(done Done) {
