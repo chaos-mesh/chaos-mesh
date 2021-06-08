@@ -244,7 +244,11 @@ main() {
     fi
 
     if [ "${crd}" == "" ]; then
-        crd="https://mirrors.chaos-mesh.org/${cm_version}/crd.yaml"
+        if kubectl api-versions | grep -q -w apiextensions.k8s.io/v1 ; then
+            crd="https://mirrors.chaos-mesh.org/${cm_version}/crd.yaml"
+        else
+            crd="https://mirrors.chaos-mesh.org/${cm_version}/crd-v1beta1.yaml"
+        fi
     fi
     if $template; then
         ensure gen_crd_manifests "${crd}"
