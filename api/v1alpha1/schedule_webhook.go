@@ -16,7 +16,7 @@ package v1alpha1
 import (
 	"fmt"
 
-	"github.com/robfig/cron"
+	"github.com/robfig/cron/v3"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
