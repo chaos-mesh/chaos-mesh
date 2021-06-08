@@ -20,11 +20,15 @@ import (
 	v1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	ctrl "sigs.k8s.io/controller-runtime"
+
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/netutils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 )
+
+var log = ctrl.Log.WithName("iptable")
 
 // SetIptablesChains makes grpc call to chaosdaemon to flush iptable
 func SetIptablesChains(ctx context.Context, c client.Client, pod *v1.Pod, chains []*pb.Chain) error {
@@ -38,14 +42,26 @@ func SetIptablesChains(ctx context.Context, c client.Client, pod *v1.Pod, chains
 		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
 	}
 
-	containerID := pod.Status.ContainerStatuses[0].ContainerID
+	log.Info("Setting IP Tables Chains...")
+	for _, containerStatus := range pod.Status.ContainerStatuses {
+		containerName := containerStatus.Name
+		containerID := containerStatus.ContainerID
+		log.Info("attempting to set ip table chains", "containerName", containerName, "containerID", containerID)
+		_, err = pbClient.SetIptablesChains(ctx, &pb.IptablesChainsRequest{
+			Chains:      chains,
+			ContainerId: containerID,
+			EnterNS:     true,
+		})
 
-	_, err = pbClient.SetIptablesChains(ctx, &pb.IptablesChainsRequest{
-		Chains:      chains,
-		ContainerId: containerID,
-		EnterNS:     true,
-	})
-	return err
+		if err != nil {
+			log.Error(err, fmt.Sprintf("error while setting ip tables chains for container %s, id %s", containerName, containerID))
+		} else {
+			log.Info("Successfully set ip table chains")
+			return nil
+		}
+	}
+
+	return fmt.Errorf("unable to set ip tables chains for pod %s", pod.Name)
 }
 
 // GenerateName generates chain name for network chaos

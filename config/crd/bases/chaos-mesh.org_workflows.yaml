@@ -75,7 +75,7 @@ spec:
                     - awsRegion
                     - ec2Instance
                     type: object
-                  dNSChaos:
+                  dnsChaos:
                     description: DNSChaosSpec defines the desired state of DNSChaos
                     properties:
                       action:
@@ -219,7 +219,7 @@ spec:
                     - project
                     - zone
                     type: object
-                  hTTPChaos:
+                  httpChaos:
                     properties:
                       abort:
                         description: Abort is a rule to abort a http session.
@@ -404,7 +404,7 @@ spec:
                     - target
                     type: object
                   ioChaos:
-                    description: IoChaosSpec defines the desired state of IoChaos
+                    description: IOChaosSpec defines the desired state of IOChaos
                     properties:
                       action:
                         description: 'Action defines the specific pod chaos action. Supported action: latency / fault / attrOverride / mistake'
@@ -617,7 +617,7 @@ spec:
                     - selector
                     - volumePath
                     type: object
-                  jVMChaos:
+                  jvmChaos:
                     description: JVMChaosSpec defines the desired state of JVMChaos
                     properties:
                       action:
