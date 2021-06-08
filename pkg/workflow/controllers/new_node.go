@@ -66,6 +66,7 @@ func renderNodesByTemplates(workflow *v1alpha1.Workflow, parent *v1alpha1.Workfl
 					Deadline:     deadline,
 					Tasks:        template.Tasks,
 					EmbedChaos:   template.EmbedChaos,
+					Schedule:     conversionSchedule(template.Schedule),
 				},
 			}
 
@@ -111,4 +112,31 @@ func renderNodesByTemplates(workflow *v1alpha1.Workflow, parent *v1alpha1.Workfl
 		)
 	}
 	return result, nil
+}
+
+func conversionSchedule(origin *v1alpha1.ChaosOnlyScheduleSpec) *v1alpha1.ScheduleSpec {
+	if origin == nil {
+		return nil
+	}
+	return &v1alpha1.ScheduleSpec{
+		Schedule:                origin.Schedule,
+		StartingDeadlineSeconds: origin.StartingDeadlineSeconds,
+		ConcurrencyPolicy:       origin.ConcurrencyPolicy,
+		HistoryLimit:            origin.HistoryLimit,
+		Type:                    origin.Type,
+		ScheduleItem: v1alpha1.ScheduleItem{
+			AwsChaos:     origin.EmbedChaos.AwsChaos,
+			DNSChaos:     origin.EmbedChaos.DNSChaos,
+			GcpChaos:     origin.EmbedChaos.GcpChaos,
+			HTTPChaos:    origin.EmbedChaos.HTTPChaos,
+			IOChaos:      origin.EmbedChaos.IOChaos,
+			JVMChaos:     origin.EmbedChaos.JVMChaos,
+			KernelChaos:  origin.EmbedChaos.KernelChaos,
+			NetworkChaos: origin.EmbedChaos.NetworkChaos,
+			PodChaos:     origin.EmbedChaos.PodChaos,
+			StressChaos:  origin.EmbedChaos.StressChaos,
+			TimeChaos:    origin.EmbedChaos.TimeChaos,
+			Workflow:     nil,
+		},
+	}
 }
