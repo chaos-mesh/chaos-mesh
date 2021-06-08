@@ -50,6 +50,8 @@ type WorkflowNodeSpec struct {
 	Tasks []string `json:"tasks,omitempty"`
 	// +optional
 	*EmbedChaos `json:",inline,omitempty"`
+	// +optional
+	Schedule *ScheduleSpec `json:"schedule,omitempty"`
 }
 
 type WorkflowNodeStatus struct {
