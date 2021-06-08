@@ -149,23 +149,23 @@ type ChaosList interface {
 func GetChaosState(condition []ChaosCondition) ChaosStatusString {
 	selected := false
 	allInjected := false
+	allRecovered := false
 	for _, c := range condition {
-		if c.Type == ConditionPaused {
-			if c.Status == corev1.ConditionTrue {
+		if c.Status == corev1.ConditionTrue {
+			switch c.Type {
+			case ConditionPaused:
 				return Paused
+			case ConditionAllRecovered:
+				allRecovered = true
+			case ConditionSelected:
+				selected = true
+			case ConditionAllInjected:
+				allInjected = true
 			}
 		}
-		if c.Type == ConditionAllRecovered {
-			if c.Status == corev1.ConditionTrue {
-				return Finished
-			}
-		}
-		if c.Type == ConditionSelected && c.Status == corev1.ConditionTrue {
-			selected = true
-		}
-		if c.Type == ConditionAllInjected && c.Status == corev1.ConditionTrue {
-			allInjected = true
-		}
+	}
+	if allRecovered {
+		return Finished
 	}
 	if selected && allInjected {
 		return Running
