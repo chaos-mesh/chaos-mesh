@@ -206,13 +206,16 @@ func newWorkflow(
 				Tasks:    nil,
 				EmbedChaos: &v1alpha1.EmbedChaos{
 					PodChaos: &v1alpha1.PodChaosSpec{
-						Selector: v1alpha1.SelectorSpec{
-							Namespaces:     []string{ns},
-							LabelSelectors: workloadLabels,
+						ContainerSelector: v1alpha1.ContainerSelector{
+							PodSelector: v1alpha1.PodSelector{
+								Selector: v1alpha1.PodSelectorSpec{
+									Namespaces:     []string{ns},
+									LabelSelectors: workloadLabels,
+								},
+								Mode: v1alpha1.AllPodMode,
+							},
 						},
-						Mode:      v1alpha1.AllPodMode,
-						Action:    v1alpha1.PodKillAction,
-						Scheduler: &v1alpha1.SchedulerSpec{Cron: "@every 1s"},
+						Action: v1alpha1.PodKillAction,
 					},
 				},
 			}, {
@@ -221,11 +224,15 @@ func newWorkflow(
 				Duration: &timeChaosDurationString,
 				EmbedChaos: &v1alpha1.EmbedChaos{
 					TimeChaos: &v1alpha1.TimeChaosSpec{
-						Selector: v1alpha1.SelectorSpec{
-							Namespaces:     []string{ns},
-							LabelSelectors: workloadLabels,
+						ContainerSelector: v1alpha1.ContainerSelector{
+							PodSelector: v1alpha1.PodSelector{
+								Selector: v1alpha1.PodSelectorSpec{
+									Namespaces:     []string{ns},
+									LabelSelectors: workloadLabels,
+								},
+								Mode: v1alpha1.AllPodMode,
+							},
 						},
-						Mode:       v1alpha1.AllPodMode,
 						TimeOffset: "-1h",
 					},
 				},
