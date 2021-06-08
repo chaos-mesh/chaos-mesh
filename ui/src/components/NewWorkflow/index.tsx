@@ -160,7 +160,7 @@ const NewWorkflow = () => {
       dispatch(
         setAlert({
           type: 'success',
-          message: intl.formatMessage({ id: 'confirm.updateSuccessfully' }),
+          message: T('confirm.updateSuccessfully', intl) as string,
         })
       )
       resetRestore()
@@ -191,7 +191,7 @@ const NewWorkflow = () => {
     dispatch(
       setAlert({
         type: 'success',
-        message: intl.formatMessage({ id: 'confirm.updateSuccessfully' }),
+        message: T('confirm.updateSuccessfully', intl) as string,
       })
     )
     resetRestore()
@@ -211,7 +211,7 @@ const NewWorkflow = () => {
       dispatch(
         setAlert({
           type: 'success',
-          message: intl.formatMessage({ id: 'confirm.updateSuccessfully' }),
+          message: T('confirm.updateSuccessfully', intl) as string,
         })
       )
       resetRestore()
@@ -222,7 +222,7 @@ const NewWorkflow = () => {
     dispatch(
       setAlert({
         type: 'success',
-        message: intl.formatMessage({ id: 'confirm.deleteSuccessfully' }),
+        message: T('confirm.deleteSuccessfully', intl) as string,
       })
     )
     resetRestore()
@@ -234,8 +234,8 @@ const NewWorkflow = () => {
         dispatch(
           setConfirm({
             index,
-            title: `${intl.formatMessage({ id: 'common.delete' })} ${name}`,
-            description: intl.formatMessage({ id: 'newW.node.deleteDesc' }),
+            title: `${T('common.delete', intl)} ${name}`,
+            description: T('newW.node.deleteDesc', intl) as string,
             handle: handleAction(action, index),
           })
         )

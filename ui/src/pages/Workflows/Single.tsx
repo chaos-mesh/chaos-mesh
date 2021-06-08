@@ -128,7 +128,7 @@ const Single = () => {
           dispatch(
             setAlert({
               type: 'success',
-              message: intl.formatMessage({ id: `confirm.${action}Successfully` }),
+              message: T(`confirm.${action}Successfully`, intl),
             })
           )
 
@@ -190,7 +190,7 @@ const Single = () => {
         dispatch(
           setAlert({
             type: 'success',
-            message: intl.formatMessage({ id: `confirm.updateSuccessfully` }),
+            message: T(`confirm.updateSuccessfully`, intl),
           })
         )
 
@@ -210,8 +210,8 @@ const Single = () => {
                 size="small"
                 startIcon={<DeleteOutlinedIcon />}
                 onClick={handleSelect({
-                  title: `${intl.formatMessage({ id: 'common.delete' })} ${name}`,
-                  description: intl.formatMessage({ id: 'workflows.deleteDesc' }),
+                  title: `${T('common.delete', intl)} ${name}`,
+                  description: T('workflows.deleteDesc', intl),
                   handle: handleAction('delete', { namespace, name }),
                 })}
               >

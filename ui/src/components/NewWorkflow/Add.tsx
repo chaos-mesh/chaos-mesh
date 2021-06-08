@@ -121,7 +121,7 @@ const Add = () => {
         dispatch(
           setAlert({
             type: 'success',
-            message: intl.formatMessage({ id: 'confirm.updateSuccessfully' }),
+            message: T('confirm.updateSuccessfully', intl),
           })
         )
       } else {
@@ -154,7 +154,7 @@ const Add = () => {
       dispatch(
         setAlert({
           type: 'warning',
-          message: intl.formatMessage({ id: 'newW.messages.m1' }),
+          message: T('newW.messages.m1', intl),
         })
       )
 

@@ -69,7 +69,7 @@ const RBACGenerator = () => {
     dispatch(
       setAlert({
         type: 'success',
-        message: intl.formatMessage({ id: 'common.copied' }),
+        message: T('common.copied', intl),
       })
     )
   }

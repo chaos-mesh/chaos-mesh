@@ -211,7 +211,7 @@ const EventsTable: React.FC<EventsTableProps> = ({ events: allEvents }) => {
                 onRowsPerPageChange={handleRowsPerPageChange}
                 ActionsComponent={TablePaginationActions as any}
                 labelDisplayedRows={({ from, to, count }) => `${from} - ${to} of ${count}`}
-                labelRowsPerPage={intl.formatMessage({ id: 'events.eventsPerPage' })}
+                labelRowsPerPage={T('events.eventsPerPage', intl)}
               />
             )}
           </TableRow>

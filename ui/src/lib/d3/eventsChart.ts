@@ -204,10 +204,10 @@ export default function gen({
     .attr('class', `chaos-event-tooltip${theme === 'light' ? '' : ' dark'}`)
 
   function genTooltipContent(d: Event) {
-    return `<b>${intl.formatMessage({ id: 'events.event.experiment' })}: ${d.name}</b>
+    return `<b>${T('events.event.experiment' })}: ${d.name}</b>
             <br />
             <span class="secondary">
-              ${intl.formatMessage({ id: 'events.event.started' })}: ${format(d.created_at)}
+              ${T('events.event.started' })}: ${format(d.created_at)}
             </span>
             `
   }

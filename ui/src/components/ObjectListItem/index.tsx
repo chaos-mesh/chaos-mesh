@@ -35,8 +35,8 @@ const ObjectListItem: React.FC<ObjectListItemProps> = ({ data, type = 'experimen
     switch (action) {
       case 'archive':
         onSelect({
-          title: `${intl.formatMessage({ id: 'archives.single' })} ${data.name}`,
-          description: intl.formatMessage({ id: `${type}s.deleteDesc` }),
+          title: `${T('archives.single', intl)} ${data.name}`,
+          description: T(`${type}s.deleteDesc`, intl),
           action,
           uuid: data.uid,
         })
@@ -44,8 +44,8 @@ const ObjectListItem: React.FC<ObjectListItemProps> = ({ data, type = 'experimen
         return
       case 'pause':
         onSelect({
-          title: `${intl.formatMessage({ id: 'common.pause' })} ${data.name}`,
-          description: intl.formatMessage({ id: 'experiments.pauseDesc' }),
+          title: `${T('common.pause', intl)} ${data.name}`,
+          description: T('experiments.pauseDesc', intl),
           action,
           uuid: data.uid,
         })
@@ -53,8 +53,8 @@ const ObjectListItem: React.FC<ObjectListItemProps> = ({ data, type = 'experimen
         return
       case 'start':
         onSelect({
-          title: `${intl.formatMessage({ id: 'common.start' })} ${data.name}`,
-          description: intl.formatMessage({ id: 'experiments.startDesc' }),
+          title: `${T('common.start', intl)} ${data.name}`,
+          description: T('experiments.startDesc', intl),
           action,
           uuid: data.uid,
         })
@@ -62,8 +62,8 @@ const ObjectListItem: React.FC<ObjectListItemProps> = ({ data, type = 'experimen
         return
       case 'delete':
         onSelect({
-          title: `${intl.formatMessage({ id: 'common.delete' })} ${data.name}`,
-          description: intl.formatMessage({ id: 'archives.deleteDesc' }),
+          title: `${T('common.delete', intl)} ${data.name}`,
+          description: T('archives.deleteDesc', intl),
           action,
           uuid: data.uid,
         })
@@ -99,42 +99,21 @@ const ObjectListItem: React.FC<ObjectListItemProps> = ({ data, type = 'experimen
       </Typography>
       {type === 'experiment' &&
         ((data as Experiment).status === 'paused' ? (
-          <IconButton
-            color="primary"
-            title={intl.formatMessage({ id: 'common.start' })}
-            size="small"
-            onClick={handleAction('start')}
-          >
+          <IconButton color="primary" title={T('common.start', intl)} size="small" onClick={handleAction('start')}>
             <PlayCircleOutlineIcon />
           </IconButton>
         ) : (data as Experiment).status !== 'finished' ? (
-          <IconButton
-            color="primary"
-            title={intl.formatMessage({ id: 'common.pause' })}
-            size="small"
-            onClick={handleAction('pause')}
-          >
+          <IconButton color="primary" title={T('common.pause', intl)} size="small" onClick={handleAction('pause')}>
             <PauseCircleOutlineIcon />
           </IconButton>
         ) : null)}
       {type !== 'archive' && (
-        <IconButton
-          color="primary"
-          title={intl.formatMessage({ id: 'archives.single' })}
-          aria-label={intl.formatMessage({ id: 'archives.single' })}
-          size="small"
-          onClick={handleAction('archive')}
-        >
+        <IconButton color="primary" title={T('archives.single', intl)} size="small" onClick={handleAction('archive')}>
           <ArchiveOutlinedIcon />
         </IconButton>
       )}
       {type === 'archive' && (
-        <IconButton
-          color="primary"
-          title={intl.formatMessage({ id: 'common.delete' })}
-          size="small"
-          onClick={handleAction('delete')}
-        >
+        <IconButton color="primary" title={T('common.delete', intl)} size="small" onClick={handleAction('delete')}>
           <DeleteOutlinedIcon />
         </IconButton>
       )}

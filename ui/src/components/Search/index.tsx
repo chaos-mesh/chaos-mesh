@@ -11,7 +11,6 @@ import {
 import React, { useMemo, useState } from 'react'
 
 import { Archive } from 'api/archives.type'
-import { Event } from 'api/events.type'
 import { Experiment } from 'api/experiments.type'
 import FingerprintIcon from '@material-ui/icons/Fingerprint'
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline'
@@ -92,9 +91,7 @@ const Search: React.FC = () => {
   )
 
   const groupBy = (option: Option) =>
-    option.is === 'experiment'
-      ? intl.formatMessage({ id: 'experiments.title' })
-      : intl.formatMessage({ id: 'archives.title' })
+    (option.is === 'experiment' ? T('experiments.title', intl) : T('archives.title', intl)) as string
 
   const getOptionLabel = (option: Option) => option.name
 

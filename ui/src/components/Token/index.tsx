@@ -45,7 +45,7 @@ const Token: React.FC<TokenProps> = ({ onSubmitCallback }) => {
       dispatch(
         setAlert({
           type: 'warning',
-          message: intl.formatMessage({ id: 'settings.addToken.duplicateDesc' }),
+          message: T('settings.addToken.duplicateDesc', intl),
         })
       )
 

@@ -52,7 +52,7 @@ const DataTable: React.FC<DataTableProps> = ({ data, fetchData }) => {
           dispatch(
             setAlert({
               type: 'success',
-              message: intl.formatMessage({ id: `confirm.${action}Successfully` }),
+              message: T(`confirm.${action}Successfully` }),
             })
           )
 
@@ -95,12 +95,12 @@ const DataTable: React.FC<DataTableProps> = ({ data, fetchData }) => {
                   <Space direction="row">
                     <IconButton
                       color="primary"
-                      title={intl.formatMessage({ id: 'common.delete' })}
+                      title={T('common.delete' })}
                       component="span"
                       size="small"
                       onClick={handleSelect({
-                        title: `${intl.formatMessage({ id: 'common.delete' })} ${d.name}`,
-                        description: intl.formatMessage({ id: 'workflows.deleteDesc' }),
+                        title: `${T('common.delete' })} ${d.name}`,
+                        description: T('workflows.deleteDesc', intl),
                         handle: handleAction('delete', { namespace: d.namespace, name: d.name }),
                       })}
                     >

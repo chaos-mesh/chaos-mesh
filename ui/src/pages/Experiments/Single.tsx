@@ -86,8 +86,8 @@ export default function Single() {
       case 'archive':
         dispatch(
           setConfirm({
-            title: `${intl.formatMessage({ id: 'archives.single' })} ${single!.name}`,
-            description: intl.formatMessage({ id: 'experiments.deleteDesc' }),
+            title: `${T('archives.single', intl)} ${single!.name}`,
+            description: T('experiments.deleteDesc', intl),
             handle: handleAction('archive'),
           })
         )
@@ -96,8 +96,8 @@ export default function Single() {
       case 'pause':
         dispatch(
           setConfirm({
-            title: `${intl.formatMessage({ id: 'common.pause' })} ${single!.name}`,
-            description: intl.formatMessage({ id: 'experiments.pauseDesc' }),
+            title: `${T('common.pause', intl)} ${single!.name}`,
+            description: T('experiments.pauseDesc', intl),
             handle: handleAction('pause'),
           })
         )
@@ -106,8 +106,8 @@ export default function Single() {
       case 'start':
         dispatch(
           setConfirm({
-            title: `${intl.formatMessage({ id: 'common.start' })} ${single!.name}`,
-            description: intl.formatMessage({ id: 'experiments.startDesc' }),
+            title: `${T('common.start', intl)} ${single!.name}`,
+            description: T('experiments.startDesc', intl),
             handle: handleAction('start'),
           })
         )
@@ -142,7 +142,7 @@ export default function Single() {
           dispatch(
             setAlert({
               type: 'success',
-              message: intl.formatMessage({ id: `confirm.${action}Successfully` }),
+              message: T(`confirm.${action}Successfully`, intl),
             })
           )
 
@@ -169,7 +169,7 @@ export default function Single() {
         dispatch(
           setAlert({
             type: 'success',
-            message: intl.formatMessage({ id: 'confirm.updateSuccessfully' }),
+            message: T('confirm.updateSuccessfully', intl),
           })
         )
 

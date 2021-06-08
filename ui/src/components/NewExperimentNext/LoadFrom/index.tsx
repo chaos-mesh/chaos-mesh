@@ -94,7 +94,7 @@ const LoadFrom: React.FC<LoadFromProps> = ({ loadCallback, inSchedule = false })
         dispatch(
           setAlert({
             type: 'success',
-            message: intl.formatMessage({ id: 'confirm.loadSuccessfully' }),
+            message: T('confirm.loadSuccessfully', intl),
           })
         )
       })

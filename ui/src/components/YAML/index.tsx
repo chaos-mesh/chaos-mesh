@@ -34,7 +34,7 @@ const YAML: React.FC<YAMLProps> = ({ callback, buttonProps }) => {
         dispatch(
           setAlert({
             type: 'success',
-            message: intl.formatMessage({ id: 'confirm.loadSuccessfully' }),
+            message: T('confirm.loadSuccessfully', intl),
           })
         )
       } catch (e) {

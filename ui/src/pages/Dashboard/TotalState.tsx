@@ -28,7 +28,7 @@ const TotalState: React.FC<TotalStateProps> = (props) => {
   const [s, setS] = useState<SingleData[]>([])
 
   const arcLinkLabel: PropertyAccessor<ComputedDatum<SingleData>, string> = (d) =>
-    d.value + ' ' + intl.formatMessage({ id: `experiments.state.${d.id}` })
+    d.value + ' ' + T(`experiments.state.${d.id}`, intl)
 
   const tooltip = ({ datum }: PieTooltipProps<SingleData>) => (
     <Box
@@ -38,7 +38,7 @@ const TotalState: React.FC<TotalStateProps> = (props) => {
       style={{ background: theme.palette.background.default, fontSize: theme.typography.caption.fontSize }}
     >
       <Box mr={1.5} style={{ width: 12, height: 12, background: datum.color }} />
-      {(datum.value < 1 ? 0 : datum.value) + ' ' + intl.formatMessage({ id: `experiments.state.${datum.id}` })}
+      {(datum.value < 1 ? 0 : datum.value) + ' ' + T(`experiments.state.${datum.id}`, intl)}
     </Box>
   )
 
@@ -50,7 +50,7 @@ const TotalState: React.FC<TotalStateProps> = (props) => {
           setS(
             (Object.entries(resp.data) as [keyof StateOfExperiments, number][]).map(([k, v]) => ({
               id: k,
-              label: intl.formatMessage({ id: `experiments.state.${k}` }),
+              label: T(`experiments.state.${k}`, intl),
               value: v === 0 ? 0.01 : v,
             }))
           )

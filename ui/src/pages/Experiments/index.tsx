@@ -111,7 +111,7 @@ export default function Experiments() {
           dispatch(
             setAlert({
               type: 'success',
-              message: intl.formatMessage({ id: `confirm.${action}Successfully` }),
+              message: T(`confirm.${action}Successfully`, intl),
             })
           )
 
@@ -136,8 +136,8 @@ export default function Experiments() {
 
   const handleBatchDelete = () =>
     handleSelect({
-      title: `${intl.formatMessage({ id: 'experiments.deleteMulti' })}`,
-      description: intl.formatMessage({ id: 'experiments.deleteDesc' }),
+      title: T('experiments.deleteMulti', intl),
+      description: T('experiments.deleteDesc', intl),
       handle: handleAction('archiveMulti'),
     })
 

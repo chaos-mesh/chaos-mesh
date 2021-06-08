@@ -101,7 +101,7 @@ export default function Archives() {
           dispatch(
             setAlert({
               type: 'success',
-              message: intl.formatMessage({ id: `confirm.${action}Successfully` }),
+              message: T(`confirm.${action}Successfully`, intl),
             })
           )
 
@@ -126,8 +126,8 @@ export default function Archives() {
 
   const handleBatchDelete = () =>
     handleSelect({
-      title: `${intl.formatMessage({ id: 'archives.deleteMulti' })}`,
-      description: intl.formatMessage({ id: 'archives.deleteDesc' }),
+      title: T('archives.deleteMulti', intl),
+      description: T('archives.deleteDesc', intl),
       handle: handleAction('deleteMulti'),
     })
 
