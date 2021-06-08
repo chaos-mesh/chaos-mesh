@@ -29,7 +29,6 @@ var _ = Describe("gcpchaos_webhook", func() {
 				execute func(chaos *GcpChaos) error
 				expect  string
 			}
-			duration := "400s"
 			tcs := []TestCase{
 				{
 					name: "simple ValidateCreate for DiskLoss",
@@ -40,42 +39,6 @@ var _ = Describe("gcpchaos_webhook", func() {
 						},
 						Spec: GcpChaosSpec{
 							Action: DiskLoss,
-						},
-					},
-					execute: func(chaos *GcpChaos) error {
-						return chaos.ValidateCreate()
-					},
-					expect: "error",
-				},
-				{
-					name: "only define the Scheduler and execute NodeStop",
-					chaos: GcpChaos{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: metav1.NamespaceDefault,
-							Name:      "foo4",
-						},
-						Spec: GcpChaosSpec{
-							Scheduler: &SchedulerSpec{
-								Cron: "@every 10m",
-							},
-							Action: NodeStop,
-						},
-					},
-					execute: func(chaos *GcpChaos) error {
-						return chaos.ValidateCreate()
-					},
-					expect: "error",
-				},
-				{
-					name: "only define the Duration and execute NodeStop",
-					chaos: GcpChaos{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: metav1.NamespaceDefault,
-							Name:      "foo5",
-						},
-						Spec: GcpChaosSpec{
-							Action:   NodeStop,
-							Duration: &duration,
 						},
 					},
 					execute: func(chaos *GcpChaos) error {

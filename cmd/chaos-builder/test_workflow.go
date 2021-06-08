@@ -21,7 +21,7 @@ import (
 
 // struct workflowTestCodeGenerator will render content of one file for testing the coupling with chaosKindMap
 type workflowTestCodeGenerator struct {
-	// name of each Kind of chaos, for example: PodChaos, IoChaos, DNSChaos
+	// name of each Kind of chaos, for example: PodChaos, IOChaos, DNSChaos
 	chaosTypes []string
 }
 
@@ -48,7 +48,7 @@ func (it *workflowTestCodeGenerator) Render() string {
 %s
 %s
 `,
-		codeHeader,
+		boilerplate,
 		imports,
 		testMethods,
 	)

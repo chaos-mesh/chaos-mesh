@@ -98,12 +98,14 @@ type ScopeInfo struct {
 
 // SelectorInfo defines the selector options of the Experiment.
 type SelectorInfo struct {
-	NamespaceSelectors  []string                          `json:"namespace_selectors" binding:"NamespaceSelectorsValid"`
+	Namespaces          []string                          `json:"namespaces" binding:"NamespaceSelectorsValid"`
+	Nodes               []string                          `json:"nodes,omitempty"`
+	NodeSelectors       map[string]string                 `json:"node_selectors,omitempty"`
+	FieldSelectors      map[string]string                 `json:"field_selectors" binding:"MapSelectorsValid"`
 	LabelSelectors      map[string]string                 `json:"label_selectors" binding:"MapSelectorsValid"`
 	ExpressionSelectors []metav1.LabelSelectorRequirement `json:"expression_selectors" binding:"RequirementSelectorsValid"`
 	AnnotationSelectors map[string]string                 `json:"annotation_selectors" binding:"MapSelectorsValid"`
-	FieldSelectors      map[string]string                 `json:"field_selectors" binding:"MapSelectorsValid"`
-	PhaseSelector       []string                          `json:"phase_selectors" binding:"PhaseSelectorsValid"`
+	PodPhaseSelectors   []string                          `json:"phase_selectors" binding:"PhaseSelectorsValid"`
 
 	// Pods is a map of string keys and a set values that used to select pods.
 	// The key defines the namespace which pods belong,
@@ -112,9 +114,9 @@ type SelectorInfo struct {
 }
 
 // ParseSelector parses SelectorInfo to v1alpha1.SelectorSpec
-func (s *SelectorInfo) ParseSelector() v1alpha1.SelectorSpec {
-	selector := v1alpha1.SelectorSpec{}
-	selector.Namespaces = append(selector.Namespaces, s.NamespaceSelectors...)
+func (s *SelectorInfo) ParseSelector() v1alpha1.PodSelectorSpec {
+	selector := v1alpha1.PodSelectorSpec{}
+	selector.Namespaces = append(selector.Namespaces, s.Namespaces...)
 
 	selector.LabelSelectors = make(map[string]string)
 	for key, val := range s.LabelSelectors {
@@ -133,7 +135,7 @@ func (s *SelectorInfo) ParseSelector() v1alpha1.SelectorSpec {
 		selector.FieldSelectors[key] = val
 	}
 
-	selector.PodPhaseSelectors = append(selector.PodPhaseSelectors, s.PhaseSelector...)
+	selector.PodPhaseSelectors = append(selector.PodPhaseSelectors, s.PodPhaseSelectors...)
 
 	if s.Pods != nil {
 		selector.Pods = s.Pods
@@ -144,10 +146,10 @@ func (s *SelectorInfo) ParseSelector() v1alpha1.SelectorSpec {
 
 // TargetInfo defines the information of target objects.
 type TargetInfo struct {
-	Kind         string            `json:"kind" binding:"required,oneof=PodChaos NetworkChaos IoChaos KernelChaos TimeChaos StressChaos DNSChaos AwsChaos GcpChaos"`
+	Kind         string            `json:"kind" binding:"required,oneof=PodChaos NetworkChaos IOChaos KernelChaos TimeChaos StressChaos DNSChaos AwsChaos GcpChaos"`
 	PodChaos     *PodChaosInfo     `json:"pod_chaos,omitempty" binding:"RequiredFieldEqual=Kind:PodChaos"`
 	NetworkChaos *NetworkChaosInfo `json:"network_chaos,omitempty" binding:"RequiredFieldEqual=Kind:NetworkChaos"`
-	IOChaos      *IOChaosInfo      `json:"io_chaos,omitempty" binding:"RequiredFieldEqual=Kind:IoChaos"`
+	IOChaos      *IOChaosInfo      `json:"io_chaos,omitempty" binding:"RequiredFieldEqual=Kind:IOChaos"`
 	KernelChaos  *KernelChaosInfo  `json:"kernel_chaos,omitempty" binding:"RequiredFieldEqual=Kind:KernelChaos"`
 	TimeChaos    *TimeChaosInfo    `json:"time_chaos,omitempty" binding:"RequiredFieldEqual=Kind:TimeChaos"`
 	StressChaos  *StressChaosInfo  `json:"stress_chaos,omitempty" binding:"RequiredFieldEqual=Kind:StressChaos"`
@@ -158,15 +160,14 @@ type TargetInfo struct {
 
 // SchedulerInfo defines the scheduler information.
 type SchedulerInfo struct {
-	Cron     string `json:"cron" binding:"CronValid"`
 	Duration string `json:"duration" binding:"DurationValid"`
 }
 
 // PodChaosInfo defines the basic information of pod chaos for creating a new PodChaos.
 type PodChaosInfo struct {
-	Action        string `json:"action" binding:"oneof='' 'pod-kill' 'pod-failure' 'container-kill'"`
-	ContainerName string `json:"container_name"`
-	GracePeriod   int64  `json:"grace_period"`
+	Action         string   `json:"action" binding:"oneof='' 'pod-kill' 'pod-failure' 'container-kill'"`
+	ContainerNames []string `json:"container_names,omitempty"`
+	GracePeriod    int64    `json:"grace_period"`
 }
 
 // NetworkChaosInfo defines the basic information of network chaos for creating a new NetworkChaos.
@@ -219,6 +220,7 @@ type StressChaosInfo struct {
 type DNSChaosInfo struct {
 	Action             string   `json:"action" binding:"oneof='error' 'random'"`
 	DomainNamePatterns []string `json:"patterns"`
+	ContainerNames     []string `json:"container_names,omitempty"`
 }
 
 // AwsChaosInfo defines the basic information of aws chaos for creating a new AwsChaos.
@@ -287,7 +289,7 @@ func (e *Experiment) ParseNetworkChaos() (KubeObjectDesc, error) {
 
 // ParseIOChaos Parse IOChaos JSON string into KubeObjectDesc.
 func (e *Experiment) ParseIOChaos() (KubeObjectDesc, error) {
-	chaos := &v1alpha1.IoChaos{}
+	chaos := &v1alpha1.IOChaos{}
 	if err := json.Unmarshal([]byte(e.Experiment), &chaos); err != nil {
 		return KubeObjectDesc{}, err
 	}

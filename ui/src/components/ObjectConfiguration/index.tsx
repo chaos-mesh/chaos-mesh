@@ -52,7 +52,7 @@ const ObjectConfiguration: React.FC<ObjectConfigurationProps> = ({ config, verti
               </TableCell>
             </TableRow>
 
-            {['PodChaos', 'NetworkChaos', 'IoChaos'].includes(config.kind) && (
+            {['PodChaos', 'NetworkChaos', 'IOChaos'].includes(config.kind) && (
               <TableRow>
                 <TableCell>{T('newE.target.action')}</TableCell>
                 <TableCell>

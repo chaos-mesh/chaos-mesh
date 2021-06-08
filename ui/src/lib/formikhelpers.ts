@@ -66,7 +66,7 @@ export function parseSubmit(e: Experiment) {
     }
   }
 
-  if (kind === 'IoChaos' && values.target.io_chaos.action === 'attrOverride') {
+  if (kind === 'IOChaos' && values.target.io_chaos.action === 'attrOverride') {
     values.target.io_chaos.attr = helper1(values.target.io_chaos.attr as string[], (s: string) => parseInt(s, 10))
   }
 
@@ -138,7 +138,7 @@ export function yamlToExperiment(yamlObj: any): any {
     }
   }
 
-  if (kind === 'IoChaos' && spec.attr) {
+  if (kind === 'IOChaos' && spec.attr) {
     spec.attr = selectorsToArr(spec.attr, ':')
   }
 

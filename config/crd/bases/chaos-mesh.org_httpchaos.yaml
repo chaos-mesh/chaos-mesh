@@ -1,10 +1,10 @@
 
 ---
-apiVersion: apiextensions.k8s.io/v1beta1
+apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.2.5
+    controller-gen.kubebuilder.io/version: v0.4.1
   creationTimestamp: null
   name: httpchaos.chaos-mesh.org
 spec:
@@ -14,264 +14,257 @@ spec:
     listKind: HTTPChaosList
     plural: httpchaos
     singular: httpchaos
-  preserveUnknownFields: false
   scope: Namespaced
-  validation:
-    openAPIV3Schema:
-      description: HTTPChaos is the Schema for the HTTPchaos API
-      properties:
-        apiVersion:
-          description: 'APIVersion defines the versioned schema of this representation
-            of an object. Servers should convert recognized schemas to the latest
-            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
-          type: string
-        kind:
-          description: 'Kind is a string value representing the REST resource this
-            object represents. Servers may infer this from the endpoint the client
-            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
-          type: string
-        metadata:
-          type: object
-        spec:
-          properties:
-            action:
-              description: 'Action defines the specific pod chaos action. Supported
-                action: delay | abort | mixed Default action: delay'
-              enum:
-              - delay
-              - abort
-              - mixed
-              type: string
-            duration:
-              description: Duration represents the duration of the chaos action. It
-                is required when the action is `PodFailureAction`. A duration string
-                is a possibly signed sequence of decimal numbers, each with optional
-                fraction and a unit suffix, such as "300ms", "-1.5h" or "2h45m". Valid
-                time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
-              type: string
-            headers:
-              description: Specifies how the header match will be performed to route
-                the request.
-              items:
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: HTTPChaos is the Schema for the HTTPchaos API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            properties:
+              abort:
+                description: Abort is a rule to abort a http session.
+                type: boolean
+              code:
+                description: Code is a rule to select target by http status code in response.
+                format: int32
+                type: integer
+              delay:
+                description: Delay represents the delay of the target request/response. A duration string is a possibly unsigned sequence of decimal numbers, each with optional fraction and a unit suffix, such as "300ms", "2h45m". Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+                type: string
+              duration:
+                description: Duration represents the duration of the chaos action.
+                type: string
+              method:
+                description: Method is a rule to select target by http method in request.
+                type: string
+              mode:
+                description: 'Mode defines the mode to run chaos action. Supported mode: one / all / fixed / fixed-percent / random-max-percent'
+                enum:
+                - one
+                - all
+                - fixed
+                - fixed-percent
+                - random-max-percent
+                type: string
+              patch:
+                description: Patch is a rule to patch some contents in target.
                 properties:
-                  exact_match:
-                    type: string
-                  invert_match:
-                    type: string
-                  name:
-                    type: string
-                  prefix_match:
-                    type: string
-                  present_match:
-                    type: string
-                  range_match:
-                    type: string
-                  regex_match:
-                    type: string
-                  safe_regex_match:
-                    type: string
-                  suffix_match:
-                    type: string
-                required:
-                - name
-                type: object
-              type: array
-            mode:
-              description: 'Mode defines the mode to run chaos action. Supported mode:
-                one / all / fixed / fixed-percent / random-max-percent'
-              enum:
-              - one
-              - all
-              - fixed
-              - fixed-percent
-              - random-max-percent
-              type: string
-            percent:
-              description: 'Percent defines the percentage of injection errors and
-                provides a number from 0-100. default: 100.'
-              type: string
-            scheduler:
-              description: Scheduler defines some schedule rules to control the running
-                time of the chaos experiment about pods.
-              properties:
-                cron:
-                  description: "Cron defines a cron job rule. \n Some rule examples:
-                    \"0 30 * * * *\" means to \"Every hour on the half hour\" \"@hourly\"
-                    \     means to \"Every hour\" \"@every 1h30m\" means to \"Every
-                    hour thirty\" \n More rule info: https://godoc.org/github.com/robfig/cron"
-                  type: string
-              required:
-              - cron
-              type: object
-            selector:
-              description: Selector is used to select pods that are used to inject
-                chaos action.
-              properties:
-                annotationSelectors:
-                  additionalProperties:
-                    type: string
-                  description: Map of string keys and values that can be used to select
-                    objects. A selector based on annotations.
-                  type: object
-                expressionSelectors:
-                  description: a slice of label selector expressions that can be used
-                    to select objects. A list of selectors based on set-based label
-                    expressions.
-                  items:
-                    description: A label selector requirement is a selector that contains
-                      values, a key, and an operator that relates the key and values.
+                  body:
+                    description: Body is a rule to patch message body of target.
                     properties:
-                      key:
-                        description: key is the label key that the selector applies
-                          to.
+                      type:
+                        description: Type represents the patch type, only support `JSON` as [merge patch json](https://tools.ietf.org/html/rfc7396) currently.
                         type: string
-                      operator:
-                        description: operator represents a key's relationship to a
-                          set of values. Valid operators are In, NotIn, Exists and
-                          DoesNotExist.
+                      value:
+                        description: Value is the patch contents.
                         type: string
-                      values:
-                        description: values is an array of string values. If the operator
-                          is In or NotIn, the values array must be non-empty. If the
-                          operator is Exists or DoesNotExist, the values array must
-                          be empty. This array is replaced during a strategic merge
-                          patch.
-                        items:
-                          type: string
-                        type: array
                     required:
-                    - key
-                    - operator
+                    - type
+                    - value
                     type: object
-                  type: array
-                fieldSelectors:
-                  additionalProperties:
+                  headers:
+                    description: 'Headers is a rule to append http headers of target. For example: `[["Set-Cookie", "<one cookie>"], ["Set-Cookie", "<another cookie>"]]`.'
+                    items:
+                      items:
+                        type: string
+                      type: array
+                    type: array
+                  queries:
+                    description: 'Queries is a rule to append uri queries of target(Request only). For example: `[["foo", "bar"], ["foo", "unknown"]]`.'
+                    items:
+                      items:
+                        type: string
+                      type: array
+                    type: array
+                type: object
+              path:
+                description: Path is a rule to select target by uri path in http request.
+                type: string
+              port:
+                description: Port represents the target port to be proxy of.
+                format: int32
+                type: integer
+              replace:
+                description: Replace is a rule to replace some contents in target.
+                properties:
+                  body:
+                    description: Body is a rule to replace http message body in target.
+                    format: byte
                     type: string
-                  description: Map of string keys and values that can be used to select
-                    objects. A selector based on fields.
-                  type: object
-                labelSelectors:
-                  additionalProperties:
+                  code:
+                    description: Code is a rule to replace http status code in response.
+                    format: int32
+                    type: integer
+                  headers:
+                    additionalProperties:
+                      type: string
+                    description: Headers is a rule to replace http headers of target. The key-value pairs represent header name and header value pairs.
+                    type: object
+                  method:
+                    description: Method is a rule to replace http method in request.
                     type: string
-                  description: Map of string keys and values that can be used to select
-                    objects. A selector based on labels.
-                  type: object
-                namespaces:
-                  description: Namespaces is a set of namespace to which objects belong.
-                  items:
+                  path:
+                    description: Path is rule to to replace uri path in http request.
                     type: string
-                  type: array
-                nodeSelectors:
-                  additionalProperties:
-                    type: string
-                  description: Map of string keys and values that can be used to select
-                    nodes. Selector which must match a node's labels, and objects
-                    must belong to these selected nodes.
-                  type: object
-                nodes:
-                  description: Nodes is a set of node name and objects must belong
-                    to these nodes.
-                  items:
-                    type: string
-                  type: array
-                podPhaseSelectors:
-                  description: 'PodPhaseSelectors is a set of condition of a pod at
-                    the current time. supported value: Pending / Running / Succeeded
-                    / Failed / Unknown'
-                  items:
-                    type: string
-                  type: array
-                pods:
-                  additionalProperties:
+                  queries:
+                    additionalProperties:
+                      type: string
+                    description: 'Queries is a rule to replace uri queries in http request. For example, with value `{ "foo": "unknown" }`, the `/?foo=bar` will be altered to `/?foo=unknown`,'
+                    type: object
+                type: object
+              request_headers:
+                additionalProperties:
+                  type: string
+                description: RequestHeaders is a rule to select target by http headers in request. The key-value pairs represent header name and header value pairs.
+                type: object
+              response_headers:
+                additionalProperties:
+                  type: string
+                description: ResponseHeaders is a rule to select target by http headers in response. The key-value pairs represent header name and header value pairs.
+                type: object
+              selector:
+                description: Selector is used to select pods that are used to inject chaos action.
+                properties:
+                  annotationSelectors:
+                    additionalProperties:
+                      type: string
+                    description: Map of string keys and values that can be used to select objects. A selector based on annotations.
+                    type: object
+                  expressionSelectors:
+                    description: a slice of label selector expressions that can be used to select objects. A list of selectors based on set-based label expressions.
+                    items:
+                      description: A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.
+                      properties:
+                        key:
+                          description: key is the label key that the selector applies to.
+                          type: string
+                        operator:
+                          description: operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+                          type: string
+                        values:
+                          description: values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+                          items:
+                            type: string
+                          type: array
+                      required:
+                      - key
+                      - operator
+                      type: object
+                    type: array
+                  fieldSelectors:
+                    additionalProperties:
+                      type: string
+                    description: Map of string keys and values that can be used to select objects. A selector based on fields.
+                    type: object
+                  labelSelectors:
+                    additionalProperties:
+                      type: string
+                    description: Map of string keys and values that can be used to select objects. A selector based on labels.
+                    type: object
+                  namespaces:
+                    description: Namespaces is a set of namespace to which objects belong.
                     items:
                       type: string
                     type: array
-                  description: Pods is a map of string keys and a set values that
-                    used to select pods. The key defines the namespace which pods
-                    belong, and the each values is a set of pod names.
-                  type: object
-              type: object
-            value:
-              description: Value is required when the mode is set to `FixedPodMode`
-                / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
-                provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
-                provide a number from 0-100 to specify the percent of pods the server
-                can do chaos action. IF `RandomMaxPercentPodMod`,  provide a number
-                from 0-100 to specify the max percent of pods to do chaos action
-              type: string
-          required:
-          - action
-          - mode
-          - selector
-          type: object
-        status:
-          properties:
-            experiment:
-              description: Experiment records the last experiment state.
-              properties:
-                duration:
-                  type: string
-                endTime:
-                  format: date-time
-                  type: string
-                phase:
-                  description: ExperimentPhase is the current status of chaos experiment.
-                  type: string
-                podRecords:
-                  items:
-                    description: PodStatus represents information about the status
-                      of a pod in chaos experiment.
-                    properties:
-                      action:
-                        type: string
-                      hostIP:
-                        type: string
-                      message:
-                        description: A brief CamelCase message indicating details
-                          about the chaos action. e.g. "delete this pod" or "pause
-                          this pod duration 5m"
-                        type: string
-                      name:
-                        type: string
-                      namespace:
-                        type: string
-                      podIP:
-                        type: string
-                    required:
-                    - action
-                    - hostIP
-                    - name
-                    - namespace
-                    - podIP
+                  nodeSelectors:
+                    additionalProperties:
+                      type: string
+                    description: Map of string keys and values that can be used to select nodes. Selector which must match a node's labels, and objects must belong to these selected nodes.
                     type: object
-                  type: array
-                reason:
-                  type: string
-                startTime:
-                  format: date-time
-                  type: string
-              type: object
-            failedMessage:
-              type: string
-            scheduler:
-              description: ScheduleStatus is the current status of chaos scheduler.
-              properties:
-                nextRecover:
-                  description: Next time when this action will be recovered
-                  format: date-time
-                  type: string
-                nextStart:
-                  description: Next time when this action will be applied again
-                  format: date-time
-                  type: string
-              type: object
-          required:
-          - experiment
-          type: object
-      type: object
-  version: v1alpha1
-  versions:
-  - name: v1alpha1
+                  nodes:
+                    description: Nodes is a set of node name and objects must belong to these nodes.
+                    items:
+                      type: string
+                    type: array
+                  podPhaseSelectors:
+                    description: 'PodPhaseSelectors is a set of condition of a pod at the current time. supported value: Pending / Running / Succeeded / Failed / Unknown'
+                    items:
+                      type: string
+                    type: array
+                  pods:
+                    additionalProperties:
+                      items:
+                        type: string
+                      type: array
+                    description: Pods is a map of string keys and a set values that used to select pods. The key defines the namespace which pods belong, and the each values is a set of pod names.
+                    type: object
+                type: object
+              target:
+                description: Target is the object to be selected and injected.
+                enum:
+                - Request
+                - Response
+                type: string
+              value:
+                description: Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`, provide an integer of pods to do chaos action. If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+                type: string
+            required:
+            - mode
+            - selector
+            - target
+            type: object
+          status:
+            properties:
+              conditions:
+                description: Conditions represents the current global condition of the chaos
+                items:
+                  properties:
+                    reason:
+                      type: string
+                    status:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - status
+                  - type
+                  type: object
+                type: array
+              experiment:
+                description: Experiment records the last experiment state.
+                properties:
+                  containerRecords:
+                    description: Records are used to track the running status
+                    items:
+                      properties:
+                        id:
+                          type: string
+                        phase:
+                          type: string
+                        selectorKey:
+                          type: string
+                      required:
+                      - id
+                      - phase
+                      - selectorKey
+                      type: object
+                    type: array
+                  desiredPhase:
+                    enum:
+                    - Run
+                    - Stop
+                    type: string
+                type: object
+              instances:
+                additionalProperties:
+                  format: int64
+                  type: integer
+                description: Instances always specifies podhttpchaos generation or empty
+                type: object
+            required:
+            - experiment
+            type: object
+        type: object
     served: true
     storage: true
 status:

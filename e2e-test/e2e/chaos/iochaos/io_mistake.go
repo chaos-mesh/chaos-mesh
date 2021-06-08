@@ -41,18 +41,22 @@ func TestcaseIOMistakeDurationForATimeThenRecover(
 	err := util.WaitE2EHelperReady(c, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
-	ioChaos := &v1alpha1.IoChaos{
+	ioChaos := &v1alpha1.IOChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "io-chaos",
 			Namespace: ns,
 		},
-		Spec: v1alpha1.IoChaosSpec{
-			Selector: v1alpha1.SelectorSpec{
-				Namespaces:     []string{ns},
-				LabelSelectors: map[string]string{"app": "io"},
+		Spec: v1alpha1.IOChaosSpec{
+			ContainerSelector: v1alpha1.ContainerSelector{
+				PodSelector: v1alpha1.PodSelector{
+					Selector: v1alpha1.PodSelectorSpec{
+						Namespaces:     []string{ns},
+						LabelSelectors: map[string]string{"app": "io"},
+					},
+					Mode: v1alpha1.OnePodMode,
+				},
 			},
 			Action:     v1alpha1.IoMistake,
-			Mode:       v1alpha1.OnePodMode,
 			VolumePath: "/var/run/data",
 			Path:       "/var/run/data/*",
 			Percent:    100,
@@ -64,9 +68,6 @@ func TestcaseIOMistakeDurationForATimeThenRecover(
 			// only inject read or write method. Other method may or may not run properly, but is not recommended
 			Methods:  []v1alpha1.IoMethod{v1alpha1.Read, v1alpha1.Write},
 			Duration: pointer.StringPtr("9m"),
-			Scheduler: &v1alpha1.SchedulerSpec{
-				Cron: "@every 10m",
-			},
 		},
 	}
 	err = cli.Create(ctx, ioChaos)
@@ -112,18 +113,22 @@ func TestcaseIOMistakeDurationForATimePauseAndUnPause(
 	err := util.WaitE2EHelperReady(c, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
-	ioChaos := &v1alpha1.IoChaos{
+	ioChaos := &v1alpha1.IOChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "io-chaos",
 			Namespace: ns,
 		},
-		Spec: v1alpha1.IoChaosSpec{
-			Selector: v1alpha1.SelectorSpec{
-				Namespaces:     []string{ns},
-				LabelSelectors: map[string]string{"app": "io"},
+		Spec: v1alpha1.IOChaosSpec{
+			ContainerSelector: v1alpha1.ContainerSelector{
+				PodSelector: v1alpha1.PodSelector{
+					Selector: v1alpha1.PodSelectorSpec{
+						Namespaces:     []string{ns},
+						LabelSelectors: map[string]string{"app": "io"},
+					},
+					Mode: v1alpha1.OnePodMode,
+				},
 			},
 			Action:     v1alpha1.IoMistake,
-			Mode:       v1alpha1.OnePodMode,
 			VolumePath: "/var/run/data",
 			Path:       "/var/run/data/*",
 			Percent:    100,
@@ -135,9 +140,6 @@ func TestcaseIOMistakeDurationForATimePauseAndUnPause(
 			// only inject read or write method. Other method may or may not run properly, but is not recommended
 			Methods:  []v1alpha1.IoMethod{v1alpha1.Read, v1alpha1.Write},
 			Duration: pointer.StringPtr("9m"),
-			Scheduler: &v1alpha1.SchedulerSpec{
-				Cron: "@every 10m",
-			},
 		},
 	}
 	err = cli.Create(ctx, ioChaos)
@@ -169,10 +171,10 @@ func TestcaseIOMistakeDurationForATimePauseAndUnPause(
 	klog.Info("pause iochaos")
 
 	err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
-		chaos := &v1alpha1.IoChaos{}
+		chaos := &v1alpha1.IOChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
 		framework.ExpectNoError(err, "get io chaos error")
-		if chaos.Status.Experiment.Phase == v1alpha1.ExperimentPhasePaused {
+		if chaos.Status.Experiment.DesiredPhase == v1alpha1.StoppedPhase {
 			return true, nil
 		}
 		return false, err
@@ -197,10 +199,10 @@ func TestcaseIOMistakeDurationForATimePauseAndUnPause(
 	framework.ExpectNoError(err, "resume chaos error")
 
 	err = wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
-		chaos := &v1alpha1.IoChaos{}
+		chaos := &v1alpha1.IOChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
 		framework.ExpectNoError(err, "get io chaos error")
-		if chaos.Status.Experiment.Phase == v1alpha1.ExperimentPhaseRunning {
+		if chaos.Status.Experiment.DesiredPhase == v1alpha1.RunningPhase {
 			return true, nil
 		}
 		return false, err
@@ -234,18 +236,23 @@ func TestcaseIOMistakeWithSpecifiedContainer(
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
 	containerName := "io"
-	ioChaos := &v1alpha1.IoChaos{
+	ioChaos := &v1alpha1.IOChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "io-chaos",
 			Namespace: ns,
 		},
-		Spec: v1alpha1.IoChaosSpec{
-			Selector: v1alpha1.SelectorSpec{
-				Namespaces:     []string{ns},
-				LabelSelectors: map[string]string{"app": "io"},
+		Spec: v1alpha1.IOChaosSpec{
+			ContainerSelector: v1alpha1.ContainerSelector{
+				PodSelector: v1alpha1.PodSelector{
+					Selector: v1alpha1.PodSelectorSpec{
+						Namespaces:     []string{ns},
+						LabelSelectors: map[string]string{"app": "io"},
+					},
+					Mode: v1alpha1.OnePodMode,
+				},
+				ContainerNames: []string{containerName},
 			},
 			Action:     v1alpha1.IoMistake,
-			Mode:       v1alpha1.OnePodMode,
 			VolumePath: "/var/run/data",
 			Path:       "/var/run/data/*",
 			Percent:    100,
@@ -254,13 +261,9 @@ func TestcaseIOMistakeWithSpecifiedContainer(
 				MaxLength:      10000,
 				Filling:        v1alpha1.Zero,
 			},
-			ContainerName: &containerName,
 			// only inject read or write method. Other method may or may not run properly, but is not recommended
 			Methods:  []v1alpha1.IoMethod{v1alpha1.Read, v1alpha1.Write},
 			Duration: pointer.StringPtr("9m"),
-			Scheduler: &v1alpha1.SchedulerSpec{
-				Cron: "@every 10m",
-			},
 		},
 	}
 	err = cli.Create(ctx, ioChaos)

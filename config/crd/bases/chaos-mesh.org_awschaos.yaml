@@ -1,10 +1,10 @@
 
 ---
-apiVersion: apiextensions.k8s.io/v1beta1
+apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.2.5
+    controller-gen.kubebuilder.io/version: v0.4.1
   creationTimestamp: null
   name: awschaos.chaos-mesh.org
 spec:
@@ -14,148 +14,106 @@ spec:
     listKind: AwsChaosList
     plural: awschaos
     singular: awschaos
-  preserveUnknownFields: false
   scope: Namespaced
-  validation:
-    openAPIV3Schema:
-      description: AwsChaos is the Schema for the awschaos API
-      properties:
-        apiVersion:
-          description: 'APIVersion defines the versioned schema of this representation
-            of an object. Servers should convert recognized schemas to the latest
-            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
-          type: string
-        kind:
-          description: 'Kind is a string value representing the REST resource this
-            object represents. Servers may infer this from the endpoint the client
-            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
-          type: string
-        metadata:
-          type: object
-        spec:
-          description: AwsChaosSpec is the content of the specification for an AwsChaos
-          properties:
-            action:
-              description: 'Action defines the specific aws chaos action. Supported
-                action: ec2-stop / ec2-restart / detach-volume Default action: ec2-stop'
-              enum:
-              - ec2-stop
-              - ec2-restart
-              - detach-volume
-              type: string
-            awsRegion:
-              description: AwsRegion defines the region of aws.
-              type: string
-            deviceName:
-              description: DeviceName indicates the name of the device. Needed in
-                detach-volume.
-              type: string
-            duration:
-              description: Duration represents the duration of the chaos action.
-              type: string
-            ec2Instance:
-              description: Ec2Instance indicates the ID of the ec2 instance.
-              type: string
-            endpoint:
-              description: Endpoint indicates the endpoint of the aws server. Just
-                used it in test now.
-              type: string
-            scheduler:
-              description: Scheduler defines some schedule rules to control the running
-                time of the chaos experiment about time.
-              properties:
-                cron:
-                  description: "Cron defines a cron job rule. \n Some rule examples:
-                    \"0 30 * * * *\" means to \"Every hour on the half hour\" \"@hourly\"
-                    \     means to \"Every hour\" \"@every 1h30m\" means to \"Every
-                    hour thirty\" \n More rule info: https://godoc.org/github.com/robfig/cron"
-                  type: string
-              required:
-              - cron
-              type: object
-            secretName:
-              description: SecretName defines the name of kubernetes secret.
-              type: string
-            volumeID:
-              description: EbsVolume indicates the ID of the EBS volume. Needed in
-                detach-volume.
-              type: string
-          required:
-          - action
-          - awsRegion
-          - ec2Instance
-          type: object
-        status:
-          description: AwsChaosStatus represents the status of an AwsChaos
-          properties:
-            experiment:
-              description: Experiment records the last experiment state.
-              properties:
-                duration:
-                  type: string
-                endTime:
-                  format: date-time
-                  type: string
-                phase:
-                  description: ExperimentPhase is the current status of chaos experiment.
-                  type: string
-                podRecords:
-                  items:
-                    description: PodStatus represents information about the status
-                      of a pod in chaos experiment.
-                    properties:
-                      action:
-                        type: string
-                      hostIP:
-                        type: string
-                      message:
-                        description: A brief CamelCase message indicating details
-                          about the chaos action. e.g. "delete this pod" or "pause
-                          this pod duration 5m"
-                        type: string
-                      name:
-                        type: string
-                      namespace:
-                        type: string
-                      podIP:
-                        type: string
-                    required:
-                    - action
-                    - hostIP
-                    - name
-                    - namespace
-                    - podIP
-                    type: object
-                  type: array
-                reason:
-                  type: string
-                startTime:
-                  format: date-time
-                  type: string
-              type: object
-            failedMessage:
-              type: string
-            scheduler:
-              description: ScheduleStatus is the current status of chaos scheduler.
-              properties:
-                nextRecover:
-                  description: Next time when this action will be recovered
-                  format: date-time
-                  type: string
-                nextStart:
-                  description: Next time when this action will be applied again
-                  format: date-time
-                  type: string
-              type: object
-          required:
-          - experiment
-          type: object
-      required:
-      - spec
-      type: object
-  version: v1alpha1
   versions:
   - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: AwsChaos is the Schema for the awschaos API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: AwsChaosSpec is the content of the specification for an AwsChaos
+            properties:
+              action:
+                description: 'Action defines the specific aws chaos action. Supported action: ec2-stop / ec2-restart / detach-volume Default action: ec2-stop'
+                enum:
+                - ec2-stop
+                - ec2-restart
+                - detach-volume
+                type: string
+              awsRegion:
+                description: AwsRegion defines the region of aws.
+                type: string
+              deviceName:
+                description: DeviceName indicates the name of the device. Needed in detach-volume.
+                type: string
+              duration:
+                description: Duration represents the duration of the chaos action.
+                type: string
+              ec2Instance:
+                description: Ec2Instance indicates the ID of the ec2 instance.
+                type: string
+              endpoint:
+                description: Endpoint indicates the endpoint of the aws server. Just used it in test now.
+                type: string
+              secretName:
+                description: SecretName defines the name of kubernetes secret.
+                type: string
+              volumeID:
+                description: EbsVolume indicates the ID of the EBS volume. Needed in detach-volume.
+                type: string
+            required:
+            - action
+            - awsRegion
+            - ec2Instance
+            type: object
+          status:
+            description: AwsChaosStatus represents the status of an AwsChaos
+            properties:
+              conditions:
+                description: Conditions represents the current global condition of the chaos
+                items:
+                  properties:
+                    reason:
+                      type: string
+                    status:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - status
+                  - type
+                  type: object
+                type: array
+              experiment:
+                description: Experiment records the last experiment state.
+                properties:
+                  containerRecords:
+                    description: Records are used to track the running status
+                    items:
+                      properties:
+                        id:
+                          type: string
+                        phase:
+                          type: string
+                        selectorKey:
+                          type: string
+                      required:
+                      - id
+                      - phase
+                      - selectorKey
+                      type: object
+                    type: array
+                  desiredPhase:
+                    enum:
+                    - Run
+                    - Stop
+                    type: string
+                type: object
+            required:
+            - experiment
+            type: object
+        required:
+        - spec
+        type: object
     served: true
     storage: true
 status:

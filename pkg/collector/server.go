@@ -16,6 +16,7 @@ package collector
 import (
 	"os"
 
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -23,7 +24,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
-	"github.com/chaos-mesh/chaos-mesh/pkg/config"
+	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 )
 
@@ -46,7 +47,8 @@ type Server struct {
 // NewServer returns a CollectorServer and Client.
 func NewServer(
 	conf *config.ChaosDashboardConfig,
-	archive core.ExperimentStore,
+	experimentArchive core.ExperimentStore,
+	scheduleArchive core.ScheduleStore,
 	event core.EventStore,
 ) (*Server, client.Client, client.Reader, *runtime.Scheme) {
 	s := &Server{}
@@ -93,12 +95,30 @@ func NewServer(
 		if err = (&ChaosCollector{
 			Client:  s.Manager.GetClient(),
 			Log:     ctrl.Log.WithName("collector").WithName(kind),
-			archive: archive,
+			archive: experimentArchive,
 			event:   event,
 		}).Setup(s.Manager, chaosKind.Chaos); err != nil {
 			log.Error(err, "unable to create collector", "collector", kind)
 			os.Exit(1)
 		}
+	}
+
+	if err = (&ScheduleCollector{
+		Client:  s.Manager.GetClient(),
+		Log:     ctrl.Log.WithName("schedule-collector").WithName(v1alpha1.KindSchedule),
+		archive: scheduleArchive,
+	}).Setup(s.Manager, &v1alpha1.Schedule{}); err != nil {
+		log.Error(err, "unable to create collector", "collector", v1alpha1.KindSchedule)
+		os.Exit(1)
+	}
+
+	if err = (&EventCollector{
+		Client: s.Manager.GetClient(),
+		Log:    ctrl.Log.WithName("event-collector").WithName("Event"),
+		event:  event,
+	}).Setup(s.Manager, &v1.Event{}); err != nil {
+		log.Error(err, "unable to create collector", "collector", v1alpha1.KindSchedule)
+		os.Exit(1)
 	}
 
 	return s, s.Manager.GetClient(), s.Manager.GetAPIReader(), s.Manager.GetScheme()

@@ -20,9 +20,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/pkg/errors"
-
 	"code.cloudfoundry.org/bytefmt"
+	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 
@@ -37,14 +36,10 @@ func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet, result *c
 		return fmt.Errorf("chaos is not stresschaos")
 	}
 	chaosStatus := stressChaos.Status.ChaosStatus
-	chaosSelector := stressChaos.Spec.GetSelector()
+	chaosSelector := stressChaos.Spec.Selector
 
 	pods, daemons, err := cm.GetPods(ctx, stressChaos.GetName(), chaosStatus, chaosSelector, c.CtrlCli)
 	if err != nil {
-		return err
-	}
-
-	if err := cm.CheckFailedMessage(ctx, chaosStatus.FailedMessage, daemons, c); err != nil {
 		return err
 	}
 

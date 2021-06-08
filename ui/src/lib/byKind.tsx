@@ -25,7 +25,7 @@ export function iconByKind(kind: ExperimentKind | 'Schedule', size: 'small' | 'l
     case 'NetworkChaos':
       icon = <NetworkIcon />
       break
-    case 'IoChaos':
+    case 'IOChaos':
       icon = <FileSystemIOIcon />
       break
     case 'KernelChaos':

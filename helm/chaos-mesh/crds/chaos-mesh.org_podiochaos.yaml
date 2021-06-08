@@ -1,204 +1,199 @@
 
 ---
-apiVersion: apiextensions.k8s.io/v1beta1
+apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.2.5
+    controller-gen.kubebuilder.io/version: v0.4.1
   creationTimestamp: null
   name: podiochaos.chaos-mesh.org
 spec:
   group: chaos-mesh.org
   names:
-    kind: PodIoChaos
-    listKind: PodIoChaosList
+    kind: PodIOChaos
+    listKind: PodIOChaosList
     plural: podiochaos
     singular: podiochaos
-  preserveUnknownFields: false
   scope: Namespaced
-  validation:
-    openAPIV3Schema:
-      description: PodIoChaos is the Schema for the podiochaos API
-      properties:
-        apiVersion:
-          description: 'APIVersion defines the versioned schema of this representation
-            of an object. Servers should convert recognized schemas to the latest
-            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
-          type: string
-        kind:
-          description: 'Kind is a string value representing the REST resource this
-            object represents. Servers may infer this from the endpoint the client
-            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
-          type: string
-        metadata:
-          type: object
-        spec:
-          description: PodIoChaosSpec defines the desired state of IoChaos
-          properties:
-            actions:
-              description: Actions are a list of IoChaos actions
-              items:
-                description: IoChaosAction defines an possible action of IoChaos
-                properties:
-                  atime:
-                    description: Timespec represents a time
-                    properties:
-                      nsec:
-                        format: int64
-                        type: integer
-                      sec:
-                        format: int64
-                        type: integer
-                    required:
-                    - nsec
-                    - sec
-                    type: object
-                  blocks:
-                    format: int64
-                    type: integer
-                  ctime:
-                    description: Timespec represents a time
-                    properties:
-                      nsec:
-                        format: int64
-                        type: integer
-                      sec:
-                        format: int64
-                        type: integer
-                    required:
-                    - nsec
-                    - sec
-                    type: object
-                  faults:
-                    description: Faults represents the fault to inject
-                    items:
-                      description: IoFault represents the fault to inject and their
-                        weight
-                      properties:
-                        errno:
-                          format: int32
-                          type: integer
-                        weight:
-                          format: int32
-                          type: integer
-                      required:
-                      - errno
-                      - weight
-                      type: object
-                    type: array
-                  gid:
-                    format: int32
-                    type: integer
-                  ino:
-                    format: int64
-                    type: integer
-                  kind:
-                    description: FileType represents type of a file
-                    type: string
-                  latency:
-                    description: Latency represents the latency to inject
-                    type: string
-                  methods:
-                    description: Methods represents the method that the action will
-                      inject in
-                    items:
-                      type: string
-                    type: array
-                  mistake:
-                    description: MistakeSpec represents the mistake to inject
-                    properties:
-                      filling:
-                        description: Filling determines what is filled in the miskate
-                          data.
-                        enum:
-                        - zero
-                        - random
-                        type: string
-                      maxLength:
-                        description: Max length of each wrong data segment in bytes
-                        format: int64
-                        minimum: 1
-                        type: integer
-                      maxOccurrences:
-                        description: There will be [1, MaxOccurrences] segments of
-                          wrong data.
-                        format: int64
-                        minimum: 1
-                        type: integer
-                    type: object
-                  mtime:
-                    description: Timespec represents a time
-                    properties:
-                      nsec:
-                        format: int64
-                        type: integer
-                      sec:
-                        format: int64
-                        type: integer
-                    required:
-                    - nsec
-                    - sec
-                    type: object
-                  nlink:
-                    format: int32
-                    type: integer
-                  path:
-                    description: Path represents a glob of injecting path
-                    type: string
-                  percent:
-                    description: Percent represents the percent probability of injecting
-                      this action
-                    type: integer
-                  perm:
-                    type: integer
-                  rdev:
-                    format: int32
-                    type: integer
-                  size:
-                    format: int64
-                    type: integer
-                  source:
-                    description: Source represents the source of current rules
-                    type: string
-                  type:
-                    description: IoChaosType represents the type of an IoChaos Action
-                    type: string
-                  uid:
-                    format: int32
-                    type: integer
-                required:
-                - path
-                - percent
-                - type
-                type: object
-              type: array
-            container:
-              description: 'TODO: support multiple different container to inject in
-                one pod'
-              type: string
-            pid:
-              description: Pid represents a running toda process id
-              format: int64
-              type: integer
-            startTime:
-              description: StartTime represents the start time of a toda process
-              format: int64
-              type: integer
-            volumeMountPath:
-              description: 'VolumeMountPath represents the target mount path It must
-                be a root of mount path now. TODO: search the mount parent of any
-                path automatically. TODO: support multiple different volume mount
-                path in one pod'
-              type: string
-          required:
-          - volumeMountPath
-          type: object
-      type: object
-  version: v1alpha1
   versions:
   - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: PodIOChaos is the Schema for the podiochaos API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: PodIOChaosSpec defines the desired state of IOChaos
+            properties:
+              actions:
+                description: Actions are a list of IOChaos actions
+                items:
+                  description: IOChaosAction defines an possible action of IOChaos
+                  properties:
+                    atime:
+                      description: Timespec represents a time
+                      properties:
+                        nsec:
+                          format: int64
+                          type: integer
+                        sec:
+                          format: int64
+                          type: integer
+                      required:
+                      - nsec
+                      - sec
+                      type: object
+                    blocks:
+                      format: int64
+                      type: integer
+                    ctime:
+                      description: Timespec represents a time
+                      properties:
+                        nsec:
+                          format: int64
+                          type: integer
+                        sec:
+                          format: int64
+                          type: integer
+                      required:
+                      - nsec
+                      - sec
+                      type: object
+                    faults:
+                      description: Faults represents the fault to inject
+                      items:
+                        description: IoFault represents the fault to inject and their weight
+                        properties:
+                          errno:
+                            format: int32
+                            type: integer
+                          weight:
+                            format: int32
+                            type: integer
+                        required:
+                        - errno
+                        - weight
+                        type: object
+                      type: array
+                    gid:
+                      format: int32
+                      type: integer
+                    ino:
+                      format: int64
+                      type: integer
+                    kind:
+                      description: FileType represents type of a file
+                      type: string
+                    latency:
+                      description: Latency represents the latency to inject
+                      type: string
+                    methods:
+                      description: Methods represents the method that the action will inject in
+                      items:
+                        type: string
+                      type: array
+                    mistake:
+                      description: MistakeSpec represents the mistake to inject
+                      properties:
+                        filling:
+                          description: Filling determines what is filled in the miskate data.
+                          enum:
+                          - zero
+                          - random
+                          type: string
+                        maxLength:
+                          description: Max length of each wrong data segment in bytes
+                          format: int64
+                          minimum: 1
+                          type: integer
+                        maxOccurrences:
+                          description: There will be [1, MaxOccurrences] segments of wrong data.
+                          format: int64
+                          minimum: 1
+                          type: integer
+                      type: object
+                    mtime:
+                      description: Timespec represents a time
+                      properties:
+                        nsec:
+                          format: int64
+                          type: integer
+                        sec:
+                          format: int64
+                          type: integer
+                      required:
+                      - nsec
+                      - sec
+                      type: object
+                    nlink:
+                      format: int32
+                      type: integer
+                    path:
+                      description: Path represents a glob of injecting path
+                      type: string
+                    percent:
+                      description: Percent represents the percent probability of injecting this action
+                      type: integer
+                    perm:
+                      type: integer
+                    rdev:
+                      format: int32
+                      type: integer
+                    size:
+                      format: int64
+                      type: integer
+                    source:
+                      description: Source represents the source of current rules
+                      type: string
+                    type:
+                      description: IOChaosType represents the type of an IOChaos Action
+                      type: string
+                    uid:
+                      format: int32
+                      type: integer
+                  required:
+                  - path
+                  - percent
+                  - type
+                  type: object
+                type: array
+              container:
+                description: 'TODO: support multiple different container to inject in one pod'
+                type: string
+              volumeMountPath:
+                description: 'VolumeMountPath represents the target mount path It must be a root of mount path now. TODO: search the mount parent of any path automatically. TODO: support multiple different volume mount path in one pod'
+                type: string
+            required:
+            - volumeMountPath
+            type: object
+          status:
+            properties:
+              failedMessage:
+                type: string
+              observedGeneration:
+                format: int64
+                type: integer
+              pid:
+                description: Pid represents a running toda process id
+                format: int64
+                type: integer
+              startTime:
+                description: StartTime represents the start time of a toda process
+                format: int64
+                type: integer
+            type: object
+        type: object
     served: true
     storage: true
+    subresources:
+      status: {}
 status:
   acceptedNames:
     kind: ""

@@ -21,15 +21,10 @@ import (
 	"io"
 	"regexp"
 	"strings"
-	"time"
-
-	"google.golang.org/grpc"
-
-	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
-	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 
 	"github.com/fatih/color"
 	"github.com/pkg/errors"
+	"google.golang.org/grpc"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -42,8 +37,10 @@ import (
 	ctrlconfig "github.com/chaos-mesh/chaos-mesh/controllers/config"
 	daemonClient "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/client"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
+	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 	"github.com/chaos-mesh/chaos-mesh/pkg/portforward"
-	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
 )
 
 type Color string
@@ -179,23 +176,14 @@ func InitClientSet() (*ClientSet, error) {
 }
 
 // GetPods returns pod list and corresponding chaos daemon
-func GetPods(ctx context.Context, chaosName string, status v1alpha1.ChaosStatus, selectorSpec v1alpha1.SelectorSpec, c client.Client) ([]v1.Pod, []v1.Pod, error) {
+func GetPods(ctx context.Context, chaosName string, status v1alpha1.ChaosStatus, selectorSpec v1alpha1.PodSelectorSpec, c client.Client) ([]v1.Pod, []v1.Pod, error) {
 	// get podName
-	failedMessage := status.FailedMessage
+	failedMessage := "" // TODO: fill in message
 	if failedMessage != "" {
 		PrettyPrint(fmt.Sprintf("chaos %s failed with: %s", chaosName, failedMessage), 0, Red)
 	}
 
-	phase := status.Experiment.Phase
-	nextStart := status.Scheduler.NextStart
-
-	if phase == v1alpha1.ExperimentPhaseWaiting {
-		waitTime := nextStart.Sub(time.Now())
-		L().WithName("GetPods").V(1).Info(fmt.Sprintf("Waiting for chaos %s to start, in %s\n", chaosName, waitTime))
-		time.Sleep(waitTime)
-	}
-
-	pods, err := selector.SelectPods(ctx, c, c, selectorSpec, ctrlconfig.ControllerCfg.ClusterScoped, ctrlconfig.ControllerCfg.TargetNamespace, ctrlconfig.ControllerCfg.EnableFilterNamespace)
+	pods, err := pod.SelectPods(ctx, c, c, selectorSpec, ctrlconfig.ControllerCfg.ClusterScoped, ctrlconfig.ControllerCfg.TargetNamespace, false)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "failed to SelectPods")
 	}
@@ -204,21 +192,20 @@ func GetPods(ctx context.Context, chaosName string, status v1alpha1.ChaosStatus,
 		return nil, nil, fmt.Errorf("no pods found for chaos %s, selector: %s", chaosName, selectorSpec)
 	}
 
-	// TODO: replace select daemon by
 	var chaosDaemons []v1.Pod
 	// get chaos daemon
-	for _, pod := range pods {
-		nodeName := pod.Spec.NodeName
-		daemonSelector := v1alpha1.SelectorSpec{
+	for _, chaosPod := range pods {
+		nodeName := chaosPod.Spec.NodeName
+		daemonSelector := v1alpha1.PodSelectorSpec{
 			Nodes:          []string{nodeName},
 			LabelSelectors: map[string]string{"app.kubernetes.io/component": "chaos-daemon"},
 		}
-		daemons, err := selector.SelectPods(ctx, c, nil, daemonSelector, ctrlconfig.ControllerCfg.ClusterScoped, ctrlconfig.ControllerCfg.TargetNamespace, ctrlconfig.ControllerCfg.EnableFilterNamespace)
+		daemons, err := pod.SelectPods(ctx, c, nil, daemonSelector, ctrlconfig.ControllerCfg.ClusterScoped, ctrlconfig.ControllerCfg.TargetNamespace, false)
 		if err != nil {
-			return nil, nil, errors.Wrap(err, fmt.Sprintf("failed to select daemon pod for pod %s", pod.GetName()))
+			return nil, nil, errors.Wrap(err, fmt.Sprintf("failed to select daemon pod for pod %s", chaosPod.GetName()))
 		}
 		if len(daemons) == 0 {
-			return nil, nil, fmt.Errorf("no daemons found for pod %s with selector: %s", pod.GetName(), daemonSelector)
+			return nil, nil, fmt.Errorf("no daemons found for pod %s with selector: %s", chaosPod.GetName(), daemonSelector)
 		}
 		chaosDaemons = append(chaosDaemons, daemons[0])
 	}
@@ -374,45 +361,6 @@ func Log(pod v1.Pod, tail int64, c *kubernetes.Clientset) (string, error) {
 		return "", errors.Wrapf(err, "failed to copy information from podLogs to buf")
 	}
 	return buf.String(), nil
-}
-
-// CheckFailedMessage provide debug info and suggestions from failed message
-func CheckFailedMessage(ctx context.Context, failedMessage string, daemons []v1.Pod, c *ClientSet) error {
-	if strings.Contains(failedMessage, "rpc error: code = Unavailable desc = connection error") || strings.Contains(failedMessage, "connect: connection refused") {
-		if err := checkConnForCtrlAndDaemon(ctx, daemons, c); err != nil {
-			return fmt.Errorf("error occurs when check failed message: %s", err)
-		}
-	}
-	return nil
-}
-
-func checkConnForCtrlAndDaemon(ctx context.Context, daemons []v1.Pod, c *ClientSet) error {
-	ctrlSelector := v1alpha1.SelectorSpec{
-		LabelSelectors: map[string]string{"app.kubernetes.io/component": "controller-manager"},
-	}
-	ctrlMgrs, err := selector.SelectPods(ctx, c.CtrlCli, c.CtrlCli, ctrlSelector, ctrlconfig.ControllerCfg.ClusterScoped, ctrlconfig.ControllerCfg.TargetNamespace, ctrlconfig.ControllerCfg.EnableFilterNamespace)
-	if err != nil {
-		return errors.Wrapf(err, "failed to select pod for controller-manager")
-	}
-	if len(ctrlMgrs) == 0 {
-		return fmt.Errorf("could not found controller manager")
-	}
-	for _, daemon := range daemons {
-		daemonIP := daemon.Status.PodIP
-		cmd := fmt.Sprintf("ping -c 1 %s > /dev/null; echo $?", daemonIP)
-		out, err := Exec(ctx, ctrlMgrs[0], cmd, c.KubeCli)
-		if err != nil {
-			return errors.Wrapf(err, "run command %s failed", cmd)
-		}
-		if string(out) == "0" {
-			PrettyPrint(fmt.Sprintf("Connection between Controller-Manager and Daemon %s (ip address: %s) works well", daemon.Name, daemonIP), 0, Green)
-		} else {
-			PrettyPrint(fmt.Sprintf(`Connection between Controller-Manager and Daemon %s (ip address: %s) is blocked.
-Please check network policy / firewall, or see FAQ on website`, daemon.Name, daemonIP), 0, Red)
-		}
-
-	}
-	return nil
 }
 
 // ConnectToLocalChaosDaemon would connect to ChaosDaemon run in localhost

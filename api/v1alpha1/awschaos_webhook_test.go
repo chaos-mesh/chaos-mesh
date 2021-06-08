@@ -20,7 +20,7 @@ import (
 )
 
 var _ = Describe("awschaos_webhook", func() {
-	Context("ChaosValidator of awschaos", func() {
+	Context("webhook.Validator of awschaos", func() {
 		It("Validate", func() {
 
 			type TestCase struct {
@@ -29,7 +29,6 @@ var _ = Describe("awschaos_webhook", func() {
 				execute func(chaos *AwsChaos) error
 				expect  string
 			}
-			duration := "400s"
 			testDeviceName := "testDeviceName"
 			testEbsVolume := "testEbsVolume"
 			tcs := []TestCase{
@@ -42,42 +41,6 @@ var _ = Describe("awschaos_webhook", func() {
 						},
 						Spec: AwsChaosSpec{
 							Action: DetachVolume,
-						},
-					},
-					execute: func(chaos *AwsChaos) error {
-						return chaos.ValidateCreate()
-					},
-					expect: "error",
-				},
-				{
-					name: "only define the Scheduler and execute Ec2Stop",
-					chaos: AwsChaos{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: metav1.NamespaceDefault,
-							Name:      "foo4",
-						},
-						Spec: AwsChaosSpec{
-							Scheduler: &SchedulerSpec{
-								Cron: "@every 10m",
-							},
-							Action: Ec2Stop,
-						},
-					},
-					execute: func(chaos *AwsChaos) error {
-						return chaos.ValidateCreate()
-					},
-					expect: "error",
-				},
-				{
-					name: "only define the Duration and execute Ec2Stop",
-					chaos: AwsChaos{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: metav1.NamespaceDefault,
-							Name:      "foo5",
-						},
-						Spec: AwsChaosSpec{
-							Action:   Ec2Stop,
-							Duration: &duration,
 						},
 					},
 					execute: func(chaos *AwsChaos) error {
@@ -106,8 +69,10 @@ var _ = Describe("awschaos_webhook", func() {
 							Name:      "foo7",
 						},
 						Spec: AwsChaosSpec{
-							Action:     DetachVolume,
-							DeviceName: &testDeviceName,
+							Action: DetachVolume,
+							AwsSelector: AwsSelector{
+								DeviceName: &testDeviceName,
+							},
 						},
 					},
 					execute: func(chaos *AwsChaos) error {
@@ -123,8 +88,10 @@ var _ = Describe("awschaos_webhook", func() {
 							Name:      "foo7",
 						},
 						Spec: AwsChaosSpec{
-							Action:    DetachVolume,
-							EbsVolume: &testEbsVolume,
+							Action: DetachVolume,
+							AwsSelector: AwsSelector{
+								EbsVolume: &testEbsVolume,
+							},
 						},
 					},
 					execute: func(chaos *AwsChaos) error {

@@ -10,7 +10,6 @@ tags
 *.fail.go
 vendor
 .DS_Store
-core.
 core.sqlite
 
 # Output of the go coverage tool, specifically when used with LiteIDE
@@ -25,6 +24,7 @@ core.sqlite
 
 /images/chaos-dashboard/build
 node_modules
+yarn.lock
 
 output/
 _artifacts/
@@ -42,3 +42,4 @@ e2e-test/image/e2e/manifests/
 
 .dockerbuilt
 /Dockerfile
+.cache

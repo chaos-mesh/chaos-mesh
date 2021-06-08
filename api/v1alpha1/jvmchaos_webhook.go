@@ -15,6 +15,7 @@ package v1alpha1
 
 import (
 	"fmt"
+	"reflect"
 	"strconv"
 
 	"k8s.io/apimachinery/pkg/runtime"
@@ -39,7 +40,7 @@ func (in *JVMChaos) Default() {
 
 // +kubebuilder:webhook:verbs=create;update,path=/validate-chaos-mesh-org-v1alpha1-jvmchaos,mutating=false,failurePolicy=fail,groups=chaos-mesh.org,resources=jvmchaos,versions=v1alpha1,name=vjvmchaos.kb.io
 
-var _ ChaosValidator = &JVMChaos{}
+var _ webhook.Validator = &JVMChaos{}
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
 func (in *JVMChaos) ValidateCreate() error {
@@ -51,7 +52,9 @@ func (in *JVMChaos) ValidateCreate() error {
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
 func (in *JVMChaos) ValidateUpdate(old runtime.Object) error {
 	jvmchaoslog.Info("validate update", "name", in.Name)
-
+	if !reflect.DeepEqual(in.Spec, old.(*JVMChaos).Spec) {
+		return ErrCanNotUpdateChaos
+	}
 	return in.Validate()
 }
 
@@ -66,29 +69,12 @@ func (in *JVMChaos) ValidateDelete() error {
 // Validate validates chaos object
 func (in *JVMChaos) Validate() error {
 	specField := field.NewPath("spec")
-	allErrs := in.ValidateScheduler(specField)
-	allErrs = append(allErrs, in.ValidatePodMode(specField)...)
-	allErrs = append(allErrs, in.validateJvmChaos(specField)...)
+	allErrs := in.validateJvmChaos(specField)
 	if len(allErrs) > 0 {
 		return fmt.Errorf(allErrs.ToAggregate().Error())
 	}
 
 	return nil
-}
-
-// ValidateScheduler validates the scheduler and duration
-func (in *JVMChaos) ValidateScheduler(spec *field.Path) field.ErrorList {
-	return ValidateScheduler(in, spec)
-}
-
-// ValidatePodMode validates the value with podmode
-func (in *JVMChaos) ValidatePodMode(spec *field.Path) field.ErrorList {
-	return ValidatePodMode(in.Spec.Value, in.Spec.Mode, spec.Child("value"))
-}
-
-// SelectSpec returns the selector config for authority validate
-func (in *JVMChaos) GetSelectSpec() []SelectSpec {
-	return []SelectSpec{&in.Spec}
 }
 
 func (in *JVMChaos) validateJvmChaos(spec *field.Path) field.ErrorList {

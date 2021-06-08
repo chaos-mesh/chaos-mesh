@@ -24,7 +24,12 @@ const (
 	AnnotationPrefix = "chaos-mesh"
 )
 
-func GenKeyForImage(pc *v1alpha1.PodChaos, containerName string) string {
+func GenKeyForImage(pc *v1alpha1.PodChaos, containerName string, isInit bool) string {
+	if isInit {
+		containerName += "-init"
+	} else {
+		containerName += "-normal"
+	}
 	imageKey := fmt.Sprintf("%s-%s-%s-%s-image", AnnotationPrefix, pc.Name, pc.Spec.Action, containerName)
 
 	// name part of annotation must be no more than 63 characters.

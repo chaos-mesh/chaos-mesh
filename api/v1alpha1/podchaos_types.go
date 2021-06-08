@@ -48,30 +48,13 @@ const (
 
 // PodChaosSpec defines the attributes that a user creates on a chaos experiment about pods.
 type PodChaosSpec struct {
-	// Selector is used to select pods that are used to inject chaos action.
-	Selector SelectorSpec `json:"selector"`
-
-	// Scheduler defines some schedule rules to
-	// control the running time of the chaos experiment about pods.
-	Scheduler *SchedulerSpec `json:"scheduler,omitempty"`
+	ContainerSelector `json:",inline"`
 
 	// Action defines the specific pod chaos action.
 	// Supported action: pod-kill / pod-failure / container-kill
 	// Default action: pod-kill
 	// +kubebuilder:validation:Enum=pod-kill;pod-failure;container-kill
 	Action PodChaosAction `json:"action"`
-
-	// Mode defines the mode to run chaos action.
-	// Supported mode: one / all / fixed / fixed-percent / random-max-percent
-	// +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
-	Mode PodMode `json:"mode"`
-
-	// Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
-	// If `FixedPodMode`, provide an integer of pods to do chaos action.
-	// If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
-	// IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
-	// +optional
-	Value string `json:"value,omitempty"`
 
 	// Duration represents the duration of the chaos action.
 	// It is required when the action is `PodFailureAction`.
@@ -82,11 +65,6 @@ type PodChaosSpec struct {
 	// +optional
 	Duration *string `json:"duration,omitempty"`
 
-	// ContainerName indicates the name of the container.
-	// Needed in container-kill.
-	// +optional
-	ContainerName string `json:"containerName,omitempty"`
-
 	// GracePeriod is used in pod-kill action. It represents the duration in seconds before the pod should be deleted.
 	// Value must be non-negative integer. The default value is zero that indicates delete immediately.
 	// +optional
@@ -94,33 +72,22 @@ type PodChaosSpec struct {
 	GracePeriod int64 `json:"gracePeriod"`
 }
 
-func (in *PodChaosSpec) GetSelector() SelectorSpec {
-	return in.Selector
-}
-
-func (in *PodChaosSpec) GetMode() PodMode {
-	return in.Mode
-}
-
-func (in *PodChaosSpec) GetValue() string {
-	return in.Value
-}
-
 // PodChaosStatus represents the current status of the chaos experiment about pods.
 type PodChaosStatus struct {
 	ChaosStatus `json:",inline"`
 }
 
-// PodStatus represents information about the status of a pod in chaos experiment.
-type PodStatus struct {
-	Namespace string `json:"namespace"`
-	Name      string `json:"name"`
-	Action    string `json:"action"`
-	HostIP    string `json:"hostIP"`
-	PodIP     string `json:"podIP"`
+func (obj *PodChaos) GetSelectorSpecs() map[string]interface{} {
+	switch obj.Spec.Action {
+	case PodKillAction, PodFailureAction:
+		return map[string]interface{}{
+			".": &obj.Spec.PodSelector,
+		}
+	case ContainerKillAction:
+		return map[string]interface{}{
+			".": &obj.Spec.ContainerSelector,
+		}
+	}
 
-	// A brief CamelCase message indicating details about the chaos action.
-	// e.g. "delete this pod" or "pause this pod duration 5m"
-	// +optional
-	Message string `json:"message"`
+	return nil
 }
