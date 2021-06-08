@@ -19,6 +19,8 @@ import (
 	"path/filepath"
 	"testing"
 
+	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
+
 	"github.com/go-logr/logr"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -54,7 +56,7 @@ func TestSchedule(t *testing.T) {
 
 	RunSpecsWithDefaultAndCustomReporters(t,
 		"Schedule suit",
-		[]Reporter{envtest.NewlineReporter{}})
+		[]Reporter{printer.NewlineReporter{}})
 }
 
 var _ = BeforeSuite(func() {
