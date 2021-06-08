@@ -20,7 +20,7 @@
     "startAWorkflowDesc": "工作流允许你编排多个实验来模拟更加真实的故障",
     "startASchedule": "从计划开始",
     "startAScheduleDesc": "计划允许你周期性地运行一个实验",
-    "totalState": "当前状态",
+    "totalState": "当前实验状态",
     "predefined": "预定义",
     "predefinedDesc": "📦 在这里存储自定义的实验以快速执行。",
     "noPredefinedFound": "未发现预定义",

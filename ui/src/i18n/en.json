@@ -20,7 +20,7 @@
     "startAWorkflowDesc": "Workflow allows you to organize multiple experiments to simulate more realistic failures",
     "startASchedule": "Start with schedule",
     "startAScheduleDesc": "Schedule allows you to run an experiment periodically",
-    "totalState": "Total State",
+    "totalState": "Total Experiments Status",
     "predefined": "Predefined",
     "predefinedDesc": "📦 Store custom experiments here for quick execution.",
     "noPredefinedFound": "No predefined found",

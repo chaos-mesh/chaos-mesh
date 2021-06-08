@@ -57,7 +57,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
-type Option = Experiment | Event | Archive
+type Option = Experiment | Archive
 
 const Search: React.FC = () => {
   const classes = useStyles()
@@ -75,14 +75,13 @@ const Search: React.FC = () => {
         setNoResult(false)
         setOpen(true)
 
-        const [experiments, events, archives] = [
+        const [experiments, archives] = [
           (await api.experiments.experiments()).data.map((d) => ({ ...d, is: 'experiment' as 'experiment' })),
-          (await api.events.events({ limit: 6 })).data.map((d) => ({ ...d, is: 'event' as 'event' })),
           (await api.archives.archives()).data.map((d) => ({ ...d, is: 'archive' as 'archive' })),
         ]
 
-        const result = search({ experiments, events, archives }, s)
-        const newOptions = [...result.experiments, ...result.events, ...result.archives]
+        const result = search({ experiments, archives }, s)
+        const newOptions = [...result.experiments, ...result.archives]
 
         setOptions(newOptions)
         if (newOptions.length === 0) {
@@ -95,8 +94,6 @@ const Search: React.FC = () => {
   const groupBy = (option: Option) =>
     option.is === 'experiment'
       ? intl.formatMessage({ id: 'experiments.title' })
-      : option.is === 'event'
-      ? intl.formatMessage({ id: 'events.title' })
       : intl.formatMessage({ id: 'archives.title' })
 
   const getOptionLabel = (option: Option) => option.name
@@ -113,9 +110,6 @@ const Search: React.FC = () => {
     switch (type) {
       case 'experiment':
         link = `/${type}s/${(option as Experiment).uid}`
-        break
-      case 'event':
-        link = `/${type}s?id=${(option as Event).id}`
         break
       case 'archive':
       default:
@@ -135,11 +129,7 @@ const Search: React.FC = () => {
           {name}
         </Typography>
         <div className={classes.chipContainer}>
-          {type !== 'event' ? (
-            <Chip color="primary" icon={<FingerprintIcon />} label={truncate(uid)} title={uid} />
-          ) : (
-            <Chip color="primary" icon={<FingerprintIcon />} label={(option as Event).id} />
-          )}
+          <Chip color="primary" icon={<FingerprintIcon />} label={truncate(uid)} title={uid} />
           <Chip label={kind} />
           {type !== 'archive' && <Chip icon={<ScheduleIcon />} label={format(time)} />}
         </div>

@@ -1,8 +1,8 @@
 import { Box, IconButton, Typography } from '@material-ui/core'
+import DateTime, { format } from 'lib/luxon'
 
 import { Archive } from 'api/archives.type'
 import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
-import DateTime from 'lib/luxon'
 import DeleteOutlinedIcon from '@material-ui/icons/DeleteOutlined'
 import { Experiment } from 'api/experiments.type'
 import ExperimentStatus from 'components/ExperimentStatus'
@@ -91,7 +91,7 @@ const ObjectListItem: React.FC<ObjectListItemProps> = ({ data, type = 'experimen
 
   const Actions = () => (
     <Space direction="row" justifyContent="end" alignItems="center">
-      <Typography variant="body2">
+      <Typography variant="body2" title={format(data.created_at)}>
         {T('table.created')}{' '}
         {DateTime.fromISO(data.created_at, {
           locale: lang,
@@ -102,7 +102,6 @@ const ObjectListItem: React.FC<ObjectListItemProps> = ({ data, type = 'experimen
           <IconButton
             color="primary"
             title={intl.formatMessage({ id: 'common.start' })}
-            aria-label={intl.formatMessage({ id: 'common.start' })}
             size="small"
             onClick={handleAction('start')}
           >
@@ -112,7 +111,6 @@ const ObjectListItem: React.FC<ObjectListItemProps> = ({ data, type = 'experimen
           <IconButton
             color="primary"
             title={intl.formatMessage({ id: 'common.pause' })}
-            aria-label={intl.formatMessage({ id: 'common.pause' })}
             size="small"
             onClick={handleAction('pause')}
           >
@@ -134,7 +132,6 @@ const ObjectListItem: React.FC<ObjectListItemProps> = ({ data, type = 'experimen
         <IconButton
           color="primary"
           title={intl.formatMessage({ id: 'common.delete' })}
-          aria-label={intl.formatMessage({ id: 'common.delete' })}
           size="small"
           onClick={handleAction('delete')}
         >

@@ -59,14 +59,6 @@ const Common = ({ template: t }: NodeConfigurationProps) => (
   </>
 )
 
-const Suspend = ({ template: t }: NodeConfigurationProps) => (
-  <Table size="small">
-    <TableBody>
-      <Common template={t} />
-    </TableBody>
-  </Table>
-)
-
 const Selector = ({ data }: any) => (
   <>
     <TableRow>
@@ -409,6 +401,14 @@ const Time = ({ data }: any) => (
       </TableRow>
     )}
   </>
+)
+
+const Suspend = ({ template: t }: NodeConfigurationProps) => (
+  <Table size="small">
+    <TableBody>
+      <Common template={t} />
+    </TableBody>
+  </Table>
 )
 
 const Experiment = ({ template: t }: NodeConfigurationProps) => (

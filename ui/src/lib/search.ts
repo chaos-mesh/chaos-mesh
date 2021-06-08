@@ -1,11 +1,9 @@
 import { Archive } from 'api/archives.type'
-import { Event } from 'api/events.type'
 import { Experiment } from 'api/experiments.type'
 
-type Keyword = 'namespace' | 'kind' | 'pod' | 'ip'
+type Keyword = 'namespace' | 'kind'
 
 interface SearchData {
-  events: Event[]
   experiments: Experiment[]
   archives: Archive[]
 }
@@ -81,18 +79,17 @@ class SearchAutomata {
   }
 }
 
-const automata = new SearchAutomata(['namespace', 'kind', 'pod', 'ip'])
+const automata = new SearchAutomata(['namespace', 'kind'])
 
 export default function search(data: SearchData, s: string) {
   const tokens = automata.parseStart(s)
 
   const experiments = searchExperiments(data.experiments, tokens)
-  const events = searchEvents(data.events, tokens)
   const archives = searchExperiments<Archive>(data.archives, tokens)
 
   automata.clearTokens()
 
-  return { experiments, events, archives }
+  return { experiments, archives }
 }
 
 function searchCommon(data: any, keyword: string, value: string) {
@@ -104,22 +101,6 @@ function searchCommon(data: any, keyword: string, value: string) {
 }
 
 function searchExperiments<T extends { name: string } = Experiment>(data: T[], tokens: Token[]) {
-  let filtered = data
-
-  tokens.forEach((t) => {
-    const val = t.value.toLowerCase()
-
-    if (t.type === 'keyword') {
-      filtered = searchCommon(filtered, t.keyword, val)
-    } else if (t.type === 'content') {
-      filtered = filtered.filter((d) => d.name.toLowerCase().includes(val))
-    }
-  })
-
-  return filtered
-}
-
-function searchEvents(data: SearchData['events'], tokens: Token[]) {
   let filtered = data
 
   tokens.forEach((t) => {

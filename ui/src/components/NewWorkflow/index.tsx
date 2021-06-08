@@ -375,33 +375,27 @@ const NewWorkflow = () => {
               <Form style={{ height: '100%' }}>
                 <Space height="100%">
                   <Typography>{T('newW.titleBasic')}</Typography>
-                  <Box>
-                    <TextField
-                      name="name"
-                      label={T('common.name')}
-                      validate={validateName(T('newW.nameValidation') as unknown as string)}
-                      helperText={errors.name && touched.name ? errors.name : T('newW.nameHelper')}
-                      error={errors.name && touched.name ? true : false}
-                    />
-                    <SelectField
-                      name="namespace"
-                      label={T('k8s.namespace')}
-                      helperText={T('newE.basic.namespaceHelper')}
-                    >
-                      {namespaces.map((n) => (
-                        <MenuItem key={n} value={n}>
-                          {n}
-                        </MenuItem>
-                      ))}
-                    </SelectField>
-                    <TextField
-                      name="duration"
-                      label={T('newE.run.duration')}
-                      validate={validateDuration(T('newW.durationValidation') as unknown as string)}
-                      helperText={errors.duration && touched.duration ? errors.duration : T('newW.durationHelper')}
-                      error={errors.duration && touched.duration ? true : false}
-                    />
-                  </Box>
+                  <TextField
+                    name="name"
+                    label={T('common.name')}
+                    validate={validateName(T('newW.nameValidation') as unknown as string)}
+                    helperText={errors.name && touched.name ? errors.name : T('newW.nameHelper')}
+                    error={errors.name && touched.name ? true : false}
+                  />
+                  <SelectField name="namespace" label={T('k8s.namespace')} helperText={T('newE.basic.namespaceHelper')}>
+                    {namespaces.map((n) => (
+                      <MenuItem key={n} value={n}>
+                        {n}
+                      </MenuItem>
+                    ))}
+                  </SelectField>
+                  <TextField
+                    name="duration"
+                    label={T('newE.run.duration')}
+                    validate={validateDuration(T('newW.durationValidation') as unknown as string)}
+                    helperText={errors.duration && touched.duration ? errors.duration : T('newW.durationHelper')}
+                    error={errors.duration && touched.duration ? true : false}
+                  />
                   <Typography>{T('common.preview')}</Typography>
                   <Box flex={1}>
                     <Paper sx={{ p: 0 }}>

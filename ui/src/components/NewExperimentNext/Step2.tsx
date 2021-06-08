@@ -138,13 +138,13 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false })
             <Form>
               <Grid container spacing={6}>
                 <Grid item xs={6}>
-                  <Box mb={3}>
+                  <Space>
                     <Typography color={scopeDisabled ? 'textSecondary' : undefined}>
                       {T('newE.steps.scope')}
                       {scopeDisabled && T('newE.steps.scopeDisabled')}
                     </Typography>
-                  </Box>
-                  {namespaces.length ? <Scope namespaces={namespaces} /> : <SkeletonN n={6} />}
+                    {namespaces.length ? <Scope namespaces={namespaces} /> : <SkeletonN n={6} />}
+                  </Space>
                 </Grid>
                 <Grid item xs={6}>
                   <Space>
@@ -174,32 +174,30 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false })
                       />
                     )}
                     {inSchedule && <ScheduleSpecificFields errors={errors} touched={touched} />}
-                  </Space>
-                  <AdvancedOptions>
-                    {namespaces.length && (
-                      <SelectField
-                        name="namespace"
-                        label={T('k8s.namespace')}
-                        helperText={T('newE.basic.namespaceHelper')}
-                      >
-                        {namespaces.map((n) => (
-                          <MenuItem key={n} value={n}>
-                            {n}
-                          </MenuItem>
-                        ))}
-                      </SelectField>
-                    )}
-                    <LabelField name="labels" label={T('k8s.labels')} isKV />
-                    <LabelField name="annotations" label={T('k8s.annotations')} isKV />
-                  </AdvancedOptions>
-                  {!inWorkflow && !isInstant(target) && (
-                    <>
-                      <Box my={3}>
+                    <AdvancedOptions>
+                      {namespaces.length && (
+                        <SelectField
+                          name="namespace"
+                          label={T('k8s.namespace')}
+                          helperText={T('newE.basic.namespaceHelper')}
+                        >
+                          {namespaces.map((n) => (
+                            <MenuItem key={n} value={n}>
+                              {n}
+                            </MenuItem>
+                          ))}
+                        </SelectField>
+                      )}
+                      <LabelField name="labels" label={T('k8s.labels')} isKV />
+                      <LabelField name="annotations" label={T('k8s.annotations')} isKV />
+                    </AdvancedOptions>
+                    {!inWorkflow && !isInstant(target) && (
+                      <>
                         <Divider />
-                      </Box>
-                      <Scheduler errors={errors} touched={touched} inSchedule={inSchedule} />
-                    </>
-                  )}
+                        <Scheduler errors={errors} touched={touched} inSchedule={inSchedule} />
+                      </>
+                    )}
+                  </Space>
                   <Box mt={6} textAlign="right">
                     <Button type="submit" variant="contained" color="primary" startIcon={<PublishIcon />}>
                       {T('common.submit')}

@@ -129,7 +129,7 @@ const Add = () => {
       }
     }
 
-    newERef.current?.setShowNewPanel('existing')
+    newERef.current?.setPanel('existing')
     dispatch(resetNewExperiment())
   }
 
@@ -174,7 +174,7 @@ const Add = () => {
         })
       )
 
-      newERef.current?.setShowNewPanel('initial')
+      newERef.current?.setPanel('initial')
     }
 
     return true
@@ -213,7 +213,7 @@ const Add = () => {
             </StepLabel>
 
             {showNum && (
-              <Box mt={6} ml={8}>
+              <Box ml={8}>
                 <Paper>
                   <PaperTop title={T(`newW.${values.type}Title`)} />
                   <Grid container spacing={6}>
@@ -248,7 +248,7 @@ const Add = () => {
           </Form>
         )}
       </Formik>
-      <Box mt={6} ml={8}>
+      <Box ml={8}>
         <Box style={{ display: otherTypes ? 'none' : 'initial' }}>
           <NewExperimentNext ref={newERef} initPanel="existing" onSubmit={onSubmit} inWorkflow={true} />
         </Box>

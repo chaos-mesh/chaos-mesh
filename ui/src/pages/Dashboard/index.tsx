@@ -113,7 +113,11 @@ export default function Dashboard() {
           </Grid>
           <Grid item xs={12}>
             <Paper>
-              <PaperTop title={T('dashboard.predefined')} subtitle={T('dashboard.predefinedDesc')} />
+              <PaperTop
+                title={T('dashboard.predefined')}
+                subtitle={T('dashboard.predefinedDesc')}
+                boxProps={{ mb: 3 }}
+              />
               <Predefined />
             </Paper>
           </Grid>
@@ -128,7 +132,7 @@ export default function Dashboard() {
           </Grid>
           <Grid item xs={12}>
             <Paper>
-              <PaperTop title={T('dashboard.recent')} />
+              <PaperTop title={T('dashboard.recent')} boxProps={{ mb: 3 }} />
               <EventsTimeline events={data.events} />
             </Paper>
           </Grid>

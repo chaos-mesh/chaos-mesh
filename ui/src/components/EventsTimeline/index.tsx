@@ -1,6 +1,6 @@
 import { Box, Typography } from '@material-ui/core'
+import DateTime, { format } from 'lib/luxon'
 
-import DateTime from 'lib/luxon'
 import { Event } from 'api/events.type'
 import Timeline from '@material-ui/lab/Timeline'
 import TimelineConnector from '@material-ui/lab/TimelineConnector'
@@ -46,7 +46,7 @@ const EventsTimeline: React.FC<EventsTimelineProps> = ({ events }) => {
                   {e.message}
                 </Typography>
               </Box>
-              <Typography variant="overline">
+              <Typography variant="overline" title={format(e.created_at)}>
                 {DateTime.fromISO(e.created_at, {
                   locale: lang,
                 }).toRelative()}

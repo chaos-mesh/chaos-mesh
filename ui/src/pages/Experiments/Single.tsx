@@ -201,7 +201,7 @@ export default function Single() {
                 >
                   {T('common.start')}
                 </Button>
-              ) : (
+              ) : single?.status !== 'finished' ? (
                 <Button
                   variant="outlined"
                   size="small"
@@ -210,7 +210,7 @@ export default function Single() {
                 >
                   {T('common.pause')}
                 </Button>
-              )}
+              ) : null}
             </Space>
 
             {single?.failed_message && (
@@ -226,9 +226,9 @@ export default function Single() {
 
             <Grid container>
               <Grid item xs={12} lg={6} sx={{ pr: 3 }}>
-                <Paper sx={{ height: 600, overflow: 'scroll' }}>
+                <Paper sx={{ display: 'flex', flexDirection: 'column', height: 600 }}>
                   <PaperTop title={T('events.title')} />
-                  <Box flex={1}>
+                  <Box flex={1} overflow="scroll">
                     <EventsTimeline events={events} />
                   </Box>
                 </Paper>

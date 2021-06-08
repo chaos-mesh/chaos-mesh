@@ -33,14 +33,14 @@ const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
   }
 
   return (
-    <Box display="flex" flexDirection="column">
-      <Box my={3} textAlign="right">
+    <>
+      <Box mb={3} textAlign="right">
         <Button color="primary" startIcon={open ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />} onClick={setOpen}>
           {title ? title : T('common.advancedOptions')}
         </Button>
       </Box>
       <Space sx={{ display: open ? 'unset' : 'none' }}>{children}</Space>
-    </Box>
+    </>
   )
 }
 

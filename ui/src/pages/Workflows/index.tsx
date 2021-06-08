@@ -1,4 +1,4 @@
-import { Box, Button, Typography } from '@material-ui/core'
+import { Box, Button, Grow, Typography } from '@material-ui/core'
 import { useEffect, useState } from 'react'
 
 import AddIcon from '@material-ui/icons/Add'
@@ -32,13 +32,17 @@ const Workflows = () => {
 
   return (
     <>
-      <Box mb={6}>
-        <Button variant="outlined" startIcon={<AddIcon />} onClick={() => history.push('/workflows/new')}>
-          {T('newW.title')}
-        </Button>
-      </Box>
+      <Grow in={!loading} style={{ transformOrigin: '0 0 0' }}>
+        <div>
+          <Box mb={6}>
+            <Button variant="outlined" startIcon={<AddIcon />} onClick={() => history.push('/workflows/new')}>
+              {T('newW.title')}
+            </Button>
+          </Box>
 
-      {workflows.length > 0 && <DataTable data={workflows} fetchData={fetchWorkflows} />}
+          {workflows.length > 0 && <DataTable data={workflows} fetchData={fetchWorkflows} />}
+        </div>
+      </Grow>
 
       {!loading && workflows.length === 0 && (
         <NotFound illustrated textAlign="center">

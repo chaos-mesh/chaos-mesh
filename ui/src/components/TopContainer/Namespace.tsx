@@ -1,10 +1,9 @@
+import { Autocomplete, TextField } from '@material-ui/core'
 import { useHistory, useLocation } from 'react-router-dom'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
-import Autocomplete from '@material-ui/lab/Autocomplete'
 import Paper from 'components-mui/Paper'
 import T from 'components/T'
-import { TextField } from '@material-ui/core'
 import api from 'api'
 import { getNamespaces } from 'slices/experiments'
 import { setNameSpace } from 'slices/globalStatus'

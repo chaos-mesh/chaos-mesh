@@ -4,19 +4,13 @@ import { useStoreDispatch, useStoreSelector } from 'store'
 
 import DateTime from 'lib/luxon'
 import DeleteOutlinedIcon from '@material-ui/icons/DeleteOutlined'
+import Paper from 'components-mui/Paper'
 import Space from 'components-mui/Space'
 import T from 'components/T'
 import { Workflow } from 'api/workflows.type'
 import api from 'api'
-import { makeStyles } from '@material-ui/styles'
 import { useHistory } from 'react-router-dom'
 import { useIntl } from 'react-intl'
-
-const useStyles = makeStyles({
-  tableRow: {
-    cursor: 'pointer',
-  },
-})
 
 interface DataTableProps {
   data: Workflow[]
@@ -24,9 +18,8 @@ interface DataTableProps {
 }
 
 const DataTable: React.FC<DataTableProps> = ({ data, fetchData }) => {
-  const classes = useStyles()
-  const intl = useIntl()
   const history = useHistory()
+  const intl = useIntl()
 
   const { lang } = useStoreSelector((state) => state.settings)
   const dispatch = useStoreDispatch()
@@ -70,8 +63,8 @@ const DataTable: React.FC<DataTableProps> = ({ data, fetchData }) => {
   }
 
   return (
-    <TableContainer>
-      <Table>
+    <TableContainer component={(props) => <Paper {...props} sx={{ p: 0, borderBottom: 'none' }} />}>
+      <Table stickyHeader>
         <TableHead>
           <TableRow>
             <TableCell>{T('common.name')}</TableCell>
@@ -82,12 +75,13 @@ const DataTable: React.FC<DataTableProps> = ({ data, fetchData }) => {
             <TableCell>{T('common.operation')}</TableCell>
           </TableRow>
         </TableHead>
+
         <TableBody>
           {data.map((d) => {
             const key = `${d.namespace}/${d.name}`
 
             return (
-              <TableRow key={key} className={classes.tableRow} hover onClick={handleJumpTo(d.namespace, d.name)}>
+              <TableRow key={key} hover sx={{ cursor: 'pointer' }} onClick={handleJumpTo(d.namespace, d.name)}>
                 <TableCell>{d.name}</TableCell>
                 <TableCell>{d.entry}</TableCell>
                 {/* <TableCell></TableCell> */}
@@ -102,7 +96,6 @@ const DataTable: React.FC<DataTableProps> = ({ data, fetchData }) => {
                     <IconButton
                       color="primary"
                       title={intl.formatMessage({ id: 'common.delete' })}
-                      aria-label={intl.formatMessage({ id: 'common.delete' })}
                       component="span"
                       size="small"
                       onClick={handleSelect({

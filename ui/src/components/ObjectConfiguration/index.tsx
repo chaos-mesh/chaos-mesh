@@ -17,16 +17,17 @@ const TableCell = withStyles({
 
 interface ObjectConfigurationProps {
   config: ExperimentSingle | ArchiveSingle
+  vertical?: boolean
 }
 
-const ObjectConfiguration: React.FC<ObjectConfigurationProps> = ({ config }) => {
+const ObjectConfiguration: React.FC<ObjectConfigurationProps> = ({ config, vertical = false }) => {
   const { lang } = useStoreSelector((state) => state.settings)
 
   const action: string = config.kube_object.spec.action
 
   return (
     <Grid container>
-      <Grid item md={4}>
+      <Grid item xs={vertical ? 12 : 4}>
         <Typography variant="subtitle2" gutterBottom>
           {T('newE.steps.basic')}
         </Typography>
@@ -71,7 +72,7 @@ const ObjectConfiguration: React.FC<ObjectConfigurationProps> = ({ config }) => 
         </Table>
       </Grid>
 
-      <Grid item md={4}>
+      <Grid item xs={vertical ? 12 : 4}>
         <Typography variant="subtitle2" gutterBottom>
           {T('common.meta')}
         </Typography>
@@ -110,7 +111,7 @@ const ObjectConfiguration: React.FC<ObjectConfigurationProps> = ({ config }) => 
         </Table>
       </Grid>
 
-      <Grid item md={4}>
+      <Grid item xs={vertical ? 12 : 4}>
         <Typography variant="subtitle2" gutterBottom>
           {T('newE.steps.run')}
         </Typography>
