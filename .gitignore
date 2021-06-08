@@ -42,3 +42,4 @@ e2e-test/image/e2e/manifests/
 
 .dockerbuilt
 /Dockerfile
+.cache
