@@ -397,13 +397,11 @@ var _ = Describe("event", func() {
 		It("success", func() {
 			response := []Archive{
 				Archive{
-					UID:        "testUID",
-					Kind:       "testKind",
-					Namespace:  "testNamespace",
-					Name:       "testName",
-					Action:     "testAction",
-					StartTime:  time.Time{},
-					FinishTime: time.Time{},
+					UID:       "testUID",
+					Kind:      "testKind",
+					Namespace: "testNamespace",
+					Name:      "testName",
+					CreatedAt: time.Time{},
 				},
 			}
 			rr := httptest.NewRecorder()
@@ -435,13 +433,11 @@ var _ = Describe("event", func() {
 			chaos := &v1alpha1.PodChaos{}
 			response := Detail{
 				Archive: Archive{
-					UID:        "testPodChaos",
-					Kind:       v1alpha1.KindPodChaos,
-					Namespace:  "testNamespace",
-					Name:       "testName",
-					Action:     "testAction",
-					StartTime:  time.Time{},
-					FinishTime: time.Time{},
+					UID:       "testPodChaos",
+					Kind:      v1alpha1.KindPodChaos,
+					Namespace: "testNamespace",
+					Name:      "testName",
+					CreatedAt: time.Time{},
 				},
 				KubeObject: core.KubeObjectDesc{
 					TypeMeta: metav1.TypeMeta{
@@ -470,13 +466,11 @@ var _ = Describe("event", func() {
 			chaos := &v1alpha1.IOChaos{}
 			response := Detail{
 				Archive: Archive{
-					UID:        "testIOChaos",
-					Kind:       v1alpha1.KindIOChaos,
-					Namespace:  "testNamespace",
-					Name:       "testName",
-					Action:     "testAction",
-					StartTime:  time.Time{},
-					FinishTime: time.Time{},
+					UID:       "testIOChaos",
+					Kind:      v1alpha1.KindIOChaos,
+					Namespace: "testNamespace",
+					Name:      "testName",
+					CreatedAt: time.Time{},
 				},
 				KubeObject: core.KubeObjectDesc{
 					TypeMeta: metav1.TypeMeta{
@@ -505,13 +499,11 @@ var _ = Describe("event", func() {
 			chaos := &v1alpha1.NetworkChaos{}
 			response := Detail{
 				Archive: Archive{
-					UID:        "testNetworkChaos",
-					Kind:       v1alpha1.KindNetworkChaos,
-					Namespace:  "testNamespace",
-					Name:       "testName",
-					Action:     "testAction",
-					StartTime:  time.Time{},
-					FinishTime: time.Time{},
+					UID:       "testNetworkChaos",
+					Kind:      v1alpha1.KindNetworkChaos,
+					Namespace: "testNamespace",
+					Name:      "testName",
+					CreatedAt: time.Time{},
 				},
 				KubeObject: core.KubeObjectDesc{
 					TypeMeta: metav1.TypeMeta{
@@ -540,13 +532,11 @@ var _ = Describe("event", func() {
 			chaos := &v1alpha1.TimeChaos{}
 			response := Detail{
 				Archive: Archive{
-					UID:        "testTimeChaos",
-					Kind:       v1alpha1.KindTimeChaos,
-					Namespace:  "testNamespace",
-					Name:       "testName",
-					Action:     "testAction",
-					StartTime:  time.Time{},
-					FinishTime: time.Time{},
+					UID:       "testTimeChaos",
+					Kind:      v1alpha1.KindTimeChaos,
+					Namespace: "testNamespace",
+					Name:      "testName",
+					CreatedAt: time.Time{},
 				},
 				KubeObject: core.KubeObjectDesc{
 					TypeMeta: metav1.TypeMeta{
@@ -575,13 +565,11 @@ var _ = Describe("event", func() {
 			chaos := &v1alpha1.KernelChaos{}
 			response := Detail{
 				Archive: Archive{
-					UID:        "testKernelChaos",
-					Kind:       v1alpha1.KindKernelChaos,
-					Namespace:  "testNamespace",
-					Name:       "testName",
-					Action:     "testAction",
-					StartTime:  time.Time{},
-					FinishTime: time.Time{},
+					UID:       "testKernelChaos",
+					Kind:      v1alpha1.KindKernelChaos,
+					Namespace: "testNamespace",
+					Name:      "testName",
+					CreatedAt: time.Time{},
 				},
 				KubeObject: core.KubeObjectDesc{
 					TypeMeta: metav1.TypeMeta{
@@ -610,13 +598,11 @@ var _ = Describe("event", func() {
 			chaos := &v1alpha1.StressChaos{}
 			response := Detail{
 				Archive: Archive{
-					UID:        "testStressChaos",
-					Kind:       v1alpha1.KindStressChaos,
-					Namespace:  "testNamespace",
-					Name:       "testName",
-					Action:     "testAction",
-					StartTime:  time.Time{},
-					FinishTime: time.Time{},
+					UID:       "testStressChaos",
+					Kind:      v1alpha1.KindStressChaos,
+					Namespace: "testNamespace",
+					Name:      "testName",
+					CreatedAt: time.Time{},
 				},
 				KubeObject: core.KubeObjectDesc{
 					TypeMeta: metav1.TypeMeta{
@@ -667,13 +653,11 @@ var _ = Describe("event", func() {
 		It("success", func() {
 			response := []Archive{
 				Archive{
-					UID:        "testUID",
-					Kind:       "testKind",
-					Namespace:  "testNamespace",
-					Name:       "testScheduleName",
-					Action:     "testAction",
-					StartTime:  time.Time{},
-					FinishTime: time.Time{},
+					UID:       "testUID",
+					Kind:      "testKind",
+					Namespace: "testNamespace",
+					Name:      "testScheduleName",
+					CreatedAt: time.Time{},
 				},
 			}
 			rr := httptest.NewRecorder()
@@ -705,13 +689,11 @@ var _ = Describe("event", func() {
 			sch := &v1alpha1.Schedule{}
 			response := Detail{
 				Archive: Archive{
-					UID:        "testPodChaos",
-					Kind:       v1alpha1.KindPodChaos,
-					Namespace:  "testNamespace",
-					Name:       "testName",
-					Action:     "testAction",
-					StartTime:  time.Time{},
-					FinishTime: time.Time{},
+					UID:       "testPodChaos",
+					Kind:      v1alpha1.KindPodChaos,
+					Namespace: "testNamespace",
+					Name:      "testName",
+					CreatedAt: time.Time{},
 				},
 				KubeObject: core.KubeObjectDesc{
 					TypeMeta: metav1.TypeMeta{
