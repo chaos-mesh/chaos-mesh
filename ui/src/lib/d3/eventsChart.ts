@@ -4,6 +4,7 @@ import DateTime, { format, now } from 'lib/luxon'
 
 import { Event } from 'api/events.type'
 import { IntlShape } from 'react-intl'
+import T from 'components/T'
 import { Theme } from 'slices/settings'
 import _debounce from 'lodash.debounce'
 import { truncate } from '../utils'
@@ -204,10 +205,10 @@ export default function gen({
     .attr('class', `chaos-event-tooltip${theme === 'light' ? '' : ' dark'}`)
 
   function genTooltipContent(d: Event) {
-    return `<b>${T('events.event.experiment' })}: ${d.name}</b>
+    return `<b>${T('events.event.experiment', intl)}: ${d.name}</b>
             <br />
             <span class="secondary">
-              ${T('events.event.started' })}: ${format(d.created_at)}
+              ${T('events.event.started', intl)}: ${format(d.created_at)}
             </span>
             `
   }
