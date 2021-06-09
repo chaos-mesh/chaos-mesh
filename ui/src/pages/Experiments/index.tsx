@@ -111,7 +111,7 @@ export default function Experiments() {
           dispatch(
             setAlert({
               type: 'success',
-              message: T(`confirm.${action}Successfully`, intl),
+              message: T(`confirm.success.${action}`, intl),
             })
           )
 
@@ -184,7 +184,7 @@ export default function Experiments() {
               {T('common.selectAll')}
             </Button>
             <Button variant="outlined" color="secondary" startIcon={<DeleteOutlinedIcon />} onClick={handleBatchDelete}>
-              {T('common.delete')}
+              {T('archives.single')}
             </Button>
           </>
         )}

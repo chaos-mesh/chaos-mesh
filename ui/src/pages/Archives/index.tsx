@@ -1,4 +1,4 @@
-import { Box, Breadcrumbs, Button, Checkbox, LinkProps, Link as MUILink, Typography } from '@material-ui/core'
+import { Box, Button, Checkbox, Typography } from '@material-ui/core'
 import { Confirm, setAlert, setConfirm } from 'slices/globalStatus'
 import { FixedSizeList as RWList, ListChildComponentProps as RWListChildComponentProps } from 'react-window'
 import { useCallback, useEffect, useState } from 'react'
@@ -7,17 +7,20 @@ import { Archive } from 'api/archives.type'
 import CloseIcon from '@material-ui/icons/Close'
 import DeleteOutlinedIcon from '@material-ui/icons/DeleteOutlined'
 import FilterListIcon from '@material-ui/icons/FilterList'
-import { Link } from 'react-router-dom'
 import Loading from 'components-mui/Loading'
 import NotFound from 'components-mui/NotFound'
 import ObjectListItem from 'components/ObjectListItem'
 import PlaylistAddCheckIcon from '@material-ui/icons/PlaylistAddCheck'
 import Space from 'components-mui/Space'
 import T from 'components/T'
+import Tab from '@material-ui/core/Tab'
+import TabContext from '@material-ui/lab/TabContext'
+import TabList from '@material-ui/lab/TabList'
 import _groupBy from 'lodash.groupby'
 import api from 'api'
 import { styled } from '@material-ui/styles'
 import { transByKind } from 'lib/byKind'
+import { useHistory } from 'react-router-dom'
 import { useIntl } from 'react-intl'
 import { useQuery } from 'lib/hooks'
 import { useStoreDispatch } from 'store'
@@ -31,13 +34,17 @@ const StyledCheckBox = styled(Checkbox)({
   },
 })
 
+type PanelType = 'workflow' | 'schedule' | 'experiment'
+
 export default function Archives() {
+  const history = useHistory()
   const intl = useIntl()
   const query = useQuery()
   let kind = query.get('kind') || 'experiment'
 
   const dispatch = useStoreDispatch()
 
+  const [panel, setPanel] = useState<PanelType>(kind as PanelType)
   const [loading, setLoading] = useState(true)
   const [archives, setArchives] = useState<Archive[]>([])
   const [batch, setBatch] = useState<Record<uuid, boolean>>({})
@@ -82,13 +89,29 @@ export default function Archives() {
 
     switch (action) {
       case 'delete':
-        actionFunc = api.archives.del
+        switch (kind) {
+          case 'schedule':
+            actionFunc = api.schedules.delArchive
+            break
+          case 'experiment':
+          default:
+            actionFunc = api.archives.del
+            break
+        }
         arg = uuid
 
         break
       case 'deleteMulti':
         action = 'delete'
-        actionFunc = api.archives.delMulti
+        switch (kind) {
+          case 'schedule':
+            actionFunc = api.schedules.delArchives
+            break
+          case 'experiment':
+          default:
+            actionFunc = api.archives.delMulti
+            break
+        }
         arg = Object.keys(batch)
         setBatch({})
 
@@ -101,7 +124,7 @@ export default function Archives() {
           dispatch(
             setAlert({
               type: 'success',
-              message: T(`confirm.${action}Successfully`, intl),
+              message: T(`confirm.success.${action}`, intl),
             })
           )
 
@@ -138,16 +161,6 @@ export default function Archives() {
     })
   }
 
-  const ActiveLink = ({ href, children }: LinkProps) => (
-    <MUILink
-      component={Link}
-      color={kind === href ? 'primary' : kind === undefined && href === 'experiment' ? 'primary' : 'inherit'}
-      to={`/archives?kind=${href}`}
-    >
-      {children}
-    </MUILink>
-  )
-
   const Row = ({ data, index, style }: RWListChildComponentProps) => (
     <Box display="flex" alignItems="center" mb={3} style={style}>
       {!isBatchEmpty && (
@@ -164,13 +177,20 @@ export default function Archives() {
     </Box>
   )
 
+  const onTabChange = (_: any, newValue: PanelType) => {
+    history.push(`/archives?kind=${newValue}`)
+    setPanel(newValue)
+  }
+
   return (
-    <>
-      <Breadcrumbs aria-label="breadcrumb">
-        <ActiveLink href="workflow">{T('workflows.title')}</ActiveLink>
-        <ActiveLink href="schedule">{T('schedules.title')}</ActiveLink>
-        <ActiveLink href="experiment">{T('experiments.title')}</ActiveLink>
-      </Breadcrumbs>
+    <TabContext value={panel}>
+      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <TabList onChange={onTabChange}>
+          <Tab label={T('workflows.title')} value="workflow" />
+          <Tab label={T('schedules.title')} value="schedule" />
+          <Tab label={T('experiments.title')} value="experiment" />
+        </TabList>
+      </Box>
 
       <Space direction="row" my={6}>
         <Button
@@ -216,6 +236,6 @@ export default function Archives() {
       )}
 
       {loading && <Loading />}
-    </>
+    </TabContext>
   )
 }

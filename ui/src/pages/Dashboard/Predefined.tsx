@@ -105,7 +105,7 @@ const Predefined = () => {
         dispatch(
           setAlert({
             type: 'success',
-            message: T('confirm.createSuccessfully', intl),
+            message: T('confirm.success.create', intl),
           })
         )
       })
@@ -122,7 +122,7 @@ const Predefined = () => {
     dispatch(
       setAlert({
         type: 'success',
-        message: T('confirm.deleteSuccessfully', intl),
+        message: T('confirm.success.delete', intl),
       })
     )
   }

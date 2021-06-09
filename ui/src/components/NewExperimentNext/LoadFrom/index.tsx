@@ -6,13 +6,15 @@ import { Archive } from 'api/archives.type'
 import { Experiment } from 'api/experiments.type'
 import Paper from 'components-mui/Paper'
 import RadioLabel from './RadioLabel'
+import { Schedule } from 'api/schedules.type'
 import SkeletonN from 'components-mui/SkeletonN'
+import Space from 'components-mui/Space'
 import T from 'components/T'
-import YAML from 'components/YAML'
 import _snakecase from 'lodash.snakecase'
 import api from 'api'
 import { setAlert } from 'slices/globalStatus'
 import { setExternalExperiment } from 'slices/experiments'
+import { toCamelCase } from 'lib/utils'
 import { useIntl } from 'react-intl'
 import { useStoreDispatch } from 'store'
 import { yamlToExperiment } from 'lib/formikhelpers'
@@ -27,40 +29,75 @@ const LoadFrom: React.FC<LoadFromProps> = ({ loadCallback, inSchedule = false })
 
   const dispatch = useStoreDispatch()
 
-  const [experiments, setExperiments] = useState<Experiment[]>()
-  const [archives, setArchives] = useState<Archive[]>()
-  const [predefined, setPredefined] = useState<PreDefinedValue[]>()
+  const [loading, setLoading] = useState(true)
+  const [data, setData] = useState<{
+    experiments: Experiment[]
+    archives: Archive[]
+    schedules: Schedule[]
+  }>({
+    experiments: [],
+    archives: [],
+    schedules: [],
+  })
+  const [predefined, setPredefined] = useState<PreDefinedValue[]>([])
   const [radio, setRadio] = useState('')
 
-  const fetchExperiments = () =>
-    api.experiments
-      .experiments()
-      .then(({ data }) => setExperiments(data))
-      .catch(console.error)
-
-  const fetchArchives = () =>
-    api.archives
-      .archives()
-      .then(({ data }) => setArchives(data))
-      .catch(console.error)
-
-  const fetchPredefined = async () => setPredefined(await (await getDB()).getAll('predefined'))
-
   useEffect(() => {
-    Promise.all([fetchExperiments(), fetchArchives()])
+    const fetchExperiments = api.experiments.experiments()
+    const fetchArchives = api.archives.archives()
+    const promises: Promise<any>[] = [fetchExperiments, fetchArchives]
 
-    fetchPredefined()
-  }, [])
+    if (inSchedule) {
+      promises.push(api.schedules.schedules())
+    }
+
+    const fetchAll = async () => {
+      const data = await Promise.all(promises)
+
+      setData({
+        experiments: data[0].data,
+        archives: data[1].data,
+        schedules: data[2] ? data[2].data : [],
+      })
+
+      setPredefined(await (await getDB()).getAll('predefined'))
+
+      setLoading(false)
+    }
+
+    fetchAll()
+  }, [inSchedule])
 
   function fillExperiment(original: any) {
-    const y = yamlToExperiment(original)
-    const kind = y.target.kind
+    if (original.kind === 'Schedule') {
+      const kind = original.spec.type
+      const data = yamlToExperiment({
+        kind,
+        metadata: original.metadata,
+        spec: original.spec[toCamelCase(kind)],
+      })
+      delete original.spec[toCamelCase(kind)]
+
+      dispatch(
+        setExternalExperiment({
+          kindAction: [kind, data.target[_snakecase(kind)].action ?? ''],
+          target: data.target,
+          basic: { ...data.basic, ...original.spec },
+        })
+      )
+
+      return
+    }
+
+    const data = yamlToExperiment(original)
+
+    const kind = data.target.kind
 
     dispatch(
       setExternalExperiment({
-        kindAction: [kind, y.target[_snakecase(kind)].action ?? ''],
-        target: y.target,
-        basic: y.basic,
+        kindAction: [kind, data.target[_snakecase(kind)].action ?? ''],
+        target: data.target,
+        basic: data.basic,
       })
     )
   }
@@ -74,100 +111,142 @@ const LoadFrom: React.FC<LoadFromProps> = ({ loadCallback, inSchedule = false })
       fillExperiment(experiment)
 
       loadCallback && loadCallback()
-      setRadio('')
 
       return
     }
 
-    const apiRequest = type === 'e' ? api.experiments : api.archives
+    let apiRequest
+    switch (type) {
+      case 's':
+        apiRequest = api.schedules
+        break
+      case 'e':
+        apiRequest = api.experiments
+        break
+      case 'a':
+        apiRequest = api.archives
+        break
+    }
 
     setRadio(e.target.value)
 
-    apiRequest
-      .single(uuid)
-      .then(({ data }) => {
-        fillExperiment(data.kube_object)
+    if (apiRequest) {
+      apiRequest
+        .single(uuid)
+        .then(({ data }) => {
+          fillExperiment(data.kube_object)
 
-        loadCallback && loadCallback()
-        setRadio('')
+          loadCallback && loadCallback()
 
-        dispatch(
-          setAlert({
-            type: 'success',
-            message: T('confirm.loadSuccessfully', intl),
-          })
-        )
-      })
-      .catch(console.error)
+          dispatch(
+            setAlert({
+              type: 'success',
+              message: T('confirm.success.load', intl),
+            })
+          )
+        })
+        .catch(console.error)
+    }
   }
 
   return (
     <Paper>
       <RadioGroup value={radio} onChange={onRadioChange}>
-        <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+        <Space>
+          {inSchedule && (
+            <>
+              <Typography>{T('schedules.title')}</Typography>
+
+              {loading ? (
+                <SkeletonN n={3} />
+              ) : data.schedules.length > 0 ? (
+                <Box display="flex" flexWrap="wrap">
+                  {data.schedules.map((d) => (
+                    <FormControlLabel
+                      key={d.uid}
+                      value={`s+${d.uid}`}
+                      control={<Radio color="primary" />}
+                      label={RadioLabel(d.name, d.uid)}
+                    />
+                  ))}
+                </Box>
+              ) : (
+                <Typography variant="body2" color="textSecondary">
+                  {T('experiments.notFound')}
+                </Typography>
+              )}
+
+              <Divider />
+            </>
+          )}
+
           <Typography>{T('experiments.title')}</Typography>
-          <YAML callback={fillExperiment} />
-        </Box>
-        {experiments && experiments.length > 0 ? (
-          <Box display="flex" flexWrap="wrap">
-            {experiments.map((e) => (
-              <FormControlLabel
-                key={e.uid}
-                value={`e+${e.uid}`}
-                control={<Radio color="primary" />}
-                label={RadioLabel(e.name, e.uid)}
-              />
-            ))}
-          </Box>
-        ) : experiments?.length === 0 ? (
-          <Typography variant="body2">{T('experiments.notFound')}</Typography>
-        ) : (
-          <SkeletonN n={3} />
-        )}
-        <Box my={6}>
+
+          {loading ? (
+            <SkeletonN n={3} />
+          ) : data.experiments.length > 0 ? (
+            <Box display="flex" flexWrap="wrap">
+              {data.experiments.map((d) => (
+                <FormControlLabel
+                  key={d.uid}
+                  value={`e+${d.uid}`}
+                  control={<Radio color="primary" />}
+                  label={RadioLabel(d.name, d.uid)}
+                />
+              ))}
+            </Box>
+          ) : (
+            <Typography variant="body2" color="textSecondary">
+              {T('experiments.notFound')}
+            </Typography>
+          )}
+
           <Divider />
-        </Box>
-        <Box mb={3}>
+
           <Typography>{T('archives.title')}</Typography>
-        </Box>
-        {archives && archives.length > 0 ? (
-          <Box display="flex" flexWrap="wrap">
-            {archives.map((a) => (
-              <FormControlLabel
-                key={a.uid}
-                value={`a+${a.uid}`}
-                control={<Radio color="primary" />}
-                label={RadioLabel(a.name, a.uid)}
-              />
-            ))}
-          </Box>
-        ) : archives?.length === 0 ? (
-          <Typography variant="body2">{T('archives.notFound')}</Typography>
-        ) : (
-          <SkeletonN n={3} />
-        )}
-        <Box my={6}>
+
+          {loading ? (
+            <SkeletonN n={3} />
+          ) : data.archives.length > 0 ? (
+            <Box display="flex" flexWrap="wrap">
+              {data.archives.map((d) => (
+                <FormControlLabel
+                  key={d.uid}
+                  value={`a+${d.uid}`}
+                  control={<Radio color="primary" />}
+                  label={RadioLabel(d.name, d.uid)}
+                />
+              ))}
+            </Box>
+          ) : (
+            <Typography variant="body2" color="textSecondary">
+              {T('archives.notFound')}
+            </Typography>
+          )}
+
           <Divider />
-        </Box>
-        <Box mb={3}>
+
           <Typography>{T('dashboard.predefined')}</Typography>
-        </Box>
-        {predefined && predefined.length > 0 ? (
-          <Box display="flex" flexWrap="wrap">
-            {predefined.map((p) => (
-              <FormControlLabel
-                key={p.name}
-                value={`p+${p.name}`}
-                control={<Radio color="primary" />}
-                label={RadioLabel(p.name)}
-              />
-            ))}
-          </Box>
-        ) : predefined?.length === 0 ? (
-          <Typography variant="body2">{T('dashboard.noPredefinedFound')}</Typography>
-        ) : (
-          <SkeletonN n={3} />
-        )}
+
+          {loading ? (
+            <SkeletonN n={3} />
+          ) : predefined.length > 0 ? (
+            <Box display="flex" flexWrap="wrap">
+              {predefined.map((d) => (
+                <FormControlLabel
+                  key={d.name}
+                  value={`p+${d.name}`}
+                  control={<Radio color="primary" />}
+                  label={RadioLabel(d.name)}
+                />
+              ))}
+            </Box>
+          ) : (
+            <Typography variant="body2" color="textSecondary">
+              {T('dashboard.noPredefinedFound')}
+            </Typography>
+          )}
+        </Space>
       </RadioGroup>
     </Paper>
   )

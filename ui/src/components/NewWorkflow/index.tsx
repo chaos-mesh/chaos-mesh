@@ -160,7 +160,7 @@ const NewWorkflow = () => {
       dispatch(
         setAlert({
           type: 'success',
-          message: T('confirm.updateSuccessfully', intl) as string,
+          message: T('confirm.success.update', intl) as string,
         })
       )
       resetRestore()
@@ -191,7 +191,7 @@ const NewWorkflow = () => {
     dispatch(
       setAlert({
         type: 'success',
-        message: T('confirm.updateSuccessfully', intl) as string,
+        message: T('confirm.success.update', intl) as string,
       })
     )
     resetRestore()
@@ -211,7 +211,7 @@ const NewWorkflow = () => {
       dispatch(
         setAlert({
           type: 'success',
-          message: T('confirm.updateSuccessfully', intl) as string,
+          message: T('confirm.success.update', intl) as string,
         })
       )
       resetRestore()
@@ -222,7 +222,7 @@ const NewWorkflow = () => {
     dispatch(
       setAlert({
         type: 'success',
-        message: T('confirm.deleteSuccessfully', intl) as string,
+        message: T('confirm.success.delete', intl) as string,
       })
     )
     resetRestore()

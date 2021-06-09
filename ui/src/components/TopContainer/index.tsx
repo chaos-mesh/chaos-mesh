@@ -1,11 +1,10 @@
-import { Box, CssBaseline, Paper, Portal, Snackbar, useMediaQuery, useTheme } from '@material-ui/core'
+import { Alert, Box, CssBaseline, Paper, Portal, Snackbar, useMediaQuery, useTheme } from '@material-ui/core'
 import React, { useEffect, useMemo, useState } from 'react'
 import { Redirect, Route, Switch } from 'react-router-dom'
 import { drawerCloseWidth, drawerWidth } from './Sidebar'
 import { setAlertOpen, setConfig, setConfirmOpen, setNameSpace, setTokenName, setTokens } from 'slices/globalStatus'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
-import Alert from '@material-ui/lab/Alert'
 import ConfirmDialog from 'components-mui/ConfirmDialog'
 import ContentContainer from 'components-mui/ContentContainer'
 import { IntlProvider } from 'react-intl'

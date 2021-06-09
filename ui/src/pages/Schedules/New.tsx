@@ -37,7 +37,7 @@ const New = () => {
         dispatch(
           setAlert({
             type: 'success',
-            message: T('confirm.createSuccessfully', intl),
+            message: T('confirm.success.create', intl),
           })
         )
 

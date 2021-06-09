@@ -1,12 +1,12 @@
 import * as d3 from 'd3'
 
+import { Box, Typography } from '@material-ui/core'
 import DateTime, { format, now } from 'lib/luxon'
 
 import { Event } from 'api/events.type'
-import { IntlShape } from 'react-intl'
-import T from 'components/T'
 import { Theme } from 'slices/settings'
 import _debounce from 'lodash.debounce'
+import { renderToString } from 'react-dom/server'
 import { truncate } from '../utils'
 import wrapText from './wrapText'
 
@@ -17,7 +17,6 @@ import wrapText from './wrapText'
  * @param {{
  *   root: HTMLElement
  *   events: Event[]
- *   intl: IntlShape
  *   theme: Theme
  *   options?: {
  *     enableLegends?: boolean
@@ -37,7 +36,6 @@ import wrapText from './wrapText'
 export default function gen({
   root,
   events,
-  intl,
   theme,
   options = {
     enableLegends: true,
@@ -45,7 +43,6 @@ export default function gen({
 }: {
   root: HTMLElement
   events: Event[]
-  intl: IntlShape
   theme: Theme
   options?: {
     enableLegends?: boolean
@@ -205,12 +202,17 @@ export default function gen({
     .attr('class', `chaos-event-tooltip${theme === 'light' ? '' : ' dark'}`)
 
   function genTooltipContent(d: Event) {
-    return `<b>${T('events.event.experiment', intl)}: ${d.name}</b>
-            <br />
-            <span class="secondary">
-              ${T('events.event.started', intl)}: ${format(d.created_at)}
-            </span>
-            `
+    return renderToString(
+      <Box width={360}>
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Typography>{d.name}</Typography>
+          <Typography variant="overline">{format(d.created_at)}</Typography>
+        </Box>
+        <Typography variant="body2" color="textSecondary">
+          {d.message}
+        </Typography>
+      </Box>
+    )
   }
 
   if (enableLegends) {

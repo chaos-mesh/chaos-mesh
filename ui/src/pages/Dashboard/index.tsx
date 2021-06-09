@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 
 import AccountTreeOutlinedIcon from '@material-ui/icons/AccountTreeOutlined'
 import { Event } from 'api/events.type'
+import EventsChart from 'components/EventsChart'
 import EventsTimeline from 'components/EventsTimeline'
 import { Experiment } from 'api/experiments.type'
 import ExperimentIcon from 'components-mui/Icons/Experiment'
@@ -19,7 +20,7 @@ import api from 'api'
 import { makeStyles } from '@material-ui/styles'
 
 const useStyles = makeStyles({
-  totalState: {
+  container: {
     position: 'relative',
     height: 300,
   },
@@ -121,13 +122,19 @@ export default function Dashboard() {
               <Predefined />
             </Paper>
           </Grid>
+          <Grid item xs={12}>
+            <Paper>
+              <PaperTop title={T('common.timeline')} boxProps={{ mb: 3 }} />
+              <EventsChart events={data.events} className={classes.container} />
+            </Paper>
+          </Grid>
         </Grid>
 
         <Grid container spacing={6} item xs={12} lg={4}>
           <Grid item xs={12}>
             <Paper>
               <PaperTop title={T('dashboard.totalState')} />
-              <TotalState className={classes.totalState} />
+              <TotalState className={classes.container} />
             </Paper>
           </Grid>
           <Grid item xs={12}>

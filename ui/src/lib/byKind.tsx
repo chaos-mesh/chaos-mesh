@@ -7,7 +7,6 @@ import { ReactComponent as GCPIcon } from 'images/chaos/gcp.svg'
 import { ReactComponent as LinuxKernelIcon } from 'images/chaos/kernel.svg'
 import { ReactComponent as NetworkIcon } from 'images/chaos/network.svg'
 import { ReactComponent as PodLifecycleIcon } from 'images/chaos/pod.svg'
-import ScheduleIcon from '@material-ui/icons/Schedule'
 import { ReactComponent as StressIcon } from 'images/chaos/stress.svg'
 import { SvgIcon } from '@material-ui/core'
 import T from 'components/T'
@@ -16,9 +15,6 @@ export function iconByKind(kind: ExperimentKind | 'Schedule', size: 'small' | 'l
   let icon
 
   switch (kind) {
-    case 'Schedule':
-      icon = <ScheduleIcon />
-      break
     case 'PodChaos':
       icon = <PodLifecycleIcon />
       break
@@ -32,6 +28,7 @@ export function iconByKind(kind: ExperimentKind | 'Schedule', size: 'small' | 'l
       icon = <LinuxKernelIcon />
       break
     case 'TimeChaos':
+    case 'Schedule':
       icon = <ClockIcon />
       break
     case 'StressChaos':
@@ -48,7 +45,7 @@ export function iconByKind(kind: ExperimentKind | 'Schedule', size: 'small' | 'l
       break
   }
 
-  return kind !== 'Schedule' ? <SvgIcon fontSize={size}>{icon}</SvgIcon> : icon
+  return <SvgIcon fontSize={size}>{icon}</SvgIcon>
 }
 
 export function transByKind(kind: ExperimentKind) {

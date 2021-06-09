@@ -64,7 +64,7 @@ const Schedules = () => {
           dispatch(
             setAlert({
               type: 'success',
-              message: T(`confirm.${action}Successfully`, intl),
+              message: T(`confirm.success.${action}`, intl),
             })
           )
 

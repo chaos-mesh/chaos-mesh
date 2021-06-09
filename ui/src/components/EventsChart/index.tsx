@@ -4,23 +4,20 @@ import { Event } from 'api/events.type'
 import NotFound from 'components-mui/NotFound'
 import T from 'components/T'
 import genEventsChart from 'lib/d3/eventsChart'
-import { useIntl } from 'react-intl'
 import { useStoreSelector } from 'store'
 
-interface TimelineProps {
+interface EventsChartProps {
   events: Event[]
   className: string
 }
 
-const Timeline: React.FC<TimelineProps> = ({ events, ...rest }) => {
-  const intl = useIntl()
-
+const EventsChart: React.FC<EventsChartProps> = ({ events, ...rest }) => {
   const { theme } = useStoreSelector((state) => state.settings)
 
   const chartRef = useRef<any>(null)
 
   useEffect(() => {
-    if (events && events.length) {
+    if (events.length) {
       const chart = chartRef.current!
 
       if (typeof chart === 'function') {
@@ -32,11 +29,10 @@ const Timeline: React.FC<TimelineProps> = ({ events, ...rest }) => {
       chartRef.current = genEventsChart({
         root: chart,
         events,
-        intl,
         theme,
       })
     }
-  }, [events, intl, theme])
+  }, [events, theme])
 
   return (
     <div ref={chartRef} {...rest}>
@@ -45,4 +41,4 @@ const Timeline: React.FC<TimelineProps> = ({ events, ...rest }) => {
   )
 }
 
-export default Timeline
+export default EventsChart

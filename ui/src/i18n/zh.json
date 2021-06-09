@@ -244,9 +244,9 @@
   "search": {
     "placeholder": "搜索",
     "tip": {
-      "title": "使用以下语法来快速定位事件，实验和归档：",
-      "namespace": "namespace:default xxx 将搜索命名空间为 default 的事件，实验和归档",
-      "kind": "kind:NetworkChaos xxx 将搜索类型为 NetworkChaos 的事件，实验和归档"
+      "title": "使用以下语法来快速定位工作流，计划，实验和归档：",
+      "namespace": "namespace:default xxx 将搜索命名空间为 default 的工作流，计划，实验和归档",
+      "kind": "kind:NetworkChaos xxx 将搜索类型为 NetworkChaos 的计划，实验和归档"
     },
     "result": {
       "acquiring": "获取中...",
@@ -297,14 +297,16 @@
     "created": "创建于"
   },
   "confirm": {
-    "archiveSuccessfully": "归档成功",
-    "createSuccessfully": "创建成功",
-    "deleteSuccessfully": "删除成功",
-    "loadSuccessfully": "加载成功",
-    "pauseSuccessfully": "暂停成功",
-    "updateSuccessfully": "更新成功",
-    "startSuccessfully": "启动成功",
-    "submitSuccessfully": "提交成功"
+    "success": {
+      "archive": "归档成功",
+      "create": "创建成功",
+      "delete": "删除成功",
+      "load": "加载成功",
+      "pause": "暂停成功",
+      "update": "更新成功",
+      "start": "启动成功",
+      "submit": "提交成功"
+    }
   },
   "k8s": {
     "namespace": "命名空间",

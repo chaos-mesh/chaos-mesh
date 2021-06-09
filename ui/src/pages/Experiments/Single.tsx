@@ -23,23 +23,12 @@ import T from 'components/T'
 import api from 'api'
 import fileDownload from 'js-file-download'
 import loadable from '@loadable/component'
-import { makeStyles } from '@material-ui/styles'
 import { useIntl } from 'react-intl'
 import yaml from 'js-yaml'
 
 const YAMLEditor = loadable(() => import('components/YAMLEditor'))
 
-const useStyles = makeStyles((theme) => ({
-  yamlEditorWrapper: {
-    flex: 1,
-    width: `calc(100% + ${theme.spacing(9)})`,
-    marginLeft: theme.spacing(-4.5),
-  },
-}))
-
 export default function Single() {
-  const classes = useStyles()
-
   const history = useHistory()
   const { uuid } = useParams<{ uuid: uuid }>()
 
@@ -142,7 +131,7 @@ export default function Single() {
           dispatch(
             setAlert({
               type: 'success',
-              message: T(`confirm.${action}Successfully`, intl),
+              message: T(`confirm.success.${action}`, intl),
             })
           )
 
@@ -169,7 +158,7 @@ export default function Single() {
         dispatch(
           setAlert({
             type: 'success',
-            message: T('confirm.updateSuccessfully', intl),
+            message: T('confirm.success.update', intl),
           })
         )
 
@@ -220,24 +209,24 @@ export default function Single() {
             )}
 
             <Paper>
-              <PaperTop title={T('common.configuration')}></PaperTop>
+              <PaperTop title={T('common.configuration')} boxProps={{ mb: 3 }} />
               {single && <ObjectConfiguration config={single} />}
             </Paper>
 
             <Grid container>
               <Grid item xs={12} lg={6} sx={{ pr: 3 }}>
                 <Paper sx={{ display: 'flex', flexDirection: 'column', height: 600 }}>
-                  <PaperTop title={T('events.title')} />
+                  <PaperTop title={T('events.title')} boxProps={{ mb: 3 }} />
                   <Box flex={1} overflow="scroll">
                     <EventsTimeline events={events} />
                   </Box>
                 </Paper>
               </Grid>
               <Grid item xs={12} lg={6} sx={{ pl: 3 }}>
-                <Paper sx={{ height: 600, pb: 0 }}>
+                <Paper sx={{ height: 600, p: 0 }}>
                   {single && (
                     <Box display="flex" flexDirection="column" height="100%">
-                      <PaperTop title={T('common.definition')}>
+                      <PaperTop title={T('common.definition')} boxProps={{ p: 4.5, pb: 3 }}>
                         <Space direction="row">
                           <Button
                             variant="outlined"
@@ -258,7 +247,7 @@ export default function Single() {
                           </Button>
                         </Space>
                       </PaperTop>
-                      <Box className={classes.yamlEditorWrapper}>
+                      <Box flex={1}>
                         <YAMLEditor theme={theme} data={yaml.dump(single.kube_object)} mountEditor={setYAMLEditor} />
                       </Box>
                     </Box>

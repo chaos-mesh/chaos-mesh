@@ -22,6 +22,7 @@ const YAMLEditor: React.FC<YAMLEditorProps> = ({ theme, data, mountEditor }) => 
       onLoad={handleOnLoad}
       width="100%"
       height="100%"
+      style={{ borderBottomLeftRadius: 4, borderBottomRightRadius: 4 }}
       mode="yaml"
       theme={theme === 'light' ? 'tomorrow' : 'tomorrow_night_eighties'}
       value={data}

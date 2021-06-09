@@ -245,9 +245,9 @@
   "search": {
     "placeholder": "Search",
     "tip": {
-      "title": "Use the following syntax to quickly locate events, experiments and archives:",
-      "namespace": "namespace:default xxx will search for events, experiments and archives with namespace default",
-      "kind": "kind:NetworkChaos xxx will search for events, experiments and archives with kind NetworkChaos"
+      "title": "Use the following syntax to quickly locate workflows, schedules, experiments and archives:",
+      "namespace": "namespace:default xxx will search for workflows, schedules, experiments and archives with namespace default",
+      "kind": "kind:NetworkChaos xxx will search for schedules, experiments and archives with kind NetworkChaos"
     },
     "result": {
       "acquiring": "Acquiring...",
@@ -298,14 +298,16 @@
     "created": "Created at"
   },
   "confirm": {
-    "archiveSuccessfully": "Archived successfully",
-    "createSuccessfully": "Created successfully",
-    "deleteSuccessfully": "Deleted successfully",
-    "loadSuccessfully": "Loaded successfully",
-    "pauseSuccessfully": "Paused successfully",
-    "updateSuccessfully": "Updated successfully",
-    "startSuccessfully": "Started successfully",
-    "submitSuccessfully": "Submitted successfully"
+    "success": {
+      "archive": "Archived successfully",
+      "create": "Created successfully",
+      "delete": "Deleted successfully",
+      "load": "Loaded successfully",
+      "pause": "Paused successfully",
+      "update": "Updated successfully",
+      "start": "Started successfully",
+      "submit": "Submitted successfully"
+    }
   },
   "k8s": {
     "namespace": "Namespace",

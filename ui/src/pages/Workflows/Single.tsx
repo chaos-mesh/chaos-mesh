@@ -128,7 +128,7 @@ const Single = () => {
           dispatch(
             setAlert({
               type: 'success',
-              message: T(`confirm.${action}Successfully`, intl),
+              message: T(`confirm.success.${action}`, intl),
             })
           )
 
@@ -190,7 +190,7 @@ const Single = () => {
         dispatch(
           setAlert({
             type: 'success',
-            message: T(`confirm.updateSuccessfully`, intl),
+            message: T(`confirm.success.update`, intl),
           })
         )
 

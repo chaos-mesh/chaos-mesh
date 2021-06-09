@@ -52,7 +52,7 @@ const DataTable: React.FC<DataTableProps> = ({ data, fetchData }) => {
           dispatch(
             setAlert({
               type: 'success',
-              message: T(`confirm.${action}Successfully`, intl),
+              message: T(`confirm.success.${action}`, intl),
             })
           )
 
@@ -68,7 +68,7 @@ const DataTable: React.FC<DataTableProps> = ({ data, fetchData }) => {
         <TableHead>
           <TableRow>
             <TableCell>{T('common.name')}</TableCell>
-            <TableCell>{T('workflow.entry')}</TableCell>
+            {/* <TableCell>{T('workflow.entry')}</TableCell> */}
             {/* <TableCell>{T('workflow.time')}</TableCell> */}
             <TableCell>{T('workflow.state')}</TableCell>
             <TableCell>{T('table.created')}</TableCell>
@@ -83,7 +83,7 @@ const DataTable: React.FC<DataTableProps> = ({ data, fetchData }) => {
             return (
               <TableRow key={key} hover sx={{ cursor: 'pointer' }} onClick={handleJumpTo(d.namespace, d.name)}>
                 <TableCell>{d.name}</TableCell>
-                <TableCell>{d.entry}</TableCell>
+                {/* <TableCell>{d.entry}</TableCell> */}
                 {/* <TableCell></TableCell> */}
                 <TableCell>{d.status}</TableCell>
                 <TableCell>
