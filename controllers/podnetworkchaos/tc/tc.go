@@ -18,7 +18,6 @@ import (
 	"fmt"
 
 	v1 "k8s.io/api/core/v1"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 
@@ -29,8 +28,8 @@ import (
 var log = ctrl.Log.WithName("tc")
 
 // SetTcs makes grpc call to chaosdaemon to flush traffic control rules
-func SetTcs(ctx context.Context, c client.Client, pod *v1.Pod, tcs []*pb.Tc) error {
-	pbClient, err := chaosdaemon.NewChaosDaemonClient(ctx, c, pod)
+func SetTcs(ctx context.Context, builder *chaosdaemon.ChaosDaemonClientBuilder, pod *v1.Pod, tcs []*pb.Tc) error {
+	pbClient, err := builder.Build(ctx, pod)
 	if err != nil {
 		return err
 	}
