@@ -213,7 +213,7 @@ func parsePodChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	}
 
 	return v1alpha1.ScheduleItem{
-		PodChaos: &chaos.Spec,
+		EmbedChaos: v1alpha1.EmbedChaos{PodChaos: &chaos.Spec},
 	}
 }
 
@@ -257,7 +257,7 @@ func parseNetworkChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	}
 
 	return v1alpha1.ScheduleItem{
-		NetworkChaos: &chaos.Spec,
+		EmbedChaos: v1alpha1.EmbedChaos{NetworkChaos: &chaos.Spec},
 	}
 }
 
@@ -295,7 +295,7 @@ func parseIOChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	}
 
 	return v1alpha1.ScheduleItem{
-		IOChaos: &chaos.Spec,
+		EmbedChaos: v1alpha1.EmbedChaos{IOChaos: &chaos.Spec},
 	}
 }
 
@@ -326,7 +326,7 @@ func parseTimeChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	}
 
 	return v1alpha1.ScheduleItem{
-		TimeChaos: &chaos.Spec,
+		EmbedChaos: v1alpha1.EmbedChaos{TimeChaos: &chaos.Spec},
 	}
 }
 
@@ -353,7 +353,7 @@ func parseKernelChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	}
 
 	return v1alpha1.ScheduleItem{
-		KernelChaos: &chaos.Spec,
+		EmbedChaos: v1alpha1.EmbedChaos{KernelChaos: &chaos.Spec},
 	}
 }
 
@@ -399,7 +399,7 @@ func parseStressChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	}
 
 	return v1alpha1.ScheduleItem{
-		StressChaos: &chaos.Spec,
+		EmbedChaos: v1alpha1.EmbedChaos{StressChaos: &chaos.Spec},
 	}
 }
 
@@ -430,7 +430,7 @@ func parseDNSChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	}
 
 	return v1alpha1.ScheduleItem{
-		DNSChaos: &chaos.Spec,
+		EmbedChaos: v1alpha1.EmbedChaos{DNSChaos: &chaos.Spec},
 	}
 }
 
@@ -459,7 +459,7 @@ func parseAwsChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	}
 
 	return v1alpha1.ScheduleItem{
-		AwsChaos: &chaos.Spec,
+		EmbedChaos: v1alpha1.EmbedChaos{AwsChaos: &chaos.Spec},
 	}
 }
 
@@ -486,7 +486,7 @@ func parseGcpChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	}
 
 	return v1alpha1.ScheduleItem{
-		GcpChaos: &chaos.Spec,
+		EmbedChaos: v1alpha1.EmbedChaos{GcpChaos: &chaos.Spec},
 	}
 }
 
