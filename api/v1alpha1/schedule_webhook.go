@@ -15,7 +15,6 @@ package v1alpha1
 
 import (
 	"fmt"
-	"reflect"
 
 	"github.com/robfig/cron/v3"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -92,20 +91,7 @@ func (in *ScheduleSpec) validateSchedule(schedule *field.Path) field.ErrorList {
 func (in *ScheduleSpec) validateChaos(chaos *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 	if in.Type != ScheduleTypeWorkflow {
-		spec := reflect.ValueOf(in.ScheduleItem).FieldByName(string(in.Type))
-
-		if !spec.IsValid() || spec.IsNil() {
-			allErrs = append(allErrs, field.Invalid(chaos,
-				in.ScheduleItem,
-				fmt.Sprintf("parse schedule field error: missing chaos spec")))
-			return allErrs
-		}
-		addr, success := spec.Interface().(CommonSpec)
-		if success == false {
-			schedulelog.Info(fmt.Sprintf("%s does not seem to have a validator", string(in.Type)))
-			return allErrs
-		}
-		allErrs = append(allErrs, addr.Validate()...)
+		allErrs = append(allErrs, in.EmbedChaos.Validate(string(in.Type))...)
 	}
 	return allErrs
 }
