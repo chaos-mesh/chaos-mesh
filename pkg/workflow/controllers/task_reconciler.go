@@ -58,7 +58,7 @@ func (it *TaskReconciler) Reconcile(request reconcile.Request) (reconcile.Result
 
 	startTime := time.Now()
 	defer func() {
-		it.logger.V(4).Info("Finished syncing for serial node",
+		it.logger.V(4).Info("Finished syncing for task node",
 			"node", request.NamespacedName,
 			"duration", time.Since(startTime),
 		)
