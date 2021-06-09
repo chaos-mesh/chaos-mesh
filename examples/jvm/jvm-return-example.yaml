@@ -15,7 +15,3 @@ spec:
   selector:
     labelSelectors:
       app: springboot-jvmchaos-demo
-<<<<<<< HEAD
-=======
-  duration: "50s"
->>>>>>> 215931075a6348c8705b6c68d4b5bb28f34164c2
