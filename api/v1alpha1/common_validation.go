@@ -16,6 +16,7 @@ package v1alpha1
 import (
 	"fmt"
 	"strconv"
+	"time"
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
@@ -25,11 +26,17 @@ const (
 	ValidateValueParseError = "parse value field error:%s"
 )
 
-func validateDuration(schedulerObject InnerObject, spec *field.Path) field.ErrorList {
+// +kubebuilder:object:generate=false
+type CommonSpec interface {
+	GetDuration() (*time.Duration, error)
+	Validate() field.ErrorList
+}
+
+func validateDuration(spec CommonSpec, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
-	durationField := spec.Child("duration")
-	_, err := schedulerObject.GetDuration()
+	durationField := path.Child("duration")
+	_, err := spec.GetDuration()
 	if err != nil {
 		allErrs = append(allErrs, field.Invalid(durationField, nil,
 			fmt.Sprintf("parse duration field error:%s", err)))
