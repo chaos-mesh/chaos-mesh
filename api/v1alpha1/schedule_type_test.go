@@ -56,13 +56,14 @@ var _ = Describe("Schedule", func() {
 				Spec: ScheduleSpec{
 					Schedule: "* * * * 1",
 					ScheduleItem: ScheduleItem{
-						PodChaos: &PodChaosSpec{
+						EmbedChaos: EmbedChaos{PodChaos: &PodChaosSpec{
 							Action: PodKillAction,
 							ContainerSelector: ContainerSelector{
 								PodSelector: PodSelector{
 									Mode: OnePodMode,
 								},
 							},
+						},
 						},
 					},
 					ConcurrencyPolicy: ForbidConcurrent,

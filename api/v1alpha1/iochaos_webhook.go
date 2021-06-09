@@ -75,17 +75,23 @@ func (in *IOChaos) ValidateDelete() error {
 
 // Validate validates chaos object
 func (in *IOChaos) Validate() error {
-	specField := field.NewPath("spec")
-	allErrs := in.Spec.validateDelay(specField.Child("delay"))
-	allErrs = append(allErrs, in.Spec.validateErrno(specField.Child("errno"))...)
-	allErrs = append(allErrs, validateDuration(in, specField)...)
-	allErrs = append(allErrs, validatePodSelector(in.Spec.PodSelector.Value, in.Spec.PodSelector.Mode, specField.Child("value"))...)
-	allErrs = append(allErrs, in.Spec.validatePercent(specField.Child("percent"))...)
+	allErrs := in.Spec.Validate()
 
 	if len(allErrs) > 0 {
 		return fmt.Errorf(allErrs.ToAggregate().Error())
 	}
 	return nil
+}
+
+func (in *IOChaosSpec) Validate() field.ErrorList {
+	specField := field.NewPath("spec")
+	allErrs := in.validateDelay(specField.Child("delay"))
+	allErrs = append(allErrs, validateDuration(in, specField)...)
+	allErrs = append(allErrs, validatePodSelector(in.PodSelector.Value, in.PodSelector.Mode, specField.Child("value"))...)
+	allErrs = append(allErrs, in.validateErrno(specField.Child("errno"))...)
+	allErrs = append(allErrs, in.validatePercent(specField.Child("percent"))...)
+
+	return allErrs
 }
 
 func (in *IOChaosSpec) validateDelay(delay *field.Path) field.ErrorList {

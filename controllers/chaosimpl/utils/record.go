@@ -25,6 +25,18 @@ import (
 	chaosdaemonclient "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/client"
 )
 
+type ContianerRecordDecoder struct {
+	client.Client
+	*chaosdaemon.ChaosDaemonClientBuilder
+}
+
+func NewContainerRecordDecoder(c client.Client, builder *chaosdaemon.ChaosDaemonClientBuilder) *ContianerRecordDecoder {
+	return &ContianerRecordDecoder{
+		Client:                   c,
+		ChaosDaemonClientBuilder: builder,
+	}
+}
+
 type DecodedContainerRecord struct {
 	PbClient    chaosdaemonclient.ChaosDaemonClientInterface
 	ContainerId string
@@ -32,10 +44,10 @@ type DecodedContainerRecord struct {
 	Pod *v1.Pod
 }
 
-func DecodeContainerRecord(ctx context.Context, record *v1alpha1.Record, c client.Client) (decoded DecodedContainerRecord, err error) {
+func (d *ContianerRecordDecoder) DecodeContainerRecord(ctx context.Context, record *v1alpha1.Record) (decoded DecodedContainerRecord, err error) {
 	var pod v1.Pod
 	podId, containerName := controller.ParseNamespacedNameContainer(record.Id)
-	err = c.Get(ctx, podId, &pod)
+	err = d.Client.Get(ctx, podId, &pod)
 	if err != nil {
 		// TODO: organize the error in a better way
 		err = NewFailToFindContainer(pod.Namespace, pod.Name, containerName, err)
@@ -60,7 +72,7 @@ func DecodeContainerRecord(ctx context.Context, record *v1alpha1.Record, c clien
 		return
 	}
 
-	decoded.PbClient, err = chaosdaemon.NewChaosDaemonClient(ctx, c, &pod)
+	decoded.PbClient, err = d.ChaosDaemonClientBuilder.Build(ctx, &pod)
 	if err != nil {
 		return
 	}
