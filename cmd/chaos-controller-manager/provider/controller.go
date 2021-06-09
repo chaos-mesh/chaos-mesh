@@ -15,15 +15,19 @@ package provider
 
 import (
 	"github.com/go-logr/logr"
+	"go.uber.org/fx"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/config"
+
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 	"k8s.io/client-go/rest"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
+	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 )
 
 var (
@@ -46,17 +50,17 @@ func NewOption(logger logr.Logger) *ctrl.Options {
 
 	options := ctrl.Options{
 		Scheme:             scheme,
-		MetricsBindAddress: ccfg.ControllerCfg.MetricsAddr,
-		LeaderElection:     ccfg.ControllerCfg.EnableLeaderElection,
+		MetricsBindAddress: config.ControllerCfg.MetricsAddr,
+		LeaderElection:     config.ControllerCfg.EnableLeaderElection,
 		Port:               9443,
 	}
 
-	if ccfg.ControllerCfg.ClusterScoped {
+	if config.ControllerCfg.ClusterScoped {
 		setupLog.Info("Chaos controller manager is running in cluster scoped mode.")
 		// will not specific a certain namespace
 	} else {
-		setupLog.Info("Chaos controller manager is running in namespace scoped mode.", "targetNamespace", ccfg.ControllerCfg.TargetNamespace)
-		options.Namespace = ccfg.ControllerCfg.TargetNamespace
+		setupLog.Info("Chaos controller manager is running in namespace scoped mode.", "targetNamespace", config.ControllerCfg.TargetNamespace)
+		options.Namespace = config.ControllerCfg.TargetNamespace
 	}
 
 	return &options
@@ -67,11 +71,11 @@ func NewConfig() *rest.Config {
 }
 
 func NewManager(options *ctrl.Options, cfg *rest.Config) (ctrl.Manager, error) {
-	if ccfg.ControllerCfg.QPS > 0 {
-		cfg.QPS = ccfg.ControllerCfg.QPS
+	if config.ControllerCfg.QPS > 0 {
+		cfg.QPS = config.ControllerCfg.QPS
 	}
-	if ccfg.ControllerCfg.Burst > 0 {
-		cfg.Burst = ccfg.ControllerCfg.Burst
+	if config.ControllerCfg.Burst > 0 {
+		cfg.Burst = config.ControllerCfg.Burst
 	}
 
 	return ctrl.NewManager(cfg, *options)
@@ -79,11 +83,11 @@ func NewManager(options *ctrl.Options, cfg *rest.Config) (ctrl.Manager, error) {
 
 func NewAuthCli(cfg *rest.Config) (*authorizationv1.AuthorizationV1Client, error) {
 
-	if ccfg.ControllerCfg.QPS > 0 {
-		cfg.QPS = ccfg.ControllerCfg.QPS
+	if config.ControllerCfg.QPS > 0 {
+		cfg.QPS = config.ControllerCfg.QPS
 	}
-	if ccfg.ControllerCfg.Burst > 0 {
-		cfg.Burst = ccfg.ControllerCfg.Burst
+	if config.ControllerCfg.Burst > 0 {
+		cfg.Burst = config.ControllerCfg.Burst
 	}
 
 	return authorizationv1.NewForConfig(cfg)
@@ -97,6 +101,88 @@ func NewLogger() logr.Logger {
 	return ctrl.Log
 }
 
-func NewReader(mgr ctrl.Manager) client.Reader {
-	return mgr.GetAPIReader()
+type noCacheReader struct {
+	fx.Out
+
+	client.Reader `name:"no-cache"`
 }
+
+func NewNoCacheReader(mgr ctrl.Manager) noCacheReader {
+	return noCacheReader{
+		Reader: mgr.GetAPIReader(),
+	}
+}
+
+type globalCacheReader struct {
+	fx.Out
+
+	client.Reader `name:"global-cache"`
+}
+
+func NewGlobalCacheReader(mgr ctrl.Manager) globalCacheReader {
+	return globalCacheReader{
+		Reader: mgr.GetClient(),
+	}
+}
+
+type controlPlaneCacheReader struct {
+	fx.Out
+
+	client.Reader `name:"control-plane-cache"`
+}
+
+func NewControlPlaneCacheReader(logger logr.Logger) (controlPlaneCacheReader, error) {
+	cfg := ctrl.GetConfigOrDie()
+
+	mapper, err := apiutil.NewDynamicRESTMapper(cfg)
+	if err != nil {
+		return controlPlaneCacheReader{}, err
+	}
+
+	scheme := runtime.NewScheme()
+	_ = clientgoscheme.AddToScheme(scheme)
+
+	// Create the cache for the cached read client and registering informers
+	cache, err := cache.New(cfg, cache.Options{Scheme: scheme, Mapper: mapper, Resync: nil, Namespace: config.ControllerCfg.Namespace})
+	if err != nil {
+		return controlPlaneCacheReader{}, err
+	}
+	// TODO: store the channel and use it to stop
+	go func() {
+		err := cache.Start(make(chan struct{}))
+		if err != nil {
+			logger.Error(err, "fail to start cached client")
+		}
+	}()
+
+	c, err := client.New(cfg, client.Options{Scheme: scheme, Mapper: mapper})
+	if err != nil {
+		return controlPlaneCacheReader{}, err
+	}
+
+	cachedClient := &client.DelegatingClient{
+		Reader: &client.DelegatingReader{
+			CacheReader:  cache,
+			ClientReader: c,
+		},
+		Writer:       c,
+		StatusClient: c,
+	}
+
+	return controlPlaneCacheReader{
+		Reader: cachedClient,
+	}, nil
+}
+
+var Module = fx.Provide(
+	NewOption,
+	NewClient,
+	NewManager,
+	NewLogger,
+	NewAuthCli,
+	NewScheme,
+	NewConfig,
+	NewNoCacheReader,
+	NewGlobalCacheReader,
+	NewControlPlaneCacheReader,
+)

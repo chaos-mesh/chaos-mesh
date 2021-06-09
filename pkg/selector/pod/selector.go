@@ -23,15 +23,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-
-	"github.com/chaos-mesh/chaos-mesh/controllers/config"
-	"github.com/chaos-mesh/chaos-mesh/pkg/label"
-	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
-
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-
+	"go.uber.org/fx"
 	v1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -39,6 +31,13 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/apimachinery/pkg/types"
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/config"
+	"github.com/chaos-mesh/chaos-mesh/pkg/label"
+	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
 var log = ctrl.Log.WithName("selector")
@@ -89,10 +88,17 @@ func (impl *SelectImpl) Select(ctx context.Context, ps *v1alpha1.PodSelector) ([
 	return result, nil
 }
 
-func New(c client.Client, r client.Reader) *SelectImpl {
+type Params struct {
+	fx.In
+
+	Client client.Client
+	Reader client.Reader `name:"no-cache"`
+}
+
+func New(params Params) *SelectImpl {
 	return &SelectImpl{
-		c,
-		r,
+		params.Client,
+		params.Reader,
 		Option{
 			config.ControllerCfg.ClusterScoped,
 			config.ControllerCfg.TargetNamespace,

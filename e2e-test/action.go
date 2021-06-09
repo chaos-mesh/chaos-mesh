@@ -20,11 +20,10 @@ import (
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/util/wait"
-
 	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/klog"
 	aggregatorclientset "k8s.io/kube-aggregator/pkg/client/clientset_generated/clientset"
@@ -69,7 +68,7 @@ func (oa *operatorAction) DeployOperator(info OperatorConfig) error {
 		return fmt.Errorf("failed to create namespace chaos-testing: %v %s", err, string(output))
 	}
 	klog.Infof("deploying chaos-mesh:%v", info.ReleaseName)
-	cmd = fmt.Sprintf(`helm install %s %s --namespace %s --set %s`,
+	cmd = fmt.Sprintf(`helm install %s %s --namespace %s --set %s --skip-crds`,
 		info.ReleaseName,
 		oa.operatorChartPath(info.Tag),
 		info.Namespace,
@@ -112,7 +111,11 @@ func (oa *operatorAction) DeployOperator(info OperatorConfig) error {
 
 func (oa *operatorAction) InstallCRD(info OperatorConfig) error {
 	klog.Infof("deploying chaos-mesh crd :%v", info.ReleaseName)
-	oa.runKubectlOrDie("apply", "-f", oa.manifestPath("e2e/crd.yaml"), "--validate=false")
+	if oa.apiextensionsV1Available() {
+		oa.runKubectlOrDie("apply", "-f", oa.manifestPath("e2e/crd.yaml"), "--validate=false")
+	} else {
+		oa.runKubectlOrDie("apply", "-f", oa.manifestPath("e2e/crd-v1beta1.yaml"), "--validate=false")
+	}
 	e2eutil.WaitForCRDsEstablished(oa.apiExtCli, labels.Everything())
 	// workaround for https://github.com/kubernetes/kubernetes/issues/65517
 	klog.Infof("force sync kubectl cache")
@@ -122,6 +125,16 @@ func (oa *operatorAction) InstallCRD(info OperatorConfig) error {
 		klog.Fatalf("Failed to run '%s': %v", strings.Join(cmdArgs, " "), err)
 	}
 	return nil
+}
+
+// check apiextensions.k8s.io/v1 CustomResourceDefinition is Availabel or not
+func (oa *operatorAction) apiextensionsV1Available() bool {
+	for _, item := range oa.apiVersions() {
+		if item == "apiextensions.k8s.io/v1" {
+			return true
+		}
+	}
+	return false
 }
 
 func (oa *operatorAction) CleanCRDOrDie() {

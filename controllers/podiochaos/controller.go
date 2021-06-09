@@ -19,8 +19,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
-
 	"github.com/go-logr/logr"
 	v1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -31,22 +29,23 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
 // Reconciler applys podioworkchaos
 type Reconciler struct {
 	client.Client
-	client.Reader
 	Recorder record.EventRecorder
 
-	Log logr.Logger
+	Log                      logr.Logger
+	ChaosDaemonClientBuilder *chaosdaemon.ChaosDaemonClientBuilder
 }
 
 func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ctx := context.TODO()
 
-	obj := &v1alpha1.PodIoChaos{}
+	obj := &v1alpha1.PodIOChaos{}
 
 	if err := r.Client.Get(ctx, req.NamespacedName, obj); err != nil {
 		if apierrors.IsNotFound(err) {
@@ -86,7 +85,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		}
 
 		updateError := retry.RetryOnConflict(retry.DefaultBackoff, func() error {
-			obj := &v1alpha1.PodIoChaos{}
+			obj := &v1alpha1.PodIOChaos{}
 
 			if err := r.Client.Get(context.TODO(), req.NamespacedName, obj); err != nil {
 				r.Log.Error(err, "unable to get chaos")
@@ -107,7 +106,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		}
 	}()
 
-	pbClient, err := chaosdaemon.NewChaosDaemonClient(ctx, r.Client, pod)
+	pbClient, err := r.ChaosDaemonClientBuilder.Build(ctx, pod)
 	if err != nil {
 		r.Recorder.Event(obj, "Warning", "Failed", err.Error())
 		return ctrl.Result{Requeue: true}, nil
@@ -145,7 +144,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	input := string(actions)
 	r.Log.Info("input with", "config", input)
 
-	res, err := pbClient.ApplyIoChaos(ctx, &pb.ApplyIoChaosRequest{
+	res, err := pbClient.ApplyIOChaos(ctx, &pb.ApplyIOChaosRequest{
 		Actions:     input,
 		Volume:      obj.Spec.VolumeMountPath,
 		ContainerId: containerID,

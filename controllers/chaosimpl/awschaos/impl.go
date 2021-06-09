@@ -14,16 +14,14 @@
 package awschaos
 
 import (
-	"github.com/chaos-mesh/chaos-mesh/controllers/action"
-
 	"go.uber.org/fx"
 
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/action"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/awschaos/detachvolume"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/awschaos/ec2restart"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/awschaos/ec2stop"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
-
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
 type Impl struct {

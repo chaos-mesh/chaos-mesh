@@ -40,12 +40,12 @@ func TestcaseIOErrorDurationForATimeThenRecover(
 	err := util.WaitE2EHelperReady(c, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
-	ioChaos := &v1alpha1.IoChaos{
+	ioChaos := &v1alpha1.IOChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "io-chaos",
 			Namespace: ns,
 		},
-		Spec: v1alpha1.IoChaosSpec{
+		Spec: v1alpha1.IOChaosSpec{
 			Action:     v1alpha1.IoFaults,
 			VolumePath: "/var/run/data",
 			Path:       "/var/run/data/*",
@@ -105,12 +105,12 @@ func TestcaseIOErrorDurationForATimePauseAndUnPause(
 	err := util.WaitE2EHelperReady(c, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
-	ioChaos := &v1alpha1.IoChaos{
+	ioChaos := &v1alpha1.IOChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "io-chaos",
 			Namespace: ns,
 		},
-		Spec: v1alpha1.IoChaosSpec{
+		Spec: v1alpha1.IOChaosSpec{
 			Action:     v1alpha1.IoFaults,
 			VolumePath: "/var/run/data",
 			Path:       "/var/run/data/*",
@@ -157,7 +157,7 @@ func TestcaseIOErrorDurationForATimePauseAndUnPause(
 	klog.Info("pause iochaos")
 
 	err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
-		chaos := &v1alpha1.IoChaos{}
+		chaos := &v1alpha1.IOChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
 		framework.ExpectNoError(err, "get io chaos error")
 		if chaos.Status.Experiment.DesiredPhase == v1alpha1.StoppedPhase {
@@ -183,7 +183,7 @@ func TestcaseIOErrorDurationForATimePauseAndUnPause(
 	framework.ExpectNoError(err, "resume chaos error")
 
 	err = wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
-		chaos := &v1alpha1.IoChaos{}
+		chaos := &v1alpha1.IOChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
 		framework.ExpectNoError(err, "get io chaos error")
 		if chaos.Status.Experiment.DesiredPhase == v1alpha1.RunningPhase {
@@ -219,12 +219,12 @@ func TestcaseIOErrorWithSpecifiedContainer(
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
 	containerName := "io"
-	ioChaos := &v1alpha1.IoChaos{
+	ioChaos := &v1alpha1.IOChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "io-chaos",
 			Namespace: ns,
 		},
-		Spec: v1alpha1.IoChaosSpec{
+		Spec: v1alpha1.IOChaosSpec{
 			Action:     v1alpha1.IoFaults,
 			VolumePath: "/var/run/data",
 			Path:       "/var/run/data/*",

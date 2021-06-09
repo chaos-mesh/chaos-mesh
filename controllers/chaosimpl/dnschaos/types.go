@@ -19,34 +19,30 @@ import (
 	"net"
 	"time"
 
-	"go.uber.org/fx"
-
-	"github.com/chaos-mesh/chaos-mesh/controllers/common"
-
-	"sigs.k8s.io/controller-runtime/pkg/client"
-
-	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/utils"
-
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
-	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
-
 	dnspb "github.com/chaos-mesh/k8s_dns_chaos/pb"
 	"github.com/go-logr/logr"
+	"go.uber.org/fx"
 	"google.golang.org/grpc"
 	v1 "k8s.io/api/core/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/utils"
+	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
 )
 
 type Impl struct {
 	client.Client
 	Log logr.Logger
+
+	decoder *utils.ContianerRecordDecoder
 }
 
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
-	decodedContainer, err := utils.DecodeContainerRecord(ctx, records[index], impl.Client)
+	decodedContainer, err := impl.decoder.DecodeContainerRecord(ctx, records[index])
 	if decodedContainer.PbClient != nil {
 		defer decodedContainer.PbClient.Close()
 	}
@@ -119,7 +115,7 @@ func (impl *Impl) setDNSServerRules(dnsServerIP string, port int, name string, p
 }
 
 func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
-	decodedContainer, err := utils.DecodeContainerRecord(ctx, records[index], impl.Client)
+	decodedContainer, err := impl.decoder.DecodeContainerRecord(ctx, records[index])
 	if decodedContainer.PbClient != nil {
 		defer decodedContainer.PbClient.Close()
 	}
@@ -147,14 +143,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		return v1alpha1.Injected, err
 	}
 
-	daemonClient, err := chaosdaemon.NewChaosDaemonClient(ctx, impl.Client, decodedContainer.Pod)
-	if err != nil {
-		impl.Log.Error(err, "get chaos daemon client")
-		return v1alpha1.Injected, err
-	}
-	defer daemonClient.Close()
-
-	_, err = daemonClient.SetDNSServer(ctx, &pb.SetDNSServerRequest{
+	_, err = decodedContainer.PbClient.SetDNSServer(ctx, &pb.SetDNSServerRequest{
 		ContainerId: decodedContainer.ContainerId,
 		Enable:      false,
 		EnterNS:     true,
@@ -193,13 +182,15 @@ func (impl *Impl) cancelDNSServerRules(dnsServerIP string, port int, name string
 	return nil
 }
 
-func NewImpl(c client.Client, log logr.Logger) *common.ChaosImplPair {
+func NewImpl(c client.Client, log logr.Logger, decoder *utils.ContianerRecordDecoder) *common.ChaosImplPair {
 	return &common.ChaosImplPair{
 		Name:   "dnschaos",
 		Object: &v1alpha1.DNSChaos{},
 		Impl: &Impl{
 			Client: c,
 			Log:    log.WithName("dnschaos"),
+
+			decoder: decoder,
 		},
 	}
 }
