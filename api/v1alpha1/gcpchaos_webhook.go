@@ -76,6 +76,24 @@ func (in *GcpChaosSpec) Validate() field.ErrorList {
 	specField := field.NewPath("spec")
 	allErrs := in.validateDeviceName(specField.Child("deviceName"))
 	allErrs = append(allErrs, validateDuration(in, specField)...)
+	allErrs = append(allErrs, in.validateAction(specField)...)
+	return allErrs
+}
+
+// validateDeviceName validates the DeviceName
+func (in *GcpChaosSpec) validateAction(spec *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+
+	switch in.Action {
+	case NodeStop, DiskLoss:
+	case NodeReset:
+	default:
+		err := fmt.Errorf("awschaos have unknown action type")
+		log.Error(err, "Wrong AwsChaos Action type")
+
+		actionField := spec.Child("action")
+		allErrs = append(allErrs, field.Invalid(actionField, in.Action, err.Error()))
+	}
 	return allErrs
 }
 
