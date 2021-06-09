@@ -17,6 +17,10 @@ export const schedules = (namespace = null) =>
 export const single = (uuid: uuid) => http.get<ScheduleSingle>(`/schedules/${uuid}`)
 
 export const del = (uuid: uuid) => http.delete(`/schedules/${uuid}`)
+export const delMulti = (uuids: uuid[]) => http.delete(`/schedules?uids=${uuids.join(',')}`)
+
+export const pause = (uuid: uuid) => http.put(`/schedules/pause/${uuid}`)
+export const start = (uuid: uuid) => http.put(`/schedules/start/${uuid}`)
 
 export const archives = (namespace = null, name = null, kind = null) =>
   http.get<Archive[]>('/archives/schedules', {

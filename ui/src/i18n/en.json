@@ -140,17 +140,6 @@
       "m1": "Please complete the creation of the current node first"
     }
   },
-  "workflows": {
-    "title": "Workflows",
-    "notFound": "No workflows found",
-    "deleteDesc": "This workflow will be permanently deleted"
-  },
-  "workflow": {
-    "entry": "Entry",
-    "time": "Time",
-    "state": "State",
-    "topology": "Topology"
-  },
   "newS": {
     "title": "New Schedule",
     "titleStep2": "Fill the schedule info",
@@ -171,7 +160,19 @@
     "title": "Schedules",
     "single": "Schedule",
     "notFound": "No schedules found",
+    "deleteMulti": "Archive selected schedules",
     "deleteDesc": "You can still find this schedule in the archives"
+  },
+  "workflows": {
+    "title": "Workflows",
+    "notFound": "No workflows found",
+    "deleteDesc": "This workflow will be permanently deleted"
+  },
+  "workflow": {
+    "entry": "Entry",
+    "time": "Time",
+    "state": "State",
+    "topology": "Topology"
   },
   "events": {
     "title": "Events",

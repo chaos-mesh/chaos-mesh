@@ -109,6 +109,29 @@
     "pauseDesc": "你可以在同一位置重启这个实验",
     "startDesc": "此操作将立即生效"
   },
+  "newS": {
+    "title": "新的计划",
+    "titleStep2": "填写计划信息",
+    "basic": {
+      "nameHelper": "计划的名称",
+      "scheduleHelper": "定义计划",
+      "startingDeadlineSeconds": "实验过期时间",
+      "startingDeadlineSecondsHelper": "设置以忽略长时间未运行的实验",
+      "concurrencyPolicy": "并发策略",
+      "concurrencyPolicyHelper": "是否允许实验同时运行",
+      "forbid": "禁止",
+      "allow": "允许",
+      "historyLimit": "历史限制",
+      "historyLimitHelper": "最大实验记录数"
+    }
+  },
+  "schedules": {
+    "title": "计划",
+    "single": "计划",
+    "notFound": "未发现计划",
+    "deleteMulti": "归档所选计划",
+    "deleteDesc": "你仍然可以在归档中找到此计划"
+  },
   "newW": {
     "title": "新的工作流",
     "titleBasic": "工作流信息",
@@ -149,28 +172,6 @@
     "time": "时间",
     "state": "状态",
     "topology": "拓扑"
-  },
-  "newS": {
-    "title": "新的计划",
-    "titleStep2": "填写计划信息",
-    "basic": {
-      "nameHelper": "计划的名称",
-      "scheduleHelper": "定义计划",
-      "startingDeadlineSeconds": "实验过期时间",
-      "startingDeadlineSecondsHelper": "设置以忽略长时间未运行的实验",
-      "concurrencyPolicy": "并发策略",
-      "concurrencyPolicyHelper": "是否允许实验同时运行",
-      "forbid": "禁止",
-      "allow": "允许",
-      "historyLimit": "历史限制",
-      "historyLimitHelper": "最大实验记录数"
-    }
-  },
-  "schedules": {
-    "title": "计划",
-    "single": "计划",
-    "notFound": "未发现计划",
-    "deleteDesc": "你仍然可以在归档中找到此计划"
   },
   "events": {
     "title": "事件",

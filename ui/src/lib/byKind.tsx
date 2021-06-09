@@ -48,6 +48,14 @@ export function iconByKind(kind: ExperimentKind | 'Schedule', size: 'small' | 'l
   return <SvgIcon fontSize={size}>{icon}</SvgIcon>
 }
 
-export function transByKind(kind: ExperimentKind) {
-  return T(`newE.target.${kind.replace('Chaos', '').toLowerCase()}.title`)
+export function transByKind(kind: ExperimentKind | 'Schedule') {
+  let id: string
+
+  if (kind === 'Schedule') {
+    id = 'schedules.title'
+  } else {
+    id = `newE.target.${kind.replace('Chaos', '').toLowerCase()}.title`
+  }
+
+  return T(id)
 }
