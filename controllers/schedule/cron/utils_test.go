@@ -91,6 +91,7 @@ func TestGetRecentUnmetScheduleTime(t *testing.T) {
 		lastScheduleTime, err := time.Parse(time.RFC3339, t.lastScheduleTime)
 		g.Expect(err).To(BeNil())
 		createTimeStamp, err := time.Parse(time.RFC3339, t.creationTimeStamp)
+		g.Expect(err).To(BeNil())
 
 		schedule := v1alpha1.Schedule{
 			ObjectMeta: metav1.ObjectMeta{
