@@ -6,8 +6,8 @@ export interface Workflow {
   name: string
   namespace: string
   entry: string
-  created: string
-  endTime: string
+  created_at: string
+  end_time: string
   status: string
 }
 

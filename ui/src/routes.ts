@@ -21,17 +21,8 @@ const routes: RouteProps[] = [
     exact: true,
   },
   {
-    component: Experiments,
-    path: '/experiments',
-    exact: true,
-  },
-  {
-    component: NewExperiment,
-    path: '/experiments/new',
-  },
-  {
-    component: Experiment,
-    path: '/experiments/:uuid',
+    component: NewWorkflow,
+    path: '/workflows/new',
   },
   {
     component: Workflows,
@@ -39,12 +30,12 @@ const routes: RouteProps[] = [
     exact: true,
   },
   {
-    component: NewWorkflow,
-    path: '/workflows/new',
-  },
-  {
     component: Workflow,
     path: '/workflows/:namespace/:name',
+  },
+  {
+    component: NewSchedule,
+    path: '/schedules/new',
   },
   {
     component: Schedules,
@@ -52,12 +43,21 @@ const routes: RouteProps[] = [
     exact: true,
   },
   {
-    component: NewSchedule,
-    path: '/schedules/new',
-  },
-  {
     component: Schedule,
     path: '/schedules/:uuid',
+  },
+  {
+    component: NewExperiment,
+    path: '/experiments/new',
+  },
+  {
+    component: Experiments,
+    path: '/experiments',
+    exact: true,
+  },
+  {
+    component: Experiment,
+    path: '/experiments/:uuid',
   },
   {
     component: Events,

@@ -109,11 +109,6 @@
     "pauseDesc": "你可以在同一位置重启这个实验",
     "startDesc": "此操作将立即生效"
   },
-  "workflows": {
-    "title": "工作流",
-    "notFound": "未发现工作流",
-    "deleteDesc": "此工作流将被永久删除"
-  },
   "newW": {
     "title": "新的工作流",
     "titleBasic": "工作流信息",
@@ -144,17 +139,16 @@
       "m1": "请首先完成当前任务的创建"
     }
   },
+  "workflows": {
+    "title": "工作流",
+    "notFound": "未发现工作流",
+    "deleteDesc": "此工作流将被永久删除"
+  },
   "workflow": {
     "entry": "入口",
     "time": "时间",
     "state": "状态",
     "topology": "拓扑"
-  },
-  "schedules": {
-    "title": "计划",
-    "single": "计划",
-    "notFound": "未发现计划",
-    "deleteDesc": "你仍然可以在归档中找到此计划"
   },
   "newS": {
     "title": "新的计划",
@@ -171,6 +165,12 @@
       "historyLimit": "历史限制",
       "historyLimitHelper": "最大实验记录数"
     }
+  },
+  "schedules": {
+    "title": "计划",
+    "single": "计划",
+    "notFound": "未发现计划",
+    "deleteDesc": "你仍然可以在归档中找到此计划"
   },
   "events": {
     "title": "事件",

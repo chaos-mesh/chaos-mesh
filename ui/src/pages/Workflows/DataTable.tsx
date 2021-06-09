@@ -87,7 +87,7 @@ const DataTable: React.FC<DataTableProps> = ({ data, fetchData }) => {
                 {/* <TableCell></TableCell> */}
                 <TableCell>{d.status}</TableCell>
                 <TableCell>
-                  {DateTime.fromISO(d.created, {
+                  {DateTime.fromISO(d.created_at, {
                     locale: lang,
                   }).toRelative()}
                 </TableCell>

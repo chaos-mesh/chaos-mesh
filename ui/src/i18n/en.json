@@ -110,11 +110,6 @@
     "pauseDesc": "You can restart the experiment in the same position",
     "startDesc": "The operation will take effect immediately"
   },
-  "workflows": {
-    "title": "Workflows",
-    "notFound": "No workflows found",
-    "deleteDesc": "This workflow will be permanently deleted"
-  },
   "newW": {
     "title": "New Workflow",
     "titleBasic": "Workflow info",
@@ -145,17 +140,16 @@
       "m1": "Please complete the creation of the current node first"
     }
   },
+  "workflows": {
+    "title": "Workflows",
+    "notFound": "No workflows found",
+    "deleteDesc": "This workflow will be permanently deleted"
+  },
   "workflow": {
     "entry": "Entry",
     "time": "Time",
     "state": "State",
     "topology": "Topology"
-  },
-  "schedules": {
-    "title": "Schedules",
-    "single": "Schedule",
-    "notFound": "No schedules found",
-    "deleteDesc": "You can still find this schedule in the archives"
   },
   "newS": {
     "title": "New Schedule",
@@ -172,6 +166,12 @@
       "historyLimit": "History Limit",
       "historyLimitHelper": "Maximum number of experiment records"
     }
+  },
+  "schedules": {
+    "title": "Schedules",
+    "single": "Schedule",
+    "notFound": "No schedules found",
+    "deleteDesc": "You can still find this schedule in the archives"
   },
   "events": {
     "title": "Events",
