@@ -18,7 +18,7 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"sigs.k8s.io/controller-runtime/pkg/envtest"
+	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 )
 
 func TestSuite(t *testing.T) {
@@ -26,5 +26,5 @@ func TestSuite(t *testing.T) {
 
 	RunSpecsWithDefaultAndCustomReporters(t,
 		"Background Process Manager Suite",
-		[]Reporter{envtest.NewlineReporter{}})
+		[]Reporter{printer.NewlineReporter{}})
 }

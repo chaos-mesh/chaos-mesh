@@ -15,6 +15,7 @@ package schedule
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"reflect"
@@ -75,6 +76,8 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint.PUT("/", s.updateSchedule)
 	endpoint.DELETE("/:uid", s.deleteSchedule)
 	endpoint.DELETE("/", s.batchDeleteSchedule)
+	endpoint.PUT("/pause/:uid", s.pauseSchedule)
+	endpoint.PUT("/start/:uid", s.startSchedule)
 }
 
 // Base represents the base info of an experiment.
@@ -104,6 +107,13 @@ type parseScheduleFunc func(*core.ScheduleInfo) v1alpha1.ScheduleItem
 type StatusResponse struct {
 	Status string `json:"status"`
 }
+
+type pauseFlag bool
+
+const (
+	PauseSchedule pauseFlag = true
+	StartSchedule pauseFlag = false
+)
 
 // @Summary Create a new schedule experiment.
 // @Description Create a new schedule experiment.
@@ -834,4 +844,119 @@ func (s *Service) batchDeleteSchedule(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusOK, StatusResponse{Status: "success"})
 	}
+}
+
+// @Summary Pause a schedule object.
+// @Description Pause a schedule object.
+// @Tags schedules
+// @Produce json
+// @Param uid path string true "uid"
+// @Success 200 {object} StatusResponse
+// @Failure 400 {object} utils.APIError
+// @Failure 404 {object} utils.APIError
+// @Failure 500 {object} utils.APIError
+// @Router /schedules/pause/{uid} [put]
+func (s *Service) pauseSchedule(c *gin.Context) {
+	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
+	if err != nil {
+		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		return
+	}
+
+	uid := c.Param("uid")
+	err = s.pauseOrStartSchedule(uid, PauseSchedule, kubeCli)
+
+	if err != nil {
+		if gorm.IsRecordNotFoundError(err) || apierrors.IsNotFound(err) {
+			c.Status(http.StatusNotFound)
+			_ = c.Error(utils.ErrInvalidRequest.New("the schedule is not found"))
+		}
+		c.Status(http.StatusInternalServerError)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		return
+	}
+
+	c.JSON(http.StatusOK, StatusResponse{Status: "success"})
+}
+
+// @Summary Start a schedule object.
+// @Description Start a schedule object.
+// @Tags schedules
+// @Produce json
+// @Param uid path string true "uid"
+// @Success 200 {object} StatusResponse
+// @Failure 400 {object} utils.APIError
+// @Failure 404 {object} utils.APIError
+// @Failure 500 {object} utils.APIError
+// @Router /schedules/start/{uid} [put]
+func (s *Service) startSchedule(c *gin.Context) {
+	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
+	if err != nil {
+		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		return
+	}
+
+	uid := c.Param("uid")
+	err = s.pauseOrStartSchedule(uid, StartSchedule, kubeCli)
+
+	if err != nil {
+		if gorm.IsRecordNotFoundError(err) || apierrors.IsNotFound(err) {
+			c.Status(http.StatusNotFound)
+			_ = c.Error(utils.ErrInvalidRequest.New("the schedule is not found"))
+		}
+		c.Status(http.StatusInternalServerError)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		return
+	}
+
+	c.JSON(http.StatusOK, StatusResponse{Status: "success"})
+}
+
+func (s *Service) pauseOrStartSchedule(uid string, flag pauseFlag, kubeCli client.Client) error {
+	var (
+		err             error
+		schedule        *core.Schedule
+		pauseAnnotation string
+	)
+
+	if schedule, err = s.schedule.FindByUID(context.Background(), uid); err != nil {
+		return err
+	}
+
+	exp := &Base{
+		Name:      schedule.Name,
+		Namespace: schedule.Namespace,
+	}
+
+	if flag == PauseSchedule {
+		pauseAnnotation = "true"
+	} else {
+		pauseAnnotation = "false"
+	}
+
+	annotations := map[string]string{
+		v1alpha1.PauseAnnotationKey: pauseAnnotation,
+	}
+
+	return s.patchSchedule(exp, annotations, kubeCli)
+}
+
+func (s *Service) patchSchedule(exp *Base, annotations map[string]string, kubeCli client.Client) error {
+	sch := &v1alpha1.Schedule{}
+	key := types.NamespacedName{Namespace: exp.Namespace, Name: exp.Name}
+
+	if err := kubeCli.Get(context.Background(), key, sch); err != nil {
+		return err
+	}
+
+	var mergePatch []byte
+	mergePatch, _ = json.Marshal(map[string]interface{}{
+		"metadata": map[string]interface{}{
+			"annotations": annotations,
+		},
+	})
+
+	return kubeCli.Patch(context.Background(),
+		sch,
+		client.ConstantPatch(types.MergePatchType, mergePatch))
 }

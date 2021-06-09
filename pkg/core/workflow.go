@@ -51,10 +51,11 @@ type Workflow struct {
 	Namespace string `json:"namespace"`
 	Name      string `json:"name"`
 	// the entry node name
-	Entry   string         `json:"entry"`
-	Created string         `json:"created"`
-	EndTime string         `json:"endTime"`
-	Status  WorkflowStatus `json:"status,omitempty"`
+	Entry     string         `json:"entry"`
+	CreatedAt string         `json:"created_at"`
+	EndTime   string         `json:"end_time"`
+	Status    WorkflowStatus `json:"status,omitempty"`
+	UID       string         `json:"uid"`
 }
 
 type WorkflowDetail struct {
@@ -84,6 +85,7 @@ type Node struct {
 	Serial   *NodeSerial   `json:"serial,omitempty"`
 	Parallel *NodeParallel `json:"parallel,omitempty"`
 	Template string        `json:"template"`
+	UID      string        `json:"uid"`
 }
 
 type NodeNameWithTemplate struct {
@@ -244,10 +246,11 @@ func convertWorkflow(kubeWorkflow v1alpha1.Workflow) Workflow {
 		Namespace: kubeWorkflow.Namespace,
 		Name:      kubeWorkflow.Name,
 		Entry:     kubeWorkflow.Spec.Entry,
+		UID:       string(kubeWorkflow.UID),
 	}
 
 	if kubeWorkflow.Status.StartTime != nil {
-		result.Created = kubeWorkflow.Status.StartTime.Format(time.RFC3339)
+		result.CreatedAt = kubeWorkflow.Status.StartTime.Format(time.RFC3339)
 	}
 
 	if kubeWorkflow.Status.EndTime != nil {
@@ -311,6 +314,7 @@ func convertWorkflowNode(kubeWorkflowNode v1alpha1.WorkflowNode) (Node, error) {
 		Serial:   nil,
 		Parallel: nil,
 		Template: kubeWorkflowNode.Spec.TemplateName,
+		UID:      string(kubeWorkflowNode.UID),
 	}
 
 	if kubeWorkflowNode.Spec.Type == v1alpha1.TypeSerial {

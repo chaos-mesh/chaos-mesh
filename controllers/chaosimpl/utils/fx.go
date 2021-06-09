@@ -1,4 +1,4 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,21 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package chaosdaemon
+package utils
 
-import (
-	"testing"
+import "go.uber.org/fx"
 
-	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
-
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
+var Module = fx.Provide(
+	NewContainerRecordDecoder,
 )
-
-func TestAPIs(t *testing.T) {
-	RegisterFailHandler(Fail)
-
-	RunSpecsWithDefaultAndCustomReporters(t,
-		"chaosdaemon Suite",
-		[]Reporter{printer.NewlineReporter{}})
-}
