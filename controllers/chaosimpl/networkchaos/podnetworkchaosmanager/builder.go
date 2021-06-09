@@ -15,6 +15,7 @@ package podnetworkchaosmanager
 
 import (
 	"github.com/go-logr/logr"
+	"go.uber.org/fx"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -27,12 +28,21 @@ type Builder struct {
 	scheme *runtime.Scheme
 }
 
-func NewBuilder(logger logr.Logger, client client.Client, reader client.Reader, scheme *runtime.Scheme) *Builder {
+type Params struct {
+	fx.In
+
+	Logger logr.Logger
+	Client client.Client
+	Reader client.Reader `name:"no-cache"`
+	Scheme *runtime.Scheme
+}
+
+func NewBuilder(params Params) *Builder {
 	return &Builder{
-		Log:    logger,
-		Client: client,
-		Reader: reader,
-		scheme: scheme,
+		Log:    params.Logger,
+		Client: params.Client,
+		Reader: params.Reader,
+		scheme: params.Scheme,
 	}
 }
 
