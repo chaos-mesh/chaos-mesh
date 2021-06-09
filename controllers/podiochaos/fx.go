@@ -25,9 +25,10 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
 )
 
-func NewController(mgr ctrl.Manager, client client.Client, reader client.Reader, logger logr.Logger) (types.Controller, error) {
+func NewController(mgr ctrl.Manager, client client.Client, logger logr.Logger, b *chaosdaemon.ChaosDaemonClientBuilder) (types.Controller, error) {
 	err := builder.Default(mgr).
 		For(&v1alpha1.PodIOChaos{}).
 		Named("podiochaos").
@@ -40,10 +41,10 @@ func NewController(mgr ctrl.Manager, client client.Client, reader client.Reader,
 			},
 		}).
 		Complete(&Reconciler{
-			Client:   client,
-			Reader:   reader,
-			Log:      logger.WithName("podiochaos"),
-			Recorder: mgr.GetEventRecorderFor("podiochaos"),
+			Client:                   client,
+			Log:                      logger.WithName("podiochaos"),
+			Recorder:                 mgr.GetEventRecorderFor("podiochaos"),
+			ChaosDaemonClientBuilder: b,
 		})
 	if err != nil {
 		return "", err
