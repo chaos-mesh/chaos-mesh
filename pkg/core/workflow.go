@@ -51,11 +51,11 @@ type Workflow struct {
 	Namespace string `json:"namespace"`
 	Name      string `json:"name"`
 	// the entry node name
-	Entry   string         `json:"entry"`
-	Created string         `json:"created"`
-	EndTime string         `json:"endTime"`
-	Status  WorkflowStatus `json:"status,omitempty"`
-	UID     string         `json:"uid"`
+	Entry     string         `json:"entry"`
+	CreatedAt string         `json:"created_at"`
+	EndTime   string         `json:"end_time"`
+	Status    WorkflowStatus `json:"status,omitempty"`
+	UID       string         `json:"uid"`
 }
 
 type WorkflowDetail struct {
@@ -250,7 +250,7 @@ func convertWorkflow(kubeWorkflow v1alpha1.Workflow) Workflow {
 	}
 
 	if kubeWorkflow.Status.StartTime != nil {
-		result.Created = kubeWorkflow.Status.StartTime.Format(time.RFC3339)
+		result.CreatedAt = kubeWorkflow.Status.StartTime.Format(time.RFC3339)
 	}
 
 	if kubeWorkflow.Status.EndTime != nil {
