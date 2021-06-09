@@ -101,7 +101,7 @@ func (in *ScheduleSpec) validateChaos(chaos *field.Path) field.ErrorList {
 	case ScheduleTypeKernelChaos:
 	case ScheduleTypeNetworkChaos:
 	case ScheduleTypePodChaos:
-		allErrs = append(allErrs, in.ScheduleItem.PodChaos.validateContainerName(chaos)...)
+		allErrs = append(allErrs, in.ScheduleItem.PodChaos.validateContainerNames(chaos)...)
 	case ScheduleTypeStressChaos:
 		allErrs = append(allErrs, in.ScheduleItem.StressChaos.Validate(chaos)...)
 	case ScheduleTypeTimeChaos:
