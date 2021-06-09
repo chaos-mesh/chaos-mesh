@@ -67,16 +67,7 @@ func main() {
 
 	app := fx.New(
 		fx.Options(
-			fx.Provide(
-				provider.NewOption,
-				provider.NewClient,
-				provider.NewManager,
-				provider.NewReader,
-				provider.NewLogger,
-				provider.NewAuthCli,
-				provider.NewScheme,
-				provider.NewConfig,
-			),
+			provider.Module,
 			controllers.Module,
 			selector.Module,
 			types.ChaosObjects,
@@ -150,7 +141,7 @@ func Run(params RunParams) error {
 		}},
 	)
 	hookServer.Register("/validate-auth", &webhook.Admission{
-		Handler: apiWebhook.NewAuthValidator(ccfg.ControllerCfg.SecurityMode, mgr.GetClient(), mgr.GetAPIReader(), authCli,
+		Handler: apiWebhook.NewAuthValidator(ccfg.ControllerCfg.SecurityMode, authCli,
 			ccfg.ControllerCfg.ClusterScoped, ccfg.ControllerCfg.TargetNamespace, ccfg.ControllerCfg.EnableFilterNamespace),
 	},
 	)

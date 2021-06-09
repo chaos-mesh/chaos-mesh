@@ -100,6 +100,7 @@ const (
 	TypeSerial   TemplateType = "Serial"
 	TypeParallel TemplateType = "Parallel"
 	TypeSuspend  TemplateType = "Suspend"
+	TypeSchedule TemplateType = "Schedule"
 )
 
 func IsChaosTemplateType(target TemplateType) bool {
@@ -127,6 +128,32 @@ type Template struct {
 	ConditionalTasks []ConditionalTask `json:"conditionalTasks,omitempty"`
 	// +optional
 	*EmbedChaos `json:",inline"`
+	// +optional
+	Schedule *ChaosOnlyScheduleSpec `json:"schedule,omitempty"`
+}
+
+// ChaosOnlyScheduleSpec is very similar with ScheduleSpec, but it could not schedule Workflow
+// because we could not resolve nested CRD now
+type ChaosOnlyScheduleSpec struct {
+	Schedule string `json:"schedule"`
+
+	// +optional
+	// +nullable
+	// +kubebuilder:validation:Minimum=0
+	StartingDeadlineSeconds *int64 `json:"startingDeadlineSeconds"`
+
+	// +optional
+	// +kubebuilder:validation:Enum=Forbid;Allow
+	ConcurrencyPolicy ConcurrencyPolicy `json:"concurrencyPolicy"`
+
+	// +optional
+	// +kubebuilder:validation:Minimum=1
+	HistoryLimit int `json:"historyLimit,omitempty"`
+
+	// TODO: use a custom type, as `TemplateType` contains other possible values
+	Type ScheduleTemplateType `json:"type"`
+
+	EmbedChaos `json:",inline"`
 }
 
 type Task struct {

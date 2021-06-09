@@ -49,7 +49,7 @@ endif
 FAILPOINT_ENABLE  := $$(find $$PWD/ -type d | grep -vE "(\.git|bin)" | xargs $(GOBIN)/failpoint-ctl enable)
 FAILPOINT_DISABLE := $$(find $$PWD/ -type d | grep -vE "(\.git|bin)" | xargs $(GOBIN)/failpoint-ctl disable)
 
-GO_BUILD_CACHE ?= $(HOME)/.cache/chaos-mesh
+GO_BUILD_CACHE ?= $(ROOT)/.cache/chaos-mesh
 
 BUILD_TAGS ?=
 
@@ -206,12 +206,7 @@ endif
 GO_TARGET_PHONY += $(1)
 endef
 
-BUILD_INDOCKER_ARG := --env IN_DOCKER=1
-ifeq ($(DOCKER_HOST),)
-    BUILD_INDOCKER_ARG += --volume $(ROOT):/mnt --user $(shell id -u):$(shell id -g)
-else
-	CLEAN_TARGETS += Dockerfile
-endif
+BUILD_INDOCKER_ARG := --env IN_DOCKER=1 --volume $(ROOT):/mnt --user $(shell id -u):$(shell id -g)
 
 ifneq ($(GO_BUILD_CACHE),)
 	BUILD_INDOCKER_ARG += --volume $(GO_BUILD_CACHE)/chaos-mesh-gopath:/tmp/go
@@ -223,12 +218,6 @@ CLEAN_TARGETS += $(2)
 ifneq ($(IN_DOCKER),1)
 
 $(2): image-build-env go_build_cache_directory
-	[[ "$(DOCKER_HOST)" == "" ]] || (printf "\
-	FROM ${DOCKER_REGISTRY_PREFIX}pingcap/build-env:${IMAGE_TAG} \n\
-	RUN rm -rf /mnt \n\
-	COPY ./ /mnt \n"\
-	> Dockerfile; docker build . -t ${DOCKER_REGISTRY_PREFIX}pingcap/build-env:${IMAGE_TAG})
-
 	DOCKER_ID=$$$$(docker run -d \
 		$(BUILD_INDOCKER_ARG) \
 		${DOCKER_REGISTRY_PREFIX}pingcap/build-env:${IMAGE_TAG} \
@@ -237,7 +226,6 @@ $(2): image-build-env go_build_cache_directory
 		--env IMG_LDFLAGS="${LDFLAGS}" \
 		--env UI=${UI} --env SWAGGER=${SWAGGER} \
 		$$$$DOCKER_ID /usr/bin/make $(2) && \
-	([[ "$(DOCKER_HOST)" == "" ]] || docker cp $$$$DOCKER_ID:/mnt/$(2) $(2)) && \
 	docker rm -f $$$$DOCKER_ID
 endif
 
@@ -387,8 +375,9 @@ proto:
 	done
 else
 proto: image-chaos-mesh-protoc
-	docker run --rm --workdir /mnt/ --volume $(shell pwd):/mnt \
-		--user $(shell id -u):$(shell id -g) --env IN_DOCKER=1 ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh-protoc \
+	docker run --rm --workdir /mnt/ \
+		$(BUILD_INDOCKER_ARG) \
+		${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh-protoc \
 		/usr/bin/make proto
 
 	make fmt

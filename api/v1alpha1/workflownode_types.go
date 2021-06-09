@@ -54,6 +54,8 @@ type WorkflowNodeSpec struct {
 	ConditionalTasks []ConditionalTask `json:"conditionalTasks,omitempty"`
 	// +optional
 	*EmbedChaos `json:",inline,omitempty"`
+	// +optional
+	Schedule *ScheduleSpec `json:"schedule,omitempty"`
 }
 
 type WorkflowNodeStatus struct {

@@ -23,6 +23,7 @@ import (
 	"strconv"
 	"strings"
 
+	"go.uber.org/fx"
 	v1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -87,10 +88,17 @@ func (impl *SelectImpl) Select(ctx context.Context, ps *v1alpha1.PodSelector) ([
 	return result, nil
 }
 
-func New(c client.Client, r client.Reader) *SelectImpl {
+type Params struct {
+	fx.In
+
+	Client client.Client
+	Reader client.Reader `name:"no-cache"`
+}
+
+func New(params Params) *SelectImpl {
 	return &SelectImpl{
-		c,
-		r,
+		params.Client,
+		params.Reader,
 		Option{
 			config.ControllerCfg.ClusterScoped,
 			config.ControllerCfg.TargetNamespace,
