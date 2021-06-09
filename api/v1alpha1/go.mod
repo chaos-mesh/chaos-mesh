@@ -7,6 +7,7 @@ require (
 	github.com/docker/go-units v0.3.3
 	github.com/onsi/ginkgo v1.10.1
 	github.com/onsi/gomega v1.7.0
+	github.com/robfig/cron/v3 v3.0.1
 	k8s.io/api v0.17.0
 	k8s.io/apimachinery v0.17.0
 	k8s.io/client-go v0.17.0
