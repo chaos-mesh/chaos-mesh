@@ -27,11 +27,12 @@ const (
 )
 
 // +kubebuilder:object:generate=false
-type DurationSpec interface {
+type CommonSpec interface {
 	GetDuration() (*time.Duration, error)
+	Validate() field.ErrorList
 }
 
-func validateDuration(spec DurationSpec, path *field.Path) field.ErrorList {
+func validateDuration(spec CommonSpec, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
 	durationField := path.Child("duration")
