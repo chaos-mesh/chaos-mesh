@@ -27,7 +27,6 @@ import (
 	"go.uber.org/fx"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-controller-manager/provider"
 	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/utils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/test"
@@ -86,14 +85,8 @@ var _ = BeforeSuite(func() {
 
 	app = fx.New(
 		fx.Options(
+			test.Module,
 			fx.Provide(
-				provider.NewOption,
-				provider.NewClient,
-				provider.NewReader,
-				provider.NewLogger,
-				provider.NewAuthCli,
-				provider.NewScheme,
-				test.NewTestManager,
 				fx.Annotated{
 					Group:  "controller",
 					Target: NewController,

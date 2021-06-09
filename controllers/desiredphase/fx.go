@@ -30,7 +30,7 @@ type Objs struct {
 	Objs []types.Object `group:"objs"`
 }
 
-func NewController(mgr ctrl.Manager, client client.Client, reader client.Reader, logger logr.Logger, pairs Objs) (types.Controller, error) {
+func NewController(mgr ctrl.Manager, client client.Client, logger logr.Logger, pairs Objs) (types.Controller, error) {
 	for _, obj := range pairs.Objs {
 
 		err := builder.Default(mgr).
@@ -39,7 +39,6 @@ func NewController(mgr ctrl.Manager, client client.Client, reader client.Reader,
 			Complete(&Reconciler{
 				Object:   obj.Object,
 				Client:   client,
-				Reader:   reader,
 				Recorder: recorder.NewRecorder(mgr, "desiredphase", logger),
 				Log:      logger.WithName("desiredphase"),
 			})
