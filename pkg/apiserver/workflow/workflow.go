@@ -15,6 +15,7 @@ package workflow
 
 import (
 	"encoding/json"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -35,24 +36,19 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint := r.Group("/workflows")
 	endpoint.GET("", s.listWorkflows)
 	endpoint.POST("", s.createWorkflow)
-	endpoint.GET("/:namespace/:name", s.getWorkflowDetail)
-	endpoint.DELETE("/:namespace/:name", s.deleteWorkflow)
-	endpoint.PUT("/:namespace/:name", s.updateWorkflow)
+	endpoint.GET("/:uid", s.getWorkflowDetailByUID)
+	endpoint.PUT("/:uid", s.updateWorkflow)
+	endpoint.DELETE("/:uid", s.deleteWorkflow)
 }
 
 // Service defines a handler service for workflows.
 type Service struct {
-	conf *config.ChaosDashboardConfig
+	conf  *config.ChaosDashboardConfig
+	store core.WorkflowStore
 }
 
-func NewService(conf *config.ChaosDashboardConfig) *Service {
-	return &Service{
-		conf: conf,
-	}
-}
-
-func NewServiceWithKubeRepo(conf *config.ChaosDashboardConfig) *Service {
-	return NewService(conf)
+func NewService(conf *config.ChaosDashboardConfig, store core.WorkflowStore) *Service {
+	return &Service{conf: conf, store: store}
 }
 
 // @Summary List workflows from Kubernetes cluster.
@@ -100,32 +96,58 @@ func (it *Service) listWorkflows(c *gin.Context) {
 }
 
 // @Summary Get detailed information about the specified workflow.
-// @Description Get detailed information about the specified workflow.
+// @Description Get detailed information about the specified workflow. If that object is not existed in kubernetes, it will only return ths persisted data in the database.
 // @Tags workflows
 // @Produce json
-// @Param namespace path string true "namespace"
-// @Param name path string true "name"
-// @Router /workflows/{namespace}/{name} [GET]
+// @Param uid path string true "uid"
+// @Router /workflows/{uid} [GET]
 // @Success 200 {object} core.WorkflowDetail
 // @Failure 400 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
-func (it *Service) getWorkflowDetail(c *gin.Context) {
-	namespace := c.Param("namespace")
-	name := c.Param("name")
+func (it *Service) getWorkflowDetailByUID(c *gin.Context) {
+	uid := c.Param("uid")
 
-	kubeClient, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
-	if err != nil {
-		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
-		return
-	}
-
-	repo := core.NewKubeWorkflowRepository(kubeClient)
-
-	result, err := repo.Get(c.Request.Context(), namespace, name)
+	entity, err := it.store.FindByUID(c.Request.Context(), uid)
 	if err != nil {
 		utils.SetErrorForGinCtx(c, err)
 		return
 	}
+
+	namespace := entity.Namespace
+	name := entity.Name
+
+	kubeClient, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
+	if err != nil {
+		if apierrors.IsNotFound(err) {
+			// if not exists in kubernetes anymore, return the persisted entity directly.
+			workflowDetail, err := core.WorkflowEntity2WorkflowDetail(entity)
+			if err != nil {
+				utils.SetErrorForGinCtx(c, err)
+				return
+			}
+			c.JSON(http.StatusOK, workflowDetail)
+			return
+		}
+		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		return
+	}
+
+	// enriching the topology and spec/status with CR in kubernetes
+	repo := core.NewKubeWorkflowRepository(kubeClient)
+
+	workflowCRInKubernetes, err := repo.Get(c.Request.Context(), namespace, name)
+	if err != nil {
+		utils.SetErrorForGinCtx(c, err)
+		return
+	}
+	result, err := core.WorkflowEntity2WorkflowDetail(entity)
+	if err != nil {
+		utils.SetErrorForGinCtx(c, err)
+		return
+	}
+	result.Topology = workflowCRInKubernetes.Topology
+	result.KubeObject = workflowCRInKubernetes.KubeObject
+
 	c.JSON(http.StatusOK, result)
 }
 
@@ -167,16 +189,23 @@ func (it *Service) createWorkflow(c *gin.Context) {
 // @Description Delete the specified workflow.
 // @Tags workflows
 // @Produce json
-// @Param namespace path string true "namespace"
-// @Param name path string true "name"
+// @Param uid path string true "uid"
 // @Success 200 {object} StatusResponse
 // @Failure 400 {object} utils.APIError
 // @Failure 404 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
-// @Router /workflows/{namespace}/{name} [delete]
+// @Router /workflows/{uid} [delete]
 func (it *Service) deleteWorkflow(c *gin.Context) {
-	namespace := c.Param("namespace")
-	name := c.Param("name")
+	uid := c.Param("uid")
+
+	entity, err := it.store.FindByUID(c.Request.Context(), uid)
+	if err != nil {
+		utils.SetErrorForGinCtx(c, err)
+		return
+	}
+
+	namespace := entity.Namespace
+	name := entity.Name
 
 	kubeClient, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
@@ -198,11 +227,12 @@ func (it *Service) deleteWorkflow(c *gin.Context) {
 // @Description Update a workflow.
 // @Tags workflows
 // @Produce json
+// @Param uid path string true "uid"
 // @Param request body v1alpha1.Workflow true "Request body"
 // @Success 200 {object} core.WorkflowDetail
 // @Failure 400 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
-// @Router /workflows/update [put]
+// @Router /workflows/{uid} [put]
 func (it *Service) updateWorkflow(c *gin.Context) {
 	payload := v1alpha1.Workflow{}
 
@@ -211,9 +241,15 @@ func (it *Service) updateWorkflow(c *gin.Context) {
 		_ = c.Error(utils.ErrInternalServer.Wrap(err, "failed to parse request body"))
 		return
 	}
-	// validate the consistent with path parameter and request body of namespace and name
-	namespace := c.Param("namespace")
-	name := c.Param("name")
+	uid := c.Param("uid")
+	entity, err := it.store.FindByUID(c.Request.Context(), uid)
+	if err != nil {
+		utils.SetErrorForGinCtx(c, err)
+		return
+	}
+
+	namespace := entity.Namespace
+	name := entity.Name
 
 	if namespace != payload.Namespace {
 		_ = c.Error(utils.ErrInvalidRequest.Wrap(err,

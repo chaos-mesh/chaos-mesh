@@ -443,3 +443,23 @@ func WorkflowEntity2WorkflowCR(entity *WorkflowEntity) (*v1alpha1.Workflow, erro
 	}
 	return &result, nil
 }
+
+func WorkflowEntity2WorkflowDetail(entity *WorkflowEntity) (*WorkflowDetail, error) {
+	workflowCustomResource, err := WorkflowEntity2WorkflowCR(entity)
+	if err != nil {
+		return nil, err
+	}
+	return &WorkflowDetail{
+		WorkflowMeta: entity.WorkflowMeta,
+		KubeObject: KubeObjectDesc{
+			TypeMeta: workflowCustomResource.TypeMeta,
+			Meta: KubeObjectMeta{
+				Name:        workflowCustomResource.Name,
+				Namespace:   workflowCustomResource.Namespace,
+				Labels:      workflowCustomResource.Labels,
+				Annotations: workflowCustomResource.Annotations,
+			},
+			Spec: workflowCustomResource.Spec,
+		},
+	}, nil
+}
