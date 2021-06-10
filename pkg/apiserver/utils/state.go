@@ -31,6 +31,13 @@ const (
 	Paused    ChaosStatusString = "paused"
 )
 
+type ScheduleStatusString string
+
+const (
+	ScheduleRunning ScheduleStatusString = "running"
+	SchedulePaused  ScheduleStatusString = "paused"
+)
+
 func GetChaosState(obj v1alpha1.InnerObject) ChaosStatusString {
 	selected := false
 	allInjected := false
@@ -53,4 +60,11 @@ func GetChaosState(obj v1alpha1.InnerObject) ChaosStatusString {
 		return Running
 	}
 	return Injecting
+}
+
+func GetScheduleState(sch v1alpha1.Schedule) ScheduleStatusString {
+	if sch.IsPaused() {
+		return SchedulePaused
+	}
+	return ScheduleRunning
 }
