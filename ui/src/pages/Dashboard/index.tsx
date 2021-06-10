@@ -115,7 +115,7 @@ export default function Dashboard() {
           <Grid item xs={12}>
             <Paper>
               <PaperTop title={T('common.timeline')} boxProps={{ mb: 3 }} />
-              <EventsChart events={data.events} position="relative" height={450} />
+              <EventsChart events={data.events} position="relative" height={300} />
             </Paper>
           </Grid>
         </Grid>
