@@ -66,8 +66,7 @@ func (in *PodChaos) ValidateDelete() error {
 
 // Validate validates chaos object
 func (in *PodChaos) Validate() error {
-	specField := field.NewPath("spec")
-	allErrs := in.Spec.validateContainerName(specField.Child("containerName"))
+	allErrs := in.Spec.Validate()
 
 	if len(allErrs) > 0 {
 		return fmt.Errorf(allErrs.ToAggregate().Error())
@@ -75,8 +74,16 @@ func (in *PodChaos) Validate() error {
 	return nil
 }
 
-// validateContainerName validates the ContainerName
-func (in *PodChaosSpec) validateContainerName(containerField *field.Path) field.ErrorList {
+func (in *PodChaosSpec) Validate() field.ErrorList {
+	specField := field.NewPath("spec")
+	allErrs := in.validateContainerNames(specField.Child("containerNames"))
+	allErrs = append(allErrs, validateDuration(in, specField)...)
+
+	return allErrs
+}
+
+// validateContainerNames validates the ContainerNames
+func (in *PodChaosSpec) validateContainerNames(containerField *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 	if in.Action == ContainerKillAction {
 		if len(in.ContainerSelector.ContainerNames) == 0 {

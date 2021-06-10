@@ -64,9 +64,7 @@ func (in *GcpChaos) ValidateDelete() error {
 
 // Validate validates chaos object
 func (in *GcpChaos) Validate() error {
-	specField := field.NewPath("spec")
-	allErrs := in.ValidateScheduler(specField)
-	allErrs = append(allErrs, in.Spec.validateDeviceName(specField.Child("deviceName"))...)
+	allErrs := in.Spec.Validate()
 
 	if len(allErrs) > 0 {
 		return fmt.Errorf(allErrs.ToAggregate().Error())
@@ -74,19 +72,27 @@ func (in *GcpChaos) Validate() error {
 	return nil
 }
 
-// ValidateScheduler validates the scheduler and duration
-func (in *GcpChaos) ValidateScheduler(spec *field.Path) field.ErrorList {
+func (in *GcpChaosSpec) Validate() field.ErrorList {
+	specField := field.NewPath("spec")
+	allErrs := in.validateDeviceName(specField.Child("deviceName"))
+	allErrs = append(allErrs, validateDuration(in, specField)...)
+	allErrs = append(allErrs, in.validateAction(specField)...)
+	return allErrs
+}
+
+// validateDeviceName validates the DeviceName
+func (in *GcpChaosSpec) validateAction(spec *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
-	switch in.Spec.Action {
+	switch in.Action {
 	case NodeStop, DiskLoss:
 	case NodeReset:
 	default:
-		err := fmt.Errorf("awschaos[%s/%s] have unknown action type", in.Namespace, in.Name)
+		err := fmt.Errorf("awschaos have unknown action type")
 		log.Error(err, "Wrong AwsChaos Action type")
 
 		actionField := spec.Child("action")
-		allErrs = append(allErrs, field.Invalid(actionField, in.Spec.Action, err.Error()))
+		allErrs = append(allErrs, field.Invalid(actionField, in.Action, err.Error()))
 	}
 	return allErrs
 }

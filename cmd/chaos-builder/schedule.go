@@ -100,10 +100,6 @@ var allScheduleTemplateType = []ScheduleTemplateType{
 %s
 }
 
-type ScheduleItem struct {
-%s
-}
-
 func (it *ScheduleItem) SpawnNewObject(templateType ScheduleTemplateType) (runtime.Object, metav1.Object, error) {
 
 	switch templateType {
@@ -120,7 +116,6 @@ func (it *ScheduleItem) SpawnNewObject(templateType ScheduleTemplateType) (runti
 		imports,
 		scheduleTemplateTypesEntries,
 		scheduleTemplateTypeEntries,
-		embedChaosEntries,
 		spawnMethod,
 	)
 

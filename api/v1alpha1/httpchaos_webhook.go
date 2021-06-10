@@ -64,12 +64,20 @@ func (in *HTTPChaos) ValidateDelete() error {
 
 // Validate validates chaos object
 func (in *HTTPChaos) Validate() error {
-	specField := field.NewPath("spec")
 
-	allErrs := validatePodSelector(in.Spec.PodSelector.Value, in.Spec.PodSelector.Mode, specField.Child("value"))
+	allErrs := in.Spec.Validate()
 	if len(allErrs) > 0 {
 		return fmt.Errorf(allErrs.ToAggregate().Error())
 	}
 
 	return nil
+}
+
+func (in *HTTPChaosSpec) Validate() field.ErrorList {
+	specField := field.NewPath("spec")
+
+	allErrs := validatePodSelector(in.PodSelector.Value, in.PodSelector.Mode, specField.Child("value"))
+	allErrs = append(allErrs, validateDuration(in, specField)...)
+	return allErrs
+
 }
