@@ -17,8 +17,8 @@ import (
 	"context"
 	"time"
 
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
+	"github.com/onsi/ginkgo"
+	"github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -65,15 +65,15 @@ func TestScheduleBasic(k8sClient client.Client) {
 		},
 	}
 
-	By("creating an API obj")
-	Expect(k8sClient.Create(context.TODO(), schedule)).To(Succeed())
+	ginkgo.By("creating an API obj")
+	gomega.Expect(k8sClient.Create(context.TODO(), schedule)).To(gomega.Succeed())
 
 	fetched := &v1alpha1.Schedule{}
-	Expect(k8sClient.Get(context.TODO(), key, fetched)).To(Succeed())
-	Expect(fetched).To(Equal(schedule))
+	gomega.Expect(k8sClient.Get(context.TODO(), key, fetched)).To(gomega.Succeed())
+	gomega.Expect(fetched).To(gomega.Equal(schedule))
 
-	By("deleting the created object")
-	Expect(k8sClient.Delete(context.TODO(), schedule)).To(Succeed())
+	ginkgo.By("deleting the created object")
+	gomega.Expect(k8sClient.Delete(context.TODO(), schedule)).To(gomega.Succeed())
 }
 
 func TestScheduleChaos(k8sClient client.Client) {
@@ -110,12 +110,12 @@ func TestScheduleChaos(k8sClient client.Client) {
 		},
 	}
 
-	By("creating a schedule obj")
+	ginkgo.By("creating a schedule obj")
 	{
-		Expect(k8sClient.Create(context.TODO(), schedule)).To(Succeed())
+		gomega.Expect(k8sClient.Create(context.TODO(), schedule)).To(gomega.Succeed())
 	}
 
-	By("Reconciling the created schedule obj")
+	ginkgo.By("Reconciling the created schedule obj")
 	{
 		err := wait.Poll(time.Second*1, time.Minute*1, func() (ok bool, err error) {
 			err = k8sClient.Get(context.TODO(), key, schedule)
@@ -124,20 +124,20 @@ func TestScheduleChaos(k8sClient client.Client) {
 			}
 			return len(schedule.Status.Active) > 0, nil
 		})
-		Expect(err).ToNot(HaveOccurred())
+		gomega.Expect(err).ToNot(gomega.HaveOccurred())
 	}
 
-	By("Disallow concurrency")
+	ginkgo.By("Disallow concurrency")
 	{
 		time.Sleep(5 * time.Second)
 		err := k8sClient.Get(context.TODO(), key, schedule)
-		Expect(err).ToNot(HaveOccurred())
-		Expect(len(schedule.Status.Active)).To(Equal(1))
+		gomega.Expect(err).ToNot(gomega.HaveOccurred())
+		gomega.Expect(len(schedule.Status.Active)).To(gomega.Equal(1))
 	}
 
-	By("deleting the created object")
+	ginkgo.By("deleting the created object")
 	{
-		Expect(k8sClient.Delete(context.TODO(), schedule)).To(Succeed())
+		gomega.Expect(k8sClient.Delete(context.TODO(), schedule)).To(gomega.Succeed())
 	}
 }
 func TestScheduleConcurrentChaos(k8sClient client.Client) {
@@ -174,12 +174,12 @@ func TestScheduleConcurrentChaos(k8sClient client.Client) {
 		},
 	}
 
-	By("creating a schedule obj")
+	ginkgo.By("creating a schedule obj")
 	{
-		Expect(k8sClient.Create(context.TODO(), schedule)).To(Succeed())
+		gomega.Expect(k8sClient.Create(context.TODO(), schedule)).To(gomega.Succeed())
 	}
 
-	By("Allowing concurrency and skip deleting running chaos")
+	ginkgo.By("Allowing concurrency and skip deleting running chaos")
 	{
 		err := wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
 			err = k8sClient.Get(context.TODO(), key, schedule)
@@ -189,12 +189,12 @@ func TestScheduleConcurrentChaos(k8sClient client.Client) {
 			ctrl.Log.Info("active chaos", "size", len(schedule.Status.Active))
 			return len(schedule.Status.Active) >= 4, nil
 		})
-		Expect(err).ToNot(HaveOccurred())
+		gomega.Expect(err).ToNot(gomega.HaveOccurred())
 	}
 
-	By("deleting the created object")
+	ginkgo.By("deleting the created object")
 	{
-		Expect(k8sClient.Delete(context.TODO(), schedule)).To(Succeed())
+		gomega.Expect(k8sClient.Delete(context.TODO(), schedule)).To(gomega.Succeed())
 	}
 }
 func TestScheduleGC(k8sClient client.Client) {
@@ -231,12 +231,12 @@ func TestScheduleGC(k8sClient client.Client) {
 		},
 	}
 
-	By("creating a schedule obj")
+	ginkgo.By("creating a schedule obj")
 	{
-		Expect(k8sClient.Create(context.TODO(), schedule)).To(Succeed())
+		gomega.Expect(k8sClient.Create(context.TODO(), schedule)).To(gomega.Succeed())
 	}
 
-	By("deleting outdated chaos")
+	ginkgo.By("deleting outdated chaos")
 	{
 		time.Sleep(time.Second * 10)
 		err := wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
@@ -247,12 +247,12 @@ func TestScheduleGC(k8sClient client.Client) {
 			ctrl.Log.Info("active chaos", "size", len(schedule.Status.Active))
 			return len(schedule.Status.Active) == 2, nil
 		})
-		Expect(err).ToNot(HaveOccurred())
+		gomega.Expect(err).ToNot(gomega.HaveOccurred())
 	}
 
-	By("deleting the created object")
+	ginkgo.By("deleting the created object")
 	{
-		Expect(k8sClient.Delete(context.TODO(), schedule)).To(Succeed())
+		gomega.Expect(k8sClient.Delete(context.TODO(), schedule)).To(gomega.Succeed())
 	}
 }
 
@@ -297,12 +297,12 @@ func TestScheduleWorkflow(k8sClient client.Client) {
 		},
 	}
 
-	By("creating a schedule obj")
+	ginkgo.By("creating a schedule obj")
 	{
-		Expect(k8sClient.Create(context.TODO(), schedule)).To(Succeed())
+		gomega.Expect(k8sClient.Create(context.TODO(), schedule)).To(gomega.Succeed())
 	}
 
-	By("disallowing concurrent")
+	ginkgo.By("disallowing concurrent")
 	{
 		time.Sleep(time.Second * 10)
 		err := wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
@@ -313,12 +313,12 @@ func TestScheduleWorkflow(k8sClient client.Client) {
 			ctrl.Log.Info("active chaos", "size", len(schedule.Status.Active))
 			return len(schedule.Status.Active) == 1, nil
 		})
-		Expect(err).ToNot(HaveOccurred())
+		gomega.Expect(err).ToNot(gomega.HaveOccurred())
 	}
 
-	By("deleting the created object")
+	ginkgo.By("deleting the created object")
 	{
-		Expect(k8sClient.Delete(context.TODO(), schedule)).To(Succeed())
+		gomega.Expect(k8sClient.Delete(context.TODO(), schedule)).To(gomega.Succeed())
 	}
 }
 
@@ -357,12 +357,12 @@ func TestScheduleWorkflowGC(k8sClient client.Client) {
 		},
 	}
 
-	By("creating a schedule obj")
+	ginkgo.By("creating a schedule obj")
 	{
-		Expect(k8sClient.Create(context.TODO(), schedule)).To(Succeed())
+		gomega.Expect(k8sClient.Create(context.TODO(), schedule)).To(gomega.Succeed())
 	}
 
-	By("deleting outdated workflow")
+	ginkgo.By("deleting outdated workflow")
 	{
 		time.Sleep(time.Second * 10)
 		err := wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
@@ -373,11 +373,11 @@ func TestScheduleWorkflowGC(k8sClient client.Client) {
 			ctrl.Log.Info("active chaos", "size", len(schedule.Status.Active))
 			return len(schedule.Status.Active) == 2, nil
 		})
-		Expect(err).ToNot(HaveOccurred())
+		gomega.Expect(err).ToNot(gomega.HaveOccurred())
 	}
 
-	By("deleting the created object")
+	ginkgo.By("deleting the created object")
 	{
-		Expect(k8sClient.Delete(context.TODO(), schedule)).To(Succeed())
+		gomega.Expect(k8sClient.Delete(context.TODO(), schedule)).To(gomega.Succeed())
 	}
 }

@@ -24,11 +24,12 @@ import (
 	"k8s.io/client-go/rest"
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/go-logr/logr"
 	ginkgoConfig "github.com/onsi/ginkgo/config"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
 )
 
 func NewTestManager(lc fx.Lifecycle, options *ctrl.Options, cfg *rest.Config) (ctrl.Manager, error) {

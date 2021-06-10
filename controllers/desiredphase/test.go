@@ -17,8 +17,8 @@ import (
 	"context"
 	"time"
 
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
+	"github.com/onsi/ginkgo"
+	"github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -54,12 +54,12 @@ func TestDesiredPhaseBasic(k8sClient client.Client) {
 		},
 	}
 
-	By("creating a chaos")
+	ginkgo.By("creating a chaos")
 	{
-		Expect(k8sClient.Create(context.TODO(), chaos)).To(Succeed())
+		gomega.Expect(k8sClient.Create(context.TODO(), chaos)).To(gomega.Succeed())
 	}
 
-	By("Reconciling desired phase")
+	ginkgo.By("Reconciling desired phase")
 	{
 		err := wait.Poll(time.Second*1, time.Second*10, func() (ok bool, err error) {
 			err = k8sClient.Get(context.TODO(), key, chaos)
@@ -68,7 +68,7 @@ func TestDesiredPhaseBasic(k8sClient client.Client) {
 			}
 			return chaos.GetStatus().Experiment.DesiredPhase == v1alpha1.RunningPhase, nil
 		})
-		Expect(err).ToNot(HaveOccurred())
+		gomega.Expect(err).ToNot(gomega.HaveOccurred())
 		err = wait.Poll(time.Second*1, time.Second*10, func() (ok bool, err error) {
 			err = k8sClient.Get(context.TODO(), key, chaos)
 			if err != nil {
@@ -76,12 +76,12 @@ func TestDesiredPhaseBasic(k8sClient client.Client) {
 			}
 			return chaos.GetStatus().Experiment.DesiredPhase == v1alpha1.StoppedPhase, nil
 		})
-		Expect(err).ToNot(HaveOccurred())
+		gomega.Expect(err).ToNot(gomega.HaveOccurred())
 	}
 
-	By("deleting the created object")
+	ginkgo.By("deleting the created object")
 	{
-		Expect(k8sClient.Delete(context.TODO(), chaos)).To(Succeed())
+		gomega.Expect(k8sClient.Delete(context.TODO(), chaos)).To(gomega.Succeed())
 	}
 }
 func TestDesiredPhasePause(k8sClient client.Client) {
@@ -107,12 +107,12 @@ func TestDesiredPhasePause(k8sClient client.Client) {
 		},
 	}
 
-	By("creating a chaos")
+	ginkgo.By("creating a chaos")
 	{
-		Expect(k8sClient.Create(context.TODO(), chaos)).To(Succeed())
+		gomega.Expect(k8sClient.Create(context.TODO(), chaos)).To(gomega.Succeed())
 	}
 
-	By("Reconciling desired phase")
+	ginkgo.By("Reconciling desired phase")
 	{
 		err := wait.Poll(time.Second*1, time.Second*10, func() (ok bool, err error) {
 			err = k8sClient.Get(context.TODO(), key, chaos)
@@ -121,9 +121,9 @@ func TestDesiredPhasePause(k8sClient client.Client) {
 			}
 			return chaos.GetStatus().Experiment.DesiredPhase == v1alpha1.RunningPhase, nil
 		})
-		Expect(err).ToNot(HaveOccurred())
+		gomega.Expect(err).ToNot(gomega.HaveOccurred())
 	}
-	By("Pause chaos")
+	ginkgo.By("Pause chaos")
 	{
 		err := retry.RetryOnConflict(retry.DefaultRetry, func() (err error) {
 			err = k8sClient.Get(context.TODO(), key, chaos)
@@ -133,7 +133,7 @@ func TestDesiredPhasePause(k8sClient client.Client) {
 			chaos.SetAnnotations(map[string]string{v1alpha1.PauseAnnotationKey: "true"})
 			return k8sClient.Update(context.TODO(), chaos)
 		})
-		Expect(err).ToNot(HaveOccurred())
+		gomega.Expect(err).ToNot(gomega.HaveOccurred())
 		err = wait.Poll(time.Second*5, time.Second*60, func() (ok bool, err error) {
 			err = k8sClient.Get(context.TODO(), key, chaos)
 			if err != nil {
@@ -141,10 +141,10 @@ func TestDesiredPhasePause(k8sClient client.Client) {
 			}
 			return chaos.GetStatus().Experiment.DesiredPhase == v1alpha1.StoppedPhase, nil
 		})
-		Expect(err).ToNot(HaveOccurred())
+		gomega.Expect(err).ToNot(gomega.HaveOccurred())
 	}
 
-	By("Resume chaos")
+	ginkgo.By("Resume chaos")
 	{
 		err := retry.RetryOnConflict(retry.DefaultRetry, func() (err error) {
 			err = k8sClient.Get(context.TODO(), key, chaos)
@@ -154,7 +154,7 @@ func TestDesiredPhasePause(k8sClient client.Client) {
 			chaos.SetAnnotations(map[string]string{v1alpha1.PauseAnnotationKey: "false"})
 			return k8sClient.Update(context.TODO(), chaos)
 		})
-		Expect(err).ToNot(HaveOccurred())
+		gomega.Expect(err).ToNot(gomega.HaveOccurred())
 		err = wait.Poll(time.Second*5, time.Second*60, func() (ok bool, err error) {
 			err = k8sClient.Get(context.TODO(), key, chaos)
 			if err != nil {
@@ -162,11 +162,11 @@ func TestDesiredPhasePause(k8sClient client.Client) {
 			}
 			return chaos.GetStatus().Experiment.DesiredPhase == v1alpha1.RunningPhase, nil
 		})
-		Expect(err).ToNot(HaveOccurred())
+		gomega.Expect(err).ToNot(gomega.HaveOccurred())
 	}
 
-	By("deleting the created object")
+	ginkgo.By("deleting the created object")
 	{
-		Expect(k8sClient.Delete(context.TODO(), chaos)).To(Succeed())
+		gomega.Expect(k8sClient.Delete(context.TODO(), chaos)).To(gomega.Succeed())
 	}
 }

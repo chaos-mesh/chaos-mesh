@@ -17,8 +17,8 @@ import (
 	"context"
 	"time"
 
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
+	"github.com/onsi/ginkgo"
+	"github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -53,12 +53,12 @@ func TestAddDefaultFinalizer(k8sClient client.Client) {
 		},
 	}
 
-	By("creating a chaos")
+	ginkgo.By("creating a chaos")
 	{
-		Expect(k8sClient.Create(context.TODO(), chaos)).To(Succeed())
+		gomega.Expect(k8sClient.Create(context.TODO(), chaos)).To(gomega.Succeed())
 	}
 
-	By("Adding finalizers")
+	ginkgo.By("Adding finalizers")
 	{
 		err := wait.Poll(time.Second*1, time.Second*10, func() (ok bool, err error) {
 			err = k8sClient.Get(context.TODO(), key, chaos)
@@ -67,11 +67,11 @@ func TestAddDefaultFinalizer(k8sClient client.Client) {
 			}
 			return len(chaos.GetObjectMeta().GetFinalizers()) > 0 && chaos.GetObjectMeta().GetFinalizers()[0] == RecordFinalizer, nil
 		})
-		Expect(err).ToNot(HaveOccurred())
+		gomega.Expect(err).ToNot(gomega.HaveOccurred())
 	}
 
-	By("deleting the created object")
+	ginkgo.By("deleting the created object")
 	{
-		Expect(k8sClient.Delete(context.TODO(), chaos)).To(Succeed())
+		gomega.Expect(k8sClient.Delete(context.TODO(), chaos)).To(gomega.Succeed())
 	}
 }

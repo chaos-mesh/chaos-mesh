@@ -16,6 +16,10 @@ package controllers
 import (
 	"context"
 
+	"github.com/go-logr/logr"
+	"go.uber.org/fx"
+	ctrl "sigs.k8s.io/controller-runtime"
+
 	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-controller-manager/provider"
 	"github.com/chaos-mesh/chaos-mesh/controllers/desiredphase"
 	"github.com/chaos-mesh/chaos-mesh/controllers/finalizers"
@@ -24,9 +28,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/test"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/controllers"
-	"github.com/go-logr/logr"
-	"go.uber.org/fx"
-	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
