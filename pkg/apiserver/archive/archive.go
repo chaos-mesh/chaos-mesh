@@ -77,12 +77,12 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint.GET("/schedules", s.listSchedule)
 	endpoint.GET("/schedules/:uid", s.detailSchedule)
 	endpoint.DELETE("/schedules/:uid", s.deleteSchedule)
-	endpoint.DELETE("/schedules/", s.batchDeleteSchedule)
+	endpoint.DELETE("/schedules", s.batchDeleteSchedule)
 
 	endpoint.GET("/workflows", s.listWorkflow)
 	endpoint.GET("/workflows/:uid", s.detailWorkflow)
 	endpoint.DELETE("/workflows/:uid", s.deleteWorkflow)
-	endpoint.DELETE("/workflows/", s.batchDeleteWorkflow)
+	endpoint.DELETE("/workflows", s.batchDeleteWorkflow)
 }
 
 // Archive defines the basic information of an archive.
