@@ -96,16 +96,16 @@ func (it *WorkflowStore) Save(ctx context.Context, entity *core.WorkflowEntity) 
 }
 
 func (it *WorkflowStore) DeleteByUID(ctx context.Context, uid string) error {
-	return it.db.Where("object_id = ?", uid).Unscoped().
-		Delete(core.Event{}).Error
+	return it.db.Where("uid = ?", uid).Unscoped().
+		Delete(core.WorkflowEntity{}).Error
 }
 
 func (it *WorkflowStore) DeleteByUIDs(ctx context.Context, uids []string) error {
-	return it.db.Where("object_id IN (?)", uids).Unscoped().Delete(core.Event{}).Error
+	return it.db.Where("uid IN (?)", uids).Unscoped().Delete(core.WorkflowEntity{}).Error
 }
 
 func (it *WorkflowStore) MarkAsArchived(ctx context.Context, namespace, name string) error {
-	if err := it.db.Model(core.Schedule{}).
+	if err := it.db.Model(core.WorkflowEntity{}).
 		Where("namespace = ? AND name = ? AND archived = ?", namespace, name, false).
 		Updates(map[string]interface{}{"archived": true, "finish_time": time.Now()}).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
 		return err
@@ -114,7 +114,7 @@ func (it *WorkflowStore) MarkAsArchived(ctx context.Context, namespace, name str
 }
 
 func (it *WorkflowStore) MarkAsArchivedWithUID(ctx context.Context, uid string) error {
-	if err := it.db.Model(core.Schedule{}).
+	if err := it.db.Model(core.WorkflowEntity{}).
 		Where("uid = ? AND archived = ?", uid, false).
 		Updates(map[string]interface{}{"archived": true, "finish_time": time.Now()}).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
 		return err
