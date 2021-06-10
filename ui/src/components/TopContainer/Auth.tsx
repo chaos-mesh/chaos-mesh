@@ -53,7 +53,7 @@ const Auth: React.FC<AuthProps> = ({ open, setOpen }) => {
         }}
       >
         <RBACGenerator />
-        <Box textAlign="right">
+        <Box mt={3} textAlign="right">
           <Button onClick={() => setTokenGenOpen(false)}>{T('common.close')}</Button>
         </Box>
       </ConfirmDialog>

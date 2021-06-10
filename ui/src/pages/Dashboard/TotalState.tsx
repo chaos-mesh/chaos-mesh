@@ -1,7 +1,7 @@
+import { Box, BoxProps } from '@material-ui/core'
 import { ComputedDatum, PieTooltipProps, ResponsivePie } from '@nivo/pie'
 import React, { useEffect, useState } from 'react'
 
-import { Box } from '@material-ui/core'
 import NotFound from 'components-mui/NotFound'
 import { PropertyAccessor } from '@nivo/core'
 import { StateOfExperiments } from 'api/experiments.type'
@@ -17,11 +17,7 @@ interface SingleData {
   value: number
 }
 
-interface TotalStateProps {
-  className?: string
-}
-
-const TotalState: React.FC<TotalStateProps> = (props) => {
+const TotalState: React.FC<BoxProps> = (props) => {
   const intl = useIntl()
   const theme = useTheme()
 
@@ -66,7 +62,7 @@ const TotalState: React.FC<TotalStateProps> = (props) => {
   }, [intl])
 
   return (
-    <div className={props.className}>
+    <Box {...props}>
       {s.some((d) => d.value >= 1) ? (
         <ResponsivePie
           data={s}
@@ -99,7 +95,7 @@ const TotalState: React.FC<TotalStateProps> = (props) => {
       ) : (
         <NotFound>{T('experiments.notFound')}</NotFound>
       )}
-    </div>
+    </Box>
   )
 }
 

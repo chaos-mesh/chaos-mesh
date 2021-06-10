@@ -23,8 +23,8 @@ const useStyles = makeStyles((theme) => ({
   },
   copy: {
     position: 'absolute',
-    top: theme.spacing(1),
-    right: theme.spacing(1),
+    top: theme.spacing(6),
+    right: theme.spacing(3),
   },
 }))
 
@@ -76,28 +76,24 @@ const RBACGenerator = () => {
 
   return (
     <div ref={containerRef}>
-      <Box mb={3}>
+      <Space>
         <Typography variant="body2" color="textSecondary">
           {T('settings.addToken.generatorHelper')}
         </Typography>
-      </Box>
-      <Formik
-        initialValues={{ namespace: 'default', role: 'viewer', clustered: false }}
-        onSubmit={() => {}}
-        validate={onValidate}
-        validateOnBlur={false}
-      >
-        <Form>
-          <Box mb={3}>
-            <FormControl>
-              <FormControlLabel
-                control={<Field as={Checkbox} name="clustered" color="primary" />}
-                label={<Typography variant="body2">{T('settings.addToken.clustered')}</Typography>}
-              />
-            </FormControl>
-          </Box>
-          <Space mb={3}>
-            <Box flex={1}>
+        <Formik
+          initialValues={{ namespace: 'default', role: 'viewer', clustered: false }}
+          onSubmit={() => {}}
+          validate={onValidate}
+          validateOnBlur={false}
+        >
+          <Form>
+            <Space>
+              <FormControl>
+                <FormControlLabel
+                  control={<Field as={Checkbox} name="clustered" color="primary" />}
+                  label={<Typography variant="body2">{T('settings.addToken.clustered')}</Typography>}
+                />
+              </FormControl>
               <SelectField
                 name="namespace"
                 label={T('k8s.namespace')}
@@ -110,8 +106,6 @@ const RBACGenerator = () => {
                   </MenuItem>
                 ))}
               </SelectField>
-            </Box>
-            <Box flex={1}>
               <SelectField
                 name="role"
                 label={T('settings.addToken.role')}
@@ -123,29 +117,29 @@ const RBACGenerator = () => {
                   </MenuItem>
                 ))}
               </SelectField>
-            </Box>
-          </Space>
-        </Form>
-      </Formik>
-      <Typography variant="body2" color="textSecondary">
-        {T('settings.addToken.generatorHelper2')}
-      </Typography>
-      <Box position="relative">
-        <pre className={classes.pre} style={{ height: 250, overflow: 'auto' }}>
-          {rbac}
-        </pre>
-        <Box className={classes.copy}>
-          <Button onClick={copyRBAC}>{T('common.copy')}</Button>
+            </Space>
+          </Form>
+        </Formik>
+        <Typography variant="body2" color="textSecondary">
+          {T('settings.addToken.generatorHelper2')}
+        </Typography>
+        <Box position="relative">
+          <pre className={classes.pre} style={{ height: 300, overflow: 'auto' }}>
+            {rbac}
+          </pre>
+          <Box className={classes.copy}>
+            <Button onClick={copyRBAC}>{T('common.copy')}</Button>
+          </Box>
         </Box>
-      </Box>
-      <Typography variant="body2" color="textSecondary">
-        {T('settings.addToken.generatorHelper3')}
-      </Typography>
-      <pre className={classes.pre}>kubectl apply -f rbac.yaml</pre>
-      <Typography variant="body2" color="textSecondary">
-        {T('settings.addToken.generatorHelper4')}
-      </Typography>
-      <pre className={classes.pre}>{getSecret}</pre>
+        <Typography variant="body2" color="textSecondary">
+          {T('settings.addToken.generatorHelper3')}
+        </Typography>
+        <pre className={classes.pre}>kubectl apply -f rbac.yaml</pre>
+        <Typography variant="body2" color="textSecondary">
+          {T('settings.addToken.generatorHelper4')}
+        </Typography>
+        <pre className={classes.pre}>{getSecret}</pre>
+      </Space>
     </div>
   )
 }

@@ -1,30 +1,9 @@
-import {
-  Box,
-  List,
-  ListItem as MUIListItem,
-  TableCell as MUITableCell,
-  Table,
-  TableBody,
-  TableRow,
-  Typography,
-} from '@material-ui/core'
+import { Box, List, Table, TableBody, TableRow, Typography } from '@material-ui/core'
+import { ListItem, TableCell } from './common'
 import { objToArrBySep, toCamelCase, toTitleCase } from 'lib/utils'
 
 import PaperTop from 'components-mui/PaperTop'
 import T from 'components/T'
-import { withStyles } from '@material-ui/styles'
-
-const TableCell = withStyles({
-  root: {
-    borderBottom: 'none',
-  },
-})(MUITableCell)
-
-const ListItem: any = withStyles({
-  root: {
-    paddingLeft: 0,
-  },
-})(MUIListItem)
 
 interface NodeConfigurationProps {
   template: any

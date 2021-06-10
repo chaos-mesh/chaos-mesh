@@ -1,10 +1,10 @@
-export interface workflowParams {
+export interface WorkflowParams {
   namespace?: string
 }
 
 export interface Workflow {
-  name: string
   namespace: string
+  name: string
   entry: string
   created_at: string
   end_time: string

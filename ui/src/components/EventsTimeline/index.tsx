@@ -2,6 +2,8 @@ import { Box, Typography } from '@material-ui/core'
 import DateTime, { format } from 'lib/luxon'
 
 import { Event } from 'api/events.type'
+import NotFound from 'components-mui/NotFound'
+import T from 'components/T'
 import Timeline from '@material-ui/lab/Timeline'
 import TimelineConnector from '@material-ui/lab/TimelineConnector'
 import TimelineContent from '@material-ui/lab/TimelineContent'
@@ -10,27 +12,17 @@ import TimelineItem from '@material-ui/lab/TimelineItem'
 import TimelineOppositeContent from '@material-ui/lab/TimelineOppositeContent'
 import TimelineSeparator from '@material-ui/lab/TimelineSeparator'
 import { iconByKind } from 'lib/byKind'
-import { makeStyles } from '@material-ui/styles'
 import { useStoreSelector } from 'store'
-
-const useStyles = makeStyles({
-  root: {
-    margin: 0,
-    padding: 0,
-  },
-})
 
 interface EventsTimelineProps {
   events: Event[]
 }
 
 const EventsTimeline: React.FC<EventsTimelineProps> = ({ events }) => {
-  const classes = useStyles()
-
   const { lang } = useStoreSelector((state) => state.settings)
 
-  return (
-    <Timeline classes={classes}>
+  return events.length > 0 ? (
+    <Timeline sx={{ m: 0, p: 0 }}>
       {events.map((e) => (
         <TimelineItem key={e.id}>
           <TimelineOppositeContent style={{ flex: 0.001, padding: 0 }} />
@@ -56,6 +48,8 @@ const EventsTimeline: React.FC<EventsTimelineProps> = ({ events }) => {
         </TimelineItem>
       ))}
     </Timeline>
+  ) : (
+    <NotFound>{T('events.notFound')}</NotFound>
   )
 }
 

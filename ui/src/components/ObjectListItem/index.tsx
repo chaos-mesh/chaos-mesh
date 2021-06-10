@@ -97,7 +97,7 @@ const ObjectListItem: React.FC<ObjectListItemProps> = ({ data, type = 'experimen
           locale: lang,
         }).toRelative()}
       </Typography>
-      {type === 'experiment' &&
+      {(type === 'schedule' || type === 'experiment') &&
         ((data as Experiment).status === 'paused' ? (
           <IconButton color="primary" title={T('common.start', intl)} size="small" onClick={handleAction('start')}>
             <PlayCircleOutlineIcon />

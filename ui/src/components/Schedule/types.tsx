@@ -15,7 +15,7 @@ export interface ScheduleSpecific {
 
 export const data: ScheduleSpecific = {
   schedule: '',
-  starting_deadline_seconds: 0,
+  starting_deadline_seconds: undefined,
   concurrency_policy: 'Forbid',
   history_limit: 1,
 }

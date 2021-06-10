@@ -1,3 +1,4 @@
+import { Box, BoxProps } from '@material-ui/core'
 import React, { useEffect, useRef } from 'react'
 
 import { Event } from 'api/events.type'
@@ -6,9 +7,8 @@ import T from 'components/T'
 import genEventsChart from 'lib/d3/eventsChart'
 import { useStoreSelector } from 'store'
 
-interface EventsChartProps {
+interface EventsChartProps extends BoxProps {
   events: Event[]
-  className: string
 }
 
 const EventsChart: React.FC<EventsChartProps> = ({ events, ...rest }) => {
@@ -35,9 +35,9 @@ const EventsChart: React.FC<EventsChartProps> = ({ events, ...rest }) => {
   }, [events, theme])
 
   return (
-    <div ref={chartRef} {...rest}>
+    <Box {...rest} ref={chartRef}>
       {events?.length === 0 && <NotFound>{T('events.notFound')}</NotFound>}
-    </div>
+    </Box>
   )
 }
 

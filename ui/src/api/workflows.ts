@@ -1,10 +1,10 @@
-import { Workflow, WorkflowSingle, workflowParams } from './workflows.type'
+import { Workflow, WorkflowParams, WorkflowSingle } from './workflows.type'
 
 import http from './http'
 
 export const newWorkflow = (data: any) => http.post('/workflows', data)
 
-export const workflows = (params?: workflowParams) =>
+export const workflows = (params?: WorkflowParams) =>
   http.get<Workflow[]>('/workflows', {
     params,
   })

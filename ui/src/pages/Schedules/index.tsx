@@ -81,6 +81,16 @@ const Schedules = () => {
         setBatch({})
 
         break
+      case 'pause':
+        actionFunc = api.schedules.pause
+        arg = uuid
+
+        break
+      case 'start':
+        actionFunc = api.schedules.start
+        arg = uuid
+
+        break
     }
 
     if (actionFunc) {

@@ -1,29 +1,30 @@
-import { Grid, TableCell as MUITableCell, Table, TableBody, TableRow, Typography } from '@material-ui/core'
+import { Grid, Table, TableBody, TableRow, Typography } from '@material-ui/core'
+import { toCamelCase, toTitleCase } from 'lib/utils'
 
 import { ArchiveSingle } from 'api/archives.type'
 import { ExperimentSingle } from 'api/experiments.type'
-import React from 'react'
 import T from 'components/T'
+import { TableCell } from './common'
 import { format } from 'lib/luxon'
-import { toTitleCase } from 'lib/utils'
 import { useStoreSelector } from 'store'
-import { withStyles } from '@material-ui/styles'
 
-const TableCell = withStyles({
-  root: {
-    borderBottom: 'none',
-  },
-})(MUITableCell)
+type Config = ExperimentSingle | ArchiveSingle
 
 interface ObjectConfigurationProps {
-  config: ExperimentSingle | ArchiveSingle
+  config: Config
+  inSchedule?: boolean
   vertical?: boolean
 }
 
-const ObjectConfiguration: React.FC<ObjectConfigurationProps> = ({ config, vertical = false }) => {
+const ObjectConfiguration: React.FC<ObjectConfigurationProps> = ({ config, inSchedule = false, vertical = false }) => {
   const { lang } = useStoreSelector((state) => state.settings)
 
-  const action: string = config.kube_object.spec.action
+  let action: string
+  if (inSchedule) {
+    action = config.kube_object.spec[toCamelCase(config.kube_object.spec.type)].action
+  } else {
+    action = config.kube_object.spec.action
+  }
 
   return (
     <Grid container>
@@ -118,14 +119,26 @@ const ObjectConfiguration: React.FC<ObjectConfigurationProps> = ({ config, verti
 
         <Table size="small">
           <TableBody>
-            <TableRow>
-              <TableCell>{T('newE.run.duration')}</TableCell>
-              <TableCell>
-                <Typography variant="body2" color="textSecondary">
-                  {config.kube_object.spec.duration ? config.kube_object.spec.duration : T('newE.run.continuous')}
-                </Typography>
-              </TableCell>
-            </TableRow>
+            {!inSchedule && (
+              <TableRow>
+                <TableCell>{T('newE.run.duration')}</TableCell>
+                <TableCell>
+                  <Typography variant="body2" color="textSecondary">
+                    {config.kube_object.spec.duration ? config.kube_object.spec.duration : T('newE.run.continuous')}
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            )}
+            {inSchedule && (
+              <TableRow>
+                <TableCell>{T('schedules.single')}</TableCell>
+                <TableCell>
+                  <Typography variant="body2" color="textSecondary">
+                    {config.kube_object.spec.schedule}
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </Grid>

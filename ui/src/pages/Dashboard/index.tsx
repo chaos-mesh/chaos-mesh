@@ -17,14 +17,6 @@ import TotalState from './TotalState'
 import Welcome from './Welcome'
 import { Workflow } from 'api/workflows.type'
 import api from 'api'
-import { makeStyles } from '@material-ui/styles'
-
-const useStyles = makeStyles({
-  container: {
-    position: 'relative',
-    height: 300,
-  },
-})
 
 const NumPanel: React.FC<{ title: JSX.Element; num: number; background: JSX.Element }> = ({
   title,
@@ -45,8 +37,6 @@ const NumPanel: React.FC<{ title: JSX.Element; num: number; background: JSX.Elem
 )
 
 export default function Dashboard() {
-  const classes = useStyles()
-
   const [data, setData] = useState<{
     workflows: Workflow[]
     schedules: Schedule[]
@@ -125,7 +115,7 @@ export default function Dashboard() {
           <Grid item xs={12}>
             <Paper>
               <PaperTop title={T('common.timeline')} boxProps={{ mb: 3 }} />
-              <EventsChart events={data.events} className={classes.container} />
+              <EventsChart events={data.events} position="relative" height={450} />
             </Paper>
           </Grid>
         </Grid>
@@ -134,7 +124,7 @@ export default function Dashboard() {
           <Grid item xs={12}>
             <Paper>
               <PaperTop title={T('dashboard.totalState')} />
-              <TotalState className={classes.container} />
+              <TotalState position="relative" height={data.events.length > 0 ? 300 : '100%'} />
             </Paper>
           </Grid>
           <Grid item xs={12}>

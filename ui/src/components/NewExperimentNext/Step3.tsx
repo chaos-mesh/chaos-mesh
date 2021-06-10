@@ -64,12 +64,12 @@ const Step3: React.FC<Step3Props> = ({ onSubmit }) => {
     <>
       {step1 && step2 && (
         <Paper>
-          <PaperTop title={T('common.submit')} />
+          <PaperTop title={T('common.submit')} boxProps={{ mb: 6 }} />
           <Box textAlign="center">
             <DoneAllIcon fontSize="large" />
             <Typography>{T('newE.complete')}</Typography>
-            <Submit onClick={submitExperiment} />
           </Box>
+          <Submit onClick={submitExperiment} />
         </Paper>
       )}
     </>

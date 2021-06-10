@@ -4,8 +4,8 @@ import { FixedSizeList as RWList, ListChildComponentProps as RWListChildComponen
 import { useEffect, useRef, useState } from 'react'
 
 import AddIcon from '@material-ui/icons/Add'
+import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
 import CloseIcon from '@material-ui/icons/Close'
-import DeleteOutlinedIcon from '@material-ui/icons/DeleteOutlined'
 import { Experiment } from 'api/experiments.type'
 import FilterListIcon from '@material-ui/icons/FilterList'
 import Loading from 'components-mui/Loading'
@@ -183,7 +183,12 @@ export default function Experiments() {
             <Button variant="outlined" startIcon={<PlaylistAddCheckIcon />} onClick={handleBatchSelectAll}>
               {T('common.selectAll')}
             </Button>
-            <Button variant="outlined" color="secondary" startIcon={<DeleteOutlinedIcon />} onClick={handleBatchDelete}>
+            <Button
+              variant="outlined"
+              color="secondary"
+              startIcon={<ArchiveOutlinedIcon />}
+              onClick={handleBatchDelete}
+            >
               {T('archives.single')}
             </Button>
           </>

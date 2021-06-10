@@ -12,6 +12,7 @@ import Space from 'components-mui/Space'
 import T from 'components/T'
 import _snakecase from 'lodash.snakecase'
 import api from 'api'
+import { data as scheduleSpecificData } from 'components/Schedule/types'
 import { setAlert } from 'slices/globalStatus'
 import { setExternalExperiment } from 'slices/experiments'
 import { toCamelCase } from 'lib/utils'
@@ -82,7 +83,7 @@ const LoadFrom: React.FC<LoadFromProps> = ({ loadCallback, inSchedule = false })
         setExternalExperiment({
           kindAction: [kind, data.target[_snakecase(kind)].action ?? ''],
           target: data.target,
-          basic: { ...data.basic, ...original.spec },
+          basic: { ...data.basic, ...scheduleSpecificData, ...original.spec },
         })
       )
 

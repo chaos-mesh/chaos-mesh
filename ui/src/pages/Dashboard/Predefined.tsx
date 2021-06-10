@@ -154,7 +154,7 @@ const Predefined = () => {
               <Box display="flex" flexDirection="column" height="100%">
                 <Box px={3} pt={3}>
                   <PaperTop title={experiment.name}>
-                    <Space>
+                    <Space direction="row">
                       <Button color="secondary" size="small" onClick={handleDeleteExperiment}>
                         {T('common.delete')}
                       </Button>

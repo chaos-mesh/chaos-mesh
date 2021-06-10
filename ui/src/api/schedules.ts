@@ -1,4 +1,4 @@
-import { Schedule, ScheduleSingle } from './schedules.type'
+import { Schedule, ScheduleParams, ScheduleSingle } from './schedules.type'
 
 import { Archive } from './archives.type'
 import { Experiment } from 'components/NewExperiment/types'
@@ -7,11 +7,9 @@ import http from './http'
 
 export const newSchedule = (data: Experiment & ScheduleSpecific) => http.post('/schedules', data)
 
-export const schedules = (namespace = null) =>
+export const schedules = (params?: ScheduleParams) =>
   http.get<Schedule[]>('/schedules', {
-    params: {
-      namespace,
-    },
+    params,
   })
 
 export const single = (uuid: uuid) => http.get<ScheduleSingle>(`/schedules/${uuid}`)
