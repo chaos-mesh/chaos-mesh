@@ -15,8 +15,9 @@ package workflow
 
 import (
 	"encoding/json"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"net/http"
+
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 
 	"github.com/gin-gonic/gin"
 
