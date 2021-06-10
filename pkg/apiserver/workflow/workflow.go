@@ -62,7 +62,7 @@ func NewService(conf *config.ChaosDashboardConfig, store core.WorkflowStore) *Se
 // @Produce json
 // @Param namespace query string false "namespace, given empty string means list from all namespace"
 // @Param status query string false "status" Enums(Initializing, Running, Errored, Finished)
-// @Success 200 {array} core.Workflow
+// @Success 200 {array} core.WorkflowMeta
 // @Router /workflows [get]
 // @Failure 500 {object} utils.APIError
 func (it *Service) listWorkflows(c *gin.Context) {
