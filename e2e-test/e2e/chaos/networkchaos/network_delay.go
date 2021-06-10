@@ -46,9 +46,9 @@ func TestcaseNetworkDelay(
 		framework.ExpectNoError(err, "wait e2e helper ready error")
 	}
 
-	result := probeNetworkCondition(c, networkPeers, ports, false)
-	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
-	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
+	result := ProbeNetworkCondition(c, networkPeers, ports, false)
+	framework.ExpectEqual(len(result[NetworkConditionBlocked]), 0)
+	framework.ExpectEqual(len(result[NetworkConditionSlow]), 0)
 
 	var (
 		testDelayTcParam = v1alpha1.TcParameter{
@@ -96,30 +96,30 @@ func TestcaseNetworkDelay(
 	framework.ExpectNoError(err, "create network chaos error")
 
 	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
-		result = probeNetworkCondition(c, networkPeers, ports, false)
-		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 3 {
+		result = ProbeNetworkCondition(c, networkPeers, ports, false)
+		if len(result[NetworkConditionBlocked]) != 0 || len(result[NetworkConditionSlow]) != 3 {
 			return false, nil
 		}
 		return true, nil
 	})
 
-	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
-	framework.ExpectEqual(result[networkConditionSlow], [][]int{{0, 1}, {0, 2}, {0, 3}})
+	framework.ExpectEqual(len(result[NetworkConditionBlocked]), 0)
+	framework.ExpectEqual(result[NetworkConditionSlow], [][]int{{0, 1}, {0, 2}, {0, 3}})
 
 	By("recover")
 	err = cli.Delete(ctx, networkDelay.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 
 	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
-		result = probeNetworkCondition(c, networkPeers, ports, false)
-		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 0 {
+		result = ProbeNetworkCondition(c, networkPeers, ports, false)
+		if len(result[NetworkConditionBlocked]) != 0 || len(result[NetworkConditionSlow]) != 0 {
 			return false, nil
 		}
 		return true, nil
 	})
 
-	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
-	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
+	framework.ExpectEqual(len(result[NetworkConditionBlocked]), 0)
+	framework.ExpectEqual(len(result[NetworkConditionSlow]), 0)
 
 	networkDelayWithTarget := makeNetworkDelayChaos(
 		ns, "network-chaos-1",
@@ -137,29 +137,29 @@ func TestcaseNetworkDelay(
 	framework.ExpectNoError(err, "create network chaos error")
 
 	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
-		result = probeNetworkCondition(c, networkPeers, ports, false)
-		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 1 {
+		result = ProbeNetworkCondition(c, networkPeers, ports, false)
+		if len(result[NetworkConditionBlocked]) != 0 || len(result[NetworkConditionSlow]) != 1 {
 			return false, nil
 		}
 		return true, nil
 	})
 
-	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
-	framework.ExpectEqual(result[networkConditionSlow], [][]int{{0, 1}})
+	framework.ExpectEqual(len(result[NetworkConditionBlocked]), 0)
+	framework.ExpectEqual(result[NetworkConditionSlow], [][]int{{0, 1}})
 
 	err = cli.Delete(ctx, networkDelayWithTarget.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 
 	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
-		result = probeNetworkCondition(c, networkPeers, ports, false)
-		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 0 {
+		result = ProbeNetworkCondition(c, networkPeers, ports, false)
+		if len(result[NetworkConditionBlocked]) != 0 || len(result[NetworkConditionSlow]) != 0 {
 			return false, nil
 		}
 		return true, nil
 	})
 
-	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
-	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
+	framework.ExpectEqual(len(result[NetworkConditionBlocked]), 0)
+	framework.ExpectEqual(len(result[NetworkConditionSlow]), 0)
 
 	evenNetworkDelay := makeNetworkDelayChaos(
 		ns, "network-chaos-2",
@@ -176,54 +176,54 @@ func TestcaseNetworkDelay(
 	framework.ExpectNoError(err, "create network chaos error")
 
 	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
-		result = probeNetworkCondition(c, networkPeers, ports, false)
-		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 1 {
+		result = ProbeNetworkCondition(c, networkPeers, ports, false)
+		if len(result[NetworkConditionBlocked]) != 0 || len(result[NetworkConditionSlow]) != 1 {
 			return false, nil
 		}
 		return true, nil
 	})
-	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
-	framework.ExpectEqual(result[networkConditionSlow], [][]int{{0, 2}})
+	framework.ExpectEqual(len(result[NetworkConditionBlocked]), 0)
+	framework.ExpectEqual(result[NetworkConditionSlow], [][]int{{0, 2}})
 
 	By("Injecting delay for 0 -> 1")
 	err = cli.Create(ctx, networkDelayWithTarget.DeepCopy())
 	framework.ExpectNoError(err, "create network chaos error")
 
 	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
-		result = probeNetworkCondition(c, networkPeers, ports, false)
-		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 2 {
+		result = ProbeNetworkCondition(c, networkPeers, ports, false)
+		if len(result[NetworkConditionBlocked]) != 0 || len(result[NetworkConditionSlow]) != 2 {
 			return false, nil
 		}
 		return true, nil
 	})
-	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
-	framework.ExpectEqual(result[networkConditionSlow], [][]int{{0, 1}, {0, 2}})
+	framework.ExpectEqual(len(result[NetworkConditionBlocked]), 0)
+	framework.ExpectEqual(result[NetworkConditionSlow], [][]int{{0, 1}, {0, 2}})
 
 	err = cli.Delete(ctx, networkDelayWithTarget.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 
 	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
-		result = probeNetworkCondition(c, networkPeers, ports, false)
-		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 1 {
+		result = ProbeNetworkCondition(c, networkPeers, ports, false)
+		if len(result[NetworkConditionBlocked]) != 0 || len(result[NetworkConditionSlow]) != 1 {
 			return false, nil
 		}
 		return true, nil
 	})
-	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
-	framework.ExpectEqual(result[networkConditionSlow], [][]int{{0, 2}})
+	framework.ExpectEqual(len(result[NetworkConditionBlocked]), 0)
+	framework.ExpectEqual(result[NetworkConditionSlow], [][]int{{0, 2}})
 
 	err = cli.Delete(ctx, evenNetworkDelay.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 
 	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
-		result = probeNetworkCondition(c, networkPeers, ports, false)
-		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 0 {
+		result = ProbeNetworkCondition(c, networkPeers, ports, false)
+		if len(result[NetworkConditionBlocked]) != 0 || len(result[NetworkConditionSlow]) != 0 {
 			return false, nil
 		}
 		return true, nil
 	})
-	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
-	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
+	framework.ExpectEqual(len(result[NetworkConditionBlocked]), 0)
+	framework.ExpectEqual(len(result[NetworkConditionSlow]), 0)
 
 	complicateNetem := makeNetworkDelayChaos(
 		ns, "network-chaos-3",
@@ -239,28 +239,28 @@ func TestcaseNetworkDelay(
 	err = cli.Create(ctx, complicateNetem.DeepCopy())
 	framework.ExpectNoError(err, "create network chaos error")
 	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
-		result = probeNetworkCondition(c, networkPeers, ports, false)
-		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 3 {
+		result = ProbeNetworkCondition(c, networkPeers, ports, false)
+		if len(result[NetworkConditionBlocked]) != 0 || len(result[NetworkConditionSlow]) != 3 {
 			return false, nil
 		}
 		return true, nil
 	})
-	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
-	framework.ExpectEqual(result[networkConditionSlow], [][]int{{0, 1}, {0, 2}, {0, 3}})
+	framework.ExpectEqual(len(result[NetworkConditionBlocked]), 0)
+	framework.ExpectEqual(result[NetworkConditionSlow], [][]int{{0, 1}, {0, 2}, {0, 3}})
 
 	By("recover")
 	err = cli.Delete(ctx, complicateNetem.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 
 	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
-		result = probeNetworkCondition(c, networkPeers, ports, false)
-		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 0 {
+		result = ProbeNetworkCondition(c, networkPeers, ports, false)
+		if len(result[NetworkConditionBlocked]) != 0 || len(result[NetworkConditionSlow]) != 0 {
 			return false, nil
 		}
 		return true, nil
 	})
-	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
-	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
+	framework.ExpectEqual(len(result[NetworkConditionBlocked]), 0)
+	framework.ExpectEqual(len(result[NetworkConditionSlow]), 0)
 
 	bothDirectionNetem := makeNetworkDelayChaos(
 		ns, "network-chaos-4",
@@ -276,26 +276,26 @@ func TestcaseNetworkDelay(
 	err = cli.Create(ctx, bothDirectionNetem.DeepCopy())
 	framework.ExpectNoError(err, "create network chaos error")
 	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
-		result = probeNetworkCondition(c, networkPeers, ports, true)
-		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 2 {
+		result = ProbeNetworkCondition(c, networkPeers, ports, true)
+		if len(result[NetworkConditionBlocked]) != 0 || len(result[NetworkConditionSlow]) != 2 {
 			return false, nil
 		}
 		return true, nil
 	})
-	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
-	framework.ExpectEqual(result[networkConditionSlow], [][]int{{0, 2}, {2, 0}})
+	framework.ExpectEqual(len(result[NetworkConditionBlocked]), 0)
+	framework.ExpectEqual(result[NetworkConditionSlow], [][]int{{0, 2}, {2, 0}})
 
 	By("recover")
 	err = cli.Delete(ctx, bothDirectionNetem.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 
 	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
-		result = probeNetworkCondition(c, networkPeers, ports, true)
-		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 0 {
+		result = ProbeNetworkCondition(c, networkPeers, ports, true)
+		if len(result[NetworkConditionBlocked]) != 0 || len(result[NetworkConditionSlow]) != 0 {
 			return false, nil
 		}
 		return true, nil
 	})
-	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
-	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
+	framework.ExpectEqual(len(result[NetworkConditionBlocked]), 0)
+	framework.ExpectEqual(len(result[NetworkConditionSlow]), 0)
 }

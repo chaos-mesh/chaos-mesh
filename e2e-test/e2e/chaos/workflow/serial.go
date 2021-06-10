@@ -19,6 +19,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/chaos/networkchaos"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
@@ -66,7 +68,7 @@ func TestcaseWorkflowSerial(
 	const sleepDuration = 10 * time.Second
 	const podChaosDuration = 20 * time.Second
 	const timeChaosDuration = 20 * time.Second
-	workflowSpec := newWorkflow(sleepDuration, podChaosDuration, timeChaosDuration, ns, workloadLabels)
+	workflowSpec := commonSerialWorkflow(sleepDuration, podChaosDuration, timeChaosDuration, ns, workloadLabels)
 	err = cli.Create(ctx, &v1alpha1.Workflow{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: ns,
@@ -89,7 +91,7 @@ func TestcaseWorkflowSerial(
 	timeWhenTimeSkewChaosAffected := time.Now()
 	By(fmt.Sprintf("time chaos in workflow affected, in %s", timeWhenTimeSkewChaosAffected.Sub(timeWhenWorkflowCreate)))
 
-	// waiting for time skew chaos
+	// waiting for the recover of time skew chaos
 	Eventually(func() bool {
 		By("assertion that time chaos will be deleted")
 		allTimeChaos := v1alpha1.TimeChaosList{}
@@ -163,7 +165,7 @@ func TestcaseWorkflowSerial(
 }
 
 // it will kill all the pod, and inject -1h time skew for all pods
-func newWorkflow(
+func commonSerialWorkflow(
 	sleepDuration, podChaosDuration, timeChaosDuration time.Duration,
 	ns string,
 	workloadLabels map[string]string,
@@ -220,6 +222,158 @@ func newWorkflow(
 				},
 			}, {
 				Name:     timechaos,
+				Type:     v1alpha1.TypeTimeChaos,
+				Duration: &timeChaosDurationString,
+				EmbedChaos: &v1alpha1.EmbedChaos{
+					TimeChaos: &v1alpha1.TimeChaosSpec{
+						ContainerSelector: v1alpha1.ContainerSelector{
+							PodSelector: v1alpha1.PodSelector{
+								Selector: v1alpha1.PodSelectorSpec{
+									Namespaces:     []string{ns},
+									LabelSelectors: workloadLabels,
+								},
+								Mode: v1alpha1.AllPodMode,
+							},
+						},
+						TimeOffset: "-1h",
+					},
+				},
+			},
+		},
+	}
+}
+
+func TestcaseDeadlineOfSerial(
+	ns string,
+	kubeCli kubernetes.Interface,
+	cli client.Client,
+	c http.Client,
+	peers []*corev1.Pod,
+	ports []uint16,
+	workloadLabels map[string]string,
+) {
+	const timeChaosShouldNotSpawned = "time-chaos-should-not-spawned"
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	By("wait e2e helper ready")
+	for _, port := range ports {
+		err := util.WaitE2EHelperReady(c, port)
+		framework.ExpectNoError(err, "wait e2e helper ready error")
+	}
+
+	By("create the workflow")
+
+	timeWhenWorkflowCreate := time.Now()
+	const serialDeadline = 10 * time.Second
+	const networkChaosDuration = 20 * time.Second
+	const timeChaosDuration = 40 * time.Second
+
+	// network partition will be set:
+	// partition 1: peer-0
+	// partition 2: peer-1, peer-2, peer-3
+	workflowSpec := secondOneShouldNotSpawned(serialDeadline, networkChaosDuration, timeChaosDuration, ns, workloadLabels)
+	err := cli.Create(ctx, &v1alpha1.Workflow{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: ns,
+			Name:      timeChaosShouldNotSpawned,
+		},
+		Spec: workflowSpec,
+	})
+	Expect(err).ShouldNot(HaveOccurred())
+
+	// assert that network chaos applied
+	Eventually(func() bool {
+		framework.Logf("assertion that network chaos is affected")
+		conditions := networkchaos.ProbeNetworkCondition(c, peers, ports, false)
+		blocked := conditions[networkchaos.NetworkConditionBlocked]
+		By(fmt.Sprintf("blocked %+v", blocked))
+		return len(blocked) == 3
+	}, "10s", "1s").Should(BeTrue())
+
+	timeWhenTimeSkewChaosAffected := time.Now()
+	By(fmt.Sprintf("network chaos in workflow affected, in %s", timeWhenTimeSkewChaosAffected.Sub(timeWhenWorkflowCreate)))
+
+	// assert that network chaos recovered
+	Eventually(func() bool {
+		framework.Logf("assertion that network chaos is recovered")
+		conditions := networkchaos.ProbeNetworkCondition(c, peers, ports, false)
+		blocked := conditions[networkchaos.NetworkConditionBlocked]
+		By(fmt.Sprintf("blocked %+v", blocked))
+		return len(blocked) == 0
+	}, "30s", "1s", "asdasd").Should(BeTrue())
+	timeWhenTimeChaosRecovered := time.Now()
+
+	By(fmt.Sprintf("network chaos in workflow recovered, in %s", timeWhenTimeChaosRecovered.Sub(timeWhenWorkflowCreate)))
+
+	// assert that time chaos should not be spawned
+	Consistently(func() bool {
+		framework.Logf("assertion that time chaos would never applied")
+		podTimeNS, err := timechaos.GetPodTimeNS(c, ports[0])
+		if err != nil {
+			By(fmt.Sprintf("failed to fetch time from pods, %s", err.Error()))
+			return false
+		}
+		return time.Now().Sub(*podTimeNS).Round(time.Hour) == 0
+	}, "20s", "1s").Should(BeTrue())
+
+}
+
+func secondOneShouldNotSpawned(
+	serialDeadline, networkChaosDuration, timeChaosDuration time.Duration,
+	ns string,
+	workloadLabels map[string]string,
+) v1alpha1.WorkflowSpec {
+	const entry = "the-serial"
+	const networkChaos = "network-chaos"
+	const timeChaos = "time-chaos"
+
+	if serialDeadline > networkChaosDuration {
+		panic("the deadline ")
+	}
+
+	deadlineString := serialDeadline.String()
+	networkChaosDurationString := networkChaosDuration.String()
+	timeChaosDurationString := timeChaosDuration.String()
+	return v1alpha1.WorkflowSpec{
+		Entry: entry,
+		Templates: []v1alpha1.Template{
+			{
+				Name:     entry,
+				Type:     v1alpha1.TypeSerial,
+				Duration: &deadlineString,
+				Tasks: []string{
+					networkChaos,
+					timeChaos,
+				},
+			}, {
+				Name:     networkChaos,
+				Type:     v1alpha1.TypeNetworkChaos,
+				Duration: &networkChaosDurationString,
+				EmbedChaos: &v1alpha1.EmbedChaos{NetworkChaos: &v1alpha1.NetworkChaosSpec{
+					PodSelector: v1alpha1.PodSelector{
+						Selector: v1alpha1.PodSelectorSpec{
+							LabelSelectors: map[string]string{
+								"app": "network-peer-0",
+							},
+						},
+						Mode: v1alpha1.AllPodMode,
+					},
+					Action:      v1alpha1.PartitionAction,
+					Duration:    &networkChaosDurationString,
+					TcParameter: v1alpha1.TcParameter{},
+					Target: &v1alpha1.PodSelector{
+						Selector: v1alpha1.PodSelectorSpec{
+							Namespaces: []string{
+								ns,
+							},
+						},
+						Mode: v1alpha1.AllPodMode,
+					},
+				}},
+			}, {
+				Name:     timeChaos,
 				Type:     v1alpha1.TypeTimeChaos,
 				Duration: &timeChaosDurationString,
 				EmbedChaos: &v1alpha1.EmbedChaos{

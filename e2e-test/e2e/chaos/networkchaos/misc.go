@@ -31,9 +31,9 @@ import (
 )
 
 const (
-	networkConditionBlocked = "blocked"
-	networkConditionSlow    = "slow"
-	networkConditionGood    = "good"
+	NetworkConditionBlocked = "blocked"
+	NetworkConditionSlow    = "slow"
+	NetworkConditionGood    = "good"
 )
 
 func recvUDPPacket(c http.Client, port uint16) (string, error) {
@@ -180,7 +180,7 @@ func makeNetworkDelayChaos(
 	}
 }
 
-func probeNetworkCondition(c http.Client, peers []*corev1.Pod, ports []uint16, bidirection bool) map[string][][]int {
+func ProbeNetworkCondition(c http.Client, peers []*corev1.Pod, ports []uint16, bidirection bool) map[string][][]int {
 	result := make(map[string][][]int)
 
 	testDelay := func(from int, to int) (int64, error) {
@@ -222,12 +222,12 @@ func probeNetworkCondition(c http.Client, peers []*corev1.Pod, ports []uint16, b
 
 			if !link1 {
 				klog.Infof("%s could not connect to %s", peers[source].Name, peers[target].Name)
-				result[networkConditionBlocked] = append(result[networkConditionBlocked], []int{source, target})
+				result[NetworkConditionBlocked] = append(result[NetworkConditionBlocked], []int{source, target})
 				connectable = false
 			}
 			if !link2 {
 				klog.Infof("%s could not connect to %s", peers[target].Name, peers[source].Name)
-				result[networkConditionBlocked] = append(result[networkConditionBlocked], []int{target, source})
+				result[NetworkConditionBlocked] = append(result[NetworkConditionBlocked], []int{target, source})
 				connectable = false
 			}
 
@@ -246,13 +246,13 @@ func probeNetworkCondition(c http.Client, peers []*corev1.Pod, ports []uint16, b
 			klog.Infof("delay from %d to %d: %d", source, target, delay)
 			if delay > 100*1e6 {
 				klog.Infof("detect slow network from %s to %s", peers[source].Name, peers[target].Name)
-				result[networkConditionSlow] = append(result[networkConditionSlow], []int{source, target})
+				result[NetworkConditionSlow] = append(result[NetworkConditionSlow], []int{source, target})
 				continue
 			}
 
 			// case 3: otherwise, good network
 			klog.Infof("good network from %d to %d", source, target)
-			result[networkConditionGood] = append(result[networkConditionGood], []int{source, target})
+			result[NetworkConditionGood] = append(result[NetworkConditionGood], []int{source, target})
 		}
 	}
 
@@ -266,7 +266,7 @@ func couldConnect(c http.Client, sourcePort uint16, targetPodIP string, targetPo
 		return false
 	}
 
-	time.Sleep(time.Second)
+	time.Sleep(100 * time.Millisecond)
 
 	data, err := recvUDPPacket(c, targetPort)
 	if err != nil {

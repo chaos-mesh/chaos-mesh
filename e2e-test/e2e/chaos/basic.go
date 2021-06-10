@@ -460,11 +460,16 @@ var _ = ginkgo.Describe("[Basic]", func() {
 	})
 
 	ginkgo.Context("[Workflow]", func() {
-		var err error
-		var port uint16
-		var pfCancel context.CancelFunc
 
-		ginkgo.JustBeforeEach(func() {
+		ginkgo.It("[WorkflowSerial]", func() {
+			var err error
+			var port uint16
+			var pfCancel context.CancelFunc
+			defer func() {
+				if pfCancel != nil {
+					pfCancel()
+				}
+			}()
 			svc := fixture.NewE2EService("timer", ns)
 			_, err = kubeCli.CoreV1().Services(ns).Create(svc)
 			framework.ExpectNoError(err, "create service error")
@@ -475,16 +480,42 @@ var _ = ginkgo.Describe("[Basic]", func() {
 			framework.ExpectNoError(err, "wait timer deployment ready error")
 			_, port, pfCancel, err = portforward.ForwardOnePort(fw, ns, "svc/timer", 8080)
 			framework.ExpectNoError(err, "create helper port-forward failed")
-		})
-
-		ginkgo.JustAfterEach(func() {
-			if pfCancel != nil {
-				pfCancel()
-			}
-		})
-
-		ginkgo.It("[WorkflowSerial]", func() {
 			workflowtestcases.TestcaseWorkflowSerial(ns, kubeCli, cli, c, port, map[string]string{
+				"app": "timer",
+			})
+		})
+
+		ginkgo.It("[DeadlineOfSerial]", func() {
+			var err error
+
+			var networkPeers []*v1.Pod
+			var ports []uint16
+			var pfCancels []context.CancelFunc
+
+			ports = []uint16{}
+			networkPeers = []*v1.Pod{}
+			for index := 0; index < 4; index++ {
+				name := fmt.Sprintf("network-peer-%d", index)
+
+				svc := fixture.NewE2EService(name, ns)
+				_, err = kubeCli.CoreV1().Services(ns).Create(svc)
+				framework.ExpectNoError(err, "create service error")
+				nd := fixture.NewNetworkTestDeployment(name, ns, map[string]string{"partition": strconv.Itoa(index % 2)})
+				_, err = kubeCli.AppsV1().Deployments(ns).Create(nd)
+				framework.ExpectNoError(err, "create network-peer deployment error")
+				err = util.WaitDeploymentReady(name, ns, kubeCli)
+				framework.ExpectNoError(err, "wait network-peer deployment ready error")
+
+				pod, err := getPod(kubeCli, ns, name)
+				framework.ExpectNoError(err, "select network-peer pod error")
+				networkPeers = append(networkPeers, pod)
+
+				_, port, pfCancel, err := portforward.ForwardOnePort(fw, ns, "svc/"+svc.Name, 8080)
+				ports = append(ports, port)
+				pfCancels = append(pfCancels, pfCancel)
+				framework.ExpectNoError(err, "create helper io port port-forward failed")
+			}
+			workflowtestcases.TestcaseDeadlineOfSerial(ns, kubeCli, cli, c, networkPeers, ports, map[string]string{
 				"app": "timer",
 			})
 		})

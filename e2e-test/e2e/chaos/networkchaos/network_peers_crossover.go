@@ -48,9 +48,9 @@ func TestcasePeersCrossover(
 		framework.ExpectNoError(err, "wait e2e helper ready error")
 	}
 
-	result := probeNetworkCondition(c, networkPeers, ports, false)
-	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
-	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
+	result := ProbeNetworkCondition(c, networkPeers, ports, false)
+	framework.ExpectEqual(len(result[NetworkConditionBlocked]), 0)
+	framework.ExpectEqual(len(result[NetworkConditionSlow]), 0)
 
 	var (
 		testDelayTcParam = v1alpha1.TcParameter{
@@ -81,31 +81,31 @@ func TestcasePeersCrossover(
 	framework.ExpectNoError(err, "create network chaos error")
 
 	err = wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
-		result = probeNetworkCondition(c, networkPeers, ports, false)
-		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 4 {
+		result = ProbeNetworkCondition(c, networkPeers, ports, false)
+		if len(result[NetworkConditionBlocked]) != 0 || len(result[NetworkConditionSlow]) != 4 {
 			return false, nil
 		}
 		return true, nil
 	})
 
 	framework.ExpectNoError(err, "failed to waiting condition for chaos injection")
-	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
-	framework.ExpectEqual(result[networkConditionSlow], [][]int{{0, 1}, {0, 3}, {1, 2}, {2, 3}})
+	framework.ExpectEqual(len(result[NetworkConditionBlocked]), 0)
+	framework.ExpectEqual(result[NetworkConditionSlow], [][]int{{0, 1}, {0, 3}, {1, 2}, {2, 3}})
 
 	By("recover")
 	err = cli.Delete(ctx, networkDelay.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 
 	err = wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
-		result = probeNetworkCondition(c, networkPeers, ports, false)
-		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 0 {
+		result = ProbeNetworkCondition(c, networkPeers, ports, false)
+		if len(result[NetworkConditionBlocked]) != 0 || len(result[NetworkConditionSlow]) != 0 {
 			return false, nil
 		}
 		return true, nil
 	})
 
 	framework.ExpectNoError(err, "failed to waiting condition for chaos recover")
-	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
-	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
+	framework.ExpectEqual(len(result[NetworkConditionBlocked]), 0)
+	framework.ExpectEqual(len(result[NetworkConditionSlow]), 0)
 
 }
