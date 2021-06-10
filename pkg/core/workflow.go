@@ -58,6 +58,7 @@ type WorkflowMeta struct {
 	EndTime   string         `json:"end_time"`
 	Status    WorkflowStatus `json:"status,omitempty"`
 	UID       string         `gorm:"index:uid" json:"uid"`
+	Archived  bool           `json:"archived"`
 }
 
 type WorkflowDetail struct {
@@ -402,7 +403,7 @@ type WorkflowStore interface {
 	FindByID(ctx context.Context, ID uint) (*WorkflowEntity, error)
 	FindByUID(ctx context.Context, UID string) (*WorkflowEntity, error)
 	FindMetaByUID(ctx context.Context, UID string) (*WorkflowMeta, error)
-	Save(ctx context.Context, entity WorkflowEntity) error
+	Save(ctx context.Context, entity *WorkflowEntity) error
 	DeleteByUID(ctx context.Context, UID string) error
 	DeleteByUIDs(ctx context.Context, UIDs []string) error
 	MarkAsArchived(ctx context.Context, namespace, name string) error

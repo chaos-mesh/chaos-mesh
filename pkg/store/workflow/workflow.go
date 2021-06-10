@@ -27,7 +27,7 @@ type WorkflowStore struct {
 	db *dbstore.DB
 }
 
-func NewStore(db *dbstore.DB) *WorkflowStore {
+func NewStore(db *dbstore.DB) core.WorkflowStore {
 	db.AutoMigrate(&core.WorkflowEntity{})
 	return &WorkflowStore{db: db}
 }
@@ -91,7 +91,7 @@ func (it *WorkflowStore) FindMetaByUID(ctx context.Context, UID string) (*core.W
 	return &entity.WorkflowMeta, nil
 }
 
-func (it *WorkflowStore) Save(ctx context.Context, entity core.WorkflowEntity) error {
+func (it *WorkflowStore) Save(ctx context.Context, entity *core.WorkflowEntity) error {
 	return it.db.Model(core.WorkflowEntity{}).Save(entity).Error
 }
 

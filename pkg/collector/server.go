@@ -126,7 +126,7 @@ func NewServer(
 		kubeClient: s.Manager.GetClient(),
 		Log:        ctrl.Log.WithName("workflow-collector").WithName(v1alpha1.KindWorkflow),
 		store:      workflowStore,
-	}).Setup(s.Manager, &v1.Event{}); err != nil {
+	}).Setup(s.Manager, &v1alpha1.Workflow{}); err != nil {
 		log.Error(err, "unable to create collector", "collector", v1alpha1.KindWorkflow)
 		os.Exit(1)
 	}

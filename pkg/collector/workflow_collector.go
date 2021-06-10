@@ -96,7 +96,7 @@ func (it *WorkflowCollector) persistentWorkflow(workflow *v1alpha1.Workflow) err
 		newEntity.ID = existedEntity.ID
 	}
 
-	err = it.store.Save(context.Background(), *newEntity)
+	err = it.store.Save(context.Background(), newEntity)
 	if err != nil {
 		it.Log.Error(err, "failed to update schedule", "archive", newEntity)
 	}
