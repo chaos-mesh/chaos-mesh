@@ -34,8 +34,9 @@ func NewStore(db *dbstore.DB) core.WorkflowStore {
 
 func (it *WorkflowStore) List(ctx context.Context, namespace, name string, archived bool) ([]*core.WorkflowEntity, error) {
 	var entities []core.WorkflowEntity
+	query, args := constructQueryArgs(namespace, name, "")
 
-	err := it.db.Find(&entities).Error
+	err := it.db.Where(query, args).Where("archived = ?", archived).Find(&entities).Error
 	if err != nil && !gorm.IsRecordNotFoundError(err) {
 		return nil, err
 	}
@@ -120,4 +121,37 @@ func (it *WorkflowStore) MarkAsArchivedWithUID(ctx context.Context, uid string) 
 		return err
 	}
 	return nil
+}
+func constructQueryArgs(ns, name, uid string) (string, []string) {
+	query := ""
+	args := make([]string, 0)
+
+	if ns != "" {
+		if len(args) > 0 {
+			query += " AND namespace = ?"
+		} else {
+			query += "namespace = ?"
+		}
+		args = append(args, ns)
+	}
+
+	if name != "" {
+		if len(args) > 0 {
+			query += " AND name = ?"
+		} else {
+			query += "name = ?"
+		}
+		args = append(args, name)
+	}
+
+	if uid != "" {
+		if len(args) > 0 {
+			query += " AND uid = ?"
+		} else {
+			query += "uid = ?"
+		}
+		args = append(args, uid)
+	}
+
+	return query, args
 }
