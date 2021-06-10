@@ -36,10 +36,10 @@ import (
 // Reconciler applys podhttpchaos
 type Reconciler struct {
 	client.Client
-	client.Reader
 
-	Recorder record.EventRecorder
-	Log      logr.Logger
+	Recorder                 record.EventRecorder
+	Log                      logr.Logger
+	ChaosDaemonClientBuilder *chaosdaemon.ChaosDaemonClientBuilder
 }
 
 func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
@@ -102,7 +102,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		}
 	}()
 
-	pbClient, err := chaosdaemon.NewChaosDaemonClient(ctx, r.Client, pod)
+	pbClient, err := r.ChaosDaemonClientBuilder.Build(ctx, pod)
 	if err != nil {
 		r.Recorder.Event(obj, "Warning", "Failed", err.Error())
 		return ctrl.Result{Requeue: true}, nil
