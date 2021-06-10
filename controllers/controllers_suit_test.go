@@ -112,7 +112,7 @@ func startNewAppWithGivenOptions(options fx.Option, Run func(RunParams) error) *
 			fx.Provide(
 				test.NewTestOption,
 				provider.NewClient,
-				provider.NewReader,
+				provider.NewGlobalCacheReader,
 				provider.NewLogger,
 				provider.NewAuthCli,
 				provider.NewScheme,

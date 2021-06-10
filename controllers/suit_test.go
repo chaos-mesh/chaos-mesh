@@ -20,12 +20,6 @@ import (
 	"path/filepath"
 	"testing"
 
-<<<<<<< HEAD:controllers/suit_test.go
-=======
-	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
-
-	"github.com/go-logr/logr"
->>>>>>> master:controllers/finalizers/suit_test.go
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"k8s.io/client-go/rest"
@@ -53,17 +47,8 @@ func TestControllers(t *testing.T) {
 	RegisterFailHandler(Fail)
 
 	RunSpecsWithDefaultAndCustomReporters(t,
-<<<<<<< HEAD:controllers/suit_test.go
 		"controller test suit",
-<<<<<<< HEAD
 		[]Reporter{})
-=======
-		[]Reporter{envtest.NewlineReporter{}})
-=======
-		"Schedule suit",
-		[]Reporter{printer.NewlineReporter{}})
->>>>>>> master:controllers/finalizers/suit_test.go
->>>>>>> 3eec2644 (Merge master)
 }
 
 var _ = SynchronizedBeforeSuite(func() []byte {
@@ -87,35 +72,12 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 	enc.Encode(config)
 	Expect(err).ToNot(HaveOccurred())
 
-<<<<<<< HEAD:controllers/suit_test.go
 	return data.Bytes()
 }, func(confBytes []byte) {
 	data := bytes.NewBuffer(confBytes)
 	dec := gob.NewDecoder(data)
 	var gotConfig rest.Config
 	err := dec.Decode(&gotConfig)
-=======
-	app = fx.New(
-		fx.Options(
-			test.Module,
-			fx.Provide(
-				fx.Annotated{
-					Group:  "controller",
-					Target: NewController,
-				},
-			),
-			fx.Supply(config),
-			types.ChaosObjects,
-		),
-		fx.Invoke(Run),
-	)
-	startCtx, cancel := context.WithTimeout(context.Background(), app.StartTimeout())
-	defer cancel()
-
-	if err := app.Start(startCtx); err != nil {
-		setupLog.Error(err, "fail to start manager")
-	}
->>>>>>> master:controllers/finalizers/suit_test.go
 	Expect(err).ToNot(HaveOccurred())
 	config = &gotConfig
 	logf.SetLogger(zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)))
