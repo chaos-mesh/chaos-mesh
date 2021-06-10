@@ -18,6 +18,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 	"github.com/chaos-mesh/chaos-mesh/pkg/store/dbstore"
 	"github.com/jinzhu/gorm"
+	"time"
 )
 
 type WorkflowStore struct {
@@ -88,8 +89,8 @@ func (it *WorkflowStore) FindMetaByUID(ctx context.Context, UID string) (*core.W
 	return &entity.WorkflowMeta, nil
 }
 
-func (it *WorkflowStore) Create(ctx context.Context, entity core.WorkflowEntity) error {
-	return it.db.Create(entity).Error
+func (it *WorkflowStore) Save(ctx context.Context, entity core.WorkflowEntity) error {
+	return it.db.Model(core.WorkflowEntity{}).Save(entity).Error
 }
 
 func (it *WorkflowStore) DeleteByUID(ctx context.Context, uid string) error {
@@ -99,4 +100,22 @@ func (it *WorkflowStore) DeleteByUID(ctx context.Context, uid string) error {
 
 func (it *WorkflowStore) DeleteByUIDs(ctx context.Context, uids []string) error {
 	return it.db.Where("object_id IN (?)", uids).Unscoped().Delete(core.Event{}).Error
+}
+
+func (it *WorkflowStore) MarkAsArchived(ctx context.Context, namespace, name string) error {
+	if err := it.db.Model(core.Schedule{}).
+		Where("namespace = ? AND name = ? AND archived = ?", namespace, name, false).
+		Updates(map[string]interface{}{"archived": true, "finish_time": time.Now()}).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
+		return err
+	}
+	return nil
+}
+
+func (it *WorkflowStore) MarkAsArchivedWithUID(ctx context.Context, uid string) error {
+	if err := it.db.Model(core.Schedule{}).
+		Where("uid = ? AND archived = ?", uid, false).
+		Updates(map[string]interface{}{"archived": true, "finish_time": time.Now()}).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
+		return err
+	}
+	return nil
 }

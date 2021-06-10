@@ -402,9 +402,11 @@ type WorkflowStore interface {
 	FindByID(ctx context.Context, ID uint) (*WorkflowEntity, error)
 	FindByUID(ctx context.Context, UID string) (*WorkflowEntity, error)
 	FindMetaByUID(ctx context.Context, UID string) (*WorkflowMeta, error)
-	Create(ctx context.Context, entity WorkflowEntity) error
+	Save(ctx context.Context, entity WorkflowEntity) error
 	DeleteByUID(ctx context.Context, UID string) error
 	DeleteByUIDs(ctx context.Context, UIDs []string) error
+	MarkAsArchived(ctx context.Context, namespace, name string) error
+	MarkAsArchivedWithUID(ctx context.Context, UID string) error
 }
 
 // WorkflowEntity is the gorm entity, refers to a row of data
@@ -413,19 +415,26 @@ type WorkflowEntity struct {
 	Workflow string `gorm:"size:32768"`
 }
 
-func WorkflowCR2WorkflowEntity(workflow v1alpha1.Workflow) (*WorkflowEntity, error) {
+func WorkflowCR2WorkflowEntity(workflow *v1alpha1.Workflow) (*WorkflowEntity, error) {
+	if workflow == nil {
+		return nil, nil
+
+	}
 	jsonContent, err := json.Marshal(workflow)
 	if err != nil {
 		return nil, err
 	}
 	return &WorkflowEntity{
-		WorkflowMeta: convertWorkflow(workflow),
+		WorkflowMeta: convertWorkflow(*workflow),
 		Workflow:     string(jsonContent),
 	}, nil
 
 }
 
-func WorkflowEntity2WorkflowCR(entity WorkflowEntity) (*v1alpha1.Workflow, error) {
+func WorkflowEntity2WorkflowCR(entity *WorkflowEntity) (*v1alpha1.Workflow, error) {
+	if entity == nil {
+		return nil, nil
+	}
 	result := v1alpha1.Workflow{}
 	err := json.Unmarshal([]byte(entity.Workflow), &result)
 	if err != nil {
