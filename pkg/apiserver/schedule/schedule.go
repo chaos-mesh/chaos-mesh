@@ -92,6 +92,7 @@ type Schedule struct {
 	Base
 	UID     string `json:"uid"`
 	Created string `json:"created_at"`
+	Status  string `json:"status"`
 }
 
 // Detail represents an experiment instance.
@@ -533,6 +534,7 @@ func (s *Service) listSchedules(c *gin.Context) {
 			},
 			UID:     string(schedule.UID),
 			Created: schedule.CreationTimestamp.Format(time.RFC3339),
+			Status:  string(utils.GetScheduleState(schedule)),
 		})
 	}
 
@@ -625,6 +627,7 @@ func (s *Service) getScheduleDetail(c *gin.Context) {
 			},
 			UID:     string(schedule.UID),
 			Created: schedule.CreationTimestamp.Format(time.RFC3339),
+			Status:  string(utils.GetScheduleState(*schedule)),
 		},
 		YAML: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
