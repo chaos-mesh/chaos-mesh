@@ -26,7 +26,7 @@ const (
 	ScheduleTypeDNSChaos ScheduleTemplateType = "DNSChaos"
 	ScheduleTypeGcpChaos ScheduleTemplateType = "GcpChaos"
 	ScheduleTypeHTTPChaos ScheduleTemplateType = "HTTPChaos"
-	ScheduleTypeIoChaos ScheduleTemplateType = "IoChaos"
+	ScheduleTypeIOChaos ScheduleTemplateType = "IOChaos"
 	ScheduleTypeJVMChaos ScheduleTemplateType = "JVMChaos"
 	ScheduleTypeKernelChaos ScheduleTemplateType = "KernelChaos"
 	ScheduleTypeNetworkChaos ScheduleTemplateType = "NetworkChaos"
@@ -42,7 +42,7 @@ var allScheduleTemplateType = []ScheduleTemplateType{
 	ScheduleTypeDNSChaos,
 	ScheduleTypeGcpChaos,
 	ScheduleTypeHTTPChaos,
-	ScheduleTypeIoChaos,
+	ScheduleTypeIOChaos,
 	ScheduleTypeJVMChaos,
 	ScheduleTypeKernelChaos,
 	ScheduleTypeNetworkChaos,
@@ -50,34 +50,6 @@ var allScheduleTemplateType = []ScheduleTemplateType{
 	ScheduleTypeStressChaos,
 	ScheduleTypeTimeChaos,
 	ScheduleTypeWorkflow,
-
-}
-
-type ScheduleItem struct {
-	// +optional
-	AwsChaos *AwsChaosSpec `json:"awsChaos,omitempty"`
-	// +optional
-	DNSChaos *DNSChaosSpec `json:"dNSChaos,omitempty"`
-	// +optional
-	GcpChaos *GcpChaosSpec `json:"gcpChaos,omitempty"`
-	// +optional
-	HTTPChaos *HTTPChaosSpec `json:"hTTPChaos,omitempty"`
-	// +optional
-	IoChaos *IoChaosSpec `json:"ioChaos,omitempty"`
-	// +optional
-	JVMChaos *JVMChaosSpec `json:"jVMChaos,omitempty"`
-	// +optional
-	KernelChaos *KernelChaosSpec `json:"kernelChaos,omitempty"`
-	// +optional
-	NetworkChaos *NetworkChaosSpec `json:"networkChaos,omitempty"`
-	// +optional
-	PodChaos *PodChaosSpec `json:"podChaos,omitempty"`
-	// +optional
-	StressChaos *StressChaosSpec `json:"stressChaos,omitempty"`
-	// +optional
-	TimeChaos *TimeChaosSpec `json:"timeChaos,omitempty"`
-	// +optional
-	Workflow *WorkflowSpec `json:"workflow,omitempty"`
 
 }
 
@@ -100,9 +72,9 @@ func (it *ScheduleItem) SpawnNewObject(templateType ScheduleTemplateType) (runti
 		result := HTTPChaos{}
 		result.Spec = *it.HTTPChaos
 		return &result, result.GetObjectMeta(), nil
-	case ScheduleTypeIoChaos:
-		result := IoChaos{}
-		result.Spec = *it.IoChaos
+	case ScheduleTypeIOChaos:
+		result := IOChaos{}
+		result.Spec = *it.IOChaos
 		return &result, result.GetObjectMeta(), nil
 	case ScheduleTypeJVMChaos:
 		result := JVMChaos{}

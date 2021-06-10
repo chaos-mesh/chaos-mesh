@@ -15,30 +15,30 @@ package schedule
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
+	"reflect"
 	"strings"
 	"time"
 
-	"github.com/mitchellh/mapstructure"
-	"k8s.io/client-go/util/retry"
-
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
+	"github.com/mitchellh/mapstructure"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/util/retry"
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
 	dashboardconfig "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
-
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 )
 
 var log = ctrl.Log.WithName("schedule api")
@@ -76,6 +76,8 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint.PUT("/", s.updateSchedule)
 	endpoint.DELETE("/:uid", s.deleteSchedule)
 	endpoint.DELETE("/", s.batchDeleteSchedule)
+	endpoint.PUT("/pause/:uid", s.pauseSchedule)
+	endpoint.PUT("/start/:uid", s.startSchedule)
 }
 
 // Base represents the base info of an experiment.
@@ -90,12 +92,14 @@ type Schedule struct {
 	Base
 	UID     string `json:"uid"`
 	Created string `json:"created_at"`
+	Status  string `json:"status"`
 }
 
 // Detail represents an experiment instance.
 type Detail struct {
 	Schedule
-	YAML core.KubeObjectDesc `json:"kube_object"`
+	YAML           core.KubeObjectDesc `json:"kube_object"`
+	ExperimentUIDs []string            `json:"experiment_uids"`
 }
 
 type parseScheduleFunc func(*core.ScheduleInfo) v1alpha1.ScheduleItem
@@ -104,6 +108,13 @@ type parseScheduleFunc func(*core.ScheduleInfo) v1alpha1.ScheduleItem
 type StatusResponse struct {
 	Status string `json:"status"`
 }
+
+type pauseFlag bool
+
+const (
+	PauseSchedule pauseFlag = true
+	StartSchedule pauseFlag = false
+)
 
 // @Summary Create a new schedule experiment.
 // @Description Create a new schedule experiment.
@@ -149,7 +160,7 @@ func (s *Service) createSchedule(c *gin.Context) {
 	parseFuncs := map[string]parseScheduleFunc{
 		v1alpha1.KindPodChaos:     parsePodChaos,
 		v1alpha1.KindNetworkChaos: parseNetworkChaos,
-		v1alpha1.KindIoChaos:      parseIOChaos,
+		v1alpha1.KindIOChaos:      parseIOChaos,
 		v1alpha1.KindStressChaos:  parseStressChaos,
 		v1alpha1.KindTimeChaos:    parseTimeChaos,
 		v1alpha1.KindKernelChaos:  parseKernelChaos,
@@ -203,7 +214,7 @@ func parsePodChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	}
 
 	return v1alpha1.ScheduleItem{
-		PodChaos: &chaos.Spec,
+		EmbedChaos: v1alpha1.EmbedChaos{PodChaos: &chaos.Spec},
 	}
 }
 
@@ -247,19 +258,19 @@ func parseNetworkChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	}
 
 	return v1alpha1.ScheduleItem{
-		NetworkChaos: &chaos.Spec,
+		EmbedChaos: v1alpha1.EmbedChaos{NetworkChaos: &chaos.Spec},
 	}
 }
 
 func parseIOChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
-	chaos := &v1alpha1.IoChaos{
+	chaos := &v1alpha1.IOChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        exp.Name,
 			Namespace:   exp.Namespace,
 			Labels:      exp.Labels,
 			Annotations: exp.Annotations,
 		},
-		Spec: v1alpha1.IoChaosSpec{
+		Spec: v1alpha1.IOChaosSpec{
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{
 					Selector: exp.Scope.ParseSelector(),
@@ -268,7 +279,7 @@ func parseIOChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 				},
 				ContainerNames: exp.Target.PodChaos.ContainerNames,
 			},
-			Action:     v1alpha1.IoChaosType(exp.Target.IOChaos.Action),
+			Action:     v1alpha1.IOChaosType(exp.Target.IOChaos.Action),
 			Delay:      exp.Target.IOChaos.Delay,
 			Errno:      exp.Target.IOChaos.Errno,
 			Attr:       exp.Target.IOChaos.Attr,
@@ -285,7 +296,7 @@ func parseIOChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	}
 
 	return v1alpha1.ScheduleItem{
-		IoChaos: &chaos.Spec,
+		EmbedChaos: v1alpha1.EmbedChaos{IOChaos: &chaos.Spec},
 	}
 }
 
@@ -316,7 +327,7 @@ func parseTimeChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	}
 
 	return v1alpha1.ScheduleItem{
-		TimeChaos: &chaos.Spec,
+		EmbedChaos: v1alpha1.EmbedChaos{TimeChaos: &chaos.Spec},
 	}
 }
 
@@ -343,7 +354,7 @@ func parseKernelChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	}
 
 	return v1alpha1.ScheduleItem{
-		KernelChaos: &chaos.Spec,
+		EmbedChaos: v1alpha1.EmbedChaos{KernelChaos: &chaos.Spec},
 	}
 }
 
@@ -389,7 +400,7 @@ func parseStressChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	}
 
 	return v1alpha1.ScheduleItem{
-		StressChaos: &chaos.Spec,
+		EmbedChaos: v1alpha1.EmbedChaos{StressChaos: &chaos.Spec},
 	}
 }
 
@@ -420,7 +431,7 @@ func parseDNSChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	}
 
 	return v1alpha1.ScheduleItem{
-		DNSChaos: &chaos.Spec,
+		EmbedChaos: v1alpha1.EmbedChaos{DNSChaos: &chaos.Spec},
 	}
 }
 
@@ -449,7 +460,7 @@ func parseAwsChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	}
 
 	return v1alpha1.ScheduleItem{
-		AwsChaos: &chaos.Spec,
+		EmbedChaos: v1alpha1.EmbedChaos{AwsChaos: &chaos.Spec},
 	}
 }
 
@@ -476,7 +487,7 @@ func parseGcpChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	}
 
 	return v1alpha1.ScheduleItem{
-		GcpChaos: &chaos.Spec,
+		EmbedChaos: v1alpha1.EmbedChaos{GcpChaos: &chaos.Spec},
 	}
 }
 
@@ -523,6 +534,7 @@ func (s *Service) listSchedules(c *gin.Context) {
 			},
 			UID:     string(schedule.UID),
 			Created: schedule.CreationTimestamp.Format(time.RFC3339),
+			Status:  string(utils.GetScheduleState(schedule)),
 		})
 	}
 
@@ -581,6 +593,31 @@ func (s *Service) getScheduleDetail(c *gin.Context) {
 		return
 	}
 
+	UIDList := make([]string, 0)
+	kind, ok := v1alpha1.AllScheduleItemKinds()[string(schedule.Spec.Type)]
+	if !ok {
+		c.Status(http.StatusInternalServerError)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		return
+	}
+	list := kind.ChaosList.DeepCopyObject()
+	err = kubeCli.List(context.Background(), list, client.MatchingLabels{"managed-by": schedule.Name})
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		return
+	}
+	items := reflect.ValueOf(list).Elem().FieldByName("Items")
+	for i := 0; i < items.Len(); i++ {
+		if schedule.Spec.Type != v1alpha1.ScheduleTypeWorkflow {
+			item := items.Index(i).Addr().Interface().(v1alpha1.InnerObject)
+			UIDList = append(UIDList, item.GetChaos().UID)
+		} else {
+			workflow := items.Index(i).Addr().Interface().(*v1alpha1.Workflow)
+			UIDList = append(UIDList, string(workflow.UID))
+		}
+	}
+
 	schDetail = Detail{
 		Schedule: Schedule{
 			Base: Base{
@@ -590,6 +627,7 @@ func (s *Service) getScheduleDetail(c *gin.Context) {
 			},
 			UID:     string(schedule.UID),
 			Created: schedule.CreationTimestamp.Format(time.RFC3339),
+			Status:  string(utils.GetScheduleState(*schedule)),
 		},
 		YAML: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
@@ -604,6 +642,7 @@ func (s *Service) getScheduleDetail(c *gin.Context) {
 			},
 			Spec: schedule.Spec,
 		},
+		ExperimentUIDs: UIDList,
 	}
 
 	c.JSON(http.StatusOK, schDetail)
@@ -808,4 +847,119 @@ func (s *Service) batchDeleteSchedule(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusOK, StatusResponse{Status: "success"})
 	}
+}
+
+// @Summary Pause a schedule object.
+// @Description Pause a schedule object.
+// @Tags schedules
+// @Produce json
+// @Param uid path string true "uid"
+// @Success 200 {object} StatusResponse
+// @Failure 400 {object} utils.APIError
+// @Failure 404 {object} utils.APIError
+// @Failure 500 {object} utils.APIError
+// @Router /schedules/pause/{uid} [put]
+func (s *Service) pauseSchedule(c *gin.Context) {
+	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
+	if err != nil {
+		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		return
+	}
+
+	uid := c.Param("uid")
+	err = s.pauseOrStartSchedule(uid, PauseSchedule, kubeCli)
+
+	if err != nil {
+		if gorm.IsRecordNotFoundError(err) || apierrors.IsNotFound(err) {
+			c.Status(http.StatusNotFound)
+			_ = c.Error(utils.ErrInvalidRequest.New("the schedule is not found"))
+		}
+		c.Status(http.StatusInternalServerError)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		return
+	}
+
+	c.JSON(http.StatusOK, StatusResponse{Status: "success"})
+}
+
+// @Summary Start a schedule object.
+// @Description Start a schedule object.
+// @Tags schedules
+// @Produce json
+// @Param uid path string true "uid"
+// @Success 200 {object} StatusResponse
+// @Failure 400 {object} utils.APIError
+// @Failure 404 {object} utils.APIError
+// @Failure 500 {object} utils.APIError
+// @Router /schedules/start/{uid} [put]
+func (s *Service) startSchedule(c *gin.Context) {
+	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
+	if err != nil {
+		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		return
+	}
+
+	uid := c.Param("uid")
+	err = s.pauseOrStartSchedule(uid, StartSchedule, kubeCli)
+
+	if err != nil {
+		if gorm.IsRecordNotFoundError(err) || apierrors.IsNotFound(err) {
+			c.Status(http.StatusNotFound)
+			_ = c.Error(utils.ErrInvalidRequest.New("the schedule is not found"))
+		}
+		c.Status(http.StatusInternalServerError)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		return
+	}
+
+	c.JSON(http.StatusOK, StatusResponse{Status: "success"})
+}
+
+func (s *Service) pauseOrStartSchedule(uid string, flag pauseFlag, kubeCli client.Client) error {
+	var (
+		err             error
+		schedule        *core.Schedule
+		pauseAnnotation string
+	)
+
+	if schedule, err = s.schedule.FindByUID(context.Background(), uid); err != nil {
+		return err
+	}
+
+	exp := &Base{
+		Name:      schedule.Name,
+		Namespace: schedule.Namespace,
+	}
+
+	if flag == PauseSchedule {
+		pauseAnnotation = "true"
+	} else {
+		pauseAnnotation = "false"
+	}
+
+	annotations := map[string]string{
+		v1alpha1.PauseAnnotationKey: pauseAnnotation,
+	}
+
+	return s.patchSchedule(exp, annotations, kubeCli)
+}
+
+func (s *Service) patchSchedule(exp *Base, annotations map[string]string, kubeCli client.Client) error {
+	sch := &v1alpha1.Schedule{}
+	key := types.NamespacedName{Namespace: exp.Namespace, Name: exp.Name}
+
+	if err := kubeCli.Get(context.Background(), key, sch); err != nil {
+		return err
+	}
+
+	var mergePatch []byte
+	mergePatch, _ = json.Marshal(map[string]interface{}{
+		"metadata": map[string]interface{}{
+			"annotations": annotations,
+		},
+	})
+
+	return kubeCli.Patch(context.Background(),
+		sch,
+		client.ConstantPatch(types.MergePatchType, mergePatch))
 }

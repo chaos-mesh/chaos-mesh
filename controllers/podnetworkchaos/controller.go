@@ -17,25 +17,24 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
-
+	corev1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/util/retry"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/ipset"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/iptable"
 	tcpkg "github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/tc"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 	pbutils "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/netem"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/netem"
-
-	"github.com/go-logr/logr"
-	corev1 "k8s.io/api/core/v1"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/client-go/util/retry"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 const (
@@ -45,11 +44,11 @@ const (
 // Reconciler applys podnetworkchaos
 type Reconciler struct {
 	client.Client
-	client.Reader
 	Recorder recorder.ChaosRecorder
 
-	Log                     logr.Logger
-	AllowHostNetworkTesting bool
+	Log                      logr.Logger
+	AllowHostNetworkTesting  bool
+	ChaosDaemonClientBuilder *chaosdaemon.ChaosDaemonClientBuilder
 }
 
 func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
@@ -172,7 +171,7 @@ func (r *Reconciler) SetIPSets(ctx context.Context, pod *corev1.Pod, chaos *v1al
 			Cidrs: ipset.Cidrs,
 		})
 	}
-	return ipset.FlushIPSets(ctx, r.Client, pod, ipsets)
+	return ipset.FlushIPSets(ctx, r.ChaosDaemonClientBuilder, pod, ipsets)
 }
 
 // SetIptables sets iptables on pod
@@ -196,7 +195,7 @@ func (r *Reconciler) SetIptables(ctx context.Context, pod *corev1.Pod, chaos *v1
 			Target:    "DROP",
 		})
 	}
-	return iptable.SetIptablesChains(ctx, r.Client, pod, chains)
+	return iptable.SetIptablesChains(ctx, r.ChaosDaemonClientBuilder, pod, chains)
 }
 
 // SetTcs sets traffic control related chaos on pod
@@ -229,7 +228,7 @@ func (r *Reconciler) SetTcs(ctx context.Context, pod *corev1.Pod, chaos *v1alpha
 	}
 
 	r.Log.Info("setting tcs", "tcs", tcs)
-	return tcpkg.SetTcs(ctx, r.Client, pod, tcs)
+	return tcpkg.SetTcs(ctx, r.ChaosDaemonClientBuilder, pod, tcs)
 }
 
 // NetemSpec defines the interface to convert to a Netem protobuf

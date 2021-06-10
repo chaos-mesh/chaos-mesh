@@ -17,16 +17,14 @@ import (
 	"context"
 	"time"
 
-	"go.uber.org/fx"
-
-	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/utils"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common"
-
 	"github.com/go-logr/logr"
+	"go.uber.org/fx"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/utils"
+	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
@@ -34,10 +32,12 @@ type Impl struct {
 	client.Client
 
 	Log logr.Logger
+
+	decoder *utils.ContianerRecordDecoder
 }
 
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
-	decodedContainer, err := utils.DecodeContainerRecord(ctx, records[index], impl.Client)
+	decodedContainer, err := impl.decoder.DecodeContainerRecord(ctx, records[index])
 	pbClient := decodedContainer.PbClient
 	containerId := decodedContainer.ContainerId
 	if pbClient != nil {
@@ -88,7 +88,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 }
 
 func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
-	decodedContainer, err := utils.DecodeContainerRecord(ctx, records[index], impl.Client)
+	decodedContainer, err := impl.decoder.DecodeContainerRecord(ctx, records[index])
 	pbClient := decodedContainer.PbClient
 	if pbClient != nil {
 		defer pbClient.Close()
@@ -121,13 +121,14 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	return v1alpha1.NotInjected, nil
 }
 
-func NewImpl(c client.Client, log logr.Logger) *common.ChaosImplPair {
+func NewImpl(c client.Client, log logr.Logger, decoder *utils.ContianerRecordDecoder) *common.ChaosImplPair {
 	return &common.ChaosImplPair{
 		Name:   "stresschaos",
 		Object: &v1alpha1.StressChaos{},
 		Impl: &Impl{
-			Client: c,
-			Log:    log.WithName("stresschaos"),
+			Client:  c,
+			Log:     log.WithName("stresschaos"),
+			decoder: decoder,
 		},
 	}
 }

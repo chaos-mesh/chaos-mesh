@@ -244,7 +244,11 @@ main() {
     fi
 
     if [ "${crd}" == "" ]; then
-        crd="https://mirrors.chaos-mesh.org/${cm_version}/crd.yaml"
+        if kubectl api-versions | grep -q -w apiextensions.k8s.io/v1 ; then
+            crd="https://mirrors.chaos-mesh.org/${cm_version}/crd.yaml"
+        else
+            crd="https://mirrors.chaos-mesh.org/${cm_version}/crd-v1beta1.yaml"
+        fi
     fi
     if $template; then
         ensure gen_crd_manifests "${crd}"
@@ -955,10 +959,7 @@ metadata:
     app.kubernetes.io/component: controller-manager
 rules:
   - apiGroups: [ "" ]
-    resources: [ "endpoints" ]
-    verbs: [ "get", "list", "watch" ]
-  - apiGroups: [ "" ]
-    resources: [ "pods", "secrets" ]
+    resources: [ "pods", "secrets"]
     verbs: [ "get", "list", "watch", "delete", "update" ]
   - apiGroups:
       - ""
@@ -1057,7 +1058,7 @@ metadata:
     app.kubernetes.io/component: controller-manager
 rules:
   - apiGroups: [ "" ]
-    resources: [ "configmaps", "services" ]
+    resources: [ "configmaps", "services", "endpoints" ]
     verbs: [ "get", "list", "watch" ]
   - apiGroups: [ "authorization.k8s.io" ]
     resources:
@@ -1628,6 +1629,25 @@ webhooks:
           - UPDATE
         resources:
           - jvmchaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /mutate-chaos-mesh-org-v1alpha1-schedule
+    failurePolicy: Fail
+    name: mschedule.kb.io
+    timeoutSeconds: 5
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - schedule
 ---
 # Source: chaos-mesh/templates/secrets-configuration.yaml
 apiVersion: admissionregistration.k8s.io/v1beta1
@@ -1831,6 +1851,25 @@ webhooks:
           - UPDATE
         resources:
           - jvmchaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /validate-chaos-mesh-org-v1alpha1-schedule
+    failurePolicy: Fail
+    name: vschedule.kb.io
+    timeoutSeconds: 5
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - schedule
 ---
 # Source: chaos-mesh/templates/secrets-configuration.yaml
 apiVersion: admissionregistration.k8s.io/v1beta1

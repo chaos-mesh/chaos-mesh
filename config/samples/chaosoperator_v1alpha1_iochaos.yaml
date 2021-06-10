@@ -1,5 +1,5 @@
 apiVersion: chaosmesh.chaos-mesh.org/v1alpha1
-kind: IoChaos
+kind: IOChaos
 metadata:
   name: iochaos-sample
 spec:

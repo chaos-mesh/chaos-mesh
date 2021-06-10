@@ -69,7 +69,7 @@ var _ = Describe("podchaos_webhook", func() {
 					expect: "",
 				},
 				{
-					name: "validate the ContainerName",
+					name: "validate the ContainerNames",
 					chaos: PodChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,

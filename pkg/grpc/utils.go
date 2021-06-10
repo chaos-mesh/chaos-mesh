@@ -23,9 +23,8 @@ import (
 	"strconv"
 	"time"
 
-	"google.golang.org/grpc/credentials"
-
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 // DefaultRPCTimeout specifies default timeout of RPC between controller and chaos-operator

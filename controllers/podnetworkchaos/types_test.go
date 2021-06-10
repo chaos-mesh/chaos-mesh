@@ -23,7 +23,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
@@ -91,11 +90,9 @@ func TestHostNetworkOption(t *testing.T) {
 
 		fakeClient := fake.NewFakeClientWithScheme(provider.NewScheme(), objs...)
 
-		var r client.Reader
 		recorder := recorder.NewDebugRecorder()
 		h := &Reconciler{
 			Client:                  fakeClient,
-			Reader:                  r,
 			Recorder:                recorder,
 			Log:                     zap.New(zap.UseDevMode(true)),
 			AllowHostNetworkTesting: testCase.enableHostNetworkTesting,

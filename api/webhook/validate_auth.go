@@ -22,7 +22,6 @@ import (
 	authv1 "k8s.io/api/authorization/v1"
 	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -32,7 +31,7 @@ import (
 var alwaysAllowedKind = []string{
 	v1alpha1.KindAwsChaos,
 	v1alpha1.KindPodNetworkChaos,
-	v1alpha1.KindPodIoChaos,
+	v1alpha1.KindPodIOChaos,
 	v1alpha1.KindGcpChaos,
 	v1alpha1.KindPodHttpChaos,
 
@@ -51,8 +50,6 @@ var authLog = ctrl.Log.WithName("validate-auth")
 // AuthValidator validates the authority
 type AuthValidator struct {
 	enabled bool
-	client  client.Client
-	reader  client.Reader
 	authCli *authorizationv1.AuthorizationV1Client
 
 	decoder *admission.Decoder
@@ -63,12 +60,10 @@ type AuthValidator struct {
 }
 
 // NewAuthValidator returns a new AuthValidator
-func NewAuthValidator(enabled bool, client client.Client, reader client.Reader, authCli *authorizationv1.AuthorizationV1Client,
+func NewAuthValidator(enabled bool, authCli *authorizationv1.AuthorizationV1Client,
 	clusterScoped bool, targetNamespace string, enableFilterNamespace bool) *AuthValidator {
 	return &AuthValidator{
 		enabled:               enabled,
-		client:                client,
-		reader:                reader,
 		authCli:               authCli,
 		clusterScoped:         clusterScoped,
 		targetNamespace:       targetNamespace,
