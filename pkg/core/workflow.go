@@ -397,7 +397,9 @@ func mappingTemplateType(templateType v1alpha1.TemplateType) (NodeType, error) {
 
 // The WorkflowStore of workflow is not so similar with others store.
 type WorkflowStore interface {
+	List(ctx context.Context, namespace, name string, archived bool) ([]*WorkflowEntity, error)
 	ListMeta(ctx context.Context, namespace, name string, archived bool) ([]*WorkflowMeta, error)
+	FindByID(ctx context.Context, ID uint) (*WorkflowEntity, error)
 	FindByUID(ctx context.Context, UID string) (*WorkflowEntity, error)
 	FindMetaByUID(ctx context.Context, UID string) (*WorkflowMeta, error)
 	Create(ctx context.Context, entity WorkflowEntity) error
