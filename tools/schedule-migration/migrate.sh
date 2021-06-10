@@ -12,6 +12,7 @@
 # distributed under the License is distributed on an "AS IS" BASIS,
 # See the License for the specific language governing permissions and
 # limitations under the License.
+set -e
 
 NAMESPACES=$(kubectl get namespace | sed '1d' | awk '{print $1}')
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
@@ -27,6 +28,20 @@ stresschaos
 timechaos
 "
 cnt=0
+
+usage() {
+    cat << EOF
+This script is used to migrate to chaos-mesh 2.0.
+USAGE:
+    migrate.sh [FLAGS]
+FLAGS:
+    -h, --help              Prints help information
+    -e, --export            Export existing chaos and update them
+    -i, --import            Import updated chaos (do this after chaos-mesh upgrade)
+    -c, --crd               Update CRD (do this after exporting chaos, and before ugrading chaos-mesh)
+EOF
+}
+
 build () {
     cd $SCRIPT_DIR
     go build main.go
@@ -38,7 +53,7 @@ update_yaml () {
 }
 
 reapply_crd () {
-    kubectl delete -f ../../manifests/crd.yaml
+    kubectl delete -f https://mirrors.chaos-mesh.org/v1.2.1/crd.yaml
     kubectl apply -f ../../manifests/crd.yaml
 }
 
@@ -58,17 +73,65 @@ handle_namespace () {
     done
 }
 
-build
+export_chaos () {
+    build
 
-for ns in $NAMESPACES
+    for ns in $NAMESPACES
+    do
+        echo "searching namespace $ns"
+        handle_namespace $ns
+    done
+}
+
+import_chaos() {
+    local yamls=$(find . -regex ".*\.yaml")
+    for yaml in $yamls
+    do
+        kubectl apply -f $yaml
+    done
+}
+
+UPDATE_CRD=false
+EXPORT_CHAOS=false
+IMPORT_CHAOS=false
+
+while [[ $# -gt 0 ]]
 do
-    echo "searching namespace $ns"
-    handle_namespace $ns
+key="$1"
+
+case $key in
+    -e|--export)
+        EXPORT_CHAOS=true
+        shift
+        ;;
+    -i|--import)
+        IMPORT_CHAOS=true
+        shift
+        ;;
+    -c|--crd)
+        UPDATE_CRD=true
+        shift
+        ;;
+    -h|--help)
+        usage
+        exit 0
+        ;;
+    *)
+        echo "unknown option: $key"
+        usage
+        exit 1
+        ;;
+esac
 done
 
-reapply_crd
+if [ ${EXPORT_CHAOS} == "true" ]; then
+    export_chaos
+fi
 
-for (( id=0; id<$cnt; id++ ))
-do
-    kubectl apply -f $id.yaml
-done
+if [ ${UPDATE_CRD} == "true" ]; then
+    reapply_crd
+fi
+
+if [ ${IMPORT_CHAOS} == "true" ]; then
+    import_chaos
+fi
