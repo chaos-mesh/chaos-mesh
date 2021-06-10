@@ -11,62 +11,54 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package controllers
+package desiredphase
 
 import (
-	"bytes"
-	"encoding/gob"
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
 
-<<<<<<< HEAD:controllers/suit_test.go
-=======
-	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
-
 	"github.com/go-logr/logr"
->>>>>>> master:controllers/finalizers/suit_test.go
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"go.uber.org/fx"
 	"k8s.io/client-go/rest"
 	"k8s.io/kubectl/pkg/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
+	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/utils"
+	"github.com/chaos-mesh/chaos-mesh/controllers/types"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/test"
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to
 // http://onsi.github.io/ginkgo/ to learn more about Ginkgo.
 
+var app *fx.App
 var k8sClient client.Client
 var lister *utils.ActiveLister
 var config *rest.Config
 var testEnv *envtest.Environment
 var setupLog = ctrl.Log.WithName("setup")
 
-func TestControllers(t *testing.T) {
+func TestDesiredPhase(t *testing.T) {
 	RegisterFailHandler(Fail)
 
 	RunSpecsWithDefaultAndCustomReporters(t,
-<<<<<<< HEAD:controllers/suit_test.go
-		"controller test suit",
-<<<<<<< HEAD
-		[]Reporter{})
-=======
-		[]Reporter{envtest.NewlineReporter{}})
-=======
-		"Schedule suit",
+		"Desired Phase suit",
 		[]Reporter{printer.NewlineReporter{}})
->>>>>>> master:controllers/finalizers/suit_test.go
->>>>>>> 3eec2644 (Merge master)
 }
 
-var _ = SynchronizedBeforeSuite(func() []byte {
+var _ = BeforeSuite(func() {
+	logf.SetLogger(zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)))
+	By("bootstrapping test environment")
 	t := true
 	if os.Getenv("TEST_USE_EXISTING_CLUSTER") == "true" {
 		testEnv = &envtest.Environment{
@@ -74,27 +66,21 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 		}
 	} else {
 		testEnv = &envtest.Environment{
-			CRDDirectoryPaths: []string{filepath.Join("..", "config", "crd", "bases")},
+			CRDDirectoryPaths: []string{filepath.Join("..", "..", "config", "crd", "bases")},
 		}
 	}
 
-	config, err := testEnv.Start()
+	err := v1alpha1.SchemeBuilder.AddToScheme(scheme.Scheme)
+	Expect(err).NotTo(HaveOccurred())
+
+	config, err = testEnv.Start()
 	Expect(err).ToNot(HaveOccurred())
 	Expect(config).ToNot(BeNil())
 
-	var data bytes.Buffer
-	enc := gob.NewEncoder(&data)
-	enc.Encode(config)
+	k8sClient, err = client.New(config, client.Options{Scheme: scheme.Scheme})
 	Expect(err).ToNot(HaveOccurred())
+	Expect(k8sClient).ToNot(BeNil())
 
-<<<<<<< HEAD:controllers/suit_test.go
-	return data.Bytes()
-}, func(confBytes []byte) {
-	data := bytes.NewBuffer(confBytes)
-	dec := gob.NewDecoder(data)
-	var gotConfig rest.Config
-	err := dec.Decode(&gotConfig)
-=======
 	app = fx.New(
 		fx.Options(
 			test.Module,
@@ -115,22 +101,33 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 	if err := app.Start(startCtx); err != nil {
 		setupLog.Error(err, "fail to start manager")
 	}
->>>>>>> master:controllers/finalizers/suit_test.go
-	Expect(err).ToNot(HaveOccurred())
-	config = &gotConfig
-	logf.SetLogger(zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)))
-	By("bootstrapping test environment")
-
-	err = v1alpha1.SchemeBuilder.AddToScheme(scheme.Scheme)
 	Expect(err).ToNot(HaveOccurred())
 
-	k8sClient, err = client.New(config, client.Options{Scheme: scheme.Scheme})
-	Expect(err).ToNot(HaveOccurred())
-	Expect(k8sClient).ToNot(BeNil())
 }, 60)
 
-var _ = SynchronizedAfterSuite(func() {}, func() {
+var _ = AfterSuite(func() {
 	By("tearing down the test environment")
+	stopCtx, cancel := context.WithTimeout(context.Background(), app.StopTimeout())
+	defer cancel()
+
+	if err := app.Stop(stopCtx); err != nil {
+		setupLog.Error(err, "fail to stop manager")
+	}
 	err := testEnv.Stop()
 	Expect(err).ToNot(HaveOccurred())
-}, 60)
+})
+
+type RunParams struct {
+	fx.In
+
+	Mgr    ctrl.Manager
+	Logger logr.Logger
+
+	Controllers []types.Controller `group:"controller"`
+	Objs        []types.Object     `group:"objs"`
+}
+
+func Run(params RunParams) error {
+	lister = utils.NewActiveLister(k8sClient, params.Logger)
+	return nil
+}
