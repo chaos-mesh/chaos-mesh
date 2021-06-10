@@ -15,7 +15,9 @@ package workflow
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+	ctrl "sigs.k8s.io/controller-runtime"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 
@@ -27,6 +29,8 @@ import (
 	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 )
+
+var log = ctrl.Log.WithName("workflow api")
 
 // StatusResponse defines a common status struct.
 type StatusResponse struct {
@@ -91,6 +95,21 @@ func (it *Service) listWorkflows(c *gin.Context) {
 			return
 		}
 		result = append(result, allWorkflow...)
+	}
+
+	// enriching with ID
+	for index, item := range result {
+		entity, err := it.store.FindByUID(c.Request.Context(), string(item.UID))
+		if err != nil {
+			log.Info("warning: workflow does not have a record in database",
+				"namespaced name", fmt.Sprintf("%s/%s", item.Namespace, item.Name),
+				"uid", item.UID,
+			)
+		}
+
+		if entity != nil {
+			result[index].ID = entity.ID
+		}
 	}
 
 	c.JSON(http.StatusOK, result)
