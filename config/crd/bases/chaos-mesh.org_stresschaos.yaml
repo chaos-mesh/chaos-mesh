@@ -33,7 +33,7 @@ spec:
             description: Spec defines the behavior of a time chaos experiment
             properties:
               containerNames:
-                description: ContainerName indicates the name of affected container. If not set, all containers will be injected
+                description: ContainerNames indicates list of the name of affected container. If not set, all containers will be injected
                 items:
                   type: string
                 type: array

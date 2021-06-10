@@ -40,7 +40,7 @@ spec:
                 - container-kill
                 type: string
               containerNames:
-                description: ContainerName indicates the name of affected container. If not set, all containers will be injected
+                description: ContainerNames indicates list of the name of affected container. If not set, all containers will be injected
                 items:
                   type: string
                 type: array
