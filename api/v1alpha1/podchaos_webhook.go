@@ -76,14 +76,14 @@ func (in *PodChaos) Validate() error {
 
 func (in *PodChaosSpec) Validate() field.ErrorList {
 	specField := field.NewPath("spec")
-	allErrs := in.validateContainerName(specField.Child("containerName"))
+	allErrs := in.validateContainerNames(specField.Child("containerNames"))
 	allErrs = append(allErrs, validateDuration(in, specField)...)
 
 	return allErrs
 }
 
-// validateContainerName validates the ContainerName
-func (in *PodChaosSpec) validateContainerName(containerField *field.Path) field.ErrorList {
+// validateContainerNames validates the ContainerNames
+func (in *PodChaosSpec) validateContainerNames(containerField *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 	if in.Action == ContainerKillAction {
 		if len(in.ContainerSelector.ContainerNames) == 0 {

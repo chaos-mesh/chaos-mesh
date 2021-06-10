@@ -84,7 +84,7 @@ spec:
                           - random
                           type: string
                         containerNames:
-                          description: ContainerName indicates the name of affected container. If not set, all containers will be injected
+                          description: ContainerNames indicates list of the name of affected container. If not set, all containers will be injected
                           items:
                             type: string
                           type: array
@@ -483,7 +483,7 @@ spec:
                               type: integer
                           type: object
                         containerNames:
-                          description: ContainerName indicates the name of affected container. If not set, all containers will be injected
+                          description: ContainerNames indicates list of the name of affected container. If not set, all containers will be injected
                           items:
                             type: string
                           type: array
@@ -634,7 +634,7 @@ spec:
                           - tpf
                           type: string
                         containerNames:
-                          description: ContainerName indicates the name of affected container. If not set, all containers will be injected
+                          description: ContainerNames indicates list of the name of affected container. If not set, all containers will be injected
                           items:
                             type: string
                           type: array
@@ -1190,7 +1190,7 @@ spec:
                           - container-kill
                           type: string
                         containerNames:
-                          description: ContainerName indicates the name of affected container. If not set, all containers will be injected
+                          description: ContainerNames indicates list of the name of affected container. If not set, all containers will be injected
                           items:
                             type: string
                           type: array
@@ -1340,7 +1340,7 @@ spec:
                               - random
                               type: string
                             containerNames:
-                              description: ContainerName indicates the name of affected container. If not set, all containers will be injected
+                              description: ContainerNames indicates list of the name of affected container. If not set, all containers will be injected
                               items:
                                 type: string
                               type: array
@@ -1740,7 +1740,7 @@ spec:
                                   type: integer
                               type: object
                             containerNames:
-                              description: ContainerName indicates the name of affected container. If not set, all containers will be injected
+                              description: ContainerNames indicates list of the name of affected container. If not set, all containers will be injected
                               items:
                                 type: string
                               type: array
@@ -1891,7 +1891,7 @@ spec:
                               - tpf
                               type: string
                             containerNames:
-                              description: ContainerName indicates the name of affected container. If not set, all containers will be injected
+                              description: ContainerNames indicates list of the name of affected container. If not set, all containers will be injected
                               items:
                                 type: string
                               type: array
@@ -2445,7 +2445,7 @@ spec:
                               - container-kill
                               type: string
                             containerNames:
-                              description: ContainerName indicates the name of affected container. If not set, all containers will be injected
+                              description: ContainerNames indicates list of the name of affected container. If not set, all containers will be injected
                               items:
                                 type: string
                               type: array
@@ -2552,7 +2552,7 @@ spec:
                           description: StressChaosSpec defines the desired state of StressChaos
                           properties:
                             containerNames:
-                              description: ContainerName indicates the name of affected container. If not set, all containers will be injected
+                              description: ContainerNames indicates list of the name of affected container. If not set, all containers will be injected
                               items:
                                 type: string
                               type: array
@@ -2692,7 +2692,7 @@ spec:
                                 type: string
                               type: array
                             containerNames:
-                              description: ContainerName indicates the name of affected container. If not set, all containers will be injected
+                              description: ContainerNames indicates list of the name of affected container. If not set, all containers will be injected
                               items:
                                 type: string
                               type: array
@@ -2797,7 +2797,7 @@ spec:
                       description: StressChaosSpec defines the desired state of StressChaos
                       properties:
                         containerNames:
-                          description: ContainerName indicates the name of affected container. If not set, all containers will be injected
+                          description: ContainerNames indicates list of the name of affected container. If not set, all containers will be injected
                           items:
                             type: string
                           type: array
@@ -2943,7 +2943,7 @@ spec:
                             type: string
                           type: array
                         containerNames:
-                          description: ContainerName indicates the name of affected container. If not set, all containers will be injected
+                          description: ContainerNames indicates list of the name of affected container. If not set, all containers will be injected
                           items:
                             type: string
                           type: array
