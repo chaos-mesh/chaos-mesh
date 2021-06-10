@@ -15,10 +15,12 @@ package workflow
 
 import (
 	"context"
+	"time"
+
+	"github.com/jinzhu/gorm"
+
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 	"github.com/chaos-mesh/chaos-mesh/pkg/store/dbstore"
-	"github.com/jinzhu/gorm"
-	"time"
 )
 
 type WorkflowStore struct {

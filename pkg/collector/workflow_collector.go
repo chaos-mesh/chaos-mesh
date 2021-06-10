@@ -15,8 +15,7 @@ package collector
 
 import (
 	"context"
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/pkg/core"
+
 	"github.com/go-logr/logr"
 	"github.com/jinzhu/gorm"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -24,6 +23,9 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 )
 
 type WorkflowCollector struct {

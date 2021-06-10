@@ -14,8 +14,9 @@
 package store
 
 import (
-	"github.com/chaos-mesh/chaos-mesh/pkg/store/workflow"
 	"go.uber.org/fx"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/store/workflow"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/store/event"
 	"github.com/chaos-mesh/chaos-mesh/pkg/store/experiment"
