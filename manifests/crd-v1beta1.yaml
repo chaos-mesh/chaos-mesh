@@ -13048,6 +13048,7 @@ spec:
                 schedule:
                   type: string
                 startingDeadlineSeconds:
+                  exclusiveMinimum: true
                   format: int64
                   minimum: 0
                   nullable: true
