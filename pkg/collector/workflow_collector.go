@@ -53,7 +53,7 @@ func (it *WorkflowCollector) Reconcile(request reconcile.Request) (reconcile.Res
 	err := it.kubeClient.Get(ctx, request.NamespacedName, &workflow)
 	if apierrors.IsNotFound(err) {
 		// target
-		if err = it.markAsArchived(workflow.DeepCopy()); err != nil {
+		if err = it.markAsArchived(ctx, request.Namespace, request.Name); err != nil {
 			it.Log.Error(err, "failed to archive experiment")
 		}
 		return ctrl.Result{}, nil
@@ -63,7 +63,7 @@ func (it *WorkflowCollector) Reconcile(request reconcile.Request) (reconcile.Res
 		return ctrl.Result{}, nil
 	}
 	if !workflow.DeletionTimestamp.IsZero() {
-		if err = it.markAsArchived(workflow.DeepCopy()); err != nil {
+		if err = it.markAsArchived(ctx, request.Namespace, request.Name); err != nil {
 			it.Log.Error(err, "failed to archive workflow")
 		}
 		return ctrl.Result{}, nil
@@ -76,8 +76,8 @@ func (it *WorkflowCollector) Reconcile(request reconcile.Request) (reconcile.Res
 	return ctrl.Result{}, nil
 }
 
-func (it *WorkflowCollector) markAsArchived(workflow *v1alpha1.Workflow) error {
-	return it.store.MarkAsArchivedWithUID(context.Background(), string(workflow.UID))
+func (it *WorkflowCollector) markAsArchived(ctx context.Context, namespace, name string) error {
+	return it.store.MarkAsArchived(ctx, namespace, name)
 }
 
 func (it *WorkflowCollector) persistentWorkflow(workflow *v1alpha1.Workflow) error {

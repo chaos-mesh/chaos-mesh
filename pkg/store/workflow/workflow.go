@@ -15,8 +15,6 @@ package workflow
 
 import (
 	"context"
-	"time"
-
 	"github.com/jinzhu/gorm"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
@@ -108,7 +106,7 @@ func (it *WorkflowStore) DeleteByUIDs(ctx context.Context, uids []string) error 
 func (it *WorkflowStore) MarkAsArchived(ctx context.Context, namespace, name string) error {
 	if err := it.db.Model(core.WorkflowEntity{}).
 		Where("namespace = ? AND name = ? AND archived = ?", namespace, name, false).
-		Updates(map[string]interface{}{"archived": true, "finish_time": time.Now()}).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
+		Updates(map[string]interface{}{"archived": true}).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
 		return err
 	}
 	return nil
@@ -117,7 +115,7 @@ func (it *WorkflowStore) MarkAsArchived(ctx context.Context, namespace, name str
 func (it *WorkflowStore) MarkAsArchivedWithUID(ctx context.Context, uid string) error {
 	if err := it.db.Model(core.WorkflowEntity{}).
 		Where("uid = ? AND archived = ?", uid, false).
-		Updates(map[string]interface{}{"archived": true, "finish_time": time.Now()}).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
+		Updates(map[string]interface{}{"archived": true}).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
 		return err
 	}
 	return nil
