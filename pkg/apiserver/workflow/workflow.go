@@ -71,7 +71,7 @@ func (it *Service) listWorkflows(c *gin.Context) {
 		namespace = it.conf.TargetNamespace
 	}
 
-	result := make([]core.Workflow, 0)
+	result := make([]core.WorkflowMeta, 0)
 
 	kubeClient, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
