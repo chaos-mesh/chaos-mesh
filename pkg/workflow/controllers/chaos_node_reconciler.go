@@ -366,12 +366,12 @@ func (it ChaosNodeReconciler) createSchedule(ctx context.Context, node v1alpha1.
 	}
 	err := it.kubeClient.Create(ctx, &scheduleToCreate)
 	if err != nil {
-		it.eventRecorder.Event(&node, corev1.EventTypeWarning, v1alpha1.ChaosCRCreateFailed, "Failed to create schedule CR")
+		it.eventRecorder.Event(&node, recorder.ChaosCustomResourceCreateFailed{})
 		it.logger.Error(err, "failed to create schedule CR")
 		return nil
 	}
 	it.logger.Info("schedule CR created", "namespace", scheduleToCreate.GetNamespace(), "name", scheduleToCreate.GetName())
-	it.eventRecorder.Event(&node, corev1.EventTypeNormal, v1alpha1.ChaosCRCreated, fmt.Sprintf("schedule CR %s/%s created", scheduleToCreate.GetNamespace(), scheduleToCreate.GetName()))
+	it.eventRecorder.Event(&node, recorder.ChaosCustomResourceCreated{Name: scheduleToCreate.GetName()})
 	return nil
 
 }
