@@ -1,10 +1,10 @@
-import { Experiment as ExperimentResponse, ExperimentSingle, StateOfExperiments } from './experiments.type'
+import { Experiment as ExperimentResponse, ExperimentSingle, StatusOfExperiments } from './experiments.type'
 
 import { Experiment } from 'components/NewExperiment/types'
 import http from './http'
 
 export const state = (namespace = null) =>
-  http.get<StateOfExperiments>('/experiments/state', {
+  http.get<StatusOfExperiments>('/experiments/state', {
     params: {
       namespace,
     },

@@ -2,10 +2,10 @@ import { Box, CircularProgress } from '@material-ui/core'
 
 import DoneIcon from '@material-ui/icons/Done'
 import React from 'react'
-import { StateOfExperiments } from 'api/experiments.type'
+import { StatusOfExperiments } from 'api/experiments.type'
 
 interface ExperimentEventsPreviewProps {
-  status: keyof StateOfExperiments
+  status: keyof StatusOfExperiments
 }
 
 const ExperimentEventsPreview: React.FC<ExperimentEventsPreviewProps> = ({ status }) => {

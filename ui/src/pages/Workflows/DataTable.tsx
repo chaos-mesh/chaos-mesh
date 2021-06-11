@@ -6,6 +6,7 @@ import DateTime from 'lib/luxon'
 import DeleteOutlinedIcon from '@material-ui/icons/DeleteOutlined'
 import Paper from 'components-mui/Paper'
 import Space from 'components-mui/Space'
+import StatusLabel from 'components-mui/StatusLabel'
 import T from 'components/T'
 import { Workflow } from 'api/workflows.type'
 import api from 'api'
@@ -70,7 +71,7 @@ const DataTable: React.FC<DataTableProps> = ({ data, fetchData }) => {
             <TableCell>{T('common.name')}</TableCell>
             {/* <TableCell>{T('workflow.entry')}</TableCell> */}
             {/* <TableCell>{T('workflow.time')}</TableCell> */}
-            <TableCell>{T('workflow.state')}</TableCell>
+            <TableCell>{T('common.status')}</TableCell>
             <TableCell>{T('table.created')}</TableCell>
             <TableCell>{T('common.operation')}</TableCell>
           </TableRow>
@@ -85,7 +86,9 @@ const DataTable: React.FC<DataTableProps> = ({ data, fetchData }) => {
                 <TableCell>{d.name}</TableCell>
                 {/* <TableCell>{d.entry}</TableCell> */}
                 {/* <TableCell></TableCell> */}
-                <TableCell>{d.status}</TableCell>
+                <TableCell>
+                  <StatusLabel status={d.status} />
+                </TableCell>
                 <TableCell>
                   {DateTime.fromISO(d.created_at, {
                     locale: lang,

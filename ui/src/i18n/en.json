@@ -20,7 +20,7 @@
     "startAWorkflowDesc": "Workflow allows you to organize multiple experiments to simulate more realistic failures",
     "startASchedule": "Start with schedule",
     "startAScheduleDesc": "Schedule allows you to run an experiment periodically",
-    "totalState": "Total Experiments Status",
+    "totalStatus": "Total Experiments Status",
     "predefined": "Predefined",
     "predefinedDesc": "📦 Store custom experiments here for quick execution.",
     "noPredefinedFound": "No predefined found",
@@ -97,7 +97,7 @@
   "experiments": {
     "title": "Experiments",
     "single": "Experiment",
-    "state": {
+    "status": {
       "injecting": "Injecting",
       "running": "Running",
       "finished": "Finished",
@@ -171,7 +171,7 @@
   "workflow": {
     "entry": "Entry",
     "time": "Time",
-    "state": "State",
+    "status": "Status",
     "topology": "Topology"
   },
   "events": {

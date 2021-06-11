@@ -1,6 +1,6 @@
 import { ExperimentKind } from 'components/NewExperiment/types'
 
-export interface StateOfExperiments {
+export interface StatusOfExperiments {
   injecting: number
   running: number
   finished: number

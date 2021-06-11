@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 
 import NotFound from 'components-mui/NotFound'
 import { PropertyAccessor } from '@nivo/core'
-import { StateOfExperiments } from 'api/experiments.type'
+import { StatusOfExperiments } from 'api/experiments.type'
 import T from 'components/T'
 import api from 'api'
 import { schemeTableau10 } from 'd3-scale-chromatic'
@@ -12,19 +12,19 @@ import { useIntl } from 'react-intl'
 import { useTheme } from '@material-ui/core/styles'
 
 interface SingleData {
-  id: keyof StateOfExperiments
+  id: keyof StatusOfExperiments
   label: string
   value: number
 }
 
-const TotalState: React.FC<BoxProps> = (props) => {
+const TotalStatus: React.FC<BoxProps> = (props) => {
   const intl = useIntl()
   const theme = useTheme()
 
   const [s, setS] = useState<SingleData[]>([])
 
   const arcLinkLabel: PropertyAccessor<ComputedDatum<SingleData>, string> = (d) =>
-    d.value + ' ' + T(`experiments.state.${d.id}`, intl)
+    d.value + ' ' + T(`experiments.status.${d.id}`, intl)
 
   const tooltip = ({ datum }: PieTooltipProps<SingleData>) => (
     <Box
@@ -34,7 +34,7 @@ const TotalState: React.FC<BoxProps> = (props) => {
       style={{ background: theme.palette.background.default, fontSize: theme.typography.caption.fontSize }}
     >
       <Box mr={1.5} style={{ width: 12, height: 12, background: datum.color }} />
-      {(datum.value < 1 ? 0 : datum.value) + ' ' + T(`experiments.state.${datum.id}`, intl)}
+      {(datum.value < 1 ? 0 : datum.value) + ' ' + T(`experiments.status.${datum.id}`, intl)}
     </Box>
   )
 
@@ -44,9 +44,9 @@ const TotalState: React.FC<BoxProps> = (props) => {
         .state()
         .then((resp) =>
           setS(
-            (Object.entries(resp.data) as [keyof StateOfExperiments, number][]).map(([k, v]) => ({
+            (Object.entries(resp.data) as [keyof StatusOfExperiments, number][]).map(([k, v]) => ({
               id: k,
-              label: T(`experiments.state.${k}`, intl),
+              label: T(`experiments.status.${k}`, intl),
               value: v === 0 ? 0.01 : v,
             }))
           )
@@ -99,4 +99,4 @@ const TotalState: React.FC<BoxProps> = (props) => {
   )
 }
 
-export default TotalState
+export default TotalStatus

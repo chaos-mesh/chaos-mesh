@@ -13,7 +13,7 @@ import Predefined from './Predefined'
 import { Schedule } from 'api/schedules.type'
 import ScheduleIcon from '@material-ui/icons/Schedule'
 import T from 'components/T'
-import TotalState from './TotalState'
+import TotalStatus from './TotalStatus'
 import Welcome from './Welcome'
 import { Workflow } from 'api/workflows.type'
 import api from 'api'
@@ -123,8 +123,8 @@ export default function Dashboard() {
         <Grid container spacing={6} item xs={12} lg={4}>
           <Grid item xs={12}>
             <Paper>
-              <PaperTop title={T('dashboard.totalState')} />
-              <TotalState position="relative" height={data.events.length > 0 ? 300 : '100%'} />
+              <PaperTop title={T('dashboard.totalStatus')} />
+              <TotalStatus position="relative" height={data.events.length > 0 ? 300 : '100%'} />
             </Paper>
           </Grid>
           <Grid item xs={12}>
