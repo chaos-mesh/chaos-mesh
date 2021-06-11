@@ -555,8 +555,8 @@ func (s *Service) detailWorkflow(c *gin.Context) {
 		return
 	}
 
-	sch := &v1alpha1.Workflow{}
-	if err := json.Unmarshal([]byte(meta.Workflow), &sch); err != nil {
+	workflow := &v1alpha1.Workflow{}
+	if err := json.Unmarshal([]byte(meta.Workflow), &workflow); err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
 		return
@@ -579,16 +579,16 @@ func (s *Service) detailWorkflow(c *gin.Context) {
 		},
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
-				APIVersion: sch.APIVersion,
-				Kind:       sch.Kind,
+				APIVersion: workflow.APIVersion,
+				Kind:       workflow.Kind,
 			},
 			Meta: core.KubeObjectMeta{
-				Name:        sch.Name,
-				Namespace:   sch.Namespace,
-				Labels:      sch.Labels,
-				Annotations: sch.Annotations,
+				Name:        workflow.Name,
+				Namespace:   workflow.Namespace,
+				Labels:      workflow.Labels,
+				Annotations: workflow.Annotations,
 			},
-			Spec: sch.Spec,
+			Spec: workflow.Spec,
 		},
 	}
 
