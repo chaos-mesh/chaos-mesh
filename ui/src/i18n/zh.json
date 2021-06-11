@@ -272,7 +272,6 @@
     "download": "下载",
     "ip": "IP 地址",
     "isKVHelperText": "键入 key:value 并以空格结尾来创建一个键值对",
-    "meta": "元信息",
     "multiOptions": "支持多选",
     "name": "名称",
     "noOptions": "无选项",

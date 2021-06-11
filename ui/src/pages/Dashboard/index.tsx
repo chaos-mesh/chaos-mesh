@@ -53,7 +53,7 @@ export default function Dashboard() {
     const fetchExperiments = api.experiments.experiments()
     const fetchSchedules = api.schedules.schedules()
     const fetchWorkflows = api.workflows.workflows()
-    const fetchEvents = api.events.events({ limit: 6 })
+    const fetchEvents = api.events.events({ limit: 216 })
     const fetchAll = () => {
       Promise.all([fetchSchedules, fetchWorkflows, fetchExperiments, fetchEvents])
         .then((data) =>
@@ -130,7 +130,7 @@ export default function Dashboard() {
           <Grid item xs={12}>
             <Paper>
               <PaperTop title={T('dashboard.recent')} boxProps={{ mb: 3 }} />
-              <EventsTimeline events={data.events} />
+              <EventsTimeline events={data.events.slice(0, 6)} />
             </Paper>
           </Grid>
         </Grid>

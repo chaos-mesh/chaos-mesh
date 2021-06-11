@@ -273,7 +273,6 @@
     "download": "Download",
     "ip": "IP address",
     "isKVHelperText": "Type key:value and end with a space to generate a key/value pair",
-    "meta": "Meta",
     "multiOptions": "Support mutiple options",
     "name": "Name",
     "noOptions": "No options",

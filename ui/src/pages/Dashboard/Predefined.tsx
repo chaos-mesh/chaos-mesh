@@ -36,11 +36,11 @@ const useStyles = makeStyles((theme) => ({
     position: 'absolute',
     top: '50%',
     left: '50%',
-    width: '50vw',
+    width: '75vw',
     height: '90vh',
     padding: 0,
     transform: 'translate(-50%, -50%)',
-    [theme.breakpoints.down('sm')]: {
+    [theme.breakpoints.down('lg')]: {
       width: '90vw',
     },
   },
