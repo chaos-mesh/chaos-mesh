@@ -50,11 +50,11 @@ func (in *{{.Type}}) GetObjectMeta() *metav1.ObjectMeta {
 }
 
 // GetDuration would return the duration for chaos
-func (in *{{.Type}}) GetDuration() (*time.Duration, error) {
-	if in.Spec.Duration == nil {
+func (in *{{.Type}}Spec) GetDuration() (*time.Duration, error) {
+	if in.Duration == nil {
 		return nil, nil
 	}
-	duration, err := time.ParseDuration(*in.Spec.Duration)
+	duration, err := time.ParseDuration(*in.Duration)
 	if err != nil {
 		return nil, err
 	}
@@ -124,7 +124,7 @@ func (in *{{.Type}}List) ListChaos() []*ChaosInstance {
 }
 
 func (in *{{.Type}}) DurationExceeded(now time.Time) (bool, time.Duration, error) {
-	duration, err := in.GetDuration()
+	duration, err := in.Spec.GetDuration()
 	if err != nil {
 		return false, 0, err
 	}

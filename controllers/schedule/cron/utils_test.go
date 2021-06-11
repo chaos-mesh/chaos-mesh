@@ -28,29 +28,61 @@ func TestGetRecentUnmetScheduleTime(t *testing.T) {
 	g := NewGomegaWithT(t)
 
 	type testCase struct {
-		now              string
-		lastScheduleTime string
-		schedule         string
-		missedRun        *string
-		nextRun          *string
-		err              error
+		now               string
+		lastScheduleTime  string
+		creationTimeStamp string
+		schedule          string
+		missedRun         *string
+		nextRun           *string
+		err               error
 	}
+
+	zeroTime := "0001-01-01T00:00:00.000Z"
 	testCases := []testCase{
 		{
-			now:              "2021-04-28T05:59:43.5Z",
-			lastScheduleTime: "2021-04-28T05:59:38.0Z",
-			schedule:         "@every 5s",
-			missedRun:        pointer.StringPtr("2021-04-28T05:59:43.0Z"),
-			nextRun:          pointer.StringPtr("2021-04-28T05:59:48.0Z"),
-			err:              nil,
+			now:               "2021-04-28T05:59:43.5Z",
+			lastScheduleTime:  "2021-04-28T05:59:38.0Z",
+			creationTimeStamp: zeroTime,
+			schedule:          "@every 5s",
+			missedRun:         pointer.StringPtr("2021-04-28T05:59:43.0Z"),
+			nextRun:           pointer.StringPtr("2021-04-28T05:59:48.0Z"),
+			err:               nil,
 		},
 		{
-			now:              "2021-04-28T06:49:35.079Z",
-			lastScheduleTime: "2021-04-28T06:49:35.000Z",
-			schedule:         "@every 5s",
-			missedRun:        nil,
-			nextRun:          pointer.StringPtr("2021-04-28T06:49:40.000Z"),
-			err:              nil,
+			now:               "2021-04-28T06:49:35.079Z",
+			lastScheduleTime:  "2021-04-28T06:49:35.000Z",
+			creationTimeStamp: zeroTime,
+			schedule:          "@every 5s",
+			missedRun:         nil,
+			nextRun:           pointer.StringPtr("2021-04-28T06:49:40.000Z"),
+			err:               nil,
+		},
+		{
+			now:               "2021-04-28T06:49:35.079Z",
+			lastScheduleTime:  zeroTime,
+			creationTimeStamp: "2021-04-28T06:49:35.000Z",
+			schedule:          "@every 5s",
+			missedRun:         nil,
+			nextRun:           pointer.StringPtr("2021-04-28T06:49:40.000Z"),
+			err:               nil,
+		},
+		{
+			now:               "2021-04-28T06:49:38.079Z",
+			lastScheduleTime:  zeroTime,
+			creationTimeStamp: "2021-04-28T06:49:35.000Z",
+			schedule:          "@every 5s",
+			missedRun:         nil,
+			nextRun:           pointer.StringPtr("2021-04-28T06:49:40.000Z"),
+			err:               nil,
+		},
+		{
+			now:               "2021-04-28T06:49:40.079Z",
+			lastScheduleTime:  zeroTime,
+			creationTimeStamp: "2021-04-28T06:49:35.000Z",
+			schedule:          "@every 5s",
+			missedRun:         pointer.StringPtr("2021-04-28T06:49:40.000Z"),
+			nextRun:           pointer.StringPtr("2021-04-28T06:49:45.000Z"),
+			err:               nil,
 		},
 	}
 	for _, t := range testCases {
@@ -58,8 +90,15 @@ func TestGetRecentUnmetScheduleTime(t *testing.T) {
 		g.Expect(err).To(BeNil())
 		lastScheduleTime, err := time.Parse(time.RFC3339, t.lastScheduleTime)
 		g.Expect(err).To(BeNil())
+		createTimeStamp, err := time.Parse(time.RFC3339, t.creationTimeStamp)
+		g.Expect(err).To(BeNil())
 
 		schedule := v1alpha1.Schedule{
+			ObjectMeta: metav1.ObjectMeta{
+				CreationTimestamp: metav1.Time{
+					Time: createTimeStamp,
+				},
+			},
 			Spec: v1alpha1.ScheduleSpec{
 				Schedule: t.schedule,
 			},
@@ -88,8 +127,8 @@ func TestGetRecentUnmetScheduleTime(t *testing.T) {
 			expectedErr = Equal(t.err)
 		}
 
+		g.Expect(err).To(expectedErr)
 		g.Expect(missedRun).To(expectedMissedRun)
 		g.Expect(nextRun).To(expectedNextRun)
-		g.Expect(err).To(expectedErr)
 	}
 }

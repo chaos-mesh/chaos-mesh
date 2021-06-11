@@ -67,15 +67,21 @@ func (in *AwsChaos) ValidateDelete() error {
 
 // Validate validates chaos object
 func (in *AwsChaos) Validate() error {
-	specField := field.NewPath("spec")
-	allErrs := in.Spec.validateEbsVolume(specField.Child("volumeID"))
-	allErrs = append(allErrs, in.validateAction(specField)...)
-	allErrs = append(allErrs, in.Spec.validateDeviceName(specField.Child("deviceName"))...)
+	allErrs := in.Spec.Validate()
 
 	if len(allErrs) > 0 {
 		return fmt.Errorf(allErrs.ToAggregate().Error())
 	}
 	return nil
+}
+
+func (in *AwsChaosSpec) Validate() field.ErrorList {
+	specField := field.NewPath("spec")
+	allErrs := in.validateEbsVolume(specField.Child("volumeID"))
+	allErrs = append(allErrs, in.validateAction(specField)...)
+	allErrs = append(allErrs, validateDuration(in, specField)...)
+	allErrs = append(allErrs, in.validateDeviceName(specField.Child("deviceName"))...)
+	return allErrs
 }
 
 // validateEbsVolume validates the EbsVolume
@@ -103,18 +109,18 @@ func (in *AwsChaosSpec) validateDeviceName(containerField *field.Path) field.Err
 }
 
 // ValidateScheduler validates the scheduler and duration
-func (in *AwsChaos) validateAction(spec *field.Path) field.ErrorList {
+func (in *AwsChaosSpec) validateAction(spec *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
-	switch in.Spec.Action {
+	switch in.Action {
 	case Ec2Stop, DetachVolume:
 	case Ec2Restart:
 	default:
-		err := fmt.Errorf("awschaos[%s/%s] have unknown action type", in.Namespace, in.Name)
+		err := fmt.Errorf("awschaos have unknown action type")
 		log.Error(err, "Wrong AwsChaos Action type")
 
 		actionField := spec.Child("action")
-		allErrs = append(allErrs, field.Invalid(actionField, in.Spec.Action, err.Error()))
+		allErrs = append(allErrs, field.Invalid(actionField, in.Action, err.Error()))
 	}
 	return allErrs
 }
