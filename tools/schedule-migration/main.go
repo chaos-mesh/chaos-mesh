@@ -71,7 +71,7 @@ func main() {
 			new.Metadata = old.Metadata
 			new.Kind = "Schedule"
 			new.Spec = append(new.Spec, yaml.MapItem{Key: "schedule", Value: cron})
-			new.Spec = append(new.Spec, yaml.MapItem{Key: "type", Value: old.Kind})
+			new.Spec = append(new.Spec, yaml.MapItem{Key: "type", Value: toNewKind(old.Kind)})
 			new.Spec = append(new.Spec, yaml.MapItem{Key: "historyLimit", Value: 5})
 			new.Spec = append(new.Spec, yaml.MapItem{Key: "concurrencyPolicy", Value: "Forbid"})
 			var newSpec yaml.MapSlice
@@ -99,4 +99,12 @@ func main() {
 func getKeyName(name string) string {
 	s := strings.ToLower(name)
 	return strings.ReplaceAll(s, "chaos", "Chaos")
+}
+
+func toNewKind(kind string) string {
+	if kind == "IoChaos" {
+		return "IOChaos"
+	} else {
+		return kind
+	}
 }
