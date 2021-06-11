@@ -104,7 +104,6 @@ func getKeyName(name string) string {
 func toNewKind(kind string) string {
 	if kind == "IoChaos" {
 		return "IOChaos"
-	} else {
-		return kind
 	}
+	return kind
 }
