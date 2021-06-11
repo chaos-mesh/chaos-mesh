@@ -100,3 +100,7 @@ type GcpChaosStatus struct {
 	// Needed in disk-loss.
 	AttachedDisksStrings []string `json:"attachedDiskStrings,omitempty"`
 }
+
+func (obj *GcpChaos) GetCustomStatus() interface{} {
+	return &obj.Status.AttachedDisksStrings
+}
