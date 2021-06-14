@@ -78,6 +78,9 @@ type ChaosControllerConfig struct {
 
 	// AllowHostNetworkTesting removes the restriction on chaos testing pods with `hostNetwork` set to true
 	AllowHostNetworkTesting bool `envconfig:"ALLOW_HOST_NETWORK_TESTING" default:"false"`
+
+	// PodFailurePauseImage is used to set a custom image for pod failure
+	PodFailurePauseImage string `envconfig:"POD_FAILURE_PAUSE_IMAGE" default:"gcr.io/google-containers/pause:latest"`
 }
 
 // EnvironChaosController returns the settings from the environment.
