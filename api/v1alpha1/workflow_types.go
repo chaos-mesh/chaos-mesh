@@ -119,7 +119,7 @@ func contains(arr []TemplateType, target TemplateType) bool {
 type Template struct {
 	Name     string       `json:"name"`
 	Type     TemplateType `json:"templateType"`
-	Duration *string      `json:"duration,omitempty"`
+	Deadline *string      `json:"deadline,omitempty"`
 	Tasks    []string     `json:"tasks,omitempty"`
 	// +optional
 	*EmbedChaos `json:",inline"`

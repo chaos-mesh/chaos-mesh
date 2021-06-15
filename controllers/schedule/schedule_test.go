@@ -294,13 +294,13 @@ var _ = Describe("Schedule", func() {
 								{
 									Name:     "the-entry",
 									Type:     v1alpha1.TypeSerial,
-									Duration: &duration,
+									Deadline: &duration,
 									Tasks:    []string{"hardwork"},
 								},
 								{
 									Name:     "hardwork",
 									Type:     v1alpha1.TypeSuspend,
-									Duration: &duration,
+									Deadline: &duration,
 									Tasks:    nil,
 								},
 							},
@@ -361,7 +361,7 @@ var _ = Describe("Schedule", func() {
 								{
 									Name:     "the-entry",
 									Type:     v1alpha1.TypeSerial,
-									Duration: &duration,
+									Deadline: &duration,
 									Tasks:    nil,
 								},
 							},
