@@ -88,8 +88,8 @@ func (in *GcpChaosSpec) validateAction(spec *field.Path) field.ErrorList {
 	case NodeStop, DiskLoss:
 	case NodeReset:
 	default:
-		err := fmt.Errorf("awschaos have unknown action type")
-		log.Error(err, "Wrong AwsChaos Action type")
+		err := fmt.Errorf("gcpchaos have unknown action type")
+		log.Error(err, "Wrong GcpChaos Action type")
 
 		actionField := spec.Child("action")
 		allErrs = append(allErrs, field.Invalid(actionField, in.Action, err.Error()))
