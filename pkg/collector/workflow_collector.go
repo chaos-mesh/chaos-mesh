@@ -88,7 +88,7 @@ func (it *WorkflowCollector) persistentWorkflow(workflow *v1alpha1.Workflow) err
 
 	existedEntity, err := it.store.FindByUID(context.Background(), string(workflow.UID))
 	if err != nil && !gorm.IsRecordNotFoundError(err) {
-		it.Log.Error(err, "failed to find schedule", "UID", workflow.UID)
+		it.Log.Error(err, "failed to find workflow", "UID", workflow.UID)
 		return err
 	}
 
@@ -98,7 +98,7 @@ func (it *WorkflowCollector) persistentWorkflow(workflow *v1alpha1.Workflow) err
 
 	err = it.store.Save(context.Background(), newEntity)
 	if err != nil {
-		it.Log.Error(err, "failed to update schedule", "archive", newEntity)
+		it.Log.Error(err, "failed to update workflow", "archive", newEntity)
 	}
 	return err
 }
