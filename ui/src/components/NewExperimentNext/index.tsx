@@ -34,7 +34,7 @@ interface NewExperimentProps {
 }
 
 const NewExperiment: React.ForwardRefRenderFunction<NewExperimentHandles, NewExperimentProps> = (
-  { initPanel = 'initial', onSubmit, loadFrom = true, inWorkflow = false, inSchedule = false },
+  { initPanel = 'initial', onSubmit, loadFrom = true, inWorkflow, inSchedule },
   ref
 ) => {
   const dispatch = useStoreDispatch()
@@ -104,10 +104,10 @@ const NewExperiment: React.ForwardRefRenderFunction<NewExperimentHandles, NewExp
         </Space>
       </TabPanel>
       <TabPanel value="existing" sx={{ p: 0, pt: 6 }}>
-        {loadFrom && <LoadFrom callback={fillExperiment} inSchedule={inSchedule} />}
+        {loadFrom && <LoadFrom callback={fillExperiment} inSchedule={inSchedule} inWorkflow={inWorkflow} />}
       </TabPanel>
       <TabPanel value="yaml" sx={{ p: 0, pt: 6 }}>
-        <ByYAML callback={fillExperiment} />
+        <ByYAML callback={fillExperiment} inWorkflow={inWorkflow} />
       </TabPanel>
     </TabContext>
   )

@@ -5,7 +5,7 @@ export type TemplateExperiment = {
   basic: any
 }
 export interface Template {
-  type: 'single' | 'serial' | 'parallel' | 'suspend'
+  type: 'single' | 'serial' | 'parallel' | 'suspend' | 'yaml'
   index?: number
   name: string
   duration?: string

@@ -213,10 +213,10 @@ const Add = () => {
             </StepLabel>
 
             {showNum && (
-              <Box ml={8}>
+              <Box my={3} ml={8}>
                 <Paper>
-                  <PaperTop title={T(`newW.${values.type}Title`)} />
-                  <Grid container spacing={6}>
+                  <PaperTop title={T(`newW.${values.type}Title`)} boxProps={{ mb: 3 }} />
+                  <Grid container spacing={3}>
                     <Grid item xs={6}>
                       <TextField
                         name="name"
@@ -249,10 +249,14 @@ const Add = () => {
         )}
       </Formik>
       <Box ml={8}>
-        <Box style={{ display: otherTypes ? 'none' : 'initial' }}>
+        <Box display={otherTypes ? 'none' : 'initial'}>
           <NewExperimentNext ref={newERef} initPanel="existing" onSubmit={onSubmit} inWorkflow={true} />
         </Box>
-        {otherTypes && <Suspend />}
+        {otherTypes && (
+          <Box mt={3}>
+            <Suspend />
+          </Box>
+        )}
       </Box>
     </>
   )

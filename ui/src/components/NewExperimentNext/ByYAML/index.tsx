@@ -17,9 +17,10 @@ const YAMLEditor = loadable(() => import('components/YAMLEditor'))
 
 interface ByYAMLProps {
   callback?: (data: any) => void
+  inWorkflow?: boolean
 }
 
-const ByYAML: React.FC<ByYAMLProps> = ({ callback }) => {
+const ByYAML: React.FC<ByYAMLProps> = ({ callback, inWorkflow }) => {
   const intl = useIntl()
 
   const dispatch = useStoreDispatch()

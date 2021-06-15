@@ -35,31 +35,34 @@ const Suspend: React.FC<SuspendProps> = ({ initialValues, onSubmit }) => {
 
   return (
     <Paper>
-      <PaperTop title={T('newW.suspendTitle')} />
-      <Formik initialValues={initialValues || { name: '', duration: '' }} onSubmit={onSubmit || defaultOnSubmit}>
-        {({ errors, touched }) => (
-          <Form>
-            <Space>
-              <TextField
-                name="name"
-                label={T('common.name')}
-                validate={validateName(T('newW.nameValidation') as unknown as string)}
-                helperText={errors.name && touched.name ? errors.name : T('newW.node.nameHelper')}
-                error={errors.name && touched.name ? true : false}
-              />
-              <TextField
-                fast
-                name="duration"
-                label={T('newE.run.duration')}
-                validate={validateDuration(T('newW.durationValidation') as unknown as string)}
-                helperText={errors.duration && touched.duration ? errors.duration : T('newW.node.durationHelper')}
-                error={errors.duration && touched.duration ? true : false}
-              />
+      <Space>
+        <PaperTop title={T('newW.suspendTitle')} />
+        <Formik initialValues={initialValues || { name: '', duration: '' }} onSubmit={onSubmit || defaultOnSubmit}>
+          {({ errors, touched }) => (
+            <Form>
+              <Space>
+                <TextField
+                  fast
+                  name="name"
+                  label={T('common.name')}
+                  validate={validateName(T('newW.nameValidation') as unknown as string)}
+                  helperText={errors.name && touched.name ? errors.name : T('newW.node.nameHelper')}
+                  error={errors.name && touched.name ? true : false}
+                />
+                <TextField
+                  fast
+                  name="duration"
+                  label={T('newE.run.duration')}
+                  validate={validateDuration(T('newW.durationValidation') as unknown as string)}
+                  helperText={errors.duration && touched.duration ? errors.duration : T('newW.node.durationHelper')}
+                  error={errors.duration && touched.duration ? true : false}
+                />
+              </Space>
               <Submit />
-            </Space>
-          </Form>
-        )}
-      </Formik>
+            </Form>
+          )}
+        </Formik>
+      </Space>
     </Paper>
   )
 }

@@ -18,9 +18,10 @@ import { useStoreDispatch } from 'store'
 interface LoadFromProps {
   callback?: (data: any) => void
   inSchedule?: boolean
+  inWorkflow?: boolean
 }
 
-const LoadFrom: React.FC<LoadFromProps> = ({ callback, inSchedule = false }) => {
+const LoadFrom: React.FC<LoadFromProps> = ({ callback, inSchedule, inWorkflow }) => {
   const intl = useIntl()
 
   const dispatch = useStoreDispatch()
@@ -56,13 +57,17 @@ const LoadFrom: React.FC<LoadFromProps> = ({ callback, inSchedule = false }) => 
         schedules: data[2] ? data[2].data : [],
       })
 
-      setPredefined(await (await getDB()).getAll('predefined' as never)) // never?
+      let _predefined = await (await getDB()).getAll('predefined' as never) // never?
+      if (inWorkflow) {
+        _predefined = _predefined.filter((d) => d.kind !== 'Schedule')
+      }
+      setPredefined(_predefined)
 
       setLoading(false)
     }
 
     fetchAll()
-  }, [inSchedule])
+  }, [inSchedule, inWorkflow])
 
   const onRadioChange = (e: any) => {
     const [type, uuid] = e.target.value.split('+')

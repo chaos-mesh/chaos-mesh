@@ -9,7 +9,7 @@ export const workflows = (params?: WorkflowParams) =>
     params,
   })
 
-export const detail = (ns: string, name: string) => http.get<WorkflowSingle>(`/workflows/${ns}/${name}`)
+export const single = (ns: string, name: string) => http.get<WorkflowSingle>(`/workflows/${ns}/${name}`)
 
 export const update = (ns: string, name: string, data: WorkflowSingle['kube_object']) =>
   http.put(`/workflows/${ns}/${name}`, data)
