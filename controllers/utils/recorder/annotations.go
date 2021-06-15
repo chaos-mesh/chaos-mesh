@@ -15,6 +15,7 @@ package recorder
 
 import (
 	"encoding"
+	"encoding/json"
 	"errors"
 	"reflect"
 	"strconv"
@@ -48,15 +49,19 @@ func generateAnnotations(e ChaosEvent) (map[string]string, error) {
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 			annotations[key] = strconv.Itoa(int(field.Int()))
 		default:
-			if field, ok := field.Interface().(encoding.TextMarshaler); ok {
-				text, err := field.MarshalText()
+			if marshaler, ok := field.Interface().(encoding.TextMarshaler); ok {
+				text, err := marshaler.MarshalText()
 				if err != nil {
 					return nil, err
 				}
 
 				annotations[key] = string(text)
 			} else {
-				return nil, ErrInvalidType
+				text, err := json.Marshal(field.Interface())
+				if err != nil {
+					return nil, err
+				}
+				annotations[key] = string(text)
 			}
 		}
 	}
@@ -106,7 +111,10 @@ func FromAnnotations(annotations map[string]string) (ChaosEvent, error) {
 					return nil, err
 				}
 			} else {
-				return nil, ErrInvalidType
+				err := json.Unmarshal([]byte(annotations[key]), field.Addr().Interface())
+				if err != nil {
+					return nil, err
+				}
 			}
 		}
 	}
