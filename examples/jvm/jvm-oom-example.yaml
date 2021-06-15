@@ -1,18 +1,21 @@
 apiVersion: chaos-mesh.org/v1alpha1
-kind: JVMChaos
+kind: Schedule
 metadata:
   name: jvm-oom-example
   namespace: app
 spec:
-  action: oom
-  target: jvm
-  flags:
-    area: "HEAP"
-    wild-mode: "true"
-  mode: one
-  selector:
-    labelSelectors:
-      app: springboot-jvmchaos-demo
-  duration: "30s"
-  scheduler:
-    cron: "@every 1m"
+  schedule: '@every 1m'
+  type: JVMChaos
+  historyLimit: 5
+  concurrencyPolicy: Forbid
+  jvmChaos:
+    action: oom
+    target: jvm
+    flags:
+      area: HEAP
+      wild-mode: "true"
+    mode: one
+    selector:
+      labelSelectors:
+        app: springboot-jvmchaos-demo
+    duration: 30s
