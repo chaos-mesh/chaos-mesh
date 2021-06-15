@@ -16,28 +16,29 @@ package controllers
 import (
 	"context"
 	"fmt"
-	"k8s.io/apimachinery/pkg/types"
 	"time"
+
+	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 )
 
 type DeadlineReconciler struct {
 	*ChildNodesFetcher
 	kubeClient    client.Client
-	eventRecorder record.EventRecorder
+	eventRecorder recorder.ChaosRecorder
 	logger        logr.Logger
 }
 
-func NewDeadlineReconciler(kubeClient client.Client, eventRecorder record.EventRecorder, logger logr.Logger) *DeadlineReconciler {
+func NewDeadlineReconciler(kubeClient client.Client, eventRecorder recorder.ChaosRecorder, logger logr.Logger) *DeadlineReconciler {
 	return &DeadlineReconciler{
 		ChildNodesFetcher: NewChildNodesFetcher(kubeClient, logger),
 		kubeClient:        kubeClient,
@@ -79,6 +80,10 @@ func (it *DeadlineReconciler) Reconcile(request reconcile.Request) (reconcile.Re
 				reason = v1alpha1.NodeDeadlineOmitted
 			} else {
 				reason = v1alpha1.NodeDeadlineExceed
+			}
+
+			if !ConditionEqualsTo(nodeNeedUpdate.Status, v1alpha1.ConditionDeadlineExceed, corev1.ConditionTrue) && reason == v1alpha1.NodeDeadlineExceed {
+				it.eventRecorder.Event(&node, recorder.DeadlineExceed{})
 			}
 
 			SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{

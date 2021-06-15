@@ -105,6 +105,7 @@ const (
 	EntryCreated             string = "EntryCreated"
 	InvalidEntry             string = "InvalidEntry"
 	NodeAccomplished         string = "NodeAccomplished"
+	NodesCreated             string = "NodesCreated"
 	NodeDeadlineExceed       string = "NodeDeadlineExceed"
 	NodeDeadlineNotExceed    string = "NodeDeadlineNotExceed"
 	NodeDeadlineOmitted      string = "NodeDeadlineOmitted"
