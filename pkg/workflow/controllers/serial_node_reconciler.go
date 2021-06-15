@@ -22,23 +22,23 @@ import (
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 )
 
 // SerialNodeReconciler watches on nodes which type is Serial
 type SerialNodeReconciler struct {
 	*ChildNodesFetcher
 	kubeClient    client.Client
-	eventRecorder record.EventRecorder
+	eventRecorder recorder.ChaosRecorder
 	logger        logr.Logger
 }
 
-func NewSerialNodeReconciler(kubeClient client.Client, eventRecorder record.EventRecorder, logger logr.Logger) *SerialNodeReconciler {
+func NewSerialNodeReconciler(kubeClient client.Client, eventRecorder recorder.ChaosRecorder, logger logr.Logger) *SerialNodeReconciler {
 	return &SerialNodeReconciler{
 		ChildNodesFetcher: NewChildNodesFetcher(kubeClient, logger),
 		kubeClient:        kubeClient,
@@ -253,7 +253,6 @@ func (it *SerialNodeReconciler) syncChildNodes(ctx context.Context, node v1alpha
 		return err
 	}
 
-	// TODO: emit event
 	var childrenNames []string
 	for _, childNode := range childNodes {
 		err := it.kubeClient.Create(ctx, childNode)
@@ -265,6 +264,7 @@ func (it *SerialNodeReconciler) syncChildNodes(ctx context.Context, node v1alpha
 		}
 		childrenNames = append(childrenNames, childNode.Name)
 	}
+	it.eventRecorder.Event(&node, recorder.NodesCreated{ChildNodes: childrenNames})
 	it.logger.Info("serial node spawn new child node",
 		"node", fmt.Sprintf("%s/%s", node.Namespace, node.Name),
 		"child node", childrenNames)
