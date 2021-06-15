@@ -24,6 +24,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
@@ -31,11 +32,14 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 )
 
+var log = ctrl.Log.WithName("archive api")
+
 // Service defines a handler service for archive experiments.
 type Service struct {
 	archive         core.ExperimentStore
 	archiveSchedule core.ScheduleStore
 	event           core.EventStore
+	workflowStore   core.WorkflowStore
 	conf            *config.ChaosDashboardConfig
 }
 
@@ -44,12 +48,14 @@ func NewService(
 	archive core.ExperimentStore,
 	archiveSchedule core.ScheduleStore,
 	event core.EventStore,
+	workflowStore core.WorkflowStore,
 	conf *config.ChaosDashboardConfig,
 ) *Service {
 	return &Service{
 		archive:         archive,
 		archiveSchedule: archiveSchedule,
 		event:           event,
+		workflowStore:   workflowStore,
 		conf:            conf,
 	}
 }
@@ -75,6 +81,11 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint.GET("/schedules/:uid", s.detailSchedule)
 	endpoint.DELETE("/schedules/:uid", s.deleteSchedule)
 	endpoint.DELETE("/schedules", s.batchDeleteSchedule)
+
+	endpoint.GET("/workflows", s.listWorkflow)
+	endpoint.GET("/workflows/:uid", s.detailWorkflow)
+	endpoint.DELETE("/workflows/:uid", s.deleteWorkflow)
+	endpoint.DELETE("/workflows", s.batchDeleteWorkflow)
 }
 
 // Archive defines the basic information of an archive.
@@ -460,6 +471,184 @@ func (s *Service) batchDeleteSchedule(c *gin.Context) {
 	uidSlice = strings.Split(uids, ",")
 
 	if err = s.archiveSchedule.DeleteByUIDs(context.Background(), uidSlice); err != nil {
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+	if err = s.event.DeleteByUIDs(context.Background(), uidSlice); err != nil {
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+
+	c.JSON(http.StatusOK, StatusResponse{Status: "success"})
+}
+
+// @Summary Get archived workflow.
+// @Description Get archived workflow.
+// @Tags archives
+// @Produce json
+// @Param namespace query string false "namespace"
+// @Param name query string false "name"
+// @Success 200 {array} Archive
+// @Router /archives/workflows [get]
+// @Failure 500 {object} utils.APIError
+func (s *Service) listWorkflow(c *gin.Context) {
+	name := c.Query("name")
+	ns := c.Query("namespace")
+
+	metas, err := s.workflowStore.ListMeta(context.Background(), ns, name, true)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
+		return
+	}
+
+	archives := make([]Archive, 0)
+
+	for _, meta := range metas {
+		parsedTime, err := time.Parse(time.RFC3339, meta.CreatedAt)
+		if err != nil {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
+			return
+		}
+		archives = append(archives, Archive{
+			UID:       meta.UID,
+			Kind:      v1alpha1.KindWorkflow,
+			Namespace: meta.Namespace,
+			Name:      meta.Name,
+			CreatedAt: parsedTime,
+		})
+	}
+
+	c.JSON(http.StatusOK, archives)
+}
+
+// @Summary Get the detail of an archived workflow.
+// @Description Get the detail of an archived workflow.
+// @Tags archives
+// @Produce json
+// @Param uid query string true "uid"
+// @Success 200 {object} Detail
+// @Router /archives/workflows/{uid} [get]
+// @Failure 500 {object} utils.APIError
+func (s *Service) detailWorkflow(c *gin.Context) {
+	var (
+		err    error
+		detail Detail
+	)
+	uid := c.Param("uid")
+
+	if uid == "" {
+		c.Status(http.StatusBadRequest)
+		_ = c.Error(utils.ErrInvalidRequest.New("uid cannot be empty"))
+		return
+	}
+
+	meta, err := s.workflowStore.FindByUID(context.Background(), uid)
+	if err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInvalidRequest.New("the archive schedule is not found"))
+		} else {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
+		}
+		return
+	}
+
+	workflow := &v1alpha1.Workflow{}
+	if err := json.Unmarshal([]byte(meta.Workflow), &workflow); err != nil {
+		c.Status(http.StatusInternalServerError)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		return
+	}
+
+	parsedTime, err := time.Parse(time.RFC3339, meta.CreatedAt)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
+		return
+	}
+
+	detail = Detail{
+		Archive: Archive{
+			UID:       meta.UID,
+			Kind:      v1alpha1.KindWorkflow,
+			Name:      meta.Name,
+			Namespace: meta.Namespace,
+			CreatedAt: parsedTime,
+		},
+		KubeObject: core.KubeObjectDesc{
+			TypeMeta: metav1.TypeMeta{
+				APIVersion: workflow.APIVersion,
+				Kind:       workflow.Kind,
+			},
+			Meta: core.KubeObjectMeta{
+				Name:        workflow.Name,
+				Namespace:   workflow.Namespace,
+				Labels:      workflow.Labels,
+				Annotations: workflow.Annotations,
+			},
+			Spec: workflow.Spec,
+		},
+	}
+
+	c.JSON(http.StatusOK, detail)
+}
+
+// @Summary Delete the specified archived workflow.
+// @Description Delete the specified archived workflow.
+// @Tags archives
+// @Produce json
+// @Param uid path string true "uid"
+// @Success 200 {object} StatusResponse
+// @Failure 500 {object} utils.APIError
+// @Router /archives/workflows/{uid} [delete]
+func (s *Service) deleteWorkflow(c *gin.Context) {
+	var (
+		err error
+	)
+
+	uid := c.Param("uid")
+
+	if err = s.workflowStore.DeleteByUID(context.Background(), uid); err != nil {
+		c.Status(http.StatusInternalServerError)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+	} else {
+		if err = s.event.DeleteByUID(context.Background(), uid); err != nil {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		} else {
+			c.JSON(http.StatusOK, StatusResponse{Status: "success"})
+		}
+	}
+}
+
+// @Summary Delete the specified archived workflows.
+// @Description Delete the specified archived workflows.
+// @Tags archives
+// @Produce json
+// @Param uids query string true "uids"
+// @Success 200 {object} StatusResponse
+// @Failure 500 {object} utils.APIError
+// @Router /archives/workflows [delete]
+func (s *Service) batchDeleteWorkflow(c *gin.Context) {
+	var (
+		err      error
+		uidSlice []string
+	)
+
+	uids := c.Query("uids")
+	if uids == "" {
+		c.Status(http.StatusBadRequest)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("uids cannot be empty")))
+		return
+	}
+	uidSlice = strings.Split(uids, ",")
+
+	if err = s.workflowStore.DeleteByUIDs(context.Background(), uidSlice); err != nil {
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
 		c.Status(http.StatusInternalServerError)
 		return
