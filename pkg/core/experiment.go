@@ -98,19 +98,19 @@ type ScopeInfo struct {
 
 // SelectorInfo defines the selector options of the Experiment.
 type SelectorInfo struct {
-	Namespaces          []string                          `json:"namespaces" binding:"NamespaceSelectorsValid"`
+	Namespaces          []string                          `json:"namespaces,omitempty" binding:"NamespaceSelectorsValid"`
 	Nodes               []string                          `json:"nodes,omitempty"`
 	NodeSelectors       map[string]string                 `json:"node_selectors,omitempty"`
-	FieldSelectors      map[string]string                 `json:"field_selectors" binding:"MapSelectorsValid"`
-	LabelSelectors      map[string]string                 `json:"label_selectors" binding:"MapSelectorsValid"`
-	ExpressionSelectors []metav1.LabelSelectorRequirement `json:"expression_selectors" binding:"RequirementSelectorsValid"`
-	AnnotationSelectors map[string]string                 `json:"annotation_selectors" binding:"MapSelectorsValid"`
-	PodPhaseSelectors   []string                          `json:"phase_selectors" binding:"PhaseSelectorsValid"`
+	FieldSelectors      map[string]string                 `json:"field_selectors,omitempty" binding:"MapSelectorsValid"`
+	LabelSelectors      map[string]string                 `json:"label_selectors,omitempty" binding:"MapSelectorsValid"`
+	ExpressionSelectors []metav1.LabelSelectorRequirement `json:"expression_selectors,omitempty" binding:"RequirementSelectorsValid"`
+	AnnotationSelectors map[string]string                 `json:"annotation_selectors,omitempty" binding:"MapSelectorsValid"`
+	PodPhaseSelectors   []string                          `json:"phase_selectors,omitempty" binding:"PhaseSelectorsValid"`
 
 	// Pods is a map of string keys and a set values that used to select pods.
 	// The key defines the namespace which pods belong,
 	// and the each values is a set of pod names.
-	Pods map[string][]string `json:"pods" binding:"PodsValid"`
+	Pods map[string][]string `json:"pods,omitempty" binding:"PodsValid"`
 }
 
 // ParseSelector parses SelectorInfo to v1alpha1.SelectorSpec
