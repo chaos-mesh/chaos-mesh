@@ -59,14 +59,19 @@ func (in *Schedule) ValidateDelete() error {
 
 // Validate validates chaos object
 func (in *Schedule) Validate() error {
-	specField := field.NewPath("spec")
-	allErrs := field.ErrorList{}
-	allErrs = append(allErrs, in.Spec.validateSchedule(specField.Child("schedule"))...)
-	allErrs = append(allErrs, in.Spec.validateChaos(specField)...)
+	allErrs := in.Spec.Validate()
 	if len(allErrs) > 0 {
 		return fmt.Errorf(allErrs.ToAggregate().Error())
 	}
 	return nil
+}
+
+func (in *ScheduleSpec) Validate() field.ErrorList {
+	specField := field.NewPath("spec")
+	allErrs := field.ErrorList{}
+	allErrs = append(allErrs, in.validateSchedule(specField.Child("schedule"))...)
+	allErrs = append(allErrs, in.validateChaos(specField)...)
+	return allErrs
 }
 
 // validateSchedule validates the cron
@@ -85,28 +90,8 @@ func (in *ScheduleSpec) validateSchedule(schedule *field.Path) field.ErrorList {
 // validateChaos validates the chaos
 func (in *ScheduleSpec) validateChaos(chaos *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
-	switch in.Type {
-	case ScheduleTypeAwsChaos:
-		allErrs = append(allErrs, in.ScheduleItem.AwsChaos.validateEbsVolume(chaos)...)
-		allErrs = append(allErrs, in.ScheduleItem.AwsChaos.validateDeviceName(chaos)...)
-	case ScheduleTypeDNSChaos:
-	case ScheduleTypeGcpChaos:
-		allErrs = append(allErrs, in.ScheduleItem.GcpChaos.validateDeviceName(chaos)...)
-	case ScheduleTypeHTTPChaos:
-	case ScheduleTypeIOChaos:
-		allErrs = append(allErrs, in.ScheduleItem.IOChaos.validateDelay(chaos)...)
-		allErrs = append(allErrs, in.ScheduleItem.IOChaos.validateErrno(chaos)...)
-		allErrs = append(allErrs, in.ScheduleItem.IOChaos.validatePercent(chaos)...)
-	case ScheduleTypeJVMChaos:
-	case ScheduleTypeKernelChaos:
-	case ScheduleTypeNetworkChaos:
-	case ScheduleTypePodChaos:
-		allErrs = append(allErrs, in.ScheduleItem.PodChaos.validateContainerName(chaos)...)
-	case ScheduleTypeStressChaos:
-		allErrs = append(allErrs, in.ScheduleItem.StressChaos.Validate(chaos)...)
-	case ScheduleTypeTimeChaos:
-		allErrs = append(allErrs, in.ScheduleItem.TimeChaos.validateTimeOffset(chaos)...)
-	case ScheduleTypeWorkflow:
+	if in.Type != ScheduleTypeWorkflow {
+		allErrs = append(allErrs, in.EmbedChaos.Validate(string(in.Type))...)
 	}
 	return allErrs
 }

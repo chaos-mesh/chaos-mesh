@@ -18,6 +18,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"reflect"
 	"strings"
 	"sync"
 	"time"
@@ -486,7 +487,7 @@ func (s *Service) getPodChaosDetail(namespace string, name string, kubeCli clien
 			},
 			UID:     chaos.GetChaos().UID,
 			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
-			Status:  string(v1alpha1.GetChaosState(chaos.Status.Conditions)),
+			Status:  string(utils.GetChaosState(chaos)),
 		},
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
@@ -530,7 +531,7 @@ func (s *Service) getIOChaosDetail(namespace string, name string, kubeCli client
 			},
 			UID:     chaos.GetChaos().UID,
 			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
-			Status:  string(v1alpha1.GetChaosState(chaos.Status.Conditions)),
+			Status:  string(utils.GetChaosState(chaos)),
 		},
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
@@ -574,7 +575,7 @@ func (s *Service) getNetworkChaosDetail(namespace string, name string, kubeCli c
 			},
 			UID:     chaos.GetChaos().UID,
 			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
-			Status:  string(v1alpha1.GetChaosState(chaos.Status.Conditions)),
+			Status:  string(utils.GetChaosState(chaos)),
 		},
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
@@ -617,7 +618,7 @@ func (s *Service) getTimeChaosDetail(namespace string, name string, kubeCli clie
 				Name:      chaos.Name,
 			},
 			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
-			Status:  string(v1alpha1.GetChaosState(chaos.Status.Conditions)),
+			Status:  string(utils.GetChaosState(chaos)),
 			UID:     chaos.GetChaos().UID,
 		},
 		KubeObject: core.KubeObjectDesc{
@@ -661,7 +662,7 @@ func (s *Service) getKernelChaosDetail(namespace string, name string, kubeCli cl
 				Name:      chaos.Name,
 			},
 			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
-			Status:  string(v1alpha1.GetChaosState(chaos.Status.Conditions)),
+			Status:  string(utils.GetChaosState(chaos)),
 			UID:     chaos.GetChaos().UID,
 		},
 		KubeObject: core.KubeObjectDesc{
@@ -705,7 +706,7 @@ func (s *Service) getStressChaosDetail(namespace string, name string, kubeCli cl
 				Name:      chaos.Name,
 			},
 			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
-			Status:  string(v1alpha1.GetChaosState(chaos.Status.Conditions)),
+			Status:  string(utils.GetChaosState(chaos)),
 			UID:     chaos.GetChaos().UID,
 		},
 		KubeObject: core.KubeObjectDesc{
@@ -749,7 +750,7 @@ func (s *Service) getDNSChaosDetail(namespace string, name string, kubeCli clien
 				Name:      chaos.Name,
 			},
 			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
-			Status:  string(v1alpha1.GetChaosState(chaos.Status.Conditions)),
+			Status:  string(utils.GetChaosState(chaos)),
 			UID:     chaos.GetChaos().UID,
 		},
 		KubeObject: core.KubeObjectDesc{
@@ -793,7 +794,7 @@ func (s *Service) getAwsChaosDetail(namespace string, name string, kubeCli clien
 				Name:      chaos.Name,
 			},
 			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
-			Status:  string(v1alpha1.GetChaosState(chaos.Status.Conditions)),
+			Status:  string(utils.GetChaosState(chaos)),
 			UID:     chaos.GetChaos().UID,
 		},
 		KubeObject: core.KubeObjectDesc{
@@ -837,7 +838,7 @@ func (s *Service) getGcpChaosDetail(namespace string, name string, kubeCli clien
 				Name:      chaos.Name,
 			},
 			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
-			Status:  string(v1alpha1.GetChaosState(chaos.Status.Conditions)),
+			Status:  string(utils.GetChaosState(chaos)),
 			UID:     chaos.GetChaos().UID,
 		},
 		KubeObject: core.KubeObjectDesc{
@@ -893,11 +894,15 @@ func (s *Service) listExperiments(c *gin.Context) {
 			utils.SetErrorForGinCtx(c, err)
 			return
 		}
-		for _, chaos := range list.ListChaos() {
+
+		items := reflect.ValueOf(list.ChaosList).Elem().FieldByName("Items")
+		for i := 0; i < items.Len(); i++ {
+			item := items.Index(i).Addr().Interface().(v1alpha1.InnerObject)
+			chaos := item.GetChaos()
 			if name != "" && chaos.Name != name {
 				continue
 			}
-			status := v1alpha1.GetChaosState(chaos.Status.Conditions)
+			status := utils.GetChaosState(item)
 			exps = append(exps, &Experiment{
 				Base: Base{
 					Name:      chaos.Name,
@@ -1348,21 +1353,24 @@ func (s *Service) state(c *gin.Context) {
 				return err
 			}
 			m.Lock()
-			for _, chaos := range list.ListChaos() {
-				state := v1alpha1.GetChaosState(chaos.Status.Conditions)
+
+			items := reflect.ValueOf(list.ChaosList).Elem().FieldByName("Items")
+			for i := 0; i < items.Len(); i++ {
+				item := items.Index(i).Addr().Interface().(v1alpha1.InnerObject)
+				state := utils.GetChaosState(item)
 				if err != nil {
 					c.Status(http.StatusInternalServerError)
 					_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
 					return err
 				}
 				switch state {
-				case v1alpha1.Paused:
+				case utils.Paused:
 					states.Paused++
-				case v1alpha1.Running:
+				case utils.Running:
 					states.Running++
-				case v1alpha1.Injecting:
+				case utils.Injecting:
 					states.Injecting++
-				case v1alpha1.Finished:
+				case utils.Finished:
 					states.Finished++
 				}
 			}

@@ -53,34 +53,6 @@ var allScheduleTemplateType = []ScheduleTemplateType{
 
 }
 
-type ScheduleItem struct {
-	// +optional
-	AwsChaos *AwsChaosSpec `json:"awsChaos,omitempty"`
-	// +optional
-	DNSChaos *DNSChaosSpec `json:"dnsChaos,omitempty"`
-	// +optional
-	GcpChaos *GcpChaosSpec `json:"gcpChaos,omitempty"`
-	// +optional
-	HTTPChaos *HTTPChaosSpec `json:"httpChaos,omitempty"`
-	// +optional
-	IOChaos *IOChaosSpec `json:"ioChaos,omitempty"`
-	// +optional
-	JVMChaos *JVMChaosSpec `json:"jvmChaos,omitempty"`
-	// +optional
-	KernelChaos *KernelChaosSpec `json:"kernelChaos,omitempty"`
-	// +optional
-	NetworkChaos *NetworkChaosSpec `json:"networkChaos,omitempty"`
-	// +optional
-	PodChaos *PodChaosSpec `json:"podChaos,omitempty"`
-	// +optional
-	StressChaos *StressChaosSpec `json:"stressChaos,omitempty"`
-	// +optional
-	TimeChaos *TimeChaosSpec `json:"timeChaos,omitempty"`
-	// +optional
-	Workflow *WorkflowSpec `json:"workflow,omitempty"`
-
-}
-
 func (it *ScheduleItem) SpawnNewObject(templateType ScheduleTemplateType) (runtime.Object, metav1.Object, error) {
 
 	switch templateType {
