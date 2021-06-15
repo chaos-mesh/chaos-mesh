@@ -62,6 +62,11 @@ func (it *DeadlineReconciler) Reconcile(request reconcile.Request) (reconcile.Re
 				return err
 			}
 
+			if ConditionEqualsTo(nodeNeedUpdate.Status,v1alpha1.ConditionDeadlineExceed,corev1.ConditionTrue) {
+				// no need to update
+				return nil
+			}
+
 			var reason string
 			if ConditionEqualsTo(nodeNeedUpdate.Status, v1alpha1.ConditionAccomplished, corev1.ConditionTrue) {
 				reason = v1alpha1.NodeDeadlineOmitted
@@ -88,6 +93,12 @@ func (it *DeadlineReconciler) Reconcile(request reconcile.Request) (reconcile.Re
 			if err != nil {
 				return err
 			}
+
+			if ConditionEqualsTo(nodeNeedUpdate.Status,v1alpha1.ConditionDeadlineExceed,corev1.ConditionFalse) {
+				// no need to update
+				return nil
+			}
+
 			SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
 				Type:   v1alpha1.ConditionDeadlineExceed,
 				Status: corev1.ConditionFalse,
