@@ -50,6 +50,7 @@ func NewServer(
 	experimentArchive core.ExperimentStore,
 	scheduleArchive core.ScheduleStore,
 	event core.EventStore,
+	workflowStore core.WorkflowStore,
 ) (*Server, client.Client, client.Reader, *runtime.Scheme) {
 	s := &Server{}
 
@@ -118,6 +119,15 @@ func NewServer(
 		event:  event,
 	}).Setup(s.Manager, &v1.Event{}); err != nil {
 		log.Error(err, "unable to create collector", "collector", v1alpha1.KindSchedule)
+		os.Exit(1)
+	}
+
+	if err = (&WorkflowCollector{
+		kubeClient: s.Manager.GetClient(),
+		Log:        ctrl.Log.WithName("workflow-collector").WithName(v1alpha1.KindWorkflow),
+		store:      workflowStore,
+	}).Setup(s.Manager, &v1alpha1.Workflow{}); err != nil {
+		log.Error(err, "unable to create collector", "collector", v1alpha1.KindWorkflow)
 		os.Exit(1)
 	}
 
