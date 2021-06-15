@@ -1,15 +1,18 @@
 apiVersion: chaos-mesh.org/v1alpha1
-kind: PodChaos
+kind: Schedule
 metadata:
   name: web-show-pod-failure
 spec:
-  action: pod-failure
-  mode: one
-  duration: "30s"
-  selector:
-    namespaces:
+  schedule: '@every 2m'
+  type: PodChaos
+  historyLimit: 5
+  concurrencyPolicy: Forbid
+  podChaos:
+    action: pod-failure
+    mode: one
+    duration: 30s
+    selector:
+      namespaces:
       - default
-    labelSelectors:
-      "app": "web-show"
-  scheduler:
-    cron: "@every 2m"
+      labelSelectors:
+        app: web-show
