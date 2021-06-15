@@ -52,6 +52,7 @@ func TestGenerateAnnotations(t *testing.T) {
 		{map[string]string{"chaos-mesh.org/name": "test", "chaos-mesh.org/type": "schedule-spawn"}, ScheduleSpawn{Name: "test"}},
 		{map[string]string{"chaos-mesh.org/running-name": "test", "chaos-mesh.org/type": "schedule-forbid"}, ScheduleForbid{RunningName: "test"}},
 		{map[string]string{"chaos-mesh.org/running-name": "test", "chaos-mesh.org/type": "schedule-skip-remove-history"}, ScheduleSkipRemoveHistory{RunningName: "test"}},
+		{map[string]string{"chaos-mesh.org/type": "nodes-created", "chaos-mesh.org/child-nodes": "[\"node-a\",\"node-b\"]"}, NodesCreated{ChildNodes: []string{"node-a", "node-b"}}},
 	}
 
 	for _, c := range testCases {
