@@ -1,14 +1,17 @@
 apiVersion: chaos-mesh.org/v1alpha1
-kind: PodChaos
+kind: Schedule
 metadata:
   name: web-show-pod-kill
 spec:
-  action: pod-kill
-  mode: one
-  selector:
-    namespaces:
+  schedule: '@every 1m'
+  type: PodChaos
+  historyLimit: 5
+  concurrencyPolicy: Forbid
+  podChaos:
+    action: pod-kill
+    mode: one
+    selector:
+      namespaces:
       - default
-    labelSelectors:
-      "app": "web-show"
-  scheduler:
-    cron: "@every 1m"
+      labelSelectors:
+        app: web-show
