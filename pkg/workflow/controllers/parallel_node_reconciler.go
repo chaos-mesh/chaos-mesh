@@ -143,6 +143,10 @@ func (it *ParallelNodeReconciler) syncChildNodes(ctx context.Context, node v1alp
 		return nil
 	}
 
+	if WorkflowNodeFinished(node.Status) {
+		return nil
+	}
+
 	activeChildNodes, finishedChildNodes, err := it.fetchChildNodes(ctx, node)
 	if err != nil {
 		return err
