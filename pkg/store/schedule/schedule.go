@@ -130,7 +130,7 @@ func (e *ScheduleStore) DeleteByUIDs(_ context.Context, uids []string) error {
 
 // DeleteIncompleteSchedules implements the core.ScheduleStore.DeleteIncompleteSchedules method.
 func (e *ScheduleStore) DeleteIncompleteSchedules(_ context.Context) error {
-	return e.db.Where("finish_time IS NULL").Unscoped().Delete(core.Event{}).Error
+	return e.db.Where("finish_time IS NULL").Unscoped().Delete(core.Schedule{}).Error
 }
 
 func constructQueryArgs(kind, ns, name, uid string) (string, []string) {
