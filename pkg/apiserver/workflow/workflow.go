@@ -18,11 +18,9 @@ import (
 	"fmt"
 	"net/http"
 
-	ctrl "sigs.k8s.io/controller-runtime"
-
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
-
 	"github.com/gin-gonic/gin"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
