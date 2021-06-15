@@ -49,7 +49,7 @@ func (r *ScheduleCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	err := r.Get(ctx, req.NamespacedName, schedule)
 	if apierrors.IsNotFound(err) {
 		if err = r.archiveSchedule(req.Namespace, req.Name); err != nil {
-			r.Log.Error(err, "failed to archive experiment")
+			r.Log.Error(err, "failed to archive schedule")
 		}
 		return ctrl.Result{}, nil
 	}
@@ -60,13 +60,13 @@ func (r *ScheduleCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	if !schedule.DeletionTimestamp.IsZero() {
 		if err = r.archiveSchedule(req.Namespace, req.Name); err != nil {
-			r.Log.Error(err, "failed to archive experiment")
+			r.Log.Error(err, "failed to archive schedule")
 		}
 		return ctrl.Result{}, nil
 	}
 
 	if err := r.setUnarchivedSchedule(req, *schedule); err != nil {
-		r.Log.Error(err, "failed to archive experiment")
+		r.Log.Error(err, "failed to archive schedule")
 		// ignore error here
 	}
 
