@@ -1456,7 +1456,13 @@ func (s *Service) updatePodChaos(exp *core.KubeObjectDesc, kubeCli client.Client
 	chaos.SetAnnotations(meta.Annotations)
 
 	var spec v1alpha1.PodChaosSpec
-	mapstructure.Decode(exp.Spec, &spec)
+	bytes, err := json.Marshal(exp.Spec)
+	if err != nil {
+		return err
+	}
+	if err = json.Unmarshal(bytes, &spec); err != nil {
+		return err
+	}
 	chaos.Spec = spec
 
 	return kubeCli.Update(context.Background(), chaos)
@@ -1476,14 +1482,14 @@ func (s *Service) updateNetworkChaos(exp *core.KubeObjectDesc, kubeCli client.Cl
 
 	var spec v1alpha1.NetworkChaosSpec
 	mapstructure.Decode(exp.Spec, &spec)
-	chaos.Spec = spec
-
-	var tcParameter v1alpha1.TcParameter
-	err := mapstructure.Decode(exp.Spec, &tcParameter)
+	bytes, err := json.Marshal(exp.Spec)
 	if err != nil {
 		return err
 	}
-	chaos.Spec.TcParameter = tcParameter
+	if err = json.Unmarshal(bytes, &spec); err != nil {
+		return err
+	}
+	chaos.Spec = spec
 
 	return kubeCli.Update(context.Background(), chaos)
 }
@@ -1501,7 +1507,13 @@ func (s *Service) updateIOChaos(exp *core.KubeObjectDesc, kubeCli client.Client)
 	chaos.SetAnnotations(meta.Annotations)
 
 	var spec v1alpha1.IOChaosSpec
-	mapstructure.Decode(exp.Spec, &spec)
+	bytes, err := json.Marshal(exp.Spec)
+	if err != nil {
+		return err
+	}
+	if err = json.Unmarshal(bytes, &spec); err != nil {
+		return err
+	}
 	chaos.Spec = spec
 
 	return kubeCli.Update(context.Background(), chaos)
@@ -1520,7 +1532,13 @@ func (s *Service) updateKernelChaos(exp *core.KubeObjectDesc, kubeCli client.Cli
 	chaos.SetAnnotations(meta.Annotations)
 
 	var spec v1alpha1.KernelChaosSpec
-	mapstructure.Decode(exp.Spec, &spec)
+	bytes, err := json.Marshal(exp.Spec)
+	if err != nil {
+		return err
+	}
+	if err = json.Unmarshal(bytes, &spec); err != nil {
+		return err
+	}
 	chaos.Spec = spec
 
 	return kubeCli.Update(context.Background(), chaos)
@@ -1539,7 +1557,13 @@ func (s *Service) updateTimeChaos(exp *core.KubeObjectDesc, kubeCli client.Clien
 	chaos.SetAnnotations(meta.Annotations)
 
 	var spec v1alpha1.TimeChaosSpec
-	mapstructure.Decode(exp.Spec, &spec)
+	bytes, err := json.Marshal(exp.Spec)
+	if err != nil {
+		return err
+	}
+	if err = json.Unmarshal(bytes, &spec); err != nil {
+		return err
+	}
 	chaos.Spec = spec
 
 	return kubeCli.Update(context.Background(), chaos)
@@ -1577,7 +1601,13 @@ func (s *Service) updateDNSChaos(exp *core.KubeObjectDesc, kubeCli client.Client
 	chaos.SetAnnotations(meta.Annotations)
 
 	var spec v1alpha1.DNSChaosSpec
-	mapstructure.Decode(exp.Spec, &spec)
+	bytes, err := json.Marshal(exp.Spec)
+	if err != nil {
+		return err
+	}
+	if err = json.Unmarshal(bytes, &spec); err != nil {
+		return err
+	}
 	chaos.Spec = spec
 
 	return kubeCli.Update(context.Background(), chaos)
@@ -1596,7 +1626,13 @@ func (s *Service) updateAwsChaos(exp *core.KubeObjectDesc, kubeCli client.Client
 	chaos.SetAnnotations(meta.Annotations)
 
 	var spec v1alpha1.AwsChaosSpec
-	mapstructure.Decode(exp.Spec, &spec)
+	bytes, err := json.Marshal(exp.Spec)
+	if err != nil {
+		return err
+	}
+	if err = json.Unmarshal(bytes, &spec); err != nil {
+		return err
+	}
 	chaos.Spec = spec
 
 	return kubeCli.Update(context.Background(), chaos)
@@ -1615,7 +1651,13 @@ func (s *Service) updateGcpChaos(exp *core.KubeObjectDesc, kubeCli client.Client
 	chaos.SetAnnotations(meta.Annotations)
 
 	var spec v1alpha1.AwsChaosSpec
-	mapstructure.Decode(exp.Spec, &spec)
+	bytes, err := json.Marshal(exp.Spec)
+	if err != nil {
+		return err
+	}
+	if err = json.Unmarshal(bytes, &spec); err != nil {
+		return err
+	}
 	chaos.Spec = spec
 
 	return kubeCli.Update(context.Background(), chaos)
