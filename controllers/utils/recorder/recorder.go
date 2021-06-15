@@ -37,7 +37,7 @@ type chaosRecorder struct {
 func (r *chaosRecorder) Event(object runtime.Object, ev ChaosEvent) {
 	annotations, err := generateAnnotations(ev)
 	if err != nil {
-		r.log.Error(err, "event", ev)
+		r.log.Error(err, "failed to generate annotations for event", "event", ev)
 	}
 
 	r.recorder.AnnotatedEventf(object, annotations, ev.Type(), ev.Reason(), ev.Message())
