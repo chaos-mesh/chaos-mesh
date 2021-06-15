@@ -302,7 +302,7 @@ func TestcaseDeadlineOfSerial(
 		blocked := conditions[networkchaos.NetworkConditionBlocked]
 		By(fmt.Sprintf("blocked %+v", blocked))
 		return len(blocked) == 0
-	}, "30s", "1s", "asdasd").Should(BeTrue())
+	}, "30s", "1s").Should(BeTrue())
 	timeWhenTimeChaosRecovered := time.Now()
 
 	By(fmt.Sprintf("network chaos in workflow recovered, in %s", timeWhenTimeChaosRecovered.Sub(timeWhenWorkflowCreate)))
