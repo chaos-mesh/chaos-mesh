@@ -14,16 +14,14 @@
 package gcpchaos
 
 import (
-	"github.com/chaos-mesh/chaos-mesh/controllers/action"
-
 	"go.uber.org/fx"
 
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/action"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/gcpchaos/diskloss"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/gcpchaos/nodereset"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/gcpchaos/nodestop"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
-
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
 type Impl struct {

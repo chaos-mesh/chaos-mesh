@@ -18,12 +18,11 @@ import (
 	"encoding/json"
 	"errors"
 
+	"github.com/go-logr/logr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/gcpchaos/utils"
-
-	"github.com/go-logr/logr"
 )
 
 type Impl struct {
