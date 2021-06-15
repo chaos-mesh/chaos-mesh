@@ -5106,6 +5106,8 @@ spec:
                         - ec2Instance
                         type: object
                       conditionalTasks:
+                        description: ConditionalTasks describes the conditional branches
+                          of custom tasks. Only used when Type is TypeTask.
                         items:
                           properties:
                             expression:
@@ -6757,9 +6759,9 @@ spec:
                         - selector
                         type: object
                       schedule:
-                        description: ChaosOnlyScheduleSpec is very similar with ScheduleSpec,
-                          but it could not schedule Workflow because we could not
-                          resolve nested CRD now
+                        description: Schedule describe the Schedule(describing scheduled
+                          chaos) to be injected with chaos nodes. Only used when Type
+                          is TypeSchedule.
                         properties:
                           awsChaos:
                             description: AwsChaosSpec is the content of the specification
@@ -9058,6 +9060,8 @@ spec:
                         - selector
                         type: object
                       task:
+                        description: Task describes the behavior of the custom task.
+                          Only used when Type is TypeTask.
                         properties:
                           container:
                             description: Container is the main container image to
@@ -11580,6 +11584,8 @@ spec:
                             type: array
                         type: object
                       tasks:
+                        description: Tasks describes the children steps of serial
+                          or parallel node. Only used when Type is TypeSerial or TypeParallel.
                         items:
                           type: string
                         type: array
@@ -15992,6 +15998,8 @@ spec:
                             - ec2Instance
                             type: object
                           conditionalTasks:
+                            description: ConditionalTasks describes the conditional
+                              branches of custom tasks. Only used when Type is TypeTask.
                             items:
                               properties:
                                 expression:
@@ -17689,9 +17697,9 @@ spec:
                             - selector
                             type: object
                           schedule:
-                            description: ChaosOnlyScheduleSpec is very similar with
-                              ScheduleSpec, but it could not schedule Workflow because
-                              we could not resolve nested CRD now
+                            description: Schedule describe the Schedule(describing
+                              scheduled chaos) to be injected with chaos nodes. Only
+                              used when Type is TypeSchedule.
                             properties:
                               awsChaos:
                                 description: AwsChaosSpec is the content of the specification
@@ -20074,6 +20082,8 @@ spec:
                             - selector
                             type: object
                           task:
+                            description: Task describes the behavior of the custom
+                              task. Only used when Type is TypeTask.
                             properties:
                               container:
                                 description: Container is the main container image
@@ -22715,6 +22725,9 @@ spec:
                                 type: array
                             type: object
                           tasks:
+                            description: Tasks describes the children steps of serial
+                              or parallel node. Only used when Type is TypeSerial
+                              or TypeParallel.
                             items:
                               type: string
                             type: array
@@ -25706,6 +25719,8 @@ spec:
                     - ec2Instance
                     type: object
                   conditionalTasks:
+                    description: ConditionalTasks describes the conditional branches
+                      of custom tasks. Only used when Type is TypeTask.
                     items:
                       properties:
                         expression:
@@ -27317,9 +27332,9 @@ spec:
                     - selector
                     type: object
                   schedule:
-                    description: ChaosOnlyScheduleSpec is very similar with ScheduleSpec,
-                      but it could not schedule Workflow because we could not resolve
-                      nested CRD now
+                    description: Schedule describe the Schedule(describing scheduled
+                      chaos) to be injected with chaos nodes. Only used when Type
+                      is TypeSchedule.
                     properties:
                       awsChaos:
                         description: AwsChaosSpec is the content of the specification
@@ -29555,6 +29570,8 @@ spec:
                     - selector
                     type: object
                   task:
+                    description: Task describes the behavior of the custom task. Only
+                      used when Type is TypeTask.
                     properties:
                       container:
                         description: Container is the main container image to run
@@ -31973,6 +31990,8 @@ spec:
                         type: array
                     type: object
                   tasks:
+                    description: Tasks describes the children steps of serial or parallel
+                      node. Only used when Type is TypeSerial or TypeParallel.
                     items:
                       type: string
                     type: array

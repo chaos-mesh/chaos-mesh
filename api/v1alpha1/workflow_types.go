@@ -120,14 +120,19 @@ type Template struct {
 	Name     string       `json:"name"`
 	Type     TemplateType `json:"templateType"`
 	Duration *string      `json:"duration,omitempty"`
+	// Task describes the behavior of the custom task. Only used when Type is TypeTask.
 	// +optional
 	Task *Task `json:"task,omitempty"`
+	// Tasks describes the children steps of serial or parallel node. Only used when Type is TypeSerial or TypeParallel.
 	// +optional
 	Tasks []string `json:"tasks,omitempty"`
+	// ConditionalTasks describes the conditional branches of custom tasks. Only used when Type is TypeTask.
 	// +optional
 	ConditionalTasks []ConditionalTask `json:"conditionalTasks,omitempty"`
+	// EmbedChaos describe the chaos to be injected with chaos nodes. Only used when Type is Type<Something>Chaos.
 	// +optional
 	*EmbedChaos `json:",inline"`
+	// Schedule describe the Schedule(describing scheduled chaos) to be injected with chaos nodes. Only used when Type is TypeSchedule.
 	// +optional
 	Schedule *ChaosOnlyScheduleSpec `json:"schedule,omitempty"`
 }
