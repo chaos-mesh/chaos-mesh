@@ -15,6 +15,7 @@ package core
 
 import (
 	"context"
+	"encoding/json"
 	"strings"
 	"time"
 
@@ -29,8 +30,8 @@ import (
 )
 
 type WorkflowRepository interface {
-	List(ctx context.Context) ([]Workflow, error)
-	ListByNamespace(ctx context.Context, namespace string) ([]Workflow, error)
+	List(ctx context.Context) ([]WorkflowMeta, error)
+	ListByNamespace(ctx context.Context, namespace string) ([]WorkflowMeta, error)
 	Create(ctx context.Context, workflow v1alpha1.Workflow) (WorkflowDetail, error)
 	Get(ctx context.Context, namespace, name string) (WorkflowDetail, error)
 	Delete(ctx context.Context, namespace, name string) error
@@ -47,7 +48,8 @@ const (
 )
 
 // Workflow defines the root structure of a workflow.
-type Workflow struct {
+type WorkflowMeta struct {
+	ID        uint   `gorm:"primary_key" json:"id"`
 	Namespace string `json:"namespace"`
 	Name      string `json:"name"`
 	// the entry node name
@@ -55,13 +57,14 @@ type Workflow struct {
 	CreatedAt string         `json:"created_at"`
 	EndTime   string         `json:"end_time"`
 	Status    WorkflowStatus `json:"status,omitempty"`
-	UID       string         `json:"uid"`
+	UID       string         `gorm:"index:uid" json:"uid"`
+	Archived  bool           `json:"archived"`
 }
 
 type WorkflowDetail struct {
-	Workflow   `json:",inline"`
-	Topology   Topology       `json:"topology"`
-	KubeObject KubeObjectDesc `json:"kube_object,omitempty"`
+	WorkflowMeta `json:",inline"`
+	Topology     Topology       `json:"topology"`
+	KubeObject   KubeObjectDesc `json:"kube_object,omitempty"`
 }
 
 // Topology describes the process of a workflow.
@@ -172,7 +175,7 @@ func (it *KubeWorkflowRepository) Update(ctx context.Context, namespace, name st
 	return it.Get(ctx, workflow.Namespace, workflow.Name)
 }
 
-func (it *KubeWorkflowRepository) ListByNamespace(ctx context.Context, namespace string) ([]Workflow, error) {
+func (it *KubeWorkflowRepository) ListByNamespace(ctx context.Context, namespace string) ([]WorkflowMeta, error) {
 	workflowList := v1alpha1.WorkflowList{}
 
 	err := it.kubeclient.List(ctx, &workflowList, &client.ListOptions{
@@ -182,7 +185,7 @@ func (it *KubeWorkflowRepository) ListByNamespace(ctx context.Context, namespace
 		return nil, err
 	}
 
-	var result []Workflow
+	var result []WorkflowMeta
 	for _, item := range workflowList.Items {
 		result = append(result, convertWorkflow(item))
 	}
@@ -190,7 +193,7 @@ func (it *KubeWorkflowRepository) ListByNamespace(ctx context.Context, namespace
 	return result, nil
 }
 
-func (it *KubeWorkflowRepository) List(ctx context.Context) ([]Workflow, error) {
+func (it *KubeWorkflowRepository) List(ctx context.Context) ([]WorkflowMeta, error) {
 	return it.ListByNamespace(ctx, "")
 }
 
@@ -241,8 +244,8 @@ func (it *KubeWorkflowRepository) Delete(ctx context.Context, namespace, name st
 	return it.kubeclient.Delete(ctx, &kubeWorkflow)
 }
 
-func convertWorkflow(kubeWorkflow v1alpha1.Workflow) Workflow {
-	result := Workflow{
+func convertWorkflow(kubeWorkflow v1alpha1.Workflow) WorkflowMeta {
+	result := WorkflowMeta{
 		Namespace: kubeWorkflow.Namespace,
 		Name:      kubeWorkflow.Name,
 		Entry:     kubeWorkflow.Spec.Entry,
@@ -283,7 +286,7 @@ func convertWorkflowDetail(kubeWorkflow v1alpha1.Workflow, kubeNodes []v1alpha1.
 	}
 
 	result := WorkflowDetail{
-		Workflow: convertWorkflow(kubeWorkflow),
+		WorkflowMeta: convertWorkflow(kubeWorkflow),
 		Topology: Topology{
 			Nodes: nodes,
 		},
@@ -391,4 +394,72 @@ func mappingTemplateType(templateType v1alpha1.TemplateType) (NodeType, error) {
 	} else {
 		return "", errors.Errorf("can not resolve such type called %s", templateType)
 	}
+}
+
+// The WorkflowStore of workflow is not so similar with others store.
+type WorkflowStore interface {
+	List(ctx context.Context, namespace, name string, archived bool) ([]*WorkflowEntity, error)
+	ListMeta(ctx context.Context, namespace, name string, archived bool) ([]*WorkflowMeta, error)
+	FindByID(ctx context.Context, ID uint) (*WorkflowEntity, error)
+	FindByUID(ctx context.Context, UID string) (*WorkflowEntity, error)
+	FindMetaByUID(ctx context.Context, UID string) (*WorkflowMeta, error)
+	Save(ctx context.Context, entity *WorkflowEntity) error
+	DeleteByUID(ctx context.Context, UID string) error
+	DeleteByUIDs(ctx context.Context, UIDs []string) error
+	MarkAsArchived(ctx context.Context, namespace, name string) error
+	MarkAsArchivedWithUID(ctx context.Context, UID string) error
+}
+
+// WorkflowEntity is the gorm entity, refers to a row of data
+type WorkflowEntity struct {
+	WorkflowMeta
+	Workflow string `gorm:"size:32768"`
+}
+
+func WorkflowCR2WorkflowEntity(workflow *v1alpha1.Workflow) (*WorkflowEntity, error) {
+	if workflow == nil {
+		return nil, nil
+
+	}
+	jsonContent, err := json.Marshal(workflow)
+	if err != nil {
+		return nil, err
+	}
+	return &WorkflowEntity{
+		WorkflowMeta: convertWorkflow(*workflow),
+		Workflow:     string(jsonContent),
+	}, nil
+
+}
+
+func WorkflowEntity2WorkflowCR(entity *WorkflowEntity) (*v1alpha1.Workflow, error) {
+	if entity == nil {
+		return nil, nil
+	}
+	result := v1alpha1.Workflow{}
+	err := json.Unmarshal([]byte(entity.Workflow), &result)
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func WorkflowEntity2WorkflowDetail(entity *WorkflowEntity) (*WorkflowDetail, error) {
+	workflowCustomResource, err := WorkflowEntity2WorkflowCR(entity)
+	if err != nil {
+		return nil, err
+	}
+	return &WorkflowDetail{
+		WorkflowMeta: entity.WorkflowMeta,
+		KubeObject: KubeObjectDesc{
+			TypeMeta: workflowCustomResource.TypeMeta,
+			Meta: KubeObjectMeta{
+				Name:        workflowCustomResource.Name,
+				Namespace:   workflowCustomResource.Namespace,
+				Labels:      workflowCustomResource.Labels,
+				Annotations: workflowCustomResource.Annotations,
+			},
+			Spec: workflowCustomResource.Spec,
+		},
+	}, nil
 }
