@@ -2,7 +2,6 @@ import { Box, Button, Grow, Modal } from '@material-ui/core'
 import { Confirm, setAlert, setConfirm } from 'slices/globalStatus'
 import { useEffect, useRef, useState } from 'react'
 import { useHistory, useParams } from 'react-router-dom'
-import { useStoreDispatch, useStoreSelector } from 'store'
 
 import { Ace } from 'ace-builds'
 import DeleteOutlinedIcon from '@material-ui/icons/DeleteOutlined'
@@ -19,6 +18,7 @@ import { constructWorkflowTopology } from 'lib/cytoscape'
 import loadable from '@loadable/component'
 import { makeStyles } from '@material-ui/styles'
 import { useIntl } from 'react-intl'
+import { useStoreDispatch } from 'store'
 import yaml from 'js-yaml'
 
 const YAMLEditor = loadable(() => import('components/YAMLEditor'))
@@ -47,7 +47,6 @@ const Single = () => {
   const history = useHistory()
   const { namespace, name } = useParams<any>()
 
-  const { theme } = useStoreSelector((state) => state.settings)
   const dispatch = useStoreDispatch()
 
   const [detail, setDetail] = useState<WorkflowSingle>()
@@ -263,7 +262,7 @@ const Single = () => {
                       <NodeConfiguration template={data} />
                     </Box>
                   )}
-                  <YAMLEditor theme={theme} data={yaml.dump(data)} mountEditor={setYAMLEditor} />
+                  <YAMLEditor data={yaml.dump(data)} mountEditor={setYAMLEditor} />
                 </Box>
               </Box>
             )}

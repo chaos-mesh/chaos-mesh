@@ -4,11 +4,11 @@ import DoneIcon from '@material-ui/icons/Done'
 import React from 'react'
 import { StatusOfExperiments } from 'api/experiments.type'
 
-interface ExperimentEventsPreviewProps {
+interface ExperimentStatusProps {
   status: keyof StatusOfExperiments
 }
 
-const ExperimentEventsPreview: React.FC<ExperimentEventsPreviewProps> = ({ status }) => {
+const ExperimentStatus: React.FC<ExperimentStatusProps> = ({ status }) => {
   return status === 'finished' ? (
     <DoneIcon sx={{ color: 'success.main' }} />
   ) : status !== 'paused' ? (
@@ -24,4 +24,4 @@ const ExperimentEventsPreview: React.FC<ExperimentEventsPreviewProps> = ({ statu
   ) : null
 }
 
-export default ExperimentEventsPreview
+export default ExperimentStatus

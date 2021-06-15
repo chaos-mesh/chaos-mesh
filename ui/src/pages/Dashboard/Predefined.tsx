@@ -2,7 +2,6 @@ import { Box, Button, Card, Modal, Typography } from '@material-ui/core'
 import { PreDefinedValue, getDB } from 'lib/idb'
 import React, { useEffect, useRef, useState } from 'react'
 import { parseSubmit, yamlToExperiment } from 'lib/formikhelpers'
-import { useStoreDispatch, useStoreSelector } from 'store'
 
 import { Ace } from 'ace-builds'
 import Paper from 'components-mui/Paper'
@@ -17,6 +16,7 @@ import loadable from '@loadable/component'
 import { makeStyles } from '@material-ui/styles'
 import { setAlert } from 'slices/globalStatus'
 import { useIntl } from 'react-intl'
+import { useStoreDispatch } from 'store'
 import yaml from 'js-yaml'
 
 const YAMLEditor = loadable(() => import('components/YAMLEditor'))
@@ -51,7 +51,6 @@ const Predefined = () => {
 
   const intl = useIntl()
 
-  const { theme } = useStoreSelector((state) => state.settings)
   const dispatch = useStoreDispatch()
 
   const idb = useRef(getDB())
@@ -165,7 +164,7 @@ const Predefined = () => {
                   </PaperTop>
                 </Box>
                 <Box flex={1}>
-                  <YAMLEditor theme={theme} data={yaml.dump(experiment.yaml)} mountEditor={setYAMLEditor} />
+                  <YAMLEditor data={yaml.dump(experiment.yaml)} mountEditor={setYAMLEditor} />
                 </Box>
               </Box>
             )}

@@ -81,7 +81,6 @@ const NewWorkflow = () => {
   const state = useStoreSelector((state) => state)
   const { namespaces } = state.experiments
   const { templates } = state.workflows
-  const { theme } = state.settings
   const dispatch = useStoreDispatch()
 
   const [steps, setSteps] = useState<IStep[]>([])
@@ -400,7 +399,6 @@ const NewWorkflow = () => {
                   <Box flex={1}>
                     <Paper sx={{ p: 0 }}>
                       <YAMLEditor
-                        theme={theme}
                         data={constructWorkflow(workflowBasic, Object.values(templates))}
                         mountEditor={setYAMLEditor}
                       />

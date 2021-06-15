@@ -133,7 +133,7 @@ const ObjectListItem: React.FC<ObjectListItemProps> = ({ data, type = 'experimen
     >
       <Box display="flex" justifyContent="space-between" alignItems="center" p={3}>
         <Space direction="row" alignItems="center">
-          {type === 'experiment' && <ExperimentStatus status={(data as Experiment).status} />}
+          {type !== 'archive' && <ExperimentStatus status={(data as Experiment).status} />}
           <Typography component="div" variant="body1">
             {data.name}
           </Typography>

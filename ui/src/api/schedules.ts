@@ -14,6 +14,8 @@ export const schedules = (params?: ScheduleParams) =>
 
 export const single = (uuid: uuid) => http.get<ScheduleSingle>(`/schedules/${uuid}`)
 
+export const update = (data: ScheduleSingle['kube_object']) => http.put('/schedules', data)
+
 export const del = (uuid: uuid) => http.delete(`/schedules/${uuid}`)
 export const delMulti = (uuids: uuid[]) => http.delete(`/schedules?uids=${uuids.join(',')}`)
 
@@ -28,6 +30,8 @@ export const archives = (namespace = null, name = null, kind = null) =>
       kind,
     },
   })
+
+export const singleArchive = (uuid: uuid) => http.get<Archive>(`archives/schedules/${uuid}`)
 
 export const delArchive = (uuid: uuid) => http.delete(`/archives/schedules/${uuid}`)
 export const delArchives = (uuids: uuid[]) => http.delete(`/archives/schedules?uids=${uuids.join(',')}`)

@@ -2,7 +2,6 @@ import { Box, Button, Grid, Grow } from '@material-ui/core'
 import { setAlert, setConfirm } from 'slices/globalStatus'
 import { useEffect, useState } from 'react'
 import { useHistory, useParams } from 'react-router-dom'
-import { useStoreDispatch, useStoreSelector } from 'store'
 
 import { Ace } from 'ace-builds'
 import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
@@ -23,6 +22,7 @@ import api from 'api'
 import fileDownload from 'js-file-download'
 import loadable from '@loadable/component'
 import { useIntl } from 'react-intl'
+import { useStoreDispatch } from 'store'
 import yaml from 'js-yaml'
 
 const YAMLEditor = loadable(() => import('components/YAMLEditor'))
@@ -33,7 +33,6 @@ const Single = () => {
 
   const intl = useIntl()
 
-  const { theme } = useStoreSelector((state) => state.settings)
   const dispatch = useStoreDispatch()
 
   const [loading, setLoading] = useState(true)
@@ -151,7 +150,7 @@ const Single = () => {
   const handleUpdateSchedule = () => {
     const data = yaml.load(yamlEditor!.getValue())
 
-    api.experiments
+    api.schedules
       .update(data)
       .then(() => {
         dispatch(
@@ -241,7 +240,7 @@ const Single = () => {
                         </Space>
                       </PaperTop>
                       <Box flex={1}>
-                        <YAMLEditor theme={theme} data={yaml.dump(single.kube_object)} mountEditor={setYAMLEditor} />
+                        <YAMLEditor data={yaml.dump(single.kube_object)} mountEditor={setYAMLEditor} />
                       </Box>
                     </Box>
                   )}

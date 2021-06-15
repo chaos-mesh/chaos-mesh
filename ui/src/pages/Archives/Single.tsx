@@ -1,54 +1,119 @@
-import { Grid, Grow } from '@material-ui/core'
-import React, { useEffect, useState } from 'react'
+import { Box, Button, Grid, Grow } from '@material-ui/core'
+import { useCallback, useEffect, useState } from 'react'
 
 import { ArchiveSingle } from 'api/archives.type'
+import CloudDownloadOutlinedIcon from '@material-ui/icons/CloudDownloadOutlined'
+import { Event } from 'api/events.type'
+import EventsTimeline from 'components/EventsTimeline'
 import Loading from 'components-mui/Loading'
 import ObjectConfiguration from 'components/ObjectConfiguration'
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
+import Space from 'components-mui/Space'
 import T from 'components/T'
 import api from 'api'
+import fileDownload from 'js-file-download'
+import loadable from '@loadable/component'
 import { useParams } from 'react-router-dom'
+import { useQuery } from 'lib/hooks'
+import yaml from 'js-yaml'
+
+const YAMLEditor = loadable(() => import('components/YAMLEditor'))
 
 const Single = () => {
   const { uuid } = useParams<{ uuid: string }>()
+  const query = useQuery()
+  let kind = query.get('kind') || 'experiment'
 
   const [loading, setLoading] = useState(true)
-  const [detail, setDetail] = useState<ArchiveSingle>()
+  const [single, setSingle] = useState<ArchiveSingle>()
+  const [events, setEvents] = useState<Event[]>([])
 
-  const fetchDetail = () => api.archives.single(uuid).then(({ data }) => setDetail(data))
+  const fetchSingle = useCallback(() => {
+    let request
+    switch (kind) {
+      case 'schedule':
+        request = api.schedules.singleArchive
+        break
+      case 'experiment':
+      default:
+        request = api.archives.single
+        break
+    }
+
+    request(uuid)
+      .then(({ data }) => {
+        setSingle(data)
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false))
+  }, [uuid, kind])
+
+  useEffect(fetchSingle, [fetchSingle])
 
   useEffect(() => {
-    Promise.all([fetchDetail()])
-      .then((_) => setLoading(false))
-      .catch(console.error)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+    const fetchEvents = () => {
+      api.events
+        .events({ object_id: uuid, limit: 999 })
+        .then(({ data }) => setEvents(data))
+        .catch(console.error)
+        .finally(() => {
+          setLoading(false)
+        })
+    }
+
+    if (single) {
+      fetchEvents()
+    }
+  }, [uuid, single])
+
+  const handleDownloadExperiment = () => fileDownload(yaml.dump(single!.kube_object), `${single!.name}.yaml`)
 
   return (
     <>
       <Grow in={!loading} style={{ transformOrigin: '0 0 0' }}>
-        <Grid container spacing={6}>
-          {detail && (
-            <>
-              <Grid item xs={6} sm={6} md={3}></Grid>
-              <Grid item xs={6} sm={6} md={3}></Grid>
+        <div>
+          <Space spacing={6}>
+            <Paper>
+              <PaperTop title={T('common.configuration')} boxProps={{ mb: 3 }} />
+              {single && <ObjectConfiguration config={single} inSchedule={kind === 'schedule'} />}
+            </Paper>
 
-              <Grid item xs={12} md={6}></Grid>
-
-              <Grid item xs={12}>
-                <Paper>
-                  <PaperTop title={T('common.configuration')} />
-                  <ObjectConfiguration config={detail} />
+            <Grid container>
+              <Grid item xs={12} lg={6} sx={{ pr: 3 }}>
+                <Paper sx={{ display: 'flex', flexDirection: 'column', height: 600 }}>
+                  <PaperTop title={T('events.title')} boxProps={{ mb: 3 }} />
+                  <Box flex={1} overflow="scroll">
+                    <EventsTimeline events={events} />
+                  </Box>
                 </Paper>
               </Grid>
-
-              <Grid item xs={12}>
-                {/* {events.length > 0 && <EventsTable events={events} />} */}
+              <Grid item xs={12} lg={6} sx={{ pl: 3 }}>
+                <Paper sx={{ height: 600, p: 0 }}>
+                  {single && (
+                    <Box display="flex" flexDirection="column" height="100%">
+                      <PaperTop title={T('common.definition')} boxProps={{ p: 4.5, pb: 3 }}>
+                        <Space direction="row">
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            startIcon={<CloudDownloadOutlinedIcon />}
+                            onClick={handleDownloadExperiment}
+                          >
+                            {T('common.download')}
+                          </Button>
+                        </Space>
+                      </PaperTop>
+                      <Box flex={1}>
+                        <YAMLEditor data={yaml.dump(single.kube_object)} aceProps={{ readOnly: true }} />
+                      </Box>
+                    </Box>
+                  )}
+                </Paper>
               </Grid>
-            </>
-          )}
-        </Grid>
+            </Grid>
+          </Space>
+        </div>
       </Grow>
 
       {loading && <Loading />}

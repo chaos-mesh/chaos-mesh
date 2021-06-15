@@ -3,18 +3,21 @@ import 'ace-builds/src-min-noconflict/theme-tomorrow_night_eighties'
 import 'ace-builds/src-min-noconflict/mode-yaml'
 import 'ace-builds/src-min-noconflict/theme-tomorrow'
 
+import AceEditor, { IAceEditorProps } from 'react-ace'
+
 import { Ace } from 'ace-builds'
-import AceEditor from 'react-ace'
 import React from 'react'
-import { Theme } from 'slices/settings'
+import { useStoreSelector } from 'store'
 
 interface YAMLEditorProps {
-  theme: Theme
   data: string
   mountEditor?: (editor: Ace.Editor) => void
+  aceProps?: IAceEditorProps
 }
 
-const YAMLEditor: React.FC<YAMLEditorProps> = ({ theme, data, mountEditor }) => {
+const YAMLEditor: React.FC<YAMLEditorProps> = ({ data, mountEditor, aceProps }) => {
+  const { theme } = useStoreSelector((state) => state.settings)
+
   const handleOnLoad = (editor: Ace.Editor) => typeof mountEditor === 'function' && mountEditor(editor)
 
   return (
@@ -26,6 +29,7 @@ const YAMLEditor: React.FC<YAMLEditorProps> = ({ theme, data, mountEditor }) => 
       mode="yaml"
       theme={theme === 'light' ? 'tomorrow' : 'tomorrow_night_eighties'}
       value={data}
+      {...aceProps}
     />
   )
 }
