@@ -10,7 +10,7 @@ import React from 'react'
 import { useStoreSelector } from 'store'
 
 interface YAMLEditorProps {
-  data: string
+  data?: string
   mountEditor?: (editor: Ace.Editor) => void
   aceProps?: IAceEditorProps
 }

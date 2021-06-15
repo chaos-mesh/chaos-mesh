@@ -1,5 +1,5 @@
 import { AutocompleteMultipleField, SelectField, TextField } from 'components/FormField'
-import { Box, InputAdornment, MenuItem, Typography } from '@material-ui/core'
+import { InputAdornment, MenuItem, Typography } from '@material-ui/core'
 import React, { useEffect, useMemo } from 'react'
 import { arrToObjBySep, objToArrBySep, toTitleCase } from 'lib/utils'
 import {
@@ -12,6 +12,7 @@ import { getIn, useFormikContext } from 'formik'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
 import AdvancedOptions from 'components/AdvancedOptions'
+import PaperTop from 'components-mui/PaperTop'
 import ScopePodsTable from './ScopePodsTable'
 import Space from 'components-mui/Space'
 import T from 'components/T'
@@ -186,13 +187,10 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
         </SelectField>
       </AdvancedOptions>
 
-      <Box my={3}>
-        <Typography>{podsPreviewTitle || T('newE.scope.affectedPodsPreview')}</Typography>
-        <Typography variant="subtitle2" color="textSecondary">
-          {podsPreviewDesc || T('newE.scope.affectedPodsPreviewHelper')}
-        </Typography>
-      </Box>
-
+      <PaperTop
+        title={podsPreviewTitle || T('newE.scope.affectedPodsPreview')}
+        subtitle={podsPreviewDesc || T('newE.scope.affectedPodsPreviewHelper')}
+      />
       {pods.length > 0 ? (
         <ScopePodsTable scope={scope} pods={pods} />
       ) : (

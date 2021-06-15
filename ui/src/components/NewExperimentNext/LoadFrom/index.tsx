@@ -10,22 +10,17 @@ import { Schedule } from 'api/schedules.type'
 import SkeletonN from 'components-mui/SkeletonN'
 import Space from 'components-mui/Space'
 import T from 'components/T'
-import _snakecase from 'lodash.snakecase'
 import api from 'api'
-import { data as scheduleSpecificData } from 'components/Schedule/types'
 import { setAlert } from 'slices/globalStatus'
-import { setExternalExperiment } from 'slices/experiments'
-import { toCamelCase } from 'lib/utils'
 import { useIntl } from 'react-intl'
 import { useStoreDispatch } from 'store'
-import { yamlToExperiment } from 'lib/formikhelpers'
 
 interface LoadFromProps {
-  loadCallback?: () => void
+  callback?: (data: any) => void
   inSchedule?: boolean
 }
 
-const LoadFrom: React.FC<LoadFromProps> = ({ loadCallback, inSchedule = false }) => {
+const LoadFrom: React.FC<LoadFromProps> = ({ callback, inSchedule = false }) => {
   const intl = useIntl()
 
   const dispatch = useStoreDispatch()
@@ -61,7 +56,7 @@ const LoadFrom: React.FC<LoadFromProps> = ({ loadCallback, inSchedule = false })
         schedules: data[2] ? data[2].data : [],
       })
 
-      setPredefined(await (await getDB()).getAll('predefined'))
+      setPredefined(await (await getDB()).getAll('predefined' as never)) // never?
 
       setLoading(false)
     }
@@ -69,49 +64,20 @@ const LoadFrom: React.FC<LoadFromProps> = ({ loadCallback, inSchedule = false })
     fetchAll()
   }, [inSchedule])
 
-  function fillExperiment(original: any) {
-    if (original.kind === 'Schedule') {
-      const kind = original.spec.type
-      const data = yamlToExperiment({
-        kind,
-        metadata: original.metadata,
-        spec: original.spec[toCamelCase(kind)],
-      })
-      delete original.spec[toCamelCase(kind)]
-
-      dispatch(
-        setExternalExperiment({
-          kindAction: [kind, data.target[_snakecase(kind)].action ?? ''],
-          target: data.target,
-          basic: { ...data.basic, ...scheduleSpecificData, ...original.spec },
-        })
-      )
-
-      return
-    }
-
-    const data = yamlToExperiment(original)
-
-    const kind = data.target.kind
-
-    dispatch(
-      setExternalExperiment({
-        kindAction: [kind, data.target[_snakecase(kind)].action ?? ''],
-        target: data.target,
-        basic: data.basic,
-      })
-    )
-  }
-
   const onRadioChange = (e: any) => {
     const [type, uuid] = e.target.value.split('+')
 
     if (type === 'p') {
       const experiment = predefined?.filter((p) => p.name === uuid)[0].yaml
 
-      fillExperiment(experiment)
+      callback && callback(experiment)
 
-      loadCallback && loadCallback()
+      dispatch(
+        setAlert({
+          type: 'success',
+          message: T('confirm.success.load', intl),
+        })
+      )
 
       return
     }
@@ -135,9 +101,7 @@ const LoadFrom: React.FC<LoadFromProps> = ({ loadCallback, inSchedule = false })
       apiRequest
         .single(uuid)
         .then(({ data }) => {
-          fillExperiment(data.kube_object)
-
-          loadCallback && loadCallback()
+          callback && callback(data.kube_object)
 
           dispatch(
             setAlert({

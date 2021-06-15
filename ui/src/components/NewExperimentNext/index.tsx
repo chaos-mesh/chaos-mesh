@@ -1,6 +1,7 @@
 import React, { useImperativeHandle, useState } from 'react'
 
 import { Box } from '@material-ui/core'
+import ByYAML from './ByYAML'
 import LoadFrom from './LoadFrom'
 import Space from 'components-mui/Space'
 import Step1 from './Step1'
@@ -11,8 +12,14 @@ import Tab from '@material-ui/core/Tab'
 import TabContext from '@material-ui/lab/TabContext'
 import TabList from '@material-ui/lab/TabList'
 import TabPanel from '@material-ui/lab/TabPanel'
+import _snakecase from 'lodash.snakecase'
+import { data as scheduleSpecificData } from 'components/Schedule/types'
+import { setExternalExperiment } from 'slices/experiments'
+import { toCamelCase } from 'lib/utils'
+import { useStoreDispatch } from 'store'
+import { yamlToExperiment } from 'lib/formikhelpers'
 
-type PanelType = 'initial' | 'existing'
+type PanelType = 'initial' | 'existing' | 'yaml'
 
 export interface NewExperimentHandles {
   setPanel: React.Dispatch<React.SetStateAction<PanelType>>
@@ -30,6 +37,8 @@ const NewExperiment: React.ForwardRefRenderFunction<NewExperimentHandles, NewExp
   { initPanel = 'initial', onSubmit, loadFrom = true, inWorkflow = false, inSchedule = false },
   ref
 ) => {
+  const dispatch = useStoreDispatch()
+
   const [panel, setPanel] = useState<PanelType>(initPanel)
 
   useImperativeHandle(ref, () => ({
@@ -40,7 +49,41 @@ const NewExperiment: React.ForwardRefRenderFunction<NewExperimentHandles, NewExp
     setPanel(newValue)
   }
 
-  const loadCallback = () => setPanel('initial')
+  const fillExperiment = (original: any) => {
+    if (original.kind === 'Schedule') {
+      const kind = original.spec.type
+      const data = yamlToExperiment({
+        kind,
+        metadata: original.metadata,
+        spec: original.spec[toCamelCase(kind)],
+      })
+      delete original.spec[toCamelCase(kind)]
+
+      dispatch(
+        setExternalExperiment({
+          kindAction: [kind, data.target[_snakecase(kind)].action ?? ''],
+          target: data.target,
+          basic: { ...data.basic, ...scheduleSpecificData, ...original.spec },
+        })
+      )
+
+      return
+    }
+
+    const data = yamlToExperiment(original)
+
+    const kind = data.target.kind
+
+    dispatch(
+      setExternalExperiment({
+        kindAction: [kind, data.target[_snakecase(kind)].action ?? ''],
+        target: data.target,
+        basic: data.basic,
+      })
+    )
+
+    setPanel('initial')
+  }
 
   return (
     <TabContext value={panel}>
@@ -49,6 +92,7 @@ const NewExperiment: React.ForwardRefRenderFunction<NewExperimentHandles, NewExp
           <TabList onChange={onChange}>
             <Tab label={T(`${inSchedule ? 'newS' : 'newE'}.title`)} value="initial" />
             <Tab label={T('newE.loadFrom')} value="existing" />
+            <Tab label={T('newE.byYAML')} value="yaml" />
           </TabList>
         </Box>
       )}
@@ -60,7 +104,10 @@ const NewExperiment: React.ForwardRefRenderFunction<NewExperimentHandles, NewExp
         </Space>
       </TabPanel>
       <TabPanel value="existing" sx={{ p: 0, pt: 6 }}>
-        {loadFrom && <LoadFrom loadCallback={loadCallback} inSchedule={inSchedule} />}
+        {loadFrom && <LoadFrom callback={fillExperiment} inSchedule={inSchedule} />}
+      </TabPanel>
+      <TabPanel value="yaml" sx={{ p: 0, pt: 6 }}>
+        <ByYAML callback={fillExperiment} />
       </TabPanel>
     </TabContext>
   )

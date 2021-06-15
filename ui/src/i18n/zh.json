@@ -3,7 +3,7 @@
     "title": "仪表盘",
     "tutorial": {
       "title": "教程",
-      "desc": "📖 快速浏览 Chaos Mesh Dashboard 的各项功能。",
+      "desc": "📖 快速浏览 Chaos Mesh Dashboard 的各项功能",
       "step1": "仪表盘是对 Chaos Mesh 的概览，在这里你可以观察到所有实验的运行状态。",
       "step2": "实验页面管理着所有的实验，在这里你可以对实验进行多种操作（暂停，归档，更新等）。",
       "step3": "事件页面展示了所有实验产生的事件。",
@@ -15,14 +15,14 @@
       "step9": "🎉 恭喜你完成了所有的教程步骤！点击空白处即可退出。"
     },
     "newbie": "作为新手",
-    "newbieDesc": "⛑ 从一个简单的实验开始快速注入一个故障。",
+    "newbieDesc": "⛑ 从一个简单的实验开始快速注入一个故障",
     "startAWorkflow": "从工作流开始",
     "startAWorkflowDesc": "工作流允许你编排多个实验来模拟更加真实的故障",
     "startASchedule": "从计划开始",
     "startAScheduleDesc": "计划允许你周期性地运行一个实验",
     "totalStatus": "当前实验状态",
     "predefined": "预定义",
-    "predefinedDesc": "📦 在这里存储自定义的实验以快速执行。",
+    "predefinedDesc": "📦 在这里存储自定义的实验以快速执行",
     "noPredefinedFound": "未发现预定义",
     "recent": "最近事件"
   },
@@ -37,6 +37,8 @@
       "run": "运行"
     },
     "loadFrom": "加载自",
+    "byYAML": "通过 YAML",
+    "byYAMLDesc": "通过填写或上传 YAML 的方式创建实验，计划或复杂的工作流任务",
     "basic": {
       "nameHelper": "实验的名称",
       "namespaceHelper": "选择命名空间"

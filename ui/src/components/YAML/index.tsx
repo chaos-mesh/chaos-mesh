@@ -6,7 +6,6 @@ import T from 'components/T'
 import { setAlert } from 'slices/globalStatus'
 import { useIntl } from 'react-intl'
 import { useStoreDispatch } from 'store'
-import yaml from 'js-yaml'
 
 interface YAMLProps {
   callback: (y: any) => void
@@ -24,7 +23,7 @@ const YAML: React.FC<YAMLProps> = ({ callback, buttonProps }) => {
     const reader = new FileReader()
     reader.onload = function (e) {
       try {
-        const y = yaml.load(e.target!.result as string)
+        const y = e.target!.result as string
         if (process.env.NODE_ENV === 'development') {
           console.debug('Debug yamlToExperiment:', y)
         }
