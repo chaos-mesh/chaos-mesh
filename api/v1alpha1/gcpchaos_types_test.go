@@ -57,10 +57,12 @@ var _ = Describe("GcpChaos", func() {
 					Namespace: "default",
 				},
 				Spec: GcpChaosSpec{
-					Action:     NodeReset,
-					Project:    testProject,
-					Zone:       testZone,
-					Instance:   testInstance,
+					Action: NodeReset,
+					GcpSelector: GcpSelector{
+						Project:  testProject,
+						Zone:     testZone,
+						Instance: testInstance,
+					},
 					SecretName: &testSecretName,
 				},
 			}
