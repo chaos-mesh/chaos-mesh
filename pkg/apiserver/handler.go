@@ -30,7 +30,7 @@ var handlerModule = fx.Options(
 		experiment.NewService,
 		event.NewService,
 		archive.NewService,
-		workflow.NewServiceWithKubeRepo,
+		workflow.NewService,
 		schedule.NewService,
 	),
 	fx.Invoke(

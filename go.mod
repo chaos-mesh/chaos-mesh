@@ -6,7 +6,7 @@ require (
 	github.com/Microsoft/go-winio v0.4.11 // indirect
 	github.com/Microsoft/hcsshim v0.0.0-20190417211021-672e52e9209d // indirect
 	github.com/Nvveen/Gotty v0.0.0-20120604004816-cd527374f1e5 // indirect
-	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
+	github.com/antonmedv/expr v1.8.9
 	github.com/aws/aws-sdk-go-v2 v1.3.2
 	github.com/aws/aws-sdk-go-v2/config v1.1.1
 	github.com/aws/aws-sdk-go-v2/credentials v1.1.1
@@ -44,7 +44,6 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/lib/pq v1.2.0 // indirect
 	github.com/mgechev/revive v1.0.2-0.20200225072153-6219ca02fffb
-	github.com/mitchellh/mapstructure v1.3.3
 	github.com/moby/locker v1.0.1
 	github.com/onsi/ginkgo v1.14.0
 	github.com/onsi/gomega v1.10.1
@@ -78,8 +77,10 @@ require (
 	golang.org/x/time v0.0.0-20201208040808-7e3f01d25324
 	golang.org/x/tools v0.0.0-20200616195046-dc31b401abb5
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1
+	google.golang.org/api v0.15.0
 	google.golang.org/grpc v1.27.0
 	google.golang.org/protobuf v1.23.0
+	gopkg.in/yaml.v2 v2.3.0
 	honnef.co/go/tools v0.0.1-2020.1.3 // indirect
 	k8s.io/api v0.18.2
 	k8s.io/apimachinery v0.18.2

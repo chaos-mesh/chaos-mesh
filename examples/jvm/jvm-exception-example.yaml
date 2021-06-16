@@ -1,20 +1,23 @@
 apiVersion: chaos-mesh.org/v1alpha1
-kind: JVMChaos
+kind: Schedule
 metadata:
   name: jvm-exception-example
   namespace: app
 spec:
-  action: tce
-  target: jvm
-  flags:
-    exception: "java.lang.Exception"
-  matchers:
-    classname: "org.chaosmesh.jvm.Application"
-    methodname: "hello"
-  mode: one
-  selector:
-    labelSelectors:
-      app: springboot-jvmchaos-demo
-  duration: "30s"
-  scheduler:
-    cron: "@every 1m"
+  schedule: '@every 1m'
+  type: JVMChaos
+  historyLimit: 5
+  concurrencyPolicy: Forbid
+  jvmChaos:
+    action: tce
+    target: jvm
+    flags:
+      exception: java.lang.Exception
+    matchers:
+      classname: org.chaosmesh.jvm.Application
+      methodname: hello
+    mode: one
+    selector:
+      labelSelectors:
+        app: springboot-jvmchaos-demo
+    duration: 30s
