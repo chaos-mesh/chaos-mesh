@@ -24,7 +24,7 @@ const TotalStatus: React.FC<BoxProps> = (props) => {
   const [s, setS] = useState<SingleData[]>([])
 
   const arcLinkLabel: PropertyAccessor<ComputedDatum<SingleData>, string> = (d) =>
-    d.value + ' ' + T(`experiments.status.${d.id}`, intl)
+    d.value + ' ' + T(`status.${d.id}`, intl)
 
   const tooltip = ({ datum }: PieTooltipProps<SingleData>) => (
     <Box
@@ -34,7 +34,7 @@ const TotalStatus: React.FC<BoxProps> = (props) => {
       style={{ background: theme.palette.background.default, fontSize: theme.typography.caption.fontSize }}
     >
       <Box mr={1.5} style={{ width: 12, height: 12, background: datum.color }} />
-      {(datum.value < 1 ? 0 : datum.value) + ' ' + T(`experiments.status.${datum.id}`, intl)}
+      {(datum.value < 1 ? 0 : datum.value) + ' ' + T(`status.${datum.id}`, intl)}
     </Box>
   )
 
@@ -46,7 +46,7 @@ const TotalStatus: React.FC<BoxProps> = (props) => {
           setS(
             (Object.entries(resp.data) as [keyof StatusOfExperiments, number][]).map(([k, v]) => ({
               id: k,
-              label: T(`experiments.status.${k}`, intl),
+              label: T(`status.${k}`, intl),
               value: v === 0 ? 0.01 : v,
             }))
           )
