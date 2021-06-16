@@ -3,7 +3,6 @@ import { Submit, TextField } from 'components/FormField'
 import { setAlert, setTokenName, setTokens } from 'slices/globalStatus'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
-import React from 'react'
 import Space from 'components-mui/Space'
 import T from 'components/T'
 import api from 'api'

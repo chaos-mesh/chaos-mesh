@@ -1,8 +1,9 @@
 import { Avatar, Typography } from '@material-ui/core'
-import React, { useImperativeHandle, useState } from 'react'
+import { useImperativeHandle, useState } from 'react'
 
 import Space from 'components-mui/Space'
 import T from 'components/T'
+import { forwardRef } from 'react'
 
 export interface MultiNodeHandles {
   current: number
@@ -62,4 +63,4 @@ const MultiNode: React.ForwardRefRenderFunction<MultiNodeHandles, MultiNodeProps
   )
 }
 
-export default React.forwardRef(MultiNode)
+export default forwardRef(MultiNode)

@@ -1,6 +1,6 @@
 import { Box, Button, Checkbox, FormControl, FormControlLabel, MenuItem, Typography } from '@material-ui/core'
 import { Field, Form, Formik } from 'formik'
-import React, { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
 import { RBACConfigParams } from 'api/common.type'

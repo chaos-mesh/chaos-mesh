@@ -1,6 +1,6 @@
 import { Box, FormControlLabel, Switch, Typography } from '@material-ui/core'
 import { FormikErrors, FormikTouched, getIn } from 'formik'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import T from 'components/T'
 import { TextField } from 'components/FormField'

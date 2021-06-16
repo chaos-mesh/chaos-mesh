@@ -2,7 +2,6 @@ import { Box, MenuItem, TextField, Typography } from '@material-ui/core'
 import { setLang, setTheme } from 'slices/settings'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
-import React from 'react'
 import T from 'components/T'
 import messages from 'i18n/messages'
 

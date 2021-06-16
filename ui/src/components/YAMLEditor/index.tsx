@@ -5,7 +5,6 @@ import 'ace-builds/src-min-noconflict/theme-tomorrow'
 
 import AceEditor, { IAceEditorProps } from 'react-ace'
 import { Box, Button } from '@material-ui/core'
-import React, { useState } from 'react'
 
 import { Ace } from 'ace-builds'
 import CloudDownloadOutlinedIcon from '@material-ui/icons/CloudDownloadOutlined'
@@ -13,6 +12,8 @@ import PublishIcon from '@material-ui/icons/Publish'
 import Space from 'components-mui/Space'
 import T from 'components/T'
 import fileDownload from 'js-file-download'
+import { memo } from 'react'
+import { useState } from 'react'
 import { useStoreSelector } from 'store'
 import yaml from 'js-yaml'
 
@@ -83,4 +84,4 @@ const YAMLEditor: React.FC<YAMLEditorProps> = ({ name, data, mountEditor, onUpda
   )
 }
 
-export default React.memo(YAMLEditor)
+export default memo(YAMLEditor)

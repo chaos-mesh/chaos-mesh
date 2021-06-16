@@ -1,7 +1,7 @@
 import { Box, Button, Divider, InputAdornment, MenuItem, Typography } from '@material-ui/core'
 import { Form, Formik } from 'formik'
 import { LabelField, SelectField, Submit, TextField } from 'components/FormField'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import AddIcon from '@material-ui/icons/Add'
 import Paper from 'components-mui/Paper'

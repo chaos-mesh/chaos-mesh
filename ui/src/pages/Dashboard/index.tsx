@@ -1,5 +1,5 @@
 import { Box, Grid, Grow, Typography } from '@material-ui/core'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import AccountTreeOutlinedIcon from '@material-ui/icons/AccountTreeOutlined'
 import { Event } from 'api/events.type'

@@ -1,6 +1,6 @@
 import { Box, BoxProps } from '@material-ui/core'
 import { ComputedDatum, PieTooltipProps, ResponsivePie } from '@nivo/pie'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import NotFound from 'components-mui/NotFound'
 import { PropertyAccessor } from '@nivo/core'

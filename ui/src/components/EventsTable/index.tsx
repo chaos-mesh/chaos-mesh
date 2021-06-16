@@ -11,7 +11,6 @@ import {
   TableRow,
   TableSortLabel,
 } from '@material-ui/core'
-import React, { useState } from 'react'
 import { comparator, format } from 'lib/luxon'
 
 import { Event } from 'api/events.type'
@@ -23,6 +22,7 @@ import Paper from 'components-mui/Paper'
 import T from 'components/T'
 import { truncate } from 'lib/utils'
 import { useIntl } from 'react-intl'
+import { useState } from 'react'
 
 function descendingComparator<T extends Record<string, any>>(a: T, b: T, orderBy: string) {
   if (['StartTime', 'EndTime'].includes(orderBy)) {

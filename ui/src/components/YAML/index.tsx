@@ -1,7 +1,6 @@
 import { Button, ButtonProps } from '@material-ui/core'
 
 import CloudUploadOutlinedIcon from '@material-ui/icons/CloudUploadOutlined'
-import React from 'react'
 import T from 'components/T'
 import { setAlert } from 'slices/globalStatus'
 import { useIntl } from 'react-intl'

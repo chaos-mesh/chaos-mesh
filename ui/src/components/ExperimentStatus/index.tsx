@@ -1,7 +1,6 @@
 import { Box, CircularProgress } from '@material-ui/core'
 
 import DoneIcon from '@material-ui/icons/Done'
-import React from 'react'
 import { StatusOfExperiments } from 'api/experiments.type'
 
 interface ExperimentStatusProps {

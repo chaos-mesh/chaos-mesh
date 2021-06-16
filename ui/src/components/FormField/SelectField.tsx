@@ -2,7 +2,6 @@ import { Box, Chip, TextField, TextFieldProps } from '@material-ui/core'
 import { Field, getIn, useFormikContext } from 'formik'
 
 import { Experiment } from 'components/NewExperiment/types'
-import React from 'react'
 
 const SelectField: React.FC<TextFieldProps & { multiple?: boolean }> = ({ multiple = false, ...props }) => {
   const { values, setFieldValue } = useFormikContext<Experiment>()

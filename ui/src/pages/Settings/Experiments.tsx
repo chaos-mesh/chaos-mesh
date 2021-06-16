@@ -2,7 +2,6 @@ import { Box, Checkbox, FormControl, FormControlLabel, FormHelperText } from '@m
 import { setDebugMode, setEnableKubeSystemNS } from 'slices/settings'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
-import React from 'react'
 import T from 'components/T'
 
 const Experiments = () => {

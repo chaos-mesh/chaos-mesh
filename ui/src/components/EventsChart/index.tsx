@@ -1,5 +1,5 @@
 import { Box, BoxProps } from '@material-ui/core'
-import React, { useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 
 import { Event } from 'api/events.type'
 import NotFound from 'components-mui/NotFound'

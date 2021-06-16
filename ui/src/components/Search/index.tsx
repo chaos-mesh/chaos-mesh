@@ -8,7 +8,7 @@ import {
   TextField,
   Typography,
 } from '@material-ui/core'
-import React, { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import { Archive } from 'api/archives.type'
 import { Experiment } from 'api/experiments.type'

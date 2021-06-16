@@ -1,5 +1,5 @@
 import { Grow, Typography } from '@material-ui/core'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { Event } from 'api/events.type'
 import EventsTable from 'components/EventsTable'

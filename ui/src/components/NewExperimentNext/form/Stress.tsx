@@ -1,6 +1,6 @@
 import { Form, Formik, getIn } from 'formik'
 import { LabelField, Submit, TextField } from 'components/FormField'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import AdvancedOptions from 'components/AdvancedOptions'
 import { Typography } from '@material-ui/core'

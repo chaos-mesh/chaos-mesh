@@ -1,7 +1,6 @@
 import { Autocomplete, Chip, TextField, TextFieldProps } from '@material-ui/core'
 import { getIn, useFormikContext } from 'formik'
 
-import React from 'react'
 import T from 'components/T'
 
 interface AutocompleteMultipleFieldProps {

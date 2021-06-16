@@ -1,5 +1,4 @@
 import App from './App'
-import React from 'react'
 import ReactDOM from 'react-dom'
 
 // Temporarily disable React.StrictMode in dev and prod.

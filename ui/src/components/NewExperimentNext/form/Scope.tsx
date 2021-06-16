@@ -1,6 +1,5 @@
 import { AutocompleteMultipleField, SelectField, TextField } from 'components/FormField'
 import { InputAdornment, MenuItem, Typography } from '@material-ui/core'
-import React, { useEffect, useMemo } from 'react'
 import { arrToObjBySep, objToArrBySep, toTitleCase } from 'lib/utils'
 import {
   getAnnotations,
@@ -9,6 +8,7 @@ import {
   getNetworkTargetPodsByNamespaces as getNetworkTargetPods,
 } from 'slices/experiments'
 import { getIn, useFormikContext } from 'formik'
+import { useEffect, useMemo } from 'react'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
 import AdvancedOptions from 'components/AdvancedOptions'

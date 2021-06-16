@@ -1,4 +1,4 @@
-import React, { useImperativeHandle, useState } from 'react'
+import { forwardRef, useImperativeHandle, useState } from 'react'
 
 import { Box } from '@material-ui/core'
 import ByYAML from './ByYAML'
@@ -115,4 +115,4 @@ const NewExperiment: React.ForwardRefRenderFunction<NewExperimentHandles, NewExp
   )
 }
 
-export default React.forwardRef(NewExperiment)
+export default forwardRef(NewExperiment)

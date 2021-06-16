@@ -1,6 +1,6 @@
 import { Box, Divider, FormControlLabel, Radio, RadioGroup, Typography } from '@material-ui/core'
 import { PreDefinedValue, getDB } from 'lib/idb'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { Archive } from 'api/archives.type'
 import { Experiment } from 'api/experiments.type'

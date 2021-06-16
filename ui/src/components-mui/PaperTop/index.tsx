@@ -1,7 +1,5 @@
 import { Box, BoxProps, Typography } from '@material-ui/core'
 
-import React from 'react'
-
 interface PaperTopProps {
   title: string | JSX.Element
   subtitle?: string | JSX.Element

@@ -1,6 +1,5 @@
 import { Container, ContainerProps } from '@material-ui/core'
 
-import React from 'react'
 import { styled } from '@material-ui/styles'
 
 type ContentContainerProps = Omit<ContainerProps, 'maxWidth'>

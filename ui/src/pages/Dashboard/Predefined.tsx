@@ -1,7 +1,7 @@
 import { Box, Button, Card, Modal, Typography } from '@material-ui/core'
 import { PreDefinedValue, getDB } from 'lib/idb'
-import React, { useEffect, useRef, useState } from 'react'
 import { parseSubmit, yamlToExperiment } from 'lib/formikhelpers'
+import { useEffect, useRef, useState } from 'react'
 
 import { Ace } from 'ace-builds'
 import Paper from 'components-mui/Paper'

@@ -1,8 +1,6 @@
 import { FastField, Field, FieldValidator } from 'formik'
 import { TextField as MUITextField, TextFieldProps } from '@material-ui/core'
 
-import React from 'react'
-
 const TextField: React.FC<TextFieldProps & { validate?: FieldValidator; fast?: boolean }> = ({
   fast = false,
   ...rest
