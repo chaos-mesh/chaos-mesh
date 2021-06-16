@@ -188,8 +188,8 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
       </AdvancedOptions>
 
       <PaperTop
-        title={podsPreviewTitle || T('newE.scope.affectedPodsPreview')}
-        subtitle={podsPreviewDesc || T('newE.scope.affectedPodsPreviewHelper')}
+        title={podsPreviewTitle || T('newE.scope.targetPodsPreview')}
+        subtitle={podsPreviewDesc || T('newE.scope.targetPodsPreviewHelper')}
       />
       {pods.length > 0 ? (
         <ScopePodsTable scope={scope} pods={pods} />

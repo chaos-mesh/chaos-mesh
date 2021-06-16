@@ -48,9 +48,9 @@
       "modeHelper": "选择实验模式",
       "modeValue": "模式值",
       "modeValueHelper": "请填写模式值",
-      "affectedPods": "受到实验作用的 Pod",
-      "affectedPodsPreview": "预览将要受到实验作用的 Pod",
-      "affectedPodsPreviewHelper": "通过勾选 Pod 来进一步限制实验的范围",
+      "targetPods": "目标 Pod",
+      "targetPodsPreview": "预览目标 Pod",
+      "targetPodsPreviewHelper": "通过勾选 Pod 来进一步限制范围",
       "noPodsFound": "未发现 Pod"
     },
     "target": {
