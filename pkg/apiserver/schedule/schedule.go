@@ -472,12 +472,14 @@ func parseGcpChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 			Annotations: exp.Annotations,
 		},
 		Spec: v1alpha1.GcpChaosSpec{
-			Action:      v1alpha1.GcpChaosAction(exp.Target.GcpChaos.Action),
-			SecretName:  exp.Target.GcpChaos.SecretName,
-			Project:     exp.Target.GcpChaos.Project,
-			Zone:        exp.Target.GcpChaos.Zone,
-			Instance:    exp.Target.GcpChaos.Instance,
-			DeviceNames: exp.Target.GcpChaos.DeviceNames,
+			Action:     v1alpha1.GcpChaosAction(exp.Target.GcpChaos.Action),
+			SecretName: exp.Target.GcpChaos.SecretName,
+			GcpSelector: v1alpha1.GcpSelector{
+				Project:     exp.Target.GcpChaos.Project,
+				Zone:        exp.Target.GcpChaos.Zone,
+				Instance:    exp.Target.GcpChaos.Instance,
+				DeviceNames: exp.Target.GcpChaos.DeviceNames,
+			},
 		},
 	}
 
