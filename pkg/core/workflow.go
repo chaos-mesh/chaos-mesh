@@ -41,10 +41,10 @@ type WorkflowRepository interface {
 type WorkflowStatus string
 
 const (
-	WorkflowRunning WorkflowStatus = "Running"
-	WorkflowSucceed WorkflowStatus = "Succeed"
-	WorkflowFailed  WorkflowStatus = "Failed"
-	WorkflowUnknown WorkflowStatus = "Unknown"
+	WorkflowRunning WorkflowStatus = "running"
+	WorkflowSucceed WorkflowStatus = "finished"
+	WorkflowFailed  WorkflowStatus = "failed"
+	WorkflowUnknown WorkflowStatus = "unknown"
 )
 
 // Workflow defines the root structure of a workflow.
