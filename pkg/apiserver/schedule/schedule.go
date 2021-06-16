@@ -24,7 +24,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
-	"github.com/mitchellh/mapstructure"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -768,7 +767,13 @@ func (s *Service) updateScheduleFun(exp *core.KubeObjectDesc, kubeCli client.Cli
 	sch.SetAnnotations(meta.Annotations)
 
 	var spec v1alpha1.ScheduleSpec
-	mapstructure.Decode(exp.Spec, &spec)
+	bytes, err := json.Marshal(exp.Spec)
+	if err != nil {
+		return err
+	}
+	if err = json.Unmarshal(bytes, &spec); err != nil {
+		return err
+	}
 	sch.Spec = spec
 
 	return kubeCli.Update(context.Background(), sch)
