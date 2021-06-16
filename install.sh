@@ -1869,7 +1869,7 @@ webhooks:
           - CREATE
           - UPDATE
         resources:
-          - schedule
+          - schedules
 ---
 # Source: chaos-mesh/templates/secrets-configuration.yaml
 apiVersion: admissionregistration.k8s.io/v1beta1
