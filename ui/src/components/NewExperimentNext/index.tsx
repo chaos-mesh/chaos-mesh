@@ -107,7 +107,7 @@ const NewExperiment: React.ForwardRefRenderFunction<NewExperimentHandles, NewExp
         {loadFrom && <LoadFrom callback={fillExperiment} inSchedule={inSchedule} inWorkflow={inWorkflow} />}
       </TabPanel>
       <TabPanel value="yaml" sx={{ p: 0, pt: 6 }}>
-        <ByYAML callback={fillExperiment} inWorkflow={inWorkflow} />
+        <ByYAML callback={fillExperiment} />
       </TabPanel>
     </TabContext>
   )

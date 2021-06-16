@@ -9,7 +9,7 @@ export interface Workflow {
   entry: string
   created_at: string
   end_time: string
-  status: 'Succeed'
+  status: 'running' | 'finished' | 'failed' | 'unknown'
 }
 
 interface MultiNode {

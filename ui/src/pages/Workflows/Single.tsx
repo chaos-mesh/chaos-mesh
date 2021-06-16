@@ -69,7 +69,7 @@ const Single = () => {
         setSingle(data)
 
         // Clear interval after workflow succeed
-        if (data.status === 'Succeed') {
+        if (data.status === 'finished') {
           clearInterval(intervalIDRef.current)
         }
       })

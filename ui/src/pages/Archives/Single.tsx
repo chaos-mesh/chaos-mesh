@@ -73,7 +73,7 @@ const Single = () => {
   const handleDownloadExperiment = () => fileDownload(yaml.dump(single!.kube_object), `${single!.name}.yaml`)
 
   const YAML = () => (
-    <Paper sx={{ height: 600, p: 0 }}>
+    <Paper sx={{ height: kind === 'workflow' ? (theme) => `calc(100vh - 56px - ${theme.spacing(18)})` : 600, p: 0 }}>
       {single && (
         <Box display="flex" flexDirection="column" height="100%">
           <PaperTop title={T('common.definition')} boxProps={{ p: 4.5, pb: 3 }}>

@@ -13,20 +13,7 @@ interface StatusLabelProps {
 const StatusLabel: React.FC<StatusLabelProps> = ({ status }) => {
   const intl = useIntl()
 
-  let label
-  switch (status) {
-    case 'Succeed':
-      label = T(`workflow.status.${status}`, intl)
-
-      break
-    case 'injecting':
-    case 'running':
-    case 'finished':
-    case 'paused':
-      label = T(`experiments.status.${status}`, intl)
-
-      break
-  }
+  const label = T(`status.${status}`, intl)
 
   let color
   switch (status) {
@@ -39,7 +26,6 @@ const StatusLabel: React.FC<StatusLabelProps> = ({ status }) => {
       color = 'grey.500'
 
       break
-    case 'Succeed':
     case 'finished':
       color = 'success.main'
 
@@ -48,7 +34,6 @@ const StatusLabel: React.FC<StatusLabelProps> = ({ status }) => {
 
   let icon
   switch (status) {
-    case 'Succeed':
     case 'finished':
       icon = <CheckCircleIcon sx={{ color }} />
 

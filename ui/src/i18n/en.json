@@ -14,7 +14,7 @@
       "step8": "Predefined can store custom experiments for quick execution in the future.",
       "step9": "🎉 Congratulations on completing all the tutorial steps! Click the blank space to exit."
     },
-    "newbie": "As a newbie",
+    "newbie": "Newbie",
     "newbieDesc": "⛑ Quickly inject a fault from a simple experiment",
     "startAWorkflow": "Start with workflow",
     "startAWorkflowDesc": "Workflow allows you to organize multiple experiments to simulate more realistic failures",
@@ -38,7 +38,7 @@
     },
     "loadFrom": "Load from",
     "byYAML": "By YAML",
-    "byYAMLDesc": "Create an experiment, schedule, or complex workflow task by filling in or uploading YAML",
+    "byYAMLDesc": "Create an experiment or schedule by filling in or uploading YAML",
     "basic": {
       "nameHelper": "The experiment name",
       "namespaceHelper": "Select the namespace"
@@ -99,12 +99,6 @@
   "experiments": {
     "title": "Experiments",
     "single": "Experiment",
-    "status": {
-      "injecting": "Injecting",
-      "running": "Running",
-      "finished": "Finished",
-      "paused": "Paused"
-    },
     "notFound": "No experiments found",
     "createdAt": "Created",
     "deleteMulti": "Archive selected experiments",
@@ -194,9 +188,7 @@
     "single": "Archive",
     "notFound": "No archives found",
     "deleteMulti": "Delete selected archives",
-    "deleteDesc": "The Archive will be permanently deleted",
-    "numberOfRuns": "Number of Runs",
-    "numberOfAffectedPods": "Number of Affected Pods"
+    "deleteDesc": "The Archive will be permanently deleted"
   },
   "settings": {
     "title": "Settings",
@@ -298,6 +290,14 @@
   },
   "table": {
     "created": "Created at"
+  },
+  "status": {
+    "injecting": "Injecting",
+    "running": "Running",
+    "finished": "Finished",
+    "paused": "Paused",
+    "failed": "Failed",
+    "unknown": "Unknown"
   },
   "confirm": {
     "success": {
