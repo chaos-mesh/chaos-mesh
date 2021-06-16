@@ -89,6 +89,7 @@ func (s *server) setupUDPServer() error {
 	go func() {
 		for {
 			_, _, err := pc.ReadFrom(s.recvBuf)
+			fmt.Println("receive buf " + string(s.recvBuf))
 			if err != nil {
 				return
 			}

@@ -2930,7 +2930,6 @@ spec:
                       type: string
                   required:
                   - direction
-                  - ipsets
                   - name
                   - source
                   type: object

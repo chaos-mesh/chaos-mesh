@@ -83,6 +83,7 @@ type RawIptables struct {
 	Name string `json:"name"`
 
 	// The name of related ipset
+	// +optional
 	IPSets []string `json:"ipsets"`
 
 	// The block direction of this iptables rule
