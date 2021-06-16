@@ -47,7 +47,7 @@ const (
 	WorkflowUnknown WorkflowStatus = "unknown"
 )
 
-// Workflow defines the root structure of a workflow.
+// WorkflowMeta defines the root structure of a workflow.
 type WorkflowMeta struct {
 	ID        uint   `gorm:"primary_key" json:"id"`
 	Namespace string `json:"namespace"`
@@ -58,7 +58,7 @@ type WorkflowMeta struct {
 	EndTime   string         `json:"end_time"`
 	Status    WorkflowStatus `json:"status,omitempty"`
 	UID       string         `gorm:"index:uid" json:"uid"`
-	Archived  bool           `json:"archived"`
+	Archived  bool           `json:"-"`
 }
 
 type WorkflowDetail struct {
