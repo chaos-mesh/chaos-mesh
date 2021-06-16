@@ -5,6 +5,7 @@ import 'ace-builds/src-min-noconflict/theme-tomorrow'
 
 import AceEditor, { IAceEditorProps } from 'react-ace'
 import { Box, Button } from '@material-ui/core'
+import { useStoreDispatch, useStoreSelector } from 'store'
 
 import { Ace } from 'ace-builds'
 import CloudDownloadOutlinedIcon from '@material-ui/icons/CloudDownloadOutlined'
@@ -13,8 +14,9 @@ import Space from 'components-mui/Space'
 import T from 'components/T'
 import fileDownload from 'js-file-download'
 import { memo } from 'react'
+import { setConfirm } from 'slices/globalStatus'
+import { useIntl } from 'react-intl'
 import { useState } from 'react'
-import { useStoreSelector } from 'store'
 import yaml from 'js-yaml'
 
 interface YAMLEditorProps {
@@ -27,7 +29,10 @@ interface YAMLEditorProps {
 }
 
 const YAMLEditor: React.FC<YAMLEditorProps> = ({ name, data, mountEditor, onUpdate, download, aceProps }) => {
+  const intl = useIntl()
+
   const { theme } = useStoreSelector((state) => state.settings)
+  const dispatch = useStoreDispatch()
 
   const [editor, setEditor] = useState<Ace.Editor>()
 
@@ -35,6 +40,15 @@ const YAMLEditor: React.FC<YAMLEditorProps> = ({ name, data, mountEditor, onUpda
     setEditor(editor)
 
     typeof mountEditor === 'function' && mountEditor(editor)
+  }
+
+  const handleSelect = () => {
+    dispatch(
+      setConfirm({
+        title: `${T('common.update', intl)} ${name}`,
+        handle: handleOnUpdate,
+      })
+    )
   }
 
   const handleOnUpdate = () => {
@@ -68,13 +82,7 @@ const YAMLEditor: React.FC<YAMLEditorProps> = ({ name, data, mountEditor, onUpda
             </Button>
           )}
           {typeof onUpdate === 'function' && (
-            <Button
-              variant="outlined"
-              color="primary"
-              size="small"
-              startIcon={<PublishIcon />}
-              onClick={handleOnUpdate}
-            >
+            <Button variant="outlined" color="primary" size="small" startIcon={<PublishIcon />} onClick={handleSelect}>
               {T('common.update')}
             </Button>
           )}
