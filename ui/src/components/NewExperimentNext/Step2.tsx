@@ -21,20 +21,7 @@ import SkeletonN from 'components-mui/SkeletonN'
 import Space from 'components-mui/Space'
 import T from 'components/T'
 import UndoIcon from '@material-ui/icons/Undo'
-import { makeStyles } from '@material-ui/styles'
 import { string as yupString } from 'yup'
-
-const useStyles = makeStyles((theme) => ({
-  submit: {
-    borderColor: theme.palette.success.main,
-  },
-  submitIcon: {
-    color: theme.palette.success.main,
-  },
-  asButton: {
-    cursor: 'pointer',
-  },
-}))
 
 function isInstant(target: any) {
   if (
@@ -53,8 +40,6 @@ interface Step2Props {
 }
 
 const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false }) => {
-  const classes = useStyles()
-
   const { namespaces, step2, basic, target, scheduleSpecific } = useStoreSelector((state) => state.experiments)
   const scopeDisabled = target.kind === 'AwsChaos' || target.kind === 'GcpChaos'
   const dispatch = useStoreDispatch()
@@ -106,17 +91,17 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false })
   const handleUndo = () => dispatch(setStep2(false))
 
   return (
-    <Paper className={step2 ? classes.submit : ''}>
+    <Paper sx={{ borderColor: step2 ? 'success.main' : undefined }}>
       <Box display="flex" justifyContent="space-between" mb={step2 ? 0 : 6}>
         <Box display="flex" alignItems="center">
           {step2 && (
             <Box display="flex" mr={3}>
-              <CheckIcon className={classes.submitIcon} />
+              <CheckIcon sx={{ color: 'success.main' }} />
             </Box>
           )}
           <Typography>{T(`${inSchedule ? 'newS' : 'newE'}.titleStep2`)}</Typography>
         </Box>
-        {step2 && <UndoIcon className={classes.asButton} onClick={handleUndo} />}
+        {step2 && <UndoIcon onClick={handleUndo} sx={{ cursor: 'pointer' }} />}
       </Box>
       <Box position="relative" hidden={step2}>
         <Formik

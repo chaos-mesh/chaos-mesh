@@ -1,5 +1,5 @@
 import { Box, FormControlLabel, Switch, Typography } from '@material-ui/core'
-import { FormikErrors, FormikTouched, getIn } from 'formik'
+import { FormikErrors, FormikTouched, getIn, useFormikContext } from 'formik'
 import { useEffect, useState } from 'react'
 
 import T from 'components/T'
@@ -15,6 +15,8 @@ interface SchedulerProps {
 
 const Scheduler: React.FC<SchedulerProps> = ({ errors, touched, inSchedule = false }) => {
   const { fromExternal, basic } = useStoreSelector((state) => state.experiments)
+  const { values, setFieldValue } = useFormikContext()
+
   const [continuous, setContinuous] = useState(false)
 
   useEffect(() => {
@@ -24,7 +26,15 @@ const Scheduler: React.FC<SchedulerProps> = ({ errors, touched, inSchedule = fal
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fromExternal])
 
-  const handleChecked = (e: React.ChangeEvent<HTMLInputElement>) => setContinuous(e.target.checked)
+  const handleChecked = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const checked = e.target.checked
+
+    setContinuous(checked)
+
+    if (checked && getIn(values, 'scheduler.duration') !== '') {
+      setFieldValue('scheduler.duration', '')
+    }
+  }
 
   return (
     <>
