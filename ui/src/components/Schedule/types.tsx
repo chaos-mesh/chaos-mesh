@@ -1,9 +1,9 @@
 import * as Yup from 'yup'
 
 import { FormikProps, FormikValues } from 'formik'
+import { InputAdornment, MenuItem } from '@material-ui/core'
 import { SelectField, TextField } from 'components/FormField'
 
-import { MenuItem } from '@material-ui/core'
 import T from 'components/T'
 
 export interface ScheduleSpecific {
@@ -34,6 +34,9 @@ export const Fields = ({ errors, touched }: Pick<FormikProps<FormikValues>, 'err
       type="number"
       name="starting_deadline_seconds"
       label={T('newS.basic.startingDeadlineSeconds')}
+      InputProps={{
+        endAdornment: <InputAdornment position="end">{T('common.seconds')}</InputAdornment>,
+      }}
       helperText={
         errors.starting_deadline_seconds && touched.starting_deadline_seconds
           ? errors.starting_deadline_seconds
