@@ -143,7 +143,7 @@ func (in *{{.Type}}) DurationExceeded(now time.Time) (bool, time.Duration, error
 
 func (in *{{.Type}}) IsOneShot() bool {
 	{{if .OneShotExp}}
-	if in{{.OneShotExp}} {
+	if {{.OneShotExp}} {
 		return true
 	}
 

@@ -1087,7 +1087,7 @@ func (in *PodChaos) DurationExceeded(now time.Time) (bool, time.Duration, error)
 
 func (in *PodChaos) IsOneShot() bool {
 	
-	if in.Spec.Action==PodKillAction {
+	if in.Spec.Action==PodKillAction || in.Spec.Action==ContainerKillAction {
 		return true
 	}
 

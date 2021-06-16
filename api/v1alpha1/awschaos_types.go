@@ -21,7 +21,7 @@ import (
 
 // +kubebuilder:object:root=true
 // +chaos-mesh:base
-// +chaos-mesh:oneshot=.Spec.Action==Ec2Restart
+// +chaos-mesh:oneshot=in.Spec.Action==Ec2Restart
 
 // AwsChaos is the Schema for the awschaos API
 type AwsChaos struct {
