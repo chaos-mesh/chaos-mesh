@@ -289,7 +289,7 @@ func TestcaseNetworkPartition(
 	err = cli.Create(ctx, anotherNetworkPartition.DeepCopy())
 	framework.ExpectNoError(err, "create network chaos error")
 
-	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
+	wait.Poll(time.Second, 30*time.Second, func() (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 5 || len(result[networkConditionSlow]) != 0 {
 			return false, nil
@@ -324,6 +324,47 @@ func TestcaseNetworkPartition(
 		v1alpha1.OnePodMode,
 		v1alpha1.AllPodMode,
 		v1alpha1.To,
+		testDelayDuration,
+	)
+	err = cli.Create(ctx, networkPartitionWithoutTarget.DeepCopy())
+	framework.ExpectNoError(err, "create network chaos error")
+
+	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
+		result = probeNetworkCondition(c, networkPeers, ports, false)
+		if len(result[networkConditionBlocked]) != 5 || len(result[networkConditionSlow]) != 0 {
+			return false, nil
+		}
+		return true, nil
+	})
+	// The expected behavior is to block only 0 -> 1, 0 -> 2 and 0 -> 3
+	// Actually, 1 -> 0, 2 -> 0, 3 -> 0 are not blocked, but the `recvUDP`
+	// request failed due to partition.
+	framework.ExpectEqual(result[networkConditionBlocked], [][]int{{0, 1}, {1, 0}, {0, 2}, {2, 0}, {0, 3}, {3, 0}})
+	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
+
+	By("recover")
+	err = cli.Delete(ctx, networkPartitionWithoutTarget.DeepCopy())
+	framework.ExpectNoError(err, "delete network chaos error")
+
+	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
+		klog.Info("retry probeNetworkCondition")
+		result = probeNetworkCondition(c, networkPeers, ports, false)
+		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 0 {
+			return false, nil
+		}
+		return true, nil
+	})
+	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
+	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
+
+	By("block from peer-0 from all")
+	networkPartitionWithoutTarget = makeNetworkPartitionChaos(
+		ns, "network-chaos-without-target",
+		map[string]string{"app": "network-peer-0"},
+		nil,
+		v1alpha1.OnePodMode,
+		v1alpha1.AllPodMode,
+		v1alpha1.From,
 		testDelayDuration,
 	)
 	err = cli.Create(ctx, networkPartitionWithoutTarget.DeepCopy())
