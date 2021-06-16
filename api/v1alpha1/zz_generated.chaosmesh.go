@@ -375,6 +375,10 @@ func (in *GcpChaos) DurationExceeded(now time.Time) (bool, time.Duration, error)
 
 func (in *GcpChaos) IsOneShot() bool {
 	
+	if in.Spec.Action==NodeReset {
+		return true
+	}
+
 	return false
 	
 }

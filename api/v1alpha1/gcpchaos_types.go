@@ -21,6 +21,7 @@ import (
 
 // +kubebuilder:object:root=true
 // +chaos-mesh:base
+// +chaos-mesh:oneshot=.Spec.Action==NodeReset
 
 // GcpChaos is the Schema for the gcpchaos API
 type GcpChaos struct {
