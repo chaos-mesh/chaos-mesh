@@ -16,6 +16,8 @@ package store
 import (
 	"go.uber.org/fx"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/store/workflow"
+
 	"github.com/chaos-mesh/chaos-mesh/pkg/store/event"
 	"github.com/chaos-mesh/chaos-mesh/pkg/store/experiment"
 	"github.com/chaos-mesh/chaos-mesh/pkg/store/schedule"
@@ -27,6 +29,7 @@ var Module = fx.Options(
 		experiment.NewStore,
 		event.NewStore,
 		schedule.NewStore,
+		workflow.NewStore,
 	),
 	fx.Invoke(experiment.DeleteIncompleteExperiments),
 	fx.Invoke(schedule.DeleteIncompleteSchedules),

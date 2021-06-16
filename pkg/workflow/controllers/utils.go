@@ -17,6 +17,7 @@ import (
 	"context"
 	"fmt"
 	"sort"
+	"strings"
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
@@ -173,4 +174,32 @@ func (it *ChildNodesFetcher) fetchChildNodes(ctx context.Context, node v1alpha1.
 		}
 	}
 	return activeChildren, finishedChildren, nil
+}
+
+func getTaskNameFromGeneratedName(generatedNodeName string) string {
+	index := strings.LastIndex(generatedNodeName, "-")
+	if index < 0 {
+		return generatedNodeName
+	}
+	return generatedNodeName[:index]
+}
+
+// setDifference return the set of elements which contained in former but not in latter
+func setDifference(former []string, latter []string) []string {
+	var result []string
+	formerSet := make(map[string]struct{})
+	latterSet := make(map[string]struct{})
+
+	for _, item := range former {
+		formerSet[item] = struct{}{}
+	}
+	for _, item := range latter {
+		latterSet[item] = struct{}{}
+	}
+	for k := range formerSet {
+		if _, ok := latterSet[k]; !ok {
+			result = append(result, k)
+		}
+	}
+	return result
 }

@@ -16,29 +16,28 @@ package controllers
 import (
 	"context"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 )
 
 // ParallelNodeReconciler watches on nodes which type is Parallel
 type ParallelNodeReconciler struct {
 	*ChildNodesFetcher
 	kubeClient    client.Client
-	eventRecorder record.EventRecorder
+	eventRecorder recorder.ChaosRecorder
 	logger        logr.Logger
 }
 
-func NewParallelNodeReconciler(kubeClient client.Client, eventRecorder record.EventRecorder, logger logr.Logger) *ParallelNodeReconciler {
+func NewParallelNodeReconciler(kubeClient client.Client, eventRecorder recorder.ChaosRecorder, logger logr.Logger) *ParallelNodeReconciler {
 	return &ParallelNodeReconciler{
 		ChildNodesFetcher: NewChildNodesFetcher(kubeClient, logger),
 		kubeClient:        kubeClient,
@@ -197,7 +196,6 @@ func (it *ParallelNodeReconciler) syncChildNodes(ctx context.Context, node v1alp
 		return err
 	}
 
-	// TODO: emit event
 	var childrenNames []string
 	for _, childNode := range childNodes {
 		err := it.kubeClient.Create(ctx, childNode)
@@ -209,37 +207,10 @@ func (it *ParallelNodeReconciler) syncChildNodes(ctx context.Context, node v1alp
 		}
 		childrenNames = append(childrenNames, childNode.Name)
 	}
+	it.eventRecorder.Event(&node, recorder.NodesCreated{ChildNodes: childrenNames})
 	it.logger.Info("parallel node spawn new child node",
 		"node", fmt.Sprintf("%s/%s", node.Namespace, node.Name),
 		"child node", childrenNames)
 
 	return nil
-}
-
-func getTaskNameFromGeneratedName(generatedNodeName string) string {
-	index := strings.LastIndex(generatedNodeName, "-")
-	if index < 0 {
-		return generatedNodeName
-	}
-	return generatedNodeName[:index]
-}
-
-// setDifference return the set of elements which contained in former but not in latter
-func setDifference(former []string, latter []string) []string {
-	var result []string
-	formerSet := make(map[string]struct{})
-	latterSet := make(map[string]struct{})
-
-	for _, item := range former {
-		formerSet[item] = struct{}{}
-	}
-	for _, item := range latter {
-		latterSet[item] = struct{}{}
-	}
-	for k := range formerSet {
-		if _, ok := latterSet[k]; !ok {
-			result = append(result, k)
-		}
-	}
-	return result
 }
