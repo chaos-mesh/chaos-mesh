@@ -1314,6 +1314,8 @@ spec:
               value: "false"
             - name: SECURITY_MODE
               value: "false"
+            - name: POD_FAILURE_PAUSE_IMAGE
+              value: gcr.io/google-containers/pause:latest
             - name: DNS_SERVER_CREATE
               value: "false"
           volumeMounts:
