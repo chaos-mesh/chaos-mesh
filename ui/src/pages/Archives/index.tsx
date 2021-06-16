@@ -54,6 +54,9 @@ export default function Archives() {
   const fetchArchives = useCallback(() => {
     let request
     switch (kind) {
+      case 'workflow':
+        request = api.workflows.archives
+        break
       case 'schedule':
         request = api.schedules.archives
         break
@@ -90,6 +93,9 @@ export default function Archives() {
     switch (action) {
       case 'delete':
         switch (kind) {
+          case 'workflow':
+            actionFunc = api.workflows.delArchive
+            break
           case 'schedule':
             actionFunc = api.schedules.delArchive
             break
@@ -104,6 +110,9 @@ export default function Archives() {
       case 'deleteMulti':
         action = 'delete'
         switch (kind) {
+          case 'workflow':
+            actionFunc = api.workflows.delArchives
+            break
           case 'schedule':
             actionFunc = api.schedules.delArchives
             break

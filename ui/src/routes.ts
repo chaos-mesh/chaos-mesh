@@ -31,7 +31,7 @@ const routes: RouteProps[] = [
   },
   {
     component: Workflow,
-    path: '/workflows/:namespace/:name',
+    path: '/workflows/:uuid',
   },
   {
     component: NewSchedule,

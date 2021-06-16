@@ -168,7 +168,7 @@
   "workflows": {
     "title": "Workflows",
     "notFound": "No workflows found",
-    "deleteDesc": "This workflow will be permanently deleted"
+    "deleteDesc": "You can still find this workflow in the archives"
   },
   "workflow": {
     "entry": "Entry",

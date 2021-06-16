@@ -12,6 +12,7 @@ import PlayCircleOutlineIcon from '@material-ui/icons/PlayCircleOutline'
 import { Schedule } from 'api/schedules.type'
 import Space from 'components-mui/Space'
 import T from 'components/T'
+import { truncate } from 'lib/utils'
 import { useHistory } from 'react-router-dom'
 import { useIntl } from 'react-intl'
 import { useStoreSelector } from 'store'
@@ -134,8 +135,11 @@ const ObjectListItem: React.FC<ObjectListItemProps> = ({ data, type = 'experimen
       <Box display="flex" justifyContent="space-between" alignItems="center" p={3}>
         <Space direction="row" alignItems="center">
           {type !== 'archive' && <ExperimentStatus status={(data as Experiment).status} />}
-          <Typography component="div" variant="body1">
-            {data.name}
+          <Typography component="div" title={data.name}>
+            {truncate(data.name)}
+          </Typography>
+          <Typography component="div" variant="body2" color="textSecondary" title={data.uid}>
+            {truncate(data.uid)}
           </Typography>
         </Space>
 

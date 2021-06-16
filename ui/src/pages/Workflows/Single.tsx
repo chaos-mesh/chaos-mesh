@@ -45,28 +45,28 @@ const Single = () => {
   const classes = useStyles()
   const intl = useIntl()
   const history = useHistory()
-  const { namespace, name } = useParams<any>()
+  const { uuid } = useParams<{ uuid: uuid }>()
 
   const dispatch = useStoreDispatch()
 
-  const [detail, setDetail] = useState<WorkflowSingle>()
+  const [single, setSingle] = useState<WorkflowSingle>()
   const [yamlEditor, setYAMLEditor] = useState<Ace.Editor>()
   const [data, setData] = useState<any>()
   const [selected, setSelected] = useState<'workflow' | 'node'>('workflow')
-  const modalTitle = selected === 'workflow' ? detail?.name : selected === 'node' ? data.name : ''
+  const modalTitle = selected === 'workflow' ? single?.name : selected === 'node' ? data.name : ''
   const [configOpen, setConfigOpen] = useState(false)
   const topologyRef = useRef<any>(null)
   const intervalIDRef = useRef<number>()
 
-  const fetchWorkflowDetail = (ns: string, name: string) =>
+  const fetchWorkflowSingle = (uuid: uuid) =>
     api.workflows
-      .detail(ns, name)
+      .single(uuid)
       .then(({ data }) => {
         // TODO: remove noise in API
         data.kube_object.metadata.annotations &&
           delete data.kube_object.metadata.annotations['kubectl.kubernetes.io/last-applied-configuration']
 
-        setDetail(data)
+        setSingle(data)
 
         // Clear interval after workflow succeed
         if (data.status === 'Succeed') {
@@ -76,38 +76,38 @@ const Single = () => {
       .catch(console.error)
 
   useEffect(() => {
-    fetchWorkflowDetail(namespace, name)
+    fetchWorkflowSingle(uuid)
 
     intervalIDRef.current = window.setInterval(() => {
-      fetchWorkflowDetail(namespace, name)
+      fetchWorkflowSingle(uuid)
     }, 6000)
 
     return () => clearInterval(intervalIDRef.current)
-  }, [namespace, name])
+  }, [uuid])
 
   useEffect(() => {
-    if (detail) {
+    if (single) {
       const topology = topologyRef.current!
 
       if (typeof topology === 'function') {
-        topology(detail)
+        topology(single)
 
         return
       }
 
-      const { updateElements } = constructWorkflowTopology(topologyRef.current!, detail, handleNodeClick)
+      const { updateElements } = constructWorkflowTopology(topologyRef.current!, single, handleNodeClick)
 
       topologyRef.current = updateElements
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [detail])
+  }, [single])
 
   const onModalOpen = () => setConfigOpen(true)
   const onModalClose = () => setConfigOpen(false)
 
   const handleSelect = (selected: Confirm) => () => dispatch(setConfirm(selected))
 
-  const handleAction = (action: string, data: { namespace: string; name: string }) => () => {
+  const handleAction = (action: string) => () => {
     let actionFunc: any
 
     switch (action) {
@@ -119,10 +119,8 @@ const Single = () => {
         actionFunc = null
     }
 
-    const { namespace, name } = data
-
     if (actionFunc) {
-      actionFunc(namespace, name)
+      actionFunc(uuid)
         .then(() => {
           dispatch(
             setAlert({
@@ -143,7 +141,7 @@ const Single = () => {
     setData({
       apiVersion: 'chaos-mesh.org/v1alpha1',
       kind: 'Workflow',
-      ...detail?.kube_object,
+      ...single?.kube_object,
     })
     setSelected('workflow')
 
@@ -153,7 +151,7 @@ const Single = () => {
   const handleNodeClick: EventHandler = (e) => {
     const node = e.target
     const { template: nodeTemplate } = node.data()
-    const template = detail?.kube_object.spec.templates.find((t: any) => t.name === nodeTemplate)
+    const template = single?.kube_object.spec.templates.find((t: any) => t.name === nodeTemplate)
 
     setData(template)
     setSelected('node')
@@ -165,7 +163,7 @@ const Single = () => {
     let data = yaml.load(yamlEditor!.getValue())
 
     if (selected === 'node') {
-      const kubeObject = detail?.kube_object
+      const kubeObject = single?.kube_object
       kubeObject.spec.templates = kubeObject.spec.templates.map((t: any) => {
         if (t.name === (data as any).name) {
           return data
@@ -182,7 +180,7 @@ const Single = () => {
     }
 
     api.workflows
-      .update(namespace, name, data)
+      .update(uuid, data)
       .then(() => {
         onModalClose()
 
@@ -193,7 +191,7 @@ const Single = () => {
           })
         )
 
-        fetchWorkflowDetail(namespace, name)
+        fetchWorkflowSingle(uuid)
       })
       .catch(console.error)
   }
@@ -209,9 +207,9 @@ const Single = () => {
                 size="small"
                 startIcon={<DeleteOutlinedIcon />}
                 onClick={handleSelect({
-                  title: `${T('common.delete', intl)} ${name}`,
+                  title: `${T('common.delete', intl)} ${single?.name}`,
                   description: T('workflows.deleteDesc', intl),
-                  handle: handleAction('delete', { namespace, name }),
+                  handle: handleAction('delete'),
                 })}
               >
                 {T('common.delete')}
@@ -247,7 +245,7 @@ const Single = () => {
             className={classes.configPaper}
             sx={{ width: selected === 'workflow' ? '50vw' : selected === 'node' ? '70vw' : '50vw' }}
           >
-            {detail && configOpen && (
+            {single && configOpen && (
               <Box display="flex" flexDirection="column" height="100%">
                 <Box px={3} pt={3}>
                   <PaperTop title={modalTitle}>

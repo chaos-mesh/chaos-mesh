@@ -167,7 +167,7 @@
   "workflows": {
     "title": "工作流",
     "notFound": "未发现工作流",
-    "deleteDesc": "此工作流将被永久删除"
+    "deleteDesc": "你仍然可以在归档中找到此工作流"
   },
   "workflow": {
     "entry": "入口",

@@ -32,6 +32,9 @@ const Single = () => {
   const fetchSingle = useCallback(() => {
     let request
     switch (kind) {
+      case 'workflow':
+        request = api.workflows.singleArchive
+        break
       case 'schedule':
         request = api.schedules.singleArchive
         break
@@ -69,50 +72,58 @@ const Single = () => {
 
   const handleDownloadExperiment = () => fileDownload(yaml.dump(single!.kube_object), `${single!.name}.yaml`)
 
+  const YAML = () => (
+    <Paper sx={{ height: 600, p: 0 }}>
+      {single && (
+        <Box display="flex" flexDirection="column" height="100%">
+          <PaperTop title={T('common.definition')} boxProps={{ p: 4.5, pb: 3 }}>
+            <Space direction="row">
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<CloudDownloadOutlinedIcon />}
+                onClick={handleDownloadExperiment}
+              >
+                {T('common.download')}
+              </Button>
+            </Space>
+          </PaperTop>
+          <Box flex={1}>
+            <YAMLEditor data={yaml.dump(single.kube_object)} aceProps={{ readOnly: true }} />
+          </Box>
+        </Box>
+      )}
+    </Paper>
+  )
+
   return (
     <>
       <Grow in={!loading} style={{ transformOrigin: '0 0 0' }}>
         <div>
-          <Space spacing={6}>
-            <Paper>
-              <PaperTop title={T('common.configuration')} boxProps={{ mb: 3 }} />
-              {single && <ObjectConfiguration config={single} inSchedule={kind === 'schedule'} />}
-            </Paper>
+          {kind !== 'workflow' ? (
+            <Space spacing={6}>
+              <Paper>
+                <PaperTop title={T('common.configuration')} boxProps={{ mb: 3 }} />
+                {single && <ObjectConfiguration config={single} inSchedule={kind === 'schedule'} />}
+              </Paper>
 
-            <Grid container>
-              <Grid item xs={12} lg={6} sx={{ pr: 3 }}>
-                <Paper sx={{ display: 'flex', flexDirection: 'column', height: 600 }}>
-                  <PaperTop title={T('events.title')} boxProps={{ mb: 3 }} />
-                  <Box flex={1} overflow="scroll">
-                    <EventsTimeline events={events} />
-                  </Box>
-                </Paper>
-              </Grid>
-              <Grid item xs={12} lg={6} sx={{ pl: 3 }}>
-                <Paper sx={{ height: 600, p: 0 }}>
-                  {single && (
-                    <Box display="flex" flexDirection="column" height="100%">
-                      <PaperTop title={T('common.definition')} boxProps={{ p: 4.5, pb: 3 }}>
-                        <Space direction="row">
-                          <Button
-                            variant="outlined"
-                            size="small"
-                            startIcon={<CloudDownloadOutlinedIcon />}
-                            onClick={handleDownloadExperiment}
-                          >
-                            {T('common.download')}
-                          </Button>
-                        </Space>
-                      </PaperTop>
-                      <Box flex={1}>
-                        <YAMLEditor data={yaml.dump(single.kube_object)} aceProps={{ readOnly: true }} />
-                      </Box>
+              <Grid container>
+                <Grid item xs={12} lg={6} sx={{ pr: 3 }}>
+                  <Paper sx={{ display: 'flex', flexDirection: 'column', height: 600 }}>
+                    <PaperTop title={T('events.title')} boxProps={{ mb: 3 }} />
+                    <Box flex={1} overflow="scroll">
+                      <EventsTimeline events={events} />
                     </Box>
-                  )}
-                </Paper>
+                  </Paper>
+                </Grid>
+                <Grid item xs={12} lg={6} sx={{ pl: 3 }}>
+                  <YAML />
+                </Grid>
               </Grid>
-            </Grid>
-          </Space>
+            </Space>
+          ) : (
+            <YAML />
+          )}
         </div>
       </Grow>
 
