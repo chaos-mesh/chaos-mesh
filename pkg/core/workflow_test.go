@@ -31,7 +31,7 @@ func Test_convertWorkflow(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want Workflow
+		want WorkflowMeta
 	}{
 		{
 			name: "simple workflow",
@@ -48,7 +48,7 @@ func Test_convertWorkflow(t *testing.T) {
 					Status: v1alpha1.WorkflowStatus{},
 				},
 			},
-			want: Workflow{
+			want: WorkflowMeta{
 				Namespace: "fake-namespace",
 				Name:      "fake-workflow-0",
 				Entry:     "an-entry",
@@ -77,7 +77,7 @@ func Test_convertWorkflow(t *testing.T) {
 					},
 				},
 			},
-			want: Workflow{
+			want: WorkflowMeta{
 				Namespace: "fake-namespace",
 				Name:      "fake-workflow-0",
 				Entry:     "an-entry",
@@ -111,7 +111,7 @@ func Test_convertWorkflow(t *testing.T) {
 					},
 				},
 			},
-			want: Workflow{
+			want: WorkflowMeta{
 				Namespace: "fake-namespace",
 				Name:      "fake-workflow-0",
 				Entry:     "an-entry",
@@ -145,7 +145,7 @@ func Test_convertWorkflow(t *testing.T) {
 					},
 				},
 			},
-			want: Workflow{
+			want: WorkflowMeta{
 				Namespace: "fake-namespace",
 				Name:      "fake-workflow-0",
 				Entry:     "an-entry",
@@ -179,7 +179,7 @@ func Test_convertWorkflow(t *testing.T) {
 					},
 				},
 			},
-			want: Workflow{
+			want: WorkflowMeta{
 				Namespace: "fake-namespace",
 				Name:      "fake-workflow-0",
 				Entry:     "an-entry",
@@ -214,7 +214,7 @@ func Test_convertWorkflow(t *testing.T) {
 					},
 				},
 			},
-			want: Workflow{
+			want: WorkflowMeta{
 				Namespace: "fake-namespace",
 				Name:      "fake-workflow-0",
 				Entry:     "an-entry",
@@ -261,7 +261,7 @@ func Test_convertWorkflowDetail(t *testing.T) {
 				kubeNodes: nil,
 			},
 			want: WorkflowDetail{
-				Workflow: Workflow{
+				WorkflowMeta: WorkflowMeta{
 					Namespace: "another-namespace",
 					Name:      "another-fake-workflow",
 					Entry:     "another-entry",
