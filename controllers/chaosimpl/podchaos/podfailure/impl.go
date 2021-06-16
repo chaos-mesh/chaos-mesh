@@ -21,6 +21,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+        "github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
 	"github.com/chaos-mesh/chaos-mesh/pkg/annotation"
 )
@@ -58,7 +59,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 			continue
 		}
 		pod.Annotations[key] = originImage
-		pod.Spec.Containers[index].Image = pauseImage
+		pod.Spec.Containers[index].Image = config.ControllerCfg.PodFailurePauseImage
 	}
 
 	for index := range pod.Spec.InitContainers {
@@ -75,7 +76,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 			continue
 		}
 		pod.Annotations[key] = originImage
-		pod.Spec.InitContainers[index].Image = pauseImage
+		pod.Spec.InitContainers[index].Image = config.ControllerCfg.PodFailurePauseImage
 	}
 
 	err = impl.Update(ctx, &pod)
