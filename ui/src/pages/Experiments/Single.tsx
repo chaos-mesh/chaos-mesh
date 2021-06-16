@@ -3,10 +3,8 @@ import { setAlert, setConfirm } from 'slices/globalStatus'
 import { useEffect, useState } from 'react'
 import { useHistory, useParams } from 'react-router-dom'
 
-import { Ace } from 'ace-builds'
 import Alert from '@material-ui/lab/Alert'
 import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
-import CloudDownloadOutlinedIcon from '@material-ui/icons/CloudDownloadOutlined'
 import { Event } from 'api/events.type'
 import EventsTimeline from 'components/EventsTimeline'
 import { ExperimentSingle } from 'api/experiments.type'
@@ -16,11 +14,9 @@ import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
 import PauseCircleOutlineIcon from '@material-ui/icons/PauseCircleOutline'
 import PlayCircleOutlineIcon from '@material-ui/icons/PlayCircleOutline'
-import PublishIcon from '@material-ui/icons/Publish'
 import Space from 'components-mui/Space'
 import T from 'components/T'
 import api from 'api'
-import fileDownload from 'js-file-download'
 import loadable from '@loadable/component'
 import { useIntl } from 'react-intl'
 import { useStoreDispatch } from 'store'
@@ -39,7 +35,6 @@ export default function Single() {
   const [loading, setLoading] = useState(true)
   const [single, setSingle] = useState<ExperimentSingle>()
   const [events, setEvents] = useState<Event[]>([])
-  const [yamlEditor, setYAMLEditor] = useState<Ace.Editor>()
 
   const fetchExperiment = () => {
     api.experiments
@@ -146,11 +141,7 @@ export default function Single() {
     }
   }
 
-  const handleDownloadExperiment = () => fileDownload(yaml.dump(single!.kube_object), `${single!.name}.yaml`)
-
-  const handleUpdateExperiment = () => {
-    const data = yaml.load(yamlEditor!.getValue())
-
+  const handleUpdateExperiment = (data: any) => {
     api.experiments
       .update(data)
       .then(() => {
@@ -224,32 +215,17 @@ export default function Single() {
               <Grid item xs={12} lg={6} sx={{ pl: 3 }}>
                 <Paper sx={{ height: 600, p: 0 }}>
                   {single && (
-                    <Box display="flex" flexDirection="column" height="100%">
-                      <PaperTop title={T('common.definition')} boxProps={{ p: 4.5, pb: 3 }}>
-                        <Space direction="row">
-                          <Button
-                            variant="outlined"
-                            size="small"
-                            startIcon={<CloudDownloadOutlinedIcon />}
-                            onClick={handleDownloadExperiment}
-                          >
-                            {T('common.download')}
-                          </Button>
-                          <Button
-                            variant="outlined"
-                            color="primary"
-                            size="small"
-                            startIcon={<PublishIcon />}
-                            onClick={handleUpdateExperiment}
-                          >
-                            {T('common.update')}
-                          </Button>
-                        </Space>
-                      </PaperTop>
+                    <Space display="flex" flexDirection="column" height="100%">
+                      <PaperTop title={T('common.definition')} boxProps={{ p: 4.5, pb: 0 }} />
                       <Box flex={1}>
-                        <YAMLEditor data={yaml.dump(single.kube_object)} mountEditor={setYAMLEditor} />
+                        <YAMLEditor
+                          name={single.name}
+                          data={yaml.dump(single.kube_object)}
+                          onUpdate={handleUpdateExperiment}
+                          download
+                        />
                       </Box>
-                    </Box>
+                    </Space>
                   )}
                 </Paper>
               </Grid>

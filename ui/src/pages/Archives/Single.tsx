@@ -1,8 +1,7 @@
-import { Box, Button, Grid, Grow } from '@material-ui/core'
+import { Box, Grid, Grow } from '@material-ui/core'
 import { useCallback, useEffect, useState } from 'react'
 
 import { ArchiveSingle } from 'api/archives.type'
-import CloudDownloadOutlinedIcon from '@material-ui/icons/CloudDownloadOutlined'
 import { Event } from 'api/events.type'
 import EventsTimeline from 'components/EventsTimeline'
 import Loading from 'components-mui/Loading'
@@ -12,7 +11,6 @@ import PaperTop from 'components-mui/PaperTop'
 import Space from 'components-mui/Space'
 import T from 'components/T'
 import api from 'api'
-import fileDownload from 'js-file-download'
 import loadable from '@loadable/component'
 import { useParams } from 'react-router-dom'
 import { useQuery } from 'lib/hooks'
@@ -70,28 +68,20 @@ const Single = () => {
     }
   }, [uuid, single])
 
-  const handleDownloadExperiment = () => fileDownload(yaml.dump(single!.kube_object), `${single!.name}.yaml`)
-
   const YAML = () => (
     <Paper sx={{ height: kind === 'workflow' ? (theme) => `calc(100vh - 56px - ${theme.spacing(18)})` : 600, p: 0 }}>
       {single && (
-        <Box display="flex" flexDirection="column" height="100%">
-          <PaperTop title={T('common.definition')} boxProps={{ p: 4.5, pb: 3 }}>
-            <Space direction="row">
-              <Button
-                variant="outlined"
-                size="small"
-                startIcon={<CloudDownloadOutlinedIcon />}
-                onClick={handleDownloadExperiment}
-              >
-                {T('common.download')}
-              </Button>
-            </Space>
-          </PaperTop>
+        <Space display="flex" flexDirection="column" height="100%">
+          <PaperTop title={T('common.definition')} boxProps={{ p: 4.5, pb: 0 }} />
           <Box flex={1}>
-            <YAMLEditor data={yaml.dump(single.kube_object)} aceProps={{ readOnly: true }} />
+            <YAMLEditor
+              name={single.name}
+              data={yaml.dump(single.kube_object)}
+              download
+              aceProps={{ readOnly: true }}
+            />
           </Box>
-        </Box>
+        </Space>
       )}
     </Paper>
   )

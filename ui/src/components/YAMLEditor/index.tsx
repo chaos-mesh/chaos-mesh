@@ -4,33 +4,82 @@ import 'ace-builds/src-min-noconflict/mode-yaml'
 import 'ace-builds/src-min-noconflict/theme-tomorrow'
 
 import AceEditor, { IAceEditorProps } from 'react-ace'
+import { Box, Button } from '@material-ui/core'
+import React, { useState } from 'react'
 
 import { Ace } from 'ace-builds'
-import React from 'react'
+import CloudDownloadOutlinedIcon from '@material-ui/icons/CloudDownloadOutlined'
+import PublishIcon from '@material-ui/icons/Publish'
+import Space from 'components-mui/Space'
+import T from 'components/T'
+import fileDownload from 'js-file-download'
 import { useStoreSelector } from 'store'
+import yaml from 'js-yaml'
 
 interface YAMLEditorProps {
+  name?: string
   data?: string
   mountEditor?: (editor: Ace.Editor) => void
+  onUpdate?: (data: any) => void
+  download?: boolean
   aceProps?: IAceEditorProps
 }
 
-const YAMLEditor: React.FC<YAMLEditorProps> = ({ data, mountEditor, aceProps }) => {
+const YAMLEditor: React.FC<YAMLEditorProps> = ({ name, data, mountEditor, onUpdate, download, aceProps }) => {
   const { theme } = useStoreSelector((state) => state.settings)
 
-  const handleOnLoad = (editor: Ace.Editor) => typeof mountEditor === 'function' && mountEditor(editor)
+  const [editor, setEditor] = useState<Ace.Editor>()
+
+  const handleOnLoad = (editor: Ace.Editor) => {
+    setEditor(editor)
+
+    typeof mountEditor === 'function' && mountEditor(editor)
+  }
+
+  const handleOnUpdate = () => {
+    typeof onUpdate === 'function' && onUpdate(yaml.load(editor!.getValue()))
+  }
+
+  const handleDownloadExperiment = () => fileDownload(editor!.getValue(), `${name}.yaml`)
 
   return (
-    <AceEditor
-      onLoad={handleOnLoad}
-      width="100%"
-      height="100%"
-      style={{ borderBottomLeftRadius: 4, borderBottomRightRadius: 4 }}
-      mode="yaml"
-      theme={theme === 'light' ? 'tomorrow' : 'tomorrow_night_eighties'}
-      value={data}
-      {...aceProps}
-    />
+    <Box position="relative" height="100%">
+      <AceEditor
+        onLoad={handleOnLoad}
+        width="100%"
+        height="100%"
+        style={{ borderBottomLeftRadius: 4, borderBottomRightRadius: 4 }}
+        mode="yaml"
+        theme={theme === 'light' ? 'tomorrow' : 'tomorrow_night_eighties'}
+        value={data}
+        {...aceProps}
+      />
+      {(typeof onUpdate === 'function' || download) && (
+        <Space direction="row" sx={{ position: 'absolute', top: 0, right: (theme) => theme.spacing(3) }}>
+          {download && (
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<CloudDownloadOutlinedIcon />}
+              onClick={handleDownloadExperiment}
+            >
+              {T('common.download')}
+            </Button>
+          )}
+          {typeof onUpdate === 'function' && (
+            <Button
+              variant="outlined"
+              color="primary"
+              size="small"
+              startIcon={<PublishIcon />}
+              onClick={handleOnUpdate}
+            >
+              {T('common.update')}
+            </Button>
+          )}
+        </Space>
+      )}
+    </Box>
   )
 }
 

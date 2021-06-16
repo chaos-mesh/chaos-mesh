@@ -3,9 +3,7 @@ import { setAlert, setConfirm } from 'slices/globalStatus'
 import { useEffect, useState } from 'react'
 import { useHistory, useParams } from 'react-router-dom'
 
-import { Ace } from 'ace-builds'
 import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
-import CloudDownloadOutlinedIcon from '@material-ui/icons/CloudDownloadOutlined'
 import { Event } from 'api/events.type'
 import EventsTimeline from 'components/EventsTimeline'
 import Loading from 'components-mui/Loading'
@@ -14,12 +12,10 @@ import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
 import PauseCircleOutlineIcon from '@material-ui/icons/PauseCircleOutline'
 import PlayCircleOutlineIcon from '@material-ui/icons/PlayCircleOutline'
-import PublishIcon from '@material-ui/icons/Publish'
 import { ScheduleSingle } from 'api/schedules.type'
 import Space from 'components-mui/Space'
 import T from 'components/T'
 import api from 'api'
-import fileDownload from 'js-file-download'
 import loadable from '@loadable/component'
 import { useIntl } from 'react-intl'
 import { useStoreDispatch } from 'store'
@@ -38,7 +34,6 @@ const Single = () => {
   const [loading, setLoading] = useState(true)
   const [single, setSingle] = useState<ScheduleSingle>()
   const [events, setEvents] = useState<Event[]>([])
-  const [yamlEditor, setYAMLEditor] = useState<Ace.Editor>()
 
   const fetchSchedule = () => {
     api.schedules
@@ -145,11 +140,7 @@ const Single = () => {
     }
   }
 
-  const handleDownloadSchedule = () => fileDownload(yaml.dump(single!.kube_object), `${single!.name}.yaml`)
-
-  const handleUpdateSchedule = () => {
-    const data = yaml.load(yamlEditor!.getValue())
-
+  const handleUpdateSchedule = (data: any) => {
     api.schedules
       .update(data)
       .then(() => {
@@ -217,32 +208,17 @@ const Single = () => {
               <Grid item xs={12} lg={6} sx={{ pl: 3 }}>
                 <Paper sx={{ height: 600, p: 0 }}>
                   {single && (
-                    <Box display="flex" flexDirection="column" height="100%">
-                      <PaperTop title={T('common.definition')} boxProps={{ p: 4.5, pb: 3 }}>
-                        <Space direction="row">
-                          <Button
-                            variant="outlined"
-                            size="small"
-                            startIcon={<CloudDownloadOutlinedIcon />}
-                            onClick={handleDownloadSchedule}
-                          >
-                            {T('common.download')}
-                          </Button>
-                          <Button
-                            variant="outlined"
-                            color="primary"
-                            size="small"
-                            startIcon={<PublishIcon />}
-                            onClick={handleUpdateSchedule}
-                          >
-                            {T('common.update')}
-                          </Button>
-                        </Space>
-                      </PaperTop>
+                    <Space display="flex" flexDirection="column" height="100%">
+                      <PaperTop title={T('common.definition')} boxProps={{ p: 4.5, pb: 0 }} />
                       <Box flex={1}>
-                        <YAMLEditor data={yaml.dump(single.kube_object)} mountEditor={setYAMLEditor} />
+                        <YAMLEditor
+                          name={single.name}
+                          data={yaml.dump(single.kube_object)}
+                          onUpdate={handleUpdateSchedule}
+                          download
+                        />
                       </Box>
-                    </Box>
+                    </Space>
                   )}
                 </Paper>
               </Grid>

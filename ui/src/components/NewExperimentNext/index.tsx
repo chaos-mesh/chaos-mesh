@@ -67,6 +67,8 @@ const NewExperiment: React.ForwardRefRenderFunction<NewExperimentHandles, NewExp
         })
       )
 
+      setPanel('initial')
+
       return
     }
 
