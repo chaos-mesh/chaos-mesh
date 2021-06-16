@@ -21,6 +21,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 )
 
 func BootstrapWorkflowControllers(mgr manager.Manager, logger logr.Logger) error {
@@ -38,7 +39,7 @@ func BootstrapWorkflowControllers(mgr manager.Manager, logger logr.Logger) error
 		Complete(
 			NewWorkflowEntryReconciler(
 				mgr.GetClient(),
-				mgr.GetEventRecorderFor("workflow-entry-reconciler"),
+				recorder.NewRecorder(mgr, "workflow-entry-reconciler", logger.WithName("workflow-entry-reconciler")),
 				logger.WithName("workflow-entry-reconciler"),
 			),
 		)
@@ -55,7 +56,7 @@ func BootstrapWorkflowControllers(mgr manager.Manager, logger logr.Logger) error
 		Complete(
 			NewSerialNodeReconciler(
 				noCacheClient,
-				mgr.GetEventRecorderFor("workflow-serial-node-reconciler"),
+				recorder.NewRecorder(mgr, "workflow-serial-node-reconciler", logger.WithName("workflow-serial-node-reconciler")),
 				logger.WithName("workflow-serial-node-reconciler"),
 			),
 		)
@@ -70,7 +71,7 @@ func BootstrapWorkflowControllers(mgr manager.Manager, logger logr.Logger) error
 		Complete(
 			NewParallelNodeReconciler(
 				noCacheClient,
-				mgr.GetEventRecorderFor("workflow-parallel-node-reconciler"),
+				recorder.NewRecorder(mgr, "workflow-parallel-node-reconciler", logger.WithName("workflow-parallel-node-reconciler")),
 				logger.WithName("workflow-parallel-node-reconciler"),
 			),
 		)
@@ -84,7 +85,7 @@ func BootstrapWorkflowControllers(mgr manager.Manager, logger logr.Logger) error
 		Complete(
 			NewDeadlineReconciler(
 				mgr.GetClient(),
-				mgr.GetEventRecorderFor("workflow-deadline-reconciler"),
+				recorder.NewRecorder(mgr, "workflow-deadline-reconciler", logger.WithName("workflow-deadline-reconciler")),
 				logger.WithName("workflow-deadline-reconciler"),
 			),
 		)
@@ -98,7 +99,7 @@ func BootstrapWorkflowControllers(mgr manager.Manager, logger logr.Logger) error
 		Complete(
 			NewChaosNodeReconciler(
 				mgr.GetClient(),
-				mgr.GetEventRecorderFor("workflow-chaos-node-reconciler"),
+				recorder.NewRecorder(mgr, "workflow-chaos-node-reconciler", logger.WithName("workflow-chaos-node-reconciler")),
 				logger.WithName("workflow-chaos-node-reconciler"),
 			),
 		)
