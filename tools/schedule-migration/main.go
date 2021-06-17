@@ -50,17 +50,25 @@ func main() {
 		os.Exit(1)
 	}
 	{
-		var schedule yaml.MapSlice
-		var find bool
+		var (
+			schedule yaml.MapSlice
+			containerNames []string
+			findSchedule bool
+			findContainerName bool
+		)
 		for _, item := range old.Spec {
 			if item.Key == "scheduler" {
 				schedule = item.Value.(yaml.MapSlice)
-				find = true
+				findSchedule = true
+			}
+			if item.Key == "containerName" {
+				containerNames = append(containerNames, item.Value.(string))
+				findContainerName = true
 			}
 		}
-		if !find {
+		if !findSchedule && !findContainerName {
 			new = old
-		} else {
+		} else if findSchedule && !findContainerName{
 			var cron string
 			for _, item := range schedule {
 				if item.Key == "cron" {
@@ -81,6 +89,40 @@ func main() {
 				}
 			}
 			new.Spec = append(new.Spec, yaml.MapItem{Key: getKeyName(old.Kind), Value: newSpec})
+		} else if findSchedule && findContainerName{
+			var cron string
+			for _, item := range schedule {
+				if item.Key == "cron" {
+					cron = item.Value.(string)
+				}
+			}
+			new.ApiVersion = old.ApiVersion
+			new.Metadata = old.Metadata
+			new.Kind = "Schedule"
+			new.Spec = append(new.Spec, yaml.MapItem{Key: "schedule", Value: cron})
+			new.Spec = append(new.Spec, yaml.MapItem{Key: "type", Value: toNewKind(old.Kind)})
+			new.Spec = append(new.Spec, yaml.MapItem{Key: "historyLimit", Value: 5})
+			new.Spec = append(new.Spec, yaml.MapItem{Key: "concurrencyPolicy", Value: "Forbid"})
+			new.Spec = append(new.Spec, yaml.MapItem{Key: "containerNames", Value: containerNames})
+			var newSpec yaml.MapSlice
+			for _, item := range old.Spec {
+				if item.Key != "scheduler" && item.Key != "containerName" {
+					newSpec = append(newSpec, item)
+				}
+			}
+			new.Spec = append(new.Spec, yaml.MapItem{Key: getKeyName(old.Kind), Value: newSpec})
+		} else {
+			new.ApiVersion = old.ApiVersion
+			new.Metadata = old.Metadata
+			new.Kind = old.Kind
+			for _, item := range old.Spec {
+				if item.Key != "containerName" {
+					new.Spec = append(new.Spec, item)
+				}
+			}
+			fmt.Println(containerNames)
+			fmt.Println(strings.Join(containerNames[:],""))
+			new.Spec = append(new.Spec, yaml.MapItem{Key: "containerNames", Value: containerNames})
 		}
 
 	}
