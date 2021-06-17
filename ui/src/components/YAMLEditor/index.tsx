@@ -58,7 +58,7 @@ const YAMLEditor: React.FC<YAMLEditorProps> = ({ name, data, mountEditor, onUpda
   const handleDownloadExperiment = () => fileDownload(editor!.getValue(), `${name}.yaml`)
 
   return (
-    <Box position="relative" height="100%">
+    <Box position="relative" width="100%" height="100%">
       <AceEditor
         onLoad={handleOnLoad}
         width="100%"
