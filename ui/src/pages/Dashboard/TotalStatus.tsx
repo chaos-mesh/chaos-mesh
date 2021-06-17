@@ -66,7 +66,7 @@ const TotalStatus: React.FC<BoxProps> = (props) => {
       {s.some((d) => d.value >= 1) ? (
         <ResponsivePie
           data={s}
-          margin={{ top: 15, right: 15, bottom: 15, left: 15 }}
+          margin={{ top: 15, bottom: 60 }}
           colors={schemeTableau10 as any}
           innerRadius={0.75}
           padAngle={0.25}
@@ -85,10 +85,11 @@ const TotalStatus: React.FC<BoxProps> = (props) => {
           activeOuterRadiusOffset={2}
           legends={[
             {
-              anchor: 'top-left',
-              direction: 'column',
-              itemWidth: 100,
-              itemHeight: 25,
+              anchor: 'bottom',
+              direction: 'row',
+              itemWidth: 75,
+              itemHeight: 30,
+              translateY: 60,
             },
           ]}
         />
