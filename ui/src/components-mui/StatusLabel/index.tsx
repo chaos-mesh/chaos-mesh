@@ -1,6 +1,9 @@
+import { Chip, CircularProgress, useTheme } from '@material-ui/core'
+
 import CheckCircleIcon from '@material-ui/icons/CheckCircle'
-import { Chip } from '@material-ui/core'
+import ErrorIcon from '@material-ui/icons/Error'
 import { Experiment } from 'api/experiments.type'
+import HelpIcon from '@material-ui/icons/Help'
 import PauseCircleFilledIcon from '@material-ui/icons/PauseCircleFilled'
 import T from 'components/T'
 import { Workflow } from 'api/workflows.type'
@@ -12,6 +15,7 @@ interface StatusLabelProps {
 
 const StatusLabel: React.FC<StatusLabelProps> = ({ status }) => {
   const intl = useIntl()
+  const theme = useTheme()
 
   const label = T(`status.${status}`, intl)
 
@@ -19,15 +23,20 @@ const StatusLabel: React.FC<StatusLabelProps> = ({ status }) => {
   switch (status) {
     case 'injecting':
     case 'running':
-      color = 'info.main'
+      color = theme.palette.primary.main
 
       break
     case 'paused':
-      color = 'grey.500'
+    case 'unknown':
+      color = theme.palette.grey[500]
 
       break
     case 'finished':
-      color = 'success.main'
+      color = theme.palette.success.main
+
+      break
+    case 'failed':
+      color = theme.palette.error.main
 
       break
   }
@@ -35,14 +44,30 @@ const StatusLabel: React.FC<StatusLabelProps> = ({ status }) => {
   let icon
   switch (status) {
     case 'finished':
-      icon = <CheckCircleIcon sx={{ color }} />
+      icon = <CheckCircleIcon style={{ color }} />
 
       break
     case 'injecting':
     case 'running':
+      icon = (
+        <CircularProgress
+          size={15}
+          disableShrink
+          sx={{ ml: (theme) => `${theme.spacing(1)} !important`, color: `${color} !important` }}
+        />
+      )
+
       break
     case 'paused':
-      icon = <PauseCircleFilledIcon sx={{ color }} />
+      icon = <PauseCircleFilledIcon style={{ color }} />
+
+      break
+    case 'unknown':
+      icon = <HelpIcon style={{ color }} />
+
+      break
+    case 'failed':
+      icon = <ErrorIcon style={{ color }} />
 
       break
   }

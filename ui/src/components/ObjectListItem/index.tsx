@@ -5,12 +5,12 @@ import { Archive } from 'api/archives.type'
 import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
 import DeleteOutlinedIcon from '@material-ui/icons/DeleteOutlined'
 import { Experiment } from 'api/experiments.type'
-import ExperimentStatus from 'components/ExperimentStatus'
 import Paper from 'components-mui/Paper'
 import PauseCircleOutlineIcon from '@material-ui/icons/PauseCircleOutline'
 import PlayCircleOutlineIcon from '@material-ui/icons/PlayCircleOutline'
 import { Schedule } from 'api/schedules.type'
 import Space from 'components-mui/Space'
+import StatusLabel from 'components-mui/StatusLabel'
 import T from 'components/T'
 import { truncate } from 'lib/utils'
 import { useHistory } from 'react-router-dom'
@@ -134,7 +134,7 @@ const ObjectListItem: React.FC<ObjectListItemProps> = ({ data, type = 'experimen
     >
       <Box display="flex" justifyContent="space-between" alignItems="center" p={3}>
         <Space direction="row" alignItems="center">
-          {type !== 'archive' && <ExperimentStatus status={(data as Experiment).status} />}
+          {type !== 'archive' && <StatusLabel status={(data as Experiment).status} />}
           <Typography component="div" title={data.name}>
             {truncate(data.name)}
           </Typography>
