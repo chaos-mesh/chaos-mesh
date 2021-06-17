@@ -107,7 +107,7 @@ func (it *ParallelNodeReconciler) Reconcile(request reconcile.Request) (reconcil
 		}
 
 		// TODO: also check the consistent between spec in task and the spec in child node
-		if len(finishedChildren) == len(nodeNeedUpdate.Spec.Tasks) {
+		if len(finishedChildren) == len(nodeNeedUpdate.Spec.Children) {
 			SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
 				Type:   v1alpha1.ConditionAccomplished,
 				Status: corev1.ConditionTrue,
@@ -135,7 +135,7 @@ func (it *ParallelNodeReconciler) Reconcile(request reconcile.Request) (reconcil
 func (it *ParallelNodeReconciler) syncChildNodes(ctx context.Context, node v1alpha1.WorkflowNode) error {
 
 	// empty parallel node
-	if len(node.Spec.Tasks) == 0 {
+	if len(node.Spec.Children) == 0 {
 		it.logger.V(4).Info("empty parallel node, NOOP",
 			"node", fmt.Sprintf("%s/%s", node.Namespace, node.Name),
 		)
@@ -157,9 +157,9 @@ func (it *ParallelNodeReconciler) syncChildNodes(ctx context.Context, node v1alp
 
 	// TODO: check the specific of task and workflow nodes
 	// the definition of Spec.Children changed, remove all the existed nodes
-	if len(setDifference(taskNamesOfNodes, node.Spec.Tasks)) > 0 ||
-		len(setDifference(node.Spec.Tasks, taskNamesOfNodes)) > 0 {
-		tasksToStartup = node.Spec.Tasks
+	if len(setDifference(taskNamesOfNodes, node.Spec.Children)) > 0 ||
+		len(setDifference(node.Spec.Children, taskNamesOfNodes)) > 0 {
+		tasksToStartup = node.Spec.Children
 		for _, childNode := range existsChildNodes {
 			// best effort deletion
 			err := it.kubeClient.Delete(ctx, &childNode)
