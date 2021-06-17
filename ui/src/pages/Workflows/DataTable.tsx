@@ -91,7 +91,7 @@ const DataTable: React.FC<DataTableProps> = ({ data, fetchData }) => {
                 <Space direction="row">
                   <IconButton
                     color="primary"
-                    title={T('archive.single', intl)}
+                    title={T('archives.single', intl)}
                     component="span"
                     size="small"
                     onClick={handleSelect({
