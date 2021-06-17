@@ -26,17 +26,30 @@ func IsChaosFinished(obj v1alpha1.InnerObject, now time.Time) bool {
 
 func IsChaosFinishedWithUntilStop(obj v1alpha1.InnerObject, now time.Time) (bool, time.Duration) {
 	status := obj.GetStatus()
+	if obj.IsOneShot() {
+		finished := true
+		for _, record := range status.Experiment.Records {
+			if record.Phase != v1alpha1.Injected {
+				finished = false
+			}
+		}
+		return finished, time.Duration(0)
+	}
 
 	finished := true
 
-	// If one of the record has not been recovered, it's not finished
-	for _, record := range status.Experiment.Records {
-		if record.Phase != v1alpha1.NotInjected {
-			finished = false
+	if status.Experiment.DesiredPhase == v1alpha1.RunningPhase {
+		finished = false
+	} else {
+		// If one of the record has not been recovered, it's not finished
+		for _, record := range status.Experiment.Records {
+			if record.Phase != v1alpha1.NotInjected {
+				finished = false
+			}
 		}
 	}
 
-	durationExceeded, untilStop, err := obj.DurationExceeded(time.Now())
+	durationExceeded, untilStop, err := obj.DurationExceeded(now)
 	if err != nil {
 		return finished, untilStop
 	}
@@ -44,18 +57,5 @@ func IsChaosFinishedWithUntilStop(obj v1alpha1.InnerObject, now time.Time) (bool
 		return finished, untilStop
 	}
 
-	if untilStop != 0 {
-		return false, untilStop
-	}
-
-	// duration is not Exceeded, but untilStop is 0
-	// which means the current object is one-shot (like PodKill)
-	// then if all records are injected, they are finished
-	finished = true
-	for _, record := range status.Experiment.Records {
-		if record.Phase != v1alpha1.Injected {
-			finished = false
-		}
-	}
-	return finished, untilStop
+	return false, untilStop
 }

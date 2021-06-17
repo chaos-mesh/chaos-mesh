@@ -140,9 +140,21 @@ func (in *{{.Type}}) DurationExceeded(now time.Time) (bool, time.Duration, error
 
 	return false, 0, nil
 }
+
+func (in *{{.Type}}) IsOneShot() bool {
+	{{if .OneShotExp}}
+	if {{.OneShotExp}} {
+		return true
+	}
+
+	return false
+	{{else}}
+	return false
+	{{end}}
+}
 `
 
-func generateImpl(name string) string {
+func generateImpl(name string, oneShotExp string) string {
 	tmpl, err := template.New("impl").Parse(implTemplate)
 	if err != nil {
 		log.Error(err, "fail to build template")
@@ -151,7 +163,8 @@ func generateImpl(name string) string {
 
 	buf := new(bytes.Buffer)
 	err = tmpl.Execute(buf, &metadata{
-		Type: name,
+		Type:       name,
+		OneShotExp: oneShotExp,
 	})
 	if err != nil {
 		log.Error(err, "fail to execute template")

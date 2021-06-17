@@ -49,9 +49,9 @@ type WorkflowNodeSpec struct {
 	// +optional
 	Task *Task `json:"task,omitempty"`
 	// +optional
-	Tasks []string `json:"tasks,omitempty"`
+	Children []string `json:"children,omitempty"`
 	// +optional
-	ConditionalTasks []ConditionalTask `json:"conditionalTasks,omitempty"`
+	ConditionalBranches []ConditionalBranch `json:"conditionalBranches,omitempty"`
 	// +optional
 	*EmbedChaos `json:",inline,omitempty"`
 	// +optional
@@ -64,9 +64,9 @@ type WorkflowNodeStatus struct {
 	// +optional
 	ChaosResource *corev1.TypedLocalObjectReference `json:"chaosResource,omitempty"`
 
-	// ConditionalBranches records the evaluation result of each ConditionalTask
+	// ConditionalBranchesStatus records the evaluation result of each ConditionalBranch
 	// +optional
-	ConditionalBranches *ConditionalBranchesStatus `json:"conditionalBranches,omitempty"`
+	ConditionalBranchesStatus *ConditionalBranchesStatus `json:"conditionalBranchesStatus,omitempty"`
 
 	// ActiveChildren means the created children node
 	// +optional
@@ -83,22 +83,24 @@ type WorkflowNodeStatus struct {
 	Conditions []WorkflowNodeCondition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type"`
 }
 
-type ConditionalTask struct {
-	Task string `json:"task"`
+type ConditionalBranch struct {
+	// Target is the name of other template, if expression is evaluated as true, this template will be spawned.
+	Target string `json:"target"`
+	// Expression is the expression for this conditional branch, expected type of result is boolean. If expression is empty, this branch will always be selected/the template will be spawned.
 	// +optional
 	Expression string `json:"expression,omitempty"`
 }
 
 type ConditionalBranchesStatus struct {
 	// +optional
-	Branches []ConditionalBranch `json:"branches"`
+	Branches []ConditionalBranchStatus `json:"branches"`
 	// +optional
 	Context []string `json:"context"`
 }
 
-type ConditionalBranch struct {
-	Task             string                 `json:"task"`
-	EvaluationResult corev1.ConditionStatus `json:"run"`
+type ConditionalBranchStatus struct {
+	Target           string                 `json:"target"`
+	EvaluationResult corev1.ConditionStatus `json:"evaluationResult"`
 }
 
 type WorkflowNodeConditionType string
