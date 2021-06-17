@@ -6,7 +6,8 @@ metadata:
 spec:
   action: container-kill
   mode: one
-  containerName: "prometheus"
+  containerNames:
+    - "prometheus"
   selector:
     labelSelectors:
       "app.kubernetes.io/component": "monitor"
