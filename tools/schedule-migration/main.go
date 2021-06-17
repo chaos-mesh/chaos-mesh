@@ -51,9 +51,9 @@ func main() {
 	}
 	{
 		var (
-			schedule yaml.MapSlice
-			containerNames []string
-			findSchedule bool
+			schedule          yaml.MapSlice
+			containerNames    []string
+			findSchedule      bool
 			findContainerName bool
 		)
 		for _, item := range old.Spec {
@@ -68,7 +68,7 @@ func main() {
 		}
 		if !findSchedule && !findContainerName {
 			new = old
-		} else if findSchedule && !findContainerName{
+		} else if findSchedule && !findContainerName {
 			var cron string
 			for _, item := range schedule {
 				if item.Key == "cron" {
@@ -89,7 +89,7 @@ func main() {
 				}
 			}
 			new.Spec = append(new.Spec, yaml.MapItem{Key: getKeyName(old.Kind), Value: newSpec})
-		} else if findSchedule && findContainerName{
+		} else if findSchedule && findContainerName {
 			var cron string
 			for _, item := range schedule {
 				if item.Key == "cron" {
@@ -120,8 +120,6 @@ func main() {
 					new.Spec = append(new.Spec, item)
 				}
 			}
-			fmt.Println(containerNames)
-			fmt.Println(strings.Join(containerNames[:],""))
 			new.Spec = append(new.Spec, yaml.MapItem{Key: "containerNames", Value: containerNames})
 		}
 
