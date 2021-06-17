@@ -31,7 +31,8 @@ var (
 )
 
 type metadata struct {
-	Type string
+	Type       string
+	OneShotExp string
 }
 
 func main() {
@@ -74,6 +75,13 @@ func main() {
 		for node, commentGroups := range cmap {
 			for _, commentGroup := range commentGroups {
 				var err error
+				var oneShotExp string
+				for _, comment := range commentGroup.List {
+					if strings.Contains(comment.Text, "+chaos-mesh:oneshot") {
+						oneShotExp = strings.TrimPrefix(comment.Text, "// +chaos-mesh:oneshot=")
+						log.Info("decode oneshot expression", "expression", oneShotExp)
+					}
+				}
 				for _, comment := range commentGroup.List {
 					if strings.Contains(comment.Text, "+chaos-mesh:base") {
 						log.Info("build", "pos", fset.Position(comment.Pos()))
@@ -97,7 +105,7 @@ func main() {
 							return err
 						}
 						if baseType.Name.Name != "Workflow" {
-							implCode += generateImpl(baseType.Name.Name)
+							implCode += generateImpl(baseType.Name.Name, oneShotExp)
 							testCode += generateTest(baseType.Name.Name)
 							initImpl += generateInit(baseType.Name.Name)
 							workflowGenerator.AppendTypes(baseType.Name.Name)

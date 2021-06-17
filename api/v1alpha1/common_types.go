@@ -94,6 +94,7 @@ type InnerObject interface {
 	IsPaused() bool
 	GetChaos() *ChaosInstance
 	DurationExceeded(time.Time) (bool, time.Duration, error)
+	IsOneShot() bool
 	StatefulObject
 }
 
