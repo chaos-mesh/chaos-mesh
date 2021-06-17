@@ -127,7 +127,7 @@ func (it *SerialNodeReconciler) Reconcile(request reconcile.Request) (reconcile.
 		}
 
 		// TODO: also check the consistent between spec in task and the spec in child node
-		if len(finishedChildren) == len(nodeNeedUpdate.Spec.Tasks) {
+		if len(finishedChildren) == len(nodeNeedUpdate.Spec.Children) {
 			SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
 				Type:   v1alpha1.ConditionAccomplished,
 				Status: corev1.ConditionTrue,
@@ -160,7 +160,7 @@ func (it *SerialNodeReconciler) Reconcile(request reconcile.Request) (reconcile.
 func (it *SerialNodeReconciler) syncChildNodes(ctx context.Context, node v1alpha1.WorkflowNode) error {
 
 	// empty serial node
-	if len(node.Spec.Tasks) == 0 {
+	if len(node.Spec.Children) == 0 {
 		it.logger.V(4).Info("empty serial node, NOOP",
 			"node", fmt.Sprintf("%s/%s", node.Namespace, node.Name),
 		)
@@ -174,7 +174,7 @@ func (it *SerialNodeReconciler) syncChildNodes(ctx context.Context, node v1alpha
 	var taskToStartup string
 	if len(activeChildNodes) == 0 {
 		// no active children, trying to spawn a new one
-		for index, task := range node.Spec.Tasks {
+		for index, task := range node.Spec.Children {
 			// Walking through on the Spec.Children, each one of task SHOULD has one corresponding workflow node;
 			// If the spec of one task has been changed, the corresponding workflow node and other
 			// workflow nodes **behinds** that workflow node will be deleted.
