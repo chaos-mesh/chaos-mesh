@@ -71,6 +71,10 @@ controllerManager:
   # This is Dangerous. Run only on temporary clusters.
   allowHostNetworkTesting: false
 
+  podChaos:
+    podFailure:
+      pauseImage: gcr.io/google-containers/pause:latest
+
 chaosDaemon:
   image: pingcap/chaos-daemon:latest
   imagePullPolicy: IfNotPresent
