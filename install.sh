@@ -644,7 +644,7 @@ install_chaos_mesh() {
         fi
     fi
 
-    gen_crd_manifests "${crd}" | kubectl apply --validate=false -f - || exit 1
+    gen_crd_manifests "${crd}" | kubectl create --validate=false -f - || exit 1
     gen_chaos_mesh_manifests "${runtime}" "${k3s}" "${version}" "${timezone}" "${host_network}" "${docker_registry}" "${microk8s}" | kubectl apply -f - || exit 1
 }
 
@@ -961,6 +961,18 @@ rules:
   - apiGroups: [ "" ]
     resources: [ "pods", "secrets"]
     verbs: [ "get", "list", "watch", "delete", "update" ]
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+    verbs:
+      - "create"
+  - apiGroups:
+      - ""
+    resources:
+      - "pods/log"
+    verbs:
+      - "get"
   - apiGroups:
       - ""
     resources:
@@ -1394,6 +1406,8 @@ spec:
             value: !!str 9288
           - name: SECURITY_MODE
             value: "false"
+          - name: POD_FAILURE_PAUSE_IMAGE
+            value: gcr.io/google-containers/pause:latest
         volumeMounts:
           - name: webhook-certs
             mountPath: /etc/webhook/certs
@@ -1869,7 +1883,7 @@ webhooks:
           - CREATE
           - UPDATE
         resources:
-          - schedule
+          - schedules
 ---
 # Source: chaos-mesh/templates/secrets-configuration.yaml
 apiVersion: admissionregistration.k8s.io/v1beta1

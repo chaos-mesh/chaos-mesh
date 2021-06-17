@@ -31,6 +31,7 @@ import (
 	controllermetrics "sigs.k8s.io/controller-runtime/pkg/metrics"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	apiWebhook "github.com/chaos-mesh/chaos-mesh/api/webhook"
 	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-controller-manager/provider"
 	"github.com/chaos-mesh/chaos-mesh/controllers"
@@ -101,6 +102,13 @@ func Run(params RunParams) error {
 		if err != nil {
 			return err
 		}
+	}
+
+	err = ctrl.NewWebhookManagedBy(mgr).
+		For(&v1alpha1.Schedule{}).
+		Complete()
+	if err != nil {
+		return err
 	}
 
 	// Init metrics collector

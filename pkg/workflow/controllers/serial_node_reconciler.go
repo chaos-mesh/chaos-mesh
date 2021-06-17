@@ -179,19 +179,19 @@ func (it *SerialNodeReconciler) syncChildNodes(ctx context.Context, node v1alpha
 	if len(activeChildNodes) == 0 {
 		// no active children, trying to spawn a new one
 		for index, task := range node.Spec.Tasks {
-			// Walking through on the Spec.Tasks, each one of task SHOULD has one corresponding workflow node;
+			// Walking through on the Spec.Children, each one of task SHOULD has one corresponding workflow node;
 			// If the spec of one task has been changed, the corresponding workflow node and other
 			// workflow nodes **behinds** that workflow node will be deleted.
 			// That's so called "partial rerun" feature.
 			// For example:
 			// One serial node have three children nodes: A, B, C, and all of them have finished.
-			// Then user updates the Spec.Tasks[B], the expected behavior is workflow node B and C will be
+			// Then user updates the Spec.Children[B], the expected behavior is workflow node B and C will be
 			// deleted, then create a new node that refs to B, no effects on A.
 			if index < len(finishedChildNodes) {
 				// TODO: if the definition/spec of task changed, we should also respawn the node
 				// child node start with task name
 
-				// TODO: maybe the changes on Spec.Tasks should be concerned each time, not only during spawning
+				// TODO: maybe the changes on Spec.Children should be concerned each time, not only during spawning
 				// new instances, for shutdown outdated nodes **instantly**
 
 				if strings.HasPrefix(task, finishedChildNodes[index].Name) {

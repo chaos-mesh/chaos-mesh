@@ -47,7 +47,11 @@ type WorkflowNodeSpec struct {
 	// +optional
 	Deadline *metav1.Time `json:"deadline,omitempty"`
 	// +optional
+	Task *Task `json:"task,omitempty"`
+	// +optional
 	Tasks []string `json:"tasks,omitempty"`
+	// +optional
+	ConditionalBranches []ConditionalBranch `json:"conditionalBranches,omitempty"`
 	// +optional
 	*EmbedChaos `json:",inline,omitempty"`
 	// +optional
@@ -60,6 +64,10 @@ type WorkflowNodeStatus struct {
 	// +optional
 	ChaosResource *corev1.TypedLocalObjectReference `json:"chaosResource,omitempty"`
 
+	// ConditionalBranchesStatus records the evaluation result of each ConditionalBranch
+	// +optional
+	ConditionalBranchesStatus *ConditionalBranchesStatus `json:"conditionalBranchesStatus,omitempty"`
+
 	// ActiveChildren means the created children node
 	// +optional
 	ActiveChildren []corev1.LocalObjectReference `json:"activeChildren,omitempty"`
@@ -68,11 +76,31 @@ type WorkflowNodeStatus struct {
 	// +optional
 	FinishedChildren []corev1.LocalObjectReference `json:"finishedChildren,omitempty"`
 
-	// Represents the latest available observations of a worklfow node's current state.
+	// Represents the latest available observations of a workflow node's current state.
 	// +optional
 	// +patchMergeKey=type
 	// +patchStrategy=merge
 	Conditions []WorkflowNodeCondition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type"`
+}
+
+type ConditionalBranch struct {
+	// Target is the name of other template, if expression is evaluated as true, this template will be spawned.
+	Target string `json:"target"`
+	// Expression is the expression for this conditional branch, expected type of result is boolean. If expression is empty, this branch will always be selected/the template will be spawned.
+	// +optional
+	Expression string `json:"expression,omitempty"`
+}
+
+type ConditionalBranchesStatus struct {
+	// +optional
+	Branches []ConditionalBranchStatus `json:"branches"`
+	// +optional
+	Context []string `json:"context"`
+}
+
+type ConditionalBranchStatus struct {
+	Target           string                 `json:"target"`
+	EvaluationResult corev1.ConditionStatus `json:"evaluationResult"`
 }
 
 type WorkflowNodeConditionType string

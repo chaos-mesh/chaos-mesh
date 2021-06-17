@@ -17,9 +17,9 @@ import (
 	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 )
 
 // +kubebuilder:object:root=true
@@ -120,9 +120,19 @@ type Template struct {
 	Name     string       `json:"name"`
 	Type     TemplateType `json:"templateType"`
 	Duration *string      `json:"duration,omitempty"`
-	Tasks    []string     `json:"tasks,omitempty"`
+	// Task describes the behavior of the custom task. Only used when Type is TypeTask.
+	// +optional
+	Task *Task `json:"task,omitempty"`
+	// Children describes the children steps of serial or parallel node. Only used when Type is TypeSerial or TypeParallel.
+	// +optional
+	Children []string `json:"children,omitempty"`
+	// ConditionalBranches describes the conditional branches of custom tasks. Only used when Type is TypeTask.
+	// +optional
+	ConditionalBranches []ConditionalBranch `json:"conditionalBranches,omitempty"`
+	// EmbedChaos describe the chaos to be injected with chaos nodes. Only used when Type is Type<Something>Chaos.
 	// +optional
 	*EmbedChaos `json:",inline"`
+	// Schedule describe the Schedule(describing scheduled chaos) to be injected with chaos nodes. Only used when Type is TypeSchedule.
 	// +optional
 	Schedule *ChaosOnlyScheduleSpec `json:"schedule,omitempty"`
 }
@@ -149,6 +159,18 @@ type ChaosOnlyScheduleSpec struct {
 	Type ScheduleTemplateType `json:"type"`
 
 	EmbedChaos `json:",inline"`
+}
+
+type Task struct {
+	// Container is the main container image to run in the pod
+	Container *corev1.Container `json:"container,omitempty"`
+
+	// Volumes is a list of volumes that can be mounted by containers in a template.
+	// +patchStrategy=merge
+	// +patchMergeKey=name
+	Volumes []corev1.Volume `json:"volumes,omitempty" patchStrategy:"merge" patchMergeKey:"name"`
+
+	// TODO: maybe we could specify parameters in other ways, like loading context from file
 }
 
 // +kubebuilder:object:root=true
