@@ -98,12 +98,12 @@ type NodeNameWithTemplate struct {
 
 // NodeSerial defines SerialNode's specific fields.
 type NodeSerial struct {
-	Tasks []NodeNameWithTemplate `json:"tasks"`
+	Children []NodeNameWithTemplate `json:"children"`
 }
 
 // NodeParallel defines ParallelNode's specific fields.
 type NodeParallel struct {
-	Tasks []NodeNameWithTemplate `json:"tasks"`
+	Children []NodeNameWithTemplate `json:"children"`
 }
 
 // NodeType represents the type of a workflow node.
@@ -329,7 +329,7 @@ func convertWorkflowNode(kubeWorkflowNode v1alpha1.WorkflowNode) (Node, error) {
 			nodes = append(nodes, child.Name)
 		}
 		result.Serial = &NodeSerial{
-			Tasks: composeSerialTaskAndNodes(kubeWorkflowNode.Spec.Tasks, nodes),
+			Children: composeSerialTaskAndNodes(kubeWorkflowNode.Spec.Children, nodes),
 		}
 	} else if kubeWorkflowNode.Spec.Type == v1alpha1.TypeParallel {
 		var nodes []string
@@ -340,7 +340,7 @@ func convertWorkflowNode(kubeWorkflowNode v1alpha1.WorkflowNode) (Node, error) {
 			nodes = append(nodes, child.Name)
 		}
 		result.Parallel = &NodeParallel{
-			Tasks: composeParallelTaskAndNodes(kubeWorkflowNode.Spec.Tasks, nodes),
+			Children: composeParallelTaskAndNodes(kubeWorkflowNode.Spec.Children, nodes),
 		}
 	}
 
@@ -354,22 +354,22 @@ func convertWorkflowNode(kubeWorkflowNode v1alpha1.WorkflowNode) (Node, error) {
 }
 
 // composeSerialTaskAndNodes need nodes to be ordered with its creation time
-func composeSerialTaskAndNodes(tasks []string, nodes []string) []NodeNameWithTemplate {
+func composeSerialTaskAndNodes(children []string, nodes []string) []NodeNameWithTemplate {
 	var result []NodeNameWithTemplate
 	for _, node := range nodes {
 		// TODO: that reverse the generated name, maybe we could use WorkflowNode.TemplateName in the future
 		templateName := node[0:strings.LastIndex(node, "-")]
 		result = append(result, NodeNameWithTemplate{Name: node, Template: templateName})
 	}
-	for _, task := range tasks[len(nodes):] {
+	for _, task := range children[len(nodes):] {
 		result = append(result, NodeNameWithTemplate{Template: task})
 	}
 	return result
 }
 
-func composeParallelTaskAndNodes(tasks []string, nodes []string) []NodeNameWithTemplate {
+func composeParallelTaskAndNodes(children []string, nodes []string) []NodeNameWithTemplate {
 	var result []NodeNameWithTemplate
-	for _, task := range tasks {
+	for _, task := range children {
 		result = append(result, NodeNameWithTemplate{
 			Name:     "",
 			Template: task,
