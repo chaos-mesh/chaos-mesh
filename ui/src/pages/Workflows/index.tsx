@@ -1,5 +1,4 @@
 import { Box, Button, Grow, Typography } from '@material-ui/core'
-import { useEffect, useState } from 'react'
 
 import AddIcon from '@material-ui/icons/Add'
 import DataTable from './DataTable'
@@ -9,26 +8,30 @@ import T from 'components/T'
 import { Workflow } from 'api/workflows.type'
 import api from 'api'
 import { useHistory } from 'react-router-dom'
+import { useIntervalFetch } from 'lib/hooks'
+import { useState } from 'react'
 
 const Workflows = () => {
   const history = useHistory()
 
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [workflows, setWorkflows] = useState<Workflow[]>([])
 
-  const fetchWorkflows = () => {
-    setLoading(true)
-
+  const fetchWorkflows = (intervalID?: number) => {
     api.workflows
       .workflows()
-      .then(({ data }) => setWorkflows(data))
+      .then(({ data }) => {
+        setWorkflows(data)
+
+        if (data.every((d) => d.status === 'finished')) {
+          clearInterval(intervalID)
+        }
+      })
       .catch(console.error)
       .finally(() => setLoading(false))
   }
 
-  useEffect(() => {
-    fetchWorkflows()
-  }, [])
+  useIntervalFetch(fetchWorkflows)
 
   return (
     <>

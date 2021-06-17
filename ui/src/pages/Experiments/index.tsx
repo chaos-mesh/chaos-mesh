@@ -1,7 +1,6 @@
 import { Box, Button, Checkbox, Typography } from '@material-ui/core'
 import { Confirm, setAlert, setConfirm } from 'slices/globalStatus'
 import { FixedSizeList as RWList, ListChildComponentProps as RWListChildComponentProps } from 'react-window'
-import { useEffect, useRef, useState } from 'react'
 
 import AddIcon from '@material-ui/icons/Add'
 import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
@@ -19,7 +18,9 @@ import api from 'api'
 import { styled } from '@material-ui/styles'
 import { transByKind } from 'lib/byKind'
 import { useHistory } from 'react-router-dom'
+import { useIntervalFetch } from 'lib/hooks'
 import { useIntl } from 'react-intl'
+import { useState } from 'react'
 import { useStoreDispatch } from 'store'
 
 const StyledCheckBox = styled(Checkbox)({
@@ -39,32 +40,25 @@ export default function Experiments() {
 
   const [loading, setLoading] = useState(true)
   const [experiments, setExperiments] = useState<Experiment[]>([])
-  const intervalID = useRef(0)
   const [batch, setBatch] = useState<Record<uuid, boolean>>({})
   const batchLength = Object.keys(batch).length
   const isBatchEmpty = batchLength === 0
 
-  const fetchExperiments = () => {
+  const fetchExperiments = (intervalID?: number) => {
     api.experiments
       .experiments()
       .then(({ data }) => {
         setExperiments(data)
 
         if (data.every((d) => d.status === 'finished')) {
-          clearInterval(intervalID.current)
+          clearInterval(intervalID)
         }
       })
       .catch(console.error)
       .finally(() => setLoading(false))
   }
 
-  useEffect(() => {
-    fetchExperiments()
-
-    intervalID.current = window.setInterval(fetchExperiments, 6000)
-
-    return () => clearInterval(intervalID.current)
-  }, [])
+  useIntervalFetch(fetchExperiments)
 
   const handleSelect = (selected: Confirm) => dispatch(setConfirm(selected))
   const onSelect = (selected: Confirm) =>

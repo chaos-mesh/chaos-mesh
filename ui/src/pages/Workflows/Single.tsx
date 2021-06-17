@@ -17,6 +17,7 @@ import api from 'api'
 import { constructWorkflowTopology } from 'lib/cytoscape'
 import loadable from '@loadable/component'
 import { makeStyles } from '@material-ui/styles'
+import { useIntervalFetch } from 'lib/hooks'
 import { useIntl } from 'react-intl'
 import { useStoreDispatch } from 'store'
 import yaml from 'js-yaml'
@@ -56,9 +57,8 @@ const Single = () => {
   const modalTitle = selected === 'workflow' ? single?.name : selected === 'node' ? data.name : ''
   const [configOpen, setConfigOpen] = useState(false)
   const topologyRef = useRef<any>(null)
-  const intervalIDRef = useRef<number>()
 
-  const fetchWorkflowSingle = (uuid: uuid) =>
+  const fetchWorkflowSingle = (intervalID?: number) =>
     api.workflows
       .single(uuid)
       .then(({ data }) => {
@@ -70,20 +70,12 @@ const Single = () => {
 
         // Clear interval after workflow succeed
         if (data.status === 'finished') {
-          clearInterval(intervalIDRef.current)
+          clearInterval(intervalID)
         }
       })
       .catch(console.error)
 
-  useEffect(() => {
-    fetchWorkflowSingle(uuid)
-
-    intervalIDRef.current = window.setInterval(() => {
-      fetchWorkflowSingle(uuid)
-    }, 6000)
-
-    return () => clearInterval(intervalIDRef.current)
-  }, [uuid])
+  useIntervalFetch(fetchWorkflowSingle)
 
   useEffect(() => {
     if (single) {
@@ -191,7 +183,7 @@ const Single = () => {
           })
         )
 
-        fetchWorkflowSingle(uuid)
+        fetchWorkflowSingle()
       })
       .catch(console.error)
   }
