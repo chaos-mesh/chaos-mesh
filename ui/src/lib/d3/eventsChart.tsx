@@ -66,7 +66,7 @@ export default function gen({
     margin.right = enableLegends && document.documentElement.offsetWidth > 768 ? 150 : 0
   }
 
-  const halfHourLater = (events.length ? DateTime.fromISO(events[events.length - 1].created_at) : now()).plus({
+  const halfHourLater = (events.length ? DateTime.fromISO(events[0].created_at) : now()).plus({
     hours: 0.5,
   })
 
