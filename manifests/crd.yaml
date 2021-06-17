@@ -2922,6 +2922,7 @@ spec:
                       description: The name of related ipset
                       items:
                         type: string
+                      nullable: true
                       type: array
                     name:
                       description: The name of iptables chain
