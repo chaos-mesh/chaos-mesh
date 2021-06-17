@@ -74,16 +74,23 @@ spec:
                       - awsRegion
                       - ec2Instance
                       type: object
-                    conditionalTasks:
-                      description: ConditionalTasks describes the conditional branches of custom tasks. Only used when Type is TypeTask.
+                    children:
+                      description: Children describes the children steps of serial or parallel node. Only used when Type is TypeSerial or TypeParallel.
+                      items:
+                        type: string
+                      type: array
+                    conditionalBranches:
+                      description: ConditionalBranches describes the conditional branches of custom tasks. Only used when Type is TypeTask.
                       items:
                         properties:
                           expression:
+                            description: Expression is the expression for this conditional branch, expected type of result is boolean. If expression is empty, this branch will always be selected/the template will be spawned.
                             type: string
-                          task:
+                          target:
+                            description: Target is the name of other template, if expression is evaluated as true, this template will be spawned.
                             type: string
                         required:
-                        - task
+                        - target
                         type: object
                       type: array
                     dnsChaos:
@@ -4458,11 +4465,6 @@ spec:
                             type: object
                           type: array
                       type: object
-                    tasks:
-                      description: Tasks describes the children steps of serial or parallel node. Only used when Type is TypeSerial or TypeParallel.
-                      items:
-                        type: string
-                      type: array
                     templateType:
                       type: string
                     timeChaos:
