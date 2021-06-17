@@ -578,6 +578,12 @@ func (s *Service) getScheduleDetail(c *gin.Context) {
 	ns := sch.Namespace
 	name := sch.Name
 
+	if !s.conf.ClusterScoped && ns != s.conf.TargetNamespace {
+		c.Status(http.StatusBadRequest)
+		_ = c.Error(utils.ErrInvalidRequest.New("the namespace is not supported in cluster scoped mode"))
+		return
+	}
+
 	schedule := &v1alpha1.Schedule{}
 
 	scheduleKey := types.NamespacedName{Namespace: ns, Name: name}
@@ -602,7 +608,14 @@ func (s *Service) getScheduleDetail(c *gin.Context) {
 		return
 	}
 	list := kind.ChaosList.DeepCopyObject()
-	err = kubeCli.List(context.Background(), list, client.MatchingLabels{"managed-by": schedule.Name})
+	selector, err := metav1.LabelSelectorAsSelector(&metav1.LabelSelector{
+		MatchLabels: map[string]string{"managed-by": schedule.Name},
+	})
+
+	err = kubeCli.List(context.Background(), list, &client.ListOptions{
+		Namespace:     ns,
+		LabelSelector: selector,
+	})
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
