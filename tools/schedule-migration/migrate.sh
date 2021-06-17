@@ -54,7 +54,7 @@ update_yaml () {
 
 reapply_crd () {
     kubectl delete -f https://mirrors.chaos-mesh.org/v1.2.1/crd.yaml
-    kubectl apply -f ../../manifests/crd.yaml
+    kubectl create -f ../../manifests/crd.yaml
 }
 
 handle_namespace () {
