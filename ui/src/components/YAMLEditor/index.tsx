@@ -92,4 +92,6 @@ const YAMLEditor: React.FC<YAMLEditorProps> = ({ name, data, mountEditor, onUpda
   )
 }
 
-export default memo(YAMLEditor)
+export default memo(YAMLEditor, () => {
+  return true
+})

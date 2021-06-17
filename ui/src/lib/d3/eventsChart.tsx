@@ -173,7 +173,7 @@ export default function gen({
       .append('div')
       .on('click', function (_, d) {
         const _events = events.filter((e) => e.object_id === d.uuid)
-        const event = _events[_events.length - 1]
+        const event = _events[0]
 
         svg
           .transition()
