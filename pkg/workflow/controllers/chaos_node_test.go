@@ -16,12 +16,17 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	"strings"
+	"time"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
 // integration tests
@@ -50,11 +55,105 @@ var _ = Describe("Workflow", func() {
 
 	Context("one chaos node", func() {
 		It("could spawn one chaos", func() {
-			// TODO: unfinished test case
+			ctx := context.TODO()
+			now := time.Now()
+			duration := 5 * time.Second
+
+			By("create simple chaos node with pod chaos")
+			startTime := metav1.NewTime(now)
+			deadline := metav1.NewTime(now.Add(duration))
+			workflowNode := v1alpha1.WorkflowNode{
+				ObjectMeta: metav1.ObjectMeta{
+					Namespace:    ns,
+					GenerateName: "chaos-node-with-chaos-",
+				},
+				Spec: v1alpha1.WorkflowNodeSpec{
+					TemplateName: "",
+					WorkflowName: "",
+					Type:         v1alpha1.TypePodChaos,
+					StartTime:    &startTime,
+					Deadline:     &deadline,
+					EmbedChaos: &v1alpha1.EmbedChaos{
+						PodChaos: &v1alpha1.PodChaosSpec{
+							ContainerSelector: v1alpha1.ContainerSelector{
+								PodSelector: v1alpha1.PodSelector{
+									Selector: v1alpha1.PodSelectorSpec{
+										Namespaces: []string{ns},
+									},
+									Mode: v1alpha1.AllPodMode,
+								},
+							},
+							Action: v1alpha1.PodKillAction,
+						},
+					},
+				},
+			}
+			Expect(kubeClient.Create(ctx, &workflowNode)).To(Succeed())
+			Eventually(func() bool {
+				podChaosList := v1alpha1.PodChaosList{}
+				Expect(kubeClient.List(ctx, &podChaosList, &client.ListOptions{Namespace: ns})).To(Succeed())
+				if len(podChaosList.Items) == 0 {
+					return false
+				}
+				return strings.HasPrefix(podChaosList.Items[0].Name, "chaos-node-with-chaos-")
+			}, 10*time.Second, time.Second).Should(BeTrue())
 		})
 
 		It("could spawn one schedule", func() {
-			// TODO: unfinished test case
+			ctx := context.TODO()
+			now := time.Now()
+			duration := 5 * time.Second
+
+			By("create simple chaos node with schedule")
+			startTime := metav1.NewTime(now)
+			deadline := metav1.NewTime(now.Add(duration))
+			node := v1alpha1.WorkflowNode{
+				ObjectMeta: metav1.ObjectMeta{
+					Namespace:    ns,
+					GenerateName: "chaos-node-schedule-",
+				},
+				Spec: v1alpha1.WorkflowNodeSpec{
+					WorkflowName: "",
+					Type:         v1alpha1.TypeSchedule,
+					StartTime:    &startTime,
+					Deadline:     &deadline,
+					Schedule: &v1alpha1.ScheduleSpec{
+						Schedule:                "@every 1s",
+						StartingDeadlineSeconds: nil,
+						ConcurrencyPolicy:       v1alpha1.AllowConcurrent,
+						HistoryLimit:            5,
+						Type:                    v1alpha1.ScheduleTypePodChaos,
+						ScheduleItem: v1alpha1.ScheduleItem{
+							EmbedChaos: v1alpha1.EmbedChaos{
+								PodChaos: &v1alpha1.PodChaosSpec{
+									ContainerSelector: v1alpha1.ContainerSelector{
+										PodSelector: v1alpha1.PodSelector{
+											Selector: v1alpha1.PodSelectorSpec{
+												Namespaces: []string{ns},
+												LabelSelectors: map[string]string{
+													"app": "not-actually-exist",
+												},
+											},
+											Mode: v1alpha1.AllPodMode,
+										},
+										ContainerNames: nil,
+									},
+									Action: v1alpha1.PodKillAction,
+								},
+							},
+						},
+					},
+				},
+			}
+			Expect(kubeClient.Create(ctx, &node)).To(Succeed())
+			Eventually(func() bool {
+				scheduleList := v1alpha1.ScheduleList{}
+				Expect(kubeClient.List(ctx, &scheduleList, &client.ListOptions{Namespace: ns})).To(Succeed())
+				if len(scheduleList.Items) == 0 {
+					return false
+				}
+				return strings.HasPrefix(scheduleList.Items[0].Name, "chaos-node-schedule-")
+			}, 10*time.Second, time.Second).Should(BeTrue())
 		})
 	})
 })
