@@ -127,8 +127,8 @@ func (it *TaskReconciler) Reconcile(request reconcile.Request) (reconcile.Result
 					return err
 				}
 
-				if nodeNeedUpdate.Status.ConditionalBranches == nil {
-					nodeNeedUpdate.Status.ConditionalBranches = &v1alpha1.ConditionalBranchesStatus{}
+				if nodeNeedUpdate.Status.ConditionalBranchesStatus == nil {
+					nodeNeedUpdate.Status.ConditionalBranchesStatus = &v1alpha1.ConditionalBranchesStatus{}
 				}
 
 				// TODO: update related condition
@@ -147,12 +147,12 @@ func (it *TaskReconciler) Reconcile(request reconcile.Request) (reconcile.Result
 							"task", fmt.Sprintf("%s/%s", nodeNeedUpdate.Namespace, nodeNeedUpdate.Name),
 							"env", env)
 					} else {
-						nodeNeedUpdate.Status.ConditionalBranches.Context = []string{string(jsonString)}
+						nodeNeedUpdate.Status.ConditionalBranchesStatus.Context = []string{string(jsonString)}
 					}
 				}
 
 				evaluator := task.NewEvaluator(it.logger, it.kubeClient)
-				evaluateConditionBranches, err := evaluator.EvaluateConditionBranches(nodeNeedUpdate.Spec.ConditionalTasks, env)
+				evaluateConditionBranches, err := evaluator.EvaluateConditionBranches(nodeNeedUpdate.Spec.ConditionalBranches, env)
 				if err != nil {
 					it.logger.Error(err, "failed to evaluate expression",
 						"task", fmt.Sprintf("%s/%s", nodeNeedUpdate.Namespace, nodeNeedUpdate.Name),
@@ -160,7 +160,7 @@ func (it *TaskReconciler) Reconcile(request reconcile.Request) (reconcile.Result
 					return err
 				}
 
-				nodeNeedUpdate.Status.ConditionalBranches.Branches = evaluateConditionBranches
+				nodeNeedUpdate.Status.ConditionalBranchesStatus.Branches = evaluateConditionBranches
 
 				err = it.kubeClient.Status().Update(ctx, &nodeNeedUpdate)
 				return err
@@ -179,21 +179,21 @@ func (it *TaskReconciler) Reconcile(request reconcile.Request) (reconcile.Result
 				return err
 			}
 			// TODO: update related condition
-			var branches []v1alpha1.ConditionalBranch
+			var branches []v1alpha1.ConditionalBranchStatus
 
-			if nodeNeedUpdate.Status.ConditionalBranches == nil {
-				nodeNeedUpdate.Status.ConditionalBranches = &v1alpha1.ConditionalBranchesStatus{}
+			if nodeNeedUpdate.Status.ConditionalBranchesStatus == nil {
+				nodeNeedUpdate.Status.ConditionalBranchesStatus = &v1alpha1.ConditionalBranchesStatus{}
 			}
 
-			for _, conditionalTask := range nodeNeedUpdate.Spec.ConditionalTasks {
-				branch := v1alpha1.ConditionalBranch{
-					Task:             conditionalTask.Task,
+			for _, conditionalTask := range nodeNeedUpdate.Spec.ConditionalBranches {
+				branch := v1alpha1.ConditionalBranchStatus{
+					Target:           conditionalTask.Target,
 					EvaluationResult: corev1.ConditionUnknown,
 				}
 				branches = append(branches, branch)
 			}
 
-			nodeNeedUpdate.Status.ConditionalBranches.Branches = branches
+			nodeNeedUpdate.Status.ConditionalBranchesStatus.Branches = branches
 
 			err = it.kubeClient.Status().Update(ctx, &nodeNeedUpdate)
 			return err
@@ -227,9 +227,9 @@ func (it *TaskReconciler) Reconcile(request reconcile.Request) (reconcile.Result
 				return err
 			}
 			var tasks []string
-			for _, branch := range evaluatedNode.Status.ConditionalBranches.Branches {
+			for _, branch := range evaluatedNode.Status.ConditionalBranchesStatus.Branches {
 				if branch.EvaluationResult == corev1.ConditionTrue {
-					tasks = append(tasks, branch.Task)
+					tasks = append(tasks, branch.Target)
 				}
 			}
 
@@ -283,9 +283,9 @@ func (it *TaskReconciler) Reconcile(request reconcile.Request) (reconcile.Result
 func (it *TaskReconciler) syncChildNodes(ctx context.Context, evaluatedNode v1alpha1.WorkflowNode) error {
 
 	var tasks []string
-	for _, branch := range evaluatedNode.Status.ConditionalBranches.Branches {
+	for _, branch := range evaluatedNode.Status.ConditionalBranchesStatus.Branches {
 		if branch.EvaluationResult == corev1.ConditionTrue {
-			tasks = append(tasks, branch.Task)
+			tasks = append(tasks, branch.Target)
 		}
 	}
 
@@ -390,7 +390,7 @@ func (it *TaskReconciler) FetchPodControlledByThisWorkflowNode(ctx context.Conte
 
 func (it *TaskReconciler) SpawnTaskPod(ctx context.Context, node *v1alpha1.WorkflowNode, workflow *v1alpha1.Workflow) error {
 	if node.Spec.Task == nil {
-		return errors.Errorf("node %s/%s does not contains spec of Task", node.Namespace, node.Name)
+		return errors.Errorf("node %s/%s does not contains spec of Target", node.Namespace, node.Name)
 	}
 	podSpec, err := task.SpawnPodForTask(*node.Spec.Task)
 	if err != nil {
@@ -423,13 +423,13 @@ func (it *TaskReconciler) SpawnTaskPod(ctx context.Context, node *v1alpha1.Workf
 }
 
 func conditionalBranchesEvaluated(node v1alpha1.WorkflowNode) bool {
-	if node.Status.ConditionalBranches == nil {
+	if node.Status.ConditionalBranchesStatus == nil {
 		return false
 	}
-	if len(node.Spec.ConditionalTasks) != len(node.Status.ConditionalBranches.Branches) {
+	if len(node.Spec.ConditionalBranches) != len(node.Status.ConditionalBranchesStatus.Branches) {
 		return false
 	}
-	for _, branch := range node.Status.ConditionalBranches.Branches {
+	for _, branch := range node.Status.ConditionalBranchesStatus.Branches {
 		if branch.EvaluationResult == corev1.ConditionUnknown {
 			return false
 		}
