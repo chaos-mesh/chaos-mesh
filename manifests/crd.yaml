@@ -25967,7 +25967,7 @@ spec:
                 type: object
               conditionalBranchesStatus:
                 description: ConditionalBranchesStatus records the evaluation result
-                  of each ConditionalBranches
+                  of each ConditionalBranch
                 properties:
                   branches:
                     items:

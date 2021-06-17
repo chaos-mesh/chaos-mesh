@@ -128,7 +128,7 @@ type Template struct {
 	Children []string `json:"children,omitempty"`
 	// ConditionalBranches describes the conditional branches of custom tasks. Only used when Type is TypeTask.
 	// +optional
-	ConditionalBranches []ConditionalBranches `json:"conditionalBranches,omitempty"`
+	ConditionalBranches []ConditionalBranch `json:"conditionalBranches,omitempty"`
 	// EmbedChaos describe the chaos to be injected with chaos nodes. Only used when Type is Type<Something>Chaos.
 	// +optional
 	*EmbedChaos `json:",inline"`

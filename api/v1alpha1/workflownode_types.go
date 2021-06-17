@@ -51,7 +51,7 @@ type WorkflowNodeSpec struct {
 	// +optional
 	Tasks []string `json:"tasks,omitempty"`
 	// +optional
-	ConditionalBranches []ConditionalBranches `json:"conditionalBranches,omitempty"`
+	ConditionalBranches []ConditionalBranch `json:"conditionalBranches,omitempty"`
 	// +optional
 	*EmbedChaos `json:",inline,omitempty"`
 	// +optional
@@ -64,7 +64,7 @@ type WorkflowNodeStatus struct {
 	// +optional
 	ChaosResource *corev1.TypedLocalObjectReference `json:"chaosResource,omitempty"`
 
-	// ConditionalBranchesStatus records the evaluation result of each ConditionalBranches
+	// ConditionalBranchesStatus records the evaluation result of each ConditionalBranch
 	// +optional
 	ConditionalBranchesStatus *ConditionalBranchesStatus `json:"conditionalBranchesStatus,omitempty"`
 
@@ -83,7 +83,7 @@ type WorkflowNodeStatus struct {
 	Conditions []WorkflowNodeCondition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type"`
 }
 
-type ConditionalBranches struct {
+type ConditionalBranch struct {
 	// Target is the name of other template, if expression is evaluated as true, this template will be spawned.
 	Target string `json:"target"`
 	// Expression is the expression for this conditional branch, expected type of result is boolean. If expression is empty, this branch will always be selected/the template will be spawned.
@@ -93,12 +93,12 @@ type ConditionalBranches struct {
 
 type ConditionalBranchesStatus struct {
 	// +optional
-	Branches []ConditionalBranch `json:"branches"`
+	Branches []ConditionalBranchStatus `json:"branches"`
 	// +optional
 	Context []string `json:"context"`
 }
 
-type ConditionalBranch struct {
+type ConditionalBranchStatus struct {
 	Target           string                 `json:"target"`
 	EvaluationResult corev1.ConditionStatus `json:"evaluationResult"`
 }

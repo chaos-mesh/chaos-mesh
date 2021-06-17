@@ -179,14 +179,14 @@ func (it *TaskReconciler) Reconcile(request reconcile.Request) (reconcile.Result
 				return err
 			}
 			// TODO: update related condition
-			var branches []v1alpha1.ConditionalBranch
+			var branches []v1alpha1.ConditionalBranchStatus
 
 			if nodeNeedUpdate.Status.ConditionalBranchesStatus == nil {
 				nodeNeedUpdate.Status.ConditionalBranchesStatus = &v1alpha1.ConditionalBranchesStatus{}
 			}
 
 			for _, conditionalTask := range nodeNeedUpdate.Spec.ConditionalBranches {
-				branch := v1alpha1.ConditionalBranch{
+				branch := v1alpha1.ConditionalBranchStatus{
 					Target:           conditionalTask.Target,
 					EvaluationResult: corev1.ConditionUnknown,
 				}

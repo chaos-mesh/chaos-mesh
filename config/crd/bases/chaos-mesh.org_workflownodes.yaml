@@ -9153,7 +9153,7 @@ spec:
                 - name
                 type: object
               conditionalBranchesStatus:
-                description: ConditionalBranchesStatus records the evaluation result of each ConditionalBranches
+                description: ConditionalBranchesStatus records the evaluation result of each ConditionalBranch
                 properties:
                   branches:
                     items:
