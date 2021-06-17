@@ -207,23 +207,23 @@ var _ = Describe("Workflow", func() {
 				}
 				Expect(kubeClient.Create(ctx, &node)).To(Succeed())
 
-				By("assert that pod chaos CR is created")
+				By("assert that schedule CR is created")
 				Eventually(func() bool {
 					updatedNode := v1alpha1.WorkflowNode{}
 					Expect(kubeClient.Get(ctx, types.NamespacedName{Namespace: ns, Name: node.Name}, &updatedNode)).To(Succeed())
 					if !ConditionEqualsTo(updatedNode.Status, v1alpha1.ConditionChaosInjected, corev1.ConditionTrue) {
 						return false
 					}
-					chaos := v1alpha1.PodChaos{}
-					err := kubeClient.Get(ctx, types.NamespacedName{Namespace: ns, Name: updatedNode.Status.ChaosResource.Name}, &chaos)
+					schedule := v1alpha1.Schedule{}
+					err := kubeClient.Get(ctx, types.NamespacedName{Namespace: ns, Name: updatedNode.Status.ChaosResource.Name}, &schedule)
 					return err == nil
 				}, toleratedJitter, time.Second).Should(BeTrue())
 
-				By("assert that pod chaos should be purged")
+				By("assert that schedule should be purged")
 				Eventually(func() bool {
-					podChaosList := v1alpha1.PodChaosList{}
-					Expect(kubeClient.List(ctx, &podChaosList, &client.ListOptions{Namespace: ns})).To(Succeed())
-					return len(podChaosList.Items) == 0
+					scheduleList := v1alpha1.ScheduleList{}
+					Expect(kubeClient.List(ctx, &scheduleList, &client.ListOptions{Namespace: ns})).To(Succeed())
+					return len(scheduleList.Items) == 0
 				}, duration+toleratedJitter, time.Second).Should(BeTrue())
 			})
 		})
