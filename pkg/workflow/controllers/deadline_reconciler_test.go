@@ -16,9 +16,11 @@ package controllers
 import (
 	"context"
 	"fmt"
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"time"
+
+	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
