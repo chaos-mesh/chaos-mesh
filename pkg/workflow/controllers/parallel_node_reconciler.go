@@ -156,7 +156,7 @@ func (it *ParallelNodeReconciler) syncChildNodes(ctx context.Context, node v1alp
 	var tasksToStartup []string
 
 	// TODO: check the specific of task and workflow nodes
-	// the definition of Spec.Tasks changed, remove all the existed nodes
+	// the definition of Spec.Children changed, remove all the existed nodes
 	if len(setDifference(taskNamesOfNodes, node.Spec.Tasks)) > 0 ||
 		len(setDifference(node.Spec.Tasks, taskNamesOfNodes)) > 0 {
 		tasksToStartup = node.Spec.Tasks
