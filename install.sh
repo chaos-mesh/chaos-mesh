@@ -1406,6 +1406,8 @@ spec:
             value: !!str 9288
           - name: SECURITY_MODE
             value: "false"
+          - name: POD_FAILURE_PAUSE_IMAGE
+            value: gcr.io/google-containers/pause:latest
         volumeMounts:
           - name: webhook-certs
             mountPath: /etc/webhook/certs

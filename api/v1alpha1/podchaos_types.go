@@ -19,6 +19,7 @@ import (
 
 // +kubebuilder:object:root=true
 // +chaos-mesh:base
+// +chaos-mesh:oneshot=in.Spec.Action==PodKillAction || in.Spec.Action==ContainerKillAction
 
 // PodChaos is the control script`s spec.
 type PodChaos struct {

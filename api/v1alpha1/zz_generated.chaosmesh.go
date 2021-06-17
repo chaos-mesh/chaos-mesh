@@ -133,6 +133,16 @@ func (in *AwsChaos) DurationExceeded(now time.Time) (bool, time.Duration, error)
 	return false, 0, nil
 }
 
+func (in *AwsChaos) IsOneShot() bool {
+	
+	if in.Spec.Action==Ec2Restart {
+		return true
+	}
+
+	return false
+	
+}
+
 const KindDNSChaos = "DNSChaos"
 
 // IsDeleted returns whether this resource has been deleted
@@ -243,6 +253,12 @@ func (in *DNSChaos) DurationExceeded(now time.Time) (bool, time.Duration, error)
 	}
 
 	return false, 0, nil
+}
+
+func (in *DNSChaos) IsOneShot() bool {
+	
+	return false
+	
 }
 
 const KindGcpChaos = "GcpChaos"
@@ -357,6 +373,16 @@ func (in *GcpChaos) DurationExceeded(now time.Time) (bool, time.Duration, error)
 	return false, 0, nil
 }
 
+func (in *GcpChaos) IsOneShot() bool {
+	
+	if in.Spec.Action==NodeReset {
+		return true
+	}
+
+	return false
+	
+}
+
 const KindHTTPChaos = "HTTPChaos"
 
 // IsDeleted returns whether this resource has been deleted
@@ -467,6 +493,12 @@ func (in *HTTPChaos) DurationExceeded(now time.Time) (bool, time.Duration, error
 	}
 
 	return false, 0, nil
+}
+
+func (in *HTTPChaos) IsOneShot() bool {
+	
+	return false
+	
 }
 
 const KindIOChaos = "IOChaos"
@@ -581,6 +613,12 @@ func (in *IOChaos) DurationExceeded(now time.Time) (bool, time.Duration, error) 
 	return false, 0, nil
 }
 
+func (in *IOChaos) IsOneShot() bool {
+	
+	return false
+	
+}
+
 const KindJVMChaos = "JVMChaos"
 
 // IsDeleted returns whether this resource has been deleted
@@ -691,6 +729,12 @@ func (in *JVMChaos) DurationExceeded(now time.Time) (bool, time.Duration, error)
 	}
 
 	return false, 0, nil
+}
+
+func (in *JVMChaos) IsOneShot() bool {
+	
+	return false
+	
 }
 
 const KindKernelChaos = "KernelChaos"
@@ -805,6 +849,12 @@ func (in *KernelChaos) DurationExceeded(now time.Time) (bool, time.Duration, err
 	return false, 0, nil
 }
 
+func (in *KernelChaos) IsOneShot() bool {
+	
+	return false
+	
+}
+
 const KindNetworkChaos = "NetworkChaos"
 
 // IsDeleted returns whether this resource has been deleted
@@ -915,6 +965,12 @@ func (in *NetworkChaos) DurationExceeded(now time.Time) (bool, time.Duration, er
 	}
 
 	return false, 0, nil
+}
+
+func (in *NetworkChaos) IsOneShot() bool {
+	
+	return false
+	
 }
 
 const KindPodChaos = "PodChaos"
@@ -1029,6 +1085,16 @@ func (in *PodChaos) DurationExceeded(now time.Time) (bool, time.Duration, error)
 	return false, 0, nil
 }
 
+func (in *PodChaos) IsOneShot() bool {
+	
+	if in.Spec.Action==PodKillAction || in.Spec.Action==ContainerKillAction {
+		return true
+	}
+
+	return false
+	
+}
+
 const KindStressChaos = "StressChaos"
 
 // IsDeleted returns whether this resource has been deleted
@@ -1141,6 +1207,12 @@ func (in *StressChaos) DurationExceeded(now time.Time) (bool, time.Duration, err
 	return false, 0, nil
 }
 
+func (in *StressChaos) IsOneShot() bool {
+	
+	return false
+	
+}
+
 const KindTimeChaos = "TimeChaos"
 
 // IsDeleted returns whether this resource has been deleted
@@ -1251,6 +1323,12 @@ func (in *TimeChaos) DurationExceeded(now time.Time) (bool, time.Duration, error
 	}
 
 	return false, 0, nil
+}
+
+func (in *TimeChaos) IsOneShot() bool {
+	
+	return false
+	
 }
 
 func init() {
