@@ -604,13 +604,18 @@ func (s *Service) getScheduleDetail(c *gin.Context) {
 	kind, ok := v1alpha1.AllScheduleItemKinds()[string(schedule.Spec.Type)]
 	if !ok {
 		c.Status(http.StatusInternalServerError)
-		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		_ = c.Error(utils.ErrInvalidRequest.New("the kind is not supported"))
 		return
 	}
 	list := kind.ChaosList.DeepCopyObject()
 	selector, err := metav1.LabelSelectorAsSelector(&metav1.LabelSelector{
 		MatchLabels: map[string]string{"managed-by": schedule.Name},
 	})
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		return
+	}
 
 	err = kubeCli.List(context.Background(), list, &client.ListOptions{
 		Namespace:     ns,
