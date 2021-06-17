@@ -49,7 +49,7 @@ type WorkflowNodeSpec struct {
 	// +optional
 	Task *Task `json:"task,omitempty"`
 	// +optional
-	Tasks []string `json:"tasks,omitempty"`
+	Children []string `json:"children,omitempty"`
 	// +optional
 	ConditionalBranches []ConditionalBranch `json:"conditionalBranches,omitempty"`
 	// +optional
