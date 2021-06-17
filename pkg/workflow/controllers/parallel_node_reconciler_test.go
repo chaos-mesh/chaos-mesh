@@ -147,7 +147,7 @@ var _ = Describe("Workflow", func() {
 		nsToDelete := corev1.Namespace{}
 		Expect(kubeClient.Get(ctx, types.NamespacedName{Name: ns}, &nsToDelete)).To(Succeed())
 		Expect(kubeClient.Delete(ctx, &nsToDelete)).To(Succeed())
-		By(fmt.Sprintf("cleanupz namespace %s", ns))
+		By(fmt.Sprintf("cleanup namespace %s", ns))
 	})
 
 	Context("with one parallel node", func() {
@@ -402,7 +402,7 @@ var _ = Describe("Workflow", func() {
 					workflowNodeList := v1alpha1.WorkflowNodeList{}
 					Expect(kubeClient.List(ctx, &workflowNodeList, &client.ListOptions{Namespace: ns})).To(Succeed())
 					return len(workflowNodeList.Items)
-				}, 10*time.Second, time.Second).Should(Equal(0))
+				}, time.Minute, time.Second).Should(Equal(0))
 				Eventually(func() int {
 					chaosList := v1alpha1.NetworkChaosList{}
 					Expect(kubeClient.List(ctx, &chaosList, &client.ListOptions{Namespace: ns})).To(Succeed())

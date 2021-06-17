@@ -50,7 +50,7 @@ var _ = Describe("Workflow", func() {
 		nsToDelete := corev1.Namespace{}
 		Expect(kubeClient.Get(ctx, types.NamespacedName{Name: ns}, &nsToDelete)).To(Succeed())
 		Expect(kubeClient.Delete(ctx, &nsToDelete)).To(Succeed())
-		By(fmt.Sprintf("cleanupz namespace %s", ns))
+		By(fmt.Sprintf("cleanup namespace %s", ns))
 	})
 
 	Context("with deadline", func() {
