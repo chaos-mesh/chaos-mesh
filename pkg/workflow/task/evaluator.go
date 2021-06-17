@@ -31,7 +31,7 @@ func NewEvaluator(logger logr.Logger, kubeclient client.Client) *Evaluator {
 	return &Evaluator{logger: logger, kubeclient: kubeclient}
 }
 
-func (it *Evaluator) EvaluateConditionBranches(tasks []v1alpha1.ConditionalTask, resultEnv map[string]interface{}) (branches []v1alpha1.ConditionalBranch, err error) {
+func (it *Evaluator) EvaluateConditionBranches(tasks []v1alpha1.ConditionalBranches, resultEnv map[string]interface{}) (branches []v1alpha1.ConditionalBranch, err error) {
 
 	var result []v1alpha1.ConditionalBranch
 	for _, task := range tasks {
@@ -51,7 +51,7 @@ func (it *Evaluator) EvaluateConditionBranches(tasks []v1alpha1.ConditionalTask,
 		}
 
 		result = append(result, v1alpha1.ConditionalBranch{
-			Task:             task.Task,
+			Target:           task.Target,
 			EvaluationResult: evalResult,
 		})
 	}

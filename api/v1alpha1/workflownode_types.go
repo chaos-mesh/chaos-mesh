@@ -51,7 +51,7 @@ type WorkflowNodeSpec struct {
 	// +optional
 	Tasks []string `json:"tasks,omitempty"`
 	// +optional
-	ConditionalTasks []ConditionalTask `json:"conditionalTasks,omitempty"`
+	ConditionalBranches []ConditionalBranches `json:"conditionalBranches,omitempty"`
 	// +optional
 	*EmbedChaos `json:",inline,omitempty"`
 	// +optional
@@ -64,9 +64,9 @@ type WorkflowNodeStatus struct {
 	// +optional
 	ChaosResource *corev1.TypedLocalObjectReference `json:"chaosResource,omitempty"`
 
-	// ConditionalBranches records the evaluation result of each ConditionalTask
+	// ConditionalBranchesStatus records the evaluation result of each ConditionalBranches
 	// +optional
-	ConditionalBranches *ConditionalBranchesStatus `json:"conditionalBranches,omitempty"`
+	ConditionalBranchesStatus *ConditionalBranchesStatus `json:"conditionalBranchesStatus,omitempty"`
 
 	// ActiveChildren means the created children node
 	// +optional
@@ -83,8 +83,10 @@ type WorkflowNodeStatus struct {
 	Conditions []WorkflowNodeCondition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type"`
 }
 
-type ConditionalTask struct {
-	Task string `json:"task"`
+type ConditionalBranches struct {
+	// Target is the name of other template, if expression is evaluated as true, this template will be spawned.
+	Target string `json:"target"`
+	// Expression is the expression for this conditional branch, expected type of result is boolean. If expression is empty, this branch will always be selected/the template will be spawned.
 	// +optional
 	Expression string `json:"expression,omitempty"`
 }
@@ -97,8 +99,8 @@ type ConditionalBranchesStatus struct {
 }
 
 type ConditionalBranch struct {
-	Task             string                 `json:"task"`
-	EvaluationResult corev1.ConditionStatus `json:"run"`
+	Target           string                 `json:"target"`
+	EvaluationResult corev1.ConditionStatus `json:"evaluationResult"`
 }
 
 type WorkflowNodeConditionType string
