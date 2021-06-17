@@ -47,7 +47,11 @@ type WorkflowNodeSpec struct {
 	// +optional
 	Deadline *metav1.Time `json:"deadline,omitempty"`
 	// +optional
+	Task *Task `json:"task,omitempty"`
+	// +optional
 	Tasks []string `json:"tasks,omitempty"`
+	// +optional
+	ConditionalTasks []ConditionalTask `json:"conditionalTasks,omitempty"`
 	// +optional
 	*EmbedChaos `json:",inline,omitempty"`
 	// +optional
@@ -60,6 +64,10 @@ type WorkflowNodeStatus struct {
 	// +optional
 	ChaosResource *corev1.TypedLocalObjectReference `json:"chaosResource,omitempty"`
 
+	// ConditionalBranches records the evaluation result of each ConditionalTask
+	// +optional
+	ConditionalBranches *ConditionalBranchesStatus `json:"conditionalBranches,omitempty"`
+
 	// ActiveChildren means the created children node
 	// +optional
 	ActiveChildren []corev1.LocalObjectReference `json:"activeChildren,omitempty"`
@@ -68,11 +76,29 @@ type WorkflowNodeStatus struct {
 	// +optional
 	FinishedChildren []corev1.LocalObjectReference `json:"finishedChildren,omitempty"`
 
-	// Represents the latest available observations of a worklfow node's current state.
+	// Represents the latest available observations of a workflow node's current state.
 	// +optional
 	// +patchMergeKey=type
 	// +patchStrategy=merge
 	Conditions []WorkflowNodeCondition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type"`
+}
+
+type ConditionalTask struct {
+	Task string `json:"task"`
+	// +optional
+	Expression string `json:"expression,omitempty"`
+}
+
+type ConditionalBranchesStatus struct {
+	// +optional
+	Branches []ConditionalBranch `json:"branches"`
+	// +optional
+	Context []string `json:"context"`
+}
+
+type ConditionalBranch struct {
+	Task             string                 `json:"task"`
+	EvaluationResult corev1.ConditionStatus `json:"run"`
 }
 
 type WorkflowNodeConditionType string
