@@ -167,6 +167,10 @@ func (it *SerialNodeReconciler) syncChildNodes(ctx context.Context, node v1alpha
 		return nil
 	}
 
+	if WorkflowNodeFinished(node.Status) {
+		return nil
+	}
+
 	activeChildNodes, finishedChildNodes, err := it.fetchChildNodes(ctx, node)
 	if err != nil {
 		return err
