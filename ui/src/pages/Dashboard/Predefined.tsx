@@ -131,7 +131,7 @@ const Predefined = () => {
       <Space direction="row" sx={{ height: 88, overflowX: 'scroll' }}>
         <YAML
           callback={saveExperiment}
-          buttonProps={{ className: clsx(classes.card, classes.addCard, 'predefined-upload') }}
+          buttonProps={{ className: clsx(classes.card, classes.addCard, 'tutorial-predefined') }}
         />
         {experiments.map((d) => (
           <Card key={d.name} className={classes.card} variant="outlined" onClick={onModalOpen(d)}>

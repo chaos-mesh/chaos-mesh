@@ -30,40 +30,56 @@ const Welcome = () => {
 
   const steps: ReactourStep[] = [
     {
-      selector: '.sidebar-dashboard',
-      content: T('dashboard.tutorial.step1'),
+      selector: '.tutorial-dashboard',
+      content: T('dashboard.tutorial.steps.dashboard'),
     },
     {
-      selector: '.sidebar-experiments',
-      content: T('dashboard.tutorial.step2'),
+      selector: '.tutorial-workflows',
+      content: T('dashboard.tutorial.steps.workflows'),
     },
     {
-      selector: '.sidebar-events',
-      content: T('dashboard.tutorial.step3'),
+      selector: '.tutorial-schedules',
+      content: T('dashboard.tutorial.steps.schedules'),
     },
     {
-      selector: '.sidebar-archives',
-      content: T('dashboard.tutorial.step4'),
+      selector: '.tutorial-experiments',
+      content: T('dashboard.tutorial.steps.experiments'),
     },
     {
-      selector: '.dashboard-new-experiment',
-      content: T('dashboard.tutorial.step5'),
+      selector: '.tutorial-events',
+      content: T('dashboard.tutorial.steps.events'),
     },
     {
-      selector: '.nav-search',
-      content: T('dashboard.tutorial.step6'),
+      selector: '.tutorial-archives',
+      content: T('dashboard.tutorial.steps.archives'),
     },
     {
-      selector: '.nav-namespace',
-      content: T('dashboard.tutorial.step7'),
+      selector: '.tutorial-newW',
+      content: T('dashboard.tutorial.steps.newW'),
     },
     {
-      selector: '.predefined-upload',
-      content: T('dashboard.tutorial.step8'),
+      selector: '.tutorial-newS',
+      content: T('dashboard.tutorial.steps.newS'),
     },
     {
-      selector: '.dashboard-tutorial',
-      content: T('dashboard.tutorial.step9'),
+      selector: '.tutorial-newE',
+      content: T('dashboard.tutorial.steps.newE'),
+    },
+    {
+      selector: '.tutorial-search',
+      content: T('dashboard.tutorial.steps.search'),
+    },
+    {
+      selector: '.tutorial-namespace',
+      content: T('dashboard.tutorial.steps.namespace'),
+    },
+    {
+      selector: '.tutorial-predefined',
+      content: T('dashboard.tutorial.steps.predefined'),
+    },
+    {
+      selector: '.tutorial-end',
+      content: T('dashboard.tutorial.steps.end'),
     },
   ].map((d) => ({
     ...d,
@@ -81,7 +97,7 @@ const Welcome = () => {
           <Space className={classes.space}>
             <PaperTop title={T('dashboard.tutorial.title')} subtitle={T('dashboard.tutorial.desc')} />
             <Button
-              className="dashboard-tutorial"
+              className="tutorial-end"
               variant="contained"
               color="primary"
               fullWidth
@@ -101,7 +117,7 @@ const Welcome = () => {
             />
             <PaperTop title={T('dashboard.newbie')} subtitle={T('dashboard.newbieDesc')} />
             <Button
-              className="dashboard-new-experiment"
+              className="tutorial-newE"
               component={Link}
               to="/experiments/new"
               variant="contained"
@@ -119,6 +135,7 @@ const Welcome = () => {
           <Space className={classes.space}>
             <PaperTop title={T('dashboard.startAWorkflow')} subtitle={T('dashboard.startAWorkflowDesc')} />
             <Button
+              className="tutorial-newW"
               component={Link}
               to="/workflows/new"
               variant="contained"
@@ -130,6 +147,7 @@ const Welcome = () => {
             </Button>
             <PaperTop title={T('dashboard.startASchedule')} subtitle={T('dashboard.startAScheduleDesc')} />
             <Button
+              className="tutorial-newS"
               component={Link}
               to="/schedules/new"
               variant="contained"

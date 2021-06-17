@@ -142,7 +142,7 @@ const Search: React.FC = () => {
 
   return (
     <Autocomplete
-      className={clsx(classes.search, 'nav-search')}
+      className={clsx(classes.search, 'tutorial-search')}
       freeSolo
       open={open}
       onClose={() => setOpen(false)}

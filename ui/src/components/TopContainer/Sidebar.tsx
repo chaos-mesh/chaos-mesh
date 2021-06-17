@@ -157,7 +157,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open }) => {
             {listItems.map(({ icon, text }) => (
               <ListItem
                 key={text}
-                className={clsx(classes.listItem, `sidebar-${text}`)}
+                className={clsx(classes.listItem, `tutorial-${text}`)}
                 component={NavLink}
                 to={`/${text}`}
                 button

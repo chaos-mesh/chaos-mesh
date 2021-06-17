@@ -33,7 +33,7 @@ const ControlBar = () => {
 
   return (
     <Autocomplete
-      className="nav-namespace"
+      className="tutorial-namespace"
       sx={{ minWidth: 180 }}
       value={namespace}
       options={['All', ...namespaces]}
