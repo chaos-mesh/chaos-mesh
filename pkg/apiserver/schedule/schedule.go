@@ -387,7 +387,7 @@ func parseStressChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 					Mode:     v1alpha1.PodMode(exp.Scope.Mode),
 					Value:    exp.Scope.Value,
 				},
-				ContainerNames: []string{exp.Target.StressChaos.ContainerName},
+				ContainerNames: []string{*exp.Target.StressChaos.ContainerName},
 			},
 			Stressors:         stressors,
 			StressngStressors: exp.Target.StressChaos.StressngStressors,
