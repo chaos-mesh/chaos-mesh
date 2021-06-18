@@ -117,9 +117,10 @@ func contains(arr []TemplateType, target TemplateType) bool {
 }
 
 type Template struct {
-	Name     string       `json:"name"`
-	Type     TemplateType `json:"templateType"`
-	Deadline *string      `json:"deadline,omitempty"`
+	Name string       `json:"name"`
+	Type TemplateType `json:"templateType"`
+	// +optional
+	Deadline *string `json:"deadline,omitempty"`
 	// Task describes the behavior of the custom task. Only used when Type is TypeTask.
 	// +optional
 	Task *Task `json:"task,omitempty"`
