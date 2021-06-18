@@ -1595,6 +1595,8 @@ spec:
                             - target
                             type: object
                           type: array
+                        deadline:
+                          type: string
                         dnsChaos:
                           description: DNSChaosSpec defines the desired state of DNSChaos
                           properties:
@@ -1701,8 +1703,6 @@ spec:
                           - mode
                           - selector
                           type: object
-                        duration:
-                          type: string
                         gcpChaos:
                           description: GcpChaosSpec is the content of the specification for a GcpChaos
                           properties:

@@ -303,6 +303,10 @@ func (in *NetworkChaosSpec) validateTargetPodSelector(target *field.Path) field.
 func (in *NetworkChaosSpec) validateTargets(target *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
+	if in.Action == PartitionAction {
+		return nil
+	}
+
 	if (in.Direction == From || in.Direction == Both) &&
 		in.ExternalTargets != nil && in.Action != PartitionAction {
 		allErrs = append(allErrs,

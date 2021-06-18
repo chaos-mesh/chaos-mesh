@@ -2924,6 +2924,7 @@ spec:
                     description: The name of related ipset
                     items:
                       type: string
+                    nullable: true
                     type: array
                   name:
                     description: The name of iptables chain
@@ -2932,7 +2933,6 @@ spec:
                     type: string
                 required:
                 - direction
-                - ipsets
                 - name
                 - source
                 type: object
@@ -5131,6 +5131,8 @@ spec:
                           - target
                           type: object
                         type: array
+                      deadline:
+                        type: string
                       dnsChaos:
                         description: DNSChaosSpec defines the desired state of DNSChaos
                         properties:
@@ -5284,8 +5286,6 @@ spec:
                         - mode
                         - selector
                         type: object
-                      duration:
-                        type: string
                       gcpChaos:
                         description: GcpChaosSpec is the content of the specification
                           for a GcpChaos
@@ -16041,6 +16041,8 @@ spec:
                               - target
                               type: object
                             type: array
+                          deadline:
+                            type: string
                           dnsChaos:
                             description: DNSChaosSpec defines the desired state of
                               DNSChaos
@@ -16199,8 +16201,6 @@ spec:
                             - mode
                             - selector
                             type: object
-                          duration:
-                            type: string
                           gcpChaos:
                             description: GcpChaosSpec is the content of the specification
                               for a GcpChaos
@@ -25763,6 +25763,8 @@ spec:
                       - target
                       type: object
                     type: array
+                  deadline:
+                    type: string
                   dnsChaos:
                     description: DNSChaosSpec defines the desired state of DNSChaos
                     properties:
@@ -25911,8 +25913,6 @@ spec:
                     - mode
                     - selector
                     type: object
-                  duration:
-                    type: string
                   gcpChaos:
                     description: GcpChaosSpec is the content of the specification
                       for a GcpChaos
