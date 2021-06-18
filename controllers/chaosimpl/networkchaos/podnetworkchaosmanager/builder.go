@@ -46,6 +46,21 @@ func NewBuilder(params Params) *Builder {
 	}
 }
 
+func (b *Builder) Build(source string, key types.NamespacedName) *PodNetworkManager {
+	t := &PodNetworkTransaction{}
+
+	return &PodNetworkManager{
+		Source: source,
+		Log:    b.Log,
+		Client: b.Client,
+		Reader: b.Reader,
+		scheme: b.scheme,
+
+		Key: key,
+		T:   t,
+	}
+}
+
 func (b *Builder) WithInit(source string, key types.NamespacedName) *PodNetworkManager {
 	t := &PodNetworkTransaction{}
 	t.Clear(source)
