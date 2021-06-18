@@ -12417,6 +12417,10 @@ spec:
               - awsRegion
               - ec2Instance
               type: object
+            children:
+              items:
+                type: string
+              type: array
             conditionalBranches:
               items:
                 properties:
@@ -25396,10 +25400,6 @@ spec:
                     type: object
                   type: array
               type: object
-            tasks:
-              items:
-                type: string
-              type: array
             templateName:
               type: string
             timeChaos:

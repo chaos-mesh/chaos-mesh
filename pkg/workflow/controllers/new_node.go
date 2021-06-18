@@ -64,7 +64,7 @@ func renderNodesByTemplates(workflow *v1alpha1.Workflow, parent *v1alpha1.Workfl
 					Type:                template.Type,
 					StartTime:           &now,
 					Deadline:            deadline,
-					Tasks:               template.Children,
+					Children:            template.Children,
 					Task:                template.Task,
 					ConditionalBranches: template.ConditionalBranches,
 					EmbedChaos:          template.EmbedChaos,
