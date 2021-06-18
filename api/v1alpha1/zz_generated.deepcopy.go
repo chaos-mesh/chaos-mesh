@@ -3105,8 +3105,8 @@ func (in *WorkflowNodeSpec) DeepCopyInto(out *WorkflowNodeSpec) {
 		*out = new(Task)
 		(*in).DeepCopyInto(*out)
 	}
-	if in.Tasks != nil {
-		in, out := &in.Tasks, &out.Tasks
+	if in.Children != nil {
+		in, out := &in.Children, &out.Children
 		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}

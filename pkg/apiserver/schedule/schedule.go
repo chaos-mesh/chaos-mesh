@@ -276,7 +276,7 @@ func parseIOChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 					Mode:     v1alpha1.PodMode(exp.Scope.Mode),
 					Value:    exp.Scope.Value,
 				},
-				ContainerNames: exp.Target.PodChaos.ContainerNames,
+				ContainerNames: []string{exp.Target.IOChaos.ContainerName},
 			},
 			Action:     v1alpha1.IOChaosType(exp.Target.IOChaos.Action),
 			Delay:      exp.Target.IOChaos.Delay,
@@ -314,7 +314,7 @@ func parseTimeChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 					Mode:     v1alpha1.PodMode(exp.Scope.Mode),
 					Value:    exp.Scope.Value,
 				},
-				ContainerNames: exp.Target.PodChaos.ContainerNames,
+				ContainerNames: exp.Target.TimeChaos.ContainerNames,
 			},
 			TimeOffset: exp.Target.TimeChaos.TimeOffset,
 			ClockIds:   exp.Target.TimeChaos.ClockIDs,
@@ -387,11 +387,14 @@ func parseStressChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 					Mode:     v1alpha1.PodMode(exp.Scope.Mode),
 					Value:    exp.Scope.Value,
 				},
-				ContainerNames: exp.Target.PodChaos.ContainerNames,
 			},
 			Stressors:         stressors,
 			StressngStressors: exp.Target.StressChaos.StressngStressors,
 		},
+	}
+
+	if exp.Target.StressChaos.ContainerName != nil {
+		chaos.Spec.ContainerSelector.ContainerNames = []string{*exp.Target.StressChaos.ContainerName}
 	}
 
 	if exp.Duration != "" {
@@ -419,7 +422,7 @@ func parseDNSChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 					Mode:     v1alpha1.PodMode(exp.Scope.Mode),
 					Value:    exp.Scope.Value,
 				},
-				ContainerNames: exp.Target.PodChaos.ContainerNames,
+				ContainerNames: exp.Target.DNSChaos.ContainerNames,
 			},
 			DomainNamePatterns: exp.Target.DNSChaos.DomainNamePatterns,
 		},

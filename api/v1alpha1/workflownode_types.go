@@ -49,7 +49,7 @@ type WorkflowNodeSpec struct {
 	// +optional
 	Task *Task `json:"task,omitempty"`
 	// +optional
-	Tasks []string `json:"tasks,omitempty"`
+	Children []string `json:"children,omitempty"`
 	// +optional
 	ConditionalBranches []ConditionalBranch `json:"conditionalBranches,omitempty"`
 	// +optional
@@ -130,16 +130,17 @@ func init() {
 
 // Reasons
 const (
-	EntryCreated          string = "EntryCreated"
-	InvalidEntry          string = "InvalidEntry"
-	NodesCreated          string = "NodesCreated"
-	NodeAccomplished      string = "NodeAccomplished"
-	NodeDeadlineExceed    string = "NodeDeadlineExceed"
-	NodeDeadlineNotExceed string = "NodeDeadlineNotExceed"
-	NodeDeadlineOmitted   string = "NodeDeadlineOmitted"
-	ChaosCRCreated        string = "ChaosCRCreated"
-	ChaosCRCreateFailed   string = "ChaosCRCreateFailed"
-	ChaosCRNotExists      string = "ChaosCRNotExists"
+	EntryCreated             string = "EntryCreated"
+	InvalidEntry             string = "InvalidEntry"
+	NodeAccomplished         string = "NodeAccomplished"
+	NodesCreated             string = "NodesCreated"
+	NodeDeadlineExceed       string = "NodeDeadlineExceed"
+	NodeDeadlineNotExceed    string = "NodeDeadlineNotExceed"
+	NodeDeadlineOmitted      string = "NodeDeadlineOmitted"
+	ParentNodeDeadlineExceed string = "ParentNodeDeadlineExceed"
+	ChaosCRCreated           string = "ChaosCRCreated"
+	ChaosCRCreateFailed      string = "ChaosCRCreateFailed"
+	ChaosCRNotExists         string = "ChaosCRNotExists"
 )
 
 // TODO: GenericChaosList/GenericChaos is very similar to ChaosList/ChaosInstance, maybe we could combine them later.
