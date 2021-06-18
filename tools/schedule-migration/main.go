@@ -69,9 +69,9 @@ func main() {
 		if !findSchedule && !findContainerName {
 			new = old
 		} else if findSchedule && !findContainerName {
-			new = toScheduleObjcet(old, schedule)
+			new = toScheduleObject(old, schedule)
 		} else if findSchedule && findContainerName {
-			new = toScheduleObjcet(old, schedule)
+			new = toScheduleObject(old, schedule)
 			new.Spec = append(new.Spec, yaml.MapItem{Key: "containerNames", Value: containerNames})
 		} else {
 			new.ApiVersion = old.ApiVersion
@@ -110,7 +110,7 @@ func toNewKind(kind string) string {
 	return kind
 }
 
-func toScheduleObjcet(old Item, schedule yaml.MapSlice) Item {
+func toScheduleObject(old Item, schedule yaml.MapSlice) Item {
 	var new Item
 	var cron string
 	for _, item := range schedule {
