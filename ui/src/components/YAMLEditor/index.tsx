@@ -92,6 +92,10 @@ const YAMLEditor: React.FC<YAMLEditorProps> = ({ name, data, mountEditor, onUpda
   )
 }
 
-export default memo(YAMLEditor, () => {
+export default memo(YAMLEditor, (prevProps, nextProps) => {
+  if (prevProps.data !== nextProps.data) {
+    return false
+  }
+
   return true
 })

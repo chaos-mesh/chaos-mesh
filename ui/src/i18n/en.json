@@ -125,8 +125,9 @@
       "chooseChildren": "Choose child task",
       "nameHelper": "The task name",
       "nameValidation": "The task name is required",
-      "durationHelper": "The task duration",
-      "durationValidation": "The task duration is required",
+      "deadline": "Deadline",
+      "deadlineHelper": "The task deadline",
+      "deadlineValidation": "The task deadline is required",
       "deleteDesc": "This task will be deleted",
       "submitAll": "Submit All"
     },

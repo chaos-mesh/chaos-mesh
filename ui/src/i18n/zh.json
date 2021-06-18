@@ -147,8 +147,9 @@
       "chooseChildren": "选择子任务",
       "nameHelper": "任务的名称",
       "nameValidation": "任务名称不能为空",
-      "durationHelper": "任务的持续时间",
-      "durationValidation": "任务持续时间不能为空",
+      "deadline": "期限",
+      "deadlineHelper": "任务的期限",
+      "deadlineValidation": "任务的期限不能为空",
       "deleteDesc": "此任务将被删除",
       "submitAll": "提交所有改动"
     },

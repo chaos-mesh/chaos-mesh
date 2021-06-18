@@ -8,7 +8,7 @@ export interface Template {
   type: 'single' | 'serial' | 'parallel' | 'suspend'
   index?: number
   name: string
-  duration?: string
+  deadline?: string
   experiments: TemplateExperiment[]
 }
 

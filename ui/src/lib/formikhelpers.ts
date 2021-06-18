@@ -193,6 +193,7 @@ function validate(defaultI18n: string, i18n?: string) {
 }
 export const validateName = (i18n?: string) => validate('The name is required', i18n)
 export const validateDuration = (i18n?: string) => validate('The duration is required', i18n)
+export const validateDeadline = (i18n?: string) => validate('The deadline is required', i18n)
 
 function scopeToYAMLJSON(scope: ExperimentScope) {
   const result = {
@@ -235,11 +236,10 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
           realTemplates.push({
             name: t.name,
             templateType: kind,
-            duration: experiment.basic.duration,
+            deadline: experiment.basic.deadline,
             [toCamelCase(kind)]: {
               ...scopeToYAMLJSON(basic.scope),
               ...experiment.target[spec],
-              scheduler: basic.scheduler,
             },
           })
 
@@ -255,11 +255,10 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
               realTemplates.push({
                 name,
                 templateType: kind,
-                duration: d.basic.duration,
+                deadline: d.basic.deadline,
                 [toCamelCase(kind)]: {
                   ...scopeToYAMLJSON(basic.scope),
                   ...d.target[spec],
-                  scheduler: basic.scheduler,
                 },
               })
             }
@@ -268,7 +267,7 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
           realTemplates.push({
             name: t.name,
             templateType: 'Serial',
-            duration: t.duration,
+            deadline: t.deadline,
             tasks: t.experiments.map((d) => d.basic.name),
           })
 
@@ -284,11 +283,10 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
               realTemplates.push({
                 name,
                 templateType: kind,
-                duration: d.basic.duration,
+                deadline: d.basic.deadline,
                 [toCamelCase(kind)]: {
                   ...scopeToYAMLJSON(basic.scope),
                   ...d.target[spec],
-                  scheduler: basic.scheduler,
                 },
               })
             }
@@ -297,7 +295,7 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
           realTemplates.push({
             name: t.name,
             templateType: 'Parallel',
-            duration: t.duration,
+            deadline: t.deadline,
             tasks: t.experiments.map((d) => d.basic.name),
           })
 
@@ -306,7 +304,7 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
           realTemplates.push({
             name: t.name,
             templateType: 'Suspend',
-            duration: t.duration,
+            deadline: t.deadline,
           })
 
           break
