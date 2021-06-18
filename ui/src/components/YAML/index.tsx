@@ -1,12 +1,10 @@
 import { Button, ButtonProps } from '@material-ui/core'
 
 import CloudUploadOutlinedIcon from '@material-ui/icons/CloudUploadOutlined'
-import React from 'react'
 import T from 'components/T'
 import { setAlert } from 'slices/globalStatus'
 import { useIntl } from 'react-intl'
 import { useStoreDispatch } from 'store'
-import yaml from 'js-yaml'
 
 interface YAMLProps {
   callback: (y: any) => void
@@ -24,7 +22,7 @@ const YAML: React.FC<YAMLProps> = ({ callback, buttonProps }) => {
     const reader = new FileReader()
     reader.onload = function (e) {
       try {
-        const y = yaml.load(e.target!.result as string)
+        const y = e.target!.result as string
         if (process.env.NODE_ENV === 'development') {
           console.debug('Debug yamlToExperiment:', y)
         }
@@ -34,7 +32,7 @@ const YAML: React.FC<YAMLProps> = ({ callback, buttonProps }) => {
         dispatch(
           setAlert({
             type: 'success',
-            message: intl.formatMessage({ id: 'confirm.loadSuccessfully' }),
+            message: T('confirm.success.load', intl),
           })
         )
       } catch (e) {

@@ -1,24 +1,11 @@
-import { Box, BoxProps } from '@material-ui/core'
-import { Theme, styled } from '@material-ui/core/styles'
+import { Stack, StackProps } from '@material-ui/core'
 
-interface SpaceProps {
-  spacing?: number
-  vertical?: boolean
+function Space({ children, ...rest }: StackProps) {
+  return (
+    <Stack spacing={3} {...rest}>
+      {children}
+    </Stack>
+  )
 }
-type Props = BoxProps & SpaceProps
 
-export default styled(({ spacing, vertical, children, ...rest }: Props) => <Box {...rest}>{children}</Box>)<
-  Theme,
-  SpaceProps
->(({ theme, spacing = 3, vertical = false }) => {
-  const direction = vertical ? 'marginBottom' : 'marginRight'
-
-  return {
-    '& > *': {
-      [direction]: theme.spacing(spacing),
-      '&:last-child': {
-        [direction]: 0,
-      },
-    },
-  }
-})
+export default Space

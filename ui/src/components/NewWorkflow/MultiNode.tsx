@@ -1,28 +1,9 @@
 import { Avatar, Typography } from '@material-ui/core'
-import React, { useImperativeHandle, useState } from 'react'
+import { useImperativeHandle, useState } from 'react'
 
 import Space from 'components-mui/Space'
 import T from 'components/T'
-import clsx from 'clsx'
-import { makeStyles } from '@material-ui/core/styles'
-
-const useStyles = makeStyles((theme) => ({
-  avatar: {
-    width: 20,
-    height: 20,
-    fontSize: '1rem',
-    cursor: 'pointer',
-  },
-  finish: {
-    background: theme.palette.success.main,
-  },
-  primary: {
-    background: theme.palette.primary.main,
-  },
-  disabled: {
-    background: theme.palette.action.disabled,
-  },
-}))
+import { forwardRef } from 'react'
 
 export interface MultiNodeHandles {
   current: number
@@ -38,7 +19,6 @@ const MultiNode: React.ForwardRefRenderFunction<MultiNodeHandles, MultiNodeProps
   { count, setCurrentCallback },
   ref
 ) => {
-  const classes = useStyles()
   const [current, setCurrent] = useState(0)
 
   // Methods exposed to the parent
@@ -60,17 +40,20 @@ const MultiNode: React.ForwardRefRenderFunction<MultiNodeHandles, MultiNodeProps
   }
 
   return (
-    <Space display="flex" alignItems="center">
+    <Space direction="row" alignItems="center">
       <Typography>{T(`newW.node.chooseChildren`)}</Typography>
       {Array(count)
         .fill(0)
         .map((_, index) => (
           <Avatar
             key={index}
-            className={clsx(
-              classes.avatar,
-              current > index ? classes.finish : current === index ? classes.primary : classes.disabled
-            )}
+            sx={{
+              width: 20,
+              height: 20,
+              fontSize: 16,
+              bgcolor: current > index ? 'success.main' : current === index ? 'primary.main' : 'action.disabled',
+              cursor: 'pointer',
+            }}
             onClick={handleSetCurrent(index)}
           >
             {index + 1}
@@ -80,4 +63,4 @@ const MultiNode: React.ForwardRefRenderFunction<MultiNodeHandles, MultiNodeProps
   )
 }
 
-export default React.forwardRef(MultiNode)
+export default forwardRef(MultiNode)

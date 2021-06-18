@@ -1,4 +1,16 @@
-import { Box, Button, Chip, Grid, MenuItem, Step, StepLabel, Stepper, Typography } from '@material-ui/core'
+import {
+  Box,
+  Button,
+  Chip,
+  Grid,
+  IconButton,
+  ListItemIcon,
+  MenuItem,
+  Step,
+  StepLabel,
+  Stepper,
+  Typography,
+} from '@material-ui/core'
 import { Form, Formik } from 'formik'
 import MultiNode, { MultiNodeHandles } from './MultiNode'
 import { SelectField, TextField } from 'components/FormField'
@@ -13,10 +25,11 @@ import { validateDuration, validateName } from 'lib/formikhelpers'
 import { Ace } from 'ace-builds'
 import Add from './Add'
 import CheckIcon from '@material-ui/icons/Check'
+import Menu from 'components-mui/Menu'
 import NewExperiment from 'components/NewExperimentNext'
 import Paper from 'components-mui/Paper'
 import PublishIcon from '@material-ui/icons/Publish'
-import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline'
+import RemoveIcon from '@material-ui/icons/Remove'
 import Space from 'components-mui/Space'
 import T from 'components/T'
 import UndoIcon from '@material-ui/icons/Undo'
@@ -24,39 +37,17 @@ import YAMLEditor from 'components/YAMLEditor'
 import _isEmpty from 'lodash.isempty'
 import _snakecase from 'lodash.snakecase'
 import api from 'api'
-import clsx from 'clsx'
 import { constructWorkflow } from 'lib/formikhelpers'
-import { makeStyles } from '@material-ui/core/styles'
+import { makeStyles } from '@material-ui/styles'
 import { useHistory } from 'react-router-dom'
 import { useIntl } from 'react-intl'
 import yaml from 'js-yaml'
 
 const useStyles = makeStyles((theme) => ({
-  stepper: {
-    padding: 0,
-  },
-  primary: {
-    color: theme.palette.primary.main,
-  },
-  success: {
-    color: theme.palette.success.main,
-  },
-  error: {
-    color: theme.palette.error.main,
-  },
-  submittedStep: {
-    borderColor: theme.palette.success.main,
-  },
-  removeSubmittedStep: {
-    borderColor: theme.palette.error.main,
-  },
-  asButton: {
-    cursor: 'pointer',
-  },
   leftSticky: {
     position: 'sticky',
     top: 0,
-    height: `calc(100vh - 56px - ${theme.spacing(12)})`,
+    height: `calc(100vh - 56px - ${theme.spacing(9)})`,
   },
   field: {
     width: 180,
@@ -90,12 +81,10 @@ const NewWorkflow = () => {
   const state = useStoreSelector((state) => state)
   const { namespaces } = state.experiments
   const { templates } = state.workflows
-  const { theme } = state.settings
   const dispatch = useStoreDispatch()
 
   const [steps, setSteps] = useState<IStep[]>([])
   const [restoreIndex, setRestoreIndex] = useState(-1)
-  const [showRemove, setShowRemove] = useState(-1)
   const [workflowBasic, setWorkflowBasic] = useState<WorkflowBasic>({
     name: '',
     namespace: '',
@@ -170,7 +159,7 @@ const NewWorkflow = () => {
       dispatch(
         setAlert({
           type: 'success',
-          message: intl.formatMessage({ id: 'confirm.updateSuccessfully' }),
+          message: T('confirm.success.update', intl) as string,
         })
       )
       resetRestore()
@@ -201,7 +190,7 @@ const NewWorkflow = () => {
     dispatch(
       setAlert({
         type: 'success',
-        message: intl.formatMessage({ id: 'confirm.updateSuccessfully' }),
+        message: T('confirm.success.update', intl) as string,
       })
     )
     resetRestore()
@@ -221,7 +210,7 @@ const NewWorkflow = () => {
       dispatch(
         setAlert({
           type: 'success',
-          message: intl.formatMessage({ id: 'confirm.updateSuccessfully' }),
+          message: T('confirm.success.update', intl) as string,
         })
       )
       resetRestore()
@@ -232,7 +221,7 @@ const NewWorkflow = () => {
     dispatch(
       setAlert({
         type: 'success',
-        message: intl.formatMessage({ id: 'confirm.deleteSuccessfully' }),
+        message: T('confirm.success.delete', intl) as string,
       })
     )
     resetRestore()
@@ -244,8 +233,8 @@ const NewWorkflow = () => {
         dispatch(
           setConfirm({
             index,
-            title: `${intl.formatMessage({ id: 'common.delete' })} ${name}`,
-            description: intl.formatMessage({ id: 'newW.node.deleteDesc' }),
+            title: `${T('common.delete', intl)} ${name}`,
+            description: T('newW.node.deleteDesc', intl) as string,
             handle: handleAction(action, index),
           })
         )
@@ -284,48 +273,34 @@ const NewWorkflow = () => {
     <>
       <Grid container spacing={9}>
         <Grid item xs={12} md={8}>
-          <Space vertical spacing={6}>
+          <Space spacing={6}>
             <Typography>{T('common.process')}</Typography>
-            <Stepper className={classes.stepper} orientation="vertical">
+            <Stepper orientation="vertical" sx={{ mt: -1, p: 0 }}>
               {steps.length > 0 &&
                 steps.map((step, index) => (
                   <Step key={step.type + index}>
-                    <StepLabel
-                      icon={
-                        <Box
-                          position="relative"
-                          display="flex"
-                          alignItems="center"
-                          onMouseEnter={() => setShowRemove(index)}
-                          onMouseLeave={() => setShowRemove(-1)}
-                        >
-                          <CheckIcon
-                            className={classes.success}
-                            style={{ visibility: showRemove === index ? 'hidden' : 'unset' }}
-                          />
-                          {showRemove === index && (
-                            <Box position="absolute" top={0} title={intl.formatMessage({ id: 'common.delete' })}>
-                              <RemoveCircleOutlineIcon
-                                className={clsx(classes.error, classes.asButton)}
-                                onClick={handleSelect(step.name, index, 'delete')}
-                              />
-                            </Box>
-                          )}
-                        </Box>
-                      }
-                    >
-                      <Paper
-                        padding={restoreIndex === index ? 4.5 : 3}
-                        className={showRemove === index ? classes.removeSubmittedStep : classes.submittedStep}
-                      >
+                    <StepLabel icon={<CheckIcon sx={{ color: 'success.main' }} />}>
+                      <Paper sx={{ p: restoreIndex === index ? 4.5 : 3, borderColor: 'success.main' }}>
                         <Box display="flex" justifyContent="space-between">
-                          <Space display="flex" alignItems="center">
+                          <Space direction="row" alignItems="center">
                             <Chip label={T(`newW.node.${step.type}`)} color="primary" size="small" />
                             <Typography component="div" variant={restoreIndex === index ? 'h6' : 'body1'}>
                               {step.name}
                             </Typography>
                           </Space>
-                          <UndoIcon className={classes.asButton} onClick={restoreExperiment(step.experiments, index)} />
+                          <Space direction="row">
+                            <IconButton size="small" onClick={restoreExperiment(step.experiments, index)}>
+                              <UndoIcon />
+                            </IconButton>
+                            <Menu>
+                              <MenuItem dense onClick={handleSelect(step.name, index, 'delete')}>
+                                <ListItemIcon>
+                                  <RemoveIcon fontSize="small" />
+                                </ListItemIcon>
+                                <Typography variant="inherit">{T('common.delete')}</Typography>
+                              </MenuItem>
+                            </Menu>
+                          </Space>
                         </Box>
                         {restoreIndex === index && (
                           <Box mt={6}>
@@ -338,10 +313,10 @@ const NewWorkflow = () => {
                                       <TextField
                                         className={classes.field}
                                         name="duration"
-                                        label={T('newE.schedule.duration')}
+                                        label={T('newE.run.duration')}
                                       />
                                     </Space>
-                                    <Space display="flex">
+                                    <Space>
                                       <MultiNode
                                         ref={multiNodeRef}
                                         count={step.experiments.length}
@@ -397,39 +372,33 @@ const NewWorkflow = () => {
           >
             {({ errors, touched }) => (
               <Form style={{ height: '100%' }}>
-                <Space display="flex" flexDirection="column" height="100%" vertical spacing={6}>
+                <Space height="100%">
+                  <Typography>{T('newW.titleBasic')}</Typography>
+                  <TextField
+                    name="name"
+                    label={T('common.name')}
+                    validate={validateName(T('newW.nameValidation') as unknown as string)}
+                    helperText={errors.name && touched.name ? errors.name : T('newW.nameHelper')}
+                    error={errors.name && touched.name ? true : false}
+                  />
+                  <SelectField name="namespace" label={T('k8s.namespace')} helperText={T('newE.basic.namespaceHelper')}>
+                    {namespaces.map((n) => (
+                      <MenuItem key={n} value={n}>
+                        {n}
+                      </MenuItem>
+                    ))}
+                  </SelectField>
+                  <TextField
+                    name="duration"
+                    label={T('newE.run.duration')}
+                    validate={validateDuration(T('newW.durationValidation') as unknown as string)}
+                    helperText={errors.duration && touched.duration ? errors.duration : T('newW.durationHelper')}
+                    error={errors.duration && touched.duration ? true : false}
+                  />
                   <Typography>{T('common.preview')}</Typography>
-                  <Box>
-                    <TextField
-                      name="name"
-                      label={T('common.name')}
-                      validate={validateName(T('newW.nameValidation') as unknown as string)}
-                      helperText={errors.name && touched.name ? errors.name : T('newW.nameHelper')}
-                      error={errors.name && touched.name ? true : false}
-                    />
-                    <SelectField
-                      name="namespace"
-                      label={T('k8s.namespace')}
-                      helperText={T('newE.basic.namespaceHelper')}
-                    >
-                      {namespaces.map((n) => (
-                        <MenuItem key={n} value={n}>
-                          {n}
-                        </MenuItem>
-                      ))}
-                    </SelectField>
-                    <TextField
-                      name="duration"
-                      label={T('newE.schedule.duration')}
-                      validate={validateDuration(T('newW.durationValidation') as unknown as string)}
-                      helperText={errors.duration && touched.duration ? errors.duration : T('newW.durationHelper')}
-                      error={errors.duration && touched.duration ? true : false}
-                    />
-                  </Box>
                   <Box flex={1}>
-                    <Paper style={{ height: '100%' }} padding={0}>
+                    <Paper sx={{ p: 0 }}>
                       <YAMLEditor
-                        theme={theme}
                         data={constructWorkflow(workflowBasic, Object.values(templates))}
                         mountEditor={setYAMLEditor}
                       />
