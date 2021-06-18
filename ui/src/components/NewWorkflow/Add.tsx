@@ -6,7 +6,7 @@ import { SelectField, Submit, TextField } from 'components/FormField'
 import { TemplateExperiment, setTemplate } from 'slices/workflows'
 import { resetNewExperiment, setExternalExperiment } from 'slices/experiments'
 import { useRef, useState } from 'react'
-import { validateDuration, validateName } from 'lib/formikhelpers'
+import { validateDeadline, validateName } from 'lib/formikhelpers'
 
 import AddCircleIcon from '@material-ui/icons/AddCircle'
 import Paper from 'components-mui/Paper'
@@ -134,13 +134,13 @@ const Add = () => {
   }
 
   const submitNoSingleNode = (_: any, { resetForm }: FormikHelpers<any>) => {
-    const { type, name, duration } = formRef.current.values
+    const { type, name, deadline } = formRef.current.values
 
     dispatch(
       setTemplate({
         type,
         name,
-        duration,
+        deadline,
         experiments,
       })
     )
@@ -184,7 +184,7 @@ const Add = () => {
     <>
       <Formik
         innerRef={formRef}
-        initialValues={{ type: 'single', num: 2, name: '', duration: '' }}
+        initialValues={{ type: 'single', num: 2, name: '', deadline: '' }}
         onSubmit={submitNoSingleNode}
         validate={onValidate}
         validateOnBlur={false}
@@ -221,20 +221,20 @@ const Add = () => {
                       <TextField
                         name="name"
                         label={T('common.name')}
-                        validate={validateName(T('newW.nameValidation') as unknown as string)}
+                        validate={validateName(T('newW.nameValidation', intl))}
                         helperText={errors.name && touched.name ? errors.name : T('newW.node.nameHelper')}
                         error={errors.name && touched.name ? true : false}
                       />
                     </Grid>
                     <Grid item xs={6}>
                       <TextField
-                        name="duration"
-                        label={T('newE.run.duration')}
-                        validate={validateDuration(T('newW.durationValidation') as unknown as string)}
+                        name="deadline"
+                        label={T('newW.node.deadline')}
+                        validate={validateDeadline(T('newW.node.deadlineValidation', intl))}
                         helperText={
-                          errors.duration && touched.duration ? errors.duration : T('newW.node.durationHelper')
+                          errors.deadline && touched.deadline ? errors.deadline : T('newW.node.deadlineHelper')
                         }
-                        error={errors.duration && touched.duration ? true : false}
+                        error={errors.deadline && touched.deadline ? true : false}
                       />
                     </Grid>
                   </Grid>

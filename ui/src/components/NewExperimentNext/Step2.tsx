@@ -47,7 +47,7 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false })
   const originalInit = useMemo(
     () =>
       inWorkflow
-        ? { ...basicData, scheduler: undefined, duration: '' }
+        ? { ...basicData, scheduler: undefined, deadline: '' }
         : inSchedule
         ? { ...basicData, ...scheduleSpecificData }
         : basicData,
@@ -110,7 +110,7 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false })
           validationSchema={
             inWorkflow
               ? schema.shape({
-                  duration: yupString().required('The duration is required'),
+                  deadline: yupString().required('The deadline is required'),
                 })
               : inSchedule
               ? schema.shape(scheduleSpecificSchema)
@@ -148,14 +148,14 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false })
                     {inWorkflow && (
                       <TextField
                         fast
-                        name="duration"
-                        label={T('newE.run.duration')}
+                        name="deadline"
+                        label={T('newW.node.deadline')}
                         helperText={
-                          (errors as any).duration && (touched as any).duration
-                            ? (errors as any).duration
-                            : T(`${inWorkflow ? 'newW.node' : 'newS.basic'}.durationHelper`)
+                          (errors as any).deadline && (touched as any).deadline
+                            ? (errors as any).deadline
+                            : T('newW.node.deadlineHelper')
                         }
-                        error={(errors as any).duration && (touched as any).duration ? true : false}
+                        error={(errors as any).deadline && (touched as any).deadline ? true : false}
                       />
                     )}
                     {inSchedule && <ScheduleSpecificFields errors={errors} touched={touched} />}

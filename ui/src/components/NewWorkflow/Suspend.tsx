@@ -1,6 +1,6 @@
 import { Form, Formik } from 'formik'
 import { Submit, TextField } from 'components/FormField'
-import { validateDuration, validateName } from 'lib/formikhelpers'
+import { validateDeadline, validateName } from 'lib/formikhelpers'
 
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
@@ -11,7 +11,7 @@ import { useStoreDispatch } from 'store'
 
 export interface SuspendValues {
   name: string
-  duration: string
+  deadline: string
 }
 
 interface SuspendProps {
@@ -22,12 +22,12 @@ interface SuspendProps {
 const Suspend: React.FC<SuspendProps> = ({ initialValues, onSubmit }) => {
   const dispatch = useStoreDispatch()
 
-  const defaultOnSubmit = ({ name, duration }: SuspendValues) => {
+  const defaultOnSubmit = ({ name, deadline }: SuspendValues) => {
     dispatch(
       setTemplate({
         type: 'suspend',
         name,
-        duration,
+        deadline,
         experiments: [],
       })
     )
@@ -37,7 +37,7 @@ const Suspend: React.FC<SuspendProps> = ({ initialValues, onSubmit }) => {
     <Paper>
       <Space>
         <PaperTop title={T('newW.suspendTitle')} />
-        <Formik initialValues={initialValues || { name: '', duration: '' }} onSubmit={onSubmit || defaultOnSubmit}>
+        <Formik initialValues={initialValues || { name: '', deadline: '' }} onSubmit={onSubmit || defaultOnSubmit}>
           {({ errors, touched }) => (
             <Form>
               <Space>
@@ -51,11 +51,11 @@ const Suspend: React.FC<SuspendProps> = ({ initialValues, onSubmit }) => {
                 />
                 <TextField
                   fast
-                  name="duration"
-                  label={T('newE.run.duration')}
-                  validate={validateDuration(T('newW.durationValidation') as unknown as string)}
-                  helperText={errors.duration && touched.duration ? errors.duration : T('newW.node.durationHelper')}
-                  error={errors.duration && touched.duration ? true : false}
+                  name="deadline"
+                  label={T('newW.node.deadline')}
+                  validate={validateDeadline(T('newW.node.deadlineValidation') as unknown as string)}
+                  helperText={errors.deadline && touched.deadline ? errors.deadline : T('newW.node.deadlineHelper')}
+                  error={errors.deadline && touched.deadline ? true : false}
                 />
               </Space>
               <Submit />

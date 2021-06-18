@@ -124,7 +124,7 @@ export default function Dashboard() {
           <Grid item xs={12}>
             <Paper>
               <PaperTop title={T('dashboard.totalStatus')} />
-              <TotalStatus position="relative" height={data.events.length > 0 ? 300 : '100%'} />
+              <TotalStatus position="relative" height={data.experiments.length > 0 ? 300 : '100%'} />
             </Paper>
           </Grid>
           <Grid item xs={12}>

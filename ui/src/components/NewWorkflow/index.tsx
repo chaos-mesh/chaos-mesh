@@ -198,13 +198,13 @@ const NewWorkflow = () => {
 
   const onSuspendRestoreSubmit =
     (stepIndex: number) =>
-    ({ name, duration }: SuspendValues) => {
+    ({ name, deadline }: SuspendValues) => {
       dispatch(
         updateTemplate({
           ...steps[stepIndex],
           index: stepIndex,
           name,
-          duration,
+          deadline,
         })
       )
       dispatch(
@@ -305,10 +305,10 @@ const NewWorkflow = () => {
                         {restoreIndex === index && (
                           <Box mt={6}>
                             {(step.type === 'serial' || step.type === 'parallel') && (
-                              <Formik initialValues={{ name: step.name, duration: step.duration }} onSubmit={() => {}}>
+                              <Formik initialValues={{ name: step.name, duration: step.deadline }} onSubmit={() => {}}>
                                 <Form>
-                                  <Box display="flex" justifyContent="space-between" alignItems="center" mb={6}>
-                                    <Space>
+                                  <Box display="flex" justifyContent="space-between" alignItems="center">
+                                    <Space direction="row">
                                       <TextField className={classes.field} name="name" label={T('common.name')} />
                                       <TextField
                                         className={classes.field}
@@ -316,7 +316,7 @@ const NewWorkflow = () => {
                                         label={T('newE.run.duration')}
                                       />
                                     </Space>
-                                    <Space>
+                                    <Space direction="row">
                                       <MultiNode
                                         ref={multiNodeRef}
                                         count={step.experiments.length}
@@ -346,7 +346,7 @@ const NewWorkflow = () => {
                               <Suspend
                                 initialValues={{
                                   name: steps[index].name,
-                                  duration: steps[index].duration!,
+                                  deadline: steps[index].deadline!,
                                 }}
                                 onSubmit={onSuspendRestoreSubmit(index)}
                               />
@@ -377,7 +377,7 @@ const NewWorkflow = () => {
                   <TextField
                     name="name"
                     label={T('common.name')}
-                    validate={validateName(T('newW.nameValidation') as unknown as string)}
+                    validate={validateName(T('newW.nameValidation', intl))}
                     helperText={errors.name && touched.name ? errors.name : T('newW.nameHelper')}
                     error={errors.name && touched.name ? true : false}
                   />
@@ -391,7 +391,7 @@ const NewWorkflow = () => {
                   <TextField
                     name="duration"
                     label={T('newE.run.duration')}
-                    validate={validateDuration(T('newW.durationValidation') as unknown as string)}
+                    validate={validateDuration(T('newW.durationValidation', intl))}
                     helperText={errors.duration && touched.duration ? errors.duration : T('newW.durationHelper')}
                     error={errors.duration && touched.duration ? true : false}
                   />
