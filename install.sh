@@ -1281,6 +1281,8 @@ spec:
         app.kubernetes.io/part-of: chaos-mesh
         app.kubernetes.io/version: v2.0.0-beta.1
         app.kubernetes.io/component: chaos-dashboard
+      annotations:
+        rollme: "install.sh"
     spec:
       serviceAccountName: chaos-controller-manager
       priorityClassName: 
