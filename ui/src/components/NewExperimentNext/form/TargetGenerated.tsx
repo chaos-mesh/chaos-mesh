@@ -1,7 +1,7 @@
 import { AutocompleteMultipleField, LabelField, SelectField, Submit, TextField } from 'components/FormField'
 import { Form, Formik, FormikErrors, FormikTouched, getIn } from 'formik'
 import { Kind, Spec } from '../data/target'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
 import AdvancedOptions from 'components/AdvancedOptions'

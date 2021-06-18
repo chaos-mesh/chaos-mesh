@@ -1,25 +1,26 @@
 import { Box, Button, Checkbox, Typography } from '@material-ui/core'
 import { Confirm, setAlert, setConfirm } from 'slices/globalStatus'
 import { FixedSizeList as RWList, ListChildComponentProps as RWListChildComponentProps } from 'react-window'
-import { useEffect, useState } from 'react'
 
 import AddIcon from '@material-ui/icons/Add'
+import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
 import CloseIcon from '@material-ui/icons/Close'
-import DeleteOutlinedIcon from '@material-ui/icons/DeleteOutlined'
 import { Experiment } from 'api/experiments.type'
-import ExperimentListItem from 'components/ExperimentListItem'
 import FilterListIcon from '@material-ui/icons/FilterList'
 import Loading from 'components-mui/Loading'
 import NotFound from 'components-mui/NotFound'
+import ObjectListItem from 'components/ObjectListItem'
 import PlaylistAddCheckIcon from '@material-ui/icons/PlaylistAddCheck'
 import Space from 'components-mui/Space'
 import T from 'components/T'
 import _groupBy from 'lodash.groupby'
 import api from 'api'
-import { styled } from '@material-ui/core/styles'
+import { styled } from '@material-ui/styles'
 import { transByKind } from 'lib/byKind'
 import { useHistory } from 'react-router-dom'
+import { useIntervalFetch } from 'lib/hooks'
 import { useIntl } from 'react-intl'
+import { useState } from 'react'
 import { useStoreDispatch } from 'store'
 
 const StyledCheckBox = styled(Checkbox)({
@@ -43,15 +44,21 @@ export default function Experiments() {
   const batchLength = Object.keys(batch).length
   const isBatchEmpty = batchLength === 0
 
-  const fetchExperiments = () => {
+  const fetchExperiments = (intervalID?: number) => {
     api.experiments
       .experiments()
-      .then(({ data }) => setExperiments(data))
+      .then(({ data }) => {
+        setExperiments(data)
+
+        if (data.every((d) => d.status === 'finished')) {
+          clearInterval(intervalID)
+        }
+      })
       .catch(console.error)
       .finally(() => setLoading(false))
   }
 
-  useEffect(fetchExperiments, [])
+  useIntervalFetch(fetchExperiments)
 
   const handleSelect = (selected: Confirm) => dispatch(setConfirm(selected))
   const onSelect = (selected: Confirm) =>
@@ -98,7 +105,7 @@ export default function Experiments() {
           dispatch(
             setAlert({
               type: 'success',
-              message: intl.formatMessage({ id: `confirm.${action}Successfully` }),
+              message: T(`confirm.success.${action}`, intl),
             })
           )
 
@@ -123,8 +130,8 @@ export default function Experiments() {
 
   const handleBatchDelete = () =>
     handleSelect({
-      title: `${intl.formatMessage({ id: 'experiments.deleteMulti' })}`,
-      description: intl.formatMessage({ id: 'experiments.deleteDesc' }),
+      title: T('experiments.deleteMulti', intl),
+      description: T('experiments.deleteDesc', intl),
       handle: handleAction('archiveMulti'),
     })
 
@@ -146,14 +153,14 @@ export default function Experiments() {
         />
       )}
       <Box flex={1}>
-        <ExperimentListItem experiment={data[index]} onSelect={onSelect} intl={intl} />
+        <ObjectListItem data={data[index]} onSelect={onSelect} />
       </Box>
     </Box>
   )
 
   return (
     <>
-      <Space mb={6}>
+      <Space direction="row" mb={6}>
         <Button variant="outlined" startIcon={<AddIcon />} onClick={() => history.push('/experiments/new')}>
           {T('newE.title')}
         </Button>
@@ -170,8 +177,13 @@ export default function Experiments() {
             <Button variant="outlined" startIcon={<PlaylistAddCheckIcon />} onClick={handleBatchSelectAll}>
               {T('common.selectAll')}
             </Button>
-            <Button variant="outlined" color="secondary" startIcon={<DeleteOutlinedIcon />} onClick={handleBatchDelete}>
-              {T('common.delete')}
+            <Button
+              variant="outlined"
+              color="secondary"
+              startIcon={<ArchiveOutlinedIcon />}
+              onClick={handleBatchDelete}
+            >
+              {T('archives.single')}
             </Button>
           </>
         )}
@@ -195,7 +207,7 @@ export default function Experiments() {
 
       {!loading && experiments.length === 0 && (
         <NotFound illustrated textAlign="center">
-          <Typography>{T('experiments.noExperimentsFound')}</Typography>
+          <Typography>{T('experiments.notFound')}</Typography>
         </NotFound>
       )}
 
