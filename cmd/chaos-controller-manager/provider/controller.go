@@ -14,6 +14,8 @@
 package provider
 
 import (
+	"math"
+
 	"github.com/go-logr/logr"
 	"go.uber.org/fx"
 
@@ -24,6 +26,7 @@ import (
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -53,6 +56,11 @@ func NewOption(logger logr.Logger) *ctrl.Options {
 		MetricsBindAddress: config.ControllerCfg.MetricsAddr,
 		LeaderElection:     config.ControllerCfg.EnableLeaderElection,
 		Port:               9443,
+		// Don't aggregate events
+		EventBroadcaster: record.NewBroadcasterWithCorrelatorOptions(record.CorrelatorOptions{
+			MaxEvents:            math.MaxInt32,
+			MaxIntervalInSeconds: 1,
+		}),
 	}
 
 	if config.ControllerCfg.ClusterScoped {
