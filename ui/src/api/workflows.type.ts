@@ -13,7 +13,7 @@ export interface Workflow {
 }
 
 interface MultiNode {
-  tasks: { name: string; template: string }[]
+  children: { name: string; template: string }[]
 }
 type SerialNode = MultiNode
 type ParallelNode = MultiNode

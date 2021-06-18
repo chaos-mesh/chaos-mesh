@@ -218,13 +218,13 @@ function scopeToYAMLJSON(scope: ExperimentScope) {
 
 export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
   const { name, namespace, duration } = basic
-  const tasks: string[] = []
+  const children: string[] = []
   const realTemplates: Record<string, any>[] = []
 
   templates
     .sort((a, b) => a.index! - b.index!)
     .forEach((t) => {
-      tasks.push(t.name)
+      children.push(t.name)
 
       switch (t.type) {
         case 'single':
@@ -268,7 +268,7 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
             name: t.name,
             templateType: 'Serial',
             deadline: t.deadline,
-            tasks: t.experiments.map((d) => d.basic.name),
+            children: t.experiments.map((d) => d.basic.name),
           })
 
           break
@@ -296,7 +296,7 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
             name: t.name,
             templateType: 'Parallel',
             deadline: t.deadline,
-            tasks: t.experiments.map((d) => d.basic.name),
+            children: t.experiments.map((d) => d.basic.name),
           })
 
           break
@@ -328,7 +328,7 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
             name: 'entry',
             templateType: 'Serial',
             duration,
-            tasks,
+            children,
           },
           ...realTemplates,
         ],

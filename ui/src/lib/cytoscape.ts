@@ -62,19 +62,19 @@ function generateWorkflowNodes(detail: WorkflowSingle) {
   const { entry, topology } = detail
   const nodeMap = new Map(topology.nodes.map((n) => [n.name, n]))
   const entryNode = topology.nodes.find((n) => n.template === entry)
-  const mainTasks = entryNode?.serial?.tasks
+  const mainChildren = entryNode?.serial?.children
 
   function toCytoscapeNode(node: Node): RecursiveNodeDefinition {
     const { name, type, state, template } = node
 
-    if (type === 'SerialNode' && node.serial!.tasks.length) {
+    if (type === 'SerialNode' && node.serial!.children.length) {
       return [
         type,
-        node.serial!.tasks.filter((d) => d.name).map((d) => toCytoscapeNode(nodeMap.get(d.name)!)),
+        node.serial!.children.filter((d) => d.name).map((d) => toCytoscapeNode(nodeMap.get(d.name)!)),
         node.name,
       ]
-    } else if (type === 'ParallelNode' && node.parallel!.tasks.length) {
-      return [type, node.parallel!.tasks.map((d) => toCytoscapeNode(nodeMap.get(d.name)!)), node.name]
+    } else if (type === 'ParallelNode' && node.parallel!.children.length) {
+      return [type, node.parallel!.children.map((d) => toCytoscapeNode(nodeMap.get(d.name)!)), node.name]
     } else {
       return {
         data: {
@@ -89,7 +89,7 @@ function generateWorkflowNodes(detail: WorkflowSingle) {
     }
   }
 
-  return mainTasks!
+  return mainChildren!
     .map((d) => nodeMap.get(d.name))
     .filter((d) => d !== undefined)
     .map((d) => toCytoscapeNode(d!))

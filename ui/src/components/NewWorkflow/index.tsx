@@ -307,8 +307,8 @@ const NewWorkflow = () => {
                             {(step.type === 'serial' || step.type === 'parallel') && (
                               <Formik initialValues={{ name: step.name, duration: step.deadline }} onSubmit={() => {}}>
                                 <Form>
-                                  <Box display="flex" justifyContent="space-between" alignItems="center" mb={6}>
-                                    <Space>
+                                  <Box display="flex" justifyContent="space-between" alignItems="center">
+                                    <Space direction="row">
                                       <TextField className={classes.field} name="name" label={T('common.name')} />
                                       <TextField
                                         className={classes.field}
@@ -316,7 +316,7 @@ const NewWorkflow = () => {
                                         label={T('newE.run.duration')}
                                       />
                                     </Space>
-                                    <Space>
+                                    <Space direction="row">
                                       <MultiNode
                                         ref={multiNodeRef}
                                         count={step.experiments.length}
