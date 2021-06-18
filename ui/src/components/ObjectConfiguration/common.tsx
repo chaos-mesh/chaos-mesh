@@ -196,79 +196,87 @@ const IO = ({ data }: any) => (
 
 export const Stress = ({ data: { stressors, stressngStressors, containerName } }: any) => (
   <>
-    <PaperTop title="CPU" />
-    {stressors.cpu.workers && (
-      <TableRow>
-        <TableCell>Workers</TableCell>
-        <TableCell>
-          <Typography variant="body2" color="textSecondary">
-            {stressors.cpu.workers}
-          </Typography>
-        </TableCell>
-      </TableRow>
+    {stressors.cpu && (
+      <>
+        <PaperTop title="CPU" />
+        {stressors.cpu.workers && (
+          <TableRow>
+            <TableCell>Workers</TableCell>
+            <TableCell>
+              <Typography variant="body2" color="textSecondary">
+                {stressors.cpu.workers}
+              </Typography>
+            </TableCell>
+          </TableRow>
+        )}
+        {stressors.cpu.load && (
+          <TableRow>
+            <TableCell>Load</TableCell>
+            <TableCell>
+              <Typography variant="body2" color="textSecondary">
+                {stressors.cpu.load}
+              </Typography>
+            </TableCell>
+          </TableRow>
+        )}
+        {stressors.cpu.options && (
+          <TableRow>
+            <TableCell>Options</TableCell>
+            <TableCell>
+              <List>
+                {objToArrBySep(stressors.cpu.options, ': ').map((d) => (
+                  <ListItem key={d}>
+                    <Typography variant="body2" color="textSecondary">
+                      {d}
+                    </Typography>
+                  </ListItem>
+                ))}
+              </List>
+            </TableCell>
+          </TableRow>
+        )}
+      </>
     )}
-    {stressors.cpu.load && (
-      <TableRow>
-        <TableCell>Load</TableCell>
-        <TableCell>
-          <Typography variant="body2" color="textSecondary">
-            {stressors.cpu.load}
-          </Typography>
-        </TableCell>
-      </TableRow>
-    )}
-    {stressors.cpu.options && (
-      <TableRow>
-        <TableCell>Options</TableCell>
-        <TableCell>
-          <List>
-            {objToArrBySep(stressors.cpu.options, ': ').map((d) => (
-              <ListItem key={d}>
-                <Typography variant="body2" color="textSecondary">
-                  {d}
-                </Typography>
-              </ListItem>
-            ))}
-          </List>
-        </TableCell>
-      </TableRow>
-    )}
-    <PaperTop title="Memory" />
-    {stressors.memory.workers && (
-      <TableRow>
-        <TableCell>Workers</TableCell>
-        <TableCell>
-          <Typography variant="body2" color="textSecondary">
-            {stressors.memory.workers}
-          </Typography>
-        </TableCell>
-      </TableRow>
-    )}
-    {stressors.memory.size && (
-      <TableRow>
-        <TableCell>Size</TableCell>
-        <TableCell>
-          <Typography variant="body2" color="textSecondary">
-            {stressors.memory.size}
-          </Typography>
-        </TableCell>
-      </TableRow>
-    )}
-    {stressors.memory.options && (
-      <TableRow>
-        <TableCell>Options</TableCell>
-        <TableCell>
-          <List>
-            {objToArrBySep(stressors.memory.options, ': ').map((d) => (
-              <ListItem key={d}>
-                <Typography variant="body2" color="textSecondary">
-                  {d}
-                </Typography>
-              </ListItem>
-            ))}
-          </List>
-        </TableCell>
-      </TableRow>
+    {stressors.memory && (
+      <>
+        <PaperTop title="Memory" />
+        {stressors.memory.workers && (
+          <TableRow>
+            <TableCell>Workers</TableCell>
+            <TableCell>
+              <Typography variant="body2" color="textSecondary">
+                {stressors.memory.workers}
+              </Typography>
+            </TableCell>
+          </TableRow>
+        )}
+        {stressors.memory.size && (
+          <TableRow>
+            <TableCell>Size</TableCell>
+            <TableCell>
+              <Typography variant="body2" color="textSecondary">
+                {stressors.memory.size}
+              </Typography>
+            </TableCell>
+          </TableRow>
+        )}
+        {stressors.memory.options && (
+          <TableRow>
+            <TableCell>Options</TableCell>
+            <TableCell>
+              <List>
+                {objToArrBySep(stressors.memory.options, ': ').map((d) => (
+                  <ListItem key={d}>
+                    <Typography variant="body2" color="textSecondary">
+                      {d}
+                    </Typography>
+                  </ListItem>
+                ))}
+              </List>
+            </TableCell>
+          </TableRow>
+        )}
+      </>
     )}
     {stressors.stressngStressors && (
       <TableRow>
