@@ -85,7 +85,7 @@ type RawIptables struct {
 	// The name of related ipset
 	// +optional
 	// +nullable
-	IPSets []string `json:"ipsets"`
+	IPSets []string `json:"ipsets,omitempty"`
 
 	// The block direction of this iptables rule
 	Direction ChainDirection `json:"direction"`
