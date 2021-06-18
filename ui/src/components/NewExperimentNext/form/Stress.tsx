@@ -1,15 +1,12 @@
-import { Box, Button } from '@material-ui/core'
 import { Form, Formik, getIn } from 'formik'
-import { LabelField, TextField } from 'components/FormField'
-import React, { useEffect, useState } from 'react'
+import { LabelField, Submit, TextField } from 'components/FormField'
+import { useEffect, useState } from 'react'
 
 import AdvancedOptions from 'components/AdvancedOptions'
-import PublishIcon from '@material-ui/icons/Publish'
-import { RootState } from 'store'
-import T from 'components/T'
+import Space from 'components-mui/Space'
 import { Typography } from '@material-ui/core'
 import targetData from '../data/target'
-import { useSelector } from 'react-redux'
+import { useStoreSelector } from 'store'
 
 const validate = (values: any) => {
   let errors = {}
@@ -39,7 +36,7 @@ interface StressProps {
 }
 
 const Stress: React.FC<StressProps> = ({ onSubmit }) => {
-  const { target } = useSelector((state: RootState) => state.experiments)
+  const { target } = useStoreSelector((state) => state.experiments)
 
   const initialValues = targetData.StressChaos.spec!
 
@@ -57,39 +54,43 @@ const Stress: React.FC<StressProps> = ({ onSubmit }) => {
     <Formik enableReinitialize initialValues={init} onSubmit={onSubmit} validate={validate}>
       {({ errors }) => (
         <Form>
-          <Typography gutterBottom>CPU</Typography>
-          <TextField
-            type="number"
-            name="stressors.cpu.workers"
-            label="Workers"
-            helperText={getIn(errors, 'stressors.cpu.workers') ? getIn(errors, 'stressors.cpu.workers') : 'CPU workers'}
-            error={getIn(errors, 'stressors.cpu.workers') ? true : false}
-            inputProps={{ min: 0 }}
-          />
-          <TextField type="number" name="stressors.cpu.load" label="Load" helperText="CPU load" />
-          <LabelField
-            name="stressors.cpu.options"
-            label="Options of CPU stressors"
-            helperText="Type string and end with a space to generate the stress-ng options"
-          />
+          <Space>
+            <Typography>CPU</Typography>
+            <TextField
+              type="number"
+              name="stressors.cpu.workers"
+              label="Workers"
+              helperText={
+                getIn(errors, 'stressors.cpu.workers') ? getIn(errors, 'stressors.cpu.workers') : 'CPU workers'
+              }
+              error={getIn(errors, 'stressors.cpu.workers') ? true : false}
+              inputProps={{ min: 0 }}
+            />
+            <TextField type="number" name="stressors.cpu.load" label="Load" helperText="CPU load" />
+            <LabelField
+              name="stressors.cpu.options"
+              label="Options of CPU stressors"
+              helperText="Type string and end with a space to generate the stress-ng options"
+            />
 
-          <Typography gutterBottom>Memory</Typography>
-          <TextField
-            type="number"
-            name="stressors.memory.workers"
-            label="Workers"
-            helperText={
-              getIn(errors, 'stressors.memory.workers') ? getIn(errors, 'stressors.memory.workers') : 'Memory workers'
-            }
-            error={getIn(errors, 'stressors.memory.workers') ? true : false}
-            inputProps={{ min: 0 }}
-          />
-          <TextField name="stressors.memory.size" label="Size" helperText="Memory size" />
-          <LabelField
-            name="stressors.memory.options"
-            label="Options of Memory stressors"
-            helperText="Type string and end with a space to generate the stress-ng options"
-          />
+            <Typography>Memory</Typography>
+            <TextField
+              type="number"
+              name="stressors.memory.workers"
+              label="Workers"
+              helperText={
+                getIn(errors, 'stressors.memory.workers') ? getIn(errors, 'stressors.memory.workers') : 'Memory workers'
+              }
+              error={getIn(errors, 'stressors.memory.workers') ? true : false}
+              inputProps={{ min: 0 }}
+            />
+            <TextField name="stressors.memory.size" label="Size" helperText="Memory size" />
+            <LabelField
+              name="stressors.memory.options"
+              label="Options of Memory stressors"
+              helperText="Type string and end with a space to generate the stress-ng options"
+            />
+          </Space>
 
           <AdvancedOptions>
             <TextField
@@ -104,11 +105,7 @@ const Stress: React.FC<StressProps> = ({ onSubmit }) => {
             />
           </AdvancedOptions>
 
-          <Box mt={6} textAlign="right">
-            <Button type="submit" variant="contained" color="primary" startIcon={<PublishIcon />}>
-              {T('common.submit')}
-            </Button>
-          </Box>
+          <Submit />
         </Form>
       )}
     </Formik>

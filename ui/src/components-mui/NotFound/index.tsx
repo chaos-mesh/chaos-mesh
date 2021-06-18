@@ -2,7 +2,7 @@ import { Box, BoxProps } from '@material-ui/core'
 
 import EmptyStreet from 'images/assets/undraw_empty_street.svg'
 import EmptyStreetDark from 'images/assets/undraw_empty_street-dark.svg'
-import { styled } from '@material-ui/core/styles'
+import { styled } from '@material-ui/styles'
 import { useStoreSelector } from 'store'
 
 const StyledBox = styled(Box)({

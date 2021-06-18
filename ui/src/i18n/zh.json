@@ -1,27 +1,36 @@
 {
   "dashboard": {
     "title": "仪表盘",
-    "welcome": "欢迎来到 Chaos Mesh Dashboard",
-    "welcomeDesc": "😎 不知道如何使用？点击下面的按钮开始教程。",
     "tutorial": {
-      "step1": "仪表盘是对 Chaos Mesh 的概览，在这里你可以观察到所有实验的运行状态。",
-      "step2": "实验页面管理着所有的实验，在这里你可以对实验进行多种操作（暂停，归档，更新等）。",
-      "step3": "事件页面展示了所有实验产生的事件。",
-      "step4": "归档页面展示了所有已归档的实验。",
-      "step5": "你可以在这里开始你的第一个实验。",
-      "step6": "搜索提供了多种语法来帮助你快速地定位实验或事件。你可以在创建实验后尝试它。",
-      "step7": "在这里通过选择不同的命名空间来浏览各自的实验，事件及归档。",
-      "step8": "预定义可以存储自定义的实验，方便未来快速执行。",
-      "step9": "🎉 恭喜你完成了所有的教程步骤！点击空白处即可退出。"
+      "title": "教程",
+      "desc": "📖 快速浏览 Chaos Mesh Dashboard 的各项功能",
+      "steps": {
+        "dashboard": "仪表盘是对 Chaos Mesh 的概览，这里你可以观察到所有实验的运行状态。",
+        "workflows": "工作流页面管理着所有的工作流。这里允许你编排多个实验来模拟更加真实的故障。",
+        "schedules": "计划页面管理着所有的计划。这里允许你周期性地运行一个实验。",
+        "experiments": "实验页面管理着所有的实验，这里你可以对实验进行多种操作（暂停，更新，归档等）。",
+        "events": "事件页面展示了所有产生的事件。",
+        "archives": "归档页面展示了所有已归档的工作流，计划和实验。",
+        "newW": "你可以在这里开始你的第一个工作流。",
+        "newS": "你可以在这里开始你的第一个计划。",
+        "newE": "你可以在这里开始你的第一个实验。",
+        "search": "搜索提供了多种语法来帮助你快速地定位工作流，计划和实验。",
+        "namespace": "通过选择不同的命名空间来浏览各自的对象。",
+        "predefined": "预定义可以存储自定义的计划和实验，方便快速执行。",
+        "end": "🎉 恭喜你完成了所有的教程步骤！点击空白处即可退出。"
+      }
     },
-    "veteran": "已经是熟手了",
-    "veteranDesc": "🧨 从一个新的实验开始！创建成功后，你可以返回仪表盘以观察其状态。",
-    "totalExperiments": "当前实验",
-    "totalState": "当前状态",
+    "newbie": "新手",
+    "newbieDesc": "⛑ 从一个简单的实验开始快速注入一个故障",
+    "startAWorkflow": "从工作流开始",
+    "startAWorkflowDesc": "工作流允许你编排多个实验来模拟更加真实的故障",
+    "startASchedule": "从计划开始",
+    "startAScheduleDesc": "计划允许你周期性地运行一个实验",
+    "totalStatus": "当前实验状态",
     "predefined": "预定义",
-    "predefinedDesc": "📦 在这里存储自定义的实验以快速执行。",
+    "predefinedDesc": "📦 在这里存储自定义的实验以快速执行",
     "noPredefinedFound": "未发现预定义",
-    "recent": "最近"
+    "recent": "最近事件"
   },
   "newE": {
     "title": "新的实验",
@@ -31,9 +40,11 @@
       "basic": "基本信息",
       "scope": "范围",
       "scopeDisabled": "（无需填写）",
-      "schedule": "计划"
+      "run": "运行"
     },
     "loadFrom": "加载自",
+    "byYAML": "通过 YAML",
+    "byYAMLDesc": "通过填写或上传 YAML 的方式创建实验或计划",
     "basic": {
       "nameHelper": "实验的名称",
       "namespaceHelper": "选择命名空间"
@@ -43,9 +54,9 @@
       "modeHelper": "选择实验模式",
       "modeValue": "模式值",
       "modeValueHelper": "请填写模式值",
-      "affectedPods": "受到实验作用的 Pod",
-      "affectedPodsPreview": "预览将要受到实验作用的 Pod",
-      "affectedPodsPreviewHelper": "通过勾选 Pod 来进一步限制实验的范围",
+      "targetPods": "目标 Pod",
+      "targetPodsPreview": "预览目标 Pod",
+      "targetPodsPreviewHelper": "通过勾选 Pod 来进一步限制范围",
       "noPodsFound": "未发现 Pod"
     },
     "target": {
@@ -84,11 +95,8 @@
         "title": "GCP 故障"
       }
     },
-    "schedule": {
-      "tooltip": "Chaos Mesh 使用 {cronv3} 来定义计划。参考其文档以获取更详细的信息。",
+    "run": {
       "continuous": "持续运行",
-      "mustBeScheduled": "所选实验必须按计划执行",
-      "cronHelper": "使用 {crontabguru} 来帮助生成 cron job 并确认它将在何时运行",
       "duration": "持续时间",
       "durationHelper": "实验的持续时间"
     },
@@ -97,32 +105,38 @@
   "experiments": {
     "title": "实验",
     "single": "实验",
-    "state": {
-      "running": "运行中",
-      "paused": "暂停",
-      "failed": "失败",
-      "waiting": "等待中",
-      "finished": "完成"
-    },
-    "noExperimentsFound": "未发现实验",
+    "notFound": "未发现实验",
     "deleteMulti": "归档所选实验",
     "deleteDesc": "你仍然可以在归档中找到此实验",
     "pauseDesc": "你可以在同一位置重启这个实验",
     "startDesc": "此操作将立即生效"
   },
-  "workflows": {
-    "title": "工作流",
-    "noWorkflowsFound": "未发现工作流",
-    "deleteDesc": "此工作流将被永久删除"
+  "newS": {
+    "title": "新的计划",
+    "titleStep2": "填写计划信息",
+    "basic": {
+      "nameHelper": "计划的名称",
+      "scheduleHelper": "定义计划",
+      "startingDeadlineSeconds": "实验过期时间",
+      "startingDeadlineSecondsHelper": "设置以忽略长时间未运行的实验",
+      "concurrencyPolicy": "并发策略",
+      "concurrencyPolicyHelper": "是否允许实验同时运行",
+      "forbid": "禁止",
+      "allow": "允许",
+      "historyLimit": "历史限制",
+      "historyLimitHelper": "最大实验记录数"
+    }
   },
-  "workflow": {
-    "entry": "入口",
-    "time": "时间",
-    "state": "状态",
-    "topology": "拓扑"
+  "schedules": {
+    "title": "计划",
+    "single": "计划",
+    "notFound": "未发现计划",
+    "deleteMulti": "归档所选计划",
+    "deleteDesc": "你仍然可以在归档中找到此计划"
   },
   "newW": {
     "title": "新的工作流",
+    "titleBasic": "工作流信息",
     "node": {
       "choose": "选择任务类型",
       "single": "单一",
@@ -150,31 +164,38 @@
       "m1": "请首先完成当前任务的创建"
     }
   },
+  "workflows": {
+    "title": "工作流",
+    "notFound": "未发现工作流",
+    "deleteDesc": "你仍然可以在归档中找到此工作流"
+  },
+  "workflow": {
+    "entry": "入口",
+    "time": "时间",
+    "status": {
+      "Succeed": "完成"
+    },
+    "topology": "拓扑"
+  },
   "events": {
     "title": "事件",
-    "noEventsFound": "未发现事件",
+    "notFound": "未发现事件",
     "eventsPerPage": "每页事件数",
     "event": {
-      "experiment": "实验",
       "uuid": "UUID",
       "namespace": "命名空间",
+      "name": "名称",
       "kind": "类别",
       "started": "开始时间",
-      "ended": "结束时间",
-      "pod": {
-        "action": "行为",
-        "message": "信息"
-      }
+      "message": "信息"
     }
   },
   "archives": {
     "title": "归档",
     "single": "归档",
-    "noArchivesFound": "未发现归档",
+    "notFound": "未发现归档",
     "deleteMulti": "删除所选归档",
-    "deleteDesc": "归档将被永久删除",
-    "numberOfRuns": "运行次数",
-    "numberOfAffectedPods": "受到实验作用的 Pod 数目"
+    "deleteDesc": "归档将被永久删除"
   },
   "settings": {
     "title": "设置",
@@ -226,11 +247,9 @@
   "search": {
     "placeholder": "搜索",
     "tip": {
-      "title": "使用以下语法来快速定位事件，实验和归档：",
-      "namespace": "namespace:default xxx 将搜索命名空间为 default 的事件，实验和归档",
-      "kind": "kind:NetworkChaos xxx 将搜索类型为 NetworkChaos 的事件，实验和归档",
-      "pod": "pod:echoserver 将通过 Pod 搜索事件",
-      "ip": "ip:172.17.0.6 将通过 Pod IP 搜索事件"
+      "title": "使用以下语法来快速定位工作流，计划，实验和归档：",
+      "namespace": "namespace:default xxx 将搜索命名空间为 default 的工作流，计划，实验和归档",
+      "kind": "kind:NetworkChaos xxx 将搜索类型为 NetworkChaos 的计划，实验和归档"
     },
     "result": {
       "acquiring": "获取中...",
@@ -248,13 +267,13 @@
     "confirm": "确认",
     "copied": "已复制！",
     "copy": "复制",
+    "definition": "定义",
     "delete": "删除",
     "detail": "详情",
     "doc": "文档",
     "download": "下载",
     "ip": "IP 地址",
     "isKVHelperText": "键入 key:value 并以空格结尾来创建一个键值对",
-    "meta": "元信息",
     "multiOptions": "支持多选",
     "name": "名称",
     "noOptions": "无选项",
@@ -263,6 +282,7 @@
     "pause": "暂停",
     "preview": "预览",
     "process": "流程",
+    "seconds": "秒",
     "selectAll": "全选",
     "start": "启动",
     "status": "状态",
@@ -279,15 +299,25 @@
   "table": {
     "created": "创建于"
   },
+  "status": {
+    "injecting": "注入中",
+    "running": "运行中",
+    "finished": "完成",
+    "paused": "暂停",
+    "failed": "失败",
+    "unknown": "未知"
+  },
   "confirm": {
-    "archiveSuccessfully": "归档成功",
-    "createSuccessfully": "创建成功",
-    "deleteSuccessfully": "删除成功",
-    "loadSuccessfully": "加载成功",
-    "pauseSuccessfully": "暂停成功",
-    "updateSuccessfully": "更新成功",
-    "startSuccessfully": "启动成功",
-    "submitSuccessfully": "提交成功"
+    "success": {
+      "archive": "归档成功",
+      "create": "创建成功",
+      "delete": "删除成功",
+      "load": "加载成功",
+      "pause": "暂停成功",
+      "update": "更新成功",
+      "start": "启动成功",
+      "submit": "提交成功"
+    }
   },
   "k8s": {
     "namespace": "命名空间",

@@ -1,8 +1,6 @@
-import { Chip, TextField, TextFieldProps } from '@material-ui/core'
+import { Autocomplete, Chip, TextField, TextFieldProps } from '@material-ui/core'
 import { getIn, useFormikContext } from 'formik'
 
-import Autocomplete from '@material-ui/lab/Autocomplete'
-import React from 'react'
 import T from 'components/T'
 
 interface AutocompleteMultipleFieldProps {
@@ -49,7 +47,7 @@ const AutocompleteMultipleField: React.FC<AutocompleteMultipleFieldProps & TextF
           />
         ))
       }
-      renderInput={(params) => <TextField {...params} {...props} variant="outlined" margin="dense" fullWidth />}
+      renderInput={(params) => <TextField {...params} {...props} size="small" fullWidth />}
     />
   )
 }
