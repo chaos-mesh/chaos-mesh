@@ -15,11 +15,13 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -29,13 +31,18 @@ import (
 )
 
 type DeadlineReconciler struct {
+	*ChildNodesFetcher
 	kubeClient    client.Client
 	eventRecorder recorder.ChaosRecorder
 	logger        logr.Logger
 }
 
 func NewDeadlineReconciler(kubeClient client.Client, eventRecorder recorder.ChaosRecorder, logger logr.Logger) *DeadlineReconciler {
-	return &DeadlineReconciler{kubeClient: kubeClient, eventRecorder: eventRecorder, logger: logger}
+	return &DeadlineReconciler{
+		ChildNodesFetcher: NewChildNodesFetcher(kubeClient, logger),
+		kubeClient:        kubeClient,
+		eventRecorder:     eventRecorder,
+		logger:            logger}
 }
 
 func (it *DeadlineReconciler) Reconcile(request reconcile.Request) (reconcile.Result, error) {
@@ -60,6 +67,11 @@ func (it *DeadlineReconciler) Reconcile(request reconcile.Request) (reconcile.Re
 			err := it.kubeClient.Get(ctx, request.NamespacedName, &nodeNeedUpdate)
 			if err != nil {
 				return err
+			}
+
+			if ConditionEqualsTo(nodeNeedUpdate.Status, v1alpha1.ConditionDeadlineExceed, corev1.ConditionTrue) {
+				// no need to update
+				return nil
 			}
 
 			var reason string
@@ -93,6 +105,12 @@ func (it *DeadlineReconciler) Reconcile(request reconcile.Request) (reconcile.Re
 			if err != nil {
 				return err
 			}
+
+			if ConditionEqualsTo(nodeNeedUpdate.Status, v1alpha1.ConditionDeadlineExceed, corev1.ConditionFalse) {
+				// no need to update
+				return nil
+			}
+
 			SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
 				Type:   v1alpha1.ConditionDeadlineExceed,
 				Status: corev1.ConditionFalse,
@@ -112,5 +130,56 @@ func (it *DeadlineReconciler) Reconcile(request reconcile.Request) (reconcile.Re
 		}, nil
 	}
 
+	if ConditionEqualsTo(node.Status, v1alpha1.ConditionDeadlineExceed, corev1.ConditionTrue) {
+		// if this node deadline is exceed, try propagating to children node
+		return reconcile.Result{}, it.propagateDeadlineToChildren(ctx, &node)
+	}
+
 	return reconcile.Result{}, nil
+}
+
+func (it *DeadlineReconciler) propagateDeadlineToChildren(ctx context.Context, parent *v1alpha1.WorkflowNode) error {
+	switch parent.Spec.Type {
+	case v1alpha1.TypeSerial, v1alpha1.TypeParallel, v1alpha1.TypeTask:
+		activeChildNodes, _, err := it.ChildNodesFetcher.fetchChildNodes(ctx, *parent)
+		if err != nil {
+			return err
+		}
+		for _, childNode := range activeChildNodes {
+			childNode := childNode
+
+			if WorkflowNodeFinished(childNode.Status) {
+				it.logger.V(4).Info("child node already finished, skip for propagate deadline", "node", fmt.Sprintf("%s/%s", childNode.Namespace, childNode.Name))
+				continue
+			}
+
+			err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+				nodeNeedUpdate := v1alpha1.WorkflowNode{}
+				err := it.kubeClient.Get(ctx, types.NamespacedName{
+					Namespace: childNode.Namespace,
+					Name:      childNode.Name,
+				}, &nodeNeedUpdate)
+				if err != nil {
+					return err
+				}
+				SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
+					Type:   v1alpha1.ConditionDeadlineExceed,
+					Status: corev1.ConditionTrue,
+					Reason: v1alpha1.ParentNodeDeadlineExceed,
+				})
+				return it.kubeClient.Status().Update(ctx, &nodeNeedUpdate)
+			})
+			if err != nil {
+				return err
+			}
+			it.logger.Info("propagate deadline for child node",
+				"child node", fmt.Sprintf("%s/%s", childNode.Namespace, childNode.Name),
+				"parent node", fmt.Sprintf("%s/%s", parent.Namespace, parent.Name),
+			)
+		}
+		return nil
+	default:
+		it.logger.V(4).Info("no need to propagate with this type of workflow node", "type", parent.Spec.Type)
+		return nil
+	}
 }

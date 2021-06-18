@@ -343,7 +343,7 @@ func Test_convertWorkflowNode(t *testing.T) {
 						TemplateName: "fake-serial-node",
 						WorkflowName: "fake-workflow-0",
 						Type:         v1alpha1.TypeSerial,
-						Tasks:        []string{"child-0", "child-1"},
+						Children:     []string{"child-0", "child-1"},
 					},
 					Status: v1alpha1.WorkflowNodeStatus{},
 				},
@@ -352,7 +352,7 @@ func Test_convertWorkflowNode(t *testing.T) {
 				Name: "fake-serial-node-0",
 				Type: SerialNode,
 				Serial: &NodeSerial{
-					Tasks: []NodeNameWithTemplate{
+					Children: []NodeNameWithTemplate{
 						{Name: "", Template: "child-0"},
 						{Name: "", Template: "child-1"},
 					},
@@ -375,7 +375,7 @@ func Test_convertWorkflowNode(t *testing.T) {
 						TemplateName: "parallel-node",
 						WorkflowName: "another-fake-workflow",
 						Type:         v1alpha1.TypeParallel,
-						Tasks:        []string{"child-1", "child-0"},
+						Children:     []string{"child-1", "child-0"},
 					},
 					Status: v1alpha1.WorkflowNodeStatus{},
 				},
@@ -385,7 +385,7 @@ func Test_convertWorkflowNode(t *testing.T) {
 				Type:   ParallelNode,
 				Serial: nil,
 				Parallel: &NodeParallel{
-					Tasks: []NodeNameWithTemplate{
+					Children: []NodeNameWithTemplate{
 						{Name: "", Template: "child-1"},
 						{Name: "", Template: "child-0"},
 					},
@@ -447,7 +447,7 @@ func Test_convertWorkflowNode(t *testing.T) {
 						TemplateName: "the-entry",
 						WorkflowName: "fake-workflow-0",
 						Type:         v1alpha1.TypeSerial,
-						Tasks:        []string{"unimportant-task-0"},
+						Children:     []string{"unimportant-task-0"},
 					},
 					Status: v1alpha1.WorkflowNodeStatus{
 						Conditions: []v1alpha1.WorkflowNodeCondition{
@@ -465,7 +465,7 @@ func Test_convertWorkflowNode(t *testing.T) {
 				Type:  SerialNode,
 				State: NodeSucceed,
 				Serial: &NodeSerial{
-					Tasks: []NodeNameWithTemplate{
+					Children: []NodeNameWithTemplate{
 						{Name: "", Template: "unimportant-task-0"},
 					},
 				},
@@ -518,7 +518,7 @@ func Test_convertWorkflowNode(t *testing.T) {
 						TemplateName: "the-entry",
 						WorkflowName: "fake-workflow-0",
 						Type:         v1alpha1.TypeSerial,
-						Tasks:        []string{"unimportant-task-0"},
+						Children:     []string{"unimportant-task-0"},
 					},
 					Status: v1alpha1.WorkflowNodeStatus{
 						Conditions: []v1alpha1.WorkflowNodeCondition{
@@ -536,7 +536,7 @@ func Test_convertWorkflowNode(t *testing.T) {
 				Type:  SerialNode,
 				State: NodeSucceed,
 				Serial: &NodeSerial{
-					Tasks: []NodeNameWithTemplate{
+					Children: []NodeNameWithTemplate{
 						{Name: "", Template: "unimportant-task-0"},
 					},
 				},
@@ -562,8 +562,8 @@ func Test_convertWorkflowNode(t *testing.T) {
 
 func Test_composeTaskAndNodes(t *testing.T) {
 	type args struct {
-		tasks []string
-		nodes []string
+		children []string
+		nodes    []string
 	}
 	tests := []struct {
 		name string
@@ -573,8 +573,8 @@ func Test_composeTaskAndNodes(t *testing.T) {
 		{
 			name: "ordered with serial",
 			args: args{
-				tasks: []string{"node-0", "node-1", "node-0", "node-2", "node-3"},
-				nodes: []string{"node-0-instance", "node-1-instance", "node-0-another_instance"},
+				children: []string{"node-0", "node-1", "node-0", "node-2", "node-3"},
+				nodes:    []string{"node-0-instance", "node-1-instance", "node-0-another_instance"},
 			},
 			want: []NodeNameWithTemplate{
 				{
@@ -598,7 +598,7 @@ func Test_composeTaskAndNodes(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := composeSerialTaskAndNodes(tt.args.tasks, tt.args.nodes); !reflect.DeepEqual(got, tt.want) {
+			if got := composeSerialTaskAndNodes(tt.args.children, tt.args.nodes); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("composeSerialTaskAndNodes() = %v, want %v", got, tt.want)
 			}
 		})
@@ -607,8 +607,8 @@ func Test_composeTaskAndNodes(t *testing.T) {
 
 func Test_composeParallelTaskAndNodes(t *testing.T) {
 	type args struct {
-		tasks []string
-		nodes []string
+		children []string
+		nodes    []string
 	}
 	tests := []struct {
 		name string
@@ -618,8 +618,8 @@ func Test_composeParallelTaskAndNodes(t *testing.T) {
 		{
 			name: "parallel",
 			args: args{
-				tasks: []string{"node-a", "node-b", "node-a", "node-c", "node-d"},
-				nodes: []string{"node-a-instance", "node-a-another_instance", "node-d-instance"},
+				children: []string{"node-a", "node-b", "node-a", "node-c", "node-d"},
+				nodes:    []string{"node-a-instance", "node-a-another_instance", "node-d-instance"},
 			},
 			want: []NodeNameWithTemplate{
 				{
@@ -643,7 +643,7 @@ func Test_composeParallelTaskAndNodes(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := composeParallelTaskAndNodes(tt.args.tasks, tt.args.nodes); !reflect.DeepEqual(got, tt.want) {
+			if got := composeParallelTaskAndNodes(tt.args.children, tt.args.nodes); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("composeParallelTaskAndNodes() = %v, want %v", got, tt.want)
 			}
 		})
