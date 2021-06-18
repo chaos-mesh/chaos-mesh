@@ -15,26 +15,12 @@ import Space from 'components-mui/Space'
 import Suspend from './Suspend'
 import T from 'components/T'
 import _snakecase from 'lodash.snakecase'
-import { makeStyles } from '@material-ui/core/styles'
+import { makeStyles } from '@material-ui/styles'
 import { setAlert } from 'slices/globalStatus'
 import { useIntl } from 'react-intl'
 import { useStoreDispatch } from 'store'
 
 const useStyles = makeStyles((theme) => ({
-  fields: {
-    display: 'flex',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    [theme.breakpoints.down('xs')]: {
-      justifyContent: 'unset',
-      '& > *': {
-        marginBottom: theme.spacing(3),
-        '&:last-child': {
-          marginBottom: 0,
-        },
-      },
-    },
-  },
   field: {
     width: 180,
     marginTop: 0,
@@ -135,7 +121,7 @@ const Add = () => {
         dispatch(
           setAlert({
             type: 'success',
-            message: intl.formatMessage({ id: 'confirm.updateSuccessfully' }),
+            message: T('confirm.success.update', intl),
           })
         )
       } else {
@@ -143,7 +129,7 @@ const Add = () => {
       }
     }
 
-    newERef.current?.setShowNewPanel('existing')
+    newERef.current?.setPanel('existing')
     dispatch(resetNewExperiment())
   }
 
@@ -168,7 +154,7 @@ const Add = () => {
       dispatch(
         setAlert({
           type: 'warning',
-          message: intl.formatMessage({ id: 'newW.messages.m1' }),
+          message: T('newW.messages.m1', intl),
         })
       )
 
@@ -188,7 +174,7 @@ const Add = () => {
         })
       )
 
-      newERef.current?.setShowNewPanel('initial')
+      newERef.current?.setPanel('initial')
     }
 
     return true
@@ -206,7 +192,7 @@ const Add = () => {
         {({ values, errors, touched }) => (
           <Form>
             <StepLabel icon={<AddCircleIcon color="primary" />}>
-              <Space className={classes.fields}>
+              <Space direction="row">
                 <SelectField className={classes.field} name="type" label={T('newW.node.choose')}>
                   {types.map((d) => (
                     <MenuItem key={d} value={d}>
@@ -227,11 +213,11 @@ const Add = () => {
             </StepLabel>
 
             {showNum && (
-              <Box mt={6} ml={8}>
+              <Box my={3} ml={8}>
                 <Paper>
-                  <PaperTop title={T(`newW.${values.type}Title`)} />
-                  <Grid container spacing={6}>
-                    <Grid item xs={12} md={6}>
+                  <PaperTop title={T(`newW.${values.type}Title`)} boxProps={{ mb: 3 }} />
+                  <Grid container spacing={3}>
+                    <Grid item xs={6}>
                       <TextField
                         name="name"
                         label={T('common.name')}
@@ -240,10 +226,10 @@ const Add = () => {
                         error={errors.name && touched.name ? true : false}
                       />
                     </Grid>
-                    <Grid item xs={12} md={6}>
+                    <Grid item xs={6}>
                       <TextField
                         name="duration"
-                        label={T('newE.schedule.duration')}
+                        label={T('newE.run.duration')}
                         validate={validateDuration(T('newW.durationValidation') as unknown as string)}
                         helperText={
                           errors.duration && touched.duration ? errors.duration : T('newW.node.durationHelper')
@@ -252,7 +238,7 @@ const Add = () => {
                       />
                     </Grid>
                   </Grid>
-                  <Box display="flex" justifyContent="space-between" alignItems="center">
+                  <Box display="flex" justifyContent="space-between" alignItems="center" mt={6}>
                     <MultiNode ref={multiNodeRef} count={num} setCurrentCallback={setCurrentCallback} />
                     <Submit mt={0} disabled={experiments.length !== num} />
                   </Box>
@@ -262,11 +248,15 @@ const Add = () => {
           </Form>
         )}
       </Formik>
-      <Box mt={6} ml={8}>
-        <Box style={{ display: otherTypes ? 'none' : 'initial' }}>
+      <Box ml={8}>
+        <Box display={otherTypes ? 'none' : 'initial'}>
           <NewExperimentNext ref={newERef} initPanel="existing" onSubmit={onSubmit} inWorkflow={true} />
         </Box>
-        {otherTypes && <Suspend />}
+        {otherTypes && (
+          <Box mt={3}>
+            <Suspend />
+          </Box>
+        )}
       </Box>
     </>
   )

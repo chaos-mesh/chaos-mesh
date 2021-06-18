@@ -11,7 +11,7 @@ export interface Alert {
 
 export interface Confirm {
   title: string
-  description: string
+  description?: string
   handle?: () => void
   [key: string]: any
 }
@@ -93,15 +93,7 @@ const globalStatusSlice = createSlice({
   },
 })
 
-export const {
-  setAlert,
-  setAlertOpen,
-  setConfirm,
-  setConfirmOpen,
-  setNameSpace,
-  setConfig,
-  setTokens,
-  setTokenName,
-} = globalStatusSlice.actions
+export const { setAlert, setAlertOpen, setConfirm, setConfirmOpen, setNameSpace, setConfig, setTokens, setTokenName } =
+  globalStatusSlice.actions
 
 export default globalStatusSlice.reducer

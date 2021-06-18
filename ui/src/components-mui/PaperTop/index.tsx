@@ -1,41 +1,25 @@
-import { Box, Typography } from '@material-ui/core'
-
-import React from 'react'
-import { makeStyles } from '@material-ui/core/styles'
-
-const useStyles = makeStyles((theme) => ({
-  root: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: '100%',
-    marginBottom: theme.spacing(3),
-  },
-}))
+import { Box, BoxProps, Typography } from '@material-ui/core'
 
 interface PaperTopProps {
   title: string | JSX.Element
   subtitle?: string | JSX.Element
+  boxProps?: BoxProps
 }
 
-const PaperTop: React.FC<PaperTopProps> = ({ title, subtitle, children }) => {
-  const classes = useStyles()
-
-  return (
-    <Box className={classes.root}>
-      <Box>
-        <Typography component="div" gutterBottom={subtitle ? true : false}>
-          {title}
+const PaperTop: React.FC<PaperTopProps> = ({ title, subtitle, boxProps, children }) => (
+  <Box {...boxProps} display="flex" justifyContent="space-between" width="100%">
+    <div>
+      <Typography component="div" gutterBottom={subtitle ? true : false}>
+        {title}
+      </Typography>
+      {subtitle && (
+        <Typography variant="body2" color="textSecondary">
+          {subtitle}
         </Typography>
-        {subtitle && (
-          <Typography variant="body2" color="textSecondary">
-            {subtitle}
-          </Typography>
-        )}
-      </Box>
-      {children}
-    </Box>
-  )
-}
+      )}
+    </div>
+    {children}
+  </Box>
+)
 
 export default PaperTop

@@ -25,8 +25,8 @@ const TokensTable = () => {
   const handleRemoveToken = (token: TokenFormValues) => () =>
     dispatch(
       setConfirm({
-        title: `${intl.formatMessage({ id: 'common.delete' })} ${token.name}`,
-        description: intl.formatMessage({ id: 'settings.addToken.deleteDesc' }),
+        title: `${T('common.delete', intl)} ${token.name}`,
+        description: T('settings.addToken.deleteDesc', intl),
         handle: handleRemoveTokenConfirm(token.name),
       })
     )
