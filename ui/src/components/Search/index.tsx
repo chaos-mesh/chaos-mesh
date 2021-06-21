@@ -97,16 +97,12 @@ const Search: React.FC = () => {
 
   const groupBy = (option: Option) => T(`${option.is}s.title`, intl)
   const getOptionLabel = (option: Option) => option.name
+  const isOptionEqualToValue = (option: Option, value: Option) => option.uid === value.uid
   const filterOptions = (options: Option[]) => options
 
-  const renderOption = (_: any, option: Option) => {
-    const type = option.is
-
-    let uid = option.uid
-    let name = option.name
-    const kind: string = type === 'workflow' ? 'Workflow' : (option as any).kind
-    const time = option.created_at
-    let link = `/${type}s/${option.uid}`
+  const determineKind = (option: Option) => (option.is === 'workflow' ? 'Workflow' : (option as any).kind)
+  const determineLink = (uuid: uuid, type: Option['is'], kind: string) => {
+    let link = `/${type}s/${uuid}`
 
     switch (type) {
       case 'archive':
@@ -122,23 +118,43 @@ const Search: React.FC = () => {
         break
     }
 
+    return link
+  }
+
+  const renderOption = (props: any, option: Option) => {
+    const type = option.is
+
+    const uuid = option.uid
+    const name = option.name
+    const kind = determineKind(option)
+    const time = option.created_at
+
     const onClick = () => {
-      history.replace(link)
+      history.push(determineLink(uuid, type, kind))
       setOpen(false)
     }
 
     return (
-      <Box key={uid} onClick={onClick} sx={{ pl: 6, py: 3, cursor: 'pointer', ':hover': { bgcolor: 'action.hover' } }}>
-        <Typography variant="subtitle1" gutterBottom>
-          {name}
-        </Typography>
-        <div className={classes.chipContainer}>
-          <Chip color="primary" icon={<FingerprintIcon />} label={truncate(uid)} title={uid} />
-          <Chip label={kind} />
-          <Chip icon={<ScheduleIcon />} label={format(time)} />
-        </div>
-      </Box>
+      <li {...props} onClick={onClick}>
+        <Box>
+          <Typography variant="subtitle1" gutterBottom>
+            {name}
+          </Typography>
+          <div className={classes.chipContainer}>
+            <Chip color="primary" icon={<FingerprintIcon />} label={truncate(uuid)} title={uuid} />
+            <Chip label={kind} />
+            <Chip icon={<ScheduleIcon />} label={format(time)} />
+          </div>
+        </Box>
+      </li>
     )
+  }
+
+  const onChange = (_: any, value: Option | null, reason: string) => {
+    if (reason === 'selectOption') {
+      history.push(determineLink(value!.uid, value!.is, determineKind(value!)))
+      setOpen(false)
+    }
   }
 
   const onInputChange = (_: any, newVal: string) => {
@@ -151,7 +167,7 @@ const Search: React.FC = () => {
     <Autocomplete
       sx={{ minWidth: 360 }}
       className="tutorial-search"
-      freeSolo
+      size="small"
       open={open}
       onClose={() => setOpen(false)}
       loading={loading}
@@ -159,13 +175,14 @@ const Search: React.FC = () => {
       options={options}
       groupBy={groupBy}
       getOptionLabel={getOptionLabel}
+      isOptionEqualToValue={isOptionEqualToValue}
       filterOptions={filterOptions}
       renderOption={renderOption}
+      onChange={onChange}
       onInputChange={onInputChange}
       renderInput={(params) => (
         <TextField
           {...params}
-          size="small"
           label={T('search.placeholder')}
           InputProps={{
             ...params.InputProps,
@@ -198,6 +215,7 @@ const Search: React.FC = () => {
         />
       )}
       PaperComponent={(props) => <Paper {...props} sx={{ p: 0 }} />}
+      clearOnEscape
     />
   )
 }
