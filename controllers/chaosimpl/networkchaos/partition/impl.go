@@ -102,12 +102,35 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	}
 
 	source := networkchaos.Namespace + "/" + networkchaos.Name
-	m := impl.builder.WithInit(source, types.NamespacedName{
-		Namespace: pod.Namespace,
-		Name:      pod.Name,
-	})
+	m := func() *podnetworkchaosmanager.PodNetworkManager {
+		shouldInit := true
+
+		if record.SelectorKey == ".Target" {
+			for _, r := range records {
+				if r.Id == record.Id {
+					// Only init in the "." selector key so it won't be cleared
+					// by another one with the same key in the ".Target"
+					shouldInit = false
+				}
+			}
+		}
+
+		if shouldInit {
+			return impl.builder.WithInit(source, types.NamespacedName{
+				Namespace: pod.Namespace,
+				Name:      pod.Name,
+			})
+		}
+
+		return impl.builder.Build(source, types.NamespacedName{
+			Namespace: pod.Namespace,
+			Name:      pod.Name,
+		})
+	}()
 
 	if record.SelectorKey == "." {
+		shouldCommit := false
+
 		if networkchaos.Spec.Direction == v1alpha1.To || networkchaos.Spec.Direction == v1alpha1.Both {
 			var targets []*v1alpha1.Record
 			for _, record := range records {
@@ -121,6 +144,26 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 				return v1alpha1.NotInjected, err
 			}
 
+			shouldCommit = true
+		}
+
+		if networkchaos.Spec.Direction == v1alpha1.From || networkchaos.Spec.Direction == v1alpha1.Both {
+			var targets []*v1alpha1.Record
+			for _, record := range records {
+				if record.SelectorKey == ".Target" {
+					targets = append(targets, record)
+				}
+			}
+
+			err := impl.SetDrop(ctx, m, targets, networkchaos, targetIPSetPostFix, v1alpha1.Input)
+			if err != nil {
+				return v1alpha1.NotInjected, err
+			}
+
+			shouldCommit = true
+		}
+
+		if shouldCommit {
 			generationNumber, err := m.Commit(ctx, networkchaos)
 			if err != nil {
 				return v1alpha1.NotInjected, err
@@ -133,6 +176,8 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 
 		return v1alpha1.Injected, nil
 	} else if record.SelectorKey == ".Target" {
+		shouldCommit := false
+
 		if networkchaos.Spec.Direction == v1alpha1.From || networkchaos.Spec.Direction == v1alpha1.Both {
 			var targets []*v1alpha1.Record
 			for _, record := range records {
@@ -146,6 +191,26 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 				return v1alpha1.NotInjected, err
 			}
 
+			shouldCommit = true
+		}
+
+		if networkchaos.Spec.Direction == v1alpha1.To || networkchaos.Spec.Direction == v1alpha1.Both {
+			var targets []*v1alpha1.Record
+			for _, record := range records {
+				if record.SelectorKey == "." {
+					targets = append(targets, record)
+				}
+			}
+
+			err := impl.SetDrop(ctx, m, targets, networkchaos, sourceIPSetPostFix, v1alpha1.Input)
+			if err != nil {
+				return v1alpha1.NotInjected, err
+			}
+
+			shouldCommit = true
+		}
+
+		if shouldCommit {
 			generationNumber, err := m.Commit(ctx, networkchaos)
 			if err != nil {
 				return v1alpha1.NotInjected, err
@@ -239,10 +304,14 @@ func (impl *Impl) SetDrop(ctx context.Context, m *podnetworkchaosmanager.PodNetw
 		return err
 	}
 
+	pbChainDirection := pb.Chain_OUTPUT
+	if chainDirection == v1alpha1.Input {
+		pbChainDirection = pb.Chain_INPUT
+	}
 	if len(targets)+len(externalCidrs) == 0 {
 		impl.Log.Info("apply traffic control", "sources", m.Source)
 		m.T.Append(v1alpha1.RawIptables{
-			Name:      iptable.GenerateName(pb.Chain_OUTPUT, networkchaos),
+			Name:      iptable.GenerateName(pbChainDirection, networkchaos),
 			Direction: chainDirection,
 			IPSets:    nil,
 			RawRuleSource: v1alpha1.RawRuleSource{
@@ -265,7 +334,7 @@ func (impl *Impl) SetDrop(ctx context.Context, m *podnetworkchaosmanager.PodNetw
 	dstIpset := ipset.BuildIPSet(targetPods, externalCidrs, networkchaos, ipSetPostFix, m.Source)
 	m.T.Append(dstIpset)
 	m.T.Append(v1alpha1.RawIptables{
-		Name:      iptable.GenerateName(pb.Chain_OUTPUT, networkchaos),
+		Name:      iptable.GenerateName(pbChainDirection, networkchaos),
 		Direction: chainDirection,
 		IPSets:    []string{dstIpset.Name},
 		RawRuleSource: v1alpha1.RawRuleSource{

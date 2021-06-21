@@ -1,14 +1,12 @@
 import { Box, MenuItem, TextField, Typography } from '@material-ui/core'
-import { RootState, useStoreDispatch } from 'store'
 import { setLang, setTheme } from 'slices/settings'
+import { useStoreDispatch, useStoreSelector } from 'store'
 
-import React from 'react'
 import T from 'components/T'
 import messages from 'i18n/messages'
-import { useSelector } from 'react-redux'
 
 const Other = () => {
-  const { settings } = useSelector((state: RootState) => state)
+  const { settings } = useStoreSelector((state) => state)
   const { theme, lang } = settings
   const dispatch = useStoreDispatch()
 
@@ -18,41 +16,39 @@ const Other = () => {
   return (
     <>
       {/* Theme */}
-      <Box mb={3}>
+      <Box>
         <TextField
-          variant="outlined"
           select
-          margin="dense"
-          fullWidth
-          value={theme}
+          size="small"
+          style={{ width: '50%' }}
           label={T('settings.theme.title')}
           helperText={T('settings.theme.choose')}
+          value={theme}
           onChange={handleChangeTheme}
         >
           <MenuItem value="light">
-            <Typography variant="body2">{T(`settings.theme.light`)}</Typography>
+            <Typography>{T(`settings.theme.light`)}</Typography>
           </MenuItem>
           <MenuItem value="dark">
-            <Typography variant="body2">{T(`settings.theme.dark`)}</Typography>
+            <Typography>{T(`settings.theme.dark`)}</Typography>
           </MenuItem>
         </TextField>
       </Box>
 
       {/* Language */}
-      <Box mb={3}>
+      <Box>
         <TextField
-          variant="outlined"
           select
-          margin="dense"
-          fullWidth
-          value={lang}
+          size="small"
+          style={{ width: '50%' }}
           label={T('settings.lang.title')}
           helperText={T('settings.lang.choose')}
+          value={lang}
           onChange={handleChangeLang}
         >
           {Object.keys(messages).map((lang) => (
             <MenuItem key={lang} value={lang}>
-              <Typography variant="body2">{T(`settings.lang.${lang}`)}</Typography>
+              <Typography>{T(`settings.lang.${lang}`)}</Typography>
             </MenuItem>
           ))}
         </TextField>

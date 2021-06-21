@@ -2924,6 +2924,7 @@ spec:
                     description: The name of related ipset
                     items:
                       type: string
+                    nullable: true
                     type: array
                   name:
                     description: The name of iptables chain
@@ -2932,7 +2933,6 @@ spec:
                     type: string
                 required:
                 - direction
-                - ipsets
                 - name
                 - source
                 type: object
@@ -5105,19 +5105,34 @@ spec:
                         - awsRegion
                         - ec2Instance
                         type: object
-                      conditionalTasks:
-                        description: ConditionalTasks describes the conditional branches
-                          of custom tasks. Only used when Type is TypeTask.
+                      children:
+                        description: Children describes the children steps of serial
+                          or parallel node. Only used when Type is TypeSerial or TypeParallel.
+                        items:
+                          type: string
+                        type: array
+                      conditionalBranches:
+                        description: ConditionalBranches describes the conditional
+                          branches of custom tasks. Only used when Type is TypeTask.
                         items:
                           properties:
                             expression:
+                              description: Expression is the expression for this conditional
+                                branch, expected type of result is boolean. If expression
+                                is empty, this branch will always be selected/the
+                                template will be spawned.
                               type: string
-                            task:
+                            target:
+                              description: Target is the name of other template, if
+                                expression is evaluated as true, this template will
+                                be spawned.
                               type: string
                           required:
-                          - task
+                          - target
                           type: object
                         type: array
+                      deadline:
+                        type: string
                       dnsChaos:
                         description: DNSChaosSpec defines the desired state of DNSChaos
                         properties:
@@ -5271,8 +5286,6 @@ spec:
                         - mode
                         - selector
                         type: object
-                      duration:
-                        type: string
                       gcpChaos:
                         description: GcpChaosSpec is the content of the specification
                           for a GcpChaos
@@ -11583,12 +11596,6 @@ spec:
                               type: object
                             type: array
                         type: object
-                      tasks:
-                        description: Tasks describes the children steps of serial
-                          or parallel node. Only used when Type is TypeSerial or TypeParallel.
-                        items:
-                          type: string
-                        type: array
                       templateType:
                         type: string
                       timeChaos:
@@ -12410,15 +12417,25 @@ spec:
               - awsRegion
               - ec2Instance
               type: object
-            conditionalTasks:
+            children:
+              items:
+                type: string
+              type: array
+            conditionalBranches:
               items:
                 properties:
                   expression:
+                    description: Expression is the expression for this conditional
+                      branch, expected type of result is boolean. If expression is
+                      empty, this branch will always be selected/the template will
+                      be spawned.
                     type: string
-                  task:
+                  target:
+                    description: Target is the name of other template, if expression
+                      is evaluated as true, this template will be spawned.
                     type: string
                 required:
-                - task
+                - target
                 type: object
               type: array
             deadline:
@@ -15997,19 +16014,35 @@ spec:
                             - awsRegion
                             - ec2Instance
                             type: object
-                          conditionalTasks:
-                            description: ConditionalTasks describes the conditional
+                          children:
+                            description: Children describes the children steps of
+                              serial or parallel node. Only used when Type is TypeSerial
+                              or TypeParallel.
+                            items:
+                              type: string
+                            type: array
+                          conditionalBranches:
+                            description: ConditionalBranches describes the conditional
                               branches of custom tasks. Only used when Type is TypeTask.
                             items:
                               properties:
                                 expression:
+                                  description: Expression is the expression for this
+                                    conditional branch, expected type of result is
+                                    boolean. If expression is empty, this branch will
+                                    always be selected/the template will be spawned.
                                   type: string
-                                task:
+                                target:
+                                  description: Target is the name of other template,
+                                    if expression is evaluated as true, this template
+                                    will be spawned.
                                   type: string
                               required:
-                              - task
+                              - target
                               type: object
                             type: array
+                          deadline:
+                            type: string
                           dnsChaos:
                             description: DNSChaosSpec defines the desired state of
                               DNSChaos
@@ -16168,8 +16201,6 @@ spec:
                             - mode
                             - selector
                             type: object
-                          duration:
-                            type: string
                           gcpChaos:
                             description: GcpChaosSpec is the content of the specification
                               for a GcpChaos
@@ -22724,13 +22755,6 @@ spec:
                                   type: object
                                 type: array
                             type: object
-                          tasks:
-                            description: Tasks describes the children steps of serial
-                              or parallel node. Only used when Type is TypeSerial
-                              or TypeParallel.
-                            items:
-                              type: string
-                            type: array
                           templateType:
                             type: string
                           timeChaos:
@@ -25376,10 +25400,6 @@ spec:
                     type: object
                   type: array
               type: object
-            tasks:
-              items:
-                type: string
-              type: array
             templateName:
               type: string
             timeChaos:
@@ -25565,20 +25585,20 @@ spec:
               - kind
               - name
               type: object
-            conditionalBranches:
-              description: ConditionalBranches records the evaluation result of each
-                ConditionalTask
+            conditionalBranchesStatus:
+              description: ConditionalBranchesStatus records the evaluation result
+                of each ConditionalBranch
               properties:
                 branches:
                   items:
                     properties:
-                      run:
+                      evaluationResult:
                         type: string
-                      task:
+                      target:
                         type: string
                     required:
-                    - run
-                    - task
+                    - evaluationResult
+                    - target
                     type: object
                   type: array
                 context:
@@ -25718,19 +25738,33 @@ spec:
                     - awsRegion
                     - ec2Instance
                     type: object
-                  conditionalTasks:
-                    description: ConditionalTasks describes the conditional branches
+                  children:
+                    description: Children describes the children steps of serial or
+                      parallel node. Only used when Type is TypeSerial or TypeParallel.
+                    items:
+                      type: string
+                    type: array
+                  conditionalBranches:
+                    description: ConditionalBranches describes the conditional branches
                       of custom tasks. Only used when Type is TypeTask.
                     items:
                       properties:
                         expression:
+                          description: Expression is the expression for this conditional
+                            branch, expected type of result is boolean. If expression
+                            is empty, this branch will always be selected/the template
+                            will be spawned.
                           type: string
-                        task:
+                        target:
+                          description: Target is the name of other template, if expression
+                            is evaluated as true, this template will be spawned.
                           type: string
                       required:
-                      - task
+                      - target
                       type: object
                     type: array
+                  deadline:
+                    type: string
                   dnsChaos:
                     description: DNSChaosSpec defines the desired state of DNSChaos
                     properties:
@@ -25879,8 +25913,6 @@ spec:
                     - mode
                     - selector
                     type: object
-                  duration:
-                    type: string
                   gcpChaos:
                     description: GcpChaosSpec is the content of the specification
                       for a GcpChaos
@@ -31989,12 +32021,6 @@ spec:
                           type: object
                         type: array
                     type: object
-                  tasks:
-                    description: Tasks describes the children steps of serial or parallel
-                      node. Only used when Type is TypeSerial or TypeParallel.
-                    items:
-                      type: string
-                    type: array
                   templateType:
                     type: string
                   timeChaos:

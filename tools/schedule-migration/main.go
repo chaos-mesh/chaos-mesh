@@ -50,37 +50,39 @@ func main() {
 		os.Exit(1)
 	}
 	{
-		var schedule yaml.MapSlice
-		var find bool
+		var (
+			schedule          yaml.MapSlice
+			containerNames    []string
+			findSchedule      bool
+			findContainerName bool
+		)
 		for _, item := range old.Spec {
 			if item.Key == "scheduler" {
 				schedule = item.Value.(yaml.MapSlice)
-				find = true
+				findSchedule = true
+			}
+			if item.Key == "containerName" {
+				containerNames = append(containerNames, item.Value.(string))
+				findContainerName = true
 			}
 		}
-		if !find {
+		if !findSchedule && !findContainerName {
 			new = old
+		} else if findSchedule && !findContainerName {
+			new = toScheduleObject(old, schedule)
+		} else if findSchedule && findContainerName {
+			new = toScheduleObject(old, schedule)
+			new.Spec = append(new.Spec, yaml.MapItem{Key: "containerNames", Value: containerNames})
 		} else {
-			var cron string
-			for _, item := range schedule {
-				if item.Key == "cron" {
-					cron = item.Value.(string)
-				}
-			}
 			new.ApiVersion = old.ApiVersion
 			new.Metadata = old.Metadata
-			new.Kind = "Schedule"
-			new.Spec = append(new.Spec, yaml.MapItem{Key: "schedule", Value: cron})
-			new.Spec = append(new.Spec, yaml.MapItem{Key: "type", Value: toNewKind(old.Kind)})
-			new.Spec = append(new.Spec, yaml.MapItem{Key: "historyLimit", Value: 5})
-			new.Spec = append(new.Spec, yaml.MapItem{Key: "concurrencyPolicy", Value: "Forbid"})
-			var newSpec yaml.MapSlice
+			new.Kind = old.Kind
 			for _, item := range old.Spec {
-				if item.Key != "scheduler" {
-					newSpec = append(newSpec, item)
+				if item.Key != "containerName" {
+					new.Spec = append(new.Spec, item)
 				}
 			}
-			new.Spec = append(new.Spec, yaml.MapItem{Key: getKeyName(old.Kind), Value: newSpec})
+			new.Spec = append(new.Spec, yaml.MapItem{Key: "containerNames", Value: containerNames})
 		}
 
 	}
@@ -106,4 +108,29 @@ func toNewKind(kind string) string {
 		return "IOChaos"
 	}
 	return kind
+}
+
+func toScheduleObject(old Item, schedule yaml.MapSlice) Item {
+	var new Item
+	var cron string
+	for _, item := range schedule {
+		if item.Key == "cron" {
+			cron = item.Value.(string)
+		}
+	}
+	new.ApiVersion = old.ApiVersion
+	new.Metadata = old.Metadata
+	new.Kind = "Schedule"
+	new.Spec = append(new.Spec, yaml.MapItem{Key: "schedule", Value: cron})
+	new.Spec = append(new.Spec, yaml.MapItem{Key: "type", Value: toNewKind(old.Kind)})
+	new.Spec = append(new.Spec, yaml.MapItem{Key: "historyLimit", Value: 5})
+	new.Spec = append(new.Spec, yaml.MapItem{Key: "concurrencyPolicy", Value: "Forbid"})
+	var newSpec yaml.MapSlice
+	for _, item := range old.Spec {
+		if item.Key != "scheduler" {
+			newSpec = append(newSpec, item)
+		}
+	}
+	new.Spec = append(new.Spec, yaml.MapItem{Key: getKeyName(old.Kind), Value: newSpec})
+	return new
 }

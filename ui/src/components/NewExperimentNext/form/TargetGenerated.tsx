@@ -1,13 +1,14 @@
 import { AutocompleteMultipleField, LabelField, SelectField, Submit, TextField } from 'components/FormField'
 import { Form, Formik, FormikErrors, FormikTouched, getIn } from 'formik'
 import { Kind, Spec } from '../data/target'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
 import AdvancedOptions from 'components/AdvancedOptions'
 import { MenuItem } from '@material-ui/core'
 import { ObjectSchema } from 'yup'
 import Scope from './Scope'
+import Space from 'components-mui/Space'
 import T from 'components/T'
 import _snakecase from 'lodash.snakecase'
 import basicData from '../data/basic'
@@ -161,7 +162,7 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ kind, data, validatio
 
         return (
           <Form>
-            {parseDataToFormFields(errors, touched)}
+            <Space>{parseDataToFormFields(errors, touched)}</Space>
             {kind === 'NetworkChaos' && (
               <AdvancedOptions
                 title={T('newE.target.network.target.title')}

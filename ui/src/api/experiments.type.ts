@@ -1,34 +1,24 @@
-import { Event } from './events.type'
 import { ExperimentKind } from 'components/NewExperiment/types'
 
-export interface StateOfExperiments {
-  Running: number
-  Waiting: number
-  Paused: number
-  Failed: number
-  Finished: number
-}
-
-export enum StateOfExperimentsEnum {
-  Running = 'Running',
-  Waiting = 'Waiting',
-  Paused = 'Paused',
-  Failed = 'Failed',
-  Finished = 'Finished',
+export interface StatusOfExperiments {
+  injecting: number
+  running: number
+  finished: number
+  paused: number
 }
 
 export interface Experiment {
+  is: 'experiment'
   uid: uuid
   kind: ExperimentKind
   namespace: string
   name: string
-  created: string
+  created_at: string
   // FIXME: support keyof in ts-interface-builder
-  status: 'Running' | 'Waiting' | 'Paused' | 'Failed' | 'Finished'
-  events?: Event[]
+  status: 'injecting' | 'running' | 'finished' | 'paused'
 }
 
-export interface ExperimentDetail extends Experiment {
+export interface ExperimentSingle extends Experiment {
   failed_message: string
   kube_object: any
 }
