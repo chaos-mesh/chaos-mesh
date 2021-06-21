@@ -15,13 +15,14 @@ import { Experiment } from 'api/experiments.type'
 import FingerprintIcon from '@material-ui/icons/Fingerprint'
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline'
 import Paper from 'components-mui/Paper'
+import { Schedule } from 'api/schedules.type'
 import ScheduleIcon from '@material-ui/icons/Schedule'
 import SearchIcon from '@material-ui/icons/Search'
 import T from 'components/T'
 import Tooltip from 'components-mui/Tooltip'
+import { Workflow } from 'api/workflows.type'
 import _debounce from 'lodash.debounce'
 import api from 'api'
-import clsx from 'clsx'
 import { format } from 'lib/luxon'
 import { makeStyles } from '@material-ui/styles'
 import search from 'lib/search'
@@ -32,13 +33,6 @@ import { useIntl } from 'react-intl'
 const Chip = (props: ChipProps) => <MUIChip {...props} variant="outlined" size="small" />
 
 const useStyles = makeStyles((theme) => ({
-  search: {
-    minWidth: 360,
-    '& .MuiInputBase-root': {
-      paddingLeft: '9px !important',
-      paddingRight: '15px !important',
-    },
-  },
   tooltip: {
     marginBottom: 0,
     paddingLeft: theme.spacing(3),
@@ -56,12 +50,12 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
-type Option = Experiment | Archive
+type Option = Workflow | Schedule | Experiment | Archive
 
 const Search: React.FC = () => {
   const classes = useStyles()
-  const intl = useIntl()
   const history = useHistory()
+  const intl = useIntl()
 
   const [open, setOpen] = useState(false)
   const [options, setOptions] = useState<Option[]>([])
@@ -74,13 +68,24 @@ const Search: React.FC = () => {
         setNoResult(false)
         setOpen(true)
 
-        const [experiments, archives] = [
+        const [workflows, schedules, experiments, archives, archivedWorkflows, archivedSchedules] = [
+          (await api.workflows.workflows()).data.map((d) => ({
+            ...d,
+            is: 'workflow' as 'workflow',
+            kind: 'Workflow',
+          })),
+          (await api.schedules.schedules()).data.map((d) => ({ ...d, is: 'schedule' as 'schedule' })),
           (await api.experiments.experiments()).data.map((d) => ({ ...d, is: 'experiment' as 'experiment' })),
           (await api.archives.archives()).data.map((d) => ({ ...d, is: 'archive' as 'archive' })),
+          (await api.workflows.archives()).data.map((d) => ({ ...d, is: 'archive' as 'archive' })),
+          (await api.schedules.archives()).data.map((d) => ({ ...d, is: 'archive' as 'archive' })),
         ]
 
-        const result = search({ experiments, archives }, s)
-        const newOptions = [...result.experiments, ...result.archives]
+        const result = search(
+          { workflows, schedules, experiments, archives: [...archives, ...archivedWorkflows, ...archivedSchedules] },
+          s
+        )
+        const newOptions = [...result.workflows, ...result.schedules, ...result.experiments, ...result.archives]
 
         setOptions(newOptions)
         if (newOptions.length === 0) {
@@ -90,45 +95,47 @@ const Search: React.FC = () => {
     []
   )
 
-  const groupBy = (option: Option) =>
-    (option.is === 'experiment' ? T('experiments.title', intl) : T('archives.title', intl)) as string
-
+  const groupBy = (option: Option) => T(`${option.is}s.title`, intl)
   const getOptionLabel = (option: Option) => option.name
+  const filterOptions = (options: Option[]) => options
 
   const renderOption = (_: any, option: Option) => {
     const type = option.is
 
-    let uid = (option as Experiment).uid
+    let uid = option.uid
     let name = option.name
-    const kind = (option as Experiment).kind
+    const kind: string = type === 'workflow' ? 'Workflow' : (option as any).kind
     const time = option.created_at
-    let link = ''
+    let link = `/${type}s/${option.uid}`
 
     switch (type) {
-      case 'experiment':
-        link = `/${type}s/${(option as Experiment).uid}`
-        break
       case 'archive':
-      default:
+        switch (kind) {
+          case 'Workflow':
+          case 'Schedule':
+            link = `${link}?kind=${kind.toLowerCase()}`
+            break
+          default:
+            link = `${link}?kind=experiment`
+            break
+        }
         break
     }
 
-    const onClick = (e: React.MouseEvent<HTMLDivElement>) => {
-      e.stopPropagation()
-
-      history.push(link)
+    const onClick = () => {
+      history.replace(link)
       setOpen(false)
     }
 
     return (
-      <Box pl={6} pb={3} onClick={onClick}>
+      <Box key={uid} onClick={onClick} sx={{ pl: 6, py: 3, cursor: 'pointer', ':hover': { bgcolor: 'action.hover' } }}>
         <Typography variant="subtitle1" gutterBottom>
           {name}
         </Typography>
         <div className={classes.chipContainer}>
           <Chip color="primary" icon={<FingerprintIcon />} label={truncate(uid)} title={uid} />
           <Chip label={kind} />
-          {type !== 'archive' && <Chip icon={<ScheduleIcon />} label={format(time)} />}
+          <Chip icon={<ScheduleIcon />} label={format(time)} />
         </div>
       </Box>
     )
@@ -142,7 +149,8 @@ const Search: React.FC = () => {
 
   return (
     <Autocomplete
-      className={clsx(classes.search, 'tutorial-search')}
+      sx={{ minWidth: 360 }}
+      className="tutorial-search"
       freeSolo
       open={open}
       onClose={() => setOpen(false)}
@@ -151,6 +159,7 @@ const Search: React.FC = () => {
       options={options}
       groupBy={groupBy}
       getOptionLabel={getOptionLabel}
+      filterOptions={filterOptions}
       renderOption={renderOption}
       onInputChange={onInputChange}
       renderInput={(params) => (
@@ -158,7 +167,6 @@ const Search: React.FC = () => {
           {...params}
           size="small"
           label={T('search.placeholder')}
-          aria-label="Search"
           InputProps={{
             ...params.InputProps,
             startAdornment: (
