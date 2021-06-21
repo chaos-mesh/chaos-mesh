@@ -55,7 +55,7 @@ spec:
             value: "{{ .Values.clusterScoped }}"
           - name: TZ
             value: {{ .Values.timezone | default "UTC" }}
-          - name: CHAOS_DAEMON_PORT
+          - name: CHAOS_DAEMON_SERVICE_PORT
             value: !!str {{ .Values.chaosDaemon.grpcPort }}
           - name: BPFKI_PORT
             value: !!str {{ .Values.bpfki.grpcPort }}

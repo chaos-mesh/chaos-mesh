@@ -34,7 +34,7 @@ type TLSConfig struct {
 // ChaosControllerConfig defines the configuration for Chaos Controller
 type ChaosControllerConfig struct {
 	// ChaosDaemonPort is the port which grpc server listens on
-	ChaosDaemonPort int `envconfig:"CHAOS_DAEMON_PORT" default:"31767"`
+	ChaosDaemonPort int `envconfig:"CHAOS_DAEMON_SERVICE_PORT" default:"31767"`
 
 	TLSConfig
 
