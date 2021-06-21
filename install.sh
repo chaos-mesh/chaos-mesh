@@ -1164,6 +1164,10 @@ metadata:
 spec:
   type: ClusterIP
   ports:
+    - port: 443
+      targetPort: webhook
+      protocol: TCP
+      name: webhook
     - port: 10081
       targetPort: pprof
       protocol: TCP
@@ -1172,10 +1176,6 @@ spec:
       targetPort: http
       protocol: TCP
       name: http
-    - port: 443
-      targetPort: webhook
-      protocol: TCP
-      name: webhook
   selector:
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
@@ -1388,7 +1388,7 @@ spec:
             value: "true"
           - name: TZ
             value: ${timezone}
-          - name: CHAOS_DAEMON_PORT
+          - name: CHAOS_DAEMON_SERVICE_PORT
             value: !!str 31767
           - name: BPFKI_PORT
             value: !!str 50051
