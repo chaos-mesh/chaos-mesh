@@ -24,6 +24,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-controller-manager/provider"
 	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 )
 
 func NewTestManager(lc fx.Lifecycle, options *ctrl.Options, cfg *rest.Config) (ctrl.Manager, error) {
@@ -70,4 +71,5 @@ var Module = fx.Provide(
 	provider.NewGlobalCacheReader,
 	provider.NewControlPlaneCacheReader,
 	NewTestManager,
+	recorder.NewRecorderBuilder,
 )

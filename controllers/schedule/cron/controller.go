@@ -212,7 +212,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	return ctrl.Result{}, nil
 }
 
-func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger, lister *utils.ActiveLister) (types.Controller, error) {
+func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger, lister *utils.ActiveLister, recorderBuilder *recorder.RecorderBuilder) (types.Controller, error) {
 	builder.Default(mgr).
 		For(&v1alpha1.Schedule{}).
 		Named("schedule-cron").
@@ -220,7 +220,7 @@ func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger, list
 			client,
 			log.WithName("schedule-cron"),
 			lister,
-			recorder.NewRecorder(mgr, "schedule-cron", log),
+			recorderBuilder.Build("schedule-cron"),
 		})
 	return "schedule-cron", nil
 }

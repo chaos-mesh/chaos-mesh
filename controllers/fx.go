@@ -26,6 +26,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/schedule"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 	wfcontrollers "github.com/chaos-mesh/chaos-mesh/pkg/workflow/controllers"
 )
 
@@ -61,6 +62,7 @@ var Module = fx.Options(
 		},
 
 		chaosdaemon.New,
+		recorder.NewRecorderBuilder,
 	),
 	fx.Invoke(wfcontrollers.BootstrapWorkflowControllers),
 	schedule.Module,
