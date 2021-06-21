@@ -153,12 +153,11 @@ const Search: React.FC = () => {
   const onChange = (_: any, value: Option | null, reason: string) => {
     if (reason === 'selectOption') {
       history.push(determineLink(value!.uid, value!.is, determineKind(value!)))
-      setOpen(false)
     }
   }
 
-  const onInputChange = (_: any, newVal: string) => {
-    if (newVal) {
+  const onInputChange = (_: any, newVal: string, reason: string) => {
+    if (newVal && reason !== 'reset') {
       debounceExecSearch(newVal)
     }
   }
@@ -215,7 +214,7 @@ const Search: React.FC = () => {
         />
       )}
       PaperComponent={(props) => <Paper {...props} sx={{ p: 0 }} />}
-      clearOnEscape
+      disableClearable
     />
   )
 }
