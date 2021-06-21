@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useHistory, useParams } from 'react-router-dom'
 
 import { Ace } from 'ace-builds'
-import DeleteOutlinedIcon from '@material-ui/icons/DeleteOutlined'
+import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
 import { EventHandler } from 'cytoscape'
 import NodeConfiguration from 'components/ObjectConfiguration/Node'
 import NoteOutlinedIcon from '@material-ui/icons/NoteOutlined'
@@ -103,7 +103,7 @@ const Single = () => {
     let actionFunc: any
 
     switch (action) {
-      case 'delete':
+      case 'archive':
         actionFunc = api.workflows.del
 
         break
@@ -121,7 +121,7 @@ const Single = () => {
             })
           )
 
-          if (action === 'delete') {
+          if (action === 'archive') {
             history.push('/workflows')
           }
         })
@@ -197,14 +197,14 @@ const Single = () => {
               <Button
                 variant="outlined"
                 size="small"
-                startIcon={<DeleteOutlinedIcon />}
+                startIcon={<ArchiveOutlinedIcon />}
                 onClick={handleSelect({
-                  title: `${T('common.delete', intl)} ${single?.name}`,
+                  title: `${T('archives.single', intl)} ${single?.name}`,
                   description: T('workflows.deleteDesc', intl),
-                  handle: handleAction('delete'),
+                  handle: handleAction('archive'),
                 })}
               >
-                {T('common.delete')}
+                {T('archives.single')}
               </Button>
             </Space>
             <Paper sx={{ display: 'flex', flexDirection: 'column', flex: 1 }}>

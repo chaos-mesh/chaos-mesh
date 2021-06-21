@@ -3,6 +3,7 @@ export interface WorkflowParams {
 }
 
 export interface Workflow {
+  is: 'workflow'
   uid: uuid
   namespace: string
   name: string
