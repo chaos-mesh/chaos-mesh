@@ -42,9 +42,6 @@ type chaosRecorder struct {
 	scheme *runtime.Scheme
 }
 
-// TODO: make `deadline` configurable
-const deadline = 15 * time.Second
-
 func (r *chaosRecorder) Event(object runtime.Object, ev ChaosEvent) {
 	eventtype := ev.Type()
 	reason := ev.Reason()
