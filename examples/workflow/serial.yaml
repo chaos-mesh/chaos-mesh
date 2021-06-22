@@ -60,4 +60,3 @@ spec:
     - name: suffix-suspending
       templateType: Suspend
       deadline: 5s
-
