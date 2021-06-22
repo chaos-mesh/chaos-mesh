@@ -7,14 +7,14 @@ spec:
   templates:
     - name: the-entry
       templateType: Parallel
-      duration: 240s
-      tasks:
+      deadline: 240s
+      children:
         - workflow-stress-chaos
         - workflow-network-chaos
         - workflow-pod-chaos
     - name: workflow-network-chaos
       templateType: NetworkChaos
-      duration: 20s
+      deadline: 20s
       networkChaos:
         direction: to
         action: delay
@@ -28,7 +28,7 @@ spec:
           jitter: "90ms"
     - name: workflow-pod-chaos
       templateType: Schedule
-      duration: 40s
+      deadline: 40s
       schedule:
         schedule: "@every 2s"
         concurrencyPolicy: Allow
@@ -41,7 +41,7 @@ spec:
               "app": "hello-kubernetes"
     - name: workflow-stress-chaos
       templateType: StressChaos
-      duration: 20s
+      deadline: 20s
       stressChaos:
         mode: one
         selector:
