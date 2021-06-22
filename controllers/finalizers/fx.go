@@ -30,7 +30,7 @@ type Objs struct {
 	Objs []types.Object `group:"objs"`
 }
 
-func NewController(mgr ctrl.Manager, client client.Client, logger logr.Logger, pairs Objs) (types.Controller, error) {
+func NewController(mgr ctrl.Manager, client client.Client, logger logr.Logger, recorderBuilder *recorder.RecorderBuilder, pairs Objs) (types.Controller, error) {
 	for _, obj := range pairs.Objs {
 		err := builder.Default(mgr).
 			For(obj.Object).
@@ -38,7 +38,7 @@ func NewController(mgr ctrl.Manager, client client.Client, logger logr.Logger, p
 			Complete(&Reconciler{
 				Object:   obj.Object,
 				Client:   client,
-				Recorder: recorder.NewRecorder(mgr, "finalizer", logger),
+				Recorder: recorderBuilder.Build("finalizer"),
 				Log:      logger.WithName("finalizers"),
 			})
 		if err != nil {

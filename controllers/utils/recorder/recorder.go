@@ -14,15 +14,21 @@
 package recorder
 
 import (
+	"context"
+	"fmt"
 	"reflect"
+	"time"
 
 	"github.com/go-logr/logr"
 	"github.com/iancoleman/strcase"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/client-go/tools/record"
-	ctrl "sigs.k8s.io/controller-runtime"
+	"k8s.io/client-go/tools/record/util"
+	ref "k8s.io/client-go/tools/reference"
+	"k8s.io/klog"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type ChaosRecorder interface {
@@ -30,17 +36,63 @@ type ChaosRecorder interface {
 }
 
 type chaosRecorder struct {
-	recorder record.EventRecorder
-	log      logr.Logger
+	log    logr.Logger
+	source v1.EventSource
+	client client.Client
+	scheme *runtime.Scheme
 }
 
 func (r *chaosRecorder) Event(object runtime.Object, ev ChaosEvent) {
+	eventtype := ev.Type()
+	reason := ev.Reason()
+	message := ev.Message()
+
 	annotations, err := generateAnnotations(ev)
 	if err != nil {
 		r.log.Error(err, "failed to generate annotations for event", "event", ev)
 	}
 
-	r.recorder.AnnotatedEventf(object, annotations, ev.Type(), ev.Reason(), ev.Message())
+	ref, err := ref.GetReference(r.scheme, object)
+	if err != nil {
+		r.log.Error(err, "fail to construct reference", "object", object)
+		return
+	}
+
+	if !util.ValidateEventType(eventtype) {
+		klog.Errorf("Unsupported event type: '%v'", eventtype)
+		return
+	}
+
+	event := r.makeEvent(ref, annotations, eventtype, reason, message)
+	event.Source = r.source
+	go func() {
+		err := r.client.Create(context.TODO(), event)
+		if err != nil {
+			r.log.Error(err, "fail to submit event", "event", event)
+		}
+	}()
+}
+
+func (r *chaosRecorder) makeEvent(ref *v1.ObjectReference, annotations map[string]string, eventtype, reason, message string) *v1.Event {
+	t := metav1.Time{Time: time.Now()}
+	namespace := ref.Namespace
+	if namespace == "" {
+		namespace = metav1.NamespaceDefault
+	}
+	return &v1.Event{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:        fmt.Sprintf("%v.%x", ref.Name, t.UnixNano()),
+			Namespace:   namespace,
+			Annotations: annotations,
+		},
+		InvolvedObject: *ref,
+		Reason:         reason,
+		Message:        message,
+		FirstTimestamp: t,
+		LastTimestamp:  t,
+		Count:          1,
+		Type:           eventtype,
+	}
 }
 
 type ChaosEvent interface {
@@ -60,10 +112,28 @@ func register(ev ...ChaosEvent) {
 	}
 }
 
-func NewRecorder(mgr ctrl.Manager, name string, logger logr.Logger) ChaosRecorder {
+type RecorderBuilder struct {
+	c      client.Client
+	logger logr.Logger
+	scheme *runtime.Scheme
+}
+
+func (b *RecorderBuilder) Build(name string) ChaosRecorder {
 	return &chaosRecorder{
-		mgr.GetEventRecorderFor(name),
-		logger.WithName("event-recorder" + name),
+		log: b.logger.WithName("event-recorder-" + name),
+		source: v1.EventSource{
+			Component: name,
+		},
+		client: b.c,
+		scheme: b.scheme,
+	}
+}
+
+func NewRecorderBuilder(c client.Client, logger logr.Logger, scheme *runtime.Scheme) *RecorderBuilder {
+	return &RecorderBuilder{
+		c,
+		logger,
+		scheme,
 	}
 }
 

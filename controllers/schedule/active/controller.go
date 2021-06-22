@@ -140,7 +140,7 @@ type Objs struct {
 	Objs []types.Object `group:"objs"`
 }
 
-func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger, objs Objs, scheme *runtime.Scheme, lister *utils.ActiveLister) (types.Controller, error) {
+func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger, objs Objs, scheme *runtime.Scheme, lister *utils.ActiveLister, recorderBuilder *recorder.RecorderBuilder) (types.Controller, error) {
 	builder := builder.Default(mgr).
 		For(&v1alpha1.Schedule{}).
 		Named("schedule-active")
@@ -156,7 +156,7 @@ func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger, objs
 		client,
 		log.WithName("schedule-active"),
 		lister,
-		recorder.NewRecorder(mgr, "schedule-active", log),
+		recorderBuilder.Build("schedule-active"),
 	})
 	return "schedule-active", nil
 }
