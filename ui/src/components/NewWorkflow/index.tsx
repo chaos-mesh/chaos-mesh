@@ -104,44 +104,29 @@ const NewWorkflow = () => {
   }, [templates])
 
   const resetRestore = () => {
-    dispatch(resetNewExperiment())
     setRestoreIndex(-1)
   }
 
-  const restoreExperiment = (experiments: any, index: number) => () => {
+  const restoreExperiment = (index: number) => () => {
     if (restoreIndex !== -1) {
       resetRestore()
     } else {
-      if (experiments.length) {
-        const e = experiments[0]
-
-        const kind = e.target.kind
-
-        dispatch(
-          setExternalExperiment({
-            kindAction: [kind, e.target[_snakecase(kind)].action ?? ''],
-            target: e.target,
-            basic: e.basic,
-          })
-        )
-      }
-
       setRestoreIndex(index)
     }
   }
 
-  const setCurrentCallback = (experiments: Template['experiments']) => (index: number) => {
-    const e = experiments[index]
+  const setCurrentCallback = (experiments: Template['children']) => (index: number) => {
+    // const e = experiments[index]
 
-    const kind = e.target.kind
+    // const kind = e.target.kind
 
-    dispatch(
-      setExternalExperiment({
-        kindAction: [kind, e.target[_snakecase(kind)].action ?? ''],
-        target: e.target,
-        basic: e.basic,
-      })
-    )
+    // dispatch(
+    //   setExternalExperiment({
+    //     kindAction: [kind, e.target[_snakecase(kind)].action ?? ''],
+    //     target: e.target,
+    //     basic: e.basic,
+    //   })
+    // )
 
     return true
   }
@@ -153,7 +138,7 @@ const NewWorkflow = () => {
           type,
           index,
           name: experiment.basic.name,
-          experiments: [experiment],
+          children: [experiment],
         })
       )
       dispatch(
@@ -167,17 +152,17 @@ const NewWorkflow = () => {
       const eIndex = multiNodeRef.current!.current
       const tmpSteps = [...steps]
       const tmpStep = { ...tmpSteps[index] }
-      const tmpStepExperiments = tmpStep.experiments.slice()
+      const tmpStepExperiments = tmpStep.children!.slice()
 
       tmpStepExperiments[eIndex] = experiment
-      tmpStep.experiments = tmpStepExperiments
+      tmpStep.children = tmpStepExperiments
       tmpSteps[index] = tmpStep
 
       setSteps(tmpSteps)
 
       dispatch(resetNewExperiment())
 
-      if (eIndex !== tmpStep.experiments.length - 1) {
+      if (eIndex !== tmpStep.children.length - 1) {
         setCurrentCallback(tmpStepExperiments)(eIndex + 1)
       }
 
@@ -250,6 +235,10 @@ const NewWorkflow = () => {
     }
   }
 
+  const updateTemplateCallback = () => {
+    setRestoreIndex(-1)
+  }
+
   const onValidate = setWorkflowBasic
 
   const submitWorkflow = () => {
@@ -279,87 +268,42 @@ const NewWorkflow = () => {
               {steps.length > 0 &&
                 steps.map((step, index) => (
                   <Step key={step.type + index}>
-                    <StepLabel icon={<CheckIcon sx={{ color: 'success.main' }} />}>
-                      <Paper sx={{ p: restoreIndex === index ? 4.5 : 3, borderColor: 'success.main' }}>
-                        <Box display="flex" justifyContent="space-between">
-                          <Space direction="row" alignItems="center">
-                            <Chip label={T(`newW.node.${step.type}`)} color="primary" size="small" />
-                            <Typography component="div" variant={restoreIndex === index ? 'h6' : 'body1'}>
-                              {step.name}
-                            </Typography>
-                          </Space>
-                          <Space direction="row">
-                            <IconButton size="small" onClick={restoreExperiment(step.experiments, index)}>
-                              <UndoIcon />
-                            </IconButton>
-                            <Menu>
-                              <MenuItem dense onClick={handleSelect(step.name, index, 'delete')}>
-                                <ListItemIcon>
-                                  <RemoveIcon fontSize="small" />
-                                </ListItemIcon>
-                                <Typography variant="inherit">{T('common.delete')}</Typography>
-                              </MenuItem>
-                            </Menu>
-                          </Space>
-                        </Box>
-                        {restoreIndex === index && (
-                          <Box mt={6}>
-                            {(step.type === 'serial' || step.type === 'parallel') && (
-                              <Formik initialValues={{ name: step.name, duration: step.deadline }} onSubmit={() => {}}>
-                                <Form>
-                                  <Box display="flex" justifyContent="space-between" alignItems="center">
-                                    <Space direction="row">
-                                      <TextField className={classes.field} name="name" label={T('common.name')} />
-                                      <TextField
-                                        className={classes.field}
-                                        name="duration"
-                                        label={T('newE.run.duration')}
-                                      />
-                                    </Space>
-                                    <Space direction="row">
-                                      <MultiNode
-                                        ref={multiNodeRef}
-                                        count={step.experiments.length}
-                                        setCurrentCallback={setCurrentCallback(step.experiments)}
-                                      />
-                                      <Button
-                                        variant="contained"
-                                        color="primary"
-                                        startIcon={<PublishIcon />}
-                                        onClick={onNoSingleRestoreSubmit(index)}
-                                      >
-                                        {T('newW.node.submitAll')}
-                                      </Button>
-                                    </Space>
-                                  </Box>
-                                </Form>
-                              </Formik>
-                            )}
-                            {step.type !== 'suspend' && (
-                              <NewExperiment
-                                loadFrom={false}
-                                onSubmit={onRestoreSubmit(step.type, index)}
-                                inWorkflow={true}
-                              />
-                            )}
-                            {step.type === 'suspend' && (
-                              <Suspend
-                                initialValues={{
-                                  name: steps[index].name,
-                                  deadline: steps[index].deadline!,
-                                }}
-                                onSubmit={onSuspendRestoreSubmit(index)}
-                              />
-                            )}
+                    {restoreIndex !== index ? (
+                      <StepLabel icon={<CheckIcon sx={{ color: 'success.main' }} />}>
+                        <Paper sx={{ p: 3, borderColor: 'success.main' }}>
+                          <Box display="flex" justifyContent="space-between">
+                            <Space direction="row" alignItems="center">
+                              <Chip label={T(`newW.node.${step.type}`)} color="primary" size="small" />
+                              <Typography component="div" variant="body1">
+                                {step.name}
+                              </Typography>
+                            </Space>
+                            <Space direction="row">
+                              <IconButton size="small" onClick={restoreExperiment(index)}>
+                                <UndoIcon />
+                              </IconButton>
+                              <Menu>
+                                <MenuItem dense onClick={handleSelect(step.name, index, 'delete')}>
+                                  <ListItemIcon>
+                                    <RemoveIcon fontSize="small" />
+                                  </ListItemIcon>
+                                  <Typography variant="inherit">{T('common.delete')}</Typography>
+                                </MenuItem>
+                              </Menu>
+                            </Space>
                           </Box>
-                        )}
-                      </Paper>
-                    </StepLabel>
+                        </Paper>
+                      </StepLabel>
+                    ) : (
+                      <Add externalTemplate={step} update={index} updateCallback={updateTemplateCallback} />
+                    )}
                   </Step>
                 ))}
-              <Step>
-                <Add />
-              </Step>
+              {restoreIndex < 0 && (
+                <Step>
+                  <Add />
+                </Step>
+              )}
             </Stepper>
           </Space>
         </Grid>
@@ -398,10 +342,10 @@ const NewWorkflow = () => {
                   <Typography>{T('common.preview')}</Typography>
                   <Box flex={1}>
                     <Paper sx={{ p: 0 }}>
-                      <YAMLEditor
+                      {/* <YAMLEditor
                         data={constructWorkflow(workflowBasic, Object.values(templates))}
                         mountEditor={setYAMLEditor}
-                      />
+                      /> */}
                     </Paper>
                   </Box>
                   <Button

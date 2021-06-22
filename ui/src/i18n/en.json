@@ -122,7 +122,7 @@
       "parallel": "Parallel",
       "suspend": "Suspend",
       "number": "Number",
-      "chooseChildren": "Choose child task",
+      "child": "Child task",
       "nameHelper": "The task name",
       "nameValidation": "The task name is required",
       "deadline": "Deadline",
@@ -140,7 +140,7 @@
     "durationValidation": "The workflow duration is required",
     "submit": "Submit workflow",
     "messages": {
-      "m1": "Please complete the creation of the current node first"
+      "m1": "Please complete the creation of the previous task first"
     }
   },
   "newS": {

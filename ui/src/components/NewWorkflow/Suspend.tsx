@@ -28,7 +28,7 @@ const Suspend: React.FC<SuspendProps> = ({ initialValues, onSubmit }) => {
         type: 'suspend',
         name,
         deadline,
-        experiments: [],
+        children: [],
       })
     )
   }

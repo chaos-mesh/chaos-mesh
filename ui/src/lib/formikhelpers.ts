@@ -1,7 +1,7 @@
 import { CallchainFrame, Experiment, ExperimentScope } from 'components/NewExperiment/types'
+import { Template, TemplateExperiment } from 'slices/workflows'
 import { arrToObjBySep, toCamelCase } from './utils'
 
-import { Template } from 'slices/workflows'
 import { WorkflowBasic } from 'components/NewWorkflow'
 import _snakecase from 'lodash.snakecase'
 import basic from 'components/NewExperimentNext/data/basic'
@@ -228,7 +228,7 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
 
       switch (t.type) {
         case 'single':
-          const experiment = t.experiments[0]
+          const experiment = t.children![0].experiment!
           const basic = experiment.basic
           const kind = experiment.target.kind
           const spec = _snakecase(kind)
@@ -245,7 +245,7 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
 
           break
         case 'serial':
-          t.experiments.forEach((d) => {
+          t.children!.forEach((d: any) => {
             const basic = d.basic
             const name = basic.name
             const kind = d.target.kind
@@ -268,12 +268,12 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
             name: t.name,
             templateType: 'Serial',
             deadline: t.deadline,
-            children: t.experiments.map((d) => d.basic.name),
+            children: t.children!.map((d: any) => d.basic.name),
           })
 
           break
         case 'parallel':
-          t.experiments.forEach((d) => {
+          t.children!.forEach((d: any) => {
             const basic = d.basic
             const name = basic.name
             const kind = d.target.kind
@@ -296,7 +296,7 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
             name: t.name,
             templateType: 'Parallel',
             deadline: t.deadline,
-            children: t.experiments.map((d) => d.basic.name),
+            children: t.children!.map((d: any) => d.basic.name),
           })
 
           break

@@ -144,7 +144,7 @@
       "parallel": "并行",
       "suspend": "暂停",
       "number": "数目",
-      "chooseChildren": "选择子任务",
+      "child": "子任务",
       "nameHelper": "任务的名称",
       "nameValidation": "任务名称不能为空",
       "deadline": "期限",
@@ -162,7 +162,7 @@
     "durationValidation": "工作流持续时间不能为空",
     "submit": "提交工作流",
     "messages": {
-      "m1": "请首先完成当前任务的创建"
+      "m1": "请先完成上一个任务的创建"
     }
   },
   "workflows": {

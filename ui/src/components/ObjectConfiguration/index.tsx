@@ -96,7 +96,10 @@ const ObjectConfiguration: React.FC<ObjectConfigurationProps> = ({
           {T('experiments.single')}
         </Typography>
 
-        <Experiment kind={inNode ? (config as any).templateType : config.kind} data={experiment} />
+        <Experiment
+          kind={inNode ? (config as any).templateType : inSchedule ? spec.type : config.kind}
+          data={experiment}
+        />
       </Grid>
 
       <Grid item xs={vertical ? 12 : 3}>
@@ -111,24 +114,52 @@ const ObjectConfiguration: React.FC<ObjectConfigurationProps> = ({
                 <TableCell>{T('newE.run.duration')}</TableCell>
                 <TableCell>
                   <Typography variant="body2" color="textSecondary">
-                    {inNode
-                      ? (config as any).duration
-                      : config.kube_object.spec.duration
-                      ? config.kube_object.spec.duration
-                      : T('newE.run.continuous')}
+                    {inNode ? (config as any).duration : spec.duration ? spec.duration : T('newE.run.continuous')}
                   </Typography>
                 </TableCell>
               </TableRow>
             )}
             {inSchedule && (
-              <TableRow>
-                <TableCell>{T('schedules.single')}</TableCell>
-                <TableCell>
-                  <Typography variant="body2" color="textSecondary">
-                    {config.kube_object.spec.schedule}
-                  </Typography>
-                </TableCell>
-              </TableRow>
+              <>
+                <TableRow>
+                  <TableCell>{T('schedules.single')}</TableCell>
+                  <TableCell>
+                    <Typography variant="body2" color="textSecondary">
+                      {spec.schedule}
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+                {spec.startingDeadlineSeconds && (
+                  <TableRow>
+                    <TableCell>{T('newS.basic.startingDeadlineSeconds')}</TableCell>
+                    <TableCell>
+                      <Typography variant="body2" color="textSecondary">
+                        {spec.startingDeadlineSeconds}
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                )}
+                {spec.concurrencyPolicy && (
+                  <TableRow>
+                    <TableCell>{T('newS.basic.concurrencyPolicy')}</TableCell>
+                    <TableCell>
+                      <Typography variant="body2" color="textSecondary">
+                        {spec.concurrencyPolicy}
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                )}
+                {spec.historyLimit && (
+                  <TableRow>
+                    <TableCell>{T('newS.basic.historyLimit')}</TableCell>
+                    <TableCell>
+                      <Typography variant="body2" color="textSecondary">
+                        {spec.historyLimit}
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </>
             )}
           </TableBody>
         </Table>
