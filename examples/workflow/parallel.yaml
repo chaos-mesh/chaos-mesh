@@ -52,4 +52,3 @@ spec:
             workers: 1
             load: 20
             options: ["--cpu 1", "--timeout 600"]
-
