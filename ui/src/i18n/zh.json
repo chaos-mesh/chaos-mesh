@@ -238,8 +238,7 @@
       "token": "令牌",
       "tokenHelper": "请输入令牌",
       "tokenValidation": "令牌不能为空",
-      "duplicateDesc": "令牌名称不能重复",
-      "deleteDesc": "此操作不可逆"
+      "duplicateDesc": "令牌名称不能重复"
     }
   },
   "swagger": {
@@ -271,6 +270,7 @@
     "copy": "复制",
     "definition": "定义",
     "delete": "删除",
+    "deleteDesc": "此操作不可逆",
     "detail": "详情",
     "doc": "文档",
     "download": "下载",
