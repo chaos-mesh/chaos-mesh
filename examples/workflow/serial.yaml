@@ -7,8 +7,8 @@ spec:
   templates:
     - name: the-entry
       templateType: Serial
-      duration: 240s
-      tasks:
+      deadline: 240s
+      children:
         - workflow-stress-chaos
         - prefix-suspending
         - workflow-network-chaos
@@ -16,10 +16,10 @@ spec:
         - workflow-pod-chaos
     - name: prefix-suspending
       templateType: Suspend
-      duration: 10s
+      deadline: 10s
     - name: workflow-network-chaos
       templateType: NetworkChaos
-      duration: 20s
+      deadline: 20s
       networkChaos:
         direction: to
         action: delay
@@ -33,7 +33,7 @@ spec:
           jitter: "90ms"
     - name: workflow-pod-chaos
       templateType: Schedule
-      duration: 40s
+      deadline: 40s
       schedule:
         schedule: "@every 2s"
         concurrencyPolicy: Allow
@@ -46,7 +46,7 @@ spec:
               "app": "hello-kubernetes"
     - name: workflow-stress-chaos
       templateType: StressChaos
-      duration: 20s
+      deadline: 20s
       stressChaos:
         mode: one
         selector:
@@ -56,8 +56,7 @@ spec:
           cpu:
             workers: 1
             load: 20
-            options: ["--cpu 1", "--timeout 600"]
+            options: [ "--cpu 1", "--timeout 600" ]
     - name: suffix-suspending
       templateType: Suspend
-      duration: 5s
-
+      deadline: 5s
