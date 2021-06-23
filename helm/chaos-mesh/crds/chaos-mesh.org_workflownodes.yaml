@@ -2665,7 +2665,8 @@ spec:
                                   type: string
                                 type: array
                               workers:
-                                description: Workers specifies N workers to apply the stressor.
+                                description: Workers specifies N workers to apply the stressor. Maximum 8192 workers can run by stress-ng
+                                maximum: 8192
                                 type: integer
                             required:
                             - workers
@@ -2682,7 +2683,8 @@ spec:
                                 description: Size specifies N bytes consumed per vm worker, default is the total available memory. One can specify the size as % of total available memory or in units of B, KB/KiB, MB/MiB, GB/GiB, TB/TiB.
                                 type: string
                               workers:
-                                description: Workers specifies N workers to apply the stressor.
+                                description: Workers specifies N workers to apply the stressor. Maximum 8192 workers can run by stress-ng
+                                maximum: 8192
                                 type: integer
                             required:
                             - workers
@@ -5442,7 +5444,8 @@ spec:
                                                 type: string
                                               type: array
                                             workers:
-                                              description: Workers specifies N workers to apply the stressor.
+                                              description: Workers specifies N workers to apply the stressor. Maximum 8192 workers can run by stress-ng
+                                              maximum: 8192
                                               type: integer
                                           required:
                                           - workers
@@ -5459,7 +5462,8 @@ spec:
                                               description: Size specifies N bytes consumed per vm worker, default is the total available memory. One can specify the size as % of total available memory or in units of B, KB/KiB, MB/MiB, GB/GiB, TB/TiB.
                                               type: string
                                             workers:
-                                              description: Workers specifies N workers to apply the stressor.
+                                              description: Workers specifies N workers to apply the stressor. Maximum 8192 workers can run by stress-ng
+                                              maximum: 8192
                                               type: integer
                                           required:
                                           - workers
@@ -5687,7 +5691,8 @@ spec:
                                             type: string
                                           type: array
                                         workers:
-                                          description: Workers specifies N workers to apply the stressor.
+                                          description: Workers specifies N workers to apply the stressor. Maximum 8192 workers can run by stress-ng
+                                          maximum: 8192
                                           type: integer
                                       required:
                                       - workers
@@ -5704,7 +5709,8 @@ spec:
                                           description: Size specifies N bytes consumed per vm worker, default is the total available memory. One can specify the size as % of total available memory or in units of B, KB/KiB, MB/MiB, GB/GiB, TB/TiB.
                                           type: string
                                         workers:
-                                          description: Workers specifies N workers to apply the stressor.
+                                          description: Workers specifies N workers to apply the stressor. Maximum 8192 workers can run by stress-ng
+                                          maximum: 8192
                                           type: integer
                                       required:
                                       - workers
@@ -7461,7 +7467,8 @@ spec:
                               type: string
                             type: array
                           workers:
-                            description: Workers specifies N workers to apply the stressor.
+                            description: Workers specifies N workers to apply the stressor. Maximum 8192 workers can run by stress-ng
+                            maximum: 8192
                             type: integer
                         required:
                         - workers
@@ -7478,7 +7485,8 @@ spec:
                             description: Size specifies N bytes consumed per vm worker, default is the total available memory. One can specify the size as % of total available memory or in units of B, KB/KiB, MB/MiB, GB/GiB, TB/TiB.
                             type: string
                           workers:
-                            description: Workers specifies N workers to apply the stressor.
+                            description: Workers specifies N workers to apply the stressor. Maximum 8192 workers can run by stress-ng
+                            maximum: 8192
                             type: integer
                         required:
                         - workers

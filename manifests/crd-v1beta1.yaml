@@ -4872,6 +4872,8 @@ spec:
                           type: array
                         workers:
                           description: Workers specifies N workers to apply the stressor.
+                            Maximum 8192 workers can run by stress-ng
+                          maximum: 8192
                           type: integer
                       required:
                       - workers
@@ -4892,6 +4894,8 @@ spec:
                           type: string
                         workers:
                           description: Workers specifies N workers to apply the stressor.
+                            Maximum 8192 workers can run by stress-ng
+                          maximum: 8192
                           type: integer
                       required:
                       - workers
@@ -8674,7 +8678,9 @@ spec:
                                         type: array
                                       workers:
                                         description: Workers specifies N workers to
-                                          apply the stressor.
+                                          apply the stressor. Maximum 8192 workers
+                                          can run by stress-ng
+                                        maximum: 8192
                                         type: integer
                                     required:
                                     - workers
@@ -8697,7 +8703,9 @@ spec:
                                         type: string
                                       workers:
                                         description: Workers specifies N workers to
-                                          apply the stressor.
+                                          apply the stressor. Maximum 8192 workers
+                                          can run by stress-ng
+                                        maximum: 8192
                                         type: integer
                                     required:
                                     - workers
@@ -9029,7 +9037,9 @@ spec:
                                     type: array
                                   workers:
                                     description: Workers specifies N workers to apply
-                                      the stressor.
+                                      the stressor. Maximum 8192 workers can run by
+                                      stress-ng
+                                    maximum: 8192
                                     type: integer
                                 required:
                                 - workers
@@ -9052,7 +9062,9 @@ spec:
                                     type: string
                                   workers:
                                     description: Workers specifies N workers to apply
-                                      the stressor.
+                                      the stressor. Maximum 8192 workers can run by
+                                      stress-ng
+                                    maximum: 8192
                                     type: integer
                                 required:
                                 - workers
@@ -11993,6 +12005,8 @@ spec:
                       type: array
                     workers:
                       description: Workers specifies N workers to apply the stressor.
+                        Maximum 8192 workers can run by stress-ng
+                      maximum: 8192
                       type: integer
                   required:
                   - workers
@@ -12013,6 +12027,8 @@ spec:
                       type: string
                     workers:
                       description: Workers specifies N workers to apply the stressor.
+                        Maximum 8192 workers can run by stress-ng
+                      maximum: 8192
                       type: integer
                   required:
                   - workers
@@ -15777,7 +15793,8 @@ spec:
                               type: array
                             workers:
                               description: Workers specifies N workers to apply the
-                                stressor.
+                                stressor. Maximum 8192 workers can run by stress-ng
+                              maximum: 8192
                               type: integer
                           required:
                           - workers
@@ -15798,7 +15815,8 @@ spec:
                               type: string
                             workers:
                               description: Workers specifies N workers to apply the
-                                stressor.
+                                stressor. Maximum 8192 workers can run by stress-ng
+                              maximum: 8192
                               type: integer
                           required:
                           - workers
@@ -19702,7 +19720,9 @@ spec:
                                             type: array
                                           workers:
                                             description: Workers specifies N workers
-                                              to apply the stressor.
+                                              to apply the stressor. Maximum 8192
+                                              workers can run by stress-ng
+                                            maximum: 8192
                                             type: integer
                                         required:
                                         - workers
@@ -19726,7 +19746,9 @@ spec:
                                             type: string
                                           workers:
                                             description: Workers specifies N workers
-                                              to apply the stressor.
+                                              to apply the stressor. Maximum 8192
+                                              workers can run by stress-ng
+                                            maximum: 8192
                                             type: integer
                                         required:
                                         - workers
@@ -20069,7 +20091,9 @@ spec:
                                         type: array
                                       workers:
                                         description: Workers specifies N workers to
-                                          apply the stressor.
+                                          apply the stressor. Maximum 8192 workers
+                                          can run by stress-ng
+                                        maximum: 8192
                                         type: integer
                                     required:
                                     - workers
@@ -20092,7 +20116,9 @@ spec:
                                         type: string
                                       workers:
                                         description: Workers specifies N workers to
-                                          apply the stressor.
+                                          apply the stressor. Maximum 8192 workers
+                                          can run by stress-ng
+                                        maximum: 8192
                                         type: integer
                                     required:
                                     - workers
@@ -23068,6 +23094,8 @@ spec:
                           type: array
                         workers:
                           description: Workers specifies N workers to apply the stressor.
+                            Maximum 8192 workers can run by stress-ng
+                          maximum: 8192
                           type: integer
                       required:
                       - workers
@@ -23088,6 +23116,8 @@ spec:
                           type: string
                         workers:
                           description: Workers specifies N workers to apply the stressor.
+                            Maximum 8192 workers can run by stress-ng
+                          maximum: 8192
                           type: integer
                       required:
                       - workers
@@ -29215,7 +29245,9 @@ spec:
                                     type: array
                                   workers:
                                     description: Workers specifies N workers to apply
-                                      the stressor.
+                                      the stressor. Maximum 8192 workers can run by
+                                      stress-ng
+                                    maximum: 8192
                                     type: integer
                                 required:
                                 - workers
@@ -29238,7 +29270,9 @@ spec:
                                     type: string
                                   workers:
                                     description: Workers specifies N workers to apply
-                                      the stressor.
+                                      the stressor. Maximum 8192 workers can run by
+                                      stress-ng
+                                    maximum: 8192
                                     type: integer
                                 required:
                                 - workers
@@ -29561,7 +29595,8 @@ spec:
                                 type: array
                               workers:
                                 description: Workers specifies N workers to apply
-                                  the stressor.
+                                  the stressor. Maximum 8192 workers can run by stress-ng
+                                maximum: 8192
                                 type: integer
                             required:
                             - workers
@@ -29582,7 +29617,8 @@ spec:
                                 type: string
                               workers:
                                 description: Workers specifies N workers to apply
-                                  the stressor.
+                                  the stressor. Maximum 8192 workers can run by stress-ng
+                                maximum: 8192
                                 type: integer
                             required:
                             - workers
