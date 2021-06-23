@@ -134,6 +134,8 @@ func (in *Stressors) Normalize() (string, error) {
 // Stressor defines common configurations of a stressor
 type Stressor struct {
 	// Workers specifies N workers to apply the stressor.
+	// Maximum 8192 workers can run by stress-ng
+	// +kubebuilder:validation:Maximum=8192
 	Workers int `json:"workers"`
 }
 
