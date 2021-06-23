@@ -12,13 +12,10 @@ import {
   Typography,
 } from '@material-ui/core'
 import { Form, Formik } from 'formik'
-import MultiNode, { MultiNodeHandles } from './MultiNode'
 import { SelectField, TextField } from 'components/FormField'
-import Suspend, { SuspendValues } from './Suspend'
-import { Template, deleteTemplate, resetWorkflow, updateTemplate } from 'slices/workflows'
-import { resetNewExperiment, setExternalExperiment } from 'slices/experiments'
+import { Template, deleteTemplate, resetWorkflow } from 'slices/workflows'
 import { setAlert, setConfirm } from 'slices/globalStatus'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useStoreDispatch, useStoreSelector } from 'store'
 import { validateDuration, validateName } from 'lib/formikhelpers'
 
@@ -26,7 +23,6 @@ import { Ace } from 'ace-builds'
 import Add from './Add'
 import CheckIcon from '@material-ui/icons/Check'
 import Menu from 'components-mui/Menu'
-import NewExperiment from 'components/NewExperimentNext'
 import Paper from 'components-mui/Paper'
 import PublishIcon from '@material-ui/icons/Publish'
 import RemoveIcon from '@material-ui/icons/Remove'
@@ -35,10 +31,10 @@ import T from 'components/T'
 import UndoIcon from '@material-ui/icons/Undo'
 import YAMLEditor from 'components/YAMLEditor'
 import _isEmpty from 'lodash.isempty'
-import _snakecase from 'lodash.snakecase'
 import api from 'api'
 import { constructWorkflow } from 'lib/formikhelpers'
 import { makeStyles } from '@material-ui/styles'
+import { resetNewExperiment } from 'slices/experiments'
 import { useHistory } from 'react-router-dom'
 import { useIntl } from 'react-intl'
 import yaml from 'js-yaml'
@@ -70,7 +66,7 @@ type IStep = Template
 export type WorkflowBasic = {
   name: string
   namespace: string
-  duration: string
+  deadline: string
 }
 
 const NewWorkflow = () => {
@@ -88,10 +84,9 @@ const NewWorkflow = () => {
   const [workflowBasic, setWorkflowBasic] = useState<WorkflowBasic>({
     name: '',
     namespace: '',
-    duration: '',
+    deadline: '',
   })
   const [yamlEditor, setYAMLEditor] = useState<Ace.Editor>()
-  const multiNodeRef = useRef<MultiNodeHandles>(null)
 
   useEffect(() => {
     return () => {
@@ -114,92 +109,6 @@ const NewWorkflow = () => {
       setRestoreIndex(index)
     }
   }
-
-  const setCurrentCallback = (experiments: Template['children']) => (index: number) => {
-    // const e = experiments[index]
-
-    // const kind = e.target.kind
-
-    // dispatch(
-    //   setExternalExperiment({
-    //     kindAction: [kind, e.target[_snakecase(kind)].action ?? ''],
-    //     target: e.target,
-    //     basic: e.basic,
-    //   })
-    // )
-
-    return true
-  }
-
-  const onRestoreSubmit = (type: Template['type'], index: number) => (experiment: any) => {
-    if (type === 'single') {
-      dispatch(
-        updateTemplate({
-          type,
-          index,
-          name: experiment.basic.name,
-          children: [experiment],
-        })
-      )
-      dispatch(
-        setAlert({
-          type: 'success',
-          message: T('confirm.success.update', intl) as string,
-        })
-      )
-      resetRestore()
-    } else if (type === 'serial' || type === 'parallel') {
-      const eIndex = multiNodeRef.current!.current
-      const tmpSteps = [...steps]
-      const tmpStep = { ...tmpSteps[index] }
-      const tmpStepExperiments = tmpStep.children!.slice()
-
-      tmpStepExperiments[eIndex] = experiment
-      tmpStep.children = tmpStepExperiments
-      tmpSteps[index] = tmpStep
-
-      setSteps(tmpSteps)
-
-      dispatch(resetNewExperiment())
-
-      if (eIndex !== tmpStep.children.length - 1) {
-        setCurrentCallback(tmpStepExperiments)(eIndex + 1)
-      }
-
-      multiNodeRef.current!.setCurrent(eIndex + 1)
-    }
-  }
-
-  const onNoSingleRestoreSubmit = (stepIndex: number) => () => {
-    dispatch(updateTemplate(steps[stepIndex]))
-    dispatch(
-      setAlert({
-        type: 'success',
-        message: T('confirm.success.update', intl) as string,
-      })
-    )
-    resetRestore()
-  }
-
-  const onSuspendRestoreSubmit =
-    (stepIndex: number) =>
-    ({ name, deadline }: SuspendValues) => {
-      dispatch(
-        updateTemplate({
-          ...steps[stepIndex],
-          index: stepIndex,
-          name,
-          deadline,
-        })
-      )
-      dispatch(
-        setAlert({
-          type: 'success',
-          message: T('confirm.success.update', intl) as string,
-        })
-      )
-      resetRestore()
-    }
 
   const removeExperiment = (index: number) => {
     dispatch(deleteTemplate(index))
@@ -237,6 +146,7 @@ const NewWorkflow = () => {
 
   const updateTemplateCallback = () => {
     setRestoreIndex(-1)
+    dispatch(resetNewExperiment())
   }
 
   const onValidate = setWorkflowBasic
@@ -267,7 +177,7 @@ const NewWorkflow = () => {
             <Stepper orientation="vertical" sx={{ mt: -1, p: 0 }}>
               {steps.length > 0 &&
                 steps.map((step, index) => (
-                  <Step key={step.type + index}>
+                  <Step key={step.name}>
                     {restoreIndex !== index ? (
                       <StepLabel icon={<CheckIcon sx={{ color: 'success.main' }} />}>
                         <Paper sx={{ p: 3, borderColor: 'success.main' }}>
@@ -279,7 +189,11 @@ const NewWorkflow = () => {
                               </Typography>
                             </Space>
                             <Space direction="row">
-                              <IconButton size="small" onClick={restoreExperiment(index)}>
+                              <IconButton
+                                size="small"
+                                title={T('common.edit', intl)}
+                                onClick={restoreExperiment(index)}
+                              >
                                 <UndoIcon />
                               </IconButton>
                               <Menu>
@@ -309,7 +223,7 @@ const NewWorkflow = () => {
         </Grid>
         <Grid item xs={12} md={4} className={classes.leftSticky}>
           <Formik
-            initialValues={{ name: '', namespace: '', duration: '' }}
+            initialValues={{ name: '', namespace: '', deadline: '' }}
             onSubmit={submitWorkflow}
             validate={onValidate}
             validateOnBlur={false}
@@ -333,19 +247,19 @@ const NewWorkflow = () => {
                     ))}
                   </SelectField>
                   <TextField
-                    name="duration"
+                    name="deadline"
                     label={T('newE.run.duration')}
                     validate={validateDuration(T('newW.durationValidation', intl))}
-                    helperText={errors.duration && touched.duration ? errors.duration : T('newW.durationHelper')}
-                    error={errors.duration && touched.duration ? true : false}
+                    helperText={errors.deadline && touched.deadline ? errors.deadline : T('newW.durationHelper')}
+                    error={errors.deadline && touched.deadline ? true : false}
                   />
                   <Typography>{T('common.preview')}</Typography>
                   <Box flex={1}>
                     <Paper sx={{ p: 0 }}>
-                      {/* <YAMLEditor
+                      <YAMLEditor
                         data={constructWorkflow(workflowBasic, Object.values(templates))}
                         mountEditor={setYAMLEditor}
-                      /> */}
+                      />
                     </Paper>
                   </Box>
                   <Button

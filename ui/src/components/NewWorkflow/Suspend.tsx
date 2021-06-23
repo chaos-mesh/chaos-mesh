@@ -1,12 +1,12 @@
 import { Form, Formik } from 'formik'
 import { Submit, TextField } from 'components/FormField'
+import { Template, setTemplate, updateTemplate } from 'slices/workflows'
 import { validateDeadline, validateName } from 'lib/formikhelpers'
 
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
 import Space from 'components-mui/Space'
 import T from 'components/T'
-import { setTemplate } from 'slices/workflows'
 import { useStoreDispatch } from 'store'
 
 export interface SuspendValues {
@@ -16,28 +16,29 @@ export interface SuspendValues {
 
 interface SuspendProps {
   initialValues?: SuspendValues
-  onSubmit?: (values: SuspendValues) => void
+  update?: number
+  updateCallback?: () => void
 }
 
-const Suspend: React.FC<SuspendProps> = ({ initialValues, onSubmit }) => {
+const Suspend: React.FC<SuspendProps> = ({ initialValues, update, updateCallback }) => {
   const dispatch = useStoreDispatch()
 
-  const defaultOnSubmit = ({ name, deadline }: SuspendValues) => {
-    dispatch(
-      setTemplate({
-        type: 'suspend',
-        name,
-        deadline,
-        children: [],
-      })
-    )
+  const onSubmit = ({ name, deadline }: SuspendValues) => {
+    const template: Template = {
+      type: 'suspend',
+      name,
+      deadline,
+    }
+
+    dispatch(update !== undefined ? updateTemplate({ ...template, index: update }) : setTemplate(template))
+    typeof updateCallback === 'function' && updateCallback()
   }
 
   return (
     <Paper>
       <Space>
         <PaperTop title={T('newW.suspendTitle')} />
-        <Formik initialValues={initialValues || { name: '', deadline: '' }} onSubmit={onSubmit || defaultOnSubmit}>
+        <Formik initialValues={initialValues || { name: '', deadline: '' }} onSubmit={onSubmit}>
           {({ errors, touched }) => (
             <Form>
               <Space>
@@ -45,7 +46,7 @@ const Suspend: React.FC<SuspendProps> = ({ initialValues, onSubmit }) => {
                   fast
                   name="name"
                   label={T('common.name')}
-                  validate={validateName(T('newW.nameValidation') as unknown as string)}
+                  validate={validateName(T('newW.node.nameValidation') as unknown as string)}
                   helperText={errors.name && touched.name ? errors.name : T('newW.node.nameHelper')}
                   error={errors.name && touched.name ? true : false}
                 />

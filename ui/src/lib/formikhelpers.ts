@@ -1,7 +1,7 @@
 import { CallchainFrame, Experiment, ExperimentScope } from 'components/NewExperiment/types'
-import { Template, TemplateExperiment } from 'slices/workflows'
-import { arrToObjBySep, toCamelCase } from './utils'
+import { arrToObjBySep, toCamelCase, toTitleCase } from './utils'
 
+import { Template } from 'slices/workflows'
 import { WorkflowBasic } from 'components/NewWorkflow'
 import _snakecase from 'lodash.snakecase'
 import basic from 'components/NewExperimentNext/data/basic'
@@ -217,18 +217,15 @@ function scopeToYAMLJSON(scope: ExperimentScope) {
 }
 
 export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
-  const { name, namespace, duration } = basic
-  const children: string[] = []
+  const { name, namespace, deadline } = basic
+  const children: string[] = templates.map((d) => d.name)
   const realTemplates: Record<string, any>[] = []
 
-  templates
-    .sort((a, b) => a.index! - b.index!)
-    .forEach((t) => {
-      children.push(t.name)
-
+  function recurInsertTemplates(templates: Template[]) {
+    templates.forEach((t) => {
       switch (t.type) {
         case 'single':
-          const experiment = t.children![0].experiment!
+          const experiment = t.experiment!
           const basic = experiment.basic
           const kind = experiment.target.kind
           const spec = _snakecase(kind)
@@ -245,48 +242,31 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
 
           break
         case 'serial':
-          t.children!.forEach((d: any) => {
-            const basic = d.basic
-            const name = basic.name
-            const kind = d.target.kind
-            const spec = _snakecase(kind)
-
-            if (!realTemplates.some((t) => t.name === name)) {
-              realTemplates.push({
-                name,
-                templateType: kind,
-                deadline: d.basic.deadline,
-                [toCamelCase(kind)]: {
-                  ...scopeToYAMLJSON(basic.scope),
-                  ...d.target[spec],
-                },
-              })
-            }
-          })
-
-          realTemplates.push({
-            name: t.name,
-            templateType: 'Serial',
-            deadline: t.deadline,
-            children: t.children!.map((d: any) => d.basic.name),
-          })
-
-          break
         case 'parallel':
-          t.children!.forEach((d: any) => {
-            const basic = d.basic
-            const name = basic.name
-            const kind = d.target.kind
-            const spec = _snakecase(kind)
+          t.children!.forEach((d) => {
+            if (d.children) {
+              realTemplates.push({
+                name: d.name,
+                templateType: toTitleCase(d.type),
+                deadline: d.deadline,
+                children: d.children!.map((dd) => dd.name),
+              })
 
-            if (!realTemplates.some((t) => t.name === name)) {
+              recurInsertTemplates(d.children)
+            } else {
+              const e = d.experiment!
+              const basic = e.basic
+              const name = basic.name
+              const kind = e.target.kind
+              const spec = _snakecase(kind)
+
               realTemplates.push({
                 name,
                 templateType: kind,
-                deadline: d.basic.deadline,
+                deadline: e.basic.deadline,
                 [toCamelCase(kind)]: {
                   ...scopeToYAMLJSON(basic.scope),
-                  ...d.target[spec],
+                  ...e.target[spec],
                 },
               })
             }
@@ -294,9 +274,9 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
 
           realTemplates.push({
             name: t.name,
-            templateType: 'Parallel',
+            templateType: toTitleCase(t.type),
             deadline: t.deadline,
-            children: t.children!.map((d: any) => d.basic.name),
+            children: t.children!.map((d) => d.name),
           })
 
           break
@@ -312,6 +292,9 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
           break
       }
     })
+  }
+
+  recurInsertTemplates(templates)
 
   return yaml.dump(
     {
@@ -327,7 +310,7 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
           {
             name: 'entry',
             templateType: 'Serial',
-            duration,
+            deadline,
             children,
           },
           ...realTemplates,

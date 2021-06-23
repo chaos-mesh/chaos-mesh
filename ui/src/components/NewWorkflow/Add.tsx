@@ -1,4 +1,4 @@
-import { Box, Grid, IconButton, MenuItem, StepLabel, Typography } from '@material-ui/core'
+import { Box, Button, Grid, IconButton, MenuItem, StepLabel, Typography } from '@material-ui/core'
 import NewExperimentNext, { NewExperimentHandles } from 'components/NewExperimentNext'
 import { SelectField, Submit, TextField } from 'components/FormField'
 import { Template, setTemplate, updateTemplate } from 'slices/workflows'
@@ -9,6 +9,7 @@ import { validateDeadline, validateName } from 'lib/formikhelpers'
 import AddCircleIcon from '@material-ui/icons/AddCircle'
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown'
 import ArrowRightIcon from '@material-ui/icons/ArrowRight'
+import CloseIcon from '@material-ui/icons/Close'
 import { Formik } from 'formik'
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
@@ -101,8 +102,12 @@ const Add: React.FC<AddProps> = ({
 
           setTemplates(templates)
           setNum(templates.length)
+
           break
         case 'suspend':
+          setInitialValues({ ...initialValues, name, deadline: deadline! })
+          setOtherTypes(true)
+
           break
       }
 
@@ -136,7 +141,7 @@ const Add: React.FC<AddProps> = ({
 
     if (type === 'serial' || type === 'parallel') {
       if (typeof newNum !== 'number' || newNum < 0) {
-        setNum(2)
+        formRef.current.setFieldValue('num', 2)
 
         return
       }
@@ -163,7 +168,7 @@ const Add: React.FC<AddProps> = ({
   const submit = (template: Template) => {
     if (childIndex !== undefined) {
       if (parentTemplates![childIndex!]) {
-        const tmp = parentTemplates!
+        const tmp = JSON.parse(JSON.stringify(parentTemplates!))
         tmp[childIndex!] = template
 
         setParentTemplates!(tmp)
@@ -260,6 +265,11 @@ const Add: React.FC<AddProps> = ({
                     inputProps={{ min: 1 }}
                   />
                 )}
+                {update !== undefined && (
+                  <Button variant="outlined" startIcon={<CloseIcon />} onClick={updateCallback}>
+                    {T('common.cancelEdit')}
+                  </Button>
+                )}
               </Space>
             </StepLabel>
 
@@ -333,7 +343,7 @@ const Add: React.FC<AddProps> = ({
           </Box>
           {otherTypes && (
             <Box mt={3}>
-              <Suspend />
+              <Suspend initialValues={initialValues} update={update} updateCallback={updateCallback} />
             </Box>
           )}
         </Box>

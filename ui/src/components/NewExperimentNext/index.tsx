@@ -26,7 +26,6 @@ export interface NewExperimentHandles {
 }
 
 interface NewExperimentProps {
-  initPanel?: PanelType
   onSubmit?: (experiment: { target: any; basic: any }) => void
   loadFrom?: boolean
   inWorkflow?: boolean
@@ -34,12 +33,12 @@ interface NewExperimentProps {
 }
 
 const NewExperiment: React.ForwardRefRenderFunction<NewExperimentHandles, NewExperimentProps> = (
-  { initPanel = 'initial', onSubmit, loadFrom = true, inWorkflow, inSchedule },
+  { onSubmit, loadFrom = true, inWorkflow, inSchedule },
   ref
 ) => {
   const dispatch = useStoreDispatch()
 
-  const [panel, setPanel] = useState<PanelType>(initPanel)
+  const [panel, setPanel] = useState<PanelType>('initial')
 
   useImperativeHandle(ref, () => ({
     setPanel,
