@@ -1,8 +1,7 @@
 import { Box, Button, Card, Modal, Typography } from '@material-ui/core'
 import { PreDefinedValue, getDB } from 'lib/idb'
-import React, { useEffect, useRef, useState } from 'react'
 import { parseSubmit, yamlToExperiment } from 'lib/formikhelpers'
-import { useStoreDispatch, useStoreSelector } from 'store'
+import { useEffect, useRef, useState } from 'react'
 
 import { Ace } from 'ace-builds'
 import Paper from 'components-mui/Paper'
@@ -14,19 +13,15 @@ import api from 'api'
 import clsx from 'clsx'
 import { iconByKind } from 'lib/byKind'
 import loadable from '@loadable/component'
-import { makeStyles } from '@material-ui/core/styles'
+import { makeStyles } from '@material-ui/styles'
 import { setAlert } from 'slices/globalStatus'
 import { useIntl } from 'react-intl'
+import { useStoreDispatch } from 'store'
 import yaml from 'js-yaml'
 
 const YAMLEditor = loadable(() => import('components/YAMLEditor'))
 
 const useStyles = makeStyles((theme) => ({
-  container: {
-    display: 'flex',
-    height: 88,
-    overflowX: 'scroll',
-  },
   card: {
     flex: '0 0 240px',
     cursor: 'pointer',
@@ -41,10 +36,11 @@ const useStyles = makeStyles((theme) => ({
     position: 'absolute',
     top: '50%',
     left: '50%',
-    width: '50vw',
+    width: '75vw',
     height: '90vh',
+    padding: 0,
     transform: 'translate(-50%, -50%)',
-    [theme.breakpoints.down('sm')]: {
+    [theme.breakpoints.down('lg')]: {
       width: '90vw',
     },
   },
@@ -55,7 +51,6 @@ const Predefined = () => {
 
   const intl = useIntl()
 
-  const { theme } = useStoreSelector((state) => state.settings)
   const dispatch = useStoreDispatch()
 
   const idb = useRef(getDB())
@@ -109,7 +104,7 @@ const Predefined = () => {
         dispatch(
           setAlert({
             type: 'success',
-            message: intl.formatMessage({ id: 'confirm.createSuccessfully' }),
+            message: T('confirm.success.create', intl),
           })
         )
       })
@@ -126,17 +121,17 @@ const Predefined = () => {
     dispatch(
       setAlert({
         type: 'success',
-        message: intl.formatMessage({ id: 'confirm.deleteSuccessfully' }),
+        message: T('confirm.success.delete', intl),
       })
     )
   }
 
   return (
     <>
-      <Space className={classes.container}>
+      <Space direction="row" sx={{ height: 88, overflowX: 'scroll' }}>
         <YAML
           callback={saveExperiment}
-          buttonProps={{ className: clsx(classes.card, classes.addCard, 'predefined-upload') }}
+          buttonProps={{ className: clsx(classes.card, classes.addCard, 'tutorial-predefined') }}
         />
         {experiments.map((d) => (
           <Card key={d.name} className={classes.card} variant="outlined" onClick={onModalOpen(d)}>
@@ -153,12 +148,12 @@ const Predefined = () => {
       </Space>
       <Modal open={editorOpen} onClose={onModalClose}>
         <div>
-          <Paper className={classes.editorPaperWrapper} padding={0}>
+          <Paper className={classes.editorPaperWrapper}>
             {experiment && (
               <Box display="flex" flexDirection="column" height="100%">
                 <Box px={3} pt={3}>
                   <PaperTop title={experiment.name}>
-                    <Space>
+                    <Space direction="row">
                       <Button color="secondary" size="small" onClick={handleDeleteExperiment}>
                         {T('common.delete')}
                       </Button>
@@ -169,7 +164,7 @@ const Predefined = () => {
                   </PaperTop>
                 </Box>
                 <Box flex={1}>
-                  <YAMLEditor theme={theme} data={yaml.dump(experiment.yaml)} mountEditor={setYAMLEditor} />
+                  <YAMLEditor data={yaml.dump(experiment.yaml)} mountEditor={setYAMLEditor} />
                 </Box>
               </Box>
             )}

@@ -50,11 +50,11 @@ func (in *{{.Type}}) GetObjectMeta() *metav1.ObjectMeta {
 }
 
 // GetDuration would return the duration for chaos
-func (in *{{.Type}}) GetDuration() (*time.Duration, error) {
-	if in.Spec.Duration == nil {
+func (in *{{.Type}}Spec) GetDuration() (*time.Duration, error) {
+	if in.Duration == nil {
 		return nil, nil
 	}
-	duration, err := time.ParseDuration(*in.Spec.Duration)
+	duration, err := time.ParseDuration(*in.Duration)
 	if err != nil {
 		return nil, err
 	}
@@ -70,6 +70,7 @@ func (in *{{.Type}}) GetChaos() *ChaosInstance {
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
 		UID:       string(in.UID),
+		Status:    in.Status.ChaosStatus,
 	}
 
 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
@@ -123,7 +124,7 @@ func (in *{{.Type}}List) ListChaos() []*ChaosInstance {
 }
 
 func (in *{{.Type}}) DurationExceeded(now time.Time) (bool, time.Duration, error) {
-	duration, err := in.GetDuration()
+	duration, err := in.Spec.GetDuration()
 	if err != nil {
 		return false, 0, err
 	}
@@ -139,9 +140,21 @@ func (in *{{.Type}}) DurationExceeded(now time.Time) (bool, time.Duration, error
 
 	return false, 0, nil
 }
+
+func (in *{{.Type}}) IsOneShot() bool {
+	{{if .OneShotExp}}
+	if {{.OneShotExp}} {
+		return true
+	}
+
+	return false
+	{{else}}
+	return false
+	{{end}}
+}
 `
 
-func generateImpl(name string) string {
+func generateImpl(name string, oneShotExp string) string {
 	tmpl, err := template.New("impl").Parse(implTemplate)
 	if err != nil {
 		log.Error(err, "fail to build template")
@@ -150,7 +163,8 @@ func generateImpl(name string) string {
 
 	buf := new(bytes.Buffer)
 	err = tmpl.Execute(buf, &metadata{
-		Type: name,
+		Type:       name,
+		OneShotExp: oneShotExp,
 	})
 	if err != nil {
 		log.Error(err, "fail to execute template")

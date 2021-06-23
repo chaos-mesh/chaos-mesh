@@ -15,6 +15,7 @@ package v1alpha1
 
 import (
 	"fmt"
+	"reflect"
 	"strconv"
 
 	"k8s.io/apimachinery/pkg/runtime"
@@ -51,7 +52,9 @@ func (in *JVMChaos) ValidateCreate() error {
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
 func (in *JVMChaos) ValidateUpdate(old runtime.Object) error {
 	jvmchaoslog.Info("validate update", "name", in.Name)
-
+	if !reflect.DeepEqual(in.Spec, old.(*JVMChaos).Spec) {
+		return ErrCanNotUpdateChaos
+	}
 	return in.Validate()
 }
 
@@ -65,8 +68,7 @@ func (in *JVMChaos) ValidateDelete() error {
 
 // Validate validates chaos object
 func (in *JVMChaos) Validate() error {
-	specField := field.NewPath("spec")
-	allErrs := in.validateJvmChaos(specField)
+	allErrs := in.Spec.Validate()
 	if len(allErrs) > 0 {
 		return fmt.Errorf(allErrs.ToAggregate().Error())
 	}
@@ -74,21 +76,27 @@ func (in *JVMChaos) Validate() error {
 	return nil
 }
 
-func (in *JVMChaos) validateJvmChaos(spec *field.Path) field.ErrorList {
+func (in *JVMChaosSpec) Validate() field.ErrorList {
+	specField := field.NewPath("spec")
+	allErrs := in.validateJvmChaos(specField)
+	allErrs = append(allErrs, validateDuration(in, specField)...)
+	return allErrs
+}
+
+func (in *JVMChaosSpec) validateJvmChaos(spec *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 	targetField := spec.Child("target")
 	actionField := spec.Child("action")
 	flagsField := spec.Child("flags")
 	matcherField := spec.Child("matcher")
-	if actions, ok := JvmSpec[in.Spec.Target]; ok {
-
-		if actionPR, actionOK := actions[in.Spec.Action]; actionOK {
+	if actions, ok := JvmSpec[in.Target]; ok {
+		if actionPR, actionOK := actions[in.Action]; actionOK {
 			if actionPR.Flags != nil {
-				allErrs = append(allErrs, in.validateParameterRules(in.Spec.Flags, actionPR.Flags, flagsField, targetField, actionField)...)
+				allErrs = append(allErrs, in.validateParameterRules(in.Flags, actionPR.Flags, flagsField, targetField, actionField)...)
 			}
 
 			if actionPR.Matchers != nil {
-				allErrs = append(allErrs, in.validateParameterRules(in.Spec.Matchers, actionPR.Matchers, matcherField, targetField, actionField)...)
+				allErrs = append(allErrs, in.validateParameterRules(in.Matchers, actionPR.Matchers, matcherField, targetField, actionField)...)
 			}
 
 		} else {
@@ -97,13 +105,13 @@ func (in *JVMChaos) validateJvmChaos(spec *field.Path) field.ErrorList {
 				supportActions = append(supportActions, k)
 			}
 
-			notSupportedError := field.NotSupported(actionField, in.Spec.Action, toString(supportActions))
+			notSupportedError := field.NotSupported(actionField, in.Action, toString(supportActions))
 			errorMsg := fmt.Sprintf("target: %s does not match action: %s, action detail error: %s",
-				in.Spec.Target, in.Spec.Action, notSupportedError)
-			allErrs = append(allErrs, field.Invalid(targetField, in.Spec.Target, errorMsg))
+				in.Target, in.Action, notSupportedError)
+			allErrs = append(allErrs, field.Invalid(targetField, in.Target, errorMsg))
 		}
 	} else {
-		allErrs = append(allErrs, field.Invalid(targetField, in.Spec.Target, "unknown JVM chaos target"))
+		allErrs = append(allErrs, field.Invalid(targetField, in.Target, "unknown JVM chaos target"))
 	}
 
 	return allErrs
@@ -117,7 +125,7 @@ func toString(actions []JVMChaosAction) []string {
 	return ret
 }
 
-func (in *JVMChaos) validateParameterRules(parameters map[string]string, rules []ParameterRules, parent *field.Path, target *field.Path, action *field.Path) field.ErrorList {
+func (in *JVMChaosSpec) validateParameterRules(parameters map[string]string, rules []ParameterRules, parent *field.Path, target *field.Path, action *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 	for _, rule := range rules {
 		innerField := parent.Child(rule.Name)
@@ -128,7 +136,7 @@ func (in *JVMChaos) validateParameterRules(parameters map[string]string, rules [
 			value, exist = parameters[rule.Name]
 		}
 		if rule.Required && !exist {
-			errorMsg := fmt.Sprintf("with %s: %s, %s: %s", target, in.Spec.Target, action, in.Spec.Action)
+			errorMsg := fmt.Sprintf("with %s: %s, %s: %s", target, in.Target, action, in.Action)
 			allErrs = append(allErrs, field.Required(innerField, errorMsg))
 		}
 

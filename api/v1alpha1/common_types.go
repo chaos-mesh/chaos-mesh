@@ -93,8 +93,8 @@ type InnerObject interface {
 	IsDeleted() bool
 	IsPaused() bool
 	GetChaos() *ChaosInstance
-	GetDuration() (*time.Duration, error)
 	DurationExceeded(time.Time) (bool, time.Duration, error)
+	IsOneShot() bool
 	StatefulObject
 }
 
@@ -125,7 +125,7 @@ type ChaosInstance struct {
 	EndTime   time.Time
 	Action    string
 	Duration  string
-	Status    string
+	Status    ChaosStatus
 	UID       string
 }
 

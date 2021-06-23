@@ -89,6 +89,7 @@ func (s *server) setupUDPServer() error {
 	go func() {
 		for {
 			_, _, err := pc.ReadFrom(s.recvBuf)
+			fmt.Println("receive buf " + string(s.recvBuf))
 			if err != nil {
 				return
 			}
@@ -252,9 +253,7 @@ func (s *server) networkSendTest(w http.ResponseWriter, r *http.Request) {
 func (s *server) networkRecvTest(w http.ResponseWriter, r *http.Request) {
 	w.Write(s.recvBuf)
 
-	for index := range s.recvBuf {
-		s.recvBuf[index] = 0
-	}
+	s.recvBuf = []byte{}
 }
 
 func (s *server) stressCondition(w http.ResponseWriter, r *http.Request) {

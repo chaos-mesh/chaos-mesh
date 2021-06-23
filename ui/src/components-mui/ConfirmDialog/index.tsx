@@ -43,9 +43,13 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
       {...dialogProps}
     >
       <DialogTitle id="dialog-title">{title}</DialogTitle>
-      <DialogContent>
-        {children ? children : <DialogContentText id="dialog-description">{description}</DialogContentText>}
-      </DialogContent>
+      {children ? (
+        <DialogContent>{children}</DialogContent>
+      ) : description ? (
+        <DialogContent>
+          <DialogContentText id="dialog-description">{description}</DialogContentText>
+        </DialogContent>
+      ) : null}
       {onConfirm && (
         <DialogActions>
           <Button size="small" onClick={close}>

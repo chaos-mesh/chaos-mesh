@@ -9,6 +9,10 @@ metadata:
 spec:
   type: {{ .Values.controllerManager.service.type }}
   ports:
+    - port: 443
+      targetPort: webhook
+      protocol: TCP
+      name: webhook
   {{- if .Values.enableProfiling }}
     - port: 10081
       targetPort: pprof
@@ -19,10 +23,6 @@ spec:
       targetPort: http
       protocol: TCP
       name: http
-    - port: 443
-      targetPort: webhook
-      protocol: TCP
-      name: webhook
   selector:
     {{- include "chaos-mesh.selectors" . | nindent 4 }}
     app.kubernetes.io/component: controller-manager

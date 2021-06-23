@@ -15,6 +15,7 @@ package v1alpha1
 
 import (
 	"fmt"
+	"reflect"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
@@ -49,6 +50,9 @@ func (in *DNSChaos) ValidateCreate() error {
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
 func (in *DNSChaos) ValidateUpdate(old runtime.Object) error {
 	dnschaoslog.Info("validate update", "name", in.Name)
+	if !reflect.DeepEqual(in.Spec, old.(*DNSChaos).Spec) {
+		return ErrCanNotUpdateChaos
+	}
 	return in.Validate()
 }
 
@@ -62,12 +66,17 @@ func (in *DNSChaos) ValidateDelete() error {
 
 // Validate validates chaos object
 func (in *DNSChaos) Validate() error {
-	specField := field.NewPath("spec")
-
-	allErrs := validatePodSelector(in.Spec.PodSelector.Value, in.Spec.PodSelector.Mode, specField.Child("value"))
+	allErrs := in.Spec.Validate()
 	if len(allErrs) > 0 {
 		return fmt.Errorf(allErrs.ToAggregate().Error())
 	}
 
 	return nil
+}
+
+func (in *DNSChaosSpec) Validate() field.ErrorList {
+	specField := field.NewPath("spec")
+	allErrs := validatePodSelector(in.PodSelector.Value, in.PodSelector.Mode, specField.Child("value"))
+	allErrs = append(allErrs, validateDuration(in, specField)...)
+	return allErrs
 }

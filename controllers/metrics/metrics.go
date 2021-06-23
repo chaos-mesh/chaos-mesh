@@ -15,12 +15,14 @@ package metrics
 
 import (
 	"context"
+	"reflect"
 
 	"github.com/prometheus/client_golang/prometheus"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
 )
 
 var log = ctrl.Log.WithName("metrics-collector")
@@ -122,12 +124,15 @@ func (c *ChaosCollector) collect() {
 			log.Error(err, "failed to list chaos", "kind", kind)
 			return
 		}
-		for _, chaos := range obj.ListChaos() {
-			if _, ok := expCache[chaos.Namespace]; !ok {
+
+		items := reflect.ValueOf(obj.ChaosList).Elem().FieldByName("Items")
+		for i := 0; i < items.Len(); i++ {
+			item := items.Index(i).Addr().Interface().(v1alpha1.InnerObject)
+			if _, ok := expCache[item.GetChaos().Namespace]; !ok {
 				// There is only 4 supported phases
-				expCache[chaos.Namespace] = make(map[string]int, 4)
+				expCache[item.GetChaos().Namespace] = make(map[string]int, 4)
 			}
-			expCache[chaos.Namespace][chaos.Status]++
+			expCache[item.GetChaos().Namespace][string(utils.GetChaosState(item))]++
 		}
 
 		for ns, v := range expCache {

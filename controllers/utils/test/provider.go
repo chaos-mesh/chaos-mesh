@@ -22,7 +22,9 @@ import (
 	"k8s.io/client-go/rest"
 	ctrl "sigs.k8s.io/controller-runtime"
 
+	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-controller-manager/provider"
 	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 )
 
 func NewTestManager(lc fx.Lifecycle, options *ctrl.Options, cfg *rest.Config) (ctrl.Manager, error) {
@@ -58,3 +60,16 @@ func NewTestManager(lc fx.Lifecycle, options *ctrl.Options, cfg *rest.Config) (c
 	})
 	return mgr, nil
 }
+
+var Module = fx.Provide(
+	provider.NewOption,
+	provider.NewClient,
+	provider.NewLogger,
+	provider.NewAuthCli,
+	provider.NewScheme,
+	provider.NewNoCacheReader,
+	provider.NewGlobalCacheReader,
+	provider.NewControlPlaneCacheReader,
+	NewTestManager,
+	recorder.NewRecorderBuilder,
+)

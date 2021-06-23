@@ -67,7 +67,7 @@ func Test{{.Type}}GetDuration(t *testing.T) {
 
 	g.Expect(err).To(BeNil())
 
-	chaos.GetDuration()
+	chaos.Spec.GetDuration()
 }
 
 func Test{{.Type}}GetChaos(t *testing.T) {

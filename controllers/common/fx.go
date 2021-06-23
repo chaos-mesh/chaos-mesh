@@ -43,15 +43,29 @@ type ChaosImplPair struct {
 	Controlls  []runtime.Object
 }
 
-type ChaosImplPairs struct {
+type Params struct {
 	fx.In
 
-	Impls []*ChaosImplPair `group:"impl"`
+	Mgr             ctrl.Manager
+	Client          client.Client
+	Logger          logr.Logger
+	Selector        *selector.Selector
+	RecorderBuilder *recorder.RecorderBuilder
+	Impls           []*ChaosImplPair `group:"impl"`
+	Reader          client.Reader    `name:"no-cache"`
 }
 
-func NewController(mgr ctrl.Manager, client client.Client, reader client.Reader, logger logr.Logger, selector *selector.Selector, pairs ChaosImplPairs) (types.Controller, error) {
+func NewController(params Params) (types.Controller, error) {
+	logger := params.Logger
+	pairs := params.Impls
+	mgr := params.Mgr
+	client := params.Client
+	reader := params.Reader
+	selector := params.Selector
+	recorderBuilder := params.RecorderBuilder
+
 	setupLog := logger.WithName("setup-common")
-	for _, pair := range pairs.Impls {
+	for _, pair := range pairs {
 		setupLog.Info("setting up controller", "resource-name", pair.Name)
 
 		builder := builder.Default(mgr).
@@ -104,7 +118,7 @@ func NewController(mgr ctrl.Manager, client client.Client, reader client.Reader,
 			Object:   pair.Object,
 			Client:   client,
 			Reader:   reader,
-			Recorder: recorder.NewRecorder(mgr, "common", logger),
+			Recorder: recorderBuilder.Build("records"),
 			Selector: selector,
 			Log:      logger.WithName("records"),
 		})

@@ -16,6 +16,7 @@ package v1alpha1
 import (
 	"errors"
 	"fmt"
+	"reflect"
 	"strconv"
 
 	"github.com/docker/go-units"
@@ -60,6 +61,9 @@ func (in *StressChaos) ValidateCreate() error {
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
 func (in *StressChaos) ValidateUpdate(old runtime.Object) error {
 	stressChaosLog.Info("validate update", "name", in.Name)
+	if !reflect.DeepEqual(in.Spec, old.(*StressChaos).Spec) {
+		return ErrCanNotUpdateChaos
+	}
 	return in.Validate()
 }
 
@@ -73,8 +77,7 @@ func (in *StressChaos) ValidateDelete() error {
 
 // Validate validates chaos object
 func (in *StressChaos) Validate() error {
-	root := field.NewPath("stresschaos")
-	errs := in.Spec.Validate(root)
+	errs := in.Spec.Validate()
 	if len(errs) > 0 {
 		return fmt.Errorf(errs.ToAggregate().Error())
 	}
@@ -82,15 +85,17 @@ func (in *StressChaos) Validate() error {
 }
 
 // Validate validates the scheduler and duration
-func (in *StressChaosSpec) Validate(parent *field.Path) field.ErrorList {
+func (in *StressChaosSpec) Validate() field.ErrorList {
 	errs := field.ErrorList{}
-	current := parent.Child("spec")
+	specField := field.NewPath("spec")
+	var allErrs field.ErrorList
 	if len(in.StressngStressors) == 0 && in.Stressors == nil {
-		errs = append(errs, field.Invalid(current, in, "missing stressors"))
+		allErrs = append(errs, field.Invalid(specField, in, "missing stressors"))
 	} else if in.Stressors != nil {
-		errs = append(errs, in.Stressors.Validate(current)...)
+		allErrs = append(errs, in.Stressors.Validate(specField)...)
 	}
-	return errs
+	allErrs = append(allErrs, validateDuration(in, specField)...)
+	return allErrs
 }
 
 // Validate validates whether the Stressors are all well defined

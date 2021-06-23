@@ -22,23 +22,23 @@ import (
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 )
 
 // SerialNodeReconciler watches on nodes which type is Serial
 type SerialNodeReconciler struct {
 	*ChildNodesFetcher
 	kubeClient    client.Client
-	eventRecorder record.EventRecorder
+	eventRecorder recorder.ChaosRecorder
 	logger        logr.Logger
 }
 
-func NewSerialNodeReconciler(kubeClient client.Client, eventRecorder record.EventRecorder, logger logr.Logger) *SerialNodeReconciler {
+func NewSerialNodeReconciler(kubeClient client.Client, eventRecorder recorder.ChaosRecorder, logger logr.Logger) *SerialNodeReconciler {
 	return &SerialNodeReconciler{
 		ChildNodesFetcher: NewChildNodesFetcher(kubeClient, logger),
 		kubeClient:        kubeClient,
@@ -127,7 +127,7 @@ func (it *SerialNodeReconciler) Reconcile(request reconcile.Request) (reconcile.
 		}
 
 		// TODO: also check the consistent between spec in task and the spec in child node
-		if len(finishedChildren) == len(nodeNeedUpdate.Spec.Tasks) {
+		if len(finishedChildren) == len(nodeNeedUpdate.Spec.Children) {
 			SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
 				Type:   v1alpha1.ConditionAccomplished,
 				Status: corev1.ConditionTrue,
@@ -160,10 +160,14 @@ func (it *SerialNodeReconciler) Reconcile(request reconcile.Request) (reconcile.
 func (it *SerialNodeReconciler) syncChildNodes(ctx context.Context, node v1alpha1.WorkflowNode) error {
 
 	// empty serial node
-	if len(node.Spec.Tasks) == 0 {
+	if len(node.Spec.Children) == 0 {
 		it.logger.V(4).Info("empty serial node, NOOP",
 			"node", fmt.Sprintf("%s/%s", node.Namespace, node.Name),
 		)
+		return nil
+	}
+
+	if WorkflowNodeFinished(node.Status) {
 		return nil
 	}
 
@@ -174,20 +178,20 @@ func (it *SerialNodeReconciler) syncChildNodes(ctx context.Context, node v1alpha
 	var taskToStartup string
 	if len(activeChildNodes) == 0 {
 		// no active children, trying to spawn a new one
-		for index, task := range node.Spec.Tasks {
-			// Walking through on the Spec.Tasks, each one of task SHOULD has one corresponding workflow node;
+		for index, task := range node.Spec.Children {
+			// Walking through on the Spec.Children, each one of task SHOULD has one corresponding workflow node;
 			// If the spec of one task has been changed, the corresponding workflow node and other
 			// workflow nodes **behinds** that workflow node will be deleted.
 			// That's so called "partial rerun" feature.
 			// For example:
 			// One serial node have three children nodes: A, B, C, and all of them have finished.
-			// Then user updates the Spec.Tasks[B], the expected behavior is workflow node B and C will be
+			// Then user updates the Spec.Children[B], the expected behavior is workflow node B and C will be
 			// deleted, then create a new node that refs to B, no effects on A.
 			if index < len(finishedChildNodes) {
 				// TODO: if the definition/spec of task changed, we should also respawn the node
 				// child node start with task name
 
-				// TODO: maybe the changes on Spec.Tasks should be concerned each time, not only during spawning
+				// TODO: maybe the changes on Spec.Children should be concerned each time, not only during spawning
 				// new instances, for shutdown outdated nodes **instantly**
 
 				if strings.HasPrefix(task, finishedChildNodes[index].Name) {
@@ -253,7 +257,6 @@ func (it *SerialNodeReconciler) syncChildNodes(ctx context.Context, node v1alpha
 		return err
 	}
 
-	// TODO: emit event
 	var childrenNames []string
 	for _, childNode := range childNodes {
 		err := it.kubeClient.Create(ctx, childNode)
@@ -265,6 +268,7 @@ func (it *SerialNodeReconciler) syncChildNodes(ctx context.Context, node v1alpha
 		}
 		childrenNames = append(childrenNames, childNode.Name)
 	}
+	it.eventRecorder.Event(&node, recorder.NodesCreated{ChildNodes: childrenNames})
 	it.logger.Info("serial node spawn new child node",
 		"node", fmt.Sprintf("%s/%s", node.Namespace, node.Name),
 		"child node", childrenNames)

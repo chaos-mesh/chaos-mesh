@@ -26,10 +26,11 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 )
 
-func NewController(mgr ctrl.Manager, client client.Client, reader client.Reader, logger logr.Logger) (types.Controller, error) {
+func NewController(mgr ctrl.Manager, client client.Client, logger logr.Logger, b *chaosdaemon.ChaosDaemonClientBuilder, recorderBuilder *recorder.RecorderBuilder) (types.Controller, error) {
 	err := builder.Default(mgr).
 		For(&v1alpha1.PodNetworkChaos{}).
 		Named("podnetworkchaos").
@@ -43,12 +44,12 @@ func NewController(mgr ctrl.Manager, client client.Client, reader client.Reader,
 		}).
 		Complete(&Reconciler{
 			Client:   client,
-			Reader:   reader,
 			Log:      logger.WithName("podnetworkchaos"),
-			Recorder: recorder.NewRecorder(mgr, "podnetworkchaos", logger),
+			Recorder: recorderBuilder.Build("podnetworkchaos"),
 
 			// TODO:
-			AllowHostNetworkTesting: config.ControllerCfg.AllowHostNetworkTesting,
+			AllowHostNetworkTesting:  config.ControllerCfg.AllowHostNetworkTesting,
+			ChaosDaemonClientBuilder: b,
 		})
 	if err != nil {
 		return "", err

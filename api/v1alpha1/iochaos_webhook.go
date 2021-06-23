@@ -15,6 +15,7 @@ package v1alpha1
 
 import (
 	"fmt"
+	"reflect"
 	"time"
 
 	"k8s.io/apimachinery/pkg/runtime"
@@ -58,6 +59,9 @@ func (in *IOChaos) ValidateCreate() error {
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
 func (in *IOChaos) ValidateUpdate(old runtime.Object) error {
 	iochaoslog.Info("validate update", "name", in.Name)
+	if !reflect.DeepEqual(in.Spec, old.(*IOChaos).Spec) {
+		return ErrCanNotUpdateChaos
+	}
 	return in.Validate()
 }
 
@@ -71,17 +75,23 @@ func (in *IOChaos) ValidateDelete() error {
 
 // Validate validates chaos object
 func (in *IOChaos) Validate() error {
-	specField := field.NewPath("spec")
-	allErrs := in.Spec.validateDelay(specField.Child("delay"))
-	allErrs = append(allErrs, in.Spec.validateErrno(specField.Child("errno"))...)
-	allErrs = append(allErrs, validateDuration(in, specField)...)
-	allErrs = append(allErrs, validatePodSelector(in.Spec.PodSelector.Value, in.Spec.PodSelector.Mode, specField.Child("value"))...)
-	allErrs = append(allErrs, in.Spec.validatePercent(specField.Child("percent"))...)
+	allErrs := in.Spec.Validate()
 
 	if len(allErrs) > 0 {
 		return fmt.Errorf(allErrs.ToAggregate().Error())
 	}
 	return nil
+}
+
+func (in *IOChaosSpec) Validate() field.ErrorList {
+	specField := field.NewPath("spec")
+	allErrs := in.validateDelay(specField.Child("delay"))
+	allErrs = append(allErrs, validateDuration(in, specField)...)
+	allErrs = append(allErrs, validatePodSelector(in.PodSelector.Value, in.PodSelector.Mode, specField.Child("value"))...)
+	allErrs = append(allErrs, in.validateErrno(specField.Child("errno"))...)
+	allErrs = append(allErrs, in.validatePercent(specField.Child("percent"))...)
+
+	return allErrs
 }
 
 func (in *IOChaosSpec) validateDelay(delay *field.Path) field.ErrorList {

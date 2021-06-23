@@ -35,7 +35,6 @@ type Reconciler struct {
 
 	// Client is used to operate on the Kubernetes cluster
 	client.Client
-	client.Reader
 
 	Recorder recorder.ChaosRecorder
 	Log      logr.Logger
@@ -84,6 +83,12 @@ func (ctx *reconcileContext) CalcDesiredPhase() (v1alpha1.DesiredPhase, []record
 			events = append(events, recorder.Deleted{})
 		}
 		return v1alpha1.StoppedPhase, events
+	}
+
+	if ctx.obj.IsOneShot() {
+		// An oneshot chaos should always be in running phase, so that it cannot
+		// be applied multiple times or cause other bugs :(
+		return v1alpha1.RunningPhase, events
 	}
 
 	// Consider the duration

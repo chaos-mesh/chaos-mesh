@@ -31,6 +31,7 @@ import (
 	controllermetrics "sigs.k8s.io/controller-runtime/pkg/metrics"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	apiWebhook "github.com/chaos-mesh/chaos-mesh/api/webhook"
 	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-controller-manager/provider"
 	"github.com/chaos-mesh/chaos-mesh/controllers"
@@ -67,16 +68,7 @@ func main() {
 
 	app := fx.New(
 		fx.Options(
-			fx.Provide(
-				provider.NewOption,
-				provider.NewClient,
-				provider.NewManager,
-				provider.NewReader,
-				provider.NewLogger,
-				provider.NewAuthCli,
-				provider.NewScheme,
-				provider.NewConfig,
-			),
+			provider.Module,
 			controllers.Module,
 			selector.Module,
 			types.ChaosObjects,
@@ -110,6 +102,13 @@ func Run(params RunParams) error {
 		if err != nil {
 			return err
 		}
+	}
+
+	err = ctrl.NewWebhookManagedBy(mgr).
+		For(&v1alpha1.Schedule{}).
+		Complete()
+	if err != nil {
+		return err
 	}
 
 	// Init metrics collector
@@ -150,7 +149,7 @@ func Run(params RunParams) error {
 		}},
 	)
 	hookServer.Register("/validate-auth", &webhook.Admission{
-		Handler: apiWebhook.NewAuthValidator(ccfg.ControllerCfg.SecurityMode, mgr.GetClient(), mgr.GetAPIReader(), authCli,
+		Handler: apiWebhook.NewAuthValidator(ccfg.ControllerCfg.SecurityMode, authCli,
 			ccfg.ControllerCfg.ClusterScoped, ccfg.ControllerCfg.TargetNamespace, ccfg.ControllerCfg.EnableFilterNamespace),
 	},
 	)

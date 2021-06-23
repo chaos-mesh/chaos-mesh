@@ -55,7 +55,7 @@ var _ = Describe("Schedule", func() {
 				Spec: v1alpha1.ScheduleSpec{
 					Schedule: "@every 10s",
 					ScheduleItem: v1alpha1.ScheduleItem{
-						TimeChaos: &v1alpha1.TimeChaosSpec{
+						EmbedChaos: v1alpha1.EmbedChaos{TimeChaos: &v1alpha1.TimeChaosSpec{
 							TimeOffset: "100ms",
 							ClockIds:   []string{"CLOCK_REALTIME"},
 							Duration:   &duration,
@@ -64,7 +64,7 @@ var _ = Describe("Schedule", func() {
 									Mode: v1alpha1.OnePodMode,
 								},
 							},
-						},
+						}},
 					},
 					ConcurrencyPolicy: v1alpha1.ForbidConcurrent,
 					HistoryLimit:      5,
@@ -103,7 +103,7 @@ var _ = Describe("Schedule", func() {
 				Spec: v1alpha1.ScheduleSpec{
 					Schedule: "@every 1s",
 					ScheduleItem: v1alpha1.ScheduleItem{
-						TimeChaos: &v1alpha1.TimeChaosSpec{
+						EmbedChaos: v1alpha1.EmbedChaos{TimeChaos: &v1alpha1.TimeChaosSpec{
 							TimeOffset: "100ms",
 							ClockIds:   []string{"CLOCK_REALTIME"},
 							Duration:   &duration,
@@ -112,7 +112,7 @@ var _ = Describe("Schedule", func() {
 									Mode: v1alpha1.OnePodMode,
 								},
 							},
-						},
+						}},
 					},
 					ConcurrencyPolicy: v1alpha1.ForbidConcurrent,
 					HistoryLimit:      2,
@@ -168,7 +168,7 @@ var _ = Describe("Schedule", func() {
 				Spec: v1alpha1.ScheduleSpec{
 					Schedule: "@every 2s",
 					ScheduleItem: v1alpha1.ScheduleItem{
-						TimeChaos: &v1alpha1.TimeChaosSpec{
+						EmbedChaos: v1alpha1.EmbedChaos{TimeChaos: &v1alpha1.TimeChaosSpec{
 							TimeOffset: "100ms",
 							ClockIds:   []string{"CLOCK_REALTIME"},
 							Duration:   &duration,
@@ -177,7 +177,7 @@ var _ = Describe("Schedule", func() {
 									Mode: v1alpha1.OnePodMode,
 								},
 							},
-						},
+						}},
 					},
 					ConcurrencyPolicy: v1alpha1.AllowConcurrent,
 					HistoryLimit:      2,
@@ -226,7 +226,7 @@ var _ = Describe("Schedule", func() {
 				Spec: v1alpha1.ScheduleSpec{
 					Schedule: "@every 3s",
 					ScheduleItem: v1alpha1.ScheduleItem{
-						TimeChaos: &v1alpha1.TimeChaosSpec{
+						EmbedChaos: v1alpha1.EmbedChaos{TimeChaos: &v1alpha1.TimeChaosSpec{
 							TimeOffset: "100ms",
 							ClockIds:   []string{"CLOCK_REALTIME"},
 							Duration:   &duration,
@@ -235,7 +235,7 @@ var _ = Describe("Schedule", func() {
 									Mode: v1alpha1.OnePodMode,
 								},
 							},
-						},
+						}},
 					},
 					ConcurrencyPolicy: v1alpha1.AllowConcurrent,
 					HistoryLimit:      2,
@@ -294,14 +294,14 @@ var _ = Describe("Schedule", func() {
 								{
 									Name:     "the-entry",
 									Type:     v1alpha1.TypeSerial,
-									Duration: &duration,
-									Tasks:    []string{"hardwork"},
+									Deadline: &duration,
+									Children: []string{"hardwork"},
 								},
 								{
 									Name:     "hardwork",
 									Type:     v1alpha1.TypeSuspend,
-									Duration: &duration,
-									Tasks:    nil,
+									Deadline: &duration,
+									Children: nil,
 								},
 							},
 						},
@@ -361,8 +361,8 @@ var _ = Describe("Schedule", func() {
 								{
 									Name:     "the-entry",
 									Type:     v1alpha1.TypeSerial,
-									Duration: &duration,
-									Tasks:    nil,
+									Deadline: &duration,
+									Children: nil,
 								},
 							},
 						},

@@ -28,13 +28,14 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
+	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-controller-manager/provider"
 	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/utils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/test"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/controllers"
 )
@@ -54,7 +55,7 @@ func TestSchedule(t *testing.T) {
 
 	RunSpecsWithDefaultAndCustomReporters(t,
 		"Schedule suit",
-		[]Reporter{envtest.NewlineReporter{}})
+		[]Reporter{printer.NewlineReporter{}})
 }
 
 var _ = BeforeSuite(func() {
@@ -84,15 +85,7 @@ var _ = BeforeSuite(func() {
 
 	app = fx.New(
 		fx.Options(
-			fx.Provide(
-				provider.NewOption,
-				provider.NewClient,
-				provider.NewReader,
-				provider.NewLogger,
-				provider.NewAuthCli,
-				provider.NewScheme,
-				test.NewTestManager,
-			),
+			test.Module,
 			fx.Supply(config),
 			Module,
 			types.ChaosObjects,
@@ -124,8 +117,9 @@ var _ = AfterSuite(func() {
 type RunParams struct {
 	fx.In
 
-	Mgr    ctrl.Manager
-	Logger logr.Logger
+	Mgr             ctrl.Manager
+	Logger          logr.Logger
+	RecorderBuilder *recorder.RecorderBuilder
 
 	Controllers []types.Controller `group:"controller"`
 	Objs        []types.Object     `group:"objs"`
@@ -133,7 +127,7 @@ type RunParams struct {
 
 func Run(params RunParams) error {
 	lister = utils.NewActiveLister(k8sClient, params.Logger)
-	err := controllers.BootstrapWorkflowControllers(params.Mgr, params.Logger)
+	err := controllers.BootstrapWorkflowControllers(params.Mgr, params.Logger, params.RecorderBuilder)
 	if err != nil {
 		return err
 	}
