@@ -254,6 +254,16 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
 
               recurInsertTemplates(d.children)
             } else {
+              if (d.type === 'suspend') {
+                realTemplates.push({
+                  name: t.name,
+                  templateType: 'Suspend',
+                  deadline: t.deadline,
+                })
+
+                return
+              }
+
               const e = d.experiment!
               const basic = e.basic
               const name = basic.name
