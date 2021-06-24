@@ -38,13 +38,13 @@ const (
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	podchaos := obj.(*v1alpha1.PodChaos)
 
-	var pod v1.Pod
-	err := impl.Get(ctx, controller.ParseNamespacedName(records[index].Id), &pod)
+	var origin v1.Pod
+	err := impl.Get(ctx, controller.ParseNamespacedName(records[index].Id), &origin)
 	if err != nil {
 		// TODO: handle this error
 		return v1alpha1.NotInjected, err
 	}
-
+	pod := origin.DeepCopy()
 	for index := range pod.Spec.Containers {
 		originImage := pod.Spec.Containers[index].Image
 		name := pod.Spec.Containers[index].Name
@@ -79,7 +79,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		pod.Spec.InitContainers[index].Image = config.ControllerCfg.PodFailurePauseImage
 	}
 
-	err = impl.Update(ctx, &pod)
+	err = impl.Patch(ctx, pod, client.MergeFrom(&origin))
 	if err != nil {
 		// TODO: handle this error
 		return v1alpha1.NotInjected, err
@@ -91,8 +91,8 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	podchaos := obj.(*v1alpha1.PodChaos)
 
-	var pod v1.Pod
-	err := impl.Get(ctx, controller.ParseNamespacedName(records[index].Id), &pod)
+	var origin v1.Pod
+	err := impl.Get(ctx, controller.ParseNamespacedName(records[index].Id), &origin)
 	if err != nil {
 		// TODO: handle this error
 		if k8sError.IsNotFound(err) {
@@ -100,7 +100,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		}
 		return v1alpha1.NotInjected, err
 	}
-
+	pod := origin.DeepCopy()
 	for index := range pod.Spec.Containers {
 		name := pod.Spec.Containers[index].Name
 		key := annotation.GenKeyForImage(podchaos, name, false)
@@ -129,7 +129,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		}
 	}
 
-	err = impl.Update(ctx, &pod)
+	err = impl.Patch(ctx, pod, client.MergeFrom(&origin))
 	if err != nil {
 		// TODO: handle this error
 		return v1alpha1.Injected, err
