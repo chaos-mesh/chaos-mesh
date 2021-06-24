@@ -44,7 +44,7 @@ jobs:
           make ensure-kustomize || echo 0
 
           # preload go modules before goimports
-          go mod download -x
+          go mod download
 
           make groupimports || echo 0
           #use sh function
