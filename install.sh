@@ -955,7 +955,7 @@ rules:
     verbs: [ "get", "list", "watch" ]
   - apiGroups: [ "" ]
     resources: [ "pods", "secrets" ]
-    verbs: [ "get", "list", "watch", "delete", "update" ]
+    verbs: [ "get", "list", "watch", "delete", "update", "patch" ]
   - apiGroups:
       - ""
     resources:
