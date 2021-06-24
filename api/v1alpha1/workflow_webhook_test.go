@@ -367,3 +367,41 @@ func Test_shouldBeNoSchedule(t *testing.T) {
 		})
 	}
 }
+
+func Test_namesCouldNotBeDuplicated(t *testing.T) {
+	templatesPath := field.NewPath("spec", "templates")
+	type args struct {
+		templatesPath *field.Path
+		names         []string
+	}
+	tests := []struct {
+		name string
+		args args
+		want field.ErrorList
+	}{
+		{
+			name: "names could not be duplicated",
+			args: args{
+				templatesPath: templatesPath,
+				names:         []string{"template-a", "template-b", "template-c", "template-a", "template-b", "template-d"},
+			},
+			want: field.ErrorList{
+				field.Invalid(templatesPath, "", fmt.Sprintf("template name must be unique, duplicated names: %s", []string{"template-a", "template-b"})),
+			},
+		}, {
+			name: "names could not be duplicated",
+			args: args{
+				templatesPath: templatesPath,
+				names:         []string{"template-a", "template-b", "template-c", "template-d"},
+			},
+			want: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := namesCouldNotBeDuplicated(tt.args.templatesPath, tt.args.names); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("namesCouldNotBeDuplicated() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
