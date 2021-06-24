@@ -209,23 +209,25 @@ func (r *endpoint) failPod(ctx context.Context, pod *v1.Pod, podchaos *v1alpha1.
 		pod.Annotations[key] = originImage
 		pod.Spec.Containers[index].Image = pauseImage
 	}
-	updateErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		var newPod v1.Pod
+	patchErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		var origin v1.Pod
 		getErr := r.Client.Get(ctx, types.NamespacedName{
 			Namespace: pod.Namespace,
 			Name:      pod.Name,
-		}, &newPod)
+		}, &origin)
 		if getErr != nil {
 			return getErr
 		}
+		newPod := origin.DeepCopy()
 		newPod.Annotations = pod.Annotations
 		newPod.Spec.Containers = pod.Spec.Containers
 		newPod.Spec.InitContainers = pod.Spec.InitContainers
-		return r.Client.Update(ctx, &newPod)
+
+		return r.Client.Patch(ctx, newPod, client.MergeFrom(&origin))
 	})
-	if updateErr != nil {
-		r.Log.Error(updateErr, "unable to use fake image on pod")
-		return updateErr
+	if patchErr != nil {
+		r.Log.Error(patchErr, "unable to use fake image on pod")
+		return patchErr
 	}
 
 	ps := v1alpha1.PodStatus{
