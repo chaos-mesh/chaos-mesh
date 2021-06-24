@@ -104,8 +104,17 @@ func Run(params RunParams) error {
 		}
 	}
 
+	// setup schedule webhook
 	err = ctrl.NewWebhookManagedBy(mgr).
 		For(&v1alpha1.Schedule{}).
+		Complete()
+	if err != nil {
+		return err
+	}
+
+	// setup workflow webhook
+	err = ctrl.NewWebhookManagedBy(mgr).
+		For(&v1alpha1.Workflow{}).
 		Complete()
 	if err != nil {
 		return err
