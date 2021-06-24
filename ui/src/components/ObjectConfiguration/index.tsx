@@ -111,10 +111,10 @@ const ObjectConfiguration: React.FC<ObjectConfigurationProps> = ({
           <TableBody>
             {!inSchedule && (
               <TableRow>
-                <TableCell>{T('newE.run.duration')}</TableCell>
+                <TableCell>{T(inNode ? 'newW.node.deadline' : 'newE.run.duration')}</TableCell>
                 <TableCell>
                   <Typography variant="body2" color="textSecondary">
-                    {inNode ? (config as any).duration : spec.duration ? spec.duration : T('newE.run.continuous')}
+                    {inNode ? (config as any).deadline : spec.duration ? spec.duration : T('newE.run.continuous')}
                   </Typography>
                 </TableCell>
               </TableRow>

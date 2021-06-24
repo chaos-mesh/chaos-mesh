@@ -1,60 +1,11 @@
 import { Node, WorkflowSingle } from 'api/workflows.type'
 import cytoscape, { EdgeDefinition, EventHandler, NodeDefinition, Stylesheet } from 'cytoscape'
 
+import { Theme } from '@material-ui/core'
 import _flattenDeep from 'lodash.flattendeep'
 import dagre from 'cytoscape-dagre'
-import theme from 'theme'
 
 cytoscape.use(dagre)
-
-const workflowNodeStyle = {
-  width: 24,
-  height: 24,
-  color: 'rgb(0, 0, 0)',
-  opacity: 0,
-  'background-color': 'grey',
-  'text-margin-y': '-3px',
-  'text-opacity': 0.87,
-  label: 'data(id)',
-}
-
-const workflowStyle: Stylesheet[] = [
-  {
-    selector: 'node',
-    style: workflowNodeStyle,
-  },
-  {
-    selector: 'node.Succeed',
-    style: {
-      'background-color': theme.palette.success.main,
-    },
-  },
-  {
-    selector: 'edge',
-    style: {
-      width: 3,
-      opacity: 0,
-      'line-color': 'rgb(0, 0, 0)',
-      'line-opacity': 0.12,
-      'curve-style': 'taxi',
-      'taxi-direction': 'horizontal',
-      'taxi-turn': 100,
-    } as any,
-  },
-  {
-    selector: 'edge.Succeed',
-    style: {
-      'line-color': theme.palette.success.main,
-    },
-  },
-  {
-    selector: 'edge.bezier',
-    style: {
-      'curve-style': 'bezier',
-      'control-point-step-size': 40,
-    },
-  },
-]
 
 type RecursiveNodeDefinition = NodeDefinition | Array<string | RecursiveNodeDefinition>
 
@@ -74,7 +25,11 @@ function generateWorkflowNodes(detail: WorkflowSingle) {
         node.name,
       ]
     } else if (type === 'ParallelNode' && node.parallel!.children.length) {
-      return [type, node.parallel!.children.map((d) => toCytoscapeNode(nodeMap.get(d.name)!)), node.name]
+      return [
+        type,
+        node.parallel!.children.filter((d) => d.name).map((d) => toCytoscapeNode(nodeMap.get(d.name)!)),
+        node.name,
+      ]
     } else {
       return {
         data: {
@@ -120,7 +75,11 @@ function connectSerial(edges: EdgeDefinition[], id: string, serial: RecursiveNod
   }
 }
 
-function generateWorkflowEdges(result: EdgeDefinition[], nodes: RecursiveNodeDefinition[]) {
+function generateWorkflowEdges(
+  result: EdgeDefinition[],
+  connections: NodeDefinition[],
+  nodes: RecursiveNodeDefinition[]
+) {
   let source = nodes[0] as NodeDefinition
 
   // source != single node
@@ -128,17 +87,17 @@ function generateWorkflowEdges(result: EdgeDefinition[], nodes: RecursiveNodeDef
     const type = source[0]
 
     if (type === 'SerialNode') {
-      generateWorkflowEdges(result, [...source[1], ...nodes.slice(1)])
+      generateWorkflowEdges(result, connections, [...source[1], ...nodes.slice(1)])
 
       // connectSerial(result, source[2], source[1])
     } else if (type === 'ParallelNode') {
       ;(source[1] as NodeDefinition[]).forEach((d) => {
         if (nodes.length > 1) {
-          generateWorkflowEdges(result, [d, nodes[1]])
+          generateWorkflowEdges(result, connections, [d, nodes[1]])
         }
       })
 
-      generateWorkflowEdges(result, nodes.slice(1))
+      generateWorkflowEdges(result, connections, nodes.slice(1))
     }
   } else {
     // source = single node
@@ -154,7 +113,11 @@ function generateWorkflowEdges(result: EdgeDefinition[], nodes: RecursiveNodeDef
         const type = target[0]
 
         if (type === 'SerialNode') {
-          generateWorkflowEdges(result, [source, ...(target[1] as RecursiveNodeDefinition[]), ...nodes.slice(i + 2)])
+          generateWorkflowEdges(result, connections, [
+            source,
+            ...(target[1] as RecursiveNodeDefinition[]),
+            ...nodes.slice(i + 2),
+          ])
 
           // connectSerial(result, target[2] as string, target[1] as NodeDefinition[])
 
@@ -164,21 +127,19 @@ function generateWorkflowEdges(result: EdgeDefinition[], nodes: RecursiveNodeDef
             data: {
               id: `parallel-connection-${i}`,
             },
-            style: {
-              label: '',
-            },
+            classes: 'connection',
             grabbable: false,
           }
 
           // eslint-disable-next-line no-loop-func
           ;(target[1] as NodeDefinition[]).forEach((d) => {
-            generateWorkflowEdges(result, [source, d])
-            generateWorkflowEdges(result, [d, connection])
+            generateWorkflowEdges(result, connections, [source, d])
+            generateWorkflowEdges(result, connections, [d, connection])
           })
 
-          generateWorkflowEdges(result, [connection, ...nodes.slice(i + 2)])
+          generateWorkflowEdges(result, connections, [connection, ...nodes.slice(i + 2)])
 
-          nodes.push(connection)
+          connections.push(connection)
 
           break
         }
@@ -202,12 +163,70 @@ function generateWorkflowEdges(result: EdgeDefinition[], nodes: RecursiveNodeDef
 export const constructWorkflowTopology = (
   container: HTMLElement,
   detail: WorkflowSingle,
+  theme: Theme,
   onNodeClick: EventHandler
 ) => {
+  const workflowNodeStyle = {
+    width: 24,
+    height: 24,
+    color: theme.palette.text.primary,
+    opacity: 0,
+    'background-color': theme.palette.grey[500],
+    'text-margin-y': '-12px',
+    'text-opacity': 0.87,
+    label: 'data(id)',
+  }
+
+  const workflowStyle: Stylesheet[] = [
+    {
+      selector: 'node',
+      style: workflowNodeStyle,
+    },
+    {
+      selector: 'node.Succeed',
+      style: {
+        'background-color': theme.palette.success.main,
+      },
+    },
+    {
+      selector: 'node.connection',
+      style: {
+        content: '',
+      },
+    },
+    {
+      selector: 'edge',
+      style: {
+        width: 3,
+        opacity: 0,
+        'line-color': theme.palette.grey[500],
+        'line-opacity': 0.38,
+        'curve-style': 'taxi',
+        'taxi-direction': 'horizontal',
+        'taxi-turn': 225,
+      } as any,
+    },
+    {
+      selector: 'edge.Succeed',
+      style: {
+        'line-color': theme.palette.success.main,
+      },
+    },
+    {
+      selector: 'edge.bezier',
+      style: {
+        'curve-style': 'bezier',
+        'control-point-step-size': 40,
+      },
+    },
+  ]
+
   function generateElements(detail: WorkflowSingle) {
-    const nodes = generateWorkflowNodes(detail)!
+    let nodes = generateWorkflowNodes(detail)!
     const edges = [] as EdgeDefinition[]
-    generateWorkflowEdges(edges, nodes)
+    const connections = [] as NodeDefinition[]
+    generateWorkflowEdges(edges, connections, nodes)
+    nodes = nodes.concat(connections)
 
     return {
       nodes: _flattenDeep(nodes).filter((d) => typeof d !== 'string') as NodeDefinition[],

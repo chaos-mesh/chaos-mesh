@@ -1,4 +1,4 @@
-import { Box, Button, Grow, Modal } from '@material-ui/core'
+import { Box, Button, Grow, Modal, useTheme } from '@material-ui/core'
 import { Confirm, setAlert, setConfirm } from 'slices/globalStatus'
 import { useEffect, useRef, useState } from 'react'
 import { useHistory, useParams } from 'react-router-dom'
@@ -46,6 +46,7 @@ const Single = () => {
   const classes = useStyles()
   const intl = useIntl()
   const history = useHistory()
+  const theme = useTheme()
   const { uuid } = useParams<{ uuid: uuid }>()
 
   const dispatch = useStoreDispatch()
@@ -87,7 +88,7 @@ const Single = () => {
         return
       }
 
-      const { updateElements } = constructWorkflowTopology(topologyRef.current!, single, handleNodeClick)
+      const { updateElements } = constructWorkflowTopology(topologyRef.current!, single, theme, handleNodeClick)
 
       topologyRef.current = updateElements
     }
