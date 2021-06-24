@@ -17,6 +17,7 @@ import (
 	"math"
 
 	"github.com/go-logr/logr"
+	lru "github.com/hashicorp/golang-lru"
 	"go.uber.org/fx"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -101,8 +102,17 @@ func NewAuthCli(cfg *rest.Config) (*authorizationv1.AuthorizationV1Client, error
 	return authorizationv1.NewForConfig(cfg)
 }
 
-func NewClient(mgr ctrl.Manager) client.Client {
-	return mgr.GetClient()
+func NewClient(mgr ctrl.Manager, scheme *runtime.Scheme) (client.Client, error) {
+	// TODO: make this size configurable
+	cache, err := lru.New(20)
+	if err != nil {
+		return nil, err
+	}
+	return &UpdatedClient{
+		client: mgr.GetClient(),
+		scheme: scheme,
+		cache:  cache,
+	}, nil
 }
 
 func NewLogger() logr.Logger {
