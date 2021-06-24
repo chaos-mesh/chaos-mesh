@@ -362,6 +362,7 @@ webhook:
     - dnschaos
     - jvmchaos
     - schedule
+    - workflow
 
 bpfki:
   create: false
