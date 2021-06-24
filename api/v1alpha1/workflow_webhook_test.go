@@ -15,10 +15,11 @@ package v1alpha1
 
 import (
 	"fmt"
-	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/util/validation/field"
 	"reflect"
 	"testing"
+
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
 func Test_entryMustExists(t *testing.T) {
