@@ -16,6 +16,7 @@ package v1alpha1
 import (
 	"fmt"
 	"reflect"
+	"sort"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
@@ -72,6 +73,11 @@ func validateTemplates(path *field.Path, templates []Template) field.ErrorList {
 		result = append(result, field.Invalid(path, templates, "templates in workflow could not be empty"))
 		return result
 	}
+	var allNames []string
+	for _, template := range templates {
+		allNames = append(allNames, template.Name)
+	}
+	result = append(result, namesCouldNotBeDuplicated(path, allNames)...)
 
 	for i, item := range templates {
 		itemPath := path.Index(i)
@@ -86,6 +92,8 @@ func validateTemplate(path *field.Path, template Template, allTemplates []Templa
 	if len(template.Name) == 0 {
 		result = append(result, field.Required(path.Child("name"), "name of template is required"))
 	}
+
+	// template name could not be duplicated
 
 	switch templateType := template.Type; {
 	case templateType == TypeSuspend:
@@ -128,6 +136,30 @@ func validateTemplate(path *field.Path, template Template, allTemplates []Templa
 	}
 
 	return result
+}
+
+func namesCouldNotBeDuplicated(templatesPath *field.Path, names []string) field.ErrorList {
+	nameCounter := make(map[string]int)
+	for _, name := range names {
+		if count, ok := nameCounter[name]; ok {
+			nameCounter[name] = count + 1
+		} else {
+			nameCounter[name] = 1
+		}
+	}
+	var duplicatedNames []string
+	for name, count := range nameCounter {
+		if count > 1 {
+			duplicatedNames = append(duplicatedNames, name)
+		}
+	}
+	sort.Strings(duplicatedNames)
+	if len(duplicatedNames) > 0 {
+		return field.ErrorList{
+			field.Invalid(templatesPath, "", fmt.Sprintf("template name must be unique, duplicated names: %s", duplicatedNames)),
+		}
+	}
+	return nil
 }
 
 func templateMustExists(templateName string, path *field.Path, template []Template) field.ErrorList {
