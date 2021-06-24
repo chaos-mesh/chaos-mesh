@@ -256,9 +256,9 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
             } else {
               if (d.type === 'suspend') {
                 realTemplates.push({
-                  name: t.name,
+                  name: d.name,
                   templateType: 'Suspend',
-                  deadline: t.deadline,
+                  deadline: d.deadline,
                 })
 
                 return
