@@ -15,6 +15,7 @@ package v1alpha1
 
 import (
 	"fmt"
+	"reflect"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
@@ -149,12 +150,19 @@ func templateMustExists(templateName string, path *field.Path, template []Templa
 
 func shouldNotSetupDurationInTheChaos(path *field.Path, template Template) field.ErrorList {
 	var result field.ErrorList
-	o, _, err := template.EmbedChaos.SpawnNewObject(template.Type)
-	if err != nil {
-		result = append(result, field.Invalid(path, "", err.Error()))
+
+	if template.EmbedChaos == nil {
+		result = append(result, field.Invalid(path.Child(string(template.Type)), nil, fmt.Sprintf("the value of chaos %s is required", template.Type)))
+	}
+
+	spec := reflect.ValueOf(template.EmbedChaos).Elem().FieldByName(string(template.Type))
+	if !spec.IsValid() || spec.IsNil() {
+		result = append(result, field.Invalid(path.Child(string(template.Type)),
+			nil,
+			fmt.Sprintf("parse workflow field error: missing chaos spec %s", template.Type)))
 		return result
 	}
-	if commonSpec, ok := o.(CommonSpec); !ok {
+	if commonSpec, ok := spec.Interface().(CommonSpec); !ok {
 		result = append(result, field.Invalid(path, "", fmt.Sprintf("Chaos: %s does not implement CommonSpec", template.Type)))
 	} else {
 		duration, err := commonSpec.GetDuration()
