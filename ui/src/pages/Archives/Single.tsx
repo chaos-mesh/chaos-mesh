@@ -24,7 +24,7 @@ const Single = () => {
   let kind = query.get('kind') || 'experiment'
 
   const [loading, setLoading] = useState(true)
-  const [single, setSingle] = useState<ArchiveSingle>()
+  const [single, setSingle] = useState<{ kind: string; data: ArchiveSingle | null }>({ kind, data: null })
   const [events, setEvents] = useState<Event[]>([])
 
   const fetchSingle = useCallback(() => {
@@ -44,15 +44,21 @@ const Single = () => {
 
     request(uuid)
       .then(({ data }) => {
-        setSingle(data)
+        setSingle({ kind, data })
       })
       .catch(console.error)
-      .finally(() => setLoading(false))
+      .finally(() => {
+        setLoading(false)
+      })
   }, [uuid, kind])
 
   useEffect(fetchSingle, [fetchSingle])
 
   useEffect(() => {
+    if (kind === 'workflow') {
+      return
+    }
+
     const fetchEvents = () => {
       api.events
         .events({ object_id: uuid, limit: 999 })
@@ -66,17 +72,17 @@ const Single = () => {
     if (single) {
       fetchEvents()
     }
-  }, [uuid, single])
+  }, [uuid, kind, single])
 
   const YAML = () => (
     <Paper sx={{ height: kind === 'workflow' ? (theme) => `calc(100vh - 56px - ${theme.spacing(18)})` : 600, p: 0 }}>
-      {single && (
+      {single.data && (
         <Space display="flex" flexDirection="column" height="100%">
           <PaperTop title={T('common.definition')} boxProps={{ p: 4.5, pb: 0 }} />
           <Box flex={1}>
             <YAMLEditor
-              name={single.name}
-              data={yaml.dump(single.kube_object)}
+              name={single.data.name}
+              data={yaml.dump(single.data.kube_object)}
               download
               aceProps={{ readOnly: true }}
             />
@@ -94,7 +100,9 @@ const Single = () => {
             <Space spacing={6}>
               <Paper>
                 <PaperTop title={T('common.configuration')} boxProps={{ mb: 3 }} />
-                {single && <ObjectConfiguration config={single} inSchedule={kind === 'schedule'} />}
+                {single.kind === kind && single.data && (
+                  <ObjectConfiguration config={single.data} inSchedule={kind === 'schedule'} />
+                )}
               </Paper>
 
               <Grid container>
