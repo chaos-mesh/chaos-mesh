@@ -11,9 +11,17 @@ type RecursiveNodeDefinition = NodeDefinition | Array<string | RecursiveNodeDefi
 
 function generateWorkflowNodes(detail: WorkflowSingle) {
   const { entry, topology } = detail
-  const nodeMap = new Map(topology.nodes.map((n) => [n.name, n]))
-  const entryNode = topology.nodes.find((n) => n.template === entry)
-  const mainChildren = entryNode?.serial?.children
+  let entryNode: Node
+  const nodeMap = new Map(
+    topology.nodes.map((n) => {
+      if (n.template === entry) {
+        entryNode = n
+      }
+
+      return [n.name, n]
+    })
+  )
+  const mainChildren = entryNode!.serial?.children
 
   function toCytoscapeNode(node: Node): RecursiveNodeDefinition {
     const { name, type, state, template } = node
@@ -39,14 +47,13 @@ function generateWorkflowNodes(detail: WorkflowSingle) {
           template,
         },
         classes: state,
-        grabbable: false,
       }
     }
   }
 
   return mainChildren!
+    .filter((d) => d.name)
     .map((d) => nodeMap.get(d.name))
-    .filter((d) => d !== undefined)
     .map((d) => toCytoscapeNode(d!))
 }
 
@@ -58,22 +65,22 @@ function mergeStates(nodes: NodeDefinition[]) {
   return undefined
 }
 
-function connectSerial(edges: EdgeDefinition[], id: string, serial: RecursiveNodeDefinition[]) {
-  const length = serial.length
-  const first = serial[0]
-  const last = serial[length - 1]
+// function connectSerial(edges: EdgeDefinition[], id: string, serial: RecursiveNodeDefinition[]) {
+//   const length = serial.length
+//   const first = serial[0]
+//   const last = serial[length - 1]
 
-  if (!Array.isArray(first) && !Array.isArray(last)) {
-    edges.push({
-      data: {
-        id,
-        source: first.data.id!,
-        target: last.data.id!,
-      },
-      classes: 'bezier',
-    })
-  }
-}
+//   if (!Array.isArray(first) && !Array.isArray(last)) {
+//     edges.push({
+//       data: {
+//         id,
+//         source: first.data.id!,
+//         target: last.data.id!,
+//       },
+//       classes: 'bezier',
+//     })
+//   }
+// }
 
 function generateWorkflowEdges(
   result: EdgeDefinition[],
@@ -91,21 +98,30 @@ function generateWorkflowEdges(
 
       // connectSerial(result, source[2], source[1])
     } else if (type === 'ParallelNode') {
+      const c = {
+        data: {
+          id: `parallel-connection-${source[2]}`,
+        },
+        classes: 'connection',
+      }
+
       ;(source[1] as NodeDefinition[]).forEach((d) => {
         if (nodes.length > 1) {
-          generateWorkflowEdges(result, connections, [d, nodes[1]])
+          generateWorkflowEdges(result, connections, [d, c])
         }
       })
 
-      generateWorkflowEdges(result, connections, nodes.slice(1))
+      connections.push(c)
+
+      generateWorkflowEdges(result, connections, [c, ...nodes.slice(1)])
     }
   } else {
     // source = single node
-    const nodes_ = nodes.slice(1)
+    const _nodes = nodes.slice(1)
 
-    for (let i = 0; i < nodes_.length; i++) {
+    for (let i = 0; i < _nodes.length; i++) {
       const sourceID = source.data.id!
-      const n = nodes_[i]
+      const n = _nodes[i]
 
       // N (target) != single node
       if (Array.isArray(n)) {
@@ -123,23 +139,22 @@ function generateWorkflowEdges(
 
           break
         } else if (type === 'ParallelNode') {
-          const connection = {
+          const c1 = {
             data: {
-              id: `parallel-connection-${i}`,
+              id: `parallel-connection-${target[2]}`,
             },
             classes: 'connection',
-            grabbable: false,
           }
 
           // eslint-disable-next-line no-loop-func
           ;(target[1] as NodeDefinition[]).forEach((d) => {
             generateWorkflowEdges(result, connections, [source, d])
-            generateWorkflowEdges(result, connections, [d, connection])
+            generateWorkflowEdges(result, connections, [d, c1])
           })
 
-          generateWorkflowEdges(result, connections, [connection, ...nodes.slice(i + 2)])
+          generateWorkflowEdges(result, connections, [c1, ...nodes.slice(i + 2)])
 
-          connections.push(connection)
+          connections.push(c1)
 
           break
         }
@@ -202,8 +217,7 @@ export const constructWorkflowTopology = (
         'line-color': theme.palette.grey[500],
         'line-opacity': 0.38,
         'curve-style': 'taxi',
-        'taxi-direction': 'horizontal',
-        'taxi-turn': 225,
+        'taxi-turn': '50%',
       } as any,
     },
     {
@@ -253,7 +267,7 @@ export const constructWorkflowTopology = (
     minZoom: 0.5,
     maxZoom: 1.5,
   })
-    .pan({ x: 150, y: container.offsetHeight / 2 - 50 })
+    .pan({ x: 150, y: 150 })
     .zoom(0.75)
     .on('click', 'node', onNodeClick)
 
