@@ -73,14 +73,13 @@ var _ = Describe("UpdatedClient", func() {
 				err = k8sClient.Update(context.TODO(), obj)
 				Expect(err).ToNot(HaveOccurred())
 
-				newObj := &corev1.ConfigMap{}
 				err = k8sClient.Get(context.TODO(), types.NamespacedName{
 					Namespace: "default",
 					Name:      "test-configmap-update",
-				}, newObj)
+				}, obj)
 				Expect(err).ToNot(HaveOccurred())
 
-				Expect(newObj.Data["test"]).To(Equal(data))
+				Expect(obj.Data["test"]).To(Equal(data))
 			}
 
 			err = k8sClient.Delete(context.TODO(), obj)
@@ -91,7 +90,7 @@ var _ = Describe("UpdatedClient", func() {
 			obj := &corev1.ConfigMap{
 				ObjectMeta: v1.ObjectMeta{
 					Namespace: "default",
-					Name:      "test-configmap-update",
+					Name:      "test-configmap-another-update",
 				},
 				Data: map[string]string{
 					"test": "0",

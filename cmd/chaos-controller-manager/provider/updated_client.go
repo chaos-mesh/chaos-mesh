@@ -16,6 +16,7 @@ package provider
 import (
 	"context"
 	"reflect"
+	"strconv"
 
 	lru "github.com/hashicorp/golang-lru"
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -66,7 +67,15 @@ func (c *UpdatedClient) Get(ctx context.Context, key client.ObjectKey, obj runti
 			return nil
 		}
 
-		if cachedMeta.GetResourceVersion() == objMeta.GetResourceVersion() {
+		cachedResourceVersion, err := strconv.Atoi(cachedMeta.GetResourceVersion())
+		if err != nil {
+			return nil
+		}
+		newResourceVersion, err := strconv.Atoi(objMeta.GetResourceVersion())
+		if err != nil {
+			return nil
+		}
+		if cachedResourceVersion >= newResourceVersion {
 			reflect.ValueOf(obj).Elem().Set(reflect.ValueOf(cachedObject).Elem())
 		}
 	}
@@ -105,7 +114,7 @@ func (c *UpdatedClient) Update(ctx context.Context, obj runtime.Object, opts ...
 		return err
 	}
 
-	c.cache.Add(objectKey, obj)
+	c.cache.Add(objectKey, obj.DeepCopyObject())
 	return nil
 }
 
