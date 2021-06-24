@@ -247,7 +247,7 @@
     "placeholder": "Search",
     "tip": {
       "title": "Use the following syntax to quickly locate workflows, schedules, experiments and archives:",
-      "namespace": "namespace:default xxx will search for workflows, schedules, experiments and archives with namespace default",
+      "namespace": "namespace:default xxx / ns:default xxx will search for workflows, schedules, experiments and archives with namespace default",
       "kind": "kind:NetworkChaos xxx will search for schedules, experiments and archives with kind NetworkChaos"
     },
     "result": {

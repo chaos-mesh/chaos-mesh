@@ -17,7 +17,7 @@ import { Template, deleteTemplate, resetWorkflow } from 'slices/workflows'
 import { setAlert, setConfirm } from 'slices/globalStatus'
 import { useEffect, useState } from 'react'
 import { useStoreDispatch, useStoreSelector } from 'store'
-import { validateDuration, validateName } from 'lib/formikhelpers'
+import { validateDeadline, validateName } from 'lib/formikhelpers'
 
 import { Ace } from 'ace-builds'
 import Add from './Add'
@@ -248,9 +248,9 @@ const NewWorkflow = () => {
                   </SelectField>
                   <TextField
                     name="deadline"
-                    label={T('newE.run.duration')}
-                    validate={validateDuration(T('newW.durationValidation', intl))}
-                    helperText={errors.deadline && touched.deadline ? errors.deadline : T('newW.durationHelper')}
+                    label={T('newW.node.deadline')}
+                    validate={validateDeadline(T('newW.node.deadlineValidation', intl))}
+                    helperText={errors.deadline && touched.deadline ? errors.deadline : T('newW.node.deadlineHelper')}
                     error={errors.deadline && touched.deadline ? true : false}
                   />
                   <Typography>{T('common.preview')}</Typography>
