@@ -240,7 +240,7 @@ const Single = () => {
             {single && configOpen && (
               <Box display="flex" flexDirection="column" height="100%">
                 <Box px={3} pt={3}>
-                  <PaperTop title={modalTitle}>
+                  <PaperTop title={modalTitle} boxProps={{ mb: 3 }}>
                     <Button variant="contained" color="primary" size="small" onClick={handleUpdateWorkflow}>
                       {T('common.update')}
                     </Button>
@@ -252,7 +252,7 @@ const Single = () => {
                       <NodeConfiguration template={data} />
                     </Box>
                   )}
-                  <YAMLEditor data={yaml.dump(data)} mountEditor={setYAMLEditor} />
+                  <YAMLEditor name={modalTitle} data={yaml.dump(data)} mountEditor={setYAMLEditor} download />
                 </Box>
               </Box>
             )}
