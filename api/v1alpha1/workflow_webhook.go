@@ -188,7 +188,7 @@ func shouldBeNoChildren(path *field.Path, template Template) field.ErrorList {
 }
 
 func shouldBeNoConditionalBranches(path *field.Path, template Template) field.ErrorList {
-	if template.ConditionalBranches != nil {
+	if len(template.ConditionalBranches) > 0 {
 		return field.ErrorList{
 			field.Invalid(path, template.ConditionalBranches, "this template should not contain ConditionalBranches"),
 		}
@@ -197,6 +197,7 @@ func shouldBeNoConditionalBranches(path *field.Path, template Template) field.Er
 }
 
 func shouldBeNoEmbedChaos(path *field.Path, template Template) field.ErrorList {
+	// TODO: we could improve that with code generation in the future
 	if template.EmbedChaos != nil {
 		return field.ErrorList{
 			field.Invalid(path, template.EmbedChaos, "this template should not contain any Chaos"),
