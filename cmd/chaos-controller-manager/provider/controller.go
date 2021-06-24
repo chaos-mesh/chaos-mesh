@@ -104,7 +104,7 @@ func NewAuthCli(cfg *rest.Config) (*authorizationv1.AuthorizationV1Client, error
 
 func NewClient(mgr ctrl.Manager, scheme *runtime.Scheme) (client.Client, error) {
 	// TODO: make this size configurable
-	cache, err := lru.New(20)
+	cache, err := lru.New(100)
 	if err != nil {
 		return nil, err
 	}
