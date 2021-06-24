@@ -15,6 +15,7 @@ package v1alpha1
 
 import (
 	"fmt"
+	"k8s.io/apimachinery/pkg/util/validation"
 	"reflect"
 	"sort"
 
@@ -91,6 +92,12 @@ func validateTemplate(path *field.Path, template Template, allTemplates []Templa
 	// name is required
 	if len(template.Name) == 0 {
 		result = append(result, field.Required(path.Child("name"), "name of template is required"))
+	}
+
+	// name must be restricted with DNS-1123
+	errs := validation.IsDNS1123Subdomain(template.Name)
+	if len(errs) > 0 {
+		result = append(result, field.Invalid(path.Child("name"), template.Name, fmt.Sprintf("field name must be DNS-1123 subdomain, %s", errs)))
 	}
 
 	// template name could not be duplicated
