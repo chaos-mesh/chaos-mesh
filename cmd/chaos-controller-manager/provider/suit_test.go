@@ -46,7 +46,7 @@ var mgr ctrl.Manager
 var testEnv *envtest.Environment
 var setupLog = ctrl.Log.WithName("setup")
 
-func TestSchedule(t *testing.T) {
+func TestClient(t *testing.T) {
 	RegisterFailHandler(Fail)
 
 	RunSpecsWithDefaultAndCustomReporters(t,

@@ -53,31 +53,6 @@ var _ = Describe("UpdatedClient", func() {
 			Expect(err).ToNot(HaveOccurred())
 		})
 
-		It("Update should update the generation number", func() {
-			obj := &corev1.ConfigMap{
-				ObjectMeta: v1.ObjectMeta{
-					Namespace: "default",
-					Name:      "test-configmap-generation-number",
-				},
-				Data: map[string]string{
-					"test": "1",
-				},
-			}
-			err := k8sClient.Create(context.TODO(), obj)
-			Expect(err).ToNot(HaveOccurred())
-
-			originalGenerationNumber := obj.Generation
-
-			obj.Data["test"] = "2"
-			err = k8sClient.Update(context.TODO(), obj)
-			Expect(err).ToNot(HaveOccurred())
-
-			Expect(obj.Generation).To(BeNumerically(">", originalGenerationNumber))
-
-			err = k8sClient.Delete(context.TODO(), obj)
-			Expect(err).ToNot(HaveOccurred())
-		})
-
 		It("Data should always be updated", func() {
 			obj := &corev1.ConfigMap{
 				ObjectMeta: v1.ObjectMeta{
@@ -91,7 +66,7 @@ var _ = Describe("UpdatedClient", func() {
 			err := k8sClient.Create(context.TODO(), obj)
 			Expect(err).ToNot(HaveOccurred())
 
-			for i := 0; i <= 100; i++ {
+			for i := 0; i <= 200; i++ {
 				data := strconv.Itoa(i)
 
 				obj.Data["test"] = data

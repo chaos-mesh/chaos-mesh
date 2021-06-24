@@ -65,7 +65,8 @@ func (c *UpdatedClient) Get(ctx context.Context, key client.ObjectKey, obj runti
 		if err != nil {
 			return nil
 		}
-		if cachedMeta.GetGeneration() > objMeta.GetGeneration() {
+
+		if cachedMeta.GetResourceVersion() == objMeta.GetResourceVersion() {
 			reflect.ValueOf(obj).Elem().Set(reflect.ValueOf(cachedObject).Elem())
 		}
 	}
@@ -103,12 +104,6 @@ func (c *UpdatedClient) Update(ctx context.Context, obj runtime.Object, opts ...
 	if err != nil {
 		return err
 	}
-
-	objMeta, err = meta.Accessor(obj)
-	if err != nil {
-		return nil
-	}
-	objMeta.SetGeneration(objMeta.GetGeneration() + 1)
 
 	c.cache.Add(objectKey, obj)
 	return nil
