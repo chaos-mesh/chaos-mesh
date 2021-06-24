@@ -1,13 +1,12 @@
 import { Form, Formik } from 'formik'
 import { Submit, TextField } from 'components/FormField'
-import { Template, setTemplate, updateTemplate } from 'slices/workflows'
 import { validateDeadline, validateName } from 'lib/formikhelpers'
 
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
 import Space from 'components-mui/Space'
 import T from 'components/T'
-import { useStoreDispatch } from 'store'
+import { Template } from 'slices/workflows'
 
 export interface SuspendValues {
   name: string
@@ -16,22 +15,16 @@ export interface SuspendValues {
 
 interface SuspendProps {
   initialValues?: SuspendValues
-  update?: number
-  updateCallback?: () => void
+  submit: (template: Template) => void
 }
 
-const Suspend: React.FC<SuspendProps> = ({ initialValues, update, updateCallback }) => {
-  const dispatch = useStoreDispatch()
-
+const Suspend: React.FC<SuspendProps> = ({ initialValues, submit }) => {
   const onSubmit = ({ name, deadline }: SuspendValues) => {
-    const template: Template = {
+    submit({
       type: 'suspend',
       name,
       deadline,
-    }
-
-    dispatch(update !== undefined ? updateTemplate({ ...template, index: update }) : setTemplate(template))
-    typeof updateCallback === 'function' && updateCallback()
+    })
   }
 
   return (

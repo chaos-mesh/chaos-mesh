@@ -343,7 +343,7 @@ const Add: React.FC<AddProps> = ({
           </Box>
           {otherTypes && (
             <Box mt={3}>
-              <Suspend initialValues={initialValues} update={update} updateCallback={updateCallback} />
+              <Suspend initialValues={initialValues} submit={submit} />
             </Box>
           )}
         </Box>
