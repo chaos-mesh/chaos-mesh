@@ -12,13 +12,12 @@ export const state = (namespace = null) =>
 
 export const newExperiment = (data: Experiment) => http.post('/experiments/new', data)
 
-export const experiments = (namespace = null, name = null, kind = null, status = null) =>
+export const experiments = (namespace = null, name = null, kind = null) =>
   http.get<ExperimentResponse[]>('/experiments', {
     params: {
       namespace,
       name,
       kind,
-      status,
     },
   })
 

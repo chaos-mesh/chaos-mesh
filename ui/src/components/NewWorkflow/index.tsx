@@ -20,7 +20,7 @@ import { resetNewExperiment, setExternalExperiment } from 'slices/experiments'
 import { setAlert, setConfirm } from 'slices/globalStatus'
 import { useEffect, useRef, useState } from 'react'
 import { useStoreDispatch, useStoreSelector } from 'store'
-import { validateDuration, validateName } from 'lib/formikhelpers'
+import { validateDeadline, validateName } from 'lib/formikhelpers'
 
 import { Ace } from 'ace-builds'
 import Add from './Add'
@@ -70,7 +70,7 @@ type IStep = Template
 export type WorkflowBasic = {
   name: string
   namespace: string
-  duration: string
+  deadline: string
 }
 
 const NewWorkflow = () => {
@@ -88,7 +88,7 @@ const NewWorkflow = () => {
   const [workflowBasic, setWorkflowBasic] = useState<WorkflowBasic>({
     name: '',
     namespace: '',
-    duration: '',
+    deadline: '',
   })
   const [yamlEditor, setYAMLEditor] = useState<Ace.Editor>()
   const multiNodeRef = useRef<MultiNodeHandles>(null)
@@ -365,7 +365,7 @@ const NewWorkflow = () => {
         </Grid>
         <Grid item xs={12} md={4} className={classes.leftSticky}>
           <Formik
-            initialValues={{ name: '', namespace: '', duration: '' }}
+            initialValues={{ name: '', namespace: '', deadline: '' }}
             onSubmit={submitWorkflow}
             validate={onValidate}
             validateOnBlur={false}
@@ -389,11 +389,11 @@ const NewWorkflow = () => {
                     ))}
                   </SelectField>
                   <TextField
-                    name="duration"
-                    label={T('newE.run.duration')}
-                    validate={validateDuration(T('newW.durationValidation', intl))}
-                    helperText={errors.duration && touched.duration ? errors.duration : T('newW.durationHelper')}
-                    error={errors.duration && touched.duration ? true : false}
+                    name="deadline"
+                    label={T('newW.node.deadline')}
+                    validate={validateDeadline(T('newW.node.deadlineValidation', intl))}
+                    helperText={errors.deadline && touched.deadline ? errors.deadline : T('newW.node.deadlineHelper')}
+                    error={errors.deadline && touched.deadline ? true : false}
                   />
                   <Typography>{T('common.preview')}</Typography>
                   <Box flex={1}>
