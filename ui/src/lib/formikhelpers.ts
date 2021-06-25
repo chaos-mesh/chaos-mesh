@@ -217,7 +217,7 @@ function scopeToYAMLJSON(scope: ExperimentScope) {
 }
 
 export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
-  const { name, namespace, duration } = basic
+  const { name, namespace, deadline } = basic
   const children: string[] = []
   const realTemplates: Record<string, any>[] = []
 
@@ -327,7 +327,7 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
           {
             name: 'entry',
             templateType: 'Serial',
-            duration,
+            deadline,
             children,
           },
           ...realTemplates,

@@ -249,7 +249,7 @@
     "placeholder": "搜索",
     "tip": {
       "title": "使用以下语法来快速定位工作流，计划，实验和归档：",
-      "namespace": "namespace:default xxx 将搜索命名空间为 default 的工作流，计划，实验和归档",
+      "namespace": "namespace:default xxx / ns:default xxx 将搜索命名空间为 default 的工作流，计划，实验和归档",
       "kind": "kind:NetworkChaos xxx 将搜索类型为 NetworkChaos 的计划，实验和归档"
     },
     "result": {
