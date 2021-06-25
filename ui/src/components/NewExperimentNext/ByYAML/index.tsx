@@ -24,7 +24,10 @@ const ByYAML: React.FC<ByYAMLProps> = ({ callback }) => {
 
   const dispatch = useStoreDispatch()
 
+  const [empty, setEmpty] = useState(true)
   const [yamlEditor, setYAMLEditor] = useState<Ace.Editor>()
+
+  const onChange = (value: string) => setEmpty(value === '')
 
   const handleUploadYAMLCallback = (y: any) => yamlEditor?.setValue(y)
 
@@ -47,7 +50,7 @@ const ByYAML: React.FC<ByYAMLProps> = ({ callback }) => {
         {T('newE.byYAMLDesc')}
       </Typography>
       <Paper sx={{ height: 600, p: 0 }}>
-        <YAMLEditor mountEditor={setYAMLEditor} />
+        <YAMLEditor mountEditor={setYAMLEditor} aceProps={{ onChange }} />
       </Paper>
       <Space direction="row" justifyContent="flex-end">
         <YAML callback={handleUploadYAMLCallback} />
@@ -56,7 +59,7 @@ const ByYAML: React.FC<ByYAMLProps> = ({ callback }) => {
           color="primary"
           startIcon={<PublishIcon />}
           size="small"
-          disabled={yamlEditor?.getValue() === ''}
+          disabled={empty}
           onClick={handleSubmit}
         >
           {T('common.submit')}

@@ -10,6 +10,9 @@ const common: ThemeOptions = {
     primary: {
       main: '#172d72',
     },
+    secondary: {
+      main: '#d32f2f',
+    },
     background: {
       default: '#fafafa',
     },
@@ -26,6 +29,9 @@ export const darkTheme = responsiveFontSizes(
       mode: 'dark',
       primary: {
         main: '#9db0eb',
+      },
+      secondary: {
+        main: '#f44336',
       },
       background: {
         paper: '#424242',
