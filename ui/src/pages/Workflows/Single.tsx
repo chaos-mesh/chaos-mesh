@@ -3,7 +3,6 @@ import { Confirm, setAlert, setConfirm } from 'slices/globalStatus'
 import { useEffect, useRef, useState } from 'react'
 import { useHistory, useParams } from 'react-router-dom'
 
-import { Ace } from 'ace-builds'
 import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
 import { EventHandler } from 'cytoscape'
 import NodeConfiguration from 'components/ObjectConfiguration/Node'
@@ -52,7 +51,6 @@ const Single = () => {
   const dispatch = useStoreDispatch()
 
   const [single, setSingle] = useState<WorkflowSingle>()
-  const [yamlEditor, setYAMLEditor] = useState<Ace.Editor>()
   const [data, setData] = useState<any>()
   const [selected, setSelected] = useState<'workflow' | 'node'>('workflow')
   const modalTitle = selected === 'workflow' ? single?.name : selected === 'node' ? data.name : ''
