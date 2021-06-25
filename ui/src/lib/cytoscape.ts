@@ -269,7 +269,13 @@ export const constructWorkflowTopology = (
   })
     .pan({ x: 250, y: 250 })
     .zoom(0.75)
-    .on('click', 'node', onNodeClick)
+    .on('click', 'node', function (e) {
+      if (e.target.hasClass('connection')) {
+        return
+      }
+
+      onNodeClick(e)
+    })
 
   let flashRunning: number
   function updateElements(detail: WorkflowSingle) {
