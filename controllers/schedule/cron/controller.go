@@ -21,7 +21,6 @@ import (
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/apiserver/pkg/storage/names"
 	"k8s.io/client-go/util/retry"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -190,23 +189,6 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		r.Recorder.Event(schedule, recorder.Updated{
 			Field: "lastScheduleTime",
 		})
-
-		// TODO: make the interval and total time configurable
-		// The following codes ensure the Schedule in cache has the latest lastScheduleTime
-		ensureLatestError := wait.Poll(100*time.Millisecond, 2*time.Second, func() (bool, error) {
-			schedule = schedule.DeepCopyObject().(*v1alpha1.Schedule)
-
-			if err := r.Client.Get(ctx, req.NamespacedName, schedule); err != nil {
-				r.Log.Error(err, "unable to get schedule")
-				return false, err
-			}
-
-			return schedule.Status.LastScheduleTime.Time == lastScheduleTime, nil
-		})
-		if ensureLatestError != nil {
-			r.Log.Error(ensureLatestError, "Fail to ensure that the resource in cache has the latest lastScheduleTime")
-			return ctrl.Result{}, nil
-		}
 	}
 
 	return ctrl.Result{}, nil
