@@ -67,8 +67,8 @@ const Kernel: React.FC<KernelProps> = ({ onSubmit }) => {
               {callchain.length > 0 && (
                 <Space mt={6}>
                   {callchain.map((_: any, i: number) => (
-                    <Box key={'frame' + i}>
-                      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+                    <Space key={'frame' + i}>
+                      <Box display="flex" justifyContent="space-between" alignItems="center">
                         <Typography variant="body2" gutterBottom>
                           Frame {i + 1}
                         </Typography>
@@ -85,7 +85,7 @@ const Kernel: React.FC<KernelProps> = ({ onSubmit }) => {
                       <TextField name={`fail_kern_request.callchain[${i}].funcname`} label="funcname" />
                       <TextField name={`fail_kern_request.callchain[${i}].parameters`} label="parameters" />
                       <TextField name={`fail_kern_request.callchain[${i}].predicate`} label="predicate" />
-                    </Box>
+                    </Space>
                   ))}
                 </Space>
               )}
