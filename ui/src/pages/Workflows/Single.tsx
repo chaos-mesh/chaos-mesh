@@ -152,9 +152,7 @@ const Single = () => {
     onModalOpen()
   }
 
-  const handleUpdateWorkflow = () => {
-    let data = yaml.load(yamlEditor!.getValue())
-
+  const handleUpdateWorkflow = (data: any) => {
     if (selected === 'node') {
       const kubeObject = single?.kube_object
       kubeObject.spec.templates = kubeObject.spec.templates.map((t: any) => {
@@ -239,23 +237,17 @@ const Single = () => {
             sx={{ width: selected === 'workflow' ? '50vw' : selected === 'node' ? '70vw' : '50vw' }}
           >
             {single && configOpen && (
-              <Box display="flex" flexDirection="column" height="100%">
-                <Box px={3} pt={3}>
-                  <PaperTop title={modalTitle} boxProps={{ mb: 3 }}>
-                    <Button variant="contained" color="primary" size="small" onClick={handleUpdateWorkflow}>
-                      {T('common.update')}
-                    </Button>
-                  </PaperTop>
-                </Box>
+              <Space display="flex" flexDirection="column" height="100%">
+                <PaperTop title={modalTitle} boxProps={{ p: 4.5, pb: 0 }} />
                 <Box display="flex" flex={1}>
                   {selected === 'node' && (
                     <Box width="50%">
                       <NodeConfiguration template={data} />
                     </Box>
                   )}
-                  <YAMLEditor name={modalTitle} data={yaml.dump(data)} mountEditor={setYAMLEditor} download />
+                  <YAMLEditor name={modalTitle} data={yaml.dump(data)} onUpdate={handleUpdateWorkflow} download />
                 </Box>
-              </Box>
+              </Space>
             )}
           </Paper>
         </div>
