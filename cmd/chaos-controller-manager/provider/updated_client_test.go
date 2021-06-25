@@ -106,7 +106,7 @@ var _ = Describe("UpdatedClient", func() {
 			newObj := &corev1.ConfigMap{}
 			err = k8sClient.Get(context.TODO(), types.NamespacedName{
 				Namespace: "default",
-				Name:      "test-configmap-update",
+				Name:      "test-configmap-another-update",
 			}, newObj)
 			Expect(err).ToNot(HaveOccurred())
 
@@ -119,7 +119,7 @@ var _ = Describe("UpdatedClient", func() {
 			newObj = &corev1.ConfigMap{}
 			err = k8sClient.Get(context.TODO(), types.NamespacedName{
 				Namespace: "default",
-				Name:      "test-configmap-update",
+				Name:      "test-configmap-another-update",
 			}, newObj)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(newObj.Data["test"]).To(Equal("2"))
