@@ -62,6 +62,9 @@ func (in *NetworkChaosSpec) Default() {
 	}
 
 	in.DefaultDelay()
+	in.DefaultLoss()
+	in.DefaultDuplicate()
+	in.DefaultCorrupt()
 }
 
 // DefaultDelay set the default value if Jitter or Correlation is not set
@@ -72,6 +75,36 @@ func (in *NetworkChaosSpec) DefaultDelay() {
 		}
 		if in.Delay.Correlation == "" {
 			in.Delay.Correlation = DefaultCorrelation
+		}
+
+		if in.Delay.Reorder != nil {
+			if in.Delay.Reorder.Correlation == "" {
+				in.Delay.Reorder.Correlation = DefaultCorrelation
+			}
+		}
+	}
+}
+
+func (in *NetworkChaosSpec) DefaultLoss() {
+	if in.Loss != nil {
+		if in.Loss.Correlation == "" {
+			in.Loss.Correlation = DefaultCorrelation
+		}
+	}
+}
+
+func (in *NetworkChaosSpec) DefaultDuplicate() {
+	if in.Duplicate != nil {
+		if in.Duplicate.Correlation == "" {
+			in.Duplicate.Correlation = DefaultCorrelation
+		}
+	}
+}
+
+func (in *NetworkChaosSpec) DefaultCorrupt() {
+	if in.Corrupt != nil {
+		if in.Corrupt.Correlation == "" {
+			in.Corrupt.Correlation = DefaultCorrelation
 		}
 	}
 }
