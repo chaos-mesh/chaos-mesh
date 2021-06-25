@@ -52,12 +52,16 @@ func (in *NetworkChaos) Default() {
 		in.Spec.Target.Selector.DefaultNamespace(in.GetNamespace())
 	}
 
+	in.Spec.Default()
+}
+
+func (in *NetworkChaosSpec) Default() {
 	// set default direction
-	if in.Spec.Direction == "" {
-		in.Spec.Direction = To
+	if in.Direction == "" {
+		in.Direction = To
 	}
 
-	in.Spec.DefaultDelay()
+	in.DefaultDelay()
 }
 
 // DefaultDelay set the default value if Jitter or Correlation is not set
