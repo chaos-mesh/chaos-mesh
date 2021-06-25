@@ -96,9 +96,7 @@
       }
     },
     "run": {
-      "continuous": "Run continuously",
-      "duration": "Duration",
-      "durationHelper": "The experiment duration"
+      "continuous": "Run continuously"
     },
     "complete": "All steps are completed"
   },
@@ -126,7 +124,7 @@
       "nameHelper": "The task name",
       "nameValidation": "The task name is required",
       "deadline": "Deadline",
-      "deadlineHelper": "The task deadline",
+      "deadlineHelper": "The task will end within the deadline, the supported formats of the deadline are: ms / s / m / h.",
       "deadlineValidation": "The task deadline is required",
       "deleteDesc": "This task will be deleted",
       "submitAll": "Submit All"
@@ -136,7 +134,6 @@
     "suspendTitle": "Set suspend",
     "nameHelper": "The workflow name",
     "nameValidation": "The workflow name is required",
-    "durationHelper": "The workflow duration",
     "durationValidation": "The workflow duration is required",
     "submit": "Submit workflow",
     "messages": {
@@ -148,7 +145,7 @@
     "titleStep2": "Fill the schedule info",
     "basic": {
       "nameHelper": "The schedule name",
-      "scheduleHelper": "Define the schedule",
+      "scheduleHelper": "The schedule is expressed in the form of CronJob. If you are not familiar with it, you can use {crontabguru} to help define the schedule",
       "startingDeadlineSeconds": "Experiment expiration time",
       "startingDeadlineSecondsHelper": "Set to ignore experiments that haven’t been running for a long time",
       "concurrencyPolicy": "Concurrency Policy",
@@ -273,6 +270,8 @@
     "detail": "Detail",
     "doc": "Documentation",
     "download": "Download",
+    "duration": "Duration",
+    "durationHelper": "The supported formats of the duration are: ms / s / m / h.",
     "edit": "Edit",
     "ip": "IP address",
     "isKVHelperText": "Type key:value and end with a space to generate a key/value pair",

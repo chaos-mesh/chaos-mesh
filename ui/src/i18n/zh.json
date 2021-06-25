@@ -96,9 +96,7 @@
       }
     },
     "run": {
-      "continuous": "持续运行",
-      "duration": "持续时间",
-      "durationHelper": "实验的持续时间"
+      "continuous": "持续运行"
     },
     "complete": "所有步骤已完成"
   },
@@ -116,7 +114,7 @@
     "titleStep2": "填写计划信息",
     "basic": {
       "nameHelper": "计划的名称",
-      "scheduleHelper": "定义计划",
+      "scheduleHelper": "计划以 CronJob 的形式表示。如果你还不熟悉它，可以借助 {crontabguru} 来帮助定义计划",
       "startingDeadlineSeconds": "实验过期时间",
       "startingDeadlineSecondsHelper": "设置以忽略长时间未运行的实验",
       "concurrencyPolicy": "并发策略",
@@ -147,9 +145,9 @@
       "child": "子任务",
       "nameHelper": "任务的名称",
       "nameValidation": "任务名称不能为空",
-      "deadline": "期限",
-      "deadlineHelper": "任务的期限",
-      "deadlineValidation": "任务的期限不能为空",
+      "deadline": "超时时间",
+      "deadlineHelper": "任务将会在超时时间内结束，超时时间支持的格式有：ms / s / m / h。",
+      "deadlineValidation": "任务的超时时间不能为空",
       "deleteDesc": "此任务将被删除",
       "submitAll": "提交所有改动"
     },
@@ -158,7 +156,6 @@
     "suspendTitle": "设置暂停",
     "nameHelper": "工作流的名称",
     "nameValidation": "工作流名称不能为空",
-    "durationHelper": "工作流的持续时间",
     "durationValidation": "工作流持续时间不能为空",
     "submit": "提交工作流",
     "messages": {
@@ -274,6 +271,8 @@
     "detail": "详情",
     "doc": "文档",
     "download": "下载",
+    "duration": "持续时间",
+    "durationHelper": "持续时间支持的格式有：ms / s / m / h。",
     "edit": "修改",
     "ip": "IP 地址",
     "isKVHelperText": "键入 key:value 并以空格结尾来创建一个键值对",

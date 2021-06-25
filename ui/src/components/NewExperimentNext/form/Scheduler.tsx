@@ -55,12 +55,12 @@ const Scheduler: React.FC<SchedulerProps> = ({ errors, touched, inSchedule = fal
         <TextField
           fast
           name="scheduler.duration"
-          label={T('newE.run.duration')}
+          label={T('common.duration')}
           validate={validateDuration()}
           helperText={
             getIn(errors, 'scheduler.duration') && getIn(touched, 'scheduler.duration')
               ? getIn(errors, 'scheduler.duration')
-              : T('newE.run.durationHelper')
+              : T('common.durationHelper')
           }
           error={getIn(errors, 'scheduler.duration') && getIn(touched, 'scheduler.duration') ? true : false}
         />

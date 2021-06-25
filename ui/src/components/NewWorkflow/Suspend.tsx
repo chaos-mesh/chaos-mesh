@@ -22,7 +22,7 @@ const Suspend: React.FC<SuspendProps> = ({ initialValues, submit }) => {
   const onSubmit = ({ name, deadline }: SuspendValues) => {
     submit({
       type: 'suspend',
-      name,
+      name: name.trim(),
       deadline,
     })
   }

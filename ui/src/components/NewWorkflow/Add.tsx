@@ -202,7 +202,7 @@ const Add: React.FC<AddProps> = ({
     const { type, name, deadline } = formRef.current.values
     const template = {
       type,
-      name,
+      name: name.trim(),
       deadline,
       children: templates,
     }
