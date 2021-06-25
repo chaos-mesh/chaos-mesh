@@ -106,7 +106,7 @@ function generateWorkflowEdges(
       }
 
       ;(source[1] as NodeDefinition[]).forEach((d) => {
-        if (nodes.length > 1) {
+        if (nodes.length >= 1) {
           generateWorkflowEdges(result, connections, [d, c])
         }
       })
@@ -267,7 +267,7 @@ export const constructWorkflowTopology = (
     minZoom: 0.5,
     maxZoom: 1.5,
   })
-    .pan({ x: 150, y: 150 })
+    .pan({ x: 250, y: 250 })
     .zoom(0.75)
     .on('click', 'node', onNodeClick)
 
