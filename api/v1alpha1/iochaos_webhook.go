@@ -44,6 +44,11 @@ func (in *IOChaos) Default() {
 	iochaoslog.Info("default", "name", in.Name)
 
 	in.Spec.Selector.DefaultNamespace(in.GetNamespace())
+	in.Spec.Default()
+}
+
+func (in *IOChaosSpec) Default() {
+
 }
 
 // +kubebuilder:webhook:verbs=create;update,path=/validate-chaos-mesh-org-v1alpha1-iochaos,mutating=false,failurePolicy=fail,groups=chaos-mesh.org,resources=iochaos,versions=v1alpha1,name=viochaos.kb.io
