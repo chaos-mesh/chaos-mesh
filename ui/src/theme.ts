@@ -1,11 +1,5 @@
-import { ThemeOptions, createMuiTheme, responsiveFontSizes } from '@material-ui/core/styles'
+import { ThemeOptions, createTheme, responsiveFontSizes } from '@material-ui/core/styles'
 
-// Design system
-// https://material-ui.com/system/basics/
-// The Default theme
-// https://material-ui.com/customization/default-theme/
-// How to customize
-// https://material-ui.com/customization/theming/
 const common: ThemeOptions = {
   mixins: {
     toolbar: {
@@ -16,19 +10,32 @@ const common: ThemeOptions = {
     primary: {
       main: '#172d72',
     },
+    secondary: {
+      main: '#d32f2f',
+    },
+    background: {
+      default: '#fafafa',
+    },
   },
-  spacing: (factor) => `${0.25 * factor}rem`,
+  spacing: (factor: number) => `${0.25 * factor}rem`,
 }
 
-const theme = responsiveFontSizes(createMuiTheme(common))
+const theme = responsiveFontSizes(createTheme(common))
 
 export const darkTheme = responsiveFontSizes(
-  createMuiTheme({
+  createTheme({
     ...common,
     palette: {
-      type: 'dark',
+      mode: 'dark',
       primary: {
         main: '#9db0eb',
+      },
+      secondary: {
+        main: '#f44336',
+      },
+      background: {
+        paper: '#424242',
+        default: '#303030',
       },
     },
   })

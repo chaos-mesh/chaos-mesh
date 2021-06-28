@@ -1,32 +1,34 @@
-export interface workflowParams {
+export interface WorkflowParams {
   namespace?: string
 }
 
 export interface Workflow {
-  name: string
+  is: 'workflow'
+  uid: uuid
   namespace: string
+  name: string
   entry: string
-  created: string
-  endTime: string
-  status: string
+  created_at: string
+  end_time: string
+  status: 'running' | 'finished' | 'failed' | 'unknown'
 }
 
 interface MultiNode {
-  tasks: { name: string; template: string }[]
+  children: { name: string; template: string }[]
 }
 type SerialNode = MultiNode
 type ParallelNode = MultiNode
 
 export interface Node {
   name: string
-  type: string
+  type: 'ChaosNode' | 'SerialNode' | 'ParallelNode' | 'SuspendNode'
   state: string
   template: string
   serial?: SerialNode
   parallel?: ParallelNode
 }
 
-export interface WorkflowDetail extends Workflow {
+export interface WorkflowSingle extends Workflow {
   topology: {
     nodes: Node[]
   }

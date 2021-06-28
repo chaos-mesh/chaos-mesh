@@ -1,5 +1,5 @@
 import { CallchainFrame, Experiment, ExperimentScope } from 'components/NewExperiment/types'
-import { arrToObjBySep, toCamelCase } from './utils'
+import { arrToObjBySep, toCamelCase, toTitleCase } from './utils'
 
 import { Template } from 'slices/workflows'
 import { WorkflowBasic } from 'components/NewWorkflow'
@@ -13,7 +13,7 @@ export function parseSubmit(e: Experiment) {
 
   // Set default namespace when it's not present
   if (!values.namespace) {
-    values.namespace = values.scope.namespace_selectors[0]
+    values.namespace = values.scope.namespaces[0]
   }
 
   // Parse labels, label_selectors, annotations and annotation_selectors to object
@@ -94,7 +94,7 @@ export function yamlToExperiment(yamlObj: any): any {
       annotations: metadata.annotations ? selectorsToArr(metadata.annotations, ':') : [],
       scope: {
         ...basic.scope,
-        namespace_selectors: spec.selector.namespaces ?? [],
+        namespaces: spec.selector.namespaces ?? [],
         label_selectors: spec.selector?.label_selectors ? selectorsToArr(spec.selector.label_selectors, ': ') : [],
         annotation_selectors: spec.selector?.annotation_selectors
           ? selectorsToArr(spec.selector.annotation_selectors, ': ')
@@ -103,7 +103,6 @@ export function yamlToExperiment(yamlObj: any): any {
         value: spec.value?.toString() ?? '',
       },
       scheduler: {
-        cron: spec.scheduler?.cron ?? '',
         duration: spec.duration ?? '',
       },
     },
@@ -117,7 +116,7 @@ export function yamlToExperiment(yamlObj: any): any {
 
   if (kind === 'NetworkChaos') {
     if (spec.target) {
-      const namespace_selectors = spec.target.selector?.namespaces ?? []
+      const namespaces = spec.target.selector?.namespaces ?? []
       const label_selectors = spec.target.selector?.label_selectors
         ? selectorsToArr(spec.target.selector.label_selectors, ': ')
         : []
@@ -130,7 +129,7 @@ export function yamlToExperiment(yamlObj: any): any {
       spec.target_scope = {
         ...basic.scope,
         ...spec.target,
-        namespace_selectors,
+        namespaces,
         label_selectors,
         annotation_selectors,
       }
@@ -194,6 +193,7 @@ function validate(defaultI18n: string, i18n?: string) {
 }
 export const validateName = (i18n?: string) => validate('The name is required', i18n)
 export const validateDuration = (i18n?: string) => validate('The duration is required', i18n)
+export const validateDeadline = (i18n?: string) => validate('The deadline is required', i18n)
 
 function scopeToYAMLJSON(scope: ExperimentScope) {
   const result = {
@@ -201,8 +201,8 @@ function scopeToYAMLJSON(scope: ExperimentScope) {
     mode: scope.mode,
   }
 
-  if (scope.namespace_selectors.length) {
-    result.selector.namespaces = scope.namespace_selectors
+  if (scope.namespaces.length) {
+    result.selector.namespaces = scope.namespaces
   }
 
   if ((scope.label_selectors as string[]).length) {
@@ -217,18 +217,15 @@ function scopeToYAMLJSON(scope: ExperimentScope) {
 }
 
 export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
-  const { name, namespace, duration } = basic
-  const tasks: string[] = []
+  const { name, namespace, deadline } = basic
+  const children: string[] = templates.map((d) => d.name)
   const realTemplates: Record<string, any>[] = []
 
-  templates
-    .sort((a, b) => a.index! - b.index!)
-    .forEach((t) => {
-      tasks.push(t.name)
-
+  function recurInsertTemplates(templates: Template[]) {
+    templates.forEach((t) => {
       switch (t.type) {
         case 'single':
-          const experiment = t.experiments[0]
+          const experiment = t.experiment!
           const basic = experiment.basic
           const kind = experiment.target.kind
           const spec = _snakecase(kind)
@@ -236,60 +233,50 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
           realTemplates.push({
             name: t.name,
             templateType: kind,
-            duration: experiment.basic.duration,
+            deadline: experiment.basic.deadline,
             [toCamelCase(kind)]: {
               ...scopeToYAMLJSON(basic.scope),
               ...experiment.target[spec],
-              scheduler: basic.scheduler,
             },
           })
 
           break
         case 'serial':
-          t.experiments.forEach((d) => {
-            const basic = d.basic
-            const name = basic.name
-            const kind = d.target.kind
-            const spec = _snakecase(kind)
-
-            if (!realTemplates.some((t) => t.name === name)) {
-              realTemplates.push({
-                name,
-                templateType: kind,
-                duration: d.basic.duration,
-                [toCamelCase(kind)]: {
-                  ...scopeToYAMLJSON(basic.scope),
-                  ...d.target[spec],
-                  scheduler: basic.scheduler,
-                },
-              })
-            }
-          })
-
-          realTemplates.push({
-            name: t.name,
-            templateType: 'Serial',
-            duration: t.duration,
-            tasks: t.experiments.map((d) => d.basic.name),
-          })
-
-          break
         case 'parallel':
-          t.experiments.forEach((d) => {
-            const basic = d.basic
-            const name = basic.name
-            const kind = d.target.kind
-            const spec = _snakecase(kind)
+          t.children!.forEach((d) => {
+            if (d.children) {
+              realTemplates.push({
+                name: d.name,
+                templateType: toTitleCase(d.type),
+                deadline: d.deadline,
+                children: d.children!.map((dd) => dd.name),
+              })
 
-            if (!realTemplates.some((t) => t.name === name)) {
+              recurInsertTemplates(d.children)
+            } else {
+              if (d.type === 'suspend') {
+                realTemplates.push({
+                  name: d.name,
+                  templateType: 'Suspend',
+                  deadline: d.deadline,
+                })
+
+                return
+              }
+
+              const e = d.experiment!
+              const basic = e.basic
+              const name = basic.name
+              const kind = e.target.kind
+              const spec = _snakecase(kind)
+
               realTemplates.push({
                 name,
                 templateType: kind,
-                duration: d.basic.duration,
+                deadline: e.basic.deadline,
                 [toCamelCase(kind)]: {
                   ...scopeToYAMLJSON(basic.scope),
-                  ...d.target[spec],
-                  scheduler: basic.scheduler,
+                  ...e.target[spec],
                 },
               })
             }
@@ -297,9 +284,9 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
 
           realTemplates.push({
             name: t.name,
-            templateType: 'Parallel',
-            duration: t.duration,
-            tasks: t.experiments.map((d) => d.basic.name),
+            templateType: toTitleCase(t.type),
+            deadline: t.deadline,
+            children: t.children!.map((d) => d.name),
           })
 
           break
@@ -307,7 +294,7 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
           realTemplates.push({
             name: t.name,
             templateType: 'Suspend',
-            duration: t.duration,
+            deadline: t.deadline,
           })
 
           break
@@ -315,6 +302,9 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
           break
       }
     })
+  }
+
+  recurInsertTemplates(templates)
 
   return yaml.dump(
     {
@@ -330,8 +320,8 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
           {
             name: 'entry',
             templateType: 'Serial',
-            duration,
-            tasks,
+            deadline,
+            children,
           },
           ...realTemplates,
         ],

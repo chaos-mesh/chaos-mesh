@@ -55,7 +55,7 @@ spec:
             value: "{{ .Values.clusterScoped }}"
           - name: TZ
             value: {{ .Values.timezone | default "UTC" }}
-          - name: CHAOS_DAEMON_PORT
+          - name: CHAOS_DAEMON_SERVICE_PORT
             value: !!str {{ .Values.chaosDaemon.grpcPort }}
           - name: BPFKI_PORT
             value: !!str {{ .Values.bpfki.grpcPort }}
@@ -86,6 +86,10 @@ spec:
             value: "30"
           - name: BURST
             value: "50"
+          {{- end }}
+          {{- if .Values.controllerManager.podChaos.podFailure.pauseImage }}
+          - name: POD_FAILURE_PAUSE_IMAGE
+            value: {{ .Values.controllerManager.podChaos.podFailure.pauseImage }}
           {{- end }}
         volumeMounts:
           - name: webhook-certs

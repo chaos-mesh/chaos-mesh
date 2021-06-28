@@ -127,7 +127,7 @@ func (it *SerialNodeReconciler) Reconcile(request reconcile.Request) (reconcile.
 		}
 
 		// TODO: also check the consistent between spec in task and the spec in child node
-		if len(finishedChildren) == len(nodeNeedUpdate.Spec.Tasks) {
+		if len(finishedChildren) == len(nodeNeedUpdate.Spec.Children) {
 			SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
 				Type:   v1alpha1.ConditionAccomplished,
 				Status: corev1.ConditionTrue,
@@ -160,10 +160,14 @@ func (it *SerialNodeReconciler) Reconcile(request reconcile.Request) (reconcile.
 func (it *SerialNodeReconciler) syncChildNodes(ctx context.Context, node v1alpha1.WorkflowNode) error {
 
 	// empty serial node
-	if len(node.Spec.Tasks) == 0 {
+	if len(node.Spec.Children) == 0 {
 		it.logger.V(4).Info("empty serial node, NOOP",
 			"node", fmt.Sprintf("%s/%s", node.Namespace, node.Name),
 		)
+		return nil
+	}
+
+	if WorkflowNodeFinished(node.Status) {
 		return nil
 	}
 
@@ -174,20 +178,20 @@ func (it *SerialNodeReconciler) syncChildNodes(ctx context.Context, node v1alpha
 	var taskToStartup string
 	if len(activeChildNodes) == 0 {
 		// no active children, trying to spawn a new one
-		for index, task := range node.Spec.Tasks {
-			// Walking through on the Spec.Tasks, each one of task SHOULD has one corresponding workflow node;
+		for index, task := range node.Spec.Children {
+			// Walking through on the Spec.Children, each one of task SHOULD has one corresponding workflow node;
 			// If the spec of one task has been changed, the corresponding workflow node and other
 			// workflow nodes **behinds** that workflow node will be deleted.
 			// That's so called "partial rerun" feature.
 			// For example:
 			// One serial node have three children nodes: A, B, C, and all of them have finished.
-			// Then user updates the Spec.Tasks[B], the expected behavior is workflow node B and C will be
+			// Then user updates the Spec.Children[B], the expected behavior is workflow node B and C will be
 			// deleted, then create a new node that refs to B, no effects on A.
 			if index < len(finishedChildNodes) {
 				// TODO: if the definition/spec of task changed, we should also respawn the node
 				// child node start with task name
 
-				// TODO: maybe the changes on Spec.Tasks should be concerned each time, not only during spawning
+				// TODO: maybe the changes on Spec.Children should be concerned each time, not only during spawning
 				// new instances, for shutdown outdated nodes **instantly**
 
 				if strings.HasPrefix(task, finishedChildNodes[index].Name) {

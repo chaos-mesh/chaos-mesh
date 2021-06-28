@@ -43,8 +43,8 @@ func renderNodesByTemplates(workflow *v1alpha1.Workflow, parent *v1alpha1.Workfl
 			now := metav1.NewTime(time.Now())
 			var deadline *metav1.Time = nil
 
-			if template.Duration != nil {
-				duration, err := time.ParseDuration(*template.Duration)
+			if template.Deadline != nil {
+				duration, err := time.ParseDuration(*template.Deadline)
 				if err != nil {
 					// TODO: logger
 					return nil, err
@@ -59,14 +59,16 @@ func renderNodesByTemplates(workflow *v1alpha1.Workflow, parent *v1alpha1.Workfl
 					GenerateName: fmt.Sprintf("%s-", template.Name),
 				},
 				Spec: v1alpha1.WorkflowNodeSpec{
-					TemplateName: template.Name,
-					WorkflowName: workflow.Name,
-					Type:         template.Type,
-					StartTime:    &now,
-					Deadline:     deadline,
-					Tasks:        template.Tasks,
-					EmbedChaos:   template.EmbedChaos,
-					Schedule:     conversionSchedule(template.Schedule),
+					TemplateName:        template.Name,
+					WorkflowName:        workflow.Name,
+					Type:                template.Type,
+					StartTime:           &now,
+					Deadline:            deadline,
+					Children:            template.Children,
+					Task:                template.Task,
+					ConditionalBranches: template.ConditionalBranches,
+					EmbedChaos:          template.EmbedChaos,
+					Schedule:            conversionSchedule(template.Schedule),
 				},
 			}
 

@@ -644,7 +644,7 @@ install_chaos_mesh() {
         fi
     fi
 
-    gen_crd_manifests "${crd}" | kubectl apply --validate=false -f - || exit 1
+    gen_crd_manifests "${crd}" | kubectl create --validate=false -f - || exit 1
     gen_chaos_mesh_manifests "${runtime}" "${k3s}" "${version}" "${timezone}" "${host_network}" "${docker_registry}" "${microk8s}" | kubectl apply -f - || exit 1
 }
 
@@ -960,7 +960,19 @@ metadata:
 rules:
   - apiGroups: [ "" ]
     resources: [ "pods", "secrets"]
-    verbs: [ "get", "list", "watch", "delete", "update" ]
+    verbs: [ "get", "list", "watch", "delete", "update", "patch" ]
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+    verbs:
+      - "create"
+  - apiGroups:
+      - ""
+    resources:
+      - "pods/log"
+    verbs:
+      - "get"
   - apiGroups:
       - ""
     resources:
@@ -1152,6 +1164,10 @@ metadata:
 spec:
   type: ClusterIP
   ports:
+    - port: 443
+      targetPort: webhook
+      protocol: TCP
+      name: webhook
     - port: 10081
       targetPort: pprof
       protocol: TCP
@@ -1160,10 +1176,6 @@ spec:
       targetPort: http
       protocol: TCP
       name: http
-    - port: 443
-      targetPort: webhook
-      protocol: TCP
-      name: webhook
   selector:
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
@@ -1269,6 +1281,8 @@ spec:
         app.kubernetes.io/part-of: chaos-mesh
         app.kubernetes.io/version: v0.9.0
         app.kubernetes.io/component: chaos-dashboard
+      annotations:
+        rollme: "install.sh"
     spec:
       serviceAccountName: chaos-controller-manager
       priorityClassName: 
@@ -1376,7 +1390,7 @@ spec:
             value: "true"
           - name: TZ
             value: ${timezone}
-          - name: CHAOS_DAEMON_PORT
+          - name: CHAOS_DAEMON_SERVICE_PORT
             value: !!str 31767
           - name: BPFKI_PORT
             value: !!str 50051
@@ -1394,6 +1408,8 @@ spec:
             value: !!str 9288
           - name: SECURITY_MODE
             value: "false"
+          - name: POD_FAILURE_PAUSE_IMAGE
+            value: gcr.io/google-containers/pause:latest
         volumeMounts:
           - name: webhook-certs
             mountPath: /etc/webhook/certs

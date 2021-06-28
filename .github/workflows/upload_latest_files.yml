@@ -1,48 +1,49 @@
-# name: Upload latest install related files to CDN
-# on:
-#   push:
-#     branches:
-#       - master
-#     paths:
-#       - install.sh
-#       - manifests/crd.yaml
-#       - manifests/crd-v1beta1.yaml
-#       - examples/web-show/deploy.sh
-#       - pkg/chaosctl/**
-#       - cmd/chaosctl/**
-# jobs:
-#   run:
-#     if: github.repository_owner == 'chaos-mesh'
-#     name: Upload
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Set up Go 1.15
-#         uses: actions/setup-go@v2
-#         with:
-#           go-version: 1.15.11
-#         id: go
-#
-#       - uses: actions/checkout@master
-#         with:
-#           # Must use at least depth 2!
-#           fetch-depth: 2
-#
-#       - uses: actions/setup-python@v2
-#       - name: Configure awscli
-#         run: |
-#           pip3 install awscli
-#           printf "%s\n" ${{ secrets.AWS_ACCESS_KEY }} ${{ secrets.AWS_SECRET_KEY }} ${{ secrets.AWS_REGION }} "json" | aws configure
-#
-#       - name: Build chaosctl
-#         run: make chaosctl
-#
-#       - name: Upload files
-#         run: |
-#           GIT_TAG=${GITHUB_REF##*/}
-#           if [[ "$GIT_TAG" == "master" ]]; then
-#             GIT_TAG="latest"
-#           fi
-#           aws s3 cp install.sh ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/install.sh
-#           aws s3 cp manifests/crd.yaml ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/crd.yaml
-#           aws s3 cp examples/web-show/deploy.sh ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/web-show/deploy.sh
-#           aws s3 cp bin/chaosctl ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/chaosctl
+ name: Upload latest install related files to CDN
+ on:
+   push:
+     branches:
+       - master
+     paths:
+       - install.sh
+       - manifests/crd.yaml
+       - manifests/crd-v1beta1.yaml
+       - examples/web-show/deploy.sh
+       - pkg/chaosctl/**
+       - cmd/chaosctl/**
+ jobs:
+   run:
+     if: github.repository_owner == 'chaos-mesh'
+     name: Upload
+     runs-on: ubuntu-latest
+     steps:
+       - name: Set up Go 1.15
+         uses: actions/setup-go@v2
+         with:
+           go-version: 1.15.11
+         id: go
+
+       - uses: actions/checkout@master
+         with:
+           # Must use at least depth 2!
+           fetch-depth: 2
+
+       - uses: actions/setup-python@v2
+       - name: Configure awscli
+         run: |
+           pip3 install awscli
+           printf "%s\n" ${{ secrets.AWS_ACCESS_KEY }} ${{ secrets.AWS_SECRET_KEY }} ${{ secrets.AWS_REGION }} "json" | aws configure
+
+       - name: Build chaosctl
+         run: make chaosctl
+
+       - name: Upload files
+         run: |
+           GIT_TAG=${GITHUB_REF##*/}
+           if [[ "$GIT_TAG" == "master" ]]; then
+             GIT_TAG="latest"
+           fi
+           aws s3 cp install.sh ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/install.sh
+           aws s3 cp manifests/crd.yaml ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/crd.yaml
+           aws s3 cp manifests/crd-v1beta1.yaml ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/crd-v1beta1.yaml
+           aws s3 cp examples/web-show/deploy.sh ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/web-show/deploy.sh
+           aws s3 cp bin/chaosctl ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/chaosctl

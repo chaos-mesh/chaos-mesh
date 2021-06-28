@@ -1,15 +1,17 @@
-import ArchiveReport from 'pages/ArchiveReport'
+import Archive from 'pages/Archives/Single'
 import Archives from 'pages/Archives'
 import Dashboard from 'pages/Dashboard'
 import Events from 'pages/Events'
-import ExperimentDetail from 'pages/ExperimentDetail'
+import Experiment from 'pages/Experiments/Single'
 import Experiments from 'pages/Experiments'
 import NewExperiment from 'pages/Experiments/New'
+import NewSchedule from 'pages/Schedules/New'
 import NewWorkflow from 'components/NewWorkflow'
 import { RouteProps } from 'react-router'
+import Schedule from 'pages/Schedules/Single'
+import Schedules from 'pages/Schedules'
 import Settings from 'pages/Settings'
-import Swagger from 'pages/Swagger'
-import WorkflowDetail from 'pages/WorkflowDetail'
+import Workflow from 'pages/Workflows/Single'
 import Workflows from 'pages/Workflows'
 
 const routes: RouteProps[] = [
@@ -19,17 +21,8 @@ const routes: RouteProps[] = [
     exact: true,
   },
   {
-    component: Experiments,
-    path: '/experiments',
-    exact: true,
-  },
-  {
-    component: NewExperiment,
-    path: '/experiments/new',
-  },
-  {
-    component: ExperimentDetail,
-    path: '/experiments/:uuid',
+    component: NewWorkflow,
+    path: '/workflows/new',
   },
   {
     component: Workflows,
@@ -37,12 +30,34 @@ const routes: RouteProps[] = [
     exact: true,
   },
   {
-    component: NewWorkflow,
-    path: '/workflows/new',
+    component: Workflow,
+    path: '/workflows/:uuid',
   },
   {
-    component: WorkflowDetail,
-    path: '/workflows/:namespace/:name',
+    component: NewSchedule,
+    path: '/schedules/new',
+  },
+  {
+    component: Schedules,
+    path: '/schedules',
+    exact: true,
+  },
+  {
+    component: Schedule,
+    path: '/schedules/:uuid',
+  },
+  {
+    component: NewExperiment,
+    path: '/experiments/new',
+  },
+  {
+    component: Experiments,
+    path: '/experiments',
+    exact: true,
+  },
+  {
+    component: Experiment,
+    path: '/experiments/:uuid',
   },
   {
     component: Events,
@@ -55,17 +70,12 @@ const routes: RouteProps[] = [
     exact: true,
   },
   {
-    component: ArchiveReport,
+    component: Archive,
     path: '/archives/:uuid',
   },
   {
     component: Settings,
     path: '/settings',
-    exact: true,
-  },
-  {
-    component: Swagger,
-    path: '/swagger',
     exact: true,
   },
 ]

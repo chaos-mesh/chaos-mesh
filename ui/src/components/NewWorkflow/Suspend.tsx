@@ -1,62 +1,62 @@
 import { Form, Formik } from 'formik'
 import { Submit, TextField } from 'components/FormField'
-import { validateDuration, validateName } from 'lib/formikhelpers'
+import { validateDeadline, validateName } from 'lib/formikhelpers'
 
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
+import Space from 'components-mui/Space'
 import T from 'components/T'
-import { setTemplate } from 'slices/workflows'
-import { useStoreDispatch } from 'store'
+import { Template } from 'slices/workflows'
 
 export interface SuspendValues {
   name: string
-  duration: string
+  deadline: string
 }
 
 interface SuspendProps {
   initialValues?: SuspendValues
-  onSubmit?: (values: SuspendValues) => void
+  submit: (template: Template) => void
 }
 
-const Suspend: React.FC<SuspendProps> = ({ initialValues, onSubmit }) => {
-  const dispatch = useStoreDispatch()
-
-  const defaultOnSubmit = ({ name, duration }: SuspendValues) => {
-    dispatch(
-      setTemplate({
-        type: 'suspend',
-        name,
-        duration,
-        experiments: [],
-      })
-    )
+const Suspend: React.FC<SuspendProps> = ({ initialValues, submit }) => {
+  const onSubmit = ({ name, deadline }: SuspendValues) => {
+    submit({
+      type: 'suspend',
+      name: name.trim(),
+      deadline,
+    })
   }
 
   return (
     <Paper>
-      <PaperTop title={T('newW.suspendTitle')} />
-      <Formik initialValues={initialValues || { name: '', duration: '' }} onSubmit={onSubmit || defaultOnSubmit}>
-        {({ errors, touched }) => (
-          <Form>
-            <TextField
-              name="name"
-              label={T('common.name')}
-              validate={validateName((T('newW.nameValidation') as unknown) as string)}
-              helperText={errors.name && touched.name ? errors.name : T('newW.node.nameHelper')}
-              error={errors.name && touched.name ? true : false}
-            />
-            <TextField
-              fast
-              name="duration"
-              label={T('newE.schedule.duration')}
-              validate={validateDuration((T('newW.durationValidation') as unknown) as string)}
-              helperText={errors.duration && touched.duration ? errors.duration : T('newW.node.durationHelper')}
-              error={errors.duration && touched.duration ? true : false}
-            />
-            <Submit />
-          </Form>
-        )}
-      </Formik>
+      <Space>
+        <PaperTop title={T('newW.suspendTitle')} />
+        <Formik initialValues={initialValues || { name: '', deadline: '' }} onSubmit={onSubmit}>
+          {({ errors, touched }) => (
+            <Form>
+              <Space>
+                <TextField
+                  fast
+                  name="name"
+                  label={T('common.name')}
+                  validate={validateName(T('newW.node.nameValidation') as unknown as string)}
+                  helperText={errors.name && touched.name ? errors.name : T('newW.node.nameHelper')}
+                  error={errors.name && touched.name ? true : false}
+                />
+                <TextField
+                  fast
+                  name="deadline"
+                  label={T('newW.node.deadline')}
+                  validate={validateDeadline(T('newW.node.deadlineValidation') as unknown as string)}
+                  helperText={errors.deadline && touched.deadline ? errors.deadline : T('newW.node.deadlineHelper')}
+                  error={errors.deadline && touched.deadline ? true : false}
+                />
+              </Space>
+              <Submit />
+            </Form>
+          )}
+        </Formik>
+      </Space>
     </Paper>
   )
 }

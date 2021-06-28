@@ -15,6 +15,7 @@ package controllers
 
 import (
 	"github.com/go-logr/logr"
+	corev1 "k8s.io/api/core/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -23,7 +24,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 )
 
-func BootstrapWorkflowControllers(mgr manager.Manager, logger logr.Logger) error {
+func BootstrapWorkflowControllers(mgr manager.Manager, logger logr.Logger, recorderBuilder *recorder.RecorderBuilder) error {
 	noCacheClient, err := client.New(mgr.GetConfig(), client.Options{
 		Scheme: mgr.GetScheme(),
 		Mapper: mgr.GetRESTMapper(),
@@ -38,7 +39,7 @@ func BootstrapWorkflowControllers(mgr manager.Manager, logger logr.Logger) error
 		Complete(
 			NewWorkflowEntryReconciler(
 				mgr.GetClient(),
-				recorder.NewRecorder(mgr, "workflow-entry-reconciler", logger.WithName("workflow-entry-reconciler")),
+				recorderBuilder.Build("workflow-entry-reconciler"),
 				logger.WithName("workflow-entry-reconciler"),
 			),
 		)
@@ -55,7 +56,7 @@ func BootstrapWorkflowControllers(mgr manager.Manager, logger logr.Logger) error
 		Complete(
 			NewSerialNodeReconciler(
 				noCacheClient,
-				recorder.NewRecorder(mgr, "workflow-serial-node-reconciler", logger.WithName("workflow-serial-node-reconciler")),
+				recorderBuilder.Build("workflow-serial-node-reconciler"),
 				logger.WithName("workflow-serial-node-reconciler"),
 			),
 		)
@@ -70,7 +71,7 @@ func BootstrapWorkflowControllers(mgr manager.Manager, logger logr.Logger) error
 		Complete(
 			NewParallelNodeReconciler(
 				noCacheClient,
-				recorder.NewRecorder(mgr, "workflow-parallel-node-reconciler", logger.WithName("workflow-parallel-node-reconciler")),
+				recorderBuilder.Build("workflow-parallel-node-reconciler"),
 				logger.WithName("workflow-parallel-node-reconciler"),
 			),
 		)
@@ -84,7 +85,7 @@ func BootstrapWorkflowControllers(mgr manager.Manager, logger logr.Logger) error
 		Complete(
 			NewDeadlineReconciler(
 				mgr.GetClient(),
-				recorder.NewRecorder(mgr, "workflow-deadline-reconciler", logger.WithName("workflow-deadline-reconciler")),
+				recorderBuilder.Build("workflow-deadline-reconciler"),
 				logger.WithName("workflow-deadline-reconciler"),
 			),
 		)
@@ -98,9 +99,22 @@ func BootstrapWorkflowControllers(mgr manager.Manager, logger logr.Logger) error
 		Complete(
 			NewChaosNodeReconciler(
 				mgr.GetClient(),
-				recorder.NewRecorder(mgr, "workflow-chaos-node-reconciler", logger.WithName("workflow-chaos-node-reconciler")),
+				recorderBuilder.Build("workflow-chaos-node-reconciler"),
 				logger.WithName("workflow-chaos-node-reconciler"),
 			),
 		)
+	if err != nil {
+		return err
+	}
+	err = ctrl.NewControllerManagedBy(mgr).
+		For(&v1alpha1.WorkflowNode{}).
+		Owns(&corev1.Pod{}).
+		Named("workflow-task-reconciler").
+		Complete(NewTaskReconciler(
+			noCacheClient,
+			mgr.GetConfig(),
+			mgr.GetEventRecorderFor("workflow-task-reconciler"),
+			logger.WithName("workflow-task-reconciler"),
+		))
 	return err
 }

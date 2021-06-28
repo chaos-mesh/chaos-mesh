@@ -14,7 +14,10 @@
 package provider
 
 import (
+	"math"
+
 	"github.com/go-logr/logr"
+	lru "github.com/hashicorp/golang-lru"
 	"go.uber.org/fx"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -24,6 +27,7 @@ import (
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -53,6 +57,11 @@ func NewOption(logger logr.Logger) *ctrl.Options {
 		MetricsBindAddress: config.ControllerCfg.MetricsAddr,
 		LeaderElection:     config.ControllerCfg.EnableLeaderElection,
 		Port:               9443,
+		// Don't aggregate events
+		EventBroadcaster: record.NewBroadcasterWithCorrelatorOptions(record.CorrelatorOptions{
+			MaxEvents:            math.MaxInt32,
+			MaxIntervalInSeconds: 1,
+		}),
 	}
 
 	if config.ControllerCfg.ClusterScoped {
@@ -93,8 +102,17 @@ func NewAuthCli(cfg *rest.Config) (*authorizationv1.AuthorizationV1Client, error
 	return authorizationv1.NewForConfig(cfg)
 }
 
-func NewClient(mgr ctrl.Manager) client.Client {
-	return mgr.GetClient()
+func NewClient(mgr ctrl.Manager, scheme *runtime.Scheme) (client.Client, error) {
+	// TODO: make this size configurable
+	cache, err := lru.New(100)
+	if err != nil {
+		return nil, err
+	}
+	return &UpdatedClient{
+		client: mgr.GetClient(),
+		scheme: scheme,
+		cache:  cache,
+	}, nil
 }
 
 func NewLogger() logr.Logger {

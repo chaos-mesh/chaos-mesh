@@ -1,40 +1,28 @@
-import { Box, Grid, MenuItem, StepLabel, Typography } from '@material-ui/core'
-import { Form, Formik, FormikHelpers } from 'formik'
-import MultiNode, { MultiNodeHandles } from './MultiNode'
+import { Box, Button, Grid, IconButton, MenuItem, StepLabel, Typography } from '@material-ui/core'
 import NewExperimentNext, { NewExperimentHandles } from 'components/NewExperimentNext'
 import { SelectField, Submit, TextField } from 'components/FormField'
-import { TemplateExperiment, setTemplate } from 'slices/workflows'
+import { Template, setTemplate, updateTemplate } from 'slices/workflows'
 import { resetNewExperiment, setExternalExperiment } from 'slices/experiments'
-import { useRef, useState } from 'react'
-import { validateDuration, validateName } from 'lib/formikhelpers'
+import { useEffect, useRef, useState } from 'react'
+import { validateDeadline, validateName } from 'lib/formikhelpers'
 
 import AddCircleIcon from '@material-ui/icons/AddCircle'
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown'
+import ArrowRightIcon from '@material-ui/icons/ArrowRight'
+import CloseIcon from '@material-ui/icons/Close'
+import { Formik } from 'formik'
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
 import Space from 'components-mui/Space'
 import Suspend from './Suspend'
 import T from 'components/T'
 import _snakecase from 'lodash.snakecase'
-import { makeStyles } from '@material-ui/core/styles'
+import { makeStyles } from '@material-ui/styles'
 import { setAlert } from 'slices/globalStatus'
 import { useIntl } from 'react-intl'
 import { useStoreDispatch } from 'store'
 
 const useStyles = makeStyles((theme) => ({
-  fields: {
-    display: 'flex',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    [theme.breakpoints.down('xs')]: {
-      justifyContent: 'unset',
-      '& > *': {
-        marginBottom: theme.spacing(3),
-        '&:last-child': {
-          marginBottom: 0,
-        },
-      },
-    },
-  },
   field: {
     width: 180,
     marginTop: 0,
@@ -53,24 +41,89 @@ const useStyles = makeStyles((theme) => ({
 
 const types = ['single', 'serial', 'parallel', 'suspend']
 
-const Add = () => {
+interface AddProps {
+  childIndex?: number
+  parentTemplates?: Template[]
+  setParentTemplates?: React.Dispatch<React.SetStateAction<Template[]>>
+  setParentExpand?: React.Dispatch<React.SetStateAction<number>>
+  externalTemplate?: Template
+  update?: number
+  updateCallback?: () => void
+}
+
+const Add: React.FC<AddProps> = ({
+  childIndex,
+  parentTemplates,
+  setParentTemplates,
+  setParentExpand,
+  externalTemplate,
+  update,
+  updateCallback,
+}) => {
   const classes = useStyles()
   const intl = useIntl()
 
   const dispatch = useStoreDispatch()
 
-  const [showNum, setShowNum] = useState(false)
-  const [num, setNum] = useState(1)
+  const [initialValues, setInitialValues] = useState({ type: 'single', num: 2, name: '', deadline: '' })
+  const [num, setNum] = useState(-1)
+  const [expand, setExpand] = useState(-1)
   const [otherTypes, setOtherTypes] = useState(false)
-  const [experiments, setExperiments] = useState<TemplateExperiment[]>([])
+  const [templates, setTemplates] = useState<Template[]>([])
   const formRef = useRef<any>()
   const newERef = useRef<NewExperimentHandles>(null)
-  const multiNodeRef = useRef<MultiNodeHandles>(null)
+
+  const fillExperiment = (t: Template) => {
+    const e = t.experiment!
+
+    const kind = e.target.kind
+
+    dispatch(
+      setExternalExperiment({
+        kindAction: [kind, e.target[_snakecase(kind)].action ?? ''],
+        target: e.target,
+        basic: e.basic,
+      })
+    )
+  }
+
+  useEffect(() => {
+    if (externalTemplate) {
+      const { type, name, deadline, children } = externalTemplate
+
+      switch (type) {
+        case 'single':
+          fillExperiment(externalTemplate)
+
+          break
+        case 'serial':
+        case 'parallel':
+          const templates = children!
+
+          setTemplates(templates)
+          setNum(templates.length)
+
+          break
+        case 'suspend':
+          setInitialValues({ ...initialValues, name, deadline: deadline! })
+          setOtherTypes(true)
+
+          break
+      }
+
+      setInitialValues({
+        type,
+        num: children ? children.length : 2,
+        name,
+        deadline: deadline || '',
+      })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [externalTemplate])
 
   const resetNoSingle = () => {
-    setShowNum(false)
-    setExperiments([])
-    multiNodeRef.current?.setCurrent(0)
+    setNum(-1)
+    setTemplates([])
   }
 
   const onValidate = ({ type, num: newNum }: { type: string; num: number }) => {
@@ -87,11 +140,15 @@ const Add = () => {
     }
 
     if (type === 'serial' || type === 'parallel') {
-      setShowNum(true)
+      if (typeof newNum !== 'number' || newNum < 0) {
+        formRef.current.setFieldValue('num', 2)
 
-      // Delete extra experiments
-      if (num > newNum) {
-        setExperiments(experiments.slice(0, -1))
+        return
+      }
+
+      // Protect exist templates
+      if (newNum < templates.length) {
+        return
       }
 
       setNum(newNum)
@@ -108,105 +165,90 @@ const Add = () => {
     }
   }
 
+  const submit = (template: Template) => {
+    if (childIndex !== undefined) {
+      if (parentTemplates![childIndex!]) {
+        const tmp = JSON.parse(JSON.stringify(parentTemplates!))
+        tmp[childIndex!] = template
+
+        setParentTemplates!(tmp)
+      } else {
+        setParentTemplates!([...parentTemplates!, template])
+      }
+
+      setParentExpand!(-1)
+    } else {
+      dispatch(update !== undefined ? updateTemplate({ ...template, index: update }) : setTemplate(template))
+      typeof updateCallback === 'function' && updateCallback()
+    }
+  }
+
   const onSubmit = (experiment: any) => {
     const type = formRef.current.values.type
 
-    if (type === 'single') {
-      dispatch(
-        setTemplate({
-          type,
-          name: experiment.basic.name,
-          experiments: [experiment],
-        })
-      )
-    } else {
-      const current = multiNodeRef.current!.current
-
-      multiNodeRef.current!.setCurrent(current + 1)
-
-      // Edit the node that has been submitted before
-      if (current < experiments.length) {
-        const es = experiments
-
-        es[current] = experiment
-
-        setExperiments(es)
-
-        dispatch(
-          setAlert({
-            type: 'success',
-            message: intl.formatMessage({ id: 'confirm.updateSuccessfully' }),
-          })
-        )
-      } else {
-        setExperiments([...experiments, experiment])
-      }
+    const name = experiment.basic.name
+    const template = {
+      type,
+      name,
+      experiment,
     }
 
-    newERef.current?.setShowNewPanel('existing')
+    submit(template)
+
     dispatch(resetNewExperiment())
   }
 
-  const submitNoSingleNode = (_: any, { resetForm }: FormikHelpers<any>) => {
-    const { type, name, duration } = formRef.current.values
+  const submitNoSingleNode = () => {
+    const { type, name, deadline } = formRef.current.values
+    const template = {
+      type,
+      name: name.trim(),
+      deadline,
+      children: templates,
+    }
 
-    dispatch(
-      setTemplate({
-        type,
-        name,
-        duration,
-        experiments,
-      })
-    )
+    submit(template)
 
     resetNoSingle()
-    resetForm()
   }
 
-  const setCurrentCallback = (index: number) => {
-    if (index > experiments.length) {
+  const switchExpand = (index: number) => () => {
+    if (index > templates.length) {
       dispatch(
         setAlert({
           type: 'warning',
-          message: intl.formatMessage({ id: 'newW.messages.m1' }),
+          message: T('newW.messages.m1', intl),
         })
       )
 
-      return false
+      return
     }
 
-    if (index < experiments.length) {
-      const e = experiments[index]
+    setExpand(
+      expand === index
+        ? (function () {
+            dispatch(resetNewExperiment())
 
-      const kind = e.target.kind
-
-      dispatch(
-        setExternalExperiment({
-          kindAction: [kind, e.target[_snakecase(kind)].action ?? ''],
-          target: e.target,
-          basic: e.basic,
-        })
-      )
-
-      newERef.current?.setShowNewPanel('initial')
-    }
-
-    return true
+            return -1
+          })()
+        : index
+    )
   }
 
   return (
     <>
       <Formik
         innerRef={formRef}
-        initialValues={{ type: 'single', num: 2, name: '', duration: '' }}
-        onSubmit={submitNoSingleNode}
+        initialValues={initialValues}
+        enableReinitialize
+        onSubmit={() => {}}
         validate={onValidate}
         validateOnBlur={false}
       >
         {({ values, errors, touched }) => (
-          <Form>
+          <>
             <StepLabel icon={<AddCircleIcon color="primary" />}>
-              <Space className={classes.fields}>
+              <Space direction="row">
                 <SelectField className={classes.field} name="type" label={T('newW.node.choose')}>
                   {types.map((d) => (
                     <MenuItem key={d} value={d}>
@@ -214,7 +256,7 @@ const Add = () => {
                     </MenuItem>
                   ))}
                 </SelectField>
-                {showNum && (
+                {num > 0 && (
                   <TextField
                     className={classes.field}
                     type="number"
@@ -223,51 +265,89 @@ const Add = () => {
                     inputProps={{ min: 1 }}
                   />
                 )}
+                {update !== undefined && (
+                  <Button variant="outlined" startIcon={<CloseIcon />} onClick={updateCallback}>
+                    {T('common.cancelEdit')}
+                  </Button>
+                )}
               </Space>
             </StepLabel>
 
-            {showNum && (
-              <Box mt={6} ml={8}>
+            {num > 0 && (
+              <Box mt={3} ml={8}>
                 <Paper>
-                  <PaperTop title={T(`newW.${values.type}Title`)} />
-                  <Grid container spacing={6}>
-                    <Grid item xs={12} md={6}>
+                  <PaperTop title={T(`newW.${values.type}Title`)} boxProps={{ mb: 3 }} />
+                  <Grid container spacing={3}>
+                    <Grid item xs={6}>
                       <TextField
                         name="name"
                         label={T('common.name')}
-                        validate={validateName(T('newW.nameValidation') as unknown as string)}
+                        validate={validateName(T('newW.nameValidation', intl))}
                         helperText={errors.name && touched.name ? errors.name : T('newW.node.nameHelper')}
                         error={errors.name && touched.name ? true : false}
                       />
                     </Grid>
-                    <Grid item xs={12} md={6}>
+                    <Grid item xs={6}>
                       <TextField
-                        name="duration"
-                        label={T('newE.schedule.duration')}
-                        validate={validateDuration(T('newW.durationValidation') as unknown as string)}
+                        name="deadline"
+                        label={T('newW.node.deadline')}
+                        validate={validateDeadline(T('newW.node.deadlineValidation', intl))}
                         helperText={
-                          errors.duration && touched.duration ? errors.duration : T('newW.node.durationHelper')
+                          errors.deadline && touched.deadline ? errors.deadline : T('newW.node.deadlineHelper')
                         }
-                        error={errors.duration && touched.duration ? true : false}
+                        error={errors.deadline && touched.deadline ? true : false}
                       />
                     </Grid>
                   </Grid>
-                  <Box display="flex" justifyContent="space-between" alignItems="center">
-                    <MultiNode ref={multiNodeRef} count={num} setCurrentCallback={setCurrentCallback} />
-                    <Submit mt={0} disabled={experiments.length !== num} />
-                  </Box>
+                  <Submit disabled={templates.length !== num} onClick={submitNoSingleNode} />
                 </Paper>
+
+                {Array(num)
+                  .fill(0)
+                  .map((_, index) => (
+                    <Box key={index} ml={8}>
+                      <Paper sx={{ my: 6, p: 1.5, borderColor: templates[index] ? 'success.main' : undefined }}>
+                        <Box display="flex" alignItems="center">
+                          <IconButton size="small" onClick={switchExpand(index)}>
+                            {expand === index ? <ArrowDropDownIcon /> : <ArrowRightIcon />}
+                          </IconButton>
+                          <Typography component="div" sx={{ ml: 1 }}>
+                            {templates.length > index
+                              ? templates[index].name
+                              : `${T('newW.node.child', intl)} ${index + 1}`}
+                          </Typography>
+                        </Box>
+                      </Paper>
+                      {expand === index && (
+                        <Box mt={6}>
+                          <Add
+                            childIndex={index}
+                            parentTemplates={templates}
+                            setParentTemplates={setTemplates}
+                            setParentExpand={setExpand}
+                            externalTemplate={templates[index]}
+                          />
+                        </Box>
+                      )}
+                    </Box>
+                  ))}
               </Box>
             )}
-          </Form>
+          </>
         )}
       </Formik>
-      <Box mt={6} ml={8}>
-        <Box style={{ display: otherTypes ? 'none' : 'initial' }}>
-          <NewExperimentNext ref={newERef} initPanel="existing" onSubmit={onSubmit} inWorkflow={true} />
+      {num < 0 && (
+        <Box ml={8}>
+          <Box display={otherTypes ? 'none' : 'initial'}>
+            <NewExperimentNext ref={newERef} onSubmit={onSubmit} inWorkflow={true} />
+          </Box>
+          {otherTypes && (
+            <Box mt={3}>
+              <Suspend initialValues={initialValues} submit={submit} />
+            </Box>
+          )}
         </Box>
-        {otherTypes && <Suspend />}
-      </Box>
+      )}
     </>
   )
 }

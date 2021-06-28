@@ -28,7 +28,6 @@ const Auth: React.FC<AuthProps> = ({ open, setOpen }) => {
       open={open}
       title={T('settings.addToken.prompt')}
       dialogProps={{
-        disableBackdropClick: true,
         disableEscapeKeyDown: true,
         PaperProps: {
           style: { width: 512 },
@@ -54,7 +53,7 @@ const Auth: React.FC<AuthProps> = ({ open, setOpen }) => {
         }}
       >
         <RBACGenerator />
-        <Box textAlign="right">
+        <Box mt={3} textAlign="right">
           <Button onClick={() => setTokenGenOpen(false)}>{T('common.close')}</Button>
         </Box>
       </ConfirmDialog>

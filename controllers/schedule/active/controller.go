@@ -17,14 +17,12 @@ import (
 	"context"
 	"reflect"
 	"sort"
-	"time"
 
 	"github.com/go-logr/logr"
 	"go.uber.org/fx"
 	v1 "k8s.io/api/core/v1"
 	k8sError "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/tools/reference"
 	"k8s.io/client-go/util/retry"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -115,22 +113,6 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, nil
 	}
 
-	// TODO: make the interval and total time configurable
-	// The following codes ensure the Schedule in cache has the latest lastScheduleTime
-	ensureLatestError := wait.Poll(100*time.Millisecond, 2*time.Second, func() (bool, error) {
-		schedule = schedule.DeepCopyObject().(*v1alpha1.Schedule)
-
-		if err := r.Client.Get(ctx, req.NamespacedName, schedule); err != nil {
-			r.Log.Error(err, "unable to get schedule")
-			return false, err
-		}
-
-		return reflect.DeepEqual(schedule.Status.Active, active), nil
-	})
-	if ensureLatestError != nil {
-		r.Log.Error(ensureLatestError, "Fail to ensure that the resource in cache has the latest .Status.Active")
-		return ctrl.Result{}, nil
-	}
 	return ctrl.Result{}, nil
 }
 
@@ -140,7 +122,7 @@ type Objs struct {
 	Objs []types.Object `group:"objs"`
 }
 
-func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger, objs Objs, scheme *runtime.Scheme, lister *utils.ActiveLister) (types.Controller, error) {
+func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger, objs Objs, scheme *runtime.Scheme, lister *utils.ActiveLister, recorderBuilder *recorder.RecorderBuilder) (types.Controller, error) {
 	builder := builder.Default(mgr).
 		For(&v1alpha1.Schedule{}).
 		Named("schedule-active")
@@ -156,7 +138,7 @@ func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger, objs
 		client,
 		log.WithName("schedule-active"),
 		lister,
-		recorder.NewRecorder(mgr, "schedule-active", log),
+		recorderBuilder.Build("schedule-active"),
 	})
 	return "schedule-active", nil
 }

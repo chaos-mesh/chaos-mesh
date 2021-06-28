@@ -5,11 +5,12 @@ export type TemplateExperiment = {
   basic: any
 }
 export interface Template {
-  type: 'single' | 'serial' | 'parallel' | 'suspend'
   index?: number
+  type: 'single' | 'serial' | 'parallel' | 'suspend'
   name: string
-  duration?: string
-  experiments: TemplateExperiment[]
+  deadline?: string
+  experiment?: TemplateExperiment
+  children?: Template[]
 }
 
 const initialState: {
