@@ -141,6 +141,7 @@
       "serial": "顺序",
       "parallel": "并行",
       "suspend": "暂停",
+      "custom": "自定义",
       "number": "数目",
       "child": "子任务",
       "nameHelper": "任务的名称",
@@ -148,12 +149,27 @@
       "deadline": "超时时间",
       "deadlineHelper": "任务将会在超时时间内结束，超时时间支持的格式有：ms / s / m / h。",
       "deadlineValidation": "任务的超时时间不能为空",
+      "container": {
+        "title": "容器",
+        "nameHelper": "容器的名称",
+        "image": "镜像",
+        "imageHelper": "容器的镜像",
+        "command": "命令",
+        "commandHelper": "可选项。指定在容器中运行的命令，输入字符串并以空格结尾来创建单条命令。"
+      },
+      "conditionalBranches": {
+        "title": "条件分支",
+        "branch": "分支",
+        "target": "目标",
+        "expression": "表达式"
+      },
       "deleteDesc": "此任务将被删除",
       "submitAll": "提交所有改动"
     },
     "serialTitle": "填写顺序任务",
     "parallelTitle": "填写并行任务",
     "suspendTitle": "设置暂停",
+    "customTitle": "自定义任务",
     "nameHelper": "工作流的名称",
     "nameValidation": "工作流名称不能为空",
     "durationValidation": "工作流持续时间不能为空",

@@ -91,14 +91,6 @@ const Network = ({ data }: any) => (
 
 const IO = ({ data }: any) => (
   <>
-    <TableRow>
-      <TableCell>{T('newE.target.action')}</TableCell>
-      <TableCell>
-        <Typography variant="body2" color="textSecondary">
-          {data.action}
-        </Typography>
-      </TableCell>
-    </TableRow>
     {data.delay && (
       <TableRow>
         <TableCell>Delay</TableCell>
