@@ -1,4 +1,5 @@
-import { Box, Button, Grid, IconButton, MenuItem, StepLabel, Typography } from '@material-ui/core'
+import { Box, Button, IconButton, MenuItem, StepLabel, Typography } from '@material-ui/core'
+import { Form, Formik } from 'formik'
 import NewExperimentNext, { NewExperimentHandles } from 'components/NewExperimentNext'
 import { SelectField, Submit, TextField } from 'components/FormField'
 import { Template, setTemplate, updateTemplate } from 'slices/workflows'
@@ -10,7 +11,7 @@ import AddCircleIcon from '@material-ui/icons/AddCircle'
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown'
 import ArrowRightIcon from '@material-ui/icons/ArrowRight'
 import CloseIcon from '@material-ui/icons/Close'
-import { Formik } from 'formik'
+import Custom from './Custom'
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
 import Space from 'components-mui/Space'
@@ -39,7 +40,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
-const types = ['single', 'serial', 'parallel', 'suspend']
+const types = ['single', 'serial', 'parallel', 'suspend', 'custom']
 
 interface AddProps {
   childIndex?: number
@@ -65,10 +66,26 @@ const Add: React.FC<AddProps> = ({
 
   const dispatch = useStoreDispatch()
 
-  const [initialValues, setInitialValues] = useState({ type: 'single', num: 2, name: '', deadline: '' })
+  const [initialValues, setInitialValues] = useState({
+    type: 'single',
+    num: 2,
+    name: '',
+    deadline: '',
+    container: {
+      name: '',
+      image: '',
+      command: [] as string[],
+    },
+    conditionalBranches: [
+      {
+        target: '',
+        expression: '',
+      },
+    ],
+  })
   const [num, setNum] = useState(-1)
   const [expand, setExpand] = useState(-1)
-  const [otherTypes, setOtherTypes] = useState(false)
+  const [otherTypes, setOtherTypes] = useState<'suspend' | 'custom' | ''>('')
   const [templates, setTemplates] = useState<Template[]>([])
   const formRef = useRef<any>()
   const newERef = useRef<NewExperimentHandles>(null)
@@ -89,7 +106,7 @@ const Add: React.FC<AddProps> = ({
 
   useEffect(() => {
     if (externalTemplate) {
-      const { type, name, deadline, children } = externalTemplate
+      const { type, name, deadline, children, custom } = externalTemplate
 
       switch (type) {
         case 'single':
@@ -105,17 +122,19 @@ const Add: React.FC<AddProps> = ({
 
           break
         case 'suspend':
-          setInitialValues({ ...initialValues, name, deadline: deadline! })
-          setOtherTypes(true)
+        case 'custom':
+          setOtherTypes(type)
 
           break
       }
 
       setInitialValues({
+        ...initialValues,
         type,
         num: children ? children.length : 2,
         name,
         deadline: deadline || '',
+        ...custom,
       })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -127,8 +146,8 @@ const Add: React.FC<AddProps> = ({
   }
 
   const onValidate = ({ type, num: newNum }: { type: string; num: number }) => {
-    if (type !== 'suspend') {
-      setOtherTypes(false)
+    if (type !== 'suspend' && type !== 'custom') {
+      setOtherTypes('')
     }
 
     const prevType = formRef.current.values.type
@@ -156,12 +175,12 @@ const Add: React.FC<AddProps> = ({
       return
     }
 
-    if (type === 'suspend') {
+    if (type === 'suspend' || type === 'custom') {
       if (prevType === 'serial' || prevType === 'parallel') {
         resetNoSingle()
       }
 
-      setOtherTypes(true)
+      setOtherTypes(type)
     }
   }
 
@@ -241,7 +260,7 @@ const Add: React.FC<AddProps> = ({
         innerRef={formRef}
         initialValues={initialValues}
         enableReinitialize
-        onSubmit={() => {}}
+        onSubmit={submitNoSingleNode}
         validate={onValidate}
         validateOnBlur={false}
       >
@@ -275,10 +294,10 @@ const Add: React.FC<AddProps> = ({
 
             {num > 0 && (
               <Box mt={3} ml={8}>
-                <Paper>
-                  <PaperTop title={T(`newW.${values.type}Title`)} boxProps={{ mb: 3 }} />
-                  <Grid container spacing={3}>
-                    <Grid item xs={6}>
+                <Form>
+                  <Paper>
+                    <PaperTop title={T(`newW.${values.type}Title`)} boxProps={{ mb: 3 }} />
+                    <Space direction="row">
                       <TextField
                         name="name"
                         label={T('common.name')}
@@ -286,8 +305,6 @@ const Add: React.FC<AddProps> = ({
                         helperText={errors.name && touched.name ? errors.name : T('newW.node.nameHelper')}
                         error={errors.name && touched.name ? true : false}
                       />
-                    </Grid>
-                    <Grid item xs={6}>
                       <TextField
                         name="deadline"
                         label={T('newW.node.deadline')}
@@ -297,10 +314,10 @@ const Add: React.FC<AddProps> = ({
                         }
                         error={errors.deadline && touched.deadline ? true : false}
                       />
-                    </Grid>
-                  </Grid>
-                  <Submit disabled={templates.length !== num} onClick={submitNoSingleNode} />
-                </Paper>
+                    </Space>
+                    <Submit disabled={templates.length !== num} />
+                  </Paper>
+                </Form>
 
                 {Array(num)
                   .fill(0)
@@ -341,9 +358,14 @@ const Add: React.FC<AddProps> = ({
           <Box display={otherTypes ? 'none' : 'initial'}>
             <NewExperimentNext ref={newERef} onSubmit={onSubmit} inWorkflow={true} />
           </Box>
-          {otherTypes && (
+          {otherTypes === 'suspend' && (
             <Box mt={3}>
               <Suspend initialValues={initialValues} submit={submit} />
+            </Box>
+          )}
+          {otherTypes === 'custom' && (
+            <Box mt={3}>
+              <Custom initialValues={initialValues} submit={submit} />
             </Box>
           )}
         </Box>

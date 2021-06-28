@@ -298,6 +298,17 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
           })
 
           break
+        case 'custom':
+          realTemplates.push({
+            name: t.name,
+            templateType: 'Task',
+            task: {
+              container: t.custom?.container,
+            },
+            conditionalBranches: t.custom?.conditionalBranches,
+          })
+
+          break
         default:
           break
       }

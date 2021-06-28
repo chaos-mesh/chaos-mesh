@@ -119,6 +119,7 @@
       "serial": "Serial",
       "parallel": "Parallel",
       "suspend": "Suspend",
+      "custom": "Custom",
       "number": "Number",
       "child": "Child task",
       "nameHelper": "The task name",
@@ -126,12 +127,27 @@
       "deadline": "Deadline",
       "deadlineHelper": "The task will end within the deadline, the supported formats of the deadline are: ms / s / m / h.",
       "deadlineValidation": "The task deadline is required",
+      "container": {
+        "title": "Container",
+        "nameHelper": "The container name",
+        "image": "Image",
+        "imageHelper": "The image of container",
+        "command": "Command",
+        "commandHelper": "Optional. Specifies the command running in the container, enter the string and ends a space to create a single command."
+      },
+      "conditionalBranches": {
+        "title": "Conditional branches",
+        "branch": "Branch",
+        "target": "Target",
+        "expression": "Expression"
+      },
       "deleteDesc": "This task will be deleted",
       "submitAll": "Submit All"
     },
     "serialTitle": "Set serial",
     "parallelTitle": "Set parallel",
     "suspendTitle": "Set suspend",
+    "customTitle": "Set custom",
     "nameHelper": "The workflow name",
     "nameValidation": "The workflow name is required",
     "durationValidation": "The workflow duration is required",
