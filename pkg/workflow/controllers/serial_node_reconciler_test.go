@@ -81,7 +81,7 @@ var _ = Describe("Workflow", func() {
 							{
 								Name: "serial",
 								Type: v1alpha1.TypeSerial,
-								Tasks: []string{
+								Children: []string{
 									"network-chaos",
 									"pod-chaos",
 									"stress-chaos",
@@ -89,7 +89,7 @@ var _ = Describe("Workflow", func() {
 							}, {
 								Name:     "network-chaos",
 								Type:     v1alpha1.TypeNetworkChaos,
-								Duration: &networkChaosDurationString,
+								Deadline: &networkChaosDurationString,
 								EmbedChaos: &v1alpha1.EmbedChaos{
 									NetworkChaos: &v1alpha1.NetworkChaosSpec{
 										PodSelector: v1alpha1.PodSelector{
@@ -107,7 +107,7 @@ var _ = Describe("Workflow", func() {
 							}, {
 								Name:     "pod-chaos",
 								Type:     v1alpha1.TypePodChaos,
-								Duration: &podChaosDurationString,
+								Deadline: &podChaosDurationString,
 								EmbedChaos: &v1alpha1.EmbedChaos{
 									PodChaos: &v1alpha1.PodChaosSpec{
 										ContainerSelector: v1alpha1.ContainerSelector{
@@ -128,7 +128,7 @@ var _ = Describe("Workflow", func() {
 							{
 								Name:     "stress-chaos",
 								Type:     v1alpha1.TypeStressChaos,
-								Duration: &stressChaosDurationString,
+								Deadline: &stressChaosDurationString,
 								EmbedChaos: &v1alpha1.EmbedChaos{
 									StressChaos: &v1alpha1.StressChaosSpec{
 										ContainerSelector: v1alpha1.ContainerSelector{

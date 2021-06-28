@@ -167,7 +167,7 @@ var _ = Describe("Workflow", func() {
 							{
 								Name: "parallel",
 								Type: v1alpha1.TypeParallel,
-								Tasks: []string{
+								Children: []string{
 									"network-chaos",
 									"pod-chaos",
 									"stress-chaos",
