@@ -36,7 +36,10 @@ var _ webhook.Defaulter = &AwsChaos{}
 // Default implements webhook.Defaulter so a webhook will be registered for the type
 func (in *AwsChaos) Default() {
 	awschaoslog.Info("default", "name", in.Name)
+	in.Spec.Default()
 }
+
+func (in *AwsChaosSpec) Default() {}
 
 // +kubebuilder:webhook:verbs=create;update,path=/validate-chaos-mesh-org-v1alpha1-awschaos,mutating=false,failurePolicy=fail,groups=chaos-mesh.org,resources=awschaos,versions=v1alpha1,name=vawschaos.kb.io
 

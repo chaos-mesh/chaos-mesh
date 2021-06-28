@@ -26,7 +26,7 @@ const TokensTable = () => {
     dispatch(
       setConfirm({
         title: `${T('common.delete', intl)} ${token.name}`,
-        description: T('settings.addToken.deleteDesc', intl),
+        description: T('common.deleteDesc', intl),
         handle: handleRemoveTokenConfirm(token.name),
       })
     )

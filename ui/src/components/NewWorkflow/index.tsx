@@ -12,13 +12,10 @@ import {
   Typography,
 } from '@material-ui/core'
 import { Form, Formik } from 'formik'
-import MultiNode, { MultiNodeHandles } from './MultiNode'
 import { SelectField, TextField } from 'components/FormField'
-import Suspend, { SuspendValues } from './Suspend'
-import { Template, deleteTemplate, resetWorkflow, updateTemplate } from 'slices/workflows'
-import { resetNewExperiment, setExternalExperiment } from 'slices/experiments'
+import { Template, deleteTemplate, resetWorkflow } from 'slices/workflows'
 import { setAlert, setConfirm } from 'slices/globalStatus'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useStoreDispatch, useStoreSelector } from 'store'
 import { validateDeadline, validateName } from 'lib/formikhelpers'
 
@@ -26,7 +23,6 @@ import { Ace } from 'ace-builds'
 import Add from './Add'
 import CheckIcon from '@material-ui/icons/Check'
 import Menu from 'components-mui/Menu'
-import NewExperiment from 'components/NewExperimentNext'
 import Paper from 'components-mui/Paper'
 import PublishIcon from '@material-ui/icons/Publish'
 import RemoveIcon from '@material-ui/icons/Remove'
@@ -35,10 +31,10 @@ import T from 'components/T'
 import UndoIcon from '@material-ui/icons/Undo'
 import YAMLEditor from 'components/YAMLEditor'
 import _isEmpty from 'lodash.isempty'
-import _snakecase from 'lodash.snakecase'
 import api from 'api'
 import { constructWorkflow } from 'lib/formikhelpers'
 import { makeStyles } from '@material-ui/styles'
+import { resetNewExperiment } from 'slices/experiments'
 import { useHistory } from 'react-router-dom'
 import { useIntl } from 'react-intl'
 import yaml from 'js-yaml'
@@ -91,7 +87,6 @@ const NewWorkflow = () => {
     deadline: '',
   })
   const [yamlEditor, setYAMLEditor] = useState<Ace.Editor>()
-  const multiNodeRef = useRef<MultiNodeHandles>(null)
 
   useEffect(() => {
     return () => {
@@ -104,117 +99,16 @@ const NewWorkflow = () => {
   }, [templates])
 
   const resetRestore = () => {
-    dispatch(resetNewExperiment())
     setRestoreIndex(-1)
   }
 
-  const restoreExperiment = (experiments: any, index: number) => () => {
+  const restoreExperiment = (index: number) => () => {
     if (restoreIndex !== -1) {
       resetRestore()
     } else {
-      if (experiments.length) {
-        const e = experiments[0]
-
-        const kind = e.target.kind
-
-        dispatch(
-          setExternalExperiment({
-            kindAction: [kind, e.target[_snakecase(kind)].action ?? ''],
-            target: e.target,
-            basic: e.basic,
-          })
-        )
-      }
-
       setRestoreIndex(index)
     }
   }
-
-  const setCurrentCallback = (experiments: Template['experiments']) => (index: number) => {
-    const e = experiments[index]
-
-    const kind = e.target.kind
-
-    dispatch(
-      setExternalExperiment({
-        kindAction: [kind, e.target[_snakecase(kind)].action ?? ''],
-        target: e.target,
-        basic: e.basic,
-      })
-    )
-
-    return true
-  }
-
-  const onRestoreSubmit = (type: Template['type'], index: number) => (experiment: any) => {
-    if (type === 'single') {
-      dispatch(
-        updateTemplate({
-          type,
-          index,
-          name: experiment.basic.name,
-          experiments: [experiment],
-        })
-      )
-      dispatch(
-        setAlert({
-          type: 'success',
-          message: T('confirm.success.update', intl) as string,
-        })
-      )
-      resetRestore()
-    } else if (type === 'serial' || type === 'parallel') {
-      const eIndex = multiNodeRef.current!.current
-      const tmpSteps = [...steps]
-      const tmpStep = { ...tmpSteps[index] }
-      const tmpStepExperiments = tmpStep.experiments.slice()
-
-      tmpStepExperiments[eIndex] = experiment
-      tmpStep.experiments = tmpStepExperiments
-      tmpSteps[index] = tmpStep
-
-      setSteps(tmpSteps)
-
-      dispatch(resetNewExperiment())
-
-      if (eIndex !== tmpStep.experiments.length - 1) {
-        setCurrentCallback(tmpStepExperiments)(eIndex + 1)
-      }
-
-      multiNodeRef.current!.setCurrent(eIndex + 1)
-    }
-  }
-
-  const onNoSingleRestoreSubmit = (stepIndex: number) => () => {
-    dispatch(updateTemplate(steps[stepIndex]))
-    dispatch(
-      setAlert({
-        type: 'success',
-        message: T('confirm.success.update', intl) as string,
-      })
-    )
-    resetRestore()
-  }
-
-  const onSuspendRestoreSubmit =
-    (stepIndex: number) =>
-    ({ name, deadline }: SuspendValues) => {
-      dispatch(
-        updateTemplate({
-          ...steps[stepIndex],
-          index: stepIndex,
-          name,
-          deadline,
-        })
-      )
-      dispatch(
-        setAlert({
-          type: 'success',
-          message: T('confirm.success.update', intl) as string,
-        })
-      )
-      resetRestore()
-    }
 
   const removeExperiment = (index: number) => {
     dispatch(deleteTemplate(index))
@@ -250,6 +144,11 @@ const NewWorkflow = () => {
     }
   }
 
+  const updateTemplateCallback = () => {
+    setRestoreIndex(-1)
+    dispatch(resetNewExperiment())
+  }
+
   const onValidate = setWorkflowBasic
 
   const submitWorkflow = () => {
@@ -278,88 +177,47 @@ const NewWorkflow = () => {
             <Stepper orientation="vertical" sx={{ mt: -1, p: 0 }}>
               {steps.length > 0 &&
                 steps.map((step, index) => (
-                  <Step key={step.type + index}>
-                    <StepLabel icon={<CheckIcon sx={{ color: 'success.main' }} />}>
-                      <Paper sx={{ p: restoreIndex === index ? 4.5 : 3, borderColor: 'success.main' }}>
-                        <Box display="flex" justifyContent="space-between">
-                          <Space direction="row" alignItems="center">
-                            <Chip label={T(`newW.node.${step.type}`)} color="primary" size="small" />
-                            <Typography component="div" variant={restoreIndex === index ? 'h6' : 'body1'}>
-                              {step.name}
-                            </Typography>
-                          </Space>
-                          <Space direction="row">
-                            <IconButton size="small" onClick={restoreExperiment(step.experiments, index)}>
-                              <UndoIcon />
-                            </IconButton>
-                            <Menu>
-                              <MenuItem dense onClick={handleSelect(step.name, index, 'delete')}>
-                                <ListItemIcon>
-                                  <RemoveIcon fontSize="small" />
-                                </ListItemIcon>
-                                <Typography variant="inherit">{T('common.delete')}</Typography>
-                              </MenuItem>
-                            </Menu>
-                          </Space>
-                        </Box>
-                        {restoreIndex === index && (
-                          <Box mt={6}>
-                            {(step.type === 'serial' || step.type === 'parallel') && (
-                              <Formik initialValues={{ name: step.name, duration: step.deadline }} onSubmit={() => {}}>
-                                <Form>
-                                  <Box display="flex" justifyContent="space-between" alignItems="center">
-                                    <Space direction="row">
-                                      <TextField className={classes.field} name="name" label={T('common.name')} />
-                                      <TextField
-                                        className={classes.field}
-                                        name="duration"
-                                        label={T('newE.run.duration')}
-                                      />
-                                    </Space>
-                                    <Space direction="row">
-                                      <MultiNode
-                                        ref={multiNodeRef}
-                                        count={step.experiments.length}
-                                        setCurrentCallback={setCurrentCallback(step.experiments)}
-                                      />
-                                      <Button
-                                        variant="contained"
-                                        color="primary"
-                                        startIcon={<PublishIcon />}
-                                        onClick={onNoSingleRestoreSubmit(index)}
-                                      >
-                                        {T('newW.node.submitAll')}
-                                      </Button>
-                                    </Space>
-                                  </Box>
-                                </Form>
-                              </Formik>
-                            )}
-                            {step.type !== 'suspend' && (
-                              <NewExperiment
-                                loadFrom={false}
-                                onSubmit={onRestoreSubmit(step.type, index)}
-                                inWorkflow={true}
-                              />
-                            )}
-                            {step.type === 'suspend' && (
-                              <Suspend
-                                initialValues={{
-                                  name: steps[index].name,
-                                  deadline: steps[index].deadline!,
-                                }}
-                                onSubmit={onSuspendRestoreSubmit(index)}
-                              />
-                            )}
+                  <Step key={step.name}>
+                    {restoreIndex !== index ? (
+                      <StepLabel icon={<CheckIcon sx={{ color: 'success.main' }} />}>
+                        <Paper sx={{ p: 3, borderColor: 'success.main' }}>
+                          <Box display="flex" justifyContent="space-between">
+                            <Space direction="row" alignItems="center">
+                              <Chip label={T(`newW.node.${step.type}`)} color="primary" size="small" />
+                              <Typography component="div" variant="body1">
+                                {step.name}
+                              </Typography>
+                            </Space>
+                            <Space direction="row">
+                              <IconButton
+                                size="small"
+                                title={T('common.edit', intl)}
+                                onClick={restoreExperiment(index)}
+                              >
+                                <UndoIcon />
+                              </IconButton>
+                              <Menu>
+                                <MenuItem dense onClick={handleSelect(step.name, index, 'delete')}>
+                                  <ListItemIcon>
+                                    <RemoveIcon fontSize="small" />
+                                  </ListItemIcon>
+                                  <Typography variant="inherit">{T('common.delete')}</Typography>
+                                </MenuItem>
+                              </Menu>
+                            </Space>
                           </Box>
-                        )}
-                      </Paper>
-                    </StepLabel>
+                        </Paper>
+                      </StepLabel>
+                    ) : (
+                      <Add externalTemplate={step} update={index} updateCallback={updateTemplateCallback} />
+                    )}
                   </Step>
                 ))}
-              <Step>
-                <Add />
-              </Step>
+              {restoreIndex < 0 && (
+                <Step>
+                  <Add />
+                </Step>
+              )}
             </Stepper>
           </Space>
         </Grid>
