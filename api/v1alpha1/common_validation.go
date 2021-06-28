@@ -30,6 +30,7 @@ const (
 type CommonSpec interface {
 	GetDuration() (*time.Duration, error)
 	Validate() field.ErrorList
+	Default()
 }
 
 func validateDuration(spec CommonSpec, path *field.Path) field.ErrorList {

@@ -42,6 +42,7 @@ func (in EmbedChaos) Validate(chaosType string) field.ErrorList {
 		logf.Log.Info(fmt.Sprintf("%s does not seem to have a validator", chaosType))
 		return allErrs
 	}
+	addr.Default()
 	allErrs = append(allErrs, addr.Validate()...)
 	return allErrs
 }
