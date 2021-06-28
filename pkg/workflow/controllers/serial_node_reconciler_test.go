@@ -16,115 +16,19 @@ package controllers
 import (
 	"context"
 	"fmt"
-	"reflect"
-	"sort"
 	"strings"
-	"testing"
 	"time"
 
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
-
-// unit tests
-func Test_getTaskNameFromGeneratedName(t *testing.T) {
-	type args struct {
-		generatedNodeName string
-	}
-	tests := []struct {
-		name string
-		args args
-		want string
-	}{
-		{
-			"common case",
-			args{"name-1"},
-			"name",
-		}, {
-			"common case",
-			args{"name-1-2"},
-			"name-1",
-		}, {
-			"common case",
-			args{"name"},
-			"name",
-		}, {
-			"common case",
-			args{"name-"},
-			"name",
-		},
-		{
-			"common case",
-			args{"-name"},
-			"",
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := getTaskNameFromGeneratedName(tt.args.generatedNodeName); got != tt.want {
-				t.Errorf("getTaskNameFromGeneratedName() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func Test_relativeComplementSet(t *testing.T) {
-	type args struct {
-		former []string
-		latter []string
-	}
-	tests := []struct {
-		name string
-		args args
-		want []string
-	}{
-		{
-			name: "common_case",
-			args: args{
-				former: []string{"a", "b", "c"},
-				latter: []string{},
-			},
-			want: []string{"a", "b", "c"},
-		}, {
-			name: "common_case",
-			args: args{
-				former: []string{"a", "b", "c"},
-				latter: []string{"b", "c"},
-			},
-			want: []string{"a"},
-		}, {
-			name: "common_case",
-			args: args{
-				former: []string{"a", "b", "c"},
-				latter: []string{"c", "a"},
-			},
-			want: []string{"b"},
-		}, {
-			name: "common_case",
-			args: args{
-				former: []string{"a", "b", "c"},
-				latter: []string{"c", "b", "d"},
-			},
-			want: []string{"a"},
-		},
-	}
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			got := setDifference(test.args.former, test.args.latter)
-			sort.Strings(got)
-			sort.Strings(test.want)
-			if !reflect.DeepEqual(got, test.want) {
-				t.Errorf("getTaskNameFromGeneratedName() = %v, want %v", got, test.want)
-			}
-		})
-	}
-}
 
 // integration tests
 var _ = Describe("Workflow", func() {
@@ -150,31 +54,42 @@ var _ = Describe("Workflow", func() {
 		By(fmt.Sprintf("cleanup namespace %s", ns))
 	})
 
-	Context("with one parallel node", func() {
-		Context("with one simple parallel node", func() {
+	Context("with one serial node", func() {
+		Context("with one simple serial node", func() {
 
-			It("should spawn all the children at the same time", func() {
+			It("should spawn all the children one by one", func() {
 				By("create simple workflow")
 				ctx := context.TODO()
-				simpleParallelWorkflow := v1alpha1.Workflow{
+
+				networkChaosDuration := 5 * time.Second
+				networkChaosDurationString := networkChaosDuration.String()
+				podChaosDuration := 7 * time.Second
+				podChaosDurationString := podChaosDuration.String()
+				stressChaosDuration := 9 * time.Second
+				stressChaosDurationString := stressChaosDuration.String()
+
+				toleratedJitter := 3 * time.Second
+
+				simpleSerialWorkflow := v1alpha1.Workflow{
 					ObjectMeta: metav1.ObjectMeta{
-						Name:      "simple-parallel",
+						Name:      "simple-serial",
 						Namespace: ns,
 					},
 					Spec: v1alpha1.WorkflowSpec{
-						Entry: "parallel",
+						Entry: "serial",
 						Templates: []v1alpha1.Template{
 							{
-								Name: "parallel",
-								Type: v1alpha1.TypeParallel,
+								Name: "serial",
+								Type: v1alpha1.TypeSerial,
 								Children: []string{
 									"network-chaos",
 									"pod-chaos",
 									"stress-chaos",
 								},
 							}, {
-								Name: "network-chaos",
-								Type: v1alpha1.TypeNetworkChaos,
+								Name:     "network-chaos",
+								Type:     v1alpha1.TypeNetworkChaos,
+								Deadline: &networkChaosDurationString,
 								EmbedChaos: &v1alpha1.EmbedChaos{
 									NetworkChaos: &v1alpha1.NetworkChaosSpec{
 										PodSelector: v1alpha1.PodSelector{
@@ -190,8 +105,9 @@ var _ = Describe("Workflow", func() {
 									},
 								},
 							}, {
-								Name: "pod-chaos",
-								Type: v1alpha1.TypePodChaos,
+								Name:     "pod-chaos",
+								Type:     v1alpha1.TypePodChaos,
+								Deadline: &podChaosDurationString,
 								EmbedChaos: &v1alpha1.EmbedChaos{
 									PodChaos: &v1alpha1.PodChaosSpec{
 										ContainerSelector: v1alpha1.ContainerSelector{
@@ -210,8 +126,9 @@ var _ = Describe("Workflow", func() {
 								},
 							},
 							{
-								Name: "stress-chaos",
-								Type: v1alpha1.TypeStressChaos,
+								Name:     "stress-chaos",
+								Type:     v1alpha1.TypeStressChaos,
+								Deadline: &stressChaosDurationString,
 								EmbedChaos: &v1alpha1.EmbedChaos{
 									StressChaos: &v1alpha1.StressChaosSpec{
 										ContainerSelector: v1alpha1.ContainerSelector{
@@ -236,16 +153,16 @@ var _ = Describe("Workflow", func() {
 							},
 						},
 					}}
-				Expect(kubeClient.Create(ctx, &simpleParallelWorkflow)).To(Succeed())
+				Expect(kubeClient.Create(ctx, &simpleSerialWorkflow)).To(Succeed())
 
 				By("assert that all resource has been created")
 
-				By("assert that 1 entry node and 3 chaos nodes created")
+				By("assert that entry node created")
 				Eventually(func() int {
 					workflowNodeList := v1alpha1.WorkflowNodeList{}
 					Expect(kubeClient.List(ctx, &workflowNodeList, &client.ListOptions{Namespace: ns})).To(Succeed())
 					return len(workflowNodeList.Items)
-				}, 10*time.Second, time.Second).Should(Equal(4))
+				}, 10*time.Second, time.Second).Should(BeNumerically(">=", 1))
 
 				By("assert that network chaos has been created")
 				Eventually(func() bool {
@@ -255,7 +172,14 @@ var _ = Describe("Workflow", func() {
 						return false
 					}
 					return strings.HasPrefix(chaosList.Items[0].Name, "network-chaos")
-				}, 10*time.Second, time.Second).Should(BeTrue())
+				}, toleratedJitter, time.Second).Should(BeTrue())
+
+				By("assert that network chaos has been deleted")
+				Eventually(func() int {
+					chaosList := v1alpha1.NetworkChaosList{}
+					Expect(kubeClient.List(ctx, &chaosList, &client.ListOptions{Namespace: ns})).To(Succeed())
+					return len(chaosList.Items)
+				}, networkChaosDuration+toleratedJitter, time.Second).Should(BeZero())
 
 				By("assert that pod chaos has been created")
 				Eventually(func() bool {
@@ -265,7 +189,14 @@ var _ = Describe("Workflow", func() {
 						return false
 					}
 					return strings.HasPrefix(chaosList.Items[0].Name, "pod-chaos")
-				}, 10*time.Second, time.Second).Should(BeTrue())
+				}, toleratedJitter, time.Second).Should(BeTrue())
+
+				By("assert that pod chaos has been deleted")
+				Eventually(func() int {
+					chaosList := v1alpha1.PodChaosList{}
+					Expect(kubeClient.List(ctx, &chaosList, &client.ListOptions{Namespace: ns})).To(Succeed())
+					return len(chaosList.Items)
+				}, podChaosDuration+toleratedJitter, time.Second).Should(BeZero())
 
 				By("assert that stress chaos has been created")
 				Eventually(func() bool {
@@ -275,7 +206,36 @@ var _ = Describe("Workflow", func() {
 						return false
 					}
 					return strings.HasPrefix(chaosList.Items[0].Name, "stress-chaos")
-				}, 10*time.Second, time.Second).Should(BeTrue())
+				}, toleratedJitter, time.Second).Should(BeTrue())
+
+				By("assert that stress chaos has been deleted")
+				Eventually(func() int {
+					chaosList := v1alpha1.StressChaosList{}
+					Expect(kubeClient.List(ctx, &chaosList, &client.ListOptions{Namespace: ns})).To(Succeed())
+					return len(chaosList.Items)
+				}, stressChaosDuration+toleratedJitter, time.Second).Should(BeZero())
+
+				By("assert that serial node marked as finished")
+				Eventually(func() bool {
+					workflowNodeList := v1alpha1.WorkflowNodeList{}
+					Expect(kubeClient.List(ctx, &workflowNodeList, &client.ListOptions{Namespace: ns})).To(Succeed())
+					if len(workflowNodeList.Items) != 4 {
+						return false
+					}
+					entryFounded := false
+					var entry *v1alpha1.WorkflowNode = nil
+					for _, item := range workflowNodeList.Items {
+						item := item
+						if item.Spec.Type == v1alpha1.TypeSerial {
+							entryFounded = true
+							entry = &item
+						}
+					}
+					if !entryFounded || entry == nil {
+						return false
+					}
+					return ConditionEqualsTo(entry.Status, v1alpha1.ConditionAccomplished, corev1.ConditionTrue)
+				}, toleratedJitter, time.Second).Should(BeTrue())
 			})
 		})
 	})
