@@ -1,9 +1,8 @@
-import { Box, Button, Grow, Modal } from '@material-ui/core'
+import { Box, Button, Grow, Modal, useTheme } from '@material-ui/core'
 import { Confirm, setAlert, setConfirm } from 'slices/globalStatus'
 import { useEffect, useRef, useState } from 'react'
 import { useHistory, useParams } from 'react-router-dom'
 
-import { Ace } from 'ace-builds'
 import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
 import { EventHandler } from 'cytoscape'
 import NodeConfiguration from 'components/ObjectConfiguration/Node'
@@ -46,12 +45,12 @@ const Single = () => {
   const classes = useStyles()
   const intl = useIntl()
   const history = useHistory()
+  const theme = useTheme()
   const { uuid } = useParams<{ uuid: uuid }>()
 
   const dispatch = useStoreDispatch()
 
   const [single, setSingle] = useState<WorkflowSingle>()
-  const [yamlEditor, setYAMLEditor] = useState<Ace.Editor>()
   const [data, setData] = useState<any>()
   const [selected, setSelected] = useState<'workflow' | 'node'>('workflow')
   const modalTitle = selected === 'workflow' ? single?.name : selected === 'node' ? data.name : ''
@@ -87,7 +86,7 @@ const Single = () => {
         return
       }
 
-      const { updateElements } = constructWorkflowTopology(topologyRef.current!, single, handleNodeClick)
+      const { updateElements } = constructWorkflowTopology(topologyRef.current!, single, theme, handleNodeClick)
 
       topologyRef.current = updateElements
     }
@@ -151,9 +150,7 @@ const Single = () => {
     onModalOpen()
   }
 
-  const handleUpdateWorkflow = () => {
-    let data = yaml.load(yamlEditor!.getValue())
-
+  const handleUpdateWorkflow = (data: any) => {
     if (selected === 'node') {
       const kubeObject = single?.kube_object
       kubeObject.spec.templates = kubeObject.spec.templates.map((t: any) => {
@@ -238,23 +235,17 @@ const Single = () => {
             sx={{ width: selected === 'workflow' ? '50vw' : selected === 'node' ? '70vw' : '50vw' }}
           >
             {single && configOpen && (
-              <Box display="flex" flexDirection="column" height="100%">
-                <Box px={3} pt={3}>
-                  <PaperTop title={modalTitle}>
-                    <Button variant="contained" color="primary" size="small" onClick={handleUpdateWorkflow}>
-                      {T('common.update')}
-                    </Button>
-                  </PaperTop>
-                </Box>
+              <Space display="flex" flexDirection="column" height="100%">
+                <PaperTop title={modalTitle} boxProps={{ p: 4.5, pb: 0 }} />
                 <Box display="flex" flex={1}>
                   {selected === 'node' && (
                     <Box width="50%">
                       <NodeConfiguration template={data} />
                     </Box>
                   )}
-                  <YAMLEditor data={yaml.dump(data)} mountEditor={setYAMLEditor} />
+                  <YAMLEditor name={modalTitle} data={yaml.dump(data)} onUpdate={handleUpdateWorkflow} download />
                 </Box>
-              </Box>
+              </Space>
             )}
           </Paper>
         </div>
