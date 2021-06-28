@@ -29,10 +29,10 @@ const Suspend = ({ template: t }: NodeConfigurationProps) => (
         </TableCell>
       </TableRow>
       <TableRow>
-        <TableCell>{T('newE.run.duration')}</TableCell>
+        <TableCell>{T('newW.node.deadline')}</TableCell>
         <TableCell>
           <Typography variant="body2" color="textSecondary">
-            {t.duration}
+            {t.deadline}
           </Typography>
         </TableCell>
       </TableRow>

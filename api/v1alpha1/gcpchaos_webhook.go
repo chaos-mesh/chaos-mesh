@@ -33,6 +33,10 @@ var _ webhook.Defaulter = &GcpChaos{}
 // Default implements webhook.Defaulter so a webhook will be registered for the type
 func (in *GcpChaos) Default() {
 	gcpchaoslog.Info("default", "name", in.Name)
+	in.Spec.Default()
+}
+
+func (in *GcpChaosSpec) Default() {
 }
 
 // +kubebuilder:webhook:verbs=create;update,path=/validate-chaos-mesh-org-v1alpha1-gcpchaos,mutating=false,failurePolicy=fail,groups=chaos-mesh.org,resources=gcpchaos,versions=v1alpha1,name=vgcpchaos.kb.io

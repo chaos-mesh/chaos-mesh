@@ -37,10 +37,10 @@ export function iconByKind(kind: ExperimentKind | 'Schedule', size: 'small' | 'l
     case 'DNSChaos':
       icon = <DNSIcon />
       break
-    case 'AwsChaos':
+    case 'AWSChaos':
       icon = <AWSIcon />
       break
-    case 'GcpChaos':
+    case 'GCPChaos':
       icon = <GCPIcon />
       break
   }

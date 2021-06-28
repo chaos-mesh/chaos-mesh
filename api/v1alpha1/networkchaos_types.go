@@ -119,28 +119,34 @@ type NetworkChaosStatus struct {
 
 // DelaySpec defines detail of a delay action
 type DelaySpec struct {
-	Latency     string       `json:"latency"`
-	Correlation string       `json:"correlation,omitempty"`
-	Jitter      string       `json:"jitter,omitempty"`
-	Reorder     *ReorderSpec `json:"reorder,omitempty"`
+	Latency string `json:"latency"`
+	// +optional
+	Correlation string `json:"correlation,omitempty"`
+	// +optional
+	Jitter string `json:"jitter,omitempty"`
+	// +optional
+	Reorder *ReorderSpec `json:"reorder,omitempty"`
 }
 
 // LossSpec defines detail of a loss action
 type LossSpec struct {
-	Loss        string `json:"loss"`
-	Correlation string `json:"correlation"`
+	Loss string `json:"loss"`
+	// +optional
+	Correlation string `json:"correlation,omitempty"`
 }
 
 // DuplicateSpec defines detail of a duplicate action
 type DuplicateSpec struct {
-	Duplicate   string `json:"duplicate"`
-	Correlation string `json:"correlation"`
+	Duplicate string `json:"duplicate"`
+	// +optional
+	Correlation string `json:"correlation,omitempty"`
 }
 
 // CorruptSpec defines detail of a corrupt action
 type CorruptSpec struct {
-	Corrupt     string `json:"corrupt"`
-	Correlation string `json:"correlation"`
+	Corrupt string `json:"corrupt"`
+	// +optional
+	Correlation string `json:"correlation,omitempty"`
 }
 
 // BandwidthSpec defines detail of bandwidth limit.
@@ -171,8 +177,9 @@ type BandwidthSpec struct {
 
 // ReorderSpec defines details of packet reorder.
 type ReorderSpec struct {
-	Reorder     string `json:"reorder"`
-	Correlation string `json:"correlation"`
+	Reorder string `json:"reorder"`
+	// +optional
+	Correlation string `json:"correlation,omitempty"`
 	Gap         int    `json:"gap"`
 }
 

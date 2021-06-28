@@ -477,8 +477,8 @@ const data: Record<Kind, Target> = {
       },
     ],
   },
-  // Aws
-  AwsChaos: {
+  // AWS
+  AWSChaos: {
     categories: [
       {
         name: 'Stop EC2',
@@ -518,8 +518,8 @@ const data: Record<Kind, Target> = {
       },
     ],
   },
-  // Gcp
-  GcpChaos: {
+  // GCP
+  GCPChaos: {
     categories: [
       {
         name: 'Stop node',
@@ -641,7 +641,7 @@ export const schema: Partial<Record<Kind, Record<string, Yup.ObjectSchema>>> = {
       patterns: patternsSchema,
     }),
   },
-  AwsChaos: {
+  AWSChaos: {
     'ec2-stop': AwsChaosCommonSchema,
     'ec2-restart': AwsChaosCommonSchema,
     'detach-volume': AwsChaosCommonSchema.shape({
@@ -649,7 +649,7 @@ export const schema: Partial<Record<Kind, Record<string, Yup.ObjectSchema>>> = {
       volumeID: Yup.string().required('The ID of the EBS volume is required'),
     }),
   },
-  GcpChaos: {
+  GCPChaos: {
     'node-stop': GcpChaosCommonSchema,
     'node-reset': GcpChaosCommonSchema,
     'disk-loss': GcpChaosCommonSchema.shape({

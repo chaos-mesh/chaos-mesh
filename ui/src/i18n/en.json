@@ -96,9 +96,7 @@
       }
     },
     "run": {
-      "continuous": "Run continuously",
-      "duration": "Duration",
-      "durationHelper": "The experiment duration"
+      "continuous": "Run continuously"
     },
     "complete": "All steps are completed"
   },
@@ -122,11 +120,11 @@
       "parallel": "Parallel",
       "suspend": "Suspend",
       "number": "Number",
-      "chooseChildren": "Choose child task",
+      "child": "Child task",
       "nameHelper": "The task name",
       "nameValidation": "The task name is required",
       "deadline": "Deadline",
-      "deadlineHelper": "The task deadline",
+      "deadlineHelper": "The task will end within the deadline, the supported formats of the deadline are: ms / s / m / h.",
       "deadlineValidation": "The task deadline is required",
       "deleteDesc": "This task will be deleted",
       "submitAll": "Submit All"
@@ -136,11 +134,10 @@
     "suspendTitle": "Set suspend",
     "nameHelper": "The workflow name",
     "nameValidation": "The workflow name is required",
-    "durationHelper": "The workflow duration",
     "durationValidation": "The workflow duration is required",
     "submit": "Submit workflow",
     "messages": {
-      "m1": "Please complete the creation of the current node first"
+      "m1": "Please complete the creation of the previous task first"
     }
   },
   "newS": {
@@ -148,7 +145,7 @@
     "titleStep2": "Fill the schedule info",
     "basic": {
       "nameHelper": "The schedule name",
-      "scheduleHelper": "Define the schedule",
+      "scheduleHelper": "The schedule is expressed in the form of CronJob. If you are not familiar with it, you can use {crontabguru} to help define the schedule",
       "startingDeadlineSeconds": "Experiment expiration time",
       "startingDeadlineSecondsHelper": "Set to ignore experiments that haven’t been running for a long time",
       "concurrencyPolicy": "Concurrency Policy",
@@ -237,8 +234,7 @@
       "token": "Token",
       "tokenHelper": "Please fill the secret token",
       "tokenValidation": "The token is required",
-      "duplicateDesc": "Token name can't be duplicate",
-      "deleteDesc": "The operation is irreversible"
+      "duplicateDesc": "Token name can't be duplicate"
     }
   },
   "swagger": {
@@ -248,7 +244,7 @@
     "placeholder": "Search",
     "tip": {
       "title": "Use the following syntax to quickly locate workflows, schedules, experiments and archives:",
-      "namespace": "namespace:default xxx will search for workflows, schedules, experiments and archives with namespace default",
+      "namespace": "namespace:default xxx / ns:default xxx will search for workflows, schedules, experiments and archives with namespace default",
       "kind": "kind:NetworkChaos xxx will search for schedules, experiments and archives with kind NetworkChaos"
     },
     "result": {
@@ -261,6 +257,7 @@
     "advancedOptions": "Advanced Options",
     "batchOperation": "Batch operation",
     "cancel": "Cancel",
+    "cancelEdit": "Cancel edit",
     "chooseNamespace": "Choose namespace",
     "close": "Close",
     "configuration": "Configuration",
@@ -269,15 +266,20 @@
     "copy": "Copy",
     "definition": "Definition",
     "delete": "Delete",
+    "deleteDesc": "The operation is irreversible",
     "detail": "Detail",
     "doc": "Documentation",
     "download": "Download",
+    "duration": "Duration",
+    "durationHelper": "The supported formats of the duration are: ms / s / m / h.",
+    "edit": "Edit",
     "ip": "IP address",
     "isKVHelperText": "Type key:value and end with a space to generate a key/value pair",
     "multiOptions": "Support mutiple options",
     "name": "Name",
     "noOptions": "No options",
     "operation": "Operation",
+    "options": "Options",
     "other": "Other",
     "pause": "Pause",
     "preview": "Preview",

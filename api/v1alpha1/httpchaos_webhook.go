@@ -33,6 +33,13 @@ var _ webhook.Defaulter = &HTTPChaos{}
 // Default implements webhook.Defaulter so a webhook will be registered for the type
 func (in *HTTPChaos) Default() {
 	httpchaoslog.Info("default", "name", in.Name)
+
+	in.Spec.Selector.DefaultNamespace(in.GetNamespace())
+	in.Spec.Default()
+}
+
+func (in *HTTPChaosSpec) Default() {
+
 }
 
 // +kubebuilder:webhook:verbs=create;update,path=/validate-chaos-mesh-org-v1alpha1-httpchaos,mutating=false,failurePolicy=fail,groups=chaos-mesh.org,resources=httpchaos,versions=v1alpha1,name=vhttpchaos.kb.io

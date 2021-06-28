@@ -36,7 +36,11 @@ func (in *TimeChaos) Default() {
 	timechaoslog.Info("default", "name", in.Name)
 
 	in.Spec.Selector.DefaultNamespace(in.GetNamespace())
-	in.Spec.DefaultClockIds()
+	in.Spec.Default()
+}
+
+func (in *TimeChaosSpec) Default() {
+	in.DefaultClockIds()
 }
 
 // +kubebuilder:webhook:verbs=create;update,path=/validate-chaos-mesh-org-v1alpha1-timechaos,mutating=false,failurePolicy=fail,groups=chaos-mesh.org,resources=timechaos,versions=v1alpha1,name=vtimechaos.kb.io
