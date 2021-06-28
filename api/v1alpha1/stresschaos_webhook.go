@@ -46,6 +46,11 @@ var _ webhook.Defaulter = &StressChaos{}
 func (in *StressChaos) Default() {
 	stressChaosLog.Info("default", "name", in.Name)
 	in.Spec.Selector.DefaultNamespace(in.GetNamespace())
+	in.Spec.Default()
+}
+
+func (in *StressChaosSpec) Default() {
+
 }
 
 // +kubebuilder:webhook:verbs=create;update,path=/validate-chaos-mesh-org-v1alpha1-stresschaos,mutating=false,failurePolicy=fail,groups=chaos-mesh.org,resources=stresschaos,versions=v1alpha1,name=vstresschaos.kb.io
