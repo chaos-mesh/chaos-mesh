@@ -146,6 +146,7 @@ func (it *ChildNodesFetcher) fetchChildNodes(ctx context.Context, node v1alpha1.
 	}
 
 	err = it.kubeClient.List(ctx, &childNodes, &client.ListOptions{
+		Namespace:     node.Namespace,
 		LabelSelector: controlledByThisNode,
 	})
 
