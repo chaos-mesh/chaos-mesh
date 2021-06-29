@@ -147,18 +147,20 @@
       "nameHelper": "任务的名称",
       "nameValidation": "任务名称不能为空",
       "deadline": "超时时间",
-      "deadlineHelper": "任务将会在超时时间内结束，超时时间支持的格式有：ms / s / m / h。",
+      "deadlineHelper": "任务将会在超时时间内结束。超时时间支持的格式有：ms / s / m / h。",
       "deadlineValidation": "任务的超时时间不能为空",
       "container": {
         "title": "容器",
         "nameHelper": "容器的名称",
+        "nameValidation": "容器名称不能为空",
         "image": "镜像",
         "imageHelper": "容器的镜像",
+        "imageValidation": "镜像不能为空",
         "command": "命令",
         "commandHelper": "可选项。指定在容器中运行的命令，输入字符串并以空格结尾来创建单条命令。"
       },
       "conditionalBranches": {
-        "title": "条件分支",
+        "title": "条件分支（可选）",
         "branch": "分支",
         "target": "目标",
         "expression": "表达式"
@@ -175,7 +177,8 @@
     "durationValidation": "工作流持续时间不能为空",
     "submit": "提交工作流",
     "messages": {
-      "m1": "请先完成上一个任务的创建"
+      "m1": "请先完成上一个任务的创建",
+      "m2": "请先填写当前分支"
     }
   },
   "workflows": {
