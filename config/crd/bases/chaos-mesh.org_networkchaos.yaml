@@ -82,7 +82,6 @@ spec:
                   corrupt:
                     type: string
                 required:
-                - correlation
                 - corrupt
                 type: object
               delay:
@@ -104,7 +103,6 @@ spec:
                       reorder:
                         type: string
                     required:
-                    - correlation
                     - gap
                     - reorder
                     type: object
@@ -127,7 +125,6 @@ spec:
                   duplicate:
                     type: string
                 required:
-                - correlation
                 - duplicate
                 type: object
               duration:
@@ -146,7 +143,6 @@ spec:
                   loss:
                     type: string
                 required:
-                - correlation
                 - loss
                 type: object
               mode:

@@ -215,6 +215,7 @@ func (it *WorkflowEntryReconciler) fetchEntryNode(ctx context.Context, workflow 
 	}
 
 	err = it.kubeClient.List(ctx, &entryNodesList, &client.ListOptions{
+		Namespace:     workflow.Namespace,
 		LabelSelector: controlledByWorkflow,
 	})
 	if err != nil {
@@ -239,7 +240,7 @@ func (it *WorkflowEntryReconciler) spawnEntryNode(ctx context.Context, workflow 
 	}
 
 	if len(nodes) > 1 {
-		it.logger.V(1).Info("the results of entry nodes are more than 1, will only pick the first one",
+		it.logger.Info("the results of entry nodes are more than 1, will only pick the first one",
 			"workflow", fmt.Sprintf("%s/%s", workflow.Namespace, workflow.Name),
 			"nodes", nodes,
 		)
@@ -248,9 +249,13 @@ func (it *WorkflowEntryReconciler) spawnEntryNode(ctx context.Context, workflow 
 	entryNode := nodes[0]
 	err = it.kubeClient.Create(ctx, entryNode)
 	if err != nil {
-		it.logger.V(1).Info("failed to create workflow nodes")
+		it.logger.Info("failed to create workflow nodes")
 		return nil, err
 	}
+	it.logger.Info("entry workflow node created",
+		"workflow", fmt.Sprintf("%s/%s", workflow.Namespace, workflow.Name),
+		"entry node", entryNode.Name,
+	)
 
 	return entryNode, nil
 }

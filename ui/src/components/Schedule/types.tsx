@@ -1,9 +1,10 @@
 import * as Yup from 'yup'
 
 import { FormikProps, FormikValues } from 'formik'
-import { InputAdornment, MenuItem } from '@material-ui/core'
+import { InputAdornment, Link, MenuItem } from '@material-ui/core'
 import { SelectField, TextField } from 'components/FormField'
 
+import { FormattedMessage } from 'react-intl'
 import T from 'components/T'
 
 export interface ScheduleSpecific {
@@ -26,7 +27,22 @@ export const Fields = ({ errors, touched }: Pick<FormikProps<FormikValues>, 'err
       fast
       name="schedule"
       label={T('schedules.single')}
-      helperText={errors.schedule && touched.schedule ? errors.schedule : T('newS.basic.scheduleHelper')}
+      helperText={
+        errors.schedule && touched.schedule ? (
+          errors.schedule
+        ) : (
+          <FormattedMessage
+            id="newS.basic.scheduleHelper"
+            values={{
+              crontabguru: (
+                <Link href="https://crontab.guru/" target="_blank" underline="always">
+                  https://crontab.guru/
+                </Link>
+              ),
+            }}
+          />
+        )
+      }
       error={errors.schedule && touched.schedule ? true : false}
     />
     <TextField

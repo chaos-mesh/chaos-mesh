@@ -1,15 +1,32 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 
-export type TemplateExperiment = {
+export interface TemplateExperiment {
   target: any
   basic: any
 }
+
+export interface Branch {
+  target: string
+  expression: string
+}
+
+export interface TemplateCustom {
+  container: {
+    name: string
+    image: string
+    command: string[]
+  }
+  conditionalBranches: Branch[]
+}
+
 export interface Template {
-  type: 'single' | 'serial' | 'parallel' | 'suspend'
   index?: number
+  type: 'single' | 'serial' | 'parallel' | 'suspend' | 'custom'
   name: string
   deadline?: string
-  experiments: TemplateExperiment[]
+  experiment?: TemplateExperiment
+  children?: Template[]
+  custom?: TemplateCustom
 }
 
 const initialState: {

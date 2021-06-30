@@ -17,7 +17,7 @@ import T from 'components/T'
 import { objToArrBySep } from 'lib/utils'
 
 export const TableCell = (props: TableCellProps) => (
-  <MUITableCell sx={{ borderBottom: 'none', '&:first-child': { width: '30%' } }} {...props} />
+  <MUITableCell sx={{ borderBottom: 'none', '&:first-child': { width: '50%' } }} {...props} />
 )
 export const List = (props: ListProps) => <MUIList sx={{ p: 0 }} {...props} />
 export const ListItem = (props: ListItemProps) => <MUIListItem sx={{ p: 0 }} {...props} />
@@ -91,14 +91,6 @@ const Network = ({ data }: any) => (
 
 const IO = ({ data }: any) => (
   <>
-    <TableRow>
-      <TableCell>{T('newE.target.action')}</TableCell>
-      <TableCell>
-        <Typography variant="body2" color="textSecondary">
-          {data.action}
-        </Typography>
-      </TableCell>
-    </TableRow>
     {data.delay && (
       <TableRow>
         <TableCell>Delay</TableCell>
