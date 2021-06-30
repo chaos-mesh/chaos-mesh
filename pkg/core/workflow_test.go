@@ -794,9 +794,7 @@ func Test_composeTaskConditionalBranches(t *testing.T) {
 						Expression: "c: whatever valid or not",
 					},
 				},
-				nodes: []string{
-
-				},
+				nodes: []string{},
 			},
 			want: []ConditionalBranch{
 				{
