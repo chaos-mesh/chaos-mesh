@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"net/http"
 	"reflect"
+	"sort"
 	"strings"
 	"time"
 
@@ -541,6 +542,10 @@ func (s *Service) listSchedules(c *gin.Context) {
 			Status:  string(utils.GetScheduleState(schedule)),
 		})
 	}
+
+	sort.Slice(sches, func(i, j int) bool {
+		return sches[i].Created > sches[j].Created
+	})
 
 	c.JSON(http.StatusOK, sches)
 }

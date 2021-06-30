@@ -17,6 +17,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"sort"
 
 	"github.com/gin-gonic/gin"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -110,6 +111,10 @@ func (it *Service) listWorkflows(c *gin.Context) {
 			result[index].ID = entity.ID
 		}
 	}
+
+	sort.Slice(result, func(i, j int) bool {
+		return result[i].CreatedAt > result[j].CreatedAt
+	})
 
 	c.JSON(http.StatusOK, result)
 }
