@@ -21,6 +21,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/jinzhu/gorm"
 )
 
 // ExperimentStore defines operations for working with experiments.
@@ -64,18 +65,15 @@ type Experiment struct {
 
 // ExperimentMeta defines the metadata of an experiment. Use in db.
 type ExperimentMeta struct {
-	ID         uint       `gorm:"primary_key" json:"id"`
-	CreatedAt  time.Time  `json:"created_at"`
-	UpdatedAt  time.Time  `json:"updated_at"`
-	DeletedAt  *time.Time `sql:"index" json:"deleted_at"`
-	UID        string     `gorm:"index:uid" json:"uid"`
-	Kind       string     `json:"kind"`
-	Name       string     `json:"name"`
-	Namespace  string     `json:"namespace"`
-	Action     string     `json:"action"`
-	StartTime  time.Time  `json:"start_time"`
-	FinishTime time.Time  `json:"finish_time"`
-	Archived   bool       `json:"archived"`
+	gorm.Model
+	UID        string    `gorm:"index:uid" json:"uid"`
+	Kind       string    `json:"kind"`
+	Name       string    `json:"name"`
+	Namespace  string    `json:"namespace"`
+	Action     string    `json:"action"`
+	StartTime  time.Time `json:"start_time"`
+	FinishTime time.Time `json:"finish_time"`
+	Archived   bool      `json:"archived"`
 }
 
 // ExperimentInfo defines a form data of Experiment from API.

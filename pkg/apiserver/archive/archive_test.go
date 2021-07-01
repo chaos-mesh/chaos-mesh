@@ -55,10 +55,6 @@ func (m *MockExperimentStore) ListMeta(ctx context.Context, kind, namespace, nam
 	var err error
 	if kind == "testKind" {
 		expMeta := &core.ExperimentMeta{
-			ID:         0,
-			CreatedAt:  time.Time{},
-			UpdatedAt:  time.Time{},
-			DeletedAt:  nil,
 			UID:        "testUID",
 			Kind:       "testKind",
 			Name:       "testName",
@@ -84,10 +80,6 @@ func (m *MockExperimentStore) FindByUID(ctx context.Context, UID string) (*core.
 		jsonStr, _ := json.Marshal(chaos)
 		res = &core.Experiment{
 			ExperimentMeta: core.ExperimentMeta{
-				ID:         0,
-				CreatedAt:  time.Time{},
-				UpdatedAt:  time.Time{},
-				DeletedAt:  nil,
 				UID:        UID,
 				Kind:       v1alpha1.KindPodChaos,
 				Name:       "testName",
@@ -104,10 +96,6 @@ func (m *MockExperimentStore) FindByUID(ctx context.Context, UID string) (*core.
 		jsonStr, _ := json.Marshal(chaos)
 		res = &core.Experiment{
 			ExperimentMeta: core.ExperimentMeta{
-				ID:         0,
-				CreatedAt:  time.Time{},
-				UpdatedAt:  time.Time{},
-				DeletedAt:  nil,
 				UID:        UID,
 				Kind:       v1alpha1.KindIOChaos,
 				Name:       "testName",
@@ -124,10 +112,6 @@ func (m *MockExperimentStore) FindByUID(ctx context.Context, UID string) (*core.
 		jsonStr, _ := json.Marshal(chaos)
 		res = &core.Experiment{
 			ExperimentMeta: core.ExperimentMeta{
-				ID:         0,
-				CreatedAt:  time.Time{},
-				UpdatedAt:  time.Time{},
-				DeletedAt:  nil,
 				UID:        UID,
 				Kind:       v1alpha1.KindNetworkChaos,
 				Name:       "testName",
@@ -144,10 +128,6 @@ func (m *MockExperimentStore) FindByUID(ctx context.Context, UID string) (*core.
 		jsonStr, _ := json.Marshal(chaos)
 		res = &core.Experiment{
 			ExperimentMeta: core.ExperimentMeta{
-				ID:         0,
-				CreatedAt:  time.Time{},
-				UpdatedAt:  time.Time{},
-				DeletedAt:  nil,
 				UID:        UID,
 				Kind:       v1alpha1.KindTimeChaos,
 				Name:       "testName",
@@ -164,10 +144,6 @@ func (m *MockExperimentStore) FindByUID(ctx context.Context, UID string) (*core.
 		jsonStr, _ := json.Marshal(chaos)
 		res = &core.Experiment{
 			ExperimentMeta: core.ExperimentMeta{
-				ID:         0,
-				CreatedAt:  time.Time{},
-				UpdatedAt:  time.Time{},
-				DeletedAt:  nil,
 				UID:        UID,
 				Kind:       v1alpha1.KindKernelChaos,
 				Name:       "testName",
@@ -184,10 +160,6 @@ func (m *MockExperimentStore) FindByUID(ctx context.Context, UID string) (*core.
 		jsonStr, _ := json.Marshal(chaos)
 		res = &core.Experiment{
 			ExperimentMeta: core.ExperimentMeta{
-				ID:         0,
-				CreatedAt:  time.Time{},
-				UpdatedAt:  time.Time{},
-				DeletedAt:  nil,
 				UID:        UID,
 				Kind:       v1alpha1.KindStressChaos,
 				Name:       "testName",
@@ -202,10 +174,6 @@ func (m *MockExperimentStore) FindByUID(ctx context.Context, UID string) (*core.
 	case "testOtherChaos":
 		res = &core.Experiment{
 			ExperimentMeta: core.ExperimentMeta{
-				ID:         0,
-				CreatedAt:  time.Time{},
-				UpdatedAt:  time.Time{},
-				DeletedAt:  nil,
 				UID:        UID,
 				Kind:       "OtherChaos",
 				Name:       "testName",
@@ -231,10 +199,6 @@ func (m *MockExperimentStore) FindMetaByUID(ctx context.Context, UID string) (*c
 	switch UID {
 	case "tsetUID":
 		res = &core.ExperimentMeta{
-			ID:         0,
-			CreatedAt:  time.Time{},
-			UpdatedAt:  time.Time{},
-			DeletedAt:  nil,
 			UID:        "testUID",
 			Kind:       "testKind",
 			Name:       "testName",
@@ -281,10 +245,6 @@ func (m *MockScheduleStore) ListMeta(ctx context.Context, namespace, name string
 	var err error
 	if name == "testScheduleName" {
 		schMeta := &core.ScheduleMeta{
-			ID:         0,
-			CreatedAt:  time.Time{},
-			UpdatedAt:  time.Time{},
-			DeletedAt:  nil,
 			UID:        "testUID",
 			Kind:       "testKind",
 			Name:       "testScheduleName",
@@ -310,10 +270,6 @@ func (m *MockScheduleStore) FindByUID(ctx context.Context, UID string) (*core.Sc
 		jsonStr, _ := json.Marshal(sch)
 		res = &core.Schedule{
 			ScheduleMeta: core.ScheduleMeta{
-				ID:         0,
-				CreatedAt:  time.Time{},
-				UpdatedAt:  time.Time{},
-				DeletedAt:  nil,
 				UID:        UID,
 				Kind:       v1alpha1.KindPodChaos,
 				Name:       "testName",
