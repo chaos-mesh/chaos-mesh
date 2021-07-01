@@ -17,8 +17,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/jinzhu/gorm"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
 // ScheduleStore defines operations for working with schedules.
