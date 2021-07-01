@@ -194,6 +194,7 @@ function validate(defaultI18n: string, i18n?: string) {
 export const validateName = (i18n?: string) => validate('The name is required', i18n)
 export const validateDuration = (i18n?: string) => validate('The duration is required', i18n)
 export const validateDeadline = (i18n?: string) => validate('The deadline is required', i18n)
+export const validateImage = (i18n?: string) => validate('The image is required', i18n)
 
 function scopeToYAMLJSON(scope: ExperimentScope) {
   const result = {
@@ -221,6 +222,12 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
   const children: string[] = templates.map((d) => d.name)
   const realTemplates: Record<string, any>[] = []
 
+  function pushTemplate(template: any) {
+    if (!realTemplates.some((t) => t.name === template.name)) {
+      realTemplates.push(template)
+    }
+  }
+
   function recurInsertTemplates(templates: Template[]) {
     templates.forEach((t) => {
       switch (t.type) {
@@ -230,7 +237,7 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
           const kind = experiment.target.kind
           const spec = _snakecase(kind)
 
-          realTemplates.push({
+          pushTemplate({
             name: t.name,
             templateType: kind,
             deadline: experiment.basic.deadline,
@@ -243,9 +250,10 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
           break
         case 'serial':
         case 'parallel':
+        case 'custom':
           t.children!.forEach((d) => {
             if (d.children) {
-              realTemplates.push({
+              pushTemplate({
                 name: d.name,
                 templateType: toTitleCase(d.type),
                 deadline: d.deadline,
@@ -255,7 +263,7 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
               recurInsertTemplates(d.children)
             } else {
               if (d.type === 'suspend') {
-                realTemplates.push({
+                pushTemplate({
                   name: d.name,
                   templateType: 'Suspend',
                   deadline: d.deadline,
@@ -270,7 +278,7 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
               const kind = e.target.kind
               const spec = _snakecase(kind)
 
-              realTemplates.push({
+              pushTemplate({
                 name,
                 templateType: kind,
                 deadline: e.basic.deadline,
@@ -282,16 +290,23 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
             }
           })
 
-          realTemplates.push({
+          pushTemplate({
             name: t.name,
-            templateType: toTitleCase(t.type),
-            deadline: t.deadline,
-            children: t.children!.map((d) => d.name),
+            templateType: toTitleCase(t.type === 'custom' ? 'task' : t.type),
+            deadline: t.type !== 'custom' ? t.deadline : undefined,
+            children: t.type !== 'custom' ? t.children!.map((d) => d.name) : undefined,
+            task:
+              t.type === 'custom'
+                ? {
+                    container: t.custom?.container,
+                  }
+                : undefined,
+            conditionalBranches: t.type === 'custom' ? t.custom?.conditionalBranches : undefined,
           })
 
           break
         case 'suspend':
-          realTemplates.push({
+          pushTemplate({
             name: t.name,
             templateType: 'Suspend',
             deadline: t.deadline,

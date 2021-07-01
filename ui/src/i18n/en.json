@@ -119,25 +119,43 @@
       "serial": "Serial",
       "parallel": "Parallel",
       "suspend": "Suspend",
+      "custom": "Task",
       "number": "Number",
       "child": "Child task",
       "nameHelper": "The task name",
       "nameValidation": "The task name is required",
       "deadline": "Deadline",
-      "deadlineHelper": "The task will end within the deadline, the supported formats of the deadline are: ms / s / m / h.",
+      "deadlineHelper": "The task will end within the deadline. the supported formats of the deadline are: ms / s / m / h.",
       "deadlineValidation": "The task deadline is required",
+      "container": {
+        "title": "Container",
+        "nameHelper": "The container name",
+        "image": "Image",
+        "imageHelper": "The image of container",
+        "imageValidation": "The image is required",
+        "command": "Command",
+        "commandHelper": "Optional. Specifies the command running in the container, enter the string and ends a space to create a single command."
+      },
+      "conditionalBranches": {
+        "title": "Conditional branches (Optional)",
+        "branch": "Branch",
+        "target": "Target",
+        "expression": "Expression"
+      },
       "deleteDesc": "This task will be deleted",
       "submitAll": "Submit All"
     },
     "serialTitle": "Set serial",
     "parallelTitle": "Set parallel",
     "suspendTitle": "Set suspend",
+    "customTitle": "Set task",
     "nameHelper": "The workflow name",
     "nameValidation": "The workflow name is required",
     "durationValidation": "The workflow duration is required",
     "submit": "Submit workflow",
     "messages": {
-      "m1": "Please complete the creation of the previous task first"
+      "m1": "Please complete the creation of the previous task first",
+      "m2": "Please fill in the current branch first"
     }
   },
   "newS": {
