@@ -115,8 +115,8 @@ endif
 
 ui: yarn_dependencies
 ifeq (${UI},1)
-	# cd ui &&\
-	# yarn build
+	cd ui &&\
+	yarn build
 	hack/embed_ui_assets.sh
 endif
 
