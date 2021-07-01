@@ -18,7 +18,7 @@ jobs:
           fetch-depth: 2
 
       - name: Creating kind cluster
-        uses: helm/kind-action@v1.0.0-rc.1
+        uses: helm/kind-action@v1.2.0
 
       - name: Install Chaos Mesh
         run: |
