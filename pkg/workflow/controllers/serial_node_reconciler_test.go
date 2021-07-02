@@ -68,7 +68,7 @@ var _ = Describe("Workflow", func() {
 				stressChaosDuration := 9 * time.Second
 				stressChaosDurationString := stressChaosDuration.String()
 
-				toleratedJitter := 3 * time.Second
+				toleratedJitter := 10 * time.Second
 
 				simpleSerialWorkflow := v1alpha1.Workflow{
 					ObjectMeta: metav1.ObjectMeta{
