@@ -37,7 +37,6 @@ type ChaosDashboardConfig struct {
 	// EnableFilterNamespace will filter namespace with annotation. Only the pods/containers in namespace
 	// annotated with `chaos-mesh.org/inject=enabled` will be injected
 	EnableFilterNamespace bool `envconfig:"ENABLE_FILTER_NAMESPACE" default:"false"`
-
 	// SecurityMode will use the token login by the user if set to true
 	SecurityMode    bool   `envconfig:"SECURITY_MODE" default:"true" json:"security_mode"`
 	DNSServerCreate bool   `envconfig:"DNS_SERVER_CREATE" default:"false" json:"dns_server_create"`
@@ -60,8 +59,8 @@ type DatabaseConfig struct {
 	Secret     string `envconfig:"DATABASE_SECRET"`
 }
 
-// EnvironChaosDashboard returns the settings from the environment.
-func EnvironChaosDashboard() (*ChaosDashboardConfig, error) {
+// GetChaosDashboardEnv gets all env variables related to dashboard.
+func GetChaosDashboardEnv() (*ChaosDashboardConfig, error) {
 	cfg := ChaosDashboardConfig{}
 	err := envconfig.Process("", &cfg)
 	return &cfg, err

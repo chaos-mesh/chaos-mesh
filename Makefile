@@ -25,14 +25,14 @@ endif
 
 # Enable GO111MODULE=on explicitly, disable it with GO111MODULE=off when necessary.
 export GO111MODULE := on
-GOOS := $(if $(GOOS),$(GOOS),"")
+GOOS   := $(if $(GOOS),$(GOOS),"")
 GOARCH := $(if $(GOARCH),$(GOARCH),"")
 GOENV  := GO15VENDOREXPERIMENT="1" CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH)
-CGOENV  := GO15VENDOREXPERIMENT="1" CGO_ENABLED=1 GOOS=$(GOOS) GOARCH=$(GOARCH)
+CGOENV := GO15VENDOREXPERIMENT="1" CGO_ENABLED=1 GOOS=$(GOOS) GOARCH=$(GOARCH)
 GO     := $(GOENV) go
 CGO    := $(CGOENV) go
 GOTEST := TEST_USE_EXISTING_CLUSTER=false NO_PROXY="${NO_PROXY},testhost" go test
-SHELL    := bash
+SHELL  := bash
 
 PACKAGE_LIST := echo $$(go list ./... | grep -vE "chaos-mesh/test|pkg/ptrace|zz_generated|vendor") github.com/chaos-mesh/chaos-mesh/api/v1alpha1
 

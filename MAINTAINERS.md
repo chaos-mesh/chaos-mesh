@@ -30,4 +30,5 @@ The Committers of Chaos Mesh, along with their emails, are listed below:
 | Shenan Zhang ([Andrewmatilde](https://github.com/Andrewmatilde)) | [zhangshenan@pingcap.com](mailto:zhangshenan@pingcap.com)   | [PingCAP](https://www.pingcap.com/)        |
 | Xiang Wang ([WangXiangUSTC](https://github.com/WangXiangUSTC))   | [wangxiang@pingcap.com](mailto:wangxiang@pingcap.com)    | [PingCAP](https://www.pingcap.com/) |
 | Wenbo Zhang ([ethercflow](https://github.com/ethercflow))     | [zhangwenbo@pingcap.com](mailto:zhangwenbo@pingcap.com)   | [PingCAP](https://www.pingcap.com/) |
-| Zhiqiang Zhou ([STRRL](https://github.com/STRRL))        | [zhouzhiqiang@pingcap.com](mailto:zhouzhiqiang@pingcap.com) | [PingCAP](https://www.pingcap.com/) 
+| Zhiqiang Zhou ([STRRL](https://github.com/STRRL))        | [zhouzhiqiang@pingcap.com](mailto:zhouzhiqiang@pingcap.com) | [PingCAP](https://www.pingcap.com/) |
+| Shivansh Saini  ([shivanshs9](https://github.com/shivanshs9))  | [shivansh.saini.cse17@iitbhu.ac.in](mailto:shivansh.saini.cse17@iitbhu.ac.in) | [Headout](https://github.com/headout) |

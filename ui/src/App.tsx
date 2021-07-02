@@ -6,7 +6,7 @@ import store from './store'
 
 const App = () => (
   <Provider store={store}>
-    <Router basename="/dashboard">
+    <Router>
       <ThemeProvider>
         <TopContainer />
       </ThemeProvider>
