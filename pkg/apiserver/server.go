@@ -75,6 +75,9 @@ func newEngine(config *config.ChaosDashboardConfig) *gin.Engine {
 		r.GET("/", func(c *gin.Context) {
 			c.FileFromFS("/", ui)
 		})
+		// `/:foo/*bar` from https://en.wikipedia.org/wiki/Foobar, the name itself has no meaning.
+		//
+		// This handle just internally redirects all no-exact routes to the root directory of static files because the UI is a single page application and only has one entry (index.html).
 		r.GET("/:foo/*bar", func(c *gin.Context) {
 			c.FileFromFS("/", ui)
 		})
