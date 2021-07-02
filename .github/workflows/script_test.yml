@@ -22,7 +22,7 @@ jobs:
 
       - name: Install Chaos Mesh
         run: |
-          bash install.sh --local kind --crd ./manifests/crd.yaml
+          bash install.sh --runtime containerd --crd ./manifests/crd.yaml
 
       - name: Run integration test
         run: |
