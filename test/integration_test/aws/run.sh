@@ -20,9 +20,11 @@ cd $cur
 
 # wait localstash pod status to running
 for ((k=0; k<30; k++)); do
-    not_run_num=`kubectl get pods -l app.kubernetes.io/name=localstack --no-headers | grep -v Running | wc -l`
 
-    if [ $not_run_num == 0 ]; then
+    JSONPATH='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{"\n"}{end}'
+    not_ready_num=`kubectl get pods -l app.kubernetes.io/name=localstack --no-headers -o jsonpath="$JSONPATH" | grep "Ready=False" | wc -l`
+
+    if [ $not_ready_num == 0 ]; then
         break
     fi
 
