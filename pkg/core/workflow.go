@@ -85,8 +85,8 @@ type Node struct {
 	Name     string        `json:"name"`
 	Type     NodeType      `json:"type"`
 	State    NodeState     `json:"state"`
-	Serial   *NodeSerial   `json:"serial,omitempty"`
-	Parallel *NodeParallel `json:"parallel,omitempty"`
+	Serial   []NodeNameWithTemplate `json:"serial,omitempty"`
+	Parallel []NodeNameWithTemplate `json:"parallel,omitempty"`
 	Template string        `json:"template"`
 	UID      string        `json:"uid"`
 }
@@ -94,16 +94,6 @@ type Node struct {
 type NodeNameWithTemplate struct {
 	Name     string `json:"name,omitempty"`
 	Template string `json:"template,omitempty"`
-}
-
-// NodeSerial defines SerialNode's specific fields.
-type NodeSerial struct {
-	Children []NodeNameWithTemplate `json:"children"`
-}
-
-// NodeParallel defines ParallelNode's specific fields.
-type NodeParallel struct {
-	Children []NodeNameWithTemplate `json:"children"`
 }
 
 // NodeType represents the type of a workflow node.
