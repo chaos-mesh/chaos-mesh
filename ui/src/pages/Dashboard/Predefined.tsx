@@ -68,8 +68,10 @@ const Predefined = () => {
     getExperiments()
   }, [])
 
-  const saveExperiment = async (y: any) => {
+  const saveExperiment = async (_y: any) => {
     const db = await idb.current
+
+    const y: any = yaml.load(_y)
 
     await db.put('predefined', {
       name: y.metadata.name,
