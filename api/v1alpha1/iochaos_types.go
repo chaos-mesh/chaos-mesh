@@ -47,12 +47,12 @@ type IOChaosSpec struct {
 	// such as "300ms".
 	// Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
 	// +optional
-	Delay string `json:"delay,omitempty"`
+	Delay Duration `json:"delay,omitempty"`
 
 	// Errno defines the error code that returned by I/O action.
 	// refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html
 	// +optional
-	Errno uint32 `json:"errno,omitempty"`
+	Errno IOErrno `json:"errno,omitempty"`
 
 	// Attr defines the overrided attribution
 	// +optional
@@ -74,7 +74,7 @@ type IOChaosSpec struct {
 	// Percent defines the percentage of injection errors and provides a number from 0-100.
 	// default: 100.
 	// +optional
-	Percent int `json:"percent,omitempty"`
+	Percent Percent `json:"percent,omitempty"`
 
 	// VolumePath represents the mount path of injected volume
 	VolumePath string `json:"volumePath"`
@@ -86,7 +86,7 @@ type IOChaosSpec struct {
 	// such as "300ms", "-1.5h" or "2h45m".
 	// Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
 	// +optional
-	Duration *string `json:"duration,omitempty"`
+	Duration *Duration `json:"duration,omitempty"`
 }
 
 // IOChaosStatus defines the observed state of IOChaos
@@ -107,3 +107,5 @@ func (obj *IOChaos) GetSelectorSpecs() map[string]interface{} {
 func (obj *IOChaos) GetCustomStatus() interface{} {
 	return &obj.Status.Instances
 }
+
+type IOErrno uint32

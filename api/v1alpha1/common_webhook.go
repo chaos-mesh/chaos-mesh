@@ -15,9 +15,11 @@ package v1alpha1
 
 import (
 	"fmt"
+	"reflect"
 	"strconv"
 	"time"
 
+	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
@@ -33,22 +35,44 @@ type CommonSpec interface {
 	Default()
 }
 
-func validateDuration(spec CommonSpec, path *field.Path) field.ErrorList {
-	allErrs := field.ErrorList{}
-
-	durationField := path.Child("duration")
-	_, err := spec.GetDuration()
-	if err != nil {
-		allErrs = append(allErrs, field.Invalid(durationField, nil,
-			fmt.Sprintf("parse duration field error:%s", err)))
+func (d *Duration) Validate(root interface{}, path *field.Path) field.ErrorList {
+	if d == nil {
+		return nil
 	}
 
-	return allErrs
+	if len(*d) == 0 {
+		// allow duration to be zero
+		// TODO: control by tag
+		return nil
+	}
+
+	_, err := time.ParseDuration(string(*d))
+	return field.ErrorList{
+		field.Invalid(path, d, fmt.Sprintf("parse duration field error: %s", err)),
+	}
 }
 
-// validatePodSelector validates the value with podmode
-func validatePodSelector(value string, mode PodMode, valueField *field.Path) field.ErrorList {
+func (d *Duration) Default(root interface{}, field reflect.StructField) {
+	if d == nil {
+		return
+	}
+
+	// d cannot be nil
+	if len(*d) == 0 {
+		*d = Duration(field.Tag.Get("default"))
+	}
+}
+
+func (p *PodSelector) Validate(root interface{}, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
+
+	if p == nil {
+		return nil
+	}
+
+	mode := p.Mode
+	value := p.Value
+	valueField := path.Child("value")
 
 	switch mode {
 	case FixedPodMode:
@@ -80,4 +104,52 @@ func validatePodSelector(value string, mode PodMode, valueField *field.Path) fie
 	}
 
 	return allErrs
+}
+
+func (p *PodSelector) Default(root interface{}, field reflect.StructField) {
+	if p == nil {
+		return
+	}
+
+	metaData, err := meta.Accessor(root)
+	if err != nil {
+		return
+	}
+
+	if len(p.Selector.Namespaces) == 0 {
+		p.Selector.Namespaces = []string{metaData.GetNamespace()}
+	}
+}
+
+func (p *Percent) Validate(root interface{}, path *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+	if p == nil {
+		return nil
+	}
+
+	if *p > 100 || *p < 0 {
+		allErrs = append(allErrs, field.Invalid(path, p,
+			"percent field should be in 0-100"))
+	}
+
+	return allErrs
+}
+
+func (f *FloatStr) Validate(root interface{}, path *field.Path) field.ErrorList {
+	_, err := strconv.ParseFloat(string(*f), 32)
+	if err != nil {
+		return field.ErrorList{
+			field.Invalid(path, f,
+				fmt.Sprintf("parse correlation field error:%s", err)),
+		}
+	}
+
+	return nil
+}
+
+func (f *FloatStr) Default(root interface{}, field reflect.StructField) {
+	// f cannot be nil
+	if len(*f) == 0 {
+		*f = FloatStr(field.Tag.Get("default"))
+	}
 }

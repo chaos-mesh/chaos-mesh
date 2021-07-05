@@ -90,7 +90,7 @@ type NetworkChaosSpec struct {
 	Action NetworkChaosAction `json:"action"`
 
 	// Duration represents the duration of the chaos action
-	Duration *string `json:"duration,omitempty"`
+	Duration *Duration `json:"duration,omitempty"`
 
 	// TcParameter represents the traffic control definition
 	TcParameter `json:",inline"`
@@ -119,40 +119,40 @@ type NetworkChaosStatus struct {
 
 // DelaySpec defines detail of a delay action
 type DelaySpec struct {
-	Latency string `json:"latency"`
+	Latency Duration `json:"latency"`
 	// +optional
-	Correlation string `json:"correlation,omitempty"`
+	Correlation FloatStr `json:"correlation,omitempty" default:"0"`
 	// +optional
-	Jitter string `json:"jitter,omitempty"`
+	Jitter Duration `json:"jitter,omitempty" default:"0ms"`
 	// +optional
 	Reorder *ReorderSpec `json:"reorder,omitempty"`
 }
 
 // LossSpec defines detail of a loss action
 type LossSpec struct {
-	Loss string `json:"loss"`
+	Loss FloatStr `json:"loss"`
 	// +optional
-	Correlation string `json:"correlation,omitempty"`
+	Correlation FloatStr `json:"correlation,omitempty" default:"0"`
 }
 
 // DuplicateSpec defines detail of a duplicate action
 type DuplicateSpec struct {
-	Duplicate string `json:"duplicate"`
+	Duplicate FloatStr `json:"duplicate"`
 	// +optional
-	Correlation string `json:"correlation,omitempty"`
+	Correlation FloatStr `json:"correlation,omitempty" default:"0"`
 }
 
 // CorruptSpec defines detail of a corrupt action
 type CorruptSpec struct {
-	Corrupt string `json:"corrupt"`
+	Corrupt FloatStr `json:"corrupt"`
 	// +optional
-	Correlation string `json:"correlation,omitempty"`
+	Correlation FloatStr `json:"correlation,omitempty" default:"0"`
 }
 
 // BandwidthSpec defines detail of bandwidth limit.
 type BandwidthSpec struct {
 	// Rate is the speed knob. Allows bps, kbps, mbps, gbps, tbps unit. bps means bytes per second.
-	Rate string `json:"rate"`
+	Rate Rate `json:"rate"`
 	// Limit is the number of bytes that can be queued waiting for tokens to become available.
 	// +kubebuilder:validation:Minimum=1
 	Limit uint32 `json:"limit"`
@@ -177,10 +177,10 @@ type BandwidthSpec struct {
 
 // ReorderSpec defines details of packet reorder.
 type ReorderSpec struct {
-	Reorder string `json:"reorder"`
+	Reorder FloatStr `json:"reorder"`
 	// +optional
-	Correlation string `json:"correlation,omitempty"`
-	Gap         int    `json:"gap"`
+	Correlation FloatStr `json:"correlation,omitempty" default:"0"`
+	Gap         int      `json:"gap"`
 }
 
 func (obj *NetworkChaos) GetSelectorSpecs() map[string]interface{} {
@@ -193,3 +193,5 @@ func (obj *NetworkChaos) GetSelectorSpecs() map[string]interface{} {
 func (obj *NetworkChaos) GetCustomStatus() interface{} {
 	return &obj.Status.Instances
 }
+
+type Rate string

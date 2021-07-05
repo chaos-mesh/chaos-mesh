@@ -59,7 +59,7 @@ type StressChaosSpec struct {
 
 	// Duration represents the duration of the chaos action
 	// +optional
-	Duration *string `json:"duration,omitempty"`
+	Duration *Duration `json:"duration,omitempty"`
 }
 
 // StressChaosStatus defines the observed state of StressChaos
@@ -98,7 +98,7 @@ func (in *Stressors) Normalize() (string, error) {
 		stressors += fmt.Sprintf(" --vm %d --vm-keep", in.MemoryStressor.Workers)
 		if len(in.MemoryStressor.Size) != 0 {
 			if in.MemoryStressor.Size[len(in.MemoryStressor.Size)-1] != '%' {
-				size, err := units.FromHumanSize(in.MemoryStressor.Size)
+				size, err := units.FromHumanSize(string(in.MemoryStressor.Size))
 				if err != nil {
 					return "", err
 				}
@@ -147,7 +147,7 @@ type MemoryStressor struct {
 	// One can specify the size as % of total available memory or in units of B, KB/KiB,
 	// MB/MiB, GB/GiB, TB/TiB.
 	// +optional
-	Size string `json:"size,omitempty"`
+	Size Bytes `json:"size,omitempty"`
 
 	// extend stress-ng options
 	// +optional
@@ -176,3 +176,5 @@ func (obj *StressChaos) GetSelectorSpecs() map[string]interface{} {
 func (obj *StressChaos) GetCustomStatus() interface{} {
 	return &obj.Status.Instances
 }
+
+type Bytes string

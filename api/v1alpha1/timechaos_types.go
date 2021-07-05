@@ -39,29 +39,17 @@ type TimeChaosSpec struct {
 
 	// TimeOffset defines the delta time of injected program. It's a possibly signed sequence of decimal numbers, such as
 	// "300ms", "-1.5h" or "2h45m". Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
-	TimeOffset string `json:"timeOffset"`
+	TimeOffset TimeOffset `json:"timeOffset"`
 
 	// ClockIds defines all affected clock id
 	// All available options are ["CLOCK_REALTIME","CLOCK_MONOTONIC","CLOCK_PROCESS_CPUTIME_ID","CLOCK_THREAD_CPUTIME_ID",
 	// "CLOCK_MONOTONIC_RAW","CLOCK_REALTIME_COARSE","CLOCK_MONOTONIC_COARSE","CLOCK_BOOTTIME","CLOCK_REALTIME_ALARM",
 	// "CLOCK_BOOTTIME_ALARM"]
 	// Default value is ["CLOCK_REALTIME"]
-	ClockIds []string `json:"clockIds,omitempty"`
+	ClockIds ClockIds `json:"clockIds,omitempty"`
 
 	// Duration represents the duration of the chaos action
-	Duration *string `json:"duration,omitempty"`
-}
-
-// SetDefaultValue will set default value for empty fields
-func (in *TimeChaos) SetDefaultValue() {
-	in.Spec.DefaultClockIds()
-}
-
-// DefaultClockIds will set default value for empty ClockIds fields
-func (in *TimeChaosSpec) DefaultClockIds() {
-	if in.ClockIds == nil || len(in.ClockIds) == 0 {
-		in.ClockIds = []string{"CLOCK_REALTIME"}
-	}
+	Duration *Duration `json:"duration,omitempty"`
 }
 
 // TimeChaosStatus defines the observed state of TimeChaos
@@ -74,3 +62,6 @@ func (in *TimeChaos) GetSelectorSpecs() map[string]interface{} {
 		".": &in.Spec.ContainerSelector,
 	}
 }
+
+type TimeOffset string
+type ClockIds []string

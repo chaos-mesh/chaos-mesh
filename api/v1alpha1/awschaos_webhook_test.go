@@ -29,8 +29,8 @@ var _ = Describe("awschaos_webhook", func() {
 				execute func(chaos *AwsChaos) error
 				expect  string
 			}
-			testDeviceName := "testDeviceName"
-			testEbsVolume := "testEbsVolume"
+			testDeviceName := AwsDeviceName("testDeviceName")
+			testEbsVolume := EbsVolume("testEbsVolume")
 			tcs := []TestCase{
 				{
 					name: "simple ValidateCreate for DetachVolume",

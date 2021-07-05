@@ -23,9 +23,18 @@ import (
 	"encoding/json"
 	"reflect"
 	"time"
+	"fmt"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/controller-runtime/pkg/webhook"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
+	"k8s.io/apimachinery/pkg/runtime"
+
+	gw "github.com/chaos-mesh/chaos-mesh/api/v1alpha1/genericwebhook"
 )
+
+// updating spec of a chaos will have no effect, we'd better reject it
+var ErrCanNotUpdateChaos = fmt.Errorf("Cannot update chaos spec")
 `
 
 const implTemplate = `
@@ -54,7 +63,7 @@ func (in *{{.Type}}Spec) GetDuration() (*time.Duration, error) {
 	if in.Duration == nil {
 		return nil, nil
 	}
-	duration, err := time.ParseDuration(*in.Duration)
+	duration, err := time.ParseDuration(string(*in.Duration))
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +87,7 @@ func (in *{{.Type}}) GetChaos() *ChaosInstance {
 		instance.Action = action.String()
 	}
 	if in.Spec.Duration != nil {
-		instance.Duration = *in.Spec.Duration
+		instance.Duration = string(*in.Spec.Duration)
 	}
 	if in.DeletionTimestamp != nil {
 		instance.EndTime = in.DeletionTimestamp.Time
@@ -151,6 +160,43 @@ func (in *{{.Type}}) IsOneShot() bool {
 	{{else}}
 	return false
 	{{end}}
+}
+
+var {{.Type}}WebhookLog = logf.Log.WithName("awschaos-resource")
+
+func (in *{{.Type}}) ValidateCreate() error {
+	{{.Type}}WebhookLog.Info("validate create", "name", in.Name)
+	return in.Validate()
+}
+
+// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
+func (in *{{.Type}}) ValidateUpdate(old runtime.Object) error {
+	{{.Type}}WebhookLog.Info("validate update", "name", in.Name)
+	if !reflect.DeepEqual(in.Spec, old.(*{{.Type}}).Spec) {
+		return ErrCanNotUpdateChaos
+	}
+	return in.Validate()
+}
+
+// ValidateDelete implements webhook.Validator so a webhook will be registered for the type
+func (in *{{.Type}}) ValidateDelete() error {
+	{{.Type}}WebhookLog.Info("validate delete", "name", in.Name)
+
+	// Nothing to do?
+	return nil
+}
+
+var _ webhook.Validator = &{{.Type}}{}
+
+func (in *{{.Type}}) Validate() error {
+	errs := gw.Validate(in)
+	return gw.Aggregate(errs)
+}
+
+var _ webhook.Defaulter = &{{.Type}}{}
+
+func (in *{{.Type}}) Default() {
+	gw.Default(in)
 }
 `
 

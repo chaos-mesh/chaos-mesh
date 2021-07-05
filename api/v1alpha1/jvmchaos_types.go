@@ -23,7 +23,7 @@ type JVMChaosSpec struct {
 
 	// Duration represents the duration of the chaos action
 	// +optional
-	Duration *string `json:"duration,omitempty"`
+	Duration *Duration `json:"duration,omitempty"`
 
 	// Action defines the specific jvm chaos action.
 	// Supported action: delay;return;script;cfl;oom;ccf;tce;cpf;tde;tpf

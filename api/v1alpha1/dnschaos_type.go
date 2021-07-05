@@ -61,7 +61,7 @@ type DNSChaosSpec struct {
 	ContainerSelector `json:",inline"`
 
 	// Duration represents the duration of the chaos action
-	Duration *string `json:"duration,omitempty"`
+	Duration *Duration `json:"duration,omitempty"`
 
 	// Choose which domain names to take effect, support the placeholder ? and wildcard *, or the Specified domain name.
 	// Note:

@@ -1,4 +1,4 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,22 +11,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package v1alpha1
+package genericwebhook
 
 import (
-	"fmt"
+	"reflect"
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
-func (in *IOErrno) Validate(root interface{}, path *field.Path) field.ErrorList {
-	allErrs := field.ErrorList{}
-	obj := root.(*IOChaos)
-	if obj.Spec.Action == IoFaults {
-		if *in == 0 {
-			allErrs = append(allErrs, field.Invalid(path, in,
-				fmt.Sprintf("action %s: errno 0 is not supported", obj.Spec.Action)))
+type Defaulter interface {
+	Default(root interface{}, field reflect.StructField)
+}
+
+func Default(obj interface{}) {
+	root := obj
+	walker := NewFieldWalker(obj, func(path *field.Path, obj interface{}, field reflect.StructField) bool {
+		if defaulter, ok := obj.(Defaulter); ok {
+			defaulter.Default(root, field)
+
+			return true
 		}
-	}
-	return allErrs
+
+		return true
+	})
+	walker.Walk()
 }

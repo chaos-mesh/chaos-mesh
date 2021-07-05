@@ -136,3 +136,9 @@ type ChaosList interface {
 	runtime.Object
 	ListChaos() []*ChaosInstance
 }
+
+type Duration string
+
+type Percent int
+
+type FloatStr string

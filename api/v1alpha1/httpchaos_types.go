@@ -65,7 +65,7 @@ type HTTPChaosSpec struct {
 
 	// Duration represents the duration of the chaos action.
 	// +optional
-	Duration *string `json:"duration,omitempty"`
+	Duration *Duration `json:"duration,omitempty"`
 }
 
 type HTTPChaosStatus struct {

@@ -54,7 +54,7 @@ type AwsChaosSpec struct {
 
 	// Duration represents the duration of the chaos action.
 	// +optional
-	Duration *string `json:"duration,omitempty"`
+	Duration *Duration `json:"duration,omitempty"`
 
 	// SecretName defines the name of kubernetes secret.
 	// +optional
@@ -85,12 +85,12 @@ type AwsSelector struct {
 	// EbsVolume indicates the ID of the EBS volume.
 	// Needed in detach-volume.
 	// +optional
-	EbsVolume *string `json:"volumeID,omitempty"`
+	EbsVolume *EbsVolume `json:"volumeID,omitempty"`
 
 	// DeviceName indicates the name of the device.
 	// Needed in detach-volume.
 	// +optional
-	DeviceName *string `json:"deviceName,omitempty"`
+	DeviceName *AwsDeviceName `json:"deviceName,omitempty"`
 }
 
 func (obj *AwsChaos) GetSelectorSpecs() map[string]interface{} {
@@ -106,3 +106,6 @@ func (selector *AwsSelector) Id() string {
 
 	return string(json)
 }
+
+type EbsVolume string
+type AwsDeviceName string
