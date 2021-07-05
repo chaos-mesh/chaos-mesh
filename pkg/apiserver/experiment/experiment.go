@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"net/http"
 	"reflect"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -914,6 +915,10 @@ func (s *Service) listExperiments(c *gin.Context) {
 			})
 		}
 	}
+
+	sort.Slice(exps, func(i, j int) bool {
+		return exps[i].Created > exps[j].Created
+	})
 
 	c.JSON(http.StatusOK, exps)
 }
