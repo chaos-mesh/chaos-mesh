@@ -30,9 +30,7 @@ var log = ctrl.Log.WithName("store/schedule")
 func NewStore(db *dbstore.DB) core.ScheduleStore {
 	db.AutoMigrate(&core.Schedule{})
 
-	es := &ScheduleStore{db}
-
-	return es
+	return &ScheduleStore{db}
 }
 
 // DeleteIncompleteSchedules call core.ScheduleStore.DeleteIncompleteSchedules to deletes all incomplete schedules.

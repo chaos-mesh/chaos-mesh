@@ -30,9 +30,7 @@ var log = ctrl.Log.WithName("store/experiment")
 func NewStore(db *dbstore.DB) core.ExperimentStore {
 	db.AutoMigrate(&core.Experiment{})
 
-	es := &experimentStore{db}
-
-	return es
+	return &experimentStore{db}
 }
 
 // DeleteIncompleteExperiments call core.ExperimentStore.DeleteIncompleteExperiments to deletes all incomplete experiments.

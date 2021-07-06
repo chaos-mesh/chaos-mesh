@@ -21,20 +21,16 @@ import (
 	"time"
 
 	"github.com/jinzhu/gorm"
-	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 	"github.com/chaos-mesh/chaos-mesh/pkg/store/dbstore"
 )
 
-var log = ctrl.Log.WithName("store/event")
-
 // NewStore return a new EventStore.
 func NewStore(db *dbstore.DB) core.EventStore {
 	db.AutoMigrate(&core.Event{})
 
-	es := &eventStore{db}
-	return es
+	return &eventStore{db}
 }
 
 type eventStore struct {
@@ -249,24 +245,4 @@ func constructQueryArgs(experimentName, experimentNamespace, uid, kind, createTi
 	}
 
 	return query, args
-}
-
-func splitArray(arr []uint, num int) [][]uint {
-	max := int(len(arr))
-	if max < num {
-		return nil
-	}
-	var segments = make([][]uint, 0)
-	quantity := max / num
-	end := int(0)
-	for i := int(1); i <= num; i++ {
-		point := i * quantity
-		if i != num {
-			segments = append(segments, arr[i-1+end:point])
-		} else {
-			segments = append(segments, arr[i-1+end:])
-		}
-		end = point - i
-	}
-	return segments
 }
