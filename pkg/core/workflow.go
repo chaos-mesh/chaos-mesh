@@ -260,7 +260,7 @@ func convertWorkflow(kubeWorkflow v1alpha1.Workflow) WorkflowMeta {
 	}
 
 	if kubeWorkflow.Status.StartTime != nil {
-		result.CreatedAt = kubeWorkflow.Status.StartTime.Format(time.RFC3339)
+		result.CreatedAt = kubeWorkflow.Status.StartTime.Time
 	}
 
 	if kubeWorkflow.Status.EndTime != nil {
