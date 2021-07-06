@@ -76,7 +76,7 @@ type GcpSelector struct {
 	// The device name of disks to detach.
 	// Needed in disk-loss.
 	// +optional
-	DeviceNames GcpDeviceNames `json:"deviceNames,omitempty"`
+	DeviceNames GcpDeviceNames `json:"deviceNames,omitempty" validate:"optional"`
 }
 
 func (obj *GcpChaos) GetSelectorSpecs() map[string]interface{} {

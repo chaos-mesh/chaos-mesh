@@ -121,13 +121,10 @@ func (p *PodSelector) Default(root interface{}, field reflect.StructField) {
 	}
 }
 
-func (p *Percent) Validate(root interface{}, path *field.Path) field.ErrorList {
+func (p Percent) Validate(root interface{}, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
-	if p == nil {
-		return nil
-	}
 
-	if *p > 100 || *p < 0 {
+	if p > 100 || p < 0 {
 		allErrs = append(allErrs, field.Invalid(path, p,
 			"percent field should be in 0-100"))
 	}
@@ -135,8 +132,8 @@ func (p *Percent) Validate(root interface{}, path *field.Path) field.ErrorList {
 	return allErrs
 }
 
-func (f *FloatStr) Validate(root interface{}, path *field.Path) field.ErrorList {
-	_, err := strconv.ParseFloat(string(*f), 32)
+func (f FloatStr) Validate(root interface{}, path *field.Path) field.ErrorList {
+	_, err := strconv.ParseFloat(string(f), 32)
 	if err != nil {
 		return field.ErrorList{
 			field.Invalid(path, f,

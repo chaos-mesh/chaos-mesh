@@ -46,9 +46,8 @@ func (in *Stressors) Validate(root interface{}, path *field.Path) field.ErrorLis
 	return nil
 }
 
-func (in *Bytes) Validate(root interface{}, path *field.Path) field.ErrorList {
-	// in cannot be nil
-	size := *in
+func (in Bytes) Validate(root interface{}, path *field.Path) field.ErrorList {
+	size := in
 	length := len(size)
 	if length == 0 {
 		return nil

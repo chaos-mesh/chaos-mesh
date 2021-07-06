@@ -29,11 +29,10 @@ func (in *ClockIds) Default(root interface{}, field reflect.StructField) {
 	}
 }
 
-func (in *TimeOffset) Validate(root interface{}, path *field.Path) field.ErrorList {
+func (in TimeOffset) Validate(root interface{}, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
-	// in cannot be nil
-	_, err := time.ParseDuration(string(*in))
+	_, err := time.ParseDuration(string(in))
 	if err != nil {
 		allErrs = append(allErrs, field.Invalid(path,
 			in,

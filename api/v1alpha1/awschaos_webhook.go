@@ -48,10 +48,10 @@ func (in *AwsDeviceName) Validate(root interface{}, path *field.Path) field.Erro
 }
 
 // ValidateScheduler validates the scheduler and duration
-func (in *AwsChaosAction) Validate(root interface{}, path *field.Path) field.ErrorList {
+func (in AwsChaosAction) Validate(root interface{}, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
-	switch *in {
+	switch in {
 	case Ec2Stop, DetachVolume:
 	case Ec2Restart:
 	default:

@@ -13,27 +13,25 @@
 
 package v1alpha1
 
-
 import (
 	"fmt"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
-
 const (
-	TypeAwsChaos TemplateType = "AwsChaos"
-	TypeDNSChaos TemplateType = "DNSChaos"
-	TypeGcpChaos TemplateType = "GcpChaos"
-	TypeHTTPChaos TemplateType = "HTTPChaos"
-	TypeIOChaos TemplateType = "IOChaos"
-	TypeJVMChaos TemplateType = "JVMChaos"
-	TypeKernelChaos TemplateType = "KernelChaos"
+	TypeAwsChaos     TemplateType = "AwsChaos"
+	TypeDNSChaos     TemplateType = "DNSChaos"
+	TypeGcpChaos     TemplateType = "GcpChaos"
+	TypeHTTPChaos    TemplateType = "HTTPChaos"
+	TypeIOChaos      TemplateType = "IOChaos"
+	TypeJVMChaos     TemplateType = "JVMChaos"
+	TypeKernelChaos  TemplateType = "KernelChaos"
 	TypeNetworkChaos TemplateType = "NetworkChaos"
-	TypePodChaos TemplateType = "PodChaos"
-	TypeStressChaos TemplateType = "StressChaos"
-	TypeTimeChaos TemplateType = "TimeChaos"
-
+	TypePodChaos     TemplateType = "PodChaos"
+	TypeStressChaos  TemplateType = "StressChaos"
+	TypeTimeChaos    TemplateType = "TimeChaos"
 )
 
 var allChaosTemplateType = []TemplateType{
@@ -49,7 +47,6 @@ var allChaosTemplateType = []TemplateType{
 	TypePodChaos,
 	TypeStressChaos,
 	TypeTimeChaos,
-
 }
 
 type EmbedChaos struct {
@@ -75,7 +72,6 @@ type EmbedChaos struct {
 	StressChaos *StressChaosSpec `json:"stressChaos,omitempty"`
 	// +optional
 	TimeChaos *TimeChaosSpec `json:"timeChaos,omitempty"`
-
 }
 
 func (it *EmbedChaos) SpawnNewObject(templateType TemplateType) (runtime.Object, metav1.Object, error) {
@@ -265,4 +261,3 @@ func (in *TimeChaosList) GetItems() []GenericChaos {
 	}
 	return result
 }
-

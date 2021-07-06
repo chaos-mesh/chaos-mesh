@@ -20,10 +20,10 @@ import (
 )
 
 // validateDeviceName validates the DeviceName
-func (in *GcpChaosAction) Validate(root interface{}, path *field.Path) field.ErrorList {
+func (in GcpChaosAction) Validate(root interface{}, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
-	switch *in {
+	switch in {
 	case NodeStop, DiskLoss:
 	case NodeReset:
 	default:
@@ -36,11 +36,11 @@ func (in *GcpChaosAction) Validate(root interface{}, path *field.Path) field.Err
 }
 
 // validateDeviceName validates the DeviceName
-func (in *GcpDeviceNames) Validate(root interface{}, path *field.Path) field.ErrorList {
+func (in GcpDeviceNames) Validate(root interface{}, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 	obj := root.(*GcpChaos)
 	if obj.Spec.Action == DiskLoss {
-		if *in == nil {
+		if in == nil {
 			err := fmt.Errorf("at least one device name is required on %s action", obj.Spec.Action)
 			allErrs = append(allErrs, field.Invalid(path, in, err.Error()))
 		}

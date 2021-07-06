@@ -102,7 +102,7 @@ type NetworkChaosSpec struct {
 
 	// Target represents network target, this applies on netem and network partition action
 	// +optional
-	Target *PodSelector `json:"target,omitempty"`
+	Target *PodSelector `json:"target,omitempty" validate="optional"`
 
 	// ExternalTargets represents network targets outside k8s
 	// +optional

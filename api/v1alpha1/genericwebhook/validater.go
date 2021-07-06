@@ -30,11 +30,13 @@ func Validate(obj interface{}) field.ErrorList {
 	root := obj
 	walker := NewFieldWalker(obj, func(path *field.Path, obj interface{}, field reflect.StructField) bool {
 		val := reflect.ValueOf(obj)
+		optional := field.Tag.Get("validate") == "optional"
 		for {
 			if !val.IsValid() {
 				return true
 			}
 			obj = val.Interface()
+
 			if validator, ok := obj.(FieldValidator); ok {
 				errs := validator.Validate(root, path)
 				errorList = append(errorList, errs...)
@@ -42,11 +44,19 @@ func Validate(obj interface{}) field.ErrorList {
 				return true
 			}
 
-			if val.Kind() != reflect.Ptr {
-				break
+			if val.Kind() == reflect.Ptr && !val.IsZero() {
+				val = val.Elem()
+
+				// if this field is not optional and we have a nil pointer,
+				// we need to break the loop
+				if !optional && val.Kind() == reflect.Ptr && val.IsZero() {
+					break
+				}
+
+				continue
 			}
 
-			val = val.Elem()
+			break
 		}
 
 		return true

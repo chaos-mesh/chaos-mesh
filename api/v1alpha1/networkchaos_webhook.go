@@ -35,9 +35,9 @@ func (in *Direction) Default(root interface{}, path *field.Path) {
 }
 
 // validateBandwidth validates the bandwidth
-func (in *Rate) Validate(root interface{}, path *field.Path) field.ErrorList {
+func (in Rate) Validate(root interface{}, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
-	_, err := ConvertUnitToBytes(string(*in))
+	_, err := ConvertUnitToBytes(string(in))
 
 	if err != nil {
 		allErrs = append(allErrs,
