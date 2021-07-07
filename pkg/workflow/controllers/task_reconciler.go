@@ -17,21 +17,20 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 	"time"
-
-	"k8s.io/client-go/rest"
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/task"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/task/collector"
 )
