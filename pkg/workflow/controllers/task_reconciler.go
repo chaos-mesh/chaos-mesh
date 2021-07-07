@@ -17,6 +17,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 	"time"
 
 	"k8s.io/client-go/rest"
@@ -26,7 +27,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -40,11 +40,11 @@ type TaskReconciler struct {
 	*ChildNodesFetcher
 	kubeClient    client.Client
 	restConfig    *rest.Config
-	eventRecorder record.EventRecorder
+	eventRecorder recorder.ChaosRecorder
 	logger        logr.Logger
 }
 
-func NewTaskReconciler(kubeClient client.Client, restConfig *rest.Config, eventRecorder record.EventRecorder, logger logr.Logger) *TaskReconciler {
+func NewTaskReconciler(kubeClient client.Client, restConfig *rest.Config, eventRecorder recorder.ChaosRecorder, logger logr.Logger) *TaskReconciler {
 	return &TaskReconciler{
 		ChildNodesFetcher: NewChildNodesFetcher(kubeClient, logger),
 		kubeClient:        kubeClient,
@@ -357,6 +357,7 @@ func (it *TaskReconciler) syncChildNodes(ctx context.Context, evaluatedNode v1al
 		}
 		childrenNames = append(childrenNames, childNode.Name)
 	}
+	it.eventRecorder.Event(&evaluatedNode, recorder.NodesCreated{ChildNodes: childrenNames})
 	it.logger.Info("task node spawn new child node",
 		"node", fmt.Sprintf("%s/%s", evaluatedNode.Namespace, evaluatedNode.Name),
 		"child node", childrenNames)
