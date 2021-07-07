@@ -98,7 +98,7 @@ function generateWorkflowEdges(
       generateWorkflowEdges(result, connections, [...source[1], ...nodes.slice(1)])
 
       // connectSerial(result, source[2], source[1])
-    } else if (type === 'ParallelNode') {
+    } else if (type === 'ParallelNode' || type === 'TaskNode') {
       const c = {
         data: {
           id: `parallel-connection-${source[2]}`,
