@@ -507,18 +507,12 @@ func (s *Service) listWorkflow(c *gin.Context) {
 	archives := make([]Archive, 0)
 
 	for _, meta := range metas {
-		parsedTime, err := time.Parse(time.RFC3339, meta.CreatedAt)
-		if err != nil {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
-			return
-		}
 		archives = append(archives, Archive{
 			UID:       meta.UID,
 			Kind:      v1alpha1.KindWorkflow,
 			Namespace: meta.Namespace,
 			Name:      meta.Name,
-			CreatedAt: parsedTime,
+			CreatedAt: meta.CreatedAt,
 		})
 	}
 
@@ -565,20 +559,13 @@ func (s *Service) detailWorkflow(c *gin.Context) {
 		return
 	}
 
-	parsedTime, err := time.Parse(time.RFC3339, meta.CreatedAt)
-	if err != nil {
-		c.Status(http.StatusInternalServerError)
-		_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
-		return
-	}
-
 	detail = Detail{
 		Archive: Archive{
 			UID:       meta.UID,
 			Kind:      v1alpha1.KindWorkflow,
 			Name:      meta.Name,
 			Namespace: meta.Namespace,
-			CreatedAt: parsedTime,
+			CreatedAt: meta.CreatedAt,
 		},
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{

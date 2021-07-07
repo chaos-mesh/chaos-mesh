@@ -113,7 +113,7 @@ func (it *Service) listWorkflows(c *gin.Context) {
 	}
 
 	sort.Slice(result, func(i, j int) bool {
-		return result[i].CreatedAt > result[j].CreatedAt
+		return result[i].CreatedAt.After(result[i].CreatedAt)
 	})
 
 	c.JSON(http.StatusOK, result)
