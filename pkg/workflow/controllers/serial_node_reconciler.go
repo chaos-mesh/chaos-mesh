@@ -133,6 +133,7 @@ func (it *SerialNodeReconciler) Reconcile(request reconcile.Request) (reconcile.
 				Status: corev1.ConditionTrue,
 				Reason: "",
 			})
+			it.eventRecorder.Event(&nodeNeedUpdate,recorder.NodeAccomplished{})
 		} else {
 			SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
 				Type:   v1alpha1.ConditionAccomplished,
