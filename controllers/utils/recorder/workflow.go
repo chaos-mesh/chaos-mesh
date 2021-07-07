@@ -72,6 +72,7 @@ func (it NodesCreated) Message() string {
 
 type ChaosCustomResourceCreated struct {
 	Name string
+	Kind string
 }
 
 func (it ChaosCustomResourceCreated) Type() string {
@@ -103,6 +104,7 @@ func (it ChaosCustomResourceCreateFailed) Message() string {
 
 type ChaosCustomResourceDeleted struct {
 	Name string
+	Kind string
 }
 
 func (it ChaosCustomResourceDeleted) Type() string {
@@ -119,6 +121,7 @@ func (it ChaosCustomResourceDeleted) Message() string {
 
 type ChaosCustomResourceDeleteFailed struct {
 	Name string
+	Kind string
 }
 
 func (it ChaosCustomResourceDeleteFailed) Type() string {
