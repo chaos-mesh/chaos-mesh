@@ -99,9 +99,8 @@ func (it *TaskReconciler) Reconcile(request reconcile.Request) (reconcile.Result
 				it.logger.Error(err, "failed to spawn pod for Task Node", "node", request)
 				it.eventRecorder.Event(&node, recorder.TaskPodSpawnFailed{})
 				return reconcile.Result{}, err
-			} else {
-				it.eventRecorder.Event(&node, recorder.TaskPodSpawned{PodName: spawnedPod.Name})
 			}
+			it.eventRecorder.Event(&node, recorder.TaskPodSpawned{PodName: spawnedPod.Name})
 		} else {
 			return reconcile.Result{}, errors.Errorf("node %s/%s does not contains label %s", node.Namespace, node.Name, v1alpha1.LabelWorkflow)
 		}
