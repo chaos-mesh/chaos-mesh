@@ -178,6 +178,9 @@ func (it *ChaosNodeReconciler) syncSchedule(ctx context.Context, node v1alpha1.W
 					"chaos node", node.Name,
 					"schedule CR name", item.GetName(),
 				)
+				it.eventRecorder.Event(&node, recorder.ChaosCustomResourceDeleteFailed{Name: item.GetName()})
+			} else {
+				it.eventRecorder.Event(&node, recorder.ChaosCustomResourceDeleted{Name: item.GetName()})
 			}
 		}
 		return nil
@@ -236,6 +239,9 @@ func (it *ChaosNodeReconciler) syncChaosResources(ctx context.Context, node v1al
 					"chaos node", node.Name,
 					"chaos CR name", item.GetName(),
 				)
+				it.eventRecorder.Event(&node, recorder.ChaosCustomResourceDeleteFailed{Name: item.GetName()})
+			} else {
+				it.eventRecorder.Event(&node, recorder.ChaosCustomResourceDeleted{Name: item.GetName()})
 			}
 		}
 		return nil

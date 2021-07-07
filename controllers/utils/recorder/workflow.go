@@ -101,6 +101,38 @@ func (it ChaosCustomResourceCreateFailed) Message() string {
 	return "failed to create chaos CR"
 }
 
+type ChaosCustomResourceDeleted struct {
+	Name string
+}
+
+func (it ChaosCustomResourceDeleted) Type() string {
+	return corev1.EventTypeNormal
+}
+
+func (it ChaosCustomResourceDeleted) Reason() string {
+	return v1alpha1.ChaosCRDeleted
+}
+
+func (it ChaosCustomResourceDeleted) Message() string {
+	return fmt.Sprintf("chaos CR %s deleted", it.Name)
+}
+
+type ChaosCustomResourceDeleteFailed struct {
+	Name string
+}
+
+func (it ChaosCustomResourceDeleteFailed) Type() string {
+	return corev1.EventTypeWarning
+}
+
+func (it ChaosCustomResourceDeleteFailed) Reason() string {
+	return v1alpha1.ChaosCRDeleteFailed
+}
+
+func (it ChaosCustomResourceDeleteFailed) Message() string {
+	return fmt.Sprintf("chaos CR %s delete failed", it.Name)
+}
+
 type DeadlineExceed struct {
 }
 
@@ -131,6 +163,21 @@ func (it WorkflowAccomplished) Message() string {
 	return "workflow accomplished"
 }
 
+type NodeAccomplished struct {
+}
+
+func (it NodeAccomplished) Type() string {
+	return corev1.EventTypeNormal
+}
+
+func (it NodeAccomplished) Reason() string {
+	return v1alpha1.NodeAccomplished
+}
+
+func (it NodeAccomplished) Message() string {
+	return "node accomplished"
+}
+
 func init() {
 	register(
 		InvalidEntry{},
@@ -140,5 +187,6 @@ func init() {
 		ChaosCustomResourceCreateFailed{},
 		DeadlineExceed{},
 		WorkflowAccomplished{},
+		NodeAccomplished{},
 	)
 }
