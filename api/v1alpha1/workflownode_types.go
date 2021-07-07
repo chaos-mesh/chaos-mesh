@@ -141,6 +141,8 @@ const (
 	ParentNodeDeadlineExceed string = "ParentNodeDeadlineExceed"
 	ChaosCRCreated           string = "ChaosCRCreated"
 	ChaosCRCreateFailed      string = "ChaosCRCreateFailed"
+	ChaosCRDeleted           string = "ChaosCRDeleted"
+	ChaosCRDeleteFailed      string = "ChaosCRDeleteFailed"
 	ChaosCRNotExists         string = "ChaosCRNotExists"
 )
 
