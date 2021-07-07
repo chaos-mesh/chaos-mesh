@@ -148,6 +148,7 @@ const (
 	TaskPodSpawnFailed          string = "TaskPodSpawnFailed"
 	TaskPodPodCompleted         string = "TaskPodPodCompleted"
 	ConditionalBranchesSelected string = "ConditionalBranchesSelected"
+	RerunBySpecChanged          string = "RerunBySpecChanged"
 )
 
 // TODO: GenericChaosList/GenericChaos is very similar to ChaosList/ChaosInstance, maybe we could combine them later.

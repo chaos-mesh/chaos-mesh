@@ -325,6 +325,13 @@ func (it *TaskReconciler) syncChildNodes(ctx context.Context, evaluatedNode v1al
 	// the definition of tasks changed, remove all the existed nodes
 	if len(setDifference(taskNamesOfNodes, tasks)) > 0 ||
 		len(setDifference(tasks, taskNamesOfNodes)) > 0 {
+
+		var nodesToCleanup []string
+		for _, item := range existsChildNodes {
+			nodesToCleanup = append(nodesToCleanup, item.Name)
+		}
+		it.eventRecorder.Event(&evaluatedNode, recorder.RerunBySpecChanged{CleanedChildrenNode: nodesToCleanup})
+
 		for _, childNode := range existsChildNodes {
 			// best effort deletion
 			err := it.kubeClient.Delete(ctx, &childNode)
