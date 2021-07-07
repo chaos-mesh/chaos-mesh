@@ -204,7 +204,10 @@ func init() {
 		NodesCreated{},
 		ChaosCustomResourceCreated{},
 		ChaosCustomResourceCreateFailed{},
+		ChaosCustomResourceDeleted{},
+		ChaosCustomResourceDeleteFailed{},
 		DeadlineExceed{},
+		ParentNodeDeadlineExceed{},
 		WorkflowAccomplished{},
 		NodeAccomplished{},
 	)
