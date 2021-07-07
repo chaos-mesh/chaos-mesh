@@ -148,6 +148,22 @@ func (it DeadlineExceed) Message() string {
 	return "deadline exceed"
 }
 
+type ParentNodeDeadlineExceed struct {
+	ParentNodeName string
+}
+
+func (it ParentNodeDeadlineExceed) Type() string {
+	return corev1.EventTypeNormal
+}
+
+func (it ParentNodeDeadlineExceed) Reason() string {
+	return v1alpha1.ParentNodeDeadlineExceed
+}
+
+func (it ParentNodeDeadlineExceed) Message() string {
+	return fmt.Sprintf("deadline exceed bscause parent node %s deadline exceed", it.ParentNodeName)
+}
+
 type WorkflowAccomplished struct {
 }
 
