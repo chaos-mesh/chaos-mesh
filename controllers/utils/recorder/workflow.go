@@ -116,6 +116,21 @@ func (it DeadlineExceed) Message() string {
 	return "deadline exceed"
 }
 
+type WorkflowAccomplished struct {
+}
+
+func (it WorkflowAccomplished) Type() string {
+	return corev1.EventTypeNormal
+}
+
+func (it WorkflowAccomplished) Reason() string {
+	return v1alpha1.WorkflowAccomplished
+}
+
+func (it WorkflowAccomplished) Message() string {
+	return "workflow accomplished"
+}
+
 func init() {
 	register(
 		InvalidEntry{},
@@ -124,5 +139,6 @@ func init() {
 		ChaosCustomResourceCreated{},
 		ChaosCustomResourceCreateFailed{},
 		DeadlineExceed{},
+		WorkflowAccomplished{},
 	)
 }
