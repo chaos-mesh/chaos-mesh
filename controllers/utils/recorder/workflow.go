@@ -260,6 +260,22 @@ func (it ConditionalBranchesSelected) Message() string {
 	return fmt.Sprintf("selected branches: %s", it.SelectedBranches)
 }
 
+type RerunBySpecChanged struct {
+	CleanedChildrenNode []string
+}
+
+func (it RerunBySpecChanged) Type() string {
+	return corev1.EventTypeNormal
+}
+
+func (it RerunBySpecChanged) Reason() string {
+	return v1alpha1.RerunBySpecChanged
+}
+
+func (it RerunBySpecChanged) Message() string {
+	return fmt.Sprintf("rerun by spec changed, remove children nodes: %s", it.CleanedChildrenNode)
+}
+
 func init() {
 	register(
 		InvalidEntry{},
@@ -277,5 +293,6 @@ func init() {
 		TaskPodSpawnFailed{},
 		TaskPodPodCompleted{},
 		ConditionalBranchesSelected{},
+		RerunBySpecChanged{},
 	)
 }

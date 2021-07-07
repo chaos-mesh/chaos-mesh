@@ -113,7 +113,7 @@ func (it *ParallelNodeReconciler) Reconcile(request reconcile.Request) (reconcil
 				Status: corev1.ConditionTrue,
 				Reason: "",
 			})
-			it.eventRecorder.Event(&nodeNeedUpdate,recorder.NodeAccomplished{})
+			it.eventRecorder.Event(&nodeNeedUpdate, recorder.NodeAccomplished{})
 		} else {
 			SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
 				Type:   v1alpha1.ConditionAccomplished,
@@ -165,6 +165,13 @@ func (it *ParallelNodeReconciler) syncChildNodes(ctx context.Context, node v1alp
 	if len(setDifference(taskNamesOfNodes, node.Spec.Children)) > 0 ||
 		len(setDifference(node.Spec.Children, taskNamesOfNodes)) > 0 {
 		tasksToStartup = node.Spec.Children
+
+		var nodesToCleanup []string
+		for _, item := range existsChildNodes {
+			nodesToCleanup = append(nodesToCleanup, item.Name)
+		}
+		it.eventRecorder.Event(&node, recorder.RerunBySpecChanged{CleanedChildrenNode: nodesToCleanup})
+
 		for _, childNode := range existsChildNodes {
 			// best effort deletion
 			err := it.kubeClient.Delete(ctx, &childNode)
@@ -175,6 +182,7 @@ func (it *ParallelNodeReconciler) syncChildNodes(ctx context.Context, node v1alp
 				)
 			}
 		}
+
 	}
 
 	if len(tasksToStartup) == 0 {
