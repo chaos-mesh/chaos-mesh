@@ -197,6 +197,69 @@ func (it NodeAccomplished) Message() string {
 	return "node accomplished"
 }
 
+type TaskPodSpawned struct {
+	PodName string
+}
+
+func (it TaskPodSpawned) Type() string {
+	return corev1.EventTypeNormal
+}
+
+func (it TaskPodSpawned) Reason() string {
+	return v1alpha1.TaskPodSpawned
+}
+
+func (it TaskPodSpawned) Message() string {
+	return fmt.Sprintf("pod %s spawned for task", it.PodName)
+}
+
+type TaskPodSpawnFailed struct {
+}
+
+func (it TaskPodSpawnFailed) Type() string {
+	return corev1.EventTypeWarning
+}
+
+func (it TaskPodSpawnFailed) Reason() string {
+	return v1alpha1.TaskPodSpawnFailed
+}
+
+func (it TaskPodSpawnFailed) Message() string {
+	return "failed to create pod for task"
+}
+
+type TaskPodPodCompleted struct {
+	PodName string
+}
+
+func (it TaskPodPodCompleted) Type() string {
+	return corev1.EventTypeNormal
+}
+
+func (it TaskPodPodCompleted) Reason() string {
+	return v1alpha1.TaskPodPodCompleted
+}
+
+func (it TaskPodPodCompleted) Message() string {
+	return fmt.Sprintf("pod %s for task node completed", it.PodName)
+}
+
+type ConditionalBranchesSelected struct {
+	SelectedBranches []string
+}
+
+func (it ConditionalBranchesSelected) Type() string {
+	return corev1.EventTypeNormal
+}
+
+func (it ConditionalBranchesSelected) Reason() string {
+	return v1alpha1.ConditionalBranchesSelected
+}
+
+func (it ConditionalBranchesSelected) Message() string {
+	return fmt.Sprintf("selected branches: %s", it.SelectedBranches)
+}
+
 func init() {
 	register(
 		InvalidEntry{},
@@ -210,5 +273,9 @@ func init() {
 		ParentNodeDeadlineExceed{},
 		WorkflowAccomplished{},
 		NodeAccomplished{},
+		TaskPodSpawned{},
+		TaskPodSpawnFailed{},
+		TaskPodPodCompleted{},
+		ConditionalBranchesSelected{},
 	)
 }

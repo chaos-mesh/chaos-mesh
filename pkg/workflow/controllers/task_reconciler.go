@@ -94,9 +94,13 @@ func (it *TaskReconciler) Reconcile(request reconcile.Request) (reconcile.Result
 			if err != nil {
 				return reconcile.Result{}, err
 			}
-			err = it.SpawnTaskPod(ctx, &node, &parentWorkflow)
+			spawnedPod, err := it.SpawnTaskPod(ctx, &node, &parentWorkflow)
 			if err != nil {
+				it.logger.Error(err, "failed to spawn pod for Task Node", "node", request)
+				it.eventRecorder.Event(&node, recorder.TaskPodSpawnFailed{})
 				return reconcile.Result{}, err
+			} else {
+				it.eventRecorder.Event(&node, recorder.TaskPodSpawned{PodName: spawnedPod.Name})
 			}
 		} else {
 			return reconcile.Result{}, errors.Errorf("node %s/%s does not contains label %s", node.Namespace, node.Name, v1alpha1.LabelWorkflow)
@@ -119,6 +123,7 @@ func (it *TaskReconciler) Reconcile(request reconcile.Request) (reconcile.Result
 	// update the status about conditional tasks
 	if len(pods) > 0 && (pods[0].Status.Phase == corev1.PodFailed || pods[0].Status.Phase == corev1.PodSucceeded) {
 		if !conditionalBranchesEvaluated(node) {
+			it.eventRecorder.Event(&node, recorder.TaskPodPodCompleted{PodName: pods[0].Name})
 			// task pod is terminated
 			updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
 				nodeNeedUpdate := v1alpha1.WorkflowNode{}
@@ -161,6 +166,14 @@ func (it *TaskReconciler) Reconcile(request reconcile.Request) (reconcile.Result
 				}
 
 				nodeNeedUpdate.Status.ConditionalBranchesStatus.Branches = evaluateConditionBranches
+
+				var selectedBranches []string
+				for _, item := range evaluateConditionBranches {
+					if item.EvaluationResult == corev1.ConditionTrue {
+						selectedBranches = append(selectedBranches, item.Target)
+					}
+				}
+				it.eventRecorder.Event(&nodeNeedUpdate, recorder.ConditionalBranchesSelected{SelectedBranches: selectedBranches})
 
 				err = it.kubeClient.Status().Update(ctx, &nodeNeedUpdate)
 				return err
@@ -262,7 +275,7 @@ func (it *TaskReconciler) Reconcile(request reconcile.Request) (reconcile.Result
 					Status: corev1.ConditionTrue,
 					Reason: "",
 				})
-				it.eventRecorder.Event(&nodeNeedUpdate,recorder.NodeAccomplished{})
+				it.eventRecorder.Event(&nodeNeedUpdate, recorder.NodeAccomplished{})
 			} else {
 				SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
 					Type:   v1alpha1.ConditionAccomplished,
@@ -390,13 +403,13 @@ func (it *TaskReconciler) FetchPodControlledByThisWorkflowNode(ctx context.Conte
 	return childPods.Items, nil
 }
 
-func (it *TaskReconciler) SpawnTaskPod(ctx context.Context, node *v1alpha1.WorkflowNode, workflow *v1alpha1.Workflow) error {
+func (it *TaskReconciler) SpawnTaskPod(ctx context.Context, node *v1alpha1.WorkflowNode, workflow *v1alpha1.Workflow) (*corev1.Pod, error) {
 	if node.Spec.Task == nil {
-		return errors.Errorf("node %s/%s does not contains spec of Target", node.Namespace, node.Name)
+		return nil, errors.Errorf("node %s/%s does not contains spec of Target", node.Namespace, node.Name)
 	}
 	podSpec, err := task.SpawnPodForTask(*node.Spec.Task)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	taskPod := corev1.Pod{
 		TypeMeta: metav1.TypeMeta{},
@@ -421,7 +434,11 @@ func (it *TaskReconciler) SpawnTaskPod(ctx context.Context, node *v1alpha1.Workf
 		},
 		Spec: podSpec,
 	}
-	return it.kubeClient.Create(ctx, &taskPod)
+	err = it.kubeClient.Create(ctx, &taskPod)
+	if err != nil {
+		return nil, err
+	}
+	return &taskPod, nil
 }
 
 func conditionalBranchesEvaluated(node v1alpha1.WorkflowNode) bool {
