@@ -25,8 +25,10 @@ jobs:
           pip3 install awscli
           printf "%s\n" ${{ secrets.AWS_ACCESS_KEY }} ${{ secrets.AWS_SECRET_KEY }} ${{ secrets.AWS_REGION }} "json" | aws configure
 
-      - name: Build chaosctl
-        run: make chaosctl
+      - name: Build binary
+        run: |
+          make chaosctl
+          make schedule-migration
 
       - name: Upload files
         run: |
@@ -36,3 +38,4 @@ jobs:
           aws s3 cp manifests/crd-v1beta1.yaml ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/crd-v1beta1.yaml
           aws s3 cp examples/web-show/deploy.sh ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/web-show/deploy.sh
           aws s3 cp bin/chaosctl ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/chaosctl
+          aws s3 cp bin/schedule-migration ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/schedule-migration
