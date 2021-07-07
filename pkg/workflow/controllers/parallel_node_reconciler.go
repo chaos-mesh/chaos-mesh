@@ -113,6 +113,7 @@ func (it *ParallelNodeReconciler) Reconcile(request reconcile.Request) (reconcil
 				Status: corev1.ConditionTrue,
 				Reason: "",
 			})
+			it.eventRecorder.Event(&nodeNeedUpdate,recorder.NodeAccomplished{})
 		} else {
 			SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
 				Type:   v1alpha1.ConditionAccomplished,
