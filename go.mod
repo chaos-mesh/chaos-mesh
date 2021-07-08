@@ -13,7 +13,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.5.0
 	github.com/chaos-mesh/chaos-mesh/api/v1alpha1 v0.0.0
 	github.com/chaos-mesh/k8s_dns_chaos v0.2.0
-	github.com/containerd/cgroups v0.0.0-20200404012852-53ba5634dc0f
+	github.com/containerd/cgroups v0.0.0
 	github.com/containerd/containerd v1.2.3
 	github.com/containerd/continuity v0.0.0-20200107194136-26c1120b8d41 // indirect
 	github.com/containerd/cri v1.11.1 // indirect
@@ -96,6 +96,8 @@ require (
 
 replace (
 	github.com/chaos-mesh/chaos-mesh/api/v1alpha1 => ./api/v1alpha1
+	github.com/containerd/cgroups => github.com/YangKeao/cgroups v1.0.2-0.20210708074205-ab6ee1a3bee9
+
 	k8s.io/api => k8s.io/api v0.17.0
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.17.0
 	k8s.io/apimachinery => k8s.io/apimachinery v0.17.0
@@ -120,8 +122,6 @@ replace (
 	k8s.io/sample-apiserver => k8s.io/sample-apiserver v0.17.0
 	k8s.io/sample-cli-plugin => k8s.io/sample-cli-plugin v0.17.0
 	k8s.io/sample-controller => k8s.io/sample-controller v0.17.0
-
-	github.com/containerd/cgroups => github.com/YangKeao/cgroups v1.0.2-0.20210708074205-ab6ee1a3bee9
 )
 
 go 1.15
