@@ -167,6 +167,7 @@ func (it *DeadlineReconciler) propagateDeadlineToChildren(ctx context.Context, p
 					Status: corev1.ConditionTrue,
 					Reason: v1alpha1.ParentNodeDeadlineExceed,
 				})
+				it.eventRecorder.Event(&nodeNeedUpdate, recorder.ParentNodeDeadlineExceed{ParentNodeName: parent.Name})
 				return it.kubeClient.Status().Update(ctx, &nodeNeedUpdate)
 			})
 			if err != nil {

@@ -114,7 +114,7 @@ func BootstrapWorkflowControllers(mgr manager.Manager, logger logr.Logger, recor
 		Complete(NewTaskReconciler(
 			noCacheClient,
 			mgr.GetConfig(),
-			mgr.GetEventRecorderFor("workflow-task-reconciler"),
+			recorderBuilder.Build("workflow-task-reconciler"),
 			logger.WithName("workflow-task-reconciler"),
 		))
 	return err
