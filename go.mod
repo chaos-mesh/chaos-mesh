@@ -75,7 +75,7 @@ require (
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
 	golang.org/x/sync v0.0.0-20201207232520-09787c993a3a
 	golang.org/x/time v0.0.0-20201208040808-7e3f01d25324
-	golang.org/x/tools v0.0.0-20200616195046-dc31b401abb5
+	golang.org/x/tools v0.0.0-20210106214847-113979e3529a
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1
 	google.golang.org/api v0.15.0
 	google.golang.org/grpc v1.27.0
@@ -120,6 +120,8 @@ replace (
 	k8s.io/sample-apiserver => k8s.io/sample-apiserver v0.17.0
 	k8s.io/sample-cli-plugin => k8s.io/sample-cli-plugin v0.17.0
 	k8s.io/sample-controller => k8s.io/sample-controller v0.17.0
+
+	github.com/containerd/cgroups => github.com/YangKeao/cgroups v1.0.2-0.20210708074205-ab6ee1a3bee9
 )
 
 go 1.15
