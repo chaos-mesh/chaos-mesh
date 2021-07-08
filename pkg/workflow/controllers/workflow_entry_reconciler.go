@@ -159,6 +159,7 @@ func (it *WorkflowEntryReconciler) Reconcile(request reconcile.Request) (reconci
 					now := metav1.NewTime(time.Now())
 					workflowNeedUpdate.Status.EndTime = &now
 				}
+				it.eventRecorder.Event(&workflow, recorder.WorkflowAccomplished{})
 			} else {
 				SetWorkflowCondition(&workflowNeedUpdate.Status, v1alpha1.WorkflowCondition{
 					Type:   v1alpha1.WorkflowConditionAccomplished,
