@@ -21,8 +21,6 @@ function generateWorkflowNodes(detail: WorkflowSingle) {
       return [n.name, n]
     })
   )
-  const mainChildren = entryNode!.serial?.children
-
   function toCytoscapeNode(node: Node): RecursiveNodeDefinition {
     const { name, type, state, template } = node
 
@@ -38,6 +36,12 @@ function generateWorkflowNodes(detail: WorkflowSingle) {
         node.parallel!.children.filter((d) => d.name).map((d) => toCytoscapeNode(nodeMap.get(d.name)!)),
         node.name,
       ]
+    } else if (type === 'TaskNode' && node.conditional_branches!.length) {
+      return [
+        type,
+        node.conditional_branches!.filter((d) => d.name).map((d) => toCytoscapeNode(nodeMap.get(d.name)!)),
+        node.name,
+      ]
     } else {
       return {
         data: {
@@ -51,10 +55,7 @@ function generateWorkflowNodes(detail: WorkflowSingle) {
     }
   }
 
-  return mainChildren!
-    .filter((d) => d.name)
-    .map((d) => nodeMap.get(d.name))
-    .map((d) => toCytoscapeNode(d!))
+  return [toCytoscapeNode(entryNode!)]
 }
 
 function mergeStates(nodes: NodeDefinition[]) {
@@ -97,7 +98,7 @@ function generateWorkflowEdges(
       generateWorkflowEdges(result, connections, [...source[1], ...nodes.slice(1)])
 
       // connectSerial(result, source[2], source[1])
-    } else if (type === 'ParallelNode') {
+    } else if (type === 'ParallelNode' || type === 'TaskNode') {
       const c = {
         data: {
           id: `parallel-connection-${source[2]}`,
