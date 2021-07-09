@@ -21,10 +21,10 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestAwsChaosIsDeleted(t *testing.T) {
+func TestAWSChaosIsDeleted(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	chaos := &AwsChaos{}
+	chaos := &AWSChaos{}
 	err := faker.FakeData(chaos)
 
 	g.Expect(err).To(BeNil())
@@ -32,10 +32,10 @@ func TestAwsChaosIsDeleted(t *testing.T) {
 	chaos.IsDeleted()
 }
 
-func TestAwsChaosIsIsPaused(t *testing.T) {
+func TestAWSChaosIsIsPaused(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	chaos := &AwsChaos{}
+	chaos := &AWSChaos{}
 	err := faker.FakeData(chaos)
 
 	g.Expect(err).To(BeNil())
@@ -43,10 +43,10 @@ func TestAwsChaosIsIsPaused(t *testing.T) {
 	chaos.IsPaused()
 }
 
-func TestAwsChaosGetDuration(t *testing.T) {
+func TestAWSChaosGetDuration(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	chaos := &AwsChaos{}
+	chaos := &AWSChaos{}
 	err := faker.FakeData(chaos)
 
 	g.Expect(err).To(BeNil())
@@ -54,10 +54,10 @@ func TestAwsChaosGetDuration(t *testing.T) {
 	chaos.Spec.GetDuration()
 }
 
-func TestAwsChaosGetChaos(t *testing.T) {
+func TestAWSChaosGetChaos(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	chaos := &AwsChaos{}
+	chaos := &AWSChaos{}
 	err := faker.FakeData(chaos)
 
 	g.Expect(err).To(BeNil())
@@ -65,10 +65,10 @@ func TestAwsChaosGetChaos(t *testing.T) {
 	chaos.GetChaos()
 }
 
-func TestAwsChaosGetStatus(t *testing.T) {
+func TestAWSChaosGetStatus(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	chaos := &AwsChaos{}
+	chaos := &AWSChaos{}
 	err := faker.FakeData(chaos)
 
 	g.Expect(err).To(BeNil())
@@ -76,18 +76,18 @@ func TestAwsChaosGetStatus(t *testing.T) {
 	chaos.GetStatus()
 }
 
-func TestAwsChaosGetSpecAndMetaString(t *testing.T) {
+func TestAWSChaosGetSpecAndMetaString(t *testing.T) {
 	g := NewGomegaWithT(t)
-	chaos := &AwsChaos{}
+	chaos := &AWSChaos{}
 	err := faker.FakeData(chaos)
 	g.Expect(err).To(BeNil())
 	chaos.GetSpecAndMetaString()
 }
 
-func TestAwsChaosListChaos(t *testing.T) {
+func TestAWSChaosListChaos(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	chaos := &AwsChaosList{}
+	chaos := &AWSChaosList{}
 	err := faker.FakeData(chaos)
 
 	g.Expect(err).To(BeNil())

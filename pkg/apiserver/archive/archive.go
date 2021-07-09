@@ -204,8 +204,8 @@ func (s *Service) detail(c *gin.Context) {
 		kubeObject, err = exp.ParseStressChaos()
 	case v1alpha1.KindDNSChaos:
 		kubeObject, err = exp.ParseDNSChaos()
-	case v1alpha1.KindAwsChaos:
-		kubeObject, err = exp.ParseAwsChaos()
+	case v1alpha1.KindAWSChaos:
+		kubeObject, err = exp.ParseAWSChaos()
 	case v1alpha1.KindGcpChaos:
 		kubeObject, err = exp.ParseGcpChaos()
 	default:
