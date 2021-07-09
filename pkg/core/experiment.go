@@ -145,7 +145,7 @@ func (s *SelectorInfo) ParseSelector() v1alpha1.PodSelectorSpec {
 
 // TargetInfo defines the information of target objects.
 type TargetInfo struct {
-	Kind         string            `json:"kind" binding:"required,oneof=PodChaos NetworkChaos IOChaos KernelChaos TimeChaos StressChaos DNSChaos AwsChaos GcpChaos"`
+	Kind         string            `json:"kind" binding:"required,oneof=PodChaos NetworkChaos IOChaos KernelChaos TimeChaos StressChaos DNSChaos AWSChaos GcpChaos"`
 	PodChaos     *PodChaosInfo     `json:"pod_chaos,omitempty" binding:"RequiredFieldEqual=Kind:PodChaos"`
 	NetworkChaos *NetworkChaosInfo `json:"network_chaos,omitempty" binding:"RequiredFieldEqual=Kind:NetworkChaos"`
 	IOChaos      *IOChaosInfo      `json:"io_chaos,omitempty" binding:"RequiredFieldEqual=Kind:IOChaos"`
@@ -153,7 +153,7 @@ type TargetInfo struct {
 	TimeChaos    *TimeChaosInfo    `json:"time_chaos,omitempty" binding:"RequiredFieldEqual=Kind:TimeChaos"`
 	StressChaos  *StressChaosInfo  `json:"stress_chaos,omitempty" binding:"RequiredFieldEqual=Kind:StressChaos"`
 	DNSChaos     *DNSChaosInfo     `json:"dns_chaos,omitempty" binding:"RequiredFieldEqual=Kind:DNSChaos"`
-	AwsChaos     *AwsChaosInfo     `json:"aws_chaos,omitempty" binding:"RequiredFieldEqual=Kind:AwsChaos"`
+	AWSChaos     *AWSChaosInfo     `json:"aws_chaos,omitempty" binding:"RequiredFieldEqual=Kind:AWSChaos"`
 	GcpChaos     *GcpChaosInfo     `json:"gcp_chaos,omitempty" binding:"RequiredFieldEqual=Kind:GcpChaos"`
 }
 
@@ -222,17 +222,17 @@ type DNSChaosInfo struct {
 	ContainerNames     []string `json:"container_names,omitempty"`
 }
 
-// AwsChaosInfo defines the basic information of aws chaos for creating a new AwsChaos.
-type AwsChaosInfo struct {
+// AWSChaosInfo defines the basic information of aws chaos for creating a new AWSChaos.
+type AWSChaosInfo struct {
 	Action      string  `json:"action" binding:"oneof='ec2-stop' 'ec2-restart' 'detach-volume'"`
 	SecretName  *string `json:"secretName,omitempty"`
-	AwsRegion   string  `json:"awsRegion"`
+	AWSRegion   string  `json:"awsRegion"`
 	Ec2Instance string  `json:"ec2Instance"`
 	EbsVolume   *string `json:"volumeID,omitempty"`
 	DeviceName  *string `json:"deviceName,omitempty"`
 }
 
-// GcpChaosInfo defines the basic information of aws chaos for creating a new AwsChaos.
+// GcpChaosInfo defines the basic information of aws chaos for creating a new GcpChaos.
 type GcpChaosInfo struct {
 	Action      string    `json:"action" binding:"oneof='node-stop' 'node-reset' 'disk-loss'"`
 	SecretName  *string   `json:"secretName,omitempty"`
@@ -396,9 +396,9 @@ func (e *Experiment) ParseDNSChaos() (KubeObjectDesc, error) {
 	}, nil
 }
 
-// ParseAwsChaos Parse AwsChaos JSON string into KubeObjectDesc.
-func (e *Experiment) ParseAwsChaos() (KubeObjectDesc, error) {
-	chaos := &v1alpha1.AwsChaos{}
+// ParseAWSChaos Parse AWSChaos JSON string into KubeObjectDesc.
+func (e *Experiment) ParseAWSChaos() (KubeObjectDesc, error) {
+	chaos := &v1alpha1.AWSChaos{}
 	if err := json.Unmarshal([]byte(e.Experiment), &chaos); err != nil {
 		return KubeObjectDesc{}, err
 	}

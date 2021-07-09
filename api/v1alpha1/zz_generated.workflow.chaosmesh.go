@@ -22,7 +22,7 @@ import (
 
 
 const (
-	TypeAwsChaos TemplateType = "AwsChaos"
+	TypeAWSChaos TemplateType = "AWSChaos"
 	TypeDNSChaos TemplateType = "DNSChaos"
 	TypeGcpChaos TemplateType = "GcpChaos"
 	TypeHTTPChaos TemplateType = "HTTPChaos"
@@ -38,7 +38,7 @@ const (
 
 var allChaosTemplateType = []TemplateType{
 	TypeSchedule,
-	TypeAwsChaos,
+	TypeAWSChaos,
 	TypeDNSChaos,
 	TypeGcpChaos,
 	TypeHTTPChaos,
@@ -54,7 +54,7 @@ var allChaosTemplateType = []TemplateType{
 
 type EmbedChaos struct {
 	// +optional
-	AwsChaos *AwsChaosSpec `json:"awsChaos,omitempty"`
+	AWSChaos *AWSChaosSpec `json:"awsChaos,omitempty"`
 	// +optional
 	DNSChaos *DNSChaosSpec `json:"dnsChaos,omitempty"`
 	// +optional
@@ -81,9 +81,9 @@ type EmbedChaos struct {
 func (it *EmbedChaos) SpawnNewObject(templateType TemplateType) (runtime.Object, metav1.Object, error) {
 
 	switch templateType {
-	case TypeAwsChaos:
-		result := AwsChaos{}
-		result.Spec = *it.AwsChaos
+	case TypeAWSChaos:
+		result := AWSChaos{}
+		result.Spec = *it.AWSChaos
 		return &result, result.GetObjectMeta(), nil
 	case TypeDNSChaos:
 		result := DNSChaos{}
@@ -136,8 +136,8 @@ func (it *EmbedChaos) SpawnNewObject(templateType TemplateType) (runtime.Object,
 func (it *EmbedChaos) SpawnNewList(templateType TemplateType) (GenericChaosList, error) {
 
 	switch templateType {
-	case TypeAwsChaos:
-		result := AwsChaosList{}
+	case TypeAWSChaos:
+		result := AWSChaosList{}
 		return &result, nil
 	case TypeDNSChaos:
 		result := DNSChaosList{}
@@ -177,7 +177,7 @@ func (it *EmbedChaos) SpawnNewList(templateType TemplateType) (GenericChaosList,
 	return nil, nil
 }
 
-func (in *AwsChaosList) GetItems() []GenericChaos {
+func (in *AWSChaosList) GetItems() []GenericChaos {
 	var result []GenericChaos
 	for _, item := range in.Items {
 		item := item

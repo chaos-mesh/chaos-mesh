@@ -65,7 +65,7 @@ type SelectorParams struct {
 
 	PodSelector       *pod.SelectImpl
 	ContainerSelector *container.SelectImpl
-	AwsSelector       *aws.SelectImpl
+	AWSSelector       *aws.SelectImpl
 	GcpSelector       *gcp.SelectImpl
 }
 
