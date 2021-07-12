@@ -237,6 +237,12 @@ image-$(1)-dependencies := $(image-$(1)-dependencies) $(2)
 BINARIES := $(BINARIES) $(2)
 endef
 
+enter-buildenv:
+	docker run -it \
+		$(BUILD_INDOCKER_ARG) \
+		${DOCKER_REGISTRY_PREFIX}pingcap/build-env:${IMAGE_TAG} \
+		bash
+
 ifeq ($(IN_DOCKER),1)
 images/chaos-daemon/bin/pause: hack/pause.c
 	cc ./hack/pause.c -o images/chaos-daemon/bin/pause
