@@ -19,19 +19,18 @@ import (
 	"fmt"
 	"time"
 
-	"k8s.io/client-go/rest"
-
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/client-go/tools/record"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/task"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/task/collector"
 )
@@ -40,11 +39,11 @@ type TaskReconciler struct {
 	*ChildNodesFetcher
 	kubeClient    client.Client
 	restConfig    *rest.Config
-	eventRecorder record.EventRecorder
+	eventRecorder recorder.ChaosRecorder
 	logger        logr.Logger
 }
 
-func NewTaskReconciler(kubeClient client.Client, restConfig *rest.Config, eventRecorder record.EventRecorder, logger logr.Logger) *TaskReconciler {
+func NewTaskReconciler(kubeClient client.Client, restConfig *rest.Config, eventRecorder recorder.ChaosRecorder, logger logr.Logger) *TaskReconciler {
 	return &TaskReconciler{
 		ChildNodesFetcher: NewChildNodesFetcher(kubeClient, logger),
 		kubeClient:        kubeClient,
@@ -94,10 +93,13 @@ func (it *TaskReconciler) Reconcile(request reconcile.Request) (reconcile.Result
 			if err != nil {
 				return reconcile.Result{}, err
 			}
-			err = it.SpawnTaskPod(ctx, &node, &parentWorkflow)
+			spawnedPod, err := it.SpawnTaskPod(ctx, &node, &parentWorkflow)
 			if err != nil {
+				it.logger.Error(err, "failed to spawn pod for Task Node", "node", request)
+				it.eventRecorder.Event(&node, recorder.TaskPodSpawnFailed{})
 				return reconcile.Result{}, err
 			}
+			it.eventRecorder.Event(&node, recorder.TaskPodSpawned{PodName: spawnedPod.Name})
 		} else {
 			return reconcile.Result{}, errors.Errorf("node %s/%s does not contains label %s", node.Namespace, node.Name, v1alpha1.LabelWorkflow)
 		}
@@ -119,6 +121,7 @@ func (it *TaskReconciler) Reconcile(request reconcile.Request) (reconcile.Result
 	// update the status about conditional tasks
 	if len(pods) > 0 && (pods[0].Status.Phase == corev1.PodFailed || pods[0].Status.Phase == corev1.PodSucceeded) {
 		if !conditionalBranchesEvaluated(node) {
+			it.eventRecorder.Event(&node, recorder.TaskPodPodCompleted{PodName: pods[0].Name})
 			// task pod is terminated
 			updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
 				nodeNeedUpdate := v1alpha1.WorkflowNode{}
@@ -161,6 +164,14 @@ func (it *TaskReconciler) Reconcile(request reconcile.Request) (reconcile.Result
 				}
 
 				nodeNeedUpdate.Status.ConditionalBranchesStatus.Branches = evaluateConditionBranches
+
+				var selectedBranches []string
+				for _, item := range evaluateConditionBranches {
+					if item.EvaluationResult == corev1.ConditionTrue {
+						selectedBranches = append(selectedBranches, item.Target)
+					}
+				}
+				it.eventRecorder.Event(&nodeNeedUpdate, recorder.ConditionalBranchesSelected{SelectedBranches: selectedBranches})
 
 				err = it.kubeClient.Status().Update(ctx, &nodeNeedUpdate)
 				return err
@@ -262,6 +273,7 @@ func (it *TaskReconciler) Reconcile(request reconcile.Request) (reconcile.Result
 					Status: corev1.ConditionTrue,
 					Reason: "",
 				})
+				it.eventRecorder.Event(&nodeNeedUpdate, recorder.NodeAccomplished{})
 			} else {
 				SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
 					Type:   v1alpha1.ConditionAccomplished,
@@ -311,6 +323,13 @@ func (it *TaskReconciler) syncChildNodes(ctx context.Context, evaluatedNode v1al
 	// the definition of tasks changed, remove all the existed nodes
 	if len(setDifference(taskNamesOfNodes, tasks)) > 0 ||
 		len(setDifference(tasks, taskNamesOfNodes)) > 0 {
+
+		var nodesToCleanup []string
+		for _, item := range existsChildNodes {
+			nodesToCleanup = append(nodesToCleanup, item.Name)
+		}
+		it.eventRecorder.Event(&evaluatedNode, recorder.RerunBySpecChanged{CleanedChildrenNode: nodesToCleanup})
+
 		for _, childNode := range existsChildNodes {
 			// best effort deletion
 			err := it.kubeClient.Delete(ctx, &childNode)
@@ -357,6 +376,7 @@ func (it *TaskReconciler) syncChildNodes(ctx context.Context, evaluatedNode v1al
 		}
 		childrenNames = append(childrenNames, childNode.Name)
 	}
+	it.eventRecorder.Event(&evaluatedNode, recorder.NodesCreated{ChildNodes: childrenNames})
 	it.logger.Info("task node spawn new child node",
 		"node", fmt.Sprintf("%s/%s", evaluatedNode.Namespace, evaluatedNode.Name),
 		"child node", childrenNames)
@@ -388,13 +408,13 @@ func (it *TaskReconciler) FetchPodControlledByThisWorkflowNode(ctx context.Conte
 	return childPods.Items, nil
 }
 
-func (it *TaskReconciler) SpawnTaskPod(ctx context.Context, node *v1alpha1.WorkflowNode, workflow *v1alpha1.Workflow) error {
+func (it *TaskReconciler) SpawnTaskPod(ctx context.Context, node *v1alpha1.WorkflowNode, workflow *v1alpha1.Workflow) (*corev1.Pod, error) {
 	if node.Spec.Task == nil {
-		return errors.Errorf("node %s/%s does not contains spec of Target", node.Namespace, node.Name)
+		return nil, errors.Errorf("node %s/%s does not contains spec of Target", node.Namespace, node.Name)
 	}
 	podSpec, err := task.SpawnPodForTask(*node.Spec.Task)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	taskPod := corev1.Pod{
 		TypeMeta: metav1.TypeMeta{},
@@ -419,7 +439,11 @@ func (it *TaskReconciler) SpawnTaskPod(ctx context.Context, node *v1alpha1.Workf
 		},
 		Spec: podSpec,
 	}
-	return it.kubeClient.Create(ctx, &taskPod)
+	err = it.kubeClient.Create(ctx, &taskPod)
+	if err != nil {
+		return nil, err
+	}
+	return &taskPod, nil
 }
 
 func conditionalBranchesEvaluated(node v1alpha1.WorkflowNode) bool {

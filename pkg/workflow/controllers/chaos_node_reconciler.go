@@ -178,6 +178,15 @@ func (it *ChaosNodeReconciler) syncSchedule(ctx context.Context, node v1alpha1.W
 					"chaos node", node.Name,
 					"schedule CR name", item.GetName(),
 				)
+				it.eventRecorder.Event(&node, recorder.ChaosCustomResourceDeleteFailed{
+					Name: item.GetName(),
+					Kind: item.GetObjectKind().GroupVersionKind().Kind,
+				})
+			} else {
+				it.eventRecorder.Event(&node, recorder.ChaosCustomResourceDeleted{
+					Name: item.GetName(),
+					Kind: item.GetObjectKind().GroupVersionKind().Kind,
+				})
 			}
 		}
 		return nil
@@ -236,6 +245,15 @@ func (it *ChaosNodeReconciler) syncChaosResources(ctx context.Context, node v1al
 					"chaos node", node.Name,
 					"chaos CR name", item.GetName(),
 				)
+				it.eventRecorder.Event(&node, recorder.ChaosCustomResourceDeleteFailed{
+					Name: item.GetName(),
+					Kind: item.GetObjectKind().GroupVersionKind().Kind,
+				})
+			} else {
+				it.eventRecorder.Event(&node, recorder.ChaosCustomResourceDeleted{
+					Name: item.GetName(),
+					Kind: item.GetObjectKind().GroupVersionKind().Kind,
+				})
 			}
 		}
 		return nil
@@ -306,7 +324,10 @@ func (it *ChaosNodeReconciler) createChaos(ctx context.Context, node v1alpha1.Wo
 		return nil
 	}
 	it.logger.Info("chaos object created", "namespace", meta.GetNamespace(), "name", meta.GetName())
-	it.eventRecorder.Event(&node, recorder.ChaosCustomResourceCreated{Name: meta.GetName()})
+	it.eventRecorder.Event(&node, recorder.ChaosCustomResourceCreated{
+		Name: meta.GetName(),
+		Kind: chaosObject.GetObjectKind().GroupVersionKind().Kind,
+	})
 	return nil
 }
 
@@ -371,7 +392,10 @@ func (it ChaosNodeReconciler) createSchedule(ctx context.Context, node v1alpha1.
 		return nil
 	}
 	it.logger.Info("schedule CR created", "namespace", scheduleToCreate.GetNamespace(), "name", scheduleToCreate.GetName())
-	it.eventRecorder.Event(&node, recorder.ChaosCustomResourceCreated{Name: scheduleToCreate.GetName()})
+	it.eventRecorder.Event(&node, recorder.ChaosCustomResourceCreated{
+		Name: scheduleToCreate.GetName(),
+		Kind: scheduleToCreate.GetObjectKind().GroupVersionKind().Kind,
+	})
 	return nil
 
 }
