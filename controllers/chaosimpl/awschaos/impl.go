@@ -36,7 +36,7 @@ func NewImpl(impl Impl) *common.ChaosImplPair {
 	delegate := action.New(&impl)
 	return &common.ChaosImplPair{
 		Name:   "awschaos",
-		Object: &v1alpha1.AwsChaos{},
+		Object: &v1alpha1.AWSChaos{},
 		Impl:   &delegate,
 	}
 }

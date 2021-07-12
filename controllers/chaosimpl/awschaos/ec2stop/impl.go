@@ -36,13 +36,13 @@ type Impl struct {
 }
 
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
-	awschaos := obj.(*v1alpha1.AwsChaos)
+	awschaos := obj.(*v1alpha1.AWSChaos)
 
-	var selected v1alpha1.AwsSelector
+	var selected v1alpha1.AWSSelector
 	json.Unmarshal([]byte(records[index].Id), &selected)
 
 	opts := []func(*awscfg.LoadOptions) error{
-		awscfg.WithRegion(selected.AwsRegion),
+		awscfg.WithRegion(selected.AWSRegion),
 	}
 
 	if selected.Endpoint != nil {
@@ -86,13 +86,13 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 }
 
 func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
-	awschaos := obj.(*v1alpha1.AwsChaos)
+	awschaos := obj.(*v1alpha1.AWSChaos)
 
-	var selected v1alpha1.AwsSelector
+	var selected v1alpha1.AWSSelector
 	json.Unmarshal([]byte(records[index].Id), &selected)
 
 	opts := []func(*awscfg.LoadOptions) error{
-		awscfg.WithRegion(selected.AwsRegion),
+		awscfg.WithRegion(selected.AWSRegion),
 	}
 
 	if selected.Endpoint != nil {

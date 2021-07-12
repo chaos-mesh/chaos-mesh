@@ -165,7 +165,7 @@ func (s *Service) createSchedule(c *gin.Context) {
 		v1alpha1.KindTimeChaos:    parseTimeChaos,
 		v1alpha1.KindKernelChaos:  parseKernelChaos,
 		v1alpha1.KindDNSChaos:     parseDNSChaos,
-		v1alpha1.KindAwsChaos:     parseAwsChaos,
+		v1alpha1.KindAWSChaos:     parseAWSChaos,
 		v1alpha1.KindGcpChaos:     parseGcpChaos,
 	}
 
@@ -438,22 +438,22 @@ func parseDNSChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	}
 }
 
-func parseAwsChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
-	chaos := &v1alpha1.AwsChaos{
+func parseAWSChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
+	chaos := &v1alpha1.AWSChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        exp.Name,
 			Namespace:   exp.Namespace,
 			Labels:      exp.Labels,
 			Annotations: exp.Annotations,
 		},
-		Spec: v1alpha1.AwsChaosSpec{
-			Action:     v1alpha1.AwsChaosAction(exp.Target.AwsChaos.Action),
-			SecretName: exp.Target.AwsChaos.SecretName,
-			AwsSelector: v1alpha1.AwsSelector{
-				AwsRegion:   exp.Target.AwsChaos.AwsRegion,
-				Ec2Instance: exp.Target.AwsChaos.Ec2Instance,
-				EbsVolume:   exp.Target.AwsChaos.EbsVolume,
-				DeviceName:  exp.Target.AwsChaos.DeviceName,
+		Spec: v1alpha1.AWSChaosSpec{
+			Action:     v1alpha1.AWSChaosAction(exp.Target.AWSChaos.Action),
+			SecretName: exp.Target.AWSChaos.SecretName,
+			AWSSelector: v1alpha1.AWSSelector{
+				AWSRegion:   exp.Target.AWSChaos.AWSRegion,
+				Ec2Instance: exp.Target.AWSChaos.Ec2Instance,
+				EbsVolume:   exp.Target.AWSChaos.EbsVolume,
+				DeviceName:  exp.Target.AWSChaos.DeviceName,
 			},
 		},
 	}
@@ -463,7 +463,7 @@ func parseAwsChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	}
 
 	return v1alpha1.ScheduleItem{
-		EmbedChaos: v1alpha1.EmbedChaos{AwsChaos: &chaos.Spec},
+		EmbedChaos: v1alpha1.EmbedChaos{AWSChaos: &chaos.Spec},
 	}
 }
 

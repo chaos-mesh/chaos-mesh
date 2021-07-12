@@ -8,8 +8,8 @@ metadata:
 spec:
   group: chaos-mesh.org
   names:
-    kind: AwsChaos
-    listKind: AwsChaosList
+    kind: AWSChaos
+    listKind: AWSChaosList
     plural: awschaos
     singular: awschaos
   scope: Namespaced
@@ -17,7 +17,7 @@ spec:
   - name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: AwsChaos is the Schema for the awschaos API
+        description: AWSChaos is the Schema for the awschaos API
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -32,7 +32,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: AwsChaosSpec is the content of the specification for an AwsChaos
+            description: AWSChaosSpec is the content of the specification for an AWSChaos
             properties:
               action:
                 description: 'Action defines the specific aws chaos action. Supported
@@ -43,7 +43,7 @@ spec:
                 - detach-volume
                 type: string
               awsRegion:
-                description: AwsRegion defines the region of aws.
+                description: AWSRegion defines the region of aws.
                 type: string
               deviceName:
                 description: DeviceName indicates the name of the device. Needed in
@@ -72,7 +72,7 @@ spec:
             - ec2Instance
             type: object
           status:
-            description: AwsChaosStatus represents the status of an AwsChaos
+            description: AWSChaosStatus represents the status of an AWSChaos
             properties:
               conditions:
                 description: Conditions represents the current global condition of
@@ -3111,8 +3111,8 @@ spec:
             description: ScheduleSpec is the specification of a schedule object
             properties:
               awsChaos:
-                description: AwsChaosSpec is the content of the specification for
-                  an AwsChaos
+                description: AWSChaosSpec is the content of the specification for
+                  an AWSChaos
                 properties:
                   action:
                     description: 'Action defines the specific aws chaos action. Supported
@@ -3124,7 +3124,7 @@ spec:
                     - detach-volume
                     type: string
                   awsRegion:
-                    description: AwsRegion defines the region of aws.
+                    description: AWSRegion defines the region of aws.
                     type: string
                   deviceName:
                     description: DeviceName indicates the name of the device. Needed
@@ -5059,8 +5059,8 @@ spec:
                     items:
                       properties:
                         awsChaos:
-                          description: AwsChaosSpec is the content of the specification
-                            for an AwsChaos
+                          description: AWSChaosSpec is the content of the specification
+                            for an AWSChaos
                           properties:
                             action:
                               description: 'Action defines the specific aws chaos
@@ -5072,7 +5072,7 @@ spec:
                               - detach-volume
                               type: string
                             awsRegion:
-                              description: AwsRegion defines the region of aws.
+                              description: AWSRegion defines the region of aws.
                               type: string
                             deviceName:
                               description: DeviceName indicates the name of the device.
@@ -6808,8 +6808,8 @@ spec:
                             Type is TypeSchedule.
                           properties:
                             awsChaos:
-                              description: AwsChaosSpec is the content of the specification
-                                for an AwsChaos
+                              description: AWSChaosSpec is the content of the specification
+                                for an AWSChaos
                               properties:
                                 action:
                                   description: 'Action defines the specific aws chaos
@@ -6821,7 +6821,7 @@ spec:
                                   - detach-volume
                                   type: string
                                 awsRegion:
-                                  description: AwsRegion defines the region of aws.
+                                  description: AWSRegion defines the region of aws.
                                   type: string
                                 deviceName:
                                   description: DeviceName indicates the name of the
@@ -12521,8 +12521,8 @@ spec:
             description: Spec defines the behavior of a node of workflow
             properties:
               awsChaos:
-                description: AwsChaosSpec is the content of the specification for
-                  an AwsChaos
+                description: AWSChaosSpec is the content of the specification for
+                  an AWSChaos
                 properties:
                   action:
                     description: 'Action defines the specific aws chaos action. Supported
@@ -12534,7 +12534,7 @@ spec:
                     - detach-volume
                     type: string
                   awsRegion:
-                    description: AwsRegion defines the region of aws.
+                    description: AWSRegion defines the region of aws.
                     type: string
                   deviceName:
                     description: DeviceName indicates the name of the device. Needed
@@ -14143,8 +14143,8 @@ spec:
                 description: ScheduleSpec is the specification of a schedule object
                 properties:
                   awsChaos:
-                    description: AwsChaosSpec is the content of the specification
-                      for an AwsChaos
+                    description: AWSChaosSpec is the content of the specification
+                      for an AWSChaos
                     properties:
                       action:
                         description: 'Action defines the specific aws chaos action.
@@ -14156,7 +14156,7 @@ spec:
                         - detach-volume
                         type: string
                       awsRegion:
-                        description: AwsRegion defines the region of aws.
+                        description: AWSRegion defines the region of aws.
                         type: string
                       deviceName:
                         description: DeviceName indicates the name of the device.
@@ -16137,8 +16137,8 @@ spec:
                         items:
                           properties:
                             awsChaos:
-                              description: AwsChaosSpec is the content of the specification
-                                for an AwsChaos
+                              description: AWSChaosSpec is the content of the specification
+                                for an AWSChaos
                               properties:
                                 action:
                                   description: 'Action defines the specific aws chaos
@@ -16150,7 +16150,7 @@ spec:
                                   - detach-volume
                                   type: string
                                 awsRegion:
-                                  description: AwsRegion defines the region of aws.
+                                  description: AWSRegion defines the region of aws.
                                   type: string
                                 deviceName:
                                   description: DeviceName indicates the name of the
@@ -17934,8 +17934,8 @@ spec:
                                 Only used when Type is TypeSchedule.
                               properties:
                                 awsChaos:
-                                  description: AwsChaosSpec is the content of the
-                                    specification for an AwsChaos
+                                  description: AWSChaosSpec is the content of the
+                                    specification for an AWSChaos
                                   properties:
                                     action:
                                       description: 'Action defines the specific aws
@@ -17948,7 +17948,7 @@ spec:
                                       - detach-volume
                                       type: string
                                     awsRegion:
-                                      description: AwsRegion defines the region of
+                                      description: AWSRegion defines the region of
                                         aws.
                                       type: string
                                     deviceName:
@@ -26064,8 +26064,8 @@ spec:
                 items:
                   properties:
                     awsChaos:
-                      description: AwsChaosSpec is the content of the specification
-                        for an AwsChaos
+                      description: AWSChaosSpec is the content of the specification
+                        for an AWSChaos
                       properties:
                         action:
                           description: 'Action defines the specific aws chaos action.
@@ -26077,7 +26077,7 @@ spec:
                           - detach-volume
                           type: string
                         awsRegion:
-                          description: AwsRegion defines the region of aws.
+                          description: AWSRegion defines the region of aws.
                           type: string
                         deviceName:
                           description: DeviceName indicates the name of the device.
@@ -27759,8 +27759,8 @@ spec:
                         is TypeSchedule.
                       properties:
                         awsChaos:
-                          description: AwsChaosSpec is the content of the specification
-                            for an AwsChaos
+                          description: AWSChaosSpec is the content of the specification
+                            for an AWSChaos
                           properties:
                             action:
                               description: 'Action defines the specific aws chaos
@@ -27772,7 +27772,7 @@ spec:
                               - detach-volume
                               type: string
                             awsRegion:
-                              description: AwsRegion defines the region of aws.
+                              description: AWSRegion defines the region of aws.
                               type: string
                             deviceName:
                               description: DeviceName indicates the name of the device.

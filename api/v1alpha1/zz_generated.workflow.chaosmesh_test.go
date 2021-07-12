@@ -19,10 +19,10 @@ import (
 	"testing"
 )
 
-func TestChaosKindMapShouldContainsAwsChaos(t *testing.T) {
+func TestChaosKindMapShouldContainsAWSChaos(t *testing.T) {
 	g := NewGomegaWithT(t)
 	var requiredType TemplateType
-	requiredType = TypeAwsChaos
+	requiredType = TypeAWSChaos
 
 	_, ok := all.kinds[string(requiredType)]
 	g.Expect(ok).To(Equal(true), "all kinds map should contains this type", requiredType)

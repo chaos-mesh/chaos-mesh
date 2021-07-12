@@ -10,8 +10,8 @@ metadata:
 spec:
   group: chaos-mesh.org
   names:
-    kind: AwsChaos
-    listKind: AwsChaosList
+    kind: AWSChaos
+    listKind: AWSChaosList
     plural: awschaos
     singular: awschaos
   scope: Namespaced
@@ -19,7 +19,7 @@ spec:
   - name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: AwsChaos is the Schema for the awschaos API
+        description: AWSChaos is the Schema for the awschaos API
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
@@ -30,7 +30,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: AwsChaosSpec is the content of the specification for an AwsChaos
+            description: AWSChaosSpec is the content of the specification for an AWSChaos
             properties:
               action:
                 description: 'Action defines the specific aws chaos action. Supported action: ec2-stop / ec2-restart / detach-volume Default action: ec2-stop'
@@ -40,7 +40,7 @@ spec:
                 - detach-volume
                 type: string
               awsRegion:
-                description: AwsRegion defines the region of aws.
+                description: AWSRegion defines the region of aws.
                 type: string
               deviceName:
                 description: DeviceName indicates the name of the device. Needed in detach-volume.
@@ -66,7 +66,7 @@ spec:
             - ec2Instance
             type: object
           status:
-            description: AwsChaosStatus represents the status of an AwsChaos
+            description: AWSChaosStatus represents the status of an AWSChaos
             properties:
               conditions:
                 description: Conditions represents the current global condition of the chaos

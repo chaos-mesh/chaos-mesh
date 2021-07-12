@@ -153,7 +153,7 @@ func (s *Service) createExperiment(c *gin.Context) {
 		v1alpha1.KindTimeChaos:    s.createTimeChaos,
 		v1alpha1.KindKernelChaos:  s.createKernelChaos,
 		v1alpha1.KindDNSChaos:     s.createDNSChaos,
-		v1alpha1.KindAwsChaos:     s.createAwsChaos,
+		v1alpha1.KindAWSChaos:     s.createAWSChaos,
 		v1alpha1.KindGcpChaos:     s.createGcpChaos,
 	}
 
@@ -407,22 +407,22 @@ func (s *Service) createDNSChaos(exp *core.ExperimentInfo, kubeCli client.Client
 	return kubeCli.Create(context.Background(), chaos)
 }
 
-func (s *Service) createAwsChaos(exp *core.ExperimentInfo, kubeCli client.Client) error {
-	chaos := &v1alpha1.AwsChaos{
+func (s *Service) createAWSChaos(exp *core.ExperimentInfo, kubeCli client.Client) error {
+	chaos := &v1alpha1.AWSChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        exp.Name,
 			Namespace:   exp.Namespace,
 			Labels:      exp.Labels,
 			Annotations: exp.Annotations,
 		},
-		Spec: v1alpha1.AwsChaosSpec{
-			Action:     v1alpha1.AwsChaosAction(exp.Target.AwsChaos.Action),
-			SecretName: exp.Target.AwsChaos.SecretName,
-			AwsSelector: v1alpha1.AwsSelector{
-				AwsRegion:   exp.Target.AwsChaos.AwsRegion,
-				Ec2Instance: exp.Target.AwsChaos.Ec2Instance,
-				EbsVolume:   exp.Target.AwsChaos.EbsVolume,
-				DeviceName:  exp.Target.AwsChaos.DeviceName,
+		Spec: v1alpha1.AWSChaosSpec{
+			Action:     v1alpha1.AWSChaosAction(exp.Target.AWSChaos.Action),
+			SecretName: exp.Target.AWSChaos.SecretName,
+			AWSSelector: v1alpha1.AWSSelector{
+				AWSRegion:   exp.Target.AWSChaos.AWSRegion,
+				Ec2Instance: exp.Target.AWSChaos.Ec2Instance,
+				EbsVolume:   exp.Target.AWSChaos.EbsVolume,
+				DeviceName:  exp.Target.AWSChaos.DeviceName,
 			},
 		},
 	}
@@ -769,8 +769,8 @@ func (s *Service) getDNSChaosDetail(namespace string, name string, kubeCli clien
 	}, nil
 }
 
-func (s *Service) getAwsChaosDetail(namespace string, name string, kubeCli client.Client) (Detail, error) {
-	chaos := &v1alpha1.AwsChaos{}
+func (s *Service) getAWSChaosDetail(namespace string, name string, kubeCli client.Client) (Detail, error) {
+	chaos := &v1alpha1.AWSChaos{}
 
 	chaosKey := types.NamespacedName{Namespace: namespace, Name: name}
 	if err := kubeCli.Get(context.Background(), chaosKey, chaos); err != nil {
@@ -975,8 +975,8 @@ func (s *Service) getExperimentDetail(c *gin.Context) {
 		expDetail, err = s.getStressChaosDetail(ns, name, kubeCli)
 	case v1alpha1.KindDNSChaos:
 		expDetail, err = s.getDNSChaosDetail(ns, name, kubeCli)
-	case v1alpha1.KindAwsChaos:
-		expDetail, err = s.getAwsChaosDetail(ns, name, kubeCli)
+	case v1alpha1.KindAWSChaos:
+		expDetail, err = s.getAWSChaosDetail(ns, name, kubeCli)
 	case v1alpha1.KindGcpChaos:
 		expDetail, err = s.getGcpChaosDetail(ns, name, kubeCli)
 	}
@@ -1423,7 +1423,7 @@ func (s *Service) updateExperiment(c *gin.Context) {
 		v1alpha1.KindTimeChaos:    s.updateTimeChaos,
 		v1alpha1.KindKernelChaos:  s.updateKernelChaos,
 		v1alpha1.KindDNSChaos:     s.updateDNSChaos,
-		v1alpha1.KindAwsChaos:     s.updateAwsChaos,
+		v1alpha1.KindAWSChaos:     s.updateAWSChaos,
 		v1alpha1.KindGcpChaos:     s.updateGcpChaos,
 	}
 
@@ -1568,8 +1568,8 @@ func (s *Service) updateDNSChaos(exp *core.KubeObjectDesc, kubeCli client.Client
 	return kubeCli.Update(context.Background(), chaos)
 }
 
-func (s *Service) updateAwsChaos(exp *core.KubeObjectDesc, kubeCli client.Client) error {
-	chaos := &v1alpha1.AwsChaos{}
+func (s *Service) updateAWSChaos(exp *core.KubeObjectDesc, kubeCli client.Client) error {
+	chaos := &v1alpha1.AWSChaos{}
 	meta := &exp.Meta
 	key := types.NamespacedName{Namespace: meta.Namespace, Name: meta.Name}
 
@@ -1586,7 +1586,7 @@ func (s *Service) updateAwsChaos(exp *core.KubeObjectDesc, kubeCli client.Client
 }
 
 func (s *Service) updateGcpChaos(exp *core.KubeObjectDesc, kubeCli client.Client) error {
-	chaos := &v1alpha1.AwsChaos{}
+	chaos := &v1alpha1.AWSChaos{}
 	meta := &exp.Meta
 	key := types.NamespacedName{Namespace: meta.Namespace, Name: meta.Name}
 
