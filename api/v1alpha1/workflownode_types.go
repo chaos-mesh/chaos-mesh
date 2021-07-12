@@ -130,17 +130,25 @@ func init() {
 
 // Reasons
 const (
-	EntryCreated             string = "EntryCreated"
-	InvalidEntry             string = "InvalidEntry"
-	NodeAccomplished         string = "NodeAccomplished"
-	NodesCreated             string = "NodesCreated"
-	NodeDeadlineExceed       string = "NodeDeadlineExceed"
-	NodeDeadlineNotExceed    string = "NodeDeadlineNotExceed"
-	NodeDeadlineOmitted      string = "NodeDeadlineOmitted"
-	ParentNodeDeadlineExceed string = "ParentNodeDeadlineExceed"
-	ChaosCRCreated           string = "ChaosCRCreated"
-	ChaosCRCreateFailed      string = "ChaosCRCreateFailed"
-	ChaosCRNotExists         string = "ChaosCRNotExists"
+	EntryCreated                string = "EntryCreated"
+	InvalidEntry                string = "InvalidEntry"
+	WorkflowAccomplished        string = "WorkflowAccomplished"
+	NodeAccomplished            string = "NodeAccomplished"
+	NodesCreated                string = "NodesCreated"
+	NodeDeadlineExceed          string = "NodeDeadlineExceed"
+	NodeDeadlineNotExceed       string = "NodeDeadlineNotExceed"
+	NodeDeadlineOmitted         string = "NodeDeadlineOmitted"
+	ParentNodeDeadlineExceed    string = "ParentNodeDeadlineExceed"
+	ChaosCRCreated              string = "ChaosCRCreated"
+	ChaosCRCreateFailed         string = "ChaosCRCreateFailed"
+	ChaosCRDeleted              string = "ChaosCRDeleted"
+	ChaosCRDeleteFailed         string = "ChaosCRDeleteFailed"
+	ChaosCRNotExists            string = "ChaosCRNotExists"
+	TaskPodSpawned              string = "TaskPodSpawned"
+	TaskPodSpawnFailed          string = "TaskPodSpawnFailed"
+	TaskPodPodCompleted         string = "TaskPodPodCompleted"
+	ConditionalBranchesSelected string = "ConditionalBranchesSelected"
+	RerunBySpecChanged          string = "RerunBySpecChanged"
 )
 
 // TODO: GenericChaosList/GenericChaos is very similar to ChaosList/ChaosInstance, maybe we could combine them later.
