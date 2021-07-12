@@ -1,4 +1,4 @@
-# Set DEBUGGER=1 to build debug symbols
+# Set DEBUGGER=1 to build debug symbol s
 LDFLAGS = $(if $(IMG_LDFLAGS),$(IMG_LDFLAGS),$(if $(DEBUGGER),,-s -w) $(shell ./hack/version.sh))
 DOCKER_REGISTRY ?= "localhost:5000"
 
@@ -312,6 +312,7 @@ $(eval $(call IMAGE_TEMPLATE,chaos-mesh-protoc,hack/protoc))
 $(eval $(call IMAGE_TEMPLATE,chaos-mesh-e2e,e2e-test/image/e2e))
 $(eval $(call IMAGE_TEMPLATE,chaos-kernel,images/chaos-kernel))
 $(eval $(call IMAGE_TEMPLATE,chaos-jvm,images/chaos-jvm))
+$(eval $(call IMAGE_TEMPLATE,chaos-dlv,images/chaos-dlv))
 
 binary: $(BINARIES)
 
