@@ -19,6 +19,12 @@ spec:
       protocol: TCP
       name: pprof
   {{- end }}
+  {{- if .Values.chaosDlv.enable }}
+    - port: 8000
+      targetPort: dlv
+      protocol: TCP
+      name: dlv
+  {{- end }}
     - port: 10080
       targetPort: http
       protocol: TCP

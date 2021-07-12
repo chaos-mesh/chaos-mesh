@@ -17,6 +17,12 @@ spec:
       port: {{ .Values.chaosDaemon.httpPort }}
       targetPort: http
       protocol: TCP
+  {{- if .Values.chaosDlv.enable }}
+    - port: 8000
+      targetPort: dlv
+      protocol: TCP
+      name: dlv
+  {{- end }}
   selector:
     {{- include "chaos-mesh.selectors" . | nindent 4 }}
     app.kubernetes.io/component: chaos-daemon

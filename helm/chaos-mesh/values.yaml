@@ -380,3 +380,8 @@ bpfki:
     # requests:
     #  cpu: 250m
     #  memory: 512Mi
+
+chaosDlv:
+  enable: false
+  image: pingcap/chaos-dlv:latest
+  imagePullPolicy: IfNotPresent
