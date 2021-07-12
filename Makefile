@@ -1,4 +1,4 @@
-# Set DEBUGGER=1 to build debug symbol s
+# Set DEBUGGER=1 to build debug symbols
 LDFLAGS = $(if $(IMG_LDFLAGS),$(IMG_LDFLAGS),$(if $(DEBUGGER),,-s -w) $(shell ./hack/version.sh))
 DOCKER_REGISTRY ?= "localhost:5000"
 
