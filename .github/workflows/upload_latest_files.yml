@@ -10,6 +10,7 @@
        - examples/web-show/deploy.sh
        - pkg/chaosctl/**
        - cmd/chaosctl/**
+       - tools/schedule-migration/**
  jobs:
    run:
      if: github.repository_owner == 'chaos-mesh'
