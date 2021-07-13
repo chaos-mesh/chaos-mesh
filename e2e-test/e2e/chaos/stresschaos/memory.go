@@ -50,10 +50,10 @@ func TestcaseMemoryStressInjectionOnceThenRecover(
 		if err != nil {
 			return false, err
 		}
-		if conditions[0].MemoryUsage-conditions[1].MemoryUsage > allowedJitter {
+		framework.Logf("get Memory: [%d, %d]", conditions[0].MemoryUsage, conditions[1].MemoryUsage)
+		if int(conditions[0].MemoryUsage)-int(conditions[1].MemoryUsage) > allowedJitter {
 			return true, nil
 		}
-		framework.Logf("get Memory: [%d, %d]", conditions[0].MemoryUsage, conditions[1].MemoryUsage)
 		return false, nil
 	})
 	framework.ExpectNoError(err, "memory stress failed")
@@ -64,10 +64,10 @@ func TestcaseMemoryStressInjectionOnceThenRecover(
 	By("waiting for assertion recovering")
 	err = wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
 		conditions, err := probeStressCondition(c, peers, ports)
-		By(fmt.Sprintf("get Memory: [%d, %d]", conditions[0].MemoryUsage, conditions[1].MemoryUsage))
 		if err != nil {
 			return false, err
 		}
+		By(fmt.Sprintf("get Memory: [%d, %d]", conditions[0].MemoryUsage, conditions[1].MemoryUsage))
 		if conditions[0].MemoryUsage < conditions[1].MemoryUsage+allowedJitter {
 			return true, nil
 		}
