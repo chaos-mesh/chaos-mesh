@@ -43,7 +43,6 @@ require (
 	github.com/jinzhu/gorm v1.9.12
 	github.com/joomcode/errorx v1.0.1
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/lib/pq v1.2.0 // indirect
 	github.com/mgechev/revive v1.0.2-0.20200225072153-6219ca02fffb
 	github.com/moby/locker v1.0.1
