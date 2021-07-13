@@ -21,9 +21,6 @@ require (
 replace (
 	github.com/chaos-mesh/chaos-mesh => ../
 	github.com/chaos-mesh/chaos-mesh/api/v1alpha1 => ../api/v1alpha1
-
-	github.com/containerd/cgroups => github.com/YangKeao/cgroups v1.0.2-0.20210708074205-ab6ee1a3bee9
-
 	google.golang.org/grpc => google.golang.org/grpc v1.26.0
 	k8s.io/api => k8s.io/api v0.17.0
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.17.0
