@@ -1239,7 +1239,7 @@ spec:
             - name: socket-path
               mountPath: ${mountPath}
             - name: sys-path
-              mountPath: /sys
+              mountPath: /host-sys
           ports:
             - name: grpc
               containerPort: 31767
