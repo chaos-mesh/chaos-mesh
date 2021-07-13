@@ -24,6 +24,7 @@ import (
 	"github.com/golang/protobuf/ptypes/empty"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
+	daemonCgroups "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/cgroups"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
@@ -34,7 +35,7 @@ func (s *DaemonServer) ExecStressors(ctx context.Context,
 	if err != nil {
 		return nil, err
 	}
-	control, err := cgroups.Load(cgroups.V1, cgroups.PidPath(int(pid)))
+	control, err := cgroups.Load(daemonCgroups.V1, daemonCgroups.PidPath(int(pid)))
 	if err != nil {
 		return nil, err
 	}
