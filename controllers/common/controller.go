@@ -116,6 +116,15 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		// TODO: dynamic upgrade the records when some of these pods/containers stopped
 	}
 
+	if len(records) == 0 {
+		r.Log.Info("no record has been selected")
+		r.Recorder.Event(obj, recorder.Failed{
+			Activity: "select targets",
+			Err:      "no record has been selected",
+		})
+		return ctrl.Result{}, nil
+	}
+
 	needRetry := false
 	for index, record := range records {
 		var err error
