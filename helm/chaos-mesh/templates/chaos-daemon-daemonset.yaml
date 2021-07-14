@@ -97,7 +97,7 @@ spec:
               mountPath: /var/run/crio/crio.sock
               {{- end }}
             - name: sys-path
-              mountPath: /sys
+              mountPath: /host-sys
             {{- if .Values.dashboard.securityMode}}
             - name: chaos-daemon-cert
               mountPath: /etc/chaos-daemon/cert
