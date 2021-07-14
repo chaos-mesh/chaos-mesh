@@ -166,7 +166,7 @@ func (s *Service) createSchedule(c *gin.Context) {
 		v1alpha1.KindKernelChaos:  parseKernelChaos,
 		v1alpha1.KindDNSChaos:     parseDNSChaos,
 		v1alpha1.KindAWSChaos:     parseAWSChaos,
-		v1alpha1.KindGcpChaos:     parseGcpChaos,
+		v1alpha1.KindGCPChaos:     parseGCPChaos,
 	}
 
 	f, ok := parseFuncs[exp.Target.Kind]
@@ -467,22 +467,22 @@ func parseAWSChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	}
 }
 
-func parseGcpChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
-	chaos := &v1alpha1.GcpChaos{
+func parseGCPChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
+	chaos := &v1alpha1.GCPChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        exp.Name,
 			Namespace:   exp.Namespace,
 			Labels:      exp.Labels,
 			Annotations: exp.Annotations,
 		},
-		Spec: v1alpha1.GcpChaosSpec{
-			Action:     v1alpha1.GcpChaosAction(exp.Target.GcpChaos.Action),
-			SecretName: exp.Target.GcpChaos.SecretName,
-			GcpSelector: v1alpha1.GcpSelector{
-				Project:     exp.Target.GcpChaos.Project,
-				Zone:        exp.Target.GcpChaos.Zone,
-				Instance:    exp.Target.GcpChaos.Instance,
-				DeviceNames: exp.Target.GcpChaos.DeviceNames,
+		Spec: v1alpha1.GCPChaosSpec{
+			Action:     v1alpha1.GCPChaosAction(exp.Target.GCPChaos.Action),
+			SecretName: exp.Target.GCPChaos.SecretName,
+			GCPSelector: v1alpha1.GCPSelector{
+				Project:     exp.Target.GCPChaos.Project,
+				Zone:        exp.Target.GCPChaos.Zone,
+				Instance:    exp.Target.GCPChaos.Instance,
+				DeviceNames: exp.Target.GCPChaos.DeviceNames,
 			},
 		},
 	}
@@ -492,7 +492,7 @@ func parseGcpChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	}
 
 	return v1alpha1.ScheduleItem{
-		EmbedChaos: v1alpha1.EmbedChaos{GcpChaos: &chaos.Spec},
+		EmbedChaos: v1alpha1.EmbedChaos{GCPChaos: &chaos.Spec},
 	}
 }
 

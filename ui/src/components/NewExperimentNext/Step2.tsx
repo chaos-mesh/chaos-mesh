@@ -41,7 +41,7 @@ interface Step2Props {
 
 const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false }) => {
   const { namespaces, step2, basic, target, scheduleSpecific } = useStoreSelector((state) => state.experiments)
-  const scopeDisabled = target.kind === 'AWSChaos' || target.kind === 'GcpChaos'
+  const scopeDisabled = target.kind === 'AWSChaos' || target.kind === 'GCPChaos'
   const dispatch = useStoreDispatch()
 
   const originalInit = useMemo(

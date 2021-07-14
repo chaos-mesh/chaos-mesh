@@ -46,7 +46,7 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
   const { labels, annotations, target } = state.experiments
   const pods = scope === 'scope' ? state.experiments.pods : state.experiments.networkTargetPods
   const getPods = scope === 'scope' ? getCommonPods : getNetworkTargetPods
-  const disabled = target.kind === 'AWSChaos' || target.kind === 'GcpChaos'
+  const disabled = target.kind === 'AWSChaos' || target.kind === 'GCPChaos'
   const dispatch = useStoreDispatch()
 
   const kvSeparator = ': '

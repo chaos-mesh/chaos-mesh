@@ -169,10 +169,10 @@ func TestDNSChaosListChaos(t *testing.T) {
 	chaos.ListChaos()
 }
 
-func TestGcpChaosIsDeleted(t *testing.T) {
+func TestGCPChaosIsDeleted(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	chaos := &GcpChaos{}
+	chaos := &GCPChaos{}
 	err := faker.FakeData(chaos)
 
 	g.Expect(err).To(BeNil())
@@ -180,10 +180,10 @@ func TestGcpChaosIsDeleted(t *testing.T) {
 	chaos.IsDeleted()
 }
 
-func TestGcpChaosIsIsPaused(t *testing.T) {
+func TestGCPChaosIsIsPaused(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	chaos := &GcpChaos{}
+	chaos := &GCPChaos{}
 	err := faker.FakeData(chaos)
 
 	g.Expect(err).To(BeNil())
@@ -191,10 +191,10 @@ func TestGcpChaosIsIsPaused(t *testing.T) {
 	chaos.IsPaused()
 }
 
-func TestGcpChaosGetDuration(t *testing.T) {
+func TestGCPChaosGetDuration(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	chaos := &GcpChaos{}
+	chaos := &GCPChaos{}
 	err := faker.FakeData(chaos)
 
 	g.Expect(err).To(BeNil())
@@ -202,10 +202,10 @@ func TestGcpChaosGetDuration(t *testing.T) {
 	chaos.Spec.GetDuration()
 }
 
-func TestGcpChaosGetChaos(t *testing.T) {
+func TestGCPChaosGetChaos(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	chaos := &GcpChaos{}
+	chaos := &GCPChaos{}
 	err := faker.FakeData(chaos)
 
 	g.Expect(err).To(BeNil())
@@ -213,10 +213,10 @@ func TestGcpChaosGetChaos(t *testing.T) {
 	chaos.GetChaos()
 }
 
-func TestGcpChaosGetStatus(t *testing.T) {
+func TestGCPChaosGetStatus(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	chaos := &GcpChaos{}
+	chaos := &GCPChaos{}
 	err := faker.FakeData(chaos)
 
 	g.Expect(err).To(BeNil())
@@ -224,18 +224,18 @@ func TestGcpChaosGetStatus(t *testing.T) {
 	chaos.GetStatus()
 }
 
-func TestGcpChaosGetSpecAndMetaString(t *testing.T) {
+func TestGCPChaosGetSpecAndMetaString(t *testing.T) {
 	g := NewGomegaWithT(t)
-	chaos := &GcpChaos{}
+	chaos := &GCPChaos{}
 	err := faker.FakeData(chaos)
 	g.Expect(err).To(BeNil())
 	chaos.GetSpecAndMetaString()
 }
 
-func TestGcpChaosListChaos(t *testing.T) {
+func TestGCPChaosListChaos(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	chaos := &GcpChaosList{}
+	chaos := &GCPChaosList{}
 	err := faker.FakeData(chaos)
 
 	g.Expect(err).To(BeNil())

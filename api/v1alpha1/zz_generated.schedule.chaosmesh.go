@@ -24,7 +24,7 @@ import (
 const (
 	ScheduleTypeAWSChaos ScheduleTemplateType = "AWSChaos"
 	ScheduleTypeDNSChaos ScheduleTemplateType = "DNSChaos"
-	ScheduleTypeGcpChaos ScheduleTemplateType = "GcpChaos"
+	ScheduleTypeGCPChaos ScheduleTemplateType = "GCPChaos"
 	ScheduleTypeHTTPChaos ScheduleTemplateType = "HTTPChaos"
 	ScheduleTypeIOChaos ScheduleTemplateType = "IOChaos"
 	ScheduleTypeJVMChaos ScheduleTemplateType = "JVMChaos"
@@ -40,7 +40,7 @@ const (
 var allScheduleTemplateType = []ScheduleTemplateType{
 	ScheduleTypeAWSChaos,
 	ScheduleTypeDNSChaos,
-	ScheduleTypeGcpChaos,
+	ScheduleTypeGCPChaos,
 	ScheduleTypeHTTPChaos,
 	ScheduleTypeIOChaos,
 	ScheduleTypeJVMChaos,
@@ -64,9 +64,9 @@ func (it *ScheduleItem) SpawnNewObject(templateType ScheduleTemplateType) (runti
 		result := DNSChaos{}
 		result.Spec = *it.DNSChaos
 		return &result, result.GetObjectMeta(), nil
-	case ScheduleTypeGcpChaos:
-		result := GcpChaos{}
-		result.Spec = *it.GcpChaos
+	case ScheduleTypeGCPChaos:
+		result := GCPChaos{}
+		result.Spec = *it.GCPChaos
 		return &result, result.GetObjectMeta(), nil
 	case ScheduleTypeHTTPChaos:
 		result := HTTPChaos{}

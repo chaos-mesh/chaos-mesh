@@ -106,8 +106,8 @@ func (r *ScheduleCollector) setUnarchivedSchedule(req ctrl.Request, schedule v1a
 		archive.Action = string(schedule.Spec.ScheduleItem.DNSChaos.Action)
 	case v1alpha1.ScheduleTypeAWSChaos:
 		archive.Action = string(schedule.Spec.ScheduleItem.AWSChaos.Action)
-	case v1alpha1.ScheduleTypeGcpChaos:
-		archive.Action = string(schedule.Spec.ScheduleItem.GcpChaos.Action)
+	case v1alpha1.ScheduleTypeGCPChaos:
+		archive.Action = string(schedule.Spec.ScheduleItem.GCPChaos.Action)
 	default:
 		return errors.New("unsupported chaos type " + string(schedule.Spec.Type))
 	}

@@ -202,7 +202,7 @@ spec:
                       - selector
                       type: object
                     gcpChaos:
-                      description: GcpChaosSpec is the content of the specification for a GcpChaos
+                      description: GCPChaosSpec is the content of the specification for a GCPChaos
                       properties:
                         action:
                           description: 'Action defines the specific gcp chaos action. Supported action: node-stop / node-reset / disk-loss Default action: node-stop'
@@ -1452,7 +1452,7 @@ spec:
                           - selector
                           type: object
                         gcpChaos:
-                          description: GcpChaosSpec is the content of the specification for a GcpChaos
+                          description: GCPChaosSpec is the content of the specification for a GCPChaos
                           properties:
                             action:
                               description: 'Action defines the specific gcp chaos action. Supported action: node-stop / node-reset / disk-loss Default action: node-stop'

@@ -111,7 +111,7 @@ var ChaosObjects = fx.Supply(
 		Group: "objs",
 		Target: Object{
 			Name:   "gcpchaos",
-			Object: &v1alpha1.GcpChaos{},
+			Object: &v1alpha1.GCPChaos{},
 		},
 	},
 )
