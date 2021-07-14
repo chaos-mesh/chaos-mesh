@@ -378,15 +378,15 @@ metadata:
 spec:
   group: chaos-mesh.org
   names:
-    kind: GcpChaos
-    listKind: GcpChaosList
+    kind: GCPChaos
+    listKind: GCPChaosList
     plural: gcpchaos
     singular: gcpchaos
   preserveUnknownFields: false
   scope: Namespaced
   validation:
     openAPIV3Schema:
-      description: GcpChaos is the Schema for the gcpchaos API
+      description: GCPChaos is the Schema for the gcpchaos API
       properties:
         apiVersion:
           description: 'APIVersion defines the versioned schema of this representation
@@ -401,7 +401,7 @@ spec:
         metadata:
           type: object
         spec:
-          description: GcpChaosSpec is the content of the specification for a GcpChaos
+          description: GCPChaosSpec is the content of the specification for a GCPChaos
           properties:
             action:
               description: 'Action defines the specific gcp chaos action. Supported
@@ -439,7 +439,7 @@ spec:
           - zone
           type: object
         status:
-          description: GcpChaosStatus represents the status of a GcpChaos
+          description: GCPChaosStatus represents the status of a GCPChaos
           properties:
             attachedDiskStrings:
               description: The attached disk info strings. Needed in disk-loss.
@@ -3302,8 +3302,8 @@ spec:
               - selector
               type: object
             gcpChaos:
-              description: GcpChaosSpec is the content of the specification for a
-                GcpChaos
+              description: GCPChaosSpec is the content of the specification for a
+                GCPChaos
               properties:
                 action:
                   description: 'Action defines the specific gcp chaos action. Supported
@@ -5279,8 +5279,8 @@ spec:
                         - selector
                         type: object
                       gcpChaos:
-                        description: GcpChaosSpec is the content of the specification
-                          for a GcpChaos
+                        description: GCPChaosSpec is the content of the specification
+                          for a GCPChaos
                         properties:
                           action:
                             description: 'Action defines the specific gcp chaos action.
@@ -6973,8 +6973,8 @@ spec:
                             - selector
                             type: object
                           gcpChaos:
-                            description: GcpChaosSpec is the content of the specification
-                              for a GcpChaos
+                            description: GCPChaosSpec is the content of the specification
+                              for a GCPChaos
                             properties:
                               action:
                                 description: 'Action defines the specific gcp chaos
@@ -12582,8 +12582,8 @@ spec:
               - selector
               type: object
             gcpChaos:
-              description: GcpChaosSpec is the content of the specification for a
-                GcpChaos
+              description: GCPChaosSpec is the content of the specification for a
+                GCPChaos
               properties:
                 action:
                   description: 'Action defines the specific gcp chaos action. Supported
@@ -14183,8 +14183,8 @@ spec:
                   - selector
                   type: object
                 gcpChaos:
-                  description: GcpChaosSpec is the content of the specification for
-                    a GcpChaos
+                  description: GCPChaosSpec is the content of the specification for
+                    a GCPChaos
                   properties:
                     action:
                       description: 'Action defines the specific gcp chaos action.
@@ -16192,8 +16192,8 @@ spec:
                             - selector
                             type: object
                           gcpChaos:
-                            description: GcpChaosSpec is the content of the specification
-                              for a GcpChaos
+                            description: GCPChaosSpec is the content of the specification
+                              for a GCPChaos
                             properties:
                               action:
                                 description: 'Action defines the specific gcp chaos
@@ -17934,8 +17934,8 @@ spec:
                                 - selector
                                 type: object
                               gcpChaos:
-                                description: GcpChaosSpec is the content of the specification
-                                  for a GcpChaos
+                                description: GCPChaosSpec is the content of the specification
+                                  for a GCPChaos
                                 properties:
                                   action:
                                     description: 'Action defines the specific gcp
@@ -25908,8 +25908,8 @@ spec:
                     - selector
                     type: object
                   gcpChaos:
-                    description: GcpChaosSpec is the content of the specification
-                      for a GcpChaos
+                    description: GCPChaosSpec is the content of the specification
+                      for a GCPChaos
                     properties:
                       action:
                         description: 'Action defines the specific gcp chaos action.
@@ -27561,8 +27561,8 @@ spec:
                         - selector
                         type: object
                       gcpChaos:
-                        description: GcpChaosSpec is the content of the specification
-                          for a GcpChaos
+                        description: GCPChaosSpec is the content of the specification
+                          for a GCPChaos
                         properties:
                           action:
                             description: 'Action defines the specific gcp chaos action.
