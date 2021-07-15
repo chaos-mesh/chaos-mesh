@@ -30,6 +30,9 @@ spec:
       serviceAccountName: {{ .Values.controllerManager.serviceAccount }}
     {{- end }}
       priorityClassName: {{ .Values.controllerManager.priorityClassName}}
+      {{- if .Values.chaosDlv.enable }}
+      shareProcessNamespace: true
+      {{- end }}
       containers:
       - name: chaos-mesh
         image: {{template "registry-prefix" .}}{{ .Values.controllerManager.image }}
@@ -109,6 +112,21 @@ spec:
           - name: pprof
             containerPort: 10081
         {{- end }}
+      {{- if .Values.chaosDlv.enable }}
+      - name: chaos-mesh-dlv
+        image: {{template "registry-prefix" .}}{{ .Values.chaosDlv.image }}
+        imagePullPolicy: {{ .Values.chaosDlv.imagePullPolicy | default "IfNotPresent" }}
+        env:
+          - name: CMD_NAME
+            value: chaos-controller-manager
+        securityContext:
+          capabilities:
+            add:
+            - SYS_PTRACE
+        ports:
+        - name: dlv
+          containerPort: 8000
+      {{- end }}
       volumes:
         - name: webhook-certs
           secret:
