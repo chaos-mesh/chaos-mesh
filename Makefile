@@ -318,6 +318,7 @@ $(eval $(call IMAGE_TEMPLATE,chaos-mesh-protoc,hack/protoc))
 $(eval $(call IMAGE_TEMPLATE,chaos-mesh-e2e,e2e-test/image/e2e))
 $(eval $(call IMAGE_TEMPLATE,chaos-kernel,images/chaos-kernel))
 $(eval $(call IMAGE_TEMPLATE,chaos-jvm,images/chaos-jvm))
+$(eval $(call IMAGE_TEMPLATE,chaos-dlv,images/chaos-dlv))
 
 binary: $(BINARIES)
 
