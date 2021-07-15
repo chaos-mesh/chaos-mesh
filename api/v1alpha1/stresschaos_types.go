@@ -27,8 +27,8 @@ import (
 
 // StressChaos is the Schema for the stresschaos API
 type StressChaos struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
+	metav1.TypeMeta   `json:",inline" mapstructure:",squash"`
+	metav1.ObjectMeta `json:"metadata,omitempty" mapstructure:",squash"`
 
 	// Spec defines the behavior of a time chaos experiment
 	Spec StressChaosSpec `json:"spec"`
@@ -40,7 +40,7 @@ type StressChaos struct {
 
 // StressChaosSpec defines the desired state of StressChaos
 type StressChaosSpec struct {
-	ContainerSelector `json:",inline"`
+	ContainerSelector `json:",inline" mapstructure:",squash"`
 
 	// Stressors defines plenty of stressors supported to stress system components out.
 	// You can use one or more of them to make up various kinds of stresses. At least

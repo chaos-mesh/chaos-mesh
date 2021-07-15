@@ -20,7 +20,7 @@ const Scheduler: React.FC<SchedulerProps> = ({ errors, touched, inSchedule = fal
   const [continuous, setContinuous] = useState(false)
 
   useEffect(() => {
-    if (!inSchedule && fromExternal && basic.scheduler.duration === '') {
+    if (!inSchedule && fromExternal && basic.spec.duration === '') {
       setContinuous(true)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -31,8 +31,8 @@ const Scheduler: React.FC<SchedulerProps> = ({ errors, touched, inSchedule = fal
 
     setContinuous(checked)
 
-    if (checked && getIn(values, 'scheduler.duration') !== '') {
-      setFieldValue('scheduler.duration', '')
+    if (checked && getIn(values, 'spec.duration') !== '') {
+      setFieldValue('spec.duration', '')
     }
   }
 
@@ -54,15 +54,15 @@ const Scheduler: React.FC<SchedulerProps> = ({ errors, touched, inSchedule = fal
       {!continuous && (
         <TextField
           fast
-          name="scheduler.duration"
+          name="spec.duration"
           label={T('common.duration')}
           validate={validateDuration()}
           helperText={
-            getIn(errors, 'scheduler.duration') && getIn(touched, 'scheduler.duration')
-              ? getIn(errors, 'scheduler.duration')
+            getIn(errors, 'spec.duration') && getIn(touched, 'spec.duration')
+              ? getIn(errors, 'spec.duration')
               : T('common.durationHelper')
           }
-          error={getIn(errors, 'scheduler.duration') && getIn(touched, 'scheduler.duration') ? true : false}
+          error={getIn(errors, 'spec.duration') && getIn(touched, 'spec.duration') ? true : false}
         />
       )}
     </>

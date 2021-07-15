@@ -27,58 +27,22 @@ export interface Target {
 const networkCommon: Spec = {
   direction: {
     field: 'select',
-    items: ['', 'from', 'to', 'both'],
+    items: ['from', 'to', 'both'],
     label: 'Direction',
-    value: '',
+    value: 'to',
     helperText: 'Specify the network direction',
   },
-  external_targets: {
+  externalTargets: {
     field: 'label',
     label: 'External targets',
     value: [],
     helperText: 'Type string and end with a space to generate the network targets outside k8s',
   },
-  target_scope: undefined as any,
+  target: undefined as any,
 }
 
-const ioMethods = [
-  '',
-  'lookup',
-  'forget',
-  'getattr',
-  'setattr',
-  'readlink',
-  'mknod',
-  'mkdir',
-  'unlink',
-  'rmdir',
-  'symlink',
-  'rename',
-  'link',
-  'open',
-  'read',
-  'write',
-  'flush',
-  'release',
-  'fsync',
-  'opendir',
-  'readdir',
-  'releasedir',
-  'fsyncdir',
-  'statfs',
-  'setxattr',
-  'getxattr',
-  'listxattr',
-  'removexattr',
-  'access',
-  'create',
-  'getlk',
-  'setlk',
-  'bmap',
-]
-
 const ioCommon: Spec = {
-  volume_path: {
+  volumePath: {
     field: 'text',
     label: 'Volume path',
     value: '',
@@ -90,7 +54,7 @@ const ioCommon: Spec = {
     value: '',
     helperText: "Optional. The path of files for injecting. If it's empty, the action will inject into all files.",
   },
-  container_name: {
+  containerName: {
     field: 'text',
     label: 'Container name',
     value: '',
@@ -103,8 +67,7 @@ const ioCommon: Spec = {
     helperText: 'The percentage of injection errors',
   },
   methods: {
-    field: 'autocomplete',
-    items: ioMethods,
+    field: 'label',
     label: 'Methods',
     value: [],
     helperText: 'Optional. The IO methods for injecting IOChaos actions',
@@ -118,7 +81,7 @@ const dnsCommon: Spec = {
     value: [],
     helperText: 'Specify the DNS patterns. For example, type google.com and then press space to add it.',
   },
-  container_names: {
+  containerNames: {
     field: 'label',
     label: 'Affected container names',
     value: [],
@@ -191,7 +154,7 @@ const data: Record<Kind, Target> = {
         key: 'pod-kill',
         spec: {
           action: 'pod-kill' as any,
-          grace_period: {
+          gracePeriod: {
             field: 'number',
             label: 'Grace period',
             value: 0,
@@ -204,7 +167,7 @@ const data: Record<Kind, Target> = {
         key: 'container-kill',
         spec: {
           action: 'container-kill' as any,
-          container_names: {
+          containerNames: {
             field: 'label',
             label: 'Container names',
             value: [],
@@ -415,14 +378,14 @@ const data: Record<Kind, Target> = {
           options: [],
         },
       },
-      stressng_stressors: '',
-      container_name: '',
+      stressngStressors: '',
+      containerNames: [],
     } as any,
   },
   // Kernel Fault
   KernelChaos: {
     spec: {
-      fail_kern_request: {
+      failKernRequest: {
         callchain: [],
         failtype: 0,
         headers: [],
@@ -434,20 +397,20 @@ const data: Record<Kind, Target> = {
   // Clock Skew
   TimeChaos: {
     spec: {
-      time_offset: {
+      timeOffset: {
         field: 'text',
         label: 'Offset',
         value: '',
         helperText: 'Fill the time offset',
       },
-      clock_ids: {
+      clockIds: {
         field: 'label',
         label: 'Clock ids',
         value: [],
         helperText:
           "Optional. Type string and end with a space to generate the clock ids. If it's empty, it will be set to ['CLOCK_REALTIME']",
       },
-      container_names: {
+      containerNames: {
         field: 'label',
         label: 'Affected container names',
         value: [],
@@ -555,7 +518,7 @@ const data: Record<Kind, Target> = {
   },
 }
 
-const targetScopeSchema = Yup.object({
+const networkTargetSchema = Yup.object({
   namespaces: Yup.array().min(1, 'The namespace selectors is required'),
 })
 
@@ -575,46 +538,46 @@ const GcpChaosCommonSchema = Yup.object({
 export const schema: Partial<Record<Kind, Record<string, Yup.ObjectSchema>>> = {
   PodChaos: {
     'pod-kill': Yup.object({
-      grace_period: Yup.number().min(0, 'Grace period must be non-negative integer'),
+      gracePeriod: Yup.number().min(0, 'Grace period must be non-negative integer'),
     }),
     'container-kill': Yup.object({
-      container_names: Yup.array().of(Yup.string()).required('The container name is required'),
+      containerNames: Yup.array().of(Yup.string()).required('The container name is required'),
     }),
   },
   NetworkChaos: {
     partition: Yup.object({
       direction: Yup.string().required('The direction is required'),
-      target_scope: targetScopeSchema,
+      target: networkTargetSchema,
     }),
     loss: Yup.object({
       loss: Yup.object({
         loss: Yup.string().required('The loss is required'),
       }),
-      target_scope: targetScopeSchema,
+      target: networkTargetSchema,
     }),
     delay: Yup.object({
       delay: Yup.object({
         latency: Yup.string().required('The latency is required'),
       }),
-      target_scope: targetScopeSchema,
+      target: networkTargetSchema,
     }),
     duplicate: Yup.object({
       duplicate: Yup.object({
         duplicate: Yup.string().required('The duplicate is required'),
       }),
-      target_scope: targetScopeSchema,
+      target: networkTargetSchema,
     }),
     corrupt: Yup.object({
       corrupt: Yup.object({
         corrupt: Yup.string().required('The corrupt is required'),
       }),
-      target_scope: targetScopeSchema,
+      target: networkTargetSchema,
     }),
     bandwidth: Yup.object({
       bandwidth: Yup.object({
         rate: Yup.string().required('The rate of bandwidth is required'),
       }),
-      target_scope: targetScopeSchema,
+      target: networkTargetSchema,
     }),
   },
   IOChaos: {

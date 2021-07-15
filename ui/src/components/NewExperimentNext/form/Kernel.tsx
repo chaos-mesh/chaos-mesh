@@ -23,9 +23,9 @@ const Kernel: React.FC<KernelProps> = ({ onSubmit }) => {
 
   useEffect(() => {
     setInit({
-      fail_kern_request: {
-        ...initialValues.fail_kern_request,
-        ...target['kernel_chaos']?.fail_kern_request,
+      failKernRequest: {
+        ...initialValues.failKernRequest,
+        ...target.spec.failKernRequest,
       },
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -34,11 +34,11 @@ const Kernel: React.FC<KernelProps> = ({ onSubmit }) => {
   return (
     <Formik enableReinitialize initialValues={init} onSubmit={onSubmit}>
       {({ values, setFieldValue }) => {
-        const callchain = (values.fail_kern_request as any).callchain
+        const callchain = (values.failKernRequest as any).callchain
 
         const addFrame = () =>
           setFieldValue(
-            'fail_kern_request.callchain',
+            'failKernRequest.callchain',
             callchain.concat([
               {
                 funcname: '',
@@ -50,7 +50,7 @@ const Kernel: React.FC<KernelProps> = ({ onSubmit }) => {
 
         const removeFrame = (index: number) => () => {
           setFieldValue(
-            'fail_kern_request.callchain',
+            'failKernRequest.callchain',
             callchain.filter((_: any, i: number) => index !== i)
           )
         }
@@ -74,9 +74,9 @@ const Kernel: React.FC<KernelProps> = ({ onSubmit }) => {
                           <RemoveCircleIcon />
                         </IconButton>
                       </Box>
-                      <TextField name={`fail_kern_request.callchain[${i}].funcname`} label="funcname" />
-                      <TextField name={`fail_kern_request.callchain[${i}].parameters`} label="parameters" />
-                      <TextField name={`fail_kern_request.callchain[${i}].predicate`} label="predicate" />
+                      <TextField name={`failKernRequest.callchain[${i}].funcname`} label="funcname" />
+                      <TextField name={`failKernRequest.callchain[${i}].parameters`} label="parameters" />
+                      <TextField name={`failKernRequest.callchain[${i}].predicate`} label="predicate" />
                     </Space>
                   ))}
                 </Space>
@@ -84,7 +84,7 @@ const Kernel: React.FC<KernelProps> = ({ onSubmit }) => {
             </Paper>
             <Space>
               <SelectField
-                name="fail_kern_request.failtype"
+                name="failKernRequest.failtype"
                 label="Failtype"
                 helperText="What to fail, can be set to 0 / 1 / 2"
               >
@@ -95,19 +95,19 @@ const Kernel: React.FC<KernelProps> = ({ onSubmit }) => {
                 ))}
               </SelectField>
               <LabelField
-                name="fail_kern_request.headers"
+                name="failKernRequest.headers"
                 label="Headers"
                 helperText="Type string and end with a space to generate the appropriate kernel headers"
               />
               <TextField
                 type="number"
-                name="fail_kern_request.probability"
+                name="failKernRequest.probability"
                 helperText="The fails with probability"
                 InputProps={{
                   endAdornment: <InputAdornment position="end">%</InputAdornment>,
                 }}
               />
-              <TextField type="number" name="fail_kern_request.times" helperText="The max times of failures" />
+              <TextField type="number" name="failKernRequest.times" helperText="The max times of failures" />
             </Space>
 
             <Submit />

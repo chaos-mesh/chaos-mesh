@@ -1,47 +1,51 @@
-export interface ExperimentBasic {
+export interface Metadata {
   name: string
   namespace: string
-  labels: object | string[]
-  annotations: object | string[]
+  labels?: string[]
+  annotations?: string[]
 }
 
-export interface ExperimentTargetPod {
-  action: 'pod-failure' | 'pod-kill' | 'container-kill'
-  container_names?: string[]
-}
-
-export interface ExperimentScope {
+interface Selector {
   namespaces: string[]
-  label_selectors: object | string[]
-  annotation_selectors: object | string[]
-  phase_selectors: string[]
-  mode: string
-  value: string
-  pods: object | string[]
+  labelSelectors?: string[]
+  annotationSelectors?: string[]
+  phaseSelectors?: string[]
+  pods?: string[]
 }
 
-export interface ExperimentTargetNetworkLoss {
+export interface Scope {
+  selector: Selector
+  mode: string
+  value?: string
+}
+
+export interface Pod {
+  action: 'pod-failure' | 'pod-kill' | 'container-kill'
+  containerNames?: string[]
+}
+
+export interface NetworkLoss {
   loss: string
   correlation: string
 }
 
-export interface ExperimentTargetNetworkDelay {
+export interface NetworkDelay {
   latency: string
   jitter: string
   correlation: string
 }
 
-export interface ExperimentTargetNetworkDuplicate {
+export interface NetworkDuplicate {
   duplicate: string
   correlation: string
 }
 
-export interface ExperimentTargetNetworkCorrupt {
+export interface NetworkCorrupt {
   corrupt: string
   correlation: string
 }
 
-export interface ExperimentTargetNetworkBandwidth {
+export interface NetworkBandwidth {
   rate: string
   limit: number
   buffer: number
@@ -49,53 +53,29 @@ export interface ExperimentTargetNetworkBandwidth {
   peakrate: number
 }
 
-export interface ExperimentTargetNetwork {
+export interface Network {
   action: 'partition' | 'loss' | 'delay' | 'duplicate' | 'corrupt' | 'bandwidth'
-  loss: ExperimentTargetNetworkLoss
-  delay: ExperimentTargetNetworkDelay
-  duplicate: ExperimentTargetNetworkDuplicate
-  corrupt: ExperimentTargetNetworkCorrupt
-  bandwidth: ExperimentTargetNetworkBandwidth
-  direction: 'from' | 'to' | 'both' | ''
-  target_scope?: ExperimentScope
+  loss?: NetworkLoss
+  delay?: NetworkDelay
+  duplicate?: NetworkDuplicate
+  corrupt?: NetworkCorrupt
+  bandwidth?: NetworkBandwidth
+  direction?: 'from' | 'to' | 'both'
+  target?: Selector
 }
 
-export interface ExperimentTargetIO {
+export interface IO {
   action: 'latency' | 'fault' | 'attrOverride'
   delay?: string
   errno?: number
   attr?: object | string[]
-  volume_path: string
+  volumePath: string
   path: string
   percent: number
   methods: string[]
 }
 
-export interface CallchainFrame {
-  funcname: string
-  parameters: string
-  predicate: string
-}
-
-export interface FailKernelReq {
-  callchain: CallchainFrame[]
-  failtype: number
-  headers: string[]
-  probability: number
-  times: number
-}
-
-export interface ExperimentTargetKernel {
-  fail_kern_request: FailKernelReq
-}
-
-export interface ExperimentTargetTime {
-  time_offset: string
-  clock_ids: string[]
-  container_names: string[]
-}
-
-export interface ExperimentTargetStress {
+export interface Stress {
   stressors: {
     cpu?: {
       workers: number
@@ -108,37 +88,58 @@ export interface ExperimentTargetStress {
       options: string[]
     }
   }
-  stressng_stressors: string
-  container_name: string
+  stressngStressors: string
+  containerNames: string
 }
 
-export type ExperimentKind =
-  | 'PodChaos'
-  | 'NetworkChaos'
-  | 'IOChaos'
-  | 'KernelChaos'
-  | 'TimeChaos'
-  | 'StressChaos'
-  | 'DNSChaos'
-  | 'AWSChaos'
-  | 'GCPChaos'
+export interface Frame {
+  funcname: string
+  parameters: string
+  predicate: string
+}
+
+export interface FailKernelReq {
+  callchain: Frame[]
+  failtype: number
+  headers: string[]
+  probability: number
+  times: number
+}
+
+export interface Kernel {
+  failKernRequest: FailKernelReq
+}
+
+export interface Time {
+  timeOffset: string
+  clockIds: string[]
+  containerNames: string[]
+}
+
+export interface DNS {
+  action: 'error' | 'random'
+  patterns: string[]
+  containerNames?: string[]
+}
 
 export interface ExperimentTarget {
-  kind: ExperimentKind
-  pod_chaos: ExperimentTargetPod
-  network_chaos: ExperimentTargetNetwork
-  io_chaos: ExperimentTargetIO
-  kernel_chaos: ExperimentTargetKernel
-  time_chaos: ExperimentTargetTime
-  stress_chaos: ExperimentTargetStress
+  PodChaos: Pod
+  NetworkChaos: Network
+  IOChaos: IO
+  StressChaos: Stress
+  KernelChaos: Kernel
+  TimeChaos: Time
+  DNSChaos: DNS
+  AWSChaos: DNS
+  GCPChaos: DNS
 }
 
-export interface ExperimentSchedule {
-  duration: string
-}
+export type ExperimentKind = keyof ExperimentTarget
 
-export interface Experiment extends ExperimentBasic {
-  scope: ExperimentScope
-  target: ExperimentTarget
-  scheduler: ExperimentSchedule
+export interface Experiment<K extends ExperimentKind = any> {
+  metadata: Metadata
+  spec: Scope &
+    Pick<ExperimentTarget, K>[K] & {
+      duration?: string
+    }
 }

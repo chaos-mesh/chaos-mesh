@@ -45,6 +45,7 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/lib/pq v1.2.0 // indirect
 	github.com/mgechev/revive v1.0.2-0.20200225072153-6219ca02fffb
+	github.com/mitchellh/mapstructure v1.4.1
 	github.com/moby/locker v1.0.1
 	github.com/onsi/ginkgo v1.14.0
 	github.com/onsi/gomega v1.10.1

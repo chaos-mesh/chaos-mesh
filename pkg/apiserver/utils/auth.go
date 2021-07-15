@@ -31,7 +31,7 @@ func AuthRequired(c *gin.Context, clusterScoped bool, targetNamespace string) {
 
 	authCli, err := clientpool.ExtractTokenAndGetAuthClient(c.Request.Header)
 	if err != nil {
-		c.AbortWithError(http.StatusUnauthorized, ErrInvalidRequest.WrapWithNoMessage(err))
+		c.AbortWithError(http.StatusUnauthorized, ErrBadRequest.WrapWithNoMessage(err))
 		return
 	}
 
@@ -59,7 +59,7 @@ func AuthRequired(c *gin.Context, clusterScoped bool, targetNamespace string) {
 
 	response, err := authCli.SelfSubjectAccessReviews().Create(sar)
 	if err != nil {
-		c.AbortWithError(http.StatusUnauthorized, ErrInvalidRequest.WrapWithNoMessage(err))
+		c.AbortWithError(http.StatusUnauthorized, ErrBadRequest.WrapWithNoMessage(err))
 		return
 	}
 

@@ -2,6 +2,7 @@ import { Box, Typography } from '@material-ui/core'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
 import DoneAllIcon from '@material-ui/icons/DoneAll'
+import { ExperimentKind } from 'components/NewExperiment/types'
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
 import { Submit } from 'components/FormField'
@@ -22,14 +23,17 @@ const Step3: React.FC<Step3Props> = ({ onSubmit }) => {
   const intl = useIntl()
 
   const state = useStoreSelector((state) => state)
-  const { step1, step2, basic, target } = state.experiments
+  const { step1, step2, kindAction, basic, target } = state.experiments
   const { debugMode } = state.settings
   const dispatch = useStoreDispatch()
 
   const submitExperiment = () => {
-    const parsedValues = parseSubmit({
+    const parsedValues = parseSubmit(kindAction[0] as ExperimentKind, {
       ...basic,
-      target,
+      spec: {
+        ...basic.spec,
+        ...target.spec,
+      },
     })
 
     if (process.env.NODE_ENV === 'development' || debugMode) {

@@ -109,7 +109,7 @@ type PodSelector struct {
 }
 
 type ContainerSelector struct {
-	PodSelector `json:",inline"`
+	PodSelector `json:",inline" mapstructure:",squash"`
 
 	// ContainerNames indicates list of the name of affected container.
 	// If not set, all containers will be injected

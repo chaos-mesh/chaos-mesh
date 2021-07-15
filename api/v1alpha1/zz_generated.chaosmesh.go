@@ -1400,62 +1400,62 @@ func init() {
 	})
 
 
-	allScheduleItem.register(KindAwsChaos, &ChaosKind{
+	allSchedules.register(KindAwsChaos, &ChaosKind{
 		Chaos:     &AwsChaos{},
 		ChaosList: &AwsChaosList{},
 	})
 
-	allScheduleItem.register(KindDNSChaos, &ChaosKind{
+	allSchedules.register(KindDNSChaos, &ChaosKind{
 		Chaos:     &DNSChaos{},
 		ChaosList: &DNSChaosList{},
 	})
 
-	allScheduleItem.register(KindGcpChaos, &ChaosKind{
+	allSchedules.register(KindGcpChaos, &ChaosKind{
 		Chaos:     &GcpChaos{},
 		ChaosList: &GcpChaosList{},
 	})
 
-	allScheduleItem.register(KindHTTPChaos, &ChaosKind{
+	allSchedules.register(KindHTTPChaos, &ChaosKind{
 		Chaos:     &HTTPChaos{},
 		ChaosList: &HTTPChaosList{},
 	})
 
-	allScheduleItem.register(KindIOChaos, &ChaosKind{
+	allSchedules.register(KindIOChaos, &ChaosKind{
 		Chaos:     &IOChaos{},
 		ChaosList: &IOChaosList{},
 	})
 
-	allScheduleItem.register(KindJVMChaos, &ChaosKind{
+	allSchedules.register(KindJVMChaos, &ChaosKind{
 		Chaos:     &JVMChaos{},
 		ChaosList: &JVMChaosList{},
 	})
 
-	allScheduleItem.register(KindKernelChaos, &ChaosKind{
+	allSchedules.register(KindKernelChaos, &ChaosKind{
 		Chaos:     &KernelChaos{},
 		ChaosList: &KernelChaosList{},
 	})
 
-	allScheduleItem.register(KindNetworkChaos, &ChaosKind{
+	allSchedules.register(KindNetworkChaos, &ChaosKind{
 		Chaos:     &NetworkChaos{},
 		ChaosList: &NetworkChaosList{},
 	})
 
-	allScheduleItem.register(KindPodChaos, &ChaosKind{
+	allSchedules.register(KindPodChaos, &ChaosKind{
 		Chaos:     &PodChaos{},
 		ChaosList: &PodChaosList{},
 	})
 
-	allScheduleItem.register(KindStressChaos, &ChaosKind{
+	allSchedules.register(KindStressChaos, &ChaosKind{
 		Chaos:     &StressChaos{},
 		ChaosList: &StressChaosList{},
 	})
 
-	allScheduleItem.register(KindTimeChaos, &ChaosKind{
+	allSchedules.register(KindTimeChaos, &ChaosKind{
 		Chaos:     &TimeChaos{},
 		ChaosList: &TimeChaosList{},
 	})
 
-	allScheduleItem.register(KindWorkflow, &ChaosKind{
+	allSchedules.register(KindWorkflow, &ChaosKind{
 		Chaos:     &Workflow{},
 		ChaosList: &WorkflowList{},
 	})

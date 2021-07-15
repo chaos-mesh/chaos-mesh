@@ -22,8 +22,8 @@ import (
 
 // TimeChaos is the Schema for the timechaos API
 type TimeChaos struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
+	metav1.TypeMeta   `json:",inline" mapstructure:",squash"`
+	metav1.ObjectMeta `json:"metadata,omitempty" mapstructure:",squash"`
 
 	// Spec defines the behavior of a time chaos experiment
 	Spec TimeChaosSpec `json:"spec"`
@@ -35,7 +35,7 @@ type TimeChaos struct {
 
 // TimeChaosSpec defines the desired state of TimeChaos
 type TimeChaosSpec struct {
-	ContainerSelector `json:",inline"`
+	ContainerSelector `json:",inline" mapstructure:",squash"`
 
 	// TimeOffset defines the delta time of injected program. It's a possibly signed sequence of decimal numbers, such as
 	// "300ms", "-1.5h" or "2h45m". Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".

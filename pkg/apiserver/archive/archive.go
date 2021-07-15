@@ -167,7 +167,7 @@ func (s *Service) detail(c *gin.Context) {
 
 	if uid == "" {
 		c.Status(http.StatusBadRequest)
-		_ = c.Error(utils.ErrInvalidRequest.New("uid cannot be empty"))
+		_ = c.Error(utils.ErrBadRequest.New("uid cannot be empty"))
 		return
 	}
 
@@ -175,7 +175,7 @@ func (s *Service) detail(c *gin.Context) {
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
 			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInvalidRequest.New("the archive is not found"))
+			_ = c.Error(utils.ErrBadRequest.New("the archive is not found"))
 		} else {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
@@ -185,7 +185,7 @@ func (s *Service) detail(c *gin.Context) {
 
 	if len(namespace) != 0 && exp.Namespace != namespace {
 		c.Status(http.StatusBadRequest)
-		_ = c.Error(utils.ErrInvalidRequest.New("exp %s belong to namespace %s but not namespace %s", uid, exp.Namespace, namespace))
+		_ = c.Error(utils.ErrBadRequest.New("exp %s belong to namespace %s but not namespace %s", uid, exp.Namespace, namespace))
 		return
 	}
 
@@ -250,7 +250,7 @@ func (s *Service) delete(c *gin.Context) {
 	if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
 		if gorm.IsRecordNotFoundError(err) {
 			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInvalidRequest.New("the archived experiment is not found"))
+			_ = c.Error(utils.ErrBadRequest.New("the archived experiment is not found"))
 		} else {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
@@ -359,7 +359,7 @@ func (s *Service) detailSchedule(c *gin.Context) {
 
 	if uid == "" {
 		c.Status(http.StatusBadRequest)
-		_ = c.Error(utils.ErrInvalidRequest.New("uid cannot be empty"))
+		_ = c.Error(utils.ErrBadRequest.New("uid cannot be empty"))
 		return
 	}
 
@@ -367,7 +367,7 @@ func (s *Service) detailSchedule(c *gin.Context) {
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
 			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInvalidRequest.New("the archive schedule is not found"))
+			_ = c.Error(utils.ErrBadRequest.New("the archive schedule is not found"))
 		} else {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
@@ -427,7 +427,7 @@ func (s *Service) deleteSchedule(c *gin.Context) {
 	if exp, err = s.archiveSchedule.FindByUID(context.Background(), uid); err != nil {
 		if gorm.IsRecordNotFoundError(err) {
 			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInvalidRequest.New("the archived schedule is not found"))
+			_ = c.Error(utils.ErrBadRequest.New("the archived schedule is not found"))
 		} else {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
@@ -536,7 +536,7 @@ func (s *Service) detailWorkflow(c *gin.Context) {
 
 	if uid == "" {
 		c.Status(http.StatusBadRequest)
-		_ = c.Error(utils.ErrInvalidRequest.New("uid cannot be empty"))
+		_ = c.Error(utils.ErrBadRequest.New("uid cannot be empty"))
 		return
 	}
 
@@ -544,7 +544,7 @@ func (s *Service) detailWorkflow(c *gin.Context) {
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
 			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInvalidRequest.New("the archive schedule is not found"))
+			_ = c.Error(utils.ErrBadRequest.New("the archive schedule is not found"))
 		} else {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())

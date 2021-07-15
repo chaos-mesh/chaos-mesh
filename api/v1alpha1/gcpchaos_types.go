@@ -25,8 +25,8 @@ import (
 
 // GcpChaos is the Schema for the gcpchaos API
 type GcpChaos struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
+	metav1.TypeMeta   `json:",inline" mapstructure:",squash"`
+	metav1.ObjectMeta `json:"metadata,omitempty" mapstructure:",squash"`
 
 	Spec   GcpChaosSpec   `json:"spec"`
 	Status GcpChaosStatus `json:"status,omitempty"`
@@ -60,7 +60,7 @@ type GcpChaosSpec struct {
 	// +optional
 	SecretName *string `json:"secretName,omitempty"`
 
-	GcpSelector `json:",inline"`
+	GcpSelector `json:",inline" mapstructure:",squash"`
 }
 
 type GcpSelector struct {

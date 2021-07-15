@@ -71,15 +71,13 @@ const NewExperiment: React.ForwardRefRenderFunction<NewExperimentHandles, NewExp
       return
     }
 
-    const data = yamlToExperiment(original)
-
-    const kind = data.target.kind
+    const { basic, target } = yamlToExperiment(original)
 
     dispatch(
       setExternalExperiment({
-        kindAction: [kind, data.target[_snakecase(kind)].action ?? ''],
-        target: data.target,
-        basic: data.basic,
+        kindAction: [target.kind, target.spec.action ?? ''],
+        target,
+        basic,
       })
     )
 

@@ -132,7 +132,7 @@ func (c *ChaosCollector) collect() {
 				// There is only 4 supported phases
 				expCache[item.GetChaos().Namespace] = make(map[string]int, 4)
 			}
-			expCache[item.GetChaos().Namespace][string(utils.GetChaosState(item))]++
+			expCache[item.GetChaos().Namespace][string(utils.GetChaosStatus(item))]++
 		}
 
 		for ns, v := range expCache {

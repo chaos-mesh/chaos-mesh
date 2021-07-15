@@ -22,25 +22,26 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
 )
 
-type ChaosStatusString string
+type ChaosStatus string
 
 const (
-	Injecting ChaosStatusString = "injecting"
-	Running   ChaosStatusString = "running"
-	Finished  ChaosStatusString = "finished"
-	Paused    ChaosStatusString = "paused"
+	Injecting ChaosStatus = "injecting"
+	Running   ChaosStatus = "running"
+	Finished  ChaosStatus = "finished"
+	Paused    ChaosStatus = "paused"
 )
 
-type ScheduleStatusString string
+type ScheduleStatus string
 
 const (
-	ScheduleRunning ScheduleStatusString = "running"
-	SchedulePaused  ScheduleStatusString = "paused"
+	ScheduleRunning ScheduleStatus = "running"
+	SchedulePaused  ScheduleStatus = "paused"
 )
 
-func GetChaosState(obj v1alpha1.InnerObject) ChaosStatusString {
+func GetChaosStatus(obj v1alpha1.InnerObject) ChaosStatus {
 	selected := false
 	allInjected := false
+
 	for _, c := range obj.GetChaos().Status.Conditions {
 		if c.Status == corev1.ConditionTrue {
 			switch c.Type {
@@ -53,18 +54,22 @@ func GetChaosState(obj v1alpha1.InnerObject) ChaosStatusString {
 			}
 		}
 	}
+
 	if controller.IsChaosFinished(obj, time.Now()) {
 		return Finished
 	}
+
 	if selected && allInjected {
 		return Running
 	}
+
 	return Injecting
 }
 
-func GetScheduleState(sch v1alpha1.Schedule) ScheduleStatusString {
+func GetScheduleStatus(sch v1alpha1.Schedule) ScheduleStatus {
 	if sch.IsPaused() {
 		return SchedulePaused
 	}
+
 	return ScheduleRunning
 }

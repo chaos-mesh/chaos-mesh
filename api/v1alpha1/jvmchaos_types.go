@@ -19,7 +19,7 @@ import (
 
 // JVMChaosSpec defines the desired state of JVMChaos
 type JVMChaosSpec struct {
-	ContainerSelector `json:",inline"`
+	ContainerSelector `json:",inline" mapstructure:",squash"`
 
 	// Duration represents the duration of the chaos action
 	// +optional
@@ -32,7 +32,7 @@ type JVMChaosSpec struct {
 
 	// JVMParameter represents the detail about jvm chaos action definition
 	// +optional
-	JVMParameter `json:",inline"`
+	JVMParameter `json:",inline" mapstructure:",squash"`
 
 	// Target defines the specific jvm chaos target.
 	// Supported target: servlet;psql;jvm;jedis;http;dubbo;rocketmq;tars;mysql;druid;redisson;rabbitmq;mongodb
@@ -142,8 +142,8 @@ type JVMChaosStatus struct {
 
 // JVMChaos is the Schema for the jvmchaos API
 type JVMChaos struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
+	metav1.TypeMeta   `json:",inline" mapstructure:",squash"`
+	metav1.ObjectMeta `json:"metadata,omitempty" mapstructure:",squash"`
 
 	Spec   JVMChaosSpec   `json:"spec,omitempty"`
 	Status JVMChaosStatus `json:"status,omitempty"`

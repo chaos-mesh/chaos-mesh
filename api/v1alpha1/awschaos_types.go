@@ -25,8 +25,8 @@ import (
 
 // AwsChaos is the Schema for the awschaos API
 type AwsChaos struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
+	metav1.TypeMeta   `json:",inline" mapstructure:",squash"`
+	metav1.ObjectMeta `json:"metadata,omitempty" mapstructure:",squash"`
 
 	Spec   AwsChaosSpec   `json:"spec"`
 	Status AwsChaosStatus `json:"status,omitempty"`
@@ -60,7 +60,7 @@ type AwsChaosSpec struct {
 	// +optional
 	SecretName *string `json:"secretName,omitempty"`
 
-	AwsSelector `json:",inline"`
+	AwsSelector `json:",inline" mapstructure:",squash"`
 }
 
 // AwsChaosStatus represents the status of an AwsChaos

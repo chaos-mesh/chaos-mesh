@@ -11,4 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swaggerserver
+// This file ensures the `swaggerdocs` package exists even if swagger is not enabled. This is also required for `go mod tidy`.
+
+package swaggerdocs

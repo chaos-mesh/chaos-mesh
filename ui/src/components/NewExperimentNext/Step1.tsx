@@ -14,7 +14,6 @@ import Stress from './form/Stress'
 import T from 'components/T'
 import TargetGenerated from './form/TargetGenerated'
 import UndoIcon from '@material-ui/icons/Undo'
-import _snakecase from 'lodash.snakecase'
 import clsx from 'clsx'
 import { makeStyles } from '@material-ui/styles'
 
@@ -81,7 +80,7 @@ const Step1 = () => {
   const handleSubmitStep1 = (values: Record<string, any>) => {
     const result = {
       kind,
-      [_snakecase(kind)]:
+      spec:
         submitDirectly.includes(values.action) && Object.keys(values).length === 1
           ? values
           : action

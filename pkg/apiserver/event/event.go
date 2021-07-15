@@ -112,14 +112,14 @@ func (s *Service) getEvent(c *gin.Context) {
 
 	if idStr == "" {
 		c.Status(http.StatusBadRequest)
-		_ = c.Error(utils.ErrInvalidRequest.New("id cannot be empty"))
+		_ = c.Error(utils.ErrBadRequest.New("id cannot be empty"))
 		return
 	}
 
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		c.Status(http.StatusBadRequest)
-		_ = c.Error(utils.ErrInvalidRequest.New("the format of id is wrong"))
+		_ = c.Error(utils.ErrBadRequest.New("the format of id is wrong"))
 		return
 	}
 
@@ -127,7 +127,7 @@ func (s *Service) getEvent(c *gin.Context) {
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
 			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInvalidRequest.New("the event is not found"))
+			_ = c.Error(utils.ErrBadRequest.New("the event is not found"))
 		} else {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
@@ -137,7 +137,7 @@ func (s *Service) getEvent(c *gin.Context) {
 
 	if len(namespace) != 0 && event.Namespace != namespace {
 		c.Status(http.StatusBadRequest)
-		_ = c.Error(utils.ErrInvalidRequest.New("event %s belong to namespace %s but not namespace %s", idStr, event.Namespace, namespace))
+		_ = c.Error(utils.ErrBadRequest.New("event %s belong to namespace %s but not namespace %s", idStr, event.Namespace, namespace))
 		return
 	}
 

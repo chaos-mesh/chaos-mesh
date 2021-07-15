@@ -76,7 +76,7 @@ func (it *Service) listWorkflows(c *gin.Context) {
 
 	kubeClient, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		_ = c.Error(utils.ErrBadRequest.WrapWithNoMessage(err))
 		return
 	}
 	repo := core.NewKubeWorkflowRepository(kubeClient)
@@ -84,14 +84,14 @@ func (it *Service) listWorkflows(c *gin.Context) {
 	if namespace != "" {
 		workflowFromNs, err := repo.ListByNamespace(c.Request.Context(), namespace)
 		if err != nil {
-			utils.SetErrorForGinCtx(c, err)
+			utils.SetApimachineryError(c, err)
 			return
 		}
 		result = append(result, workflowFromNs...)
 	} else {
 		allWorkflow, err := repo.List(c.Request.Context())
 		if err != nil {
-			utils.SetErrorForGinCtx(c, err)
+			utils.SetApimachineryError(c, err)
 			return
 		}
 		result = append(result, allWorkflow...)
@@ -133,7 +133,7 @@ func (it *Service) getWorkflowDetailByUID(c *gin.Context) {
 
 	entity, err := it.store.FindByUID(c.Request.Context(), uid)
 	if err != nil {
-		utils.SetErrorForGinCtx(c, err)
+		utils.SetApimachineryError(c, err)
 		return
 	}
 
@@ -146,13 +146,13 @@ func (it *Service) getWorkflowDetailByUID(c *gin.Context) {
 			// if not exists in kubernetes anymore, return the persisted entity directly.
 			workflowDetail, err := core.WorkflowEntity2WorkflowDetail(entity)
 			if err != nil {
-				utils.SetErrorForGinCtx(c, err)
+				utils.SetApimachineryError(c, err)
 				return
 			}
 			c.JSON(http.StatusOK, workflowDetail)
 			return
 		}
-		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		_ = c.Error(utils.ErrBadRequest.WrapWithNoMessage(err))
 		return
 	}
 
@@ -161,12 +161,12 @@ func (it *Service) getWorkflowDetailByUID(c *gin.Context) {
 
 	workflowCRInKubernetes, err := repo.Get(c.Request.Context(), namespace, name)
 	if err != nil {
-		utils.SetErrorForGinCtx(c, err)
+		utils.SetApimachineryError(c, err)
 		return
 	}
 	result, err := core.WorkflowEntity2WorkflowDetail(entity)
 	if err != nil {
-		utils.SetErrorForGinCtx(c, err)
+		utils.SetApimachineryError(c, err)
 		return
 	}
 	result.Topology = workflowCRInKubernetes.Topology
@@ -195,7 +195,7 @@ func (it *Service) createWorkflow(c *gin.Context) {
 
 	kubeClient, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		_ = c.Error(utils.ErrBadRequest.WrapWithNoMessage(err))
 		return
 	}
 
@@ -224,7 +224,7 @@ func (it *Service) deleteWorkflow(c *gin.Context) {
 
 	entity, err := it.store.FindByUID(c.Request.Context(), uid)
 	if err != nil {
-		utils.SetErrorForGinCtx(c, err)
+		utils.SetApimachineryError(c, err)
 		return
 	}
 
@@ -233,7 +233,7 @@ func (it *Service) deleteWorkflow(c *gin.Context) {
 
 	kubeClient, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		_ = c.Error(utils.ErrBadRequest.WrapWithNoMessage(err))
 		return
 	}
 
@@ -241,7 +241,7 @@ func (it *Service) deleteWorkflow(c *gin.Context) {
 
 	err = repo.Delete(c.Request.Context(), namespace, name)
 	if err != nil {
-		utils.SetErrorForGinCtx(c, err)
+		utils.SetApimachineryError(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, StatusResponse{Status: "success"})
@@ -268,7 +268,7 @@ func (it *Service) updateWorkflow(c *gin.Context) {
 	uid := c.Param("uid")
 	entity, err := it.store.FindByUID(c.Request.Context(), uid)
 	if err != nil {
-		utils.SetErrorForGinCtx(c, err)
+		utils.SetApimachineryError(c, err)
 		return
 	}
 
@@ -276,7 +276,7 @@ func (it *Service) updateWorkflow(c *gin.Context) {
 	name := entity.Name
 
 	if namespace != payload.Namespace {
-		_ = c.Error(utils.ErrInvalidRequest.Wrap(err,
+		_ = c.Error(utils.ErrBadRequest.Wrap(err,
 			"namespace is not consistent, pathParameter: %s, metaInRaw: %s",
 			namespace,
 			payload.Namespace),
@@ -284,7 +284,7 @@ func (it *Service) updateWorkflow(c *gin.Context) {
 		return
 	}
 	if name != payload.Name {
-		_ = c.Error(utils.ErrInvalidRequest.Wrap(err,
+		_ = c.Error(utils.ErrBadRequest.Wrap(err,
 			"name is not consistent, pathParameter: %s, metaInRaw: %s",
 			name,
 			payload.Name),
@@ -294,7 +294,7 @@ func (it *Service) updateWorkflow(c *gin.Context) {
 
 	kubeClient, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		_ = c.Error(utils.ErrBadRequest.WrapWithNoMessage(err))
 		return
 	}
 

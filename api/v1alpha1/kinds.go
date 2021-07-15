@@ -21,6 +21,14 @@ import (
 
 // +kubebuilder:object:generate=false
 
+// ChaosKind includes one kind of chaos and its list.
+type ChaosKind struct {
+	Chaos runtime.Object
+	ChaosList
+}
+
+// +kubebuilder:object:generate=false
+
 // ChaosKindMap defines a map including all chaos kinds.
 type chaosKindMap struct {
 	sync.RWMutex
@@ -30,6 +38,7 @@ type chaosKindMap struct {
 func (c *chaosKindMap) register(name string, kind *ChaosKind) {
 	c.Lock()
 	defer c.Unlock()
+
 	c.kinds[name] = kind
 }
 
@@ -48,30 +57,20 @@ func (c *chaosKindMap) clone() map[string]*ChaosKind {
 	return out
 }
 
-// AllKinds returns all chaos kinds.
-func AllKinds() map[string]*ChaosKind {
-	return all.clone()
-}
-
-// all is a ChaosKindMap instance.
 var all = &chaosKindMap{
 	kinds: make(map[string]*ChaosKind),
 }
 
-// +kubebuilder:object:generate=false
-
-// ChaosKind includes one kind of chaos and its list type
-type ChaosKind struct {
-	Chaos runtime.Object
-	ChaosList
+// AllKinds returns all chaos by kind.
+func AllKinds() map[string]*ChaosKind {
+	return all.clone()
 }
 
-// AllKinds returns all chaos kinds.
-func AllScheduleItemKinds() map[string]*ChaosKind {
-	return allScheduleItem.clone()
-}
-
-// all is a ChaosKindMap instance.
-var allScheduleItem = &chaosKindMap{
+var allSchedules = &chaosKindMap{
 	kinds: make(map[string]*ChaosKind),
+}
+
+// AllSchedules returns all schedules by kind.
+func AllSchedules() map[string]*ChaosKind {
+	return allSchedules.clone()
 }

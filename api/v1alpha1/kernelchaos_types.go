@@ -22,8 +22,8 @@ import (
 
 // KernelChaos is the Schema for the kernelchaos API
 type KernelChaos struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
+	metav1.TypeMeta   `json:",inline" mapstructure:",squash"`
+	metav1.ObjectMeta `json:"metadata,omitempty" mapstructure:",squash"`
 
 	// Spec defines the behavior of a kernel chaos experiment
 	Spec KernelChaosSpec `json:"spec"`
@@ -35,7 +35,7 @@ type KernelChaos struct {
 
 // KernelChaosSpec defines the desired state of KernelChaos
 type KernelChaosSpec struct {
-	PodSelector `json:",inline"`
+	PodSelector `json:",inline" mapstructure:",squash"`
 
 	// FailKernRequest defines the request of kernel injection
 	FailKernRequest FailKernRequest `json:"failKernRequest"`

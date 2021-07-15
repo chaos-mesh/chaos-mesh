@@ -1,7 +1,6 @@
+import { ExperimentKind, Scope } from 'components/NewExperiment/types'
 import { PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 
-import { ExperimentScope } from 'components/NewExperiment/types'
-import { Kind } from 'components/NewExperimentNext/data/target'
 import { ScheduleSpecific } from 'components/Schedule/types'
 import api from 'api'
 
@@ -19,11 +18,11 @@ export const getAnnotations = createAsyncThunk(
 )
 export const getCommonPodsByNamespaces = createAsyncThunk(
   'common/pods',
-  async (data: Partial<ExperimentScope>) => (await api.common.pods(data)).data
+  async (data: Partial<Scope['selector']>) => (await api.common.pods(data)).data
 )
 export const getNetworkTargetPodsByNamespaces = createAsyncThunk(
   'network/target/pods',
-  async (data: Partial<ExperimentScope>) => (await api.common.pods(data)).data
+  async (data: Partial<Scope['selector']>) => (await api.common.pods(data)).data
 )
 
 const initialState: {
@@ -35,7 +34,7 @@ const initialState: {
   fromExternal: boolean
   step1: boolean
   step2: boolean
-  kindAction: [Kind | '', string]
+  kindAction: [ExperimentKind | '', string]
   target: any
   basic: any
   scheduleSpecific: ScheduleSpecific

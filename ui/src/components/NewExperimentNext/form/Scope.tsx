@@ -20,6 +20,7 @@ import T from 'components/T'
 interface ScopeStepProps {
   namespaces: string[]
   scope?: string
+  modeScope?: string
   podsPreviewTitle?: string | JSX.Element
   podsPreviewDesc?: string | JSX.Element
 }
@@ -33,12 +34,18 @@ const modes = [
 ]
 const modesWithAdornment = ['fixed-percent', 'random-max-percent']
 
-const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', podsPreviewTitle, podsPreviewDesc }) => {
+const ScopeStep: React.FC<ScopeStepProps> = ({
+  namespaces,
+  scope = 'spec.selector',
+  modeScope = 'spec',
+  podsPreviewTitle,
+  podsPreviewDesc,
+}) => {
   const { values, handleChange, setFieldValue, errors, touched } = useFormikContext()
   const {
     namespaces: currentNamespaces,
-    label_selectors: currentLabels,
-    annotation_selectors: currentAnnotations,
+    labelSelectors: currentLabels,
+    annotationSelectors: currentAnnotations,
   } = getIn(values, scope)
 
   const state = useStoreSelector((state) => state)
@@ -73,7 +80,7 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
     if (namespaces.length === 1) {
       setFieldValue(`${scope}.namespace`, namespaces)
 
-      if (scope === 'scope') {
+      if (scope === 'spec.selector') {
         setFieldValue('namespace', namespaces[0])
       }
     }
@@ -97,8 +104,8 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
       dispatch(
         getPods({
           namespaces: currentNamespaces,
-          label_selectors: arrToObjBySep(currentLabels, kvSeparator),
-          annotation_selectors: arrToObjBySep(currentAnnotations, kvSeparator),
+          labelSelectors: arrToObjBySep(currentLabels, kvSeparator) as any,
+          annotationSelectors: arrToObjBySep(currentAnnotations, kvSeparator) as any,
         })
       )
     }
@@ -122,8 +129,7 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
       />
 
       <AutocompleteMultipleField
-        id={`${scope}.label_selectors`}
-        name={`${scope}.label_selectors`}
+        name={`${scope}.labelSelectors`}
         label={T('k8s.labelSelectors')}
         helperText={T('common.multiOptions')}
         options={labelKVs}
@@ -132,8 +138,7 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
 
       <AdvancedOptions>
         <AutocompleteMultipleField
-          id={`${scope}.annotation_selectors`}
-          name={`${scope}.annotation_selectors`}
+          name={`${scope}.annotationSelectors`}
           label={T('k8s.annotationsSelectors')}
           helperText={T('common.multiOptions')}
           options={annotationKVs}
@@ -141,8 +146,7 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
         />
 
         <SelectField
-          id={`${scope}.mode`}
-          name={`${scope}.mode`}
+          name={`${modeScope}.mode`}
           label={T('newE.scope.mode')}
           helperText={T('newE.scope.modeHelper')}
           disabled={disabled}
@@ -155,10 +159,9 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
           ))}
         </SelectField>
 
-        {getIn(values, scope).mode !== 'all' && getIn(values, scope).mode !== 'one' && (
+        {!['all', 'one'].includes(getIn(values, modeScope).mode) && (
           <TextField
-            id={`${scope}.value`}
-            name={`${scope}.value`}
+            name={`${modeScope}.value`}
             label={T('newE.scope.modeValue')}
             helperText={T('newE.scope.modeValueHelper')}
             InputProps={{
@@ -171,8 +174,7 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
         )}
 
         <SelectField
-          id={`${scope}.phase_selectors`}
-          name={`${scope}.phase_selectors`}
+          name={`${scope}.phaseSelectors`}
           label={T('k8s.phaseSelectors')}
           helperText={T('common.multiOptions')}
           multiple

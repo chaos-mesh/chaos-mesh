@@ -128,14 +128,14 @@ const (
 func (s *Service) createSchedule(c *gin.Context) {
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		_ = c.Error(utils.ErrBadRequest.WrapWithNoMessage(err))
 		return
 	}
 
 	exp := &core.ScheduleInfo{}
 	if err := c.ShouldBindJSON(exp); err != nil {
 		c.Status(http.StatusBadRequest)
-		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		_ = c.Error(utils.ErrBadRequest.WrapWithNoMessage(err))
 		return
 	}
 
@@ -172,7 +172,7 @@ func (s *Service) createSchedule(c *gin.Context) {
 	f, ok := parseFuncs[exp.Target.Kind]
 	if !ok {
 		c.Status(http.StatusBadRequest)
-		_ = c.Error(utils.ErrInvalidRequest.New(exp.Target.Kind + " is not supported"))
+		_ = c.Error(utils.ErrBadRequest.New(exp.Target.Kind + " is not supported"))
 		return
 	}
 	embedChaos := f(exp)
@@ -508,7 +508,7 @@ func parseGcpChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 func (s *Service) listSchedules(c *gin.Context) {
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		_ = c.Error(utils.ErrBadRequest.WrapWithNoMessage(err))
 		return
 	}
 
@@ -524,7 +524,7 @@ func (s *Service) listSchedules(c *gin.Context) {
 	sches := make([]*Schedule, 0)
 	if err := kubeCli.List(context.Background(), &ScheduleList, &client.ListOptions{Namespace: ns}); err != nil {
 		c.Status(http.StatusInternalServerError)
-		utils.SetErrorForGinCtx(c, err)
+		utils.SetApimachineryError(c, err)
 		return
 	}
 	for _, schedule := range ScheduleList.Items {
@@ -539,7 +539,7 @@ func (s *Service) listSchedules(c *gin.Context) {
 			},
 			UID:     string(schedule.UID),
 			Created: schedule.CreationTimestamp.Format(time.RFC3339),
-			Status:  string(utils.GetScheduleState(schedule)),
+			Status:  string(utils.GetScheduleStatus(schedule)),
 		})
 	}
 
@@ -567,7 +567,7 @@ func (s *Service) getScheduleDetail(c *gin.Context) {
 
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		_ = c.Error(utils.ErrBadRequest.WrapWithNoMessage(err))
 		return
 	}
 
@@ -575,7 +575,7 @@ func (s *Service) getScheduleDetail(c *gin.Context) {
 	if sch, err = s.schedule.FindByUID(context.Background(), uid); err != nil {
 		if gorm.IsRecordNotFoundError(err) {
 			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInvalidRequest.New("the schedule is not found"))
+			_ = c.Error(utils.ErrBadRequest.New("the schedule is not found"))
 		} else {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
@@ -588,7 +588,7 @@ func (s *Service) getScheduleDetail(c *gin.Context) {
 
 	if !s.conf.ClusterScoped && ns != s.conf.TargetNamespace {
 		c.Status(http.StatusBadRequest)
-		_ = c.Error(utils.ErrInvalidRequest.New("the namespace is not supported in cluster scoped mode"))
+		_ = c.Error(utils.ErrBadRequest.New("the namespace is not supported in cluster scoped mode"))
 		return
 	}
 
@@ -609,10 +609,10 @@ func (s *Service) getScheduleDetail(c *gin.Context) {
 	}
 
 	UIDList := make([]string, 0)
-	kind, ok := v1alpha1.AllScheduleItemKinds()[string(schedule.Spec.Type)]
+	kind, ok := v1alpha1.AllSchedules()[string(schedule.Spec.Type)]
 	if !ok {
 		c.Status(http.StatusInternalServerError)
-		_ = c.Error(utils.ErrInvalidRequest.New("the kind is not supported"))
+		_ = c.Error(utils.ErrBadRequest.New("the kind is not supported"))
 		return
 	}
 	list := kind.ChaosList.DeepCopyObject()
@@ -654,7 +654,7 @@ func (s *Service) getScheduleDetail(c *gin.Context) {
 			},
 			UID:     string(schedule.UID),
 			Created: schedule.CreationTimestamp.Format(time.RFC3339),
-			Status:  string(utils.GetScheduleState(*schedule)),
+			Status:  string(utils.GetScheduleStatus(*schedule)),
 		},
 		YAML: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
@@ -693,7 +693,7 @@ func (s *Service) deleteSchedule(c *gin.Context) {
 
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		_ = c.Error(utils.ErrBadRequest.WrapWithNoMessage(err))
 		return
 	}
 
@@ -701,7 +701,7 @@ func (s *Service) deleteSchedule(c *gin.Context) {
 	if exp, err = s.schedule.FindByUID(context.Background(), uid); err != nil {
 		if gorm.IsRecordNotFoundError(err) {
 			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInvalidRequest.New("the experiment is not found"))
+			_ = c.Error(utils.ErrBadRequest.New("the experiment is not found"))
 		} else {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
@@ -753,14 +753,14 @@ func (s *Service) deleteSchedule(c *gin.Context) {
 func (s *Service) updateSchedule(c *gin.Context) {
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		_ = c.Error(utils.ErrBadRequest.WrapWithNoMessage(err))
 		return
 	}
 
 	exp := &core.KubeObjectDesc{}
 	if err := c.ShouldBindJSON(exp); err != nil {
 		c.Status(http.StatusBadRequest)
-		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		_ = c.Error(utils.ErrBadRequest.WrapWithNoMessage(err))
 		return
 	}
 
@@ -824,7 +824,7 @@ func (s *Service) batchDeleteSchedule(c *gin.Context) {
 
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		_ = c.Error(utils.ErrBadRequest.WrapWithNoMessage(err))
 		return
 	}
 
@@ -895,7 +895,7 @@ func (s *Service) batchDeleteSchedule(c *gin.Context) {
 func (s *Service) pauseSchedule(c *gin.Context) {
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		_ = c.Error(utils.ErrBadRequest.WrapWithNoMessage(err))
 		return
 	}
 
@@ -905,7 +905,7 @@ func (s *Service) pauseSchedule(c *gin.Context) {
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) || apierrors.IsNotFound(err) {
 			c.Status(http.StatusNotFound)
-			_ = c.Error(utils.ErrInvalidRequest.New("the schedule is not found"))
+			_ = c.Error(utils.ErrBadRequest.New("the schedule is not found"))
 		}
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
@@ -928,7 +928,7 @@ func (s *Service) pauseSchedule(c *gin.Context) {
 func (s *Service) startSchedule(c *gin.Context) {
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		_ = c.Error(utils.ErrBadRequest.WrapWithNoMessage(err))
 		return
 	}
 
@@ -938,7 +938,7 @@ func (s *Service) startSchedule(c *gin.Context) {
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) || apierrors.IsNotFound(err) {
 			c.Status(http.StatusNotFound)
-			_ = c.Error(utils.ErrInvalidRequest.New("the schedule is not found"))
+			_ = c.Error(utils.ErrBadRequest.New("the schedule is not found"))
 		}
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))

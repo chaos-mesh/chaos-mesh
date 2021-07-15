@@ -37,19 +37,13 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
 )
 
-var (
-	log = ctrl.Log.WithName("dashboard")
-)
-
-var (
-	printVersion bool
-)
+var log = ctrl.Log.WithName("chaos-dashboard")
 
 // @title Chaos Mesh Dashboard API
 // @version 2.0
-// @description Swagger docs for Chaos Mesh Dashboard. If you encounter any problems with API, please click on the issues link below to report bugs or questions.
+// @description Swagger for Chaos Mesh Dashboard. If you encounter any problems with API, please click on the issues link below to report.
 
-// @contact.name Issues
+// @contact.name GitHub Issues
 // @contact.url https://github.com/chaos-mesh/chaos-mesh/issues
 
 // @license.name Apache 2.0
@@ -57,6 +51,8 @@ var (
 
 // @BasePath /api
 func main() {
+	var printVersion bool
+
 	flag.BoolVar(&printVersion, "version", false, "print version information and exit")
 	flag.Parse()
 

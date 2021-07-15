@@ -18,16 +18,13 @@ const New = () => {
   const dispatch = useStoreDispatch()
 
   const onSubmit = ({ target, basic }: any) => {
-    const parsedValues = parseSubmit({
+    const parsedValues = parseSubmit('PodChaos', {
       ...basic,
       target,
     })
-    const duration = parsedValues.scheduler.duration
-    delete (parsedValues as any).scheduler
 
     const data = {
       ...parsedValues,
-      duration,
       ...scheduleSpecific,
     }
 

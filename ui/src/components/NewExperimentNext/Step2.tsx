@@ -24,10 +24,7 @@ import UndoIcon from '@material-ui/icons/Undo'
 import { string as yupString } from 'yup'
 
 function isInstant(target: any) {
-  if (
-    target.kind === 'PodChaos' &&
-    (target.pod_chaos.action === 'pod-kill' || target.pod_chaos.action === 'container-kill')
-  ) {
+  if (target.kind === 'PodChaos' && ['pod-kill', 'container-kill'].includes(target.spec.action)) {
     return true
   }
 
@@ -46,11 +43,7 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false })
 
   const originalInit = useMemo(
     () =>
-      inWorkflow
-        ? { ...basicData, scheduler: undefined, deadline: '' }
-        : inSchedule
-        ? { ...basicData, ...scheduleSpecificData }
-        : basicData,
+      inWorkflow ? { ...basicData, deadline: '' } : inSchedule ? { ...basicData, ...scheduleSpecificData } : basicData,
     [inWorkflow, inSchedule]
   )
   const [init, setInit] = useState(originalInit)
@@ -138,14 +131,14 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false })
                     <Typography>{T('newE.steps.basic')}</Typography>
                     <TextField
                       fast
-                      name="name"
+                      name="metadata.name"
                       label={T('common.name')}
                       helperText={
-                        errors.name && touched.name
-                          ? errors.name
+                        errors.metadata?.name && touched.metadata?.name
+                          ? errors.metadata.name
                           : T(`${inSchedule ? 'newS' : 'newE'}.basic.nameHelper`)
                       }
-                      error={errors.name && touched.name ? true : false}
+                      error={errors.metadata?.name && touched.metadata?.name ? true : false}
                     />
                     {inWorkflow && (
                       <TextField
@@ -164,7 +157,7 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false })
                     <AdvancedOptions>
                       {namespaces.length && (
                         <SelectField
-                          name="namespace"
+                          name="metadata.namespace"
                           label={T('k8s.namespace')}
                           helperText={T('newE.basic.namespaceHelper')}
                         >
@@ -175,8 +168,8 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false })
                           ))}
                         </SelectField>
                       )}
-                      <LabelField name="labels" label={T('k8s.labels')} isKV />
-                      <LabelField name="annotations" label={T('k8s.annotations')} isKV />
+                      <LabelField name="metadata.labels" label={T('k8s.labels')} isKV />
+                      <LabelField name="metadata.annotations" label={T('k8s.annotations')} isKV />
                     </AdvancedOptions>
                     {!inWorkflow && !isInstant(target) && (
                       <>

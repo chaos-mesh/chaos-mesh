@@ -89,18 +89,14 @@ const Predefined = () => {
   const onModalClose = () => seteditorOpen(false)
 
   const handleApplyExperiment = () => {
-    const { basic, target } = yamlToExperiment(yaml.load(yamlEditor!.getValue()))
-    const parsedValues = parseSubmit({
-      ...basic,
-      target,
-    })
+    const exp: any = yaml.load(yamlEditor!.getValue())
 
     if (process.env.NODE_ENV === 'development') {
-      console.debug('Debug parsedValues:', parsedValues)
+      console.debug('Debug parsedValues:', exp)
     }
 
     api.experiments
-      .newExperiment(parsedValues)
+      .newExperiment(exp)
       .then(() => {
         seteditorOpen(false)
         dispatch(

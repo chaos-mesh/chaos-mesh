@@ -10,7 +10,6 @@ import { ObjectSchema } from 'yup'
 import Scope from './Scope'
 import Space from 'components-mui/Space'
 import T from 'components/T'
-import _snakecase from 'lodash.snakecase'
 import basicData from '../data/basic'
 import { clearNetworkTargetPods } from 'slices/experiments'
 
@@ -40,24 +39,24 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ kind, data, validatio
     delete initialValues.action
     const direction = initialValues.direction
     delete initialValues.direction
-    const externalTargets = initialValues.external_targets
-    delete initialValues.external_targets
+    const externalTargets = initialValues.externalTargets
+    delete initialValues.externalTargets
 
     initialValues = {
       action,
       [action]: initialValues,
       direction,
-      external_targets: externalTargets,
+      externalTargets,
     }
   }
 
   const [init, setInit] = useState(initialValues)
 
   useEffect(() => {
-    if (target['kind']) {
+    if (target.kind) {
       setInit({
         ...initialValues,
-        ...target[_snakecase(kind)],
+        ...target.spec,
       })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -70,7 +69,7 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ kind, data, validatio
     const rendered = Object.entries(data)
       .filter(([_, v]) => v && v instanceof Object && v.field)
       .map(([k, v]) => {
-        if (kind === 'NetworkChaos' && k !== 'direction' && k !== 'external_targets') {
+        if (kind === 'NetworkChaos' && k !== 'direction' && k !== 'externalTargets') {
           k = `${data.action}.${k}`
         }
 
@@ -148,14 +147,14 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ kind, data, validatio
     <Formik enableReinitialize initialValues={init} validationSchema={validationSchema} onSubmit={onSubmit}>
       {({ values, setFieldValue, errors, touched }) => {
         const beforeTargetOpen = () => {
-          if (!getIn(values, 'target_scope')) {
-            setFieldValue('target_scope', basicData.scope)
+          if (!getIn(values, 'target')) {
+            setFieldValue('target', basicData.spec.selector)
           }
         }
 
         const afterTargetClose = () => {
-          if (getIn(values, 'target_scope')) {
-            setFieldValue('target_scope', undefined)
+          if (getIn(values, 'target')) {
+            setFieldValue('target', undefined)
             dispatch(clearNetworkTargetPods())
           }
         }
@@ -169,10 +168,11 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ kind, data, validatio
                 beforeOpen={beforeTargetOpen}
                 afterClose={afterTargetClose}
               >
-                {values.target_scope && (
+                {values.target && (
                   <Scope
                     namespaces={namespaces}
-                    scope="target_scope"
+                    scope="target.selector"
+                    modeScope="target"
                     podsPreviewTitle={T('newE.target.network.target.podsPreview')}
                     podsPreviewDesc={T('newE.target.network.target.podsPreviewHelper')}
                   />

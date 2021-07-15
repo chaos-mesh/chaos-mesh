@@ -17,6 +17,14 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+type ObjectBase struct {
+	Namespace string `json:"namespace"`
+	Name      string `json:"name"`
+	Kind      string `json:"kind"`
+	UID       string `json:"uid"`
+	Created   string `json:"created_at"`
+}
+
 // KubeObjectDesc defines a simple kube object description which uses in apiserver.
 type KubeObjectDesc struct {
 	metav1.TypeMeta `json:",inline"`
@@ -24,10 +32,10 @@ type KubeObjectDesc struct {
 	Spec            interface{}    `json:"spec"`
 }
 
-// KubeObjectMetadata extracts the required fields from metav1.ObjectMeta.
+// KubeObjectMetadata extracts the required fields from `metav1.ObjectMeta`.
 type KubeObjectMeta struct {
-	Name        string            `json:"name"`
 	Namespace   string            `json:"namespace"`
+	Name        string            `json:"name"`
 	Labels      map[string]string `json:"labels,omitempty"`
 	Annotations map[string]string `json:"annotations,omitempty"`
 }
