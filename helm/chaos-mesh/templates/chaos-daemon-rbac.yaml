@@ -73,7 +73,7 @@ spec:
     - IPC_LOCK
   {{- end }}
   allowedHostPaths:
-    - pathPrefix: {{ .Values.chaosDaemon.socketPath | default "/var/run/docker.sock" }}
+    - pathPrefix: {{ .Values.chaosDaemon.socketPath }}
       readOnly: false
     - pathPrefix: /sys
       readOnly: false
