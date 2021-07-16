@@ -55,7 +55,7 @@ type WorkflowMeta struct {
 	Namespace  string         `json:"namespace"`
 	Name       string         `json:"name"`
 	Entry      string         `json:"entry"` // the entry node name
-	CreatedAt  time.Time      `json:"created_at"`
+	CreatedAt  time.Time      `gorm:"-" json:"created_at"`
 	EndTime    string         `json:"end_time"`
 	Status     WorkflowStatus `json:"status,omitempty"`
 	Archived   bool           `json:"-"`
