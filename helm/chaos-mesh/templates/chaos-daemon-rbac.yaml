@@ -48,6 +48,7 @@ rules:
   verbs:
   - use
 ---
+{{- $chaos_daemon_needs_privileged := or (eq .Values.chaosDaemon.privileged true) (eq .Values.bpfki.create true) -}}
 # Restricted DEFAULT policy
 # ( Default policy for all new services )
 apiVersion: policy/v1beta1
@@ -58,7 +59,7 @@ metadata:
     {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: chaos-daemon
 spec:
-  {{- if .Values.chaosDaemon.privileged }}
+  {{- if $chaos_daemon_needs_privileged }}
   allowedCapabilities:
     - SYS_PTRACE
   {{- else }}
@@ -96,7 +97,7 @@ spec:
   {{- end }}
   hostIPC: true
   hostPID: true
-  privileged: {{ or (eq .Values.chaosDaemon.privileged true) (eq .Values.bpfki.create true) }}
+  privileged: {{ $chaos_daemon_needs_privileged }}
   seLinux:
     rule: RunAsAny
   supplementalGroups:
