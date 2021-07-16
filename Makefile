@@ -127,6 +127,10 @@ watchmaker:
 chaosctl:
 	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaosctl ./cmd/chaosctl/*.go
 
+# Build schedule-migration
+schedule-migration:
+	$(GO) build -ldflags '$(LDFLAGS)' -o bin/schedule-migration ./tools/schedule-migration/*.go
+
 # Run against the configured Kubernetes cluster in ~/.kube/config
 run: generate fmt vet manifests
 	$(GO) run ./cmd/controller-manager/main.go
@@ -406,4 +410,4 @@ install-local-coverage-tools:
 	$(all-tool-dependencies) install.sh $(GO_TARGET_PHONY) \
 	manager chaosfs chaosdaemon chaos-dashboard \
 	dashboard dashboard-server-frontend gosec-scan \
-	proto bin/chaos-builder go_build_cache_directory
+	proto bin/chaos-builder go_build_cache_directory schedule-migration

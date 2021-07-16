@@ -133,6 +133,7 @@ func (it *SerialNodeReconciler) Reconcile(request reconcile.Request) (reconcile.
 				Status: corev1.ConditionTrue,
 				Reason: "",
 			})
+			it.eventRecorder.Event(&nodeNeedUpdate, recorder.NodeAccomplished{})
 		} else {
 			SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
 				Type:   v1alpha1.ConditionAccomplished,
@@ -201,6 +202,13 @@ func (it *SerialNodeReconciler) syncChildNodes(ctx context.Context, node v1alpha
 					// TODO: nodes to delete should be all other unrecognized children nodes, include not contained in finishedChildNodes
 					// delete that related nodes with best-effort pattern
 					nodesToDelete := finishedChildNodes[index:]
+
+					var nodesToCleanup []string
+					for _, item := range nodesToDelete {
+						nodesToCleanup = append(nodesToCleanup, item.Name)
+					}
+					it.eventRecorder.Event(&node, recorder.RerunBySpecChanged{CleanedChildrenNode: nodesToCleanup})
+
 					for _, refToDelete := range nodesToDelete {
 						nodeToDelete := v1alpha1.WorkflowNode{}
 						err := it.kubeClient.Get(ctx, types.NamespacedName{

@@ -55,7 +55,6 @@ type WorkflowMeta struct {
 	Namespace string         `json:"namespace"`
 	Name      string         `json:"name"`
 	Entry     string         `json:"entry"` // the entry node name
-	CreatedAt string         `json:"created_at"`
 	EndTime   string         `json:"end_time"`
 	Status    WorkflowStatus `json:"status,omitempty"`
 	Archived  bool           `json:"-"`
@@ -82,19 +81,22 @@ const (
 
 // Node defines a single step of a workflow.
 type Node struct {
-	Name     string        `json:"name"`
-	Type     NodeType      `json:"type"`
-	State    NodeState     `json:"state"`
-	Serial   *NodeSerial   `json:"serial,omitempty"`
-	Parallel *NodeParallel `json:"parallel,omitempty"`
-	Template string        `json:"template"`
-	UID      string        `json:"uid"`
+	Name                string              `json:"name"`
+	Type                NodeType            `json:"type"`
+	State               NodeState           `json:"state"`
+	Serial              *NodeSerial         `json:"serial,omitempty"`
+	Parallel            *NodeParallel       `json:"parallel,omitempty"`
+	ConditionalBranches []ConditionalBranch `json:"conditional_branches,omitempty"`
+	Template            string              `json:"template"`
+	UID                 string              `json:"uid"`
 }
 
 type NodeNameWithTemplate struct {
 	Name     string `json:"name,omitempty"`
 	Template string `json:"template,omitempty"`
 }
+
+// FIXME: unnecessary another wrap of []NodeNameWithTemplate, like struct NodeSerial and NodeParallel
 
 // NodeSerial defines SerialNode's specific fields.
 type NodeSerial struct {
@@ -104,6 +106,11 @@ type NodeSerial struct {
 // NodeParallel defines ParallelNode's specific fields.
 type NodeParallel struct {
 	Children []NodeNameWithTemplate `json:"children"`
+}
+
+type ConditionalBranch struct {
+	NodeNameWithTemplate `json:",inline,omitempty"`
+	Expression           string `json:"expression,omitempty"`
 }
 
 // NodeType represents the type of a workflow node.
@@ -253,7 +260,7 @@ func convertWorkflow(kubeWorkflow v1alpha1.Workflow) WorkflowMeta {
 	}
 
 	if kubeWorkflow.Status.StartTime != nil {
-		result.CreatedAt = kubeWorkflow.Status.StartTime.Format(time.RFC3339)
+		result.CreatedAt = kubeWorkflow.Status.StartTime.Time
 	}
 
 	if kubeWorkflow.Status.EndTime != nil {
@@ -342,6 +349,15 @@ func convertWorkflowNode(kubeWorkflowNode v1alpha1.WorkflowNode) (Node, error) {
 		result.Parallel = &NodeParallel{
 			Children: composeParallelTaskAndNodes(kubeWorkflowNode.Spec.Children, nodes),
 		}
+	} else if kubeWorkflowNode.Spec.Type == v1alpha1.TypeTask {
+		var nodes []string
+		for _, child := range kubeWorkflowNode.Status.FinishedChildren {
+			nodes = append(nodes, child.Name)
+		}
+		for _, child := range kubeWorkflowNode.Status.ActiveChildren {
+			nodes = append(nodes, child.Name)
+		}
+		result.ConditionalBranches = composeTaskConditionalBranches(kubeWorkflowNode.Spec.ConditionalBranches, nodes)
 	}
 
 	if wfcontrollers.WorkflowNodeFinished(kubeWorkflowNode.Status) {
@@ -383,6 +399,28 @@ func composeParallelTaskAndNodes(children []string, nodes []string) []NodeNameWi
 			}
 		}
 	}
+	return result
+}
+
+func composeTaskConditionalBranches(conditionalBranches []v1alpha1.ConditionalBranch, nodes []string) []ConditionalBranch {
+	var result []ConditionalBranch
+	for _, item := range conditionalBranches {
+		nodeName := ""
+		for _, node := range nodes {
+			if strings.HasPrefix(node, item.Target) {
+				nodeName = node
+			}
+		}
+		result = append(result,
+			ConditionalBranch{
+				NodeNameWithTemplate: NodeNameWithTemplate{
+					Name:     nodeName,
+					Template: item.Target,
+				},
+				Expression: item.Expression,
+			})
+	}
+
 	return result
 }
 
