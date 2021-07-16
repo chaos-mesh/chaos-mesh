@@ -198,10 +198,7 @@ export default function Single() {
               </Alert>
             )}
 
-            <Paper>
-              <PaperTop title={T('common.configuration')} boxProps={{ mb: 3 }} />
-              {single && <ObjectConfiguration config={single} />}
-            </Paper>
+            <Paper>{single && <ObjectConfiguration config={single} />}</Paper>
 
             <Grid container>
               <Grid item xs={12} lg={6} sx={{ pr: 3 }}>
