@@ -16,6 +16,7 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"k8s.io/client-go/util/retry"
 	"time"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -243,6 +244,184 @@ var _ = Describe("Workflow", func() {
 		Context("nested serial or parallel", func() {
 			It("should shutdown children recursively", func() {
 				// TODO: unfinished test case
+			})
+		})
+
+		Context("if this node is already in DeadlineExceed because of ParentNodeDeadlineExceed", func() {
+			It("should omit the next coming deadline", func() {
+				ctx := context.TODO()
+				now := time.Now()
+				duration := 5 * time.Second
+				toleratedJitter := 3 * time.Second
+
+				startTime := metav1.NewTime(now)
+				deadline := metav1.NewTime(now.Add(duration))
+
+				By("create one empty podchaos workflow node, with deadline: 3s")
+				node := v1alpha1.WorkflowNode{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace:    ns,
+						GenerateName: "pod-chaos-",
+					},
+					Spec: v1alpha1.WorkflowNodeSpec{
+						WorkflowName: "",
+						Type:         v1alpha1.TypePodChaos,
+						StartTime:    &startTime,
+						Deadline:     &deadline,
+						EmbedChaos: &v1alpha1.EmbedChaos{
+							PodChaos: &v1alpha1.PodChaosSpec{
+								ContainerSelector: v1alpha1.ContainerSelector{
+									PodSelector: v1alpha1.PodSelector{
+										Selector: v1alpha1.PodSelectorSpec{
+											Namespaces: []string{ns},
+											LabelSelectors: map[string]string{
+												"app": "not-actually-exist",
+											},
+										},
+										Mode: v1alpha1.AllPodMode,
+									},
+									ContainerNames: nil,
+								},
+								Action: v1alpha1.PodKillAction,
+							},
+						},
+					},
+					Status: v1alpha1.WorkflowNodeStatus{},
+				}
+				Expect(kubeClient.Create(ctx, &node)).To(Succeed())
+				By("manually set condition ConditionDeadlineExceed to true, because of v1alpha1.ParentNodeDeadlineExceed")
+				updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+					deadlineExceedNode := v1alpha1.WorkflowNode{}
+
+					err := kubeClient.Get(ctx, types.NamespacedName{Namespace: ns, Name: node.Name}, &deadlineExceedNode)
+					if err != nil {
+						return err
+					}
+					deadlineExceedNode.Status.Conditions = []v1alpha1.WorkflowNodeCondition{
+						{
+							Type:   v1alpha1.ConditionDeadlineExceed,
+							Status: corev1.ConditionTrue,
+							Reason: v1alpha1.ParentNodeDeadlineExceed,
+						},
+					}
+					err = kubeClient.Status().Update(ctx, &deadlineExceedNode)
+					if err != nil {
+						return err
+					}
+					return nil
+				})
+				Expect(updateError).To(BeNil())
+				By("after 3 seconds, the condition ConditionDeadlineExceed should not be modified")
+				Consistently(func() bool {
+					updatedNode := v1alpha1.WorkflowNode{}
+					Expect(kubeClient.Get(ctx, types.NamespacedName{Namespace: ns, Name: node.Name}, &updatedNode)).To(Succeed())
+
+					condition := GetCondition(updatedNode.Status, v1alpha1.ConditionDeadlineExceed)
+					if condition == nil {
+						return false
+					}
+					if condition.Status != corev1.ConditionTrue {
+						return false
+					}
+					if condition.Reason != v1alpha1.ParentNodeDeadlineExceed {
+						return false
+					}
+					return true
+				},
+					duration+toleratedJitter, time.Second,
+				).Should(BeTrue())
+			})
+
+			It("should NOT omit the next coming deadline otherwise", func() {
+				ctx := context.TODO()
+				now := time.Now()
+				duration := 5 * time.Second
+				toleratedJitter := 3 * time.Second
+
+				startTime := metav1.NewTime(now)
+				deadline := metav1.NewTime(now.Add(duration))
+
+				By("create one empty podchaos workflow node, with deadline: 3s")
+				node := v1alpha1.WorkflowNode{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace:    ns,
+						GenerateName: "pod-chaos-",
+					},
+					Spec: v1alpha1.WorkflowNodeSpec{
+						WorkflowName: "",
+						Type:         v1alpha1.TypePodChaos,
+						StartTime:    &startTime,
+						Deadline:     &deadline,
+						EmbedChaos: &v1alpha1.EmbedChaos{
+							PodChaos: &v1alpha1.PodChaosSpec{
+								ContainerSelector: v1alpha1.ContainerSelector{
+									PodSelector: v1alpha1.PodSelector{
+										Selector: v1alpha1.PodSelectorSpec{
+											Namespaces: []string{ns},
+											LabelSelectors: map[string]string{
+												"app": "not-actually-exist",
+											},
+										},
+										Mode: v1alpha1.AllPodMode,
+									},
+									ContainerNames: nil,
+								},
+								Action: v1alpha1.PodKillAction,
+							},
+						},
+					},
+					Status: v1alpha1.WorkflowNodeStatus{},
+				}
+				Expect(kubeClient.Create(ctx, &node)).To(Succeed())
+				By("manually set condition ConditionDeadlineExceed to true, but NOT caused by v1alpha1.ParentNodeDeadlineExceed")
+				updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+					deadlineExceedNode := v1alpha1.WorkflowNode{}
+
+					err := kubeClient.Get(ctx, types.NamespacedName{Namespace: ns, Name: node.Name}, &deadlineExceedNode)
+					if err != nil {
+						return err
+					}
+					deadlineExceedNode.Status.Conditions = []v1alpha1.WorkflowNodeCondition{
+						{
+							Type:   v1alpha1.ConditionDeadlineExceed,
+							Status: corev1.ConditionTrue,
+							Reason: v1alpha1.NodeDeadlineExceed,
+						},
+					}
+					err = kubeClient.Status().Update(ctx, &deadlineExceedNode)
+					if err != nil {
+						return err
+					}
+					return nil
+				})
+				Expect(updateError).To(BeNil())
+				By("condition ConditionDeadlineExceed should be corrected soon")
+				Eventually(func() bool {
+					updatedNode := v1alpha1.WorkflowNode{}
+					Expect(kubeClient.Get(ctx, types.NamespacedName{Namespace: ns, Name: node.Name}, &updatedNode)).To(Succeed())
+					return ConditionEqualsTo(updatedNode.Status, v1alpha1.ConditionDeadlineExceed, corev1.ConditionFalse)
+				},
+					toleratedJitter,
+					time.Second)
+				By("after 5 seconds, the condition ConditionDeadlineExceed should not be modified, caused by NodeDeadlineExceed itself")
+				Eventually(func() bool {
+					updatedNode := v1alpha1.WorkflowNode{}
+					Expect(kubeClient.Get(ctx, types.NamespacedName{Namespace: ns, Name: node.Name}, &updatedNode)).To(Succeed())
+
+					condition := GetCondition(updatedNode.Status, v1alpha1.ConditionDeadlineExceed)
+					if condition == nil {
+						return false
+					}
+					if condition.Status != corev1.ConditionTrue {
+						return false
+					}
+					if condition.Reason != v1alpha1.NodeDeadlineExceed {
+						return false
+					}
+					return true
+				},
+					duration+toleratedJitter, time.Second,
+				).Should(BeTrue())
 			})
 		})
 	})
