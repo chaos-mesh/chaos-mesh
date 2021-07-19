@@ -22,9 +22,9 @@ import (
 
 
 const (
-	ScheduleTypeAwsChaos ScheduleTemplateType = "AwsChaos"
+	ScheduleTypeAWSChaos ScheduleTemplateType = "AWSChaos"
 	ScheduleTypeDNSChaos ScheduleTemplateType = "DNSChaos"
-	ScheduleTypeGcpChaos ScheduleTemplateType = "GcpChaos"
+	ScheduleTypeGCPChaos ScheduleTemplateType = "GCPChaos"
 	ScheduleTypeHTTPChaos ScheduleTemplateType = "HTTPChaos"
 	ScheduleTypeIOChaos ScheduleTemplateType = "IOChaos"
 	ScheduleTypeJVMChaos ScheduleTemplateType = "JVMChaos"
@@ -38,9 +38,9 @@ const (
 )
 
 var allScheduleTemplateType = []ScheduleTemplateType{
-	ScheduleTypeAwsChaos,
+	ScheduleTypeAWSChaos,
 	ScheduleTypeDNSChaos,
-	ScheduleTypeGcpChaos,
+	ScheduleTypeGCPChaos,
 	ScheduleTypeHTTPChaos,
 	ScheduleTypeIOChaos,
 	ScheduleTypeJVMChaos,
@@ -56,17 +56,17 @@ var allScheduleTemplateType = []ScheduleTemplateType{
 func (it *ScheduleItem) SpawnNewObject(templateType ScheduleTemplateType) (runtime.Object, metav1.Object, error) {
 
 	switch templateType {
-	case ScheduleTypeAwsChaos:
-		result := AwsChaos{}
-		result.Spec = *it.AwsChaos
+	case ScheduleTypeAWSChaos:
+		result := AWSChaos{}
+		result.Spec = *it.AWSChaos
 		return &result, result.GetObjectMeta(), nil
 	case ScheduleTypeDNSChaos:
 		result := DNSChaos{}
 		result.Spec = *it.DNSChaos
 		return &result, result.GetObjectMeta(), nil
-	case ScheduleTypeGcpChaos:
-		result := GcpChaos{}
-		result.Spec = *it.GcpChaos
+	case ScheduleTypeGCPChaos:
+		result := GCPChaos{}
+		result.Spec = *it.GCPChaos
 		return &result, result.GetObjectMeta(), nil
 	case ScheduleTypeHTTPChaos:
 		result := HTTPChaos{}

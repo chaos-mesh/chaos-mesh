@@ -36,7 +36,7 @@ func NewImpl(impl Impl) *common.ChaosImplPair {
 	delegate := action.New(&impl)
 	return &common.ChaosImplPair{
 		Name:   "gcpchaos",
-		Object: &v1alpha1.GcpChaos{},
+		Object: &v1alpha1.GCPChaos{},
 		Impl:   &delegate,
 	}
 }

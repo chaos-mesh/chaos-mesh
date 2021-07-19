@@ -10,8 +10,8 @@ metadata:
 spec:
   group: chaos-mesh.org
   names:
-    kind: GcpChaos
-    listKind: GcpChaosList
+    kind: GCPChaos
+    listKind: GCPChaosList
     plural: gcpchaos
     singular: gcpchaos
   scope: Namespaced
@@ -19,7 +19,7 @@ spec:
   - name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: GcpChaos is the Schema for the gcpchaos API
+        description: GCPChaos is the Schema for the gcpchaos API
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
@@ -30,7 +30,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: GcpChaosSpec is the content of the specification for a GcpChaos
+            description: GCPChaosSpec is the content of the specification for a GCPChaos
             properties:
               action:
                 description: 'Action defines the specific gcp chaos action. Supported action: node-stop / node-reset / disk-loss Default action: node-stop'
@@ -66,7 +66,7 @@ spec:
             - zone
             type: object
           status:
-            description: GcpChaosStatus represents the status of a GcpChaos
+            description: GCPChaosStatus represents the status of a GCPChaos
             properties:
               attachedDiskStrings:
                 description: The attached disk info strings. Needed in disk-loss.

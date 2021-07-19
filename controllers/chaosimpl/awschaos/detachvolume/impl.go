@@ -35,10 +35,10 @@ type Impl struct {
 }
 
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
-	awschaos := obj.(*v1alpha1.AwsChaos)
+	awschaos := obj.(*v1alpha1.AWSChaos)
 
 	opts := []func(*awscfg.LoadOptions) error{
-		awscfg.WithRegion(awschaos.Spec.AwsRegion),
+		awscfg.WithRegion(awschaos.Spec.AWSRegion),
 	}
 	if awschaos.Spec.SecretName != nil {
 		secret := &v1.Secret{}
@@ -63,7 +63,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	}
 	ec2client := ec2.NewFromConfig(cfg)
 
-	var selected v1alpha1.AwsSelector
+	var selected v1alpha1.AWSSelector
 	json.Unmarshal([]byte(records[index].Id), &selected)
 	_, err = ec2client.DetachVolume(context.TODO(), &ec2.DetachVolumeInput{
 		VolumeId:   selected.EbsVolume,
@@ -81,10 +81,10 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 }
 
 func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
-	awschaos := obj.(*v1alpha1.AwsChaos)
+	awschaos := obj.(*v1alpha1.AWSChaos)
 
 	opts := []func(*awscfg.LoadOptions) error{
-		awscfg.WithRegion(awschaos.Spec.AwsRegion),
+		awscfg.WithRegion(awschaos.Spec.AWSRegion),
 	}
 	if awschaos.Spec.SecretName != nil {
 		secret := &v1.Secret{}
@@ -109,7 +109,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	}
 	ec2client := ec2.NewFromConfig(cfg)
 
-	var selected v1alpha1.AwsSelector
+	var selected v1alpha1.AWSSelector
 	json.Unmarshal([]byte(records[index].Id), &selected)
 
 	_, err = ec2client.AttachVolume(context.TODO(), &ec2.AttachVolumeInput{
