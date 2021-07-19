@@ -1,5 +1,5 @@
 apiVersion: chaos-mesh.org/v1alpha1
-kind: AwsChaos
+kind: AWSChaos
 metadata:
   name: aws-ec2-stop
   namespace: chaos-testing
