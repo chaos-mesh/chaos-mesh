@@ -28,38 +28,38 @@ var gcpchaoslog = logf.Log.WithName("gcpchaos-resource")
 
 // +kubebuilder:webhook:path=/mutate-chaos-mesh-org-v1alpha1-gcpchaos,mutating=true,failurePolicy=fail,groups=chaos-mesh.org,resources=gcpchaos,verbs=create;update,versions=v1alpha1,name=mgcpchaos.kb.io
 
-var _ webhook.Defaulter = &GcpChaos{}
+var _ webhook.Defaulter = &GCPChaos{}
 
 // Default implements webhook.Defaulter so a webhook will be registered for the type
-func (in *GcpChaos) Default() {
+func (in *GCPChaos) Default() {
 	gcpchaoslog.Info("default", "name", in.Name)
 	in.Spec.Default()
 }
 
-func (in *GcpChaosSpec) Default() {
+func (in *GCPChaosSpec) Default() {
 }
 
 // +kubebuilder:webhook:verbs=create;update,path=/validate-chaos-mesh-org-v1alpha1-gcpchaos,mutating=false,failurePolicy=fail,groups=chaos-mesh.org,resources=gcpchaos,versions=v1alpha1,name=vgcpchaos.kb.io
 
-var _ webhook.Validator = &GcpChaos{}
+var _ webhook.Validator = &GCPChaos{}
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
-func (in *GcpChaos) ValidateCreate() error {
+func (in *GCPChaos) ValidateCreate() error {
 	gcpchaoslog.Info("validate create", "name", in.Name)
 	return in.Validate()
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
-func (in *GcpChaos) ValidateUpdate(old runtime.Object) error {
+func (in *GCPChaos) ValidateUpdate(old runtime.Object) error {
 	gcpchaoslog.Info("validate update", "name", in.Name)
-	if !reflect.DeepEqual(in.Spec, old.(*GcpChaos).Spec) {
+	if !reflect.DeepEqual(in.Spec, old.(*GCPChaos).Spec) {
 		return ErrCanNotUpdateChaos
 	}
 	return in.Validate()
 }
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type
-func (in *GcpChaos) ValidateDelete() error {
+func (in *GCPChaos) ValidateDelete() error {
 	gcpchaoslog.Info("validate delete", "name", in.Name)
 
 	// Nothing to do?
@@ -67,7 +67,7 @@ func (in *GcpChaos) ValidateDelete() error {
 }
 
 // Validate validates chaos object
-func (in *GcpChaos) Validate() error {
+func (in *GCPChaos) Validate() error {
 	allErrs := in.Spec.Validate()
 
 	if len(allErrs) > 0 {
@@ -76,7 +76,7 @@ func (in *GcpChaos) Validate() error {
 	return nil
 }
 
-func (in *GcpChaosSpec) Validate() field.ErrorList {
+func (in *GCPChaosSpec) Validate() field.ErrorList {
 	specField := field.NewPath("spec")
 	allErrs := in.validateDeviceName(specField.Child("deviceName"))
 	allErrs = append(allErrs, validateDuration(in, specField)...)
@@ -85,7 +85,7 @@ func (in *GcpChaosSpec) Validate() field.ErrorList {
 }
 
 // validateDeviceName validates the DeviceName
-func (in *GcpChaosSpec) validateAction(spec *field.Path) field.ErrorList {
+func (in *GCPChaosSpec) validateAction(spec *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
 	switch in.Action {
@@ -93,7 +93,7 @@ func (in *GcpChaosSpec) validateAction(spec *field.Path) field.ErrorList {
 	case NodeReset:
 	default:
 		err := fmt.Errorf("gcpchaos have unknown action type")
-		log.Error(err, "Wrong GcpChaos Action type")
+		log.Error(err, "Wrong GCPChaos Action type")
 
 		actionField := spec.Child("action")
 		allErrs = append(allErrs, field.Invalid(actionField, in.Action, err.Error()))
@@ -102,7 +102,7 @@ func (in *GcpChaosSpec) validateAction(spec *field.Path) field.ErrorList {
 }
 
 // validateDeviceName validates the DeviceName
-func (in *GcpChaosSpec) validateDeviceName(containerField *field.Path) field.ErrorList {
+func (in *GCPChaosSpec) validateDeviceName(containerField *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 	if in.Action == DiskLoss {
 		if in.DeviceNames == nil {
