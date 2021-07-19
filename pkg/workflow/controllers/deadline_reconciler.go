@@ -106,8 +106,11 @@ func (it *DeadlineReconciler) Reconcile(request reconcile.Request) (reconcile.Re
 				return err
 			}
 
-			if ConditionEqualsTo(nodeNeedUpdate.Status, v1alpha1.ConditionDeadlineExceed, corev1.ConditionTrue) {
+			if ConditionEqualsTo(nodeNeedUpdate.Status, v1alpha1.ConditionDeadlineExceed, corev1.ConditionFalse) {
 				// no need to update
+				return nil
+			} else if ConditionEqualsTo(nodeNeedUpdate.Status, v1alpha1.ConditionDeadlineExceed, corev1.ConditionTrue) &&
+				GetCondition(nodeNeedUpdate.Status, v1alpha1.ConditionDeadlineExceed).Reason == v1alpha1.ParentNodeDeadlineExceed {
 				return nil
 			}
 
