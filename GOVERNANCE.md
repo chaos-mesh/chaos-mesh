@@ -2,9 +2,9 @@
 
 Chaos Mesh is a meritocratic, consensus-based community project. Anyone with an interest in the project can join the community, contribute to the project design and participate in the decision making process. This document describes how that participation takes place and how to set about earning merit within the project community.
 
-# Roles and responsibilities
+## Roles and responsibilities
 
-## Users
+### Users
 
 Users are community members who have a need for the project. They are the most important members of the community, without them, the project would have no purpose. Anyone can be a user, there are no special requirements.
 
@@ -18,7 +18,7 @@ The project asks its users to participate in the project and community as much a
 
 Users who continue to engage with the project may either be recognized as Chaos Mesh Evangelists or find themselves becoming contributors, as described in the following section.
 
-## Contributor
+### Contributor
 
 Contributors are community members who contribute in concrete ways to the project. Anyone can contribute to the project and become a contributor, regardless of their skills. There is no expectation of commitment to the project, no specific skill requirements and no selection process. There are many ways to contribute to the project, which may be one or more of the following (but not limited to):
 
@@ -34,7 +34,7 @@ For details, see [Contributing to Chaos Mesh](https://github.com/chaos-mesh/chao
 
 As one gains experience and familiarity with the project and as their commitment to the community increases, they may find themselves being nominated for committership at some stage.
 
-## Committer
+### Committer
 
 Committers are active community members who have shown that they are committed to the continuous development of the project through ongoing engagement with the community. Committership allows contributors to more easily carry on with their project-related activities by giving them direct access to the project’s resources.
 
@@ -50,7 +50,7 @@ Committers are expected to review issues and PRs. Their LGTM counts towards the 
 
 A committer who shows an above-average level of contribution to the project, particularly with respect to its strategic direction and long-term health, may be nominated to become a maintainer. This role is described below.
 
-## Maintainer
+### Maintainer
 
 Maintainers are first and foremost committers that have shown they are committed to the long term success of a project. They are the planners and designers of the Chaos Mesh project. Maintainership is about building trust with the current maintainers of the project and being a person that they can depend on to make decisions in the best interest of the project in a consistent manner.
 
@@ -65,7 +65,7 @@ A new maintainer must be nominated by an existing maintainer. The nominating mai
 
 If a maintainer is no longer interested or cannot perform the maintainer duties listed above, they should volunteer to be moved to emeritus status. In extreme cases this can also occur by a vote of the maintainers per the voting process, as mentioned below.
 
-# Approving PRs
+### Approving PRs
 
 PRs may be merged only after receiving at least two approvals (LGTMs) from committers or maintainers. However, maintainers can sidestep this rule under justifiable circumstances. For example:
 
@@ -73,16 +73,16 @@ PRs may be merged only after receiving at least two approvals (LGTMs) from commi
 - Minor typos or fixes for broken tests.
 - The change was approved through other means than the standard process.
 
-# Decision Making Process
+### Decision Making Process
 
 Ideally, all project decisions are resolved by consensus via a PR or GitHub issue. Any of the day-to-day project maintenance can be done by a [lazy consensus model(https://communitymgt.fandom.com/wiki/Lazy_consensus).
 
-Community or project level decisions such as RFC submission, creating a new project, maintainer promotion, and major updates on GOVERNANCE must be brought to broader awareness of the community via community meetings, GitHub discussions,  and slack channels. A supermajority (2/3) approval from Maintainers is required for such approvals.
+Community or project level decisions such as RFC submission, creating a new project, maintainer promotion, and major updates on GOVERNANCE must be brought to broader awareness of the community via community meetings, GitHub discussions, and slack channels. A supermajority (2/3) approval from Maintainers is required for such approvals.
 
 In general, we prefer that technical issues and maintainer membership are amicably worked out between the persons involved. If a dispute cannot be decided independently, the maintainers can be called in to resolve the issue by voting. For voting, a specific statement of what is being voted on should be added to the relevant github issue or PR, and a link to that issue or PR added to the maintainers meeting agenda document. Maintainers should indicate their yes/no vote on that issue or PR, and after a suitable period of time, the votes will be tallied and the outcome noted.
 
 Decision making must comply with the [CNCF Code of Conduct](https://github.com/chaos-mesh/chaos-mesh/blob/master/CODE_OF_CONDUCT.md).
 
-## Proposal process
+### Proposal process
 
 We use a Request for Comments (RFC) process for any substantial changes to Chaos Mesh. This process involves an upfront design that will provide increased visibility to the community. If you're considering a PR that will bring in a new feature that may affect how Chaos Mesh is implemented, or may be a breaking change, then you should start with a RFC. The process is documented in the [RFC repository](https://github.com/chaos-mesh/rfcs)) and has [a template](https://github.com/chaos-mesh/rfcs/blob/main/template.md) for you to get started.

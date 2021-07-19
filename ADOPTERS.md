@@ -3,6 +3,7 @@
 This is a list of known adopters of Chaos Mesh. Some have already gone into production, and others are at various stages of testing.
 
 - [Apache APISIX](https://github.com/apache/apisix)
+- [ByteDance](https://bytedance.com/en/)
 - [Celo](https://celo.org/)
 - [Dailymotion](https://www.dailymotion.com/)
 - [DataStax Fallout](https://github.com/datastax/fallout)
@@ -14,6 +15,7 @@ This is a list of known adopters of Chaos Mesh. Some have already gone into prod
 - [Apache Pulsar](https://pulsar.apache.org/)
 - [Qihoo 360](https://360.cn/)
 - [Qiniu Cloud](https://qiniu.com/en)
+- [S.J. Distributors](https://www.sjfood.com/)
 - [Tencent](https://www.tencent.com/en-us)
 - [Vald](https://vald.vdaas.org/)
 - [WeBank](https://www.webank.com/)
