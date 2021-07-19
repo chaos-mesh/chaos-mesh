@@ -128,9 +128,9 @@ func conversionSchedule(origin *v1alpha1.ChaosOnlyScheduleSpec) *v1alpha1.Schedu
 		Type:                    origin.Type,
 		ScheduleItem: v1alpha1.ScheduleItem{
 			EmbedChaos: v1alpha1.EmbedChaos{
-				AwsChaos:     origin.EmbedChaos.AwsChaos,
+				AWSChaos:     origin.EmbedChaos.AWSChaos,
 				DNSChaos:     origin.EmbedChaos.DNSChaos,
-				GcpChaos:     origin.EmbedChaos.GcpChaos,
+				GCPChaos:     origin.EmbedChaos.GCPChaos,
 				HTTPChaos:    origin.EmbedChaos.HTTPChaos,
 				IOChaos:      origin.EmbedChaos.IOChaos,
 				JVMChaos:     origin.EmbedChaos.JVMChaos,
