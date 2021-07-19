@@ -14,8 +14,9 @@
 package v1alpha1
 
 import (
-	gw "github.com/chaos-mesh/chaos-mesh/api/v1alpha1/genericwebhook"
 	"k8s.io/apimachinery/pkg/util/validation/field"
+
+	gw "github.com/chaos-mesh/chaos-mesh/api/v1alpha1/genericwebhook"
 )
 
 type ScheduleItem struct {
