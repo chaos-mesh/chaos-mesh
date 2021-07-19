@@ -165,6 +165,13 @@ func (it *DeadlineReconciler) propagateDeadlineToChildren(ctx context.Context, p
 				if err != nil {
 					return err
 				}
+				if ConditionEqualsTo(nodeNeedUpdate.Status, v1alpha1.ConditionDeadlineExceed, corev1.ConditionTrue) {
+					it.logger.Info("omit propagate deadline to children, child already in deadline exceed",
+						"node", fmt.Sprintf("%s/%s", nodeNeedUpdate.Namespace, nodeNeedUpdate.Name),
+						"parent node", fmt.Sprintf("%s/%s", parent.Namespace, parent.Name),
+					)
+					return nil
+				}
 				SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
 					Type:   v1alpha1.ConditionDeadlineExceed,
 					Status: corev1.ConditionTrue,

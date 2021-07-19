@@ -16,6 +16,7 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"k8s.io/utils/pointer"
 	"sort"
 	"time"
 
@@ -143,6 +144,8 @@ func (it *WorkflowEntryReconciler) Reconcile(request reconcile.Request) (reconci
 					"entry nodes", nodeNames,
 				)
 			}
+
+			workflowNeedUpdate.Status.EntryNode = pointer.StringPtr(entryNodes[0].Name)
 			SetWorkflowCondition(&workflowNeedUpdate.Status, v1alpha1.WorkflowCondition{
 				Type:   v1alpha1.WorkflowConditionScheduled,
 				Status: corev1.ConditionTrue,
