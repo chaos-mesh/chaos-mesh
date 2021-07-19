@@ -98,12 +98,11 @@ const Single = () => {
         <div>
           {kind !== 'workflow' ? (
             <Space spacing={6}>
-              <Paper>
-                <PaperTop title={T('common.configuration')} boxProps={{ mb: 3 }} />
-                {single.kind === kind && single.data && (
-                  <ObjectConfiguration config={single.data} inSchedule={kind === 'schedule'} />
-                )}
-              </Paper>
+              {single.kind === kind && single.data && (
+                <Paper>
+                  <ObjectConfiguration config={single.data} inSchedule={kind === 'schedule'} inArchive={true} />
+                </Paper>
+              )}
 
               <Grid container>
                 <Grid item xs={12} lg={6} sx={{ pr: 3 }}>
