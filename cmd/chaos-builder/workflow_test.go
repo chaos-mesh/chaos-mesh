@@ -53,8 +53,8 @@ func Test_lowercaseCamelCase(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := LowercaseCamelCase(tt.args.str); got != tt.want {
-				t.Errorf("LowercaseCamelCase() = %v, want %v", got, tt.want)
+			if got := lowercaseCamelCase(tt.args.str); got != tt.want {
+				t.Errorf("lowercaseCamelCase() = %v, want %v", got, tt.want)
 			}
 		})
 	}

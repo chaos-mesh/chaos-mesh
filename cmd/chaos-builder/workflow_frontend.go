@@ -42,7 +42,7 @@ func (it *workflowFrontendCodeGenerator) mapEntries() string {
 	entries := ""
 	for _, chaosType := range it.chaosTypes {
 		entries += fmt.Sprintf(`  ['%s', '%s'],
-`, chaosType, LowercaseCamelCase(chaosType))
+`, chaosType, lowercaseCamelCase(chaosType))
 	}
 	return entries
 }
