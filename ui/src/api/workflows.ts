@@ -30,6 +30,6 @@ export const singleArchive = (uuid: uuid) => http.get<Archive>(`archives/workflo
 export const delArchive = (uuid: uuid) => http.delete(`/archives/workflows/${uuid}`)
 export const delArchives = (uuids: uuid[]) => http.delete(`/archives/workflows?uids=${uuids.join(',')}`)
 
-export function mappingTemplateType2FieldName(templateType: string): string {
+export function templateTypeToFieldName(templateType: string): string {
   return mapping.get(templateType)!
 }
