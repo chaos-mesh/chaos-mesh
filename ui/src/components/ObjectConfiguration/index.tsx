@@ -7,7 +7,7 @@ import Space from 'components-mui/Space'
 import StatusLabel from 'components-mui/StatusLabel'
 import T from 'components/T'
 import { format } from 'lib/luxon'
-import { mappingTemplateType2FieldName } from 'api/workflows'
+import { templateTypeToFieldName } from 'api/workflows'
 import { useStoreSelector } from 'store'
 
 type Config = ExperimentSingle | ArchiveSingle
@@ -31,9 +31,7 @@ const ObjectConfiguration: React.FC<ObjectConfigurationProps> = ({
 
   const spec = inNode ? config : config.kube_object.spec
   const experiment =
-    inSchedule || inNode
-      ? spec[mappingTemplateType2FieldName(inSchedule ? spec.type : (config as any).templateType)]
-      : spec
+    inSchedule || inNode ? spec[templateTypeToFieldName(inSchedule ? spec.type : (config as any).templateType)] : spec
 
   return (
     <>
