@@ -23,16 +23,16 @@ import (
 
 // FromDelay convert delay to netem
 func FromDelay(in *v1alpha1.DelaySpec) (*chaosdaemonpb.Netem, error) {
-	delayTime, err := time.ParseDuration(in.Latency)
+	delayTime, err := time.ParseDuration(string(in.Latency))
 	if err != nil {
 		return nil, err
 	}
-	jitter, err := time.ParseDuration(in.Jitter)
+	jitter, err := time.ParseDuration(string(in.Jitter))
 	if err != nil {
 		return nil, err
 	}
 
-	corr, err := strconv.ParseFloat(in.Correlation, 32)
+	corr, err := strconv.ParseFloat(string(in.Correlation), 32)
 	if err != nil {
 		return nil, err
 	}
@@ -44,12 +44,12 @@ func FromDelay(in *v1alpha1.DelaySpec) (*chaosdaemonpb.Netem, error) {
 	}
 
 	if in.Reorder != nil {
-		reorderPercentage, err := strconv.ParseFloat(in.Reorder.Reorder, 32)
+		reorderPercentage, err := strconv.ParseFloat(string(in.Reorder.Reorder), 32)
 		if err != nil {
 			return nil, err
 		}
 
-		corr, err := strconv.ParseFloat(in.Reorder.Correlation, 32)
+		corr, err := strconv.ParseFloat(string(in.Reorder.Correlation), 32)
 		if err != nil {
 			return nil, err
 		}
@@ -64,12 +64,12 @@ func FromDelay(in *v1alpha1.DelaySpec) (*chaosdaemonpb.Netem, error) {
 
 // FromLoss convert loss to netem
 func FromLoss(in *v1alpha1.LossSpec) (*chaosdaemonpb.Netem, error) {
-	lossPercentage, err := strconv.ParseFloat(in.Loss, 32)
+	lossPercentage, err := strconv.ParseFloat(string(in.Loss), 32)
 	if err != nil {
 		return nil, err
 	}
 
-	corr, err := strconv.ParseFloat(in.Correlation, 32)
+	corr, err := strconv.ParseFloat(string(in.Correlation), 32)
 	if err != nil {
 		return nil, err
 	}
@@ -82,12 +82,12 @@ func FromLoss(in *v1alpha1.LossSpec) (*chaosdaemonpb.Netem, error) {
 
 // FromDuplicate convert duplicate to netem
 func FromDuplicate(in *v1alpha1.DuplicateSpec) (*chaosdaemonpb.Netem, error) {
-	duplicatePercentage, err := strconv.ParseFloat(in.Duplicate, 32)
+	duplicatePercentage, err := strconv.ParseFloat(string(in.Duplicate), 32)
 	if err != nil {
 		return nil, err
 	}
 
-	corr, err := strconv.ParseFloat(in.Correlation, 32)
+	corr, err := strconv.ParseFloat(string(in.Correlation), 32)
 	if err != nil {
 		return nil, err
 	}
@@ -100,12 +100,12 @@ func FromDuplicate(in *v1alpha1.DuplicateSpec) (*chaosdaemonpb.Netem, error) {
 
 // FromCorrupt convert corrupt to netem
 func FromCorrupt(in *v1alpha1.CorruptSpec) (*chaosdaemonpb.Netem, error) {
-	corruptPercentage, err := strconv.ParseFloat(in.Corrupt, 32)
+	corruptPercentage, err := strconv.ParseFloat(string(in.Corrupt), 32)
 	if err != nil {
 		return nil, err
 	}
 
-	corr, err := strconv.ParseFloat(in.Correlation, 32)
+	corr, err := strconv.ParseFloat(string(in.Correlation), 32)
 	if err != nil {
 		return nil, err
 	}
@@ -122,7 +122,7 @@ func FromCorrupt(in *v1alpha1.CorruptSpec) (*chaosdaemonpb.Netem, error) {
 // for traffic control with the tc command.
 // http://man7.org/linux/man-pages/man8/tc-tbf.8.html
 func FromBandwidth(in *v1alpha1.BandwidthSpec) (*chaosdaemonpb.Tbf, error) {
-	rate, err := v1alpha1.ConvertUnitToBytes(in.Rate)
+	rate, err := v1alpha1.ConvertUnitToBytes(string(in.Rate))
 
 	if err != nil {
 		return nil, err

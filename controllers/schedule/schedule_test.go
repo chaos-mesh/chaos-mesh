@@ -46,7 +46,7 @@ var _ = Describe("Schedule", func() {
 				Name:      "foo0",
 				Namespace: "default",
 			}
-			duration := "100m"
+			duration := v1alpha1.Duration("100m")
 			schedule := &v1alpha1.Schedule{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "foo0",
@@ -94,7 +94,7 @@ var _ = Describe("Schedule", func() {
 				Name:      "foo1",
 				Namespace: "default",
 			}
-			duration := "100s"
+			duration := v1alpha1.Duration("100s")
 			schedule := &v1alpha1.Schedule{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "foo1",
@@ -159,7 +159,7 @@ var _ = Describe("Schedule", func() {
 				Name:      "foo2",
 				Namespace: "default",
 			}
-			duration := "100s"
+			duration := v1alpha1.Duration("100s")
 			schedule := &v1alpha1.Schedule{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "foo2",
@@ -217,7 +217,7 @@ var _ = Describe("Schedule", func() {
 				Name:      "foo3",
 				Namespace: "default",
 			}
-			duration := "1s"
+			duration := v1alpha1.Duration("1s")
 			schedule := &v1alpha1.Schedule{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "foo3",

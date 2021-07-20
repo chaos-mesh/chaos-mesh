@@ -49,7 +49,7 @@ func makeMemoryStressChaos(
 			},
 			Stressors: &v1alpha1.Stressors{
 				MemoryStressor: &v1alpha1.MemoryStressor{
-					Size:     memorySize,
+					Size:     v1alpha1.Bytes(memorySize),
 					Stressor: v1alpha1.Stressor{Workers: worker},
 				},
 			},

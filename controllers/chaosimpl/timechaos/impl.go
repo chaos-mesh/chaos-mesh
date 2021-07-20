@@ -51,7 +51,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		return v1alpha1.NotInjected, err
 	}
 
-	duration, err := time.ParseDuration(timechaos.Spec.TimeOffset)
+	duration, err := time.ParseDuration(string(timechaos.Spec.TimeOffset))
 	if err != nil {
 		return v1alpha1.NotInjected, err
 	}

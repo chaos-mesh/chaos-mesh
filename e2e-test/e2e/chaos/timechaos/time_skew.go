@@ -54,7 +54,7 @@ func TestcaseTimeSkewOnceThenRecover(
 			Namespace: ns,
 		},
 		Spec: v1alpha1.TimeChaosSpec{
-			Duration:   pointer.StringPtr("9m"),
+			Duration:   (*v1alpha1.Duration)(pointer.StringPtr("9m")),
 			TimeOffset: "-1h",
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{
@@ -124,7 +124,7 @@ func TestcaseTimeSkewPauseThenUnpause(
 			Namespace: ns,
 		},
 		Spec: v1alpha1.TimeChaosSpec{
-			Duration:   pointer.StringPtr("9m"),
+			Duration:   (*v1alpha1.Duration)(pointer.StringPtr("9m")),
 			TimeOffset: "-1h",
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{

@@ -46,7 +46,7 @@ var _ = Describe("Schedule", func() {
 				Name:      "foo1",
 				Namespace: "default",
 			}
-			duration := "10s"
+			duration := v1alpha1.Duration("10s")
 			chaos := &v1alpha1.TimeChaos{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "foo1",
@@ -100,7 +100,7 @@ var _ = Describe("Schedule", func() {
 				Name:      "foo2",
 				Namespace: "default",
 			}
-			duration := "1000s"
+			duration := v1alpha1.Duration("1000s")
 			chaos := &v1alpha1.TimeChaos{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "foo2",
