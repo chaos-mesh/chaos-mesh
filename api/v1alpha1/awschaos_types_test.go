@@ -26,10 +26,10 @@ import (
 // These tests are written in BDD-style using Ginkgo framework. Refer to
 // http://onsi.github.io/ginkgo to learn more.
 
-var _ = Describe("AwsChaos", func() {
+var _ = Describe("AWSChaos", func() {
 	var (
 		key              types.NamespacedName
-		created, fetched *AwsChaos
+		created, fetched *AWSChaos
 	)
 
 	BeforeEach(func() {
@@ -49,14 +49,14 @@ var _ = Describe("AwsChaos", func() {
 				Namespace: "default",
 			}
 
-			created = &AwsChaos{
+			created = &AWSChaos{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "foo",
 					Namespace: "default",
 				},
-				Spec: AwsChaosSpec{
+				Spec: AWSChaosSpec{
 					Action: Ec2Stop,
-					AwsSelector: AwsSelector{
+					AWSSelector: AWSSelector{
 						Ec2Instance: testInstance,
 					},
 					SecretName: &testSecretName,
@@ -66,7 +66,7 @@ var _ = Describe("AwsChaos", func() {
 			By("creating an API obj")
 			Expect(k8sClient.Create(context.TODO(), created)).To(Succeed())
 
-			fetched = &AwsChaos{}
+			fetched = &AWSChaos{}
 			Expect(k8sClient.Get(context.TODO(), key, fetched)).To(Succeed())
 			Expect(fetched).To(Equal(created))
 

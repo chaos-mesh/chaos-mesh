@@ -34,7 +34,7 @@ spec:
             description: Spec defines the behavior of a node of workflow
             properties:
               awsChaos:
-                description: AwsChaosSpec is the content of the specification for an AwsChaos
+                description: AWSChaosSpec is the content of the specification for an AWSChaos
                 properties:
                   action:
                     description: 'Action defines the specific aws chaos action. Supported action: ec2-stop / ec2-restart / detach-volume Default action: ec2-stop'
@@ -44,7 +44,7 @@ spec:
                     - detach-volume
                     type: string
                   awsRegion:
-                    description: AwsRegion defines the region of aws.
+                    description: AWSRegion defines the region of aws.
                     type: string
                   deviceName:
                     description: DeviceName indicates the name of the device. Needed in detach-volume.
@@ -196,7 +196,7 @@ spec:
                 - selector
                 type: object
               gcpChaos:
-                description: GcpChaosSpec is the content of the specification for a GcpChaos
+                description: GCPChaosSpec is the content of the specification for a GCPChaos
                 properties:
                   action:
                     description: 'Action defines the specific gcp chaos action. Supported action: node-stop / node-reset / disk-loss Default action: node-stop'
@@ -1297,7 +1297,7 @@ spec:
                 description: ScheduleSpec is the specification of a schedule object
                 properties:
                   awsChaos:
-                    description: AwsChaosSpec is the content of the specification for an AwsChaos
+                    description: AWSChaosSpec is the content of the specification for an AWSChaos
                     properties:
                       action:
                         description: 'Action defines the specific aws chaos action. Supported action: ec2-stop / ec2-restart / detach-volume Default action: ec2-stop'
@@ -1307,7 +1307,7 @@ spec:
                         - detach-volume
                         type: string
                       awsRegion:
-                        description: AwsRegion defines the region of aws.
+                        description: AWSRegion defines the region of aws.
                         type: string
                       deviceName:
                         description: DeviceName indicates the name of the device. Needed in detach-volume.
@@ -1444,7 +1444,7 @@ spec:
                     - selector
                     type: object
                   gcpChaos:
-                    description: GcpChaosSpec is the content of the specification for a GcpChaos
+                    description: GCPChaosSpec is the content of the specification for a GCPChaos
                     properties:
                       action:
                         description: 'Action defines the specific gcp chaos action. Supported action: node-stop / node-reset / disk-loss Default action: node-stop'
@@ -2803,7 +2803,7 @@ spec:
                         items:
                           properties:
                             awsChaos:
-                              description: AwsChaosSpec is the content of the specification for an AwsChaos
+                              description: AWSChaosSpec is the content of the specification for an AWSChaos
                               properties:
                                 action:
                                   description: 'Action defines the specific aws chaos action. Supported action: ec2-stop / ec2-restart / detach-volume Default action: ec2-stop'
@@ -2813,7 +2813,7 @@ spec:
                                   - detach-volume
                                   type: string
                                 awsRegion:
-                                  description: AwsRegion defines the region of aws.
+                                  description: AWSRegion defines the region of aws.
                                   type: string
                                 deviceName:
                                   description: DeviceName indicates the name of the device. Needed in detach-volume.
@@ -2966,7 +2966,7 @@ spec:
                               - selector
                               type: object
                             gcpChaos:
-                              description: GcpChaosSpec is the content of the specification for a GcpChaos
+                              description: GCPChaosSpec is the content of the specification for a GCPChaos
                               properties:
                                 action:
                                   description: 'Action defines the specific gcp chaos action. Supported action: node-stop / node-reset / disk-loss Default action: node-stop'
@@ -4069,7 +4069,7 @@ spec:
                               description: Schedule describe the Schedule(describing scheduled chaos) to be injected with chaos nodes. Only used when Type is TypeSchedule.
                               properties:
                                 awsChaos:
-                                  description: AwsChaosSpec is the content of the specification for an AwsChaos
+                                  description: AWSChaosSpec is the content of the specification for an AWSChaos
                                   properties:
                                     action:
                                       description: 'Action defines the specific aws chaos action. Supported action: ec2-stop / ec2-restart / detach-volume Default action: ec2-stop'
@@ -4079,7 +4079,7 @@ spec:
                                       - detach-volume
                                       type: string
                                     awsRegion:
-                                      description: AwsRegion defines the region of aws.
+                                      description: AWSRegion defines the region of aws.
                                       type: string
                                     deviceName:
                                       description: DeviceName indicates the name of the device. Needed in detach-volume.
@@ -4216,7 +4216,7 @@ spec:
                                   - selector
                                   type: object
                                 gcpChaos:
-                                  description: GcpChaosSpec is the content of the specification for a GcpChaos
+                                  description: GCPChaosSpec is the content of the specification for a GCPChaos
                                   properties:
                                     action:
                                       description: 'Action defines the specific gcp chaos action. Supported action: node-stop / node-reset / disk-loss Default action: node-stop'

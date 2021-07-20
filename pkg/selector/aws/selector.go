@@ -21,8 +21,8 @@ import (
 
 type SelectImpl struct{}
 
-func (impl *SelectImpl) Select(ctx context.Context, awsSelector *v1alpha1.AwsSelector) ([]*v1alpha1.AwsSelector, error) {
-	return []*v1alpha1.AwsSelector{awsSelector}, nil
+func (impl *SelectImpl) Select(ctx context.Context, awsSelector *v1alpha1.AWSSelector) ([]*v1alpha1.AWSSelector, error) {
+	return []*v1alpha1.AWSSelector{awsSelector}, nil
 }
 
 func New() *SelectImpl {

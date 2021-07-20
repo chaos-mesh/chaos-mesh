@@ -6,7 +6,7 @@ import {
   data as scheduleSpecificData,
   schema as scheduleSpecificSchema,
 } from 'components/Schedule/types'
-import basicData, { schema } from './data/basic'
+import basicData, { schema as basicSchema } from './data/basic'
 import { setBasic, setScheduleSpecific, setStep2 } from 'slices/experiments'
 import { useEffect, useMemo, useState } from 'react'
 import { useStoreDispatch, useStoreSelector } from 'store'
@@ -41,6 +41,7 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false })
   const { namespaces, step2, kindAction, basic, scheduleSpecific } = useStoreSelector((state) => state.experiments)
   const [kind, action] = kindAction
   const scopeDisabled = kind === 'AWSChaos' || kind === 'GCPChaos'
+  const schema = basicSchema({ scopeDisabled })
   const dispatch = useStoreDispatch()
 
   const originalInit = useMemo(
