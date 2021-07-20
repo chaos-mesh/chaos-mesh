@@ -16,20 +16,19 @@ package controllers
 import (
 	"context"
 	"fmt"
-	"k8s.io/client-go/util/retry"
-	"k8s.io/utils/pointer"
 	"strings"
 	"time"
-
-	"sigs.k8s.io/controller-runtime/pkg/client"
-
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/util/retry"
+	"k8s.io/utils/pointer"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
 // integration tests
