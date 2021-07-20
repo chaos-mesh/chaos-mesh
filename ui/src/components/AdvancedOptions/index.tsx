@@ -11,6 +11,7 @@ interface AdvancedOptionsProps {
   beforeOpen?: () => void
   afterClose?: () => void
   title?: string | JSX.Element
+  disabled?: boolean
 }
 
 const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
@@ -18,6 +19,7 @@ const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
   beforeOpen,
   afterClose,
   title,
+  disabled,
   children,
 }) => {
   const [open, _setOpen] = useState(isOpen)
@@ -33,14 +35,19 @@ const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
   }
 
   return (
-    <>
-      <Box mb={3} textAlign="right">
-        <Button color="primary" startIcon={open ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />} onClick={setOpen}>
+    <Space>
+      <Box textAlign="right">
+        <Button
+          color="primary"
+          startIcon={open ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />}
+          onClick={setOpen}
+          disabled={disabled}
+        >
           {title ? title : T('common.advancedOptions')}
         </Button>
       </Box>
       <Space sx={{ display: open ? 'unset' : 'none' }}>{children}</Space>
-    </>
+    </Space>
   )
 }
 
