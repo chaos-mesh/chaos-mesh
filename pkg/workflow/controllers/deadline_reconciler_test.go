@@ -508,7 +508,123 @@ var _ = Describe("Workflow", func() {
 
 		Context("nested serial or parallel", func() {
 			It("should shutdown children recursively", func() {
-				// TODO: unfinished test case
+				ctx := context.TODO()
+				parallelDuration := 3 * time.Second
+				durationOfSuspend := 10 * time.Second
+				toleratedJitter := 2 * time.Second
+
+				workflow := v1alpha1.Workflow{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace:    ns,
+						GenerateName: "fake-workflow-parallel-",
+					},
+					Spec: v1alpha1.WorkflowSpec{
+						Entry: "entry-parallel",
+						Templates: []v1alpha1.Template{{
+							Name:     "entry-parallel",
+							Type:     v1alpha1.TypeParallel,
+							Deadline: pointer.StringPtr(parallelDuration.String()),
+							Children: []string{
+								"parallel-level-1",
+							},
+						}, {
+							Name: "parallel-level-1",
+							Type: v1alpha1.TypeParallel,
+							Children: []string{
+								"parallel-level-2",
+							},
+						}, {
+							Name: "parallel-level-2",
+							Type: v1alpha1.TypeParallel,
+							Children: []string{
+								"suspend-task",
+							},
+						}, {
+							Name:     "suspend-task",
+							Type:     v1alpha1.TypeSuspend,
+							Deadline: pointer.StringPtr(durationOfSuspend.String()),
+						}},
+					},
+					Status: v1alpha1.WorkflowStatus{},
+				}
+
+				By("create workflow with parallel entry")
+				Expect(kubeClient.Create(ctx, &workflow)).To(Succeed())
+
+				By("all the node should be created")
+				parallelLevel1NodeName := ""
+				parallelLevel2NodeName := ""
+				suspendTaskNodeName := ""
+				Eventually(func() bool {
+					workflowNodes := v1alpha1.WorkflowNodeList{}
+					Expect(kubeClient.List(ctx, &workflowNodes)).To(Succeed())
+					for _, item := range workflowNodes.Items {
+						if strings.HasPrefix(item.Name, "parallel-level-1") {
+							parallelLevel1NodeName = item.Name
+							return true
+						}
+					}
+					return false
+				}, toleratedJitter, 200*time.Millisecond).Should(BeTrue())
+				Eventually(func() bool {
+					workflowNodes := v1alpha1.WorkflowNodeList{}
+					Expect(kubeClient.List(ctx, &workflowNodes)).To(Succeed())
+					for _, item := range workflowNodes.Items {
+						if strings.HasPrefix(item.Name, "parallel-level-2") {
+							parallelLevel2NodeName = item.Name
+							return true
+						}
+					}
+					return false
+				}, toleratedJitter, 200*time.Millisecond).Should(BeTrue())
+				Eventually(func() bool {
+					workflowNodes := v1alpha1.WorkflowNodeList{}
+					Expect(kubeClient.List(ctx, &workflowNodes)).To(Succeed())
+					for _, item := range workflowNodes.Items {
+						if strings.HasPrefix(item.Name, "suspend-task") {
+							suspendTaskNodeName = item.Name
+							return true
+						}
+					}
+					return false
+				}, toleratedJitter, 200*time.Millisecond).Should(BeTrue())
+
+				Expect(parallelLevel1NodeName).NotTo(BeEmpty())
+				Expect(parallelLevel2NodeName).NotTo(BeEmpty())
+				Expect(suspendTaskNodeName).NotTo(BeEmpty())
+
+				By("parallel level 1, parallel level 2 and suspend task should be DeadlineExceed by parent")
+				for _, nodeName := range []string{parallelLevel1NodeName, parallelLevel2NodeName, suspendTaskNodeName} {
+					Eventually(func() bool {
+						taskNode := v1alpha1.WorkflowNode{}
+						Expect(kubeClient.Get(ctx, types.NamespacedName{Namespace: ns, Name: nodeName}, &taskNode)).To(Succeed())
+						condition := GetCondition(taskNode.Status, v1alpha1.ConditionDeadlineExceed)
+						if condition == nil {
+							return false
+						}
+						if condition.Status != corev1.ConditionTrue {
+							return false
+						}
+						if condition.Reason != v1alpha1.ParentNodeDeadlineExceed {
+							return false
+						}
+						return true
+					}, parallelDuration+toleratedJitter, 200*time.Millisecond).Should(BeTrue())
+				}
+
+				By("entry parallel should also be DeadlineExceed by itself")
+				updateWorkflow := v1alpha1.Workflow{}
+				Expect(kubeClient.Get(ctx, types.NamespacedName{Namespace: ns, Name: workflow.Name}, &updateWorkflow)).To(Succeed())
+				entryNodeName := updateWorkflow.Status.EntryNode
+				Expect(entryNodeName).NotTo(BeNil())
+				Expect(*entryNodeName).NotTo(BeEmpty())
+				entryNode := v1alpha1.WorkflowNode{}
+				Expect(kubeClient.Get(ctx, types.NamespacedName{Namespace: ns, Name: *entryNodeName}, &entryNode)).To(Succeed())
+				condition := GetCondition(entryNode.Status, v1alpha1.ConditionDeadlineExceed)
+				Expect(condition).NotTo(BeNil())
+				Expect(condition.Status).To(Equal(corev1.ConditionTrue))
+				Expect(condition.Reason).To(Equal(v1alpha1.NodeDeadlineExceed))
+
 			})
 		})
 

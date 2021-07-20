@@ -16,8 +16,6 @@ package controllers
 import (
 	"context"
 	"fmt"
-	"time"
-
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -25,6 +23,7 @@ import (
 	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+	"time"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
@@ -53,6 +52,11 @@ func (it *DeadlineReconciler) Reconcile(request reconcile.Request) (reconcile.Re
 	err := it.kubeClient.Get(ctx, request.NamespacedName, &node)
 	if err != nil {
 		return reconcile.Result{}, client.IgnoreNotFound(err)
+	}
+
+	if ConditionEqualsTo(node.Status, v1alpha1.ConditionDeadlineExceed, corev1.ConditionTrue) {
+		// if this node deadline is exceed, try propagating to children node
+		return reconcile.Result{}, it.propagateDeadlineToChildren(ctx, &node)
 	}
 
 	if node.Spec.Deadline == nil {
@@ -98,6 +102,11 @@ func (it *DeadlineReconciler) Reconcile(request reconcile.Request) (reconcile.Re
 			return reconcile.Result{}, updateError
 		}
 		it.logger.Info("deadline exceed", "key", request.NamespacedName, "deadline", node.Spec.Deadline.Time)
+		propagateErr := it.propagateDeadlineToChildren(ctx, &node)
+		if propagateErr != nil {
+			it.logger.Error(propagateErr, "failed to propagate to children nodes", "key", request.NamespacedName)
+			return reconcile.Result{}, propagateErr
+		}
 	} else {
 		updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
 			nodeNeedUpdate := v1alpha1.WorkflowNode{}
@@ -133,11 +142,6 @@ func (it *DeadlineReconciler) Reconcile(request reconcile.Request) (reconcile.Re
 		}, nil
 	}
 
-	if ConditionEqualsTo(node.Status, v1alpha1.ConditionDeadlineExceed, corev1.ConditionTrue) {
-		// if this node deadline is exceed, try propagating to children node
-		return reconcile.Result{}, it.propagateDeadlineToChildren(ctx, &node)
-	}
-
 	return reconcile.Result{}, nil
 }
 
@@ -152,7 +156,7 @@ func (it *DeadlineReconciler) propagateDeadlineToChildren(ctx context.Context, p
 			childNode := childNode
 
 			if WorkflowNodeFinished(childNode.Status) {
-				it.logger.V(4).Info("child node already finished, skip for propagate deadline", "node", fmt.Sprintf("%s/%s", childNode.Namespace, childNode.Name))
+				it.logger.Info("child node already finished, skip for propagate deadline", "node", fmt.Sprintf("%s/%s", childNode.Namespace, childNode.Name))
 				continue
 			}
 
