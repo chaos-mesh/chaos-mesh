@@ -160,7 +160,7 @@ func generateEmbedChaos(typeName string) string {
 		JsonField string
 	}{
 		Type:      typeName,
-		JsonField: lowercaseCamelCase(typeName),
+		JsonField: LowercaseCamelCase(typeName),
 	}
 	tmpl, err := template.New("workflowTemplates").Parse(embedChaosEntryTemplate)
 	if err != nil {
@@ -178,7 +178,7 @@ func generateEmbedChaos(typeName string) string {
 	return buf.String()
 }
 
-func lowercaseCamelCase(str string) string {
+func LowercaseCamelCase(str string) string {
 	// here are some name thing issue about the acronyms, we used ALLCAP name in chaos kind, like DNSChaos or JVMChaos,
 	// library could not resolve that well, so we just manually do it.
 	if strings.Contains(str, "Chaos") {

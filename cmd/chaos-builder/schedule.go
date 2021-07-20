@@ -154,7 +154,7 @@ func generateScheduleItem(typeName string) string {
 		JsonField string
 	}{
 		Type:      typeName,
-		JsonField: lowercaseCamelCase(typeName),
+		JsonField: LowercaseCamelCase(typeName),
 	}
 	tmpl, err := template.New("scheduleTemplates").Parse(scheduleItemTemplate)
 	if err != nil {
