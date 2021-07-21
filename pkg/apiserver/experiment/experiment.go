@@ -188,11 +188,14 @@ func (s *Service) createPodChaos(exp *core.ExperimentInfo, kubeCli client.Client
 					Mode:     v1alpha1.PodMode(exp.Scope.Mode),
 					Value:    exp.Scope.Value,
 				},
-				ContainerNames: exp.Target.PodChaos.ContainerNames,
 			},
 			Action:      v1alpha1.PodChaosAction(exp.Target.PodChaos.Action),
 			GracePeriod: exp.Target.PodChaos.GracePeriod,
 		},
+	}
+
+	if v1alpha1.PodChaosAction(exp.Target.PodChaos.Action) == v1alpha1.ContainerKillAction {
+		chaos.Spec.ContainerNames = exp.Target.PodChaos.ContainerNames
 	}
 
 	if exp.Scheduler.Duration != "" {
@@ -259,7 +262,6 @@ func (s *Service) createIOChaos(exp *core.ExperimentInfo, kubeCli client.Client)
 					Mode:     v1alpha1.PodMode(exp.Scope.Mode),
 					Value:    exp.Scope.Value,
 				},
-				ContainerNames: []string{exp.Target.IOChaos.ContainerName},
 			},
 			Action:     v1alpha1.IOChaosType(exp.Target.IOChaos.Action),
 			Delay:      exp.Target.IOChaos.Delay,
@@ -271,6 +273,10 @@ func (s *Service) createIOChaos(exp *core.ExperimentInfo, kubeCli client.Client)
 			Percent:    exp.Target.IOChaos.Percent,
 			VolumePath: exp.Target.IOChaos.VolumePath,
 		},
+	}
+
+	if exp.Target.IOChaos.ContainerName != "" {
+		chaos.Spec.ContainerNames = []string{exp.Target.IOChaos.ContainerName}
 	}
 
 	if exp.Scheduler.Duration != "" {
@@ -295,11 +301,14 @@ func (s *Service) createTimeChaos(exp *core.ExperimentInfo, kubeCli client.Clien
 					Mode:     v1alpha1.PodMode(exp.Scope.Mode),
 					Value:    exp.Scope.Value,
 				},
-				ContainerNames: exp.Target.TimeChaos.ContainerNames,
 			},
 			TimeOffset: exp.Target.TimeChaos.TimeOffset,
 			ClockIds:   exp.Target.TimeChaos.ClockIDs,
 		},
+	}
+
+	if len(exp.Target.TimeChaos.ContainerNames) != 0 {
+		chaos.Spec.ContainerNames = exp.Target.TimeChaos.ContainerNames
 	}
 
 	if exp.Scheduler.Duration != "" {
@@ -364,11 +373,14 @@ func (s *Service) createStressChaos(exp *core.ExperimentInfo, kubeCli client.Cli
 					Mode:     v1alpha1.PodMode(exp.Scope.Mode),
 					Value:    exp.Scope.Value,
 				},
-				ContainerNames: []string{*exp.Target.StressChaos.ContainerName},
 			},
 			Stressors:         stressors,
 			StressngStressors: exp.Target.StressChaos.StressngStressors,
 		},
+	}
+
+	if exp.Target.StressChaos.ContainerName != nil {
+		chaos.Spec.ContainerNames = []string{*exp.Target.StressChaos.ContainerName}
 	}
 
 	if exp.Scheduler.Duration != "" {
@@ -394,10 +406,13 @@ func (s *Service) createDNSChaos(exp *core.ExperimentInfo, kubeCli client.Client
 					Mode:     v1alpha1.PodMode(exp.Scope.Mode),
 					Value:    exp.Scope.Value,
 				},
-				ContainerNames: exp.Target.DNSChaos.ContainerNames,
 			},
 			DomainNamePatterns: exp.Target.DNSChaos.DomainNamePatterns,
 		},
+	}
+
+	if len(exp.Target.DNSChaos.ContainerNames) != 0 {
+		chaos.Spec.ContainerNames = exp.Target.DNSChaos.ContainerNames
 	}
 
 	if exp.Scheduler.Duration != "" {
