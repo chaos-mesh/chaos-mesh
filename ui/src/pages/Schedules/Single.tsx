@@ -191,10 +191,7 @@ const Single = () => {
               ) : null}
             </Space>
 
-            <Paper>
-              <PaperTop title={T('common.configuration')} boxProps={{ mb: 3 }} />
-              {single && <ObjectConfiguration config={single} inSchedule />}
-            </Paper>
+            <Paper>{single && <ObjectConfiguration config={single} inSchedule />}</Paper>
 
             <Grid container>
               <Grid item xs={12} lg={6} sx={{ pr: 3 }}>
