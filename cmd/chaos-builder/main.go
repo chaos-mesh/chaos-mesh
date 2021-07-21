@@ -45,6 +45,7 @@ func main() {
 
 	workflowGenerator := newWorkflowCodeGenerator(nil)
 	workflowTestGenerator := newWorkflowTestCodeGenerator(nil)
+	workflowFrontendGenerator := newWorkflowFrontendCodeGenerator(nil)
 
 	scheduleGenerator := newScheduleCodeGenerator(nil)
 
@@ -110,6 +111,7 @@ func main() {
 							initImpl += generateInit(baseType.Name.Name)
 							workflowGenerator.AppendTypes(baseType.Name.Name)
 							workflowTestGenerator.AppendTypes(baseType.Name.Name)
+							workflowFrontendGenerator.AppendTypes(baseType.Name.Name)
 						}
 						scheduleImpl += generateScheduleRegister(baseType.Name.Name)
 						scheduleGenerator.AppendTypes(baseType.Name.Name)
@@ -157,6 +159,13 @@ func init() {
 		os.Exit(1)
 	}
 	fmt.Fprint(file, workflowTestGenerator.Render())
+
+	file, err = os.Create("./ui/src/api/zz_generated.workflow.chaos-mesh.ts")
+	if err != nil {
+		log.Error(err, "fail to create file")
+		os.Exit(1)
+	}
+	fmt.Fprint(file, workflowFrontendGenerator.Render())
 
 	file, err = os.Create("./api/v1alpha1/zz_generated.schedule.chaosmesh.go")
 	if err != nil {
