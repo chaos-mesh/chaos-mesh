@@ -55,6 +55,11 @@ func (it *DeadlineReconciler) Reconcile(request reconcile.Request) (reconcile.Re
 		return reconcile.Result{}, client.IgnoreNotFound(err)
 	}
 
+	if ConditionEqualsTo(node.Status, v1alpha1.ConditionDeadlineExceed, corev1.ConditionTrue) {
+		// if this node deadline is exceed, try propagating to children node
+		return reconcile.Result{}, it.propagateDeadlineToChildren(ctx, &node)
+	}
+
 	if node.Spec.Deadline == nil {
 		return reconcile.Result{}, nil
 	}
@@ -98,6 +103,11 @@ func (it *DeadlineReconciler) Reconcile(request reconcile.Request) (reconcile.Re
 			return reconcile.Result{}, updateError
 		}
 		it.logger.Info("deadline exceed", "key", request.NamespacedName, "deadline", node.Spec.Deadline.Time)
+		propagateErr := it.propagateDeadlineToChildren(ctx, &node)
+		if propagateErr != nil {
+			it.logger.Error(propagateErr, "failed to propagate to children nodes", "key", request.NamespacedName)
+			return reconcile.Result{}, propagateErr
+		}
 	} else {
 		updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
 			nodeNeedUpdate := v1alpha1.WorkflowNode{}
@@ -108,6 +118,9 @@ func (it *DeadlineReconciler) Reconcile(request reconcile.Request) (reconcile.Re
 
 			if ConditionEqualsTo(nodeNeedUpdate.Status, v1alpha1.ConditionDeadlineExceed, corev1.ConditionFalse) {
 				// no need to update
+				return nil
+			} else if ConditionEqualsTo(nodeNeedUpdate.Status, v1alpha1.ConditionDeadlineExceed, corev1.ConditionTrue) &&
+				GetCondition(nodeNeedUpdate.Status, v1alpha1.ConditionDeadlineExceed).Reason == v1alpha1.ParentNodeDeadlineExceed {
 				return nil
 			}
 
@@ -130,11 +143,6 @@ func (it *DeadlineReconciler) Reconcile(request reconcile.Request) (reconcile.Re
 		}, nil
 	}
 
-	if ConditionEqualsTo(node.Status, v1alpha1.ConditionDeadlineExceed, corev1.ConditionTrue) {
-		// if this node deadline is exceed, try propagating to children node
-		return reconcile.Result{}, it.propagateDeadlineToChildren(ctx, &node)
-	}
-
 	return reconcile.Result{}, nil
 }
 
@@ -149,7 +157,7 @@ func (it *DeadlineReconciler) propagateDeadlineToChildren(ctx context.Context, p
 			childNode := childNode
 
 			if WorkflowNodeFinished(childNode.Status) {
-				it.logger.V(4).Info("child node already finished, skip for propagate deadline", "node", fmt.Sprintf("%s/%s", childNode.Namespace, childNode.Name))
+				it.logger.Info("child node already finished, skip for propagate deadline", "node", fmt.Sprintf("%s/%s", childNode.Namespace, childNode.Name))
 				continue
 			}
 
@@ -161,6 +169,13 @@ func (it *DeadlineReconciler) propagateDeadlineToChildren(ctx context.Context, p
 				}, &nodeNeedUpdate)
 				if err != nil {
 					return err
+				}
+				if ConditionEqualsTo(nodeNeedUpdate.Status, v1alpha1.ConditionDeadlineExceed, corev1.ConditionTrue) {
+					it.logger.Info("omit propagate deadline to children, child already in deadline exceed",
+						"node", fmt.Sprintf("%s/%s", nodeNeedUpdate.Namespace, nodeNeedUpdate.Name),
+						"parent node", fmt.Sprintf("%s/%s", parent.Namespace, parent.Name),
+					)
+					return nil
 				}
 				SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
 					Type:   v1alpha1.ConditionDeadlineExceed,
