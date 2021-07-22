@@ -47,6 +47,12 @@ func (in *Stressors) Validate(root interface{}, path *field.Path) field.ErrorLis
 }
 
 func (in Bytes) Validate(root interface{}, path *field.Path) field.ErrorList {
+	packError := func(err error) field.ErrorList {
+		return field.ErrorList{
+			field.Invalid(path, in, fmt.Sprintf("incorrect bytes format: %s", err.Error())),
+		}
+	}
+
 	size := in
 	length := len(size)
 	if length == 0 {
@@ -58,25 +64,20 @@ func (in Bytes) Validate(root interface{}, path *field.Path) field.ErrorList {
 		var percent int
 		percent, err = strconv.Atoi(string(size)[:length-1])
 		if err != nil {
-			goto handleErr
+			return packError(err)
 		}
 		if percent > 100 || percent < 0 {
 			err = errors.New("illegal proportion")
-			goto handleErr
+			return packError(err)
 		}
 	} else {
 		_, err = units.FromHumanSize(string(size))
 		if err != nil {
-			goto handleErr
+			return packError(err)
 		}
 	}
 
 	return nil
-
-handleErr:
-	return field.ErrorList{
-		field.Invalid(path, in, fmt.Sprintf("incorrect bytes format: %s", err.Error())),
-	}
 }
 
 // Validate validates whether the Stressor is well defined
