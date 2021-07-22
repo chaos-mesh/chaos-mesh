@@ -83,7 +83,7 @@ func (it *ChaosNodeReconciler) Reconcile(request reconcile.Request) (reconcile.R
 			return client.IgnoreNotFound(err)
 		}
 
-		if node.Spec.Type == v1alpha1.TypeSchedule {
+		if nodeNeedUpdate.Spec.Type == v1alpha1.TypeSchedule {
 			// sync status with schedule
 			scheduleList, err := it.fetchChildrenSchedule(ctx, nodeNeedUpdate)
 			if err != nil {
@@ -91,7 +91,7 @@ func (it *ChaosNodeReconciler) Reconcile(request reconcile.Request) (reconcile.R
 			}
 			if len(scheduleList) > 1 {
 				it.logger.Info("the number of schedule custom resource affected by chaos node is more than 1",
-					"chaos node", fmt.Sprintf("%s/%s", node.Namespace, node.Name),
+					"chaos node", fmt.Sprintf("%s/%s", nodeNeedUpdate.Namespace, nodeNeedUpdate.Name),
 					"schedule custom resources", scheduleList,
 				)
 			}
@@ -323,7 +323,7 @@ func (it *ChaosNodeReconciler) createChaos(ctx context.Context, node v1alpha1.Wo
 		it.logger.Error(err, "failed to create chaos")
 		return nil
 	}
-	it.logger.Info("chaos object created", "namespace", meta.GetNamespace(), "name", meta.GetName())
+	it.logger.Info("chaos object created", "namespace", meta.GetNamespace(), "name", meta.GetName(), "parent node", node)
 	it.eventRecorder.Event(&node, recorder.ChaosCustomResourceCreated{
 		Name: meta.GetName(),
 		Kind: chaosObject.GetObjectKind().GroupVersionKind().Kind,

@@ -23,6 +23,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/util/retry"
+	"k8s.io/utils/pointer"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
@@ -143,6 +144,8 @@ func (it *WorkflowEntryReconciler) Reconcile(request reconcile.Request) (reconci
 					"entry nodes", nodeNames,
 				)
 			}
+
+			workflowNeedUpdate.Status.EntryNode = pointer.StringPtr(entryNodes[0].Name)
 			SetWorkflowCondition(&workflowNeedUpdate.Status, v1alpha1.WorkflowCondition{
 				Type:   v1alpha1.WorkflowConditionScheduled,
 				Status: corev1.ConditionTrue,
