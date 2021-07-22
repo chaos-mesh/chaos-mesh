@@ -16,6 +16,7 @@ package v1alpha1
 import (
 	"errors"
 	"fmt"
+	"reflect"
 	"strconv"
 	"strings"
 
@@ -30,7 +31,7 @@ const (
 	DefaultCorrelation = "0"
 )
 
-func (in *Direction) Default(root interface{}, path *field.Path) {
+func (in *Direction) Default(root interface{}, field reflect.StructField) {
 	*in = To
 }
 
