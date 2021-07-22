@@ -29,10 +29,10 @@ import (
 )
 
 var alwaysAllowedKind = []string{
-	v1alpha1.KindAwsChaos,
+	v1alpha1.KindAWSChaos,
 	v1alpha1.KindPodNetworkChaos,
 	v1alpha1.KindPodIOChaos,
-	v1alpha1.KindGcpChaos,
+	v1alpha1.KindGCPChaos,
 	v1alpha1.KindPodHttpChaos,
 
 	// TODO: check the auth for Schedule

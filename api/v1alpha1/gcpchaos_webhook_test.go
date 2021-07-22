@@ -27,36 +27,36 @@ var _ = Describe("gcpchaos_webhook", func() {
 
 			type TestCase struct {
 				name    string
-				chaos   GcpChaos
-				execute func(chaos *GcpChaos) error
+				chaos   GCPChaos
+				execute func(chaos *GCPChaos) error
 				expect  string
 			}
 			tcs := []TestCase{
 				{
 					name: "simple ValidateCreate for DiskLoss",
-					chaos: GcpChaos{
+					chaos: GCPChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
 							Name:      "foo1",
 						},
-						Spec: GcpChaosSpec{
+						Spec: GCPChaosSpec{
 							Action: DiskLoss,
 						},
 					},
-					execute: func(chaos *GcpChaos) error {
+					execute: func(chaos *GCPChaos) error {
 						return chaos.ValidateCreate()
 					},
 					expect: "error",
 				},
 				{
 					name: "unknow action",
-					chaos: GcpChaos{
+					chaos: GCPChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
 							Name:      "foo6",
 						},
 					},
-					execute: func(chaos *GcpChaos) error {
+					execute: func(chaos *GCPChaos) error {
 						return chaos.ValidateCreate()
 					},
 					expect: "error",

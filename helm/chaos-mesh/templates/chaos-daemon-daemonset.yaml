@@ -97,7 +97,7 @@ spec:
               mountPath: /var/run/crio/crio.sock
               {{- end }}
             - name: sys-path
-              mountPath: /sys
+              mountPath: /host-sys
             {{- if .Values.dashboard.securityMode}}
             - name: chaos-daemon-cert
               mountPath: /etc/chaos-daemon/cert
@@ -138,6 +138,21 @@ spec:
               containerPort: {{ .Values.bpfki.grpcPort }}
               hostPort: {{ .Values.bpfki.grpcPort }}
 {{- end }}
+        {{- if .Values.chaosDlv.enable }}
+        - name: chaos-mesh-dlv
+          image: {{template "registry-prefix" .}}{{ .Values.chaosDlv.image }}
+          imagePullPolicy: {{ .Values.chaosDlv.imagePullPolicy | default "IfNotPresent" }}
+          env:
+            - name: CMD_NAME
+              value: chaos-daemon
+          securityContext:
+            capabilities:
+              add:
+              - SYS_PTRACE
+          ports:
+          - name: dlv
+            containerPort: 8000
+        {{- end }}
       volumes:
         - name: socket-path
           hostPath:

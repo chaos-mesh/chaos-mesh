@@ -22,7 +22,7 @@ import (
 func (in *EbsVolume) Validate(root interface{}, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
-	awsChaos := root.(*AwsChaos)
+	awsChaos := root.(*AWSChaos)
 	if awsChaos.Spec.Action == DetachVolume {
 		if in == nil {
 			err := fmt.Errorf("the ID of EBS volume should not be empty on %s action", awsChaos.Spec.Action)
@@ -36,7 +36,7 @@ func (in *EbsVolume) Validate(root interface{}, path *field.Path) field.ErrorLis
 func (in *AwsDeviceName) Validate(root interface{}, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
-	awsChaos := root.(*AwsChaos)
+	awsChaos := root.(*AWSChaos)
 	if awsChaos.Spec.Action == DetachVolume {
 		if in == nil {
 			err := fmt.Errorf("the name of device should not be empty on %s action", awsChaos.Spec.Action)
@@ -48,7 +48,7 @@ func (in *AwsDeviceName) Validate(root interface{}, path *field.Path) field.Erro
 }
 
 // ValidateScheduler validates the scheduler and duration
-func (in AwsChaosAction) Validate(root interface{}, path *field.Path) field.ErrorList {
+func (in AWSChaosAction) Validate(root interface{}, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
 	switch in {
@@ -56,7 +56,7 @@ func (in AwsChaosAction) Validate(root interface{}, path *field.Path) field.Erro
 	case Ec2Restart:
 	default:
 		err := fmt.Errorf("awschaos have unknown action type")
-		log.Error(err, "Wrong AwsChaos Action type")
+		log.Error(err, "Wrong AWSChaos Action type")
 
 		allErrs = append(allErrs, field.Invalid(path, in, err.Error()))
 	}

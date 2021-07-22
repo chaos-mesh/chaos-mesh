@@ -25,8 +25,8 @@ var _ = Describe("awschaos_webhook", func() {
 
 			type TestCase struct {
 				name    string
-				chaos   AwsChaos
-				execute func(chaos *AwsChaos) error
+				chaos   AWSChaos
+				execute func(chaos *AWSChaos) error
 				expect  string
 			}
 			testDeviceName := AwsDeviceName("testDeviceName")
@@ -34,67 +34,67 @@ var _ = Describe("awschaos_webhook", func() {
 			tcs := []TestCase{
 				{
 					name: "simple ValidateCreate for DetachVolume",
-					chaos: AwsChaos{
+					chaos: AWSChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
 							Name:      "foo1",
 						},
-						Spec: AwsChaosSpec{
+						Spec: AWSChaosSpec{
 							Action: DetachVolume,
 						},
 					},
-					execute: func(chaos *AwsChaos) error {
+					execute: func(chaos *AWSChaos) error {
 						return chaos.ValidateCreate()
 					},
 					expect: "error",
 				},
 				{
 					name: "unknow action",
-					chaos: AwsChaos{
+					chaos: AWSChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
 							Name:      "foo6",
 						},
 					},
-					execute: func(chaos *AwsChaos) error {
+					execute: func(chaos *AWSChaos) error {
 						return chaos.ValidateCreate()
 					},
 					expect: "error",
 				},
 				{
 					name: "validate the DetachVolume without EbsVolume",
-					chaos: AwsChaos{
+					chaos: AWSChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
 							Name:      "foo7",
 						},
-						Spec: AwsChaosSpec{
+						Spec: AWSChaosSpec{
 							Action: DetachVolume,
-							AwsSelector: AwsSelector{
+							AWSSelector: AWSSelector{
 								DeviceName: &testDeviceName,
 							},
 						},
 					},
-					execute: func(chaos *AwsChaos) error {
+					execute: func(chaos *AWSChaos) error {
 						return chaos.ValidateCreate()
 					},
 					expect: "error",
 				},
 				{
 					name: "validate the DetachVolume without DeviceName",
-					chaos: AwsChaos{
+					chaos: AWSChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
 							Name:      "foo7",
 						},
-						Spec: AwsChaosSpec{
+						Spec: AWSChaosSpec{
 							Action: DetachVolume,
-							AwsSelector: AwsSelector{
+							AWSSelector: AWSSelector{
 								EbsVolume: &testEbsVolume,
 							},
 						},
 					},
-					execute: func(chaos *AwsChaos) error {
+					execute: func(chaos *AWSChaos) error {
 						return chaos.ValidateCreate()
 					},
 					expect: "error",
