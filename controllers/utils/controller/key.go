@@ -21,16 +21,30 @@ import (
 
 func ParseNamespacedName(namespacedName string) types.NamespacedName {
 	parts := strings.Split(namespacedName, "/")
-	return types.NamespacedName{
-		Namespace: parts[0],
-		Name:      parts[1],
+	if len(parts) == 2 {
+		return types.NamespacedName{
+			Namespace: parts[0],
+			Name:      parts[1],
+		}
+	} else {
+		return types.NamespacedName{
+			Namespace: "",
+			Name:      "",
+		}
 	}
 }
 
 func ParseNamespacedNameContainer(namespacedName string) (types.NamespacedName, string) {
 	parts := strings.Split(namespacedName, "/")
-	return types.NamespacedName{
-		Namespace: parts[0],
-		Name:      parts[1],
-	}, strings.Join(parts[2:], "")
+	if len(parts) > 2 {
+		return types.NamespacedName{
+			Namespace: parts[0],
+			Name:      parts[1],
+		}, strings.Join(parts[2:], "")
+	} else {
+		return types.NamespacedName{
+			Namespace: "",
+			Name:      "",
+		}, ""
+	}
 }
