@@ -138,7 +138,7 @@ func (in *AWSSelector) DeepCopyInto(out *AWSSelector) {
 	}
 	if in.DeviceName != nil {
 		in, out := &in.DeviceName, &out.DeviceName
-		*out = new(AwsDeviceName)
+		*out = new(AWSDeviceName)
 		**out = **in
 	}
 }

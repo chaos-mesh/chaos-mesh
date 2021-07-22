@@ -90,7 +90,7 @@ type AWSSelector struct {
 	// DeviceName indicates the name of the device.
 	// Needed in detach-volume.
 	// +optional
-	DeviceName *AwsDeviceName `json:"deviceName,omitempty" validate:"optional"`
+	DeviceName *AWSDeviceName `json:"deviceName,omitempty" validate:"optional"`
 }
 
 func (obj *AWSChaos) GetSelectorSpecs() map[string]interface{} {
@@ -108,4 +108,4 @@ func (selector *AWSSelector) Id() string {
 }
 
 type EbsVolume string
-type AwsDeviceName string
+type AWSDeviceName string

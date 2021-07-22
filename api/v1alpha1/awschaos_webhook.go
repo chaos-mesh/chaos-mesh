@@ -33,7 +33,7 @@ func (in *EbsVolume) Validate(root interface{}, path *field.Path) field.ErrorLis
 	return allErrs
 }
 
-func (in *AwsDeviceName) Validate(root interface{}, path *field.Path) field.ErrorList {
+func (in *AWSDeviceName) Validate(root interface{}, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
 	awsChaos := root.(*AWSChaos)

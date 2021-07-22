@@ -222,24 +222,24 @@ type DNSChaosInfo struct {
 	ContainerNames     []string `json:"container_names,omitempty"`
 }
 
-// AwsChaosInfo defines the basic information of aws chaos for creating a new AwsChaos.
-type AwsChaosInfo struct {
+// AWSChaosInfo defines the basic information of aws chaos for creating a new AwsChaos.
+type AWSChaosInfo struct {
 	Action      string                  `json:"action" binding:"oneof='ec2-stop' 'ec2-restart' 'detach-volume'"`
 	SecretName  *string                 `json:"secretName,omitempty"`
-	AwsRegion   string                  `json:"awsRegion"`
+	AWSRegion   string                  `json:"awsRegion"`
 	Ec2Instance string                  `json:"ec2Instance"`
 	EbsVolume   *v1alpha1.EbsVolume     `json:"volumeID,omitempty"`
-	DeviceName  *v1alpha1.AwsDeviceName `json:"deviceName,omitempty"`
+	DeviceName  *v1alpha1.AWSDeviceName `json:"deviceName,omitempty"`
 }
 
 // GCPChaosInfo defines the basic information of aws chaos for creating a new GCPChaos.
 type GCPChaosInfo struct {
-	Action      string    `json:"action" binding:"oneof='node-stop' 'node-reset' 'disk-loss'"`
-	SecretName  *string   `json:"secretName,omitempty"`
-	Project     string    `json:"project"`
-	Zone        string    `json:"zone"`
-	Instance    string    `json:"instance"`
-	DeviceNames v1alpha1.GcpDeviceNames `json:"deviceNames,omitempty"`
+	Action      string                  `json:"action" binding:"oneof='node-stop' 'node-reset' 'disk-loss'"`
+	SecretName  *string                 `json:"secretName,omitempty"`
+	Project     string                  `json:"project"`
+	Zone        string                  `json:"zone"`
+	Instance    string                  `json:"instance"`
+	DeviceNames v1alpha1.GCPDeviceNames `json:"deviceNames,omitempty"`
 }
 
 // ParsePodChaos Parse PodChaos JSON string into KubeObjectDesc.

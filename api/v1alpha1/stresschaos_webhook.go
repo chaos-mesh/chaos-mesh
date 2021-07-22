@@ -71,9 +71,11 @@ func (in Bytes) Validate(root interface{}, path *field.Path) field.ErrorList {
 		}
 	}
 
+	return nil
+
 handleErr:
 	return field.ErrorList{
-		field.Invalid(path, in, fmt.Sprintf("incorrect bytes format: %s", err)),
+		field.Invalid(path, in, fmt.Sprintf("incorrect bytes format: %s", err.Error())),
 	}
 }
 

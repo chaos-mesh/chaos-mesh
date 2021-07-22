@@ -29,7 +29,7 @@ var _ = Describe("awschaos_webhook", func() {
 				execute func(chaos *AWSChaos) error
 				expect  string
 			}
-			testDeviceName := AwsDeviceName("testDeviceName")
+			testDeviceName := AWSDeviceName("testDeviceName")
 			testEbsVolume := EbsVolume("testEbsVolume")
 			tcs := []TestCase{
 				{

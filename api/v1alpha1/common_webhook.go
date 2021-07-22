@@ -47,9 +47,13 @@ func (d *Duration) Validate(root interface{}, path *field.Path) field.ErrorList 
 	}
 
 	_, err := time.ParseDuration(string(*d))
-	return field.ErrorList{
-		field.Invalid(path, d, fmt.Sprintf("parse duration field error: %s", err)),
+	if err != nil {
+		return field.ErrorList{
+			field.Invalid(path, d, fmt.Sprintf("parse duration field error: %s", err.Error())),
+		}
 	}
+
+	return nil
 }
 
 func (d *Duration) Default(root interface{}, field reflect.StructField) {
@@ -137,7 +141,7 @@ func (f FloatStr) Validate(root interface{}, path *field.Path) field.ErrorList {
 	if err != nil {
 		return field.ErrorList{
 			field.Invalid(path, f,
-				fmt.Sprintf("parse correlation field error:%s", err)),
+				fmt.Sprintf("parse correlation field error:%s", err.Error())),
 		}
 	}
 
