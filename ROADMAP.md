@@ -17,7 +17,7 @@ This document defines the roadmap for Chaos Mesh development.
 
 - [ ] Improve Chaos Dashboard and make it easier to use
 - [ ] Support status checks. A status check is used to evaluate the health of your environment.
-- [ ] Support defining the scenario to manage a group of chaos experiments. 
+- [ ] Support defining the scenario to manage a group of chaos experiments.
 - [ ] Support generating the report for each chaos scenario.
 - [ ] Add JVM chaos. Support injecting faults into Java applications.
 - [ ] Add HTTP Chaos. Support injecting faults into http connections.

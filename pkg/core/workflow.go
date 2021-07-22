@@ -19,7 +19,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -50,11 +49,12 @@ const (
 
 // WorkflowMeta defines the root structure of a workflow.
 type WorkflowMeta struct {
-	gorm.Model
+	ID        uint           `gorm:"primary_key" json:"id"`
 	UID       string         `gorm:"index:workflow_uid" json:"uid"`
 	Namespace string         `json:"namespace"`
 	Name      string         `json:"name"`
 	Entry     string         `json:"entry"` // the entry node name
+	CreatedAt time.Time      `json:"created_at"`
 	EndTime   string         `json:"end_time"`
 	Status    WorkflowStatus `json:"status,omitempty"`
 	Archived  bool           `json:"-"`
