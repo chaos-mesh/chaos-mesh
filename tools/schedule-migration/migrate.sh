@@ -42,14 +42,9 @@ FLAGS:
 EOF
 }
 
-build () {
-    cd $SCRIPT_DIR
-    go build main.go
-}
-
 update_yaml () {
     local yaml=$1
-    ./main $yaml $yaml
+    ./schedule-migration $yaml $yaml
 }
 
 reapply_crd () {
@@ -80,8 +75,6 @@ handle_namespace () {
 }
 
 export_chaos () {
-    build
-
     for ns in $NAMESPACES
     do
         echo "searching namespace $ns"
