@@ -69,7 +69,7 @@ handle_namespace () {
             echo "      getting $resource"
             kubectl get $kind $resource -n $namespace -o yaml > $cnt.yaml
             update_yaml $cnt.yaml
-            let cnt++
+            let "cnt+=1"
         done
     done
 }
