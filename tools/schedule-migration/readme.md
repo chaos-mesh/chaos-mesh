@@ -8,13 +8,12 @@ Due to controller refactor and CRD modification, old chaos resource (1.x) won't 
 
 We provide a bash script to do step 1,2 and 4. Check it out.
 
-``` bash
-./migrate.sh -h
+Before running the script, you need to compile an `schedule-migrate` binary
+
+```bash 
+go build -o schedule-migration main.go
 ```
 
-You can also upgrade old yaml manually.
-
 ``` bash
-go build main.go
-./main
+./migrate.sh -h
 ```
