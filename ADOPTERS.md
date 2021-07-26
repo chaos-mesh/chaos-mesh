@@ -39,7 +39,7 @@ If you are a Chaos Mesh adopter, and are willing to share your Chaos Mesh story,
     - Xpeng Motors is China's leading smart electric vehicle designer and manufacturer, as well as a technology company integrating cutting-edge Internet and AI innovation. They use Chaos Mesh in the following scenarios:
         - Rolling updates of microservices and lossless verification of traffic;
         - Microservices, multi-registries, multi-party synchronization, and traffic lossless verification;
-        - mqtt cluster two-way subscription verification;
+        - MQTT cluster two-way subscription verification;
         - Exactly-once consumer business verification for message queues;
         - Simulation of weak 4G network for in-vehicle systems, saving drive test costs;
         - AIOPS anomaly detection dataset generation.
