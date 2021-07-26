@@ -39,7 +39,11 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	podchaos := obj.(*v1alpha1.PodChaos)
 
 	var origin v1.Pod
-	err := impl.Get(ctx, controller.ParseNamespacedName(records[index].Id), &origin)
+	NamespacedName, err := controller.ParseNamespacedName(records[index].Id)
+	if err != nil {
+		return v1alpha1.NotInjected, err
+	}
+	err = impl.Get(ctx, NamespacedName, &origin)
 	if err != nil {
 		// TODO: handle this error
 		return v1alpha1.NotInjected, err
@@ -92,7 +96,12 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	podchaos := obj.(*v1alpha1.PodChaos)
 
 	var origin v1.Pod
-	err := impl.Get(ctx, controller.ParseNamespacedName(records[index].Id), &origin)
+	NamespacedName, err := controller.ParseNamespacedName(records[index].Id)
+	if err != nil {
+		// This error is not expected to exist
+		return v1alpha1.NotInjected, err
+	}
+	err = impl.Get(ctx, NamespacedName, &origin)
 	if err != nil {
 		// TODO: handle this error
 		if k8sError.IsNotFound(err) {

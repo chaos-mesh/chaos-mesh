@@ -46,7 +46,12 @@ type DecodedContainerRecord struct {
 
 func (d *ContianerRecordDecoder) DecodeContainerRecord(ctx context.Context, record *v1alpha1.Record) (decoded DecodedContainerRecord, err error) {
 	var pod v1.Pod
-	podId, containerName := controller.ParseNamespacedNameContainer(record.Id)
+	podId, containerName, err := controller.ParseNamespacedNameContainer(record.Id)
+	if err != nil {
+		// TODO: organize the error in a better way
+		err = NewFailToFindContainer(pod.Namespace, pod.Name, containerName, err)
+		return
+	}
 	err = d.Client.Get(ctx, podId, &pod)
 	if err != nil {
 		// TODO: organize the error in a better way

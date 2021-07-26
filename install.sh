@@ -62,7 +62,7 @@ main() {
     local local_kube=""
     local cm_version="latest"
     local kind_name="kind"
-    local kind_version="v0.7.0"
+    local kind_version="v0.11.1"
     local node_num=3
     local k8s_version="v1.17.2"
     local volume_num=5
