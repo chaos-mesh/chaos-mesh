@@ -131,6 +131,13 @@ chaosctl:
 schedule-migration:
 	$(GO) build -ldflags '$(LDFLAGS)' -o bin/schedule-migration ./tools/schedule-migration/*.go
 
+schedule-migration.tar.gz: schedule-migration
+	cp ./bin/schedule-migration ./schedule-migration
+	cp ./tools/schedule-migration/migrate.sh ./migrate.sh
+	tar -czvf schedule-migration.tar.gz schedule-migration migrate.sh
+	rm ./migrate.sh
+	rm ./schedule-migration
+
 # Run against the configured Kubernetes cluster in ~/.kube/config
 run: generate fmt vet manifests
 	$(GO) run ./cmd/controller-manager/main.go
