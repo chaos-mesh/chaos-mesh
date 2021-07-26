@@ -42,14 +42,9 @@ FLAGS:
 EOF
 }
 
-build () {
-    cd $SCRIPT_DIR
-    go build main.go
-}
-
 update_yaml () {
     local yaml=$1
-    ./main $yaml $yaml
+    ./schedule-migration $yaml $yaml
 }
 
 reapply_crd () {
@@ -74,14 +69,12 @@ handle_namespace () {
             echo "      getting $resource"
             kubectl get $kind $resource -n $namespace -o yaml > $cnt.yaml
             update_yaml $cnt.yaml
-            let cnt++
+            let "cnt+=1"
         done
     done
 }
 
 export_chaos () {
-    build
-
     for ns in $NAMESPACES
     do
         echo "searching namespace $ns"
