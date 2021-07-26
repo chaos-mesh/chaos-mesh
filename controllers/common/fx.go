@@ -98,7 +98,7 @@ func NewController(params Params) (types.Controller, error) {
 								if err != nil {
 									setupLog.Error(err, "fail to get pods")
 								}
-								if  NamespacedName == objName {
+								if NamespacedName == objName {
 									id := k8sTypes.NamespacedName{
 										Namespace: item.GetObjectMeta().Namespace,
 										Name:      item.GetObjectMeta().Name,

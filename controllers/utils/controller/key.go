@@ -32,7 +32,7 @@ func ParseNamespacedName(namespacedName string) (types.NamespacedName, error) {
 	return types.NamespacedName{
 		Namespace: "",
 		Name:      "",
-	}, errors.New("Too Few Parts of NamespacedName")
+	}, errors.New("too few parts of namespacedname")
 
 }
 
@@ -48,6 +48,6 @@ func ParseNamespacedNameContainer(namespacedName string) (types.NamespacedName, 
 	return types.NamespacedName{
 		Namespace: "",
 		Name:      "",
-	}, "", errors.New("Too Few Parts of NamespacedName")
+	}, "", errors.New("too few parts of namespacedname")
 
 }

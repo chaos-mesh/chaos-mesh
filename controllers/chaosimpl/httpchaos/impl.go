@@ -165,7 +165,6 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		return waitForRecoverSync, nil
 	}
 
-
 	podId, _, err := controller.ParseNamespacedNameContainer(records[index].Id)
 	if err != nil {
 		// This error is not expected to exist
