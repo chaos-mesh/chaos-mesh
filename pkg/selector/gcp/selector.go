@@ -21,8 +21,8 @@ import (
 
 type SelectImpl struct{}
 
-func (impl *SelectImpl) Select(ctx context.Context, gcpSelector *v1alpha1.GcpSelector) ([]*v1alpha1.GcpSelector, error) {
-	return []*v1alpha1.GcpSelector{gcpSelector}, nil
+func (impl *SelectImpl) Select(ctx context.Context, gcpSelector *v1alpha1.GCPSelector) ([]*v1alpha1.GCPSelector, error) {
+	return []*v1alpha1.GCPSelector{gcpSelector}, nil
 }
 
 func New() *SelectImpl {

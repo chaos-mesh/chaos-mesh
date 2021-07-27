@@ -12,7 +12,6 @@ import { useEffect, useMemo } from 'react'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
 import AdvancedOptions from 'components/AdvancedOptions'
-import PaperTop from 'components-mui/PaperTop'
 import ScopePodsTable from './ScopePodsTable'
 import Space from 'components-mui/Space'
 import T from 'components/T'
@@ -43,10 +42,11 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
 
   const state = useStoreSelector((state) => state)
   const { enableKubeSystemNS } = state.settings
-  const { labels, annotations, target } = state.experiments
+  const { labels, annotations, kindAction } = state.experiments
+  const [kind] = kindAction
   const pods = scope === 'scope' ? state.experiments.pods : state.experiments.networkTargetPods
   const getPods = scope === 'scope' ? getCommonPods : getNetworkTargetPods
-  const disabled = target.kind === 'AwsChaos' || target.kind === 'GcpChaos'
+  const disabled = kind === 'AWSChaos' || kind === 'GCPChaos'
   const dispatch = useStoreDispatch()
 
   const kvSeparator = ': '
@@ -81,19 +81,13 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
 
   useEffect(() => {
     if (currentNamespaces.length) {
-      dispatch(
-        getPods({
-          namespaces: currentNamespaces,
-        })
-      )
-
       dispatch(getLabels(currentNamespaces))
       dispatch(getAnnotations(currentNamespaces))
     }
-  }, [currentNamespaces, getPods, dispatch])
+  }, [dispatch, getPods, currentNamespaces])
 
   useEffect(() => {
-    if (currentLabels.length || currentAnnotations.length) {
+    if (currentNamespaces.length) {
       dispatch(
         getPods({
           namespaces: currentNamespaces,
@@ -102,13 +96,11 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
         })
       )
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentLabels, currentAnnotations])
+  }, [dispatch, getPods, currentNamespaces, currentLabels, currentAnnotations])
 
   return (
     <Space>
       <AutocompleteMultipleField
-        id={`${scope}.namespaces`}
         name={`${scope}.namespaces`}
         label={T('k8s.namespaceSelectors')}
         helperText={
@@ -122,7 +114,6 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
       />
 
       <AutocompleteMultipleField
-        id={`${scope}.label_selectors`}
         name={`${scope}.label_selectors`}
         label={T('k8s.labelSelectors')}
         helperText={T('common.multiOptions')}
@@ -130,9 +121,8 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
         disabled={disabled}
       />
 
-      <AdvancedOptions>
+      <AdvancedOptions disabled={disabled}>
         <AutocompleteMultipleField
-          id={`${scope}.annotation_selectors`}
           name={`${scope}.annotation_selectors`}
           label={T('k8s.annotationsSelectors')}
           helperText={T('common.multiOptions')}
@@ -141,7 +131,6 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
         />
 
         <SelectField
-          id={`${scope}.mode`}
           name={`${scope}.mode`}
           label={T('newE.scope.mode')}
           helperText={T('newE.scope.modeHelper')}
@@ -157,7 +146,6 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
 
         {getIn(values, scope).mode !== 'all' && getIn(values, scope).mode !== 'one' && (
           <TextField
-            id={`${scope}.value`}
             name={`${scope}.value`}
             label={T('newE.scope.modeValue')}
             helperText={T('newE.scope.modeValueHelper')}
@@ -171,7 +159,6 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
         )}
 
         <SelectField
-          id={`${scope}.phase_selectors`}
           name={`${scope}.phase_selectors`}
           label={T('k8s.phaseSelectors')}
           helperText={T('common.multiOptions')}
@@ -187,14 +174,20 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
         </SelectField>
       </AdvancedOptions>
 
-      <PaperTop
-        title={podsPreviewTitle || T('newE.scope.targetPodsPreview')}
-        subtitle={podsPreviewDesc || T('newE.scope.targetPodsPreviewHelper')}
-      />
+      <div>
+        <Typography sx={{ color: disabled ? 'text.disabled' : undefined }}>
+          {podsPreviewTitle || T('newE.scope.targetPodsPreview')}
+        </Typography>
+        <Typography variant="body2" sx={{ color: disabled ? 'text.disabled' : 'text.secondary' }}>
+          {podsPreviewDesc || T('newE.scope.targetPodsPreviewHelper')}
+        </Typography>
+      </div>
       {pods.length > 0 ? (
         <ScopePodsTable scope={scope} pods={pods} />
       ) : (
-        <Typography variant="subtitle2">{T('newE.scope.noPodsFound')}</Typography>
+        <Typography variant="subtitle2" sx={{ color: disabled ? 'text.disabled' : undefined }}>
+          {T('newE.scope.noPodsFound')}
+        </Typography>
       )}
     </Space>
   )

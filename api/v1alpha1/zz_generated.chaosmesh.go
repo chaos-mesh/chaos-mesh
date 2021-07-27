@@ -21,15 +21,15 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-const KindAwsChaos = "AwsChaos"
+const KindAWSChaos = "AWSChaos"
 
 // IsDeleted returns whether this resource has been deleted
-func (in *AwsChaos) IsDeleted() bool {
+func (in *AWSChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
 // IsPaused returns whether this resource has been paused
-func (in *AwsChaos) IsPaused() bool {
+func (in *AWSChaos) IsPaused() bool {
 	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
 		return false
 	}
@@ -37,12 +37,12 @@ func (in *AwsChaos) IsPaused() bool {
 }
 
 // GetObjectMeta would return the ObjectMeta for chaos
-func (in *AwsChaos) GetObjectMeta() *metav1.ObjectMeta {
+func (in *AWSChaos) GetObjectMeta() *metav1.ObjectMeta {
 	return &in.ObjectMeta
 }
 
 // GetDuration would return the duration for chaos
-func (in *AwsChaosSpec) GetDuration() (*time.Duration, error) {
+func (in *AWSChaosSpec) GetDuration() (*time.Duration, error) {
 	if in.Duration == nil {
 		return nil, nil
 	}
@@ -54,11 +54,11 @@ func (in *AwsChaosSpec) GetDuration() (*time.Duration, error) {
 }
 
 // GetChaos would return the a record for chaos
-func (in *AwsChaos) GetChaos() *ChaosInstance {
+func (in *AWSChaos) GetChaos() *ChaosInstance {
 	instance := &ChaosInstance{
 		Name:      in.Name,
 		Namespace: in.Namespace,
-		Kind:      KindAwsChaos,
+		Kind:      KindAWSChaos,
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
 		UID:       string(in.UID),
@@ -79,12 +79,12 @@ func (in *AwsChaos) GetChaos() *ChaosInstance {
 }
 
 // GetStatus returns the status
-func (in *AwsChaos) GetStatus() *ChaosStatus {
+func (in *AWSChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
 }
 
 // GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
-func (in *AwsChaos) GetSpecAndMetaString() (string, error) {
+func (in *AWSChaos) GetSpecAndMetaString() (string, error) {
 	spec, err := json.Marshal(in.Spec)
 	if err != nil {
 		return "", err
@@ -99,15 +99,15 @@ func (in *AwsChaos) GetSpecAndMetaString() (string, error) {
 
 // +kubebuilder:object:root=true
 
-// AwsChaosList contains a list of AwsChaos
-type AwsChaosList struct {
+// AWSChaosList contains a list of AWSChaos
+type AWSChaosList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []AwsChaos `json:"items"`
+	Items           []AWSChaos `json:"items"`
 }
 
 // ListChaos returns a list of chaos
-func (in *AwsChaosList) ListChaos() []*ChaosInstance {
+func (in *AWSChaosList) ListChaos() []*ChaosInstance {
 	res := make([]*ChaosInstance, 0, len(in.Items))
 	for _, item := range in.Items {
 		res = append(res, item.GetChaos())
@@ -115,7 +115,7 @@ func (in *AwsChaosList) ListChaos() []*ChaosInstance {
 	return res
 }
 
-func (in *AwsChaos) DurationExceeded(now time.Time) (bool, time.Duration, error) {
+func (in *AWSChaos) DurationExceeded(now time.Time) (bool, time.Duration, error) {
 	duration, err := in.Spec.GetDuration()
 	if err != nil {
 		return false, 0, err
@@ -133,7 +133,7 @@ func (in *AwsChaos) DurationExceeded(now time.Time) (bool, time.Duration, error)
 	return false, 0, nil
 }
 
-func (in *AwsChaos) IsOneShot() bool {
+func (in *AWSChaos) IsOneShot() bool {
 	
 	if in.Spec.Action==Ec2Restart {
 		return true
@@ -261,15 +261,15 @@ func (in *DNSChaos) IsOneShot() bool {
 	
 }
 
-const KindGcpChaos = "GcpChaos"
+const KindGCPChaos = "GCPChaos"
 
 // IsDeleted returns whether this resource has been deleted
-func (in *GcpChaos) IsDeleted() bool {
+func (in *GCPChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
 // IsPaused returns whether this resource has been paused
-func (in *GcpChaos) IsPaused() bool {
+func (in *GCPChaos) IsPaused() bool {
 	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
 		return false
 	}
@@ -277,12 +277,12 @@ func (in *GcpChaos) IsPaused() bool {
 }
 
 // GetObjectMeta would return the ObjectMeta for chaos
-func (in *GcpChaos) GetObjectMeta() *metav1.ObjectMeta {
+func (in *GCPChaos) GetObjectMeta() *metav1.ObjectMeta {
 	return &in.ObjectMeta
 }
 
 // GetDuration would return the duration for chaos
-func (in *GcpChaosSpec) GetDuration() (*time.Duration, error) {
+func (in *GCPChaosSpec) GetDuration() (*time.Duration, error) {
 	if in.Duration == nil {
 		return nil, nil
 	}
@@ -294,11 +294,11 @@ func (in *GcpChaosSpec) GetDuration() (*time.Duration, error) {
 }
 
 // GetChaos would return the a record for chaos
-func (in *GcpChaos) GetChaos() *ChaosInstance {
+func (in *GCPChaos) GetChaos() *ChaosInstance {
 	instance := &ChaosInstance{
 		Name:      in.Name,
 		Namespace: in.Namespace,
-		Kind:      KindGcpChaos,
+		Kind:      KindGCPChaos,
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
 		UID:       string(in.UID),
@@ -319,12 +319,12 @@ func (in *GcpChaos) GetChaos() *ChaosInstance {
 }
 
 // GetStatus returns the status
-func (in *GcpChaos) GetStatus() *ChaosStatus {
+func (in *GCPChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
 }
 
 // GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
-func (in *GcpChaos) GetSpecAndMetaString() (string, error) {
+func (in *GCPChaos) GetSpecAndMetaString() (string, error) {
 	spec, err := json.Marshal(in.Spec)
 	if err != nil {
 		return "", err
@@ -339,15 +339,15 @@ func (in *GcpChaos) GetSpecAndMetaString() (string, error) {
 
 // +kubebuilder:object:root=true
 
-// GcpChaosList contains a list of GcpChaos
-type GcpChaosList struct {
+// GCPChaosList contains a list of GCPChaos
+type GCPChaosList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []GcpChaos `json:"items"`
+	Items           []GCPChaos `json:"items"`
 }
 
 // ListChaos returns a list of chaos
-func (in *GcpChaosList) ListChaos() []*ChaosInstance {
+func (in *GCPChaosList) ListChaos() []*ChaosInstance {
 	res := make([]*ChaosInstance, 0, len(in.Items))
 	for _, item := range in.Items {
 		res = append(res, item.GetChaos())
@@ -355,7 +355,7 @@ func (in *GcpChaosList) ListChaos() []*ChaosInstance {
 	return res
 }
 
-func (in *GcpChaos) DurationExceeded(now time.Time) (bool, time.Duration, error) {
+func (in *GCPChaos) DurationExceeded(now time.Time) (bool, time.Duration, error) {
 	duration, err := in.Spec.GetDuration()
 	if err != nil {
 		return false, 0, err
@@ -373,7 +373,7 @@ func (in *GcpChaos) DurationExceeded(now time.Time) (bool, time.Duration, error)
 	return false, 0, nil
 }
 
-func (in *GcpChaos) IsOneShot() bool {
+func (in *GCPChaos) IsOneShot() bool {
 	
 	if in.Spec.Action==NodeReset {
 		return true
@@ -1333,10 +1333,10 @@ func (in *TimeChaos) IsOneShot() bool {
 
 func init() {
 
-	SchemeBuilder.Register(&AwsChaos{}, &AwsChaosList{})
-	all.register(KindAwsChaos, &ChaosKind{
-		Chaos:     &AwsChaos{},
-		ChaosList: &AwsChaosList{},
+	SchemeBuilder.Register(&AWSChaos{}, &AWSChaosList{})
+	all.register(KindAWSChaos, &ChaosKind{
+		Chaos:     &AWSChaos{},
+		ChaosList: &AWSChaosList{},
 	})
 
 	SchemeBuilder.Register(&DNSChaos{}, &DNSChaosList{})
@@ -1345,10 +1345,10 @@ func init() {
 		ChaosList: &DNSChaosList{},
 	})
 
-	SchemeBuilder.Register(&GcpChaos{}, &GcpChaosList{})
-	all.register(KindGcpChaos, &ChaosKind{
-		Chaos:     &GcpChaos{},
-		ChaosList: &GcpChaosList{},
+	SchemeBuilder.Register(&GCPChaos{}, &GCPChaosList{})
+	all.register(KindGCPChaos, &ChaosKind{
+		Chaos:     &GCPChaos{},
+		ChaosList: &GCPChaosList{},
 	})
 
 	SchemeBuilder.Register(&HTTPChaos{}, &HTTPChaosList{})
@@ -1400,9 +1400,9 @@ func init() {
 	})
 
 
-	allScheduleItem.register(KindAwsChaos, &ChaosKind{
-		Chaos:     &AwsChaos{},
-		ChaosList: &AwsChaosList{},
+	allScheduleItem.register(KindAWSChaos, &ChaosKind{
+		Chaos:     &AWSChaos{},
+		ChaosList: &AWSChaosList{},
 	})
 
 	allScheduleItem.register(KindDNSChaos, &ChaosKind{
@@ -1410,9 +1410,9 @@ func init() {
 		ChaosList: &DNSChaosList{},
 	})
 
-	allScheduleItem.register(KindGcpChaos, &ChaosKind{
-		Chaos:     &GcpChaos{},
-		ChaosList: &GcpChaosList{},
+	allScheduleItem.register(KindGCPChaos, &ChaosKind{
+		Chaos:     &GCPChaos{},
+		ChaosList: &GCPChaosList{},
 	})
 
 	allScheduleItem.register(KindHTTPChaos, &ChaosKind{
