@@ -1,8 +1,7 @@
 import { Box, Card, Divider, Typography } from '@material-ui/core'
 import { iconByKind, transByKind } from 'lib/byKind'
-import { setKindAction as setKindActionToStore, setStep1, setTarget as setTargetToStore } from 'slices/experiments'
+import { setKindAction, setStep1, setTarget as setTargetToStore } from 'slices/experiments'
 import targetData, { Kind, Target, schema } from './data/target'
-import { useEffect, useState } from 'react'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
 import CheckIcon from '@material-ui/icons/Check'
@@ -56,22 +55,17 @@ const Step1 = () => {
     targetDataEntries = targetDataEntries.filter((d) => d[0] !== 'DNSChaos')
   }
   const {
-    kindAction: [_kind, _action],
+    kindAction: [kind, action],
     step1,
   } = state.experiments
   const dispatch = useStoreDispatch()
 
-  const [kindAction, setKindAction] = useState<[Kind | '', string]>([_kind, _action])
-  const [kind, action] = kindAction
-
-  useEffect(() => {
-    setKindAction([_kind, _action])
-  }, [_kind, _action])
-
-  const handleSelectTarget = (key: Kind) => () => setKindAction([key, ''])
+  const handleSelectTarget = (key: Kind) => () => {
+    dispatch(setKindAction([key, '']))
+  }
 
   const handleSelectAction = (newAction: string) => () => {
-    dispatch(setKindActionToStore([kind, newAction]))
+    dispatch(setKindAction([kind, newAction]))
 
     if (submitDirectly.includes(newAction)) {
       handleSubmitStep1({ action: newAction })
@@ -167,6 +161,7 @@ const Step1 = () => {
             ) : kind === 'TimeChaos' ? (
               <Box mt={6}>
                 <TargetGenerated
+                  kind={kind}
                   data={targetData[kind].spec!}
                   validationSchema={schema.TimeChaos!.default}
                   onSubmit={handleSubmitStep1}
@@ -181,9 +176,7 @@ const Step1 = () => {
         )}
         {action && !submitDirectly.includes(action) && (
           <>
-            <Box my={6}>
-              <Divider />
-            </Box>
+            <Divider sx={{ my: 6 }} />
             <TargetGenerated
               // Force re-rendered after action changed
               key={kind + action}
