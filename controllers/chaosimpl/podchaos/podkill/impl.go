@@ -31,11 +31,11 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	podchaos := obj.(*v1alpha1.PodChaos)
 
 	var pod v1.Pod
-	NamespacedName, err := controller.ParseNamespacedName(records[index].Id)
+	namespacedName, err := controller.ParseNamespacedName(records[index].Id)
 	if err != nil {
 		return v1alpha1.NotInjected, err
 	}
-	err = impl.Get(ctx, NamespacedName, &pod)
+	err = impl.Get(ctx, namespacedName, &pod)
 	if err != nil {
 		// TODO: handle this error
 		return v1alpha1.NotInjected, err

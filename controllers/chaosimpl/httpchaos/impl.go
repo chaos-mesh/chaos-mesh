@@ -59,11 +59,11 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 
 	if phase == waitForApplySync {
 		podhttpchaos := &v1alpha1.PodHttpChaos{}
-		NamespacedName, err := controller.ParseNamespacedName(record.Id)
+		namespacedName, err := controller.ParseNamespacedName(record.Id)
 		if err != nil {
 			return waitForApplySync, err
 		}
-		err = impl.Client.Get(ctx, NamespacedName, podhttpchaos)
+		err = impl.Client.Get(ctx, namespacedName, podhttpchaos)
 		if err != nil {
 			return waitForApplySync, err
 		}
@@ -133,12 +133,12 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	phase := record.Phase
 	if phase == waitForRecoverSync {
 		podhttpchaos := &v1alpha1.PodHttpChaos{}
-		NamespacedName, err := controller.ParseNamespacedName(record.Id)
+		namespacedName, err := controller.ParseNamespacedName(record.Id)
 		if err != nil {
 			// This error is not expected to exist
 			return waitForRecoverSync, err
 		}
-		err = impl.Client.Get(ctx, NamespacedName, podhttpchaos)
+		err = impl.Client.Get(ctx, namespacedName, podhttpchaos)
 		if err != nil {
 			// TODO: handle this error
 			if k8sError.IsNotFound(err) {
@@ -165,7 +165,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		return waitForRecoverSync, nil
 	}
 
-	podId, _, err := controller.ParseNamespacedNameContainer(records[index].Id)
+	podId, err := controller.ParseNamespacedName(records[index].Id)
 	if err != nil {
 		// This error is not expected to exist
 		return v1alpha1.NotInjected, err

@@ -58,11 +58,11 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 
 	if phase == waitForApplySync {
 		podiochaos := &v1alpha1.PodIOChaos{}
-		NamespacedName, err := controller.ParseNamespacedName(record.Id)
+		namespacedName, err := controller.ParseNamespacedName(record.Id)
 		if err != nil {
 			return waitForApplySync, err
 		}
-		err = impl.Client.Get(ctx, NamespacedName, podiochaos)
+		err = impl.Client.Get(ctx, namespacedName, podiochaos)
 		if err != nil {
 			if k8sError.IsNotFound(err) {
 				return v1alpha1.NotInjected, nil
@@ -147,12 +147,12 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	phase := record.Phase
 	if phase == waitForRecoverSync {
 		podiochaos := &v1alpha1.PodIOChaos{}
-		NamespacedName, err := controller.ParseNamespacedName(record.Id)
+		namespacedName, err := controller.ParseNamespacedName(record.Id)
 		if err != nil {
 			// This error is not expected to exist
 			return waitForRecoverSync, nil
 		}
-		err = impl.Client.Get(ctx, NamespacedName, podiochaos)
+		err = impl.Client.Get(ctx, namespacedName, podiochaos)
 		if err != nil {
 			// TODO: handle this error
 			if k8sError.IsNotFound(err) {
