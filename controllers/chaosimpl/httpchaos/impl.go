@@ -79,7 +79,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		return waitForApplySync, nil
 	}
 
-	podId, _, err := controller.ParseNamespacedNameContainer(records[index].Id)
+	podId, err := controller.ParseNamespacedName(records[index].Id)
 	if err != nil {
 		return v1alpha1.NotInjected, err
 	}
