@@ -15,9 +15,15 @@ package v1alpha1
 
 import (
 	"fmt"
+	"reflect"
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1/genericwebhook"
 )
+
+type EbsVolume string
+type AWSDeviceName string
 
 func (in *EbsVolume) Validate(root interface{}, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
@@ -48,10 +54,11 @@ func (in *AWSDeviceName) Validate(root interface{}, path *field.Path) field.Erro
 }
 
 // ValidateScheduler validates the scheduler and duration
-func (in AWSChaosAction) Validate(root interface{}, path *field.Path) field.ErrorList {
+func (in *AWSChaosAction) Validate(root interface{}, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
-	switch in {
+	// in cannot be nil
+	switch *in {
 	case Ec2Stop, DetachVolume:
 	case Ec2Restart:
 	default:
@@ -61,4 +68,9 @@ func (in AWSChaosAction) Validate(root interface{}, path *field.Path) field.Erro
 		allErrs = append(allErrs, field.Invalid(path, in, err.Error()))
 	}
 	return allErrs
+}
+
+func init() {
+	genericwebhook.Register("EbsVolume", reflect.PtrTo(reflect.TypeOf(EbsVolume(""))))
+	genericwebhook.Register("AWSDeviceName", reflect.PtrTo(reflect.TypeOf(AWSDeviceName(""))))
 }

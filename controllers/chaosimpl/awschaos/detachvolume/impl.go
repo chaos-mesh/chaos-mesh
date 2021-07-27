@@ -66,8 +66,8 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	var selected v1alpha1.AWSSelector
 	json.Unmarshal([]byte(records[index].Id), &selected)
 	_, err = ec2client.DetachVolume(context.TODO(), &ec2.DetachVolumeInput{
-		VolumeId:   (*string)(selected.EbsVolume),
-		Device:     (*string)(selected.DeviceName),
+		VolumeId:   selected.EbsVolume,
+		Device:     selected.DeviceName,
 		Force:      true,
 		InstanceId: &selected.Ec2Instance,
 	})
@@ -113,9 +113,9 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	json.Unmarshal([]byte(records[index].Id), &selected)
 
 	_, err = ec2client.AttachVolume(context.TODO(), &ec2.AttachVolumeInput{
-		Device:     (*string)(selected.DeviceName),
+		Device:     selected.DeviceName,
 		InstanceId: &selected.Ec2Instance,
-		VolumeId:   (*string)(selected.EbsVolume),
+		VolumeId:   selected.EbsVolume,
 	})
 
 	if err != nil {

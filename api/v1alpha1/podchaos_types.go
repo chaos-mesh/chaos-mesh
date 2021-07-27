@@ -64,7 +64,7 @@ type PodChaosSpec struct {
 	// such as "300ms", "-1.5h" or "2h45m".
 	// Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
 	// +optional
-	Duration *Duration `json:"duration,omitempty"`
+	Duration *string `json:"duration,omitempty" webhook:"Duration"`
 
 	// GracePeriod is used in pod-kill action. It represents the duration in seconds before the pod should be deleted.
 	// Value must be non-negative integer. The default value is zero that indicates delete immediately.

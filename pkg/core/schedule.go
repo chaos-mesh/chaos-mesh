@@ -83,7 +83,7 @@ type ScheduleInfo struct {
 	Scope                   ScopeInfo                  `json:"scope"`
 	Target                  TargetInfo                 `json:"target"`
 	Schedule                string                     `json:"schedule"`
-	Duration                v1alpha1.Duration          `json:"duration" binding:"DurationValid"`
+	Duration                string                     `json:"duration" binding:"DurationValid"`
 	StartingDeadlineSeconds *int64                     `json:"starting_deadline_seconds,omitempty"`
 	ConcurrencyPolicy       v1alpha1.ConcurrencyPolicy `json:"concurrency_policy"`
 	HistoryLimit            int                        `json:"history_limit,omitempty"`

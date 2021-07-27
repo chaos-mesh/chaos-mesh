@@ -34,7 +34,7 @@ func makeTestPodKill(creationTime time.Time, duration *string, desiredPhase v1al
 		},
 		Spec: v1alpha1.PodChaosSpec{
 			Action:   v1alpha1.PodKillAction,
-			Duration: (*v1alpha1.Duration)(duration),
+			Duration: duration,
 		},
 		Status: v1alpha1.PodChaosStatus{
 			ChaosStatus: v1alpha1.ChaosStatus{
@@ -54,7 +54,7 @@ func makeTestNetworkChaos(creationTime time.Time, duration *string, desiredPhase
 			},
 		},
 		Spec: v1alpha1.NetworkChaosSpec{
-			Duration: (*v1alpha1.Duration)(duration),
+			Duration: duration,
 		},
 		Status: v1alpha1.NetworkChaosStatus{
 			ChaosStatus: v1alpha1.ChaosStatus{

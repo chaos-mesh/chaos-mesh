@@ -77,7 +77,7 @@ func TestcaseNetworkDelay(
 				Correlation: "25",
 			},
 		}
-		testDelayDuration = (*v1alpha1.Duration)(pointer.StringPtr("9m"))
+		testDelayDuration = pointer.StringPtr("9m")
 	)
 
 	By("normal delay chaos")

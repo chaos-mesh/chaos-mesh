@@ -159,7 +159,7 @@ type TargetInfo struct {
 
 // SchedulerInfo defines the scheduler information.
 type SchedulerInfo struct {
-	Duration v1alpha1.Duration `json:"duration" binding:"DurationValid"`
+	Duration string `json:"duration" binding:"DurationValid"`
 }
 
 // PodChaosInfo defines the basic information of pod chaos for creating a new PodChaos.
@@ -185,12 +185,12 @@ type NetworkChaosInfo struct {
 // IOChaosInfo defines the basic information of io chaos for creating a new IOChaos.
 type IOChaosInfo struct {
 	Action        string                     `json:"action" binding:"oneof='' 'latency' 'fault' 'attrOverride'"`
-	Delay         v1alpha1.Duration          `json:"delay"`
-	Errno         v1alpha1.IOErrno           `json:"errno"`
+	Delay         string                     `json:"delay"`
+	Errno         uint32                     `json:"errno"`
 	Attr          *v1alpha1.AttrOverrideSpec `json:"attr"`
 	Mistake       *v1alpha1.MistakeSpec      `json:"mistake"`
 	Path          string                     `json:"path"`
-	Percent       v1alpha1.Percent           `json:"percent"`
+	Percent       int                        `json:"percent"`
 	Methods       []v1alpha1.IoMethod        `json:"methods"`
 	VolumePath    string                     `json:"volume_path"`
 	ContainerName string                     `json:"container_name"`
@@ -203,9 +203,9 @@ type KernelChaosInfo struct {
 
 // TimeChaosInfo defines the basic information of time chaos for creating a new TimeChaos.
 type TimeChaosInfo struct {
-	TimeOffset     v1alpha1.TimeOffset `json:"time_offset"`
-	ClockIDs       []string            `json:"clock_ids"`
-	ContainerNames []string            `json:"container_names"`
+	TimeOffset     string   `json:"time_offset"`
+	ClockIDs       []string `json:"clock_ids"`
+	ContainerNames []string `json:"container_names"`
 }
 
 // StressChaosInfo defines the basic information of stress chaos for creating a new StressChaos.
@@ -222,24 +222,24 @@ type DNSChaosInfo struct {
 	ContainerNames     []string `json:"container_names,omitempty"`
 }
 
-// AWSChaosInfo defines the basic information of aws chaos for creating a new AwsChaos.
+// AWSChaosInfo defines the basic information of aws chaos for creating a new AWSChaos.
 type AWSChaosInfo struct {
-	Action      string                  `json:"action" binding:"oneof='ec2-stop' 'ec2-restart' 'detach-volume'"`
-	SecretName  *string                 `json:"secretName,omitempty"`
-	AWSRegion   string                  `json:"awsRegion"`
-	Ec2Instance string                  `json:"ec2Instance"`
-	EbsVolume   *v1alpha1.EbsVolume     `json:"volumeID,omitempty"`
-	DeviceName  *v1alpha1.AWSDeviceName `json:"deviceName,omitempty"`
+	Action      string  `json:"action" binding:"oneof='ec2-stop' 'ec2-restart' 'detach-volume'"`
+	SecretName  *string `json:"secretName,omitempty"`
+	AWSRegion   string  `json:"awsRegion"`
+	Ec2Instance string  `json:"ec2Instance"`
+	EbsVolume   *string `json:"volumeID,omitempty"`
+	DeviceName  *string `json:"deviceName,omitempty"`
 }
 
 // GCPChaosInfo defines the basic information of aws chaos for creating a new GCPChaos.
 type GCPChaosInfo struct {
-	Action      string                  `json:"action" binding:"oneof='node-stop' 'node-reset' 'disk-loss'"`
-	SecretName  *string                 `json:"secretName,omitempty"`
-	Project     string                  `json:"project"`
-	Zone        string                  `json:"zone"`
-	Instance    string                  `json:"instance"`
-	DeviceNames v1alpha1.GCPDeviceNames `json:"deviceNames,omitempty"`
+	Action      string   `json:"action" binding:"oneof='node-stop' 'node-reset' 'disk-loss'"`
+	SecretName  *string  `json:"secretName,omitempty"`
+	Project     string   `json:"project"`
+	Zone        string   `json:"zone"`
+	Instance    string   `json:"instance"`
+	DeviceNames []string `json:"deviceNames,omitempty"`
 }
 
 // ParsePodChaos Parse PodChaos JSON string into KubeObjectDesc.

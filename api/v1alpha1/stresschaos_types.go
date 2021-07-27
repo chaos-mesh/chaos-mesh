@@ -59,7 +59,7 @@ type StressChaosSpec struct {
 
 	// Duration represents the duration of the chaos action
 	// +optional
-	Duration *Duration `json:"duration,omitempty"`
+	Duration *string `json:"duration,omitempty" webhook:"Duration"`
 }
 
 // StressChaosStatus defines the observed state of StressChaos
@@ -147,7 +147,7 @@ type MemoryStressor struct {
 	// One can specify the size as % of total available memory or in units of B, KB/KiB,
 	// MB/MiB, GB/GiB, TB/TiB.
 	// +optional
-	Size Bytes `json:"size,omitempty"`
+	Size string `json:"size,omitempty" webhook:"Bytes"`
 
 	// extend stress-ng options
 	// +optional
@@ -176,5 +176,3 @@ func (obj *StressChaos) GetSelectorSpecs() map[string]interface{} {
 func (obj *StressChaos) GetCustomStatus() interface{} {
 	return &obj.Status.Instances
 }
-
-type Bytes string

@@ -86,7 +86,7 @@ func (in *AWSChaosSpec) DeepCopyInto(out *AWSChaosSpec) {
 	*out = *in
 	if in.Duration != nil {
 		in, out := &in.Duration, &out.Duration
-		*out = new(Duration)
+		*out = new(string)
 		**out = **in
 	}
 	if in.SecretName != nil {
@@ -133,12 +133,12 @@ func (in *AWSSelector) DeepCopyInto(out *AWSSelector) {
 	}
 	if in.EbsVolume != nil {
 		in, out := &in.EbsVolume, &out.EbsVolume
-		*out = new(EbsVolume)
+		*out = new(string)
 		**out = **in
 	}
 	if in.DeviceName != nil {
 		in, out := &in.DeviceName, &out.DeviceName
-		*out = new(AWSDeviceName)
+		*out = new(string)
 		**out = **in
 	}
 }
@@ -536,7 +536,7 @@ func (in *DNSChaosSpec) DeepCopyInto(out *DNSChaosSpec) {
 	in.ContainerSelector.DeepCopyInto(&out.ContainerSelector)
 	if in.Duration != nil {
 		in, out := &in.Duration, &out.Duration
-		*out = new(Duration)
+		*out = new(string)
 		**out = **in
 	}
 	if in.DomainNamePatterns != nil {
@@ -827,7 +827,7 @@ func (in *GCPChaosSpec) DeepCopyInto(out *GCPChaosSpec) {
 	*out = *in
 	if in.Duration != nil {
 		in, out := &in.Duration, &out.Duration
-		*out = new(Duration)
+		*out = new(string)
 		**out = **in
 	}
 	if in.SecretName != nil {
@@ -893,7 +893,7 @@ func (in *GCPSelector) DeepCopyInto(out *GCPSelector) {
 	*out = *in
 	if in.DeviceNames != nil {
 		in, out := &in.DeviceNames, &out.DeviceNames
-		*out = make(GCPDeviceNames, len(*in))
+		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
 }
@@ -1003,7 +1003,7 @@ func (in *HTTPChaosSpec) DeepCopyInto(out *HTTPChaosSpec) {
 	}
 	if in.Duration != nil {
 		in, out := &in.Duration, &out.Duration
-		*out = new(Duration)
+		*out = new(string)
 		**out = **in
 	}
 }
@@ -1152,7 +1152,7 @@ func (in *IOChaosSpec) DeepCopyInto(out *IOChaosSpec) {
 	}
 	if in.Duration != nil {
 		in, out := &in.Duration, &out.Duration
-		*out = new(Duration)
+		*out = new(string)
 		**out = **in
 	}
 }
@@ -1270,7 +1270,7 @@ func (in *JVMChaosSpec) DeepCopyInto(out *JVMChaosSpec) {
 	in.ContainerSelector.DeepCopyInto(&out.ContainerSelector)
 	if in.Duration != nil {
 		in, out := &in.Duration, &out.Duration
-		*out = new(Duration)
+		*out = new(string)
 		**out = **in
 	}
 	in.JVMParameter.DeepCopyInto(&out.JVMParameter)
@@ -1397,7 +1397,7 @@ func (in *KernelChaosSpec) DeepCopyInto(out *KernelChaosSpec) {
 	in.FailKernRequest.DeepCopyInto(&out.FailKernRequest)
 	if in.Duration != nil {
 		in, out := &in.Duration, &out.Duration
-		*out = new(Duration)
+		*out = new(string)
 		**out = **in
 	}
 }
@@ -1565,7 +1565,7 @@ func (in *NetworkChaosSpec) DeepCopyInto(out *NetworkChaosSpec) {
 	in.PodSelector.DeepCopyInto(&out.PodSelector)
 	if in.Duration != nil {
 		in, out := &in.Duration, &out.Duration
-		*out = new(Duration)
+		*out = new(string)
 		**out = **in
 	}
 	in.TcParameter.DeepCopyInto(&out.TcParameter)
@@ -1694,7 +1694,7 @@ func (in *PodChaosSpec) DeepCopyInto(out *PodChaosSpec) {
 	in.ContainerSelector.DeepCopyInto(&out.ContainerSelector)
 	if in.Duration != nil {
 		in, out := &in.Duration, &out.Duration
-		*out = new(Duration)
+		*out = new(string)
 		**out = **in
 	}
 }
@@ -2646,7 +2646,7 @@ func (in *StressChaosSpec) DeepCopyInto(out *StressChaosSpec) {
 	}
 	if in.Duration != nil {
 		in, out := &in.Duration, &out.Duration
-		*out = new(Duration)
+		*out = new(string)
 		**out = **in
 	}
 }
@@ -2920,12 +2920,12 @@ func (in *TimeChaosSpec) DeepCopyInto(out *TimeChaosSpec) {
 	in.ContainerSelector.DeepCopyInto(&out.ContainerSelector)
 	if in.ClockIds != nil {
 		in, out := &in.ClockIds, &out.ClockIds
-		*out = make(ClockIds, len(*in))
+		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
 	if in.Duration != nil {
 		in, out := &in.Duration, &out.Duration
-		*out = new(Duration)
+		*out = new(string)
 		**out = **in
 	}
 }

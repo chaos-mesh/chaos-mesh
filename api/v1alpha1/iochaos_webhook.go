@@ -15,18 +15,28 @@ package v1alpha1
 
 import (
 	"fmt"
+	"reflect"
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1/genericwebhook"
 )
 
-func (in IOErrno) Validate(root interface{}, path *field.Path) field.ErrorList {
+type IOErrno uint32
+
+func (in *IOErrno) Validate(root interface{}, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 	obj := root.(*IOChaos)
 	if obj.Spec.Action == IoFaults {
-		if in == 0 {
+		// in cannot be nil
+		if *in == 0 {
 			allErrs = append(allErrs, field.Invalid(path, in,
 				fmt.Sprintf("action %s: errno 0 is not supported", obj.Spec.Action)))
 		}
 	}
 	return allErrs
+}
+
+func init() {
+	genericwebhook.Register("IOErrno", reflect.PtrTo(reflect.TypeOf(IOErrno(0))))
 }

@@ -61,7 +61,12 @@ func (w *FieldWalker) Walk() {
 		// If node is not the root node, then we need to check whether
 		// we need to iterate its children.
 		if node.Path != nil {
-			val := node.Val.Addr()
+			val := node.Val
+			if val.Kind() != reflect.Ptr {
+				// If it's not a pointer or a slice, then we need to
+				// take the address of it, to be able to modify it.
+				val = val.Addr()
+			}
 			if !w.callback(node.Path, val.Interface(), node.Field) {
 				continue
 			}

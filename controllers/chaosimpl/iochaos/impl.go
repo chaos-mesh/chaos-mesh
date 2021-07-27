@@ -104,16 +104,16 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		Type: iochaos.Spec.Action,
 		Filter: v1alpha1.Filter{
 			Path:    iochaos.Spec.Path,
-			Percent: int(iochaos.Spec.Percent),
+			Percent: iochaos.Spec.Percent,
 			Methods: iochaos.Spec.Methods,
 		},
 		Faults: []v1alpha1.IoFault{
 			{
-				Errno:  uint32(iochaos.Spec.Errno),
+				Errno:  iochaos.Spec.Errno,
 				Weight: 1,
 			},
 		},
-		Latency:          string(iochaos.Spec.Delay),
+		Latency:          iochaos.Spec.Delay,
 		AttrOverrideSpec: iochaos.Spec.Attr,
 		MistakeSpec:      iochaos.Spec.Mistake,
 		Source:           m.Source,

@@ -54,7 +54,7 @@ type GCPChaosSpec struct {
 
 	// Duration represents the duration of the chaos action.
 	// +optional
-	Duration *Duration `json:"duration,omitempty"`
+	Duration *string `json:"duration,omitempty" webhook:"Duration"`
 
 	// SecretName defines the name of kubernetes secret. It is used for GCP credentials.
 	// +optional
@@ -76,7 +76,7 @@ type GCPSelector struct {
 	// The device name of disks to detach.
 	// Needed in disk-loss.
 	// +optional
-	DeviceNames GCPDeviceNames `json:"deviceNames,omitempty" validate:"optional"`
+	DeviceNames []string `json:"deviceNames,omitempty" webhook:"GCPDeviceNames,optional"`
 }
 
 func (obj *GCPChaos) GetSelectorSpecs() map[string]interface{} {
@@ -105,5 +105,3 @@ type GCPChaosStatus struct {
 func (obj *GCPChaos) GetCustomStatus() interface{} {
 	return &obj.Status.AttachedDisksStrings
 }
-
-type GCPDeviceNames []string

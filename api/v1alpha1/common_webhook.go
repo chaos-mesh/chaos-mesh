@@ -21,6 +21,8 @@ import (
 
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/util/validation/field"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1/genericwebhook"
 )
 
 const (
@@ -34,6 +36,8 @@ type CommonSpec interface {
 	Validate() field.ErrorList
 	Default()
 }
+
+type Duration string
 
 func (d *Duration) Validate(root interface{}, path *field.Path) field.ErrorList {
 	if d == nil {
@@ -125,10 +129,18 @@ func (p *PodSelector) Default(root interface{}, field reflect.StructField) {
 	}
 }
 
-func (p Percent) Validate(root interface{}, path *field.Path) field.ErrorList {
+type Percent int
+
+type FloatStr string
+
+func (p *Percent) Validate(root interface{}, path *field.Path) field.ErrorList {
+	if p == nil {
+		return nil
+	}
+
 	allErrs := field.ErrorList{}
 
-	if p > 100 || p < 0 {
+	if *p > 100 || *p < 0 {
 		allErrs = append(allErrs, field.Invalid(path, p,
 			"percent field should be in 0-100"))
 	}
@@ -136,8 +148,12 @@ func (p Percent) Validate(root interface{}, path *field.Path) field.ErrorList {
 	return allErrs
 }
 
-func (f FloatStr) Validate(root interface{}, path *field.Path) field.ErrorList {
-	_, err := strconv.ParseFloat(string(f), 32)
+func (f *FloatStr) Validate(root interface{}, path *field.Path) field.ErrorList {
+	if f == nil {
+		return nil
+	}
+
+	_, err := strconv.ParseFloat(string(*f), 32)
 	if err != nil {
 		return field.ErrorList{
 			field.Invalid(path, f,
@@ -153,4 +169,10 @@ func (f *FloatStr) Default(root interface{}, field reflect.StructField) {
 	if len(*f) == 0 {
 		*f = FloatStr(field.Tag.Get("default"))
 	}
+}
+
+func init() {
+	genericwebhook.Register("Duration", reflect.PtrTo(reflect.TypeOf(Duration(""))))
+	genericwebhook.Register("Percent", reflect.PtrTo(reflect.TypeOf(Percent(0))))
+	genericwebhook.Register("FloatStr", reflect.PtrTo(reflect.TypeOf(FloatStr(""))))
 }

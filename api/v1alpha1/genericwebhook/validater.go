@@ -16,6 +16,7 @@ package genericwebhook
 import (
 	"fmt"
 	"reflect"
+	"strings"
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
@@ -29,34 +30,23 @@ func Validate(obj interface{}) field.ErrorList {
 
 	root := obj
 	walker := NewFieldWalker(obj, func(path *field.Path, obj interface{}, field reflect.StructField) bool {
-		val := reflect.ValueOf(obj)
-		optional := field.Tag.Get("validate") == "optional"
-		for {
-			if !val.IsValid() {
-				return true
+		webhookAttr := field.Tag.Get("webhook")
+		attributes := strings.Split(webhookAttr, ",")
+
+		webhook := ""
+		optional := false
+		if len(attributes) > 0 {
+			webhook = attributes[0]
+		}
+		if len(attributes) > 1 {
+			optional = attributes[1] == "optional"
+		}
+
+		validator := getValidator(obj, webhook, optional)
+		if validator != nil {
+			if err := validator.Validate(root, path); err != nil {
+				errorList = append(errorList, err...)
 			}
-			obj = val.Interface()
-
-			if validator, ok := obj.(FieldValidator); ok {
-				errs := validator.Validate(root, path)
-				errorList = append(errorList, errs...)
-
-				return true
-			}
-
-			if val.Kind() == reflect.Ptr && !val.IsZero() {
-				val = val.Elem()
-
-				// if this field is not optional and we have a nil pointer,
-				// we need to break the loop
-				if !optional && val.Kind() == reflect.Ptr && val.IsZero() {
-					break
-				}
-
-				continue
-			}
-
-			break
 		}
 
 		return true
@@ -71,4 +61,31 @@ func Aggregate(errors field.ErrorList) error {
 		return nil
 	}
 	return fmt.Errorf(errors.ToAggregate().Error())
+}
+
+func getValidator(obj interface{}, webhook string, optional bool) FieldValidator {
+	// There are two possible situations:
+	// 1. The field is a value (int, string, normal struct, etc), and the obj is the reference of it.
+	// 2. The field is a pointer to a value or a slice, then the obj is itself.
+
+	val := reflect.ValueOf(obj)
+
+	if validator, ok := obj.(FieldValidator); ok {
+		if optional || !val.IsZero() {
+			return validator
+		}
+	}
+
+	if webhook != "" {
+		webhookImpl := webhooks[webhook]
+
+		v := val.Convert(webhookImpl).Interface()
+		if validator, ok := v.(FieldValidator); ok {
+			if optional || !val.IsZero() {
+				return validator
+			}
+		}
+	}
+
+	return nil
 }

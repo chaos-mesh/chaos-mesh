@@ -38,7 +38,7 @@ var _ = Describe("iochaos_webhook", func() {
 				execute func(chaos *IOChaos) error
 				expect  string
 			}
-			errorDuration := Duration("400S")
+			errorDuration := "400S"
 
 			tcs := []TestCase{
 				{

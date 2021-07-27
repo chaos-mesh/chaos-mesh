@@ -15,6 +15,7 @@ package genericwebhook
 
 import (
 	"reflect"
+	"strings"
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
@@ -23,16 +24,58 @@ type Defaulter interface {
 	Default(root interface{}, field reflect.StructField)
 }
 
-func Default(obj interface{}) {
+func Default(obj interface{}) field.ErrorList {
+	errorList := field.ErrorList{}
+
 	root := obj
 	walker := NewFieldWalker(obj, func(path *field.Path, obj interface{}, field reflect.StructField) bool {
-		if defaulter, ok := obj.(Defaulter); ok {
-			defaulter.Default(root, field)
+		webhookAttr := field.Tag.Get("webhook")
+		attributes := strings.Split(webhookAttr, ",")
 
-			return true
+		webhook := ""
+		optional := false
+		if len(attributes) > 0 {
+			webhook = attributes[0]
+		}
+		if len(attributes) > 1 {
+			optional = attributes[1] == "optional"
+		}
+
+		defaulter := getDefaulter(obj, webhook, optional)
+		if defaulter != nil {
+			defaulter.Default(root, field)
 		}
 
 		return true
 	})
 	walker.Walk()
+
+	return errorList
+}
+
+func getDefaulter(obj interface{}, webhook string, optional bool) Defaulter {
+	// There are two possible situations:
+	// 1. The field is a value (int, string, normal struct, etc), and the obj is the reference of it.
+	// 2. The field is a pointer to a value or a slice, then the obj is itself.
+
+	val := reflect.ValueOf(obj)
+
+	if defaulter, ok := obj.(Defaulter); ok {
+		if optional || !val.IsZero() {
+			return defaulter
+		}
+	}
+
+	if webhook != "" {
+		webhookImpl := webhooks[webhook]
+
+		v := val.Convert(webhookImpl).Interface()
+		if defaulter, ok := v.(Defaulter); ok {
+			if optional || !val.IsZero() {
+				return defaulter
+			}
+		}
+	}
+
+	return nil
 }

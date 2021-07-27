@@ -21,6 +21,8 @@ import (
 	"strings"
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1/genericwebhook"
 )
 
 const (
@@ -35,10 +37,13 @@ func (in *Direction) Default(root interface{}, field reflect.StructField) {
 	*in = To
 }
 
+type Rate string
+
 // validateBandwidth validates the bandwidth
-func (in Rate) Validate(root interface{}, path *field.Path) field.ErrorList {
+func (in *Rate) Validate(root interface{}, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
-	_, err := ConvertUnitToBytes(string(in))
+	// in cannot be nil
+	_, err := ConvertUnitToBytes(string(*in))
 
 	if err != nil {
 		allErrs = append(allErrs,
@@ -104,4 +109,8 @@ func (in *NetworkChaosSpec) Validate(root interface{}, path *field.Path) field.E
 
 	// TODO: validate externalTargets are in ip or domain form
 	return allErrs
+}
+
+func init() {
+	genericwebhook.Register("Rate", reflect.PtrTo(reflect.TypeOf(Rate(""))))
 }

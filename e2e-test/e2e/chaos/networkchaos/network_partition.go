@@ -60,7 +60,7 @@ func TestcaseForbidHostNetwork(
 		v1alpha1.OnePodMode,
 		v1alpha1.OnePodMode,
 		v1alpha1.To,
-		(*v1alpha1.Duration)(pointer.StringPtr("9m")),
+		pointer.StringPtr("9m"),
 	)
 
 	err = cli.Create(ctx, networkPartition.DeepCopy())
@@ -120,7 +120,7 @@ func TestcaseNetworkPartition(
 	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
 
 	var (
-		testDelayDuration = (*v1alpha1.Duration)(pointer.StringPtr("9m"))
+		testDelayDuration = pointer.StringPtr("9m")
 	)
 
 	baseNetworkPartition := makeNetworkPartitionChaos(

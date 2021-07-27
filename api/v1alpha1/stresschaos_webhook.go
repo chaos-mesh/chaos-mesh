@@ -16,10 +16,13 @@ package v1alpha1
 import (
 	"errors"
 	"fmt"
+	"reflect"
 	"strconv"
 
 	"github.com/docker/go-units"
 	"k8s.io/apimachinery/pkg/util/validation/field"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1/genericwebhook"
 )
 
 // Validate validates the scheduler and duration
@@ -46,14 +49,17 @@ func (in *Stressors) Validate(root interface{}, path *field.Path) field.ErrorLis
 	return nil
 }
 
-func (in Bytes) Validate(root interface{}, path *field.Path) field.ErrorList {
+type Bytes string
+
+func (in *Bytes) Validate(root interface{}, path *field.Path) field.ErrorList {
 	packError := func(err error) field.ErrorList {
 		return field.ErrorList{
 			field.Invalid(path, in, fmt.Sprintf("incorrect bytes format: %s", err.Error())),
 		}
 	}
 
-	size := in
+	// in cannot be nil
+	size := *in
 	length := len(size)
 	if length == 0 {
 		return nil
@@ -87,4 +93,8 @@ func (in *Stressor) Validate(parent *field.Path) field.ErrorList {
 		errs = append(errs, field.Invalid(parent, in, "workers should always be positive"))
 	}
 	return errs
+}
+
+func init() {
+	genericwebhook.Register("Bytes", reflect.PtrTo(reflect.TypeOf(Bytes(""))))
 }

@@ -15,8 +15,11 @@ package v1alpha1
 
 import (
 	"fmt"
+	"reflect"
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1/genericwebhook"
 )
 
 // validateDeviceName validates the DeviceName
@@ -35,15 +38,21 @@ func (in GCPChaosAction) Validate(root interface{}, path *field.Path) field.Erro
 	return allErrs
 }
 
+type GCPDeviceNames []string
+
 // validateDeviceName validates the DeviceName
-func (in GCPDeviceNames) Validate(root interface{}, path *field.Path) field.ErrorList {
+func (in *GCPDeviceNames) Validate(root interface{}, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 	obj := root.(*GCPChaos)
 	if obj.Spec.Action == DiskLoss {
-		if in == nil {
+		if *in == nil {
 			err := fmt.Errorf("at least one device name is required on %s action", obj.Spec.Action)
-			allErrs = append(allErrs, field.Invalid(path, in, err.Error()))
+			allErrs = append(allErrs, field.Invalid(path, *in, err.Error()))
 		}
 	}
 	return allErrs
+}
+
+func init() {
+	genericwebhook.Register("GCPDeviceNames", reflect.PtrTo(reflect.TypeOf(GCPDeviceNames{})))
 }

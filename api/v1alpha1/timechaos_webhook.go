@@ -19,7 +19,11 @@ import (
 	"time"
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1/genericwebhook"
 )
+
+type ClockIds []string
 
 // DefaultClockIds will set default value for empty ClockIds fields
 func (in *ClockIds) Default(root interface{}, field reflect.StructField) {
@@ -29,10 +33,12 @@ func (in *ClockIds) Default(root interface{}, field reflect.StructField) {
 	}
 }
 
-func (in TimeOffset) Validate(root interface{}, path *field.Path) field.ErrorList {
+type TimeOffset string
+
+func (in *TimeOffset) Validate(root interface{}, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
-	_, err := time.ParseDuration(string(in))
+	_, err := time.ParseDuration(string(*in))
 	if err != nil {
 		allErrs = append(allErrs, field.Invalid(path,
 			in,
@@ -40,4 +46,9 @@ func (in TimeOffset) Validate(root interface{}, path *field.Path) field.ErrorLis
 	}
 
 	return allErrs
+}
+
+func init() {
+	genericwebhook.Register("ClockIds", reflect.PtrTo(reflect.TypeOf(ClockIds{})))
+	genericwebhook.Register("TimeOffset", reflect.PtrTo(reflect.TypeOf(TimeOffset(""))))
 }

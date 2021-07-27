@@ -39,17 +39,17 @@ type TimeChaosSpec struct {
 
 	// TimeOffset defines the delta time of injected program. It's a possibly signed sequence of decimal numbers, such as
 	// "300ms", "-1.5h" or "2h45m". Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
-	TimeOffset TimeOffset `json:"timeOffset"`
+	TimeOffset string `json:"timeOffset" webhook:"TimeOffset"`
 
 	// ClockIds defines all affected clock id
 	// All available options are ["CLOCK_REALTIME","CLOCK_MONOTONIC","CLOCK_PROCESS_CPUTIME_ID","CLOCK_THREAD_CPUTIME_ID",
 	// "CLOCK_MONOTONIC_RAW","CLOCK_REALTIME_COARSE","CLOCK_MONOTONIC_COARSE","CLOCK_BOOTTIME","CLOCK_REALTIME_ALARM",
 	// "CLOCK_BOOTTIME_ALARM"]
 	// Default value is ["CLOCK_REALTIME"]
-	ClockIds ClockIds `json:"clockIds,omitempty"`
+	ClockIds []string `json:"clockIds,omitempty" webhook:"ClockIds,optional"`
 
 	// Duration represents the duration of the chaos action
-	Duration *Duration `json:"duration,omitempty"`
+	Duration *string `json:"duration,omitempty"`
 }
 
 // TimeChaosStatus defines the observed state of TimeChaos
@@ -62,6 +62,3 @@ func (in *TimeChaos) GetSelectorSpecs() map[string]interface{} {
 		".": &in.Spec.ContainerSelector,
 	}
 }
-
-type TimeOffset string
-type ClockIds []string
