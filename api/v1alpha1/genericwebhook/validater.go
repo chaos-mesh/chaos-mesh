@@ -34,15 +34,15 @@ func Validate(obj interface{}) field.ErrorList {
 		attributes := strings.Split(webhookAttr, ",")
 
 		webhook := ""
-		optional := false
+		nilable := false
 		if len(attributes) > 0 {
 			webhook = attributes[0]
 		}
 		if len(attributes) > 1 {
-			optional = attributes[1] == "optional"
+			nilable = attributes[1] == "nilable"
 		}
 
-		validator := getValidator(obj, webhook, optional)
+		validator := getValidator(obj, webhook, nilable)
 		if validator != nil {
 			if err := validator.Validate(root, path); err != nil {
 				errorList = append(errorList, err...)
@@ -63,7 +63,7 @@ func Aggregate(errors field.ErrorList) error {
 	return fmt.Errorf(errors.ToAggregate().Error())
 }
 
-func getValidator(obj interface{}, webhook string, optional bool) FieldValidator {
+func getValidator(obj interface{}, webhook string, nilable bool) FieldValidator {
 	// There are two possible situations:
 	// 1. The field is a value (int, string, normal struct, etc), and the obj is the reference of it.
 	// 2. The field is a pointer to a value or a slice, then the obj is itself.
@@ -71,7 +71,7 @@ func getValidator(obj interface{}, webhook string, optional bool) FieldValidator
 	val := reflect.ValueOf(obj)
 
 	if validator, ok := obj.(FieldValidator); ok {
-		if optional || !val.IsZero() {
+		if nilable || !val.IsZero() {
 			return validator
 		}
 	}
@@ -81,7 +81,7 @@ func getValidator(obj interface{}, webhook string, optional bool) FieldValidator
 
 		v := val.Convert(webhookImpl).Interface()
 		if validator, ok := v.(FieldValidator); ok {
-			if optional || !val.IsZero() {
+			if nilable || !val.IsZero() {
 				return validator
 			}
 		}

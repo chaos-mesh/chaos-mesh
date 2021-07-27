@@ -46,7 +46,7 @@ type TimeChaosSpec struct {
 	// "CLOCK_MONOTONIC_RAW","CLOCK_REALTIME_COARSE","CLOCK_MONOTONIC_COARSE","CLOCK_BOOTTIME","CLOCK_REALTIME_ALARM",
 	// "CLOCK_BOOTTIME_ALARM"]
 	// Default value is ["CLOCK_REALTIME"]
-	ClockIds []string `json:"clockIds,omitempty" webhook:"ClockIds,optional"`
+	ClockIds []string `json:"clockIds,omitempty" webhook:"ClockIds,nilable"`
 
 	// Duration represents the duration of the chaos action
 	Duration *string `json:"duration,omitempty"`

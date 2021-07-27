@@ -76,7 +76,7 @@ type GCPSelector struct {
 	// The device name of disks to detach.
 	// Needed in disk-loss.
 	// +optional
-	DeviceNames []string `json:"deviceNames,omitempty" webhook:"GCPDeviceNames,optional"`
+	DeviceNames []string `json:"deviceNames,omitempty" webhook:"GCPDeviceNames,nilable"`
 }
 
 func (obj *GCPChaos) GetSelectorSpecs() map[string]interface{} {

@@ -33,15 +33,15 @@ func Default(obj interface{}) field.ErrorList {
 		attributes := strings.Split(webhookAttr, ",")
 
 		webhook := ""
-		optional := false
+		nilable := false
 		if len(attributes) > 0 {
 			webhook = attributes[0]
 		}
 		if len(attributes) > 1 {
-			optional = attributes[1] == "optional"
+			nilable = attributes[1] == "nilable"
 		}
 
-		defaulter := getDefaulter(obj, webhook, optional)
+		defaulter := getDefaulter(obj, webhook, nilable)
 		if defaulter != nil {
 			defaulter.Default(root, field)
 		}
@@ -53,7 +53,7 @@ func Default(obj interface{}) field.ErrorList {
 	return errorList
 }
 
-func getDefaulter(obj interface{}, webhook string, optional bool) Defaulter {
+func getDefaulter(obj interface{}, webhook string, nilable bool) Defaulter {
 	// There are two possible situations:
 	// 1. The field is a value (int, string, normal struct, etc), and the obj is the reference of it.
 	// 2. The field is a pointer to a value or a slice, then the obj is itself.
@@ -61,7 +61,7 @@ func getDefaulter(obj interface{}, webhook string, optional bool) Defaulter {
 	val := reflect.ValueOf(obj)
 
 	if defaulter, ok := obj.(Defaulter); ok {
-		if optional || !val.IsZero() {
+		if nilable || !val.IsZero() {
 			return defaulter
 		}
 	}
@@ -71,7 +71,7 @@ func getDefaulter(obj interface{}, webhook string, optional bool) Defaulter {
 
 		v := val.Convert(webhookImpl).Interface()
 		if defaulter, ok := v.(Defaulter); ok {
-			if optional || !val.IsZero() {
+			if nilable || !val.IsZero() {
 				return defaulter
 			}
 		}
