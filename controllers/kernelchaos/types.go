@@ -248,7 +248,7 @@ func CreateBPFKIConnection(ctx context.Context, c kubeclient.Client, pod *v1.Pod
 		return nil, err
 	}
 
-	return grpcUtils.CreateGrpcConnection(daemonIP, config.ControllerCfg.BPFKIPort, config.ControllerCfg.TLSConfig.ChaosMeshCACert, config.ControllerCfg.TLSConfig.ChaosDaemonClientCert, config.ControllerCfg.TLSConfig.ChaosDaemonClientKey)
+	return grpcUtils.CreateGrpcConnection(daemonIP, config.ControllerCfg.BPFKIPort, "", "", "")
 }
 
 func init() {
