@@ -58,7 +58,7 @@ type AWSChaosSpec struct {
 
 	// SecretName defines the name of kubernetes secret.
 	// +optional
-	SecretName *string `json:"secretName,omitempty" webhoo:",nilable"`
+	SecretName *string `json:"secretName,omitempty" webhook:",nilable"`
 
 	AWSSelector `json:",inline"`
 }
