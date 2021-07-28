@@ -26,11 +26,11 @@ func ParseNamespacedName(namespacedName string) types.NamespacedName {
 			Namespace: parts[0],
 			Name:      parts[1],
 		}
-	} else {
-		return types.NamespacedName{
-			Namespace: "",
-			Name:      "",
-		}
+	}
+
+	return types.NamespacedName{
+		Namespace: "",
+		Name:      "",
 	}
 }
 
@@ -41,10 +41,11 @@ func ParseNamespacedNameContainer(namespacedName string) (types.NamespacedName, 
 			Namespace: parts[0],
 			Name:      parts[1],
 		}, strings.Join(parts[2:], "")
-	} else {
-		return types.NamespacedName{
-			Namespace: "",
-			Name:      "",
-		}, ""
 	}
+
+	return types.NamespacedName{
+		Namespace: "",
+		Name:      "",
+	}, ""
+
 }

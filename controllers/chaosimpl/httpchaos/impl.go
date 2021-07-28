@@ -75,7 +75,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		return waitForApplySync, nil
 	}
 
-	podId, _ := controller.ParseNamespacedNameContainer(records[index].Id)
+	podId := controller.ParseNamespacedName(records[index].Id)
 	var pod v1.Pod
 	err := impl.Client.Get(ctx, podId, &pod)
 	if err != nil {
@@ -153,7 +153,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		return waitForRecoverSync, nil
 	}
 
-	podId, _ := controller.ParseNamespacedNameContainer(records[index].Id)
+	podId := controller.ParseNamespacedName(records[index].Id)
 	var pod v1.Pod
 	err := impl.Client.Get(ctx, podId, &pod)
 	if err != nil {
