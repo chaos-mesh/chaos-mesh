@@ -42,7 +42,7 @@ func NewBlockingBuffer() io.ReadWriteCloser {
 	m := sync.Mutex{}
 	return &blockingBuffer{
 		cond:   sync.NewCond(&m),
-		buf:    NewConcurrentBuffer(),
+		buf:    newInternalBuffer(),
 		closed: atomic.NewBool(false),
 	}
 }
@@ -85,13 +85,14 @@ func (br *blockingBuffer) Close() error {
 	return nil
 }
 
-type concurrentBuffer struct {
+// internalBuffer is a buffer with a lock
+type internalBuffer struct {
 	buf   bytes.Buffer
 	mutex sync.Mutex
 }
 
-func NewConcurrentBuffer() io.ReadWriteCloser {
-	buffer := &concurrentBuffer{
+func newInternalBuffer() io.ReadWriteCloser {
+	buffer := &internalBuffer{
 		buf:   bytes.Buffer{},
 		mutex: sync.Mutex{},
 	}
@@ -99,20 +100,20 @@ func NewConcurrentBuffer() io.ReadWriteCloser {
 	return buffer
 }
 
-func (b *concurrentBuffer) Write(buf []byte) (ln int, err error) {
-	b.mutex.Lock()
-	defer b.mutex.Unlock()
+func (cb *internalBuffer) Write(buf []byte) (ln int, err error) {
+	cb.mutex.Lock()
+	defer cb.mutex.Unlock()
 
-	return b.buf.Write(buf)
+	return cb.buf.Write(buf)
 }
 
-func (b *concurrentBuffer) Read(buf []byte) (ln int, err error) {
-	b.mutex.Lock()
-	defer b.mutex.Unlock()
+func (cb *internalBuffer) Read(buf []byte) (ln int, err error) {
+	cb.mutex.Lock()
+	defer cb.mutex.Unlock()
 
-	return b.buf.Read(buf)
+	return cb.buf.Read(buf)
 }
 
-func (cb *concurrentBuffer) Close() error {
+func (cb *internalBuffer) Close() error {
 	return nil
 }

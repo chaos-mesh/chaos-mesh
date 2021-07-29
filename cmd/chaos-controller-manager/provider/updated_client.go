@@ -18,7 +18,6 @@ import (
 	"reflect"
 	"strconv"
 
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	lru "github.com/hashicorp/golang-lru"
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime"
