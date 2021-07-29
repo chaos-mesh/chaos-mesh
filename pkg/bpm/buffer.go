@@ -28,16 +28,6 @@ type blockingBuffer struct {
 	closed *atomic.Bool
 }
 
-type readCtx struct {
-	ret  chan readRet
-	data []byte
-}
-
-type readRet struct {
-	ln  int
-	err error
-}
-
 func NewBlockingBuffer() io.ReadWriteCloser {
 	m := sync.Mutex{}
 	return &blockingBuffer{
