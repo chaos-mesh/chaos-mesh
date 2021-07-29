@@ -15,24 +15,17 @@ package bpm
 
 import (
 	"bytes"
-	"context"
 	"io"
 	"sync"
+
+	"go.uber.org/atomic"
 )
 
 type blockingBuffer struct {
-	buf    bytes.Buffer
+	buf io.ReadWriteCloser
+
 	cond   *sync.Cond
-	closed bool
-}
-
-type concurrentBuffer struct {
-	ctx    context.Context
-	cancel context.CancelFunc
-
-	buf       bytes.Buffer
-	writeChan chan []byte
-	readChan  chan *readCtx
+	closed *atomic.Bool
 }
 
 type readCtx struct {
@@ -49,113 +42,77 @@ func NewBlockingBuffer() io.ReadWriteCloser {
 	m := sync.Mutex{}
 	return &blockingBuffer{
 		cond:   sync.NewCond(&m),
-		buf:    bytes.Buffer{},
-		closed: false,
+		buf:    NewConcurrentBuffer(),
+		closed: atomic.NewBool(false),
 	}
-}
-
-func NewConcurrentBuffer() io.ReadWriteCloser {
-	ctx, cancel := context.WithCancel(context.Background())
-
-	buffer := &concurrentBuffer{
-		ctx:       ctx,
-		cancel:    cancel,
-		writeChan: make(chan []byte),
-		readChan:  make(chan *readCtx),
-	}
-
-	go buffer.start()
-	return buffer
 }
 
 func (br *blockingBuffer) Write(b []byte) (ln int, err error) {
-	if br.closed {
+	if br.closed.Load() {
 		return 0, nil
 	}
 	ln, err = br.buf.Write(b)
+
 	br.cond.Broadcast()
 	return
 }
 
 func (br *blockingBuffer) Read(b []byte) (ln int, err error) {
-	if br.closed {
+	if br.closed.Load() {
 		return 0, io.EOF
 	}
 	ln, err = br.buf.Read(b)
+
 	for err == io.EOF {
 		br.cond.L.Lock()
-		if br.closed {
+		if br.closed.Load() {
 			return 0, io.EOF
 		}
 		br.cond.Wait()
 		br.cond.L.Unlock()
+
 		ln, err = br.buf.Read(b)
 	}
 	return
 }
 
 func (br *blockingBuffer) Close() error {
-	br.closed = true
+	br.closed.Store(true)
+
 	br.cond.Broadcast()
+
+	br.buf.Close()
 	return nil
 }
 
-func (cb *concurrentBuffer) start() {
-	for {
-		if cb.buf.Len() == 0 {
-			select {
-			case data := <-cb.writeChan:
-				cb.buf.Write(data)
-				continue
-			case <-cb.ctx.Done():
-				return
-			}
-		}
-
-		select {
-		case data := <-cb.writeChan:
-			cb.buf.Write(data)
-		case <-cb.ctx.Done():
-			return
-		case ctx := <-cb.readChan:
-			ln, err := cb.buf.Read(ctx.data)
-			ctx.ret <- readRet{
-				ln:  ln,
-				err: err,
-			}
-		}
-	}
+type concurrentBuffer struct {
+	buf   bytes.Buffer
+	mutex sync.Mutex
 }
 
-func (cb *concurrentBuffer) Write(b []byte) (ln int, err error) {
-	select {
-	case <-cb.ctx.Done():
-		return 0, nil
-	case cb.writeChan <- b:
-		return len(b), nil
+func NewConcurrentBuffer() io.ReadWriteCloser {
+	buffer := &concurrentBuffer{
+		buf:   bytes.Buffer{},
+		mutex: sync.Mutex{},
 	}
+
+	return buffer
 }
 
-func (cb *concurrentBuffer) Read(b []byte) (ln int, err error) {
-	ret := make(chan readRet)
+func (b *concurrentBuffer) Write(buf []byte) (ln int, err error) {
+	b.mutex.Lock()
+	defer b.mutex.Unlock()
 
-	select {
-	case <-cb.ctx.Done():
-		return 0, io.EOF
-	case cb.readChan <- &readCtx{
-		ret:  ret,
-		data: b,
-	}:
-		select {
-		case <-cb.ctx.Done():
-			return 0, io.EOF
-		case result := <-ret:
-			return result.ln, result.err
-		}
-	}
+	return b.buf.Write(buf)
+}
+
+func (b *concurrentBuffer) Read(buf []byte) (ln int, err error) {
+	b.mutex.Lock()
+	defer b.mutex.Unlock()
+
+	return b.buf.Read(buf)
 }
 
 func (cb *concurrentBuffer) Close() error {
-	cb.cancel()
 	return nil
 }

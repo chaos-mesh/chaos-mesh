@@ -18,6 +18,7 @@ import (
 	"reflect"
 	"strconv"
 
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	lru "github.com/hashicorp/golang-lru"
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -76,6 +77,8 @@ func (c *UpdatedClient) Get(ctx context.Context, key client.ObjectKey, obj runti
 			return nil
 		}
 		if cachedResourceVersion >= newResourceVersion {
+			cachedObject := cachedObject.(runtime.Object).DeepCopyObject()
+
 			reflect.ValueOf(obj).Elem().Set(reflect.ValueOf(cachedObject).Elem())
 		}
 	}
@@ -101,6 +104,15 @@ func (c *UpdatedClient) Update(ctx context.Context, obj runtime.Object, opts ...
 		return err
 	}
 
+	err = c.writeCache(obj)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *UpdatedClient) writeCache(obj runtime.Object) error {
 	objMeta, err := meta.Accessor(obj)
 	if err != nil {
 		return nil
@@ -115,6 +127,7 @@ func (c *UpdatedClient) Update(ctx context.Context, obj runtime.Object, opts ...
 	}
 
 	c.cache.Add(objectKey, obj.DeepCopyObject())
+
 	return nil
 }
 
@@ -127,7 +140,31 @@ func (c *UpdatedClient) DeleteAllOf(ctx context.Context, obj runtime.Object, opt
 }
 
 func (c *UpdatedClient) Status() client.StatusWriter {
-	// TODO: add cache for status client
+	return &UpdatedStatusWriter{
+		statusWriter: c.client.Status(),
+		client:       c,
+	}
+}
 
-	return c.client.Status()
+type UpdatedStatusWriter struct {
+	statusWriter client.StatusWriter
+	client       *UpdatedClient
+}
+
+func (c *UpdatedStatusWriter) Update(ctx context.Context, obj runtime.Object, opts ...client.UpdateOption) error {
+	err := c.statusWriter.Update(ctx, obj, opts...)
+	if err != nil {
+		return err
+	}
+
+	err = c.client.writeCache(obj)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *UpdatedStatusWriter) Patch(ctx context.Context, obj runtime.Object, patch client.Patch, opts ...client.PatchOption) error {
+	return c.statusWriter.Patch(ctx, obj, patch, opts...)
 }
