@@ -58,8 +58,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 
 	if phase == waitForApplySync {
 		podiochaos := &v1alpha1.PodIOChaos{}
-		podId, _ := controller.ParseNamespacedNameContainer(record.Id)
-		err := impl.Client.Get(ctx, podId, podiochaos)
+		err := impl.Client.Get(ctx, controller.ParseNamespacedName(record.Id), podiochaos)
 		if err != nil {
 			if k8sError.IsNotFound(err) {
 				return v1alpha1.NotInjected, nil
@@ -141,8 +140,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	phase := record.Phase
 	if phase == waitForRecoverSync {
 		podiochaos := &v1alpha1.PodIOChaos{}
-		podId, _ := controller.ParseNamespacedNameContainer(record.Id)
-		err := impl.Client.Get(ctx, podId, podiochaos)
+		err := impl.Client.Get(ctx, controller.ParseNamespacedName(record.Id), podiochaos)
 		if err != nil {
 			// TODO: handle this error
 			if k8sError.IsNotFound(err) {
@@ -162,9 +160,8 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		return waitForRecoverSync, nil
 	}
 
-	podId, _ := controller.ParseNamespacedNameContainer(records[index].Id)
 	var pod v1.Pod
-	err := impl.Client.Get(ctx, podId, &pod)
+	err := impl.Client.Get(ctx, controller.ParseNamespacedName(records[index].Id), &pod)
 	if err != nil {
 		// TODO: handle this error
 		if k8sError.IsNotFound(err) {
