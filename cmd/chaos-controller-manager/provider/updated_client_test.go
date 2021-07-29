@@ -113,7 +113,7 @@ var _ = Describe("UpdatedClient", func() {
 			Expect(newObj.Data["test"]).To(Equal("1"))
 			newObj.Data["test"] = "2"
 			anotherCleanClient := mgr.GetClient()
-			err = anotherCleanClient.Update(context.TODO(), obj)
+			err = anotherCleanClient.Update(context.TODO(), newObj)
 			Expect(err).ToNot(HaveOccurred())
 
 			newObj = &corev1.ConfigMap{}
