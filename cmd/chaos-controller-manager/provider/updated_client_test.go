@@ -16,6 +16,7 @@ package provider
 import (
 	"context"
 	"strconv"
+	"time"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -116,6 +117,7 @@ var _ = Describe("UpdatedClient", func() {
 			err = anotherCleanClient.Update(context.TODO(), newObj)
 			Expect(err).ToNot(HaveOccurred())
 
+			time.Sleep(1 * time.Second)
 			newObj = &corev1.ConfigMap{}
 			err = k8sClient.Get(context.TODO(), types.NamespacedName{
 				Namespace: "default",
