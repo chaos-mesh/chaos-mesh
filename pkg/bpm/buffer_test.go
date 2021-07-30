@@ -25,7 +25,7 @@ import (
 	"go.uber.org/zap/buffer"
 )
 
-var _ = Describe("concurrent buffer", func() {
+var _ = Describe("internal buffer", func() {
 	var testLines = map[string]bool{
 		"a":     true,
 		"ab":    true,
@@ -45,7 +45,7 @@ var _ = Describe("concurrent buffer", func() {
 
 	testSequentially := func() {
 		linesChan := makeLinesChain(testLines, repeated)
-		buffer := NewConcurrentBuffer()
+		buffer := newInternalBuffer()
 		Expect(writeBuffer(linesChan, buffer)).To(BeNil())
 		result, err := readTimeout(buffer, time.Second)
 		Expect(err).To(BeNil())
@@ -54,13 +54,18 @@ var _ = Describe("concurrent buffer", func() {
 
 	testConcurrently := func() {
 		linesChan := makeLinesChain(testLines, repeated)
-		buffer := NewConcurrentBuffer()
+		buffer := newInternalBuffer()
+
+		wg := sync.WaitGroup{}
 		for i := 0; i < workers; i++ {
+			wg.Add(1)
 			go func() {
 				defer GinkgoRecover()
 				Expect(writeBuffer(linesChan, buffer)).To(BeNil())
+				wg.Done()
 			}()
 		}
+		wg.Wait()
 		result, err := readTimeout(buffer, time.Second)
 		Expect(err).To(BeNil())
 		check(testLines, result, seperator, repeated)
@@ -146,6 +151,9 @@ func readTimeout(reader io.Reader, timeout time.Duration) ([]byte, error) {
 			if err != nil {
 				break
 			}
+		}
+		if err == io.EOF {
+			return
 		}
 		errChan <- err
 	}()
