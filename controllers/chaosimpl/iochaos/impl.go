@@ -172,6 +172,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		return waitForRecoverSync, nil
 	}
 
+<<<<<<< HEAD
 	podId, _, err := controller.ParseNamespacedNameContainer(records[index].Id)
 	if err != nil {
 		// This error is not expected to exist
@@ -179,6 +180,10 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	}
 	var pod v1.Pod
 	err = impl.Client.Get(ctx, podId, &pod)
+=======
+	var pod v1.Pod
+	err := impl.Client.Get(ctx, controller.ParseNamespacedName(records[index].Id), &pod)
+>>>>>>> eb18be4a056cb78e939a423fcb3a719beb8e977e
 	if err != nil {
 		// TODO: handle this error
 		if k8sError.IsNotFound(err) {
