@@ -165,8 +165,8 @@ func (s *Service) createSchedule(c *gin.Context) {
 		v1alpha1.KindTimeChaos:    parseTimeChaos,
 		v1alpha1.KindKernelChaos:  parseKernelChaos,
 		v1alpha1.KindDNSChaos:     parseDNSChaos,
-		v1alpha1.KindAwsChaos:     parseAwsChaos,
-		v1alpha1.KindGcpChaos:     parseGcpChaos,
+		v1alpha1.KindAWSChaos:     parseAWSChaos,
+		v1alpha1.KindGCPChaos:     parseGCPChaos,
 	}
 
 	f, ok := parseFuncs[exp.Target.Kind]
@@ -438,22 +438,22 @@ func parseDNSChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	}
 }
 
-func parseAwsChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
-	chaos := &v1alpha1.AwsChaos{
+func parseAWSChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
+	chaos := &v1alpha1.AWSChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        exp.Name,
 			Namespace:   exp.Namespace,
 			Labels:      exp.Labels,
 			Annotations: exp.Annotations,
 		},
-		Spec: v1alpha1.AwsChaosSpec{
-			Action:     v1alpha1.AwsChaosAction(exp.Target.AwsChaos.Action),
-			SecretName: exp.Target.AwsChaos.SecretName,
-			AwsSelector: v1alpha1.AwsSelector{
-				AwsRegion:   exp.Target.AwsChaos.AwsRegion,
-				Ec2Instance: exp.Target.AwsChaos.Ec2Instance,
-				EbsVolume:   exp.Target.AwsChaos.EbsVolume,
-				DeviceName:  exp.Target.AwsChaos.DeviceName,
+		Spec: v1alpha1.AWSChaosSpec{
+			Action:     v1alpha1.AWSChaosAction(exp.Target.AWSChaos.Action),
+			SecretName: exp.Target.AWSChaos.SecretName,
+			AWSSelector: v1alpha1.AWSSelector{
+				AWSRegion:   exp.Target.AWSChaos.AWSRegion,
+				Ec2Instance: exp.Target.AWSChaos.Ec2Instance,
+				EbsVolume:   exp.Target.AWSChaos.EbsVolume,
+				DeviceName:  exp.Target.AWSChaos.DeviceName,
 			},
 		},
 	}
@@ -463,26 +463,26 @@ func parseAwsChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	}
 
 	return v1alpha1.ScheduleItem{
-		EmbedChaos: v1alpha1.EmbedChaos{AwsChaos: &chaos.Spec},
+		EmbedChaos: v1alpha1.EmbedChaos{AWSChaos: &chaos.Spec},
 	}
 }
 
-func parseGcpChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
-	chaos := &v1alpha1.GcpChaos{
+func parseGCPChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
+	chaos := &v1alpha1.GCPChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        exp.Name,
 			Namespace:   exp.Namespace,
 			Labels:      exp.Labels,
 			Annotations: exp.Annotations,
 		},
-		Spec: v1alpha1.GcpChaosSpec{
-			Action:     v1alpha1.GcpChaosAction(exp.Target.GcpChaos.Action),
-			SecretName: exp.Target.GcpChaos.SecretName,
-			GcpSelector: v1alpha1.GcpSelector{
-				Project:     exp.Target.GcpChaos.Project,
-				Zone:        exp.Target.GcpChaos.Zone,
-				Instance:    exp.Target.GcpChaos.Instance,
-				DeviceNames: exp.Target.GcpChaos.DeviceNames,
+		Spec: v1alpha1.GCPChaosSpec{
+			Action:     v1alpha1.GCPChaosAction(exp.Target.GCPChaos.Action),
+			SecretName: exp.Target.GCPChaos.SecretName,
+			GCPSelector: v1alpha1.GCPSelector{
+				Project:     exp.Target.GCPChaos.Project,
+				Zone:        exp.Target.GCPChaos.Zone,
+				Instance:    exp.Target.GCPChaos.Instance,
+				DeviceNames: exp.Target.GCPChaos.DeviceNames,
 			},
 		},
 	}
@@ -492,7 +492,7 @@ func parseGcpChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	}
 
 	return v1alpha1.ScheduleItem{
-		EmbedChaos: v1alpha1.EmbedChaos{GcpChaos: &chaos.Spec},
+		EmbedChaos: v1alpha1.EmbedChaos{GCPChaos: &chaos.Spec},
 	}
 }
 
@@ -609,7 +609,7 @@ func (s *Service) getScheduleDetail(c *gin.Context) {
 	}
 
 	UIDList := make([]string, 0)
-	kind, ok := v1alpha1.AllSchedules()[string(schedule.Spec.Type)]
+	kind, ok := v1alpha1.AllScheduleItemKinds()[string(schedule.Spec.Type)]
 	if !ok {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrBadRequest.New("the kind is not supported"))

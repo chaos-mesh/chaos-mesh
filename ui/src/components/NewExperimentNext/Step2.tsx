@@ -6,13 +6,14 @@ import {
   data as scheduleSpecificData,
   schema as scheduleSpecificSchema,
 } from 'components/Schedule/types'
-import basicData, { schema } from './data/basic'
+import basicData, { schema as basicSchema } from './data/basic'
 import { setBasic, setScheduleSpecific, setStep2 } from 'slices/experiments'
 import { useEffect, useMemo, useState } from 'react'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
 import AdvancedOptions from 'components/AdvancedOptions'
 import CheckIcon from '@material-ui/icons/Check'
+import { ExperimentKind } from 'components/NewExperiment/types'
 import Paper from 'components-mui/Paper'
 import PublishIcon from '@material-ui/icons/Publish'
 import Scheduler from './form/Scheduler'
@@ -23,8 +24,8 @@ import T from 'components/T'
 import UndoIcon from '@material-ui/icons/Undo'
 import { string as yupString } from 'yup'
 
-function isInstant(target: any) {
-  if (target.kind === 'PodChaos' && ['pod-kill', 'container-kill'].includes(target.spec.action)) {
+function isInstant(kind: ExperimentKind | '', action: string) {
+  if (kind === 'PodChaos' && (action === 'pod-kill' || action === 'container-kill')) {
     return true
   }
 
@@ -37,8 +38,10 @@ interface Step2Props {
 }
 
 const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false }) => {
-  const { namespaces, step2, basic, target, scheduleSpecific } = useStoreSelector((state) => state.experiments)
-  const scopeDisabled = target.kind === 'AwsChaos' || target.kind === 'GcpChaos'
+  const { namespaces, step2, kindAction, basic, scheduleSpecific } = useStoreSelector((state) => state.experiments)
+  const [kind, action] = kindAction
+  const scopeDisabled = kind === 'AWSChaos' || kind === 'GCPChaos'
+  const schema = basicSchema({ scopeDisabled })
   const dispatch = useStoreDispatch()
 
   const originalInit = useMemo(
@@ -119,7 +122,7 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false })
               <Grid container spacing={6}>
                 <Grid item xs={6}>
                   <Space>
-                    <Typography color={scopeDisabled ? 'textSecondary' : undefined}>
+                    <Typography sx={{ color: scopeDisabled ? 'text.disabled' : undefined }}>
                       {T('newE.steps.scope')}
                       {scopeDisabled && T('newE.steps.scopeDisabled')}
                     </Typography>
@@ -171,7 +174,7 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false })
                       <LabelField name="metadata.labels" label={T('k8s.labels')} isKV />
                       <LabelField name="metadata.annotations" label={T('k8s.annotations')} isKV />
                     </AdvancedOptions>
-                    {!inWorkflow && !isInstant(target) && (
+                    {!inWorkflow && !isInstant(kind, action) && (
                       <>
                         <Divider />
                         <Scheduler errors={errors} touched={touched} inSchedule={inSchedule} />

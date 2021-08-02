@@ -20,7 +20,7 @@ import (
 )
 
 const scheduleTemplate = `
-	allSchedules.register(Kind{{.Type}}, &ChaosKind{
+	allScheduleItem.register(Kind{{.Type}}, &ChaosKind{
 		Chaos:     &{{.Type}}{},
 		ChaosList: &{{.Type}}List{},
 	})

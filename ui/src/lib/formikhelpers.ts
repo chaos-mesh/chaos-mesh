@@ -177,6 +177,14 @@ export function yamlToExperiment(yamlObj: any): any {
     }
   }
 
+  console.log({
+    ...result,
+    target: {
+      kind,
+      [_snakecase(kind)]: spec,
+    },
+  })
+
   return {
     ...result,
     target: {

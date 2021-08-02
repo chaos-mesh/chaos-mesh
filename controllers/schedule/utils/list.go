@@ -30,7 +30,7 @@ type ActiveLister struct {
 }
 
 func (lister *ActiveLister) ListActiveJobs(ctx context.Context, schedule *v1alpha1.Schedule) (runtime.Object, error) {
-	kind, ok := v1alpha1.AllSchedules()[string(schedule.Spec.Type)]
+	kind, ok := v1alpha1.AllScheduleItemKinds()[string(schedule.Spec.Type)]
 	if !ok {
 		lister.Log.Info("unknown kind", "kind", schedule.Spec.Type)
 		return nil, errors.Errorf("Unknown type: %s", schedule.Spec.Type)

@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"net/http"
 	"reflect"
-	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -231,12 +230,12 @@ func (s *Service) create(c *gin.Context) {
 		var chaos v1alpha1.DNSChaos
 		mapstructure.Decode(exp, &chaos)
 		err = kubeCli.Create(context.Background(), &chaos)
-	case v1alpha1.KindAwsChaos:
-		var chaos v1alpha1.AwsChaos
+	case v1alpha1.KindAWSChaos:
+		var chaos v1alpha1.AWSChaos
 		mapstructure.Decode(exp, &chaos)
 		err = kubeCli.Create(context.Background(), &chaos)
-	case v1alpha1.KindGcpChaos:
-		var chaos v1alpha1.GcpChaos
+	case v1alpha1.KindGCPChaos:
+		var chaos v1alpha1.GCPChaos
 		mapstructure.Decode(exp, &chaos)
 		err = kubeCli.Create(context.Background(), &chaos)
 	case v1alpha1.KindJVMChaos:
@@ -360,10 +359,10 @@ func (s *Service) get(c *gin.Context) {
 		expDetail = s.findChaosInCluster(c, kubeCli, ns, name, &v1alpha1.TimeChaos{})
 	case v1alpha1.KindDNSChaos:
 		expDetail = s.findChaosInCluster(c, kubeCli, ns, name, &v1alpha1.DNSChaos{})
-	case v1alpha1.KindAwsChaos:
-		expDetail = s.findChaosInCluster(c, kubeCli, ns, name, &v1alpha1.AwsChaos{})
-	case v1alpha1.KindGcpChaos:
-		expDetail = s.findChaosInCluster(c, kubeCli, ns, name, &v1alpha1.GcpChaos{})
+	case v1alpha1.KindAWSChaos:
+		expDetail = s.findChaosInCluster(c, kubeCli, ns, name, &v1alpha1.AWSChaos{})
+	case v1alpha1.KindGCPChaos:
+		expDetail = s.findChaosInCluster(c, kubeCli, ns, name, &v1alpha1.GCPChaos{})
 	case v1alpha1.KindJVMChaos:
 		expDetail = s.findChaosInCluster(c, kubeCli, ns, name, &v1alpha1.JVMChaos{})
 	case v1alpha1.KindHTTPChaos:

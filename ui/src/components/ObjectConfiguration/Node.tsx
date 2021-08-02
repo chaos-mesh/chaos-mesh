@@ -2,7 +2,6 @@ import { Box, Table, TableBody, TableRow, Typography } from '@material-ui/core'
 
 import { Branch } from 'slices/workflows'
 import ObjectConfiguration from '.'
-import PaperTop from 'components-mui/PaperTop'
 import T from 'components/T'
 import { TableCell } from './common'
 
@@ -134,16 +133,15 @@ const NodeConfiguration: React.FC<NodeConfigurationProps> = ({ template: t }) =>
       case 'Task':
         return <Custom template={t} />
       default:
-        return <ObjectConfiguration config={t} inNode vertical />
+        return (
+          <Box p={4.5}>
+            <ObjectConfiguration config={t} inNode vertical />
+          </Box>
+        )
     }
   }
 
-  return (
-    <Box p={4.5}>
-      <PaperTop title={T('common.configuration')} boxProps={{ mb: 3 }} />
-      {rendered()}
-    </Box>
-  )
+  return rendered()
 }
 
 export default NodeConfiguration

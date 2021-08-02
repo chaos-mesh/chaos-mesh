@@ -24,22 +24,22 @@ If you have a specific idea of a fix or update, follow these steps below to subm
 1. Fork the Chaos Mesh repo, and then clone it:
 
    ```bash
-   $ export user={your github. profile name}
-   $ git clone git@github.com:${user}/chaos-mesh.git
+   export user={your github. profile name}
+   git clone git@github.com:${user}/chaos-mesh.git
    ```
 
 2. Set your cloned local to track the upstream repository:
 
    ```bash
-   $ cd chaos-mesh
-   $ git remote add upstream https://github.com/chaos-mesh/chaos-mesh
+   cd chaos-mesh
+   git remote add upstream https://github.com/chaos-mesh/chaos-mesh
    ```
 
 3. Disable pushing to upstream master:
 
    ```bash
-   $ git remote set-url --push upstream no_push
-   $ git remote -v
+   git remote set-url --push upstream no_push
+   git remote -v
    ```
 
    The output should look like:
@@ -54,10 +54,10 @@ If you have a specific idea of a fix or update, follow these steps below to subm
 4. Get your local master up-to-date and create your working branch:
 
    ```bash
-   $ git fetch upstream
-   $ git checkout master
-   $ git rebase upstream/master
-   $ git checkout -b myfeature
+   git fetch upstream
+   git checkout master
+   git rebase upstream/master
+   git checkout -b myfeature
    ```
 
 5. Make the change on the code.
@@ -67,14 +67,14 @@ If you have a specific idea of a fix or update, follow these steps below to subm
    If you want to update the `crd.yaml` according the the CRD structs, run the following commands:
 
    ```bash
-   $ make generate
-   $ make manifests/crd.yaml
+   make generate
+   make manifests/crd.yaml
    ```
 
 6. Check the code change by running the following command:
 
    ```bash
-   $ make check
+   make check
    ```
 
    This will show errors if your code change does not pass the check. (eg: fmt, lint). Please fix them before submitting the PR.
@@ -84,8 +84,8 @@ If you have a specific idea of a fix or update, follow these steps below to subm
 Before running your code in a real Kubernetes cluster, make sure it passes all unit tests:
 
 ```bash
-$ make ensure-kubebuilder # install some test dependencies
-$ make test
+make ensure-kubebuilder # install some test dependencies
+make test
 ```
 
 ### Step 3: Start Chaos Mesh locally and do manual tests
@@ -97,16 +97,16 @@ $ make test
    - Install the above dependencies in `~/local/bin` using [`install.sh`](https://github.com/chaos-mesh/chaos-mesh/blob/master/install.sh):
 
      ```bash
-     $ ./install.sh --local kind --dependency-only
+     ./install.sh --local kind --dependency-only
      ```
 
 2. Make sure the installation in step 1 is successful:
 
    ```bash
-   $ source ~/.bash_profile
-   $ kind --version
+   source ~/.bash_profile
+   kind --version
    ...
-   $ kubectl version
+   kubectl version
    ...
    ```
 
@@ -115,7 +115,7 @@ $ make test
    Following command will rebuild project code and reinstall chaos mesh.
 
    ```bash
-   $ ./hack/local-up-chaos-mesh.sh
+   ./hack/local-up-chaos-mesh.sh
    ```
 
 Now you can test your code update on the deployed cluster.
@@ -127,21 +127,21 @@ Congratulations! Now you have finished all tests and are ready to commit your co
 1. Run the following commands to keep your branch in sync:
 
    ```bash
-   $ git fetch upstream
-   $ git rebase upstream/master
+   git fetch upstream
+   git rebase upstream/master
    ```
 
 2. Commit your changes:
 
    ```bash
-   $ git add -A
-   $ git commit --signoff
+   git add -A
+   git commit --signoff
    ```
 
 3. Push your changes to the remote branch:
 
    ```bash
-   $ git push -f origin myfeature
+   git push -f origin myfeature
    ```
 
 ### Step 5: Create a pull request
