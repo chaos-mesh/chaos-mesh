@@ -96,7 +96,7 @@ func NewController(params Params) (types.Controller, error) {
 							for _, record := range item.GetStatus().Experiment.Records {
 								namespacedName, err := controller.ParseNamespacedName(record.Id)
 								if err != nil {
-									setupLog.Error(err, "fail to get pods")
+									setupLog.Error(err, "failed to parse record", "record", record.Id)
 								}
 								if namespacedName == objName {
 									id := k8sTypes.NamespacedName{
