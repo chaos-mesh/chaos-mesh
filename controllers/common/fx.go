@@ -97,6 +97,7 @@ func NewController(params Params) (types.Controller, error) {
 								namespacedName, err := controller.ParseNamespacedName(record.Id)
 								if err != nil {
 									setupLog.Error(err, "failed to parse record", "record", record.Id)
+									continue
 								}
 								if namespacedName == objName {
 									id := k8sTypes.NamespacedName{
