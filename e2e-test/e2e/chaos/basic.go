@@ -16,6 +16,7 @@ package chaos
 import (
 	"context"
 	"fmt"
+	"github.com/onsi/gomega"
 	"net/http"
 	"strconv"
 	"time"
@@ -457,6 +458,17 @@ var _ = ginkgo.Describe("[Basic]", func() {
 			}
 		})
 	})
+
+	// e2e must fall
+	ginkgo.Context("[e2e must fail]", func() {
+		ginkgo.It("[assert fail]", func() {
+			gomega.Expect("I want e2e assert fail here").To(gomega.BeEmpty())
+		})
+		ginkgo.It("[panic]", func() {
+			panic("I want e2e panic here")
+		})
+	})
+
 })
 
 func getPod(kubeCli kubernetes.Interface, ns string, appLabel string) (*v1.Pod, error) {
