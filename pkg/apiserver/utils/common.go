@@ -13,7 +13,13 @@
 
 package utils
 
-import ctrl "sigs.k8s.io/controller-runtime"
+import (
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	ctrl "sigs.k8s.io/controller-runtime"
+)
 
 var (
 	Log             = ctrl.Log.WithName("apiserver")
@@ -23,4 +29,11 @@ var (
 // Response defines a common status struct.
 type Response struct {
 	Status string `json:"status"`
+}
+
+func ShouldBindBodyWithJSON(c *gin.Context, obj interface{}) {
+	if err := c.ShouldBindBodyWith(obj, binding.JSON); err != nil {
+		c.Status(http.StatusBadRequest)
+		c.Error(ErrBadRequest.WrapWithNoMessage(err))
+	}
 }

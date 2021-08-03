@@ -23,7 +23,7 @@ import (
 
 // PodChaos is the control script`s spec.
 type PodChaos struct {
-	metav1.TypeMeta   `json:",inline" mapstructure:",squash"`
+	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	// Spec defines the behavior of a pod chaos experiment
@@ -49,7 +49,7 @@ const (
 
 // PodChaosSpec defines the attributes that a user creates on a chaos experiment about pods.
 type PodChaosSpec struct {
-	ContainerSelector `json:",inline" mapstructure:",squash"`
+	ContainerSelector `json:",inline"`
 
 	// Action defines the specific pod chaos action.
 	// Supported action: pod-kill / pod-failure / container-kill

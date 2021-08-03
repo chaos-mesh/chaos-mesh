@@ -134,6 +134,7 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false })
                     <Typography>{T('newE.steps.basic')}</Typography>
                     <TextField
                       fast
+                      id="metadata.name"
                       name="metadata.name"
                       label={T('common.name')}
                       helperText={

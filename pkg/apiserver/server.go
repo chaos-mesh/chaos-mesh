@@ -39,11 +39,11 @@ var (
 			newAPIRouter,
 		),
 		handlerModule,
-		fx.Invoke(serverRegister),
+		fx.Invoke(register),
 	)
 )
 
-func serverRegister(r *gin.Engine, conf *config.ChaosDashboardConfig) {
+func register(r *gin.Engine, conf *config.ChaosDashboardConfig) {
 	listenAddr := net.JoinHostPort(conf.ListenHost, fmt.Sprintf("%d", conf.ListenPort))
 
 	go r.Run(listenAddr)

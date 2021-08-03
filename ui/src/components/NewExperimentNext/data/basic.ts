@@ -23,13 +23,17 @@ const data = {
 
 export const schema = (options: { scopeDisabled: boolean }) => {
   let result = Yup.object({
-    name: Yup.string().trim().required('The name is required'),
+    metadata: Yup.object({
+      name: Yup.string().trim().required('The name is required'),
+    }),
   })
 
   if (!options.scopeDisabled) {
     result = result.shape({
-      scope: Yup.object({
-        namespaces: Yup.array().min(1, 'The namespace selectors is required'),
+      spec: Yup.object({
+        selector: Yup.object({
+          namespaces: Yup.array().min(1, 'The namespace selectors is required'),
+        }),
       }),
     })
   }

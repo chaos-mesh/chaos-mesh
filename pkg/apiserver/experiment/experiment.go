@@ -24,8 +24,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"github.com/jinzhu/gorm"
-	"github.com/mitchellh/mapstructure"
 	"golang.org/x/sync/errgroup"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -180,7 +180,7 @@ func (s *Service) list(c *gin.Context) {
 // @Failure 400 {object} utils.APIError
 // @Failure 404 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
-// @Router /experiments/new [post]
+// @Router /experiments [post]
 func (s *Service) create(c *gin.Context) {
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
@@ -191,7 +191,7 @@ func (s *Service) create(c *gin.Context) {
 	}
 
 	var exp map[string]interface{}
-	if err = c.ShouldBindJSON(&exp); err != nil {
+	if err = c.ShouldBindBodyWith(&exp, binding.JSON); err != nil {
 		c.Status(http.StatusInternalServerError)
 		c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
 
@@ -201,50 +201,47 @@ func (s *Service) create(c *gin.Context) {
 	switch kind := exp["kind"].(string); kind {
 	case v1alpha1.KindPodChaos:
 		var chaos v1alpha1.PodChaos
-		mapstructure.Decode(exp, &chaos)
-		fmt.Printf("%#v\n", chaos)
+		utils.ShouldBindBodyWithJSON(c, &chaos)
 		err = kubeCli.Create(context.Background(), &chaos)
 	case v1alpha1.KindNetworkChaos:
 		var chaos v1alpha1.NetworkChaos
-		fmt.Printf("%#v", exp)
-		mapstructure.Decode(exp, &chaos)
-		fmt.Printf("%#v", chaos)
+		utils.ShouldBindBodyWithJSON(c, &chaos)
 		err = kubeCli.Create(context.Background(), &chaos)
 	case v1alpha1.KindIOChaos:
 		var chaos v1alpha1.IOChaos
-		mapstructure.Decode(exp, &chaos)
+		utils.ShouldBindBodyWithJSON(c, &chaos)
 		err = kubeCli.Create(context.Background(), &chaos)
 	case v1alpha1.KindStressChaos:
 		var chaos v1alpha1.StressChaos
-		mapstructure.Decode(exp, &chaos)
+		utils.ShouldBindBodyWithJSON(c, &chaos)
 		err = kubeCli.Create(context.Background(), &chaos)
 	case v1alpha1.KindKernelChaos:
 		var chaos v1alpha1.KernelChaos
-		mapstructure.Decode(exp, &chaos)
+		utils.ShouldBindBodyWithJSON(c, &chaos)
 		err = kubeCli.Create(context.Background(), &chaos)
 	case v1alpha1.KindTimeChaos:
 		var chaos v1alpha1.TimeChaos
-		mapstructure.Decode(exp, &chaos)
+		utils.ShouldBindBodyWithJSON(c, &chaos)
 		err = kubeCli.Create(context.Background(), &chaos)
 	case v1alpha1.KindDNSChaos:
 		var chaos v1alpha1.DNSChaos
-		mapstructure.Decode(exp, &chaos)
+		utils.ShouldBindBodyWithJSON(c, &chaos)
 		err = kubeCli.Create(context.Background(), &chaos)
 	case v1alpha1.KindAWSChaos:
 		var chaos v1alpha1.AWSChaos
-		mapstructure.Decode(exp, &chaos)
+		utils.ShouldBindBodyWithJSON(c, &chaos)
 		err = kubeCli.Create(context.Background(), &chaos)
 	case v1alpha1.KindGCPChaos:
 		var chaos v1alpha1.GCPChaos
-		mapstructure.Decode(exp, &chaos)
+		utils.ShouldBindBodyWithJSON(c, &chaos)
 		err = kubeCli.Create(context.Background(), &chaos)
 	case v1alpha1.KindJVMChaos:
 		var chaos v1alpha1.JVMChaos
-		mapstructure.Decode(exp, &chaos)
+		utils.ShouldBindBodyWithJSON(c, &chaos)
 		err = kubeCli.Create(context.Background(), &chaos)
 	case v1alpha1.KindHTTPChaos:
 		var chaos v1alpha1.HTTPChaos
-		mapstructure.Decode(exp, &chaos)
+		utils.ShouldBindBodyWithJSON(c, &chaos)
 		err = kubeCli.Create(context.Background(), &chaos)
 	default:
 		c.Status(http.StatusBadRequest)
@@ -756,11 +753,11 @@ func (s *Service) update(c *gin.Context) {
 		switch kind := exp["kind"].(string); kind {
 		case v1alpha1.KindPodChaos:
 			var chaos v1alpha1.PodChaos
-			mapstructure.Decode(exp, &chaos)
+			utils.ShouldBindBodyWithJSON(c, &chaos)
 			err = internalUpdate(c, kubeCli, &v1alpha1.PodChaos{}, &chaos)
 		case v1alpha1.KindNetworkChaos:
 			var chaos v1alpha1.NetworkChaos
-			mapstructure.Decode(exp, &chaos)
+			utils.ShouldBindBodyWithJSON(c, &chaos)
 			err = internalUpdate(c, kubeCli, &v1alpha1.NetworkChaos{}, &chaos)
 			// case v1alpha1.KindIOChaos:
 			// 	var chaos v1alpha1.IOChaos

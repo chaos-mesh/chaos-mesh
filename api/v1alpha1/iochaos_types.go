@@ -25,8 +25,8 @@ import (
 
 // IOChaos is the Schema for the iochaos API
 type IOChaos struct {
-	metav1.TypeMeta   `json:",inline" mapstructure:",squash"`
-	metav1.ObjectMeta `json:"metadata,omitempty" mapstructure:",squash"`
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	Spec   IOChaosSpec   `json:"spec,omitempty"`
 	Status IOChaosStatus `json:"status,omitempty"`
@@ -34,7 +34,7 @@ type IOChaos struct {
 
 // IOChaosSpec defines the desired state of IOChaos
 type IOChaosSpec struct {
-	ContainerSelector `json:",inline" mapstructure:",squash"`
+	ContainerSelector `json:",inline"`
 
 	// Action defines the specific pod chaos action.
 	// Supported action: latency / fault / attrOverride / mistake

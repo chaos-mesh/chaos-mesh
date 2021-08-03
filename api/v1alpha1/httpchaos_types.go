@@ -22,21 +22,21 @@ import (
 
 // HTTPChaos is the Schema for the HTTPchaos API
 type HTTPChaos struct {
-	metav1.TypeMeta   `json:",inline" mapstructure:",squash"`
-	metav1.ObjectMeta `json:"metadata,omitempty" mapstructure:",squash"`
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	Spec   HTTPChaosSpec   `json:"spec,omitempty"`
 	Status HTTPChaosStatus `json:"status,omitempty"`
 }
 
 type HTTPChaosSpec struct {
-	PodSelector `json:",inline" mapstructure:",squash"`
+	PodSelector `json:",inline"`
 
 	// +kubebuilder:validation:Enum=Request;Response
 	// Target is the object to be selected and injected.
 	Target PodHttpChaosTarget `json:"target"`
 
-	PodHttpChaosActions `json:",inline" mapstructure:",squash"`
+	PodHttpChaosActions `json:",inline"`
 
 	// Port represents the target port to be proxy of.
 	Port int32 `json:"port,omitempty"`

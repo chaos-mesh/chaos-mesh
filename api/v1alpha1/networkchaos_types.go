@@ -25,8 +25,8 @@ import (
 
 // NetworkChaos is the Schema for the networkchaos API
 type NetworkChaos struct {
-	metav1.TypeMeta   `json:",inline" mapstructure:",squash"`
-	metav1.ObjectMeta `json:"metadata,omitempty" mapstructure:"metadata"`
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	// Spec defines the behavior of a pod chaos experiment
 	Spec NetworkChaosSpec `json:"spec"`
@@ -81,7 +81,7 @@ const (
 
 // NetworkChaosSpec defines the desired state of NetworkChaos
 type NetworkChaosSpec struct {
-	PodSelector `json:",inline" mapstructure:",squash"`
+	PodSelector `json:",inline"`
 
 	// Action defines the specific network chaos action.
 	// Supported action: partition, netem, delay, loss, duplicate, corrupt
@@ -93,7 +93,7 @@ type NetworkChaosSpec struct {
 	Duration *string `json:"duration,omitempty"`
 
 	// TcParameter represents the traffic control definition
-	TcParameter `json:",inline" mapstructure:",squash"`
+	TcParameter `json:",inline"`
 
 	// Direction represents the direction, this applies on netem and network partition action
 	// +optional

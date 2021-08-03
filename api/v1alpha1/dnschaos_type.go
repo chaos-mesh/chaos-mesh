@@ -39,8 +39,8 @@ const (
 
 // DNSChaos is the Schema for the networkchaos API
 type DNSChaos struct {
-	metav1.TypeMeta   `json:",inline" mapstructure:",squash"`
-	metav1.ObjectMeta `json:"metadata,omitempty" mapstructure:",squash"`
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	// Spec defines the behavior of a pod chaos experiment
 	Spec DNSChaosSpec `json:"spec"`
@@ -58,7 +58,7 @@ type DNSChaosSpec struct {
 	// +kubebuilder:validation:Enum=error;random
 	Action DNSChaosAction `json:"action"`
 
-	ContainerSelector `json:",inline" mapstructure:",squash"`
+	ContainerSelector `json:",inline"`
 
 	// Duration represents the duration of the chaos action
 	Duration *string `json:"duration,omitempty"`
