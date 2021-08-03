@@ -8,11 +8,20 @@ import (
 	"fmt"
 	"time"
 
+	v11 "k8s.io/api/core/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"github.com/chaos-mesh/chaos-mesh/pkg/ctrlserver/graph/generated"
 	"github.com/chaos-mesh/chaos-mesh/pkg/ctrlserver/graph/model"
-	v11 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
 )
+
+func (r *loggerResolver) Component(ctx context.Context, ns string, component model.Component) (<-chan string, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *loggerResolver) Pod(ctx context.Context, ns string, name string) (<-chan string, error) {
+	panic(fmt.Errorf("not implemented"))
+}
 
 func (r *namespaceResolver) Component(ctx context.Context, obj *model.Namespace, component model.Component) (*v11.Pod, error) {
 	panic(fmt.Errorf("not implemented"))
@@ -110,6 +119,9 @@ func (r *queryResolver) Namepsace(ctx context.Context, ns *string) (*model.Names
 	panic(fmt.Errorf("not implemented"))
 }
 
+// Logger returns generated.LoggerResolver implementation.
+func (r *Resolver) Logger() generated.LoggerResolver { return &loggerResolver{r} }
+
 // Namespace returns generated.NamespaceResolver implementation.
 func (r *Resolver) Namespace() generated.NamespaceResolver { return &namespaceResolver{r} }
 
@@ -124,17 +136,8 @@ func (r *Resolver) Pod() generated.PodResolver { return &podResolver{r} }
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
+type loggerResolver struct{ *Resolver }
 type namespaceResolver struct{ *Resolver }
 type ownerReferenceResolver struct{ *Resolver }
 type podResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//    it when you're done.
-//  - You have helper methods in this file. Move them out to keep these resolver files clean.
-func (r *namespaceResolver) Logs(ctx context.Context, obj *model.Namespace, component model.Component) (string, error) {
-	panic(fmt.Errorf("not implemented"))
-}

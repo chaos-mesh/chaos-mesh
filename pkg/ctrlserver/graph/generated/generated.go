@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"io"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -13,11 +14,12 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
-	"github.com/chaos-mesh/chaos-mesh/pkg/ctrlserver/graph/model"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	v11 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/ctrlserver/graph/model"
 )
 
 // region    ************************** generated!.gotpl **************************
@@ -38,6 +40,7 @@ type Config struct {
 }
 
 type ResolverRoot interface {
+	Logger() LoggerResolver
 	Namespace() NamespaceResolver
 	OwnerReference() OwnerReferenceResolver
 	Pod() PodResolver
@@ -88,6 +91,11 @@ type ComplexityRoot struct {
 		ResourceVersion            func(childComplexity int) int
 		SelfLink                   func(childComplexity int) int
 		UID                        func(childComplexity int) int
+	}
+
+	Logger struct {
+		Component func(childComplexity int, ns string, component model.Component) int
+		Pod       func(childComplexity int, ns string, name string) int
 	}
 
 	Namespace struct {
@@ -249,6 +257,10 @@ type ComplexityRoot struct {
 	}
 }
 
+type LoggerResolver interface {
+	Component(ctx context.Context, ns string, component model.Component) (<-chan string, error)
+	Pod(ctx context.Context, ns string, name string) (<-chan string, error)
+}
 type NamespaceResolver interface {
 	Component(ctx context.Context, obj *model.Namespace, component model.Component) (*v1.Pod, error)
 	Pod(ctx context.Context, obj *model.Namespace, name string) (*v1.Pod, error)
@@ -550,6 +562,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.IOChaos.UID(childComplexity), true
+
+	case "Logger.component":
+		if e.complexity.Logger.Component == nil {
+			break
+		}
+
+		args, err := ec.field_Logger_component_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Logger.Component(childComplexity, args["ns"].(string), args["component"].(model.Component)), true
+
+	case "Logger.pod":
+		if e.complexity.Logger.Pod == nil {
+			break
+		}
+
+		args, err := ec.field_Logger_pod_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Logger.Pod(childComplexity, args["ns"].(string), args["name"].(string)), true
 
 	case "Namespace.component":
 		if e.complexity.Namespace.Component == nil {
@@ -1542,6 +1578,23 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 				Data: buf.Bytes(),
 			}
 		}
+	case ast.Subscription:
+		next := ec._Logger(ctx, rc.Operation.SelectionSet)
+
+		var buf bytes.Buffer
+		return func(ctx context.Context) *graphql.Response {
+			buf.Reset()
+			data := next()
+
+			if data == nil {
+				return nil
+			}
+			data.MarshalGQL(&buf)
+
+			return &graphql.Response{
+				Data: buf.Bytes(),
+			}
+		}
 
 	default:
 		return graphql.OneShot(graphql.ErrorResponse(ctx, "unsupported GraphQL operation"))
@@ -1580,10 +1633,16 @@ directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITI
 
 schema {
     query: Query
+    subscription: Logger
 }
 
 type Query {
     namepsace(ns: String): Namespace!
+}
+
+type Logger {
+    component(ns: String!, component: Component!): String!  @goField(forceResolver: true)
+    pod(ns: String!, name: String!): String!                @goField(forceResolver: true)
 }
 
 type Namespace {
@@ -1805,6 +1864,54 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Logger_component_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["ns"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ns"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["ns"] = arg0
+	var arg1 model.Component
+	if tmp, ok := rawArgs["component"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("component"))
+		arg1, err = ec.unmarshalNComponent2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlserverᚋgraphᚋmodelᚐComponent(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["component"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Logger_pod_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["ns"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ns"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["ns"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["name"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg1
+	return args, nil
+}
 
 func (ec *executionContext) field_Namespace_component_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -3225,6 +3332,110 @@ func (ec *executionContext) _IOChaos_podchaos(ctx context.Context, field graphql
 	res := resTmp.([]*model.PodIOChaos)
 	fc.Result = res
 	return ec.marshalOPodIOChaos2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlserverᚋgraphᚋmodelᚐPodIOChaosᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Logger_component(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = nil
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Logger",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Logger_component_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Logger().Component(rctx, args["ns"].(string), args["component"].(model.Component))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-resTmp.(<-chan string)
+		if !ok {
+			return nil
+		}
+		return graphql.WriterFunc(func(w io.Writer) {
+			w.Write([]byte{'{'})
+			graphql.MarshalString(field.Alias).MarshalGQL(w)
+			w.Write([]byte{':'})
+			ec.marshalNString2string(ctx, field.Selections, res).MarshalGQL(w)
+			w.Write([]byte{'}'})
+		})
+	}
+}
+
+func (ec *executionContext) _Logger_pod(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = nil
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Logger",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Logger_pod_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Logger().Pod(rctx, args["ns"].(string), args["name"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-resTmp.(<-chan string)
+		if !ok {
+			return nil
+		}
+		return graphql.WriterFunc(func(w io.Writer) {
+			w.Write([]byte{'{'})
+			graphql.MarshalString(field.Alias).MarshalGQL(w)
+			w.Write([]byte{':'})
+			ec.marshalNString2string(ctx, field.Selections, res).MarshalGQL(w)
+			w.Write([]byte{'}'})
+		})
+	}
 }
 
 func (ec *executionContext) _Namespace_ns(ctx context.Context, field graphql.CollectedField, obj *model.Namespace) (ret graphql.Marshaler) {
@@ -9087,6 +9298,28 @@ func (ec *executionContext) _IOChaos(ctx context.Context, sel ast.SelectionSet, 
 		return graphql.Null
 	}
 	return out
+}
+
+var loggerImplementors = []string{"Logger"}
+
+func (ec *executionContext) _Logger(ctx context.Context, sel ast.SelectionSet) func() graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, loggerImplementors)
+	ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
+		Object: "Logger",
+	})
+	if len(fields) != 1 {
+		ec.Errorf(ctx, "must subscribe to exactly one stream")
+		return nil
+	}
+
+	switch fields[0].Name {
+	case "component":
+		return ec._Logger_component(ctx, fields[0])
+	case "pod":
+		return ec._Logger_pod(ctx, fields[0])
+	default:
+		panic("unknown field " + strconv.Quote(fields[0].Name))
+	}
 }
 
 var namespaceImplementors = []string{"Namespace"}

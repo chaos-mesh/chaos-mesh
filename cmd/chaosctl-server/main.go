@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/99designs/gqlgen/graphql/playground"
+
 	"github.com/chaos-mesh/chaos-mesh/pkg/ctrlserver"
 )
 

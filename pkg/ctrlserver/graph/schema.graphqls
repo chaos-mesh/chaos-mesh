@@ -10,10 +10,16 @@ directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITI
 
 schema {
     query: Query
+    subscription: Logger
 }
 
 type Query {
     namepsace(ns: String): Namespace!
+}
+
+type Logger {
+    component(ns: String!, component: Component!): String!  @goField(forceResolver: true)
+    pod(ns: String!, name: String!): String!                @goField(forceResolver: true)
 }
 
 type Namespace {
