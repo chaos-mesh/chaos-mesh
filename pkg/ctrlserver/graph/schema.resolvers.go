@@ -6,16 +6,135 @@ package graph
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/ctrlserver/graph/generated"
 	"github.com/chaos-mesh/chaos-mesh/pkg/ctrlserver/graph/model"
+	v11 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
 )
+
+func (r *namespaceResolver) Component(ctx context.Context, obj *model.Namespace, component model.Component) (*v11.Pod, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *namespaceResolver) Pod(ctx context.Context, obj *model.Namespace, name string) (*v11.Pod, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *namespaceResolver) Pods(ctx context.Context, obj *model.Namespace) ([]*v11.Pod, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *namespaceResolver) Stress(ctx context.Context, obj *model.Namespace, name string) (*model.StressChaos, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *namespaceResolver) Stresses(ctx context.Context, obj *model.Namespace) ([]*model.StressChaos, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *namespaceResolver) Io(ctx context.Context, obj *model.Namespace, name string) (*model.IOChaos, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *namespaceResolver) Ios(ctx context.Context, obj *model.Namespace) ([]*model.IOChaos, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *namespaceResolver) Podio(ctx context.Context, obj *model.Namespace, name string) (*model.PodIOChaos, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *namespaceResolver) Podios(ctx context.Context, obj *model.Namespace) ([]*model.PodIOChaos, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *namespaceResolver) HTTP(ctx context.Context, obj *model.Namespace, name string) (*model.HTTPChaos, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *namespaceResolver) HTTPS(ctx context.Context, obj *model.Namespace) ([]*model.HTTPChaos, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *namespaceResolver) Podhttp(ctx context.Context, obj *model.Namespace, name string) (*model.PodHTTPChaos, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *namespaceResolver) Podhttps(ctx context.Context, obj *model.Namespace) ([]*model.PodHTTPChaos, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *namespaceResolver) Network(ctx context.Context, obj *model.Namespace, name string) (*model.NetworkChaos, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *namespaceResolver) Networks(ctx context.Context, obj *model.Namespace) ([]*model.NetworkChaos, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *namespaceResolver) Podnetwork(ctx context.Context, obj *model.Namespace, name string) (*model.PodNetWorkChaos, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *namespaceResolver) Podnetworks(ctx context.Context, obj *model.Namespace) ([]*model.PodNetWorkChaos, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *ownerReferenceResolver) UID(ctx context.Context, obj *v1.OwnerReference) (string, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *podResolver) UID(ctx context.Context, obj *v11.Pod) (string, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *podResolver) CreationTimestamp(ctx context.Context, obj *v11.Pod) (*time.Time, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *podResolver) DeletionTimestamp(ctx context.Context, obj *v11.Pod) (*time.Time, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *podResolver) Labels(ctx context.Context, obj *v11.Pod) (map[string]interface{}, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *podResolver) Annotations(ctx context.Context, obj *v11.Pod) (map[string]interface{}, error) {
+	panic(fmt.Errorf("not implemented"))
+}
 
 func (r *queryResolver) Namepsace(ctx context.Context, ns *string) (*model.Namespace, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
+// Namespace returns generated.NamespaceResolver implementation.
+func (r *Resolver) Namespace() generated.NamespaceResolver { return &namespaceResolver{r} }
+
+// OwnerReference returns generated.OwnerReferenceResolver implementation.
+func (r *Resolver) OwnerReference() generated.OwnerReferenceResolver {
+	return &ownerReferenceResolver{r}
+}
+
+// Pod returns generated.PodResolver implementation.
+func (r *Resolver) Pod() generated.PodResolver { return &podResolver{r} }
+
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
+type namespaceResolver struct{ *Resolver }
+type ownerReferenceResolver struct{ *Resolver }
+type podResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//    it when you're done.
+//  - You have helper methods in this file. Move them out to keep these resolver files clean.
+func (r *namespaceResolver) Logs(ctx context.Context, obj *model.Namespace, component model.Component) (string, error) {
+	panic(fmt.Errorf("not implemented"))
+}

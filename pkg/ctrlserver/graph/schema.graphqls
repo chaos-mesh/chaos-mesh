@@ -1,3 +1,13 @@
+directive @goModel(model: String, models: [String!]) on OBJECT
+    | INPUT_OBJECT
+    | SCALAR
+    | ENUM
+    | INTERFACE
+    | UNION
+
+directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITION
+    | FIELD_DEFINITION
+
 schema {
     query: Query
 }
@@ -8,50 +18,35 @@ type Query {
 
 type Namespace {
     ns: String!
-    logs(component: Component!): String!
-    pod(name: String): [Pod!]
-    stressChaos(name: String): [StressChaos!]
-    ioChaos(name: String): [IOChaos!]
-    podIOChaos(name: String): [PodIOChaos!]
-    httpChaos(name: String): [HTTPChaos!]
-    podHTTPChaos(name: String): [PodHTTPChaos!]
-    networkChaos(name: String): [NetworkChaos!]
-    podNetworkChaos(name: String): [PodNetWorkChaos!]
-}
-
-interface TypeMeta {
-    kind: String!
-    apiVersion: String!
+    component(component: Component!): Pod!      @goField(forceResolver: true)
+    pod(name: String!): Pod!                    @goField(forceResolver: true)
+    pods: [Pod!]                                @goField(forceResolver: true)
+    stress(name: String!): StressChaos!         @goField(forceResolver: true)
+    stresses: [StressChaos!]                    @goField(forceResolver: true)
+    io(name: String!): IOChaos!                 @goField(forceResolver: true)
+    ios: [IOChaos!]                             @goField(forceResolver: true)
+    podio(name: String!): PodIOChaos!           @goField(forceResolver: true)
+    podios: [PodIOChaos!]                       @goField(forceResolver: true)
+    http(name: String!): HTTPChaos!             @goField(forceResolver: true)
+    https: [HTTPChaos!]                         @goField(forceResolver: true)
+    podhttp(name: String!): PodHTTPChaos!       @goField(forceResolver: true)
+    podhttps: [PodHTTPChaos!]                   @goField(forceResolver: true)
+    network(name: String!): NetworkChaos!       @goField(forceResolver: true)
+    networks: [NetworkChaos!]                   @goField(forceResolver: true)
+    podnetwork(name: String!): PodNetWorkChaos! @goField(forceResolver: true)
+    podnetworks: [PodNetWorkChaos!]             @goField(forceResolver: true)
 }
 
 scalar Time
 scalar Map
 
-type OwnerReference {
+type OwnerReference @goModel(model: "k8s.io/apimachinery/pkg/apis/meta/v1.OwnerReference") {
     kind: String!
     apiVersion: String!
     name: String!
     uid: String!
     controller: Boolean
     blockOwnerDeletion: Boolean
-}
-
-interface ObjectMeta {
-    name: String!
-    generateName: String!
-    namespace: String!
-    selfLink: String!
-    uid: String! 
-    resourceVersion: String!
-    generation: Int!
-    creationTimestamp: Time!
-    deletionTimestamp: Time
-    deletionGracePeriodSeconds: Int
-    labels: Map
-    annotations: Map
-    ownerReferences: [OwnerReference!]
-    finalizers: [String!]
-    clusterName: String!
 }
 
 enum Component {
@@ -61,7 +56,7 @@ enum Component {
     DNSSERVER
 }
 
-type Pod implements TypeMeta & ObjectMeta {
+type Pod @goModel(model: "k8s.io/api/core/v1.Pod") {
     kind: String!
     apiVersion: String!
     name: String!
@@ -103,7 +98,7 @@ type PodIOChaos {
     pod: Pod!
 }
 
-type IOChaos implements TypeMeta & ObjectMeta {
+type IOChaos {
     kind: String!
     apiVersion: String!
     name: String!
@@ -125,7 +120,7 @@ type IOChaos implements TypeMeta & ObjectMeta {
     podchaos: [PodIOChaos!]
 }
 
-type PodHTTPChaos implements TypeMeta & ObjectMeta {
+type PodHTTPChaos {
     kind: String!
     apiVersion: String!
     name: String!
@@ -147,7 +142,7 @@ type PodHTTPChaos implements TypeMeta & ObjectMeta {
     pod: Pod!
 }
 
-type HTTPChaos implements TypeMeta & ObjectMeta {
+type HTTPChaos {
     kind: String!
     apiVersion: String!
     name: String!
@@ -169,7 +164,7 @@ type HTTPChaos implements TypeMeta & ObjectMeta {
     podchaos: [PodHTTPChaos!]
 }
 
-type PodNetWorkChaos implements TypeMeta & ObjectMeta {
+type PodNetWorkChaos {
     kind: String!
     apiVersion: String!
     name: String!
@@ -191,7 +186,7 @@ type PodNetWorkChaos implements TypeMeta & ObjectMeta {
     pod: Pod!
 }
 
-type NetworkChaos implements TypeMeta & ObjectMeta {
+type NetworkChaos {
     kind: String!
     apiVersion: String!
     name: String!
@@ -213,7 +208,7 @@ type NetworkChaos implements TypeMeta & ObjectMeta {
     podchaos: [NetworkChaos!]
 }
 
-type StressChaos implements TypeMeta & ObjectMeta {
+type StressChaos {
     kind: String!
     apiVersion: String!
     name: String!

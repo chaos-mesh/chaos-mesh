@@ -7,15 +7,10 @@ import (
 	"io"
 	"strconv"
 	"time"
+
+	v11 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
 )
-
-type ObjectMeta interface {
-	IsObjectMeta()
-}
-
-type TypeMeta interface {
-	IsTypeMeta()
-}
 
 type HTTPChaos struct {
 	Kind                       string                 `json:"kind"`
@@ -32,14 +27,11 @@ type HTTPChaos struct {
 	DeletionGracePeriodSeconds *int                   `json:"deletionGracePeriodSeconds"`
 	Labels                     map[string]interface{} `json:"labels"`
 	Annotations                map[string]interface{} `json:"annotations"`
-	OwnerReferences            []*OwnerReference      `json:"ownerReferences"`
+	OwnerReferences            []*v1.OwnerReference   `json:"ownerReferences"`
 	Finalizers                 []string               `json:"finalizers"`
 	ClusterName                string                 `json:"clusterName"`
 	Podchaos                   []*PodHTTPChaos        `json:"podchaos"`
 }
-
-func (HTTPChaos) IsTypeMeta()   {}
-func (HTTPChaos) IsObjectMeta() {}
 
 type IOChaos struct {
 	Kind                       string                 `json:"kind"`
@@ -56,26 +48,31 @@ type IOChaos struct {
 	DeletionGracePeriodSeconds *int                   `json:"deletionGracePeriodSeconds"`
 	Labels                     map[string]interface{} `json:"labels"`
 	Annotations                map[string]interface{} `json:"annotations"`
-	OwnerReferences            []*OwnerReference      `json:"ownerReferences"`
+	OwnerReferences            []*v1.OwnerReference   `json:"ownerReferences"`
 	Finalizers                 []string               `json:"finalizers"`
 	ClusterName                string                 `json:"clusterName"`
 	Podchaos                   []*PodIOChaos          `json:"podchaos"`
 }
 
-func (IOChaos) IsTypeMeta()   {}
-func (IOChaos) IsObjectMeta() {}
-
 type Namespace struct {
-	Ns              string             `json:"ns"`
-	Logs            string             `json:"logs"`
-	Pod             []*Pod             `json:"pod"`
-	StressChaos     []*StressChaos     `json:"stressChaos"`
-	IoChaos         []*IOChaos         `json:"ioChaos"`
-	PodIOChaos      []*PodIOChaos      `json:"podIOChaos"`
-	HTTPChaos       []*HTTPChaos       `json:"httpChaos"`
-	PodHTTPChaos    []*PodHTTPChaos    `json:"podHTTPChaos"`
-	NetworkChaos    []*NetworkChaos    `json:"networkChaos"`
-	PodNetworkChaos []*PodNetWorkChaos `json:"podNetworkChaos"`
+	Ns          string             `json:"ns"`
+	Component   *v11.Pod           `json:"component"`
+	Pod         *v11.Pod           `json:"pod"`
+	Pods        []*v11.Pod         `json:"pods"`
+	Stress      *StressChaos       `json:"stress"`
+	Stresses    []*StressChaos     `json:"stresses"`
+	Io          *IOChaos           `json:"io"`
+	Ios         []*IOChaos         `json:"ios"`
+	Podio       *PodIOChaos        `json:"podio"`
+	Podios      []*PodIOChaos      `json:"podios"`
+	HTTP        *HTTPChaos         `json:"http"`
+	HTTPS       []*HTTPChaos       `json:"https"`
+	Podhttp     *PodHTTPChaos      `json:"podhttp"`
+	Podhttps    []*PodHTTPChaos    `json:"podhttps"`
+	Network     *NetworkChaos      `json:"network"`
+	Networks    []*NetworkChaos    `json:"networks"`
+	Podnetwork  *PodNetWorkChaos   `json:"podnetwork"`
+	Podnetworks []*PodNetWorkChaos `json:"podnetworks"`
 }
 
 type NetworkChaos struct {
@@ -93,46 +90,11 @@ type NetworkChaos struct {
 	DeletionGracePeriodSeconds *int                   `json:"deletionGracePeriodSeconds"`
 	Labels                     map[string]interface{} `json:"labels"`
 	Annotations                map[string]interface{} `json:"annotations"`
-	OwnerReferences            []*OwnerReference      `json:"ownerReferences"`
+	OwnerReferences            []*v1.OwnerReference   `json:"ownerReferences"`
 	Finalizers                 []string               `json:"finalizers"`
 	ClusterName                string                 `json:"clusterName"`
 	Podchaos                   []*NetworkChaos        `json:"podchaos"`
 }
-
-func (NetworkChaos) IsTypeMeta()   {}
-func (NetworkChaos) IsObjectMeta() {}
-
-type OwnerReference struct {
-	Kind               string `json:"kind"`
-	APIVersion         string `json:"apiVersion"`
-	Name               string `json:"name"`
-	UID                string `json:"uid"`
-	Controller         *bool  `json:"controller"`
-	BlockOwnerDeletion *bool  `json:"blockOwnerDeletion"`
-}
-
-type Pod struct {
-	Kind                       string                 `json:"kind"`
-	APIVersion                 string                 `json:"apiVersion"`
-	Name                       string                 `json:"name"`
-	GenerateName               string                 `json:"generateName"`
-	Namespace                  string                 `json:"namespace"`
-	SelfLink                   string                 `json:"selfLink"`
-	UID                        string                 `json:"uid"`
-	ResourceVersion            string                 `json:"resourceVersion"`
-	Generation                 int                    `json:"generation"`
-	CreationTimestamp          time.Time              `json:"creationTimestamp"`
-	DeletionTimestamp          *time.Time             `json:"deletionTimestamp"`
-	DeletionGracePeriodSeconds *int                   `json:"deletionGracePeriodSeconds"`
-	Labels                     map[string]interface{} `json:"labels"`
-	Annotations                map[string]interface{} `json:"annotations"`
-	OwnerReferences            []*OwnerReference      `json:"ownerReferences"`
-	Finalizers                 []string               `json:"finalizers"`
-	ClusterName                string                 `json:"clusterName"`
-}
-
-func (Pod) IsTypeMeta()   {}
-func (Pod) IsObjectMeta() {}
 
 type PodHTTPChaos struct {
 	Kind                       string                 `json:"kind"`
@@ -149,14 +111,11 @@ type PodHTTPChaos struct {
 	DeletionGracePeriodSeconds *int                   `json:"deletionGracePeriodSeconds"`
 	Labels                     map[string]interface{} `json:"labels"`
 	Annotations                map[string]interface{} `json:"annotations"`
-	OwnerReferences            []*OwnerReference      `json:"ownerReferences"`
+	OwnerReferences            []*v1.OwnerReference   `json:"ownerReferences"`
 	Finalizers                 []string               `json:"finalizers"`
 	ClusterName                string                 `json:"clusterName"`
-	Pod                        *Pod                   `json:"pod"`
+	Pod                        *v11.Pod               `json:"pod"`
 }
-
-func (PodHTTPChaos) IsTypeMeta()   {}
-func (PodHTTPChaos) IsObjectMeta() {}
 
 type PodIOChaos struct {
 	Kind                       string                 `json:"kind"`
@@ -173,10 +132,10 @@ type PodIOChaos struct {
 	DeletionGracePeriodSeconds *int                   `json:"deletionGracePeriodSeconds"`
 	Labels                     map[string]interface{} `json:"labels"`
 	Annotations                map[string]interface{} `json:"annotations"`
-	OwnerReferences            []*OwnerReference      `json:"ownerReferences"`
+	OwnerReferences            []*v1.OwnerReference   `json:"ownerReferences"`
 	Finalizers                 []string               `json:"finalizers"`
 	ClusterName                string                 `json:"clusterName"`
-	Pod                        *Pod                   `json:"pod"`
+	Pod                        *v11.Pod               `json:"pod"`
 }
 
 type PodNetWorkChaos struct {
@@ -194,14 +153,11 @@ type PodNetWorkChaos struct {
 	DeletionGracePeriodSeconds *int                   `json:"deletionGracePeriodSeconds"`
 	Labels                     map[string]interface{} `json:"labels"`
 	Annotations                map[string]interface{} `json:"annotations"`
-	OwnerReferences            []*OwnerReference      `json:"ownerReferences"`
+	OwnerReferences            []*v1.OwnerReference   `json:"ownerReferences"`
 	Finalizers                 []string               `json:"finalizers"`
 	ClusterName                string                 `json:"clusterName"`
-	Pod                        *Pod                   `json:"pod"`
+	Pod                        *v11.Pod               `json:"pod"`
 }
-
-func (PodNetWorkChaos) IsTypeMeta()   {}
-func (PodNetWorkChaos) IsObjectMeta() {}
 
 type StressChaos struct {
 	Kind                       string                 `json:"kind"`
@@ -218,13 +174,10 @@ type StressChaos struct {
 	DeletionGracePeriodSeconds *int                   `json:"deletionGracePeriodSeconds"`
 	Labels                     map[string]interface{} `json:"labels"`
 	Annotations                map[string]interface{} `json:"annotations"`
-	OwnerReferences            []*OwnerReference      `json:"ownerReferences"`
+	OwnerReferences            []*v1.OwnerReference   `json:"ownerReferences"`
 	Finalizers                 []string               `json:"finalizers"`
 	ClusterName                string                 `json:"clusterName"`
 }
-
-func (StressChaos) IsTypeMeta()   {}
-func (StressChaos) IsObjectMeta() {}
 
 type Component string
 
