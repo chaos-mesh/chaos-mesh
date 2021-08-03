@@ -39,8 +39,8 @@ type Namespace {
     podhttps: [PodHTTPChaos!]                   @goField(forceResolver: true)
     network(name: String!): NetworkChaos!       @goField(forceResolver: true)
     networks: [NetworkChaos!]                   @goField(forceResolver: true)
-    podnetwork(name: String!): PodNetWorkChaos! @goField(forceResolver: true)
-    podnetworks: [PodNetWorkChaos!]             @goField(forceResolver: true)
+    podnetwork(name: String!): PodNetworkChaos! @goField(forceResolver: true)
+    podnetworks: [PodNetworkChaos!]             @goField(forceResolver: true)
 }
 
 scalar Time
@@ -82,139 +82,7 @@ type Pod @goModel(model: "k8s.io/api/core/v1.Pod") {
     clusterName: String!
 }
 
-type PodIOChaos {
-    kind: String!
-    apiVersion: String!
-    name: String!
-    generateName: String!
-    namespace: String!
-    selfLink: String!
-    uid: String! 
-    resourceVersion: String!
-    generation: Int!
-    creationTimestamp: Time!
-    deletionTimestamp: Time
-    deletionGracePeriodSeconds: Int
-    labels: Map
-    annotations: Map
-    ownerReferences: [OwnerReference!]
-    finalizers: [String!]
-    clusterName: String!
-
-    pod: Pod!
-}
-
-type IOChaos {
-    kind: String!
-    apiVersion: String!
-    name: String!
-    generateName: String!
-    namespace: String!
-    selfLink: String!
-    uid: String! 
-    resourceVersion: String!
-    generation: Int!
-    creationTimestamp: Time!
-    deletionTimestamp: Time
-    deletionGracePeriodSeconds: Int
-    labels: Map
-    annotations: Map
-    ownerReferences: [OwnerReference!]
-    finalizers: [String!]
-    clusterName: String!
-
-    podchaos: [PodIOChaos!]
-}
-
-type PodHTTPChaos {
-    kind: String!
-    apiVersion: String!
-    name: String!
-    generateName: String!
-    namespace: String!
-    selfLink: String!
-    uid: String! 
-    resourceVersion: String!
-    generation: Int!
-    creationTimestamp: Time!
-    deletionTimestamp: Time
-    deletionGracePeriodSeconds: Int
-    labels: Map
-    annotations: Map
-    ownerReferences: [OwnerReference!]
-    finalizers: [String!]
-    clusterName: String!
-
-    pod: Pod!
-}
-
-type HTTPChaos {
-    kind: String!
-    apiVersion: String!
-    name: String!
-    generateName: String!
-    namespace: String!
-    selfLink: String!
-    uid: String! 
-    resourceVersion: String!
-    generation: Int!
-    creationTimestamp: Time!
-    deletionTimestamp: Time
-    deletionGracePeriodSeconds: Int
-    labels: Map
-    annotations: Map
-    ownerReferences: [OwnerReference!]
-    finalizers: [String!]
-    clusterName: String!
-
-    podchaos: [PodHTTPChaos!]
-}
-
-type PodNetWorkChaos {
-    kind: String!
-    apiVersion: String!
-    name: String!
-    generateName: String!
-    namespace: String!
-    selfLink: String!
-    uid: String! 
-    resourceVersion: String!
-    generation: Int!
-    creationTimestamp: Time!
-    deletionTimestamp: Time
-    deletionGracePeriodSeconds: Int
-    labels: Map
-    annotations: Map
-    ownerReferences: [OwnerReference!]
-    finalizers: [String!]
-    clusterName: String!
-
-    pod: Pod!
-}
-
-type NetworkChaos {
-    kind: String!
-    apiVersion: String!
-    name: String!
-    generateName: String!
-    namespace: String!
-    selfLink: String!
-    uid: String! 
-    resourceVersion: String!
-    generation: Int!
-    creationTimestamp: Time!
-    deletionTimestamp: Time
-    deletionGracePeriodSeconds: Int
-    labels: Map
-    annotations: Map
-    ownerReferences: [OwnerReference!]
-    finalizers: [String!]
-    clusterName: String!
-
-    podchaos: [NetworkChaos!]
-}
-
-type StressChaos {
+type PodIOChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodIOChaos") {
     kind: String!
     apiVersion: String!
     name: String!
@@ -234,3 +102,122 @@ type StressChaos {
     clusterName: String!
 }
 
+type IOChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.IOChaos") {
+    kind: String!
+    apiVersion: String!
+    name: String!
+    generateName: String!
+    namespace: String!
+    selfLink: String!
+    uid: String! 
+    resourceVersion: String!
+    generation: Int!
+    creationTimestamp: Time!
+    deletionTimestamp: Time
+    deletionGracePeriodSeconds: Int
+    labels: Map
+    annotations: Map
+    ownerReferences: [OwnerReference!]
+    finalizers: [String!]
+    clusterName: String!
+}
+
+type PodHTTPChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodHttpChaos") {
+    kind: String!
+    apiVersion: String!
+    name: String!
+    generateName: String!
+    namespace: String!
+    selfLink: String!
+    uid: String! 
+    resourceVersion: String!
+    generation: Int!
+    creationTimestamp: Time!
+    deletionTimestamp: Time
+    deletionGracePeriodSeconds: Int
+    labels: Map
+    annotations: Map
+    ownerReferences: [OwnerReference!]
+    finalizers: [String!]
+    clusterName: String!
+}
+
+type HTTPChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.HTTPChaos") {
+    kind: String!
+    apiVersion: String!
+    name: String!
+    generateName: String!
+    namespace: String!
+    selfLink: String!
+    uid: String! 
+    resourceVersion: String!
+    generation: Int!
+    creationTimestamp: Time!
+    deletionTimestamp: Time
+    deletionGracePeriodSeconds: Int
+    labels: Map
+    annotations: Map
+    ownerReferences: [OwnerReference!]
+    finalizers: [String!]
+    clusterName: String!
+}
+
+type PodNetworkChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodNetworkChaos") {
+    kind: String!
+    apiVersion: String!
+    name: String!
+    generateName: String!
+    namespace: String!
+    selfLink: String!
+    uid: String! 
+    resourceVersion: String!
+    generation: Int!
+    creationTimestamp: Time!
+    deletionTimestamp: Time
+    deletionGracePeriodSeconds: Int
+    labels: Map
+    annotations: Map
+    ownerReferences: [OwnerReference!]
+    finalizers: [String!]
+    clusterName: String!
+}
+
+type NetworkChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.NetworkChaos") {
+    kind: String!
+    apiVersion: String!
+    name: String!
+    generateName: String!
+    namespace: String!
+    selfLink: String!
+    uid: String! 
+    resourceVersion: String!
+    generation: Int!
+    creationTimestamp: Time!
+    deletionTimestamp: Time
+    deletionGracePeriodSeconds: Int
+    labels: Map
+    annotations: Map
+    ownerReferences: [OwnerReference!]
+    finalizers: [String!]
+    clusterName: String!
+}
+
+type StressChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.StressChaos") {
+    kind: String!
+    apiVersion: String!
+    name: String!
+    generateName: String!
+    namespace: String!
+    selfLink: String!
+    uid: String! 
+    resourceVersion: String!
+    generation: Int!
+    creationTimestamp: Time!
+    deletionTimestamp: Time
+    deletionGracePeriodSeconds: Int
+    labels: Map
+    annotations: Map
+    ownerReferences: [OwnerReference!]
+    finalizers: [String!]
+    clusterName: String!
+}

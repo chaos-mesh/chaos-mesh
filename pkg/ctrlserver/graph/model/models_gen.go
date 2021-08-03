@@ -6,177 +6,31 @@ import (
 	"fmt"
 	"io"
 	"strconv"
-	"time"
 
-	v11 "k8s.io/api/core/v1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/api/core/v1"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
-type HTTPChaos struct {
-	Kind                       string                 `json:"kind"`
-	APIVersion                 string                 `json:"apiVersion"`
-	Name                       string                 `json:"name"`
-	GenerateName               string                 `json:"generateName"`
-	Namespace                  string                 `json:"namespace"`
-	SelfLink                   string                 `json:"selfLink"`
-	UID                        string                 `json:"uid"`
-	ResourceVersion            string                 `json:"resourceVersion"`
-	Generation                 int                    `json:"generation"`
-	CreationTimestamp          time.Time              `json:"creationTimestamp"`
-	DeletionTimestamp          *time.Time             `json:"deletionTimestamp"`
-	DeletionGracePeriodSeconds *int                   `json:"deletionGracePeriodSeconds"`
-	Labels                     map[string]interface{} `json:"labels"`
-	Annotations                map[string]interface{} `json:"annotations"`
-	OwnerReferences            []*v1.OwnerReference   `json:"ownerReferences"`
-	Finalizers                 []string               `json:"finalizers"`
-	ClusterName                string                 `json:"clusterName"`
-	Podchaos                   []*PodHTTPChaos        `json:"podchaos"`
-}
-
-type IOChaos struct {
-	Kind                       string                 `json:"kind"`
-	APIVersion                 string                 `json:"apiVersion"`
-	Name                       string                 `json:"name"`
-	GenerateName               string                 `json:"generateName"`
-	Namespace                  string                 `json:"namespace"`
-	SelfLink                   string                 `json:"selfLink"`
-	UID                        string                 `json:"uid"`
-	ResourceVersion            string                 `json:"resourceVersion"`
-	Generation                 int                    `json:"generation"`
-	CreationTimestamp          time.Time              `json:"creationTimestamp"`
-	DeletionTimestamp          *time.Time             `json:"deletionTimestamp"`
-	DeletionGracePeriodSeconds *int                   `json:"deletionGracePeriodSeconds"`
-	Labels                     map[string]interface{} `json:"labels"`
-	Annotations                map[string]interface{} `json:"annotations"`
-	OwnerReferences            []*v1.OwnerReference   `json:"ownerReferences"`
-	Finalizers                 []string               `json:"finalizers"`
-	ClusterName                string                 `json:"clusterName"`
-	Podchaos                   []*PodIOChaos          `json:"podchaos"`
-}
-
 type Namespace struct {
-	Ns          string             `json:"ns"`
-	Component   *v11.Pod           `json:"component"`
-	Pod         *v11.Pod           `json:"pod"`
-	Pods        []*v11.Pod         `json:"pods"`
-	Stress      *StressChaos       `json:"stress"`
-	Stresses    []*StressChaos     `json:"stresses"`
-	Io          *IOChaos           `json:"io"`
-	Ios         []*IOChaos         `json:"ios"`
-	Podio       *PodIOChaos        `json:"podio"`
-	Podios      []*PodIOChaos      `json:"podios"`
-	HTTP        *HTTPChaos         `json:"http"`
-	HTTPS       []*HTTPChaos       `json:"https"`
-	Podhttp     *PodHTTPChaos      `json:"podhttp"`
-	Podhttps    []*PodHTTPChaos    `json:"podhttps"`
-	Network     *NetworkChaos      `json:"network"`
-	Networks    []*NetworkChaos    `json:"networks"`
-	Podnetwork  *PodNetWorkChaos   `json:"podnetwork"`
-	Podnetworks []*PodNetWorkChaos `json:"podnetworks"`
-}
-
-type NetworkChaos struct {
-	Kind                       string                 `json:"kind"`
-	APIVersion                 string                 `json:"apiVersion"`
-	Name                       string                 `json:"name"`
-	GenerateName               string                 `json:"generateName"`
-	Namespace                  string                 `json:"namespace"`
-	SelfLink                   string                 `json:"selfLink"`
-	UID                        string                 `json:"uid"`
-	ResourceVersion            string                 `json:"resourceVersion"`
-	Generation                 int                    `json:"generation"`
-	CreationTimestamp          time.Time              `json:"creationTimestamp"`
-	DeletionTimestamp          *time.Time             `json:"deletionTimestamp"`
-	DeletionGracePeriodSeconds *int                   `json:"deletionGracePeriodSeconds"`
-	Labels                     map[string]interface{} `json:"labels"`
-	Annotations                map[string]interface{} `json:"annotations"`
-	OwnerReferences            []*v1.OwnerReference   `json:"ownerReferences"`
-	Finalizers                 []string               `json:"finalizers"`
-	ClusterName                string                 `json:"clusterName"`
-	Podchaos                   []*NetworkChaos        `json:"podchaos"`
-}
-
-type PodHTTPChaos struct {
-	Kind                       string                 `json:"kind"`
-	APIVersion                 string                 `json:"apiVersion"`
-	Name                       string                 `json:"name"`
-	GenerateName               string                 `json:"generateName"`
-	Namespace                  string                 `json:"namespace"`
-	SelfLink                   string                 `json:"selfLink"`
-	UID                        string                 `json:"uid"`
-	ResourceVersion            string                 `json:"resourceVersion"`
-	Generation                 int                    `json:"generation"`
-	CreationTimestamp          time.Time              `json:"creationTimestamp"`
-	DeletionTimestamp          *time.Time             `json:"deletionTimestamp"`
-	DeletionGracePeriodSeconds *int                   `json:"deletionGracePeriodSeconds"`
-	Labels                     map[string]interface{} `json:"labels"`
-	Annotations                map[string]interface{} `json:"annotations"`
-	OwnerReferences            []*v1.OwnerReference   `json:"ownerReferences"`
-	Finalizers                 []string               `json:"finalizers"`
-	ClusterName                string                 `json:"clusterName"`
-	Pod                        *v11.Pod               `json:"pod"`
-}
-
-type PodIOChaos struct {
-	Kind                       string                 `json:"kind"`
-	APIVersion                 string                 `json:"apiVersion"`
-	Name                       string                 `json:"name"`
-	GenerateName               string                 `json:"generateName"`
-	Namespace                  string                 `json:"namespace"`
-	SelfLink                   string                 `json:"selfLink"`
-	UID                        string                 `json:"uid"`
-	ResourceVersion            string                 `json:"resourceVersion"`
-	Generation                 int                    `json:"generation"`
-	CreationTimestamp          time.Time              `json:"creationTimestamp"`
-	DeletionTimestamp          *time.Time             `json:"deletionTimestamp"`
-	DeletionGracePeriodSeconds *int                   `json:"deletionGracePeriodSeconds"`
-	Labels                     map[string]interface{} `json:"labels"`
-	Annotations                map[string]interface{} `json:"annotations"`
-	OwnerReferences            []*v1.OwnerReference   `json:"ownerReferences"`
-	Finalizers                 []string               `json:"finalizers"`
-	ClusterName                string                 `json:"clusterName"`
-	Pod                        *v11.Pod               `json:"pod"`
-}
-
-type PodNetWorkChaos struct {
-	Kind                       string                 `json:"kind"`
-	APIVersion                 string                 `json:"apiVersion"`
-	Name                       string                 `json:"name"`
-	GenerateName               string                 `json:"generateName"`
-	Namespace                  string                 `json:"namespace"`
-	SelfLink                   string                 `json:"selfLink"`
-	UID                        string                 `json:"uid"`
-	ResourceVersion            string                 `json:"resourceVersion"`
-	Generation                 int                    `json:"generation"`
-	CreationTimestamp          time.Time              `json:"creationTimestamp"`
-	DeletionTimestamp          *time.Time             `json:"deletionTimestamp"`
-	DeletionGracePeriodSeconds *int                   `json:"deletionGracePeriodSeconds"`
-	Labels                     map[string]interface{} `json:"labels"`
-	Annotations                map[string]interface{} `json:"annotations"`
-	OwnerReferences            []*v1.OwnerReference   `json:"ownerReferences"`
-	Finalizers                 []string               `json:"finalizers"`
-	ClusterName                string                 `json:"clusterName"`
-	Pod                        *v11.Pod               `json:"pod"`
-}
-
-type StressChaos struct {
-	Kind                       string                 `json:"kind"`
-	APIVersion                 string                 `json:"apiVersion"`
-	Name                       string                 `json:"name"`
-	GenerateName               string                 `json:"generateName"`
-	Namespace                  string                 `json:"namespace"`
-	SelfLink                   string                 `json:"selfLink"`
-	UID                        string                 `json:"uid"`
-	ResourceVersion            string                 `json:"resourceVersion"`
-	Generation                 int                    `json:"generation"`
-	CreationTimestamp          time.Time              `json:"creationTimestamp"`
-	DeletionTimestamp          *time.Time             `json:"deletionTimestamp"`
-	DeletionGracePeriodSeconds *int                   `json:"deletionGracePeriodSeconds"`
-	Labels                     map[string]interface{} `json:"labels"`
-	Annotations                map[string]interface{} `json:"annotations"`
-	OwnerReferences            []*v1.OwnerReference   `json:"ownerReferences"`
-	Finalizers                 []string               `json:"finalizers"`
-	ClusterName                string                 `json:"clusterName"`
+	Ns          string                      `json:"ns"`
+	Component   *v1.Pod                     `json:"component"`
+	Pod         *v1.Pod                     `json:"pod"`
+	Pods        []*v1.Pod                   `json:"pods"`
+	Stress      *v1alpha1.StressChaos       `json:"stress"`
+	Stresses    []*v1alpha1.StressChaos     `json:"stresses"`
+	Io          *v1alpha1.IOChaos           `json:"io"`
+	Ios         []*v1alpha1.IOChaos         `json:"ios"`
+	Podio       *v1alpha1.PodIOChaos        `json:"podio"`
+	Podios      []*v1alpha1.PodIOChaos      `json:"podios"`
+	HTTP        *v1alpha1.HTTPChaos         `json:"http"`
+	HTTPS       []*v1alpha1.HTTPChaos       `json:"https"`
+	Podhttp     *v1alpha1.PodHttpChaos      `json:"podhttp"`
+	Podhttps    []*v1alpha1.PodHttpChaos    `json:"podhttps"`
+	Network     *v1alpha1.NetworkChaos      `json:"network"`
+	Networks    []*v1alpha1.NetworkChaos    `json:"networks"`
+	Podnetwork  *v1alpha1.PodNetworkChaos   `json:"podnetwork"`
+	Podnetworks []*v1alpha1.PodNetworkChaos `json:"podnetworks"`
 }
 
 type Component string
