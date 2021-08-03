@@ -17,6 +17,7 @@ import (
 	"go.uber.org/fx"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/archive"
+	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/auth/gcp"
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/common"
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/event"
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/experiment"
@@ -32,6 +33,7 @@ var handlerModule = fx.Options(
 		archive.NewService,
 		workflow.NewService,
 		schedule.NewService,
+		gcp.NewService,
 	),
 	fx.Invoke(
 		common.Register,
@@ -40,5 +42,6 @@ var handlerModule = fx.Options(
 		archive.Register,
 		workflow.Register,
 		schedule.Register,
+		gcp.Register,
 	),
 )

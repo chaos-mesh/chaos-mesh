@@ -137,6 +137,8 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 		}
 		authLog.Info("user have the privileges on cluster, auth validate passed", "user", username, "groups", groups, "namespace", affectedNamespaces)
 	} else {
+		authLog.Info("start validating user", "user", username, "groups", groups, "namespace", affectedNamespaces)
+
 		for namespace := range affectedNamespaces {
 			allow, err := v.auth(username, groups, namespace, requestKind)
 			if err != nil {

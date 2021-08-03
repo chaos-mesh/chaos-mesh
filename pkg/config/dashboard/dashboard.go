@@ -38,7 +38,14 @@ type ChaosDashboardConfig struct {
 	// annotated with `chaos-mesh.org/inject=enabled` will be injected
 	EnableFilterNamespace bool `envconfig:"ENABLE_FILTER_NAMESPACE" default:"false"`
 	// SecurityMode will use the token login by the user if set to true
-	SecurityMode    bool   `envconfig:"SECURITY_MODE" default:"true" json:"security_mode"`
+	SecurityMode bool `envconfig:"SECURITY_MODE" default:"true" json:"security_mode"`
+	// GcpSecurityMode will use the gcloud authentication to login to GKE user
+	GcpClientId     string `envconfig:"GCP_CLIENT_ID" default:"" json:"-"`
+	GcpClientSecret string `envconfig:"GCP_CLIENT_SECRET" default:"" json:"-"`
+	GcpProject      string `envconfig:"GCP_PROJECT" default:"" json:"-"`
+	GcpLocation     string `envconfig:"GCP_LOCATION" default:"" json:"-"`
+	GcpCluster      string `envconfig:"GCP_CLUSTER" default:"" json:"-"`
+
 	DNSServerCreate bool   `envconfig:"DNS_SERVER_CREATE" default:"false" json:"dns_server_create"`
 	Version         string `json:"version"`
 }

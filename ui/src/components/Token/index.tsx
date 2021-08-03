@@ -1,8 +1,10 @@
+import { Box, Button, ButtonProps } from '@material-ui/core'
 import { Form, Formik, FormikHelpers } from 'formik'
 import { Submit, TextField } from 'components/FormField'
 import { setAlert, setTokenName, setTokens } from 'slices/globalStatus'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
+import PublishIcon from '@material-ui/icons/Publish'
 import Space from 'components-mui/Space'
 import T from 'components/T'
 import api from 'api'
@@ -101,6 +103,17 @@ const Token: React.FC<TokenProps> = ({ onSubmitCallback }) => {
               helperText={errors.token && touched.token ? errors.token : T('settings.addToken.tokenHelper')}
               error={errors.token && touched.token ? true : false}
             />
+            <Box mt={6} textAlign="right">
+              <Button
+                variant="contained"
+                startIcon={<PublishIcon />}
+                onClick={() => {
+                  window.location.href = '/api/auth/gcp/redirect'
+                }}
+              >
+                GCP Login
+              </Button>
+            </Box>
             <Submit />
           </Space>
         </Form>

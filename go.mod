@@ -1,6 +1,7 @@
 module github.com/chaos-mesh/chaos-mesh
 
 require (
+	cloud.google.com/go v0.51.0
 	code.cloudfoundry.org/bytefmt v0.0.0-20200131002437-cf55d5288a48
 	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/Microsoft/go-winio v0.4.11 // indirect
@@ -74,12 +75,14 @@ require (
 	go.uber.org/fx v1.12.0
 	go.uber.org/zap v1.15.0
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
+	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c // indirect
 	golang.org/x/time v0.0.0-20201208040808-7e3f01d25324
 	golang.org/x/tools v0.1.4
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1
 	google.golang.org/api v0.15.0
+	google.golang.org/genproto v0.0.0-20200108215221-bd8f9a0ef82f
 	google.golang.org/grpc v1.27.0
 	google.golang.org/protobuf v1.23.0
 	gopkg.in/yaml.v2 v2.3.0

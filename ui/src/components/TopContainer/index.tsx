@@ -7,6 +7,7 @@ import { useStoreDispatch, useStoreSelector } from 'store'
 
 import ConfirmDialog from 'components-mui/ConfirmDialog'
 import ContentContainer from 'components-mui/ContentContainer'
+import Cookies from 'js-cookie'
 import { IntlProvider } from 'react-intl'
 import LS from 'lib/localStorage'
 import Loading from 'components-mui/Loading'
@@ -93,6 +94,7 @@ const TopContainer = () => {
       .config()
       .then(({ data }) => {
         if (data.security_mode) {
+          setGcpTokenFromCookie()
           setAuth()
         }
 
@@ -103,6 +105,55 @@ const TopContainer = () => {
 
   const [loading, setLoading] = useState(true)
   const [authOpen, setAuthOpen] = useState(false)
+
+  interface GcpToken {
+    token: string
+    expiry: string
+    ca: string
+    name: 'gcp'
+  }
+  /**
+   * Set GCP related token from cookie
+   *
+   */
+  function setGcpTokenFromCookie() {
+    const accessToken = Cookies.get('access_token')
+    const expiry = Cookies.get('expiry')
+    const ca = Cookies.get('ca')
+    console.log(accessToken, expiry, ca)
+    if (accessToken && expiry && ca) {
+      const token: GcpToken = {
+        token: accessToken,
+        expiry,
+        ca,
+        name: 'gcp',
+      }
+      console.log('get token!', token)
+
+      const storedToken = LS.get('token')
+      if (storedToken) {
+        const storedTokens = JSON.parse(storedToken)
+
+        const existingGcpTokens = storedTokens.filter(({ name }: { name: string }) => name === 'gcp')
+        if (existingGcpTokens.length > 0) {
+          existingGcpTokens[0] = token
+        } else {
+          storedTokens.push(token)
+        }
+
+        dispatch(setTokens(storedTokens))
+      } else {
+        const tokens = [token]
+
+        dispatch(setTokens(tokens))
+      }
+
+      const tokenName = LS.get('token-name')
+      if (!tokenName) {
+        dispatch(setTokenName('gcp'))
+      }
+    }
+  }
 
   /**
    * Set authorization (RBAC token) for API use.
