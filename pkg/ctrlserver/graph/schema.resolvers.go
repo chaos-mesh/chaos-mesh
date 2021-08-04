@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"time"
 
-	v11 "k8s.io/api/core/v1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/api/core/v1"
+	v11 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/ctrlserver/graph/generated"
@@ -56,6 +56,58 @@ func (r *iOChaosResolver) Annotations(ctx context.Context, obj *v1alpha1.IOChaos
 	panic(fmt.Errorf("not implemented"))
 }
 
+func (r *iOChaosActionResolver) Type(ctx context.Context, obj *v1alpha1.IOChaosAction) (string, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *iOChaosActionResolver) Methods(ctx context.Context, obj *v1alpha1.IOChaosAction) ([]string, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *iOChaosActionResolver) Ino(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *iOChaosActionResolver) Size(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *iOChaosActionResolver) Blocks(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *iOChaosActionResolver) Kind(ctx context.Context, obj *v1alpha1.IOChaosAction) (*string, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *iOChaosActionResolver) Perm(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *iOChaosActionResolver) Nlink(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *iOChaosActionResolver) UID(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *iOChaosActionResolver) Gid(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *iOChaosActionResolver) Rdev(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *iOChaosActionResolver) Filling(ctx context.Context, obj *v1alpha1.IOChaosAction) (*string, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *ioFaultResolver) Errno(ctx context.Context, obj *v1alpha1.IoFault) (*int, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
 func (r *loggerResolver) Component(ctx context.Context, ns string, component model.Component) (<-chan string, error) {
 	panic(fmt.Errorf("not implemented"))
 }
@@ -64,15 +116,15 @@ func (r *loggerResolver) Pod(ctx context.Context, ns string, name string) (<-cha
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *namespaceResolver) Component(ctx context.Context, obj *model.Namespace, component model.Component) (*v11.Pod, error) {
+func (r *namespaceResolver) Component(ctx context.Context, obj *model.Namespace, component model.Component) (*v1.Pod, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *namespaceResolver) Pod(ctx context.Context, obj *model.Namespace, name string) (*v11.Pod, error) {
+func (r *namespaceResolver) Pod(ctx context.Context, obj *model.Namespace, name string) (*v1.Pod, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *namespaceResolver) Pods(ctx context.Context, obj *model.Namespace) ([]*v11.Pod, error) {
+func (r *namespaceResolver) Pods(ctx context.Context, obj *model.Namespace) ([]*v1.Pod, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
@@ -152,27 +204,27 @@ func (r *networkChaosResolver) Annotations(ctx context.Context, obj *v1alpha1.Ne
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *ownerReferenceResolver) UID(ctx context.Context, obj *v1.OwnerReference) (string, error) {
+func (r *ownerReferenceResolver) UID(ctx context.Context, obj *v11.OwnerReference) (string, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *podResolver) UID(ctx context.Context, obj *v11.Pod) (string, error) {
+func (r *podResolver) UID(ctx context.Context, obj *v1.Pod) (string, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *podResolver) CreationTimestamp(ctx context.Context, obj *v11.Pod) (*time.Time, error) {
+func (r *podResolver) CreationTimestamp(ctx context.Context, obj *v1.Pod) (*time.Time, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *podResolver) DeletionTimestamp(ctx context.Context, obj *v11.Pod) (*time.Time, error) {
+func (r *podResolver) DeletionTimestamp(ctx context.Context, obj *v1.Pod) (*time.Time, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *podResolver) Labels(ctx context.Context, obj *v11.Pod) (map[string]interface{}, error) {
+func (r *podResolver) Labels(ctx context.Context, obj *v1.Pod) (map[string]interface{}, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *podResolver) Annotations(ctx context.Context, obj *v11.Pod) (map[string]interface{}, error) {
+func (r *podResolver) Annotations(ctx context.Context, obj *v1.Pod) (map[string]interface{}, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
@@ -213,6 +265,14 @@ func (r *podIOChaosResolver) Labels(ctx context.Context, obj *v1alpha1.PodIOChao
 }
 
 func (r *podIOChaosResolver) Annotations(ctx context.Context, obj *v1alpha1.PodIOChaos) (map[string]interface{}, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *podIOChaosResolver) Pod(ctx context.Context, obj *v1alpha1.PodIOChaos) (*v1.Pod, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *podIOChaosResolver) Ios(ctx context.Context, obj *v1alpha1.PodIOChaos) ([]*v1alpha1.IOChaos, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
@@ -266,6 +326,12 @@ func (r *Resolver) HTTPChaos() generated.HTTPChaosResolver { return &hTTPChaosRe
 // IOChaos returns generated.IOChaosResolver implementation.
 func (r *Resolver) IOChaos() generated.IOChaosResolver { return &iOChaosResolver{r} }
 
+// IOChaosAction returns generated.IOChaosActionResolver implementation.
+func (r *Resolver) IOChaosAction() generated.IOChaosActionResolver { return &iOChaosActionResolver{r} }
+
+// IoFault returns generated.IoFaultResolver implementation.
+func (r *Resolver) IoFault() generated.IoFaultResolver { return &ioFaultResolver{r} }
+
 // Logger returns generated.LoggerResolver implementation.
 func (r *Resolver) Logger() generated.LoggerResolver { return &loggerResolver{r} }
 
@@ -302,6 +368,8 @@ func (r *Resolver) StressChaos() generated.StressChaosResolver { return &stressC
 
 type hTTPChaosResolver struct{ *Resolver }
 type iOChaosResolver struct{ *Resolver }
+type iOChaosActionResolver struct{ *Resolver }
+type ioFaultResolver struct{ *Resolver }
 type loggerResolver struct{ *Resolver }
 type namespaceResolver struct{ *Resolver }
 type networkChaosResolver struct{ *Resolver }
@@ -312,3 +380,13 @@ type podIOChaosResolver struct{ *Resolver }
 type podNetworkChaosResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type stressChaosResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//    it when you're done.
+//  - You have helper methods in this file. Move them out to keep these resolver files clean.
+func (r *iOChaosActionResolver) Int64(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error) {
+	panic(fmt.Errorf("not implemented"))
+}

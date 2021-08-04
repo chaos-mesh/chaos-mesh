@@ -8,6 +8,9 @@ directive @goModel(model: String, models: [String!]) on OBJECT
 directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITION
     | FIELD_DEFINITION
 
+scalar Time
+scalar Map
+
 schema {
     query: Query
     subscription: Logger
@@ -42,9 +45,6 @@ type Namespace {
     podnetwork(name: String!): PodNetworkChaos! @goField(forceResolver: true)
     podnetworks: [PodNetworkChaos!]             @goField(forceResolver: true)
 }
-
-scalar Time
-scalar Map
 
 type OwnerReference @goModel(model: "k8s.io/apimachinery/pkg/apis/meta/v1.OwnerReference") {
     kind: String!
@@ -82,6 +82,7 @@ type Pod @goModel(model: "k8s.io/api/core/v1.Pod") {
     clusterName: String!
 }
 
+
 type PodIOChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodIOChaos") {
     kind: String!
     apiVersion: String!
@@ -100,7 +101,96 @@ type PodIOChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.P
     ownerReferences: [OwnerReference!]
     finalizers: [String!]
     clusterName: String!
+
+    spec: PodIOChaosSpec!
+    status: PodIOChaosStatus!
+
+    pod: Pod!       @goField(forceResolver: true)
+    ios: [IOChaos!] @goField(forceResolver: true)
 }
+
+# PodIOChaosSpec defines the desired state of PodIOChaos
+type PodIOChaosSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodIOChaosSpec") {
+	# volumeMountPath represents the target mount path
+	# It must be a root of mount path now.
+	volumeMountPath: String!
+
+	container: String
+
+    # actions are a list of IOChaos actions
+	actions: [IOChaosAction!]
+}
+
+type PodIOChaosStatus @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodIOChaosStatus") {
+
+	# pid represents a running toda process id
+	pid: Int
+
+	# startTime represents the start time of a toda process
+	startTime: Int
+	failedMessage: String
+	observedGeneration: Int
+}
+
+# IOChaosAction defines an possible action of IOChaos
+type IOChaosAction @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.IOChaosAction") {
+	type: String!
+
+	# path represents a glob of injecting path
+	path: String!
+
+	# methods represents the method that the action will inject in
+	methods: [String!]
+
+	# percent represents the percent probability of injecting this action
+	percent: Int
+
+	# faults represents the fault to inject
+	faults: [IoFault!]
+
+	# Latency represents the latency to inject
+	latency: String
+
+	# attrOverrides represents the attribution to override
+	ino: Int
+	size: Int
+	blocks: Int
+	atime: Timespec
+	mtime: Timespec
+    ctime: Timespec
+	kind: String # the file kind
+	perm: Int
+	nlink: Int
+	uid: Int
+    gid: Int
+    rdev: Int
+
+	# MistakeSpec represents the mistake to inject
+	
+    # filling determines what is filled in the miskate data.
+	filling: String
+
+	# there will be [1, MaxOccurrences] segments of wrong data.
+	maxOccurrences: Int
+
+	# max length of each wrong data segment in bytes
+	maxLength: Int
+
+	# source represents the source of current rules
+	source: String!
+}
+
+type IoFault @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.IoFault") {
+	errno: Int
+	weight: Int
+}
+
+# Timespec represents a time
+type Timespec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.Timespec") {
+	sec: Int
+	nsec: Int
+}
+
 
 type IOChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.IOChaos") {
     kind: String!

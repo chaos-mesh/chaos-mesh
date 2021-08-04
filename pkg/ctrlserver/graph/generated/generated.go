@@ -43,6 +43,8 @@ type Config struct {
 type ResolverRoot interface {
 	HTTPChaos() HTTPChaosResolver
 	IOChaos() IOChaosResolver
+	IOChaosAction() IOChaosActionResolver
+	IoFault() IoFaultResolver
 	Logger() LoggerResolver
 	Namespace() NamespaceResolver
 	NetworkChaos() NetworkChaosResolver
@@ -97,6 +99,36 @@ type ComplexityRoot struct {
 		ResourceVersion            func(childComplexity int) int
 		SelfLink                   func(childComplexity int) int
 		UID                        func(childComplexity int) int
+	}
+
+	IOChaosAction struct {
+		Atime          func(childComplexity int) int
+		Blocks         func(childComplexity int) int
+		Ctime          func(childComplexity int) int
+		Faults         func(childComplexity int) int
+		Filling        func(childComplexity int) int
+		Gid            func(childComplexity int) int
+		Ino            func(childComplexity int) int
+		Kind           func(childComplexity int) int
+		Latency        func(childComplexity int) int
+		MaxLength      func(childComplexity int) int
+		MaxOccurrences func(childComplexity int) int
+		Methods        func(childComplexity int) int
+		Mtime          func(childComplexity int) int
+		Nlink          func(childComplexity int) int
+		Path           func(childComplexity int) int
+		Percent        func(childComplexity int) int
+		Perm           func(childComplexity int) int
+		Rdev           func(childComplexity int) int
+		Size           func(childComplexity int) int
+		Source         func(childComplexity int) int
+		Type           func(childComplexity int) int
+		UID            func(childComplexity int) int
+	}
+
+	IoFault struct {
+		Errno  func(childComplexity int) int
+		Weight func(childComplexity int) int
 	}
 
 	Logger struct {
@@ -204,14 +236,31 @@ type ComplexityRoot struct {
 		Finalizers                 func(childComplexity int) int
 		GenerateName               func(childComplexity int) int
 		Generation                 func(childComplexity int) int
+		Ios                        func(childComplexity int) int
 		Kind                       func(childComplexity int) int
 		Labels                     func(childComplexity int) int
 		Name                       func(childComplexity int) int
 		Namespace                  func(childComplexity int) int
 		OwnerReferences            func(childComplexity int) int
+		Pod                        func(childComplexity int) int
 		ResourceVersion            func(childComplexity int) int
 		SelfLink                   func(childComplexity int) int
+		Spec                       func(childComplexity int) int
+		Status                     func(childComplexity int) int
 		UID                        func(childComplexity int) int
+	}
+
+	PodIOChaosSpec struct {
+		Actions         func(childComplexity int) int
+		Container       func(childComplexity int) int
+		VolumeMountPath func(childComplexity int) int
+	}
+
+	PodIOChaosStatus struct {
+		FailedMessage      func(childComplexity int) int
+		ObservedGeneration func(childComplexity int) int
+		Pid                func(childComplexity int) int
+		StartTime          func(childComplexity int) int
 	}
 
 	PodNetworkChaos struct {
@@ -257,6 +306,11 @@ type ComplexityRoot struct {
 		SelfLink                   func(childComplexity int) int
 		UID                        func(childComplexity int) int
 	}
+
+	Timespec struct {
+		Nsec func(childComplexity int) int
+		Sec  func(childComplexity int) int
+	}
 }
 
 type HTTPChaosResolver interface {
@@ -276,6 +330,26 @@ type IOChaosResolver interface {
 
 	Labels(ctx context.Context, obj *v1alpha1.IOChaos) (map[string]interface{}, error)
 	Annotations(ctx context.Context, obj *v1alpha1.IOChaos) (map[string]interface{}, error)
+}
+type IOChaosActionResolver interface {
+	Type(ctx context.Context, obj *v1alpha1.IOChaosAction) (string, error)
+
+	Methods(ctx context.Context, obj *v1alpha1.IOChaosAction) ([]string, error)
+
+	Ino(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error)
+	Size(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error)
+	Blocks(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error)
+
+	Kind(ctx context.Context, obj *v1alpha1.IOChaosAction) (*string, error)
+	Perm(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error)
+	Nlink(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error)
+	UID(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error)
+	Gid(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error)
+	Rdev(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error)
+	Filling(ctx context.Context, obj *v1alpha1.IOChaosAction) (*string, error)
+}
+type IoFaultResolver interface {
+	Errno(ctx context.Context, obj *v1alpha1.IoFault) (*int, error)
 }
 type LoggerResolver interface {
 	Component(ctx context.Context, ns string, component model.Component) (<-chan string, error)
@@ -338,6 +412,9 @@ type PodIOChaosResolver interface {
 
 	Labels(ctx context.Context, obj *v1alpha1.PodIOChaos) (map[string]interface{}, error)
 	Annotations(ctx context.Context, obj *v1alpha1.PodIOChaos) (map[string]interface{}, error)
+
+	Pod(ctx context.Context, obj *v1alpha1.PodIOChaos) (*v1.Pod, error)
+	Ios(ctx context.Context, obj *v1alpha1.PodIOChaos) ([]*v1alpha1.IOChaos, error)
 }
 type PodNetworkChaosResolver interface {
 	UID(ctx context.Context, obj *v1alpha1.PodNetworkChaos) (string, error)
@@ -613,6 +690,174 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.IOChaos.UID(childComplexity), true
+
+	case "IOChaosAction.atime":
+		if e.complexity.IOChaosAction.Atime == nil {
+			break
+		}
+
+		return e.complexity.IOChaosAction.Atime(childComplexity), true
+
+	case "IOChaosAction.blocks":
+		if e.complexity.IOChaosAction.Blocks == nil {
+			break
+		}
+
+		return e.complexity.IOChaosAction.Blocks(childComplexity), true
+
+	case "IOChaosAction.ctime":
+		if e.complexity.IOChaosAction.Ctime == nil {
+			break
+		}
+
+		return e.complexity.IOChaosAction.Ctime(childComplexity), true
+
+	case "IOChaosAction.faults":
+		if e.complexity.IOChaosAction.Faults == nil {
+			break
+		}
+
+		return e.complexity.IOChaosAction.Faults(childComplexity), true
+
+	case "IOChaosAction.filling":
+		if e.complexity.IOChaosAction.Filling == nil {
+			break
+		}
+
+		return e.complexity.IOChaosAction.Filling(childComplexity), true
+
+	case "IOChaosAction.gid":
+		if e.complexity.IOChaosAction.Gid == nil {
+			break
+		}
+
+		return e.complexity.IOChaosAction.Gid(childComplexity), true
+
+	case "IOChaosAction.ino":
+		if e.complexity.IOChaosAction.Ino == nil {
+			break
+		}
+
+		return e.complexity.IOChaosAction.Ino(childComplexity), true
+
+	case "IOChaosAction.kind":
+		if e.complexity.IOChaosAction.Kind == nil {
+			break
+		}
+
+		return e.complexity.IOChaosAction.Kind(childComplexity), true
+
+	case "IOChaosAction.latency":
+		if e.complexity.IOChaosAction.Latency == nil {
+			break
+		}
+
+		return e.complexity.IOChaosAction.Latency(childComplexity), true
+
+	case "IOChaosAction.maxLength":
+		if e.complexity.IOChaosAction.MaxLength == nil {
+			break
+		}
+
+		return e.complexity.IOChaosAction.MaxLength(childComplexity), true
+
+	case "IOChaosAction.maxOccurrences":
+		if e.complexity.IOChaosAction.MaxOccurrences == nil {
+			break
+		}
+
+		return e.complexity.IOChaosAction.MaxOccurrences(childComplexity), true
+
+	case "IOChaosAction.methods":
+		if e.complexity.IOChaosAction.Methods == nil {
+			break
+		}
+
+		return e.complexity.IOChaosAction.Methods(childComplexity), true
+
+	case "IOChaosAction.mtime":
+		if e.complexity.IOChaosAction.Mtime == nil {
+			break
+		}
+
+		return e.complexity.IOChaosAction.Mtime(childComplexity), true
+
+	case "IOChaosAction.nlink":
+		if e.complexity.IOChaosAction.Nlink == nil {
+			break
+		}
+
+		return e.complexity.IOChaosAction.Nlink(childComplexity), true
+
+	case "IOChaosAction.path":
+		if e.complexity.IOChaosAction.Path == nil {
+			break
+		}
+
+		return e.complexity.IOChaosAction.Path(childComplexity), true
+
+	case "IOChaosAction.percent":
+		if e.complexity.IOChaosAction.Percent == nil {
+			break
+		}
+
+		return e.complexity.IOChaosAction.Percent(childComplexity), true
+
+	case "IOChaosAction.perm":
+		if e.complexity.IOChaosAction.Perm == nil {
+			break
+		}
+
+		return e.complexity.IOChaosAction.Perm(childComplexity), true
+
+	case "IOChaosAction.rdev":
+		if e.complexity.IOChaosAction.Rdev == nil {
+			break
+		}
+
+		return e.complexity.IOChaosAction.Rdev(childComplexity), true
+
+	case "IOChaosAction.size":
+		if e.complexity.IOChaosAction.Size == nil {
+			break
+		}
+
+		return e.complexity.IOChaosAction.Size(childComplexity), true
+
+	case "IOChaosAction.source":
+		if e.complexity.IOChaosAction.Source == nil {
+			break
+		}
+
+		return e.complexity.IOChaosAction.Source(childComplexity), true
+
+	case "IOChaosAction.type":
+		if e.complexity.IOChaosAction.Type == nil {
+			break
+		}
+
+		return e.complexity.IOChaosAction.Type(childComplexity), true
+
+	case "IOChaosAction.uid":
+		if e.complexity.IOChaosAction.UID == nil {
+			break
+		}
+
+		return e.complexity.IOChaosAction.UID(childComplexity), true
+
+	case "IoFault.errno":
+		if e.complexity.IoFault.Errno == nil {
+			break
+		}
+
+		return e.complexity.IoFault.Errno(childComplexity), true
+
+	case "IoFault.weight":
+		if e.complexity.IoFault.Weight == nil {
+			break
+		}
+
+		return e.complexity.IoFault.Weight(childComplexity), true
 
 	case "Logger.component":
 		if e.complexity.Logger.Component == nil {
@@ -1271,6 +1516,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.PodIOChaos.Generation(childComplexity), true
 
+	case "PodIOChaos.ios":
+		if e.complexity.PodIOChaos.Ios == nil {
+			break
+		}
+
+		return e.complexity.PodIOChaos.Ios(childComplexity), true
+
 	case "PodIOChaos.kind":
 		if e.complexity.PodIOChaos.Kind == nil {
 			break
@@ -1306,6 +1558,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.PodIOChaos.OwnerReferences(childComplexity), true
 
+	case "PodIOChaos.pod":
+		if e.complexity.PodIOChaos.Pod == nil {
+			break
+		}
+
+		return e.complexity.PodIOChaos.Pod(childComplexity), true
+
 	case "PodIOChaos.resourceVersion":
 		if e.complexity.PodIOChaos.ResourceVersion == nil {
 			break
@@ -1320,12 +1579,75 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.PodIOChaos.SelfLink(childComplexity), true
 
+	case "PodIOChaos.spec":
+		if e.complexity.PodIOChaos.Spec == nil {
+			break
+		}
+
+		return e.complexity.PodIOChaos.Spec(childComplexity), true
+
+	case "PodIOChaos.status":
+		if e.complexity.PodIOChaos.Status == nil {
+			break
+		}
+
+		return e.complexity.PodIOChaos.Status(childComplexity), true
+
 	case "PodIOChaos.uid":
 		if e.complexity.PodIOChaos.UID == nil {
 			break
 		}
 
 		return e.complexity.PodIOChaos.UID(childComplexity), true
+
+	case "PodIOChaosSpec.actions":
+		if e.complexity.PodIOChaosSpec.Actions == nil {
+			break
+		}
+
+		return e.complexity.PodIOChaosSpec.Actions(childComplexity), true
+
+	case "PodIOChaosSpec.container":
+		if e.complexity.PodIOChaosSpec.Container == nil {
+			break
+		}
+
+		return e.complexity.PodIOChaosSpec.Container(childComplexity), true
+
+	case "PodIOChaosSpec.volumeMountPath":
+		if e.complexity.PodIOChaosSpec.VolumeMountPath == nil {
+			break
+		}
+
+		return e.complexity.PodIOChaosSpec.VolumeMountPath(childComplexity), true
+
+	case "PodIOChaosStatus.failedMessage":
+		if e.complexity.PodIOChaosStatus.FailedMessage == nil {
+			break
+		}
+
+		return e.complexity.PodIOChaosStatus.FailedMessage(childComplexity), true
+
+	case "PodIOChaosStatus.observedGeneration":
+		if e.complexity.PodIOChaosStatus.ObservedGeneration == nil {
+			break
+		}
+
+		return e.complexity.PodIOChaosStatus.ObservedGeneration(childComplexity), true
+
+	case "PodIOChaosStatus.pid":
+		if e.complexity.PodIOChaosStatus.Pid == nil {
+			break
+		}
+
+		return e.complexity.PodIOChaosStatus.Pid(childComplexity), true
+
+	case "PodIOChaosStatus.startTime":
+		if e.complexity.PodIOChaosStatus.StartTime == nil {
+			break
+		}
+
+		return e.complexity.PodIOChaosStatus.StartTime(childComplexity), true
 
 	case "PodNetworkChaos.apiVersion":
 		if e.complexity.PodNetworkChaos.APIVersion == nil {
@@ -1577,6 +1899,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.StressChaos.UID(childComplexity), true
 
+	case "Timespec.nsec":
+		if e.complexity.Timespec.Nsec == nil {
+			break
+		}
+
+		return e.complexity.Timespec.Nsec(childComplexity), true
+
+	case "Timespec.sec":
+		if e.complexity.Timespec.Sec == nil {
+			break
+		}
+
+		return e.complexity.Timespec.Sec(childComplexity), true
+
 	}
 	return 0, false
 }
@@ -1654,6 +1990,9 @@ var sources = []*ast.Source{
 directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITION
     | FIELD_DEFINITION
 
+scalar Time
+scalar Map
+
 schema {
     query: Query
     subscription: Logger
@@ -1688,9 +2027,6 @@ type Namespace {
     podnetwork(name: String!): PodNetworkChaos! @goField(forceResolver: true)
     podnetworks: [PodNetworkChaos!]             @goField(forceResolver: true)
 }
-
-scalar Time
-scalar Map
 
 type OwnerReference @goModel(model: "k8s.io/apimachinery/pkg/apis/meta/v1.OwnerReference") {
     kind: String!
@@ -1728,6 +2064,7 @@ type Pod @goModel(model: "k8s.io/api/core/v1.Pod") {
     clusterName: String!
 }
 
+
 type PodIOChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodIOChaos") {
     kind: String!
     apiVersion: String!
@@ -1746,7 +2083,96 @@ type PodIOChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.P
     ownerReferences: [OwnerReference!]
     finalizers: [String!]
     clusterName: String!
+
+    spec: PodIOChaosSpec!
+    status: PodIOChaosStatus!
+
+    pod: Pod!       @goField(forceResolver: true)
+    ios: [IOChaos!] @goField(forceResolver: true)
 }
+
+# PodIOChaosSpec defines the desired state of PodIOChaos
+type PodIOChaosSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodIOChaosSpec") {
+	# volumeMountPath represents the target mount path
+	# It must be a root of mount path now.
+	volumeMountPath: String!
+
+	container: String
+
+    # actions are a list of IOChaos actions
+	actions: [IOChaosAction!]
+}
+
+type PodIOChaosStatus @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodIOChaosStatus") {
+
+	# pid represents a running toda process id
+	pid: Int
+
+	# startTime represents the start time of a toda process
+	startTime: Int
+	failedMessage: String
+	observedGeneration: Int
+}
+
+# IOChaosAction defines an possible action of IOChaos
+type IOChaosAction @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.IOChaosAction") {
+	type: String!
+
+	# path represents a glob of injecting path
+	path: String!
+
+	# methods represents the method that the action will inject in
+	methods: [String!]
+
+	# percent represents the percent probability of injecting this action
+	percent: Int
+
+	# faults represents the fault to inject
+	faults: [IoFault!]
+
+	# Latency represents the latency to inject
+	latency: String
+
+	# attrOverrides represents the attribution to override
+	ino: Int
+	size: Int
+	blocks: Int
+	atime: Timespec
+	mtime: Timespec
+    ctime: Timespec
+	kind: String # the file kind
+	perm: Int
+	nlink: Int
+	uid: Int
+    gid: Int
+    rdev: Int
+
+	# MistakeSpec represents the mistake to inject
+	
+    # filling determines what is filled in the miskate data.
+	filling: String
+
+	# there will be [1, MaxOccurrences] segments of wrong data.
+	maxOccurrences: Int
+
+	# max length of each wrong data segment in bytes
+	maxLength: Int
+
+	# source represents the source of current rules
+	source: String!
+}
+
+type IoFault @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.IoFault") {
+	errno: Int
+	weight: Int
+}
+
+# Timespec represents a time
+type Timespec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.Timespec") {
+	sec: Int
+	nsec: Int
+}
+
 
 type IOChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.IOChaos") {
     kind: String!
@@ -3278,6 +3704,783 @@ func (ec *executionContext) _IOChaos_clusterName(ctx context.Context, field grap
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _IOChaosAction_type(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.IOChaosAction) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "IOChaosAction",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.IOChaosAction().Type(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _IOChaosAction_path(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.IOChaosAction) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "IOChaosAction",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Path, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _IOChaosAction_methods(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.IOChaosAction) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "IOChaosAction",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.IOChaosAction().Methods(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	fc.Result = res
+	return ec.marshalOString2ᚕstringᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _IOChaosAction_percent(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.IOChaosAction) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "IOChaosAction",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Percent, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalOInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _IOChaosAction_faults(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.IOChaosAction) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "IOChaosAction",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Faults, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]v1alpha1.IoFault)
+	fc.Result = res
+	return ec.marshalOIoFault2ᚕgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐIoFaultᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _IOChaosAction_latency(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.IOChaosAction) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "IOChaosAction",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Latency, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _IOChaosAction_ino(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.IOChaosAction) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "IOChaosAction",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.IOChaosAction().Ino(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _IOChaosAction_size(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.IOChaosAction) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "IOChaosAction",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.IOChaosAction().Size(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _IOChaosAction_blocks(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.IOChaosAction) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "IOChaosAction",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.IOChaosAction().Blocks(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _IOChaosAction_atime(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.IOChaosAction) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "IOChaosAction",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Atime, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v1alpha1.Timespec)
+	fc.Result = res
+	return ec.marshalOTimespec2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐTimespec(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _IOChaosAction_mtime(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.IOChaosAction) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "IOChaosAction",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Mtime, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v1alpha1.Timespec)
+	fc.Result = res
+	return ec.marshalOTimespec2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐTimespec(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _IOChaosAction_ctime(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.IOChaosAction) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "IOChaosAction",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Ctime, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v1alpha1.Timespec)
+	fc.Result = res
+	return ec.marshalOTimespec2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐTimespec(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _IOChaosAction_kind(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.IOChaosAction) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "IOChaosAction",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.IOChaosAction().Kind(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _IOChaosAction_perm(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.IOChaosAction) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "IOChaosAction",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.IOChaosAction().Perm(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _IOChaosAction_nlink(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.IOChaosAction) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "IOChaosAction",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.IOChaosAction().Nlink(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _IOChaosAction_uid(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.IOChaosAction) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "IOChaosAction",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.IOChaosAction().UID(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _IOChaosAction_gid(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.IOChaosAction) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "IOChaosAction",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.IOChaosAction().Gid(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _IOChaosAction_rdev(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.IOChaosAction) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "IOChaosAction",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.IOChaosAction().Rdev(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _IOChaosAction_filling(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.IOChaosAction) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "IOChaosAction",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.IOChaosAction().Filling(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _IOChaosAction_maxOccurrences(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.IOChaosAction) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "IOChaosAction",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.MaxOccurrences, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(int64)
+	fc.Result = res
+	return ec.marshalOInt2int64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _IOChaosAction_maxLength(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.IOChaosAction) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "IOChaosAction",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.MaxLength, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(int64)
+	fc.Result = res
+	return ec.marshalOInt2int64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _IOChaosAction_source(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.IOChaosAction) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "IOChaosAction",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Source, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _IoFault_errno(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.IoFault) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "IoFault",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.IoFault().Errno(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _IoFault_weight(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.IoFault) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "IoFault",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Weight, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(int32)
+	fc.Result = res
+	return ec.marshalOInt2int32(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Logger_component(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
@@ -6565,6 +7768,370 @@ func (ec *executionContext) _PodIOChaos_clusterName(ctx context.Context, field g
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _PodIOChaos_spec(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodIOChaos) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodIOChaos",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Spec, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(v1alpha1.PodIOChaosSpec)
+	fc.Result = res
+	return ec.marshalNPodIOChaosSpec2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodIOChaosSpec(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodIOChaos_status(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodIOChaos) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodIOChaos",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Status, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(v1alpha1.PodIOChaosStatus)
+	fc.Result = res
+	return ec.marshalNPodIOChaosStatus2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodIOChaosStatus(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodIOChaos_pod(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodIOChaos) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodIOChaos",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.PodIOChaos().Pod(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*v1.Pod)
+	fc.Result = res
+	return ec.marshalNPod2ᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐPod(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodIOChaos_ios(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodIOChaos) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodIOChaos",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.PodIOChaos().Ios(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*v1alpha1.IOChaos)
+	fc.Result = res
+	return ec.marshalOIOChaos2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐIOChaosᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodIOChaosSpec_volumeMountPath(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodIOChaosSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodIOChaosSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.VolumeMountPath, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodIOChaosSpec_container(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodIOChaosSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodIOChaosSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Container, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodIOChaosSpec_actions(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodIOChaosSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodIOChaosSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Actions, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]v1alpha1.IOChaosAction)
+	fc.Result = res
+	return ec.marshalOIOChaosAction2ᚕgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐIOChaosActionᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodIOChaosStatus_pid(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodIOChaosStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodIOChaosStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Pid, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(int64)
+	fc.Result = res
+	return ec.marshalOInt2int64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodIOChaosStatus_startTime(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodIOChaosStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodIOChaosStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.StartTime, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(int64)
+	fc.Result = res
+	return ec.marshalOInt2int64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodIOChaosStatus_failedMessage(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodIOChaosStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodIOChaosStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.FailedMessage, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodIOChaosStatus_observedGeneration(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodIOChaosStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodIOChaosStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ObservedGeneration, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(int64)
+	fc.Result = res
+	return ec.marshalOInt2int64(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _PodNetworkChaos_kind(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodNetworkChaos) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -7830,6 +9397,70 @@ func (ec *executionContext) _StressChaos_clusterName(ctx context.Context, field 
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Timespec_sec(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.Timespec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Timespec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Sec, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(int64)
+	fc.Result = res
+	return ec.marshalOInt2int64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Timespec_nsec(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.Timespec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Timespec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Nsec, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(int64)
+	fc.Result = res
+	return ec.marshalOInt2int64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -9195,6 +10826,224 @@ func (ec *executionContext) _IOChaos(ctx context.Context, sel ast.SelectionSet, 
 	return out
 }
 
+var iOChaosActionImplementors = []string{"IOChaosAction"}
+
+func (ec *executionContext) _IOChaosAction(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.IOChaosAction) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, iOChaosActionImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("IOChaosAction")
+		case "type":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._IOChaosAction_type(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "path":
+			out.Values[i] = ec._IOChaosAction_path(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "methods":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._IOChaosAction_methods(ctx, field, obj)
+				return res
+			})
+		case "percent":
+			out.Values[i] = ec._IOChaosAction_percent(ctx, field, obj)
+		case "faults":
+			out.Values[i] = ec._IOChaosAction_faults(ctx, field, obj)
+		case "latency":
+			out.Values[i] = ec._IOChaosAction_latency(ctx, field, obj)
+		case "ino":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._IOChaosAction_ino(ctx, field, obj)
+				return res
+			})
+		case "size":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._IOChaosAction_size(ctx, field, obj)
+				return res
+			})
+		case "blocks":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._IOChaosAction_blocks(ctx, field, obj)
+				return res
+			})
+		case "atime":
+			out.Values[i] = ec._IOChaosAction_atime(ctx, field, obj)
+		case "mtime":
+			out.Values[i] = ec._IOChaosAction_mtime(ctx, field, obj)
+		case "ctime":
+			out.Values[i] = ec._IOChaosAction_ctime(ctx, field, obj)
+		case "kind":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._IOChaosAction_kind(ctx, field, obj)
+				return res
+			})
+		case "perm":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._IOChaosAction_perm(ctx, field, obj)
+				return res
+			})
+		case "nlink":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._IOChaosAction_nlink(ctx, field, obj)
+				return res
+			})
+		case "uid":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._IOChaosAction_uid(ctx, field, obj)
+				return res
+			})
+		case "gid":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._IOChaosAction_gid(ctx, field, obj)
+				return res
+			})
+		case "rdev":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._IOChaosAction_rdev(ctx, field, obj)
+				return res
+			})
+		case "filling":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._IOChaosAction_filling(ctx, field, obj)
+				return res
+			})
+		case "maxOccurrences":
+			out.Values[i] = ec._IOChaosAction_maxOccurrences(ctx, field, obj)
+		case "maxLength":
+			out.Values[i] = ec._IOChaosAction_maxLength(ctx, field, obj)
+		case "source":
+			out.Values[i] = ec._IOChaosAction_source(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var ioFaultImplementors = []string{"IoFault"}
+
+func (ec *executionContext) _IoFault(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.IoFault) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, ioFaultImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("IoFault")
+		case "errno":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._IoFault_errno(ctx, field, obj)
+				return res
+			})
+		case "weight":
+			out.Values[i] = ec._IoFault_weight(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var loggerImplementors = []string{"Logger"}
 
 func (ec *executionContext) _Logger(ctx context.Context, sel ast.SelectionSet) func() graphql.Marshaler {
@@ -10038,6 +11887,102 @@ func (ec *executionContext) _PodIOChaos(ctx context.Context, sel ast.SelectionSe
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
+		case "spec":
+			out.Values[i] = ec._PodIOChaos_spec(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "status":
+			out.Values[i] = ec._PodIOChaos_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "pod":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._PodIOChaos_pod(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "ios":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._PodIOChaos_ios(ctx, field, obj)
+				return res
+			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var podIOChaosSpecImplementors = []string{"PodIOChaosSpec"}
+
+func (ec *executionContext) _PodIOChaosSpec(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.PodIOChaosSpec) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, podIOChaosSpecImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PodIOChaosSpec")
+		case "volumeMountPath":
+			out.Values[i] = ec._PodIOChaosSpec_volumeMountPath(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "container":
+			out.Values[i] = ec._PodIOChaosSpec_container(ctx, field, obj)
+		case "actions":
+			out.Values[i] = ec._PodIOChaosSpec_actions(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var podIOChaosStatusImplementors = []string{"PodIOChaosStatus"}
+
+func (ec *executionContext) _PodIOChaosStatus(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.PodIOChaosStatus) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, podIOChaosStatusImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PodIOChaosStatus")
+		case "pid":
+			out.Values[i] = ec._PodIOChaosStatus_pid(ctx, field, obj)
+		case "startTime":
+			out.Values[i] = ec._PodIOChaosStatus_startTime(ctx, field, obj)
+		case "failedMessage":
+			out.Values[i] = ec._PodIOChaosStatus_failedMessage(ctx, field, obj)
+		case "observedGeneration":
+			out.Values[i] = ec._PodIOChaosStatus_observedGeneration(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -10361,6 +12306,32 @@ func (ec *executionContext) _StressChaos(ctx context.Context, sel ast.SelectionS
 	return out
 }
 
+var timespecImplementors = []string{"Timespec"}
+
+func (ec *executionContext) _Timespec(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.Timespec) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, timespecImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Timespec")
+		case "sec":
+			out.Values[i] = ec._Timespec_sec(ctx, field, obj)
+		case "nsec":
+			out.Values[i] = ec._Timespec_nsec(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var __DirectiveImplementors = []string{"__Directive"}
 
 func (ec *executionContext) ___Directive(ctx context.Context, sel ast.SelectionSet, obj *introspection.Directive) graphql.Marshaler {
@@ -10659,6 +12630,10 @@ func (ec *executionContext) marshalNIOChaos2ᚖgithubᚗcomᚋchaosᚑmeshᚋcha
 	return ec._IOChaos(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNIOChaosAction2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐIOChaosAction(ctx context.Context, sel ast.SelectionSet, v v1alpha1.IOChaosAction) graphql.Marshaler {
+	return ec._IOChaosAction(ctx, sel, &v)
+}
+
 func (ec *executionContext) unmarshalNInt2int64(ctx context.Context, v interface{}) (int64, error) {
 	res, err := graphql.UnmarshalInt64(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -10672,6 +12647,10 @@ func (ec *executionContext) marshalNInt2int64(ctx context.Context, sel ast.Selec
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalNIoFault2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐIoFault(ctx context.Context, sel ast.SelectionSet, v v1alpha1.IoFault) graphql.Marshaler {
+	return ec._IoFault(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNNamespace2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlserverᚋgraphᚋmodelᚐNamespace(ctx context.Context, sel ast.SelectionSet, v model.Namespace) graphql.Marshaler {
@@ -10746,6 +12725,14 @@ func (ec *executionContext) marshalNPodIOChaos2ᚖgithubᚗcomᚋchaosᚑmeshᚋ
 		return graphql.Null
 	}
 	return ec._PodIOChaos(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNPodIOChaosSpec2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodIOChaosSpec(ctx context.Context, sel ast.SelectionSet, v v1alpha1.PodIOChaosSpec) graphql.Marshaler {
+	return ec._PodIOChaosSpec(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNPodIOChaosStatus2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodIOChaosStatus(ctx context.Context, sel ast.SelectionSet, v v1alpha1.PodIOChaosStatus) graphql.Marshaler {
+	return ec._PodIOChaosStatus(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNPodNetworkChaos2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodNetworkChaos(ctx context.Context, sel ast.SelectionSet, v v1alpha1.PodNetworkChaos) graphql.Marshaler {
@@ -11160,6 +13147,88 @@ func (ec *executionContext) marshalOIOChaos2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋ
 	return ret
 }
 
+func (ec *executionContext) marshalOIOChaosAction2ᚕgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐIOChaosActionᚄ(ctx context.Context, sel ast.SelectionSet, v []v1alpha1.IOChaosAction) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNIOChaosAction2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐIOChaosAction(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) unmarshalOInt2int(ctx context.Context, v interface{}) (int, error) {
+	res, err := graphql.UnmarshalInt(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
+	return graphql.MarshalInt(v)
+}
+
+func (ec *executionContext) unmarshalOInt2int32(ctx context.Context, v interface{}) (int32, error) {
+	res, err := graphql.UnmarshalInt32(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOInt2int32(ctx context.Context, sel ast.SelectionSet, v int32) graphql.Marshaler {
+	return graphql.MarshalInt32(v)
+}
+
+func (ec *executionContext) unmarshalOInt2int64(ctx context.Context, v interface{}) (int64, error) {
+	res, err := graphql.UnmarshalInt64(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOInt2int64(ctx context.Context, sel ast.SelectionSet, v int64) graphql.Marshaler {
+	return graphql.MarshalInt64(v)
+}
+
+func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v interface{}) (*int, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalInt(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.SelectionSet, v *int) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalInt(*v)
+}
+
 func (ec *executionContext) unmarshalOInt2ᚖint64(ctx context.Context, v interface{}) (*int64, error) {
 	if v == nil {
 		return nil, nil
@@ -11173,6 +13242,46 @@ func (ec *executionContext) marshalOInt2ᚖint64(ctx context.Context, sel ast.Se
 		return graphql.Null
 	}
 	return graphql.MarshalInt64(*v)
+}
+
+func (ec *executionContext) marshalOIoFault2ᚕgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐIoFaultᚄ(ctx context.Context, sel ast.SelectionSet, v []v1alpha1.IoFault) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNIoFault2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐIoFault(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
 }
 
 func (ec *executionContext) unmarshalOMap2map(ctx context.Context, v interface{}) (map[string]interface{}, error) {
@@ -11543,6 +13652,13 @@ func (ec *executionContext) marshalOTime2ᚖtimeᚐTime(ctx context.Context, sel
 		return graphql.Null
 	}
 	return graphql.MarshalTime(*v)
+}
+
+func (ec *executionContext) marshalOTimespec2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐTimespec(ctx context.Context, sel ast.SelectionSet, v *v1alpha1.Timespec) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Timespec(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {

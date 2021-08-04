@@ -371,7 +371,7 @@ chaos-build: bin/chaos-builder
 	bin/chaos-builder
 
 generate-ctrl: $(GOBIN)/gqlgen
-	go generate ./pkg/ctrlserver/graph
+	go generate ./pkg/ctrlserver/graph; make fmt;
 
 # Generate code
 generate: $(GOBIN)/controller-gen chaos-build
