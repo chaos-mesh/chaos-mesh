@@ -132,11 +132,11 @@ const TopContainer = () => {
 
       const storedToken = LS.get('token')
       if (storedToken) {
-        const storedTokens = JSON.parse(storedToken)
+        let storedTokens = JSON.parse(storedToken)
 
         const existingGcpTokens = storedTokens.filter(({ name }: { name: string }) => name === 'gcp')
         if (existingGcpTokens.length > 0) {
-          existingGcpTokens[0] = token
+          storedTokens = storedTokens.map((item: { name: string }) => (item.name === 'gcp' ? token : item))
         } else {
           storedTokens.push(token)
         }
