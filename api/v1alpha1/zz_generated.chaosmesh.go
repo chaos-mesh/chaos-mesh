@@ -152,7 +152,7 @@ func (in *AWSChaos) IsOneShot() bool {
 	
 }
 
-var AWSChaosWebhookLog = logf.Log.WithName("awschaos-resource")
+var AWSChaosWebhookLog = logf.Log.WithName("AWSChaos-resource")
 
 func (in *AWSChaos) ValidateCreate() error {
 	AWSChaosWebhookLog.Info("validate create", "name", in.Name)
@@ -307,7 +307,7 @@ func (in *DNSChaos) IsOneShot() bool {
 	
 }
 
-var DNSChaosWebhookLog = logf.Log.WithName("awschaos-resource")
+var DNSChaosWebhookLog = logf.Log.WithName("DNSChaos-resource")
 
 func (in *DNSChaos) ValidateCreate() error {
 	DNSChaosWebhookLog.Info("validate create", "name", in.Name)
@@ -466,7 +466,7 @@ func (in *GCPChaos) IsOneShot() bool {
 	
 }
 
-var GCPChaosWebhookLog = logf.Log.WithName("awschaos-resource")
+var GCPChaosWebhookLog = logf.Log.WithName("GCPChaos-resource")
 
 func (in *GCPChaos) ValidateCreate() error {
 	GCPChaosWebhookLog.Info("validate create", "name", in.Name)
@@ -621,7 +621,7 @@ func (in *HTTPChaos) IsOneShot() bool {
 	
 }
 
-var HTTPChaosWebhookLog = logf.Log.WithName("awschaos-resource")
+var HTTPChaosWebhookLog = logf.Log.WithName("HTTPChaos-resource")
 
 func (in *HTTPChaos) ValidateCreate() error {
 	HTTPChaosWebhookLog.Info("validate create", "name", in.Name)
@@ -776,7 +776,7 @@ func (in *IOChaos) IsOneShot() bool {
 	
 }
 
-var IOChaosWebhookLog = logf.Log.WithName("awschaos-resource")
+var IOChaosWebhookLog = logf.Log.WithName("IOChaos-resource")
 
 func (in *IOChaos) ValidateCreate() error {
 	IOChaosWebhookLog.Info("validate create", "name", in.Name)
@@ -931,7 +931,7 @@ func (in *JVMChaos) IsOneShot() bool {
 	
 }
 
-var JVMChaosWebhookLog = logf.Log.WithName("awschaos-resource")
+var JVMChaosWebhookLog = logf.Log.WithName("JVMChaos-resource")
 
 func (in *JVMChaos) ValidateCreate() error {
 	JVMChaosWebhookLog.Info("validate create", "name", in.Name)
@@ -1086,7 +1086,7 @@ func (in *KernelChaos) IsOneShot() bool {
 	
 }
 
-var KernelChaosWebhookLog = logf.Log.WithName("awschaos-resource")
+var KernelChaosWebhookLog = logf.Log.WithName("KernelChaos-resource")
 
 func (in *KernelChaos) ValidateCreate() error {
 	KernelChaosWebhookLog.Info("validate create", "name", in.Name)
@@ -1241,7 +1241,7 @@ func (in *NetworkChaos) IsOneShot() bool {
 	
 }
 
-var NetworkChaosWebhookLog = logf.Log.WithName("awschaos-resource")
+var NetworkChaosWebhookLog = logf.Log.WithName("NetworkChaos-resource")
 
 func (in *NetworkChaos) ValidateCreate() error {
 	NetworkChaosWebhookLog.Info("validate create", "name", in.Name)
@@ -1400,7 +1400,7 @@ func (in *PodChaos) IsOneShot() bool {
 	
 }
 
-var PodChaosWebhookLog = logf.Log.WithName("awschaos-resource")
+var PodChaosWebhookLog = logf.Log.WithName("PodChaos-resource")
 
 func (in *PodChaos) ValidateCreate() error {
 	PodChaosWebhookLog.Info("validate create", "name", in.Name)
@@ -1555,7 +1555,7 @@ func (in *StressChaos) IsOneShot() bool {
 	
 }
 
-var StressChaosWebhookLog = logf.Log.WithName("awschaos-resource")
+var StressChaosWebhookLog = logf.Log.WithName("StressChaos-resource")
 
 func (in *StressChaos) ValidateCreate() error {
 	StressChaosWebhookLog.Info("validate create", "name", in.Name)
@@ -1710,7 +1710,7 @@ func (in *TimeChaos) IsOneShot() bool {
 	
 }
 
-var TimeChaosWebhookLog = logf.Log.WithName("awschaos-resource")
+var TimeChaosWebhookLog = logf.Log.WithName("TimeChaos-resource")
 
 func (in *TimeChaos) ValidateCreate() error {
 	TimeChaosWebhookLog.Info("validate create", "name", in.Name)
