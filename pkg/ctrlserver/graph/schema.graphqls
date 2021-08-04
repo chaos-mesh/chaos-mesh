@@ -17,7 +17,7 @@ schema {
 }
 
 type Query {
-    namepsace(ns: String): Namespace!
+    namepsace(ns: String!): Namespace!
 }
 
 type Logger {
@@ -181,14 +181,14 @@ type IOChaosAction @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha
 }
 
 type IoFault @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.IoFault") {
-	errno: Int
-	weight: Int
+	errno: Int!
+	weight: Int!
 }
 
 # Timespec represents a time
 type Timespec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.Timespec") {
-	sec: Int
-	nsec: Int
+	sec: Int!
+	nsec: Int!
 }
 
 

@@ -284,7 +284,7 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Namepsace func(childComplexity int, ns *string) int
+		Namepsace func(childComplexity int, ns string) int
 	}
 
 	StressChaos struct {
@@ -349,7 +349,7 @@ type IOChaosActionResolver interface {
 	Filling(ctx context.Context, obj *v1alpha1.IOChaosAction) (*string, error)
 }
 type IoFaultResolver interface {
-	Errno(ctx context.Context, obj *v1alpha1.IoFault) (*int, error)
+	Errno(ctx context.Context, obj *v1alpha1.IoFault) (int, error)
 }
 type LoggerResolver interface {
 	Component(ctx context.Context, ns string, component model.Component) (<-chan string, error)
@@ -426,7 +426,7 @@ type PodNetworkChaosResolver interface {
 	Annotations(ctx context.Context, obj *v1alpha1.PodNetworkChaos) (map[string]interface{}, error)
 }
 type QueryResolver interface {
-	Namepsace(ctx context.Context, ns *string) (*model.Namespace, error)
+	Namepsace(ctx context.Context, ns string) (*model.Namespace, error)
 }
 type StressChaosResolver interface {
 	UID(ctx context.Context, obj *v1alpha1.StressChaos) (string, error)
@@ -1778,7 +1778,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Namepsace(childComplexity, args["ns"].(*string)), true
+		return e.complexity.Query.Namepsace(childComplexity, args["ns"].(string)), true
 
 	case "StressChaos.apiVersion":
 		if e.complexity.StressChaos.APIVersion == nil {
@@ -1999,7 +1999,7 @@ schema {
 }
 
 type Query {
-    namepsace(ns: String): Namespace!
+    namepsace(ns: String!): Namespace!
 }
 
 type Logger {
@@ -2163,14 +2163,14 @@ type IOChaosAction @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha
 }
 
 type IoFault @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.IoFault") {
-	errno: Int
-	weight: Int
+	errno: Int!
+	weight: Int!
 }
 
 # Timespec represents a time
 type Timespec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.Timespec") {
-	sec: Int
-	nsec: Int
+	sec: Int!
+	nsec: Int!
 }
 
 
@@ -2502,10 +2502,10 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 func (ec *executionContext) field_Query_namepsace_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *string
+	var arg0 string
 	if tmp, ok := rawArgs["ns"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ns"))
-		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -4444,11 +4444,14 @@ func (ec *executionContext) _IoFault_errno(ctx context.Context, field graphql.Co
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*int)
+	res := resTmp.(int)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _IoFault_weight(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.IoFault) (ret graphql.Marshaler) {
@@ -4476,11 +4479,14 @@ func (ec *executionContext) _IoFault_weight(ctx context.Context, field graphql.C
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(int32)
 	fc.Result = res
-	return ec.marshalOInt2int32(ctx, field.Selections, res)
+	return ec.marshalNInt2int32(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Logger_component(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
@@ -8734,7 +8740,7 @@ func (ec *executionContext) _Query_namepsace(ctx context.Context, field graphql.
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Namepsace(rctx, args["ns"].(*string))
+		return ec.resolvers.Query().Namepsace(rctx, args["ns"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -9424,11 +9430,14 @@ func (ec *executionContext) _Timespec_sec(ctx context.Context, field graphql.Col
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(int64)
 	fc.Result = res
-	return ec.marshalOInt2int64(ctx, field.Selections, res)
+	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Timespec_nsec(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.Timespec) (ret graphql.Marshaler) {
@@ -9456,11 +9465,14 @@ func (ec *executionContext) _Timespec_nsec(ctx context.Context, field graphql.Co
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(int64)
 	fc.Result = res
-	return ec.marshalOInt2int64(ctx, field.Selections, res)
+	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -11029,10 +11041,16 @@ func (ec *executionContext) _IoFault(ctx context.Context, sel ast.SelectionSet, 
 					}
 				}()
 				res = ec._IoFault_errno(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
 				return res
 			})
 		case "weight":
 			out.Values[i] = ec._IoFault_weight(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -12319,8 +12337,14 @@ func (ec *executionContext) _Timespec(ctx context.Context, sel ast.SelectionSet,
 			out.Values[i] = graphql.MarshalString("Timespec")
 		case "sec":
 			out.Values[i] = ec._Timespec_sec(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "nsec":
 			out.Values[i] = ec._Timespec_nsec(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -12632,6 +12656,36 @@ func (ec *executionContext) marshalNIOChaos2ᚖgithubᚗcomᚋchaosᚑmeshᚋcha
 
 func (ec *executionContext) marshalNIOChaosAction2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐIOChaosAction(ctx context.Context, sel ast.SelectionSet, v v1alpha1.IOChaosAction) graphql.Marshaler {
 	return ec._IOChaosAction(ctx, sel, &v)
+}
+
+func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
+	res, err := graphql.UnmarshalInt(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
+	res := graphql.MarshalInt(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalNInt2int32(ctx context.Context, v interface{}) (int32, error) {
+	res, err := graphql.UnmarshalInt32(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNInt2int32(ctx context.Context, sel ast.SelectionSet, v int32) graphql.Marshaler {
+	res := graphql.MarshalInt32(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
 }
 
 func (ec *executionContext) unmarshalNInt2int64(ctx context.Context, v interface{}) (int64, error) {
@@ -13194,15 +13248,6 @@ func (ec *executionContext) unmarshalOInt2int(ctx context.Context, v interface{}
 
 func (ec *executionContext) marshalOInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
 	return graphql.MarshalInt(v)
-}
-
-func (ec *executionContext) unmarshalOInt2int32(ctx context.Context, v interface{}) (int32, error) {
-	res, err := graphql.UnmarshalInt32(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOInt2int32(ctx context.Context, sel ast.SelectionSet, v int32) graphql.Marshaler {
-	return graphql.MarshalInt32(v)
 }
 
 func (ec *executionContext) unmarshalOInt2int64(ctx context.Context, v interface{}) (int64, error) {

@@ -10,6 +10,8 @@ import (
 
 	v1 "k8s.io/api/core/v1"
 	v11 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/ctrlserver/graph/generated"
@@ -17,95 +19,152 @@ import (
 )
 
 func (r *hTTPChaosResolver) UID(ctx context.Context, obj *v1alpha1.HTTPChaos) (string, error) {
-	panic(fmt.Errorf("not implemented"))
+	return string(obj.UID), nil
 }
 
 func (r *hTTPChaosResolver) CreationTimestamp(ctx context.Context, obj *v1alpha1.HTTPChaos) (*time.Time, error) {
-	panic(fmt.Errorf("not implemented"))
+	return &obj.CreationTimestamp.Time, nil
 }
 
 func (r *hTTPChaosResolver) DeletionTimestamp(ctx context.Context, obj *v1alpha1.HTTPChaos) (*time.Time, error) {
-	panic(fmt.Errorf("not implemented"))
+	return &obj.DeletionTimestamp.Time, nil
 }
 
 func (r *hTTPChaosResolver) Labels(ctx context.Context, obj *v1alpha1.HTTPChaos) (map[string]interface{}, error) {
-	panic(fmt.Errorf("not implemented"))
+	labels := make(map[string]interface{})
+	for k, v := range obj.Labels {
+		labels[k] = v
+	}
+	return labels, nil
 }
 
 func (r *hTTPChaosResolver) Annotations(ctx context.Context, obj *v1alpha1.HTTPChaos) (map[string]interface{}, error) {
-	panic(fmt.Errorf("not implemented"))
+	annotations := make(map[string]interface{})
+	for k, v := range obj.Annotations {
+		annotations[k] = v
+	}
+	return annotations, nil
 }
 
 func (r *iOChaosResolver) UID(ctx context.Context, obj *v1alpha1.IOChaos) (string, error) {
-	panic(fmt.Errorf("not implemented"))
+	return string(obj.UID), nil
 }
 
 func (r *iOChaosResolver) CreationTimestamp(ctx context.Context, obj *v1alpha1.IOChaos) (*time.Time, error) {
-	panic(fmt.Errorf("not implemented"))
+	return &obj.CreationTimestamp.Time, nil
 }
 
 func (r *iOChaosResolver) DeletionTimestamp(ctx context.Context, obj *v1alpha1.IOChaos) (*time.Time, error) {
-	panic(fmt.Errorf("not implemented"))
+	return &obj.DeletionTimestamp.Time, nil
 }
 
 func (r *iOChaosResolver) Labels(ctx context.Context, obj *v1alpha1.IOChaos) (map[string]interface{}, error) {
-	panic(fmt.Errorf("not implemented"))
+	labels := make(map[string]interface{})
+	for k, v := range obj.Labels {
+		labels[k] = v
+	}
+	return labels, nil
 }
 
 func (r *iOChaosResolver) Annotations(ctx context.Context, obj *v1alpha1.IOChaos) (map[string]interface{}, error) {
-	panic(fmt.Errorf("not implemented"))
+	annotations := make(map[string]interface{})
+	for k, v := range obj.Annotations {
+		annotations[k] = v
+	}
+	return annotations, nil
 }
 
 func (r *iOChaosActionResolver) Type(ctx context.Context, obj *v1alpha1.IOChaosAction) (string, error) {
-	panic(fmt.Errorf("not implemented"))
+	return string(obj.Type), nil
 }
 
 func (r *iOChaosActionResolver) Methods(ctx context.Context, obj *v1alpha1.IOChaosAction) ([]string, error) {
-	panic(fmt.Errorf("not implemented"))
+	methods := make([]string, 0, len(obj.Methods))
+	for k, v := range obj.Methods {
+		methods[k] = string(v)
+	}
+	return methods, nil
 }
 
 func (r *iOChaosActionResolver) Ino(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error) {
-	panic(fmt.Errorf("not implemented"))
+	if obj.Ino == nil {
+		return nil, nil
+	}
+	ino := (int)(*obj.Ino)
+	return &ino, nil
 }
 
 func (r *iOChaosActionResolver) Size(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error) {
-	panic(fmt.Errorf("not implemented"))
+	if obj.Size == nil {
+		return nil, nil
+	}
+	size := (int)(*obj.Size)
+	return &size, nil
 }
 
 func (r *iOChaosActionResolver) Blocks(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error) {
-	panic(fmt.Errorf("not implemented"))
+	if obj.Blocks == nil {
+		return nil, nil
+	}
+	blocks := (int)(*obj.Blocks)
+	return &blocks, nil
 }
 
 func (r *iOChaosActionResolver) Kind(ctx context.Context, obj *v1alpha1.IOChaosAction) (*string, error) {
-	panic(fmt.Errorf("not implemented"))
+	if obj.Kind == nil {
+		return nil, nil
+	}
+	kind := (string)(*obj.Kind)
+	return &kind, nil
 }
 
 func (r *iOChaosActionResolver) Perm(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error) {
-	panic(fmt.Errorf("not implemented"))
+	if obj.Perm == nil {
+		return nil, nil
+	}
+	perm := (int)(*obj.Perm)
+	return &perm, nil
 }
 
 func (r *iOChaosActionResolver) Nlink(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error) {
-	panic(fmt.Errorf("not implemented"))
+	if obj.Nlink == nil {
+		return nil, nil
+	}
+	nlink := (int)(*obj.Nlink)
+	return &nlink, nil
 }
 
 func (r *iOChaosActionResolver) UID(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error) {
-	panic(fmt.Errorf("not implemented"))
+	if obj.UID == nil {
+		return nil, nil
+	}
+	uid := (int)(*obj.UID)
+	return &uid, nil
 }
 
 func (r *iOChaosActionResolver) Gid(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error) {
-	panic(fmt.Errorf("not implemented"))
+	if obj.GID == nil {
+		return nil, nil
+	}
+	gid := (int)(*obj.GID)
+	return &gid, nil
 }
 
 func (r *iOChaosActionResolver) Rdev(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error) {
-	panic(fmt.Errorf("not implemented"))
+	if obj.Rdev == nil {
+		return nil, nil
+	}
+	rdev := (int)(*obj.Rdev)
+	return &rdev, nil
 }
 
 func (r *iOChaosActionResolver) Filling(ctx context.Context, obj *v1alpha1.IOChaosAction) (*string, error) {
-	panic(fmt.Errorf("not implemented"))
+	filling := string(obj.Filling)
+	return &filling, nil
 }
 
-func (r *ioFaultResolver) Errno(ctx context.Context, obj *v1alpha1.IoFault) (*int, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *ioFaultResolver) Errno(ctx context.Context, obj *v1alpha1.IoFault) (int, error) {
+	return int(obj.Errno), nil
 }
 
 func (r *loggerResolver) Component(ctx context.Context, ns string, component model.Component) (<-chan string, error) {
@@ -121,155 +180,312 @@ func (r *namespaceResolver) Component(ctx context.Context, obj *model.Namespace,
 }
 
 func (r *namespaceResolver) Pod(ctx context.Context, obj *model.Namespace, name string) (*v1.Pod, error) {
-	panic(fmt.Errorf("not implemented"))
+	key := types.NamespacedName{Namespace: obj.Ns, Name: name}
+	pod := new(v1.Pod)
+	if err := r.Client.Get(ctx, key, pod); err != nil {
+		return nil, err
+	}
+	return pod, nil
 }
 
 func (r *namespaceResolver) Pods(ctx context.Context, obj *model.Namespace) ([]*v1.Pod, error) {
-	panic(fmt.Errorf("not implemented"))
+	var podList v1.PodList
+	var pods []*v1.Pod
+	if err := r.Client.List(ctx, &podList, &client.ListOptions{Namespace: obj.Ns}); err != nil {
+		return nil, err
+	}
+
+	for i := range podList.Items {
+		pods = append(pods, &podList.Items[i])
+	}
+
+	return pods, nil
 }
 
 func (r *namespaceResolver) Stress(ctx context.Context, obj *model.Namespace, name string) (*v1alpha1.StressChaos, error) {
-	panic(fmt.Errorf("not implemented"))
+	key := types.NamespacedName{Namespace: obj.Ns, Name: name}
+	stress := new(v1alpha1.StressChaos)
+	if err := r.Client.Get(ctx, key, stress); err != nil {
+		return nil, err
+	}
+	return stress, nil
 }
 
 func (r *namespaceResolver) Stresses(ctx context.Context, obj *model.Namespace) ([]*v1alpha1.StressChaos, error) {
-	panic(fmt.Errorf("not implemented"))
+	var stressList v1alpha1.StressChaosList
+	var stresses []*v1alpha1.StressChaos
+	if err := r.Client.List(ctx, &stressList, &client.ListOptions{Namespace: obj.Ns}); err != nil {
+		return nil, err
+	}
+
+	for i := range stressList.Items {
+		stresses = append(stresses, &stressList.Items[i])
+	}
+
+	return stresses, nil
 }
 
 func (r *namespaceResolver) Io(ctx context.Context, obj *model.Namespace, name string) (*v1alpha1.IOChaos, error) {
-	panic(fmt.Errorf("not implemented"))
+	key := types.NamespacedName{Namespace: obj.Ns, Name: name}
+	io := new(v1alpha1.IOChaos)
+	if err := r.Client.Get(ctx, key, io); err != nil {
+		return nil, err
+	}
+	return io, nil
 }
 
 func (r *namespaceResolver) Ios(ctx context.Context, obj *model.Namespace) ([]*v1alpha1.IOChaos, error) {
-	panic(fmt.Errorf("not implemented"))
+	var ioList v1alpha1.IOChaosList
+	var ios []*v1alpha1.IOChaos
+	if err := r.Client.List(ctx, &ioList, &client.ListOptions{Namespace: obj.Ns}); err != nil {
+		return nil, err
+	}
+
+	for i := range ioList.Items {
+		ios = append(ios, &ioList.Items[i])
+	}
+
+	return ios, nil
 }
 
 func (r *namespaceResolver) Podio(ctx context.Context, obj *model.Namespace, name string) (*v1alpha1.PodIOChaos, error) {
-	panic(fmt.Errorf("not implemented"))
+	key := types.NamespacedName{Namespace: obj.Ns, Name: name}
+	io := new(v1alpha1.PodIOChaos)
+	if err := r.Client.Get(ctx, key, io); err != nil {
+		return nil, err
+	}
+	return io, nil
 }
 
 func (r *namespaceResolver) Podios(ctx context.Context, obj *model.Namespace) ([]*v1alpha1.PodIOChaos, error) {
-	panic(fmt.Errorf("not implemented"))
+	var ioList v1alpha1.PodIOChaosList
+	var ios []*v1alpha1.PodIOChaos
+	if err := r.Client.List(ctx, &ioList, &client.ListOptions{Namespace: obj.Ns}); err != nil {
+		return nil, err
+	}
+
+	for i := range ioList.Items {
+		ios = append(ios, &ioList.Items[i])
+	}
+
+	return ios, nil
 }
 
 func (r *namespaceResolver) HTTP(ctx context.Context, obj *model.Namespace, name string) (*v1alpha1.HTTPChaos, error) {
-	panic(fmt.Errorf("not implemented"))
+	key := types.NamespacedName{Namespace: obj.Ns, Name: name}
+	http := new(v1alpha1.HTTPChaos)
+	if err := r.Client.Get(ctx, key, http); err != nil {
+		return nil, err
+	}
+	return http, nil
 }
 
 func (r *namespaceResolver) HTTPS(ctx context.Context, obj *model.Namespace) ([]*v1alpha1.HTTPChaos, error) {
-	panic(fmt.Errorf("not implemented"))
+	var httpList v1alpha1.HTTPChaosList
+	var https []*v1alpha1.HTTPChaos
+	if err := r.Client.List(ctx, &httpList, &client.ListOptions{Namespace: obj.Ns}); err != nil {
+		return nil, err
+	}
+
+	for i := range httpList.Items {
+		https = append(https, &httpList.Items[i])
+	}
+
+	return https, nil
 }
 
 func (r *namespaceResolver) Podhttp(ctx context.Context, obj *model.Namespace, name string) (*v1alpha1.PodHttpChaos, error) {
-	panic(fmt.Errorf("not implemented"))
+	key := types.NamespacedName{Namespace: obj.Ns, Name: name}
+	http := new(v1alpha1.PodHttpChaos)
+	if err := r.Client.Get(ctx, key, http); err != nil {
+		return nil, err
+	}
+	return http, nil
 }
 
 func (r *namespaceResolver) Podhttps(ctx context.Context, obj *model.Namespace) ([]*v1alpha1.PodHttpChaos, error) {
-	panic(fmt.Errorf("not implemented"))
+	var httpList v1alpha1.PodHttpChaosList
+	var https []*v1alpha1.PodHttpChaos
+	if err := r.Client.List(ctx, &httpList, &client.ListOptions{Namespace: obj.Ns}); err != nil {
+		return nil, err
+	}
+
+	for i := range httpList.Items {
+		https = append(https, &httpList.Items[i])
+	}
+
+	return https, nil
 }
 
 func (r *namespaceResolver) Network(ctx context.Context, obj *model.Namespace, name string) (*v1alpha1.NetworkChaos, error) {
-	panic(fmt.Errorf("not implemented"))
+	key := types.NamespacedName{Namespace: obj.Ns, Name: name}
+	network := new(v1alpha1.NetworkChaos)
+	if err := r.Client.Get(ctx, key, network); err != nil {
+		return nil, err
+	}
+	return network, nil
 }
 
 func (r *namespaceResolver) Networks(ctx context.Context, obj *model.Namespace) ([]*v1alpha1.NetworkChaos, error) {
-	panic(fmt.Errorf("not implemented"))
+	var networkList v1alpha1.NetworkChaosList
+	var networks []*v1alpha1.NetworkChaos
+	if err := r.Client.List(ctx, &networkList, &client.ListOptions{Namespace: obj.Ns}); err != nil {
+		return nil, err
+	}
+
+	for i := range networkList.Items {
+		networks = append(networks, &networkList.Items[i])
+	}
+
+	return networks, nil
 }
 
 func (r *namespaceResolver) Podnetwork(ctx context.Context, obj *model.Namespace, name string) (*v1alpha1.PodNetworkChaos, error) {
-	panic(fmt.Errorf("not implemented"))
+	key := types.NamespacedName{Namespace: obj.Ns, Name: name}
+	network := new(v1alpha1.PodNetworkChaos)
+	if err := r.Client.Get(ctx, key, network); err != nil {
+		return nil, err
+	}
+	return network, nil
 }
 
 func (r *namespaceResolver) Podnetworks(ctx context.Context, obj *model.Namespace) ([]*v1alpha1.PodNetworkChaos, error) {
-	panic(fmt.Errorf("not implemented"))
+	var networkList v1alpha1.PodNetworkChaosList
+	var networks []*v1alpha1.PodNetworkChaos
+	if err := r.Client.List(ctx, &networkList, &client.ListOptions{Namespace: obj.Ns}); err != nil {
+		return nil, err
+	}
+
+	for i := range networkList.Items {
+		networks = append(networks, &networkList.Items[i])
+	}
+
+	return networks, nil
 }
 
 func (r *networkChaosResolver) UID(ctx context.Context, obj *v1alpha1.NetworkChaos) (string, error) {
-	panic(fmt.Errorf("not implemented"))
+	return string(obj.UID), nil
 }
 
 func (r *networkChaosResolver) CreationTimestamp(ctx context.Context, obj *v1alpha1.NetworkChaos) (*time.Time, error) {
-	panic(fmt.Errorf("not implemented"))
+	return &obj.CreationTimestamp.Time, nil
 }
 
 func (r *networkChaosResolver) DeletionTimestamp(ctx context.Context, obj *v1alpha1.NetworkChaos) (*time.Time, error) {
-	panic(fmt.Errorf("not implemented"))
+	return &obj.DeletionTimestamp.Time, nil
 }
 
 func (r *networkChaosResolver) Labels(ctx context.Context, obj *v1alpha1.NetworkChaos) (map[string]interface{}, error) {
-	panic(fmt.Errorf("not implemented"))
+	labels := make(map[string]interface{})
+	for k, v := range obj.Labels {
+		labels[k] = v
+	}
+	return labels, nil
 }
 
 func (r *networkChaosResolver) Annotations(ctx context.Context, obj *v1alpha1.NetworkChaos) (map[string]interface{}, error) {
-	panic(fmt.Errorf("not implemented"))
+	annotations := make(map[string]interface{})
+	for k, v := range obj.Annotations {
+		annotations[k] = v
+	}
+	return annotations, nil
 }
 
 func (r *ownerReferenceResolver) UID(ctx context.Context, obj *v11.OwnerReference) (string, error) {
-	panic(fmt.Errorf("not implemented"))
+	return string(obj.UID), nil
 }
 
 func (r *podResolver) UID(ctx context.Context, obj *v1.Pod) (string, error) {
-	panic(fmt.Errorf("not implemented"))
+	return string(obj.UID), nil
 }
 
 func (r *podResolver) CreationTimestamp(ctx context.Context, obj *v1.Pod) (*time.Time, error) {
-	panic(fmt.Errorf("not implemented"))
+	return &obj.CreationTimestamp.Time, nil
 }
 
 func (r *podResolver) DeletionTimestamp(ctx context.Context, obj *v1.Pod) (*time.Time, error) {
-	panic(fmt.Errorf("not implemented"))
+	return &obj.DeletionTimestamp.Time, nil
 }
 
 func (r *podResolver) Labels(ctx context.Context, obj *v1.Pod) (map[string]interface{}, error) {
-	panic(fmt.Errorf("not implemented"))
+	labels := make(map[string]interface{})
+	for k, v := range obj.Labels {
+		labels[k] = v
+	}
+	return labels, nil
 }
 
 func (r *podResolver) Annotations(ctx context.Context, obj *v1.Pod) (map[string]interface{}, error) {
-	panic(fmt.Errorf("not implemented"))
+	annotations := make(map[string]interface{})
+	for k, v := range obj.Annotations {
+		annotations[k] = v
+	}
+	return annotations, nil
 }
 
 func (r *podHTTPChaosResolver) UID(ctx context.Context, obj *v1alpha1.PodHttpChaos) (string, error) {
-	panic(fmt.Errorf("not implemented"))
+	return string(obj.UID), nil
 }
 
 func (r *podHTTPChaosResolver) CreationTimestamp(ctx context.Context, obj *v1alpha1.PodHttpChaos) (*time.Time, error) {
-	panic(fmt.Errorf("not implemented"))
+	return &obj.CreationTimestamp.Time, nil
 }
 
 func (r *podHTTPChaosResolver) DeletionTimestamp(ctx context.Context, obj *v1alpha1.PodHttpChaos) (*time.Time, error) {
-	panic(fmt.Errorf("not implemented"))
+	return &obj.DeletionTimestamp.Time, nil
 }
 
 func (r *podHTTPChaosResolver) Labels(ctx context.Context, obj *v1alpha1.PodHttpChaos) (map[string]interface{}, error) {
-	panic(fmt.Errorf("not implemented"))
+	labels := make(map[string]interface{})
+	for k, v := range obj.Labels {
+		labels[k] = v
+	}
+	return labels, nil
 }
 
 func (r *podHTTPChaosResolver) Annotations(ctx context.Context, obj *v1alpha1.PodHttpChaos) (map[string]interface{}, error) {
-	panic(fmt.Errorf("not implemented"))
+	annotations := make(map[string]interface{})
+	for k, v := range obj.Annotations {
+		annotations[k] = v
+	}
+	return annotations, nil
 }
 
 func (r *podIOChaosResolver) UID(ctx context.Context, obj *v1alpha1.PodIOChaos) (string, error) {
-	panic(fmt.Errorf("not implemented"))
+	return string(obj.UID), nil
 }
 
 func (r *podIOChaosResolver) CreationTimestamp(ctx context.Context, obj *v1alpha1.PodIOChaos) (*time.Time, error) {
-	panic(fmt.Errorf("not implemented"))
+	return &obj.CreationTimestamp.Time, nil
 }
 
 func (r *podIOChaosResolver) DeletionTimestamp(ctx context.Context, obj *v1alpha1.PodIOChaos) (*time.Time, error) {
-	panic(fmt.Errorf("not implemented"))
+	return &obj.DeletionTimestamp.Time, nil
 }
 
 func (r *podIOChaosResolver) Labels(ctx context.Context, obj *v1alpha1.PodIOChaos) (map[string]interface{}, error) {
-	panic(fmt.Errorf("not implemented"))
+	labels := make(map[string]interface{})
+	for k, v := range obj.Labels {
+		labels[k] = v
+	}
+	return labels, nil
 }
 
 func (r *podIOChaosResolver) Annotations(ctx context.Context, obj *v1alpha1.PodIOChaos) (map[string]interface{}, error) {
-	panic(fmt.Errorf("not implemented"))
+	annotations := make(map[string]interface{})
+	for k, v := range obj.Annotations {
+		annotations[k] = v
+	}
+	return annotations, nil
 }
 
 func (r *podIOChaosResolver) Pod(ctx context.Context, obj *v1alpha1.PodIOChaos) (*v1.Pod, error) {
-	panic(fmt.Errorf("not implemented"))
+	pod := new(v1.Pod)
+	key := types.NamespacedName{Namespace: obj.Namespace, Name: obj.Name}
+	if err := r.Client.Get(ctx, key, pod); err != nil {
+		return nil, err
+	}
+	return pod, nil
 }
 
 func (r *podIOChaosResolver) Ios(ctx context.Context, obj *v1alpha1.PodIOChaos) ([]*v1alpha1.IOChaos, error) {
@@ -277,47 +493,63 @@ func (r *podIOChaosResolver) Ios(ctx context.Context, obj *v1alpha1.PodIOChaos) 
 }
 
 func (r *podNetworkChaosResolver) UID(ctx context.Context, obj *v1alpha1.PodNetworkChaos) (string, error) {
-	panic(fmt.Errorf("not implemented"))
+	return string(obj.UID), nil
 }
 
 func (r *podNetworkChaosResolver) CreationTimestamp(ctx context.Context, obj *v1alpha1.PodNetworkChaos) (*time.Time, error) {
-	panic(fmt.Errorf("not implemented"))
+	return &obj.CreationTimestamp.Time, nil
 }
 
 func (r *podNetworkChaosResolver) DeletionTimestamp(ctx context.Context, obj *v1alpha1.PodNetworkChaos) (*time.Time, error) {
-	panic(fmt.Errorf("not implemented"))
+	return &obj.DeletionTimestamp.Time, nil
 }
 
 func (r *podNetworkChaosResolver) Labels(ctx context.Context, obj *v1alpha1.PodNetworkChaos) (map[string]interface{}, error) {
-	panic(fmt.Errorf("not implemented"))
+	labels := make(map[string]interface{})
+	for k, v := range obj.Labels {
+		labels[k] = v
+	}
+	return labels, nil
 }
 
 func (r *podNetworkChaosResolver) Annotations(ctx context.Context, obj *v1alpha1.PodNetworkChaos) (map[string]interface{}, error) {
-	panic(fmt.Errorf("not implemented"))
+	annotations := make(map[string]interface{})
+	for k, v := range obj.Annotations {
+		annotations[k] = v
+	}
+	return annotations, nil
 }
 
-func (r *queryResolver) Namepsace(ctx context.Context, ns *string) (*model.Namespace, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *queryResolver) Namepsace(ctx context.Context, ns string) (*model.Namespace, error) {
+	return &model.Namespace{Ns: ns}, nil
 }
 
 func (r *stressChaosResolver) UID(ctx context.Context, obj *v1alpha1.StressChaos) (string, error) {
-	panic(fmt.Errorf("not implemented"))
+	return string(obj.UID), nil
 }
 
 func (r *stressChaosResolver) CreationTimestamp(ctx context.Context, obj *v1alpha1.StressChaos) (*time.Time, error) {
-	panic(fmt.Errorf("not implemented"))
+	return &obj.CreationTimestamp.Time, nil
 }
 
 func (r *stressChaosResolver) DeletionTimestamp(ctx context.Context, obj *v1alpha1.StressChaos) (*time.Time, error) {
-	panic(fmt.Errorf("not implemented"))
+	return &obj.DeletionTimestamp.Time, nil
 }
 
 func (r *stressChaosResolver) Labels(ctx context.Context, obj *v1alpha1.StressChaos) (map[string]interface{}, error) {
-	panic(fmt.Errorf("not implemented"))
+	labels := make(map[string]interface{})
+	for k, v := range obj.Labels {
+		labels[k] = v
+	}
+	return labels, nil
 }
 
 func (r *stressChaosResolver) Annotations(ctx context.Context, obj *v1alpha1.StressChaos) (map[string]interface{}, error) {
-	panic(fmt.Errorf("not implemented"))
+	annotations := make(map[string]interface{})
+	for k, v := range obj.Annotations {
+		annotations[k] = v
+	}
+	return annotations, nil
 }
 
 // HTTPChaos returns generated.HTTPChaosResolver implementation.
@@ -380,13 +612,3 @@ type podIOChaosResolver struct{ *Resolver }
 type podNetworkChaosResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type stressChaosResolver struct{ *Resolver }
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//    it when you're done.
-//  - You have helper methods in this file. Move them out to keep these resolver files clean.
-func (r *iOChaosActionResolver) Int64(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error) {
-	panic(fmt.Errorf("not implemented"))
-}
