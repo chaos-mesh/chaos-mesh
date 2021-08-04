@@ -162,7 +162,7 @@ func (in *{{.Type}}) IsOneShot() bool {
 	{{end}}
 }
 
-var {{.Type}}WebhookLog = logf.Log.WithName("awschaos-resource")
+var {{.Type}}WebhookLog = logf.Log.WithName("{{.Type}}-resource")
 
 func (in *{{.Type}}) ValidateCreate() error {
 	{{.Type}}WebhookLog.Info("validate create", "name", in.Name)

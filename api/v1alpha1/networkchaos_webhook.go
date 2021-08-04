@@ -34,7 +34,9 @@ const (
 )
 
 func (in *Direction) Default(root interface{}, field reflect.StructField) {
-	*in = To
+	if *in == "" {
+		*in = To
+	}
 }
 
 type Rate string
