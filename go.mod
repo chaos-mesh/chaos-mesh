@@ -14,10 +14,11 @@ require (
 	github.com/chaos-mesh/chaos-mesh/api/v1alpha1 v0.0.0
 	github.com/chaos-mesh/k8s_dns_chaos v0.2.0
 	github.com/containerd/cgroups v1.0.2-0.20210605143700-23b51209bf7b
-	github.com/containerd/containerd v1.2.3
+	github.com/containerd/containerd v1.4.8
 	github.com/containerd/continuity v0.0.0-20200107194136-26c1120b8d41 // indirect
-	github.com/containerd/cri v1.11.1 // indirect
 	github.com/containerd/fifo v0.0.0-20191213151349-ff969a566b00 // indirect
+	github.com/containerd/go-runc v1.0.0 // indirect
+	github.com/containerd/ttrpc v1.0.2 // indirect
 	github.com/containerd/typeurl v0.0.0-20200115183213-fe1d0d650e42 // indirect
 	github.com/coreos/go-systemd/v22 v22.3.2 // indirect
 	github.com/docker/docker v1.4.2-0.20180625184442-8e610b2b55bf
@@ -50,6 +51,7 @@ require (
 	github.com/onsi/gomega v1.10.1
 	github.com/opencontainers/image-spec v1.0.1 // indirect
 	github.com/opencontainers/runc v1.0.0-rc9 // indirect
+	github.com/opencontainers/selinux v1.8.3 // indirect
 	github.com/pingcap/check v0.0.0-20191216031241-8a5a85928f12 // indirect
 	github.com/pingcap/errors v0.11.5-0.20190809092503-95897b64e011
 	github.com/pingcap/failpoint v0.0.0-20200210140405-f8f9fb234798
@@ -84,6 +86,7 @@ require (
 	google.golang.org/grpc v1.27.0
 	google.golang.org/protobuf v1.23.0
 	gopkg.in/yaml.v2 v2.3.0
+	gotest.tools/v3 v3.0.3 // indirect
 	honnef.co/go/tools v0.0.1-2020.1.3 // indirect
 	k8s.io/api v0.18.2
 	k8s.io/apimachinery v0.18.2
