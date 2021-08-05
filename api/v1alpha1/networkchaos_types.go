@@ -90,7 +90,7 @@ type NetworkChaosSpec struct {
 	Action NetworkChaosAction `json:"action"`
 
 	// Duration represents the duration of the chaos action
-	Duration *string `json:"duration,omitempty"`
+	Duration *string `json:"duration,omitempty" webhook:"Duration"`
 
 	// TcParameter represents the traffic control definition
 	TcParameter `json:",inline"`
@@ -102,7 +102,7 @@ type NetworkChaosSpec struct {
 
 	// Target represents network target, this applies on netem and network partition action
 	// +optional
-	Target *PodSelector `json:"target,omitempty"`
+	Target *PodSelector `json:"target,omitempty" webhook:",nilable"`
 
 	// ExternalTargets represents network targets outside k8s
 	// +optional
@@ -119,40 +119,40 @@ type NetworkChaosStatus struct {
 
 // DelaySpec defines detail of a delay action
 type DelaySpec struct {
-	Latency string `json:"latency"`
+	Latency string `json:"latency" webhook:"Duration"`
 	// +optional
-	Correlation string `json:"correlation,omitempty"`
+	Correlation string `json:"correlation,omitempty" default:"0" webhook:"FloatStr"`
 	// +optional
-	Jitter string `json:"jitter,omitempty"`
+	Jitter string `json:"jitter,omitempty" default:"0ms" webhook:"Duration"`
 	// +optional
 	Reorder *ReorderSpec `json:"reorder,omitempty"`
 }
 
 // LossSpec defines detail of a loss action
 type LossSpec struct {
-	Loss string `json:"loss"`
+	Loss string `json:"loss" webhook:"FloatStr"`
 	// +optional
-	Correlation string `json:"correlation,omitempty"`
+	Correlation string `json:"correlation,omitempty" default:"0" webhook:"FloatStr"`
 }
 
 // DuplicateSpec defines detail of a duplicate action
 type DuplicateSpec struct {
-	Duplicate string `json:"duplicate"`
+	Duplicate string `json:"duplicate" webhook:"FloatStr"`
 	// +optional
-	Correlation string `json:"correlation,omitempty"`
+	Correlation string `json:"correlation,omitempty" default:"0" webhook:"FloatStr"`
 }
 
 // CorruptSpec defines detail of a corrupt action
 type CorruptSpec struct {
-	Corrupt string `json:"corrupt"`
+	Corrupt string `json:"corrupt" webhook:"FloatStr"`
 	// +optional
-	Correlation string `json:"correlation,omitempty"`
+	Correlation string `json:"correlation,omitempty" default:"0" webhook:"FloatStr"`
 }
 
 // BandwidthSpec defines detail of bandwidth limit.
 type BandwidthSpec struct {
 	// Rate is the speed knob. Allows bps, kbps, mbps, gbps, tbps unit. bps means bytes per second.
-	Rate string `json:"rate"`
+	Rate string `json:"rate" webhook:"Rate"`
 	// Limit is the number of bytes that can be queued waiting for tokens to become available.
 	// +kubebuilder:validation:Minimum=1
 	Limit uint32 `json:"limit"`
@@ -177,9 +177,9 @@ type BandwidthSpec struct {
 
 // ReorderSpec defines details of packet reorder.
 type ReorderSpec struct {
-	Reorder string `json:"reorder"`
+	Reorder string `json:"reorder" webhook:"FloatStr"`
 	// +optional
-	Correlation string `json:"correlation,omitempty"`
+	Correlation string `json:"correlation,omitempty" default:"0" webhook:"FloatStr"`
 	Gap         int    `json:"gap"`
 }
 
