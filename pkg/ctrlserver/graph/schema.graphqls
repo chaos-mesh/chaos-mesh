@@ -212,6 +212,114 @@ type IOChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.IOCh
     ownerReferences: [OwnerReference!]
     finalizers: [String!]
     clusterName: String!
+
+    spec: IOChaosSpec!
+    status: IOChaosStatus!
+
+    podios: [PodIOChaos!] @goField(forceResolver: true)
+}
+
+# IOChaosSpec defines the desired state of IOChaos
+type IOChaosSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.IOChaosSpec") {
+    # containerNames indicates list of the name of affected container.
+	# If not set, all containers will be injected
+	containerNames: [String!]
+
+	# selector is used to select pods that are used to inject chaos action.
+	selector: PodSelectorSpec!
+
+	# mode defines the mode to run chaos action.
+	# supported mode: one / all / fixed / fixed-percent / random-max-percent
+	mode: String!
+
+    # value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+	# If `FixedPodMode`, provide an integer of pods to do chaos action.
+	# If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
+	# IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+	value: String
+
+
+	# action defines the specific pod chaos action.
+	# Supported action: latency / fault / attrOverride / mistake
+	action: String!
+
+	# delay defines the value of I/O chaos action delay.
+	# A delay string is a possibly signed sequence of
+	# decimal numbers, each with optional fraction and a unit suffix,
+	# such as "300ms".
+	# Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+	delay: String
+
+	# errno defines the error code that returned by I/O action.
+	# refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html
+	errno: Int
+
+	# attr defines the overrided attribution
+	attr: AttrOverrideSpec
+
+	# mistake defines what types of incorrectness are injected to IO operations
+	mistake: MistakeSpec
+
+	# path defines the path of files for injecting I/O chaos action.
+	path: String
+
+	# methods defines the I/O methods for injecting I/O chaos action.
+	# default: all I/O methods.
+	methods: [String!]
+
+	# percent defines the percentage of injection errors and provides a number from 0-100.
+	# default: 100.
+	percent: Int
+
+	# volumePath represents the mount path of injected volume
+	volumePath: String!
+
+	# duration represents the duration of the chaos action.
+	# It is required when the action is `PodFailureAction`.
+	# A duration string is a possibly signed sequence of
+	# decimal numbers, each with optional fraction and a unit suffix,
+	# such as "300ms", "-1.5h" or "2h45m".
+	# Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+	duration: String
+}
+
+# AttrOverrideSpec represents an override of attribution
+type AttrOverrideSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.AttrOverrideSpec") {
+    ino: Int
+	size: Int
+	blocks: Int
+	atime: Timespec
+	mtime: Timespec
+    ctime: Timespec
+	kind: String # the file kind
+	perm: Int
+	nlink: Int
+	uid: Int
+    gid: Int
+    rdev: Int
+}
+
+# MistakeSpec represents one type of mistake
+type MistakeSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.MistakeSpec") {
+	# filling determines what is filled in the miskate data.
+	filling: String
+
+	# there will be [1, MaxOccurrences] segments of wrong data.
+	maxOccurrences: Int
+
+	# max length of each wrong data segment in bytes
+	maxLength: Int
+}
+
+type IOChaosStatus @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.IOChaosStatus") {
+    # conditions represents the current global condition of the chaos
+	conditions: [ChaosCondition!]
+
+	# experiment records the last experiment state.
+	experiment: ExperimentStatus
+
+    # instances always specifies podhttpchaos generation or empty
+	instances: Map
 }
 
 type PodHTTPChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodHttpChaos") {

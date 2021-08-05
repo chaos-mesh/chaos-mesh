@@ -21,6 +21,78 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/ctrlserver/graph/model"
 )
 
+func (r *attrOverrideSpecResolver) Ino(ctx context.Context, obj *v1alpha1.AttrOverrideSpec) (*int, error) {
+	if obj.Ino == nil {
+		return nil, nil
+	}
+	ino := (int)(*obj.Ino)
+	return &ino, nil
+}
+
+func (r *attrOverrideSpecResolver) Size(ctx context.Context, obj *v1alpha1.AttrOverrideSpec) (*int, error) {
+	if obj.Size == nil {
+		return nil, nil
+	}
+	size := (int)(*obj.Size)
+	return &size, nil
+}
+
+func (r *attrOverrideSpecResolver) Blocks(ctx context.Context, obj *v1alpha1.AttrOverrideSpec) (*int, error) {
+	if obj.Blocks == nil {
+		return nil, nil
+	}
+	blocks := (int)(*obj.Blocks)
+	return &blocks, nil
+}
+
+func (r *attrOverrideSpecResolver) Kind(ctx context.Context, obj *v1alpha1.AttrOverrideSpec) (*string, error) {
+	if obj.Kind == nil {
+		return nil, nil
+	}
+	kind := (string)(*obj.Kind)
+	return &kind, nil
+}
+
+func (r *attrOverrideSpecResolver) Perm(ctx context.Context, obj *v1alpha1.AttrOverrideSpec) (*int, error) {
+	if obj.Perm == nil {
+		return nil, nil
+	}
+	perm := (int)(*obj.Perm)
+	return &perm, nil
+}
+
+func (r *attrOverrideSpecResolver) Nlink(ctx context.Context, obj *v1alpha1.AttrOverrideSpec) (*int, error) {
+	if obj.Nlink == nil {
+		return nil, nil
+	}
+	nlink := (int)(*obj.Nlink)
+	return &nlink, nil
+}
+
+func (r *attrOverrideSpecResolver) UID(ctx context.Context, obj *v1alpha1.AttrOverrideSpec) (*int, error) {
+	if obj.UID == nil {
+		return nil, nil
+	}
+	uid := (int)(*obj.UID)
+	return &uid, nil
+}
+
+func (r *attrOverrideSpecResolver) Gid(ctx context.Context, obj *v1alpha1.AttrOverrideSpec) (*int, error) {
+	if obj.GID == nil {
+		return nil, nil
+	}
+	gid := (int)(*obj.GID)
+	return &gid, nil
+}
+
+func (r *attrOverrideSpecResolver) Rdev(ctx context.Context, obj *v1alpha1.AttrOverrideSpec) (*int, error) {
+	if obj.Rdev == nil {
+		return nil, nil
+	}
+	rdev := (int)(*obj.Rdev)
+	return &rdev, nil
+}
+
 func (r *chaosConditionResolver) Type(ctx context.Context, obj *v1alpha1.ChaosCondition) (string, error) {
 	return string(obj.Type), nil
 }
@@ -133,6 +205,18 @@ func (r *iOChaosResolver) Annotations(ctx context.Context, obj *v1alpha1.IOChaos
 	return annotations, nil
 }
 
+func (r *iOChaosResolver) Podios(ctx context.Context, obj *v1alpha1.IOChaos) ([]*v1alpha1.PodIOChaos, error) {
+	podios := make([]*v1alpha1.PodIOChaos, 0, len(obj.Status.Instances))
+	for id := range obj.Status.Instances {
+		podio := new(v1alpha1.PodIOChaos)
+		if err := r.Client.Get(ctx, parseNamespacedName(id), podio); err != nil {
+			return nil, err
+		}
+		podios = append(podios, podio)
+	}
+	return podios, nil
+}
+
 func (r *iOChaosActionResolver) Type(ctx context.Context, obj *v1alpha1.IOChaosAction) (string, error) {
 	return string(obj.Type), nil
 }
@@ -222,6 +306,35 @@ func (r *iOChaosActionResolver) Filling(ctx context.Context, obj *v1alpha1.IOCha
 	return &filling, nil
 }
 
+func (r *iOChaosSpecResolver) Mode(ctx context.Context, obj *v1alpha1.IOChaosSpec) (string, error) {
+	return string(obj.Mode), nil
+}
+
+func (r *iOChaosSpecResolver) Action(ctx context.Context, obj *v1alpha1.IOChaosSpec) (string, error) {
+	return string(obj.Action), nil
+}
+
+func (r *iOChaosSpecResolver) Errno(ctx context.Context, obj *v1alpha1.IOChaosSpec) (*int, error) {
+	errno := int(obj.Errno)
+	return &errno, nil
+}
+
+func (r *iOChaosSpecResolver) Methods(ctx context.Context, obj *v1alpha1.IOChaosSpec) ([]string, error) {
+	methods := make([]string, 0, len(obj.Methods))
+	for _, method := range obj.Methods {
+		methods = append(methods, string(method))
+	}
+	return methods, nil
+}
+
+func (r *iOChaosStatusResolver) Instances(ctx context.Context, obj *v1alpha1.IOChaosStatus) (map[string]interface{}, error) {
+	instances := make(map[string]interface{})
+	for k, v := range obj.Instances {
+		instances[k] = v
+	}
+	return instances, nil
+}
+
 func (r *ioFaultResolver) Errno(ctx context.Context, obj *v1alpha1.IoFault) (int, error) {
 	return int(obj.Errno), nil
 }
@@ -264,6 +377,11 @@ func (r *loggerResolver) Pod(ctx context.Context, ns string, name string) (<-cha
 		}
 	}()
 	return logChan, nil
+}
+
+func (r *mistakeSpecResolver) Filling(ctx context.Context, obj *v1alpha1.MistakeSpec) (*string, error) {
+	filling := string(obj.Filling)
+	return &filling, nil
 }
 
 func (r *namespaceResolver) Component(ctx context.Context, obj *model.Namespace, component model.Component) ([]*v1.Pod, error) {
@@ -776,6 +894,11 @@ func (r *stressChaosResolver) Annotations(ctx context.Context, obj *v1alpha1.Str
 	return annotations, nil
 }
 
+// AttrOverrideSpec returns generated.AttrOverrideSpecResolver implementation.
+func (r *Resolver) AttrOverrideSpec() generated.AttrOverrideSpecResolver {
+	return &attrOverrideSpecResolver{r}
+}
+
 // ChaosCondition returns generated.ChaosConditionResolver implementation.
 func (r *Resolver) ChaosCondition() generated.ChaosConditionResolver {
 	return &chaosConditionResolver{r}
@@ -803,11 +926,20 @@ func (r *Resolver) IOChaos() generated.IOChaosResolver { return &iOChaosResolver
 // IOChaosAction returns generated.IOChaosActionResolver implementation.
 func (r *Resolver) IOChaosAction() generated.IOChaosActionResolver { return &iOChaosActionResolver{r} }
 
+// IOChaosSpec returns generated.IOChaosSpecResolver implementation.
+func (r *Resolver) IOChaosSpec() generated.IOChaosSpecResolver { return &iOChaosSpecResolver{r} }
+
+// IOChaosStatus returns generated.IOChaosStatusResolver implementation.
+func (r *Resolver) IOChaosStatus() generated.IOChaosStatusResolver { return &iOChaosStatusResolver{r} }
+
 // IoFault returns generated.IoFaultResolver implementation.
 func (r *Resolver) IoFault() generated.IoFaultResolver { return &ioFaultResolver{r} }
 
 // Logger returns generated.LoggerResolver implementation.
 func (r *Resolver) Logger() generated.LoggerResolver { return &loggerResolver{r} }
+
+// MistakeSpec returns generated.MistakeSpecResolver implementation.
+func (r *Resolver) MistakeSpec() generated.MistakeSpecResolver { return &mistakeSpecResolver{r} }
 
 // Namespace returns generated.NamespaceResolver implementation.
 func (r *Resolver) Namespace() generated.NamespaceResolver { return &namespaceResolver{r} }
@@ -863,6 +995,7 @@ func (r *Resolver) Record() generated.RecordResolver { return &recordResolver{r}
 // StressChaos returns generated.StressChaosResolver implementation.
 func (r *Resolver) StressChaos() generated.StressChaosResolver { return &stressChaosResolver{r} }
 
+type attrOverrideSpecResolver struct{ *Resolver }
 type chaosConditionResolver struct{ *Resolver }
 type experimentStatusResolver struct{ *Resolver }
 type hTTPChaosResolver struct{ *Resolver }
@@ -870,8 +1003,11 @@ type hTTPChaosSpecResolver struct{ *Resolver }
 type hTTPChaosStatusResolver struct{ *Resolver }
 type iOChaosResolver struct{ *Resolver }
 type iOChaosActionResolver struct{ *Resolver }
+type iOChaosSpecResolver struct{ *Resolver }
+type iOChaosStatusResolver struct{ *Resolver }
 type ioFaultResolver struct{ *Resolver }
 type loggerResolver struct{ *Resolver }
+type mistakeSpecResolver struct{ *Resolver }
 type namespaceResolver struct{ *Resolver }
 type networkChaosResolver struct{ *Resolver }
 type ownerReferenceResolver struct{ *Resolver }
