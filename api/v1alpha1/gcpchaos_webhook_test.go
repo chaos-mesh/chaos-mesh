@@ -14,6 +14,8 @@
 package v1alpha1
 
 import (
+	"fmt"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -64,6 +66,9 @@ var _ = Describe("gcpchaos_webhook", func() {
 			for _, tc := range tcs {
 				err := tc.execute(&tc.chaos)
 				if tc.expect == "error" {
+					if err == nil {
+						fmt.Println("Aha")
+					}
 					Expect(err).To(HaveOccurred())
 				} else {
 					Expect(err).NotTo(HaveOccurred())

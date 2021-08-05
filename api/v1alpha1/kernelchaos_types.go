@@ -41,7 +41,7 @@ type KernelChaosSpec struct {
 	FailKernRequest FailKernRequest `json:"failKernRequest"`
 
 	// Duration represents the duration of the chaos action
-	Duration *string `json:"duration,omitempty"`
+	Duration *string `json:"duration,omitempty" webhook:"Duration"`
 }
 
 // FailKernRequest defines the injection conditions
