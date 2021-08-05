@@ -71,7 +71,11 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 
 	if phase == waitForApplySync {
 		podnetworkchaos := &v1alpha1.PodNetworkChaos{}
-		err := impl.Client.Get(ctx, controller.ParseNamespacedName(record.Id), podnetworkchaos)
+		namespacedName, err := controller.ParseNamespacedName(record.Id)
+		if err != nil {
+			return waitForApplySync, err
+		}
+		err = impl.Client.Get(ctx, namespacedName, podnetworkchaos)
 		if err != nil {
 			if k8sError.IsNotFound(err) {
 				return v1alpha1.NotInjected, nil
@@ -98,7 +102,11 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	}
 
 	var pod v1.Pod
-	err := impl.Client.Get(ctx, controller.ParseNamespacedName(record.Id), &pod)
+	namespacedName, err := controller.ParseNamespacedName(record.Id)
+	if err != nil {
+		return v1alpha1.NotInjected, err
+	}
+	err = impl.Client.Get(ctx, namespacedName, &pod)
 	if err != nil {
 		// TODO: handle this error
 		return v1alpha1.NotInjected, err
@@ -182,7 +190,12 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 
 	if phase == waitForRecoverSync {
 		podnetworkchaos := &v1alpha1.PodNetworkChaos{}
-		err := impl.Client.Get(ctx, controller.ParseNamespacedName(record.Id), podnetworkchaos)
+		namespacedName, err := controller.ParseNamespacedName(record.Id)
+		if err != nil {
+			// This error is not expected to exist
+			return waitForRecoverSync, err
+		}
+		err = impl.Client.Get(ctx, namespacedName, podnetworkchaos)
 		if err != nil {
 			// TODO: handle this error
 			if k8sError.IsNotFound(err) {
@@ -203,7 +216,12 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	}
 
 	var pod v1.Pod
-	err := impl.Client.Get(ctx, controller.ParseNamespacedName(record.Id), &pod)
+	namespacedName, err := controller.ParseNamespacedName(record.Id)
+	if err != nil {
+		// This error is not expected to exist
+		return v1alpha1.Injected, err
+	}
+	err = impl.Client.Get(ctx, namespacedName, &pod)
 	if err != nil {
 		// TODO: handle this error
 		if k8sError.IsNotFound(err) {
@@ -267,7 +285,12 @@ func (impl *Impl) ApplyTc(ctx context.Context, m *podnetworkchaosmanager.PodNetw
 	targetPods := []v1.Pod{}
 	for _, record := range targets {
 		var pod v1.Pod
-		err := impl.Client.Get(ctx, controller.ParseNamespacedName(record.Id), &pod)
+		namespacedName, err := controller.ParseNamespacedName(record.Id)
+		if err != nil {
+			// TODO: handle this error
+			return err
+		}
+		err = impl.Client.Get(ctx, namespacedName, &pod)
 		if err != nil {
 			// TODO: handle this error
 			return err
