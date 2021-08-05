@@ -1,6 +1,12 @@
 package graph
 
-import "github.com/chaos-mesh/chaos-mesh/pkg/ctrlserver/graph/model"
+import (
+	"strings"
+
+	"k8s.io/apimachinery/pkg/types"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/ctrlserver/graph/model"
+)
 
 func componentLabels(component model.Component) map[string]string {
 	var componentLabel string
@@ -18,5 +24,13 @@ func componentLabels(component model.Component) map[string]string {
 	}
 	return map[string]string{
 		"app.kubernetes.io/component": componentLabel,
+	}
+}
+
+func parseNamespacedName(namespacedName string) types.NamespacedName {
+	parts := strings.Split(namespacedName, "/")
+	return types.NamespacedName{
+		Namespace: parts[0],
+		Name:      parts[1],
 	}
 }

@@ -530,7 +530,21 @@ func (r *podIOChaosResolver) Pod(ctx context.Context, obj *v1alpha1.PodIOChaos) 
 }
 
 func (r *podIOChaosResolver) Ios(ctx context.Context, obj *v1alpha1.PodIOChaos) ([]*v1alpha1.IOChaos, error) {
-	panic(fmt.Errorf("not implemented"))
+	ioNames := make(map[string]bool)
+	for _, action := range obj.Spec.Actions {
+		ioNames[action.Source] = true
+	}
+
+	ios := make([]*v1alpha1.IOChaos, 0, len(ioNames))
+	for name := range ioNames {
+		namespaced := parseNamespacedName(name)
+		io := new(v1alpha1.IOChaos)
+		if err := r.Client.Get(ctx, namespaced, io); err != nil {
+			return nil, err
+		}
+		ios = append(ios, io)
+	}
+	return ios, nil
 }
 
 func (r *podNetworkChaosResolver) UID(ctx context.Context, obj *v1alpha1.PodNetworkChaos) (string, error) {
