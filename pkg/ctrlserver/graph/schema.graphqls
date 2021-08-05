@@ -80,6 +80,8 @@ type Pod @goModel(model: "k8s.io/api/core/v1.Pod") {
     ownerReferences: [OwnerReference!]
     finalizers: [String!]
     clusterName: String!
+
+    logs: String! @goField(forceResolver: true)
 }
 
 
@@ -230,6 +232,86 @@ type PodHTTPChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1
     ownerReferences: [OwnerReference!]
     finalizers: [String!]
     clusterName: String!
+
+    spec: PodHttpChaosSpec!
+    status: PodHttpChaosStatus!
+
+    pod: Pod!   @goField(forceResolver: true)
+}
+
+# PodHttpChaosSpec defines the desired state of PodHttpChaos.
+type PodHttpChaosSpec  @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodHttpChaosSpec") {
+	# rules are a list of injection rule for http request.
+	rules: [PodHttpChaosRule!]!
+}
+
+# PodHttpChaosStatus defines the actual state of PodHttpChaos.
+type PodHttpChaosStatus @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodHttpChaosStatus") {
+	# pid represents a running tproxy process id.
+	pid: Int
+
+	# startTime represents the start time of a tproxy process.
+	startTime: Int
+
+	failedMessage: String
+	observedGeneration: Int
+}
+
+# PodHttpChaosRule defines the injection rule for http.
+type PodHttpChaosRule @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodHttpChaosRule") {
+	# target is the object to be selected and injected, <Request|Response>.
+	target: String!
+
+	selector: PodHttpChaosSelector!
+
+	actions: PodHttpChaosActions!
+
+	# source represents the source of current rules
+	source: String!
+
+	# port represents the target port to be proxy of.
+	port: Int!
+}
+
+type PodHttpChaosSelector @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodHttpChaosSelector") {
+    # port represents the target port to be proxy of.
+	port: Int
+
+	# path is a rule to select target by uri path in http request.
+	path: String
+
+	# method is a rule to select target by http method in request.
+	method: String
+
+	# code is a rule to select target by http status code in response.
+	code: Int
+
+	# requestHeaders is a rule to select target by http headers in request.
+	# The key-value pairs represent header name and header value pairs.
+	requestHeaders: Map
+
+	# responseHeaders is a rule to select target by http headers in response.
+	# The key-value pairs represent header name and header value pairs.
+	responseHeaders: Map
+}
+
+# PodHttpChaosAction defines possible actions of HttpChaos.
+type PodHttpChaosActions @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodHttpChaosActions") {
+	# abort is a rule to abort a http session.
+	abort: Boolean
+
+	# delay represents the delay of the target request/response.
+	# A duration string is a possibly unsigned sequence of
+	# decimal numbers, each with optional fraction and a unit suffix,
+	# such as "300ms", "2h45m".
+	# Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+	delay: String
+
+	# replace is a rule to replace some contents in target.
+	replace: PodHttpChaosReplaceActions
+
+	# patch is a rule to patch some contents in target.
+	patch: PodHttpChaosPatchActions
 }
 
 type HTTPChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.HTTPChaos") {
@@ -250,6 +332,179 @@ type HTTPChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.HT
     ownerReferences: [OwnerReference!]
     finalizers: [String!]
     clusterName: String!
+
+    spec: HTTPChaosSpec!
+    status: HTTPChaosStatus!
+
+    podhttp: [PodHTTPChaos!]    @goField(forceResolver: true)
+}
+
+type HTTPChaosSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.HTTPChaosSpec") {
+    # selector is used to select pods that are used to inject chaos action.
+	selector: PodSelectorSpec!
+
+	# mode defines the mode to run chaos action.
+	# supported mode: one / all / fixed / fixed-percent / random-max-percent
+	mode: String!
+
+    # value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+	# If `FixedPodMode`, provide an integer of pods to do chaos action.
+	# If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
+	# IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+	value: String
+
+	# target is the object to be selected and injected.
+	target: String!
+
+	# abort is a rule to abort a http session.
+	abort: Boolean
+
+	# delay represents the delay of the target request/response.
+	# A duration string is a possibly unsigned sequence of
+	# decimal numbers, each with optional fraction and a unit suffix,
+	# such as "300ms", "2h45m".
+	# Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+	delay: String
+
+	# replace is a rule to replace some contents in target.
+	replace: PodHttpChaosReplaceActions
+
+	# patch is a rule to patch some contents in target.
+	patch: PodHttpChaosPatchActions
+
+	# port represents the target port to be proxy of.
+	port: Int
+
+	# path is a rule to select target by uri path in http request.
+	path: String
+
+	# method is a rule to select target by http method in request.
+	method: String
+
+	# code is a rule to select target by http status code in response.
+	code: Int
+
+	# requestHeaders is a rule to select target by http headers in request.
+	# The key-value pairs represent header name and header value pairs.
+	requestHeaders: Map
+
+	# responseHeaders is a rule to select target by http headers in response.
+	# The key-value pairs represent header name and header value pairs.
+	responseHeaders: Map
+
+	# duration represents the duration of the chaos action.
+	duration: String
+}
+
+# PodSelectorSpec defines the some selectors to select objects.
+# If the all selectors are empty, all objects will be used in chaos experiment.
+type PodSelectorSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodSelectorSpec") {
+    # namespaces is a set of namespace to which objects belong.
+	namespaces: [String!]
+
+	# nodes is a set of node name and objects must belong to these nodes.
+	nodes: [String!]
+
+	# pods is a map of string keys and a set values that used to select pods.
+	# The key defines the namespace which pods belong,
+	# and the each values is a set of pod names.
+	pods: Map
+
+	# map of string keys and values that can be used to select nodes.
+	# Selector which must match a node's labels,
+	# and objects must belong to these selected nodes.
+	nodeSelectors: Map
+
+	# map of string keys and values that can be used to select objects.
+	# A selector based on fields.
+	fieldSelectors: Map
+
+	# map of string keys and values that can be used to select objects.
+	# A selector based on labels.
+	labelSelectors: Map
+
+	# map of string keys and values that can be used to select objects.
+	# A selector based on annotations.
+	annotationSelectors: Map
+
+	# podPhaseSelectors is a set of condition of a pod at the current time.
+	# supported value: Pending / Running / Succeeded / Failed / Unknown
+	podPhaseSelectors: [String!]
+}
+
+type PodHttpChaosReplaceActions @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodHttpChaosReplaceActions") {
+    # path is rule to to replace uri path in http request.
+	path: String
+
+	# method is a rule to replace http method in request.
+	method: String
+
+	# code is a rule to replace http status code in response.
+	code: Int
+
+	# body is a rule to replace http message body in target.
+	body: String
+
+	# queries is a rule to replace uri queries in http request.
+	# For example, with value `{ "foo": "unknown" }`, the `/?foo=bar` will be altered to `/?foo=unknown`,
+	queries: Map
+
+	# headers is a rule to replace http headers of target.
+	# The key-value pairs represent header name and header value pairs.
+	headers: Map
+}
+
+# PodHttpChaosPatchActions defines possible patch-actions of HttpChaos.
+type PodHttpChaosPatchActions @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodHttpChaosPatchActions") {
+	# body is a rule to patch message body of target.
+	body: PodHttpChaosPatchBodyAction
+
+	# queries is a rule to append uri queries of target(Request only).
+	# For example: `[["foo", "bar"], ["foo", "unknown"]]`.
+	queries: [[String!]!]
+
+	# headers is a rule to append http headers of target.
+	# For example: `[["Set-Cookie", "<one cookie>"], ["Set-Cookie", "<another cookie>"]]`.
+	headers: [[String!]!]
+}
+
+# PodHttpChaosPatchBodyAction defines patch body action of HttpChaos.
+type PodHttpChaosPatchBodyAction @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodHttpChaosPatchBodyAction") {
+	# type represents the patch type, only support `JSON` as [merge patch json](https://tools.ietf.org/html/rfc7396) currently.
+	type: String!
+
+	# value is the patch contents.
+	value: String!
+}
+
+type HTTPChaosStatus @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.HTTPChaosStatus") {
+    # conditions represents the current global condition of the chaos
+	conditions: [ChaosCondition!]
+
+	# experiment records the last experiment state.
+	experiment: ExperimentStatus
+
+    # instances always specifies podhttpchaos generation or empty
+	instances: Map
+}
+
+type ChaosCondition @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.ChaosCondition") {
+	type: String!
+	status: String!
+	reason: String
+}
+
+type ExperimentStatus @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.ExperimentStatus") {
+	desiredPhase: String!
+
+	# Records are used to track the running status
+	Records: [Record!]
+}
+
+type Record @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.Record") {
+	id: String!
+	selectorKey: String!
+	phase: String!
 }
 
 type PodNetworkChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodNetworkChaos") {

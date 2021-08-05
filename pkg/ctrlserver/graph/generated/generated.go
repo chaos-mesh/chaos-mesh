@@ -41,7 +41,11 @@ type Config struct {
 }
 
 type ResolverRoot interface {
+	ChaosCondition() ChaosConditionResolver
+	ExperimentStatus() ExperimentStatusResolver
 	HTTPChaos() HTTPChaosResolver
+	HTTPChaosSpec() HTTPChaosSpecResolver
+	HTTPChaosStatus() HTTPChaosStatusResolver
 	IOChaos() IOChaosResolver
 	IOChaosAction() IOChaosActionResolver
 	IoFault() IoFaultResolver
@@ -51,9 +55,14 @@ type ResolverRoot interface {
 	OwnerReference() OwnerReferenceResolver
 	Pod() PodResolver
 	PodHTTPChaos() PodHTTPChaosResolver
+	PodHttpChaosReplaceActions() PodHttpChaosReplaceActionsResolver
+	PodHttpChaosRule() PodHttpChaosRuleResolver
+	PodHttpChaosSelector() PodHttpChaosSelectorResolver
 	PodIOChaos() PodIOChaosResolver
 	PodNetworkChaos() PodNetworkChaosResolver
+	PodSelectorSpec() PodSelectorSpecResolver
 	Query() QueryResolver
+	Record() RecordResolver
 	StressChaos() StressChaosResolver
 }
 
@@ -61,6 +70,17 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	ChaosCondition struct {
+		Reason func(childComplexity int) int
+		Status func(childComplexity int) int
+		Type   func(childComplexity int) int
+	}
+
+	ExperimentStatus struct {
+		DesiredPhase func(childComplexity int) int
+		Records      func(childComplexity int) int
+	}
+
 	HTTPChaos struct {
 		APIVersion                 func(childComplexity int) int
 		Annotations                func(childComplexity int) int
@@ -76,9 +96,36 @@ type ComplexityRoot struct {
 		Name                       func(childComplexity int) int
 		Namespace                  func(childComplexity int) int
 		OwnerReferences            func(childComplexity int) int
+		Podhttp                    func(childComplexity int) int
 		ResourceVersion            func(childComplexity int) int
 		SelfLink                   func(childComplexity int) int
+		Spec                       func(childComplexity int) int
+		Status                     func(childComplexity int) int
 		UID                        func(childComplexity int) int
+	}
+
+	HTTPChaosSpec struct {
+		Abort           func(childComplexity int) int
+		Code            func(childComplexity int) int
+		Delay           func(childComplexity int) int
+		Duration        func(childComplexity int) int
+		Method          func(childComplexity int) int
+		Mode            func(childComplexity int) int
+		Patch           func(childComplexity int) int
+		Path            func(childComplexity int) int
+		Port            func(childComplexity int) int
+		Replace         func(childComplexity int) int
+		RequestHeaders  func(childComplexity int) int
+		ResponseHeaders func(childComplexity int) int
+		Selector        func(childComplexity int) int
+		Target          func(childComplexity int) int
+		Value           func(childComplexity int) int
+	}
+
+	HTTPChaosStatus struct {
+		Conditions func(childComplexity int) int
+		Experiment func(childComplexity int) int
+		Instances  func(childComplexity int) int
 	}
 
 	IOChaos struct {
@@ -198,6 +245,7 @@ type ComplexityRoot struct {
 		Generation                 func(childComplexity int) int
 		Kind                       func(childComplexity int) int
 		Labels                     func(childComplexity int) int
+		Logs                       func(childComplexity int) int
 		Name                       func(childComplexity int) int
 		Namespace                  func(childComplexity int) int
 		OwnerReferences            func(childComplexity int) int
@@ -221,9 +269,67 @@ type ComplexityRoot struct {
 		Name                       func(childComplexity int) int
 		Namespace                  func(childComplexity int) int
 		OwnerReferences            func(childComplexity int) int
+		Pod                        func(childComplexity int) int
 		ResourceVersion            func(childComplexity int) int
 		SelfLink                   func(childComplexity int) int
+		Spec                       func(childComplexity int) int
+		Status                     func(childComplexity int) int
 		UID                        func(childComplexity int) int
+	}
+
+	PodHTTPChaosActions struct {
+		Abort   func(childComplexity int) int
+		Delay   func(childComplexity int) int
+		Patch   func(childComplexity int) int
+		Replace func(childComplexity int) int
+	}
+
+	PodHTTPChaosPatchActions struct {
+		Body    func(childComplexity int) int
+		Headers func(childComplexity int) int
+		Queries func(childComplexity int) int
+	}
+
+	PodHTTPChaosPatchBodyAction struct {
+		Type  func(childComplexity int) int
+		Value func(childComplexity int) int
+	}
+
+	PodHTTPChaosReplaceActions struct {
+		Body    func(childComplexity int) int
+		Code    func(childComplexity int) int
+		Headers func(childComplexity int) int
+		Method  func(childComplexity int) int
+		Path    func(childComplexity int) int
+		Queries func(childComplexity int) int
+	}
+
+	PodHTTPChaosRule struct {
+		Actions  func(childComplexity int) int
+		Port     func(childComplexity int) int
+		Selector func(childComplexity int) int
+		Source   func(childComplexity int) int
+		Target   func(childComplexity int) int
+	}
+
+	PodHTTPChaosSelector struct {
+		Code            func(childComplexity int) int
+		Method          func(childComplexity int) int
+		Path            func(childComplexity int) int
+		Port            func(childComplexity int) int
+		RequestHeaders  func(childComplexity int) int
+		ResponseHeaders func(childComplexity int) int
+	}
+
+	PodHTTPChaosSpec struct {
+		Rules func(childComplexity int) int
+	}
+
+	PodHTTPChaosStatus struct {
+		FailedMessage      func(childComplexity int) int
+		ObservedGeneration func(childComplexity int) int
+		Pid                func(childComplexity int) int
+		StartTime          func(childComplexity int) int
 	}
 
 	PodIOChaos struct {
@@ -283,8 +389,25 @@ type ComplexityRoot struct {
 		UID                        func(childComplexity int) int
 	}
 
+	PodSelectorSpec struct {
+		AnnotationSelectors func(childComplexity int) int
+		FieldSelectors      func(childComplexity int) int
+		LabelSelectors      func(childComplexity int) int
+		Namespaces          func(childComplexity int) int
+		NodeSelectors       func(childComplexity int) int
+		Nodes               func(childComplexity int) int
+		PodPhaseSelectors   func(childComplexity int) int
+		Pods                func(childComplexity int) int
+	}
+
 	Query struct {
 		Namepsace func(childComplexity int, ns string) int
+	}
+
+	Record struct {
+		Id          func(childComplexity int) int
+		Phase       func(childComplexity int) int
+		SelectorKey func(childComplexity int) int
 	}
 
 	StressChaos struct {
@@ -313,6 +436,13 @@ type ComplexityRoot struct {
 	}
 }
 
+type ChaosConditionResolver interface {
+	Type(ctx context.Context, obj *v1alpha1.ChaosCondition) (string, error)
+	Status(ctx context.Context, obj *v1alpha1.ChaosCondition) (string, error)
+}
+type ExperimentStatusResolver interface {
+	DesiredPhase(ctx context.Context, obj *v1alpha1.ExperimentStatus) (string, error)
+}
 type HTTPChaosResolver interface {
 	UID(ctx context.Context, obj *v1alpha1.HTTPChaos) (string, error)
 
@@ -321,6 +451,19 @@ type HTTPChaosResolver interface {
 
 	Labels(ctx context.Context, obj *v1alpha1.HTTPChaos) (map[string]interface{}, error)
 	Annotations(ctx context.Context, obj *v1alpha1.HTTPChaos) (map[string]interface{}, error)
+
+	Podhttp(ctx context.Context, obj *v1alpha1.HTTPChaos) ([]*v1alpha1.PodHttpChaos, error)
+}
+type HTTPChaosSpecResolver interface {
+	Mode(ctx context.Context, obj *v1alpha1.HTTPChaosSpec) (string, error)
+
+	Target(ctx context.Context, obj *v1alpha1.HTTPChaosSpec) (string, error)
+
+	RequestHeaders(ctx context.Context, obj *v1alpha1.HTTPChaosSpec) (map[string]interface{}, error)
+	ResponseHeaders(ctx context.Context, obj *v1alpha1.HTTPChaosSpec) (map[string]interface{}, error)
+}
+type HTTPChaosStatusResolver interface {
+	Instances(ctx context.Context, obj *v1alpha1.HTTPChaosStatus) (map[string]interface{}, error)
 }
 type IOChaosResolver interface {
 	UID(ctx context.Context, obj *v1alpha1.IOChaos) (string, error)
@@ -394,6 +537,8 @@ type PodResolver interface {
 
 	Labels(ctx context.Context, obj *v1.Pod) (map[string]interface{}, error)
 	Annotations(ctx context.Context, obj *v1.Pod) (map[string]interface{}, error)
+
+	Logs(ctx context.Context, obj *v1.Pod) (string, error)
 }
 type PodHTTPChaosResolver interface {
 	UID(ctx context.Context, obj *v1alpha1.PodHttpChaos) (string, error)
@@ -403,6 +548,20 @@ type PodHTTPChaosResolver interface {
 
 	Labels(ctx context.Context, obj *v1alpha1.PodHttpChaos) (map[string]interface{}, error)
 	Annotations(ctx context.Context, obj *v1alpha1.PodHttpChaos) (map[string]interface{}, error)
+
+	Pod(ctx context.Context, obj *v1alpha1.PodHttpChaos) (*v1.Pod, error)
+}
+type PodHttpChaosReplaceActionsResolver interface {
+	Body(ctx context.Context, obj *v1alpha1.PodHttpChaosReplaceActions) (*string, error)
+	Queries(ctx context.Context, obj *v1alpha1.PodHttpChaosReplaceActions) (map[string]interface{}, error)
+	Headers(ctx context.Context, obj *v1alpha1.PodHttpChaosReplaceActions) (map[string]interface{}, error)
+}
+type PodHttpChaosRuleResolver interface {
+	Target(ctx context.Context, obj *v1alpha1.PodHttpChaosRule) (string, error)
+}
+type PodHttpChaosSelectorResolver interface {
+	RequestHeaders(ctx context.Context, obj *v1alpha1.PodHttpChaosSelector) (map[string]interface{}, error)
+	ResponseHeaders(ctx context.Context, obj *v1alpha1.PodHttpChaosSelector) (map[string]interface{}, error)
 }
 type PodIOChaosResolver interface {
 	UID(ctx context.Context, obj *v1alpha1.PodIOChaos) (string, error)
@@ -425,8 +584,18 @@ type PodNetworkChaosResolver interface {
 	Labels(ctx context.Context, obj *v1alpha1.PodNetworkChaos) (map[string]interface{}, error)
 	Annotations(ctx context.Context, obj *v1alpha1.PodNetworkChaos) (map[string]interface{}, error)
 }
+type PodSelectorSpecResolver interface {
+	Pods(ctx context.Context, obj *v1alpha1.PodSelectorSpec) (map[string]interface{}, error)
+	NodeSelectors(ctx context.Context, obj *v1alpha1.PodSelectorSpec) (map[string]interface{}, error)
+	FieldSelectors(ctx context.Context, obj *v1alpha1.PodSelectorSpec) (map[string]interface{}, error)
+	LabelSelectors(ctx context.Context, obj *v1alpha1.PodSelectorSpec) (map[string]interface{}, error)
+	AnnotationSelectors(ctx context.Context, obj *v1alpha1.PodSelectorSpec) (map[string]interface{}, error)
+}
 type QueryResolver interface {
 	Namepsace(ctx context.Context, ns string) (*model.Namespace, error)
+}
+type RecordResolver interface {
+	Phase(ctx context.Context, obj *v1alpha1.Record) (string, error)
 }
 type StressChaosResolver interface {
 	UID(ctx context.Context, obj *v1alpha1.StressChaos) (string, error)
@@ -452,6 +621,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e}
 	_ = ec
 	switch typeName + "." + field {
+
+	case "ChaosCondition.reason":
+		if e.complexity.ChaosCondition.Reason == nil {
+			break
+		}
+
+		return e.complexity.ChaosCondition.Reason(childComplexity), true
+
+	case "ChaosCondition.status":
+		if e.complexity.ChaosCondition.Status == nil {
+			break
+		}
+
+		return e.complexity.ChaosCondition.Status(childComplexity), true
+
+	case "ChaosCondition.type":
+		if e.complexity.ChaosCondition.Type == nil {
+			break
+		}
+
+		return e.complexity.ChaosCondition.Type(childComplexity), true
+
+	case "ExperimentStatus.desiredPhase":
+		if e.complexity.ExperimentStatus.DesiredPhase == nil {
+			break
+		}
+
+		return e.complexity.ExperimentStatus.DesiredPhase(childComplexity), true
+
+	case "ExperimentStatus.Records":
+		if e.complexity.ExperimentStatus.Records == nil {
+			break
+		}
+
+		return e.complexity.ExperimentStatus.Records(childComplexity), true
 
 	case "HTTPChaos.apiVersion":
 		if e.complexity.HTTPChaos.APIVersion == nil {
@@ -551,6 +755,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.HTTPChaos.OwnerReferences(childComplexity), true
 
+	case "HTTPChaos.podhttp":
+		if e.complexity.HTTPChaos.Podhttp == nil {
+			break
+		}
+
+		return e.complexity.HTTPChaos.Podhttp(childComplexity), true
+
 	case "HTTPChaos.resourceVersion":
 		if e.complexity.HTTPChaos.ResourceVersion == nil {
 			break
@@ -565,12 +776,152 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.HTTPChaos.SelfLink(childComplexity), true
 
+	case "HTTPChaos.spec":
+		if e.complexity.HTTPChaos.Spec == nil {
+			break
+		}
+
+		return e.complexity.HTTPChaos.Spec(childComplexity), true
+
+	case "HTTPChaos.status":
+		if e.complexity.HTTPChaos.Status == nil {
+			break
+		}
+
+		return e.complexity.HTTPChaos.Status(childComplexity), true
+
 	case "HTTPChaos.uid":
 		if e.complexity.HTTPChaos.UID == nil {
 			break
 		}
 
 		return e.complexity.HTTPChaos.UID(childComplexity), true
+
+	case "HTTPChaosSpec.abort":
+		if e.complexity.HTTPChaosSpec.Abort == nil {
+			break
+		}
+
+		return e.complexity.HTTPChaosSpec.Abort(childComplexity), true
+
+	case "HTTPChaosSpec.code":
+		if e.complexity.HTTPChaosSpec.Code == nil {
+			break
+		}
+
+		return e.complexity.HTTPChaosSpec.Code(childComplexity), true
+
+	case "HTTPChaosSpec.delay":
+		if e.complexity.HTTPChaosSpec.Delay == nil {
+			break
+		}
+
+		return e.complexity.HTTPChaosSpec.Delay(childComplexity), true
+
+	case "HTTPChaosSpec.duration":
+		if e.complexity.HTTPChaosSpec.Duration == nil {
+			break
+		}
+
+		return e.complexity.HTTPChaosSpec.Duration(childComplexity), true
+
+	case "HTTPChaosSpec.method":
+		if e.complexity.HTTPChaosSpec.Method == nil {
+			break
+		}
+
+		return e.complexity.HTTPChaosSpec.Method(childComplexity), true
+
+	case "HTTPChaosSpec.mode":
+		if e.complexity.HTTPChaosSpec.Mode == nil {
+			break
+		}
+
+		return e.complexity.HTTPChaosSpec.Mode(childComplexity), true
+
+	case "HTTPChaosSpec.patch":
+		if e.complexity.HTTPChaosSpec.Patch == nil {
+			break
+		}
+
+		return e.complexity.HTTPChaosSpec.Patch(childComplexity), true
+
+	case "HTTPChaosSpec.path":
+		if e.complexity.HTTPChaosSpec.Path == nil {
+			break
+		}
+
+		return e.complexity.HTTPChaosSpec.Path(childComplexity), true
+
+	case "HTTPChaosSpec.port":
+		if e.complexity.HTTPChaosSpec.Port == nil {
+			break
+		}
+
+		return e.complexity.HTTPChaosSpec.Port(childComplexity), true
+
+	case "HTTPChaosSpec.replace":
+		if e.complexity.HTTPChaosSpec.Replace == nil {
+			break
+		}
+
+		return e.complexity.HTTPChaosSpec.Replace(childComplexity), true
+
+	case "HTTPChaosSpec.requestHeaders":
+		if e.complexity.HTTPChaosSpec.RequestHeaders == nil {
+			break
+		}
+
+		return e.complexity.HTTPChaosSpec.RequestHeaders(childComplexity), true
+
+	case "HTTPChaosSpec.responseHeaders":
+		if e.complexity.HTTPChaosSpec.ResponseHeaders == nil {
+			break
+		}
+
+		return e.complexity.HTTPChaosSpec.ResponseHeaders(childComplexity), true
+
+	case "HTTPChaosSpec.selector":
+		if e.complexity.HTTPChaosSpec.Selector == nil {
+			break
+		}
+
+		return e.complexity.HTTPChaosSpec.Selector(childComplexity), true
+
+	case "HTTPChaosSpec.target":
+		if e.complexity.HTTPChaosSpec.Target == nil {
+			break
+		}
+
+		return e.complexity.HTTPChaosSpec.Target(childComplexity), true
+
+	case "HTTPChaosSpec.value":
+		if e.complexity.HTTPChaosSpec.Value == nil {
+			break
+		}
+
+		return e.complexity.HTTPChaosSpec.Value(childComplexity), true
+
+	case "HTTPChaosStatus.conditions":
+		if e.complexity.HTTPChaosStatus.Conditions == nil {
+			break
+		}
+
+		return e.complexity.HTTPChaosStatus.Conditions(childComplexity), true
+
+	case "HTTPChaosStatus.experiment":
+		if e.complexity.HTTPChaosStatus.Experiment == nil {
+			break
+		}
+
+		return e.complexity.HTTPChaosStatus.Experiment(childComplexity), true
+
+	case "HTTPChaosStatus.instances":
+		if e.complexity.HTTPChaosStatus.Instances == nil {
+			break
+		}
+
+		return e.complexity.HTTPChaosStatus.Instances(childComplexity), true
 
 	case "IOChaos.apiVersion":
 		if e.complexity.IOChaos.APIVersion == nil {
@@ -1292,6 +1643,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Pod.Labels(childComplexity), true
 
+	case "Pod.logs":
+		if e.complexity.Pod.Logs == nil {
+			break
+		}
+
+		return e.complexity.Pod.Logs(childComplexity), true
+
 	case "Pod.name":
 		if e.complexity.Pod.Name == nil {
 			break
@@ -1432,6 +1790,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.PodHTTPChaos.OwnerReferences(childComplexity), true
 
+	case "PodHTTPChaos.pod":
+		if e.complexity.PodHTTPChaos.Pod == nil {
+			break
+		}
+
+		return e.complexity.PodHTTPChaos.Pod(childComplexity), true
+
 	case "PodHTTPChaos.resourceVersion":
 		if e.complexity.PodHTTPChaos.ResourceVersion == nil {
 			break
@@ -1446,12 +1811,243 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.PodHTTPChaos.SelfLink(childComplexity), true
 
+	case "PodHTTPChaos.spec":
+		if e.complexity.PodHTTPChaos.Spec == nil {
+			break
+		}
+
+		return e.complexity.PodHTTPChaos.Spec(childComplexity), true
+
+	case "PodHTTPChaos.status":
+		if e.complexity.PodHTTPChaos.Status == nil {
+			break
+		}
+
+		return e.complexity.PodHTTPChaos.Status(childComplexity), true
+
 	case "PodHTTPChaos.uid":
 		if e.complexity.PodHTTPChaos.UID == nil {
 			break
 		}
 
 		return e.complexity.PodHTTPChaos.UID(childComplexity), true
+
+	case "PodHttpChaosActions.abort":
+		if e.complexity.PodHTTPChaosActions.Abort == nil {
+			break
+		}
+
+		return e.complexity.PodHTTPChaosActions.Abort(childComplexity), true
+
+	case "PodHttpChaosActions.delay":
+		if e.complexity.PodHTTPChaosActions.Delay == nil {
+			break
+		}
+
+		return e.complexity.PodHTTPChaosActions.Delay(childComplexity), true
+
+	case "PodHttpChaosActions.patch":
+		if e.complexity.PodHTTPChaosActions.Patch == nil {
+			break
+		}
+
+		return e.complexity.PodHTTPChaosActions.Patch(childComplexity), true
+
+	case "PodHttpChaosActions.replace":
+		if e.complexity.PodHTTPChaosActions.Replace == nil {
+			break
+		}
+
+		return e.complexity.PodHTTPChaosActions.Replace(childComplexity), true
+
+	case "PodHttpChaosPatchActions.body":
+		if e.complexity.PodHTTPChaosPatchActions.Body == nil {
+			break
+		}
+
+		return e.complexity.PodHTTPChaosPatchActions.Body(childComplexity), true
+
+	case "PodHttpChaosPatchActions.headers":
+		if e.complexity.PodHTTPChaosPatchActions.Headers == nil {
+			break
+		}
+
+		return e.complexity.PodHTTPChaosPatchActions.Headers(childComplexity), true
+
+	case "PodHttpChaosPatchActions.queries":
+		if e.complexity.PodHTTPChaosPatchActions.Queries == nil {
+			break
+		}
+
+		return e.complexity.PodHTTPChaosPatchActions.Queries(childComplexity), true
+
+	case "PodHttpChaosPatchBodyAction.type":
+		if e.complexity.PodHTTPChaosPatchBodyAction.Type == nil {
+			break
+		}
+
+		return e.complexity.PodHTTPChaosPatchBodyAction.Type(childComplexity), true
+
+	case "PodHttpChaosPatchBodyAction.value":
+		if e.complexity.PodHTTPChaosPatchBodyAction.Value == nil {
+			break
+		}
+
+		return e.complexity.PodHTTPChaosPatchBodyAction.Value(childComplexity), true
+
+	case "PodHttpChaosReplaceActions.body":
+		if e.complexity.PodHTTPChaosReplaceActions.Body == nil {
+			break
+		}
+
+		return e.complexity.PodHTTPChaosReplaceActions.Body(childComplexity), true
+
+	case "PodHttpChaosReplaceActions.code":
+		if e.complexity.PodHTTPChaosReplaceActions.Code == nil {
+			break
+		}
+
+		return e.complexity.PodHTTPChaosReplaceActions.Code(childComplexity), true
+
+	case "PodHttpChaosReplaceActions.headers":
+		if e.complexity.PodHTTPChaosReplaceActions.Headers == nil {
+			break
+		}
+
+		return e.complexity.PodHTTPChaosReplaceActions.Headers(childComplexity), true
+
+	case "PodHttpChaosReplaceActions.method":
+		if e.complexity.PodHTTPChaosReplaceActions.Method == nil {
+			break
+		}
+
+		return e.complexity.PodHTTPChaosReplaceActions.Method(childComplexity), true
+
+	case "PodHttpChaosReplaceActions.path":
+		if e.complexity.PodHTTPChaosReplaceActions.Path == nil {
+			break
+		}
+
+		return e.complexity.PodHTTPChaosReplaceActions.Path(childComplexity), true
+
+	case "PodHttpChaosReplaceActions.queries":
+		if e.complexity.PodHTTPChaosReplaceActions.Queries == nil {
+			break
+		}
+
+		return e.complexity.PodHTTPChaosReplaceActions.Queries(childComplexity), true
+
+	case "PodHttpChaosRule.actions":
+		if e.complexity.PodHTTPChaosRule.Actions == nil {
+			break
+		}
+
+		return e.complexity.PodHTTPChaosRule.Actions(childComplexity), true
+
+	case "PodHttpChaosRule.port":
+		if e.complexity.PodHTTPChaosRule.Port == nil {
+			break
+		}
+
+		return e.complexity.PodHTTPChaosRule.Port(childComplexity), true
+
+	case "PodHttpChaosRule.selector":
+		if e.complexity.PodHTTPChaosRule.Selector == nil {
+			break
+		}
+
+		return e.complexity.PodHTTPChaosRule.Selector(childComplexity), true
+
+	case "PodHttpChaosRule.source":
+		if e.complexity.PodHTTPChaosRule.Source == nil {
+			break
+		}
+
+		return e.complexity.PodHTTPChaosRule.Source(childComplexity), true
+
+	case "PodHttpChaosRule.target":
+		if e.complexity.PodHTTPChaosRule.Target == nil {
+			break
+		}
+
+		return e.complexity.PodHTTPChaosRule.Target(childComplexity), true
+
+	case "PodHttpChaosSelector.code":
+		if e.complexity.PodHTTPChaosSelector.Code == nil {
+			break
+		}
+
+		return e.complexity.PodHTTPChaosSelector.Code(childComplexity), true
+
+	case "PodHttpChaosSelector.method":
+		if e.complexity.PodHTTPChaosSelector.Method == nil {
+			break
+		}
+
+		return e.complexity.PodHTTPChaosSelector.Method(childComplexity), true
+
+	case "PodHttpChaosSelector.path":
+		if e.complexity.PodHTTPChaosSelector.Path == nil {
+			break
+		}
+
+		return e.complexity.PodHTTPChaosSelector.Path(childComplexity), true
+
+	case "PodHttpChaosSelector.port":
+		if e.complexity.PodHTTPChaosSelector.Port == nil {
+			break
+		}
+
+		return e.complexity.PodHTTPChaosSelector.Port(childComplexity), true
+
+	case "PodHttpChaosSelector.requestHeaders":
+		if e.complexity.PodHTTPChaosSelector.RequestHeaders == nil {
+			break
+		}
+
+		return e.complexity.PodHTTPChaosSelector.RequestHeaders(childComplexity), true
+
+	case "PodHttpChaosSelector.responseHeaders":
+		if e.complexity.PodHTTPChaosSelector.ResponseHeaders == nil {
+			break
+		}
+
+		return e.complexity.PodHTTPChaosSelector.ResponseHeaders(childComplexity), true
+
+	case "PodHttpChaosSpec.rules":
+		if e.complexity.PodHTTPChaosSpec.Rules == nil {
+			break
+		}
+
+		return e.complexity.PodHTTPChaosSpec.Rules(childComplexity), true
+
+	case "PodHttpChaosStatus.failedMessage":
+		if e.complexity.PodHTTPChaosStatus.FailedMessage == nil {
+			break
+		}
+
+		return e.complexity.PodHTTPChaosStatus.FailedMessage(childComplexity), true
+
+	case "PodHttpChaosStatus.observedGeneration":
+		if e.complexity.PodHTTPChaosStatus.ObservedGeneration == nil {
+			break
+		}
+
+		return e.complexity.PodHTTPChaosStatus.ObservedGeneration(childComplexity), true
+
+	case "PodHttpChaosStatus.pid":
+		if e.complexity.PodHTTPChaosStatus.Pid == nil {
+			break
+		}
+
+		return e.complexity.PodHTTPChaosStatus.Pid(childComplexity), true
+
+	case "PodHttpChaosStatus.startTime":
+		if e.complexity.PodHTTPChaosStatus.StartTime == nil {
+			break
+		}
+
+		return e.complexity.PodHTTPChaosStatus.StartTime(childComplexity), true
 
 	case "PodIOChaos.apiVersion":
 		if e.complexity.PodIOChaos.APIVersion == nil {
@@ -1768,6 +2364,62 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.PodNetworkChaos.UID(childComplexity), true
 
+	case "PodSelectorSpec.annotationSelectors":
+		if e.complexity.PodSelectorSpec.AnnotationSelectors == nil {
+			break
+		}
+
+		return e.complexity.PodSelectorSpec.AnnotationSelectors(childComplexity), true
+
+	case "PodSelectorSpec.fieldSelectors":
+		if e.complexity.PodSelectorSpec.FieldSelectors == nil {
+			break
+		}
+
+		return e.complexity.PodSelectorSpec.FieldSelectors(childComplexity), true
+
+	case "PodSelectorSpec.labelSelectors":
+		if e.complexity.PodSelectorSpec.LabelSelectors == nil {
+			break
+		}
+
+		return e.complexity.PodSelectorSpec.LabelSelectors(childComplexity), true
+
+	case "PodSelectorSpec.namespaces":
+		if e.complexity.PodSelectorSpec.Namespaces == nil {
+			break
+		}
+
+		return e.complexity.PodSelectorSpec.Namespaces(childComplexity), true
+
+	case "PodSelectorSpec.nodeSelectors":
+		if e.complexity.PodSelectorSpec.NodeSelectors == nil {
+			break
+		}
+
+		return e.complexity.PodSelectorSpec.NodeSelectors(childComplexity), true
+
+	case "PodSelectorSpec.nodes":
+		if e.complexity.PodSelectorSpec.Nodes == nil {
+			break
+		}
+
+		return e.complexity.PodSelectorSpec.Nodes(childComplexity), true
+
+	case "PodSelectorSpec.podPhaseSelectors":
+		if e.complexity.PodSelectorSpec.PodPhaseSelectors == nil {
+			break
+		}
+
+		return e.complexity.PodSelectorSpec.PodPhaseSelectors(childComplexity), true
+
+	case "PodSelectorSpec.pods":
+		if e.complexity.PodSelectorSpec.Pods == nil {
+			break
+		}
+
+		return e.complexity.PodSelectorSpec.Pods(childComplexity), true
+
 	case "Query.namepsace":
 		if e.complexity.Query.Namepsace == nil {
 			break
@@ -1779,6 +2431,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Namepsace(childComplexity, args["ns"].(string)), true
+
+	case "Record.id":
+		if e.complexity.Record.Id == nil {
+			break
+		}
+
+		return e.complexity.Record.Id(childComplexity), true
+
+	case "Record.phase":
+		if e.complexity.Record.Phase == nil {
+			break
+		}
+
+		return e.complexity.Record.Phase(childComplexity), true
+
+	case "Record.selectorKey":
+		if e.complexity.Record.SelectorKey == nil {
+			break
+		}
+
+		return e.complexity.Record.SelectorKey(childComplexity), true
 
 	case "StressChaos.apiVersion":
 		if e.complexity.StressChaos.APIVersion == nil {
@@ -2062,6 +2735,8 @@ type Pod @goModel(model: "k8s.io/api/core/v1.Pod") {
     ownerReferences: [OwnerReference!]
     finalizers: [String!]
     clusterName: String!
+
+    logs: String! @goField(forceResolver: true)
 }
 
 
@@ -2212,6 +2887,86 @@ type PodHTTPChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1
     ownerReferences: [OwnerReference!]
     finalizers: [String!]
     clusterName: String!
+
+    spec: PodHttpChaosSpec!
+    status: PodHttpChaosStatus!
+
+    pod: Pod!   @goField(forceResolver: true)
+}
+
+# PodHttpChaosSpec defines the desired state of PodHttpChaos.
+type PodHttpChaosSpec  @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodHttpChaosSpec") {
+	# rules are a list of injection rule for http request.
+	rules: [PodHttpChaosRule!]!
+}
+
+# PodHttpChaosStatus defines the actual state of PodHttpChaos.
+type PodHttpChaosStatus @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodHttpChaosStatus") {
+	# pid represents a running tproxy process id.
+	pid: Int
+
+	# startTime represents the start time of a tproxy process.
+	startTime: Int
+
+	failedMessage: String
+	observedGeneration: Int
+}
+
+# PodHttpChaosRule defines the injection rule for http.
+type PodHttpChaosRule @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodHttpChaosRule") {
+	# target is the object to be selected and injected, <Request|Response>.
+	target: String!
+
+	selector: PodHttpChaosSelector!
+
+	actions: PodHttpChaosActions!
+
+	# source represents the source of current rules
+	source: String!
+
+	# port represents the target port to be proxy of.
+	port: Int!
+}
+
+type PodHttpChaosSelector @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodHttpChaosSelector") {
+    # port represents the target port to be proxy of.
+	port: Int
+
+	# path is a rule to select target by uri path in http request.
+	path: String
+
+	# method is a rule to select target by http method in request.
+	method: String
+
+	# code is a rule to select target by http status code in response.
+	code: Int
+
+	# requestHeaders is a rule to select target by http headers in request.
+	# The key-value pairs represent header name and header value pairs.
+	requestHeaders: Map
+
+	# responseHeaders is a rule to select target by http headers in response.
+	# The key-value pairs represent header name and header value pairs.
+	responseHeaders: Map
+}
+
+# PodHttpChaosAction defines possible actions of HttpChaos.
+type PodHttpChaosActions @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodHttpChaosActions") {
+	# abort is a rule to abort a http session.
+	abort: Boolean
+
+	# delay represents the delay of the target request/response.
+	# A duration string is a possibly unsigned sequence of
+	# decimal numbers, each with optional fraction and a unit suffix,
+	# such as "300ms", "2h45m".
+	# Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+	delay: String
+
+	# replace is a rule to replace some contents in target.
+	replace: PodHttpChaosReplaceActions
+
+	# patch is a rule to patch some contents in target.
+	patch: PodHttpChaosPatchActions
 }
 
 type HTTPChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.HTTPChaos") {
@@ -2232,6 +2987,179 @@ type HTTPChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.HT
     ownerReferences: [OwnerReference!]
     finalizers: [String!]
     clusterName: String!
+
+    spec: HTTPChaosSpec!
+    status: HTTPChaosStatus!
+
+    podhttp: [PodHTTPChaos!]    @goField(forceResolver: true)
+}
+
+type HTTPChaosSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.HTTPChaosSpec") {
+    # selector is used to select pods that are used to inject chaos action.
+	selector: PodSelectorSpec!
+
+	# mode defines the mode to run chaos action.
+	# supported mode: one / all / fixed / fixed-percent / random-max-percent
+	mode: String!
+
+    # value is required when the mode is set to ` + "`" + `FixedPodMode` + "`" + ` / ` + "`" + `FixedPercentPodMod` + "`" + ` / ` + "`" + `RandomMaxPercentPodMod` + "`" + `.
+	# If ` + "`" + `FixedPodMode` + "`" + `, provide an integer of pods to do chaos action.
+	# If ` + "`" + `FixedPercentPodMod` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
+	# IF ` + "`" + `RandomMaxPercentPodMod` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+	value: String
+
+	# target is the object to be selected and injected.
+	target: String!
+
+	# abort is a rule to abort a http session.
+	abort: Boolean
+
+	# delay represents the delay of the target request/response.
+	# A duration string is a possibly unsigned sequence of
+	# decimal numbers, each with optional fraction and a unit suffix,
+	# such as "300ms", "2h45m".
+	# Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+	delay: String
+
+	# replace is a rule to replace some contents in target.
+	replace: PodHttpChaosReplaceActions
+
+	# patch is a rule to patch some contents in target.
+	patch: PodHttpChaosPatchActions
+
+	# port represents the target port to be proxy of.
+	port: Int
+
+	# path is a rule to select target by uri path in http request.
+	path: String
+
+	# method is a rule to select target by http method in request.
+	method: String
+
+	# code is a rule to select target by http status code in response.
+	code: Int
+
+	# requestHeaders is a rule to select target by http headers in request.
+	# The key-value pairs represent header name and header value pairs.
+	requestHeaders: Map
+
+	# responseHeaders is a rule to select target by http headers in response.
+	# The key-value pairs represent header name and header value pairs.
+	responseHeaders: Map
+
+	# duration represents the duration of the chaos action.
+	duration: String
+}
+
+# PodSelectorSpec defines the some selectors to select objects.
+# If the all selectors are empty, all objects will be used in chaos experiment.
+type PodSelectorSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodSelectorSpec") {
+    # namespaces is a set of namespace to which objects belong.
+	namespaces: [String!]
+
+	# nodes is a set of node name and objects must belong to these nodes.
+	nodes: [String!]
+
+	# pods is a map of string keys and a set values that used to select pods.
+	# The key defines the namespace which pods belong,
+	# and the each values is a set of pod names.
+	pods: Map
+
+	# map of string keys and values that can be used to select nodes.
+	# Selector which must match a node's labels,
+	# and objects must belong to these selected nodes.
+	nodeSelectors: Map
+
+	# map of string keys and values that can be used to select objects.
+	# A selector based on fields.
+	fieldSelectors: Map
+
+	# map of string keys and values that can be used to select objects.
+	# A selector based on labels.
+	labelSelectors: Map
+
+	# map of string keys and values that can be used to select objects.
+	# A selector based on annotations.
+	annotationSelectors: Map
+
+	# podPhaseSelectors is a set of condition of a pod at the current time.
+	# supported value: Pending / Running / Succeeded / Failed / Unknown
+	podPhaseSelectors: [String!]
+}
+
+type PodHttpChaosReplaceActions @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodHttpChaosReplaceActions") {
+    # path is rule to to replace uri path in http request.
+	path: String
+
+	# method is a rule to replace http method in request.
+	method: String
+
+	# code is a rule to replace http status code in response.
+	code: Int
+
+	# body is a rule to replace http message body in target.
+	body: String
+
+	# queries is a rule to replace uri queries in http request.
+	# For example, with value ` + "`" + `{ "foo": "unknown" }` + "`" + `, the ` + "`" + `/?foo=bar` + "`" + ` will be altered to ` + "`" + `/?foo=unknown` + "`" + `,
+	queries: Map
+
+	# headers is a rule to replace http headers of target.
+	# The key-value pairs represent header name and header value pairs.
+	headers: Map
+}
+
+# PodHttpChaosPatchActions defines possible patch-actions of HttpChaos.
+type PodHttpChaosPatchActions @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodHttpChaosPatchActions") {
+	# body is a rule to patch message body of target.
+	body: PodHttpChaosPatchBodyAction
+
+	# queries is a rule to append uri queries of target(Request only).
+	# For example: ` + "`" + `[["foo", "bar"], ["foo", "unknown"]]` + "`" + `.
+	queries: [[String!]!]
+
+	# headers is a rule to append http headers of target.
+	# For example: ` + "`" + `[["Set-Cookie", "<one cookie>"], ["Set-Cookie", "<another cookie>"]]` + "`" + `.
+	headers: [[String!]!]
+}
+
+# PodHttpChaosPatchBodyAction defines patch body action of HttpChaos.
+type PodHttpChaosPatchBodyAction @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodHttpChaosPatchBodyAction") {
+	# type represents the patch type, only support ` + "`" + `JSON` + "`" + ` as [merge patch json](https://tools.ietf.org/html/rfc7396) currently.
+	type: String!
+
+	# value is the patch contents.
+	value: String!
+}
+
+type HTTPChaosStatus @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.HTTPChaosStatus") {
+    # conditions represents the current global condition of the chaos
+	conditions: [ChaosCondition!]
+
+	# experiment records the last experiment state.
+	experiment: ExperimentStatus
+
+    # instances always specifies podhttpchaos generation or empty
+	instances: Map
+}
+
+type ChaosCondition @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.ChaosCondition") {
+	type: String!
+	status: String!
+	reason: String
+}
+
+type ExperimentStatus @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.ExperimentStatus") {
+	desiredPhase: String!
+
+	# Records are used to track the running status
+	Records: [Record!]
+}
+
+type Record @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.Record") {
+	id: String!
+	selectorKey: String!
+	phase: String!
 }
 
 type PodNetworkChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodNetworkChaos") {
@@ -2551,6 +3479,175 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 // endregion ************************** directives.gotpl **************************
 
 // region    **************************** field.gotpl *****************************
+
+func (ec *executionContext) _ChaosCondition_type(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.ChaosCondition) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ChaosCondition",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.ChaosCondition().Type(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ChaosCondition_status(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.ChaosCondition) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ChaosCondition",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.ChaosCondition().Status(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ChaosCondition_reason(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.ChaosCondition) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ChaosCondition",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Reason, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ExperimentStatus_desiredPhase(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.ExperimentStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ExperimentStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.ExperimentStatus().DesiredPhase(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ExperimentStatus_Records(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.ExperimentStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ExperimentStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Records, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*v1alpha1.Record)
+	fc.Result = res
+	return ec.marshalORecord2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐRecordᚄ(ctx, field.Selections, res)
+}
 
 func (ec *executionContext) _HTTPChaos_kind(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.HTTPChaos) (ret graphql.Marshaler) {
 	defer func() {
@@ -3127,6 +4224,693 @@ func (ec *executionContext) _HTTPChaos_clusterName(ctx context.Context, field gr
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _HTTPChaos_spec(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.HTTPChaos) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "HTTPChaos",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Spec, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(v1alpha1.HTTPChaosSpec)
+	fc.Result = res
+	return ec.marshalNHTTPChaosSpec2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐHTTPChaosSpec(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _HTTPChaos_status(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.HTTPChaos) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "HTTPChaos",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Status, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(v1alpha1.HTTPChaosStatus)
+	fc.Result = res
+	return ec.marshalNHTTPChaosStatus2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐHTTPChaosStatus(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _HTTPChaos_podhttp(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.HTTPChaos) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "HTTPChaos",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.HTTPChaos().Podhttp(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*v1alpha1.PodHttpChaos)
+	fc.Result = res
+	return ec.marshalOPodHTTPChaos2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodHttpChaosᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _HTTPChaosSpec_selector(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.HTTPChaosSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "HTTPChaosSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Selector, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(v1alpha1.PodSelectorSpec)
+	fc.Result = res
+	return ec.marshalNPodSelectorSpec2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodSelectorSpec(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _HTTPChaosSpec_mode(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.HTTPChaosSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "HTTPChaosSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.HTTPChaosSpec().Mode(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _HTTPChaosSpec_value(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.HTTPChaosSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "HTTPChaosSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Value, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _HTTPChaosSpec_target(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.HTTPChaosSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "HTTPChaosSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.HTTPChaosSpec().Target(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _HTTPChaosSpec_abort(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.HTTPChaosSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "HTTPChaosSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Abort, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*bool)
+	fc.Result = res
+	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _HTTPChaosSpec_delay(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.HTTPChaosSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "HTTPChaosSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Delay, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _HTTPChaosSpec_replace(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.HTTPChaosSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "HTTPChaosSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Replace, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v1alpha1.PodHttpChaosReplaceActions)
+	fc.Result = res
+	return ec.marshalOPodHttpChaosReplaceActions2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodHttpChaosReplaceActions(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _HTTPChaosSpec_patch(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.HTTPChaosSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "HTTPChaosSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Patch, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v1alpha1.PodHttpChaosPatchActions)
+	fc.Result = res
+	return ec.marshalOPodHttpChaosPatchActions2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodHttpChaosPatchActions(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _HTTPChaosSpec_port(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.HTTPChaosSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "HTTPChaosSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Port, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(int32)
+	fc.Result = res
+	return ec.marshalOInt2int32(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _HTTPChaosSpec_path(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.HTTPChaosSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "HTTPChaosSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Path, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _HTTPChaosSpec_method(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.HTTPChaosSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "HTTPChaosSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Method, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _HTTPChaosSpec_code(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.HTTPChaosSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "HTTPChaosSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Code, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int32)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint32(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _HTTPChaosSpec_requestHeaders(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.HTTPChaosSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "HTTPChaosSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.HTTPChaosSpec().RequestHeaders(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(map[string]interface{})
+	fc.Result = res
+	return ec.marshalOMap2map(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _HTTPChaosSpec_responseHeaders(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.HTTPChaosSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "HTTPChaosSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.HTTPChaosSpec().ResponseHeaders(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(map[string]interface{})
+	fc.Result = res
+	return ec.marshalOMap2map(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _HTTPChaosSpec_duration(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.HTTPChaosSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "HTTPChaosSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Duration, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _HTTPChaosStatus_conditions(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.HTTPChaosStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "HTTPChaosStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Conditions, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]v1alpha1.ChaosCondition)
+	fc.Result = res
+	return ec.marshalOChaosCondition2ᚕgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐChaosConditionᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _HTTPChaosStatus_experiment(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.HTTPChaosStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "HTTPChaosStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Experiment, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(v1alpha1.ExperimentStatus)
+	fc.Result = res
+	return ec.marshalOExperimentStatus2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐExperimentStatus(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _HTTPChaosStatus_instances(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.HTTPChaosStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "HTTPChaosStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.HTTPChaosStatus().Instances(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(map[string]interface{})
+	fc.Result = res
+	return ec.marshalOMap2map(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _IOChaos_kind(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.IOChaos) (ret graphql.Marshaler) {
@@ -6617,6 +8401,41 @@ func (ec *executionContext) _Pod_clusterName(ctx context.Context, field graphql.
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Pod_logs(ctx context.Context, field graphql.CollectedField, obj *v1.Pod) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Pod",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Pod().Logs(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _PodHTTPChaos_kind(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodHttpChaos) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -7192,6 +9011,1127 @@ func (ec *executionContext) _PodHTTPChaos_clusterName(ctx context.Context, field
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodHTTPChaos_spec(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodHttpChaos) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodHTTPChaos",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Spec, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(v1alpha1.PodHttpChaosSpec)
+	fc.Result = res
+	return ec.marshalNPodHttpChaosSpec2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodHttpChaosSpec(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodHTTPChaos_status(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodHttpChaos) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodHTTPChaos",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Status, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(v1alpha1.PodHttpChaosStatus)
+	fc.Result = res
+	return ec.marshalNPodHttpChaosStatus2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodHttpChaosStatus(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodHTTPChaos_pod(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodHttpChaos) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodHTTPChaos",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.PodHTTPChaos().Pod(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*v1.Pod)
+	fc.Result = res
+	return ec.marshalNPod2ᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐPod(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodHttpChaosActions_abort(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodHttpChaosActions) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodHttpChaosActions",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Abort, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*bool)
+	fc.Result = res
+	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodHttpChaosActions_delay(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodHttpChaosActions) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodHttpChaosActions",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Delay, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodHttpChaosActions_replace(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodHttpChaosActions) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodHttpChaosActions",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Replace, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v1alpha1.PodHttpChaosReplaceActions)
+	fc.Result = res
+	return ec.marshalOPodHttpChaosReplaceActions2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodHttpChaosReplaceActions(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodHttpChaosActions_patch(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodHttpChaosActions) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodHttpChaosActions",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Patch, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v1alpha1.PodHttpChaosPatchActions)
+	fc.Result = res
+	return ec.marshalOPodHttpChaosPatchActions2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodHttpChaosPatchActions(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodHttpChaosPatchActions_body(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodHttpChaosPatchActions) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodHttpChaosPatchActions",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Body, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v1alpha1.PodHttpChaosPatchBodyAction)
+	fc.Result = res
+	return ec.marshalOPodHttpChaosPatchBodyAction2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodHttpChaosPatchBodyAction(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodHttpChaosPatchActions_queries(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodHttpChaosPatchActions) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodHttpChaosPatchActions",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Queries, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([][]string)
+	fc.Result = res
+	return ec.marshalOString2ᚕᚕstringᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodHttpChaosPatchActions_headers(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodHttpChaosPatchActions) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodHttpChaosPatchActions",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Headers, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([][]string)
+	fc.Result = res
+	return ec.marshalOString2ᚕᚕstringᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodHttpChaosPatchBodyAction_type(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodHttpChaosPatchBodyAction) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodHttpChaosPatchBodyAction",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Type, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodHttpChaosPatchBodyAction_value(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodHttpChaosPatchBodyAction) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodHttpChaosPatchBodyAction",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Value, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodHttpChaosReplaceActions_path(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodHttpChaosReplaceActions) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodHttpChaosReplaceActions",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Path, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodHttpChaosReplaceActions_method(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodHttpChaosReplaceActions) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodHttpChaosReplaceActions",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Method, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodHttpChaosReplaceActions_code(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodHttpChaosReplaceActions) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodHttpChaosReplaceActions",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Code, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int32)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint32(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodHttpChaosReplaceActions_body(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodHttpChaosReplaceActions) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodHttpChaosReplaceActions",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.PodHttpChaosReplaceActions().Body(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodHttpChaosReplaceActions_queries(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodHttpChaosReplaceActions) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodHttpChaosReplaceActions",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.PodHttpChaosReplaceActions().Queries(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(map[string]interface{})
+	fc.Result = res
+	return ec.marshalOMap2map(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodHttpChaosReplaceActions_headers(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodHttpChaosReplaceActions) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodHttpChaosReplaceActions",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.PodHttpChaosReplaceActions().Headers(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(map[string]interface{})
+	fc.Result = res
+	return ec.marshalOMap2map(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodHttpChaosRule_target(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodHttpChaosRule) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodHttpChaosRule",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.PodHttpChaosRule().Target(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodHttpChaosRule_selector(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodHttpChaosRule) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodHttpChaosRule",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Selector, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(v1alpha1.PodHttpChaosSelector)
+	fc.Result = res
+	return ec.marshalNPodHttpChaosSelector2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodHttpChaosSelector(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodHttpChaosRule_actions(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodHttpChaosRule) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodHttpChaosRule",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Actions, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(v1alpha1.PodHttpChaosActions)
+	fc.Result = res
+	return ec.marshalNPodHttpChaosActions2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodHttpChaosActions(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodHttpChaosRule_source(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodHttpChaosRule) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodHttpChaosRule",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Source, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodHttpChaosRule_port(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodHttpChaosRule) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodHttpChaosRule",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Port, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int32)
+	fc.Result = res
+	return ec.marshalNInt2int32(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodHttpChaosSelector_port(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodHttpChaosSelector) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodHttpChaosSelector",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Port, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int32)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint32(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodHttpChaosSelector_path(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodHttpChaosSelector) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodHttpChaosSelector",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Path, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodHttpChaosSelector_method(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodHttpChaosSelector) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodHttpChaosSelector",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Method, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodHttpChaosSelector_code(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodHttpChaosSelector) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodHttpChaosSelector",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Code, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int32)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint32(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodHttpChaosSelector_requestHeaders(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodHttpChaosSelector) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodHttpChaosSelector",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.PodHttpChaosSelector().RequestHeaders(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(map[string]interface{})
+	fc.Result = res
+	return ec.marshalOMap2map(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodHttpChaosSelector_responseHeaders(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodHttpChaosSelector) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodHttpChaosSelector",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.PodHttpChaosSelector().ResponseHeaders(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(map[string]interface{})
+	fc.Result = res
+	return ec.marshalOMap2map(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodHttpChaosSpec_rules(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodHttpChaosSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodHttpChaosSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Rules, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]v1alpha1.PodHttpChaosRule)
+	fc.Result = res
+	return ec.marshalNPodHttpChaosRule2ᚕgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodHttpChaosRuleᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodHttpChaosStatus_pid(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodHttpChaosStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodHttpChaosStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Pid, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(int64)
+	fc.Result = res
+	return ec.marshalOInt2int64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodHttpChaosStatus_startTime(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodHttpChaosStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodHttpChaosStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.StartTime, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(int64)
+	fc.Result = res
+	return ec.marshalOInt2int64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodHttpChaosStatus_failedMessage(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodHttpChaosStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodHttpChaosStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.FailedMessage, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodHttpChaosStatus_observedGeneration(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodHttpChaosStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodHttpChaosStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ObservedGeneration, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(int64)
+	fc.Result = res
+	return ec.marshalOInt2int64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _PodIOChaos_kind(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodIOChaos) (ret graphql.Marshaler) {
@@ -8712,6 +11652,262 @@ func (ec *executionContext) _PodNetworkChaos_clusterName(ctx context.Context, fi
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _PodSelectorSpec_namespaces(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodSelectorSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodSelectorSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Namespaces, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	fc.Result = res
+	return ec.marshalOString2ᚕstringᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodSelectorSpec_nodes(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodSelectorSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodSelectorSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Nodes, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	fc.Result = res
+	return ec.marshalOString2ᚕstringᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodSelectorSpec_pods(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodSelectorSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodSelectorSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.PodSelectorSpec().Pods(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(map[string]interface{})
+	fc.Result = res
+	return ec.marshalOMap2map(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodSelectorSpec_nodeSelectors(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodSelectorSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodSelectorSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.PodSelectorSpec().NodeSelectors(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(map[string]interface{})
+	fc.Result = res
+	return ec.marshalOMap2map(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodSelectorSpec_fieldSelectors(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodSelectorSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodSelectorSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.PodSelectorSpec().FieldSelectors(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(map[string]interface{})
+	fc.Result = res
+	return ec.marshalOMap2map(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodSelectorSpec_labelSelectors(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodSelectorSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodSelectorSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.PodSelectorSpec().LabelSelectors(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(map[string]interface{})
+	fc.Result = res
+	return ec.marshalOMap2map(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodSelectorSpec_annotationSelectors(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodSelectorSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodSelectorSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.PodSelectorSpec().AnnotationSelectors(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(map[string]interface{})
+	fc.Result = res
+	return ec.marshalOMap2map(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodSelectorSpec_podPhaseSelectors(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodSelectorSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodSelectorSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PodPhaseSelectors, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	fc.Result = res
+	return ec.marshalOString2ᚕstringᚄ(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query_namepsace(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -8823,6 +12019,111 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 	res := resTmp.(*introspection.Schema)
 	fc.Result = res
 	return ec.marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Record_id(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.Record) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Record",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Id, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Record_selectorKey(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.Record) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Record",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.SelectorKey, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Record_phase(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.Record) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Record",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Record().Phase(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _StressChaos_kind(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.StressChaos) (ret graphql.Marshaler) {
@@ -10567,6 +13868,96 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** object.gotpl ****************************
 
+var chaosConditionImplementors = []string{"ChaosCondition"}
+
+func (ec *executionContext) _ChaosCondition(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.ChaosCondition) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, chaosConditionImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ChaosCondition")
+		case "type":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._ChaosCondition_type(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "status":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._ChaosCondition_status(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "reason":
+			out.Values[i] = ec._ChaosCondition_reason(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var experimentStatusImplementors = []string{"ExperimentStatus"}
+
+func (ec *executionContext) _ExperimentStatus(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.ExperimentStatus) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, experimentStatusImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ExperimentStatus")
+		case "desiredPhase":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._ExperimentStatus_desiredPhase(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "Records":
+			out.Values[i] = ec._ExperimentStatus_Records(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var hTTPChaosImplementors = []string{"HTTPChaos"}
 
 func (ec *executionContext) _HTTPChaos(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.HTTPChaos) graphql.Marshaler {
@@ -10690,6 +14081,161 @@ func (ec *executionContext) _HTTPChaos(ctx context.Context, sel ast.SelectionSet
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
+		case "spec":
+			out.Values[i] = ec._HTTPChaos_spec(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "status":
+			out.Values[i] = ec._HTTPChaos_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "podhttp":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._HTTPChaos_podhttp(ctx, field, obj)
+				return res
+			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var hTTPChaosSpecImplementors = []string{"HTTPChaosSpec"}
+
+func (ec *executionContext) _HTTPChaosSpec(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.HTTPChaosSpec) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, hTTPChaosSpecImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("HTTPChaosSpec")
+		case "selector":
+			out.Values[i] = ec._HTTPChaosSpec_selector(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "mode":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._HTTPChaosSpec_mode(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "value":
+			out.Values[i] = ec._HTTPChaosSpec_value(ctx, field, obj)
+		case "target":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._HTTPChaosSpec_target(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "abort":
+			out.Values[i] = ec._HTTPChaosSpec_abort(ctx, field, obj)
+		case "delay":
+			out.Values[i] = ec._HTTPChaosSpec_delay(ctx, field, obj)
+		case "replace":
+			out.Values[i] = ec._HTTPChaosSpec_replace(ctx, field, obj)
+		case "patch":
+			out.Values[i] = ec._HTTPChaosSpec_patch(ctx, field, obj)
+		case "port":
+			out.Values[i] = ec._HTTPChaosSpec_port(ctx, field, obj)
+		case "path":
+			out.Values[i] = ec._HTTPChaosSpec_path(ctx, field, obj)
+		case "method":
+			out.Values[i] = ec._HTTPChaosSpec_method(ctx, field, obj)
+		case "code":
+			out.Values[i] = ec._HTTPChaosSpec_code(ctx, field, obj)
+		case "requestHeaders":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._HTTPChaosSpec_requestHeaders(ctx, field, obj)
+				return res
+			})
+		case "responseHeaders":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._HTTPChaosSpec_responseHeaders(ctx, field, obj)
+				return res
+			})
+		case "duration":
+			out.Values[i] = ec._HTTPChaosSpec_duration(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var hTTPChaosStatusImplementors = []string{"HTTPChaosStatus"}
+
+func (ec *executionContext) _HTTPChaosStatus(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.HTTPChaosStatus) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, hTTPChaosStatusImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("HTTPChaosStatus")
+		case "conditions":
+			out.Values[i] = ec._HTTPChaosStatus_conditions(ctx, field, obj)
+		case "experiment":
+			out.Values[i] = ec._HTTPChaosStatus_experiment(ctx, field, obj)
+		case "instances":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._HTTPChaosStatus_instances(ctx, field, obj)
+				return res
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -11631,6 +15177,20 @@ func (ec *executionContext) _Pod(ctx context.Context, sel ast.SelectionSet, obj 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
+		case "logs":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Pod_logs(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -11765,6 +15325,346 @@ func (ec *executionContext) _PodHTTPChaos(ctx context.Context, sel ast.Selection
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
+		case "spec":
+			out.Values[i] = ec._PodHTTPChaos_spec(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "status":
+			out.Values[i] = ec._PodHTTPChaos_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "pod":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._PodHTTPChaos_pod(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var podHttpChaosActionsImplementors = []string{"PodHttpChaosActions"}
+
+func (ec *executionContext) _PodHttpChaosActions(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.PodHttpChaosActions) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, podHttpChaosActionsImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PodHttpChaosActions")
+		case "abort":
+			out.Values[i] = ec._PodHttpChaosActions_abort(ctx, field, obj)
+		case "delay":
+			out.Values[i] = ec._PodHttpChaosActions_delay(ctx, field, obj)
+		case "replace":
+			out.Values[i] = ec._PodHttpChaosActions_replace(ctx, field, obj)
+		case "patch":
+			out.Values[i] = ec._PodHttpChaosActions_patch(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var podHttpChaosPatchActionsImplementors = []string{"PodHttpChaosPatchActions"}
+
+func (ec *executionContext) _PodHttpChaosPatchActions(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.PodHttpChaosPatchActions) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, podHttpChaosPatchActionsImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PodHttpChaosPatchActions")
+		case "body":
+			out.Values[i] = ec._PodHttpChaosPatchActions_body(ctx, field, obj)
+		case "queries":
+			out.Values[i] = ec._PodHttpChaosPatchActions_queries(ctx, field, obj)
+		case "headers":
+			out.Values[i] = ec._PodHttpChaosPatchActions_headers(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var podHttpChaosPatchBodyActionImplementors = []string{"PodHttpChaosPatchBodyAction"}
+
+func (ec *executionContext) _PodHttpChaosPatchBodyAction(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.PodHttpChaosPatchBodyAction) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, podHttpChaosPatchBodyActionImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PodHttpChaosPatchBodyAction")
+		case "type":
+			out.Values[i] = ec._PodHttpChaosPatchBodyAction_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "value":
+			out.Values[i] = ec._PodHttpChaosPatchBodyAction_value(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var podHttpChaosReplaceActionsImplementors = []string{"PodHttpChaosReplaceActions"}
+
+func (ec *executionContext) _PodHttpChaosReplaceActions(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.PodHttpChaosReplaceActions) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, podHttpChaosReplaceActionsImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PodHttpChaosReplaceActions")
+		case "path":
+			out.Values[i] = ec._PodHttpChaosReplaceActions_path(ctx, field, obj)
+		case "method":
+			out.Values[i] = ec._PodHttpChaosReplaceActions_method(ctx, field, obj)
+		case "code":
+			out.Values[i] = ec._PodHttpChaosReplaceActions_code(ctx, field, obj)
+		case "body":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._PodHttpChaosReplaceActions_body(ctx, field, obj)
+				return res
+			})
+		case "queries":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._PodHttpChaosReplaceActions_queries(ctx, field, obj)
+				return res
+			})
+		case "headers":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._PodHttpChaosReplaceActions_headers(ctx, field, obj)
+				return res
+			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var podHttpChaosRuleImplementors = []string{"PodHttpChaosRule"}
+
+func (ec *executionContext) _PodHttpChaosRule(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.PodHttpChaosRule) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, podHttpChaosRuleImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PodHttpChaosRule")
+		case "target":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._PodHttpChaosRule_target(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "selector":
+			out.Values[i] = ec._PodHttpChaosRule_selector(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "actions":
+			out.Values[i] = ec._PodHttpChaosRule_actions(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "source":
+			out.Values[i] = ec._PodHttpChaosRule_source(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "port":
+			out.Values[i] = ec._PodHttpChaosRule_port(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var podHttpChaosSelectorImplementors = []string{"PodHttpChaosSelector"}
+
+func (ec *executionContext) _PodHttpChaosSelector(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.PodHttpChaosSelector) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, podHttpChaosSelectorImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PodHttpChaosSelector")
+		case "port":
+			out.Values[i] = ec._PodHttpChaosSelector_port(ctx, field, obj)
+		case "path":
+			out.Values[i] = ec._PodHttpChaosSelector_path(ctx, field, obj)
+		case "method":
+			out.Values[i] = ec._PodHttpChaosSelector_method(ctx, field, obj)
+		case "code":
+			out.Values[i] = ec._PodHttpChaosSelector_code(ctx, field, obj)
+		case "requestHeaders":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._PodHttpChaosSelector_requestHeaders(ctx, field, obj)
+				return res
+			})
+		case "responseHeaders":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._PodHttpChaosSelector_responseHeaders(ctx, field, obj)
+				return res
+			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var podHttpChaosSpecImplementors = []string{"PodHttpChaosSpec"}
+
+func (ec *executionContext) _PodHttpChaosSpec(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.PodHttpChaosSpec) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, podHttpChaosSpecImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PodHttpChaosSpec")
+		case "rules":
+			out.Values[i] = ec._PodHttpChaosSpec_rules(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var podHttpChaosStatusImplementors = []string{"PodHttpChaosStatus"}
+
+func (ec *executionContext) _PodHttpChaosStatus(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.PodHttpChaosStatus) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, podHttpChaosStatusImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PodHttpChaosStatus")
+		case "pid":
+			out.Values[i] = ec._PodHttpChaosStatus_pid(ctx, field, obj)
+		case "startTime":
+			out.Values[i] = ec._PodHttpChaosStatus_startTime(ctx, field, obj)
+		case "failedMessage":
+			out.Values[i] = ec._PodHttpChaosStatus_failedMessage(ctx, field, obj)
+		case "observedGeneration":
+			out.Values[i] = ec._PodHttpChaosStatus_observedGeneration(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -12140,6 +16040,89 @@ func (ec *executionContext) _PodNetworkChaos(ctx context.Context, sel ast.Select
 	return out
 }
 
+var podSelectorSpecImplementors = []string{"PodSelectorSpec"}
+
+func (ec *executionContext) _PodSelectorSpec(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.PodSelectorSpec) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, podSelectorSpecImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PodSelectorSpec")
+		case "namespaces":
+			out.Values[i] = ec._PodSelectorSpec_namespaces(ctx, field, obj)
+		case "nodes":
+			out.Values[i] = ec._PodSelectorSpec_nodes(ctx, field, obj)
+		case "pods":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._PodSelectorSpec_pods(ctx, field, obj)
+				return res
+			})
+		case "nodeSelectors":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._PodSelectorSpec_nodeSelectors(ctx, field, obj)
+				return res
+			})
+		case "fieldSelectors":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._PodSelectorSpec_fieldSelectors(ctx, field, obj)
+				return res
+			})
+		case "labelSelectors":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._PodSelectorSpec_labelSelectors(ctx, field, obj)
+				return res
+			})
+		case "annotationSelectors":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._PodSelectorSpec_annotationSelectors(ctx, field, obj)
+				return res
+			})
+		case "podPhaseSelectors":
+			out.Values[i] = ec._PodSelectorSpec_podPhaseSelectors(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var queryImplementors = []string{"Query"}
 
 func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -12173,6 +16156,52 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Values[i] = ec._Query___type(ctx, field)
 		case "__schema":
 			out.Values[i] = ec._Query___schema(ctx, field)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var recordImplementors = []string{"Record"}
+
+func (ec *executionContext) _Record(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.Record) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, recordImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Record")
+		case "id":
+			out.Values[i] = ec._Record_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "selectorKey":
+			out.Values[i] = ec._Record_selectorKey(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "phase":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Record_phase(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -12610,6 +16639,10 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
+func (ec *executionContext) marshalNChaosCondition2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐChaosCondition(ctx context.Context, sel ast.SelectionSet, v v1alpha1.ChaosCondition) graphql.Marshaler {
+	return ec._ChaosCondition(ctx, sel, &v)
+}
+
 func (ec *executionContext) unmarshalNComponent2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlserverᚋgraphᚋmodelᚐComponent(ctx context.Context, v interface{}) (model.Component, error) {
 	var res model.Component
 	err := res.UnmarshalGQL(v)
@@ -12632,6 +16665,14 @@ func (ec *executionContext) marshalNHTTPChaos2ᚖgithubᚗcomᚋchaosᚑmeshᚋc
 		return graphql.Null
 	}
 	return ec._HTTPChaos(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNHTTPChaosSpec2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐHTTPChaosSpec(ctx context.Context, sel ast.SelectionSet, v v1alpha1.HTTPChaosSpec) graphql.Marshaler {
+	return ec._HTTPChaosSpec(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNHTTPChaosStatus2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐHTTPChaosStatus(ctx context.Context, sel ast.SelectionSet, v v1alpha1.HTTPChaosStatus) graphql.Marshaler {
+	return ec._HTTPChaosStatus(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNIOChaos2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐIOChaos(ctx context.Context, sel ast.SelectionSet, v v1alpha1.IOChaos) graphql.Marshaler {
@@ -12761,6 +16802,63 @@ func (ec *executionContext) marshalNPodHTTPChaos2ᚖgithubᚗcomᚋchaosᚑmesh�
 	return ec._PodHTTPChaos(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNPodHttpChaosActions2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodHttpChaosActions(ctx context.Context, sel ast.SelectionSet, v v1alpha1.PodHttpChaosActions) graphql.Marshaler {
+	return ec._PodHttpChaosActions(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNPodHttpChaosRule2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodHttpChaosRule(ctx context.Context, sel ast.SelectionSet, v v1alpha1.PodHttpChaosRule) graphql.Marshaler {
+	return ec._PodHttpChaosRule(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNPodHttpChaosRule2ᚕgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodHttpChaosRuleᚄ(ctx context.Context, sel ast.SelectionSet, v []v1alpha1.PodHttpChaosRule) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNPodHttpChaosRule2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodHttpChaosRule(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNPodHttpChaosSelector2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodHttpChaosSelector(ctx context.Context, sel ast.SelectionSet, v v1alpha1.PodHttpChaosSelector) graphql.Marshaler {
+	return ec._PodHttpChaosSelector(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNPodHttpChaosSpec2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodHttpChaosSpec(ctx context.Context, sel ast.SelectionSet, v v1alpha1.PodHttpChaosSpec) graphql.Marshaler {
+	return ec._PodHttpChaosSpec(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNPodHttpChaosStatus2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodHttpChaosStatus(ctx context.Context, sel ast.SelectionSet, v v1alpha1.PodHttpChaosStatus) graphql.Marshaler {
+	return ec._PodHttpChaosStatus(ctx, sel, &v)
+}
+
 func (ec *executionContext) marshalNPodIOChaos2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodIOChaos(ctx context.Context, sel ast.SelectionSet, v v1alpha1.PodIOChaos) graphql.Marshaler {
 	return ec._PodIOChaos(ctx, sel, &v)
 }
@@ -12797,6 +16895,20 @@ func (ec *executionContext) marshalNPodNetworkChaos2ᚖgithubᚗcomᚋchaosᚑme
 	return ec._PodNetworkChaos(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNPodSelectorSpec2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodSelectorSpec(ctx context.Context, sel ast.SelectionSet, v v1alpha1.PodSelectorSpec) graphql.Marshaler {
+	return ec._PodSelectorSpec(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNRecord2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐRecord(ctx context.Context, sel ast.SelectionSet, v *v1alpha1.Record) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Record(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNStressChaos2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐStressChaos(ctx context.Context, sel ast.SelectionSet, v v1alpha1.StressChaos) graphql.Marshaler {
 	return ec._StressChaos(ctx, sel, &v)
 }
@@ -12824,6 +16936,36 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNString2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]string, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNString2string(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalNString2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNString2string(ctx, sel, v[i])
+	}
+
+	return ret
 }
 
 func (ec *executionContext) unmarshalNTime2timeᚐTime(ctx context.Context, v interface{}) (time.Time, error) {
@@ -13115,6 +17257,50 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return graphql.MarshalBoolean(*v)
 }
 
+func (ec *executionContext) marshalOChaosCondition2ᚕgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐChaosConditionᚄ(ctx context.Context, sel ast.SelectionSet, v []v1alpha1.ChaosCondition) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNChaosCondition2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐChaosCondition(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalOExperimentStatus2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐExperimentStatus(ctx context.Context, sel ast.SelectionSet, v v1alpha1.ExperimentStatus) graphql.Marshaler {
+	return ec._ExperimentStatus(ctx, sel, &v)
+}
+
 func (ec *executionContext) marshalOHTTPChaos2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐHTTPChaosᚄ(ctx context.Context, sel ast.SelectionSet, v []*v1alpha1.HTTPChaos) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -13244,6 +17430,15 @@ func (ec *executionContext) marshalOInt2int(ctx context.Context, sel ast.Selecti
 	return graphql.MarshalInt(v)
 }
 
+func (ec *executionContext) unmarshalOInt2int32(ctx context.Context, v interface{}) (int32, error) {
+	res, err := graphql.UnmarshalInt32(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOInt2int32(ctx context.Context, sel ast.SelectionSet, v int32) graphql.Marshaler {
+	return graphql.MarshalInt32(v)
+}
+
 func (ec *executionContext) unmarshalOInt2int64(ctx context.Context, v interface{}) (int64, error) {
 	res, err := graphql.UnmarshalInt64(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -13266,6 +17461,21 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 		return graphql.Null
 	}
 	return graphql.MarshalInt(*v)
+}
+
+func (ec *executionContext) unmarshalOInt2ᚖint32(ctx context.Context, v interface{}) (*int32, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalInt32(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOInt2ᚖint32(ctx context.Context, sel ast.SelectionSet, v *int32) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalInt32(*v)
 }
 
 func (ec *executionContext) unmarshalOInt2ᚖint64(ctx context.Context, v interface{}) (*int64, error) {
@@ -13498,6 +17708,27 @@ func (ec *executionContext) marshalOPodHTTPChaos2ᚕᚖgithubᚗcomᚋchaosᚑme
 	return ret
 }
 
+func (ec *executionContext) marshalOPodHttpChaosPatchActions2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodHttpChaosPatchActions(ctx context.Context, sel ast.SelectionSet, v *v1alpha1.PodHttpChaosPatchActions) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._PodHttpChaosPatchActions(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOPodHttpChaosPatchBodyAction2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodHttpChaosPatchBodyAction(ctx context.Context, sel ast.SelectionSet, v *v1alpha1.PodHttpChaosPatchBodyAction) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._PodHttpChaosPatchBodyAction(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOPodHttpChaosReplaceActions2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodHttpChaosReplaceActions(ctx context.Context, sel ast.SelectionSet, v *v1alpha1.PodHttpChaosReplaceActions) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._PodHttpChaosReplaceActions(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalOPodIOChaos2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodIOChaosᚄ(ctx context.Context, sel ast.SelectionSet, v []*v1alpha1.PodIOChaos) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -13566,6 +17797,46 @@ func (ec *executionContext) marshalOPodNetworkChaos2ᚕᚖgithubᚗcomᚋchaos�
 				defer wg.Done()
 			}
 			ret[i] = ec.marshalNPodNetworkChaos2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodNetworkChaos(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalORecord2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐRecordᚄ(ctx context.Context, sel ast.SelectionSet, v []*v1alpha1.Record) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNRecord2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐRecord(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -13658,6 +17929,42 @@ func (ec *executionContext) marshalOString2ᚕstringᚄ(ctx context.Context, sel
 	ret := make(graphql.Array, len(v))
 	for i := range v {
 		ret[i] = ec.marshalNString2string(ctx, sel, v[i])
+	}
+
+	return ret
+}
+
+func (ec *executionContext) unmarshalOString2ᚕᚕstringᚄ(ctx context.Context, v interface{}) ([][]string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([][]string, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNString2ᚕstringᚄ(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOString2ᚕᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v [][]string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNString2ᚕstringᚄ(ctx, sel, v[i])
 	}
 
 	return ret

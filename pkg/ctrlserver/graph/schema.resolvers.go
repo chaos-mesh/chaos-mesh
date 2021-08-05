@@ -6,7 +6,9 @@ package graph
 import (
 	"bufio"
 	"context"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"time"
 
 	v1 "k8s.io/api/core/v1"
@@ -18,6 +20,18 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/ctrlserver/graph/generated"
 	"github.com/chaos-mesh/chaos-mesh/pkg/ctrlserver/graph/model"
 )
+
+func (r *chaosConditionResolver) Type(ctx context.Context, obj *v1alpha1.ChaosCondition) (string, error) {
+	return string(obj.Type), nil
+}
+
+func (r *chaosConditionResolver) Status(ctx context.Context, obj *v1alpha1.ChaosCondition) (string, error) {
+	return string(obj.Status), nil
+}
+
+func (r *experimentStatusResolver) DesiredPhase(ctx context.Context, obj *v1alpha1.ExperimentStatus) (string, error) {
+	return string(obj.DesiredPhase), nil
+}
 
 func (r *hTTPChaosResolver) UID(ctx context.Context, obj *v1alpha1.HTTPChaos) (string, error) {
 	return string(obj.UID), nil
@@ -45,6 +59,50 @@ func (r *hTTPChaosResolver) Annotations(ctx context.Context, obj *v1alpha1.HTTPC
 		annotations[k] = v
 	}
 	return annotations, nil
+}
+
+func (r *hTTPChaosResolver) Podhttp(ctx context.Context, obj *v1alpha1.HTTPChaos) ([]*v1alpha1.PodHttpChaos, error) {
+	podhttps := make([]*v1alpha1.PodHttpChaos, 0, len(obj.Status.Instances))
+	for id := range obj.Status.Instances {
+		podhttp := new(v1alpha1.PodHttpChaos)
+		if err := r.Client.Get(ctx, parseNamespacedName(id), podhttp); err != nil {
+			return nil, err
+		}
+		podhttps = append(podhttps, podhttp)
+	}
+	return podhttps, nil
+}
+
+func (r *hTTPChaosSpecResolver) Mode(ctx context.Context, obj *v1alpha1.HTTPChaosSpec) (string, error) {
+	return string(obj.Mode), nil
+}
+
+func (r *hTTPChaosSpecResolver) Target(ctx context.Context, obj *v1alpha1.HTTPChaosSpec) (string, error) {
+	return string(obj.Target), nil
+}
+
+func (r *hTTPChaosSpecResolver) RequestHeaders(ctx context.Context, obj *v1alpha1.HTTPChaosSpec) (map[string]interface{}, error) {
+	headers := make(map[string]interface{})
+	for k, v := range obj.RequestHeaders {
+		headers[k] = v
+	}
+	return headers, nil
+}
+
+func (r *hTTPChaosSpecResolver) ResponseHeaders(ctx context.Context, obj *v1alpha1.HTTPChaosSpec) (map[string]interface{}, error) {
+	headers := make(map[string]interface{})
+	for k, v := range obj.ResponseHeaders {
+		headers[k] = v
+	}
+	return headers, nil
+}
+
+func (r *hTTPChaosStatusResolver) Instances(ctx context.Context, obj *v1alpha1.HTTPChaosStatus) (map[string]interface{}, error) {
+	instances := make(map[string]interface{})
+	for k, v := range obj.Instances {
+		instances[k] = v
+	}
+	return instances, nil
 }
 
 func (r *iOChaosResolver) UID(ctx context.Context, obj *v1alpha1.IOChaos) (string, error) {
@@ -464,6 +522,19 @@ func (r *podResolver) Annotations(ctx context.Context, obj *v1.Pod) (map[string]
 	return annotations, nil
 }
 
+func (r *podResolver) Logs(ctx context.Context, obj *v1.Pod) (string, error) {
+	logs, err := r.Clientset.CoreV1().Pods(obj.Namespace).GetLogs(obj.Name, &v1.PodLogOptions{}).Stream()
+	if err != nil {
+		return "", err
+	}
+	defer logs.Close()
+	data, err := ioutil.ReadAll(logs)
+	if err != nil {
+		return "", err
+	}
+	return string(data), nil
+}
+
 func (r *podHTTPChaosResolver) UID(ctx context.Context, obj *v1alpha1.PodHttpChaos) (string, error) {
 	return string(obj.UID), nil
 }
@@ -490,6 +561,60 @@ func (r *podHTTPChaosResolver) Annotations(ctx context.Context, obj *v1alpha1.Po
 		annotations[k] = v
 	}
 	return annotations, nil
+}
+
+func (r *podHTTPChaosResolver) Pod(ctx context.Context, obj *v1alpha1.PodHttpChaos) (*v1.Pod, error) {
+	pod := new(v1.Pod)
+	if err := r.Client.Get(ctx, types.NamespacedName{Namespace: obj.Namespace, Name: obj.Name}, pod); err != nil {
+		return nil, err
+	}
+	return pod, nil
+}
+
+func (r *podHttpChaosReplaceActionsResolver) Body(ctx context.Context, obj *v1alpha1.PodHttpChaosReplaceActions) (*string, error) {
+	data, err := json.Marshal(obj.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	body := string(data)
+	return &body, nil
+}
+
+func (r *podHttpChaosReplaceActionsResolver) Queries(ctx context.Context, obj *v1alpha1.PodHttpChaosReplaceActions) (map[string]interface{}, error) {
+	queries := make(map[string]interface{})
+	for k, v := range obj.Queries {
+		queries[k] = v
+	}
+	return queries, nil
+}
+
+func (r *podHttpChaosReplaceActionsResolver) Headers(ctx context.Context, obj *v1alpha1.PodHttpChaosReplaceActions) (map[string]interface{}, error) {
+	headers := make(map[string]interface{})
+	for k, v := range obj.Headers {
+		headers[k] = v
+	}
+	return headers, nil
+}
+
+func (r *podHttpChaosRuleResolver) Target(ctx context.Context, obj *v1alpha1.PodHttpChaosRule) (string, error) {
+	return string(obj.Target), nil
+}
+
+func (r *podHttpChaosSelectorResolver) RequestHeaders(ctx context.Context, obj *v1alpha1.PodHttpChaosSelector) (map[string]interface{}, error) {
+	headers := make(map[string]interface{})
+	for k, v := range obj.RequestHeaders {
+		headers[k] = v
+	}
+	return headers, nil
+}
+
+func (r *podHttpChaosSelectorResolver) ResponseHeaders(ctx context.Context, obj *v1alpha1.PodHttpChaosSelector) (map[string]interface{}, error) {
+	headers := make(map[string]interface{})
+	for k, v := range obj.ResponseHeaders {
+		headers[k] = v
+	}
+	return headers, nil
 }
 
 func (r *podIOChaosResolver) UID(ctx context.Context, obj *v1alpha1.PodIOChaos) (string, error) {
@@ -575,8 +700,52 @@ func (r *podNetworkChaosResolver) Annotations(ctx context.Context, obj *v1alpha1
 	return annotations, nil
 }
 
+func (r *podSelectorSpecResolver) Pods(ctx context.Context, obj *v1alpha1.PodSelectorSpec) (map[string]interface{}, error) {
+	pods := make(map[string]interface{})
+	for k, v := range obj.Pods {
+		pods[k] = v
+	}
+	return pods, nil
+}
+
+func (r *podSelectorSpecResolver) NodeSelectors(ctx context.Context, obj *v1alpha1.PodSelectorSpec) (map[string]interface{}, error) {
+	selectors := make(map[string]interface{})
+	for k, v := range obj.NodeSelectors {
+		selectors[k] = v
+	}
+	return selectors, nil
+}
+
+func (r *podSelectorSpecResolver) FieldSelectors(ctx context.Context, obj *v1alpha1.PodSelectorSpec) (map[string]interface{}, error) {
+	selectors := make(map[string]interface{})
+	for k, v := range obj.FieldSelectors {
+		selectors[k] = v
+	}
+	return selectors, nil
+}
+
+func (r *podSelectorSpecResolver) LabelSelectors(ctx context.Context, obj *v1alpha1.PodSelectorSpec) (map[string]interface{}, error) {
+	selectors := make(map[string]interface{})
+	for k, v := range obj.LabelSelectors {
+		selectors[k] = v
+	}
+	return selectors, nil
+}
+
+func (r *podSelectorSpecResolver) AnnotationSelectors(ctx context.Context, obj *v1alpha1.PodSelectorSpec) (map[string]interface{}, error) {
+	selectors := make(map[string]interface{})
+	for k, v := range obj.AnnotationSelectors {
+		selectors[k] = v
+	}
+	return selectors, nil
+}
+
 func (r *queryResolver) Namepsace(ctx context.Context, ns string) (*model.Namespace, error) {
 	return &model.Namespace{Ns: ns}, nil
+}
+
+func (r *recordResolver) Phase(ctx context.Context, obj *v1alpha1.Record) (string, error) {
+	return string(obj.Phase), nil
 }
 
 func (r *stressChaosResolver) UID(ctx context.Context, obj *v1alpha1.StressChaos) (string, error) {
@@ -607,8 +776,26 @@ func (r *stressChaosResolver) Annotations(ctx context.Context, obj *v1alpha1.Str
 	return annotations, nil
 }
 
+// ChaosCondition returns generated.ChaosConditionResolver implementation.
+func (r *Resolver) ChaosCondition() generated.ChaosConditionResolver {
+	return &chaosConditionResolver{r}
+}
+
+// ExperimentStatus returns generated.ExperimentStatusResolver implementation.
+func (r *Resolver) ExperimentStatus() generated.ExperimentStatusResolver {
+	return &experimentStatusResolver{r}
+}
+
 // HTTPChaos returns generated.HTTPChaosResolver implementation.
 func (r *Resolver) HTTPChaos() generated.HTTPChaosResolver { return &hTTPChaosResolver{r} }
+
+// HTTPChaosSpec returns generated.HTTPChaosSpecResolver implementation.
+func (r *Resolver) HTTPChaosSpec() generated.HTTPChaosSpecResolver { return &hTTPChaosSpecResolver{r} }
+
+// HTTPChaosStatus returns generated.HTTPChaosStatusResolver implementation.
+func (r *Resolver) HTTPChaosStatus() generated.HTTPChaosStatusResolver {
+	return &hTTPChaosStatusResolver{r}
+}
 
 // IOChaos returns generated.IOChaosResolver implementation.
 func (r *Resolver) IOChaos() generated.IOChaosResolver { return &iOChaosResolver{r} }
@@ -639,6 +826,21 @@ func (r *Resolver) Pod() generated.PodResolver { return &podResolver{r} }
 // PodHTTPChaos returns generated.PodHTTPChaosResolver implementation.
 func (r *Resolver) PodHTTPChaos() generated.PodHTTPChaosResolver { return &podHTTPChaosResolver{r} }
 
+// PodHttpChaosReplaceActions returns generated.PodHttpChaosReplaceActionsResolver implementation.
+func (r *Resolver) PodHttpChaosReplaceActions() generated.PodHttpChaosReplaceActionsResolver {
+	return &podHttpChaosReplaceActionsResolver{r}
+}
+
+// PodHttpChaosRule returns generated.PodHttpChaosRuleResolver implementation.
+func (r *Resolver) PodHttpChaosRule() generated.PodHttpChaosRuleResolver {
+	return &podHttpChaosRuleResolver{r}
+}
+
+// PodHttpChaosSelector returns generated.PodHttpChaosSelectorResolver implementation.
+func (r *Resolver) PodHttpChaosSelector() generated.PodHttpChaosSelectorResolver {
+	return &podHttpChaosSelectorResolver{r}
+}
+
 // PodIOChaos returns generated.PodIOChaosResolver implementation.
 func (r *Resolver) PodIOChaos() generated.PodIOChaosResolver { return &podIOChaosResolver{r} }
 
@@ -647,13 +849,25 @@ func (r *Resolver) PodNetworkChaos() generated.PodNetworkChaosResolver {
 	return &podNetworkChaosResolver{r}
 }
 
+// PodSelectorSpec returns generated.PodSelectorSpecResolver implementation.
+func (r *Resolver) PodSelectorSpec() generated.PodSelectorSpecResolver {
+	return &podSelectorSpecResolver{r}
+}
+
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
+
+// Record returns generated.RecordResolver implementation.
+func (r *Resolver) Record() generated.RecordResolver { return &recordResolver{r} }
 
 // StressChaos returns generated.StressChaosResolver implementation.
 func (r *Resolver) StressChaos() generated.StressChaosResolver { return &stressChaosResolver{r} }
 
+type chaosConditionResolver struct{ *Resolver }
+type experimentStatusResolver struct{ *Resolver }
 type hTTPChaosResolver struct{ *Resolver }
+type hTTPChaosSpecResolver struct{ *Resolver }
+type hTTPChaosStatusResolver struct{ *Resolver }
 type iOChaosResolver struct{ *Resolver }
 type iOChaosActionResolver struct{ *Resolver }
 type ioFaultResolver struct{ *Resolver }
@@ -663,7 +877,12 @@ type networkChaosResolver struct{ *Resolver }
 type ownerReferenceResolver struct{ *Resolver }
 type podResolver struct{ *Resolver }
 type podHTTPChaosResolver struct{ *Resolver }
+type podHttpChaosReplaceActionsResolver struct{ *Resolver }
+type podHttpChaosRuleResolver struct{ *Resolver }
+type podHttpChaosSelectorResolver struct{ *Resolver }
 type podIOChaosResolver struct{ *Resolver }
 type podNetworkChaosResolver struct{ *Resolver }
+type podSelectorSpecResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+type recordResolver struct{ *Resolver }
 type stressChaosResolver struct{ *Resolver }
