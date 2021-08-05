@@ -4,6 +4,7 @@ package graph
 // will be copied through when generating and any unknown code will be moved to the end.
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"time"
@@ -168,15 +169,55 @@ func (r *ioFaultResolver) Errno(ctx context.Context, obj *v1alpha1.IoFault) (int
 }
 
 func (r *loggerResolver) Component(ctx context.Context, ns string, component model.Component) (<-chan string, error) {
-	panic(fmt.Errorf("not implemented"))
+	var list v1.PodList
+	if err := r.Client.List(ctx, &list, client.MatchingLabels(componentLabels(component))); err != nil {
+		return nil, err
+	}
+
+	if len(list.Items) == 0 {
+		return nil, fmt.Errorf("instance of %s not found", component)
+	}
+
+	return r.Pod(ctx, list.Items[0].Namespace, list.Items[0].Name)
 }
 
 func (r *loggerResolver) Pod(ctx context.Context, ns string, name string) (<-chan string, error) {
-	panic(fmt.Errorf("not implemented"))
+	logs, err := r.Clientset.CoreV1().Pods(ns).GetLogs(name, &v1.PodLogOptions{Follow: true}).Stream()
+	if err != nil {
+		return nil, err
+	}
+	logChan := make(chan string)
+	go func() {
+		defer logs.Close()
+		reader := bufio.NewReader(logs)
+		for {
+			line, err := reader.ReadString('\n')
+			if err != nil {
+				r.Log.Error(err, fmt.Sprintf("fail to read log of pod(%s/%s)", ns, name))
+				break
+			}
+			select {
+			case logChan <- string(line):
+				continue
+			case <-time.NewTimer(time.Minute).C:
+				r.Log.Info(fmt.Sprintf("client has not read log of pod(%s/%s) for 1m, close channel", ns, name))
+				break
+			}
+		}
+	}()
+	return logChan, nil
 }
 
-func (r *namespaceResolver) Component(ctx context.Context, obj *model.Namespace, component model.Component) (*v1.Pod, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *namespaceResolver) Component(ctx context.Context, obj *model.Namespace, component model.Component) ([]*v1.Pod, error) {
+	var list v1.PodList
+	var pods []*v1.Pod
+	if err := r.Client.List(ctx, &list, client.MatchingLabels(componentLabels(component))); err != nil {
+		return nil, err
+	}
+	for i := range list.Items {
+		pods = append(pods, &list.Items[i])
+	}
+	return pods, nil
 }
 
 func (r *namespaceResolver) Pod(ctx context.Context, obj *model.Namespace, name string) (*v1.Pod, error) {

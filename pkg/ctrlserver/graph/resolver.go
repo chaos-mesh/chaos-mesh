@@ -6,8 +6,14 @@ package graph
 //
 // It serves as dependency injection for your app, add any dependencies you require here.
 
-import "sigs.k8s.io/controller-runtime/pkg/client"
+import (
+	"github.com/go-logr/logr"
+	"k8s.io/client-go/kubernetes"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+)
 
 type Resolver struct {
-	Client client.Client
+	Log       logr.Logger
+	Client    client.Client
+	Clientset kubernetes.Interface
 }

@@ -27,7 +27,7 @@ type Logger {
 
 type Namespace {
     ns: String!
-    component(component: Component!): Pod!      @goField(forceResolver: true)
+    component(component: Component!): [Pod!]    @goField(forceResolver: true)
     pod(name: String!): Pod!                    @goField(forceResolver: true)
     pods: [Pod!]                                @goField(forceResolver: true)
     stress(name: String!): StressChaos!         @goField(forceResolver: true)

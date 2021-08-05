@@ -356,7 +356,7 @@ type LoggerResolver interface {
 	Pod(ctx context.Context, ns string, name string) (<-chan string, error)
 }
 type NamespaceResolver interface {
-	Component(ctx context.Context, obj *model.Namespace, component model.Component) (*v1.Pod, error)
+	Component(ctx context.Context, obj *model.Namespace, component model.Component) ([]*v1.Pod, error)
 	Pod(ctx context.Context, obj *model.Namespace, name string) (*v1.Pod, error)
 	Pods(ctx context.Context, obj *model.Namespace) ([]*v1.Pod, error)
 	Stress(ctx context.Context, obj *model.Namespace, name string) (*v1alpha1.StressChaos, error)
@@ -2009,7 +2009,7 @@ type Logger {
 
 type Namespace {
     ns: String!
-    component(component: Component!): Pod!      @goField(forceResolver: true)
+    component(component: Component!): [Pod!]    @goField(forceResolver: true)
     pod(name: String!): Pod!                    @goField(forceResolver: true)
     pods: [Pod!]                                @goField(forceResolver: true)
     stress(name: String!): StressChaos!         @goField(forceResolver: true)
@@ -4660,14 +4660,11 @@ func (ec *executionContext) _Namespace_component(ctx context.Context, field grap
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(*v1.Pod)
+	res := resTmp.([]*v1.Pod)
 	fc.Result = res
-	return ec.marshalNPod2ᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐPod(ctx, field.Selections, res)
+	return ec.marshalOPod2ᚕᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐPodᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Namespace_pod(ctx context.Context, field graphql.CollectedField, obj *model.Namespace) (ret graphql.Marshaler) {
@@ -11109,9 +11106,6 @@ func (ec *executionContext) _Namespace(ctx context.Context, sel ast.SelectionSet
 					}
 				}()
 				res = ec._Namespace_component(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
 				return res
 			})
 		case "pod":

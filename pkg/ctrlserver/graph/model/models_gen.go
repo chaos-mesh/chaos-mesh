@@ -14,7 +14,7 @@ import (
 
 type Namespace struct {
 	Ns          string                      `json:"ns"`
-	Component   *v1.Pod                     `json:"component"`
+	Component   []*v1.Pod                   `json:"component"`
 	Pod         *v1.Pod                     `json:"pod"`
 	Pods        []*v1.Pod                   `json:"pods"`
 	Stress      *v1alpha1.StressChaos       `json:"stress"`
