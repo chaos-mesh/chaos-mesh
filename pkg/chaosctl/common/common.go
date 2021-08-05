@@ -340,6 +340,16 @@ func forwardPorts(ctx context.Context, pod v1.Pod, port uint16) (context.CancelF
 	return pfCancel, localPort, err
 }
 
+func ForwardSvcPorts(ctx context.Context, ns, svc string, port uint16) (context.CancelFunc, uint16, error) {
+	commonRestClientGetter := NewCommonRestClientGetter()
+	fw, err := portforward.NewPortForwarder(ctx, commonRestClientGetter, false)
+	if err != nil {
+		return nil, 0, errors.Wrap(err, "failed to create port forwarder")
+	}
+	_, localPort, pfCancel, err := portforward.ForwardOnePort(fw, ns, svc, port)
+	return pfCancel, localPort, err
+}
+
 // Log print log of pod
 func Log(pod v1.Pod, tail int64, c *kubernetes.Clientset) (string, error) {
 	podLogOpts := v1.PodLogOptions{}
