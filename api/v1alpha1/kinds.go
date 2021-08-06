@@ -16,7 +16,7 @@ package v1alpha1
 import (
 	"sync"
 
-	"k8s.io/apimachinery/pkg/runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // +kubebuilder:object:generate=false
@@ -62,7 +62,7 @@ var all = &chaosKindMap{
 
 // ChaosKind includes one kind of chaos and its list type
 type ChaosKind struct {
-	Chaos runtime.Object
+	Chaos client.Object
 	ChaosList
 }
 

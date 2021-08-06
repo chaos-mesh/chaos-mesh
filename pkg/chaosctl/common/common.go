@@ -349,7 +349,8 @@ func Log(pod v1.Pod, tail int64, c *kubernetes.Clientset) (string, error) {
 	}
 
 	req := c.CoreV1().Pods(pod.Namespace).GetLogs(pod.Name, &podLogOpts)
-	podLogs, err := req.Stream()
+	// FIXME: get context from parameter
+	podLogs, err := req.Stream(context.TODO())
 	if err != nil {
 		return "", errors.Wrapf(err, "failed to open log stream for pod %s/%s", pod.GetNamespace(), pod.GetName())
 	}
@@ -408,7 +409,8 @@ func getTLSConfigFromSecrets() (*grpcUtils.TLSRaw, error) {
 	if err != nil {
 		return nil, err
 	}
-	secret, err := kubeClient.CoreV1().Secrets(ChaosDaemonNamespace).Get(ChaosDaemonClientCert, metav1.GetOptions{})
+	// FIXME: get context from parameter
+	secret, err := kubeClient.CoreV1().Secrets(ChaosDaemonNamespace).Get(context.TODO(), ChaosDaemonClientCert, metav1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}
