@@ -14,6 +14,7 @@
 package provider
 
 import (
+	"context"
 	"math"
 
 	"github.com/go-logr/logr"
@@ -149,25 +150,26 @@ type controlPlaneCacheReader struct {
 	client.Reader `name:"control-plane-cache"`
 }
 
-func NewControlPlaneCacheReader(logger logr.Logger) (controlPlaneCacheReader, error) {
+func NewControlPlaneCacheReader(logger logr.Logger) (*controlPlaneCacheReader, error) {
 	cfg := ctrl.GetConfigOrDie()
 
 	mapper, err := apiutil.NewDynamicRESTMapper(cfg)
 	if err != nil {
-		return controlPlaneCacheReader{}, err
+		return nil, err
 	}
 
 	scheme := runtime.NewScheme()
 	_ = clientgoscheme.AddToScheme(scheme)
 
 	// Create the cache for the cached read client and registering informers
-	cache, err := cache.New(cfg, cache.Options{Scheme: scheme, Mapper: mapper, Resync: nil, Namespace: config.ControllerCfg.Namespace})
+	cacheReader, err := cache.New(cfg, cache.Options{Scheme: scheme, Mapper: mapper, Resync: nil, Namespace: config.ControllerCfg.Namespace})
 	if err != nil {
-		return controlPlaneCacheReader{}, err
+		return nil, err
 	}
 	// TODO: store the channel and use it to stop
 	go func() {
-		err := cache.Start(make(chan struct{}))
+		// FIXME: get context from parameter
+		err := cacheReader.Start(context.TODO())
 		if err != nil {
 			logger.Error(err, "fail to start cached client")
 		}
@@ -175,19 +177,20 @@ func NewControlPlaneCacheReader(logger logr.Logger) (controlPlaneCacheReader, er
 
 	c, err := client.New(cfg, client.Options{Scheme: scheme, Mapper: mapper})
 	if err != nil {
-		return controlPlaneCacheReader{}, err
+		return nil, err
 	}
 
-	cachedClient := &client.DelegatingClient{
-		Reader: &client.DelegatingReader{
-			CacheReader:  cache,
-			ClientReader: c,
-		},
-		Writer:       c,
-		StatusClient: c,
+	cachedClient, err := client.NewDelegatingClient(client.NewDelegatingClientInput{
+		CacheReader:       cacheReader,
+		Client:            c,
+		UncachedObjects:   nil,
+		CacheUnstructured: false,
+	})
+	if err != nil {
+		return nil, err
 	}
 
-	return controlPlaneCacheReader{
+	return &controlPlaneCacheReader{
 		Reader: cachedClient,
 	}, nil
 }
