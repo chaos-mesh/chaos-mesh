@@ -1325,7 +1325,7 @@ func (s *Service) patchExperiment(exp *Base, annotations map[string]string, kube
 
 	return kubeCli.Patch(context.Background(),
 		chaosKind.Chaos,
-		client.ConstantPatch(types.MergePatchType, mergePatch))
+		client.RawPatch(types.MergePatchType, mergePatch))
 }
 
 // @Summary Get chaos experiments state from Kubernetes cluster.

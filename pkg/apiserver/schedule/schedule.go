@@ -994,5 +994,5 @@ func (s *Service) patchSchedule(exp *Base, annotations map[string]string, kubeCl
 
 	return kubeCli.Patch(context.Background(),
 		sch,
-		client.ConstantPatch(types.MergePatchType, mergePatch))
+		client.RawPatch(types.MergePatchType, mergePatch))
 }
