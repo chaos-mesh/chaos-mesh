@@ -40,7 +40,7 @@ func NewChaosNodeReconciler(kubeClient client.Client, eventRecorder recorder.Cha
 	return &ChaosNodeReconciler{kubeClient: kubeClient, eventRecorder: eventRecorder, logger: logger}
 }
 
-func (it *ChaosNodeReconciler) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+func (it *ChaosNodeReconciler) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
 
 	startTime := time.Now()
 	defer func() {
@@ -50,7 +50,6 @@ func (it *ChaosNodeReconciler) Reconcile(request reconcile.Request) (reconcile.R
 		)
 	}()
 
-	ctx := context.TODO()
 	node := v1alpha1.WorkflowNode{}
 
 	err := it.kubeClient.Get(ctx, request.NamespacedName, &node)

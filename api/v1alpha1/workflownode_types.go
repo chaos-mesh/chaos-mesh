@@ -157,6 +157,7 @@ const (
 // +kubebuilder:object:generate=false
 type GenericChaosList interface {
 	runtime.Object
+	metav1.ListInterface
 	GetItems() []GenericChaos
 }
 
