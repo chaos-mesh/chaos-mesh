@@ -18,7 +18,6 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
-	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -29,7 +28,8 @@ type ActiveLister struct {
 	Log logr.Logger
 }
 
-func (lister *ActiveLister) ListActiveJobs(ctx context.Context, schedule *v1alpha1.Schedule) (runtime.Object, error) {
+// TODO: use another easy-to-used type for describing ChaosList
+func (lister *ActiveLister) ListActiveJobs(ctx context.Context, schedule *v1alpha1.Schedule) (v1alpha1.ChaosList, error) {
 	kind, ok := v1alpha1.AllScheduleItemKinds()[string(schedule.Spec.Type)]
 	if !ok {
 		lister.Log.Info("unknown kind", "kind", schedule.Spec.Type)

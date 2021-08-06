@@ -45,9 +45,7 @@ type Reconciler struct {
 	ActiveLister *utils.ActiveLister
 }
 
-func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	ctx := context.Background()
-
+func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	// In this controller, schedule could be out of date, as the reconcilation may be not caused by
 	// an update on Schedule, but by a *Chaos.
 	schedule := &v1alpha1.Schedule{}
@@ -69,14 +67,14 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	items := reflect.ValueOf(list).Elem().FieldByName("Items")
-	metaItems := []v1alpha1.MetaObject{}
+	metaItems := []client.Object{}
 	for i := 0; i < items.Len(); i++ {
-		item := items.Index(i).Addr().Interface().(v1alpha1.MetaObject)
+		item := items.Index(i).Addr().Interface().(client.Object)
 		metaItems = append(metaItems, item)
 	}
 
 	sort.Slice(metaItems, func(x, y int) bool {
-		return metaItems[x].GetObjectMeta().CreationTimestamp.Time.Before(metaItems[y].GetObjectMeta().CreationTimestamp.Time)
+		return metaItems[x].GetCreationTimestamp().Time.Before(metaItems[y].GetCreationTimestamp().Time)
 	})
 
 	exceededHistory := len(metaItems) - schedule.Spec.HistoryLimit
@@ -120,7 +118,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			err := r.Client.Delete(ctx, obj)
 			if err != nil && !k8sError.IsNotFound(err) {
 				r.Recorder.Event(schedule, recorder.Failed{
-					Activity: fmt.Sprintf("delete %s/%s", obj.GetObjectMeta().Namespace, obj.GetObjectMeta().Name),
+					Activity: fmt.Sprintf("delete %s/%s", obj.GetNamespace(), obj.GetName()),
 					Err:      err.Error(),
 				})
 			}

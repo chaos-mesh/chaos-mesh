@@ -615,7 +615,7 @@ func (s *Service) getScheduleDetail(c *gin.Context) {
 		_ = c.Error(utils.ErrInvalidRequest.New("the kind is not supported"))
 		return
 	}
-	list := kind.ChaosList.DeepCopyObject()
+	list := kind.ChaosList.DeepCopyList()
 	selector, err := metav1.LabelSelectorAsSelector(&metav1.LabelSelector{
 		MatchLabels: map[string]string{"managed-by": schedule.Name},
 	})
