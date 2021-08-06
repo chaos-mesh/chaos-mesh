@@ -103,10 +103,14 @@ type InnerObject interface {
 // StatefulObject defines a basic Object that can get the status
 type StatefulObject interface {
 	runtime.Object
-	GetStatus() *ChaosStatus
+	metav1.Object
+	// deprecated, use GetNamepsace() in metav1.Object directly.
+	// TODO: duplicated method, remove GetObjectMeta()
 	GetObjectMeta() *metav1.ObjectMeta
+	GetStatus() *ChaosStatus
 }
 
+// TODO: duplicated, remove MetaObject
 // +kubebuilder:object:generate=false
 // MetaObject defines a very basic Object that can get meta
 type MetaObject interface {
@@ -136,5 +140,7 @@ type ChaosInstance struct {
 type ChaosList interface {
 	runtime.Object
 	metav1.ListInterface
+	// TODO: refactor: move this DeepCopyList() to upper level, rename to SpawnList()
+	DeepCopyList() ChaosList
 	ListChaos() []*ChaosInstance
 }

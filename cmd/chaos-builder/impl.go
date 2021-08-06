@@ -114,6 +114,10 @@ type {{.Type}}List struct {
 	Items           []{{.Type}} ` + "`" + `json:"items"` + "`" + `
 }
 
+func (in *{{.Type}}List) DeepCopyList() ChaosList {
+	return in.DeepCopy()
+}
+
 // ListChaos returns a list of chaos
 func (in *{{.Type}}List) ListChaos() []*ChaosInstance {
 	res := make([]*ChaosInstance, 0, len(in.Items))

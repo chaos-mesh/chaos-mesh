@@ -189,6 +189,11 @@ func (in *WorkflowList) ListChaos() []*ChaosInstance {
 	return res
 }
 
+// TODO: refactor: not so accurate
+func (in *WorkflowList) DeepCopyList() ChaosList {
+	return in.DeepCopy()
+}
+
 func init() {
 	SchemeBuilder.Register(&Workflow{}, &WorkflowList{})
 }
