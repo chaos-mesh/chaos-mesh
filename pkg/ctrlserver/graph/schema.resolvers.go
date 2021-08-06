@@ -93,12 +93,40 @@ func (r *attrOverrideSpecResolver) Rdev(ctx context.Context, obj *v1alpha1.AttrO
 	return &rdev, nil
 }
 
+func (r *bandwidthSpecResolver) Limit(ctx context.Context, obj *v1alpha1.BandwidthSpec) (int, error) {
+	return int(obj.Limit), nil
+}
+
+func (r *bandwidthSpecResolver) Buffer(ctx context.Context, obj *v1alpha1.BandwidthSpec) (int, error) {
+	return int(obj.Buffer), nil
+}
+
+func (r *bandwidthSpecResolver) Peakrate(ctx context.Context, obj *v1alpha1.BandwidthSpec) (*int, error) {
+	if obj.Peakrate == nil {
+		return nil, nil
+	}
+	value := int(*obj.Peakrate)
+	return &value, nil
+}
+
+func (r *bandwidthSpecResolver) Minburst(ctx context.Context, obj *v1alpha1.BandwidthSpec) (*int, error) {
+	if obj.Minburst == nil {
+		return nil, nil
+	}
+	value := int(*obj.Minburst)
+	return &value, nil
+}
+
 func (r *chaosConditionResolver) Type(ctx context.Context, obj *v1alpha1.ChaosCondition) (string, error) {
 	return string(obj.Type), nil
 }
 
 func (r *chaosConditionResolver) Status(ctx context.Context, obj *v1alpha1.ChaosCondition) (string, error) {
 	return string(obj.Status), nil
+}
+
+func (r *corruptSpecResolver) Corrup(ctx context.Context, obj *v1alpha1.CorruptSpec) (string, error) {
+	return obj.Corrupt, nil
 }
 
 func (r *experimentStatusResolver) DesiredPhase(ctx context.Context, obj *v1alpha1.ExperimentStatus) (string, error) {
@@ -608,6 +636,18 @@ func (r *networkChaosResolver) Annotations(ctx context.Context, obj *v1alpha1.Ne
 	return annotations, nil
 }
 
+func (r *networkChaosResolver) Podnetworks(ctx context.Context, obj *v1alpha1.NetworkChaos) ([]*v1alpha1.PodNetworkChaos, error) {
+	podnetworks := make([]*v1alpha1.PodNetworkChaos, 0, len(obj.Status.Instances))
+	for id := range obj.Status.Instances {
+		podnetwork := new(v1alpha1.PodNetworkChaos)
+		if err := r.Client.Get(ctx, parseNamespacedName(id), podnetwork); err != nil {
+			return nil, err
+		}
+		podnetworks = append(podnetworks, podnetwork)
+	}
+	return podnetworks, nil
+}
+
 func (r *ownerReferenceResolver) UID(ctx context.Context, obj *v11.OwnerReference) (string, error) {
 	return string(obj.UID), nil
 }
@@ -818,6 +858,14 @@ func (r *podNetworkChaosResolver) Annotations(ctx context.Context, obj *v1alpha1
 	return annotations, nil
 }
 
+func (r *podNetworkChaosResolver) Pod(ctx context.Context, obj *v1alpha1.PodNetworkChaos) (*v1.Pod, error) {
+	pod := new(v1.Pod)
+	if err := r.Client.Get(ctx, types.NamespacedName{Namespace: obj.Namespace, Name: obj.Name}, pod); err != nil {
+		return nil, err
+	}
+	return pod, nil
+}
+
 func (r *podSelectorSpecResolver) Pods(ctx context.Context, obj *v1alpha1.PodSelectorSpec) (map[string]interface{}, error) {
 	pods := make(map[string]interface{})
 	for k, v := range obj.Pods {
@@ -862,6 +910,14 @@ func (r *queryResolver) Namepsace(ctx context.Context, ns string) (*model.Namesp
 	return &model.Namespace{Ns: ns}, nil
 }
 
+func (r *rawIptablesResolver) Direction(ctx context.Context, obj *v1alpha1.RawIptables) (string, error) {
+	return string(obj.Direction), nil
+}
+
+func (r *rawTrafficControlResolver) Type(ctx context.Context, obj *v1alpha1.RawTrafficControl) (string, error) {
+	return string(obj.Type), nil
+}
+
 func (r *recordResolver) Phase(ctx context.Context, obj *v1alpha1.Record) (string, error) {
 	return string(obj.Phase), nil
 }
@@ -899,10 +955,16 @@ func (r *Resolver) AttrOverrideSpec() generated.AttrOverrideSpecResolver {
 	return &attrOverrideSpecResolver{r}
 }
 
+// BandwidthSpec returns generated.BandwidthSpecResolver implementation.
+func (r *Resolver) BandwidthSpec() generated.BandwidthSpecResolver { return &bandwidthSpecResolver{r} }
+
 // ChaosCondition returns generated.ChaosConditionResolver implementation.
 func (r *Resolver) ChaosCondition() generated.ChaosConditionResolver {
 	return &chaosConditionResolver{r}
 }
+
+// CorruptSpec returns generated.CorruptSpecResolver implementation.
+func (r *Resolver) CorruptSpec() generated.CorruptSpecResolver { return &corruptSpecResolver{r} }
 
 // ExperimentStatus returns generated.ExperimentStatusResolver implementation.
 func (r *Resolver) ExperimentStatus() generated.ExperimentStatusResolver {
@@ -989,6 +1051,14 @@ func (r *Resolver) PodSelectorSpec() generated.PodSelectorSpecResolver {
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
+// RawIptables returns generated.RawIptablesResolver implementation.
+func (r *Resolver) RawIptables() generated.RawIptablesResolver { return &rawIptablesResolver{r} }
+
+// RawTrafficControl returns generated.RawTrafficControlResolver implementation.
+func (r *Resolver) RawTrafficControl() generated.RawTrafficControlResolver {
+	return &rawTrafficControlResolver{r}
+}
+
 // Record returns generated.RecordResolver implementation.
 func (r *Resolver) Record() generated.RecordResolver { return &recordResolver{r} }
 
@@ -996,7 +1066,9 @@ func (r *Resolver) Record() generated.RecordResolver { return &recordResolver{r}
 func (r *Resolver) StressChaos() generated.StressChaosResolver { return &stressChaosResolver{r} }
 
 type attrOverrideSpecResolver struct{ *Resolver }
+type bandwidthSpecResolver struct{ *Resolver }
 type chaosConditionResolver struct{ *Resolver }
+type corruptSpecResolver struct{ *Resolver }
 type experimentStatusResolver struct{ *Resolver }
 type hTTPChaosResolver struct{ *Resolver }
 type hTTPChaosSpecResolver struct{ *Resolver }
@@ -1020,5 +1092,7 @@ type podIOChaosResolver struct{ *Resolver }
 type podNetworkChaosResolver struct{ *Resolver }
 type podSelectorSpecResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+type rawIptablesResolver struct{ *Resolver }
+type rawTrafficControlResolver struct{ *Resolver }
 type recordResolver struct{ *Resolver }
 type stressChaosResolver struct{ *Resolver }

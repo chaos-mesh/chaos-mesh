@@ -42,7 +42,9 @@ type Config struct {
 
 type ResolverRoot interface {
 	AttrOverrideSpec() AttrOverrideSpecResolver
+	BandwidthSpec() BandwidthSpecResolver
 	ChaosCondition() ChaosConditionResolver
+	CorruptSpec() CorruptSpecResolver
 	ExperimentStatus() ExperimentStatusResolver
 	HTTPChaos() HTTPChaosResolver
 	HTTPChaosSpec() HTTPChaosSpecResolver
@@ -66,6 +68,8 @@ type ResolverRoot interface {
 	PodNetworkChaos() PodNetworkChaosResolver
 	PodSelectorSpec() PodSelectorSpecResolver
 	Query() QueryResolver
+	RawIptables() RawIptablesResolver
+	RawTrafficControl() RawTrafficControlResolver
 	Record() RecordResolver
 	StressChaos() StressChaosResolver
 }
@@ -89,10 +93,35 @@ type ComplexityRoot struct {
 		UID    func(childComplexity int) int
 	}
 
+	BandwidthSpec struct {
+		Buffer   func(childComplexity int) int
+		Limit    func(childComplexity int) int
+		Minburst func(childComplexity int) int
+		Peakrate func(childComplexity int) int
+		Rate     func(childComplexity int) int
+	}
+
 	ChaosCondition struct {
 		Reason func(childComplexity int) int
 		Status func(childComplexity int) int
 		Type   func(childComplexity int) int
+	}
+
+	CorruptSpec struct {
+		Correlation func(childComplexity int) int
+		Corrup      func(childComplexity int) int
+	}
+
+	DelaySpec struct {
+		Correlation func(childComplexity int) int
+		Jitter      func(childComplexity int) int
+		Latency     func(childComplexity int) int
+		Reorder     func(childComplexity int) int
+	}
+
+	DuplicateSpec struct {
+		Correlation func(childComplexity int) int
+		Duplicate   func(childComplexity int) int
 	}
 
 	ExperimentStatus struct {
@@ -228,6 +257,11 @@ type ComplexityRoot struct {
 		Pod       func(childComplexity int, ns string, name string) int
 	}
 
+	LossSpec struct {
+		Correlation func(childComplexity int) int
+		Loss        func(childComplexity int) int
+	}
+
 	MistakeSpec struct {
 		Filling        func(childComplexity int) int
 		MaxLength      func(childComplexity int) int
@@ -270,6 +304,7 @@ type ComplexityRoot struct {
 		Name                       func(childComplexity int) int
 		Namespace                  func(childComplexity int) int
 		OwnerReferences            func(childComplexity int) int
+		Podnetworks                func(childComplexity int) int
 		ResourceVersion            func(childComplexity int) int
 		SelfLink                   func(childComplexity int) int
 		UID                        func(childComplexity int) int
@@ -435,9 +470,23 @@ type ComplexityRoot struct {
 		Name                       func(childComplexity int) int
 		Namespace                  func(childComplexity int) int
 		OwnerReferences            func(childComplexity int) int
+		Pod                        func(childComplexity int) int
 		ResourceVersion            func(childComplexity int) int
 		SelfLink                   func(childComplexity int) int
+		Spec                       func(childComplexity int) int
+		Status                     func(childComplexity int) int
 		UID                        func(childComplexity int) int
+	}
+
+	PodNetworkChaosSpec struct {
+		IPSets          func(childComplexity int) int
+		Iptables        func(childComplexity int) int
+		TrafficControls func(childComplexity int) int
+	}
+
+	PodNetworkChaosStatus struct {
+		FailedMessage      func(childComplexity int) int
+		ObservedGeneration func(childComplexity int) int
 	}
 
 	PodSelectorSpec struct {
@@ -455,10 +504,40 @@ type ComplexityRoot struct {
 		Namepsace func(childComplexity int, ns string) int
 	}
 
+	RawIPSet struct {
+		Cidrs  func(childComplexity int) int
+		Name   func(childComplexity int) int
+		Source func(childComplexity int) int
+	}
+
+	RawIptables struct {
+		Direction func(childComplexity int) int
+		IPSets    func(childComplexity int) int
+		Name      func(childComplexity int) int
+		Source    func(childComplexity int) int
+	}
+
+	RawTrafficControl struct {
+		Bandwidth func(childComplexity int) int
+		Corrupt   func(childComplexity int) int
+		Delay     func(childComplexity int) int
+		Duplicate func(childComplexity int) int
+		IPSet     func(childComplexity int) int
+		Loss      func(childComplexity int) int
+		Source    func(childComplexity int) int
+		Type      func(childComplexity int) int
+	}
+
 	Record struct {
 		Id          func(childComplexity int) int
 		Phase       func(childComplexity int) int
 		SelectorKey func(childComplexity int) int
+	}
+
+	ReorderSpec struct {
+		Correlation func(childComplexity int) int
+		Gap         func(childComplexity int) int
+		Reorder     func(childComplexity int) int
 	}
 
 	StressChaos struct {
@@ -499,9 +578,18 @@ type AttrOverrideSpecResolver interface {
 	Gid(ctx context.Context, obj *v1alpha1.AttrOverrideSpec) (*int, error)
 	Rdev(ctx context.Context, obj *v1alpha1.AttrOverrideSpec) (*int, error)
 }
+type BandwidthSpecResolver interface {
+	Limit(ctx context.Context, obj *v1alpha1.BandwidthSpec) (int, error)
+	Buffer(ctx context.Context, obj *v1alpha1.BandwidthSpec) (int, error)
+	Peakrate(ctx context.Context, obj *v1alpha1.BandwidthSpec) (*int, error)
+	Minburst(ctx context.Context, obj *v1alpha1.BandwidthSpec) (*int, error)
+}
 type ChaosConditionResolver interface {
 	Type(ctx context.Context, obj *v1alpha1.ChaosCondition) (string, error)
 	Status(ctx context.Context, obj *v1alpha1.ChaosCondition) (string, error)
+}
+type CorruptSpecResolver interface {
+	Corrup(ctx context.Context, obj *v1alpha1.CorruptSpec) (string, error)
 }
 type ExperimentStatusResolver interface {
 	DesiredPhase(ctx context.Context, obj *v1alpha1.ExperimentStatus) (string, error)
@@ -605,6 +693,8 @@ type NetworkChaosResolver interface {
 
 	Labels(ctx context.Context, obj *v1alpha1.NetworkChaos) (map[string]interface{}, error)
 	Annotations(ctx context.Context, obj *v1alpha1.NetworkChaos) (map[string]interface{}, error)
+
+	Podnetworks(ctx context.Context, obj *v1alpha1.NetworkChaos) ([]*v1alpha1.PodNetworkChaos, error)
 }
 type OwnerReferenceResolver interface {
 	UID(ctx context.Context, obj *v11.OwnerReference) (string, error)
@@ -663,6 +753,8 @@ type PodNetworkChaosResolver interface {
 
 	Labels(ctx context.Context, obj *v1alpha1.PodNetworkChaos) (map[string]interface{}, error)
 	Annotations(ctx context.Context, obj *v1alpha1.PodNetworkChaos) (map[string]interface{}, error)
+
+	Pod(ctx context.Context, obj *v1alpha1.PodNetworkChaos) (*v1.Pod, error)
 }
 type PodSelectorSpecResolver interface {
 	Pods(ctx context.Context, obj *v1alpha1.PodSelectorSpec) (map[string]interface{}, error)
@@ -673,6 +765,12 @@ type PodSelectorSpecResolver interface {
 }
 type QueryResolver interface {
 	Namepsace(ctx context.Context, ns string) (*model.Namespace, error)
+}
+type RawIptablesResolver interface {
+	Direction(ctx context.Context, obj *v1alpha1.RawIptables) (string, error)
+}
+type RawTrafficControlResolver interface {
+	Type(ctx context.Context, obj *v1alpha1.RawTrafficControl) (string, error)
 }
 type RecordResolver interface {
 	Phase(ctx context.Context, obj *v1alpha1.Record) (string, error)
@@ -786,6 +884,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.AttrOverrideSpec.UID(childComplexity), true
 
+	case "BandwidthSpec.buffer":
+		if e.complexity.BandwidthSpec.Buffer == nil {
+			break
+		}
+
+		return e.complexity.BandwidthSpec.Buffer(childComplexity), true
+
+	case "BandwidthSpec.limit":
+		if e.complexity.BandwidthSpec.Limit == nil {
+			break
+		}
+
+		return e.complexity.BandwidthSpec.Limit(childComplexity), true
+
+	case "BandwidthSpec.minburst":
+		if e.complexity.BandwidthSpec.Minburst == nil {
+			break
+		}
+
+		return e.complexity.BandwidthSpec.Minburst(childComplexity), true
+
+	case "BandwidthSpec.peakrate":
+		if e.complexity.BandwidthSpec.Peakrate == nil {
+			break
+		}
+
+		return e.complexity.BandwidthSpec.Peakrate(childComplexity), true
+
+	case "BandwidthSpec.rate":
+		if e.complexity.BandwidthSpec.Rate == nil {
+			break
+		}
+
+		return e.complexity.BandwidthSpec.Rate(childComplexity), true
+
 	case "ChaosCondition.reason":
 		if e.complexity.ChaosCondition.Reason == nil {
 			break
@@ -806,6 +939,62 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ChaosCondition.Type(childComplexity), true
+
+	case "CorruptSpec.correlation":
+		if e.complexity.CorruptSpec.Correlation == nil {
+			break
+		}
+
+		return e.complexity.CorruptSpec.Correlation(childComplexity), true
+
+	case "CorruptSpec.corrup":
+		if e.complexity.CorruptSpec.Corrup == nil {
+			break
+		}
+
+		return e.complexity.CorruptSpec.Corrup(childComplexity), true
+
+	case "DelaySpec.correlation":
+		if e.complexity.DelaySpec.Correlation == nil {
+			break
+		}
+
+		return e.complexity.DelaySpec.Correlation(childComplexity), true
+
+	case "DelaySpec.jitter":
+		if e.complexity.DelaySpec.Jitter == nil {
+			break
+		}
+
+		return e.complexity.DelaySpec.Jitter(childComplexity), true
+
+	case "DelaySpec.latency":
+		if e.complexity.DelaySpec.Latency == nil {
+			break
+		}
+
+		return e.complexity.DelaySpec.Latency(childComplexity), true
+
+	case "DelaySpec.reorder":
+		if e.complexity.DelaySpec.Reorder == nil {
+			break
+		}
+
+		return e.complexity.DelaySpec.Reorder(childComplexity), true
+
+	case "DuplicateSpec.correlation":
+		if e.complexity.DuplicateSpec.Correlation == nil {
+			break
+		}
+
+		return e.complexity.DuplicateSpec.Correlation(childComplexity), true
+
+	case "DuplicateSpec.duplicate":
+		if e.complexity.DuplicateSpec.Duplicate == nil {
+			break
+		}
+
+		return e.complexity.DuplicateSpec.Duplicate(childComplexity), true
 
 	case "ExperimentStatus.desiredPhase":
 		if e.complexity.ExperimentStatus.DesiredPhase == nil {
@@ -1538,6 +1727,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Logger.Pod(childComplexity, args["ns"].(string), args["name"].(string)), true
 
+	case "LossSpec.correlation":
+		if e.complexity.LossSpec.Correlation == nil {
+			break
+		}
+
+		return e.complexity.LossSpec.Correlation(childComplexity), true
+
+	case "LossSpec.loss":
+		if e.complexity.LossSpec.Loss == nil {
+			break
+		}
+
+		return e.complexity.LossSpec.Loss(childComplexity), true
+
 	case "MistakeSpec.filling":
 		if e.complexity.MistakeSpec.Filling == nil {
 			break
@@ -1827,6 +2030,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.NetworkChaos.OwnerReferences(childComplexity), true
+
+	case "NetworkChaos.podnetworks":
+		if e.complexity.NetworkChaos.Podnetworks == nil {
+			break
+		}
+
+		return e.complexity.NetworkChaos.Podnetworks(childComplexity), true
 
 	case "NetworkChaos.resourceVersion":
 		if e.complexity.NetworkChaos.ResourceVersion == nil {
@@ -2668,6 +2878,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.PodNetworkChaos.OwnerReferences(childComplexity), true
 
+	case "PodNetworkChaos.pod":
+		if e.complexity.PodNetworkChaos.Pod == nil {
+			break
+		}
+
+		return e.complexity.PodNetworkChaos.Pod(childComplexity), true
+
 	case "PodNetworkChaos.resourceVersion":
 		if e.complexity.PodNetworkChaos.ResourceVersion == nil {
 			break
@@ -2682,12 +2899,61 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.PodNetworkChaos.SelfLink(childComplexity), true
 
+	case "PodNetworkChaos.spec":
+		if e.complexity.PodNetworkChaos.Spec == nil {
+			break
+		}
+
+		return e.complexity.PodNetworkChaos.Spec(childComplexity), true
+
+	case "PodNetworkChaos.status":
+		if e.complexity.PodNetworkChaos.Status == nil {
+			break
+		}
+
+		return e.complexity.PodNetworkChaos.Status(childComplexity), true
+
 	case "PodNetworkChaos.uid":
 		if e.complexity.PodNetworkChaos.UID == nil {
 			break
 		}
 
 		return e.complexity.PodNetworkChaos.UID(childComplexity), true
+
+	case "PodNetworkChaosSpec.ipSets":
+		if e.complexity.PodNetworkChaosSpec.IPSets == nil {
+			break
+		}
+
+		return e.complexity.PodNetworkChaosSpec.IPSets(childComplexity), true
+
+	case "PodNetworkChaosSpec.iptables":
+		if e.complexity.PodNetworkChaosSpec.Iptables == nil {
+			break
+		}
+
+		return e.complexity.PodNetworkChaosSpec.Iptables(childComplexity), true
+
+	case "PodNetworkChaosSpec.trafficControls":
+		if e.complexity.PodNetworkChaosSpec.TrafficControls == nil {
+			break
+		}
+
+		return e.complexity.PodNetworkChaosSpec.TrafficControls(childComplexity), true
+
+	case "PodNetworkChaosStatus.failedMessage":
+		if e.complexity.PodNetworkChaosStatus.FailedMessage == nil {
+			break
+		}
+
+		return e.complexity.PodNetworkChaosStatus.FailedMessage(childComplexity), true
+
+	case "PodNetworkChaosStatus.observedGeneration":
+		if e.complexity.PodNetworkChaosStatus.ObservedGeneration == nil {
+			break
+		}
+
+		return e.complexity.PodNetworkChaosStatus.ObservedGeneration(childComplexity), true
 
 	case "PodSelectorSpec.annotationSelectors":
 		if e.complexity.PodSelectorSpec.AnnotationSelectors == nil {
@@ -2757,6 +3023,111 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Namepsace(childComplexity, args["ns"].(string)), true
 
+	case "RawIPSet.cidrs":
+		if e.complexity.RawIPSet.Cidrs == nil {
+			break
+		}
+
+		return e.complexity.RawIPSet.Cidrs(childComplexity), true
+
+	case "RawIPSet.name":
+		if e.complexity.RawIPSet.Name == nil {
+			break
+		}
+
+		return e.complexity.RawIPSet.Name(childComplexity), true
+
+	case "RawIPSet.source":
+		if e.complexity.RawIPSet.Source == nil {
+			break
+		}
+
+		return e.complexity.RawIPSet.Source(childComplexity), true
+
+	case "RawIptables.direction":
+		if e.complexity.RawIptables.Direction == nil {
+			break
+		}
+
+		return e.complexity.RawIptables.Direction(childComplexity), true
+
+	case "RawIptables.ipSets":
+		if e.complexity.RawIptables.IPSets == nil {
+			break
+		}
+
+		return e.complexity.RawIptables.IPSets(childComplexity), true
+
+	case "RawIptables.name":
+		if e.complexity.RawIptables.Name == nil {
+			break
+		}
+
+		return e.complexity.RawIptables.Name(childComplexity), true
+
+	case "RawIptables.source":
+		if e.complexity.RawIptables.Source == nil {
+			break
+		}
+
+		return e.complexity.RawIptables.Source(childComplexity), true
+
+	case "RawTrafficControl.Bandwidth":
+		if e.complexity.RawTrafficControl.Bandwidth == nil {
+			break
+		}
+
+		return e.complexity.RawTrafficControl.Bandwidth(childComplexity), true
+
+	case "RawTrafficControl.corrupt":
+		if e.complexity.RawTrafficControl.Corrupt == nil {
+			break
+		}
+
+		return e.complexity.RawTrafficControl.Corrupt(childComplexity), true
+
+	case "RawTrafficControl.delay":
+		if e.complexity.RawTrafficControl.Delay == nil {
+			break
+		}
+
+		return e.complexity.RawTrafficControl.Delay(childComplexity), true
+
+	case "RawTrafficControl.duplicate":
+		if e.complexity.RawTrafficControl.Duplicate == nil {
+			break
+		}
+
+		return e.complexity.RawTrafficControl.Duplicate(childComplexity), true
+
+	case "RawTrafficControl.ipSet":
+		if e.complexity.RawTrafficControl.IPSet == nil {
+			break
+		}
+
+		return e.complexity.RawTrafficControl.IPSet(childComplexity), true
+
+	case "RawTrafficControl.loss":
+		if e.complexity.RawTrafficControl.Loss == nil {
+			break
+		}
+
+		return e.complexity.RawTrafficControl.Loss(childComplexity), true
+
+	case "RawTrafficControl.source":
+		if e.complexity.RawTrafficControl.Source == nil {
+			break
+		}
+
+		return e.complexity.RawTrafficControl.Source(childComplexity), true
+
+	case "RawTrafficControl.type":
+		if e.complexity.RawTrafficControl.Type == nil {
+			break
+		}
+
+		return e.complexity.RawTrafficControl.Type(childComplexity), true
+
 	case "Record.id":
 		if e.complexity.Record.Id == nil {
 			break
@@ -2777,6 +3148,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Record.SelectorKey(childComplexity), true
+
+	case "ReorderSpec.correlation":
+		if e.complexity.ReorderSpec.Correlation == nil {
+			break
+		}
+
+		return e.complexity.ReorderSpec.Correlation(childComplexity), true
+
+	case "ReorderSpec.gap":
+		if e.complexity.ReorderSpec.Gap == nil {
+			break
+		}
+
+		return e.complexity.ReorderSpec.Gap(childComplexity), true
+
+	case "ReorderSpec.reorder":
+		if e.complexity.ReorderSpec.Reorder == nil {
+			break
+		}
+
+		return e.complexity.ReorderSpec.Reorder(childComplexity), true
 
 	case "StressChaos.apiVersion":
 		if e.complexity.StressChaos.APIVersion == nil {
@@ -3613,6 +4005,140 @@ type PodNetworkChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alp
     ownerReferences: [OwnerReference!]
     finalizers: [String!]
     clusterName: String!
+
+	spec: PodNetworkChaosSpec!
+	status: PodNetworkChaosStatus!
+
+	pod: Pod!       @goField(forceResolver: true)
+}
+
+# PodNetworkChaosSpec defines the desired state of PodNetworkChaos
+type PodNetworkChaosSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodNetworkChaosSpec") {
+	# The ipset on the pod
+	ipSets: [RawIPSet!]
+
+	# The iptables rules on the pod
+	iptables: [RawIptables!]
+
+	# The tc rules on the pod
+	trafficControls: [RawTrafficControl!]
+}
+
+# PodNetworkChaosStatus defines the observed state of PodNetworkChaos
+type PodNetworkChaosStatus @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodNetworkChaosStatus") {
+	failedMessage: String!
+	observedGeneration: Int!
+}
+
+# RawIPSet represents an ipset on specific pod
+type RawIPSet @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.RawIPSet") {
+	# The name of ipset
+	name: String!
+
+	# The contents of ipset
+	cidrs: [String!]!
+
+	# The name and namespace of the source network chaos
+	source: String!
+}
+
+# RawIptables represents the iptables rules on specific pod
+type RawIptables @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.RawIptables") {
+	# The name of iptables chain
+	name: String!
+
+	# The name of related ipset
+	ipSets: [String!]!
+
+	# The block direction of this iptables rule
+	direction: String!
+
+	# The name and namespace of the source network chaos
+	source: String!
+}
+
+# RawTrafficControl represents the traffic control chaos on specific pod
+type RawTrafficControl @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.RawTrafficControl") {
+	# The type of traffic control
+	type: String!
+
+	# delay represents the detail about delay action
+	delay: DelaySpec
+
+	# loss represents the detail about loss action
+	loss: LossSpec
+
+	# duplicateSpec represents the detail about loss action
+	duplicate: DuplicateSpec
+
+	# corrupt represents the detail about corrupt action
+	corrupt: CorruptSpec
+
+	# bandwidth represents the detail about bandwidth control action
+	Bandwidth: BandwidthSpec
+
+	# The name of target ipset
+	ipSet: String
+
+	# The name and namespace of the source network chaos
+	source: String
+}
+
+# DelaySpec defines detail of a delay action
+type DelaySpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.DelaySpec") {
+	latency: String!
+	correlation: String
+	jitter: String
+	reorder: ReorderSpec
+}
+
+# LossSpec defines detail of a loss action
+type LossSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.LossSpec") {
+	loss: String!
+	correlation: String
+}
+
+# DuplicateSpec defines detail of a duplicate action
+type DuplicateSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.DuplicateSpec") {
+	duplicate: String!
+	correlation: String
+}
+
+# CorruptSpec defines detail of a corrupt action
+type CorruptSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.CorruptSpec") {
+	corrup: String!
+	correlation: String
+}
+
+# BandwidthSpec defines detail of bandwidth limit.
+type BandwidthSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.BandwidthSpec") {
+	# rate is the speed knob. Allows bps, kbps, mbps, gbps, tbps unit. bps means bytes per second.
+	rate: String!
+
+	# limit is the number of bytes that can be queued waiting for tokens to become available.
+	limit: Int!
+
+	# buffer is the maximum amount of bytes that tokens can be available for instantaneously.
+	buffer: Int!
+
+	# peakrate is the maximum depletion rate of the bucket.
+	# The peakrate does not need to be set, it is only necessary
+	# if perfect millisecond timescale shaping is required.
+	peakrate: Int
+
+	# minburst specifies the size of the peakrate bucket. For perfect
+	# accuracy, should be set to the MTU of the interface.  If a
+	# peakrate is needed, but some burstiness is acceptable, this
+	# size can be raised. A 3000 byte minburst allows around 3mbit/s
+	# of peakrate, given 1000 byte packets.
+	minburst: Int
+}
+
+# ReorderSpec defines details of packet reorder.
+type ReorderSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.ReorderSpec") {
+	reorder: String!
+	correlation: String
+	gap: Int
 }
 
 type NetworkChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.NetworkChaos") {
@@ -3633,6 +4159,8 @@ type NetworkChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1
     ownerReferences: [OwnerReference!]
     finalizers: [String!]
     clusterName: String!
+
+	podnetworks: [PodNetworkChaos!]	@goField(forceResolver: true)
 }
 
 type StressChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.StressChaos") {
@@ -4297,6 +4825,175 @@ func (ec *executionContext) _AttrOverrideSpec_rdev(ctx context.Context, field gr
 	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _BandwidthSpec_rate(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.BandwidthSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "BandwidthSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Rate, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _BandwidthSpec_limit(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.BandwidthSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "BandwidthSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.BandwidthSpec().Limit(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _BandwidthSpec_buffer(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.BandwidthSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "BandwidthSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.BandwidthSpec().Buffer(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _BandwidthSpec_peakrate(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.BandwidthSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "BandwidthSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.BandwidthSpec().Peakrate(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _BandwidthSpec_minburst(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.BandwidthSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "BandwidthSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.BandwidthSpec().Minburst(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _ChaosCondition_type(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.ChaosCondition) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -4386,6 +5083,271 @@ func (ec *executionContext) _ChaosCondition_reason(ctx context.Context, field gr
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Reason, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _CorruptSpec_corrup(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.CorruptSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "CorruptSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.CorruptSpec().Corrup(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _CorruptSpec_correlation(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.CorruptSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "CorruptSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Correlation, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DelaySpec_latency(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.DelaySpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DelaySpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Latency, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DelaySpec_correlation(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.DelaySpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DelaySpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Correlation, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DelaySpec_jitter(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.DelaySpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DelaySpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Jitter, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DelaySpec_reorder(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.DelaySpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DelaySpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Reorder, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v1alpha1.ReorderSpec)
+	fc.Result = res
+	return ec.marshalOReorderSpec2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐReorderSpec(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DuplicateSpec_duplicate(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.DuplicateSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DuplicateSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Duplicate, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DuplicateSpec_correlation(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.DuplicateSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DuplicateSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Correlation, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -7852,6 +8814,73 @@ func (ec *executionContext) _Logger_pod(ctx context.Context, field graphql.Colle
 	}
 }
 
+func (ec *executionContext) _LossSpec_loss(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.LossSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "LossSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Loss, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _LossSpec_correlation(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.LossSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "LossSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Correlation, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _MistakeSpec_filling(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.MistakeSpec) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -9189,6 +10218,38 @@ func (ec *executionContext) _NetworkChaos_clusterName(ctx context.Context, field
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _NetworkChaos_podnetworks(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.NetworkChaos) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "NetworkChaos",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.NetworkChaos().Podnetworks(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*v1alpha1.PodNetworkChaos)
+	fc.Result = res
+	return ec.marshalOPodNetworkChaos2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodNetworkChaosᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _OwnerReference_kind(ctx context.Context, field graphql.CollectedField, obj *v11.OwnerReference) (ret graphql.Marshaler) {
@@ -13223,6 +14284,277 @@ func (ec *executionContext) _PodNetworkChaos_clusterName(ctx context.Context, fi
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _PodNetworkChaos_spec(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodNetworkChaos) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodNetworkChaos",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Spec, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(v1alpha1.PodNetworkChaosSpec)
+	fc.Result = res
+	return ec.marshalNPodNetworkChaosSpec2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodNetworkChaosSpec(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodNetworkChaos_status(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodNetworkChaos) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodNetworkChaos",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Status, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(v1alpha1.PodNetworkChaosStatus)
+	fc.Result = res
+	return ec.marshalNPodNetworkChaosStatus2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodNetworkChaosStatus(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodNetworkChaos_pod(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodNetworkChaos) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodNetworkChaos",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.PodNetworkChaos().Pod(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*v1.Pod)
+	fc.Result = res
+	return ec.marshalNPod2ᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐPod(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodNetworkChaosSpec_ipSets(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodNetworkChaosSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodNetworkChaosSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IPSets, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]v1alpha1.RawIPSet)
+	fc.Result = res
+	return ec.marshalORawIPSet2ᚕgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐRawIPSetᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodNetworkChaosSpec_iptables(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodNetworkChaosSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodNetworkChaosSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Iptables, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]v1alpha1.RawIptables)
+	fc.Result = res
+	return ec.marshalORawIptables2ᚕgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐRawIptablesᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodNetworkChaosSpec_trafficControls(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodNetworkChaosSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodNetworkChaosSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TrafficControls, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]v1alpha1.RawTrafficControl)
+	fc.Result = res
+	return ec.marshalORawTrafficControl2ᚕgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐRawTrafficControlᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodNetworkChaosStatus_failedMessage(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodNetworkChaosStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodNetworkChaosStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.FailedMessage, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodNetworkChaosStatus_observedGeneration(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodNetworkChaosStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodNetworkChaosStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ObservedGeneration, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int64)
+	fc.Result = res
+	return ec.marshalNInt2int64(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _PodSelectorSpec_namespaces(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodSelectorSpec) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -13592,6 +14924,510 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 	return ec.marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _RawIPSet_name(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.RawIPSet) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "RawIPSet",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RawIPSet_cidrs(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.RawIPSet) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "RawIPSet",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Cidrs, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	fc.Result = res
+	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RawIPSet_source(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.RawIPSet) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "RawIPSet",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Source, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RawIptables_name(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.RawIptables) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "RawIptables",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RawIptables_ipSets(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.RawIptables) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "RawIptables",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IPSets, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	fc.Result = res
+	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RawIptables_direction(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.RawIptables) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "RawIptables",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.RawIptables().Direction(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RawIptables_source(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.RawIptables) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "RawIptables",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Source, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RawTrafficControl_type(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.RawTrafficControl) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "RawTrafficControl",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.RawTrafficControl().Type(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RawTrafficControl_delay(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.RawTrafficControl) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "RawTrafficControl",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Delay, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v1alpha1.DelaySpec)
+	fc.Result = res
+	return ec.marshalODelaySpec2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐDelaySpec(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RawTrafficControl_loss(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.RawTrafficControl) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "RawTrafficControl",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Loss, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v1alpha1.LossSpec)
+	fc.Result = res
+	return ec.marshalOLossSpec2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐLossSpec(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RawTrafficControl_duplicate(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.RawTrafficControl) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "RawTrafficControl",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Duplicate, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v1alpha1.DuplicateSpec)
+	fc.Result = res
+	return ec.marshalODuplicateSpec2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐDuplicateSpec(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RawTrafficControl_corrupt(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.RawTrafficControl) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "RawTrafficControl",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Corrupt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v1alpha1.CorruptSpec)
+	fc.Result = res
+	return ec.marshalOCorruptSpec2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐCorruptSpec(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RawTrafficControl_Bandwidth(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.RawTrafficControl) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "RawTrafficControl",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Bandwidth, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v1alpha1.BandwidthSpec)
+	fc.Result = res
+	return ec.marshalOBandwidthSpec2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐBandwidthSpec(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RawTrafficControl_ipSet(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.RawTrafficControl) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "RawTrafficControl",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IPSet, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RawTrafficControl_source(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.RawTrafficControl) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "RawTrafficControl",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Source, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Record_id(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.Record) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -13695,6 +15531,105 @@ func (ec *executionContext) _Record_phase(ctx context.Context, field graphql.Col
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ReorderSpec_reorder(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.ReorderSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ReorderSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Reorder, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ReorderSpec_correlation(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.ReorderSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ReorderSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Correlation, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ReorderSpec_gap(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.ReorderSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ReorderSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Gap, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalOInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _StressChaos_kind(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.StressChaos) (ret graphql.Marshaler) {
@@ -15566,6 +17501,83 @@ func (ec *executionContext) _AttrOverrideSpec(ctx context.Context, sel ast.Selec
 	return out
 }
 
+var bandwidthSpecImplementors = []string{"BandwidthSpec"}
+
+func (ec *executionContext) _BandwidthSpec(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.BandwidthSpec) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, bandwidthSpecImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("BandwidthSpec")
+		case "rate":
+			out.Values[i] = ec._BandwidthSpec_rate(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "limit":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._BandwidthSpec_limit(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "buffer":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._BandwidthSpec_buffer(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "peakrate":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._BandwidthSpec_peakrate(ctx, field, obj)
+				return res
+			})
+		case "minburst":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._BandwidthSpec_minburst(ctx, field, obj)
+				return res
+			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var chaosConditionImplementors = []string{"ChaosCondition"}
 
 func (ec *executionContext) _ChaosCondition(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.ChaosCondition) graphql.Marshaler {
@@ -15607,6 +17619,106 @@ func (ec *executionContext) _ChaosCondition(ctx context.Context, sel ast.Selecti
 			})
 		case "reason":
 			out.Values[i] = ec._ChaosCondition_reason(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var corruptSpecImplementors = []string{"CorruptSpec"}
+
+func (ec *executionContext) _CorruptSpec(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.CorruptSpec) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, corruptSpecImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("CorruptSpec")
+		case "corrup":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._CorruptSpec_corrup(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "correlation":
+			out.Values[i] = ec._CorruptSpec_correlation(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var delaySpecImplementors = []string{"DelaySpec"}
+
+func (ec *executionContext) _DelaySpec(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.DelaySpec) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, delaySpecImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("DelaySpec")
+		case "latency":
+			out.Values[i] = ec._DelaySpec_latency(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "correlation":
+			out.Values[i] = ec._DelaySpec_correlation(ctx, field, obj)
+		case "jitter":
+			out.Values[i] = ec._DelaySpec_jitter(ctx, field, obj)
+		case "reorder":
+			out.Values[i] = ec._DelaySpec_reorder(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var duplicateSpecImplementors = []string{"DuplicateSpec"}
+
+func (ec *executionContext) _DuplicateSpec(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.DuplicateSpec) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, duplicateSpecImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("DuplicateSpec")
+		case "duplicate":
+			out.Values[i] = ec._DuplicateSpec_duplicate(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "correlation":
+			out.Values[i] = ec._DuplicateSpec_correlation(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -16481,6 +18593,35 @@ func (ec *executionContext) _Logger(ctx context.Context, sel ast.SelectionSet) f
 	}
 }
 
+var lossSpecImplementors = []string{"LossSpec"}
+
+func (ec *executionContext) _LossSpec(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.LossSpec) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, lossSpecImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("LossSpec")
+		case "loss":
+			out.Values[i] = ec._LossSpec_loss(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "correlation":
+			out.Values[i] = ec._LossSpec_correlation(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var mistakeSpecImplementors = []string{"MistakeSpec"}
 
 func (ec *executionContext) _MistakeSpec(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.MistakeSpec) graphql.Marshaler {
@@ -16879,6 +19020,17 @@ func (ec *executionContext) _NetworkChaos(ctx context.Context, sel ast.Selection
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
+		case "podnetworks":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._NetworkChaos_podnetworks(ctx, field, obj)
+				return res
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -17920,6 +20072,90 @@ func (ec *executionContext) _PodNetworkChaos(ctx context.Context, sel ast.Select
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
+		case "spec":
+			out.Values[i] = ec._PodNetworkChaos_spec(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "status":
+			out.Values[i] = ec._PodNetworkChaos_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "pod":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._PodNetworkChaos_pod(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var podNetworkChaosSpecImplementors = []string{"PodNetworkChaosSpec"}
+
+func (ec *executionContext) _PodNetworkChaosSpec(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.PodNetworkChaosSpec) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, podNetworkChaosSpecImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PodNetworkChaosSpec")
+		case "ipSets":
+			out.Values[i] = ec._PodNetworkChaosSpec_ipSets(ctx, field, obj)
+		case "iptables":
+			out.Values[i] = ec._PodNetworkChaosSpec_iptables(ctx, field, obj)
+		case "trafficControls":
+			out.Values[i] = ec._PodNetworkChaosSpec_trafficControls(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var podNetworkChaosStatusImplementors = []string{"PodNetworkChaosStatus"}
+
+func (ec *executionContext) _PodNetworkChaosStatus(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.PodNetworkChaosStatus) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, podNetworkChaosStatusImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PodNetworkChaosStatus")
+		case "failedMessage":
+			out.Values[i] = ec._PodNetworkChaosStatus_failedMessage(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "observedGeneration":
+			out.Values[i] = ec._PodNetworkChaosStatus_observedGeneration(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -18058,6 +20294,144 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 	return out
 }
 
+var rawIPSetImplementors = []string{"RawIPSet"}
+
+func (ec *executionContext) _RawIPSet(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.RawIPSet) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, rawIPSetImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("RawIPSet")
+		case "name":
+			out.Values[i] = ec._RawIPSet_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "cidrs":
+			out.Values[i] = ec._RawIPSet_cidrs(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "source":
+			out.Values[i] = ec._RawIPSet_source(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var rawIptablesImplementors = []string{"RawIptables"}
+
+func (ec *executionContext) _RawIptables(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.RawIptables) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, rawIptablesImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("RawIptables")
+		case "name":
+			out.Values[i] = ec._RawIptables_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "ipSets":
+			out.Values[i] = ec._RawIptables_ipSets(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "direction":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._RawIptables_direction(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "source":
+			out.Values[i] = ec._RawIptables_source(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var rawTrafficControlImplementors = []string{"RawTrafficControl"}
+
+func (ec *executionContext) _RawTrafficControl(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.RawTrafficControl) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, rawTrafficControlImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("RawTrafficControl")
+		case "type":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._RawTrafficControl_type(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "delay":
+			out.Values[i] = ec._RawTrafficControl_delay(ctx, field, obj)
+		case "loss":
+			out.Values[i] = ec._RawTrafficControl_loss(ctx, field, obj)
+		case "duplicate":
+			out.Values[i] = ec._RawTrafficControl_duplicate(ctx, field, obj)
+		case "corrupt":
+			out.Values[i] = ec._RawTrafficControl_corrupt(ctx, field, obj)
+		case "Bandwidth":
+			out.Values[i] = ec._RawTrafficControl_Bandwidth(ctx, field, obj)
+		case "ipSet":
+			out.Values[i] = ec._RawTrafficControl_ipSet(ctx, field, obj)
+		case "source":
+			out.Values[i] = ec._RawTrafficControl_source(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var recordImplementors = []string{"Record"}
 
 func (ec *executionContext) _Record(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.Record) graphql.Marshaler {
@@ -18093,6 +20467,37 @@ func (ec *executionContext) _Record(ctx context.Context, sel ast.SelectionSet, o
 				}
 				return res
 			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var reorderSpecImplementors = []string{"ReorderSpec"}
+
+func (ec *executionContext) _ReorderSpec(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.ReorderSpec) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, reorderSpecImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ReorderSpec")
+		case "reorder":
+			out.Values[i] = ec._ReorderSpec_reorder(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "correlation":
+			out.Values[i] = ec._ReorderSpec_correlation(ctx, field, obj)
+		case "gap":
+			out.Values[i] = ec._ReorderSpec_gap(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -18794,8 +21199,28 @@ func (ec *executionContext) marshalNPodNetworkChaos2ᚖgithubᚗcomᚋchaosᚑme
 	return ec._PodNetworkChaos(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNPodNetworkChaosSpec2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodNetworkChaosSpec(ctx context.Context, sel ast.SelectionSet, v v1alpha1.PodNetworkChaosSpec) graphql.Marshaler {
+	return ec._PodNetworkChaosSpec(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNPodNetworkChaosStatus2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodNetworkChaosStatus(ctx context.Context, sel ast.SelectionSet, v v1alpha1.PodNetworkChaosStatus) graphql.Marshaler {
+	return ec._PodNetworkChaosStatus(ctx, sel, &v)
+}
+
 func (ec *executionContext) marshalNPodSelectorSpec2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodSelectorSpec(ctx context.Context, sel ast.SelectionSet, v v1alpha1.PodSelectorSpec) graphql.Marshaler {
 	return ec._PodSelectorSpec(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNRawIPSet2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐRawIPSet(ctx context.Context, sel ast.SelectionSet, v v1alpha1.RawIPSet) graphql.Marshaler {
+	return ec._RawIPSet(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNRawIptables2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐRawIptables(ctx context.Context, sel ast.SelectionSet, v v1alpha1.RawIptables) graphql.Marshaler {
+	return ec._RawIptables(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNRawTrafficControl2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐRawTrafficControl(ctx context.Context, sel ast.SelectionSet, v v1alpha1.RawTrafficControl) graphql.Marshaler {
+	return ec._RawTrafficControl(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNRecord2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐRecord(ctx context.Context, sel ast.SelectionSet, v *v1alpha1.Record) graphql.Marshaler {
@@ -19139,6 +21564,13 @@ func (ec *executionContext) marshalOAttrOverrideSpec2ᚖgithubᚗcomᚋchaosᚑm
 	return ec._AttrOverrideSpec(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalOBandwidthSpec2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐBandwidthSpec(ctx context.Context, sel ast.SelectionSet, v *v1alpha1.BandwidthSpec) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._BandwidthSpec(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
 	res, err := graphql.UnmarshalBoolean(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -19201,6 +21633,27 @@ func (ec *executionContext) marshalOChaosCondition2ᚕgithubᚗcomᚋchaosᚑmes
 	}
 	wg.Wait()
 	return ret
+}
+
+func (ec *executionContext) marshalOCorruptSpec2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐCorruptSpec(ctx context.Context, sel ast.SelectionSet, v *v1alpha1.CorruptSpec) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._CorruptSpec(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalODelaySpec2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐDelaySpec(ctx context.Context, sel ast.SelectionSet, v *v1alpha1.DelaySpec) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._DelaySpec(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalODuplicateSpec2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐDuplicateSpec(ctx context.Context, sel ast.SelectionSet, v *v1alpha1.DuplicateSpec) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._DuplicateSpec(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOExperimentStatus2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐExperimentStatus(ctx context.Context, sel ast.SelectionSet, v v1alpha1.ExperimentStatus) graphql.Marshaler {
@@ -19437,6 +21890,13 @@ func (ec *executionContext) marshalOIoFault2ᚕgithubᚗcomᚋchaosᚑmeshᚋcha
 	}
 	wg.Wait()
 	return ret
+}
+
+func (ec *executionContext) marshalOLossSpec2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐLossSpec(ctx context.Context, sel ast.SelectionSet, v *v1alpha1.LossSpec) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._LossSpec(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOMap2map(ctx context.Context, v interface{}) (map[string]interface{}, error) {
@@ -19722,6 +22182,126 @@ func (ec *executionContext) marshalOPodNetworkChaos2ᚕᚖgithubᚗcomᚋchaos�
 	return ret
 }
 
+func (ec *executionContext) marshalORawIPSet2ᚕgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐRawIPSetᚄ(ctx context.Context, sel ast.SelectionSet, v []v1alpha1.RawIPSet) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNRawIPSet2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐRawIPSet(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalORawIptables2ᚕgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐRawIptablesᚄ(ctx context.Context, sel ast.SelectionSet, v []v1alpha1.RawIptables) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNRawIptables2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐRawIptables(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalORawTrafficControl2ᚕgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐRawTrafficControlᚄ(ctx context.Context, sel ast.SelectionSet, v []v1alpha1.RawTrafficControl) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNRawTrafficControl2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐRawTrafficControl(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
 func (ec *executionContext) marshalORecord2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐRecordᚄ(ctx context.Context, sel ast.SelectionSet, v []*v1alpha1.Record) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -19760,6 +22340,13 @@ func (ec *executionContext) marshalORecord2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋc
 	}
 	wg.Wait()
 	return ret
+}
+
+func (ec *executionContext) marshalOReorderSpec2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐReorderSpec(ctx context.Context, sel ast.SelectionSet, v *v1alpha1.ReorderSpec) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._ReorderSpec(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOStressChaos2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐStressChaosᚄ(ctx context.Context, sel ast.SelectionSet, v []*v1alpha1.StressChaos) graphql.Marshaler {

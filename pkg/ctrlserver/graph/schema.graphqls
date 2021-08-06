@@ -633,6 +633,140 @@ type PodNetworkChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alp
     ownerReferences: [OwnerReference!]
     finalizers: [String!]
     clusterName: String!
+
+	spec: PodNetworkChaosSpec!
+	status: PodNetworkChaosStatus!
+
+	pod: Pod!       @goField(forceResolver: true)
+}
+
+# PodNetworkChaosSpec defines the desired state of PodNetworkChaos
+type PodNetworkChaosSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodNetworkChaosSpec") {
+	# The ipset on the pod
+	ipSets: [RawIPSet!]
+
+	# The iptables rules on the pod
+	iptables: [RawIptables!]
+
+	# The tc rules on the pod
+	trafficControls: [RawTrafficControl!]
+}
+
+# PodNetworkChaosStatus defines the observed state of PodNetworkChaos
+type PodNetworkChaosStatus @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodNetworkChaosStatus") {
+	failedMessage: String!
+	observedGeneration: Int!
+}
+
+# RawIPSet represents an ipset on specific pod
+type RawIPSet @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.RawIPSet") {
+	# The name of ipset
+	name: String!
+
+	# The contents of ipset
+	cidrs: [String!]!
+
+	# The name and namespace of the source network chaos
+	source: String!
+}
+
+# RawIptables represents the iptables rules on specific pod
+type RawIptables @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.RawIptables") {
+	# The name of iptables chain
+	name: String!
+
+	# The name of related ipset
+	ipSets: [String!]!
+
+	# The block direction of this iptables rule
+	direction: String!
+
+	# The name and namespace of the source network chaos
+	source: String!
+}
+
+# RawTrafficControl represents the traffic control chaos on specific pod
+type RawTrafficControl @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.RawTrafficControl") {
+	# The type of traffic control
+	type: String!
+
+	# delay represents the detail about delay action
+	delay: DelaySpec
+
+	# loss represents the detail about loss action
+	loss: LossSpec
+
+	# duplicateSpec represents the detail about loss action
+	duplicate: DuplicateSpec
+
+	# corrupt represents the detail about corrupt action
+	corrupt: CorruptSpec
+
+	# bandwidth represents the detail about bandwidth control action
+	Bandwidth: BandwidthSpec
+
+	# The name of target ipset
+	ipSet: String
+
+	# The name and namespace of the source network chaos
+	source: String
+}
+
+# DelaySpec defines detail of a delay action
+type DelaySpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.DelaySpec") {
+	latency: String!
+	correlation: String
+	jitter: String
+	reorder: ReorderSpec
+}
+
+# LossSpec defines detail of a loss action
+type LossSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.LossSpec") {
+	loss: String!
+	correlation: String
+}
+
+# DuplicateSpec defines detail of a duplicate action
+type DuplicateSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.DuplicateSpec") {
+	duplicate: String!
+	correlation: String
+}
+
+# CorruptSpec defines detail of a corrupt action
+type CorruptSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.CorruptSpec") {
+	corrup: String!
+	correlation: String
+}
+
+# BandwidthSpec defines detail of bandwidth limit.
+type BandwidthSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.BandwidthSpec") {
+	# rate is the speed knob. Allows bps, kbps, mbps, gbps, tbps unit. bps means bytes per second.
+	rate: String!
+
+	# limit is the number of bytes that can be queued waiting for tokens to become available.
+	limit: Int!
+
+	# buffer is the maximum amount of bytes that tokens can be available for instantaneously.
+	buffer: Int!
+
+	# peakrate is the maximum depletion rate of the bucket.
+	# The peakrate does not need to be set, it is only necessary
+	# if perfect millisecond timescale shaping is required.
+	peakrate: Int
+
+	# minburst specifies the size of the peakrate bucket. For perfect
+	# accuracy, should be set to the MTU of the interface.  If a
+	# peakrate is needed, but some burstiness is acceptable, this
+	# size can be raised. A 3000 byte minburst allows around 3mbit/s
+	# of peakrate, given 1000 byte packets.
+	minburst: Int
+}
+
+# ReorderSpec defines details of packet reorder.
+type ReorderSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.ReorderSpec") {
+	reorder: String!
+	correlation: String
+	gap: Int
 }
 
 type NetworkChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.NetworkChaos") {
@@ -653,6 +787,8 @@ type NetworkChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1
     ownerReferences: [OwnerReference!]
     finalizers: [String!]
     clusterName: String!
+
+	podnetworks: [PodNetworkChaos!]	@goField(forceResolver: true)
 }
 
 type StressChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.StressChaos") {
