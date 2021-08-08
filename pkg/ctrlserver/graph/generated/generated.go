@@ -44,6 +44,8 @@ type ResolverRoot interface {
 	AttrOverrideSpec() AttrOverrideSpecResolver
 	BandwidthSpec() BandwidthSpecResolver
 	ChaosCondition() ChaosConditionResolver
+	ContainerStateRunning() ContainerStateRunningResolver
+	ContainerStateTerminated() ContainerStateTerminatedResolver
 	CorruptSpec() CorruptSpecResolver
 	ExperimentStatus() ExperimentStatusResolver
 	HTTPChaos() HTTPChaosResolver
@@ -60,6 +62,7 @@ type ResolverRoot interface {
 	NetworkChaos() NetworkChaosResolver
 	OwnerReference() OwnerReferenceResolver
 	Pod() PodResolver
+	PodCondition() PodConditionResolver
 	PodHTTPChaos() PodHTTPChaosResolver
 	PodHttpChaosReplaceActions() PodHttpChaosReplaceActionsResolver
 	PodHttpChaosRule() PodHttpChaosRuleResolver
@@ -67,6 +70,7 @@ type ResolverRoot interface {
 	PodIOChaos() PodIOChaosResolver
 	PodNetworkChaos() PodNetworkChaosResolver
 	PodSelectorSpec() PodSelectorSpecResolver
+	PodStatus() PodStatusResolver
 	Query() QueryResolver
 	RawIptables() RawIptablesResolver
 	RawTrafficControl() RawTrafficControlResolver
@@ -105,6 +109,43 @@ type ComplexityRoot struct {
 		Reason func(childComplexity int) int
 		Status func(childComplexity int) int
 		Type   func(childComplexity int) int
+	}
+
+	ContainerState struct {
+		Running    func(childComplexity int) int
+		Terminated func(childComplexity int) int
+		Waiting    func(childComplexity int) int
+	}
+
+	ContainerStateRunning struct {
+		StartedAt func(childComplexity int) int
+	}
+
+	ContainerStateTerminated struct {
+		ContainerID func(childComplexity int) int
+		ExitCode    func(childComplexity int) int
+		FinishedAt  func(childComplexity int) int
+		Message     func(childComplexity int) int
+		Reason      func(childComplexity int) int
+		Signal      func(childComplexity int) int
+		StartedAt   func(childComplexity int) int
+	}
+
+	ContainerStateWaiting struct {
+		Message func(childComplexity int) int
+		Reason  func(childComplexity int) int
+	}
+
+	ContainerStatus struct {
+		ContainerID          func(childComplexity int) int
+		Image                func(childComplexity int) int
+		ImageID              func(childComplexity int) int
+		LastTerminationState func(childComplexity int) int
+		Name                 func(childComplexity int) int
+		Ready                func(childComplexity int) int
+		RestartCount         func(childComplexity int) int
+		Started              func(childComplexity int) int
+		State                func(childComplexity int) int
 	}
 
 	CorruptSpec struct {
@@ -337,7 +378,18 @@ type ComplexityRoot struct {
 		OwnerReferences            func(childComplexity int) int
 		ResourceVersion            func(childComplexity int) int
 		SelfLink                   func(childComplexity int) int
+		Spec                       func(childComplexity int) int
+		Status                     func(childComplexity int) int
 		UID                        func(childComplexity int) int
+	}
+
+	PodCondition struct {
+		LastProbeTime      func(childComplexity int) int
+		LastTransitionTime func(childComplexity int) int
+		Message            func(childComplexity int) int
+		Reason             func(childComplexity int) int
+		Status             func(childComplexity int) int
+		Type               func(childComplexity int) int
 	}
 
 	PodHTTPChaos struct {
@@ -455,6 +507,10 @@ type ComplexityRoot struct {
 		StartTime          func(childComplexity int) int
 	}
 
+	PodIP struct {
+		IP func(childComplexity int) int
+	}
+
 	PodNetworkChaos struct {
 		APIVersion                 func(childComplexity int) int
 		Annotations                func(childComplexity int) int
@@ -498,6 +554,26 @@ type ComplexityRoot struct {
 		Nodes               func(childComplexity int) int
 		PodPhaseSelectors   func(childComplexity int) int
 		Pods                func(childComplexity int) int
+	}
+
+	PodSpec struct {
+		NodeName func(childComplexity int) int
+	}
+
+	PodStatus struct {
+		Conditions                 func(childComplexity int) int
+		ContainerStatuses          func(childComplexity int) int
+		EphemeralContainerStatuses func(childComplexity int) int
+		HostIP                     func(childComplexity int) int
+		InitContainerStatuses      func(childComplexity int) int
+		Message                    func(childComplexity int) int
+		NominatedNodeName          func(childComplexity int) int
+		Phase                      func(childComplexity int) int
+		PodIP                      func(childComplexity int) int
+		PodIPs                     func(childComplexity int) int
+		QosClass                   func(childComplexity int) int
+		Reason                     func(childComplexity int) int
+		StartTime                  func(childComplexity int) int
 	}
 
 	Query struct {
@@ -587,6 +663,13 @@ type BandwidthSpecResolver interface {
 type ChaosConditionResolver interface {
 	Type(ctx context.Context, obj *v1alpha1.ChaosCondition) (string, error)
 	Status(ctx context.Context, obj *v1alpha1.ChaosCondition) (string, error)
+}
+type ContainerStateRunningResolver interface {
+	StartedAt(ctx context.Context, obj *v1.ContainerStateRunning) (*time.Time, error)
+}
+type ContainerStateTerminatedResolver interface {
+	StartedAt(ctx context.Context, obj *v1.ContainerStateTerminated) (*time.Time, error)
+	FinishedAt(ctx context.Context, obj *v1.ContainerStateTerminated) (*time.Time, error)
 }
 type CorruptSpecResolver interface {
 	Corrup(ctx context.Context, obj *v1alpha1.CorruptSpec) (string, error)
@@ -710,6 +793,12 @@ type PodResolver interface {
 
 	Logs(ctx context.Context, obj *v1.Pod) (string, error)
 }
+type PodConditionResolver interface {
+	Type(ctx context.Context, obj *v1.PodCondition) (string, error)
+	Status(ctx context.Context, obj *v1.PodCondition) (string, error)
+	LastProbeTime(ctx context.Context, obj *v1.PodCondition) (*time.Time, error)
+	LastTransitionTime(ctx context.Context, obj *v1.PodCondition) (*time.Time, error)
+}
 type PodHTTPChaosResolver interface {
 	UID(ctx context.Context, obj *v1alpha1.PodHttpChaos) (string, error)
 
@@ -762,6 +851,13 @@ type PodSelectorSpecResolver interface {
 	FieldSelectors(ctx context.Context, obj *v1alpha1.PodSelectorSpec) (map[string]interface{}, error)
 	LabelSelectors(ctx context.Context, obj *v1alpha1.PodSelectorSpec) (map[string]interface{}, error)
 	AnnotationSelectors(ctx context.Context, obj *v1alpha1.PodSelectorSpec) (map[string]interface{}, error)
+}
+type PodStatusResolver interface {
+	Phase(ctx context.Context, obj *v1.PodStatus) (string, error)
+
+	StartTime(ctx context.Context, obj *v1.PodStatus) (*time.Time, error)
+
+	QosClass(ctx context.Context, obj *v1.PodStatus) (string, error)
 }
 type QueryResolver interface {
 	Namepsace(ctx context.Context, ns string) (*model.Namespace, error)
@@ -939,6 +1035,160 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ChaosCondition.Type(childComplexity), true
+
+	case "ContainerState.running":
+		if e.complexity.ContainerState.Running == nil {
+			break
+		}
+
+		return e.complexity.ContainerState.Running(childComplexity), true
+
+	case "ContainerState.terminated":
+		if e.complexity.ContainerState.Terminated == nil {
+			break
+		}
+
+		return e.complexity.ContainerState.Terminated(childComplexity), true
+
+	case "ContainerState.waiting":
+		if e.complexity.ContainerState.Waiting == nil {
+			break
+		}
+
+		return e.complexity.ContainerState.Waiting(childComplexity), true
+
+	case "ContainerStateRunning.startedAt":
+		if e.complexity.ContainerStateRunning.StartedAt == nil {
+			break
+		}
+
+		return e.complexity.ContainerStateRunning.StartedAt(childComplexity), true
+
+	case "ContainerStateTerminated.containerID":
+		if e.complexity.ContainerStateTerminated.ContainerID == nil {
+			break
+		}
+
+		return e.complexity.ContainerStateTerminated.ContainerID(childComplexity), true
+
+	case "ContainerStateTerminated.exitCode":
+		if e.complexity.ContainerStateTerminated.ExitCode == nil {
+			break
+		}
+
+		return e.complexity.ContainerStateTerminated.ExitCode(childComplexity), true
+
+	case "ContainerStateTerminated.finishedAt":
+		if e.complexity.ContainerStateTerminated.FinishedAt == nil {
+			break
+		}
+
+		return e.complexity.ContainerStateTerminated.FinishedAt(childComplexity), true
+
+	case "ContainerStateTerminated.message":
+		if e.complexity.ContainerStateTerminated.Message == nil {
+			break
+		}
+
+		return e.complexity.ContainerStateTerminated.Message(childComplexity), true
+
+	case "ContainerStateTerminated.reason":
+		if e.complexity.ContainerStateTerminated.Reason == nil {
+			break
+		}
+
+		return e.complexity.ContainerStateTerminated.Reason(childComplexity), true
+
+	case "ContainerStateTerminated.signal":
+		if e.complexity.ContainerStateTerminated.Signal == nil {
+			break
+		}
+
+		return e.complexity.ContainerStateTerminated.Signal(childComplexity), true
+
+	case "ContainerStateTerminated.startedAt":
+		if e.complexity.ContainerStateTerminated.StartedAt == nil {
+			break
+		}
+
+		return e.complexity.ContainerStateTerminated.StartedAt(childComplexity), true
+
+	case "ContainerStateWaiting.message":
+		if e.complexity.ContainerStateWaiting.Message == nil {
+			break
+		}
+
+		return e.complexity.ContainerStateWaiting.Message(childComplexity), true
+
+	case "ContainerStateWaiting.reason":
+		if e.complexity.ContainerStateWaiting.Reason == nil {
+			break
+		}
+
+		return e.complexity.ContainerStateWaiting.Reason(childComplexity), true
+
+	case "ContainerStatus.containerID":
+		if e.complexity.ContainerStatus.ContainerID == nil {
+			break
+		}
+
+		return e.complexity.ContainerStatus.ContainerID(childComplexity), true
+
+	case "ContainerStatus.image":
+		if e.complexity.ContainerStatus.Image == nil {
+			break
+		}
+
+		return e.complexity.ContainerStatus.Image(childComplexity), true
+
+	case "ContainerStatus.imageID":
+		if e.complexity.ContainerStatus.ImageID == nil {
+			break
+		}
+
+		return e.complexity.ContainerStatus.ImageID(childComplexity), true
+
+	case "ContainerStatus.lastTerminationState":
+		if e.complexity.ContainerStatus.LastTerminationState == nil {
+			break
+		}
+
+		return e.complexity.ContainerStatus.LastTerminationState(childComplexity), true
+
+	case "ContainerStatus.name":
+		if e.complexity.ContainerStatus.Name == nil {
+			break
+		}
+
+		return e.complexity.ContainerStatus.Name(childComplexity), true
+
+	case "ContainerStatus.ready":
+		if e.complexity.ContainerStatus.Ready == nil {
+			break
+		}
+
+		return e.complexity.ContainerStatus.Ready(childComplexity), true
+
+	case "ContainerStatus.restartCount":
+		if e.complexity.ContainerStatus.RestartCount == nil {
+			break
+		}
+
+		return e.complexity.ContainerStatus.RestartCount(childComplexity), true
+
+	case "ContainerStatus.started":
+		if e.complexity.ContainerStatus.Started == nil {
+			break
+		}
+
+		return e.complexity.ContainerStatus.Started(childComplexity), true
+
+	case "ContainerStatus.State":
+		if e.complexity.ContainerStatus.State == nil {
+			break
+		}
+
+		return e.complexity.ContainerStatus.State(childComplexity), true
 
 	case "CorruptSpec.correlation":
 		if e.complexity.CorruptSpec.Correlation == nil {
@@ -2220,12 +2470,68 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Pod.SelfLink(childComplexity), true
 
+	case "Pod.spec":
+		if e.complexity.Pod.Spec == nil {
+			break
+		}
+
+		return e.complexity.Pod.Spec(childComplexity), true
+
+	case "Pod.status":
+		if e.complexity.Pod.Status == nil {
+			break
+		}
+
+		return e.complexity.Pod.Status(childComplexity), true
+
 	case "Pod.uid":
 		if e.complexity.Pod.UID == nil {
 			break
 		}
 
 		return e.complexity.Pod.UID(childComplexity), true
+
+	case "PodCondition.lastProbeTime":
+		if e.complexity.PodCondition.LastProbeTime == nil {
+			break
+		}
+
+		return e.complexity.PodCondition.LastProbeTime(childComplexity), true
+
+	case "PodCondition.lastTransitionTime":
+		if e.complexity.PodCondition.LastTransitionTime == nil {
+			break
+		}
+
+		return e.complexity.PodCondition.LastTransitionTime(childComplexity), true
+
+	case "PodCondition.message":
+		if e.complexity.PodCondition.Message == nil {
+			break
+		}
+
+		return e.complexity.PodCondition.Message(childComplexity), true
+
+	case "PodCondition.reason":
+		if e.complexity.PodCondition.Reason == nil {
+			break
+		}
+
+		return e.complexity.PodCondition.Reason(childComplexity), true
+
+	case "PodCondition.status":
+		if e.complexity.PodCondition.Status == nil {
+			break
+		}
+
+		return e.complexity.PodCondition.Status(childComplexity), true
+
+	case "PodCondition.type":
+		if e.complexity.PodCondition.Type == nil {
+			break
+		}
+
+		return e.complexity.PodCondition.Type(childComplexity), true
 
 	case "PodHTTPChaos.apiVersion":
 		if e.complexity.PodHTTPChaos.APIVersion == nil {
@@ -2780,6 +3086,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.PodIOChaosStatus.StartTime(childComplexity), true
 
+	case "PodIP.ip":
+		if e.complexity.PodIP.IP == nil {
+			break
+		}
+
+		return e.complexity.PodIP.IP(childComplexity), true
+
 	case "PodNetworkChaos.apiVersion":
 		if e.complexity.PodNetworkChaos.APIVersion == nil {
 			break
@@ -3010,6 +3323,104 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.PodSelectorSpec.Pods(childComplexity), true
+
+	case "PodSpec.nodeName":
+		if e.complexity.PodSpec.NodeName == nil {
+			break
+		}
+
+		return e.complexity.PodSpec.NodeName(childComplexity), true
+
+	case "PodStatus.conditions":
+		if e.complexity.PodStatus.Conditions == nil {
+			break
+		}
+
+		return e.complexity.PodStatus.Conditions(childComplexity), true
+
+	case "PodStatus.containerStatuses":
+		if e.complexity.PodStatus.ContainerStatuses == nil {
+			break
+		}
+
+		return e.complexity.PodStatus.ContainerStatuses(childComplexity), true
+
+	case "PodStatus.ephemeralContainerStatuses":
+		if e.complexity.PodStatus.EphemeralContainerStatuses == nil {
+			break
+		}
+
+		return e.complexity.PodStatus.EphemeralContainerStatuses(childComplexity), true
+
+	case "PodStatus.hostIP":
+		if e.complexity.PodStatus.HostIP == nil {
+			break
+		}
+
+		return e.complexity.PodStatus.HostIP(childComplexity), true
+
+	case "PodStatus.initContainerStatuses":
+		if e.complexity.PodStatus.InitContainerStatuses == nil {
+			break
+		}
+
+		return e.complexity.PodStatus.InitContainerStatuses(childComplexity), true
+
+	case "PodStatus.message":
+		if e.complexity.PodStatus.Message == nil {
+			break
+		}
+
+		return e.complexity.PodStatus.Message(childComplexity), true
+
+	case "PodStatus.nominatedNodeName":
+		if e.complexity.PodStatus.NominatedNodeName == nil {
+			break
+		}
+
+		return e.complexity.PodStatus.NominatedNodeName(childComplexity), true
+
+	case "PodStatus.phase":
+		if e.complexity.PodStatus.Phase == nil {
+			break
+		}
+
+		return e.complexity.PodStatus.Phase(childComplexity), true
+
+	case "PodStatus.podIP":
+		if e.complexity.PodStatus.PodIP == nil {
+			break
+		}
+
+		return e.complexity.PodStatus.PodIP(childComplexity), true
+
+	case "PodStatus.podIPs":
+		if e.complexity.PodStatus.PodIPs == nil {
+			break
+		}
+
+		return e.complexity.PodStatus.PodIPs(childComplexity), true
+
+	case "PodStatus.qosClass":
+		if e.complexity.PodStatus.QosClass == nil {
+			break
+		}
+
+		return e.complexity.PodStatus.QosClass(childComplexity), true
+
+	case "PodStatus.reason":
+		if e.complexity.PodStatus.Reason == nil {
+			break
+		}
+
+		return e.complexity.PodStatus.Reason(childComplexity), true
+
+	case "PodStatus.startTime":
+		if e.complexity.PodStatus.StartTime == nil {
+			break
+		}
+
+		return e.complexity.PodStatus.StartTime(childComplexity), true
 
 	case "Query.namepsace":
 		if e.complexity.Query.Namepsace == nil {
@@ -3453,9 +3864,226 @@ type Pod @goModel(model: "k8s.io/api/core/v1.Pod") {
     finalizers: [String!]
     clusterName: String!
 
+	spec: PodSpec!
+	status: PodStatus!
+
     logs: String! @goField(forceResolver: true)
 }
 
+# PodStatus represents information about the status of a pod. Status may trail the actual
+# state of a system, especially if the node that hosts the pod cannot contact the control
+# plane.
+type PodStatus @goModel(model: "k8s.io/api/core/v1.PodStatus") {
+	# The phase of a Pod is a simple, high-level summary of where the Pod is in its lifecycle.
+	# The conditions array, the reason and message fields, and the individual container status
+	# arrays contain more detail about the pod's status.
+	# There are five possible phase values:
+	#
+	# Pending: The pod has been accepted by the Kubernetes system, but one or more of the
+	# container images has not been created. This includes time before being scheduled as
+	# well as time spent downloading images over the network, which could take a while.
+	# Running: The pod has been bound to a node, and all of the containers have been created.
+	# At least one container is still running, or is in the process of starting or restarting.
+	# Succeeded: All containers in the pod have terminated in success, and will not be restarted.
+	# Failed: All containers in the pod have terminated, and at least one container has
+	# terminated in failure. The container either exited with non-zero status or was terminated
+	# by the system.
+	# Unknown: For some reason the state of the pod could not be obtained, typically due to an
+	# error in communicating with the host of the pod.
+	#
+	# More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#pod-phase
+	phase: String!
+
+	# Current service state of pod.
+	# More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#pod-conditions
+	conditions: [PodCondition!]
+
+	# A human readable message indicating details about why the pod is in this condition.
+	message: String!
+
+	# A brief CamelCase message indicating details about why the pod is in this state.
+	# e.g. 'Evicted'
+	reason: String!
+
+	# nominatedNodeName is set only when this pod preempts other pods on the node, but it cannot be
+	# scheduled right away as preemption victims receive their graceful termination periods.
+	# This field does not guarantee that the pod will be scheduled on this node. Scheduler may decide
+	# to place the pod elsewhere if other nodes become available sooner. Scheduler may also decide to
+	# give the resources on this node to a higher priority pod that is created after preemption.
+	# As a result, this field may be different than PodSpec.nodeName when the pod is
+	# scheduled.
+	nominatedNodeName: String!
+
+	# IP address of the host to which the pod is assigned. Empty if not yet scheduled.
+	hostIP: String!
+
+	# IP address allocated to the pod. Routable at least within the cluster.
+	# Empty if not yet allocated.
+	podIP: String!
+
+	# podIPs holds the IP addresses allocated to the pod. If this field is specified, the 0th entry must
+	# match the podIP field. Pods may be allocated at most 1 value for each of IPv4 and IPv6. This list
+	# is empty if no IPs have been allocated yet.
+	podIPs: [PodIP!]
+
+	# RFC 3339 date and time at which the object was acknowledged by the Kubelet.
+	# This is before the Kubelet pulled the container image(s) for the pod.
+	startTime: Time
+
+	# The list has one entry per init container in the manifest. The most recent successful
+	# init container will have ready = true, the most recently started container will have
+	# startTime set.
+	# More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#pod-and-container-status
+	initContainerStatuses: [ContainerStatus!]
+
+	# The list has one entry per container in the manifest. Each entry is currently the output
+	# of ` + "`" + `docker inspect` + "`" + `.
+	# More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#pod-and-container-status
+	containerStatuses: [ContainerStatus!]
+
+	# The Quality of Service (QOS) classification assigned to the pod based on resource requirements
+	# See PodQOSClass type for available QOS classes
+	# More info: https://git.k8s.io/community/contributors/design-proposals/node/resource-qos.md
+	qosClass: String!
+
+	# Status for any ephemeral containers that have run in this pod.
+	# This field is alpha-level and is only populated by servers that enable the EphemeralContainers feature.
+	ephemeralContainerStatuses: [ContainerStatus!]
+}
+
+# IP address information for entries in the (plural) PodIPs field.
+# Each entry includes:
+#    IP: An IP address allocated to the pod. Routable at least within the cluster.
+type PodIP @goModel(model: "k8s.io/api/core/v1.PodIP") {
+	# ip is an IP address (IPv4 or IPv6) assigned to the pod
+	ip: String!
+}
+
+# PodCondition contains details for the current condition of this pod.
+type PodCondition @goModel(model: "k8s.io/api/core/v1.PodCondition") {
+	# Type is the type of the condition.
+	# More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#pod-conditions
+	type: String!
+
+	# Status is the status of the condition.
+	# Can be True, False, Unknown.
+	# More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#pod-conditions
+	status: String!
+
+	# Last time we probed the condition.
+	lastProbeTime: Time
+
+	# Last time the condition transitioned from one status to another.
+	lastTransitionTime: Time
+
+	# Unique, one-word, CamelCase reason for the condition's last transition.
+	reason: String
+
+	# Human-readable message indicating details about last transition.
+	message: String
+}
+
+# ContainerStatus contains details for the current status of this container.
+type ContainerStatus @goModel(model: "k8s.io/api/core/v1.ContainerStatus") {
+	# This must be a DNS_LABEL. Each container in a pod must have a unique name.
+	# Cannot be updated.
+	name: String!
+
+	# Details about the container's current condition.
+	State: ContainerState
+
+	# Details about the container's last termination condition.
+	lastTerminationState: ContainerState
+
+	# Specifies whether the container has passed its readiness probe.
+	ready: Boolean!
+
+	# The number of times the container has been restarted, currently based on
+	# the number of dead containers that have not yet been removed.
+	# Note that this is calculated from dead containers. But those containers are subject to
+	# garbage collection. This value will get capped at 5 by GC.
+	restartCount: Int!
+
+	# The image the container is running.
+	# More info: https://kubernetes.io/docs/concepts/containers/images
+	# TODO(dchen1107): Which image the container is running with?
+	image: String!
+
+	# ImageID of the container's image.
+	imageID: String!
+
+	# Container's ID in the format 'docker://<container_id>'.
+	containerID: String!
+
+	# Specifies whether the container has passed its startup probe.
+	# Initialized as false, becomes true after startupProbe is considered successful.
+	# Resets to false when the container is restarted, or if kubelet loses state temporarily.
+	# Is always true when no startupProbe is defined.
+	started: Boolean
+}
+
+# ContainerState holds a possible state of container.
+# Only one of its members may be specified.
+# If none of them is specified, the default one is ContainerStateWaiting.
+type ContainerState @goModel(model: "k8s.io/api/core/v1.ContainerState") {
+	# Details about a waiting container
+	waiting: ContainerStateWaiting
+
+	# Details about a running container
+	running: ContainerStateRunning
+
+	# Details about a terminated container
+	terminated: ContainerStateTerminated
+}
+
+# ContainerStateWaiting is a waiting state of a container.
+type ContainerStateWaiting @goModel(model: "k8s.io/api/core/v1.ContainerStateWaiting") {
+	# (brief) reason the container is not yet running.
+	reason: String
+
+	# Message regarding why the container is not yet running.
+	message: String
+}
+
+# ContainerStateRunning is a running state of a container.
+type ContainerStateRunning @goModel(model: "k8s.io/api/core/v1.ContainerStateRunning") {
+	# Time at which the container was last (re-)started
+	startedAt: Time
+}
+
+# ContainerStateTerminated is a terminated state of a container.
+type ContainerStateTerminated @goModel(model: "k8s.io/api/core/v1.ContainerStateTerminated") {
+	# Exit status from the last termination of the container
+	exitCode: Int!
+
+	# Signal from the last termination of the container
+	signal: Int
+
+	# (brief) reason from the last termination of the container
+	reason: String
+
+	# Message regarding the last termination of the container
+	message: String
+	
+	#Time at which previous execution of the container started
+	startedAt: Time
+
+	# Time at which the container last terminated
+	finishedAt: Time
+
+	# Container's ID in the format 'docker://<container_id>'
+	containerID: String
+}
+
+
+# TODO: add more fields
+type PodSpec @goModel(model: "k8s.io/api/core/v1.PodSpec") {
+	# ndeName is a request to schedule this pod onto a specific node. If it is non-empty,
+	# the scheduler simply schedules this pod onto that node, assuming that it fits resource
+	# requirements.
+	nodeName: String!
+
+}
 
 type PodIOChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodIOChaos") {
     kind: String!
@@ -5094,6 +5722,731 @@ func (ec *executionContext) _ChaosCondition_reason(ctx context.Context, field gr
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ContainerState_waiting(ctx context.Context, field graphql.CollectedField, obj *v1.ContainerState) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ContainerState",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Waiting, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v1.ContainerStateWaiting)
+	fc.Result = res
+	return ec.marshalOContainerStateWaiting2ᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐContainerStateWaiting(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ContainerState_running(ctx context.Context, field graphql.CollectedField, obj *v1.ContainerState) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ContainerState",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Running, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v1.ContainerStateRunning)
+	fc.Result = res
+	return ec.marshalOContainerStateRunning2ᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐContainerStateRunning(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ContainerState_terminated(ctx context.Context, field graphql.CollectedField, obj *v1.ContainerState) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ContainerState",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Terminated, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v1.ContainerStateTerminated)
+	fc.Result = res
+	return ec.marshalOContainerStateTerminated2ᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐContainerStateTerminated(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ContainerStateRunning_startedAt(ctx context.Context, field graphql.CollectedField, obj *v1.ContainerStateRunning) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ContainerStateRunning",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.ContainerStateRunning().StartedAt(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*time.Time)
+	fc.Result = res
+	return ec.marshalOTime2ᚖtimeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ContainerStateTerminated_exitCode(ctx context.Context, field graphql.CollectedField, obj *v1.ContainerStateTerminated) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ContainerStateTerminated",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ExitCode, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int32)
+	fc.Result = res
+	return ec.marshalNInt2int32(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ContainerStateTerminated_signal(ctx context.Context, field graphql.CollectedField, obj *v1.ContainerStateTerminated) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ContainerStateTerminated",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Signal, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(int32)
+	fc.Result = res
+	return ec.marshalOInt2int32(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ContainerStateTerminated_reason(ctx context.Context, field graphql.CollectedField, obj *v1.ContainerStateTerminated) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ContainerStateTerminated",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Reason, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ContainerStateTerminated_message(ctx context.Context, field graphql.CollectedField, obj *v1.ContainerStateTerminated) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ContainerStateTerminated",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Message, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ContainerStateTerminated_startedAt(ctx context.Context, field graphql.CollectedField, obj *v1.ContainerStateTerminated) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ContainerStateTerminated",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.ContainerStateTerminated().StartedAt(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*time.Time)
+	fc.Result = res
+	return ec.marshalOTime2ᚖtimeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ContainerStateTerminated_finishedAt(ctx context.Context, field graphql.CollectedField, obj *v1.ContainerStateTerminated) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ContainerStateTerminated",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.ContainerStateTerminated().FinishedAt(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*time.Time)
+	fc.Result = res
+	return ec.marshalOTime2ᚖtimeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ContainerStateTerminated_containerID(ctx context.Context, field graphql.CollectedField, obj *v1.ContainerStateTerminated) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ContainerStateTerminated",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ContainerID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ContainerStateWaiting_reason(ctx context.Context, field graphql.CollectedField, obj *v1.ContainerStateWaiting) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ContainerStateWaiting",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Reason, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ContainerStateWaiting_message(ctx context.Context, field graphql.CollectedField, obj *v1.ContainerStateWaiting) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ContainerStateWaiting",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Message, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ContainerStatus_name(ctx context.Context, field graphql.CollectedField, obj *v1.ContainerStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ContainerStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ContainerStatus_State(ctx context.Context, field graphql.CollectedField, obj *v1.ContainerStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ContainerStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.State, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(v1.ContainerState)
+	fc.Result = res
+	return ec.marshalOContainerState2k8sᚗioᚋapiᚋcoreᚋv1ᚐContainerState(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ContainerStatus_lastTerminationState(ctx context.Context, field graphql.CollectedField, obj *v1.ContainerStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ContainerStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.LastTerminationState, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(v1.ContainerState)
+	fc.Result = res
+	return ec.marshalOContainerState2k8sᚗioᚋapiᚋcoreᚋv1ᚐContainerState(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ContainerStatus_ready(ctx context.Context, field graphql.CollectedField, obj *v1.ContainerStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ContainerStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Ready, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ContainerStatus_restartCount(ctx context.Context, field graphql.CollectedField, obj *v1.ContainerStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ContainerStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.RestartCount, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int32)
+	fc.Result = res
+	return ec.marshalNInt2int32(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ContainerStatus_image(ctx context.Context, field graphql.CollectedField, obj *v1.ContainerStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ContainerStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Image, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ContainerStatus_imageID(ctx context.Context, field graphql.CollectedField, obj *v1.ContainerStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ContainerStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ImageID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ContainerStatus_containerID(ctx context.Context, field graphql.CollectedField, obj *v1.ContainerStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ContainerStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ContainerID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ContainerStatus_started(ctx context.Context, field graphql.CollectedField, obj *v1.ContainerStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ContainerStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Started, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*bool)
+	fc.Result = res
+	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _CorruptSpec_corrup(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.CorruptSpec) (ret graphql.Marshaler) {
@@ -11033,6 +12386,76 @@ func (ec *executionContext) _Pod_clusterName(ctx context.Context, field graphql.
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Pod_spec(ctx context.Context, field graphql.CollectedField, obj *v1.Pod) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Pod",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Spec, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(v1.PodSpec)
+	fc.Result = res
+	return ec.marshalNPodSpec2k8sᚗioᚋapiᚋcoreᚋv1ᚐPodSpec(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Pod_status(ctx context.Context, field graphql.CollectedField, obj *v1.Pod) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Pod",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Status, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(v1.PodStatus)
+	fc.Result = res
+	return ec.marshalNPodStatus2k8sᚗioᚋapiᚋcoreᚋv1ᚐPodStatus(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Pod_logs(ctx context.Context, field graphql.CollectedField, obj *v1.Pod) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -11066,6 +12489,204 @@ func (ec *executionContext) _Pod_logs(ctx context.Context, field graphql.Collect
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodCondition_type(ctx context.Context, field graphql.CollectedField, obj *v1.PodCondition) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodCondition",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.PodCondition().Type(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodCondition_status(ctx context.Context, field graphql.CollectedField, obj *v1.PodCondition) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodCondition",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.PodCondition().Status(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodCondition_lastProbeTime(ctx context.Context, field graphql.CollectedField, obj *v1.PodCondition) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodCondition",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.PodCondition().LastProbeTime(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*time.Time)
+	fc.Result = res
+	return ec.marshalOTime2ᚖtimeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodCondition_lastTransitionTime(ctx context.Context, field graphql.CollectedField, obj *v1.PodCondition) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodCondition",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.PodCondition().LastTransitionTime(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*time.Time)
+	fc.Result = res
+	return ec.marshalOTime2ᚖtimeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodCondition_reason(ctx context.Context, field graphql.CollectedField, obj *v1.PodCondition) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodCondition",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Reason, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodCondition_message(ctx context.Context, field graphql.CollectedField, obj *v1.PodCondition) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodCondition",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Message, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _PodHTTPChaos_kind(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodHttpChaos) (ret graphql.Marshaler) {
@@ -13707,6 +15328,41 @@ func (ec *executionContext) _PodIOChaosStatus_observedGeneration(ctx context.Con
 	return ec.marshalOInt2int64(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _PodIP_ip(ctx context.Context, field graphql.CollectedField, obj *v1.PodIP) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodIP",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IP, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _PodNetworkChaos_kind(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodNetworkChaos) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -14809,6 +16465,478 @@ func (ec *executionContext) _PodSelectorSpec_podPhaseSelectors(ctx context.Conte
 	res := resTmp.([]string)
 	fc.Result = res
 	return ec.marshalOString2ᚕstringᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodSpec_nodeName(ctx context.Context, field graphql.CollectedField, obj *v1.PodSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NodeName, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodStatus_phase(ctx context.Context, field graphql.CollectedField, obj *v1.PodStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.PodStatus().Phase(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodStatus_conditions(ctx context.Context, field graphql.CollectedField, obj *v1.PodStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Conditions, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]v1.PodCondition)
+	fc.Result = res
+	return ec.marshalOPodCondition2ᚕk8sᚗioᚋapiᚋcoreᚋv1ᚐPodConditionᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodStatus_message(ctx context.Context, field graphql.CollectedField, obj *v1.PodStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Message, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodStatus_reason(ctx context.Context, field graphql.CollectedField, obj *v1.PodStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Reason, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodStatus_nominatedNodeName(ctx context.Context, field graphql.CollectedField, obj *v1.PodStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NominatedNodeName, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodStatus_hostIP(ctx context.Context, field graphql.CollectedField, obj *v1.PodStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.HostIP, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodStatus_podIP(ctx context.Context, field graphql.CollectedField, obj *v1.PodStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PodIP, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodStatus_podIPs(ctx context.Context, field graphql.CollectedField, obj *v1.PodStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PodIPs, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]v1.PodIP)
+	fc.Result = res
+	return ec.marshalOPodIP2ᚕk8sᚗioᚋapiᚋcoreᚋv1ᚐPodIPᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodStatus_startTime(ctx context.Context, field graphql.CollectedField, obj *v1.PodStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.PodStatus().StartTime(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*time.Time)
+	fc.Result = res
+	return ec.marshalOTime2ᚖtimeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodStatus_initContainerStatuses(ctx context.Context, field graphql.CollectedField, obj *v1.PodStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.InitContainerStatuses, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]v1.ContainerStatus)
+	fc.Result = res
+	return ec.marshalOContainerStatus2ᚕk8sᚗioᚋapiᚋcoreᚋv1ᚐContainerStatusᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodStatus_containerStatuses(ctx context.Context, field graphql.CollectedField, obj *v1.PodStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ContainerStatuses, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]v1.ContainerStatus)
+	fc.Result = res
+	return ec.marshalOContainerStatus2ᚕk8sᚗioᚋapiᚋcoreᚋv1ᚐContainerStatusᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodStatus_qosClass(ctx context.Context, field graphql.CollectedField, obj *v1.PodStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.PodStatus().QosClass(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodStatus_ephemeralContainerStatuses(ctx context.Context, field graphql.CollectedField, obj *v1.PodStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.EphemeralContainerStatuses, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]v1.ContainerStatus)
+	fc.Result = res
+	return ec.marshalOContainerStatus2ᚕk8sᚗioᚋapiᚋcoreᚋv1ᚐContainerStatusᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_namepsace(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -17630,6 +19758,208 @@ func (ec *executionContext) _ChaosCondition(ctx context.Context, sel ast.Selecti
 	return out
 }
 
+var containerStateImplementors = []string{"ContainerState"}
+
+func (ec *executionContext) _ContainerState(ctx context.Context, sel ast.SelectionSet, obj *v1.ContainerState) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, containerStateImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ContainerState")
+		case "waiting":
+			out.Values[i] = ec._ContainerState_waiting(ctx, field, obj)
+		case "running":
+			out.Values[i] = ec._ContainerState_running(ctx, field, obj)
+		case "terminated":
+			out.Values[i] = ec._ContainerState_terminated(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var containerStateRunningImplementors = []string{"ContainerStateRunning"}
+
+func (ec *executionContext) _ContainerStateRunning(ctx context.Context, sel ast.SelectionSet, obj *v1.ContainerStateRunning) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, containerStateRunningImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ContainerStateRunning")
+		case "startedAt":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._ContainerStateRunning_startedAt(ctx, field, obj)
+				return res
+			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var containerStateTerminatedImplementors = []string{"ContainerStateTerminated"}
+
+func (ec *executionContext) _ContainerStateTerminated(ctx context.Context, sel ast.SelectionSet, obj *v1.ContainerStateTerminated) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, containerStateTerminatedImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ContainerStateTerminated")
+		case "exitCode":
+			out.Values[i] = ec._ContainerStateTerminated_exitCode(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "signal":
+			out.Values[i] = ec._ContainerStateTerminated_signal(ctx, field, obj)
+		case "reason":
+			out.Values[i] = ec._ContainerStateTerminated_reason(ctx, field, obj)
+		case "message":
+			out.Values[i] = ec._ContainerStateTerminated_message(ctx, field, obj)
+		case "startedAt":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._ContainerStateTerminated_startedAt(ctx, field, obj)
+				return res
+			})
+		case "finishedAt":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._ContainerStateTerminated_finishedAt(ctx, field, obj)
+				return res
+			})
+		case "containerID":
+			out.Values[i] = ec._ContainerStateTerminated_containerID(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var containerStateWaitingImplementors = []string{"ContainerStateWaiting"}
+
+func (ec *executionContext) _ContainerStateWaiting(ctx context.Context, sel ast.SelectionSet, obj *v1.ContainerStateWaiting) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, containerStateWaitingImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ContainerStateWaiting")
+		case "reason":
+			out.Values[i] = ec._ContainerStateWaiting_reason(ctx, field, obj)
+		case "message":
+			out.Values[i] = ec._ContainerStateWaiting_message(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var containerStatusImplementors = []string{"ContainerStatus"}
+
+func (ec *executionContext) _ContainerStatus(ctx context.Context, sel ast.SelectionSet, obj *v1.ContainerStatus) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, containerStatusImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ContainerStatus")
+		case "name":
+			out.Values[i] = ec._ContainerStatus_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "State":
+			out.Values[i] = ec._ContainerStatus_State(ctx, field, obj)
+		case "lastTerminationState":
+			out.Values[i] = ec._ContainerStatus_lastTerminationState(ctx, field, obj)
+		case "ready":
+			out.Values[i] = ec._ContainerStatus_ready(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "restartCount":
+			out.Values[i] = ec._ContainerStatus_restartCount(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "image":
+			out.Values[i] = ec._ContainerStatus_image(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "imageID":
+			out.Values[i] = ec._ContainerStatus_imageID(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "containerID":
+			out.Values[i] = ec._ContainerStatus_containerID(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "started":
+			out.Values[i] = ec._ContainerStatus_started(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var corruptSpecImplementors = []string{"CorruptSpec"}
 
 func (ec *executionContext) _CorruptSpec(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.CorruptSpec) graphql.Marshaler {
@@ -19220,6 +21550,16 @@ func (ec *executionContext) _Pod(ctx context.Context, sel ast.SelectionSet, obj 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
+		case "spec":
+			out.Values[i] = ec._Pod_spec(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "status":
+			out.Values[i] = ec._Pod_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
 		case "logs":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -19234,6 +21574,82 @@ func (ec *executionContext) _Pod(ctx context.Context, sel ast.SelectionSet, obj 
 				}
 				return res
 			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var podConditionImplementors = []string{"PodCondition"}
+
+func (ec *executionContext) _PodCondition(ctx context.Context, sel ast.SelectionSet, obj *v1.PodCondition) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, podConditionImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PodCondition")
+		case "type":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._PodCondition_type(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "status":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._PodCondition_status(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "lastProbeTime":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._PodCondition_lastProbeTime(ctx, field, obj)
+				return res
+			})
+		case "lastTransitionTime":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._PodCondition_lastTransitionTime(ctx, field, obj)
+				return res
+			})
+		case "reason":
+			out.Values[i] = ec._PodCondition_reason(ctx, field, obj)
+		case "message":
+			out.Values[i] = ec._PodCondition_message(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -19949,6 +22365,33 @@ func (ec *executionContext) _PodIOChaosStatus(ctx context.Context, sel ast.Selec
 	return out
 }
 
+var podIPImplementors = []string{"PodIP"}
+
+func (ec *executionContext) _PodIP(ctx context.Context, sel ast.SelectionSet, obj *v1.PodIP) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, podIPImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PodIP")
+		case "ip":
+			out.Values[i] = ec._PodIP_ip(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var podNetworkChaosImplementors = []string{"PodNetworkChaos"}
 
 func (ec *executionContext) _PodNetworkChaos(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.PodNetworkChaos) graphql.Marshaler {
@@ -20239,6 +22682,129 @@ func (ec *executionContext) _PodSelectorSpec(ctx context.Context, sel ast.Select
 			})
 		case "podPhaseSelectors":
 			out.Values[i] = ec._PodSelectorSpec_podPhaseSelectors(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var podSpecImplementors = []string{"PodSpec"}
+
+func (ec *executionContext) _PodSpec(ctx context.Context, sel ast.SelectionSet, obj *v1.PodSpec) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, podSpecImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PodSpec")
+		case "nodeName":
+			out.Values[i] = ec._PodSpec_nodeName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var podStatusImplementors = []string{"PodStatus"}
+
+func (ec *executionContext) _PodStatus(ctx context.Context, sel ast.SelectionSet, obj *v1.PodStatus) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, podStatusImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PodStatus")
+		case "phase":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._PodStatus_phase(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "conditions":
+			out.Values[i] = ec._PodStatus_conditions(ctx, field, obj)
+		case "message":
+			out.Values[i] = ec._PodStatus_message(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "reason":
+			out.Values[i] = ec._PodStatus_reason(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "nominatedNodeName":
+			out.Values[i] = ec._PodStatus_nominatedNodeName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "hostIP":
+			out.Values[i] = ec._PodStatus_hostIP(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "podIP":
+			out.Values[i] = ec._PodStatus_podIP(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "podIPs":
+			out.Values[i] = ec._PodStatus_podIPs(ctx, field, obj)
+		case "startTime":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._PodStatus_startTime(ctx, field, obj)
+				return res
+			})
+		case "initContainerStatuses":
+			out.Values[i] = ec._PodStatus_initContainerStatuses(ctx, field, obj)
+		case "containerStatuses":
+			out.Values[i] = ec._PodStatus_containerStatuses(ctx, field, obj)
+		case "qosClass":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._PodStatus_qosClass(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "ephemeralContainerStatuses":
+			out.Values[i] = ec._PodStatus_ephemeralContainerStatuses(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -20949,6 +23515,10 @@ func (ec *executionContext) marshalNComponent2githubᚗcomᚋchaosᚑmeshᚋchao
 	return v
 }
 
+func (ec *executionContext) marshalNContainerStatus2k8sᚗioᚋapiᚋcoreᚋv1ᚐContainerStatus(ctx context.Context, sel ast.SelectionSet, v v1.ContainerStatus) graphql.Marshaler {
+	return ec._ContainerStatus(ctx, sel, &v)
+}
+
 func (ec *executionContext) marshalNHTTPChaos2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐHTTPChaos(ctx context.Context, sel ast.SelectionSet, v v1alpha1.HTTPChaos) graphql.Marshaler {
 	return ec._HTTPChaos(ctx, sel, &v)
 }
@@ -21092,6 +23662,10 @@ func (ec *executionContext) marshalNPod2ᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐPod(ctx 
 	return ec._Pod(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNPodCondition2k8sᚗioᚋapiᚋcoreᚋv1ᚐPodCondition(ctx context.Context, sel ast.SelectionSet, v v1.PodCondition) graphql.Marshaler {
+	return ec._PodCondition(ctx, sel, &v)
+}
+
 func (ec *executionContext) marshalNPodHTTPChaos2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodHttpChaos(ctx context.Context, sel ast.SelectionSet, v v1alpha1.PodHttpChaos) graphql.Marshaler {
 	return ec._PodHTTPChaos(ctx, sel, &v)
 }
@@ -21185,6 +23759,10 @@ func (ec *executionContext) marshalNPodIOChaosStatus2githubᚗcomᚋchaosᚑmesh
 	return ec._PodIOChaosStatus(ctx, sel, &v)
 }
 
+func (ec *executionContext) marshalNPodIP2k8sᚗioᚋapiᚋcoreᚋv1ᚐPodIP(ctx context.Context, sel ast.SelectionSet, v v1.PodIP) graphql.Marshaler {
+	return ec._PodIP(ctx, sel, &v)
+}
+
 func (ec *executionContext) marshalNPodNetworkChaos2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodNetworkChaos(ctx context.Context, sel ast.SelectionSet, v v1alpha1.PodNetworkChaos) graphql.Marshaler {
 	return ec._PodNetworkChaos(ctx, sel, &v)
 }
@@ -21209,6 +23787,14 @@ func (ec *executionContext) marshalNPodNetworkChaosStatus2githubᚗcomᚋchaos�
 
 func (ec *executionContext) marshalNPodSelectorSpec2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodSelectorSpec(ctx context.Context, sel ast.SelectionSet, v v1alpha1.PodSelectorSpec) graphql.Marshaler {
 	return ec._PodSelectorSpec(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNPodSpec2k8sᚗioᚋapiᚋcoreᚋv1ᚐPodSpec(ctx context.Context, sel ast.SelectionSet, v v1.PodSpec) graphql.Marshaler {
+	return ec._PodSpec(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNPodStatus2k8sᚗioᚋapiᚋcoreᚋv1ᚐPodStatus(ctx context.Context, sel ast.SelectionSet, v v1.PodStatus) graphql.Marshaler {
+	return ec._PodStatus(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNRawIPSet2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐRawIPSet(ctx context.Context, sel ast.SelectionSet, v v1alpha1.RawIPSet) graphql.Marshaler {
@@ -21635,6 +24221,71 @@ func (ec *executionContext) marshalOChaosCondition2ᚕgithubᚗcomᚋchaosᚑmes
 	return ret
 }
 
+func (ec *executionContext) marshalOContainerState2k8sᚗioᚋapiᚋcoreᚋv1ᚐContainerState(ctx context.Context, sel ast.SelectionSet, v v1.ContainerState) graphql.Marshaler {
+	return ec._ContainerState(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalOContainerStateRunning2ᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐContainerStateRunning(ctx context.Context, sel ast.SelectionSet, v *v1.ContainerStateRunning) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._ContainerStateRunning(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOContainerStateTerminated2ᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐContainerStateTerminated(ctx context.Context, sel ast.SelectionSet, v *v1.ContainerStateTerminated) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._ContainerStateTerminated(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOContainerStateWaiting2ᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐContainerStateWaiting(ctx context.Context, sel ast.SelectionSet, v *v1.ContainerStateWaiting) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._ContainerStateWaiting(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOContainerStatus2ᚕk8sᚗioᚋapiᚋcoreᚋv1ᚐContainerStatusᚄ(ctx context.Context, sel ast.SelectionSet, v []v1.ContainerStatus) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNContainerStatus2k8sᚗioᚋapiᚋcoreᚋv1ᚐContainerStatus(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
 func (ec *executionContext) marshalOCorruptSpec2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐCorruptSpec(ctx context.Context, sel ast.SelectionSet, v *v1alpha1.CorruptSpec) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -22041,6 +24692,46 @@ func (ec *executionContext) marshalOPod2ᚕᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐPod�
 	return ret
 }
 
+func (ec *executionContext) marshalOPodCondition2ᚕk8sᚗioᚋapiᚋcoreᚋv1ᚐPodConditionᚄ(ctx context.Context, sel ast.SelectionSet, v []v1.PodCondition) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNPodCondition2k8sᚗioᚋapiᚋcoreᚋv1ᚐPodCondition(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
 func (ec *executionContext) marshalOPodHTTPChaos2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodHttpChaosᚄ(ctx context.Context, sel ast.SelectionSet, v []*v1alpha1.PodHttpChaos) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -22130,6 +24821,46 @@ func (ec *executionContext) marshalOPodIOChaos2ᚕᚖgithubᚗcomᚋchaosᚑmesh
 				defer wg.Done()
 			}
 			ret[i] = ec.marshalNPodIOChaos2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodIOChaos(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalOPodIP2ᚕk8sᚗioᚋapiᚋcoreᚋv1ᚐPodIPᚄ(ctx context.Context, sel ast.SelectionSet, v []v1.PodIP) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNPodIP2k8sᚗioᚋapiᚋcoreᚋv1ᚐPodIP(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)

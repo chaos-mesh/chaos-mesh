@@ -125,6 +125,18 @@ func (r *chaosConditionResolver) Status(ctx context.Context, obj *v1alpha1.Chaos
 	return string(obj.Status), nil
 }
 
+func (r *containerStateRunningResolver) StartedAt(ctx context.Context, obj *v1.ContainerStateRunning) (*time.Time, error) {
+	return &obj.StartedAt.Time, nil
+}
+
+func (r *containerStateTerminatedResolver) StartedAt(ctx context.Context, obj *v1.ContainerStateTerminated) (*time.Time, error) {
+	return &obj.StartedAt.Time, nil
+}
+
+func (r *containerStateTerminatedResolver) FinishedAt(ctx context.Context, obj *v1.ContainerStateTerminated) (*time.Time, error) {
+	return &obj.FinishedAt.Time, nil
+}
+
 func (r *corruptSpecResolver) Corrup(ctx context.Context, obj *v1alpha1.CorruptSpec) (string, error) {
 	return obj.Corrupt, nil
 }
@@ -693,6 +705,22 @@ func (r *podResolver) Logs(ctx context.Context, obj *v1.Pod) (string, error) {
 	return string(data), nil
 }
 
+func (r *podConditionResolver) Type(ctx context.Context, obj *v1.PodCondition) (string, error) {
+	return string(obj.Type), nil
+}
+
+func (r *podConditionResolver) Status(ctx context.Context, obj *v1.PodCondition) (string, error) {
+	return string(obj.Status), nil
+}
+
+func (r *podConditionResolver) LastProbeTime(ctx context.Context, obj *v1.PodCondition) (*time.Time, error) {
+	return &obj.LastProbeTime.Time, nil
+}
+
+func (r *podConditionResolver) LastTransitionTime(ctx context.Context, obj *v1.PodCondition) (*time.Time, error) {
+	return &obj.LastTransitionTime.Time, nil
+}
+
 func (r *podHTTPChaosResolver) UID(ctx context.Context, obj *v1alpha1.PodHttpChaos) (string, error) {
 	return string(obj.UID), nil
 }
@@ -906,6 +934,18 @@ func (r *podSelectorSpecResolver) AnnotationSelectors(ctx context.Context, obj *
 	return selectors, nil
 }
 
+func (r *podStatusResolver) Phase(ctx context.Context, obj *v1.PodStatus) (string, error) {
+	return string(obj.Phase), nil
+}
+
+func (r *podStatusResolver) StartTime(ctx context.Context, obj *v1.PodStatus) (*time.Time, error) {
+	return &obj.StartTime.Time, nil
+}
+
+func (r *podStatusResolver) QosClass(ctx context.Context, obj *v1.PodStatus) (string, error) {
+	return string(obj.QOSClass), nil
+}
+
 func (r *queryResolver) Namepsace(ctx context.Context, ns string) (*model.Namespace, error) {
 	return &model.Namespace{Ns: ns}, nil
 }
@@ -963,6 +1003,16 @@ func (r *Resolver) ChaosCondition() generated.ChaosConditionResolver {
 	return &chaosConditionResolver{r}
 }
 
+// ContainerStateRunning returns generated.ContainerStateRunningResolver implementation.
+func (r *Resolver) ContainerStateRunning() generated.ContainerStateRunningResolver {
+	return &containerStateRunningResolver{r}
+}
+
+// ContainerStateTerminated returns generated.ContainerStateTerminatedResolver implementation.
+func (r *Resolver) ContainerStateTerminated() generated.ContainerStateTerminatedResolver {
+	return &containerStateTerminatedResolver{r}
+}
+
 // CorruptSpec returns generated.CorruptSpecResolver implementation.
 func (r *Resolver) CorruptSpec() generated.CorruptSpecResolver { return &corruptSpecResolver{r} }
 
@@ -1017,6 +1067,9 @@ func (r *Resolver) OwnerReference() generated.OwnerReferenceResolver {
 // Pod returns generated.PodResolver implementation.
 func (r *Resolver) Pod() generated.PodResolver { return &podResolver{r} }
 
+// PodCondition returns generated.PodConditionResolver implementation.
+func (r *Resolver) PodCondition() generated.PodConditionResolver { return &podConditionResolver{r} }
+
 // PodHTTPChaos returns generated.PodHTTPChaosResolver implementation.
 func (r *Resolver) PodHTTPChaos() generated.PodHTTPChaosResolver { return &podHTTPChaosResolver{r} }
 
@@ -1048,6 +1101,9 @@ func (r *Resolver) PodSelectorSpec() generated.PodSelectorSpecResolver {
 	return &podSelectorSpecResolver{r}
 }
 
+// PodStatus returns generated.PodStatusResolver implementation.
+func (r *Resolver) PodStatus() generated.PodStatusResolver { return &podStatusResolver{r} }
+
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
@@ -1068,6 +1124,8 @@ func (r *Resolver) StressChaos() generated.StressChaosResolver { return &stressC
 type attrOverrideSpecResolver struct{ *Resolver }
 type bandwidthSpecResolver struct{ *Resolver }
 type chaosConditionResolver struct{ *Resolver }
+type containerStateRunningResolver struct{ *Resolver }
+type containerStateTerminatedResolver struct{ *Resolver }
 type corruptSpecResolver struct{ *Resolver }
 type experimentStatusResolver struct{ *Resolver }
 type hTTPChaosResolver struct{ *Resolver }
@@ -1084,6 +1142,7 @@ type namespaceResolver struct{ *Resolver }
 type networkChaosResolver struct{ *Resolver }
 type ownerReferenceResolver struct{ *Resolver }
 type podResolver struct{ *Resolver }
+type podConditionResolver struct{ *Resolver }
 type podHTTPChaosResolver struct{ *Resolver }
 type podHttpChaosReplaceActionsResolver struct{ *Resolver }
 type podHttpChaosRuleResolver struct{ *Resolver }
@@ -1091,6 +1150,7 @@ type podHttpChaosSelectorResolver struct{ *Resolver }
 type podIOChaosResolver struct{ *Resolver }
 type podNetworkChaosResolver struct{ *Resolver }
 type podSelectorSpecResolver struct{ *Resolver }
+type podStatusResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type rawIptablesResolver struct{ *Resolver }
 type rawTrafficControlResolver struct{ *Resolver }
