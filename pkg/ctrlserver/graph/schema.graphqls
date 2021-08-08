@@ -17,12 +17,12 @@ schema {
 }
 
 type Query {
-    namepsace(ns: String!): Namespace!
+    namepsace(ns: String): Namespace!
 }
 
 type Logger {
-    component(ns: String!, component: Component!): String!  @goField(forceResolver: true)
-    pod(ns: String!, name: String!): String!                @goField(forceResolver: true)
+    component(ns: String, component: Component!): String!  @goField(forceResolver: true)
+    pod(ns: String, name: String!): String!                @goField(forceResolver: true)
 }
 
 type Namespace {

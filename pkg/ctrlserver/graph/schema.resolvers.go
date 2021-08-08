@@ -379,9 +379,14 @@ func (r *ioFaultResolver) Errno(ctx context.Context, obj *v1alpha1.IoFault) (int
 	return int(obj.Errno), nil
 }
 
-func (r *loggerResolver) Component(ctx context.Context, ns string, component model.Component) (<-chan string, error) {
+func (r *loggerResolver) Component(ctx context.Context, ns *string, component model.Component) (<-chan string, error) {
+	if ns == nil {
+		ns = new(string)
+		*ns = DefaultNamespace
+	}
+
 	var list v1.PodList
-	if err := r.Client.List(ctx, &list, client.MatchingLabels(componentLabels(component))); err != nil {
+	if err := r.Client.List(ctx, &list, client.MatchingLabels(componentLabels(component)), client.InNamespace(*ns)); err != nil {
 		return nil, err
 	}
 
@@ -389,11 +394,16 @@ func (r *loggerResolver) Component(ctx context.Context, ns string, component mod
 		return nil, fmt.Errorf("instance of %s not found", component)
 	}
 
-	return r.Pod(ctx, list.Items[0].Namespace, list.Items[0].Name)
+	return r.Pod(ctx, &list.Items[0].Namespace, list.Items[0].Name)
 }
 
-func (r *loggerResolver) Pod(ctx context.Context, ns string, name string) (<-chan string, error) {
-	logs, err := r.Clientset.CoreV1().Pods(ns).GetLogs(name, &v1.PodLogOptions{Follow: true}).Stream()
+func (r *loggerResolver) Pod(ctx context.Context, ns *string, name string) (<-chan string, error) {
+	if ns == nil {
+		ns = new(string)
+		*ns = DefaultNamespace
+	}
+
+	logs, err := r.Clientset.CoreV1().Pods(*ns).GetLogs(name, &v1.PodLogOptions{Follow: true}).Stream()
 	if err != nil {
 		return nil, err
 	}
@@ -404,14 +414,14 @@ func (r *loggerResolver) Pod(ctx context.Context, ns string, name string) (<-cha
 		for {
 			line, err := reader.ReadString('\n')
 			if err != nil {
-				r.Log.Error(err, fmt.Sprintf("fail to read log of pod(%s/%s)", ns, name))
+				r.Log.Error(err, fmt.Sprintf("fail to read log of pod(%s/%s)", *ns, name))
 				break
 			}
 			select {
 			case logChan <- string(line):
 				continue
 			case <-time.NewTimer(time.Minute).C:
-				r.Log.Info(fmt.Sprintf("client has not read log of pod(%s/%s) for 1m, close channel", ns, name))
+				r.Log.Info(fmt.Sprintf("client has not read log of pod(%s/%s) for 1m, close channel", *ns, name))
 				break
 			}
 		}
@@ -959,8 +969,12 @@ func (r *podStatusResolver) QosClass(ctx context.Context, obj *v1.PodStatus) (st
 	return string(obj.QOSClass), nil
 }
 
-func (r *queryResolver) Namepsace(ctx context.Context, ns string) (*model.Namespace, error) {
-	return &model.Namespace{Ns: ns}, nil
+func (r *queryResolver) Namepsace(ctx context.Context, ns *string) (*model.Namespace, error) {
+	if ns == nil {
+		ns = new(string)
+		*ns = DefaultNamespace
+	}
+	return &model.Namespace{Ns: *ns}, nil
 }
 
 func (r *rawIptablesResolver) Direction(ctx context.Context, obj *v1alpha1.RawIptables) (string, error) {

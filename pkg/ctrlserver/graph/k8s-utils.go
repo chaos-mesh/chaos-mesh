@@ -8,6 +8,8 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/ctrlserver/graph/model"
 )
 
+const DefaultNamespace = "default"
+
 func componentLabels(component model.Component) map[string]string {
 	var componentLabel string
 	switch component {
