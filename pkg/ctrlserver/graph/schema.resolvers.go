@@ -705,6 +705,19 @@ func (r *podResolver) Logs(ctx context.Context, obj *v1.Pod) (string, error) {
 	return string(data), nil
 }
 
+func (r *podResolver) Daemon(ctx context.Context, obj *v1.Pod) (*v1.Pod, error) {
+	var list v1.PodList
+	if err := r.Client.List(ctx, &list, client.MatchingLabels(componentLabels(model.ComponentDaemon))); err != nil {
+		return nil, err
+	}
+	for _, daemon := range list.Items {
+		if obj.Spec.NodeName == daemon.Spec.NodeName {
+			return &daemon, nil
+		}
+	}
+	return nil, nil
+}
+
 func (r *podConditionResolver) Type(ctx context.Context, obj *v1.PodCondition) (string, error) {
 	return string(obj.Type), nil
 }
