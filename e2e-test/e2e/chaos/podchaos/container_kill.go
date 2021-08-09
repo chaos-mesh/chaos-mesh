@@ -187,7 +187,7 @@ func TestcaseContainerKillPauseThenUnPause(ns string, kubeCli kubernetes.Interfa
 	err = util.PauseChaos(ctx, cli, containerKillChaos)
 	framework.ExpectNoError(err, "pause chaos error")
 
-	err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
+	err = wait.Poll(1*time.Second, 10*time.Second, func() (done bool, err error) {
 		chaos := &v1alpha1.PodChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
 		framework.ExpectNoError(err, "get pod chaos error")
@@ -196,7 +196,7 @@ func TestcaseContainerKillPauseThenUnPause(ns string, kubeCli kubernetes.Interfa
 		}
 		return false, err
 	})
-	framework.ExpectNoError(err, "check paused chaos failed")
+	framework.ExpectError(err, "one-shot chaos shouldn't enter stopped phase")
 
 	// wait for 1 minutes and check whether nginx container will be killed or not
 	pods, err = kubeCli.CoreV1().Pods(ns).List(listOption)
@@ -223,17 +223,17 @@ func TestcaseContainerKillPauseThenUnPause(ns string, kubeCli kubernetes.Interfa
 		}
 		return false, err
 	})
-	framework.ExpectNoError(err, "check resumed chaos failed")
+	framework.ExpectNoError(err, "chaos should keep in running phase")
 
 	// nginx container is killed by resumed experiment
 	pods, err = kubeCli.CoreV1().Pods(ns).List(listOption)
 	framework.ExpectNoError(err, "get nginx pods error")
 	containerID = pods.Items[0].Status.ContainerStatuses[0].ContainerID
-	err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
+	err = wait.Poll(1*time.Second, 10*time.Second, func() (done bool, err error) {
 		newPods, err = kubeCli.CoreV1().Pods(ns).List(listOption)
 		framework.ExpectNoError(err, "get nginx pods error")
 		return containerID != newPods.Items[0].Status.ContainerStatuses[0].ContainerID, nil
 	})
-	framework.ExpectNoError(err, "wait container killed failed")
+	framework.ExpectError(err, "container shouldn't be killed")
 
 }

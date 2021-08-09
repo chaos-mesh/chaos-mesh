@@ -14,6 +14,8 @@
 package v1alpha1
 
 import (
+	"fmt"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -25,36 +27,36 @@ var _ = Describe("gcpchaos_webhook", func() {
 
 			type TestCase struct {
 				name    string
-				chaos   GcpChaos
-				execute func(chaos *GcpChaos) error
+				chaos   GCPChaos
+				execute func(chaos *GCPChaos) error
 				expect  string
 			}
 			tcs := []TestCase{
 				{
 					name: "simple ValidateCreate for DiskLoss",
-					chaos: GcpChaos{
+					chaos: GCPChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
 							Name:      "foo1",
 						},
-						Spec: GcpChaosSpec{
+						Spec: GCPChaosSpec{
 							Action: DiskLoss,
 						},
 					},
-					execute: func(chaos *GcpChaos) error {
+					execute: func(chaos *GCPChaos) error {
 						return chaos.ValidateCreate()
 					},
 					expect: "error",
 				},
 				{
 					name: "unknow action",
-					chaos: GcpChaos{
+					chaos: GCPChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
 							Name:      "foo6",
 						},
 					},
-					execute: func(chaos *GcpChaos) error {
+					execute: func(chaos *GCPChaos) error {
 						return chaos.ValidateCreate()
 					},
 					expect: "error",
@@ -64,6 +66,9 @@ var _ = Describe("gcpchaos_webhook", func() {
 			for _, tc := range tcs {
 				err := tc.execute(&tc.chaos)
 				if tc.expect == "error" {
+					if err == nil {
+						fmt.Println("Aha")
+					}
 					Expect(err).To(HaveOccurred())
 				} else {
 					Expect(err).NotTo(HaveOccurred())

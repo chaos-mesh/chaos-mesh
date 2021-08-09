@@ -22,21 +22,21 @@ import (
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 )
 
 type ChaosNodeReconciler struct {
 	kubeClient    client.Client
-	eventRecorder record.EventRecorder
+	eventRecorder recorder.ChaosRecorder
 	logger        logr.Logger
 }
 
-func NewChaosNodeReconciler(kubeClient client.Client, eventRecorder record.EventRecorder, logger logr.Logger) *ChaosNodeReconciler {
+func NewChaosNodeReconciler(kubeClient client.Client, eventRecorder recorder.ChaosRecorder, logger logr.Logger) *ChaosNodeReconciler {
 	return &ChaosNodeReconciler{kubeClient: kubeClient, eventRecorder: eventRecorder, logger: logger}
 }
 
@@ -83,7 +83,7 @@ func (it *ChaosNodeReconciler) Reconcile(request reconcile.Request) (reconcile.R
 			return client.IgnoreNotFound(err)
 		}
 
-		if node.Spec.Type == v1alpha1.TypeSchedule {
+		if nodeNeedUpdate.Spec.Type == v1alpha1.TypeSchedule {
 			// sync status with schedule
 			scheduleList, err := it.fetchChildrenSchedule(ctx, nodeNeedUpdate)
 			if err != nil {
@@ -91,7 +91,7 @@ func (it *ChaosNodeReconciler) Reconcile(request reconcile.Request) (reconcile.R
 			}
 			if len(scheduleList) > 1 {
 				it.logger.Info("the number of schedule custom resource affected by chaos node is more than 1",
-					"chaos node", fmt.Sprintf("%s/%s", node.Namespace, node.Name),
+					"chaos node", fmt.Sprintf("%s/%s", nodeNeedUpdate.Namespace, nodeNeedUpdate.Name),
 					"schedule custom resources", scheduleList,
 				)
 			}
@@ -178,6 +178,15 @@ func (it *ChaosNodeReconciler) syncSchedule(ctx context.Context, node v1alpha1.W
 					"chaos node", node.Name,
 					"schedule CR name", item.GetName(),
 				)
+				it.eventRecorder.Event(&node, recorder.ChaosCustomResourceDeleteFailed{
+					Name: item.GetName(),
+					Kind: item.GetObjectKind().GroupVersionKind().Kind,
+				})
+			} else {
+				it.eventRecorder.Event(&node, recorder.ChaosCustomResourceDeleted{
+					Name: item.GetName(),
+					Kind: item.GetObjectKind().GroupVersionKind().Kind,
+				})
 			}
 		}
 		return nil
@@ -236,6 +245,15 @@ func (it *ChaosNodeReconciler) syncChaosResources(ctx context.Context, node v1al
 					"chaos node", node.Name,
 					"chaos CR name", item.GetName(),
 				)
+				it.eventRecorder.Event(&node, recorder.ChaosCustomResourceDeleteFailed{
+					Name: item.GetName(),
+					Kind: item.GetObjectKind().GroupVersionKind().Kind,
+				})
+			} else {
+				it.eventRecorder.Event(&node, recorder.ChaosCustomResourceDeleted{
+					Name: item.GetName(),
+					Kind: item.GetObjectKind().GroupVersionKind().Kind,
+				})
 			}
 		}
 		return nil
@@ -301,12 +319,15 @@ func (it *ChaosNodeReconciler) createChaos(ctx context.Context, node v1alpha1.Wo
 
 	err = it.kubeClient.Create(ctx, chaosObject)
 	if err != nil {
-		it.eventRecorder.Event(&node, corev1.EventTypeWarning, v1alpha1.ChaosCRCreateFailed, "Failed to create chaos CR")
+		it.eventRecorder.Event(&node, recorder.ChaosCustomResourceCreateFailed{})
 		it.logger.Error(err, "failed to create chaos")
 		return nil
 	}
-	it.logger.Info("chaos object created", "namespace", meta.GetNamespace(), "name", meta.GetName())
-	it.eventRecorder.Event(&node, corev1.EventTypeNormal, v1alpha1.ChaosCRCreated, fmt.Sprintf("Chaos CR %s/%s created", meta.GetNamespace(), meta.GetName()))
+	it.logger.Info("chaos object created", "namespace", meta.GetNamespace(), "name", meta.GetName(), "parent node", node)
+	it.eventRecorder.Event(&node, recorder.ChaosCustomResourceCreated{
+		Name: meta.GetName(),
+		Kind: chaosObject.GetObjectKind().GroupVersionKind().Kind,
+	})
 	return nil
 }
 
@@ -366,12 +387,15 @@ func (it ChaosNodeReconciler) createSchedule(ctx context.Context, node v1alpha1.
 	}
 	err := it.kubeClient.Create(ctx, &scheduleToCreate)
 	if err != nil {
-		it.eventRecorder.Event(&node, corev1.EventTypeWarning, v1alpha1.ChaosCRCreateFailed, "Failed to create schedule CR")
+		it.eventRecorder.Event(&node, recorder.ChaosCustomResourceCreateFailed{})
 		it.logger.Error(err, "failed to create schedule CR")
 		return nil
 	}
 	it.logger.Info("schedule CR created", "namespace", scheduleToCreate.GetNamespace(), "name", scheduleToCreate.GetName())
-	it.eventRecorder.Event(&node, corev1.EventTypeNormal, v1alpha1.ChaosCRCreated, fmt.Sprintf("schedule CR %s/%s created", scheduleToCreate.GetNamespace(), scheduleToCreate.GetName()))
+	it.eventRecorder.Event(&node, recorder.ChaosCustomResourceCreated{
+		Name: scheduleToCreate.GetName(),
+		Kind: scheduleToCreate.GetObjectKind().GroupVersionKind().Kind,
+	})
 	return nil
 
 }

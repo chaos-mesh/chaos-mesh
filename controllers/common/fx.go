@@ -46,12 +46,13 @@ type ChaosImplPair struct {
 type Params struct {
 	fx.In
 
-	Mgr      ctrl.Manager
-	Client   client.Client
-	Logger   logr.Logger
-	Selector *selector.Selector
-	Impls    []*ChaosImplPair `group:"impl"`
-	Reader   client.Reader    `name:"no-cache"`
+	Mgr             ctrl.Manager
+	Client          client.Client
+	Logger          logr.Logger
+	Selector        *selector.Selector
+	RecorderBuilder *recorder.RecorderBuilder
+	Impls           []*ChaosImplPair `group:"impl"`
+	Reader          client.Reader    `name:"no-cache"`
 }
 
 func NewController(params Params) (types.Controller, error) {
@@ -61,6 +62,7 @@ func NewController(params Params) (types.Controller, error) {
 	client := params.Client
 	reader := params.Reader
 	selector := params.Selector
+	recorderBuilder := params.RecorderBuilder
 
 	setupLog := logger.WithName("setup-common")
 	for _, pair := range pairs {
@@ -92,7 +94,12 @@ func NewController(params Params) (types.Controller, error) {
 						for i := 0; i < items.Len(); i++ {
 							item := items.Index(i).Addr().Interface().(InnerObjectWithSelector)
 							for _, record := range item.GetStatus().Experiment.Records {
-								if controller.ParseNamespacedName(record.Id) == objName {
+								namespacedName, err := controller.ParseNamespacedName(record.Id)
+								if err != nil {
+									setupLog.Error(err, "failed to parse record", "record", record.Id)
+									continue
+								}
+								if namespacedName == objName {
 									id := k8sTypes.NamespacedName{
 										Namespace: item.GetObjectMeta().Namespace,
 										Name:      item.GetObjectMeta().Name,
@@ -116,7 +123,7 @@ func NewController(params Params) (types.Controller, error) {
 			Object:   pair.Object,
 			Client:   client,
 			Reader:   reader,
-			Recorder: recorder.NewRecorder(mgr, "common", logger),
+			Recorder: recorderBuilder.Build("records"),
 			Selector: selector,
 			Log:      logger.WithName("records"),
 		})

@@ -7,8 +7,8 @@ export function toCamelCase(s: string) {
 }
 
 export function truncate(s: string) {
-  if (s.length > 7) {
-    return s.substring(0, 15) + '...'
+  if (s.length > 25) {
+    return s.substring(0, 25) + '...'
   }
 
   return s

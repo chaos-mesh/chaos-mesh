@@ -1,39 +1,38 @@
-import { Box, Chip, CircularProgress, InputAdornment, TextField, Typography } from '@material-ui/core'
-import React, { useMemo, useState } from 'react'
+import {
+  Autocomplete,
+  Box,
+  ChipProps,
+  CircularProgress,
+  InputAdornment,
+  Chip as MUIChip,
+  TextField,
+  Typography,
+} from '@material-ui/core'
+import { useMemo, useState } from 'react'
 
 import { Archive } from 'api/archives.type'
-import Autocomplete from '@material-ui/lab/Autocomplete'
-import { Event } from 'api/events.type'
 import { Experiment } from 'api/experiments.type'
 import FingerprintIcon from '@material-ui/icons/Fingerprint'
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline'
 import Paper from 'components-mui/Paper'
+import { Schedule } from 'api/schedules.type'
 import ScheduleIcon from '@material-ui/icons/Schedule'
 import SearchIcon from '@material-ui/icons/Search'
 import T from 'components/T'
 import Tooltip from 'components-mui/Tooltip'
+import { Workflow } from 'api/workflows.type'
 import _debounce from 'lodash.debounce'
 import api from 'api'
-import clsx from 'clsx'
 import { format } from 'lib/luxon'
-import { makeStyles } from '@material-ui/core/styles'
+import { makeStyles } from '@material-ui/styles'
 import search from 'lib/search'
 import { truncate } from 'lib/utils'
 import { useHistory } from 'react-router-dom'
 import { useIntl } from 'react-intl'
 
+const Chip = (props: ChipProps) => <MUIChip {...props} variant="outlined" size="small" />
+
 const useStyles = makeStyles((theme) => ({
-  search: {
-    minWidth: 360,
-    '& .MuiInputBase-root': {
-      paddingLeft: '9px !important',
-      paddingRight: '15px !important',
-    },
-    [theme.breakpoints.down('xs')]: {
-      flex: 2,
-      minWidth: 'unset',
-    },
-  },
   tooltip: {
     marginBottom: 0,
     paddingLeft: theme.spacing(3),
@@ -51,12 +50,12 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
-type Option = Experiment | Event | Archive
+type Option = Workflow | Schedule | Experiment | Archive
 
 const Search: React.FC = () => {
   const classes = useStyles()
-  const intl = useIntl()
   const history = useHistory()
+  const intl = useIntl()
 
   const [open, setOpen] = useState(false)
   const [options, setOptions] = useState<Option[]>([])
@@ -69,13 +68,24 @@ const Search: React.FC = () => {
         setNoResult(false)
         setOpen(true)
 
-        const [experiments, events, archives] = (
-          await Promise.all([api.experiments.experiments(), api.events.events(), api.archives.archives()])
-        ).map((d) => d.data)
+        const [workflows, schedules, experiments, archives, archivedWorkflows, archivedSchedules] = [
+          (await api.workflows.workflows()).data.map((d) => ({
+            ...d,
+            is: 'workflow' as 'workflow',
+            kind: 'Workflow',
+          })),
+          (await api.schedules.schedules()).data.map((d) => ({ ...d, is: 'schedule' as 'schedule' })),
+          (await api.experiments.experiments()).data.map((d) => ({ ...d, is: 'experiment' as 'experiment' })),
+          (await api.archives.archives()).data.map((d) => ({ ...d, is: 'archive' as 'archive' })),
+          (await api.workflows.archives()).data.map((d) => ({ ...d, is: 'archive' as 'archive' })),
+          (await api.schedules.archives()).data.map((d) => ({ ...d, is: 'archive' as 'archive' })),
+        ]
 
-        const result = search({ experiments, events, archives } as any, s)
-        result.events = result.events.reverse().slice(0, 5)
-        const newOptions = [...result.experiments, ...result.events, ...result.archives]
+        const result = search(
+          { workflows, schedules, experiments, archives: [...archives, ...archivedWorkflows, ...archivedSchedules] },
+          s
+        )
+        const newOptions = [...result.workflows, ...result.schedules, ...result.experiments, ...result.archives]
 
         setOptions(newOptions)
         if (newOptions.length === 0) {
@@ -85,104 +95,94 @@ const Search: React.FC = () => {
     []
   )
 
-  const filterOptions = (options: any) => options
+  const groupBy = (option: Option) => T(`${option.is}s.title`, intl)
+  const getOptionLabel = (option: Option) => option.name
+  const isOptionEqualToValue = (option: Option, value: Option) => option.uid === value.uid
+  const filterOptions = (options: Option[]) => options
 
-  const groupBy = (option: Option) =>
-    (option as Experiment).status
-      ? intl.formatMessage({ id: 'experiments.title' })
-      : (option as Event).experiment
-      ? intl.formatMessage({ id: 'events.title' })
-      : intl.formatMessage({ id: 'archives.title' })
-
-  const getOptionLabel = (option: Option) => (option as Event).experiment || (option as any).name
-
-  const renderOption = (option: Option) => {
-    const type = (option as Experiment).status ? 'experiment' : (option as Event).experiment ? 'event' : 'archive'
-    let link = ''
-    let name = ''
-    let uid = (option as Experiment).uid
-    let kind = (option as Experiment).kind
-    let time = ''
+  const determineKind = (option: Option) => (option.is === 'workflow' ? 'Workflow' : (option as any).kind)
+  const determineLink = (uuid: uuid, type: Option['is'], kind: string) => {
+    let link = `/${type}s/${uuid}`
 
     switch (type) {
-      case 'experiment':
       case 'archive':
-        link = `/${type}s/${(option as Experiment).uid}`
-        name = (option as Experiment).name
-        time = (option as Experiment).created
-        break
-      case 'event':
-        link = `/${type}s?event_id=${(option as Event).id}`
-        name = (option as Event).experiment
-        time = (option as Event).start_time
-        break
-      default:
+        switch (kind) {
+          case 'Workflow':
+          case 'Schedule':
+            link = `${link}?kind=${kind.toLowerCase()}`
+            break
+          default:
+            link = `${link}?kind=experiment`
+            break
+        }
         break
     }
 
-    const onClick = (e: React.MouseEvent<HTMLDivElement>) => {
-      e.stopPropagation()
+    return link
+  }
 
-      history.push(link)
+  const renderOption = (props: any, option: Option) => {
+    const type = option.is
+
+    const uuid = option.uid
+    const name = option.name
+    const kind = determineKind(option)
+    const time = option.created_at
+
+    const onClick = () => {
+      history.push(determineLink(uuid, type, kind))
       setOpen(false)
     }
 
     return (
-      <Box onClick={onClick}>
-        <Typography gutterBottom>{name}</Typography>
-        <Box className={classes.chipContainer}>
-          {type !== 'event' ? (
-            <Chip
-              variant="outlined"
-              color="primary"
-              size="small"
-              icon={<FingerprintIcon />}
-              label={truncate(uid)}
-              title={uid}
-            />
-          ) : (
-            <Chip
-              variant="outlined"
-              color="primary"
-              size="small"
-              icon={<FingerprintIcon />}
-              label={(option as Event).id}
-            />
-          )}
-          <Chip variant="outlined" size="small" label={kind} />
-          {type !== 'archive' && <Chip variant="outlined" size="small" icon={<ScheduleIcon />} label={format(time)} />}
+      <li {...props} onClick={onClick}>
+        <Box>
+          <Typography variant="subtitle1" gutterBottom>
+            {name}
+          </Typography>
+          <div className={classes.chipContainer}>
+            <Chip color="primary" icon={<FingerprintIcon />} label={truncate(uuid)} title={uuid} />
+            <Chip label={kind} />
+            <Chip icon={<ScheduleIcon />} label={format(time)} />
+          </div>
         </Box>
-      </Box>
+      </li>
     )
   }
 
-  const onInputChange = (_: any, newVal: string) => {
-    if (newVal) {
+  const onChange = (_: any, value: Option | null, reason: string) => {
+    if (reason === 'selectOption') {
+      history.push(determineLink(value!.uid, value!.is, determineKind(value!)))
+    }
+  }
+
+  const onInputChange = (_: any, newVal: string, reason: string) => {
+    if (newVal && reason !== 'reset') {
       debounceExecSearch(newVal)
     }
   }
 
   return (
     <Autocomplete
-      className={clsx(classes.search, 'nav-search')}
-      freeSolo
+      sx={{ minWidth: 360 }}
+      className="tutorial-search"
+      size="small"
       open={open}
       onClose={() => setOpen(false)}
       loading={loading}
       loadingText={noResult ? T('search.result.noResult') : T('search.result.acquiring')}
       options={options}
-      filterOptions={filterOptions}
       groupBy={groupBy}
       getOptionLabel={getOptionLabel}
+      isOptionEqualToValue={isOptionEqualToValue}
+      filterOptions={filterOptions}
       renderOption={renderOption}
+      onChange={onChange}
       onInputChange={onInputChange}
       renderInput={(params) => (
         <TextField
           {...params}
-          variant="outlined"
-          size="small"
           label={T('search.placeholder')}
-          aria-label="Search"
           InputProps={{
             ...params.InputProps,
             startAdornment: (
@@ -201,12 +201,9 @@ const Search: React.FC = () => {
                         <ul className={classes.tooltip}>
                           <li>{T('search.tip.namespace')}</li>
                           <li>{T('search.tip.kind')}</li>
-                          <li>{T('search.tip.pod')}</li>
-                          <li>{T('search.tip.ip')}</li>
                         </ul>
                       </Typography>
                     }
-                    interactive
                   >
                     <HelpOutlineIcon fontSize="small" />
                   </Tooltip>
@@ -216,7 +213,8 @@ const Search: React.FC = () => {
           }}
         />
       )}
-      PaperComponent={(props) => <Paper {...props} padding={0} />}
+      PaperComponent={(props) => <Paper {...props} sx={{ p: 0 }} />}
+      disableClearable
     />
   )
 }

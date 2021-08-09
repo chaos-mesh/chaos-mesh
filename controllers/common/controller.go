@@ -17,11 +17,9 @@ import (
 	"context"
 	"reflect"
 	"strings"
-	"time"
 
 	"github.com/go-logr/logr"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/util/retry"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -116,6 +114,15 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			}
 		}
 		// TODO: dynamic upgrade the records when some of these pods/containers stopped
+	}
+
+	if len(records) == 0 {
+		r.Log.Info("no record has been selected")
+		r.Recorder.Event(obj, recorder.Failed{
+			Activity: "select targets",
+			Err:      "no record has been selected",
+		})
+		return ctrl.Result{}, nil
 	}
 
 	needRetry := false
@@ -235,23 +242,6 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		r.Recorder.Event(obj, recorder.Updated{
 			Field: "records",
 		})
-
-		// TODO: make the interval and total time configurable
-		// The following codes ensure the Schedule in cache has the latest lastScheduleTime
-		ensureLatestError := wait.Poll(100*time.Millisecond, 2*time.Second, func() (bool, error) {
-			obj := r.Object.DeepCopyObject().(InnerObjectWithSelector)
-
-			if err := r.Client.Get(context.TODO(), req.NamespacedName, obj); err != nil {
-				r.Log.Error(err, "unable to get object")
-				return false, err
-			}
-
-			return reflect.DeepEqual(obj.GetStatus().Experiment.Records, records), nil
-		})
-		if ensureLatestError != nil {
-			r.Log.Error(ensureLatestError, "Fail to ensure that the resource in cache has the latest records")
-			return ctrl.Result{Requeue: needRetry}, nil
-		}
 	}
 	return ctrl.Result{Requeue: needRetry}, nil
 }

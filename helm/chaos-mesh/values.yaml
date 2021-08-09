@@ -71,6 +71,10 @@ controllerManager:
   # This is Dangerous. Run only on temporary clusters.
   allowHostNetworkTesting: false
 
+  podChaos:
+    podFailure:
+      pauseImage: gcr.io/google-containers/pause:latest
+
 chaosDaemon:
   image: pingcap/chaos-daemon:latest
   imagePullPolicy: IfNotPresent
@@ -357,6 +361,8 @@ webhook:
     - gcpchaos
     - dnschaos
     - jvmchaos
+    - schedule
+    - workflow
 
 bpfki:
   create: false
@@ -374,3 +380,8 @@ bpfki:
     # requests:
     #  cpu: 250m
     #  memory: 512Mi
+
+chaosDlv:
+  enable: false
+  image: pingcap/chaos-dlv:latest
+  imagePullPolicy: IfNotPresent

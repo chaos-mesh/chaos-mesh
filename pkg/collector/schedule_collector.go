@@ -49,7 +49,7 @@ func (r *ScheduleCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	err := r.Get(ctx, req.NamespacedName, schedule)
 	if apierrors.IsNotFound(err) {
 		if err = r.archiveSchedule(req.Namespace, req.Name); err != nil {
-			r.Log.Error(err, "failed to archive experiment")
+			r.Log.Error(err, "failed to archive schedule")
 		}
 		return ctrl.Result{}, nil
 	}
@@ -60,13 +60,13 @@ func (r *ScheduleCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	if !schedule.DeletionTimestamp.IsZero() {
 		if err = r.archiveSchedule(req.Namespace, req.Name); err != nil {
-			r.Log.Error(err, "failed to archive experiment")
+			r.Log.Error(err, "failed to archive schedule")
 		}
 		return ctrl.Result{}, nil
 	}
 
 	if err := r.setUnarchivedSchedule(req, *schedule); err != nil {
-		r.Log.Error(err, "failed to archive experiment")
+		r.Log.Error(err, "failed to archive schedule")
 		// ignore error here
 	}
 
@@ -104,10 +104,10 @@ func (r *ScheduleCollector) setUnarchivedSchedule(req ctrl.Request, schedule v1a
 		archive.Action = ""
 	case v1alpha1.ScheduleTypeDNSChaos:
 		archive.Action = string(schedule.Spec.ScheduleItem.DNSChaos.Action)
-	case v1alpha1.ScheduleTypeAwsChaos:
-		archive.Action = string(schedule.Spec.ScheduleItem.AwsChaos.Action)
-	case v1alpha1.ScheduleTypeGcpChaos:
-		archive.Action = string(schedule.Spec.ScheduleItem.GcpChaos.Action)
+	case v1alpha1.ScheduleTypeAWSChaos:
+		archive.Action = string(schedule.Spec.ScheduleItem.AWSChaos.Action)
+	case v1alpha1.ScheduleTypeGCPChaos:
+		archive.Action = string(schedule.Spec.ScheduleItem.GCPChaos.Action)
 	default:
 		return errors.New("unsupported chaos type " + string(schedule.Spec.Type))
 	}

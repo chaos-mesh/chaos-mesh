@@ -1,0 +1,66 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: Workflow
+metadata:
+  name: try-workflow-custom-task
+spec:
+  entry: the-entry
+  templates:
+    - name: the-entry
+      templateType: Task
+      task:
+        container:
+          name: main-contaienr
+          image: busybox
+          command:
+            - echo
+            - branch-b
+#            - sh
+#            - -c
+#            - exit 1
+      conditionalBranches:
+        - target: workflow-stress-chaos
+          expression: 'exitCode == 0 && stdout == "branch-a"'
+        - target: workflow-network-chaos
+          expression: 'exitCode == 0 && stdout == "branch-b"'
+        - target: on-failed
+          expression: 'exitCode != 0'
+    - name: workflow-network-chaos
+      templateType: NetworkChaos
+      deadline: 20s
+      networkChaos:
+        direction: to
+        action: delay
+        mode: all
+        selector:
+          labelSelectors:
+            "app": "hello-kubernetes"
+        delay:
+          latency: "90ms"
+          correlation: "25"
+          jitter: "90ms"
+    - name: workflow-stress-chaos
+      templateType: StressChaos
+      deadline: 20s
+      stressChaos:
+        mode: one
+        selector:
+          labelSelectors:
+            "app": "hello-kubernetes"
+        stressors:
+          cpu:
+            workers: 1
+            load: 20
+            options: [ "--cpu 1", "--timeout 600" ]
+    - name: on-failed
+      templateType: Task
+      task:
+        container:
+          name: main-contaienr
+          image: curlimages/curl
+          # for example: your webhook for sending notify
+          command:
+            - curl
+            - -XPOST
+            - -d
+            - k1=v1&k2=v2
+            - https://jsonplaceholder.typicode.com/posts

@@ -19,12 +19,12 @@ import (
 	"fmt"
 	"net/http"
 	"reflect"
+	"sort"
 	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
-	"github.com/mitchellh/mapstructure"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -92,6 +92,7 @@ type Schedule struct {
 	Base
 	UID     string `json:"uid"`
 	Created string `json:"created_at"`
+	Status  string `json:"status"`
 }
 
 // Detail represents an experiment instance.
@@ -164,8 +165,8 @@ func (s *Service) createSchedule(c *gin.Context) {
 		v1alpha1.KindTimeChaos:    parseTimeChaos,
 		v1alpha1.KindKernelChaos:  parseKernelChaos,
 		v1alpha1.KindDNSChaos:     parseDNSChaos,
-		v1alpha1.KindAwsChaos:     parseAwsChaos,
-		v1alpha1.KindGcpChaos:     parseGcpChaos,
+		v1alpha1.KindAWSChaos:     parseAWSChaos,
+		v1alpha1.KindGCPChaos:     parseGCPChaos,
 	}
 
 	f, ok := parseFuncs[exp.Target.Kind]
@@ -276,7 +277,7 @@ func parseIOChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 					Mode:     v1alpha1.PodMode(exp.Scope.Mode),
 					Value:    exp.Scope.Value,
 				},
-				ContainerNames: exp.Target.PodChaos.ContainerNames,
+				ContainerNames: []string{exp.Target.IOChaos.ContainerName},
 			},
 			Action:     v1alpha1.IOChaosType(exp.Target.IOChaos.Action),
 			Delay:      exp.Target.IOChaos.Delay,
@@ -314,7 +315,7 @@ func parseTimeChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 					Mode:     v1alpha1.PodMode(exp.Scope.Mode),
 					Value:    exp.Scope.Value,
 				},
-				ContainerNames: exp.Target.PodChaos.ContainerNames,
+				ContainerNames: exp.Target.TimeChaos.ContainerNames,
 			},
 			TimeOffset: exp.Target.TimeChaos.TimeOffset,
 			ClockIds:   exp.Target.TimeChaos.ClockIDs,
@@ -387,11 +388,14 @@ func parseStressChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 					Mode:     v1alpha1.PodMode(exp.Scope.Mode),
 					Value:    exp.Scope.Value,
 				},
-				ContainerNames: exp.Target.PodChaos.ContainerNames,
 			},
 			Stressors:         stressors,
 			StressngStressors: exp.Target.StressChaos.StressngStressors,
 		},
+	}
+
+	if exp.Target.StressChaos.ContainerName != nil {
+		chaos.Spec.ContainerSelector.ContainerNames = []string{*exp.Target.StressChaos.ContainerName}
 	}
 
 	if exp.Duration != "" {
@@ -419,7 +423,7 @@ func parseDNSChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 					Mode:     v1alpha1.PodMode(exp.Scope.Mode),
 					Value:    exp.Scope.Value,
 				},
-				ContainerNames: exp.Target.PodChaos.ContainerNames,
+				ContainerNames: exp.Target.DNSChaos.ContainerNames,
 			},
 			DomainNamePatterns: exp.Target.DNSChaos.DomainNamePatterns,
 		},
@@ -434,22 +438,22 @@ func parseDNSChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	}
 }
 
-func parseAwsChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
-	chaos := &v1alpha1.AwsChaos{
+func parseAWSChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
+	chaos := &v1alpha1.AWSChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        exp.Name,
 			Namespace:   exp.Namespace,
 			Labels:      exp.Labels,
 			Annotations: exp.Annotations,
 		},
-		Spec: v1alpha1.AwsChaosSpec{
-			Action:     v1alpha1.AwsChaosAction(exp.Target.AwsChaos.Action),
-			SecretName: exp.Target.AwsChaos.SecretName,
-			AwsSelector: v1alpha1.AwsSelector{
-				AwsRegion:   exp.Target.AwsChaos.AwsRegion,
-				Ec2Instance: exp.Target.AwsChaos.Ec2Instance,
-				EbsVolume:   exp.Target.AwsChaos.EbsVolume,
-				DeviceName:  exp.Target.AwsChaos.DeviceName,
+		Spec: v1alpha1.AWSChaosSpec{
+			Action:     v1alpha1.AWSChaosAction(exp.Target.AWSChaos.Action),
+			SecretName: exp.Target.AWSChaos.SecretName,
+			AWSSelector: v1alpha1.AWSSelector{
+				AWSRegion:   exp.Target.AWSChaos.AWSRegion,
+				Ec2Instance: exp.Target.AWSChaos.Ec2Instance,
+				EbsVolume:   exp.Target.AWSChaos.EbsVolume,
+				DeviceName:  exp.Target.AWSChaos.DeviceName,
 			},
 		},
 	}
@@ -459,25 +463,27 @@ func parseAwsChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	}
 
 	return v1alpha1.ScheduleItem{
-		EmbedChaos: v1alpha1.EmbedChaos{AwsChaos: &chaos.Spec},
+		EmbedChaos: v1alpha1.EmbedChaos{AWSChaos: &chaos.Spec},
 	}
 }
 
-func parseGcpChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
-	chaos := &v1alpha1.GcpChaos{
+func parseGCPChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
+	chaos := &v1alpha1.GCPChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        exp.Name,
 			Namespace:   exp.Namespace,
 			Labels:      exp.Labels,
 			Annotations: exp.Annotations,
 		},
-		Spec: v1alpha1.GcpChaosSpec{
-			Action:      v1alpha1.GcpChaosAction(exp.Target.GcpChaos.Action),
-			SecretName:  exp.Target.GcpChaos.SecretName,
-			Project:     exp.Target.GcpChaos.Project,
-			Zone:        exp.Target.GcpChaos.Zone,
-			Instance:    exp.Target.GcpChaos.Instance,
-			DeviceNames: exp.Target.GcpChaos.DeviceNames,
+		Spec: v1alpha1.GCPChaosSpec{
+			Action:     v1alpha1.GCPChaosAction(exp.Target.GCPChaos.Action),
+			SecretName: exp.Target.GCPChaos.SecretName,
+			GCPSelector: v1alpha1.GCPSelector{
+				Project:     exp.Target.GCPChaos.Project,
+				Zone:        exp.Target.GCPChaos.Zone,
+				Instance:    exp.Target.GCPChaos.Instance,
+				DeviceNames: exp.Target.GCPChaos.DeviceNames,
+			},
 		},
 	}
 
@@ -486,7 +492,7 @@ func parseGcpChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 	}
 
 	return v1alpha1.ScheduleItem{
-		EmbedChaos: v1alpha1.EmbedChaos{GcpChaos: &chaos.Spec},
+		EmbedChaos: v1alpha1.EmbedChaos{GCPChaos: &chaos.Spec},
 	}
 }
 
@@ -533,8 +539,13 @@ func (s *Service) listSchedules(c *gin.Context) {
 			},
 			UID:     string(schedule.UID),
 			Created: schedule.CreationTimestamp.Format(time.RFC3339),
+			Status:  string(utils.GetScheduleState(schedule)),
 		})
 	}
+
+	sort.Slice(sches, func(i, j int) bool {
+		return sches[i].Created > sches[j].Created
+	})
 
 	c.JSON(http.StatusOK, sches)
 }
@@ -575,6 +586,12 @@ func (s *Service) getScheduleDetail(c *gin.Context) {
 	ns := sch.Namespace
 	name := sch.Name
 
+	if !s.conf.ClusterScoped && ns != s.conf.TargetNamespace {
+		c.Status(http.StatusBadRequest)
+		_ = c.Error(utils.ErrInvalidRequest.New("the namespace is not supported in cluster scoped mode"))
+		return
+	}
+
 	schedule := &v1alpha1.Schedule{}
 
 	scheduleKey := types.NamespacedName{Namespace: ns, Name: name}
@@ -595,11 +612,23 @@ func (s *Service) getScheduleDetail(c *gin.Context) {
 	kind, ok := v1alpha1.AllScheduleItemKinds()[string(schedule.Spec.Type)]
 	if !ok {
 		c.Status(http.StatusInternalServerError)
-		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		_ = c.Error(utils.ErrInvalidRequest.New("the kind is not supported"))
 		return
 	}
 	list := kind.ChaosList.DeepCopyObject()
-	err = kubeCli.List(context.Background(), list, client.MatchingLabels{"managed-by": schedule.Name})
+	selector, err := metav1.LabelSelectorAsSelector(&metav1.LabelSelector{
+		MatchLabels: map[string]string{"managed-by": schedule.Name},
+	})
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		return
+	}
+
+	err = kubeCli.List(context.Background(), list, &client.ListOptions{
+		Namespace:     ns,
+		LabelSelector: selector,
+	})
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
@@ -625,6 +654,7 @@ func (s *Service) getScheduleDetail(c *gin.Context) {
 			},
 			UID:     string(schedule.UID),
 			Created: schedule.CreationTimestamp.Format(time.RFC3339),
+			Status:  string(utils.GetScheduleState(*schedule)),
 		},
 		YAML: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
@@ -763,7 +793,13 @@ func (s *Service) updateScheduleFun(exp *core.KubeObjectDesc, kubeCli client.Cli
 	sch.SetAnnotations(meta.Annotations)
 
 	var spec v1alpha1.ScheduleSpec
-	mapstructure.Decode(exp.Spec, &spec)
+	bytes, err := json.Marshal(exp.Spec)
+	if err != nil {
+		return err
+	}
+	if err = json.Unmarshal(bytes, &spec); err != nil {
+		return err
+	}
 	sch.Spec = spec
 
 	return kubeCli.Update(context.Background(), sch)

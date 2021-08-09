@@ -6,7 +6,7 @@ const data = {
   labels: [],
   annotations: [],
   scope: {
-    namespace_selectors: [],
+    namespaces: [],
     label_selectors: [],
     annotation_selectors: [],
     phase_selectors: ['all'],
@@ -15,17 +15,25 @@ const data = {
     pods: [],
   },
   scheduler: {
-    cron: '',
     duration: '',
   },
 }
 
-export const schema: Yup.ObjectSchema = Yup.object({
-  name: Yup.string().required('The experiment name is required'),
-  scope: Yup.object({
-    namespace_selectors: Yup.array().min(1, 'The namespace selectors is required'),
-  }),
-})
+export const schema = (options: { scopeDisabled: boolean }) => {
+  let result = Yup.object({
+    name: Yup.string().trim().required('The name is required'),
+  })
+
+  if (!options.scopeDisabled) {
+    result = result.shape({
+      scope: Yup.object({
+        namespaces: Yup.array().min(1, 'The namespace selectors is required'),
+      }),
+    })
+  }
+
+  return result
+}
 
 export type dataType = typeof data
 

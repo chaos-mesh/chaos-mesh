@@ -4,7 +4,6 @@ import { useStoreDispatch, useStoreSelector } from 'store'
 import DoneAllIcon from '@material-ui/icons/DoneAll'
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
-import React from 'react'
 import { Submit } from 'components/FormField'
 import T from 'components/T'
 import api from 'api'
@@ -19,13 +18,13 @@ interface Step3Props {
 }
 
 const Step3: React.FC<Step3Props> = ({ onSubmit }) => {
+  const history = useHistory()
+  const intl = useIntl()
+
   const state = useStoreSelector((state) => state)
   const { step1, step2, basic, target } = state.experiments
   const { debugMode } = state.settings
   const dispatch = useStoreDispatch()
-
-  const history = useHistory()
-  const intl = useIntl()
 
   const submitExperiment = () => {
     const parsedValues = parseSubmit({
@@ -47,7 +46,7 @@ const Step3: React.FC<Step3Props> = ({ onSubmit }) => {
             dispatch(
               setAlert({
                 type: 'success',
-                message: intl.formatMessage({ id: 'confirm.createSuccessfully' }),
+                message: T('confirm.success.create', intl),
               })
             )
 
@@ -64,12 +63,12 @@ const Step3: React.FC<Step3Props> = ({ onSubmit }) => {
     <>
       {step1 && step2 && (
         <Paper>
-          <PaperTop title={T('common.submit')} />
+          <PaperTop title={T('common.submit')} boxProps={{ mb: 6 }} />
           <Box textAlign="center">
             <DoneAllIcon fontSize="large" />
             <Typography>{T('newE.complete')}</Typography>
-            <Submit onClick={submitExperiment} />
           </Box>
+          <Submit onClick={submitExperiment} />
         </Paper>
       )}
     </>

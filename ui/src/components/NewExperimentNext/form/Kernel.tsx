@@ -1,24 +1,21 @@
-import { Box, Button, Divider, InputAdornment, MenuItem, Typography } from '@material-ui/core'
+import { Box, IconButton, InputAdornment, MenuItem, Typography } from '@material-ui/core'
 import { Form, Formik } from 'formik'
-import { LabelField, SelectField, TextField } from 'components/FormField'
-import React, { useEffect, useState } from 'react'
+import { LabelField, SelectField, Submit, TextField } from 'components/FormField'
+import { useEffect, useState } from 'react'
 
-import AddIcon from '@material-ui/icons/Add'
+import AddCircleIcon from '@material-ui/icons/AddCircle'
 import Paper from 'components-mui/Paper'
-import PaperTop from 'components-mui/PaperTop'
-import PublishIcon from '@material-ui/icons/Publish'
-import RemoveIcon from '@material-ui/icons/Remove'
-import { RootState } from 'store'
-import T from 'components/T'
+import RemoveCircleIcon from '@material-ui/icons/RemoveCircle'
+import Space from 'components-mui/Space'
 import targetData from '../data/target'
-import { useSelector } from 'react-redux'
+import { useStoreSelector } from 'store'
 
 interface KernelProps {
   onSubmit: (values: Record<string, any>) => void
 }
 
 const Kernel: React.FC<KernelProps> = ({ onSubmit }) => {
-  const { target } = useSelector((state: RootState) => state.experiments)
+  const { target } = useStoreSelector((state) => state.experiments)
 
   const initialValues = targetData.KernelChaos.spec!
 
@@ -60,70 +57,60 @@ const Kernel: React.FC<KernelProps> = ({ onSubmit }) => {
 
         return (
           <Form>
-            <Paper>
-              <PaperTop title="Callchain">
-                <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={addFrame}>
-                  Add
-                </Button>
-              </PaperTop>
-              <Box>
-                {callchain.map((_: any, i: number) => (
-                  <Box key={'frame' + i} p={3}>
-                    <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-                      <Typography variant="body2" gutterBottom>
-                        Frame {i + 1}
-                      </Typography>
-                      <Button
-                        variant="contained"
-                        color="secondary"
-                        size="small"
-                        startIcon={<RemoveIcon />}
-                        onClick={removeFrame(i)}
-                      >
-                        Remove
-                      </Button>
-                    </Box>
-                    <TextField name={`fail_kern_request.callchain[${i}].funcname`} label="funcname" />
-                    <TextField name={`fail_kern_request.callchain[${i}].parameters`} label="parameters" />
-                    <TextField name={`fail_kern_request.callchain[${i}].predicate`} label="predicate" />
-                  </Box>
-                ))}
+            <Paper sx={{ mb: 6 }}>
+              <Box display="flex" justifyContent="space-between" alignItems="center">
+                <Typography component="div">Callchain</Typography>
+                <IconButton color="primary" size="small" onClick={addFrame}>
+                  <AddCircleIcon />
+                </IconButton>
               </Box>
+              {callchain.length > 0 && (
+                <Space mt={6}>
+                  {callchain.map((_: any, i: number) => (
+                    <Space key={'frame' + i}>
+                      <Box display="flex" justifyContent="space-between" alignItems="center">
+                        <Typography variant="body2">Frame {i + 1}</Typography>
+                        <IconButton color="secondary" size="small" onClick={removeFrame(i)}>
+                          <RemoveCircleIcon />
+                        </IconButton>
+                      </Box>
+                      <TextField name={`fail_kern_request.callchain[${i}].funcname`} label="funcname" />
+                      <TextField name={`fail_kern_request.callchain[${i}].parameters`} label="parameters" />
+                      <TextField name={`fail_kern_request.callchain[${i}].predicate`} label="predicate" />
+                    </Space>
+                  ))}
+                </Space>
+              )}
             </Paper>
-            <Box my={6}>
-              <Divider />
-            </Box>
-            <SelectField
-              name="fail_kern_request.failtype"
-              label="Failtype"
-              helperText="What to fail, can be set to 0 / 1 / 2"
-            >
-              {[0, 1, 2].map((option) => (
-                <MenuItem key={option} value={option}>
-                  {option}
-                </MenuItem>
-              ))}
-            </SelectField>
-            <LabelField
-              name="fail_kern_request.headers"
-              label="Headers"
-              helperText="Type string and end with a space to generate the appropriate kernel headers"
-            />
-            <TextField
-              type="number"
-              name="fail_kern_request.probability"
-              helperText="The fails with probability"
-              InputProps={{
-                endAdornment: <InputAdornment position="end">%</InputAdornment>,
-              }}
-            />
-            <TextField type="number" name="fail_kern_request.times" helperText="The max times of failures" />
+            <Space>
+              <SelectField
+                name="fail_kern_request.failtype"
+                label="Failtype"
+                helperText="What to fail, can be set to 0 / 1 / 2"
+              >
+                {[0, 1, 2].map((option) => (
+                  <MenuItem key={option} value={option}>
+                    {option}
+                  </MenuItem>
+                ))}
+              </SelectField>
+              <LabelField
+                name="fail_kern_request.headers"
+                label="Headers"
+                helperText="Type string and end with a space to generate the appropriate kernel headers"
+              />
+              <TextField
+                type="number"
+                name="fail_kern_request.probability"
+                helperText="The fails with probability"
+                InputProps={{
+                  endAdornment: <InputAdornment position="end">%</InputAdornment>,
+                }}
+              />
+              <TextField type="number" name="fail_kern_request.times" helperText="The max times of failures" />
+            </Space>
 
-            <Box mt={6} textAlign="right">
-              <Button type="submit" variant="contained" color="primary" startIcon={<PublishIcon />}>
-                {T('common.submit')}
-              </Button>
-            </Box>
+            <Submit />
           </Form>
         )
       }}

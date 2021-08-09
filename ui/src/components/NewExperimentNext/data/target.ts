@@ -27,9 +27,9 @@ export interface Target {
 const networkCommon: Spec = {
   direction: {
     field: 'select',
-    items: ['', 'from', 'to', 'both'],
+    items: ['from', 'to', 'both'],
     label: 'Direction',
-    value: '',
+    value: 'to',
     helperText: 'Specify the network direction',
   },
   external_targets: {
@@ -118,6 +118,13 @@ const dnsCommon: Spec = {
     value: [],
     helperText: 'Specify the DNS patterns. For example, type google.com and then press space to add it.',
   },
+  container_names: {
+    field: 'label',
+    label: 'Affected container names',
+    value: [],
+    helperText:
+      "Optional. Type string and end with a space to generate the container names. If it's empty, all containers will be injected",
+  },
 }
 
 const awsCommon: Spec = {
@@ -197,11 +204,11 @@ const data: Record<Kind, Target> = {
         key: 'container-kill',
         spec: {
           action: 'container-kill' as any,
-          container_name: {
-            field: 'text',
-            label: 'Container name',
-            value: '',
-            helperText: 'Fill the container name',
+          container_names: {
+            field: 'label',
+            label: 'Container names',
+            value: [],
+            helperText: 'Type string and end with a space to generate the container names.',
           },
         },
       },
@@ -470,8 +477,8 @@ const data: Record<Kind, Target> = {
       },
     ],
   },
-  // Aws
-  AwsChaos: {
+  // AWS
+  AWSChaos: {
     categories: [
       {
         name: 'Stop EC2',
@@ -511,8 +518,8 @@ const data: Record<Kind, Target> = {
       },
     ],
   },
-  // Gcp
-  GcpChaos: {
+  // GCP
+  GCPChaos: {
     categories: [
       {
         name: 'Stop node',
@@ -549,7 +556,7 @@ const data: Record<Kind, Target> = {
 }
 
 const targetScopeSchema = Yup.object({
-  namespace_selectors: Yup.array().min(1, 'The namespace selectors is required'),
+  namespaces: Yup.array().min(1, 'The namespace selectors is required'),
 })
 
 const patternsSchema = Yup.array().of(Yup.string()).required('The patterns is required')
@@ -571,7 +578,7 @@ export const schema: Partial<Record<Kind, Record<string, Yup.ObjectSchema>>> = {
       grace_period: Yup.number().min(0, 'Grace period must be non-negative integer'),
     }),
     'container-kill': Yup.object({
-      container_name: Yup.string().required('The container name is required'),
+      container_names: Yup.array().of(Yup.string()).required('The container name is required'),
     }),
   },
   NetworkChaos: {
@@ -634,7 +641,7 @@ export const schema: Partial<Record<Kind, Record<string, Yup.ObjectSchema>>> = {
       patterns: patternsSchema,
     }),
   },
-  AwsChaos: {
+  AWSChaos: {
     'ec2-stop': AwsChaosCommonSchema,
     'ec2-restart': AwsChaosCommonSchema,
     'detach-volume': AwsChaosCommonSchema.shape({
@@ -642,7 +649,7 @@ export const schema: Partial<Record<Kind, Record<string, Yup.ObjectSchema>>> = {
       volumeID: Yup.string().required('The ID of the EBS volume is required'),
     }),
   },
-  GcpChaos: {
+  GCPChaos: {
     'node-stop': GcpChaosCommonSchema,
     'node-reset': GcpChaosCommonSchema,
     'disk-loss': GcpChaosCommonSchema.shape({

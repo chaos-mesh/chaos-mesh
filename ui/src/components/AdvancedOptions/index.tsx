@@ -1,15 +1,17 @@
 import { Box, Button } from '@material-ui/core'
-import React, { useState } from 'react'
 
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown'
 import ArrowDropUpIcon from '@material-ui/icons/ArrowDropUp'
+import Space from 'components-mui/Space'
 import T from 'components/T'
+import { useState } from 'react'
 
 interface AdvancedOptionsProps {
   isOpen?: boolean
   beforeOpen?: () => void
   afterClose?: () => void
   title?: string | JSX.Element
+  disabled?: boolean
 }
 
 const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
@@ -17,6 +19,7 @@ const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
   beforeOpen,
   afterClose,
   title,
+  disabled,
   children,
 }) => {
   const [open, _setOpen] = useState(isOpen)
@@ -32,14 +35,19 @@ const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
   }
 
   return (
-    <Box display="flex" flexDirection="column">
-      <Box my={3} textAlign="right">
-        <Button color="primary" startIcon={open ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />} onClick={setOpen}>
+    <Space>
+      <Box textAlign="right">
+        <Button
+          color="primary"
+          startIcon={open ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />}
+          onClick={setOpen}
+          disabled={disabled}
+        >
           {title ? title : T('common.advancedOptions')}
         </Button>
       </Box>
-      <Box hidden={!open}>{children}</Box>
-    </Box>
+      <Space sx={{ display: open ? 'unset' : 'none' }}>{children}</Space>
+    </Space>
   )
 }
 

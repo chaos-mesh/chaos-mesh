@@ -55,6 +55,7 @@ type ScheduleSpec struct {
 	// +optional
 	// +nullable
 	// +kubebuilder:validation:Minimum=0
+	// +kubebuilder:validation:ExclusiveMinimum=true
 	StartingDeadlineSeconds *int64 `json:"startingDeadlineSeconds"`
 
 	// +optional

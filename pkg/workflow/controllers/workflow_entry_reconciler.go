@@ -19,26 +19,26 @@ import (
 	"sort"
 	"time"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/client-go/tools/record"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/util/retry"
+	"k8s.io/utils/pointer"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 )
 
 // WorkflowEntryReconciler watches on Workflow, creates new Entry Node for created Workflow.
 type WorkflowEntryReconciler struct {
 	kubeClient    client.Client
-	eventRecorder record.EventRecorder
+	eventRecorder recorder.ChaosRecorder
 	logger        logr.Logger
 }
 
-func NewWorkflowEntryReconciler(kubeClient client.Client, eventRecorder record.EventRecorder, logger logr.Logger) *WorkflowEntryReconciler {
+func NewWorkflowEntryReconciler(kubeClient client.Client, eventRecorder recorder.ChaosRecorder, logger logr.Logger) *WorkflowEntryReconciler {
 	return &WorkflowEntryReconciler{kubeClient: kubeClient, eventRecorder: eventRecorder, logger: logger}
 }
 
@@ -71,9 +71,12 @@ func (it *WorkflowEntryReconciler) Reconcile(request reconcile.Request) (reconci
 			// Not scheduled yet, spawn the entry workflow node
 			spawnedEntryNode, err := it.spawnEntryNode(ctx, workflow)
 			if err != nil {
-				it.eventRecorder.Event(&workflow, corev1.EventTypeWarning, v1alpha1.InvalidEntry, "can not find workflow's entry template")
+				it.eventRecorder.Event(&workflow, recorder.InvalidEntry{
+					EntryTemplate: workflow.Spec.Entry,
+				})
 				it.logger.Error(err, "failed to spawn new entry node of workflow",
-					"workflow", request.NamespacedName)
+					"workflow", request.NamespacedName,
+					"entry", workflow.Spec.Entry)
 				// failed to spawn new entry, but will not break the reconcile, continue to sync status
 				return
 			}
@@ -82,7 +85,7 @@ func (it *WorkflowEntryReconciler) Reconcile(request reconcile.Request) (reconci
 				"workflow", request.NamespacedName,
 				"entry node", fmt.Sprintf("%s/%s", spawnedEntryNode.Namespace, spawnedEntryNode.Name),
 			)
-			it.eventRecorder.Event(&workflow, corev1.EventTypeNormal, v1alpha1.EntryCreated, "Entry node created")
+			it.eventRecorder.Event(&workflow, recorder.EntryCreated{Entry: spawnedEntryNode.Name})
 		}()
 	}
 
@@ -141,6 +144,8 @@ func (it *WorkflowEntryReconciler) Reconcile(request reconcile.Request) (reconci
 					"entry nodes", nodeNames,
 				)
 			}
+
+			workflowNeedUpdate.Status.EntryNode = pointer.StringPtr(entryNodes[0].Name)
 			SetWorkflowCondition(&workflowNeedUpdate.Status, v1alpha1.WorkflowCondition{
 				Type:   v1alpha1.WorkflowConditionScheduled,
 				Status: corev1.ConditionTrue,
@@ -157,6 +162,7 @@ func (it *WorkflowEntryReconciler) Reconcile(request reconcile.Request) (reconci
 					now := metav1.NewTime(time.Now())
 					workflowNeedUpdate.Status.EndTime = &now
 				}
+				it.eventRecorder.Event(&workflow, recorder.WorkflowAccomplished{})
 			} else {
 				SetWorkflowCondition(&workflowNeedUpdate.Status, v1alpha1.WorkflowCondition{
 					Type:   v1alpha1.WorkflowConditionAccomplished,
@@ -213,6 +219,7 @@ func (it *WorkflowEntryReconciler) fetchEntryNode(ctx context.Context, workflow 
 	}
 
 	err = it.kubeClient.List(ctx, &entryNodesList, &client.ListOptions{
+		Namespace:     workflow.Namespace,
 		LabelSelector: controlledByWorkflow,
 	})
 	if err != nil {
@@ -237,7 +244,7 @@ func (it *WorkflowEntryReconciler) spawnEntryNode(ctx context.Context, workflow 
 	}
 
 	if len(nodes) > 1 {
-		it.logger.V(1).Info("the results of entry nodes are more than 1, will only pick the first one",
+		it.logger.Info("the results of entry nodes are more than 1, will only pick the first one",
 			"workflow", fmt.Sprintf("%s/%s", workflow.Namespace, workflow.Name),
 			"nodes", nodes,
 		)
@@ -246,9 +253,13 @@ func (it *WorkflowEntryReconciler) spawnEntryNode(ctx context.Context, workflow 
 	entryNode := nodes[0]
 	err = it.kubeClient.Create(ctx, entryNode)
 	if err != nil {
-		it.logger.V(1).Info("failed to create workflow nodes")
+		it.logger.Info("failed to create workflow nodes")
 		return nil, err
 	}
+	it.logger.Info("entry workflow node created",
+		"workflow", fmt.Sprintf("%s/%s", workflow.Namespace, workflow.Name),
+		"entry node", entryNode.Name,
+	)
 
 	return entryNode, nil
 }

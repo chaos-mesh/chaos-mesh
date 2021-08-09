@@ -141,7 +141,7 @@ func TestcasePodKillPauseThenUnPause(ns string, kubeCli kubernetes.Interface, cl
 	err = util.PauseChaos(ctx, cli, podKillChaos)
 	framework.ExpectNoError(err, "pause chaos error")
 
-	err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
+	err = wait.Poll(1*time.Second, 5*time.Second, func() (done bool, err error) {
 		chaos := &v1alpha1.PodChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
 		framework.ExpectNoError(err, "get pod chaos error")
@@ -150,7 +150,7 @@ func TestcasePodKillPauseThenUnPause(ns string, kubeCli kubernetes.Interface, cl
 		}
 		return false, err
 	})
-	framework.ExpectNoError(err, "check paused chaos failed")
+	framework.ExpectError(err, "chaos shouldn't enter stopped phase")
 
 	// wait for 1 minutes and no pod is killed
 	pods, err = kubeCli.CoreV1().Pods(ns).List(listOption)

@@ -1,8 +1,7 @@
-import { Chip, TextField, TextFieldProps } from '@material-ui/core'
-import React, { useEffect, useState } from 'react'
+import { Autocomplete, Chip, TextField, TextFieldProps } from '@material-ui/core'
 import { getIn, useFormikContext } from 'formik'
+import { useEffect, useState } from 'react'
 
-import Autocomplete from '@material-ui/lab/Autocomplete'
 import T from 'components/T'
 
 interface LabelFieldProps {
@@ -105,14 +104,13 @@ const LabelField: React.FC<LabelFieldProps & TextFieldProps> = ({ isKV = false, 
         <TextField
           {...params}
           {...props}
-          variant="outlined"
-          margin="dense"
+          size="small"
           fullWidth
           helperText={error !== '' ? error : isKV ? T('common.isKVHelperText') : props.helperText}
+          error={error !== ''}
           onChange={onInputChange}
           onKeyDown={onKeyDown}
           onBlur={processText}
-          error={error !== ''}
         />
       )}
     />

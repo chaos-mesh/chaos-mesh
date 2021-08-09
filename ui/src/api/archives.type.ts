@@ -1,14 +1,9 @@
-import { ExperimentKind } from '../components/NewExperiment/types'
+import { Experiment } from './experiments.type'
 
-export interface Archive {
-  uid: uuid
-  kind: ExperimentKind
-  namespace: string
-  name: string
-  start_time: string
-  finish_time: string
-}
+type Common = Omit<Experiment, 'is' | 'status'>
 
-export interface ArchiveDetail extends Archive {
+export type Archive = { is: 'archive' } & Common
+
+export interface ArchiveSingle extends Common {
   kube_object: any
 }

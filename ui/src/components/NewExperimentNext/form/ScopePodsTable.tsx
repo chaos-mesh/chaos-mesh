@@ -1,10 +1,10 @@
 import { Checkbox, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@material-ui/core'
-import React, { useMemo } from 'react'
 import { getIn, useFormikContext } from 'formik'
 
 import PaperContainer from 'components-mui/PaperContainer'
 import T from 'components/T'
 import { setAlert } from 'slices/globalStatus'
+import { useMemo } from 'react'
 import { useStoreDispatch } from 'store'
 
 interface ScopePodsTableProps {

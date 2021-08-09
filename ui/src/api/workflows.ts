@@ -1,17 +1,35 @@
-import { Workflow, WorkflowDetail, workflowParams } from './workflows.type'
+import { Workflow, WorkflowParams, WorkflowSingle } from './workflows.type'
 
+import { Archive } from './archives.type'
 import http from './http'
+import { mapping } from './zz_generated.workflow.chaos-mesh'
 
-export const workflows = (params?: workflowParams) =>
+export const newWorkflow = (data: any) => http.post('/workflows', data)
+
+export const workflows = (params?: WorkflowParams) =>
   http.get<Workflow[]>('/workflows', {
     params,
   })
 
-export const newWorkflow = (data: any) => http.post('/workflows', data)
+export const single = (uuid: uuid) => http.get<WorkflowSingle>(`/workflows/${uuid}`)
 
-export const detail = (ns: string, name: string) => http.get<WorkflowDetail>(`/workflows/${ns}/${name}`)
+export const update = (uuid: uuid, data: WorkflowSingle['kube_object']) => http.put(`/workflows/${uuid}`, data)
 
-export const del = (ns: string, name: string) => http.delete(`/workflows/${ns}/${name}`)
+export const del = (uuid: uuid) => http.delete(`/workflows/${uuid}`)
 
-export const update = (ns: string, name: string, data: WorkflowDetail['kube_object']) =>
-  http.put(`/workflows/${ns}/${name}`, data)
+export const archives = (namespace = null, name = null) =>
+  http.get<Archive[]>('/archives/workflows', {
+    params: {
+      namespace,
+      name,
+    },
+  })
+
+export const singleArchive = (uuid: uuid) => http.get<Archive>(`archives/workflows/${uuid}`)
+
+export const delArchive = (uuid: uuid) => http.delete(`/archives/workflows/${uuid}`)
+export const delArchives = (uuids: uuid[]) => http.delete(`/archives/workflows?uids=${uuids.join(',')}`)
+
+export function templateTypeToFieldName(templateType: string): string {
+  return mapping.get(templateType)!
+}

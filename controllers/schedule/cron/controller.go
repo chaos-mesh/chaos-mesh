@@ -21,7 +21,6 @@ import (
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/apiserver/pkg/storage/names"
 	"k8s.io/client-go/util/retry"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -56,6 +55,11 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, nil
 	}
 
+	if schedule.IsPaused() {
+		r.Log.Info("not starting chaos as it is paused")
+		return ctrl.Result{}, nil
+	}
+
 	now := time.Now()
 	shouldSpawn := false
 	r.Log.Info("calculate schedule time", "schedule", schedule.Spec.Schedule, "lastScheduleTime", schedule.Status.LastScheduleTime, "now", now)
@@ -79,11 +83,6 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			})
 			return ctrl.Result{}, nil
 		}
-	}
-
-	if schedule.IsPaused() {
-		r.Log.Info("not starting chaos as it is paused")
-		return ctrl.Result{}, nil
 	}
 
 	r.Log.Info("schedule to spawn new chaos", "missedRun", missedRun, "nextRun", nextRun)
@@ -190,29 +189,12 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		r.Recorder.Event(schedule, recorder.Updated{
 			Field: "lastScheduleTime",
 		})
-
-		// TODO: make the interval and total time configurable
-		// The following codes ensure the Schedule in cache has the latest lastScheduleTime
-		ensureLatestError := wait.Poll(100*time.Millisecond, 2*time.Second, func() (bool, error) {
-			schedule = schedule.DeepCopyObject().(*v1alpha1.Schedule)
-
-			if err := r.Client.Get(ctx, req.NamespacedName, schedule); err != nil {
-				r.Log.Error(err, "unable to get schedule")
-				return false, err
-			}
-
-			return schedule.Status.LastScheduleTime.Time == lastScheduleTime, nil
-		})
-		if ensureLatestError != nil {
-			r.Log.Error(ensureLatestError, "Fail to ensure that the resource in cache has the latest lastScheduleTime")
-			return ctrl.Result{}, nil
-		}
 	}
 
 	return ctrl.Result{}, nil
 }
 
-func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger, lister *utils.ActiveLister) (types.Controller, error) {
+func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger, lister *utils.ActiveLister, recorderBuilder *recorder.RecorderBuilder) (types.Controller, error) {
 	builder.Default(mgr).
 		For(&v1alpha1.Schedule{}).
 		Named("schedule-cron").
@@ -220,7 +202,7 @@ func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger, list
 			client,
 			log.WithName("schedule-cron"),
 			lister,
-			recorder.NewRecorder(mgr, "schedule-cron", log),
+			recorderBuilder.Build("schedule-cron"),
 		})
 	return "schedule-cron", nil
 }

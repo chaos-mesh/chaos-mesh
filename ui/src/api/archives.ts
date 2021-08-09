@@ -10,15 +10,8 @@ export const archives = (namespace = null, name = null, kind = null) =>
     },
   })
 
-export const detail = (uuid: uuid) =>
+export const single = (uuid: uuid) =>
   http.get('/archives/detail', {
-    params: {
-      uid: uuid,
-    },
-  })
-
-export const report = (uuid: uuid) =>
-  http.get('/archives/report', {
     params: {
       uid: uuid,
     },

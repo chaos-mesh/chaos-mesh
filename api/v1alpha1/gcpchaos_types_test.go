@@ -26,10 +26,10 @@ import (
 // These tests are written in BDD-style using Ginkgo framework. Refer to
 // http://onsi.github.io/ginkgo to learn more.
 
-var _ = Describe("GcpChaos", func() {
+var _ = Describe("GCPChaos", func() {
 	var (
 		key              types.NamespacedName
-		created, fetched *GcpChaos
+		created, fetched *GCPChaos
 	)
 
 	BeforeEach(func() {
@@ -51,16 +51,18 @@ var _ = Describe("GcpChaos", func() {
 				Namespace: "default",
 			}
 
-			created = &GcpChaos{
+			created = &GCPChaos{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "foo",
 					Namespace: "default",
 				},
-				Spec: GcpChaosSpec{
-					Action:     NodeReset,
-					Project:    testProject,
-					Zone:       testZone,
-					Instance:   testInstance,
+				Spec: GCPChaosSpec{
+					Action: NodeReset,
+					GCPSelector: GCPSelector{
+						Project:  testProject,
+						Zone:     testZone,
+						Instance: testInstance,
+					},
 					SecretName: &testSecretName,
 				},
 			}
@@ -68,7 +70,7 @@ var _ = Describe("GcpChaos", func() {
 			By("creating an API obj")
 			Expect(k8sClient.Create(context.TODO(), created)).To(Succeed())
 
-			fetched = &GcpChaos{}
+			fetched = &GCPChaos{}
 			Expect(k8sClient.Get(context.TODO(), key, fetched)).To(Succeed())
 			Expect(fetched).To(Equal(created))
 

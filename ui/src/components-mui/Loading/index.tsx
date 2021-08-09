@@ -1,6 +1,6 @@
 import { Box, CircularProgress } from '@material-ui/core'
 
-import { styled } from '@material-ui/core/styles'
+import { styled } from '@material-ui/styles'
 
 const StyledBox = styled(Box)({
   position: 'absolute',
