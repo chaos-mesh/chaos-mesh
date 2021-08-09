@@ -3,24 +3,26 @@ module github.com/chaos-mesh/chaos-mesh/e2e-test
 require (
 	github.com/chaos-mesh/chaos-mesh v0.0.0-00010101000000-000000000000
 	github.com/chaos-mesh/chaos-mesh/api/v1alpha1 v0.0.0
-	github.com/onsi/ginkgo v1.14.0
-	github.com/onsi/gomega v1.10.1
-	k8s.io/api v0.18.2
-	k8s.io/apiextensions-apiserver v0.18.2
-	k8s.io/apimachinery v0.18.2
-	k8s.io/cli-runtime v0.17.0
-	k8s.io/client-go v0.18.2
-	k8s.io/component-base v0.17.0
+	github.com/onsi/ginkgo v1.16.4
+	github.com/onsi/gomega v1.14.0
+	k8s.io/api v0.21.3
+	k8s.io/apiextensions-apiserver v0.21.3
+	k8s.io/apimachinery v0.21.3
+	k8s.io/cli-runtime v0.21.3
+	k8s.io/client-go v0.21.3
+	k8s.io/component-base v0.21.3
 	k8s.io/klog v1.0.0
 	k8s.io/kube-aggregator v0.0.0
 	k8s.io/kubernetes v1.17.2
-	k8s.io/utils v0.0.0-20191114184206-e782cd3c129f
+	k8s.io/utils v0.0.0-20210722164352-7f3ee0f31471
 	sigs.k8s.io/controller-runtime v0.9.5
 )
 
 replace (
+	github.com/Azure/go-autorest => github.com/Azure/go-autorest v12.2.0+incompatible
 	github.com/chaos-mesh/chaos-mesh => ../
 	github.com/chaos-mesh/chaos-mesh/api/v1alpha1 => ../api/v1alpha1
+	github.com/googleapis/gnostic => github.com/googleapis/gnostic v0.3.1
 	google.golang.org/grpc => google.golang.org/grpc v1.26.0
 	k8s.io/api => k8s.io/api v0.17.0
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.17.0

@@ -3,6 +3,8 @@ module github.com/chaos-mesh/chaos-mesh
 require (
 	code.cloudfoundry.org/bytefmt v0.0.0-20200131002437-cf55d5288a48
 	github.com/DATA-DOG/go-sqlmock v1.5.0
+	github.com/Microsoft/go-winio v0.5.0 // indirect
+	github.com/Microsoft/hcsshim v0.8.20 // indirect
 	github.com/antonmedv/expr v1.8.9
 	github.com/aws/aws-sdk-go-v2 v1.3.2
 	github.com/aws/aws-sdk-go-v2/config v1.1.1
@@ -11,7 +13,7 @@ require (
 	github.com/chaos-mesh/chaos-mesh/api/v1alpha1 v0.0.0
 	github.com/chaos-mesh/k8s_dns_chaos v0.2.0
 	github.com/containerd/cgroups v1.0.2-0.20210605143700-23b51209bf7b
-	github.com/containerd/containerd v1.5.4
+	github.com/containerd/containerd v1.5.1
 	github.com/coreos/go-systemd/v22 v22.3.2 // indirect
 	github.com/docker/docker v20.10.2+incompatible
 	github.com/docker/go-connections v0.4.0 // indirect
