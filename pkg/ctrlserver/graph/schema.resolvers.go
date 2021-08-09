@@ -732,6 +732,10 @@ func (r *podResolver) Processes(ctx context.Context, obj *v1.Pod) ([]*model.Proc
 	return r.GetPidFromPS(ctx, obj)
 }
 
+func (r *podResolver) Mounts(ctx context.Context, obj *v1.Pod) ([]string, error) {
+	return r.GetMounts(ctx, obj)
+}
+
 func (r *podConditionResolver) Type(ctx context.Context, obj *v1.PodCondition) (string, error) {
 	return string(obj.Type), nil
 }

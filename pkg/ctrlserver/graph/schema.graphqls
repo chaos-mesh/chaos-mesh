@@ -101,6 +101,7 @@ type Pod @goModel(model: "k8s.io/api/core/v1.Pod") {
     logs: String! 			@goField(forceResolver: true)
 	daemon: Pod 			@goField(forceResolver: true)
 	processes: [Process!] 	@goField(forceResolver: true)
+	mounts: [String!]      	@goField(forceResolver: true)
 }
 
 # PodStatus represents information about the status of a pod. Status may trail the actual

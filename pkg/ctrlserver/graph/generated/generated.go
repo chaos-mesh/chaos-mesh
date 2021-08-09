@@ -380,6 +380,7 @@ type ComplexityRoot struct {
 		Kind                       func(childComplexity int) int
 		Labels                     func(childComplexity int) int
 		Logs                       func(childComplexity int) int
+		Mounts                     func(childComplexity int) int
 		Name                       func(childComplexity int) int
 		Namespace                  func(childComplexity int) int
 		OwnerReferences            func(childComplexity int) int
@@ -809,6 +810,7 @@ type PodResolver interface {
 	Logs(ctx context.Context, obj *v1.Pod) (string, error)
 	Daemon(ctx context.Context, obj *v1.Pod) (*v1.Pod, error)
 	Processes(ctx context.Context, obj *v1.Pod) ([]*model.Process, error)
+	Mounts(ctx context.Context, obj *v1.Pod) ([]string, error)
 }
 type PodConditionResolver interface {
 	Type(ctx context.Context, obj *v1.PodCondition) (string, error)
@@ -2476,6 +2478,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Pod.Logs(childComplexity), true
 
+	case "Pod.mounts":
+		if e.complexity.Pod.Mounts == nil {
+			break
+		}
+
+		return e.complexity.Pod.Mounts(childComplexity), true
+
 	case "Pod.name":
 		if e.complexity.Pod.Name == nil {
 			break
@@ -3960,6 +3969,7 @@ type Pod @goModel(model: "k8s.io/api/core/v1.Pod") {
     logs: String! 			@goField(forceResolver: true)
 	daemon: Pod 			@goField(forceResolver: true)
 	processes: [Process!] 	@goField(forceResolver: true)
+	mounts: [String!]      	@goField(forceResolver: true)
 }
 
 # PodStatus represents information about the status of a pod. Status may trail the actual
@@ -12715,6 +12725,38 @@ func (ec *executionContext) _Pod_processes(ctx context.Context, field graphql.Co
 	res := resTmp.([]*model.Process)
 	fc.Result = res
 	return ec.marshalOProcess2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlserverᚋgraphᚋmodelᚐProcessᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Pod_mounts(ctx context.Context, field graphql.CollectedField, obj *v1.Pod) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Pod",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Pod().Mounts(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	fc.Result = res
+	return ec.marshalOString2ᚕstringᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _PodCondition_type(ctx context.Context, field graphql.CollectedField, obj *v1.PodCondition) (ret graphql.Marshaler) {
@@ -21989,6 +22031,17 @@ func (ec *executionContext) _Pod(ctx context.Context, sel ast.SelectionSet, obj 
 					}
 				}()
 				res = ec._Pod_processes(ctx, field, obj)
+				return res
+			})
+		case "mounts":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Pod_mounts(ctx, field, obj)
 				return res
 			})
 		default:
