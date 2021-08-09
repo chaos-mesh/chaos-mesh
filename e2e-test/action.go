@@ -14,6 +14,7 @@
 package test
 
 import (
+	"context"
 	"fmt"
 	"os/exec"
 	"strings"
@@ -91,7 +92,7 @@ func (oa *operatorAction) DeployOperator(info OperatorConfig) error {
 			klog.Errorf("failed to get selector, err:%v", err)
 			return false, nil
 		}
-		pods, err := oa.kubeCli.CoreV1().Pods(info.Namespace).List(metav1.ListOptions{LabelSelector: l.String()})
+		pods, err := oa.kubeCli.CoreV1().Pods(info.Namespace).List(context.TODO(), metav1.ListOptions{LabelSelector: l.String()})
 		if err != nil {
 			klog.Errorf("failed to get chaos-mesh pods, err:%v", err)
 			return false, nil

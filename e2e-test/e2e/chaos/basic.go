@@ -121,10 +121,10 @@ var _ = ginkgo.Describe("[Basic]", func() {
 
 		ginkgo.JustBeforeEach(func() {
 			svc := fixture.NewE2EService("timer", ns)
-			_, err = kubeCli.CoreV1().Services(ns).Create(svc)
+			_, err = kubeCli.CoreV1().Services(ns).Create(context.TODO(), svc, metav1.CreateOptions{})
 			framework.ExpectNoError(err, "create service error")
 			nd := fixture.NewTimerDeployment("timer", ns)
-			_, err = kubeCli.AppsV1().Deployments(ns).Create(nd)
+			_, err = kubeCli.AppsV1().Deployments(ns).Create(context.TODO(), nd, metav1.CreateOptions{})
 			framework.ExpectNoError(err, "create timer deployment error")
 			err = util.WaitDeploymentReady("timer", ns, kubeCli)
 			framework.ExpectNoError(err, "wait timer deployment ready error")
@@ -162,10 +162,10 @@ var _ = ginkgo.Describe("[Basic]", func() {
 
 		ginkgo.JustBeforeEach(func() {
 			svc := fixture.NewE2EService("io", ns)
-			_, err = kubeCli.CoreV1().Services(ns).Create(svc)
+			_, err = kubeCli.CoreV1().Services(ns).Create(context.TODO(), svc, metav1.CreateOptions{})
 			framework.ExpectNoError(err, "create service error")
 			nd := fixture.NewIOTestDeployment("io-test", ns)
-			_, err = kubeCli.AppsV1().Deployments(ns).Create(nd)
+			_, err = kubeCli.AppsV1().Deployments(ns).Create(context.TODO(), nd, metav1.CreateOptions{})
 			framework.ExpectNoError(err, "create io-test deployment error")
 			err = util.WaitDeploymentReady("io-test", ns, kubeCli)
 			framework.ExpectNoError(err, "wait io-test deployment ready error")
@@ -237,10 +237,10 @@ var _ = ginkgo.Describe("[Basic]", func() {
 
 		ginkgo.JustBeforeEach(func() {
 			svc := fixture.NewE2EService("http", ns)
-			_, err = kubeCli.CoreV1().Services(ns).Create(svc)
+			_, err = kubeCli.CoreV1().Services(ns).Create(context.TODO(), svc, metav1.CreateOptions{})
 			framework.ExpectNoError(err, "create service error")
 			nd := fixture.NewHTTPTestDeployment("http-test", ns)
-			_, err = kubeCli.AppsV1().Deployments(ns).Create(nd)
+			_, err = kubeCli.AppsV1().Deployments(ns).Create(context.TODO(), nd, metav1.CreateOptions{})
 			framework.ExpectNoError(err, "create http-test deployment error")
 			err = util.WaitDeploymentReady("http-test", ns, kubeCli)
 			framework.ExpectNoError(err, "wait http-test deployment ready error")
@@ -284,7 +284,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 
 		// delete the created config map in each test case
 		ginkgo.JustAfterEach(func() {
-			kubeCli.CoreV1().ConfigMaps(cmNamespace).Delete(cmName, &metav1.DeleteOptions{})
+			kubeCli.CoreV1().ConfigMaps(cmNamespace).Delete(context.TODO(), cmName, metav1.DeleteOptions{})
 		})
 
 		ginkgo.Context("[Template Config]", func() {
@@ -331,10 +331,10 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				name := fmt.Sprintf("network-peer-%d", index)
 
 				svc := fixture.NewE2EService(name, ns)
-				_, err = kubeCli.CoreV1().Services(ns).Create(svc)
+				_, err = kubeCli.CoreV1().Services(ns).Create(context.TODO(), svc, metav1.CreateOptions{})
 				framework.ExpectNoError(err, "create service error")
 				nd := fixture.NewNetworkTestDeployment(name, ns, map[string]string{"partition": strconv.Itoa(index % 2)})
-				_, err = kubeCli.AppsV1().Deployments(ns).Create(nd)
+				_, err = kubeCli.AppsV1().Deployments(ns).Create(context.TODO(), nd, metav1.CreateOptions{})
 				framework.ExpectNoError(err, "create network-peer deployment error")
 				err = util.WaitDeploymentReady(name, ns, kubeCli)
 				framework.ExpectNoError(err, "wait network-peer deployment ready error")
@@ -386,10 +386,10 @@ var _ = ginkgo.Describe("[Basic]", func() {
 			name := "network-peer"
 
 			svc := fixture.NewE2EService(name, ns)
-			_, err = kubeCli.CoreV1().Services(ns).Create(svc)
+			_, err = kubeCli.CoreV1().Services(ns).Create(context.TODO(), svc, metav1.CreateOptions{})
 			framework.ExpectNoError(err, "create service error")
 			nd := fixture.NewNetworkTestDeployment(name, ns, map[string]string{"partition": "0"})
-			_, err = kubeCli.AppsV1().Deployments(ns).Create(nd)
+			_, err = kubeCli.AppsV1().Deployments(ns).Create(context.TODO(), nd, metav1.CreateOptions{})
 			framework.ExpectNoError(err, "create network-peer deployment error")
 			err = util.WaitDeploymentReady(name, ns, kubeCli)
 			framework.ExpectNoError(err, "wait network-peer deployment ready error")
@@ -423,10 +423,10 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				name := fmt.Sprintf("stress-peer-%d", index)
 
 				svc := fixture.NewE2EService(name, ns)
-				_, err = kubeCli.CoreV1().Services(ns).Create(svc)
+				_, err = kubeCli.CoreV1().Services(ns).Create(context.TODO(), svc, metav1.CreateOptions{})
 				framework.ExpectNoError(err, "create service error")
 				nd := fixture.NewStressTestDeployment(name, ns, map[string]string{"partition": strconv.Itoa(index % 2)})
-				_, err = kubeCli.AppsV1().Deployments(ns).Create(nd)
+				_, err = kubeCli.AppsV1().Deployments(ns).Create(context.TODO(), nd, metav1.CreateOptions{})
 				framework.ExpectNoError(err, "create network-peer deployment error")
 				err = util.WaitDeploymentReady(name, ns, kubeCli)
 				framework.ExpectNoError(err, "wait network-peer deployment ready error")
@@ -466,7 +466,7 @@ func getPod(kubeCli kubernetes.Interface, ns string, appLabel string) (*v1.Pod, 
 		}).String(),
 	}
 
-	pods, err := kubeCli.CoreV1().Pods(ns).List(listOption)
+	pods, err := kubeCli.CoreV1().Pods(ns).List(context.TODO(), listOption)
 	if err != nil {
 		return nil, err
 	}
