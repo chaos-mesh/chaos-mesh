@@ -27,12 +27,12 @@ type ObjectBase struct {
 
 // KubeObjectDesc defines a simple kube object description which uses in apiserver.
 type KubeObjectDesc struct {
-	metav1.TypeMeta `json:",inline"`
-	Meta            KubeObjectMeta `json:"metadata"`
-	Spec            interface{}    `json:"spec"`
+	metav1.TypeMeta
+	Meta KubeObjectMeta `json:"metadata"`
+	Spec interface{}    `json:"spec"`
 }
 
-// KubeObjectMetadata extracts the required fields from `metav1.ObjectMeta`.
+// KubeObjectMetadata extracts the required fields from metav1.ObjectMeta.
 type KubeObjectMeta struct {
 	Namespace   string            `json:"namespace"`
 	Name        string            `json:"name"`
