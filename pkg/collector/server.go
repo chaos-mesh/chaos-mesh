@@ -14,6 +14,7 @@
 package collector
 
 import (
+	"context"
 	"os"
 
 	v1 "k8s.io/api/core/v1"
@@ -135,10 +136,10 @@ func NewServer(
 }
 
 // Register starts collectors manager.
-func Register(s *Server, controllerRuntimeStopCh <-chan struct{}) {
+func Register(ctx context.Context, s *Server) {
 	go func() {
 		log.Info("Starting collector")
-		if err := s.Manager.Start(controllerRuntimeStopCh); err != nil {
+		if err := s.Manager.Start(ctx); err != nil {
 			log.Error(err, "could not start collector")
 			os.Exit(1)
 		}
