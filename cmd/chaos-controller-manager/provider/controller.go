@@ -150,12 +150,12 @@ type controlPlaneCacheReader struct {
 	client.Reader `name:"control-plane-cache"`
 }
 
-func NewControlPlaneCacheReader(logger logr.Logger) (*controlPlaneCacheReader, error) {
+func NewControlPlaneCacheReader(logger logr.Logger) (controlPlaneCacheReader, error) {
 	cfg := ctrl.GetConfigOrDie()
 
 	mapper, err := apiutil.NewDynamicRESTMapper(cfg)
 	if err != nil {
-		return nil, err
+		return controlPlaneCacheReader{}, err
 	}
 
 	scheme := runtime.NewScheme()
@@ -164,7 +164,7 @@ func NewControlPlaneCacheReader(logger logr.Logger) (*controlPlaneCacheReader, e
 	// Create the cache for the cached read client and registering informers
 	cacheReader, err := cache.New(cfg, cache.Options{Scheme: scheme, Mapper: mapper, Resync: nil, Namespace: config.ControllerCfg.Namespace})
 	if err != nil {
-		return nil, err
+		return controlPlaneCacheReader{}, err
 	}
 	// TODO: store the channel and use it to stop
 	go func() {
@@ -177,7 +177,7 @@ func NewControlPlaneCacheReader(logger logr.Logger) (*controlPlaneCacheReader, e
 
 	c, err := client.New(cfg, client.Options{Scheme: scheme, Mapper: mapper})
 	if err != nil {
-		return nil, err
+		return controlPlaneCacheReader{}, err
 	}
 
 	cachedClient, err := client.NewDelegatingClient(client.NewDelegatingClientInput{
@@ -187,10 +187,10 @@ func NewControlPlaneCacheReader(logger logr.Logger) (*controlPlaneCacheReader, e
 		CacheUnstructured: false,
 	})
 	if err != nil {
-		return nil, err
+		return controlPlaneCacheReader{}, err
 	}
 
-	return &controlPlaneCacheReader{
+	return controlPlaneCacheReader{
 		Reader: cachedClient,
 	}, nil
 }
