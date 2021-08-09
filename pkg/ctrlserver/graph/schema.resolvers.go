@@ -1,3 +1,16 @@
+// Copyright 2021 Chaos Mesh Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package graph
 
 // This file will be automatically regenerated based on the schema, any resolver implementations
@@ -7,6 +20,7 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"time"
@@ -725,7 +739,27 @@ func (r *podResolver) Daemon(ctx context.Context, obj *v1.Pod) (*v1.Pod, error) 
 			return &daemon, nil
 		}
 	}
-	return nil, nil
+	return nil, fmt.Errorf("daemon of pod(%s/%s) not found", obj.Namespace, obj.Name)
+}
+
+func (r *podResolver) Processes(ctx context.Context, obj *v1.Pod) ([]*model.Process, error) {
+	pids, commands, err := r.GetPidFromPS(ctx, obj)
+	if err != nil {
+		return nil, err
+	}
+	if len(pids) != len(commands) {
+		return nil, errors.New("wrong parse result of ps, len(pids) != len(commands)")
+	}
+
+	var processes []*model.Process
+	for i := range pids {
+		processes = append(processes, &model.Process{
+			Pid:     pids[i],
+			Command: commands[i],
+		})
+	}
+
+	return processes, nil
 }
 
 func (r *podConditionResolver) Type(ctx context.Context, obj *v1.PodCondition) (string, error) {

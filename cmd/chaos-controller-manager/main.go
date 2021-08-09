@@ -40,6 +40,7 @@ import (
 	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/metrics"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
 	"github.com/chaos-mesh/chaos-mesh/pkg/ctrlserver"
 	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
@@ -85,10 +86,11 @@ func main() {
 type RunParams struct {
 	fx.In
 
-	Mgr       ctrl.Manager
-	Clientset *kubernetes.Clientset
-	Logger    logr.Logger
-	AuthCli   *authorizationv1.AuthorizationV1Client
+	Mgr                 ctrl.Manager
+	Clientset           *kubernetes.Clientset
+	Logger              logr.Logger
+	AuthCli             *authorizationv1.AuthorizationV1Client
+	DaemonClientBuilder *chaosdaemon.ChaosDaemonClientBuilder
 
 	Controllers []types.Controller `group:"controller"`
 	Objs        []types.Object     `group:"objs"`
@@ -147,7 +149,7 @@ func Run(params RunParams) error {
 		go func() {
 			mutex := http.NewServeMux()
 			mutex.Handle("/", playground.Handler("GraphQL playground", "/query"))
-			mutex.Handle("/query", ctrlserver.Handler(params.Logger, mgr.GetClient(), params.Clientset))
+			mutex.Handle("/query", ctrlserver.Handler(params.Logger, mgr.GetClient(), params.Clientset, params.DaemonClientBuilder))
 			setupLog.Info("setup ctrlserver", "addr", ccfg.ControllerCfg.CtrlAddr)
 			setupLog.Error(http.ListenAndServe(ccfg.ControllerCfg.CtrlAddr, mutex), "unable to start ctrlserver")
 		}()

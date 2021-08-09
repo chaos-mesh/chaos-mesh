@@ -377,6 +377,7 @@ type ComplexityRoot struct {
 		Name                       func(childComplexity int) int
 		Namespace                  func(childComplexity int) int
 		OwnerReferences            func(childComplexity int) int
+		Processes                  func(childComplexity int) int
 		ResourceVersion            func(childComplexity int) int
 		SelfLink                   func(childComplexity int) int
 		Spec                       func(childComplexity int) int
@@ -575,6 +576,11 @@ type ComplexityRoot struct {
 		QosClass                   func(childComplexity int) int
 		Reason                     func(childComplexity int) int
 		StartTime                  func(childComplexity int) int
+	}
+
+	Process struct {
+		Command func(childComplexity int) int
+		Pid     func(childComplexity int) int
 	}
 
 	Query struct {
@@ -794,6 +800,7 @@ type PodResolver interface {
 
 	Logs(ctx context.Context, obj *v1.Pod) (string, error)
 	Daemon(ctx context.Context, obj *v1.Pod) (*v1.Pod, error)
+	Processes(ctx context.Context, obj *v1.Pod) ([]*model.Process, error)
 }
 type PodConditionResolver interface {
 	Type(ctx context.Context, obj *v1.PodCondition) (string, error)
@@ -2465,6 +2472,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Pod.OwnerReferences(childComplexity), true
 
+	case "Pod.processes":
+		if e.complexity.Pod.Processes == nil {
+			break
+		}
+
+		return e.complexity.Pod.Processes(childComplexity), true
+
 	case "Pod.resourceVersion":
 		if e.complexity.Pod.ResourceVersion == nil {
 			break
@@ -3431,6 +3445,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.PodStatus.StartTime(childComplexity), true
 
+	case "Process.command":
+		if e.complexity.Process.Command == nil {
+			break
+		}
+
+		return e.complexity.Process.Command(childComplexity), true
+
+	case "Process.pid":
+		if e.complexity.Process.Pid == nil {
+			break
+		}
+
+		return e.complexity.Process.Pid(childComplexity), true
+
 	case "Query.namepsace":
 		if e.complexity.Query.Namepsace == nil {
 			break
@@ -3854,6 +3882,11 @@ enum Component {
     DNSSERVER
 }
 
+type Process {
+	pid: String!
+	command: String!
+}
+
 type Pod @goModel(model: "k8s.io/api/core/v1.Pod") {
     kind: String!
     apiVersion: String!
@@ -3876,8 +3909,9 @@ type Pod @goModel(model: "k8s.io/api/core/v1.Pod") {
 	spec: PodSpec!
 	status: PodStatus!
 
-    logs: String! 	@goField(forceResolver: true)
-	daemon: Pod 	@goField(forceResolver: true)
+    logs: String! 			@goField(forceResolver: true)
+	daemon: Pod 			@goField(forceResolver: true)
+	processes: [Process!] 	@goField(forceResolver: true)
 }
 
 # PodStatus represents information about the status of a pod. Status may trail the actual
@@ -12533,6 +12567,38 @@ func (ec *executionContext) _Pod_daemon(ctx context.Context, field graphql.Colle
 	return ec.marshalOPod2ᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐPod(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Pod_processes(ctx context.Context, field graphql.CollectedField, obj *v1.Pod) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Pod",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Pod().Processes(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Process)
+	fc.Result = res
+	return ec.marshalOProcess2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlserverᚋgraphᚋmodelᚐProcessᚄ(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _PodCondition_type(ctx context.Context, field graphql.CollectedField, obj *v1.PodCondition) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -16979,6 +17045,76 @@ func (ec *executionContext) _PodStatus_ephemeralContainerStatuses(ctx context.Co
 	res := resTmp.([]v1.ContainerStatus)
 	fc.Result = res
 	return ec.marshalOContainerStatus2ᚕk8sᚗioᚋapiᚋcoreᚋv1ᚐContainerStatusᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Process_pid(ctx context.Context, field graphql.CollectedField, obj *model.Process) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Process",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Pid, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Process_command(ctx context.Context, field graphql.CollectedField, obj *model.Process) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Process",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Command, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_namepsace(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -21627,6 +21763,17 @@ func (ec *executionContext) _Pod(ctx context.Context, sel ast.SelectionSet, obj 
 				res = ec._Pod_daemon(ctx, field, obj)
 				return res
 			})
+		case "processes":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Pod_processes(ctx, field, obj)
+				return res
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -22869,6 +23016,38 @@ func (ec *executionContext) _PodStatus(ctx context.Context, sel ast.SelectionSet
 	return out
 }
 
+var processImplementors = []string{"Process"}
+
+func (ec *executionContext) _Process(ctx context.Context, sel ast.SelectionSet, obj *model.Process) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, processImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Process")
+		case "pid":
+			out.Values[i] = ec._Process_pid(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "command":
+			out.Values[i] = ec._Process_command(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var queryImplementors = []string{"Query"}
 
 func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -23848,6 +24027,16 @@ func (ec *executionContext) marshalNPodSpec2k8sᚗioᚋapiᚋcoreᚋv1ᚐPodSpec
 
 func (ec *executionContext) marshalNPodStatus2k8sᚗioᚋapiᚋcoreᚋv1ᚐPodStatus(ctx context.Context, sel ast.SelectionSet, v v1.PodStatus) graphql.Marshaler {
 	return ec._PodStatus(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNProcess2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlserverᚋgraphᚋmodelᚐProcess(ctx context.Context, sel ast.SelectionSet, v *model.Process) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Process(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNRawIPSet2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐRawIPSet(ctx context.Context, sel ast.SelectionSet, v v1alpha1.RawIPSet) graphql.Marshaler {
@@ -24961,6 +25150,46 @@ func (ec *executionContext) marshalOPodNetworkChaos2ᚕᚖgithubᚗcomᚋchaos�
 				defer wg.Done()
 			}
 			ret[i] = ec.marshalNPodNetworkChaos2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodNetworkChaos(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalOProcess2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlserverᚋgraphᚋmodelᚐProcessᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Process) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNProcess2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlserverᚋgraphᚋmodelᚐProcess(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)

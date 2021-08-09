@@ -33,6 +33,11 @@ type Namespace struct {
 	Podnetworks []*v1alpha1.PodNetworkChaos `json:"podnetworks"`
 }
 
+type Process struct {
+	Pid     string `json:"pid"`
+	Command string `json:"command"`
+}
+
 type Component string
 
 const (
