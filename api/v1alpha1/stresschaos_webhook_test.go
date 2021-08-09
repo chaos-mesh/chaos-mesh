@@ -17,7 +17,6 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
 var _ = Describe("stresschaos_webhook", func() {
@@ -118,52 +117,52 @@ var _ = Describe("stresschaos_webhook", func() {
 			}
 		})
 
-		It("Validate Stressors", func() {
-			type TestCase struct {
-				name     string
-				stressor Validateable
-				errs     int
-			}
-			tcs := []TestCase{
-				{
-					name:     "missing workers",
-					stressor: &Stressor{},
-					errs:     1,
-				},
-				{
-					name: "default MemoryStressor",
-					stressor: &MemoryStressor{
-						Stressor: Stressor{Workers: 1},
-					},
-					errs: 0,
-				},
-				{
-					name: "default CPUStressor",
-					stressor: &CPUStressor{
-						Stressor: Stressor{Workers: 1},
-					},
-					errs: 0,
-				},
-			}
-			parent := field.NewPath("parent")
-			for _, tc := range tcs {
-				Expect(tc.stressor.Validate(parent)).To(HaveLen(tc.errs))
-			}
-		})
+		//		It("Validate Stressors", func() {
+		//type TestCase struct {
+		//name     string
+		//stressor Validateable
+		//errs     int
+		//}
+		//tcs := []TestCase{
+		//{
+		//name:     "missing workers",
+		//stressor: &Stressor{},
+		//errs:     1,
+		//},
+		//{
+		//name: "default MemoryStressor",
+		//stressor: &MemoryStressor{
+		//Stressor: Stressor{Workers: 1},
+		//},
+		//errs: 0,
+		//},
+		//{
+		//name: "default CPUStressor",
+		//stressor: &CPUStressor{
+		//Stressor: Stressor{Workers: 1},
+		//},
+		//errs: 0,
+		//},
+		//}
+		//parent := field.NewPath("parent")
+		//for _, tc := range tcs {
+		//Expect(tc.stressor.Validate(parent)).To(HaveLen(tc.errs))
+		//}
+		//})
 
-		It("Parse MemoryStressor fields", func() {
-			vm := MemoryStressor{}
-			incorrectBytes := []string{"-1", "-1%", "101%", "x%", "-1Kb"}
-			for _, b := range incorrectBytes {
-				vm.Size = b
-				Expect(vm.tryParseBytes()).Should(HaveOccurred())
-			}
-			correctBytes := []string{"", "1%", "100KB", "100B"}
-			for _, b := range correctBytes {
-				vm.Size = b
-				Expect(vm.tryParseBytes()).ShouldNot(HaveOccurred())
-			}
-		})
+		//It("Parse MemoryStressor fields", func() {
+		//vm := MemoryStressor{}
+		//incorrectBytes := []string{"-1", "-1%", "101%", "x%", "-1Kb"}
+		//for _, b := range incorrectBytes {
+		//vm.Size = b
+		//Expect(vm.tryParseBytes()).Should(HaveOccurred())
+		//}
+		//correctBytes := []string{"", "1%", "100KB", "100B"}
+		//for _, b := range correctBytes {
+		//vm.Size = b
+		//Expect(vm.tryParseBytes()).ShouldNot(HaveOccurred())
+		//}
+		//})
 
 	})
 
