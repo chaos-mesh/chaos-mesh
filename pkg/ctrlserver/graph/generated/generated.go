@@ -71,6 +71,7 @@ type ResolverRoot interface {
 	PodNetworkChaos() PodNetworkChaosResolver
 	PodSelectorSpec() PodSelectorSpecResolver
 	PodStatus() PodStatusResolver
+	Process() ProcessResolver
 	Query() QueryResolver
 	RawIptables() RawIptablesResolver
 	RawTrafficControl() RawTrafficControlResolver
@@ -168,6 +169,11 @@ type ComplexityRoot struct {
 	ExperimentStatus struct {
 		DesiredPhase func(childComplexity int) int
 		Records      func(childComplexity int) int
+	}
+
+	Fd struct {
+		Fd     func(childComplexity int) int
+		Target func(childComplexity int) int
 	}
 
 	HTTPChaos struct {
@@ -580,7 +586,9 @@ type ComplexityRoot struct {
 
 	Process struct {
 		Command func(childComplexity int) int
+		Fds     func(childComplexity int) int
 		Pid     func(childComplexity int) int
+		Pod     func(childComplexity int) int
 	}
 
 	Query struct {
@@ -867,6 +875,9 @@ type PodStatusResolver interface {
 	StartTime(ctx context.Context, obj *v1.PodStatus) (*time.Time, error)
 
 	QosClass(ctx context.Context, obj *v1.PodStatus) (string, error)
+}
+type ProcessResolver interface {
+	Fds(ctx context.Context, obj *model.Process) ([]*model.Fd, error)
 }
 type QueryResolver interface {
 	Namepsace(ctx context.Context, ns *string) (*model.Namespace, error)
@@ -1268,6 +1279,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ExperimentStatus.Records(childComplexity), true
+
+	case "Fd.fd":
+		if e.complexity.Fd.Fd == nil {
+			break
+		}
+
+		return e.complexity.Fd.Fd(childComplexity), true
+
+	case "Fd.target":
+		if e.complexity.Fd.Target == nil {
+			break
+		}
+
+		return e.complexity.Fd.Target(childComplexity), true
 
 	case "HTTPChaos.apiVersion":
 		if e.complexity.HTTPChaos.APIVersion == nil {
@@ -3452,12 +3477,26 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Process.Command(childComplexity), true
 
+	case "Process.fds":
+		if e.complexity.Process.Fds == nil {
+			break
+		}
+
+		return e.complexity.Process.Fds(childComplexity), true
+
 	case "Process.pid":
 		if e.complexity.Process.Pid == nil {
 			break
 		}
 
 		return e.complexity.Process.Pid(childComplexity), true
+
+	case "Process.pod":
+		if e.complexity.Process.Pod == nil {
+			break
+		}
+
+		return e.complexity.Process.Pod(childComplexity), true
 
 	case "Query.namepsace":
 		if e.complexity.Query.Namepsace == nil {
@@ -3883,8 +3922,17 @@ enum Component {
 }
 
 type Process {
+	pod: Pod!
+
 	pid: String!
 	command: String!
+
+	fds: [Fd!] @goField(forceResolver: true)
+}
+
+type Fd {
+	fd: String!
+	target: String!
 }
 
 type Pod @goModel(model: "k8s.io/api/core/v1.Pod") {
@@ -6823,6 +6871,76 @@ func (ec *executionContext) _ExperimentStatus_Records(ctx context.Context, field
 	res := resTmp.([]*v1alpha1.Record)
 	fc.Result = res
 	return ec.marshalORecord2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐRecordᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Fd_fd(ctx context.Context, field graphql.CollectedField, obj *model.Fd) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Fd",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Fd, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Fd_target(ctx context.Context, field graphql.CollectedField, obj *model.Fd) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Fd",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Target, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _HTTPChaos_kind(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.HTTPChaos) (ret graphql.Marshaler) {
@@ -17047,6 +17165,41 @@ func (ec *executionContext) _PodStatus_ephemeralContainerStatuses(ctx context.Co
 	return ec.marshalOContainerStatus2ᚕk8sᚗioᚋapiᚋcoreᚋv1ᚐContainerStatusᚄ(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Process_pod(ctx context.Context, field graphql.CollectedField, obj *model.Process) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Process",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Pod, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*v1.Pod)
+	fc.Result = res
+	return ec.marshalNPod2ᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐPod(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Process_pid(ctx context.Context, field graphql.CollectedField, obj *model.Process) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -17115,6 +17268,38 @@ func (ec *executionContext) _Process_command(ctx context.Context, field graphql.
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Process_fds(ctx context.Context, field graphql.CollectedField, obj *model.Process) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Process",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Process().Fds(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Fd)
+	fc.Result = res
+	return ec.marshalOFd2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlserverᚋgraphᚋmodelᚐFdᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_namepsace(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -20276,6 +20461,38 @@ func (ec *executionContext) _ExperimentStatus(ctx context.Context, sel ast.Selec
 	return out
 }
 
+var fdImplementors = []string{"Fd"}
+
+func (ec *executionContext) _Fd(ctx context.Context, sel ast.SelectionSet, obj *model.Fd) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, fdImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Fd")
+		case "fd":
+			out.Values[i] = ec._Fd_fd(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "target":
+			out.Values[i] = ec._Fd_target(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var hTTPChaosImplementors = []string{"HTTPChaos"}
 
 func (ec *executionContext) _HTTPChaos(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.HTTPChaos) graphql.Marshaler {
@@ -23027,16 +23244,32 @@ func (ec *executionContext) _Process(ctx context.Context, sel ast.SelectionSet, 
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Process")
+		case "pod":
+			out.Values[i] = ec._Process_pod(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
 		case "pid":
 			out.Values[i] = ec._Process_pid(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "command":
 			out.Values[i] = ec._Process_command(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
+		case "fds":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Process_fds(ctx, field, obj)
+				return res
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -23749,6 +23982,16 @@ func (ec *executionContext) marshalNComponent2githubᚗcomᚋchaosᚑmeshᚋchao
 
 func (ec *executionContext) marshalNContainerStatus2k8sᚗioᚋapiᚋcoreᚋv1ᚐContainerStatus(ctx context.Context, sel ast.SelectionSet, v v1.ContainerStatus) graphql.Marshaler {
 	return ec._ContainerStatus(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNFd2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlserverᚋgraphᚋmodelᚐFd(ctx context.Context, sel ast.SelectionSet, v *model.Fd) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Fd(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNHTTPChaos2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐHTTPChaos(ctx context.Context, sel ast.SelectionSet, v v1alpha1.HTTPChaos) graphql.Marshaler {
@@ -24551,6 +24794,46 @@ func (ec *executionContext) marshalODuplicateSpec2ᚖgithubᚗcomᚋchaosᚑmesh
 
 func (ec *executionContext) marshalOExperimentStatus2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐExperimentStatus(ctx context.Context, sel ast.SelectionSet, v v1alpha1.ExperimentStatus) graphql.Marshaler {
 	return ec._ExperimentStatus(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalOFd2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlserverᚋgraphᚋmodelᚐFdᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Fd) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNFd2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlserverᚋgraphᚋmodelᚐFd(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
 }
 
 func (ec *executionContext) marshalOHTTPChaos2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐHTTPChaosᚄ(ctx context.Context, sel ast.SelectionSet, v []*v1alpha1.HTTPChaos) graphql.Marshaler {

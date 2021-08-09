@@ -1,16 +1,3 @@
-// Copyright 2021 Chaos Mesh Authors.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package graph
 
 // This file will be automatically regenerated based on the schema, any resolver implementations
@@ -20,7 +7,6 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"time"
@@ -743,23 +729,7 @@ func (r *podResolver) Daemon(ctx context.Context, obj *v1.Pod) (*v1.Pod, error) 
 }
 
 func (r *podResolver) Processes(ctx context.Context, obj *v1.Pod) ([]*model.Process, error) {
-	pids, commands, err := r.GetPidFromPS(ctx, obj)
-	if err != nil {
-		return nil, err
-	}
-	if len(pids) != len(commands) {
-		return nil, errors.New("wrong parse result of ps, len(pids) != len(commands)")
-	}
-
-	var processes []*model.Process
-	for i := range pids {
-		processes = append(processes, &model.Process{
-			Pid:     pids[i],
-			Command: commands[i],
-		})
-	}
-
-	return processes, nil
+	return r.GetPidFromPS(ctx, obj)
 }
 
 func (r *podConditionResolver) Type(ctx context.Context, obj *v1.PodCondition) (string, error) {
@@ -1003,6 +973,10 @@ func (r *podStatusResolver) QosClass(ctx context.Context, obj *v1.PodStatus) (st
 	return string(obj.QOSClass), nil
 }
 
+func (r *processResolver) Fds(ctx context.Context, obj *model.Process) ([]*model.Fd, error) {
+	return r.GetFdsOfProcess(ctx, obj)
+}
+
 func (r *queryResolver) Namepsace(ctx context.Context, ns *string) (*model.Namespace, error) {
 	if ns == nil {
 		ns = new(string)
@@ -1165,6 +1139,9 @@ func (r *Resolver) PodSelectorSpec() generated.PodSelectorSpecResolver {
 // PodStatus returns generated.PodStatusResolver implementation.
 func (r *Resolver) PodStatus() generated.PodStatusResolver { return &podStatusResolver{r} }
 
+// Process returns generated.ProcessResolver implementation.
+func (r *Resolver) Process() generated.ProcessResolver { return &processResolver{r} }
+
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
@@ -1212,6 +1189,7 @@ type podIOChaosResolver struct{ *Resolver }
 type podNetworkChaosResolver struct{ *Resolver }
 type podSelectorSpecResolver struct{ *Resolver }
 type podStatusResolver struct{ *Resolver }
+type processResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type rawIptablesResolver struct{ *Resolver }
 type rawTrafficControlResolver struct{ *Resolver }

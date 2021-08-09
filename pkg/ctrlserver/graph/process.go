@@ -20,18 +20,20 @@ import (
 
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/ctrlserver/graph/model"
 )
 
 // GetPidFromPS returns pid-command pairs
-func (r *Resolver) GetPidFromPS(ctx context.Context, pod *v1.Pod) ([]string, []string, error) {
+func (r *Resolver) GetPidFromPS(ctx context.Context, pod *v1.Pod) ([]*model.Process, error) {
 	cmd := "ps"
 	out, err := r.ExecBypass(ctx, pod, cmd)
 	if err != nil {
-		return nil, nil, errors.Wrapf(err, "run command %s failed", cmd)
+		return nil, errors.Wrapf(err, "run command %s failed", cmd)
 	}
 	outLines := strings.Split(string(out), "\n")
 	if len(outLines) < 2 {
-		return nil, nil, fmt.Errorf("ps returns empty")
+		return nil, fmt.Errorf("ps returns empty")
 	}
 	titles := strings.Fields(outLines[0])
 	var pidColumn, cmdColumn int
@@ -44,17 +46,24 @@ func (r *Resolver) GetPidFromPS(ctx context.Context, pod *v1.Pod) ([]string, []s
 		}
 	}
 	if pidColumn == 0 && cmdColumn == 0 {
-		return nil, nil, fmt.Errorf("parsing ps error: could not get PID and COMMAND column")
+		return nil, fmt.Errorf("parsing ps error: could not get PID and COMMAND column")
 	}
-	var pids, commands []string
+
+	var processes []*model.Process
 	for _, line := range outLines[1:] {
 		item := strings.Fields(line)
 		// break when got empty line
 		if len(item) == 0 {
 			break
 		}
-		pids = append(pids, item[pidColumn])
-		commands = append(commands, item[cmdColumn])
+		if item[cmdColumn] == cmd {
+			continue
+		}
+		processes = append(processes, &model.Process{
+			Pod:     pod,
+			Pid:     item[pidColumn],
+			Command: item[cmdColumn],
+		})
 	}
-	return pids, commands, nil
+	return processes, nil
 }

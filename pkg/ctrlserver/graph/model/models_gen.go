@@ -12,6 +12,11 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
+type Fd struct {
+	Fd     string `json:"fd"`
+	Target string `json:"target"`
+}
+
 type Namespace struct {
 	Ns          string                      `json:"ns"`
 	Component   []*v1.Pod                   `json:"component"`
@@ -34,8 +39,10 @@ type Namespace struct {
 }
 
 type Process struct {
-	Pid     string `json:"pid"`
-	Command string `json:"command"`
+	Pod     *v1.Pod `json:"pod"`
+	Pid     string  `json:"pid"`
+	Command string  `json:"command"`
+	Fds     []*Fd   `json:"fds"`
 }
 
 type Component string

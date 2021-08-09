@@ -63,8 +63,17 @@ enum Component {
 }
 
 type Process {
+	pod: Pod!
+
 	pid: String!
 	command: String!
+
+	fds: [Fd!] @goField(forceResolver: true)
+}
+
+type Fd {
+	fd: String!
+	target: String!
 }
 
 type Pod @goModel(model: "k8s.io/api/core/v1.Pod") {
