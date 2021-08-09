@@ -33,7 +33,7 @@ Chaos Operator injects chaos into the applications and Kubernetes infrastructure
 
 ![Chaos Operator](./static/chaos-mesh.svg)
 
-Chaos Operator uses [Custom Resource Definition (CRD)](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/) to define chaos objects.
+Chaos Operator uses [CustomResourceDefinition (CRD)](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/) to define chaos objects.
 The current implementation supports a few types of CRD objects for fault injection, namely DNSChaos, PodChaos, PodIOChaos, PodNetworkChaos, NetworkChaos, IOChaos, TimeChaos, StressChaos, and KernelChaos, which correspond to the following major actions (experiments):
 
 - pod-kill: The selected pod is killed (ReplicaSet or something similar may be needed to ensure the pod will be restarted).
@@ -50,12 +50,7 @@ The current implementation supports a few types of CRD objects for fault injecti
 
 ## Quick start
 
-- [Get Started on kind](https://chaos-mesh.org/docs/get_started/get_started_on_kind)
-- [Get Started on minikube](https://chaos-mesh.org/docs/get_started/get_started_on_minikube)
-
-## Deploy and use
-
-See [Docs](https://chaos-mesh.org/docs/).
+See [Chaos Mesh Docs](https://chaos-mesh.org/docs/).
 
 ## Adopters
 
@@ -71,7 +66,7 @@ Blogs on Chaos Mesh design & implementation, features, chaos engineering, commun
 - [Building an Automated Testing Framework Based on Chaos Mesh® and Argo](https://chaos-mesh.org/blog/building_automated_testing_framework)
 - [Chaos Mesh 1.0: Chaos Engineering on Kubernetes Made Easier](https://chaos-mesh.org/blog/chaos-mesh-1.0-chaos-engineering-on-kubernetes-made-easier)
 
-## Contribute
+## Contributing
 
 See the [contributing guide](./CONTRIBUTING.md) and [development guide](https://chaos-mesh.org/docs/development_guides/development_overview).
 
@@ -129,7 +124,7 @@ On the fourth Thursday of every month (unless otherwise specified), the Chaos Me
 
 ## FAQs
 
-See [FAQs](https://chaos-mesh.org/docs/faqs).
+See [FAQs](https://chaos-mesh.org/docs).
 
 ## Roadmap
 
