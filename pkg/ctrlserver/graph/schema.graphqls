@@ -1,0 +1,235 @@
+schema {
+    query: Query
+}
+
+type Query {
+    namepsace(ns: String): Namespace!
+}
+
+type Namespace {
+    ns: String!
+    logs(component: Component!): String!
+    pod(name: String): [Pod!]
+    stressChaos(name: String): [StressChaos!]
+    ioChaos(name: String): [IOChaos!]
+    podIOChaos(name: String): [PodIOChaos!]
+    httpChaos(name: String): [HTTPChaos!]
+    podHTTPChaos(name: String): [PodHTTPChaos!]
+    networkChaos(name: String): [NetworkChaos!]
+    podNetworkChaos(name: String): [PodNetWorkChaos!]
+}
+
+interface TypeMeta {
+    kind: String!
+    apiVersion: String!
+}
+
+scalar Time
+scalar Map
+
+type OwnerReference {
+    kind: String!
+    apiVersion: String!
+    name: String!
+    uid: String!
+    controller: Boolean
+    blockOwnerDeletion: Boolean
+}
+
+interface ObjectMeta {
+    name: String!
+    generateName: String!
+    namespace: String!
+    selfLink: String!
+    uid: String! 
+    resourceVersion: String!
+    generation: Int!
+    creationTimestamp: Time!
+    deletionTimestamp: Time
+    deletionGracePeriodSeconds: Int
+    labels: Map
+    annotations: Map
+    ownerReferences: [OwnerReference!]
+    finalizers: [String!]
+    clusterName: String!
+}
+
+enum Component {
+    MANAGER
+    DAEMON
+    DASHBOARD
+    DNSSERVER
+}
+
+type Pod implements TypeMeta & ObjectMeta {
+    kind: String!
+    apiVersion: String!
+    name: String!
+    generateName: String!
+    namespace: String!
+    selfLink: String!
+    uid: String! 
+    resourceVersion: String!
+    generation: Int!
+    creationTimestamp: Time!
+    deletionTimestamp: Time
+    deletionGracePeriodSeconds: Int
+    labels: Map
+    annotations: Map
+    ownerReferences: [OwnerReference!]
+    finalizers: [String!]
+    clusterName: String!
+}
+
+type PodIOChaos {
+    kind: String!
+    apiVersion: String!
+    name: String!
+    generateName: String!
+    namespace: String!
+    selfLink: String!
+    uid: String! 
+    resourceVersion: String!
+    generation: Int!
+    creationTimestamp: Time!
+    deletionTimestamp: Time
+    deletionGracePeriodSeconds: Int
+    labels: Map
+    annotations: Map
+    ownerReferences: [OwnerReference!]
+    finalizers: [String!]
+    clusterName: String!
+
+    pod: Pod!
+}
+
+type IOChaos implements TypeMeta & ObjectMeta {
+    kind: String!
+    apiVersion: String!
+    name: String!
+    generateName: String!
+    namespace: String!
+    selfLink: String!
+    uid: String! 
+    resourceVersion: String!
+    generation: Int!
+    creationTimestamp: Time!
+    deletionTimestamp: Time
+    deletionGracePeriodSeconds: Int
+    labels: Map
+    annotations: Map
+    ownerReferences: [OwnerReference!]
+    finalizers: [String!]
+    clusterName: String!
+
+    podchaos: [PodIOChaos!]
+}
+
+type PodHTTPChaos implements TypeMeta & ObjectMeta {
+    kind: String!
+    apiVersion: String!
+    name: String!
+    generateName: String!
+    namespace: String!
+    selfLink: String!
+    uid: String! 
+    resourceVersion: String!
+    generation: Int!
+    creationTimestamp: Time!
+    deletionTimestamp: Time
+    deletionGracePeriodSeconds: Int
+    labels: Map
+    annotations: Map
+    ownerReferences: [OwnerReference!]
+    finalizers: [String!]
+    clusterName: String!
+
+    pod: Pod!
+}
+
+type HTTPChaos implements TypeMeta & ObjectMeta {
+    kind: String!
+    apiVersion: String!
+    name: String!
+    generateName: String!
+    namespace: String!
+    selfLink: String!
+    uid: String! 
+    resourceVersion: String!
+    generation: Int!
+    creationTimestamp: Time!
+    deletionTimestamp: Time
+    deletionGracePeriodSeconds: Int
+    labels: Map
+    annotations: Map
+    ownerReferences: [OwnerReference!]
+    finalizers: [String!]
+    clusterName: String!
+
+    podchaos: [PodHTTPChaos!]
+}
+
+type PodNetWorkChaos implements TypeMeta & ObjectMeta {
+    kind: String!
+    apiVersion: String!
+    name: String!
+    generateName: String!
+    namespace: String!
+    selfLink: String!
+    uid: String! 
+    resourceVersion: String!
+    generation: Int!
+    creationTimestamp: Time!
+    deletionTimestamp: Time
+    deletionGracePeriodSeconds: Int
+    labels: Map
+    annotations: Map
+    ownerReferences: [OwnerReference!]
+    finalizers: [String!]
+    clusterName: String!
+
+    pod: Pod!
+}
+
+type NetworkChaos implements TypeMeta & ObjectMeta {
+    kind: String!
+    apiVersion: String!
+    name: String!
+    generateName: String!
+    namespace: String!
+    selfLink: String!
+    uid: String! 
+    resourceVersion: String!
+    generation: Int!
+    creationTimestamp: Time!
+    deletionTimestamp: Time
+    deletionGracePeriodSeconds: Int
+    labels: Map
+    annotations: Map
+    ownerReferences: [OwnerReference!]
+    finalizers: [String!]
+    clusterName: String!
+
+    podchaos: [NetworkChaos!]
+}
+
+type StressChaos implements TypeMeta & ObjectMeta {
+    kind: String!
+    apiVersion: String!
+    name: String!
+    generateName: String!
+    namespace: String!
+    selfLink: String!
+    uid: String! 
+    resourceVersion: String!
+    generation: Int!
+    creationTimestamp: Time!
+    deletionTimestamp: Time
+    deletionGracePeriodSeconds: Int
+    labels: Map
+    annotations: Map
+    ownerReferences: [OwnerReference!]
+    finalizers: [String!]
+    clusterName: String!
+}
+
