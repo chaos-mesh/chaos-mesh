@@ -422,7 +422,7 @@ func (r *loggerResolver) Pod(ctx context.Context, ns *string, name string) (<-ch
 				continue
 			case <-time.NewTimer(time.Minute).C:
 				r.Log.Info(fmt.Sprintf("client has not read log of pod(%s/%s) for 1m, close channel", *ns, name))
-				break
+				return
 			}
 		}
 	}()
