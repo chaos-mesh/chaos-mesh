@@ -377,6 +377,8 @@ type ComplexityRoot struct {
 		Finalizers                 func(childComplexity int) int
 		GenerateName               func(childComplexity int) int
 		Generation                 func(childComplexity int) int
+		Ipset                      func(childComplexity int) int
+		Iptables                   func(childComplexity int) int
 		Kind                       func(childComplexity int) int
 		Labels                     func(childComplexity int) int
 		Logs                       func(childComplexity int) int
@@ -389,6 +391,7 @@ type ComplexityRoot struct {
 		SelfLink                   func(childComplexity int) int
 		Spec                       func(childComplexity int) int
 		Status                     func(childComplexity int) int
+		TcQdisc                    func(childComplexity int) int
 		UID                        func(childComplexity int) int
 	}
 
@@ -811,6 +814,9 @@ type PodResolver interface {
 	Daemon(ctx context.Context, obj *v1.Pod) (*v1.Pod, error)
 	Processes(ctx context.Context, obj *v1.Pod) ([]*model.Process, error)
 	Mounts(ctx context.Context, obj *v1.Pod) ([]string, error)
+	Ipset(ctx context.Context, obj *v1.Pod) (string, error)
+	TcQdisc(ctx context.Context, obj *v1.Pod) (string, error)
+	Iptables(ctx context.Context, obj *v1.Pod) (string, error)
 }
 type PodConditionResolver interface {
 	Type(ctx context.Context, obj *v1.PodCondition) (string, error)
@@ -2457,6 +2463,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Pod.Generation(childComplexity), true
 
+	case "Pod.ipset":
+		if e.complexity.Pod.Ipset == nil {
+			break
+		}
+
+		return e.complexity.Pod.Ipset(childComplexity), true
+
+	case "Pod.iptables":
+		if e.complexity.Pod.Iptables == nil {
+			break
+		}
+
+		return e.complexity.Pod.Iptables(childComplexity), true
+
 	case "Pod.kind":
 		if e.complexity.Pod.Kind == nil {
 			break
@@ -2540,6 +2560,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Pod.Status(childComplexity), true
+
+	case "Pod.tcQdisc":
+		if e.complexity.Pod.TcQdisc == nil {
+			break
+		}
+
+		return e.complexity.Pod.TcQdisc(childComplexity), true
 
 	case "Pod.uid":
 		if e.complexity.Pod.UID == nil {
@@ -3970,6 +3997,9 @@ type Pod @goModel(model: "k8s.io/api/core/v1.Pod") {
 	daemon: Pod 			@goField(forceResolver: true)
 	processes: [Process!] 	@goField(forceResolver: true)
 	mounts: [String!]      	@goField(forceResolver: true)
+	ipset: String! 			@goField(forceResolver: true)
+	tcQdisc: String! 		@goField(forceResolver: true)
+	iptables: String!		@goField(forceResolver: true)
 }
 
 # PodStatus represents information about the status of a pod. Status may trail the actual
@@ -12757,6 +12787,111 @@ func (ec *executionContext) _Pod_mounts(ctx context.Context, field graphql.Colle
 	res := resTmp.([]string)
 	fc.Result = res
 	return ec.marshalOString2ᚕstringᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Pod_ipset(ctx context.Context, field graphql.CollectedField, obj *v1.Pod) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Pod",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Pod().Ipset(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Pod_tcQdisc(ctx context.Context, field graphql.CollectedField, obj *v1.Pod) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Pod",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Pod().TcQdisc(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Pod_iptables(ctx context.Context, field graphql.CollectedField, obj *v1.Pod) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Pod",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Pod().Iptables(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _PodCondition_type(ctx context.Context, field graphql.CollectedField, obj *v1.PodCondition) (ret graphql.Marshaler) {
@@ -22042,6 +22177,48 @@ func (ec *executionContext) _Pod(ctx context.Context, sel ast.SelectionSet, obj 
 					}
 				}()
 				res = ec._Pod_mounts(ctx, field, obj)
+				return res
+			})
+		case "ipset":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Pod_ipset(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "tcQdisc":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Pod_tcQdisc(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "iptables":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Pod_iptables(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
 				return res
 			})
 		default:

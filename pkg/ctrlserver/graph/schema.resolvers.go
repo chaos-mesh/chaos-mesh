@@ -736,6 +736,18 @@ func (r *podResolver) Mounts(ctx context.Context, obj *v1.Pod) ([]string, error)
 	return r.GetMounts(ctx, obj)
 }
 
+func (r *podResolver) Ipset(ctx context.Context, obj *v1.Pod) (string, error) {
+	return r.GetIpset(ctx, obj)
+}
+
+func (r *podResolver) TcQdisc(ctx context.Context, obj *v1.Pod) (string, error) {
+	return r.GetTcQdisc(ctx, obj)
+}
+
+func (r *podResolver) Iptables(ctx context.Context, obj *v1.Pod) (string, error) {
+	return r.GetIptables(ctx, obj)
+}
+
 func (r *podConditionResolver) Type(ctx context.Context, obj *v1.PodCondition) (string, error) {
 	return string(obj.Type), nil
 }
