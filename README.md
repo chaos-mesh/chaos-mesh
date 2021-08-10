@@ -68,7 +68,7 @@ Blogs on Chaos Mesh design & implementation, features, chaos engineering, commun
 
 ## Contributing
 
-See the [contributing guide](./CONTRIBUTING.md) and [development guide](https://chaos-mesh.org/docs/development_guides/development_overview).
+See the [contributing guide](./CONTRIBUTING.md) and [development guide](https://chaos-mesh.org/docs/developer-guide-overview).
 
 ## Community
 
