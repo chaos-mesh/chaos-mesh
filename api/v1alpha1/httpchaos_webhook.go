@@ -70,4 +70,5 @@ func (in *PodHttpChaosTarget) Validate(root interface{}, path *field.Path) field
 func init() {
 	genericwebhook.Register("Port", reflect.PtrTo(reflect.TypeOf(Port(0))))
 	genericwebhook.Register("HTTPMethod", reflect.PtrTo(reflect.TypeOf(HTTPMethod(""))))
+	genericwebhook.Register("PodHttpChaosTarget", reflect.PtrTo(reflect.TypeOf(PodHttpChaosTarget(""))))
 }
