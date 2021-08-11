@@ -29,7 +29,7 @@ func (in *Port) Validate(root interface{}, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 	// in cannot be zero or negative
 	if *in <= 0 {
-		allErrs = append(allErrs, field.Invalid(path, in, fmt.Sprintf("port %d is not supported", in)))
+		allErrs = append(allErrs, field.Invalid(path, in, fmt.Sprintf("port %d is not supported", *in)))
 	}
 	return allErrs
 }

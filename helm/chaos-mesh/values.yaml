@@ -363,6 +363,7 @@ webhook:
     - jvmchaos
     - schedule
     - workflow
+    - httpchaos
 
 bpfki:
   create: false
