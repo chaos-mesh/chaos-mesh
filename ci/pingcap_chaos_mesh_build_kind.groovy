@@ -16,6 +16,7 @@ spec:
   containers:
   - name: main
     image: hub.pingcap.net/chaos-mesh/chaos-mesh-e2e-base:latest
+    imagePullPolicy: Always
     command:
     - runner.sh
     # Clean containers on TERM signal in root process to avoid cgroup leaking.
@@ -115,6 +116,8 @@ def build(String name, String code) {
 							env
 							echo "====== go env ======"
 							go env
+							echo "====== go version ======"
+							go version
 							echo "====== docker version ======"
 							docker version
 							"""
