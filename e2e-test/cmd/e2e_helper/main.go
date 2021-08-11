@@ -282,12 +282,15 @@ func (s *server) stressCondition(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *server) httpEcho(w http.ResponseWriter, r *http.Request) {
-	secret := r.Header.Get("Secret")
-	if secret == "" {
+	secrets := r.Header["Secret"]
+	if len(secrets) == 0 {
 		http.Error(w, "Forbidden", http.StatusForbidden)
 		return
 	}
-	w.Header().Set("Secret", secret)
+
+	for _, secret := range secrets {
+		w.Header().Add("Secret", secret)
+	}
 	defer r.Body.Close()
 	_, err := io.Copy(w, r.Body)
 	if err != nil {
