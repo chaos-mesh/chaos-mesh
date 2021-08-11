@@ -15,7 +15,7 @@ import { useHistory } from 'react-router-dom'
 import { useIntl } from 'react-intl'
 
 interface Step3Props {
-  onSubmit?: (experiment: { target: any; basic: any }) => void
+  onSubmit?: (experiment: { spec: any; basic: any }) => void
 }
 
 const Step3: React.FC<Step3Props> = ({ onSubmit }) => {
@@ -23,7 +23,7 @@ const Step3: React.FC<Step3Props> = ({ onSubmit }) => {
   const intl = useIntl()
 
   const state = useStoreSelector((state) => state)
-  const { step1, step2, kindAction, basic, target } = state.experiments
+  const { step1, step2, kindAction, basic, spec } = state.experiments
   const { debugMode } = state.settings
   const dispatch = useStoreDispatch()
 
@@ -32,7 +32,7 @@ const Step3: React.FC<Step3Props> = ({ onSubmit }) => {
       ...basic,
       spec: {
         ...basic.spec,
-        ...target.spec,
+        ...spec,
       },
     })
 
@@ -42,7 +42,7 @@ const Step3: React.FC<Step3Props> = ({ onSubmit }) => {
 
     if (!debugMode) {
       if (onSubmit) {
-        onSubmit({ target, basic })
+        onSubmit({ spec, basic })
       } else {
         api.experiments
           .newExperiment(parsedValues)

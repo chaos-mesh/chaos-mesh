@@ -19,9 +19,57 @@ export interface Scope {
   value?: string
 }
 
-export interface Pod {
-  action: 'pod-failure' | 'pod-kill' | 'container-kill'
+export interface AWS {
+  action: 'ec2-stop' | 'ec2-restart' | 'detach-volume'
+  secretName: string
+  awsRegion: string
+  ec2Instance: string
+  volumeID?: string
+  deviceName?: string
+}
+
+export interface DNS {
+  action: 'error' | 'random'
+  patterns: string[]
   containerNames?: string[]
+}
+
+export interface GCP {
+  action: 'node-stop' | 'node-reset' | 'disk-loss'
+  secretName: string
+  project: string
+  zone: string
+  instance: string
+  deviceNames?: string[]
+}
+
+export interface IO {
+  action: 'latency' | 'fault' | 'attrOverride'
+  delay?: string
+  errno?: number
+  attr?: object | string[]
+  volumePath: string
+  path: string
+  percent: number
+  methods: string[]
+}
+
+export interface Frame {
+  funcname: string
+  parameters: string
+  predicate: string
+}
+
+export interface FailKernelReq {
+  callchain: Frame[]
+  failtype: number
+  headers: string[]
+  probability: number
+  times: number
+}
+
+export interface Kernel {
+  failKernRequest: FailKernelReq
 }
 
 export interface NetworkLoss {
@@ -64,15 +112,9 @@ export interface Network {
   target?: Selector
 }
 
-export interface IO {
-  action: 'latency' | 'fault' | 'attrOverride'
-  delay?: string
-  errno?: number
-  attr?: object | string[]
-  volumePath: string
-  path: string
-  percent: number
-  methods: string[]
+export interface Pod {
+  action: 'pod-failure' | 'pod-kill' | 'container-kill'
+  containerNames?: string[]
 }
 
 export interface Stress {
@@ -92,54 +134,30 @@ export interface Stress {
   containerNames: string
 }
 
-export interface Frame {
-  funcname: string
-  parameters: string
-  predicate: string
-}
-
-export interface FailKernelReq {
-  callchain: Frame[]
-  failtype: number
-  headers: string[]
-  probability: number
-  times: number
-}
-
-export interface Kernel {
-  failKernRequest: FailKernelReq
-}
-
 export interface Time {
   timeOffset: string
   clockIds: string[]
   containerNames: string[]
 }
 
-export interface DNS {
-  action: 'error' | 'random'
-  patterns: string[]
-  containerNames?: string[]
-}
-
-export interface ExperimentTarget {
-  PodChaos: Pod
-  NetworkChaos: Network
-  IOChaos: IO
-  StressChaos: Stress
-  KernelChaos: Kernel
-  TimeChaos: Time
+export interface ExperimentType {
+  AWSChaos: AWS
   DNSChaos: DNS
-  AWSChaos: DNS
-  GCPChaos: DNS
+  GCPChaos: GCP
+  IOChaos: IO
+  KernelChaos: Kernel
+  NetworkChaos: Network
+  PodChaos: Pod
+  StressChaos: Stress
+  TimeChaos: Time
 }
 
-export type ExperimentKind = keyof ExperimentTarget
+export type ExperimentKind = keyof ExperimentType
 
-export interface Experiment<K extends ExperimentKind = any> {
+export interface Experiment<K extends ExperimentKind> {
   metadata: Metadata
   spec: Scope &
-    Pick<ExperimentTarget, K>[K] & {
+    ExperimentType[K] & {
       duration?: string
     }
 }

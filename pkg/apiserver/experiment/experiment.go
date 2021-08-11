@@ -18,6 +18,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"reflect"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -34,13 +35,13 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/finalizers"
-	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
+	u "github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
 	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 )
 
-var log = utils.Log.WithName("experiments")
+var log = u.Log.WithName("experiments")
 
 // Service defines a handler service for experiments.
 type Service struct {
@@ -80,18 +81,11 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint.GET("/state", s.state)
 }
 
-type allChaosStatus struct {
-	Injecting int `json:"injecting"`
-	Running   int `json:"running"`
-	Finished  int `json:"finished"`
-	Paused    int `json:"paused"`
-}
-
 // Experiment defines the information of an experiment.
 type Experiment struct {
 	core.ObjectBase
-	Status        utils.ChaosStatus `json:"status"`
-	FailedMessage string            `json:"failed_message,omitempty"`
+	Status        u.ChaosStatus `json:"status"`
+	FailedMessage string        `json:"failed_message,omitempty"`
 }
 
 // Detail adds KubeObjectDesc on Experiment.
@@ -109,14 +103,13 @@ type Detail struct {
 // @Param kind query string false "filter exps by kind" Enums(PodChaos, NetworkChaos, IOChaos, StressChaos, KernelChaos, TimeChaos, DNSChaos, AWSChaos, GCPChaos, JVMChaos, HTTPChaos)
 // @Param status query string false "filter exps by status" Enums(Injecting, Running, Finished, Paused)
 // @Success 200 {array} Experiment
-// @Failure 400 {object} utils.APIError
-// @Failure 500 {object} utils.APIError
+// @Failure 400 {object} u.APIError
+// @Failure 500 {object} u.APIError
 // @Router /experiments [get]
 func (s *Service) list(c *gin.Context) {
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		c.Status(http.StatusBadRequest)
-		c.Error(utils.ErrBadRequest.WrapWithNoMessage(err))
+		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
 
 		return
 	}
@@ -136,7 +129,7 @@ func (s *Service) list(c *gin.Context) {
 		}
 
 		if err := kubeCli.List(context.Background(), list.ChaosList, &client.ListOptions{Namespace: ns}); err != nil {
-			utils.SetApimachineryError(c, err)
+			u.SetAPImachineryError(c, err)
 
 			return
 		}
@@ -158,10 +151,14 @@ func (s *Service) list(c *gin.Context) {
 					UID:       chaos.UID,
 					Created:   chaos.StartTime.Format(time.RFC3339),
 				},
-				Status: utils.GetChaosStatus(item),
+				Status: u.GetChaosStatus(item),
 			})
 		}
 	}
+
+	sort.Slice(exps, func(i, j int) bool {
+		return exps[i].Created > exps[j].Created
+	})
 
 	c.JSON(http.StatusOK, exps)
 }
@@ -173,34 +170,31 @@ func (s *Service) list(c *gin.Context) {
 // @Produce json
 // @Param chaos body map[string]interface{} true "the chaos definition"
 // @Success 200 {object} map[string]interface{}
-// @Failure 400 {object} utils.APIError
-// @Failure 404 {object} utils.APIError
-// @Failure 500 {object} utils.APIError
+// @Failure 400 {object} u.APIError
+// @Failure 500 {object} u.APIError
 // @Router /experiments [post]
 func (s *Service) create(c *gin.Context) {
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		c.Status(http.StatusBadRequest)
-		c.Error(utils.ErrBadRequest.WrapWithNoMessage(err))
+		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
 
 		return
 	}
 
 	var exp map[string]interface{}
-	utils.ShouldBindBodyWithJSON(c, &exp)
+	u.ShouldBindBodyWithJSON(c, &exp)
 	kind := exp["kind"].(string)
 
 	if chaosKind, ok := v1alpha1.AllKinds()[kind]; ok {
-		utils.ShouldBindBodyWithJSON(c, chaosKind.Chaos)
+		u.ShouldBindBodyWithJSON(c, chaosKind.Chaos)
 
 		if err = kubeCli.Create(context.Background(), chaosKind.Chaos); err != nil {
-			utils.SetApimachineryError(c, err)
+			u.SetAPImachineryError(c, err)
 
 			return
 		}
 	} else {
-		c.Status(http.StatusBadRequest)
-		c.Error(utils.ErrBadRequest.New("Kind " + kind + " is not supported"))
+		u.SetAPIError(c, u.ErrBadRequest.New("Kind "+kind+" is not supported"))
 
 		return
 	}
@@ -214,9 +208,9 @@ func (s *Service) create(c *gin.Context) {
 // @Produce json
 // @Param uid path string true "the experiment uid"
 // @Success 200 {object} Detail
-// @Failure 400 {object} utils.APIError
-// @Failure 404 {object} utils.APIError
-// @Failure 500 {object} utils.APIError
+// @Failure 400 {object} u.APIError
+// @Failure 404 {object} u.APIError
+// @Failure 500 {object} u.APIError
 // @Router /experiments/{uid} [get]
 func (s *Service) get(c *gin.Context) {
 	var (
@@ -226,8 +220,7 @@ func (s *Service) get(c *gin.Context) {
 
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		c.Status(http.StatusBadRequest)
-		c.Error(utils.ErrBadRequest.WrapWithNoMessage(err))
+		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
 
 		return
 	}
@@ -235,11 +228,9 @@ func (s *Service) get(c *gin.Context) {
 	uid := c.Param("uid")
 	if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
 		if gorm.IsRecordNotFoundError(err) {
-			c.Status(http.StatusNotFound)
-			c.Error(utils.ErrNotFound.New("Experiment " + uid + " not found"))
+			u.SetAPIError(c, u.ErrNotFound.New("Experiment "+uid+" not found"))
 		} else {
-			c.Status(http.StatusInternalServerError)
-			c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		}
 
 		return
@@ -254,8 +245,7 @@ func (s *Service) get(c *gin.Context) {
 			return
 		}
 	} else {
-		c.Status(http.StatusBadRequest)
-		c.Error(utils.ErrBadRequest.New("Kind " + kind + " is not supported"))
+		u.SetAPIError(c, u.ErrBadRequest.New("Kind "+kind+" is not supported"))
 
 		return
 	}
@@ -265,15 +255,14 @@ func (s *Service) get(c *gin.Context) {
 
 func (s *Service) findChaosInCluster(c *gin.Context, kubeCli client.Client, namespacedName types.NamespacedName, chaos runtime.Object) *Detail {
 	if err := kubeCli.Get(context.Background(), namespacedName, chaos); err != nil {
-		utils.SetApimachineryError(c, err)
+		u.SetAPImachineryError(c, err)
 
 		return nil
 	}
 
 	gvk, err := apiutil.GVKForObject(chaos, s.scheme)
 	if err != nil {
-		c.Status(http.StatusInternalServerError)
-		c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 
 		return nil
 	}
@@ -287,7 +276,7 @@ func (s *Service) findChaosInCluster(c *gin.Context, kubeCli client.Client, name
 				UID:       reflect.ValueOf(chaos).MethodByName("GetChaos").Call(nil)[0].Elem().FieldByName("UID").String(),
 				Created:   reflect.ValueOf(chaos).MethodByName("GetChaos").Call(nil)[0].Elem().FieldByName("StartTime").Interface().(time.Time).Format(time.RFC3339),
 			},
-			Status: utils.GetChaosStatus(chaos.(v1alpha1.InnerObject)),
+			Status: u.GetChaosStatus(chaos.(v1alpha1.InnerObject)),
 		},
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
@@ -311,10 +300,10 @@ func (s *Service) findChaosInCluster(c *gin.Context, kubeCli client.Client, name
 // @Produce json
 // @Param uid path string true "the experiment uid"
 // @Param force query string false "force" Enums(true, false)
-// @Success 200 {object} utils.Response
-// @Failure 400 {object} utils.APIError
-// @Failure 404 {object} utils.APIError
-// @Failure 500 {object} utils.APIError
+// @Success 200 {object} u.Response
+// @Failure 400 {object} u.APIError
+// @Failure 404 {object} u.APIError
+// @Failure 500 {object} u.APIError
 // @Router /experiments/{uid} [delete]
 func (s *Service) delete(c *gin.Context) {
 	var (
@@ -323,8 +312,7 @@ func (s *Service) delete(c *gin.Context) {
 
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		c.Status(http.StatusBadRequest)
-		c.Error(utils.ErrBadRequest.WrapWithNoMessage(err))
+		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
 
 		return
 	}
@@ -332,11 +320,9 @@ func (s *Service) delete(c *gin.Context) {
 	uid := c.Param("uid")
 	if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
 		if gorm.IsRecordNotFoundError(err) {
-			c.Status(http.StatusNotFound)
-			c.Error(utils.ErrNotFound.New("Experiment " + uid + " not found"))
+			u.SetAPIError(c, u.ErrNotFound.New("Experiment "+uid+" not found"))
 		} else {
-			c.Status(http.StatusInternalServerError)
-			c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		}
 
 		return
@@ -347,7 +333,7 @@ func (s *Service) delete(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, utils.Response{Status: "success"})
+	c.JSON(http.StatusOK, u.Response{Status: "success"})
 }
 
 // @Summary Batch delete chaos experiments.
@@ -356,10 +342,10 @@ func (s *Service) delete(c *gin.Context) {
 // @Produce json
 // @Param uids query string true "the experiment uids, split with comma. Example: ?uids=uid1,uid2"
 // @Param force query string false "force" Enums(true, false)
-// @Success 200 {object} utils.Response
-// @Failure 400 {object} utils.APIError
-// @Failure 404 {object} utils.APIError
-// @Failure 500 {object} utils.APIError
+// @Success 200 {object} u.Response
+// @Failure 400 {object} u.APIError
+// @Failure 404 {object} u.APIError
+// @Failure 500 {object} u.APIError
 // @Router /experiments [delete]
 func (s *Service) batchDelete(c *gin.Context) {
 	var (
@@ -368,16 +354,14 @@ func (s *Service) batchDelete(c *gin.Context) {
 
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		c.Status(http.StatusBadRequest)
-		c.Error(utils.ErrBadRequest.WrapWithNoMessage(err))
+		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
 
 		return
 	}
 
 	uids := c.Query("uids")
 	if uids == "" {
-		c.Status(http.StatusBadRequest)
-		c.Error(utils.ErrInternalServer.New("The uids cannot be empty"))
+		u.SetAPIError(c, u.ErrInternalServer.New("The uids cannot be empty"))
 
 		return
 	}
@@ -385,8 +369,7 @@ func (s *Service) batchDelete(c *gin.Context) {
 	uidSlice, force := strings.Split(uids, ","), c.DefaultQuery("force", "false")
 
 	if len(uidSlice) > 100 {
-		c.Status(http.StatusBadRequest)
-		c.Error(utils.ErrInternalServer.New("Too many uids, please delete less than 100 at a time"))
+		u.SetAPIError(c, u.ErrInternalServer.New("Too many uids, please delete less than 100 at a time"))
 
 		return
 	}
@@ -394,11 +377,9 @@ func (s *Service) batchDelete(c *gin.Context) {
 	for _, uid := range uidSlice {
 		if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
 			if gorm.IsRecordNotFoundError(err) {
-				c.Status(http.StatusNotFound)
-				c.Error(utils.ErrNotFound.New("Experiment " + uid + " not found"))
+				u.SetAPIError(c, u.ErrNotFound.New("Experiment "+uid+" not found"))
 			} else {
-				c.Status(http.StatusInternalServerError)
-				c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+				u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 			}
 
 			return
@@ -410,7 +391,7 @@ func (s *Service) batchDelete(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusOK, utils.Response{Status: "success"})
+	c.JSON(http.StatusOK, u.Response{Status: "success"})
 }
 
 func checkAndDeleteChaos(c *gin.Context, kubeCli client.Client, namespacedName types.NamespacedName, kind string, force string) bool {
@@ -421,8 +402,7 @@ func checkAndDeleteChaos(c *gin.Context, kubeCli client.Client, namespacedName t
 	)
 
 	if chaosKind, ok = v1alpha1.AllKinds()[kind]; !ok {
-		c.Status(http.StatusBadRequest)
-		c.Error(utils.ErrBadRequest.New("Kind " + kind + " is not supported"))
+		u.SetAPIError(c, u.ErrBadRequest.New("Kind "+kind+" is not supported"))
 
 		return false
 	}
@@ -430,7 +410,7 @@ func checkAndDeleteChaos(c *gin.Context, kubeCli client.Client, namespacedName t
 	ctx := context.Background()
 
 	if err = kubeCli.Get(ctx, namespacedName, chaosKind.Chaos); err != nil {
-		utils.SetApimachineryError(c, err)
+		u.SetAPImachineryError(c, err)
 
 		return false
 	}
@@ -439,15 +419,14 @@ func checkAndDeleteChaos(c *gin.Context, kubeCli client.Client, namespacedName t
 		if err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
 			return forceClean(kubeCli, chaosKind.Chaos)
 		}); err != nil {
-			c.Status(http.StatusInternalServerError)
-			c.Error(utils.ErrInternalServer.New("Forced deletion failed"))
+			u.SetAPIError(c, u.ErrInternalServer.New("Forced deletion failed"))
 
 			return false
 		}
 	}
 
 	if err := kubeCli.Delete(ctx, chaosKind.Chaos); err != nil {
-		utils.SetApimachineryError(c, err)
+		u.SetAPImachineryError(c, err)
 
 		return false
 	}
@@ -473,36 +452,34 @@ func forceClean(kubeCli client.Client, chaos runtime.Object) error {
 // @Produce json
 // @Param request body map[string]interface{} true "Request body"
 // @Success 200 {object} map[string]interface{}
-// @Failure 400 {object} utils.APIError
-// @Failure 404 {object} utils.APIError
-// @Failure 500 {object} utils.APIError
-// @Router /experiments/update [put]
+// @Failure 400 {object} u.APIError
+// @Failure 404 {object} u.APIError
+// @Failure 500 {object} u.APIError
+// @Router /experiments [put]
 func (s *Service) update(c *gin.Context) {
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		c.Status(http.StatusBadRequest)
-		c.Error(utils.ErrBadRequest.WrapWithNoMessage(err))
+		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
 
 		return
 	}
 
 	var exp map[string]interface{}
-	utils.ShouldBindBodyWithJSON(c, &exp)
+	u.ShouldBindBodyWithJSON(c, &exp)
 	kind := exp["kind"].(string)
 
 	if chaosKind, ok := v1alpha1.AllKinds()[kind]; ok {
-		utils.ShouldBindBodyWithJSON(c, chaosKind.Chaos)
+		u.ShouldBindBodyWithJSON(c, chaosKind.Chaos)
 
 		if err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
 			return internalUpdate(kubeCli, chaosKind.Chaos)
 		}); err != nil {
-			utils.SetApimachineryError(c, err)
+			u.SetAPImachineryError(c, err)
 
 			return
 		}
 	} else {
-		c.Status(http.StatusBadRequest)
-		c.Error(utils.ErrBadRequest.New("Kind " + kind + " is not supported"))
+		u.SetAPIError(c, u.ErrBadRequest.New("Kind "+kind+" is not supported"))
 
 		return
 	}
@@ -528,18 +505,17 @@ func internalUpdate(kubeCli client.Client, chaos runtime.Object) error {
 // @Tags experiments
 // @Produce json
 // @Param uid path string true "the experiment uid"
-// @Success 200 {object} utils.Response
-// @Failure 400 {object} utils.APIError
-// @Failure 404 {object} utils.APIError
-// @Failure 500 {object} utils.APIError
+// @Success 200 {object} u.Response
+// @Failure 400 {object} u.APIError
+// @Failure 404 {object} u.APIError
+// @Failure 500 {object} u.APIError
 // @Router /experiments/pause/{uid} [put]
 func (s *Service) pause(c *gin.Context) {
 	var exp *core.Experiment
 
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		c.Status(http.StatusBadRequest)
-		c.Error(utils.ErrBadRequest.WrapWithNoMessage(err))
+		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
 
 		return
 	}
@@ -547,11 +523,9 @@ func (s *Service) pause(c *gin.Context) {
 	uid := c.Param("uid")
 	if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
 		if gorm.IsRecordNotFoundError(err) {
-			c.Status(http.StatusNotFound)
-			c.Error(utils.ErrNotFound.New("Experiment " + uid + " not found"))
+			u.SetAPIError(c, u.ErrNotFound.New("Experiment "+uid+" not found"))
 		} else {
-			c.Status(http.StatusInternalServerError)
-			c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		}
 
 		return
@@ -560,13 +534,13 @@ func (s *Service) pause(c *gin.Context) {
 	annotations := map[string]string{
 		v1alpha1.PauseAnnotationKey: "true",
 	}
-	if err := s.patchExperiment(kubeCli, exp, annotations); err != nil {
-		utils.SetApimachineryError(c, err)
+	if err = patchExperiment(kubeCli, exp, annotations); err != nil {
+		u.SetAPImachineryError(c, err)
 
 		return
 	}
 
-	c.JSON(http.StatusOK, utils.Response{Status: "success"})
+	c.JSON(http.StatusOK, u.Response{Status: "success"})
 }
 
 // @Summary Start a chaos experiment.
@@ -574,18 +548,17 @@ func (s *Service) pause(c *gin.Context) {
 // @Tags experiments
 // @Produce json
 // @Param uid path string true "the experiment uid"
-// @Success 200 {object} utils.Response
-// @Failure 400 {object} utils.APIError
-// @Failure 404 {object} utils.APIError
-// @Failure 500 {object} utils.APIError
+// @Success 200 {object} u.Response
+// @Failure 400 {object} u.APIError
+// @Failure 404 {object} u.APIError
+// @Failure 500 {object} u.APIError
 // @Router /experiments/start/{uid} [put]
 func (s *Service) start(c *gin.Context) {
 	var exp *core.Experiment
 
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		c.Status(http.StatusBadRequest)
-		c.Error(utils.ErrBadRequest.WrapWithNoMessage(err))
+		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
 
 		return
 	}
@@ -593,11 +566,9 @@ func (s *Service) start(c *gin.Context) {
 	uid := c.Param("uid")
 	if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
 		if gorm.IsRecordNotFoundError(err) {
-			c.Status(http.StatusNotFound)
-			c.Error(utils.ErrNotFound.New("Experiment " + uid + " not found"))
+			u.SetAPIError(c, u.ErrNotFound.New("Experiment "+uid+" not found"))
 		} else {
-			c.Status(http.StatusInternalServerError)
-			c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		}
 
 		return
@@ -606,16 +577,16 @@ func (s *Service) start(c *gin.Context) {
 	annotations := map[string]string{
 		v1alpha1.PauseAnnotationKey: "false",
 	}
-	if err := s.patchExperiment(kubeCli, exp, annotations); err != nil {
-		utils.SetApimachineryError(c, err)
+	if err = patchExperiment(kubeCli, exp, annotations); err != nil {
+		u.SetAPImachineryError(c, err)
 
 		return
 	}
 
-	c.JSON(http.StatusOK, utils.Response{Status: "success"})
+	c.JSON(http.StatusOK, u.ResponseSuccess)
 }
 
-func (s *Service) patchExperiment(kubeCli client.Client, exp *core.Experiment, annotations map[string]string) error {
+func patchExperiment(kubeCli client.Client, exp *core.Experiment, annotations map[string]string) error {
 	chaos := v1alpha1.AllKinds()[exp.Kind].Chaos
 
 	if err := kubeCli.Get(context.Background(), types.NamespacedName{Namespace: exp.Namespace, Name: exp.Name}, chaos); err != nil {
@@ -637,15 +608,14 @@ func (s *Service) patchExperiment(kubeCli client.Client, exp *core.Experiment, a
 // @Tags experiments
 // @Produce json
 // @Param namespace query string false "namespace"
-// @Success 200 {object} allChaosStatus
-// @Failure 400 {object} utils.APIError
-// @Failure 500 {object} utils.APIError
+// @Success 200 {object} u.AllChaosStatus
+// @Failure 400 {object} u.APIError
+// @Failure 500 {object} u.APIError
 // @Router /experiments/state [get]
 func (s *Service) state(c *gin.Context) {
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		c.Status(http.StatusBadRequest)
-		c.Error(utils.ErrBadRequest.WrapWithNoMessage(err))
+		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
 
 		return
 	}
@@ -657,7 +627,7 @@ func (s *Service) state(c *gin.Context) {
 		log.V(1).Info("Replace query namespace with", ns)
 	}
 
-	status := allChaosStatus{}
+	status := u.AllChaosStatus{}
 
 	g, ctx := errgroup.WithContext(context.Background())
 	m := &sync.Mutex{}
@@ -678,16 +648,16 @@ func (s *Service) state(c *gin.Context) {
 			items := reflect.ValueOf(list.ChaosList).Elem().FieldByName("Items")
 			for i := 0; i < items.Len(); i++ {
 				item := items.Index(i).Addr().Interface().(v1alpha1.InnerObject)
-				state := utils.GetChaosStatus(item)
+				state := u.GetChaosStatus(item)
 
 				switch state {
-				case utils.Paused:
+				case u.Paused:
 					status.Paused++
-				case utils.Running:
+				case u.Running:
 					status.Running++
-				case utils.Injecting:
+				case u.Injecting:
 					status.Injecting++
-				case utils.Finished:
+				case u.Finished:
 					status.Finished++
 				}
 			}
@@ -698,7 +668,7 @@ func (s *Service) state(c *gin.Context) {
 	}
 
 	if err = g.Wait(); err != nil {
-		utils.SetApimachineryError(c, err)
+		u.SetAPImachineryError(c, err)
 
 		return
 	}

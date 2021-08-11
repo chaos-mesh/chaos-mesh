@@ -1,6 +1,6 @@
 import { AutocompleteMultipleField, LabelField, SelectField, Submit, TextField } from 'components/FormField'
 import { Form, Formik, FormikErrors, FormikTouched, getIn } from 'formik'
-import { Kind, Spec } from '../data/target'
+import { Kind, Spec } from '../data/types'
 import { useEffect, useState } from 'react'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
@@ -21,7 +21,7 @@ interface TargetGeneratedProps {
 }
 
 const TargetGenerated: React.FC<TargetGeneratedProps> = ({ kind, data, validationSchema, onSubmit }) => {
-  const { namespaces, target } = useStoreSelector((state) => state.experiments)
+  const { namespaces, spec } = useStoreSelector((state) => state.experiments)
   const dispatch = useStoreDispatch()
 
   let initialValues = Object.entries(data).reduce((acc, [k, v]) => {
@@ -53,14 +53,12 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ kind, data, validatio
   const [init, setInit] = useState(initialValues)
 
   useEffect(() => {
-    if (target.kind) {
-      setInit({
-        ...initialValues,
-        ...target.spec,
-      })
-    }
+    setInit({
+      ...initialValues,
+      ...spec,
+    })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [target])
+  }, [spec])
 
   const parseDataToFormFields = (
     errors: FormikErrors<Record<string, any>>,

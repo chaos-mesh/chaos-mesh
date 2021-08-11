@@ -34,10 +34,10 @@
   },
   "newE": {
     "title": "New experiment",
-    "titleStep1": "Choose a Target",
-    "titleStep2": "Fill the experiment info",
+    "titleStep1": "Experiment Type",
+    "titleStep2": "Experiment Info",
     "steps": {
-      "basic": "Basic",
+      "basic": "Metadata",
       "scope": "Scope",
       "scopeDisabled": " (No need to fill in)",
       "run": "Run"

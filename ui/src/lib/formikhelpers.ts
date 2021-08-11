@@ -4,7 +4,7 @@ import { toCamelCase, toTitleCase } from './utils'
 import { Template } from 'slices/workflows'
 import { WorkflowBasic } from 'components/NewWorkflow'
 import _snakecase from 'lodash.snakecase'
-import basic from 'components/NewExperimentNext/data/basic'
+import basicData from 'components/NewExperimentNext/data/basic'
 import yaml from 'js-yaml'
 
 export function parseSubmit<K extends ExperimentKind>(kind: K, e: Experiment<K>) {
@@ -99,32 +99,35 @@ function selectorsToArr(selectors: Object, separator: string) {
   return Object.entries(selectors).map(([key, val]) => `${key}${separator}${val}`)
 }
 
-export function yamlToExperiment(yamlObj: any): any {
+export function yamlToExperiment(yamlObj: any): { kind: ExperimentKind; basic: any; spec: any } {
   const { kind, metadata, spec } = yamlObj
 
   if (!kind || !metadata || !spec) {
     throw new Error('Fail to parse the YAML file. Please check the kind, metadata, and spec fields.')
   }
 
-  let result = {
-    basic: {
-      ...basic,
+  if (!spec.selector) {
+    throw new Error('The required spec.selector field is missing.')
+  }
+
+  let basic = {
+    metadata: {
       ...metadata,
       labels: metadata.labels ? selectorsToArr(metadata.labels, ':') : [],
       annotations: metadata.annotations ? selectorsToArr(metadata.annotations, ':') : [],
-      spec: {
-        selector: {
-          ...basic.spec.selector,
-          namespaces: spec.selector.namespaces,
-          labelSelectors: spec.selector?.labelSelectors ? selectorsToArr(spec.selector.labelSelectors, ': ') : [],
-          annotation_selectors: spec.selector?.annotationSelectors
-            ? selectorsToArr(spec.selector.annotationSelectors, ': ')
-            : [],
-        },
-        mode: spec.mode ?? 'one',
-        value: spec.value ?? '',
-        duration: spec.duration ?? '',
+    },
+    spec: {
+      selector: {
+        ...basicData.spec.selector,
+        namespaces: spec.selector.namespaces ?? [],
+        labelSelectors: spec.selector.labelSelectors ? selectorsToArr(spec.selector.labelSelectors, ': ') : [],
+        annotation_selectors: spec.selector.annotationSelectors
+          ? selectorsToArr(spec.selector.annotationSelectors, ': ')
+          : [],
       },
+      mode: spec.mode ?? 'one',
+      value: spec.value,
+      duration: spec.duration ?? '',
     },
   }
 
@@ -177,20 +180,10 @@ export function yamlToExperiment(yamlObj: any): any {
     }
   }
 
-  console.log({
-    ...result,
-    target: {
-      kind,
-      [_snakecase(kind)]: spec,
-    },
-  })
-
   return {
-    ...result,
-    target: {
-      kind,
-      spec,
-    },
+    kind,
+    basic,
+    spec,
   }
 }
 

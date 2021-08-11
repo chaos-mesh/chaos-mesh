@@ -24,7 +24,6 @@ import (
 	"github.com/go-playground/validator/v10"
 	"go.uber.org/fx"
 
-	utils "github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/apivalidator"
 	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
 	"github.com/chaos-mesh/chaos-mesh/pkg/swaggerserver"
@@ -54,8 +53,6 @@ func newEngine(config *config.ChaosDashboardConfig) *gin.Engine {
 
 	// default is "/debug/pprof"
 	pprof.Register(r)
-
-	r.Use(utils.MWHandleErrors())
 
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		v.RegisterValidation("NameValid", apivalidator.NameValid)

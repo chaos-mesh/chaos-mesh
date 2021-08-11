@@ -34,10 +34,10 @@
   },
   "newE": {
     "title": "新的实验",
-    "titleStep1": "选择目标",
-    "titleStep2": "填写实验信息",
+    "titleStep1": "实验类型",
+    "titleStep2": "实验信息",
     "steps": {
-      "basic": "基本信息",
+      "basic": "元信息",
       "scope": "范围",
       "scopeDisabled": "（无需填写）",
       "run": "运行"

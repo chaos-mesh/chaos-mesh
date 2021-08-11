@@ -31,6 +31,13 @@ const (
 	Paused    ChaosStatus = "paused"
 )
 
+type AllChaosStatus struct {
+	Injecting int `json:"injecting"`
+	Running   int `json:"running"`
+	Finished  int `json:"finished"`
+	Paused    int `json:"paused"`
+}
+
 type ScheduleStatus string
 
 const (

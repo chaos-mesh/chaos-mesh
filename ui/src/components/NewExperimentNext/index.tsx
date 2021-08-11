@@ -12,7 +12,6 @@ import Tab from '@material-ui/core/Tab'
 import TabContext from '@material-ui/lab/TabContext'
 import TabList from '@material-ui/lab/TabList'
 import TabPanel from '@material-ui/lab/TabPanel'
-import _snakecase from 'lodash.snakecase'
 import { data as scheduleSpecificData } from 'components/Schedule/types'
 import { setExternalExperiment } from 'slices/experiments'
 import { toCamelCase } from 'lib/utils'
@@ -26,7 +25,7 @@ export interface NewExperimentHandles {
 }
 
 interface NewExperimentProps {
-  onSubmit?: (experiment: { target: any; basic: any }) => void
+  onSubmit?: (experiment: { spec: any; basic: any }) => void
   loadFrom?: boolean
   inWorkflow?: boolean
   inSchedule?: boolean
@@ -51,7 +50,7 @@ const NewExperiment: React.ForwardRefRenderFunction<NewExperimentHandles, NewExp
   const fillExperiment = (original: any) => {
     if (original.kind === 'Schedule') {
       const kind = original.spec.type
-      const data = yamlToExperiment({
+      const { basic, spec } = yamlToExperiment({
         kind,
         metadata: original.metadata,
         spec: original.spec[toCamelCase(kind)],
@@ -60,9 +59,9 @@ const NewExperiment: React.ForwardRefRenderFunction<NewExperimentHandles, NewExp
 
       dispatch(
         setExternalExperiment({
-          kindAction: [kind, data.target[_snakecase(kind)].action ?? ''],
-          target: data.target,
-          basic: { ...data.basic, ...scheduleSpecificData, ...original.spec },
+          kindAction: [kind, spec.action ?? ''],
+          spec,
+          basic: { ...scheduleSpecificData, ...basic },
         })
       )
 
@@ -71,12 +70,12 @@ const NewExperiment: React.ForwardRefRenderFunction<NewExperimentHandles, NewExp
       return
     }
 
-    const { basic, target } = yamlToExperiment(original)
+    const { kind, basic, spec } = yamlToExperiment(original)
 
     dispatch(
       setExternalExperiment({
-        kindAction: [target.kind, target.spec.action ?? ''],
-        target,
+        kindAction: [kind, spec.action ?? ''],
+        spec,
         basic,
       })
     )

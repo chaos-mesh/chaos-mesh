@@ -25,76 +25,64 @@ import (
 
 var (
 	ErrNS             = errorx.NewNamespace("error.api")
-	ErrUnknown        = ErrNS.NewType("unknown")
+	ErrUnknown        = ErrNS.NewType("unknown")               // 500
 	ErrBadRequest     = ErrNS.NewType("bad_request")           // 400
 	ErrNotFound       = ErrNS.NewType("resource_not_found")    // 404
 	ErrInternalServer = ErrNS.NewType("internal_server_error") // 500
 	// Custom
-	ErrNoClusterPrivilege   = ErrNS.NewType("no_cluster_privilege")
-	ErrNoNamespacePrivilege = ErrNS.NewType("no_namespace_privilege")
+	ErrNoClusterPrivilege   = ErrNS.NewType("no_cluster_privilege")   // 400
+	ErrNoNamespacePrivilege = ErrNS.NewType("no_namespace_privilege") // 400
 )
 
 type APIError struct {
-	Code     string `json:"code"`
+	Code     int    `json:"code"`
+	Type     string `json:"type"`
 	Message  string `json:"message"`
 	FullText string `json:"full_text"`
 }
 
-func NewAPIError(err error) *APIError {
-	innerErr := errorx.Cast(err)
-	if innerErr == nil {
-		innerErr = ErrUnknown.WrapWithNoMessage(err)
+func SetAPIError(c *gin.Context, err *errorx.Error) {
+	typeName := errorx.GetTypeName(err)
+
+	var code int
+	switch typeName {
+	case ErrBadRequest.FullName():
+	case ErrNoClusterPrivilege.FullName():
+	case ErrNoNamespacePrivilege.FullName():
+		code = http.StatusBadRequest
+	case ErrNotFound.FullName():
+		code = http.StatusNotFound
+	case ErrUnknown.FullName():
+	case ErrInternalServer.FullName():
+	default:
+		code = http.StatusInternalServerError
 	}
 
-	return &APIError{
-		Code:     errorx.GetTypeName(innerErr),
-		Message:  innerErr.Error(),
-		FullText: fmt.Sprintf("%+v", innerErr),
+	apiError := APIError{
+		Code:     code,
+		Type:     typeName,
+		Message:  err.Error(),
+		FullText: fmt.Sprintf("%+v", err),
 	}
 
+	Log.Error(err.Cause(), typeName)
+	c.AbortWithStatusJSON(code, &apiError)
 }
 
-// MWHandleErrors creates a middleware that turns (last) error in the context into an `APIError` json response.
-// In handlers, `c.Error(err)` can be used to attach the error to the context.
-// When error is attached in the context:
-// - The handler can optionally assign the HTTP status code.
-// - The handler must not self-generate a response body.
-func MWHandleErrors() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Next()
-
-		err := c.Errors.Last()
-		if err == nil {
-			return
-		}
-
-		statusCode := c.Writer.Status()
-		if statusCode == http.StatusOK {
-			statusCode = http.StatusInternalServerError
-		}
-
-		c.AbortWithStatusJSON(statusCode, NewAPIError(err))
-	}
-}
-
-func SetApimachineryError(c *gin.Context, err error) {
+func SetAPImachineryError(c *gin.Context, err error) {
 	if apierrors.IsForbidden(err) && strings.Contains(err.Error(), "at the cluster scope") {
-		c.Status(http.StatusForbidden)
-		c.Error(ErrNoClusterPrivilege.WrapWithNoMessage(err))
+		SetAPIError(c, ErrNoClusterPrivilege.WrapWithNoMessage(err))
 
 		return
 	} else if apierrors.IsForbidden(err) && strings.Contains(err.Error(), "in the namespace") {
-		c.Status(http.StatusForbidden)
-		c.Error(ErrNoNamespacePrivilege.WrapWithNoMessage(err))
+		SetAPIError(c, ErrNoNamespacePrivilege.WrapWithNoMessage(err))
 
 		return
 	} else if apierrors.IsNotFound(err) {
-		c.Status(http.StatusNotFound)
-		c.Error(ErrNotFound.WrapWithNoMessage(err))
+		SetAPIError(c, ErrNotFound.WrapWithNoMessage(err))
 
 		return
 	}
 
-	c.Status(http.StatusInternalServerError)
-	c.Error(ErrInternalServer.WrapWithNoMessage(err))
+	SetAPIError(c, ErrInternalServer.WrapWithNoMessage(err))
 }

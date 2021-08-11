@@ -7,7 +7,7 @@ import AddCircleIcon from '@material-ui/icons/AddCircle'
 import Paper from 'components-mui/Paper'
 import RemoveCircleIcon from '@material-ui/icons/RemoveCircle'
 import Space from 'components-mui/Space'
-import targetData from '../data/target'
+import typesData from '../data/types'
 import { useStoreSelector } from 'store'
 
 interface KernelProps {
@@ -15,9 +15,9 @@ interface KernelProps {
 }
 
 const Kernel: React.FC<KernelProps> = ({ onSubmit }) => {
-  const { target } = useStoreSelector((state) => state.experiments)
+  const { spec } = useStoreSelector((state) => state.experiments)
 
-  const initialValues = targetData.KernelChaos.spec!
+  const initialValues = typesData.KernelChaos.spec!
 
   const [init, setInit] = useState(initialValues)
 
@@ -25,11 +25,11 @@ const Kernel: React.FC<KernelProps> = ({ onSubmit }) => {
     setInit({
       failKernRequest: {
         ...initialValues.failKernRequest,
-        ...target.spec.failKernRequest,
+        ...spec.failKernRequest,
       },
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [target])
+  }, [spec])
 
   return (
     <Formik enableReinitialize initialValues={init} onSubmit={onSubmit}>

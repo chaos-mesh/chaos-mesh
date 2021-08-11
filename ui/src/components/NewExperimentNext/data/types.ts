@@ -19,26 +19,73 @@ interface Category {
   key: string
   spec: Spec
 }
-export interface Target {
+export interface Definition {
   categories?: Category[]
   spec?: Spec
 }
 
-const networkCommon: Spec = {
-  direction: {
-    field: 'select',
-    items: ['from', 'to', 'both'],
-    label: 'Direction',
-    value: 'to',
-    helperText: 'Specify the network direction',
+const awsCommon: Spec = {
+  secretName: {
+    field: 'text',
+    label: 'Secret name',
+    value: '',
+    helperText: 'Optional. The Kubernetes secret which includes AWS credentials',
   },
-  externalTargets: {
+  awsRegion: {
+    field: 'text',
+    label: 'Region',
+    value: '',
+    helperText: 'The AWS region',
+  },
+  ec2Instance: {
+    field: 'text',
+    label: 'EC2 instance',
+    value: '',
+    helperText: 'The ID of a EC2 instance',
+  },
+}
+
+const dnsCommon: Spec = {
+  patterns: {
     field: 'label',
-    label: 'External targets',
+    label: 'Patterns',
     value: [],
-    helperText: 'Type string and end with a space to generate the network targets outside k8s',
+    helperText: 'Specify the DNS patterns. For example, type google.com and then press space to add it.',
   },
-  target: undefined as any,
+  containerNames: {
+    field: 'label',
+    label: 'Affected container names',
+    value: [],
+    helperText:
+      "Optional. Type string and end with a space to generate the container names. If it's empty, all containers will be injected",
+  },
+}
+
+const gcpCommon: Spec = {
+  secretName: {
+    field: 'text',
+    label: 'Secret name',
+    value: '',
+    helperText: 'Optional. The Kubernetes secret which includes GCP credentials',
+  },
+  project: {
+    field: 'text',
+    label: 'Project',
+    value: '',
+    helperText: 'The name of a GCP project',
+  },
+  zone: {
+    field: 'text',
+    label: 'Zone',
+    value: '',
+    helperText: 'The zone of a GCP project',
+  },
+  instance: {
+    field: 'text',
+    label: 'Instance',
+    value: '',
+    helperText: 'The name of a VM instance',
+  },
 }
 
 const ioCommon: Spec = {
@@ -74,108 +121,181 @@ const ioCommon: Spec = {
   },
 }
 
-const dnsCommon: Spec = {
-  patterns: {
+const networkCommon: Spec = {
+  direction: {
+    field: 'select',
+    items: ['from', 'to', 'both'],
+    label: 'Direction',
+    value: 'to',
+    helperText: 'Specify the network direction',
+  },
+  externalTargets: {
     field: 'label',
-    label: 'Patterns',
+    label: 'External targets',
     value: [],
-    helperText: 'Specify the DNS patterns. For example, type google.com and then press space to add it.',
+    helperText: 'Type string and end with a space to generate the network targets outside k8s',
   },
-  containerNames: {
-    field: 'label',
-    label: 'Affected container names',
-    value: [],
-    helperText:
-      "Optional. Type string and end with a space to generate the container names. If it's empty, all containers will be injected",
-  },
+  target: undefined as any,
 }
 
-const awsCommon: Spec = {
-  secretName: {
-    field: 'text',
-    label: 'Secret name',
-    value: '',
-    helperText: 'Optional. The Kubernetes secret which includes AWS credentials',
-  },
-  awsRegion: {
-    field: 'text',
-    label: 'Region',
-    value: '',
-    helperText: 'The AWS region',
-  },
-  ec2Instance: {
-    field: 'text',
-    label: 'EC2 instance',
-    value: '',
-    helperText: 'The ID of a EC2 instance',
-  },
-}
-
-const gcpCommon: Spec = {
-  secretName: {
-    field: 'text',
-    label: 'Secret name',
-    value: '',
-    helperText: 'Optional. The Kubernetes secret which includes GCP credentials',
-  },
-  project: {
-    field: 'text',
-    label: 'Project',
-    value: '',
-    helperText: 'The name of a GCP project',
-  },
-  zone: {
-    field: 'text',
-    label: 'Zone',
-    value: '',
-    helperText: 'The zone of a GCP project',
-  },
-  instance: {
-    field: 'text',
-    label: 'Instance',
-    value: '',
-    helperText: 'The name of a VM instance',
-  },
-}
-
-const data: Record<Kind, Target> = {
-  // Pod Fault
-  PodChaos: {
+const data: Record<Kind, Definition> = {
+  // AWS
+  AWSChaos: {
     categories: [
       {
-        name: 'Pod Failure',
-        key: 'pod-failure',
+        name: 'Stop EC2',
+        key: 'ec2-stop',
         spec: {
-          action: 'pod-failure' as any,
+          action: 'ec2-stop' as any,
+          ...awsCommon,
         },
       },
       {
-        name: 'Pod Kill',
-        key: 'pod-kill',
+        name: 'Restart EC2',
+        key: 'ec2-restart',
         spec: {
-          action: 'pod-kill' as any,
-          gracePeriod: {
-            field: 'number',
-            label: 'Grace period',
-            value: 0,
-            helperText: 'Optional. Grace period represents the duration in seconds before the pod should be deleted',
+          action: 'ec2-restart' as any,
+          ...awsCommon,
+        },
+      },
+      {
+        name: 'Detach Volumne',
+        key: 'detach-volume',
+        spec: {
+          action: 'detach-volume' as any,
+          ...awsCommon,
+          deviceName: {
+            field: 'text',
+            label: 'Device name',
+            value: '',
+            helperText: 'The device name for the volume',
           },
-        },
-      },
-      {
-        name: 'Container Kill',
-        key: 'container-kill',
-        spec: {
-          action: 'container-kill' as any,
-          containerNames: {
-            field: 'label',
-            label: 'Container names',
-            value: [],
-            helperText: 'Type string and end with a space to generate the container names.',
+          volumeID: {
+            field: 'text',
+            label: 'EBS volume',
+            value: '',
+            helperText: 'The ID of a EBS volume',
           },
         },
       },
     ],
+  },
+  // DNS Fault
+  DNSChaos: {
+    categories: [
+      {
+        name: 'Error',
+        key: 'error',
+        spec: {
+          action: 'error' as any,
+          ...dnsCommon,
+        },
+      },
+      {
+        name: 'Random',
+        key: 'random',
+        spec: {
+          action: 'random' as any,
+          ...dnsCommon,
+        },
+      },
+    ],
+  },
+  // GCP
+  GCPChaos: {
+    categories: [
+      {
+        name: 'Stop node',
+        key: 'node-stop',
+        spec: {
+          action: 'node-stop' as any,
+          ...gcpCommon,
+        },
+      },
+      {
+        name: 'Reset node',
+        key: 'node-reset',
+        spec: {
+          action: 'node-reset' as any,
+          ...gcpCommon,
+        },
+      },
+      {
+        name: 'Loss disk',
+        key: 'disk-loss',
+        spec: {
+          action: 'disk-loss' as any,
+          ...gcpCommon,
+          deviceNames: {
+            field: 'label',
+            label: 'Device names',
+            value: [],
+            helperText: 'Type string and end with a space to generate the device names',
+          },
+        },
+      },
+    ],
+  },
+  // IO Injection
+  IOChaos: {
+    categories: [
+      {
+        name: 'Latency',
+        key: 'latency',
+        spec: {
+          action: 'latency' as any,
+          delay: {
+            field: 'text',
+            label: 'Delay',
+            value: '',
+            helperText:
+              "The value of delay of I/O operations. If it's empty, the operator will generate a value for it randomly.",
+            inputProps: { min: 0 },
+          },
+          ...ioCommon,
+        },
+      },
+      {
+        name: 'Fault',
+        key: 'fault',
+        spec: {
+          action: 'fault' as any,
+          errno: {
+            field: 'number',
+            label: 'Errno',
+            value: 0,
+            helperText: 'The error code returned by I/O operators. By default, it returns a random error code',
+          },
+          ...ioCommon,
+        },
+      },
+      {
+        name: 'AttrOverride',
+        key: 'attrOverride',
+        spec: {
+          action: 'attrOverride' as any,
+          attr: {
+            field: 'label',
+            isKV: true,
+            label: 'Attr',
+            value: [],
+          },
+          ...ioCommon,
+        },
+      },
+    ],
+  },
+  // Kernel Fault
+  KernelChaos: {
+    spec: {
+      failKernRequest: {
+        callchain: [],
+        failtype: 0,
+        headers: [],
+        probability: 0,
+        times: 0,
+      },
+    } as any,
   },
   // Network Attack
   NetworkChaos: {
@@ -314,51 +434,40 @@ const data: Record<Kind, Target> = {
       },
     ],
   },
-  // IO Injection
-  IOChaos: {
+  // Pod Fault
+  PodChaos: {
     categories: [
       {
-        name: 'Latency',
-        key: 'latency',
+        name: 'Pod Failure',
+        key: 'pod-failure',
         spec: {
-          action: 'latency' as any,
-          delay: {
-            field: 'text',
-            label: 'Delay',
-            value: '',
-            helperText:
-              "The value of delay of I/O operations. If it's empty, the operator will generate a value for it randomly.",
-            inputProps: { min: 0 },
-          },
-          ...ioCommon,
+          action: 'pod-failure' as any,
         },
       },
       {
-        name: 'Fault',
-        key: 'fault',
+        name: 'Pod Kill',
+        key: 'pod-kill',
         spec: {
-          action: 'fault' as any,
-          errno: {
+          action: 'pod-kill' as any,
+          gracePeriod: {
             field: 'number',
-            label: 'Errno',
+            label: 'Grace period',
             value: 0,
-            helperText: 'The error code returned by I/O operators. By default, it returns a random error code',
+            helperText: 'Optional. Grace period represents the duration in seconds before the pod should be deleted',
           },
-          ...ioCommon,
         },
       },
       {
-        name: 'AttrOverride',
-        key: 'attrOverride',
+        name: 'Container Kill',
+        key: 'container-kill',
         spec: {
-          action: 'attrOverride' as any,
-          attr: {
+          action: 'container-kill' as any,
+          containerNames: {
             field: 'label',
-            isKV: true,
-            label: 'Attr',
+            label: 'Container names',
             value: [],
+            helperText: 'Type string and end with a space to generate the container names.',
           },
-          ...ioCommon,
         },
       },
     ],
@@ -380,18 +489,6 @@ const data: Record<Kind, Target> = {
       },
       stressngStressors: '',
       containerNames: [],
-    } as any,
-  },
-  // Kernel Fault
-  KernelChaos: {
-    spec: {
-      failKernRequest: {
-        callchain: [],
-        failtype: 0,
-        headers: [],
-        probability: 0,
-        times: 0,
-      },
     } as any,
   },
   // Clock Skew
@@ -419,115 +516,14 @@ const data: Record<Kind, Target> = {
       },
     },
   },
-  // DNS Fault
-  DNSChaos: {
-    categories: [
-      {
-        name: 'Error',
-        key: 'error',
-        spec: {
-          action: 'error' as any,
-          ...dnsCommon,
-        },
-      },
-      {
-        name: 'Random',
-        key: 'random',
-        spec: {
-          action: 'random' as any,
-          ...dnsCommon,
-        },
-      },
-    ],
-  },
-  // AWS
-  AWSChaos: {
-    categories: [
-      {
-        name: 'Stop EC2',
-        key: 'ec2-stop',
-        spec: {
-          action: 'ec2-stop' as any,
-          ...awsCommon,
-        },
-      },
-      {
-        name: 'Restart EC2',
-        key: 'ec2-restart',
-        spec: {
-          action: 'ec2-restart' as any,
-          ...awsCommon,
-        },
-      },
-      {
-        name: 'Detach Volumne',
-        key: 'detach-volume',
-        spec: {
-          action: 'detach-volume' as any,
-          ...awsCommon,
-          deviceName: {
-            field: 'text',
-            label: 'Device name',
-            value: '',
-            helperText: 'The device name for the volume',
-          },
-          volumeID: {
-            field: 'text',
-            label: 'EBS volume',
-            value: '',
-            helperText: 'The ID of a EBS volume',
-          },
-        },
-      },
-    ],
-  },
-  // GCP
-  GCPChaos: {
-    categories: [
-      {
-        name: 'Stop node',
-        key: 'node-stop',
-        spec: {
-          action: 'node-stop' as any,
-          ...gcpCommon,
-        },
-      },
-      {
-        name: 'Reset node',
-        key: 'node-reset',
-        spec: {
-          action: 'node-reset' as any,
-          ...gcpCommon,
-        },
-      },
-      {
-        name: 'Loss disk',
-        key: 'disk-loss',
-        spec: {
-          action: 'disk-loss' as any,
-          ...gcpCommon,
-          deviceNames: {
-            field: 'label',
-            label: 'Device names',
-            value: [],
-            helperText: 'Type string and end with a space to generate the device names',
-          },
-        },
-      },
-    ],
-  },
 }
-
-const networkTargetSchema = Yup.object({
-  namespaces: Yup.array().min(1, 'The namespace selectors is required'),
-})
-
-const patternsSchema = Yup.array().of(Yup.string()).required('The patterns is required')
 
 const AwsChaosCommonSchema = Yup.object({
   awsRegion: Yup.string().required('The region is required'),
   ec2Instance: Yup.string().required('The ID of the EC2 instance is required'),
 })
+
+const patternsSchema = Yup.array().of(Yup.string()).required('The patterns is required')
 
 const GcpChaosCommonSchema = Yup.object({
   project: Yup.string().required('The project is required'),
@@ -535,13 +531,43 @@ const GcpChaosCommonSchema = Yup.object({
   instance: Yup.string().required('The instance is required'),
 })
 
+const networkTargetSchema = Yup.object({
+  namespaces: Yup.array().min(1, 'The namespace selectors is required'),
+})
+
 export const schema: Partial<Record<Kind, Record<string, Yup.ObjectSchema>>> = {
-  PodChaos: {
-    'pod-kill': Yup.object({
-      gracePeriod: Yup.number().min(0, 'Grace period must be non-negative integer'),
+  AWSChaos: {
+    'ec2-stop': AwsChaosCommonSchema,
+    'ec2-restart': AwsChaosCommonSchema,
+    'detach-volume': AwsChaosCommonSchema.shape({
+      deviceName: Yup.string().required('The device name is required'),
+      volumeID: Yup.string().required('The ID of the EBS volume is required'),
     }),
-    'container-kill': Yup.object({
-      containerNames: Yup.array().of(Yup.string()).required('The container name is required'),
+  },
+  DNSChaos: {
+    error: Yup.object({
+      patterns: patternsSchema,
+    }),
+    random: Yup.object({
+      patterns: patternsSchema,
+    }),
+  },
+  GCPChaos: {
+    'node-stop': GcpChaosCommonSchema,
+    'node-reset': GcpChaosCommonSchema,
+    'disk-loss': GcpChaosCommonSchema.shape({
+      deviceNames: Yup.array().of(Yup.string()).required('At least one device name is required'),
+    }),
+  },
+  IOChaos: {
+    latency: Yup.object({
+      delay: Yup.string().required('The delay is required'),
+    }),
+    fault: Yup.object({
+      errno: Yup.number().min(0).required('The errno is required'),
+    }),
+    attrOverride: Yup.object({
+      attr: Yup.array().of(Yup.string()).required('The attr is required'),
     }),
   },
   NetworkChaos: {
@@ -580,43 +606,17 @@ export const schema: Partial<Record<Kind, Record<string, Yup.ObjectSchema>>> = {
       target: networkTargetSchema,
     }),
   },
-  IOChaos: {
-    latency: Yup.object({
-      delay: Yup.string().required('The delay is required'),
+  PodChaos: {
+    'pod-kill': Yup.object({
+      gracePeriod: Yup.number().min(0, 'Grace period must be non-negative integer'),
     }),
-    fault: Yup.object({
-      errno: Yup.number().min(0).required('The errno is required'),
-    }),
-    attrOverride: Yup.object({
-      attr: Yup.array().of(Yup.string()).required('The attr is required'),
+    'container-kill': Yup.object({
+      containerNames: Yup.array().of(Yup.string()).required('The container name is required'),
     }),
   },
   TimeChaos: {
     default: Yup.object({
       time_offset: Yup.string().required('The time offset is required'),
-    }),
-  },
-  DNSChaos: {
-    error: Yup.object({
-      patterns: patternsSchema,
-    }),
-    random: Yup.object({
-      patterns: patternsSchema,
-    }),
-  },
-  AWSChaos: {
-    'ec2-stop': AwsChaosCommonSchema,
-    'ec2-restart': AwsChaosCommonSchema,
-    'detach-volume': AwsChaosCommonSchema.shape({
-      deviceName: Yup.string().required('The device name is required'),
-      volumeID: Yup.string().required('The ID of the EBS volume is required'),
-    }),
-  },
-  GCPChaos: {
-    'node-stop': GcpChaosCommonSchema,
-    'node-reset': GcpChaosCommonSchema,
-    'disk-loss': GcpChaosCommonSchema.shape({
-      deviceNames: Yup.array().of(Yup.string()).required('At least one device name is required'),
     }),
   },
 }

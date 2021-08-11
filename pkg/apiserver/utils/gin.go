@@ -18,18 +18,16 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
-	ctrl "sigs.k8s.io/controller-runtime"
-)
-
-var (
-	Log             = ctrl.Log.WithName("apiserver")
-	ResponseSuccess = Response{Status: "success"}
 )
 
 // Response defines a common status struct.
 type Response struct {
 	Status string `json:"status"`
 }
+
+var (
+	ResponseSuccess = Response{Status: "success"}
+)
 
 func ShouldBindBodyWithJSON(c *gin.Context, obj interface{}) {
 	if err := c.ShouldBindBodyWith(obj, binding.JSON); err != nil {

@@ -35,7 +35,7 @@ const initialState: {
   step1: boolean
   step2: boolean
   kindAction: [ExperimentKind | '', string]
-  target: any
+  spec: any
   basic: any
   scheduleSpecific: ScheduleSpecific
 } = {
@@ -49,7 +49,7 @@ const initialState: {
   step1: false,
   step2: false,
   kindAction: ['', ''],
-  target: {},
+  spec: {},
   basic: {},
   scheduleSpecific: {} as any,
 }
@@ -70,18 +70,18 @@ const experimentsSlice = createSlice({
     setKindAction(state, action) {
       state.kindAction = action.payload
     },
-    setTarget(state, action) {
-      state.target = action.payload
+    setSpec(state, action) {
+      state.spec = action.payload
     },
     setBasic(state, action) {
       state.basic = action.payload
     },
     setExternalExperiment(state, action: PayloadAction<any>) {
-      const { kindAction, target, basic } = action.payload
+      const { kindAction, spec, basic } = action.payload
 
       state.fromExternal = true
       state.kindAction = kindAction
-      state.target = target
+      state.spec = spec
       state.basic = basic
     },
     resetNewExperiment(state) {
@@ -91,7 +91,7 @@ const experimentsSlice = createSlice({
       state.step1 = false
       state.step2 = false
       state.kindAction = ['', '']
-      state.target = {}
+      state.spec = {}
       state.basic = {}
     },
     setScheduleSpecific(state, action: PayloadAction<ScheduleSpecific>) {
@@ -122,7 +122,7 @@ export const {
   setStep1,
   setStep2,
   setKindAction,
-  setTarget,
+  setSpec,
   setBasic,
   setExternalExperiment,
   resetNewExperiment,
