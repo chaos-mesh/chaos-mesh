@@ -287,12 +287,11 @@ func (s *server) httpEcho(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Forbidden", http.StatusForbidden)
 		return
 	}
+	w.Header().Set("Secret", secret)
 	defer r.Body.Close()
 	_, err := io.Copy(w, r.Body)
 	if err != nil {
 		http.Error(w, "fail to copy body between request and response", http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("Secret", secret)
-	w.WriteHeader(http.StatusOK)
 }

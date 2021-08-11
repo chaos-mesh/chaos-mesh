@@ -274,6 +274,16 @@ var _ = ginkgo.Describe("[Basic]", func() {
 			})
 		})
 
+		// http chaos case in [HTTPReplace] context
+		ginkgo.Context("[HTTPReplace]", func() {
+			ginkgo.It("[Schedule]", func() {
+				httpchaostestcases.TestcaseHttpReplaceThenRecover(ns, cli, c, port)
+			})
+			ginkgo.It("[Pause]", func() {
+				httpchaostestcases.TestcaseHttpReplacePauseAndUnPause(ns, cli, c, port)
+			})
+		})
+
 	})
 
 	ginkgo.Context("[Sidecar Config]", func() {
