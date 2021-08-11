@@ -280,7 +280,7 @@ e2e-build: e2e-test/image/e2e/bin/ginkgo e2e-test/image/e2e/bin/e2e.test
 
 CLEAN_TARGETS+=e2e-test/image/e2e/bin/ginkgo
 e2e-test/image/e2e/bin/ginkgo:
-	cd e2e-test && go install github.com/onsi/ginkgo/ginkgo@v1.16.4 && cp $$GOPATH/bin/ginkgo image/e2e/bin/ginkgo
+	cd e2e-test && go install github.com/onsi/ginkgo/ginkgo@v1.16.4 && mkdir -p image/e2e/bin && cp $$GOPATH/bin/ginkgo image/e2e/bin/ginkgo
 
 CLEAN_TARGETS+=e2e-test/image/e2e/bin/e2e.test
 e2e-test/image/e2e/bin/e2e.test: e2e-test/e2e/**/*.go
