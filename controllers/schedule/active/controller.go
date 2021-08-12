@@ -29,6 +29,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/utils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
@@ -122,7 +123,10 @@ type Objs struct {
 	Objs []types.Object `group:"objs"`
 }
 
-func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger, objs Objs, scheme *runtime.Scheme, lister *utils.ActiveLister, recorderBuilder *recorder.RecorderBuilder) (types.Controller, error) {
+func Bootstrap(mgr ctrl.Manager, client client.Client, log logr.Logger, objs Objs, scheme *runtime.Scheme, lister *utils.ActiveLister, recorderBuilder *recorder.RecorderBuilder) error {
+	if !config.ShouldSpawnController("schedule-active") {
+		return nil
+	}
 	builder := builder.Default(mgr).
 		For(&v1alpha1.Schedule{}).
 		Named("schedule-active")
@@ -140,5 +144,5 @@ func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger, objs
 		lister,
 		recorderBuilder.Build("schedule-active"),
 	})
-	return "schedule-active", nil
+	return nil
 }

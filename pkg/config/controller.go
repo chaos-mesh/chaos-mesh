@@ -81,6 +81,9 @@ type ChaosControllerConfig struct {
 
 	// PodFailurePauseImage is used to set a custom image for pod failure
 	PodFailurePauseImage string `envconfig:"POD_FAILURE_PAUSE_IMAGE" default:"gcr.io/google-containers/pause:latest"`
+
+	EnabledControllers []string `envconfig:"ENABLED_CONTROLLERS" default:"*"`
+	EnabledWebhooks    []string `envconfig:"ENABLED_WEBHOOKS" default:"*"`
 }
 
 // EnvironChaosController returns the settings from the environment.

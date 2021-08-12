@@ -24,22 +24,10 @@ import (
 )
 
 var Module = fx.Provide(
-	fx.Annotated{
-		Group:  "controller",
-		Target: cron.NewController,
-	},
-	fx.Annotated{
-		Group:  "controller",
-		Target: active.NewController,
-	},
-	fx.Annotated{
-		Group:  "controller",
-		Target: gc.NewController,
-	},
+	fx.Invoke(cron.Bootstrap),
+	fx.Invoke(active.Bootstrap),
+	fx.Invoke(gc.Bootstrap),
+	fx.Invoke(pause.Bootstrap),
 
-	fx.Annotated{
-		Group:  "controller",
-		Target: pause.NewController,
-	},
 	utils.NewActiveLister,
 )

@@ -27,6 +27,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
+	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
@@ -65,11 +66,16 @@ func Bootstrap(params Params) error {
 
 	setupLog := logger.WithName("setup-common")
 	for _, pair := range pairs {
+		name := pair.Name + "-records"
+		if !config.ShouldSpawnController(name) {
+			return nil
+		}
+
 		setupLog.Info("setting up controller", "resource-name", pair.Name)
 
 		builder := builder.Default(mgr).
 			For(pair.Object).
-			Named(pair.Name + "-records")
+			Named(name)
 
 		// Add owning resources
 		if len(pair.Controlls) > 0 {

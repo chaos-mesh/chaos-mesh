@@ -30,6 +30,10 @@ import (
 )
 
 func Bootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, b *chaosdaemon.ChaosDaemonClientBuilder, recorderBuilder *recorder.RecorderBuilder) error {
+	if !config.ShouldSpawnController("podnetworkchaos") {
+		return nil
+	}
+
 	err := builder.Default(mgr).
 		For(&v1alpha1.PodNetworkChaos{}).
 		Named("podnetworkchaos").
