@@ -21,12 +21,10 @@ import (
 const implImport = `
 import (
 	"encoding/json"
-	// "reflect"
 	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
-// var _ = reflect.String
 `
 
 const implTemplate = `
