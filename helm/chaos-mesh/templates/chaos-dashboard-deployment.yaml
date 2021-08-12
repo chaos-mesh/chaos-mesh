@@ -34,6 +34,9 @@ spec:
       {{- if .Values.chaosDlv.enable }}
       shareProcessNamespace: true
       {{- end }}
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets: {{ toYaml .Values.imagePullSecrets | nindent 8 }}
+      {{- end }}
       containers:
         - name: chaos-dashboard
           image: {{template "registry-prefix" .}}{{ .Values.dashboard.image }}

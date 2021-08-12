@@ -282,10 +282,14 @@ func (s *server) stressCondition(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *server) httpEcho(w http.ResponseWriter, r *http.Request) {
-	secret := r.Header.Get("Secret")
-	if secret == "" {
+	secrets := r.Header["Secret"]
+	if len(secrets) == 0 {
 		http.Error(w, "Forbidden", http.StatusForbidden)
 		return
+	}
+
+	for _, secret := range secrets {
+		w.Header().Add("Secret", secret)
 	}
 	defer r.Body.Close()
 	_, err := io.Copy(w, r.Body)
@@ -293,6 +297,4 @@ func (s *server) httpEcho(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "fail to copy body between request and response", http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("Secret", secret)
-	w.WriteHeader(http.StatusOK)
 }
