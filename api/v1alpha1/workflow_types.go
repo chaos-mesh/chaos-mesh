@@ -38,21 +38,6 @@ type Workflow struct {
 	Status WorkflowStatus `json:"status"`
 }
 
-// func (in *Workflow) GetChaos() *ChaosInstance {
-// 	instance := &ChaosInstance{
-// 		Name:      in.Name,
-// 		Namespace: in.Namespace,
-// 		StartTime: in.CreationTimestamp.Time,
-// 		Action:    "",
-// 		UID:       string(in.UID),
-// 	}
-
-// 	if in.DeletionTimestamp != nil {
-// 		instance.EndTime = in.DeletionTimestamp.Time
-// 	}
-// 	return instance
-// }
-
 func (in *Workflow) GetObjectMeta() *metav1.ObjectMeta {
 	return &in.ObjectMeta
 }
