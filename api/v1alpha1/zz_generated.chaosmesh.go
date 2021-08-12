@@ -20,6 +20,7 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
+
 // var _ = reflect.String
 
 const KindAWSChaos = "AWSChaos"
@@ -53,30 +54,6 @@ func (in *AWSChaosSpec) GetDuration() (*time.Duration, error) {
 	}
 	return &duration, nil
 }
-
-// GetChaos would return the a record for chaos
-// func (in *AWSChaos) GetChaos() GenericChaos{
-// 	instance := &ChaosInstance{
-// 		Name:      in.Name,
-// 		Namespace: in.Namespace,
-// 		StartTime: in.CreationTimestamp.Time,
-// 		Action:    "",
-// 		UID:       string(in.UID),
-// 		Status:    in.Status.ChaosStatus,
-// 	}
-	
-// 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
-// 	if action.IsValid() {
-// 		instance.Action = action.String()
-// 	}
-// 	if in.Spec.Duration != nil {
-// 		instance.Duration = *in.Spec.Duration
-// 	}
-// 	if in.DeletionTimestamp != nil {
-// 		instance.EndTime = in.DeletionTimestamp.Time
-// 	}
-// 	return instance
-// }
 
 // GetStatus returns the status
 func (in *AWSChaos) GetStatus() *ChaosStatus {
@@ -135,13 +112,13 @@ func (in *AWSChaos) DurationExceeded(now time.Time) (bool, time.Duration, error)
 }
 
 func (in *AWSChaos) IsOneShot() bool {
-	
-	if in.Spec.Action==Ec2Restart {
+
+	if in.Spec.Action == Ec2Restart {
 		return true
 	}
 
 	return false
-	
+
 }
 
 const KindDNSChaos = "DNSChaos"
@@ -186,7 +163,7 @@ func (in *DNSChaosSpec) GetDuration() (*time.Duration, error) {
 // 		UID:       string(in.UID),
 // 		Status:    in.Status.ChaosStatus,
 // 	}
-	
+
 // 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
 // 	if action.IsValid() {
 // 		instance.Action = action.String()
@@ -257,9 +234,9 @@ func (in *DNSChaos) DurationExceeded(now time.Time) (bool, time.Duration, error)
 }
 
 func (in *DNSChaos) IsOneShot() bool {
-	
+
 	return false
-	
+
 }
 
 const KindGCPChaos = "GCPChaos"
@@ -304,7 +281,7 @@ func (in *GCPChaosSpec) GetDuration() (*time.Duration, error) {
 // 		UID:       string(in.UID),
 // 		Status:    in.Status.ChaosStatus,
 // 	}
-	
+
 // 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
 // 	if action.IsValid() {
 // 		instance.Action = action.String()
@@ -375,13 +352,13 @@ func (in *GCPChaos) DurationExceeded(now time.Time) (bool, time.Duration, error)
 }
 
 func (in *GCPChaos) IsOneShot() bool {
-	
-	if in.Spec.Action==NodeReset {
+
+	if in.Spec.Action == NodeReset {
 		return true
 	}
 
 	return false
-	
+
 }
 
 const KindHTTPChaos = "HTTPChaos"
@@ -426,7 +403,7 @@ func (in *HTTPChaosSpec) GetDuration() (*time.Duration, error) {
 // 		UID:       string(in.UID),
 // 		Status:    in.Status.ChaosStatus,
 // 	}
-	
+
 // 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
 // 	if action.IsValid() {
 // 		instance.Action = action.String()
@@ -497,9 +474,9 @@ func (in *HTTPChaos) DurationExceeded(now time.Time) (bool, time.Duration, error
 }
 
 func (in *HTTPChaos) IsOneShot() bool {
-	
+
 	return false
-	
+
 }
 
 const KindIOChaos = "IOChaos"
@@ -544,7 +521,7 @@ func (in *IOChaosSpec) GetDuration() (*time.Duration, error) {
 // 		UID:       string(in.UID),
 // 		Status:    in.Status.ChaosStatus,
 // 	}
-	
+
 // 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
 // 	if action.IsValid() {
 // 		instance.Action = action.String()
@@ -615,9 +592,9 @@ func (in *IOChaos) DurationExceeded(now time.Time) (bool, time.Duration, error) 
 }
 
 func (in *IOChaos) IsOneShot() bool {
-	
+
 	return false
-	
+
 }
 
 const KindJVMChaos = "JVMChaos"
@@ -662,7 +639,7 @@ func (in *JVMChaosSpec) GetDuration() (*time.Duration, error) {
 // 		UID:       string(in.UID),
 // 		Status:    in.Status.ChaosStatus,
 // 	}
-	
+
 // 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
 // 	if action.IsValid() {
 // 		instance.Action = action.String()
@@ -733,9 +710,9 @@ func (in *JVMChaos) DurationExceeded(now time.Time) (bool, time.Duration, error)
 }
 
 func (in *JVMChaos) IsOneShot() bool {
-	
+
 	return false
-	
+
 }
 
 const KindKernelChaos = "KernelChaos"
@@ -780,7 +757,7 @@ func (in *KernelChaosSpec) GetDuration() (*time.Duration, error) {
 // 		UID:       string(in.UID),
 // 		Status:    in.Status.ChaosStatus,
 // 	}
-	
+
 // 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
 // 	if action.IsValid() {
 // 		instance.Action = action.String()
@@ -851,9 +828,9 @@ func (in *KernelChaos) DurationExceeded(now time.Time) (bool, time.Duration, err
 }
 
 func (in *KernelChaos) IsOneShot() bool {
-	
+
 	return false
-	
+
 }
 
 const KindNetworkChaos = "NetworkChaos"
@@ -898,7 +875,7 @@ func (in *NetworkChaosSpec) GetDuration() (*time.Duration, error) {
 // 		UID:       string(in.UID),
 // 		Status:    in.Status.ChaosStatus,
 // 	}
-	
+
 // 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
 // 	if action.IsValid() {
 // 		instance.Action = action.String()
@@ -969,9 +946,9 @@ func (in *NetworkChaos) DurationExceeded(now time.Time) (bool, time.Duration, er
 }
 
 func (in *NetworkChaos) IsOneShot() bool {
-	
+
 	return false
-	
+
 }
 
 const KindPodChaos = "PodChaos"
@@ -1016,7 +993,7 @@ func (in *PodChaosSpec) GetDuration() (*time.Duration, error) {
 // 		UID:       string(in.UID),
 // 		Status:    in.Status.ChaosStatus,
 // 	}
-	
+
 // 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
 // 	if action.IsValid() {
 // 		instance.Action = action.String()
@@ -1087,13 +1064,13 @@ func (in *PodChaos) DurationExceeded(now time.Time) (bool, time.Duration, error)
 }
 
 func (in *PodChaos) IsOneShot() bool {
-	
-	if in.Spec.Action==PodKillAction || in.Spec.Action==ContainerKillAction {
+
+	if in.Spec.Action == PodKillAction || in.Spec.Action == ContainerKillAction {
 		return true
 	}
 
 	return false
-	
+
 }
 
 const KindStressChaos = "StressChaos"
@@ -1138,7 +1115,7 @@ func (in *StressChaosSpec) GetDuration() (*time.Duration, error) {
 // 		UID:       string(in.UID),
 // 		Status:    in.Status.ChaosStatus,
 // 	}
-	
+
 // 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
 // 	if action.IsValid() {
 // 		instance.Action = action.String()
@@ -1209,9 +1186,9 @@ func (in *StressChaos) DurationExceeded(now time.Time) (bool, time.Duration, err
 }
 
 func (in *StressChaos) IsOneShot() bool {
-	
+
 	return false
-	
+
 }
 
 const KindTimeChaos = "TimeChaos"
@@ -1256,7 +1233,7 @@ func (in *TimeChaosSpec) GetDuration() (*time.Duration, error) {
 // 		UID:       string(in.UID),
 // 		Status:    in.Status.ChaosStatus,
 // 	}
-	
+
 // 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
 // 	if action.IsValid() {
 // 		instance.Action = action.String()
@@ -1327,137 +1304,136 @@ func (in *TimeChaos) DurationExceeded(now time.Time) (bool, time.Duration, error
 }
 
 func (in *TimeChaos) IsOneShot() bool {
-	
+
 	return false
-	
+
 }
 
 func init() {
 
 	SchemeBuilder.Register(&AWSChaos{}, &AWSChaosList{})
 	all.register(KindAWSChaos, &ChaosKind{
-		Chaos:     &AWSChaos{},
+		Chaos:            &AWSChaos{},
 		GenericChaosList: &AWSChaosList{},
 	})
 
 	SchemeBuilder.Register(&DNSChaos{}, &DNSChaosList{})
 	all.register(KindDNSChaos, &ChaosKind{
-		Chaos:     &DNSChaos{},
+		Chaos:            &DNSChaos{},
 		GenericChaosList: &DNSChaosList{},
 	})
 
 	SchemeBuilder.Register(&GCPChaos{}, &GCPChaosList{})
 	all.register(KindGCPChaos, &ChaosKind{
-		Chaos:     &GCPChaos{},
+		Chaos:            &GCPChaos{},
 		GenericChaosList: &GCPChaosList{},
 	})
 
 	SchemeBuilder.Register(&HTTPChaos{}, &HTTPChaosList{})
 	all.register(KindHTTPChaos, &ChaosKind{
-		Chaos:     &HTTPChaos{},
+		Chaos:            &HTTPChaos{},
 		GenericChaosList: &HTTPChaosList{},
 	})
 
 	SchemeBuilder.Register(&IOChaos{}, &IOChaosList{})
 	all.register(KindIOChaos, &ChaosKind{
-		Chaos:     &IOChaos{},
+		Chaos:            &IOChaos{},
 		GenericChaosList: &IOChaosList{},
 	})
 
 	SchemeBuilder.Register(&JVMChaos{}, &JVMChaosList{})
 	all.register(KindJVMChaos, &ChaosKind{
-		Chaos:     &JVMChaos{},
+		Chaos:            &JVMChaos{},
 		GenericChaosList: &JVMChaosList{},
 	})
 
 	SchemeBuilder.Register(&KernelChaos{}, &KernelChaosList{})
 	all.register(KindKernelChaos, &ChaosKind{
-		Chaos:     &KernelChaos{},
+		Chaos:            &KernelChaos{},
 		GenericChaosList: &KernelChaosList{},
 	})
 
 	SchemeBuilder.Register(&NetworkChaos{}, &NetworkChaosList{})
 	all.register(KindNetworkChaos, &ChaosKind{
-		Chaos:     &NetworkChaos{},
+		Chaos:            &NetworkChaos{},
 		GenericChaosList: &NetworkChaosList{},
 	})
 
 	SchemeBuilder.Register(&PodChaos{}, &PodChaosList{})
 	all.register(KindPodChaos, &ChaosKind{
-		Chaos:     &PodChaos{},
+		Chaos:            &PodChaos{},
 		GenericChaosList: &PodChaosList{},
 	})
 
 	SchemeBuilder.Register(&StressChaos{}, &StressChaosList{})
 	all.register(KindStressChaos, &ChaosKind{
-		Chaos:     &StressChaos{},
+		Chaos:            &StressChaos{},
 		GenericChaosList: &StressChaosList{},
 	})
 
 	SchemeBuilder.Register(&TimeChaos{}, &TimeChaosList{})
 	all.register(KindTimeChaos, &ChaosKind{
-		Chaos:     &TimeChaos{},
+		Chaos:            &TimeChaos{},
 		GenericChaosList: &TimeChaosList{},
 	})
 
-
 	allScheduleItem.register(KindAWSChaos, &ChaosKind{
-		Chaos:     &AWSChaos{},
+		Chaos:            &AWSChaos{},
 		GenericChaosList: &AWSChaosList{},
 	})
 
 	allScheduleItem.register(KindDNSChaos, &ChaosKind{
-		Chaos:     &DNSChaos{},
+		Chaos:            &DNSChaos{},
 		GenericChaosList: &DNSChaosList{},
 	})
 
 	allScheduleItem.register(KindGCPChaos, &ChaosKind{
-		Chaos:     &GCPChaos{},
+		Chaos:            &GCPChaos{},
 		GenericChaosList: &GCPChaosList{},
 	})
 
 	allScheduleItem.register(KindHTTPChaos, &ChaosKind{
-		Chaos:     &HTTPChaos{},
+		Chaos:            &HTTPChaos{},
 		GenericChaosList: &HTTPChaosList{},
 	})
 
 	allScheduleItem.register(KindIOChaos, &ChaosKind{
-		Chaos:     &IOChaos{},
+		Chaos:            &IOChaos{},
 		GenericChaosList: &IOChaosList{},
 	})
 
 	allScheduleItem.register(KindJVMChaos, &ChaosKind{
-		Chaos:     &JVMChaos{},
+		Chaos:            &JVMChaos{},
 		GenericChaosList: &JVMChaosList{},
 	})
 
 	allScheduleItem.register(KindKernelChaos, &ChaosKind{
-		Chaos:     &KernelChaos{},
+		Chaos:            &KernelChaos{},
 		GenericChaosList: &KernelChaosList{},
 	})
 
 	allScheduleItem.register(KindNetworkChaos, &ChaosKind{
-		Chaos:     &NetworkChaos{},
+		Chaos:            &NetworkChaos{},
 		GenericChaosList: &NetworkChaosList{},
 	})
 
 	allScheduleItem.register(KindPodChaos, &ChaosKind{
-		Chaos:     &PodChaos{},
+		Chaos:            &PodChaos{},
 		GenericChaosList: &PodChaosList{},
 	})
 
 	allScheduleItem.register(KindStressChaos, &ChaosKind{
-		Chaos:     &StressChaos{},
+		Chaos:            &StressChaos{},
 		GenericChaosList: &StressChaosList{},
 	})
 
 	allScheduleItem.register(KindTimeChaos, &ChaosKind{
-		Chaos:     &TimeChaos{},
+		Chaos:            &TimeChaos{},
 		GenericChaosList: &TimeChaosList{},
 	})
 
 	allScheduleItem.register(KindWorkflow, &ChaosKind{
-		Chaos:     &Workflow{},
+		Chaos:            &Workflow{},
 		GenericChaosList: &WorkflowList{},
 	})
 
