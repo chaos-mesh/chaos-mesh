@@ -15,11 +15,12 @@ package v1alpha1
 
 import (
 	"encoding/json"
-	"reflect"
+	// "reflect"
 	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
+// var _ = reflect.String
 
 const KindAWSChaos = "AWSChaos"
 
@@ -54,29 +55,28 @@ func (in *AWSChaosSpec) GetDuration() (*time.Duration, error) {
 }
 
 // GetChaos would return the a record for chaos
-func (in *AWSChaos) GetChaos() *ChaosInstance {
-	instance := &ChaosInstance{
-		Name:      in.Name,
-		Namespace: in.Namespace,
-		Kind:      KindAWSChaos,
-		StartTime: in.CreationTimestamp.Time,
-		Action:    "",
-		UID:       string(in.UID),
-		Status:    in.Status.ChaosStatus,
-	}
-
-	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
-	if action.IsValid() {
-		instance.Action = action.String()
-	}
-	if in.Spec.Duration != nil {
-		instance.Duration = *in.Spec.Duration
-	}
-	if in.DeletionTimestamp != nil {
-		instance.EndTime = in.DeletionTimestamp.Time
-	}
-	return instance
-}
+// func (in *AWSChaos) GetChaos() GenericChaos{
+// 	instance := &ChaosInstance{
+// 		Name:      in.Name,
+// 		Namespace: in.Namespace,
+// 		StartTime: in.CreationTimestamp.Time,
+// 		Action:    "",
+// 		UID:       string(in.UID),
+// 		Status:    in.Status.ChaosStatus,
+// 	}
+	
+// 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
+// 	if action.IsValid() {
+// 		instance.Action = action.String()
+// 	}
+// 	if in.Spec.Duration != nil {
+// 		instance.Duration = *in.Spec.Duration
+// 	}
+// 	if in.DeletionTimestamp != nil {
+// 		instance.EndTime = in.DeletionTimestamp.Time
+// 	}
+// 	return instance
+// }
 
 // GetStatus returns the status
 func (in *AWSChaos) GetStatus() *ChaosStatus {
@@ -107,12 +107,13 @@ type AWSChaosList struct {
 }
 
 // ListChaos returns a list of chaos
-func (in *AWSChaosList) ListChaos() []*ChaosInstance {
-	res := make([]*ChaosInstance, 0, len(in.Items))
+func (in *AWSChaosList) ListChaos() []GenericChaos {
+	var result []GenericChaos
 	for _, item := range in.Items {
-		res = append(res, item.GetChaos())
+		item := item
+		result = append(result, &item)
 	}
-	return res
+	return result
 }
 
 func (in *AWSChaos) DurationExceeded(now time.Time) (bool, time.Duration, error) {
@@ -176,29 +177,28 @@ func (in *DNSChaosSpec) GetDuration() (*time.Duration, error) {
 }
 
 // GetChaos would return the a record for chaos
-func (in *DNSChaos) GetChaos() *ChaosInstance {
-	instance := &ChaosInstance{
-		Name:      in.Name,
-		Namespace: in.Namespace,
-		Kind:      KindDNSChaos,
-		StartTime: in.CreationTimestamp.Time,
-		Action:    "",
-		UID:       string(in.UID),
-		Status:    in.Status.ChaosStatus,
-	}
-
-	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
-	if action.IsValid() {
-		instance.Action = action.String()
-	}
-	if in.Spec.Duration != nil {
-		instance.Duration = *in.Spec.Duration
-	}
-	if in.DeletionTimestamp != nil {
-		instance.EndTime = in.DeletionTimestamp.Time
-	}
-	return instance
-}
+// func (in *DNSChaos) GetChaos() GenericChaos{
+// 	instance := &ChaosInstance{
+// 		Name:      in.Name,
+// 		Namespace: in.Namespace,
+// 		StartTime: in.CreationTimestamp.Time,
+// 		Action:    "",
+// 		UID:       string(in.UID),
+// 		Status:    in.Status.ChaosStatus,
+// 	}
+	
+// 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
+// 	if action.IsValid() {
+// 		instance.Action = action.String()
+// 	}
+// 	if in.Spec.Duration != nil {
+// 		instance.Duration = *in.Spec.Duration
+// 	}
+// 	if in.DeletionTimestamp != nil {
+// 		instance.EndTime = in.DeletionTimestamp.Time
+// 	}
+// 	return instance
+// }
 
 // GetStatus returns the status
 func (in *DNSChaos) GetStatus() *ChaosStatus {
@@ -229,12 +229,13 @@ type DNSChaosList struct {
 }
 
 // ListChaos returns a list of chaos
-func (in *DNSChaosList) ListChaos() []*ChaosInstance {
-	res := make([]*ChaosInstance, 0, len(in.Items))
+func (in *DNSChaosList) ListChaos() []GenericChaos {
+	var result []GenericChaos
 	for _, item := range in.Items {
-		res = append(res, item.GetChaos())
+		item := item
+		result = append(result, &item)
 	}
-	return res
+	return result
 }
 
 func (in *DNSChaos) DurationExceeded(now time.Time) (bool, time.Duration, error) {
@@ -294,29 +295,28 @@ func (in *GCPChaosSpec) GetDuration() (*time.Duration, error) {
 }
 
 // GetChaos would return the a record for chaos
-func (in *GCPChaos) GetChaos() *ChaosInstance {
-	instance := &ChaosInstance{
-		Name:      in.Name,
-		Namespace: in.Namespace,
-		Kind:      KindGCPChaos,
-		StartTime: in.CreationTimestamp.Time,
-		Action:    "",
-		UID:       string(in.UID),
-		Status:    in.Status.ChaosStatus,
-	}
-
-	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
-	if action.IsValid() {
-		instance.Action = action.String()
-	}
-	if in.Spec.Duration != nil {
-		instance.Duration = *in.Spec.Duration
-	}
-	if in.DeletionTimestamp != nil {
-		instance.EndTime = in.DeletionTimestamp.Time
-	}
-	return instance
-}
+// func (in *GCPChaos) GetChaos() GenericChaos{
+// 	instance := &ChaosInstance{
+// 		Name:      in.Name,
+// 		Namespace: in.Namespace,
+// 		StartTime: in.CreationTimestamp.Time,
+// 		Action:    "",
+// 		UID:       string(in.UID),
+// 		Status:    in.Status.ChaosStatus,
+// 	}
+	
+// 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
+// 	if action.IsValid() {
+// 		instance.Action = action.String()
+// 	}
+// 	if in.Spec.Duration != nil {
+// 		instance.Duration = *in.Spec.Duration
+// 	}
+// 	if in.DeletionTimestamp != nil {
+// 		instance.EndTime = in.DeletionTimestamp.Time
+// 	}
+// 	return instance
+// }
 
 // GetStatus returns the status
 func (in *GCPChaos) GetStatus() *ChaosStatus {
@@ -347,12 +347,13 @@ type GCPChaosList struct {
 }
 
 // ListChaos returns a list of chaos
-func (in *GCPChaosList) ListChaos() []*ChaosInstance {
-	res := make([]*ChaosInstance, 0, len(in.Items))
+func (in *GCPChaosList) ListChaos() []GenericChaos {
+	var result []GenericChaos
 	for _, item := range in.Items {
-		res = append(res, item.GetChaos())
+		item := item
+		result = append(result, &item)
 	}
-	return res
+	return result
 }
 
 func (in *GCPChaos) DurationExceeded(now time.Time) (bool, time.Duration, error) {
@@ -416,29 +417,28 @@ func (in *HTTPChaosSpec) GetDuration() (*time.Duration, error) {
 }
 
 // GetChaos would return the a record for chaos
-func (in *HTTPChaos) GetChaos() *ChaosInstance {
-	instance := &ChaosInstance{
-		Name:      in.Name,
-		Namespace: in.Namespace,
-		Kind:      KindHTTPChaos,
-		StartTime: in.CreationTimestamp.Time,
-		Action:    "",
-		UID:       string(in.UID),
-		Status:    in.Status.ChaosStatus,
-	}
-
-	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
-	if action.IsValid() {
-		instance.Action = action.String()
-	}
-	if in.Spec.Duration != nil {
-		instance.Duration = *in.Spec.Duration
-	}
-	if in.DeletionTimestamp != nil {
-		instance.EndTime = in.DeletionTimestamp.Time
-	}
-	return instance
-}
+// func (in *HTTPChaos) GetChaos() GenericChaos{
+// 	instance := &ChaosInstance{
+// 		Name:      in.Name,
+// 		Namespace: in.Namespace,
+// 		StartTime: in.CreationTimestamp.Time,
+// 		Action:    "",
+// 		UID:       string(in.UID),
+// 		Status:    in.Status.ChaosStatus,
+// 	}
+	
+// 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
+// 	if action.IsValid() {
+// 		instance.Action = action.String()
+// 	}
+// 	if in.Spec.Duration != nil {
+// 		instance.Duration = *in.Spec.Duration
+// 	}
+// 	if in.DeletionTimestamp != nil {
+// 		instance.EndTime = in.DeletionTimestamp.Time
+// 	}
+// 	return instance
+// }
 
 // GetStatus returns the status
 func (in *HTTPChaos) GetStatus() *ChaosStatus {
@@ -469,12 +469,13 @@ type HTTPChaosList struct {
 }
 
 // ListChaos returns a list of chaos
-func (in *HTTPChaosList) ListChaos() []*ChaosInstance {
-	res := make([]*ChaosInstance, 0, len(in.Items))
+func (in *HTTPChaosList) ListChaos() []GenericChaos {
+	var result []GenericChaos
 	for _, item := range in.Items {
-		res = append(res, item.GetChaos())
+		item := item
+		result = append(result, &item)
 	}
-	return res
+	return result
 }
 
 func (in *HTTPChaos) DurationExceeded(now time.Time) (bool, time.Duration, error) {
@@ -534,29 +535,28 @@ func (in *IOChaosSpec) GetDuration() (*time.Duration, error) {
 }
 
 // GetChaos would return the a record for chaos
-func (in *IOChaos) GetChaos() *ChaosInstance {
-	instance := &ChaosInstance{
-		Name:      in.Name,
-		Namespace: in.Namespace,
-		Kind:      KindIOChaos,
-		StartTime: in.CreationTimestamp.Time,
-		Action:    "",
-		UID:       string(in.UID),
-		Status:    in.Status.ChaosStatus,
-	}
-
-	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
-	if action.IsValid() {
-		instance.Action = action.String()
-	}
-	if in.Spec.Duration != nil {
-		instance.Duration = *in.Spec.Duration
-	}
-	if in.DeletionTimestamp != nil {
-		instance.EndTime = in.DeletionTimestamp.Time
-	}
-	return instance
-}
+// func (in *IOChaos) GetChaos() GenericChaos{
+// 	instance := &ChaosInstance{
+// 		Name:      in.Name,
+// 		Namespace: in.Namespace,
+// 		StartTime: in.CreationTimestamp.Time,
+// 		Action:    "",
+// 		UID:       string(in.UID),
+// 		Status:    in.Status.ChaosStatus,
+// 	}
+	
+// 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
+// 	if action.IsValid() {
+// 		instance.Action = action.String()
+// 	}
+// 	if in.Spec.Duration != nil {
+// 		instance.Duration = *in.Spec.Duration
+// 	}
+// 	if in.DeletionTimestamp != nil {
+// 		instance.EndTime = in.DeletionTimestamp.Time
+// 	}
+// 	return instance
+// }
 
 // GetStatus returns the status
 func (in *IOChaos) GetStatus() *ChaosStatus {
@@ -587,12 +587,13 @@ type IOChaosList struct {
 }
 
 // ListChaos returns a list of chaos
-func (in *IOChaosList) ListChaos() []*ChaosInstance {
-	res := make([]*ChaosInstance, 0, len(in.Items))
+func (in *IOChaosList) ListChaos() []GenericChaos {
+	var result []GenericChaos
 	for _, item := range in.Items {
-		res = append(res, item.GetChaos())
+		item := item
+		result = append(result, &item)
 	}
-	return res
+	return result
 }
 
 func (in *IOChaos) DurationExceeded(now time.Time) (bool, time.Duration, error) {
@@ -652,29 +653,28 @@ func (in *JVMChaosSpec) GetDuration() (*time.Duration, error) {
 }
 
 // GetChaos would return the a record for chaos
-func (in *JVMChaos) GetChaos() *ChaosInstance {
-	instance := &ChaosInstance{
-		Name:      in.Name,
-		Namespace: in.Namespace,
-		Kind:      KindJVMChaos,
-		StartTime: in.CreationTimestamp.Time,
-		Action:    "",
-		UID:       string(in.UID),
-		Status:    in.Status.ChaosStatus,
-	}
-
-	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
-	if action.IsValid() {
-		instance.Action = action.String()
-	}
-	if in.Spec.Duration != nil {
-		instance.Duration = *in.Spec.Duration
-	}
-	if in.DeletionTimestamp != nil {
-		instance.EndTime = in.DeletionTimestamp.Time
-	}
-	return instance
-}
+// func (in *JVMChaos) GetChaos() GenericChaos{
+// 	instance := &ChaosInstance{
+// 		Name:      in.Name,
+// 		Namespace: in.Namespace,
+// 		StartTime: in.CreationTimestamp.Time,
+// 		Action:    "",
+// 		UID:       string(in.UID),
+// 		Status:    in.Status.ChaosStatus,
+// 	}
+	
+// 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
+// 	if action.IsValid() {
+// 		instance.Action = action.String()
+// 	}
+// 	if in.Spec.Duration != nil {
+// 		instance.Duration = *in.Spec.Duration
+// 	}
+// 	if in.DeletionTimestamp != nil {
+// 		instance.EndTime = in.DeletionTimestamp.Time
+// 	}
+// 	return instance
+// }
 
 // GetStatus returns the status
 func (in *JVMChaos) GetStatus() *ChaosStatus {
@@ -705,12 +705,13 @@ type JVMChaosList struct {
 }
 
 // ListChaos returns a list of chaos
-func (in *JVMChaosList) ListChaos() []*ChaosInstance {
-	res := make([]*ChaosInstance, 0, len(in.Items))
+func (in *JVMChaosList) ListChaos() []GenericChaos {
+	var result []GenericChaos
 	for _, item := range in.Items {
-		res = append(res, item.GetChaos())
+		item := item
+		result = append(result, &item)
 	}
-	return res
+	return result
 }
 
 func (in *JVMChaos) DurationExceeded(now time.Time) (bool, time.Duration, error) {
@@ -770,29 +771,28 @@ func (in *KernelChaosSpec) GetDuration() (*time.Duration, error) {
 }
 
 // GetChaos would return the a record for chaos
-func (in *KernelChaos) GetChaos() *ChaosInstance {
-	instance := &ChaosInstance{
-		Name:      in.Name,
-		Namespace: in.Namespace,
-		Kind:      KindKernelChaos,
-		StartTime: in.CreationTimestamp.Time,
-		Action:    "",
-		UID:       string(in.UID),
-		Status:    in.Status.ChaosStatus,
-	}
-
-	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
-	if action.IsValid() {
-		instance.Action = action.String()
-	}
-	if in.Spec.Duration != nil {
-		instance.Duration = *in.Spec.Duration
-	}
-	if in.DeletionTimestamp != nil {
-		instance.EndTime = in.DeletionTimestamp.Time
-	}
-	return instance
-}
+// func (in *KernelChaos) GetChaos() GenericChaos{
+// 	instance := &ChaosInstance{
+// 		Name:      in.Name,
+// 		Namespace: in.Namespace,
+// 		StartTime: in.CreationTimestamp.Time,
+// 		Action:    "",
+// 		UID:       string(in.UID),
+// 		Status:    in.Status.ChaosStatus,
+// 	}
+	
+// 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
+// 	if action.IsValid() {
+// 		instance.Action = action.String()
+// 	}
+// 	if in.Spec.Duration != nil {
+// 		instance.Duration = *in.Spec.Duration
+// 	}
+// 	if in.DeletionTimestamp != nil {
+// 		instance.EndTime = in.DeletionTimestamp.Time
+// 	}
+// 	return instance
+// }
 
 // GetStatus returns the status
 func (in *KernelChaos) GetStatus() *ChaosStatus {
@@ -823,12 +823,13 @@ type KernelChaosList struct {
 }
 
 // ListChaos returns a list of chaos
-func (in *KernelChaosList) ListChaos() []*ChaosInstance {
-	res := make([]*ChaosInstance, 0, len(in.Items))
+func (in *KernelChaosList) ListChaos() []GenericChaos {
+	var result []GenericChaos
 	for _, item := range in.Items {
-		res = append(res, item.GetChaos())
+		item := item
+		result = append(result, &item)
 	}
-	return res
+	return result
 }
 
 func (in *KernelChaos) DurationExceeded(now time.Time) (bool, time.Duration, error) {
@@ -888,29 +889,28 @@ func (in *NetworkChaosSpec) GetDuration() (*time.Duration, error) {
 }
 
 // GetChaos would return the a record for chaos
-func (in *NetworkChaos) GetChaos() *ChaosInstance {
-	instance := &ChaosInstance{
-		Name:      in.Name,
-		Namespace: in.Namespace,
-		Kind:      KindNetworkChaos,
-		StartTime: in.CreationTimestamp.Time,
-		Action:    "",
-		UID:       string(in.UID),
-		Status:    in.Status.ChaosStatus,
-	}
-
-	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
-	if action.IsValid() {
-		instance.Action = action.String()
-	}
-	if in.Spec.Duration != nil {
-		instance.Duration = *in.Spec.Duration
-	}
-	if in.DeletionTimestamp != nil {
-		instance.EndTime = in.DeletionTimestamp.Time
-	}
-	return instance
-}
+// func (in *NetworkChaos) GetChaos() GenericChaos{
+// 	instance := &ChaosInstance{
+// 		Name:      in.Name,
+// 		Namespace: in.Namespace,
+// 		StartTime: in.CreationTimestamp.Time,
+// 		Action:    "",
+// 		UID:       string(in.UID),
+// 		Status:    in.Status.ChaosStatus,
+// 	}
+	
+// 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
+// 	if action.IsValid() {
+// 		instance.Action = action.String()
+// 	}
+// 	if in.Spec.Duration != nil {
+// 		instance.Duration = *in.Spec.Duration
+// 	}
+// 	if in.DeletionTimestamp != nil {
+// 		instance.EndTime = in.DeletionTimestamp.Time
+// 	}
+// 	return instance
+// }
 
 // GetStatus returns the status
 func (in *NetworkChaos) GetStatus() *ChaosStatus {
@@ -941,12 +941,13 @@ type NetworkChaosList struct {
 }
 
 // ListChaos returns a list of chaos
-func (in *NetworkChaosList) ListChaos() []*ChaosInstance {
-	res := make([]*ChaosInstance, 0, len(in.Items))
+func (in *NetworkChaosList) ListChaos() []GenericChaos {
+	var result []GenericChaos
 	for _, item := range in.Items {
-		res = append(res, item.GetChaos())
+		item := item
+		result = append(result, &item)
 	}
-	return res
+	return result
 }
 
 func (in *NetworkChaos) DurationExceeded(now time.Time) (bool, time.Duration, error) {
@@ -1006,29 +1007,28 @@ func (in *PodChaosSpec) GetDuration() (*time.Duration, error) {
 }
 
 // GetChaos would return the a record for chaos
-func (in *PodChaos) GetChaos() *ChaosInstance {
-	instance := &ChaosInstance{
-		Name:      in.Name,
-		Namespace: in.Namespace,
-		Kind:      KindPodChaos,
-		StartTime: in.CreationTimestamp.Time,
-		Action:    "",
-		UID:       string(in.UID),
-		Status:    in.Status.ChaosStatus,
-	}
-
-	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
-	if action.IsValid() {
-		instance.Action = action.String()
-	}
-	if in.Spec.Duration != nil {
-		instance.Duration = *in.Spec.Duration
-	}
-	if in.DeletionTimestamp != nil {
-		instance.EndTime = in.DeletionTimestamp.Time
-	}
-	return instance
-}
+// func (in *PodChaos) GetChaos() GenericChaos{
+// 	instance := &ChaosInstance{
+// 		Name:      in.Name,
+// 		Namespace: in.Namespace,
+// 		StartTime: in.CreationTimestamp.Time,
+// 		Action:    "",
+// 		UID:       string(in.UID),
+// 		Status:    in.Status.ChaosStatus,
+// 	}
+	
+// 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
+// 	if action.IsValid() {
+// 		instance.Action = action.String()
+// 	}
+// 	if in.Spec.Duration != nil {
+// 		instance.Duration = *in.Spec.Duration
+// 	}
+// 	if in.DeletionTimestamp != nil {
+// 		instance.EndTime = in.DeletionTimestamp.Time
+// 	}
+// 	return instance
+// }
 
 // GetStatus returns the status
 func (in *PodChaos) GetStatus() *ChaosStatus {
@@ -1059,12 +1059,13 @@ type PodChaosList struct {
 }
 
 // ListChaos returns a list of chaos
-func (in *PodChaosList) ListChaos() []*ChaosInstance {
-	res := make([]*ChaosInstance, 0, len(in.Items))
+func (in *PodChaosList) ListChaos() []GenericChaos {
+	var result []GenericChaos
 	for _, item := range in.Items {
-		res = append(res, item.GetChaos())
+		item := item
+		result = append(result, &item)
 	}
-	return res
+	return result
 }
 
 func (in *PodChaos) DurationExceeded(now time.Time) (bool, time.Duration, error) {
@@ -1128,29 +1129,28 @@ func (in *StressChaosSpec) GetDuration() (*time.Duration, error) {
 }
 
 // GetChaos would return the a record for chaos
-func (in *StressChaos) GetChaos() *ChaosInstance {
-	instance := &ChaosInstance{
-		Name:      in.Name,
-		Namespace: in.Namespace,
-		Kind:      KindStressChaos,
-		StartTime: in.CreationTimestamp.Time,
-		Action:    "",
-		UID:       string(in.UID),
-		Status:    in.Status.ChaosStatus,
-	}
-
-	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
-	if action.IsValid() {
-		instance.Action = action.String()
-	}
-	if in.Spec.Duration != nil {
-		instance.Duration = *in.Spec.Duration
-	}
-	if in.DeletionTimestamp != nil {
-		instance.EndTime = in.DeletionTimestamp.Time
-	}
-	return instance
-}
+// func (in *StressChaos) GetChaos() GenericChaos{
+// 	instance := &ChaosInstance{
+// 		Name:      in.Name,
+// 		Namespace: in.Namespace,
+// 		StartTime: in.CreationTimestamp.Time,
+// 		Action:    "",
+// 		UID:       string(in.UID),
+// 		Status:    in.Status.ChaosStatus,
+// 	}
+	
+// 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
+// 	if action.IsValid() {
+// 		instance.Action = action.String()
+// 	}
+// 	if in.Spec.Duration != nil {
+// 		instance.Duration = *in.Spec.Duration
+// 	}
+// 	if in.DeletionTimestamp != nil {
+// 		instance.EndTime = in.DeletionTimestamp.Time
+// 	}
+// 	return instance
+// }
 
 // GetStatus returns the status
 func (in *StressChaos) GetStatus() *ChaosStatus {
@@ -1181,12 +1181,13 @@ type StressChaosList struct {
 }
 
 // ListChaos returns a list of chaos
-func (in *StressChaosList) ListChaos() []*ChaosInstance {
-	res := make([]*ChaosInstance, 0, len(in.Items))
+func (in *StressChaosList) ListChaos() []GenericChaos {
+	var result []GenericChaos
 	for _, item := range in.Items {
-		res = append(res, item.GetChaos())
+		item := item
+		result = append(result, &item)
 	}
-	return res
+	return result
 }
 
 func (in *StressChaos) DurationExceeded(now time.Time) (bool, time.Duration, error) {
@@ -1246,29 +1247,28 @@ func (in *TimeChaosSpec) GetDuration() (*time.Duration, error) {
 }
 
 // GetChaos would return the a record for chaos
-func (in *TimeChaos) GetChaos() *ChaosInstance {
-	instance := &ChaosInstance{
-		Name:      in.Name,
-		Namespace: in.Namespace,
-		Kind:      KindTimeChaos,
-		StartTime: in.CreationTimestamp.Time,
-		Action:    "",
-		UID:       string(in.UID),
-		Status:    in.Status.ChaosStatus,
-	}
-
-	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
-	if action.IsValid() {
-		instance.Action = action.String()
-	}
-	if in.Spec.Duration != nil {
-		instance.Duration = *in.Spec.Duration
-	}
-	if in.DeletionTimestamp != nil {
-		instance.EndTime = in.DeletionTimestamp.Time
-	}
-	return instance
-}
+// func (in *TimeChaos) GetChaos() GenericChaos{
+// 	instance := &ChaosInstance{
+// 		Name:      in.Name,
+// 		Namespace: in.Namespace,
+// 		StartTime: in.CreationTimestamp.Time,
+// 		Action:    "",
+// 		UID:       string(in.UID),
+// 		Status:    in.Status.ChaosStatus,
+// 	}
+	
+// 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
+// 	if action.IsValid() {
+// 		instance.Action = action.String()
+// 	}
+// 	if in.Spec.Duration != nil {
+// 		instance.Duration = *in.Spec.Duration
+// 	}
+// 	if in.DeletionTimestamp != nil {
+// 		instance.EndTime = in.DeletionTimestamp.Time
+// 	}
+// 	return instance
+// }
 
 // GetStatus returns the status
 func (in *TimeChaos) GetStatus() *ChaosStatus {
@@ -1299,12 +1299,13 @@ type TimeChaosList struct {
 }
 
 // ListChaos returns a list of chaos
-func (in *TimeChaosList) ListChaos() []*ChaosInstance {
-	res := make([]*ChaosInstance, 0, len(in.Items))
+func (in *TimeChaosList) ListChaos() []GenericChaos {
+	var result []GenericChaos
 	for _, item := range in.Items {
-		res = append(res, item.GetChaos())
+		item := item
+		result = append(result, &item)
 	}
-	return res
+	return result
 }
 
 func (in *TimeChaos) DurationExceeded(now time.Time) (bool, time.Duration, error) {
@@ -1336,128 +1337,128 @@ func init() {
 	SchemeBuilder.Register(&AWSChaos{}, &AWSChaosList{})
 	all.register(KindAWSChaos, &ChaosKind{
 		Chaos:     &AWSChaos{},
-		ChaosList: &AWSChaosList{},
+		GenericChaosList: &AWSChaosList{},
 	})
 
 	SchemeBuilder.Register(&DNSChaos{}, &DNSChaosList{})
 	all.register(KindDNSChaos, &ChaosKind{
 		Chaos:     &DNSChaos{},
-		ChaosList: &DNSChaosList{},
+		GenericChaosList: &DNSChaosList{},
 	})
 
 	SchemeBuilder.Register(&GCPChaos{}, &GCPChaosList{})
 	all.register(KindGCPChaos, &ChaosKind{
 		Chaos:     &GCPChaos{},
-		ChaosList: &GCPChaosList{},
+		GenericChaosList: &GCPChaosList{},
 	})
 
 	SchemeBuilder.Register(&HTTPChaos{}, &HTTPChaosList{})
 	all.register(KindHTTPChaos, &ChaosKind{
 		Chaos:     &HTTPChaos{},
-		ChaosList: &HTTPChaosList{},
+		GenericChaosList: &HTTPChaosList{},
 	})
 
 	SchemeBuilder.Register(&IOChaos{}, &IOChaosList{})
 	all.register(KindIOChaos, &ChaosKind{
 		Chaos:     &IOChaos{},
-		ChaosList: &IOChaosList{},
+		GenericChaosList: &IOChaosList{},
 	})
 
 	SchemeBuilder.Register(&JVMChaos{}, &JVMChaosList{})
 	all.register(KindJVMChaos, &ChaosKind{
 		Chaos:     &JVMChaos{},
-		ChaosList: &JVMChaosList{},
+		GenericChaosList: &JVMChaosList{},
 	})
 
 	SchemeBuilder.Register(&KernelChaos{}, &KernelChaosList{})
 	all.register(KindKernelChaos, &ChaosKind{
 		Chaos:     &KernelChaos{},
-		ChaosList: &KernelChaosList{},
+		GenericChaosList: &KernelChaosList{},
 	})
 
 	SchemeBuilder.Register(&NetworkChaos{}, &NetworkChaosList{})
 	all.register(KindNetworkChaos, &ChaosKind{
 		Chaos:     &NetworkChaos{},
-		ChaosList: &NetworkChaosList{},
+		GenericChaosList: &NetworkChaosList{},
 	})
 
 	SchemeBuilder.Register(&PodChaos{}, &PodChaosList{})
 	all.register(KindPodChaos, &ChaosKind{
 		Chaos:     &PodChaos{},
-		ChaosList: &PodChaosList{},
+		GenericChaosList: &PodChaosList{},
 	})
 
 	SchemeBuilder.Register(&StressChaos{}, &StressChaosList{})
 	all.register(KindStressChaos, &ChaosKind{
 		Chaos:     &StressChaos{},
-		ChaosList: &StressChaosList{},
+		GenericChaosList: &StressChaosList{},
 	})
 
 	SchemeBuilder.Register(&TimeChaos{}, &TimeChaosList{})
 	all.register(KindTimeChaos, &ChaosKind{
 		Chaos:     &TimeChaos{},
-		ChaosList: &TimeChaosList{},
+		GenericChaosList: &TimeChaosList{},
 	})
 
 
 	allScheduleItem.register(KindAWSChaos, &ChaosKind{
 		Chaos:     &AWSChaos{},
-		ChaosList: &AWSChaosList{},
+		GenericChaosList: &AWSChaosList{},
 	})
 
 	allScheduleItem.register(KindDNSChaos, &ChaosKind{
 		Chaos:     &DNSChaos{},
-		ChaosList: &DNSChaosList{},
+		GenericChaosList: &DNSChaosList{},
 	})
 
 	allScheduleItem.register(KindGCPChaos, &ChaosKind{
 		Chaos:     &GCPChaos{},
-		ChaosList: &GCPChaosList{},
+		GenericChaosList: &GCPChaosList{},
 	})
 
 	allScheduleItem.register(KindHTTPChaos, &ChaosKind{
 		Chaos:     &HTTPChaos{},
-		ChaosList: &HTTPChaosList{},
+		GenericChaosList: &HTTPChaosList{},
 	})
 
 	allScheduleItem.register(KindIOChaos, &ChaosKind{
 		Chaos:     &IOChaos{},
-		ChaosList: &IOChaosList{},
+		GenericChaosList: &IOChaosList{},
 	})
 
 	allScheduleItem.register(KindJVMChaos, &ChaosKind{
 		Chaos:     &JVMChaos{},
-		ChaosList: &JVMChaosList{},
+		GenericChaosList: &JVMChaosList{},
 	})
 
 	allScheduleItem.register(KindKernelChaos, &ChaosKind{
 		Chaos:     &KernelChaos{},
-		ChaosList: &KernelChaosList{},
+		GenericChaosList: &KernelChaosList{},
 	})
 
 	allScheduleItem.register(KindNetworkChaos, &ChaosKind{
 		Chaos:     &NetworkChaos{},
-		ChaosList: &NetworkChaosList{},
+		GenericChaosList: &NetworkChaosList{},
 	})
 
 	allScheduleItem.register(KindPodChaos, &ChaosKind{
 		Chaos:     &PodChaos{},
-		ChaosList: &PodChaosList{},
+		GenericChaosList: &PodChaosList{},
 	})
 
 	allScheduleItem.register(KindStressChaos, &ChaosKind{
 		Chaos:     &StressChaos{},
-		ChaosList: &StressChaosList{},
+		GenericChaosList: &StressChaosList{},
 	})
 
 	allScheduleItem.register(KindTimeChaos, &ChaosKind{
 		Chaos:     &TimeChaos{},
-		ChaosList: &TimeChaosList{},
+		GenericChaosList: &TimeChaosList{},
 	})
 
 	allScheduleItem.register(KindWorkflow, &ChaosKind{
 		Chaos:     &Workflow{},
-		ChaosList: &WorkflowList{},
+		GenericChaosList: &WorkflowList{},
 	})
 
 }

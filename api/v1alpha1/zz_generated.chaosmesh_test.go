@@ -54,16 +54,16 @@ func TestAWSChaosGetDuration(t *testing.T) {
 	chaos.Spec.GetDuration()
 }
 
-func TestAWSChaosGetChaos(t *testing.T) {
-	g := NewGomegaWithT(t)
+// func TestAWSChaosGetChaos(t *testing.T) {
+// 	g := NewGomegaWithT(t)
 
-	chaos := &AWSChaos{}
-	err := faker.FakeData(chaos)
+// 	chaos := &AWSChaos{}
+// 	err := faker.FakeData(chaos)
 
-	g.Expect(err).To(BeNil())
+// 	g.Expect(err).To(BeNil())
 
-	chaos.GetChaos()
-}
+// 	chaos.GetChaos()
+// }
 
 func TestAWSChaosGetStatus(t *testing.T) {
 	g := NewGomegaWithT(t)
@@ -128,16 +128,16 @@ func TestDNSChaosGetDuration(t *testing.T) {
 	chaos.Spec.GetDuration()
 }
 
-func TestDNSChaosGetChaos(t *testing.T) {
-	g := NewGomegaWithT(t)
+// func TestDNSChaosGetChaos(t *testing.T) {
+// 	g := NewGomegaWithT(t)
 
-	chaos := &DNSChaos{}
-	err := faker.FakeData(chaos)
+// 	chaos := &DNSChaos{}
+// 	err := faker.FakeData(chaos)
 
-	g.Expect(err).To(BeNil())
+// 	g.Expect(err).To(BeNil())
 
-	chaos.GetChaos()
-}
+// 	chaos.GetChaos()
+// }
 
 func TestDNSChaosGetStatus(t *testing.T) {
 	g := NewGomegaWithT(t)
@@ -202,16 +202,16 @@ func TestGCPChaosGetDuration(t *testing.T) {
 	chaos.Spec.GetDuration()
 }
 
-func TestGCPChaosGetChaos(t *testing.T) {
-	g := NewGomegaWithT(t)
+// func TestGCPChaosGetChaos(t *testing.T) {
+// 	g := NewGomegaWithT(t)
 
-	chaos := &GCPChaos{}
-	err := faker.FakeData(chaos)
+// 	chaos := &GCPChaos{}
+// 	err := faker.FakeData(chaos)
 
-	g.Expect(err).To(BeNil())
+// 	g.Expect(err).To(BeNil())
 
-	chaos.GetChaos()
-}
+// 	chaos.GetChaos()
+// }
 
 func TestGCPChaosGetStatus(t *testing.T) {
 	g := NewGomegaWithT(t)
@@ -276,16 +276,16 @@ func TestHTTPChaosGetDuration(t *testing.T) {
 	chaos.Spec.GetDuration()
 }
 
-func TestHTTPChaosGetChaos(t *testing.T) {
-	g := NewGomegaWithT(t)
+// func TestHTTPChaosGetChaos(t *testing.T) {
+// 	g := NewGomegaWithT(t)
 
-	chaos := &HTTPChaos{}
-	err := faker.FakeData(chaos)
+// 	chaos := &HTTPChaos{}
+// 	err := faker.FakeData(chaos)
 
-	g.Expect(err).To(BeNil())
+// 	g.Expect(err).To(BeNil())
 
-	chaos.GetChaos()
-}
+// 	chaos.GetChaos()
+// }
 
 func TestHTTPChaosGetStatus(t *testing.T) {
 	g := NewGomegaWithT(t)
@@ -350,16 +350,16 @@ func TestIOChaosGetDuration(t *testing.T) {
 	chaos.Spec.GetDuration()
 }
 
-func TestIOChaosGetChaos(t *testing.T) {
-	g := NewGomegaWithT(t)
+// func TestIOChaosGetChaos(t *testing.T) {
+// 	g := NewGomegaWithT(t)
 
-	chaos := &IOChaos{}
-	err := faker.FakeData(chaos)
+// 	chaos := &IOChaos{}
+// 	err := faker.FakeData(chaos)
 
-	g.Expect(err).To(BeNil())
+// 	g.Expect(err).To(BeNil())
 
-	chaos.GetChaos()
-}
+// 	chaos.GetChaos()
+// }
 
 func TestIOChaosGetStatus(t *testing.T) {
 	g := NewGomegaWithT(t)
@@ -424,16 +424,16 @@ func TestJVMChaosGetDuration(t *testing.T) {
 	chaos.Spec.GetDuration()
 }
 
-func TestJVMChaosGetChaos(t *testing.T) {
-	g := NewGomegaWithT(t)
+// func TestJVMChaosGetChaos(t *testing.T) {
+// 	g := NewGomegaWithT(t)
 
-	chaos := &JVMChaos{}
-	err := faker.FakeData(chaos)
+// 	chaos := &JVMChaos{}
+// 	err := faker.FakeData(chaos)
 
-	g.Expect(err).To(BeNil())
+// 	g.Expect(err).To(BeNil())
 
-	chaos.GetChaos()
-}
+// 	chaos.GetChaos()
+// }
 
 func TestJVMChaosGetStatus(t *testing.T) {
 	g := NewGomegaWithT(t)
@@ -498,16 +498,16 @@ func TestKernelChaosGetDuration(t *testing.T) {
 	chaos.Spec.GetDuration()
 }
 
-func TestKernelChaosGetChaos(t *testing.T) {
-	g := NewGomegaWithT(t)
+// func TestKernelChaosGetChaos(t *testing.T) {
+// 	g := NewGomegaWithT(t)
 
-	chaos := &KernelChaos{}
-	err := faker.FakeData(chaos)
+// 	chaos := &KernelChaos{}
+// 	err := faker.FakeData(chaos)
 
-	g.Expect(err).To(BeNil())
+// 	g.Expect(err).To(BeNil())
 
-	chaos.GetChaos()
-}
+// 	chaos.GetChaos()
+// }
 
 func TestKernelChaosGetStatus(t *testing.T) {
 	g := NewGomegaWithT(t)
@@ -572,16 +572,16 @@ func TestNetworkChaosGetDuration(t *testing.T) {
 	chaos.Spec.GetDuration()
 }
 
-func TestNetworkChaosGetChaos(t *testing.T) {
-	g := NewGomegaWithT(t)
+// func TestNetworkChaosGetChaos(t *testing.T) {
+// 	g := NewGomegaWithT(t)
 
-	chaos := &NetworkChaos{}
-	err := faker.FakeData(chaos)
+// 	chaos := &NetworkChaos{}
+// 	err := faker.FakeData(chaos)
 
-	g.Expect(err).To(BeNil())
+// 	g.Expect(err).To(BeNil())
 
-	chaos.GetChaos()
-}
+// 	chaos.GetChaos()
+// }
 
 func TestNetworkChaosGetStatus(t *testing.T) {
 	g := NewGomegaWithT(t)
@@ -646,16 +646,16 @@ func TestPodChaosGetDuration(t *testing.T) {
 	chaos.Spec.GetDuration()
 }
 
-func TestPodChaosGetChaos(t *testing.T) {
-	g := NewGomegaWithT(t)
+// func TestPodChaosGetChaos(t *testing.T) {
+// 	g := NewGomegaWithT(t)
 
-	chaos := &PodChaos{}
-	err := faker.FakeData(chaos)
+// 	chaos := &PodChaos{}
+// 	err := faker.FakeData(chaos)
 
-	g.Expect(err).To(BeNil())
+// 	g.Expect(err).To(BeNil())
 
-	chaos.GetChaos()
-}
+// 	chaos.GetChaos()
+// }
 
 func TestPodChaosGetStatus(t *testing.T) {
 	g := NewGomegaWithT(t)
@@ -720,16 +720,16 @@ func TestStressChaosGetDuration(t *testing.T) {
 	chaos.Spec.GetDuration()
 }
 
-func TestStressChaosGetChaos(t *testing.T) {
-	g := NewGomegaWithT(t)
+// func TestStressChaosGetChaos(t *testing.T) {
+// 	g := NewGomegaWithT(t)
 
-	chaos := &StressChaos{}
-	err := faker.FakeData(chaos)
+// 	chaos := &StressChaos{}
+// 	err := faker.FakeData(chaos)
 
-	g.Expect(err).To(BeNil())
+// 	g.Expect(err).To(BeNil())
 
-	chaos.GetChaos()
-}
+// 	chaos.GetChaos()
+// }
 
 func TestStressChaosGetStatus(t *testing.T) {
 	g := NewGomegaWithT(t)
@@ -794,16 +794,16 @@ func TestTimeChaosGetDuration(t *testing.T) {
 	chaos.Spec.GetDuration()
 }
 
-func TestTimeChaosGetChaos(t *testing.T) {
-	g := NewGomegaWithT(t)
+// func TestTimeChaosGetChaos(t *testing.T) {
+// 	g := NewGomegaWithT(t)
 
-	chaos := &TimeChaos{}
-	err := faker.FakeData(chaos)
+// 	chaos := &TimeChaos{}
+// 	err := faker.FakeData(chaos)
 
-	g.Expect(err).To(BeNil())
+// 	g.Expect(err).To(BeNil())
 
-	chaos.GetChaos()
-}
+// 	chaos.GetChaos()
+// }
 
 func TestTimeChaosGetStatus(t *testing.T) {
 	g := NewGomegaWithT(t)

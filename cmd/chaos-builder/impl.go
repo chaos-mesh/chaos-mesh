@@ -21,11 +21,12 @@ import (
 const implImport = `
 import (
 	"encoding/json"
-	"reflect"
+	// "reflect"
 	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
+// var _ = reflect.String
 `
 
 const implTemplate = `
@@ -61,31 +62,6 @@ func (in *{{.Type}}Spec) GetDuration() (*time.Duration, error) {
 	return &duration, nil
 }
 
-// GetChaos would return the a record for chaos
-func (in *{{.Type}}) GetChaos() *ChaosInstance {
-	instance := &ChaosInstance{
-		Name:      in.Name,
-		Namespace: in.Namespace,
-		Kind:      Kind{{.Type}},
-		StartTime: in.CreationTimestamp.Time,
-		Action:    "",
-		UID:       string(in.UID),
-		Status:    in.Status.ChaosStatus,
-	}
-
-	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
-	if action.IsValid() {
-		instance.Action = action.String()
-	}
-	if in.Spec.Duration != nil {
-		instance.Duration = *in.Spec.Duration
-	}
-	if in.DeletionTimestamp != nil {
-		instance.EndTime = in.DeletionTimestamp.Time
-	}
-	return instance
-}
-
 // GetStatus returns the status
 func (in *{{.Type}}) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
@@ -115,12 +91,13 @@ type {{.Type}}List struct {
 }
 
 // ListChaos returns a list of chaos
-func (in *{{.Type}}List) ListChaos() []*ChaosInstance {
-	res := make([]*ChaosInstance, 0, len(in.Items))
+func (in *{{.Type}}List) ListChaos() []GenericChaos {
+	var result []GenericChaos
 	for _, item := range in.Items {
-		res = append(res, item.GetChaos())
+		item := item
+		result = append(result, &item)
 	}
-	return res
+	return result
 }
 
 func (in *{{.Type}}) DurationExceeded(now time.Time) (bool, time.Duration, error) {
