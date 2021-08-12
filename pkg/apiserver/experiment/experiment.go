@@ -98,8 +98,8 @@ type Detail struct {
 // @Param kind query string false "filter exps by kind" Enums(PodChaos, NetworkChaos, IOChaos, StressChaos, KernelChaos, TimeChaos, DNSChaos, AWSChaos, GCPChaos, JVMChaos, HTTPChaos)
 // @Param status query string false "filter exps by status" Enums(Injecting, Running, Finished, Paused)
 // @Success 200 {array} Experiment
-// @Failure 400 {object} u.APIError
-// @Failure 500 {object} u.APIError
+// @Failure 400 {object} utils.APIError
+// @Failure 500 {object} utils.APIError
 // @Router /experiments [get]
 func (s *Service) list(c *gin.Context) {
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
@@ -165,8 +165,8 @@ func (s *Service) list(c *gin.Context) {
 // @Produce json
 // @Param chaos body map[string]interface{} true "the chaos definition"
 // @Success 200 {object} map[string]interface{}
-// @Failure 400 {object} u.APIError
-// @Failure 500 {object} u.APIError
+// @Failure 400 {object} utils.APIError
+// @Failure 500 {object} utils.APIError
 // @Router /experiments [post]
 func (s *Service) create(c *gin.Context) {
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
@@ -203,9 +203,9 @@ func (s *Service) create(c *gin.Context) {
 // @Produce json
 // @Param uid path string true "the experiment uid"
 // @Success 200 {object} Detail
-// @Failure 400 {object} u.APIError
-// @Failure 404 {object} u.APIError
-// @Failure 500 {object} u.APIError
+// @Failure 400 {object} utils.APIError
+// @Failure 404 {object} utils.APIError
+// @Failure 500 {object} utils.APIError
 // @Router /experiments/{uid} [get]
 func (s *Service) get(c *gin.Context) {
 	var (
@@ -288,10 +288,10 @@ func (s *Service) findChaosInCluster(c *gin.Context, kubeCli client.Client, name
 // @Produce json
 // @Param uid path string true "the experiment uid"
 // @Param force query string false "force" Enums(true, false)
-// @Success 200 {object} u.Response
-// @Failure 400 {object} u.APIError
-// @Failure 404 {object} u.APIError
-// @Failure 500 {object} u.APIError
+// @Success 200 {object} utils.Response
+// @Failure 400 {object} utils.APIError
+// @Failure 404 {object} utils.APIError
+// @Failure 500 {object} utils.APIError
 // @Router /experiments/{uid} [delete]
 func (s *Service) delete(c *gin.Context) {
 	var (
@@ -330,10 +330,10 @@ func (s *Service) delete(c *gin.Context) {
 // @Produce json
 // @Param uids query string true "the experiment uids, split with comma. Example: ?uids=uid1,uid2"
 // @Param force query string false "force" Enums(true, false)
-// @Success 200 {object} u.Response
-// @Failure 400 {object} u.APIError
-// @Failure 404 {object} u.APIError
-// @Failure 500 {object} u.APIError
+// @Success 200 {object} utils.Response
+// @Failure 400 {object} utils.APIError
+// @Failure 404 {object} utils.APIError
+// @Failure 500 {object} utils.APIError
 // @Router /experiments [delete]
 func (s *Service) batchDelete(c *gin.Context) {
 	var (
@@ -440,9 +440,9 @@ func forceClean(kubeCli client.Client, chaos runtime.Object) error {
 // @Produce json
 // @Param request body map[string]interface{} true "Request body"
 // @Success 200 {object} map[string]interface{}
-// @Failure 400 {object} u.APIError
-// @Failure 404 {object} u.APIError
-// @Failure 500 {object} u.APIError
+// @Failure 400 {object} utils.APIError
+// @Failure 404 {object} utils.APIError
+// @Failure 500 {object} utils.APIError
 // @Router /experiments [put]
 func (s *Service) update(c *gin.Context) {
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
@@ -493,10 +493,10 @@ func internalUpdate(kubeCli client.Client, chaos runtime.Object) error {
 // @Tags experiments
 // @Produce json
 // @Param uid path string true "the experiment uid"
-// @Success 200 {object} u.Response
-// @Failure 400 {object} u.APIError
-// @Failure 404 {object} u.APIError
-// @Failure 500 {object} u.APIError
+// @Success 200 {object} utils.Response
+// @Failure 400 {object} utils.APIError
+// @Failure 404 {object} utils.APIError
+// @Failure 500 {object} utils.APIError
 // @Router /experiments/pause/{uid} [put]
 func (s *Service) pause(c *gin.Context) {
 	var exp *core.Experiment
@@ -536,10 +536,10 @@ func (s *Service) pause(c *gin.Context) {
 // @Tags experiments
 // @Produce json
 // @Param uid path string true "the experiment uid"
-// @Success 200 {object} u.Response
-// @Failure 400 {object} u.APIError
-// @Failure 404 {object} u.APIError
-// @Failure 500 {object} u.APIError
+// @Success 200 {object} utils.Response
+// @Failure 400 {object} utils.APIError
+// @Failure 404 {object} utils.APIError
+// @Failure 500 {object} utils.APIError
 // @Router /experiments/start/{uid} [put]
 func (s *Service) start(c *gin.Context) {
 	var exp *core.Experiment
@@ -596,9 +596,9 @@ func patchExperiment(kubeCli client.Client, exp *core.Experiment, annotations ma
 // @Tags experiments
 // @Produce json
 // @Param namespace query string false "namespace"
-// @Success 200 {object} u.AllChaosStatus
-// @Failure 400 {object} u.APIError
-// @Failure 500 {object} u.APIError
+// @Success 200 {object} utils.AllChaosStatus
+// @Failure 400 {object} utils.APIError
+// @Failure 500 {object} utils.APIError
 // @Router /experiments/state [get]
 func (s *Service) state(c *gin.Context) {
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)

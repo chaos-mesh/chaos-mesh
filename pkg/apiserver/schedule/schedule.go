@@ -91,8 +91,8 @@ type Detail struct {
 // @Param namespace query string false "filter schedules by namespace"
 // @Param name query string false "filter schedules by name"
 // @Success 200 {array} Schedule
-// @Failure 400 {object} u.APIError
-// @Failure 500 {object} u.APIError
+// @Failure 400 {object} utils.APIError
+// @Failure 500 {object} utils.APIError
 // @Router /schedules [get]
 func (s *Service) list(c *gin.Context) {
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
@@ -149,8 +149,8 @@ func (s *Service) list(c *gin.Context) {
 // @Produce json
 // @Param schedule body v1alpha1.Schedule true "the schedule definition"
 // @Success 200 {object} v1alpha1.Schedule
-// @Failure 400 {object} u.APIError
-// @Failure 500 {object} u.APIError
+// @Failure 400 {object} utils.APIError
+// @Failure 500 {object} utils.APIError
 // @Router /schedules [post]
 func (s *Service) create(c *gin.Context) {
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
@@ -178,9 +178,9 @@ func (s *Service) create(c *gin.Context) {
 // @Produce json
 // @Param uid path string true "the schedule uid"
 // @Success 200 {object} Detail
-// @Failure 400 {object} u.APIError
-// @Failure 404 {object} u.APIError
-// @Failure 500 {object} u.APIError
+// @Failure 400 {object} utils.APIError
+// @Failure 404 {object} utils.APIError
+// @Failure 500 {object} utils.APIError
 // @Router /schedules/{uid} [get]
 func (s *Service) get(c *gin.Context) {
 	var (
@@ -297,10 +297,10 @@ func (s *Service) findScheduleInCluster(c *gin.Context, kubeCli client.Client, n
 // @Tags schedules
 // @Produce json
 // @Param uid path string true "the schedule uid"
-// @Success 200 {object} u.Response
-// @Failure 400 {object} u.APIError
-// @Failure 404 {object} u.APIError
-// @Failure 500 {object} u.APIError
+// @Success 200 {object} utils.Response
+// @Failure 400 {object} utils.APIError
+// @Failure 404 {object} utils.APIError
+// @Failure 500 {object} utils.APIError
 // @Router /schedules/{uid} [delete]
 func (s *Service) delete(c *gin.Context) {
 	var (
@@ -340,10 +340,10 @@ func (s *Service) delete(c *gin.Context) {
 // @Tags schedules
 // @Produce json
 // @Param uids query string true "the schedule uids, split with comma. Example: ?uids=uid1,uid2"
-// @Success 200 {object} u.Response
-// @Failure 400 {object} u.APIError
-// @Failure 404 {object} u.APIError
-// @Failure 500 {object} u.APIError
+// @Success 200 {object} utils.Response
+// @Failure 400 {object} utils.APIError
+// @Failure 404 {object} utils.APIError
+// @Failure 500 {object} utils.APIError
 // @Router /schedules [delete]
 func (s *Service) batchDelete(c *gin.Context) {
 	var (
@@ -416,9 +416,9 @@ func checkAndDeleteSchedule(c *gin.Context, kubeCli client.Client, namespacedNam
 // @Produce json
 // @Param request body v1alpha1.Schedule true "Request body"
 // @Success 200 {object} v1alpha1.Schedule
-// @Failure 400 {object} u.APIError
-// @Failure 404 {object} u.APIError
-// @Failure 500 {object} u.APIError
+// @Failure 400 {object} utils.APIError
+// @Failure 404 {object} utils.APIError
+// @Failure 500 {object} utils.APIError
 // @Router /schedules [put]
 func (s *Service) update(c *gin.Context) {
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
@@ -457,10 +457,10 @@ func internalUpdate(kubeCli client.Client, sch *v1alpha1.Schedule) error {
 // @Tags schedules
 // @Produce json
 // @Param uid path string true "the schedule uid"
-// @Success 200 {object} u.Response
-// @Failure 400 {object} u.APIError
-// @Failure 404 {object} u.APIError
-// @Failure 500 {object} u.APIError
+// @Success 200 {object} utils.Response
+// @Failure 400 {object} utils.APIError
+// @Failure 404 {object} utils.APIError
+// @Failure 500 {object} utils.APIError
 // @Router /schedules/pause/{uid} [put]
 func (s *Service) pauseSchedule(c *gin.Context) {
 	var sch *core.Schedule
@@ -499,10 +499,10 @@ func (s *Service) pauseSchedule(c *gin.Context) {
 // @Tags schedules
 // @Produce json
 // @Param uid path string true "the schedule uid"
-// @Success 200 {object} u.Response
-// @Failure 400 {object} u.APIError
-// @Failure 404 {object} u.APIError
-// @Failure 500 {object} u.APIError
+// @Success 200 {object} utils.Response
+// @Failure 400 {object} utils.APIError
+// @Failure 404 {object} utils.APIError
+// @Failure 500 {object} utils.APIError
 // @Router /schedules/start/{uid} [put]
 func (s *Service) startSchedule(c *gin.Context) {
 	var sch *core.Schedule
