@@ -17,9 +17,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/oauth2"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
 )
 
 func (s *Service) Middleware(c *gin.Context) {

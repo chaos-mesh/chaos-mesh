@@ -1,7 +1,6 @@
 module github.com/chaos-mesh/chaos-mesh
 
 require (
-	cloud.google.com/go v0.51.0
 	code.cloudfoundry.org/bytefmt v0.0.0-20200131002437-cf55d5288a48
 	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/Microsoft/go-winio v0.4.11 // indirect
@@ -85,7 +84,6 @@ require (
 	golang.org/x/tools v0.1.4
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1
 	google.golang.org/api v0.15.0
-	google.golang.org/genproto v0.0.0-20200117163144-32f20d992d24
 	google.golang.org/grpc v1.27.0
 	google.golang.org/protobuf v1.23.0
 	gopkg.in/yaml.v2 v2.3.0

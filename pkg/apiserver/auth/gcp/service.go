@@ -17,12 +17,13 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
-	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	ctrl "sigs.k8s.io/controller-runtime"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
+	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
 )
 
 var log = ctrl.Log.WithName("gcp auth api")
