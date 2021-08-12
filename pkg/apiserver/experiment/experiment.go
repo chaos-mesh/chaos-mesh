@@ -31,7 +31,6 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/finalizers"
@@ -48,21 +47,17 @@ type Service struct {
 	archive core.ExperimentStore
 	event   core.EventStore
 	conf    *config.ChaosDashboardConfig
-	scheme  *runtime.Scheme
 }
 
-// NewService returns an Service instance.
 func NewService(
 	archive core.ExperimentStore,
 	event core.EventStore,
 	conf *config.ChaosDashboardConfig,
-	scheme *runtime.Scheme,
 ) *Service {
 	return &Service{
 		archive: archive,
 		event:   event,
 		conf:    conf,
-		scheme:  scheme,
 	}
 }
 
@@ -260,19 +255,12 @@ func (s *Service) findChaosInCluster(c *gin.Context, kubeCli client.Client, name
 		return nil
 	}
 
-	gvk, err := apiutil.GVKForObject(chaos, s.scheme)
-	if err != nil {
-		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
-
-		return nil
-	}
-
 	return &Detail{
 		Experiment: Experiment{
 			ObjectBase: core.ObjectBase{
 				Namespace: reflect.ValueOf(chaos).Elem().FieldByName("Namespace").String(),
 				Name:      reflect.ValueOf(chaos).Elem().FieldByName("Name").String(),
-				Kind:      gvk.Kind,
+				Kind:      reflect.ValueOf(chaos).Elem().FieldByName("Kind").String(),
 				UID:       reflect.ValueOf(chaos).MethodByName("GetChaos").Call(nil)[0].Elem().FieldByName("UID").String(),
 				Created:   reflect.ValueOf(chaos).MethodByName("GetChaos").Call(nil)[0].Elem().FieldByName("StartTime").Interface().(time.Time).Format(time.RFC3339),
 			},
@@ -280,8 +268,8 @@ func (s *Service) findChaosInCluster(c *gin.Context, kubeCli client.Client, name
 		},
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
-				APIVersion: gvk.GroupVersion().String(),
-				Kind:       gvk.Kind,
+				APIVersion: reflect.ValueOf(chaos).Elem().FieldByName("APIVersion").String(),
+				Kind:       reflect.ValueOf(chaos).Elem().FieldByName("Kind").String(),
 			},
 			Meta: core.KubeObjectMeta{
 				Namespace:   reflect.ValueOf(chaos).Elem().FieldByName("Namespace").String(),

@@ -25,11 +25,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	u "github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
@@ -45,21 +43,17 @@ type Service struct {
 	schedule core.ScheduleStore
 	event    core.EventStore
 	conf     *config.ChaosDashboardConfig
-	scheme   *runtime.Scheme
 }
 
-// NewService returns an Service instance.
 func NewService(
 	schedule core.ScheduleStore,
 	event core.EventStore,
 	conf *config.ChaosDashboardConfig,
-	scheme *runtime.Scheme,
 ) *Service {
 	return &Service{
 		schedule: schedule,
 		event:    event,
 		conf:     conf,
-		scheme:   scheme,
 	}
 }
 
@@ -230,13 +224,6 @@ func (s *Service) findScheduleInCluster(c *gin.Context, kubeCli client.Client, n
 		return nil
 	}
 
-	gvk, err := apiutil.GVKForObject(&sch, s.scheme)
-	if err != nil {
-		c.Error(u.ErrInternalServer.WrapWithNoMessage(err))
-
-		return nil
-	}
-
 	UIDList := make([]string, 0)
 	schType := string(sch.Spec.Type)
 	chaosKind, ok := v1alpha1.AllScheduleItemKinds()[schType]
@@ -291,8 +278,8 @@ func (s *Service) findScheduleInCluster(c *gin.Context, kubeCli client.Client, n
 		ExperimentUIDs: UIDList,
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
-				APIVersion: gvk.GroupVersion().String(),
-				Kind:       gvk.Kind,
+				APIVersion: sch.APIVersion,
+				Kind:       sch.Kind,
 			},
 			Meta: core.KubeObjectMeta{
 				Namespace:   sch.Namespace,
