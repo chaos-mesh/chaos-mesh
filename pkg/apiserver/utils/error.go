@@ -46,14 +46,12 @@ func SetAPIError(c *gin.Context, err *errorx.Error) {
 
 	var code int
 	switch typeName {
-	case ErrBadRequest.FullName():
-	case ErrNoClusterPrivilege.FullName():
-	case ErrNoNamespacePrivilege.FullName():
+	case ErrBadRequest.FullName(), ErrNoClusterPrivilege.FullName(), ErrNoNamespacePrivilege.FullName():
 		code = http.StatusBadRequest
 	case ErrNotFound.FullName():
 		code = http.StatusNotFound
-	case ErrUnknown.FullName():
-	case ErrInternalServer.FullName():
+	case ErrUnknown.FullName(), ErrInternalServer.FullName():
+		code = http.StatusInternalServerError
 	default:
 		code = http.StatusInternalServerError
 	}

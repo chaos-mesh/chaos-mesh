@@ -357,6 +357,7 @@ var _ = Describe("event", func() {
 					Kind:      "testKind",
 					Namespace: "testNamespace",
 					Name:      "testName",
+					Created:   time.Time{}.Format(time.RFC3339),
 				},
 			}
 			rr := httptest.NewRecorder()
@@ -377,13 +378,6 @@ var _ = Describe("event", func() {
 	})
 
 	Context("Detail", func() {
-		It("empty uid", func() {
-			rr := httptest.NewRecorder()
-			request, _ := http.NewRequest(http.MethodGet, "/api/archives/detail", nil)
-			router.ServeHTTP(rr, request)
-			Expect(rr.Code).Should(Equal(http.StatusBadRequest))
-		})
-
 		It("testPodChaos", func() {
 			chaos := &v1alpha1.PodChaos{}
 			response := Detail{
@@ -392,6 +386,7 @@ var _ = Describe("event", func() {
 					Kind:      v1alpha1.KindPodChaos,
 					Namespace: "testNamespace",
 					Name:      "testName",
+					Created:   time.Time{}.Format(time.RFC3339),
 				},
 				KubeObject: core.KubeObjectDesc{
 					TypeMeta: metav1.TypeMeta{
@@ -408,7 +403,7 @@ var _ = Describe("event", func() {
 				},
 			}
 			rr := httptest.NewRecorder()
-			request, _ := http.NewRequest(http.MethodGet, "/api/archives/detail?uid=testPodChaos", nil)
+			request, _ := http.NewRequest(http.MethodGet, "/api/archives/testPodChaos", nil)
 			router.ServeHTTP(rr, request)
 			Expect(rr.Code).Should(Equal(http.StatusOK))
 			responseBody, err := json.Marshal(response)
@@ -424,6 +419,7 @@ var _ = Describe("event", func() {
 					Kind:      v1alpha1.KindIOChaos,
 					Namespace: "testNamespace",
 					Name:      "testName",
+					Created:   time.Time{}.Format(time.RFC3339),
 				},
 				KubeObject: core.KubeObjectDesc{
 					TypeMeta: metav1.TypeMeta{
@@ -440,7 +436,7 @@ var _ = Describe("event", func() {
 				},
 			}
 			rr := httptest.NewRecorder()
-			request, _ := http.NewRequest(http.MethodGet, "/api/archives/detail?uid=testIOChaos", nil)
+			request, _ := http.NewRequest(http.MethodGet, "/api/archives/testIOChaos", nil)
 			router.ServeHTTP(rr, request)
 			Expect(rr.Code).Should(Equal(http.StatusOK))
 			responseBody, err := json.Marshal(response)
@@ -456,6 +452,7 @@ var _ = Describe("event", func() {
 					Kind:      v1alpha1.KindNetworkChaos,
 					Namespace: "testNamespace",
 					Name:      "testName",
+					Created:   time.Time{}.Format(time.RFC3339),
 				},
 				KubeObject: core.KubeObjectDesc{
 					TypeMeta: metav1.TypeMeta{
@@ -472,7 +469,7 @@ var _ = Describe("event", func() {
 				},
 			}
 			rr := httptest.NewRecorder()
-			request, _ := http.NewRequest(http.MethodGet, "/api/archives/detail?uid=testNetworkChaos", nil)
+			request, _ := http.NewRequest(http.MethodGet, "/api/archives/testNetworkChaos", nil)
 			router.ServeHTTP(rr, request)
 			Expect(rr.Code).Should(Equal(http.StatusOK))
 			responseBody, err := json.Marshal(response)
@@ -488,6 +485,7 @@ var _ = Describe("event", func() {
 					Kind:      v1alpha1.KindTimeChaos,
 					Namespace: "testNamespace",
 					Name:      "testName",
+					Created:   time.Time{}.Format(time.RFC3339),
 				},
 				KubeObject: core.KubeObjectDesc{
 					TypeMeta: metav1.TypeMeta{
@@ -504,7 +502,7 @@ var _ = Describe("event", func() {
 				},
 			}
 			rr := httptest.NewRecorder()
-			request, _ := http.NewRequest(http.MethodGet, "/api/archives/detail?uid=testTimeChaos", nil)
+			request, _ := http.NewRequest(http.MethodGet, "/api/archives/testTimeChaos", nil)
 			router.ServeHTTP(rr, request)
 			Expect(rr.Code).Should(Equal(http.StatusOK))
 			responseBody, err := json.Marshal(response)
@@ -520,6 +518,7 @@ var _ = Describe("event", func() {
 					Kind:      v1alpha1.KindKernelChaos,
 					Namespace: "testNamespace",
 					Name:      "testName",
+					Created:   time.Time{}.Format(time.RFC3339),
 				},
 				KubeObject: core.KubeObjectDesc{
 					TypeMeta: metav1.TypeMeta{
@@ -536,7 +535,7 @@ var _ = Describe("event", func() {
 				},
 			}
 			rr := httptest.NewRecorder()
-			request, _ := http.NewRequest(http.MethodGet, "/api/archives/detail?uid=testKernelChaos", nil)
+			request, _ := http.NewRequest(http.MethodGet, "/api/archives/testKernelChaos", nil)
 			router.ServeHTTP(rr, request)
 			Expect(rr.Code).Should(Equal(http.StatusOK))
 			responseBody, err := json.Marshal(response)
@@ -552,6 +551,7 @@ var _ = Describe("event", func() {
 					Kind:      v1alpha1.KindStressChaos,
 					Namespace: "testNamespace",
 					Name:      "testName",
+					Created:   time.Time{}.Format(time.RFC3339),
 				},
 				KubeObject: core.KubeObjectDesc{
 					TypeMeta: metav1.TypeMeta{
@@ -568,7 +568,7 @@ var _ = Describe("event", func() {
 				},
 			}
 			rr := httptest.NewRecorder()
-			request, _ := http.NewRequest(http.MethodGet, "/api/archives/detail?uid=testStressChaos", nil)
+			request, _ := http.NewRequest(http.MethodGet, "/api/archives/testStressChaos", nil)
 			router.ServeHTTP(rr, request)
 			Expect(rr.Code).Should(Equal(http.StatusOK))
 			responseBody, err := json.Marshal(response)
@@ -578,22 +578,23 @@ var _ = Describe("event", func() {
 
 		It("testOtherChaos", func() {
 			rr := httptest.NewRecorder()
-			request, _ := http.NewRequest(http.MethodGet, "/api/archives/detail?uid=testOtherChaos", nil)
+			request, _ := http.NewRequest(http.MethodGet, "/api/archives/testOtherChaos", nil)
 			router.ServeHTTP(rr, request)
 			Expect(rr.Code).Should(Equal(http.StatusInternalServerError))
 		})
 
 		It("testErrRecordNotFound", func() {
 			rr := httptest.NewRecorder()
-			request, _ := http.NewRequest(http.MethodGet, "/api/archives/detail?uid=testErrRecordNotFound", nil)
+			request, _ := http.NewRequest(http.MethodGet, "/api/archives/testErrRecordNotFound", nil)
 			router.ServeHTTP(rr, request)
-			Expect(rr.Code).Should(Equal(http.StatusInternalServerError))
+			Expect(rr.Code).Should(Equal(http.StatusNotFound))
 		})
 
 		It("test err", func() {
 			rr := httptest.NewRecorder()
-			request, _ := http.NewRequest(http.MethodGet, "/api/archives/detail?uid=testErr", nil)
+			request, _ := http.NewRequest(http.MethodGet, "/api/archives/testErr", nil)
 			router.ServeHTTP(rr, request)
+			fmt.Println(rr.Code)
 			Expect(rr.Code).Should(Equal(http.StatusInternalServerError))
 		})
 	})
@@ -606,6 +607,7 @@ var _ = Describe("event", func() {
 					Kind:      "testKind",
 					Namespace: "testNamespace",
 					Name:      "testScheduleName",
+					Created:   time.Time{}.Format(time.RFC3339),
 				},
 			}
 			rr := httptest.NewRecorder()
@@ -626,13 +628,6 @@ var _ = Describe("event", func() {
 	})
 
 	Context("DetailSchedule", func() {
-		It("empty uid", func() {
-			rr := httptest.NewRecorder()
-			request, _ := http.NewRequest(http.MethodGet, "/api/archives/detail", nil)
-			router.ServeHTTP(rr, request)
-			Expect(rr.Code).Should(Equal(http.StatusBadRequest))
-		})
-
 		It("testPodChaos", func() {
 			sch := &v1alpha1.Schedule{}
 			response := Detail{
@@ -641,6 +636,7 @@ var _ = Describe("event", func() {
 					Kind:      v1alpha1.KindPodChaos,
 					Namespace: "testNamespace",
 					Name:      "testName",
+					Created:   time.Time{}.Format(time.RFC3339),
 				},
 				KubeObject: core.KubeObjectDesc{
 					TypeMeta: metav1.TypeMeta{
