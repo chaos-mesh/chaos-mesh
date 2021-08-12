@@ -83,11 +83,11 @@ function REQUEST() {
 echo "***** create chaos experiments *****"
 
 echo "viewer is forbidden to create experiments"
-REQUEST BUSYBOX_MANAGER_FORBIDDEN_TOKEN_LIST[@] "POST" "/api/experiments/new" "create_exp.out" "is forbidden"
+REQUEST BUSYBOX_MANAGER_FORBIDDEN_TOKEN_LIST[@] "POST" "/api/experiments" "create_exp.out" "is forbidden"
 
 echo "only manager can create experiments success"
 # here just use busybox manager because experiment can be created only one time
-REQUEST BUSYBOX_MANAGER_TOKEN_LIST[@] "POST" "/api/experiments/new" "create_exp.out" '"name":"ci-test"'
+REQUEST BUSYBOX_MANAGER_TOKEN_LIST[@] "POST" "/api/experiments" "create_exp.out" '"name":"ci-test"'
 
 
 echo "***** list chaos experiments *****"
@@ -218,14 +218,14 @@ REQUEST CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@] "GET" "/api/archives?namespace=defa
 echo "***** get detail of archive chaos experiment *****"
 
 echo "all token can get the details of archive experiments under namespace busybox"
-REQUEST BUSYBOX_VIEW_TOKEN_LIST[@] "GET" "/api/archives/detail?uid=${EXP_UID}&namespace=busybox" "detail_archives.out" '"name":"ci-test"'
+REQUEST BUSYBOX_VIEW_TOKEN_LIST[@] "GET" "/api/archives/${EXP_UID}&namespace=busybox" "detail_archives.out" '"name":"ci-test"'
 
 echo "cluster manager and viewer can get the details of archive experiments in the cluster"
-REQUEST CLUSTER_VIEW_TOKEN_LIST[@] "GET" "/api/archives/detail?uid=${EXP_UID}" "detail_archives.out" '"name":"ci-test"'
+REQUEST CLUSTER_VIEW_TOKEN_LIST[@] "GET" "/api/archives/${EXP_UID}" "detail_archives.out" '"name":"ci-test"'
 
 echo "busybox manager and viewer is forbidden to get the details of archive experiments in the cluster or other namespace"
-REQUEST CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@] "GET" "/api/archives/detail?uid=${EXP_UID}" "detail_archives.out" "can't list"
-REQUEST CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@] "GET" "/api/archives/detail?uid=${EXP_UID}&namespace=default" "detail_archives.out" "can't list"
+REQUEST CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@] "GET" "/api/archives/${EXP_UID}" "detail_archives.out" "can't list"
+REQUEST CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@] "GET" "/api/archives/${EXP_UID}&namespace=default" "detail_archives.out" "can't list"
 
 
 #echo "***** get report of archive chaos experiment *****"
@@ -257,9 +257,9 @@ EXP_JSON='{"name": "ci-test2", "namespace": "busybox", "scope": {"mode": "one", 
 UPDATE_EXP_JSON='{"apiVersion": "chaos-mesh.org/v1alpha1", "kind": "NetworkChaos", "metadata": {"name": "ci-test2", "namespace": "busybox"}, "spec": {"direction": "both", "target": {"selector": {"namespaces": ["chaos-testing", "default" ]}, "mode": "one"}, "action": "delay", "latency": "2ms", "mode": "one"}}'
 
 # create experiment require the privileges of namespace busybox and chaos-testing, so only cluster manager can create exp success
-REQUEST CLUSTER_MANAGER_FORBIDDEN_TOKEN_LIST[@] "POST" "/api/experiments/new" "create_exp.out" 'is forbidden'
+REQUEST CLUSTER_MANAGER_FORBIDDEN_TOKEN_LIST[@] "POST" "/api/experiments" "create_exp.out" 'is forbidden'
 
-REQUEST CLUSTER_MANAGER_TOKEN_LIST[@] "POST" "/api/experiments/new" "create_exp.out" '"name":"ci-test2"'
+REQUEST CLUSTER_MANAGER_TOKEN_LIST[@] "POST" "/api/experiments" "create_exp.out" '"name":"ci-test2"'
 
 # update the experiment require the privileges of namespace busybox, chaos-testing and default, so only cluster manager can update exp success
 
