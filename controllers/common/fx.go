@@ -27,7 +27,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
-	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
@@ -55,7 +54,7 @@ type Params struct {
 	Reader          client.Reader    `name:"no-cache"`
 }
 
-func NewController(params Params) (types.Controller, error) {
+func Bootstrap(params Params) error {
 	logger := params.Logger
 	pairs := params.Impls
 	mgr := params.Mgr
@@ -128,10 +127,10 @@ func NewController(params Params) (types.Controller, error) {
 			Log:      logger.WithName("records"),
 		})
 		if err != nil {
-			return "", err
+			return err
 		}
 
 	}
 
-	return "records", nil
+	return nil
 }

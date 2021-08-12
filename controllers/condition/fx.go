@@ -30,7 +30,7 @@ type Objs struct {
 	Objs []types.Object `group:"objs"`
 }
 
-func NewController(mgr ctrl.Manager, client client.Client, logger logr.Logger, objs Objs) (types.Controller, error) {
+func Bootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, objs Objs) error {
 	setupLog := logger.WithName("setup-condition")
 	for _, obj := range objs.Objs {
 		setupLog.Info("setting up controller", "resource-name", obj.Name)
@@ -45,10 +45,10 @@ func NewController(mgr ctrl.Manager, client client.Client, logger logr.Logger, o
 				Log:      logger.WithName("condition"),
 			})
 		if err != nil {
-			return "", err
+			return err
 		}
 
 	}
 
-	return "condition", nil
+	return nil
 }

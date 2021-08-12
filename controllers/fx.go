@@ -32,38 +32,18 @@ import (
 
 var Module = fx.Options(
 	fx.Provide(
-		fx.Annotated{
-			Group:  "controller",
-			Target: common.NewController,
-		},
-		fx.Annotated{
-			Group:  "controller",
-			Target: finalizers.NewController,
-		},
-		fx.Annotated{
-			Group:  "controller",
-			Target: desiredphase.NewController,
-		},
-		fx.Annotated{
-			Group:  "controller",
-			Target: condition.NewController,
-		},
-		fx.Annotated{
-			Group:  "controller",
-			Target: podnetworkchaos.NewController,
-		},
-		fx.Annotated{
-			Group:  "controller",
-			Target: podhttpchaos.NewController,
-		},
-		fx.Annotated{
-			Group:  "controller",
-			Target: podiochaos.NewController,
-		},
-
 		chaosdaemon.New,
 		recorder.NewRecorderBuilder,
 	),
+
+	fx.Invoke(common.Bootstrap),
+	fx.Invoke(podhttpchaos.Bootstrap),
+	fx.Invoke(podnetworkchaos.Bootstrap),
+	fx.Invoke(podiochaos.Bootstrap),
+	fx.Invoke(condition.Bootstrap),
+	fx.Invoke(desiredphase.Bootstrap),
+	fx.Invoke(finalizers.Bootstrap),
 	fx.Invoke(wfcontrollers.BootstrapWorkflowControllers),
+
 	schedule.Module,
 	chaosimpl.AllImpl)

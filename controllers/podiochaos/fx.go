@@ -23,12 +23,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
 )
 
-func NewController(mgr ctrl.Manager, client client.Client, logger logr.Logger, b *chaosdaemon.ChaosDaemonClientBuilder) (types.Controller, error) {
+func Bootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, b *chaosdaemon.ChaosDaemonClientBuilder) error {
 	err := builder.Default(mgr).
 		For(&v1alpha1.PodIOChaos{}).
 		Named("podiochaos").
@@ -47,8 +46,8 @@ func NewController(mgr ctrl.Manager, client client.Client, logger logr.Logger, b
 			ChaosDaemonClientBuilder: b,
 		})
 	if err != nil {
-		return "", err
+		return err
 	}
 
-	return "podiochaos", nil
+	return nil
 }

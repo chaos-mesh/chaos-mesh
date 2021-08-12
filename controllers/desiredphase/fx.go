@@ -30,7 +30,7 @@ type Objs struct {
 	Objs []types.Object `group:"objs"`
 }
 
-func NewController(mgr ctrl.Manager, client client.Client, logger logr.Logger, recorderBuilder *recorder.RecorderBuilder, pairs Objs) (types.Controller, error) {
+func Bootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, recorderBuilder *recorder.RecorderBuilder, pairs Objs) error {
 	for _, obj := range pairs.Objs {
 
 		err := builder.Default(mgr).
@@ -43,10 +43,10 @@ func NewController(mgr ctrl.Manager, client client.Client, logger logr.Logger, r
 				Log:      logger.WithName("desiredphase"),
 			})
 		if err != nil {
-			return "", err
+			return err
 		}
 
 	}
 
-	return "desiredphase", nil
+	return nil
 }

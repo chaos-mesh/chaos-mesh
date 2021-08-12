@@ -86,7 +86,6 @@ type RunParams struct {
 	Logger  logr.Logger
 	AuthCli *authorizationv1.AuthorizationV1Client
 
-	Controllers []types.Controller `group:"controller"`
 	Objs        []types.Object     `group:"objs"`
 }
 
