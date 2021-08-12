@@ -39,7 +39,7 @@ type HTTPChaosSpec struct {
 	PodHttpChaosActions `json:",inline"`
 
 	// Port represents the target port to be proxy of.
-	Port int32 `json:"port,omitempty"`
+	Port int32 `json:"port,omitempty" webhook:"Port"`
 
 	// Path is a rule to select target by uri path in http request.
 	// +optional
@@ -47,7 +47,7 @@ type HTTPChaosSpec struct {
 
 	// Method is a rule to select target by http method in request.
 	// +optional
-	Method *string `json:"method,omitempty"`
+	Method *string `json:"method,omitempty" webhook:"HTTPMethod"`
 
 	// Code is a rule to select target by http status code in response.
 	// +optional
