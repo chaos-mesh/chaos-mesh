@@ -51,6 +51,9 @@ spec:
 {{ toYaml . | indent 8 }}
       {{- end }}
       priorityClassName: {{ .Values.dnsServer.priorityClassName}}
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets: {{ toYaml .Values.imagePullSecrets | nindent 8 }}
+      {{- end }}
       containers:
       - name: chaos-dns-server
         image: {{template "registry-prefix" .}}{{ .Values.dnsServer.image }}
