@@ -47,6 +47,7 @@ var t = true
 
 func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ctx := context.Background()
+	const LabelManagedBy = "managed-by"
 
 	schedule := &v1alpha1.Schedule{}
 	err := r.Get(ctx, req.NamespacedName, schedule)
@@ -145,7 +146,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			},
 		})
 		meta.SetLabels(map[string]string{
-			"managed-by": schedule.Name,
+			LabelManagedBy: schedule.Name,
 		})
 		meta.SetNamespace(schedule.Namespace)
 		meta.SetName(names.SimpleNameGenerator.GenerateName(schedule.Name + "-"))
