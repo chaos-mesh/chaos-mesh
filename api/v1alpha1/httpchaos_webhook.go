@@ -86,4 +86,5 @@ func (in *HTTPChaosSpec) Validate() field.ErrorList {
 	allErrs := validatePodSelector(in.PodSelector.Value, in.PodSelector.Mode, specField.Child("value"))
 	allErrs = append(allErrs, validateDuration(in, specField)...)
 	return allErrs
+
 }
