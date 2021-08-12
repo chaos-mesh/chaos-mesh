@@ -1,14 +1,21 @@
 import { Experiment, ExperimentKind, Frame, Scope } from 'components/NewExperiment/types'
-import { toCamelCase, toTitleCase } from './utils'
 
+import { ScheduleSpecific } from 'components/Schedule/types'
 import { Template } from 'slices/workflows'
 import { WorkflowBasic } from 'components/NewWorkflow'
-import _snakecase from 'lodash.snakecase'
 import basicData from 'components/NewExperimentNext/data/basic'
+import { templateTypeToFieldName } from 'api/zz_generated.frontend.chaos-mesh'
+import { toTitleCase } from './utils'
 import yaml from 'js-yaml'
 
-export function parseSubmit<K extends ExperimentKind>(kind: K, e: Experiment<K>) {
-  const values: Experiment<K> = JSON.parse(JSON.stringify(e))
+export function parseSubmit<K extends ExperimentKind>(
+  kind: K,
+  e: Experiment<Exclude<K, 'Schedule'>>,
+  options?: {
+    inSchedule?: boolean
+  }
+) {
+  const values: typeof e = JSON.parse(JSON.stringify(e))
   let { metadata, spec } = values
 
   // Set default namespace when it's not present
@@ -74,9 +81,13 @@ export function parseSubmit<K extends ExperimentKind>(kind: K, e: Experiment<K>)
   helper2(spec.selector)
 
   if (kind === 'NetworkChaos') {
+    if (!(spec as any).externalTargets.length) {
+      delete (spec as any).externalTargets
+    }
+
     if ((spec as any).target) {
-      if (spec.mode) {
-        helper2((spec as any).target)
+      if ((spec as any).target.mode) {
+        helper2((spec as any).target.selector)
       } else {
         ;(spec as any).target = undefined
       }
@@ -87,9 +98,23 @@ export function parseSubmit<K extends ExperimentKind>(kind: K, e: Experiment<K>)
     ;(spec as any).attr = helper1((spec as any).attr as string[], (s: string) => parseInt(s, 10))
   }
 
+  if (options?.inSchedule) {
+    const { schedule, historyLimit, concurrencyPolicy, startingDeadlineSeconds, ...rest } =
+      spec as unknown as ScheduleSpecific
+    const scheduleSpec = {
+      schedule,
+      historyLimit,
+      concurrencyPolicy,
+      startingDeadlineSeconds,
+      type: kind,
+      [templateTypeToFieldName(kind)]: rest,
+    }
+    spec = scheduleSpec as any
+  }
+
   return {
     apiVersion: 'chaos-mesh.org/v1alpha1',
-    kind,
+    kind: options?.inSchedule ? 'Schedule' : kind,
     metadata,
     spec,
   }
@@ -99,14 +124,19 @@ function selectorsToArr(selectors: Object, separator: string) {
   return Object.entries(selectors).map(([key, val]) => `${key}${separator}${val}`)
 }
 
-export function yamlToExperiment(yamlObj: any): { kind: ExperimentKind; basic: any; spec: any } {
-  const { kind, metadata, spec } = yamlObj
+export function parseYAML(
+  yamlObj: any,
+  options?: {
+    isSchedule?: boolean
+  }
+): { kind: ExperimentKind; basic: any; spec: any } {
+  let { kind, metadata, spec } = yamlObj
 
   if (!kind || !metadata || !spec) {
     throw new Error('Fail to parse the YAML file. Please check the kind, metadata, and spec fields.')
   }
 
-  if (!spec.selector) {
+  if (!options?.isSchedule && !spec.selector) {
     throw new Error('The required spec.selector field is missing.')
   }
 
@@ -116,7 +146,11 @@ export function yamlToExperiment(yamlObj: any): { kind: ExperimentKind; basic: a
       labels: metadata.labels ? selectorsToArr(metadata.labels, ':') : [],
       annotations: metadata.annotations ? selectorsToArr(metadata.annotations, ':') : [],
     },
-    spec: {
+    spec: {},
+  }
+
+  function parseBasicSpec(spec: typeof basicData.spec) {
+    return {
       selector: {
         ...basicData.spec.selector,
         namespaces: spec.selector.namespaces ?? [],
@@ -128,13 +162,27 @@ export function yamlToExperiment(yamlObj: any): { kind: ExperimentKind; basic: a
       mode: spec.mode ?? 'one',
       value: spec.value,
       duration: spec.duration ?? '',
-    },
+    }
   }
 
-  delete spec.selector
-  delete spec.mode
-  delete spec.value
-  delete spec.duration
+  if (options?.isSchedule) {
+    const { schedule, historyLimit, concurrencyPolicy, startingDeadlineSeconds, ...rest } =
+      spec as unknown as ScheduleSpecific
+    const scheduleSpec = {
+      schedule,
+      historyLimit,
+      concurrencyPolicy,
+      startingDeadlineSeconds,
+    }
+    kind = (rest as any).type
+    spec = (rest as any)[templateTypeToFieldName(kind)]
+    basic.spec = { ...parseBasicSpec(spec), ...scheduleSpec }
+  } else {
+    basic.spec = parseBasicSpec(spec)
+  }
+
+  const { selector, mode, value, duration, ...rest } = spec
+  spec = rest
 
   if (kind === 'NetworkChaos') {
     if (spec.target) {
@@ -203,11 +251,6 @@ export const validateDuration = (i18n?: string) => validate('The duration is req
 export const validateDeadline = (i18n?: string) => validate('The deadline is required', i18n)
 export const validateImage = (i18n?: string) => validate('The image is required', i18n)
 
-// FIXME
-function scopeToYAMLJSON(scope: Scope['selector']) {
-  return scope
-}
-
 export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
   const { name, namespace, deadline } = basic
   const children: string[] = templates.map((d) => d.name)
@@ -219,24 +262,25 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
     }
   }
 
+  function pushSingle(template: Template) {
+    console.log(template)
+    const exp = template.experiment
+    const kind = exp.kind
+    const { duration: deadline, ...rest } = exp.spec
+
+    pushTemplate({
+      name: template.name,
+      templateType: kind,
+      deadline,
+      [templateTypeToFieldName(kind)]: rest,
+    })
+  }
+
   function recurInsertTemplates(templates: Template[]) {
     templates.forEach((t) => {
       switch (t.type) {
         case 'single':
-          const experiment = t.experiment!
-          const basic = experiment.basic
-          const kind = experiment.target.kind
-          const spec = _snakecase(kind)
-
-          pushTemplate({
-            name: t.name,
-            templateType: kind,
-            deadline: experiment.basic.deadline,
-            [toCamelCase(kind)]: {
-              ...scopeToYAMLJSON(basic.scope),
-              ...experiment.target[spec],
-            },
-          })
+          pushSingle(t)
 
           break
         case 'serial':
@@ -263,21 +307,7 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
                 return
               }
 
-              const e = d.experiment!
-              const basic = e.basic
-              const name = basic.name
-              const kind = e.target.kind
-              const spec = _snakecase(kind)
-
-              pushTemplate({
-                name,
-                templateType: kind,
-                deadline: e.basic.deadline,
-                [toCamelCase(kind)]: {
-                  ...scopeToYAMLJSON(basic.scope),
-                  ...e.target[spec],
-                },
-              })
+              pushSingle(d)
             }
           })
 

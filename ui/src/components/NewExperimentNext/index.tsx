@@ -12,11 +12,9 @@ import Tab from '@material-ui/core/Tab'
 import TabContext from '@material-ui/lab/TabContext'
 import TabList from '@material-ui/lab/TabList'
 import TabPanel from '@material-ui/lab/TabPanel'
-import { data as scheduleSpecificData } from 'components/Schedule/types'
+import { parseYAML } from 'lib/formikhelpers'
 import { setExternalExperiment } from 'slices/experiments'
-import { toCamelCase } from 'lib/utils'
 import { useStoreDispatch } from 'store'
-import { yamlToExperiment } from 'lib/formikhelpers'
 
 type PanelType = 'initial' | 'existing' | 'yaml'
 
@@ -25,7 +23,7 @@ export interface NewExperimentHandles {
 }
 
 interface NewExperimentProps {
-  onSubmit?: (experiment: { spec: any; basic: any }) => void
+  onSubmit?: (parsedValues: any) => void
   loadFrom?: boolean
   inWorkflow?: boolean
   inSchedule?: boolean
@@ -48,29 +46,7 @@ const NewExperiment: React.ForwardRefRenderFunction<NewExperimentHandles, NewExp
   }
 
   const fillExperiment = (original: any) => {
-    if (original.kind === 'Schedule') {
-      const kind = original.spec.type
-      const { basic, spec } = yamlToExperiment({
-        kind,
-        metadata: original.metadata,
-        spec: original.spec[toCamelCase(kind)],
-      })
-      delete original.spec[toCamelCase(kind)]
-
-      dispatch(
-        setExternalExperiment({
-          kindAction: [kind, spec.action ?? ''],
-          spec,
-          basic: { ...scheduleSpecificData, ...basic },
-        })
-      )
-
-      setPanel('initial')
-
-      return
-    }
-
-    const { kind, basic, spec } = yamlToExperiment(original)
+    const { kind, basic, spec } = parseYAML(original, { isSchedule: original.kind === 'Schedule' })
 
     dispatch(
       setExternalExperiment({
@@ -98,7 +74,7 @@ const NewExperiment: React.ForwardRefRenderFunction<NewExperimentHandles, NewExp
         <Space spacing={6}>
           <Step1 />
           <Step2 inWorkflow={inWorkflow} inSchedule={inSchedule} />
-          <Step3 onSubmit={onSubmit ? onSubmit : undefined} />
+          <Step3 onSubmit={onSubmit ? onSubmit : undefined} inSchedule={inSchedule} />
         </Space>
       </TabPanel>
       <TabPanel value="existing" sx={{ p: 0, pt: 6 }}>

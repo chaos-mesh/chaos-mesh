@@ -1,7 +1,8 @@
-import { Box, FormControlLabel, Switch, Typography } from '@material-ui/core'
+import { Box, FormControlLabel, Link, Switch, Typography } from '@material-ui/core'
 import { FormikErrors, FormikTouched, getIn, useFormikContext } from 'formik'
 import { useEffect, useState } from 'react'
 
+import { FormattedMessage } from 'react-intl'
 import T from 'components/T'
 import { TextField } from 'components/FormField'
 import { useStoreSelector } from 'store'
@@ -50,6 +51,31 @@ const Scheduler: React.FC<SchedulerProps> = ({ errors, touched, inSchedule = fal
           />
         )}
       </Box>
+
+      {inSchedule && (
+        <TextField
+          fast
+          name="spec.schedule"
+          label={T('schedules.single')}
+          helperText={
+            getIn(errors, 'spec.schedule') && getIn(touched, 'spec.schedule') ? (
+              getIn(errors, 'spec.schedule')
+            ) : (
+              <FormattedMessage
+                id="newS.basic.scheduleHelper"
+                values={{
+                  crontabguru: (
+                    <Link href="https://crontab.guru/" target="_blank" underline="always">
+                      https://crontab.guru/
+                    </Link>
+                  ),
+                }}
+              />
+            )
+          }
+          error={getIn(errors, 'spec.schedule') && getIn(touched, 'spec.schedule') ? true : false}
+        />
+      )}
 
       {!continuous && (
         <TextField

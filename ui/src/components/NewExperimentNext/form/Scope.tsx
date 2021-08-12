@@ -11,7 +11,7 @@ import { getIn, useFormikContext } from 'formik'
 import { useEffect, useMemo } from 'react'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
-import AdvancedOptions from 'components/AdvancedOptions'
+import OtherOptions from 'components/OtherOptions'
 import ScopePodsTable from './ScopePodsTable'
 import Space from 'components-mui/Space'
 import T from 'components/T'
@@ -51,8 +51,8 @@ const ScopeStep: React.FC<ScopeStepProps> = ({
   const { enableKubeSystemNS } = state.settings
   const { labels, annotations, kindAction } = state.experiments
   const [kind] = kindAction
-  const pods = scope === 'scope' ? state.experiments.pods : state.experiments.networkTargetPods
-  const getPods = scope === 'scope' ? getCommonPods : getNetworkTargetPods
+  const pods = scope === 'spec.selector' ? state.experiments.pods : state.experiments.networkTargetPods
+  const getPods = scope === 'spec.selector' ? getCommonPods : getNetworkTargetPods
   const disabled = kind === 'AWSChaos' || kind === 'GCPChaos'
   const dispatch = useStoreDispatch()
 
@@ -128,7 +128,7 @@ const ScopeStep: React.FC<ScopeStepProps> = ({
         disabled={disabled}
       />
 
-      <AdvancedOptions disabled={disabled}>
+      <OtherOptions disabled={disabled}>
         <AutocompleteMultipleField
           name={`${scope}.annotationSelectors`}
           label={T('k8s.annotationsSelectors')}
@@ -179,7 +179,7 @@ const ScopeStep: React.FC<ScopeStepProps> = ({
             </MenuItem>
           ))}
         </SelectField>
-      </AdvancedOptions>
+      </OtherOptions>
 
       <div>
         <Typography sx={{ color: disabled ? 'text.disabled' : undefined }}>

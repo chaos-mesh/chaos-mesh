@@ -1,6 +1,5 @@
 import { Box, Button, Card, Modal, Typography } from '@material-ui/core'
 import { PreDefinedValue, getDB } from 'lib/idb'
-import { parseSubmit, yamlToExperiment } from 'lib/formikhelpers'
 import { setAlert, setConfirm } from 'slices/globalStatus'
 import { useEffect, useRef, useState } from 'react'
 
@@ -95,8 +94,10 @@ const Predefined = () => {
       console.debug('Debug parsedValues:', exp)
     }
 
-    api.experiments
-      .newExperiment(exp)
+    const isSchedule = exp['kind'] === 'Schedule'
+    const action = isSchedule ? api.schedules.newSchedule : api.experiments.newExperiment
+
+    action(exp)
       .then(() => {
         seteditorOpen(false)
         dispatch(

@@ -2,10 +2,9 @@ import { Schedule, ScheduleParams, ScheduleSingle } from './schedules.type'
 
 import { Archive } from './archives.type'
 import { Experiment } from 'components/NewExperiment/types'
-import { ScheduleSpecific } from 'components/Schedule/types'
 import http from './http'
 
-export const newSchedule = (data: Experiment<any> & ScheduleSpecific) => http.post('/schedules', data)
+export const newSchedule = (data: Experiment<any>) => http.post('/schedules', data)
 
 export const schedules = (params?: ScheduleParams) =>
   http.get<Schedule[]>('/schedules', {

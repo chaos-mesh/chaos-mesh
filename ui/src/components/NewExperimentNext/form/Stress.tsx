@@ -2,7 +2,7 @@ import { Form, Formik, getIn } from 'formik'
 import { LabelField, Submit, TextField } from 'components/FormField'
 import { useEffect, useState } from 'react'
 
-import AdvancedOptions from 'components/AdvancedOptions'
+import OtherOptions from 'components/OtherOptions'
 import Space from 'components-mui/Space'
 import { Typography } from '@material-ui/core'
 import typesData from '../data/types'
@@ -96,7 +96,7 @@ const Stress: React.FC<StressProps> = ({ onSubmit }) => {
             />
           </Space>
 
-          <AdvancedOptions>
+          <OtherOptions>
             <TextField
               name="stressngStressors"
               label="Options of stress-ng"
@@ -107,7 +107,7 @@ const Stress: React.FC<StressProps> = ({ onSubmit }) => {
               label="Container Name"
               helperText="Optional. Type string and end with a space to generate the container names. If it's empty, all containers will be injected"
             />
-          </AdvancedOptions>
+          </OtherOptions>
 
           <Submit />
         </Form>

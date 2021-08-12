@@ -4,9 +4,9 @@ import { Kind, Spec } from '../data/types'
 import { useEffect, useState } from 'react'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
-import AdvancedOptions from 'components/AdvancedOptions'
 import { MenuItem } from '@material-ui/core'
 import { ObjectSchema } from 'yup'
+import OtherOptions from 'components/OtherOptions'
 import Scope from './Scope'
 import Space from 'components-mui/Space'
 import T from 'components/T'
@@ -44,7 +44,7 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ kind, data, validatio
 
     initialValues = {
       action,
-      [action]: initialValues,
+      [action]: action !== 'partition' ? initialValues : undefined,
       direction,
       externalTargets,
     }
@@ -146,7 +146,11 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ kind, data, validatio
       {({ values, setFieldValue, errors, touched }) => {
         const beforeTargetOpen = () => {
           if (!getIn(values, 'target')) {
-            setFieldValue('target', basicData.spec.selector)
+            setFieldValue('target', {
+              selector: basicData.spec.selector,
+              mode: basicData.spec.mode,
+              value: basicData.spec.value,
+            })
           }
         }
 
@@ -161,7 +165,7 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ kind, data, validatio
           <Form>
             <Space>{parseDataToFormFields(errors, touched)}</Space>
             {kind === 'NetworkChaos' && (
-              <AdvancedOptions
+              <OtherOptions
                 title={T('newE.target.network.target.title')}
                 beforeOpen={beforeTargetOpen}
                 afterClose={afterTargetClose}
@@ -175,7 +179,7 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ kind, data, validatio
                     podsPreviewDesc={T('newE.target.network.target.podsPreviewHelper')}
                   />
                 )}
-              </AdvancedOptions>
+              </OtherOptions>
             )}
             <Submit />
           </Form>

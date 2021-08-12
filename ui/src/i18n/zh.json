@@ -274,7 +274,7 @@
   },
   "common": {
     "add": "添加",
-    "advancedOptions": "高级选项",
+    "otherOptions": "其他选项",
     "batchOperation": "批量操作",
     "cancel": "取消",
     "cancelEdit": "取消修改",

@@ -272,7 +272,7 @@
   },
   "common": {
     "add": "Add",
-    "advancedOptions": "Advanced Options",
+    "otherOptions": "Other Options",
     "batchOperation": "Batch operation",
     "cancel": "Cancel",
     "cancelEdit": "Cancel edit",

@@ -2,7 +2,7 @@ import * as Yup from 'yup'
 
 import { ExperimentKind } from 'components/NewExperiment/types'
 
-export type Kind = ExperimentKind
+export type Kind = Exclude<ExperimentKind, 'HTTPChaos' | 'JVMChaos'>
 type FieldType = 'text' | 'number' | 'select' | 'label' | 'autocomplete'
 interface SpecField {
   field: FieldType

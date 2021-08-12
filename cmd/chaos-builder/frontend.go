@@ -15,30 +15,34 @@ package main
 
 import "fmt"
 
-type workflowFrontendCodeGenerator struct {
+type FrontendCodeGenerator struct {
 	// name of each Kind of chaos, for example: PodChaos, IOChaos, DNSChaos
 	chaosTypes []string
 }
 
-func newWorkflowFrontendCodeGenerator(chaosTypes []string) *workflowFrontendCodeGenerator {
-	return &workflowFrontendCodeGenerator{chaosTypes: chaosTypes}
+func newFrontendCodeGenerator(chaosTypes []string) *FrontendCodeGenerator {
+	return &FrontendCodeGenerator{chaosTypes}
 }
 
-func (it *workflowFrontendCodeGenerator) AppendTypes(typeName string) {
+func (it *FrontendCodeGenerator) AppendTypes(typeName string) {
 	it.chaosTypes = append(it.chaosTypes, typeName)
 }
 
-const typescriptTemplate = `export const mapping = new Map<string, string>([
+const typesTemplate = `import { ExperimentKind } from "components/NewExperiment/types"
+
+const mapping = new Map<ExperimentKind, string>([
 %s])
+
+export function templateTypeToFieldName(templateType: ExperimentKind): string {
+  return mapping.get(templateType)!
+}
 `
 
-func (it *workflowFrontendCodeGenerator) Render() string {
-	return fmt.Sprintf(typescriptTemplate,
-		it.mapEntries(),
-	)
+func (it *FrontendCodeGenerator) Render() string {
+	return fmt.Sprintf(typesTemplate, it.mapEntries())
 }
 
-func (it *workflowFrontendCodeGenerator) mapEntries() string {
+func (it *FrontendCodeGenerator) mapEntries() string {
 	entries := ""
 	for _, chaosType := range it.chaosTypes {
 		entries += fmt.Sprintf(`  ['%s', '%s'],

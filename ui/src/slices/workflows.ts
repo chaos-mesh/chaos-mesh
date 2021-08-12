@@ -1,9 +1,6 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 
-export interface TemplateExperiment {
-  target: any
-  basic: any
-}
+export type TemplateExperiment = any
 
 export interface Branch {
   target: string

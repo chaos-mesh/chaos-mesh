@@ -144,7 +144,9 @@ export interface ExperimentType {
   AWSChaos: AWS
   DNSChaos: DNS
   GCPChaos: GCP
+  HTTPChaos?: unknown
   IOChaos: IO
+  JVMChaos?: unknown
   KernelChaos: Kernel
   NetworkChaos: Network
   PodChaos: Pod
