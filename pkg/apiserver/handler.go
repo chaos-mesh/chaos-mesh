@@ -36,12 +36,14 @@ var handlerModule = fx.Options(
 		gcp.NewService,
 	),
 	fx.Invoke(
+		// gcp should register at the first, because it registers a middleware
+		gcp.Register,
+
 		common.Register,
 		experiment.Register,
 		event.Register,
 		archive.Register,
 		workflow.Register,
 		schedule.Register,
-		gcp.Register,
 	),
 )

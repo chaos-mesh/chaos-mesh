@@ -159,9 +159,6 @@ dashboard:
   securityMode: true
   gcpClientId: ""
   gcpClientSecret: ""
-  gcpProject: ""
-  gcpLocation: ""
-  gcpCluster: ""
 
   nodeSelector: {}
 

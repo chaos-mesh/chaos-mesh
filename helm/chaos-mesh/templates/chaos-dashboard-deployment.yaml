@@ -66,12 +66,6 @@ spec:
               value: "{{ .Values.dashboard.gcpClientId }}"
             - name: GCP_CLIENT_SECRET
               value: "{{ .Values.dashboard.gcpClientSecret }}"
-            - name: GCP_PROJECT
-              value: "{{ .Values.dashboard.gcpProject }}"
-            - name: GCP_LOCATION
-              value: "{{ .Values.dashboard.gcpLocation }}"
-            - name: GCP_CLUSTER
-              value: "{{ .Values.dashboard.gcpCluster }}"
             - name: DNS_SERVER_CREATE
               value: "{{ .Values.dnsServer.create }}"
           volumeMounts:
