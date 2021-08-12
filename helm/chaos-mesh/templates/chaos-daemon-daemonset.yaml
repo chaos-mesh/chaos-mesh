@@ -33,6 +33,9 @@ spec:
       hostIPC: true
       hostPID: true
       priorityClassName: {{ .Values.chaosDaemon.priorityClassName}}
+  {{- if .Values.imagePullSecrets }}
+      imagePullSecrets: {{ toYaml .Values.imagePullSecrets | nindent 8 }}
+  {{- end }}
       containers:
         - name: chaos-daemon
           image: {{template "registry-prefix" .}}{{ .Values.chaosDaemon.image }}

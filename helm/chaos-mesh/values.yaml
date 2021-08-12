@@ -28,6 +28,11 @@ enableProfiling: true
 
 registry: ""
 
+## Optional array of imagePullSecrets containing private registry credentials
+## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+imagePullSecrets: []
+# - name: secretName
+
 controllerManager:
   hostNetwork: false
   serviceAccount: chaos-controller-manager
@@ -363,6 +368,7 @@ webhook:
     - jvmchaos
     - schedule
     - workflow
+    - httpchaos
 
 bpfki:
   create: false
