@@ -14,8 +14,6 @@
 package utils
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 )
@@ -31,7 +29,6 @@ var (
 
 func ShouldBindBodyWithJSON(c *gin.Context, obj interface{}) {
 	if err := c.ShouldBindBodyWith(obj, binding.JSON); err != nil {
-		c.Status(http.StatusBadRequest)
-		c.Error(ErrBadRequest.WrapWithNoMessage(err))
+		SetAPIError(c, ErrBadRequest.WrapWithNoMessage(err))
 	}
 }

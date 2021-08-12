@@ -97,7 +97,7 @@ type Detail struct {
 func (s *Service) list(c *gin.Context) {
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		c.Error(u.ErrBadRequest.WrapWithNoMessage(err))
+		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
 
 		return
 	}
@@ -155,7 +155,7 @@ func (s *Service) list(c *gin.Context) {
 func (s *Service) create(c *gin.Context) {
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		c.Error(u.ErrBadRequest.WrapWithNoMessage(err))
+		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
 
 		return
 	}
@@ -190,7 +190,7 @@ func (s *Service) get(c *gin.Context) {
 
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		c.Error(u.ErrBadRequest.WrapWithNoMessage(err))
+		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
 
 		return
 	}
@@ -198,9 +198,9 @@ func (s *Service) get(c *gin.Context) {
 	uid := c.Param("uid")
 	if sch, err = s.schedule.FindByUID(context.Background(), uid); err != nil {
 		if gorm.IsRecordNotFoundError(err) {
-			c.Error(u.ErrBadRequest.New("Schedule " + uid + "not found"))
+			u.SetAPIError(c, u.ErrBadRequest.New("Schedule "+uid+"not found"))
 		} else {
-			c.Error(u.ErrInternalServer.WrapWithNoMessage(err))
+			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		}
 
 		return
@@ -228,7 +228,7 @@ func (s *Service) findScheduleInCluster(c *gin.Context, kubeCli client.Client, n
 	schType := string(sch.Spec.Type)
 	chaosKind, ok := v1alpha1.AllScheduleItemKinds()[schType]
 	if !ok {
-		c.Error(u.ErrInternalServer.New("Kind " + schType + " is not supported"))
+		u.SetAPIError(c, u.ErrInternalServer.New("Kind "+schType+" is not supported"))
 
 		return nil
 	}
@@ -237,7 +237,7 @@ func (s *Service) findScheduleInCluster(c *gin.Context, kubeCli client.Client, n
 		MatchLabels: map[string]string{"managed-by": sch.Name},
 	})
 	if err != nil {
-		c.Error(u.ErrInternalServer.WrapWithNoMessage(err))
+		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 
 		return nil
 	}
@@ -248,7 +248,7 @@ func (s *Service) findScheduleInCluster(c *gin.Context, kubeCli client.Client, n
 		LabelSelector: selector,
 	})
 	if err != nil {
-		c.Error(u.ErrInternalServer.WrapWithNoMessage(err))
+		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 
 		return nil
 	}
