@@ -20,12 +20,14 @@ import (
 	"time"
 )
 
+const SECRET = "Secret"
+
 func getPodHttp(c http.Client, port uint16, secret, body string) (*http.Response, error) {
 	request, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://localhost:%d/http", port), strings.NewReader(body))
 	if err != nil {
 		return nil, err
 	}
-	request.Header.Set("Secret", time.Now().Format(time.RFC3339))
+	request.Header.Set(SECRET, secret)
 	client := &http.Client{
 		Transport: &http.Transport{},
 	}
