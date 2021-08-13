@@ -17,7 +17,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"sort"
 	"strings"
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/metrics"
@@ -527,15 +526,7 @@ func mergeVolumeMounts(volumeMounts []corev1.VolumeMount, containers []corev1.Co
 }
 
 func updateAnnotations(target map[string]string, added map[string]string) (patch []patchOperation) {
-	var keys []string
-	//To ensure deterministic patches sort the keys。
-	for k := range added {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
-
-	for _, key := range keys {
-		value := added[key]
+	for key, value := range added {
 		if target == nil {
 			target = map[string]string{}
 			patch = append(patch, patchOperation{
