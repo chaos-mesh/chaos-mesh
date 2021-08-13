@@ -163,12 +163,6 @@ var _ = ginkgo.SynchronizedBeforeSuite(func() []byte {
 	setupSuitePerGinkgoNode()
 })
 
-//var _ = ginkgo.SynchronizedAfterSuite(func() {
-//	framework.CleanupSuite()
-//}, func() {
-//	framework.AfterSuiteActions()
-//})
-
 func setupSuitePerGinkgoNode() {
 	c, err := framework.LoadClientset()
 	if err != nil {
