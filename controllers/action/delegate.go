@@ -21,10 +21,16 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/controllers/common"
+	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 )
 
-func (i *common.ChaosImpl) callAccordingToAction(action, methodName string, defaultPhase v1alpha1.Phase, args ...interface{}) (v1alpha1.Phase, error) {
+type Delegate struct {
+	impl interface{}
+}
+
+var _ common.ChaosImpl = (*Delegate)(nil)
+
+func (i *Delegate) callAccordingToAction(action, methodName string, defaultPhase v1alpha1.Phase, args ...interface{}) (v1alpha1.Phase, error) {
 	implType := reflect.TypeOf(i.impl).Elem()
 	implVal := reflect.ValueOf(i.impl)
 
@@ -54,20 +60,20 @@ func (i *common.ChaosImpl) callAccordingToAction(action, methodName string, defa
 	return defaultPhase, errors.Errorf("unknown action %s", action)
 }
 
-func (i *common.ChaosImpl) getAction(obj v1alpha1.InnerObject) string {
+func (i *Delegate) getAction(obj v1alpha1.InnerObject) string {
 	return reflect.ValueOf(obj).Elem().FieldByName("Spec").FieldByName("Action").String()
 }
 
-func (i *common.ChaosImpl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
+func (i *Delegate) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	return i.callAccordingToAction(i.getAction(obj), "Apply", v1alpha1.NotInjected, ctx, index, records, obj)
 }
 
-func (i *common.ChaosImpl) Recover(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
+func (i *Delegate) Recover(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	return i.callAccordingToAction(i.getAction(obj), "Recover", v1alpha1.Injected, ctx, index, records, obj)
 }
 
-func New(impl interface{}) common.ChaosImpl {
-	return common.ChaosImpl{
+func New(impl interface{}) Delegate {
+	return Delegate{
 		impl,
 	}
 }
