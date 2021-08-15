@@ -57,8 +57,8 @@ BUSYBOX_MANAGE_TOKEN_LIST=($CLUSTER_MANAGER_TOKEN $BUSYBOX_MANAGER_TOKEN)
 BUSYBOX_MANAGER_FORBIDDEN_TOKEN_LIST=($CLUSTER_VIEWER_TOKEN $BUSYBOX_VIEWER_TOKEN)
 BUSYBOX_VIEW_TOKEN_LIST=($CLUSTER_MANAGER_TOKEN $CLUSTER_VIEWER_TOKEN $BUSYBOX_MANAGER_TOKEN $BUSYBOX_VIEWER_TOKEN)
 
-EXP_JSON='{"name": "ci-test", "namespace": "busybox", "scope": {"mode":"one", "namespaces": ["busybox"]}, "target": {"kind": "NetworkChaos", "network_chaos": {"action": "delay", "delay": {"latency": "1ms"}}}}'
-UPDATE_EXP_JSON='{"apiVersion": "chaos-mesh.org/v1alpha1", "kind": "NetworkChaos", "metadata": {"name": "ci-test", "namespace": "busybox"}, "spec": {"action": "delay", "latency": "2ms", "mode": "one"}}'
+EXP_JSON='{"apiVersion": "chaos-mesh.org/v1alpha1", "kind": "NetworkChaos", "metadata": {"name": "ci-test", "namespace": "busybox"}, "spec": {"action": "delay", "delay": {"latency": "1ms"}, "mode":"one"}}'
+UPDATE_EXP_JSON='{"apiVersion": "chaos-mesh.org/v1alpha1", "kind": "NetworkChaos", "metadata": {"name": "ci-test", "namespace": "busybox"}, "spec": {"action": "delay", "delay": {"latency": "2ms"}, "mode": "one"}}'
 
 function REQUEST() {
     declare -a TOKEN_LIST=("${!1}")
@@ -253,8 +253,8 @@ REQUEST CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@] "GET" "/api/archives/${EXP_UID}&nam
 
 echo "***** test webhook authority ******"
 
-EXP_JSON='{"name": "ci-test2", "namespace": "busybox", "scope": {"mode": "one", "namespaces": ["busybox"]}, "target": {"kind": "NetworkChaos", "network_chaos": {"direction": "both", "target_scope": {"namespaces": ["chaos-testing"], "mode": "one"}, "action": "delay", "delay": {"latency": "1ms"}}}}'
-UPDATE_EXP_JSON='{"apiVersion": "chaos-mesh.org/v1alpha1", "kind": "NetworkChaos", "metadata": {"name": "ci-test2", "namespace": "busybox"}, "spec": {"direction": "both", "target": {"selector": {"namespaces": ["chaos-testing", "default" ]}, "mode": "one"}, "action": "delay", "latency": "2ms", "mode": "one"}}'
+EXP_JSON='{"apiVersion": "chaos-mesh.org/v1alpha1", "kind": "NetworkChaos", "metadata": {"name": "ci-test2", "namespace": "busybox"}, "spec": {"direction": "both", "target": {"selector": {"namespaces": ["chaos-testing"]}, "mode": "one"}, "action": "delay", "delay": {"latency": "1ms"}, "mode": "one"}}'
+UPDATE_EXP_JSON='{"apiVersion": "chaos-mesh.org/v1alpha1", "kind": "NetworkChaos", "metadata": {"name": "ci-test2", "namespace": "busybox"}, "spec": {"direction": "both", "target": {"selector": {"namespaces": ["chaos-testing", "default" ]}, "mode": "one"}, "action": "delay", "delay": {"latency": "2ms"}, "mode": "one"}}'
 
 # create experiment require the privileges of namespace busybox and chaos-testing, so only cluster manager can create exp success
 REQUEST CLUSTER_MANAGER_FORBIDDEN_TOKEN_LIST[@] "POST" "/api/experiments" "create_exp.out" 'is forbidden'
