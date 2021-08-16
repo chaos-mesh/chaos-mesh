@@ -256,21 +256,23 @@ func (s *Service) findChaosInCluster(c *gin.Context, kubeCli client.Client, name
 		return nil
 	}
 
+	getChaosResult := reflect.ValueOf(chaos).MethodByName("GetChaos").Call(nil)[0].Elem()
+
 	return &Detail{
 		Experiment: Experiment{
 			ObjectBase: core.ObjectBase{
 				Namespace: reflect.ValueOf(chaos).Elem().FieldByName("Namespace").String(),
 				Name:      reflect.ValueOf(chaos).Elem().FieldByName("Name").String(),
-				Kind:      reflect.ValueOf(chaos).Elem().FieldByName("Kind").String(),
-				UID:       reflect.ValueOf(chaos).MethodByName("GetChaos").Call(nil)[0].Elem().FieldByName("UID").String(),
-				Created:   reflect.ValueOf(chaos).MethodByName("GetChaos").Call(nil)[0].Elem().FieldByName("StartTime").Interface().(time.Time).Format(time.RFC3339),
+				Kind:      getChaosResult.FieldByName("Kind").String(),
+				UID:       getChaosResult.FieldByName("UID").String(),
+				Created:   getChaosResult.FieldByName("StartTime").Interface().(time.Time).Format(time.RFC3339),
 			},
 			Status: u.GetChaosStatus(chaos.(v1alpha1.InnerObject)),
 		},
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
-				APIVersion: reflect.ValueOf(chaos).Elem().FieldByName("APIVersion").String(),
-				Kind:       reflect.ValueOf(chaos).Elem().FieldByName("Kind").String(),
+				APIVersion: v1alpha1.GroupVersion.String(),
+				Kind:       getChaosResult.FieldByName("Kind").String(),
 			},
 			Meta: core.KubeObjectMeta{
 				Namespace:   reflect.ValueOf(chaos).Elem().FieldByName("Namespace").String(),

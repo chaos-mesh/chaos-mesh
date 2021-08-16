@@ -278,8 +278,8 @@ func (s *Service) findScheduleInCluster(c *gin.Context, kubeCli client.Client, n
 		ExperimentUIDs: UIDList,
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
-				APIVersion: sch.APIVersion,
-				Kind:       sch.Kind,
+				APIVersion: v1alpha1.GroupVersion.String(),
+				Kind:       v1alpha1.KindSchedule,
 			},
 			Meta: core.KubeObjectMeta{
 				Namespace:   sch.Namespace,
