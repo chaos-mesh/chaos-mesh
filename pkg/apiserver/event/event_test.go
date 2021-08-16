@@ -117,6 +117,14 @@ func (m *MockEventService) DeleteByUID(context.Context, string) error {
 	panic("implement me")
 }
 
+func (m *MockEventService) DeleteByTime(context.Context, string, string) error {
+	panic("implement me")
+}
+
+func (m *MockEventService) DeleteByDuration(context.Context, time.Duration) error {
+	panic("implement me")
+}
+
 func TestEvent(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Event Suite")
@@ -180,53 +188,11 @@ var _ = Describe("event", func() {
 	})
 
 	Context("GetEvent", func() {
-		It("success", func() {
-			response := &core.Event{
-				ID:        0,
-				CreatedAt: time.Time{},
-				Kind:      "testKind",
-				Type:      "testType",
-				Reason:    "testReason",
-				Message:   "testMessage",
-				Name:      "testName",
-				Namespace: "testNamespace",
-				ObjectID:  "testUID",
-			}
-			rr := httptest.NewRecorder()
-			request, _ := http.NewRequest(http.MethodGet, "/api/events/0", nil)
-			router.ServeHTTP(rr, request)
-			Expect(rr.Code).Should(Equal(http.StatusOK))
-			responseBody, err := json.Marshal(response)
-			Expect(err).ShouldNot(HaveOccurred())
-			Expect(rr.Body.Bytes()).Should(Equal(responseBody))
-		})
-
-		It("empty id", func() {
-			rr := httptest.NewRecorder()
-			request, _ := http.NewRequest(http.MethodGet, "/api/events/get", nil)
-			router.ServeHTTP(rr, request)
-			Expect(rr.Code).Should(Equal(http.StatusBadRequest))
-		})
-
-		It("bad id", func() {
-			rr := httptest.NewRecorder()
-			request, _ := http.NewRequest(http.MethodGet, "/api/events/badID", nil)
-			router.ServeHTTP(rr, request)
-			Expect(rr.Code).Should(Equal(http.StatusBadRequest))
-		})
-
 		It("not found", func() {
 			rr := httptest.NewRecorder()
 			request, _ := http.NewRequest(http.MethodGet, "/api/events/1", nil)
 			router.ServeHTTP(rr, request)
-			Expect(rr.Code).Should(Equal(http.StatusInternalServerError))
-		})
-
-		It("other err", func() {
-			rr := httptest.NewRecorder()
-			request, _ := http.NewRequest(http.MethodGet, "/api/events/2", nil)
-			router.ServeHTTP(rr, request)
-			Expect(rr.Code).Should(Equal(http.StatusInternalServerError))
+			Expect(rr.Code).Should(Equal(http.StatusNotFound))
 		})
 	})
 })
