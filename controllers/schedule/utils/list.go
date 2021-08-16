@@ -30,6 +30,7 @@ type ActiveLister struct {
 }
 
 func (lister *ActiveLister) ListActiveJobs(ctx context.Context, schedule *v1alpha1.Schedule) (runtime.Object, error) {
+	const v1alpha1LabelManagedBy = "managed-by"
 	kind, ok := v1alpha1.AllScheduleItemKinds()[string(schedule.Spec.Type)]
 	if !ok {
 		lister.Log.Info("unknown kind", "kind", schedule.Spec.Type)
@@ -37,7 +38,7 @@ func (lister *ActiveLister) ListActiveJobs(ctx context.Context, schedule *v1alph
 	}
 
 	list := kind.ChaosList.DeepCopyObject()
-	err := lister.List(ctx, list, client.MatchingLabels{"managed-by": schedule.Name})
+	err := lister.List(ctx, list, client.MatchingLabels{v1alpha1LabelManagedBy: schedule.Name})
 	if err != nil {
 		lister.Log.Error(err, "fail to list chaos")
 		return nil, nil

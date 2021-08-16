@@ -41,6 +41,7 @@ type ChaosCollector struct {
 
 // Reconcile reconciles a chaos collector.
 func (r *ChaosCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+	const v1alpha1LabelManagedBy = "managed-by"
 	var (
 		chaosMeta  metav1.Object
 		ok         bool
@@ -65,7 +66,7 @@ func (r *ChaosCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		if chaosMeta, ok = obj.(metav1.Object); !ok {
 			r.Log.Error(nil, "failed to get chaos meta information")
 		}
-		if chaosMeta.GetLabels()["managed-by"] != "" {
+		if chaosMeta.GetLabels()[v1alpha1LabelManagedBy] != "" {
 			manageFlag = true
 		}
 		if !manageFlag {
@@ -89,7 +90,7 @@ func (r *ChaosCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		r.Log.Error(nil, "failed to get chaos meta information")
 	}
 
-	if chaosMeta.GetLabels()["managed-by"] != "" {
+	if chaosMeta.GetLabels()[v1alpha1LabelManagedBy] != "" {
 		manageFlag = true
 	}
 

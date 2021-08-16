@@ -560,6 +560,7 @@ func (s *Service) listSchedules(c *gin.Context) {
 // @Failure 400 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
 func (s *Service) getScheduleDetail(c *gin.Context) {
+	const v1alpha1LabelManagedBy = "managed-by"
 	var (
 		sch       *core.Schedule
 		schDetail Detail
@@ -617,7 +618,7 @@ func (s *Service) getScheduleDetail(c *gin.Context) {
 	}
 	list := kind.ChaosList.DeepCopyObject()
 	selector, err := metav1.LabelSelectorAsSelector(&metav1.LabelSelector{
-		MatchLabels: map[string]string{"managed-by": schedule.Name},
+		MatchLabels: map[string]string{v1alpha1LabelManagedBy: schedule.Name},
 	})
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
