@@ -22,6 +22,7 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `rbac.create` |  | `true`                                                |
 | `timezone` | The timezone where controller-manager, chaos-daemon and dashboard uses. For example: `UTC`, `Asia/Shanghai` | `UTC` |
 | `enableProfiling` | A flag to enable pprof in controller-manager and chaos-daemon  | `true` |
+| `imagePullSecrets` | Global Docker registry secret names as an array  | [] (does not add image pull secrets to deployed pods) |
 | `controllerManager.hostNetwork` | running chaos-controller-manager on host network | `false` |
 | `controllerManager.allowHostNetworkTesting`   | Allow testing on `hostNetwork` pods | `false` |
 | `controllerManager.serviceAccount` | The serviceAccount for chaos-controller-manager | `chaos-controller-manager` |

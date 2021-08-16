@@ -177,7 +177,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		if k8sError.IsNotFound(err) {
 			return v1alpha1.NotInjected, nil
 		}
-		return v1alpha1.NotInjected, err
+		return v1alpha1.Injected, err
 	}
 
 	source := httpchaos.Namespace + "/" + httpchaos.Name
