@@ -30,11 +30,12 @@ const (
 	ValidateValueParseError = "parse value field error:%s"
 )
 
+
+// FIXME: struct ContainsDuration only used for validating EmbedChaos in Workflow
+
 // +kubebuilder:object:generate=false
-type CommonSpec interface {
+type ContainsDuration interface {
 	GetDuration() (*time.Duration, error)
-	Validate() field.ErrorList
-	Default()
 }
 
 type Duration string
