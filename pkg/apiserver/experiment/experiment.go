@@ -181,6 +181,7 @@ func (s *Service) create(c *gin.Context) {
 	kind := exp["kind"].(string)
 
 	if chaosKind, ok := v1alpha1.AllKinds()[kind]; ok {
+		reflect.ValueOf(chaosKind.Chaos).Elem().FieldByName("ObjectMeta").Set(reflect.ValueOf(metav1.ObjectMeta{}))
 		u.ShouldBindBodyWithJSON(c, chaosKind.Chaos)
 
 		if err = kubeCli.Create(context.Background(), chaosKind.Chaos); err != nil {
