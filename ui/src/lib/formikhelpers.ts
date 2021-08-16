@@ -263,7 +263,6 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
   }
 
   function pushSingle(template: Template) {
-    console.log(template)
     const exp = template.experiment
     const kind = exp.kind
     const { duration: deadline, ...rest } = exp.spec

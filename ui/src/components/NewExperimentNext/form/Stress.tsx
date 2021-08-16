@@ -43,10 +43,6 @@ const Stress: React.FC<StressProps> = ({ onSubmit }) => {
   const [init, setInit] = useState(initialValues)
 
   useEffect(() => {
-    console.log({
-      ...initialValues,
-      ...spec,
-    })
     setInit({
       ...initialValues,
       ...spec,

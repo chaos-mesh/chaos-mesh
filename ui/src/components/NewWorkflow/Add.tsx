@@ -189,6 +189,17 @@ const Add: React.FC<AddProps> = ({
   }
 
   const submit = (template: Template) => {
+    if (storeTemplates.some((t) => t.name === template.name)) {
+      dispatch(
+        setAlert({
+          type: 'warning',
+          message: T('newW.messages.redundant', intl),
+        })
+      )
+
+      return
+    }
+
     if (childIndex !== undefined) {
       if (parentTemplates![childIndex!]) {
         const tmp = JSON.parse(JSON.stringify(parentTemplates!))

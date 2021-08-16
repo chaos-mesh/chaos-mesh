@@ -155,7 +155,8 @@
     "submit": "Submit workflow",
     "messages": {
       "m1": "Please complete the creation of the previous task first",
-      "m2": "Please fill in the current branch first"
+      "m2": "Please fill in the current branch first",
+      "redundant": "Duplicate names detected, please create templates with unique names"
     }
   },
   "newS": {

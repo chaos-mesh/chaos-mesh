@@ -572,7 +572,6 @@ export const schema: Partial<Record<Kind, Record<string, Yup.ObjectSchema>>> = {
   },
   NetworkChaos: {
     partition: Yup.object({
-      direction: Yup.string().required('The direction is required'),
       target: networkTargetSchema,
     }),
     loss: Yup.object({
@@ -611,7 +610,7 @@ export const schema: Partial<Record<Kind, Record<string, Yup.ObjectSchema>>> = {
       gracePeriod: Yup.number().min(0, 'Grace period must be non-negative integer'),
     }),
     'container-kill': Yup.object({
-      containerNames: Yup.array().of(Yup.string()).required('The container name is required'),
+      containerNames: Yup.array().of(Yup.string()).required('At least one container name is required'),
     }),
   },
   TimeChaos: {
