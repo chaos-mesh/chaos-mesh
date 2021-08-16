@@ -31,7 +31,7 @@ const (
 )
 
 
-// FIXME: struct ContainsDuration only used for validating EmbedChaos in Workflow
+// FIXME: interface ContainsDuration only used for validating EmbedChaos in Workflow
 
 // +kubebuilder:object:generate=false
 type ContainsDuration interface {
