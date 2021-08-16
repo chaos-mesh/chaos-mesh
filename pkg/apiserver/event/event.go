@@ -21,42 +21,42 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
+	u "github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
 	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 )
 
+var log = u.Log.WithName("events")
+
 // Service defines a handler service for events.
 type Service struct {
-	conf  *config.ChaosDashboardConfig
 	event core.EventStore
+	conf  *config.ChaosDashboardConfig
 }
 
-// NewService return an event service instance.
 func NewService(
-	conf *config.ChaosDashboardConfig,
 	event core.EventStore,
+	conf *config.ChaosDashboardConfig,
 ) *Service {
 	return &Service{
-		conf:  conf,
 		event: event,
+		conf:  conf,
 	}
 }
 
-// Register mounts our HTTP handler on the mux.
+// Register events RouterGroup.
 func Register(r *gin.RouterGroup, s *Service) {
 	endpoint := r.Group("/events")
 	endpoint.Use(func(c *gin.Context) {
-		utils.AuthRequired(c, s.conf.ClusterScoped, s.conf.TargetNamespace)
+		u.AuthRequired(c, s.conf.ClusterScoped, s.conf.TargetNamespace)
 	})
 
-	// TODO: add more api handlers
-	endpoint.GET("", s.listEvents)
-	endpoint.GET("/get", s.getEvent)
+	endpoint.GET("", s.list)
+	endpoint.GET("/:id", s.get)
 }
 
-// @Summary Get the list of events from db.
-// @Description Get the list of events from db.
+// @Summary list events.
+// @Description Get events from db.
 // @Tags events
 // @Produce json
 // @Param created_at query string false "The create time of events"
@@ -66,78 +66,83 @@ func Register(r *gin.RouterGroup, s *Service) {
 // @Param kind query string false "kind" Enums(PodChaos, IOChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos, AWSChaos, GCPChaos, DNSChaos, Schedule)
 // @Param limit query string false "The max length of events list"
 // @Success 200 {array} core.Event
-// @Router /events [get]
 // @Failure 500 {object} utils.APIError
-func (s *Service) listEvents(c *gin.Context) {
-	namespace := c.Query("namespace")
-	if len(namespace) == 0 && !s.conf.ClusterScoped &&
-		len(s.conf.TargetNamespace) != 0 {
-		namespace = s.conf.TargetNamespace
+// @Router /events [get]
+func (s *Service) list(c *gin.Context) {
+	ns := c.Query("namespace")
+
+	if ns == "" && !s.conf.ClusterScoped && s.conf.TargetNamespace != "" {
+		ns = s.conf.TargetNamespace
+
+		log.V(1).Info("Replace query namespace with", ns)
 	}
 
 	filter := core.Filter{
-		CreateTimeStr: c.Query("created_at"),
-		Name:          c.Query("name"),
-		Namespace:     namespace,
-		ObjectID:      c.Query("object_id"),
-		Kind:          c.Query("kind"),
-		LimitStr:      c.Query("limit"),
+		ObjectID:  c.Query("object_id"),
+		Start:     c.Query("start"),
+		End:       c.Query("end"),
+		Namespace: ns,
+		Name:      c.Query("name"),
+		Kind:      c.Query("kind"),
+		Limit:     c.Query("limit"),
 	}
 
-	eventList, err := s.event.ListByFilter(context.Background(), filter)
+	events, err := s.event.ListByFilter(context.Background(), filter)
 	if err != nil {
-		c.Status(http.StatusInternalServerError)
-		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
+
 		return
 	}
 
-	c.JSON(http.StatusOK, eventList)
+	c.JSON(http.StatusOK, events)
 }
 
-// @Summary Get the event from db by ID.
+// @Summary Get an event.
 // @Description Get the event from db by ID.
 // @Tags events
 // @Produce json
-// @Param id query uint true "The id of the event"
+// @Param id path uint true "The event ID"
 // @Success 200 {object} core.Event
-// @Router /events/get [get]
+// @Failure 400 {object} utils.APIError
+// @Failure 404 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
-func (s *Service) getEvent(c *gin.Context) {
-	idStr := c.Query("id")
-	namespace := c.Query("namespace")
-	if len(namespace) == 0 && !s.conf.ClusterScoped &&
-		len(s.conf.TargetNamespace) != 0 {
-		namespace = s.conf.TargetNamespace
-	}
+// @Router /events/{id} [get]
+func (s *Service) get(c *gin.Context) {
+	id, ns := c.Param("id"), c.Query("namespace")
 
-	if idStr == "" {
-		c.Status(http.StatusBadRequest)
-		_ = c.Error(utils.ErrBadRequest.New("id cannot be empty"))
+	if id == "" {
+		u.SetAPIError(c, u.ErrBadRequest.New("ID cannot be empty"))
+
 		return
 	}
 
-	id, err := strconv.Atoi(idStr)
+	intID, err := strconv.Atoi(id)
 	if err != nil {
-		c.Status(http.StatusBadRequest)
-		_ = c.Error(utils.ErrBadRequest.New("the format of id is wrong"))
+		u.SetAPIError(c, u.ErrBadRequest.New("ID is not a number"))
+
 		return
 	}
 
-	event, err := s.event.Find(context.Background(), uint(id))
+	if ns == "" && !s.conf.ClusterScoped && s.conf.TargetNamespace != "" {
+		ns = s.conf.TargetNamespace
+
+		log.V(1).Info("Replace query namespace with", ns)
+	}
+
+	event, err := s.event.Find(context.Background(), uint(intID))
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrBadRequest.New("the event is not found"))
+			u.SetAPIError(c, u.ErrNotFound.New("Event "+id+" not found"))
 		} else {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
+			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		}
+
 		return
 	}
 
-	if len(namespace) != 0 && event.Namespace != namespace {
-		c.Status(http.StatusBadRequest)
-		_ = c.Error(utils.ErrBadRequest.New("event %s belong to namespace %s but not namespace %s", idStr, event.Namespace, namespace))
+	if len(ns) != 0 && event.Namespace != ns {
+		u.SetAPIError(c, u.ErrInternalServer.New("The namespace of event %s is %s instead of the %s in the request", id, event.Namespace, ns))
+
 		return
 	}
 

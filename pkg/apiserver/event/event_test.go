@@ -138,8 +138,8 @@ var _ = Describe("event", func() {
 		router = gin.Default()
 		r := router.Group("/api")
 		endpoint := r.Group("/events")
-		endpoint.GET("", s.listEvents)
-		endpoint.GET("/get", s.getEvent)
+		endpoint.GET("", s.list)
+		endpoint.GET("/{id}", s.get)
 	})
 
 	AfterEach(func() {
@@ -150,7 +150,7 @@ var _ = Describe("event", func() {
 	Context("ListEvents", func() {
 		It("success", func() {
 			response := []*core.Event{
-				&core.Event{
+				{
 					ID:        0,
 					CreatedAt: time.Time{},
 					Kind:      "testKind",
@@ -193,7 +193,7 @@ var _ = Describe("event", func() {
 				ObjectID:  "testUID",
 			}
 			rr := httptest.NewRecorder()
-			request, _ := http.NewRequest(http.MethodGet, "/api/events/get?id=0", nil)
+			request, _ := http.NewRequest(http.MethodGet, "/api/events/0", nil)
 			router.ServeHTTP(rr, request)
 			Expect(rr.Code).Should(Equal(http.StatusOK))
 			responseBody, err := json.Marshal(response)
@@ -210,21 +210,21 @@ var _ = Describe("event", func() {
 
 		It("bad id", func() {
 			rr := httptest.NewRecorder()
-			request, _ := http.NewRequest(http.MethodGet, "/api/events/get?id=badID", nil)
+			request, _ := http.NewRequest(http.MethodGet, "/api/events/badID", nil)
 			router.ServeHTTP(rr, request)
 			Expect(rr.Code).Should(Equal(http.StatusBadRequest))
 		})
 
 		It("not found", func() {
 			rr := httptest.NewRecorder()
-			request, _ := http.NewRequest(http.MethodGet, "/api/events/get?id=1", nil)
+			request, _ := http.NewRequest(http.MethodGet, "/api/events/1", nil)
 			router.ServeHTTP(rr, request)
 			Expect(rr.Code).Should(Equal(http.StatusInternalServerError))
 		})
 
 		It("other err", func() {
 			rr := httptest.NewRecorder()
-			request, _ := http.NewRequest(http.MethodGet, "/api/events/get?id=2", nil)
+			request, _ := http.NewRequest(http.MethodGet, "/api/events/2", nil)
 			router.ServeHTTP(rr, request)
 			Expect(rr.Code).Should(Equal(http.StatusInternalServerError))
 		})

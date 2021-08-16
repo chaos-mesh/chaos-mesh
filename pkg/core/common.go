@@ -14,6 +14,9 @@
 package core
 
 import (
+	"encoding/json"
+	"strings"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -38,4 +41,65 @@ type KubeObjectMeta struct {
 	Name        string            `json:"name"`
 	Labels      map[string]string `json:"labels,omitempty"`
 	Annotations map[string]string `json:"annotations,omitempty"`
+}
+
+type Filter struct {
+	ObjectID  string `json:"object_id"`
+	Start     string
+	End       string
+	Namespace string `json:"namespace"`
+	Name      string `json:"name"`
+	Kind      string `json:"kind"`
+	Limit     string
+}
+
+func (f *Filter) toMap() map[string]interface{} {
+	var fMap map[string]interface{}
+
+	marshal, _ := json.Marshal(f)
+	json.Unmarshal(marshal, &fMap)
+
+	return fMap
+}
+
+func (f *Filter) ConstructQueryArgs() (string, []interface{}) {
+	fMap, query, args := f.toMap(), make([]string, 0), make([]interface{}, 0)
+
+	for k, v := range fMap {
+		if v != "" {
+			if k == "Start" || k == "End" || k == "Limit" {
+				continue
+			}
+
+			if len(args) > 0 {
+				query = append(query, "AND", k, "= ?")
+			} else {
+				query = append(query, k, "= ?")
+			}
+
+			args = append(args, v)
+		}
+	}
+
+	startEnd := ""
+	if f.Start != "" && f.End != "" {
+		startEnd = "created_at BETWEEN ? AND ?"
+		args = append(args, f.Start, f.End)
+	} else if f.Start != "" && f.End == "" {
+		startEnd = "created_at >= ?"
+		args = append(args, f.Start)
+	} else if f.Start == "" && f.End != "" {
+		startEnd = "created_at <= ?"
+		args = append(args, f.End)
+	}
+
+	if startEnd != "" {
+		if len(args) > 0 {
+			query = append(query, "AND", startEnd)
+		} else {
+			query = append(query, startEnd)
+		}
+	}
+
+	return strings.Join(query, " "), args
 }
