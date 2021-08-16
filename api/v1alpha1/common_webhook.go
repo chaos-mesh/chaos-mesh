@@ -30,7 +30,6 @@ const (
 	ValidateValueParseError = "parse value field error:%s"
 )
 
-
 // FIXME: interface ContainsDuration only used for validating EmbedChaos in Workflow
 
 // +kubebuilder:object:generate=false
