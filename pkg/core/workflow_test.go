@@ -351,11 +351,9 @@ func Test_convertWorkflowNode(t *testing.T) {
 			want: Node{
 				Name: "fake-serial-node-0",
 				Type: SerialNode,
-				Serial: &NodeSerial{
-					Children: []NodeNameWithTemplate{
-						{Name: "", Template: "child-0"},
-						{Name: "", Template: "child-1"},
-					},
+				Serial: []NodeNameWithTemplate{
+					{Name: "", Template: "child-0"},
+					{Name: "", Template: "child-1"},
 				},
 				Parallel: nil,
 				Template: "fake-serial-node",
@@ -384,11 +382,9 @@ func Test_convertWorkflowNode(t *testing.T) {
 				Name:   "parallel-node-0",
 				Type:   ParallelNode,
 				Serial: nil,
-				Parallel: &NodeParallel{
-					Children: []NodeNameWithTemplate{
-						{Name: "", Template: "child-1"},
-						{Name: "", Template: "child-0"},
-					},
+				Parallel: []NodeNameWithTemplate{
+					{Name: "", Template: "child-1"},
+					{Name: "", Template: "child-0"},
 				},
 				Template: "parallel-node",
 				State:    NodeRunning,
@@ -464,10 +460,8 @@ func Test_convertWorkflowNode(t *testing.T) {
 				Name:  "the-entry-0",
 				Type:  SerialNode,
 				State: NodeSucceed,
-				Serial: &NodeSerial{
-					Children: []NodeNameWithTemplate{
-						{Name: "", Template: "unimportant-task-0"},
-					},
+				Serial: []NodeNameWithTemplate{
+					{Name: "", Template: "unimportant-task-0"},
 				},
 				Parallel: nil,
 				Template: "the-entry",
@@ -536,10 +530,8 @@ func Test_convertWorkflowNode(t *testing.T) {
 				Name:  "the-entry-0",
 				Type:  SerialNode,
 				State: NodeSucceed,
-				Serial: &NodeSerial{
-					Children: []NodeNameWithTemplate{
-						{Name: "", Template: "unimportant-task-0"},
-					},
+				Serial: []NodeNameWithTemplate{
+					{Name: "", Template: "unimportant-task-0"},
 				},
 				Parallel: nil,
 				Template: "the-entry",
