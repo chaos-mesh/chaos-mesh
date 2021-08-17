@@ -16,8 +16,9 @@ package config
 import (
 	"time"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/ttlcontroller"
 	"github.com/kelseyhightower/envconfig"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/ttlcontroller"
 )
 
 // ChaosDashboardConfig defines the configuration for Chaos Dashboard

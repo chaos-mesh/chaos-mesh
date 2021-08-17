@@ -38,6 +38,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
 	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
+	"github.com/chaos-mesh/chaos-mesh/pkg/status"
 )
 
 var log = u.Log.WithName("experiments")
@@ -79,8 +80,8 @@ func Register(r *gin.RouterGroup, s *Service) {
 // Experiment defines the information of an experiment.
 type Experiment struct {
 	core.ObjectBase
-	Status        u.ChaosStatus `json:"status"`
-	FailedMessage string        `json:"failed_message,omitempty"`
+	Status        status.ChaosStatus `json:"status"`
+	FailedMessage string             `json:"failed_message,omitempty"`
 }
 
 // Detail adds KubeObjectDesc on Experiment.
@@ -146,7 +147,7 @@ func (s *Service) list(c *gin.Context) {
 					UID:       chaos.UID,
 					Created:   chaos.StartTime.Format(time.RFC3339),
 				},
-				Status: u.GetChaosStatus(item),
+				Status: status.GetChaosStatus(item),
 			})
 		}
 	}
@@ -267,7 +268,7 @@ func (s *Service) findChaosInCluster(c *gin.Context, kubeCli client.Client, name
 				UID:       getChaosResult.FieldByName("UID").String(),
 				Created:   getChaosResult.FieldByName("StartTime").Interface().(time.Time).Format(time.RFC3339),
 			},
-			Status: u.GetChaosStatus(chaos.(v1alpha1.InnerObject)),
+			Status: status.GetChaosStatus(chaos.(v1alpha1.InnerObject)),
 		},
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
@@ -618,7 +619,7 @@ func (s *Service) state(c *gin.Context) {
 		log.V(1).Info("Replace query namespace with", ns)
 	}
 
-	status := u.AllChaosStatus{}
+	allChaosStatus := status.AllChaosStatus{}
 
 	g, ctx := errgroup.WithContext(context.Background())
 	m := &sync.Mutex{}
@@ -639,17 +640,17 @@ func (s *Service) state(c *gin.Context) {
 			items := reflect.ValueOf(list.ChaosList).Elem().FieldByName("Items")
 			for i := 0; i < items.Len(); i++ {
 				item := items.Index(i).Addr().Interface().(v1alpha1.InnerObject)
-				state := u.GetChaosStatus(item)
+				s := status.GetChaosStatus(item)
 
-				switch state {
-				case u.Paused:
-					status.Paused++
-				case u.Running:
-					status.Running++
-				case u.Injecting:
-					status.Injecting++
-				case u.Finished:
-					status.Finished++
+				switch s {
+				case status.Injecting:
+					allChaosStatus.Injecting++
+				case status.Running:
+					allChaosStatus.Running++
+				case status.Finished:
+					allChaosStatus.Finished++
+				case status.Paused:
+					allChaosStatus.Paused++
 				}
 			}
 
@@ -664,5 +665,5 @@ func (s *Service) state(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, status)
+	c.JSON(http.StatusOK, allChaosStatus)
 }

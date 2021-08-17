@@ -34,6 +34,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
 	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
+	"github.com/chaos-mesh/chaos-mesh/pkg/status"
 )
 
 var log = u.Log.WithName("schedules")
@@ -74,7 +75,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 // Schedule defines the information of a schedule.
 type Schedule struct {
 	core.ObjectBase
-	Status u.ScheduleStatus `json:"status"`
+	Status status.ScheduleStatus `json:"status"`
 }
 
 // Detail adds KubeObjectDesc on Schedule.
@@ -131,7 +132,7 @@ func (s *Service) list(c *gin.Context) {
 				UID:       string(schedule.UID),
 				Created:   schedule.CreationTimestamp.Format(time.RFC3339),
 			},
-			Status: u.GetScheduleStatus(schedule),
+			Status: status.GetScheduleStatus(schedule),
 		})
 	}
 
@@ -273,7 +274,7 @@ func (s *Service) findScheduleInCluster(c *gin.Context, kubeCli client.Client, n
 				UID:       string(sch.UID),
 				Created:   sch.CreationTimestamp.Format(time.RFC3339),
 			},
-			Status: u.GetScheduleStatus(sch),
+			Status: status.GetScheduleStatus(sch),
 		},
 		ExperimentUIDs: UIDList,
 		KubeObject: core.KubeObjectDesc{
