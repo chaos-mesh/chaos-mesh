@@ -176,30 +176,17 @@ REQUEST CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@] "GET" "/api/events" "list_event.out
 REQUEST CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@] "GET" "/api/events?namespace=default" "list_event.out" "can't list"
 
 
-#echo "***** list dry events *****"
-#
-#echo "all token can list dry events under namespace busybox"
-#REQUEST BUSYBOX_VIEW_TOKEN_LIST[@] "GET" "/api/events/dry?namespace=busybox" "list_dry_event.out" "ci-test"
-#
-#echo "cluster manager and viewer can list dry events in the cluster"
-#REQUEST CLUSTER_VIEW_TOKEN_LIST[@] "GET" "/api/events/dry" "list_dry_event.out" "ci-test"
-#
-#echo "busybox manager and viewer is forbidden to list dry events in the cluster or other namespace"
-#REQUEST CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@] "GET" "/api/events/dry" "list_dry_event.out" "can't list"
-#REQUEST CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@] "GET" "/api/events/dry?namespace=default" "list_dry_event.out" "can't list"
-
-
 echo "***** get event by id *****"
 
 echo "all token can get event under namespace busybox"
-REQUEST BUSYBOX_VIEW_TOKEN_LIST[@] "GET" "/api/events/get?id=$EVENT_ID&namespace=busybox" "get_event.out" "ci-test"
+REQUEST BUSYBOX_VIEW_TOKEN_LIST[@] "GET" "/api/events/$EVENT_ID&namespace=busybox" "get_event.out" "ci-test"
 
 echo "cluster manager and viewer can get event in the cluster"
-REQUEST CLUSTER_VIEW_TOKEN_LIST[@] "GET" "/api/events/get?id=$EVENT_ID" "get_event.out" "ci-test"
+REQUEST CLUSTER_VIEW_TOKEN_LIST[@] "GET" "/api/events/$EVENT_ID" "get_event.out" "ci-test"
 
 echo "busybox manager and viewer is forbidden to get event in the cluster or other namespace"
-REQUEST CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@] "GET" "/api/events/get?id=$EVENT_ID" "get_event.out" "can't list"
-REQUEST CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@] "GET" "/api/events/get?id=$EVENT_ID&namespace=default" "get_event.out" "can't list"
+REQUEST CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@] "GET" "/api/events/$EVENT_ID" "get_event.out" "can't list"
+REQUEST CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@] "GET" "/api/events/$EVENT_ID&namespace=default" "get_event.out" "can't list"
 
 
 echo "***** list archive chaos experiments *****"
