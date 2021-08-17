@@ -7,6 +7,7 @@ export const mapping = new Map<string, string>([
   ['JVMChaos', 'jvmChaos'],
   ['KernelChaos', 'kernelChaos'],
   ['NetworkChaos', 'networkChaos'],
+  ['PhysicalMachineChaos', 'physicalmachineChaos'],
   ['PodChaos', 'podChaos'],
   ['StressChaos', 'stressChaos'],
   ['TimeChaos', 'timeChaos'],
