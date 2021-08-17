@@ -18,10 +18,11 @@ import (
 
 	"go.uber.org/fx"
 
-	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
-	"github.com/chaos-mesh/chaos-mesh/pkg/store/workflow"
 	"github.com/jinzhu/gorm"
 	ctrl "sigs.k8s.io/controller-runtime"
+
+	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
+	"github.com/chaos-mesh/chaos-mesh/pkg/store/workflow"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/store/event"
 	"github.com/chaos-mesh/chaos-mesh/pkg/store/experiment"

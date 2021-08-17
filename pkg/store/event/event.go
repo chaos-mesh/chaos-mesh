@@ -18,8 +18,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 	"github.com/jinzhu/gorm"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 )
 
 func NewStore(db *gorm.DB) core.EventStore {

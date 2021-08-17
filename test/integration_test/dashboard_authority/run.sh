@@ -205,14 +205,14 @@ REQUEST CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@] "GET" "/api/archives?namespace=defa
 echo "***** get detail of archive chaos experiment *****"
 
 echo "all token can get the details of archive experiments under namespace busybox"
-REQUEST BUSYBOX_VIEW_TOKEN_LIST[@] "GET" "/api/archives/${EXP_UID}&namespace=busybox" "detail_archives.out" '"name":"ci-test"'
+REQUEST BUSYBOX_VIEW_TOKEN_LIST[@] "GET" "/api/archives/${EXP_UID}?namespace=busybox" "detail_archives.out" '"name":"ci-test"'
 
 echo "cluster manager and viewer can get the details of archive experiments in the cluster"
 REQUEST CLUSTER_VIEW_TOKEN_LIST[@] "GET" "/api/archives/${EXP_UID}" "detail_archives.out" '"name":"ci-test"'
 
 echo "busybox manager and viewer is forbidden to get the details of archive experiments in the cluster or other namespace"
 REQUEST CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@] "GET" "/api/archives/${EXP_UID}" "detail_archives.out" "can't list"
-REQUEST CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@] "GET" "/api/archives/${EXP_UID}&namespace=default" "detail_archives.out" "can't list"
+REQUEST CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@] "GET" "/api/archives/${EXP_UID}?namespace=default" "detail_archives.out" "can't list"
 
 
 #echo "***** get report of archive chaos experiment *****"
