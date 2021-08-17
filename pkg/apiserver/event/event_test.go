@@ -147,7 +147,7 @@ var _ = Describe("event", func() {
 		r := router.Group("/api")
 		endpoint := r.Group("/events")
 		endpoint.GET("", s.list)
-		endpoint.GET("/{id}", s.get)
+		endpoint.GET("/:id", s.get)
 	})
 
 	AfterEach(func() {
