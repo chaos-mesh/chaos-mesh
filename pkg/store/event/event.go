@@ -78,9 +78,9 @@ func (e *eventStore) ListByFilter(_ context.Context, filter core.Filter) ([]*cor
 		limit, err = strconv.Atoi(filter.Limit)
 		if err != nil {
 			return nil, err
-		} else {
-			statement = statement.Limit(limit)
 		}
+
+		statement = statement.Limit(limit)
 	}
 
 	if err := statement.Find(&events).Error; err != nil {

@@ -600,7 +600,7 @@ func patchExperiment(kubeCli client.Client, exp *core.Experiment, annotations ma
 // @Tags experiments
 // @Produce json
 // @Param namespace query string false "namespace"
-// @Success 200 {object} utils.AllChaosStatus
+// @Success 200 {object} status.AllChaosStatus
 // @Failure 400 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
 // @Router /experiments/state [get]
