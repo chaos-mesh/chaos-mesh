@@ -19,14 +19,13 @@ import (
 	"github.com/jinzhu/gorm"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
-	"github.com/chaos-mesh/chaos-mesh/pkg/store/dbstore"
 )
 
 type WorkflowStore struct {
-	db *dbstore.DB
+	db *gorm.DB
 }
 
-func NewStore(db *dbstore.DB) core.WorkflowStore {
+func NewStore(db *gorm.DB) core.WorkflowStore {
 	db.AutoMigrate(&core.WorkflowEntity{})
 
 	return &WorkflowStore{db}

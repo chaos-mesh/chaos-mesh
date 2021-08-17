@@ -32,7 +32,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/collector"
 	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
 	"github.com/chaos-mesh/chaos-mesh/pkg/store"
-	"github.com/chaos-mesh/chaos-mesh/pkg/store/dbstore"
 	"github.com/chaos-mesh/chaos-mesh/pkg/ttlcontroller"
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
 )
@@ -83,7 +82,7 @@ func main() {
 			func() (<-chan struct{}, *config.ChaosDashboardConfig, *ttlcontroller.TTLconfig) {
 				return ctrlRuntimeStopCh, dashboardConfig, persistTTLConfigParsed
 			},
-			dbstore.NewDBStore,
+			store.NewDBStore,
 			collector.NewServer,
 			ttlcontroller.NewController,
 		),

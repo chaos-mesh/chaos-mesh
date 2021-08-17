@@ -19,17 +19,17 @@ import (
 	"time"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
-	"github.com/chaos-mesh/chaos-mesh/pkg/store/dbstore"
+	"github.com/jinzhu/gorm"
 )
 
-func NewStore(db *dbstore.DB) core.EventStore {
+func NewStore(db *gorm.DB) core.EventStore {
 	db.AutoMigrate(&core.Event{})
 
 	return &eventStore{db}
 }
 
 type eventStore struct {
-	db *dbstore.DB
+	db *gorm.DB
 }
 
 func (e *eventStore) List(_ context.Context) ([]*core.Event, error) {
@@ -91,9 +91,9 @@ func (e *eventStore) ListByFilter(_ context.Context, filter core.Filter) ([]*cor
 }
 
 func (e *eventStore) Find(_ context.Context, id uint) (*core.Event, error) {
-	var event *core.Event
+	event := new(core.Event)
 
-	if err := e.db.Where("id = ?", id).First(event).Error; err != nil {
+	if err := e.db.First(event, id).Error; err != nil {
 		return nil, err
 	}
 
