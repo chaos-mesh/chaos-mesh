@@ -1316,6 +1316,10 @@ spec:
               value: "false"
             - name: SECURITY_MODE
               value: "false"
+            - name: GCP_CLIENT_ID
+              value: ""
+            - name: GCP_CLIENT_SECRET
+              value: ""
             - name: DNS_SERVER_CREATE
               value: "false"
           volumeMounts:

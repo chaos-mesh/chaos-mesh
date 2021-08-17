@@ -109,7 +109,6 @@ const TopContainer = () => {
   interface GcpToken {
     token: string
     expiry: string
-    ca: string
     name: 'gcp'
   }
   /**
@@ -119,13 +118,11 @@ const TopContainer = () => {
   function setGcpTokenFromCookie() {
     const accessToken = Cookies.get('access_token')
     const expiry = Cookies.get('expiry')
-    const ca = Cookies.get('ca')
-    console.log(accessToken, expiry, ca)
-    if (accessToken && expiry && ca) {
+    console.log(accessToken, expiry)
+    if (accessToken && expiry) {
       const token: GcpToken = {
         token: accessToken,
         expiry,
-        ca,
         name: 'gcp',
       }
       console.log('get token!', token)
