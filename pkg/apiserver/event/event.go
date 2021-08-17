@@ -48,7 +48,7 @@ func NewService(
 func Register(r *gin.RouterGroup, s *Service) {
 	endpoint := r.Group("/events")
 	endpoint.Use(func(c *gin.Context) {
-		u.AuthRequired(c, s.conf.ClusterScoped, s.conf.TargetNamespace)
+		u.AuthMiddleware(c, s.conf)
 	})
 
 	endpoint.GET("", s.list)

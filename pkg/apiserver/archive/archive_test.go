@@ -320,7 +320,7 @@ func (m *MockScheduleStore) DeleteIncompleteSchedules(context.Context) error {
 var _ = Describe("event", func() {
 	var router *gin.Engine
 	BeforeEach(func() {
-		pkgmock.With("MockAuthRequired", true)
+		pkgmock.With("AuthMiddleware", true)
 
 		mockExpStore := new(MockExperimentStore)
 		mockSchStore := new(MockScheduleStore)
@@ -346,7 +346,7 @@ var _ = Describe("event", func() {
 
 	AfterEach(func() {
 		// Add any setup steps that needs to be executed after each test
-		pkgmock.Reset("MockAuthRequired")
+		pkgmock.Reset("AuthMiddleware")
 	})
 
 	Context("List", func() {

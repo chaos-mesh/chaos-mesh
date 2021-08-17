@@ -30,8 +30,8 @@ var (
 	ErrNotFound       = ErrNS.NewType("resource_not_found")    // 404
 	ErrInternalServer = ErrNS.NewType("internal_server_error") // 500
 	// Custom
-	ErrNoClusterPrivilege   = ErrNS.NewType("no_cluster_privilege")   // 400
-	ErrNoNamespacePrivilege = ErrNS.NewType("no_namespace_privilege") // 400
+	ErrNoClusterPrivilege   = ErrNS.NewType("no_cluster_privilege")   // 401
+	ErrNoNamespacePrivilege = ErrNS.NewType("no_namespace_privilege") // 401
 )
 
 type APIError struct {
@@ -46,8 +46,10 @@ func SetAPIError(c *gin.Context, err *errorx.Error) {
 
 	var code int
 	switch typeName {
-	case ErrBadRequest.FullName(), ErrNoClusterPrivilege.FullName(), ErrNoNamespacePrivilege.FullName():
+	case ErrBadRequest.FullName():
 		code = http.StatusBadRequest
+	case ErrNoClusterPrivilege.FullName(), ErrNoNamespacePrivilege.FullName():
+		code = http.StatusUnauthorized
 	case ErrNotFound.FullName():
 		code = http.StatusNotFound
 	case ErrUnknown.FullName(), ErrInternalServer.FullName():
