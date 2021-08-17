@@ -23,11 +23,11 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/utils"
 )
 
-var Module = fx.Provide(
+var Module = fx.Options(
 	fx.Invoke(cron.Bootstrap),
 	fx.Invoke(active.Bootstrap),
 	fx.Invoke(gc.Bootstrap),
 	fx.Invoke(pause.Bootstrap),
 
-	utils.NewActiveLister,
+	fx.Provide(utils.NewActiveLister),
 )
