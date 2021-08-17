@@ -33,7 +33,7 @@ import (
 	pkgmock "github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
-// MockEventService is a mock type for event.Service
+// MockEventService is a mock of core.EventStore
 type MockEventService struct {
 	mock.Mock
 }

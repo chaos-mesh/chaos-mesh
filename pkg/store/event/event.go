@@ -15,7 +15,6 @@ package event
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 	"time"
 
@@ -73,8 +72,6 @@ func (e *eventStore) ListByFilter(_ context.Context, filter core.Filter) ([]*cor
 	)
 
 	query, args := filter.ConstructQueryArgs()
-	fmt.Println(query)
-	fmt.Println(args)
 	statement := e.db.Where(query, args...).Order("id desc")
 
 	if filter.Limit != "" {
@@ -120,7 +117,7 @@ func (e *eventStore) DeleteByTime(_ context.Context, start string, end string) e
 }
 
 func (e *eventStore) DeleteByDuration(_ context.Context, duration time.Duration) error {
-	now := time.Now().Add(-duration).Format(time.RFC3339)
+	now := time.Now().Add(-duration).Format("2006-01-02 15:04:05")
 
 	return e.db.Where("created_at <= ?", now).Delete(&core.Event{}).Error
 }
