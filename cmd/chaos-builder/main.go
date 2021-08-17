@@ -63,6 +63,9 @@ func main() {
 		if !strings.HasSuffix(info.Name(), ".go") {
 			return nil
 		}
+		if strings.HasPrefix(info.Name(), "zz_generated") {
+			return nil
+		}
 
 		fset := token.NewFileSet()
 		file, err := parser.ParseFile(fset, path, nil, parser.ParseComments)
