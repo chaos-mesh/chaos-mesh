@@ -13,11 +13,12 @@ export interface Workflow {
   status: 'running' | 'finished' | 'failed' | 'unknown'
 }
 
-interface MultiNode {
-  children: { name: string; template: string }[]
+interface NodeNameWithTemplate {
+  name: string
+  template: string
 }
-type SerialNode = MultiNode
-type ParallelNode = MultiNode
+type SerialNode = NodeNameWithTemplate[]
+type ParallelNode = NodeNameWithTemplate[]
 
 interface ConditionalBranch {
   name: string
