@@ -120,7 +120,7 @@ type MetaObject interface {
 
 // +kubebuilder:object:generate=false
 
-// TODO: refactor/cleanup ChaosInstance only used in common controller, and only field Name is used, I think it could be replace with other kind kie GenericChaos in this usage.
+// TODO: refactor/cleanup ChaosInstance only used in common controller, and only field Name is used, I think it could be replace with other kind like GenericChaos in this usage.
 // ChaosInstance defines some common attribute for a chaos
 type ChaosInstance struct {
 	Name      string
