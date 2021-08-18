@@ -21,4 +21,4 @@ For known public security vulnerabilities, we will disclose the disclosure as so
 2. After the vulnerability is confirmed, we will create a draft Security Advisory on Github that lists the details of the vulnerability.
 3. Invite related personnel to discuss the fix.
 4. Fork the temporary private repository on Github, and collaborate to fix the vulnerability.
-5. After the fix code is merged into all supported versions, the vulnerability will be publicly posted in the GitHub Advisory Database.
+5. After the fixed code is merged into all supported versions, the vulnerability will be publicly posted in the GitHub Advisory Database.
