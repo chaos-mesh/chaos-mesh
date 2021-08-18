@@ -1,6 +1,6 @@
 import { Box, Card, Divider, Typography } from '@material-ui/core'
 import { iconByKind, transByKind } from 'lib/byKind'
-import { setKindAction, setStep1, setSpec as setTargetToStore } from 'slices/experiments'
+import { setKindAction, setSpec, setStep1 } from 'slices/experiments'
 import typesData, { Definition, Kind, schema } from './data/types'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
@@ -67,12 +67,17 @@ const Step1 = () => {
     dispatch(setKindAction([kind, newAction]))
 
     if (submitDirectly.includes(newAction)) {
-      handleSubmitStep1({ action: newAction }, true)
+      handleSubmitStep1({ action: newAction }, { direct: true })
     }
   }
 
-  const handleSubmitStep1 = (values: Record<string, any>, direct: boolean = false) => {
-    const result = direct
+  const handleSubmitStep1 = (
+    values: Record<string, any>,
+    options?: {
+      direct?: boolean
+    }
+  ) => {
+    const result = options?.direct
       ? values
       : action
       ? {
@@ -82,10 +87,10 @@ const Step1 = () => {
       : values
 
     if (process.env.NODE_ENV === 'development') {
-      console.debug('Debug handleSubmitStep1', result)
+      console.debug('Debug handleSubmitStep1:', result)
     }
 
-    dispatch(setTargetToStore(result))
+    dispatch(setSpec(result))
     dispatch(setStep1(true))
   }
 

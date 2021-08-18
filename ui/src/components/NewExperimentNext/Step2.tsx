@@ -65,7 +65,7 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false })
     const values = schema.cast(_values) as Record<string, any>
 
     if (process.env.NODE_ENV === 'development') {
-      console.debug('Debug handleSubmitStep2', values)
+      console.debug('Debug handleSubmitStep2:', values)
     }
 
     dispatch(setBasic(values))

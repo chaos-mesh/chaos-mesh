@@ -90,10 +90,6 @@ const Predefined = () => {
   const handleApplyExperiment = () => {
     const exp: any = yaml.load(yamlEditor!.getValue())
 
-    if (process.env.NODE_ENV === 'development') {
-      console.debug('Debug parsedValues:', exp)
-    }
-
     const isSchedule = exp['kind'] === 'Schedule'
     const action = isSchedule ? api.schedules.newSchedule : api.experiments.newExperiment
 

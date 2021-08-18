@@ -67,6 +67,7 @@ const experimentsSlice = createSlice({
     },
     setKindAction(state, action) {
       state.kindAction = action.payload
+      state.spec = {}
     },
     setSpec(state, action) {
       state.spec = action.payload

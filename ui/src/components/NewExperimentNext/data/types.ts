@@ -322,7 +322,7 @@ const data: Record<Kind, Definition> = {
           correlation: {
             field: 'text',
             label: 'Correlation',
-            value: '0',
+            value: '',
             helperText: 'The correlation of loss',
           },
           ...networkCommon,
