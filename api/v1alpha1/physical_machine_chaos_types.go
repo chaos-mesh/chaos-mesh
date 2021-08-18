@@ -102,22 +102,17 @@ type PhysicalMachineChaos struct {
 
 // PhysicalMachineChaosSpec defines the desired state of PhysicalMachineChaos
 type PhysicalMachineChaosSpec struct {
-	// +kubebuilder:validation:Enum=stress;network;disk;host;process;jvm
+	// +kubebuilder:validation:Enum=stress-cpu;stress-mem;disk-read-payload;disk-write-payload;disk-fill;network-corrupt;network-duplicate;network-loss;network-delay;process;jvm-exception;jvm-gc;jvm-latency;jvm-return;jvm-stress;jvm-rule-data
 	Action PhysicalMachineChaosAction `json:"action"`
 
 	PhysicalMachineSelector `json:",inline"`
 
-	//ExpInfo string `json:"expInfo"`
-
+	// ExpInfo string `json:"expInfo"`
 	ExpInfo `json:",inline"`
 
 	// Duration represents the duration of the chaos action
 	// +optional
 	Duration *string `json:"duration,omitempty"`
-
-	// the experiment ID
-	// +optional
-	UID string `json:"uid"`
 }
 
 // PhysicalMachineChaosStatus defines the observed state of PhysicalMachineChaos
@@ -132,7 +127,7 @@ func (obj *PhysicalMachineChaos) GetSelectorSpecs() map[string]interface{} {
 }
 
 type PhysicalMachineSelector struct {
-	Address []string `json:"address"`
+	Address []string `json:"address" webhook:"Address"`
 }
 
 func (selector *PhysicalMachineSelector) Id() string {
@@ -140,37 +135,61 @@ func (selector *PhysicalMachineSelector) Id() string {
 }
 
 type ExpInfo struct {
+	// the experiment ID
+	// +optional
+	UID string `json:"uid,omitempty" webhook:"ExpUID"`
+
+	// the subAction, generate atomaticly
+	// +optional
+	Action string `json:"action,omitempty"`
+
+	// +optional
 	StressCPU *StressCPUSpec `json:"stress-cpu,omitempty"`
 
+	// +optional
 	StressMemory *StressMemorySpec `json:"stress-mem,omitempty"`
 
+	// +optional
 	DiskReadPayload *DiskPayloadSpec `json:"disk-read-payload,omitempty"`
 
+	// +optional
 	DiskWritePayload *DiskPayloadSpec `json:"disk-write-payload,omitempty"`
 
+	// +optional
 	DiskFill *DiskFillSpec `json:"disk-fill,omitempty"`
 
+	// +optional
 	NetworkCorrupt *NetworkCorruptSpec `json:"network-corrupt,omitempty"`
 
+	// +optional
 	NetworkDuplicate *NetworkDuplicateSpec `json:"network-duplicate,omitempty"`
 
+	// +optional
 	NetworkLoss *NetworkLossSpec `json:"network-loss,omitempty"`
 
+	// +optional
 	NetworkDelay *NetworkDelaySpec `json:"network-delay,omitempty"`
 
+	// +optional
 	Process *ProcessSpec `json:"process,omitempty"`
 
+	// +optional
 	JVMException *JVMExceptionSpec `json:"jvm-exception,omitempty"`
 
+	// +optional
 	JVMGC *JVMGCSpec `json:"jvm-gc,omitempty"`
 
+	// +optional
 	JVMLatency *JVMLatencySpec `json:"jvm-latency,omitempty"`
 
+	// +optional
 	JVMReturn *JVMReturnSpec `json:"jvm-return,omitempty"`
 
+	// +optional
 	JVMStress *JVMStressSpec `json:"jvm-stress,omitempty"`
 
-	JVMRuleData *JVMRuleDataSpec `json:"jvm-rule-data",omitempty`
+	// +optional
+	JVMRuleData *JVMRuleDataSpec `json:"jvm-rule-data,omitempty"`
 }
 
 type StressCPUSpec struct {
