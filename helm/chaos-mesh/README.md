@@ -8,7 +8,7 @@ This chart bootstraps a [Chaos Mesh](https://github.com/chaos-mesh/chaos-mesh) d
 
 ## Deploy
 
-Before deploying Chaos Mesh, make sure you have installed the [Prerequisites](https://chaos-mesh.org/docs/user_guides/installation#prerequisites). And then follow the [install-by-helm](https://chaos-mesh.org/docs/user_guides/installation#install-by-helm) doc step by step.
+Before deploying Chaos Mesh, make sure you have installed the [Prerequisites](https://chaos-mesh.org/docs/production-installation-using-helm#prerequisites). And then follow the [install-by-helm](https://chaos-mesh.org/docs/production-installation-using-helm#install-chaos-mesh-using-helm) doc step by step.
 
 ## Configuration
 
@@ -22,6 +22,7 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `rbac.create` |  | `true`                                                |
 | `timezone` | The timezone where controller-manager, chaos-daemon and dashboard uses. For example: `UTC`, `Asia/Shanghai` | `UTC` |
 | `enableProfiling` | A flag to enable pprof in controller-manager and chaos-daemon  | `true` |
+| `imagePullSecrets` | Global Docker registry secret names as an array  | [] (does not add image pull secrets to deployed pods) |
 | `controllerManager.hostNetwork` | running chaos-controller-manager on host network | `false` |
 | `controllerManager.allowHostNetworkTesting`   | Allow testing on `hostNetwork` pods | `false` |
 | `controllerManager.serviceAccount` | The serviceAccount for chaos-controller-manager | `chaos-controller-manager` |
