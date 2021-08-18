@@ -1,4 +1,4 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,8 +27,11 @@ var (
 	ResponseSuccess = Response{Status: "success"}
 )
 
-func ShouldBindBodyWithJSON(c *gin.Context, obj interface{}) {
-	if err := c.ShouldBindBodyWith(obj, binding.JSON); err != nil {
+func ShouldBindBodyWithJSON(c *gin.Context, obj interface{}) (err error) {
+	err = c.ShouldBindBodyWith(obj, binding.JSON)
+	if err != nil {
 		SetAPIError(c, ErrBadRequest.WrapWithNoMessage(err))
 	}
+
+	return
 }

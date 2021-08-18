@@ -178,12 +178,16 @@ func (s *Service) create(c *gin.Context) {
 	}
 
 	var exp map[string]interface{}
-	u.ShouldBindBodyWithJSON(c, &exp)
+	if err = u.ShouldBindBodyWithJSON(c, &exp); err != nil {
+		return
+	}
 	kind := exp["kind"].(string)
 
 	if chaosKind, ok := v1alpha1.AllKinds()[kind]; ok {
 		reflect.ValueOf(chaosKind.Chaos).Elem().FieldByName("ObjectMeta").Set(reflect.ValueOf(metav1.ObjectMeta{}))
-		u.ShouldBindBodyWithJSON(c, chaosKind.Chaos)
+		if err = u.ShouldBindBodyWithJSON(c, chaosKind.Chaos); err != nil {
+			return
+		}
 
 		if err = kubeCli.Create(context.Background(), chaosKind.Chaos); err != nil {
 			u.SetAPImachineryError(c, err)
@@ -457,11 +461,15 @@ func (s *Service) update(c *gin.Context) {
 	}
 
 	var exp map[string]interface{}
-	u.ShouldBindBodyWithJSON(c, &exp)
+	if err = u.ShouldBindBodyWithJSON(c, &exp); err != nil {
+		return
+	}
 	kind := exp["kind"].(string)
 
 	if chaosKind, ok := v1alpha1.AllKinds()[kind]; ok {
-		u.ShouldBindBodyWithJSON(c, chaosKind.Chaos)
+		if err = u.ShouldBindBodyWithJSON(c, chaosKind.Chaos); err != nil {
+			return
+		}
 
 		if err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
 			return internalUpdate(kubeCli, chaosKind.Chaos)

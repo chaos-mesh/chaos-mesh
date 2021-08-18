@@ -162,7 +162,9 @@ func (s *Service) create(c *gin.Context) {
 	}
 
 	var sch v1alpha1.Schedule
-	u.ShouldBindBodyWithJSON(c, &sch)
+	if err = u.ShouldBindBodyWithJSON(c, &sch); err != nil {
+		return
+	}
 
 	if err = kubeCli.Create(context.Background(), &sch); err != nil {
 		u.SetAPImachineryError(c, err)
@@ -430,7 +432,9 @@ func (s *Service) update(c *gin.Context) {
 	}
 
 	var sch v1alpha1.Schedule
-	u.ShouldBindBodyWithJSON(c, &sch)
+	if err = u.ShouldBindBodyWithJSON(c, &sch); err != nil {
+		return
+	}
 
 	if err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
 		return internalUpdate(kubeCli, &sch)

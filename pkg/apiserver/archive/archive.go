@@ -130,7 +130,7 @@ func (s *Service) list(c *gin.Context) {
 	c.JSON(http.StatusOK, archives)
 }
 
-// @Summary Get a archived chaos experiment.
+// @Summary Get an archived chaos experiment.
 // @Description Get the archived chaos experiment's detail by uid.
 // @Tags archives
 // @Produce json
