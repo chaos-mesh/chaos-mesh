@@ -27,6 +27,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/networkchaos/podnetworkchaosmanager"
+	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/ipset"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/netutils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
@@ -53,6 +54,8 @@ type Impl struct {
 
 	Log logr.Logger
 }
+
+var _ common.ChaosImpl = (*Impl)(nil)
 
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	// The only possible phase to get in here is "Not Injected" or "Not Injected/Wait"
