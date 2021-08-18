@@ -17,6 +17,7 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
+	"time"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/validation/field"
@@ -401,6 +402,62 @@ func Test_namesCouldNotBeDuplicated(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := namesCouldNotBeDuplicated(tt.args.templatesPath, tt.args.names); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("namesCouldNotBeDuplicated() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_shouldNotSetupDurationInTheChaos(t *testing.T) {
+	templatesPath := field.NewPath("spec", "templates")
+	duration20sString := "20s"
+	duration20s := 20 * time.Second
+
+	type args struct {
+		path     *field.Path
+		template Template
+	}
+	tests := []struct {
+		name string
+		args args
+		want field.ErrorList
+	}{
+		{
+			name: "should not set duration in the chaos",
+			args: args{
+				path: templatesPath,
+				template: Template{
+					Name: "invalid-pod-chaos",
+					Type: TypePodChaos,
+					EmbedChaos: &EmbedChaos{
+						PodChaos: &PodChaosSpec{
+							Duration: &duration20sString,
+						},
+					},
+				},
+			},
+			want: field.ErrorList{
+				field.Invalid(templatesPath, &duration20s, "should not define duration in chaos when using Workflow, use Template#Deadline instead."),
+			},
+		}, {
+			name: "should set duration in the template",
+			args: args{
+				path: templatesPath,
+				template: Template{
+					Name:     "invalid-pod-chaos",
+					Type:     TypePodChaos,
+					Deadline: &duration20sString,
+					EmbedChaos: &EmbedChaos{
+						PodChaos: &PodChaosSpec{},
+					},
+				},
+			},
+			want: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := shouldNotSetupDurationInTheChaos(tt.args.path, tt.args.template); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("shouldNotSetupDurationInTheChaos() = %v, want %v", got, tt.want)
 			}
 		})
 	}
