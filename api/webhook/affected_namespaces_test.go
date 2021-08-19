@@ -16,8 +16,9 @@ package webhook
 import (
 	"testing"
 
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/onsi/gomega"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
 func TestAffectedNamespaces(t *testing.T) {

@@ -16,9 +16,10 @@ package webhook
 import (
 	"reflect"
 
+	"k8s.io/apimachinery/pkg/util/validation/field"
+
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1/genericwebhook"
-	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
 func affectedNamespaces(obj interface{}) (bool, map[string]struct{}) {
