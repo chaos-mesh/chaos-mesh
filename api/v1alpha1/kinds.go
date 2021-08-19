@@ -40,8 +40,8 @@ func (c *chaosKindMap) clone() map[string]*ChaosKind {
 	out := make(map[string]*ChaosKind)
 	for key, kind := range c.kinds {
 		out[key] = &ChaosKind{
-			Chaos:     kind.Chaos,
-			ChaosList: kind.ChaosList,
+			Chaos:            kind.Chaos,
+			GenericChaosList: kind.GenericChaosList,
 		}
 	}
 
@@ -63,7 +63,7 @@ var all = &chaosKindMap{
 // ChaosKind includes one kind of chaos and its list type
 type ChaosKind struct {
 	Chaos runtime.Object
-	ChaosList
+	GenericChaosList
 }
 
 // AllKinds returns all chaos kinds.

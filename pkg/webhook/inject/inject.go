@@ -527,7 +527,7 @@ func mergeVolumeMounts(volumeMounts []corev1.VolumeMount, containers []corev1.Co
 
 func updateAnnotations(target map[string]string, added map[string]string) (patch []patchOperation) {
 	for key, value := range added {
-		if target == nil || target[key] == "" {
+		if target == nil {
 			target = map[string]string{}
 			patch = append(patch, patchOperation{
 				Op:   "add",
@@ -537,14 +537,23 @@ func updateAnnotations(target map[string]string, added map[string]string) (patch
 				},
 			})
 		} else {
+			op := "add"
+			if target[key] != "" {
+				op = "replace"
+			}
 			patch = append(patch, patchOperation{
-				Op:    "replace",
-				Path:  "/metadata/annotations/" + key,
+				Op:    op,
+				Path:  "/metadata/annotations/" + escapeJSONPointerValue(key),
 				Value: value,
 			})
 		}
 	}
 	return patch
+}
+
+func escapeJSONPointerValue(in string) string {
+	step := strings.Replace(in, "~", "~0", -1)
+	return strings.Replace(step, "/", "~1", -1)
 }
 
 func updateShareProcessNamespace(value bool) (patch []patchOperation) {
