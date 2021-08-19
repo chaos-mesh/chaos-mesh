@@ -21,18 +21,27 @@ import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
-func affectedNamespaces(obj interface{}) map[string]struct{} {
+func affectedNamespaces(obj interface{}) (bool, map[string]struct{}) {
+	clusterScoped := false
 	namespaces := make(map[string]struct{})
 
 	walker := genericwebhook.NewFieldWalker(obj, func(path *field.Path, obj interface{}, field *reflect.StructField) bool {
+
 		// These are some trivial rules to cut a lot of edges.
 		if field != nil && (field.Name == "Status" || field.Name == "TypeMeta" || field.Name == "ObjectMeta") {
 			return false
 		}
 
 		if selector, ok := obj.(*v1alpha1.PodSelector); ok {
+			if selector == nil {
+				return false
+			}
+
 			for _, ns := range selector.Selector.Namespaces {
 				namespaces[ns] = struct{}{}
+			}
+			if selector.Selector.ClusterScoped() {
+				clusterScoped = true
 			}
 
 			return true
@@ -41,5 +50,5 @@ func affectedNamespaces(obj interface{}) map[string]struct{} {
 	})
 	walker.Walk()
 
-	return namespaces
+	return clusterScoped, namespaces
 }

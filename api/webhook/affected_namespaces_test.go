@@ -23,7 +23,7 @@ import (
 func TestAffectedNamespaces(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
-	namespaces := affectedNamespaces(&v1alpha1.Schedule{
+	_, namespaces := affectedNamespaces(&v1alpha1.Schedule{
 		Spec: v1alpha1.ScheduleSpec{
 			ScheduleItem: v1alpha1.ScheduleItem{
 				EmbedChaos: v1alpha1.EmbedChaos{
@@ -45,7 +45,7 @@ func TestAffectedNamespaces(t *testing.T) {
 		"ns2": {},
 	}))
 
-	namespaces = affectedNamespaces(&v1alpha1.Workflow{
+	_, namespaces = affectedNamespaces(&v1alpha1.Workflow{
 		Spec: v1alpha1.WorkflowSpec{
 			Templates: []v1alpha1.Template{
 				{
@@ -66,4 +66,14 @@ func TestAffectedNamespaces(t *testing.T) {
 		"ns1": {},
 		"ns2": {},
 	}))
+
+	clusterScoped, _ := affectedNamespaces(&v1alpha1.NetworkChaos{
+		Spec: v1alpha1.NetworkChaosSpec{
+			Target: &v1alpha1.PodSelector{},
+		},
+	})
+	g.Expect(clusterScoped).To(gomega.BeTrue())
+
+	clusterScoped, _ = affectedNamespaces(&v1alpha1.NetworkChaos{})
+	g.Expect(clusterScoped).To(gomega.BeTrue())
 }
