@@ -201,7 +201,7 @@ func shouldNotSetupDurationInTheChaos(path *field.Path, template Template) field
 			fmt.Sprintf("parse workflow field error: missing chaos spec %s", template.Type)))
 		return result
 	}
-	if commonSpec, ok := spec.Interface().(CommonSpec); !ok {
+	if commonSpec, ok := spec.Interface().(ContainsDuration); !ok {
 		result = append(result, field.Invalid(path, "", fmt.Sprintf("Chaos: %s does not implement CommonSpec", template.Type)))
 	} else {
 		duration, err := commonSpec.GetDuration()
