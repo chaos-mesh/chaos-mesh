@@ -24,6 +24,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/kubernetes"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 	"k8s.io/client-go/rest"
@@ -192,9 +193,14 @@ func NewControlPlaneCacheReader(logger logr.Logger) (controlPlaneCacheReader, er
 	}, nil
 }
 
+func NewClientSet(config *rest.Config) (*kubernetes.Clientset, error) {
+	return kubernetes.NewForConfig(config)
+}
+
 var Module = fx.Provide(
 	NewOption,
 	NewClient,
+	NewClientSet,
 	NewManager,
 	NewLogger,
 	NewAuthCli,
