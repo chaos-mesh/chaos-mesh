@@ -35,6 +35,8 @@ type Impl struct {
 	Log logr.Logger
 }
 
+var _ common.ChaosImpl = (*Impl)(nil)
+
 // Apply applies jvm-chaos
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	jvmchaos := obj.(*v1alpha1.JVMChaos)
