@@ -22,7 +22,7 @@ const initTemplate = `
 	SchemeBuilder.Register(&{{.Type}}{}, &{{.Type}}List{})
 	all.register(Kind{{.Type}}, &ChaosKind{
 		Chaos:     &{{.Type}}{},
-		ChaosList: &{{.Type}}List{},
+		GenericChaosList: &{{.Type}}List{},
 	})
 `
 

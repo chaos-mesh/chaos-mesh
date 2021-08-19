@@ -151,8 +151,6 @@ const (
 	RerunBySpecChanged          string = "RerunBySpecChanged"
 )
 
-// TODO: GenericChaosList/GenericChaos is very similar to ChaosList/ChaosInstance, maybe we could combine them later.
-
 // GenericChaosList only use to list GenericChaos by certain EmbedChaos
 // +kubebuilder:object:generate=false
 type GenericChaosList interface {

@@ -615,7 +615,7 @@ func (s *Service) getScheduleDetail(c *gin.Context) {
 		_ = c.Error(utils.ErrInvalidRequest.New("the kind is not supported"))
 		return
 	}
-	list := kind.ChaosList.DeepCopyObject()
+	list := kind.GenericChaosList.DeepCopyObject()
 	selector, err := metav1.LabelSelectorAsSelector(&metav1.LabelSelector{
 		MatchLabels: map[string]string{"managed-by": schedule.Name},
 	})
@@ -638,7 +638,7 @@ func (s *Service) getScheduleDetail(c *gin.Context) {
 	for i := 0; i < items.Len(); i++ {
 		if schedule.Spec.Type != v1alpha1.ScheduleTypeWorkflow {
 			item := items.Index(i).Addr().Interface().(v1alpha1.InnerObject)
-			UIDList = append(UIDList, item.GetChaos().UID)
+			UIDList = append(UIDList, string(item.GetUID()))
 		} else {
 			workflow := items.Index(i).Addr().Interface().(*v1alpha1.Workflow)
 			UIDList = append(UIDList, string(workflow.UID))
