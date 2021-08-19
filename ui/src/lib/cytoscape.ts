@@ -24,18 +24,10 @@ function generateWorkflowNodes(detail: WorkflowSingle) {
   function toCytoscapeNode(node: Node): RecursiveNodeDefinition {
     const { name, type, state, template } = node
 
-    if (type === 'SerialNode' && node.serial!.children.length) {
-      return [
-        type,
-        node.serial!.children.filter((d) => d.name).map((d) => toCytoscapeNode(nodeMap.get(d.name)!)),
-        node.name,
-      ]
-    } else if (type === 'ParallelNode' && node.parallel!.children.length) {
-      return [
-        type,
-        node.parallel!.children.filter((d) => d.name).map((d) => toCytoscapeNode(nodeMap.get(d.name)!)),
-        node.name,
-      ]
+    if (type === 'SerialNode' && node.serial!.length) {
+      return [type, node.serial!.filter((d) => d.name).map((d) => toCytoscapeNode(nodeMap.get(d.name)!)), node.name]
+    } else if (type === 'ParallelNode' && node.parallel!.length) {
+      return [type, node.parallel!.filter((d) => d.name).map((d) => toCytoscapeNode(nodeMap.get(d.name)!)), node.name]
     } else if (type === 'TaskNode' && node.conditional_branches!.length) {
       return [
         type,
