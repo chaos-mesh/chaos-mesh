@@ -73,6 +73,14 @@ controllerManager:
 
   podAnnotations: {}
 
+  # A list of controllers to enable. "*" enables all controllers by default.
+  enabledControllers:
+  - "*" 
+
+  # A list of webhooks to enable. "*" enables all webhooks by default.
+  enabledWebhooks:
+  - "*"
+
   # This is Dangerous. Run only on temporary clusters.
   allowHostNetworkTesting: false
 
@@ -124,12 +132,6 @@ chaosDaemon:
   # config below to use containerd as the runtime in chaos-daemon.
   # runtime: containerd
   # socketPath: /run/containerd/containerd.sock
-
-  # A list of controllers to enable. "*" enables all controllers by default.
-  enabledControllers: "*"
-
-  # A list of webhooks to enable. "*" enables all webhooks by default.
-  enabledWebhooks: "*"
 
   resources: {}
     # We usually recommend not to specify default resources and to leave this as a conscious
