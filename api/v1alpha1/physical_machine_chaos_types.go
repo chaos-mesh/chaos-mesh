@@ -127,7 +127,8 @@ func (obj *PhysicalMachineChaos) GetSelectorSpecs() map[string]interface{} {
 }
 
 type PhysicalMachineSelector struct {
-	Address []string `json:"address" webhook:"Address"`
+	//Address []string `json:"address" webhook:"Address"`
+	Address []string `json:"address"`
 }
 
 func (selector *PhysicalMachineSelector) Id() string {
@@ -137,7 +138,8 @@ func (selector *PhysicalMachineSelector) Id() string {
 type ExpInfo struct {
 	// the experiment ID
 	// +optional
-	UID string `json:"uid,omitempty" webhook:"ExpUID"`
+	//UID string `json:"uid,omitempty" webhook:"ExpUID"`
+	UID string `json:"uid,omitempty"`
 
 	// the subAction, generate atomaticly
 	// +optional

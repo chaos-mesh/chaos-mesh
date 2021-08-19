@@ -53,6 +53,7 @@ spec:
                 - jvm-rule-data
                 type: string
               address:
+                description: Address []string `json:"address" webhook:"Address"`
                 items:
                   type: string
                 type: array
@@ -282,7 +283,7 @@ spec:
                     type: string
                 type: object
               uid:
-                description: the experiment ID
+                description: the experiment ID UID string `json:"uid,omitempty" webhook:"ExpUID"`
                 type: string
             required:
             - action
