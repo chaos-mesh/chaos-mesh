@@ -15,30 +15,43 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"os"
-	"os/signal"
 
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v2"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
 )
 
-// forwardCmd represents the forward command
-var forwardCmd = &cobra.Command{
-	Use:   "forward",
-	Short: "Forward ctrl api port to local",
+// schemaCmd represents the schema command
+var schemaCmd = &cobra.Command{
+	Use:   "schema",
+	Short: "get the graphql schema of ctrl server",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		ctx := context.Background()
 		// TODO: input ns by args
-		cancel, port, err := common.ForwardCtrlServer(context.Background(), nil)
+		cancel, port, err := common.ForwardCtrlServer(ctx, nil)
 		if err != nil {
 			return err
 		}
-		fmt.Printf("forward ctrl api to local port(%d)", port)
-		c := make(chan os.Signal, 1)
-		signal.Notify(c, os.Interrupt)
-		<-c
-		cancel()
+		defer cancel()
+
+		client, err := common.NewCtrlClient(ctx, fmt.Sprintf("http://127.0.0.1:%d/query", port))
+		if err != nil {
+			return fmt.Errorf("fail to init ctrl client: %s", err)
+		}
+
+		if client.Schema == nil {
+			return errors.New("fail to fetch schema")
+		}
+
+		data, err := yaml.Marshal(client.Schema)
+		if err != nil {
+			return err
+		}
+
+		fmt.Print(string(data))
 		return nil
 	},
 }

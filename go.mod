@@ -37,10 +37,12 @@ require (
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/golang/mock v1.5.0
 	github.com/golang/protobuf v1.4.3
+	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/mux v1.7.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/hashicorp/golang-lru v0.5.5-0.20210104140557-80c98217689d
+	github.com/hasura/go-graphql-client v0.2.0
 	github.com/iancoleman/strcase v0.1.3
 	github.com/jinzhu/gorm v1.9.12
 	github.com/joomcode/errorx v1.0.1
@@ -79,6 +81,7 @@ require (
 	go.uber.org/fx v1.12.0
 	go.uber.org/zap v1.15.0
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
+	golang.org/x/net v0.0.0-20210813160813-60bc85c4be6d // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c // indirect
 	golang.org/x/time v0.0.0-20201208040808-7e3f01d25324

@@ -39,7 +39,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
-	"github.com/chaos-mesh/chaos-mesh/pkg/portforward"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
 )
 
@@ -328,26 +327,6 @@ func GetPidFromPod(ctx context.Context, pod v1.Pod, daemon v1.Pod) (uint32, erro
 		return 0, errors.Wrapf(err, "failed get pid from pod %s/%s", pod.GetNamespace(), pod.GetName())
 	}
 	return res.Pid, nil
-}
-
-func forwardPorts(ctx context.Context, pod v1.Pod, port uint16) (context.CancelFunc, uint16, error) {
-	commonRestClientGetter := NewCommonRestClientGetter()
-	fw, err := portforward.NewPortForwarder(ctx, commonRestClientGetter, false)
-	if err != nil {
-		return nil, 0, errors.Wrap(err, "failed to create port forwarder")
-	}
-	_, localPort, pfCancel, err := portforward.ForwardOnePort(fw, pod.Namespace, pod.Name, port)
-	return pfCancel, localPort, err
-}
-
-func ForwardSvcPorts(ctx context.Context, ns, svc string, port uint16) (context.CancelFunc, uint16, error) {
-	commonRestClientGetter := NewCommonRestClientGetter()
-	fw, err := portforward.NewPortForwarder(ctx, commonRestClientGetter, false)
-	if err != nil {
-		return nil, 0, errors.Wrap(err, "failed to create port forwarder")
-	}
-	_, localPort, pfCancel, err := portforward.ForwardOnePort(fw, ns, svc, port)
-	return pfCancel, localPort, err
 }
 
 // Log print log of pod
