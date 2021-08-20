@@ -36,7 +36,7 @@ func (lister *ActiveLister) ListActiveJobs(ctx context.Context, schedule *v1alph
 		return nil, errors.Errorf("Unknown type: %s", schedule.Spec.Type)
 	}
 
-	list := kind.ChaosList.DeepCopyObject()
+	list := kind.GenericChaosList.DeepCopyObject()
 	err := lister.List(ctx, list, client.MatchingLabels{"managed-by": schedule.Name})
 	if err != nil {
 		lister.Log.Error(err, "fail to list chaos")

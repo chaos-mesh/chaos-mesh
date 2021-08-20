@@ -91,7 +91,9 @@ rules:
     resources:
       - subjectaccessreviews
     verbs: [ "create" ]
-
+  - apiGroups: [ "" ]
+    resources: [ "pods/exec" ]
+    verbs: [ "create" ]
 ---
 # bindings cluster level
 kind: ClusterRoleBinding
