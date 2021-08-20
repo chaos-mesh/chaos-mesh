@@ -154,7 +154,7 @@ func (s *Service) get(c *gin.Context) {
 
 	chaosKind, ok := v1alpha1.AllKinds()[exp.Kind]
 	if ok {
-		json.Unmarshal([]byte(exp.Experiment), chaosKind.Chaos)
+		_ = json.Unmarshal([]byte(exp.Experiment), chaosKind.Chaos)
 	}
 	chaos := chaosKind.Chaos
 

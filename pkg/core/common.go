@@ -57,7 +57,7 @@ func (f *Filter) toMap() map[string]interface{} {
 	var fMap map[string]interface{}
 
 	marshal, _ := json.Marshal(f)
-	json.Unmarshal(marshal, &fMap)
+	_ = json.Unmarshal(marshal, &fMap)
 
 	return fMap
 }
