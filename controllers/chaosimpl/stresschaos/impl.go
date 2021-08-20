@@ -36,6 +36,8 @@ type Impl struct {
 	decoder *utils.ContianerRecordDecoder
 }
 
+var _ common.ChaosImpl = (*Impl)(nil)
+
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	decodedContainer, err := impl.decoder.DecodeContainerRecord(ctx, records[index])
 	pbClient := decodedContainer.PbClient

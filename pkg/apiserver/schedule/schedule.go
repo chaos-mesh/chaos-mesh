@@ -245,7 +245,7 @@ func (s *Service) findScheduleInCluster(c *gin.Context, kubeCli client.Client, n
 		return nil
 	}
 
-	chaosList := chaosKind.ChaosList.DeepCopyObject()
+	chaosList := chaosKind.GenericChaosList.DeepCopyObject()
 	err = kubeCli.List(context.Background(), chaosList, &client.ListOptions{
 		Namespace:     sch.Namespace,
 		LabelSelector: selector,
@@ -260,7 +260,7 @@ func (s *Service) findScheduleInCluster(c *gin.Context, kubeCli client.Client, n
 	for i := 0; i < items.Len(); i++ {
 		if sch.Spec.Type != v1alpha1.ScheduleTypeWorkflow {
 			item := items.Index(i).Addr().Interface().(v1alpha1.InnerObject)
-			UIDList = append(UIDList, item.GetChaos().UID)
+			UIDList = append(UIDList, string(item.GetUID()))
 		} else {
 			workflow := items.Index(i).Addr().Interface().(*v1alpha1.Workflow)
 			UIDList = append(UIDList, string(workflow.UID))

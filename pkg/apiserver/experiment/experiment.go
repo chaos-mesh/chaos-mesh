@@ -124,28 +124,28 @@ func (s *Service) list(c *gin.Context) {
 			continue
 		}
 
-		if err := kubeCli.List(context.Background(), list.ChaosList, &client.ListOptions{Namespace: ns}); err != nil {
+		if err := kubeCli.List(context.Background(), list.GenericChaosList, &client.ListOptions{Namespace: ns}); err != nil {
 			u.SetAPImachineryError(c, err)
 
 			return
 		}
 
-		items := reflect.ValueOf(list.ChaosList).Elem().FieldByName("Items")
+		items := reflect.ValueOf(list.GenericChaosList).Elem().FieldByName("Items")
 		for i := 0; i < items.Len(); i++ {
 			item := items.Index(i).Addr().Interface().(v1alpha1.InnerObject)
-			chaos := item.GetChaos()
+			chaosName := item.GetName()
 
-			if name != "" && chaos.Name != name {
+			if name != "" && chaosName != name {
 				continue
 			}
 
 			exps = append(exps, &Experiment{
 				ObjectBase: core.ObjectBase{
-					Namespace: chaos.Namespace,
-					Name:      chaos.Name,
-					Kind:      chaos.Kind,
-					UID:       chaos.UID,
-					Created:   chaos.StartTime.Format(time.RFC3339),
+					Namespace: item.GetNamespace(),
+					Name:      chaosName,
+					Kind:      item.GetObjectKind().GroupVersionKind().Kind,
+					UID:       string(item.GetUID()),
+					Created:   item.GetCreationTimestamp().Format(time.RFC3339),
 				},
 				Status: status.GetChaosStatus(item),
 			})
@@ -261,23 +261,23 @@ func (s *Service) findChaosInCluster(c *gin.Context, kubeCli client.Client, name
 		return nil
 	}
 
-	getChaosResult := reflect.ValueOf(chaos).MethodByName("GetChaos").Call(nil)[0].Elem()
+	kind := chaos.GetObjectKind().GroupVersionKind().Kind
 
 	return &Detail{
 		Experiment: Experiment{
 			ObjectBase: core.ObjectBase{
-				Namespace: reflect.ValueOf(chaos).Elem().FieldByName("Namespace").String(),
-				Name:      reflect.ValueOf(chaos).Elem().FieldByName("Name").String(),
-				Kind:      getChaosResult.FieldByName("Kind").String(),
-				UID:       getChaosResult.FieldByName("UID").String(),
-				Created:   getChaosResult.FieldByName("StartTime").Interface().(time.Time).Format(time.RFC3339),
+				Namespace: reflect.ValueOf(chaos).MethodByName("GetNamespace").Call(nil)[0].String(),
+				Name:      reflect.ValueOf(chaos).MethodByName("GetName").Call(nil)[0].String(),
+				Kind:      kind,
+				UID:       reflect.ValueOf(chaos).MethodByName("GetUID").Call(nil)[0].String(),
+				Created:   reflect.ValueOf(chaos).MethodByName("GetCreationTimestamp").Call(nil)[0].Interface().(metav1.Time).Format(time.RFC3339),
 			},
 			Status: status.GetChaosStatus(chaos.(v1alpha1.InnerObject)),
 		},
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
-				APIVersion: v1alpha1.GroupVersion.String(),
-				Kind:       getChaosResult.FieldByName("Kind").String(),
+				APIVersion: chaos.GetObjectKind().GroupVersionKind().GroupVersion().String(),
+				Kind:       kind,
 			},
 			Meta: core.KubeObjectMeta{
 				Namespace:   reflect.ValueOf(chaos).Elem().FieldByName("Namespace").String(),
@@ -640,12 +640,12 @@ func (s *Service) state(c *gin.Context) {
 		list := kinds[index]
 
 		g.Go(func() error {
-			if err := kubeCli.List(ctx, list.ChaosList, listOptions...); err != nil {
+			if err := kubeCli.List(ctx, list.GenericChaosList, listOptions...); err != nil {
 				return err
 			}
 			m.Lock()
 
-			items := reflect.ValueOf(list.ChaosList).Elem().FieldByName("Items")
+			items := reflect.ValueOf(list.GenericChaosList).Elem().FieldByName("Items")
 			for i := 0; i < items.Len(); i++ {
 				item := items.Index(i).Addr().Interface().(v1alpha1.InnerObject)
 				s := status.GetChaosStatus(item)

@@ -92,7 +92,7 @@ var log = ctrl.Log.WithName("api")
 type InnerObject interface {
 	IsDeleted() bool
 	IsPaused() bool
-	GetChaos() *ChaosInstance
+	GenericChaos
 	DurationExceeded(time.Time) (bool, time.Duration, error)
 	IsOneShot() bool
 	StatefulObject
@@ -102,7 +102,6 @@ type InnerObject interface {
 
 // StatefulObject defines a basic Object that can get the status
 type StatefulObject interface {
-	runtime.Object
 	GetStatus() *ChaosStatus
 	GetObjectMeta() *metav1.ObjectMeta
 }
@@ -112,27 +111,4 @@ type StatefulObject interface {
 type MetaObject interface {
 	runtime.Object
 	GetObjectMeta() *metav1.ObjectMeta
-}
-
-// +kubebuilder:object:generate=false
-
-// ChaosInstance defines some common attribute for a chaos
-type ChaosInstance struct {
-	Name      string
-	Namespace string
-	Kind      string
-	StartTime time.Time
-	EndTime   time.Time
-	Action    string
-	Duration  string
-	Status    ChaosStatus
-	UID       string
-}
-
-// +kubebuilder:object:generate=false
-
-// ChaosList defines a common interface for chaos lists
-type ChaosList interface {
-	runtime.Object
-	ListChaos() []*ChaosInstance
 }

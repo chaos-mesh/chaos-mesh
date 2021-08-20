@@ -70,17 +70,6 @@ func Test{{.Type}}GetDuration(t *testing.T) {
 	chaos.Spec.GetDuration()
 }
 
-func Test{{.Type}}GetChaos(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &{{.Type}}{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.GetChaos()
-}
-
 func Test{{.Type}}GetStatus(t *testing.T) {
 	g := NewGomegaWithT(t)
 

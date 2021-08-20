@@ -217,12 +217,12 @@ func GetPods(ctx context.Context, chaosName string, status v1alpha1.ChaosStatus,
 func GetChaosList(ctx context.Context, chaosType string, chaosName string, ns string, c client.Client) ([]runtime.Object, []string, error) {
 	chaosType = upperCaseChaos(strings.ToLower(chaosType))
 	allKinds := v1alpha1.AllKinds()
-	chaosListInterface := allKinds[chaosType].ChaosList
+	chaosListInterface := allKinds[chaosType].GenericChaosList
 
 	if err := c.List(ctx, chaosListInterface, client.InNamespace(ns)); err != nil {
 		return nil, nil, errors.Wrapf(err, "failed to get chaosList with namespace %s", ns)
 	}
-	chaosList := chaosListInterface.ListChaos()
+	chaosList := chaosListInterface.GetItems()
 	if len(chaosList) == 0 {
 		return nil, nil, fmt.Errorf("no chaos is found, please check your input")
 	}
@@ -230,13 +230,13 @@ func GetChaosList(ctx context.Context, chaosType string, chaosName string, ns st
 	var retList []runtime.Object
 	var retNameList []string
 	for _, ch := range chaosList {
-		if chaosName == "" || chaosName == ch.Name {
-			chaos, err := getChaos(ctx, chaosType, ch.Name, ns, c)
+		if chaosName == "" || chaosName == ch.GetName() {
+			chaos, err := getChaos(ctx, chaosType, ch.GetName(), ns, c)
 			if err != nil {
 				return nil, nil, err
 			}
 			retList = append(retList, chaos)
-			retNameList = append(retNameList, ch.Name)
+			retNameList = append(retNameList, ch.GetName())
 		}
 	}
 	if len(retList) == 0 {
@@ -337,6 +337,16 @@ func forwardPorts(ctx context.Context, pod v1.Pod, port uint16) (context.CancelF
 		return nil, 0, errors.Wrap(err, "failed to create port forwarder")
 	}
 	_, localPort, pfCancel, err := portforward.ForwardOnePort(fw, pod.Namespace, pod.Name, port)
+	return pfCancel, localPort, err
+}
+
+func ForwardSvcPorts(ctx context.Context, ns, svc string, port uint16) (context.CancelFunc, uint16, error) {
+	commonRestClientGetter := NewCommonRestClientGetter()
+	fw, err := portforward.NewPortForwarder(ctx, commonRestClientGetter, false)
+	if err != nil {
+		return nil, 0, errors.Wrap(err, "failed to create port forwarder")
+	}
+	_, localPort, pfCancel, err := portforward.ForwardOnePort(fw, ns, svc, port)
 	return pfCancel, localPort, err
 }
 
