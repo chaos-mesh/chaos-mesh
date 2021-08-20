@@ -75,6 +75,10 @@ spec:
           - name: PPROF_ADDR
             value: ":10081"
           {{- end }}
+          {{- if .Values.enableCtrlServer }}
+          - name: CTRL_ADDR
+            value: ":10082"
+          {{- end }}
           - name: CHAOS_DNS_SERVICE_NAME
             value: {{ .Values.dnsServer.name }}
           - name: CHAOS_DNS_SERVICE_PORT
@@ -114,6 +118,10 @@ spec:
         {{- if .Values.enableProfiling }}
           - name: pprof
             containerPort: 10081
+        {{- end }}
+        {{- if .Values.enableCtrlServer }}
+          - name: ctrl
+            containerPort: 10082
         {{- end }}
       {{- if .Values.chaosDlv.enable }}
       - name: chaos-mesh-dlv

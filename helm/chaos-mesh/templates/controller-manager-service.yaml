@@ -19,6 +19,12 @@ spec:
       protocol: TCP
       name: pprof
   {{- end }}
+  {{- if .Values.enableCtrlServer }}
+    - port: 10082
+      targetPort: ctrl
+      protocol: TCP
+      name: ctrl
+  {{- end }}
   {{- if .Values.chaosDlv.enable }}
     - port: 8000
       targetPort: dlv
