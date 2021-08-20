@@ -222,9 +222,6 @@ def call(BUILD_BRANCH, CREDENTIALS_ID) {
 						]
 					}
 
-					sh """
-					git fetch --no-tags
-					"""
 					def modifiedFiles = sh(script: "git diff --name-only origin/master...", returnStdout: true).trim().split('\n')
 					List modifiedMarkdown = modifiedFiles.findAll { it.endsWith(".md") }
 					echo modifiedFiles
