@@ -495,8 +495,6 @@ func internalUpdate(kubeCli client.Client, chaos runtime.Object) error {
 		return err
 	}
 
-	reflect.ValueOf(chaos).Elem().FieldByName("ObjectMeta").FieldByName("ResourceVersion").SetString(reflect.ValueOf(chaos).Elem().FieldByName("ObjectMeta").FieldByName("ResourceVersion").String())
-
 	return kubeCli.Update(context.Background(), chaos)
 }
 
