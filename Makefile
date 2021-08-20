@@ -195,7 +195,7 @@ clean:
 boilerplate:
 	./hack/verify-boilerplate.sh
 
-image: image-chaos-daemon image-chaos-mesh image-chaos-dashboard
+image: image-chaos-daemon image-chaos-mesh image-chaos-dashboard $(if $(DEBUGGER), image-chaos-dlv)
 
 e2e-image: image-e2e-helper
 
