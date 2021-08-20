@@ -224,10 +224,10 @@ def call(BUILD_BRANCH, CREDENTIALS_ID) {
 
 					def modifiedFiles = sh(script: "git diff --name-only origin/master...", returnStdout: true).trim().split('\n')
 					List modifiedMarkdown = modifiedFiles.findAll { it.endsWith(".md") }
-					echo modifiedFiles
-					echo modifiedMarkdown
+					echo modifiedFiles.join(",")
+					echo modifiedMarkdown.join(",")
 					SKIP_TEST = modifiedFiles.size() == modifiedMarkdown.size()
-					echo SKIP_TEST
+					echo String.valueOf(SKIP_TEST)
 
 					stash excludes: "vendor/**,deploy/**", name: "chaos-mesh"
 				}
