@@ -373,14 +373,11 @@ func (s *Service) createStressChaos(exp *core.ExperimentInfo, kubeCli client.Cli
 					Mode:     v1alpha1.PodMode(exp.Scope.Mode),
 					Value:    exp.Scope.Value,
 				},
+				ContainerNames: exp.Target.StressChaos.ContainerNames,
 			},
 			Stressors:         stressors,
 			StressngStressors: exp.Target.StressChaos.StressngStressors,
 		},
-	}
-
-	if exp.Target.StressChaos.ContainerName != nil {
-		chaos.Spec.ContainerNames = []string{*exp.Target.StressChaos.ContainerName}
 	}
 
 	if exp.Scheduler.Duration != "" {

@@ -98,10 +98,10 @@ const Stress: React.FC<StressProps> = ({ onSubmit }) => {
               label="Options of stress-ng"
               helperText="The options of stress-ng, treated as a string"
             />
-            <TextField
-              name="container_name"
-              label="Container Name"
-              helperText="Optional. Fill the container name you want to inject stress in"
+            <LabelField
+              name="container_names"
+              label="Container Names"
+              helperText="Optional. Type string and end with a space to generate the container names. If it's empty, all containers will be injected"
             />
           </AdvancedOptions>
 
