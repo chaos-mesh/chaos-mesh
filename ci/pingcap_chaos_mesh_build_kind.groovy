@@ -223,10 +223,17 @@ def call(BUILD_BRANCH, CREDENTIALS_ID) {
 					}
 
 					def modifiedFiles = sh(script: "git diff --name-only origin/master...", returnStdout: true).trim().split('\n')
-					List modifiedMarkdown = modifiedFiles.findAll { it.endsWith(".groovy") }
-					echo modifiedFiles.join(",")
-					echo modifiedMarkdown.join(",")
-					SKIP_TEST = modifiedFiles.size() == modifiedMarkdown.size()
+					List ignoredModifications = modifiedFiles.findAll { 
+						// all files without extension and is not Makefile will be regarded as markdown file
+						it.endsWith('.md') || 
+							(!it.contains('.') && it != 'Makefile') || 
+							it.startsWith('ui') || 
+							it.startsWith('docs') || 
+							it.startsWith('static')
+					}
+					echo 'Modified Files: ' + modifiedFiles.join(',')
+					echo 'Modified Ignored Files: ' + ignoredModifications.join(',')
+					SKIP_TEST = modifiedFiles.size() == ignoredModifications.size()
 					echo String.valueOf(SKIP_TEST)
 
 					stash excludes: "vendor/**,deploy/**", name: "chaos-mesh"
