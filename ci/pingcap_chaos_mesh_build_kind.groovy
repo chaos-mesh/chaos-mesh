@@ -247,7 +247,7 @@ def call(BUILD_BRANCH, CREDENTIALS_ID) {
                 build("v1.20", "${GLOBALS} GINKGO_NODES=6 KUBE_VERSION=v1.20.2 ./hack/e2e.sh -- --ginkgo.focus='Basic'")
         }
 		builds.failFast = false
-		if !SKIP_TEST {
+		if (!SKIP_TEST) {
 			parallel builds
 		}
 
