@@ -18,9 +18,9 @@ cd $cur
 
 echo "download and deploy chaosd"
 
-#curl -fsSL -o chaosd-v1.0.1-linux-amd64.tar.gz https://mirrors.chaos-mesh.org/chaosd-v1.0.1-linux-amd64.tar.gz
-#tar zxvf chaosd-v1.0.1-linux-amd64.tar.gz
-#./chaosd-v1.0.1-linux-amd64/chaosd server --port 31768 &
+curl -fsSL -o chaosd-v1.0.1-linux-amd64.tar.gz https://mirrors.chaos-mesh.org/chaosd-v1.0.1-linux-amd64.tar.gz
+tar zxvf chaosd-v1.0.1-linux-amd64.tar.gz
+./chaosd-v1.0.1-linux-amd64/chaosd server --port 31768 > chaosd.log 2>&1 &
 
 function judge_stress() {
     hava_stress=$1
@@ -52,10 +52,9 @@ function judge_stress() {
 }
 
 echo "create physical machine chaos"
-#localIP=`ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | head -1`
-localIP="172.16.112.130"
+localIP=`ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | head -1`
 
-#cp chaos.yaml chaos_tmp.yaml
+cp chaos.yaml chaos_tmp.yaml
 sed -i 's/CHAOSD_ADDRESS/'$localIP'\:31768/g' chaos_tmp.yaml
 kubectl apply -f chaos_tmp.yaml
 judge_stress true
@@ -83,5 +82,10 @@ judge_stress false
 
 
 echo "****** finish physical machine chaos test ******"
+# clean
+rm chaosd-v1.0.1-linux-amd64.tar.gz
+rm -rf chaosd-v1.0.1-linux-amd64
+rm *_tmp.yaml
+rm chaosd.log
 
 cd -
