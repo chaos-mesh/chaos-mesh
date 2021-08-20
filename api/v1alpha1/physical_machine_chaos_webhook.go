@@ -22,7 +22,6 @@ import (
 	"github.com/google/uuid"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
-	//"github.com/chaos-mesh/chaos-mesh/api/v1alpha1/genericwebhook"
 )
 
 // log is for logging in this package.

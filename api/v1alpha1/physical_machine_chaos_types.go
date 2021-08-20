@@ -58,27 +58,6 @@ const (
 	PMJVMStressAction PhysicalMachineChaosAction = "jvm-stress"
 
 	PMJVMRuleDataAction PhysicalMachineChaosAction = "jvm-rule-data"
-
-	/*
-
-		// StressAction represents generates stress on the physical machine.
-		StressAction PhysicalMachineChaosAction = "stress"
-
-		// NetworkAction represents inject fault into network on the physical machine.
-		NetworkAction PhysicalMachineChaosAction = "network"
-
-		// DiskAction represents attack the disk on the physical machine.
-		DiskAction PhysicalMachineChaosAction = "disk"
-
-		// HostAction represents attack the host.
-		HostAction PhysicalMachineChaosAction = "host"
-
-		// ProcessAction represents attack the process on the physical machine.
-		ProcessAction PhysicalMachineChaosAction = "process"
-
-		// JVMAction represents attack JVM on the physical machine.
-		JVMAction PhysicalMachineChaosAction = "jvm"
-	*/
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
