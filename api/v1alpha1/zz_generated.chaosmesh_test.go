@@ -558,17 +558,6 @@ func TestPhysicalMachineChaosGetDuration(t *testing.T) {
 	chaos.Spec.GetDuration()
 }
 
-func TestPhysicalMachineChaosGetChaos(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	chaos := &PhysicalMachineChaos{}
-	err := faker.FakeData(chaos)
-
-	g.Expect(err).To(BeNil())
-
-	chaos.GetChaos()
-}
-
 func TestPhysicalMachineChaosGetStatus(t *testing.T) {
 	g := NewGomegaWithT(t)
 

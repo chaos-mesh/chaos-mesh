@@ -1229,7 +1229,7 @@ spec:
                         type: string
                     type: object
                   duration:
-                    description: Duration represents the duration of the chaos action
+                    description: Duration represents the duration of the chaos action Duration represents the duration of the chaos action
                     type: string
                   jvm-exception:
                     properties:
@@ -3010,7 +3010,7 @@ spec:
                                   type: string
                               type: object
                             duration:
-                              description: Duration represents the duration of the chaos action
+                              description: Duration represents the duration of the chaos action Duration represents the duration of the chaos action
                               type: string
                             jvm-exception:
                               properties:
@@ -4521,7 +4521,7 @@ spec:
                                       type: string
                                   type: object
                                 duration:
-                                  description: Duration represents the duration of the chaos action
+                                  description: Duration represents the duration of the chaos action Duration represents the duration of the chaos action
                                   type: string
                                 jvm-exception:
                                   properties:

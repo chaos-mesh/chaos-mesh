@@ -112,7 +112,8 @@ type PhysicalMachineChaosSpec struct {
 
 	// Duration represents the duration of the chaos action
 	// +optional
-	Duration *string `json:"duration,omitempty"`
+	// Duration represents the duration of the chaos action
+	Duration *string `json:"duration,omitempty" webhook:"Duration"`
 }
 
 // PhysicalMachineChaosStatus defines the observed state of PhysicalMachineChaos

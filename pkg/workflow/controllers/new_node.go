@@ -139,7 +139,7 @@ func conversionSchedule(origin *v1alpha1.ChaosOnlyScheduleSpec) *v1alpha1.Schedu
 				PodChaos:     origin.EmbedChaos.PodChaos,
 				StressChaos:  origin.EmbedChaos.StressChaos,
 				TimeChaos:    origin.EmbedChaos.TimeChaos,
-				//PhysicalMachineChaos:
+				PhysicalMachineChaos: origin.EmbedChaos.PhysicalMachineChaos,
 			},
 			Workflow: nil,
 		},

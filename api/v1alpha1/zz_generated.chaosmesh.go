@@ -1118,31 +1118,6 @@ func (in *PhysicalMachineChaosSpec) GetDuration() (*time.Duration, error) {
 	return &duration, nil
 }
 
-// GetChaos would return the a record for chaos
-func (in *PhysicalMachineChaos) GetChaos() *ChaosInstance {
-	instance := &ChaosInstance{
-		Name:      in.Name,
-		Namespace: in.Namespace,
-		Kind:      KindPhysicalMachineChaos,
-		StartTime: in.CreationTimestamp.Time,
-		Action:    "",
-		UID:       string(in.UID),
-		Status:    in.Status.ChaosStatus,
-	}
-
-	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
-	if action.IsValid() {
-		instance.Action = action.String()
-	}
-	if in.Spec.Duration != nil {
-		instance.Duration = string(*in.Spec.Duration)
-	}
-	if in.DeletionTimestamp != nil {
-		instance.EndTime = in.DeletionTimestamp.Time
-	}
-	return instance
-}
-
 // GetStatus returns the status
 func (in *PhysicalMachineChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
@@ -1172,12 +1147,13 @@ type PhysicalMachineChaosList struct {
 }
 
 // ListChaos returns a list of chaos
-func (in *PhysicalMachineChaosList) ListChaos() []*ChaosInstance {
-	res := make([]*ChaosInstance, 0, len(in.Items))
+func (in *PhysicalMachineChaosList) ListChaos() []GenericChaos {
+	var result []GenericChaos
 	for _, item := range in.Items {
-		res = append(res, item.GetChaos())
+		item := item
+		result = append(result, &item)
 	}
-	return res
+	return result
 }
 
 func (in *PhysicalMachineChaos) DurationExceeded(now time.Time) (bool, time.Duration, error) {
@@ -1691,7 +1667,7 @@ func init() {
 	SchemeBuilder.Register(&PhysicalMachineChaos{}, &PhysicalMachineChaosList{})
 	all.register(KindPhysicalMachineChaos, &ChaosKind{
 		Chaos:     &PhysicalMachineChaos{},
-		ChaosList: &PhysicalMachineChaosList{},
+		GenericChaosList: &PhysicalMachineChaosList{},
 	})
 
 	SchemeBuilder.Register(&PodChaos{}, &PodChaosList{})
@@ -1755,7 +1731,7 @@ func init() {
 
 	allScheduleItem.register(KindPhysicalMachineChaos, &ChaosKind{
 		Chaos:     &PhysicalMachineChaos{},
-		ChaosList: &PhysicalMachineChaosList{},
+		GenericChaosList: &PhysicalMachineChaosList{},
 	})
 
 	allScheduleItem.register(KindPodChaos, &ChaosKind{
