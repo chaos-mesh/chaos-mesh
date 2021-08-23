@@ -40,7 +40,7 @@ type ChaosImplPair struct {
 	Object InnerObjectWithSelector
 	Impl   ChaosImpl
 
-	ObjectList v1alpha1.ChaosList
+	ObjectList v1alpha1.GenericChaosList
 	Controlls  []client.Object
 }
 

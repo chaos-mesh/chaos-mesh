@@ -74,6 +74,7 @@ func Execute() {
 
 	rootCmd.AddCommand(debugCommand)
 	rootCmd.AddCommand(completionCmd)
+	rootCmd.AddCommand(forwardCmd)
 	if err := rootCmd.Execute(); err != nil {
 		rootLogger.Error(err, "failed to execute cmd",
 			"errorVerbose", fmt.Sprintf("%+v", err),

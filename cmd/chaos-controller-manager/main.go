@@ -20,9 +20,11 @@ import (
 	"os"
 	"time"
 
+	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-logr/logr"
 	"go.uber.org/fx"
 	"golang.org/x/time/rate"
+	"k8s.io/client-go/kubernetes"
 	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"k8s.io/client-go/util/workqueue"
@@ -38,6 +40,8 @@ import (
 	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/metrics"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
+	"github.com/chaos-mesh/chaos-mesh/pkg/ctrlserver"
 	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
@@ -82,9 +86,11 @@ func main() {
 type RunParams struct {
 	fx.In
 
-	Mgr     ctrl.Manager
-	Logger  logr.Logger
-	AuthCli *authorizationv1.AuthorizationV1Client
+	Mgr                 ctrl.Manager
+	Clientset           *kubernetes.Clientset
+	Logger              logr.Logger
+	AuthCli             *authorizationv1.AuthorizationV1Client
+	DaemonClientBuilder *chaosdaemon.ChaosDaemonClientBuilder
 
 	Controllers []types.Controller `group:"controller"`
 	Objs        []types.Object     `group:"objs"`
@@ -136,6 +142,16 @@ func Run(params RunParams) error {
 				setupLog.Error(err, "unable to start pprof server")
 				os.Exit(1)
 			}
+		}()
+	}
+
+	if ccfg.ControllerCfg.CtrlAddr != "" {
+		go func() {
+			mutex := http.NewServeMux()
+			mutex.Handle("/", playground.Handler("GraphQL playground", "/query"))
+			mutex.Handle("/query", ctrlserver.Handler(params.Logger, mgr.GetClient(), params.Clientset, params.DaemonClientBuilder))
+			setupLog.Info("setup ctrlserver", "addr", ccfg.ControllerCfg.CtrlAddr)
+			setupLog.Error(http.ListenAndServe(ccfg.ControllerCfg.CtrlAddr, mutex), "unable to start ctrlserver")
 		}()
 	}
 

@@ -92,7 +92,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 						}
 
 						r.Recorder.Event(schedule, recorder.ScheduleSkipRemoveHistory{
-							RunningName: innerObj.GetChaos().Name,
+							RunningName: innerObj.GetName(),
 						})
 						continue
 					}

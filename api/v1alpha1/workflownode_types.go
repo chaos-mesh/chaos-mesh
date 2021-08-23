@@ -151,14 +151,13 @@ const (
 	RerunBySpecChanged          string = "RerunBySpecChanged"
 )
 
-// TODO: GenericChaosList/GenericChaos is very similar to ChaosList/ChaosInstance, maybe we could combine them later.
-
 // GenericChaosList only use to list GenericChaos by certain EmbedChaos
 // +kubebuilder:object:generate=false
 type GenericChaosList interface {
 	runtime.Object
 	metav1.ListInterface
 	GetItems() []GenericChaos
+	DeepCopyList() GenericChaosList
 }
 
 // GenericChaos could be a place holder for any kubernetes Kind

@@ -106,7 +106,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 					r.Recorder.Event(schedule, recorder.ScheduleForbid{
 						RunningName: item.GetObjectMeta().Name,
 					})
-					r.Log.Info("forbid to spawn new chaos", "running", item.GetChaos().Name)
+					r.Log.Info("forbid to spawn new chaos", "running", item.GetName())
 					break
 				}
 			} else {
@@ -116,7 +116,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 					r.Recorder.Event(schedule, recorder.ScheduleForbid{
 						RunningName: workflow.GetObjectMeta().Name,
 					})
-					r.Log.Info("forbid to spawn new workflow", "running", workflow.GetChaos().Name)
+					r.Log.Info("forbid to spawn new workflow", "running", workflow.GetName())
 					break
 				}
 			}

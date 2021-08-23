@@ -43,6 +43,8 @@ type Impl struct {
 	builder *podiochaosmanager.Builder
 }
 
+var _ common.ChaosImpl = (*Impl)(nil)
+
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	// The only possible phase to get in here is "Not Injected" or "Not Injected/Wait"
 
@@ -183,7 +185,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		if k8sError.IsNotFound(err) {
 			return v1alpha1.NotInjected, nil
 		}
-		return v1alpha1.NotInjected, err
+		return v1alpha1.Injected, err
 	}
 
 	source := iochaos.Namespace + "/" + iochaos.Name
