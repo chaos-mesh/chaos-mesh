@@ -52,31 +52,52 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	action, subAction := actions[0], actions[1]
 	physicalMachinechaos.Spec.ExpInfo.Action = subAction
 
+	/*
+		transform ExpInfo in PhysicalMachineChaos to json data required by chaosd
+		for example:
+		    ExpInfo: &ExpInfo {
+			    UID: "123",
+				Action: "cpu",
+				StressCPU: &StressCPU {
+					Load: 1,
+					Workers: 1,
+				}
+			}
+
+			transform to json data: "{\"uid\":\"123\",\"action\":\"cpu\",\"load\":1,\"workers\":1}
+	*/
+	var expInfoMap map[string]interface{}
+	expInfoBytes, _ := json.Marshal(physicalMachinechaos.Spec.ExpInfo)
+	err := json.Unmarshal(expInfoBytes, &expInfoMap)
+	if err != nil {
+		impl.Log.Error(err, "fail to unmarshal experiment info")
+		return v1alpha1.NotInjected, err
+	}
+	configKV, ok := expInfoMap[string(physicalMachinechaos.Spec.Action)].(map[string]interface{})
+	if !ok {
+		err = errors.New("transform action config to map failed")
+		impl.Log.Error(err, "")
+		return v1alpha1.NotInjected, err
+	}
+	for k, v := range configKV {
+		expInfoMap[k] = v
+	}
+	delete(expInfoMap, string(physicalMachinechaos.Spec.Action))
+
+	expInfoBytes, err = json.Marshal(expInfoMap)
+	if err != nil {
+		impl.Log.Error(err, "fail to marshal experiment info")
+		return v1alpha1.NotInjected, err
+	}
+
 	for _, address := range addressArray {
 		url := fmt.Sprintf("%s/api/attack/%s", address, action)
-
-		/*
-			var objmap map[string]interface{}
-			err := json.Unmarshal([]byte(physicalMachinechaos.Spec.ExpInfo), &objmap)
-			if err != nil {
-				impl.Log.Error(err, "fail to unmarshal experiment info")
-				return v1alpha1.NotInjected, err
-			}
-			objmap["uid"] = physicalMachinechaos.Spec.UID
-		*/
-
-		expInfo, err := json.Marshal(physicalMachinechaos.Spec.ExpInfo)
-		if err != nil {
-			impl.Log.Error(err, "fail to marshal experiment info")
-			return v1alpha1.NotInjected, err
-		}
-
-		req, err := http.NewRequest("POST", url, bytes.NewBuffer(expInfo))
+		impl.Log.Info("HTTP request", "address", address, "data", string(expInfoBytes))
+		req, err := http.NewRequest("POST", url, bytes.NewBuffer(expInfoBytes))
 		if err != nil {
 			impl.Log.Error(err, "fail to generate HTTP request")
 			return v1alpha1.NotInjected, err
 		}
-		req.Header.Set("X-Custom-Header", "myvalue")
 		req.Header.Set("Content-Type", "application/json")
 
 		client := &http.Client{}

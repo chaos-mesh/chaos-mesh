@@ -18,16 +18,17 @@ cd $cur
 
 echo "download and deploy chaosd"
 
-curl -fsSL -o chaosd-v1.0.1-linux-amd64.tar.gz https://mirrors.chaos-mesh.org/chaosd-v1.0.1-linux-amd64.tar.gz
-tar zxvf chaosd-v1.0.1-linux-amd64.tar.gz
-./chaosd-v1.0.1-linux-amd64/chaosd server --port 31768 > chaosd.log 2>&1 &
+# TODO: use a released version
+curl -fsSL -o chaosd-platform-linux-amd64.tar.gz https://mirrors.chaos-mesh.org/chaosd-platform-linux-amd64.tar.gz
+tar zxvf chaosd-platform-linux-amd64.tar.gz
+./chaosd-platform-linux-amd64/chaosd server --port 31768 > chaosd.log 2>&1 &
 
 function judge_stress() {
     hava_stress=$1
     success=false
     for ((k=0; k<10; k++)); do
         stress_ng_num=`ps aux > test.temp && grep "stress-ng" test.temp | wc -l && rm test.temp`
-        if [ $hava_stress ]; then
+        if [ "$hava_stress" = true ]; then
             if [ ${stress_ng_num} -lt 1 ]; then
                 echo "stress-ng is not run when creating stress chaos on physical machine"
             else
@@ -46,7 +47,7 @@ function judge_stress() {
         sleep 1
     done
 
-    if [ !$success ]; then
+    if [ "$success" = false ]; then
         exit 1
     fi
 }
@@ -87,5 +88,6 @@ rm chaosd-v1.0.1-linux-amd64.tar.gz
 rm -rf chaosd-v1.0.1-linux-amd64
 rm *_tmp.yaml
 rm chaosd.log
+killall chaosd
 
 cd -
