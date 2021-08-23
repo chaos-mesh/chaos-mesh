@@ -84,8 +84,8 @@ judge_stress false
 
 echo "****** finish physical machine chaos test ******"
 # clean
-rm chaosd-v1.0.1-linux-amd64.tar.gz
-rm -rf chaosd-v1.0.1-linux-amd64
+rm chaosd-platform-linux-amd64.tar.gz
+rm -rf chaosd-platform-linux-amd64
 rm *_tmp.yaml
 rm chaosd.log
 killall chaosd

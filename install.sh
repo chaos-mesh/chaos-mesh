@@ -742,10 +742,6 @@ ensure_pods_ready() {
     do
         echo "Waiting for pod running" && sleep 10;
 
-        POD=$(kubectl get pod -l app.kubernetes.io/component=chaos-dashboard -n chaos-testing -o jsonpath="{.items[0].metadata.name}")
-
-        kubectl logs $POD -n chaos-testing | tail -20
-
         kubectl get pods -n "${namespace}" ${labels} --no-headers | >&2 grep -v Running || true
 
         ((count=count+1))

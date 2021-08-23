@@ -132,7 +132,6 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	addresses := records[index].Id
 
 	addressArray := strings.Split(addresses, ",")
-	// TODO: do this in goroutine
 	for _, address := range addressArray {
 		url := fmt.Sprintf("%s/api/attack/%s", address, physicalMachinechaos.Spec.ExpInfo.UID)
 
