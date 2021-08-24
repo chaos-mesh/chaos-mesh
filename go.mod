@@ -14,7 +14,7 @@ require (
 	github.com/chaos-mesh/chaos-mesh/api/v1alpha1 v0.0.0
 	github.com/chaos-mesh/k8s_dns_chaos v0.2.0
 	github.com/containerd/cgroups v1.0.2-0.20210605143700-23b51209bf7b
-	github.com/containerd/containerd v1.5.1
+	github.com/containerd/containerd v1.5.4
 	github.com/coreos/go-systemd/v22 v22.3.2 // indirect
 	github.com/docker/docker v20.10.2+incompatible
 	github.com/docker/go-connections v0.4.0 // indirect
