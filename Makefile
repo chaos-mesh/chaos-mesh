@@ -81,16 +81,6 @@ mockgen:
 generate-mock: mockgen
 	go generate ./pkg/workflow
 
-coverage:
-ifeq ("$(CI)", "1")
-	@bash <(curl -s https://codecov.io/bash) -f cover.out -t $(CODECOV_TOKEN)
-else
-	mkdir -p cover
-	gocov convert cover.out > cover.json
-	gocov-xml < cover.json > cover.xml
-	gocov-html < cover.json > cover/index.html
-endif
-
 swagger_spec:
 ifeq (${SWAGGER},1)
 	hack/generate_swagger_spec.sh
@@ -135,12 +125,6 @@ NAMESPACE ?= chaos-testing
 # Install CRDs into a cluster
 install: manifests
 	$(HELM_BIN) upgrade --install chaos-mesh helm/chaos-mesh --namespace=${NAMESPACE} --set registry=${DOCKER_REGISTRY} --set dnsServer.create=true --set dashboard.create=true;
-
-install.sh:
-	./hack/update_install_script.sh
-
-check-install-script: install.sh
-	git diff -U --exit-code install.sh
 
 clean:
 	rm -rf docs/docs.go $(CLEAN_TARGETS)
@@ -396,7 +380,7 @@ define generate-make
 		controller-gen object:headerFile=../../hack/boilerplate/boilerplate.generatego.txt paths="./..." ;
 endef
 $(eval $(call RUN_IN_DEV_ENV_TEMPLATE,generate,chaos-build,generate-ctrl))
-check: fmt vet boilerplate lint generate yaml tidy check-install-script
+check: fmt vet boilerplate lint generate yaml tidy install.sh
 
 CLEAN_TARGETS+=e2e-test/image/e2e/bin/ginkgo
 define e2e-test/image/e2e/bin/ginkgo-make
@@ -423,6 +407,23 @@ define gosec-scan-make
 	gosec ./api/... ./controllers/... ./pkg/... || echo "*** sec-scan failed: known-issues ***"
 endef
 $(eval $(call RUN_IN_DEV_ENV_TEMPLATE,gosec-scan))
+
+define coverage-make
+ifeq ("$(CI)", "1")
+	@bash <(curl -s https://codecov.io/bash) -f cover.out -t $(CODECOV_TOKEN)
+else
+	mkdir -p cover
+	gocov convert cover.out > cover.json
+	gocov-xml < cover.json > cover.xml
+	gocov-html < cover.json > cover/index.html
+endif
+endef
+$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,coverage))
+
+define install.sh-make
+	./hack/update_install_script.sh
+endef
+$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,install.sh))
 
 .PHONY: all clean test install manifests groupimports fmt vet tidy image \
 	docker-push lint generate config mockgen generate-mock \
