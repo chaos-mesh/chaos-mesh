@@ -46,9 +46,6 @@ else
 GOBIN=$(shell go env GOBIN)
 endif
 
-FAILPOINT_ENABLE  := $$(find $$PWD/ -type d | grep -vE "(\.git|bin)" | xargs $(GOBIN)/failpoint-ctl enable)
-FAILPOINT_DISABLE := $$(find $$PWD/ -type d | grep -vE "(\.git|bin)" | xargs $(GOBIN)/failpoint-ctl disable)
-
 GO_BUILD_CACHE ?= $(ROOT)/.cache/chaos-mesh
 
 BUILD_TAGS ?=
@@ -64,18 +61,11 @@ endif
 CLEAN_TARGETS :=
 
 all: yaml image
-go_build_cache_directory:
-	mkdir -p $(GO_BUILD_CACHE)/chaos-mesh-gobuild
-	mkdir -p $(GO_BUILD_CACHE)/chaos-mesh-gopath
-
-check: fmt vet boilerplate lint generate yaml tidy check-install-script
-
-# Run tests
-test: ensure-kubebuilder failpoint-enable generate generate-mock manifests test-utils
-	rm -rf cover.* cover
-	$(GOTEST) -p 1 $$($(PACKAGE_LIST)) -coverprofile cover.out.tmp
-	cat cover.out.tmp | grep -v "_generated.deepcopy.go" > cover.out
-	@$(FAILPOINT_DISABLE)
+go_build_cache_directory:  $(GO_BUILD_CACHE)/chaos-mesh-gobuild $(GO_BUILD_CACHE)/chaos-mesh-gopath
+$(GO_BUILD_CACHE)/chaos-mesh-gobuild:
+	@mkdir -p $(GO_BUILD_CACHE)/chaos-mesh-gobuild
+$(GO_BUILD_CACHE)/chaos-mesh-gopath:
+	@mkdir -p $(GO_BUILD_CACHE)/chaos-mesh-gopath
 
 test-utils: timer multithread_tracee
 
@@ -90,7 +80,6 @@ mockgen:
 
 generate-mock: mockgen
 	go generate ./pkg/workflow
-	make fmt vet lint
 
 coverage:
 ifeq ("$(CI)", "1")
@@ -147,42 +136,6 @@ NAMESPACE ?= chaos-testing
 install: manifests
 	$(HELM_BIN) upgrade --install chaos-mesh helm/chaos-mesh --namespace=${NAMESPACE} --set registry=${DOCKER_REGISTRY} --set dnsServer.create=true --set dashboard.create=true;
 
-# Generate manifests e.g. CRD, RBAC etc.
-config: $(GOBIN)/controller-gen
-	cd ./api/v1alpha1 ;\
-		$< $(CRD_OPTIONS) rbac:roleName=manager-role paths="./..." output:crd:artifacts:config=../../config/crd/bases ;\
-		$< $(CRD_OPTIONS) rbac:roleName=manager-role paths="./..." output:crd:artifacts:config=../../helm/chaos-mesh/crds ;
-
-# Run go fmt against code
-fmt: groupimports
-	$(CGO) fmt $$(go list ./... | grep -v 'zz_generated.*.go')
-
-gosec-scan: $(GOBIN)/gosec
-	$(GOENV) $< ./api/... ./controllers/... ./pkg/... || echo "*** sec-scan failed: known-issues ***"
-
-groupimports: $(GOBIN)/goimports
-	$< -w -l -local github.com/chaos-mesh/chaos-mesh $$(find . -type f -name '*.go' -not -path '**/zz_generated.*.go' -not -path './.cache/**')
-
-failpoint-enable: $(GOBIN)/failpoint-ctl
-# Converting gofail failpoints...
-	@$(FAILPOINT_ENABLE)
-
-failpoint-disable: $(GOBIN)/failpoint-ctl
-# Restoring gofail failpoints...
-	@$(FAILPOINT_DISABLE)
-
-# Run go vet against code
-vet:
-	$(CGOENV) go vet ./...
-
-tidy: clean
-	@echo "go mod tidy"
-	GO111MODULE=on go mod tidy
-	git diff -U --exit-code go.mod go.sum
-	cd api/v1alpha1; GO111MODULE=on go mod tidy; git diff -U --exit-code go.mod go.sum
-	cd e2e-test; GO111MODULE=on go mod tidy; git diff -U --exit-code go.mod go.sum
-	cd e2e-test/cmd/e2e_helper; GO111MODULE=on go mod tidy; git diff -U --exit-code go.mod go.sum
-
 install.sh:
 	./hack/update_install_script.sh
 
@@ -233,21 +186,27 @@ $(2): image-build-env go_build_cache_directory
 		$(BUILD_INDOCKER_ARG) \
 		${DOCKER_REGISTRY_PREFIX}pingcap/build-env:${IMAGE_TAG} \
 		sleep infinity); \
-	docker exec --workdir /mnt/ \
+	@docker exec --workdir /mnt/ \
 		--env IMG_LDFLAGS="${LDFLAGS}" \
 		--env UI=${UI} --env SWAGGER=${SWAGGER} \
 		$$$$DOCKER_ID /usr/bin/make $(2) && \
-	docker rm -f $$$$DOCKER_ID
+	@docker rm -f $$$$DOCKER_ID
 endif
 
 image-$(1)-dependencies := $(image-$(1)-dependencies) $(2)
 BINARIES := $(BINARIES) $(2)
 endef
 
-enter-buildenv:
-	docker run -it \
+enter-buildenv: image-build-env go_build_cache_directory
+	@docker run -it \
 		$(BUILD_INDOCKER_ARG) \
 		${DOCKER_REGISTRY_PREFIX}pingcap/build-env:${IMAGE_TAG} \
+		bash
+
+enter-devenv: image-dev-env go_build_cache_directory
+	@docker run -it \
+		$(BUILD_INDOCKER_ARG) \
+		${DOCKER_REGISTRY_PREFIX}pingcap/dev-env:${IMAGE_TAG} \
 		bash
 
 ifeq ($(IN_DOCKER),1)
@@ -277,14 +236,6 @@ image-chaos-mesh-e2e-dependencies += e2e-test/image/e2e/manifests e2e-test/image
 CLEAN_TARGETS += e2e-test/image/e2e/manifests e2e-test/image/e2e/chaos-mesh
 
 e2e-build: e2e-test/image/e2e/bin/ginkgo e2e-test/image/e2e/bin/e2e.test
-
-CLEAN_TARGETS+=e2e-test/image/e2e/bin/ginkgo
-e2e-test/image/e2e/bin/ginkgo:
-	cd e2e-test && $(GO) build -ldflags "$(LDFLAGS)" -tags "${BUILD_TAGS}" -o image/e2e/bin/ginkgo github.com/onsi/ginkgo/ginkgo
-
-CLEAN_TARGETS+=e2e-test/image/e2e/bin/e2e.test
-e2e-test/image/e2e/bin/e2e.test: e2e-test/e2e/**/*.go
-	cd e2e-test && $(GO) test -c  -o ./image/e2e/bin/e2e.test ./e2e
 
 e2e-test/image/e2e/manifests: manifests
 	rm -rf e2e-test/image/e2e/manifests
@@ -320,8 +271,8 @@ $(eval $(call IMAGE_TEMPLATE,chaos-daemon,images/chaos-daemon))
 $(eval $(call IMAGE_TEMPLATE,chaos-mesh,images/chaos-mesh))
 $(eval $(call IMAGE_TEMPLATE,chaos-dashboard,images/chaos-dashboard))
 $(eval $(call IMAGE_TEMPLATE,build-env,images/build-env))
+$(eval $(call IMAGE_TEMPLATE,dev-env,images/dev-env))
 $(eval $(call IMAGE_TEMPLATE,e2e-helper,e2e-test/cmd/e2e_helper))
-$(eval $(call IMAGE_TEMPLATE,chaos-mesh-protoc,hack/protoc))
 $(eval $(call IMAGE_TEMPLATE,chaos-mesh-e2e,e2e-test/image/e2e))
 $(eval $(call IMAGE_TEMPLATE,chaos-kernel,images/chaos-kernel))
 $(eval $(call IMAGE_TEMPLATE,chaos-jvm,images/chaos-jvm))
@@ -347,87 +298,137 @@ docker-push-dns-server:
 docker-push-chaos-kernel:
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-kernel:${IMAGE_TAG}"
 
-$(GOBIN)/controller-gen:
-	$(GO) get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.4.1
-$(GOBIN)/revive:
-	$(GO) get github.com/mgechev/revive@v1.0.2-0.20200225072153-6219ca02fffb
-$(GOBIN)/failpoint-ctl:
-	$(GO) get github.com/pingcap/failpoint/failpoint-ctl@v0.0.0-20200210140405-f8f9fb234798
-$(GOBIN)/goimports:
-	$(GO) get golang.org/x/tools/cmd/goimports@v0.1.4
-$(GOBIN)/gosec:
-	$(GO) get github.com/securego/gosec/cmd/gosec@v0.0.0-20200401082031-e946c8c39989
-$(GOBIN)/gqlgen:
-	$(GO) get github.com/99designs/gqlgen@v0.13.0
-
-lint: $(GOBIN)/revive
-	@echo "linting"
-	$< -formatter friendly -config revive.toml $$($(PACKAGE_LIST))
-
 bin/chaos-builder:
 	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/chaos-builder ./cmd/chaos-builder/...
 
 chaos-build: bin/chaos-builder
 	bin/chaos-builder
 
-generate-ctrl: $(GOBIN)/gqlgen
-	go generate ./pkg/ctrlserver/graph; make fmt;
-
-# Generate code
-generate: $(GOBIN)/controller-gen chaos-build
-	cd ./api/v1alpha1 ;\
-		$< object:headerFile=../../hack/boilerplate/boilerplate.generatego.txt paths="./..." ;
-
-
-manifests/crd.yaml: config ensure-kustomize
-	$(KUSTOMIZE_BIN) build config/default > manifests/crd.yaml
-
-manifests/crd-v1beta1.yaml: ensure-kustomize
-	rm -rf output/config-v1beta1
-	cp -r ./config ./output/config-v1beta1
-	cd ./api/v1alpha1 ;\
-		$(GOBIN)/controller-gen "crd:trivialVersions=true,preserveUnknownFields=false,crdVersions=v1beta1" rbac:roleName=manager-role paths="./..." output:crd:artifacts:config=../../output/config-v1beta1/crd/bases ;
-	$(KUSTOMIZE_BIN) build output/config-v1beta1/default > manifests/crd-v1beta1.yaml
-
-yaml: manifests/crd.yaml manifests/crd-v1beta1.yaml
-
-# Generate Go files from Chaos Mesh proto files.
-ifeq ($(IN_DOCKER),1)
-proto:
-	for dir in pkg/chaosdaemon pkg/chaoskernel ; do\
-		protoc -I $$dir/pb $$dir/pb/*.proto --go_out=plugins=grpc:$$dir/pb --go_out=./$$dir/pb ;\
-	done
+define RUN_IN_DEV_ENV_TEMPLATE
+ifeq ($$(IN_DOCKER),1)
+$(1):$(2)
+$($(1)-make)
 else
-proto: image-chaos-mesh-protoc
-	docker run --rm --workdir /mnt/ \
+$(1):image-dev-env go_build_cache_directory
+	@docker run -it --rm --workdir /mnt/ \
+		--cap-add=sys_ptrace \
 		$(BUILD_INDOCKER_ARG) \
-		${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh-protoc \
-		/usr/bin/make proto
-
-	make fmt
+		${DOCKER_REGISTRY_PREFIX}pingcap/dev-env:${IMAGE_TAG} \
+		/usr/bin/make $(1)
 endif
-
-tools := kubectl helm kind kubebuilder kustomize kubetest2
-define DOWNLOAD_TOOL
-ensure-$(1):
-	@echo "ensuring $(1)"
-	ROOT=$(ROOT) && source ./hack/lib.sh && hack::ensure_$(1)
-
-all-tool-dependencies := $(all-tool-dependencies) ensure-$(1)
 endef
 
-$(foreach tool, $(tools), $(eval $(call DOWNLOAD_TOOL,$(tool))))
+define proto-make
+	for dir in pkg/chaosdaemon pkg/chaoskernel ; do\
+		protoc -I $$$$dir/pb $$$$dir/pb/*.proto --go_out=plugins=grpc:$$$$dir/pb --go_out=./$$$$dir/pb ;\
+	done
+endef
+$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,proto))
 
-ensure-all: $(all-tool-dependencies)
+define manifests/crd.yaml-make
+	kustomize build config/default > manifests/crd.yaml
+endef
+$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,manifests/crd.yaml,config))
 
-install-local-coverage-tools:
-	go get github.com/axw/gocov/gocov \
-	&& go get github.com/AlekSi/gocov-xml \
-	&& go get -u github.com/matm/gocov-html
+define manifests/crd-v1beta1.yaml-make
+	cp -Tr ./config ./output/config-v1beta1
+	cd ./api/v1alpha1 ;\
+		controller-gen "crd:trivialVersions=true,preserveUnknownFields=false,crdVersions=v1beta1" rbac:roleName=manager-role paths="./..." output:crd:artifacts:config=../../output/config-v1beta1/crd/bases ;
+	kustomize build output/config-v1beta1/default > manifests/crd-v1beta1.yaml
+endef
+$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,manifests/crd-v1beta1.yaml,config))
+yaml: manifests/crd.yaml manifests/crd-v1beta1.yaml
+
+define config-make
+	cd ./api/v1alpha1 ;\
+		controller-gen $(CRD_OPTIONS) rbac:roleName=manager-role paths="./..." output:crd:artifacts:config=../../config/crd/bases ;\
+		controller-gen $(CRD_OPTIONS) rbac:roleName=manager-role paths="./..." output:crd:artifacts:config=../../helm/chaos-mesh/crds ;
+endef
+$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,config))
+
+define lint-make
+	revive -formatter friendly -config revive.toml $$$$($$(PACKAGE_LIST))
+endef
+$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,lint))
+
+define failpoint-enable-make
+	find $$$$PWD/* -type d | grep -vE "(\.git|bin|\.cache|ui)" | xargs failpoint-ctl enable
+endef
+$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,failpoint-enable))
+
+define failpoint-disable-make
+	find $$$$PWD/* -type d | grep -vE "(\.git|bin|\.cache|ui)" | xargs failpoint-ctl disable
+endef
+$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,failpoint-disable))
+
+define groupimports-make
+	goimports -w -l -local github.com/chaos-mesh/chaos-mesh $$$$(find . -type f -name '*.go' -not -path '**/zz_generated.*.go' -not -path './.cache/**')
+endef
+$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,groupimports))
+
+define fmt-make
+	$(CGO) fmt $$$$(go list ./... | grep -v 'zz_generated.*.go')
+endef
+$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,fmt,groupimports))
+
+define vet-make
+	$(CGOENV) go vet ./...
+endef
+$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,vet))
+
+define tidy-make
+	@echo "go mod tidy"
+	GO111MODULE=on go mod tidy
+	git diff -U --exit-code go.mod go.sum
+	cd api/v1alpha1; GO111MODULE=on go mod tidy; git diff -U --exit-code go.mod go.sum
+	cd e2e-test; GO111MODULE=on go mod tidy; git diff -U --exit-code go.mod go.sum
+	cd e2e-test/cmd/e2e_helper; GO111MODULE=on go mod tidy; git diff -U --exit-code go.mod go.sum
+endef
+$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,tidy,clean))
+
+define generate-ctrl-make
+	go generate ./pkg/ctrlserver/graph
+endef
+$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,generate-ctrl))
+
+define generate-make
+	cd ./api/v1alpha1 ;\
+		controller-gen object:headerFile=../../hack/boilerplate/boilerplate.generatego.txt paths="./..." ;
+endef
+$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,generate,chaos-build,generate-ctrl))
+check: fmt vet boilerplate lint generate yaml tidy check-install-script
+
+CLEAN_TARGETS+=e2e-test/image/e2e/bin/ginkgo
+define e2e-test/image/e2e/bin/ginkgo-make
+	cd e2e-test && $(GO) build -ldflags "$(LDFLAGS)" -tags "${BUILD_TAGS}" -o image/e2e/bin/ginkgo github.com/onsi/ginkgo/ginkgo
+endef
+$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,e2e-test/image/e2e/bin/ginkgo))
+
+CLEAN_TARGETS+=e2e-test/image/e2e/bin/e2e.test
+define e2e-test/image/e2e/bin/e2e.test-make
+	cd e2e-test && $(GO) test -c  -o ./image/e2e/bin/e2e.test ./e2e
+endef
+$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,e2e-test/image/e2e/bin/e2e.test,e2e-test/e2e/**/*.go))
+
+# Run tests
+CLEAN_TARGETS += cover.out cover.out.tmp
+define test-make
+	$(GOTEST) -p 1 $$$$($$(PACKAGE_LIST)) -coverprofile cover.out.tmp
+	cat cover.out.tmp | grep -v "_generated.deepcopy.go" > cover.out
+	make failpoint-disable
+endef
+$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,test,failpoint-enable generate generate-mock manifests test-utils))
+
+define gosec-scan-make
+	gosec ./api/... ./controllers/... ./pkg/... || echo "*** sec-scan failed: known-issues ***"
+endef
+$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,gosec-scan))
 
 .PHONY: all clean test install manifests groupimports fmt vet tidy image \
 	docker-push lint generate config mockgen generate-mock \
-	$(all-tool-dependencies) install.sh $(GO_TARGET_PHONY) \
+	install.sh $(GO_TARGET_PHONY) \
 	manager chaosfs chaosdaemon chaos-dashboard \
 	dashboard dashboard-server-frontend gosec-scan \
-	proto bin/chaos-builder go_build_cache_directory schedule-migration
+	failpoint-enable failpoint-disable \
+	proto bin/chaos-builder go_build_cache_directory schedule-migration enter-buildenv enter-devenv \
+	manifests/crd.yaml
