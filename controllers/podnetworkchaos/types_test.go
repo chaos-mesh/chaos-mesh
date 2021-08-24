@@ -98,12 +98,14 @@ func TestHostNetworkOption(t *testing.T) {
 			AllowHostNetworkTesting: testCase.enableHostNetworkTesting,
 		}
 
-		_, err := h.Reconcile(ctrl.Request{
-			NamespacedName: types.NamespacedName{
-				Namespace: metav1.NamespaceDefault,
-				Name:      "p0",
-			},
-		})
+		_, err := h.Reconcile(
+			context.TODO(),
+			ctrl.Request{
+				NamespacedName: types.NamespacedName{
+					Namespace: metav1.NamespaceDefault,
+					Name:      "p0",
+				},
+			})
 		Expect(err).To(BeNil())
 
 		fakeClient.Get(context.Background(), types.NamespacedName{

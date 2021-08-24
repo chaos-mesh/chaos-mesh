@@ -49,11 +49,11 @@ selector:
 			"app.kubernetes.io/component": "controller-manager",
 		}).String(),
 	}
-	pods, err := kubeCli.CoreV1().Pods(cmNamespace).List(listOptions)
+	pods, err := kubeCli.CoreV1().Pods(cmNamespace).List(context.TODO(), listOptions)
 	framework.ExpectNoError(err, "get chaos mesh controller pods error")
 
 	err = wait.Poll(time.Second, 10*time.Second, func() (done bool, err error) {
-		newPods, err := kubeCli.CoreV1().Pods(cmNamespace).List(listOptions)
+		newPods, err := kubeCli.CoreV1().Pods(cmNamespace).List(context.TODO(), listOptions)
 		framework.ExpectNoError(err, "get chaos mesh controller pods error")
 		if !fixture.HaveSameUIDs(pods.Items, newPods.Items) {
 			return true, nil
@@ -92,11 +92,11 @@ selector:
 			"app.kubernetes.io/component": "controller-manager",
 		}).String(),
 	}
-	pods, err := kubeCli.CoreV1().Pods(cmNamespace).List(listOptions)
+	pods, err := kubeCli.CoreV1().Pods(cmNamespace).List(context.TODO(), listOptions)
 	framework.ExpectNoError(err, "get chaos mesh controller pods error")
 
 	err = wait.Poll(time.Second, 10*time.Second, func() (done bool, err error) {
-		newPods, err := kubeCli.CoreV1().Pods(cmNamespace).List(listOptions)
+		newPods, err := kubeCli.CoreV1().Pods(cmNamespace).List(context.TODO(), listOptions)
 		framework.ExpectNoError(err, "get chaos mesh controller pods error")
 		if !fixture.HaveSameUIDs(pods.Items, newPods.Items) {
 			return true, nil

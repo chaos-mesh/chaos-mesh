@@ -615,7 +615,8 @@ func (s *Service) getScheduleDetail(c *gin.Context) {
 		_ = c.Error(utils.ErrInvalidRequest.New("the kind is not supported"))
 		return
 	}
-	list := kind.GenericChaosList.DeepCopyObject()
+
+	list := kind.GenericChaosList.DeepCopyList()
 	selector, err := metav1.LabelSelectorAsSelector(&metav1.LabelSelector{
 		MatchLabels: map[string]string{"managed-by": schedule.Name},
 	})
@@ -994,5 +995,5 @@ func (s *Service) patchSchedule(exp *Base, annotations map[string]string, kubeCl
 
 	return kubeCli.Patch(context.Background(),
 		sch,
-		client.ConstantPatch(types.MergePatchType, mergePatch))
+		client.RawPatch(types.MergePatchType, mergePatch))
 }

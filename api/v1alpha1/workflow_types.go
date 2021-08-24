@@ -174,6 +174,11 @@ func (in *WorkflowList) GetItems() []GenericChaos {
 	return result
 }
 
+// TODO: refactor: not so accurate
+func (in *WorkflowList) DeepCopyList() GenericChaosList {
+	return in.DeepCopy()
+}
+
 func init() {
 	SchemeBuilder.Register(&Workflow{}, &WorkflowList{})
 }
