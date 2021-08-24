@@ -31,6 +31,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/finalizers"
@@ -47,18 +48,21 @@ var log = u.Log.WithName("experiments")
 type Service struct {
 	archive core.ExperimentStore
 	event   core.EventStore
-	conf    *config.ChaosDashboardConfig
+	config  *config.ChaosDashboardConfig
+	scheme  *runtime.Scheme
 }
 
 func NewService(
 	archive core.ExperimentStore,
 	event core.EventStore,
-	conf *config.ChaosDashboardConfig,
+	config *config.ChaosDashboardConfig,
+	scheme *runtime.Scheme,
 ) *Service {
 	return &Service{
 		archive: archive,
 		event:   event,
-		conf:    conf,
+		config:  config,
+		scheme:  scheme,
 	}
 }
 
@@ -112,8 +116,8 @@ func (s *Service) list(c *gin.Context) {
 
 	ns, name, kind := c.Query("namespace"), c.Query("name"), c.Query("kind")
 
-	if ns == "" && !s.conf.ClusterScoped && s.conf.TargetNamespace != "" {
-		ns = s.conf.TargetNamespace
+	if ns == "" && !s.config.ClusterScoped && s.config.TargetNamespace != "" {
+		ns = s.config.TargetNamespace
 
 		log.V(1).Info("Replace query namespace with", ns)
 	}
@@ -261,7 +265,14 @@ func (s *Service) findChaosInCluster(c *gin.Context, kubeCli client.Client, name
 		return nil
 	}
 
-	kind := chaos.GetObjectKind().GroupVersionKind().Kind
+	gvk, err := apiutil.GVKForObject(chaos, s.scheme)
+	if err != nil {
+		u.SetAPImachineryError(c, err)
+
+		return nil
+	}
+
+	kind := gvk.Kind
 
 	return &Detail{
 		Experiment: Experiment{
@@ -276,7 +287,7 @@ func (s *Service) findChaosInCluster(c *gin.Context, kubeCli client.Client, name
 		},
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
-				APIVersion: chaos.GetObjectKind().GroupVersionKind().GroupVersion().String(),
+				APIVersion: gvk.GroupVersion().String(),
 				Kind:       kind,
 			},
 			Meta: core.KubeObjectMeta{
@@ -619,8 +630,8 @@ func (s *Service) state(c *gin.Context) {
 	}
 
 	ns := c.Query("namespace")
-	if ns == "" && !s.conf.ClusterScoped && s.conf.TargetNamespace != "" {
-		ns = s.conf.TargetNamespace
+	if ns == "" && !s.config.ClusterScoped && s.config.TargetNamespace != "" {
+		ns = s.config.TargetNamespace
 
 		log.V(1).Info("Replace query namespace with", ns)
 	}

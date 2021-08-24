@@ -25,9 +25,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	u "github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
@@ -43,18 +45,21 @@ var log = u.Log.WithName("schedules")
 type Service struct {
 	schedule core.ScheduleStore
 	event    core.EventStore
-	conf     *config.ChaosDashboardConfig
+	config   *config.ChaosDashboardConfig
+	scheme   *runtime.Scheme
 }
 
 func NewService(
 	schedule core.ScheduleStore,
 	event core.EventStore,
-	conf *config.ChaosDashboardConfig,
+	config *config.ChaosDashboardConfig,
+	scheme *runtime.Scheme,
 ) *Service {
 	return &Service{
 		schedule: schedule,
 		event:    event,
-		conf:     conf,
+		config:   config,
+		scheme:   scheme,
 	}
 }
 
@@ -105,8 +110,8 @@ func (s *Service) list(c *gin.Context) {
 
 	ns, name := c.Query("namespace"), c.Query("name")
 
-	if ns == "" && !s.conf.ClusterScoped && s.conf.TargetNamespace != "" {
-		ns = s.conf.TargetNamespace
+	if ns == "" && !s.config.ClusterScoped && s.config.TargetNamespace != "" {
+		ns = s.config.TargetNamespace
 
 		log.V(1).Info("Replace query namespace with", ns)
 	}
@@ -227,6 +232,13 @@ func (s *Service) findScheduleInCluster(c *gin.Context, kubeCli client.Client, n
 		return nil
 	}
 
+	gvk, err := apiutil.GVKForObject(&sch, s.scheme)
+	if err != nil {
+		u.SetAPImachineryError(c, err)
+
+		return nil
+	}
+
 	UIDList := make([]string, 0)
 	schType := string(sch.Spec.Type)
 	chaosKind, ok := v1alpha1.AllScheduleItemKinds()[schType]
@@ -281,8 +293,8 @@ func (s *Service) findScheduleInCluster(c *gin.Context, kubeCli client.Client, n
 		ExperimentUIDs: UIDList,
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
-				APIVersion: v1alpha1.GroupVersion.String(),
-				Kind:       v1alpha1.KindSchedule,
+				APIVersion: gvk.GroupVersion().String(),
+				Kind:       gvk.Kind,
 			},
 			Meta: core.KubeObjectMeta{
 				Namespace:   sch.Namespace,
