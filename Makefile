@@ -294,7 +294,7 @@ $(1):$(2)
 $($(1)-make)
 else
 $(1):image-dev-env go_build_cache_directory
-	@docker run -it --rm --workdir /mnt/ \
+	@docker run $$$$(if [ -t 0 ] ;then echo -n "-it";fi) --rm --workdir /mnt/ \
 		--cap-add=sys_ptrace \
 		$(BUILD_INDOCKER_ARG) \
 		${DOCKER_REGISTRY_PREFIX}pingcap/dev-env:${IMAGE_TAG} \
