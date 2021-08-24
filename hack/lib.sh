@@ -123,6 +123,10 @@ function hack::ensure_kubebuilder() {
     fi
     tmpfile=$(mktemp)
     trap "test -f $tmpfile && rm $tmpfile" RETURN
+
+    # reference: https://github.com/kubernetes-sigs/kubebuilder/issues/2311#issuecomment-903940052
+    # and https://github.com/chaos-mesh/chaos-mesh/issues/2248
+    # kubebuilder_${KUBEBUILDER_VERSION}_${OS}_${ARCH}.tar.gz only works for kubebuilder v2.x, if we upgrade to v3 one day, we need to change the filename, remove the ${KUBEBUILDER_VERSION}
     curl --retry 10 -L -o ${tmpfile} https://github.com/kubernetes-sigs/kubebuilder/releases/download/v${KUBEBUILDER_VERSION}/kubebuilder_${KUBEBUILDER_VERSION}_${OS}_${ARCH}.tar.gz
     tar -C ${OUTPUT_BIN} -xzf ${tmpfile}
     mv ${OUTPUT_BIN}/kubebuilder_${KUBEBUILDER_VERSION}_${OS}_${ARCH} ${KUBEBUILDER_PATH}
