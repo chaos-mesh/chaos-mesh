@@ -33,6 +33,8 @@ RUN curl -L https://get.helm.sh/helm-v3.6.3-$(go env GOOS)-$(go env GOARCH).tar.
 RUN mv /usr/local/kubebuilder_2.3.2_$(go env GOOS)_$(go env GOARCH) /usr/local/kubebuilder
 RUN mv /usr/local/bin/$(go env GOOS)-$(go env GOARCH)/helm /usr/local/bin/helm
 RUN rm -rf /usr/local/bin/$(go env GOOS)-$(go env GOARCH)
+RUN mkdir /.cache
+RUN chmod -R 777 /.cache
 
 ENV GOCACHE /tmp/go-build
 ENV GOPATH /tmp/go
