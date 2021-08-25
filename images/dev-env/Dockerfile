@@ -13,7 +13,7 @@ ENV https_proxy $HTTPS_PROXY
 RUN apt-get update && apt-get install protobuf-compiler git build-essential curl -y
 
 ARG TARGET_PLATFORM=amd64
-RUN curl https://dl.google.com/go/go1.15.11.linux-$TARGET_PLATFORM.tar.gz | tar -xz -C /usr/local
+RUN curl https://dl.google.com/go/go1.16.7.linux-$TARGET_PLATFORM.tar.gz | tar -xz -C /usr/local
 ENV GO111MODULE=on
 ENV GOPATH /go
 ENV PATH "/usr/local/go/bin:${PATH}:/tmp/go/bin:/go/bin"
