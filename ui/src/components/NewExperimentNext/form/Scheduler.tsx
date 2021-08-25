@@ -1,12 +1,12 @@
 import { Box, FormControlLabel, Link, Switch, Typography } from '@material-ui/core'
 import { FormikErrors, FormikTouched, getIn, useFormikContext } from 'formik'
 import { useEffect, useState } from 'react'
+import { validateDuration, validateSchedule } from 'lib/formikhelpers'
 
 import { FormattedMessage } from 'react-intl'
 import T from 'components/T'
 import { TextField } from 'components/FormField'
 import { useStoreSelector } from 'store'
-import { validateDuration } from 'lib/formikhelpers'
 
 interface SchedulerProps {
   errors: FormikErrors<Record<string, any>>
@@ -57,6 +57,7 @@ const Scheduler: React.FC<SchedulerProps> = ({ errors, touched, inSchedule = fal
           fast
           name="spec.schedule"
           label={T('schedules.single')}
+          validate={validateSchedule()}
           helperText={
             getIn(errors, 'spec.schedule') && getIn(touched, 'spec.schedule') ? (
               getIn(errors, 'spec.schedule')

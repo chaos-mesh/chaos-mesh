@@ -165,14 +165,14 @@
     "basic": {
       "nameHelper": "The schedule name",
       "scheduleHelper": "The schedule is expressed in the form of CronJob. If you are not familiar with it, you can use {crontabguru} to help define the schedule",
-      "startingDeadlineSeconds": "Experiment expiration time",
-      "startingDeadlineSecondsHelper": "Set to ignore experiments that haven’t been running for a long time",
+      "historyLimit": "History Limit",
+      "historyLimitHelper": "Maximum number of experiment records",
       "concurrencyPolicy": "Concurrency Policy",
       "concurrencyPolicyHelper": "Whether to allow experiments to run at the same time",
       "forbid": "Forbid",
       "allow": "Allow",
-      "historyLimit": "History Limit",
-      "historyLimitHelper": "Maximum number of experiment records"
+      "startingDeadlineSeconds": "Experiment expiration time",
+      "startingDeadlineSecondsHelper": "Set to ignore experiments that haven’t been running for a long time"
     }
   },
   "schedules": {

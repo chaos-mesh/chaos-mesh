@@ -67,7 +67,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint.GET("", s.list)
 	endpoint.GET("/:uid", s.get)
 	endpoint.DELETE("/:uid", s.delete)
-	endpoint.DELETE("/", s.batchDelete)
+	endpoint.DELETE("", s.batchDelete)
 
 	endpoint.GET("/schedules", s.listSchedule)
 	endpoint.GET("/schedules/:uid", s.detailSchedule)

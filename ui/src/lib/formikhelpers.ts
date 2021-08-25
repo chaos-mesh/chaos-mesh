@@ -248,6 +248,7 @@ function validate(defaultI18n: string, i18n?: string) {
 }
 export const validateName = (i18n?: string) => validate('The name is required', i18n)
 export const validateDuration = (i18n?: string) => validate('The duration is required', i18n)
+export const validateSchedule = (i18n?: string) => validate('The schedule is required', i18n)
 export const validateDeadline = (i18n?: string) => validate('The deadline is required', i18n)
 export const validateImage = (i18n?: string) => validate('The image is required', i18n)
 

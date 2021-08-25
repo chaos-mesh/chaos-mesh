@@ -1,6 +1,6 @@
 import * as Yup from 'yup'
 
-import { FormikProps, FormikValues } from 'formik'
+import { FormikProps, FormikValues, getIn } from 'formik'
 import { InputAdornment, MenuItem } from '@material-ui/core'
 import { SelectField, TextField } from 'components/FormField'
 
@@ -28,19 +28,21 @@ export const Fields = ({ errors, touched }: Pick<FormikProps<FormikValues>, 'err
       name="spec.historyLimit"
       label={T('newS.basic.historyLimit')}
       helperText={
-        errors.historyLimit && touched.historyLimit ? errors.historyLimit : T('newS.basic.historyLimitHelper')
+        getIn(errors, 'spec.historyLimit') && getIn(touched, 'spec.historyLimit')
+          ? getIn(errors, 'spec.historyLimit')
+          : T('newS.basic.historyLimitHelper')
       }
-      error={errors.historyLimit && touched.historyLimit ? true : false}
+      error={getIn(errors, 'spec.historyLimit') && getIn(touched, 'spec.historyLimit') ? true : false}
     />
     <SelectField
       name="spec.concurrencyPolicy"
       label={T('newS.basic.concurrencyPolicy')}
       helperText={
-        errors.concurrencyPolicy && touched.concurrencyPolicy
-          ? errors.concurrencyPolicy
+        getIn(errors, 'spec.concurrencyPolicy') && getIn(touched, 'spec.concurrencyPolicy')
+          ? getIn(errors, 'spec.concurrencyPolicy')
           : T('newS.basic.concurrencyPolicyHelper')
       }
-      error={errors.concurrencyPolicy && touched.concurrencyPolicy ? true : false}
+      error={getIn(errors, 'spec.concurrencyPolicy') && getIn(touched, 'spec.concurrencyPolicy') ? true : false}
     >
       <MenuItem value="Forbid">{T('newS.basic.forbid')}</MenuItem>
       <MenuItem value="Allow">{T('newS.basic.allow')}</MenuItem>
@@ -54,17 +56,19 @@ export const Fields = ({ errors, touched }: Pick<FormikProps<FormikValues>, 'err
         endAdornment: <InputAdornment position="end">{T('common.seconds')}</InputAdornment>,
       }}
       helperText={
-        errors.startingDeadlineSeconds && touched.startingDeadlineSeconds
-          ? errors.startingDeadlineSeconds
+        getIn(errors, 'spec.startingDeadlineSeconds') && getIn(touched, 'spec.startingDeadlineSeconds')
+          ? getIn(errors, 'spec.startingDeadlineSeconds')
           : T('newS.basic.startingDeadlineSecondsHelper')
       }
-      error={errors.startingDeadlineSeconds && touched.startingDeadlineSeconds ? true : false}
+      error={
+        getIn(errors, 'spec.startingDeadlineSeconds') && getIn(touched, 'spec.startingDeadlineSeconds') ? true : false
+      }
     />
   </>
 )
 
 export const schema = {
-  schedule: Yup.string().required('The schedule is required'),
   historyLimit: Yup.number().min(1, 'The historyLimit is at least 1'),
-  startingDeadlineSeconds: Yup.number().min(0, 'The startingDeadlineSeconds is at least 0'),
+  concurrencyPolicy: Yup.string().required('The concurrencyPolicy is required'),
+  startingDeadlineSeconds: Yup.number().min(0, 'The startingDeadlineSeconds is at least 0').nullable(true),
 }
