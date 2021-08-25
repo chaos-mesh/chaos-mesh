@@ -315,7 +315,7 @@ endef
 $(eval $(call RUN_IN_DEV_ENV_TEMPLATE,manifests/crd.yaml,config))
 
 define manifests/crd-v1beta1.yaml-make
-	mkdir ./output
+	mkdir -p ./output
 	cp -Tr ./config ./output/config-v1beta1
 	cd ./api/v1alpha1 ;\
 		controller-gen "crd:trivialVersions=true,preserveUnknownFields=false,crdVersions=v1beta1" rbac:roleName=manager-role paths="./..." output:crd:artifacts:config=../../output/config-v1beta1/crd/bases ;
