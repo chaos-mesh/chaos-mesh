@@ -81,10 +81,6 @@ mockgen:
 generate-mock: mockgen
 	go generate ./pkg/workflow
 
-swagger_spec:
-ifeq (${SWAGGER},1)
-	hack/generate_swagger_spec.sh
-endif
 
 yarn_dependencies:
 ifeq (${UI},1)
@@ -127,7 +123,7 @@ install: manifests
 	$(HELM_BIN) upgrade --install chaos-mesh helm/chaos-mesh --namespace=${NAMESPACE} --set registry=${DOCKER_REGISTRY} --set dnsServer.create=true --set dashboard.create=true;
 
 clean:
-	rm -rf docs/docs.go $(CLEAN_TARGETS)
+	rm -rf $(CLEAN_TARGETS)
 
 boilerplate:
 	./hack/verify-boilerplate.sh
@@ -381,7 +377,7 @@ define generate-make
 	cd ./api/v1alpha1 ;\
 		controller-gen object:headerFile=../../hack/boilerplate/boilerplate.generatego.txt paths="./..." ;
 endef
-$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,generate,chaos-build,generate-ctrl))
+$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,generate,chaos-build,generate-ctrl,swagger_spec))
 check: fmt vet boilerplate lint generate yaml tidy install.sh
 
 CLEAN_TARGETS+=e2e-test/image/e2e/bin/ginkgo
@@ -426,6 +422,12 @@ define install.sh-make
 	./hack/update_install_script.sh
 endef
 $(eval $(call RUN_IN_DEV_ENV_TEMPLATE,install.sh))
+
+swagger_spec:
+define swagger_spec-make
+	swag init -g cmd/chaos-dashboard/main.go
+endef
+$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,swagger_spec))
 
 .PHONY: all clean test install manifests groupimports fmt vet tidy image \
 	docker-push lint generate config mockgen generate-mock \

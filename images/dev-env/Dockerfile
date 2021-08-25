@@ -28,6 +28,7 @@ RUN go get github.com/golang/protobuf/protoc-gen-go@v1.4.2
 RUN go get github.com/axw/gocov/gocov@v1.0.0
 RUN go get github.com/AlekSi/gocov-xml@v0.0.0-20190121064608-3a14fb1c4737
 RUN go get github.com/matm/gocov-html@v0.0.0-20200509184451-71874e2e203b
+RUN go get github.com/swaggo/swag/cmd/swag@v1.6.7
 
 RUN curl -L https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv3.5.4/kustomize_v3.5.4_$(go env GOOS)_$(go env GOARCH).tar.gz | tar -xz -C /usr/local/bin/
 RUN curl -L https://github.com/kubernetes-sigs/kubebuilder/releases/download/v2.3.2/kubebuilder_2.3.2_$(go env GOOS)_$(go env GOARCH).tar.gz | tar -xz -C /usr/local/

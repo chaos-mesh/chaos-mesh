@@ -34,9 +34,6 @@ e2e-test/image/e2e/manifests/
 
 /pkg/uiserver/embedded_assets_handler.go
 
-/docs/swagger.*
-/docs/docs.go
-
 /images/*/bin/*
 !/images/*/bin/.gitkeep
 
