@@ -189,6 +189,7 @@ func (s *Service) create(c *gin.Context) {
 
 	if chaosKind, ok := v1alpha1.AllKinds()[kind]; ok {
 		reflect.ValueOf(chaosKind.Chaos).Elem().FieldByName("ObjectMeta").Set(reflect.ValueOf(metav1.ObjectMeta{}))
+
 		if err = u.ShouldBindBodyWithJSON(c, chaosKind.Chaos); err != nil {
 			return
 		}
@@ -340,7 +341,7 @@ func (s *Service) delete(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, u.Response{Status: "success"})
+	c.JSON(http.StatusOK, u.ResponseSuccess)
 }
 
 // @Summary Batch delete chaos experiments.
@@ -398,7 +399,7 @@ func (s *Service) batchDelete(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusOK, u.Response{Status: "success"})
+	c.JSON(http.StatusOK, u.ResponseSuccess)
 }
 
 func checkAndDeleteChaos(c *gin.Context, kubeCli client.Client, namespacedName types.NamespacedName, kind string, force string) bool {
@@ -549,7 +550,7 @@ func (s *Service) pause(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, u.Response{Status: "success"})
+	c.JSON(http.StatusOK, u.ResponseSuccess)
 }
 
 // @Summary Start a chaos experiment.
