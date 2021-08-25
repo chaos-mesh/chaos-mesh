@@ -90,6 +90,10 @@ type AWSChaosList struct {
 	Items           []AWSChaos `json:"items"`
 }
 
+func (in *AWSChaosList) DeepCopyList() GenericChaosList {
+	return in.DeepCopy()
+}
+
 // ListChaos returns a list of chaos
 func (in *AWSChaosList) ListChaos() []GenericChaos {
 	var result []GenericChaos
@@ -225,6 +229,10 @@ type DNSChaosList struct {
 	Items           []DNSChaos `json:"items"`
 }
 
+func (in *DNSChaosList) DeepCopyList() GenericChaosList {
+	return in.DeepCopy()
+}
+
 // ListChaos returns a list of chaos
 func (in *DNSChaosList) ListChaos() []GenericChaos {
 	var result []GenericChaos
@@ -354,6 +362,10 @@ type GCPChaosList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []GCPChaos `json:"items"`
+}
+
+func (in *GCPChaosList) DeepCopyList() GenericChaosList {
+	return in.DeepCopy()
 }
 
 // ListChaos returns a list of chaos
@@ -491,6 +503,10 @@ type HTTPChaosList struct {
 	Items           []HTTPChaos `json:"items"`
 }
 
+func (in *HTTPChaosList) DeepCopyList() GenericChaosList {
+	return in.DeepCopy()
+}
+
 // ListChaos returns a list of chaos
 func (in *HTTPChaosList) ListChaos() []GenericChaos {
 	var result []GenericChaos
@@ -620,6 +636,10 @@ type IOChaosList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []IOChaos `json:"items"`
+}
+
+func (in *IOChaosList) DeepCopyList() GenericChaosList {
+	return in.DeepCopy()
 }
 
 // ListChaos returns a list of chaos
@@ -753,6 +773,10 @@ type JVMChaosList struct {
 	Items           []JVMChaos `json:"items"`
 }
 
+func (in *JVMChaosList) DeepCopyList() GenericChaosList {
+	return in.DeepCopy()
+}
+
 // ListChaos returns a list of chaos
 func (in *JVMChaosList) ListChaos() []GenericChaos {
 	var result []GenericChaos
@@ -882,6 +906,10 @@ type KernelChaosList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []KernelChaos `json:"items"`
+}
+
+func (in *KernelChaosList) DeepCopyList() GenericChaosList {
+	return in.DeepCopy()
 }
 
 // ListChaos returns a list of chaos
@@ -1015,6 +1043,10 @@ type NetworkChaosList struct {
 	Items           []NetworkChaos `json:"items"`
 }
 
+func (in *NetworkChaosList) DeepCopyList() GenericChaosList {
+	return in.DeepCopy()
+}
+
 // ListChaos returns a list of chaos
 func (in *NetworkChaosList) ListChaos() []GenericChaos {
 	var result []GenericChaos
@@ -1146,6 +1178,10 @@ type PhysicalMachineChaosList struct {
 	Items           []PhysicalMachineChaos `json:"items"`
 }
 
+func (in *PhysicalMachineChaosList) DeepCopyList() GenericChaosList {
+	return in.DeepCopy()
+}
+
 // ListChaos returns a list of chaos
 func (in *PhysicalMachineChaosList) ListChaos() []GenericChaos {
 	var result []GenericChaos
@@ -1275,6 +1311,10 @@ type PodChaosList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []PodChaos `json:"items"`
+}
+
+func (in *PodChaosList) DeepCopyList() GenericChaosList {
+	return in.DeepCopy()
 }
 
 // ListChaos returns a list of chaos
@@ -1412,6 +1452,10 @@ type StressChaosList struct {
 	Items           []StressChaos `json:"items"`
 }
 
+func (in *StressChaosList) DeepCopyList() GenericChaosList {
+	return in.DeepCopy()
+}
+
 // ListChaos returns a list of chaos
 func (in *StressChaosList) ListChaos() []GenericChaos {
 	var result []GenericChaos
@@ -1541,6 +1585,10 @@ type TimeChaosList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []TimeChaos `json:"items"`
+}
+
+func (in *TimeChaosList) DeepCopyList() GenericChaosList {
+	return in.DeepCopy()
 }
 
 // ListChaos returns a list of chaos

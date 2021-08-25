@@ -16,8 +16,6 @@ package v1alpha1
 
 import (
 	"fmt"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 )
 
 
@@ -82,63 +80,63 @@ type EmbedChaos struct {
 
 }
 
-func (it *EmbedChaos) SpawnNewObject(templateType TemplateType) (runtime.Object, metav1.Object, error) {
+func (it *EmbedChaos) SpawnNewObject(templateType TemplateType) (GenericChaos, error) {
 
 	switch templateType {
 	case TypeAWSChaos:
 		result := AWSChaos{}
 		result.Spec = *it.AWSChaos
-		return &result, result.GetObjectMeta(), nil
+		return &result, nil
 	case TypeDNSChaos:
 		result := DNSChaos{}
 		result.Spec = *it.DNSChaos
-		return &result, result.GetObjectMeta(), nil
+		return &result, nil
 	case TypeGCPChaos:
 		result := GCPChaos{}
 		result.Spec = *it.GCPChaos
-		return &result, result.GetObjectMeta(), nil
+		return &result, nil
 	case TypeHTTPChaos:
 		result := HTTPChaos{}
 		result.Spec = *it.HTTPChaos
-		return &result, result.GetObjectMeta(), nil
+		return &result, nil
 	case TypeIOChaos:
 		result := IOChaos{}
 		result.Spec = *it.IOChaos
-		return &result, result.GetObjectMeta(), nil
+		return &result, nil
 	case TypeJVMChaos:
 		result := JVMChaos{}
 		result.Spec = *it.JVMChaos
-		return &result, result.GetObjectMeta(), nil
+		return &result, nil
 	case TypeKernelChaos:
 		result := KernelChaos{}
 		result.Spec = *it.KernelChaos
-		return &result, result.GetObjectMeta(), nil
+		return &result, nil
 	case TypeNetworkChaos:
 		result := NetworkChaos{}
 		result.Spec = *it.NetworkChaos
-		return &result, result.GetObjectMeta(), nil
+		return &result, nil
 	case TypePhysicalMachineChaos:
 		result := PhysicalMachineChaos{}
 		result.Spec = *it.PhysicalMachineChaos
-		return &result, result.GetObjectMeta(), nil
+		return &result, nil
 	case TypePodChaos:
 		result := PodChaos{}
 		result.Spec = *it.PodChaos
-		return &result, result.GetObjectMeta(), nil
+		return &result, nil
 	case TypeStressChaos:
 		result := StressChaos{}
 		result.Spec = *it.StressChaos
-		return &result, result.GetObjectMeta(), nil
+		return &result, nil
 	case TypeTimeChaos:
 		result := TimeChaos{}
 		result.Spec = *it.TimeChaos
-		return &result, result.GetObjectMeta(), nil
+		return &result, nil
 
 	default:
-		return nil, nil, fmt.Errorf("unsupported template type %s", templateType)
+		return nil, fmt.Errorf("unsupported template type %s", templateType)
 	}
 
-	return nil, &metav1.ObjectMeta{}, nil
+	return nil, nil
 }
 
 func (it *EmbedChaos) SpawnNewList(templateType TemplateType) (GenericChaosList, error) {

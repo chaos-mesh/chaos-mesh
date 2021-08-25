@@ -19,13 +19,18 @@ spec:
   - name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: PhysicalMachineChaos is the Schema for the physical machine chaos API
+        description: PhysicalMachineChaos is the Schema for the physical machine chaos
+          API
         properties:
           apiVersion:
-            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
             type: string
           kind:
-            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
             type: string
           metadata:
             type: object
@@ -84,7 +89,8 @@ spec:
                     type: string
                 type: object
               duration:
-                description: Duration represents the duration of the chaos action Duration represents the duration of the chaos action
+                description: Duration represents the duration of the chaos action
+                  Duration represents the duration of the chaos action
                 type: string
               jvm-exception:
                 properties:
@@ -158,16 +164,19 @@ spec:
                     description: the port of agent server
                     type: integer
                   rule-data:
-                    description: RuleData used to save the rule file's data, will use it when recover
+                    description: RuleData used to save the rule file's data, will
+                      use it when recover
                     type: string
                 type: object
               jvm-stress:
                 properties:
                   cpu-count:
-                    description: the CPU core number need to use, only set it when action is stress
+                    description: the CPU core number need to use, only set it when
+                      action is stress
                     type: integer
                   mem-size:
-                    description: the memory size need to locate, only set it when action is stress
+                    description: the memory size need to locate, only set it when
+                      action is stress
                     type: integer
                   pid:
                     description: the pid of Java process which need to attach
@@ -292,7 +301,8 @@ spec:
             description: Most recently observed status of the chaos experiment
             properties:
               conditions:
-                description: Conditions represents the current global condition of the chaos
+                description: Conditions represents the current global condition of
+                  the chaos
                 items:
                   properties:
                     reason:

@@ -16,8 +16,6 @@ package v1alpha1
 
 import (
 	"fmt"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 )
 
 
@@ -55,66 +53,66 @@ var allScheduleTemplateType = []ScheduleTemplateType{
 
 }
 
-func (it *ScheduleItem) SpawnNewObject(templateType ScheduleTemplateType) (runtime.Object, metav1.Object, error) {
+func (it *ScheduleItem) SpawnNewObject(templateType ScheduleTemplateType) (GenericChaos, error) {
 
 	switch templateType {
 	case ScheduleTypeAWSChaos:
 		result := AWSChaos{}
 		result.Spec = *it.AWSChaos
-		return &result, result.GetObjectMeta(), nil
+		return &result, nil
 	case ScheduleTypeDNSChaos:
 		result := DNSChaos{}
 		result.Spec = *it.DNSChaos
-		return &result, result.GetObjectMeta(), nil
+		return &result, nil
 	case ScheduleTypeGCPChaos:
 		result := GCPChaos{}
 		result.Spec = *it.GCPChaos
-		return &result, result.GetObjectMeta(), nil
+		return &result, nil
 	case ScheduleTypeHTTPChaos:
 		result := HTTPChaos{}
 		result.Spec = *it.HTTPChaos
-		return &result, result.GetObjectMeta(), nil
+		return &result, nil
 	case ScheduleTypeIOChaos:
 		result := IOChaos{}
 		result.Spec = *it.IOChaos
-		return &result, result.GetObjectMeta(), nil
+		return &result, nil
 	case ScheduleTypeJVMChaos:
 		result := JVMChaos{}
 		result.Spec = *it.JVMChaos
-		return &result, result.GetObjectMeta(), nil
+		return &result, nil
 	case ScheduleTypeKernelChaos:
 		result := KernelChaos{}
 		result.Spec = *it.KernelChaos
-		return &result, result.GetObjectMeta(), nil
+		return &result, nil
 	case ScheduleTypeNetworkChaos:
 		result := NetworkChaos{}
 		result.Spec = *it.NetworkChaos
-		return &result, result.GetObjectMeta(), nil
+		return &result, nil
 	case ScheduleTypePhysicalMachineChaos:
 		result := PhysicalMachineChaos{}
 		result.Spec = *it.PhysicalMachineChaos
-		return &result, result.GetObjectMeta(), nil
+		return &result, nil
 	case ScheduleTypePodChaos:
 		result := PodChaos{}
 		result.Spec = *it.PodChaos
-		return &result, result.GetObjectMeta(), nil
+		return &result, nil
 	case ScheduleTypeStressChaos:
 		result := StressChaos{}
 		result.Spec = *it.StressChaos
-		return &result, result.GetObjectMeta(), nil
+		return &result, nil
 	case ScheduleTypeTimeChaos:
 		result := TimeChaos{}
 		result.Spec = *it.TimeChaos
-		return &result, result.GetObjectMeta(), nil
+		return &result, nil
 	case ScheduleTypeWorkflow:
 		result := Workflow{}
 		result.Spec = *it.Workflow
-		return &result, result.GetObjectMeta(), nil
+		return &result, nil
 
 	default:
-		return nil, nil, fmt.Errorf("unsupported template type %s", templateType)
+		return nil, fmt.Errorf("unsupported template type %s", templateType)
 	}
 
-	return nil, &metav1.ObjectMeta{}, nil
+	return nil, nil
 }
 
