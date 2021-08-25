@@ -98,6 +98,10 @@ type {{.Type}}List struct {
 	Items           []{{.Type}} ` + "`" + `json:"items"` + "`" + `
 }
 
+func (in *{{.Type}}List) DeepCopyList() GenericChaosList {
+	return in.DeepCopy()
+}
+
 // ListChaos returns a list of chaos
 func (in *{{.Type}}List) ListChaos() []GenericChaos {
 	var result []GenericChaos

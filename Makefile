@@ -166,15 +166,15 @@ CLEAN_TARGETS += $(2)
 ifneq ($(IN_DOCKER),1)
 
 $(2): image-build-env go_build_cache_directory
-	DOCKER_ID=$$$$(docker run -d \
+	@DOCKER_ID=$$$$(docker run -d \
 		$(BUILD_INDOCKER_ARG) \
 		${DOCKER_REGISTRY_PREFIX}pingcap/build-env:${IMAGE_TAG} \
 		sleep infinity); \
-	@docker exec --workdir /mnt/ \
+	docker exec --workdir /mnt/ \
 		--env IMG_LDFLAGS="${LDFLAGS}" \
 		--env UI=${UI} --env SWAGGER=${SWAGGER} \
 		$$$$DOCKER_ID /usr/bin/make $(2) && \
-	@docker rm -f $$$$DOCKER_ID
+	docker rm -f $$$$DOCKER_ID
 endif
 
 image-$(1)-dependencies := $(image-$(1)-dependencies) $(2)

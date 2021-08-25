@@ -134,7 +134,7 @@ func Run(params RunParams) error {
 	hookServer.CertDir = ccfg.ControllerCfg.CertsDir
 	conf := config.NewConfigWatcherConf()
 
-	stopCh := ctrl.SetupSignalHandler()
+	controllerRuntimeSignalHandler := ctrl.SetupSignalHandler()
 
 	if ccfg.ControllerCfg.PprofAddr != "0" {
 		go func() {
@@ -165,7 +165,7 @@ func Run(params RunParams) error {
 		os.Exit(1)
 	}
 
-	go watchConfig(configWatcher, conf, stopCh)
+	go watchConfig(configWatcher, conf, controllerRuntimeSignalHandler.Done())
 	hookServer.Register("/inject-v1-pod", &webhook.Admission{
 		Handler: &apiWebhook.PodInjector{
 			Config:        conf,
@@ -180,7 +180,7 @@ func Run(params RunParams) error {
 	)
 
 	setupLog.Info("Starting manager")
-	if err := mgr.Start(stopCh); err != nil {
+	if err := mgr.Start(controllerRuntimeSignalHandler); err != nil {
 		setupLog.Error(err, "unable to start manager")
 		os.Exit(1)
 	}
