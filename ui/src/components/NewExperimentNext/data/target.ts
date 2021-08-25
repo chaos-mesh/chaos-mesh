@@ -416,7 +416,7 @@ const data: Record<Kind, Target> = {
         },
       },
       stressng_stressors: '',
-      container_name: '',
+      container_names: [],
     } as any,
   },
   // Kernel Fault

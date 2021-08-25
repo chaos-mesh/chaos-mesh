@@ -388,14 +388,11 @@ func parseStressChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
 					Mode:     v1alpha1.PodMode(exp.Scope.Mode),
 					Value:    exp.Scope.Value,
 				},
+				ContainerNames: exp.Target.StressChaos.ContainerNames,
 			},
 			Stressors:         stressors,
 			StressngStressors: exp.Target.StressChaos.StressngStressors,
 		},
-	}
-
-	if exp.Target.StressChaos.ContainerName != nil {
-		chaos.Spec.ContainerSelector.ContainerNames = []string{*exp.Target.StressChaos.ContainerName}
 	}
 
 	if exp.Duration != "" {
