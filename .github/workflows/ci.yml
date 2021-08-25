@@ -40,14 +40,6 @@ jobs:
           # workaround for https://github.com/actions/setup-go/issues/14
           export GOPATH=${GITHUB_WORKSPACE}/go
           export PATH=$PATH:$GOPATH/bin
-          make ensure-kubebuilder || echo 0
-          make ensure-kustomize || echo 0
-
-          # preload go modules before goimports
-          go mod download
-
-          make groupimports || echo 0
-          #use sh function
 
           if [[ "$job" == "verify" ]]; then
             make check
