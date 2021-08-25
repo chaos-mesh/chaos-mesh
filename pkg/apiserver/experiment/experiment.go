@@ -258,7 +258,7 @@ func (s *Service) get(c *gin.Context) {
 	c.JSON(http.StatusOK, expDetail)
 }
 
-func (s *Service) findChaosInCluster(c *gin.Context, kubeCli client.Client, namespacedName types.NamespacedName, chaos runtime.Object) *Detail {
+func (s *Service) findChaosInCluster(c *gin.Context, kubeCli client.Client, namespacedName types.NamespacedName, chaos client.Object) *Detail {
 	if err := kubeCli.Get(context.Background(), namespacedName, chaos); err != nil {
 		u.SetAPImachineryError(c, err)
 
@@ -441,7 +441,7 @@ func checkAndDeleteChaos(c *gin.Context, kubeCli client.Client, namespacedName t
 	return true
 }
 
-func forceClean(kubeCli client.Client, chaos runtime.Object) error {
+func forceClean(kubeCli client.Client, chaos client.Object) error {
 	annotations := chaos.(metav1.Object).GetAnnotations()
 	if annotations == nil {
 		annotations = make(map[string]string)
@@ -498,7 +498,7 @@ func (s *Service) update(c *gin.Context) {
 	c.JSON(http.StatusOK, exp)
 }
 
-func internalUpdate(kubeCli client.Client, chaos runtime.Object) error {
+func internalUpdate(kubeCli client.Client, chaos client.Object) error {
 	namespace := reflect.ValueOf(chaos).Elem().FieldByName("Namespace").String()
 	name := reflect.ValueOf(chaos).Elem().FieldByName("Name").String()
 
