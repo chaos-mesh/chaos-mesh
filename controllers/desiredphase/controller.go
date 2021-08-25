@@ -41,7 +41,7 @@ type Reconciler struct {
 }
 
 // Reconcile the common chaos
-func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	obj := r.Object.DeepCopyObject().(v1alpha1.InnerObject)
 
 	if err := r.Client.Get(context.TODO(), req.NamespacedName, obj); err != nil {
@@ -54,14 +54,15 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, nil
 	}
 
-	ctx := &reconcileContext{
+	reconcilerCtx := &reconcileContext{
 		obj:          obj,
 		Reconciler:   r,
 		shouldUpdate: false,
 	}
-	return ctx.Reconcile(req)
+	return reconcilerCtx.Reconcile(req)
 }
 
+// TODO: refactor: rename this struct, ambiguous with context.Context
 type reconcileContext struct {
 	obj v1alpha1.InnerObject
 

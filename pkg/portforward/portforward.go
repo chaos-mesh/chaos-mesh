@@ -130,7 +130,8 @@ func (f *portForwarder) Forward(namespace, resourceName string, addresses []stri
 		return nil, nil, err
 	}
 
-	pod, err := f.client.CoreV1().Pods(namespace).Get(forwardablePod.Name, metav1.GetOptions{})
+	// FIXME: get context from parameter
+	pod, err := f.client.CoreV1().Pods(namespace).Get(context.TODO(), forwardablePod.Name, metav1.GetOptions{})
 	if err != nil {
 		return nil, nil, err
 	}

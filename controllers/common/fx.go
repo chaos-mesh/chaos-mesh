@@ -17,9 +17,10 @@ import (
 	"context"
 	"reflect"
 
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+
 	"github.com/go-logr/logr"
 	"go.uber.org/fx"
-	"k8s.io/apimachinery/pkg/runtime"
 	k8sTypes "k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -39,8 +40,8 @@ type ChaosImplPair struct {
 	Object InnerObjectWithSelector
 	Impl   ChaosImpl
 
-	ObjectList runtime.Object
-	Controlls  []runtime.Object
+	ObjectList v1alpha1.GenericChaosList
+	Controlls  []client.Object
 }
 
 type Params struct {
@@ -59,7 +60,7 @@ func NewController(params Params) (types.Controller, error) {
 	logger := params.Logger
 	pairs := params.Impls
 	mgr := params.Mgr
-	client := params.Client
+	kubeclient := params.Client
 	reader := params.Reader
 	selector := params.Selector
 	recorderBuilder := params.RecorderBuilder
@@ -76,16 +77,18 @@ func NewController(params Params) (types.Controller, error) {
 		if len(pair.Controlls) > 0 {
 			pair := pair
 			for _, obj := range pair.Controlls {
-				builder = builder.Watches(&source.Kind{Type: obj}, &handler.EnqueueRequestsFromMapFunc{
-					ToRequests: handler.ToRequestsFunc(func(obj handler.MapObject) []reconcile.Request {
+				builder.Watches(&source.Kind{
+					Type: obj,
+				},
+					handler.EnqueueRequestsFromMapFunc(func(obj client.Object) []reconcile.Request {
 						reqs := []reconcile.Request{}
 						objName := k8sTypes.NamespacedName{
-							Namespace: obj.Meta.GetNamespace(),
-							Name:      obj.Meta.GetName(),
+							Namespace: obj.GetNamespace(),
+							Name:      obj.GetName(),
 						}
 
-						list := pair.ObjectList.DeepCopyObject()
-						err := client.List(context.TODO(), list)
+						list := pair.ObjectList.DeepCopyList()
+						err := kubeclient.List(context.TODO(), list)
 						if err != nil {
 							setupLog.Error(err, "fail to list object")
 						}
@@ -111,17 +114,16 @@ func NewController(params Params) (types.Controller, error) {
 								}
 							}
 						}
-
 						return reqs
 					}),
-				})
+				)
 			}
 		}
 
 		err := builder.Complete(&Reconciler{
 			Impl:     pair.Impl,
 			Object:   pair.Object,
-			Client:   client,
+			Client:   kubeclient,
 			Reader:   reader,
 			Recorder: recorderBuilder.Build("records"),
 			Selector: selector,

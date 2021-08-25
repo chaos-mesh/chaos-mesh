@@ -16,6 +16,8 @@ package utils
 import (
 	"net/http"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"github.com/gin-gonic/gin"
 	authorizationv1 "k8s.io/api/authorization/v1"
 
@@ -65,7 +67,7 @@ func AuthMiddleware(c *gin.Context, config *config.ChaosDashboardConfig) {
 		},
 	}
 
-	result, err := kubeCli.SelfSubjectAccessReviews().Create(sar)
+	result, err := kubeCli.SelfSubjectAccessReviews().Create(c.Request.Context(), sar, metav1.CreateOptions{})
 	if err != nil {
 		SetAPImachineryError(c, ErrInternalServer.WrapWithNoMessage(err))
 

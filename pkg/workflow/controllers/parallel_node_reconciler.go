@@ -47,7 +47,7 @@ func NewParallelNodeReconciler(kubeClient client.Client, eventRecorder recorder.
 }
 
 // Reconcile is extremely like the one in SerialNodeReconciler, only allows the parallel schedule, and respawn **all** the children tasks during retry
-func (it *ParallelNodeReconciler) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+func (it *ParallelNodeReconciler) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
 	startTime := time.Now()
 	defer func() {
 		it.logger.V(4).Info("Finished syncing for parallel node",
@@ -55,8 +55,6 @@ func (it *ParallelNodeReconciler) Reconcile(request reconcile.Request) (reconcil
 			"duration", time.Since(startTime),
 		)
 	}()
-
-	ctx := context.TODO()
 
 	node := v1alpha1.WorkflowNode{}
 	err := it.kubeClient.Get(ctx, request.NamespacedName, &node)

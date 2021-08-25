@@ -59,12 +59,12 @@ func NewController(
 }
 
 // Register periodically calls function runWorker to delete the data.
-func Register(c *Controller, controllerRuntimeStopCh <-chan struct{}) {
+func Register(ctx context.Context, c *Controller) {
 	defer utilruntime.HandleCrash()
 
 	log.Info("Starting database TTL controller")
 
-	go wait.Until(c.runWorker, c.ttlconfig.DatabaseTTLResyncPeriod, controllerRuntimeStopCh)
+	go wait.Until(c.runWorker, c.ttlconfig.DatabaseTTLResyncPeriod, ctx.Done())
 }
 
 // runWorker is a long-running function that will be called in order to delete the events and archives.
