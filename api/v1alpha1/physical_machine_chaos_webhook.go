@@ -21,46 +21,7 @@ import (
 
 	"github.com/google/uuid"
 	"k8s.io/apimachinery/pkg/util/validation/field"
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 )
-
-// log is for logging in this package.
-var physicalmachinechaoslog = logf.Log.WithName("physicalmachinechaos-resource")
-
-type ExpUID string
-
-func (in *ExpUID) Default(root interface{}, field reflect.StructField) {
-	if in == nil {
-		return
-	}
-
-	if len(*in) == 0 {
-		*in = ExpUID(uuid.New().String())
-		physicalmachinechaoslog.Info("PhysicalMachineChaosSpec default", "UID", string(*in))
-	}
-}
-
-type Address []string
-
-func (in *Address) Default(root interface{}, field reflect.StructField) {
-	if in == nil {
-		return
-	}
-
-	if len(*in) == 0 {
-		return
-	}
-
-	newAddress := []string(*in)
-
-	// add http prefix for address
-	for i := range newAddress {
-		if !strings.HasPrefix(newAddress[i], "http") {
-			newAddress[i] = fmt.Sprintf("http://%s", newAddress[i])
-		}
-	}
-	*in = Address(newAddress)
-}
 
 func (in *PhysicalMachineChaosSpec) Default(root interface{}, field reflect.StructField) {
 	if in == nil {
@@ -69,7 +30,6 @@ func (in *PhysicalMachineChaosSpec) Default(root interface{}, field reflect.Stru
 
 	if len(in.UID) == 0 {
 		in.UID = uuid.New().String()
-		physicalmachinechaoslog.Info("PhysicalMachineChaosSpec default", "UID", in.UID)
 	}
 
 	for i := range in.Address {

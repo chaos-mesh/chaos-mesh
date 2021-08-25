@@ -140,13 +140,12 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 			impl.Log.Error(err, "fail to generate HTTP request")
 			return v1alpha1.Injected, err
 		}
-		req.Header.Set("X-Custom-Header", "myvalue")
 		req.Header.Set("Content-Type", "application/json")
 
 		client := &http.Client{}
 		resp, err := client.Do(req)
 		if err != nil {
-			impl.Log.Error(err, "do http request")
+			impl.Log.Error(err, "do HTTP request")
 			return v1alpha1.Injected, err
 		}
 		defer resp.Body.Close()

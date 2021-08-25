@@ -66,16 +66,16 @@ const (
 // +kubebuilder:object:root=true
 // +chaos-mesh:base
 
-// PhysicalMachineChaos is the Schema for the networkchaos API
+// PhysicalMachineChaos is the Schema for the physical machine chaos API
 type PhysicalMachineChaos struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	// Spec defines the behavior of a pod chaos experiment
+	// Spec defines the behavior of a physical machine chaos experiment
 	Spec PhysicalMachineChaosSpec `json:"spec"`
 
 	// +optional
-	// Most recently observed status of the chaos experiment about pods
+	// Most recently observed status of the chaos experiment
 	Status PhysicalMachineChaosStatus `json:"status"`
 }
 
@@ -107,7 +107,6 @@ func (obj *PhysicalMachineChaos) GetSelectorSpecs() map[string]interface{} {
 }
 
 type PhysicalMachineSelector struct {
-	//Address []string `json:"address" webhook:"Address"`
 	Address []string `json:"address"`
 }
 
@@ -118,7 +117,6 @@ func (selector *PhysicalMachineSelector) Id() string {
 type ExpInfo struct {
 	// the experiment ID
 	// +optional
-	//UID string `json:"uid,omitempty" webhook:"ExpUID"`
 	UID string `json:"uid,omitempty"`
 
 	// the subAction, generate atomaticly

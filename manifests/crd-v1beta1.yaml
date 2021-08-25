@@ -2198,7 +2198,8 @@ spec:
   scope: Namespaced
   validation:
     openAPIV3Schema:
-      description: PhysicalMachineChaos is the Schema for the networkchaos API
+      description: PhysicalMachineChaos is the Schema for the physical machine chaos
+        API
       properties:
         apiVersion:
           description: 'APIVersion defines the versioned schema of this representation
@@ -2213,7 +2214,7 @@ spec:
         metadata:
           type: object
         spec:
-          description: Spec defines the behavior of a pod chaos experiment
+          description: Spec defines the behavior of a physical machine chaos experiment
           properties:
             action:
               description: the subAction, generate atomaticly
@@ -2236,7 +2237,6 @@ spec:
               - jvm-rule-data
               type: string
             address:
-              description: Address []string `json:"address" webhook:"Address"`
               items:
                 type: string
               type: array
@@ -2470,15 +2470,14 @@ spec:
                   type: string
               type: object
             uid:
-              description: the experiment ID UID string `json:"uid,omitempty" webhook:"ExpUID"`
+              description: the experiment ID
               type: string
           required:
           - action
           - address
           type: object
         status:
-          description: Most recently observed status of the chaos experiment about
-            pods
+          description: Most recently observed status of the chaos experiment
           properties:
             conditions:
               description: Conditions represents the current global condition of the
@@ -4943,7 +4942,6 @@ spec:
                   - jvm-rule-data
                   type: string
                 address:
-                  description: Address []string `json:"address" webhook:"Address"`
                   items:
                     type: string
                   type: array
@@ -5178,8 +5176,7 @@ spec:
                       type: string
                   type: object
                 uid:
-                  description: the experiment ID UID string `json:"uid,omitempty"
-                    webhook:"ExpUID"`
+                  description: the experiment ID
                   type: string
               required:
               - action
@@ -7254,7 +7251,6 @@ spec:
                             - jvm-rule-data
                             type: string
                           address:
-                            description: Address []string `json:"address" webhook:"Address"`
                             items:
                               type: string
                             type: array
@@ -7497,8 +7493,7 @@ spec:
                                 type: string
                             type: object
                           uid:
-                            description: the experiment ID UID string `json:"uid,omitempty"
-                              webhook:"ExpUID"`
+                            description: the experiment ID
                             type: string
                         required:
                         - action
@@ -9260,7 +9255,6 @@ spec:
                                 - jvm-rule-data
                                 type: string
                               address:
-                                description: Address []string `json:"address" webhook:"Address"`
                                 items:
                                   type: string
                                 type: array
@@ -9503,8 +9497,7 @@ spec:
                                     type: string
                                 type: object
                               uid:
-                                description: the experiment ID UID string `json:"uid,omitempty"
-                                  webhook:"ExpUID"`
+                                description: the experiment ID
                                 type: string
                             required:
                             - action
@@ -15036,7 +15029,6 @@ spec:
                   - jvm-rule-data
                   type: string
                 address:
-                  description: Address []string `json:"address" webhook:"Address"`
                   items:
                     type: string
                   type: array
@@ -15271,8 +15263,7 @@ spec:
                       type: string
                   type: object
                 uid:
-                  description: the experiment ID UID string `json:"uid,omitempty"
-                    webhook:"ExpUID"`
+                  description: the experiment ID
                   type: string
               required:
               - action
@@ -16928,7 +16919,6 @@ spec:
                       - jvm-rule-data
                       type: string
                     address:
-                      description: Address []string `json:"address" webhook:"Address"`
                       items:
                         type: string
                       type: array
@@ -17164,8 +17154,7 @@ spec:
                           type: string
                       type: object
                     uid:
-                      description: the experiment ID UID string `json:"uid,omitempty"
-                        webhook:"ExpUID"`
+                      description: the experiment ID
                       type: string
                   required:
                   - action
@@ -19287,7 +19276,6 @@ spec:
                                 - jvm-rule-data
                                 type: string
                               address:
-                                description: Address []string `json:"address" webhook:"Address"`
                                 items:
                                   type: string
                                 type: array
@@ -19530,8 +19518,7 @@ spec:
                                     type: string
                                 type: object
                               uid:
-                                description: the experiment ID UID string `json:"uid,omitempty"
-                                  webhook:"ExpUID"`
+                                description: the experiment ID
                                 type: string
                             required:
                             - action
@@ -21356,8 +21343,6 @@ spec:
                                     - jvm-rule-data
                                     type: string
                                   address:
-                                    description: Address []string `json:"address"
-                                      webhook:"Address"`
                                     items:
                                       type: string
                                     type: array
@@ -21600,8 +21585,7 @@ spec:
                                         type: string
                                     type: object
                                   uid:
-                                    description: the experiment ID UID string `json:"uid,omitempty"
-                                      webhook:"ExpUID"`
+                                    description: the experiment ID
                                     type: string
                                 required:
                                 - action
@@ -29487,7 +29471,6 @@ spec:
                         - jvm-rule-data
                         type: string
                       address:
-                        description: Address []string `json:"address" webhook:"Address"`
                         items:
                           type: string
                         type: array
@@ -29723,8 +29706,7 @@ spec:
                             type: string
                         type: object
                       uid:
-                        description: the experiment ID UID string `json:"uid,omitempty"
-                          webhook:"ExpUID"`
+                        description: the experiment ID
                         type: string
                     required:
                     - action
@@ -31440,7 +31422,6 @@ spec:
                             - jvm-rule-data
                             type: string
                           address:
-                            description: Address []string `json:"address" webhook:"Address"`
                             items:
                               type: string
                             type: array
@@ -31683,8 +31664,7 @@ spec:
                                 type: string
                             type: object
                           uid:
-                            description: the experiment ID UID string `json:"uid,omitempty"
-                              webhook:"ExpUID"`
+                            description: the experiment ID
                             type: string
                         required:
                         - action
