@@ -188,13 +188,14 @@ func (s *Service) create(c *gin.Context) {
 	kind := exp["kind"].(string)
 
 	if chaosKind, ok := v1alpha1.AllKinds()[kind]; ok {
-		reflect.ValueOf(chaosKind.Chaos).Elem().FieldByName("ObjectMeta").Set(reflect.ValueOf(metav1.ObjectMeta{}))
+		chaos := chaosKind.Chaos.DeepCopyObject().(client.Object)
+		reflect.ValueOf(chaos).Elem().FieldByName("ObjectMeta").Set(reflect.ValueOf(metav1.ObjectMeta{}))
 
-		if err = u.ShouldBindBodyWithJSON(c, chaosKind.Chaos); err != nil {
+		if err = u.ShouldBindBodyWithJSON(c, chaos); err != nil {
 			return
 		}
 
-		if err = kubeCli.Create(context.Background(), chaosKind.Chaos); err != nil {
+		if err = kubeCli.Create(context.Background(), chaos); err != nil {
 			u.SetAPImachineryError(c, err)
 
 			return
@@ -245,7 +246,7 @@ func (s *Service) get(c *gin.Context) {
 	ns, name, kind := exp.Namespace, exp.Name, exp.Kind
 
 	if chaosKind, ok := v1alpha1.AllKinds()[kind]; ok {
-		expDetail = s.findChaosInCluster(c, kubeCli, types.NamespacedName{Namespace: ns, Name: name}, chaosKind.Chaos)
+		expDetail = s.findChaosInCluster(c, kubeCli, types.NamespacedName{Namespace: ns, Name: name}, chaosKind.Chaos.DeepCopyObject().(client.Object))
 
 		if expDetail == nil {
 			return
@@ -416,8 +417,9 @@ func checkAndDeleteChaos(c *gin.Context, kubeCli client.Client, namespacedName t
 	}
 
 	ctx := context.Background()
+	chaos := chaosKind.Chaos.DeepCopyObject().(client.Object)
 
-	if err = kubeCli.Get(ctx, namespacedName, chaosKind.Chaos); err != nil {
+	if err = kubeCli.Get(ctx, namespacedName, chaos); err != nil {
 		u.SetAPImachineryError(c, err)
 
 		return false
@@ -425,7 +427,7 @@ func checkAndDeleteChaos(c *gin.Context, kubeCli client.Client, namespacedName t
 
 	if force == "true" {
 		if err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
-			return forceClean(kubeCli, chaosKind.Chaos)
+			return forceClean(kubeCli, chaos)
 		}); err != nil {
 			u.SetAPIError(c, u.ErrInternalServer.New("Forced deletion failed"))
 
@@ -433,7 +435,7 @@ func checkAndDeleteChaos(c *gin.Context, kubeCli client.Client, namespacedName t
 		}
 	}
 
-	if err := kubeCli.Delete(ctx, chaosKind.Chaos); err != nil {
+	if err := kubeCli.Delete(ctx, chaos); err != nil {
 		u.SetAPImachineryError(c, err)
 
 		return false
@@ -479,12 +481,14 @@ func (s *Service) update(c *gin.Context) {
 	kind := exp["kind"].(string)
 
 	if chaosKind, ok := v1alpha1.AllKinds()[kind]; ok {
-		if err = u.ShouldBindBodyWithJSON(c, chaosKind.Chaos); err != nil {
+		chaos := chaosKind.Chaos.DeepCopyObject().(client.Object)
+
+		if err = u.ShouldBindBodyWithJSON(c, chaos); err != nil {
 			return
 		}
 
 		if err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
-			return internalUpdate(kubeCli, chaosKind.Chaos)
+			return internalUpdate(kubeCli, chaos)
 		}); err != nil {
 			u.SetAPImachineryError(c, err)
 
@@ -597,7 +601,7 @@ func (s *Service) start(c *gin.Context) {
 }
 
 func patchExperiment(kubeCli client.Client, exp *core.Experiment, annotations map[string]string) error {
-	chaos := v1alpha1.AllKinds()[exp.Kind].Chaos
+	chaos := v1alpha1.AllKinds()[exp.Kind].Chaos.DeepCopyObject().(client.Object)
 
 	if err := kubeCli.Get(context.Background(), types.NamespacedName{Namespace: exp.Namespace, Name: exp.Name}, chaos); err != nil {
 		return err

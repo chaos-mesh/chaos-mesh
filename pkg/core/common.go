@@ -45,12 +45,12 @@ type KubeObjectMeta struct {
 
 type Filter struct {
 	ObjectID  string `json:"object_id"`
-	Start     string
-	End       string
+	Start     string `json:"start"`
+	End       string `json:"end"`
 	Namespace string `json:"namespace"`
 	Name      string `json:"name"`
 	Kind      string `json:"kind"`
-	Limit     string
+	Limit     string `json:"limit"`
 }
 
 func (f *Filter) toMap() map[string]interface{} {
@@ -67,7 +67,7 @@ func (f *Filter) ConstructQueryArgs() (string, []interface{}) {
 
 	for k, v := range fMap {
 		if v != "" {
-			if k == "Start" || k == "End" || k == "Limit" {
+			if k == "start" || k == "end" || k == "limit" {
 				continue
 			}
 
