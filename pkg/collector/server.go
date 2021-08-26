@@ -99,7 +99,7 @@ func NewServer(
 			Log:     ctrl.Log.WithName("collector").WithName(kind),
 			archive: experimentArchive,
 			event:   event,
-		}).Setup(s.Manager, chaosKind.Chaos); err != nil {
+		}).Setup(s.Manager, chaosKind.SpawnObject()); err != nil {
 			log.Error(err, "unable to create collector", "collector", kind)
 			os.Exit(1)
 		}
