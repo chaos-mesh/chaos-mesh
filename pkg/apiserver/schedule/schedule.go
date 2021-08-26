@@ -616,7 +616,7 @@ func (s *Service) getScheduleDetail(c *gin.Context) {
 		return
 	}
 
-	list := kind.GenericChaosList.DeepCopyList()
+	list := kind.SpawnList()
 	selector, err := metav1.LabelSelectorAsSelector(&metav1.LabelSelector{
 		MatchLabels: map[string]string{"managed-by": schedule.Name},
 	})

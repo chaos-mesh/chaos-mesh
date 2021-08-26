@@ -120,12 +120,13 @@ func (c *ChaosCollector) collect() {
 
 	for kind, obj := range v1alpha1.AllKinds() {
 		expCache := map[string]map[string]int{}
-		if err := c.store.List(context.TODO(), obj.GenericChaosList); err != nil {
+		chaosList := obj.SpawnList()
+		if err := c.store.List(context.TODO(), chaosList); err != nil {
 			log.Error(err, "failed to list chaos", "kind", kind)
 			return
 		}
 
-		items := reflect.ValueOf(obj.GenericChaosList).Elem().FieldByName("Items")
+		items := reflect.ValueOf(chaosList).Elem().FieldByName("Items")
 		for i := 0; i < items.Len(); i++ {
 			item := items.Index(i).Addr().Interface().(v1alpha1.InnerObject)
 			if _, ok := expCache[item.GetNamespace()]; !ok {
