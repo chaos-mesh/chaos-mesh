@@ -48,13 +48,13 @@ OPTIONS:
     -n, --name               Name of Kubernetes cluster, default value: kind
     -c  --crd                The path of the crd files. Get the crd file from "https://mirrors.chaos-mesh.org" if the crd path is empty.
     -r  --runtime            Runtime specifies which container runtime to use. Currently we only supports docker and containerd. default value: docker
-        --kind-version       Version of the Kind tool, default value: v0.7.0
+        --kind-version       Version of the Kind tool, default value: v0.11.1
         --node-num           The count of the cluster nodes,default value: 3
         --k8s-version        Version of the Kubernetes cluster,default value: v1.17.2
         --volume-num         The volumes number of each kubernetes node,default value: 5
         --release-name       Release name of chaos-mesh, default value: chaos-mesh
         --namespace          Namespace of chaos-mesh, default value: chaos-testing
-        --timezone           Specifies timezone to be used by chaos-dashboard, chaos-daemon and controlller.
+        --timezone           Specifies timezone to be used by chaos-dashboard, chaos-daemon and controller.
 EOF
 }
 

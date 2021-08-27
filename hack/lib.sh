@@ -30,7 +30,7 @@ HELM_BIN=$OUTPUT_BIN/helm
 # (https://github.com/helm/helm/issues/6361) has been fixed.
 #
 HELM_VERSION=3.5.3
-KIND_VERSION=${KIND_VERSION:-0.11.0}
+KIND_VERSION=${KIND_VERSION:-0.11.1}
 KIND_BIN=$OUTPUT_BIN/kind
 KUBEBUILDER_PATH=$OUTPUT_BIN/kubebuilder
 KUBEBUILDER_BIN=$KUBEBUILDER_PATH/bin/kubebuilder
