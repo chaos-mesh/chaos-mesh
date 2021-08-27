@@ -123,20 +123,19 @@ func (s *Service) list(c *gin.Context) {
 	}
 
 	exps := make([]*Experiment, 0)
-	for key, list := range v1alpha1.AllKinds() {
-		if kind != "" && key != kind {
+	for k, chaosKind := range v1alpha1.AllKinds() {
+		if kind != "" && k != kind {
 			continue
 		}
 
-		if err := kubeCli.List(context.Background(), list.SpawnList(), &client.ListOptions{Namespace: ns}); err != nil {
+		list := chaosKind.SpawnList()
+		if err := kubeCli.List(context.Background(), list, &client.ListOptions{Namespace: ns}); err != nil {
 			u.SetAPImachineryError(c, err)
 
 			return
 		}
 
-		items := reflect.ValueOf(list.SpawnList()).Elem().FieldByName("Items")
-		for i := 0; i < items.Len(); i++ {
-			item := items.Index(i).Addr().Interface().(v1alpha1.InnerObject)
+		for _, item := range list.GetItems() {
 			chaosName := item.GetName()
 
 			if name != "" && chaosName != name {
@@ -151,7 +150,7 @@ func (s *Service) list(c *gin.Context) {
 					UID:       string(item.GetUID()),
 					Created:   item.GetCreationTimestamp().Format(time.RFC3339),
 				},
-				Status: status.GetChaosStatus(item),
+				Status: status.GetChaosStatus(item.(v1alpha1.InnerObject)),
 			})
 		}
 	}
@@ -645,25 +644,21 @@ func (s *Service) state(c *gin.Context) {
 
 	g, ctx := errgroup.WithContext(context.Background())
 	m := &sync.Mutex{}
-	kinds := v1alpha1.AllKinds()
 
 	var listOptions []client.ListOption
 	listOptions = append(listOptions, &client.ListOptions{Namespace: ns})
 
-	for index := range kinds {
-		list := kinds[index]
+	for _, chaosKind := range v1alpha1.AllKinds() {
+		list := chaosKind.SpawnList()
 
 		g.Go(func() error {
-			chaosList := list.SpawnList()
-			if err := kubeCli.List(ctx, chaosList, listOptions...); err != nil {
+			if err := kubeCli.List(ctx, list, listOptions...); err != nil {
 				return err
 			}
 			m.Lock()
 
-			items := reflect.ValueOf(chaosList).Elem().FieldByName("Items")
-			for i := 0; i < items.Len(); i++ {
-				item := items.Index(i).Addr().Interface().(v1alpha1.InnerObject)
-				s := status.GetChaosStatus(item)
+			for _, item := range list.GetItems() {
+				s := status.GetChaosStatus(item.(v1alpha1.InnerObject))
 
 				switch s {
 				case status.Injecting:
