@@ -14,10 +14,12 @@ IMAGE_TAG := $(if $(IMAGE_TAG),$(IMAGE_TAG),latest)
 
 ROOT=$(shell pwd)
 OUTPUT_BIN=$(ROOT)/output/bin
-KUSTOMIZE_BIN=$(OUTPUT_BIN)/kustomize
-KUBEBUILDER_BIN=$(OUTPUT_BIN)/kubebuilder
-KUBECTL_BIN=$(OUTPUT_BIN)/kubectl
 HELM_BIN=$(OUTPUT_BIN)/helm
+
+IMAGE_BUILD_ENV_PROJECT ?= "chaos-mesh"
+IMAGE_BUILD_ENV_REGISTRY ?= "ghcr.io"
+IMAGE_DEV_ENV_PROJECT ?= "chaos-mesh"
+IMAGE_DEV_ENV_REGISTRY ?= "ghcr.io"
 
 ifeq ($(GO111), 1)
 $(error Please upgrade your Go compiler to 1.11 or higher version)
@@ -164,7 +166,7 @@ ifneq ($(IN_DOCKER),1)
 $(2): image-build-env go_build_cache_directory
 	@DOCKER_ID=$$$$(docker run -d \
 		$(BUILD_INDOCKER_ARG) \
-		${DOCKER_REGISTRY_PREFIX}pingcap/build-env:${IMAGE_TAG} \
+		$$(BUILD_ENV_IMAGE) \
 		sleep infinity); \
 	docker exec --workdir /mnt/ \
 		--env IMG_LDFLAGS="${LDFLAGS}" \
@@ -180,13 +182,13 @@ endef
 enter-buildenv: image-build-env go_build_cache_directory
 	@docker run -it \
 		$(BUILD_INDOCKER_ARG) \
-		${DOCKER_REGISTRY_PREFIX}pingcap/build-env:${IMAGE_TAG} \
+		$(BUILD_ENV_IMAGE) \
 		bash
 
 enter-devenv: image-dev-env go_build_cache_directory
 	@docker run -it \
 		$(BUILD_INDOCKER_ARG) \
-		${DOCKER_REGISTRY_PREFIX}pingcap/dev-env:${IMAGE_TAG} \
+		$(DEV_ENV_IMAGE) \
 		bash
 
 ifeq ($(IN_DOCKER),1)
@@ -225,7 +227,27 @@ e2e-test/image/e2e/chaos-mesh: helm/chaos-mesh
 	rm -rf e2e-test/image/e2e/chaos-mesh
 	cp -r helm/chaos-mesh e2e-test/image/e2e
 
+# $(1): the name of the image
+# $(2): the path of the Dockerfile build directory
+# $(3): whether building is optional. If $(3) equals 1, the image will be pulled from ghcr.io.
+# $(IMAGE_$(4)_PROJECT): the project name of the image, by default it is `pingcap`
+# $(IMAGE_$(4)_REGISTRY): the registry name of the image, it will override `DOCKER_REGISTRY`
 define IMAGE_TEMPLATE
+
+$(4)_PROJECT := ${IMAGE_$(4)_PROJECT}
+ifeq ($$($(4)_PROJECT),)
+$(4)_PROJECT := pingcap
+endif
+
+$(4)_REGISTRY := $(IMAGE_$(4)_REGISTRY)
+ifeq ($$($(4)_REGISTRY),)
+$(4)_DOCKER_REGISTRY_PREFIX = $(DOCKER_REGISTRY_PREFIX)
+else
+$(4)_DOCKER_REGISTRY_PREFIX = $$($(4)_REGISTRY)/
+endif
+
+$(4)_IMAGE := $$($(4)_DOCKER_REGISTRY_PREFIX)$$($(4)_PROJECT)/$(1):${IMAGE_TAG}
+
 CLEAN_TARGETS += $(2)/.dockerbuilt
 
 image-$(1): $(2)/.dockerbuilt
@@ -234,29 +256,29 @@ $(2)/.dockerbuilt:$(image-$(1)-dependencies) $(2)/Dockerfile
 ifeq ($(DOCKER_CACHE),1)
 
 ifneq ($(DISABLE_CACHE_FROM),1)
-	DOCKER_BUILDKIT=1 DOCKER_CLI_EXPERIMENTAL=enabled docker buildx build --load --cache-to type=local,dest=$(DOCKER_CACHE_DIR)/image-$(1) --cache-from type=local,src=$(DOCKER_CACHE_DIR)/image-$(1) -t ${DOCKER_REGISTRY_PREFIX}pingcap/$(1):${IMAGE_TAG} ${DOCKER_BUILD_ARGS} $(2)
+	DOCKER_BUILDKIT=1 DOCKER_CLI_EXPERIMENTAL=enabled docker buildx build --load --cache-to type=local,dest=$(DOCKER_CACHE_DIR)/image-$(1) --cache-from type=local,src=$(DOCKER_CACHE_DIR)/image-$(1) -t $$($(4)_IMAGE) ${DOCKER_BUILD_ARGS} $(2)
 else
-	DOCKER_BUILDKIT=1 DOCKER_CLI_EXPERIMENTAL=enabled docker buildx build --load --cache-to type=local,dest=$(DOCKER_CACHE_DIR)/image-$(1) -t ${DOCKER_REGISTRY_PREFIX}pingcap/$(1):${IMAGE_TAG} ${DOCKER_BUILD_ARGS} $(2)
+	DOCKER_BUILDKIT=1 DOCKER_CLI_EXPERIMENTAL=enabled docker buildx build --load --cache-to type=local,dest=$(DOCKER_CACHE_DIR)/image-$(1) -t $$($(4)_IMAGE) ${DOCKER_BUILD_ARGS} $(2)
 endif
 
 else ifneq ($(TARGET_PLATFORM),)
-	DOCKER_BUILDKIT=1 docker buildx build --load --platform linux/$(TARGET_PLATFORM) -t ${DOCKER_REGISTRY_PREFIX}pingcap/$(1):${IMAGE_TAG} --build-arg TARGET_PLATFORM=$(TARGET_PLATFORM) ${DOCKER_BUILD_ARGS} $(2)
+	DOCKER_BUILDKIT=1 docker buildx build --load --platform linux/$(TARGET_PLATFORM) -t $$($(4)_IMAGE) --build-arg TARGET_PLATFORM=$(TARGET_PLATFORM) ${DOCKER_BUILD_ARGS} $(2)
 else
-	DOCKER_BUILDKIT=1 docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/$(1):${IMAGE_TAG} ${DOCKER_BUILD_ARGS} $(2)
+	DOCKER_BUILDKIT=1 docker build -t $$($(4)_IMAGE) ${DOCKER_BUILD_ARGS} $(2)
 endif
 	touch $(2)/.dockerbuilt
 endef
 
-$(eval $(call IMAGE_TEMPLATE,chaos-daemon,images/chaos-daemon))
-$(eval $(call IMAGE_TEMPLATE,chaos-mesh,images/chaos-mesh))
-$(eval $(call IMAGE_TEMPLATE,chaos-dashboard,images/chaos-dashboard))
-$(eval $(call IMAGE_TEMPLATE,build-env,images/build-env))
-$(eval $(call IMAGE_TEMPLATE,dev-env,images/dev-env))
-$(eval $(call IMAGE_TEMPLATE,e2e-helper,e2e-test/cmd/e2e_helper))
-$(eval $(call IMAGE_TEMPLATE,chaos-mesh-e2e,e2e-test/image/e2e))
-$(eval $(call IMAGE_TEMPLATE,chaos-kernel,images/chaos-kernel))
-$(eval $(call IMAGE_TEMPLATE,chaos-jvm,images/chaos-jvm))
-$(eval $(call IMAGE_TEMPLATE,chaos-dlv,images/chaos-dlv))
+$(eval $(call IMAGE_TEMPLATE,chaos-daemon,images/chaos-daemon,0,CHAOS_DAEMON))
+$(eval $(call IMAGE_TEMPLATE,chaos-mesh,images/chaos-mesh,0,CHAOS_MESH))
+$(eval $(call IMAGE_TEMPLATE,chaos-dashboard,images/chaos-dashboard,0,CHAOS_DASHBOARD))
+$(eval $(call IMAGE_TEMPLATE,build-env,images/build-env,0,BUILD_ENV))
+$(eval $(call IMAGE_TEMPLATE,dev-env,images/dev-env,0,DEV_ENV))
+$(eval $(call IMAGE_TEMPLATE,e2e-helper,e2e-test/cmd/e2e_helper,0,E2E_HELPER))
+$(eval $(call IMAGE_TEMPLATE,chaos-mesh-e2e,e2e-test/image/e2e,0,CHAOS_MESH_E2E))
+$(eval $(call IMAGE_TEMPLATE,chaos-kernel,images/chaos-kernel,0,CHAOS_KERNEL))
+$(eval $(call IMAGE_TEMPLATE,chaos-jvm,images/chaos-jvm,0,CHAOS_JVM))
+$(eval $(call IMAGE_TEMPLATE,chaos-dlv,images/chaos-dlv,0,CHAOS_DLV))
 
 binary: $(BINARIES)
 
@@ -294,7 +316,7 @@ $(1):image-dev-env go_build_cache_directory
 		--cap-add=sys_ptrace \
 		--env CI="${CI}" --env CODECOV_TOKEN="${CODECOV_TOKEN}" \
 		$(BUILD_INDOCKER_ARG) \
-		${DOCKER_REGISTRY_PREFIX}pingcap/dev-env:${IMAGE_TAG} \
+		$$(DEV_ENV_IMAGE) \
 		/usr/bin/make $(1)
 endif
 endef
