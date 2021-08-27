@@ -217,7 +217,7 @@ func GetPods(ctx context.Context, chaosName string, status v1alpha1.ChaosStatus,
 func GetChaosList(ctx context.Context, chaosType string, chaosName string, ns string, c client.Client) ([]runtime.Object, []string, error) {
 	chaosType = upperCaseChaos(strings.ToLower(chaosType))
 	allKinds := v1alpha1.AllKinds()
-	chaosListInterface := allKinds[chaosType].GenericChaosList
+	chaosListInterface := allKinds[chaosType].SpawnList()
 
 	if err := c.List(ctx, chaosListInterface, client.InNamespace(ns)); err != nil {
 		return nil, nil, errors.Wrapf(err, "failed to get chaosList with namespace %s", ns)
@@ -248,7 +248,7 @@ func GetChaosList(ctx context.Context, chaosType string, chaosName string, ns st
 
 func getChaos(ctx context.Context, chaosType string, chaosName string, ns string, c client.Client) (runtime.Object, error) {
 	allKinds := v1alpha1.AllKinds()
-	chaos := allKinds[chaosType].Chaos
+	chaos := allKinds[chaosType].SpawnObject()
 	objectKey := client.ObjectKey{
 		Namespace: ns,
 		Name:      chaosName,

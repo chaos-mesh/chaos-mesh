@@ -128,13 +128,13 @@ func (s *Service) list(c *gin.Context) {
 			continue
 		}
 
-		if err := kubeCli.List(context.Background(), list.GenericChaosList, &client.ListOptions{Namespace: ns}); err != nil {
+		if err := kubeCli.List(context.Background(), list.SpawnList(), &client.ListOptions{Namespace: ns}); err != nil {
 			u.SetAPImachineryError(c, err)
 
 			return
 		}
 
-		items := reflect.ValueOf(list.GenericChaosList).Elem().FieldByName("Items")
+		items := reflect.ValueOf(list.SpawnList()).Elem().FieldByName("Items")
 		for i := 0; i < items.Len(); i++ {
 			item := items.Index(i).Addr().Interface().(v1alpha1.InnerObject)
 			chaosName := item.GetName()
@@ -188,7 +188,7 @@ func (s *Service) create(c *gin.Context) {
 	kind := exp["kind"].(string)
 
 	if chaosKind, ok := v1alpha1.AllKinds()[kind]; ok {
-		chaos := chaosKind.Chaos.DeepCopyObject().(client.Object)
+		chaos := chaosKind.SpawnObject()
 		reflect.ValueOf(chaos).Elem().FieldByName("ObjectMeta").Set(reflect.ValueOf(metav1.ObjectMeta{}))
 
 		if err = u.ShouldBindBodyWithJSON(c, chaos); err != nil {
@@ -246,7 +246,7 @@ func (s *Service) get(c *gin.Context) {
 	ns, name, kind := exp.Namespace, exp.Name, exp.Kind
 
 	if chaosKind, ok := v1alpha1.AllKinds()[kind]; ok {
-		expDetail = s.findChaosInCluster(c, kubeCli, types.NamespacedName{Namespace: ns, Name: name}, chaosKind.Chaos.DeepCopyObject().(client.Object))
+		expDetail = s.findChaosInCluster(c, kubeCli, types.NamespacedName{Namespace: ns, Name: name}, chaosKind.SpawnObject())
 
 		if expDetail == nil {
 			return
@@ -417,7 +417,7 @@ func checkAndDeleteChaos(c *gin.Context, kubeCli client.Client, namespacedName t
 	}
 
 	ctx := context.Background()
-	chaos := chaosKind.Chaos.DeepCopyObject().(client.Object)
+	chaos := chaosKind.SpawnObject()
 
 	if err = kubeCli.Get(ctx, namespacedName, chaos); err != nil {
 		u.SetAPImachineryError(c, err)
@@ -481,7 +481,7 @@ func (s *Service) update(c *gin.Context) {
 	kind := exp["kind"].(string)
 
 	if chaosKind, ok := v1alpha1.AllKinds()[kind]; ok {
-		chaos := chaosKind.Chaos.DeepCopyObject().(client.Object)
+		chaos := chaosKind.SpawnObject()
 
 		if err = u.ShouldBindBodyWithJSON(c, chaos); err != nil {
 			return
@@ -601,7 +601,7 @@ func (s *Service) start(c *gin.Context) {
 }
 
 func patchExperiment(kubeCli client.Client, exp *core.Experiment, annotations map[string]string) error {
-	chaos := v1alpha1.AllKinds()[exp.Kind].Chaos.DeepCopyObject().(client.Object)
+	chaos := v1alpha1.AllKinds()[exp.Kind].SpawnObject()
 
 	if err := kubeCli.Get(context.Background(), types.NamespacedName{Namespace: exp.Namespace, Name: exp.Name}, chaos); err != nil {
 		return err
@@ -654,12 +654,13 @@ func (s *Service) state(c *gin.Context) {
 		list := kinds[index]
 
 		g.Go(func() error {
-			if err := kubeCli.List(ctx, list.GenericChaosList, listOptions...); err != nil {
+			chaosList := list.SpawnList()
+			if err := kubeCli.List(ctx, chaosList, listOptions...); err != nil {
 				return err
 			}
 			m.Lock()
 
-			items := reflect.ValueOf(list.GenericChaosList).Elem().FieldByName("Items")
+			items := reflect.ValueOf(chaosList).Elem().FieldByName("Items")
 			for i := 0; i < items.Len(); i++ {
 				item := items.Index(i).Addr().Interface().(v1alpha1.InnerObject)
 				s := status.GetChaosStatus(item)

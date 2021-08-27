@@ -185,7 +185,7 @@ func init() {
 
 func FetchChaosByTemplateType(templateType TemplateType) (runtime.Object, error) {
 	if kind, ok := all.kinds[string(templateType)]; ok {
-		return kind.Chaos.DeepCopyObject(), nil
+		return kind.SpawnObject(), nil
 	}
 	return nil, fmt.Errorf("no such kind refers to template type %s", templateType)
 }

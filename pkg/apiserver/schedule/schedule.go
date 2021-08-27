@@ -256,7 +256,7 @@ func (s *Service) findScheduleInCluster(c *gin.Context, kubeCli client.Client, n
 		return nil
 	}
 
-	chaosList := chaosKind.GenericChaosList
+	chaosList := chaosKind.SpawnList()
 	err = kubeCli.List(context.Background(), chaosList, &client.ListOptions{
 		Namespace:     sch.Namespace,
 		LabelSelector: selector,
