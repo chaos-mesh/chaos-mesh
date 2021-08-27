@@ -18,11 +18,13 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"path"
 	"testing"
 	"time"
 
 	"github.com/onsi/ginkgo"
 	ginkgoconfig "github.com/onsi/ginkgo/config"
+	"github.com/onsi/ginkgo/reporters"
 	"github.com/onsi/gomega"
 	runtimeutils "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/tools/clientcmd"
@@ -30,17 +32,13 @@ import (
 	"k8s.io/klog"
 	"k8s.io/kubernetes/test/e2e/framework"
 	"k8s.io/kubernetes/test/e2e/framework/config"
-	e2elog "k8s.io/kubernetes/test/e2e/framework/log"
 	"k8s.io/kubernetes/test/e2e/framework/testfiles"
-	"k8s.io/kubernetes/test/e2e/framework/viperconfig"
 
 	e2econfig "github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/config"
 
 	// test sources
 	_ "github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/chaos"
 )
-
-var viperConfig = flag.String("viper-config", "", "The name of a viper config file (https://github.com/spf13/viper#what-is-viper). All e2e command line parameters can also be configured in such a file. May contain a path and may or may not contain the file suffix. The default is to look for an optional file with `e2e` as base name. If a file is specified explicitly, it must be present.")
 
 // handleFlags sets up all flags and parses the command line.
 func handleFlags() {
@@ -54,14 +52,6 @@ func handleFlags() {
 func TestMain(m *testing.M) {
 	// Register test flags, then parse flags.
 	handleFlags()
-
-	// Now that we know which Viper config (if any) was chosen,
-	// parse it and update those options which weren't already set via command line flags
-	// (which have higher priority).
-	if err := viperconfig.ViperizeFlags(*viperConfig, "e2e", flag.CommandLine); err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
-	}
 
 	framework.AfterReadingAllFlags(&framework.TestContext)
 
@@ -82,10 +72,11 @@ func RunE2ETests(t *testing.T) {
 	logs.InitLogs()
 	defer logs.FlushLogs()
 
-	gomega.RegisterFailHandler(e2elog.Fail)
+	gomega.RegisterFailHandler(framework.Fail)
 
 	// Run tests through the Ginkgo runner with output to console + JUnit for Jenkins
 	var r []ginkgo.Reporter
+	r = append(r, reporters.NewJUnitReporter(path.Join(framework.TestContext.ReportDir, fmt.Sprintf("junit_%v%02d.xml", framework.TestContext.ReportPrefix, ginkgoconfig.GinkgoConfig.ParallelNode))))
 	klog.Infof("Starting e2e run %q on Ginkgo node %d", framework.RunID, ginkgoconfig.GinkgoConfig.ParallelNode)
 
 	ginkgo.RunSpecsWithDefaultAndCustomReporters(t, "chaosmesh e2e suit", r)
@@ -111,7 +102,6 @@ func hackRegisterClusterFlags(flags *flag.FlagSet) {
 	flags.StringVar(&framework.TestContext.Prefix, "prefix", "e2e", "A prefix to be added to cloud resources created during testing.")
 	flags.StringVar(&framework.TestContext.MasterOSDistro, "master-os-distro", "debian", "The OS distribution of cluster master (debian, ubuntu, gci, coreos, or custom).")
 	flags.StringVar(&framework.TestContext.NodeOSDistro, "node-os-distro", "debian", "The OS distribution of cluster VM instances (debian, ubuntu, gci, coreos, or custom).")
-	flags.StringVar(&framework.TestContext.ClusterMonitoringMode, "cluster-monitoring-mode", "standalone", "The monitoring solution that is used in the cluster.")
 	flags.StringVar(&framework.TestContext.ClusterDNSDomain, "dns-domain", "cluster.local", "The DNS Domain of the cluster.")
 
 	flags.IntVar(&framework.TestContext.MinStartupPods, "minStartupPods", 0, "The number of pods which we need to see in 'Running' state with a 'Ready' condition of true, before we try running tests. This is useful in any cluster which needs some base pod-based services running before it can be used.")

@@ -14,6 +14,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"os"
 
@@ -38,7 +39,7 @@ import (
 )
 
 var (
-	log = ctrl.Log.WithName("setup")
+	log = ctrl.Log.WithName("dashboard")
 )
 
 var (
@@ -46,7 +47,7 @@ var (
 )
 
 // @title Chaos Mesh Dashboard API
-// @version 1.2
+// @version 2.0
 // @description Swagger docs for Chaos Mesh Dashboard. If you encounter any problems with API, please click on the issues link below to report bugs or questions.
 
 // @contact.name Issues
@@ -66,25 +67,26 @@ func main() {
 	}
 
 	ctrl.SetLogger(zap.New(zap.UseDevMode(true)))
+	mainLog := log.WithName("main")
 
-	dashboardConfig, err := config.EnvironChaosDashboard()
+	dashboardConfig, err := config.GetChaosDashboardEnv()
 	if err != nil {
-		log.Error(err, "main: invalid ChaosDashboardConfig")
+		mainLog.Error(err, "invalid ChaosDashboardConfig")
 		os.Exit(1)
 	}
 	dashboardConfig.Version = version.Get().GitVersion
 
 	persistTTLConfigParsed, err := config.ParsePersistTTLConfig(dashboardConfig.PersistTTL)
 	if err != nil {
-		log.Error(err, "main: invalid PersistTTLConfig")
+		mainLog.Error(err, "invalid PersistTTLConfig")
 		os.Exit(1)
 	}
 
-	controllerRuntimeStopCh := ctrl.SetupSignalHandler()
+	controllerRuntimeSignalHandlerContext := ctrl.SetupSignalHandler()
 	app := fx.New(
 		fx.Provide(
-			func() (<-chan struct{}, *config.ChaosDashboardConfig, *ttlcontroller.TTLconfig) {
-				return controllerRuntimeStopCh, dashboardConfig, persistTTLConfigParsed
+			func() (context.Context, *config.ChaosDashboardConfig, *ttlcontroller.TTLconfig) {
+				return controllerRuntimeSignalHandlerContext, dashboardConfig, persistTTLConfigParsed
 			},
 			dbstore.NewDBStore,
 			collector.NewServer,
@@ -97,5 +99,4 @@ func main() {
 	)
 
 	app.Run()
-	<-controllerRuntimeStopCh
 }

@@ -23,47 +23,47 @@ import (
 // +chaos-mesh:base
 // +chaos-mesh:oneshot=in.Spec.Action==NodeReset
 
-// GcpChaos is the Schema for the gcpchaos API
-type GcpChaos struct {
+// GCPChaos is the Schema for the gcpchaos API
+type GCPChaos struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   GcpChaosSpec   `json:"spec"`
-	Status GcpChaosStatus `json:"status,omitempty"`
+	Spec   GCPChaosSpec   `json:"spec"`
+	Status GCPChaosStatus `json:"status,omitempty"`
 }
 
-// GcpChaosAction represents the chaos action about gcp.
-type GcpChaosAction string
+// GCPChaosAction represents the chaos action about gcp.
+type GCPChaosAction string
 
 const (
 	// NodeStop represents the chaos action of stopping the node.
-	NodeStop GcpChaosAction = "node-stop"
+	NodeStop GCPChaosAction = "node-stop"
 	// NodeReset represents the chaos action of resetting the node.
-	NodeReset GcpChaosAction = "node-reset"
+	NodeReset GCPChaosAction = "node-reset"
 	// DiskLoss represents the chaos action of detaching the disk.
-	DiskLoss GcpChaosAction = "disk-loss"
+	DiskLoss GCPChaosAction = "disk-loss"
 )
 
-// GcpChaosSpec is the content of the specification for a GcpChaos
-type GcpChaosSpec struct {
+// GCPChaosSpec is the content of the specification for a GCPChaos
+type GCPChaosSpec struct {
 	// Action defines the specific gcp chaos action.
 	// Supported action: node-stop / node-reset / disk-loss
 	// Default action: node-stop
 	// +kubebuilder:validation:Enum=node-stop;node-reset;disk-loss
-	Action GcpChaosAction `json:"action"`
+	Action GCPChaosAction `json:"action"`
 
 	// Duration represents the duration of the chaos action.
 	// +optional
-	Duration *string `json:"duration,omitempty"`
+	Duration *string `json:"duration,omitempty" webhook:"Duration"`
 
 	// SecretName defines the name of kubernetes secret. It is used for GCP credentials.
 	// +optional
 	SecretName *string `json:"secretName,omitempty"`
 
-	GcpSelector `json:",inline"`
+	GCPSelector `json:",inline"`
 }
 
-type GcpSelector struct {
+type GCPSelector struct {
 	// Project defines the name of gcp project.
 	Project string `json:"project"`
 
@@ -76,16 +76,16 @@ type GcpSelector struct {
 	// The device name of disks to detach.
 	// Needed in disk-loss.
 	// +optional
-	DeviceNames *[]string `json:"deviceNames,omitempty"`
+	DeviceNames []string `json:"deviceNames,omitempty" webhook:"GCPDeviceNames,nilable"`
 }
 
-func (obj *GcpChaos) GetSelectorSpecs() map[string]interface{} {
+func (obj *GCPChaos) GetSelectorSpecs() map[string]interface{} {
 	return map[string]interface{}{
-		".": &obj.Spec.GcpSelector,
+		".": &obj.Spec.GCPSelector,
 	}
 }
 
-func (selector *GcpSelector) Id() string {
+func (selector *GCPSelector) Id() string {
 	// TODO: handle the error here
 	// or ignore it is enough ?
 	json, _ := json.Marshal(selector)
@@ -93,8 +93,8 @@ func (selector *GcpSelector) Id() string {
 	return string(json)
 }
 
-// GcpChaosStatus represents the status of a GcpChaos
-type GcpChaosStatus struct {
+// GCPChaosStatus represents the status of a GCPChaos
+type GCPChaosStatus struct {
 	ChaosStatus `json:",inline"`
 
 	// The attached disk info strings.
@@ -102,6 +102,6 @@ type GcpChaosStatus struct {
 	AttachedDisksStrings []string `json:"attachedDiskStrings,omitempty"`
 }
 
-func (obj *GcpChaos) GetCustomStatus() interface{} {
+func (obj *GCPChaos) GetCustomStatus() interface{} {
 	return &obj.Status.AttachedDisksStrings
 }

@@ -31,7 +31,6 @@ type Item struct {
 
 func main() {
 	if len(os.Args) != 3 {
-		fmt.Println(len(os.Args))
 		fmt.Println("migrator <old-yaml> <new-yaml>")
 		os.Exit(1)
 	}

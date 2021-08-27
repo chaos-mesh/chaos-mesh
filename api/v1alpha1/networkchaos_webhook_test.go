@@ -41,8 +41,8 @@ var _ = Describe("networkchaos_webhook", func() {
 				},
 			}
 			networkchaos.Default()
-			Expect(networkchaos.Spec.Delay.Correlation).To(Equal(DefaultCorrelation))
-			Expect(networkchaos.Spec.Delay.Jitter).To(Equal(DefaultJitter))
+			Expect(string(networkchaos.Spec.Delay.Correlation)).To(Equal(DefaultCorrelation))
+			Expect(string(networkchaos.Spec.Delay.Jitter)).To(Equal(DefaultJitter))
 		})
 	})
 	Context("webhook.Validator of networkchaos", func() {

@@ -15,80 +15,17 @@ package v1alpha1
 
 import (
 	"fmt"
-	"reflect"
 	"strconv"
 
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
-	"sigs.k8s.io/controller-runtime/pkg/webhook"
 )
 
-// log is for logging in this package.
-var jvmchaoslog = logf.Log.WithName("jvmchaos-resource")
-
-// +kubebuilder:webhook:path=/mutate-chaos-mesh-org-v1alpha1-jvmchaos,mutating=true,failurePolicy=fail,groups=chaos-mesh.org,resources=jvmchaos,verbs=create;update,versions=v1alpha1,name=mjvmchaos.kb.io
-
-var _ webhook.Defaulter = &JVMChaos{}
-
-// Default implements webhook.Defaulter so a webhook will be registered for the type
-func (in *JVMChaos) Default() {
-	jvmchaoslog.Info("default", "name", in.Name)
-
-	in.Spec.Selector.DefaultNamespace(in.GetNamespace())
-}
-
-// +kubebuilder:webhook:verbs=create;update,path=/validate-chaos-mesh-org-v1alpha1-jvmchaos,mutating=false,failurePolicy=fail,groups=chaos-mesh.org,resources=jvmchaos,versions=v1alpha1,name=vjvmchaos.kb.io
-
-var _ webhook.Validator = &JVMChaos{}
-
-// ValidateCreate implements webhook.Validator so a webhook will be registered for the type
-func (in *JVMChaos) ValidateCreate() error {
-	jvmchaoslog.Info("validate create", "name", in.Name)
-
-	return in.Validate()
-}
-
-// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
-func (in *JVMChaos) ValidateUpdate(old runtime.Object) error {
-	jvmchaoslog.Info("validate update", "name", in.Name)
-	if !reflect.DeepEqual(in.Spec, old.(*JVMChaos).Spec) {
-		return ErrCanNotUpdateChaos
-	}
-	return in.Validate()
-}
-
-// ValidateDelete implements webhook.Validator so a webhook will be registered for the type
-func (in *JVMChaos) ValidateDelete() error {
-	jvmchaoslog.Info("validate delete", "name", in.Name)
-
-	// Nothing to do?
-	return nil
-}
-
-// Validate validates chaos object
-func (in *JVMChaos) Validate() error {
-	allErrs := in.Spec.Validate()
-	if len(allErrs) > 0 {
-		return fmt.Errorf(allErrs.ToAggregate().Error())
-	}
-
-	return nil
-}
-
-func (in *JVMChaosSpec) Validate() field.ErrorList {
-	specField := field.NewPath("spec")
-	allErrs := in.validateJvmChaos(specField)
-	allErrs = append(allErrs, validateDuration(in, specField)...)
-	return allErrs
-}
-
-func (in *JVMChaosSpec) validateJvmChaos(spec *field.Path) field.ErrorList {
+func (in *JVMChaosSpec) Validate(root interface{}, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
-	targetField := spec.Child("target")
-	actionField := spec.Child("action")
-	flagsField := spec.Child("flags")
-	matcherField := spec.Child("matcher")
+	targetField := path.Child("target")
+	actionField := path.Child("action")
+	flagsField := path.Child("flags")
+	matcherField := path.Child("matcher")
 	if actions, ok := JvmSpec[in.Target]; ok {
 		if actionPR, actionOK := actions[in.Action]; actionOK {
 			if actionPR.Flags != nil {

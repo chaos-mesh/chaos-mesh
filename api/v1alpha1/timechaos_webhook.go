@@ -18,82 +18,37 @@ import (
 	"reflect"
 	"time"
 
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
-	"sigs.k8s.io/controller-runtime/pkg/webhook"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1/genericwebhook"
 )
 
-// log is for logging in this package.
-var timechaoslog = logf.Log.WithName("timechaos-resource")
+type ClockIds []string
 
-// +kubebuilder:webhook:path=/mutate-chaos-mesh-org-v1alpha1-timechaos,mutating=true,failurePolicy=fail,groups=chaos-mesh.org,resources=timechaos,verbs=create;update,versions=v1alpha1,name=mtimechaos.kb.io
-
-var _ webhook.Defaulter = &TimeChaos{}
-
-// Default implements webhook.Defaulter so a webhook will be registered for the type
-func (in *TimeChaos) Default() {
-	timechaoslog.Info("default", "name", in.Name)
-
-	in.Spec.Selector.DefaultNamespace(in.GetNamespace())
-	in.Spec.DefaultClockIds()
-}
-
-// +kubebuilder:webhook:verbs=create;update,path=/validate-chaos-mesh-org-v1alpha1-timechaos,mutating=false,failurePolicy=fail,groups=chaos-mesh.org,resources=timechaos,versions=v1alpha1,name=vtimechaos.kb.io
-
-var _ webhook.Validator = &TimeChaos{}
-
-// ValidateCreate implements webhook.Validator so a webhook will be registered for the type
-func (in *TimeChaos) ValidateCreate() error {
-	timechaoslog.Info("validate create", "name", in.Name)
-	return in.Validate()
-}
-
-// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
-func (in *TimeChaos) ValidateUpdate(old runtime.Object) error {
-	timechaoslog.Info("validate update", "name", in.Name)
-	if !reflect.DeepEqual(in.Spec, old.(*TimeChaos).Spec) {
-		return ErrCanNotUpdateChaos
+// DefaultClockIds will set default value for empty ClockIds fields
+func (in *ClockIds) Default(root interface{}, field reflect.StructField) {
+	// in cannot be nil
+	if *in == nil || len(*in) == 0 {
+		*in = []string{"CLOCK_REALTIME"}
 	}
-	return in.Validate()
 }
 
-// ValidateDelete implements webhook.Validator so a webhook will be registered for the type
-func (in *TimeChaos) ValidateDelete() error {
-	timechaoslog.Info("validate delete", "name", in.Name)
+type TimeOffset string
 
-	// Nothing to do?
-	return nil
-}
-
-// Validate validates chaos object
-func (in *TimeChaos) Validate() error {
-	allErrs := in.Spec.Validate()
-
-	if len(allErrs) > 0 {
-		return fmt.Errorf(allErrs.ToAggregate().Error())
-	}
-	return nil
-}
-
-func (in *TimeChaosSpec) Validate() field.ErrorList {
-	specField := field.NewPath("spec")
-	allErrs := in.validateTimeOffset(specField.Child("timeOffset"))
-	allErrs = append(allErrs, validateDuration(in, specField)...)
-
-	return allErrs
-}
-
-// validateTimeOffset validates the timeOffset
-func (in *TimeChaosSpec) validateTimeOffset(timeOffset *field.Path) field.ErrorList {
+func (in *TimeOffset) Validate(root interface{}, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
-	_, err := time.ParseDuration(in.TimeOffset)
+	_, err := time.ParseDuration(string(*in))
 	if err != nil {
-		allErrs = append(allErrs, field.Invalid(timeOffset,
-			in.TimeOffset,
+		allErrs = append(allErrs, field.Invalid(path,
+			in,
 			fmt.Sprintf("parse timeOffset field error:%s", err)))
 	}
 
 	return allErrs
+}
+
+func init() {
+	genericwebhook.Register("ClockIds", reflect.PtrTo(reflect.TypeOf(ClockIds{})))
+	genericwebhook.Register("TimeOffset", reflect.PtrTo(reflect.TypeOf(TimeOffset(""))))
 }

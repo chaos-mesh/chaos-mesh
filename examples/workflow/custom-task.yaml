@@ -17,16 +17,16 @@ spec:
 #            - sh
 #            - -c
 #            - exit 1
-      conditionalTasks:
-        - task: workflow-stress-chaos
+      conditionalBranches:
+        - target: workflow-stress-chaos
           expression: 'exitCode == 0 && stdout == "branch-a"'
-        - task: workflow-network-chaos
+        - target: workflow-network-chaos
           expression: 'exitCode == 0 && stdout == "branch-b"'
-        - task: on-failed
+        - target: on-failed
           expression: 'exitCode != 0'
     - name: workflow-network-chaos
       templateType: NetworkChaos
-      duration: 20s
+      deadline: 20s
       networkChaos:
         direction: to
         action: delay
@@ -40,7 +40,7 @@ spec:
           jitter: "90ms"
     - name: workflow-stress-chaos
       templateType: StressChaos
-      duration: 20s
+      deadline: 20s
       stressChaos:
         mode: one
         selector:
@@ -64,4 +64,3 @@ spec:
             - -d
             - k1=v1&k2=v2
             - https://jsonplaceholder.typicode.com/posts
-

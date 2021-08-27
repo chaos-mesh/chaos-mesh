@@ -23,6 +23,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/gcpchaos/utils"
+	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 )
 
 type Impl struct {
@@ -31,11 +32,13 @@ type Impl struct {
 	Log logr.Logger
 }
 
+var _ common.ChaosImpl = (*Impl)(nil)
+
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, chaos v1alpha1.InnerObject) (v1alpha1.Phase, error) {
-	gcpchaos, ok := chaos.(*v1alpha1.GcpChaos)
+	gcpchaos, ok := chaos.(*v1alpha1.GCPChaos)
 	if !ok {
 		err := errors.New("chaos is not gcpchaos")
-		impl.Log.Error(err, "chaos is not GcpChaos", "chaos", chaos)
+		impl.Log.Error(err, "chaos is not GCPChaos", "chaos", chaos)
 		return v1alpha1.NotInjected, err
 	}
 	computeService, err := utils.GetComputeService(ctx, impl.Client, gcpchaos)
@@ -43,7 +46,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		impl.Log.Error(err, "fail to get the compute service")
 		return v1alpha1.NotInjected, err
 	}
-	var selected v1alpha1.GcpSelector
+	var selected v1alpha1.GCPSelector
 	json.Unmarshal([]byte(records[index].Id), &selected)
 
 	_, err = computeService.Instances.Stop(selected.Project, selected.Zone, selected.Instance).Do()
@@ -56,10 +59,10 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 }
 
 func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Record, chaos v1alpha1.InnerObject) (v1alpha1.Phase, error) {
-	gcpchaos, ok := chaos.(*v1alpha1.GcpChaos)
+	gcpchaos, ok := chaos.(*v1alpha1.GCPChaos)
 	if !ok {
 		err := errors.New("chaos is not gcpchaos")
-		impl.Log.Error(err, "chaos is not GcpChaos", "chaos", chaos)
+		impl.Log.Error(err, "chaos is not GCPChaos", "chaos", chaos)
 		return v1alpha1.Injected, err
 	}
 	computeService, err := utils.GetComputeService(ctx, impl.Client, gcpchaos)
@@ -67,7 +70,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		impl.Log.Error(err, "fail to get the compute service")
 		return v1alpha1.Injected, err
 	}
-	var selected v1alpha1.GcpSelector
+	var selected v1alpha1.GCPSelector
 	json.Unmarshal([]byte(records[index].Id), &selected)
 	_, err = computeService.Instances.Start(selected.Project, selected.Zone, selected.Instance).Do()
 	if err != nil {

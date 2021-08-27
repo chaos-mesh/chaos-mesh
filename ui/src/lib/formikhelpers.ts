@@ -1,5 +1,5 @@
 import { CallchainFrame, Experiment, ExperimentScope } from 'components/NewExperiment/types'
-import { arrToObjBySep, toCamelCase } from './utils'
+import { arrToObjBySep, toCamelCase, toTitleCase } from './utils'
 
 import { Template } from 'slices/workflows'
 import { WorkflowBasic } from 'components/NewWorkflow'
@@ -79,7 +79,7 @@ function selectorsToArr(selectors: Object, separator: string) {
 
 export function yamlToExperiment(yamlObj: any): any {
   const { kind, metadata, spec } = snakeCaseKeys(yamlObj, {
-    exclude: [/\.|\//], // Keys like app.kubernetes.io/component should be ignored
+    exclude: [/\.|\/|-/], // Keys like app.kubernetes.io/component should be ignored
   }) as any
 
   if (!kind || !metadata || !spec) {
@@ -171,6 +171,14 @@ export function yamlToExperiment(yamlObj: any): any {
     }
   }
 
+  console.log({
+    ...result,
+    target: {
+      kind,
+      [_snakecase(kind)]: spec,
+    },
+  })
+
   return {
     ...result,
     target: {
@@ -194,6 +202,7 @@ function validate(defaultI18n: string, i18n?: string) {
 export const validateName = (i18n?: string) => validate('The name is required', i18n)
 export const validateDuration = (i18n?: string) => validate('The duration is required', i18n)
 export const validateDeadline = (i18n?: string) => validate('The deadline is required', i18n)
+export const validateImage = (i18n?: string) => validate('The image is required', i18n)
 
 function scopeToYAMLJSON(scope: ExperimentScope) {
   const result = {
@@ -217,23 +226,26 @@ function scopeToYAMLJSON(scope: ExperimentScope) {
 }
 
 export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
-  const { name, namespace, duration } = basic
-  const children: string[] = []
+  const { name, namespace, deadline } = basic
+  const children: string[] = templates.map((d) => d.name)
   const realTemplates: Record<string, any>[] = []
 
-  templates
-    .sort((a, b) => a.index! - b.index!)
-    .forEach((t) => {
-      children.push(t.name)
+  function pushTemplate(template: any) {
+    if (!realTemplates.some((t) => t.name === template.name)) {
+      realTemplates.push(template)
+    }
+  }
 
+  function recurInsertTemplates(templates: Template[]) {
+    templates.forEach((t) => {
       switch (t.type) {
         case 'single':
-          const experiment = t.experiments[0]
+          const experiment = t.experiment!
           const basic = experiment.basic
           const kind = experiment.target.kind
           const spec = _snakecase(kind)
 
-          realTemplates.push({
+          pushTemplate({
             name: t.name,
             templateType: kind,
             deadline: experiment.basic.deadline,
@@ -245,63 +257,64 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
 
           break
         case 'serial':
-          t.experiments.forEach((d) => {
-            const basic = d.basic
-            const name = basic.name
-            const kind = d.target.kind
-            const spec = _snakecase(kind)
-
-            if (!realTemplates.some((t) => t.name === name)) {
-              realTemplates.push({
-                name,
-                templateType: kind,
-                deadline: d.basic.deadline,
-                [toCamelCase(kind)]: {
-                  ...scopeToYAMLJSON(basic.scope),
-                  ...d.target[spec],
-                },
-              })
-            }
-          })
-
-          realTemplates.push({
-            name: t.name,
-            templateType: 'Serial',
-            deadline: t.deadline,
-            children: t.experiments.map((d) => d.basic.name),
-          })
-
-          break
         case 'parallel':
-          t.experiments.forEach((d) => {
-            const basic = d.basic
-            const name = basic.name
-            const kind = d.target.kind
-            const spec = _snakecase(kind)
+        case 'custom':
+          t.children!.forEach((d) => {
+            if (d.children) {
+              pushTemplate({
+                name: d.name,
+                templateType: toTitleCase(d.type),
+                deadline: d.deadline,
+                children: d.children!.map((dd) => dd.name),
+              })
 
-            if (!realTemplates.some((t) => t.name === name)) {
-              realTemplates.push({
+              recurInsertTemplates(d.children)
+            } else {
+              if (d.type === 'suspend') {
+                pushTemplate({
+                  name: d.name,
+                  templateType: 'Suspend',
+                  deadline: d.deadline,
+                })
+
+                return
+              }
+
+              const e = d.experiment!
+              const basic = e.basic
+              const name = basic.name
+              const kind = e.target.kind
+              const spec = _snakecase(kind)
+
+              pushTemplate({
                 name,
                 templateType: kind,
-                deadline: d.basic.deadline,
+                deadline: e.basic.deadline,
                 [toCamelCase(kind)]: {
                   ...scopeToYAMLJSON(basic.scope),
-                  ...d.target[spec],
+                  ...e.target[spec],
                 },
               })
             }
           })
 
-          realTemplates.push({
+          pushTemplate({
             name: t.name,
-            templateType: 'Parallel',
-            deadline: t.deadline,
-            children: t.experiments.map((d) => d.basic.name),
+            templateType: toTitleCase(t.type === 'custom' ? 'task' : t.type),
+            deadline: t.type !== 'custom' ? t.deadline : undefined,
+            children: t.type !== 'custom' ? t.children!.map((d) => d.name) : undefined,
+            task:
+              t.type === 'custom'
+                ? {
+                    container: t.custom?.container,
+                  }
+                : undefined,
+            conditionalBranches: t.type === 'custom' ? t.custom?.conditionalBranches : undefined,
           })
 
           break
         case 'suspend':
-          realTemplates.push({
+          pushTemplate({
             name: t.name,
             templateType: 'Suspend',
             deadline: t.deadline,
@@ -312,6 +325,9 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
           break
       }
     })
+  }
+
+  recurInsertTemplates(templates)
 
   return yaml.dump(
     {
@@ -327,7 +343,7 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
           {
             name: 'entry',
             templateType: 'Serial',
-            duration,
+            deadline,
             children,
           },
           ...realTemplates,

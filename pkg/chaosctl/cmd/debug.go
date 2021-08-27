@@ -209,7 +209,8 @@ func (o *DebugOptions) Run(chaosType string, args []string, c *common.ClientSet)
 }
 
 func listNamespace(toComplete string, c *kubernetes.Clientset) ([]string, cobra.ShellCompDirective) {
-	namespaces, err := c.CoreV1().Namespaces().List(v1.ListOptions{})
+	// FIXME: get context from parameter
+	namespaces, err := c.CoreV1().Namespaces().List(context.TODO(), v1.ListOptions{})
 	if err != nil {
 		return nil, cobra.ShellCompDirectiveDefault
 	}

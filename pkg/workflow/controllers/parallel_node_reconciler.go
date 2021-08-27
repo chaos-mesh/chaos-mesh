@@ -47,7 +47,7 @@ func NewParallelNodeReconciler(kubeClient client.Client, eventRecorder recorder.
 }
 
 // Reconcile is extremely like the one in SerialNodeReconciler, only allows the parallel schedule, and respawn **all** the children tasks during retry
-func (it *ParallelNodeReconciler) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+func (it *ParallelNodeReconciler) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
 	startTime := time.Now()
 	defer func() {
 		it.logger.V(4).Info("Finished syncing for parallel node",
@@ -55,8 +55,6 @@ func (it *ParallelNodeReconciler) Reconcile(request reconcile.Request) (reconcil
 			"duration", time.Since(startTime),
 		)
 	}()
-
-	ctx := context.TODO()
 
 	node := v1alpha1.WorkflowNode{}
 	err := it.kubeClient.Get(ctx, request.NamespacedName, &node)
@@ -113,6 +111,7 @@ func (it *ParallelNodeReconciler) Reconcile(request reconcile.Request) (reconcil
 				Status: corev1.ConditionTrue,
 				Reason: "",
 			})
+			it.eventRecorder.Event(&nodeNeedUpdate, recorder.NodeAccomplished{})
 		} else {
 			SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
 				Type:   v1alpha1.ConditionAccomplished,
@@ -164,6 +163,13 @@ func (it *ParallelNodeReconciler) syncChildNodes(ctx context.Context, node v1alp
 	if len(setDifference(taskNamesOfNodes, node.Spec.Children)) > 0 ||
 		len(setDifference(node.Spec.Children, taskNamesOfNodes)) > 0 {
 		tasksToStartup = node.Spec.Children
+
+		var nodesToCleanup []string
+		for _, item := range existsChildNodes {
+			nodesToCleanup = append(nodesToCleanup, item.Name)
+		}
+		it.eventRecorder.Event(&node, recorder.RerunBySpecChanged{CleanedChildrenNode: nodesToCleanup})
+
 		for _, childNode := range existsChildNodes {
 			// best effort deletion
 			err := it.kubeClient.Delete(ctx, &childNode)
@@ -174,6 +180,7 @@ func (it *ParallelNodeReconciler) syncChildNodes(ctx context.Context, node v1alp
 				)
 			}
 		}
+
 	}
 
 	if len(tasksToStartup) == 0 {

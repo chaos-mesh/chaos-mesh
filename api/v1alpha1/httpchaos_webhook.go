@@ -15,69 +15,60 @@ package v1alpha1
 
 import (
 	"fmt"
+	"net/http"
 	"reflect"
 
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
-	"sigs.k8s.io/controller-runtime/pkg/webhook"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1/genericwebhook"
 )
 
-// log is for logging in this package.
-var httpchaoslog = logf.Log.WithName("httpchaos-resource")
+type Port int32
 
-// +kubebuilder:webhook:path=/mutate-chaos-mesh-org-v1alpha1-httpchaos,mutating=true,failurePolicy=fail,groups=chaos-mesh.org,resources=httpchaos,verbs=create;update,versions=v1alpha1,name=mhttpchaos.kb.io
-
-var _ webhook.Defaulter = &HTTPChaos{}
-
-// Default implements webhook.Defaulter so a webhook will be registered for the type
-func (in *HTTPChaos) Default() {
-	httpchaoslog.Info("default", "name", in.Name)
-}
-
-// +kubebuilder:webhook:verbs=create;update,path=/validate-chaos-mesh-org-v1alpha1-httpchaos,mutating=false,failurePolicy=fail,groups=chaos-mesh.org,resources=httpchaos,versions=v1alpha1,name=vhttpchaos.kb.io
-
-var _ webhook.Validator = &HTTPChaos{}
-
-// ValidateCreate implements webhook.Validator so a webhook will be registered for the type
-func (in *HTTPChaos) ValidateCreate() error {
-	httpchaoslog.Info("validate create", "name", in.Name)
-	return in.Validate()
-}
-
-// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
-func (in *HTTPChaos) ValidateUpdate(old runtime.Object) error {
-	httpchaoslog.Info("validate update", "name", in.Name)
-	if !reflect.DeepEqual(in.Spec, old.(*HTTPChaos).Spec) {
-		return ErrCanNotUpdateChaos
+func (in *Port) Validate(root interface{}, path *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+	// in cannot be zero or negative
+	if *in <= 0 {
+		allErrs = append(allErrs, field.Invalid(path, in, fmt.Sprintf("port %d is not supported", *in)))
 	}
-	return in.Validate()
-}
-
-// ValidateDelete implements webhook.Validator so a webhook will be registered for the type
-func (in *HTTPChaos) ValidateDelete() error {
-	httpchaoslog.Info("validate delete", "name", in.Name)
-
-	// Nothing to do?
-	return nil
-}
-
-// Validate validates chaos object
-func (in *HTTPChaos) Validate() error {
-
-	allErrs := in.Spec.Validate()
-	if len(allErrs) > 0 {
-		return fmt.Errorf(allErrs.ToAggregate().Error())
-	}
-
-	return nil
-}
-
-func (in *HTTPChaosSpec) Validate() field.ErrorList {
-	specField := field.NewPath("spec")
-
-	allErrs := validatePodSelector(in.PodSelector.Value, in.PodSelector.Mode, specField.Child("value"))
-	allErrs = append(allErrs, validateDuration(in, specField)...)
 	return allErrs
+}
 
+type HTTPMethod string
+
+func (in *HTTPMethod) Validate(root interface{}, path *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+	if in != nil && root.(*HTTPChaos).Spec.Target == PodHttpRequest {
+		switch *in {
+		case http.MethodGet:
+		case http.MethodPost:
+		case http.MethodPut:
+		case http.MethodDelete:
+		case http.MethodPatch:
+		case http.MethodHead:
+		case http.MethodOptions:
+		case http.MethodTrace:
+		case http.MethodConnect:
+		default:
+			allErrs = append(allErrs, field.Invalid(path, in, fmt.Sprintf("method %s is not supported", *in)))
+		}
+	}
+	return allErrs
+}
+
+func (in *PodHttpChaosTarget) Validate(root interface{}, path *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+	switch *in {
+	case PodHttpRequest:
+	case PodHttpResponse:
+	default:
+		allErrs = append(allErrs, field.Invalid(path, in, fmt.Sprintf("target %s is not supported", *in)))
+	}
+	return allErrs
+}
+
+func init() {
+	genericwebhook.Register("Port", reflect.PtrTo(reflect.TypeOf(Port(0))))
+	genericwebhook.Register("HTTPMethod", reflect.PtrTo(reflect.TypeOf(HTTPMethod(""))))
+	genericwebhook.Register("PodHttpChaosTarget", reflect.PtrTo(reflect.TypeOf(PodHttpChaosTarget(""))))
 }

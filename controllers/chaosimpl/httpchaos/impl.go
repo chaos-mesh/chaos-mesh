@@ -22,7 +22,6 @@ import (
 	"go.uber.org/fx"
 	v1 "k8s.io/api/core/v1"
 	k8sError "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -45,6 +44,8 @@ type Impl struct {
 	builder *podhttpchaosmanager.Builder
 }
 
+var _ common.ChaosImpl = (*Impl)(nil)
+
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	// The only possible phase to get in here is "Not Injected" or "Not Injected/Wait"
 
@@ -59,7 +60,11 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 
 	if phase == waitForApplySync {
 		podhttpchaos := &v1alpha1.PodHttpChaos{}
-		err := impl.Client.Get(ctx, controller.ParseNamespacedName(record.Id), podhttpchaos)
+		namespacedName, err := controller.ParseNamespacedName(record.Id)
+		if err != nil {
+			return waitForApplySync, err
+		}
+		err = impl.Client.Get(ctx, namespacedName, podhttpchaos)
 		if err != nil {
 			return waitForApplySync, err
 		}
@@ -75,9 +80,12 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		return waitForApplySync, nil
 	}
 
-	podId, _ := controller.ParseNamespacedNameContainer(records[index].Id)
+	podId, err := controller.ParseNamespacedName(records[index].Id)
+	if err != nil {
+		return v1alpha1.NotInjected, err
+	}
 	var pod v1.Pod
-	err := impl.Client.Get(ctx, podId, &pod)
+	err = impl.Client.Get(ctx, podId, &pod)
 	if err != nil {
 		return v1alpha1.NotInjected, err
 	}
@@ -126,7 +134,12 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	phase := record.Phase
 	if phase == waitForRecoverSync {
 		podhttpchaos := &v1alpha1.PodHttpChaos{}
-		err := impl.Client.Get(ctx, controller.ParseNamespacedName(record.Id), podhttpchaos)
+		namespacedName, err := controller.ParseNamespacedName(record.Id)
+		if err != nil {
+			// This error is not expected to exist
+			return waitForRecoverSync, err
+		}
+		err = impl.Client.Get(ctx, namespacedName, podhttpchaos)
 		if err != nil {
 			// TODO: handle this error
 			if k8sError.IsNotFound(err) {
@@ -153,15 +166,19 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		return waitForRecoverSync, nil
 	}
 
-	podId, _ := controller.ParseNamespacedNameContainer(records[index].Id)
+	podId, err := controller.ParseNamespacedName(records[index].Id)
+	if err != nil {
+		// This error is not expected to exist
+		return v1alpha1.NotInjected, err
+	}
 	var pod v1.Pod
-	err := impl.Client.Get(ctx, podId, &pod)
+	err = impl.Client.Get(ctx, podId, &pod)
 	if err != nil {
 		// TODO: handle this error
 		if k8sError.IsNotFound(err) {
 			return v1alpha1.NotInjected, nil
 		}
-		return v1alpha1.NotInjected, err
+		return v1alpha1.Injected, err
 	}
 
 	source := httpchaos.Namespace + "/" + httpchaos.Name
@@ -199,7 +216,7 @@ func NewImpl(c client.Client, b *podhttpchaosmanager.Builder, log logr.Logger) *
 			builder: b,
 		},
 		ObjectList: &v1alpha1.HTTPChaosList{},
-		Controlls:  []runtime.Object{&v1alpha1.PodHttpChaos{}},
+		Controlls:  []client.Object{&v1alpha1.PodHttpChaos{}},
 	}
 }
 

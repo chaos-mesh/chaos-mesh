@@ -45,10 +45,10 @@ func (it *StdoutCollector) CollectContext(ctx context.Context) (env map[string]i
 	request := client.CoreV1().Pods(it.namespace).GetLogs(it.podName, &v1.PodLogOptions{
 		TypeMeta:  metav1.TypeMeta{},
 		Container: it.containerName,
-	}).Context(ctx)
+	})
 
 	var bytes []byte
-	if bytes, err = request.Do().Raw(); err != nil {
+	if bytes, err = request.Do(ctx).Raw(); err != nil {
 		return nil, err
 	}
 	stdout := strings.TrimSpace(string(bytes))

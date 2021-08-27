@@ -45,11 +45,12 @@ func TestAPIs(t *testing.T) {
 }
 
 var _ = BeforeSuite(func(done Done) {
-	logf.SetLogger(zap.LoggerTo(GinkgoWriter, true))
+
+	logf.SetLogger(zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)))
 
 	By("bootstrapping test environment")
 	t := true
-	if os.Getenv("TEST_USE_EXISTING_CLUSTER") == "true" {
+	if os.Getenv("USE_EXISTING_CLUSTER") == "true" {
 		testEnv = &envtest.Environment{
 			UseExistingCluster: &t,
 		}

@@ -1,6 +1,7 @@
 import { Box, Button, Card, Modal, Typography } from '@material-ui/core'
 import { PreDefinedValue, getDB } from 'lib/idb'
 import { parseSubmit, yamlToExperiment } from 'lib/formikhelpers'
+import { setAlert, setConfirm } from 'slices/globalStatus'
 import { useEffect, useRef, useState } from 'react'
 
 import { Ace } from 'ace-builds'
@@ -14,7 +15,6 @@ import clsx from 'clsx'
 import { iconByKind } from 'lib/byKind'
 import loadable from '@loadable/component'
 import { makeStyles } from '@material-ui/styles'
-import { setAlert } from 'slices/globalStatus'
 import { useIntl } from 'react-intl'
 import { useStoreDispatch } from 'store'
 import yaml from 'js-yaml'
@@ -68,8 +68,10 @@ const Predefined = () => {
     getExperiments()
   }, [])
 
-  const saveExperiment = async (y: any) => {
+  const saveExperiment = async (_y: any) => {
     const db = await idb.current
+
+    const y: any = yaml.load(_y)
 
     await db.put('predefined', {
       name: y.metadata.name,
@@ -109,6 +111,16 @@ const Predefined = () => {
         )
       })
       .catch(console.error)
+  }
+
+  const handleDeleteConfirm = () => {
+    dispatch(
+      setConfirm({
+        title: `${T('common.delete', intl)} ${experiment!.name}`,
+        description: T('common.deleteDesc', intl),
+        handle: handleDeleteExperiment,
+      })
+    )
   }
 
   const handleDeleteExperiment = async () => {
@@ -154,7 +166,7 @@ const Predefined = () => {
                 <Box px={3} pt={3}>
                   <PaperTop title={experiment.name}>
                     <Space direction="row">
-                      <Button color="secondary" size="small" onClick={handleDeleteExperiment}>
+                      <Button color="secondary" size="small" onClick={handleDeleteConfirm}>
                         {T('common.delete')}
                       </Button>
                       <Button variant="contained" color="primary" size="small" onClick={handleApplyExperiment}>

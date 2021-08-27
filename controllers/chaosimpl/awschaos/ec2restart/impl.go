@@ -26,6 +26,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 )
 
 type Impl struct {
@@ -34,13 +35,15 @@ type Impl struct {
 	Log logr.Logger
 }
 
-func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
-	awschaos := obj.(*v1alpha1.AwsChaos)
+var _ common.ChaosImpl = (*Impl)(nil)
 
-	var selected v1alpha1.AwsSelector
+func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
+	awschaos := obj.(*v1alpha1.AWSChaos)
+
+	var selected v1alpha1.AWSSelector
 	json.Unmarshal([]byte(records[index].Id), &selected)
 	opts := []func(*awscfg.LoadOptions) error{
-		awscfg.WithRegion(selected.AwsRegion),
+		awscfg.WithRegion(selected.AWSRegion),
 	}
 
 	if awschaos.Spec.SecretName != nil {

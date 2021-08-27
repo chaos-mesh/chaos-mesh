@@ -38,12 +38,11 @@ type ScheduleCollector struct {
 }
 
 // Reconcile reconciles a Schedule collector.
-func (r *ScheduleCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+func (r *ScheduleCollector) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	if r.apiType == nil {
 		r.Log.Error(nil, "apiType has not been initialized")
 		return ctrl.Result{}, nil
 	}
-	ctx := context.Background()
 
 	schedule := &v1alpha1.Schedule{}
 	err := r.Get(ctx, req.NamespacedName, schedule)
@@ -74,7 +73,7 @@ func (r *ScheduleCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 }
 
 // Setup setups collectors by Manager.
-func (r *ScheduleCollector) Setup(mgr ctrl.Manager, apiType runtime.Object) error {
+func (r *ScheduleCollector) Setup(mgr ctrl.Manager, apiType client.Object) error {
 	r.apiType = apiType
 
 	return ctrl.NewControllerManagedBy(mgr).
@@ -104,10 +103,10 @@ func (r *ScheduleCollector) setUnarchivedSchedule(req ctrl.Request, schedule v1a
 		archive.Action = ""
 	case v1alpha1.ScheduleTypeDNSChaos:
 		archive.Action = string(schedule.Spec.ScheduleItem.DNSChaos.Action)
-	case v1alpha1.ScheduleTypeAwsChaos:
-		archive.Action = string(schedule.Spec.ScheduleItem.AwsChaos.Action)
-	case v1alpha1.ScheduleTypeGcpChaos:
-		archive.Action = string(schedule.Spec.ScheduleItem.GcpChaos.Action)
+	case v1alpha1.ScheduleTypeAWSChaos:
+		archive.Action = string(schedule.Spec.ScheduleItem.AWSChaos.Action)
+	case v1alpha1.ScheduleTypeGCPChaos:
+		archive.Action = string(schedule.Spec.ScheduleItem.GCPChaos.Action)
 	default:
 		return errors.New("unsupported chaos type " + string(schedule.Spec.Type))
 	}

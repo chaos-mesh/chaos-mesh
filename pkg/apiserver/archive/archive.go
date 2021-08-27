@@ -204,10 +204,10 @@ func (s *Service) detail(c *gin.Context) {
 		kubeObject, err = exp.ParseStressChaos()
 	case v1alpha1.KindDNSChaos:
 		kubeObject, err = exp.ParseDNSChaos()
-	case v1alpha1.KindAwsChaos:
-		kubeObject, err = exp.ParseAwsChaos()
-	case v1alpha1.KindGcpChaos:
-		kubeObject, err = exp.ParseGcpChaos()
+	case v1alpha1.KindAWSChaos:
+		kubeObject, err = exp.ParseAWSChaos()
+	case v1alpha1.KindGCPChaos:
+		kubeObject, err = exp.ParseGCPChaos()
 	default:
 		err = fmt.Errorf("kind %s is not support", exp.Kind)
 	}
@@ -507,18 +507,12 @@ func (s *Service) listWorkflow(c *gin.Context) {
 	archives := make([]Archive, 0)
 
 	for _, meta := range metas {
-		parsedTime, err := time.Parse(time.RFC3339, meta.CreatedAt)
-		if err != nil {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
-			return
-		}
 		archives = append(archives, Archive{
 			UID:       meta.UID,
 			Kind:      v1alpha1.KindWorkflow,
 			Namespace: meta.Namespace,
 			Name:      meta.Name,
-			CreatedAt: parsedTime,
+			CreatedAt: meta.CreatedAt,
 		})
 	}
 
@@ -565,20 +559,13 @@ func (s *Service) detailWorkflow(c *gin.Context) {
 		return
 	}
 
-	parsedTime, err := time.Parse(time.RFC3339, meta.CreatedAt)
-	if err != nil {
-		c.Status(http.StatusInternalServerError)
-		_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
-		return
-	}
-
 	detail = Detail{
 		Archive: Archive{
 			UID:       meta.UID,
 			Kind:      v1alpha1.KindWorkflow,
 			Name:      meta.Name,
 			Namespace: meta.Namespace,
-			CreatedAt: parsedTime,
+			CreatedAt: meta.CreatedAt,
 		},
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{

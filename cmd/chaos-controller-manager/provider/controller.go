@@ -14,15 +14,18 @@
 package provider
 
 import (
+	"context"
 	"math"
 
 	"github.com/go-logr/logr"
+	lru "github.com/hashicorp/golang-lru"
 	"go.uber.org/fx"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/kubernetes"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 	"k8s.io/client-go/rest"
@@ -101,8 +104,17 @@ func NewAuthCli(cfg *rest.Config) (*authorizationv1.AuthorizationV1Client, error
 	return authorizationv1.NewForConfig(cfg)
 }
 
-func NewClient(mgr ctrl.Manager) client.Client {
-	return mgr.GetClient()
+func NewClient(mgr ctrl.Manager, scheme *runtime.Scheme) (client.Client, error) {
+	// TODO: make this size configurable
+	cache, err := lru.New(100)
+	if err != nil {
+		return nil, err
+	}
+	return &UpdatedClient{
+		client: mgr.GetClient(),
+		scheme: scheme,
+		cache:  cache,
+	}, nil
 }
 
 func NewLogger() logr.Logger {
@@ -151,13 +163,14 @@ func NewControlPlaneCacheReader(logger logr.Logger) (controlPlaneCacheReader, er
 	_ = clientgoscheme.AddToScheme(scheme)
 
 	// Create the cache for the cached read client and registering informers
-	cache, err := cache.New(cfg, cache.Options{Scheme: scheme, Mapper: mapper, Resync: nil, Namespace: config.ControllerCfg.Namespace})
+	cacheReader, err := cache.New(cfg, cache.Options{Scheme: scheme, Mapper: mapper, Resync: nil, Namespace: config.ControllerCfg.Namespace})
 	if err != nil {
 		return controlPlaneCacheReader{}, err
 	}
 	// TODO: store the channel and use it to stop
 	go func() {
-		err := cache.Start(make(chan struct{}))
+		// FIXME: get context from parameter
+		err := cacheReader.Start(context.TODO())
 		if err != nil {
 			logger.Error(err, "fail to start cached client")
 		}
@@ -168,13 +181,14 @@ func NewControlPlaneCacheReader(logger logr.Logger) (controlPlaneCacheReader, er
 		return controlPlaneCacheReader{}, err
 	}
 
-	cachedClient := &client.DelegatingClient{
-		Reader: &client.DelegatingReader{
-			CacheReader:  cache,
-			ClientReader: c,
-		},
-		Writer:       c,
-		StatusClient: c,
+	cachedClient, err := client.NewDelegatingClient(client.NewDelegatingClientInput{
+		CacheReader:       cacheReader,
+		Client:            c,
+		UncachedObjects:   nil,
+		CacheUnstructured: false,
+	})
+	if err != nil {
+		return controlPlaneCacheReader{}, err
 	}
 
 	return controlPlaneCacheReader{
@@ -182,9 +196,14 @@ func NewControlPlaneCacheReader(logger logr.Logger) (controlPlaneCacheReader, er
 	}, nil
 }
 
+func NewClientSet(config *rest.Config) (*kubernetes.Clientset, error) {
+	return kubernetes.NewForConfig(config)
+}
+
 var Module = fx.Provide(
 	NewOption,
 	NewClient,
+	NewClientSet,
 	NewManager,
 	NewLogger,
 	NewAuthCli,

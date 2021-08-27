@@ -28,7 +28,8 @@ type WorkflowStore struct {
 
 func NewStore(db *dbstore.DB) core.WorkflowStore {
 	db.AutoMigrate(&core.WorkflowEntity{})
-	return &WorkflowStore{db: db}
+
+	return &WorkflowStore{db}
 }
 
 func (it *WorkflowStore) List(ctx context.Context, namespace, name string, archived bool) ([]*core.WorkflowEntity, error) {

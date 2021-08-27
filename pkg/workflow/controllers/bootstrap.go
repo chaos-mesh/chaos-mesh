@@ -108,12 +108,13 @@ func BootstrapWorkflowControllers(mgr manager.Manager, logger logr.Logger, recor
 	}
 	err = ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.WorkflowNode{}).
+		Owns(&v1alpha1.WorkflowNode{}).
 		Owns(&corev1.Pod{}).
 		Named("workflow-task-reconciler").
 		Complete(NewTaskReconciler(
 			noCacheClient,
 			mgr.GetConfig(),
-			mgr.GetEventRecorderFor("workflow-task-reconciler"),
+			recorderBuilder.Build("workflow-task-reconciler"),
 			logger.WithName("workflow-task-reconciler"),
 		))
 	return err

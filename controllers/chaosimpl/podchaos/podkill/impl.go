@@ -20,6 +20,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
 )
 
@@ -27,11 +28,17 @@ type Impl struct {
 	client.Client
 }
 
+var _ common.ChaosImpl = (*Impl)(nil)
+
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	podchaos := obj.(*v1alpha1.PodChaos)
 
 	var pod v1.Pod
-	err := impl.Get(ctx, controller.ParseNamespacedName(records[index].Id), &pod)
+	namespacedName, err := controller.ParseNamespacedName(records[index].Id)
+	if err != nil {
+		return v1alpha1.NotInjected, err
+	}
+	err = impl.Get(ctx, namespacedName, &pod)
 	if err != nil {
 		// TODO: handle this error
 		return v1alpha1.NotInjected, err

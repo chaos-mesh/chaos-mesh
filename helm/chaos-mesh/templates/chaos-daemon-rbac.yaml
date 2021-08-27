@@ -16,7 +16,7 @@ kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ .Release.Name }}-chaos-daemon-target-namespace
-  namespace: chaos-testing
+  namespace: {{ .Release.Namespace | quote }}
   labels:
     {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: chaos-daemon
@@ -48,6 +48,7 @@ rules:
   verbs:
   - use
 ---
+{{- $chaos_daemon_needs_privileged := or (eq .Values.chaosDaemon.privileged true) (eq .Values.bpfki.create true) -}}
 # Restricted DEFAULT policy
 # ( Default policy for all new services )
 apiVersion: policy/v1beta1
@@ -58,16 +59,45 @@ metadata:
     {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: chaos-daemon
 spec:
-  privileged: false
-  allowPrivilegeEscalation: true
+  {{- if $chaos_daemon_needs_privileged }}
   allowedCapabilities:
-    - '*'
+    - SYS_PTRACE
+  {{- else }}
+  allowedCapabilities:
+    - SYS_PTRACE
+    - NET_ADMIN
+    - MKNOD
+    - SYS_CHROOT
+    - SYS_ADMIN
+    - KILL
+    # CAP_IPC_LOCK is used to lock memory
+    - IPC_LOCK
+  {{- end }}
+  allowedHostPaths:
+    - pathPrefix: {{ .Values.chaosDaemon.socketPath }}
+      readOnly: false
+    - pathPrefix: /sys
+      readOnly: false
+    {{- if .Values.bpfki.create }}
+    - pathPrefix: /etc/localtime
+      readOnly: false
+    - pathPrefix: /lib/modules
+      readOnly: false
+    - pathPrefix: /usr/src
+      readOnly: false
+    {{- end }}
+  allowPrivilegeEscalation: true
+  {{- if .Values.chaosDaemon.hostNetwork }}
   hostNetwork: true
+  {{- end }}
+  {{- if .Values.bpfki.create }}
   hostPorts:
-  - max: 65535
-    min: 0
+  - max: {{ .Values.bpfki.grpcPort }}
+    min: {{ .Values.bpfki.grpcPort }}
+  {{- end }}
   hostIPC: true
   hostPID: true
+  privileged: {{ $chaos_daemon_needs_privileged }}
   seLinux:
     rule: RunAsAny
   supplementalGroups:
@@ -77,6 +107,11 @@ spec:
   fsGroup:
     rule: RunAsAny
   volumes:
-  - '*'
+  - configMap
+  - downwardAPI
+  - emptyDir
+  - projected
+  - secret
+  - hostPath
 {{- end }}
 

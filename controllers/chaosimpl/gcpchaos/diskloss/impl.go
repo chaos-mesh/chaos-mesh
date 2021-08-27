@@ -25,6 +25,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/gcpchaos/utils"
+	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 )
 
 type Impl struct {
@@ -33,11 +34,13 @@ type Impl struct {
 	Log logr.Logger
 }
 
+var _ common.ChaosImpl = (*Impl)(nil)
+
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, chaos v1alpha1.InnerObject) (v1alpha1.Phase, error) {
-	gcpchaos, ok := chaos.(*v1alpha1.GcpChaos)
+	gcpchaos, ok := chaos.(*v1alpha1.GCPChaos)
 	if !ok {
 		err := errors.New("chaos is not gcpchaos")
-		impl.Log.Error(err, "chaos is not GcpChaos", "chaos", chaos)
+		impl.Log.Error(err, "chaos is not GCPChaos", "chaos", chaos)
 		return v1alpha1.NotInjected, err
 	}
 	computeService, err := utils.GetComputeService(ctx, impl.Client, gcpchaos)
@@ -45,7 +48,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		impl.Log.Error(err, "fail to get the compute service")
 		return v1alpha1.NotInjected, err
 	}
-	var selected v1alpha1.GcpSelector
+	var selected v1alpha1.GCPSelector
 	json.Unmarshal([]byte(records[index].Id), &selected)
 	instance, err := computeService.Instances.Get(selected.Project, selected.Zone, selected.Instance).Do()
 	if err != nil {
@@ -57,7 +60,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		notFound   []string
 		marshalErr []string
 	)
-	for _, specDeviceName := range *selected.DeviceNames {
+	for _, specDeviceName := range selected.DeviceNames {
 		haveDisk := false
 		for _, disk := range instance.Disks {
 			if disk.DeviceName == specDeviceName {
@@ -85,7 +88,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		return v1alpha1.NotInjected, err
 	}
 
-	for _, specDeviceName := range *selected.DeviceNames {
+	for _, specDeviceName := range selected.DeviceNames {
 		_, err = computeService.Instances.DetachDisk(selected.Project, selected.Zone, selected.Instance, specDeviceName).Do()
 		if err != nil {
 			impl.Log.Error(err, "fail to detach the disk")
@@ -97,10 +100,10 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 }
 
 func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Record, chaos v1alpha1.InnerObject) (v1alpha1.Phase, error) {
-	gcpchaos, ok := chaos.(*v1alpha1.GcpChaos)
+	gcpchaos, ok := chaos.(*v1alpha1.GCPChaos)
 	if !ok {
 		err := errors.New("chaos is not gcpchaos")
-		impl.Log.Error(err, "chaos is not GcpChaos", "chaos", chaos)
+		impl.Log.Error(err, "chaos is not GCPChaos", "chaos", chaos)
 		return v1alpha1.Injected, err
 	}
 	computeService, err := utils.GetComputeService(ctx, impl.Client, gcpchaos)
@@ -109,7 +112,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		return v1alpha1.Injected, err
 	}
 	var disk compute.AttachedDisk
-	var selected v1alpha1.GcpSelector
+	var selected v1alpha1.GCPSelector
 	json.Unmarshal([]byte(records[index].Id), &selected)
 	for _, attachedDiskString := range gcpchaos.Status.AttachedDisksStrings {
 		err = json.Unmarshal([]byte(attachedDiskString), &disk)

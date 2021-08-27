@@ -17,6 +17,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/jinzhu/gorm"
+
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
@@ -61,18 +63,15 @@ type Schedule struct {
 
 // ScheduleMeta defines the metadata of a schedule instance. Use in db.
 type ScheduleMeta struct {
-	ID         uint       `gorm:"primary_key" json:"id"`
-	CreatedAt  time.Time  `json:"created_at"`
-	UpdatedAt  time.Time  `json:"updated_at"`
-	DeletedAt  *time.Time `sql:"index" json:"deleted_at"`
-	UID        string     `gorm:"index:uid" json:"uid"`
-	Kind       string     `json:"kind"`
-	Name       string     `json:"name"`
-	Namespace  string     `json:"namespace"`
-	Action     string     `json:"action"`
-	StartTime  time.Time  `json:"start_time"`
-	FinishTime time.Time  `json:"finish_time"`
-	Archived   bool       `json:"archived"`
+	gorm.Model
+	UID        string    `gorm:"index:schedule_uid" json:"uid"`
+	Kind       string    `json:"kind"`
+	Name       string    `json:"name"`
+	Namespace  string    `json:"namespace"`
+	Action     string    `json:"action"`
+	StartTime  time.Time `json:"start_time"`
+	FinishTime time.Time `json:"finish_time"`
+	Archived   bool      `json:"archived"`
 }
 
 // ScheduleInfo defines a form data of schedule from API.

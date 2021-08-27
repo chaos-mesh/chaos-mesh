@@ -1,0 +1,1049 @@
+directive @goModel(model: String, models: [String!]) on OBJECT
+    | INPUT_OBJECT
+    | SCALAR
+    | ENUM
+    | INTERFACE
+    | UNION
+
+directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITION
+    | FIELD_DEFINITION
+
+scalar Time
+scalar Map
+
+schema {
+    query: Query
+    subscription: Logger
+}
+
+type Query {
+    namepsace(ns: String): Namespace!
+}
+
+type Logger {
+    component(ns: String, component: Component!): String!  @goField(forceResolver: true)
+    pod(ns: String, name: String!): String!                @goField(forceResolver: true)
+}
+
+type Namespace {
+    ns: String!
+    component(component: Component!): [Pod!]    @goField(forceResolver: true)
+    pod(name: String!): Pod!                    @goField(forceResolver: true)
+    pods: [Pod!]                                @goField(forceResolver: true)
+    stress(name: String!): StressChaos!         @goField(forceResolver: true)
+    stresses: [StressChaos!]                    @goField(forceResolver: true)
+    io(name: String!): IOChaos!                 @goField(forceResolver: true)
+    ios: [IOChaos!]                             @goField(forceResolver: true)
+    podio(name: String!): PodIOChaos!           @goField(forceResolver: true)
+    podios: [PodIOChaos!]                       @goField(forceResolver: true)
+    http(name: String!): HTTPChaos!             @goField(forceResolver: true)
+    https: [HTTPChaos!]                         @goField(forceResolver: true)
+    podhttp(name: String!): PodHTTPChaos!       @goField(forceResolver: true)
+    podhttps: [PodHTTPChaos!]                   @goField(forceResolver: true)
+    network(name: String!): NetworkChaos!       @goField(forceResolver: true)
+    networks: [NetworkChaos!]                   @goField(forceResolver: true)
+    podnetwork(name: String!): PodNetworkChaos! @goField(forceResolver: true)
+    podnetworks: [PodNetworkChaos!]             @goField(forceResolver: true)
+}
+
+type OwnerReference @goModel(model: "k8s.io/apimachinery/pkg/apis/meta/v1.OwnerReference") {
+    kind: String!
+    apiVersion: String!
+    name: String!
+    uid: String!
+    controller: Boolean
+    blockOwnerDeletion: Boolean
+}
+
+enum Component {
+    MANAGER
+    DAEMON
+    DASHBOARD
+    DNSSERVER
+}
+
+type Process {
+	pod: Pod!
+
+	pid: String!
+	command: String!
+
+	fds: [Fd!] @goField(forceResolver: true)
+}
+
+type Fd {
+	fd: String!
+	target: String!
+}
+
+type Pod @goModel(model: "k8s.io/api/core/v1.Pod") {
+    kind: String!
+    apiVersion: String!
+    name: String!
+    generateName: String!
+    namespace: String!
+    selfLink: String!
+    uid: String! 
+    resourceVersion: String!
+    generation: Int!
+    creationTimestamp: Time!
+    deletionTimestamp: Time
+    deletionGracePeriodSeconds: Int
+    labels: Map
+    annotations: Map
+    ownerReferences: [OwnerReference!]
+    finalizers: [String!]
+    clusterName: String!
+
+	spec: PodSpec!
+	status: PodStatus!
+
+    logs: String! 			@goField(forceResolver: true)
+	daemon: Pod 			@goField(forceResolver: true)
+	processes: [Process!] 	@goField(forceResolver: true)
+	mounts: [String!]      	@goField(forceResolver: true)
+	ipset: String! 			@goField(forceResolver: true)
+	tcQdisc: String! 		@goField(forceResolver: true)
+	iptables: String!		@goField(forceResolver: true)
+}
+
+# PodStatus represents information about the status of a pod. Status may trail the actual
+# state of a system, especially if the node that hosts the pod cannot contact the control
+# plane.
+type PodStatus @goModel(model: "k8s.io/api/core/v1.PodStatus") {
+	# The phase of a Pod is a simple, high-level summary of where the Pod is in its lifecycle.
+	# The conditions array, the reason and message fields, and the individual container status
+	# arrays contain more detail about the pod's status.
+	# There are five possible phase values:
+	#
+	# Pending: The pod has been accepted by the Kubernetes system, but one or more of the
+	# container images has not been created. This includes time before being scheduled as
+	# well as time spent downloading images over the network, which could take a while.
+	# Running: The pod has been bound to a node, and all of the containers have been created.
+	# At least one container is still running, or is in the process of starting or restarting.
+	# Succeeded: All containers in the pod have terminated in success, and will not be restarted.
+	# Failed: All containers in the pod have terminated, and at least one container has
+	# terminated in failure. The container either exited with non-zero status or was terminated
+	# by the system.
+	# Unknown: For some reason the state of the pod could not be obtained, typically due to an
+	# error in communicating with the host of the pod.
+	#
+	# More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#pod-phase
+	phase: String!
+
+	# Current service state of pod.
+	# More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#pod-conditions
+	conditions: [PodCondition!]
+
+	# A human readable message indicating details about why the pod is in this condition.
+	message: String!
+
+	# A brief CamelCase message indicating details about why the pod is in this state.
+	# e.g. 'Evicted'
+	reason: String!
+
+	# nominatedNodeName is set only when this pod preempts other pods on the node, but it cannot be
+	# scheduled right away as preemption victims receive their graceful termination periods.
+	# This field does not guarantee that the pod will be scheduled on this node. Scheduler may decide
+	# to place the pod elsewhere if other nodes become available sooner. Scheduler may also decide to
+	# give the resources on this node to a higher priority pod that is created after preemption.
+	# As a result, this field may be different than PodSpec.nodeName when the pod is
+	# scheduled.
+	nominatedNodeName: String!
+
+	# IP address of the host to which the pod is assigned. Empty if not yet scheduled.
+	hostIP: String!
+
+	# IP address allocated to the pod. Routable at least within the cluster.
+	# Empty if not yet allocated.
+	podIP: String!
+
+	# podIPs holds the IP addresses allocated to the pod. If this field is specified, the 0th entry must
+	# match the podIP field. Pods may be allocated at most 1 value for each of IPv4 and IPv6. This list
+	# is empty if no IPs have been allocated yet.
+	podIPs: [PodIP!]
+
+	# RFC 3339 date and time at which the object was acknowledged by the Kubelet.
+	# This is before the Kubelet pulled the container image(s) for the pod.
+	startTime: Time
+
+	# The list has one entry per init container in the manifest. The most recent successful
+	# init container will have ready = true, the most recently started container will have
+	# startTime set.
+	# More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#pod-and-container-status
+	initContainerStatuses: [ContainerStatus!]
+
+	# The list has one entry per container in the manifest. Each entry is currently the output
+	# of `docker inspect`.
+	# More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#pod-and-container-status
+	containerStatuses: [ContainerStatus!]
+
+	# The Quality of Service (QOS) classification assigned to the pod based on resource requirements
+	# See PodQOSClass type for available QOS classes
+	# More info: https://git.k8s.io/community/contributors/design-proposals/node/resource-qos.md
+	qosClass: String!
+
+	# Status for any ephemeral containers that have run in this pod.
+	# This field is alpha-level and is only populated by servers that enable the EphemeralContainers feature.
+	ephemeralContainerStatuses: [ContainerStatus!]
+}
+
+# IP address information for entries in the (plural) PodIPs field.
+# Each entry includes:
+#    IP: An IP address allocated to the pod. Routable at least within the cluster.
+type PodIP @goModel(model: "k8s.io/api/core/v1.PodIP") {
+	# ip is an IP address (IPv4 or IPv6) assigned to the pod
+	ip: String!
+}
+
+# PodCondition contains details for the current condition of this pod.
+type PodCondition @goModel(model: "k8s.io/api/core/v1.PodCondition") {
+	# Type is the type of the condition.
+	# More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#pod-conditions
+	type: String!
+
+	# Status is the status of the condition.
+	# Can be True, False, Unknown.
+	# More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#pod-conditions
+	status: String!
+
+	# Last time we probed the condition.
+	lastProbeTime: Time
+
+	# Last time the condition transitioned from one status to another.
+	lastTransitionTime: Time
+
+	# Unique, one-word, CamelCase reason for the condition's last transition.
+	reason: String
+
+	# Human-readable message indicating details about last transition.
+	message: String
+}
+
+# ContainerStatus contains details for the current status of this container.
+type ContainerStatus @goModel(model: "k8s.io/api/core/v1.ContainerStatus") {
+	# This must be a DNS_LABEL. Each container in a pod must have a unique name.
+	# Cannot be updated.
+	name: String!
+
+	# Details about the container's current condition.
+	State: ContainerState
+
+	# Details about the container's last termination condition.
+	lastTerminationState: ContainerState
+
+	# Specifies whether the container has passed its readiness probe.
+	ready: Boolean!
+
+	# The number of times the container has been restarted, currently based on
+	# the number of dead containers that have not yet been removed.
+	# Note that this is calculated from dead containers. But those containers are subject to
+	# garbage collection. This value will get capped at 5 by GC.
+	restartCount: Int!
+
+	# The image the container is running.
+	# More info: https://kubernetes.io/docs/concepts/containers/images
+	# TODO(dchen1107): Which image the container is running with?
+	image: String!
+
+	# ImageID of the container's image.
+	imageID: String!
+
+	# Container's ID in the format 'docker://<container_id>'.
+	containerID: String!
+
+	# Specifies whether the container has passed its startup probe.
+	# Initialized as false, becomes true after startupProbe is considered successful.
+	# Resets to false when the container is restarted, or if kubelet loses state temporarily.
+	# Is always true when no startupProbe is defined.
+	started: Boolean
+}
+
+# ContainerState holds a possible state of container.
+# Only one of its members may be specified.
+# If none of them is specified, the default one is ContainerStateWaiting.
+type ContainerState @goModel(model: "k8s.io/api/core/v1.ContainerState") {
+	# Details about a waiting container
+	waiting: ContainerStateWaiting
+
+	# Details about a running container
+	running: ContainerStateRunning
+
+	# Details about a terminated container
+	terminated: ContainerStateTerminated
+}
+
+# ContainerStateWaiting is a waiting state of a container.
+type ContainerStateWaiting @goModel(model: "k8s.io/api/core/v1.ContainerStateWaiting") {
+	# (brief) reason the container is not yet running.
+	reason: String
+
+	# Message regarding why the container is not yet running.
+	message: String
+}
+
+# ContainerStateRunning is a running state of a container.
+type ContainerStateRunning @goModel(model: "k8s.io/api/core/v1.ContainerStateRunning") {
+	# Time at which the container was last (re-)started
+	startedAt: Time
+}
+
+# ContainerStateTerminated is a terminated state of a container.
+type ContainerStateTerminated @goModel(model: "k8s.io/api/core/v1.ContainerStateTerminated") {
+	# Exit status from the last termination of the container
+	exitCode: Int!
+
+	# Signal from the last termination of the container
+	signal: Int
+
+	# (brief) reason from the last termination of the container
+	reason: String
+
+	# Message regarding the last termination of the container
+	message: String
+	
+	#Time at which previous execution of the container started
+	startedAt: Time
+
+	# Time at which the container last terminated
+	finishedAt: Time
+
+	# Container's ID in the format 'docker://<container_id>'
+	containerID: String
+}
+
+
+# TODO: add more fields
+type PodSpec @goModel(model: "k8s.io/api/core/v1.PodSpec") {
+	# ndeName is a request to schedule this pod onto a specific node. If it is non-empty,
+	# the scheduler simply schedules this pod onto that node, assuming that it fits resource
+	# requirements.
+	nodeName: String!
+
+}
+
+type PodIOChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodIOChaos") {
+    kind: String!
+    apiVersion: String!
+    name: String!
+    generateName: String!
+    namespace: String!
+    selfLink: String!
+    uid: String! 
+    resourceVersion: String!
+    generation: Int!
+    creationTimestamp: Time!
+    deletionTimestamp: Time
+    deletionGracePeriodSeconds: Int
+    labels: Map
+    annotations: Map
+    ownerReferences: [OwnerReference!]
+    finalizers: [String!]
+    clusterName: String!
+
+    spec: PodIOChaosSpec!
+    status: PodIOChaosStatus!
+
+    pod: Pod!       @goField(forceResolver: true)
+    ios: [IOChaos!] @goField(forceResolver: true)
+}
+
+# PodIOChaosSpec defines the desired state of PodIOChaos
+type PodIOChaosSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodIOChaosSpec") {
+	# volumeMountPath represents the target mount path
+	# It must be a root of mount path now.
+	volumeMountPath: String!
+
+	container: String
+
+    # actions are a list of IOChaos actions
+	actions: [IOChaosAction!]
+}
+
+type PodIOChaosStatus @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodIOChaosStatus") {
+
+	# pid represents a running toda process id
+	pid: Int
+
+	# startTime represents the start time of a toda process
+	startTime: Int
+	failedMessage: String
+	observedGeneration: Int
+}
+
+# IOChaosAction defines an possible action of IOChaos
+type IOChaosAction @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.IOChaosAction") {
+	type: String!
+
+	# path represents a glob of injecting path
+	path: String!
+
+	# methods represents the method that the action will inject in
+	methods: [String!]
+
+	# percent represents the percent probability of injecting this action
+	percent: Int
+
+	# faults represents the fault to inject
+	faults: [IoFault!]
+
+	# Latency represents the latency to inject
+	latency: String
+
+	# attrOverrides represents the attribution to override
+	ino: Int
+	size: Int
+	blocks: Int
+	atime: Timespec
+	mtime: Timespec
+    ctime: Timespec
+	kind: String # the file kind
+	perm: Int
+	nlink: Int
+	uid: Int
+    gid: Int
+    rdev: Int
+
+	# MistakeSpec represents the mistake to inject
+	
+    # filling determines what is filled in the miskate data.
+	filling: String
+
+	# there will be [1, MaxOccurrences] segments of wrong data.
+	maxOccurrences: Int
+
+	# max length of each wrong data segment in bytes
+	maxLength: Int
+
+	# source represents the source of current rules
+	source: String!
+}
+
+type IoFault @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.IoFault") {
+	errno: Int!
+	weight: Int!
+}
+
+# Timespec represents a time
+type Timespec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.Timespec") {
+	sec: Int!
+	nsec: Int!
+}
+
+
+type IOChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.IOChaos") {
+    kind: String!
+    apiVersion: String!
+    name: String!
+    generateName: String!
+    namespace: String!
+    selfLink: String!
+    uid: String! 
+    resourceVersion: String!
+    generation: Int!
+    creationTimestamp: Time!
+    deletionTimestamp: Time
+    deletionGracePeriodSeconds: Int
+    labels: Map
+    annotations: Map
+    ownerReferences: [OwnerReference!]
+    finalizers: [String!]
+    clusterName: String!
+
+    spec: IOChaosSpec!
+    status: IOChaosStatus!
+
+    podios: [PodIOChaos!] @goField(forceResolver: true)
+}
+
+# IOChaosSpec defines the desired state of IOChaos
+type IOChaosSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.IOChaosSpec") {
+    # containerNames indicates list of the name of affected container.
+	# If not set, all containers will be injected
+	containerNames: [String!]
+
+	# selector is used to select pods that are used to inject chaos action.
+	selector: PodSelectorSpec!
+
+	# mode defines the mode to run chaos action.
+	# supported mode: one / all / fixed / fixed-percent / random-max-percent
+	mode: String!
+
+    # value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+	# If `FixedPodMode`, provide an integer of pods to do chaos action.
+	# If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
+	# IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+	value: String
+
+
+	# action defines the specific pod chaos action.
+	# Supported action: latency / fault / attrOverride / mistake
+	action: String!
+
+	# delay defines the value of I/O chaos action delay.
+	# A delay string is a possibly signed sequence of
+	# decimal numbers, each with optional fraction and a unit suffix,
+	# such as "300ms".
+	# Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+	delay: String
+
+	# errno defines the error code that returned by I/O action.
+	# refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html
+	errno: Int
+
+	# attr defines the overrided attribution
+	attr: AttrOverrideSpec
+
+	# mistake defines what types of incorrectness are injected to IO operations
+	mistake: MistakeSpec
+
+	# path defines the path of files for injecting I/O chaos action.
+	path: String
+
+	# methods defines the I/O methods for injecting I/O chaos action.
+	# default: all I/O methods.
+	methods: [String!]
+
+	# percent defines the percentage of injection errors and provides a number from 0-100.
+	# default: 100.
+	percent: Int
+
+	# volumePath represents the mount path of injected volume
+	volumePath: String!
+
+	# duration represents the duration of the chaos action.
+	# It is required when the action is `PodFailureAction`.
+	# A duration string is a possibly signed sequence of
+	# decimal numbers, each with optional fraction and a unit suffix,
+	# such as "300ms", "-1.5h" or "2h45m".
+	# Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+	duration: String
+}
+
+# AttrOverrideSpec represents an override of attribution
+type AttrOverrideSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.AttrOverrideSpec") {
+    ino: Int
+	size: Int
+	blocks: Int
+	atime: Timespec
+	mtime: Timespec
+    ctime: Timespec
+	kind: String # the file kind
+	perm: Int
+	nlink: Int
+	uid: Int
+    gid: Int
+    rdev: Int
+}
+
+# MistakeSpec represents one type of mistake
+type MistakeSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.MistakeSpec") {
+	# filling determines what is filled in the miskate data.
+	filling: String
+
+	# there will be [1, MaxOccurrences] segments of wrong data.
+	maxOccurrences: Int
+
+	# max length of each wrong data segment in bytes
+	maxLength: Int
+}
+
+type IOChaosStatus @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.IOChaosStatus") {
+    # conditions represents the current global condition of the chaos
+	conditions: [ChaosCondition!]
+
+	# experiment records the last experiment state.
+	experiment: ExperimentStatus
+
+    # instances always specifies podhttpchaos generation or empty
+	instances: Map
+}
+
+type PodHTTPChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodHttpChaos") {
+    kind: String!
+    apiVersion: String!
+    name: String!
+    generateName: String!
+    namespace: String!
+    selfLink: String!
+    uid: String! 
+    resourceVersion: String!
+    generation: Int!
+    creationTimestamp: Time!
+    deletionTimestamp: Time
+    deletionGracePeriodSeconds: Int
+    labels: Map
+    annotations: Map
+    ownerReferences: [OwnerReference!]
+    finalizers: [String!]
+    clusterName: String!
+
+    spec: PodHttpChaosSpec!
+    status: PodHttpChaosStatus!
+
+    pod: Pod!   @goField(forceResolver: true)
+}
+
+# PodHttpChaosSpec defines the desired state of PodHttpChaos.
+type PodHttpChaosSpec  @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodHttpChaosSpec") {
+	# rules are a list of injection rule for http request.
+	rules: [PodHttpChaosRule!]!
+}
+
+# PodHttpChaosStatus defines the actual state of PodHttpChaos.
+type PodHttpChaosStatus @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodHttpChaosStatus") {
+	# pid represents a running tproxy process id.
+	pid: Int
+
+	# startTime represents the start time of a tproxy process.
+	startTime: Int
+
+	failedMessage: String
+	observedGeneration: Int
+}
+
+# PodHttpChaosRule defines the injection rule for http.
+type PodHttpChaosRule @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodHttpChaosRule") {
+	# target is the object to be selected and injected, <Request|Response>.
+	target: String!
+
+	selector: PodHttpChaosSelector!
+
+	actions: PodHttpChaosActions!
+
+	# source represents the source of current rules
+	source: String!
+
+	# port represents the target port to be proxy of.
+	port: Int!
+}
+
+type PodHttpChaosSelector @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodHttpChaosSelector") {
+    # port represents the target port to be proxy of.
+	port: Int
+
+	# path is a rule to select target by uri path in http request.
+	path: String
+
+	# method is a rule to select target by http method in request.
+	method: String
+
+	# code is a rule to select target by http status code in response.
+	code: Int
+
+	# requestHeaders is a rule to select target by http headers in request.
+	# The key-value pairs represent header name and header value pairs.
+	requestHeaders: Map
+
+	# responseHeaders is a rule to select target by http headers in response.
+	# The key-value pairs represent header name and header value pairs.
+	responseHeaders: Map
+}
+
+# PodHttpChaosAction defines possible actions of HttpChaos.
+type PodHttpChaosActions @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodHttpChaosActions") {
+	# abort is a rule to abort a http session.
+	abort: Boolean
+
+	# delay represents the delay of the target request/response.
+	# A duration string is a possibly unsigned sequence of
+	# decimal numbers, each with optional fraction and a unit suffix,
+	# such as "300ms", "2h45m".
+	# Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+	delay: String
+
+	# replace is a rule to replace some contents in target.
+	replace: PodHttpChaosReplaceActions
+
+	# patch is a rule to patch some contents in target.
+	patch: PodHttpChaosPatchActions
+}
+
+type HTTPChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.HTTPChaos") {
+    kind: String!
+    apiVersion: String!
+    name: String!
+    generateName: String!
+    namespace: String!
+    selfLink: String!
+    uid: String! 
+    resourceVersion: String!
+    generation: Int!
+    creationTimestamp: Time!
+    deletionTimestamp: Time
+    deletionGracePeriodSeconds: Int
+    labels: Map
+    annotations: Map
+    ownerReferences: [OwnerReference!]
+    finalizers: [String!]
+    clusterName: String!
+
+    spec: HTTPChaosSpec!
+    status: HTTPChaosStatus!
+
+    podhttp: [PodHTTPChaos!]    @goField(forceResolver: true)
+}
+
+type HTTPChaosSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.HTTPChaosSpec") {
+    # selector is used to select pods that are used to inject chaos action.
+	selector: PodSelectorSpec!
+
+	# mode defines the mode to run chaos action.
+	# supported mode: one / all / fixed / fixed-percent / random-max-percent
+	mode: String!
+
+    # value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+	# If `FixedPodMode`, provide an integer of pods to do chaos action.
+	# If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
+	# IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+	value: String
+
+	# target is the object to be selected and injected.
+	target: String!
+
+	# abort is a rule to abort a http session.
+	abort: Boolean
+
+	# delay represents the delay of the target request/response.
+	# A duration string is a possibly unsigned sequence of
+	# decimal numbers, each with optional fraction and a unit suffix,
+	# such as "300ms", "2h45m".
+	# Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+	delay: String
+
+	# replace is a rule to replace some contents in target.
+	replace: PodHttpChaosReplaceActions
+
+	# patch is a rule to patch some contents in target.
+	patch: PodHttpChaosPatchActions
+
+	# port represents the target port to be proxy of.
+	port: Int
+
+	# path is a rule to select target by uri path in http request.
+	path: String
+
+	# method is a rule to select target by http method in request.
+	method: String
+
+	# code is a rule to select target by http status code in response.
+	code: Int
+
+	# requestHeaders is a rule to select target by http headers in request.
+	# The key-value pairs represent header name and header value pairs.
+	requestHeaders: Map
+
+	# responseHeaders is a rule to select target by http headers in response.
+	# The key-value pairs represent header name and header value pairs.
+	responseHeaders: Map
+
+	# duration represents the duration of the chaos action.
+	duration: String
+}
+
+# PodSelectorSpec defines the some selectors to select objects.
+# If the all selectors are empty, all objects will be used in chaos experiment.
+type PodSelectorSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodSelectorSpec") {
+    # namespaces is a set of namespace to which objects belong.
+	namespaces: [String!]
+
+	# nodes is a set of node name and objects must belong to these nodes.
+	nodes: [String!]
+
+	# pods is a map of string keys and a set values that used to select pods.
+	# The key defines the namespace which pods belong,
+	# and the each values is a set of pod names.
+	pods: Map
+
+	# map of string keys and values that can be used to select nodes.
+	# Selector which must match a node's labels,
+	# and objects must belong to these selected nodes.
+	nodeSelectors: Map
+
+	# map of string keys and values that can be used to select objects.
+	# A selector based on fields.
+	fieldSelectors: Map
+
+	# map of string keys and values that can be used to select objects.
+	# A selector based on labels.
+	labelSelectors: Map
+
+	# map of string keys and values that can be used to select objects.
+	# A selector based on annotations.
+	annotationSelectors: Map
+
+	# podPhaseSelectors is a set of condition of a pod at the current time.
+	# supported value: Pending / Running / Succeeded / Failed / Unknown
+	podPhaseSelectors: [String!]
+}
+
+type PodHttpChaosReplaceActions @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodHttpChaosReplaceActions") {
+    # path is rule to to replace uri path in http request.
+	path: String
+
+	# method is a rule to replace http method in request.
+	method: String
+
+	# code is a rule to replace http status code in response.
+	code: Int
+
+	# body is a rule to replace http message body in target.
+	body: String
+
+	# queries is a rule to replace uri queries in http request.
+	# For example, with value `{ "foo": "unknown" }`, the `/?foo=bar` will be altered to `/?foo=unknown`,
+	queries: Map
+
+	# headers is a rule to replace http headers of target.
+	# The key-value pairs represent header name and header value pairs.
+	headers: Map
+}
+
+# PodHttpChaosPatchActions defines possible patch-actions of HttpChaos.
+type PodHttpChaosPatchActions @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodHttpChaosPatchActions") {
+	# body is a rule to patch message body of target.
+	body: PodHttpChaosPatchBodyAction
+
+	# queries is a rule to append uri queries of target(Request only).
+	# For example: `[["foo", "bar"], ["foo", "unknown"]]`.
+	queries: [[String!]!]
+
+	# headers is a rule to append http headers of target.
+	# For example: `[["Set-Cookie", "<one cookie>"], ["Set-Cookie", "<another cookie>"]]`.
+	headers: [[String!]!]
+}
+
+# PodHttpChaosPatchBodyAction defines patch body action of HttpChaos.
+type PodHttpChaosPatchBodyAction @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodHttpChaosPatchBodyAction") {
+	# type represents the patch type, only support `JSON` as [merge patch json](https://tools.ietf.org/html/rfc7396) currently.
+	type: String!
+
+	# value is the patch contents.
+	value: String!
+}
+
+type HTTPChaosStatus @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.HTTPChaosStatus") {
+    # conditions represents the current global condition of the chaos
+	conditions: [ChaosCondition!]
+
+	# experiment records the last experiment state.
+	experiment: ExperimentStatus
+
+    # instances always specifies podhttpchaos generation or empty
+	instances: Map
+}
+
+type ChaosCondition @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.ChaosCondition") {
+	type: String!
+	status: String!
+	reason: String
+}
+
+type ExperimentStatus @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.ExperimentStatus") {
+	desiredPhase: String!
+
+	# Records are used to track the running status
+	Records: [Record!]
+}
+
+type Record @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.Record") {
+	id: String!
+	selectorKey: String!
+	phase: String!
+}
+
+type PodNetworkChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodNetworkChaos") {
+    kind: String!
+    apiVersion: String!
+    name: String!
+    generateName: String!
+    namespace: String!
+    selfLink: String!
+    uid: String! 
+    resourceVersion: String!
+    generation: Int!
+    creationTimestamp: Time!
+    deletionTimestamp: Time
+    deletionGracePeriodSeconds: Int
+    labels: Map
+    annotations: Map
+    ownerReferences: [OwnerReference!]
+    finalizers: [String!]
+    clusterName: String!
+
+	spec: PodNetworkChaosSpec!
+	status: PodNetworkChaosStatus!
+
+	pod: Pod!       @goField(forceResolver: true)
+}
+
+# PodNetworkChaosSpec defines the desired state of PodNetworkChaos
+type PodNetworkChaosSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodNetworkChaosSpec") {
+	# The ipset on the pod
+	ipSets: [RawIPSet!]
+
+	# The iptables rules on the pod
+	iptables: [RawIptables!]
+
+	# The tc rules on the pod
+	trafficControls: [RawTrafficControl!]
+}
+
+# PodNetworkChaosStatus defines the observed state of PodNetworkChaos
+type PodNetworkChaosStatus @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodNetworkChaosStatus") {
+	failedMessage: String!
+	observedGeneration: Int!
+}
+
+# RawIPSet represents an ipset on specific pod
+type RawIPSet @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.RawIPSet") {
+	# The name of ipset
+	name: String!
+
+	# The contents of ipset
+	cidrs: [String!]!
+
+	# The name and namespace of the source network chaos
+	source: String!
+}
+
+# RawIptables represents the iptables rules on specific pod
+type RawIptables @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.RawIptables") {
+	# The name of iptables chain
+	name: String!
+
+	# The name of related ipset
+	ipSets: [String!]!
+
+	# The block direction of this iptables rule
+	direction: String!
+
+	# The name and namespace of the source network chaos
+	source: String!
+}
+
+# RawTrafficControl represents the traffic control chaos on specific pod
+type RawTrafficControl @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.RawTrafficControl") {
+	# The type of traffic control
+	type: String!
+
+	# delay represents the detail about delay action
+	delay: DelaySpec
+
+	# loss represents the detail about loss action
+	loss: LossSpec
+
+	# duplicateSpec represents the detail about loss action
+	duplicate: DuplicateSpec
+
+	# corrupt represents the detail about corrupt action
+	corrupt: CorruptSpec
+
+	# bandwidth represents the detail about bandwidth control action
+	Bandwidth: BandwidthSpec
+
+	# The name of target ipset
+	ipSet: String
+
+	# The name and namespace of the source network chaos
+	source: String
+}
+
+# DelaySpec defines detail of a delay action
+type DelaySpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.DelaySpec") {
+	latency: String!
+	correlation: String
+	jitter: String
+	reorder: ReorderSpec
+}
+
+# LossSpec defines detail of a loss action
+type LossSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.LossSpec") {
+	loss: String!
+	correlation: String
+}
+
+# DuplicateSpec defines detail of a duplicate action
+type DuplicateSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.DuplicateSpec") {
+	duplicate: String!
+	correlation: String
+}
+
+# CorruptSpec defines detail of a corrupt action
+type CorruptSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.CorruptSpec") {
+	corrup: String!
+	correlation: String
+}
+
+# BandwidthSpec defines detail of bandwidth limit.
+type BandwidthSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.BandwidthSpec") {
+	# rate is the speed knob. Allows bps, kbps, mbps, gbps, tbps unit. bps means bytes per second.
+	rate: String!
+
+	# limit is the number of bytes that can be queued waiting for tokens to become available.
+	limit: Int!
+
+	# buffer is the maximum amount of bytes that tokens can be available for instantaneously.
+	buffer: Int!
+
+	# peakrate is the maximum depletion rate of the bucket.
+	# The peakrate does not need to be set, it is only necessary
+	# if perfect millisecond timescale shaping is required.
+	peakrate: Int
+
+	# minburst specifies the size of the peakrate bucket. For perfect
+	# accuracy, should be set to the MTU of the interface.  If a
+	# peakrate is needed, but some burstiness is acceptable, this
+	# size can be raised. A 3000 byte minburst allows around 3mbit/s
+	# of peakrate, given 1000 byte packets.
+	minburst: Int
+}
+
+# ReorderSpec defines details of packet reorder.
+type ReorderSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.ReorderSpec") {
+	reorder: String!
+	correlation: String
+	gap: Int
+}
+
+type NetworkChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.NetworkChaos") {
+    kind: String!
+    apiVersion: String!
+    name: String!
+    generateName: String!
+    namespace: String!
+    selfLink: String!
+    uid: String! 
+    resourceVersion: String!
+    generation: Int!
+    creationTimestamp: Time!
+    deletionTimestamp: Time
+    deletionGracePeriodSeconds: Int
+    labels: Map
+    annotations: Map
+    ownerReferences: [OwnerReference!]
+    finalizers: [String!]
+    clusterName: String!
+
+	podnetworks: [PodNetworkChaos!]	@goField(forceResolver: true)
+}
+
+type StressChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.StressChaos") {
+    kind: String!
+    apiVersion: String!
+    name: String!
+    generateName: String!
+    namespace: String!
+    selfLink: String!
+    uid: String! 
+    resourceVersion: String!
+    generation: Int!
+    creationTimestamp: Time!
+    deletionTimestamp: Time
+    deletionGracePeriodSeconds: Int
+    labels: Map
+    annotations: Map
+    ownerReferences: [OwnerReference!]
+    finalizers: [String!]
+    clusterName: String!
+}

@@ -23,6 +23,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/util/retry"
+	"k8s.io/utils/pointer"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
@@ -41,7 +42,7 @@ func NewWorkflowEntryReconciler(kubeClient client.Client, eventRecorder recorder
 	return &WorkflowEntryReconciler{kubeClient: kubeClient, eventRecorder: eventRecorder, logger: logger}
 }
 
-func (it *WorkflowEntryReconciler) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+func (it *WorkflowEntryReconciler) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
 	startTime := time.Now()
 	defer func() {
 		it.logger.V(4).Info("Finished syncing for workflow",
@@ -49,8 +50,6 @@ func (it *WorkflowEntryReconciler) Reconcile(request reconcile.Request) (reconci
 			"duration", time.Since(startTime),
 		)
 	}()
-
-	ctx := context.TODO()
 
 	workflow := v1alpha1.Workflow{}
 	err := it.kubeClient.Get(ctx, request.NamespacedName, &workflow)
@@ -143,6 +142,8 @@ func (it *WorkflowEntryReconciler) Reconcile(request reconcile.Request) (reconci
 					"entry nodes", nodeNames,
 				)
 			}
+
+			workflowNeedUpdate.Status.EntryNode = pointer.StringPtr(entryNodes[0].Name)
 			SetWorkflowCondition(&workflowNeedUpdate.Status, v1alpha1.WorkflowCondition{
 				Type:   v1alpha1.WorkflowConditionScheduled,
 				Status: corev1.ConditionTrue,
@@ -159,6 +160,7 @@ func (it *WorkflowEntryReconciler) Reconcile(request reconcile.Request) (reconci
 					now := metav1.NewTime(time.Now())
 					workflowNeedUpdate.Status.EndTime = &now
 				}
+				it.eventRecorder.Event(&workflow, recorder.WorkflowAccomplished{})
 			} else {
 				SetWorkflowCondition(&workflowNeedUpdate.Status, v1alpha1.WorkflowCondition{
 					Type:   v1alpha1.WorkflowConditionAccomplished,
@@ -215,6 +217,7 @@ func (it *WorkflowEntryReconciler) fetchEntryNode(ctx context.Context, workflow 
 	}
 
 	err = it.kubeClient.List(ctx, &entryNodesList, &client.ListOptions{
+		Namespace:     workflow.Namespace,
 		LabelSelector: controlledByWorkflow,
 	})
 	if err != nil {
@@ -239,7 +242,7 @@ func (it *WorkflowEntryReconciler) spawnEntryNode(ctx context.Context, workflow 
 	}
 
 	if len(nodes) > 1 {
-		it.logger.V(1).Info("the results of entry nodes are more than 1, will only pick the first one",
+		it.logger.Info("the results of entry nodes are more than 1, will only pick the first one",
 			"workflow", fmt.Sprintf("%s/%s", workflow.Namespace, workflow.Name),
 			"nodes", nodes,
 		)
@@ -248,9 +251,13 @@ func (it *WorkflowEntryReconciler) spawnEntryNode(ctx context.Context, workflow 
 	entryNode := nodes[0]
 	err = it.kubeClient.Create(ctx, entryNode)
 	if err != nil {
-		it.logger.V(1).Info("failed to create workflow nodes")
+		it.logger.Info("failed to create workflow nodes")
 		return nil, err
 	}
+	it.logger.Info("entry workflow node created",
+		"workflow", fmt.Sprintf("%s/%s", workflow.Namespace, workflow.Name),
+		"entry node", entryNode.Name,
+	)
 
 	return entryNode, nil
 }
