@@ -1708,6 +1708,8 @@ webhooks:
     failurePolicy: Fail
     name: mworkflow.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1727,6 +1729,8 @@ webhooks:
     failurePolicy: Fail
     name: mhttpchaos.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1990,6 +1994,8 @@ webhooks:
     failurePolicy: Fail
     name: vworkflow.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -2009,6 +2015,8 @@ webhooks:
     failurePolicy: Fail
     name: vhttpchaos.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
