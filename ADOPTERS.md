@@ -6,7 +6,7 @@ If you are a Chaos Mesh adopter, and are willing to share your Chaos Mesh story,
 
 - [Apache APISIX](https://github.com/apache/apisix)
   - Apache APISIX is a dynamic, real-time, high-performance open source API gateway, which provides rich traffic management features, such as load balancing, dynamic upstream and more.
-  - APISIX integrates Chaos Mesh into open-source CI pipelines, to further enhance APISIX's resiliency and robustness.
+  - APISIX integrates Chaos Mesh into open-source CI pipelines, to further enhance APISIX's resiliency and robustness. See [Use case](https://chaos-mesh.org/blog/How-Chaos-Mesh-Helps-Apache-APISIX-Improve-System-Stability)
 - [ByteDance](https://bytedance.com/en/)
   - ByteDance is a technology company operating a range of content platforms including TikTok, Lark, Helo, Vigo Video, Douyin, and Huoshan in over 150 markets and 75 languages.
   - ByteDance's self-developed chaos engineering platform is mainly used by the company's own technology system. As there are some cloud-native deployment services involved, they integrated Chaos Mesh as the underlying fault injection engine, which is a key supplement to ByteDance’s chaos engineering platform.

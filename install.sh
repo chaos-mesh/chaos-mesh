@@ -1075,6 +1075,9 @@ rules:
     resources:
       - subjectaccessreviews
     verbs: [ "create" ]
+  - apiGroups: [ "" ]
+    resources: [ "pods/exec" ]
+    verbs: [ "create" ]
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 # binding for control plane namespace
@@ -1171,6 +1174,10 @@ spec:
       targetPort: pprof
       protocol: TCP
       name: pprof
+    - port: 10082
+      targetPort: ctrl
+      protocol: TCP
+      name: ctrl
     - port: 10080
       targetPort: http
       protocol: TCP
@@ -1401,6 +1408,8 @@ spec:
             value: "false"
           - name: PPROF_ADDR
             value: ":10081"
+          - name: CTRL_ADDR
+            value: ":10082"
           - name: CHAOS_DNS_SERVICE_NAME
             value: chaos-mesh-dns-server
           - name: CHAOS_DNS_SERVICE_PORT
@@ -1420,6 +1429,8 @@ spec:
             containerPort: 10080
           - name: pprof
             containerPort: 10081
+          - name: ctrl
+            containerPort: 10082
       volumes:
         - name: webhook-certs
           secret:
@@ -1682,6 +1693,25 @@ webhooks:
           - UPDATE
         resources:
           - workflow
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /mutate-chaos-mesh-org-v1alpha1-httpchaos
+    failurePolicy: Fail
+    name: mhttpchaos.kb.io
+    timeoutSeconds: 5
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - httpchaos
 ---
 # Source: chaos-mesh/templates/secrets-configuration.yaml
 apiVersion: admissionregistration.k8s.io/v1beta1
@@ -1923,6 +1953,25 @@ webhooks:
           - UPDATE
         resources:
           - workflows
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /validate-chaos-mesh-org-v1alpha1-httpchaos
+    failurePolicy: Fail
+    name: vhttpchaos.kb.io
+    timeoutSeconds: 5
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - httpchaos
 ---
 # Source: chaos-mesh/templates/secrets-configuration.yaml
 apiVersion: admissionregistration.k8s.io/v1beta1

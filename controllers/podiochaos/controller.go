@@ -42,9 +42,7 @@ type Reconciler struct {
 	ChaosDaemonClientBuilder *chaosdaemon.ChaosDaemonClientBuilder
 }
 
-func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	ctx := context.TODO()
-
+func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	obj := &v1alpha1.PodIOChaos{}
 
 	if err := r.Client.Get(ctx, req.NamespacedName, obj); err != nil {

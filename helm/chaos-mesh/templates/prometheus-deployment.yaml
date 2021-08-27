@@ -28,6 +28,9 @@ spec:
       serviceAccount: {{ .Values.prometheus.serviceAccount }}
       {{- end }}
       priorityClassName: {{ .Values.prometheus.priorityClassName}}
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets: {{ toYaml .Values.imagePullSecrets | nindent 8 }}
+      {{- end }}
       initContainers:
         - name: data-permission-fix
           image: busybox

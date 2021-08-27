@@ -81,31 +81,19 @@ const (
 
 // Node defines a single step of a workflow.
 type Node struct {
-	Name                string              `json:"name"`
-	Type                NodeType            `json:"type"`
-	State               NodeState           `json:"state"`
-	Serial              *NodeSerial         `json:"serial,omitempty"`
-	Parallel            *NodeParallel       `json:"parallel,omitempty"`
-	ConditionalBranches []ConditionalBranch `json:"conditional_branches,omitempty"`
-	Template            string              `json:"template"`
-	UID                 string              `json:"uid"`
+	Name                string                 `json:"name"`
+	Type                NodeType               `json:"type"`
+	State               NodeState              `json:"state"`
+	Serial              []NodeNameWithTemplate `json:"serial,omitempty"`
+	Parallel            []NodeNameWithTemplate `json:"parallel,omitempty"`
+	ConditionalBranches []ConditionalBranch    `json:"conditional_branches,omitempty"`
+	Template            string                 `json:"template"`
+	UID                 string                 `json:"uid"`
 }
 
 type NodeNameWithTemplate struct {
 	Name     string `json:"name,omitempty"`
 	Template string `json:"template,omitempty"`
-}
-
-// FIXME: unnecessary another wrap of []NodeNameWithTemplate, like struct NodeSerial and NodeParallel
-
-// NodeSerial defines SerialNode's specific fields.
-type NodeSerial struct {
-	Children []NodeNameWithTemplate `json:"children"`
-}
-
-// NodeParallel defines ParallelNode's specific fields.
-type NodeParallel struct {
-	Children []NodeNameWithTemplate `json:"children"`
 }
 
 type ConditionalBranch struct {
@@ -335,9 +323,8 @@ func convertWorkflowNode(kubeWorkflowNode v1alpha1.WorkflowNode) (Node, error) {
 		for _, child := range kubeWorkflowNode.Status.ActiveChildren {
 			nodes = append(nodes, child.Name)
 		}
-		result.Serial = &NodeSerial{
-			Children: composeSerialTaskAndNodes(kubeWorkflowNode.Spec.Children, nodes),
-		}
+		result.Serial = composeSerialTaskAndNodes(kubeWorkflowNode.Spec.Children, nodes)
+
 	} else if kubeWorkflowNode.Spec.Type == v1alpha1.TypeParallel {
 		var nodes []string
 		for _, child := range kubeWorkflowNode.Status.FinishedChildren {
@@ -346,9 +333,8 @@ func convertWorkflowNode(kubeWorkflowNode v1alpha1.WorkflowNode) (Node, error) {
 		for _, child := range kubeWorkflowNode.Status.ActiveChildren {
 			nodes = append(nodes, child.Name)
 		}
-		result.Parallel = &NodeParallel{
-			Children: composeParallelTaskAndNodes(kubeWorkflowNode.Spec.Children, nodes),
-		}
+		result.Parallel = composeParallelTaskAndNodes(kubeWorkflowNode.Spec.Children, nodes)
+
 	} else if kubeWorkflowNode.Spec.Type == v1alpha1.TypeTask {
 		var nodes []string
 		for _, child := range kubeWorkflowNode.Status.FinishedChildren {

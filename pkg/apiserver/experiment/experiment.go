@@ -500,8 +500,8 @@ func (s *Service) getPodChaosDetail(namespace string, name string, kubeCli clien
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
-			UID:     chaos.GetChaos().UID,
-			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
+			UID:     string(chaos.GetUID()),
+			Created: chaos.GetCreationTimestamp().Format(time.RFC3339),
 			Status:  string(utils.GetChaosState(chaos)),
 		},
 		KubeObject: core.KubeObjectDesc{
@@ -544,8 +544,8 @@ func (s *Service) getIOChaosDetail(namespace string, name string, kubeCli client
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
-			UID:     chaos.GetChaos().UID,
-			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
+			UID:     string(chaos.GetUID()),
+			Created: chaos.GetCreationTimestamp().Format(time.RFC3339),
 			Status:  string(utils.GetChaosState(chaos)),
 		},
 		KubeObject: core.KubeObjectDesc{
@@ -588,8 +588,8 @@ func (s *Service) getNetworkChaosDetail(namespace string, name string, kubeCli c
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
-			UID:     chaos.GetChaos().UID,
-			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
+			UID:     string(chaos.GetUID()),
+			Created: chaos.GetCreationTimestamp().Format(time.RFC3339),
 			Status:  string(utils.GetChaosState(chaos)),
 		},
 		KubeObject: core.KubeObjectDesc{
@@ -632,9 +632,9 @@ func (s *Service) getTimeChaosDetail(namespace string, name string, kubeCli clie
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
-			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
+			UID:     string(chaos.GetUID()),
+			Created: chaos.GetCreationTimestamp().Format(time.RFC3339),
 			Status:  string(utils.GetChaosState(chaos)),
-			UID:     chaos.GetChaos().UID,
 		},
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
@@ -676,9 +676,9 @@ func (s *Service) getKernelChaosDetail(namespace string, name string, kubeCli cl
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
-			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
+			UID:     string(chaos.GetUID()),
+			Created: chaos.GetCreationTimestamp().Format(time.RFC3339),
 			Status:  string(utils.GetChaosState(chaos)),
-			UID:     chaos.GetChaos().UID,
 		},
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
@@ -720,9 +720,9 @@ func (s *Service) getStressChaosDetail(namespace string, name string, kubeCli cl
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
-			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
+			UID:     string(chaos.GetUID()),
+			Created: chaos.GetCreationTimestamp().Format(time.RFC3339),
 			Status:  string(utils.GetChaosState(chaos)),
-			UID:     chaos.GetChaos().UID,
 		},
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
@@ -764,9 +764,9 @@ func (s *Service) getDNSChaosDetail(namespace string, name string, kubeCli clien
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
-			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
+			UID:     string(chaos.GetUID()),
+			Created: chaos.GetCreationTimestamp().Format(time.RFC3339),
 			Status:  string(utils.GetChaosState(chaos)),
-			UID:     chaos.GetChaos().UID,
 		},
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
@@ -808,9 +808,9 @@ func (s *Service) getAWSChaosDetail(namespace string, name string, kubeCli clien
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
-			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
+			UID:     string(chaos.GetUID()),
+			Created: chaos.GetCreationTimestamp().Format(time.RFC3339),
 			Status:  string(utils.GetChaosState(chaos)),
-			UID:     chaos.GetChaos().UID,
 		},
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
@@ -852,9 +852,9 @@ func (s *Service) getGCPChaosDetail(namespace string, name string, kubeCli clien
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
-			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
+			UID:     string(chaos.GetUID()),
+			Created: chaos.GetCreationTimestamp().Format(time.RFC3339),
 			Status:  string(utils.GetChaosState(chaos)),
-			UID:     chaos.GetChaos().UID,
 		},
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
@@ -904,29 +904,28 @@ func (s *Service) listExperiments(c *gin.Context) {
 		if kind != "" && key != kind {
 			continue
 		}
-		if err := kubeCli.List(context.Background(), list.ChaosList, &client.ListOptions{Namespace: ns}); err != nil {
+		chaosList := list.SpawnList()
+		if err := kubeCli.List(context.Background(), chaosList, &client.ListOptions{Namespace: ns}); err != nil {
 			c.Status(http.StatusInternalServerError)
 			utils.SetErrorForGinCtx(c, err)
 			return
 		}
 
-		items := reflect.ValueOf(list.ChaosList).Elem().FieldByName("Items")
+		items := reflect.ValueOf(chaosList).Elem().FieldByName("Items")
 		for i := 0; i < items.Len(); i++ {
 			item := items.Index(i).Addr().Interface().(v1alpha1.InnerObject)
-			chaos := item.GetChaos()
-			if name != "" && chaos.Name != name {
+			if name != "" && item.GetName() != name {
 				continue
 			}
 			status := utils.GetChaosState(item)
 			exps = append(exps, &Experiment{
 				Base: Base{
-					Name:      chaos.Name,
-					Namespace: chaos.Namespace,
-					Kind:      chaos.Kind,
+					Name:      item.GetName(),
+					Namespace: item.GetNamespace(),
 				},
-				Created: chaos.StartTime.Format(time.RFC3339),
+				UID:     string(item.GetUID()),
+				Created: item.GetCreationTimestamp().Format(time.RFC3339),
 				Status:  string(status),
-				UID:     chaos.UID,
 			})
 		}
 	}
@@ -1053,7 +1052,8 @@ func (s *Service) deleteExperiment(c *gin.Context) {
 		_ = c.Error(utils.ErrInvalidRequest.New(kind + " is not supported"))
 		return
 	}
-	if err := kubeCli.Get(ctx, chaosKey, chaosKind.Chaos); err != nil {
+	chaosObject := chaosKind.SpawnObject()
+	if err := kubeCli.Get(ctx, chaosKey, chaosObject); err != nil {
 		if apierrors.IsNotFound(err) {
 			c.Status(http.StatusNotFound)
 			_ = c.Error(utils.ErrNotFound.NewWithNoMessage())
@@ -1075,7 +1075,7 @@ func (s *Service) deleteExperiment(c *gin.Context) {
 		}
 	}
 
-	if err := kubeCli.Delete(ctx, chaosKind.Chaos, &client.DeleteOptions{}); err != nil {
+	if err := kubeCli.Delete(ctx, chaosObject, &client.DeleteOptions{}); err != nil {
 		if apierrors.IsNotFound(err) {
 			c.Status(http.StatusNotFound)
 			_ = c.Error(utils.ErrNotFound.NewWithNoMessage())
@@ -1154,7 +1154,8 @@ func (s *Service) batchDeleteExperiment(c *gin.Context) {
 			errFlag = true
 			continue
 		}
-		if err := kubeCli.Get(ctx, chaosKey, chaosKind.Chaos); err != nil {
+		chaosObject := chaosKind.SpawnObject()
+		if err := kubeCli.Get(ctx, chaosKey, chaosObject); err != nil {
 			if apierrors.IsNotFound(err) {
 				_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("delete experiment uid (%s) error, because the chaos is not found", uid)))
 			} else {
@@ -1175,7 +1176,7 @@ func (s *Service) batchDeleteExperiment(c *gin.Context) {
 			}
 		}
 
-		if err := kubeCli.Delete(ctx, chaosKind.Chaos, &client.DeleteOptions{}); err != nil {
+		if err := kubeCli.Delete(ctx, chaosObject, &client.DeleteOptions{}); err != nil {
 			if apierrors.IsNotFound(err) {
 				_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("delete experiment uid (%s) error, because the chaos is not found", uid)))
 			} else {
@@ -1312,7 +1313,8 @@ func (s *Service) patchExperiment(exp *Base, annotations map[string]string, kube
 	}
 
 	key := types.NamespacedName{Namespace: exp.Namespace, Name: exp.Name}
-	if err := kubeCli.Get(context.Background(), key, chaosKind.Chaos); err != nil {
+	chaosObject := chaosKind.SpawnObject()
+	if err := kubeCli.Get(context.Background(), key, chaosObject); err != nil {
 		return err
 	}
 
@@ -1324,8 +1326,8 @@ func (s *Service) patchExperiment(exp *Base, annotations map[string]string, kube
 	})
 
 	return kubeCli.Patch(context.Background(),
-		chaosKind.Chaos,
-		client.ConstantPatch(types.MergePatchType, mergePatch))
+		chaosObject,
+		client.RawPatch(types.MergePatchType, mergePatch))
 }
 
 // @Summary Get chaos experiments state from Kubernetes cluster.
@@ -1368,12 +1370,13 @@ func (s *Service) state(c *gin.Context) {
 	for index := range kinds {
 		list := kinds[index]
 		g.Go(func() error {
-			if err := kubeCli.List(ctx, list.ChaosList, listOptions...); err != nil {
+			chaosList := list.SpawnList()
+			if err := kubeCli.List(ctx, chaosList, listOptions...); err != nil {
 				return err
 			}
 			m.Lock()
 
-			items := reflect.ValueOf(list.ChaosList).Elem().FieldByName("Items")
+			items := reflect.ValueOf(chaosList).Elem().FieldByName("Items")
 			for i := 0; i < items.Len(); i++ {
 				item := items.Index(i).Addr().Interface().(v1alpha1.InnerObject)
 				state := utils.GetChaosState(item)
@@ -1620,7 +1623,6 @@ func (s *Service) updateGCPChaos(exp *core.KubeObjectDesc, kubeCli client.Client
 func setAnnotation(kubeCli client.Client, kind string, ns string, name string) error {
 	var (
 		chaosKind *v1alpha1.ChaosKind
-		chaosMeta metav1.Object
 		ok        bool
 	)
 
@@ -1629,19 +1631,17 @@ func setAnnotation(kubeCli client.Client, kind string, ns string, name string) e
 	}
 	ctx := context.TODO()
 	chaosKey := types.NamespacedName{Namespace: ns, Name: name}
-	if err := kubeCli.Get(ctx, chaosKey, chaosKind.Chaos); err != nil {
+	chaosObject := chaosKind.SpawnObject()
+	if err := kubeCli.Get(ctx, chaosKey, chaosObject); err != nil {
 		return err
 	}
 
-	if chaosMeta, ok = chaosKind.Chaos.(metav1.Object); !ok {
-		return fmt.Errorf("failed to get chaos meta information")
-	}
-	annotations := chaosMeta.GetAnnotations()
+	annotations := chaosObject.GetAnnotations()
 	if annotations == nil {
 		annotations = make(map[string]string)
 	}
 	annotations[finalizers.AnnotationCleanFinalizer] = finalizers.AnnotationCleanFinalizerForced
-	chaosMeta.SetAnnotations(annotations)
+	chaosObject.SetAnnotations(annotations)
 
-	return kubeCli.Update(context.Background(), chaosKind.Chaos)
+	return kubeCli.Update(context.Background(), chaosObject)
 }
