@@ -152,11 +152,8 @@ func (s *Service) get(c *gin.Context) {
 		return
 	}
 
-	chaosKind, ok := v1alpha1.AllKinds()[exp.Kind]
-	if ok {
-		_ = json.Unmarshal([]byte(exp.Experiment), chaosKind.Chaos)
-	}
-	chaos := chaosKind.Chaos
+	chaos := v1alpha1.AllKinds()[exp.Kind].SpawnObject()
+	_ = json.Unmarshal([]byte(exp.Experiment), chaos)
 
 	c.JSON(http.StatusOK, &Detail{
 		Archive: Archive{
