@@ -21,8 +21,8 @@ import (
 const initTemplate = `
 	SchemeBuilder.Register(&{{.Type}}{}, &{{.Type}}List{})
 	all.register(Kind{{.Type}}, &ChaosKind{
-		Chaos:     &{{.Type}}{},
-		GenericChaosList: &{{.Type}}List{},
+		chaos: &{{.Type}}{},
+		list:  &{{.Type}}List{},
 	})
 `
 

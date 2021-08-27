@@ -55,11 +55,12 @@ func (r *EventCollector) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	}
 
 	chaosKind, ok := v1alpha1.AllKinds()[event.InvolvedObject.Kind]
+	chaosObject := chaosKind.SpawnObject()
 	if ok {
 		if err = r.Get(ctx, types.NamespacedName{
 			Namespace: event.InvolvedObject.Namespace,
 			Name:      event.InvolvedObject.Name,
-		}, chaosKind.Chaos); err != nil {
+		}, chaosObject); err != nil {
 			return ctrl.Result{}, nil
 		}
 	} else {

@@ -21,8 +21,8 @@ import (
 
 const scheduleTemplate = `
 	allScheduleItem.register(Kind{{.Type}}, &ChaosKind{
-		Chaos:     &{{.Type}}{},
-		GenericChaosList: &{{.Type}}List{},
+		chaos: &{{.Type}}{},
+		list:  &{{.Type}}List{},
 	})
 `
 
