@@ -14,6 +14,7 @@
 package collector
 
 import (
+	"context"
 	"os"
 
 	v1 "k8s.io/api/core/v1"
@@ -98,7 +99,7 @@ func NewServer(
 			Log:     ctrl.Log.WithName("collector").WithName(kind),
 			archive: experimentArchive,
 			event:   event,
-		}).Setup(s.Manager, chaosKind.Chaos); err != nil {
+		}).Setup(s.Manager, chaosKind.SpawnObject()); err != nil {
 			log.Error(err, "unable to create collector", "collector", kind)
 			os.Exit(1)
 		}
@@ -135,10 +136,10 @@ func NewServer(
 }
 
 // Register starts collectors manager.
-func Register(s *Server, controllerRuntimeStopCh <-chan struct{}) {
+func Register(ctx context.Context, s *Server) {
 	go func() {
 		log.Info("Starting collector")
-		if err := s.Manager.Start(controllerRuntimeStopCh); err != nil {
+		if err := s.Manager.Start(ctx); err != nil {
 			log.Error(err, "could not start collector")
 			os.Exit(1)
 		}

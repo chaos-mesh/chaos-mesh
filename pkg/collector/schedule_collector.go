@@ -38,12 +38,11 @@ type ScheduleCollector struct {
 }
 
 // Reconcile reconciles a Schedule collector.
-func (r *ScheduleCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+func (r *ScheduleCollector) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	if r.apiType == nil {
 		r.Log.Error(nil, "apiType has not been initialized")
 		return ctrl.Result{}, nil
 	}
-	ctx := context.Background()
 
 	schedule := &v1alpha1.Schedule{}
 	err := r.Get(ctx, req.NamespacedName, schedule)
@@ -74,7 +73,7 @@ func (r *ScheduleCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 }
 
 // Setup setups collectors by Manager.
-func (r *ScheduleCollector) Setup(mgr ctrl.Manager, apiType runtime.Object) error {
+func (r *ScheduleCollector) Setup(mgr ctrl.Manager, apiType client.Object) error {
 	r.apiType = apiType
 
 	return ctrl.NewControllerManagedBy(mgr).

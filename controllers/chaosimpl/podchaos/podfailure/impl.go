@@ -21,6 +21,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
 	"github.com/chaos-mesh/chaos-mesh/pkg/annotation"
@@ -29,6 +30,8 @@ import (
 type Impl struct {
 	client.Client
 }
+
+var _ common.ChaosImpl = (*Impl)(nil)
 
 const (
 	// Always fails a container
@@ -39,7 +42,11 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	podchaos := obj.(*v1alpha1.PodChaos)
 
 	var origin v1.Pod
-	err := impl.Get(ctx, controller.ParseNamespacedName(records[index].Id), &origin)
+	namespacedName, err := controller.ParseNamespacedName(records[index].Id)
+	if err != nil {
+		return v1alpha1.NotInjected, err
+	}
+	err = impl.Get(ctx, namespacedName, &origin)
 	if err != nil {
 		// TODO: handle this error
 		return v1alpha1.NotInjected, err
@@ -92,13 +99,18 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	podchaos := obj.(*v1alpha1.PodChaos)
 
 	var origin v1.Pod
-	err := impl.Get(ctx, controller.ParseNamespacedName(records[index].Id), &origin)
+	namespacedName, err := controller.ParseNamespacedName(records[index].Id)
+	if err != nil {
+		// This error is not expected to exist
+		return v1alpha1.NotInjected, err
+	}
+	err = impl.Get(ctx, namespacedName, &origin)
 	if err != nil {
 		// TODO: handle this error
 		if k8sError.IsNotFound(err) {
 			return v1alpha1.NotInjected, nil
 		}
-		return v1alpha1.NotInjected, err
+		return v1alpha1.Injected, err
 	}
 	pod := origin.DeepCopy()
 	for index := range pod.Spec.Containers {

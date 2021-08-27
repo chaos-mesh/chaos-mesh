@@ -25,6 +25,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/gcpchaos/utils"
+	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 )
 
 type Impl struct {
@@ -32,6 +33,8 @@ type Impl struct {
 
 	Log logr.Logger
 }
+
+var _ common.ChaosImpl = (*Impl)(nil)
 
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, chaos v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	gcpchaos, ok := chaos.(*v1alpha1.GCPChaos)
@@ -57,7 +60,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		notFound   []string
 		marshalErr []string
 	)
-	for _, specDeviceName := range *selected.DeviceNames {
+	for _, specDeviceName := range selected.DeviceNames {
 		haveDisk := false
 		for _, disk := range instance.Disks {
 			if disk.DeviceName == specDeviceName {
@@ -85,7 +88,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		return v1alpha1.NotInjected, err
 	}
 
-	for _, specDeviceName := range *selected.DeviceNames {
+	for _, specDeviceName := range selected.DeviceNames {
 		_, err = computeService.Instances.DetachDisk(selected.Project, selected.Zone, selected.Instance, specDeviceName).Do()
 		if err != nil {
 			impl.Log.Error(err, "fail to detach the disk")

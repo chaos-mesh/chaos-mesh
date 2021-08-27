@@ -27,9 +27,9 @@ export interface Target {
 const networkCommon: Spec = {
   direction: {
     field: 'select',
-    items: ['', 'from', 'to', 'both'],
+    items: ['from', 'to', 'both'],
     label: 'Direction',
-    value: '',
+    value: 'to',
     helperText: 'Specify the network direction',
   },
   external_targets: {

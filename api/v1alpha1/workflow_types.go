@@ -38,22 +38,6 @@ type Workflow struct {
 	Status WorkflowStatus `json:"status"`
 }
 
-func (in *Workflow) GetChaos() *ChaosInstance {
-	instance := &ChaosInstance{
-		Name:      in.Name,
-		Namespace: in.Namespace,
-		Kind:      KindTimeChaos,
-		StartTime: in.CreationTimestamp.Time,
-		Action:    "",
-		UID:       string(in.UID),
-	}
-
-	if in.DeletionTimestamp != nil {
-		instance.EndTime = in.DeletionTimestamp.Time
-	}
-	return instance
-}
-
 func (in *Workflow) GetObjectMeta() *metav1.ObjectMeta {
 	return &in.ObjectMeta
 }
@@ -181,12 +165,18 @@ type WorkflowList struct {
 	Items           []Workflow `json:"items"`
 }
 
-func (in *WorkflowList) ListChaos() []*ChaosInstance {
-	res := make([]*ChaosInstance, 0, len(in.Items))
+func (in *WorkflowList) GetItems() []GenericChaos {
+	var result []GenericChaos
 	for _, item := range in.Items {
-		res = append(res, item.GetChaos())
+		item := item
+		result = append(result, &item)
 	}
-	return res
+	return result
+}
+
+// TODO: refactor: not so accurate
+func (in *WorkflowList) DeepCopyList() GenericChaosList {
+	return in.DeepCopy()
 }
 
 func init() {
@@ -195,7 +185,7 @@ func init() {
 
 func FetchChaosByTemplateType(templateType TemplateType) (runtime.Object, error) {
 	if kind, ok := all.kinds[string(templateType)]; ok {
-		return kind.Chaos.DeepCopyObject(), nil
+		return kind.SpawnObject(), nil
 	}
 	return nil, fmt.Errorf("no such kind refers to template type %s", templateType)
 }

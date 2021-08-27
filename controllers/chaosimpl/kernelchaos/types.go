@@ -41,15 +41,20 @@ type Impl struct {
 	chaosDaemonClientBuilder *chaosdaemon.ChaosDaemonClientBuilder
 }
 
+var _ common.ChaosImpl = (*Impl)(nil)
+
 // Apply applies KernelChaos
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	kernelChaos := obj.(*v1alpha1.KernelChaos)
 	record := records[index]
 
 	log := impl.Log.WithValues("chaos", kernelChaos, "record", record)
-	podId := controller.ParseNamespacedName(record.Id)
+	podId, err := controller.ParseNamespacedName(record.Id)
+	if err != nil {
+		return v1alpha1.NotInjected, err
+	}
 	var pod v1.Pod
-	err := impl.Client.Get(ctx, podId, &pod)
+	err = impl.Client.Get(ctx, podId, &pod)
 	if err != nil {
 		log.Error(err, "fail to get pod by record")
 		// TODO: handle this error
@@ -75,9 +80,15 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	record := records[index]
 
 	log := impl.Log.WithValues("chaos", kernelChaos, "record", record)
-	podId := controller.ParseNamespacedName(record.Id)
+	podId, err := controller.ParseNamespacedName(record.Id)
+	if err != nil {
+		errorInfo := fmt.Sprintf("kernelChaos recover error, record ID is %s", record.Id)
+		log.Error(err, errorInfo)
+		// This error is not expected to exist
+		return v1alpha1.Injected, err
+	}
 	var pod v1.Pod
-	err := impl.Client.Get(ctx, podId, &pod)
+	err = impl.Client.Get(ctx, podId, &pod)
 	if err != nil {
 		log.Error(err, "fail to get pod by record")
 		// TODO: handle this error

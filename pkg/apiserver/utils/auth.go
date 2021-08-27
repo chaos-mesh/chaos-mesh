@@ -16,6 +16,8 @@ package utils
 import (
 	"net/http"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"github.com/gin-gonic/gin"
 	authorizationv1 "k8s.io/api/authorization/v1"
 
@@ -57,7 +59,7 @@ func AuthRequired(c *gin.Context, clusterScoped bool, targetNamespace string) {
 		},
 	}
 
-	response, err := authCli.SelfSubjectAccessReviews().Create(sar)
+	response, err := authCli.SelfSubjectAccessReviews().Create(c.Request.Context(), sar, metav1.CreateOptions{})
 	if err != nil {
 		c.AbortWithError(http.StatusUnauthorized, ErrInvalidRequest.WrapWithNoMessage(err))
 		return

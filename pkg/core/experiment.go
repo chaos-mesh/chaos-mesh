@@ -234,12 +234,12 @@ type AWSChaosInfo struct {
 
 // GCPChaosInfo defines the basic information of aws chaos for creating a new GCPChaos.
 type GCPChaosInfo struct {
-	Action      string    `json:"action" binding:"oneof='node-stop' 'node-reset' 'disk-loss'"`
-	SecretName  *string   `json:"secretName,omitempty"`
-	Project     string    `json:"project"`
-	Zone        string    `json:"zone"`
-	Instance    string    `json:"instance"`
-	DeviceNames *[]string `json:"deviceNames,omitempty"`
+	Action      string   `json:"action" binding:"oneof='node-stop' 'node-reset' 'disk-loss'"`
+	SecretName  *string  `json:"secretName,omitempty"`
+	Project     string   `json:"project"`
+	Zone        string   `json:"zone"`
+	Instance    string   `json:"instance"`
+	DeviceNames []string `json:"deviceNames,omitempty"`
 }
 
 // ParsePodChaos Parse PodChaos JSON string into KubeObjectDesc.

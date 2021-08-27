@@ -195,7 +195,7 @@ clean:
 boilerplate:
 	./hack/verify-boilerplate.sh
 
-image: image-chaos-daemon image-chaos-mesh image-chaos-dashboard
+image: image-chaos-daemon image-chaos-mesh image-chaos-dashboard $(if $(DEBUGGER), image-chaos-dlv)
 
 e2e-image: image-e2e-helper
 
@@ -280,7 +280,7 @@ e2e-build: e2e-test/image/e2e/bin/ginkgo e2e-test/image/e2e/bin/e2e.test
 
 CLEAN_TARGETS+=e2e-test/image/e2e/bin/ginkgo
 e2e-test/image/e2e/bin/ginkgo:
-	cd e2e-test && $(GO) build -ldflags "$(LDFLAGS)" -tags "${BUILD_TAGS}" -o image/e2e/bin/ginkgo github.com/onsi/ginkgo/ginkgo
+	cd e2e-test && $(GO) install github.com/onsi/ginkgo/ginkgo@v1.16.4 && mkdir -p image/e2e/bin && cp $$GOPATH/bin/ginkgo image/e2e/bin/ginkgo
 
 CLEAN_TARGETS+=e2e-test/image/e2e/bin/e2e.test
 e2e-test/image/e2e/bin/e2e.test: e2e-test/e2e/**/*.go
@@ -357,6 +357,8 @@ $(GOBIN)/goimports:
 	$(GO) get golang.org/x/tools/cmd/goimports@v0.1.4
 $(GOBIN)/gosec:
 	$(GO) get github.com/securego/gosec/cmd/gosec@v0.0.0-20200401082031-e946c8c39989
+$(GOBIN)/gqlgen:
+	$(GO) get github.com/99designs/gqlgen@v0.13.0
 
 lint: $(GOBIN)/revive
 	@echo "linting"
@@ -368,10 +370,14 @@ bin/chaos-builder:
 chaos-build: bin/chaos-builder
 	bin/chaos-builder
 
+generate-ctrl: $(GOBIN)/gqlgen
+	go generate ./pkg/ctrlserver/graph; make fmt;
+
 # Generate code
 generate: $(GOBIN)/controller-gen chaos-build
 	cd ./api/v1alpha1 ;\
 		$< object:headerFile=../../hack/boilerplate/boilerplate.generatego.txt paths="./..." ;
+
 
 manifests/crd.yaml: config ensure-kustomize
 	$(KUSTOMIZE_BIN) build config/default > manifests/crd.yaml
