@@ -397,10 +397,9 @@ install_kubernetes_by_kind() {
     config_file=${work_dir}/kind-config.yaml
     cat <<EOF > "${config_file}"
 kind: Cluster
-apiVersion: kind.sigs.k8s.io/v1alpha3
+apiVersion: kind.x-k8s.io/v1alpha4
 kubeadmConfigPatches:
 - |
-  apiVersion: kubeadm.k8s.io/v1alpha3
   kind: ClusterConfiguration
   metadata:
     name: config
