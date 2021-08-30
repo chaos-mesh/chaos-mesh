@@ -18,16 +18,10 @@ import (
 	"time"
 )
 
-// EventStore defines operations for working with event.
+// EventStore defines operations for working with events.
 type EventStore interface {
 	// List returns an event list from the datastore.
 	List(context.Context) ([]*Event, error)
-
-	// ListByFilter returns an event list by podName, podNamespace, experimentName, experimentNamespace, uid, kind, startTime and finishTime.
-	ListByFilter(context.Context, Filter) ([]*Event, error)
-
-	// ListByExperiment returns an event list by the name and namespace of the experiment.
-	ListByExperiment(context.Context, string, string, string) ([]*Event, error)
 
 	// ListByUID returns an event list by the UID.
 	ListByUID(context.Context, string) ([]*Event, error)
@@ -35,41 +29,38 @@ type EventStore interface {
 	// ListByUIDs returns an event list by the UID list.
 	ListByUIDs(context.Context, []string) ([]*Event, error)
 
-	// Find returns an event from the datastore by ID.
+	// ListByExperiment returns an event list by the namespace, name, or kind.
+	ListByExperiment(context context.Context, namespace string, name string, kind string) ([]*Event, error)
+
+	ListByFilter(context.Context, Filter) ([]*Event, error)
+
+	// Find returns an event by ID.
 	Find(context.Context, uint) (*Event, error)
 
 	// Create persists a new event to the datastore.
 	Create(context.Context, *Event) error
 
-	// DeleteByCreateTime deletes events whose time difference is greater than the given time from CreateTime.
-	DeleteByCreateTime(context.Context, time.Duration) error
-
-	// DeleteByUID deletes events list by the UID.
+	// DeleteByUID deletes events by the UID.
 	DeleteByUID(context.Context, string) error
 
-	// DeleteByUIDs deletes events list by the UID list.
+	// DeleteByUIDs deletes events by the UID list.
 	DeleteByUIDs(context.Context, []string) error
+
+	// DeleteByTime deletes events within the specified time interval.
+	DeleteByTime(context.Context, string, string) error
+
+	// DeleteByDuration selete events that exceed duration.
+	DeleteByDuration(context.Context, time.Duration) error
 }
 
-// Event represents an event instance.
 type Event struct {
 	ID        uint      `gorm:"primary_key" json:"id"`
+	ObjectID  string    `gorm:"index:object_id" json:"object_id"`
 	CreatedAt time.Time `json:"created_at"`
+	Namespace string    `json:"namespace"`
+	Name      string    `json:"name"`
 	Kind      string    `json:"kind"`
 	Type      string    `json:"type"`
 	Reason    string    `json:"reason"`
 	Message   string    `json:"message"`
-	Name      string    `json:"name"`
-	Namespace string    `json:"namespace"`
-	ObjectID  string    `gorm:"index:object_id" json:"object_id"`
-}
-
-// Filter represents the filter to list events
-type Filter struct {
-	CreateTimeStr string
-	Name          string
-	Namespace     string
-	ObjectID      string
-	Kind          string
-	LimitStr      string
 }

@@ -94,7 +94,7 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 		err := fmt.Errorf("kind %s is not support", requestKind)
 		return admission.Errored(http.StatusBadRequest, err)
 	}
-	chaos := kind.Chaos.DeepCopyObject().(common.InnerObjectWithSelector)
+	chaos := kind.SpawnObject().(common.InnerObjectWithSelector)
 	if chaos == nil {
 		err := fmt.Errorf("kind %s is not support", requestKind)
 		return admission.Errored(http.StatusBadRequest, err)

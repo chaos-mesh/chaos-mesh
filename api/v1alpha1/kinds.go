@@ -33,6 +33,7 @@ func (c *chaosKindMap) register(name string, kind *ChaosKind) {
 	c.kinds[name] = kind
 }
 
+// clone will build a new map with kinds, so if user add or delete entries of the map, the origin global map will not be affected.
 func (c *chaosKindMap) clone() map[string]*ChaosKind {
 	c.RLock()
 	defer c.RUnlock()
@@ -40,15 +41,15 @@ func (c *chaosKindMap) clone() map[string]*ChaosKind {
 	out := make(map[string]*ChaosKind)
 	for key, kind := range c.kinds {
 		out[key] = &ChaosKind{
-			Chaos:            kind.Chaos,
-			GenericChaosList: kind.GenericChaosList,
+			chaos: kind.chaos,
+			list:  kind.list,
 		}
 	}
 
 	return out
 }
 
-// AllKinds returns all chaos kinds.
+// AllKinds returns all chaos kinds, key is name of Kind, value is an accessor for spawning Object and List
 func AllKinds() map[string]*ChaosKind {
 	return all.clone()
 }
@@ -62,8 +63,18 @@ var all = &chaosKindMap{
 
 // ChaosKind includes one kind of chaos and its list type
 type ChaosKind struct {
-	Chaos client.Object
-	GenericChaosList
+	chaos client.Object
+	list  GenericChaosList
+}
+
+// SpawnObject will deepcopy a clean struct for the acquired kind as placeholder
+func (it *ChaosKind) SpawnObject() client.Object {
+	return it.chaos.DeepCopyObject().(client.Object)
+}
+
+// SpawnList will deepcopy a clean list for the acquired kind of chaos as placeholder
+func (it *ChaosKind) SpawnList() GenericChaosList {
+	return it.list.DeepCopyList()
 }
 
 // AllKinds returns all chaos kinds.
@@ -71,7 +82,7 @@ func AllScheduleItemKinds() map[string]*ChaosKind {
 	return allScheduleItem.clone()
 }
 
-// all is a ChaosKindMap instance.
+// allScheduleItem is a ChaosKindMap instance.
 var allScheduleItem = &chaosKindMap{
 	kinds: make(map[string]*ChaosKind),
 }

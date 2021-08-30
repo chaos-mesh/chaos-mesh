@@ -1666,50 +1666,50 @@ func init() {
 
 	SchemeBuilder.Register(&AWSChaos{}, &AWSChaosList{})
 	all.register(KindAWSChaos, &ChaosKind{
-		Chaos:     &AWSChaos{},
-		GenericChaosList: &AWSChaosList{},
+		chaos: &AWSChaos{},
+		list:  &AWSChaosList{},
 	})
 
 	SchemeBuilder.Register(&DNSChaos{}, &DNSChaosList{})
 	all.register(KindDNSChaos, &ChaosKind{
-		Chaos:     &DNSChaos{},
-		GenericChaosList: &DNSChaosList{},
+		chaos: &DNSChaos{},
+		list:  &DNSChaosList{},
 	})
 
 	SchemeBuilder.Register(&GCPChaos{}, &GCPChaosList{})
 	all.register(KindGCPChaos, &ChaosKind{
-		Chaos:     &GCPChaos{},
-		GenericChaosList: &GCPChaosList{},
+		chaos: &GCPChaos{},
+		list:  &GCPChaosList{},
 	})
 
 	SchemeBuilder.Register(&HTTPChaos{}, &HTTPChaosList{})
 	all.register(KindHTTPChaos, &ChaosKind{
-		Chaos:     &HTTPChaos{},
-		GenericChaosList: &HTTPChaosList{},
+		chaos: &HTTPChaos{},
+		list:  &HTTPChaosList{},
 	})
 
 	SchemeBuilder.Register(&IOChaos{}, &IOChaosList{})
 	all.register(KindIOChaos, &ChaosKind{
-		Chaos:     &IOChaos{},
-		GenericChaosList: &IOChaosList{},
+		chaos: &IOChaos{},
+		list:  &IOChaosList{},
 	})
 
 	SchemeBuilder.Register(&JVMChaos{}, &JVMChaosList{})
 	all.register(KindJVMChaos, &ChaosKind{
-		Chaos:     &JVMChaos{},
-		GenericChaosList: &JVMChaosList{},
+		chaos: &JVMChaos{},
+		list:  &JVMChaosList{},
 	})
 
 	SchemeBuilder.Register(&KernelChaos{}, &KernelChaosList{})
 	all.register(KindKernelChaos, &ChaosKind{
-		Chaos:     &KernelChaos{},
-		GenericChaosList: &KernelChaosList{},
+		chaos: &KernelChaos{},
+		list:  &KernelChaosList{},
 	})
 
 	SchemeBuilder.Register(&NetworkChaos{}, &NetworkChaosList{})
 	all.register(KindNetworkChaos, &ChaosKind{
-		Chaos:     &NetworkChaos{},
-		GenericChaosList: &NetworkChaosList{},
+		chaos: &NetworkChaos{},
+		list:  &NetworkChaosList{},
 	})
 
 	SchemeBuilder.Register(&PhysicalMachineChaos{}, &PhysicalMachineChaosList{})
@@ -1720,61 +1720,61 @@ func init() {
 
 	SchemeBuilder.Register(&PodChaos{}, &PodChaosList{})
 	all.register(KindPodChaos, &ChaosKind{
-		Chaos:     &PodChaos{},
-		GenericChaosList: &PodChaosList{},
+		chaos: &PodChaos{},
+		list:  &PodChaosList{},
 	})
 
 	SchemeBuilder.Register(&StressChaos{}, &StressChaosList{})
 	all.register(KindStressChaos, &ChaosKind{
-		Chaos:     &StressChaos{},
-		GenericChaosList: &StressChaosList{},
+		chaos: &StressChaos{},
+		list:  &StressChaosList{},
 	})
 
 	SchemeBuilder.Register(&TimeChaos{}, &TimeChaosList{})
 	all.register(KindTimeChaos, &ChaosKind{
-		Chaos:     &TimeChaos{},
-		GenericChaosList: &TimeChaosList{},
+		chaos: &TimeChaos{},
+		list:  &TimeChaosList{},
 	})
 
 
 	allScheduleItem.register(KindAWSChaos, &ChaosKind{
-		Chaos:     &AWSChaos{},
-		GenericChaosList: &AWSChaosList{},
+		chaos: &AWSChaos{},
+		list:  &AWSChaosList{},
 	})
 
 	allScheduleItem.register(KindDNSChaos, &ChaosKind{
-		Chaos:     &DNSChaos{},
-		GenericChaosList: &DNSChaosList{},
+		chaos: &DNSChaos{},
+		list:  &DNSChaosList{},
 	})
 
 	allScheduleItem.register(KindGCPChaos, &ChaosKind{
-		Chaos:     &GCPChaos{},
-		GenericChaosList: &GCPChaosList{},
+		chaos: &GCPChaos{},
+		list:  &GCPChaosList{},
 	})
 
 	allScheduleItem.register(KindHTTPChaos, &ChaosKind{
-		Chaos:     &HTTPChaos{},
-		GenericChaosList: &HTTPChaosList{},
+		chaos: &HTTPChaos{},
+		list:  &HTTPChaosList{},
 	})
 
 	allScheduleItem.register(KindIOChaos, &ChaosKind{
-		Chaos:     &IOChaos{},
-		GenericChaosList: &IOChaosList{},
+		chaos: &IOChaos{},
+		list:  &IOChaosList{},
 	})
 
 	allScheduleItem.register(KindJVMChaos, &ChaosKind{
-		Chaos:     &JVMChaos{},
-		GenericChaosList: &JVMChaosList{},
+		chaos: &JVMChaos{},
+		list:  &JVMChaosList{},
 	})
 
 	allScheduleItem.register(KindKernelChaos, &ChaosKind{
-		Chaos:     &KernelChaos{},
-		GenericChaosList: &KernelChaosList{},
+		chaos: &KernelChaos{},
+		list:  &KernelChaosList{},
 	})
 
 	allScheduleItem.register(KindNetworkChaos, &ChaosKind{
-		Chaos:     &NetworkChaos{},
-		GenericChaosList: &NetworkChaosList{},
+		chaos: &NetworkChaos{},
+		list:  &NetworkChaosList{},
 	})
 
 	allScheduleItem.register(KindPhysicalMachineChaos, &ChaosKind{
@@ -1783,23 +1783,23 @@ func init() {
 	})
 
 	allScheduleItem.register(KindPodChaos, &ChaosKind{
-		Chaos:     &PodChaos{},
-		GenericChaosList: &PodChaosList{},
+		chaos: &PodChaos{},
+		list:  &PodChaosList{},
 	})
 
 	allScheduleItem.register(KindStressChaos, &ChaosKind{
-		Chaos:     &StressChaos{},
-		GenericChaosList: &StressChaosList{},
+		chaos: &StressChaos{},
+		list:  &StressChaosList{},
 	})
 
 	allScheduleItem.register(KindTimeChaos, &ChaosKind{
-		Chaos:     &TimeChaos{},
-		GenericChaosList: &TimeChaosList{},
+		chaos: &TimeChaos{},
+		list:  &TimeChaosList{},
 	})
 
 	allScheduleItem.register(KindWorkflow, &ChaosKind{
-		Chaos:     &Workflow{},
-		GenericChaosList: &WorkflowList{},
+		chaos: &Workflow{},
+		list:  &WorkflowList{},
 	})
 
 }

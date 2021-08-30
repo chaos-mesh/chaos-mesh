@@ -1,4 +1,6 @@
-export const mapping = new Map<string, string>([
+import { ExperimentKind } from 'components/NewExperiment/types'
+
+const mapping = new Map<ExperimentKind, string>([
   ['AWSChaos', 'awsChaos'],
   ['DNSChaos', 'dnsChaos'],
   ['GCPChaos', 'gcpChaos'],
@@ -12,3 +14,7 @@ export const mapping = new Map<string, string>([
   ['StressChaos', 'stressChaos'],
   ['TimeChaos', 'timeChaos'],
 ])
+
+export function templateTypeToFieldName(templateType: ExperimentKind): string {
+  return mapping.get(templateType)!
+}

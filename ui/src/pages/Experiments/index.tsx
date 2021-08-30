@@ -50,7 +50,7 @@ export default function Experiments() {
       .then(({ data }) => {
         setExperiments(data)
 
-        if (data.every((d) => d.status === 'finished')) {
+        if (data.every((d) => d.status === 'finished' || d.status === 'paused')) {
           clearInterval(intervalID)
         }
       })
