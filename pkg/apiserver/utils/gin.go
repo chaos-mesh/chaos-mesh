@@ -1,4 +1,4 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,22 +11,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// +build swagger_server
-
-package swaggerserver
+package utils
 
 import (
 	"github.com/gin-gonic/gin"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
-
-	_ "github.com/chaos-mesh/chaos-mesh/docs" // for swagger api
+	"github.com/gin-gonic/gin/binding"
 )
 
-// Handler returns a swagger `http.Handler`.
-func Handler() gin.HandlerFunc {
-	return ginSwagger.WrapHandler(
-		swaggerFiles.Handler,
-		ginSwagger.URL("doc.json"),
-	)
+// Response defines a common status struct.
+type Response struct {
+	Status string `json:"status"`
+}
+
+var (
+	ResponseSuccess = Response{Status: "success"}
+)
+
+func ShouldBindBodyWithJSON(c *gin.Context, obj interface{}) (err error) {
+	err = c.ShouldBindBodyWith(obj, binding.JSON)
+	if err != nil {
+		SetAPIError(c, ErrBadRequest.WrapWithNoMessage(err))
+	}
+
+	return
 }

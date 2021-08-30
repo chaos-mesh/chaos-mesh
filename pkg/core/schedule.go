@@ -18,8 +18,6 @@ import (
 	"time"
 
 	"github.com/jinzhu/gorm"
-
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
 // ScheduleStore defines operations for working with schedules.
@@ -72,19 +70,4 @@ type ScheduleMeta struct {
 	StartTime  time.Time `json:"start_time"`
 	FinishTime time.Time `json:"finish_time"`
 	Archived   bool      `json:"archived"`
-}
-
-// ScheduleInfo defines a form data of schedule from API.
-type ScheduleInfo struct {
-	Name                    string                     `json:"name" binding:"required,NameValid"`
-	Namespace               string                     `json:"namespace" binding:"required,NameValid"`
-	Labels                  map[string]string          `json:"labels" binding:"MapSelectorsValid"`
-	Annotations             map[string]string          `json:"annotations" binding:"MapSelectorsValid"`
-	Scope                   ScopeInfo                  `json:"scope"`
-	Target                  TargetInfo                 `json:"target"`
-	Schedule                string                     `json:"schedule"`
-	Duration                string                     `json:"duration" binding:"DurationValid"`
-	StartingDeadlineSeconds *int64                     `json:"starting_deadline_seconds,omitempty"`
-	ConcurrencyPolicy       v1alpha1.ConcurrencyPolicy `json:"concurrency_policy"`
-	HistoryLimit            int                        `json:"history_limit,omitempty"`
 }

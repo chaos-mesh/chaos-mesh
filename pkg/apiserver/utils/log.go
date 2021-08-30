@@ -11,19 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// +build !swagger_server
+package utils
 
-package swaggerserver
+import ctrl "sigs.k8s.io/controller-runtime"
 
-import (
-	"net/http"
-
-	"github.com/gin-gonic/gin"
-)
-
-func Handler(c *gin.Context) {
-	c.String(http.StatusOK, `Swagger UI is not built.
-Please run SWAGGER=1 make.
-Run SWAGGER=1 make images/chaos-dashboard/bin/chaos-dashboard if you only want to build dashboard only.
-(Note: If you only want to build the binary, pass IN_DOCKER=1.)`)
-}
+var Log = ctrl.Log.WithName("apiserver")

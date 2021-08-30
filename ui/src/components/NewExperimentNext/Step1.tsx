@@ -1,7 +1,7 @@
 import { Box, Card, Divider, Typography } from '@material-ui/core'
 import { iconByKind, transByKind } from 'lib/byKind'
-import { setKindAction, setStep1, setTarget as setTargetToStore } from 'slices/experiments'
-import targetData, { Kind, Target, schema } from './data/target'
+import { setKindAction, setSpec, setStep1 } from 'slices/experiments'
+import typesData, { Definition, Kind, schema } from './data/types'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
 import CheckIcon from '@material-ui/icons/Check'
@@ -13,7 +13,6 @@ import Stress from './form/Stress'
 import T from 'components/T'
 import TargetGenerated from './form/TargetGenerated'
 import UndoIcon from '@material-ui/icons/Undo'
-import _snakecase from 'lodash.snakecase'
 import clsx from 'clsx'
 import { makeStyles } from '@material-ui/styles'
 
@@ -50,9 +49,9 @@ const Step1 = () => {
 
   const state = useStoreSelector((state) => state)
   const { dnsServerCreate } = state.globalStatus
-  let targetDataEntries = Object.entries(targetData) as [Kind, Target][]
+  let typesDataEntries = Object.entries(typesData) as [Kind, Definition][]
   if (!dnsServerCreate) {
-    targetDataEntries = targetDataEntries.filter((d) => d[0] !== 'DNSChaos')
+    typesDataEntries = typesDataEntries.filter((d) => d[0] !== 'DNSChaos')
   }
   const {
     kindAction: [kind, action],
@@ -68,29 +67,30 @@ const Step1 = () => {
     dispatch(setKindAction([kind, newAction]))
 
     if (submitDirectly.includes(newAction)) {
-      handleSubmitStep1({ action: newAction })
+      handleSubmitStep1({ action: newAction }, { direct: true })
     }
   }
 
-  const handleSubmitStep1 = (values: Record<string, any>) => {
-    const result = {
-      kind,
-      [_snakecase(kind)]:
-        submitDirectly.includes(values.action) && Object.keys(values).length === 1
-          ? values
-          : action
-          ? {
-              ...values,
-              action,
-            }
-          : values,
+  const handleSubmitStep1 = (
+    values: Record<string, any>,
+    options?: {
+      direct?: boolean
     }
+  ) => {
+    const result = options?.direct
+      ? values
+      : action
+      ? {
+          ...values,
+          action,
+        }
+      : values
 
     if (process.env.NODE_ENV === 'development') {
-      console.debug('Debug handleSubmitStep1', result)
+      console.debug('Debug handleSubmitStep1:', result)
     }
 
-    dispatch(setTargetToStore(result))
+    dispatch(setSpec(result))
     dispatch(setStep1(true))
   }
 
@@ -111,7 +111,7 @@ const Step1 = () => {
       </Box>
       <Box hidden={step1}>
         <Box display="flex" flexWrap="wrap">
-          {targetDataEntries.map(([key]) => (
+          {typesDataEntries.map(([key]) => (
             <Card
               key={key}
               className={clsx(classes.card, kind === key ? classes.cardActive : '')}
@@ -134,9 +134,9 @@ const Step1 = () => {
             <Box mt={6} mb={3}>
               <Divider />
             </Box>
-            {targetData[kind].categories ? (
+            {typesData[kind].categories ? (
               <Box display="flex" flexWrap="wrap">
-                {targetData[kind].categories!.map((d: any) => (
+                {typesData[kind].categories!.map((d: any) => (
                   <Card
                     key={d.key}
                     className={clsx(classes.card, action === d.key ? classes.cardActive : '')}
@@ -162,7 +162,7 @@ const Step1 = () => {
               <Box mt={6}>
                 <TargetGenerated
                   kind={kind}
-                  data={targetData[kind].spec!}
+                  data={typesData[kind].spec!}
                   validationSchema={schema.TimeChaos!.default}
                   onSubmit={handleSubmitStep1}
                 />
@@ -181,7 +181,7 @@ const Step1 = () => {
               // Force re-rendered after action changed
               key={kind + action}
               kind={kind}
-              data={targetData[kind as Kind].categories!.filter(({ key }) => key === action)[0].spec}
+              data={typesData[kind as Kind].categories!.filter(({ key }) => key === action)[0].spec}
               validationSchema={schema[kind as Kind]![action]}
               onSubmit={handleSubmitStep1}
             />

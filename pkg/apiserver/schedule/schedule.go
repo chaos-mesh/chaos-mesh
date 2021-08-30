@@ -16,530 +16,127 @@ package schedule
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
-	"reflect"
 	"sort"
 	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/retry"
-	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
+	u "github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
-	dashboardconfig "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
+	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
+	"github.com/chaos-mesh/chaos-mesh/pkg/status"
 )
 
-var log = ctrl.Log.WithName("schedule api")
+var log = u.Log.WithName("schedules")
 
-// Service defines a handler service for experiments.
+// Service defines a handler service for schedules.
 type Service struct {
 	schedule core.ScheduleStore
 	event    core.EventStore
-	conf     *dashboardconfig.ChaosDashboardConfig
+	config   *config.ChaosDashboardConfig
 	scheme   *runtime.Scheme
 }
 
-// NewService returns an experiment service instance.
 func NewService(
 	schedule core.ScheduleStore,
 	event core.EventStore,
-	conf *dashboardconfig.ChaosDashboardConfig,
+	config *config.ChaosDashboardConfig,
 	scheme *runtime.Scheme,
 ) *Service {
 	return &Service{
 		schedule: schedule,
 		event:    event,
-		conf:     conf,
+		config:   config,
 		scheme:   scheme,
 	}
 }
 
-// Register mounts HTTP handler on the mux.
+// Register schedules RouterGroup.
 func Register(r *gin.RouterGroup, s *Service) {
 	endpoint := r.Group("/schedules")
 
-	endpoint.GET("", s.listSchedules)
-	endpoint.GET("/:uid", s.getScheduleDetail)
-	endpoint.POST("/", s.createSchedule)
-	endpoint.PUT("/", s.updateSchedule)
-	endpoint.DELETE("/:uid", s.deleteSchedule)
-	endpoint.DELETE("/", s.batchDeleteSchedule)
+	endpoint.GET("", s.list)
+	endpoint.POST("", s.create)
+	endpoint.GET("/:uid", s.get)
+	endpoint.DELETE("/:uid", s.delete)
+	endpoint.DELETE("", s.batchDelete)
+	endpoint.PUT("", s.update)
 	endpoint.PUT("/pause/:uid", s.pauseSchedule)
 	endpoint.PUT("/start/:uid", s.startSchedule)
 }
 
-// Base represents the base info of an experiment.
-type Base struct {
-	Kind      string `json:"kind"`
-	Namespace string `json:"namespace"`
-	Name      string `json:"name"`
-}
-
-// Schedule defines the basic information of a Schedule object
+// Schedule defines the information of a schedule.
 type Schedule struct {
-	Base
-	UID     string `json:"uid"`
-	Created string `json:"created_at"`
-	Status  string `json:"status"`
+	core.ObjectBase
+	Status status.ScheduleStatus `json:"status"`
 }
 
-// Detail represents an experiment instance.
+// Detail adds KubeObjectDesc on Schedule.
 type Detail struct {
 	Schedule
-	YAML           core.KubeObjectDesc `json:"kube_object"`
 	ExperimentUIDs []string            `json:"experiment_uids"`
+	KubeObject     core.KubeObjectDesc `json:"kube_object"`
 }
 
-type parseScheduleFunc func(*core.ScheduleInfo) v1alpha1.ScheduleItem
-
-// StatusResponse defines a common status struct.
-type StatusResponse struct {
-	Status string `json:"status"`
-}
-
-type pauseFlag bool
-
-const (
-	PauseSchedule pauseFlag = true
-	StartSchedule pauseFlag = false
-)
-
-// @Summary Create a new schedule experiment.
-// @Description Create a new schedule experiment.
+// @Summary List chaos schedules.
+// @Description Get chaos schedules from k8s cluster in real time.
 // @Tags schedules
 // @Produce json
-// @Param request body core.ScheduleInfo true "Request body"
-// @Success 200 {object} core.ScheduleInfo
+// @Param namespace query string false "filter schedules by namespace"
+// @Param name query string false "filter schedules by name"
+// @Success 200 {array} Schedule
 // @Failure 400 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
-// @Router /schedules [post]
-func (s *Service) createSchedule(c *gin.Context) {
+// @Router /schedules [get]
+func (s *Service) list(c *gin.Context) {
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
+
 		return
 	}
 
-	exp := &core.ScheduleInfo{}
-	if err := c.ShouldBindJSON(exp); err != nil {
-		c.Status(http.StatusBadRequest)
-		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
-		return
-	}
+	ns, name := c.Query("namespace"), c.Query("name")
 
-	sch := &v1alpha1.Schedule{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:        exp.Name,
-			Namespace:   exp.Namespace,
-			Labels:      exp.Labels,
-			Annotations: exp.Annotations,
-		},
-		Spec: v1alpha1.ScheduleSpec{
-			Schedule:          exp.Schedule,
-			ConcurrencyPolicy: exp.ConcurrencyPolicy,
-			HistoryLimit:      exp.HistoryLimit,
-			Type:              v1alpha1.ScheduleTemplateType(exp.Target.Kind),
-		},
-	}
-	if exp.StartingDeadlineSeconds != nil {
-		sch.Spec.StartingDeadlineSeconds = exp.StartingDeadlineSeconds
-	}
+	if ns == "" && !s.config.ClusterScoped && s.config.TargetNamespace != "" {
+		ns = s.config.TargetNamespace
 
-	parseFuncs := map[string]parseScheduleFunc{
-		v1alpha1.KindPodChaos:     parsePodChaos,
-		v1alpha1.KindNetworkChaos: parseNetworkChaos,
-		v1alpha1.KindIOChaos:      parseIOChaos,
-		v1alpha1.KindStressChaos:  parseStressChaos,
-		v1alpha1.KindTimeChaos:    parseTimeChaos,
-		v1alpha1.KindKernelChaos:  parseKernelChaos,
-		v1alpha1.KindDNSChaos:     parseDNSChaos,
-		v1alpha1.KindAWSChaos:     parseAWSChaos,
-		v1alpha1.KindGCPChaos:     parseGCPChaos,
-	}
-
-	f, ok := parseFuncs[exp.Target.Kind]
-	if !ok {
-		c.Status(http.StatusBadRequest)
-		_ = c.Error(utils.ErrInvalidRequest.New(exp.Target.Kind + " is not supported"))
-		return
-	}
-	embedChaos := f(exp)
-	sch.Spec.ScheduleItem = embedChaos
-
-	if err := kubeCli.Create(context.Background(), sch); err != nil {
-		c.Status(http.StatusInternalServerError)
-		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
-		return
-	}
-
-	c.JSON(http.StatusOK, exp)
-}
-
-func parsePodChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
-	chaos := &v1alpha1.PodChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:        exp.Name,
-			Namespace:   exp.Namespace,
-			Labels:      exp.Labels,
-			Annotations: exp.Annotations,
-		},
-		Spec: v1alpha1.PodChaosSpec{
-			ContainerSelector: v1alpha1.ContainerSelector{
-				PodSelector: v1alpha1.PodSelector{
-					Selector: exp.Scope.ParseSelector(),
-					Mode:     v1alpha1.PodMode(exp.Scope.Mode),
-					Value:    exp.Scope.Value,
-				},
-				ContainerNames: exp.Target.PodChaos.ContainerNames,
-			},
-			Action:      v1alpha1.PodChaosAction(exp.Target.PodChaos.Action),
-			GracePeriod: exp.Target.PodChaos.GracePeriod,
-		},
-	}
-
-	if exp.Duration != "" {
-		chaos.Spec.Duration = &exp.Duration
-	}
-
-	return v1alpha1.ScheduleItem{
-		EmbedChaos: v1alpha1.EmbedChaos{PodChaos: &chaos.Spec},
-	}
-}
-
-func parseNetworkChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
-	chaos := &v1alpha1.NetworkChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:        exp.Name,
-			Namespace:   exp.Namespace,
-			Labels:      exp.Labels,
-			Annotations: exp.Annotations,
-		},
-		Spec: v1alpha1.NetworkChaosSpec{
-			PodSelector: v1alpha1.PodSelector{
-				Selector: exp.Scope.ParseSelector(),
-				Mode:     v1alpha1.PodMode(exp.Scope.Mode),
-				Value:    exp.Scope.Value,
-			},
-			Action: v1alpha1.NetworkChaosAction(exp.Target.NetworkChaos.Action),
-			TcParameter: v1alpha1.TcParameter{
-				Delay:     exp.Target.NetworkChaos.Delay,
-				Loss:      exp.Target.NetworkChaos.Loss,
-				Duplicate: exp.Target.NetworkChaos.Duplicate,
-				Corrupt:   exp.Target.NetworkChaos.Corrupt,
-				Bandwidth: exp.Target.NetworkChaos.Bandwidth,
-			},
-			Direction:       v1alpha1.Direction(exp.Target.NetworkChaos.Direction),
-			ExternalTargets: exp.Target.NetworkChaos.ExternalTargets,
-		},
-	}
-
-	if exp.Target.NetworkChaos.TargetScope != nil {
-		chaos.Spec.Target = &v1alpha1.PodSelector{
-			Selector: exp.Target.NetworkChaos.TargetScope.ParseSelector(),
-			Mode:     v1alpha1.PodMode(exp.Target.NetworkChaos.TargetScope.Mode),
-			Value:    exp.Target.NetworkChaos.TargetScope.Value,
-		}
-	}
-
-	if exp.Duration != "" {
-		chaos.Spec.Duration = &exp.Duration
-	}
-
-	return v1alpha1.ScheduleItem{
-		EmbedChaos: v1alpha1.EmbedChaos{NetworkChaos: &chaos.Spec},
-	}
-}
-
-func parseIOChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
-	chaos := &v1alpha1.IOChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:        exp.Name,
-			Namespace:   exp.Namespace,
-			Labels:      exp.Labels,
-			Annotations: exp.Annotations,
-		},
-		Spec: v1alpha1.IOChaosSpec{
-			ContainerSelector: v1alpha1.ContainerSelector{
-				PodSelector: v1alpha1.PodSelector{
-					Selector: exp.Scope.ParseSelector(),
-					Mode:     v1alpha1.PodMode(exp.Scope.Mode),
-					Value:    exp.Scope.Value,
-				},
-				ContainerNames: []string{exp.Target.IOChaos.ContainerName},
-			},
-			Action:     v1alpha1.IOChaosType(exp.Target.IOChaos.Action),
-			Delay:      exp.Target.IOChaos.Delay,
-			Errno:      exp.Target.IOChaos.Errno,
-			Attr:       exp.Target.IOChaos.Attr,
-			Mistake:    exp.Target.IOChaos.Mistake,
-			Path:       exp.Target.IOChaos.Path,
-			Methods:    exp.Target.IOChaos.Methods,
-			Percent:    exp.Target.IOChaos.Percent,
-			VolumePath: exp.Target.IOChaos.VolumePath,
-		},
-	}
-
-	if exp.Duration != "" {
-		chaos.Spec.Duration = &exp.Duration
-	}
-
-	return v1alpha1.ScheduleItem{
-		EmbedChaos: v1alpha1.EmbedChaos{IOChaos: &chaos.Spec},
-	}
-}
-
-func parseTimeChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
-	chaos := &v1alpha1.TimeChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:        exp.Name,
-			Namespace:   exp.Namespace,
-			Labels:      exp.Labels,
-			Annotations: exp.Annotations,
-		},
-		Spec: v1alpha1.TimeChaosSpec{
-			ContainerSelector: v1alpha1.ContainerSelector{
-				PodSelector: v1alpha1.PodSelector{
-					Selector: exp.Scope.ParseSelector(),
-					Mode:     v1alpha1.PodMode(exp.Scope.Mode),
-					Value:    exp.Scope.Value,
-				},
-				ContainerNames: exp.Target.TimeChaos.ContainerNames,
-			},
-			TimeOffset: exp.Target.TimeChaos.TimeOffset,
-			ClockIds:   exp.Target.TimeChaos.ClockIDs,
-		},
-	}
-
-	if exp.Duration != "" {
-		chaos.Spec.Duration = &exp.Duration
-	}
-
-	return v1alpha1.ScheduleItem{
-		EmbedChaos: v1alpha1.EmbedChaos{TimeChaos: &chaos.Spec},
-	}
-}
-
-func parseKernelChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
-	chaos := &v1alpha1.KernelChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:        exp.Name,
-			Namespace:   exp.Namespace,
-			Labels:      exp.Labels,
-			Annotations: exp.Annotations,
-		},
-		Spec: v1alpha1.KernelChaosSpec{
-			PodSelector: v1alpha1.PodSelector{
-				Selector: exp.Scope.ParseSelector(),
-				Mode:     v1alpha1.PodMode(exp.Scope.Mode),
-				Value:    exp.Scope.Value,
-			},
-			FailKernRequest: exp.Target.KernelChaos.FailKernRequest,
-		},
-	}
-
-	if exp.Duration != "" {
-		chaos.Spec.Duration = &exp.Duration
-	}
-
-	return v1alpha1.ScheduleItem{
-		EmbedChaos: v1alpha1.EmbedChaos{KernelChaos: &chaos.Spec},
-	}
-}
-
-func parseStressChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
-	var stressors *v1alpha1.Stressors
-
-	// Error checking
-	if exp.Target.StressChaos.Stressors.CPUStressor.Workers <= 0 && exp.Target.StressChaos.Stressors.MemoryStressor.Workers > 0 {
-		stressors = &v1alpha1.Stressors{
-			MemoryStressor: exp.Target.StressChaos.Stressors.MemoryStressor,
-		}
-	} else if exp.Target.StressChaos.Stressors.MemoryStressor.Workers <= 0 && exp.Target.StressChaos.Stressors.CPUStressor.Workers > 0 {
-		stressors = &v1alpha1.Stressors{
-			CPUStressor: exp.Target.StressChaos.Stressors.CPUStressor,
-		}
-	} else {
-		stressors = exp.Target.StressChaos.Stressors
-	}
-
-	chaos := &v1alpha1.StressChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:        exp.Name,
-			Namespace:   exp.Namespace,
-			Labels:      exp.Labels,
-			Annotations: exp.Annotations,
-		},
-		Spec: v1alpha1.StressChaosSpec{
-			ContainerSelector: v1alpha1.ContainerSelector{
-				PodSelector: v1alpha1.PodSelector{
-					Selector: exp.Scope.ParseSelector(),
-					Mode:     v1alpha1.PodMode(exp.Scope.Mode),
-					Value:    exp.Scope.Value,
-				},
-			},
-			Stressors:         stressors,
-			StressngStressors: exp.Target.StressChaos.StressngStressors,
-		},
-	}
-
-	if exp.Target.StressChaos.ContainerName != nil {
-		chaos.Spec.ContainerSelector.ContainerNames = []string{*exp.Target.StressChaos.ContainerName}
-	}
-
-	if exp.Duration != "" {
-		chaos.Spec.Duration = &exp.Duration
-	}
-
-	return v1alpha1.ScheduleItem{
-		EmbedChaos: v1alpha1.EmbedChaos{StressChaos: &chaos.Spec},
-	}
-}
-
-func parseDNSChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
-	chaos := &v1alpha1.DNSChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:        exp.Name,
-			Namespace:   exp.Namespace,
-			Labels:      exp.Labels,
-			Annotations: exp.Annotations,
-		},
-		Spec: v1alpha1.DNSChaosSpec{
-			Action: v1alpha1.DNSChaosAction(exp.Target.DNSChaos.Action),
-			ContainerSelector: v1alpha1.ContainerSelector{
-				PodSelector: v1alpha1.PodSelector{
-					Selector: exp.Scope.ParseSelector(),
-					Mode:     v1alpha1.PodMode(exp.Scope.Mode),
-					Value:    exp.Scope.Value,
-				},
-				ContainerNames: exp.Target.DNSChaos.ContainerNames,
-			},
-			DomainNamePatterns: exp.Target.DNSChaos.DomainNamePatterns,
-		},
-	}
-
-	if exp.Duration != "" {
-		chaos.Spec.Duration = &exp.Duration
-	}
-
-	return v1alpha1.ScheduleItem{
-		EmbedChaos: v1alpha1.EmbedChaos{DNSChaos: &chaos.Spec},
-	}
-}
-
-func parseAWSChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
-	chaos := &v1alpha1.AWSChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:        exp.Name,
-			Namespace:   exp.Namespace,
-			Labels:      exp.Labels,
-			Annotations: exp.Annotations,
-		},
-		Spec: v1alpha1.AWSChaosSpec{
-			Action:     v1alpha1.AWSChaosAction(exp.Target.AWSChaos.Action),
-			SecretName: exp.Target.AWSChaos.SecretName,
-			AWSSelector: v1alpha1.AWSSelector{
-				AWSRegion:   exp.Target.AWSChaos.AWSRegion,
-				Ec2Instance: exp.Target.AWSChaos.Ec2Instance,
-				EbsVolume:   exp.Target.AWSChaos.EbsVolume,
-				DeviceName:  exp.Target.AWSChaos.DeviceName,
-			},
-		},
-	}
-
-	if exp.Duration != "" {
-		chaos.Spec.Duration = &exp.Duration
-	}
-
-	return v1alpha1.ScheduleItem{
-		EmbedChaos: v1alpha1.EmbedChaos{AWSChaos: &chaos.Spec},
-	}
-}
-
-func parseGCPChaos(exp *core.ScheduleInfo) v1alpha1.ScheduleItem {
-	chaos := &v1alpha1.GCPChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:        exp.Name,
-			Namespace:   exp.Namespace,
-			Labels:      exp.Labels,
-			Annotations: exp.Annotations,
-		},
-		Spec: v1alpha1.GCPChaosSpec{
-			Action:     v1alpha1.GCPChaosAction(exp.Target.GCPChaos.Action),
-			SecretName: exp.Target.GCPChaos.SecretName,
-			GCPSelector: v1alpha1.GCPSelector{
-				Project:     exp.Target.GCPChaos.Project,
-				Zone:        exp.Target.GCPChaos.Zone,
-				Instance:    exp.Target.GCPChaos.Instance,
-				DeviceNames: exp.Target.GCPChaos.DeviceNames,
-			},
-		},
-	}
-
-	if exp.Duration != "" {
-		chaos.Spec.Duration = &exp.Duration
-	}
-
-	return v1alpha1.ScheduleItem{
-		EmbedChaos: v1alpha1.EmbedChaos{GCPChaos: &chaos.Spec},
-	}
-}
-
-// @Summary Get chaos schedules from Kubernetes cluster.
-// @Description Get chaos schedules from Kubernetes cluster.
-// @Tags schedules
-// @Produce json
-// @Param namespace query string false "namespace"
-// @Param name query string false "name"
-// @Success 200 {array} Schedule
-// @Router /Schedules [get]
-// @Failure 500 {object} utils.APIError
-func (s *Service) listSchedules(c *gin.Context) {
-	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
-	if err != nil {
-		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
-		return
-	}
-
-	name := c.Query("name")
-	ns := c.Query("namespace")
-
-	if !s.conf.ClusterScoped {
-		log.Info("Overwrite namespace within namespace scoped mode", "origin", ns, "new", s.conf.TargetNamespace)
-		ns = s.conf.TargetNamespace
+		log.V(1).Info("Replace query namespace with", ns)
 	}
 
 	ScheduleList := v1alpha1.ScheduleList{}
-	sches := make([]*Schedule, 0)
-	if err := kubeCli.List(context.Background(), &ScheduleList, &client.ListOptions{Namespace: ns}); err != nil {
-		c.Status(http.StatusInternalServerError)
-		utils.SetErrorForGinCtx(c, err)
+	if err = kubeCli.List(context.Background(), &ScheduleList, &client.ListOptions{Namespace: ns}); err != nil {
+		u.SetAPImachineryError(c, err)
+
 		return
 	}
+
+	sches := make([]*Schedule, 0)
 	for _, schedule := range ScheduleList.Items {
 		if name != "" && schedule.Name != name {
 			continue
 		}
+
 		sches = append(sches, &Schedule{
-			Base: Base{
-				Kind:      string(schedule.Spec.Type),
+			ObjectBase: core.ObjectBase{
 				Namespace: schedule.Namespace,
 				Name:      schedule.Name,
+				Kind:      string(schedule.Spec.Type),
+				UID:       string(schedule.UID),
+				Created:   schedule.CreationTimestamp.Format(time.RFC3339),
 			},
-			UID:     string(schedule.UID),
-			Created: schedule.CreationTimestamp.Format(time.RFC3339),
-			Status:  string(utils.GetScheduleState(schedule)),
+			Status: status.GetScheduleStatus(schedule),
 		})
 	}
 
@@ -550,439 +147,409 @@ func (s *Service) listSchedules(c *gin.Context) {
 	c.JSON(http.StatusOK, sches)
 }
 
-// @Summary Get detailed information about the specified schedule experiment.
-// @Description Get detailed information about the specified schedule experiment.
-// @Tags experiments
+// @Summary Create a new schedule.
+// @Description Pass a JSON object to create a new schedule. The schema for JSON is the same as the YAML schema for the Kubernetes object.
+// @Tags schedules
+// @Accept json
 // @Produce json
-// @Param uid path string true "uid"
-// @Router /schedules/{uid} [GET]
-// @Success 200 {object} Detail
+// @Param schedule body v1alpha1.Schedule true "the schedule definition"
+// @Success 200 {object} v1alpha1.Schedule
 // @Failure 400 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
-func (s *Service) getScheduleDetail(c *gin.Context) {
+// @Router /schedules [post]
+func (s *Service) create(c *gin.Context) {
+	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
+	if err != nil {
+		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
+
+		return
+	}
+
+	var sch v1alpha1.Schedule
+	if err = u.ShouldBindBodyWithJSON(c, &sch); err != nil {
+		return
+	}
+
+	if err = kubeCli.Create(context.Background(), &sch); err != nil {
+		u.SetAPImachineryError(c, err)
+
+		return
+	}
+
+	c.JSON(http.StatusOK, sch)
+}
+
+// @Summary Get a schedule.
+// @Description Get the schedule's detail by uid.
+// @Tags schedules
+// @Produce json
+// @Param uid path string true "the schedule uid"
+// @Success 200 {object} Detail
+// @Failure 400 {object} utils.APIError
+// @Failure 404 {object} utils.APIError
+// @Failure 500 {object} utils.APIError
+// @Router /schedules/{uid} [get]
+func (s *Service) get(c *gin.Context) {
 	var (
 		sch       *core.Schedule
-		schDetail Detail
+		schDetail *Detail
 	)
 
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
+
 		return
 	}
 
 	uid := c.Param("uid")
 	if sch, err = s.schedule.FindByUID(context.Background(), uid); err != nil {
 		if gorm.IsRecordNotFoundError(err) {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInvalidRequest.New("the schedule is not found"))
+			u.SetAPIError(c, u.ErrBadRequest.New("Schedule "+uid+"not found"))
 		} else {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
+			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		}
+
 		return
 	}
 
-	ns := sch.Namespace
-	name := sch.Name
-
-	if !s.conf.ClusterScoped && ns != s.conf.TargetNamespace {
-		c.Status(http.StatusBadRequest)
-		_ = c.Error(utils.ErrInvalidRequest.New("the namespace is not supported in cluster scoped mode"))
+	ns, name := sch.Namespace, sch.Name
+	schDetail = s.findScheduleInCluster(c, kubeCli, types.NamespacedName{Namespace: ns, Name: name})
+	if schDetail == nil {
 		return
-	}
-
-	schedule := &v1alpha1.Schedule{}
-
-	scheduleKey := types.NamespacedName{Namespace: ns, Name: name}
-	if err := kubeCli.Get(context.Background(), scheduleKey, schedule); err != nil {
-		c.Status(http.StatusInternalServerError)
-		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
-		return
-	}
-
-	gvk, err := apiutil.GVKForObject(schedule, s.scheme)
-	if err != nil {
-		c.Status(http.StatusInternalServerError)
-		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
-		return
-	}
-
-	UIDList := make([]string, 0)
-	kind, ok := v1alpha1.AllScheduleItemKinds()[string(schedule.Spec.Type)]
-	if !ok {
-		c.Status(http.StatusInternalServerError)
-		_ = c.Error(utils.ErrInvalidRequest.New("the kind is not supported"))
-		return
-	}
-
-	list := kind.SpawnList()
-	selector, err := metav1.LabelSelectorAsSelector(&metav1.LabelSelector{
-		MatchLabels: map[string]string{"managed-by": schedule.Name},
-	})
-	if err != nil {
-		c.Status(http.StatusInternalServerError)
-		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
-		return
-	}
-
-	err = kubeCli.List(context.Background(), list, &client.ListOptions{
-		Namespace:     ns,
-		LabelSelector: selector,
-	})
-	if err != nil {
-		c.Status(http.StatusInternalServerError)
-		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
-		return
-	}
-	items := reflect.ValueOf(list).Elem().FieldByName("Items")
-	for i := 0; i < items.Len(); i++ {
-		if schedule.Spec.Type != v1alpha1.ScheduleTypeWorkflow {
-			item := items.Index(i).Addr().Interface().(v1alpha1.InnerObject)
-			UIDList = append(UIDList, string(item.GetUID()))
-		} else {
-			workflow := items.Index(i).Addr().Interface().(*v1alpha1.Workflow)
-			UIDList = append(UIDList, string(workflow.UID))
-		}
-	}
-
-	schDetail = Detail{
-		Schedule: Schedule{
-			Base: Base{
-				Kind:      string(schedule.Spec.Type),
-				Namespace: schedule.Namespace,
-				Name:      schedule.Name,
-			},
-			UID:     string(schedule.UID),
-			Created: schedule.CreationTimestamp.Format(time.RFC3339),
-			Status:  string(utils.GetScheduleState(*schedule)),
-		},
-		YAML: core.KubeObjectDesc{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       gvk.Kind,
-				APIVersion: gvk.GroupVersion().String(),
-			},
-			Meta: core.KubeObjectMeta{
-				Name:        schedule.Name,
-				Namespace:   schedule.Namespace,
-				Labels:      schedule.Labels,
-				Annotations: schedule.Annotations,
-			},
-			Spec: schedule.Spec,
-		},
-		ExperimentUIDs: UIDList,
 	}
 
 	c.JSON(http.StatusOK, schDetail)
 }
 
-// @Summary Delete the specified schedule experiment.
-// @Description Delete the specified schedule experiment.
+func (s *Service) findScheduleInCluster(c *gin.Context, kubeCli client.Client, namespacedName types.NamespacedName) *Detail {
+	var sch v1alpha1.Schedule
+
+	if err := kubeCli.Get(context.Background(), namespacedName, &sch); err != nil {
+		u.SetAPImachineryError(c, err)
+
+		return nil
+	}
+
+	gvk, err := apiutil.GVKForObject(&sch, s.scheme)
+	if err != nil {
+		u.SetAPImachineryError(c, err)
+
+		return nil
+	}
+
+	UIDList := make([]string, 0)
+	schType := string(sch.Spec.Type)
+	chaosKind, ok := v1alpha1.AllScheduleItemKinds()[schType]
+	if !ok {
+		u.SetAPIError(c, u.ErrInternalServer.New("Kind "+schType+" is not supported"))
+
+		return nil
+	}
+
+	selector, err := metav1.LabelSelectorAsSelector(&metav1.LabelSelector{
+		MatchLabels: map[string]string{"managed-by": sch.Name},
+	})
+	if err != nil {
+		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
+
+		return nil
+	}
+
+	chaosList := chaosKind.SpawnList()
+	err = kubeCli.List(context.Background(), chaosList, &client.ListOptions{
+		Namespace:     sch.Namespace,
+		LabelSelector: selector,
+	})
+	if err != nil {
+		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
+
+		return nil
+	}
+
+	items := chaosList.GetItems()
+	for _, item := range items {
+		UIDList = append(UIDList, string(item.GetUID()))
+	}
+
+	return &Detail{
+		Schedule: Schedule{
+			ObjectBase: core.ObjectBase{
+				Namespace: sch.Namespace,
+				Name:      sch.Name,
+				Kind:      string(sch.Spec.Type),
+				UID:       string(sch.UID),
+				Created:   sch.CreationTimestamp.Format(time.RFC3339),
+			},
+			Status: status.GetScheduleStatus(sch),
+		},
+		ExperimentUIDs: UIDList,
+		KubeObject: core.KubeObjectDesc{
+			TypeMeta: metav1.TypeMeta{
+				APIVersion: gvk.GroupVersion().String(),
+				Kind:       gvk.Kind,
+			},
+			Meta: core.KubeObjectMeta{
+				Namespace:   sch.Namespace,
+				Name:        sch.Name,
+				Labels:      sch.Labels,
+				Annotations: sch.Annotations,
+			},
+			Spec: sch.Spec,
+		},
+	}
+}
+
+// @Summary Delete a schedule.
+// @Description Delete the schedule by uid.
 // @Tags schedules
 // @Produce json
-// @Param uid path string true "uid"
-// @Param force query string true "force" Enums(true, false)
-// @Success 200 {object} StatusResponse
+// @Param uid path string true "the schedule uid"
+// @Success 200 {object} utils.Response
 // @Failure 400 {object} utils.APIError
 // @Failure 404 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
-// @Router /experiments/{uid} [delete]
-func (s *Service) deleteSchedule(c *gin.Context) {
+// @Router /schedules/{uid} [delete]
+func (s *Service) delete(c *gin.Context) {
 	var (
-		exp *core.Schedule
+		sch *core.Schedule
 	)
 
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
+
 		return
 	}
 
 	uid := c.Param("uid")
-	if exp, err = s.schedule.FindByUID(context.Background(), uid); err != nil {
+	if sch, err = s.schedule.FindByUID(context.Background(), uid); err != nil {
 		if gorm.IsRecordNotFoundError(err) {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInvalidRequest.New("the experiment is not found"))
+			u.SetAPIError(c, u.ErrNotFound.New("Schedule "+uid+" not found"))
 		} else {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
+			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		}
+
 		return
 	}
 
-	ns := exp.Namespace
-	name := exp.Name
+	ns, name := sch.Namespace, sch.Name
+	if err = checkAndDeleteSchedule(c, kubeCli, types.NamespacedName{Namespace: ns, Name: name}); err != nil {
+		u.SetAPImachineryError(c, err)
 
-	ctx := context.TODO()
-	scheduleKey := types.NamespacedName{Namespace: ns, Name: name}
-	schedule := &v1alpha1.Schedule{}
-
-	if err := kubeCli.Get(ctx, scheduleKey, schedule); err != nil {
-		if apierrors.IsNotFound(err) {
-			c.Status(http.StatusNotFound)
-			_ = c.Error(utils.ErrNotFound.NewWithNoMessage())
-		} else {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
-		}
 		return
 	}
 
-	if err := kubeCli.Delete(ctx, schedule, &client.DeleteOptions{}); err != nil {
-		if apierrors.IsNotFound(err) {
-			c.Status(http.StatusNotFound)
-			_ = c.Error(utils.ErrNotFound.NewWithNoMessage())
-		} else {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
-		}
-		return
-	}
-
-	c.JSON(http.StatusOK, StatusResponse{Status: "success"})
+	c.JSON(http.StatusOK, u.ResponseSuccess)
 }
 
-// @Summary Update a schedule experiment.
-// @Description Update a schedule experiment.
+// @Summary Batch delete schedules.
+// @Description Batch delete schedules by uids.
 // @Tags schedules
 // @Produce json
-// @Param request body core.KubeObjectDesc true "Request body"
-// @Success 200 {object} core.KubeObjectDesc
-// @Failure 400 {object} utils.APIError
-// @Failure 500 {object} utils.APIError
-// @Router /schedules [put]
-func (s *Service) updateSchedule(c *gin.Context) {
-	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
-	if err != nil {
-		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
-		return
-	}
-
-	exp := &core.KubeObjectDesc{}
-	if err := c.ShouldBindJSON(exp); err != nil {
-		c.Status(http.StatusBadRequest)
-		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
-		return
-	}
-
-	err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		return s.updateScheduleFun(exp, kubeCli)
-	})
-	if err != nil {
-		if apierrors.IsNotFound(err) {
-			c.Status(http.StatusNotFound)
-			_ = c.Error(utils.ErrNotFound.WrapWithNoMessage(err))
-		} else {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
-		}
-		return
-	}
-	c.JSON(http.StatusOK, exp)
-}
-
-func (s *Service) updateScheduleFun(exp *core.KubeObjectDesc, kubeCli client.Client) error {
-	sch := &v1alpha1.Schedule{}
-	meta := &exp.Meta
-	key := types.NamespacedName{Namespace: meta.Namespace, Name: meta.Name}
-
-	if err := kubeCli.Get(context.Background(), key, sch); err != nil {
-		return err
-	}
-
-	sch.SetLabels(meta.Labels)
-	sch.SetAnnotations(meta.Annotations)
-
-	var spec v1alpha1.ScheduleSpec
-	bytes, err := json.Marshal(exp.Spec)
-	if err != nil {
-		return err
-	}
-	if err = json.Unmarshal(bytes, &spec); err != nil {
-		return err
-	}
-	sch.Spec = spec
-
-	return kubeCli.Update(context.Background(), sch)
-}
-
-// @Summary Delete the specified schedule experiment.
-// @Description Delete the specified schedule experiment.
-// @Tags schedules
-// @Produce json
-// @Param uids query string true "uids"
-// @Success 200 {object} StatusResponse
+// @Param uids query string true "the schedule uids, split with comma. Example: ?uids=uid1,uid2"
+// @Success 200 {object} utils.Response
 // @Failure 400 {object} utils.APIError
 // @Failure 404 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
 // @Router /schedules [delete]
-func (s *Service) batchDeleteSchedule(c *gin.Context) {
+func (s *Service) batchDelete(c *gin.Context) {
 	var (
-		exp      *core.Schedule
-		errFlag  bool
-		uidSlice []string
+		sch *core.Schedule
 	)
 
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
+
 		return
 	}
 
 	uids := c.Query("uids")
 	if uids == "" {
-		c.Status(http.StatusBadRequest)
-		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("uids cannot be empty")))
+		u.SetAPIError(c, u.ErrInternalServer.New("The uids cannot be empty"))
+
 		return
 	}
-	uidSlice = strings.Split(uids, ",")
-	errFlag = false
+
+	uidSlice := strings.Split(uids, ",")
+
+	if len(uidSlice) > 100 {
+		u.SetAPIError(c, u.ErrInternalServer.New("Too many uids, please delete less than 100 at a time"))
+
+		return
+	}
 
 	for _, uid := range uidSlice {
-		if exp, err = s.schedule.FindByUID(context.Background(), uid); err != nil {
+		if sch, err = s.schedule.FindByUID(context.Background(), uid); err != nil {
 			if gorm.IsRecordNotFoundError(err) {
-				_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("delete experiment uid (%s) error, because the experiment is not found", uid)))
+				u.SetAPIError(c, u.ErrNotFound.New("Experiment "+uid+" not found"))
 			} else {
-				_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("delete experiment uid (%s) error, because %s", uid, err.Error())))
+				u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 			}
-			errFlag = true
-			continue
+
+			return
 		}
 
-		ns := exp.Namespace
-		name := exp.Name
+		ns, name := sch.Namespace, sch.Name
+		if err = checkAndDeleteSchedule(c, kubeCli, types.NamespacedName{Namespace: ns, Name: name}); err != nil {
+			u.SetAPImachineryError(c, err)
 
-		ctx := context.TODO()
-		scheduleKey := types.NamespacedName{Namespace: ns, Name: name}
-		schedule := &v1alpha1.Schedule{}
-
-		if err := kubeCli.Get(ctx, scheduleKey, schedule); err != nil {
-			if apierrors.IsNotFound(err) {
-				_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("delete experiment uid (%s) error, because the chaos is not found", uid)))
-			} else {
-				_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("delete experiment uid (%s) error, because %s", uid, err.Error())))
-			}
-			errFlag = true
-			continue
+			return
 		}
 
-		if err := kubeCli.Delete(ctx, schedule, &client.DeleteOptions{}); err != nil {
-			if apierrors.IsNotFound(err) {
-				_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("delete experiment uid (%s) error, because the chaos is not found", uid)))
-			} else {
-				_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("delete experiment uid (%s) error, because %s", uid, err.Error())))
-			}
-			errFlag = true
-			continue
-		}
 	}
-	if errFlag {
-		c.Status(http.StatusInternalServerError)
-	} else {
-		c.JSON(http.StatusOK, StatusResponse{Status: "success"})
-	}
+
+	c.JSON(http.StatusOK, u.ResponseSuccess)
 }
 
-// @Summary Pause a schedule object.
-// @Description Pause a schedule object.
+func checkAndDeleteSchedule(c *gin.Context, kubeCli client.Client, namespacedName types.NamespacedName) (err error) {
+	ctx := context.Background()
+	var sch v1alpha1.Schedule
+
+	if err = kubeCli.Get(ctx, namespacedName, &sch); err != nil {
+		return
+	}
+
+	if err = kubeCli.Delete(ctx, &sch); err != nil {
+		return
+	}
+
+	return
+}
+
+// @Summary Update a schedule.
+// @Description Update a schedule.
 // @Tags schedules
 // @Produce json
-// @Param uid path string true "uid"
-// @Success 200 {object} StatusResponse
+// @Param request body v1alpha1.Schedule true "Request body"
+// @Success 200 {object} v1alpha1.Schedule
+// @Failure 400 {object} utils.APIError
+// @Failure 404 {object} utils.APIError
+// @Failure 500 {object} utils.APIError
+// @Router /schedules [put]
+func (s *Service) update(c *gin.Context) {
+	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
+	if err != nil {
+		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
+
+		return
+	}
+
+	var sch v1alpha1.Schedule
+	if err = u.ShouldBindBodyWithJSON(c, &sch); err != nil {
+		return
+	}
+
+	if err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		return internalUpdate(kubeCli, &sch)
+	}); err != nil {
+		u.SetAPImachineryError(c, err)
+
+		return
+	}
+
+	c.JSON(http.StatusOK, sch)
+}
+
+func internalUpdate(kubeCli client.Client, sch *v1alpha1.Schedule) error {
+	ns, name := sch.Namespace, sch.Name
+
+	if err := kubeCli.Get(context.Background(), types.NamespacedName{Namespace: ns, Name: name}, sch); err != nil {
+		return err
+	}
+
+	return kubeCli.Update(context.Background(), sch)
+}
+
+// @Summary Pause a schedule.
+// @Description Pause a schedule.
+// @Tags schedules
+// @Produce json
+// @Param uid path string true "the schedule uid"
+// @Success 200 {object} utils.Response
 // @Failure 400 {object} utils.APIError
 // @Failure 404 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
 // @Router /schedules/pause/{uid} [put]
 func (s *Service) pauseSchedule(c *gin.Context) {
+	var sch *core.Schedule
+
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
+
 		return
 	}
 
 	uid := c.Param("uid")
-	err = s.pauseOrStartSchedule(uid, PauseSchedule, kubeCli)
-
-	if err != nil {
-		if gorm.IsRecordNotFoundError(err) || apierrors.IsNotFound(err) {
-			c.Status(http.StatusNotFound)
-			_ = c.Error(utils.ErrInvalidRequest.New("the schedule is not found"))
+	if sch, err = s.schedule.FindByUID(context.Background(), uid); err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			u.SetAPIError(c, u.ErrNotFound.New("Experiment "+uid+" not found"))
+		} else {
+			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		}
-		c.Status(http.StatusInternalServerError)
-		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+
 		return
 	}
 
-	c.JSON(http.StatusOK, StatusResponse{Status: "success"})
+	annotations := map[string]string{
+		v1alpha1.PauseAnnotationKey: "true",
+	}
+	if err = patchSchedule(kubeCli, sch, annotations); err != nil {
+		u.SetAPImachineryError(c, err)
+
+		return
+	}
+	c.JSON(http.StatusOK, u.ResponseSuccess)
 }
 
-// @Summary Start a schedule object.
-// @Description Start a schedule object.
+// @Summary Start a schedule.
+// @Description Start a schedule.
 // @Tags schedules
 // @Produce json
-// @Param uid path string true "uid"
-// @Success 200 {object} StatusResponse
+// @Param uid path string true "the schedule uid"
+// @Success 200 {object} utils.Response
 // @Failure 400 {object} utils.APIError
 // @Failure 404 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
 // @Router /schedules/start/{uid} [put]
 func (s *Service) startSchedule(c *gin.Context) {
+	var sch *core.Schedule
+
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
+
 		return
 	}
 
 	uid := c.Param("uid")
-	err = s.pauseOrStartSchedule(uid, StartSchedule, kubeCli)
-
-	if err != nil {
-		if gorm.IsRecordNotFoundError(err) || apierrors.IsNotFound(err) {
-			c.Status(http.StatusNotFound)
-			_ = c.Error(utils.ErrInvalidRequest.New("the schedule is not found"))
+	if sch, err = s.schedule.FindByUID(context.Background(), uid); err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			u.SetAPIError(c, u.ErrNotFound.New("Experiment "+uid+" not found"))
+		} else {
+			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		}
-		c.Status(http.StatusInternalServerError)
-		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+
 		return
 	}
 
-	c.JSON(http.StatusOK, StatusResponse{Status: "success"})
-}
-
-func (s *Service) pauseOrStartSchedule(uid string, flag pauseFlag, kubeCli client.Client) error {
-	var (
-		err             error
-		schedule        *core.Schedule
-		pauseAnnotation string
-	)
-
-	if schedule, err = s.schedule.FindByUID(context.Background(), uid); err != nil {
-		return err
-	}
-
-	exp := &Base{
-		Name:      schedule.Name,
-		Namespace: schedule.Namespace,
-	}
-
-	if flag == PauseSchedule {
-		pauseAnnotation = "true"
-	} else {
-		pauseAnnotation = "false"
-	}
-
 	annotations := map[string]string{
-		v1alpha1.PauseAnnotationKey: pauseAnnotation,
+		v1alpha1.PauseAnnotationKey: "false",
 	}
+	if err = patchSchedule(kubeCli, sch, annotations); err != nil {
+		u.SetAPImachineryError(c, err)
 
-	return s.patchSchedule(exp, annotations, kubeCli)
+		return
+	}
+	c.JSON(http.StatusOK, u.ResponseSuccess)
 }
 
-func (s *Service) patchSchedule(exp *Base, annotations map[string]string, kubeCli client.Client) error {
-	sch := &v1alpha1.Schedule{}
-	key := types.NamespacedName{Namespace: exp.Namespace, Name: exp.Name}
+func patchSchedule(kubeCli client.Client, sch *core.Schedule, annotations map[string]string) error {
+	var tmp v1alpha1.Schedule
 
-	if err := kubeCli.Get(context.Background(), key, sch); err != nil {
+	if err := kubeCli.Get(context.Background(), types.NamespacedName{Namespace: sch.Namespace, Name: sch.Name}, &tmp); err != nil {
 		return err
 	}
 
@@ -993,7 +560,5 @@ func (s *Service) patchSchedule(exp *Base, annotations map[string]string, kubeCl
 		},
 	})
 
-	return kubeCli.Patch(context.Background(),
-		sch,
-		client.RawPatch(types.MergePatchType, mergePatch))
+	return kubeCli.Patch(context.Background(), &tmp, client.RawPatch(types.MergePatchType, mergePatch))
 }

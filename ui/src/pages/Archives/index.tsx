@@ -121,7 +121,7 @@ export default function Archives() {
             actionFunc = api.archives.delMulti
             break
         }
-        arg = Object.keys(batch)
+        arg = Object.keys(batch).filter((d) => batch[d] === true)
         setBatch({})
 
         break
