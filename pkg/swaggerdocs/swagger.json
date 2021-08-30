@@ -1,10 +1,10 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "Swagger docs for Chaos Mesh Dashboard. If you encounter any problems with API, please click on the issues link below to report bugs or questions.",
+        "description": "Swagger for Chaos Mesh Dashboard. If you encounter any problems with API, please click on the issues link below to report.",
         "title": "Chaos Mesh Dashboard API",
         "contact": {
-            "name": "Issues",
+            "name": "GitHub Issues",
             "url": "https://github.com/chaos-mesh/chaos-mesh/issues"
         },
         "license": {
@@ -15,49 +15,6 @@
     },
     "basePath": "/api",
     "paths": {
-        "/Schedules": {
-            "get": {
-                "description": "Get chaos schedules from Kubernetes cluster.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "schedules"
-                ],
-                "summary": "Get chaos schedules from Kubernetes cluster.",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "namespace",
-                        "name": "namespace",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "name",
-                        "name": "name",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/schedule.Schedule"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/utils.APIError"
-                        }
-                    }
-                }
-            }
-        },
         "/archives": {
             "get": {
                 "description": "Get archived chaos experiments.",
@@ -136,42 +93,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/archive.StatusResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/utils.APIError"
-                        }
-                    }
-                }
-            }
-        },
-        "/archives/detail": {
-            "get": {
-                "description": "Get the detail of an archived chaos experiment.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "archives"
-                ],
-                "summary": "Get the detail of an archived chaos experiment.",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "uid",
-                        "name": "uid",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/archive.Detail"
+                            "$ref": "#/definitions/utils.Response"
                         }
                     },
                     "500": {
@@ -247,7 +169,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/archive.StatusResponse"
+                            "$ref": "#/definitions/utils.Response"
                         }
                     },
                     "500": {
@@ -315,7 +237,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/archive.StatusResponse"
+                            "$ref": "#/definitions/utils.Response"
                         }
                     },
                     "500": {
@@ -391,7 +313,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/archive.StatusResponse"
+                            "$ref": "#/definitions/utils.Response"
                         }
                     },
                     "500": {
@@ -459,7 +381,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/archive.StatusResponse"
+                            "$ref": "#/definitions/utils.Response"
                         }
                     },
                     "500": {
@@ -472,6 +394,45 @@
             }
         },
         "/archives/{uid}": {
+            "get": {
+                "description": "Get the archived chaos experiment's detail by uid.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "archives"
+                ],
+                "summary": "Get an archived chaos experiment.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "the archive uid",
+                        "name": "uid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/archive.Detail"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    }
+                }
+            },
             "delete": {
                 "description": "Delete the specified archived experiment.",
                 "produces": [
@@ -494,7 +455,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/archive.StatusResponse"
+                            "$ref": "#/definitions/utils.Response"
                         }
                     },
                     "500": {
@@ -758,14 +719,14 @@
         },
         "/events": {
             "get": {
-                "description": "Get the list of events from db.",
+                "description": "Get events from db.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "events"
                 ],
-                "summary": "Get the list of events from db.",
+                "summary": "list events.",
                 "parameters": [
                     {
                         "type": "string",
@@ -835,7 +796,7 @@
                 }
             }
         },
-        "/events/get": {
+        "/events/{id}": {
             "get": {
                 "description": "Get the event from db by ID.",
                 "produces": [
@@ -844,13 +805,13 @@
                 "tags": [
                     "events"
                 ],
-                "summary": "Get the event from db by ID.",
+                "summary": "Get an event.",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "The id of the event",
+                        "description": "The event ID",
                         "name": "id",
-                        "in": "query",
+                        "in": "path",
                         "required": true
                     }
                 ],
@@ -859,119 +820,6 @@
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/core.Event"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/utils.APIError"
-                        }
-                    }
-                }
-            }
-        },
-        "/experiments": {
-            "get": {
-                "description": "Get chaos experiments from Kubernetes cluster.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "experiments"
-                ],
-                "summary": "Get chaos experiments from Kubernetes cluster.",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "namespace",
-                        "name": "namespace",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "name",
-                        "name": "name",
-                        "in": "query"
-                    },
-                    {
-                        "enum": [
-                            "PodChaos",
-                            "IOChaos",
-                            "NetworkChaos",
-                            "TimeChaos",
-                            "KernelChaos",
-                            "StressChaos"
-                        ],
-                        "type": "string",
-                        "description": "kind",
-                        "name": "kind",
-                        "in": "query"
-                    },
-                    {
-                        "enum": [
-                            "Running",
-                            "Paused",
-                            "Failed",
-                            "Finished"
-                        ],
-                        "type": "string",
-                        "description": "status",
-                        "name": "status",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/experiment.Experiment"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/utils.APIError"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Delete the specified chaos experiment.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "experiments"
-                ],
-                "summary": "Delete the specified chaos experiment.",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "uids",
-                        "name": "uids",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "enum": [
-                            "true",
-                            "false"
-                        ],
-                        "type": "string",
-                        "description": "force",
-                        "name": "force",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/experiment.StatusResponse"
                         }
                     },
                     "400": {
@@ -995,30 +843,69 @@
                 }
             }
         },
-        "/experiments/detail/{uid}": {
+        "/experiments": {
             "get": {
-                "description": "Get detailed information about the specified chaos experiment.",
+                "description": "Get chaos experiments from k8s clusters in real time.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "experiments"
                 ],
-                "summary": "Get detailed information about the specified chaos experiment.",
+                "summary": "List chaos experiments.",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "uid",
-                        "name": "uid",
-                        "in": "path",
-                        "required": true
+                        "description": "filter exps by namespace",
+                        "name": "namespace",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "filter exps by name",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "PodChaos",
+                            "NetworkChaos",
+                            "IOChaos",
+                            "StressChaos",
+                            "KernelChaos",
+                            "TimeChaos",
+                            "DNSChaos",
+                            "AWSChaos",
+                            "GCPChaos",
+                            "JVMChaos",
+                            "HTTPChaos"
+                        ],
+                        "type": "string",
+                        "description": "filter exps by kind",
+                        "name": "kind",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "Injecting",
+                            "Running",
+                            "Finished",
+                            "Paused"
+                        ],
+                        "type": "string",
+                        "description": "filter exps by status",
+                        "name": "status",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/experiment.Detail"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/experiment.Experiment"
+                            }
                         }
                     },
                     "400": {
@@ -1034,11 +921,61 @@
                         }
                     }
                 }
-            }
-        },
-        "/experiments/new": {
+            },
+            "put": {
+                "description": "Update a chaos experiment.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "experiments"
+                ],
+                "summary": "Update a chaos experiment.",
+                "parameters": [
+                    {
+                        "description": "Request body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    }
+                }
+            },
             "post": {
-                "description": "Create a new chaos experiment.",
+                "description": "Pass a JSON object to create a new chaos experiment. The schema for JSON is the same as the YAML schema for the Kubernetes object.",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -1048,12 +985,13 @@
                 "summary": "Create a new chaos experiment.",
                 "parameters": [
                     {
-                        "description": "Request body",
-                        "name": "request",
+                        "description": "the chaos definition",
+                        "name": "chaos",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/core.ExperimentInfo"
+                            "type": "object",
+                            "additionalProperties": true
                         }
                     }
                 ],
@@ -1061,11 +999,67 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/core.ExperimentInfo"
+                            "type": "object",
+                            "additionalProperties": true
                         }
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Batch delete chaos experiments by uids.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "experiments"
+                ],
+                "summary": "Batch delete chaos experiments.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "the experiment uids, split with comma. Example: ?uids=uid1,uid2",
+                        "name": "uids",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "true",
+                            "false"
+                        ],
+                        "type": "string",
+                        "description": "force",
+                        "name": "force",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/utils.APIError"
                         }
@@ -1092,7 +1086,7 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "uid",
+                        "description": "the experiment uid",
                         "name": "uid",
                         "in": "path",
                         "required": true
@@ -1102,7 +1096,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/experiment.StatusResponse"
+                            "$ref": "#/definitions/utils.Response"
                         }
                     },
                     "400": {
@@ -1139,7 +1133,7 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "uid",
+                        "description": "the experiment uid",
                         "name": "uid",
                         "in": "path",
                         "required": true
@@ -1149,7 +1143,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/experiment.StatusResponse"
+                            "$ref": "#/definitions/utils.Response"
                         }
                     },
                     "400": {
@@ -1175,14 +1169,14 @@
         },
         "/experiments/state": {
             "get": {
-                "description": "Get chaos experiments state from Kubernetes cluster.",
+                "description": "Get the status of all experiments.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "experiments"
                 ],
-                "summary": "Get chaos experiments state from Kubernetes cluster.",
+                "summary": "Get the status of all experiments.",
                 "parameters": [
                     {
                         "type": "string",
@@ -1195,44 +1189,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/experiment.ChaosState"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/utils.APIError"
-                        }
-                    }
-                }
-            }
-        },
-        "/experiments/update": {
-            "put": {
-                "description": "Update a chaos experiment.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "experiments"
-                ],
-                "summary": "Update a chaos experiment.",
-                "parameters": [
-                    {
-                        "description": "Request body",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/core.KubeObjectDesc"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/core.KubeObjectDesc"
+                            "$ref": "#/definitions/status.AllChaosStatus"
                         }
                     },
                     "400": {
@@ -1251,19 +1208,64 @@
             }
         },
         "/experiments/{uid}": {
-            "delete": {
-                "description": "Delete the specified chaos experiment.",
+            "get": {
+                "description": "Get the chaos experiment's detail by uid.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "experiments"
                 ],
-                "summary": "Delete the specified chaos experiment.",
+                "summary": "Get a chaos experiment.",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "uid",
+                        "description": "the experiment uid",
+                        "name": "uid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/experiment.Detail"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete the chaos experiment by uid.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "experiments"
+                ],
+                "summary": "Delete a chaos experiment.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "the experiment uid",
                         "name": "uid",
                         "in": "path",
                         "required": true
@@ -1276,15 +1278,14 @@
                         "type": "string",
                         "description": "force",
                         "name": "force",
-                        "in": "query",
-                        "required": true
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/experiment.StatusResponse"
+                            "$ref": "#/definitions/utils.Response"
                         }
                     },
                     "400": {
@@ -1309,31 +1310,37 @@
             }
         },
         "/schedules": {
-            "put": {
-                "description": "Update a schedule experiment.",
+            "get": {
+                "description": "Get chaos schedules from k8s cluster in real time.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "schedules"
                 ],
-                "summary": "Update a schedule experiment.",
+                "summary": "List chaos schedules.",
                 "parameters": [
                     {
-                        "description": "Request body",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/core.KubeObjectDesc"
-                        }
+                        "type": "string",
+                        "description": "filter schedules by namespace",
+                        "name": "namespace",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "filter schedules by name",
+                        "name": "name",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/core.KubeObjectDesc"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/schedule.Schedule"
+                            }
                         }
                     },
                     "400": {
@@ -1350,15 +1357,15 @@
                     }
                 }
             },
-            "post": {
-                "description": "Create a new schedule experiment.",
+            "put": {
+                "description": "Update a schedule.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "schedules"
                 ],
-                "summary": "Create a new schedule experiment.",
+                "summary": "Update a schedule.",
                 "parameters": [
                     {
                         "description": "Request body",
@@ -1366,7 +1373,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/core.ScheduleInfo"
+                            "$ref": "#/definitions/v1alpha1.Schedule"
                         }
                     }
                 ],
@@ -1374,7 +1381,57 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/core.ScheduleInfo"
+                            "$ref": "#/definitions/v1alpha1.Schedule"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Pass a JSON object to create a new schedule. The schema for JSON is the same as the YAML schema for the Kubernetes object.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "schedules"
+                ],
+                "summary": "Create a new schedule.",
+                "parameters": [
+                    {
+                        "description": "the schedule definition",
+                        "name": "schedule",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1alpha1.Schedule"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1alpha1.Schedule"
                         }
                     },
                     "400": {
@@ -1392,18 +1449,18 @@
                 }
             },
             "delete": {
-                "description": "Delete the specified schedule experiment.",
+                "description": "Batch delete schedules by uids.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "schedules"
                 ],
-                "summary": "Delete the specified schedule experiment.",
+                "summary": "Batch delete schedules.",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "uids",
+                        "description": "the schedule uids, split with comma. Example: ?uids=uid1,uid2",
                         "name": "uids",
                         "in": "query",
                         "required": true
@@ -1413,7 +1470,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/schedule.StatusResponse"
+                            "$ref": "#/definitions/utils.Response"
                         }
                     },
                     "400": {
@@ -1439,18 +1496,18 @@
         },
         "/schedules/pause/{uid}": {
             "put": {
-                "description": "Pause a schedule object.",
+                "description": "Pause a schedule.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "schedules"
                 ],
-                "summary": "Pause a schedule object.",
+                "summary": "Pause a schedule.",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "uid",
+                        "description": "the schedule uid",
                         "name": "uid",
                         "in": "path",
                         "required": true
@@ -1460,7 +1517,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/schedule.StatusResponse"
+                            "$ref": "#/definitions/utils.Response"
                         }
                     },
                     "400": {
@@ -1486,18 +1543,18 @@
         },
         "/schedules/start/{uid}": {
             "put": {
-                "description": "Start a schedule object.",
+                "description": "Start a schedule.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "schedules"
                 ],
-                "summary": "Start a schedule object.",
+                "summary": "Start a schedule.",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "uid",
+                        "description": "the schedule uid",
                         "name": "uid",
                         "in": "path",
                         "required": true
@@ -1507,7 +1564,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/schedule.StatusResponse"
+                            "$ref": "#/definitions/utils.Response"
                         }
                     },
                     "400": {
@@ -1533,18 +1590,18 @@
         },
         "/schedules/{uid}": {
             "get": {
-                "description": "Get detailed information about the specified schedule experiment.",
+                "description": "Get the schedule's detail by uid.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "experiments"
+                    "schedules"
                 ],
-                "summary": "Get detailed information about the specified schedule experiment.",
+                "summary": "Get a schedule.",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "uid",
+                        "description": "the schedule uid",
                         "name": "uid",
                         "in": "path",
                         "required": true
@@ -1559,6 +1616,57 @@
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete the schedule by uid.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "schedules"
+                ],
+                "summary": "Delete a schedule.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "the schedule uid",
+                        "name": "uid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/utils.APIError"
                         }
@@ -1801,54 +1909,14 @@
     },
     "definitions": {
         "archive.Archive": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "kind": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "namespace": {
-                    "type": "string"
-                },
-                "uid": {
-                    "type": "string"
-                }
-            }
+            "$ref": "#/definitions/core.ObjectBase"
         },
         "archive.Detail": {
             "type": "object",
             "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "kind": {
-                    "type": "string"
-                },
                 "kube_object": {
                     "type": "object",
                     "$ref": "#/definitions/core.KubeObjectDesc"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "namespace": {
-                    "type": "string"
-                },
-                "uid": {
-                    "type": "string"
-                }
-            }
-        },
-        "archive.StatusResponse": {
-            "type": "object",
-            "properties": {
-                "status": {
-                    "type": "string"
                 }
             }
         },
@@ -1882,7 +1950,7 @@
             "type": "object",
             "properties": {
                 "cluster_mode": {
-                    "description": "ClusterScoped means control Chaos Object in cluster level(all namespace),",
+                    "description": "ClusterScoped means control Chaos Object in cluster level(all namespace).",
                     "type": "boolean",
                     "default": true
                 },
@@ -1891,7 +1959,7 @@
                     "default": false
                 },
                 "enableFilterNamespace": {
-                    "description": "EnableFilterNamespace will filter namespace with annotation. Only the pods/containers in namespace\nannotated with `chaos-mesh.org/inject=enabled` will be injected",
+                    "description": "EnableFilterNamespace will filter namespace with annotation. Only the pods/containers in namespace\nannotated with `chaos-mesh.org/inject=enabled` will be injected.",
                     "type": "boolean",
                     "default": false
                 },
@@ -1904,38 +1972,15 @@
                     "default": 2333
                 },
                 "security_mode": {
-                    "description": "SecurityMode will use the token login by the user if set to true",
+                    "description": "If SecurityMode is set to true, then the dashboard requires token authentication.",
                     "type": "boolean",
                     "default": true
                 },
                 "target_namespace": {
-                    "description": "TargetNamespace is the target namespace to injecting chaos.\nIt only works with ClusterScoped is false;",
+                    "description": "TargetNamespace is the target namespace to injecting chaos.\nIt only works with ClusterScoped is false.",
                     "type": "string"
                 },
                 "version": {
-                    "type": "string"
-                }
-            }
-        },
-        "core.AWSChaosInfo": {
-            "type": "object",
-            "properties": {
-                "action": {
-                    "type": "string"
-                },
-                "awsRegion": {
-                    "type": "string"
-                },
-                "deviceName": {
-                    "type": "string"
-                },
-                "ec2Instance": {
-                    "type": "string"
-                },
-                "secretName": {
-                    "type": "string"
-                },
-                "volumeID": {
                     "type": "string"
                 }
             }
@@ -1951,26 +1996,6 @@
                 },
                 "template": {
                     "type": "string"
-                }
-            }
-        },
-        "core.DNSChaosInfo": {
-            "type": "object",
-            "properties": {
-                "action": {
-                    "type": "string"
-                },
-                "container_names": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "patterns": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
                 }
             }
         },
@@ -2006,117 +2031,6 @@
                 }
             }
         },
-        "core.ExperimentInfo": {
-            "type": "object",
-            "required": [
-                "name",
-                "namespace"
-            ],
-            "properties": {
-                "annotations": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "labels": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "name": {
-                    "type": "string"
-                },
-                "namespace": {
-                    "type": "string"
-                },
-                "scheduler": {
-                    "type": "object",
-                    "$ref": "#/definitions/core.SchedulerInfo"
-                },
-                "scope": {
-                    "type": "object",
-                    "$ref": "#/definitions/core.ScopeInfo"
-                },
-                "target": {
-                    "type": "object",
-                    "$ref": "#/definitions/core.TargetInfo"
-                }
-            }
-        },
-        "core.GCPChaosInfo": {
-            "type": "object",
-            "properties": {
-                "action": {
-                    "type": "string"
-                },
-                "deviceNames": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "instance": {
-                    "type": "string"
-                },
-                "project": {
-                    "type": "string"
-                },
-                "secretName": {
-                    "type": "string"
-                },
-                "zone": {
-                    "type": "string"
-                }
-            }
-        },
-        "core.IOChaosInfo": {
-            "type": "object",
-            "properties": {
-                "action": {
-                    "type": "string"
-                },
-                "attr": {
-                    "type": "object",
-                    "$ref": "#/definitions/v1alpha1.AttrOverrideSpec"
-                },
-                "container_name": {
-                    "type": "string"
-                },
-                "delay": {
-                    "type": "string"
-                },
-                "errno": {
-                    "type": "integer"
-                },
-                "methods": {
-                    "type": "string"
-                },
-                "mistake": {
-                    "type": "object",
-                    "$ref": "#/definitions/v1alpha1.MistakeSpec"
-                },
-                "path": {
-                    "type": "string"
-                },
-                "percent": {
-                    "type": "integer"
-                },
-                "volume_path": {
-                    "type": "string"
-                }
-            }
-        },
-        "core.KernelChaosInfo": {
-            "type": "object",
-            "properties": {
-                "fail_kern_request": {
-                    "type": "object",
-                    "$ref": "#/definitions/v1alpha1.FailKernRequest"
-                }
-            }
-        },
         "core.KubeObjectDesc": {
             "type": "object",
             "properties": {
@@ -2149,47 +2063,6 @@
                 },
                 "namespace": {
                     "type": "string"
-                }
-            }
-        },
-        "core.NetworkChaosInfo": {
-            "type": "object",
-            "properties": {
-                "action": {
-                    "type": "string"
-                },
-                "bandwidth": {
-                    "type": "object",
-                    "$ref": "#/definitions/v1alpha1.BandwidthSpec"
-                },
-                "corrupt": {
-                    "type": "object",
-                    "$ref": "#/definitions/v1alpha1.CorruptSpec"
-                },
-                "delay": {
-                    "type": "object",
-                    "$ref": "#/definitions/v1alpha1.DelaySpec"
-                },
-                "direction": {
-                    "type": "string"
-                },
-                "duplicate": {
-                    "type": "object",
-                    "$ref": "#/definitions/v1alpha1.DuplicateSpec"
-                },
-                "external_targets": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "loss": {
-                    "type": "object",
-                    "$ref": "#/definitions/v1alpha1.LossSpec"
-                },
-                "target_scope": {
-                    "type": "object",
-                    "$ref": "#/definitions/core.ScopeInfo"
                 }
             }
         },
@@ -2242,50 +2115,14 @@
                 }
             }
         },
-        "core.PodChaosInfo": {
+        "core.ObjectBase": {
             "type": "object",
             "properties": {
-                "action": {
+                "created_at": {
                     "type": "string"
                 },
-                "container_names": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "grace_period": {
-                    "type": "integer"
-                }
-            }
-        },
-        "core.ScheduleInfo": {
-            "type": "object",
-            "required": [
-                "name",
-                "namespace"
-            ],
-            "properties": {
-                "annotations": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "concurrency_policy": {
+                "kind": {
                     "type": "string"
-                },
-                "duration": {
-                    "type": "string"
-                },
-                "history_limit": {
-                    "type": "integer"
-                },
-                "labels": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
                 },
                 "name": {
                     "type": "string"
@@ -2293,92 +2130,7 @@
                 "namespace": {
                     "type": "string"
                 },
-                "schedule": {
-                    "type": "string"
-                },
-                "scope": {
-                    "type": "object",
-                    "$ref": "#/definitions/core.ScopeInfo"
-                },
-                "starting_deadline_seconds": {
-                    "type": "integer"
-                },
-                "target": {
-                    "type": "object",
-                    "$ref": "#/definitions/core.TargetInfo"
-                }
-            }
-        },
-        "core.SchedulerInfo": {
-            "type": "object",
-            "properties": {
-                "duration": {
-                    "type": "string"
-                }
-            }
-        },
-        "core.ScopeInfo": {
-            "type": "object",
-            "properties": {
-                "annotation_selectors": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "expression_selectors": {
-                    "type": "string"
-                },
-                "field_selectors": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "label_selectors": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "mode": {
-                    "type": "string"
-                },
-                "namespaces": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "node_selectors": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "nodes": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "phase_selectors": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "pods": {
-                    "description": "Pods is a map of string keys and a set values that used to select pods.\nThe key defines the namespace which pods belong,\nand the each values is a set of pod names.",
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        }
-                    }
-                },
-                "value": {
+                "uid": {
                     "type": "string"
                 }
             }
@@ -2440,88 +2192,6 @@
                             "type": "string"
                         }
                     }
-                }
-            }
-        },
-        "core.StressChaosInfo": {
-            "type": "object",
-            "properties": {
-                "container_name": {
-                    "type": "string"
-                },
-                "stressng_stressors": {
-                    "type": "string"
-                },
-                "stressors": {
-                    "type": "object",
-                    "$ref": "#/definitions/v1alpha1.Stressors"
-                }
-            }
-        },
-        "core.TargetInfo": {
-            "type": "object",
-            "required": [
-                "kind"
-            ],
-            "properties": {
-                "aws_chaos": {
-                    "type": "object",
-                    "$ref": "#/definitions/core.AWSChaosInfo"
-                },
-                "dns_chaos": {
-                    "type": "object",
-                    "$ref": "#/definitions/core.DNSChaosInfo"
-                },
-                "gcp_chaos": {
-                    "type": "object",
-                    "$ref": "#/definitions/core.GCPChaosInfo"
-                },
-                "io_chaos": {
-                    "type": "object",
-                    "$ref": "#/definitions/core.IOChaosInfo"
-                },
-                "kernel_chaos": {
-                    "type": "object",
-                    "$ref": "#/definitions/core.KernelChaosInfo"
-                },
-                "kind": {
-                    "type": "string"
-                },
-                "network_chaos": {
-                    "type": "object",
-                    "$ref": "#/definitions/core.NetworkChaosInfo"
-                },
-                "pod_chaos": {
-                    "type": "object",
-                    "$ref": "#/definitions/core.PodChaosInfo"
-                },
-                "stress_chaos": {
-                    "type": "object",
-                    "$ref": "#/definitions/core.StressChaosInfo"
-                },
-                "time_chaos": {
-                    "type": "object",
-                    "$ref": "#/definitions/core.TimeChaosInfo"
-                }
-            }
-        },
-        "core.TimeChaosInfo": {
-            "type": "object",
-            "properties": {
-                "clock_ids": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "container_names": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "time_offset": {
-                    "type": "string"
                 }
             }
         },
@@ -2604,23 +2274,6 @@
                 }
             }
         },
-        "experiment.ChaosState": {
-            "type": "object",
-            "properties": {
-                "finished": {
-                    "type": "integer"
-                },
-                "injecting": {
-                    "type": "integer"
-                },
-                "paused": {
-                    "type": "integer"
-                },
-                "running": {
-                    "type": "integer"
-                }
-            }
-        },
         "experiment.Detail": {
             "type": "object",
             "properties": {
@@ -2673,14 +2326,6 @@
                     "type": "string"
                 },
                 "uid": {
-                    "type": "string"
-                }
-            }
-        },
-        "experiment.StatusResponse": {
-            "type": "object",
-            "properties": {
-                "status": {
                     "type": "string"
                 }
             }
@@ -2741,11 +2386,20 @@
                 }
             }
         },
-        "schedule.StatusResponse": {
+        "status.AllChaosStatus": {
             "type": "object",
             "properties": {
-                "status": {
-                    "type": "string"
+                "finished": {
+                    "type": "integer"
+                },
+                "injecting": {
+                    "type": "integer"
+                },
+                "paused": {
+                    "type": "integer"
+                },
+                "running": {
+                    "type": "integer"
                 }
             }
         },
@@ -2753,7 +2407,7 @@
             "type": "object",
             "properties": {
                 "code": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "full_text": {
                     "type": "string"
@@ -2761,6 +2415,14 @@
                 "message": {
                     "type": "string"
                 },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "utils.Response": {
+            "type": "object",
+            "properties": {
                 "status": {
                     "type": "string"
                 }
@@ -3731,6 +3393,117 @@
                     "type": "integer"
                 },
                 "reorder": {
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.Schedule": {
+            "type": "object",
+            "properties": {
+                "spec": {
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.ScheduleSpec"
+                },
+                "status": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.ScheduleStatus"
+                }
+            }
+        },
+        "v1alpha1.ScheduleSpec": {
+            "type": "object",
+            "properties": {
+                "awsChaos": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.AWSChaosSpec"
+                },
+                "concurrencyPolicy": {
+                    "description": "+optional\n+kubebuilder:validation:Enum=Forbid;Allow",
+                    "type": "string"
+                },
+                "dnsChaos": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.DNSChaosSpec"
+                },
+                "gcpChaos": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.GCPChaosSpec"
+                },
+                "historyLimit": {
+                    "description": "+optional\n+kubebuilder:validation:Minimum=1",
+                    "type": "integer"
+                },
+                "httpChaos": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.HTTPChaosSpec"
+                },
+                "ioChaos": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.IOChaosSpec"
+                },
+                "jvmChaos": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.JVMChaosSpec"
+                },
+                "kernelChaos": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.KernelChaosSpec"
+                },
+                "networkChaos": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.NetworkChaosSpec"
+                },
+                "podChaos": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.PodChaosSpec"
+                },
+                "schedule": {
+                    "type": "string"
+                },
+                "startingDeadlineSeconds": {
+                    "description": "+optional\n+nullable\n+kubebuilder:validation:Minimum=0\n+kubebuilder:validation:ExclusiveMinimum=true",
+                    "type": "integer"
+                },
+                "stressChaos": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.StressChaosSpec"
+                },
+                "timeChaos": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.TimeChaosSpec"
+                },
+                "type": {
+                    "description": "TODO: use a custom type, as `TemplateType` contains other possible values",
+                    "type": "string"
+                },
+                "workflow": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.WorkflowSpec"
+                }
+            }
+        },
+        "v1alpha1.ScheduleStatus": {
+            "type": "object",
+            "properties": {
+                "active": {
+                    "description": "+optional",
+                    "type": "string"
+                },
+                "time": {
+                    "description": "+optional\n+nullable",
                     "type": "string"
                 }
             }

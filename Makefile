@@ -447,7 +447,7 @@ $(eval $(call RUN_IN_DEV_ENV_TEMPLATE,install.sh))
 
 swagger_spec:
 define swagger_spec-make
-	swag init -g cmd/chaos-dashboard/main.go
+	swag init -g cmd/chaos-dashboard/main.go --output pkg/swaggerdocs
 endef
 $(eval $(call RUN_IN_DEV_ENV_TEMPLATE,swagger_spec))
 

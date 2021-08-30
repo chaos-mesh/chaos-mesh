@@ -1,38 +1,12 @@
 basePath: /api
 definitions:
   archive.Archive:
-    properties:
-      created_at:
-        type: string
-      kind:
-        type: string
-      name:
-        type: string
-      namespace:
-        type: string
-      uid:
-        type: string
-    type: object
+    $ref: '#/definitions/core.ObjectBase'
   archive.Detail:
     properties:
-      created_at:
-        type: string
-      kind:
-        type: string
       kube_object:
         $ref: '#/definitions/core.KubeObjectDesc'
         type: object
-      name:
-        type: string
-      namespace:
-        type: string
-      uid:
-        type: string
-    type: object
-  archive.StatusResponse:
-    properties:
-      status:
-        type: string
     type: object
   common.MapSlice:
     additionalProperties:
@@ -56,7 +30,7 @@ definitions:
       cluster_mode:
         default: true
         description: ClusterScoped means control Chaos Object in cluster level(all
-          namespace),
+          namespace).
         type: boolean
       dns_server_create:
         default: false
@@ -65,7 +39,7 @@ definitions:
         default: false
         description: |-
           EnableFilterNamespace will filter namespace with annotation. Only the pods/containers in namespace
-          annotated with `chaos-mesh.org/inject=enabled` will be injected
+          annotated with `chaos-mesh.org/inject=enabled` will be injected.
         type: boolean
       listen_host:
         default: 0.0.0.0
@@ -75,29 +49,15 @@ definitions:
         type: integer
       security_mode:
         default: true
-        description: SecurityMode will use the token login by the user if set to true
+        description: If SecurityMode is set to true, then the dashboard requires token
+          authentication.
         type: boolean
       target_namespace:
         description: |-
           TargetNamespace is the target namespace to injecting chaos.
-          It only works with ClusterScoped is false;
+          It only works with ClusterScoped is false.
         type: string
       version:
-        type: string
-    type: object
-  core.AWSChaosInfo:
-    properties:
-      action:
-        type: string
-      awsRegion:
-        type: string
-      deviceName:
-        type: string
-      ec2Instance:
-        type: string
-      secretName:
-        type: string
-      volumeID:
         type: string
     type: object
   core.ConditionalBranch:
@@ -108,19 +68,6 @@ definitions:
         type: string
       template:
         type: string
-    type: object
-  core.DNSChaosInfo:
-    properties:
-      action:
-        type: string
-      container_names:
-        items:
-          type: string
-        type: array
-      patterns:
-        items:
-          type: string
-        type: array
     type: object
   core.Event:
     properties:
@@ -142,81 +89,6 @@ definitions:
         type: string
       type:
         type: string
-    type: object
-  core.ExperimentInfo:
-    properties:
-      annotations:
-        additionalProperties:
-          type: string
-        type: object
-      labels:
-        additionalProperties:
-          type: string
-        type: object
-      name:
-        type: string
-      namespace:
-        type: string
-      scheduler:
-        $ref: '#/definitions/core.SchedulerInfo'
-        type: object
-      scope:
-        $ref: '#/definitions/core.ScopeInfo'
-        type: object
-      target:
-        $ref: '#/definitions/core.TargetInfo'
-        type: object
-    required:
-    - name
-    - namespace
-    type: object
-  core.GCPChaosInfo:
-    properties:
-      action:
-        type: string
-      deviceNames:
-        items:
-          type: string
-        type: array
-      instance:
-        type: string
-      project:
-        type: string
-      secretName:
-        type: string
-      zone:
-        type: string
-    type: object
-  core.IOChaosInfo:
-    properties:
-      action:
-        type: string
-      attr:
-        $ref: '#/definitions/v1alpha1.AttrOverrideSpec'
-        type: object
-      container_name:
-        type: string
-      delay:
-        type: string
-      errno:
-        type: integer
-      methods:
-        type: string
-      mistake:
-        $ref: '#/definitions/v1alpha1.MistakeSpec'
-        type: object
-      path:
-        type: string
-      percent:
-        type: integer
-      volume_path:
-        type: string
-    type: object
-  core.KernelChaosInfo:
-    properties:
-      fail_kern_request:
-        $ref: '#/definitions/v1alpha1.FailKernRequest'
-        type: object
     type: object
   core.KubeObjectDesc:
     properties:
@@ -240,35 +112,6 @@ definitions:
         type: string
       namespace:
         type: string
-    type: object
-  core.NetworkChaosInfo:
-    properties:
-      action:
-        type: string
-      bandwidth:
-        $ref: '#/definitions/v1alpha1.BandwidthSpec'
-        type: object
-      corrupt:
-        $ref: '#/definitions/v1alpha1.CorruptSpec'
-        type: object
-      delay:
-        $ref: '#/definitions/v1alpha1.DelaySpec'
-        type: object
-      direction:
-        type: string
-      duplicate:
-        $ref: '#/definitions/v1alpha1.DuplicateSpec'
-        type: object
-      external_targets:
-        items:
-          type: string
-        type: array
-      loss:
-        $ref: '#/definitions/v1alpha1.LossSpec'
-        type: object
-      target_scope:
-        $ref: '#/definitions/core.ScopeInfo'
-        type: object
     type: object
   core.Node:
     properties:
@@ -302,101 +145,17 @@ definitions:
       template:
         type: string
     type: object
-  core.PodChaosInfo:
+  core.ObjectBase:
     properties:
-      action:
+      created_at:
         type: string
-      container_names:
-        items:
-          type: string
-        type: array
-      grace_period:
-        type: integer
-    type: object
-  core.ScheduleInfo:
-    properties:
-      annotations:
-        additionalProperties:
-          type: string
-        type: object
-      concurrency_policy:
+      kind:
         type: string
-      duration:
-        type: string
-      history_limit:
-        type: integer
-      labels:
-        additionalProperties:
-          type: string
-        type: object
       name:
         type: string
       namespace:
         type: string
-      schedule:
-        type: string
-      scope:
-        $ref: '#/definitions/core.ScopeInfo'
-        type: object
-      starting_deadline_seconds:
-        type: integer
-      target:
-        $ref: '#/definitions/core.TargetInfo'
-        type: object
-    required:
-    - name
-    - namespace
-    type: object
-  core.SchedulerInfo:
-    properties:
-      duration:
-        type: string
-    type: object
-  core.ScopeInfo:
-    properties:
-      annotation_selectors:
-        additionalProperties:
-          type: string
-        type: object
-      expression_selectors:
-        type: string
-      field_selectors:
-        additionalProperties:
-          type: string
-        type: object
-      label_selectors:
-        additionalProperties:
-          type: string
-        type: object
-      mode:
-        type: string
-      namespaces:
-        items:
-          type: string
-        type: array
-      node_selectors:
-        additionalProperties:
-          type: string
-        type: object
-      nodes:
-        items:
-          type: string
-        type: array
-      phase_selectors:
-        items:
-          type: string
-        type: array
-      pods:
-        additionalProperties:
-          items:
-            type: string
-          type: array
-        description: |-
-          Pods is a map of string keys and a set values that used to select pods.
-          The key defines the namespace which pods belong,
-          and the each values is a set of pod names.
-        type: object
-      value:
+      uid:
         type: string
     type: object
   core.SelectorInfo:
@@ -441,63 +200,6 @@ definitions:
           The key defines the namespace which pods belong,
           and the each values is a set of pod names.
         type: object
-    type: object
-  core.StressChaosInfo:
-    properties:
-      container_name:
-        type: string
-      stressng_stressors:
-        type: string
-      stressors:
-        $ref: '#/definitions/v1alpha1.Stressors'
-        type: object
-    type: object
-  core.TargetInfo:
-    properties:
-      aws_chaos:
-        $ref: '#/definitions/core.AWSChaosInfo'
-        type: object
-      dns_chaos:
-        $ref: '#/definitions/core.DNSChaosInfo'
-        type: object
-      gcp_chaos:
-        $ref: '#/definitions/core.GCPChaosInfo'
-        type: object
-      io_chaos:
-        $ref: '#/definitions/core.IOChaosInfo'
-        type: object
-      kernel_chaos:
-        $ref: '#/definitions/core.KernelChaosInfo'
-        type: object
-      kind:
-        type: string
-      network_chaos:
-        $ref: '#/definitions/core.NetworkChaosInfo'
-        type: object
-      pod_chaos:
-        $ref: '#/definitions/core.PodChaosInfo'
-        type: object
-      stress_chaos:
-        $ref: '#/definitions/core.StressChaosInfo'
-        type: object
-      time_chaos:
-        $ref: '#/definitions/core.TimeChaosInfo'
-        type: object
-    required:
-    - kind
-    type: object
-  core.TimeChaosInfo:
-    properties:
-      clock_ids:
-        items:
-          type: string
-        type: array
-      container_names:
-        items:
-          type: string
-        type: array
-      time_offset:
-        type: string
     type: object
   core.Topology:
     properties:
@@ -552,17 +254,6 @@ definitions:
       uid:
         type: string
     type: object
-  experiment.ChaosState:
-    properties:
-      finished:
-        type: integer
-      injecting:
-        type: integer
-      paused:
-        type: integer
-      running:
-        type: integer
-    type: object
   experiment.Detail:
     properties:
       created_at:
@@ -598,11 +289,6 @@ definitions:
       status:
         type: string
       uid:
-        type: string
-    type: object
-  experiment.StatusResponse:
-    properties:
-      status:
         type: string
     type: object
   schedule.Detail:
@@ -642,19 +328,30 @@ definitions:
       uid:
         type: string
     type: object
-  schedule.StatusResponse:
+  status.AllChaosStatus:
     properties:
-      status:
-        type: string
+      finished:
+        type: integer
+      injecting:
+        type: integer
+      paused:
+        type: integer
+      running:
+        type: integer
     type: object
   utils.APIError:
     properties:
       code:
-        type: string
+        type: integer
       full_text:
         type: string
       message:
         type: string
+      type:
+        type: string
+    type: object
+  utils.Response:
+    properties:
       status:
         type: string
     type: object
@@ -1732,6 +1429,101 @@ definitions:
       reorder:
         type: string
     type: object
+  v1alpha1.Schedule:
+    properties:
+      spec:
+        $ref: '#/definitions/v1alpha1.ScheduleSpec'
+        type: object
+      status:
+        $ref: '#/definitions/v1alpha1.ScheduleStatus'
+        description: +optional
+        type: object
+    type: object
+  v1alpha1.ScheduleSpec:
+    properties:
+      awsChaos:
+        $ref: '#/definitions/v1alpha1.AWSChaosSpec'
+        description: +optional
+        type: object
+      concurrencyPolicy:
+        description: |-
+          +optional
+          +kubebuilder:validation:Enum=Forbid;Allow
+        type: string
+      dnsChaos:
+        $ref: '#/definitions/v1alpha1.DNSChaosSpec'
+        description: +optional
+        type: object
+      gcpChaos:
+        $ref: '#/definitions/v1alpha1.GCPChaosSpec'
+        description: +optional
+        type: object
+      historyLimit:
+        description: |-
+          +optional
+          +kubebuilder:validation:Minimum=1
+        type: integer
+      httpChaos:
+        $ref: '#/definitions/v1alpha1.HTTPChaosSpec'
+        description: +optional
+        type: object
+      ioChaos:
+        $ref: '#/definitions/v1alpha1.IOChaosSpec'
+        description: +optional
+        type: object
+      jvmChaos:
+        $ref: '#/definitions/v1alpha1.JVMChaosSpec'
+        description: +optional
+        type: object
+      kernelChaos:
+        $ref: '#/definitions/v1alpha1.KernelChaosSpec'
+        description: +optional
+        type: object
+      networkChaos:
+        $ref: '#/definitions/v1alpha1.NetworkChaosSpec'
+        description: +optional
+        type: object
+      podChaos:
+        $ref: '#/definitions/v1alpha1.PodChaosSpec'
+        description: +optional
+        type: object
+      schedule:
+        type: string
+      startingDeadlineSeconds:
+        description: |-
+          +optional
+          +nullable
+          +kubebuilder:validation:Minimum=0
+          +kubebuilder:validation:ExclusiveMinimum=true
+        type: integer
+      stressChaos:
+        $ref: '#/definitions/v1alpha1.StressChaosSpec'
+        description: +optional
+        type: object
+      timeChaos:
+        $ref: '#/definitions/v1alpha1.TimeChaosSpec'
+        description: +optional
+        type: object
+      type:
+        description: 'TODO: use a custom type, as `TemplateType` contains other possible
+          values'
+        type: string
+      workflow:
+        $ref: '#/definitions/v1alpha1.WorkflowSpec'
+        description: +optional
+        type: object
+    type: object
+  v1alpha1.ScheduleStatus:
+    properties:
+      active:
+        description: +optional
+        type: string
+      time:
+        description: |-
+          +optional
+          +nullable
+        type: string
+    type: object
   v1alpha1.StressChaosSpec:
     properties:
       containerNames:
@@ -2008,44 +1800,16 @@ definitions:
     type: object
 info:
   contact:
-    name: Issues
+    name: GitHub Issues
     url: https://github.com/chaos-mesh/chaos-mesh/issues
-  description: Swagger docs for Chaos Mesh Dashboard. If you encounter any problems
-    with API, please click on the issues link below to report bugs or questions.
+  description: Swagger for Chaos Mesh Dashboard. If you encounter any problems with
+    API, please click on the issues link below to report.
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   title: Chaos Mesh Dashboard API
   version: "2.0"
 paths:
-  /Schedules:
-    get:
-      description: Get chaos schedules from Kubernetes cluster.
-      parameters:
-      - description: namespace
-        in: query
-        name: namespace
-        type: string
-      - description: name
-        in: query
-        name: name
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/schedule.Schedule'
-            type: array
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/utils.APIError'
-      summary: Get chaos schedules from Kubernetes cluster.
-      tags:
-      - schedules
   /archives:
     delete:
       description: Delete the specified archived experiment.
@@ -2061,7 +1825,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/archive.StatusResponse'
+            $ref: '#/definitions/utils.Response'
         "500":
           description: Internal Server Error
           schema:
@@ -2122,7 +1886,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/archive.StatusResponse'
+            $ref: '#/definitions/utils.Response'
         "500":
           description: Internal Server Error
           schema:
@@ -2130,12 +1894,11 @@ paths:
       summary: Delete the specified archived experiment.
       tags:
       - archives
-  /archives/detail:
     get:
-      description: Get the detail of an archived chaos experiment.
+      description: Get the archived chaos experiment's detail by uid.
       parameters:
-      - description: uid
-        in: query
+      - description: the archive uid
+        in: path
         name: uid
         required: true
         type: string
@@ -2146,11 +1909,15 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/archive.Detail'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIError'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/utils.APIError'
-      summary: Get the detail of an archived chaos experiment.
+      summary: Get an archived chaos experiment.
       tags:
       - archives
   /archives/schedules:
@@ -2168,7 +1935,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/archive.StatusResponse'
+            $ref: '#/definitions/utils.Response'
         "500":
           description: Internal Server Error
           schema:
@@ -2218,7 +1985,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/archive.StatusResponse'
+            $ref: '#/definitions/utils.Response'
         "500":
           description: Internal Server Error
           schema:
@@ -2263,7 +2030,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/archive.StatusResponse'
+            $ref: '#/definitions/utils.Response'
         "500":
           description: Internal Server Error
           schema:
@@ -2313,7 +2080,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/archive.StatusResponse'
+            $ref: '#/definitions/utils.Response'
         "500":
           description: Internal Server Error
           schema:
@@ -2515,7 +2282,7 @@ paths:
       - common
   /events:
     get:
-      description: Get the list of events from db.
+      description: Get events from db.
       parameters:
       - description: The create time of events
         in: query
@@ -2565,15 +2332,15 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/utils.APIError'
-      summary: Get the list of events from db.
+      summary: list events.
       tags:
       - events
-  /events/get:
+  /events/{id}:
     get:
       description: Get the event from db by ID.
       parameters:
-      - description: The id of the event
-        in: query
+      - description: The event ID
+        in: path
         name: id
         required: true
         type: integer
@@ -2584,37 +2351,6 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/core.Event'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/utils.APIError'
-      summary: Get the event from db by ID.
-      tags:
-      - events
-  /experiments:
-    delete:
-      description: Delete the specified chaos experiment.
-      parameters:
-      - description: uids
-        in: query
-        name: uids
-        required: true
-        type: string
-      - description: force
-        enum:
-        - "true"
-        - "false"
-        in: query
-        name: force
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/experiment.StatusResponse'
         "400":
           description: Bad Request
           schema:
@@ -2627,37 +2363,80 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/utils.APIError'
-      summary: Delete the specified chaos experiment.
+      summary: Get an event.
+      tags:
+      - events
+  /experiments:
+    delete:
+      description: Batch delete chaos experiments by uids.
+      parameters:
+      - description: 'the experiment uids, split with comma. Example: ?uids=uid1,uid2'
+        in: query
+        name: uids
+        required: true
+        type: string
+      - description: force
+        enum:
+        - "true"
+        - "false"
+        in: query
+        name: force
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Batch delete chaos experiments.
       tags:
       - experiments
     get:
-      description: Get chaos experiments from Kubernetes cluster.
+      description: Get chaos experiments from k8s clusters in real time.
       parameters:
-      - description: namespace
+      - description: filter exps by namespace
         in: query
         name: namespace
         type: string
-      - description: name
+      - description: filter exps by name
         in: query
         name: name
         type: string
-      - description: kind
+      - description: filter exps by kind
         enum:
         - PodChaos
-        - IOChaos
         - NetworkChaos
-        - TimeChaos
-        - KernelChaos
+        - IOChaos
         - StressChaos
+        - KernelChaos
+        - TimeChaos
+        - DNSChaos
+        - AWSChaos
+        - GCPChaos
+        - JVMChaos
+        - HTTPChaos
         in: query
         name: kind
         type: string
-      - description: status
+      - description: filter exps by status
         enum:
+        - Injecting
         - Running
-        - Paused
-        - Failed
         - Finished
+        - Paused
         in: query
         name: status
         type: string
@@ -2670,37 +2449,67 @@ paths:
             items:
               $ref: '#/definitions/experiment.Experiment'
             type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/utils.APIError'
-      summary: Get chaos experiments from Kubernetes cluster.
+      summary: List chaos experiments.
       tags:
       - experiments
-  /experiments/{uid}:
-    delete:
-      description: Delete the specified chaos experiment.
+    post:
+      consumes:
+      - application/json
+      description: Pass a JSON object to create a new chaos experiment. The schema
+        for JSON is the same as the YAML schema for the Kubernetes object.
       parameters:
-      - description: uid
-        in: path
-        name: uid
+      - description: the chaos definition
+        in: body
+        name: chaos
         required: true
-        type: string
-      - description: force
-        enum:
-        - "true"
-        - "false"
-        in: query
-        name: force
-        required: true
-        type: string
+        schema:
+          additionalProperties: true
+          type: object
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/experiment.StatusResponse'
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Create a new chaos experiment.
+      tags:
+      - experiments
+    put:
+      description: Update a chaos experiment.
+      parameters:
+      - description: Request body
+        in: body
+        name: request
+        required: true
+        schema:
+          additionalProperties: true
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
         "400":
           description: Bad Request
           schema:
@@ -2713,14 +2522,51 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/utils.APIError'
-      summary: Delete the specified chaos experiment.
+      summary: Update a chaos experiment.
       tags:
       - experiments
-  /experiments/detail/{uid}:
-    get:
-      description: Get detailed information about the specified chaos experiment.
+  /experiments/{uid}:
+    delete:
+      description: Delete the chaos experiment by uid.
       parameters:
-      - description: uid
+      - description: the experiment uid
+        in: path
+        name: uid
+        required: true
+        type: string
+      - description: force
+        enum:
+        - "true"
+        - "false"
+        in: query
+        name: force
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Delete a chaos experiment.
+      tags:
+      - experiments
+    get:
+      description: Get the chaos experiment's detail by uid.
+      parameters:
+      - description: the experiment uid
         in: path
         name: uid
         required: true
@@ -2736,46 +2582,22 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/utils.APIError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/utils.APIError'
-      summary: Get detailed information about the specified chaos experiment.
-      tags:
-      - experiments
-  /experiments/new:
-    post:
-      description: Create a new chaos experiment.
-      parameters:
-      - description: Request body
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/core.ExperimentInfo'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/core.ExperimentInfo'
-        "400":
-          description: Bad Request
+        "404":
+          description: Not Found
           schema:
             $ref: '#/definitions/utils.APIError'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/utils.APIError'
-      summary: Create a new chaos experiment.
+      summary: Get a chaos experiment.
       tags:
       - experiments
   /experiments/pause/{uid}:
     put:
       description: Pause a chaos experiment.
       parameters:
-      - description: uid
+      - description: the experiment uid
         in: path
         name: uid
         required: true
@@ -2786,7 +2608,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/experiment.StatusResponse'
+            $ref: '#/definitions/utils.Response'
         "400":
           description: Bad Request
           schema:
@@ -2806,7 +2628,7 @@ paths:
     put:
       description: Start a chaos experiment.
       parameters:
-      - description: uid
+      - description: the experiment uid
         in: path
         name: uid
         required: true
@@ -2817,7 +2639,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/experiment.StatusResponse'
+            $ref: '#/definitions/utils.Response'
         "400":
           description: Bad Request
           schema:
@@ -2835,7 +2657,7 @@ paths:
       - experiments
   /experiments/state:
     get:
-      description: Get chaos experiments state from Kubernetes cluster.
+      description: Get the status of all experiments.
       parameters:
       - description: namespace
         in: query
@@ -2847,31 +2669,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/experiment.ChaosState'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/utils.APIError'
-      summary: Get chaos experiments state from Kubernetes cluster.
-      tags:
-      - experiments
-  /experiments/update:
-    put:
-      description: Update a chaos experiment.
-      parameters:
-      - description: Request body
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/core.KubeObjectDesc'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/core.KubeObjectDesc'
+            $ref: '#/definitions/status.AllChaosStatus'
         "400":
           description: Bad Request
           schema:
@@ -2880,14 +2678,14 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/utils.APIError'
-      summary: Update a chaos experiment.
+      summary: Get the status of all experiments.
       tags:
       - experiments
   /schedules:
     delete:
-      description: Delete the specified schedule experiment.
+      description: Batch delete schedules by uids.
       parameters:
-      - description: uids
+      - description: 'the schedule uids, split with comma. Example: ?uids=uid1,uid2'
         in: query
         name: uids
         required: true
@@ -2898,7 +2696,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/schedule.StatusResponse'
+            $ref: '#/definitions/utils.Response'
         "400":
           description: Bad Request
           schema:
@@ -2911,25 +2709,59 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/utils.APIError'
-      summary: Delete the specified schedule experiment.
+      summary: Batch delete schedules.
+      tags:
+      - schedules
+    get:
+      description: Get chaos schedules from k8s cluster in real time.
+      parameters:
+      - description: filter schedules by namespace
+        in: query
+        name: namespace
+        type: string
+      - description: filter schedules by name
+        in: query
+        name: name
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/schedule.Schedule'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: List chaos schedules.
       tags:
       - schedules
     post:
-      description: Create a new schedule experiment.
+      consumes:
+      - application/json
+      description: Pass a JSON object to create a new schedule. The schema for JSON
+        is the same as the YAML schema for the Kubernetes object.
       parameters:
-      - description: Request body
+      - description: the schedule definition
         in: body
-        name: request
+        name: schedule
         required: true
         schema:
-          $ref: '#/definitions/core.ScheduleInfo'
+          $ref: '#/definitions/v1alpha1.Schedule'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/core.ScheduleInfo'
+            $ref: '#/definitions/v1alpha1.Schedule'
         "400":
           description: Bad Request
           schema:
@@ -2938,41 +2770,75 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/utils.APIError'
-      summary: Create a new schedule experiment.
+      summary: Create a new schedule.
       tags:
       - schedules
     put:
-      description: Update a schedule experiment.
+      description: Update a schedule.
       parameters:
       - description: Request body
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/core.KubeObjectDesc'
+          $ref: '#/definitions/v1alpha1.Schedule'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/core.KubeObjectDesc'
+            $ref: '#/definitions/v1alpha1.Schedule'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "404":
+          description: Not Found
           schema:
             $ref: '#/definitions/utils.APIError'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/utils.APIError'
-      summary: Update a schedule experiment.
+      summary: Update a schedule.
       tags:
       - schedules
   /schedules/{uid}:
-    get:
-      description: Get detailed information about the specified schedule experiment.
+    delete:
+      description: Delete the schedule by uid.
       parameters:
-      - description: uid
+      - description: the schedule uid
+        in: path
+        name: uid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Delete a schedule.
+      tags:
+      - schedules
+    get:
+      description: Get the schedule's detail by uid.
+      parameters:
+      - description: the schedule uid
         in: path
         name: uid
         required: true
@@ -2988,18 +2854,22 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/utils.APIError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIError'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/utils.APIError'
-      summary: Get detailed information about the specified schedule experiment.
+      summary: Get a schedule.
       tags:
-      - experiments
+      - schedules
   /schedules/pause/{uid}:
     put:
-      description: Pause a schedule object.
+      description: Pause a schedule.
       parameters:
-      - description: uid
+      - description: the schedule uid
         in: path
         name: uid
         required: true
@@ -3010,7 +2880,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/schedule.StatusResponse'
+            $ref: '#/definitions/utils.Response'
         "400":
           description: Bad Request
           schema:
@@ -3023,14 +2893,14 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/utils.APIError'
-      summary: Pause a schedule object.
+      summary: Pause a schedule.
       tags:
       - schedules
   /schedules/start/{uid}:
     put:
-      description: Start a schedule object.
+      description: Start a schedule.
       parameters:
-      - description: uid
+      - description: the schedule uid
         in: path
         name: uid
         required: true
@@ -3041,7 +2911,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/schedule.StatusResponse'
+            $ref: '#/definitions/utils.Response'
         "400":
           description: Bad Request
           schema:
@@ -3054,7 +2924,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/utils.APIError'
-      summary: Start a schedule object.
+      summary: Start a schedule.
       tags:
       - schedules
   /workflows:
