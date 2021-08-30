@@ -119,7 +119,7 @@ type ExpInfo struct {
 	// +optional
 	UID string `json:"uid,omitempty"`
 
-	// the subAction, generate atomaticly
+	// the subAction, generate automatically
 	// +optional
 	Action string `json:"action,omitempty"`
 

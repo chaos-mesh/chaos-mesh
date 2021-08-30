@@ -38,7 +38,7 @@ spec:
             description: Spec defines the behavior of a physical machine chaos experiment
             properties:
               action:
-                description: the subAction, generate atomaticly
+                description: the subAction, generate automatically
                 enum:
                 - stress-cpu
                 - stress-mem

@@ -1495,7 +1495,7 @@ spec:
                   PhysicalMachineChaos
                 properties:
                   action:
-                    description: the subAction, generate atomaticly
+                    description: the subAction, generate automatically
                     enum:
                     - stress-cpu
                     - stress-mem
@@ -3840,7 +3840,7 @@ spec:
                             state of PhysicalMachineChaos
                           properties:
                             action:
-                              description: the subAction, generate atomaticly
+                              description: the subAction, generate automatically
                               enum:
                               - stress-cpu
                               - stress-mem
@@ -5881,7 +5881,7 @@ spec:
                                 state of PhysicalMachineChaos
                               properties:
                                 action:
-                                  description: the subAction, generate atomaticly
+                                  description: the subAction, generate automatically
                                   enum:
                                   - stress-cpu
                                   - stress-mem
