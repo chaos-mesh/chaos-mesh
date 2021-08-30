@@ -27,7 +27,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 )
 
 // Reconciler for common chaos
@@ -49,7 +48,7 @@ type StatusAndReason struct {
 }
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	obj := r.Object.DeepCopyObject().(common.InnerObjectWithSelector)
+	obj := r.Object.DeepCopyObject().(v1alpha1.InnerObjectWithSelector)
 	if err := r.Client.Get(context.TODO(), req.NamespacedName, obj); err != nil {
 		if apierrors.IsNotFound(err) {
 			r.Log.Info("chaos not found")
@@ -119,7 +118,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			}
 
 			r.Log.Info("updating conditions", "conditions", conditions)
-			obj := r.Object.DeepCopyObject().(common.InnerObjectWithSelector)
+			obj := r.Object.DeepCopyObject().(v1alpha1.InnerObjectWithSelector)
 
 			if err := r.Client.Get(context.TODO(), req.NamespacedName, obj); err != nil {
 				r.Log.Error(err, "unable to get chaos")
