@@ -10,7 +10,12 @@ ARG HTTP_PROXY
 ENV http_proxy $HTTP_PROXY
 ENV https_proxy $HTTPS_PROXY
 
-RUN apt-get update && apt-get install protobuf-compiler git build-essential curl -y
+RUN apt-get update && apt-get install unzip git build-essential curl -y
+
+RUN curl -L https://github.com/protocolbuffers/protobuf/releases/download/v3.12.2/protoc-3.12.2-linux-x86_64.zip > /protoc.zip
+RUN unzip /protoc.zip -d /usr/local
+RUN chmod +xr -R /usr/local/include
+RUN chmod +x /usr/local/bin/protoc
 
 ARG TARGET_PLATFORM=amd64
 RUN curl https://dl.google.com/go/go1.16.7.linux-$TARGET_PLATFORM.tar.gz | tar -xz -C /usr/local
