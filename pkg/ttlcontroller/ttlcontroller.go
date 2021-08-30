@@ -19,13 +19,13 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 
-	runtimeutil "k8s.io/apimachinery/pkg/util/runtime"
+	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 var (
-	log = ctrl.Log.WithName("database ttl controller")
+	log = ctrl.Log.WithName("ttlcontroller")
 )
 
 // Controller defines the database ttl controller
@@ -37,12 +37,12 @@ type Controller struct {
 
 // TTLconfig defines the ttl
 type TTLconfig struct {
-	// databaseTTLResyncPeriod defines the time interval to cleanup data in the database.
+	// databaseTTLResyncPeriod defines the time interval to cleanup data in the database
 	DatabaseTTLResyncPeriod time.Duration
 	// EventTTL defines the ttl of events
 	EventTTL time.Duration
-	// ArchiveExperimentTTL defines the ttl of archive experiments
-	ArchiveExperimentTTL time.Duration
+	// ArchiveTTL defines the ttl of archives
+	ArchiveTTL time.Duration
 }
 
 // NewController returns a new database ttl controller
@@ -60,15 +60,19 @@ func NewController(
 
 // Register periodically calls function runWorker to delete the data.
 func Register(ctx context.Context, c *Controller) {
-	defer runtimeutil.HandleCrash()
-	log.Info("starting database TTL controller")
+	defer utilruntime.HandleCrash()
+
+	log.Info("Starting database TTL controller")
+
 	go wait.Until(c.runWorker, c.ttlconfig.DatabaseTTLResyncPeriod, ctx.Done())
 }
 
-// runWorker is a long-running function that will call the
-// function in order to delete the events and archives.
+// runWorker is a long-running function that will be called in order to delete the events and archives.
 func (c *Controller) runWorker() {
-	log.Info("deleting expired data from the database")
-	c.event.DeleteByCreateTime(context.Background(), c.ttlconfig.EventTTL)
-	c.experiment.DeleteByFinishTime(context.Background(), c.ttlconfig.ArchiveExperimentTTL)
+	log.Info("Deleting expired data from the database")
+
+	ctx := context.Background()
+
+	_ = c.event.DeleteByDuration(ctx, c.ttlconfig.EventTTL)
+	c.experiment.DeleteByFinishTime(ctx, c.ttlconfig.ArchiveTTL)
 }

@@ -28,17 +28,17 @@ var handlerModule = fx.Options(
 	fx.Provide(
 		common.NewService,
 		experiment.NewService,
+		schedule.NewService,
+		workflow.NewService,
 		event.NewService,
 		archive.NewService,
-		workflow.NewService,
-		schedule.NewService,
 	),
 	fx.Invoke(
 		common.Register,
 		experiment.Register,
+		schedule.Register,
+		workflow.Register,
 		event.Register,
 		archive.Register,
-		workflow.Register,
-		schedule.Register,
 	),
 )

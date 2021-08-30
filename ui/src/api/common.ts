@@ -1,6 +1,6 @@
 import { Config, RBACConfigParams } from './common.type'
 
-import { ExperimentScope } from 'components/NewExperiment/types'
+import { Scope } from 'components/NewExperiment/types'
 import http from './http'
 
 export const config = () => http.get<Config>('/common/config')
@@ -31,4 +31,4 @@ export const annotations = (podNamespaceList: string[]) =>
     },
   })
 
-export const pods = (data: Partial<Omit<ExperimentScope, 'mode' | 'value'>>) => http.post('/common/pods', data)
+export const pods = (data: Partial<Scope['selector']>) => http.post('/common/pods', data)

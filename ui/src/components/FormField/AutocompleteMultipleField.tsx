@@ -32,6 +32,7 @@ const AutocompleteMultipleField: React.FC<AutocompleteMultipleFieldProps & TextF
 
   return (
     <Autocomplete
+      freeSolo
       multiple
       options={!props.disabled ? options : []}
       noOptionsText={T('common.noOptions')}

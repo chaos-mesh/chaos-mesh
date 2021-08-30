@@ -1,19 +1,15 @@
 import { Box, Button, Divider, Grid, MenuItem, Typography } from '@material-ui/core'
 import { Form, Formik } from 'formik'
 import { LabelField, SelectField, TextField } from 'components/FormField'
-import {
-  Fields as ScheduleSpecificFields,
-  data as scheduleSpecificData,
-  schema as scheduleSpecificSchema,
-} from 'components/Schedule/types'
+import { Fields as ScheduleSpecificFields, data as scheduleSpecificData } from 'components/Schedule/types'
 import basicData, { schema as basicSchema } from './data/basic'
-import { setBasic, setScheduleSpecific, setStep2 } from 'slices/experiments'
+import { setBasic, setStep2 } from 'slices/experiments'
 import { useEffect, useMemo, useState } from 'react'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
-import AdvancedOptions from 'components/AdvancedOptions'
 import CheckIcon from '@material-ui/icons/Check'
 import { ExperimentKind } from 'components/NewExperiment/types'
+import OtherOptions from 'components/OtherOptions'
 import Paper from 'components-mui/Paper'
 import PublishIcon from '@material-ui/icons/Publish'
 import Scheduler from './form/Scheduler'
@@ -22,7 +18,6 @@ import SkeletonN from 'components-mui/SkeletonN'
 import Space from 'components-mui/Space'
 import T from 'components/T'
 import UndoIcon from '@material-ui/icons/Undo'
-import { string as yupString } from 'yup'
 
 function isInstant(kind: ExperimentKind | '', action: string) {
   if (kind === 'PodChaos' && (action === 'pod-kill' || action === 'container-kill')) {
@@ -38,20 +33,24 @@ interface Step2Props {
 }
 
 const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false }) => {
-  const { namespaces, step2, kindAction, basic, scheduleSpecific } = useStoreSelector((state) => state.experiments)
+  const { namespaces, step2, kindAction, basic } = useStoreSelector((state) => state.experiments)
   const [kind, action] = kindAction
   const scopeDisabled = kind === 'AWSChaos' || kind === 'GCPChaos'
-  const schema = basicSchema({ scopeDisabled })
+  const schema = basicSchema({ scopeDisabled, scheduled: inSchedule, needDeadline: inWorkflow })
   const dispatch = useStoreDispatch()
 
   const originalInit = useMemo(
     () =>
-      inWorkflow
-        ? { ...basicData, scheduler: undefined, deadline: '' }
-        : inSchedule
-        ? { ...basicData, ...scheduleSpecificData }
+      inSchedule
+        ? {
+            metadata: basicData.metadata,
+            spec: {
+              ...basicData.spec,
+              ...scheduleSpecificData,
+            },
+          }
         : basicData,
-    [inWorkflow, inSchedule]
+    [inSchedule]
   )
   const [init, setInit] = useState(originalInit)
 
@@ -59,31 +58,14 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false })
     setInit({
       ...originalInit,
       ...basic,
-      ...scheduleSpecific,
     })
-  }, [originalInit, basic, scheduleSpecific])
+  }, [originalInit, basic])
 
   const handleOnSubmitStep2 = (_values: Record<string, any>) => {
     const values = schema.cast(_values) as Record<string, any>
 
     if (process.env.NODE_ENV === 'development') {
-      console.debug('Debug handleSubmitStep2', values)
-    }
-
-    if (inSchedule) {
-      dispatch(
-        setScheduleSpecific({
-          schedule: values.schedule,
-          starting_deadline_seconds: values.starting_deadline_seconds,
-          concurrency_policy: values.concurrency_policy,
-          history_limit: values.history_limit,
-        })
-      )
-
-      delete values.schedule
-      delete values.starting_deadline_seconds
-      delete values.concurrency_policy
-      delete values.history_limit
+      console.debug('Debug handleSubmitStep2:', values)
     }
 
     dispatch(setBasic(values))
@@ -109,15 +91,7 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false })
         <Formik
           enableReinitialize
           initialValues={init}
-          validationSchema={
-            inWorkflow
-              ? schema.shape({
-                  deadline: yupString().required('The deadline is required'),
-                })
-              : inSchedule
-              ? schema.shape(scheduleSpecificSchema)
-              : schema
-          }
+          validationSchema={schema}
           validateOnChange={false}
           onSubmit={handleOnSubmitStep2}
         >
@@ -138,33 +112,33 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false })
                     <Typography>{T('newE.steps.basic')}</Typography>
                     <TextField
                       fast
-                      name="name"
+                      name="metadata.name"
                       label={T('common.name')}
                       helperText={
-                        errors.name && touched.name
-                          ? errors.name
+                        errors.metadata?.name && touched.metadata?.name
+                          ? errors.metadata.name
                           : T(`${inSchedule ? 'newS' : 'newE'}.basic.nameHelper`)
                       }
-                      error={errors.name && touched.name ? true : false}
+                      error={errors.metadata?.name && touched.metadata?.name ? true : false}
                     />
                     {inWorkflow && (
                       <TextField
                         fast
-                        name="deadline"
+                        name="spec.duration"
                         label={T('newW.node.deadline')}
                         helperText={
-                          (errors as any).deadline && (touched as any).deadline
-                            ? (errors as any).deadline
+                          errors.spec?.duration && touched.spec?.duration
+                            ? errors.spec?.duration
                             : T('newW.node.deadlineHelper')
                         }
-                        error={(errors as any).deadline && (touched as any).deadline ? true : false}
+                        error={errors.spec?.duration && touched.spec?.duration ? true : false}
                       />
                     )}
                     {inSchedule && <ScheduleSpecificFields errors={errors} touched={touched} />}
-                    <AdvancedOptions>
+                    <OtherOptions>
                       {namespaces.length && (
                         <SelectField
-                          name="namespace"
+                          name="metadata.namespace"
                           label={T('k8s.namespace')}
                           helperText={T('newE.basic.namespaceHelper')}
                         >
@@ -175,9 +149,9 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false })
                           ))}
                         </SelectField>
                       )}
-                      <LabelField name="labels" label={T('k8s.labels')} isKV />
-                      <LabelField name="annotations" label={T('k8s.annotations')} isKV />
-                    </AdvancedOptions>
+                      <LabelField name="metadata.labels" label={T('k8s.labels')} isKV />
+                      <LabelField name="metadata.annotations" label={T('k8s.annotations')} isKV />
+                    </OtherOptions>
                     {!inWorkflow && !isInstant(kind, action) && (
                       <>
                         <Divider />

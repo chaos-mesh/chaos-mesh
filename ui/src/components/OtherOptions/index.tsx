@@ -6,7 +6,7 @@ import Space from 'components-mui/Space'
 import T from 'components/T'
 import { useState } from 'react'
 
-interface AdvancedOptionsProps {
+interface OtherOptionsProps {
   isOpen?: boolean
   beforeOpen?: () => void
   afterClose?: () => void
@@ -14,7 +14,7 @@ interface AdvancedOptionsProps {
   disabled?: boolean
 }
 
-const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
+const OtherOptions: React.FC<OtherOptionsProps> = ({
   isOpen = false,
   beforeOpen,
   afterClose,
@@ -43,7 +43,7 @@ const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
           onClick={setOpen}
           disabled={disabled}
         >
-          {title ? title : T('common.advancedOptions')}
+          {title ? title : T('common.otherOptions')}
         </Button>
       </Box>
       <Space sx={{ display: open ? 'unset' : 'none' }}>{children}</Space>
@@ -51,4 +51,4 @@ const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
   )
 }
 
-export default AdvancedOptions
+export default OtherOptions
