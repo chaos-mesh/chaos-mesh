@@ -50,40 +50,28 @@ func main() {
 	}
 	{
 		var (
-			schedule          yaml.MapSlice
-			containerNames    []string
-			findSchedule      bool
-			findContainerName bool
+			schedule     yaml.MapSlice
+			findSchedule bool
 		)
+
+		if isIncompatibleChaos(old) {
+			fmt.Printf("the define of %s is changed in v2.0, please modify it according to the document, refer to https://chaos-mesh.org/docs/\n", old.Kind)
+			os.Exit(1)
+		}
+
 		for _, item := range old.Spec {
 			if item.Key == "scheduler" {
 				schedule = item.Value.(yaml.MapSlice)
 				findSchedule = true
 			}
-			if item.Key == "containerName" {
-				containerNames = append(containerNames, item.Value.(string))
-				findContainerName = true
-			}
-		}
-		if !findSchedule && !findContainerName {
-			new = old
-		} else if findSchedule && !findContainerName {
-			new = toScheduleObject(old, schedule)
-		} else if findSchedule && findContainerName {
-			new = toScheduleObject(old, schedule)
-			new.Spec = append(new.Spec, yaml.MapItem{Key: "containerNames", Value: containerNames})
-		} else {
-			new.ApiVersion = old.ApiVersion
-			new.Metadata = old.Metadata
-			new.Kind = old.Kind
-			for _, item := range old.Spec {
-				if item.Key != "containerName" {
-					new.Spec = append(new.Spec, item)
-				}
-			}
-			new.Spec = append(new.Spec, yaml.MapItem{Key: "containerNames", Value: containerNames})
 		}
 
+		if findSchedule {
+			new = toScheduleObject(old, schedule)
+		} else {
+			new = old
+			new.Spec = transformChaosSpec(old)
+		}
 	}
 	data, err = yaml.Marshal(new)
 	if err != nil {
@@ -124,12 +112,61 @@ func toScheduleObject(old Item, schedule yaml.MapSlice) Item {
 	new.Spec = append(new.Spec, yaml.MapItem{Key: "type", Value: toNewKind(old.Kind)})
 	new.Spec = append(new.Spec, yaml.MapItem{Key: "historyLimit", Value: 5})
 	new.Spec = append(new.Spec, yaml.MapItem{Key: "concurrencyPolicy", Value: "Forbid"})
-	var newSpec yaml.MapSlice
-	for _, item := range old.Spec {
-		if item.Key != "scheduler" {
-			newSpec = append(newSpec, item)
-		}
-	}
+
+	newSpec := transformChaosSpec(old)
 	new.Spec = append(new.Spec, yaml.MapItem{Key: getKeyName(old.Kind), Value: newSpec})
 	return new
+}
+
+func transformChaosSpec(item Item) yaml.MapSlice {
+	var (
+		newSpec        yaml.MapSlice
+		containerNames []string
+	)
+	for _, kv := range item.Spec {
+		if kv.Key == "scheduler" {
+			continue
+		}
+
+		if kv.Key == "containerName" {
+			containerNames = append(containerNames, kv.Value.(string))
+			continue
+		}
+
+		if item.Kind == "DNSChaos" {
+			// 'scope' is obsolete in v2.0, and instead with 'patterns'
+			// if 'scope' is 'all', means chaos applies to all the host
+			// so it equal to pattern "*". otherwise, can't transform.
+			if kv.Key == "scope" && kv.Value == "all" {
+				patterns := []string{"*"}
+				kv = yaml.MapItem{Key: "patterns", Value: patterns}
+			}
+		}
+
+		newSpec = append(newSpec, kv)
+	}
+
+	if len(containerNames) != 0 {
+		newSpec = append(newSpec, yaml.MapItem{Key: "containerNames", Value: containerNames})
+	}
+
+	return newSpec
+}
+
+func isIncompatibleChaos(item Item) bool {
+	incompatible := false
+	switch item.Kind {
+	case "DNSChaos":
+		for _, kv := range item.Spec {
+			// 'scope' is obsolete in v2.0, and instead with 'patterns'
+			// if 'scope' is 'all', means chaos applies to all the host
+			// so it equal to pattern "*". otherwise, can't transform.
+			if kv.Key == "scope" && kv.Value != "all" {
+				incompatible = true
+			}
+		}
+	default:
+	}
+
+	return incompatible
 }
