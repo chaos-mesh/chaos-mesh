@@ -418,7 +418,7 @@ $(eval $(call RUN_IN_DEV_ENV_TEMPLATE,e2e-test/image/e2e/bin/e2e.test,e2e-test/e
 # Run tests
 CLEAN_TARGETS += cover.out cover.out.tmp
 define test-make
-	$(GOTEST) -p 1 $$$$($$(PACKAGE_LIST)) -coverprofile cover.out.tmp
+	CGO_ENABLED=1 $(GOTEST) -p 1 $$$$($$(PACKAGE_LIST)) -coverprofile cover.out.tmp
 	cat cover.out.tmp | grep -v "_generated.deepcopy.go" > cover.out
 	make failpoint-disable
 endef
