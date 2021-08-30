@@ -21,13 +21,12 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
-	"github.com/chaos-mesh/chaos-mesh/pkg/store/dbstore"
 )
 
 var log = ctrl.Log.WithName("store/schedule")
 
 // NewStore returns a new ScheduleStore.
-func NewStore(db *dbstore.DB) core.ScheduleStore {
+func NewStore(db *gorm.DB) core.ScheduleStore {
 	db.AutoMigrate(&core.Schedule{})
 
 	return &ScheduleStore{db}
@@ -41,7 +40,7 @@ func DeleteIncompleteSchedules(es core.ScheduleStore, _ core.EventStore) {
 }
 
 type ScheduleStore struct {
-	db *dbstore.DB
+	db *gorm.DB
 }
 
 // ListMeta implements the core.ScheduleStore.ListMeta method.

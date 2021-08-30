@@ -14,6 +14,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"os"
 
@@ -32,24 +33,17 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/collector"
 	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
 	"github.com/chaos-mesh/chaos-mesh/pkg/store"
-	"github.com/chaos-mesh/chaos-mesh/pkg/store/dbstore"
 	"github.com/chaos-mesh/chaos-mesh/pkg/ttlcontroller"
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
 )
 
-var (
-	log = ctrl.Log.WithName("dashboard")
-)
-
-var (
-	printVersion bool
-)
+var log = ctrl.Log.WithName("chaos-dashboard")
 
 // @title Chaos Mesh Dashboard API
 // @version 2.0
-// @description Swagger docs for Chaos Mesh Dashboard. If you encounter any problems with API, please click on the issues link below to report bugs or questions.
+// @description Swagger for Chaos Mesh Dashboard. If you encounter any problems with API, please click on the issues link below to report.
 
-// @contact.name Issues
+// @contact.name GitHub Issues
 // @contact.url https://github.com/chaos-mesh/chaos-mesh/issues
 
 // @license.name Apache 2.0
@@ -57,6 +51,8 @@ var (
 
 // @BasePath /api
 func main() {
+	var printVersion bool
+
 	flag.BoolVar(&printVersion, "version", false, "print version information and exit")
 	flag.Parse()
 
@@ -81,13 +77,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	ctrlRuntimeStopCh := ctrl.SetupSignalHandler()
+	controllerRuntimeSignalHandlerContext := ctrl.SetupSignalHandler()
 	app := fx.New(
 		fx.Provide(
-			func() (<-chan struct{}, *config.ChaosDashboardConfig, *ttlcontroller.TTLconfig) {
-				return ctrlRuntimeStopCh, dashboardConfig, persistTTLConfigParsed
+			func() (context.Context, *config.ChaosDashboardConfig, *ttlcontroller.TTLconfig) {
+				return controllerRuntimeSignalHandlerContext, dashboardConfig, persistTTLConfigParsed
 			},
-			dbstore.NewDBStore,
+			store.NewDBStore,
 			collector.NewServer,
 			ttlcontroller.NewController,
 		),

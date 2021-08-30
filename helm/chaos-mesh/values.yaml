@@ -26,6 +26,9 @@ timezone: "UTC"
 # enableProfiling is a flag to enable pprof in controller-manager and chaos-daemon.
 enableProfiling: true
 
+# enableCtrlServer is a flag to enable ctrlserver in controller-manager and chaos-daemon.
+enableCtrlServer: true
+
 registry: ""
 
 ## Optional array of imagePullSecrets containing private registry credentials
@@ -40,7 +43,6 @@ controllerManager:
   replicaCount: 1
 
   priorityClassName: ""
-
   image: pingcap/chaos-mesh:latest
   imagePullPolicy: IfNotPresent
 

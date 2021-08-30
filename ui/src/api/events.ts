@@ -7,9 +7,4 @@ export const events = (params?: EventsParams) =>
     params,
   })
 
-export const get = (id: string) =>
-  http.get<Event>('/events/get', {
-    params: {
-      id,
-    },
-  })
+export const get = (id: string) => http.get<Event>(`/events/${id}`)

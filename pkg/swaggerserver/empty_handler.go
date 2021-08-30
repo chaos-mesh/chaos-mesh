@@ -21,9 +21,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Handler returns an empty `http.Handler`.
-func Handler() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.String(http.StatusOK, "Swagger UI is not built. Please run `SWAGGER=1 make`.")
-	}
+func Handler(c *gin.Context) {
+	c.String(http.StatusOK, `Swagger UI is not built.
+Please run SWAGGER=1 make.
+Run SWAGGER=1 make images/chaos-dashboard/bin/chaos-dashboard if you only want to build dashboard only.
+(Note: If you only want to build the binary, pass IN_DOCKER=1.)`)
 }

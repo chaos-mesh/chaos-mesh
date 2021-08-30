@@ -15,7 +15,8 @@ metadata:
 spec:
   containers:
   - name: main
-    image: hub.pingcap.net/yangkeao/chaos-mesh-e2e-base
+    image: hub.pingcap.net/chaos-mesh/chaos-mesh-e2e-base:latest
+    imagePullPolicy: Always
     command:
     - runner.sh
     # Clean containers on TERM signal in root process to avoid cgroup leaking.
@@ -115,6 +116,8 @@ def build(String name, String code) {
 							env
 							echo "====== go env ======"
 							go env
+							echo "====== go version ======"
+							go version
 							echo "====== docker version ======"
 							docker version
 							"""
@@ -196,6 +199,8 @@ def call(BUILD_BRANCH, CREDENTIALS_ID) {
 	def BUILD_URL = "git@github.com:pingcap/chaos-mesh.git"
 	def PROJECT_DIR = "go/src/github.com/chaos-mesh/chaos-mesh"
 
+	def SKIP_TEST = false
+
 	catchError {
 		node('build_go1130_memvolume') {
 			container("golang") {
@@ -220,6 +225,20 @@ def call(BUILD_BRANCH, CREDENTIALS_ID) {
 						]
 					}
 
+					def modifiedFiles = sh(script: "git diff --name-only origin/master...", returnStdout: true).trim().split('\n')
+					List ignoredModifications = modifiedFiles.findAll { 
+						// all files without extension and is not Makefile will be regarded as markdown file
+						it.endsWith('.md') || 
+							(!it.contains('.') && it != 'Makefile') || 
+							it.startsWith('ui') || 
+							it.startsWith('docs') || 
+							it.startsWith('static')
+					}
+					echo 'Modified Files: ' + modifiedFiles.join(',')
+					echo 'Modified Ignored Files: ' + ignoredModifications.join(',')
+					SKIP_TEST = modifiedFiles.size() == ignoredModifications.size()
+					echo String.valueOf(SKIP_TEST)
+
 					stash excludes: "vendor/**,deploy/**", name: "chaos-mesh"
 				}
 			}
@@ -235,7 +254,9 @@ def call(BUILD_BRANCH, CREDENTIALS_ID) {
                 build("v1.20", "${GLOBALS} GINKGO_NODES=6 KUBE_VERSION=v1.20.2 ./hack/e2e.sh -- --ginkgo.focus='Basic'")
         }
 		builds.failFast = false
-		parallel builds
+		if (!SKIP_TEST) {
+			parallel builds
+		}
 
 		currentBuild.result = "SUCCESS"
 	}

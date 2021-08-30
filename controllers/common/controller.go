@@ -73,7 +73,7 @@ const (
 )
 
 // Reconcile the common chaos
-func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	obj := r.Object.DeepCopyObject().(InnerObjectWithSelector)
 
 	if err := r.Client.Get(context.TODO(), req.NamespacedName, obj); err != nil {

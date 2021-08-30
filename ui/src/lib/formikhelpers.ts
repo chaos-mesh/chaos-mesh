@@ -1,22 +1,29 @@
-import { CallchainFrame, Experiment, ExperimentScope } from 'components/NewExperiment/types'
-import { arrToObjBySep, toCamelCase, toTitleCase } from './utils'
+import { Experiment, ExperimentKind, Frame, Scope } from 'components/NewExperiment/types'
 
+import { ScheduleSpecific } from 'components/Schedule/types'
 import { Template } from 'slices/workflows'
 import { WorkflowBasic } from 'components/NewWorkflow'
-import _snakecase from 'lodash.snakecase'
-import basic from 'components/NewExperimentNext/data/basic'
-import snakeCaseKeys from 'snakecase-keys'
+import basicData from 'components/NewExperimentNext/data/basic'
+import { templateTypeToFieldName } from 'api/zz_generated.frontend.chaos-mesh'
+import { toTitleCase } from './utils'
 import yaml from 'js-yaml'
 
-export function parseSubmit(e: Experiment) {
-  const values: Experiment = JSON.parse(JSON.stringify(e))
+export function parseSubmit<K extends ExperimentKind>(
+  kind: K,
+  e: Experiment<Exclude<K, 'Schedule'>>,
+  options?: {
+    inSchedule?: boolean
+  }
+) {
+  const values: typeof e = JSON.parse(JSON.stringify(e))
+  let { metadata, spec } = values
 
   // Set default namespace when it's not present
-  if (!values.namespace) {
-    values.namespace = values.scope.namespaces[0]
+  if (!metadata.namespace) {
+    metadata.namespace = spec.selector.namespaces[0]
   }
 
-  // Parse labels, label_selectors, annotations and annotation_selectors to object
+  // Parse labels, annotations, labelSelectors, and annotationSelectors to object
   function helper1(selectors: string[], updateVal?: (s: string) => any) {
     return selectors.reduce((acc: Record<string, any>, d) => {
       const splited = d.replace(/\s/g, '').split(/:(.+)/)
@@ -26,115 +33,165 @@ export function parseSubmit(e: Experiment) {
       return acc
     }, {})
   }
-  // For parse scope
-  function helper2(scope: ExperimentScope) {
-    scope.label_selectors = helper1(scope.label_selectors as string[])
-    scope.annotation_selectors = helper1(scope.annotation_selectors as string[])
-    scope.pods = (scope.pods as unknown as string[]).reduce((acc, d) => {
-      const [namespace, name] = d.split(':')
-      if (acc.hasOwnProperty(namespace)) {
-        acc[namespace].push(name)
-      } else {
-        acc[namespace] = [name]
-      }
+  // Parse selector
+  function helper2(scope: Scope['selector']) {
+    if (scope.labelSelectors?.length) {
+      scope.labelSelectors = helper1(scope.labelSelectors) as any
+    } else {
+      delete scope.labelSelectors
+    }
+    if (scope.annotationSelectors?.length) {
+      scope.annotationSelectors = helper1(scope.annotationSelectors) as any
+    } else {
+      delete scope.annotationSelectors
+    }
 
-      return acc
-    }, {} as Record<string, string[]>)
+    // Parse phaseSelectors
+    const phaseSelectors = scope.phaseSelectors
+    if (phaseSelectors?.length === 1 && phaseSelectors[0] === 'all') {
+      delete scope.phaseSelectors
+    }
 
-    // Parse phase_selectors
-    const phaseSelectors = scope.phase_selectors
-    if (phaseSelectors.length === 1 && phaseSelectors[0] === 'all') {
-      scope.phase_selectors = []
+    // Parse pods
+    if (scope.pods?.length) {
+      scope.pods = scope.pods.reduce((acc, d) => {
+        const [namespace, name] = d.split(':')
+        if (acc.hasOwnProperty(namespace)) {
+          acc[namespace].push(name)
+        } else {
+          acc[namespace] = [name]
+        }
+
+        return acc
+      }, {} as Record<string, string[]>) as any
+    } else {
+      delete scope.pods
     }
   }
-  values.labels = helper1(values.labels as string[])
-  values.annotations = helper1(values.annotations as string[])
-  helper2(values.scope)
+  if (metadata.labels?.length) {
+    metadata.labels = helper1(metadata.labels) as any
+  } else {
+    delete metadata.labels
+  }
+  if (metadata.annotations?.length) {
+    metadata.annotations = helper1(metadata.annotations) as any
+  } else {
+    delete metadata.annotations
+  }
+  helper2(spec.selector)
 
-  const kind = values.target.kind
-
-  // Handle NetworkChaos target
   if (kind === 'NetworkChaos') {
-    const networkTarget = values.target.network_chaos.target_scope
+    if (!(spec as any).externalTargets.length) {
+      delete (spec as any).externalTargets
+    }
 
-    if (networkTarget) {
-      if (networkTarget.mode) {
-        helper2(values.target.network_chaos.target_scope!)
+    if ((spec as any).target) {
+      if ((spec as any).target.mode) {
+        helper2((spec as any).target.selector)
       } else {
-        values.target.network_chaos.target_scope = undefined
+        ;(spec as any).target = undefined
       }
     }
   }
 
-  if (kind === 'IOChaos' && values.target.io_chaos.action === 'attrOverride') {
-    values.target.io_chaos.attr = helper1(values.target.io_chaos.attr as string[], (s: string) => parseInt(s, 10))
+  if (kind === 'IOChaos' && (spec as any).action === 'attrOverride') {
+    ;(spec as any).attr = helper1((spec as any).attr as string[], (s: string) => parseInt(s, 10))
   }
 
-  return values
+  if (options?.inSchedule) {
+    const { schedule, historyLimit, concurrencyPolicy, startingDeadlineSeconds, ...rest } =
+      spec as unknown as ScheduleSpecific
+    const scheduleSpec = {
+      schedule,
+      historyLimit,
+      concurrencyPolicy,
+      startingDeadlineSeconds,
+      type: kind,
+      [templateTypeToFieldName(kind)]: rest,
+    }
+    spec = scheduleSpec as any
+  }
+
+  return {
+    apiVersion: 'chaos-mesh.org/v1alpha1',
+    kind: options?.inSchedule ? 'Schedule' : kind,
+    metadata,
+    spec,
+  }
 }
 
 function selectorsToArr(selectors: Object, separator: string) {
   return Object.entries(selectors).map(([key, val]) => `${key}${separator}${val}`)
 }
 
-export function yamlToExperiment(yamlObj: any): any {
-  const { kind, metadata, spec } = snakeCaseKeys(yamlObj, {
-    exclude: [/\.|\/|-/], // Keys like app.kubernetes.io/component should be ignored
-  }) as any
+export function parseYAML(
+  yamlObj: any,
+  options?: {
+    isSchedule?: boolean
+  }
+): { kind: ExperimentKind; basic: any; spec: any } {
+  let { kind, metadata, spec } = yamlObj
 
   if (!kind || !metadata || !spec) {
     throw new Error('Fail to parse the YAML file. Please check the kind, metadata, and spec fields.')
   }
 
-  let result = {
-    basic: {
-      ...basic,
+  if (!options?.isSchedule && !spec.selector) {
+    throw new Error('The required spec.selector field is missing.')
+  }
+
+  let basic = {
+    metadata: {
       ...metadata,
       labels: metadata.labels ? selectorsToArr(metadata.labels, ':') : [],
       annotations: metadata.annotations ? selectorsToArr(metadata.annotations, ':') : [],
-      scope: {
-        ...basic.scope,
-        namespaces: spec.selector.namespaces ?? [],
-        label_selectors: spec.selector?.label_selectors ? selectorsToArr(spec.selector.label_selectors, ': ') : [],
-        annotation_selectors: spec.selector?.annotation_selectors
-          ? selectorsToArr(spec.selector.annotation_selectors, ': ')
-          : [],
-        mode: spec.mode ?? 'one',
-        value: spec.value?.toString() ?? '',
-      },
-      scheduler: {
-        duration: spec.duration ?? '',
-      },
     },
+    spec: {},
   }
 
-  delete spec.selector
-  delete spec.mode
-  delete spec.value
-  delete spec.scheduler
-  delete spec.duration
+  function parseBasicSpec(spec: typeof basicData.spec) {
+    return {
+      selector: {
+        ...basicData.spec.selector,
+        namespaces: spec.selector.namespaces ?? [],
+        labelSelectors: spec.selector.labelSelectors ? selectorsToArr(spec.selector.labelSelectors, ': ') : [],
+        annotation_selectors: spec.selector.annotationSelectors
+          ? selectorsToArr(spec.selector.annotationSelectors, ': ')
+          : [],
+      },
+      mode: spec.mode ?? 'one',
+      value: spec.value,
+      duration: spec.duration ?? '',
+    }
+  }
+
+  if (options?.isSchedule) {
+    const { schedule, historyLimit, concurrencyPolicy, startingDeadlineSeconds, ...rest } =
+      spec as unknown as ScheduleSpecific
+    const scheduleSpec = {
+      schedule,
+      historyLimit,
+      concurrencyPolicy,
+      startingDeadlineSeconds,
+    }
+    kind = (rest as any).type
+    spec = (rest as any)[templateTypeToFieldName(kind)]
+    basic.spec = { ...parseBasicSpec(spec), ...scheduleSpec }
+  } else {
+    basic.spec = parseBasicSpec(spec)
+  }
+
+  const { selector, mode, value, duration, ...rest } = spec
+  spec = rest
 
   if (kind === 'NetworkChaos') {
     if (spec.target) {
-      const namespaces = spec.target.selector?.namespaces ?? []
-      const label_selectors = spec.target.selector?.label_selectors
-        ? selectorsToArr(spec.target.selector.label_selectors, ': ')
+      spec.target.selector.labelSelectors = spec.target.selector.labelSelectors
+        ? selectorsToArr(spec.target.selector.labelSelectors, ': ')
         : []
-      const annotation_selectors = spec.target.selector?.annotation_selectors
-        ? selectorsToArr(spec.target.selector.annotation_selectors, ': ')
+      spec.target.selector.annotationSelectors = spec.target.selector.annotationSelectors
+        ? selectorsToArr(spec.target.selector.annotationSelectors, ': ')
         : []
-
-      spec.target.selector && delete spec.target.selector
-
-      spec.target_scope = {
-        ...basic.scope,
-        ...spec.target,
-        namespaces,
-        label_selectors,
-        annotation_selectors,
-      }
-
-      delete spec.target
     }
   }
 
@@ -143,7 +200,7 @@ export function yamlToExperiment(yamlObj: any): any {
   }
 
   if (kind === 'KernelChaos' && spec.fail_kern_request) {
-    spec.fail_kern_request.callchain = spec.fail_kern_request.callchain.map((frame: CallchainFrame) => {
+    spec.fail_kern_request.callchain = spec.fail_kern_request.callchain.map((frame: Frame) => {
       if (!frame.parameters) {
         frame.parameters = ''
       }
@@ -171,20 +228,10 @@ export function yamlToExperiment(yamlObj: any): any {
     }
   }
 
-  console.log({
-    ...result,
-    target: {
-      kind,
-      [_snakecase(kind)]: spec,
-    },
-  })
-
   return {
-    ...result,
-    target: {
-      kind,
-      [_snakecase(kind)]: spec,
-    },
+    kind,
+    basic,
+    spec,
   }
 }
 
@@ -201,29 +248,9 @@ function validate(defaultI18n: string, i18n?: string) {
 }
 export const validateName = (i18n?: string) => validate('The name is required', i18n)
 export const validateDuration = (i18n?: string) => validate('The duration is required', i18n)
+export const validateSchedule = (i18n?: string) => validate('The schedule is required', i18n)
 export const validateDeadline = (i18n?: string) => validate('The deadline is required', i18n)
 export const validateImage = (i18n?: string) => validate('The image is required', i18n)
-
-function scopeToYAMLJSON(scope: ExperimentScope) {
-  const result = {
-    selector: {} as any,
-    mode: scope.mode,
-  }
-
-  if (scope.namespaces.length) {
-    result.selector.namespaces = scope.namespaces
-  }
-
-  if ((scope.label_selectors as string[]).length) {
-    result.selector.labelSelectors = arrToObjBySep(scope.label_selectors as string[], ': ')
-  }
-
-  if ((scope.annotation_selectors as string[]).length) {
-    result.selector.annotationSelectors = arrToObjBySep(scope.annotation_selectors as string[], ': ')
-  }
-
-  return result
-}
 
 export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
   const { name, namespace, deadline } = basic
@@ -236,24 +263,24 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
     }
   }
 
+  function pushSingle(template: Template) {
+    const exp = template.experiment
+    const kind = exp.kind
+    const { duration: deadline, ...rest } = exp.spec
+
+    pushTemplate({
+      name: template.name,
+      templateType: kind,
+      deadline,
+      [templateTypeToFieldName(kind)]: rest,
+    })
+  }
+
   function recurInsertTemplates(templates: Template[]) {
     templates.forEach((t) => {
       switch (t.type) {
         case 'single':
-          const experiment = t.experiment!
-          const basic = experiment.basic
-          const kind = experiment.target.kind
-          const spec = _snakecase(kind)
-
-          pushTemplate({
-            name: t.name,
-            templateType: kind,
-            deadline: experiment.basic.deadline,
-            [toCamelCase(kind)]: {
-              ...scopeToYAMLJSON(basic.scope),
-              ...experiment.target[spec],
-            },
-          })
+          pushSingle(t)
 
           break
         case 'serial':
@@ -280,21 +307,7 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
                 return
               }
 
-              const e = d.experiment!
-              const basic = e.basic
-              const name = basic.name
-              const kind = e.target.kind
-              const spec = _snakecase(kind)
-
-              pushTemplate({
-                name,
-                templateType: kind,
-                deadline: e.basic.deadline,
-                [toCamelCase(kind)]: {
-                  ...scopeToYAMLJSON(basic.scope),
-                  ...e.target[spec],
-                },
-              })
+              pushSingle(d)
             }
           })
 

@@ -45,8 +45,7 @@ type Reconciler struct {
 
 var t = true
 
-func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	ctx := context.Background()
+func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 
 	schedule := &v1alpha1.Schedule{}
 	err := r.Get(ctx, req.NamespacedName, schedule)
@@ -107,7 +106,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 					r.Recorder.Event(schedule, recorder.ScheduleForbid{
 						RunningName: item.GetObjectMeta().Name,
 					})
-					r.Log.Info("forbid to spawn new chaos", "running", item.GetChaos().Name)
+					r.Log.Info("forbid to spawn new chaos", "running", item.GetName())
 					break
 				}
 			} else {
@@ -117,7 +116,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 					r.Recorder.Event(schedule, recorder.ScheduleForbid{
 						RunningName: workflow.GetObjectMeta().Name,
 					})
-					r.Log.Info("forbid to spawn new workflow", "running", workflow.GetChaos().Name)
+					r.Log.Info("forbid to spawn new workflow", "running", workflow.GetName())
 					break
 				}
 			}
@@ -125,7 +124,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	if shouldSpawn {
-		newObj, meta, err := schedule.Spec.ScheduleItem.SpawnNewObject(schedule.Spec.Type)
+		newObj, err := schedule.Spec.ScheduleItem.SpawnNewObject(schedule.Spec.Type)
 		if err != nil {
 			r.Recorder.Event(schedule, recorder.Failed{
 				Activity: "generate new object",
@@ -134,7 +133,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			return ctrl.Result{}, nil
 		}
 
-		meta.SetOwnerReferences([]metav1.OwnerReference{
+		newObj.SetOwnerReferences([]metav1.OwnerReference{
 			{
 				APIVersion:         schedule.APIVersion,
 				Kind:               schedule.Kind,
@@ -144,11 +143,11 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 				BlockOwnerDeletion: &t,
 			},
 		})
-		meta.SetLabels(map[string]string{
+		newObj.SetLabels(map[string]string{
 			"managed-by": schedule.Name,
 		})
-		meta.SetNamespace(schedule.Namespace)
-		meta.SetName(names.SimpleNameGenerator.GenerateName(schedule.Name + "-"))
+		newObj.SetNamespace(schedule.Namespace)
+		newObj.SetName(names.SimpleNameGenerator.GenerateName(schedule.Name + "-"))
 
 		err = r.Create(ctx, newObj)
 		if err != nil {
@@ -160,9 +159,9 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			return ctrl.Result{}, nil
 		}
 		r.Recorder.Event(schedule, recorder.ScheduleSpawn{
-			Name: meta.GetName(),
+			Name: newObj.GetName(),
 		})
-		r.Log.Info("create new object", "namespace", meta.GetNamespace(), "name", meta.GetName())
+		r.Log.Info("create new object", "namespace", newObj.GetNamespace(), "name", newObj.GetName())
 
 		lastScheduleTime := now
 		updateError := retry.RetryOnConflict(retry.DefaultBackoff, func() error {

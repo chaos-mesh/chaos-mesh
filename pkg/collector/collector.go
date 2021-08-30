@@ -40,7 +40,7 @@ type ChaosCollector struct {
 }
 
 // Reconcile reconciles a chaos collector.
-func (r *ChaosCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+func (r *ChaosCollector) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	var (
 		chaosMeta  metav1.Object
 		ok         bool
@@ -51,7 +51,7 @@ func (r *ChaosCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		r.Log.Error(nil, "apiType has not been initialized")
 		return ctrl.Result{}, nil
 	}
-	ctx := context.Background()
+
 	manageFlag = false
 
 	obj, ok := r.apiType.DeepCopyObject().(v1alpha1.InnerObject)
@@ -115,7 +115,7 @@ func (r *ChaosCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 }
 
 // Setup setups collectors by Manager.
-func (r *ChaosCollector) Setup(mgr ctrl.Manager, apiType runtime.Object) error {
+func (r *ChaosCollector) Setup(mgr ctrl.Manager, apiType client.Object) error {
 	r.apiType = apiType
 
 	return ctrl.NewControllerManagedBy(mgr).

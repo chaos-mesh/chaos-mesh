@@ -21,13 +21,12 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
-	"github.com/chaos-mesh/chaos-mesh/pkg/store/dbstore"
 )
 
 var log = ctrl.Log.WithName("store/experiment")
 
 // NewStore returns a new ExperimentStore.
-func NewStore(db *dbstore.DB) core.ExperimentStore {
+func NewStore(db *gorm.DB) core.ExperimentStore {
 	db.AutoMigrate(&core.Experiment{})
 
 	return &experimentStore{db}
@@ -41,7 +40,7 @@ func DeleteIncompleteExperiments(es core.ExperimentStore, _ core.EventStore) {
 }
 
 type experimentStore struct {
-	db *dbstore.DB
+	db *gorm.DB
 }
 
 // ListMeta implements the core.ExperimentStore.ListMeta method.

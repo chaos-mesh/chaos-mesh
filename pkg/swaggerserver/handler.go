@@ -20,13 +20,14 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
-	_ "github.com/chaos-mesh/chaos-mesh/docs" // for swagger api
+	"github.com/chaos-mesh/chaos-mesh/pkg/swaggerdocs"
 )
 
-// Handler returns a swagger `http.Handler`.
-func Handler() gin.HandlerFunc {
-	return ginSwagger.WrapHandler(
+func Handler(c *gin.Context) {
+	swaggerdocs.SwaggerInfo.Host = c.Request.Host
+
+	ginSwagger.CustomWrapHandler(
+		&ginSwagger.Config{URL: "/api/swagger/doc.json"},
 		swaggerFiles.Handler,
-		ginSwagger.URL("doc.json"),
-	)
+	)(c)
 }

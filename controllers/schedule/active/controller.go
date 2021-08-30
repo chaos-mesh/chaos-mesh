@@ -47,9 +47,7 @@ type Reconciler struct {
 	Recorder recorder.ChaosRecorder
 }
 
-func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	ctx := context.Background()
-
+func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	schedule := &v1alpha1.Schedule{}
 	err := r.Get(ctx, req.NamespacedName, schedule)
 	if err != nil {

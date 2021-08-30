@@ -34,10 +34,10 @@
   },
   "newE": {
     "title": "New experiment",
-    "titleStep1": "Choose a Target",
-    "titleStep2": "Fill the experiment info",
+    "titleStep1": "Experiment Type",
+    "titleStep2": "Experiment Info",
     "steps": {
-      "basic": "Basic",
+      "basic": "Metadata",
       "scope": "Scope",
       "scopeDisabled": " (No need to fill in)",
       "run": "Run"
@@ -155,7 +155,8 @@
     "submit": "Submit workflow",
     "messages": {
       "m1": "Please complete the creation of the previous task first",
-      "m2": "Please fill in the current branch first"
+      "m2": "Please fill in the current branch first",
+      "redundant": "Duplicate names detected, please create templates with unique names"
     }
   },
   "newS": {
@@ -164,14 +165,14 @@
     "basic": {
       "nameHelper": "The schedule name",
       "scheduleHelper": "The schedule is expressed in the form of CronJob. If you are not familiar with it, you can use {crontabguru} to help define the schedule",
-      "startingDeadlineSeconds": "Experiment expiration time",
-      "startingDeadlineSecondsHelper": "Set to ignore experiments that haven’t been running for a long time",
+      "historyLimit": "History Limit",
+      "historyLimitHelper": "Maximum number of experiment records",
       "concurrencyPolicy": "Concurrency Policy",
       "concurrencyPolicyHelper": "Whether to allow experiments to run at the same time",
       "forbid": "Forbid",
       "allow": "Allow",
-      "historyLimit": "History Limit",
-      "historyLimitHelper": "Maximum number of experiment records"
+      "startingDeadlineSeconds": "Experiment expiration time",
+      "startingDeadlineSecondsHelper": "Set to ignore experiments that haven’t been running for a long time"
     }
   },
   "schedules": {
@@ -272,7 +273,7 @@
   },
   "common": {
     "add": "Add",
-    "advancedOptions": "Advanced Options",
+    "otherOptions": "Other Options",
     "batchOperation": "Batch operation",
     "cancel": "Cancel",
     "cancelEdit": "Cancel edit",

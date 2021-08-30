@@ -151,14 +151,14 @@ func Register(r *gin.RouterGroup, s *Service) {
 func (s *Service) listPods(c *gin.Context) {
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		_ = c.Error(utils.ErrBadRequest.WrapWithNoMessage(err))
 		return
 	}
 
 	exp := &core.SelectorInfo{}
 	if err := c.ShouldBindJSON(exp); err != nil {
 		c.Status(http.StatusBadRequest)
-		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		_ = c.Error(utils.ErrBadRequest.WrapWithNoMessage(err))
 		return
 	}
 	ctx := context.TODO()
@@ -273,7 +273,7 @@ func (s *Service) getLabels(c *gin.Context) {
 
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		_ = c.Error(utils.ErrBadRequest.WrapWithNoMessage(err))
 		return
 	}
 
@@ -325,7 +325,7 @@ func (s *Service) getAnnotations(c *gin.Context) {
 
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		_ = c.Error(utils.ErrBadRequest.WrapWithNoMessage(err))
 		return
 	}
 
@@ -401,7 +401,7 @@ func (s *Service) getRbacConfig(c *gin.Context) {
 		verbs = `"get", "list", "watch"`
 	} else {
 		c.Status(http.StatusBadRequest)
-		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(fmt.Errorf("roleType is neither manager nor viewer")))
+		_ = c.Error(utils.ErrBadRequest.WrapWithNoMessage(fmt.Errorf("roleType is neither manager nor viewer")))
 		return
 	}
 

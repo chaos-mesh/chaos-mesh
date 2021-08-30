@@ -58,7 +58,7 @@ const LoadFrom: React.FC<LoadFromProps> = ({ callback, inSchedule, inWorkflow })
       })
 
       let _predefined = await (await getDB()).getAll('predefined' as never) // never?
-      if (inWorkflow) {
+      if (!inSchedule) {
         _predefined = _predefined.filter((d) => d.kind !== 'Schedule')
       }
       setPredefined(_predefined)

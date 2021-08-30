@@ -1,11 +1,12 @@
-import { Box, FormControlLabel, Switch, Typography } from '@material-ui/core'
+import { Box, FormControlLabel, Link, Switch, Typography } from '@material-ui/core'
 import { FormikErrors, FormikTouched, getIn, useFormikContext } from 'formik'
 import { useEffect, useState } from 'react'
+import { validateDuration, validateSchedule } from 'lib/formikhelpers'
 
+import { FormattedMessage } from 'react-intl'
 import T from 'components/T'
 import { TextField } from 'components/FormField'
 import { useStoreSelector } from 'store'
-import { validateDuration } from 'lib/formikhelpers'
 
 interface SchedulerProps {
   errors: FormikErrors<Record<string, any>>
@@ -20,7 +21,7 @@ const Scheduler: React.FC<SchedulerProps> = ({ errors, touched, inSchedule = fal
   const [continuous, setContinuous] = useState(false)
 
   useEffect(() => {
-    if (!inSchedule && fromExternal && basic.scheduler.duration === '') {
+    if (!inSchedule && fromExternal && basic.spec.duration === '') {
       setContinuous(true)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -31,8 +32,8 @@ const Scheduler: React.FC<SchedulerProps> = ({ errors, touched, inSchedule = fal
 
     setContinuous(checked)
 
-    if (checked && getIn(values, 'scheduler.duration') !== '') {
-      setFieldValue('scheduler.duration', '')
+    if (checked && getIn(values, 'spec.duration') !== '') {
+      setFieldValue('spec.duration', '')
     }
   }
 
@@ -51,18 +52,44 @@ const Scheduler: React.FC<SchedulerProps> = ({ errors, touched, inSchedule = fal
         )}
       </Box>
 
+      {inSchedule && (
+        <TextField
+          fast
+          name="spec.schedule"
+          label={T('schedules.single')}
+          validate={validateSchedule()}
+          helperText={
+            getIn(errors, 'spec.schedule') && getIn(touched, 'spec.schedule') ? (
+              getIn(errors, 'spec.schedule')
+            ) : (
+              <FormattedMessage
+                id="newS.basic.scheduleHelper"
+                values={{
+                  crontabguru: (
+                    <Link href="https://crontab.guru/" target="_blank" underline="always">
+                      https://crontab.guru/
+                    </Link>
+                  ),
+                }}
+              />
+            )
+          }
+          error={getIn(errors, 'spec.schedule') && getIn(touched, 'spec.schedule') ? true : false}
+        />
+      )}
+
       {!continuous && (
         <TextField
           fast
-          name="scheduler.duration"
+          name="spec.duration"
           label={T('common.duration')}
           validate={validateDuration()}
           helperText={
-            getIn(errors, 'scheduler.duration') && getIn(touched, 'scheduler.duration')
-              ? getIn(errors, 'scheduler.duration')
+            getIn(errors, 'spec.duration') && getIn(touched, 'spec.duration')
+              ? getIn(errors, 'spec.duration')
               : T('common.durationHelper')
           }
-          error={getIn(errors, 'scheduler.duration') && getIn(touched, 'scheduler.duration') ? true : false}
+          error={getIn(errors, 'spec.duration') && getIn(touched, 'spec.duration') ? true : false}
         />
       )}
     </>
