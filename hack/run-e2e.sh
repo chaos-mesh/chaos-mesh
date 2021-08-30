@@ -132,9 +132,8 @@ if [[ "${GINKGO_STREAM}" == "y" ]]; then
 fi
 
 e2e_args=(
-    /usr/local/bin/ginkgo
-    ${ginkgo_args[@]:-}
     /usr/local/bin/e2e.test
+    ${ginkgo_args[@]:-}
     --
     --manager-image="${DOCKER_REGISTRY}/pingcap/chaos-mesh"
     --manager-image-tag="${IMAGE_TAG}"

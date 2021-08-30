@@ -404,7 +404,8 @@ check: fmt vet boilerplate lint generate yaml tidy install.sh
 
 CLEAN_TARGETS+=e2e-test/image/e2e/bin/ginkgo
 define e2e-test/image/e2e/bin/ginkgo-make
-	cd e2e-test && $(GO) build -ldflags "$(LDFLAGS)" -tags "${BUILD_TAGS}" -o image/e2e/bin/ginkgo github.com/onsi/ginkgo/ginkgo
+	mkdir -p image/e2e/bin
+	cp $(shell which ginkgo) image/e2e/bin/ginkgo 
 endef
 $(eval $(call RUN_IN_DEV_ENV_TEMPLATE,e2e-test/image/e2e/bin/ginkgo))
 
