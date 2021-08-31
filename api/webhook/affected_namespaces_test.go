@@ -77,4 +77,39 @@ func TestAffectedNamespaces(t *testing.T) {
 
 	clusterScoped, _ = affectedNamespaces(&v1alpha1.NetworkChaos{})
 	g.Expect(clusterScoped).To(gomega.BeTrue())
+
+	_, namespaces = affectedNamespaces(&v1alpha1.Workflow{
+		Spec: v1alpha1.WorkflowSpec{
+			Templates: []v1alpha1.Template{
+				{
+					EmbedChaos: &v1alpha1.EmbedChaos{
+						NetworkChaos: &v1alpha1.NetworkChaosSpec{
+							Target: &v1alpha1.PodSelector{
+								Selector: v1alpha1.PodSelectorSpec{
+									Namespaces: []string{"ns1", "ns2"},
+								},
+							},
+						},
+					},
+				},
+				{
+					EmbedChaos: &v1alpha1.EmbedChaos{
+						NetworkChaos: &v1alpha1.NetworkChaosSpec{
+							Target: &v1alpha1.PodSelector{
+								Selector: v1alpha1.PodSelectorSpec{
+									Namespaces: []string{"ns3", "ns4"},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	})
+	g.Expect(namespaces).To(gomega.Equal(map[string]struct{}{
+		"ns1": {},
+		"ns2": {},
+		"ns3": {},
+		"ns4": {},
+	}))
 }
