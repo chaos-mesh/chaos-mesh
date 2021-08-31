@@ -15,7 +15,7 @@ metadata:
 spec:
   containers:
   - name: main
-    image: hub.pingcap.net/yangkeao/chaos-mesh-e2e-base
+    image: hub.pingcap.net/chaos-mesh/chaos-mesh-e2e-base
     command:
     - runner.sh
     # Clean containers on TERM signal in root process to avoid cgroup leaking.
