@@ -50,11 +50,11 @@ selector:
 			"app.kubernetes.io/component": "controller-manager",
 		}).String(),
 	}
-	pods, err := kubeCli.CoreV1().Pods(cmNamespace).List(listOptions)
+	pods, err := kubeCli.CoreV1().Pods(cmNamespace).List(context.TODO(), listOptions)
 	framework.ExpectNoError(err, "get chaos mesh controller pods error")
 
 	err = wait.Poll(time.Second, 10*time.Second, func() (done bool, err error) {
-		newPods, err := kubeCli.CoreV1().Pods(cmNamespace).List(listOptions)
+		newPods, err := kubeCli.CoreV1().Pods(cmNamespace).List(context.TODO(), listOptions)
 		framework.ExpectNoError(err, "get chaos mesh controller pods error")
 		if !fixture.HaveSameUIDs(pods.Items, newPods.Items) {
 			return true, nil
@@ -70,7 +70,7 @@ selector:
 	err = enableWebhook(ns)
 	framework.ExpectNoError(err, "enable webhook on ns error")
 	nd := fixture.NewIOTestDeployment("io-test", ns)
-	_, err = kubeCli.AppsV1().Deployments(ns).Create(nd)
+	_, err = kubeCli.AppsV1().Deployments(ns).Create(context.TODO(), nd, metav1.CreateOptions{})
 	framework.ExpectNoError(err, "create io-test deployment error")
 	err = util.WaitDeploymentReady("io-test", ns, kubeCli)
 	framework.ExpectNoError(err, "wait io-test deployment ready error")
@@ -103,11 +103,11 @@ selector:
 			"app.kubernetes.io/component": "controller-manager",
 		}).String(),
 	}
-	pods, err := kubeCli.CoreV1().Pods(cmNamespace).List(listOptions)
+	pods, err := kubeCli.CoreV1().Pods(cmNamespace).List(context.TODO(), listOptions)
 	framework.ExpectNoError(err, "get chaos mesh controller pods error")
 
 	err = wait.Poll(time.Second, 10*time.Second, func() (done bool, err error) {
-		newPods, err := kubeCli.CoreV1().Pods(cmNamespace).List(listOptions)
+		newPods, err := kubeCli.CoreV1().Pods(cmNamespace).List(context.TODO(), listOptions)
 		framework.ExpectNoError(err, "get chaos mesh controller pods error")
 		if !fixture.HaveSameUIDs(pods.Items, newPods.Items) {
 			return true, nil
@@ -123,7 +123,7 @@ selector:
 	err = enableWebhook(ns)
 	framework.ExpectNoError(err, "enable webhook on ns error")
 	nd := fixture.NewIOTestDeployment("io-test", ns)
-	_, err = kubeCli.AppsV1().Deployments(ns).Create(nd)
+	_, err = kubeCli.AppsV1().Deployments(ns).Create(context.TODO(), nd, metav1.CreateOptions{})
 	framework.ExpectNoError(err, "create io-test deployment error")
 	err = util.WaitDeploymentReady("io-test", ns, kubeCli)
 	framework.ExpectNoError(err, "wait io-test deployment ready error")

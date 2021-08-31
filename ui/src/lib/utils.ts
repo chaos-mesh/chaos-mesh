@@ -2,10 +2,6 @@ export function toTitleCase(s: string) {
   return s.charAt(0).toUpperCase() + s.substr(1)
 }
 
-export function toCamelCase(s: string) {
-  return s.charAt(0).toLowerCase() + s.substr(1)
-}
-
 export function truncate(s: string) {
   if (s.length > 25) {
     return s.substring(0, 25) + '...'

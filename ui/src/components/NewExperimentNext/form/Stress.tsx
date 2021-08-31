@@ -2,10 +2,10 @@ import { Form, Formik, getIn } from 'formik'
 import { LabelField, Submit, TextField } from 'components/FormField'
 import { useEffect, useState } from 'react'
 
-import AdvancedOptions from 'components/AdvancedOptions'
+import OtherOptions from 'components/OtherOptions'
 import Space from 'components-mui/Space'
 import { Typography } from '@material-ui/core'
-import targetData from '../data/target'
+import typesData from '../data/types'
 import { useStoreSelector } from 'store'
 
 const validate = (values: any) => {
@@ -36,19 +36,19 @@ interface StressProps {
 }
 
 const Stress: React.FC<StressProps> = ({ onSubmit }) => {
-  const { target } = useStoreSelector((state) => state.experiments)
+  const { spec } = useStoreSelector((state) => state.experiments)
 
-  const initialValues = targetData.StressChaos.spec!
+  const initialValues = typesData.StressChaos.spec!
 
   const [init, setInit] = useState(initialValues)
 
   useEffect(() => {
     setInit({
       ...initialValues,
-      ...target['stress_chaos'],
+      ...spec,
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [target])
+  }, [spec])
 
   return (
     <Formik enableReinitialize initialValues={init} onSubmit={onSubmit} validate={validate}>
@@ -92,18 +92,18 @@ const Stress: React.FC<StressProps> = ({ onSubmit }) => {
             />
           </Space>
 
-          <AdvancedOptions>
+          <OtherOptions>
             <TextField
-              name="stressng_stressors"
+              name="stressngStressors"
               label="Options of stress-ng"
               helperText="The options of stress-ng, treated as a string"
             />
-            <TextField
-              name="container_name"
+            <LabelField
+              name="containerNames"
               label="Container Name"
-              helperText="Optional. Fill the container name you want to inject stress in"
+              helperText="Optional. Type string and end with a space to generate the container names. If it's empty, all containers will be injected"
             />
-          </AdvancedOptions>
+          </OtherOptions>
 
           <Submit />
         </Form>

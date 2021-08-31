@@ -39,6 +39,9 @@ files=($(find . -type f -not \( \
         -o -path './pkg/uiserver/embedded_assets_handler.go' \
         -o -path '*/pb/*' \
         -o -path '*/*.deepcopy.go' \
+        -o -path '*/generated.go' \
+        -o -path '*/schema.resolvers.go' \
+        -o -path '*/*_gen.go' \
     \) | grep -v -F "$ignored_files"
 ))
 

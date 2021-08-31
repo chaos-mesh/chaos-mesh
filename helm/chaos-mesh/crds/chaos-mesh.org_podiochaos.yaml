@@ -22,10 +22,14 @@ spec:
         description: PodIOChaos is the Schema for the podiochaos API
         properties:
           apiVersion:
-            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
             type: string
           kind:
-            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
             type: string
           metadata:
             type: object
@@ -69,7 +73,8 @@ spec:
                     faults:
                       description: Faults represents the fault to inject
                       items:
-                        description: IoFault represents the fault to inject and their weight
+                        description: IoFault represents the fault to inject and their
+                          weight
                         properties:
                           errno:
                             format: int32
@@ -95,7 +100,8 @@ spec:
                       description: Latency represents the latency to inject
                       type: string
                     methods:
-                      description: Methods represents the method that the action will inject in
+                      description: Methods represents the method that the action will
+                        inject in
                       items:
                         type: string
                       type: array
@@ -103,7 +109,8 @@ spec:
                       description: MistakeSpec represents the mistake to inject
                       properties:
                         filling:
-                          description: Filling determines what is filled in the miskate data.
+                          description: Filling determines what is filled in the miskate
+                            data.
                           enum:
                           - zero
                           - random
@@ -114,7 +121,8 @@ spec:
                           minimum: 1
                           type: integer
                         maxOccurrences:
-                          description: There will be [1, MaxOccurrences] segments of wrong data.
+                          description: There will be [1, MaxOccurrences] segments
+                            of wrong data.
                           format: int64
                           minimum: 1
                           type: integer
@@ -139,7 +147,8 @@ spec:
                       description: Path represents a glob of injecting path
                       type: string
                     percent:
-                      description: Percent represents the percent probability of injecting this action
+                      description: Percent represents the percent probability of injecting
+                        this action
                       type: integer
                     perm:
                       type: integer
@@ -165,10 +174,14 @@ spec:
                   type: object
                 type: array
               container:
-                description: 'TODO: support multiple different container to inject in one pod'
+                description: 'TODO: support multiple different container to inject
+                  in one pod'
                 type: string
               volumeMountPath:
-                description: 'VolumeMountPath represents the target mount path It must be a root of mount path now. TODO: search the mount parent of any path automatically. TODO: support multiple different volume mount path in one pod'
+                description: 'VolumeMountPath represents the target mount path It
+                  must be a root of mount path now. TODO: search the mount parent
+                  of any path automatically. TODO: support multiple different volume
+                  mount path in one pod'
                 type: string
             required:
             - volumeMountPath

@@ -45,9 +45,7 @@ func NewDeadlineReconciler(kubeClient client.Client, eventRecorder recorder.Chao
 		logger:            logger}
 }
 
-func (it *DeadlineReconciler) Reconcile(request reconcile.Request) (reconcile.Result, error) {
-	ctx := context.TODO()
-
+func (it *DeadlineReconciler) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
 	node := v1alpha1.WorkflowNode{}
 
 	err := it.kubeClient.Get(ctx, request.NamespacedName, &node)

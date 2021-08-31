@@ -14,9 +14,11 @@
 package e2e
 
 import (
+	"context"
 	// load pprof
 	_ "net/http/pprof"
 	"os/exec"
+	"time"
 
 	"github.com/onsi/ginkgo"
 	v1 "k8s.io/api/core/v1"
@@ -26,6 +28,7 @@ import (
 	"k8s.io/klog"
 	aggregatorclientset "k8s.io/kube-aggregator/pkg/client/clientset_generated/clientset"
 	"k8s.io/kubernetes/test/e2e/framework"
+	e2ekubectl "k8s.io/kubernetes/test/e2e/framework/kubectl"
 	e2elog "k8s.io/kubernetes/test/e2e/framework/log"
 	e2epod "k8s.io/kubernetes/test/e2e/framework/pod"
 	utilnet "k8s.io/utils/net"
@@ -36,6 +39,8 @@ import (
 	// ensure auth plugins are loaded
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 )
+
+const namespaceCleanupTimeout = 15 * time.Minute
 
 // This is modified from framework.SetupSuite().
 // setupSuite is the boilerplate that can be used to setup ginkgo test suites, on the SynchronizedBeforeSuite step.
@@ -68,7 +73,7 @@ func setupSuite() {
 			e2elog.Failf("Error deleting orphaned namespaces: %v", err)
 		}
 		klog.Infof("Waiting for deletion of the following namespaces: %v", deleted)
-		if err := framework.WaitForNamespacesDeleted(c, deleted, framework.NamespaceCleanupTimeout); err != nil {
+		if err := framework.WaitForNamespacesDeleted(c, deleted, namespaceCleanupTimeout); err != nil {
 			e2elog.Failf("Failed to delete orphaned namespaces %v: %v", deleted, err)
 		}
 	}
@@ -94,7 +99,7 @@ func setupSuite() {
 	// number equal to the number of allowed not-ready nodes).
 	if err := e2epod.WaitForPodsRunningReady(c, metav1.NamespaceSystem, int32(framework.TestContext.MinStartupPods), int32(framework.TestContext.AllowedNotReadyNodes), podStartupTimeout, map[string]string{}); err != nil {
 		framework.DumpAllNamespaceInfo(c, metav1.NamespaceSystem)
-		framework.LogFailedContainers(c, metav1.NamespaceSystem, e2elog.Logf)
+		e2ekubectl.LogFailedContainers(c, metav1.NamespaceSystem, e2elog.Logf)
 		e2elog.Failf("Error waiting for all pods to be running and ready: %v", err)
 	}
 
@@ -158,12 +163,6 @@ var _ = ginkgo.SynchronizedBeforeSuite(func() []byte {
 	setupSuitePerGinkgoNode()
 })
 
-var _ = ginkgo.SynchronizedAfterSuite(func() {
-	framework.CleanupSuite()
-}, func() {
-	framework.AfterSuiteActions()
-})
-
 func setupSuitePerGinkgoNode() {
 	c, err := framework.LoadClientset()
 	if err != nil {
@@ -180,7 +179,7 @@ func setupSuitePerGinkgoNode() {
 // but we can detect if a cluster is dual stack because pods have two addresses (one per family)
 func getDefaultClusterIPFamily(c kubernetes.Interface) string {
 	// Get the ClusterIP of the kubernetes service created in the default namespace
-	svc, err := c.CoreV1().Services(metav1.NamespaceDefault).Get("kubernetes", metav1.GetOptions{})
+	svc, err := c.CoreV1().Services(metav1.NamespaceDefault).Get(context.TODO(), "kubernetes", metav1.GetOptions{})
 	if err != nil {
 		e2elog.Failf("Failed to get kubernetes service ClusterIP: %v", err)
 	}

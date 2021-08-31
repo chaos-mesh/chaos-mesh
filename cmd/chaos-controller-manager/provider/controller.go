@@ -14,6 +14,7 @@
 package provider
 
 import (
+	"context"
 	"math"
 
 	"github.com/go-logr/logr"
@@ -24,6 +25,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/kubernetes"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 	"k8s.io/client-go/rest"
@@ -161,13 +163,14 @@ func NewControlPlaneCacheReader(logger logr.Logger) (controlPlaneCacheReader, er
 	_ = clientgoscheme.AddToScheme(scheme)
 
 	// Create the cache for the cached read client and registering informers
-	cache, err := cache.New(cfg, cache.Options{Scheme: scheme, Mapper: mapper, Resync: nil, Namespace: config.ControllerCfg.Namespace})
+	cacheReader, err := cache.New(cfg, cache.Options{Scheme: scheme, Mapper: mapper, Resync: nil, Namespace: config.ControllerCfg.Namespace})
 	if err != nil {
 		return controlPlaneCacheReader{}, err
 	}
 	// TODO: store the channel and use it to stop
 	go func() {
-		err := cache.Start(make(chan struct{}))
+		// FIXME: get context from parameter
+		err := cacheReader.Start(context.TODO())
 		if err != nil {
 			logger.Error(err, "fail to start cached client")
 		}
@@ -178,13 +181,14 @@ func NewControlPlaneCacheReader(logger logr.Logger) (controlPlaneCacheReader, er
 		return controlPlaneCacheReader{}, err
 	}
 
-	cachedClient := &client.DelegatingClient{
-		Reader: &client.DelegatingReader{
-			CacheReader:  cache,
-			ClientReader: c,
-		},
-		Writer:       c,
-		StatusClient: c,
+	cachedClient, err := client.NewDelegatingClient(client.NewDelegatingClientInput{
+		CacheReader:       cacheReader,
+		Client:            c,
+		UncachedObjects:   nil,
+		CacheUnstructured: false,
+	})
+	if err != nil {
+		return controlPlaneCacheReader{}, err
 	}
 
 	return controlPlaneCacheReader{
@@ -192,9 +196,14 @@ func NewControlPlaneCacheReader(logger logr.Logger) (controlPlaneCacheReader, er
 	}, nil
 }
 
+func NewClientSet(config *rest.Config) (*kubernetes.Clientset, error) {
+	return kubernetes.NewForConfig(config)
+}
+
 var Module = fx.Provide(
 	NewOption,
 	NewClient,
+	NewClientSet,
 	NewManager,
 	NewLogger,
 	NewAuthCli,

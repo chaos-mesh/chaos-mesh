@@ -1,4 +1,4 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,4 +11,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swaggerserver
+package graph
+
+import (
+	"context"
+	"strings"
+
+	"github.com/pkg/errors"
+	v1 "k8s.io/api/core/v1"
+)
+
+// GetMounts returns mounts info
+func (r *Resolver) GetMounts(ctx context.Context, pod *v1.Pod) ([]string, error) {
+	cmd := "cat /proc/mounts"
+	out, err := r.ExecBypass(ctx, pod, cmd)
+	if err != nil {
+		return nil, errors.Wrapf(err, "run command %s failed", cmd)
+	}
+	return strings.Split(string(out), "\n"), nil
+}

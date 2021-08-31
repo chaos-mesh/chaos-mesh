@@ -30,7 +30,7 @@ HELM_BIN=$OUTPUT_BIN/helm
 # (https://github.com/helm/helm/issues/6361) has been fixed.
 #
 HELM_VERSION=3.5.3
-KIND_VERSION=${KIND_VERSION:-0.11.0}
+KIND_VERSION=${KIND_VERSION:-0.11.1}
 KIND_BIN=$OUTPUT_BIN/kind
 KUBEBUILDER_PATH=$OUTPUT_BIN/kubebuilder
 KUBEBUILDER_BIN=$KUBEBUILDER_PATH/bin/kubebuilder
@@ -123,7 +123,11 @@ function hack::ensure_kubebuilder() {
     fi
     tmpfile=$(mktemp)
     trap "test -f $tmpfile && rm $tmpfile" RETURN
-    curl --retry 10 -L -o ${tmpfile} https://go.kubebuilder.io/dl/$KUBEBUILDER_VERSION/$OS/$ARCH
+
+    # reference: https://github.com/kubernetes-sigs/kubebuilder/issues/2311#issuecomment-903940052
+    # and https://github.com/chaos-mesh/chaos-mesh/issues/2248
+    # kubebuilder_${KUBEBUILDER_VERSION}_${OS}_${ARCH}.tar.gz only works for kubebuilder v2.x, if we upgrade to v3 one day, we need to change the filename, remove the ${KUBEBUILDER_VERSION}
+    curl --retry 10 -L -o ${tmpfile} https://github.com/kubernetes-sigs/kubebuilder/releases/download/v${KUBEBUILDER_VERSION}/kubebuilder_${KUBEBUILDER_VERSION}_${OS}_${ARCH}.tar.gz
     tar -C ${OUTPUT_BIN} -xzf ${tmpfile}
     mv ${OUTPUT_BIN}/kubebuilder_${KUBEBUILDER_VERSION}_${OS}_${ARCH} ${KUBEBUILDER_PATH}
 }

@@ -39,12 +39,11 @@ type EventCollector struct {
 }
 
 // Reconcile reconciles a Event collector.
-func (r *EventCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+func (r *EventCollector) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	if r.apiType == nil {
 		r.Log.Error(nil, "apiType has not been initialized")
 		return ctrl.Result{}, nil
 	}
-	ctx := context.Background()
 
 	event := &v1.Event{}
 	err := r.Get(ctx, req.NamespacedName, event)
@@ -57,10 +56,12 @@ func (r *EventCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	chaosKind, ok := v1alpha1.AllKinds()[event.InvolvedObject.Kind]
 	if ok {
+		chaosObject := chaosKind.SpawnObject()
+
 		if err = r.Get(ctx, types.NamespacedName{
 			Namespace: event.InvolvedObject.Namespace,
 			Name:      event.InvolvedObject.Name,
-		}, chaosKind.Chaos); err != nil {
+		}, chaosObject); err != nil {
 			return ctrl.Result{}, nil
 		}
 	} else {
@@ -90,7 +91,7 @@ func (r *EventCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 }
 
 // Setup setups collectors by Manager.
-func (r *EventCollector) Setup(mgr ctrl.Manager, apiType runtime.Object) error {
+func (r *EventCollector) Setup(mgr ctrl.Manager, apiType client.Object) error {
 	r.apiType = apiType
 
 	return ctrl.NewControllerManagedBy(mgr).
