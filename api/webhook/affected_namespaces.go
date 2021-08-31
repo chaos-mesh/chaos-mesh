@@ -41,6 +41,9 @@ func affectedNamespaces(obj interface{}) (bool, map[string]struct{}) {
 			for _, ns := range selector.Selector.Namespaces {
 				namespaces[ns] = struct{}{}
 			}
+			for namespace := range selector.Selector.Pods {
+				namespaces[namespace] = struct{}{}
+			}
 			if selector.Selector.ClusterScoped() {
 				clusterScoped = true
 			}

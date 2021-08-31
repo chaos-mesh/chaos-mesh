@@ -112,4 +112,21 @@ func TestAffectedNamespaces(t *testing.T) {
 		"ns3": {},
 		"ns4": {},
 	}))
+
+	_, namespaces = affectedNamespaces(&v1alpha1.NetworkChaos{
+		Spec: v1alpha1.NetworkChaosSpec{
+			Target: &v1alpha1.PodSelector{
+				Selector: v1alpha1.PodSelectorSpec{
+					Pods: map[string][]string{
+						"ns1": {"pod1", "pod2"},
+						"ns2": {"pod3", "pod4"},
+					},
+				},
+			},
+		},
+	})
+	g.Expect(namespaces).To(gomega.Equal(map[string]struct{}{
+		"ns1": {},
+		"ns2": {},
+	}))
 }
