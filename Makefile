@@ -16,10 +16,13 @@ ROOT=$(shell pwd)
 OUTPUT_BIN=$(ROOT)/output/bin
 HELM_BIN=$(OUTPUT_BIN)/helm
 
+# Every branch should have its own image tag for build-env and dev-env
 IMAGE_BUILD_ENV_PROJECT ?= "chaos-mesh"
 IMAGE_BUILD_ENV_REGISTRY ?= "ghcr.io"
+IMAGE_BUILD_ENV_TAG ?= "latest"
 IMAGE_DEV_ENV_PROJECT ?= "chaos-mesh"
 IMAGE_DEV_ENV_REGISTRY ?= "ghcr.io"
+IMAGE_DEV_ENV_TAG ?= "latest"
 
 ifeq ($(GO111), 1)
 $(error Please upgrade your Go compiler to 1.11 or higher version)
@@ -232,6 +235,7 @@ e2e-test/image/e2e/chaos-mesh: helm/chaos-mesh
 # $(3): whether building is optional. If $(3) equals 1, the image will be pulled from ghcr.io.
 # $(IMAGE_$(4)_PROJECT): the project name of the image, by default it is `pingcap`
 # $(IMAGE_$(4)_REGISTRY): the registry name of the image, it will override `DOCKER_REGISTRY`
+# $(IMAGE_$(4)_TAG): the tag of the image, it will override `IMAGE_TAG`
 define IMAGE_TEMPLATE
 
 $(4)_PROJECT := ${IMAGE_$(4)_PROJECT}
@@ -246,7 +250,12 @@ else
 $(4)_DOCKER_REGISTRY_PREFIX = $$($(4)_REGISTRY)/
 endif
 
-$(4)_IMAGE := $$($(4)_DOCKER_REGISTRY_PREFIX)$$($(4)_PROJECT)/$(1):${IMAGE_TAG}
+$(4)_TAG := $(IMAGE_$(4)_TAG)
+ifeq ($$($(4)_TAG),)
+$(4)_TAG := $(IMAGE_TAG)
+endif
+
+$(4)_IMAGE := $$($(4)_DOCKER_REGISTRY_PREFIX)$$($(4)_PROJECT)/$(1):$$($(4)_TAG)
 
 CLEAN_TARGETS += $(2)/.dockerbuilt
 
