@@ -48,13 +48,13 @@ OPTIONS:
     -n, --name               Name of Kubernetes cluster, default value: kind
     -c  --crd                The path of the crd files. Get the crd file from "https://mirrors.chaos-mesh.org" if the crd path is empty.
     -r  --runtime            Runtime specifies which container runtime to use. Currently we only supports docker and containerd. default value: docker
-        --kind-version       Version of the Kind tool, default value: v0.7.0
+        --kind-version       Version of the Kind tool, default value: v0.11.1
         --node-num           The count of the cluster nodes,default value: 3
         --k8s-version        Version of the Kubernetes cluster,default value: v1.17.2
         --volume-num         The volumes number of each kubernetes node,default value: 5
         --release-name       Release name of chaos-mesh, default value: chaos-mesh
         --namespace          Namespace of chaos-mesh, default value: chaos-testing
-        --timezone           Specifies timezone to be used by chaos-dashboard, chaos-daemon and controlller.
+        --timezone           Specifies timezone to be used by chaos-dashboard, chaos-daemon and controller.
 EOF
 }
 
@@ -397,10 +397,9 @@ install_kubernetes_by_kind() {
     config_file=${work_dir}/kind-config.yaml
     cat <<EOF > "${config_file}"
 kind: Cluster
-apiVersion: kind.sigs.k8s.io/v1alpha3
+apiVersion: kind.x-k8s.io/v1alpha4
 kubeadmConfigPatches:
 - |
-  apiVersion: kubeadm.k8s.io/v1alpha3
   kind: ClusterConfiguration
   metadata:
     name: config
@@ -1076,6 +1075,9 @@ rules:
     resources:
       - subjectaccessreviews
     verbs: [ "create" ]
+  - apiGroups: [ "" ]
+    resources: [ "pods/exec" ]
+    verbs: [ "create" ]
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 # binding for control plane namespace
@@ -1172,6 +1174,10 @@ spec:
       targetPort: pprof
       protocol: TCP
       name: pprof
+    - port: 10082
+      targetPort: ctrl
+      protocol: TCP
+      name: ctrl
     - port: 10080
       targetPort: http
       protocol: TCP
@@ -1402,6 +1408,8 @@ spec:
             value: "false"
           - name: PPROF_ADDR
             value: ":10081"
+          - name: CTRL_ADDR
+            value: ":10082"
           - name: CHAOS_DNS_SERVICE_NAME
             value: chaos-mesh-dns-server
           - name: CHAOS_DNS_SERVICE_PORT
@@ -1421,6 +1429,8 @@ spec:
             containerPort: 10080
           - name: pprof
             containerPort: 10081
+          - name: ctrl
+            containerPort: 10082
       volumes:
         - name: webhook-certs
           secret:
@@ -1683,6 +1693,25 @@ webhooks:
           - UPDATE
         resources:
           - workflow
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /mutate-chaos-mesh-org-v1alpha1-httpchaos
+    failurePolicy: Fail
+    name: mhttpchaos.kb.io
+    timeoutSeconds: 5
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - httpchaos
 ---
 # Source: chaos-mesh/templates/secrets-configuration.yaml
 apiVersion: admissionregistration.k8s.io/v1beta1
@@ -1924,6 +1953,25 @@ webhooks:
           - UPDATE
         resources:
           - workflows
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /validate-chaos-mesh-org-v1alpha1-httpchaos
+    failurePolicy: Fail
+    name: vhttpchaos.kb.io
+    timeoutSeconds: 5
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - httpchaos
 ---
 # Source: chaos-mesh/templates/secrets-configuration.yaml
 apiVersion: admissionregistration.k8s.io/v1beta1

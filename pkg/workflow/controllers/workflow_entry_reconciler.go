@@ -42,7 +42,7 @@ func NewWorkflowEntryReconciler(kubeClient client.Client, eventRecorder recorder
 	return &WorkflowEntryReconciler{kubeClient: kubeClient, eventRecorder: eventRecorder, logger: logger}
 }
 
-func (it *WorkflowEntryReconciler) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+func (it *WorkflowEntryReconciler) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
 	startTime := time.Now()
 	defer func() {
 		it.logger.V(4).Info("Finished syncing for workflow",
@@ -50,8 +50,6 @@ func (it *WorkflowEntryReconciler) Reconcile(request reconcile.Request) (reconci
 			"duration", time.Since(startTime),
 		)
 	}()
-
-	ctx := context.TODO()
 
 	workflow := v1alpha1.Workflow{}
 	err := it.kubeClient.Get(ctx, request.NamespacedName, &workflow)

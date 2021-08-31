@@ -63,7 +63,7 @@ func NewSerialNodeReconciler(kubeClient client.Client, eventRecorder recorder.Ch
 // And We MUST update v1alpha1.WorkflowNodeStatus by "observing real world" at EACH TIME, such as listing controlled
 // children nodes.
 // We only update v1alpha1.WorkflowNodeStatus once(wrapped with retry on conflict), at the end of this method.
-func (it *SerialNodeReconciler) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+func (it *SerialNodeReconciler) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
 	startTime := time.Now()
 	defer func() {
 		it.logger.V(4).Info("Finished syncing for serial node",
@@ -71,8 +71,6 @@ func (it *SerialNodeReconciler) Reconcile(request reconcile.Request) (reconcile.
 			"duration", time.Since(startTime),
 		)
 	}()
-
-	ctx := context.TODO()
 
 	node := v1alpha1.WorkflowNode{}
 	err := it.kubeClient.Get(ctx, request.NamespacedName, &node)

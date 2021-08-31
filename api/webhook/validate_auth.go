@@ -20,6 +20,7 @@ import (
 	"strings"
 
 	authv1 "k8s.io/api/authorization/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
@@ -90,7 +91,7 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 		err := fmt.Errorf("kind %s is not support", requestKind)
 		return admission.Errored(http.StatusBadRequest, err)
 	}
-	chaos := kind.Chaos.DeepCopyObject().(common.InnerObjectWithSelector)
+	chaos := kind.SpawnObject().(common.InnerObjectWithSelector)
 	if chaos == nil {
 		err := fmt.Errorf("kind %s is not support", requestKind)
 		return admission.Errored(http.StatusBadRequest, err)
@@ -181,7 +182,8 @@ func (v *AuthValidator) auth(username string, groups []string, namespace string,
 		},
 	}
 
-	response, err := v.authCli.SubjectAccessReviews().Create(&sar)
+	// FIXME: get context from parameter
+	response, err := v.authCli.SubjectAccessReviews().Create(context.TODO(), &sar, metav1.CreateOptions{})
 	if err != nil {
 		return false, err
 	}

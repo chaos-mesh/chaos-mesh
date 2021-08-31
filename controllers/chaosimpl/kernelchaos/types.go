@@ -41,6 +41,8 @@ type Impl struct {
 	chaosDaemonClientBuilder *chaosdaemon.ChaosDaemonClientBuilder
 }
 
+var _ common.ChaosImpl = (*Impl)(nil)
+
 // Apply applies KernelChaos
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	kernelChaos := obj.(*v1alpha1.KernelChaos)
