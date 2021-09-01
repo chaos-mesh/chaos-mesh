@@ -1714,8 +1714,8 @@ func init() {
 
 	SchemeBuilder.Register(&PhysicalMachineChaos{}, &PhysicalMachineChaosList{})
 	all.register(KindPhysicalMachineChaos, &ChaosKind{
-		Chaos:     &PhysicalMachineChaos{},
-		GenericChaosList: &PhysicalMachineChaosList{},
+		chaos: &PhysicalMachineChaos{},
+		list:  &PhysicalMachineChaosList{},
 	})
 
 	SchemeBuilder.Register(&PodChaos{}, &PodChaosList{})
@@ -1778,8 +1778,8 @@ func init() {
 	})
 
 	allScheduleItem.register(KindPhysicalMachineChaos, &ChaosKind{
-		Chaos:     &PhysicalMachineChaos{},
-		GenericChaosList: &PhysicalMachineChaosList{},
+		chaos: &PhysicalMachineChaos{},
+		list:  &PhysicalMachineChaosList{},
 	})
 
 	allScheduleItem.register(KindPodChaos, &ChaosKind{
