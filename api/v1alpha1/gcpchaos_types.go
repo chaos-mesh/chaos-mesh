@@ -32,6 +32,9 @@ type GCPChaos struct {
 	Status GCPChaosStatus `json:"status,omitempty"`
 }
 
+var _ InnerObjectWithCustomStatus = (*GCPChaos)(nil)
+var _ InnerObjectWithSelector = (*GCPChaos)(nil)
+
 // GCPChaosAction represents the chaos action about gcp.
 type GCPChaosAction string
 
