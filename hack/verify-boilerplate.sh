@@ -36,7 +36,7 @@ files=($(find . -type f -not \( \
         -o -path '*/Makefile' \
         -o -path '*/Dockerfile' \
         -o -path './images/*' \
-        -o -path './pkg/uiserver/embedded_assets_handler.go' \
+        -o -path './pkg/dashboard/uiserver/embedded_assets_handler.go' \
         -o -path '*/pb/*' \
         -o -path '*/*.deepcopy.go' \
         -o -path '*/generated.go' \

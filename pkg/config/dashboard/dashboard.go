@@ -18,7 +18,7 @@ import (
 
 	"github.com/kelseyhightower/envconfig"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/ttlcontroller"
+	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/ttlcontroller"
 )
 
 // ChaosDashboardConfig defines the configuration for Chaos Dashboard

@@ -32,10 +32,10 @@ _artifacts/
 e2e-test/image/e2e/chaos-mesh
 e2e-test/image/e2e/manifests/
 
-/pkg/uiserver/embedded_assets_handler.go
+/pkg/dashboard/uiserver/embedded_assets_handler.go
 
-pkg/swaggerdocs/*
-!pkg/swaggerdocs/placeholder.go
+pkg/dashboard/swaggerdocs/*
+!pkg/dashboard/swaggerdocs/placeholder.go
 
 /images/*/bin/*
 !/images/*/bin/.gitkeep
