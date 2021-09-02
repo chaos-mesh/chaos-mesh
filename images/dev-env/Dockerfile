@@ -10,7 +10,7 @@ ARG HTTP_PROXY
 ENV http_proxy $HTTP_PROXY
 ENV https_proxy $HTTPS_PROXY
 
-RUN apt-get update && apt-get install unzip git build-essential curl -y
+RUN apt-get update && apt-get install unzip git build-essential curl python -y
 
 RUN curl -L https://github.com/protocolbuffers/protobuf/releases/download/v3.12.2/protoc-3.12.2-linux-x86_64.zip > /protoc.zip
 RUN unzip /protoc.zip -d /usr/local
