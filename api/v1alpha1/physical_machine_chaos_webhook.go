@@ -23,7 +23,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
-func (in *PhysicalMachineChaosSpec) Default(root interface{}, field reflect.StructField) {
+func (in *PhysicalMachineChaosSpec) Default(root interface{}, field *reflect.StructField) {
 	if in == nil {
 		return
 	}
