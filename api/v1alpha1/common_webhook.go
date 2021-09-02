@@ -60,13 +60,13 @@ func (d *Duration) Validate(root interface{}, path *field.Path) field.ErrorList 
 	return nil
 }
 
-func (d *Duration) Default(root interface{}, field reflect.StructField) {
+func (d *Duration) Default(root interface{}, field *reflect.StructField) {
 	if d == nil {
 		return
 	}
 
 	// d cannot be nil
-	if len(*d) == 0 {
+	if len(*d) == 0 && field != nil {
 		*d = Duration(field.Tag.Get("default"))
 	}
 }
@@ -114,7 +114,7 @@ func (p *PodSelector) Validate(root interface{}, path *field.Path) field.ErrorLi
 	return allErrs
 }
 
-func (p *PodSelector) Default(root interface{}, field reflect.StructField) {
+func (p *PodSelector) Default(root interface{}, field *reflect.StructField) {
 	if p == nil {
 		return
 	}
@@ -164,9 +164,9 @@ func (f *FloatStr) Validate(root interface{}, path *field.Path) field.ErrorList 
 	return nil
 }
 
-func (f *FloatStr) Default(root interface{}, field reflect.StructField) {
+func (f *FloatStr) Default(root interface{}, field *reflect.StructField) {
 	// f cannot be nil
-	if len(*f) == 0 {
+	if len(*f) == 0 && field != nil {
 		*f = FloatStr(field.Tag.Get("default"))
 	}
 }
