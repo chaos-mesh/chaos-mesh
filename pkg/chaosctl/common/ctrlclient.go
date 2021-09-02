@@ -35,7 +35,7 @@ func NewCtrlClient(ctx context.Context, url string) (*CtrlClient, error) {
 	}
 
 	schemaQuery := new(struct {
-		Schema Schema `graphql:"__schema"`
+		Schema RawSchema `graphql:"__schema"`
 	})
 
 	err := client.client.Query(client.ctx, schemaQuery, nil)
@@ -43,6 +43,6 @@ func NewCtrlClient(ctx context.Context, url string) (*CtrlClient, error) {
 		return nil, err
 	}
 
-	client.Schema = &schemaQuery.Schema
+	client.Schema = NewSchema(&schemaQuery.Schema)
 	return client, nil
 }
