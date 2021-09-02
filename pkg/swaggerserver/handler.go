@@ -11,5 +11,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package model the basic workflow interface and structs in this package.
-package model
+// +build swagger_server
+
+package swaggerserver
+
+import (
+	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/swaggerdocs"
+)
+
+func Handler(c *gin.Context) {
+	swaggerdocs.SwaggerInfo.Host = c.Request.Host
+
+	ginSwagger.CustomWrapHandler(
+		&ginSwagger.Config{URL: "/api/swagger/doc.json"},
+		swaggerFiles.Handler,
+	)(c)
+}

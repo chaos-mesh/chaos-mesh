@@ -20,12 +20,12 @@ import (
 	"strings"
 
 	authv1 "k8s.io/api/authorization/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 )
 
 var alwaysAllowedKind = []string{
@@ -35,11 +35,6 @@ var alwaysAllowedKind = []string{
 	v1alpha1.KindGCPChaos,
 	v1alpha1.KindPodHttpChaos,
 
-	// TODO: check the auth for Schedule
-	// The resouce will be created by the SA of controller-manager, so checking the auth of Schedule is needed.
-	v1alpha1.KindSchedule,
-
-	"Workflow",
 	"WorkflowNode",
 }
 
@@ -90,7 +85,7 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 		err := fmt.Errorf("kind %s is not support", requestKind)
 		return admission.Errored(http.StatusBadRequest, err)
 	}
-	chaos := kind.Chaos.DeepCopyObject().(common.InnerObjectWithSelector)
+	chaos := kind.SpawnObject().(v1alpha1.InnerObjectWithSelector)
 	if chaos == nil {
 		err := fmt.Errorf("kind %s is not support", requestKind)
 		return admission.Errored(http.StatusBadRequest, err)
@@ -100,31 +95,8 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 	if err != nil {
 		return admission.Errored(http.StatusBadRequest, err)
 	}
-	specs := chaos.GetSelectorSpecs()
 
-	requireClusterPrivileges := false
-	affectedNamespaces := make(map[string]struct{})
-
-	for _, spec := range specs {
-		var selector *v1alpha1.PodSelector
-		if s, ok := spec.(*v1alpha1.ContainerSelector); ok {
-			selector = &s.PodSelector
-		}
-		if p, ok := spec.(*v1alpha1.PodSelector); ok {
-			selector = p
-		}
-		if selector == nil {
-			return admission.Allowed("")
-		}
-
-		if selector.Selector.ClusterScoped() {
-			requireClusterPrivileges = true
-		}
-
-		for _, namespace := range selector.Selector.AffectedNamespaces() {
-			affectedNamespaces[namespace] = struct{}{}
-		}
-	}
+	requireClusterPrivileges, affectedNamespaces := affectedNamespaces(chaos)
 
 	if requireClusterPrivileges {
 		allow, err := v.auth(username, groups, "", requestKind)
@@ -181,7 +153,8 @@ func (v *AuthValidator) auth(username string, groups []string, namespace string,
 		},
 	}
 
-	response, err := v.authCli.SubjectAccessReviews().Create(&sar)
+	// FIXME: get context from parameter
+	response, err := v.authCli.SubjectAccessReviews().Create(context.TODO(), &sar, metav1.CreateOptions{})
 	if err != nil {
 		return false, err
 	}

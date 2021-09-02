@@ -14,20 +14,92 @@
 package core
 
 import (
+	"encoding/json"
+	"strings"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+type ObjectBase struct {
+	Namespace string `json:"namespace"`
+	Name      string `json:"name"`
+	Kind      string `json:"kind"`
+	UID       string `json:"uid"`
+	Created   string `json:"created_at"`
+}
+
 // KubeObjectDesc defines a simple kube object description which uses in apiserver.
 type KubeObjectDesc struct {
-	metav1.TypeMeta `json:",inline"`
-	Meta            KubeObjectMeta `json:"metadata"`
-	Spec            interface{}    `json:"spec"`
+	metav1.TypeMeta
+	Meta KubeObjectMeta `json:"metadata"`
+	Spec interface{}    `json:"spec"`
 }
 
 // KubeObjectMetadata extracts the required fields from metav1.ObjectMeta.
 type KubeObjectMeta struct {
-	Name        string            `json:"name"`
 	Namespace   string            `json:"namespace"`
+	Name        string            `json:"name"`
 	Labels      map[string]string `json:"labels,omitempty"`
 	Annotations map[string]string `json:"annotations,omitempty"`
+}
+
+type Filter struct {
+	ObjectID  string `json:"object_id"`
+	Start     string `json:"start"`
+	End       string `json:"end"`
+	Namespace string `json:"namespace"`
+	Name      string `json:"name"`
+	Kind      string `json:"kind"`
+	Limit     string `json:"limit"`
+}
+
+func (f *Filter) toMap() map[string]interface{} {
+	var fMap map[string]interface{}
+
+	marshal, _ := json.Marshal(f)
+	_ = json.Unmarshal(marshal, &fMap)
+
+	return fMap
+}
+
+func (f *Filter) ConstructQueryArgs() (string, []interface{}) {
+	fMap, query, args := f.toMap(), make([]string, 0), make([]interface{}, 0)
+
+	for k, v := range fMap {
+		if v != "" {
+			if k == "start" || k == "end" || k == "limit" {
+				continue
+			}
+
+			if len(args) > 0 {
+				query = append(query, "AND", k, "= ?")
+			} else {
+				query = append(query, k, "= ?")
+			}
+
+			args = append(args, v)
+		}
+	}
+
+	startEnd := ""
+	if f.Start != "" && f.End != "" {
+		startEnd = "created_at BETWEEN ? AND ?"
+		args = append(args, f.Start, f.End)
+	} else if f.Start != "" && f.End == "" {
+		startEnd = "created_at >= ?"
+		args = append(args, f.Start)
+	} else if f.Start == "" && f.End != "" {
+		startEnd = "created_at <= ?"
+		args = append(args, f.End)
+	}
+
+	if startEnd != "" {
+		if len(args) > 0 {
+			query = append(query, "AND", startEnd)
+		} else {
+			query = append(query, startEnd)
+		}
+	}
+
+	return strings.Join(query, " "), args
 }

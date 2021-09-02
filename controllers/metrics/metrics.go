@@ -22,7 +22,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
+	"github.com/chaos-mesh/chaos-mesh/pkg/status"
 )
 
 var log = ctrl.Log.WithName("metrics-collector")
@@ -120,19 +120,20 @@ func (c *ChaosCollector) collect() {
 
 	for kind, obj := range v1alpha1.AllKinds() {
 		expCache := map[string]map[string]int{}
-		if err := c.store.List(context.TODO(), obj.GenericChaosList); err != nil {
+		chaosList := obj.SpawnList()
+		if err := c.store.List(context.TODO(), chaosList); err != nil {
 			log.Error(err, "failed to list chaos", "kind", kind)
 			return
 		}
 
-		items := reflect.ValueOf(obj.GenericChaosList).Elem().FieldByName("Items")
+		items := reflect.ValueOf(chaosList).Elem().FieldByName("Items")
 		for i := 0; i < items.Len(); i++ {
 			item := items.Index(i).Addr().Interface().(v1alpha1.InnerObject)
 			if _, ok := expCache[item.GetNamespace()]; !ok {
 				// There is only 4 supported phases
 				expCache[item.GetNamespace()] = make(map[string]int, 4)
 			}
-			expCache[item.GetNamespace()][string(utils.GetChaosState(item))]++
+			expCache[item.GetNamespace()][string(status.GetChaosStatus(item))]++
 		}
 
 		for ns, v := range expCache {

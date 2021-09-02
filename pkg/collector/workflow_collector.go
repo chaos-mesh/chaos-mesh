@@ -35,7 +35,7 @@ type WorkflowCollector struct {
 	store      core.WorkflowStore
 }
 
-func (it *WorkflowCollector) Setup(mgr ctrl.Manager, apiType runtime.Object) error {
+func (it *WorkflowCollector) Setup(mgr ctrl.Manager, apiType client.Object) error {
 	it.apiType = apiType
 
 	return ctrl.NewControllerManagedBy(mgr).
@@ -43,12 +43,11 @@ func (it *WorkflowCollector) Setup(mgr ctrl.Manager, apiType runtime.Object) err
 		Complete(it)
 }
 
-func (it *WorkflowCollector) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+func (it *WorkflowCollector) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
 	if it.apiType == nil {
 		it.Log.Error(nil, "apiType has not been initialized")
 		return ctrl.Result{}, nil
 	}
-	ctx := context.Background()
 	workflow := v1alpha1.Workflow{}
 	err := it.kubeClient.Get(ctx, request.NamespacedName, &workflow)
 	if apierrors.IsNotFound(err) {

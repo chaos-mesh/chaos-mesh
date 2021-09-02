@@ -21,8 +21,8 @@ import (
 
 const scheduleTemplate = `
 	allScheduleItem.register(Kind{{.Type}}, &ChaosKind{
-		Chaos:     &{{.Type}}{},
-		GenericChaosList: &{{.Type}}List{},
+		chaos: &{{.Type}}{},
+		list:  &{{.Type}}List{},
 	})
 `
 
@@ -83,8 +83,6 @@ func (it *scheduleCodeGenerator) Render() string {
 
 	imports := `import (
 	"fmt"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 )
 `
 
@@ -100,15 +98,15 @@ var allScheduleTemplateType = []ScheduleTemplateType{
 %s
 }
 
-func (it *ScheduleItem) SpawnNewObject(templateType ScheduleTemplateType) (runtime.Object, metav1.Object, error) {
+func (it *ScheduleItem) SpawnNewObject(templateType ScheduleTemplateType) (GenericChaos, error) {
 
 	switch templateType {
 %s
 	default:
-		return nil, nil, fmt.Errorf("unsupported template type %%s", templateType)
+		return nil, fmt.Errorf("unsupported template type %%s", templateType)
 	}
 
-	return nil, &metav1.ObjectMeta{}, nil
+	return nil, nil
 }
 
 `,
@@ -175,7 +173,7 @@ func generateScheduleItem(typeName string) string {
 const scheduleFillingEntryTemplate = `	case ScheduleType{{.Type}}:
 		result := {{.Type}}{}
 		result.Spec = *it.{{.Type}}
-		return &result, result.GetObjectMeta(), nil
+		return &result, nil
 `
 
 func generateSpawnScheduleItem(typeName string) string {

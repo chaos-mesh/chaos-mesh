@@ -33,7 +33,7 @@ import (
 	pkgmock "github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
-// MockEventService is a mock type for event.Service
+// MockEventService is a mock of core.EventStore
 type MockEventService struct {
 	mock.Mock
 }
@@ -117,6 +117,14 @@ func (m *MockEventService) DeleteByUID(context.Context, string) error {
 	panic("implement me")
 }
 
+func (m *MockEventService) DeleteByTime(context.Context, string, string) error {
+	panic("implement me")
+}
+
+func (m *MockEventService) DeleteByDuration(context.Context, time.Duration) error {
+	panic("implement me")
+}
+
 func TestEvent(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Event Suite")
@@ -125,7 +133,7 @@ func TestEvent(t *testing.T) {
 var _ = Describe("event", func() {
 	var router *gin.Engine
 	BeforeEach(func() {
-		pkgmock.With("MockAuthRequired", true)
+		pkgmock.With("AuthMiddleware", true)
 
 		mockes := new(MockEventService)
 
@@ -138,19 +146,19 @@ var _ = Describe("event", func() {
 		router = gin.Default()
 		r := router.Group("/api")
 		endpoint := r.Group("/events")
-		endpoint.GET("", s.listEvents)
-		endpoint.GET("/get", s.getEvent)
+		endpoint.GET("", s.list)
+		endpoint.GET("/:id", s.get)
 	})
 
 	AfterEach(func() {
 		// Add any teardown steps that needs to be executed after each test
-		pkgmock.Reset("MockAuthRequired")
+		pkgmock.Reset("AuthMiddleware")
 	})
 
 	Context("ListEvents", func() {
 		It("success", func() {
 			response := []*core.Event{
-				&core.Event{
+				{
 					ID:        0,
 					CreatedAt: time.Time{},
 					Kind:      "testKind",
@@ -180,53 +188,11 @@ var _ = Describe("event", func() {
 	})
 
 	Context("GetEvent", func() {
-		It("success", func() {
-			response := &core.Event{
-				ID:        0,
-				CreatedAt: time.Time{},
-				Kind:      "testKind",
-				Type:      "testType",
-				Reason:    "testReason",
-				Message:   "testMessage",
-				Name:      "testName",
-				Namespace: "testNamespace",
-				ObjectID:  "testUID",
-			}
-			rr := httptest.NewRecorder()
-			request, _ := http.NewRequest(http.MethodGet, "/api/events/get?id=0", nil)
-			router.ServeHTTP(rr, request)
-			Expect(rr.Code).Should(Equal(http.StatusOK))
-			responseBody, err := json.Marshal(response)
-			Expect(err).ShouldNot(HaveOccurred())
-			Expect(rr.Body.Bytes()).Should(Equal(responseBody))
-		})
-
-		It("empty id", func() {
-			rr := httptest.NewRecorder()
-			request, _ := http.NewRequest(http.MethodGet, "/api/events/get", nil)
-			router.ServeHTTP(rr, request)
-			Expect(rr.Code).Should(Equal(http.StatusBadRequest))
-		})
-
-		It("bad id", func() {
-			rr := httptest.NewRecorder()
-			request, _ := http.NewRequest(http.MethodGet, "/api/events/get?id=badID", nil)
-			router.ServeHTTP(rr, request)
-			Expect(rr.Code).Should(Equal(http.StatusBadRequest))
-		})
-
 		It("not found", func() {
 			rr := httptest.NewRecorder()
-			request, _ := http.NewRequest(http.MethodGet, "/api/events/get?id=1", nil)
+			request, _ := http.NewRequest(http.MethodGet, "/api/events/1", nil)
 			router.ServeHTTP(rr, request)
-			Expect(rr.Code).Should(Equal(http.StatusInternalServerError))
-		})
-
-		It("other err", func() {
-			rr := httptest.NewRecorder()
-			request, _ := http.NewRequest(http.MethodGet, "/api/events/get?id=2", nil)
-			router.ServeHTTP(rr, request)
-			Expect(rr.Code).Should(Equal(http.StatusInternalServerError))
+			Expect(rr.Code).Should(Equal(http.StatusNotFound))
 		})
 	})
 })

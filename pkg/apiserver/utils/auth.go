@@ -16,40 +16,50 @@ package utils
 import (
 	"net/http"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"github.com/gin-gonic/gin"
 	authorizationv1 "k8s.io/api/authorization/v1"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
+	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
-func AuthRequired(c *gin.Context, clusterScoped bool, targetNamespace string) {
-	if mockResult := mock.On("MockAuthRequired"); mockResult != nil {
+var log = Log.WithName("auth middleware")
+
+func AuthMiddleware(c *gin.Context, config *config.ChaosDashboardConfig) {
+	if mockResult := mock.On("AuthMiddleware"); mockResult != nil {
 		c.Next()
+
 		return
 	}
 
-	authCli, err := clientpool.ExtractTokenAndGetAuthClient(c.Request.Header)
+	kubeCli, err := clientpool.ExtractTokenAndGetAuthClient(c.Request.Header)
 	if err != nil {
-		c.AbortWithError(http.StatusUnauthorized, ErrInvalidRequest.WrapWithNoMessage(err))
+		SetAPIError(c, ErrBadRequest.WrapWithNoMessage(err))
+
 		return
 	}
 
-	namespace := c.Query("namespace")
-	if len(namespace) == 0 && !clusterScoped {
-		namespace = targetNamespace
+	ns := c.Query("namespace")
+
+	if ns == "" && !config.ClusterScoped && config.TargetNamespace != "" {
+		ns = config.TargetNamespace
+
+		log.V(1).Info("Replace query namespace with", ns)
 	}
 
 	verb := "list"
 	if c.Request.Method != http.MethodGet {
-		// patch is used to indicate finalizers, create, patch, finalizers and other write operations
+		// patch is used to indicate create, patch, finalizers and other write operations
 		verb = "patch"
 	}
 
 	sar := &authorizationv1.SelfSubjectAccessReview{
 		Spec: authorizationv1.SelfSubjectAccessReviewSpec{
 			ResourceAttributes: &authorizationv1.ResourceAttributes{
-				Namespace: namespace,
+				Namespace: ns,
 				Verb:      verb,
 				Group:     "chaos-mesh.org",
 				Resource:  "*",
@@ -57,18 +67,20 @@ func AuthRequired(c *gin.Context, clusterScoped bool, targetNamespace string) {
 		},
 	}
 
-	response, err := authCli.SelfSubjectAccessReviews().Create(sar)
+	result, err := kubeCli.SelfSubjectAccessReviews().Create(c.Request.Context(), sar, metav1.CreateOptions{})
 	if err != nil {
-		c.AbortWithError(http.StatusUnauthorized, ErrInvalidRequest.WrapWithNoMessage(err))
+		SetAPImachineryError(c, ErrInternalServer.WrapWithNoMessage(err))
+
 		return
 	}
 
-	if !response.Status.Allowed {
-		if len(namespace) == 0 {
-			c.AbortWithError(http.StatusUnauthorized, ErrNoClusterPrivilege.New("can't %s resource in the cluster", verb))
+	if !result.Status.Allowed {
+		if len(ns) == 0 {
+			SetAPIError(c, ErrNoClusterPrivilege.New("can't %s resource in the cluster", verb))
 		} else {
-			c.AbortWithError(http.StatusUnauthorized, ErrNoNamespacePrivilege.New("can't %s resource in namespace %s", verb, namespace))
+			SetAPIError(c, ErrNoNamespacePrivilege.New("can't %s resource in namespace %s", verb, ns))
 		}
+
 		return
 	}
 

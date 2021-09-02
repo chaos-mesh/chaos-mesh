@@ -174,13 +174,18 @@ func (in *WorkflowList) GetItems() []GenericChaos {
 	return result
 }
 
+// TODO: refactor: not so accurate
+func (in *WorkflowList) DeepCopyList() GenericChaosList {
+	return in.DeepCopy()
+}
+
 func init() {
 	SchemeBuilder.Register(&Workflow{}, &WorkflowList{})
 }
 
 func FetchChaosByTemplateType(templateType TemplateType) (runtime.Object, error) {
 	if kind, ok := all.kinds[string(templateType)]; ok {
-		return kind.Chaos.DeepCopyObject(), nil
+		return kind.SpawnObject(), nil
 	}
 	return nil, fmt.Errorf("no such kind refers to template type %s", templateType)
 }

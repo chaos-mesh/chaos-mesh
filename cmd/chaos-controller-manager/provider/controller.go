@@ -14,6 +14,7 @@
 package provider
 
 import (
+	"context"
 	"math"
 
 	"github.com/go-logr/logr"
@@ -162,13 +163,14 @@ func NewControlPlaneCacheReader(logger logr.Logger) (controlPlaneCacheReader, er
 	_ = clientgoscheme.AddToScheme(scheme)
 
 	// Create the cache for the cached read client and registering informers
-	cache, err := cache.New(cfg, cache.Options{Scheme: scheme, Mapper: mapper, Resync: nil, Namespace: config.ControllerCfg.Namespace})
+	cacheReader, err := cache.New(cfg, cache.Options{Scheme: scheme, Mapper: mapper, Resync: nil, Namespace: config.ControllerCfg.Namespace})
 	if err != nil {
 		return controlPlaneCacheReader{}, err
 	}
 	// TODO: store the channel and use it to stop
 	go func() {
-		err := cache.Start(make(chan struct{}))
+		// FIXME: get context from parameter
+		err := cacheReader.Start(context.TODO())
 		if err != nil {
 			logger.Error(err, "fail to start cached client")
 		}
@@ -179,13 +181,14 @@ func NewControlPlaneCacheReader(logger logr.Logger) (controlPlaneCacheReader, er
 		return controlPlaneCacheReader{}, err
 	}
 
-	cachedClient := &client.DelegatingClient{
-		Reader: &client.DelegatingReader{
-			CacheReader:  cache,
-			ClientReader: c,
-		},
-		Writer:       c,
-		StatusClient: c,
+	cachedClient, err := client.NewDelegatingClient(client.NewDelegatingClientInput{
+		CacheReader:       cacheReader,
+		Client:            c,
+		UncachedObjects:   nil,
+		CacheUnstructured: false,
+	})
+	if err != nil {
+		return controlPlaneCacheReader{}, err
 	}
 
 	return controlPlaneCacheReader{

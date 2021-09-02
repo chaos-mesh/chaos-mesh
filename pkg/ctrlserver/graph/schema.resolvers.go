@@ -403,7 +403,7 @@ func (r *loggerResolver) Pod(ctx context.Context, ns *string, name string) (<-ch
 		*ns = DefaultNamespace
 	}
 
-	logs, err := r.Clientset.CoreV1().Pods(*ns).GetLogs(name, &v1.PodLogOptions{Follow: true}).Stream()
+	logs, err := r.Clientset.CoreV1().Pods(*ns).GetLogs(name, &v1.PodLogOptions{Follow: true}).Stream(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -703,7 +703,7 @@ func (r *podResolver) Annotations(ctx context.Context, obj *v1.Pod) (map[string]
 }
 
 func (r *podResolver) Logs(ctx context.Context, obj *v1.Pod) (string, error) {
-	logs, err := r.Clientset.CoreV1().Pods(obj.Namespace).GetLogs(obj.Name, &v1.PodLogOptions{}).Stream()
+	logs, err := r.Clientset.CoreV1().Pods(obj.Namespace).GetLogs(obj.Name, &v1.PodLogOptions{}).Stream(ctx)
 	if err != nil {
 		return "", err
 	}

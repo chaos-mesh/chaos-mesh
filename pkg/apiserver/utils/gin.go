@@ -1,4 +1,4 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,20 +11,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package template
+package utils
 
-import "github.com/chaos-mesh/chaos-mesh/pkg/workflow/errors"
+import (
+	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+)
 
-type SerialTemplate interface {
-	Template
-	// TODO: make it return only template name
-	SerialChildrenList() []string
+// Response defines a common status struct.
+type Response struct {
+	Status string `json:"status"`
 }
 
-func ParseSerialTemplate(raw interface{}) (SerialTemplate, error) {
-	op := "template.ParseSerialTemplate"
-	if target, ok := raw.(SerialTemplate); ok {
-		return target, nil
+var (
+	ResponseSuccess = Response{Status: "success"}
+)
+
+func ShouldBindBodyWithJSON(c *gin.Context, obj interface{}) (err error) {
+	err = c.ShouldBindBodyWith(obj, binding.JSON)
+	if err != nil {
+		SetAPIError(c, ErrBadRequest.WrapWithNoMessage(err))
 	}
-	return nil, errors.NewParseSerialTemplateFailedError(op, raw)
+
+	return
 }

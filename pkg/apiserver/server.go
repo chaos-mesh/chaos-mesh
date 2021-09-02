@@ -24,7 +24,6 @@ import (
 	"github.com/go-playground/validator/v10"
 	"go.uber.org/fx"
 
-	apiutils "github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/apivalidator"
 	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
 	"github.com/chaos-mesh/chaos-mesh/pkg/swaggerserver"
@@ -39,11 +38,11 @@ var (
 			newAPIRouter,
 		),
 		handlerModule,
-		fx.Invoke(serverRegister),
+		fx.Invoke(register),
 	)
 )
 
-func serverRegister(r *gin.Engine, conf *config.ChaosDashboardConfig) {
+func register(r *gin.Engine, conf *config.ChaosDashboardConfig) {
 	listenAddr := net.JoinHostPort(conf.ListenHost, fmt.Sprintf("%d", conf.ListenPort))
 
 	go r.Run(listenAddr)
@@ -52,10 +51,8 @@ func serverRegister(r *gin.Engine, conf *config.ChaosDashboardConfig) {
 func newEngine(config *config.ChaosDashboardConfig) *gin.Engine {
 	r := gin.Default()
 
-	// default is "/debug/pprof/"
+	// default is "/debug/pprof"
 	pprof.Register(r)
-
-	r.Use(apiutils.MWHandleErrors())
 
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		v.RegisterValidation("NameValid", apivalidator.NameValid)
@@ -92,7 +89,10 @@ func newEngine(config *config.ChaosDashboardConfig) *gin.Engine {
 		r.GET("/favicon.ico", renderStatic)
 	} else {
 		r.GET("/", func(c *gin.Context) {
-			c.String(http.StatusOK, "Dashboard UI is not built. Please run `UI=1 make`.")
+			c.String(http.StatusOK, `Dashboard UI is not built.
+Please run UI=1 make.
+Run UI=1 make images/chaos-dashboard/bin/chaos-dashboard if you only want to build dashboard only.
+(Note: If you only want to build the binary, pass IN_DOCKER=1.)`)
 		})
 	}
 
@@ -101,9 +101,8 @@ func newEngine(config *config.ChaosDashboardConfig) *gin.Engine {
 
 func newAPIRouter(r *gin.Engine) *gin.RouterGroup {
 	api := r.Group("/api")
-	{
-		api.GET("/swagger/*any", swaggerserver.Handler())
-	}
+
+	api.GET("/swagger/*any", swaggerserver.Handler)
 
 	return api
 }
