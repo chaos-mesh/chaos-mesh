@@ -1,10 +1,12 @@
-import { Box, Button, Grow, Modal, useTheme } from '@material-ui/core'
+import { Box, Button, Grid, Grow, Modal, useTheme } from '@material-ui/core'
 import { Confirm, setAlert, setConfirm } from 'slices/globalStatus'
 import { useEffect, useRef, useState } from 'react'
 import { useHistory, useParams } from 'react-router-dom'
 
 import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
+import { Event } from 'api/events.type'
 import { EventHandler } from 'cytoscape'
+import EventsTimeline from 'components/EventsTimeline'
 import NodeConfiguration from 'components/ObjectConfiguration/Node'
 import NoteOutlinedIcon from '@material-ui/icons/NoteOutlined'
 import Paper from 'components-mui/Paper'
@@ -57,6 +59,8 @@ const Single = () => {
   const [configOpen, setConfigOpen] = useState(false)
   const topologyRef = useRef<any>(null)
 
+  const [events, setEvents] = useState<Event[]>([])
+
   const fetchWorkflowSingle = (intervalID?: number) =>
     api.workflows
       .single(uuid)
@@ -90,6 +94,21 @@ const Single = () => {
 
       topologyRef.current = updateElements
     }
+
+    const fetchEvents = () => {
+      api.events
+        .events({ object_id: uuid, limit: 999 })
+        .then(({ data }) => setEvents(data))
+        .catch(console.error)
+        .finally(() => {
+          // setLoading(false)
+        })
+    }
+
+    if (single) {
+      fetchEvents()
+    }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [single])
 
@@ -224,6 +243,34 @@ const Single = () => {
               </PaperTop>
               <div ref={topologyRef} style={{ flex: 1 }} />
             </Paper>
+
+            <Grid container>
+              <Grid item xs={12} lg={6} sx={{ pr: 3 }}>
+                <Paper sx={{ display: 'flex', flexDirection: 'column', height: 600 }}>
+                  <PaperTop title={T('events.title')} boxProps={{ mb: 3 }} />
+                  <Box flex={1} overflow="scroll">
+                    <EventsTimeline events={events} />
+                  </Box>
+                </Paper>
+              </Grid>
+              <Grid item xs={12} lg={6} sx={{ pl: 3 }}>
+                <Paper sx={{ height: 600, p: 0 }}>
+                  {single && (
+                    <Space display="flex" flexDirection="column" height="100%">
+                      <PaperTop title={T('common.definition')} boxProps={{ p: 4.5, pb: 0 }} />
+                      <Box flex={1}>
+                        <YAMLEditor
+                          name={single.name}
+                          data={yaml.dump(single.kube_object)}
+                          // onUpdate={handleUpdateSchedule}
+                          download
+                        />
+                      </Box>
+                    </Space>
+                  )}
+                </Paper>
+              </Grid>
+            </Grid>
           </Space>
         </div>
       </Grow>
