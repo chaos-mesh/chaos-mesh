@@ -29,9 +29,9 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
+	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/collector"
-	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/store"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/ttlcontroller"
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"

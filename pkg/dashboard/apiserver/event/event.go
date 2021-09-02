@@ -21,8 +21,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 
-	u "github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/utils"
 	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
+	u "github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
 )
 

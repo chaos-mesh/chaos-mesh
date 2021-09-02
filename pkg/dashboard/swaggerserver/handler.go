@@ -20,7 +20,7 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/swaggerdocs"
+	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/swaggerdocs"
 )
 
 func Handler(c *gin.Context) {

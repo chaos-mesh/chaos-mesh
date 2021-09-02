@@ -24,8 +24,8 @@ import (
 	"github.com/go-playground/validator/v10"
 	"go.uber.org/fx"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apivalidator"
 	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
+	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apivalidator"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/swaggerserver"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/uiserver"
 )
