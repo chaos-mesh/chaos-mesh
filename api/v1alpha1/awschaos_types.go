@@ -32,6 +32,8 @@ type AWSChaos struct {
 	Status AWSChaosStatus `json:"status,omitempty"`
 }
 
+var _ InnerObjectWithSelector = (*AWSChaos)(nil)
+
 // AWSChaosAction represents the chaos action about aws.
 type AWSChaosAction string
 
