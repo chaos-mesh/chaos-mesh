@@ -26,7 +26,6 @@ require (
 	github.com/go-logr/logr v0.4.0
 	github.com/go-logr/zapr v0.4.0
 	github.com/go-playground/validator/v10 v10.4.1
-	github.com/golang/mock v1.5.0
 	github.com/golang/protobuf v1.5.2
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0

@@ -33,7 +33,7 @@ const (
 	DefaultCorrelation = "0"
 )
 
-func (in *Direction) Default(root interface{}, field reflect.StructField) {
+func (in *Direction) Default(root interface{}, field *reflect.StructField) {
 	if *in == "" {
 		*in = To
 	}
