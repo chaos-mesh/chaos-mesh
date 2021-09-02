@@ -149,6 +149,8 @@ type JVMChaos struct {
 	Status JVMChaosStatus `json:"status,omitempty"`
 }
 
+var _ InnerObjectWithSelector = (*JVMChaos)(nil)
+
 func init() {
 	SchemeBuilder.Register(&JVMChaos{}, &JVMChaosList{})
 }

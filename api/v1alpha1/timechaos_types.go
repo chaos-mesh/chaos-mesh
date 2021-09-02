@@ -33,6 +33,8 @@ type TimeChaos struct {
 	Status TimeChaosStatus `json:"status"`
 }
 
+var _ InnerObjectWithSelector = (*TimeChaos)(nil)
+
 // TimeChaosSpec defines the desired state of TimeChaos
 type TimeChaosSpec struct {
 	ContainerSelector `json:",inline"`
