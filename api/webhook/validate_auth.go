@@ -36,11 +36,6 @@ var alwaysAllowedKind = []string{
 	v1alpha1.KindGCPChaos,
 	v1alpha1.KindPodHttpChaos,
 
-	// TODO: check the auth for Schedule
-	// The resouce will be created by the SA of controller-manager, so checking the auth of Schedule is needed.
-	v1alpha1.KindSchedule,
-
-	"Workflow",
 	"WorkflowNode",
 }
 
@@ -101,31 +96,8 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 	if err != nil {
 		return admission.Errored(http.StatusBadRequest, err)
 	}
-	specs := chaos.GetSelectorSpecs()
 
-	requireClusterPrivileges := false
-	affectedNamespaces := make(map[string]struct{})
-
-	for _, spec := range specs {
-		var selector *v1alpha1.PodSelector
-		if s, ok := spec.(*v1alpha1.ContainerSelector); ok {
-			selector = &s.PodSelector
-		}
-		if p, ok := spec.(*v1alpha1.PodSelector); ok {
-			selector = p
-		}
-		if selector == nil {
-			return admission.Allowed("")
-		}
-
-		if selector.Selector.ClusterScoped() {
-			requireClusterPrivileges = true
-		}
-
-		for _, namespace := range selector.Selector.AffectedNamespaces() {
-			affectedNamespaces[namespace] = struct{}{}
-		}
-	}
+	requireClusterPrivileges, affectedNamespaces := affectedNamespaces(chaos)
 
 	if requireClusterPrivileges {
 		allow, err := v.auth(username, groups, "", requestKind)

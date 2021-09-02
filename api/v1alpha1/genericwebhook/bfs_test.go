@@ -30,7 +30,7 @@ func TestBfs(t *testing.T) {
 		}
 
 		testStruct := &Test{1, 2, 3}
-		walker := NewFieldWalker(testStruct, func(path *field.Path, obj interface{}, field reflect.StructField) bool {
+		walker := NewFieldWalker(testStruct, func(path *field.Path, obj interface{}, field *reflect.StructField) bool {
 			val := obj.(*int)
 			*val = 2
 			return true
@@ -48,7 +48,7 @@ func TestBfs(t *testing.T) {
 		testC := 3
 		two := 2
 		testStruct := &Test{1, 2, &testC}
-		walker := NewFieldWalker(testStruct, func(path *field.Path, obj interface{}, field reflect.StructField) bool {
+		walker := NewFieldWalker(testStruct, func(path *field.Path, obj interface{}, field *reflect.StructField) bool {
 			switch obj := obj.(type) {
 			case *int:
 				*obj = 2
@@ -73,7 +73,7 @@ func TestBfs(t *testing.T) {
 		}
 
 		testStruct := &DeepTest{1, 2, Inside{3, 4}}
-		walker := NewFieldWalker(testStruct, func(path *field.Path, obj interface{}, field reflect.StructField) bool {
+		walker := NewFieldWalker(testStruct, func(path *field.Path, obj interface{}, field *reflect.StructField) bool {
 			switch obj := obj.(type) {
 			case *int:
 				*obj = 2
@@ -99,7 +99,7 @@ func TestBfs(t *testing.T) {
 		}
 
 		testStruct := &DeepTest{1, 2, Inside{3, 4}}
-		walker := NewFieldWalker(testStruct, func(path *field.Path, obj interface{}, field reflect.StructField) bool {
+		walker := NewFieldWalker(testStruct, func(path *field.Path, obj interface{}, field *reflect.StructField) bool {
 			switch obj := obj.(type) {
 			case *int:
 				*obj = 2

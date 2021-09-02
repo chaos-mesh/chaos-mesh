@@ -128,23 +128,3 @@ func (in PodSelectorSpec) ClusterScoped() bool {
 
 	return false
 }
-
-// AffectedNamespaces returns all the namespaces which the selector effect
-func (in PodSelectorSpec) AffectedNamespaces() []string {
-	affectedNamespacesMap := make(map[string]struct{})
-	affectedNamespacesArray := make([]string, 0, 2)
-
-	for namespace := range in.Pods {
-		affectedNamespacesMap[namespace] = struct{}{}
-	}
-
-	for _, namespace := range in.Namespaces {
-		affectedNamespacesMap[namespace] = struct{}{}
-	}
-
-	for namespace := range affectedNamespacesMap {
-		affectedNamespacesArray = append(affectedNamespacesArray, namespace)
-	}
-
-	return affectedNamespacesArray
-}

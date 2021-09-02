@@ -80,13 +80,6 @@ timer:
 multithread_tracee: test/cmd/multithread_tracee/main.c
 	cc test/cmd/multithread_tracee/main.c -lpthread -O2 -o ./bin/test/multithread_tracee
 
-mockgen:
-	GO111MODULE=on go get github.com/golang/mock/mockgen@v1.5.0
-
-generate-mock: mockgen
-	go generate ./pkg/workflow
-
-
 yarn_dependencies:
 ifeq (${UI},1)
 	cd ui &&\
@@ -455,11 +448,15 @@ define install.sh-make
 endef
 $(eval $(call RUN_IN_DEV_ENV_TEMPLATE,install.sh))
 
-swagger_spec:
 define swagger_spec-make
 	swag init -g cmd/chaos-dashboard/main.go --output pkg/swaggerdocs
 endef
 $(eval $(call RUN_IN_DEV_ENV_TEMPLATE,swagger_spec))
+
+define generate-mock-make
+	go generate ./pkg/workflow
+endef
+$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,generate-mock))
 
 .PHONY: all clean test install manifests groupimports fmt vet tidy image \
 	docker-push lint generate config mockgen generate-mock \

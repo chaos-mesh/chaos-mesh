@@ -36,6 +36,7 @@ RUN go install github.com/AlekSi/gocov-xml@v0.0.0-20190121064608-3a14fb1c4737
 RUN go install github.com/matm/gocov-html@v0.0.0-20200509184451-71874e2e203b
 RUN go install github.com/swaggo/swag/cmd/swag@v1.6.7
 RUN go install github.com/onsi/ginkgo/ginkgo@v1.16.4
+RUN go install github.com/golang/mock/mockgen@v1.5.0
 
 RUN curl -L https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv3.5.4/kustomize_v3.5.4_$(go env GOOS)_$(go env GOARCH).tar.gz | tar -xz -C /usr/local/bin/
 RUN curl -L https://github.com/kubernetes-sigs/kubebuilder/releases/download/v2.3.2/kubebuilder_2.3.2_$(go env GOOS)_$(go env GOARCH).tar.gz | tar -xz -C /usr/local/

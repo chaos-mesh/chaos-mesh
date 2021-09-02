@@ -26,7 +26,7 @@ import (
 type ClockIds []string
 
 // DefaultClockIds will set default value for empty ClockIds fields
-func (in *ClockIds) Default(root interface{}, field reflect.StructField) {
+func (in *ClockIds) Default(root interface{}, field *reflect.StructField) {
 	// in cannot be nil
 	if *in == nil || len(*in) == 0 {
 		*in = []string{"CLOCK_REALTIME"}
