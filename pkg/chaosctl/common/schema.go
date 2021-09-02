@@ -13,7 +13,13 @@
 
 package common
 
-import "github.com/hasura/go-graphql-client"
+import (
+	"errors"
+	"fmt"
+	"reflect"
+
+	"github.com/hasura/go-graphql-client"
+)
 
 const (
 	ObjectKind  = "OBJECT"
@@ -92,6 +98,8 @@ type TypeRef interface {
 	GetOfType() TypeRef
 }
 
+type TypeDecorator func(reflect.Type) (reflect.Type, error)
+
 func NewSchema(s *RawSchema) *Schema {
 	schema := &Schema{
 		RawSchema: s,
@@ -169,4 +177,92 @@ func (ref *TypeRef4) GetName() *graphql.String {
 
 func (ref *TypeRef4) GetOfType() TypeRef {
 	return nil
+}
+
+func (s *Schema) mustGetType(name string) (*Type, error) {
+	typ, ok := s.TypeMap[name]
+	if !ok {
+		return nil, fmt.Errorf("type `%s` not found", name)
+	}
+	return typ, nil
+}
+
+func (t *Type) mustGetField(name string) (*Field, error) {
+	field, ok := t.FieldMap[name]
+	if !ok {
+		return nil, fmt.Errorf("field `%s` not found in type %s", name, t.Name)
+	}
+	return field, nil
+}
+
+func (t *Type) mustGetEnum(name string) (*EnumValue, error) {
+	enum, ok := t.EnumMap[name]
+	if !ok {
+		return nil, fmt.Errorf("enum value `%s` not found in type %s", name, t.Name)
+	}
+	return enum, nil
+}
+
+func (s *Schema) resolve(ref TypeRef) (*Type, error) {
+	if ref == nil {
+		return nil, errors.New("type ref cannot be nil")
+	}
+
+	if ref.GetKind() == NonNullKind || ref.GetKind() == ListKind {
+		return s.resolve(ref.GetOfType())
+	}
+
+	if ref.GetName() == nil {
+		return nil, errors.New("name of concret type ref cannot be nil")
+	}
+
+	return s.mustGetType(string(*ref.GetName()))
+}
+
+func (s *Schema) typeDecorator(ref TypeRef) (TypeDecorator, error) {
+	if ref == nil {
+		return nil, errors.New("type ref cannot be nil")
+	}
+
+	if ref.GetKind() == NonNullKind {
+		subDecorator, err := s.typeDecorator(ref.GetOfType())
+		if err != nil {
+			return nil, err
+		}
+
+		return func(t reflect.Type) (reflect.Type, error) {
+			newType, err := subDecorator(t)
+			if err != nil {
+				return t, err
+			}
+
+			switch newType.Kind() {
+			case reflect.Ptr:
+				return newType.Elem(), nil
+			case reflect.Slice, reflect.Map:
+				return newType, nil
+			default:
+				return nil, fmt.Errorf("non null decorators do not support type %#v", newType)
+			}
+		}, nil
+	}
+
+	if ref.GetKind() == ListKind {
+		subDecorator, err := s.typeDecorator(ref.GetOfType())
+		if err != nil {
+			return nil, err
+		}
+
+		return func(t reflect.Type) (reflect.Type, error) {
+			newType, err := subDecorator(t)
+			if err != nil {
+				return t, err
+			}
+			return reflect.SliceOf(newType), nil
+		}, nil
+	}
+
+	return func(t reflect.Type) (reflect.Type, error) {
+		return t, nil
+	}, nil
 }
