@@ -183,7 +183,7 @@ check-install-script: install.sh
 	git diff -U --exit-code install.sh
 
 clean:
-	rm -rf pkg/swaggerdocs/docs.go $(CLEAN_TARGETS)
+	rm -rf pkg/dashboard/swaggerdocs/docs.go $(CLEAN_TARGETS)
 
 boilerplate:
 	./hack/verify-boilerplate.sh
