@@ -8,3 +8,8 @@ export const events = (params?: EventsParams) =>
   })
 
 export const get = (id: string) => http.get<Event>(`/events/${id}`)
+
+export const cascadeFetchEventsForWorkflow = (params?: EventsParams) =>
+  http.get<Event[]>('/events/workflow', {
+    params,
+  })
