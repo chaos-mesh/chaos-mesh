@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/iancoleman/strcase"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 
@@ -57,18 +58,18 @@ func NewQueryCmd() *cobra.Command {
 			}
 
 			var query *common.Query
+			prefix := append([]string{"namespace"}, common.StandardizeQuery(namespace)...)
+
+			if len(prefix) != 2 {
+				return fmt.Errorf("invalid namepsace: %s", namespace)
+			}
+
+			if resource != "" {
+				prefix = append(prefix, common.StandardizeQuery(resource)...)
+			}
+
 			for _, arg := range args {
-				part := append([]string{"namespace"}, common.StandardizeQuery(namespace)...)
-
-				if len(part) != 2 {
-					return fmt.Errorf("invalid namepsace: %s", namespace)
-				}
-
-				if resource != "" {
-					part = append(part, common.StandardizeQuery(resource)...)
-				}
-
-				part = append(part, common.StandardizeQuery(arg)...)
+				part := append(prefix, common.StandardizeQuery(arg)...)
 				partQuery, err := client.Schema.ParseQuery(part, queryType)
 				if err != nil {
 					return err
@@ -95,7 +96,17 @@ func NewQueryCmd() *cobra.Command {
 				return err
 			}
 
-			data, err := yaml.Marshal(queryValue)
+			prefixQuery, err := client.Schema.ParseQuery(prefix, queryType)
+			if err != nil {
+				return err
+			}
+
+			value, err := findResource(queryValue, prefixQuery)
+			if err != nil {
+				return err
+			}
+
+			data, err := yaml.Marshal(value)
 			if err != nil {
 				return err
 			}
@@ -110,4 +121,37 @@ func NewQueryCmd() *cobra.Command {
 	queryCmd.Flags().StringVarP(&resource, "resource", "r", "", "the target resource")
 
 	return queryCmd
+}
+
+func findResource(object interface{}, resource *common.Query) (interface{}, error) {
+	if resource == nil {
+		return object, nil
+	}
+
+	value := reflect.ValueOf(object)
+	switch value.Kind() {
+	case reflect.Ptr:
+		return findResource(value.Elem().Interface(), resource)
+	case reflect.Struct:
+		field := value.FieldByName(strcase.ToCamel(resource.Name))
+		if field == *new(reflect.Value) {
+			return nil, fmt.Errorf("cannot find field %s in object: %#v", resource.Name, object)
+		}
+		for _, f := range resource.Fields {
+			return findResource(field.Interface(), f)
+		}
+		return findResource(field.Interface(), nil)
+	case reflect.Slice:
+		slice := make([]interface{}, 0, value.Len())
+		for i := 0; i < value.Len(); i++ {
+			elem, err := findResource(value.Index(i).Interface(), resource)
+			if err != nil {
+				return nil, err
+			}
+			slice = append(slice, elem)
+		}
+		return slice, nil
+	default:
+		return nil, fmt.Errorf("resource of %s kind is not supported", value.Kind())
+	}
 }
