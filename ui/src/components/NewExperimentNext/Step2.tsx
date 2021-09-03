@@ -19,14 +19,6 @@ import Space from 'components-mui/Space'
 import T from 'components/T'
 import UndoIcon from '@material-ui/icons/Undo'
 
-function isInstant(kind: ExperimentKind | '', action: string) {
-  if (kind === 'PodChaos' && (action === 'pod-kill' || action === 'container-kill')) {
-    return true
-  }
-
-  return false
-}
-
 interface Step2Props {
   inWorkflow?: boolean
   inSchedule?: boolean
@@ -152,7 +144,7 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false })
                       <LabelField name="metadata.labels" label={T('k8s.labels')} isKV />
                       <LabelField name="metadata.annotations" label={T('k8s.annotations')} isKV />
                     </OtherOptions>
-                    {!inWorkflow && !isInstant(kind, action) && (
+                    {!inWorkflow && (
                       <>
                         <Divider />
                         <Scheduler errors={errors} touched={touched} inSchedule={inSchedule} />

@@ -37,7 +37,7 @@ import (
 
 type ChaosImplPair struct {
 	Name   string
-	Object InnerObjectWithSelector
+	Object v1alpha1.InnerObjectWithSelector
 	Impl   ChaosImpl
 
 	ObjectList v1alpha1.GenericChaosList
@@ -95,7 +95,7 @@ func NewController(params Params) (types.Controller, error) {
 
 						items := reflect.ValueOf(list).Elem().FieldByName("Items")
 						for i := 0; i < items.Len(); i++ {
-							item := items.Index(i).Addr().Interface().(InnerObjectWithSelector)
+							item := items.Index(i).Addr().Interface().(v1alpha1.InnerObjectWithSelector)
 							for _, record := range item.GetStatus().Experiment.Records {
 								namespacedName, err := controller.ParseNamespacedName(record.Id)
 								if err != nil {
