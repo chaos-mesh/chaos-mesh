@@ -24,6 +24,8 @@ const (
 	LabelWorkflow     = "chaos-mesh.org/workflow"
 )
 
+const KindWorkflowNode = "WorkflowNode"
+
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:shortName=wfn
 // +kubebuilder:subresource:status

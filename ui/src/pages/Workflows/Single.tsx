@@ -259,12 +259,7 @@ const Single = () => {
                     <Space display="flex" flexDirection="column" height="100%">
                       <PaperTop title={T('common.definition')} boxProps={{ p: 4.5, pb: 0 }} />
                       <Box flex={1}>
-                        <YAMLEditor
-                          name={single.name}
-                          data={yaml.dump(single.kube_object)}
-                          // onUpdate={handleUpdateSchedule}
-                          download
-                        />
+                        <YAMLEditor name={single.name} data={yaml.dump(single.kube_object)} download />
                       </Box>
                     </Space>
                   )}
