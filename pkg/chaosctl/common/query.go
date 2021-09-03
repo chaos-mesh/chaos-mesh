@@ -21,6 +21,7 @@ import (
 	"strings"
 
 	"github.com/hasura/go-graphql-client"
+	"github.com/iancoleman/strcase"
 )
 
 type Query struct {
@@ -34,11 +35,41 @@ type Query struct {
 
 type Component string
 
-type Variables []*Variable
+type Variables struct {
+	inner []*Variable
+}
 
 type Variable struct {
-	Name  string
+	name  string
 	Value interface{}
+}
+
+func NewVariables() *Variables {
+	return &Variables{
+		inner: make([]*Variable, 0),
+	}
+}
+
+func (v *Variable) Name(index int) string {
+	return fmt.Sprintf("%s%d", v.name, index)
+}
+
+func (v *Variables) Append(name string, val interface{}) string {
+	variable := &Variable{
+		name:  name,
+		Value: val,
+	}
+
+	v.inner = append(v.inner, variable)
+	return variable.Name(len(v.inner) - 1)
+}
+
+func (v *Variables) GenMap() map[string]interface{} {
+	variableMap := make(map[string]interface{})
+	for i, val := range v.inner {
+		variableMap[val.Name(i)] = val.Value
+	}
+	return variableMap
 }
 
 var (
@@ -280,4 +311,50 @@ func (s *Schema) parseLeaves(leaves string, super *Type) ([]*Query, error) {
 		queries = append(queries, NewQuery(f, typ, decorator))
 	}
 	return queries, nil
+}
+
+func (s *Schema) Reflect(query *Query, variables *Variables) (typ reflect.Type, err error) {
+	nilType := reflect.TypeOf(nil)
+
+	switch query.Type.Kind {
+	case ScalarKind:
+		typ, err = ScalarType(query.Type.Name).reflect()
+		if err != nil {
+			return nilType, err
+		}
+	case EnumKind:
+		typ, err = ScalarType(ScalarString).reflect()
+		if err != nil {
+			return nilType, err
+		}
+	case ObjectKind:
+		fields := make([]reflect.StructField, 0)
+		for _, f := range query.Fields {
+			fieldType, err := s.Reflect(f, variables)
+			if err != nil {
+				return nilType, err
+			}
+
+			field := reflect.StructField{
+				Name: strcase.ToCamel(f.Name),
+				Type: fieldType,
+			}
+
+			if f.Argument != "" && f.ArgValue != nil {
+				variableName := variables.Append(f.Argument, f.ArgValue)
+				field.Tag = reflect.StructTag(fmt.Sprintf(`graphql:"%s(%s: $%s)"`, f.Name, f.Argument, variableName))
+			}
+
+			fields = append(fields, field)
+		}
+		typ = reflect.PtrTo(reflect.StructOf(fields))
+	default:
+		return nilType, fmt.Errorf("unsupported type kind: %s", query.Type.Kind)
+	}
+
+	if query.Decorator != nil {
+		typ, err = query.Decorator(typ)
+	}
+
+	return typ, err
 }

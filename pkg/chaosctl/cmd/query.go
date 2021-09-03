@@ -17,9 +17,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"reflect"
 	"strings"
 
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v2"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
 )
@@ -56,7 +58,28 @@ var queryCmd = &cobra.Command{
 			return err
 		}
 
-		fmt.Println(query)
+		superQuery := common.NewQuery("query", queryType, nil)
+		superQuery.Fields["namespace"] = query
+		variables := common.NewVariables()
+
+		queryStruct, err := client.Schema.Reflect(superQuery, variables)
+		if err != nil {
+			return err
+		}
+
+		queryValue := reflect.New(queryStruct.Elem()).Interface()
+		err = client.Client.Query(ctx, queryValue, variables.GenMap())
+		if err != nil {
+			return err
+		}
+
+		data, err := yaml.Marshal(queryValue)
+		if err != nil {
+			return err
+		}
+
+		fmt.Println(string(data))
+
 		return nil
 	},
 }

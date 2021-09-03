@@ -20,25 +20,25 @@ import (
 )
 
 type CtrlClient struct {
-	ctx                context.Context
-	client             *graphql.Client
-	subscriptionClient *graphql.SubscriptionClient
+	ctx context.Context
 
-	Schema *Schema
+	Client             *graphql.Client
+	SubscriptionClient *graphql.SubscriptionClient
+	Schema             *Schema
 }
 
 func NewCtrlClient(ctx context.Context, url string) (*CtrlClient, error) {
 	client := &CtrlClient{
 		ctx:                ctx,
-		client:             graphql.NewClient(url, nil),
-		subscriptionClient: graphql.NewSubscriptionClient(url),
+		Client:             graphql.NewClient(url, nil),
+		SubscriptionClient: graphql.NewSubscriptionClient(url),
 	}
 
 	schemaQuery := new(struct {
 		Schema RawSchema `graphql:"__schema"`
 	})
 
-	err := client.client.Query(client.ctx, schemaQuery, nil)
+	err := client.Client.Query(client.ctx, schemaQuery, nil)
 	if err != nil {
 		return nil, err
 	}
