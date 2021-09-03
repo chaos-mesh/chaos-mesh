@@ -22,7 +22,6 @@ jobs:
         uses: actions/checkout@v2
         with:
           ref: ${{ github.event.pull_request.head.sha }}
-          path: go/src/github.com/${{ github.repository }}
 
       - name: Build Chaos Mesh Build Env
         if: ${{ github.event.pull_request }}
@@ -69,6 +68,5 @@ jobs:
           else
             make $job
           fi
-        working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}
         env:
           job: ${{ matrix.job }}
