@@ -17,10 +17,10 @@ OUTPUT_BIN=$(ROOT)/output/bin
 HELM_BIN=$(OUTPUT_BIN)/helm
 
 # Every branch should have its own image tag for build-env and dev-env
-IMAGE_BUILD_ENV_PROJECT ?= chaos-mesh
+IMAGE_BUILD_ENV_PROJECT ?= chaos-mesh/chaos-mesh
 IMAGE_BUILD_ENV_REGISTRY ?= ghcr.io
 IMAGE_BUILD_ENV_BUILD ?= 0
-IMAGE_DEV_ENV_PROJECT ?= chaos-mesh
+IMAGE_DEV_ENV_PROJECT ?= chaos-mesh/chaos-mesh
 IMAGE_DEV_ENV_REGISTRY ?= ghcr.io
 IMAGE_DEV_ENV_BUILD ?= 0
 

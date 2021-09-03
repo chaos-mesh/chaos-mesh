@@ -30,9 +30,9 @@ jobs:
           IMAGE_BUILD_ENV_BUILD: ${{ contains(github.event.issue.labels.*.name, 'rebuild-build-env-image') }}
         run: |
           if [ "${IMAGE_BUILD_ENV_BUILD}" = "true" ] ; then
-            IMAGE_BUILD_ENV_BUILD=1; 
+            export IMAGE_BUILD_ENV_BUILD=1; 
           else 
-            IMAGE_BUILD_ENV_BUILD=0; 
+            export IMAGE_BUILD_ENV_BUILD=0; 
           fi
 
           make build-env
@@ -43,9 +43,9 @@ jobs:
           IMAGE_DEV_ENV_BUILD: ${{ contains(github.event.issue.labels.*.name, 'rebuild-dev-env-image') }}
         run: |
           if [ "${IMAGE_DEV_ENV_BUILD}" = "true" ] ; then
-            IMAGE_DEV_ENV_BUILD=1; 
+            export IMAGE_DEV_ENV_BUILD=1; 
           else 
-            IMAGE_DEV_ENV_BUILD=0; 
+            export IMAGE_DEV_ENV_BUILD=0; 
           fi
 
           make dev-env

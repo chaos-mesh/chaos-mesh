@@ -29,6 +29,9 @@ jobs:
         env:
           IMAGE_TAG: ${{ steps.image_tag.outputs.image_tag }}
         run: |
+          export IMAGE_DEV_ENV_BUILD=1
+          export IMAGE_BUILD_ENV_BUILD=1
+
           make build-env
           make dev-env
 
@@ -36,5 +39,5 @@ jobs:
         env:
           IMAGE_TAG: ${{ steps.image_tag.outputs.image_tag }}
         run: |
-          docker push ghcr.io/chaos-mesh/build-env:$IMAGE_TAG
-          docker push ghcr.io/chaos-mesh/dev-env:$IMAGE_TAG
+          docker push ghcr.io/chaos-mesh/chaos-mesh/build-env:$IMAGE_TAG
+          docker push ghcr.io/chaos-mesh/chaos-mesh/dev-env:$IMAGE_TAG
