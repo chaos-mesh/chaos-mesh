@@ -213,7 +213,7 @@ func (s *Service) cascadeFetchEventsForWorkflow(c *gin.Context) {
 		return result[i].CreatedAt.UnixNano() < result[j].CreatedAt.UnixNano()
 	})
 
-	if limit > 0 {
+	if limit > 0 && len(result) > limit {
 		c.JSON(http.StatusOK, result[:limit])
 		return
 	}
