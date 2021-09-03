@@ -42,7 +42,7 @@ files=($(find . -type f -not \( \
         -o -path '*/generated.go' \
         -o -path '*/schema.resolvers.go' \
         -o -path '*/*_gen.go' \
-        -o -path './pkg/swaggerdocs/*' \
+        -o -path './pkg/dashboard/swaggerdocs/*' \
     \) | grep -v -F "$ignored_files"
 ))
 

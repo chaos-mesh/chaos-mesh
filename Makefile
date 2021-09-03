@@ -407,7 +407,7 @@ check: fmt vet boilerplate lint generate yaml tidy install.sh
 CLEAN_TARGETS+=e2e-test/image/e2e/bin/ginkgo
 define e2e-test/image/e2e/bin/ginkgo-make
 	mkdir -p e2e-test/image/e2e/bin
-	cp $(shell which ginkgo) e2e-test/image/e2e/bin/ginkgo 
+	cp $(shell which ginkgo) e2e-test/image/e2e/bin/ginkgo
 endef
 $(eval $(call RUN_IN_DEV_ENV_TEMPLATE,e2e-test/image/e2e/bin/ginkgo))
 
@@ -449,7 +449,7 @@ endef
 $(eval $(call RUN_IN_DEV_ENV_TEMPLATE,install.sh))
 
 define swagger_spec-make
-	swag init -g cmd/chaos-dashboard/main.go --output pkg/swaggerdocs
+	swag init -g cmd/chaos-dashboard/main.go --output pkg/dashboard/swaggerdocs
 endef
 $(eval $(call RUN_IN_DEV_ENV_TEMPLATE,swagger_spec))
 
