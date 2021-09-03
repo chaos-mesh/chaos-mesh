@@ -21,9 +21,9 @@ jobs:
         uses: helm/kind-action@v1.2.0
 
       - name: Build Chaos Mesh Build Env
-        if: ${{ github.event.issue.pull_request }}
+        if: ${{ github.event.pull_request }}
         env:
-          IMAGE_BUILD_ENV_BUILD: ${{ contains(github.event.issue.labels.*.name, 'rebuild-build-env-image') }}
+          IMAGE_BUILD_ENV_BUILD: ${{ contains(github.event.pull_request.labels.*.name, 'rebuild-build-env-image') }}
         run: |
           if [ "${IMAGE_BUILD_ENV_BUILD}" = "true" ] ; then
             export IMAGE_BUILD_ENV_BUILD=1; 
@@ -34,9 +34,9 @@ jobs:
           make build-env
       
       - name: Build Chaos Mesh Dev Env
-        if: ${{ github.event.issue.pull_request }}
+        if: ${{ github.event.pull_request }}
         env:
-          IMAGE_DEV_ENV_BUILD: ${{ contains(github.event.issue.labels.*.name, 'rebuild-dev-env-image') }}
+          IMAGE_DEV_ENV_BUILD: ${{ contains(github.event.pull_request.labels.*.name, 'rebuild-dev-env-image') }}
         run: |
           if [ "${IMAGE_DEV_ENV_BUILD}" = "true" ] ; then
             export IMAGE_DEV_ENV_BUILD=1; 
