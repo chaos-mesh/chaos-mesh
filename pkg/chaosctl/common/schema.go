@@ -17,6 +17,8 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"strings"
+	"time"
 
 	"github.com/hasura/go-graphql-client"
 )
@@ -26,7 +28,19 @@ const (
 	ListKind    = "LIST"
 	NonNullKind = "NON_NULL"
 	EnumKind    = "ENUM"
+	ScalarKind  = "SCALAR"
 )
+
+const (
+	ScalarString  = "String"
+	ScalarInt     = "Int"
+	ScalarTime    = "Time"
+	ScalarFloat   = "Float"
+	ScalarBoolean = "Boolean"
+	ScalarMap     = "Map"
+)
+
+type ScalarType string
 
 type Schema struct {
 	*RawSchema
@@ -59,6 +73,13 @@ type RawType struct {
 }
 
 type Field struct {
+	Name        graphql.String
+	Description graphql.String
+	Type        TypeRef1
+	Args        []*Argument
+}
+
+type Argument struct {
 	Name        graphql.String
 	Description graphql.String
 	Type        TypeRef1
@@ -125,7 +146,7 @@ func NewType(t *RawType) *Type {
 	}
 
 	for _, enum := range typ.EnumValues {
-		typ.EnumMap[string(enum.Name)] = enum
+		typ.EnumMap[strings.ToLower(string(enum.Name))] = enum
 	}
 
 	return typ
@@ -179,7 +200,7 @@ func (ref *TypeRef4) GetOfType() TypeRef {
 	return nil
 }
 
-func (s *Schema) mustGetType(name string) (*Type, error) {
+func (s *Schema) MustGetType(name string) (*Type, error) {
 	typ, ok := s.TypeMap[name]
 	if !ok {
 		return nil, fmt.Errorf("type `%s` not found", name)
@@ -216,7 +237,7 @@ func (s *Schema) resolve(ref TypeRef) (*Type, error) {
 		return nil, errors.New("name of concret type ref cannot be nil")
 	}
 
-	return s.mustGetType(string(*ref.GetName()))
+	return s.MustGetType(string(*ref.GetName()))
 }
 
 func (s *Schema) typeDecorator(ref TypeRef) (TypeDecorator, error) {
@@ -265,4 +286,23 @@ func (s *Schema) typeDecorator(ref TypeRef) (TypeDecorator, error) {
 	return func(t reflect.Type) (reflect.Type, error) {
 		return t, nil
 	}, nil
+}
+
+func (t ScalarType) reflect() (reflect.Type, error) {
+	switch t {
+	case ScalarString:
+		return reflect.PtrTo(reflect.TypeOf(graphql.String(""))), nil
+	case ScalarInt:
+		return reflect.PtrTo(reflect.TypeOf(graphql.Int(0))), nil
+	case ScalarFloat:
+		return reflect.PtrTo(reflect.TypeOf(graphql.Float(0))), nil
+	case ScalarBoolean:
+		return reflect.PtrTo(reflect.TypeOf(graphql.Boolean(false))), nil
+	case ScalarTime:
+		return reflect.PtrTo(reflect.TypeOf(time.Time{})), nil
+	case ScalarMap:
+		return reflect.TypeOf(map[string]interface{}{}), nil
+	default:
+		return nil, fmt.Errorf("unsupported scalar type: %s", t)
+	}
 }

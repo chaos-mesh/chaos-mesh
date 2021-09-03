@@ -300,8 +300,8 @@ type ComplexityRoot struct {
 	}
 
 	Logger struct {
-		Component func(childComplexity int, ns *string, component model.Component) int
-		Pod       func(childComplexity int, ns *string, name string) int
+		Component func(childComplexity int, ns string, component model.Component) int
+		Pod       func(childComplexity int, ns string, name string) int
 	}
 
 	LossSpec struct {
@@ -596,7 +596,7 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Namepsace func(childComplexity int, ns *string) int
+		Namespace func(childComplexity int, ns string) int
 	}
 
 	RawIPSet struct {
@@ -762,8 +762,8 @@ type IoFaultResolver interface {
 	Errno(ctx context.Context, obj *v1alpha1.IoFault) (int, error)
 }
 type LoggerResolver interface {
-	Component(ctx context.Context, ns *string, component model.Component) (<-chan string, error)
-	Pod(ctx context.Context, ns *string, name string) (<-chan string, error)
+	Component(ctx context.Context, ns string, component model.Component) (<-chan string, error)
+	Pod(ctx context.Context, ns string, name string) (<-chan string, error)
 }
 type MistakeSpecResolver interface {
 	Filling(ctx context.Context, obj *v1alpha1.MistakeSpec) (*string, error)
@@ -888,7 +888,7 @@ type ProcessResolver interface {
 	Fds(ctx context.Context, obj *model.Process) ([]*model.Fd, error)
 }
 type QueryResolver interface {
-	Namepsace(ctx context.Context, ns *string) (*model.Namespace, error)
+	Namespace(ctx context.Context, ns string) (*model.Namespace, error)
 }
 type RawIptablesResolver interface {
 	Direction(ctx context.Context, obj *v1alpha1.RawIptables) (string, error)
@@ -2005,7 +2005,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Logger.Component(childComplexity, args["ns"].(*string), args["component"].(model.Component)), true
+		return e.complexity.Logger.Component(childComplexity, args["ns"].(string), args["component"].(model.Component)), true
 
 	case "Logger.pod":
 		if e.complexity.Logger.Pod == nil {
@@ -2017,7 +2017,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Logger.Pod(childComplexity, args["ns"].(*string), args["name"].(string)), true
+		return e.complexity.Logger.Pod(childComplexity, args["ns"].(string), args["name"].(string)), true
 
 	case "LossSpec.correlation":
 		if e.complexity.LossSpec.Correlation == nil {
@@ -3534,17 +3534,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Process.Pod(childComplexity), true
 
-	case "Query.namepsace":
-		if e.complexity.Query.Namepsace == nil {
+	case "Query.namespace":
+		if e.complexity.Query.Namespace == nil {
 			break
 		}
 
-		args, err := ec.field_Query_namepsace_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_namespace_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.Namepsace(childComplexity, args["ns"].(*string)), true
+		return e.complexity.Query.Namespace(childComplexity, args["ns"].(string)), true
 
 	case "RawIPSet.cidrs":
 		if e.complexity.RawIPSet.Cidrs == nil {
@@ -3912,12 +3912,12 @@ schema {
 }
 
 type Query {
-    namepsace(ns: String): Namespace!
+    namespace(ns: String! = "default"): Namespace!
 }
 
 type Logger {
-    component(ns: String, component: Component!): String!  @goField(forceResolver: true)
-    pod(ns: String, name: String!): String!                @goField(forceResolver: true)
+    component(ns: String! = "chaos-testing", component: Component!): String!  @goField(forceResolver: true)
+    pod(ns: String! = "default", name: String!): String!                @goField(forceResolver: true)
 }
 
 type Namespace {
@@ -4953,10 +4953,10 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 func (ec *executionContext) field_Logger_component_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *string
+	var arg0 string
 	if tmp, ok := rawArgs["ns"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ns"))
-		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -4977,10 +4977,10 @@ func (ec *executionContext) field_Logger_component_args(ctx context.Context, raw
 func (ec *executionContext) field_Logger_pod_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *string
+	var arg0 string
 	if tmp, ok := rawArgs["ns"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ns"))
-		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -5148,13 +5148,13 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_namepsace_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_namespace_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *string
+	var arg0 string
 	if tmp, ok := rawArgs["ns"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ns"))
-		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -10290,7 +10290,7 @@ func (ec *executionContext) _Logger_component(ctx context.Context, field graphql
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Logger().Component(rctx, args["ns"].(*string), args["component"].(model.Component))
+		return ec.resolvers.Logger().Component(rctx, args["ns"].(string), args["component"].(model.Component))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -10342,7 +10342,7 @@ func (ec *executionContext) _Logger_pod(ctx context.Context, field graphql.Colle
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Logger().Pod(rctx, args["ns"].(*string), args["name"].(string))
+		return ec.resolvers.Logger().Pod(rctx, args["ns"].(string), args["name"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -17479,7 +17479,7 @@ func (ec *executionContext) _Process_fds(ctx context.Context, field graphql.Coll
 	return ec.marshalOFd2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlserverᚋgraphᚋmodelᚐFdᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_namepsace(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_namespace(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -17496,7 +17496,7 @@ func (ec *executionContext) _Query_namepsace(ctx context.Context, field graphql.
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_namepsace_args(ctx, rawArgs)
+	args, err := ec.field_Query_namespace_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -17504,7 +17504,7 @@ func (ec *executionContext) _Query_namepsace(ctx context.Context, field graphql.
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Namepsace(rctx, args["ns"].(*string))
+		return ec.resolvers.Query().Namespace(rctx, args["ns"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -23526,7 +23526,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
-		case "namepsace":
+		case "namespace":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -23534,7 +23534,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_namepsace(ctx, field)
+				res = ec._Query_namespace(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
