@@ -24,6 +24,32 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           path: go/src/github.com/${{ github.repository }}
 
+      - name: Build Chaos Mesh Build Env
+        if: ${{ github.event.issue.pull_request }}
+        env:
+          IMAGE_BUILD_ENV_BUILD: ${{ contains(github.event.issue.labels.*.name, 'rebuild-build-env-image') }}
+        run: |
+          if [ "${IMAGE_BUILD_ENV_BUILD}" = "true" ] ; then
+            IMAGE_BUILD_ENV_BUILD=1; 
+          else 
+            IMAGE_BUILD_ENV_BUILD=0; 
+          fi
+
+          make build-env
+      
+      - name: Build Chaos Mesh Dev Env
+        if: ${{ github.event.issue.pull_request }}
+        env:
+          IMAGE_DEV_ENV_BUILD: ${{ contains(github.event.issue.labels.*.name, 'rebuild-dev-env-image') }}
+        run: |
+          if [ "${IMAGE_DEV_ENV_BUILD}" = "true" ] ; then
+            IMAGE_DEV_ENV_BUILD=1; 
+          else 
+            IMAGE_DEV_ENV_BUILD=0; 
+          fi
+
+          make dev-env
+
       - name: ${{ matrix.job }}
         run: |
           # workaround for https://github.com/actions/setup-go/issues/14
