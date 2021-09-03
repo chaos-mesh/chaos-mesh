@@ -18,7 +18,6 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
-	"strings"
 
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
@@ -26,60 +25,89 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
 )
 
-// queryCmd represents the query command
-var queryCmd = &cobra.Command{
-	Use:   "get [QUERY]",
-	Short: "get the target resources",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		ctx := context.Background()
-		// TODO: input ns by args
-		cancel, port, err := common.ForwardCtrlServer(ctx, nil)
-		if err != nil {
-			return err
-		}
-		defer cancel()
+func NewQueryCmd() *cobra.Command {
+	var namespace string
+	var resource string
 
-		client, err := common.NewCtrlClient(ctx, fmt.Sprintf("http://127.0.0.1:%d/query", port))
-		if err != nil {
-			return fmt.Errorf("fail to init ctrl client: %s", err)
-		}
+	// queryCmd represents the query command
+	var queryCmd = &cobra.Command{
+		Use:   "get [QUERY]",
+		Short: "get the target resources",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := context.Background()
+			// TODO: input ns by args
+			cancel, port, err := common.ForwardCtrlServer(ctx, nil)
+			if err != nil {
+				return err
+			}
+			defer cancel()
 
-		if client.Schema == nil {
-			return errors.New("fail to fetch schema")
-		}
+			client, err := common.NewCtrlClient(ctx, fmt.Sprintf("http://127.0.0.1:%d/query", port))
+			if err != nil {
+				return fmt.Errorf("fail to init ctrl client: %s", err)
+			}
 
-		queryType, err := client.Schema.MustGetType(string(client.Schema.QueryType.Name))
-		if err != nil {
-			return err
-		}
+			if client.Schema == nil {
+				return errors.New("fail to fetch schema")
+			}
 
-		query, err := client.Schema.ParseQuery(strings.Split(strings.Trim(args[0], "/"), "/"), queryType)
-		if err != nil {
-			return err
-		}
+			queryType, err := client.Schema.MustGetType(string(client.Schema.QueryType.Name))
+			if err != nil {
+				return err
+			}
 
-		superQuery := common.NewQuery("query", queryType, nil)
-		superQuery.Fields["namespace"] = query
-		variables := common.NewVariables()
+			var query *common.Query
+			for _, arg := range args {
+				part := append([]string{"namespace"}, common.StandardizeQuery(namespace)...)
 
-		queryStruct, err := client.Schema.Reflect(superQuery, variables)
-		if err != nil {
-			return err
-		}
+				if len(part) != 2 {
+					return fmt.Errorf("invalid namepsace: %s", namespace)
+				}
 
-		queryValue := reflect.New(queryStruct.Elem()).Interface()
-		err = client.Client.Query(ctx, queryValue, variables.GenMap())
-		if err != nil {
-			return err
-		}
+				if resource != "" {
+					part = append(part, common.StandardizeQuery(resource)...)
+				}
 
-		data, err := yaml.Marshal(queryValue)
-		if err != nil {
-			return err
-		}
+				part = append(part, common.StandardizeQuery(arg)...)
+				partQuery, err := client.Schema.ParseQuery(part, queryType)
+				if err != nil {
+					return err
+				}
 
-		fmt.Println(string(data))
+				query, err = query.Merge(partQuery)
+				if err != nil {
+					return err
+				}
+			}
 
-		return nil
-	},
+			superQuery := common.NewQuery("query", queryType, nil)
+			superQuery.Fields["namespace"] = query
+			variables := common.NewVariables()
+
+			queryStruct, err := client.Schema.Reflect(superQuery, variables)
+			if err != nil {
+				return err
+			}
+
+			queryValue := reflect.New(queryStruct.Elem()).Interface()
+			err = client.Client.Query(ctx, queryValue, variables.GenMap())
+			if err != nil {
+				return err
+			}
+
+			data, err := yaml.Marshal(queryValue)
+			if err != nil {
+				return err
+			}
+
+			fmt.Println(string(data))
+
+			return nil
+		},
+	}
+
+	queryCmd.Flags().StringVarP(&namespace, "namespace", "n", "default", "the kubenates namespace")
+	queryCmd.Flags().StringVarP(&resource, "resource", "r", "", "the target resource")
+
+	return queryCmd
 }

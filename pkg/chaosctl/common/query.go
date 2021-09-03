@@ -358,3 +358,7 @@ func (s *Schema) Reflect(query *Query, variables *Variables) (typ reflect.Type, 
 
 	return typ, err
 }
+
+func StandardizeQuery(query string) []string {
+	return strings.Split(strings.Trim(query, "/"), "/")
+}
