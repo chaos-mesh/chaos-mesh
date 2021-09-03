@@ -31,7 +31,7 @@ jobs:
             export IMAGE_BUILD_ENV_BUILD=0; 
           fi
 
-          make build-env
+          make image-build-env
       
       - name: Build Chaos Mesh Dev Env
         if: ${{ github.event.pull_request }}
@@ -44,7 +44,7 @@ jobs:
             export IMAGE_DEV_ENV_BUILD=0; 
           fi
 
-          make dev-env
+          make image-dev-env
 
       - name: Install Chaos Mesh
         run: |
