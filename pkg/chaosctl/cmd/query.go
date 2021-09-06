@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/go-logr/logr"
 	"github.com/iancoleman/strcase"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
@@ -26,7 +27,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
 )
 
-func NewQueryCmd() *cobra.Command {
+func NewQueryCmd(log logr.Logger) *cobra.Command {
 	var namespace string
 	var resource string
 
@@ -48,11 +49,13 @@ func NewQueryCmd() *cobra.Command {
 		client, cancel, err := createClient(ctx)
 		defer cancel()
 		if err != nil {
+			log.Error(err, "fail to create client")
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		}
 
 		queryType, err := client.GetQueryType()
 		if err != nil {
+			log.Error(err, "fail to get query type")
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		}
 
@@ -61,33 +64,40 @@ func NewQueryCmd() *cobra.Command {
 			switch e := err.(type) {
 			case *common.EnumValueNotFound:
 				if e.Target != queryStr[len(queryStr)-1] {
+					log.Error(err, "fail to parse query")
 					return nil, cobra.ShellCompDirectiveNoFileComp
 				}
 				return e.Variants, cobra.ShellCompDirectiveNoSpace
 			case *common.FieldNotFound:
 				if e.Target != queryStr[len(queryStr)-1] {
+					log.Error(err, "fail to parse query")
 					return nil, cobra.ShellCompDirectiveNoFileComp
 				}
 				return e.Fields, cobra.ShellCompDirectiveNoSpace
 			case *common.ScalarValueParseFail:
 				if e.Value != queryStr[len(queryStr)-1] {
+					log.Error(err, "fail to parse query")
 					return nil, cobra.ShellCompDirectiveNoFileComp
 				}
 				arguments, err := client.ListArguments(queryStr, e.Argument)
 				if err != nil {
+					log.Error(err, "fail to list arguments")
 					return nil, cobra.ShellCompDirectiveNoFileComp
 				}
 				return arguments, cobra.ShellCompDirectiveNoSpace
 			case *common.LeafRequireArgument:
 				if e.Leaf != queryStr[len(queryStr)-1] {
+					log.Error(err, "fail to parse query")
 					return nil, cobra.ShellCompDirectiveNoFileComp
 				}
 				arguments, err := client.ListArguments(append(queryStr, ""), e.Argument)
 				if err != nil {
+					log.Error(err, "fail to list arguments")
 					return nil, cobra.ShellCompDirectiveNoFileComp
 				}
 				return arguments, cobra.ShellCompDirectiveNoSpace
 			default:
+				log.Error(err, "fail to parse query")
 				return nil, cobra.ShellCompDirectiveNoFileComp
 			}
 		}
@@ -100,6 +110,7 @@ func NewQueryCmd() *cobra.Command {
 		if tail.Argument != "" {
 			arguments, err := client.ListArguments(queryStr, tail.Argument)
 			if err != nil {
+				log.Error(err, "fail to list arguments")
 				return nil, cobra.ShellCompDirectiveNoFileComp
 			}
 			return arguments, cobra.ShellCompDirectiveNoSpace
@@ -120,6 +131,7 @@ func NewQueryCmd() *cobra.Command {
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			prefix, err := joinPrefix()
 			if err != nil {
+				log.Error(err, "fail to join prefix")
 				return nil, cobra.ShellCompDirectiveNoFileComp
 			}
 
