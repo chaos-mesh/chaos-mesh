@@ -80,16 +80,12 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 		return admission.Allowed(fmt.Sprintf("skip the RBAC check for type %s", requestKind))
 	}
 
-	kind, ok := v1alpha1.AllKinds()[requestKind]
+	kind, ok := v1alpha1.AllKindsIncludeScheduleAndWorkflow()[requestKind]
 	if !ok {
 		err := fmt.Errorf("kind %s is not support", requestKind)
 		return admission.Errored(http.StatusBadRequest, err)
 	}
-	chaos := kind.SpawnObject().(v1alpha1.InnerObjectWithSelector)
-	if chaos == nil {
-		err := fmt.Errorf("kind %s is not support", requestKind)
-		return admission.Errored(http.StatusBadRequest, err)
-	}
+	chaos := kind.SpawnObject()
 
 	err := v.decoder.Decode(req, chaos)
 	if err != nil {
