@@ -54,6 +54,22 @@ func AllKinds() map[string]*ChaosKind {
 	return all.clone()
 }
 
+func AllKindsIncludeScheduleAndWorkflow() map[string]*ChaosKind {
+	all := chaosKindMap{
+		kinds: all.clone(),
+	}
+	all.register(KindSchedule, &ChaosKind{
+		chaos: &Schedule{},
+		list:  &ScheduleList{},
+	})
+	all.register(KindWorkflow, &ChaosKind{
+		chaos: &Workflow{},
+		list:  &WorkflowList{},
+	})
+
+	return all.kinds
+}
+
 // all is a ChaosKindMap instance.
 var all = &chaosKindMap{
 	kinds: make(map[string]*ChaosKind),
