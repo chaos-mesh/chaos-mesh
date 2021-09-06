@@ -210,7 +210,7 @@ func (s *Service) cascadeFetchEventsForWorkflow(c *gin.Context) {
 
 	// sort by CreatedAt
 	sort.Slice(result, func(i, j int) bool {
-		return result[i].CreatedAt.UnixNano() < result[j].CreatedAt.UnixNano()
+		return result[i].CreatedAt.UnixNano() > result[j].CreatedAt.UnixNano()
 	})
 
 	if limit > 0 && len(result) > limit {
