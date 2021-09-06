@@ -317,29 +317,31 @@ func (it *TaskReconciler) syncChildNodes(ctx context.Context, evaluatedNode v1al
 		taskNamesOfNodes = append(taskNamesOfNodes, getTaskNameFromGeneratedName(childNode.GetName()))
 	}
 
-	// TODO: check the specific of task and workflow nodes
-	// the definition of tasks changed, remove all the existed nodes
-	if len(existsChildNodes) > 0 && (len(setDifference(taskNamesOfNodes, tasks)) > 0 || len(setDifference(tasks, taskNamesOfNodes)) > 0) {
-		// nodesToCleanup is just a vanilla string array
-		var nodesToCleanup []string
-		for _, item := range existsChildNodes {
-			nodesToCleanup = append(nodesToCleanup, item.Name)
-		}
-		it.eventRecorder.Event(&evaluatedNode, recorder.RerunBySpecChanged{CleanedChildrenNode: nodesToCleanup})
-
-		for _, childNode := range existsChildNodes {
-			// best effort deletion
-			err := it.kubeClient.Delete(ctx, &childNode)
-			if err != nil {
-				it.logger.Error(err, "failed to delete outdated child node",
-					"node", fmt.Sprintf("%s/%s", evaluatedNode.Namespace, evaluatedNode.Name),
-					"child node", fmt.Sprintf("%s/%s", childNode.Namespace, childNode.Name),
-				)
+	if len(existsChildNodes) > 0 {
+		// TODO: check the specific of task and workflow nodes
+		// the definition of tasks changed, remove all the existed nodes
+		if len(setDifference(taskNamesOfNodes, tasks)) > 0 || len(setDifference(tasks, taskNamesOfNodes)) > 0 {
+			// nodesToCleanup is just a vanilla string array
+			var nodesToCleanup []string
+			for _, item := range existsChildNodes {
+				nodesToCleanup = append(nodesToCleanup, item.Name)
 			}
+			it.eventRecorder.Event(&evaluatedNode, recorder.RerunBySpecChanged{CleanedChildrenNode: nodesToCleanup})
+
+			for _, childNode := range existsChildNodes {
+				// best effort deletion
+				err := it.kubeClient.Delete(ctx, &childNode)
+				if err != nil {
+					it.logger.Error(err, "failed to delete outdated child node",
+						"node", fmt.Sprintf("%s/%s", evaluatedNode.Namespace, evaluatedNode.Name),
+						"child node", fmt.Sprintf("%s/%s", childNode.Namespace, childNode.Name),
+					)
+				}
+			}
+		} else {
+			// exactly same, NOOP
+			return nil
 		}
-	} else {
-		// exactly same, NOOP
-		return nil
 	}
 
 	parentWorkflow := v1alpha1.Workflow{}
