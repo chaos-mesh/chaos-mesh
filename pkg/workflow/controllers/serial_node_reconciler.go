@@ -201,7 +201,7 @@ func (it *SerialNodeReconciler) syncChildNodes(ctx context.Context, node v1alpha
 					// delete that related nodes with best-effort pattern
 					nodesToDelete := finishedChildNodes[index:]
 
-					if len(nodesToDelete)>0{
+					if len(nodesToDelete) > 0 {
 						var nodesToCleanup []string
 						for _, item := range nodesToDelete {
 							nodesToCleanup = append(nodesToCleanup, item.Name)
