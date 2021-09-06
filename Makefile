@@ -229,7 +229,7 @@ e2e-test/image/e2e/chaos-mesh: helm/chaos-mesh
 # $(IMAGE_$(4)_PROJECT): the project name of the image, by default it is `pingcap`
 # $(IMAGE_$(4)_REGISTRY): the registry name of the image, it will override `DOCKER_REGISTRY`
 # $(IMAGE_$(4)_TAG): the tag of the image, it will override `IMAGE_TAG`
-# $(IMAGE_$(4)_BUILD): whether the image should be pulled rather than build locally, by default it is `1`.
+# $(IMAGE_$(4)_BUILD): whether the image should be built locally rather than pulled from remote registry, by default it is `1`.
 define IMAGE_TEMPLATE
 
 $(4)_PROJECT := ${IMAGE_$(4)_PROJECT}
