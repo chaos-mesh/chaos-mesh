@@ -427,7 +427,7 @@ func (r *mistakeSpecResolver) Filling(ctx context.Context, obj *v1alpha1.Mistake
 func (r *namespaceResolver) Component(ctx context.Context, obj *model.Namespace, component model.Component) ([]*v1.Pod, error) {
 	var list v1.PodList
 	var pods []*v1.Pod
-	if err := r.Client.List(ctx, &list, client.MatchingLabels(componentLabels(component))); err != nil {
+	if err := r.Client.List(ctx, &list, client.MatchingLabels(componentLabels(component)), client.InNamespace(obj.Ns)); err != nil {
 		return nil, err
 	}
 	for i := range list.Items {

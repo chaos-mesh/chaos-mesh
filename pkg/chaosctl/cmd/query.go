@@ -30,42 +30,123 @@ func NewQueryCmd() *cobra.Command {
 	var namespace string
 	var resource string
 
+	var joinPrefix = func() ([]string, error) {
+		prefix := append([]string{"namespace"}, common.StandardizeQuery(namespace)...)
+
+		if len(prefix) != 2 {
+			return nil, fmt.Errorf("invalid namepsace: %s", namespace)
+		}
+
+		if resource != "" {
+			prefix = append(prefix, common.StandardizeQuery(resource)...)
+		}
+		return prefix, nil
+	}
+
+	var completeQuery = func(queryStr []string) ([]string, cobra.ShellCompDirective) {
+		ctx := context.Background()
+		client, cancel, err := createClient(ctx)
+		defer cancel()
+		if err != nil {
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		}
+
+		queryType, err := client.GetQueryType()
+		if err != nil {
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		}
+
+		query, err := client.Schema.ParseQuery(queryStr, queryType)
+		if err != nil {
+			switch e := err.(type) {
+			case *common.EnumValueNotFound:
+				if e.Target != queryStr[len(queryStr)-1] {
+					return nil, cobra.ShellCompDirectiveNoFileComp
+				}
+				return e.Variants, cobra.ShellCompDirectiveNoSpace
+			case *common.FieldNotFound:
+				if e.Target != queryStr[len(queryStr)-1] {
+					return nil, cobra.ShellCompDirectiveNoFileComp
+				}
+				return e.Fields, cobra.ShellCompDirectiveNoSpace
+			case *common.ScalarValueParseFail:
+				if e.Value != queryStr[len(queryStr)-1] {
+					return nil, cobra.ShellCompDirectiveNoFileComp
+				}
+				arguments, err := client.ListArguments(queryStr, e.Argument)
+				if err != nil {
+					return nil, cobra.ShellCompDirectiveNoFileComp
+				}
+				return arguments, cobra.ShellCompDirectiveNoSpace
+			case *common.LeafRequireArgument:
+				if e.Leaf != queryStr[len(queryStr)-1] {
+					return nil, cobra.ShellCompDirectiveNoFileComp
+				}
+				arguments, err := client.ListArguments(append(queryStr, ""), e.Argument)
+				if err != nil {
+					return nil, cobra.ShellCompDirectiveNoFileComp
+				}
+				return arguments, cobra.ShellCompDirectiveNoSpace
+			default:
+				return nil, cobra.ShellCompDirectiveNoFileComp
+			}
+		}
+
+		tail := query.Tail()
+		if tail == nil {
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		}
+
+		if tail.Argument != "" {
+			arguments, err := client.ListArguments(queryStr, tail.Argument)
+			if err != nil {
+				return nil, cobra.ShellCompDirectiveNoFileComp
+			}
+			return arguments, cobra.ShellCompDirectiveNoSpace
+		}
+
+		fields := make([]string, 0)
+		for f := range tail.Type.FieldMap {
+			fields = append(fields, f)
+		}
+
+		return fields, cobra.ShellCompDirectiveNoSpace
+	}
+
 	// queryCmd represents the query command
 	var queryCmd = &cobra.Command{
 		Use:   "get [QUERY]",
 		Short: "get the target resources",
+		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			prefix, err := joinPrefix()
+			if err != nil {
+				return nil, cobra.ShellCompDirectiveNoFileComp
+			}
+
+			if len(args) == 0 {
+				return completeQuery(prefix)
+			}
+
+			return completeQuery(append(prefix, common.StandardizeQuery(args[len(args)-1])...))
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
-			// TODO: input ns by args
-			cancel, port, err := common.ForwardCtrlServer(ctx, nil)
+			client, cancel, err := createClient(ctx)
+			defer cancel()
 			if err != nil {
 				return err
 			}
-			defer cancel()
 
-			client, err := common.NewCtrlClient(ctx, fmt.Sprintf("http://127.0.0.1:%d/query", port))
-			if err != nil {
-				return fmt.Errorf("fail to init ctrl client: %s", err)
-			}
-
-			if client.Schema == nil {
-				return errors.New("fail to fetch schema")
-			}
-
-			queryType, err := client.Schema.MustGetType(string(client.Schema.QueryType.Name))
+			queryType, err := client.GetQueryType()
 			if err != nil {
 				return err
 			}
 
 			var query *common.Query
-			prefix := append([]string{"namespace"}, common.StandardizeQuery(namespace)...)
 
-			if len(prefix) != 2 {
-				return fmt.Errorf("invalid namepsace: %s", namespace)
-			}
-
-			if resource != "" {
-				prefix = append(prefix, common.StandardizeQuery(resource)...)
+			prefix, err := joinPrefix()
+			if err != nil {
+				return err
 			}
 
 			for _, arg := range args {
@@ -119,8 +200,33 @@ func NewQueryCmd() *cobra.Command {
 
 	queryCmd.Flags().StringVarP(&namespace, "namespace", "n", "default", "the kubenates namespace")
 	queryCmd.Flags().StringVarP(&resource, "resource", "r", "", "the target resource")
+	queryCmd.RegisterFlagCompletionFunc("resource", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		prefix, err := joinPrefix()
+		if err != nil {
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		}
+		return completeQuery(prefix)
+	})
 
 	return queryCmd
+}
+
+func createClient(ctx context.Context) (*common.CtrlClient, context.CancelFunc, error) {
+	cancel, port, err := common.ForwardCtrlServer(ctx, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	client, err := common.NewCtrlClient(ctx, fmt.Sprintf("http://127.0.0.1:%d/query", port))
+	if err != nil {
+		return nil, nil, fmt.Errorf("fail to init ctrl client: %s", err)
+	}
+
+	if client.Schema == nil {
+		return nil, nil, errors.New("fail to fetch schema")
+	}
+
+	return client, cancel, nil
 }
 
 func findResource(object interface{}, resource *common.Query) (interface{}, error) {

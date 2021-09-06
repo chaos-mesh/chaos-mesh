@@ -33,6 +33,28 @@ type Query struct {
 	Fields    map[string]*Query
 }
 
+type (
+	EnumValueNotFound struct {
+		Target   string
+		Variants []string
+	}
+
+	FieldNotFound struct {
+		Target string
+		Fields []string
+	}
+
+	ScalarValueParseFail struct {
+		Value    string
+		Argument string
+	}
+
+	LeafRequireArgument struct {
+		Leaf     string
+		Argument string
+	}
+)
+
 type Component string
 
 type Variables struct {
@@ -78,6 +100,22 @@ var (
 	}
 )
 
+func (e *EnumValueNotFound) Error() string {
+	return fmt.Sprintf("enum value `%s` not found", e.Target)
+}
+
+func (e *FieldNotFound) Error() string {
+	return fmt.Sprintf("field `%s` not found", e.Target)
+}
+
+func (e ScalarValueParseFail) Error() string {
+	return fmt.Sprintf("fail to parse scalar value `%s`", e.Value)
+}
+
+func (e LeafRequireArgument) Error() string {
+	return fmt.Sprintf("leaf `%s` require argument", e.Leaf)
+}
+
 func NewQuery(name string, typ *Type, decorator TypeDecorator) *Query {
 	return &Query{
 		Name:      name,
@@ -92,7 +130,7 @@ func (q *Query) SetArgument(argument, value string, typ *Type) (err error) {
 	case EnumKind:
 		err = q.setEnumValue(value, typ)
 	case ScalarKind:
-		err = q.setScalarValue(value, typ)
+		err = q.setScalarValue(argument, value, typ)
 	default:
 		err = fmt.Errorf("type %#v is not supported as arguments", typ)
 	}
@@ -111,9 +149,9 @@ func (q *Query) setEnumValue(value string, typ *Type) error {
 		return fmt.Errorf("unsupported enum type: %s", typ.Name)
 	}
 
-	variant, ok := typ.EnumMap[value]
-	if !ok {
-		return fmt.Errorf("enum variant not found: %s", value)
+	variant, err := typ.mustGetEnum(value)
+	if err != nil {
+		return err
 	}
 
 	enumValue := reflect.New(reflectType)
@@ -122,26 +160,31 @@ func (q *Query) setEnumValue(value string, typ *Type) error {
 	return nil
 }
 
-func (q *Query) setScalarValue(value string, typ *Type) error {
+func (q *Query) setScalarValue(name, value string, typ *Type) error {
+	parseErr := &ScalarValueParseFail{
+		Argument: name,
+		Value:    value,
+	}
+
 	switch typ.Name {
 	case ScalarString:
 		q.ArgValue = graphql.String(value)
 	case ScalarBoolean:
 		v, err := strconv.ParseBool(value)
 		if err != nil {
-			return err
+			return parseErr
 		}
 		q.ArgValue = graphql.Boolean(v)
 	case ScalarInt:
 		v, err := strconv.Atoi(value)
 		if err != nil {
-			return err
+			return parseErr
 		}
 		q.ArgValue = graphql.Int(v)
 	case ScalarFloat:
 		v, err := strconv.ParseFloat(value, 64)
 		if err != nil {
-			return err
+			return parseErr
 		}
 		q.ArgValue = graphql.Float(v)
 	default:
@@ -181,6 +224,18 @@ func (q *Query) Merge(other *Query) (*Query, error) {
 		newQuery.Fields[name] = newField
 	}
 	return newQuery, nil
+}
+
+func (q *Query) Tail() *Query {
+	if q == nil {
+		return q
+	}
+
+	for _, field := range q.Fields {
+		return field.Tail()
+	}
+
+	return q.Clone()
 }
 
 func (q *Query) String() string {
@@ -290,7 +345,10 @@ func (s *Schema) parseLeaves(leaves string, super *Type) ([]*Query, error) {
 
 		if len(field.Args) != 0 {
 			// TODO: support default args
-			return nil, fmt.Errorf("leaf %s has argument", f)
+			return nil, &LeafRequireArgument{
+				Leaf:     f,
+				Argument: string(field.Args[0].Name),
+			}
 		}
 
 		typ, err := s.resolve(&field.Type)

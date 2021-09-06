@@ -211,7 +211,16 @@ func (s *Schema) MustGetType(name string) (*Type, error) {
 func (t *Type) mustGetField(name string) (*Field, error) {
 	field, ok := t.FieldMap[name]
 	if !ok {
-		return nil, fmt.Errorf("field `%s` not found in type %s", name, t.Name)
+		fields := make([]string, 0)
+		for f := range t.FieldMap {
+			if strings.HasPrefix(f, name) {
+				fields = append(fields, f)
+			}
+		}
+		return nil, &FieldNotFound{
+			Target: name,
+			Fields: fields,
+		}
 	}
 	return field, nil
 }
@@ -219,7 +228,16 @@ func (t *Type) mustGetField(name string) (*Field, error) {
 func (t *Type) mustGetEnum(name string) (*EnumValue, error) {
 	enum, ok := t.EnumMap[name]
 	if !ok {
-		return nil, fmt.Errorf("enum value `%s` not found in type %s", name, t.Name)
+		variants := make([]string, 0)
+		for v := range t.EnumMap {
+			if strings.HasPrefix(v, name) {
+				variants = append(variants, v)
+			}
+		}
+		return nil, &EnumValueNotFound{
+			Target:   name,
+			Variants: variants,
+		}
 	}
 	return enum, nil
 }
