@@ -319,9 +319,8 @@ func (it *TaskReconciler) syncChildNodes(ctx context.Context, evaluatedNode v1al
 
 	// TODO: check the specific of task and workflow nodes
 	// the definition of tasks changed, remove all the existed nodes
-	if len(setDifference(taskNamesOfNodes, tasks)) > 0 ||
-		len(setDifference(tasks, taskNamesOfNodes)) > 0 {
-
+	if len(existsChildNodes) > 0 && (len(setDifference(taskNamesOfNodes, tasks)) > 0 || len(setDifference(tasks, taskNamesOfNodes)) > 0) {
+		// nodesToCleanup is just a vanilla string array
 		var nodesToCleanup []string
 		for _, item := range existsChildNodes {
 			nodesToCleanup = append(nodesToCleanup, item.Name)
