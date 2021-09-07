@@ -27,12 +27,15 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
 )
 
+const NamespaceKey = "namespace"
+const QueryKey = "query"
+
 func NewQueryCmd(log logr.Logger) *cobra.Command {
 	var namespace string
 	var resource string
 
 	var joinPrefix = func() ([]string, error) {
-		prefix := append([]string{"namespace"}, common.StandardizeQuery(namespace)...)
+		prefix := append([]string{NamespaceKey}, common.StandardizeQuery(namespace)...)
 
 		if len(prefix) != 2 {
 			return nil, fmt.Errorf("invalid namepsace: %s", namespace)
@@ -45,6 +48,7 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 	}
 
 	var completeQuery = func(queryStr []string) ([]string, cobra.ShellCompDirective) {
+		log.Info("try to complete query", "query", queryStr)
 		ctx := context.Background()
 		client, cancel, err := createClient(ctx)
 		defer cancel()
@@ -107,10 +111,10 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		}
 
-		if tail.Argument != "" {
+		if tail.Argument != "" && tail.Name != NamespaceKey {
 			arguments, err := client.ListArguments(queryStr, tail.Argument)
 			if err != nil {
-				log.Error(err, "fail to list arguments")
+				log.Error(err, "fail to list arguments", "tail", tail.String())
 				return nil, cobra.ShellCompDirectiveNoFileComp
 			}
 			return arguments, cobra.ShellCompDirectiveNoSpace
@@ -138,6 +142,8 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 			if len(args) == 0 {
 				return completeQuery(prefix)
 			}
+
+			return args, cobra.ShellCompDirectiveNoSpace
 
 			return completeQuery(append(prefix, common.StandardizeQuery(args[len(args)-1])...))
 		},
@@ -174,8 +180,8 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 				}
 			}
 
-			superQuery := common.NewQuery("query", queryType, nil)
-			superQuery.Fields["namespace"] = query
+			superQuery := common.NewQuery(QueryKey, queryType, nil)
+			superQuery.Fields[NamespaceKey] = query
 			variables := common.NewVariables()
 
 			queryStruct, err := client.Schema.Reflect(superQuery, variables)
