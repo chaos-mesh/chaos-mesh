@@ -50,3 +50,5 @@ RUN chmod -R 777 /.cache
 
 ENV GOCACHE /tmp/go-build
 ENV GOPATH /tmp/go
+
+LABEL org.opencontainers.image.source https://github.com/chaos-mesh/chaos-mesh
