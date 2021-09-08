@@ -12,12 +12,15 @@ Specifically, if you want to develop a specific chaos type, you may also find [D
 
 If you have a specific idea of a fix or update, follow these steps below to submit a PR:
 
-- [Step 1: Make the change](#step-1-make-the-change)
-- [Step 2: Run unit tests](#step-2-run-unit-tests)
-- [Step 3: Start Chaos Mesh locally and do manual tests](#step-3-start-chaos-mesh-locally-and-do-manual-tests)
-- [Step 4: Commit and push your changes](#step-4-commit-and-push-your-changes)
-- [Step 5: Create a pull request](#step-5-create-a-pull-request)
-- [Step 6: Get a code review](#step-6-get-a-code-review)
+- [Contributing to Chaos Mesh](#contributing-to-chaos-mesh)
+  - [Communications](#communications)
+  - [Submitting a PR](#submitting-a-pr)
+    - [Step 1: Make the change](#step-1-make-the-change)
+    - [Step 2: Run unit tests](#step-2-run-unit-tests)
+    - [Step 3: Start Chaos Mesh locally and do manual tests](#step-3-start-chaos-mesh-locally-and-do-manual-tests)
+    - [Step 4: Commit and push your changes](#step-4-commit-and-push-your-changes)
+    - [Step 5: Create a pull request](#step-5-create-a-pull-request)
+    - [Step 6: Get a code review](#step-6-get-a-code-review)
 
 ### Step 1: Make the change
 
@@ -84,7 +87,6 @@ If you have a specific idea of a fix or update, follow these steps below to subm
 Before running your code in a real Kubernetes cluster, make sure it passes all unit tests:
 
 ```bash
-make ensure-kubebuilder # install some test dependencies
 make test
 ```
 
