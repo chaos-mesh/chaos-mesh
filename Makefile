@@ -410,13 +410,13 @@ define generate-make
 	cd ./api/v1alpha1 ;\
 		controller-gen object:headerFile=../../hack/boilerplate/boilerplate.generatego.txt paths="./..." ;
 endef
-$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,generate,chaos-build,generate-ctrl,swagger_spec))
-check: fmt vet boilerplate lint generate yaml tidy install.sh
+$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,generate,chaos-build generate-ctrl swagger_spec))
+check: generate yaml vet boilerplate lint tidy install.sh fmt
 
 CLEAN_TARGETS+=e2e-test/image/e2e/bin/ginkgo
 define e2e-test/image/e2e/bin/ginkgo-make
 	mkdir -p e2e-test/image/e2e/bin
-	cp $(shell which ginkgo) e2e-test/image/e2e/bin/ginkgo 
+	cp $(shell which ginkgo) e2e-test/image/e2e/bin/ginkgo
 endef
 $(eval $(call RUN_IN_DEV_ENV_TEMPLATE,e2e-test/image/e2e/bin/ginkgo))
 
@@ -458,7 +458,7 @@ endef
 $(eval $(call RUN_IN_DEV_ENV_TEMPLATE,install.sh))
 
 define swagger_spec-make
-	swag init -g cmd/chaos-dashboard/main.go --output pkg/swaggerdocs
+	swag init -g cmd/chaos-dashboard/main.go --output pkg/dashboard/swaggerdocs
 endef
 $(eval $(call RUN_IN_DEV_ENV_TEMPLATE,swagger_spec))
 
@@ -472,6 +472,6 @@ $(eval $(call RUN_IN_DEV_ENV_TEMPLATE,generate-mock))
 	install.sh $(GO_TARGET_PHONY) \
 	manager chaosfs chaosdaemon chaos-dashboard \
 	dashboard dashboard-server-frontend gosec-scan \
-	failpoint-enable failpoint-disable \
+	failpoint-enable failpoint-disable swagger_spec \
 	proto bin/chaos-builder go_build_cache_directory schedule-migration enter-buildenv enter-devenv \
 	manifests/crd.yaml

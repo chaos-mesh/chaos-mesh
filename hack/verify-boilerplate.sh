@@ -36,13 +36,13 @@ files=($(find . -type f -not \( \
         -o -path '*/Makefile' \
         -o -path '*/Dockerfile' \
         -o -path './images/*' \
-        -o -path './pkg/uiserver/embedded_assets_handler.go' \
+        -o -path './pkg/dashboard/uiserver/embedded_assets_handler.go' \
         -o -path '*/pb/*' \
         -o -path '*/*.deepcopy.go' \
         -o -path '*/generated.go' \
         -o -path '*/schema.resolvers.go' \
         -o -path '*/*_gen.go' \
-        -o -path './pkg/swaggerdocs/*' \
+        -o -path './pkg/dashboard/swaggerdocs/*' \
     \) | grep -v -F "$ignored_files"
 ))
 
