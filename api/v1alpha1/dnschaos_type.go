@@ -50,6 +50,8 @@ type DNSChaos struct {
 	Status DNSChaosStatus `json:"status"`
 }
 
+var _ InnerObjectWithSelector = (*DNSChaos)(nil)
+
 // DNSChaosSpec defines the desired state of DNSChaos
 type DNSChaosSpec struct {
 	// Action defines the specific DNS chaos action.

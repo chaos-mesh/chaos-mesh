@@ -4,8 +4,8 @@ import { setAlert } from 'slices/globalStatus'
 import store from 'store'
 
 interface ErrorData {
-  status: 'error'
-  code: string
+  code: number
+  type: string
   message: string
   full_text: string
 }
@@ -17,9 +17,11 @@ const http = axios.create({
 http.interceptors.response.use(undefined, (error: AxiosError<ErrorData>) => {
   const data = error.response?.data
 
-  if (data && data.code) {
+  if (data) {
     // slice(10): error.api.xxx => xxx
-    switch (data.code.slice(10)) {
+    const type = data.type.slice(10)
+
+    switch (type) {
       case 'invalid_request':
         if (data.message.includes('Unauthorized')) {
           store.dispatch(

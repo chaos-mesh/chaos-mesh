@@ -106,3 +106,17 @@ type StatefulObject interface {
 	GetObjectMeta() *metav1.ObjectMeta
 	GetStatus() *ChaosStatus
 }
+
+// +kubebuilder:object:generate=false
+type InnerObjectWithCustomStatus interface {
+	InnerObject
+
+	GetCustomStatus() interface{}
+}
+
+// +kubebuilder:object:generate=false
+type InnerObjectWithSelector interface {
+	InnerObject
+
+	GetSelectorSpecs() map[string]interface{}
+}

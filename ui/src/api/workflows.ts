@@ -2,7 +2,6 @@ import { Workflow, WorkflowParams, WorkflowSingle } from './workflows.type'
 
 import { Archive } from './archives.type'
 import http from './http'
-import { mapping } from './zz_generated.workflow.chaos-mesh'
 
 export const newWorkflow = (data: any) => http.post('/workflows', data)
 
@@ -29,7 +28,3 @@ export const singleArchive = (uuid: uuid) => http.get<Archive>(`archives/workflo
 
 export const delArchive = (uuid: uuid) => http.delete(`/archives/workflows/${uuid}`)
 export const delArchives = (uuids: uuid[]) => http.delete(`/archives/workflows?uids=${uuids.join(',')}`)
-
-export function templateTypeToFieldName(templateType: string): string {
-  return mapping.get(templateType)!
-}

@@ -1,0 +1,50 @@
+name: Upload Env Images
+on:
+  push:
+    branches:
+      - master
+      - release-*
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+        with:
+          # Must use at least depth 2!
+          fetch-depth: 2
+
+      - name: Extract Image Tag
+        shell: bash
+        run: |
+          IMAGE_TAG=${GITHUB_REF##*/}
+          if [ "${IMAGE_TAG}" = "master" ] ; then
+            IMAGE_TAG=latest; 
+          fi
+
+          echo "##[set-output name=image_tag;]$(echo $IMAGE_TAG)"
+        id: image_tag
+
+      - name: Log in to GitHub Docker Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Chaos Mesh Env
+        env:
+          IMAGE_TAG: ${{ steps.image_tag.outputs.image_tag }}
+        run: |
+          export IMAGE_DEV_ENV_BUILD=1
+          export IMAGE_BUILD_ENV_BUILD=1
+
+          make image-build-env
+          make image-dev-env
+
+      - name: Upload Chaos Mesh Env
+        env:
+          IMAGE_TAG: ${{ steps.image_tag.outputs.image_tag }}
+        run: |
+          docker push ghcr.io/chaos-mesh/chaos-mesh/build-env:$IMAGE_TAG
+          docker push ghcr.io/chaos-mesh/chaos-mesh/dev-env:$IMAGE_TAG

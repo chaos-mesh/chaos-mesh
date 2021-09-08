@@ -23,9 +23,6 @@ const YAML: React.FC<YAMLProps> = ({ callback, buttonProps }) => {
     reader.onload = function (e) {
       try {
         const y = e.target!.result as string
-        if (process.env.NODE_ENV === 'development') {
-          console.debug('Debug yamlToExperiment:', y)
-        }
 
         callback(y)
 
