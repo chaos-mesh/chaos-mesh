@@ -125,8 +125,7 @@ func (s *Service) cascadeFetchEventsForWorkflow(c *gin.Context) {
 	if len(limitString) > 0 {
 		parsedLimit, err := strconv.Atoi(limitString)
 		if err != nil {
-			c.Status(http.StatusBadRequest)
-			_ = c.Error(u.ErrBadRequest.New("parameter limit should be a integer"))
+			u.SetAPIError(c, u.ErrBadRequest.Wrap(err, "parameter limit should be a integer"))
 			return
 		}
 		limit = parsedLimit
@@ -142,11 +141,9 @@ func (s *Service) cascadeFetchEventsForWorkflow(c *gin.Context) {
 	workflowEntity, err := s.workflowStore.FindByUID(ctx, objectId)
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(u.ErrBadRequest.New("this requested workflow is not found"))
+			u.SetAPIError(c, u.ErrNotFound.Wrap(err, "this requested workflow is not found, object_id: %s", objectId))
 		} else {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(u.ErrInternalServer.NewWithNoMessage())
+			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		}
 		return
 	}
@@ -154,8 +151,7 @@ func (s *Service) cascadeFetchEventsForWorkflow(c *gin.Context) {
 	// if workflow has been archived, the Workflow CR and WorkflowNode CR also has been deleted from kubernetes, it's
 	// no way to "cascade fetch" anymore
 	if workflowEntity.Archived {
-		c.Status(http.StatusBadRequest)
-		_ = c.Error(u.ErrBadRequest.New("this requested workflow already been archived, can not list events for it"))
+		u.SetAPIError(c, u.ErrBadRequest.New("this requested workflow already been archived, can not list events for it"))
 		return
 	}
 
