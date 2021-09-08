@@ -18,7 +18,7 @@ import (
 
 	"github.com/kelseyhightower/envconfig"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/ttlcontroller"
+	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/ttlcontroller"
 )
 
 // ChaosDashboardConfig defines the configuration for Chaos Dashboard
@@ -29,15 +29,15 @@ type ChaosDashboardConfig struct {
 	EnableLeaderElection bool              `envconfig:"ENABLE_LEADER_ELECTION" json:"-"`
 	Database             *DatabaseConfig   `json:"-"`
 	PersistTTL           *PersistTTLConfig `json:"-"`
-	// ClusterScoped means control Chaos Object in cluster level(all namespace),
+	// ClusterScoped means control Chaos Object in cluster level(all namespace).
 	ClusterScoped bool `envconfig:"CLUSTER_SCOPED" default:"true" json:"cluster_mode"`
 	// TargetNamespace is the target namespace to injecting chaos.
-	// It only works with ClusterScoped is false;
+	// It only works with ClusterScoped is false.
 	TargetNamespace string `envconfig:"TARGET_NAMESPACE" default:"" json:"target_namespace"`
 	// EnableFilterNamespace will filter namespace with annotation. Only the pods/containers in namespace
-	// annotated with `chaos-mesh.org/inject=enabled` will be injected
+	// annotated with `chaos-mesh.org/inject=enabled` will be injected.
 	EnableFilterNamespace bool `envconfig:"ENABLE_FILTER_NAMESPACE" default:"false"`
-	// SecurityMode will use the token login by the user if set to true
+	// If SecurityMode is set to true, then the dashboard requires token authentication.
 	SecurityMode    bool   `envconfig:"SECURITY_MODE" default:"true" json:"security_mode"`
 	DNSServerCreate bool   `envconfig:"DNS_SERVER_CREATE" default:"false" json:"dns_server_create"`
 	Version         string `json:"version"`
@@ -52,8 +52,6 @@ type PersistTTLConfig struct {
 
 // DatabaseConfig defines the configuration for databases
 type DatabaseConfig struct {
-	// Archive Chaos Experiments to DB
-	Archive    bool
 	Driver     string `envconfig:"DATABASE_DRIVER"     default:"sqlite3"`
 	Datasource string `envconfig:"DATABASE_DATASOURCE" default:"core.sqlite"`
 	Secret     string `envconfig:"DATABASE_SECRET"`
@@ -86,6 +84,6 @@ func ParsePersistTTLConfig(config *PersistTTLConfig) (*ttlcontroller.TTLconfig, 
 	return &ttlcontroller.TTLconfig{
 		DatabaseTTLResyncPeriod: SyncPeriod,
 		EventTTL:                Event,
-		ArchiveExperimentTTL:    Experiment,
+		ArchiveTTL:              Experiment,
 	}, nil
 }
