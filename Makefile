@@ -4,7 +4,7 @@ DOCKER_REGISTRY ?= "localhost:5000"
 
 # SET DOCKER_REGISTRY to change the docker registry
 DOCKER_REGISTRY_PREFIX := $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY)/,)
-DOCKER_BUILD_ARGS := --build-arg HTTP_PROXY=${HTTP_PROXY} --build-arg HTTPS_PROXY=${HTTPS_PROXY} --build-arg UI=${UI} --build-arg SWAGGER=${SWAGGER} --build-arg LDFLAGS="${LDFLAGS}" --build-arg CRATES_MIRROR="${CRATES_MIRROR}"
+DOCKER_BUILD_ARGS := --build-arg HTTP_PROXY=${HTTP_PROXY} --build-arg HTTPS_PROXY=${HTTPS_PROXY} --build-arg UI=${UI} --build-arg LDFLAGS="${LDFLAGS}" --build-arg CRATES_MIRROR="${CRATES_MIRROR}"
 
 GOVER_MAJOR := $(shell go version | sed -E -e "s/.*go([0-9]+)[.]([0-9]+).*/\1/")
 GOVER_MINOR := $(shell go version | sed -E -e "s/.*go([0-9]+)[.]([0-9]+).*/\2/")
@@ -54,10 +54,6 @@ endif
 GO_BUILD_CACHE ?= $(ROOT)/.cache/chaos-mesh
 
 BUILD_TAGS ?=
-
-ifeq ($(SWAGGER),1)
-	BUILD_TAGS += swagger_server
-endif
 
 ifeq ($(UI),1)
 	BUILD_TAGS += ui_server
@@ -166,7 +162,7 @@ $(2): image-build-env go_build_cache_directory
 		sleep infinity); \
 	docker exec --workdir /mnt/ \
 		--env IMG_LDFLAGS="${LDFLAGS}" \
-		--env UI=${UI} --env SWAGGER=${SWAGGER} \
+		--env UI=${UI} \
 		$$$$DOCKER_ID /usr/bin/make $(2) && \
 	docker rm -f $$$$DOCKER_ID
 endif
