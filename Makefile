@@ -17,12 +17,12 @@ OUTPUT_BIN=$(ROOT)/output/bin
 HELM_BIN=$(OUTPUT_BIN)/helm
 
 # Every branch should have its own image tag for build-env and dev-env
-IMAGE_BUILD_ENV_PROJECT ?= "chaos-mesh"
-IMAGE_BUILD_ENV_REGISTRY ?= "ghcr.io"
-IMAGE_BUILD_ENV_TAG ?= "latest"
-IMAGE_DEV_ENV_PROJECT ?= "chaos-mesh"
-IMAGE_DEV_ENV_REGISTRY ?= "ghcr.io"
-IMAGE_DEV_ENV_TAG ?= "latest"
+IMAGE_BUILD_ENV_PROJECT ?= chaos-mesh/chaos-mesh
+IMAGE_BUILD_ENV_REGISTRY ?= ghcr.io
+IMAGE_BUILD_ENV_BUILD ?= 0
+IMAGE_DEV_ENV_PROJECT ?= chaos-mesh/chaos-mesh
+IMAGE_DEV_ENV_REGISTRY ?= ghcr.io
+IMAGE_DEV_ENV_BUILD ?= 0
 
 ifeq ($(GO111), 1)
 $(error Please upgrade your Go compiler to 1.11 or higher version)
@@ -229,6 +229,7 @@ e2e-test/image/e2e/chaos-mesh: helm/chaos-mesh
 # $(IMAGE_$(4)_PROJECT): the project name of the image, by default it is `pingcap`
 # $(IMAGE_$(4)_REGISTRY): the registry name of the image, it will override `DOCKER_REGISTRY`
 # $(IMAGE_$(4)_TAG): the tag of the image, it will override `IMAGE_TAG`
+# $(IMAGE_$(4)_BUILD): whether the image should be built locally rather than pulled from remote registry, by default it is `1`.
 define IMAGE_TEMPLATE
 
 $(4)_PROJECT := ${IMAGE_$(4)_PROJECT}
@@ -250,11 +251,17 @@ endif
 
 $(4)_IMAGE := $$($(4)_DOCKER_REGISTRY_PREFIX)$$($(4)_PROJECT)/$(1):$$($(4)_TAG)
 
+IMAGE_$(4)_BUILD ?= 1
+
 CLEAN_TARGETS += $(2)/.dockerbuilt
 
 image-$(1): $(2)/.dockerbuilt
 
 $(2)/.dockerbuilt:$(image-$(1)-dependencies) $(2)/Dockerfile
+ifeq ($$(IMAGE_$(4)_BUILD),0)
+	docker pull $$($(4)_IMAGE)
+else
+
 ifeq ($(DOCKER_CACHE),1)
 
 ifneq ($(DISABLE_CACHE_FROM),1)
@@ -267,6 +274,8 @@ else ifneq ($(TARGET_PLATFORM),)
 	DOCKER_BUILDKIT=1 docker buildx build --load --platform linux/$(TARGET_PLATFORM) -t $$($(4)_IMAGE) --build-arg TARGET_PLATFORM=$(TARGET_PLATFORM) ${DOCKER_BUILD_ARGS} $(2)
 else
 	DOCKER_BUILDKIT=1 docker build -t $$($(4)_IMAGE) ${DOCKER_BUILD_ARGS} $(2)
+endif
+
 endif
 	touch $(2)/.dockerbuilt
 endef
