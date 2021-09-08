@@ -26,3 +26,5 @@ ENV PATH "/usr/local/go/bin:${PATH}"
 ENV GO111MODULE=on
 ENV GOCACHE /tmp/go-build
 ENV GOPATH /tmp/go
+
+LABEL org.opencontainers.image.source https://github.com/chaos-mesh/chaos-mesh
