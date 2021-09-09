@@ -82,6 +82,12 @@ controllerManager:
     podFailure:
       pauseImage: gcr.io/google-containers/pause:latest
 
+  leaderElection:
+    enabled: true
+    leaseDuration: 15s
+    renewDeadline: 10s
+    retryPeriod: 2s
+
 chaosDaemon:
   image: pingcap/chaos-daemon:latest
   imagePullPolicy: IfNotPresent
