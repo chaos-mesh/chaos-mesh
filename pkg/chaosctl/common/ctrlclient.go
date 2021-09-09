@@ -21,9 +21,14 @@ import (
 	"strings"
 
 	"github.com/gertd/go-pluralize"
+	prmt "github.com/gitchander/permutation"
+	comb "github.com/gitchander/permutation/combination"
 	"github.com/hasura/go-graphql-client"
 	"github.com/iancoleman/strcase"
 )
+
+const NamespaceKey = "namespace"
+const NamespaceType = "Namespace"
 
 type CtrlClient struct {
 	ctx context.Context
@@ -31,6 +36,58 @@ type CtrlClient struct {
 	Client             *graphql.Client
 	SubscriptionClient *graphql.SubscriptionClient
 	Schema             *Schema
+}
+
+type AutoCompleteContext struct {
+	maxRecurLevel  int
+	visitedTypes   map[string]bool
+	completeLeaves bool
+	query          []string
+}
+
+func NewAutoCompleteContext(namespace string, level int, completeLeaves bool) *AutoCompleteContext {
+	return &AutoCompleteContext{
+		maxRecurLevel:  level,
+		visitedTypes:   make(map[string]bool),
+		completeLeaves: completeLeaves,
+		query:          []string{NamespaceKey, namespace},
+	}
+}
+
+func (ctx *AutoCompleteContext) IsComplete() bool {
+	return ctx.maxRecurLevel == 0
+}
+
+func (ctx *AutoCompleteContext) Visited(name string) bool {
+	return ctx.visitedTypes[name]
+}
+
+func (ctx *AutoCompleteContext) Next(typename, fieldName, arg string) *AutoCompleteContext {
+	types := map[string]bool{
+		typename: true,
+	}
+
+	query := make([]string, 0)
+
+	for name := range ctx.visitedTypes {
+		types[name] = true
+	}
+
+	for _, seg := range ctx.query {
+		query = append(query, seg)
+	}
+
+	query = append(query, fieldName)
+	if arg != "" {
+		query = append(query, arg)
+	}
+
+	return &AutoCompleteContext{
+		maxRecurLevel:  ctx.maxRecurLevel - 1,
+		visitedTypes:   types,
+		completeLeaves: ctx.completeLeaves,
+		query:          query,
+	}
 }
 
 func NewCtrlClient(ctx context.Context, url string) (*CtrlClient, error) {
@@ -145,4 +202,120 @@ func listArguments(object interface{}, resource *Query, startWith string) ([]str
 		return []string{val}, nil
 	}
 	return nil, nil
+}
+
+func (c *CtrlClient) CompleteQuery(namespace string, completeLeaves bool) ([]string, error) {
+	namespaceType, err := c.Schema.MustGetType(NamespaceType)
+	if err != nil {
+		return nil, err
+	}
+
+	completion, err := c.completeQuery(NewAutoCompleteContext(namespace, 6, completeLeaves), namespaceType)
+	if err != nil {
+		return nil, err
+	}
+
+	return completion, nil
+}
+
+// accepts ScalarKind, EnumKind and ObjectKind
+func (c *CtrlClient) completeQuery(ctx *AutoCompleteContext, root *Type) ([]string, error) {
+	if ctx.IsComplete() {
+		return nil, nil
+	}
+
+	switch root.Kind {
+	case ScalarKind, EnumKind:
+		return nil, nil
+	case ListKind, NonNullKind:
+		return nil, fmt.Errorf("type is not supported to complete: %#v", root)
+	}
+
+	var trunks, leaves []string
+	for _, field := range root.Fields {
+		subType, err := c.Schema.resolve(&field.Type)
+		if err != nil {
+			return nil, err
+		}
+
+		if ctx.Visited(string(subType.Name)) {
+			continue
+		}
+
+		if len(field.Args) == 0 {
+			subQueries, err := c.completeQuery(ctx.Next(string(subType.Name), string(field.Name), ""), subType)
+			if err != nil {
+				return nil, err
+			}
+
+			if subQueries == nil {
+				// this field is a leaf
+				// or rearching the max recursion levels
+				leaves = append(leaves, string(field.Name))
+				continue
+			}
+
+			for _, subQuery := range subQueries {
+				trunks = append(trunks, strings.Join([]string{string(field.Name), subQuery}, "/"))
+			}
+			continue
+		}
+
+		args, err := c.ListArguments(append(ctx.query, string(field.Name)), string(field.Args[0].Name))
+		if err != nil {
+			return nil, err
+		}
+
+		for _, arg := range args {
+			subQueries, err := c.completeQuery(ctx.Next(string(subType.Name), string(field.Name), arg), subType)
+			if err != nil {
+				return nil, err
+			}
+
+			for _, subQuery := range subQueries {
+				trunks = append(trunks, strings.Join([]string{string(field.Name), arg, subQuery}, "/"))
+			}
+			continue
+		}
+	}
+
+	var queries []string
+	if !ctx.completeLeaves {
+		queries = append(queries, leaves...)
+	} else {
+		for _, leafPrmt := range fullPermutation(leaves) {
+			queries = append(queries, strings.Join(leafPrmt, ","))
+		}
+	}
+
+	queries = append(queries, trunks...)
+	return queries, nil
+}
+
+func fullPermutation(strs []string) [][]string {
+	var results [][]string
+
+	for i := range strs[1:] {
+		substrs := make([]string, i+1)
+		var (
+			n = len(strs)    // length of set
+			k = len(substrs) // length of subset
+		)
+
+		c := comb.New(n, k)
+		p := prmt.New(prmt.StringSlice(substrs))
+
+		for c.Next() {
+			// fill substrs by indexes
+			for subsetIndex, setIndex := range c.Indexes() {
+				substrs[subsetIndex] = strs[setIndex]
+			}
+
+			for p.Next() {
+				results = append(results, append(make([]string, 0, len(substrs)), substrs...))
+			}
+		}
+	}
+
+	return results
 }

@@ -27,7 +27,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
 )
 
-const NamespaceKey = "namespace"
 const QueryKey = "query"
 
 func NewQueryCmd(log logr.Logger) *cobra.Command {
@@ -35,7 +34,7 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 	var resource string
 
 	var joinPrefix = func() ([]string, error) {
-		prefix := append([]string{NamespaceKey}, common.StandardizeQuery(namespace)...)
+		prefix := append([]string{common.NamespaceKey}, common.StandardizeQuery(namespace)...)
 
 		if len(prefix) != 2 {
 			return nil, fmt.Errorf("invalid namepsace: %s", namespace)
@@ -47,105 +46,107 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 		return prefix, nil
 	}
 
-	var completeQuery = func(queryStr []string) ([]string, cobra.ShellCompDirective) {
-		log.Info("try to complete query", "query", queryStr)
-		ctx := context.Background()
-		client, cancel, err := createClient(ctx)
-		defer cancel()
-		if err != nil {
-			log.Error(err, "fail to create client")
-			return nil, cobra.ShellCompDirectiveNoFileComp
-		}
+	// var completeQuery = func(queryStr []string) ([]string, cobra.ShellCompDirective) {
+	// 	log.Info("try to complete query", "query", queryStr)
+	// 	ctx := context.Background()
+	// 	client, cancel, err := createClient(ctx)
+	// 	defer cancel()
+	// 	if err != nil {
+	// 		log.Error(err, "fail to create client")
+	// 		return nil, cobra.ShellCompDirectiveNoFileComp
+	// 	}
 
-		queryType, err := client.GetQueryType()
-		if err != nil {
-			log.Error(err, "fail to get query type")
-			return nil, cobra.ShellCompDirectiveNoFileComp
-		}
+	// 	queryType, err := client.GetQueryType()
+	// 	if err != nil {
+	// 		log.Error(err, "fail to get query type")
+	// 		return nil, cobra.ShellCompDirectiveNoFileComp
+	// 	}
 
-		query, err := client.Schema.ParseQuery(queryStr, queryType)
-		if err != nil {
-			switch e := err.(type) {
-			case *common.EnumValueNotFound:
-				if e.Target != queryStr[len(queryStr)-1] {
-					log.Error(err, "fail to parse query")
-					return nil, cobra.ShellCompDirectiveNoFileComp
-				}
-				return e.Variants, cobra.ShellCompDirectiveNoSpace
-			case *common.FieldNotFound:
-				if e.Target != queryStr[len(queryStr)-1] {
-					log.Error(err, "fail to parse query")
-					return nil, cobra.ShellCompDirectiveNoFileComp
-				}
-				return e.Fields, cobra.ShellCompDirectiveNoSpace
-			case *common.ScalarValueParseFail:
-				if e.Value != queryStr[len(queryStr)-1] {
-					log.Error(err, "fail to parse query")
-					return nil, cobra.ShellCompDirectiveNoFileComp
-				}
-				arguments, err := client.ListArguments(queryStr, e.Argument)
-				if err != nil {
-					log.Error(err, "fail to list arguments")
-					return nil, cobra.ShellCompDirectiveNoFileComp
-				}
-				return arguments, cobra.ShellCompDirectiveNoSpace
-			case *common.LeafRequireArgument:
-				if e.Leaf != queryStr[len(queryStr)-1] {
-					log.Error(err, "fail to parse query")
-					return nil, cobra.ShellCompDirectiveNoFileComp
-				}
-				arguments, err := client.ListArguments(append(queryStr, ""), e.Argument)
-				if err != nil {
-					log.Error(err, "fail to list arguments")
-					return nil, cobra.ShellCompDirectiveNoFileComp
-				}
-				return arguments, cobra.ShellCompDirectiveNoSpace
-			default:
-				log.Error(err, "fail to parse query")
-				return nil, cobra.ShellCompDirectiveNoFileComp
-			}
-		}
+	// 	query, err := client.Schema.ParseQuery(queryStr, queryType)
+	// 	if err != nil {
+	// 		switch e := err.(type) {
+	// 		case *common.EnumValueNotFound:
+	// 			if e.Target != queryStr[len(queryStr)-1] {
+	// 				log.Error(err, "fail to parse query")
+	// 				return nil, cobra.ShellCompDirectiveNoFileComp
+	// 			}
+	// 			return e.Variants, cobra.ShellCompDirectiveNoSpace
+	// 		case *common.FieldNotFound:
+	// 			if e.Target != queryStr[len(queryStr)-1] {
+	// 				log.Error(err, "fail to parse query")
+	// 				return nil, cobra.ShellCompDirectiveNoFileComp
+	// 			}
+	// 			return e.Fields, cobra.ShellCompDirectiveNoSpace
+	// 		case *common.ScalarValueParseFail:
+	// 			if e.Value != queryStr[len(queryStr)-1] {
+	// 				log.Error(err, "fail to parse query")
+	// 				return nil, cobra.ShellCompDirectiveNoFileComp
+	// 			}
+	// 			arguments, err := client.ListArguments(queryStr, e.Argument)
+	// 			if err != nil {
+	// 				log.Error(err, "fail to list arguments")
+	// 				return nil, cobra.ShellCompDirectiveNoFileComp
+	// 			}
+	// 			return arguments, cobra.ShellCompDirectiveNoSpace
+	// 		case *common.LeafRequireArgument:
+	// 			if e.Leaf != queryStr[len(queryStr)-1] {
+	// 				log.Error(err, "fail to parse query")
+	// 				return nil, cobra.ShellCompDirectiveNoFileComp
+	// 			}
+	// 			arguments, err := client.ListArguments(append(queryStr, ""), e.Argument)
+	// 			if err != nil {
+	// 				log.Error(err, "fail to list arguments")
+	// 				return nil, cobra.ShellCompDirectiveNoFileComp
+	// 			}
+	// 			return arguments, cobra.ShellCompDirectiveNoSpace
+	// 		default:
+	// 			log.Error(err, "fail to parse query")
+	// 			return nil, cobra.ShellCompDirectiveNoFileComp
+	// 		}
+	// 	}
 
-		tail := query.Tail()
-		if tail == nil {
-			return nil, cobra.ShellCompDirectiveNoFileComp
-		}
+	// 	tail := query.Tail()
+	// 	if tail == nil {
+	// 		return nil, cobra.ShellCompDirectiveNoFileComp
+	// 	}
 
-		if tail.Argument != "" && tail.Name != NamespaceKey {
-			arguments, err := client.ListArguments(queryStr, tail.Argument)
-			if err != nil {
-				log.Error(err, "fail to list arguments", "tail", tail.String())
-				return nil, cobra.ShellCompDirectiveNoFileComp
-			}
-			return arguments, cobra.ShellCompDirectiveNoSpace
-		}
+	// 	if tail.Argument != "" && tail.Name != NamespaceKey {
+	// 		arguments, err := client.ListArguments(queryStr, tail.Argument)
+	// 		if err != nil {
+	// 			log.Error(err, "fail to list arguments", "tail", tail.String())
+	// 			return nil, cobra.ShellCompDirectiveNoFileComp
+	// 		}
+	// 		return arguments, cobra.ShellCompDirectiveNoSpace
+	// 	}
 
-		fields := make([]string, 0)
-		for f := range tail.Type.FieldMap {
-			fields = append(fields, f)
-		}
+	// 	fields := make([]string, 0)
+	// 	for f := range tail.Type.FieldMap {
+	// 		fields = append(fields, f)
+	// 	}
 
-		return fields, cobra.ShellCompDirectiveNoSpace
-	}
+	// 	return fields, cobra.ShellCompDirectiveNoSpace
+	// }
 
 	// queryCmd represents the query command
 	var queryCmd = &cobra.Command{
 		Use:   "get [QUERY]",
 		Short: "get the target resources",
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			prefix, err := joinPrefix()
+			ctx := context.Background()
+			client, cancel, err := createClient(ctx)
+			defer cancel()
 			if err != nil {
-				log.Error(err, "fail to join prefix")
+				log.Error(err, "fail to create client")
 				return nil, cobra.ShellCompDirectiveNoFileComp
 			}
 
-			if len(args) == 0 {
-				return completeQuery(prefix)
+			completion, err := client.CompleteQuery(namespace, true)
+			if err != nil {
+				log.Error(err, "fail to complete query")
+				return nil, cobra.ShellCompDirectiveNoFileComp
 			}
 
-			return args, cobra.ShellCompDirectiveNoSpace
-
-			return completeQuery(append(prefix, common.StandardizeQuery(args[len(args)-1])...))
+			return completion, cobra.ShellCompDirectiveDefault
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
@@ -181,7 +182,7 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 			}
 
 			superQuery := common.NewQuery(QueryKey, queryType, nil)
-			superQuery.Fields[NamespaceKey] = query
+			superQuery.Fields[common.NamespaceKey] = query
 			variables := common.NewVariables()
 
 			queryStruct, err := client.Schema.Reflect(superQuery, variables)
@@ -219,11 +220,21 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 	queryCmd.Flags().StringVarP(&namespace, "namespace", "n", "default", "the kubenates namespace")
 	queryCmd.Flags().StringVarP(&resource, "resource", "r", "", "the target resource")
 	queryCmd.RegisterFlagCompletionFunc("resource", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		prefix, err := joinPrefix()
+		ctx := context.Background()
+		client, cancel, err := createClient(ctx)
+		defer cancel()
 		if err != nil {
+			log.Error(err, "fail to create client")
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		}
-		return completeQuery(prefix)
+
+		completion, err := client.CompleteQuery(namespace, false)
+		if err != nil {
+			log.Error(err, "fail to complete query")
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		}
+
+		return completion, cobra.ShellCompDirectiveDefault
 	})
 
 	return queryCmd
