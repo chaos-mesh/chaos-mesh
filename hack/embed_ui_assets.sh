@@ -55,6 +55,6 @@ DS_Store=ui/build/.DS_Store
 
 go run tools/assets_generate/main.go $BUILD_TAG_PARAMETER
 
-HANDLER_PATH=pkg/uiserver/embedded_assets_handler.go
+HANDLER_PATH=pkg/dashboard/uiserver/embedded_assets_handler.go
 mv assets_vfsdata.go $HANDLER_PATH
 echo "  - Assets handler written to $HANDLER_PATH"

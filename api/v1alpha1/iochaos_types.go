@@ -32,6 +32,9 @@ type IOChaos struct {
 	Status IOChaosStatus `json:"status,omitempty"`
 }
 
+var _ InnerObjectWithCustomStatus = (*IOChaos)(nil)
+var _ InnerObjectWithSelector = (*IOChaos)(nil)
+
 // IOChaosSpec defines the desired state of IOChaos
 type IOChaosSpec struct {
 	ContainerSelector `json:",inline"`
