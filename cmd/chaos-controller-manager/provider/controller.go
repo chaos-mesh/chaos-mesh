@@ -55,10 +55,16 @@ func NewOption(logger logr.Logger) *ctrl.Options {
 	setupLog := logger.WithName("setup")
 
 	options := ctrl.Options{
-		Scheme:             scheme,
-		MetricsBindAddress: config.ControllerCfg.MetricsAddr,
-		LeaderElection:     config.ControllerCfg.EnableLeaderElection,
-		Port:               9443,
+		Scheme:                     scheme,
+		MetricsBindAddress:         config.ControllerCfg.MetricsAddr,
+		LeaderElection:             config.ControllerCfg.EnableLeaderElection,
+		LeaderElectionNamespace:    config.ControllerCfg.Namespace,
+		LeaderElectionResourceLock: "leases",
+		LeaderElectionID:           "chaos-mesh",
+		LeaseDuration:              &config.ControllerCfg.LeaderElectLeaseDuration,
+		RetryPeriod:                &config.ControllerCfg.LeaderElectRetryPeriod,
+		RenewDeadline:              &config.ControllerCfg.LeaderElectRenewDeadline,
+		Port:                       9443,
 		// Don't aggregate events
 		EventBroadcaster: record.NewBroadcasterWithCorrelatorOptions(record.CorrelatorOptions{
 			MaxEvents:            math.MaxInt32,
