@@ -191,6 +191,7 @@ func (r *Reconciler) SetIptables(ctx context.Context, pod *corev1.Pod, chaos *v1
 			Ipsets:    chain.IPSets,
 			Direction: direction,
 			Target:    "DROP",
+			Device:    chain.Device,
 		})
 	}
 	return iptable.SetIptablesChains(ctx, r.ChaosDaemonClientBuilder, pod, chains)
@@ -198,47 +199,37 @@ func (r *Reconciler) SetIptables(ctx context.Context, pod *corev1.Pod, chaos *v1
 
 // SetTcs sets traffic control related chaos on pod
 func (r *Reconciler) SetTcs(ctx context.Context, pod *corev1.Pod, chaos *v1alpha1.PodNetworkChaos) error {
-	deviceToTcs := make(map[string][]*pb.Tc)
+	tcs := []*pb.Tc{}
 	for _, tc := range chaos.Spec.TrafficControls {
-		device := tc.Device
-		if _, ok := deviceToTcs[device]; !ok {
-			deviceToTcs[device] = []*pb.Tc{}
-		}
-
 		if tc.Type == v1alpha1.Bandwidth {
 			tbf, err := netem.FromBandwidth(tc.Bandwidth)
 			if err != nil {
 				return err
 			}
-			deviceToTcs[device] = append(deviceToTcs[device], &pb.Tc{
-				Type:  pb.Tc_BANDWIDTH,
-				Tbf:   tbf,
-				Ipset: tc.IPSet,
+			tcs = append(tcs, &pb.Tc{
+				Type:   pb.Tc_BANDWIDTH,
+				Tbf:    tbf,
+				Ipset:  tc.IPSet,
+				Device: tc.Device,
 			})
 		} else if tc.Type == v1alpha1.Netem {
 			netem, err := mergeNetem(tc.TcParameter)
 			if err != nil {
 				return err
 			}
-			deviceToTcs[device] = append(deviceToTcs[device], &pb.Tc{
-				Type:  pb.Tc_NETEM,
-				Netem: netem,
-				Ipset: tc.IPSet,
+			tcs = append(tcs, &pb.Tc{
+				Type:   pb.Tc_NETEM,
+				Netem:  netem,
+				Ipset:  tc.IPSet,
+				Device: tc.Device,
 			})
 		} else {
 			return fmt.Errorf("unknown tc type")
 		}
 	}
 
-	for device, tcs := range deviceToTcs {
-		r.Log.Info("setting tcs", "device", device, "tcs", tcs)
-
-		err := tcpkg.SetTcs(ctx, r.ChaosDaemonClientBuilder, pod, tcs, device)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+	r.Log.Info("setting tcs", "tcs", tcs)
+	return tcpkg.SetTcs(ctx, r.ChaosDaemonClientBuilder, pod, tcs)
 }
 
 // NetemSpec defines the interface to convert to a Netem protobuf

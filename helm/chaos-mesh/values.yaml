@@ -43,7 +43,7 @@ controllerManager:
   replicaCount: 1
 
   priorityClassName: ""
-  image: yangkeao/chaos-mesh:latest
+  image: pingcap/chaos-mesh:latest
   imagePullPolicy: IfNotPresent
 
   enableFilterNamespace: false
