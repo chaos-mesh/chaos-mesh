@@ -1845,6 +1845,9 @@ spec:
               required:
               - latency
               type: object
+            device:
+              description: Device represents the network device to be affected.
+              type: string
             direction:
               description: Direction represents the direction, this applies on netem
                 and network partition action
@@ -2097,6 +2100,10 @@ spec:
               - mode
               - selector
               type: object
+            targetDevice:
+              description: TargetDevice represents the network device to be affected
+                in target scope.
+              type: string
             value:
               description: Value is required when the mode is set to `FixedPodMode`
                 / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
@@ -3015,6 +3022,9 @@ spec:
                     required:
                     - latency
                     type: object
+                  device:
+                    description: Device represents the network device to be affected.
+                    type: string
                   duplicate:
                     description: DuplicateSpec represents the detail about loss action
                     properties:
@@ -4290,6 +4300,9 @@ spec:
                   required:
                   - latency
                   type: object
+                device:
+                  description: Device represents the network device to be affected.
+                  type: string
                 direction:
                   description: Direction represents the direction, this applies on
                     netem and network partition action
@@ -4546,6 +4559,10 @@ spec:
                   - mode
                   - selector
                   type: object
+                targetDevice:
+                  description: TargetDevice represents the network device to be affected
+                    in target scope.
+                  type: string
                 value:
                   description: Value is required when the mode is set to `FixedPodMode`
                     / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
@@ -6320,6 +6337,10 @@ spec:
                             required:
                             - latency
                             type: object
+                          device:
+                            description: Device represents the network device to be
+                              affected.
+                            type: string
                           direction:
                             description: Direction represents the direction, this
                               applies on netem and network partition action
@@ -6589,6 +6610,10 @@ spec:
                             - mode
                             - selector
                             type: object
+                          targetDevice:
+                            description: TargetDevice represents the network device
+                              to be affected in target scope.
+                            type: string
                           value:
                             description: Value is required when the mode is set to
                               `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
@@ -8041,6 +8066,10 @@ spec:
                                 required:
                                 - latency
                                 type: object
+                              device:
+                                description: Device represents the network device
+                                  to be affected.
+                                type: string
                               direction:
                                 description: Direction represents the direction, this
                                   applies on netem and network partition action
@@ -8320,6 +8349,10 @@ spec:
                                 - mode
                                 - selector
                                 type: object
+                              targetDevice:
+                                description: TargetDevice represents the network device
+                                  to be affected in target scope.
+                                type: string
                               value:
                                 description: Value is required when the mode is set
                                   to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
@@ -13929,6 +13962,9 @@ spec:
                   required:
                   - latency
                   type: object
+                device:
+                  description: Device represents the network device to be affected.
+                  type: string
                 direction:
                   description: Direction represents the direction, this applies on
                     netem and network partition action
@@ -14185,6 +14221,10 @@ spec:
                   - mode
                   - selector
                   type: object
+                targetDevice:
+                  description: TargetDevice represents the network device to be affected
+                    in target scope.
+                  type: string
                 value:
                   description: Value is required when the mode is set to `FixedPodMode`
                     / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
@@ -15549,6 +15589,9 @@ spec:
                       required:
                       - latency
                       type: object
+                    device:
+                      description: Device represents the network device to be affected.
+                      type: string
                     direction:
                       description: Direction represents the direction, this applies
                         on netem and network partition action
@@ -15810,6 +15853,10 @@ spec:
                       - mode
                       - selector
                       type: object
+                    targetDevice:
+                      description: TargetDevice represents the network device to be
+                        affected in target scope.
+                      type: string
                     value:
                       description: Value is required when the mode is set to `FixedPodMode`
                         / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
@@ -17621,6 +17668,10 @@ spec:
                                 required:
                                 - latency
                                 type: object
+                              device:
+                                description: Device represents the network device
+                                  to be affected.
+                                type: string
                               direction:
                                 description: Direction represents the direction, this
                                   applies on netem and network partition action
@@ -17900,6 +17951,10 @@ spec:
                                 - mode
                                 - selector
                                 type: object
+                              targetDevice:
+                                description: TargetDevice represents the network device
+                                  to be affected in target scope.
+                                type: string
                               value:
                                 description: Value is required when the mode is set
                                   to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
@@ -19404,6 +19459,10 @@ spec:
                                     required:
                                     - latency
                                     type: object
+                                  device:
+                                    description: Device represents the network device
+                                      to be affected.
+                                    type: string
                                   direction:
                                     description: Direction represents the direction,
                                       this applies on netem and network partition
@@ -19693,6 +19752,10 @@ spec:
                                     - mode
                                     - selector
                                     type: object
+                                  targetDevice:
+                                    description: TargetDevice represents the network
+                                      device to be affected in target scope.
+                                    type: string
                                   value:
                                     description: Value is required when the mode is
                                       set to `FixedPodMode` / `FixedPercentPodMod`
@@ -27943,6 +28006,9 @@ spec:
                         required:
                         - latency
                         type: object
+                      device:
+                        description: Device represents the network device to be affected.
+                        type: string
                       direction:
                         description: Direction represents the direction, this applies
                           on netem and network partition action
@@ -28207,6 +28273,10 @@ spec:
                         - mode
                         - selector
                         type: object
+                      targetDevice:
+                        description: TargetDevice represents the network device to
+                          be affected in target scope.
+                        type: string
                       value:
                         description: Value is required when the mode is set to `FixedPodMode`
                           / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
@@ -29622,6 +29692,10 @@ spec:
                             required:
                             - latency
                             type: object
+                          device:
+                            description: Device represents the network device to be
+                              affected.
+                            type: string
                           direction:
                             description: Direction represents the direction, this
                               applies on netem and network partition action
@@ -29891,6 +29965,10 @@ spec:
                             - mode
                             - selector
                             type: object
+                          targetDevice:
+                            description: TargetDevice represents the network device
+                              to be affected in target scope.
+                            type: string
                           value:
                             description: Value is required when the mode is set to
                               `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.

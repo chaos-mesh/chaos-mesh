@@ -166,6 +166,9 @@ spec:
                       required:
                       - latency
                       type: object
+                    device:
+                      description: Device represents the network device to be affected.
+                      type: string
                     duplicate:
                       description: DuplicateSpec represents the detail about loss
                         action

@@ -130,7 +130,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 				}
 			}
 
-			err := impl.ApplyTc(ctx, m, targets, networkchaos, targetIPSetPostFix)
+			err := impl.ApplyTc(ctx, m, targets, networkchaos, targetIPSetPostFix, networkchaos.Spec.Device)
 			if err != nil {
 				return v1alpha1.NotInjected, err
 			}
@@ -155,7 +155,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 				}
 			}
 
-			err := impl.ApplyTc(ctx, m, targets, networkchaos, sourceIPSetPostFix)
+			err := impl.ApplyTc(ctx, m, targets, networkchaos, sourceIPSetPostFix, networkchaos.Spec.TargetDevice)
 			if err != nil {
 				return v1alpha1.NotInjected, err
 			}
@@ -258,7 +258,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	return waitForRecoverSync, nil
 }
 
-func (impl *Impl) ApplyTc(ctx context.Context, m *podnetworkchaosmanager.PodNetworkManager, targets []*v1alpha1.Record, networkchaos *v1alpha1.NetworkChaos, ipSetPostFix string) error {
+func (impl *Impl) ApplyTc(ctx context.Context, m *podnetworkchaosmanager.PodNetworkManager, targets []*v1alpha1.Record, networkchaos *v1alpha1.NetworkChaos, ipSetPostFix string, device string) error {
 	spec := networkchaos.Spec
 	tcType := v1alpha1.Bandwidth
 	switch spec.Action {
@@ -281,6 +281,7 @@ func (impl *Impl) ApplyTc(ctx context.Context, m *podnetworkchaosmanager.PodNetw
 			Type:        tcType,
 			TcParameter: spec.TcParameter,
 			Source:      m.Source,
+			Device:      device,
 		})
 		return nil
 	}
@@ -309,6 +310,7 @@ func (impl *Impl) ApplyTc(ctx context.Context, m *podnetworkchaosmanager.PodNetw
 		TcParameter: spec.TcParameter,
 		Source:      m.Source,
 		IPSet:       dstIpset.Name,
+		Device:      device,
 	})
 
 	return nil

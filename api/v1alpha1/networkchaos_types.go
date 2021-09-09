@@ -92,6 +92,10 @@ type NetworkChaosSpec struct {
 	// +kubebuilder:validation:Enum=netem;delay;loss;duplicate;corrupt;partition;bandwidth
 	Action NetworkChaosAction `json:"action"`
 
+	// Device represents the network device to be affected.
+	// +optional
+	Device string `json:"device,omitempty"`
+
 	// Duration represents the duration of the chaos action
 	Duration *string `json:"duration,omitempty" webhook:"Duration"`
 
@@ -106,6 +110,10 @@ type NetworkChaosSpec struct {
 	// Target represents network target, this applies on netem and network partition action
 	// +optional
 	Target *PodSelector `json:"target,omitempty" webhook:",nilable"`
+
+	// TargetDevice represents the network device to be affected in target scope.
+	// +optional
+	TargetDevice string `json:"targetDevice,omitempty"`
 
 	// ExternalTargets represents network targets outside k8s
 	// +optional

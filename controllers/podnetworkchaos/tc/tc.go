@@ -28,7 +28,7 @@ import (
 var log = ctrl.Log.WithName("tc")
 
 // SetTcs makes grpc call to chaosdaemon to flush traffic control rules
-func SetTcs(ctx context.Context, builder *chaosdaemon.ChaosDaemonClientBuilder, pod *v1.Pod, tcs []*pb.Tc) error {
+func SetTcs(ctx context.Context, builder *chaosdaemon.ChaosDaemonClientBuilder, pod *v1.Pod, tcs []*pb.Tc, device string) error {
 	pbClient, err := builder.Build(ctx, pod)
 	if err != nil {
 		return err
@@ -49,7 +49,7 @@ func SetTcs(ctx context.Context, builder *chaosdaemon.ChaosDaemonClientBuilder, 
 			Tcs:         tcs,
 			ContainerId: containerID,
 			// Prevent tcs is empty, used to clean up tc rules
-			Device:  "eth0",
+			Device:  device,
 			EnterNS: true,
 		})
 
