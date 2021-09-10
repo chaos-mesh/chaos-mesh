@@ -39,20 +39,20 @@ type CtrlClient struct {
 }
 
 type AutoCompleteContext struct {
-	maxRecurLevel  int
-	visitedTypes   map[string]bool
-	completeLeaves bool
-	query          []string
+	maxRecurLevel int
+	visitedTypes  map[string]bool
+	query         []string
+	leaves        int
 }
 
 type Completion []string
 
-func NewAutoCompleteContext(namespace string, level int, completeLeaves bool) *AutoCompleteContext {
+func NewAutoCompleteContext(namespace string, level, leaves int) *AutoCompleteContext {
 	return &AutoCompleteContext{
-		maxRecurLevel:  level,
-		visitedTypes:   make(map[string]bool),
-		completeLeaves: completeLeaves,
-		query:          []string{NamespaceKey, namespace},
+		maxRecurLevel: level,
+		visitedTypes:  make(map[string]bool),
+		query:         []string{NamespaceKey, namespace},
+		leaves:        leaves,
 	}
 }
 
@@ -85,10 +85,10 @@ func (ctx *AutoCompleteContext) Next(typename, fieldName, arg string) *AutoCompl
 	}
 
 	return &AutoCompleteContext{
-		maxRecurLevel:  ctx.maxRecurLevel - 1,
-		visitedTypes:   types,
-		completeLeaves: ctx.completeLeaves,
-		query:          query,
+		maxRecurLevel: ctx.maxRecurLevel - 1,
+		visitedTypes:  types,
+		leaves:        ctx.leaves,
+		query:         query,
 	}
 }
 
@@ -237,13 +237,13 @@ func listArguments(object interface{}, resource *Query, startWith string) ([]str
 	return nil, nil
 }
 
-func (c *CtrlClient) CompleteQuery(namespace string, completeLeaves bool) ([]string, error) {
+func (c *CtrlClient) CompleteQuery(namespace string, leaves int) ([]string, error) {
 	namespaceType, err := c.Schema.MustGetType(NamespaceType)
 	if err != nil {
 		return nil, err
 	}
 
-	completion, err := c.completeQuery(NewAutoCompleteContext(namespace, 6, completeLeaves), namespaceType)
+	completion, err := c.completeQuery(NewAutoCompleteContext(namespace, 6, leaves), namespaceType)
 	if err != nil {
 		return nil, err
 	}
@@ -251,9 +251,9 @@ func (c *CtrlClient) CompleteQuery(namespace string, completeLeaves bool) ([]str
 	return completion, nil
 }
 
-func (c *CtrlClient) CompleteQueryBased(namespace string, base string, completeLeaves bool) ([]string, error) {
+func (c *CtrlClient) CompleteQueryBased(namespace string, base string, leaves int) ([]string, error) {
 	if base == "" {
-		return c.CompleteQuery(namespace, completeLeaves)
+		return c.CompleteQuery(namespace, leaves)
 	}
 
 	queryType, err := c.GetQueryType()
@@ -268,7 +268,7 @@ func (c *CtrlClient) CompleteQueryBased(namespace string, base string, completeL
 		return nil, err
 	}
 
-	ctx := NewAutoCompleteContext(namespace, 6, completeLeaves)
+	ctx := NewAutoCompleteContext(namespace, 6, leaves)
 	ctx.query = query
 	for len(root.Fields) != 0 {
 		ctx.visitedTypes[string(root.Type.Name)] = true
@@ -356,23 +356,24 @@ func (c *CtrlClient) completeQuery(ctx *AutoCompleteContext, root *Type) ([]stri
 	}
 
 	var queries []string
-	if !ctx.completeLeaves {
-		queries = append(queries, leaves...)
-	} else {
-		for _, leafPrmt := range fullPermutation(leaves) {
-			queries = append(queries, strings.Join(leafPrmt, ","))
-		}
+	for _, leafPrmt := range fullPermutation(leaves, ctx.leaves) {
+		queries = append(queries, strings.Join(leafPrmt, ","))
 	}
 
 	queries = append(queries, trunks...)
 	return queries, nil
 }
 
-func fullPermutation(strs []string) [][]string {
+func fullPermutation(strs []string, leaves int) [][]string {
 	var results [][]string
 
-	for i := range strs[1:] {
-		substrs := make([]string, i+1)
+	maxLeaves := len(strs)
+	if leaves < maxLeaves {
+		maxLeaves = leaves
+	}
+
+	for i := 1; i <= maxLeaves; i++ {
+		substrs := make([]string, i)
 		var (
 			n = len(strs)    // length of set
 			k = len(substrs) // length of subset
