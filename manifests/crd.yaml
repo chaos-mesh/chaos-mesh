@@ -2918,6 +2918,9 @@ spec:
                   description: RawIptables represents the iptables rules on specific
                     pod
                   properties:
+                    device:
+                      description: Device represents the network device to be affected.
+                      type: string
                     direction:
                       description: The block direction of this iptables rule
                       type: string
