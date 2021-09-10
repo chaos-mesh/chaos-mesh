@@ -140,7 +140,7 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 				return nil, cobra.ShellCompDirectiveNoFileComp
 			}
 
-			completion, err := client.CompleteQuery(namespace, true)
+			completion, err := client.CompleteQueryBased(namespace, resource, false)
 			if err != nil {
 				log.Error(err, "fail to complete query")
 				return nil, cobra.ShellCompDirectiveNoFileComp

@@ -237,6 +237,47 @@ func (c *CtrlClient) CompleteQuery(namespace string, completeLeaves bool) ([]str
 	return completion, nil
 }
 
+func (c *CtrlClient) CompleteQueryBased(namespace string, base string, completeLeaves bool) ([]string, error) {
+	if base == "" {
+		return c.CompleteQuery(namespace, completeLeaves)
+	}
+
+	queryType, err := c.GetQueryType()
+	if err != nil {
+		return nil, err
+	}
+
+	query := append([]string{NamespaceKey, namespace}, strings.Split(base, "/")...)
+
+	root, err := c.Schema.ParseQuery(query, queryType)
+	if err != nil {
+		return nil, err
+	}
+
+	ctx := NewAutoCompleteContext(namespace, 6, completeLeaves)
+	ctx.query = query
+	for len(root.Fields) != 0 {
+		ctx.visitedTypes[string(root.Type.Name)] = true
+		for _, field := range root.Fields {
+			root = field
+			break
+		}
+	}
+
+	rawCompletion, err := c.completeQuery(ctx, root.Type)
+	if err != nil {
+		return nil, err
+	}
+
+	var completion []string
+
+	for _, raw := range rawCompletion {
+		completion = append(completion, strings.TrimLeft(raw, base))
+	}
+
+	return completion, nil
+}
+
 // accepts ScalarKind, EnumKind and ObjectKind
 func (c *CtrlClient) completeQuery(ctx *AutoCompleteContext, root *Type) ([]string, error) {
 	if ctx.IsComplete() {
