@@ -41,6 +41,7 @@ type (
 
 	FieldNotFound struct {
 		Target string
+		Type   string
 		Fields []string
 	}
 
@@ -105,7 +106,7 @@ func (e *EnumValueNotFound) Error() string {
 }
 
 func (e *FieldNotFound) Error() string {
-	return fmt.Sprintf("field `%s` not found", e.Target)
+	return fmt.Sprintf("field `%s` not found in type: %s; fields: %#v", e.Target, e.Type, e.Fields)
 }
 
 func (e ScalarValueParseFail) Error() string {

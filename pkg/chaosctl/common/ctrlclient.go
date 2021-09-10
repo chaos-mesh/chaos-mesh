@@ -58,8 +58,11 @@ func (ctx *AutoCompleteContext) IsComplete() bool {
 	return ctx.maxRecurLevel == 0
 }
 
-func (ctx *AutoCompleteContext) Visited(name string) bool {
-	return ctx.visitedTypes[name]
+func (ctx *AutoCompleteContext) Visited(typ *Type) bool {
+	if typ.Kind != ObjectKind {
+		return false
+	}
+	return ctx.visitedTypes[string(typ.Name)]
 }
 
 func (ctx *AutoCompleteContext) Next(typename, fieldName, arg string) *AutoCompleteContext {
@@ -73,10 +76,7 @@ func (ctx *AutoCompleteContext) Next(typename, fieldName, arg string) *AutoCompl
 		types[name] = true
 	}
 
-	for _, seg := range ctx.query {
-		query = append(query, seg)
-	}
-
+	query = append(query, ctx.query...)
 	query = append(query, fieldName)
 	if arg != "" {
 		query = append(query, arg)
@@ -127,7 +127,26 @@ func (c *CtrlClient) ListArguments(queryStr []string, argumentName string) ([]st
 	listQuery = append(listQuery, argumentName)
 	query, err := c.Schema.ParseQuery(listQuery, queryType)
 	if err != nil {
-		return nil, err
+		switch e := err.(type) {
+		case *EnumValueNotFound:
+			if e.Target != queryStr[len(queryStr)-1] {
+				return nil, err
+			}
+			return e.Variants, nil
+		case *FieldNotFound:
+			if e.Target != queryStr[len(queryStr)-1] {
+				return nil, err
+			}
+			return e.Fields, err
+		case *LeafRequireArgument:
+			if e.Leaf != queryStr[len(queryStr)-1] {
+				return nil, err
+			}
+			return c.ListArguments(append(queryStr, ""), e.Argument)
+
+		default:
+			return nil, err
+		}
 	}
 
 	superQuery := NewQuery("query", queryType, nil)
@@ -238,7 +257,7 @@ func (c *CtrlClient) completeQuery(ctx *AutoCompleteContext, root *Type) ([]stri
 			return nil, err
 		}
 
-		if ctx.Visited(string(subType.Name)) {
+		if ctx.Visited(subType) {
 			continue
 		}
 
@@ -261,9 +280,17 @@ func (c *CtrlClient) completeQuery(ctx *AutoCompleteContext, root *Type) ([]stri
 			continue
 		}
 
-		args, err := c.ListArguments(append(ctx.query, string(field.Name)), string(field.Args[0].Name))
-		if err != nil {
-			return nil, err
+		var args []string
+
+		if typ, err := c.Schema.resolve(&field.Args[0].Type); err == nil && typ.Kind == EnumKind {
+			for variant := range typ.EnumMap {
+				args = append(args, variant)
+			}
+		} else {
+			args, err = c.ListArguments(append(ctx.query, string(field.Name), ""), string(field.Args[0].Name))
+			if err != nil {
+				return nil, err
+			}
 		}
 
 		for _, arg := range args {

@@ -109,6 +109,18 @@ type TypeRef3 struct {
 }
 
 type TypeRef4 struct {
+	Kind   graphql.String
+	Name   *graphql.String
+	OfType *TypeRef5
+}
+
+type TypeRef5 struct {
+	Kind   graphql.String
+	Name   *graphql.String
+	OfType *TypeRef6
+}
+
+type TypeRef6 struct {
 	Kind graphql.String
 	Name *graphql.String
 }
@@ -197,6 +209,30 @@ func (ref *TypeRef4) GetName() *graphql.String {
 }
 
 func (ref *TypeRef4) GetOfType() TypeRef {
+	return ref.OfType
+}
+
+func (ref *TypeRef5) GetKind() graphql.String {
+	return ref.Kind
+}
+
+func (ref *TypeRef5) GetName() *graphql.String {
+	return ref.Name
+}
+
+func (ref *TypeRef5) GetOfType() TypeRef {
+	return ref.OfType
+}
+
+func (ref *TypeRef6) GetKind() graphql.String {
+	return ref.Kind
+}
+
+func (ref *TypeRef6) GetName() *graphql.String {
+	return ref.Name
+}
+
+func (ref *TypeRef6) GetOfType() TypeRef {
 	return nil
 }
 
@@ -219,6 +255,7 @@ func (t *Type) mustGetField(name string) (*Field, error) {
 		}
 		return nil, &FieldNotFound{
 			Target: name,
+			Type:   string(t.Name),
 			Fields: fields,
 		}
 	}
