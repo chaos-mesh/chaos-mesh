@@ -45,6 +45,8 @@ type AutoCompleteContext struct {
 	query          []string
 }
 
+type Completion []string
+
 func NewAutoCompleteContext(namespace string, level int, completeLeaves bool) *AutoCompleteContext {
 	return &AutoCompleteContext{
 		maxRecurLevel:  level,
@@ -90,6 +92,18 @@ func (ctx *AutoCompleteContext) Next(typename, fieldName, arg string) *AutoCompl
 	}
 }
 
+func (c Completion) Len() int {
+	return len(c)
+}
+
+func (c Completion) Less(i, j int) bool {
+	return len(c[i]) < len(c[j])
+}
+
+func (c Completion) Swap(i, j int) {
+	c[i], c[j] = c[j], c[i]
+}
+
 func NewCtrlClient(ctx context.Context, url string) (*CtrlClient, error) {
 	client := &CtrlClient{
 		ctx:                ctx,
@@ -125,7 +139,7 @@ func (c *CtrlClient) ListArguments(queryStr []string, argumentName string) ([]st
 	helper := pluralize.NewClient()
 	listQuery[len(listQuery)-1] = helper.Plural(listQuery[len(listQuery)-1])
 	listQuery = append(listQuery, argumentName)
-	query, err := c.Schema.ParseQuery(listQuery, queryType)
+	query, err := c.Schema.ParseQuery(listQuery, queryType, false)
 	if err != nil {
 		switch e := err.(type) {
 		case *EnumValueNotFound:
@@ -249,7 +263,7 @@ func (c *CtrlClient) CompleteQueryBased(namespace string, base string, completeL
 
 	query := append([]string{NamespaceKey, namespace}, strings.Split(base, "/")...)
 
-	root, err := c.Schema.ParseQuery(query, queryType)
+	root, err := c.Schema.ParseQuery(query, queryType, true)
 	if err != nil {
 		return nil, err
 	}
@@ -264,15 +278,9 @@ func (c *CtrlClient) CompleteQueryBased(namespace string, base string, completeL
 		}
 	}
 
-	rawCompletion, err := c.completeQuery(ctx, root.Type)
+	completion, err := c.completeQuery(ctx, root.Type)
 	if err != nil {
 		return nil, err
-	}
-
-	var completion []string
-
-	for _, raw := range rawCompletion {
-		completion = append(completion, strings.TrimLeft(raw, base))
 	}
 
 	return completion, nil

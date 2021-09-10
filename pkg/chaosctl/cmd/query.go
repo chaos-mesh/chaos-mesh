@@ -18,6 +18,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"sort"
 
 	"github.com/go-logr/logr"
 	"github.com/iancoleman/strcase"
@@ -146,6 +147,7 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 				return nil, cobra.ShellCompDirectiveNoFileComp
 			}
 
+			sort.Sort(common.Completion(completion))
 			return completion, cobra.ShellCompDirectiveDefault
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -170,7 +172,7 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 
 			for _, arg := range args {
 				part := append(prefix, common.StandardizeQuery(arg)...)
-				partQuery, err := client.Schema.ParseQuery(part, queryType)
+				partQuery, err := client.Schema.ParseQuery(part, queryType, false)
 				if err != nil {
 					return err
 				}
@@ -196,7 +198,7 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 				return err
 			}
 
-			prefixQuery, err := client.Schema.ParseQuery(prefix, queryType)
+			prefixQuery, err := client.Schema.ParseQuery(prefix, queryType, false)
 			if err != nil {
 				return err
 			}
@@ -234,6 +236,7 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		}
 
+		sort.Sort(common.Completion(completion))
 		return completion, cobra.ShellCompDirectiveDefault
 	})
 

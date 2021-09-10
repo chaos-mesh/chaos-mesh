@@ -273,7 +273,7 @@ func (q *Query) String() string {
 	return strings.Join([]string{segment, fieldStr}, "/")
 }
 
-func (s *Schema) ParseQuery(query []string, super *Type) (*Query, error) {
+func (s *Schema) ParseQuery(query []string, super *Type, partial bool) (*Query, error) {
 	if len(query) == 0 {
 		return nil, errors.New("query cannot be empty")
 	}
@@ -314,7 +314,7 @@ func (s *Schema) ParseQuery(query []string, super *Type) (*Query, error) {
 	}
 
 	if len(subQuery) == 1 {
-		fields, err := s.parseLeaves(subQuery[0], typ)
+		fields, err := s.parseLeaves(subQuery[0], typ, partial)
 		if err != nil {
 			return nil, err
 		}
@@ -325,7 +325,7 @@ func (s *Schema) ParseQuery(query []string, super *Type) (*Query, error) {
 	}
 
 	if len(subQuery) > 1 {
-		field, err := s.ParseQuery(subQuery, typ)
+		field, err := s.ParseQuery(subQuery, typ, partial)
 		if err != nil {
 			return nil, err
 		}
@@ -335,7 +335,7 @@ func (s *Schema) ParseQuery(query []string, super *Type) (*Query, error) {
 	return newQuery, nil
 }
 
-func (s *Schema) parseLeaves(leaves string, super *Type) ([]*Query, error) {
+func (s *Schema) parseLeaves(leaves string, super *Type, partial bool) ([]*Query, error) {
 	fields := strings.Split(leaves, ",")
 	queries := make([]*Query, 0, len(fields))
 	for _, f := range fields {
@@ -357,7 +357,7 @@ func (s *Schema) parseLeaves(leaves string, super *Type) ([]*Query, error) {
 			return nil, err
 		}
 
-		if typ.Kind != ScalarKind {
+		if typ.Kind != ScalarKind && !partial {
 			// TODO: support object kind
 			return nil, fmt.Errorf("type %s is not a scalar kind", typ.Name)
 		}
