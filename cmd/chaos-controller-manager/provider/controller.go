@@ -62,7 +62,7 @@ func NewOption(logger logr.Logger) *ctrl.Options {
 		Scheme:                     scheme,
 		MetricsBindAddress:         config.ControllerCfg.MetricsAddr,
 		LeaderElection:             config.ControllerCfg.EnableLeaderElection,
-		LeaderElectionNamespace:    config.ControllerCfg.Namespace,
+		LeaderElectionNamespace:    leaderElectionNamespace,
 		LeaderElectionResourceLock: "leases",
 		LeaderElectionID:           "chaos-mesh",
 		LeaseDuration:              &config.ControllerCfg.LeaderElectLeaseDuration,
