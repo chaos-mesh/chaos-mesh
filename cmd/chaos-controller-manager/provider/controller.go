@@ -54,6 +54,10 @@ func NewScheme() *runtime.Scheme {
 func NewOption(logger logr.Logger) *ctrl.Options {
 	setupLog := logger.WithName("setup")
 
+	leaderElectionNamespace := config.ControllerCfg.Namespace
+	if len(leaderElectionNamespace) == 0 {
+		leaderElectionNamespace = "default"
+	}
 	options := ctrl.Options{
 		Scheme:                     scheme,
 		MetricsBindAddress:         config.ControllerCfg.MetricsAddr,
