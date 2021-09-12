@@ -286,6 +286,20 @@ func (c *CtrlClient) CompleteQueryBased(namespace string, base string, leaves in
 	return completion, nil
 }
 
+func (c *CtrlClient) CompleteResource(namespace string) ([]string, error) {
+	namespaceType, err := c.Schema.MustGetType(NamespaceType)
+	if err != nil {
+		return nil, err
+	}
+
+	completion, err := c.completeResource(NewAutoCompleteContext(namespace, 6, 0), namespaceType)
+	if err != nil {
+		return nil, err
+	}
+
+	return completion, nil
+}
+
 // accepts ScalarKind, EnumKind and ObjectKind
 func (c *CtrlClient) completeQuery(ctx *AutoCompleteContext, root *Type) ([]string, error) {
 	if ctx.IsComplete() {
@@ -362,6 +376,70 @@ func (c *CtrlClient) completeQuery(ctx *AutoCompleteContext, root *Type) ([]stri
 
 	queries = append(queries, trunks...)
 	return queries, nil
+}
+
+// accepts ObjectKind only
+func (c *CtrlClient) completeResource(ctx *AutoCompleteContext, root *Type) ([]string, error) {
+	if ctx.IsComplete() {
+		return nil, nil
+	}
+
+	var resources []string
+	for _, field := range root.Fields {
+		subType, err := c.Schema.resolve(&field.Type)
+		if err != nil {
+			return nil, err
+		}
+
+		if ctx.Visited(subType) {
+			continue
+		}
+
+		if subType.Kind != ObjectKind {
+			continue
+		}
+
+		if len(field.Args) == 0 {
+			resources = append(resources, string(field.Name))
+			subResources, err := c.completeResource(ctx.Next(string(subType.Name), string(field.Name), ""), subType)
+			if err != nil {
+				return nil, err
+			}
+
+			for _, subResource := range subResources {
+				resources = append(resources, strings.Join([]string{string(field.Name), subResource}, "/"))
+			}
+			continue
+		}
+
+		var args []string
+
+		if typ, err := c.Schema.resolve(&field.Args[0].Type); err == nil && typ.Kind == EnumKind {
+			for variant := range typ.EnumMap {
+				args = append(args, variant)
+			}
+		} else {
+			args, err = c.ListArguments(append(ctx.query, string(field.Name), ""), string(field.Args[0].Name))
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		for _, arg := range args {
+			resources = append(resources, strings.Join([]string{string(field.Name), arg}, "/"))
+			subResources, err := c.completeResource(ctx.Next(string(subType.Name), string(field.Name), arg), subType)
+			if err != nil {
+				return nil, err
+			}
+
+			for _, subResource := range subResources {
+				resources = append(resources, strings.Join([]string{string(field.Name), arg, subResource}, "/"))
+			}
+			continue
+		}
+	}
+
+	return resources, nil
 }
 
 func fullPermutation(strs []string, leaves int) [][]string {

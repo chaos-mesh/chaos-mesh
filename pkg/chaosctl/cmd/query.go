@@ -48,87 +48,6 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 		return prefix, nil
 	}
 
-	// var completeQuery = func(queryStr []string) ([]string, cobra.ShellCompDirective) {
-	// 	log.Info("try to complete query", "query", queryStr)
-	// 	ctx := context.Background()
-	// 	client, cancel, err := createClient(ctx)
-	// 	defer cancel()
-	// 	if err != nil {
-	// 		log.Error(err, "fail to create client")
-	// 		return nil, cobra.ShellCompDirectiveNoFileComp
-	// 	}
-
-	// 	queryType, err := client.GetQueryType()
-	// 	if err != nil {
-	// 		log.Error(err, "fail to get query type")
-	// 		return nil, cobra.ShellCompDirectiveNoFileComp
-	// 	}
-
-	// 	query, err := client.Schema.ParseQuery(queryStr, queryType)
-	// 	if err != nil {
-	// 		switch e := err.(type) {
-	// 		case *common.EnumValueNotFound:
-	// 			if e.Target != queryStr[len(queryStr)-1] {
-	// 				log.Error(err, "fail to parse query")
-	// 				return nil, cobra.ShellCompDirectiveNoFileComp
-	// 			}
-	// 			return e.Variants, cobra.ShellCompDirectiveNoSpace
-	// 		case *common.FieldNotFound:
-	// 			if e.Target != queryStr[len(queryStr)-1] {
-	// 				log.Error(err, "fail to parse query")
-	// 				return nil, cobra.ShellCompDirectiveNoFileComp
-	// 			}
-	// 			return e.Fields, cobra.ShellCompDirectiveNoSpace
-	// 		case *common.ScalarValueParseFail:
-	// 			if e.Value != queryStr[len(queryStr)-1] {
-	// 				log.Error(err, "fail to parse query")
-	// 				return nil, cobra.ShellCompDirectiveNoFileComp
-	// 			}
-	// 			arguments, err := client.ListArguments(queryStr, e.Argument)
-	// 			if err != nil {
-	// 				log.Error(err, "fail to list arguments")
-	// 				return nil, cobra.ShellCompDirectiveNoFileComp
-	// 			}
-	// 			return arguments, cobra.ShellCompDirectiveNoSpace
-	// 		case *common.LeafRequireArgument:
-	// 			if e.Leaf != queryStr[len(queryStr)-1] {
-	// 				log.Error(err, "fail to parse query")
-	// 				return nil, cobra.ShellCompDirectiveNoFileComp
-	// 			}
-	// 			arguments, err := client.ListArguments(append(queryStr, ""), e.Argument)
-	// 			if err != nil {
-	// 				log.Error(err, "fail to list arguments")
-	// 				return nil, cobra.ShellCompDirectiveNoFileComp
-	// 			}
-	// 			return arguments, cobra.ShellCompDirectiveNoSpace
-	// 		default:
-	// 			log.Error(err, "fail to parse query")
-	// 			return nil, cobra.ShellCompDirectiveNoFileComp
-	// 		}
-	// 	}
-
-	// 	tail := query.Tail()
-	// 	if tail == nil {
-	// 		return nil, cobra.ShellCompDirectiveNoFileComp
-	// 	}
-
-	// 	if tail.Argument != "" && tail.Name != NamespaceKey {
-	// 		arguments, err := client.ListArguments(queryStr, tail.Argument)
-	// 		if err != nil {
-	// 			log.Error(err, "fail to list arguments", "tail", tail.String())
-	// 			return nil, cobra.ShellCompDirectiveNoFileComp
-	// 		}
-	// 		return arguments, cobra.ShellCompDirectiveNoSpace
-	// 	}
-
-	// 	fields := make([]string, 0)
-	// 	for f := range tail.Type.FieldMap {
-	// 		fields = append(fields, f)
-	// 	}
-
-	// 	return fields, cobra.ShellCompDirectiveNoSpace
-	// }
-
 	// queryCmd represents the query command
 	var queryCmd = &cobra.Command{
 		Use:   "get [QUERY]",
@@ -222,7 +141,7 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 
 	queryCmd.Flags().StringVarP(&namespace, "namespace", "n", "default", "the kubenates namespace")
 	queryCmd.Flags().StringVarP(&resource, "resource", "r", "", "the target resource")
-	queryCmd.Flags().IntVarP(&leaves, "leaves", "l", 3, "the max leaves to combinate in completion")
+	queryCmd.Flags().IntVarP(&leaves, "leaves", "l", 2, "the max leaves to combinate in completion")
 	queryCmd.RegisterFlagCompletionFunc("resource", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		ctx := context.Background()
 		client, cancel, err := createClient(ctx)
@@ -232,9 +151,9 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		}
 
-		completion, err := client.CompleteQuery(namespace, 1)
+		completion, err := client.CompleteResource(namespace)
 		if err != nil {
-			log.Error(err, "fail to complete query")
+			log.Error(err, "fail to complete resource")
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		}
 
