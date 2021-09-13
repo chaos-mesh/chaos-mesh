@@ -1749,6 +1749,8 @@ webhooks:
     failurePolicy: Fail
     name: mphysicalmachinechaos.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -2054,6 +2056,8 @@ webhooks:
     failurePolicy: Fail
     name: vphysicalmachinechaos.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
