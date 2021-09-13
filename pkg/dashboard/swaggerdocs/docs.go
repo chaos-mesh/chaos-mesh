@@ -812,7 +812,7 @@ var doc = `{
                 }
             }
         },
-        "/events/workflow": {
+        "/events/workflow/:id": {
             "get": {
                 "description": "list all events for Workflow and related WorkflowNode.",
                 "produces": [

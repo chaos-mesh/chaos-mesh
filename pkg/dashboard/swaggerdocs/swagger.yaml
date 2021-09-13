@@ -2366,7 +2366,7 @@ paths:
       summary: Get an event.
       tags:
       - events
-  /events/workflow:
+  /events/workflow/:id:
     get:
       description: list all events for Workflow and related WorkflowNode.
       parameters:
