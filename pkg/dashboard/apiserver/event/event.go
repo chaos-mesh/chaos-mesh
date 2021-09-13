@@ -157,7 +157,7 @@ func (s *Service) cascadeFetchEventsForWorkflow(c *gin.Context) {
 
 	kubeClient, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		_ = c.Error(u.ErrBadRequest.WrapWithNoMessage(err))
+		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
 		return
 	}
 
@@ -167,7 +167,7 @@ func (s *Service) cascadeFetchEventsForWorkflow(c *gin.Context) {
 		v1alpha1.LabelWorkflow: workflowEntity.Name,
 	}})
 	if err != nil {
-		_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(err))
+		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
 		return
 	}
 	err = kubeClient.List(ctx, &workflowNodeList, &client.ListOptions{
@@ -175,7 +175,7 @@ func (s *Service) cascadeFetchEventsForWorkflow(c *gin.Context) {
 		LabelSelector: controlledByThisWorkflow,
 	})
 	if err != nil {
-		_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(err))
+		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		return
 	}
 
@@ -186,7 +186,7 @@ func (s *Service) cascadeFetchEventsForWorkflow(c *gin.Context) {
 		Namespace: ns,
 	})
 	if err != nil {
-		_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(err))
+		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		return
 	}
 	result = append(result, eventsForWorkflow...)
@@ -198,7 +198,7 @@ func (s *Service) cascadeFetchEventsForWorkflow(c *gin.Context) {
 			Name:      workflowNode.GetName(),
 		})
 		if err != nil {
-			_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(err))
+			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 			return
 		}
 		result = append(result, eventsForWorkflowNode...)
