@@ -97,7 +97,7 @@ const Single = () => {
 
     const fetchEvents = () => {
       api.events
-        .cascadeFetchEventsForWorkflow({ object_id: uuid, limit: 999 })
+        .cascadeFetchEventsForWorkflow(uuid, { limit: 999 })
         .then(({ data }) => setEvents(data))
         .catch(console.error)
         .finally(() => {

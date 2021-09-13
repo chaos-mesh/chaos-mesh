@@ -61,7 +61,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 
 	endpoint.GET("", s.list)
 	endpoint.GET("/:id", s.get)
-	endpoint.GET("/workflow", s.cascadeFetchEventsForWorkflow)
+	endpoint.GET("/workflow/:id", s.cascadeFetchEventsForWorkflow)
 }
 
 // @Summary list events.
@@ -115,11 +115,11 @@ func (s *Service) list(c *gin.Context) {
 // @Param limit query string false "The max length of events list"
 // @Success 200 {array} core.Event
 // @Failure 500 {object} utils.APIError
-// @Router /events/workflow [get]
+// @Router /events/workflow/:id [get]
 func (s *Service) cascadeFetchEventsForWorkflow(c *gin.Context) {
 	ctx := c.Request.Context()
 	ns := c.Query("namespace")
-	objectId := c.Query("object_id")
+	id := c.Param("id")
 	limit := 0
 	limitString := c.Query("limit")
 	if len(limitString) > 0 {
@@ -138,10 +138,10 @@ func (s *Service) cascadeFetchEventsForWorkflow(c *gin.Context) {
 	}
 
 	// we should fetch the events for Workflow and related WorkflowNode, so we need namespaced name at first
-	workflowEntity, err := s.workflowStore.FindByUID(ctx, objectId)
+	workflowEntity, err := s.workflowStore.FindByUID(ctx, id)
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
-			u.SetAPIError(c, u.ErrNotFound.Wrap(err, "this requested workflow is not found, object_id: %s", objectId))
+			u.SetAPIError(c, u.ErrNotFound.Wrap(err, "this requested workflow is not found, id: %s", id))
 		} else {
 			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		}
@@ -182,7 +182,7 @@ func (s *Service) cascadeFetchEventsForWorkflow(c *gin.Context) {
 	var result []*core.Event
 	// fetch events of Workflow
 	eventsForWorkflow, err := s.event.ListByFilter(ctx, core.Filter{
-		ObjectID:  objectId,
+		ObjectID:  id,
 		Namespace: ns,
 	})
 	if err != nil {
