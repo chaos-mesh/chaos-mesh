@@ -339,9 +339,7 @@ func TestcaseNetworkPartition(
 		return true, nil
 	})
 	// The expected behavior is to block only 0 -> 1, 0 -> 2 and 0 -> 3
-	// Actually, 1 -> 0, 2 -> 0, 3 -> 0 are not blocked, but the `recvUDP`
-	// request failed due to partition.
-	framework.ExpectEqual(result[networkConditionBlocked], [][]int{{0, 1}, {1, 0}, {0, 2}, {2, 0}, {0, 3}, {3, 0}})
+	framework.ExpectEqual(result[networkConditionBlocked], [][]int{{0, 1}, {0, 2}, {0, 3}})
 	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
 
 	By("recover")
@@ -380,9 +378,7 @@ func TestcaseNetworkPartition(
 		return true, nil
 	})
 	// The expected behavior is to block only 0 -> 1, 0 -> 2 and 0 -> 3
-	// Actually, 1 -> 0, 2 -> 0, 3 -> 0 are not blocked, but the `recvUDP`
-	// request failed due to partition.
-	framework.ExpectEqual(result[networkConditionBlocked], [][]int{{0, 1}, {1, 0}, {0, 2}, {2, 0}, {0, 3}, {3, 0}})
+	framework.ExpectEqual(result[networkConditionBlocked], [][]int{{0, 1}, {0, 2}, {0, 3}})
 	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
 
 	By("recover")

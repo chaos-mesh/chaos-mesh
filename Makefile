@@ -469,5 +469,6 @@ $(eval $(call RUN_IN_DEV_ENV_TEMPLATE,generate-mock))
 	manager chaosfs chaosdaemon chaos-dashboard \
 	dashboard dashboard-server-frontend gosec-scan \
 	failpoint-enable failpoint-disable swagger_spec \
+	e2e-test/image/e2e/bin/e2e.test \
 	proto bin/chaos-builder go_build_cache_directory schedule-migration enter-buildenv enter-devenv \
 	manifests/crd.yaml
