@@ -34,7 +34,7 @@ func Bootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, b *ch
 		return nil
 	}
 
-	err := builder.Default(mgr).
+	return builder.Default(mgr).
 		For(&v1alpha1.PodNetworkChaos{}).
 		Named("podnetworkchaos").
 		WithEventFilter(predicate.Funcs{
@@ -54,9 +54,4 @@ func Bootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, b *ch
 			AllowHostNetworkTesting:  config.ControllerCfg.AllowHostNetworkTesting,
 			ChaosDaemonClientBuilder: b,
 		})
-	if err != nil {
-		return err
-	}
-
-	return nil
 }

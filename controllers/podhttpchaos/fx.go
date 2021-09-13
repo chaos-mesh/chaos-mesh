@@ -33,7 +33,7 @@ func Bootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, b *ch
 		return nil
 	}
 
-	err := builder.Default(mgr).
+	return builder.Default(mgr).
 		For(&v1alpha1.PodHttpChaos{}).
 		Named("podhttpchaos").
 		WithEventFilter(predicate.Funcs{
@@ -50,9 +50,4 @@ func Bootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, b *ch
 			Recorder:                 mgr.GetEventRecorderFor("podhttpchaos"),
 			ChaosDaemonClientBuilder: b,
 		})
-	if err != nil {
-		return err
-	}
-
-	return nil
 }

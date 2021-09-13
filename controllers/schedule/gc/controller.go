@@ -153,11 +153,10 @@ func Bootstrap(mgr ctrl.Manager, client client.Client, log logr.Logger, objs Obj
 
 	builder = builder.Owns(&v1alpha1.Workflow{})
 
-	builder.Complete(&Reconciler{
+	return builder.Complete(&Reconciler{
 		client,
 		log.WithName("schedule-gc"),
 		recorderBuilder.Build("schedule-gc"),
 		lister,
 	})
-	return nil
 }

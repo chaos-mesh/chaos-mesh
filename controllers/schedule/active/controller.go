@@ -135,12 +135,11 @@ func Bootstrap(mgr ctrl.Manager, client client.Client, log logr.Logger, objs Obj
 	}
 	builder = builder.Owns(&v1alpha1.Workflow{})
 
-	builder.Complete(&Reconciler{
+	return builder.Complete(&Reconciler{
 		scheme,
 		client,
 		log.WithName("schedule-active"),
 		lister,
 		recorderBuilder.Build("schedule-active"),
 	})
-	return nil
 }

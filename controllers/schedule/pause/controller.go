@@ -111,7 +111,7 @@ func Bootstrap(mgr ctrl.Manager, client client.Client, log logr.Logger, lister *
 	if !config.ShouldSpawnController("schedule-pause") {
 		return nil
 	}
-	builder.Default(mgr).
+	return builder.Default(mgr).
 		For(&v1alpha1.Schedule{}).
 		Named("schedule-pause").
 		Complete(&Reconciler{
@@ -120,5 +120,4 @@ func Bootstrap(mgr ctrl.Manager, client client.Client, log logr.Logger, lister *
 			lister,
 			recorderBuilder.Build("schedule-pause"),
 		})
-	return nil
 }
