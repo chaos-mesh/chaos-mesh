@@ -137,9 +137,9 @@ func (s *DaemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Em
 		//  tc qdisc add dev eth0 parent 3:2 handle 5: sfq
 		//  tc qdisc add dev eth0 parent 3:3 handle 6: sfq
 		//  tc qdisc add dev eth0 parent 3:4 handle 7: netem delay 50000
-		//  iptables -A TC-TABLES-0 -i eth0 -m set --match-set A dst -j CLASSIFY --set-class 3:4 -w 5
+		//  iptables -A TC-TABLES-0 -o eth0 -m set --match-set A dst -j CLASSIFY --set-class 3:4 -w 5
 		//  tc qdisc add dev eth0 parent 3:5 handle 8: netem delay 100000
-		//  iptables -A TC-TABLES-1 -i eth0 -m set --match-set B dst -j CLASSIFY --set-class 3:5 -w 5
+		//  iptables -A TC-TABLES-1 -o eth0 -m set --match-set B dst -j CLASSIFY --set-class 3:5 -w 5
 
 		globalTc := []*pb.Tc{}
 		filterTc := make(map[string][]*pb.Tc)

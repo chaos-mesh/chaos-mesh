@@ -87,10 +87,13 @@ func (iptables *iptablesClient) setIptablesChains(chains []*pb.Chain) error {
 
 func (iptables *iptablesClient) setIptablesChain(chain *pb.Chain) error {
 	var matchPart string
+	var interfaceMatcher string
 	if chain.Direction == pb.Chain_INPUT {
 		matchPart = "src"
+		interfaceMatcher = "-i"
 	} else if chain.Direction == pb.Chain_OUTPUT {
 		matchPart = "dst"
+		interfaceMatcher = "-o"
 	} else {
 		return fmt.Errorf("unknown chain direction %d", chain.Direction)
 	}
@@ -127,12 +130,12 @@ func (iptables *iptablesClient) setIptablesChain(chain *pb.Chain) error {
 	rules := []string{}
 
 	if len(chain.Ipsets) == 0 {
-		rules = append(rules, strings.TrimSpace(fmt.Sprintf("-A %s -i %s -j %s -w 5 %s", chain.Name, chain.Device, chain.Target, protocolAndPort)))
+		rules = append(rules, strings.TrimSpace(fmt.Sprintf("-A %s %s %s -j %s -w 5 %s", chain.Name, interfaceMatcher, chain.Device, chain.Target, protocolAndPort)))
 	}
 
 	for _, ipset := range chain.Ipsets {
-		rules = append(rules, strings.TrimSpace(fmt.Sprintf("-A %s -i %s -m set --match-set %s %s -j %s -w 5 %s",
-			chain.Name, chain.Device, ipset, matchPart, chain.Target, protocolAndPort)))
+		rules = append(rules, strings.TrimSpace(fmt.Sprintf("-A %s %s %s -m set --match-set %s %s -j %s -w 5 %s",
+			chain.Name, interfaceMatcher, chain.Device, ipset, matchPart, chain.Target, protocolAndPort)))
 	}
 	err := iptables.createNewChain(&iptablesChain{
 		Name:  chain.Name,
