@@ -166,7 +166,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 				}
 			}
 
-			err := impl.SetDrop(ctx, m, targets, networkchaos, targetIPSetPostFix, v1alpha1.Input)
+			err := impl.SetDrop(ctx, m, targets, networkchaos, targetIPSetPostFix, v1alpha1.Input)The PR #2192 brings us a ctrl server, now we are going to implement a new chaosctl based on it.
 			if err != nil {
 				return v1alpha1.NotInjected, err
 			}

@@ -148,8 +148,8 @@ func (m *BackgroundProcessManager) StartProcess(cmd *ManagedProcess) (*process.P
 	go func() {
 		err := cmd.Wait()
 		if err != nil {
-			if err, ok := err.(*exec.ExitError); ok {
-				status := err.Sys().(syscall.WaitStatus)
+			if exitErr, ok := err.(*exec.ExitError); ok {
+				status := exitErr.Sys().(syscall.WaitStatus)
 				if status.Signaled() && status.Signal() == syscall.SIGTERM {
 					log.Info("process stopped with SIGTERM signal")
 				}
