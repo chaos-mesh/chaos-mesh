@@ -1,6 +1,8 @@
 name: Upload Env Images
 on:
   push:
+    paths:
+      - 'images/build-env/Dockerfile'
     branches:
       - master
       - release-*
@@ -36,15 +38,12 @@ jobs:
         env:
           IMAGE_TAG: ${{ steps.image_tag.outputs.image_tag }}
         run: |
-          export IMAGE_DEV_ENV_BUILD=1
           export IMAGE_BUILD_ENV_BUILD=1
 
           make image-build-env
-          make image-dev-env
 
       - name: Upload Chaos Mesh Env
         env:
           IMAGE_TAG: ${{ steps.image_tag.outputs.image_tag }}
         run: |
           docker push ghcr.io/chaos-mesh/chaos-mesh/build-env:$IMAGE_TAG
-          docker push ghcr.io/chaos-mesh/chaos-mesh/dev-env:$IMAGE_TAG
