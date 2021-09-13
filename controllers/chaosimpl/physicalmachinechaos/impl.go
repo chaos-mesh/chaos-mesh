@@ -44,8 +44,11 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	addressArray := strings.Split(addresses, ",")
 
 	// for example, physicalMachinechaos.Spec.Action is 'network-delay', action is 'network', subAction is 'delay'
+	// notice: 'process' action has no subAction, set subAction to ""
 	actions := strings.SplitN(string(physicalMachinechaos.Spec.Action), "-", 2)
-	if len(actions) != 2 {
+	if len(actions) == 1 {
+		actions = append(actions, "")
+	} else if len(actions) != 2 {
 		err := errors.New("action invalid")
 		return v1alpha1.NotInjected, err
 	}

@@ -25,41 +25,6 @@ import (
 // PhysicalMachineChaosAction represents the chaos action about physical machine.
 type PhysicalMachineChaosAction string
 
-const (
-	// PM means physical machine
-	PMStressCPUAction PhysicalMachineChaosAction = "stress-cpu"
-
-	PMStressMemoryAction PhysicalMachineChaosAction = "stress-mem"
-
-	PMDiskReadPayloadAction PhysicalMachineChaosAction = "disk-read-payload"
-
-	PMDiskWritePayloadAction PhysicalMachineChaosAction = "disk-write-payload"
-
-	PMDiskFillAction PhysicalMachineChaosAction = "disk-fill"
-
-	PMNetworkCorruptAction PhysicalMachineChaosAction = "network-corrupt"
-
-	PMNetworkDuplicateAction PhysicalMachineChaosAction = "network-duplicate"
-
-	PMNetworkLossAction PhysicalMachineChaosAction = "network-loss"
-
-	PMNetworkDelayAction PhysicalMachineChaosAction = "network-delay"
-
-	PMProcessAction PhysicalMachineChaosAction = "process"
-
-	PMJVMExceptionAction PhysicalMachineChaosAction = "jvm-exception"
-
-	PMJVMGCAction PhysicalMachineChaosAction = "jvm-gc"
-
-	PMJVMLatencyAction PhysicalMachineChaosAction = "jvm-latency"
-
-	PMJVMReturnAction PhysicalMachineChaosAction = "jvm-return"
-
-	PMJVMStressAction PhysicalMachineChaosAction = "jvm-stress"
-
-	PMJVMRuleDataAction PhysicalMachineChaosAction = "jvm-rule-data"
-)
-
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
