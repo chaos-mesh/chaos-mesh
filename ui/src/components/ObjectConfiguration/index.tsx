@@ -7,7 +7,7 @@ import Space from 'components-mui/Space'
 import StatusLabel from 'components-mui/StatusLabel'
 import T from 'components/T'
 import { format } from 'lib/luxon'
-import { templateTypeToFieldName } from 'api/workflows'
+import { templateTypeToFieldName } from 'api/zz_generated.frontend.chaos-mesh'
 import { useStoreSelector } from 'store'
 
 type Config = ExperimentSingle | ArchiveSingle
@@ -129,12 +129,12 @@ const ObjectConfiguration: React.FC<ObjectConfigurationProps> = ({
                       </Typography>
                     </TableCell>
                   </TableRow>
-                  {spec.startingDeadlineSeconds && (
+                  {spec.historyLimit && (
                     <TableRow>
-                      <TableCell>{T('newS.basic.startingDeadlineSeconds')}</TableCell>
+                      <TableCell>{T('newS.basic.historyLimit')}</TableCell>
                       <TableCell>
                         <Typography variant="body2" color="textSecondary">
-                          {spec.startingDeadlineSeconds}
+                          {spec.historyLimit}
                         </Typography>
                       </TableCell>
                     </TableRow>
@@ -149,12 +149,12 @@ const ObjectConfiguration: React.FC<ObjectConfigurationProps> = ({
                       </TableCell>
                     </TableRow>
                   )}
-                  {spec.historyLimit && (
+                  {spec.startingDeadlineSeconds && (
                     <TableRow>
-                      <TableCell>{T('newS.basic.historyLimit')}</TableCell>
+                      <TableCell>{T('newS.basic.startingDeadlineSeconds')}</TableCell>
                       <TableCell>
                         <Typography variant="body2" color="textSecondary">
-                          {spec.historyLimit}
+                          {spec.startingDeadlineSeconds}
                         </Typography>
                       </TableCell>
                     </TableRow>

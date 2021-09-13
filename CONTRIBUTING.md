@@ -6,18 +6,21 @@ Thanks for your interest in improving the project! This document provides a step
 
 Before starting work on something major, please reach out to us via GitHub, Slack, email, etc. We will make sure no one else is already working on it and ask you to open a GitHub issue. Also, we will provide necessary guidance should you need it.
 
-Specifically, if you want to develop a specific chaos type, you may also find [Development Guide](https://chaos-mesh.org/docs/development_guides/development_overview) useful.
+Specifically, if you want to develop a specific chaos type, you may also find [Development Guide](https://chaos-mesh.org/docs/developer-guide-overview) useful.
 
 ## Submitting a PR
 
 If you have a specific idea of a fix or update, follow these steps below to submit a PR:
 
-- [Step 1: Make the change](#step-1-make-the-change)
-- [Step 2: Run unit tests](#step-2-run-unit-tests)
-- [Step 3: Start Chaos Mesh locally and do manual tests](#step-3-start-chaos-mesh-locally-and-do-manual-tests)
-- [Step 4: Commit and push your changes](#step-4-commit-and-push-your-changes)
-- [Step 5: Create a pull request](#step-5-create-a-pull-request)
-- [Step 6: Get a code review](#step-6-get-a-code-review)
+- [Contributing to Chaos Mesh](#contributing-to-chaos-mesh)
+  - [Communications](#communications)
+  - [Submitting a PR](#submitting-a-pr)
+    - [Step 1: Make the change](#step-1-make-the-change)
+    - [Step 2: Run unit tests](#step-2-run-unit-tests)
+    - [Step 3: Start Chaos Mesh locally and do manual tests](#step-3-start-chaos-mesh-locally-and-do-manual-tests)
+    - [Step 4: Commit and push your changes](#step-4-commit-and-push-your-changes)
+    - [Step 5: Create a pull request](#step-5-create-a-pull-request)
+    - [Step 6: Get a code review](#step-6-get-a-code-review)
 
 ### Step 1: Make the change
 
@@ -84,7 +87,6 @@ If you have a specific idea of a fix or update, follow these steps below to subm
 Before running your code in a real Kubernetes cluster, make sure it passes all unit tests:
 
 ```bash
-make ensure-kubebuilder # install some test dependencies
 make test
 ```
 

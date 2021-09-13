@@ -100,6 +100,19 @@ type ScheduleList struct {
 	Items           []Schedule `json:"items"`
 }
 
+func (in *ScheduleList) GetItems() []GenericChaos {
+	var result []GenericChaos
+	for _, item := range in.Items {
+		item := item
+		result = append(result, &item)
+	}
+	return result
+}
+
+func (in *ScheduleList) DeepCopyList() GenericChaosList {
+	return in.DeepCopy()
+}
+
 func init() {
 	SchemeBuilder.Register(&Schedule{})
 	SchemeBuilder.Register(&ScheduleList{})

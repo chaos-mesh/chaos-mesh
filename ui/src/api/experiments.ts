@@ -10,7 +10,7 @@ export const state = (namespace = null) =>
     },
   })
 
-export const newExperiment = (data: Experiment) => http.post('/experiments/new', data)
+export const newExperiment = (data: Experiment<any>) => http.post('/experiments', data)
 
 export const experiments = (namespace = null, name = null, kind = null) =>
   http.get<ExperimentResponse[]>('/experiments', {
@@ -21,9 +21,9 @@ export const experiments = (namespace = null, name = null, kind = null) =>
     },
   })
 
-export const single = (uuid: uuid) => http.get<ExperimentSingle>(`/experiments/detail/${uuid}`)
+export const single = (uuid: uuid) => http.get<ExperimentSingle>(`/experiments/${uuid}`)
 
-export const update = (data: ExperimentSingle['kube_object']) => http.put('/experiments/update', data)
+export const update = (data: ExperimentSingle['kube_object']) => http.put('/experiments', data)
 
 export const del = (uuid: uuid) => http.delete(`/experiments/${uuid}`)
 export const delMulti = (uuids: uuid[]) => http.delete(`/experiments?uids=${uuids.join(',')}`)

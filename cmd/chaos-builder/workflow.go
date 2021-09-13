@@ -69,8 +69,6 @@ func (it *workflowCodeGenerator) Render() string {
 
 	imports := `import (
 	"fmt"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 )
 `
 
@@ -91,15 +89,15 @@ type EmbedChaos struct {
 %s
 }
 
-func (it *EmbedChaos) SpawnNewObject(templateType TemplateType) (runtime.Object, metav1.Object, error) {
+func (it *EmbedChaos) SpawnNewObject(templateType TemplateType) (GenericChaos, error) {
 
 	switch templateType {
 %s
 	default:
-		return nil, nil, fmt.Errorf("unsupported template type %%s", templateType)
+		return nil, fmt.Errorf("unsupported template type %%s", templateType)
 	}
 
-	return nil, &metav1.ObjectMeta{}, nil
+	return nil, nil
 }
 
 func (it *EmbedChaos) SpawnNewList(templateType TemplateType) (GenericChaosList, error) {
@@ -191,7 +189,7 @@ func lowercaseCamelCase(str string) string {
 const spawnObjectEntryTemplate = `	case Type{{.Type}}:
 		result := {{.Type}}{}
 		result.Spec = *it.{{.Type}}
-		return &result, result.GetObjectMeta(), nil
+		return &result, nil
 `
 
 func generateSpawnObjectMethodItem(typeName string) string {

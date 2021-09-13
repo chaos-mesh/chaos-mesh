@@ -40,7 +40,7 @@ func NewChaosNodeReconciler(kubeClient client.Client, eventRecorder recorder.Cha
 	return &ChaosNodeReconciler{kubeClient: kubeClient, eventRecorder: eventRecorder, logger: logger}
 }
 
-func (it *ChaosNodeReconciler) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+func (it *ChaosNodeReconciler) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
 
 	startTime := time.Now()
 	defer func() {
@@ -50,7 +50,6 @@ func (it *ChaosNodeReconciler) Reconcile(request reconcile.Request) (reconcile.R
 		)
 	}()
 
-	ctx := context.TODO()
 	node := v1alpha1.WorkflowNode{}
 
 	err := it.kubeClient.Get(ctx, request.NamespacedName, &node)
@@ -297,14 +296,14 @@ func (it *ChaosNodeReconciler) syncChaosResources(ctx context.Context, node v1al
 // inject Chaos will create one instance of chaos CR
 func (it *ChaosNodeReconciler) createChaos(ctx context.Context, node v1alpha1.WorkflowNode) error {
 
-	chaosObject, meta, err := node.Spec.EmbedChaos.SpawnNewObject(node.Spec.Type)
+	chaosObject, err := node.Spec.EmbedChaos.SpawnNewObject(node.Spec.Type)
 	if err != nil {
 		return err
 	}
 
-	meta.SetGenerateName(fmt.Sprintf("%s-", node.Name))
-	meta.SetNamespace(node.Namespace)
-	meta.SetOwnerReferences(append(meta.GetOwnerReferences(), metav1.OwnerReference{
+	chaosObject.SetGenerateName(fmt.Sprintf("%s-", node.Name))
+	chaosObject.SetNamespace(node.Namespace)
+	chaosObject.SetOwnerReferences(append(chaosObject.GetOwnerReferences(), metav1.OwnerReference{
 		APIVersion:         node.APIVersion,
 		Kind:               node.Kind,
 		Name:               node.Name,
@@ -312,7 +311,7 @@ func (it *ChaosNodeReconciler) createChaos(ctx context.Context, node v1alpha1.Wo
 		Controller:         &isController,
 		BlockOwnerDeletion: &blockOwnerDeletion,
 	}))
-	meta.SetLabels(map[string]string{
+	chaosObject.SetLabels(map[string]string{
 		v1alpha1.LabelControlledBy: node.Name,
 		v1alpha1.LabelWorkflow:     node.Spec.WorkflowName,
 	})
@@ -323,9 +322,9 @@ func (it *ChaosNodeReconciler) createChaos(ctx context.Context, node v1alpha1.Wo
 		it.logger.Error(err, "failed to create chaos")
 		return nil
 	}
-	it.logger.Info("chaos object created", "namespace", meta.GetNamespace(), "name", meta.GetName(), "parent node", node)
+	it.logger.Info("chaos object created", "namespace", chaosObject.GetNamespace(), "name", chaosObject.GetName(), "parent node", node)
 	it.eventRecorder.Event(&node, recorder.ChaosCustomResourceCreated{
-		Name: meta.GetName(),
+		Name: chaosObject.GetName(),
 		Kind: chaosObject.GetObjectKind().GroupVersionKind().Kind,
 	})
 	return nil

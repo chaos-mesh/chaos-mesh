@@ -29,18 +29,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 )
 
-type InnerObjectWithCustomStatus interface {
-	v1alpha1.InnerObject
-
-	GetCustomStatus() interface{}
-}
-
-type InnerObjectWithSelector interface {
-	v1alpha1.InnerObject
-
-	GetSelectorSpecs() map[string]interface{}
-}
-
 type ChaosImpl interface {
 	Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error)
 	Recover(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error)
@@ -51,7 +39,7 @@ type Reconciler struct {
 	Impl ChaosImpl
 
 	// Object is used to mark the target type of this Reconciler
-	Object InnerObjectWithSelector
+	Object v1alpha1.InnerObjectWithSelector
 
 	// Client is used to operate on the Kubernetes cluster
 	client.Client
@@ -73,8 +61,8 @@ const (
 )
 
 // Reconcile the common chaos
-func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	obj := r.Object.DeepCopyObject().(InnerObjectWithSelector)
+func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	obj := r.Object.DeepCopyObject().(v1alpha1.InnerObjectWithSelector)
 
 	if err := r.Client.Get(context.TODO(), req.NamespacedName, obj); err != nil {
 		if apierrors.IsNotFound(err) {
@@ -209,13 +197,13 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	// TODO: auto generate SetCustomStatus rather than reflect
 	var customStatus reflect.Value
-	if objWithStatus, ok := obj.(InnerObjectWithCustomStatus); ok {
+	if objWithStatus, ok := obj.(v1alpha1.InnerObjectWithCustomStatus); ok {
 		customStatus = reflect.Indirect(reflect.ValueOf(objWithStatus.GetCustomStatus()))
 	}
 	if shouldUpdate {
 		updateError := retry.RetryOnConflict(retry.DefaultBackoff, func() error {
 			r.Log.Info("updating records", "records", records)
-			obj := r.Object.DeepCopyObject().(InnerObjectWithSelector)
+			obj := r.Object.DeepCopyObject().(v1alpha1.InnerObjectWithSelector)
 
 			if err := r.Client.Get(context.TODO(), req.NamespacedName, obj); err != nil {
 				r.Log.Error(err, "unable to get chaos")
@@ -223,7 +211,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			}
 
 			obj.GetStatus().Experiment.Records = records
-			if objWithStatus, ok := obj.(InnerObjectWithCustomStatus); ok {
+			if objWithStatus, ok := obj.(v1alpha1.InnerObjectWithCustomStatus); ok {
 				ptrToCustomStatus := objWithStatus.GetCustomStatus()
 				// TODO: auto generate SetCustomStatus rather than reflect
 				reflect.Indirect(reflect.ValueOf(ptrToCustomStatus)).Set(reflect.Indirect(customStatus))

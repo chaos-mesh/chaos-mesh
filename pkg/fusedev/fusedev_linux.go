@@ -58,7 +58,8 @@ func GrantAccess() error {
 		return errors.Errorf("fail to find device cgroup")
 	}
 
-	deviceCgroupPath = "/sys/fs/cgroup/devices" + deviceCgroupPath + "/devices.allow"
+	// It's hard to use /pkg/chaosdaemon/cgroups to wrap this logic.
+	deviceCgroupPath = "/host-sys/fs/cgroup/devices" + deviceCgroupPath + "/devices.allow"
 	f, err := os.OpenFile(deviceCgroupPath, os.O_WRONLY, 0)
 	if err != nil {
 		return err

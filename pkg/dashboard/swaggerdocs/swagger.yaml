@@ -1,0 +1,3081 @@
+basePath: /api
+definitions:
+  archive.Archive:
+    $ref: '#/definitions/core.ObjectBase'
+  archive.Detail:
+    properties:
+      kube_object:
+        $ref: '#/definitions/core.KubeObjectDesc'
+        type: object
+    type: object
+  common.MapSlice:
+    additionalProperties:
+      items:
+        type: string
+      type: array
+    type: object
+  common.Pod:
+    properties:
+      ip:
+        type: string
+      name:
+        type: string
+      namespace:
+        type: string
+      state:
+        type: string
+    type: object
+  config.ChaosDashboardConfig:
+    properties:
+      cluster_mode:
+        default: true
+        description: ClusterScoped means control Chaos Object in cluster level(all
+          namespace).
+        type: boolean
+      dns_server_create:
+        default: false
+        type: boolean
+      enableFilterNamespace:
+        default: false
+        description: |-
+          EnableFilterNamespace will filter namespace with annotation. Only the pods/containers in namespace
+          annotated with `chaos-mesh.org/inject=enabled` will be injected.
+        type: boolean
+      listen_host:
+        default: 0.0.0.0
+        type: string
+      listen_port:
+        default: 2333
+        type: integer
+      security_mode:
+        default: true
+        description: SecurityMode will use the token login by the user if set to true
+        type: boolean
+      target_namespace:
+        description: |-
+          TargetNamespace is the target namespace to injecting chaos.
+          It only works with ClusterScoped is false.
+        type: string
+      version:
+        type: string
+    type: object
+  core.ConditionalBranch:
+    properties:
+      expression:
+        type: string
+      name:
+        type: string
+      template:
+        type: string
+    type: object
+  core.Event:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      kind:
+        type: string
+      message:
+        type: string
+      name:
+        type: string
+      namespace:
+        type: string
+      object_id:
+        type: string
+      reason:
+        type: string
+      type:
+        type: string
+    type: object
+  core.KubeObjectDesc:
+    properties:
+      metadata:
+        $ref: '#/definitions/core.KubeObjectMeta'
+        type: object
+      spec:
+        type: object
+    type: object
+  core.KubeObjectMeta:
+    properties:
+      annotations:
+        additionalProperties:
+          type: string
+        type: object
+      labels:
+        additionalProperties:
+          type: string
+        type: object
+      name:
+        type: string
+      namespace:
+        type: string
+    type: object
+  core.Node:
+    properties:
+      conditional_branches:
+        items:
+          $ref: '#/definitions/core.ConditionalBranch'
+        type: array
+      name:
+        type: string
+      parallel:
+        items:
+          $ref: '#/definitions/core.NodeNameWithTemplate'
+        type: array
+      serial:
+        items:
+          $ref: '#/definitions/core.NodeNameWithTemplate'
+        type: array
+      state:
+        type: string
+      template:
+        type: string
+      type:
+        type: string
+      uid:
+        type: string
+    type: object
+  core.NodeNameWithTemplate:
+    properties:
+      name:
+        type: string
+      template:
+        type: string
+    type: object
+  core.ObjectBase:
+    properties:
+      created_at:
+        type: string
+      kind:
+        type: string
+      name:
+        type: string
+      namespace:
+        type: string
+      uid:
+        type: string
+    type: object
+  core.SelectorInfo:
+    properties:
+      annotation_selectors:
+        additionalProperties:
+          type: string
+        type: object
+      expression_selectors:
+        type: string
+      field_selectors:
+        additionalProperties:
+          type: string
+        type: object
+      label_selectors:
+        additionalProperties:
+          type: string
+        type: object
+      namespaces:
+        items:
+          type: string
+        type: array
+      node_selectors:
+        additionalProperties:
+          type: string
+        type: object
+      nodes:
+        items:
+          type: string
+        type: array
+      phase_selectors:
+        items:
+          type: string
+        type: array
+      pods:
+        additionalProperties:
+          items:
+            type: string
+          type: array
+        description: |-
+          Pods is a map of string keys and a set values that used to select pods.
+          The key defines the namespace which pods belong,
+          and the each values is a set of pod names.
+        type: object
+    type: object
+  core.Topology:
+    properties:
+      nodes:
+        items:
+          $ref: '#/definitions/core.Node'
+        type: array
+    type: object
+  core.WorkflowDetail:
+    properties:
+      created_at:
+        type: string
+      end_time:
+        type: string
+      entry:
+        description: the entry node name
+        type: string
+      id:
+        type: integer
+      kube_object:
+        $ref: '#/definitions/core.KubeObjectDesc'
+        type: object
+      name:
+        type: string
+      namespace:
+        type: string
+      status:
+        type: string
+      topology:
+        $ref: '#/definitions/core.Topology'
+        type: object
+      uid:
+        type: string
+    type: object
+  core.WorkflowMeta:
+    properties:
+      created_at:
+        type: string
+      end_time:
+        type: string
+      entry:
+        description: the entry node name
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      namespace:
+        type: string
+      status:
+        type: string
+      uid:
+        type: string
+    type: object
+  experiment.Detail:
+    properties:
+      created_at:
+        type: string
+      failed_message:
+        type: string
+      kind:
+        type: string
+      kube_object:
+        $ref: '#/definitions/core.KubeObjectDesc'
+        type: object
+      name:
+        type: string
+      namespace:
+        type: string
+      status:
+        type: string
+      uid:
+        type: string
+    type: object
+  experiment.Experiment:
+    properties:
+      created_at:
+        type: string
+      failed_message:
+        type: string
+      kind:
+        type: string
+      name:
+        type: string
+      namespace:
+        type: string
+      status:
+        type: string
+      uid:
+        type: string
+    type: object
+  schedule.Detail:
+    properties:
+      created_at:
+        type: string
+      experiment_uids:
+        items:
+          type: string
+        type: array
+      kind:
+        type: string
+      kube_object:
+        $ref: '#/definitions/core.KubeObjectDesc'
+        type: object
+      name:
+        type: string
+      namespace:
+        type: string
+      status:
+        type: string
+      uid:
+        type: string
+    type: object
+  schedule.Schedule:
+    properties:
+      created_at:
+        type: string
+      kind:
+        type: string
+      name:
+        type: string
+      namespace:
+        type: string
+      status:
+        type: string
+      uid:
+        type: string
+    type: object
+  status.AllChaosStatus:
+    properties:
+      finished:
+        type: integer
+      injecting:
+        type: integer
+      paused:
+        type: integer
+      running:
+        type: integer
+    type: object
+  utils.APIError:
+    properties:
+      code:
+        type: integer
+      full_text:
+        type: string
+      message:
+        type: string
+      type:
+        type: string
+    type: object
+  utils.Response:
+    properties:
+      status:
+        type: string
+    type: object
+  v1alpha1.AWSChaosSpec:
+    properties:
+      action:
+        description: |-
+          Action defines the specific aws chaos action.
+          Supported action: ec2-stop / ec2-restart / detach-volume
+          Default action: ec2-stop
+          +kubebuilder:validation:Enum=ec2-stop;ec2-restart;detach-volume
+        type: string
+      awsRegion:
+        description: AWSRegion defines the region of aws.
+        type: string
+      deviceName:
+        description: |-
+          DeviceName indicates the name of the device.
+          Needed in detach-volume.
+          +optional
+        type: string
+      duration:
+        description: |-
+          Duration represents the duration of the chaos action.
+          +optional
+        type: string
+      ec2Instance:
+        description: Ec2Instance indicates the ID of the ec2 instance.
+        type: string
+      endpoint:
+        description: |-
+          Endpoint indicates the endpoint of the aws server. Just used it in test now.
+          +optional
+        type: string
+      secretName:
+        description: |-
+          SecretName defines the name of kubernetes secret.
+          +optional
+        type: string
+      volumeID:
+        description: |-
+          EbsVolume indicates the ID of the EBS volume.
+          Needed in detach-volume.
+          +optional
+        type: string
+    type: object
+  v1alpha1.AttrOverrideSpec:
+    properties:
+      atime:
+        $ref: '#/definitions/v1alpha1.Timespec'
+        description: +optional
+        type: object
+      blocks:
+        description: +optional
+        type: integer
+      ctime:
+        $ref: '#/definitions/v1alpha1.Timespec'
+        description: +optional
+        type: object
+      gid:
+        description: +optional
+        type: integer
+      ino:
+        description: +optional
+        type: integer
+      kind:
+        description: +optional
+        type: string
+      mtime:
+        $ref: '#/definitions/v1alpha1.Timespec'
+        description: +optional
+        type: object
+      nlink:
+        description: +optional
+        type: integer
+      perm:
+        description: +optional
+        type: integer
+      rdev:
+        description: +optional
+        type: integer
+      size:
+        description: +optional
+        type: integer
+      uid:
+        description: +optional
+        type: integer
+    type: object
+  v1alpha1.BandwidthSpec:
+    properties:
+      buffer:
+        description: |-
+          Buffer is the maximum amount of bytes that tokens can be available for instantaneously.
+          +kubebuilder:validation:Minimum=1
+        type: integer
+      limit:
+        description: |-
+          Limit is the number of bytes that can be queued waiting for tokens to become available.
+          +kubebuilder:validation:Minimum=1
+        type: integer
+      minburst:
+        description: |-
+          Minburst specifies the size of the peakrate bucket. For perfect
+          accuracy, should be set to the MTU of the interface.  If a
+          peakrate is needed, but some burstiness is acceptable, this
+          size can be raised. A 3000 byte minburst allows around 3mbit/s
+          of peakrate, given 1000 byte packets.
+          +optional
+          +kubebuilder:validation:Minimum=0
+        type: integer
+      peakrate:
+        description: |-
+          Peakrate is the maximum depletion rate of the bucket.
+          The peakrate does not need to be set, it is only necessary
+          if perfect millisecond timescale shaping is required.
+          +optional
+          +kubebuilder:validation:Minimum=0
+        type: integer
+      rate:
+        description: Rate is the speed knob. Allows bps, kbps, mbps, gbps, tbps unit.
+          bps means bytes per second.
+        type: string
+    type: object
+  v1alpha1.CPUStressor:
+    properties:
+      load:
+        description: |-
+          Load specifies P percent loading per CPU worker. 0 is effectively a sleep (no load) and 100
+          is full loading.
+          +optional
+        type: integer
+      options:
+        description: |-
+          extend stress-ng options
+          +optional
+        items:
+          type: string
+        type: array
+      workers:
+        description: |-
+          Workers specifies N workers to apply the stressor.
+          Maximum 8192 workers can run by stress-ng
+          +kubebuilder:validation:Maximum=8192
+        type: integer
+    type: object
+  v1alpha1.ChaosOnlyScheduleSpec:
+    properties:
+      awsChaos:
+        $ref: '#/definitions/v1alpha1.AWSChaosSpec'
+        description: +optional
+        type: object
+      concurrencyPolicy:
+        description: |-
+          +optional
+          +kubebuilder:validation:Enum=Forbid;Allow
+        type: string
+      dnsChaos:
+        $ref: '#/definitions/v1alpha1.DNSChaosSpec'
+        description: +optional
+        type: object
+      gcpChaos:
+        $ref: '#/definitions/v1alpha1.GCPChaosSpec'
+        description: +optional
+        type: object
+      historyLimit:
+        description: |-
+          +optional
+          +kubebuilder:validation:Minimum=1
+        type: integer
+      httpChaos:
+        $ref: '#/definitions/v1alpha1.HTTPChaosSpec'
+        description: +optional
+        type: object
+      ioChaos:
+        $ref: '#/definitions/v1alpha1.IOChaosSpec'
+        description: +optional
+        type: object
+      jvmChaos:
+        $ref: '#/definitions/v1alpha1.JVMChaosSpec'
+        description: +optional
+        type: object
+      kernelChaos:
+        $ref: '#/definitions/v1alpha1.KernelChaosSpec'
+        description: +optional
+        type: object
+      networkChaos:
+        $ref: '#/definitions/v1alpha1.NetworkChaosSpec'
+        description: +optional
+        type: object
+      podChaos:
+        $ref: '#/definitions/v1alpha1.PodChaosSpec'
+        description: +optional
+        type: object
+      schedule:
+        type: string
+      startingDeadlineSeconds:
+        description: |-
+          +optional
+          +nullable
+          +kubebuilder:validation:Minimum=0
+        type: integer
+      stressChaos:
+        $ref: '#/definitions/v1alpha1.StressChaosSpec'
+        description: +optional
+        type: object
+      timeChaos:
+        $ref: '#/definitions/v1alpha1.TimeChaosSpec'
+        description: +optional
+        type: object
+      type:
+        description: 'TODO: use a custom type, as `TemplateType` contains other possible
+          values'
+        type: string
+    type: object
+  v1alpha1.ConditionalBranch:
+    properties:
+      expression:
+        description: |-
+          Expression is the expression for this conditional branch, expected type of result is boolean. If expression is empty, this branch will always be selected/the template will be spawned.
+          +optional
+        type: string
+      target:
+        description: Target is the name of other template, if expression is evaluated
+          as true, this template will be spawned.
+        type: string
+    type: object
+  v1alpha1.CorruptSpec:
+    properties:
+      correlation:
+        default: "0"
+        description: +optional
+        type: string
+      corrupt:
+        type: string
+    type: object
+  v1alpha1.DNSChaosSpec:
+    properties:
+      action:
+        description: |-
+          Action defines the specific DNS chaos action.
+          Supported action: error, random
+          Default action: error
+          +kubebuilder:validation:Enum=error;random
+        type: string
+      containerNames:
+        description: |-
+          ContainerNames indicates list of the name of affected container.
+          If not set, all containers will be injected
+          +optional
+        items:
+          type: string
+        type: array
+      duration:
+        description: Duration represents the duration of the chaos action
+        type: string
+      mode:
+        description: |-
+          Mode defines the mode to run chaos action.
+          Supported mode: one / all / fixed / fixed-percent / random-max-percent
+          +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
+        type: string
+      patterns:
+        description: "Choose which domain names to take effect, support the placeholder
+          ? and wildcard *, or the Specified domain name.\nNote:\n     1. The wildcard
+          * must be at the end of the string. For example, chaos-*.org is invalid.\n
+          \    2. if the patterns is empty, will take effect on all the domain names.\nFor
+          example:\n\t\tThe value is [\"google.com\", \"github.*\", \"chaos-mes?.org\"],\n\t\twill
+          take effect on \"google.com\", \"github.com\" and \"chaos-mesh.org\"\n+optional"
+        items:
+          type: string
+        type: array
+      selector:
+        $ref: '#/definitions/v1alpha1.PodSelectorSpec'
+        description: Selector is used to select pods that are used to inject chaos
+          action.
+        type: object
+      value:
+        description: |-
+          Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+          If `FixedPodMode`, provide an integer of pods to do chaos action.
+          If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
+          IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+          +optional
+        type: string
+    type: object
+  v1alpha1.DelaySpec:
+    properties:
+      correlation:
+        default: "0"
+        description: +optional
+        type: string
+      jitter:
+        default: 0ms
+        description: +optional
+        type: string
+      latency:
+        type: string
+      reorder:
+        $ref: '#/definitions/v1alpha1.ReorderSpec'
+        description: +optional
+        type: object
+    type: object
+  v1alpha1.DuplicateSpec:
+    properties:
+      correlation:
+        default: "0"
+        description: +optional
+        type: string
+      duplicate:
+        type: string
+    type: object
+  v1alpha1.FailKernRequest:
+    properties:
+      callchain:
+        description: |-
+          Callchain indicate a special call chain, such as:
+              ext4_mount
+                -> mount_subtree
+                   -> ...
+                      -> should_failslab
+          With an optional set of predicates and an optional set of
+          parameters, which used with predicates. You can read call chan
+          and predicate examples from https://github.com/chaos-mesh/bpfki/tree/develop/examples
+          to learn more.
+          If no special call chain, just keep Callchain empty, which means it will fail at any call chain
+          with slab alloc (eg: kmalloc).
+        items:
+          $ref: '#/definitions/v1alpha1.Frame'
+        type: array
+      failtype:
+        description: |-
+          FailType indicates what to fail, can be set to '0' / '1' / '2'
+          If `0`, indicates slab to fail (should_failslab)
+          If `1`, indicates alloc_page to fail (should_fail_alloc_page)
+          If `2`, indicates bio to fail (should_fail_bio)
+          You can read:
+            1. https://www.kernel.org/doc/html/latest/fault-injection/fault-injection.html
+            2. http://github.com/iovisor/bcc/blob/master/tools/inject_example.txt
+          to learn more
+          +kubebuilder:validation:Maximum=2
+          +kubebuilder:validation:Minimum=0
+        type: integer
+      headers:
+        description: |-
+          Headers indicates the appropriate kernel headers you need.
+          Eg: "linux/mmzone.h", "linux/blkdev.h" and so on
+        items:
+          type: string
+        type: array
+      probability:
+        description: |-
+          Probability indicates the fails with probability.
+          If you want 1%, please set this field with 1.
+          +kubebuilder:validation:Minimum=0
+          +kubebuilder:validation:Maximum=100
+        type: integer
+      times:
+        description: |-
+          Times indicates the max times of fails.
+          +kubebuilder:validation:Minimum=0
+        type: integer
+    type: object
+  v1alpha1.Frame:
+    properties:
+      funcname:
+        description: Funcname can be find from kernel source or `/proc/kallsyms`,
+          such as `ext4_mount`
+        type: string
+      parameters:
+        description: |-
+          Parameters is used with predicate, for example, if you want to inject slab error
+          in `d_alloc_parallel(struct dentry *parent, const struct qstr *name)` with a special
+          name `bananas`, you need to set it to `struct dentry *parent, const struct qstr *name`
+          otherwise omit it.
+        type: string
+      predicate:
+        description: |-
+          Predicate will access the arguments of this Frame, example with Parameters's, you can
+          set it to `STRNCMP(name->name, "bananas", 8)` to make inject only with it, or omit it
+          to inject for all d_alloc_parallel call chain.
+        type: string
+    type: object
+  v1alpha1.GCPChaosSpec:
+    properties:
+      action:
+        description: |-
+          Action defines the specific gcp chaos action.
+          Supported action: node-stop / node-reset / disk-loss
+          Default action: node-stop
+          +kubebuilder:validation:Enum=node-stop;node-reset;disk-loss
+        type: string
+      deviceNames:
+        description: |-
+          The device name of disks to detach.
+          Needed in disk-loss.
+          +optional
+        items:
+          type: string
+        type: array
+      duration:
+        description: |-
+          Duration represents the duration of the chaos action.
+          +optional
+        type: string
+      instance:
+        description: Instance defines the name of the instance
+        type: string
+      project:
+        description: Project defines the name of gcp project.
+        type: string
+      secretName:
+        description: |-
+          SecretName defines the name of kubernetes secret. It is used for GCP credentials.
+          +optional
+        type: string
+      zone:
+        description: Zone defines the zone of gcp project.
+        type: string
+    type: object
+  v1alpha1.HTTPChaosSpec:
+    properties:
+      abort:
+        description: |-
+          Abort is a rule to abort a http session.
+          +optional
+        type: boolean
+      code:
+        description: |-
+          Code is a rule to select target by http status code in response.
+          +optional
+        type: integer
+      delay:
+        description: |-
+          Delay represents the delay of the target request/response.
+          A duration string is a possibly unsigned sequence of
+          decimal numbers, each with optional fraction and a unit suffix,
+          such as "300ms", "2h45m".
+          Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+          +optional
+        type: string
+      duration:
+        description: |-
+          Duration represents the duration of the chaos action.
+          +optional
+        type: string
+      method:
+        description: |-
+          Method is a rule to select target by http method in request.
+          +optional
+        type: string
+      mode:
+        description: |-
+          Mode defines the mode to run chaos action.
+          Supported mode: one / all / fixed / fixed-percent / random-max-percent
+          +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
+        type: string
+      patch:
+        $ref: '#/definitions/v1alpha1.PodHttpChaosPatchActions'
+        description: |-
+          Patch is a rule to patch some contents in target.
+          +optional
+        type: object
+      path:
+        description: |-
+          Path is a rule to select target by uri path in http request.
+          +optional
+        type: string
+      port:
+        description: Port represents the target port to be proxy of.
+        type: integer
+      replace:
+        $ref: '#/definitions/v1alpha1.PodHttpChaosReplaceActions'
+        description: |-
+          Replace is a rule to replace some contents in target.
+          +optional
+        type: object
+      request_headers:
+        additionalProperties:
+          type: string
+        description: |-
+          RequestHeaders is a rule to select target by http headers in request.
+          The key-value pairs represent header name and header value pairs.
+          +optional
+        type: object
+      response_headers:
+        additionalProperties:
+          type: string
+        description: |-
+          ResponseHeaders is a rule to select target by http headers in response.
+          The key-value pairs represent header name and header value pairs.
+          +optional
+        type: object
+      selector:
+        $ref: '#/definitions/v1alpha1.PodSelectorSpec'
+        description: Selector is used to select pods that are used to inject chaos
+          action.
+        type: object
+      target:
+        description: |-
+          +kubebuilder:validation:Enum=Request;Response
+          Target is the object to be selected and injected.
+        type: string
+      value:
+        description: |-
+          Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+          If `FixedPodMode`, provide an integer of pods to do chaos action.
+          If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
+          IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+          +optional
+        type: string
+    type: object
+  v1alpha1.IOChaosSpec:
+    properties:
+      action:
+        description: |-
+          Action defines the specific pod chaos action.
+          Supported action: latency / fault / attrOverride / mistake
+          +kubebuilder:validation:Enum=latency;fault;attrOverride;mistake
+        type: string
+      attr:
+        $ref: '#/definitions/v1alpha1.AttrOverrideSpec'
+        description: |-
+          Attr defines the overrided attribution
+          +optional
+        type: object
+      containerNames:
+        description: |-
+          ContainerNames indicates list of the name of affected container.
+          If not set, all containers will be injected
+          +optional
+        items:
+          type: string
+        type: array
+      delay:
+        description: |-
+          Delay defines the value of I/O chaos action delay.
+          A delay string is a possibly signed sequence of
+          decimal numbers, each with optional fraction and a unit suffix,
+          such as "300ms".
+          Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+          +optional
+        type: string
+      duration:
+        description: |-
+          Duration represents the duration of the chaos action.
+          It is required when the action is `PodFailureAction`.
+          A duration string is a possibly signed sequence of
+          decimal numbers, each with optional fraction and a unit suffix,
+          such as "300ms", "-1.5h" or "2h45m".
+          Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+          +optional
+        type: string
+      errno:
+        description: |-
+          Errno defines the error code that returned by I/O action.
+          refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html
+          +optional
+        type: integer
+      methods:
+        description: |-
+          Methods defines the I/O methods for injecting I/O chaos action.
+          default: all I/O methods.
+          +optional
+        items:
+          type: string
+        type: array
+      mistake:
+        $ref: '#/definitions/v1alpha1.MistakeSpec'
+        description: |-
+          Mistake defines what types of incorrectness are injected to IO operations
+          +optional
+        type: object
+      mode:
+        description: |-
+          Mode defines the mode to run chaos action.
+          Supported mode: one / all / fixed / fixed-percent / random-max-percent
+          +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
+        type: string
+      path:
+        description: |-
+          Path defines the path of files for injecting I/O chaos action.
+          +optional
+        type: string
+      percent:
+        description: |-
+          Percent defines the percentage of injection errors and provides a number from 0-100.
+          default: 100.
+          +optional
+        type: integer
+      selector:
+        $ref: '#/definitions/v1alpha1.PodSelectorSpec'
+        description: Selector is used to select pods that are used to inject chaos
+          action.
+        type: object
+      value:
+        description: |-
+          Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+          If `FixedPodMode`, provide an integer of pods to do chaos action.
+          If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
+          IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+          +optional
+        type: string
+      volumePath:
+        description: VolumePath represents the mount path of injected volume
+        type: string
+    type: object
+  v1alpha1.JVMChaosSpec:
+    properties:
+      action:
+        description: |-
+          Action defines the specific jvm chaos action.
+          Supported action: delay;return;script;cfl;oom;ccf;tce;cpf;tde;tpf
+          +kubebuilder:validation:Enum=delay;return;script;cfl;oom;ccf;tce;cpf;tde;tpf
+        type: string
+      containerNames:
+        description: |-
+          ContainerNames indicates list of the name of affected container.
+          If not set, all containers will be injected
+          +optional
+        items:
+          type: string
+        type: array
+      duration:
+        description: |-
+          Duration represents the duration of the chaos action
+          +optional
+        type: string
+      flags:
+        additionalProperties:
+          type: string
+        description: |-
+          Flags represents the flags of action
+          +optional
+        type: object
+      matchers:
+        additionalProperties:
+          type: string
+        description: |-
+          Matchers represents the matching rules for the target
+          +optional
+        type: object
+      mode:
+        description: |-
+          Mode defines the mode to run chaos action.
+          Supported mode: one / all / fixed / fixed-percent / random-max-percent
+          +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
+        type: string
+      selector:
+        $ref: '#/definitions/v1alpha1.PodSelectorSpec'
+        description: Selector is used to select pods that are used to inject chaos
+          action.
+        type: object
+      target:
+        description: |-
+          Target defines the specific jvm chaos target.
+          Supported target: servlet;psql;jvm;jedis;http;dubbo;rocketmq;tars;mysql;druid;redisson;rabbitmq;mongodb
+          +kubebuilder:validation:Enum=servlet;psql;jvm;jedis;http;dubbo;rocketmq;tars;mysql;druid;redisson;rabbitmq;mongodb
+        type: string
+      value:
+        description: |-
+          Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+          If `FixedPodMode`, provide an integer of pods to do chaos action.
+          If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
+          IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+          +optional
+        type: string
+    type: object
+  v1alpha1.KernelChaosSpec:
+    properties:
+      duration:
+        description: Duration represents the duration of the chaos action
+        type: string
+      failKernRequest:
+        $ref: '#/definitions/v1alpha1.FailKernRequest'
+        description: FailKernRequest defines the request of kernel injection
+        type: object
+      mode:
+        description: |-
+          Mode defines the mode to run chaos action.
+          Supported mode: one / all / fixed / fixed-percent / random-max-percent
+          +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
+        type: string
+      selector:
+        $ref: '#/definitions/v1alpha1.PodSelectorSpec'
+        description: Selector is used to select pods that are used to inject chaos
+          action.
+        type: object
+      value:
+        description: |-
+          Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+          If `FixedPodMode`, provide an integer of pods to do chaos action.
+          If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
+          IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+          +optional
+        type: string
+    type: object
+  v1alpha1.LabelSelectorRequirements:
+    items:
+      $ref: '#/definitions/metav1.LabelSelectorRequirement'
+    type: array
+  v1alpha1.LossSpec:
+    properties:
+      correlation:
+        default: "0"
+        description: +optional
+        type: string
+      loss:
+        type: string
+    type: object
+  v1alpha1.MemoryStressor:
+    properties:
+      options:
+        description: |-
+          extend stress-ng options
+          +optional
+        items:
+          type: string
+        type: array
+      size:
+        description: |-
+          Size specifies N bytes consumed per vm worker, default is the total available memory.
+          One can specify the size as % of total available memory or in units of B, KB/KiB,
+          MB/MiB, GB/GiB, TB/TiB.
+          +optional
+        type: string
+      workers:
+        description: |-
+          Workers specifies N workers to apply the stressor.
+          Maximum 8192 workers can run by stress-ng
+          +kubebuilder:validation:Maximum=8192
+        type: integer
+    type: object
+  v1alpha1.MistakeSpec:
+    properties:
+      filling:
+        description: |-
+          Filling determines what is filled in the miskate data.
+          +optional
+          +kubebuilder:validation:Enum=zero;random
+        type: string
+      maxLength:
+        description: |-
+          Max length of each wrong data segment in bytes
+          +optional
+          +kubebuilder:validation:Minimum=1
+        type: integer
+      maxOccurrences:
+        description: |-
+          There will be [1, MaxOccurrences] segments of wrong data.
+          +optional
+          +kubebuilder:validation:Minimum=1
+        type: integer
+    type: object
+  v1alpha1.NetworkChaosSpec:
+    properties:
+      action:
+        description: |-
+          Action defines the specific network chaos action.
+          Supported action: partition, netem, delay, loss, duplicate, corrupt
+          Default action: delay
+          +kubebuilder:validation:Enum=netem;delay;loss;duplicate;corrupt;partition;bandwidth
+        type: string
+      bandwidth:
+        $ref: '#/definitions/v1alpha1.BandwidthSpec'
+        description: |-
+          Bandwidth represents the detail about bandwidth control action
+          +optional
+        type: object
+      corrupt:
+        $ref: '#/definitions/v1alpha1.CorruptSpec'
+        description: |-
+          Corrupt represents the detail about corrupt action
+          +optional
+        type: object
+      delay:
+        $ref: '#/definitions/v1alpha1.DelaySpec'
+        description: |-
+          Delay represents the detail about delay action
+          +optional
+        type: object
+      direction:
+        description: |-
+          Direction represents the direction, this applies on netem and network partition action
+          +optional
+          +kubebuilder:validation:Enum=to;from;both;""
+        type: string
+      duplicate:
+        $ref: '#/definitions/v1alpha1.DuplicateSpec'
+        description: |-
+          DuplicateSpec represents the detail about loss action
+          +optional
+        type: object
+      duration:
+        description: Duration represents the duration of the chaos action
+        type: string
+      externalTargets:
+        description: |-
+          ExternalTargets represents network targets outside k8s
+          +optional
+        items:
+          type: string
+        type: array
+      loss:
+        $ref: '#/definitions/v1alpha1.LossSpec'
+        description: |-
+          Loss represents the detail about loss action
+          +optional
+        type: object
+      mode:
+        description: |-
+          Mode defines the mode to run chaos action.
+          Supported mode: one / all / fixed / fixed-percent / random-max-percent
+          +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
+        type: string
+      selector:
+        $ref: '#/definitions/v1alpha1.PodSelectorSpec'
+        description: Selector is used to select pods that are used to inject chaos
+          action.
+        type: object
+      target:
+        $ref: '#/definitions/v1alpha1.PodSelector'
+        description: |-
+          Target represents network target, this applies on netem and network partition action
+          +optional
+        type: object
+      value:
+        description: |-
+          Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+          If `FixedPodMode`, provide an integer of pods to do chaos action.
+          If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
+          IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+          +optional
+        type: string
+    type: object
+  v1alpha1.PodChaosSpec:
+    properties:
+      action:
+        description: |-
+          Action defines the specific pod chaos action.
+          Supported action: pod-kill / pod-failure / container-kill
+          Default action: pod-kill
+          +kubebuilder:validation:Enum=pod-kill;pod-failure;container-kill
+        type: string
+      containerNames:
+        description: |-
+          ContainerNames indicates list of the name of affected container.
+          If not set, all containers will be injected
+          +optional
+        items:
+          type: string
+        type: array
+      duration:
+        description: |-
+          Duration represents the duration of the chaos action.
+          It is required when the action is `PodFailureAction`.
+          A duration string is a possibly signed sequence of
+          decimal numbers, each with optional fraction and a unit suffix,
+          such as "300ms", "-1.5h" or "2h45m".
+          Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+          +optional
+        type: string
+      gracePeriod:
+        description: |-
+          GracePeriod is used in pod-kill action. It represents the duration in seconds before the pod should be deleted.
+          Value must be non-negative integer. The default value is zero that indicates delete immediately.
+          +optional
+          +kubebuilder:validation:Minimum=0
+        type: integer
+      mode:
+        description: |-
+          Mode defines the mode to run chaos action.
+          Supported mode: one / all / fixed / fixed-percent / random-max-percent
+          +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
+        type: string
+      selector:
+        $ref: '#/definitions/v1alpha1.PodSelectorSpec'
+        description: Selector is used to select pods that are used to inject chaos
+          action.
+        type: object
+      value:
+        description: |-
+          Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+          If `FixedPodMode`, provide an integer of pods to do chaos action.
+          If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
+          IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+          +optional
+        type: string
+    type: object
+  v1alpha1.PodHttpChaosPatchActions:
+    properties:
+      body:
+        $ref: '#/definitions/v1alpha1.PodHttpChaosPatchBodyAction'
+        description: |-
+          Body is a rule to patch message body of target.
+          +optional
+        type: object
+      headers:
+        description: |-
+          Headers is a rule to append http headers of target.
+          For example: `[["Set-Cookie", "<one cookie>"], ["Set-Cookie", "<another cookie>"]]`.
+          +optional
+        items:
+          items:
+            type: string
+          type: array
+        type: array
+      queries:
+        description: |-
+          Queries is a rule to append uri queries of target(Request only).
+          For example: `[["foo", "bar"], ["foo", "unknown"]]`.
+          +optional
+        items:
+          items:
+            type: string
+          type: array
+        type: array
+    type: object
+  v1alpha1.PodHttpChaosPatchBodyAction:
+    properties:
+      type:
+        description: Type represents the patch type, only support `JSON` as [merge
+          patch json](https://tools.ietf.org/html/rfc7396) currently.
+        type: string
+      value:
+        description: Value is the patch contents.
+        type: string
+    type: object
+  v1alpha1.PodHttpChaosReplaceActions:
+    properties:
+      body:
+        description: |-
+          Body is a rule to replace http message body in target.
+          +optional
+        items:
+          type: integer
+        type: array
+      code:
+        description: |-
+          Code is a rule to replace http status code in response.
+          +optional
+        type: integer
+      headers:
+        additionalProperties:
+          type: string
+        description: |-
+          Headers is a rule to replace http headers of target.
+          The key-value pairs represent header name and header value pairs.
+          +optional
+        type: object
+      method:
+        description: |-
+          Method is a rule to replace http method in request.
+          +optional
+        type: string
+      path:
+        description: |-
+          Path is rule to to replace uri path in http request.
+          +optional
+        type: string
+      queries:
+        additionalProperties:
+          type: string
+        description: |-
+          Queries is a rule to replace uri queries in http request.
+          For example, with value `{ "foo": "unknown" }`, the `/?foo=bar` will be altered to `/?foo=unknown`,
+          +optional
+        type: object
+    type: object
+  v1alpha1.PodSelector:
+    properties:
+      mode:
+        description: |-
+          Mode defines the mode to run chaos action.
+          Supported mode: one / all / fixed / fixed-percent / random-max-percent
+          +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
+        type: string
+      selector:
+        $ref: '#/definitions/v1alpha1.PodSelectorSpec'
+        description: Selector is used to select pods that are used to inject chaos
+          action.
+        type: object
+      value:
+        description: |-
+          Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+          If `FixedPodMode`, provide an integer of pods to do chaos action.
+          If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
+          IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+          +optional
+        type: string
+    type: object
+  v1alpha1.PodSelectorSpec:
+    properties:
+      annotationSelectors:
+        additionalProperties:
+          type: string
+        description: |-
+          Map of string keys and values that can be used to select objects.
+          A selector based on annotations.
+          +optional
+        type: object
+      expressionSelectors:
+        $ref: '#/definitions/v1alpha1.LabelSelectorRequirements'
+        description: |-
+          a slice of label selector expressions that can be used to select objects.
+          A list of selectors based on set-based label expressions.
+          +optional
+        type: object
+      fieldSelectors:
+        additionalProperties:
+          type: string
+        description: |-
+          Map of string keys and values that can be used to select objects.
+          A selector based on fields.
+          +optional
+        type: object
+      labelSelectors:
+        additionalProperties:
+          type: string
+        description: |-
+          Map of string keys and values that can be used to select objects.
+          A selector based on labels.
+          +optional
+        type: object
+      namespaces:
+        description: |-
+          Namespaces is a set of namespace to which objects belong.
+          +optional
+        items:
+          type: string
+        type: array
+      nodeSelectors:
+        additionalProperties:
+          type: string
+        description: |-
+          Map of string keys and values that can be used to select nodes.
+          Selector which must match a node's labels,
+          and objects must belong to these selected nodes.
+          +optional
+        type: object
+      nodes:
+        description: |-
+          Nodes is a set of node name and objects must belong to these nodes.
+          +optional
+        items:
+          type: string
+        type: array
+      podPhaseSelectors:
+        description: |-
+          PodPhaseSelectors is a set of condition of a pod at the current time.
+          supported value: Pending / Running / Succeeded / Failed / Unknown
+          +optional
+        items:
+          type: string
+        type: array
+      pods:
+        additionalProperties:
+          items:
+            type: string
+          type: array
+        description: |-
+          Pods is a map of string keys and a set values that used to select pods.
+          The key defines the namespace which pods belong,
+          and the each values is a set of pod names.
+          +optional
+        type: object
+    type: object
+  v1alpha1.ReorderSpec:
+    properties:
+      correlation:
+        default: "0"
+        description: +optional
+        type: string
+      gap:
+        type: integer
+      reorder:
+        type: string
+    type: object
+  v1alpha1.Schedule:
+    properties:
+      spec:
+        $ref: '#/definitions/v1alpha1.ScheduleSpec'
+        type: object
+      status:
+        $ref: '#/definitions/v1alpha1.ScheduleStatus'
+        description: +optional
+        type: object
+    type: object
+  v1alpha1.ScheduleSpec:
+    properties:
+      awsChaos:
+        $ref: '#/definitions/v1alpha1.AWSChaosSpec'
+        description: +optional
+        type: object
+      concurrencyPolicy:
+        description: |-
+          +optional
+          +kubebuilder:validation:Enum=Forbid;Allow
+        type: string
+      dnsChaos:
+        $ref: '#/definitions/v1alpha1.DNSChaosSpec'
+        description: +optional
+        type: object
+      gcpChaos:
+        $ref: '#/definitions/v1alpha1.GCPChaosSpec'
+        description: +optional
+        type: object
+      historyLimit:
+        description: |-
+          +optional
+          +kubebuilder:validation:Minimum=1
+        type: integer
+      httpChaos:
+        $ref: '#/definitions/v1alpha1.HTTPChaosSpec'
+        description: +optional
+        type: object
+      ioChaos:
+        $ref: '#/definitions/v1alpha1.IOChaosSpec'
+        description: +optional
+        type: object
+      jvmChaos:
+        $ref: '#/definitions/v1alpha1.JVMChaosSpec'
+        description: +optional
+        type: object
+      kernelChaos:
+        $ref: '#/definitions/v1alpha1.KernelChaosSpec'
+        description: +optional
+        type: object
+      networkChaos:
+        $ref: '#/definitions/v1alpha1.NetworkChaosSpec'
+        description: +optional
+        type: object
+      podChaos:
+        $ref: '#/definitions/v1alpha1.PodChaosSpec'
+        description: +optional
+        type: object
+      schedule:
+        type: string
+      startingDeadlineSeconds:
+        description: |-
+          +optional
+          +nullable
+          +kubebuilder:validation:Minimum=0
+          +kubebuilder:validation:ExclusiveMinimum=true
+        type: integer
+      stressChaos:
+        $ref: '#/definitions/v1alpha1.StressChaosSpec'
+        description: +optional
+        type: object
+      timeChaos:
+        $ref: '#/definitions/v1alpha1.TimeChaosSpec'
+        description: +optional
+        type: object
+      type:
+        description: 'TODO: use a custom type, as `TemplateType` contains other possible
+          values'
+        type: string
+      workflow:
+        $ref: '#/definitions/v1alpha1.WorkflowSpec'
+        description: +optional
+        type: object
+    type: object
+  v1alpha1.ScheduleStatus:
+    properties:
+      active:
+        description: +optional
+        type: string
+      time:
+        description: |-
+          +optional
+          +nullable
+        type: string
+    type: object
+  v1alpha1.StressChaosSpec:
+    properties:
+      containerNames:
+        description: |-
+          ContainerNames indicates list of the name of affected container.
+          If not set, all containers will be injected
+          +optional
+        items:
+          type: string
+        type: array
+      duration:
+        description: |-
+          Duration represents the duration of the chaos action
+          +optional
+        type: string
+      mode:
+        description: |-
+          Mode defines the mode to run chaos action.
+          Supported mode: one / all / fixed / fixed-percent / random-max-percent
+          +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
+        type: string
+      selector:
+        $ref: '#/definitions/v1alpha1.PodSelectorSpec'
+        description: Selector is used to select pods that are used to inject chaos
+          action.
+        type: object
+      stressngStressors:
+        description: |-
+          StressngStressors defines plenty of stressors just like `Stressors` except that it's an experimental
+          feature and more powerful. You can define stressors in `stress-ng` (see also `man stress-ng`) dialect,
+          however not all of the supported stressors are well tested. It maybe retired in later releases. You
+          should always use `Stressors` to define the stressors and use this only when you want more stressors
+          unsupported by `Stressors`. When both `StressngStressors` and `Stressors` are defined, `StressngStressors`
+          wins.
+          +optional
+        type: string
+      stressors:
+        $ref: '#/definitions/v1alpha1.Stressors'
+        description: |-
+          Stressors defines plenty of stressors supported to stress system components out.
+          You can use one or more of them to make up various kinds of stresses. At least
+          one of the stressors should be specified.
+          +optional
+        type: object
+      value:
+        description: |-
+          Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+          If `FixedPodMode`, provide an integer of pods to do chaos action.
+          If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
+          IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+          +optional
+        type: string
+    type: object
+  v1alpha1.Stressors:
+    properties:
+      cpu:
+        $ref: '#/definitions/v1alpha1.CPUStressor'
+        description: |-
+          CPUStressor stresses CPU out
+          +optional
+        type: object
+      memory:
+        $ref: '#/definitions/v1alpha1.MemoryStressor'
+        description: |-
+          MemoryStressor stresses virtual memory out
+          +optional
+        type: object
+    type: object
+  v1alpha1.Task:
+    properties:
+      container:
+        description: Container is the main container image to run in the pod
+        type: string
+      volumes:
+        description: |-
+          Volumes is a list of volumes that can be mounted by containers in a template.
+          +patchStrategy=merge
+          +patchMergeKey=name
+        type: string
+    type: object
+  v1alpha1.Template:
+    properties:
+      awsChaos:
+        $ref: '#/definitions/v1alpha1.AWSChaosSpec'
+        description: +optional
+        type: object
+      children:
+        description: |-
+          Children describes the children steps of serial or parallel node. Only used when Type is TypeSerial or TypeParallel.
+          +optional
+        items:
+          type: string
+        type: array
+      conditionalBranches:
+        description: |-
+          ConditionalBranches describes the conditional branches of custom tasks. Only used when Type is TypeTask.
+          +optional
+        items:
+          $ref: '#/definitions/v1alpha1.ConditionalBranch'
+        type: array
+      deadline:
+        description: +optional
+        type: string
+      dnsChaos:
+        $ref: '#/definitions/v1alpha1.DNSChaosSpec'
+        description: +optional
+        type: object
+      gcpChaos:
+        $ref: '#/definitions/v1alpha1.GCPChaosSpec'
+        description: +optional
+        type: object
+      httpChaos:
+        $ref: '#/definitions/v1alpha1.HTTPChaosSpec'
+        description: +optional
+        type: object
+      ioChaos:
+        $ref: '#/definitions/v1alpha1.IOChaosSpec'
+        description: +optional
+        type: object
+      jvmChaos:
+        $ref: '#/definitions/v1alpha1.JVMChaosSpec'
+        description: +optional
+        type: object
+      kernelChaos:
+        $ref: '#/definitions/v1alpha1.KernelChaosSpec'
+        description: +optional
+        type: object
+      name:
+        type: string
+      networkChaos:
+        $ref: '#/definitions/v1alpha1.NetworkChaosSpec'
+        description: +optional
+        type: object
+      podChaos:
+        $ref: '#/definitions/v1alpha1.PodChaosSpec'
+        description: +optional
+        type: object
+      schedule:
+        $ref: '#/definitions/v1alpha1.ChaosOnlyScheduleSpec'
+        description: |-
+          Schedule describe the Schedule(describing scheduled chaos) to be injected with chaos nodes. Only used when Type is TypeSchedule.
+          +optional
+        type: object
+      stressChaos:
+        $ref: '#/definitions/v1alpha1.StressChaosSpec'
+        description: +optional
+        type: object
+      task:
+        $ref: '#/definitions/v1alpha1.Task'
+        description: |-
+          Task describes the behavior of the custom task. Only used when Type is TypeTask.
+          +optional
+        type: object
+      templateType:
+        type: string
+      timeChaos:
+        $ref: '#/definitions/v1alpha1.TimeChaosSpec'
+        description: +optional
+        type: object
+    type: object
+  v1alpha1.TimeChaosSpec:
+    properties:
+      clockIds:
+        description: |-
+          ClockIds defines all affected clock id
+          All available options are ["CLOCK_REALTIME","CLOCK_MONOTONIC","CLOCK_PROCESS_CPUTIME_ID","CLOCK_THREAD_CPUTIME_ID",
+          "CLOCK_MONOTONIC_RAW","CLOCK_REALTIME_COARSE","CLOCK_MONOTONIC_COARSE","CLOCK_BOOTTIME","CLOCK_REALTIME_ALARM",
+          "CLOCK_BOOTTIME_ALARM"]
+          Default value is ["CLOCK_REALTIME"]
+        items:
+          type: string
+        type: array
+      containerNames:
+        description: |-
+          ContainerNames indicates list of the name of affected container.
+          If not set, all containers will be injected
+          +optional
+        items:
+          type: string
+        type: array
+      duration:
+        description: Duration represents the duration of the chaos action
+        type: string
+      mode:
+        description: |-
+          Mode defines the mode to run chaos action.
+          Supported mode: one / all / fixed / fixed-percent / random-max-percent
+          +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
+        type: string
+      selector:
+        $ref: '#/definitions/v1alpha1.PodSelectorSpec'
+        description: Selector is used to select pods that are used to inject chaos
+          action.
+        type: object
+      timeOffset:
+        description: |-
+          TimeOffset defines the delta time of injected program. It's a possibly signed sequence of decimal numbers, such as
+          "300ms", "-1.5h" or "2h45m". Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+        type: string
+      value:
+        description: |-
+          Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+          If `FixedPodMode`, provide an integer of pods to do chaos action.
+          If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
+          IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+          +optional
+        type: string
+    type: object
+  v1alpha1.Timespec:
+    properties:
+      nsec:
+        type: integer
+      sec:
+        type: integer
+    type: object
+  v1alpha1.Workflow:
+    properties:
+      spec:
+        $ref: '#/definitions/v1alpha1.WorkflowSpec'
+        description: Spec defines the behavior of a workflow
+        type: object
+      status:
+        $ref: '#/definitions/v1alpha1.WorkflowStatus'
+        description: |-
+          +optional
+          Most recently observed status of the workflow
+        type: object
+    type: object
+  v1alpha1.WorkflowCondition:
+    properties:
+      reason:
+        type: string
+      startTime:
+        type: string
+      status:
+        type: string
+      type:
+        type: string
+    type: object
+  v1alpha1.WorkflowSpec:
+    properties:
+      entry:
+        type: string
+      templates:
+        items:
+          $ref: '#/definitions/v1alpha1.Template'
+        type: array
+    type: object
+  v1alpha1.WorkflowStatus:
+    properties:
+      conditions:
+        description: |-
+          Represents the latest available observations of a workflow's current state.
+          +optional
+          +patchMergeKey=type
+          +patchStrategy=merge
+        items:
+          $ref: '#/definitions/v1alpha1.WorkflowCondition'
+        type: array
+      endTime:
+        description: +optional
+        type: string
+      entryNode:
+        description: +optional
+        type: string
+      startTime:
+        description: +optional
+        type: string
+    type: object
+  workflow.StatusResponse:
+    properties:
+      status:
+        type: string
+    type: object
+info:
+  contact:
+    name: GitHub Issues
+    url: https://github.com/chaos-mesh/chaos-mesh/issues
+  description: Swagger for Chaos Mesh Dashboard. If you encounter any problems with
+    API, please click on the issues link below to report.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: Chaos Mesh Dashboard API
+  version: "2.0"
+paths:
+  /archives:
+    delete:
+      description: Delete the specified archived experiment.
+      parameters:
+      - description: uids
+        in: query
+        name: uids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Delete the specified archived experiment.
+      tags:
+      - archives
+    get:
+      description: Get archived chaos experiments.
+      parameters:
+      - description: namespace
+        in: query
+        name: namespace
+        type: string
+      - description: name
+        in: query
+        name: name
+        type: string
+      - description: kind
+        enum:
+        - PodChaos
+        - IOChaos
+        - NetworkChaos
+        - TimeChaos
+        - KernelChaos
+        - StressChaos
+        in: query
+        name: kind
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/archive.Archive'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Get archived chaos experiments.
+      tags:
+      - archives
+  /archives/{uid}:
+    delete:
+      description: Delete the specified archived experiment.
+      parameters:
+      - description: uid
+        in: path
+        name: uid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Delete the specified archived experiment.
+      tags:
+      - archives
+    get:
+      description: Get the archived chaos experiment's detail by uid.
+      parameters:
+      - description: the archive uid
+        in: path
+        name: uid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/archive.Detail'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Get an archived chaos experiment.
+      tags:
+      - archives
+  /archives/schedules:
+    delete:
+      description: Delete the specified archived schedule.
+      parameters:
+      - description: uids
+        in: query
+        name: uids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Delete the specified archived schedule.
+      tags:
+      - archives
+    get:
+      description: Get archived schedule experiments.
+      parameters:
+      - description: namespace
+        in: query
+        name: namespace
+        type: string
+      - description: name
+        in: query
+        name: name
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/archive.Archive'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Get archived schedule experiments.
+      tags:
+      - archives
+  /archives/schedules/{uid}:
+    delete:
+      description: Delete the specified archived schedule.
+      parameters:
+      - description: uid
+        in: path
+        name: uid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Delete the specified archived schedule.
+      tags:
+      - archives
+    get:
+      description: Get the detail of an archived schedule experiment.
+      parameters:
+      - description: uid
+        in: query
+        name: uid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/archive.Detail'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Get the detail of an archived schedule experiment.
+      tags:
+      - archives
+  /archives/workflows:
+    delete:
+      description: Delete the specified archived workflows.
+      parameters:
+      - description: uids
+        in: query
+        name: uids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Delete the specified archived workflows.
+      tags:
+      - archives
+    get:
+      description: Get archived workflow.
+      parameters:
+      - description: namespace
+        in: query
+        name: namespace
+        type: string
+      - description: name
+        in: query
+        name: name
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/archive.Archive'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Get archived workflow.
+      tags:
+      - archives
+  /archives/workflows/{uid}:
+    delete:
+      description: Delete the specified archived workflow.
+      parameters:
+      - description: uid
+        in: path
+        name: uid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Delete the specified archived workflow.
+      tags:
+      - archives
+    get:
+      description: Get the detail of an archived workflow.
+      parameters:
+      - description: uid
+        in: query
+        name: uid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/archive.Detail'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Get the detail of an archived workflow.
+      tags:
+      - archives
+  /common/annotations:
+    get:
+      description: Get the annotations of the pods in the specified namespace from
+        Kubernetes cluster.
+      parameters:
+      - description: The pod's namespace list, split by ,
+        in: query
+        name: podNamespaceList
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.MapSlice'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Get the annotations of the pods in the specified namespace from Kubernetes
+        cluster.
+      tags:
+      - common
+  /common/chaos-available-namespaces:
+    get:
+      description: Get all namespaces which could inject chaos(explosion scope) from
+        Kubernetes cluster.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Get all namespaces which could inject chaos(explosion scope) from Kubernetes
+        cluster.
+      tags:
+      - common
+  /common/config:
+    get:
+      description: Get the config of Dashboard.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/config.ChaosDashboardConfig'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Get the config of Dashboard.
+      tags:
+      - common
+  /common/kinds:
+    get:
+      description: Get all chaos kinds from Kubernetes cluster.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Get all chaos kinds from Kubernetes cluster.
+      tags:
+      - common
+  /common/labels:
+    get:
+      description: Get the labels of the pods in the specified namespace from Kubernetes
+        cluster.
+      parameters:
+      - description: The pod's namespace list, split by ,
+        in: query
+        name: podNamespaceList
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.MapSlice'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Get the labels of the pods in the specified namespace from Kubernetes
+        cluster.
+      tags:
+      - common
+  /common/namespaces:
+    get:
+      deprecated: true
+      description: Get all from Kubernetes cluster.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Get all namespaces from Kubernetes cluster.
+      tags:
+      - common
+  /common/pods:
+    post:
+      description: Get pods from Kubernetes cluster.
+      parameters:
+      - description: Request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/core.SelectorInfo'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/common.Pod'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Get pods from Kubernetes cluster.
+      tags:
+      - common
+  /common/rbac-config:
+    get:
+      description: Get the rbac config according to the user's choice.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.MapSlice'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Get the rbac config according to the user's choice.
+      tags:
+      - common
+  /events:
+    get:
+      description: Get events from db.
+      parameters:
+      - description: The create time of events
+        in: query
+        name: created_at
+        type: string
+      - description: The name of the object
+        in: query
+        name: name
+        type: string
+      - description: The namespace of the object
+        in: query
+        name: namespace
+        type: string
+      - description: The UID of the object
+        in: query
+        name: object_id
+        type: string
+      - description: kind
+        enum:
+        - PodChaos
+        - IOChaos
+        - NetworkChaos
+        - TimeChaos
+        - KernelChaos
+        - StressChaos
+        - AWSChaos
+        - GCPChaos
+        - DNSChaos
+        - Schedule
+        in: query
+        name: kind
+        type: string
+      - description: The max length of events list
+        in: query
+        name: limit
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/core.Event'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: list events.
+      tags:
+      - events
+  /events/{id}:
+    get:
+      description: Get the event from db by ID.
+      parameters:
+      - description: The event ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/core.Event'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Get an event.
+      tags:
+      - events
+  /experiments:
+    delete:
+      description: Batch delete chaos experiments by uids.
+      parameters:
+      - description: 'the experiment uids, split with comma. Example: ?uids=uid1,uid2'
+        in: query
+        name: uids
+        required: true
+        type: string
+      - description: force
+        enum:
+        - "true"
+        - "false"
+        in: query
+        name: force
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Batch delete chaos experiments.
+      tags:
+      - experiments
+    get:
+      description: Get chaos experiments from k8s clusters in real time.
+      parameters:
+      - description: filter exps by namespace
+        in: query
+        name: namespace
+        type: string
+      - description: filter exps by name
+        in: query
+        name: name
+        type: string
+      - description: filter exps by kind
+        enum:
+        - PodChaos
+        - NetworkChaos
+        - IOChaos
+        - StressChaos
+        - KernelChaos
+        - TimeChaos
+        - DNSChaos
+        - AWSChaos
+        - GCPChaos
+        - JVMChaos
+        - HTTPChaos
+        in: query
+        name: kind
+        type: string
+      - description: filter exps by status
+        enum:
+        - Injecting
+        - Running
+        - Finished
+        - Paused
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/experiment.Experiment'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: List chaos experiments.
+      tags:
+      - experiments
+    post:
+      consumes:
+      - application/json
+      description: Pass a JSON object to create a new chaos experiment. The schema
+        for JSON is the same as the YAML schema for the Kubernetes object.
+      parameters:
+      - description: the chaos definition
+        in: body
+        name: chaos
+        required: true
+        schema:
+          additionalProperties: true
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Create a new chaos experiment.
+      tags:
+      - experiments
+    put:
+      description: Update a chaos experiment.
+      parameters:
+      - description: Request body
+        in: body
+        name: request
+        required: true
+        schema:
+          additionalProperties: true
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Update a chaos experiment.
+      tags:
+      - experiments
+  /experiments/{uid}:
+    delete:
+      description: Delete the chaos experiment by uid.
+      parameters:
+      - description: the experiment uid
+        in: path
+        name: uid
+        required: true
+        type: string
+      - description: force
+        enum:
+        - "true"
+        - "false"
+        in: query
+        name: force
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Delete a chaos experiment.
+      tags:
+      - experiments
+    get:
+      description: Get the chaos experiment's detail by uid.
+      parameters:
+      - description: the experiment uid
+        in: path
+        name: uid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/experiment.Detail'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Get a chaos experiment.
+      tags:
+      - experiments
+  /experiments/pause/{uid}:
+    put:
+      description: Pause a chaos experiment.
+      parameters:
+      - description: the experiment uid
+        in: path
+        name: uid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Pause a chaos experiment.
+      tags:
+      - experiments
+  /experiments/start/{uid}:
+    put:
+      description: Start a chaos experiment.
+      parameters:
+      - description: the experiment uid
+        in: path
+        name: uid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Start a chaos experiment.
+      tags:
+      - experiments
+  /experiments/state:
+    get:
+      description: Get the status of all experiments.
+      parameters:
+      - description: namespace
+        in: query
+        name: namespace
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/status.AllChaosStatus'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Get the status of all experiments.
+      tags:
+      - experiments
+  /schedules:
+    delete:
+      description: Batch delete schedules by uids.
+      parameters:
+      - description: 'the schedule uids, split with comma. Example: ?uids=uid1,uid2'
+        in: query
+        name: uids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Batch delete schedules.
+      tags:
+      - schedules
+    get:
+      description: Get chaos schedules from k8s cluster in real time.
+      parameters:
+      - description: filter schedules by namespace
+        in: query
+        name: namespace
+        type: string
+      - description: filter schedules by name
+        in: query
+        name: name
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/schedule.Schedule'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: List chaos schedules.
+      tags:
+      - schedules
+    post:
+      consumes:
+      - application/json
+      description: Pass a JSON object to create a new schedule. The schema for JSON
+        is the same as the YAML schema for the Kubernetes object.
+      parameters:
+      - description: the schedule definition
+        in: body
+        name: schedule
+        required: true
+        schema:
+          $ref: '#/definitions/v1alpha1.Schedule'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1alpha1.Schedule'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Create a new schedule.
+      tags:
+      - schedules
+    put:
+      description: Update a schedule.
+      parameters:
+      - description: Request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/v1alpha1.Schedule'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1alpha1.Schedule'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Update a schedule.
+      tags:
+      - schedules
+  /schedules/{uid}:
+    delete:
+      description: Delete the schedule by uid.
+      parameters:
+      - description: the schedule uid
+        in: path
+        name: uid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Delete a schedule.
+      tags:
+      - schedules
+    get:
+      description: Get the schedule's detail by uid.
+      parameters:
+      - description: the schedule uid
+        in: path
+        name: uid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schedule.Detail'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Get a schedule.
+      tags:
+      - schedules
+  /schedules/pause/{uid}:
+    put:
+      description: Pause a schedule.
+      parameters:
+      - description: the schedule uid
+        in: path
+        name: uid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Pause a schedule.
+      tags:
+      - schedules
+  /schedules/start/{uid}:
+    put:
+      description: Start a schedule.
+      parameters:
+      - description: the schedule uid
+        in: path
+        name: uid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Start a schedule.
+      tags:
+      - schedules
+  /workflows:
+    get:
+      description: List workflows from Kubernetes cluster.
+      parameters:
+      - description: namespace, given empty string means list from all namespace
+        in: query
+        name: namespace
+        type: string
+      - description: status
+        enum:
+        - Initializing
+        - Running
+        - Errored
+        - Finished
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/core.WorkflowMeta'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: List workflows from Kubernetes cluster.
+      tags:
+      - workflows
+  /workflows/{uid}:
+    delete:
+      description: Delete the specified workflow.
+      parameters:
+      - description: uid
+        in: path
+        name: uid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/workflow.StatusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Delete the specified workflow.
+      tags:
+      - workflows
+    get:
+      description: Get detailed information about the specified workflow. If that
+        object is not existed in kubernetes, it will only return ths persisted data
+        in the database.
+      parameters:
+      - description: uid
+        in: path
+        name: uid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/core.WorkflowDetail'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Get detailed information about the specified workflow.
+      tags:
+      - workflows
+    put:
+      description: Update a workflow.
+      parameters:
+      - description: uid
+        in: path
+        name: uid
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/v1alpha1.Workflow'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/core.WorkflowDetail'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Update a workflow.
+      tags:
+      - workflows
+  /workflows/new:
+    post:
+      description: Create a new workflow.
+      parameters:
+      - description: Request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/v1alpha1.Workflow'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/core.WorkflowDetail'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Create a new workflow.
+      tags:
+      - workflows
+swagger: "2.0"
