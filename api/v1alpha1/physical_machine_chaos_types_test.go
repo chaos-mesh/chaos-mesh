@@ -53,7 +53,7 @@ var _ = Describe("PhysicalMachineChaos", func() {
 					Namespace: "default",
 				},
 				Spec: PhysicalMachineChaosSpec{
-					Action: PMStressMemoryAction,
+					Action: "stress-mem",
 					PhysicalMachineSelector: PhysicalMachineSelector{
 						Address: []string{
 							"123.123.123.123.123",
