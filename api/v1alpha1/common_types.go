@@ -18,7 +18,6 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
@@ -90,49 +89,34 @@ var log = ctrl.Log.WithName("api")
 
 // InnerObject is basic Object for the Reconciler
 type InnerObject interface {
+	StatefulObject
 	IsDeleted() bool
 	IsPaused() bool
-	GetChaos() *ChaosInstance
 	DurationExceeded(time.Time) (bool, time.Duration, error)
 	IsOneShot() bool
-	StatefulObject
 }
 
 // +kubebuilder:object:generate=false
 
 // StatefulObject defines a basic Object that can get the status
 type StatefulObject interface {
-	runtime.Object
+	GenericChaos
+	// deprecated, use GetNamepsace() in metav1.Object directly.
+	// TODO: duplicated method, remove GetObjectMeta()
+	GetObjectMeta() *metav1.ObjectMeta
 	GetStatus() *ChaosStatus
-	GetObjectMeta() *metav1.ObjectMeta
 }
 
 // +kubebuilder:object:generate=false
-// MetaObject defines a very basic Object that can get meta
-type MetaObject interface {
-	runtime.Object
-	GetObjectMeta() *metav1.ObjectMeta
+type InnerObjectWithCustomStatus interface {
+	InnerObject
+
+	GetCustomStatus() interface{}
 }
 
 // +kubebuilder:object:generate=false
+type InnerObjectWithSelector interface {
+	InnerObject
 
-// ChaosInstance defines some common attribute for a chaos
-type ChaosInstance struct {
-	Name      string
-	Namespace string
-	Kind      string
-	StartTime time.Time
-	EndTime   time.Time
-	Action    string
-	Duration  string
-	Status    ChaosStatus
-	UID       string
-}
-
-// +kubebuilder:object:generate=false
-
-// ChaosList defines a common interface for chaos lists
-type ChaosList interface {
-	runtime.Object
-	ListChaos() []*ChaosInstance
+	GetSelectorSpecs() map[string]interface{}
 }

@@ -114,7 +114,8 @@ func (o *logsOptions) Run(args []string) error {
 }
 
 func listNodes(toComplete string, c *kubernetes.Clientset) ([]string, cobra.ShellCompDirective) {
-	nodes, err := c.CoreV1().Nodes().List(v1.ListOptions{})
+	// FIXME: get context from parameter
+	nodes, err := c.CoreV1().Nodes().List(context.TODO(), v1.ListOptions{})
 	if err != nil {
 		return nil, cobra.ShellCompDirectiveDefault
 	}

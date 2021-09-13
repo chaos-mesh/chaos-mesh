@@ -38,6 +38,9 @@ type StressChaos struct {
 	Status StressChaosStatus `json:"status"`
 }
 
+var _ InnerObjectWithCustomStatus = (*StressChaos)(nil)
+var _ InnerObjectWithSelector = (*StressChaos)(nil)
+
 // StressChaosSpec defines the desired state of StressChaos
 type StressChaosSpec struct {
 	ContainerSelector `json:",inline"`

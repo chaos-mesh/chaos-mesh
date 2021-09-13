@@ -19,6 +19,8 @@ import (
 	"strings"
 	"time"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	. "github.com/onsi/ginkgo"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -47,7 +49,7 @@ func TestcaseForbidHostNetwork(
 	name := "network-peer-4"
 	nd := fixture.NewNetworkTestDeployment(name, ns, map[string]string{"partition": "0"})
 	nd.Spec.Template.Spec.HostNetwork = true
-	_, err := kubeCli.AppsV1().Deployments(ns).Create(nd)
+	_, err := kubeCli.AppsV1().Deployments(ns).Create(context.TODO(), nd, metav1.CreateOptions{})
 	framework.ExpectNoError(err, "create network-peer deployment error")
 	err = util.WaitDeploymentReady(name, ns, kubeCli)
 	framework.ExpectNoError(err, "wait network-peer deployment ready error")

@@ -53,7 +53,7 @@ func NewTaskReconciler(kubeClient client.Client, restConfig *rest.Config, eventR
 	}
 }
 
-func (it *TaskReconciler) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+func (it *TaskReconciler) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
 
 	startTime := time.Now()
 	defer func() {
@@ -62,8 +62,6 @@ func (it *TaskReconciler) Reconcile(request reconcile.Request) (reconcile.Result
 			"duration", time.Since(startTime),
 		)
 	}()
-
-	ctx := context.TODO()
 
 	node := v1alpha1.WorkflowNode{}
 	err := it.kubeClient.Get(ctx, request.NamespacedName, &node)

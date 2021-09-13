@@ -2,6 +2,7 @@ import { Box, Typography } from '@material-ui/core'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
 import DoneAllIcon from '@material-ui/icons/DoneAll'
+import { ExperimentKind } from 'components/NewExperiment/types'
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
 import { Submit } from 'components/FormField'
@@ -14,23 +15,31 @@ import { useHistory } from 'react-router-dom'
 import { useIntl } from 'react-intl'
 
 interface Step3Props {
-  onSubmit?: (experiment: { target: any; basic: any }) => void
+  onSubmit?: (parsedValues: any) => void
+  inSchedule?: boolean
 }
 
-const Step3: React.FC<Step3Props> = ({ onSubmit }) => {
+const Step3: React.FC<Step3Props> = ({ onSubmit, inSchedule }) => {
   const history = useHistory()
   const intl = useIntl()
 
   const state = useStoreSelector((state) => state)
-  const { step1, step2, basic, target } = state.experiments
+  const { step1, step2, kindAction, basic, spec } = state.experiments
   const { debugMode } = state.settings
   const dispatch = useStoreDispatch()
 
   const submitExperiment = () => {
-    const parsedValues = parseSubmit({
-      ...basic,
-      target,
-    })
+    const parsedValues = parseSubmit(
+      kindAction[0] as ExperimentKind,
+      {
+        ...basic,
+        spec: {
+          ...basic.spec,
+          ...spec,
+        },
+      },
+      { inSchedule }
+    )
 
     if (process.env.NODE_ENV === 'development' || debugMode) {
       console.debug('Debug parsedValues:', parsedValues)
@@ -38,7 +47,7 @@ const Step3: React.FC<Step3Props> = ({ onSubmit }) => {
 
     if (!debugMode) {
       if (onSubmit) {
-        onSubmit({ target, basic })
+        onSubmit(parsedValues)
       } else {
         api.experiments
           .newExperiment(parsedValues)

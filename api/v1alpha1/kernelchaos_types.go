@@ -33,6 +33,8 @@ type KernelChaos struct {
 	Status KernelChaosStatus `json:"status"`
 }
 
+var _ InnerObjectWithSelector = (*KernelChaos)(nil)
+
 // KernelChaosSpec defines the desired state of KernelChaos
 type KernelChaosSpec struct {
 	PodSelector `json:",inline"`

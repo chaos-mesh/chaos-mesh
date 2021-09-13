@@ -34,6 +34,8 @@ type PodChaos struct {
 	Status PodChaosStatus `json:"status"`
 }
 
+var _ InnerObjectWithSelector = (*PodChaos)(nil)
+
 // PodChaosAction represents the chaos action about pods.
 type PodChaosAction string
 

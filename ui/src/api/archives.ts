@@ -10,12 +10,7 @@ export const archives = (namespace = null, name = null, kind = null) =>
     },
   })
 
-export const single = (uuid: uuid) =>
-  http.get('/archives/detail', {
-    params: {
-      uid: uuid,
-    },
-  })
+export const single = (uuid: uuid) => http.get(`/archives/${uuid}`)
 
 export const del = (uuid: uuid) => http.delete(`/archives/${uuid}`)
 export const delMulti = (uuids: uuid[]) => http.delete(`/archives?uids=${uuids.join(',')}`)
