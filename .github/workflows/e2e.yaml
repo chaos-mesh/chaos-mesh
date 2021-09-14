@@ -30,6 +30,8 @@ jobs:
         with:
           minikube version: v1.23.0
           kubernetes version: ${{ matrix.kubernetes-version }}
+      - name: Setup Helm
+        uses: azure/setup-helm@v1
       - name: Enable docker registry for minikube
         run: |
           minikube addons enable registry && \
