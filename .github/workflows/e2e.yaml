@@ -1,0 +1,33 @@
+name: E2E test matrix
+
+on:
+  pull_request:
+    branches:
+      - master
+      - release-*
+
+jobs:
+  basic:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        kind-version:
+          - 0.11.1
+        kubernetes-version:
+          - v1.20.10
+          - v1.21.1
+        include:
+          - kind-version: 0.8.1
+            kubernetes-version: v1.12.10
+    steps:
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: e2e test on kubernetes ${{ matrix.kubernetes-version }}
+        env:
+          KUBE_VERSION: ${{ matrix.kubernetes-version }}
+          KIND_VERSION:  ${{ matrix.kind-version }}
+        run: |
+          echo E2E test for Chaos Mesh on kubernetes ${KUBE_VERSION}
