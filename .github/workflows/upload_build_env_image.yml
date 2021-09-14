@@ -39,6 +39,22 @@ jobs:
           IMAGE_TAG: ${{ steps.image_tag.outputs.image_tag }}
         run: |
           export IMAGE_BUILD_ENV_BUILD=1
-          export IMAGE_BUILD_ENV_EXPORTER=--push
 
-          make -B TARGET_PLATFORM="amd64 arm64" image-build-env
+          make -B TARGET_PLATFORM=amd64 IMAGE_TAG=$IMAGE_TAG-amd64 image-build-env
+
+          docker manifest create ghcr.io/chaos-mesh/chaos-mesh/build-env:$IMAGE_TAG \
+            ghcr.io/chaos-mesh/chaos-mesh/build-env:$IMAGE_TAG-amd64 \
+            ghcr.io/chaos-mesh/chaos-mesh/build-env:$IMAGE_TAG-arm64
+          
+          docker manifest annotate ghcr.io/chaos-mesh/chaos-mesh/build-env:$IMAGE_TAG \
+            ghcr.io/chaos-mesh/chaos-mesh/build-env:$IMAGE_TAG-amd64 \
+            --os linux --arch x86_64
+          docker manifest annotate ghcr.io/chaos-mesh/chaos-mesh/build-env:$IMAGE_TAG \
+            ghcr.io/chaos-mesh/chaos-mesh/build-env:$IMAGE_TAG-arm64 \
+            --os linux --arch arm64
+
+      - name: Upload Chaos Mesh Env
+        env:
+          IMAGE_TAG: ${{ steps.image_tag.outputs.image_tag }}
+        run: |
+          docker push ghcr.io/chaos-mesh/chaos-mesh/build-env:$IMAGE_TAG
