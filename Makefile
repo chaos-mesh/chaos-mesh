@@ -13,8 +13,6 @@ GO111 := $(shell [ $(GOVER_MAJOR) -gt 1 ] || [ $(GOVER_MAJOR) -eq 1 ] && [ $(GOV
 IMAGE_TAG := $(if $(IMAGE_TAG),$(IMAGE_TAG),latest)
 
 ROOT=$(shell pwd)
-OUTPUT_BIN=$(ROOT)/output/bin
-HELM_BIN=$(OUTPUT_BIN)/helm
 
 # Every branch should have its own image tag for build-env and dev-env
 IMAGE_BUILD_ENV_PROJECT ?= chaos-mesh/chaos-mesh
@@ -114,7 +112,7 @@ run: generate fmt vet manifests
 NAMESPACE ?= chaos-testing
 # Install CRDs into a cluster
 install: manifests
-	$(HELM_BIN) upgrade --install chaos-mesh helm/chaos-mesh --namespace=${NAMESPACE} --set registry=${DOCKER_REGISTRY} --set dnsServer.create=true --set dashboard.create=true;
+	helm upgrade --install chaos-mesh helm/chaos-mesh --namespace=${NAMESPACE} --set registry=${DOCKER_REGISTRY} --set dnsServer.create=true --set dashboard.create=true;
 
 clean:
 	rm -rf $(CLEAN_TARGETS)
