@@ -70,7 +70,7 @@ func sendUDPPacket(c http.Client, port uint16, targetIP string) error {
 
 	result := string(out)
 	if result != "send successfully\n" {
-		return fmt.Errorf("doesn't send successfully")
+		return fmt.Errorf("doesn't send successfully: %s", result)
 	}
 
 	klog.Info("send request successfully")
