@@ -302,8 +302,8 @@ if [ "$PROVIDER" == "kind" ]; then
         fi
     done
     if [ -z "$image" ]; then
-        echo "error: no image for $KUBE_VERSION, exit"
-        exit 1
+        echo "error: no image for $KUBE_VERSION, use the default tag"
+        image="kindest/node:$KUBE_VERSION"
     fi
     kubetest2_args+=(--image-name $image)
     kubetest2_args+=(
