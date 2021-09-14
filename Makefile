@@ -39,6 +39,10 @@ CGO    := $(CGOENV) go
 GOTEST := USE_EXISTING_CLUSTER=false NO_PROXY="${NO_PROXY},testhost" go test
 SHELL  := bash
 
+EMPTY :=
+SPACE := $(EMPTY) $(EMPTY)
+COMMA := ,
+
 PACKAGE_LIST := echo $$(go list ./... | grep -vE "chaos-mesh/test|pkg/ptrace|zz_generated|vendor") github.com/chaos-mesh/chaos-mesh/api/v1alpha1
 
 # no version conversion
@@ -144,7 +148,7 @@ endif
 GO_TARGET_PHONY += $(1)
 endef
 
-BUILD_INDOCKER_ARG := --env IN_DOCKER=1 --volume $(ROOT):/mnt --user $(shell id -u):$(shell id -g)
+BUILD_INDOCKER_ARG := --env IN_DOCKER=1 --platform=linux/$(TARGET_PLATFORM) --volume $(ROOT):/mnt --user $(shell id -u):$(shell id -g)
 
 ifneq ($(GO_BUILD_CACHE),)
 	BUILD_INDOCKER_ARG += --volume $(GO_BUILD_CACHE)/chaos-mesh-gopath:/tmp/go
@@ -251,6 +255,9 @@ IMAGE_$(4)_BUILD ?= 1
 
 CLEAN_TARGETS += $(2)/.dockerbuilt
 
+IMAGE_$(4)_PLATFORM = $(subst $(SPACE),$(COMMA),$(foreach PLATFORM,$(TARGET_PLATFORM),linux/$(PLATFORM)))
+IMAGE_$(4)_EXPORTER ?= --load
+
 image-$(1): $(2)/.dockerbuilt
 
 $(2)/.dockerbuilt:$(image-$(1)-dependencies) $(2)/Dockerfile
@@ -258,6 +265,7 @@ ifeq ($$(IMAGE_$(4)_BUILD),0)
 	docker pull $$($(4)_IMAGE)
 else
 
+# It's not supported to use cache in multiarch build.
 ifeq ($(DOCKER_CACHE),1)
 
 ifneq ($(DISABLE_CACHE_FROM),1)
@@ -267,7 +275,7 @@ else
 endif
 
 else ifneq ($(TARGET_PLATFORM),)
-	DOCKER_BUILDKIT=1 docker buildx build --load --platform linux/$(TARGET_PLATFORM) -t $$($(4)_IMAGE) --build-arg TARGET_PLATFORM=$(TARGET_PLATFORM) ${DOCKER_BUILD_ARGS} $(2)
+	DOCKER_BUILDKIT=1 docker buildx build $$(IMAGE_$(4)_EXPORTER) --platform $$(IMAGE_$(4)_PLATFORM) -t $$($(4)_IMAGE) ${DOCKER_BUILD_ARGS} $(2)
 else
 	DOCKER_BUILDKIT=1 docker build -t $$($(4)_IMAGE) ${DOCKER_BUILD_ARGS} $(2)
 endif

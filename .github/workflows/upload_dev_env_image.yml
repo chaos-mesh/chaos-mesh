@@ -40,10 +40,7 @@ jobs:
         run: |
           export IMAGE_DEV_ENV_BUILD=1
 
-          make image-dev-env
+          export IMAGE_DEV_ENV_BUILD=1
+          export IMAGE_DEV_ENV_EXPORTER=--push
 
-      - name: Upload Chaos Mesh Env
-        env:
-          IMAGE_TAG: ${{ steps.image_tag.outputs.image_tag }}
-        run: |
-          docker push ghcr.io/chaos-mesh/chaos-mesh/dev-env:$IMAGE_TAG
+          make -B TARGET_PLATFORM="amd64 arm64" image-dev-env

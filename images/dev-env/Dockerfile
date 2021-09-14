@@ -17,8 +17,11 @@ RUN unzip /protoc.zip -d /usr/local
 RUN chmod +xr -R /usr/local/include
 RUN chmod +x /usr/local/bin/protoc
 
-ARG TARGET_PLATFORM=amd64
-RUN curl https://dl.google.com/go/go1.16.7.linux-$TARGET_PLATFORM.tar.gz | tar -xz -C /usr/local
+RUN echo -n $(uname -m) > /arch
+RUN if [ $(uname -m) = aarch64 ]; then echo -n arm64 > /arch; fi
+RUN if [ $(uname -m) = x86_64 ]; then echo -n amd64 > /arch; fi
+
+RUN curl -vvv https://dl.google.com/go/go1.16.7.linux-$(cat /arch).tar.gz | tar -xz -C /usr/local
 ENV GO111MODULE=on
 ENV GOPATH /go
 ENV PATH "/usr/local/go/bin:${PATH}:/tmp/go/bin:/go/bin"
