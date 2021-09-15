@@ -33,6 +33,7 @@ type AWSChaos struct {
 }
 
 var _ InnerObjectWithSelector = (*AWSChaos)(nil)
+var _ InnerObject = (*AWSChaos)(nil)
 
 // AWSChaosAction represents the chaos action about aws.
 type AWSChaosAction string
