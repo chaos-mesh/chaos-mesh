@@ -29,7 +29,7 @@ func RenderCommands(request RequestFlags) (Commands, error) {
 	result := []string{"curl", "-i", "-s"}
 
 	// follow the request
-	if request.Follow {
+	if request.FollowLocation {
 		result = append(result, "-L")
 	}
 
@@ -45,7 +45,7 @@ func RenderCommands(request RequestFlags) (Commands, error) {
 		if request.Header == nil {
 			request.Header = http.Header{}
 		}
-		request.Header["Content-Type"] = []string{"application/json"}
+		request.Header[HeaderContentType] = []string{ApplicationJson}
 	}
 
 	for key, values := range request.Header {

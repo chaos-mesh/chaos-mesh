@@ -12,3 +12,5 @@
 // limitations under the License.
 
 package curl
+
+// Maybe we need some fuzzing test

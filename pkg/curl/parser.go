@@ -13,14 +13,65 @@
 
 package curl
 
-import "github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+import (
+	"fmt"
+	"net/http"
+	"strings"
 
-func Parse(command Commands) (RequestFlags, error) {
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 
-	return RequestFlags{}, nil
+	flag "github.com/spf13/pflag"
+)
+
+func ParseCommands(command Commands) (RequestFlags, error) {
+	flagset := flag.NewFlagSet("curl", flag.ContinueOnError)
+	flagset.ParseErrorsWhitelist.UnknownFlags = true
+
+	// these parts of flags are referenced to the manual of curl
+	location := flagset.BoolP("location", "L", false, "follow the location")
+	requestMethod := flagset.StringP("request", "X", "GET", "request method")
+	rawHeader := flagset.StringArrayP("header", "H", []string{}, "HTTP extra header")
+	data := flagset.StringP("data", "d", "", "data")
+	err := flagset.Parse(command)
+
+	// first non-flag arg is the command itself, use the second non-flag arg as the url.
+	if flag.NArg() > 1 {
+		return RequestFlags{}, fmt.Errorf("can not find the url")
+	}
+	url := flagset.Arg(1)
+
+	if err != nil {
+		return RequestFlags{}, nil
+	}
+
+	header := http.Header{}
+	for _, item := range *rawHeader {
+		k, v := parseHeader(item)
+		header[k] = append(header[k], v)
+	}
+
+	isJson := false
+	// is json content
+	if len(header[HeaderContentType]) > 0 && header[HeaderContentType][0] == ApplicationJson {
+		isJson = true
+	}
+
+	return RequestFlags{
+		Method:         *requestMethod,
+		URL:            url,
+		Header:         header,
+		Body:           *data,
+		FollowLocation: *location,
+		JsonContent:    isJson,
+	}, nil
 }
 
 func ParseWorkflowTaskTemplate(template *v1alpha1.Template) (RequestFlags, error) {
 
 	return RequestFlags{}, nil
+}
+
+func parseHeader(headerKV string) (string, string) {
+	substring := strings.SplitN(headerKV, ":", 2)
+	return strings.TrimSpace(substring[0]), strings.TrimSpace(substring[1])
 }

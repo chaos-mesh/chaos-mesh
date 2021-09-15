@@ -23,12 +23,12 @@ import (
 // notice that the output could not be used in shell directly, you need quotes and escape
 func ExampleRenderCommands() {
 	commands, _ := RenderCommands(RequestFlags{
-		Method:      http.MethodGet,
-		URL:         "https://github.com/chaos-mesh/chaos-mesh",
-		Header:      nil,
-		Body:        "",
-		Follow:      true,
-		JsonContent: false,
+		Method:         http.MethodGet,
+		URL:            "https://github.com/chaos-mesh/chaos-mesh",
+		Header:         nil,
+		Body:           "",
+		FollowLocation: true,
+		JsonContent:    false,
 	})
 
 	fmt.Println(strings.Join(commands, " "))
@@ -42,23 +42,23 @@ func ExampleRenderCommands_withCustomHeader() {
 		Header: http.Header{
 			"User-Agent": []string{"Go-http-client/1.1"},
 		},
-		Body:        "",
-		Follow:      true,
-		JsonContent: false,
+		Body:           "",
+		FollowLocation: true,
+		JsonContent:    false,
 	})
 
 	fmt.Println(strings.Join(commands, " "))
 	// Output: curl -i -s -L -H User-Agent: Go-http-client/1.1 https://github.com/chaos-mesh/chaos-mesh
 }
 
-func ExampleRenderCommands_withPost() {
+func ExampleRenderCommands_postJson() {
 	commands, _ := RenderCommands(RequestFlags{
-		Method:      http.MethodPost,
-		URL:         "https://jsonplaceholder.typicode.com/posts",
-		Header:      nil,
-		Body:        "{\"foo\": \"bar\"}",
-		Follow:      false,
-		JsonContent: true,
+		Method:         http.MethodPost,
+		URL:            "https://jsonplaceholder.typicode.com/posts",
+		Header:         nil,
+		Body:           "{\"foo\": \"bar\"}",
+		FollowLocation: false,
+		JsonContent:    true,
 	})
 
 	fmt.Println(strings.Join(commands, " "))
