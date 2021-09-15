@@ -93,7 +93,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		return v1alpha1.NotInjected, err
 	}
 
-	responses := make(http.Response, 0, len(addressArray))
+	responses := make([]*http.Response, 0, len(addressArray))
 	defer func() {
 		for _, resp := range responses {
 			resp.Body.Close()
@@ -142,7 +142,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	addresses := records[index].Id
 
 	addressArray := strings.Split(addresses, ",")
-	responses := make(http.Response, 0, len(addressArray))
+	responses := make([]*http.Response, 0, len(addressArray))
 	defer func() {
 		for _, resp := range responses {
 			resp.Body.Close()
