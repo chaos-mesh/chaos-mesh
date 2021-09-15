@@ -16,9 +16,15 @@ package curl
 import (
 	"fmt"
 	"net/http"
+
+	corev1 "k8s.io/api/core/v1"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
-func Render(request RequestFlags) (Commands, error) {
+const image = "curlimages/curl:7.78.0"
+
+func RenderCommands(request RequestFlags) (Commands, error) {
 	// TODO: validation of request
 	result := []string{"curl", "-i", "-s"}
 
@@ -51,4 +57,23 @@ func Render(request RequestFlags) (Commands, error) {
 	result = append(result, request.URL)
 
 	return result, nil
+}
+
+func RenderWorkflowTaskTemplate(name string, request RequestFlags) (*v1alpha1.Template, error) {
+	commands, err := RenderCommands(request)
+	if err != nil {
+		return nil, err
+	}
+	return &v1alpha1.Template{
+		Name: name,
+		Type: v1alpha1.TypeTask,
+		Task: &v1alpha1.Task{
+			Container: &corev1.Container{
+				Name:    name,
+				Image:   image,
+				Command: commands,
+			},
+		},
+		ConditionalBranches: nil,
+	}, nil
 }

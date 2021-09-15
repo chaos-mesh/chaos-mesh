@@ -13,7 +13,14 @@
 
 package curl
 
+import "github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+
 func Parse(command Commands) (RequestFlags, error) {
+
+	return RequestFlags{}, nil
+}
+
+func ParseWorkflowTaskTemplate(template *v1alpha1.Template) (RequestFlags, error) {
 
 	return RequestFlags{}, nil
 }
