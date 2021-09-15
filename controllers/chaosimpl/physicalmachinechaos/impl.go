@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -93,42 +94,12 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		return v1alpha1.NotInjected, err
 	}
 
-	responses := make([]*http.Response, 0, len(addressArray))
-	defer func() {
-		for _, resp := range responses {
-			resp.Body.Close()
-		}
-	}()
-
 	for _, address := range addressArray {
 		url := fmt.Sprintf("%s/api/attack/%s", address, action)
 		impl.Log.Info("HTTP request", "address", address, "data", string(expInfoBytes))
-		req, err := http.NewRequest("POST", url, bytes.NewBuffer(expInfoBytes))
-		if err != nil {
-			impl.Log.Error(err, "fail to generate HTTP request")
-			return v1alpha1.NotInjected, err
-		}
-		req.Header.Set("Content-Type", "application/json")
 
-		httpClient := &http.Client{}
-		resp, err := httpClient.Do(req)
-		if err != nil {
-			impl.Log.Error(err, "do HTTP request")
-			return v1alpha1.NotInjected, err
-		}
-		responses = append(responses, resp)
-
-		body, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			impl.Log.Error(err, "read HTTP response body")
-			return v1alpha1.NotInjected, err
-		}
-		impl.Log.Info("HTTP response", "address", address, "status", resp.Status, "body", string(body))
-
-		if resp.StatusCode != http.StatusOK {
-			err = errors.New("HTTP status is not OK")
-			impl.Log.Error(err, "")
-			return v1alpha1.NotInjected, err
+		if err := impl.doHttpRequest("POST", url, bytes.NewBuffer(expInfoBytes)); err != nil {
+			return v1alpha1.Injected, err
 		}
 	}
 
@@ -142,45 +113,44 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	addresses := records[index].Id
 
 	addressArray := strings.Split(addresses, ",")
-	responses := make([]*http.Response, 0, len(addressArray))
-	defer func() {
-		for _, resp := range responses {
-			resp.Body.Close()
-		}
-	}()
-
 	for _, address := range addressArray {
 		url := fmt.Sprintf("%s/api/attack/%s", address, physicalMachinechaos.Spec.ExpInfo.UID)
-
-		req, err := http.NewRequest("DELETE", url, nil)
-		if err != nil {
-			impl.Log.Error(err, "fail to generate HTTP request")
-			return v1alpha1.Injected, err
-		}
-		req.Header.Set("Content-Type", "application/json")
-
-		httpClient := &http.Client{}
-		resp, err := httpClient.Do(req)
-		if err != nil {
-			impl.Log.Error(err, "do HTTP request")
-			return v1alpha1.Injected, err
-		}
-		responses = append(responses, resp)
-
-		body, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			impl.Log.Error(err, "read HTTP response body")
-			return v1alpha1.Injected, err
-		}
-		impl.Log.Info("HTTP response", "url", url, "status", resp.Status, "body", string(body))
-		if resp.StatusCode != http.StatusOK {
-			err = errors.New("HTTP status is not OK")
-			impl.Log.Error(err, "")
+		if err := impl.doHttpRequest("DELETE", url, nil); err != nil {
 			return v1alpha1.Injected, err
 		}
 	}
 
 	return v1alpha1.NotInjected, nil
+}
+
+func (impl *Impl) doHttpRequest(method, url string, data io.Reader) error {
+	req, err := http.NewRequest(method, url, data)
+	if err != nil {
+		impl.Log.Error(err, "fail to generate HTTP request")
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	httpClient := &http.Client{}
+	resp, err := httpClient.Do(req)
+	if err != nil {
+		impl.Log.Error(err, "do HTTP request")
+		return err
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	impl.Log.Info("HTTP response", "url", url, "status", resp.Status, "body", string(body))
+	if resp.StatusCode != http.StatusOK {
+		err = errors.New("HTTP status is not OK")
+		impl.Log.Error(err, "")
+		return err
+	}
+
+	return nil
 }
 
 func NewImpl(c client.Client, log logr.Logger) *common.ChaosImplPair {

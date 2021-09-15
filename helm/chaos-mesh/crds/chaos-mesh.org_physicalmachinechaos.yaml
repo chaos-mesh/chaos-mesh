@@ -203,8 +203,6 @@ spec:
                     type: string
                   source-port:
                     type: string
-                required:
-                - hostname
                 type: object
               network-delay:
                 properties:
@@ -226,8 +224,6 @@ spec:
                     type: string
                   source-port:
                     type: string
-                required:
-                - hostname
                 type: object
               network-duplicate:
                 properties:
@@ -247,8 +243,6 @@ spec:
                     type: string
                   source-port:
                     type: string
-                required:
-                - hostname
                 type: object
               network-loss:
                 properties:
@@ -268,8 +262,6 @@ spec:
                     type: string
                   source-port:
                     type: string
-                required:
-                - hostname
                 type: object
               process:
                 properties:
