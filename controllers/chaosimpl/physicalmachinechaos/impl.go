@@ -93,6 +93,13 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		return v1alpha1.NotInjected, err
 	}
 
+	responses := make(http.Response, 0, len(addressArray))
+	defer func() {
+		for _, resp := range responses {
+			resp.Body.Close()
+		}
+	}()
+
 	for _, address := range addressArray {
 		url := fmt.Sprintf("%s/api/attack/%s", address, action)
 		impl.Log.Info("HTTP request", "address", address, "data", string(expInfoBytes))
@@ -103,13 +110,13 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		}
 		req.Header.Set("Content-Type", "application/json")
 
-		client := &http.Client{}
-		resp, err := client.Do(req)
+		httpClient := &http.Client{}
+		resp, err := httpClient.Do(req)
 		if err != nil {
 			impl.Log.Error(err, "do HTTP request")
 			return v1alpha1.NotInjected, err
 		}
-		defer resp.Body.Close()
+		responses = append(responses, resp)
 
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
@@ -135,6 +142,13 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	addresses := records[index].Id
 
 	addressArray := strings.Split(addresses, ",")
+	responses := make(http.Response, 0, len(addressArray))
+	defer func() {
+		for _, resp := range responses {
+			resp.Body.Close()
+		}
+	}()
+
 	for _, address := range addressArray {
 		url := fmt.Sprintf("%s/api/attack/%s", address, physicalMachinechaos.Spec.ExpInfo.UID)
 
@@ -145,13 +159,13 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		}
 		req.Header.Set("Content-Type", "application/json")
 
-		client := &http.Client{}
-		resp, err := client.Do(req)
+		httpClient := &http.Client{}
+		resp, err := httpClient.Do(req)
 		if err != nil {
 			impl.Log.Error(err, "do HTTP request")
 			return v1alpha1.Injected, err
 		}
-		defer resp.Body.Close()
+		responses = append(responses, resp)
 
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {

@@ -168,7 +168,7 @@ type NetworkCommonSpec struct {
 	EgressPort  string `json:"egress-port,omitempty"`
 	IPAddress   string `json:"ip-address,omitempty"`
 	IPProtocol  string `json:"ip-protocol,omitempty"`
-	Hostname    string `json:"hostname",omitempty`
+	Hostname    string `json:"hostname,omitempty"`
 }
 
 type NetworkCorruptSpec struct {
