@@ -1351,7 +1351,7 @@ metadata:
     app.kubernetes.io/version: v0.9.0
     app.kubernetes.io/component: controller-manager
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app.kubernetes.io/name: chaos-mesh

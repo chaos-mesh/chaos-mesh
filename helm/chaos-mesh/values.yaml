@@ -40,7 +40,7 @@ controllerManager:
   hostNetwork: false
   serviceAccount: chaos-controller-manager
 
-  replicaCount: 1
+  replicaCount: 3
 
   priorityClassName: ""
   image: pingcap/chaos-mesh:latest
