@@ -24,6 +24,8 @@ import (
 
 const image = "curlimages/curl:7.78.0"
 
+const nameSuffix = "-rendered-http-request"
+
 func RenderCommands(request RequestFlags) (Commands, error) {
 	// TODO: validation of request
 	result := []string{"curl", "-i", "-s"}
@@ -41,14 +43,18 @@ func RenderCommands(request RequestFlags) (Commands, error) {
 		result = append(result, "-d", fmt.Sprintf("%s", request.Body))
 	}
 
+	renderedHeaders := http.Header{}
+	for k, v := range request.Header {
+		renderedHeaders[k] = v
+	}
 	if request.JsonContent {
 		if request.Header == nil {
 			request.Header = http.Header{}
 		}
-		request.Header[HeaderContentType] = []string{ApplicationJson}
+		renderedHeaders[HeaderContentType] = []string{ApplicationJson}
 	}
 
-	for key, values := range request.Header {
+	for key, values := range renderedHeaders {
 		for _, value := range values {
 			result = append(result, "-H", fmt.Sprintf("%s: %s", key, value))
 		}
@@ -65,7 +71,7 @@ func RenderWorkflowTaskTemplate(name string, request RequestFlags) (*v1alpha1.Te
 		return nil, err
 	}
 	return &v1alpha1.Template{
-		Name: name,
+		Name: fmt.Sprintf("%s%s", name, nameSuffix),
 		Type: v1alpha1.TypeTask,
 		Task: &v1alpha1.Task{
 			Container: &corev1.Container{

@@ -28,6 +28,7 @@ func ParseCommands(command Commands) (RequestFlags, error) {
 	flagset.ParseErrorsWhitelist.UnknownFlags = true
 
 	// these parts of flags are referenced to the manual of curl
+	flagset.BoolP("silent", "s", true, "silent mode")
 	location := flagset.BoolP("location", "L", false, "follow the location")
 	requestMethod := flagset.StringP("request", "X", "GET", "request method")
 	rawHeader := flagset.StringArrayP("header", "H", []string{}, "HTTP extra header")
@@ -44,16 +45,21 @@ func ParseCommands(command Commands) (RequestFlags, error) {
 		return RequestFlags{}, nil
 	}
 
-	header := http.Header{}
+	isJson := false
+	var header http.Header
+	if len(*rawHeader) > 0 {
+		header = http.Header{}
+	}
 	for _, item := range *rawHeader {
 		k, v := parseHeader(item)
+		if k == HeaderContentType && v == ApplicationJson {
+			isJson = true
+			continue
+		}
 		header[k] = append(header[k], v)
 	}
-
-	isJson := false
-	// is json content
-	if len(header[HeaderContentType]) > 0 && header[HeaderContentType][0] == ApplicationJson {
-		isJson = true
+	if len(header) == 0 {
+		header = nil
 	}
 
 	return RequestFlags{

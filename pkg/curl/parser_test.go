@@ -45,5 +45,5 @@ func ExampleParseCommands_postJson() {
 	}
 
 	fmt.Printf("%+v", flags)
-	// Output: {Method:POST URL:https://jsonplaceholder.typicode.com/posts Header:map[Content-Type:[application/json]] Body:{"foo": "bar"} FollowLocation:false JsonContent:true}
+	// Output: {Method:POST URL:https://jsonplaceholder.typicode.com/posts Header:map[] Body:{"foo": "bar"} FollowLocation:false JsonContent:true}
 }
