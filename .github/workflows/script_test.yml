@@ -11,6 +11,7 @@ jobs:
   run:
     name: Script Test
     runs-on: ubuntu-latest
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-script-test') }}
     steps:
       - uses: actions/checkout@master
         with:
