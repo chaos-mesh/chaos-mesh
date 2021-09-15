@@ -80,8 +80,18 @@ func (s *Service) list(c *gin.Context) {
 		log.V(1).Info("Replace query namespace with", ns)
 	}
 
-	start, _ := time.Parse(time.RFC3339, c.Query("start"))
-	end, _ := time.Parse(time.RFC3339, c.Query("end"))
+	start, err := time.Parse(time.RFC3339, c.Query("start"))
+	if err != nil {
+		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
+
+		return
+	}
+	end, err := time.Parse(time.RFC3339, c.Query("end"))
+	if err != nil {
+		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
+
+		return
+	}
 
 	filter := core.Filter{
 		ObjectID:  c.Query("object_id"),
