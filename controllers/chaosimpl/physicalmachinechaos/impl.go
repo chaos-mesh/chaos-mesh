@@ -98,8 +98,15 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		url := fmt.Sprintf("%s/api/attack/%s", address, action)
 		impl.Log.Info("HTTP request", "address", address, "data", string(expInfoBytes))
 
-		if err := impl.doHttpRequest("POST", url, bytes.NewBuffer(expInfoBytes)); err != nil {
-			return v1alpha1.Injected, err
+		statusCode, err := impl.doHttpRequest("POST", url, bytes.NewBuffer(expInfoBytes))
+		if err != nil {
+			return v1alpha1.NotInjected, err
+		}
+
+		if statusCode != http.StatusOK {
+			err = errors.New("HTTP status is not OK")
+			impl.Log.Error(err, "")
+			return v1alpha1.NotInjected, err
 		}
 	}
 
@@ -115,7 +122,16 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	addressArray := strings.Split(addresses, ",")
 	for _, address := range addressArray {
 		url := fmt.Sprintf("%s/api/attack/%s", address, physicalMachinechaos.Spec.ExpInfo.UID)
-		if err := impl.doHttpRequest("DELETE", url, nil); err != nil {
+		statusCode, err := impl.doHttpRequest("DELETE", url, nil)
+		if err != nil {
+			return v1alpha1.Injected, err
+		}
+
+		if statusCode == http.StatusNotFound {
+			impl.Log.Info("experiment not found", "uid", physicalMachinechaos.Spec.ExpInfo.UID)
+		} else if statusCode != http.StatusOK {
+			err = errors.New("HTTP status is not OK")
+			impl.Log.Error(err, "")
 			return v1alpha1.Injected, err
 		}
 	}
@@ -123,11 +139,11 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	return v1alpha1.NotInjected, nil
 }
 
-func (impl *Impl) doHttpRequest(method, url string, data io.Reader) error {
+func (impl *Impl) doHttpRequest(method, url string, data io.Reader) (int, error) {
 	req, err := http.NewRequest(method, url, data)
 	if err != nil {
 		impl.Log.Error(err, "fail to generate HTTP request")
-		return err
+		return 0, err
 	}
 	req.Header.Set("Content-Type", "application/json")
 
@@ -135,22 +151,17 @@ func (impl *Impl) doHttpRequest(method, url string, data io.Reader) error {
 	resp, err := httpClient.Do(req)
 	if err != nil {
 		impl.Log.Error(err, "do HTTP request")
-		return err
+		return 0, err
 	}
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	impl.Log.Info("HTTP response", "url", url, "status", resp.Status, "body", string(body))
-	if resp.StatusCode != http.StatusOK {
-		err = errors.New("HTTP status is not OK")
-		impl.Log.Error(err, "")
-		return err
-	}
 
-	return nil
+	return resp.StatusCode, nil
 }
 
 func NewImpl(c client.Client, log logr.Logger) *common.ChaosImplPair {
