@@ -15,6 +15,7 @@ package cmd
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"reflect"
@@ -113,11 +114,12 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 			}
 
 			queryValue := reflect.New(queryStruct.Elem()).Interface()
-			err = client.Client.Query(ctx, queryValue, variables.GenMap())
+			rawData, err := client.Client.QueryRaw(ctx, queryValue, variables.GenMap())
 			if err != nil {
 				return err
 			}
 
+			json.Unmarshal(*rawData, queryValue)
 			prefixQuery, err := client.Schema.ParseQuery(prefix, queryType, false)
 			if err != nil {
 				return err
