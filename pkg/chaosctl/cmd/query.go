@@ -144,7 +144,7 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 
 	queryCmd.Flags().StringVarP(&namespace, "namespace", "n", "default", "the kubenates namespace")
 	queryCmd.Flags().StringVarP(&resource, "resource", "r", "", "the target resource")
-	queryCmd.Flags().IntVarP(&leaves, "leaves", "l", 2, "the max leaves to combinate in completion")
+	queryCmd.Flags().IntVarP(&leaves, "leaves", "l", 1, "the max leaves to combinate in completion")
 	queryCmd.RegisterFlagCompletionFunc("resource", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		ctx := context.Background()
 		client, cancel, err := createClient(ctx)
