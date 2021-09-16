@@ -29,6 +29,7 @@ var schemaCmd = &cobra.Command{
 	Use:   "schema",
 	Short: "get the graphql schema of ctrl server",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		common.DisableRuntimeErrorHandler()
 		ctx := context.Background()
 		// TODO: input ns by args
 		cancel, port, err := common.ForwardCtrlServer(ctx, nil)

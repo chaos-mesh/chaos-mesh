@@ -72,6 +72,7 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 			return completion, cobra.ShellCompDirectiveDefault
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
+			common.DisableRuntimeErrorHandler()
 			ctx := context.Background()
 			client, cancel, err := createClient(ctx)
 			defer cancel()
