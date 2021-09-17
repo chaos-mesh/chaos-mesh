@@ -51,7 +51,7 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 
 	// queryCmd represents the query command
 	var queryCmd = &cobra.Command{
-		Use:   "get [QUERY]",
+		Use:   "get [resources]",
 		Short: "get the target resources",
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			ctx := context.Background()
@@ -103,6 +103,10 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 				if err != nil {
 					return err
 				}
+			}
+
+			if query == nil {
+				return fmt.Errorf("resource list is empty")
 			}
 
 			superQuery := common.NewQuery(QueryKey, queryType, nil)
