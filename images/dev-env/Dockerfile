@@ -41,7 +41,7 @@ RUN go install github.com/swaggo/swag/cmd/swag@v1.6.7
 RUN go install github.com/onsi/ginkgo/ginkgo@v1.16.4
 RUN go install github.com/golang/mock/mockgen@v1.5.0
 
-RUN curl -L https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv3.5.4/kustomize_v3.5.4_$(go env GOOS)_$(go env GOARCH).tar.gz | tar -xz -C /usr/local/bin/
+RUN curl -L https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv3.5.4/kustomize_v4.3.0_$(go env GOOS)_$(go env GOARCH).tar.gz | tar -xz -C /usr/local/bin/
 RUN curl -L https://github.com/kubernetes-sigs/kubebuilder/releases/download/v2.3.2/kubebuilder_2.3.2_$(go env GOOS)_$(go env GOARCH).tar.gz | tar -xz -C /usr/local/
 RUN curl -L https://get.helm.sh/helm-v3.6.3-$(go env GOOS)-$(go env GOARCH).tar.gz | tar -xz -C /usr/local/bin
 RUN mv /usr/local/kubebuilder_2.3.2_$(go env GOOS)_$(go env GOARCH) /usr/local/kubebuilder
