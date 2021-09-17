@@ -79,7 +79,7 @@ jobs:
           
           docker manifest annotate ghcr.io/chaos-mesh/chaos-mesh/$IMAGE-env:$IMAGE_TAG \
             ghcr.io/chaos-mesh/chaos-mesh/$IMAGE-env:$IMAGE_TAG-amd64 \
-            --os linux --arch x86_64
+            --os linux --arch amd64
           docker manifest annotate ghcr.io/chaos-mesh/chaos-mesh/$IMAGE-env:$IMAGE_TAG \
             ghcr.io/chaos-mesh/chaos-mesh/$IMAGE-env:$IMAGE_TAG-arm64 \
             --os linux --arch arm64
