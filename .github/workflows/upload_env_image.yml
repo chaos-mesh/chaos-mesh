@@ -96,4 +96,4 @@ jobs:
           IMAGE: ${{ matrix.image }}
           IMAGE_TAG: ${{ needs.build-specific-architecture.outputs.image_tag }}
         run: |
-          docker push ghcr.io/chaos-mesh/chaos-mesh/$IMAGE-env:$IMAGE_TAG
+          docker manifest push ghcr.io/chaos-mesh/chaos-mesh/$IMAGE-env:$IMAGE_TAG
