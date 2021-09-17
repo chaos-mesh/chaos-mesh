@@ -63,7 +63,7 @@ func NewOption(logger logr.Logger) *ctrl.Options {
 		MetricsBindAddress:         config.ControllerCfg.MetricsAddr,
 		LeaderElection:             config.ControllerCfg.EnableLeaderElection,
 		LeaderElectionNamespace:    leaderElectionNamespace,
-		LeaderElectionResourceLock: "configmapsleases",
+		LeaderElectionResourceLock: "configmaps",
 		LeaderElectionID:           "chaos-mesh",
 		LeaseDuration:              &config.ControllerCfg.LeaderElectLeaseDuration,
 		RetryPeriod:                &config.ControllerCfg.LeaderElectRetryPeriod,

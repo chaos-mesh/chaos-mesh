@@ -960,9 +960,6 @@ rules:
   - apiGroups: [ "" ]
     resources: [ "pods", "secrets"]
     verbs: [ "get", "list", "watch", "delete", "update", "patch" ]
-  - apiGroups: [ "coordination.k8s.io" ]
-    resources: [ "leases" ]
-    verbs: [ "get", "create", "update" ]
   - apiGroups:
       - ""
     resources:
