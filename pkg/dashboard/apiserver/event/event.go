@@ -17,6 +17,7 @@ import (
 	"context"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -55,6 +56,8 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint.GET("/:id", s.get)
 }
 
+const layout = "2006-01-02 15:04:05"
+
 // @Summary list events.
 // @Description Get events from db.
 // @Tags events
@@ -77,10 +80,13 @@ func (s *Service) list(c *gin.Context) {
 		log.V(1).Info("Replace query namespace with", ns)
 	}
 
+	start, _ := time.Parse(time.RFC3339, c.Query("start"))
+	end, _ := time.Parse(time.RFC3339, c.Query("end"))
+
 	filter := core.Filter{
 		ObjectID:  c.Query("object_id"),
-		Start:     c.Query("start"),
-		End:       c.Query("end"),
+		Start:     start.UTC().Format(layout),
+		End:       end.UTC().Format(layout),
 		Namespace: ns,
 		Name:      c.Query("name"),
 		Kind:      c.Query("kind"),

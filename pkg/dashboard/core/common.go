@@ -62,6 +62,8 @@ func (f *Filter) toMap() map[string]interface{} {
 	return fMap
 }
 
+const zeroTime = "0001-01-01 00:00:00"
+
 func (f *Filter) ConstructQueryArgs() (string, []interface{}) {
 	fMap, query, args := f.toMap(), make([]string, 0), make([]interface{}, 0)
 
@@ -82,19 +84,19 @@ func (f *Filter) ConstructQueryArgs() (string, []interface{}) {
 	}
 
 	startEnd := ""
-	if f.Start != "" && f.End != "" {
+	if f.Start != zeroTime && f.End != zeroTime {
 		startEnd = "created_at BETWEEN ? AND ?"
 		args = append(args, f.Start, f.End)
-	} else if f.Start != "" && f.End == "" {
+	} else if f.Start != zeroTime && f.End == zeroTime {
 		startEnd = "created_at >= ?"
 		args = append(args, f.Start)
-	} else if f.Start == "" && f.End != "" {
+	} else if f.Start == zeroTime && f.End != zeroTime {
 		startEnd = "created_at <= ?"
 		args = append(args, f.End)
 	}
 
 	if startEnd != "" {
-		if len(args) > 0 {
+		if len(query) > 0 {
 			query = append(query, "AND", startEnd)
 		} else {
 			query = append(query, startEnd)
