@@ -33,7 +33,7 @@ const QueryKey = "query"
 
 func NewQueryCmd(log logr.Logger) *cobra.Command {
 	var namespace string
-	var resource string
+	var root string
 	var leaves int
 
 	var joinPrefix = func() ([]string, error) {
@@ -43,8 +43,8 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 			return nil, fmt.Errorf("invalid namepsace: %s", namespace)
 		}
 
-		if resource != "" {
-			prefix = append(prefix, common.StandardizeQuery(resource)...)
+		if root != "" {
+			prefix = append(prefix, common.StandardizeQuery(root)...)
 		}
 		return prefix, nil
 	}
@@ -62,7 +62,7 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 				return nil, cobra.ShellCompDirectiveNoFileComp
 			}
 
-			completion, err := client.CompleteQueryBased(namespace, resource, leaves)
+			completion, err := client.CompleteQueryBased(namespace, root, leaves)
 			if err != nil {
 				log.Error(err, "fail to complete query")
 				return nil, cobra.ShellCompDirectiveNoFileComp
@@ -143,7 +143,7 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 	}
 
 	queryCmd.Flags().StringVarP(&namespace, "namespace", "n", "default", "the kubenates namespace")
-	queryCmd.Flags().StringVarP(&resource, "resource", "r", "", "the target resource")
+	queryCmd.Flags().StringVarP(&root, "root", "r", "", "the root resource")
 	queryCmd.Flags().IntVarP(&leaves, "leaves", "l", 1, "the max leaves to combinate in completion")
 	queryCmd.RegisterFlagCompletionFunc("resource", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		ctx := context.Background()
