@@ -107,4 +107,3 @@ func TestChaosKindMapShouldContainsTimeChaos(t *testing.T) {
 	_, ok := all.kinds[string(requiredType)]
 	g.Expect(ok).To(Equal(true), "all kinds map should contains this type", requiredType)
 }
-

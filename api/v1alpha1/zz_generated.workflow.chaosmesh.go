@@ -13,25 +13,22 @@
 
 package v1alpha1
 
-
 import (
 	"fmt"
 )
 
-
 const (
-	TypeAWSChaos TemplateType = "AWSChaos"
-	TypeDNSChaos TemplateType = "DNSChaos"
-	TypeGCPChaos TemplateType = "GCPChaos"
-	TypeHTTPChaos TemplateType = "HTTPChaos"
-	TypeIOChaos TemplateType = "IOChaos"
-	TypeJVMChaos TemplateType = "JVMChaos"
-	TypeKernelChaos TemplateType = "KernelChaos"
+	TypeAWSChaos     TemplateType = "AWSChaos"
+	TypeDNSChaos     TemplateType = "DNSChaos"
+	TypeGCPChaos     TemplateType = "GCPChaos"
+	TypeHTTPChaos    TemplateType = "HTTPChaos"
+	TypeIOChaos      TemplateType = "IOChaos"
+	TypeJVMChaos     TemplateType = "JVMChaos"
+	TypeKernelChaos  TemplateType = "KernelChaos"
 	TypeNetworkChaos TemplateType = "NetworkChaos"
-	TypePodChaos TemplateType = "PodChaos"
-	TypeStressChaos TemplateType = "StressChaos"
-	TypeTimeChaos TemplateType = "TimeChaos"
-
+	TypePodChaos     TemplateType = "PodChaos"
+	TypeStressChaos  TemplateType = "StressChaos"
+	TypeTimeChaos    TemplateType = "TimeChaos"
 )
 
 var allChaosTemplateType = []TemplateType{
@@ -47,7 +44,6 @@ var allChaosTemplateType = []TemplateType{
 	TypePodChaos,
 	TypeStressChaos,
 	TypeTimeChaos,
-
 }
 
 type EmbedChaos struct {
@@ -73,7 +69,6 @@ type EmbedChaos struct {
 	StressChaos *StressChaosSpec `json:"stressChaos,omitempty"`
 	// +optional
 	TimeChaos *TimeChaosSpec `json:"timeChaos,omitempty"`
-
 }
 
 func (it *EmbedChaos) SpawnNewObject(templateType TemplateType) (GenericChaos, error) {
@@ -263,4 +258,3 @@ func (in *TimeChaosList) GetItems() []GenericChaos {
 	}
 	return result
 }
-
