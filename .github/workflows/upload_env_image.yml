@@ -20,9 +20,6 @@ jobs:
       image_tag: ${{ steps.image_tag.outputs.image_tag }}
     steps:
       - uses: actions/checkout@master
-        with:
-          # Must use at least depth 2!
-          fetch-depth: 2
 
       - name: Extract Image Tag
         shell: bash
