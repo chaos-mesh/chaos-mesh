@@ -104,7 +104,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 				if !controller.IsChaosFinished(item, now) {
 					shouldSpawn = false
 					r.Recorder.Event(schedule, recorder.ScheduleForbid{
-						RunningName: item.GetObjectMeta().Name,
+						RunningName: item.GetName(),
 					})
 					r.Log.Info("forbid to spawn new chaos", "running", item.GetName())
 					break

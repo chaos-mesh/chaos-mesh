@@ -104,8 +104,8 @@ func NewController(params Params) (types.Controller, error) {
 								}
 								if namespacedName == objName {
 									id := k8sTypes.NamespacedName{
-										Namespace: item.GetObjectMeta().Namespace,
-										Name:      item.GetObjectMeta().Name,
+										Namespace: item.GetNamespace(),
+										Name:      item.GetName(),
 									}
 									setupLog.Info("mapping requests", "source", objName, "target", id)
 									reqs = append(reqs, reconcile.Request{
