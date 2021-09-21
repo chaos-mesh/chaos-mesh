@@ -8,7 +8,6 @@ import { useEffect, useMemo, useState } from 'react'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
 import CheckIcon from '@material-ui/icons/Check'
-import { ExperimentKind } from 'components/NewExperiment/types'
 import OtherOptions from 'components/OtherOptions'
 import Paper from 'components-mui/Paper'
 import PublishIcon from '@material-ui/icons/Publish'
@@ -26,7 +25,7 @@ interface Step2Props {
 
 const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false }) => {
   const { namespaces, step2, kindAction, basic } = useStoreSelector((state) => state.experiments)
-  const [kind, action] = kindAction
+  const [kind] = kindAction
   const scopeDisabled = kind === 'AWSChaos' || kind === 'GCPChaos'
   const schema = basicSchema({ scopeDisabled, scheduled: inSchedule, needDeadline: inWorkflow })
   const dispatch = useStoreDispatch()
