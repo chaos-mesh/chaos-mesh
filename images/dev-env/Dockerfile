@@ -12,16 +12,20 @@ ENV https_proxy $HTTPS_PROXY
 
 RUN apt-get update && apt-get install unzip git build-essential curl python -y
 
-RUN curl -L https://github.com/protocolbuffers/protobuf/releases/download/v3.12.2/protoc-3.12.2-linux-x86_64.zip > /protoc.zip
+# The `TARGET_PLATFORM` would be `amd64` or `arm64`
+ARG TARGET_PLATFORM
+
+RUN if [ $TARGET_PLATFORM = amd64 ]; then echo -n x86_64 > /protoc_arch; fi
+RUN if [ $TARGET_PLATFORM = arm64 ]; then echo -n aarch_64 > /protoc_arch; fi
+
+# The architecture part of the url is `aarch_64` or `x86_64`
+RUN curl -L https://github.com/protocolbuffers/protobuf/releases/download/v3.12.2/protoc-3.12.2-linux-$(cat /protoc_arch).zip > /protoc.zip
 RUN unzip /protoc.zip -d /usr/local
 RUN chmod +xr -R /usr/local/include
 RUN chmod +x /usr/local/bin/protoc
 
-RUN echo -n $(uname -m) > /arch
-RUN if [ $(uname -m) = aarch64 ]; then echo -n arm64 > /arch; fi
-RUN if [ $(uname -m) = x86_64 ]; then echo -n amd64 > /arch; fi
 
-RUN curl -vvv https://dl.google.com/go/go1.16.7.linux-$(cat /arch).tar.gz | tar -xz -C /usr/local
+RUN curl -vvv https://dl.google.com/go/go1.16.7.linux-$TARGET_PLATFORM.tar.gz | tar -xz -C /usr/local
 ENV GO111MODULE=on
 ENV GOPATH /go
 ENV PATH "/usr/local/go/bin:${PATH}:/tmp/go/bin:/go/bin"
