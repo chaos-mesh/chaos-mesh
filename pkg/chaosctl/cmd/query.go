@@ -19,7 +19,6 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
-	"sort"
 
 	"github.com/go-logr/logr"
 	"github.com/iancoleman/strcase"
@@ -67,8 +66,7 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 				return nil, cobra.ShellCompDirectiveNoFileComp
 			}
 
-			sort.Sort(common.Completion(completion))
-			return completion, cobra.ShellCompDirectiveDefault
+			return completion, cobra.ShellCompDirectiveNoFileComp
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			common.DisableRuntimeErrorHandler()
@@ -147,7 +145,7 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 
 	queryCmd.Flags().StringVarP(&namespace, "namespace", "n", "default", "the kubenates namespace")
 	queryCmd.Flags().StringVarP(&root, "root", "r", "", "the root resource")
-	queryCmd.RegisterFlagCompletionFunc("resource", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	queryCmd.RegisterFlagCompletionFunc("root", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		ctx := context.Background()
 		client, cancel, err := createClient(ctx)
 		defer cancel()
@@ -162,8 +160,7 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		}
 
-		sort.Sort(common.Completion(completion))
-		return completion, cobra.ShellCompDirectiveDefault
+		return completion, cobra.ShellCompDirectiveNoFileComp
 	})
 
 	return queryCmd
