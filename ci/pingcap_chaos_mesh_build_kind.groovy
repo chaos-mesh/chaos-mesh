@@ -39,7 +39,7 @@ spec:
       value: "true"
     - name: DOCKER_IO_MIRROR
       value: https://registry-mirror.pingcap.net
-    - name: DOCKER_IO_MIRROR
+    - name: GCR_IO_MIRROR
       value: https://registry-mirror.pingcap.net
     - name: QUAY_IO_MIRROR
       value: https://registry-mirror.pingcap.net
