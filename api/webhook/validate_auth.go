@@ -34,6 +34,8 @@ var alwaysAllowedKind = []string{
 	v1alpha1.KindPodIOChaos,
 	v1alpha1.KindGCPChaos,
 	v1alpha1.KindPodHttpChaos,
+	// TODO: check the auth for physical machine chaos
+	v1alpha1.KindPhysicalMachineChaos,
 
 	"WorkflowNode",
 }

@@ -14,7 +14,7 @@ The Maintainers of Chaos Mesh, along with their emails, are listed be
 | Keao Yang ([YangKeao](https://github.com/YangKeao))           |  [yangkeao@pingcap.com](mailto:yangkeao@pingcap.com)    |  [PingCAP](https://www.pingcap.com/)       |
 | Song Gao ([Yisaer](https://github.com/Yisaer))                |  [gaosong@pingcap.com](mailto:gaosong@pingcap.com)      |  [PingCAP](https://www.pingcap.com/)       |
 | Calvin Weng ([dcalvin](https://github.com/dcalvin))           |  [wenghao@pingcap.com](mailto:wenghao@pingcap.com)      |  [PingCAP](https://www.pingcap.com/)       |
-| Ben Ye ([yeya24](https://github.com/yeya24))                  |  [yb532204897@gmail.com](mailto:yb532204897@gmail.com)  |  Individual                                |
+| Ben Ye ([yeya24](https://github.com/yeya24))                  |  [yb532204897@gmail.com](mailto:yb532204897@gmail.com)  |  [ByteDance](https://www.bytedance.com/)   |
 | Hengliang Tan ([Gallardot](https://github.com/Gallardot))     |  [tttick@gmail.com](mailto:tttick@gmail.com)            |  [Xpeng Motors](https://www.xiaopeng.com/) |
 
 The Committers of Chaos Mesh, along with their emails, are listed below:

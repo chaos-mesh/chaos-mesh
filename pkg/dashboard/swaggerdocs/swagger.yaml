@@ -541,6 +541,10 @@ definitions:
         $ref: '#/definitions/v1alpha1.NetworkChaosSpec'
         description: +optional
         type: object
+      physicalmachineChaos:
+        $ref: '#/definitions/v1alpha1.PhysicalMachineChaosSpec'
+        description: +optional
+        type: object
       podChaos:
         $ref: '#/definitions/v1alpha1.PodChaosSpec'
         description: +optional
@@ -653,6 +657,24 @@ definitions:
         $ref: '#/definitions/v1alpha1.ReorderSpec'
         description: +optional
         type: object
+    type: object
+  v1alpha1.DiskFillSpec:
+    properties:
+      fill_by_fallocate:
+        type: boolean
+      path:
+        type: string
+      size:
+        type: string
+    type: object
+  v1alpha1.DiskPayloadSpec:
+    properties:
+      path:
+        type: string
+      payload_process_num:
+        type: integer
+      size:
+        type: string
     type: object
   v1alpha1.DuplicateSpec:
     properties:
@@ -1019,6 +1041,97 @@ definitions:
           +optional
         type: string
     type: object
+  v1alpha1.JVMExceptionSpec:
+    properties:
+      class:
+        description: Java class
+        type: string
+      exception:
+        description: the exception which needs to throw dor action `exception`
+        type: string
+      method:
+        description: the method in Java class
+        type: string
+      pid:
+        description: the pid of Java process which need to attach
+        type: integer
+      port:
+        description: the port of agent server
+        type: integer
+    type: object
+  v1alpha1.JVMGCSpec:
+    properties:
+      pid:
+        description: the pid of Java process which need to attach
+        type: integer
+      port:
+        description: the port of agent server
+        type: integer
+    type: object
+  v1alpha1.JVMLatencySpec:
+    properties:
+      class:
+        description: Java class
+        type: string
+      latency:
+        description: the latency duration for action 'latency', unit ms
+        type: integer
+      method:
+        description: the method in Java class
+        type: string
+      pid:
+        description: the pid of Java process which need to attach
+        type: integer
+      port:
+        description: the port of agent server
+        type: integer
+    type: object
+  v1alpha1.JVMReturnSpec:
+    properties:
+      class:
+        description: Java class
+        type: string
+      method:
+        description: the method in Java class
+        type: string
+      pid:
+        description: the pid of Java process which need to attach
+        type: integer
+      port:
+        description: the port of agent server
+        type: integer
+      value:
+        description: the return value for action 'return'
+        type: string
+    type: object
+  v1alpha1.JVMRuleDataSpec:
+    properties:
+      pid:
+        description: the pid of Java process which need to attach
+        type: integer
+      port:
+        description: the port of agent server
+        type: integer
+      rule-data:
+        description: RuleData used to save the rule file's data, will use it when
+          recover
+        type: string
+    type: object
+  v1alpha1.JVMStressSpec:
+    properties:
+      cpu-count:
+        description: the CPU core number need to use, only set it when action is stress
+        type: integer
+      mem-size:
+        description: the memory size need to locate, only set it when action is stress
+        type: integer
+      pid:
+        description: the pid of Java process which need to attach
+        type: integer
+      port:
+        description: the port of agent server
+        type: integer
+    type: object
   v1alpha1.KernelChaosSpec:
     properties:
       duration:
@@ -1183,6 +1296,171 @@ definitions:
           If `FixedPodMode`, provide an integer of pods to do chaos action.
           If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
           IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+          +optional
+        type: string
+    type: object
+  v1alpha1.NetworkCorruptSpec:
+    properties:
+      correlation:
+        type: string
+      device:
+        type: string
+      egress-port:
+        type: string
+      hostname:
+        type: string
+      ip-address:
+        type: string
+      ip-protocol:
+        type: string
+      percent:
+        type: string
+      source-port:
+        type: string
+    type: object
+  v1alpha1.NetworkDelaySpec:
+    properties:
+      correlation:
+        type: string
+      device:
+        type: string
+      egress-port:
+        type: string
+      hostname:
+        type: string
+      ip-address:
+        type: string
+      ip-protocol:
+        type: string
+      jitter:
+        type: string
+      latency:
+        type: string
+      source-port:
+        type: string
+    type: object
+  v1alpha1.NetworkDuplicateSpec:
+    properties:
+      correlation:
+        type: string
+      device:
+        type: string
+      egress-port:
+        type: string
+      hostname:
+        type: string
+      ip-address:
+        type: string
+      ip-protocol:
+        type: string
+      percent:
+        type: string
+      source-port:
+        type: string
+    type: object
+  v1alpha1.NetworkLossSpec:
+    properties:
+      correlation:
+        type: string
+      device:
+        type: string
+      egress-port:
+        type: string
+      hostname:
+        type: string
+      ip-address:
+        type: string
+      ip-protocol:
+        type: string
+      percent:
+        type: string
+      source-port:
+        type: string
+    type: object
+  v1alpha1.PhysicalMachineChaosSpec:
+    properties:
+      action:
+        description: |-
+          the subAction, generate automatically
+          +optional
+        type: string
+      address:
+        items:
+          type: string
+        type: array
+      disk-fill:
+        $ref: '#/definitions/v1alpha1.DiskFillSpec'
+        description: +optional
+        type: object
+      disk-read-payload:
+        $ref: '#/definitions/v1alpha1.DiskPayloadSpec'
+        description: +optional
+        type: object
+      disk-write-payload:
+        $ref: '#/definitions/v1alpha1.DiskPayloadSpec'
+        description: +optional
+        type: object
+      duration:
+        description: |-
+          Duration represents the duration of the chaos action
+          +optional
+          Duration represents the duration of the chaos action
+        type: string
+      jvm-exception:
+        $ref: '#/definitions/v1alpha1.JVMExceptionSpec'
+        description: +optional
+        type: object
+      jvm-gc:
+        $ref: '#/definitions/v1alpha1.JVMGCSpec'
+        description: +optional
+        type: object
+      jvm-latency:
+        $ref: '#/definitions/v1alpha1.JVMLatencySpec'
+        description: +optional
+        type: object
+      jvm-return:
+        $ref: '#/definitions/v1alpha1.JVMReturnSpec'
+        description: +optional
+        type: object
+      jvm-rule-data:
+        $ref: '#/definitions/v1alpha1.JVMRuleDataSpec'
+        description: +optional
+        type: object
+      jvm-stress:
+        $ref: '#/definitions/v1alpha1.JVMStressSpec'
+        description: +optional
+        type: object
+      network-corrupt:
+        $ref: '#/definitions/v1alpha1.NetworkCorruptSpec'
+        description: +optional
+        type: object
+      network-delay:
+        $ref: '#/definitions/v1alpha1.NetworkDelaySpec'
+        description: +optional
+        type: object
+      network-duplicate:
+        $ref: '#/definitions/v1alpha1.NetworkDuplicateSpec'
+        description: +optional
+        type: object
+      network-loss:
+        $ref: '#/definitions/v1alpha1.NetworkLossSpec'
+        description: +optional
+        type: object
+      process:
+        $ref: '#/definitions/v1alpha1.ProcessSpec'
+        description: +optional
+        type: object
+      stress-cpu:
+        $ref: '#/definitions/v1alpha1.StressCPUSpec'
+        description: +optional
+        type: object
+      stress-mem:
+        $ref: '#/definitions/v1alpha1.StressMemorySpec'
+        description: +optional
+        type: object
+      uid:
+        description: |-
+          the experiment ID
           +optional
         type: string
     type: object
@@ -1418,6 +1696,13 @@ definitions:
           +optional
         type: object
     type: object
+  v1alpha1.ProcessSpec:
+    properties:
+      process:
+        type: string
+      signal:
+        type: integer
+    type: object
   v1alpha1.ReorderSpec:
     properties:
       correlation:
@@ -1483,6 +1768,10 @@ definitions:
         $ref: '#/definitions/v1alpha1.NetworkChaosSpec'
         description: +optional
         type: object
+      physicalmachineChaos:
+        $ref: '#/definitions/v1alpha1.PhysicalMachineChaosSpec'
+        description: +optional
+        type: object
       podChaos:
         $ref: '#/definitions/v1alpha1.PodChaosSpec'
         description: +optional
@@ -1523,6 +1812,13 @@ definitions:
           +optional
           +nullable
         type: string
+    type: object
+  v1alpha1.StressCPUSpec:
+    properties:
+      load:
+        type: integer
+      workers:
+        type: integer
     type: object
   v1alpha1.StressChaosSpec:
     properties:
@@ -1575,6 +1871,11 @@ definitions:
           If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
           IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
           +optional
+        type: string
+    type: object
+  v1alpha1.StressMemorySpec:
+    properties:
+      size:
         type: string
     type: object
   v1alpha1.Stressors:
@@ -1655,6 +1956,10 @@ definitions:
         type: string
       networkChaos:
         $ref: '#/definitions/v1alpha1.NetworkChaosSpec'
+        description: +optional
+        type: object
+      physicalmachineChaos:
+        $ref: '#/definitions/v1alpha1.PhysicalMachineChaosSpec'
         description: +optional
         type: object
       podChaos:
