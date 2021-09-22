@@ -16,9 +16,18 @@ export interface TemplateCustom {
   conditionalBranches: Branch[]
 }
 
+export enum TemplateType {
+  Single = 'single',
+  Serial = 'serial',
+  Parallel = 'parallel',
+  Suspend = 'suspend',
+  Custom = 'custom',
+  HTTP = 'http',
+}
+
 export interface Template {
   index?: number
-  type: 'single' | 'serial' | 'parallel' | 'suspend' | 'custom'
+  type: TemplateType
   name: string
   deadline?: string
   experiment?: TemplateExperiment

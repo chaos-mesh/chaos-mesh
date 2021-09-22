@@ -1,12 +1,12 @@
 import { Form, Formik } from 'formik'
 import { Submit, TextField } from 'components/FormField'
+import { Template, TemplateType } from 'slices/workflows'
 import { validateDeadline, validateName } from 'lib/formikhelpers'
 
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
 import Space from 'components-mui/Space'
 import T from 'components/T'
-import { Template } from 'slices/workflows'
 import { schemaBasic } from './types'
 import { useIntl } from 'react-intl'
 
@@ -27,7 +27,7 @@ const Suspend: React.FC<SuspendProps> = ({ initialValues, submit }) => {
     const values = schemaBasic.cast({ name, deadline })
 
     submit({
-      type: 'suspend',
+      type: TemplateType.Suspend,
       ...values!,
     })
   }

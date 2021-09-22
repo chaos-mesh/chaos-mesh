@@ -8,7 +8,7 @@ import {
   StepLabel,
   Typography,
 } from '@material-ui/core'
-import { Branch, Template, setTemplate, updateTemplate } from 'slices/workflows'
+import { Branch, Template, TemplateType, setTemplate, updateTemplate } from 'slices/workflows'
 import { Form, Formik } from 'formik'
 import { LabelField, SelectField, Submit, TextField } from 'components/FormField'
 import NewExperimentNext, { NewExperimentHandles } from 'components/NewExperimentNext'
@@ -21,6 +21,7 @@ import AddCircleIcon from '@material-ui/icons/AddCircle'
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown'
 import ArrowRightIcon from '@material-ui/icons/ArrowRight'
 import CloseIcon from '@material-ui/icons/Close'
+import HTTPTask from './HTTPTask'
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
 import RemoveCircleIcon from '@material-ui/icons/RemoveCircle'
@@ -38,7 +39,7 @@ const useStyles = makeStyles({
   },
 })
 
-const types = ['single', 'serial', 'parallel', 'suspend', 'custom']
+const types = Object.values(TemplateType)
 
 interface AddProps {
   childIndex?: number
@@ -66,7 +67,7 @@ const Add: React.FC<AddProps> = ({
   const { templates: storeTemplates } = useStoreSelector((state) => state.workflows)
 
   const [initialValues, setInitialValues] = useState({
-    type: 'single',
+    type: TemplateType.Single,
     num: 2,
     name: '',
     deadline: '',
@@ -88,7 +89,7 @@ const Add: React.FC<AddProps> = ({
   })
   const [num, setNum] = useState(-1)
   const [expand, setExpand] = useState(-1)
-  const [otherTypes, setOtherTypes] = useState<'suspend' | ''>('')
+  const [otherTypes, setOtherTypes] = useState<'suspend' | 'http' | ''>('')
   const [templates, setTemplates] = useState<Template[]>([])
   const templateNames = [...new Set([...storeTemplates, ...templates].map((t) => t.name))]
   const formRef = useRef<any>()
@@ -127,8 +128,8 @@ const Add: React.FC<AddProps> = ({
 
           break
         case 'suspend':
+        case 'http':
           setOtherTypes(type)
-
           break
       }
 
@@ -150,7 +151,7 @@ const Add: React.FC<AddProps> = ({
   }
 
   const onValidate = ({ type, num: newNum }: { type: string; num: number }) => {
-    if (type !== 'suspend') {
+    if (type !== 'suspend' && type !== 'http') {
       setOtherTypes('')
     }
 
@@ -179,7 +180,7 @@ const Add: React.FC<AddProps> = ({
       return
     }
 
-    if (type === 'suspend') {
+    if (type === 'suspend' || type === 'http') {
       if (prevType === 'serial' || prevType === 'parallel' || prevType === 'custom') {
         resetNoSingle()
       }
@@ -543,12 +544,17 @@ const Add: React.FC<AddProps> = ({
       </Formik>
       {num < 0 && (
         <Box ml={8}>
-          <Box display={otherTypes ? 'none' : 'initial'}>
+          <Box display={otherTypes === 'suspend' || otherTypes === 'http' ? 'none' : 'initial'}>
             <NewExperimentNext ref={newERef} onSubmit={onSubmit} inWorkflow={true} />
           </Box>
           {otherTypes === 'suspend' && (
             <Box mt={3}>
               <Suspend initialValues={initialValues} submit={submit} />
+            </Box>
+          )}
+          {otherTypes === 'http' && (
+            <Box mt={3}>
+              <HTTPTask submit={submit} />
             </Box>
           )}
         </Box>
