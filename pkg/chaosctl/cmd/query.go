@@ -66,7 +66,7 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 				return nil, cobra.ShellCompDirectiveNoFileComp
 			}
 
-			return completion, cobra.ShellCompDirectiveNoFileComp
+			return completion, cobra.ShellCompDirectiveNoFileComp | cobra.ShellCompDirectiveNoSpace
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			common.DisableRuntimeErrorHandler()
@@ -160,7 +160,7 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		}
 
-		return completion, cobra.ShellCompDirectiveNoFileComp
+		return completion, cobra.ShellCompDirectiveNoFileComp | cobra.ShellCompDirectiveNoSpace
 	})
 
 	return queryCmd
