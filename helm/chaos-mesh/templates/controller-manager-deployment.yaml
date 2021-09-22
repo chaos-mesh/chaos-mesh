@@ -101,6 +101,14 @@ spec:
           - name: POD_FAILURE_PAUSE_IMAGE
             value: {{ .Values.controllerManager.podChaos.podFailure.pauseImage }}
           {{- end }}
+          - name: ENABLE_LEADER_ELECTION
+            value: {{ .Values.controllerManager.leaderElection.enabled | quote }}
+          - name: LEADER_ELECT_LEASE_DURATION
+            value: {{ .Values.controllerManager.leaderElection.leaseDuration | quote }}
+          - name: LEADER_ELECT_RENEW_DEADLINE
+            value: {{ .Values.controllerManager.leaderElection.renewDeadline | quote }}
+          - name: LEADER_ELECT_RETRY_PERIOD
+            value: {{ .Values.controllerManager.leaderElection.retryPeriod | quote }}
         volumeMounts:
           - name: webhook-certs
             mountPath: /etc/webhook/certs
