@@ -13,7 +13,7 @@ ENV https_proxy $HTTPS_PROXY
 RUN apt-get update && apt-get install unzip git build-essential curl python -y
 
 # The `TARGET_PLATFORM` would be `amd64` or `arm64`
-ARG TARGET_PLATFORM
+ARG TARGET_PLATFORM=amd64
 
 # The architecture part of the url is `aarch_64` or `x86_64`
 RUN case "$TARGET_PLATFORM" in \
