@@ -14,6 +14,7 @@
 package v1alpha1
 
 import (
+	"github.com/robfig/cron/v3"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -112,6 +113,10 @@ func (in *ScheduleList) GetItems() []GenericChaos {
 func (in *ScheduleList) DeepCopyList() GenericChaosList {
 	return in.DeepCopy()
 }
+
+var StandardCronParser = cron.NewParser(
+	cron.SecondOptional | cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow | cron.Descriptor,
+)
 
 func init() {
 	SchemeBuilder.Register(&Schedule{})
