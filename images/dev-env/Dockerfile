@@ -15,12 +15,19 @@ RUN apt-get update && apt-get install unzip git build-essential curl python -y
 # The `TARGET_PLATFORM` would be `amd64` or `arm64`
 ARG TARGET_PLATFORM
 
-RUN if [ $TARGET_PLATFORM = amd64 ]; then echo -n x86_64 > /protoc_arch; fi
-RUN if [ $TARGET_PLATFORM = arm64 ]; then echo -n aarch_64 > /protoc_arch; fi
-
 # The architecture part of the url is `aarch_64` or `x86_64`
-RUN curl -L https://github.com/protocolbuffers/protobuf/releases/download/v3.12.2/protoc-3.12.2-linux-$(cat /protoc_arch).zip > /protoc.zip
-RUN unzip /protoc.zip -d /usr/local
+RUN case "$TARGET_PLATFORM" in \
+    'amd64') \
+    export PROTOC_ARCH='x86_64'; \
+    ;; \
+    'arm64') \
+    export PROTOC_ARCH='aarch_64'; \
+    ;; \
+    *) echo >&2 "error: unsupported architecture '$TARGET_PLATFORM'"; exit 1 ;; \
+    esac; \
+    curl -L https://github.com/protocolbuffers/protobuf/releases/download/v3.12.2/protoc-3.12.2-linux-$PROTOC_ARCH.zip > /protoc.zip; \
+    unzip /protoc.zip -d /usr/local; \
+    rm /protoc.zip;
 RUN chmod +xr -R /usr/local/include
 RUN chmod +x /usr/local/bin/protoc
 
@@ -46,14 +53,16 @@ RUN go install github.com/onsi/ginkgo/ginkgo@v1.16.4
 RUN go install github.com/golang/mock/mockgen@v1.5.0
 
 RUN curl -L https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv4.3.0/kustomize_v4.3.0_$(go env GOOS)_$(go env GOARCH).tar.gz | tar -xz -C /usr/local/bin/
-RUN curl -L https://github.com/kubernetes-sigs/kubebuilder/releases/download/v2.3.2/kubebuilder_2.3.2_$(go env GOOS)_$(go env GOARCH).tar.gz | tar -xz -C /usr/local/
-RUN curl -L https://get.helm.sh/helm-v3.6.3-$(go env GOOS)-$(go env GOARCH).tar.gz | tar -xz -C /usr/local/bin
-RUN mv /usr/local/kubebuilder_2.3.2_$(go env GOOS)_$(go env GOARCH) /usr/local/kubebuilder
-RUN mv /usr/local/bin/$(go env GOOS)-$(go env GOARCH)/helm /usr/local/bin/helm
-RUN rm -rf /usr/local/bin/$(go env GOOS)-$(go env GOARCH)
+
+RUN curl -L https://github.com/kubernetes-sigs/kubebuilder/releases/download/v2.3.2/kubebuilder_2.3.2_$(go env GOOS)_$(go env GOARCH).tar.gz | tar -xz -C /usr/local/; \
+    mv /usr/local/kubebuilder_2.3.2_$(go env GOOS)_$(go env GOARCH) /usr/local/kubebuilder
+
+RUN curl -L https://get.helm.sh/helm-v3.6.3-$(go env GOOS)-$(go env GOARCH).tar.gz | tar -xz -C /usr/local/bin; \
+    mv /usr/local/bin/$(go env GOOS)-$(go env GOARCH)/helm /usr/local/bin/helm; \
+    rm -rf /usr/local/bin/$(go env GOOS)-$(go env GOARCH)
+
 RUN mkdir /.cache
 RUN chmod -R 777 /.cache
-
 
 ENV GOCACHE /tmp/go-build
 ENV GOPATH /tmp/go
