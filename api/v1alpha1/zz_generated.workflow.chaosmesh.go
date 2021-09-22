@@ -28,6 +28,7 @@ const (
 	TypeJVMChaos TemplateType = "JVMChaos"
 	TypeKernelChaos TemplateType = "KernelChaos"
 	TypeNetworkChaos TemplateType = "NetworkChaos"
+	TypePhysicalMachineChaos TemplateType = "PhysicalMachineChaos"
 	TypePodChaos TemplateType = "PodChaos"
 	TypeStressChaos TemplateType = "StressChaos"
 	TypeTimeChaos TemplateType = "TimeChaos"
@@ -44,6 +45,7 @@ var allChaosTemplateType = []TemplateType{
 	TypeJVMChaos,
 	TypeKernelChaos,
 	TypeNetworkChaos,
+	TypePhysicalMachineChaos,
 	TypePodChaos,
 	TypeStressChaos,
 	TypeTimeChaos,
@@ -67,6 +69,8 @@ type EmbedChaos struct {
 	KernelChaos *KernelChaosSpec `json:"kernelChaos,omitempty"`
 	// +optional
 	NetworkChaos *NetworkChaosSpec `json:"networkChaos,omitempty"`
+	// +optional
+	PhysicalMachineChaos *PhysicalMachineChaosSpec `json:"physicalmachineChaos,omitempty"`
 	// +optional
 	PodChaos *PodChaosSpec `json:"podChaos,omitempty"`
 	// +optional
@@ -110,6 +114,10 @@ func (it *EmbedChaos) SpawnNewObject(templateType TemplateType) (GenericChaos, e
 	case TypeNetworkChaos:
 		result := NetworkChaos{}
 		result.Spec = *it.NetworkChaos
+		return &result, nil
+	case TypePhysicalMachineChaos:
+		result := PhysicalMachineChaos{}
+		result.Spec = *it.PhysicalMachineChaos
 		return &result, nil
 	case TypePodChaos:
 		result := PodChaos{}
@@ -157,6 +165,9 @@ func (it *EmbedChaos) SpawnNewList(templateType TemplateType) (GenericChaosList,
 		return &result, nil
 	case TypeNetworkChaos:
 		result := NetworkChaosList{}
+		return &result, nil
+	case TypePhysicalMachineChaos:
+		result := PhysicalMachineChaosList{}
 		return &result, nil
 	case TypePodChaos:
 		result := PodChaosList{}
@@ -232,6 +243,14 @@ func (in *KernelChaosList) GetItems() []GenericChaos {
 	return result
 }
 func (in *NetworkChaosList) GetItems() []GenericChaos {
+	var result []GenericChaos
+	for _, item := range in.Items {
+		item := item
+		result = append(result, &item)
+	}
+	return result
+}
+func (in *PhysicalMachineChaosList) GetItems() []GenericChaos {
 	var result []GenericChaos
 	for _, item := range in.Items {
 		item := item

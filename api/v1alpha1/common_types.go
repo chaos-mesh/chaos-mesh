@@ -24,6 +24,7 @@ import (
 const (
 	// PauseAnnotationKey defines the annotation used to pause a chaos
 	PauseAnnotationKey = "experiment.chaos-mesh.org/pause"
+	LabelManagedBy     = "managed-by"
 )
 
 type ChaosStatus struct {

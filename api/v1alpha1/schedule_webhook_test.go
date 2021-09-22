@@ -86,6 +86,24 @@ var _ = Describe("schedule_webhook", func() {
 					},
 					expect: "",
 				},
+				{
+					name: "validation for cron with second",
+					schedule: Schedule{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: metav1.NamespaceDefault,
+							Name:      "foo3",
+						},
+						Spec: ScheduleSpec{
+							ScheduleItem: ScheduleItem{Workflow: &WorkflowSpec{}},
+							Type:         ScheduleTypeWorkflow,
+							Schedule:     "*/1 * * * * *",
+						},
+					},
+					execute: func(schedule *Schedule) error {
+						return schedule.ValidateCreate()
+					},
+					expect: "",
+				},
 			}
 
 			for _, tc := range tcs {

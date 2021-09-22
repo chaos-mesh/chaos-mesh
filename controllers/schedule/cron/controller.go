@@ -144,7 +144,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			},
 		})
 		newObj.SetLabels(map[string]string{
-			"managed-by": schedule.Name,
+			v1alpha1.LabelManagedBy: schedule.Name,
 		})
 		newObj.SetNamespace(schedule.Namespace)
 		newObj.SetName(names.SimpleNameGenerator.GenerateName(schedule.Name + "-"))
