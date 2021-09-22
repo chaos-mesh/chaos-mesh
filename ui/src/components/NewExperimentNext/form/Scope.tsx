@@ -60,8 +60,8 @@ const ScopeStep: React.FC<ScopeStepProps> = ({
   const labelKVs = useMemo(() => objToArrBySep(labels, kvSeparator), [labels])
   const annotationKVs = useMemo(() => objToArrBySep(annotations, kvSeparator), [annotations])
 
-  const handleChangeIncludeAll = (id: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    const lastValues = getIn(values, id)
+  const handleChangeIncludeAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const lastValues = getIn(values, e.target.name)
     const currentValues = e.target.value as unknown as string[]
 
     if (!lastValues.includes('all') && currentValues.includes('all')) {
@@ -170,7 +170,7 @@ const ScopeStep: React.FC<ScopeStepProps> = ({
           label={T('k8s.phaseSelectors')}
           helperText={T('common.multiOptions')}
           multiple
-          onChange={handleChangeIncludeAll(`${scope}.phase_selectors`)}
+          onChange={handleChangeIncludeAll}
           disabled={disabled}
         >
           {phases.map((option: string) => (
