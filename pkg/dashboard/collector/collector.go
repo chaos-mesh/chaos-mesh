@@ -65,7 +65,7 @@ func (r *ChaosCollector) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		if chaosMeta, ok = obj.(metav1.Object); !ok {
 			r.Log.Error(nil, "failed to get chaos meta information")
 		}
-		if chaosMeta.GetLabels()["managed-by"] != "" {
+		if chaosMeta.GetLabels()[v1alpha1.LabelManagedBy] != "" {
 			manageFlag = true
 		}
 		if !manageFlag {
@@ -89,7 +89,7 @@ func (r *ChaosCollector) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		r.Log.Error(nil, "failed to get chaos meta information")
 	}
 
-	if chaosMeta.GetLabels()["managed-by"] != "" {
+	if chaosMeta.GetLabels()[v1alpha1.LabelManagedBy] != "" {
 		manageFlag = true
 	}
 

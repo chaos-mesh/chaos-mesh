@@ -1348,7 +1348,7 @@ metadata:
     app.kubernetes.io/version: v0.9.0
     app.kubernetes.io/component: controller-manager
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app.kubernetes.io/name: chaos-mesh
@@ -1418,6 +1418,14 @@ spec:
             value: "false"
           - name: POD_FAILURE_PAUSE_IMAGE
             value: gcr.io/google-containers/pause:latest
+          - name: ENABLE_LEADER_ELECTION
+            value: "true"
+          - name: LEADER_ELECT_LEASE_DURATION
+            value: "15s"
+          - name: LEADER_ELECT_RENEW_DEADLINE
+            value: "10s"
+          - name: LEADER_ELECT_RETRY_PERIOD
+            value: "2s"
         volumeMounts:
           - name: webhook-certs
             mountPath: /etc/webhook/certs
