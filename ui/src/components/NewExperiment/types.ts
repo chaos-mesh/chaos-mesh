@@ -152,6 +152,7 @@ export interface ExperimentType {
   PodChaos: Pod
   StressChaos: Stress
   TimeChaos: Time
+  PhysicalMachineChaos?: unknown
 }
 
 export type ExperimentKind = keyof ExperimentType

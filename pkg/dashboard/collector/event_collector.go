@@ -74,7 +74,7 @@ func (r *EventCollector) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	}
 
 	et := core.Event{
-		CreatedAt: event.CreationTimestamp.Time,
+		CreatedAt: event.CreationTimestamp.Time.UTC(),
 		Kind:      event.InvolvedObject.Kind,
 		Type:      event.Type,
 		Reason:    event.Reason,

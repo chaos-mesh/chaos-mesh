@@ -382,6 +382,7 @@ webhook:
     - schedule
     - workflow
     - httpchaos
+    - physicalmachinechaos
 
 bpfki:
   create: false
