@@ -40,6 +40,7 @@ type StressChaos struct {
 
 var _ InnerObjectWithCustomStatus = (*StressChaos)(nil)
 var _ InnerObjectWithSelector = (*StressChaos)(nil)
+var _ InnerObject = (*StressChaos)(nil)
 
 // StressChaosSpec defines the desired state of StressChaos
 type StressChaosSpec struct {
