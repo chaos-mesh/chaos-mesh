@@ -16,7 +16,6 @@ package v1alpha1
 import (
 	"fmt"
 
-	"github.com/robfig/cron/v3"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -77,7 +76,7 @@ func (in *ScheduleSpec) Validate() field.ErrorList {
 // validateSchedule validates the cron
 func (in *ScheduleSpec) validateSchedule(schedule *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
-	_, err := cron.ParseStandard(in.Schedule)
+	_, err := StandardCronParser.Parse(in.Schedule)
 	if err != nil {
 		allErrs = append(allErrs, field.Invalid(schedule,
 			in.Schedule,
