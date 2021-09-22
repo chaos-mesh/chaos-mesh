@@ -32,7 +32,7 @@ RUN chmod +xr -R /usr/local/include
 RUN chmod +x /usr/local/bin/protoc
 
 
-RUN curl -vvv https://dl.google.com/go/go1.16.7.linux-$TARGET_PLATFORM.tar.gz | tar -xz -C /usr/local
+RUN curl https://dl.google.com/go/go1.16.7.linux-$TARGET_PLATFORM.tar.gz | tar -xz -C /usr/local
 ENV GO111MODULE=on
 ENV GOPATH /go
 ENV PATH "/usr/local/go/bin:${PATH}:/tmp/go/bin:/go/bin"
