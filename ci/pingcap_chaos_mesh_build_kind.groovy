@@ -38,6 +38,13 @@ spec:
     env:
     - name: DOCKER_IN_DOCKER_ENABLED
       value: "true"
+    - name: DOCKER_IO_MIRROR
+      value: https://registry-mirror.pingcap.net
+    - name: DOCKER_IO_MIRROR
+      value: https://registry-mirror.pingcap.net
+    - name: QUAY_IO_MIRROR
+      value: https://registry-mirror.pingcap.net
+
     resources:
       requests:
         memory: "4Gi"
