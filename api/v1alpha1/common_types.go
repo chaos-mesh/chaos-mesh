@@ -17,7 +17,6 @@ import (
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
@@ -102,9 +101,6 @@ type InnerObject interface {
 // StatefulObject defines a basic Object that can get the status
 type StatefulObject interface {
 	GenericChaos
-	// deprecated, use GetNamepsace() in metav1.Object directly.
-	// TODO: duplicated method, remove GetObjectMeta()
-	GetObjectMeta() *metav1.ObjectMeta
 	GetStatus() *ChaosStatus
 }
 
