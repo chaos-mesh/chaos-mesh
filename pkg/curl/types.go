@@ -20,12 +20,13 @@ const ApplicationJson = "application/json"
 
 // RequestFlags should contain all the fields shown on frontend, and it could be parsed from flags of curl command line.
 type RequestFlags struct {
-	Method         string
-	URL            string
-	Header         http.Header
-	Body           string
-	FollowLocation bool
-	JsonContent    bool
+	Name           string      `json:"name"`
+	Method         string      `json:"method"`
+	URL            string      `json:"url"`
+	Header         http.Header `json:"header"`
+	Body           string      `json:"body"`
+	FollowLocation bool        `json:"followLocation"`
+	JsonContent    bool        `json:"jsonContent"`
 }
 
 type Commands []string

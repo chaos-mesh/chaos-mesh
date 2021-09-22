@@ -1788,6 +1788,92 @@ var doc = `{
                 }
             }
         },
+        "/workflows/parse-task/http": {
+            "post": {
+                "description": "Parse the rendered task back to the original request",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workflows"
+                ],
+                "summary": "Parse the rendered task back to the original request",
+                "parameters": [
+                    {
+                        "description": "Rendered Task",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1alpha1.Template"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/curl.RequestFlags"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    }
+                }
+            }
+        },
+        "/workflows/render-task/http": {
+            "post": {
+                "description": "Render a task which sends HTTP request",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workflows"
+                ],
+                "summary": "Render a task which sends HTTP request",
+                "parameters": [
+                    {
+                        "description": "Origin HTTP Request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/curl.RequestFlags"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1alpha1.Template"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    }
+                }
+            }
+        },
         "/workflows/{uid}": {
             "get": {
                 "description": "Get detailed information about the specified workflow. If that object is not existed in kubernetes, it will only return ths persisted data in the database.",
@@ -2286,6 +2372,32 @@ var doc = `{
                     "type": "string"
                 },
                 "uid": {
+                    "type": "string"
+                }
+            }
+        },
+        "curl.RequestFlags": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "string"
+                },
+                "followLocation": {
+                    "type": "boolean"
+                },
+                "header": {
+                    "type": "string"
+                },
+                "jsonContent": {
+                    "type": "boolean"
+                },
+                "method": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "url": {
                     "type": "string"
                 }
             }

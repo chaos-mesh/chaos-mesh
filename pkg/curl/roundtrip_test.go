@@ -14,9 +14,10 @@
 package curl
 
 import (
-	. "github.com/onsi/gomega"
 	"net/http"
 	"testing"
+
+	. "github.com/onsi/gomega"
 )
 
 // Maybe we need some fuzzing test

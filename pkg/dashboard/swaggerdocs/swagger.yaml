@@ -254,6 +254,23 @@ definitions:
       uid:
         type: string
     type: object
+  curl.RequestFlags:
+    properties:
+      body:
+        type: string
+      followLocation:
+        type: boolean
+      header:
+        type: string
+      jsonContent:
+        type: boolean
+      method:
+        type: string
+      name:
+        type: string
+      url:
+        type: string
+    type: object
   experiment.Detail:
     properties:
       created_at:
@@ -3382,6 +3399,62 @@ paths:
           schema:
             $ref: '#/definitions/utils.APIError'
       summary: Create a new workflow.
+      tags:
+      - workflows
+  /workflows/parse-task/http:
+    post:
+      description: Parse the rendered task back to the original request
+      parameters:
+      - description: Rendered Task
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/v1alpha1.Template'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/curl.RequestFlags'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Parse the rendered task back to the original request
+      tags:
+      - workflows
+  /workflows/render-task/http:
+    post:
+      description: Render a task which sends HTTP request
+      parameters:
+      - description: Origin HTTP Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/curl.RequestFlags'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1alpha1.Template'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Render a task which sends HTTP request
       tags:
       - workflows
 swagger: "2.0"

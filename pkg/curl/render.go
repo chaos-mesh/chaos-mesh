@@ -65,17 +65,18 @@ func RenderCommands(request RequestFlags) (Commands, error) {
 	return result, nil
 }
 
-func RenderWorkflowTaskTemplate(name string, request RequestFlags) (*v1alpha1.Template, error) {
+func RenderWorkflowTaskTemplate(request RequestFlags) (*v1alpha1.Template, error) {
 	commands, err := RenderCommands(request)
 	if err != nil {
 		return nil, err
 	}
+	containerName := fmt.Sprintf("%s%s", request.Name, nameSuffix)
 	return &v1alpha1.Template{
-		Name: fmt.Sprintf("%s%s", name, nameSuffix),
+		Name: request.Name,
 		Type: v1alpha1.TypeTask,
 		Task: &v1alpha1.Task{
 			Container: &corev1.Container{
-				Name:    name,
+				Name:    containerName,
 				Image:   image,
 				Command: commands,
 			},
