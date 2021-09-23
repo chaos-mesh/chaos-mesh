@@ -118,7 +118,7 @@ func (e *eventStore) DeleteByTime(_ context.Context, start string, end string) e
 }
 
 func (e *eventStore) DeleteByDuration(_ context.Context, duration time.Duration) error {
-	now := time.Now().Add(-duration).Format("2006-01-02 15:04:05")
+	now := time.Now().UTC().Add(-duration).Format("2006-01-02 15:04:05")
 
 	return e.db.Where("created_at <= ?", now).Delete(&core.Event{}).Error
 }

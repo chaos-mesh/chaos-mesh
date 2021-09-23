@@ -37,7 +37,7 @@ func (lister *ActiveLister) ListActiveJobs(ctx context.Context, schedule *v1alph
 	}
 
 	list := kind.SpawnList()
-	err := lister.List(ctx, list, client.MatchingLabels{"managed-by": schedule.Name})
+	err := lister.List(ctx, list, client.MatchingLabels{v1alpha1.LabelManagedBy: schedule.Name})
 	if err != nil {
 		lister.Log.Error(err, "fail to list chaos")
 		return nil, nil

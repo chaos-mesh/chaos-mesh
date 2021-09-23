@@ -38,6 +38,7 @@ type NetworkChaos struct {
 
 var _ InnerObjectWithCustomStatus = (*NetworkChaos)(nil)
 var _ InnerObjectWithSelector = (*NetworkChaos)(nil)
+var _ InnerObject = (*NetworkChaos)(nil)
 
 // NetworkChaosAction represents the chaos action about network.
 type NetworkChaosAction string

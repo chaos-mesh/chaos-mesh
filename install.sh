@@ -1348,7 +1348,7 @@ metadata:
     app.kubernetes.io/version: v0.9.0
     app.kubernetes.io/component: controller-manager
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app.kubernetes.io/name: chaos-mesh
@@ -1418,6 +1418,14 @@ spec:
             value: "false"
           - name: POD_FAILURE_PAUSE_IMAGE
             value: gcr.io/google-containers/pause:latest
+          - name: ENABLE_LEADER_ELECTION
+            value: "true"
+          - name: LEADER_ELECT_LEASE_DURATION
+            value: "15s"
+          - name: LEADER_ELECT_RENEW_DEADLINE
+            value: "10s"
+          - name: LEADER_ELECT_RETRY_PERIOD
+            value: "2s"
         volumeMounts:
           - name: webhook-certs
             mountPath: /etc/webhook/certs
@@ -1437,7 +1445,7 @@ spec:
             secretName: chaos-mesh-webhook-certs
 ---
 # Source: chaos-mesh/templates/secrets-configuration.yaml
-apiVersion: admissionregistration.k8s.io/v1beta1
+apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
   name: chaos-mesh-mutation
@@ -1450,6 +1458,8 @@ metadata:
 webhooks:
   - name: admission-webhook.chaos-mesh.org
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     clientConfig:
       caBundle: "${CA_BUNDLE}"
       service:
@@ -1474,6 +1484,8 @@ webhooks:
     failurePolicy: Fail
     name: mpodchaos.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1493,6 +1505,8 @@ webhooks:
     failurePolicy: Fail
     name: miochaos.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1512,6 +1526,8 @@ webhooks:
     failurePolicy: Fail
     name: mtimechaos.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1531,6 +1547,8 @@ webhooks:
     failurePolicy: Fail
     name: mnetworkchaos.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1550,6 +1568,8 @@ webhooks:
     failurePolicy: Fail
     name: mkernelchaos.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1569,6 +1589,8 @@ webhooks:
     failurePolicy: Fail
     name: mstresschaos.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1588,6 +1610,8 @@ webhooks:
     failurePolicy: Fail
     name: mawschaos.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1607,6 +1631,8 @@ webhooks:
     failurePolicy: Fail
     name: mgcpchaos.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1626,6 +1652,8 @@ webhooks:
     failurePolicy: Fail
     name: mdnschaos.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1645,6 +1673,8 @@ webhooks:
     failurePolicy: Fail
     name: mjvmchaos.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1664,6 +1694,8 @@ webhooks:
     failurePolicy: Fail
     name: mschedule.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1683,6 +1715,8 @@ webhooks:
     failurePolicy: Fail
     name: mworkflow.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1702,6 +1736,8 @@ webhooks:
     failurePolicy: Fail
     name: mhttpchaos.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1712,9 +1748,30 @@ webhooks:
           - UPDATE
         resources:
           - httpchaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /mutate-chaos-mesh-org-v1alpha1-physicalmachinechaos
+    failurePolicy: Fail
+    name: mphysicalmachinechaos.kb.io
+    timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - physicalmachinechaos
 ---
 # Source: chaos-mesh/templates/secrets-configuration.yaml
-apiVersion: admissionregistration.k8s.io/v1beta1
+apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
   name: chaos-mesh-validation
@@ -1734,6 +1791,8 @@ webhooks:
     failurePolicy: Fail
     name: vpodchaos.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1753,6 +1812,8 @@ webhooks:
     failurePolicy: Fail
     name: viochaos.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1772,6 +1833,8 @@ webhooks:
     failurePolicy: Fail
     name: vtimechaos.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1791,6 +1854,8 @@ webhooks:
     failurePolicy: Fail
     name: vnetworkchaos.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1810,6 +1875,8 @@ webhooks:
     failurePolicy: Fail
     name: vkernelchaos.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1829,6 +1896,8 @@ webhooks:
     failurePolicy: Fail
     name: vstresschaos.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1848,6 +1917,8 @@ webhooks:
     failurePolicy: Fail
     name: vawschaos.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1867,6 +1938,8 @@ webhooks:
     failurePolicy: Fail
     name: vgcpchaos.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1886,6 +1959,8 @@ webhooks:
     failurePolicy: Fail
     name: vdnschaos.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1905,6 +1980,8 @@ webhooks:
     failurePolicy: Fail
     name: vjvmchaos.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1924,6 +2001,8 @@ webhooks:
     failurePolicy: Fail
     name: vschedule.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1943,6 +2022,8 @@ webhooks:
     failurePolicy: Fail
     name: vworkflow.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1962,6 +2043,8 @@ webhooks:
     failurePolicy: Fail
     name: vhttpchaos.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1972,9 +2055,30 @@ webhooks:
           - UPDATE
         resources:
           - httpchaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /validate-chaos-mesh-org-v1alpha1-physicalmachinechaos
+    failurePolicy: Fail
+    name: vphysicalmachinechaos.kb.io
+    timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - physicalmachinechaos
 ---
 # Source: chaos-mesh/templates/secrets-configuration.yaml
-apiVersion: admissionregistration.k8s.io/v1beta1
+apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
   name: validate-auth
@@ -1993,6 +2097,9 @@ webhooks:
         path: /validate-auth
     failurePolicy: Fail
     name: vauth.kb.io
+    timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org

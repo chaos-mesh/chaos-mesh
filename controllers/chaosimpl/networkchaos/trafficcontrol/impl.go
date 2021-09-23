@@ -60,7 +60,7 @@ var _ common.ChaosImpl = (*Impl)(nil)
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	// The only possible phase to get in here is "Not Injected" or "Not Injected/Wait"
 
-	impl.Log.Info("traffic control Apply", "namespace", obj.GetObjectMeta().Namespace, "name", obj.GetObjectMeta().Name)
+	impl.Log.Info("traffic control Apply", "namespace", obj.GetNamespace(), "name", obj.GetName())
 	networkchaos := obj.(*v1alpha1.NetworkChaos)
 	if networkchaos.Status.Instances == nil {
 		networkchaos.Status.Instances = make(map[string]int64)

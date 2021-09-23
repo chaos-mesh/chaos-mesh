@@ -150,6 +150,7 @@ type JVMChaos struct {
 }
 
 var _ InnerObjectWithSelector = (*JVMChaos)(nil)
+var _ InnerObject = (*JVMChaos)(nil)
 
 func init() {
 	SchemeBuilder.Register(&JVMChaos{}, &JVMChaosList{})

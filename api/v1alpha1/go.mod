@@ -5,6 +5,7 @@ go 1.13
 require (
 	github.com/bxcodec/faker v2.0.1+incompatible
 	github.com/docker/go-units v0.4.0
+	github.com/google/uuid v1.1.2
 	github.com/onsi/ginkgo v1.16.4
 	github.com/onsi/gomega v1.14.0
 	github.com/robfig/cron/v3 v3.0.1

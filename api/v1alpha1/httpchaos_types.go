@@ -31,6 +31,7 @@ type HTTPChaos struct {
 
 var _ InnerObjectWithCustomStatus = (*HTTPChaos)(nil)
 var _ InnerObjectWithSelector = (*HTTPChaos)(nil)
+var _ InnerObject = (*HTTPChaos)(nil)
 
 type HTTPChaosSpec struct {
 	PodSelector `json:",inline"`

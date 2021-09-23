@@ -6,22 +6,26 @@ If you are a Chaos Mesh adopter, and are willing to share your Chaos Mesh story,
 
 - [Apache APISIX](https://github.com/apache/apisix)
   - Apache APISIX is a dynamic, real-time, high-performance open source API gateway, which provides rich traffic management features, such as load balancing, dynamic upstream and more.
-  - APISIX integrates Chaos Mesh into open-source CI pipelines, to further enhance APISIX's resiliency and robustness. See [Use case](https://chaos-mesh.org/blog/How-Chaos-Mesh-Helps-Apache-APISIX-Improve-System-Stability)
+  - APISIX integrates Chaos Mesh into open-source CI pipelines, to further enhance APISIX's resiliency and robustness. See [Use case](https://chaos-mesh.org/blog/How-Chaos-Mesh-Helps-Apache-APISIX-Improve-System-Stability).
 - [ByteDance](https://bytedance.com/en/)
   - ByteDance is a technology company operating a range of content platforms including TikTok, Lark, Helo, Vigo Video, Douyin, and Huoshan in over 150 markets and 75 languages.
   - ByteDance's self-developed chaos engineering platform is mainly used by the company's own technology system. As there are some cloud-native deployment services involved, they integrated Chaos Mesh as the underlying fault injection engine, which is a key supplement to ByteDance’s chaos engineering platform.
 - [Celo](https://celo.org/)
 - [Dailymotion](https://www.dailymotion.com/)
-- [DataStax Fallout](https://github.com/datastax/fallout)
+- [DataStax](https://www.datastax.com/) 
+  - DataStax utilized Chaos Mesh to create a tool for running local or large scale remote based distributed correctness, verification and performance tests: [Fallout](https://github.com/datastax/fallout), which they use to [test AstraDB](https://youtu.be/Kw7gMurHJnQ), a multi-cloud DBaaS built on Apache Cassandra
 - [NetEase Fuxi Lab](https://fuxi.163.com/en/about.html)
   - NetEase Fuxi AI Lab is China’s first professional game AI research institution. Researchers use their Kubernetes-based Danlu platform for algorithm development, training and tuning, and online publishing.
   - They use Chaos Mesh to improve the stability of their internal hybrid cloud. In addition, their users with cloud platforms also access Chaos Mesh to test the stability of user services. See [Use case](https://chaos-mesh.org/blog/how-a-top-game-company-uses-chaos-engineering-to-improve-testing).
+- [Netstars](https://www.netstars.co.jp/en/)
 - [JuiceFS](https://juicefs.com/?hl=en)
 - [KingNet](https://www.kingnet.com/)
   - KingNet’s main business includes the development, operation and distribution of premium entertainment content.
   - KingNet mainly uses Chaos Mesh for testing the availability of multiple data centers and microservice links. Chaos Mesh also helps them with mocking service unavailability or abnormal network conditions.
 - [Meituan Dianping](https://about.meituan.com/en)
 - [PingCAP](https://en.pingcap.com/)
+- [Percona](https://www.percona.com/)
+  - Percona uses Chaos Mesh to [test their Percona Kubernetes Operators](https://www.percona.com/blog/2020/11/05/chaosmesh-to-create-chaos-in-kubernetes/), which is used to deploy their own Database-as-Service.
 - [Apache Pulsar](https://pulsar.apache.org/)
 - [Qihoo 360](https://360.cn/)
 - [Qiniu Cloud](https://qiniu.com/en)
@@ -29,7 +33,8 @@ If you are a Chaos Mesh adopter, and are willing to share your Chaos Mesh story,
   - To ensure the reliability of cloud storage products, they use Chaos Mesh to perform chaos tests on metadata and the underlying storage system under conditions such as: single point of failure of services, network abnormality, abnormal resource consumption (CPU, memory, I/O), etc.
 - [S.J. Distributors](https://www.sjfood.com/)
 - [Tencent](https://www.tencent.com/en-us)
-  - After Tencent Interactive Entertainment migrated their online operations to the Tencent Cloud Kubernetes engine, they wished to provide users with a more stable and reliable experience, which is why they introduced Chaos Mesh. Tencent mainly use Chaos Mesh to simulate the following types of failures:
+  - After Tencent Interactive Entertainment migrated their online operations to the Tencent Cloud Kubernetes engine, they wished to provide users with a more stable and reliable experience, which is [why they introduced Chaos Mesh](https://chaos-mesh.org/blog/Securing-Online-Gaming-Combine-Chaos-Engineering-with-DevOps-Practices/).
+  - Tencent mainly use Chaos Mesh to simulate the following types of failures:
     - Fault isolation, such as simulating pod abnormality, and checking whether the system can automatically isolate fault instances;
       Service degradation, such as simulating a downstream recommended service failure through network failure, and verifying whether the local cache is effective;
     - Verifying if the alarm works, for example, purposefully burning the CPU to 90%, and checking whether the alarm is timely issued in time.
