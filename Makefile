@@ -144,11 +144,11 @@ endif
 GO_TARGET_PHONY += $(1)
 endef
 
-BUILD_INDOCKER_ARG := --env IN_DOCKER=1 --volume $(ROOT):/mnt --user $(shell id -u):$(shell id -g)
-
-ifneq ($(TARGET_PLATFORM),)
-	BUILD_INDOCKER_ARG += --platform=linux/$(TARGET_PLATFORM)
+ifeq ($(TARGET_PLATFORM),)
+	TARGET_PLATFORM := $(shell uname -m)
 endif
+
+BUILD_INDOCKER_ARG := --env IN_DOCKER=1 --volume $(ROOT):/mnt --user $(shell id -u):$(shell id -g) --platform=linux/$(TARGET_PLATFORM)
 
 ifneq ($(GO_BUILD_CACHE),)
 	BUILD_INDOCKER_ARG += --volume $(GO_BUILD_CACHE)/chaos-mesh-gopath:/tmp/go
@@ -270,10 +270,8 @@ else
 	DOCKER_BUILDKIT=1 DOCKER_CLI_EXPERIMENTAL=enabled docker buildx build --load --cache-to type=local,dest=$(DOCKER_CACHE_DIR)/image-$(1) -t $$($(4)_IMAGE) ${DOCKER_BUILD_ARGS} $(2)
 endif
 
-else ifneq ($(TARGET_PLATFORM),)
-	DOCKER_BUILDKIT=1 docker buildx build --load --platform linux/$(TARGET_PLATFORM) -t $$($(4)_IMAGE) --build-arg TARGET_PLATFORM=$(TARGET_PLATFORM) ${DOCKER_BUILD_ARGS} $(2)
 else
-	DOCKER_BUILDKIT=1 docker build -t $$($(4)_IMAGE) ${DOCKER_BUILD_ARGS} $(2)
+	DOCKER_BUILDKIT=1 docker buildx build --load --platform linux/$(TARGET_PLATFORM) -t $$($(4)_IMAGE) --build-arg TARGET_PLATFORM=$(TARGET_PLATFORM) ${DOCKER_BUILD_ARGS} $(2)
 endif
 
 endif

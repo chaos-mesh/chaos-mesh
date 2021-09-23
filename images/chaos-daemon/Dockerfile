@@ -15,7 +15,7 @@ RUN update-alternatives --set iptables /usr/sbin/iptables-legacy
 ENV RUST_BACKTRACE 1
 ARG TARGET_PLATFORM=amd64
 
-RUN curl -L https://github.com/chaos-mesh/toda/releases/download/v0.2.0/toda-linux-amd64.tar.gz | tar xvf -C /usr/local/bin
+RUN curl -L https://github.com/chaos-mesh/toda/releases/download/v0.2.0/toda-linux-amd64.tar.gz | tar xz -C /usr/local/bin
 RUN case "$TARGET_PLATFORM" in \
     'amd64') \
     export NSEXEC_ARCH='x86_64'; \
@@ -25,9 +25,9 @@ RUN case "$TARGET_PLATFORM" in \
     ;; \
     *) echo >&2 "error: unsupported architecture '$TARGET_PLATFORM'"; exit 1 ;; \
     esac; \
-    curl -L https://github.com/chaos-mesh/nsexec/releases/download/v0.1.6/nsexec-$NSEXEC_ARCH-unknown-linux-gnu.tar.gz | tar xvf -C /usr/local/bin; \
+    curl -L https://github.com/chaos-mesh/nsexec/releases/download/v0.1.6/nsexec-$NSEXEC_ARCH-unknown-linux-gnu.tar.gz | tar xz -C /usr/local/bin; \
     cp /usr/local/bin/libnsenter.so /usr/local/lib/libnsenter.so
-RUN curl -L https://github.com/chaos-mesh/rs-tproxy/releases/download/v0.2.3/tproxy-linux-amd64.tar.gz | tar xvf -C /usr/local/bin
+RUN curl -L https://github.com/chaos-mesh/rs-tproxy/releases/download/v0.2.3/tproxy-linux-amd64.tar.gz | tar xz -C /usr/local/bin
 
 COPY bin/chaos-daemon /usr/local/bin/chaos-daemon
 COPY bin/pause /usr/local/bin/pause
