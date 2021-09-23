@@ -34,6 +34,7 @@ type KernelChaos struct {
 }
 
 var _ InnerObjectWithSelector = (*KernelChaos)(nil)
+var _ InnerObject = (*KernelChaos)(nil)
 
 // KernelChaosSpec defines the desired state of KernelChaos
 type KernelChaosSpec struct {

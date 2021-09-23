@@ -54,11 +54,21 @@ func NewScheme() *runtime.Scheme {
 func NewOption(logger logr.Logger) *ctrl.Options {
 	setupLog := logger.WithName("setup")
 
+	leaderElectionNamespace := config.ControllerCfg.Namespace
+	if len(leaderElectionNamespace) == 0 {
+		leaderElectionNamespace = "default"
+	}
 	options := ctrl.Options{
-		Scheme:             scheme,
-		MetricsBindAddress: config.ControllerCfg.MetricsAddr,
-		LeaderElection:     config.ControllerCfg.EnableLeaderElection,
-		Port:               9443,
+		Scheme:                     scheme,
+		MetricsBindAddress:         config.ControllerCfg.MetricsAddr,
+		LeaderElection:             config.ControllerCfg.EnableLeaderElection,
+		LeaderElectionNamespace:    leaderElectionNamespace,
+		LeaderElectionResourceLock: "configmaps",
+		LeaderElectionID:           "chaos-mesh",
+		LeaseDuration:              &config.ControllerCfg.LeaderElectLeaseDuration,
+		RetryPeriod:                &config.ControllerCfg.LeaderElectRetryPeriod,
+		RenewDeadline:              &config.ControllerCfg.LeaderElectRenewDeadline,
+		Port:                       9443,
 		// Don't aggregate events
 		EventBroadcaster: record.NewBroadcasterWithCorrelatorOptions(record.CorrelatorOptions{
 			MaxEvents:            math.MaxInt32,
