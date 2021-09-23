@@ -106,9 +106,8 @@ func unmarshal(value reflect.Value) (string, []string) {
 			}
 		}
 		return path, args
-	} else {
-		return "", nil
 	}
+	return "", nil
 }
 
 func SearchKey(value reflect.Value) (string, bool) {
