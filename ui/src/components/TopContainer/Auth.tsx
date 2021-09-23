@@ -1,8 +1,10 @@
-import { Box, Button, Link, Typography } from '@material-ui/core'
+import { Box, Button, IconButton, Link, Typography } from '@material-ui/core'
 import { useEffect, useState } from 'react'
 
 import ConfirmDialog from 'components-mui/ConfirmDialog'
+import GoogleIcon from '@material-ui/icons/Google'
 import RBACGenerator from 'components/RBACGenerator'
+import Space from 'components-mui/Space'
 import T from 'components/T'
 import Token from 'components/Token'
 import { useHistory } from 'react-router-dom'
@@ -34,15 +36,16 @@ const Auth: React.FC<AuthProps> = ({ open, setOpen }) => {
         },
       }}
     >
-      <Box mb={3}>
+      <Space>
         <Typography variant="body2" color="textSecondary">
-          {T('settings.addToken.prompt2')}{' '}
-          <Link style={{ cursor: 'pointer' }} onClick={() => setTokenGenOpen(true)}>
+          {T('settings.addToken.prompt2')}
+          <Link sx={{ cursor: 'pointer' }} onClick={() => setTokenGenOpen(true)}>
             {T('settings.addToken.prompt3')}
           </Link>
         </Typography>
-      </Box>
-      <Token onSubmitCallback={handleSubmitCallback} />
+        <Token onSubmitCallback={handleSubmitCallback} />
+      </Space>
+
       <ConfirmDialog
         open={tokenGenOpen}
         title={T('settings.addToken.generator')}

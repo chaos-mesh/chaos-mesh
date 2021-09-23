@@ -60,7 +60,7 @@ const Navbar: React.FC<HeaderProps> = ({ openDrawer, handleDrawerToggle, breadcr
           <Box display="flex" justifyContent="space-between" alignItems="center" width="100%">
             {b && (
               <Breadcrumbs className={classes.nav} aria-label="breadcrumb">
-                <Typography variant="h6" component="h2">
+                <Typography variant="h2">
                   {hasLocalBreadcrumb(b.name)
                     ? T(
                         `${

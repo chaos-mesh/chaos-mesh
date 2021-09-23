@@ -101,8 +101,8 @@ const Token: React.FC<TokenProps> = ({ onSubmitCallback }) => {
               helperText={errors.token && touched.token ? errors.token : T('settings.addToken.tokenHelper')}
               error={errors.token && touched.token ? true : false}
             />
-            <Submit />
           </Space>
+          <Submit />
         </Form>
       )}
     </Formik>

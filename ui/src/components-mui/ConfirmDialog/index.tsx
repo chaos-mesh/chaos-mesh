@@ -34,22 +34,12 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   }
 
   return (
-    <Dialog
-      open={open}
-      onClose={close}
-      aria-labelledby="dialog-title"
-      aria-describedby="dialog-description"
-      PaperProps={{ style: { minWidth: 300 } }}
-      {...dialogProps}
-    >
-      <DialogTitle id="dialog-title">{title}</DialogTitle>
-      {children ? (
-        <DialogContent>{children}</DialogContent>
-      ) : description ? (
-        <DialogContent>
-          <DialogContentText id="dialog-description">{description}</DialogContentText>
-        </DialogContent>
-      ) : null}
+    <Dialog open={open} onClose={close} PaperProps={{ sx: { minWidth: 300 } }} {...dialogProps}>
+      <DialogTitle sx={{ p: 3 }}>{title}</DialogTitle>
+      <DialogContent sx={{ p: 3 }}>
+        {children ? children : description ? <DialogContentText>{description}</DialogContentText> : null}
+      </DialogContent>
+
       {onConfirm && (
         <DialogActions>
           <Button size="small" onClick={close}>

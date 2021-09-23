@@ -64,17 +64,17 @@ const globalStatusSlice = createSlice({
     setConfirmOpen(state, action: PayloadAction<boolean>) {
       state.confirmOpen = action.payload
     },
+    setConfig(state, action: PayloadAction<Config>) {
+      state.securityMode = action.payload.security_mode
+      state.dnsServerCreate = action.payload.dns_server_create
+      state.version = action.payload.version
+    },
     setNameSpace(state, action: PayloadAction<string>) {
       const ns = action.payload
 
       state.namespace = ns
 
       LS.set('global-namespace', ns)
-    },
-    setConfig(state, action: PayloadAction<Config>) {
-      state.securityMode = action.payload.security_mode
-      state.dnsServerCreate = action.payload.dns_server_create
-      state.version = action.payload.version
     },
     setTokens(state, action: PayloadAction<TokenFormValues[]>) {
       const tokens = action.payload
@@ -93,7 +93,7 @@ const globalStatusSlice = createSlice({
   },
 })
 
-export const { setAlert, setAlertOpen, setConfirm, setConfirmOpen, setNameSpace, setConfig, setTokens, setTokenName } =
+export const { setAlert, setAlertOpen, setConfirm, setConfirmOpen, setConfig, setNameSpace, setTokens, setTokenName } =
   globalStatusSlice.actions
 
 export default globalStatusSlice.reducer

@@ -18,6 +18,16 @@ const common: ThemeOptions = {
     },
   },
   spacing: (factor: number) => `${0.25 * factor}rem`,
+  typography: {
+    h2: {
+      fontSize: '1.25rem',
+      fontWeight: 700,
+    },
+    h3: {
+      fontSize: '1.125rem',
+      fontWeight: 500,
+    },
+  },
 }
 
 const theme = responsiveFontSizes(createTheme(common))
