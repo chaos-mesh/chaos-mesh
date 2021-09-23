@@ -34,6 +34,7 @@ type TimeChaos struct {
 }
 
 var _ InnerObjectWithSelector = (*TimeChaos)(nil)
+var _ InnerObject = (*TimeChaos)(nil)
 
 // TimeChaosSpec defines the desired state of TimeChaos
 type TimeChaosSpec struct {

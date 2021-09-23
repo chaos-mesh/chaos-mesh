@@ -40,7 +40,7 @@ controllerManager:
   hostNetwork: false
   serviceAccount: chaos-controller-manager
 
-  replicaCount: 1
+  replicaCount: 3
 
   priorityClassName: ""
   image: pingcap/chaos-mesh:latest
@@ -81,6 +81,12 @@ controllerManager:
   podChaos:
     podFailure:
       pauseImage: gcr.io/google-containers/pause:latest
+
+  leaderElection:
+    enabled: true
+    leaseDuration: 15s
+    renewDeadline: 10s
+    retryPeriod: 2s
 
 chaosDaemon:
   image: pingcap/chaos-daemon:latest

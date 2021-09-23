@@ -35,6 +35,7 @@ type PodChaos struct {
 }
 
 var _ InnerObjectWithSelector = (*PodChaos)(nil)
+var _ InnerObject = (*PodChaos)(nil)
 
 // PodChaosAction represents the chaos action about pods.
 type PodChaosAction string

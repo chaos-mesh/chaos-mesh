@@ -48,7 +48,7 @@ var _ common.ChaosImpl = (*Impl)(nil)
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	// The only possible phase to get in here is "Not Injected" or "Not Injected/Wait"
 
-	impl.Log.Info("iochaos Apply", "namespace", obj.GetObjectMeta().Namespace, "name", obj.GetObjectMeta().Name)
+	impl.Log.Info("iochaos Apply", "namespace", obj.GetNamespace(), "name", obj.GetName())
 	iochaos := obj.(*v1alpha1.IOChaos)
 	if iochaos.Status.Instances == nil {
 		iochaos.Status.Instances = make(map[string]int64)
