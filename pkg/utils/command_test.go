@@ -14,9 +14,10 @@
 package utils
 
 import (
-	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 type IptablesTest struct {
