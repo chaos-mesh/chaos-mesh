@@ -6,8 +6,33 @@ import (
 	"strings"
 )
 
+// ExecTag stand for the path of executable file in command.
+// If we want this util works ,
+// we must add Exec in the struct and use NewExec() to initialize it,
+// because the default way to initialize Exec means None in code.
 const ExecTag = "exec"
+
+// SubCommandTag stand for the sub command in common command.
+// We can use it in struct fields as a tag.
+// Just like MatchExtension below
+// type Iptables Struct {
+// 	Exec
+//	MatchExtension string `sub_command:""`
+// }
+// Field with SubcommandTag needs to be a struct with Exec.
 const SubCommandTag = "sub_command"
+
+// ParaTag stand for parameters in command.
+// We can use it in struct fields as a tag.
+// Just like Port below
+// type Iptables Struct {
+// 	Exec
+//	Port string `para:"-p"`
+// }
+// If the field is not string type or []string type , it will be skipped.
+// If the tag value like "-p" is empty string ,
+// the para will just add the field value into the command just as some single value parameter in command.
+// If the value of field is empty string or empty string slice or empty slice, the field and tag will all be skipped.
 const ParaTag = "para"
 
 type Exec struct {
@@ -57,7 +82,9 @@ func unmarshal(value reflect.Value) (string, []string) {
 				if value.Field(i).Kind() == reflect.Slice {
 					if slicePara, ok := value.Field(i).Interface().([]string); ok {
 						if strings.Join(slicePara, "") != "" {
-							args = append(args, paraName)
+							if paraName != "" {
+								args = append(args, paraName)
+							}
 							args = append(args, slicePara...)
 						}
 
