@@ -366,7 +366,7 @@ func (c *CtrlClient) completeQuery(ctx *AutoCompleteContext, root *Type) ([]stri
 		if !leafMap[leaf] && strings.HasPrefix(leaf, complete.leaves[len(complete.leaves)-1]) {
 			leaves = append(leaves, leaf)
 		}
-		if ctx.completeLeaves && root.Kind != ObjectKind {
+		if ctx.completeLeaves && root.Kind != ObjectKind && len(leaves) != 0 {
 			complete.leaves = leaves
 			completes = append(completes, complete.TrimNamespaced(ctx.namespace))
 		} else if len(leaves) == 1 && root.Kind == ObjectKind {
