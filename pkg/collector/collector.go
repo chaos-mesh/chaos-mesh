@@ -155,6 +155,10 @@ func (r *ChaosCollector) setUnarchivedExperiment(req ctrl.Request, obj v1alpha1.
 		archive.Action = ""
 	case *v1alpha1.DNSChaos:
 		archive.Action = string(chaos.Spec.Action)
+	case *v1alpha1.AWSChaos:
+		archive.Action = string(chaos.Spec.Action)
+	case *v1alpha1.GCPChaos:
+		archive.Action = string(chaos.Spec.Action)
 	default:
 		return errors.New("unsupported chaos type " + archive.Kind)
 	}
