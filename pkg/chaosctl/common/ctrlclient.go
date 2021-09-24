@@ -244,13 +244,13 @@ func listArguments(object interface{}, resource *Query, startWith string) ([]str
 	return nil, nil
 }
 
-func (c *CtrlClient) CompleteQuery(namespace, toComplete string, completeLeaves bool) ([]string, error) {
+func (c *CtrlClient) CompleteRoot(namespace, toComplete string) ([]string, error) {
 	namespaceType, err := c.Schema.MustGetType(NamespaceType)
 	if err != nil {
 		return nil, err
 	}
 
-	completion, err := c.completeQuery(NewAutoCompleteContext(namespace, toComplete, completeLeaves), namespaceType)
+	completion, err := c.completeRoot(NewAutoCompleteContext(namespace, toComplete, false), namespaceType)
 	if err != nil {
 		return nil, err
 	}
@@ -258,9 +258,23 @@ func (c *CtrlClient) CompleteQuery(namespace, toComplete string, completeLeaves 
 	return completion, nil
 }
 
-func (c *CtrlClient) CompleteQueryBased(namespace, base, toComplete string, completeLeaves bool) ([]string, error) {
+func (c *CtrlClient) CompleteQuery(namespace, toComplete string) ([]string, error) {
+	namespaceType, err := c.Schema.MustGetType(NamespaceType)
+	if err != nil {
+		return nil, err
+	}
+
+	completion, err := c.completeQuery(NewAutoCompleteContext(namespace, toComplete, true), namespaceType)
+	if err != nil {
+		return nil, err
+	}
+
+	return completion, nil
+}
+
+func (c *CtrlClient) CompleteQueryBased(namespace, base, toComplete string) ([]string, error) {
 	if base == "" {
-		return c.CompleteQuery(namespace, toComplete, completeLeaves)
+		return c.CompleteQuery(namespace, toComplete)
 	}
 
 	queryType, err := c.GetQueryType()
@@ -275,7 +289,7 @@ func (c *CtrlClient) CompleteQueryBased(namespace, base, toComplete string, comp
 		return nil, err
 	}
 
-	ctx := NewAutoCompleteContext(namespace, toComplete, completeLeaves)
+	ctx := NewAutoCompleteContext(namespace, toComplete, true)
 	ctx.query = query
 	for len(root.Fields) != 0 {
 		for _, field := range root.Fields {
@@ -292,7 +306,7 @@ func (c *CtrlClient) CompleteQueryBased(namespace, base, toComplete string, comp
 	return completion, nil
 }
 
-func (c *CtrlClient) completeQueryObject(ctx *AutoCompleteContext, root *Type) ([]string, error) {
+func (c *CtrlClient) completeObject(ctx *AutoCompleteContext, root *Type, completer func(*AutoCompleteContext, *Type) ([]string, error)) ([]string, error) {
 	var completions []string
 	for _, field := range root.Fields {
 		subType, err := c.Schema.resolve(&field.Type)
@@ -301,7 +315,7 @@ func (c *CtrlClient) completeQueryObject(ctx *AutoCompleteContext, root *Type) (
 		}
 
 		if len(field.Args) == 0 {
-			subCompletions, err := c.completeQuery(ctx.Next(string(field.Name), ""), subType)
+			subCompletions, err := completer(ctx.Next(string(field.Name), ""), subType)
 			if err != nil {
 				return nil, err
 			}
@@ -324,7 +338,7 @@ func (c *CtrlClient) completeQueryObject(ctx *AutoCompleteContext, root *Type) (
 		}
 
 		for _, arg := range args {
-			subCompletions, err := c.completeQuery(ctx.Next(string(field.Name), arg), subType)
+			subCompletions, err := completer(ctx.Next(string(field.Name), arg), subType)
 			if err != nil {
 				return nil, err
 			}
@@ -345,7 +359,7 @@ func (c *CtrlClient) completeQuery(ctx *AutoCompleteContext, root *Type) ([]stri
 			return nil, nil
 		}
 
-		return c.completeQueryObject(ctx, root)
+		return c.completeObject(ctx, root, c.completeQuery)
 	}
 
 	if !strings.HasPrefix(currentQuery, toCompleteRoot) {
@@ -370,7 +384,7 @@ func (c *CtrlClient) completeQuery(ctx *AutoCompleteContext, root *Type) ([]stri
 			complete.leaves = leaves
 			completes = append(completes, complete.TrimNamespaced(ctx.namespace))
 		} else if len(leaves) == 1 && root.Kind == ObjectKind {
-			subCompletes, err := c.completeQueryObject(ctx, root)
+			subCompletes, err := c.completeObject(ctx, root, c.completeQuery)
 			if err != nil {
 				return nil, err
 			}
@@ -382,6 +396,37 @@ func (c *CtrlClient) completeQuery(ctx *AutoCompleteContext, root *Type) ([]stri
 
 	if strings.HasPrefix(currentQuery, ctx.toComplete.ToQuery()) {
 		return []string{trimNamespace(currentQuery, ctx.namespace)}, nil
+	}
+
+	return nil, nil
+}
+
+func (c *CtrlClient) completeRoot(ctx *AutoCompleteContext, root *Type) ([]string, error) {
+	if root.Kind != ObjectKind || len(ctx.toComplete.leaves) != 1 {
+		return nil, nil
+	}
+
+	currentQuery := strings.Join(ctx.query, "/")
+	toCompleteRoot := strings.Join(ctx.toComplete.root, "/")
+
+	if len(ctx.query) <= len(ctx.toComplete.root) {
+		if !strings.HasPrefix(toCompleteRoot, currentQuery) {
+			return nil, nil
+		}
+
+		return c.completeObject(ctx, root, c.completeRoot)
+	}
+
+	if strings.HasPrefix(currentQuery, ctx.toComplete.ToQuery()) {
+		completes := []string{trimNamespace(currentQuery, ctx.namespace)}
+		if len(ctx.query)-len(ctx.toComplete.root) == 1 {
+			subCompletes, err := c.completeObject(ctx, root, c.completeRoot)
+			if err != nil {
+				return nil, err
+			}
+			completes = append(completes, subCompletes...)
+		}
+		return completes, nil
 	}
 
 	return nil, nil
