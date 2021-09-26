@@ -34,6 +34,7 @@ type GCPChaos struct {
 
 var _ InnerObjectWithCustomStatus = (*GCPChaos)(nil)
 var _ InnerObjectWithSelector = (*GCPChaos)(nil)
+var _ InnerObject = (*GCPChaos)(nil)
 
 // GCPChaosAction represents the chaos action about gcp.
 type GCPChaosAction string

@@ -248,7 +248,7 @@ func (s *Service) findScheduleInCluster(c *gin.Context, kubeCli client.Client, n
 	}
 
 	selector, err := metav1.LabelSelectorAsSelector(&metav1.LabelSelector{
-		MatchLabels: map[string]string{"managed-by": sch.Name},
+		MatchLabels: map[string]string{v1alpha1.LabelManagedBy: sch.Name},
 	})
 	if err != nil {
 		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
