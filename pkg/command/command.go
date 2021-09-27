@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package utils
+package command
 
 import (
 	"os/exec"
@@ -19,23 +19,28 @@ import (
 	"strings"
 )
 
-// ExecTag stand for the path of executable file in command.
+// ExecTag stands for the path of executable file in command.
 // If we want this util works ,
 // we must add Exec in the struct and use NewExec() to initialize it,
 // because the default way to initialize Exec means None in code.
 const ExecTag = "exec"
 
-// SubCommandTag stand for the sub command in common command.
+// SubCommandTag stands for the sub command in common command.
 // We can use it in struct fields as a tag.
 // Just like MatchExtension below
 // type Iptables Struct {
 // 	Exec
-//	MatchExtension string `sub_command:""`
+//	MatchExtension Match `sub_command:""`
+// }
+//
+// type Match Struct {
+// 	Exec
+//	Port string `para:"-p"`
 // }
 // Field with SubcommandTag needs to be a struct with Exec.
 const SubCommandTag = "sub_command"
 
-// ParaTag stand for parameters in command.
+// ParaTag stands for parameters in command.
 // We can use it in struct fields as a tag.
 // Just like Port below
 // type Iptables Struct {
@@ -48,6 +53,14 @@ const SubCommandTag = "sub_command"
 // If the value of field is empty string or empty string slice or empty slice, the field and tag will all be skipped.
 const ParaTag = "para"
 
+// Exec is the interface of a command.
+// We need to inherit it in the struct of command.
+// User must add ExecTag as the tag of Exec field.
+// Example:
+// type Iptables struct {
+//	Exec           `exec:"iptables"`
+//	Tables         string `para:"-t"`
+// }
 type Exec struct {
 	option string
 }
