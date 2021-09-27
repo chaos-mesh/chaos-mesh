@@ -19,10 +19,10 @@ import (
 	"strings"
 )
 
-// some example usage of RenderCommands
+// some example usage of renderCommands
 // notice that the output could not be used in shell directly, you need quotes and escape
-func ExampleRenderCommands() {
-	commands, _ := RenderCommands(RequestFlags{
+func Example_renderCommands() {
+	commands, _ := renderCommands(CommandFlags{
 		Method:         http.MethodGet,
 		URL:            "https://github.com/chaos-mesh/chaos-mesh",
 		Header:         nil,
@@ -35,11 +35,11 @@ func ExampleRenderCommands() {
 	// Output: curl -i -s -L https://github.com/chaos-mesh/chaos-mesh
 }
 
-func ExampleRenderCommands_withCustomHeader() {
-	commands, _ := RenderCommands(RequestFlags{
+func Example_renderCommands_withCustomHeader() {
+	commands, _ := renderCommands(CommandFlags{
 		Method: http.MethodGet,
 		URL:    "https://github.com/chaos-mesh/chaos-mesh",
-		Header: http.Header{
+		Header: Header{
 			"User-Agent": []string{"Go-http-client/1.1"},
 		},
 		Body:           "",
@@ -51,8 +51,8 @@ func ExampleRenderCommands_withCustomHeader() {
 	// Output: curl -i -s -L -H User-Agent: Go-http-client/1.1 https://github.com/chaos-mesh/chaos-mesh
 }
 
-func ExampleRenderCommands_postJson() {
-	commands, _ := RenderCommands(RequestFlags{
+func Example_renderCommands_postJson() {
+	commands, _ := renderCommands(CommandFlags{
 		Method:         http.MethodPost,
 		URL:            "https://jsonplaceholder.typicode.com/posts",
 		Header:         nil,

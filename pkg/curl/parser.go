@@ -15,15 +15,15 @@ package curl
 
 import (
 	"fmt"
-	"net/http"
 	"strings"
 
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-
+	"github.com/pkg/errors"
 	flag "github.com/spf13/pflag"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
-func ParseCommands(command Commands) (RequestFlags, error) {
+func parseCommands(command Commands) (*CommandFlags, error) {
 	flagset := flag.NewFlagSet("curl", flag.ContinueOnError)
 	flagset.ParseErrorsWhitelist.UnknownFlags = true
 
@@ -37,18 +37,18 @@ func ParseCommands(command Commands) (RequestFlags, error) {
 
 	// first non-flag arg is the command itself, use the second non-flag arg as the url.
 	if flag.NArg() > 1 {
-		return RequestFlags{}, fmt.Errorf("can not find the url")
+		return nil, fmt.Errorf("can not find the url")
 	}
 	url := flagset.Arg(1)
 
 	if err != nil {
-		return RequestFlags{}, nil
+		return nil, nil
 	}
 
 	isJson := false
-	var header http.Header
+	var header Header
 	if len(*rawHeader) > 0 {
-		header = http.Header{}
+		header = Header{}
 	}
 	for _, item := range *rawHeader {
 		k, v := parseHeader(item)
@@ -62,7 +62,7 @@ func ParseCommands(command Commands) (RequestFlags, error) {
 		header = nil
 	}
 
-	return RequestFlags{
+	return &CommandFlags{
 		Method:         *requestMethod,
 		URL:            url,
 		Header:         header,
@@ -72,9 +72,22 @@ func ParseCommands(command Commands) (RequestFlags, error) {
 	}, nil
 }
 
-func ParseWorkflowTaskTemplate(template *v1alpha1.Template) (RequestFlags, error) {
+func ParseWorkflowTaskTemplate(template *v1alpha1.Template) (*RequestForm, error) {
+	if !IsValidRenderedTask(template) {
+		return nil, errors.Errorf("invalid request, this task is not rendered by curl-render")
+	}
+	parsedFlags, err := parseCommands(template.Task.Container.Command)
+	if err != nil {
+		return nil, err
+	}
+	return &RequestForm{
+		CommandFlags: *parsedFlags,
+		Name:         template.Name,
+	}, nil
+}
 
-	return RequestFlags{}, nil
+func IsValidRenderedTask(template *v1alpha1.Template) bool {
+	return strings.HasSuffix(template.Task.Container.Name, nameSuffix)
 }
 
 func parseHeader(headerKV string) (string, string) {

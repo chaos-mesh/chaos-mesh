@@ -1813,7 +1813,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/curl.RequestFlags"
+                            "$ref": "#/definitions/curl.RequestForm"
                         }
                     },
                     "400": {
@@ -1848,7 +1848,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/curl.RequestFlags"
+                            "$ref": "#/definitions/curl.RequestForm"
                         }
                     }
                 ],
@@ -2376,7 +2376,16 @@ var doc = `{
                 }
             }
         },
-        "curl.RequestFlags": {
+        "curl.Header": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            }
+        },
+        "curl.RequestForm": {
             "type": "object",
             "properties": {
                 "body": {
@@ -2386,7 +2395,8 @@ var doc = `{
                     "type": "boolean"
                 },
                 "header": {
-                    "type": "string"
+                    "type": "object",
+                    "$ref": "#/definitions/curl.Header"
                 },
                 "jsonContent": {
                     "type": "boolean"

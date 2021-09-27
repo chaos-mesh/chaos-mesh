@@ -26,7 +26,7 @@ const image = "curlimages/curl:7.78.0"
 
 const nameSuffix = "-rendered-http-request"
 
-func RenderCommands(request RequestFlags) (Commands, error) {
+func renderCommands(request CommandFlags) (Commands, error) {
 	// TODO: validation of request
 	result := []string{"curl", "-i", "-s"}
 
@@ -37,10 +37,10 @@ func RenderCommands(request RequestFlags) (Commands, error) {
 
 	if request.Method != http.MethodGet {
 		result = append(result, "-X", request.Method)
-	}
 
-	if len(request.Body) > 0 {
-		result = append(result, "-d", request.Body)
+		if len(request.Body) > 0 {
+			result = append(result, "-d", request.Body)
+		}
 	}
 
 	renderedHeaders := http.Header{}
@@ -49,7 +49,7 @@ func RenderCommands(request RequestFlags) (Commands, error) {
 	}
 	if request.JsonContent {
 		if request.Header == nil {
-			request.Header = http.Header{}
+			request.Header = Header{}
 		}
 		renderedHeaders[HeaderContentType] = []string{ApplicationJson}
 	}
@@ -65,8 +65,8 @@ func RenderCommands(request RequestFlags) (Commands, error) {
 	return result, nil
 }
 
-func RenderWorkflowTaskTemplate(request RequestFlags) (*v1alpha1.Template, error) {
-	commands, err := RenderCommands(request)
+func RenderWorkflowTaskTemplate(request RequestForm) (*v1alpha1.Template, error) {
+	commands, err := renderCommands(request.CommandFlags)
 	if err != nil {
 		return nil, err
 	}

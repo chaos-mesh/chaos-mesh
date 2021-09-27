@@ -254,14 +254,21 @@ definitions:
       uid:
         type: string
     type: object
-  curl.RequestFlags:
+  curl.Header:
+    additionalProperties:
+      items:
+        type: string
+      type: array
+    type: object
+  curl.RequestForm:
     properties:
       body:
         type: string
       followLocation:
         type: boolean
       header:
-        type: string
+        $ref: '#/definitions/curl.Header'
+        type: object
       jsonContent:
         type: boolean
       method:
@@ -3417,7 +3424,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/curl.RequestFlags'
+            $ref: '#/definitions/curl.RequestForm'
         "400":
           description: Bad Request
           schema:
@@ -3438,7 +3445,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/curl.RequestFlags'
+          $ref: '#/definitions/curl.RequestForm'
       produces:
       - application/json
       responses:

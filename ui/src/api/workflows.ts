@@ -1,4 +1,4 @@
-import { Workflow, WorkflowParams, WorkflowSingle } from './workflows.type'
+import { RequestForm, Workflow, WorkflowParams, WorkflowSingle } from './workflows.type'
 
 import { Archive } from './archives.type'
 import http from './http'
@@ -28,3 +28,6 @@ export const singleArchive = (uuid: uuid) => http.get<Archive>(`archives/workflo
 
 export const delArchive = (uuid: uuid) => http.delete(`/archives/workflows/${uuid}`)
 export const delArchives = (uuids: uuid[]) => http.delete(`/archives/workflows?uids=${uuids.join(',')}`)
+
+export const renderHTTPTask = (form: RequestForm) => http.post('/workflows/render-task/http', form)
+export const parseHTTPTask = (form: RequestForm) => http.post('/workflows/parse-task/http', form)

@@ -15,35 +15,35 @@ package curl
 
 import "fmt"
 
-func ExampleParseCommands() {
+func Example_parseCommands() {
 	cmd := []string{"curl", "-i", "-s", "-L", "https://github.com/chaos-mesh/chaos-mesh"}
-	flags, err := ParseCommands(cmd)
+	flags, err := parseCommands(cmd)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
 
 	fmt.Printf("%+v", flags)
-	// Output: {Method:GET URL:https://github.com/chaos-mesh/chaos-mesh Header:map[] Body: FollowLocation:true JsonContent:false}
+	// Output: &{Method:GET URL:https://github.com/chaos-mesh/chaos-mesh Header:map[] Body: FollowLocation:true JsonContent:false}
 }
 
-func ExampleParseCommands_withCustomHeader() {
+func Example_parseCommands_withCustomHeader() {
 	cmd := []string{"curl", "-i", "-s", "-L", "-H", "User-Agent: Go-http-client/1.1", "https://github.com/chaos-mesh/chaos-mesh"}
-	flags, err := ParseCommands(cmd)
+	flags, err := parseCommands(cmd)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
 
 	fmt.Printf("%+v", flags)
-	// Output: {Method:GET URL:https://github.com/chaos-mesh/chaos-mesh Header:map[User-Agent:[Go-http-client/1.1]] Body: FollowLocation:true JsonContent:false}
+	// Output: &{Method:GET URL:https://github.com/chaos-mesh/chaos-mesh Header:map[User-Agent:[Go-http-client/1.1]] Body: FollowLocation:true JsonContent:false}
 }
 
-func ExampleParseCommands_postJson() {
+func Example_parseCommands_postJson() {
 	cmd := []string{"curl", "-i", "-s", "-X", "POST", "-d", "{\"foo\": \"bar\"}", "-H", "Content-Type: application/json", "https://jsonplaceholder.typicode.com/posts"}
-	flags, err := ParseCommands(cmd)
+	flags, err := parseCommands(cmd)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
 
 	fmt.Printf("%+v", flags)
-	// Output: {Method:POST URL:https://jsonplaceholder.typicode.com/posts Header:map[] Body:{"foo": "bar"} FollowLocation:false JsonContent:true}
+	// Output: &{Method:POST URL:https://jsonplaceholder.typicode.com/posts Header:map[] Body:{"foo": "bar"} FollowLocation:false JsonContent:true}
 }

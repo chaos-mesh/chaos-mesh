@@ -13,20 +13,26 @@
 
 package curl
 
-import "net/http"
-
 const HeaderContentType = "Content-Type"
 const ApplicationJson = "application/json"
 
-// RequestFlags should contain all the fields shown on frontend, and it could be parsed from flags of curl command line.
-type RequestFlags struct {
-	Name           string      `json:"name"`
-	Method         string      `json:"method"`
-	URL            string      `json:"url"`
-	Header         http.Header `json:"header"`
-	Body           string      `json:"body"`
-	FollowLocation bool        `json:"followLocation"`
-	JsonContent    bool        `json:"jsonContent"`
+// RequestForm should contain all the fields shown on frontend
+type RequestForm struct {
+	CommandFlags
+	Name string `json:"name"`
+}
+
+// Header is copied from http.Header, for speed up swagger_spec code generator without --parseDependency
+type Header map[string][]string
+
+// CommandFlags could be parsed from flags of curl command line.
+type CommandFlags struct {
+	Method         string `json:"method"`
+	URL            string `json:"url"`
+	Header         Header `json:"header"`
+	Body           string `json:"body"`
+	FollowLocation bool   `json:"followLocation"`
+	JsonContent    bool   `json:"jsonContent"`
 }
 
 type Commands []string

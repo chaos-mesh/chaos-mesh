@@ -3,9 +3,11 @@ import { Template, TemplateType } from 'slices/workflows'
 
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
+import { RequestForm } from 'api/workflows.type'
 import Space from 'components-mui/Space'
 import { Submit } from 'components/FormField'
 import T from 'components/T'
+import { renderHTTPTask } from 'api/workflows'
 import { useFormik } from 'formik'
 
 export interface RenderedHTTPTask {
@@ -17,31 +19,33 @@ export interface RenderedHTTPTask {
   }
 }
 
-export interface RequestFlags {
-  name: string
-  url: string
-  method: string
-  body: string
-  follow: boolean
-  json: boolean
-}
-
 interface HTTPTaskProps {
   initialValues?: RenderedHTTPTask
   submit: (template: Template) => void
 }
 
 const HTTPTask: React.FC<HTTPTaskProps> = ({ initialValues, submit }) => {
-  const onSubmit = ({ name }: RequestFlags) => {
-    const values = { name }
+  const onSubmit = (form: RequestForm) => {
     // TODO: convert RequestFlags to RenderedHTTPTask
-    submit({
-      type: TemplateType.HTTP,
-      ...values!,
-    })
+    renderHTTPTask(form)
+      .then((response) => {
+        const { name, task } = response.data!
+        const { container } = task
+        const result: Template = {
+          name,
+          children: [],
+          type: TemplateType.Custom,
+          custom: {
+            container,
+            conditionalBranches: [],
+          },
+        }
+        submit(result)
+      })
+      .catch(console.error)
   }
 
-  const validateRequestForm = (newValue: RequestFlags) => {
+  const validateRequestForm = (newValue: RequestForm) => {
     console.log(newValue)
   }
   const formik = useFormik({

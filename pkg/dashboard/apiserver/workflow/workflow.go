@@ -53,13 +53,13 @@ func Register(r *gin.RouterGroup, s *Service) {
 // @Description Render a task which sends HTTP request
 // @Tags workflows
 // @Produce json
-// @Param request body curl.RequestFlags true "Origin HTTP Request"
+// @Param request body curl.RequestForm true "Origin HTTP Request"
 // @Router /workflows/render-task/http [post]
 // @Success 200 {object} v1alpha1.Template
 // @Failure 400 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
 func (it *Service) renderHTTPTask(c *gin.Context) {
-	requestBody := curl.RequestFlags{}
+	requestBody := curl.RequestForm{}
 	if err := c.ShouldBindJSON(&requestBody); err != nil {
 		utils.SetAPIError(c, utils.ErrBadRequest.Wrap(err, "failed to parse request body"))
 		return
@@ -78,7 +78,7 @@ func (it *Service) renderHTTPTask(c *gin.Context) {
 // @Produce json
 // @Param request body v1alpha1.Template true "Rendered Task"
 // @Router /workflows/parse-task/http [post]
-// @Success 200 {object} curl.RequestFlags
+// @Success 200 {object} curl.RequestForm
 // @Failure 400 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
 func (it *Service) parseHTTPTask(c *gin.Context) {

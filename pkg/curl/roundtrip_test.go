@@ -26,11 +26,11 @@ func TestRoundTrip(t *testing.T) {
 	RegisterTestingT(t)
 	tests := []struct {
 		name  string
-		flags RequestFlags
+		flags CommandFlags
 	}{
 		{
 			name: "simple get",
-			flags: RequestFlags{
+			flags: CommandFlags{
 				Method:         http.MethodGet,
 				URL:            "github.com/chaos-mesh/chaos-mesh",
 				Header:         nil,
@@ -40,10 +40,10 @@ func TestRoundTrip(t *testing.T) {
 			},
 		}, {
 			name: "get with header",
-			flags: RequestFlags{
+			flags: CommandFlags{
 				Method: http.MethodGet,
 				URL:    "https://github.com/chaos-mesh/chaos-mesh",
-				Header: http.Header{
+				Header: Header{
 					"User-Agent": []string{"Go-http-client/1.1"},
 				},
 				Body:           "",
@@ -52,7 +52,7 @@ func TestRoundTrip(t *testing.T) {
 			},
 		}, {
 			name: "post json",
-			flags: RequestFlags{
+			flags: CommandFlags{
 				Method:         http.MethodPost,
 				URL:            "https://jsonplaceholder.typicode.com/posts",
 				Header:         nil,
@@ -62,10 +62,10 @@ func TestRoundTrip(t *testing.T) {
 			},
 		}, {
 			name: "post json with custom header",
-			flags: RequestFlags{
+			flags: CommandFlags{
 				Method: http.MethodPost,
 				URL:    "https://jsonplaceholder.typicode.com/posts",
-				Header: http.Header{
+				Header: Header{
 					"User-Agent": []string{"Go-http-client/1.1"},
 				},
 				Body:           "{\"foo\": \"bar\"}",
@@ -74,7 +74,7 @@ func TestRoundTrip(t *testing.T) {
 			},
 		}, {
 			name: "get with following location",
-			flags: RequestFlags{
+			flags: CommandFlags{
 				Method:         http.MethodGet,
 				URL:            "www.google.com",
 				Header:         nil,
@@ -86,11 +86,11 @@ func TestRoundTrip(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			commands, err := RenderCommands(test.flags)
+			commands, err := renderCommands(test.flags)
 			Expect(err).ShouldNot(HaveOccurred())
-			parsedFlags, err := ParseCommands(commands)
+			parsedFlags, err := parseCommands(commands)
 			Expect(err).ShouldNot(HaveOccurred())
-			Expect(parsedFlags).To(Equal(test.flags), "rendered commands %+v", commands)
+			Expect(parsedFlags).To(Equal(&test.flags), "rendered commands %+v", commands)
 		})
 	}
 }
