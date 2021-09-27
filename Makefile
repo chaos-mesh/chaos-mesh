@@ -145,7 +145,18 @@ GO_TARGET_PHONY += $(1)
 endef
 
 ifeq ($(TARGET_PLATFORM),)
-	TARGET_PLATFORM := $(shell uname -m)
+	UNAME_M := $(shell uname -m)
+	ifeq ($(UNAME_M),x86_64)
+		TARGET_PLATFORM := amd64
+	else ifeq($(UNAME_M),amd64)
+		TARGET_PLATFORM := amd64
+	else ifeq($(UNAME_M),arm64)
+		TARGET_PLATFORM := arm64
+	else ifeq($(UNAME_M),aarch64)
+		TARGET_PLATFORM := arm64
+	else
+		$(error Please run this script on amd64 or arm64 machine)
+	endif
 endif
 
 BUILD_INDOCKER_ARG := --env IN_DOCKER=1 --volume $(ROOT):/mnt --user $(shell id -u):$(shell id -g) --platform=linux/$(TARGET_PLATFORM)
