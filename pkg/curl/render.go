@@ -40,7 +40,7 @@ func RenderCommands(request RequestFlags) (Commands, error) {
 	}
 
 	if len(request.Body) > 0 {
-		result = append(result, "-d", fmt.Sprintf("%s", request.Body))
+		result = append(result, "-d", request.Body)
 	}
 
 	renderedHeaders := http.Header{}
