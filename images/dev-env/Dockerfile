@@ -58,6 +58,9 @@ RUN mkdir -p /go/bin
 COPY --from=go_install /usr/local/go /usr/local/go
 COPY --from=go_install /go/bin /go/bin
 
+# The `gqlgen` depends on the plugin in it
+COPY --from=go_install /go/pkg/mod/github.com/99designs/gqlgen@v0.13.0/plugin/modelgen /go/pkg/mod/github.com/99designs/gqlgen@v0.13.0/plugin/modelgen
+
 ENV PATH "/usr/local/go/bin:${PATH}:/tmp/go/bin:/go/bin"
 
 RUN curl -L https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv4.3.0/kustomize_v4.3.0_$(go env GOOS)_$(go env GOARCH).tar.gz | tar -xz -C /usr/local/bin/

@@ -134,11 +134,11 @@ ifeq ($(TARGET_PLATFORM),)
 	UNAME_M := $(shell uname -m)
 	ifeq ($(UNAME_M),x86_64)
 		TARGET_PLATFORM := amd64
-	else ifeq($(UNAME_M),amd64)
+	else ifeq ($(UNAME_M),amd64)
 		TARGET_PLATFORM := amd64
-	else ifeq($(UNAME_M),arm64)
+	else ifeq ($(UNAME_M),arm64)
 		TARGET_PLATFORM := arm64
-	else ifeq($(UNAME_M),aarch64)
+	else ifeq ($(UNAME_M),aarch64)
 		TARGET_PLATFORM := arm64
 	else
 		$(error Please run this script on amd64 or arm64 machine)
