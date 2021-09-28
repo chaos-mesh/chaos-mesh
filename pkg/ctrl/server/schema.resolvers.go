@@ -984,8 +984,21 @@ func (r *processResolver) Fds(ctx context.Context, obj *model.Process) ([]*model
 	return r.GetFdsOfProcess(ctx, obj)
 }
 
-func (r *queryResolver) Namespace(ctx context.Context, ns string) (*model.Namespace, error) {
-	return &model.Namespace{Ns: ns}, nil
+func (r *queryResolver) Namespace(ctx context.Context, ns *string) ([]*model.Namespace, error) {
+	if ns == nil {
+		var nsList v1.NamespaceList
+		var namespaces []*model.Namespace
+		if err := r.Client.List(ctx, &nsList); err != nil {
+			return nil, err
+		}
+
+		for _, ns := range nsList.Items {
+			namespaces = append(namespaces, &model.Namespace{Ns: ns.Name})
+		}
+
+		return namespaces, nil
+	}
+	return []*model.Namespace{{Ns: *ns}}, nil
 }
 
 func (r *rawIptablesResolver) Direction(ctx context.Context, obj *v1alpha1.RawIptables) (string, error) {

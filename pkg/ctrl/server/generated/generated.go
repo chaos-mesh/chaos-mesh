@@ -588,7 +588,7 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Namespace func(childComplexity int, ns string) int
+		Namespace func(childComplexity int, ns *string) int
 	}
 
 	RawIPSet struct {
@@ -872,7 +872,7 @@ type ProcessResolver interface {
 	Fds(ctx context.Context, obj *model.Process) ([]*model.Fd, error)
 }
 type QueryResolver interface {
-	Namespace(ctx context.Context, ns string) (*model.Namespace, error)
+	Namespace(ctx context.Context, ns *string) ([]*model.Namespace, error)
 }
 type RawIptablesResolver interface {
 	Direction(ctx context.Context, obj *v1alpha1.RawIptables) (string, error)
@@ -3472,7 +3472,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Namespace(childComplexity, args["ns"].(string)), true
+		return e.complexity.Query.Namespace(childComplexity, args["ns"].(*string)), true
 
 	case "RawIPSet.cidrs":
 		if e.complexity.RawIPSet.Cidrs == nil {
@@ -3840,7 +3840,7 @@ schema {
 }
 
 type Query {
-    namespace(ns: String! = "default"): Namespace!
+    namespace(ns: String): [Namespace!]
 }
 
 type Logger {
@@ -5071,10 +5071,10 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 func (ec *executionContext) field_Query_namespace_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
+	var arg0 *string
 	if tmp, ok := rawArgs["ns"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ns"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -17144,21 +17144,18 @@ func (ec *executionContext) _Query_namespace(ctx context.Context, field graphql.
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Namespace(rctx, args["ns"].(string))
+		return ec.resolvers.Query().Namespace(rctx, args["ns"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Namespace)
+	res := resTmp.([]*model.Namespace)
 	fc.Result = res
-	return ec.marshalNNamespace2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐNamespace(ctx, field.Selections, res)
+	return ec.marshalONamespace2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐNamespaceᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -23063,9 +23060,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_namespace(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
 				return res
 			})
 		case "__type":
@@ -23839,10 +23833,6 @@ func (ec *executionContext) marshalNInt2int64(ctx context.Context, sel ast.Selec
 
 func (ec *executionContext) marshalNIoFault2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐIoFault(ctx context.Context, sel ast.SelectionSet, v v1alpha1.IoFault) graphql.Marshaler {
 	return ec._IoFault(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNNamespace2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐNamespace(ctx context.Context, sel ast.SelectionSet, v model.Namespace) graphql.Marshaler {
-	return ec._Namespace(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNNamespace2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐNamespace(ctx context.Context, sel ast.SelectionSet, v *model.Namespace) graphql.Marshaler {
@@ -24825,6 +24815,46 @@ func (ec *executionContext) marshalOMistakeSpec2ᚖgithubᚗcomᚋchaosᚑmesh�
 		return graphql.Null
 	}
 	return ec._MistakeSpec(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalONamespace2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐNamespaceᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Namespace) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNNamespace2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐNamespace(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
 }
 
 func (ec *executionContext) marshalONetworkChaos2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐNetworkChaosᚄ(ctx context.Context, sel ast.SelectionSet, v []*v1alpha1.NetworkChaos) graphql.Marshaler {

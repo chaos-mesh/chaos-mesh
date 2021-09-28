@@ -17,7 +17,7 @@ schema {
 }
 
 type Query {
-    namespace(ns: String! = "default"): Namespace!
+    namespace(ns: String): [Namespace!]
 }
 
 type Logger {
