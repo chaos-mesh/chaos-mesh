@@ -372,14 +372,16 @@ func (s *Schema) parseQuery(query []Segment, super *Type, partial bool) ([]*Quer
 	newQuery := NewQuery(segment.Name, typ, decorator)
 	if len(field.Args) != 0 {
 		if segment.Argument != nil {
-			argument := field.Args[0]
-			argType, err := s.resolve(&argument.Type)
-			if err != nil {
-				return nil, err
-			}
-			err = newQuery.SetArgument(string(argument.Name), *segment.Argument, argType)
-			if err != nil {
-				return nil, err
+			if *segment.Argument != AllArgument {
+				argument := field.Args[0]
+				argType, err := s.resolve(&argument.Type)
+				if err != nil {
+					return nil, err
+				}
+				err = newQuery.SetArgument(string(argument.Name), *segment.Argument, argType)
+				if err != nil {
+					return nil, err
+				}
 			}
 		} else if field.Args[0].DefaultValue == nil && !partial {
 			// argument is nil
