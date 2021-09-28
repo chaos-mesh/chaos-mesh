@@ -7,8 +7,9 @@ import (
 	"io"
 	"strconv"
 
+	v1 "k8s.io/api/core/v1"
+
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"k8s.io/api/core/v1"
 )
 
 type Fd struct {
@@ -17,24 +18,16 @@ type Fd struct {
 }
 
 type Namespace struct {
-	Ns          string                      `json:"ns"`
-	Component   []*v1.Pod                   `json:"component"`
-	Pod         *v1.Pod                     `json:"pod"`
-	Pods        []*v1.Pod                   `json:"pods"`
-	Stress      *v1alpha1.StressChaos       `json:"stress"`
-	Stresses    []*v1alpha1.StressChaos     `json:"stresses"`
-	Io          *v1alpha1.IOChaos           `json:"io"`
-	Ios         []*v1alpha1.IOChaos         `json:"ios"`
-	Podio       *v1alpha1.PodIOChaos        `json:"podio"`
-	Podios      []*v1alpha1.PodIOChaos      `json:"podios"`
-	HTTP        *v1alpha1.HTTPChaos         `json:"http"`
-	HTTPS       []*v1alpha1.HTTPChaos       `json:"https"`
-	Podhttp     *v1alpha1.PodHttpChaos      `json:"podhttp"`
-	Podhttps    []*v1alpha1.PodHttpChaos    `json:"podhttps"`
-	Network     *v1alpha1.NetworkChaos      `json:"network"`
-	Networks    []*v1alpha1.NetworkChaos    `json:"networks"`
-	Podnetwork  *v1alpha1.PodNetworkChaos   `json:"podnetwork"`
-	Podnetworks []*v1alpha1.PodNetworkChaos `json:"podnetworks"`
+	Ns         string                      `json:"ns"`
+	Component  []*v1.Pod                   `json:"component"`
+	Pod        []*v1.Pod                   `json:"pod"`
+	Stress     []*v1alpha1.StressChaos     `json:"stress"`
+	Io         []*v1alpha1.IOChaos         `json:"io"`
+	Podio      []*v1alpha1.PodIOChaos      `json:"podio"`
+	HTTP       []*v1alpha1.HTTPChaos       `json:"http"`
+	Podhttp    []*v1alpha1.PodHttpChaos    `json:"podhttp"`
+	Network    []*v1alpha1.NetworkChaos    `json:"network"`
+	Podnetwork []*v1alpha1.PodNetworkChaos `json:"podnetwork"`
 }
 
 type Process struct {

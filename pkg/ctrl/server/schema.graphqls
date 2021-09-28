@@ -27,23 +27,15 @@ type Logger {
 
 type Namespace {
     ns: String!
-    component(component: Component!): [Pod!]    @goField(forceResolver: true)
-    pod(name: String!): Pod!                    @goField(forceResolver: true)
-    pods: [Pod!]                                @goField(forceResolver: true)
-    stress(name: String!): StressChaos!         @goField(forceResolver: true)
-    stresses: [StressChaos!]                    @goField(forceResolver: true)
-    io(name: String!): IOChaos!                 @goField(forceResolver: true)
-    ios: [IOChaos!]                             @goField(forceResolver: true)
-    podio(name: String!): PodIOChaos!           @goField(forceResolver: true)
-    podios: [PodIOChaos!]                       @goField(forceResolver: true)
-    http(name: String!): HTTPChaos!             @goField(forceResolver: true)
-    https: [HTTPChaos!]                         @goField(forceResolver: true)
-    podhttp(name: String!): PodHTTPChaos!       @goField(forceResolver: true)
-    podhttps: [PodHTTPChaos!]                   @goField(forceResolver: true)
-    network(name: String!): NetworkChaos!       @goField(forceResolver: true)
-    networks: [NetworkChaos!]                   @goField(forceResolver: true)
-    podnetwork(name: String!): PodNetworkChaos! @goField(forceResolver: true)
-    podnetworks: [PodNetworkChaos!]             @goField(forceResolver: true)
+    component(component: Component!): [Pod!]    	@goField(forceResolver: true)
+	pod(name: String): [Pod!]                   	@goField(forceResolver: true)
+    stress(name: String): [StressChaos!]         	@goField(forceResolver: true)
+    io(name: String): [IOChaos!]                 	@goField(forceResolver: true)
+    podio(name: String): [PodIOChaos!]           	@goField(forceResolver: true)
+    http(name: String): [HTTPChaos!]             	@goField(forceResolver: true)
+    podhttp(name: String): [PodHTTPChaos!]       	@goField(forceResolver: true)
+    network(name: String): [NetworkChaos!]       	@goField(forceResolver: true)
+    podnetwork(name: String): [PodNetworkChaos!] 	@goField(forceResolver: true)
 }
 
 type OwnerReference @goModel(model: "k8s.io/apimachinery/pkg/apis/meta/v1.OwnerReference") {
