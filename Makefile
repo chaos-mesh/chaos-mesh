@@ -398,7 +398,7 @@ endef
 $(eval $(call RUN_IN_DEV_ENV_TEMPLATE,tidy,clean))
 
 define generate-ctrl-make
-	go generate ./pkg/ctrlserver/graph
+	go generate ./pkg/ctrl/server
 endef
 $(eval $(call RUN_IN_DEV_ENV_TEMPLATE,generate-ctrl))
 

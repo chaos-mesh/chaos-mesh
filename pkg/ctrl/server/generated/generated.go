@@ -14,13 +14,12 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/pkg/ctrl/server/model"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
-	v1 "k8s.io/api/core/v1"
+	"k8s.io/api/core/v1"
 	v11 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/pkg/ctrlserver/graph/model"
 )
 
 // region    ************************** generated!.gotpl **************************
@@ -3893,7 +3892,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "graph/schema.graphqls", Input: `directive @goModel(model: String, models: [String!]) on OBJECT
+	{Name: "server/schema.graphqls", Input: `directive @goModel(model: String, models: [String!]) on OBJECT
     | INPUT_OBJECT
     | SCALAR
     | ENUM
@@ -4965,7 +4964,7 @@ func (ec *executionContext) field_Logger_component_args(ctx context.Context, raw
 	var arg1 model.Component
 	if tmp, ok := rawArgs["component"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("component"))
-		arg1, err = ec.unmarshalNComponent2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlserverᚋgraphᚋmodelᚐComponent(ctx, tmp)
+		arg1, err = ec.unmarshalNComponent2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐComponent(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -5004,7 +5003,7 @@ func (ec *executionContext) field_Namespace_component_args(ctx context.Context, 
 	var arg0 model.Component
 	if tmp, ok := rawArgs["component"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("component"))
-		arg0, err = ec.unmarshalNComponent2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlserverᚋgraphᚋmodelᚐComponent(ctx, tmp)
+		arg0, err = ec.unmarshalNComponent2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐComponent(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -12754,7 +12753,7 @@ func (ec *executionContext) _Pod_processes(ctx context.Context, field graphql.Co
 	}
 	res := resTmp.([]*model.Process)
 	fc.Result = res
-	return ec.marshalOProcess2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlserverᚋgraphᚋmodelᚐProcessᚄ(ctx, field.Selections, res)
+	return ec.marshalOProcess2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐProcessᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Pod_mounts(ctx context.Context, field graphql.CollectedField, obj *v1.Pod) (ret graphql.Marshaler) {
@@ -17476,7 +17475,7 @@ func (ec *executionContext) _Process_fds(ctx context.Context, field graphql.Coll
 	}
 	res := resTmp.([]*model.Fd)
 	fc.Result = res
-	return ec.marshalOFd2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlserverᚋgraphᚋmodelᚐFdᚄ(ctx, field.Selections, res)
+	return ec.marshalOFd2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐFdᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_namespace(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -17518,7 +17517,7 @@ func (ec *executionContext) _Query_namespace(ctx context.Context, field graphql.
 	}
 	res := resTmp.(*model.Namespace)
 	fc.Result = res
-	return ec.marshalNNamespace2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlserverᚋgraphᚋmodelᚐNamespace(ctx, field.Selections, res)
+	return ec.marshalNNamespace2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐNamespace(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -24200,13 +24199,13 @@ func (ec *executionContext) marshalNChaosCondition2githubᚗcomᚋchaosᚑmesh�
 	return ec._ChaosCondition(ctx, sel, &v)
 }
 
-func (ec *executionContext) unmarshalNComponent2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlserverᚋgraphᚋmodelᚐComponent(ctx context.Context, v interface{}) (model.Component, error) {
+func (ec *executionContext) unmarshalNComponent2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐComponent(ctx context.Context, v interface{}) (model.Component, error) {
 	var res model.Component
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNComponent2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlserverᚋgraphᚋmodelᚐComponent(ctx context.Context, sel ast.SelectionSet, v model.Component) graphql.Marshaler {
+func (ec *executionContext) marshalNComponent2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐComponent(ctx context.Context, sel ast.SelectionSet, v model.Component) graphql.Marshaler {
 	return v
 }
 
@@ -24214,7 +24213,7 @@ func (ec *executionContext) marshalNContainerStatus2k8sᚗioᚋapiᚋcoreᚋv1�
 	return ec._ContainerStatus(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNFd2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlserverᚋgraphᚋmodelᚐFd(ctx context.Context, sel ast.SelectionSet, v *model.Fd) graphql.Marshaler {
+func (ec *executionContext) marshalNFd2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐFd(ctx context.Context, sel ast.SelectionSet, v *model.Fd) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -24321,11 +24320,11 @@ func (ec *executionContext) marshalNIoFault2githubᚗcomᚋchaosᚑmeshᚋchaos�
 	return ec._IoFault(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNNamespace2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlserverᚋgraphᚋmodelᚐNamespace(ctx context.Context, sel ast.SelectionSet, v model.Namespace) graphql.Marshaler {
+func (ec *executionContext) marshalNNamespace2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐNamespace(ctx context.Context, sel ast.SelectionSet, v model.Namespace) graphql.Marshaler {
 	return ec._Namespace(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNNamespace2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlserverᚋgraphᚋmodelᚐNamespace(ctx context.Context, sel ast.SelectionSet, v *model.Namespace) graphql.Marshaler {
+func (ec *executionContext) marshalNNamespace2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐNamespace(ctx context.Context, sel ast.SelectionSet, v *model.Namespace) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -24502,7 +24501,7 @@ func (ec *executionContext) marshalNPodStatus2k8sᚗioᚋapiᚋcoreᚋv1ᚐPodSt
 	return ec._PodStatus(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNProcess2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlserverᚋgraphᚋmodelᚐProcess(ctx context.Context, sel ast.SelectionSet, v *model.Process) graphql.Marshaler {
+func (ec *executionContext) marshalNProcess2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐProcess(ctx context.Context, sel ast.SelectionSet, v *model.Process) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -25026,7 +25025,7 @@ func (ec *executionContext) marshalOExperimentStatus2githubᚗcomᚋchaosᚑmesh
 	return ec._ExperimentStatus(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalOFd2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlserverᚋgraphᚋmodelᚐFdᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Fd) graphql.Marshaler {
+func (ec *executionContext) marshalOFd2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐFdᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Fd) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -25053,7 +25052,7 @@ func (ec *executionContext) marshalOFd2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaos
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNFd2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlserverᚋgraphᚋmodelᚐFd(ctx, sel, v[i])
+			ret[i] = ec.marshalNFd2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐFd(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -25675,7 +25674,7 @@ func (ec *executionContext) marshalOPodNetworkChaos2ᚕᚖgithubᚗcomᚋchaos�
 	return ret
 }
 
-func (ec *executionContext) marshalOProcess2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlserverᚋgraphᚋmodelᚐProcessᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Process) graphql.Marshaler {
+func (ec *executionContext) marshalOProcess2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐProcessᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Process) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -25702,7 +25701,7 @@ func (ec *executionContext) marshalOProcess2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋ
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNProcess2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlserverᚋgraphᚋmodelᚐProcess(ctx, sel, v[i])
+			ret[i] = ec.marshalNProcess2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐProcess(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)

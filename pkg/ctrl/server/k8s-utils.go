@@ -11,14 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package graph
+package server
 
 import (
 	"strings"
 
 	"k8s.io/apimachinery/pkg/types"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/ctrlserver/graph/model"
+	"github.com/chaos-mesh/chaos-mesh/pkg/ctrl/server/model"
 )
 
 const DefaultNamespace = "default"

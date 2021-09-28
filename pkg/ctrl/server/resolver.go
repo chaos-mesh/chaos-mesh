@@ -11,22 +11,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package graph
+package server
+
+//go:generate gqlgen
+//
+// This file will not be regenerated automatically.
+//
+// It serves as dependency injection for your app, add any dependencies you require here.
 
 import (
-	"context"
-	"strings"
-
-	"github.com/pkg/errors"
-	v1 "k8s.io/api/core/v1"
+	"github.com/go-logr/logr"
+	"k8s.io/client-go/kubernetes"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// GetMounts returns mounts info
-func (r *Resolver) GetMounts(ctx context.Context, pod *v1.Pod) ([]string, error) {
-	cmd := "cat /proc/mounts"
-	out, err := r.ExecBypass(ctx, pod, cmd)
-	if err != nil {
-		return nil, errors.Wrapf(err, "run command %s failed", cmd)
-	}
-	return strings.Split(string(out), "\n"), nil
+type Resolver struct {
+	*DaemonHelper
+	Log       logr.Logger
+	Client    client.Client
+	Clientset *kubernetes.Clientset
 }

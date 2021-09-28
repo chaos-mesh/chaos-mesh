@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package graph
+package server
 
 import (
 	"context"
@@ -21,7 +21,7 @@ import (
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/ctrlserver/graph/model"
+	"github.com/chaos-mesh/chaos-mesh/pkg/ctrl/server/model"
 )
 
 // GetPidFromPS returns pid-command pairs
