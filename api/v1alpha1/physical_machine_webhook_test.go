@@ -20,32 +20,36 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("physicalmachinechaos_webhook", func() {
-	Context("webhook.Defaultor of physicalmachinechaos", func() {
+var _ = Describe("physicalmachine_webhook", func() {
+	Context("webhook.Defaultor of physicalmachine", func() {
 		It("Default", func() {
-			physicalMachineChaos := &PhysicalMachineChaos{
-				Spec: PhysicalMachineChaosSpec{
-					Action: "stress-cpu",
-					ExpInfo: ExpInfo{
-						UID: "",
-					},
+			physicalMachine := &PhysicalMachine{
+				Spec: PhysicalMachineSpec{
+					Address: "123.123.123.123:123",
 				},
 			}
-			physicalMachineChaos.Default()
-			Expect(physicalMachineChaos.Spec.UID).ToNot(Equal(""))
+			physicalMachine.Default()
+			Expect(physicalMachine.Spec.Address).To(BeEquivalentTo("http://123.123.123.123:123"))
 		})
 	})
-	Context("webhook.Validator of physicalmachinechaos", func() {
+	Context("webhook.Validator of physicalmachine", func() {
 		It("Validate", func() {
 			testCases := []struct {
-				chaos PhysicalMachineChaos
-				err   string
+				physicalMachine PhysicalMachine
+				err             string
 			}{
 				{
-					PhysicalMachineChaos{
-						Spec: PhysicalMachineChaosSpec{
-							Action: "stress-cpu",
-							ExpInfo: ExpInfo{},
+					PhysicalMachine{
+						Spec: PhysicalMachineSpec{
+							Address: "",
+						},
+					},
+					"the address is empty",
+				},
+				{
+					PhysicalMachine{
+						Spec: PhysicalMachineSpec{
+							Address: "",
 						},
 					},
 					"the configuration corresponding to action is empty",
@@ -53,7 +57,7 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 			}
 
 			for _, testCase := range testCases {
-				err := testCase.chaos.ValidateCreate()
+				err := testCase.physicalMachine.ValidateCreate()
 				Expect(strings.Contains(err.Error(), testCase.err)).To(BeTrue())
 			}
 		})

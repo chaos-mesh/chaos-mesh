@@ -11,32 +11,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package physicalmachine
+package v1alpha1
 
 import (
-	"context"
-
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"k8s.io/apimachinery/pkg/types"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type SelectImpl struct{}
+// +kubebuilder:object:root=true
+// +chaos-mesh:base
 
+// PhysicalMachine is the Schema for the physical machine API
 type PhysicalMachine struct {
-	v1alpha1.PhysicalMachine
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+
+	// Spec defines the behavior of a physical machine
+	Spec PhysicalMachineSpec `json:"spec"`
 }
 
-func (pm *PhysicalMachine) Id() string {
-	return (types.NamespacedName{
-		Name:      pm.Name,
-		Namespace: pm.Namespace,
-	}).String()
-}
+// PhysicalMachineSpec defines the desired state of PhysicalMachine
+type PhysicalMachineSpec struct {
 
-func (impl *SelectImpl) Select(ctx context.Context, physicalMachineSelector *v1alpha1.PhysicalMachineSelector) ([]*PhysicalMachine, error) {
-	return []*PhysicalMachine{physicalMachineSelector}, nil
-}
-
-func New() *SelectImpl {
-	return &SelectImpl{}
+	// Address represents the duration of the chaos action
+	Address string `json:"address"`
 }

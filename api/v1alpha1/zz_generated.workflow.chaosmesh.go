@@ -29,6 +29,7 @@ const (
 	TypeKernelChaos TemplateType = "KernelChaos"
 	TypeNetworkChaos TemplateType = "NetworkChaos"
 	TypePhysicalMachineChaos TemplateType = "PhysicalMachineChaos"
+	TypePhysicalMachine TemplateType = "PhysicalMachine"
 	TypePodChaos TemplateType = "PodChaos"
 	TypeStressChaos TemplateType = "StressChaos"
 	TypeTimeChaos TemplateType = "TimeChaos"
@@ -46,6 +47,7 @@ var allChaosTemplateType = []TemplateType{
 	TypeKernelChaos,
 	TypeNetworkChaos,
 	TypePhysicalMachineChaos,
+	TypePhysicalMachine,
 	TypePodChaos,
 	TypeStressChaos,
 	TypeTimeChaos,
@@ -71,6 +73,8 @@ type EmbedChaos struct {
 	NetworkChaos *NetworkChaosSpec `json:"networkChaos,omitempty"`
 	// +optional
 	PhysicalMachineChaos *PhysicalMachineChaosSpec `json:"physicalmachineChaos,omitempty"`
+	// +optional
+	PhysicalMachine *PhysicalMachineSpec `json:"physicalMachine,omitempty"`
 	// +optional
 	PodChaos *PodChaosSpec `json:"podChaos,omitempty"`
 	// +optional
@@ -118,6 +122,10 @@ func (it *EmbedChaos) SpawnNewObject(templateType TemplateType) (GenericChaos, e
 	case TypePhysicalMachineChaos:
 		result := PhysicalMachineChaos{}
 		result.Spec = *it.PhysicalMachineChaos
+		return &result, nil
+	case TypePhysicalMachine:
+		result := PhysicalMachine{}
+		result.Spec = *it.PhysicalMachine
 		return &result, nil
 	case TypePodChaos:
 		result := PodChaos{}
@@ -168,6 +176,9 @@ func (it *EmbedChaos) SpawnNewList(templateType TemplateType) (GenericChaosList,
 		return &result, nil
 	case TypePhysicalMachineChaos:
 		result := PhysicalMachineChaosList{}
+		return &result, nil
+	case TypePhysicalMachine:
+		result := PhysicalMachineList{}
 		return &result, nil
 	case TypePodChaos:
 		result := PodChaosList{}
@@ -251,6 +262,14 @@ func (in *NetworkChaosList) GetItems() []GenericChaos {
 	return result
 }
 func (in *PhysicalMachineChaosList) GetItems() []GenericChaos {
+	var result []GenericChaos
+	for _, item := range in.Items {
+		item := item
+		result = append(result, &item)
+	}
+	return result
+}
+func (in *PhysicalMachineList) GetItems() []GenericChaos {
 	var result []GenericChaos
 	for _, item := range in.Items {
 		item := item

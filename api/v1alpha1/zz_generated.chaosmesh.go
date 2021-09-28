@@ -1253,6 +1253,141 @@ func (in *PhysicalMachineChaos) Default() {
 	gw.Default(in)
 }
 
+const KindPhysicalMachine = "PhysicalMachine"
+
+// IsDeleted returns whether this resource has been deleted
+func (in *PhysicalMachine) IsDeleted() bool {
+	return !in.DeletionTimestamp.IsZero()
+}
+
+// IsPaused returns whether this resource has been paused
+func (in *PhysicalMachine) IsPaused() bool {
+	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
+		return false
+	}
+	return true
+}
+
+// GetObjectMeta would return the ObjectMeta for chaos
+func (in *PhysicalMachine) GetObjectMeta() *metav1.ObjectMeta {
+	return &in.ObjectMeta
+}
+
+// GetDuration would return the duration for chaos
+func (in *PhysicalMachineSpec) GetDuration() (*time.Duration, error) {
+	if in.Duration == nil {
+		return nil, nil
+	}
+	duration, err := time.ParseDuration(string(*in.Duration))
+	if err != nil {
+		return nil, err
+	}
+	return &duration, nil
+}
+
+// GetStatus returns the status
+func (in *PhysicalMachine) GetStatus() *ChaosStatus {
+	return &in.Status.ChaosStatus
+}
+
+// GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
+func (in *PhysicalMachine) GetSpecAndMetaString() (string, error) {
+	spec, err := json.Marshal(in.Spec)
+	if err != nil {
+		return "", err
+	}
+
+	meta := in.ObjectMeta.DeepCopy()
+	meta.SetResourceVersion("")
+	meta.SetGeneration(0)
+
+	return string(spec) + meta.String(), nil
+}
+
+// +kubebuilder:object:root=true
+
+// PhysicalMachineList contains a list of PhysicalMachine
+type PhysicalMachineList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []PhysicalMachine `json:"items"`
+}
+
+func (in *PhysicalMachineList) DeepCopyList() GenericChaosList {
+	return in.DeepCopy()
+}
+
+// ListChaos returns a list of chaos
+func (in *PhysicalMachineList) ListChaos() []GenericChaos {
+	var result []GenericChaos
+	for _, item := range in.Items {
+		item := item
+		result = append(result, &item)
+	}
+	return result
+}
+
+func (in *PhysicalMachine) DurationExceeded(now time.Time) (bool, time.Duration, error) {
+	duration, err := in.Spec.GetDuration()
+	if err != nil {
+		return false, 0, err
+	}
+
+	if duration != nil {
+		stopTime := in.GetCreationTimestamp().Add(*duration)
+		if stopTime.Before(now) {
+			return true, 0, nil
+		}
+
+		return false, stopTime.Sub(now), nil
+	}
+
+	return false, 0, nil
+}
+
+func (in *PhysicalMachine) IsOneShot() bool {
+	
+	return false
+	
+}
+
+var PhysicalMachineWebhookLog = logf.Log.WithName("PhysicalMachine-resource")
+
+func (in *PhysicalMachine) ValidateCreate() error {
+	PhysicalMachineWebhookLog.Info("validate create", "name", in.Name)
+	return in.Validate()
+}
+
+// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
+func (in *PhysicalMachine) ValidateUpdate(old runtime.Object) error {
+	PhysicalMachineWebhookLog.Info("validate update", "name", in.Name)
+	if !reflect.DeepEqual(in.Spec, old.(*PhysicalMachine).Spec) {
+		return ErrCanNotUpdateChaos
+	}
+	return in.Validate()
+}
+
+// ValidateDelete implements webhook.Validator so a webhook will be registered for the type
+func (in *PhysicalMachine) ValidateDelete() error {
+	PhysicalMachineWebhookLog.Info("validate delete", "name", in.Name)
+
+	// Nothing to do?
+	return nil
+}
+
+var _ webhook.Validator = &PhysicalMachine{}
+
+func (in *PhysicalMachine) Validate() error {
+	errs := gw.Validate(in)
+	return gw.Aggregate(errs)
+}
+
+var _ webhook.Defaulter = &PhysicalMachine{}
+
+func (in *PhysicalMachine) Default() {
+	gw.Default(in)
+}
+
 const KindPodChaos = "PodChaos"
 
 // IsDeleted returns whether this resource has been deleted
@@ -1718,6 +1853,12 @@ func init() {
 		list:  &PhysicalMachineChaosList{},
 	})
 
+	SchemeBuilder.Register(&PhysicalMachine{}, &PhysicalMachineList{})
+	all.register(KindPhysicalMachine, &ChaosKind{
+		chaos: &PhysicalMachine{},
+		list:  &PhysicalMachineList{},
+	})
+
 	SchemeBuilder.Register(&PodChaos{}, &PodChaosList{})
 	all.register(KindPodChaos, &ChaosKind{
 		chaos: &PodChaos{},
@@ -1780,6 +1921,11 @@ func init() {
 	allScheduleItem.register(KindPhysicalMachineChaos, &ChaosKind{
 		chaos: &PhysicalMachineChaos{},
 		list:  &PhysicalMachineChaosList{},
+	})
+
+	allScheduleItem.register(KindPhysicalMachine, &ChaosKind{
+		chaos: &PhysicalMachine{},
+		list:  &PhysicalMachineList{},
 	})
 
 	allScheduleItem.register(KindPodChaos, &ChaosKind{

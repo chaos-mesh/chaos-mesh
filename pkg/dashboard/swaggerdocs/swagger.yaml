@@ -541,6 +541,10 @@ definitions:
         $ref: '#/definitions/v1alpha1.NetworkChaosSpec'
         description: +optional
         type: object
+      physicalMachine:
+        $ref: '#/definitions/v1alpha1.PhysicalMachineSpec'
+        description: +optional
+        type: object
       physicalmachineChaos:
         $ref: '#/definitions/v1alpha1.PhysicalMachineChaosSpec'
         description: +optional
@@ -1384,10 +1388,6 @@ definitions:
           the subAction, generate automatically
           +optional
         type: string
-      address:
-        items:
-          type: string
-        type: array
       disk-fill:
         $ref: '#/definitions/v1alpha1.DiskFillSpec'
         description: +optional
@@ -1404,7 +1404,6 @@ definitions:
         description: |-
           Duration represents the duration of the chaos action
           +optional
-          Duration represents the duration of the chaos action
         type: string
       jvm-exception:
         $ref: '#/definitions/v1alpha1.JVMExceptionSpec'
@@ -1450,6 +1449,11 @@ definitions:
         $ref: '#/definitions/v1alpha1.ProcessSpec'
         description: +optional
         type: object
+      selector:
+        $ref: '#/definitions/v1alpha1.PhysicalMachineSelectorSpec'
+        description: Selector is used to select physical machines that are used to
+          inject chaos action.
+        type: object
       stress-cpu:
         $ref: '#/definitions/v1alpha1.StressCPUSpec'
         description: +optional
@@ -1462,6 +1466,64 @@ definitions:
         description: |-
           the experiment ID
           +optional
+        type: string
+    type: object
+  v1alpha1.PhysicalMachineSelectorSpec:
+    properties:
+      annotationSelectors:
+        additionalProperties:
+          type: string
+        description: |-
+          Map of string keys and values that can be used to select objects.
+          A selector based on annotations.
+          +optional
+        type: object
+      expressionSelectors:
+        $ref: '#/definitions/v1alpha1.LabelSelectorRequirements'
+        description: |-
+          a slice of label selector expressions that can be used to select objects.
+          A list of selectors based on set-based label expressions.
+          +optional
+        type: object
+      fieldSelectors:
+        additionalProperties:
+          type: string
+        description: |-
+          Map of string keys and values that can be used to select objects.
+          A selector based on fields.
+          +optional
+        type: object
+      labelSelectors:
+        additionalProperties:
+          type: string
+        description: |-
+          Map of string keys and values that can be used to select objects.
+          A selector based on labels.
+          +optional
+        type: object
+      namespaces:
+        description: |-
+          Namespaces is a set of namespace to which objects belong.
+          +optional
+        items:
+          type: string
+        type: array
+      physicalMachines:
+        additionalProperties:
+          items:
+            type: string
+          type: array
+        description: |-
+          PhysicalMachines is a map of string keys and a set values that used to select physical machines.
+          The key defines the namespace which physical machine belong,
+          and the each value is a set of physical machine names.
+          +optional
+        type: object
+    type: object
+  v1alpha1.PhysicalMachineSpec:
+    properties:
+      address:
+        description: Address represents the duration of the chaos action
         type: string
     type: object
   v1alpha1.PodChaosSpec:
@@ -1768,6 +1830,10 @@ definitions:
         $ref: '#/definitions/v1alpha1.NetworkChaosSpec'
         description: +optional
         type: object
+      physicalMachine:
+        $ref: '#/definitions/v1alpha1.PhysicalMachineSpec'
+        description: +optional
+        type: object
       physicalmachineChaos:
         $ref: '#/definitions/v1alpha1.PhysicalMachineChaosSpec'
         description: +optional
@@ -1956,6 +2022,10 @@ definitions:
         type: string
       networkChaos:
         $ref: '#/definitions/v1alpha1.NetworkChaosSpec'
+        description: +optional
+        type: object
+      physicalMachine:
+        $ref: '#/definitions/v1alpha1.PhysicalMachineSpec'
         description: +optional
         type: object
       physicalmachineChaos:

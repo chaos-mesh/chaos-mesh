@@ -36,28 +36,10 @@ const (
 	RandomMaxPercentPodMode PodMode = "random-max-percent"
 )
 
-// PodSelectorSpec defines the some selectors to select objects.
-// If the all selectors are empty, all objects will be used in chaos experiment.
-type PodSelectorSpec struct {
+type CommonSelectorSpec struct{
 	// Namespaces is a set of namespace to which objects belong.
 	// +optional
 	Namespaces []string `json:"namespaces,omitempty"`
-
-	// Nodes is a set of node name and objects must belong to these nodes.
-	// +optional
-	Nodes []string `json:"nodes,omitempty"`
-
-	// Pods is a map of string keys and a set values that used to select pods.
-	// The key defines the namespace which pods belong,
-	// and the each values is a set of pod names.
-	// +optional
-	Pods map[string][]string `json:"pods,omitempty"`
-
-	// Map of string keys and values that can be used to select nodes.
-	// Selector which must match a node's labels,
-	// and objects must belong to these selected nodes.
-	// +optional
-	NodeSelectors map[string]string `json:"nodeSelectors,omitempty"`
 
 	// Map of string keys and values that can be used to select objects.
 	// A selector based on fields.
@@ -78,6 +60,29 @@ type PodSelectorSpec struct {
 	// A selector based on annotations.
 	// +optional
 	AnnotationSelectors map[string]string `json:"annotationSelectors,omitempty"`
+}
+
+// PodSelectorSpec defines the some selectors to select objects.
+// If the all selectors are empty, all objects will be used in chaos experiment.
+type PodSelectorSpec struct {
+
+	CommonSelectorSpec `json:",inline"`
+
+	// Nodes is a set of node name and objects must belong to these nodes.
+	// +optional
+	Nodes []string `json:"nodes,omitempty"`
+
+	// Pods is a map of string keys and a set values that used to select pods.
+	// The key defines the namespace which pods belong,
+	// and the each values is a set of pod names.
+	// +optional
+	Pods map[string][]string `json:"pods,omitempty"`
+
+	// Map of string keys and values that can be used to select nodes.
+	// Selector which must match a node's labels,
+	// and objects must belong to these selected nodes.
+	// +optional
+	NodeSelectors map[string]string `json:"nodeSelectors,omitempty"`
 
 	// PodPhaseSelectors is a set of condition of a pod at the current time.
 	// supported value: Pending / Running / Succeeded / Failed / Unknown

@@ -14,8 +14,6 @@
 package v1alpha1
 
 import (
-	"strings"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -50,7 +48,6 @@ type PhysicalMachineChaosSpec struct {
 
 	// Duration represents the duration of the chaos action
 	// +optional
-	// Duration represents the duration of the chaos action
 	Duration *string `json:"duration,omitempty" webhook:"Duration"`
 }
 
@@ -66,11 +63,20 @@ func (obj *PhysicalMachineChaos) GetSelectorSpecs() map[string]interface{} {
 }
 
 type PhysicalMachineSelector struct {
-	Address []string `json:"address"`
+	// Selector is used to select physical machines that are used to inject chaos action.
+	Selector PhysicalMachineSelectorSpec `json:"selector"`
 }
 
-func (selector *PhysicalMachineSelector) Id() string {
-	return strings.Join(selector.Address, ",")
+// PhysicalMachineSelectorSpec defines the some selectors to select objects.
+// If the all selectors are empty, all objects will be used in chaos experiment.
+type PhysicalMachineSelectorSpec struct {
+	CommonSelectorSpec `json:",inline"`
+
+	// PhysicalMachines is a map of string keys and a set values that used to select physical machines.
+	// The key defines the namespace which physical machine belong,
+	// and the each value is a set of physical machine names.
+	// +optional
+	PhysicalMachines map[string][]string `json:"physicalMachines,omitempty"`
 }
 
 type ExpInfo struct {

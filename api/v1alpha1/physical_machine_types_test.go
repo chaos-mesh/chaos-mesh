@@ -26,10 +26,10 @@ import (
 // These tests are written in BDD-style using Ginkgo framework. Refer to
 // http://onsi.github.io/ginkgo to learn more.
 
-var _ = Describe("PhysicalMachineChaos", func() {
+var _ = Describe("PhysicalMachine", func() {
 	var (
 		key              types.NamespacedName
-		created, fetched *PhysicalMachineChaos
+		created, fetched *PhysicalMachine
 	)
 
 	BeforeEach(func() {
@@ -47,34 +47,20 @@ var _ = Describe("PhysicalMachineChaos", func() {
 				Namespace: "default",
 			}
 
-			created = &PhysicalMachineChaos{
+			created = &PhysicalMachine{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "foo",
 					Namespace: "default",
 				},
-				Spec: PhysicalMachineChaosSpec{
-					Action: "stress-mem",
-					PhysicalMachineSelector: PhysicalMachineSelector{
-						Selector: PhysicalMachineSelectorSpec{
-							CommonSelectorSpec: CommonSelectorSpec{
-								LabelSelectors: map[string]string{
-									"foo": "bar",
-								},
-							},
-						},
-					},
-					ExpInfo: ExpInfo{
-						StressMemory: &StressMemorySpec{
-							Size: "10MB",
-						},
-					},
+				Spec: PhysicalMachineSpec{
+					Address: "http://123.123.123.123:2333",
 				},
 			}
 
 			By("creating an API obj")
 			Expect(k8sClient.Create(context.TODO(), created)).To(Succeed())
 
-			fetched = &PhysicalMachineChaos{}
+			fetched = &PhysicalMachine{}
 			Expect(k8sClient.Get(context.TODO(), key, fetched)).To(Succeed())
 			Expect(fetched).To(Equal(created))
 

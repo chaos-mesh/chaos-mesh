@@ -70,18 +70,22 @@ func TestSelectPods(t *testing.T) {
 		{
 			name: "filter labels pods",
 			selector: v1alpha1.PodSelectorSpec{
-				LabelSelectors: map[string]string{"l2": "l2"},
+				CommonSelectorSpec: v1alpha1.CommonSelectorSpec{
+					LabelSelectors: map[string]string{"l2": "l2"},
+				},
 			},
 			expectedPods: []v1.Pod{pods[5], pods[6]},
 		},
 		{
 			name: "filter pods by label expressions",
 			selector: v1alpha1.PodSelectorSpec{
-				ExpressionSelectors: []metav1.LabelSelectorRequirement{
-					{
-						Key:      "l2",
-						Operator: metav1.LabelSelectorOpIn,
-						Values:   []string{"l2"},
+				CommonSelectorSpec: v1alpha1.CommonSelectorSpec{
+					ExpressionSelectors: []metav1.LabelSelectorRequirement{
+						{
+							Key:      "l2",
+							Operator: metav1.LabelSelectorOpIn,
+							Values:   []string{"l2"},
+						},
 					},
 				},
 			},
@@ -90,12 +94,14 @@ func TestSelectPods(t *testing.T) {
 		{
 			name: "filter pods by label selectors and expression selectors",
 			selector: v1alpha1.PodSelectorSpec{
-				LabelSelectors: map[string]string{"l1": "l1"},
-				ExpressionSelectors: []metav1.LabelSelectorRequirement{
-					{
-						Key:      "l2",
-						Operator: metav1.LabelSelectorOpIn,
-						Values:   []string{"l2"},
+				CommonSelectorSpec: v1alpha1.CommonSelectorSpec{
+					LabelSelectors: map[string]string{"l1": "l1"},
+					ExpressionSelectors: []metav1.LabelSelectorRequirement{
+						{
+							Key:      "l2",
+							Operator: metav1.LabelSelectorOpIn,
+							Values:   []string{"l2"},
+						},
 					},
 				},
 			},
@@ -104,16 +110,20 @@ func TestSelectPods(t *testing.T) {
 		{
 			name: "filter namespace and labels",
 			selector: v1alpha1.PodSelectorSpec{
-				Namespaces:     []string{"test-s"},
-				LabelSelectors: map[string]string{"l2": "l2"},
+				CommonSelectorSpec: v1alpha1.CommonSelectorSpec{
+					Namespaces:     []string{"test-s"},
+					LabelSelectors: map[string]string{"l2": "l2"},
+				},
 			},
 			expectedPods: []v1.Pod{pods[5], pods[6]},
 		},
 		{
 			name: "filter namespace and labels",
 			selector: v1alpha1.PodSelectorSpec{
-				Namespaces:     []string{metav1.NamespaceDefault},
-				LabelSelectors: map[string]string{"l2": "l2"},
+				CommonSelectorSpec: v1alpha1.CommonSelectorSpec{
+					Namespaces:     []string{metav1.NamespaceDefault},
+					LabelSelectors: map[string]string{"l2": "l2"},
+				},
 			},
 			expectedPods: nil,
 		},
@@ -127,8 +137,10 @@ func TestSelectPods(t *testing.T) {
 		{
 			name: "filter node and labels",
 			selector: v1alpha1.PodSelectorSpec{
-				LabelSelectors: map[string]string{"l1": "l1"},
-				Nodes:          []string{"az2-node1"},
+				CommonSelectorSpec: v1alpha1.CommonSelectorSpec{
+					LabelSelectors: map[string]string{"l1": "l1"},
+				},
+				Nodes: []string{"az2-node1"},
 			},
 			expectedPods: nil,
 		},
@@ -176,7 +188,9 @@ func TestCheckPodMeetSelector(t *testing.T) {
 			name: "meet label",
 			pod:  NewPod(PodArg{Name: "t1", Status: v1.PodPending, Labels: map[string]string{"app": "tikv", "ss": "t1"}}),
 			selector: v1alpha1.PodSelectorSpec{
-				LabelSelectors: map[string]string{"app": "tikv"},
+				CommonSelectorSpec: v1alpha1.CommonSelectorSpec{
+					LabelSelectors: map[string]string{"app": "tikv"},
+				},
 			},
 			expectedValue: true,
 		},
@@ -184,7 +198,9 @@ func TestCheckPodMeetSelector(t *testing.T) {
 			name: "not meet label",
 			pod:  NewPod(PodArg{Name: "t1", Labels: map[string]string{"app": "tidb", "ss": "t1"}}),
 			selector: v1alpha1.PodSelectorSpec{
-				LabelSelectors: map[string]string{"app": "tikv"},
+				CommonSelectorSpec: v1alpha1.CommonSelectorSpec{
+					LabelSelectors: map[string]string{"app": "tikv"},
+				},
 			},
 			expectedValue: false,
 		},
@@ -192,7 +208,9 @@ func TestCheckPodMeetSelector(t *testing.T) {
 			name: "pod labels is empty",
 			pod:  NewPod(PodArg{Name: "t1"}),
 			selector: v1alpha1.PodSelectorSpec{
-				LabelSelectors: map[string]string{"app": "tikv"},
+				CommonSelectorSpec: v1alpha1.CommonSelectorSpec{
+					LabelSelectors: map[string]string{"app": "tikv"},
+				},
 			},
 			expectedValue: false,
 		},
@@ -206,11 +224,13 @@ func TestCheckPodMeetSelector(t *testing.T) {
 			name: "meet labels and meet expressions",
 			pod:  NewPod(PodArg{Name: "t1", Status: v1.PodPending, Labels: map[string]string{"app": "tikv", "ss": "t1"}}),
 			selector: v1alpha1.PodSelectorSpec{
-				LabelSelectors: map[string]string{"app": "tikv"},
-				ExpressionSelectors: []metav1.LabelSelectorRequirement{
-					{
-						Key:      "ss",
-						Operator: metav1.LabelSelectorOpExists,
+				CommonSelectorSpec: v1alpha1.CommonSelectorSpec{
+					LabelSelectors: map[string]string{"app": "tikv"},
+					ExpressionSelectors: []metav1.LabelSelectorRequirement{
+						{
+							Key:      "ss",
+							Operator: metav1.LabelSelectorOpExists,
+						},
 					},
 				},
 			},
@@ -220,12 +240,14 @@ func TestCheckPodMeetSelector(t *testing.T) {
 			name: "meet labels and not meet expressions",
 			pod:  NewPod(PodArg{Name: "t1", Status: v1.PodPending, Labels: map[string]string{"app": "tikv", "ss": "t1"}}),
 			selector: v1alpha1.PodSelectorSpec{
-				LabelSelectors: map[string]string{"app": "tikv"},
-				ExpressionSelectors: []metav1.LabelSelectorRequirement{
-					{
-						Key:      "ss",
-						Operator: metav1.LabelSelectorOpNotIn,
-						Values:   []string{"t1"},
+				CommonSelectorSpec: v1alpha1.CommonSelectorSpec{
+					LabelSelectors: map[string]string{"app": "tikv"},
+					ExpressionSelectors: []metav1.LabelSelectorRequirement{
+						{
+							Key:      "ss",
+							Operator: metav1.LabelSelectorOpNotIn,
+							Values:   []string{"t1"},
+						},
 					},
 				},
 			},
@@ -235,7 +257,9 @@ func TestCheckPodMeetSelector(t *testing.T) {
 			name: "meet namespace",
 			pod:  NewPod(PodArg{Name: "t1"}),
 			selector: v1alpha1.PodSelectorSpec{
-				Namespaces: []string{metav1.NamespaceDefault},
+				CommonSelectorSpec: v1alpha1.CommonSelectorSpec{
+					Namespaces: []string{metav1.NamespaceDefault},
+				},
 			},
 			expectedValue: true,
 		},
@@ -243,8 +267,10 @@ func TestCheckPodMeetSelector(t *testing.T) {
 			name: "meet namespace and meet labels",
 			pod:  NewPod(PodArg{Name: "t1", Labels: map[string]string{"app": "tikv"}}),
 			selector: v1alpha1.PodSelectorSpec{
-				Namespaces:     []string{metav1.NamespaceDefault},
-				LabelSelectors: map[string]string{"app": "tikv"},
+				CommonSelectorSpec: v1alpha1.CommonSelectorSpec{
+					Namespaces:     []string{metav1.NamespaceDefault},
+					LabelSelectors: map[string]string{"app": "tikv"},
+				},
 			},
 			expectedValue: true,
 		},
@@ -252,8 +278,10 @@ func TestCheckPodMeetSelector(t *testing.T) {
 			name: "meet namespace and not meet labels",
 			pod:  NewPod(PodArg{Name: "t1", Labels: map[string]string{"app": "tidb"}}),
 			selector: v1alpha1.PodSelectorSpec{
-				Namespaces:     []string{metav1.NamespaceDefault},
-				LabelSelectors: map[string]string{"app": "tikv"},
+				CommonSelectorSpec: v1alpha1.CommonSelectorSpec{
+					Namespaces:     []string{metav1.NamespaceDefault},
+					LabelSelectors: map[string]string{"app": "tikv"},
+				},
 			},
 			expectedValue: false,
 		},
@@ -271,9 +299,11 @@ func TestCheckPodMeetSelector(t *testing.T) {
 			name: "meet annotation",
 			pod:  NewPod(PodArg{Name: "t1", Ans: map[string]string{"an": "n1", "an2": "n2"}, Labels: map[string]string{"app": "tidb"}}),
 			selector: v1alpha1.PodSelectorSpec{
-				Namespaces: []string{metav1.NamespaceDefault},
-				AnnotationSelectors: map[string]string{
-					"an": "n1",
+				CommonSelectorSpec: v1alpha1.CommonSelectorSpec{
+					Namespaces: []string{metav1.NamespaceDefault},
+					AnnotationSelectors: map[string]string{
+						"an": "n1",
+					},
 				},
 			},
 			expectedValue: true,
@@ -282,9 +312,11 @@ func TestCheckPodMeetSelector(t *testing.T) {
 			name: "not meet annotation",
 			pod:  NewPod(PodArg{Name: "t1", Ans: map[string]string{"an": "n1"}, Labels: map[string]string{"app": "tidb"}}),
 			selector: v1alpha1.PodSelectorSpec{
-				Namespaces: []string{metav1.NamespaceDefault},
-				AnnotationSelectors: map[string]string{
-					"an": "n2",
+				CommonSelectorSpec: v1alpha1.CommonSelectorSpec{
+					Namespaces: []string{metav1.NamespaceDefault},
+					AnnotationSelectors: map[string]string{
+						"an": "n2",
+					},
 				},
 			},
 			expectedValue: false,
@@ -316,7 +348,9 @@ func TestCheckPodMeetSelector(t *testing.T) {
 				Pods: map[string][]string{
 					metav1.NamespaceDefault: {"t1", "t2"},
 				},
-				LabelSelectors: map[string]string{"app": "tikv"},
+				CommonSelectorSpec: v1alpha1.CommonSelectorSpec{
+					LabelSelectors: map[string]string{"app": "tikv"},
+				},
 			},
 			expectedValue: false,
 		},

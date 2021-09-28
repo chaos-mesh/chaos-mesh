@@ -2633,6 +2633,11 @@ var doc = `{
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.NetworkChaosSpec"
                 },
+                "physicalMachine": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.PhysicalMachineSpec"
+                },
                 "physicalmachineChaos": {
                     "description": "+optional",
                     "type": "object",
@@ -3477,12 +3482,6 @@ var doc = `{
                     "description": "the subAction, generate automatically\n+optional",
                     "type": "string"
                 },
-                "address": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
                 "disk-fill": {
                     "description": "+optional",
                     "type": "object",
@@ -3499,7 +3498,7 @@ var doc = `{
                     "$ref": "#/definitions/v1alpha1.DiskPayloadSpec"
                 },
                 "duration": {
-                    "description": "Duration represents the duration of the chaos action\n+optional\nDuration represents the duration of the chaos action",
+                    "description": "Duration represents the duration of the chaos action\n+optional",
                     "type": "string"
                 },
                 "jvm-exception": {
@@ -3557,6 +3556,11 @@ var doc = `{
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.ProcessSpec"
                 },
+                "selector": {
+                    "description": "Selector is used to select physical machines that are used to inject chaos action.",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.PhysicalMachineSelectorSpec"
+                },
                 "stress-cpu": {
                     "description": "+optional",
                     "type": "object",
@@ -3569,6 +3573,63 @@ var doc = `{
                 },
                 "uid": {
                     "description": "the experiment ID\n+optional",
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.PhysicalMachineSelectorSpec": {
+            "type": "object",
+            "properties": {
+                "annotationSelectors": {
+                    "description": "Map of string keys and values that can be used to select objects.\nA selector based on annotations.\n+optional",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "expressionSelectors": {
+                    "description": "a slice of label selector expressions that can be used to select objects.\nA list of selectors based on set-based label expressions.\n+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.LabelSelectorRequirements"
+                },
+                "fieldSelectors": {
+                    "description": "Map of string keys and values that can be used to select objects.\nA selector based on fields.\n+optional",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "labelSelectors": {
+                    "description": "Map of string keys and values that can be used to select objects.\nA selector based on labels.\n+optional",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "namespaces": {
+                    "description": "Namespaces is a set of namespace to which objects belong.\n+optional",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "physicalMachines": {
+                    "description": "PhysicalMachines is a map of string keys and a set values that used to select physical machines.\nThe key defines the namespace which physical machine belong,\nand the each value is a set of physical machine names.\n+optional",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "v1alpha1.PhysicalMachineSpec": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "description": "Address represents the duration of the chaos action",
                     "type": "string"
                 }
             }
@@ -3870,6 +3931,11 @@ var doc = `{
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.NetworkChaosSpec"
                 },
+                "physicalMachine": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.PhysicalMachineSpec"
+                },
                 "physicalmachineChaos": {
                     "description": "+optional",
                     "type": "object",
@@ -4069,6 +4135,11 @@ var doc = `{
                     "description": "+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.NetworkChaosSpec"
+                },
+                "physicalMachine": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.PhysicalMachineSpec"
                 },
                 "physicalmachineChaos": {
                     "description": "+optional",
