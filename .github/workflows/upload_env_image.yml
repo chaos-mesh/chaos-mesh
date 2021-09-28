@@ -69,6 +69,7 @@ jobs:
       - name: Build Chaos Mesh manifest
         env:
           IMAGE: ${{ matrix.image }}
+          IMAGE_TAG: ${{ needs.build-specific-architecture.outputs.image_tag }}
         run: |
           docker manifest create ghcr.io/chaos-mesh/chaos-mesh/$IMAGE-env:$IMAGE_TAG \
             ghcr.io/chaos-mesh/chaos-mesh/$IMAGE-env:$IMAGE_TAG-amd64 \
