@@ -3,6 +3,8 @@ on:
   workflow_dispatch: {}
   schedule:
     - cron:  '0 18 * * *'
+  release:
+    types: [published]
 
 jobs:
   build-specific-architecture:
