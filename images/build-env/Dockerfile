@@ -10,11 +10,14 @@ ARG HTTP_PROXY
 ENV http_proxy $HTTP_PROXY
 ENV https_proxy $HTTPS_PROXY
 
-RUN apt-get update && apt-get install build-essential curl git pkg-config libfuse-dev fuse -y
+RUN apt-get update && \ 
+    apt-get install build-essential curl git pkg-config libfuse-dev fuse -y && \
+    apt-get clean
 
 # require nodejs >= 12
-RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash -
-RUN apt-get install -y nodejs
+RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash - && \
+    apt-get install -y nodejs && \
+    apt-get clean
 RUN npm config set unsafe-perm true
 RUN npm install yarn -g
 
