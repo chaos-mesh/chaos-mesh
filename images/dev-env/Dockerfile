@@ -59,7 +59,7 @@ COPY --from=go_install /usr/local/go /usr/local/go
 COPY --from=go_install /go/bin /go/bin
 
 # The `gqlgen` depends on the plugin in it
-COPY --from=go_install /go/pkg/mod/github.com/99designs/gqlgen@v0.13.0/plugin/modelgen /go/pkg/mod/github.com/99designs/gqlgen@v0.13.0/plugin/modelgen
+COPY --from=go_install /go/pkg/mod/github.com/99designs/gqlgen@v0.13.0 /go/pkg/mod/github.com/99designs/gqlgen@v0.13.0
 
 ENV PATH "/usr/local/go/bin:${PATH}:/tmp/go/bin:/go/bin"
 
