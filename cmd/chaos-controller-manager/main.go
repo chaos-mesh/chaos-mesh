@@ -41,7 +41,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/metrics"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
-	"github.com/chaos-mesh/chaos-mesh/pkg/ctrlserver"
+	ctrlserver "github.com/chaos-mesh/chaos-mesh/pkg/ctrl"
 	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"

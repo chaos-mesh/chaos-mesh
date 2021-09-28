@@ -1,4 +1,4 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,12 +11,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package common
+package client
 
 import (
+	"context"
+
+	"github.com/pkg/errors"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/portforward"
+)
+
+const (
+	DefaultManagerNamespace = "chaos-testing"
+	ManagerSvc              = "svc/chaos-mesh-controller-manager"
+	CtrlServerPort          = 10082
 )
 
 // CommonRestClientGetter is used for non-e2e test environment.
@@ -32,4 +43,23 @@ func NewCommonRestClientGetter() *CommonRestClientGetter {
 
 func (it *CommonRestClientGetter) ToRESTConfig() (*rest.Config, error) {
 	return config.GetConfig()
+}
+
+func ForwardSvcPorts(ctx context.Context, ns, svc string, port uint16) (context.CancelFunc, uint16, error) {
+	commonRestClientGetter := NewCommonRestClientGetter()
+	fw, err := portforward.NewPortForwarder(ctx, commonRestClientGetter, false)
+	if err != nil {
+		return nil, 0, errors.Wrap(err, "failed to create port forwarder")
+	}
+	_, localPort, pfCancel, err := portforward.ForwardOnePort(fw, ns, svc, port)
+	return pfCancel, localPort, err
+}
+
+func ForwardCtrlServer(ctx context.Context, ns *string) (context.CancelFunc, uint16, error) {
+	if ns == nil {
+		ns = new(string)
+		*ns = DefaultManagerNamespace
+	}
+
+	return ForwardSvcPorts(ctx, *ns, ManagerSvc, CtrlServerPort)
 }

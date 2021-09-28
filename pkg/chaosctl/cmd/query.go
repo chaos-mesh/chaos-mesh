@@ -25,7 +25,7 @@ import (
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
+	ctrlclient "github.com/chaos-mesh/chaos-mesh/pkg/ctrl/client"
 )
 
 const QueryKey = "query"
@@ -35,14 +35,14 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 	var root string
 
 	var joinPrefix = func() ([]string, error) {
-		prefix := append([]string{common.NamespaceKey}, common.StandardizeQuery(namespace)...)
+		prefix := append([]string{ctrlclient.NamespaceKey}, ctrlclient.StandardizeQuery(namespace)...)
 
 		if len(prefix) != 2 {
 			return nil, fmt.Errorf("invalid namepsace: %s", namespace)
 		}
 
 		if root != "" {
-			prefix = append(prefix, common.StandardizeQuery(root)...)
+			prefix = append(prefix, ctrlclient.StandardizeQuery(root)...)
 		}
 		return prefix, nil
 	}
@@ -54,11 +54,11 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			ctx := context.Background()
 			client, cancel, err := createClient(ctx)
-			defer cancel()
 			if err != nil {
 				log.Error(err, "fail to create client")
 				return nil, cobra.ShellCompDirectiveNoFileComp
 			}
+			defer cancel()
 
 			completion, err := client.CompleteQueryBased(namespace, root, toComplete)
 			if err != nil {
@@ -69,20 +69,20 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 			return completion, cobra.ShellCompDirectiveNoFileComp | cobra.ShellCompDirectiveNoSpace
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			common.DisableRuntimeErrorHandler()
+			ctrlclient.DisableRuntimeErrorHandler()
 			ctx := context.Background()
 			client, cancel, err := createClient(ctx)
-			defer cancel()
 			if err != nil {
 				return err
 			}
+			defer cancel()
 
 			queryType, err := client.GetQueryType()
 			if err != nil {
 				return err
 			}
 
-			var query *common.Query
+			var query *ctrlclient.Query
 
 			prefix, err := joinPrefix()
 			if err != nil {
@@ -90,7 +90,7 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 			}
 
 			for _, arg := range args {
-				part := append(prefix, common.StandardizeQuery(arg)...)
+				part := append(prefix, ctrlclient.StandardizeQuery(arg)...)
 				partQuery, err := client.Schema.ParseQuery(part, queryType, false)
 				if err != nil {
 					return err
@@ -106,9 +106,9 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 				return fmt.Errorf("resource list is empty")
 			}
 
-			superQuery := common.NewQuery(QueryKey, queryType, nil)
-			superQuery.Fields[common.NamespaceKey] = query
-			variables := common.NewVariables()
+			superQuery := ctrlclient.NewQuery(QueryKey, queryType, nil)
+			superQuery.Fields[ctrlclient.NamespaceKey] = query
+			variables := ctrlclient.NewVariables()
 
 			queryStruct, err := client.Schema.Reflect(superQuery, variables)
 			if err != nil {
@@ -148,11 +148,11 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 	queryCmd.RegisterFlagCompletionFunc("root", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		ctx := context.Background()
 		client, cancel, err := createClient(ctx)
-		defer cancel()
 		if err != nil {
 			log.Error(err, "fail to create client")
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		}
+		defer cancel()
 
 		completion, err := client.CompleteRoot(namespace, toComplete)
 		if err != nil {
@@ -166,13 +166,13 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 	return queryCmd
 }
 
-func createClient(ctx context.Context) (*common.CtrlClient, context.CancelFunc, error) {
-	cancel, port, err := common.ForwardCtrlServer(ctx, nil)
+func createClient(ctx context.Context) (*ctrlclient.CtrlClient, context.CancelFunc, error) {
+	cancel, port, err := ctrlclient.ForwardCtrlServer(ctx, nil)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	client, err := common.NewCtrlClient(ctx, fmt.Sprintf("http://127.0.0.1:%d/query", port))
+	client, err := ctrlclient.NewCtrlClient(ctx, fmt.Sprintf("http://127.0.0.1:%d/query", port))
 	if err != nil {
 		return nil, nil, fmt.Errorf("fail to init ctrl client: %s", err)
 	}
@@ -184,7 +184,7 @@ func createClient(ctx context.Context) (*common.CtrlClient, context.CancelFunc, 
 	return client, cancel, nil
 }
 
-func findResource(object interface{}, resource *common.Query) (interface{}, error) {
+func findResource(object interface{}, resource *ctrlclient.Query) (interface{}, error) {
 	if resource == nil {
 		return object, nil
 	}

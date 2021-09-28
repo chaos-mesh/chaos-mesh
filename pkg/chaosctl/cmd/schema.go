@@ -21,7 +21,7 @@ import (
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
+	ctrlclient "github.com/chaos-mesh/chaos-mesh/pkg/ctrl/client"
 )
 
 // schemaCmd represents the schema command
@@ -29,16 +29,16 @@ var schemaCmd = &cobra.Command{
 	Use:   "schema",
 	Short: "get the graphql schema of ctrl server",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		common.DisableRuntimeErrorHandler()
+		ctrlclient.DisableRuntimeErrorHandler()
 		ctx := context.Background()
 		// TODO: input ns by args
-		cancel, port, err := common.ForwardCtrlServer(ctx, nil)
+		cancel, port, err := ctrlclient.ForwardCtrlServer(ctx, nil)
 		if err != nil {
 			return err
 		}
 		defer cancel()
 
-		client, err := common.NewCtrlClient(ctx, fmt.Sprintf("http://127.0.0.1:%d/query", port))
+		client, err := ctrlclient.NewCtrlClient(ctx, fmt.Sprintf("http://127.0.0.1:%d/query", port))
 		if err != nil {
 			return fmt.Errorf("fail to init ctrl client: %s", err)
 		}

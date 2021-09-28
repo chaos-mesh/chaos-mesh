@@ -21,7 +21,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
+	ctrlclient "github.com/chaos-mesh/chaos-mesh/pkg/ctrl/client"
 )
 
 // forwardCmd represents the forward command
@@ -30,7 +30,7 @@ var forwardCmd = &cobra.Command{
 	Short: "Forward ctrl api port to local",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// TODO: input ns by args
-		cancel, port, err := common.ForwardCtrlServer(context.Background(), nil)
+		cancel, port, err := ctrlclient.ForwardCtrlServer(context.Background(), nil)
 		if err != nil {
 			return err
 		}
