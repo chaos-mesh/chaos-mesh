@@ -159,7 +159,7 @@ func (c *CtrlClient) ListArguments(queryStr []string, argumentName string) ([]st
 				return nil, err
 			}
 			return e.Fields, err
-		case *LeafRequireArgument:
+		case *RequireArgument:
 			if e.Leaf != queryStr[len(queryStr)-1] {
 				return nil, err
 			}

@@ -24,6 +24,10 @@ import (
 	"github.com/iancoleman/strcase"
 )
 
+const (
+	AllArgument = "all"
+)
+
 type Query struct {
 	Name      string
 	Argument  string
@@ -31,6 +35,11 @@ type Query struct {
 	Type      *Type
 	Decorator TypeDecorator // inner immutable
 	Fields    map[string]*Query
+}
+
+type Segment struct {
+	Name     string
+	Argument *string
 }
 
 type (
@@ -50,7 +59,7 @@ type (
 		Argument string
 	}
 
-	LeafRequireArgument struct {
+	RequireArgument struct {
 		Leaf     string
 		Argument string
 	}
@@ -113,8 +122,8 @@ func (e ScalarValueParseFail) Error() string {
 	return fmt.Sprintf("fail to parse scalar value `%s`", e.Value)
 }
 
-func (e LeafRequireArgument) Error() string {
-	return fmt.Sprintf("leaf `%s` require argument", e.Leaf)
+func (e RequireArgument) Error() string {
+	return fmt.Sprintf("field `%s` require argument", e.Leaf)
 }
 
 func NewQuery(name string, typ *Type, decorator TypeDecorator) *Query {
@@ -244,18 +253,18 @@ func (q *Query) String() string {
 	if q.ArgValue != nil {
 		switch v := q.ArgValue.(type) {
 		case graphql.String:
-			segment = strings.Join([]string{segment, string(v)}, "/")
+			segment = strings.Join([]string{segment, string(v)}, ":")
 		case graphql.Boolean:
-			segment = strings.Join([]string{segment, strconv.FormatBool(bool(v))}, "/")
+			segment = strings.Join([]string{segment, strconv.FormatBool(bool(v))}, ":")
 		case graphql.Int:
-			segment = strings.Join([]string{segment, fmt.Sprintf("%d", v)}, "/")
+			segment = strings.Join([]string{segment, fmt.Sprintf("%d", v)}, ":")
 		case graphql.Float:
-			segment = strings.Join([]string{segment, fmt.Sprintf("%f", v)}, "/")
+			segment = strings.Join([]string{segment, fmt.Sprintf("%f", v)}, ":")
 		default:
 			value := reflect.ValueOf(q.ArgValue)
 			if value.Type().Kind() == reflect.String {
 				arg := value.Convert(reflect.TypeOf("")).Interface().(string)
-				segment = strings.Join([]string{segment, strings.ToLower(arg)}, "/")
+				segment = strings.Join([]string{segment, strings.ToLower(arg)}, ":")
 			}
 		}
 	}
@@ -273,18 +282,79 @@ func (q *Query) String() string {
 	return strings.Join([]string{segment, fieldStr}, "/")
 }
 
-func (s *Schema) ParseQuery(query []string, super *Type, partial bool) (*Query, error) {
+func (s *Schema) ParseQuery(rawQuery []string, super *Type, partial bool) (*Query, error) {
+	var query []Segment
+	for _, s := range rawQuery {
+		segment := Segment{}
+		rawSegment := strings.Split(strings.Trim(s, ":"), ":")
+		if len(rawSegment) != 2 && len(rawSegment) != 1 {
+			return nil, fmt.Errorf("invalid query segment: %s", s)
+		}
+		segment.Name = rawSegment[0]
+		if len(rawSegment) == 2 {
+			segment.Argument = &rawSegment[1]
+		}
+		query = append(query, segment)
+	}
+
+	queries, err := s.parseQuery(query, super, partial)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(queries) == 0 {
+		return nil, errors.New("empty query")
+	}
+
+	return queries[0], nil
+}
+
+func (s *Schema) parseQuery(query []Segment, super *Type, partial bool) ([]*Query, error) {
 	if len(query) == 0 {
-		return nil, errors.New("query cannot be empty")
+		return nil, nil
 	}
 
 	if len(query) == 1 {
-		return nil, fmt.Errorf("query %s has single segment", query)
+		fields := strings.Split(query[0].Name, ",")
+		queries := make([]*Query, 0, len(fields))
+		for _, f := range fields {
+			field, err := super.mustGetField(f)
+			if err != nil {
+				return nil, err
+			}
+
+			if len(field.Args) != 0 && !partial {
+				// TODO: support default args
+				return nil, &RequireArgument{
+					Leaf:     f,
+					Argument: string(field.Args[0].Name),
+				}
+			}
+
+			typ, err := s.resolve(&field.Type)
+			if err != nil {
+				return nil, err
+			}
+
+			if typ.Kind != ScalarKind && !partial {
+				// TODO: support object kind
+				return nil, fmt.Errorf("type %s is not a scalar kind", typ.Name)
+			}
+
+			decorator, err := s.typeDecorator(&field.Type)
+			if err != nil {
+				return nil, err
+			}
+
+			queries = append(queries, NewQuery(f, typ, decorator))
+		}
+		return queries, nil
 	}
 
+	segment := query[0]
 	subQuery := query[1:]
 
-	field, err := super.mustGetField(query[0])
+	field, err := super.mustGetField(segment.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -299,77 +369,33 @@ func (s *Schema) ParseQuery(query []string, super *Type, partial bool) (*Query, 
 		return nil, err
 	}
 
-	newQuery := NewQuery(query[0], typ, decorator)
+	newQuery := NewQuery(segment.Name, typ, decorator)
 	if len(field.Args) != 0 {
-		argument := field.Args[0]
-		argType, err := s.resolve(&argument.Type)
-		if err != nil {
-			return nil, err
-		}
-		err = newQuery.SetArgument(string(argument.Name), query[1], argType)
-		if err != nil {
-			return nil, err
-		}
-		subQuery = query[2:]
-	}
-
-	if len(subQuery) == 1 {
-		fields, err := s.parseLeaves(subQuery[0], typ, partial)
-		if err != nil {
-			return nil, err
-		}
-
-		for _, field := range fields {
-			newQuery.Fields[field.Name] = field
+		if segment.Argument != nil {
+			argument := field.Args[0]
+			argType, err := s.resolve(&argument.Type)
+			if err != nil {
+				return nil, err
+			}
+			err = newQuery.SetArgument(string(argument.Name), *segment.Argument, argType)
+			if err != nil {
+				return nil, err
+			}
+		} else if field.Args[0].DefaultValue == nil && !partial {
+			// argument is nil
+			return nil, fmt.Errorf("query is imcomplete: path(%s) needs argument(%s)", field.Name, field.Args[0].Name)
 		}
 	}
 
-	if len(subQuery) > 1 {
-		field, err := s.ParseQuery(subQuery, typ, partial)
-		if err != nil {
-			return nil, err
-		}
+	fields, err := s.parseQuery(subQuery, typ, partial)
+	if err != nil {
+		return nil, err
+	}
+	for _, field := range fields {
 		newQuery.Fields[field.Name] = field
 	}
 
-	return newQuery, nil
-}
-
-func (s *Schema) parseLeaves(leaves string, super *Type, partial bool) ([]*Query, error) {
-	fields := strings.Split(leaves, ",")
-	queries := make([]*Query, 0, len(fields))
-	for _, f := range fields {
-		field, err := super.mustGetField(f)
-		if err != nil {
-			return nil, err
-		}
-
-		if len(field.Args) != 0 {
-			// TODO: support default args
-			return nil, &LeafRequireArgument{
-				Leaf:     f,
-				Argument: string(field.Args[0].Name),
-			}
-		}
-
-		typ, err := s.resolve(&field.Type)
-		if err != nil {
-			return nil, err
-		}
-
-		if typ.Kind != ScalarKind && !partial {
-			// TODO: support object kind
-			return nil, fmt.Errorf("type %s is not a scalar kind", typ.Name)
-		}
-
-		decorator, err := s.typeDecorator(&field.Type)
-		if err != nil {
-			return nil, err
-		}
-
-		queries = append(queries, NewQuery(f, typ, decorator))
-	}
-	return queries, nil
+	return []*Query{newQuery}, nil
 }
 
 func (s *Schema) Reflect(query *Query, variables *Variables) (typ reflect.Type, err error) {

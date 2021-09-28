@@ -80,9 +80,10 @@ type Field struct {
 }
 
 type Argument struct {
-	Name        graphql.String
-	Description graphql.String
-	Type        TypeRef1
+	Name         graphql.String
+	Description  graphql.String
+	Type         TypeRef1
+	DefaultValue *graphql.String
 }
 
 type EnumValue struct {

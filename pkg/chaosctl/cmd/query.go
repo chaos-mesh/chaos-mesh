@@ -19,6 +19,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"strings"
 
 	"github.com/go-logr/logr"
 	"github.com/iancoleman/strcase"
@@ -35,12 +36,11 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 	var root string
 
 	var joinPrefix = func() ([]string, error) {
-		prefix := append([]string{ctrlclient.NamespaceKey}, ctrlclient.StandardizeQuery(namespace)...)
-
-		if len(prefix) != 2 {
-			return nil, fmt.Errorf("invalid namepsace: %s", namespace)
+		segment := []string{ctrlclient.NamespaceKey}
+		if namespace != "" {
+			segment = append(segment, namespace)
 		}
-
+		prefix := append([]string{}, strings.Join(segment, ":"))
 		if root != "" {
 			prefix = append(prefix, ctrlclient.StandardizeQuery(root)...)
 		}
@@ -122,7 +122,7 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 			}
 
 			json.Unmarshal(*rawData, queryValue)
-			prefixQuery, err := client.Schema.ParseQuery(prefix, queryType, false)
+			prefixQuery, err := client.Schema.ParseQuery(prefix, queryType, true)
 			if err != nil {
 				return err
 			}
