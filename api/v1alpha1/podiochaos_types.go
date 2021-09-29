@@ -208,9 +208,7 @@ const (
 	Bmap        IoMethod = "bmap"
 )
 
-// KindPodIOChaos is the kind for pod io chaos
-const KindPodIOChaos = "PodIOChaos"
-
+// +chaos-mesh:base
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
 // PodIOChaos is the Schema for the podiochaos API
@@ -248,8 +246,4 @@ type PodIOChaosList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []PodIOChaos `json:"items"`
-}
-
-func init() {
-	SchemeBuilder.Register(&PodIOChaos{}, &PodIOChaosList{})
 }

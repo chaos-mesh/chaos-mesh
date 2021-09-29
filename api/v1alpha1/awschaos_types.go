@@ -20,7 +20,7 @@ import (
 )
 
 // +kubebuilder:object:root=true
-// +chaos-mesh:base
+// +chaos-mesh:experiment
 // +chaos-mesh:oneshot=in.Spec.Action==Ec2Restart
 
 // AWSChaos is the Schema for the awschaos API

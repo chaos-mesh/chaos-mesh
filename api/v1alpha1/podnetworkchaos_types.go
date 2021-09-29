@@ -20,11 +20,9 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// KindPodNetworkChaos is the kind for network chaos
-const KindPodNetworkChaos = "PodNetworkChaos"
-
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
+// +chaos-mesh:base
 
 // PodNetworkChaos is the Schema for the PodNetworkChaos API
 type PodNetworkChaos struct {
@@ -161,8 +159,4 @@ type PodNetworkChaosList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []PodNetworkChaos `json:"items"`
-}
-
-func init() {
-	SchemeBuilder.Register(&PodNetworkChaos{}, &PodNetworkChaosList{})
 }
