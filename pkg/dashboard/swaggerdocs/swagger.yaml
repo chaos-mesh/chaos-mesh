@@ -962,9 +962,13 @@ definitions:
     properties:
       action:
         description: |-
-          Action defines the specific jvm chaos action.
-          Supported action: delay;return;script;cfl;oom;ccf;tce;cpf;tde;tpf
-          +kubebuilder:validation:Enum=delay;return;script;cfl;oom;ccf;tce;cpf;tde;tpf
+          +optional
+          fault action, values can be latency, exception, return, stress
+        type: string
+      class:
+        description: |-
+          +optional
+          Java class
         type: string
       containerNames:
         description: |-
@@ -974,49 +978,69 @@ definitions:
         items:
           type: string
         type: array
+      cpu-count:
+        description: |-
+          +optional
+          the CPU core number need to use, only set it when action is stress
+        type: integer
       duration:
         description: |-
           Duration represents the duration of the chaos action
           +optional
         type: string
-      flags:
-        additionalProperties:
-          type: string
+      exception:
         description: |-
-          Flags represents the flags of action
           +optional
-        type: object
-      matchers:
-        additionalProperties:
-          type: string
+          the exception which needs to throw dor action `exception`
+        type: string
+      latency:
         description: |-
-          Matchers represents the matching rules for the target
           +optional
-        type: object
+          the latency duration for action 'latency', unit ms
+        type: integer
+      mem-size:
+        description: |-
+          +optional
+          the memory size need to locate, only set it when action is stress
+        type: integer
+      method:
+        description: |-
+          +optional
+          the method in Java class
+        type: string
       mode:
         description: |-
           Mode defines the mode to run chaos action.
           Supported mode: one / all / fixed / fixed-percent / random-max-percent
           +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
         type: string
+      name:
+        description: |-
+          +optional
+          rule name, should be unique, and will generate by chaosd automatically
+        type: string
+      pid:
+        description: |-
+          +optional
+          the pid of Java process which need to attach
+        type: integer
+      port:
+        description: |-
+          +optional
+          the port of agent server
+        type: integer
+      rule-data:
+        description: +optional
+        type: string
       selector:
         $ref: '#/definitions/v1alpha1.PodSelectorSpec'
         description: Selector is used to select pods that are used to inject chaos
           action.
         type: object
-      target:
-        description: |-
-          Target defines the specific jvm chaos target.
-          Supported target: servlet;psql;jvm;jedis;http;dubbo;rocketmq;tars;mysql;druid;redisson;rabbitmq;mongodb
-          +kubebuilder:validation:Enum=servlet;psql;jvm;jedis;http;dubbo;rocketmq;tars;mysql;druid;redisson;rabbitmq;mongodb
-        type: string
       value:
         description: |-
-          Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
-          If `FixedPodMode`, provide an integer of pods to do chaos action.
-          If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
-          IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
           +optional
+          the return value for action 'return'
         type: string
     type: object
   v1alpha1.KernelChaosSpec:

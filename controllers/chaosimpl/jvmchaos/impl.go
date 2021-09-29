@@ -19,26 +19,57 @@ import (
 
 	"github.com/go-logr/logr"
 	"go.uber.org/fx"
-	v1 "k8s.io/api/core/v1"
+	//v1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
-	"github.com/chaos-mesh/chaos-mesh/pkg/jvm"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/utils"
+	//"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
+	//"github.com/chaos-mesh/chaos-mesh/pkg/jvm"
 )
-
-const sandboxPort = 10086
 
 type Impl struct {
 	client.Client
 	Log logr.Logger
+
+	decoder *utils.ContianerRecordDecoder
 }
 
 var _ common.ChaosImpl = (*Impl)(nil)
 
 // Apply applies jvm-chaos
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
+	impl.Log.Info("jvm chaos apply", "record", records[index])
+	if impl.decoder == nil {
+		return v1alpha1.NotInjected, fmt.Errorf("impl decoder is nil")
+	}
+	decodedContainer, err := impl.decoder.DecodeContainerRecord(ctx, records[index])
+	if err != nil {
+		return v1alpha1.NotInjected, err
+	}
+	if decodedContainer.PbClient != nil {
+		defer decodedContainer.PbClient.Close()
+	}
+	
+
+	jvmChaos := obj.(*v1alpha1.JVMChaos)
+	_, err = decodedContainer.PbClient.InstallJVMRules(ctx, &pb.InstallJVMRulesRequest{
+		ContainerId: decodedContainer.ContainerId,
+		Rule: jvmChaos.Spec.RuleData,
+		Enable:      true,
+		EnterNS:     true,
+	})
+	if err != nil {
+		impl.Log.Error(err, "install jvm rules")
+		return v1alpha1.NotInjected, err
+	}
+
+	return v1alpha1.Injected, nil
+
+	
+	/*
 	jvmchaos := obj.(*v1alpha1.JVMChaos)
 
 	var pod v1.Pod
@@ -77,19 +108,37 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	impl.Log.Info("Inject JVM Chaos", "pod", pod.Name, "action", jvmchaos.Spec.Action)
 
 	return v1alpha1.Injected, nil
-}
-
-func genSUID(pod *v1.Pod, chaos *v1alpha1.JVMChaos) string {
-	return fmt.Sprintf("%s:%s:%s:%s:%s",
-		pod.Name,
-		chaos.Spec.Action,
-		chaos.Spec.Target,
-		chaos.Name,
-		chaos.Namespace)
+	*/
 }
 
 // Recover means the reconciler recovers the chaos action
 func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
+	if impl.decoder == nil {
+		return v1alpha1.Injected, fmt.Errorf("impl decoder is nil")
+	}
+	decodedContainer, err := impl.decoder.DecodeContainerRecord(ctx, records[index])
+	if decodedContainer.PbClient != nil {
+		defer decodedContainer.PbClient.Close()
+	}
+	if err != nil {
+		return v1alpha1.Injected, err
+	}
+
+	jvmChaos := obj.(*v1alpha1.JVMChaos)
+	_, err = decodedContainer.PbClient.InstallJVMRules(ctx, &pb.InstallJVMRulesRequest{
+		ContainerId: decodedContainer.ContainerId,
+		Rule: jvmChaos.Spec.RuleData,
+		Enable:      false,
+		EnterNS:     true,
+	})
+	if err != nil {
+		impl.Log.Error(err, "uninstall jvm rules")
+		return v1alpha1.Injected, err
+	}
+
+	return v1alpha1.NotInjected, nil
+
+/*
 	jvmchaos := obj.(*v1alpha1.JVMChaos)
 
 	var pod v1.Pod
@@ -125,17 +174,19 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	}
 
 	return v1alpha1.NotInjected, nil
+	*/
 }
 
 // Object would return the instance of chaos
 
-func NewImpl(c client.Client, log logr.Logger) *common.ChaosImplPair {
+func NewImpl(c client.Client, log logr.Logger, decoder *utils.ContianerRecordDecoder) *common.ChaosImplPair {
 	return &common.ChaosImplPair{
 		Name:   "jvmchaos",
 		Object: &v1alpha1.JVMChaos{},
 		Impl: &Impl{
 			Client: c,
 			Log:    log.WithName("jvmchaos"),
+			decoder: decoder,
 		},
 	}
 }

@@ -14,11 +14,11 @@
 package jvm
 
 import (
-	"encoding/json"
-	"fmt"
-	"strconv"
+	//"encoding/json"
+	//"fmt"
+	//"strconv"
 
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	//"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
 const (
@@ -27,6 +27,7 @@ const (
 	TARGET string = "target"
 )
 
+/*
 // ToSandboxAction convertes chaos to sandbox action
 func ToSandboxAction(suid string, chaos *v1alpha1.JVMChaos) ([]byte, error) {
 	if _, ok := v1alpha1.JvmSpec[chaos.Spec.Target]; !ok {
@@ -93,3 +94,4 @@ func ToSandboxAction(suid string, chaos *v1alpha1.JVMChaos) ([]byte, error) {
 	kv[TARGET] = fmt.Sprint(chaos.Spec.Target)
 	return json.Marshal(kv)
 }
+*/

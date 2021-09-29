@@ -1220,19 +1220,18 @@ spec:
             description: JVMChaosSpec defines the desired state of JVMChaos
             properties:
               action:
-                description: 'Action defines the specific jvm chaos action. Supported
-                  action: delay;return;script;cfl;oom;ccf;tce;cpf;tde;tpf'
+                description: fault action, values can be latency, exception, return,
+                  stress
                 enum:
-                - delay
+                - latency
                 - return
-                - script
-                - cfl
-                - oom
-                - ccf
-                - tce
-                - cpf
-                - tde
-                - tpf
+                - exception
+                - stress
+                - gc
+                - rule-data
+                type: string
+              class:
+                description: Java class
                 type: string
               containerNames:
                 description: ContainerNames indicates list of the name of affected
@@ -1240,19 +1239,26 @@ spec:
                 items:
                   type: string
                 type: array
+              cpu-count:
+                description: the CPU core number need to use, only set it when action
+                  is stress
+                type: integer
               duration:
                 description: Duration represents the duration of the chaos action
                 type: string
-              flags:
-                additionalProperties:
-                  type: string
-                description: Flags represents the flags of action
-                type: object
-              matchers:
-                additionalProperties:
-                  type: string
-                description: Matchers represents the matching rules for the target
-                type: object
+              exception:
+                description: the exception which needs to throw dor action `exception`
+                type: string
+              latency:
+                description: the latency duration for action 'latency', unit ms
+                type: integer
+              mem-size:
+                description: the memory size need to locate, only set it when action
+                  is stress
+                type: integer
+              method:
+                description: the method in Java class
+                type: string
               mode:
                 description: 'Mode defines the mode to run chaos action. Supported
                   mode: one / all / fixed / fixed-percent / random-max-percent'
@@ -1262,6 +1268,18 @@ spec:
                 - fixed
                 - fixed-percent
                 - random-max-percent
+                type: string
+              name:
+                description: rule name, should be unique, and will generate by chaosd
+                  automatically
+                type: string
+              pid:
+                description: the pid of Java process which need to attach
+                type: integer
+              port:
+                description: the port of agent server
+                type: integer
+              rule-data:
                 type: string
               selector:
                 description: Selector is used to select pods that are used to inject
@@ -1353,24 +1371,6 @@ spec:
                       belong, and the each values is a set of pod names.
                     type: object
                 type: object
-              target:
-                description: 'Target defines the specific jvm chaos target. Supported
-                  target: servlet;psql;jvm;jedis;http;dubbo;rocketmq;tars;mysql;druid;redisson;rabbitmq;mongodb'
-                enum:
-                - servlet
-                - psql
-                - jvm
-                - jedis
-                - http
-                - dubbo
-                - rocketmq
-                - tars
-                - mysql
-                - druid
-                - redisson
-                - rabbitmq
-                - mongodb
-                type: string
               value:
                 description: Value is required when the mode is set to `FixedPodMode`
                   / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
@@ -1383,7 +1383,6 @@ spec:
             - action
             - mode
             - selector
-            - target
             type: object
           status:
             description: JVMChaosStatus defines the observed state of JVMChaos
@@ -3845,19 +3844,18 @@ spec:
                 description: JVMChaosSpec defines the desired state of JVMChaos
                 properties:
                   action:
-                    description: 'Action defines the specific jvm chaos action. Supported
-                      action: delay;return;script;cfl;oom;ccf;tce;cpf;tde;tpf'
+                    description: fault action, values can be latency, exception, return,
+                      stress
                     enum:
-                    - delay
+                    - latency
                     - return
-                    - script
-                    - cfl
-                    - oom
-                    - ccf
-                    - tce
-                    - cpf
-                    - tde
-                    - tpf
+                    - exception
+                    - stress
+                    - gc
+                    - rule-data
+                    type: string
+                  class:
+                    description: Java class
                     type: string
                   containerNames:
                     description: ContainerNames indicates list of the name of affected
@@ -3865,19 +3863,26 @@ spec:
                     items:
                       type: string
                     type: array
+                  cpu-count:
+                    description: the CPU core number need to use, only set it when
+                      action is stress
+                    type: integer
                   duration:
                     description: Duration represents the duration of the chaos action
                     type: string
-                  flags:
-                    additionalProperties:
-                      type: string
-                    description: Flags represents the flags of action
-                    type: object
-                  matchers:
-                    additionalProperties:
-                      type: string
-                    description: Matchers represents the matching rules for the target
-                    type: object
+                  exception:
+                    description: the exception which needs to throw dor action `exception`
+                    type: string
+                  latency:
+                    description: the latency duration for action 'latency', unit ms
+                    type: integer
+                  mem-size:
+                    description: the memory size need to locate, only set it when
+                      action is stress
+                    type: integer
+                  method:
+                    description: the method in Java class
+                    type: string
                   mode:
                     description: 'Mode defines the mode to run chaos action. Supported
                       mode: one / all / fixed / fixed-percent / random-max-percent'
@@ -3887,6 +3892,18 @@ spec:
                     - fixed
                     - fixed-percent
                     - random-max-percent
+                    type: string
+                  name:
+                    description: rule name, should be unique, and will generate by
+                      chaosd automatically
+                    type: string
+                  pid:
+                    description: the pid of Java process which need to attach
+                    type: integer
+                  port:
+                    description: the port of agent server
+                    type: integer
+                  rule-data:
                     type: string
                   selector:
                     description: Selector is used to select pods that are used to
@@ -3978,24 +3995,6 @@ spec:
                           which pods belong, and the each values is a set of pod names.
                         type: object
                     type: object
-                  target:
-                    description: 'Target defines the specific jvm chaos target. Supported
-                      target: servlet;psql;jvm;jedis;http;dubbo;rocketmq;tars;mysql;druid;redisson;rabbitmq;mongodb'
-                    enum:
-                    - servlet
-                    - psql
-                    - jvm
-                    - jedis
-                    - http
-                    - dubbo
-                    - rocketmq
-                    - tars
-                    - mysql
-                    - druid
-                    - redisson
-                    - rabbitmq
-                    - mongodb
-                    type: string
                   value:
                     description: Value is required when the mode is set to `FixedPodMode`
                       / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
@@ -4009,7 +4008,6 @@ spec:
                 - action
                 - mode
                 - selector
-                - target
                 type: object
               kernelChaos:
                 description: KernelChaosSpec defines the desired state of KernelChaos
@@ -5866,19 +5864,18 @@ spec:
                           description: JVMChaosSpec defines the desired state of JVMChaos
                           properties:
                             action:
-                              description: 'Action defines the specific jvm chaos
-                                action. Supported action: delay;return;script;cfl;oom;ccf;tce;cpf;tde;tpf'
+                              description: fault action, values can be latency, exception,
+                                return, stress
                               enum:
-                              - delay
+                              - latency
                               - return
-                              - script
-                              - cfl
-                              - oom
-                              - ccf
-                              - tce
-                              - cpf
-                              - tde
-                              - tpf
+                              - exception
+                              - stress
+                              - gc
+                              - rule-data
+                              type: string
+                            class:
+                              description: Java class
                               type: string
                             containerNames:
                               description: ContainerNames indicates list of the name
@@ -5887,21 +5884,29 @@ spec:
                               items:
                                 type: string
                               type: array
+                            cpu-count:
+                              description: the CPU core number need to use, only set
+                                it when action is stress
+                              type: integer
                             duration:
                               description: Duration represents the duration of the
                                 chaos action
                               type: string
-                            flags:
-                              additionalProperties:
-                                type: string
-                              description: Flags represents the flags of action
-                              type: object
-                            matchers:
-                              additionalProperties:
-                                type: string
-                              description: Matchers represents the matching rules
-                                for the target
-                              type: object
+                            exception:
+                              description: the exception which needs to throw dor
+                                action `exception`
+                              type: string
+                            latency:
+                              description: the latency duration for action 'latency',
+                                unit ms
+                              type: integer
+                            mem-size:
+                              description: the memory size need to locate, only set
+                                it when action is stress
+                              type: integer
+                            method:
+                              description: the method in Java class
+                              type: string
                             mode:
                               description: 'Mode defines the mode to run chaos action.
                                 Supported mode: one / all / fixed / fixed-percent
@@ -5912,6 +5917,18 @@ spec:
                               - fixed
                               - fixed-percent
                               - random-max-percent
+                              type: string
+                            name:
+                              description: rule name, should be unique, and will generate
+                                by chaosd automatically
+                              type: string
+                            pid:
+                              description: the pid of Java process which need to attach
+                              type: integer
+                            port:
+                              description: the port of agent server
+                              type: integer
+                            rule-data:
                               type: string
                             selector:
                               description: Selector is used to select pods that are
@@ -6009,24 +6026,6 @@ spec:
                                     values is a set of pod names.
                                   type: object
                               type: object
-                            target:
-                              description: 'Target defines the specific jvm chaos
-                                target. Supported target: servlet;psql;jvm;jedis;http;dubbo;rocketmq;tars;mysql;druid;redisson;rabbitmq;mongodb'
-                              enum:
-                              - servlet
-                              - psql
-                              - jvm
-                              - jedis
-                              - http
-                              - dubbo
-                              - rocketmq
-                              - tars
-                              - mysql
-                              - druid
-                              - redisson
-                              - rabbitmq
-                              - mongodb
-                              type: string
                             value:
                               description: Value is required when the mode is set
                                 to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
@@ -6041,7 +6040,6 @@ spec:
                           - action
                           - mode
                           - selector
-                          - target
                           type: object
                         kernelChaos:
                           description: KernelChaosSpec defines the desired state of
@@ -7612,19 +7610,18 @@ spec:
                                 of JVMChaos
                               properties:
                                 action:
-                                  description: 'Action defines the specific jvm chaos
-                                    action. Supported action: delay;return;script;cfl;oom;ccf;tce;cpf;tde;tpf'
+                                  description: fault action, values can be latency,
+                                    exception, return, stress
                                   enum:
-                                  - delay
+                                  - latency
                                   - return
-                                  - script
-                                  - cfl
-                                  - oom
-                                  - ccf
-                                  - tce
-                                  - cpf
-                                  - tde
-                                  - tpf
+                                  - exception
+                                  - stress
+                                  - gc
+                                  - rule-data
+                                  type: string
+                                class:
+                                  description: Java class
                                   type: string
                                 containerNames:
                                   description: ContainerNames indicates list of the
@@ -7633,21 +7630,29 @@ spec:
                                   items:
                                     type: string
                                   type: array
+                                cpu-count:
+                                  description: the CPU core number need to use, only
+                                    set it when action is stress
+                                  type: integer
                                 duration:
                                   description: Duration represents the duration of
                                     the chaos action
                                   type: string
-                                flags:
-                                  additionalProperties:
-                                    type: string
-                                  description: Flags represents the flags of action
-                                  type: object
-                                matchers:
-                                  additionalProperties:
-                                    type: string
-                                  description: Matchers represents the matching rules
-                                    for the target
-                                  type: object
+                                exception:
+                                  description: the exception which needs to throw
+                                    dor action `exception`
+                                  type: string
+                                latency:
+                                  description: the latency duration for action 'latency',
+                                    unit ms
+                                  type: integer
+                                mem-size:
+                                  description: the memory size need to locate, only
+                                    set it when action is stress
+                                  type: integer
+                                method:
+                                  description: the method in Java class
+                                  type: string
                                 mode:
                                   description: 'Mode defines the mode to run chaos
                                     action. Supported mode: one / all / fixed / fixed-percent
@@ -7658,6 +7663,19 @@ spec:
                                   - fixed
                                   - fixed-percent
                                   - random-max-percent
+                                  type: string
+                                name:
+                                  description: rule name, should be unique, and will
+                                    generate by chaosd automatically
+                                  type: string
+                                pid:
+                                  description: the pid of Java process which need
+                                    to attach
+                                  type: integer
+                                port:
+                                  description: the port of agent server
+                                  type: integer
+                                rule-data:
                                   type: string
                                 selector:
                                   description: Selector is used to select pods that
@@ -7759,24 +7777,6 @@ spec:
                                         and the each values is a set of pod names.
                                       type: object
                                   type: object
-                                target:
-                                  description: 'Target defines the specific jvm chaos
-                                    target. Supported target: servlet;psql;jvm;jedis;http;dubbo;rocketmq;tars;mysql;druid;redisson;rabbitmq;mongodb'
-                                  enum:
-                                  - servlet
-                                  - psql
-                                  - jvm
-                                  - jedis
-                                  - http
-                                  - dubbo
-                                  - rocketmq
-                                  - tars
-                                  - mysql
-                                  - druid
-                                  - redisson
-                                  - rabbitmq
-                                  - mongodb
-                                  type: string
                                 value:
                                   description: Value is required when the mode is
                                     set to `FixedPodMode` / `FixedPercentPodMod` /
@@ -7791,7 +7791,6 @@ spec:
                               - action
                               - mode
                               - selector
-                              - target
                               type: object
                             kernelChaos:
                               description: KernelChaosSpec defines the desired state
@@ -13640,19 +13639,18 @@ spec:
                 description: JVMChaosSpec defines the desired state of JVMChaos
                 properties:
                   action:
-                    description: 'Action defines the specific jvm chaos action. Supported
-                      action: delay;return;script;cfl;oom;ccf;tce;cpf;tde;tpf'
+                    description: fault action, values can be latency, exception, return,
+                      stress
                     enum:
-                    - delay
+                    - latency
                     - return
-                    - script
-                    - cfl
-                    - oom
-                    - ccf
-                    - tce
-                    - cpf
-                    - tde
-                    - tpf
+                    - exception
+                    - stress
+                    - gc
+                    - rule-data
+                    type: string
+                  class:
+                    description: Java class
                     type: string
                   containerNames:
                     description: ContainerNames indicates list of the name of affected
@@ -13660,19 +13658,26 @@ spec:
                     items:
                       type: string
                     type: array
+                  cpu-count:
+                    description: the CPU core number need to use, only set it when
+                      action is stress
+                    type: integer
                   duration:
                     description: Duration represents the duration of the chaos action
                     type: string
-                  flags:
-                    additionalProperties:
-                      type: string
-                    description: Flags represents the flags of action
-                    type: object
-                  matchers:
-                    additionalProperties:
-                      type: string
-                    description: Matchers represents the matching rules for the target
-                    type: object
+                  exception:
+                    description: the exception which needs to throw dor action `exception`
+                    type: string
+                  latency:
+                    description: the latency duration for action 'latency', unit ms
+                    type: integer
+                  mem-size:
+                    description: the memory size need to locate, only set it when
+                      action is stress
+                    type: integer
+                  method:
+                    description: the method in Java class
+                    type: string
                   mode:
                     description: 'Mode defines the mode to run chaos action. Supported
                       mode: one / all / fixed / fixed-percent / random-max-percent'
@@ -13682,6 +13687,18 @@ spec:
                     - fixed
                     - fixed-percent
                     - random-max-percent
+                    type: string
+                  name:
+                    description: rule name, should be unique, and will generate by
+                      chaosd automatically
+                    type: string
+                  pid:
+                    description: the pid of Java process which need to attach
+                    type: integer
+                  port:
+                    description: the port of agent server
+                    type: integer
+                  rule-data:
                     type: string
                   selector:
                     description: Selector is used to select pods that are used to
@@ -13773,24 +13790,6 @@ spec:
                           which pods belong, and the each values is a set of pod names.
                         type: object
                     type: object
-                  target:
-                    description: 'Target defines the specific jvm chaos target. Supported
-                      target: servlet;psql;jvm;jedis;http;dubbo;rocketmq;tars;mysql;druid;redisson;rabbitmq;mongodb'
-                    enum:
-                    - servlet
-                    - psql
-                    - jvm
-                    - jedis
-                    - http
-                    - dubbo
-                    - rocketmq
-                    - tars
-                    - mysql
-                    - druid
-                    - redisson
-                    - rabbitmq
-                    - mongodb
-                    type: string
                   value:
                     description: Value is required when the mode is set to `FixedPodMode`
                       / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
@@ -13804,7 +13803,6 @@ spec:
                 - action
                 - mode
                 - selector
-                - target
                 type: object
               kernelChaos:
                 description: KernelChaosSpec defines the desired state of KernelChaos
@@ -15265,19 +15263,18 @@ spec:
                     description: JVMChaosSpec defines the desired state of JVMChaos
                     properties:
                       action:
-                        description: 'Action defines the specific jvm chaos action.
-                          Supported action: delay;return;script;cfl;oom;ccf;tce;cpf;tde;tpf'
+                        description: fault action, values can be latency, exception,
+                          return, stress
                         enum:
-                        - delay
+                        - latency
                         - return
-                        - script
-                        - cfl
-                        - oom
-                        - ccf
-                        - tce
-                        - cpf
-                        - tde
-                        - tpf
+                        - exception
+                        - stress
+                        - gc
+                        - rule-data
+                        type: string
+                      class:
+                        description: Java class
                         type: string
                       containerNames:
                         description: ContainerNames indicates list of the name of
@@ -15285,21 +15282,29 @@ spec:
                         items:
                           type: string
                         type: array
+                      cpu-count:
+                        description: the CPU core number need to use, only set it
+                          when action is stress
+                        type: integer
                       duration:
                         description: Duration represents the duration of the chaos
                           action
                         type: string
-                      flags:
-                        additionalProperties:
-                          type: string
-                        description: Flags represents the flags of action
-                        type: object
-                      matchers:
-                        additionalProperties:
-                          type: string
-                        description: Matchers represents the matching rules for the
-                          target
-                        type: object
+                      exception:
+                        description: the exception which needs to throw dor action
+                          `exception`
+                        type: string
+                      latency:
+                        description: the latency duration for action 'latency', unit
+                          ms
+                        type: integer
+                      mem-size:
+                        description: the memory size need to locate, only set it when
+                          action is stress
+                        type: integer
+                      method:
+                        description: the method in Java class
+                        type: string
                       mode:
                         description: 'Mode defines the mode to run chaos action. Supported
                           mode: one / all / fixed / fixed-percent / random-max-percent'
@@ -15309,6 +15314,18 @@ spec:
                         - fixed
                         - fixed-percent
                         - random-max-percent
+                        type: string
+                      name:
+                        description: rule name, should be unique, and will generate
+                          by chaosd automatically
+                        type: string
+                      pid:
+                        description: the pid of Java process which need to attach
+                        type: integer
+                      port:
+                        description: the port of agent server
+                        type: integer
+                      rule-data:
                         type: string
                       selector:
                         description: Selector is used to select pods that are used
@@ -15402,24 +15419,6 @@ spec:
                               names.
                             type: object
                         type: object
-                      target:
-                        description: 'Target defines the specific jvm chaos target.
-                          Supported target: servlet;psql;jvm;jedis;http;dubbo;rocketmq;tars;mysql;druid;redisson;rabbitmq;mongodb'
-                        enum:
-                        - servlet
-                        - psql
-                        - jvm
-                        - jedis
-                        - http
-                        - dubbo
-                        - rocketmq
-                        - tars
-                        - mysql
-                        - druid
-                        - redisson
-                        - rabbitmq
-                        - mongodb
-                        type: string
                       value:
                         description: Value is required when the mode is set to `FixedPodMode`
                           / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
@@ -15433,7 +15432,6 @@ spec:
                     - action
                     - mode
                     - selector
-                    - target
                     type: object
                   kernelChaos:
                     description: KernelChaosSpec defines the desired state of KernelChaos
@@ -17332,19 +17330,18 @@ spec:
                                 of JVMChaos
                               properties:
                                 action:
-                                  description: 'Action defines the specific jvm chaos
-                                    action. Supported action: delay;return;script;cfl;oom;ccf;tce;cpf;tde;tpf'
+                                  description: fault action, values can be latency,
+                                    exception, return, stress
                                   enum:
-                                  - delay
+                                  - latency
                                   - return
-                                  - script
-                                  - cfl
-                                  - oom
-                                  - ccf
-                                  - tce
-                                  - cpf
-                                  - tde
-                                  - tpf
+                                  - exception
+                                  - stress
+                                  - gc
+                                  - rule-data
+                                  type: string
+                                class:
+                                  description: Java class
                                   type: string
                                 containerNames:
                                   description: ContainerNames indicates list of the
@@ -17353,21 +17350,29 @@ spec:
                                   items:
                                     type: string
                                   type: array
+                                cpu-count:
+                                  description: the CPU core number need to use, only
+                                    set it when action is stress
+                                  type: integer
                                 duration:
                                   description: Duration represents the duration of
                                     the chaos action
                                   type: string
-                                flags:
-                                  additionalProperties:
-                                    type: string
-                                  description: Flags represents the flags of action
-                                  type: object
-                                matchers:
-                                  additionalProperties:
-                                    type: string
-                                  description: Matchers represents the matching rules
-                                    for the target
-                                  type: object
+                                exception:
+                                  description: the exception which needs to throw
+                                    dor action `exception`
+                                  type: string
+                                latency:
+                                  description: the latency duration for action 'latency',
+                                    unit ms
+                                  type: integer
+                                mem-size:
+                                  description: the memory size need to locate, only
+                                    set it when action is stress
+                                  type: integer
+                                method:
+                                  description: the method in Java class
+                                  type: string
                                 mode:
                                   description: 'Mode defines the mode to run chaos
                                     action. Supported mode: one / all / fixed / fixed-percent
@@ -17378,6 +17383,19 @@ spec:
                                   - fixed
                                   - fixed-percent
                                   - random-max-percent
+                                  type: string
+                                name:
+                                  description: rule name, should be unique, and will
+                                    generate by chaosd automatically
+                                  type: string
+                                pid:
+                                  description: the pid of Java process which need
+                                    to attach
+                                  type: integer
+                                port:
+                                  description: the port of agent server
+                                  type: integer
+                                rule-data:
                                   type: string
                                 selector:
                                   description: Selector is used to select pods that
@@ -17479,24 +17497,6 @@ spec:
                                         and the each values is a set of pod names.
                                       type: object
                                   type: object
-                                target:
-                                  description: 'Target defines the specific jvm chaos
-                                    target. Supported target: servlet;psql;jvm;jedis;http;dubbo;rocketmq;tars;mysql;druid;redisson;rabbitmq;mongodb'
-                                  enum:
-                                  - servlet
-                                  - psql
-                                  - jvm
-                                  - jedis
-                                  - http
-                                  - dubbo
-                                  - rocketmq
-                                  - tars
-                                  - mysql
-                                  - druid
-                                  - redisson
-                                  - rabbitmq
-                                  - mongodb
-                                  type: string
                                 value:
                                   description: Value is required when the mode is
                                     set to `FixedPodMode` / `FixedPercentPodMod` /
@@ -17511,7 +17511,6 @@ spec:
                               - action
                               - mode
                               - selector
-                              - target
                               type: object
                             kernelChaos:
                               description: KernelChaosSpec defines the desired state
@@ -19135,19 +19134,18 @@ spec:
                                     of JVMChaos
                                   properties:
                                     action:
-                                      description: 'Action defines the specific jvm
-                                        chaos action. Supported action: delay;return;script;cfl;oom;ccf;tce;cpf;tde;tpf'
+                                      description: fault action, values can be latency,
+                                        exception, return, stress
                                       enum:
-                                      - delay
+                                      - latency
                                       - return
-                                      - script
-                                      - cfl
-                                      - oom
-                                      - ccf
-                                      - tce
-                                      - cpf
-                                      - tde
-                                      - tpf
+                                      - exception
+                                      - stress
+                                      - gc
+                                      - rule-data
+                                      type: string
+                                    class:
+                                      description: Java class
                                       type: string
                                     containerNames:
                                       description: ContainerNames indicates list of
@@ -19156,21 +19154,29 @@ spec:
                                       items:
                                         type: string
                                       type: array
+                                    cpu-count:
+                                      description: the CPU core number need to use,
+                                        only set it when action is stress
+                                      type: integer
                                     duration:
                                       description: Duration represents the duration
                                         of the chaos action
                                       type: string
-                                    flags:
-                                      additionalProperties:
-                                        type: string
-                                      description: Flags represents the flags of action
-                                      type: object
-                                    matchers:
-                                      additionalProperties:
-                                        type: string
-                                      description: Matchers represents the matching
-                                        rules for the target
-                                      type: object
+                                    exception:
+                                      description: the exception which needs to throw
+                                        dor action `exception`
+                                      type: string
+                                    latency:
+                                      description: the latency duration for action
+                                        'latency', unit ms
+                                      type: integer
+                                    mem-size:
+                                      description: the memory size need to locate,
+                                        only set it when action is stress
+                                      type: integer
+                                    method:
+                                      description: the method in Java class
+                                      type: string
                                     mode:
                                       description: 'Mode defines the mode to run chaos
                                         action. Supported mode: one / all / fixed
@@ -19181,6 +19187,19 @@ spec:
                                       - fixed
                                       - fixed-percent
                                       - random-max-percent
+                                      type: string
+                                    name:
+                                      description: rule name, should be unique, and
+                                        will generate by chaosd automatically
+                                      type: string
+                                    pid:
+                                      description: the pid of Java process which need
+                                        to attach
+                                      type: integer
+                                    port:
+                                      description: the port of agent server
+                                      type: integer
+                                    rule-data:
                                       type: string
                                     selector:
                                       description: Selector is used to select pods
@@ -19286,24 +19305,6 @@ spec:
                                             pod names.
                                           type: object
                                       type: object
-                                    target:
-                                      description: 'Target defines the specific jvm
-                                        chaos target. Supported target: servlet;psql;jvm;jedis;http;dubbo;rocketmq;tars;mysql;druid;redisson;rabbitmq;mongodb'
-                                      enum:
-                                      - servlet
-                                      - psql
-                                      - jvm
-                                      - jedis
-                                      - http
-                                      - dubbo
-                                      - rocketmq
-                                      - tars
-                                      - mysql
-                                      - druid
-                                      - redisson
-                                      - rabbitmq
-                                      - mongodb
-                                      type: string
                                     value:
                                       description: Value is required when the mode
                                         is set to `FixedPodMode` / `FixedPercentPodMod`
@@ -19319,7 +19320,6 @@ spec:
                                   - action
                                   - mode
                                   - selector
-                                  - target
                                   type: object
                                 kernelChaos:
                                   description: KernelChaosSpec defines the desired
@@ -27898,19 +27898,18 @@ spec:
                       description: JVMChaosSpec defines the desired state of JVMChaos
                       properties:
                         action:
-                          description: 'Action defines the specific jvm chaos action.
-                            Supported action: delay;return;script;cfl;oom;ccf;tce;cpf;tde;tpf'
+                          description: fault action, values can be latency, exception,
+                            return, stress
                           enum:
-                          - delay
+                          - latency
                           - return
-                          - script
-                          - cfl
-                          - oom
-                          - ccf
-                          - tce
-                          - cpf
-                          - tde
-                          - tpf
+                          - exception
+                          - stress
+                          - gc
+                          - rule-data
+                          type: string
+                        class:
+                          description: Java class
                           type: string
                         containerNames:
                           description: ContainerNames indicates list of the name of
@@ -27919,21 +27918,29 @@ spec:
                           items:
                             type: string
                           type: array
+                        cpu-count:
+                          description: the CPU core number need to use, only set it
+                            when action is stress
+                          type: integer
                         duration:
                           description: Duration represents the duration of the chaos
                             action
                           type: string
-                        flags:
-                          additionalProperties:
-                            type: string
-                          description: Flags represents the flags of action
-                          type: object
-                        matchers:
-                          additionalProperties:
-                            type: string
-                          description: Matchers represents the matching rules for
-                            the target
-                          type: object
+                        exception:
+                          description: the exception which needs to throw dor action
+                            `exception`
+                          type: string
+                        latency:
+                          description: the latency duration for action 'latency',
+                            unit ms
+                          type: integer
+                        mem-size:
+                          description: the memory size need to locate, only set it
+                            when action is stress
+                          type: integer
+                        method:
+                          description: the method in Java class
+                          type: string
                         mode:
                           description: 'Mode defines the mode to run chaos action.
                             Supported mode: one / all / fixed / fixed-percent / random-max-percent'
@@ -27943,6 +27950,18 @@ spec:
                           - fixed
                           - fixed-percent
                           - random-max-percent
+                          type: string
+                        name:
+                          description: rule name, should be unique, and will generate
+                            by chaosd automatically
+                          type: string
+                        pid:
+                          description: the pid of Java process which need to attach
+                          type: integer
+                        port:
+                          description: the port of agent server
+                          type: integer
+                        rule-data:
                           type: string
                         selector:
                           description: Selector is used to select pods that are used
@@ -28037,24 +28056,6 @@ spec:
                                 a set of pod names.
                               type: object
                           type: object
-                        target:
-                          description: 'Target defines the specific jvm chaos target.
-                            Supported target: servlet;psql;jvm;jedis;http;dubbo;rocketmq;tars;mysql;druid;redisson;rabbitmq;mongodb'
-                          enum:
-                          - servlet
-                          - psql
-                          - jvm
-                          - jedis
-                          - http
-                          - dubbo
-                          - rocketmq
-                          - tars
-                          - mysql
-                          - druid
-                          - redisson
-                          - rabbitmq
-                          - mongodb
-                          type: string
                         value:
                           description: Value is required when the mode is set to `FixedPodMode`
                             / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If
@@ -28069,7 +28070,6 @@ spec:
                       - action
                       - mode
                       - selector
-                      - target
                       type: object
                     kernelChaos:
                       description: KernelChaosSpec defines the desired state of KernelChaos
@@ -29596,19 +29596,18 @@ spec:
                           description: JVMChaosSpec defines the desired state of JVMChaos
                           properties:
                             action:
-                              description: 'Action defines the specific jvm chaos
-                                action. Supported action: delay;return;script;cfl;oom;ccf;tce;cpf;tde;tpf'
+                              description: fault action, values can be latency, exception,
+                                return, stress
                               enum:
-                              - delay
+                              - latency
                               - return
-                              - script
-                              - cfl
-                              - oom
-                              - ccf
-                              - tce
-                              - cpf
-                              - tde
-                              - tpf
+                              - exception
+                              - stress
+                              - gc
+                              - rule-data
+                              type: string
+                            class:
+                              description: Java class
                               type: string
                             containerNames:
                               description: ContainerNames indicates list of the name
@@ -29617,21 +29616,29 @@ spec:
                               items:
                                 type: string
                               type: array
+                            cpu-count:
+                              description: the CPU core number need to use, only set
+                                it when action is stress
+                              type: integer
                             duration:
                               description: Duration represents the duration of the
                                 chaos action
                               type: string
-                            flags:
-                              additionalProperties:
-                                type: string
-                              description: Flags represents the flags of action
-                              type: object
-                            matchers:
-                              additionalProperties:
-                                type: string
-                              description: Matchers represents the matching rules
-                                for the target
-                              type: object
+                            exception:
+                              description: the exception which needs to throw dor
+                                action `exception`
+                              type: string
+                            latency:
+                              description: the latency duration for action 'latency',
+                                unit ms
+                              type: integer
+                            mem-size:
+                              description: the memory size need to locate, only set
+                                it when action is stress
+                              type: integer
+                            method:
+                              description: the method in Java class
+                              type: string
                             mode:
                               description: 'Mode defines the mode to run chaos action.
                                 Supported mode: one / all / fixed / fixed-percent
@@ -29642,6 +29649,18 @@ spec:
                               - fixed
                               - fixed-percent
                               - random-max-percent
+                              type: string
+                            name:
+                              description: rule name, should be unique, and will generate
+                                by chaosd automatically
+                              type: string
+                            pid:
+                              description: the pid of Java process which need to attach
+                              type: integer
+                            port:
+                              description: the port of agent server
+                              type: integer
+                            rule-data:
                               type: string
                             selector:
                               description: Selector is used to select pods that are
@@ -29739,24 +29758,6 @@ spec:
                                     values is a set of pod names.
                                   type: object
                               type: object
-                            target:
-                              description: 'Target defines the specific jvm chaos
-                                target. Supported target: servlet;psql;jvm;jedis;http;dubbo;rocketmq;tars;mysql;druid;redisson;rabbitmq;mongodb'
-                              enum:
-                              - servlet
-                              - psql
-                              - jvm
-                              - jedis
-                              - http
-                              - dubbo
-                              - rocketmq
-                              - tars
-                              - mysql
-                              - druid
-                              - redisson
-                              - rabbitmq
-                              - mongodb
-                              type: string
                             value:
                               description: Value is required when the mode is set
                                 to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
@@ -29771,7 +29772,6 @@ spec:
                           - action
                           - mode
                           - selector
-                          - target
                           type: object
                         kernelChaos:
                           description: KernelChaosSpec defines the desired state of

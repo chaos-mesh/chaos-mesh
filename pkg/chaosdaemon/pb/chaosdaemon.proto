@@ -25,6 +25,8 @@ service ChaosDaemon {
   rpc ApplyHttpChaos(ApplyHttpChaosRequest) returns (ApplyHttpChaosResponse) {}
 
   rpc SetDNSServer (SetDNSServerRequest) returns (google.protobuf.Empty) {}
+
+  rpc InstallJVMRules(InstallJVMRulesRequest) returns (InstallJVMRulesResponse) {}
 }
 
 message TcHandle {
@@ -238,4 +240,16 @@ message SetDNSServerRequest {
   string dns_server = 2;
   bool enable = 3;
   bool enterNS = 4;
+}
+
+message InstallJVMRulesRequest {
+  string container_id = 1;
+  string rule = 2;
+  bool enable = 3;
+  bool enterNS = 4;
+}
+
+message InstallJVMRulesResponse {
+  int32 port = 1;
+  string error = 2;
 }

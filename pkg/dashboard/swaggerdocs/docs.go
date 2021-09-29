@@ -2995,7 +2995,11 @@ var doc = `{
             "type": "object",
             "properties": {
                 "action": {
-                    "description": "Action defines the specific jvm chaos action.\nSupported action: delay;return;script;cfl;oom;ccf;tce;cpf;tde;tpf\n+kubebuilder:validation:Enum=delay;return;script;cfl;oom;ccf;tce;cpf;tde;tpf",
+                    "description": "+optional\nfault action, values can be latency, exception, return, stress",
+                    "type": "string"
+                },
+                "class": {
+                    "description": "+optional\nJava class",
                     "type": "string"
                 },
                 "containerNames": {
@@ -3005,26 +3009,48 @@ var doc = `{
                         "type": "string"
                     }
                 },
+                "cpu-count": {
+                    "description": "+optional\nthe CPU core number need to use, only set it when action is stress",
+                    "type": "integer"
+                },
                 "duration": {
                     "description": "Duration represents the duration of the chaos action\n+optional",
                     "type": "string"
                 },
-                "flags": {
-                    "description": "Flags represents the flags of action\n+optional",
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
+                "exception": {
+                    "description": "+optional\nthe exception which needs to throw dor action ` + "`" + `exception` + "`" + `",
+                    "type": "string"
                 },
-                "matchers": {
-                    "description": "Matchers represents the matching rules for the target\n+optional",
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
+                "latency": {
+                    "description": "+optional\nthe latency duration for action 'latency', unit ms",
+                    "type": "integer"
+                },
+                "mem-size": {
+                    "description": "+optional\nthe memory size need to locate, only set it when action is stress",
+                    "type": "integer"
+                },
+                "method": {
+                    "description": "+optional\nthe method in Java class",
+                    "type": "string"
                 },
                 "mode": {
                     "description": "Mode defines the mode to run chaos action.\nSupported mode: one / all / fixed / fixed-percent / random-max-percent\n+kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "+optional\nrule name, should be unique, and will generate by chaosd automatically",
+                    "type": "string"
+                },
+                "pid": {
+                    "description": "+optional\nthe pid of Java process which need to attach",
+                    "type": "integer"
+                },
+                "port": {
+                    "description": "+optional\nthe port of agent server",
+                    "type": "integer"
+                },
+                "rule-data": {
+                    "description": "+optional",
                     "type": "string"
                 },
                 "selector": {
@@ -3032,12 +3058,8 @@ var doc = `{
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.PodSelectorSpec"
                 },
-                "target": {
-                    "description": "Target defines the specific jvm chaos target.\nSupported target: servlet;psql;jvm;jedis;http;dubbo;rocketmq;tars;mysql;druid;redisson;rabbitmq;mongodb\n+kubebuilder:validation:Enum=servlet;psql;jvm;jedis;http;dubbo;rocketmq;tars;mysql;druid;redisson;rabbitmq;mongodb",
-                    "type": "string"
-                },
                 "value": {
-                    "description": "Value is required when the mode is set to ` + "`" + `FixedPodMode` + "`" + ` / ` + "`" + `FixedPercentPodMod` + "`" + ` / ` + "`" + `RandomMaxPercentPodMod` + "`" + `.\nIf ` + "`" + `FixedPodMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentPodMod` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentPodMod` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
+                    "description": "+optional\nthe return value for action 'return'",
                     "type": "string"
                 }
             }

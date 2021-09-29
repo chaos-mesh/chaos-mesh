@@ -15,6 +15,7 @@ package utils
 
 import (
 	"context"
+	"fmt"
 
 	v1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -50,6 +51,10 @@ func (d *ContianerRecordDecoder) DecodeContainerRecord(ctx context.Context, reco
 	if err != nil {
 		// TODO: organize the error in a better way
 		err = NewFailToFindContainer(pod.Namespace, pod.Name, containerName, err)
+		return
+	}
+	if d.Client == nil {
+		err = fmt.Errorf("ContianerRecordDecoder's client is nil")
 		return
 	}
 	err = d.Client.Get(ctx, podId, &pod)

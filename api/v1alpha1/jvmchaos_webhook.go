@@ -14,14 +14,12 @@
 package v1alpha1
 
 import (
-	"fmt"
-	"strconv"
-
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
 func (in *JVMChaosSpec) Validate(root interface{}, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
+	/*
 	targetField := path.Child("target")
 	actionField := path.Child("action")
 	flagsField := path.Child("flags")
@@ -50,6 +48,7 @@ func (in *JVMChaosSpec) Validate(root interface{}, path *field.Path) field.Error
 	} else {
 		allErrs = append(allErrs, field.Invalid(targetField, in.Target, "unknown JVM chaos target"))
 	}
+	*/
 
 	return allErrs
 }
@@ -62,6 +61,7 @@ func toString(actions []JVMChaosAction) []string {
 	return ret
 }
 
+/*
 func (in *JVMChaosSpec) validateParameterRules(parameters map[string]string, rules []ParameterRules, parent *field.Path, target *field.Path, action *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 	for _, rule := range rules {
@@ -537,6 +537,7 @@ var JvmSpec = map[JVMChaosTarget]map[JVMChaosAction]ActionParameterRules{
 		},
 	},
 }
+*/
 
 // ActionParameterRules defines the parameter validation rules for action
 type ActionParameterRules struct {
