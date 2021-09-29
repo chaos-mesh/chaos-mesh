@@ -25,7 +25,11 @@ import (
 )
 
 const (
-	AllArgument = "all"
+	SeperatorSegment  = "/"
+	SeperatorArgument = ":"
+	SeperatorTag      = "@"
+	SeperatorLeaf     = ","
+	TagNameAll        = "all"
 )
 
 type Query struct {
@@ -33,11 +37,18 @@ type Query struct {
 	Argument  string
 	ArgValue  interface{} // inner immutable
 	Type      *Type
+	Tag       *Tag          // inner immutable
 	Decorator TypeDecorator // inner immutable
 	Fields    map[string]*Query
 }
 
 type Segment struct {
+	Name     string
+	Argument *string
+	Tag      *Tag
+}
+
+type Tag struct {
 	Name     string
 	Argument *string
 }
@@ -248,25 +259,37 @@ func (q *Query) Tail() *Query {
 	return q.Clone()
 }
 
+func (t *Tag) String() string {
+	tag := t.Name
+	if t.Argument != nil {
+		tag = fmt.Sprintf("%s%s%s", tag, SeperatorArgument, *t.Argument)
+	}
+	return tag
+}
+
 func (q *Query) String() string {
 	segment := q.Name
 	if q.ArgValue != nil {
 		switch v := q.ArgValue.(type) {
 		case graphql.String:
-			segment = strings.Join([]string{segment, string(v)}, ":")
+			segment = strings.Join([]string{segment, string(v)}, SeperatorArgument)
 		case graphql.Boolean:
-			segment = strings.Join([]string{segment, strconv.FormatBool(bool(v))}, ":")
+			segment = strings.Join([]string{segment, strconv.FormatBool(bool(v))}, SeperatorArgument)
 		case graphql.Int:
-			segment = strings.Join([]string{segment, fmt.Sprintf("%d", v)}, ":")
+			segment = strings.Join([]string{segment, fmt.Sprintf("%d", v)}, SeperatorArgument)
 		case graphql.Float:
-			segment = strings.Join([]string{segment, fmt.Sprintf("%f", v)}, ":")
+			segment = strings.Join([]string{segment, fmt.Sprintf("%f", v)}, SeperatorArgument)
 		default:
 			value := reflect.ValueOf(q.ArgValue)
 			if value.Type().Kind() == reflect.String {
 				arg := value.Convert(reflect.TypeOf("")).Interface().(string)
-				segment = strings.Join([]string{segment, strings.ToLower(arg)}, ":")
+				segment = strings.Join([]string{segment, strings.ToLower(arg)}, SeperatorArgument)
 			}
 		}
+	}
+
+	if q.Tag != nil {
+		segment = strings.Join([]string{segment, q.Tag.String()}, SeperatorTag)
 	}
 
 	if len(q.Fields) == 0 {
@@ -278,21 +301,42 @@ func (q *Query) String() string {
 		fields = append(fields, f.String())
 	}
 
-	fieldStr := strings.Join(fields, ",")
-	return strings.Join([]string{segment, fieldStr}, "/")
+	fieldStr := strings.Join(fields, SeperatorLeaf)
+	return strings.Join([]string{segment, fieldStr}, SeperatorSegment)
 }
 
 func (s *Schema) ParseQuery(rawQuery []string, super *Type, partial bool) (*Query, error) {
 	var query []Segment
 	for _, s := range rawQuery {
 		segment := Segment{}
-		rawSegment := strings.Split(strings.Trim(s, ":"), ":")
+		rawSegment := strings.Split(strings.Trim(s, SeperatorTag), SeperatorTag)
 		if len(rawSegment) != 2 && len(rawSegment) != 1 {
 			return nil, fmt.Errorf("invalid query segment: %s", s)
 		}
-		segment.Name = rawSegment[0]
+
+		rawName := strings.Split(strings.Trim(rawSegment[0], SeperatorArgument), SeperatorArgument)
+		if len(rawName) != 2 && len(rawName) != 1 {
+			return nil, fmt.Errorf("invalid query segment: %s", s)
+		}
+
+		segment.Name = rawName[0]
+		if len(rawName) == 2 {
+			segment.Argument = &rawName[1]
+		}
+
 		if len(rawSegment) == 2 {
-			segment.Argument = &rawSegment[1]
+			rawTag := strings.Split(strings.Trim(rawSegment[1], SeperatorArgument), SeperatorArgument)
+			if len(rawTag) != 2 && len(rawTag) != 1 {
+				return nil, fmt.Errorf("invalid query segment: %s", s)
+			}
+
+			segment.Tag = &Tag{
+				Name: rawTag[0],
+			}
+
+			if len(rawTag) == 2 {
+				segment.Tag.Argument = &rawTag[1]
+			}
 		}
 		query = append(query, segment)
 	}
@@ -315,7 +359,7 @@ func (s *Schema) parseQuery(query []Segment, super *Type, partial bool) ([]*Quer
 	}
 
 	if len(query) == 1 {
-		fields := strings.Split(query[0].Name, ",")
+		fields := strings.Split(query[0].Name, SeperatorLeaf)
 		queries := make([]*Query, 0, len(fields))
 		for _, f := range fields {
 			field, err := super.mustGetField(f)
@@ -370,19 +414,21 @@ func (s *Schema) parseQuery(query []Segment, super *Type, partial bool) ([]*Quer
 	}
 
 	newQuery := NewQuery(segment.Name, typ, decorator)
+	newQuery.Tag = segment.Tag
+
 	if len(field.Args) != 0 {
 		if segment.Argument != nil {
-			if *segment.Argument != AllArgument {
-				argument := field.Args[0]
-				argType, err := s.resolve(&argument.Type)
-				if err != nil {
-					return nil, err
-				}
-				err = newQuery.SetArgument(string(argument.Name), *segment.Argument, argType)
-				if err != nil {
-					return nil, err
-				}
+			argument := field.Args[0]
+			argType, err := s.resolve(&argument.Type)
+			if err != nil {
+				return nil, err
 			}
+			err = newQuery.SetArgument(string(argument.Name), *segment.Argument, argType)
+			if err != nil {
+				return nil, err
+			}
+		} else if segment.Tag != nil && segment.Tag.Name == TagNameAll {
+			// do nothing
 		} else if field.Args[0].DefaultValue == nil && !partial {
 			// argument is nil
 			return nil, fmt.Errorf("query is imcomplete: path(%s) needs argument(%s)", field.Name, field.Args[0].Name)
@@ -447,5 +493,5 @@ func (s *Schema) Reflect(query *Query, variables *Variables) (typ reflect.Type, 
 }
 
 func StandardizeQuery(query string) []string {
-	return strings.Split(strings.Trim(query, "/"), "/")
+	return strings.Split(strings.Trim(query, SeperatorSegment), SeperatorSegment)
 }
