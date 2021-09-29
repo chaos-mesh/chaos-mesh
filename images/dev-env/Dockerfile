@@ -32,7 +32,7 @@ ENV https_proxy $HTTPS_PROXY
 
 RUN apt-get update && \ 
     apt-get install unzip git build-essential curl python -y && \
-    apt-get clean
+    rm -rf /var/lib/apt/lists/*
 
 # The `TARGET_PLATFORM` would be `amd64` or `arm64`
 ARG TARGET_PLATFORM=amd64

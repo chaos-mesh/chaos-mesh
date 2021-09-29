@@ -11,7 +11,7 @@ ARG SWAGGER
 
 RUN apt-get update && \ 
     apt-get install tzdata -y && \
-    apt-get clean
+    rm -rf /var/lib/apt/lists/*
 
 ENV http_proxy=
 ENV https_proxy=

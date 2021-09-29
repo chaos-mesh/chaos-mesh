@@ -8,7 +8,7 @@ ENV https_proxy $HTTPS_PROXY
 
 RUN apt-get update && \ 
     apt-get install -y tzdata iptables ipset stress-ng iproute2 fuse util-linux procps curl && \
-    apt-get clean
+    rm -rf /var/lib/apt/lists/*
 
 RUN update-alternatives --set iptables /usr/sbin/iptables-legacy
 
