@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: helloworld
+  namespace: helloworld
+spec:
+  containers:
+    - name: helloworld
+      image: xiang13225080/helloworld:v1.0
+      imagePullPolicy: IfNotPresent
