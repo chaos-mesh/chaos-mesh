@@ -26,7 +26,7 @@ jobs:
             IMAGE_TAG=latest; 
           fi
 
-          echo "##[set-output name=image_tag;]$(echo $IMAGE_TAG)"
+          echo "##[set-output name=image_tag::]$(echo $IMAGE_TAG)"
         id: image_tag
 
       - name: Log in to GitHub Docker Registry
