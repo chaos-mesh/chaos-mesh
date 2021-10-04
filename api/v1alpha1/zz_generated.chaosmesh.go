@@ -4,25 +4,26 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
+//
 package v1alpha1
 
 import (
 	"encoding/json"
+	"fmt"
 	"reflect"
 	"time"
-	"fmt"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"sigs.k8s.io/controller-runtime/pkg/webhook"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"k8s.io/apimachinery/pkg/runtime"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
 	gw "github.com/chaos-mesh/chaos-mesh/api/v1alpha1/genericwebhook"
 )
@@ -123,13 +124,13 @@ func (in *AWSChaos) DurationExceeded(now time.Time) (bool, time.Duration, error)
 }
 
 func (in *AWSChaos) IsOneShot() bool {
-	
-	if in.Spec.Action==Ec2Restart {
+
+	if in.Spec.Action == Ec2Restart {
 		return true
 	}
 
 	return false
-	
+
 }
 
 var AWSChaosWebhookLog = logf.Log.WithName("AWSChaos-resource")
@@ -262,9 +263,9 @@ func (in *DNSChaos) DurationExceeded(now time.Time) (bool, time.Duration, error)
 }
 
 func (in *DNSChaos) IsOneShot() bool {
-	
+
 	return false
-	
+
 }
 
 var DNSChaosWebhookLog = logf.Log.WithName("DNSChaos-resource")
@@ -397,13 +398,13 @@ func (in *GCPChaos) DurationExceeded(now time.Time) (bool, time.Duration, error)
 }
 
 func (in *GCPChaos) IsOneShot() bool {
-	
-	if in.Spec.Action==NodeReset {
+
+	if in.Spec.Action == NodeReset {
 		return true
 	}
 
 	return false
-	
+
 }
 
 var GCPChaosWebhookLog = logf.Log.WithName("GCPChaos-resource")
@@ -536,9 +537,9 @@ func (in *HTTPChaos) DurationExceeded(now time.Time) (bool, time.Duration, error
 }
 
 func (in *HTTPChaos) IsOneShot() bool {
-	
+
 	return false
-	
+
 }
 
 var HTTPChaosWebhookLog = logf.Log.WithName("HTTPChaos-resource")
@@ -671,9 +672,9 @@ func (in *IOChaos) DurationExceeded(now time.Time) (bool, time.Duration, error) 
 }
 
 func (in *IOChaos) IsOneShot() bool {
-	
+
 	return false
-	
+
 }
 
 var IOChaosWebhookLog = logf.Log.WithName("IOChaos-resource")
@@ -806,9 +807,9 @@ func (in *JVMChaos) DurationExceeded(now time.Time) (bool, time.Duration, error)
 }
 
 func (in *JVMChaos) IsOneShot() bool {
-	
+
 	return false
-	
+
 }
 
 var JVMChaosWebhookLog = logf.Log.WithName("JVMChaos-resource")
@@ -941,9 +942,9 @@ func (in *KernelChaos) DurationExceeded(now time.Time) (bool, time.Duration, err
 }
 
 func (in *KernelChaos) IsOneShot() bool {
-	
+
 	return false
-	
+
 }
 
 var KernelChaosWebhookLog = logf.Log.WithName("KernelChaos-resource")
@@ -1076,9 +1077,9 @@ func (in *NetworkChaos) DurationExceeded(now time.Time) (bool, time.Duration, er
 }
 
 func (in *NetworkChaos) IsOneShot() bool {
-	
+
 	return false
-	
+
 }
 
 var NetworkChaosWebhookLog = logf.Log.WithName("NetworkChaos-resource")
@@ -1211,9 +1212,9 @@ func (in *PhysicalMachineChaos) DurationExceeded(now time.Time) (bool, time.Dura
 }
 
 func (in *PhysicalMachineChaos) IsOneShot() bool {
-	
+
 	return false
-	
+
 }
 
 var PhysicalMachineChaosWebhookLog = logf.Log.WithName("PhysicalMachineChaos-resource")
@@ -1346,13 +1347,13 @@ func (in *PodChaos) DurationExceeded(now time.Time) (bool, time.Duration, error)
 }
 
 func (in *PodChaos) IsOneShot() bool {
-	
-	if in.Spec.Action==PodKillAction || in.Spec.Action==ContainerKillAction {
+
+	if in.Spec.Action == PodKillAction || in.Spec.Action == ContainerKillAction {
 		return true
 	}
 
 	return false
-	
+
 }
 
 var PodChaosWebhookLog = logf.Log.WithName("PodChaos-resource")
@@ -1485,9 +1486,9 @@ func (in *StressChaos) DurationExceeded(now time.Time) (bool, time.Duration, err
 }
 
 func (in *StressChaos) IsOneShot() bool {
-	
+
 	return false
-	
+
 }
 
 var StressChaosWebhookLog = logf.Log.WithName("StressChaos-resource")
@@ -1620,9 +1621,9 @@ func (in *TimeChaos) DurationExceeded(now time.Time) (bool, time.Duration, error
 }
 
 func (in *TimeChaos) IsOneShot() bool {
-	
+
 	return false
-	
+
 }
 
 var TimeChaosWebhookLog = logf.Log.WithName("TimeChaos-resource")
@@ -1735,7 +1736,6 @@ func init() {
 		chaos: &TimeChaos{},
 		list:  &TimeChaosList{},
 	})
-
 
 	allScheduleItem.register(KindAWSChaos, &ChaosKind{
 		chaos: &AWSChaos{},

@@ -4,35 +4,33 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
+//
 package v1alpha1
-
 
 import (
 	"fmt"
 )
 
-
 const (
-	TypeAWSChaos TemplateType = "AWSChaos"
-	TypeDNSChaos TemplateType = "DNSChaos"
-	TypeGCPChaos TemplateType = "GCPChaos"
-	TypeHTTPChaos TemplateType = "HTTPChaos"
-	TypeIOChaos TemplateType = "IOChaos"
-	TypeJVMChaos TemplateType = "JVMChaos"
-	TypeKernelChaos TemplateType = "KernelChaos"
-	TypeNetworkChaos TemplateType = "NetworkChaos"
+	TypeAWSChaos             TemplateType = "AWSChaos"
+	TypeDNSChaos             TemplateType = "DNSChaos"
+	TypeGCPChaos             TemplateType = "GCPChaos"
+	TypeHTTPChaos            TemplateType = "HTTPChaos"
+	TypeIOChaos              TemplateType = "IOChaos"
+	TypeJVMChaos             TemplateType = "JVMChaos"
+	TypeKernelChaos          TemplateType = "KernelChaos"
+	TypeNetworkChaos         TemplateType = "NetworkChaos"
 	TypePhysicalMachineChaos TemplateType = "PhysicalMachineChaos"
-	TypePodChaos TemplateType = "PodChaos"
-	TypeStressChaos TemplateType = "StressChaos"
-	TypeTimeChaos TemplateType = "TimeChaos"
-
+	TypePodChaos             TemplateType = "PodChaos"
+	TypeStressChaos          TemplateType = "StressChaos"
+	TypeTimeChaos            TemplateType = "TimeChaos"
 )
 
 var allChaosTemplateType = []TemplateType{
@@ -49,7 +47,6 @@ var allChaosTemplateType = []TemplateType{
 	TypePodChaos,
 	TypeStressChaos,
 	TypeTimeChaos,
-
 }
 
 type EmbedChaos struct {
@@ -77,7 +74,6 @@ type EmbedChaos struct {
 	StressChaos *StressChaosSpec `json:"stressChaos,omitempty"`
 	// +optional
 	TimeChaos *TimeChaosSpec `json:"timeChaos,omitempty"`
-
 }
 
 func (it *EmbedChaos) SpawnNewObject(templateType TemplateType) (GenericChaos, error) {
@@ -282,4 +278,3 @@ func (in *TimeChaosList) GetItems() []GenericChaos {
 	}
 	return result
 }
-
