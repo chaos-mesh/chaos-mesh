@@ -1,0 +1,11 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: PhysicalMachineChaos
+metadata:
+  name: physical-stress-mem
+  namespace: chaos-testing
+spec:
+  action: stress-mem
+  address:
+    - CHAOSD_ADDRESS
+  stress-mem:
+    size: 100MB

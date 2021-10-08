@@ -1,0 +1,18 @@
+kind: Schedule
+apiVersion: chaos-mesh.org/v1alpha1
+metadata:
+  name: test
+  namespace: chaos-testing
+spec:
+  schedule: '@every 5s'
+  startingDeadlineSeconds: null
+  concurrencyPolicy: Forbid
+  historyLimit: 1
+  type: PhysicalMachineChaos
+  physicalmachineChaos:
+    action: stress-mem
+    duration: 4s
+    address: 
+      - CHAOSD_ADDRESS
+    stress-mem:
+      size: 100MB

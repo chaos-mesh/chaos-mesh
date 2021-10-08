@@ -38,6 +38,13 @@ spec:
     env:
     - name: DOCKER_IN_DOCKER_ENABLED
       value: "true"
+    - name: DOCKER_IO_MIRROR
+      value: https://registry-mirror.pingcap.net
+    - name: GCR_IO_MIRROR
+      value: https://registry-mirror.pingcap.net
+    - name: QUAY_IO_MIRROR
+      value: https://registry-mirror.pingcap.net
+
     resources:
       requests:
         memory: "4Gi"
@@ -250,8 +257,11 @@ def call(BUILD_BRANCH, CREDENTIALS_ID) {
 		builds["E2E on kubernetes 1.12.10"] = {
                 build("v1.12", "${GLOBALS} GINKGO_NODES=6 KUBE_VERSION=v1.12.10 KIND_VERSION=0.8.1 ./hack/e2e.sh -- --ginkgo.focus='Basic'")
         }
-        builds["E2E on kubernetes 1.20.4"] = {
+        builds["E2E on kubernetes 1.20.2"] = {
                 build("v1.20", "${GLOBALS} GINKGO_NODES=6 KUBE_VERSION=v1.20.2 ./hack/e2e.sh -- --ginkgo.focus='Basic'")
+        }
+        builds["E2E on kubernetes 1.22.1"] = {
+                build("v1.22", "${GLOBALS} GINKGO_NODES=6 KUBE_VERSION=v1.22.1 ./hack/e2e.sh -- --ginkgo.focus='Basic'")
         }
 		builds.failFast = false
 		if (!SKIP_TEST) {

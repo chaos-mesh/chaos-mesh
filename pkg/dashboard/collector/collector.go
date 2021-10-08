@@ -65,7 +65,7 @@ func (r *ChaosCollector) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		if chaosMeta, ok = obj.(metav1.Object); !ok {
 			r.Log.Error(nil, "failed to get chaos meta information")
 		}
-		if chaosMeta.GetLabels()["managed-by"] != "" {
+		if chaosMeta.GetLabels()[v1alpha1.LabelManagedBy] != "" {
 			manageFlag = true
 		}
 		if !manageFlag {
@@ -89,7 +89,7 @@ func (r *ChaosCollector) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		r.Log.Error(nil, "failed to get chaos meta information")
 	}
 
-	if chaosMeta.GetLabels()["managed-by"] != "" {
+	if chaosMeta.GetLabels()[v1alpha1.LabelManagedBy] != "" {
 		manageFlag = true
 	}
 
@@ -154,6 +154,12 @@ func (r *ChaosCollector) setUnarchivedExperiment(req ctrl.Request, obj v1alpha1.
 	case *v1alpha1.TimeChaos, *v1alpha1.KernelChaos, *v1alpha1.StressChaos:
 		archive.Action = ""
 	case *v1alpha1.DNSChaos:
+		archive.Action = string(chaos.Spec.Action)
+	case *v1alpha1.PhysicalMachineChaos:
+		archive.Action = string(chaos.Spec.Action)
+	case *v1alpha1.AWSChaos:
+		archive.Action = string(chaos.Spec.Action)
+	case *v1alpha1.GCPChaos:
 		archive.Action = string(chaos.Spec.Action)
 	default:
 		return errors.New("unsupported chaos type " + archive.Kind)

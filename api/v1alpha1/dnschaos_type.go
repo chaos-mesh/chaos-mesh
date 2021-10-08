@@ -51,6 +51,7 @@ type DNSChaos struct {
 }
 
 var _ InnerObjectWithSelector = (*DNSChaos)(nil)
+var _ InnerObject = (*DNSChaos)(nil)
 
 // DNSChaosSpec defines the desired state of DNSChaos
 type DNSChaosSpec struct {

@@ -23,6 +23,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/aws"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/container"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/gcp"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector/physicalmachine"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
 )
 
@@ -63,10 +64,11 @@ func (s *Selector) Select(ctx context.Context, spec interface{}) ([]Target, erro
 type SelectorParams struct {
 	fx.In
 
-	PodSelector       *pod.SelectImpl
-	ContainerSelector *container.SelectImpl
-	AWSSelector       *aws.SelectImpl
-	GCPSelector       *gcp.SelectImpl
+	PodSelector             *pod.SelectImpl
+	ContainerSelector       *container.SelectImpl
+	AWSSelector             *aws.SelectImpl
+	GCPSelector             *gcp.SelectImpl
+	PhysicalMachineSelector *physicalmachine.SelectImpl
 }
 
 func New(p SelectorParams) *Selector {
@@ -93,4 +95,5 @@ var Module = fx.Provide(
 	container.New,
 	aws.New,
 	gcp.New,
+	physicalmachine.New,
 )

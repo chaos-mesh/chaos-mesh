@@ -146,6 +146,10 @@ endef
 
 BUILD_INDOCKER_ARG := --env IN_DOCKER=1 --volume $(ROOT):/mnt --user $(shell id -u):$(shell id -g)
 
+ifneq ($(TARGET_PLATFORM),)
+	BUILD_INDOCKER_ARG += --platform=linux/$(TARGET_PLATFORM)
+endif
+
 ifneq ($(GO_BUILD_CACHE),)
 	BUILD_INDOCKER_ARG += --volume $(GO_BUILD_CACHE)/chaos-mesh-gopath:/tmp/go
 	BUILD_INDOCKER_ARG += --volume $(GO_BUILD_CACHE)/chaos-mesh-gobuild:/tmp/go-build
