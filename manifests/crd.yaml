@@ -1252,10 +1252,10 @@ spec:
               latency:
                 description: the latency duration for action 'latency', unit ms
                 type: integer
-              mem-size:
-                description: the memory size need to locate, only set it when action
-                  is stress
-                type: integer
+              mem-type:
+                description: the memory type need to locate, only set it when action
+                  is stress, the value can be 'stack' or 'heap'
+                type: string
               method:
                 description: the method in Java class
                 type: string
@@ -1270,8 +1270,8 @@ spec:
                 - random-max-percent
                 type: string
               name:
-                description: rule name, should be unique, and will generate by chaosd
-                  automatically
+                description: rule name, should be unique, and will generate by chaos
+                  mesh automatically
                 type: string
               pid:
                 description: the pid of Java process which need to attach
@@ -3876,10 +3876,10 @@ spec:
                   latency:
                     description: the latency duration for action 'latency', unit ms
                     type: integer
-                  mem-size:
-                    description: the memory size need to locate, only set it when
-                      action is stress
-                    type: integer
+                  mem-type:
+                    description: the memory type need to locate, only set it when
+                      action is stress, the value can be 'stack' or 'heap'
+                    type: string
                   method:
                     description: the method in Java class
                     type: string
@@ -3895,7 +3895,7 @@ spec:
                     type: string
                   name:
                     description: rule name, should be unique, and will generate by
-                      chaosd automatically
+                      chaos mesh automatically
                     type: string
                   pid:
                     description: the pid of Java process which need to attach
@@ -5900,10 +5900,11 @@ spec:
                               description: the latency duration for action 'latency',
                                 unit ms
                               type: integer
-                            mem-size:
-                              description: the memory size need to locate, only set
-                                it when action is stress
-                              type: integer
+                            mem-type:
+                              description: the memory type need to locate, only set
+                                it when action is stress, the value can be 'stack'
+                                or 'heap'
+                              type: string
                             method:
                               description: the method in Java class
                               type: string
@@ -5920,7 +5921,7 @@ spec:
                               type: string
                             name:
                               description: rule name, should be unique, and will generate
-                                by chaosd automatically
+                                by chaos mesh automatically
                               type: string
                             pid:
                               description: the pid of Java process which need to attach
@@ -7646,10 +7647,11 @@ spec:
                                   description: the latency duration for action 'latency',
                                     unit ms
                                   type: integer
-                                mem-size:
-                                  description: the memory size need to locate, only
-                                    set it when action is stress
-                                  type: integer
+                                mem-type:
+                                  description: the memory type need to locate, only
+                                    set it when action is stress, the value can be
+                                    'stack' or 'heap'
+                                  type: string
                                 method:
                                   description: the method in Java class
                                   type: string
@@ -7666,7 +7668,7 @@ spec:
                                   type: string
                                 name:
                                   description: rule name, should be unique, and will
-                                    generate by chaosd automatically
+                                    generate by chaos mesh automatically
                                   type: string
                                 pid:
                                   description: the pid of Java process which need
@@ -13671,10 +13673,10 @@ spec:
                   latency:
                     description: the latency duration for action 'latency', unit ms
                     type: integer
-                  mem-size:
-                    description: the memory size need to locate, only set it when
-                      action is stress
-                    type: integer
+                  mem-type:
+                    description: the memory type need to locate, only set it when
+                      action is stress, the value can be 'stack' or 'heap'
+                    type: string
                   method:
                     description: the method in Java class
                     type: string
@@ -13690,7 +13692,7 @@ spec:
                     type: string
                   name:
                     description: rule name, should be unique, and will generate by
-                      chaosd automatically
+                      chaos mesh automatically
                     type: string
                   pid:
                     description: the pid of Java process which need to attach
@@ -15298,10 +15300,10 @@ spec:
                         description: the latency duration for action 'latency', unit
                           ms
                         type: integer
-                      mem-size:
-                        description: the memory size need to locate, only set it when
-                          action is stress
-                        type: integer
+                      mem-type:
+                        description: the memory type need to locate, only set it when
+                          action is stress, the value can be 'stack' or 'heap'
+                        type: string
                       method:
                         description: the method in Java class
                         type: string
@@ -15317,7 +15319,7 @@ spec:
                         type: string
                       name:
                         description: rule name, should be unique, and will generate
-                          by chaosd automatically
+                          by chaos mesh automatically
                         type: string
                       pid:
                         description: the pid of Java process which need to attach
@@ -17366,10 +17368,11 @@ spec:
                                   description: the latency duration for action 'latency',
                                     unit ms
                                   type: integer
-                                mem-size:
-                                  description: the memory size need to locate, only
-                                    set it when action is stress
-                                  type: integer
+                                mem-type:
+                                  description: the memory type need to locate, only
+                                    set it when action is stress, the value can be
+                                    'stack' or 'heap'
+                                  type: string
                                 method:
                                   description: the method in Java class
                                   type: string
@@ -17386,7 +17389,7 @@ spec:
                                   type: string
                                 name:
                                   description: rule name, should be unique, and will
-                                    generate by chaosd automatically
+                                    generate by chaos mesh automatically
                                   type: string
                                 pid:
                                   description: the pid of Java process which need
@@ -19170,10 +19173,11 @@ spec:
                                       description: the latency duration for action
                                         'latency', unit ms
                                       type: integer
-                                    mem-size:
-                                      description: the memory size need to locate,
-                                        only set it when action is stress
-                                      type: integer
+                                    mem-type:
+                                      description: the memory type need to locate,
+                                        only set it when action is stress, the value
+                                        can be 'stack' or 'heap'
+                                      type: string
                                     method:
                                       description: the method in Java class
                                       type: string
@@ -19190,7 +19194,7 @@ spec:
                                       type: string
                                     name:
                                       description: rule name, should be unique, and
-                                        will generate by chaosd automatically
+                                        will generate by chaos mesh automatically
                                       type: string
                                     pid:
                                       description: the pid of Java process which need
@@ -27934,10 +27938,10 @@ spec:
                           description: the latency duration for action 'latency',
                             unit ms
                           type: integer
-                        mem-size:
-                          description: the memory size need to locate, only set it
-                            when action is stress
-                          type: integer
+                        mem-type:
+                          description: the memory type need to locate, only set it
+                            when action is stress, the value can be 'stack' or 'heap'
+                          type: string
                         method:
                           description: the method in Java class
                           type: string
@@ -27953,7 +27957,7 @@ spec:
                           type: string
                         name:
                           description: rule name, should be unique, and will generate
-                            by chaosd automatically
+                            by chaos mesh automatically
                           type: string
                         pid:
                           description: the pid of Java process which need to attach
@@ -29632,10 +29636,11 @@ spec:
                               description: the latency duration for action 'latency',
                                 unit ms
                               type: integer
-                            mem-size:
-                              description: the memory size need to locate, only set
-                                it when action is stress
-                              type: integer
+                            mem-type:
+                              description: the memory type need to locate, only set
+                                it when action is stress, the value can be 'stack'
+                                or 'heap'
+                              type: string
                             method:
                               description: the method in Java class
                               type: string
@@ -29652,7 +29657,7 @@ spec:
                               type: string
                             name:
                               description: rule name, should be unique, and will generate
-                                by chaosd automatically
+                                by chaos mesh automatically
                               type: string
                             pid:
                               description: the pid of Java process which need to attach

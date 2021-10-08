@@ -3025,9 +3025,9 @@ var doc = `{
                     "description": "+optional\nthe latency duration for action 'latency', unit ms",
                     "type": "integer"
                 },
-                "mem-size": {
-                    "description": "+optional\nthe memory size need to locate, only set it when action is stress",
-                    "type": "integer"
+                "mem-type": {
+                    "description": "+optional\nthe memory type need to locate, only set it when action is stress, the value can be 'stack' or 'heap'",
+                    "type": "string"
                 },
                 "method": {
                     "description": "+optional\nthe method in Java class",
@@ -3038,7 +3038,7 @@ var doc = `{
                     "type": "string"
                 },
                 "name": {
-                    "description": "+optional\nrule name, should be unique, and will generate by chaosd automatically",
+                    "description": "+optional\nrule name, should be unique, and will generate by chaos mesh automatically",
                     "type": "string"
                 },
                 "pid": {

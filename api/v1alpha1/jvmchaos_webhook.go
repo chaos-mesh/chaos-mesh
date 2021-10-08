@@ -19,36 +19,6 @@ import (
 
 func (in *JVMChaosSpec) Validate(root interface{}, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
-	/*
-	targetField := path.Child("target")
-	actionField := path.Child("action")
-	flagsField := path.Child("flags")
-	matcherField := path.Child("matcher")
-	if actions, ok := JvmSpec[in.Target]; ok {
-		if actionPR, actionOK := actions[in.Action]; actionOK {
-			if actionPR.Flags != nil {
-				allErrs = append(allErrs, in.validateParameterRules(in.Flags, actionPR.Flags, flagsField, targetField, actionField)...)
-			}
-
-			if actionPR.Matchers != nil {
-				allErrs = append(allErrs, in.validateParameterRules(in.Matchers, actionPR.Matchers, matcherField, targetField, actionField)...)
-			}
-
-		} else {
-			supportActions := make([]JVMChaosAction, 0)
-			for k := range actions {
-				supportActions = append(supportActions, k)
-			}
-
-			notSupportedError := field.NotSupported(actionField, in.Action, toString(supportActions))
-			errorMsg := fmt.Sprintf("target: %s does not match action: %s, action detail error: %s",
-				in.Target, in.Action, notSupportedError)
-			allErrs = append(allErrs, field.Invalid(targetField, in.Target, errorMsg))
-		}
-	} else {
-		allErrs = append(allErrs, field.Invalid(targetField, in.Target, "unknown JVM chaos target"))
-	}
-	*/
 
 	return allErrs
 }

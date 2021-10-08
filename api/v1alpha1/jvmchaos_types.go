@@ -62,7 +62,7 @@ const (
 // JVMParameter represents the detail about jvm chaos action definition
 type JVMParameter struct {
 	// +optional
-	// rule name, should be unique, and will generate by chaosd automatically
+	// rule name, should be unique, and will generate by chaos mesh automatically
 	Name string `json:"name"`
 
 	// +optional
@@ -94,8 +94,8 @@ type JVMParameter struct {
 	CPUCount int `json:"cpu-count"`
 
 	// +optional
-	// the memory size need to locate, only set it when action is stress
-	MemorySize int `json:"mem-size"`
+	// the memory type need to locate, only set it when action is stress, the value can be 'stack' or 'heap'
+	MemoryType string `json:"mem-type"`
 
 	// +optional
 	// the port of agent server

@@ -998,11 +998,11 @@ definitions:
           +optional
           the latency duration for action 'latency', unit ms
         type: integer
-      mem-size:
+      mem-type:
         description: |-
           +optional
-          the memory size need to locate, only set it when action is stress
-        type: integer
+          the memory type need to locate, only set it when action is stress, the value can be 'stack' or 'heap'
+        type: string
       method:
         description: |-
           +optional
@@ -1017,7 +1017,7 @@ definitions:
       name:
         description: |-
           +optional
-          rule name, should be unique, and will generate by chaosd automatically
+          rule name, should be unique, and will generate by chaos mesh automatically
         type: string
       pid:
         description: |-

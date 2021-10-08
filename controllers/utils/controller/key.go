@@ -14,8 +14,8 @@
 package controller
 
 import (
-	"fmt"
 	"errors"
+	"fmt"
 	"strings"
 
 	"k8s.io/apimachinery/pkg/types"

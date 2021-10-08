@@ -74,3 +74,4 @@ check_log false
 echo "****** finish jvm chaos test ******"
 # clean
 kubectl delete -f ./helloworld_pod.yaml
+rm pods.status

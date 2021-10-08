@@ -16,10 +16,10 @@ package chaosdaemon
 import (
 	"context"
 	"fmt"
-	"os"
-	//"os/exec"
-	"strings"
 	"io/ioutil"
+	"os"
+	"strings"
+
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
@@ -52,7 +52,7 @@ func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 			if len(output) > 0 {
 				log.Info("touch agent.jar", "output", string(output))
 			}
-	
+
 			agentFile, err := os.Open("/usr/local/byteman/lib/byteman.jar")
 			if err != nil {
 				return nil, err
@@ -126,22 +126,24 @@ func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 		log.Info("create btm file", "file", filename)
 
 		bmSubmitCmd := fmt.Sprintf(bmSubmitCommand, 9288, "u", filename)
-		
+
 		processBuilder := bpm.DefaultProcessBuilder("sh", "-c", bmSubmitCmd).SetContext(ctx)
 		if req.EnterNS {
 			processBuilder = processBuilder.SetNS(pid, bpm.NetNS)
 		}
 		cmd := processBuilder.Build()
 		output, err := cmd.CombinedOutput()
-
-		//cmd := exec.Command("bash", "-c", bmSubmitCmd)
-		//output, err := cmd.CombinedOutput()
 		if err != nil {
 			log.Error(err, string(output))
+			if strings.Contains(string(output), "No rule scripts to remove") {
+				return &pb.InstallJVMRulesResponse{}, nil
+			}
 			return nil, err
 		}
 
-		log.Info(string(output))
+		if len(output) > 0 {
+			log.Info(string(output))
+		}
 	}
 
 	return &pb.InstallJVMRulesResponse{}, nil
