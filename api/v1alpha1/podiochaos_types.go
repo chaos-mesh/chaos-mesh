@@ -209,6 +209,7 @@ const (
 )
 
 // +chaos-mesh:base
+// +chaos-mesh:webhook:enableUpdate
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
 // PodIOChaos is the Schema for the podiochaos API

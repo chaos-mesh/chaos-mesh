@@ -152,9 +152,11 @@ func (in *{{.Type}}) ValidateCreate() error {
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
 func (in *{{.Type}}) ValidateUpdate(old runtime.Object) error {
 	{{.Type}}WebhookLog.Info("validate update", "name", in.Name)
+	{{- if not .EnableUpdate}}
 	if !reflect.DeepEqual(in.Spec, old.(*{{.Type}}).Spec) {
 		return ErrCanNotUpdateChaos
 	}
+	{{- end}}
 	return in.Validate()
 }
 
@@ -180,7 +182,7 @@ func (in *{{.Type}}) Default() {
 }
 `
 
-func generateImpl(name string, oneShotExp string, isExperiment bool) string {
+func generateImpl(name string, oneShotExp string, isExperiment, enableUpdate bool) string {
 	tmpl, err := template.New("impl").Parse(implTemplate)
 	if err != nil {
 		log.Error(err, "fail to build template")
@@ -192,6 +194,7 @@ func generateImpl(name string, oneShotExp string, isExperiment bool) string {
 		Type:         name,
 		OneShotExp:   oneShotExp,
 		IsExperiment: isExperiment,
+		EnableUpdate: enableUpdate,
 	})
 	if err != nil {
 		log.Error(err, "fail to execute template")

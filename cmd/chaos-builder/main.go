@@ -34,6 +34,7 @@ type metadata struct {
 	Type         string
 	OneShotExp   string
 	IsExperiment bool
+	EnableUpdate bool
 }
 
 func main() {
@@ -80,6 +81,15 @@ func main() {
 		for node, commentGroups := range cmap {
 			for _, commentGroup := range commentGroups {
 				var oneShotExp string
+				var enableUpdate bool
+
+				for _, comment := range commentGroup.List {
+					if strings.Contains(comment.Text, "+chaos-mesh:webhook:enableUpdate") {
+						enableUpdate = true
+						break
+					}
+				}
+
 				for _, comment := range commentGroup.List {
 					if strings.Contains(comment.Text, "+chaos-mesh:base") {
 						baseType, err := getType(fset, node, comment)
@@ -88,7 +98,7 @@ func main() {
 						}
 						if strings.Contains(comment.Text, "+chaos-mesh:base") {
 							if baseType.Name.Name != "Workflow" {
-								implCode += generateImpl(baseType.Name.Name, oneShotExp, false)
+								implCode += generateImpl(baseType.Name.Name, oneShotExp, false, enableUpdate)
 								initImpl += generateInit(baseType.Name.Name, false)
 							}
 						}
@@ -110,7 +120,7 @@ func main() {
 						}
 
 						if baseType.Name.Name != "Workflow" {
-							implCode += generateImpl(baseType.Name.Name, oneShotExp, true)
+							implCode += generateImpl(baseType.Name.Name, oneShotExp, true, enableUpdate)
 							initImpl += generateInit(baseType.Name.Name, true)
 							testCode += generateTest(baseType.Name.Name)
 							workflowGenerator.AppendTypes(baseType.Name.Name)

@@ -1384,9 +1384,6 @@ func (in *PodHttpChaos) ValidateCreate() error {
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
 func (in *PodHttpChaos) ValidateUpdate(old runtime.Object) error {
 	PodHttpChaosWebhookLog.Info("validate update", "name", in.Name)
-	if !reflect.DeepEqual(in.Spec, old.(*PodHttpChaos).Spec) {
-		return ErrCanNotUpdateChaos
-	}
 	return in.Validate()
 }
 
@@ -1423,9 +1420,6 @@ func (in *PodIOChaos) ValidateCreate() error {
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
 func (in *PodIOChaos) ValidateUpdate(old runtime.Object) error {
 	PodIOChaosWebhookLog.Info("validate update", "name", in.Name)
-	if !reflect.DeepEqual(in.Spec, old.(*PodIOChaos).Spec) {
-		return ErrCanNotUpdateChaos
-	}
 	return in.Validate()
 }
 
@@ -1462,9 +1456,6 @@ func (in *PodNetworkChaos) ValidateCreate() error {
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
 func (in *PodNetworkChaos) ValidateUpdate(old runtime.Object) error {
 	PodNetworkChaosWebhookLog.Info("validate update", "name", in.Name)
-	if !reflect.DeepEqual(in.Spec, old.(*PodNetworkChaos).Spec) {
-		return ErrCanNotUpdateChaos
-	}
 	return in.Validate()
 }
 

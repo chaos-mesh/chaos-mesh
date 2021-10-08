@@ -182,6 +182,7 @@ const (
 // +kubebuilder:object:root=true
 
 // +chaos-mesh:base
+// +chaos-mesh:webhook:enableUpdate
 // +kubebuilder:subresource:status
 // PodHttpChaos is the Schema for the podhttpchaos API
 type PodHttpChaos struct {
