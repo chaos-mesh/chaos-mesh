@@ -28,8 +28,6 @@ const NamespaceKey = "namespace"
 const NamespaceType = "Namespace"
 
 type CtrlClient struct {
-	cancel context.CancelFunc
-
 	Client             *graphql.Client
 	SubscriptionClient *graphql.SubscriptionClient
 	Schema             *Schema
@@ -284,7 +282,7 @@ func (c *CtrlClient) CompleteQueryBased(ctx context.Context, namespace, base, to
 		return nil, err
 	}
 
-	query := append([]string{NamespaceKey, namespace}, strings.Split(base, "/")...)
+	query := append([]string{argField(NamespaceKey, namespace)}, strings.Split(base, "/")...)
 
 	root, err := c.Schema.ParseQuery(query, queryType, true)
 	if err != nil {
@@ -303,6 +301,10 @@ func (c *CtrlClient) CompleteQueryBased(ctx context.Context, namespace, base, to
 	completion, err := c.completeQuery(completeCtx, root.Type)
 	if err != nil {
 		return nil, err
+	}
+
+	for i := range completion {
+		completion[i] = trimRoot(completion[i], base)
 	}
 
 	return completion, nil
@@ -446,9 +448,13 @@ func (c *CtrlClient) completeRoot(ctx *AutoCompleteContext, root *Type) ([]strin
 	return nil, nil
 }
 
-func trimNamespace(query, namespace string) string {
-	newQuery := strings.TrimPrefix(query, argField(NamespaceKey, namespace))
+func trimRoot(query, root string) string {
+	newQuery := strings.TrimPrefix(query, root)
 	return strings.Trim(newQuery, SeperatorSegment)
+}
+
+func trimNamespace(query, namespace string) string {
+	return trimRoot(query, argField(NamespaceKey, namespace))
 }
 
 func tagField(field, tag string) string {
