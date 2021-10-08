@@ -40,7 +40,7 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 		if namespace != "" {
 			segment = append(segment, namespace)
 		}
-		prefix := append([]string{}, strings.Join(segment, ":"))
+		prefix := append([]string{}, strings.Join(segment, ctrlclient.SeperatorArgument))
 		if root != "" {
 			prefix = append(prefix, ctrlclient.StandardizeQuery(root)...)
 		}
