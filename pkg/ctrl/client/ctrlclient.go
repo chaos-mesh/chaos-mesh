@@ -20,7 +20,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/gertd/go-pluralize"
 	"github.com/hasura/go-graphql-client"
 	"github.com/iancoleman/strcase"
 )
@@ -58,8 +57,8 @@ func (c *ToComplete) Clone() *ToComplete {
 func (c *ToComplete) ToQuery() string {
 	var query []string
 	query = append(query, c.root...)
-	query = append(query, strings.Join(c.leaves, ","))
-	return strings.Join(query, "/")
+	query = append(query, strings.Join(c.leaves, SeperatorLeaf))
+	return strings.Join(query, SeperatorArgument)
 }
 
 func (c *ToComplete) TrimNamespaced(namespace string) string {
@@ -69,9 +68,9 @@ func (c *ToComplete) TrimNamespaced(namespace string) string {
 type Completion []string
 
 func NewAutoCompleteContext(namespace, toComplete string, completeLeaves bool) *AutoCompleteContext {
-	query := []string{NamespaceKey, namespace}
+	query := []string{argField(NamespaceKey, namespace)}
 	toCompleteSeg := append([]string{}, query...)
-	toCompleteSeg = append(toCompleteSeg, strings.Split(toComplete, "/")...)
+	toCompleteSeg = append(toCompleteSeg, strings.Split(toComplete, SeperatorSegment)...)
 
 	return &AutoCompleteContext{
 		namespace:      namespace,
@@ -79,17 +78,18 @@ func NewAutoCompleteContext(namespace, toComplete string, completeLeaves bool) *
 		completeLeaves: completeLeaves,
 		toComplete: &ToComplete{
 			root:   toCompleteSeg[:len(toCompleteSeg)-1],
-			leaves: strings.Split(toCompleteSeg[len(toCompleteSeg)-1], ","),
+			leaves: strings.Split(toCompleteSeg[len(toCompleteSeg)-1], SeperatorLeaf),
 		},
 	}
 }
 
 func (ctx *AutoCompleteContext) Next(fieldName, arg string) *AutoCompleteContext {
 	query := append([]string{}, ctx.query...)
-	query = append(query, fieldName)
+	field := fieldName
 	if arg != "" {
-		query = append(query, arg)
+		field = argField(field, arg)
 	}
+	query = append(query, field)
 
 	return &AutoCompleteContext{
 		namespace:      ctx.namespace,
@@ -135,39 +135,19 @@ func (c *CtrlClient) GetQueryType() (*Type, error) {
 	return c.Schema.MustGetType(string(c.Schema.QueryType.Name))
 }
 
-// list tail arguments, expected queryStr: ["prefix1", "prefix2", "resource", "<some value> can be empty"]
+// list tail arguments, expected queryStr: ["prefix1", "prefix2", "resource"]
 func (c *CtrlClient) ListArguments(queryStr []string, argumentName string) ([]string, error) {
 	queryType, err := c.GetQueryType()
 	if err != nil {
 		return nil, err
 	}
 
-	listQuery := queryStr[:len(queryStr)-1]
-	helper := pluralize.NewClient()
-	listQuery[len(listQuery)-1] = helper.Plural(listQuery[len(listQuery)-1])
+	listQuery := append([]string{}, queryStr...)
+	listQuery[len(listQuery)-1] = tagField(queryStr[len(queryStr)-1], TagNameAll)
 	listQuery = append(listQuery, argumentName)
 	query, err := c.Schema.ParseQuery(listQuery, queryType, false)
 	if err != nil {
-		switch e := err.(type) {
-		case *EnumValueNotFound:
-			if e.Target != queryStr[len(queryStr)-1] {
-				return nil, err
-			}
-			return e.Variants, nil
-		case *FieldNotFound:
-			if e.Target != queryStr[len(queryStr)-1] {
-				return nil, err
-			}
-			return e.Fields, err
-		case *RequireArgument:
-			if e.Leaf != queryStr[len(queryStr)-1] {
-				return nil, err
-			}
-			return c.ListArguments(append(queryStr, ""), e.Argument)
-
-		default:
-			return nil, err
-		}
+		return nil, err
 	}
 
 	superQuery := NewQuery("query", queryType, nil)
@@ -325,20 +305,32 @@ func (c *CtrlClient) completeObject(ctx *AutoCompleteContext, root *Type, comple
 		}
 
 		var args []string
+		var tag string
 
 		if typ, err := c.Schema.resolve(&field.Args[0].Type); err == nil && typ.Kind == EnumKind {
 			for variant := range typ.EnumMap {
 				args = append(args, variant)
 			}
 		} else {
-			args, err = c.ListArguments(append(ctx.query, string(field.Name), ""), string(field.Args[0].Name))
+			query := append([]string{}, ctx.query...)
+			args, err = c.ListArguments(append(query, string(field.Name)), string(field.Args[0].Name))
 			if err != nil {
 				return nil, err
 			}
+			tag = TagNameAll
 		}
 
 		for _, arg := range args {
 			subCompletions, err := completer(ctx.Next(string(field.Name), arg), subType)
+			if err != nil {
+				return nil, err
+			}
+
+			completions = append(completions, subCompletions...)
+		}
+
+		if tag != "" {
+			subCompletions, err := completer(ctx.Next(tagField(string(field.Name), tag), ""), subType)
 			if err != nil {
 				return nil, err
 			}
@@ -435,4 +427,12 @@ func (c *CtrlClient) completeRoot(ctx *AutoCompleteContext, root *Type) ([]strin
 func trimNamespace(query, namespace string) string {
 	newQuery := strings.TrimPrefix(query, strings.Join([]string{NamespaceKey, namespace}, "/"))
 	return strings.Trim(newQuery, "/")
+}
+
+func tagField(field, tag string) string {
+	return fmt.Sprintf("%s%s%s", field, SeperatorTag, tag)
+}
+
+func argField(field, arg string) string {
+	return fmt.Sprintf("%s%s%s", field, SeperatorArgument, arg)
 }

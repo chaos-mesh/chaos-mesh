@@ -267,6 +267,17 @@ func (t *Tag) String() string {
 	return tag
 }
 
+func (s *Segment) String() string {
+	segment := s.Name
+	if s.Argument != nil {
+		segment = fmt.Sprintf("%s%s%s", segment, SeperatorArgument, *s.Argument)
+	}
+	if s.Tag != nil {
+		segment = fmt.Sprintf("%s%s%s", segment, SeperatorTag, s.Tag.String)
+	}
+	return segment
+}
+
 func (q *Query) String() string {
 	segment := q.Name
 	if q.ArgValue != nil {
@@ -305,38 +316,47 @@ func (q *Query) String() string {
 	return strings.Join([]string{segment, fieldStr}, SeperatorSegment)
 }
 
+func parseSegment(segmentStr string) (*Segment, error) {
+	segment := new(Segment)
+	rawSegment := strings.Split(strings.Trim(segmentStr, SeperatorTag), SeperatorTag)
+	if len(rawSegment) != 2 && len(rawSegment) != 1 {
+		return nil, fmt.Errorf("invalid segment: %s", segmentStr)
+	}
+
+	rawName := strings.Split(strings.Trim(rawSegment[0], SeperatorArgument), SeperatorArgument)
+	if len(rawName) != 2 && len(rawName) != 1 {
+		return nil, fmt.Errorf("invalid segment: %s", segmentStr)
+	}
+
+	segment.Name = rawName[0]
+	if len(rawName) == 2 {
+		segment.Argument = &rawName[1]
+	}
+
+	if len(rawSegment) == 2 {
+		rawTag := strings.Split(strings.Trim(rawSegment[1], SeperatorArgument), SeperatorArgument)
+		if len(rawTag) != 2 && len(rawTag) != 1 {
+			return nil, fmt.Errorf("invalid segment: %s", segmentStr)
+		}
+
+		segment.Tag = &Tag{
+			Name: rawTag[0],
+		}
+
+		if len(rawTag) == 2 {
+			segment.Tag.Argument = &rawTag[1]
+		}
+	}
+
+	return segment, nil
+}
+
 func (s *Schema) ParseQuery(rawQuery []string, super *Type, partial bool) (*Query, error) {
-	var query []Segment
+	var query []*Segment
 	for _, s := range rawQuery {
-		segment := Segment{}
-		rawSegment := strings.Split(strings.Trim(s, SeperatorTag), SeperatorTag)
-		if len(rawSegment) != 2 && len(rawSegment) != 1 {
-			return nil, fmt.Errorf("invalid query segment: %s", s)
-		}
-
-		rawName := strings.Split(strings.Trim(rawSegment[0], SeperatorArgument), SeperatorArgument)
-		if len(rawName) != 2 && len(rawName) != 1 {
-			return nil, fmt.Errorf("invalid query segment: %s", s)
-		}
-
-		segment.Name = rawName[0]
-		if len(rawName) == 2 {
-			segment.Argument = &rawName[1]
-		}
-
-		if len(rawSegment) == 2 {
-			rawTag := strings.Split(strings.Trim(rawSegment[1], SeperatorArgument), SeperatorArgument)
-			if len(rawTag) != 2 && len(rawTag) != 1 {
-				return nil, fmt.Errorf("invalid query segment: %s", s)
-			}
-
-			segment.Tag = &Tag{
-				Name: rawTag[0],
-			}
-
-			if len(rawTag) == 2 {
-				segment.Tag.Argument = &rawTag[1]
-			}
+		segment, err := parseSegment(s)
+		if err != nil {
+			return nil, err
 		}
 		query = append(query, segment)
 	}
@@ -353,7 +373,7 @@ func (s *Schema) ParseQuery(rawQuery []string, super *Type, partial bool) (*Quer
 	return queries[0], nil
 }
 
-func (s *Schema) parseQuery(query []Segment, super *Type, partial bool) ([]*Query, error) {
+func (s *Schema) parseQuery(query []*Segment, super *Type, partial bool) ([]*Query, error) {
 	if len(query) == 0 {
 		return nil, nil
 	}
