@@ -224,6 +224,26 @@ func listArguments(object interface{}, resource *Query, startWith string) ([]str
 	return nil, nil
 }
 
+func (c *CtrlClient) ListNamespace() ([]string, error) {
+	namespaceQuery := new(struct {
+		Namespace []struct {
+			Ns string
+		}
+	})
+
+	err := c.Client.Query(c.ctx, namespaceQuery, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var namespaces []string
+	for _, ns := range namespaceQuery.Namespace {
+		namespaces = append(namespaces, ns.Ns)
+	}
+
+	return namespaces, nil
+}
+
 func (c *CtrlClient) CompleteRoot(namespace, toComplete string) ([]string, error) {
 	namespaceType, err := c.Schema.MustGetType(NamespaceType)
 	if err != nil {

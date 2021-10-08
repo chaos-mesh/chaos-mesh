@@ -145,6 +145,23 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 
 	getCmd.Flags().StringVarP(&namespace, "namespace", "n", "default", "the kubenates namespace")
 	getCmd.Flags().StringVarP(&root, "root", "r", "", "the root resource")
+	getCmd.RegisterFlagCompletionFunc("namespace", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		ctx := context.Background()
+		client, cancel, err := createClient(ctx)
+		if err != nil {
+			log.Error(err, "fail to create client")
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		}
+		defer cancel()
+
+		completion, err := client.ListNamespace()
+		if err != nil {
+			log.Error(err, "fail to complete resource")
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		}
+
+		return completion, cobra.ShellCompDirectiveNoFileComp | cobra.ShellCompDirectiveNoSpace
+	})
 	getCmd.RegisterFlagCompletionFunc("root", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		ctx := context.Background()
 		client, cancel, err := createClient(ctx)
