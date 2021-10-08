@@ -273,7 +273,7 @@ func (s *Segment) String() string {
 		segment = fmt.Sprintf("%s%s%s", segment, SeperatorArgument, *s.Argument)
 	}
 	if s.Tag != nil {
-		segment = fmt.Sprintf("%s%s%s", segment, SeperatorTag, s.Tag.String)
+		segment = fmt.Sprintf("%s%s%s", segment, SeperatorTag, s.Tag.String())
 	}
 	return segment
 }
@@ -447,10 +447,7 @@ func (s *Schema) parseQuery(query []*Segment, super *Type, partial bool) ([]*Que
 			if err != nil {
 				return nil, err
 			}
-		} else if segment.Tag != nil && segment.Tag.Name == TagNameAll {
-			// do nothing
-		} else if field.Args[0].DefaultValue == nil && !partial {
-			// argument is nil
+		} else if (segment.Tag == nil || segment.Tag.Name != TagNameAll) && field.Args[0].DefaultValue == nil && !partial {
 			return nil, fmt.Errorf("query is imcomplete: path(%s) needs argument(%s)", field.Name, field.Args[0].Name)
 		}
 	}
