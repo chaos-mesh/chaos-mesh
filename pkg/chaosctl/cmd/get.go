@@ -35,7 +35,7 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 	var namespace string
 	var root string
 
-	var joinPrefix = func() ([]string, error) {
+	var joinPrefix = func() []string {
 		segment := []string{ctrlclient.NamespaceKey}
 		if namespace != "" {
 			segment = append(segment, namespace)
@@ -44,7 +44,7 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 		if root != "" {
 			prefix = append(prefix, ctrlclient.StandardizeQuery(root)...)
 		}
-		return prefix, nil
+		return prefix
 	}
 
 	// getCmd represents the get command
@@ -84,10 +84,7 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 
 			var query *ctrlclient.Query
 
-			prefix, err := joinPrefix()
-			if err != nil {
-				return err
-			}
+			prefix := joinPrefix()
 
 			for _, arg := range args {
 				part := append(prefix, ctrlclient.StandardizeQuery(arg)...)
