@@ -57,7 +57,7 @@ func TestGetChaosList(t *testing.T) {
 
 	g.Expect(v1alpha1.SchemeBuilder.AddToScheme(kubectlscheme.Scheme)).To(BeNil())
 
-	client := fake.NewFakeClientWithScheme(kubectlscheme.Scheme, &chaos1, &chaos2)
+	client := fake.NewClientBuilder().WithScheme(kubectlscheme.Scheme).WithRuntimeObjects(&chaos1, &chaos2).Build()
 
 	tests := []struct {
 		name        string
@@ -139,7 +139,7 @@ func TestGetPods(t *testing.T) {
 
 	allObjects := append(nodeObjects, daemonObjects0[0], podObjects0[0], daemonObjects1[0], podObjects1[0])
 	g.Expect(v1alpha1.SchemeBuilder.AddToScheme(kubectlscheme.Scheme)).To(BeNil())
-	client := fake.NewFakeClientWithScheme(kubectlscheme.Scheme, allObjects...)
+	client := fake.NewClientBuilder().WithScheme(kubectlscheme.Scheme).WithRuntimeObjects(allObjects...).Build()
 
 	tests := []struct {
 		name              string

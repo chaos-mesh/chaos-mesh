@@ -55,7 +55,18 @@ type ChaosControllerConfig struct {
 
 	// EnableLeaderElection enables leader election for controller manager
 	// Enabling this will ensure there is only one active controller manager
-	EnableLeaderElection bool `envconfig:"ENABLE_LEADER_ELECTION" default:"false"`
+	EnableLeaderElection bool `envconfig:"ENABLE_LEADER_ELECTION" default:"true"`
+	// LeaderElectLeaseDuration is the duration that non-leader candidates will
+	// wait to force acquire leadership. This is measured against time of
+	// last observed ack. (default 15s)
+	LeaderElectLeaseDuration time.Duration `envconfig:"LEADER_ELECT_LEASE_DURATION" default:"15s"`
+	// LeaderElectRenewDeadline is the duration that the acting control-plane
+	// will retry refreshing leadership before giving up. (default 10s)
+	LeaderElectRenewDeadline time.Duration `envconfig:"LEADER_ELECT_RENEW_DEADLINE" default:"10s"`
+	// LeaderElectRetryPeriod is the duration the LeaderElector clients should wait
+	// between tries of actions. (default 2s)
+	LeaderElectRetryPeriod time.Duration `envconfig:"LEADER_ELECT_RETRY_PERIOD" default:"2s"`
+
 	// EnableFilterNamespace will filter namespace with annotation. Only the pods/containers in namespace
 	// annotated with `chaos-mesh.org/inject=enabled` will be injected
 	EnableFilterNamespace bool `envconfig:"ENABLE_FILTER_NAMESPACE" default:"false"`

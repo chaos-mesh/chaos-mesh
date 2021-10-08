@@ -62,7 +62,7 @@ main() {
     local local_kube=""
     local cm_version="latest"
     local kind_name="kind"
-    local kind_version="v0.7.0"
+    local kind_version="v0.11.1"
     local node_num=3
     local k8s_version="v1.17.2"
     local volume_num=5
@@ -1352,7 +1352,7 @@ metadata:
     app.kubernetes.io/version: v0.9.0
     app.kubernetes.io/component: controller-manager
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app.kubernetes.io/name: chaos-mesh
@@ -1422,6 +1422,14 @@ spec:
             value: "false"
           - name: POD_FAILURE_PAUSE_IMAGE
             value: gcr.io/google-containers/pause:latest
+          - name: ENABLE_LEADER_ELECTION
+            value: "true"
+          - name: LEADER_ELECT_LEASE_DURATION
+            value: "15s"
+          - name: LEADER_ELECT_RENEW_DEADLINE
+            value: "10s"
+          - name: LEADER_ELECT_RETRY_PERIOD
+            value: "2s"
         volumeMounts:
           - name: webhook-certs
             mountPath: /etc/webhook/certs
@@ -1744,6 +1752,27 @@ webhooks:
           - UPDATE
         resources:
           - httpchaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /mutate-chaos-mesh-org-v1alpha1-physicalmachinechaos
+    failurePolicy: Fail
+    name: mphysicalmachinechaos.kb.io
+    timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - physicalmachinechaos
 ---
 # Source: chaos-mesh/templates/secrets-configuration.yaml
 apiVersion: admissionregistration.k8s.io/v1
@@ -2030,6 +2059,27 @@ webhooks:
           - UPDATE
         resources:
           - httpchaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /validate-chaos-mesh-org-v1alpha1-physicalmachinechaos
+    failurePolicy: Fail
+    name: vphysicalmachinechaos.kb.io
+    timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - physicalmachinechaos
 ---
 # Source: chaos-mesh/templates/secrets-configuration.yaml
 apiVersion: admissionregistration.k8s.io/v1

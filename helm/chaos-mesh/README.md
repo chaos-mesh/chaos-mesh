@@ -38,6 +38,10 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `controllerManager.podAnnotations` |  Pod annotations of chaos-controller-manager | `{}`|
 | `controllerManager.enableFilterNamespace` | If enabled, only pods in the namespace annotated with `"chaos-mesh.org/inject": "enabled"` will be injected | false |
 | `controllerManager.podChaos.podFailure.pauseImage` | Custom Pause Container Image for Pod Failure Chaos | `gcr.io/google-containers/pause:latest` |
+| `controllerManager.leaderElection.enabled` | Enable leader election for controller manager. | true |
+| `controllerManager.leaderElection.leaseDuration` | The duration that non-leader candidates will wait to force acquire leadership. This is measured against time of last observed ack. | 15s |
+| `controllerManager.leaderElection.renewDeadline` | The duration that the acting control-plane will retry refreshing leadership before giving up. | 10s |
+| `controllerManager.leaderElection.retryPeriod` | The duration the LeaderElector clients should wait between tries of actions. | 2s |
 | `chaosDaemon.image` | docker image for chaos-daemon | `pingcap/chaos-mesh:latest` |
 | `chaosDaemon.imagePullPolicy` | image pull policy | `Always` |
 | `chaosDaemon.grpcPort` | The port which grpc server listens on | `31767` |

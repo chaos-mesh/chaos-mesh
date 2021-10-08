@@ -28,12 +28,12 @@ Options:
        -h,--help               prints the usage message
        -n,--name               name of the Kubernetes cluster, default value: kind
        -c,--nodeNum            the count of the cluster nodes, default value: 3
-       -k,--k8sVersion         version of the Kubernetes cluster, default value: v1.15.6
+       -k,--k8sVersion         version of the Kubernetes cluster, default value: v1.20.7
        -v,--volumeNum          the volumes number of each kubernetes node, default value: 5
        -r,--registryName       the name of local docker registry, default value: registry
        -p,--registryPort       the published port of local docker registry, default value: 5000
 Usage:
-    $0 --name testCluster --nodeNum 4 --k8sVersion v1.15.6
+    $0 --name testCluster --nodeNum 4 --k8sVersion v1.20.7
 EOF
 }
 
@@ -86,7 +86,7 @@ done
 
 clusterName=${clusterName:-kind}
 nodeNum=${nodeNum:-3}
-k8sVersion=${k8sVersion:-v1.20.2}
+k8sVersion=${k8sVersion:-v1.20.7}
 volumeNum=${volumeNum:-5}
 registryName=${registryName:-registry}
 registryPort=${registryPort:-5000}
