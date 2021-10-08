@@ -25,9 +25,8 @@ import (
 )
 
 const (
-	DefaultManagerNamespace = "chaos-testing"
-	ManagerSvc              = "svc/chaos-mesh-controller-manager"
-	CtrlServerPort          = 10082
+	ManagerSvc     = "svc/chaos-mesh-controller-manager"
+	CtrlServerPort = 10082
 )
 
 // CommonRestClientGetter is used for non-e2e test environment.
@@ -55,11 +54,6 @@ func ForwardSvcPorts(ctx context.Context, ns, svc string, port uint16) (context.
 	return pfCancel, localPort, err
 }
 
-func ForwardCtrlServer(ctx context.Context, ns *string) (context.CancelFunc, uint16, error) {
-	if ns == nil {
-		ns = new(string)
-		*ns = DefaultManagerNamespace
-	}
-
-	return ForwardSvcPorts(ctx, *ns, ManagerSvc, CtrlServerPort)
+func ForwardCtrlServer(ctx context.Context, ns string) (context.CancelFunc, uint16, error) {
+	return ForwardSvcPorts(ctx, ns, ManagerSvc, CtrlServerPort)
 }

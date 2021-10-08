@@ -30,7 +30,7 @@ var forwardCmd = &cobra.Command{
 	Short: "Forward ctrl api port to local",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// TODO: input ns by args
-		cancel, port, err := ctrlclient.ForwardCtrlServer(context.Background(), nil)
+		cancel, port, err := ctrlclient.ForwardCtrlServer(context.Background(), managerNamespace)
 		if err != nil {
 			return err
 		}

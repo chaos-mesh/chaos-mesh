@@ -32,7 +32,7 @@ var schemaCmd = &cobra.Command{
 		ctrlclient.DisableRuntimeErrorHandler()
 		ctx := context.Background()
 		// TODO: input ns by args
-		cancel, port, err := ctrlclient.ForwardCtrlServer(ctx, nil)
+		cancel, port, err := ctrlclient.ForwardCtrlServer(ctx, managerNamespace)
 		if err != nil {
 			return err
 		}

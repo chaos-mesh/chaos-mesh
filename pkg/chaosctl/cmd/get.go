@@ -53,14 +53,14 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 		Short: "get the target resources",
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			ctx := context.Background()
-			client, cancel, err := createClient(ctx)
+			client, cancel, err := createClient(ctx, managerNamespace)
 			if err != nil {
 				log.Error(err, "fail to create client")
 				return nil, cobra.ShellCompDirectiveNoFileComp
 			}
 			defer cancel()
 
-			completion, err := client.CompleteQueryBased(namespace, root, toComplete)
+			completion, err := client.CompleteQueryBased(ctx, namespace, root, toComplete)
 			if err != nil {
 				log.Error(err, "fail to complete query")
 				return nil, cobra.ShellCompDirectiveNoFileComp
@@ -71,7 +71,7 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctrlclient.DisableRuntimeErrorHandler()
 			ctx := context.Background()
-			client, cancel, err := createClient(ctx)
+			client, cancel, err := createClient(ctx, managerNamespace)
 			if err != nil {
 				return err
 			}
@@ -144,18 +144,18 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 		},
 	}
 
-	getCmd.Flags().StringVarP(&namespace, "namespace", "n", "default", "the kubenates namespace")
+	getCmd.Flags().StringVarP(&namespace, "namespace", "n", "default", "the namespace resources in")
 	getCmd.Flags().StringVarP(&root, "root", "r", "", "the root resource")
 	getCmd.RegisterFlagCompletionFunc("namespace", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		ctx := context.Background()
-		client, cancel, err := createClient(ctx)
+		client, cancel, err := createClient(ctx, managerNamespace)
 		if err != nil {
 			log.Error(err, "fail to create client")
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		}
 		defer cancel()
 
-		completion, err := client.ListNamespace()
+		completion, err := client.ListNamespace(ctx)
 		if err != nil {
 			log.Error(err, "fail to complete resource")
 			return nil, cobra.ShellCompDirectiveNoFileComp
@@ -165,14 +165,14 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 	})
 	getCmd.RegisterFlagCompletionFunc("root", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		ctx := context.Background()
-		client, cancel, err := createClient(ctx)
+		client, cancel, err := createClient(ctx, managerNamespace)
 		if err != nil {
 			log.Error(err, "fail to create client")
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		}
 		defer cancel()
 
-		completion, err := client.CompleteRoot(namespace, toComplete)
+		completion, err := client.CompleteRoot(ctx, namespace, toComplete)
 		if err != nil {
 			log.Error(err, "fail to complete resource")
 			return nil, cobra.ShellCompDirectiveNoFileComp
@@ -184,8 +184,8 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 	return getCmd
 }
 
-func createClient(ctx context.Context) (*ctrlclient.CtrlClient, context.CancelFunc, error) {
-	cancel, port, err := ctrlclient.ForwardCtrlServer(ctx, nil)
+func createClient(ctx context.Context, managerNamespace string) (*ctrlclient.CtrlClient, context.CancelFunc, error) {
+	cancel, port, err := ctrlclient.ForwardCtrlServer(ctx, managerNamespace)
 	if err != nil {
 		return nil, nil, err
 	}

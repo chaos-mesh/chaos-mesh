@@ -28,7 +28,7 @@ const NamespaceKey = "namespace"
 const NamespaceType = "Namespace"
 
 type CtrlClient struct {
-	ctx context.Context
+	cancel context.CancelFunc
 
 	Client             *graphql.Client
 	SubscriptionClient *graphql.SubscriptionClient
@@ -36,6 +36,7 @@ type CtrlClient struct {
 }
 
 type AutoCompleteContext struct {
+	context.Context
 	namespace      string
 	query          []string
 	completeLeaves bool
@@ -67,12 +68,13 @@ func (c *ToComplete) TrimNamespaced(namespace string) string {
 
 type Completion []string
 
-func NewAutoCompleteContext(namespace, toComplete string, completeLeaves bool) *AutoCompleteContext {
+func NewAutoCompleteContext(ctx context.Context, namespace, toComplete string, completeLeaves bool) *AutoCompleteContext {
 	query := []string{argField(NamespaceKey, namespace)}
 	toCompleteSeg := append([]string{}, query...)
 	toCompleteSeg = append(toCompleteSeg, strings.Split(toComplete, SeperatorSegment)...)
 
 	return &AutoCompleteContext{
+		Context:        ctx,
 		namespace:      namespace,
 		query:          query,
 		completeLeaves: completeLeaves,
@@ -92,6 +94,7 @@ func (ctx *AutoCompleteContext) Next(fieldName, arg string) *AutoCompleteContext
 	query = append(query, field)
 
 	return &AutoCompleteContext{
+		Context:        ctx.Context,
 		namespace:      ctx.namespace,
 		query:          query,
 		completeLeaves: ctx.completeLeaves,
@@ -113,7 +116,6 @@ func (c Completion) Swap(i, j int) {
 
 func NewCtrlClient(ctx context.Context, url string) (*CtrlClient, error) {
 	client := &CtrlClient{
-		ctx:                ctx,
 		Client:             graphql.NewClient(url, nil),
 		SubscriptionClient: graphql.NewSubscriptionClient(url),
 	}
@@ -122,7 +124,7 @@ func NewCtrlClient(ctx context.Context, url string) (*CtrlClient, error) {
 		Schema RawSchema `graphql:"__schema"`
 	})
 
-	err := client.Client.Query(client.ctx, schemaQuery, nil)
+	err := client.Client.Query(ctx, schemaQuery, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -136,7 +138,7 @@ func (c *CtrlClient) GetQueryType() (*Type, error) {
 }
 
 // list tail arguments, expected queryStr: ["prefix1", "prefix2", "resource"]
-func (c *CtrlClient) ListArguments(queryStr []string, argumentName string) ([]string, error) {
+func (c *CtrlClient) ListArguments(ctx context.Context, queryStr []string, argumentName string) ([]string, error) {
 	queryType, err := c.GetQueryType()
 	if err != nil {
 		return nil, err
@@ -160,7 +162,7 @@ func (c *CtrlClient) ListArguments(queryStr []string, argumentName string) ([]st
 	}
 
 	queryValue := reflect.New(queryStruct.Elem()).Interface()
-	err = c.Client.Query(c.ctx, queryValue, variables.GenMap())
+	err = c.Client.Query(ctx, queryValue, variables.GenMap())
 	if err != nil {
 		return nil, err
 	}
@@ -224,14 +226,14 @@ func listArguments(object interface{}, resource *Query, startWith string) ([]str
 	return nil, nil
 }
 
-func (c *CtrlClient) ListNamespace() ([]string, error) {
+func (c *CtrlClient) ListNamespace(ctx context.Context) ([]string, error) {
 	namespaceQuery := new(struct {
 		Namespace []struct {
 			Ns string
 		}
 	})
 
-	err := c.Client.Query(c.ctx, namespaceQuery, nil)
+	err := c.Client.Query(ctx, namespaceQuery, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -244,13 +246,13 @@ func (c *CtrlClient) ListNamespace() ([]string, error) {
 	return namespaces, nil
 }
 
-func (c *CtrlClient) CompleteRoot(namespace, toComplete string) ([]string, error) {
+func (c *CtrlClient) CompleteRoot(ctx context.Context, namespace, toComplete string) ([]string, error) {
 	namespaceType, err := c.Schema.MustGetType(NamespaceType)
 	if err != nil {
 		return nil, err
 	}
 
-	completion, err := c.completeRoot(NewAutoCompleteContext(namespace, toComplete, false), namespaceType)
+	completion, err := c.completeRoot(NewAutoCompleteContext(ctx, namespace, toComplete, false), namespaceType)
 	if err != nil {
 		return nil, err
 	}
@@ -258,13 +260,13 @@ func (c *CtrlClient) CompleteRoot(namespace, toComplete string) ([]string, error
 	return completion, nil
 }
 
-func (c *CtrlClient) CompleteQuery(namespace, toComplete string) ([]string, error) {
+func (c *CtrlClient) CompleteQuery(ctx context.Context, namespace, toComplete string) ([]string, error) {
 	namespaceType, err := c.Schema.MustGetType(NamespaceType)
 	if err != nil {
 		return nil, err
 	}
 
-	completion, err := c.completeQuery(NewAutoCompleteContext(namespace, toComplete, true), namespaceType)
+	completion, err := c.completeQuery(NewAutoCompleteContext(ctx, namespace, toComplete, true), namespaceType)
 	if err != nil {
 		return nil, err
 	}
@@ -272,9 +274,9 @@ func (c *CtrlClient) CompleteQuery(namespace, toComplete string) ([]string, erro
 	return completion, nil
 }
 
-func (c *CtrlClient) CompleteQueryBased(namespace, base, toComplete string) ([]string, error) {
+func (c *CtrlClient) CompleteQueryBased(ctx context.Context, namespace, base, toComplete string) ([]string, error) {
 	if base == "" {
-		return c.CompleteQuery(namespace, toComplete)
+		return c.CompleteQuery(ctx, namespace, toComplete)
 	}
 
 	queryType, err := c.GetQueryType()
@@ -289,8 +291,8 @@ func (c *CtrlClient) CompleteQueryBased(namespace, base, toComplete string) ([]s
 		return nil, err
 	}
 
-	ctx := NewAutoCompleteContext(namespace, toComplete, true)
-	ctx.query = query
+	completeCtx := NewAutoCompleteContext(ctx, namespace, toComplete, true)
+	completeCtx.query = query
 	for len(root.Fields) != 0 {
 		for _, field := range root.Fields {
 			root = field
@@ -298,7 +300,7 @@ func (c *CtrlClient) CompleteQueryBased(namespace, base, toComplete string) ([]s
 		}
 	}
 
-	completion, err := c.completeQuery(ctx, root.Type)
+	completion, err := c.completeQuery(completeCtx, root.Type)
 	if err != nil {
 		return nil, err
 	}
@@ -333,7 +335,7 @@ func (c *CtrlClient) completeObject(ctx *AutoCompleteContext, root *Type, comple
 			}
 		} else {
 			query := append([]string{}, ctx.query...)
-			args, err = c.ListArguments(append(query, string(field.Name)), string(field.Args[0].Name))
+			args, err = c.ListArguments(ctx, append(query, string(field.Name)), string(field.Args[0].Name))
 			if err != nil {
 				return nil, err
 			}
