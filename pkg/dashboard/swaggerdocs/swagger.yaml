@@ -2366,7 +2366,7 @@ paths:
       summary: Get an event.
       tags:
       - events
-  /events/workflow/:id:
+  /events/workflow/{uid}:
     get:
       description: list all events for Workflow and related WorkflowNode.
       parameters:
@@ -2375,8 +2375,8 @@ paths:
         name: namespace
         type: string
       - description: The UID of the Workflow
-        in: query
-        name: object_id
+        in: path
+        name: uid
         type: string
       - description: The max length of events list
         in: query

@@ -812,7 +812,7 @@ var doc = `{
                 }
             }
         },
-        "/events/workflow/:id": {
+        "/events/workflow/{uid}": {
             "get": {
                 "description": "list all events for Workflow and related WorkflowNode.",
                 "produces": [
@@ -832,8 +832,8 @@ var doc = `{
                     {
                         "type": "string",
                         "description": "The UID of the Workflow",
-                        "name": "object_id",
-                        "in": "query"
+                        "name": "uid",
+                        "in": "path"
                     },
                     {
                         "type": "string",
