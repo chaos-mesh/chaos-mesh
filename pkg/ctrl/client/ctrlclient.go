@@ -58,7 +58,7 @@ func (c *ToComplete) ToQuery() string {
 	var query []string
 	query = append(query, c.root...)
 	query = append(query, strings.Join(c.leaves, SeperatorLeaf))
-	return strings.Join(query, SeperatorArgument)
+	return strings.Join(query, SeperatorSegment)
 }
 
 func (c *ToComplete) TrimNamespaced(namespace string) string {
@@ -343,8 +343,8 @@ func (c *CtrlClient) completeObject(ctx *AutoCompleteContext, root *Type, comple
 
 // accepts ScalarKind, EnumKind and ObjectKind
 func (c *CtrlClient) completeQuery(ctx *AutoCompleteContext, root *Type) ([]string, error) {
-	currentQuery := strings.Join(ctx.query, "/")
-	toCompleteRoot := strings.Join(ctx.toComplete.root, "/")
+	currentQuery := strings.Join(ctx.query, SeperatorSegment)
+	toCompleteRoot := strings.Join(ctx.toComplete.root, SeperatorSegment)
 
 	if len(ctx.query) <= len(ctx.toComplete.root) {
 		if !strings.HasPrefix(toCompleteRoot, currentQuery) {
@@ -425,8 +425,8 @@ func (c *CtrlClient) completeRoot(ctx *AutoCompleteContext, root *Type) ([]strin
 }
 
 func trimNamespace(query, namespace string) string {
-	newQuery := strings.TrimPrefix(query, strings.Join([]string{NamespaceKey, namespace}, "/"))
-	return strings.Trim(newQuery, "/")
+	newQuery := strings.TrimPrefix(query, argField(NamespaceKey, namespace))
+	return strings.Trim(newQuery, SeperatorSegment)
 }
 
 func tagField(field, tag string) string {
