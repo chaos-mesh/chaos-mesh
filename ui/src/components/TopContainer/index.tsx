@@ -7,6 +7,7 @@ import { useStoreDispatch, useStoreSelector } from 'store'
 
 import ConfirmDialog from 'components-mui/ConfirmDialog'
 import ContentContainer from 'components-mui/ContentContainer'
+import Cookies from 'js-cookie'
 import { IntlProvider } from 'react-intl'
 import LS from 'lib/localStorage'
 import Loading from 'components-mui/Loading'
@@ -89,10 +90,26 @@ const TopContainer = () => {
 
   useEffect(() => {
     /**
-     * Set authorization (RBAC token) for API use.
+     * Set authorization (RBAC token / GCP) for API use.
      *
      */
     function setAuth() {
+      // GCP
+      const accessToken = Cookies.get('access_token')
+      const expiry = Cookies.get('expiry')
+
+      if (accessToken && expiry) {
+        const token = {
+          accessToken,
+          expiry,
+        }
+
+        api.auth.token(token as any)
+        dispatch(setTokenName('gcp'))
+
+        return
+      }
+
       const token = LS.get('token')
       const tokenName = LS.get('token-name')
       const globalNamespace = LS.get('global-namespace')

@@ -252,7 +252,9 @@
       "token": "Token",
       "tokenHelper": "Please fill the secret token",
       "tokenValidation": "The token is required",
-      "duplicateDesc": "Token name can't be duplicate"
+      "duplicateDesc": "Token name can't be duplicate",
+      "or": "Or use the following authentication methods",
+      "gcp": "Currently signed in with Google"
     }
   },
   "swagger": {

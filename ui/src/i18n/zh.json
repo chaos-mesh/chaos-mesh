@@ -254,7 +254,9 @@
       "token": "令牌",
       "tokenHelper": "请输入令牌",
       "tokenValidation": "令牌不能为空",
-      "duplicateDesc": "令牌名称不能重复"
+      "duplicateDesc": "令牌名称不能重复",
+      "or": "或者使用以下方式鉴权",
+      "gcp": "当前使用 Google 登录"
     }
   },
   "swagger": {

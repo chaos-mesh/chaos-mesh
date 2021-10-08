@@ -2,15 +2,31 @@ import http from 'api/http'
 
 let tokenInterceptorId: number
 
-export const token = (token: string) => {
+interface GCPToken {
+  accessToken: string
+  expiry: string
+}
+
+export const token = (token: string | GCPToken) => {
   if (tokenInterceptorId !== undefined) {
     http.interceptors.request.eject(tokenInterceptorId)
   }
 
+  const headers =
+    typeof token === 'string'
+      ? {
+          Authorization: `Bearer ${token}`,
+        }
+      : {
+          'X-Authorization-Method': 'gcp',
+          'X-Authorization-AccessToken': token.accessToken,
+          'X-Authorization-Expiry': token.expiry,
+        }
+
   tokenInterceptorId = http.interceptors.request.use((config) => {
     config.headers = {
       ...config.headers,
-      Authorization: `Bearer ${token}`,
+      ...headers,
     }
 
     return config

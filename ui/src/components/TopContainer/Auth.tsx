@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, Link, Typography } from '@material-ui/core'
+import { Box, Button, Divider, IconButton, Link, Typography } from '@material-ui/core'
 import { useEffect, useState } from 'react'
 
 import ConfirmDialog from 'components-mui/ConfirmDialog'
@@ -24,6 +24,7 @@ const Auth: React.FC<AuthProps> = ({ open, setOpen }) => {
   }, [open, setOpen])
 
   const handleSubmitCallback = () => history.go(0)
+  const handleAuthGCP = () => (window.location.href = '/api/auth/gcp/redirect')
 
   return (
     <ConfirmDialog
@@ -45,6 +46,12 @@ const Auth: React.FC<AuthProps> = ({ open, setOpen }) => {
         </Typography>
         <Token onSubmitCallback={handleSubmitCallback} />
       </Space>
+      <Divider sx={{ mt: 6, mb: 3, color: 'text.secondary', typography: 'body2' }}>{T('settings.addToken.or')}</Divider>
+      <Box textAlign="center">
+        <IconButton color="primary" onClick={handleAuthGCP}>
+          <GoogleIcon />
+        </IconButton>
+      </Box>
 
       <ConfirmDialog
         open={tokenGenOpen}

@@ -102,7 +102,7 @@ const Token: React.FC<TokenProps> = ({ onSubmitCallback }) => {
               error={errors.token && touched.token ? true : false}
             />
           </Space>
-          <Submit />
+          <Submit fullWidth />
         </Form>
       )}
     </Formik>

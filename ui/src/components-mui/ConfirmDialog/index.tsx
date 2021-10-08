@@ -35,17 +35,15 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
 
   return (
     <Dialog open={open} onClose={close} PaperProps={{ sx: { minWidth: 300 } }} {...dialogProps}>
-      <DialogTitle sx={{ p: 3 }}>{title}</DialogTitle>
-      <DialogContent sx={{ p: 3 }}>
+      <DialogTitle sx={{ p: 4.5 }}>{title}</DialogTitle>
+      <DialogContent sx={{ p: 4.5 }}>
         {children ? children : description ? <DialogContentText>{description}</DialogContentText> : null}
       </DialogContent>
 
       {onConfirm && (
-        <DialogActions>
-          <Button size="small" onClick={close}>
-            {T('common.cancel')}
-          </Button>
-          <Button variant="contained" color="primary" size="small" autoFocus disableFocusRipple onClick={handleConfirm}>
+        <DialogActions sx={{ p: 4.5 }}>
+          <Button onClick={close}>{T('common.cancel')}</Button>
+          <Button variant="contained" color="primary" autoFocus disableFocusRipple onClick={handleConfirm}>
             {T('common.confirm')}
           </Button>
         </DialogActions>
