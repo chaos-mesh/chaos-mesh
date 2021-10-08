@@ -118,7 +118,11 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 				return err
 			}
 
-			json.Unmarshal(*rawData, queryValue)
+			err = json.Unmarshal(*rawData, queryValue)
+			if err != nil {
+				return err
+			}
+
 			prefixQuery, err := client.Schema.ParseQuery(prefix, queryType, true)
 			if err != nil {
 				return err
