@@ -291,13 +291,9 @@ func (c *CtrlClient) CompleteQueryBased(ctx context.Context, namespace, base, to
 
 	completeCtx := NewAutoCompleteContext(ctx, namespace, toComplete, true)
 	completeCtx.query = query
-	for len(root.Fields) != 0 {
-		for _, field := range root.Fields {
-			root = field
-			break
-		}
-	}
+	completeCtx.toComplete.root = query
 
+	root = root.Tail()
 	completion, err := c.completeQuery(completeCtx, root.Type)
 	if err != nil {
 		return nil, err
