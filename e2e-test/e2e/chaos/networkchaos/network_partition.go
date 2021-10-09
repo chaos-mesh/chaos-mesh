@@ -379,7 +379,7 @@ func TestcaseNetworkPartition(
 	})
 	// The expected behavior is to block only 0 -> 1, 0 -> 2 and 0 -> 3
 	// but the dropped packet will not throw an error
-	framework.ExpectEqual(result[networkConditionBlocked], nil)
+	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
 	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
 
 	By("recover")
