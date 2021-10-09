@@ -284,7 +284,6 @@ func (s *Service) getLabels(c *gin.Context) {
 		return
 	}
 
-	// exp := &core.SelectorInfo{}
 	selector := v1alpha1.PodSelectorSpec{}
 	nsList := strings.Split(podNamespaceList, ",")
 	selector.Namespaces = nsList
@@ -337,7 +336,6 @@ func (s *Service) getAnnotations(c *gin.Context) {
 		return
 	}
 
-	// exp := &core.SelectorInfo{}
 	selector := v1alpha1.PodSelectorSpec{}
 	nsList := strings.Split(podNamespaceList, ",")
 	selector.Namespaces = nsList
