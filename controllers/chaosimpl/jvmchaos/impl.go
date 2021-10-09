@@ -82,7 +82,6 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	}
 
 	jvmChaos := obj.(*v1alpha1.JVMChaos)
-	jvmChaos.Spec.Name = jvmChaos.Name
 	err = generateRuleData(&jvmChaos.Spec)
 	if err != nil {
 		return v1alpha1.Injected, err
@@ -100,47 +99,6 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	}
 
 	return v1alpha1.Injected, nil
-
-	/*
-		jvmchaos := obj.(*v1alpha1.JVMChaos)
-
-		var pod v1.Pod
-		namespacedName, err := controller.ParseNamespacedName(records[index].Id)
-		if err != nil {
-			return v1alpha1.NotInjected, err
-		}
-		err = impl.Client.Get(ctx, namespacedName, &pod)
-		if err != nil {
-			// TODO: handle this error
-			return v1alpha1.NotInjected, err
-		}
-
-		impl.Log.Info("Try to apply jvm chaos", "namespace",
-			pod.Namespace, "name", pod.Name)
-
-		// TODO: Custom port may be required
-		err = jvm.ActiveSandbox(pod.Status.PodIP, sandboxPort)
-		if err != nil {
-			return v1alpha1.NotInjected, err
-		}
-
-		impl.Log.Info("active sandbox", "pod", pod.Name)
-
-		suid := genSUID(&pod, jvmchaos)
-		jsonBytes, err := jvm.ToSandboxAction(suid, jvmchaos)
-
-		if err != nil {
-			return v1alpha1.NotInjected, err
-		}
-		// TODO: Custom port may be required
-		err = jvm.InjectChaos(pod.Status.PodIP, sandboxPort, jsonBytes)
-		if err != nil {
-			return v1alpha1.NotInjected, err
-		}
-		impl.Log.Info("Inject JVM Chaos", "pod", pod.Name, "action", jvmchaos.Spec.Action)
-
-		return v1alpha1.Injected, nil
-	*/
 }
 
 // Recover means the reconciler recovers the chaos action
@@ -157,6 +115,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	}
 
 	jvmChaos := obj.(*v1alpha1.JVMChaos)
+	//jvmChaos.Spec.Name = jvmChaos.Name
 	err = generateRuleData(&jvmChaos.Spec)
 	if err != nil {
 		return v1alpha1.Injected, err
@@ -174,44 +133,6 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	}
 
 	return v1alpha1.NotInjected, nil
-
-	/*
-		jvmchaos := obj.(*v1alpha1.JVMChaos)
-
-		var pod v1.Pod
-		namespacedName, err := controller.ParseNamespacedName(records[index].Id)
-		if err != nil {
-			// This error is not expected to exist
-			return v1alpha1.NotInjected, err
-		}
-		err = impl.Client.Get(ctx, namespacedName, &pod)
-		if err != nil {
-			if client.IgnoreNotFound(err) != nil {
-				return v1alpha1.Injected, err
-			}
-
-			impl.Log.Info("Target pod has been deleted", "namespace", pod.Namespace, "name", pod.Name)
-			return v1alpha1.NotInjected, nil
-
-		}
-
-		impl.Log.Info("Try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
-
-		suid := genSUID(&pod, jvmchaos)
-		jsonBytes, err := jvm.ToSandboxAction(suid, jvmchaos)
-		if err != nil {
-			return v1alpha1.Injected, err
-		}
-
-		// TODO: Custom port may be required
-		err = jvm.RecoverChaos(pod.Status.PodIP, sandboxPort, jsonBytes)
-
-		if err != nil {
-			return v1alpha1.Injected, err
-		}
-
-		return v1alpha1.NotInjected, nil
-	*/
 }
 
 // JVMRuleParameter is only used to generate rule data

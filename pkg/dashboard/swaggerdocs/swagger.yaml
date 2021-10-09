@@ -963,7 +963,7 @@ definitions:
       action:
         description: |-
           +optional
-          fault action, values can be latency, exception, return, stress
+          fault action, values can be latency, exception, return, stress, rule-data, gc
         type: string
       class:
         description: |-
@@ -1017,7 +1017,7 @@ definitions:
       name:
         description: |-
           +optional
-          rule name, should be unique, and will generate by chaos mesh automatically
+          rule name, should be unique, and will use JVMChaos' name if not set
         type: string
       pid:
         description: |-

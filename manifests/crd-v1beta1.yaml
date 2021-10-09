@@ -1220,7 +1220,7 @@ spec:
           properties:
             action:
               description: fault action, values can be latency, exception, return,
-                stress
+                stress, rule-data, gc
               enum:
               - latency
               - return
@@ -1269,8 +1269,8 @@ spec:
               - random-max-percent
               type: string
             name:
-              description: rule name, should be unique, and will generate by chaos
-                mesh automatically
+              description: rule name, should be unique, and will use JVMChaos' name
+                if not set
               type: string
             pid:
               description: the pid of Java process which need to attach
@@ -3843,7 +3843,7 @@ spec:
               properties:
                 action:
                   description: fault action, values can be latency, exception, return,
-                    stress
+                    stress, rule-data, gc
                   enum:
                   - latency
                   - return
@@ -3892,8 +3892,8 @@ spec:
                   - random-max-percent
                   type: string
                 name:
-                  description: rule name, should be unique, and will generate by chaos
-                    mesh automatically
+                  description: rule name, should be unique, and will use JVMChaos'
+                    name if not set
                   type: string
                 pid:
                   description: the pid of Java process which need to attach
@@ -5843,7 +5843,7 @@ spec:
                         properties:
                           action:
                             description: fault action, values can be latency, exception,
-                              return, stress
+                              return, stress, rule-data, gc
                             enum:
                             - latency
                             - return
@@ -5898,8 +5898,8 @@ spec:
                             - random-max-percent
                             type: string
                           name:
-                            description: rule name, should be unique, and will generate
-                              by chaos mesh automatically
+                            description: rule name, should be unique, and will use
+                              JVMChaos' name if not set
                             type: string
                           pid:
                             description: the pid of Java process which need to attach
@@ -7555,7 +7555,7 @@ spec:
                             properties:
                               action:
                                 description: fault action, values can be latency,
-                                  exception, return, stress
+                                  exception, return, stress, rule-data, gc
                                 enum:
                                 - latency
                                 - return
@@ -7611,7 +7611,7 @@ spec:
                                 type: string
                               name:
                                 description: rule name, should be unique, and will
-                                  generate by chaos mesh automatically
+                                  use JVMChaos' name if not set
                                 type: string
                               pid:
                                 description: the pid of Java process which need to
@@ -13484,7 +13484,7 @@ spec:
               properties:
                 action:
                   description: fault action, values can be latency, exception, return,
-                    stress
+                    stress, rule-data, gc
                   enum:
                   - latency
                   - return
@@ -13533,8 +13533,8 @@ spec:
                   - random-max-percent
                   type: string
                 name:
-                  description: rule name, should be unique, and will generate by chaos
-                    mesh automatically
+                  description: rule name, should be unique, and will use JVMChaos'
+                    name if not set
                   type: string
                 pid:
                   description: the pid of Java process which need to attach
@@ -15096,7 +15096,7 @@ spec:
                   properties:
                     action:
                       description: fault action, values can be latency, exception,
-                        return, stress
+                        return, stress, rule-data, gc
                       enum:
                       - latency
                       - return
@@ -15146,8 +15146,8 @@ spec:
                       - random-max-percent
                       type: string
                     name:
-                      description: rule name, should be unique, and will generate
-                        by chaos mesh automatically
+                      description: rule name, should be unique, and will use JVMChaos'
+                        name if not set
                       type: string
                     pid:
                       description: the pid of Java process which need to attach
@@ -17133,7 +17133,7 @@ spec:
                             properties:
                               action:
                                 description: fault action, values can be latency,
-                                  exception, return, stress
+                                  exception, return, stress, rule-data, gc
                                 enum:
                                 - latency
                                 - return
@@ -17189,7 +17189,7 @@ spec:
                                 type: string
                               name:
                                 description: rule name, should be unique, and will
-                                  generate by chaos mesh automatically
+                                  use JVMChaos' name if not set
                                 type: string
                               pid:
                                 description: the pid of Java process which need to
@@ -18900,7 +18900,7 @@ spec:
                                 properties:
                                   action:
                                     description: fault action, values can be latency,
-                                      exception, return, stress
+                                      exception, return, stress, rule-data, gc
                                     enum:
                                     - latency
                                     - return
@@ -18956,7 +18956,7 @@ spec:
                                     type: string
                                   name:
                                     description: rule name, should be unique, and
-                                      will generate by chaos mesh automatically
+                                      will use JVMChaos' name if not set
                                     type: string
                                   pid:
                                     description: the pid of Java process which need
@@ -27485,7 +27485,7 @@ spec:
                     properties:
                       action:
                         description: fault action, values can be latency, exception,
-                          return, stress
+                          return, stress, rule-data, gc
                         enum:
                         - latency
                         - return
@@ -27537,8 +27537,8 @@ spec:
                         - random-max-percent
                         type: string
                       name:
-                        description: rule name, should be unique, and will generate
-                          by chaos mesh automatically
+                        description: rule name, should be unique, and will use JVMChaos'
+                          name if not set
                         type: string
                       pid:
                         description: the pid of Java process which need to attach
@@ -29152,7 +29152,7 @@ spec:
                         properties:
                           action:
                             description: fault action, values can be latency, exception,
-                              return, stress
+                              return, stress, rule-data, gc
                             enum:
                             - latency
                             - return
@@ -29207,8 +29207,8 @@ spec:
                             - random-max-percent
                             type: string
                           name:
-                            description: rule name, should be unique, and will generate
-                              by chaos mesh automatically
+                            description: rule name, should be unique, and will use
+                              JVMChaos' name if not set
                             type: string
                           pid:
                             description: the pid of Java process which need to attach

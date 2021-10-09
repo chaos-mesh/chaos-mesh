@@ -2995,7 +2995,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "action": {
-                    "description": "+optional\nfault action, values can be latency, exception, return, stress",
+                    "description": "+optional\nfault action, values can be latency, exception, return, stress, rule-data, gc",
                     "type": "string"
                 },
                 "class": {
@@ -3038,7 +3038,7 @@ var doc = `{
                     "type": "string"
                 },
                 "name": {
-                    "description": "+optional\nrule name, should be unique, and will generate by chaos mesh automatically",
+                    "description": "+optional\nrule name, should be unique, and will use JVMChaos' name if not set",
                     "type": "string"
                 },
                 "pid": {

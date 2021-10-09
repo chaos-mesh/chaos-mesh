@@ -41,14 +41,15 @@ for ((k=0; k<30; k++)); do
 done
 
 function check_log() {
+    message=$1
     match=""
-    if [ "$1" = "false" ]; then
+    if [ "$2" = "false" ]; then
         match="-v"
     fi
 
     success=false
     for ((k=0; k<10; k++)); do
-        kubectl logs --tail=1 helloworld -n helloworld | grep $match "9999. Hello World"
+        kubectl logs --tail=1 helloworld -n helloworld | grep $match "$message"
         if [ "$?" = "0" ]; then
             success=true
             break
@@ -62,14 +63,23 @@ function check_log() {
     fi
 }
 
-echo "create jvm chaos, and will print 9999. Hello World"
-kubectl apply -f ./jvm.yaml
-check_log true
+echo "create jvm chaos to update return value, and will print '9999. Hello World'"
+kubectl apply -f ./rule-data.yaml
+check_log "9999. Hello World" true
 
-echo "delete jvm chaos, and will not print 9999. Hello World"
-kubectl delete -f ./jvm.yaml
+echo "delete jvm chaos, and will not print '9999. Hello World'"
+kubectl delete -f ./rule-data.yaml
+check_log "9999. Hello World" false
 
-check_log false
+echo "create jvm chaos to throw exception, and will print 'Got an exception!java.io.IOException: BOOM'"
+kubectl apply -f ./exception.yaml
+check_log "Got an exception!java.io.IOException: BOOM" true
+
+echo "delete jvm chaos, and will not print 'Got an exception!java.io.IOException: BOOM'"
+kubectl delete -f ./exception.yaml
+check_log "Got an exception!java.io.IOException: BOOM" false
+
+# TODO: more test
 
 echo "****** finish jvm chaos test ******"
 # clean

@@ -62,7 +62,7 @@ const (
 // JVMParameter represents the detail about jvm chaos action definition
 type JVMParameter struct {
 	// +optional
-	// rule name, should be unique, and will generate by chaos mesh automatically
+	// rule name, should be unique, and will use JVMChaos' name if not set
 	Name string `json:"name"`
 
 	// +optional
@@ -74,7 +74,7 @@ type JVMParameter struct {
 	Method string `json:"method"`
 
 	// +optional
-	// fault action, values can be latency, exception, return, stress
+	// fault action, values can be latency, exception, return, stress, rule-data, gc
 	Action string `json:"action"`
 
 	// +optional
