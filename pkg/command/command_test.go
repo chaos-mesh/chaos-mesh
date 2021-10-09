@@ -40,7 +40,7 @@ type Match_ struct {
 	Helper string `para:"--helper"`
 }
 
-func TestUnmarshal(t *testing.T) {
+func TestMarshal(t *testing.T) {
 	n := IptablesTest{
 		NewExec(),
 		"20",
@@ -71,7 +71,17 @@ type Iptables struct {
 	TcpFlags       string `para:"--tcp-flags"`
 }
 
-func TestUnmarshalExample(t *testing.T) {
+type TestInvalidParaType struct {
+	Exec `exec:"test"`
+	P    int `para:"-p"`
+}
+
+type TestInvalidParaSliceType struct {
+	Exec `exec:"test"`
+	P    []int `para:"-p"`
+}
+
+func TestMarshalExample(t *testing.T) {
 	n := Iptables{
 		Exec:           NewExec(),
 		Command:        "-A",
@@ -86,4 +96,17 @@ func TestUnmarshalExample(t *testing.T) {
 	assert.NoError(t, err, "nil")
 	assert.Equal(t, "iptables -A Chaos_Chain -j Chaos_Target --protocol tcp -m multiport --source-ports 2021,2022 --tcp-flags SYN",
 		path+" "+strings.Join(args, " "))
+
+	p := TestInvalidParaType{
+		Exec: NewExec(),
+		P:    2,
+	}
+	_, _, err = Marshal(p)
+	assert.EqualError(t, err, "invalid parameter type int : parameter must be string or string slice")
+	ps := TestInvalidParaSliceType{
+		Exec: NewExec(),
+		P:    nil,
+	}
+	_, _, err = Marshal(ps)
+	assert.EqualError(t, err, "invalid parameter slice type <[]int Value> :parameter slice must be string slice")
 }

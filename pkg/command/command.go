@@ -120,10 +120,10 @@ func marshal(value reflect.Value) (string, []string, error) {
 							args = append(args, slicePara...)
 						}
 					} else {
-						return "", nil, fmt.Errorf("invalid parameter slice type :parameter slice must be string slice")
+						return "", nil, fmt.Errorf("invalid parameter slice type %s :parameter slice must be string slice", value.Field(i).String())
 					}
 				} else {
-					return "", nil, fmt.Errorf("invalid parameter type : parameter must be string or string slice")
+					return "", nil, fmt.Errorf("invalid parameter type %s : parameter must be string or string slice", value.Type().Field(i).Type.Name())
 				}
 			}
 		}
