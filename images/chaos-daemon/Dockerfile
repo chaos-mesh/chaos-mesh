@@ -15,7 +15,6 @@ RUN apt-get update && \
 RUN update-alternatives --set iptables /usr/sbin/iptables-legacy
 
 ENV RUST_BACKTRACE 1
-
 ARG TARGET_PLATFORM=amd64
 
 # install byteman and set env

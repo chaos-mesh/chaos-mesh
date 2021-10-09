@@ -23,15 +23,12 @@ import (
 	"github.com/pingcap/errors"
 	"go.uber.org/fx"
 
-	//v1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/utils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
-	//"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
-	//"github.com/chaos-mesh/chaos-mesh/pkg/jvm"
 )
 
 const CommonRuleTemplate = `
@@ -115,7 +112,6 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	}
 
 	jvmChaos := obj.(*v1alpha1.JVMChaos)
-	//jvmChaos.Spec.Name = jvmChaos.Name
 	err = generateRuleData(&jvmChaos.Spec)
 	if err != nil {
 		return v1alpha1.Injected, err

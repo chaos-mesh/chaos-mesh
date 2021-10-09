@@ -54,7 +54,6 @@ func (d *ContianerRecordDecoder) DecodeContainerRecord(ctx context.Context, reco
 		return
 	}
 	if d.Client == nil {
-		err = fmt.Errorf("ContianerRecordDecoder's client is nil")
 		return
 	}
 	err = d.Client.Get(ctx, podId, &pod)

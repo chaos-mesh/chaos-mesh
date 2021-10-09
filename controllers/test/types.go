@@ -94,3 +94,7 @@ func (c *MockChaosDaemonClient) SetTcs(ctx context.Context, in *chaosdaemon.TcsR
 func (c *MockChaosDaemonClient) Close() error {
 	return mockError("CloseChaosDaemonClient")
 }
+
+func (c *MockChaosDaemonClient) InstallJVMRules(ctx context.Context, in *chaosdaemon.InstallJVMRulesRequest) (*chaosdaemon.InstallJVMRulesResponse, error) {
+	return nil, mockError("InstallJVMRules")
+}
