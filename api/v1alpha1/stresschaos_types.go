@@ -40,6 +40,7 @@ type StressChaos struct {
 
 var _ InnerObjectWithCustomStatus = (*StressChaos)(nil)
 var _ InnerObjectWithSelector = (*StressChaos)(nil)
+var _ InnerObject = (*StressChaos)(nil)
 
 // StressChaosSpec defines the desired state of StressChaos
 type StressChaosSpec struct {
@@ -97,7 +98,7 @@ type Stressors struct {
 // Normalize the stressors to comply with stress-ng
 func (in *Stressors) Normalize() (string, error) {
 	stressors := ""
-	if in.MemoryStressor != nil {
+	if in.MemoryStressor != nil && in.MemoryStressor.Workers != 0 {
 		stressors += fmt.Sprintf(" --vm %d --vm-keep", in.MemoryStressor.Workers)
 		if len(in.MemoryStressor.Size) != 0 {
 			if in.MemoryStressor.Size[len(in.MemoryStressor.Size)-1] != '%' {
@@ -118,7 +119,7 @@ func (in *Stressors) Normalize() (string, error) {
 			}
 		}
 	}
-	if in.CPUStressor != nil {
+	if in.CPUStressor != nil && in.CPUStressor.Workers != 0 {
 		stressors += fmt.Sprintf(" --cpu %d", in.CPUStressor.Workers)
 		if in.CPUStressor.Load != nil {
 			stressors += fmt.Sprintf(" --cpu-load %d",

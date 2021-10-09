@@ -9,6 +9,7 @@ const mapping = new Map<ExperimentKind, string>([
   ['JVMChaos', 'jvmChaos'],
   ['KernelChaos', 'kernelChaos'],
   ['NetworkChaos', 'networkChaos'],
+  ['PhysicalMachineChaos', 'physicalmachineChaos'],
   ['PodChaos', 'podChaos'],
   ['StressChaos', 'stressChaos'],
   ['TimeChaos', 'timeChaos'],
