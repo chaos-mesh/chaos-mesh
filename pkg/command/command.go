@@ -14,6 +14,7 @@
 package command
 
 import (
+	"fmt"
 	"os/exec"
 	"reflect"
 	"strings"
@@ -47,7 +48,7 @@ const SubCommandTag = "sub_command"
 // 	Exec
 //	Port string `para:"-p"`
 // }
-// If the field is not string type or []string type , it will be skipped.
+// If the field is not string type or []string type , it will bring an error.
 // If the tag value like "-p" is empty string ,
 // the para will just add the field value into the command just as some single value parameter in command.
 // If the value of field is empty string or empty string slice or empty slice, the field and tag will all be skipped.
@@ -69,28 +70,34 @@ func NewExec() Exec {
 	return Exec{option: "OK"}
 }
 
-func ToCommand(i interface{}) *exec.Cmd {
-	path, args := Unmarshal(i)
-	return exec.Command(path, args...)
+func ToCommand(i interface{}) (*exec.Cmd, error) {
+	path, args, err := Marshal(i)
+	if err != nil {
+		return nil, err
+	}
+	return exec.Command(path, args...), nil
 }
 
-func Unmarshal(i interface{}) (string, []string) {
+func Marshal(i interface{}) (string, []string, error) {
 	value := reflect.ValueOf(i)
-	return unmarshal(value)
+	return marshal(value)
 }
 
-func unmarshal(value reflect.Value) (string, []string) {
+func marshal(value reflect.Value) (string, []string, error) {
 	//var options []string
 	if path, ok := SearchKey(value); ok {
 		// Field(0).String is Exec.Path
 
 		if path == "" {
-			return "", nil
+			return "", nil, nil
 		}
 		args := make([]string, 0)
 		for i := 0; i < value.NumField(); i++ {
 			if _, ok := value.Type().Field(i).Tag.Lookup(SubCommandTag); ok {
-				subPath, subArgs := unmarshal(value.Field(i))
+				subPath, subArgs, err := marshal(value.Field(i))
+				if err != nil {
+					return "", nil, err
+				}
 				if subPath != "" {
 					args = append(args, subPath)
 				}
@@ -104,8 +111,7 @@ func unmarshal(value reflect.Value) (string, []string) {
 						}
 						args = append(args, value.Field(i).String())
 					}
-				}
-				if value.Field(i).Kind() == reflect.Slice {
+				} else if value.Field(i).Kind() == reflect.Slice {
 					if slicePara, ok := value.Field(i).Interface().([]string); ok {
 						if strings.Join(slicePara, "") != "" {
 							if paraName != "" {
@@ -113,14 +119,17 @@ func unmarshal(value reflect.Value) (string, []string) {
 							}
 							args = append(args, slicePara...)
 						}
-
+					} else {
+						return "", nil, fmt.Errorf("invalid parameter slice type :parameter slice must be string slice")
 					}
+				} else {
+					return "", nil, fmt.Errorf("invalid parameter type : parameter must be string or string slice")
 				}
 			}
 		}
-		return path, args
+		return path, args, nil
 	}
-	return "", nil
+	return "", nil, nil
 }
 
 func SearchKey(value reflect.Value) (string, bool) {
