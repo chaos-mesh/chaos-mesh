@@ -63,11 +63,11 @@ const ParaTag = "para"
 //	Tables         string `para:"-t"`
 // }
 type Exec struct {
-	option string
+	active bool
 }
 
 func NewExec() Exec {
-	return Exec{option: "OK"}
+	return Exec{active: true}
 }
 
 func ToCommand(i interface{}) (*exec.Cmd, error) {
@@ -135,10 +135,9 @@ func marshal(value reflect.Value) (string, []string, error) {
 func SearchKey(value reflect.Value) (string, bool) {
 	for i := 0; i < value.NumField(); i++ {
 		if path, ok := value.Type().Field(i).Tag.Lookup(ExecTag); ok {
-			if value.Field(i).Field(0).String() == "" {
-				return "", false
+			if value.Field(i).Field(0).Bool() {
+				return path, ok
 			}
-			return path, ok
 		}
 	}
 	return "", false
