@@ -82,7 +82,7 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 		cmd = fmt.Sprintf("cat /proc/%s/cgroup", pids[i])
 		out, err = cm.ExecBypass(ctx, pod, daemon, cmd, c.KubeCli)
 		if err != nil {
-			cm.L().WithName("stress-chaos").V(2).Info("failed to fetch cgroup ofr certain process",
+			cm.L().WithName("stress-chaos").V(2).Info("failed to fetch cgroup for certain process",
 				"pod", fmt.Sprintf("%s/%s", pod.Namespace, pod.Name),
 				"pid", i,
 			)
