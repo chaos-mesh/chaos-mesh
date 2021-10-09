@@ -36,7 +36,7 @@ const (
 	RandomMaxPercentPodMode PodMode = "random-max-percent"
 )
 
-type CommonSelectorSpec struct{
+type BasicSelectorSpec struct{
 	// Namespaces is a set of namespace to which objects belong.
 	// +optional
 	Namespaces []string `json:"namespaces,omitempty"`
@@ -62,11 +62,11 @@ type CommonSelectorSpec struct{
 	AnnotationSelectors map[string]string `json:"annotationSelectors,omitempty"`
 }
 
-// PodSelectorSpec defines the some selectors to select objects.
+// PodSelectorSpec defines some selectors to select objects.
 // If the all selectors are empty, all objects will be used in chaos experiment.
 type PodSelectorSpec struct {
 
-	CommonSelectorSpec `json:",inline"`
+	BasicSelectorSpec `json:",inline"`
 
 	// Nodes is a set of node name and objects must belong to these nodes.
 	// +optional

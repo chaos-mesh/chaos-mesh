@@ -40,7 +40,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
-var log = ctrl.Log.WithName("selector")
+var log = ctrl.Log.WithName("podselector")
 
 const injectAnnotationKey = "chaos-mesh.org/inject"
 

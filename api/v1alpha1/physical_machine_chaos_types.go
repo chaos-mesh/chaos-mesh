@@ -70,11 +70,11 @@ type PhysicalMachineSelector struct {
 // PhysicalMachineSelectorSpec defines the some selectors to select objects.
 // If the all selectors are empty, all objects will be used in chaos experiment.
 type PhysicalMachineSelectorSpec struct {
-	CommonSelectorSpec `json:",inline"`
+	BasicSelectorSpec `json:",inline"`
 
 	// PhysicalMachines is a map of string keys and a set values that used to select physical machines.
 	// The key defines the namespace which physical machine belong,
-	// and the each value is a set of physical machine names.
+	// and each value is a set of physical machine names.
 	// +optional
 	PhysicalMachines map[string][]string `json:"physicalMachines,omitempty"`
 }

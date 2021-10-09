@@ -89,13 +89,44 @@ type SelectorInfo struct {
 
 	// Pods is a map of string keys and a set values that used to select pods.
 	// The key defines the namespace which pods belong,
-	// and the each values is a set of pod names.
+	// and each value is a set of pod names.
 	Pods map[string][]string `json:"pods,omitempty" binding:"PodsValid"`
+
+	// PhysicalMachines is a map of string keys and a set values that used to select physical machines.
+	// The key defines the namespace which physical machine belong,
+	// and each value is a set of physical machine names.
+	PhysicalMachines map[string][]string `json:"physical_machines,omitempty" binding:"PhysicalMachinesValid"`
 }
 
-// ParseSelector parses SelectorInfo to v1alpha1.SelectorSpec
-func (s *SelectorInfo) ParseSelector() v1alpha1.PodSelectorSpec {
+// ParsePodSelector parses SelectorInfo to v1alpha1.PodSelectorSpec
+func (s *SelectorInfo) ParsePodSelector() v1alpha1.PodSelectorSpec {
 	selector := v1alpha1.PodSelectorSpec{}
+	selector.CommonSelectorSpec = s.parseCommonSelector()
+
+	selector.PodPhaseSelectors = append(selector.PodPhaseSelectors, s.PodPhaseSelectors...)
+
+	if s.Pods != nil {
+		selector.Pods = s.Pods
+	}
+
+	return selector
+}
+
+// ParsePhysicalMachineSelector parses SelectorInfo to v1alpha1.PhysicalMachineSelectorSpec
+func (s *SelectorInfo) ParsePhysicalMachineSelector() v1alpha1.PhysicalMachineSelectorSpec {
+	selector := v1alpha1.PhysicalMachineSelectorSpec{}
+	selector.CommonSelectorSpec = s.parseCommonSelector()
+
+	if s.PhysicalMachines != nil {
+		selector.PhysicalMachines = s.PhysicalMachines
+	}
+
+	return selector
+}
+
+// parseCommonSelector parses SelectorInfo to v1alpha1.CommonSelectorSpec
+func (s *SelectorInfo) parseCommonSelector() v1alpha1.CommonSelectorSpec {
+	selector := v1alpha1.CommonSelectorSpec{}
 	selector.Namespaces = append(selector.Namespaces, s.Namespaces...)
 
 	selector.LabelSelectors = make(map[string]string)
@@ -113,12 +144,6 @@ func (s *SelectorInfo) ParseSelector() v1alpha1.PodSelectorSpec {
 	selector.FieldSelectors = make(map[string]string)
 	for key, val := range s.FieldSelectors {
 		selector.FieldSelectors[key] = val
-	}
-
-	selector.PodPhaseSelectors = append(selector.PodPhaseSelectors, s.PodPhaseSelectors...)
-
-	if s.Pods != nil {
-		selector.Pods = s.Pods
 	}
 
 	return selector

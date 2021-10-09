@@ -64,6 +64,7 @@ func newEngine(config *config.ChaosDashboardConfig) *gin.Engine {
 		v.RegisterValidation("DurationValid", apivalidator.DurationValid)
 		v.RegisterValidation("ValueValid", apivalidator.ValueValid)
 		v.RegisterValidation("PodsValid", apivalidator.PodsValid)
+		v.RegisterValidation("PhysicalMachinesValid", apivalidator.PhysicalMachinesValid)
 		v.RegisterValidation("RequiredFieldEqual", apivalidator.RequiredFieldEqualValid, true)
 	}
 
