@@ -48,10 +48,12 @@ var _ = Describe("jvmchaos_webhook", func() {
 							Name:      "foo1",
 						},
 						Spec: JVMChaosSpec{
-							Action:          JVMLatencyAction,
-							Class:           "Main",
-							Method:          "print",
-							LatencyDuration: 1000,
+							Action: JVMLatencyAction,
+							JVMParameter: JVMParameter{
+								Class:           "Main",
+								Method:          "print",
+								LatencyDuration: 1000,
+							},
 						},
 					},
 					execute: func(chaos *JVMChaos) error {
@@ -67,10 +69,12 @@ var _ = Describe("jvmchaos_webhook", func() {
 							Name:      "foo2",
 						},
 						Spec: JVMChaosSpec{
-							Action:          JVMLatencyAction,
-							Class:           "Main",
-							Method:          "print",
-							LatencyDuration: 1000,
+							Action: JVMLatencyAction,
+							JVMParameter: JVMParameter{
+								Class:           "Main",
+								Method:          "print",
+								LatencyDuration: 1000,
+							},
 						},
 					},
 					execute: func(chaos *JVMChaos) error {
@@ -86,10 +90,12 @@ var _ = Describe("jvmchaos_webhook", func() {
 							Name:      "foo3",
 						},
 						Spec: JVMChaosSpec{
-							Action:          JVMLatencyAction,
-							Class:           "Main",
-							Method:          "print",
-							LatencyDuration: 1000,
+							Action: JVMLatencyAction,
+							JVMParameter: JVMParameter{
+								Class:           "Main",
+								Method:          "print",
+								LatencyDuration: 1000,
+							},
 						},
 					},
 					execute: func(chaos *JVMChaos) error {
@@ -106,8 +112,10 @@ var _ = Describe("jvmchaos_webhook", func() {
 						},
 						Spec: JVMChaosSpec{
 							Action: JVMLatencyAction,
-							Class:  "Main",
-							Method: "print",
+							JVMParameter: JVMParameter{
+								Class:  "Main",
+								Method: "print",
+							},
 						},
 					},
 					execute: func(chaos *JVMChaos) error {
@@ -124,8 +132,10 @@ var _ = Describe("jvmchaos_webhook", func() {
 						},
 						Spec: JVMChaosSpec{
 							Action: JVMReturnAction,
-							Class:  "Main",
-							Method: "print",
+							JVMParameter: JVMParameter{
+								Class:  "Main",
+								Method: "print",
+							},
 						},
 					},
 					execute: func(chaos *JVMChaos) error {
@@ -142,8 +152,10 @@ var _ = Describe("jvmchaos_webhook", func() {
 						},
 						Spec: JVMChaosSpec{
 							Action: JVMExceptionAction,
-							Class:  "Main",
-							Method: "print",
+							JVMParameter: JVMParameter{
+								Class:  "Main",
+								Method: "print",
+							},
 						},
 					},
 					execute: func(chaos *JVMChaos) error {
@@ -159,9 +171,11 @@ var _ = Describe("jvmchaos_webhook", func() {
 							Name:      "foo7",
 						},
 						Spec: JVMChaosSpec{
-							Action:          JVMLatencyAction,
-							Method:          "print",
-							LatencyDuration: 1000,
+							Action: JVMLatencyAction,
+							JVMParameter: JVMParameter{
+								Method:          "print",
+								LatencyDuration: 1000,
+							},
 						},
 					},
 					execute: func(chaos *JVMChaos) error {
@@ -177,9 +191,11 @@ var _ = Describe("jvmchaos_webhook", func() {
 							Name:      "foo8",
 						},
 						Spec: JVMChaosSpec{
-							Action:          JVMLatencyAction,
-							Class:           "Main",
-							LatencyDuration: 1000,
+							Action: JVMLatencyAction,
+							JVMParameter: JVMParameter{
+								Class:           "Main",
+								LatencyDuration: 1000,
+							},
 						},
 					},
 					execute: func(chaos *JVMChaos) error {

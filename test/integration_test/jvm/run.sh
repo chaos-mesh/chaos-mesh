@@ -24,6 +24,7 @@ echo "deploy a helloword pod which is implement with java"
 # 1. Hello World
 # ...
 
+kubectl create namespace helloworld
 kubectl apply -f ./helloworld_pod.yaml
 
 echo "wait helloworld pod status to running"

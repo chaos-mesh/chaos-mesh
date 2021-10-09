@@ -15,7 +15,6 @@ package controller
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 
 	"k8s.io/apimachinery/pkg/types"
@@ -49,6 +48,6 @@ func ParseNamespacedNameContainer(namespacedName string) (types.NamespacedName, 
 	return types.NamespacedName{
 		Namespace: "",
 		Name:      "",
-		}, "", errors.New("too few parts of namespacedname")
+	}, "", errors.New("too few parts of namespacedname")
 
 }

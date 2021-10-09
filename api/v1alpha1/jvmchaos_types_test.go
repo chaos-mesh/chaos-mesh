@@ -53,10 +53,12 @@ var _ = Describe("JVMChaos", func() {
 					Namespace: "default",
 				},
 				Spec: JVMChaosSpec{
-					Action:          JVMLatencyAction,
-					Class:           "Main",
-					Method:          "print",
-					LatencyDuration: "1000",
+					Action: JVMLatencyAction,
+					JVMParameter: JVMParameter{
+						Class:           "Main",
+						Method:          "print",
+						LatencyDuration: 1000,
+					},
 					ContainerSelector: ContainerSelector{
 						PodSelector: PodSelector{
 							Mode: OnePodMode,

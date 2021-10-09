@@ -95,6 +95,6 @@ func (c *MockChaosDaemonClient) Close() error {
 	return mockError("CloseChaosDaemonClient")
 }
 
-func (c *MockChaosDaemonClient) InstallJVMRules(ctx context.Context, in *chaosdaemon.InstallJVMRulesRequest) (*chaosdaemon.InstallJVMRulesResponse, error) {
+func (c *MockChaosDaemonClient) InstallJVMRules(ctx context.Context, in *chaosdaemon.InstallJVMRulesRequest, opts ...grpc.CallOption) (*chaosdaemon.InstallJVMRulesResponse, error) {
 	return nil, mockError("InstallJVMRules")
 }
