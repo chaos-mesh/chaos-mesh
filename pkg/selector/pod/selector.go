@@ -18,6 +18,7 @@ import (
 	"crypto/rand"
 	"errors"
 	"fmt"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic"
 	"math"
 	"math/big"
 	"strconv"
@@ -27,7 +28,6 @@ import (
 	v1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/apimachinery/pkg/types"
@@ -42,19 +42,11 @@ import (
 
 var log = ctrl.Log.WithName("podselector")
 
-const injectAnnotationKey = "chaos-mesh.org/inject"
-
-type Option struct {
-	ClusterScoped         bool
-	TargetNamespace       string
-	EnableFilterNamespace bool
-}
-
 type SelectImpl struct {
 	c client.Client
 	r client.Reader
 
-	Option
+	generic.Option
 }
 
 type Pod struct {
@@ -99,10 +91,10 @@ func New(params Params) *SelectImpl {
 	return &SelectImpl{
 		params.Client,
 		params.Reader,
-		Option{
-			config.ControllerCfg.ClusterScoped,
-			config.ControllerCfg.TargetNamespace,
-			config.ControllerCfg.EnableFilterNamespace,
+		generic.Option{
+			ClusterScoped:         config.ControllerCfg.ClusterScoped,
+			TargetNamespace:       config.ControllerCfg.TargetNamespace,
+			EnableFilterNamespace: config.ControllerCfg.EnableFilterNamespace,
 		},
 	}
 }
@@ -179,43 +171,43 @@ func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector 
 		return pods, nil
 	}
 
-	if !clusterScoped {
-		if len(selector.Namespaces) > 1 {
-			return nil, fmt.Errorf("could NOT use more than 1 namespace selector within namespace scoped mode")
-		} else if len(selector.Namespaces) == 1 {
-			if selector.Namespaces[0] != targetNamespace {
-				return nil, fmt.Errorf("could NOT list pods from out of scoped namespace: %s", selector.Namespaces[0])
-			}
-		}
-	}
+	//if !clusterScoped {
+	//	if len(selector.Namespaces) > 1 {
+	//		return nil, fmt.Errorf("could NOT use more than 1 namespace selector within namespace scoped mode")
+	//	} else if len(selector.Namespaces) == 1 {
+	//		if selector.Namespaces[0] != targetNamespace {
+	//			return nil, fmt.Errorf("could NOT list pods from out of scoped namespace: %s", selector.Namespaces[0])
+	//		}
+	//	}
+	//}
 
 	var listOptions = client.ListOptions{}
-	if !clusterScoped {
-		listOptions.Namespace = targetNamespace
-	}
-	if len(selector.LabelSelectors) > 0 || len(selector.ExpressionSelectors) > 0 {
-		metav1Ls := &metav1.LabelSelector{
-			MatchLabels:      selector.LabelSelectors,
-			MatchExpressions: selector.ExpressionSelectors,
-		}
-		ls, err := metav1.LabelSelectorAsSelector(metav1Ls)
-		if err != nil {
-			return nil, err
-		}
-		listOptions.LabelSelector = ls
-	}
+	//if !clusterScoped {
+	//	listOptions.Namespace = targetNamespace
+	//}
+	//if len(selector.LabelSelectors) > 0 || len(selector.ExpressionSelectors) > 0 {
+	//	metav1Ls := &metav1.LabelSelector{
+	//		MatchLabels:      selector.LabelSelectors,
+	//		MatchExpressions: selector.ExpressionSelectors,
+	//	}
+	//	ls, err := metav1.LabelSelectorAsSelector(metav1Ls)
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//	listOptions.LabelSelector = ls
+	//}
 
-	listFunc := c.List
+	//listFunc := c.List
 
-	if len(selector.FieldSelectors) > 0 {
-		listOptions.FieldSelector = fields.SelectorFromSet(selector.FieldSelectors)
-
-		// Since FieldSelectors need to implement index creation, Reader.List is used to get the pod list.
-		// Otherwise, just call Client.List directly, which can be obtained through cache.
-		if r != nil {
-			listFunc = r.List
-		}
-	}
+	//if len(selector.FieldSelectors) > 0 {
+	//	listOptions.FieldSelector = fields.SelectorFromSet(selector.FieldSelectors)
+	//
+	//	// Since FieldSelectors need to implement index creation, Reader.List is used to get the pod list.
+	//	// Otherwise, just call Client.List directly, which can be obtained through cache.
+	//	if r != nil {
+	//		listFunc = r.List
+	//	}
+	//}
 
 	var podList v1.PodList
 	if len(selector.Namespaces) > 0 {
@@ -236,35 +228,35 @@ func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector 
 		pods = append(pods, podList.Items...)
 	}
 
-	var (
-		nodes           []v1.Node
-		nodeList        v1.NodeList
-		nodeListOptions = client.ListOptions{}
-	)
+	//var (
+	//	nodes           []v1.Node
+	//	nodeList        v1.NodeList
+	//	nodeListOptions = client.ListOptions{}
+	//)
 	// if both setting Nodes and NodeSelectors, the node list will be combined.
-	if len(selector.Nodes) > 0 || len(selector.NodeSelectors) > 0 {
-		if len(selector.Nodes) > 0 {
-			for _, nodename := range selector.Nodes {
-				var node v1.Node
-				if err := c.Get(ctx, types.NamespacedName{Name: nodename}, &node); err != nil {
-					return nil, err
-				}
-				nodes = append(nodes, node)
-			}
-		}
-		if len(selector.NodeSelectors) > 0 {
-			nodeListOptions.LabelSelector = labels.SelectorFromSet(selector.NodeSelectors)
-			if err := c.List(ctx, &nodeList, &nodeListOptions); err != nil {
-				return nil, err
-			}
-			nodes = append(nodes, nodeList.Items...)
-		}
-		pods = filterPodByNode(pods, nodes)
-	}
+	//if len(selector.Nodes) > 0 || len(selector.NodeSelectors) > 0 {
+	//	if len(selector.Nodes) > 0 {
+	//		for _, nodename := range selector.Nodes {
+	//			var node v1.Node
+	//			if err := c.Get(ctx, types.NamespacedName{Name: nodename}, &node); err != nil {
+	//				return nil, err
+	//			}
+	//			nodes = append(nodes, node)
+	//		}
+	//	}
+	//	if len(selector.NodeSelectors) > 0 {
+	//		nodeListOptions.LabelSelector = labels.SelectorFromSet(selector.NodeSelectors)
+	//		if err := c.List(ctx, &nodeList, &nodeListOptions); err != nil {
+	//			return nil, err
+	//		}
+	//		nodes = append(nodes, nodeList.Items...)
+	//	}
+	//	pods = filterPodByNode(pods, nodes)
+	//}
+
 	if enableFilterNamespace {
 		pods = filterByNamespaces(ctx, c, pods)
 	}
-
 	namespaceSelector, err := parseSelector(strings.Join(selector.Namespaces, ","))
 	if err != nil {
 		return nil, err
@@ -274,11 +266,11 @@ func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector 
 		return nil, err
 	}
 
-	annotationsSelector, err := parseSelector(label.Label(selector.AnnotationSelectors).String())
-	if err != nil {
-		return nil, err
-	}
-	pods = filterByAnnotations(pods, annotationsSelector)
+	//annotationsSelector, err := parseSelector(label.Label(selector.AnnotationSelectors).String())
+	//if err != nil {
+	//	return nil, err
+	//}
+	//pods = filterByAnnotations(pods, annotationsSelector)
 
 	phaseSelector, err := parseSelector(strings.Join(selector.PodPhaseSelectors, ","))
 	if err != nil {
@@ -375,7 +367,6 @@ func CheckPodMeetSelector(pod v1.Pod, selector v1alpha1.PodSelectorSpec) (bool, 
 	if err != nil {
 		return false, err
 	}
-
 	pods = filterByAnnotations(pods, annotationsSelector)
 
 	phaseSelector, err := parseSelector(strings.Join(selector.PodPhaseSelectors, ","))
@@ -394,19 +385,110 @@ func CheckPodMeetSelector(pod v1.Pod, selector v1alpha1.PodSelectorSpec) (bool, 
 	return false, nil
 }
 
-func filterPodByNode(pods []v1.Pod, nodes []v1.Node) []v1.Pod {
-	if len(nodes) == 0 {
-		return nil
+type nodeSelector struct {
+	nodes []v1.Node
+}
+
+func (s *nodeSelector) AddListOption(opts client.ListOptions) (client.ListOptions, error) {
+	return opts, nil
+}
+
+func (s *nodeSelector) SetListFunc(f generic.ListFunc) generic.ListFunc {
+	return f
+}
+
+func (s *nodeSelector) Match(obj client.Object) (bool, error) {
+	if len(s.nodes) == 0 {
+		return true, nil
 	}
-	var filteredList []v1.Pod
-	for _, pod := range pods {
-		for _, node := range nodes {
-			if pod.Spec.NodeName == node.Name {
-				filteredList = append(filteredList, pod)
-			}
+
+	pod := obj.(*v1.Pod)
+	for _, node := range s.nodes {
+		if node.Name == pod.Spec.NodeName {
+			return true, nil
 		}
 	}
-	return filteredList
+	return false, nil
+}
+
+// if both setting Nodes and NodeSelectors, the node list will be combined.
+func ParseNodeSelector(ctx context.Context, c client.Client, nodeNames []string, selectors map[string]string) (generic.Selector, error) {
+	if len(nodeNames) == 0 && len(selectors) == 0 {
+		return nil, nil
+	}
+	var nodes []v1.Node
+	if len(nodeNames) > 0 {
+		for _, name := range nodeNames {
+			var node v1.Node
+			if err := c.Get(ctx, types.NamespacedName{Name: name}, &node); err != nil {
+				return nil, err
+			}
+			nodes = append(nodes, node)
+		}
+	}
+	if len(selectors) > 0 {
+		var nodeList v1.NodeList
+		if err := c.List(ctx, &nodeList, &client.ListOptions{
+			LabelSelector: labels.SelectorFromSet(selectors),
+		}); err != nil {
+			return nil, err
+		}
+		nodes = append(nodes, nodeList.Items...)
+	}
+	return &nodeSelector{nodes: nodes}, nil
+}
+
+type phaseSelector struct {
+	reqIncl []labels.Requirement
+	reqExcl []labels.Requirement
+}
+
+func (s *phaseSelector) AddListOption(opts client.ListOptions) (client.ListOptions, error) {
+
+	return opts, nil
+}
+
+func (s *phaseSelector) SetListFunc(f generic.ListFunc) generic.ListFunc {
+	return f
+}
+
+func (s *phaseSelector) Match(obj client.Object) (bool, error) {
+
+	return true, nil
+}
+
+func ParsePhaseSelector(podPhaseSelectors []string) (generic.Selector, error) {
+	selectorStr := strings.Join(podPhaseSelectors, ",")
+	selector, err := labels.Parse(selectorStr)
+	if err != nil {
+		return nil, err
+	}
+
+	if selector.Empty() {
+		return pods, nil
+	}
+
+	reqs, _ := selector.Requirements()
+	var (
+		reqIncl []labels.Requirement
+		reqExcl []labels.Requirement
+	)
+
+	for _, req := range reqs {
+		switch req.Operator() {
+		case selection.Exists:
+			reqIncl = append(reqIncl, req)
+		case selection.DoesNotExist:
+			reqExcl = append(reqExcl, req)
+		default:
+			return nil, fmt.Errorf("unsupported operator: %s", req.Operator())
+		}
+	}
+
+	return &phaseSelector{
+		reqIncl: reqIncl,
+		reqExcl: reqExcl,
+	}, nil
 }
 
 // filterPodsByMode filters pods by mode from pod list
@@ -476,28 +558,6 @@ func filterPodsByMode(pods []v1.Pod, mode v1alpha1.PodMode, value string) ([]v1.
 	default:
 		return nil, fmt.Errorf("mode %s not supported", mode)
 	}
-}
-
-// filterByAnnotations filters a list of pods by a given annotation selector.
-func filterByAnnotations(pods []v1.Pod, annotations labels.Selector) []v1.Pod {
-	// empty filter returns original list
-	if annotations.Empty() {
-		return pods
-	}
-
-	var filteredList []v1.Pod
-
-	for _, pod := range pods {
-		// convert the pod's annotations to an equivalent label selector
-		selector := labels.Set(pod.Annotations)
-
-		// include pod if its annotations match the selector
-		if annotations.Matches(selector) {
-			filteredList = append(filteredList, pod)
-		}
-	}
-
-	return filteredList
 }
 
 // filterByPhaseSet filters a list of pods by a given PodPhase selector.
@@ -580,7 +640,7 @@ func IsAllowedNamespaces(ctx context.Context, c client.Client, namespace string)
 		return false, err
 	}
 
-	if ns.Annotations[injectAnnotationKey] == "enabled" {
+	if ns.Annotations[generic.InjectAnnotationKey] == "enabled" {
 		return true, nil
 	}
 

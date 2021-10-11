@@ -15,6 +15,7 @@ package container
 
 import (
 	"context"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic"
 
 	"go.uber.org/fx"
 	v1 "k8s.io/api/core/v1"
@@ -29,7 +30,7 @@ type SelectImpl struct {
 	c client.Client
 	r client.Reader
 
-	pod.Option
+	generic.Option
 }
 
 type Container struct {
@@ -86,7 +87,7 @@ func New(params Params) *SelectImpl {
 	return &SelectImpl{
 		params.Client,
 		params.Reader,
-		pod.Option{
+		generic.Option{
 			ClusterScoped:         config.ControllerCfg.ClusterScoped,
 			TargetNamespace:       config.ControllerCfg.TargetNamespace,
 			EnableFilterNamespace: config.ControllerCfg.EnableFilterNamespace,
