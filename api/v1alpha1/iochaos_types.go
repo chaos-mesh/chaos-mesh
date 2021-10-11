@@ -34,6 +34,7 @@ type IOChaos struct {
 
 var _ InnerObjectWithCustomStatus = (*IOChaos)(nil)
 var _ InnerObjectWithSelector = (*IOChaos)(nil)
+var _ InnerObject = (*IOChaos)(nil)
 
 // IOChaosSpec defines the desired state of IOChaos
 type IOChaosSpec struct {

@@ -102,7 +102,7 @@ SKIP_DOWN=${SKIP_DOWN:-}
 SKIP_DUMP=${SKIP_DUMP:-}
 SKIP_TEST=${SKIP_TEST:-}
 KIND_DATA_HOSTPATH=${KIND_DATA_HOSTPATH:-none}
-KUBE_VERSION=${KUBE_VERSION:-v1.20.2}
+KUBE_VERSION=${KUBE_VERSION:-v1.20.7}
 KUBE_WORKERS=${KUBE_WORKERS:-3}
 DOCKER_IO_MIRROR=${DOCKER_IO_MIRROR:-}
 GCR_IO_MIRROR=${GCR_IO_MIRROR:-}
@@ -128,17 +128,19 @@ echo "QUAY_IO_MIRROR: $QUAY_IO_MIRROR"
 echo "ARTIFACTS: $ARTIFACTS"
 echo "KUBE_WORKERS: $KUBE_WORKERS"
 
-# https://github.com/kubernetes-sigs/kind/releases/tag/v0.8.1
+# https://github.com/kubernetes-sigs/kind/releases/tag/v0.11.1
 declare -A kind_node_images
 kind_node_images["v1.11.10"]="kindest/node:v1.11.10@sha256:74c8740710649a3abb169e7f348312deff88fc97d74cfb874c5095ab3866bb42"
 kind_node_images["v1.12.10"]="kindest/node:v1.12.10@sha256:faeb82453af2f9373447bb63f50bae02b8020968e0889c7fa308e19b348916cb"
 kind_node_images["v1.13.12"]="kindest/node:v1.13.12@sha256:214476f1514e47fe3f6f54d0f9e24cfb1e4cda449529791286c7161b7f9c08e7"
-kind_node_images["v1.14.10"]="kindest/node:v1.14.10@sha256:6cd43ff41ae9f02bb46c8f455d5323819aec858b99534a290517ebc181b443c6"
-kind_node_images["v1.15.11"]="kindest/node:v1.15.11@sha256:6cc31f3533deb138792db2c7d1ffc36f7456a06f1db5556ad3b6927641016f50"
-kind_node_images["v1.16.9"]="kindest/node:v1.16.9@sha256:7175872357bc85847ec4b1aba46ed1d12fa054c83ac7a8a11f5c268957fd5765"
-kind_node_images["v1.17.5"]="kindest/node:v1.17.5@sha256:ab3f9e6ec5ad8840eeb1f76c89bb7948c77bbf76bcebe1a8b59790b8ae9a283a"
-kind_node_images["v1.18.2"]="kindest/node:v1.18.2@sha256:7b27a6d0f2517ff88ba444025beae41491b016bc6af573ba467b70c5e8e0d85f"
-kind_node_images["v1.20.2"]="kindest/node:v1.20.2@sha256:8f7ea6e7642c0da54f04a7ee10431549c0257315b3a634f6ef2fecaaedb19bab"
+# the following node images support amd64 and arm64
+kind_node_images["v1.14.10"]="kindest/node:v1.14.10@sha256:f8a66ef82822ab4f7569e91a5bccaf27bceee135c1457c512e54de8c6f7219f8"
+kind_node_images["v1.15.12"]="kindest/node:v1.15.12@sha256:b920920e1eda689d9936dfcf7332701e80be12566999152626b2c9d730397a95"
+kind_node_images["v1.16.15"]="kindest/node:v1.16.15@sha256:83067ed51bf2a3395b24687094e283a7c7c865ccc12a8b1d7aa673ba0c5e8861"
+kind_node_images["v1.17.17"]="kindest/node:v1.17.17@sha256:66f1d0d91a88b8a001811e2f1054af60eef3b669a9a74f9b6db871f2f1eeed00"
+kind_node_images["v1.18.19"]="kindest/node:v1.18.19@sha256:7af1492e19b3192a79f606e43c35fb741e520d195f96399284515f077b3b622c"
+kind_node_images["v1.20.7"]="kindest/node:v1.20.7@sha256:cbeaf907fc78ac97ce7b625e4bf0de16e3ea725daf6b04f930bd14c67c671ff9"
+kind_node_images["v1.22.1"]="kindest/node:v1.22.1@sha256:100b3558428386d1372591f8d62add85b900538d94db8e455b66ebaf05a3ca3a"
 
 function e2e::image_build() {
     if [ -n "$SKIP_BUILD" ]; then

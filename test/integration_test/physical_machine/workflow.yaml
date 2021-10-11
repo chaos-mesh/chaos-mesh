@@ -1,0 +1,22 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: Workflow
+metadata:
+  name: workflow-test
+  namespace: chaos-testing
+spec:
+  entry: entry
+  templates:
+    - name: entry
+      templateType: Serial
+      deadline: 1m
+      children:
+        - test
+    - name: test
+      templateType: PhysicalMachineChaos
+      deadline: 1m
+      physicalmachineChaos:
+        action: stress-mem
+        address:
+          - CHAOSD_ADDRESS
+        stress-mem:
+          size: 100MB
