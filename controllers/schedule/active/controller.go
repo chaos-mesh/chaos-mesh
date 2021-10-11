@@ -121,13 +121,15 @@ type Objs struct {
 	Objs []types.Object `group:"objs"`
 }
 
+const controllerName = "schedule-active"
+
 func Bootstrap(mgr ctrl.Manager, client client.Client, log logr.Logger, objs Objs, scheme *runtime.Scheme, lister *utils.ActiveLister, recorderBuilder *recorder.RecorderBuilder) error {
-	if !config.ShouldSpawnController("schedule-active") {
+	if !config.ShouldSpawnController(controllerName) {
 		return nil
 	}
 	builder := builder.Default(mgr).
 		For(&v1alpha1.Schedule{}).
-		Named("schedule-active")
+		Named(controllerName)
 
 	for _, obj := range objs.Objs {
 		// TODO: support workflow
@@ -138,8 +140,8 @@ func Bootstrap(mgr ctrl.Manager, client client.Client, log logr.Logger, objs Obj
 	return builder.Complete(&Reconciler{
 		scheme,
 		client,
-		log.WithName("schedule-active"),
+		log.WithName(controllerName),
 		lister,
-		recorderBuilder.Build("schedule-active"),
+		recorderBuilder.Build(controllerName),
 	})
 }

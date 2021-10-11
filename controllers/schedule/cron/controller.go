@@ -193,18 +193,20 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	return ctrl.Result{}, nil
 }
 
+const controllerName = "schedule-cron"
+
 func Bootstrap(mgr ctrl.Manager, client client.Client, log logr.Logger, lister *utils.ActiveLister, recorderBuilder *recorder.RecorderBuilder) error {
-	if !config.ShouldSpawnController("schedule-cron") {
+	if !config.ShouldSpawnController(controllerName) {
 		return nil
 	}
 
 	return builder.Default(mgr).
 		For(&v1alpha1.Schedule{}).
-		Named("schedule-cron").
+		Named(controllerName).
 		Complete(&Reconciler{
 			client,
-			log.WithName("schedule-cron"),
+			log.WithName(controllerName),
 			lister,
-			recorderBuilder.Build("schedule-cron"),
+			recorderBuilder.Build(controllerName),
 		})
 }
