@@ -20,8 +20,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
+	"github.com/golang/protobuf/ptypes/empty"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
@@ -31,7 +32,7 @@ const (
 )
 
 func (s *DaemonServer) InstallJVMRules(ctx context.Context,
-	req *pb.InstallJVMRulesRequest) (*pb.InstallJVMRulesResponse, error) {
+	req *pb.InstallJVMRulesRequest) (*empty.Empty, error) {
 	log.Info("InstallJVMRules", "request", req)
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
 	if err != nil {
@@ -47,28 +48,30 @@ func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 }
 
 func (s *DaemonServer) installJVMRules(ctx context.Context,
-	req *pb.InstallJVMRulesRequest, pid uint32) (*pb.InstallJVMRulesResponse, error) {
+	req *pb.InstallJVMRulesRequest, pid uint32) (*empty.Empty, error) {
+	bytemanHome := os.Getenv("BYTEMAN_HOME")
+	if len(bytemanHome) == 0 {
+		return nil, fmt.Errorf("environment variable BYTEMAN_HOME not set")
+	}
+
 	// copy agent.jar to container's namespace
 	if req.EnterNS {
-		processBuilder := bpm.DefaultProcessBuilder("sh", "-c", "mkdir -p /usr/local/byteman/lib/ && touch /usr/local/byteman/lib/byteman.jar").SetContext(ctx)
-		processBuilder = processBuilder.SetNS(pid, bpm.MountNS)
-		cmd := processBuilder.Build()
-		output, err := cmd.CombinedOutput()
+		processBuilder := bpm.DefaultProcessBuilder("sh", "-c", fmt.Sprintf("mkdir -p %s/lib/", bytemanHome)).SetContext(ctx).SetNS(pid, bpm.MountNS)
+		output, err := processBuilder.Build().CombinedOutput()
 		if err != nil {
 			return nil, err
 		}
 		if len(output) > 0 {
-			log.Info("touch agent.jar", "output", string(output))
+			log.Info("mkdir", "output", string(output))
 		}
 
-		agentFile, err := os.Open("/usr/local/byteman/lib/byteman.jar")
+		agentFile, err := os.Open(fmt.Sprintf("%s/lib/byteman.jar", bytemanHome))
 		if err != nil {
 			return nil, err
 		}
 		processBuilder = bpm.DefaultProcessBuilder("sh", "-c", "cat > /usr/local/byteman/lib/byteman.jar").SetContext(ctx)
 		processBuilder = processBuilder.SetNS(pid, bpm.MountNS).SetStdin(agentFile)
-		cmd = processBuilder.Build()
-		output, err = cmd.CombinedOutput()
+		output, err = processBuilder.Build().CombinedOutput()
 		if err != nil {
 			return nil, err
 		}
@@ -77,8 +80,7 @@ func (s *DaemonServer) installJVMRules(ctx context.Context,
 		}
 	}
 
-	bmInstallCmd := fmt.Sprintf(bmInstallCommand, 9288, pid)
-
+	bmInstallCmd := fmt.Sprintf(bmInstallCommand, req.Port, pid)
 	processBuilder := bpm.DefaultProcessBuilder("sh", "-c", bmInstallCmd).SetContext(ctx)
 	if req.EnterNS {
 		processBuilder = processBuilder.EnableLocalMnt()
@@ -109,45 +111,41 @@ func (s *DaemonServer) installJVMRules(ctx context.Context,
 		return nil, err
 	}
 
-	bmSubmitCmd := fmt.Sprintf(bmSubmitCommand, 9288, "l", filename)
+	bmSubmitCmd := fmt.Sprintf(bmSubmitCommand, req.Port, "l", filename)
 	processBuilder = bpm.DefaultProcessBuilder("sh", "-c", bmSubmitCmd).SetContext(ctx)
 	if req.EnterNS {
 		processBuilder = processBuilder.SetNS(pid, bpm.NetNS)
 	}
-	cmd = processBuilder.Build()
-	output, err = cmd.CombinedOutput()
+	output, err = processBuilder.Build().CombinedOutput()
 	if err != nil {
 		log.Error(err, string(output))
 		return nil, err
 	}
-
 	if len(output) > 0 {
 		log.Info("submit rules", "output", string(output))
 	}
 
-	return &pb.InstallJVMRulesResponse{}, nil
+	return &empty.Empty{}, nil
 }
 
 func (s *DaemonServer) uninstallJVMRules(ctx context.Context,
-	req *pb.InstallJVMRulesRequest, pid uint32) (*pb.InstallJVMRulesResponse, error) {
+	req *pb.InstallJVMRulesRequest, pid uint32) (*empty.Empty, error) {
 	filename, err := writeDataIntoFile(req.Rule, "rule.btm")
 	if err != nil {
 		return nil, err
 	}
 	log.Info("create btm file", "file", filename)
 
-	bmSubmitCmd := fmt.Sprintf(bmSubmitCommand, 9288, "u", filename)
-
+	bmSubmitCmd := fmt.Sprintf(bmSubmitCommand, req.Port, "u", filename)
 	processBuilder := bpm.DefaultProcessBuilder("sh", "-c", bmSubmitCmd).SetContext(ctx)
 	if req.EnterNS {
 		processBuilder = processBuilder.SetNS(pid, bpm.NetNS)
 	}
-	cmd := processBuilder.Build()
-	output, err := cmd.CombinedOutput()
+	output, err := processBuilder.Build().CombinedOutput()
 	if err != nil {
 		log.Error(err, string(output))
 		if strings.Contains(string(output), "No rule scripts to remove") {
-			return &pb.InstallJVMRulesResponse{}, nil
+			return &empty.Empty{}, nil
 		}
 		return nil, err
 	}
@@ -156,7 +154,7 @@ func (s *DaemonServer) uninstallJVMRules(ctx context.Context,
 		log.Info(string(output))
 	}
 
-	return &pb.InstallJVMRulesResponse{}, nil
+	return &empty.Empty{}, nil
 }
 
 func writeDataIntoFile(data string, filename string) (string, error) {

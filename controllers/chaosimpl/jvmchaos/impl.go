@@ -87,6 +87,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	_, err = decodedContainer.PbClient.InstallJVMRules(ctx, &pb.InstallJVMRulesRequest{
 		ContainerId: decodedContainer.ContainerId,
 		Rule:        jvmChaos.Spec.RuleData,
+		Port:        jvmChaos.Spec.Port,
 		Enable:      true,
 		EnterNS:     true,
 	})
@@ -120,6 +121,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	_, err = decodedContainer.PbClient.InstallJVMRules(ctx, &pb.InstallJVMRulesRequest{
 		ContainerId: decodedContainer.ContainerId,
 		Rule:        jvmChaos.Spec.RuleData,
+		Port:        jvmChaos.Spec.Port,
 		Enable:      false,
 		EnterNS:     true,
 	})

@@ -1219,8 +1219,8 @@ spec:
           description: JVMChaosSpec defines the desired state of JVMChaos
           properties:
             action:
-              description: fault action, values can be latency, exception, return,
-                stress, rule-data, gc
+              description: 'Action defines the specific jvm chaos action. Supported
+                action: latency;return;exception;stress;gc;rule-data'
               enum:
               - latency
               - return
@@ -1269,14 +1269,12 @@ spec:
               - random-max-percent
               type: string
             name:
-              description: rule name, should be unique, and will use JVMChaos' name
-                if not set
+              description: byteman rule name, should be unique, and will use JVMChaos'
+                name if not set
               type: string
-            pid:
-              description: the pid of Java process which need to attach
-              type: integer
             port:
-              description: the port of agent server
+              description: the port of agent server, default 9277
+              format: int32
               type: integer
             rule-data:
               type: string
@@ -4192,8 +4190,8 @@ spec:
               description: JVMChaosSpec defines the desired state of JVMChaos
               properties:
                 action:
-                  description: fault action, values can be latency, exception, return,
-                    stress, rule-data, gc
+                  description: 'Action defines the specific jvm chaos action. Supported
+                    action: latency;return;exception;stress;gc;rule-data'
                   enum:
                   - latency
                   - return
@@ -4242,14 +4240,12 @@ spec:
                   - random-max-percent
                   type: string
                 name:
-                  description: rule name, should be unique, and will use JVMChaos'
+                  description: byteman rule name, should be unique, and will use JVMChaos'
                     name if not set
                   type: string
-                pid:
-                  description: the pid of Java process which need to attach
-                  type: integer
                 port:
-                  description: the port of agent server
+                  description: the port of agent server, default 9277
+                  format: int32
                   type: integer
                 rule-data:
                   type: string
@@ -6448,8 +6444,8 @@ spec:
                         description: JVMChaosSpec defines the desired state of JVMChaos
                         properties:
                           action:
-                            description: fault action, values can be latency, exception,
-                              return, stress, rule-data, gc
+                            description: 'Action defines the specific jvm chaos action.
+                              Supported action: latency;return;exception;stress;gc;rule-data'
                             enum:
                             - latency
                             - return
@@ -6504,14 +6500,12 @@ spec:
                             - random-max-percent
                             type: string
                           name:
-                            description: rule name, should be unique, and will use
-                              JVMChaos' name if not set
+                            description: byteman rule name, should be unique, and
+                              will use JVMChaos' name if not set
                             type: string
-                          pid:
-                            description: the pid of Java process which need to attach
-                            type: integer
                           port:
-                            description: the port of agent server
+                            description: the port of agent server, default 9277
+                            format: int32
                             type: integer
                           rule-data:
                             type: string
@@ -8425,8 +8419,8 @@ spec:
                               JVMChaos
                             properties:
                               action:
-                                description: fault action, values can be latency,
-                                  exception, return, stress, rule-data, gc
+                                description: 'Action defines the specific jvm chaos
+                                  action. Supported action: latency;return;exception;stress;gc;rule-data'
                                 enum:
                                 - latency
                                 - return
@@ -8481,15 +8475,12 @@ spec:
                                 - random-max-percent
                                 type: string
                               name:
-                                description: rule name, should be unique, and will
-                                  use JVMChaos' name if not set
+                                description: byteman rule name, should be unique,
+                                  and will use JVMChaos' name if not set
                                 type: string
-                              pid:
-                                description: the pid of Java process which need to
-                                  attach
-                                type: integer
                               port:
-                                description: the port of agent server
+                                description: the port of agent server, default 9277
+                                format: int32
                                 type: integer
                               rule-data:
                                 type: string
@@ -14619,8 +14610,8 @@ spec:
               description: JVMChaosSpec defines the desired state of JVMChaos
               properties:
                 action:
-                  description: fault action, values can be latency, exception, return,
-                    stress, rule-data, gc
+                  description: 'Action defines the specific jvm chaos action. Supported
+                    action: latency;return;exception;stress;gc;rule-data'
                   enum:
                   - latency
                   - return
@@ -14669,14 +14660,12 @@ spec:
                   - random-max-percent
                   type: string
                 name:
-                  description: rule name, should be unique, and will use JVMChaos'
+                  description: byteman rule name, should be unique, and will use JVMChaos'
                     name if not set
                   type: string
-                pid:
-                  description: the pid of Java process which need to attach
-                  type: integer
                 port:
-                  description: the port of agent server
+                  description: the port of agent server, default 9277
+                  format: int32
                   type: integer
                 rule-data:
                   type: string
@@ -16487,8 +16476,8 @@ spec:
                   description: JVMChaosSpec defines the desired state of JVMChaos
                   properties:
                     action:
-                      description: fault action, values can be latency, exception,
-                        return, stress, rule-data, gc
+                      description: 'Action defines the specific jvm chaos action.
+                        Supported action: latency;return;exception;stress;gc;rule-data'
                       enum:
                       - latency
                       - return
@@ -16538,14 +16527,12 @@ spec:
                       - random-max-percent
                       type: string
                     name:
-                      description: rule name, should be unique, and will use JVMChaos'
-                        name if not set
+                      description: byteman rule name, should be unique, and will use
+                        JVMChaos' name if not set
                       type: string
-                    pid:
-                      description: the pid of Java process which need to attach
-                      type: integer
                     port:
-                      description: the port of agent server
+                      description: the port of agent server, default 9277
+                      format: int32
                       type: integer
                     rule-data:
                       type: string
@@ -18782,8 +18769,8 @@ spec:
                               JVMChaos
                             properties:
                               action:
-                                description: fault action, values can be latency,
-                                  exception, return, stress, rule-data, gc
+                                description: 'Action defines the specific jvm chaos
+                                  action. Supported action: latency;return;exception;stress;gc;rule-data'
                                 enum:
                                 - latency
                                 - return
@@ -18838,15 +18825,12 @@ spec:
                                 - random-max-percent
                                 type: string
                               name:
-                                description: rule name, should be unique, and will
-                                  use JVMChaos' name if not set
+                                description: byteman rule name, should be unique,
+                                  and will use JVMChaos' name if not set
                                 type: string
-                              pid:
-                                description: the pid of Java process which need to
-                                  attach
-                                type: integer
                               port:
-                                description: the port of agent server
+                                description: the port of agent server, default 9277
+                                format: int32
                                 type: integer
                               rule-data:
                                 type: string
@@ -20814,8 +20798,8 @@ spec:
                                   of JVMChaos
                                 properties:
                                   action:
-                                    description: fault action, values can be latency,
-                                      exception, return, stress, rule-data, gc
+                                    description: 'Action defines the specific jvm
+                                      chaos action. Supported action: latency;return;exception;stress;gc;rule-data'
                                     enum:
                                     - latency
                                     - return
@@ -20870,15 +20854,13 @@ spec:
                                     - random-max-percent
                                     type: string
                                   name:
-                                    description: rule name, should be unique, and
-                                      will use JVMChaos' name if not set
+                                    description: byteman rule name, should be unique,
+                                      and will use JVMChaos' name if not set
                                     type: string
-                                  pid:
-                                    description: the pid of Java process which need
-                                      to attach
-                                    type: integer
                                   port:
-                                    description: the port of agent server
+                                    description: the port of agent server, default
+                                      9277
+                                    format: int32
                                     type: integer
                                   rule-data:
                                     type: string
@@ -29664,8 +29646,8 @@ spec:
                     description: JVMChaosSpec defines the desired state of JVMChaos
                     properties:
                       action:
-                        description: fault action, values can be latency, exception,
-                          return, stress, rule-data, gc
+                        description: 'Action defines the specific jvm chaos action.
+                          Supported action: latency;return;exception;stress;gc;rule-data'
                         enum:
                         - latency
                         - return
@@ -29717,14 +29699,12 @@ spec:
                         - random-max-percent
                         type: string
                       name:
-                        description: rule name, should be unique, and will use JVMChaos'
-                          name if not set
+                        description: byteman rule name, should be unique, and will
+                          use JVMChaos' name if not set
                         type: string
-                      pid:
-                        description: the pid of Java process which need to attach
-                        type: integer
                       port:
-                        description: the port of agent server
+                        description: the port of agent server, default 9277
+                        format: int32
                         type: integer
                       rule-data:
                         type: string
@@ -31589,8 +31569,8 @@ spec:
                         description: JVMChaosSpec defines the desired state of JVMChaos
                         properties:
                           action:
-                            description: fault action, values can be latency, exception,
-                              return, stress, rule-data, gc
+                            description: 'Action defines the specific jvm chaos action.
+                              Supported action: latency;return;exception;stress;gc;rule-data'
                             enum:
                             - latency
                             - return
@@ -31645,14 +31625,12 @@ spec:
                             - random-max-percent
                             type: string
                           name:
-                            description: rule name, should be unique, and will use
-                              JVMChaos' name if not set
+                            description: byteman rule name, should be unique, and
+                              will use JVMChaos' name if not set
                             type: string
-                          pid:
-                            description: the pid of Java process which need to attach
-                            type: integer
                           port:
-                            description: the port of agent server
+                            description: the port of agent server, default 9277
+                            format: int32
                             type: integer
                           rule-data:
                             type: string

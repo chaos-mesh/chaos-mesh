@@ -20,6 +20,8 @@ import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
+const DefaultJVMAgentPort int32 = 9277
+
 func (in *JVMChaosSpec) Default(root interface{}, field *reflect.StructField) {
 	if in == nil {
 		return
@@ -28,6 +30,10 @@ func (in *JVMChaosSpec) Default(root interface{}, field *reflect.StructField) {
 	jvmChaos := root.(*JVMChaos)
 	if len(in.Name) == 0 {
 		in.Name = jvmChaos.Name
+	}
+
+	if in.Port == 0 {
+		in.Port = DefaultJVMAgentPort
 	}
 }
 

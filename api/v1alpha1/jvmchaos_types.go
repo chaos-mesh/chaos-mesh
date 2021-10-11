@@ -62,7 +62,7 @@ const (
 // JVMParameter represents the detail about jvm chaos action definition
 type JVMParameter struct {
 	// +optional
-	// rule name, should be unique, and will use JVMChaos' name if not set
+	// byteman rule name, should be unique, and will use JVMChaos' name if not set
 	Name string `json:"name"`
 
 	// +optional
@@ -72,10 +72,6 @@ type JVMParameter struct {
 	// +optional
 	// the method in Java class
 	Method string `json:"method"`
-
-	// +optional
-	// fault action, values can be latency, exception, return, stress, rule-data, gc
-	Action string `json:"action"`
 
 	// +optional
 	// the return value for action 'return'
@@ -98,12 +94,8 @@ type JVMParameter struct {
 	MemoryType string `json:"mem-type"`
 
 	// +optional
-	// the port of agent server
-	Port int `json:"port"`
-
-	// +optional
-	// the pid of Java process which need to attach
-	Pid int `json:"pid"`
+	// the port of agent server, default 9277
+	Port int32 `json:"port"`
 
 	// +optional
 	RuleData string `json:"rule-data"`
