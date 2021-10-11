@@ -137,7 +137,7 @@ func validateTemplate(path *field.Path, template Template, allTemplates []Templa
 		result = append(result, shouldBeNoConditionalBranches(path, template)...)
 		result = append(result, shouldBeNoSchedule(path, template)...)
 
-		result = append(result, template.EmbedChaos.Validate(string(templateType))...)
+		result = append(result, template.EmbedChaos.Validate(path, string(templateType))...)
 	default:
 		result = append(result, field.Invalid(path.Child("templateType"), template.Type, fmt.Sprintf("unrecognized template type: %s", template.Type)))
 	}
