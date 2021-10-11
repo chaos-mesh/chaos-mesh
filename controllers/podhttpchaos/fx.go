@@ -25,13 +25,17 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/types"
+	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
 )
 
-func NewController(mgr ctrl.Manager, client client.Client, logger logr.Logger, b *chaosdaemon.ChaosDaemonClientBuilder) (types.Controller, error) {
-	err := builder.Default(mgr).
+func Bootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, b *chaosdaemon.ChaosDaemonClientBuilder) error {
+	if !config.ShouldSpawnController("podhttpchaos") {
+		return nil
+	}
+
+	return builder.Default(mgr).
 		For(&v1alpha1.PodHttpChaos{}).
 		Named("podhttpchaos").
 		WithEventFilter(predicate.Funcs{
@@ -48,9 +52,4 @@ func NewController(mgr ctrl.Manager, client client.Client, logger logr.Logger, b
 			Recorder:                 mgr.GetEventRecorderFor("podhttpchaos"),
 			ChaosDaemonClientBuilder: b,
 		})
-	if err != nil {
-		return "", err
-	}
-
-	return "podhttpchaos", nil
 }

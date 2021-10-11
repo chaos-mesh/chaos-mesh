@@ -21,6 +21,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
@@ -32,11 +33,16 @@ type Objs struct {
 	Objs []types.Object `group:"objs"`
 }
 
-func NewController(mgr ctrl.Manager, client client.Client, logger logr.Logger, recorderBuilder *recorder.RecorderBuilder, pairs Objs) (types.Controller, error) {
+func Bootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, recorderBuilder *recorder.RecorderBuilder, pairs Objs) error {
 	for _, obj := range pairs.Objs {
+		name := obj.Name + "-finalizers"
+		if !ccfg.ShouldSpawnController(name) {
+			return nil
+		}
+
 		err := builder.Default(mgr).
 			For(obj.Object).
-			Named(obj.Name + "-finalizers").
+			Named(name).
 			Complete(&Reconciler{
 				Object:   obj.Object,
 				Client:   client,
@@ -44,10 +50,10 @@ func NewController(mgr ctrl.Manager, client client.Client, logger logr.Logger, r
 				Log:      logger.WithName("finalizers"),
 			})
 		if err != nil {
-			return "", err
+			return err
 		}
 
 	}
 
-	return "finalizers", nil
+	return nil
 }

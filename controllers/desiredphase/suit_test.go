@@ -86,12 +86,7 @@ var _ = BeforeSuite(func() {
 	app = fx.New(
 		fx.Options(
 			test.Module,
-			fx.Provide(
-				fx.Annotated{
-					Group:  "controller",
-					Target: NewController,
-				},
-			),
+			fx.Invoke(Bootstrap),
 			fx.Supply(config),
 			types.ChaosObjects,
 		),

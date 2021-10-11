@@ -29,8 +29,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/utils"
-	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 )
@@ -111,15 +111,19 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	return ctrl.Result{}, nil
 }
 
-func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger, lister *utils.ActiveLister, recorderBuilder *recorder.RecorderBuilder) (types.Controller, error) {
-	builder.Default(mgr).
+const controllerName = "schedule-pause"
+
+func Bootstrap(mgr ctrl.Manager, client client.Client, log logr.Logger, lister *utils.ActiveLister, recorderBuilder *recorder.RecorderBuilder) error {
+	if !config.ShouldSpawnController(controllerName) {
+		return nil
+	}
+	return builder.Default(mgr).
 		For(&v1alpha1.Schedule{}).
-		Named("schedule-pause").
+		Named(controllerName).
 		Complete(&Reconciler{
 			client,
-			log.WithName("schedule-pause"),
+			log.WithName(controllerName),
 			lister,
-			recorderBuilder.Build("schedule-pause"),
+			recorderBuilder.Build(controllerName),
 		})
-	return "schedule-pause", nil
 }

@@ -40,7 +40,7 @@ import (
 
 var app *fx.App
 var kubeClient client.Client
-var config *rest.Config
+var restConfig *rest.Config
 var testEnv *envtest.Environment
 var setupLog = ctrl.Log.WithName("setup")
 
@@ -71,18 +71,18 @@ var _ = BeforeSuite(func() {
 	err := v1alpha1.SchemeBuilder.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 
-	config, err = testEnv.Start()
+	restConfig, err = testEnv.Start()
 	Expect(err).ToNot(HaveOccurred())
-	Expect(config).ToNot(BeNil())
+	Expect(restConfig).ToNot(BeNil())
 
-	kubeClient, err = client.New(config, client.Options{Scheme: scheme.Scheme})
+	kubeClient, err = client.New(restConfig, client.Options{Scheme: scheme.Scheme})
 	Expect(err).ToNot(HaveOccurred())
 	Expect(kubeClient).ToNot(BeNil())
 
 	app = fx.New(
 		fx.Options(
 			test.Module,
-			fx.Supply(config),
+			fx.Supply(restConfig),
 			types.ChaosObjects,
 		),
 		// only startup workflow related

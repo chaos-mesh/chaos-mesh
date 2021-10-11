@@ -23,10 +23,15 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 )
 
 func BootstrapWorkflowControllers(mgr manager.Manager, logger logr.Logger, recorderBuilder *recorder.RecorderBuilder) error {
+	if !config.ShouldSpawnController("workflow") {
+		return nil
+	}
+
 	noCacheClient, err := client.New(mgr.GetConfig(), client.Options{
 		Scheme: mgr.GetScheme(),
 		Mapper: mgr.GetRESTMapper(),

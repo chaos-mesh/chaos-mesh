@@ -94,8 +94,7 @@ type RunParams struct {
 	AuthCli             *authorizationv1.AuthorizationV1Client
 	DaemonClientBuilder *chaosdaemon.ChaosDaemonClientBuilder
 
-	Controllers []types.Controller `group:"controller"`
-	Objs        []types.Object     `group:"objs"`
+	Objs []types.Object `group:"objs"`
 }
 
 func Run(params RunParams) error {
@@ -104,6 +103,10 @@ func Run(params RunParams) error {
 
 	var err error
 	for _, obj := range params.Objs {
+		if !ccfg.ShouldStartWebhook(obj.Name) {
+			continue
+		}
+
 		err = ctrl.NewWebhookManagedBy(mgr).
 			For(obj.Object).
 			Complete()
@@ -112,20 +115,23 @@ func Run(params RunParams) error {
 		}
 	}
 
-	// setup schedule webhook
-	err = ctrl.NewWebhookManagedBy(mgr).
-		For(&v1alpha1.Schedule{}).
-		Complete()
-	if err != nil {
-		return err
+	if ccfg.ShouldStartWebhook("schedule") {
+		// setup schedule webhook
+		err = ctrl.NewWebhookManagedBy(mgr).
+			For(&v1alpha1.Schedule{}).
+			Complete()
+		if err != nil {
+			return err
+		}
 	}
 
-	// setup workflow webhook
-	err = ctrl.NewWebhookManagedBy(mgr).
-		For(&v1alpha1.Workflow{}).
-		Complete()
-	if err != nil {
-		return err
+	if ccfg.ShouldStartWebhook("workflow") {
+		err = ctrl.NewWebhookManagedBy(mgr).
+			For(&v1alpha1.Workflow{}).
+			Complete()
+		if err != nil {
+			return err
+		}
 	}
 
 	// Init metrics collector

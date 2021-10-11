@@ -22,6 +22,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
 )
@@ -32,14 +33,19 @@ type Objs struct {
 	Objs []types.Object `group:"objs"`
 }
 
-func NewController(mgr ctrl.Manager, client client.Client, logger logr.Logger, objs Objs) (types.Controller, error) {
+func Bootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, objs Objs) error {
 	setupLog := logger.WithName("setup-condition")
 	for _, obj := range objs.Objs {
+		name := obj.Name + "-condition"
+		if !config.ShouldSpawnController(name) {
+			return nil
+		}
+
 		setupLog.Info("setting up controller", "resource-name", obj.Name)
 
 		err := builder.Default(mgr).
 			For(obj.Object).
-			Named(obj.Name + "-condition").
+			Named(name).
 			Complete(&Reconciler{
 				Object:   obj.Object,
 				Client:   client,
@@ -47,10 +53,10 @@ func NewController(mgr ctrl.Manager, client client.Client, logger logr.Logger, o
 				Log:      logger.WithName("condition"),
 			})
 		if err != nil {
-			return "", err
+			return err
 		}
 
 	}
 
-	return "condition", nil
+	return nil
 }

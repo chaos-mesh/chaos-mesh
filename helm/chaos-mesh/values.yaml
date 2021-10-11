@@ -89,6 +89,14 @@ controllerManager:
 
   podAnnotations: {}
 
+  # A list of controllers to enable. "*" enables all controllers by default.
+  enabledControllers:
+  - "*" 
+
+  # A list of webhooks to enable. "*" enables all webhooks by default.
+  enabledWebhooks:
+  - "*"
+
   # This is Dangerous. Run only on temporary clusters.
   allowHostNetworkTesting: false
 
