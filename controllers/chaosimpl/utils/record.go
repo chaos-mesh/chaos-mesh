@@ -52,9 +52,6 @@ func (d *ContianerRecordDecoder) DecodeContainerRecord(ctx context.Context, reco
 		err = NewFailToFindContainer(pod.Namespace, pod.Name, containerName, err)
 		return
 	}
-	if d.Client == nil {
-		return
-	}
 	err = d.Client.Get(ctx, podId, &pod)
 	if err != nil {
 		// TODO: organize the error in a better way
