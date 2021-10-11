@@ -27,11 +27,11 @@ type ScheduleItem struct {
 
 func (in EmbedChaos) Validate(path *field.Path, chaosType string) field.ErrorList {
 	var allErrors field.ErrorList
+	gw.Default(&in)
 	root, err := in.SpawnNewObject(TemplateType(chaosType))
 	if err != nil {
 		allErrors = append(allErrors, field.Invalid(path, in, err.Error()))
 		return allErrors
 	}
-	gw.Default(root)
 	return gw.Validate(root)
 }
