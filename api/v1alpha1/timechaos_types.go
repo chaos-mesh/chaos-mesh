@@ -18,7 +18,7 @@ import (
 )
 
 // +kubebuilder:object:root=true
-// +chaos-mesh:base
+// +chaos-mesh:experiment
 
 // TimeChaos is the Schema for the timechaos API
 type TimeChaos struct {

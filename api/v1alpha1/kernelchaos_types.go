@@ -18,7 +18,7 @@ import (
 )
 
 // +kubebuilder:object:root=true
-// +chaos-mesh:base
+// +chaos-mesh:experiment
 
 // KernelChaos is the Schema for the kernelchaos API
 type KernelChaos struct {

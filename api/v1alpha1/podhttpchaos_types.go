@@ -179,10 +179,10 @@ const (
 	PodHttpResponse PodHttpChaosTarget = "Response"
 )
 
-const KindPodHttpChaos = "PodHttpChaos"
-
 // +kubebuilder:object:root=true
 
+// +chaos-mesh:base
+// +chaos-mesh:webhook:enableUpdate
 // +kubebuilder:subresource:status
 // PodHttpChaos is the Schema for the podhttpchaos API
 type PodHttpChaos struct {
@@ -200,8 +200,4 @@ type PodHttpChaosList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []PodHttpChaos `json:"items"`
-}
-
-func init() {
-	SchemeBuilder.Register(&PodHttpChaos{}, &PodHttpChaosList{})
 }
