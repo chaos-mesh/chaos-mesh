@@ -26,3 +26,8 @@ header:
     - 'test/integration_test/utils/check_contains'
     - 'ui/.prettierrc'
     - 'ui/src/setupProxy.js'
+    # skip auto-generated files
+    - 'manifests/crd-v1beta1.yaml'
+    - 'manifests/crd.yaml'
+    - 'helm/chaos-mesh/crds/*'
+    - 'config/**'
