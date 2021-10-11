@@ -23,7 +23,7 @@ import (
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
 // +kubebuilder:object:root=true
-// +chaos-mesh:base
+// +chaos-mesh:experiment
 
 // IOChaos is the Schema for the iochaos API
 type IOChaos struct {

@@ -20,7 +20,7 @@ import (
 )
 
 // +kubebuilder:object:root=true
-// +chaos-mesh:base
+// +chaos-mesh:experiment
 
 // HTTPChaos is the Schema for the HTTPchaos API
 type HTTPChaos struct {

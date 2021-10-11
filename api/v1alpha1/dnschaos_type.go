@@ -37,7 +37,7 @@ const (
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
 // +kubebuilder:object:root=true
-// +chaos-mesh:base
+// +chaos-mesh:experiment
 
 // DNSChaos is the Schema for the networkchaos API
 type DNSChaos struct {

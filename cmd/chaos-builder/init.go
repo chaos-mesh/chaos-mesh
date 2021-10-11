@@ -22,13 +22,15 @@ import (
 
 const initTemplate = `
 	SchemeBuilder.Register(&{{.Type}}{}, &{{.Type}}List{})
+{{- if .IsExperiment}}
 	all.register(Kind{{.Type}}, &ChaosKind{
 		chaos: &{{.Type}}{},
 		list:  &{{.Type}}List{},
 	})
+{{- end}}
 `
 
-func generateInit(name string) string {
+func generateInit(name string, isExperiment bool) string {
 	tmpl, err := template.New("ini").Parse(initTemplate)
 	if err != nil {
 		log.Error(err, "fail to build template")
@@ -37,7 +39,8 @@ func generateInit(name string) string {
 
 	buf := new(bytes.Buffer)
 	err = tmpl.Execute(buf, &metadata{
-		Type: name,
+		Type:         name,
+		IsExperiment: isExperiment,
 	})
 	if err != nil {
 		log.Error(err, "fail to execute template")

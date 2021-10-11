@@ -140,7 +140,7 @@ type JVMChaosStatus struct {
 }
 
 // +kubebuilder:object:root=true
-// +chaos-mesh:base
+// +chaos-mesh:experiment
 
 // JVMChaos is the Schema for the jvmchaos API
 type JVMChaos struct {
