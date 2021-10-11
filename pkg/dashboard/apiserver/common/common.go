@@ -143,7 +143,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 // @Description Get pods from Kubernetes cluster.
 // @Tags common
 // @Produce json
-// @Param request body core.SelectorInfo true "Request body"
+// @Param request body v1alpha1.PodSelectorSpec true "Request body"
 // @Success 200 {array} Pod
 // @Router /common/pods [post]
 // @Failure 500 {object} utils.APIError
