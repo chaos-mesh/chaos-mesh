@@ -62,7 +62,7 @@ main() {
     local local_kube=""
     local cm_version="latest"
     local kind_name="kind"
-    local kind_version="v0.7.0"
+    local kind_version="v0.11.1"
     local node_num=3
     local k8s_version="v1.17.2"
     local volume_num=5
@@ -1400,6 +1400,10 @@ spec:
             value: !!str 31767
           - name: BPFKI_PORT
             value: !!str 50051
+          - name: ENABLED_CONTROLLERS
+            value: "*"
+          - name: ENABLED_WEBHOOKS
+            value: "*"
           - name: TEMPLATE_LABELS
             value: "app.kubernetes.io/component:template"
           - name: CONFIGMAP_LABELS

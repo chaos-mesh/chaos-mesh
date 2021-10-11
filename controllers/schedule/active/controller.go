@@ -29,6 +29,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/utils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
@@ -120,10 +121,15 @@ type Objs struct {
 	Objs []types.Object `group:"objs"`
 }
 
-func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger, objs Objs, scheme *runtime.Scheme, lister *utils.ActiveLister, recorderBuilder *recorder.RecorderBuilder) (types.Controller, error) {
+const controllerName = "schedule-active"
+
+func Bootstrap(mgr ctrl.Manager, client client.Client, log logr.Logger, objs Objs, scheme *runtime.Scheme, lister *utils.ActiveLister, recorderBuilder *recorder.RecorderBuilder) error {
+	if !config.ShouldSpawnController(controllerName) {
+		return nil
+	}
 	builder := builder.Default(mgr).
 		For(&v1alpha1.Schedule{}).
-		Named("schedule-active")
+		Named(controllerName)
 
 	for _, obj := range objs.Objs {
 		// TODO: support workflow
@@ -131,12 +137,11 @@ func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger, objs
 	}
 	builder = builder.Owns(&v1alpha1.Workflow{})
 
-	builder.Complete(&Reconciler{
+	return builder.Complete(&Reconciler{
 		scheme,
 		client,
-		log.WithName("schedule-active"),
+		log.WithName(controllerName),
 		lister,
-		recorderBuilder.Build("schedule-active"),
+		recorderBuilder.Build(controllerName),
 	})
-	return "schedule-active", nil
 }
