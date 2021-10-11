@@ -20,7 +20,7 @@ import (
 )
 
 // +kubebuilder:object:root=true
-// +chaos-mesh:base
+// +chaos-mesh:experiment
 // +chaos-mesh:oneshot=in.Spec.Action==NodeReset
 
 // GCPChaos is the Schema for the gcpchaos API

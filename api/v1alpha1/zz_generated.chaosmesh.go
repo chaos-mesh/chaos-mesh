@@ -123,13 +123,11 @@ func (in *AWSChaos) DurationExceeded(now time.Time) (bool, time.Duration, error)
 }
 
 func (in *AWSChaos) IsOneShot() bool {
-	
 	if in.Spec.Action==Ec2Restart {
 		return true
 	}
 
 	return false
-	
 }
 
 var AWSChaosWebhookLog = logf.Log.WithName("AWSChaos-resource")
@@ -262,9 +260,7 @@ func (in *DNSChaos) DurationExceeded(now time.Time) (bool, time.Duration, error)
 }
 
 func (in *DNSChaos) IsOneShot() bool {
-	
 	return false
-	
 }
 
 var DNSChaosWebhookLog = logf.Log.WithName("DNSChaos-resource")
@@ -397,13 +393,11 @@ func (in *GCPChaos) DurationExceeded(now time.Time) (bool, time.Duration, error)
 }
 
 func (in *GCPChaos) IsOneShot() bool {
-	
 	if in.Spec.Action==NodeReset {
 		return true
 	}
 
 	return false
-	
 }
 
 var GCPChaosWebhookLog = logf.Log.WithName("GCPChaos-resource")
@@ -536,9 +530,7 @@ func (in *HTTPChaos) DurationExceeded(now time.Time) (bool, time.Duration, error
 }
 
 func (in *HTTPChaos) IsOneShot() bool {
-	
 	return false
-	
 }
 
 var HTTPChaosWebhookLog = logf.Log.WithName("HTTPChaos-resource")
@@ -671,9 +663,7 @@ func (in *IOChaos) DurationExceeded(now time.Time) (bool, time.Duration, error) 
 }
 
 func (in *IOChaos) IsOneShot() bool {
-	
 	return false
-	
 }
 
 var IOChaosWebhookLog = logf.Log.WithName("IOChaos-resource")
@@ -806,9 +796,7 @@ func (in *JVMChaos) DurationExceeded(now time.Time) (bool, time.Duration, error)
 }
 
 func (in *JVMChaos) IsOneShot() bool {
-	
 	return false
-	
 }
 
 var JVMChaosWebhookLog = logf.Log.WithName("JVMChaos-resource")
@@ -941,9 +929,7 @@ func (in *KernelChaos) DurationExceeded(now time.Time) (bool, time.Duration, err
 }
 
 func (in *KernelChaos) IsOneShot() bool {
-	
 	return false
-	
 }
 
 var KernelChaosWebhookLog = logf.Log.WithName("KernelChaos-resource")
@@ -1076,9 +1062,7 @@ func (in *NetworkChaos) DurationExceeded(now time.Time) (bool, time.Duration, er
 }
 
 func (in *NetworkChaos) IsOneShot() bool {
-	
 	return false
-	
 }
 
 var NetworkChaosWebhookLog = logf.Log.WithName("NetworkChaos-resource")
@@ -1211,9 +1195,7 @@ func (in *PhysicalMachineChaos) DurationExceeded(now time.Time) (bool, time.Dura
 }
 
 func (in *PhysicalMachineChaos) IsOneShot() bool {
-	
 	return false
-	
 }
 
 var PhysicalMachineChaosWebhookLog = logf.Log.WithName("PhysicalMachineChaos-resource")
@@ -1346,13 +1328,11 @@ func (in *PodChaos) DurationExceeded(now time.Time) (bool, time.Duration, error)
 }
 
 func (in *PodChaos) IsOneShot() bool {
-	
 	if in.Spec.Action==PodKillAction || in.Spec.Action==ContainerKillAction {
 		return true
 	}
 
 	return false
-	
 }
 
 var PodChaosWebhookLog = logf.Log.WithName("PodChaos-resource")
@@ -1389,6 +1369,114 @@ func (in *PodChaos) Validate() error {
 var _ webhook.Defaulter = &PodChaos{}
 
 func (in *PodChaos) Default() {
+	gw.Default(in)
+}
+
+const KindPodHttpChaos = "PodHttpChaos"
+
+var PodHttpChaosWebhookLog = logf.Log.WithName("PodHttpChaos-resource")
+
+func (in *PodHttpChaos) ValidateCreate() error {
+	PodHttpChaosWebhookLog.Info("validate create", "name", in.Name)
+	return in.Validate()
+}
+
+// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
+func (in *PodHttpChaos) ValidateUpdate(old runtime.Object) error {
+	PodHttpChaosWebhookLog.Info("validate update", "name", in.Name)
+	return in.Validate()
+}
+
+// ValidateDelete implements webhook.Validator so a webhook will be registered for the type
+func (in *PodHttpChaos) ValidateDelete() error {
+	PodHttpChaosWebhookLog.Info("validate delete", "name", in.Name)
+
+	// Nothing to do?
+	return nil
+}
+
+var _ webhook.Validator = &PodHttpChaos{}
+
+func (in *PodHttpChaos) Validate() error {
+	errs := gw.Validate(in)
+	return gw.Aggregate(errs)
+}
+
+var _ webhook.Defaulter = &PodHttpChaos{}
+
+func (in *PodHttpChaos) Default() {
+	gw.Default(in)
+}
+
+const KindPodIOChaos = "PodIOChaos"
+
+var PodIOChaosWebhookLog = logf.Log.WithName("PodIOChaos-resource")
+
+func (in *PodIOChaos) ValidateCreate() error {
+	PodIOChaosWebhookLog.Info("validate create", "name", in.Name)
+	return in.Validate()
+}
+
+// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
+func (in *PodIOChaos) ValidateUpdate(old runtime.Object) error {
+	PodIOChaosWebhookLog.Info("validate update", "name", in.Name)
+	return in.Validate()
+}
+
+// ValidateDelete implements webhook.Validator so a webhook will be registered for the type
+func (in *PodIOChaos) ValidateDelete() error {
+	PodIOChaosWebhookLog.Info("validate delete", "name", in.Name)
+
+	// Nothing to do?
+	return nil
+}
+
+var _ webhook.Validator = &PodIOChaos{}
+
+func (in *PodIOChaos) Validate() error {
+	errs := gw.Validate(in)
+	return gw.Aggregate(errs)
+}
+
+var _ webhook.Defaulter = &PodIOChaos{}
+
+func (in *PodIOChaos) Default() {
+	gw.Default(in)
+}
+
+const KindPodNetworkChaos = "PodNetworkChaos"
+
+var PodNetworkChaosWebhookLog = logf.Log.WithName("PodNetworkChaos-resource")
+
+func (in *PodNetworkChaos) ValidateCreate() error {
+	PodNetworkChaosWebhookLog.Info("validate create", "name", in.Name)
+	return in.Validate()
+}
+
+// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
+func (in *PodNetworkChaos) ValidateUpdate(old runtime.Object) error {
+	PodNetworkChaosWebhookLog.Info("validate update", "name", in.Name)
+	return in.Validate()
+}
+
+// ValidateDelete implements webhook.Validator so a webhook will be registered for the type
+func (in *PodNetworkChaos) ValidateDelete() error {
+	PodNetworkChaosWebhookLog.Info("validate delete", "name", in.Name)
+
+	// Nothing to do?
+	return nil
+}
+
+var _ webhook.Validator = &PodNetworkChaos{}
+
+func (in *PodNetworkChaos) Validate() error {
+	errs := gw.Validate(in)
+	return gw.Aggregate(errs)
+}
+
+var _ webhook.Defaulter = &PodNetworkChaos{}
+
+func (in *PodNetworkChaos) Default() {
 	gw.Default(in)
 }
 
@@ -1485,9 +1573,7 @@ func (in *StressChaos) DurationExceeded(now time.Time) (bool, time.Duration, err
 }
 
 func (in *StressChaos) IsOneShot() bool {
-	
 	return false
-	
 }
 
 var StressChaosWebhookLog = logf.Log.WithName("StressChaos-resource")
@@ -1620,9 +1706,7 @@ func (in *TimeChaos) DurationExceeded(now time.Time) (bool, time.Duration, error
 }
 
 func (in *TimeChaos) IsOneShot() bool {
-	
 	return false
-	
 }
 
 var TimeChaosWebhookLog = logf.Log.WithName("TimeChaos-resource")
@@ -1723,6 +1807,12 @@ func init() {
 		chaos: &PodChaos{},
 		list:  &PodChaosList{},
 	})
+
+	SchemeBuilder.Register(&PodHttpChaos{}, &PodHttpChaosList{})
+
+	SchemeBuilder.Register(&PodIOChaos{}, &PodIOChaosList{})
+
+	SchemeBuilder.Register(&PodNetworkChaos{}, &PodNetworkChaosList{})
 
 	SchemeBuilder.Register(&StressChaos{}, &StressChaosList{})
 	all.register(KindStressChaos, &ChaosKind{

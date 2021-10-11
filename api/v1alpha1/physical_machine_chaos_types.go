@@ -23,7 +23,7 @@ import (
 type PhysicalMachineChaosAction string
 
 // +kubebuilder:object:root=true
-// +chaos-mesh:base
+// +chaos-mesh:experiment
 
 // PhysicalMachineChaos is the Schema for the physical machine chaos API
 type PhysicalMachineChaos struct {
