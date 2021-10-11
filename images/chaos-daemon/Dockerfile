@@ -6,7 +6,7 @@ ARG HTTP_PROXY
 ENV http_proxy $HTTP_PROXY
 ENV https_proxy $HTTPS_PROXY
 
-RUN apt-get update && \
+RUN apt-get update && \ 
     apt-get install -y tzdata iptables ipset stress-ng iproute2 fuse util-linux procps curl && \
     rm -rf /var/lib/apt/lists/*
 
