@@ -65,6 +65,10 @@ spec:
             value: !!str {{ .Values.chaosDaemon.grpcPort }}
           - name: BPFKI_PORT
             value: !!str {{ .Values.bpfki.grpcPort }}
+          - name: ENABLED_CONTROLLERS
+            value: {{ .Values.controllerManager.enabledControllers | join "," | quote }}
+          - name: ENABLED_WEBHOOKS
+            value: {{ .Values.controllerManager.enabledWebhooks | join "," | quote }}
           - name: TEMPLATE_LABELS
             value: "app.kubernetes.io/component:template"
           - name: CONFIGMAP_LABELS

@@ -1400,6 +1400,10 @@ spec:
             value: !!str 31767
           - name: BPFKI_PORT
             value: !!str 50051
+          - name: ENABLED_CONTROLLERS
+            value: "*"
+          - name: ENABLED_WEBHOOKS
+            value: "*"
           - name: TEMPLATE_LABELS
             value: "app.kubernetes.io/component:template"
           - name: CONFIGMAP_LABELS
