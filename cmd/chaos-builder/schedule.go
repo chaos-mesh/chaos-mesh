@@ -16,7 +16,7 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"text/template"
+	"html/template"
 )
 
 const scheduleTemplate = `

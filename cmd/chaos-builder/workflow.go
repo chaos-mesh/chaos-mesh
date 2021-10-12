@@ -17,7 +17,7 @@ import (
 	"bytes"
 	"fmt"
 	"strings"
-	"text/template"
+	"html/template"
 
 	"github.com/iancoleman/strcase"
 )

@@ -15,7 +15,7 @@ package main
 
 import (
 	"bytes"
-	"text/template"
+	"html/template"
 )
 
 const testImport = `
