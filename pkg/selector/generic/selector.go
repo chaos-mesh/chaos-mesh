@@ -22,40 +22,34 @@ type Option struct {
 type ListFunc func(ctx context.Context, list client.ObjectList, opts ...client.ListOption) error
 
 type List interface {
-	AddListOption(client.ListOptions) (client.ListOptions, error)
+	AddListOption(client.ListOptions) client.ListOptions
 	SetListFunc(ListFunc) ListFunc
 }
 
 type Selector interface {
-	Match(client.Object) (bool, error)
+	Match(client.Object) bool
 }
 
-func ListObjects(c client.Client, lists []List) {
+func ListObjects(c client.Client, lists []List,
+	listObj func(listFunc ListFunc, opts client.ListOptions) error) error {
 	opts := client.ListOptions{}
 	listF := c.List
 
-	var err error
 	for _, list := range lists {
-		opts, err = list.AddListOption(opts)
-		if err != nil {
-			return
-		}
+		opts = list.AddListOption(opts)
 		listF = list.SetListFunc(listF)
 	}
 
+	return listObj(listF, opts)
 }
 
 func Filter(objs []client.Object, selectors []Selector) ([]client.Object, error) {
 	filterObjs := make([]client.Object, 0, len(objs))
 
-	var err error
 	for _, obj := range objs {
 		var ok bool
 		for _, selector := range selectors {
-			ok, err = selector.Match(obj)
-			if err != nil {
-				return nil, err
-			}
+			ok = selector.Match(obj)
 			if !ok {
 				break
 			}
@@ -71,17 +65,17 @@ type labelSelector struct {
 	selector labels.Selector
 }
 
-func (s *labelSelector) AddListOption(opts client.ListOptions) (client.ListOptions, error) {
+func (s *labelSelector) AddListOption(opts client.ListOptions) client.ListOptions {
 	opts.LabelSelector = s.selector
-	return opts, nil
+	return opts
 }
 
 func (s *labelSelector) SetListFunc(f ListFunc) ListFunc {
 	return f
 }
 
-func (s *labelSelector) Match(obj client.Object) (bool, error) {
-	return true, nil
+func (s *labelSelector) Match(obj client.Object) bool {
+	return true
 }
 
 func ParseLabelSelector(labels map[string]string, expressions v1alpha1.LabelSelectorRequirements) (Selector, error) {
@@ -104,11 +98,11 @@ type fieldSelector struct {
 	r              client.Reader
 }
 
-func (s *fieldSelector) AddListOption(opts client.ListOptions) (client.ListOptions, error) {
+func (s *fieldSelector) AddListOption(opts client.ListOptions) client.ListOptions {
 	if len(s.FieldSelectors) > 0 {
 		opts.FieldSelector = fields.SelectorFromSet(s.FieldSelectors)
 	}
-	return opts, nil
+	return opts
 }
 
 func (s *fieldSelector) SetListFunc(f ListFunc) ListFunc {
@@ -120,8 +114,8 @@ func (s *fieldSelector) SetListFunc(f ListFunc) ListFunc {
 	return f
 }
 
-func (s *fieldSelector) Match(obj client.Object) (bool, error) {
-	return true, nil
+func (s *fieldSelector) Match(obj client.Object) bool {
+	return true
 }
 
 func ParseFieldSelector() (Selector, error) {
@@ -133,21 +127,21 @@ type annotationSelector struct {
 	labels.Selector
 }
 
-func (s *annotationSelector) AddListOption(opts client.ListOptions) (client.ListOptions, error) {
-	return opts, nil
+func (s *annotationSelector) AddListOption(opts client.ListOptions) client.ListOptions {
+	return opts
 }
 
 func (s *annotationSelector) SetListFunc(f ListFunc) ListFunc {
 	return f
 }
 
-func (s *annotationSelector) Match(obj client.Object) (bool, error) {
+func (s *annotationSelector) Match(obj client.Object) bool {
 	// TODO fix
 	if s.Empty() {
-		return true, nil
+		return true
 	}
 	annotations := labels.Set(obj.GetAnnotations())
-	return s.Matches(annotations), nil
+	return s.Matches(annotations)
 }
 
 func ParseAnnotationSelector(selectors map[string]string) (Selector, error) {
@@ -163,33 +157,33 @@ type namespaceSelector struct {
 	Option
 }
 
-func (s *namespaceSelector) AddListOption(opts client.ListOptions) (client.ListOptions, error) {
+func (s *namespaceSelector) AddListOption(opts client.ListOptions) client.ListOptions {
 	if !s.ClusterScoped {
 		opts.Namespace = s.TargetNamespace
 	}
-	return opts, nil
+	return opts
 }
 
 func (s *namespaceSelector) SetListFunc(f ListFunc) ListFunc {
 	return f
 }
 
-func (s *namespaceSelector) Match(obj client.Object) (bool, error) {
-
-	return false, nil
+func (s *namespaceSelector) Match(obj client.Object) bool {
+	return true
 }
 
-func ParseNamespaceSelector(nodeNames []string, selectors map[string]string,
+func ParseNamespaceSelector(namespaces []string,
 	clusterScoped bool, targetNamespace string, enableFilterNamespace bool) (Selector, error) {
 	if !clusterScoped {
-		if len(nodeNames) > 1 {
+		if len(namespaces) > 1 {
 			return nil, fmt.Errorf("could NOT use more than 1 namespace selector within namespace scoped mode")
-		} else if len(nodeNames) == 1 {
-			if nodeNames[0] != targetNamespace {
-				return nil, fmt.Errorf("could NOT list pods from out of scoped namespace: %s", nodeNames[0])
+		} else if len(namespaces) == 1 {
+			if namespaces[0] != targetNamespace {
+				return nil, fmt.Errorf("could NOT list pods from out of scoped namespace: %s", namespaces[0])
 			}
 		}
 	}
+
 	return &namespaceSelector{
 		Option{
 			clusterScoped,

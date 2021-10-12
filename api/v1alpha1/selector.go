@@ -36,7 +36,7 @@ const (
 	RandomMaxPercentPodMode PodMode = "random-max-percent"
 )
 
-type BasicSelectorSpec struct{
+type GenericSelectorSpec struct{
 	// Namespaces is a set of namespace to which objects belong.
 	// +optional
 	Namespaces []string `json:"namespaces,omitempty"`
@@ -66,7 +66,7 @@ type BasicSelectorSpec struct{
 // If the all selectors are empty, all objects will be used in chaos experiment.
 type PodSelectorSpec struct {
 
-	BasicSelectorSpec `json:",inline"`
+	GenericSelectorSpec `json:",inline"`
 
 	// Nodes is a set of node name and objects must belong to these nodes.
 	// +optional
@@ -124,8 +124,8 @@ type ContainerSelector struct {
 
 // ClusterScoped returns true if the selector selects Pods in the cluster
 func (in PodSelectorSpec) ClusterScoped() bool {
-	// in fact, this will never happened, will add namespace if it is empty, so len(s.Namespaces) can not be 0,
-	// but still add judgentment here for safe
+	// in fact, this will never happen, will add namespace if it is empty, so len(s.Namespaces) can not be 0,
+	// but still add judgement here for safe
 	// https://github.com/chaos-mesh/chaos-mesh/blob/478d00d01bb0f9fb08a1085428a7da8c8f9df4e8/api/v1alpha1/common_webhook.go#L22
 	if len(in.Namespaces) == 0 && len(in.Pods) == 0 {
 		return true

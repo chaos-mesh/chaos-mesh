@@ -101,7 +101,7 @@ type SelectorInfo struct {
 // ParsePodSelector parses SelectorInfo to v1alpha1.PodSelectorSpec
 func (s *SelectorInfo) ParsePodSelector() v1alpha1.PodSelectorSpec {
 	selector := v1alpha1.PodSelectorSpec{}
-	selector.CommonSelectorSpec = s.parseCommonSelector()
+	selector.GenericSelectorSpec = s.parseCommonSelector()
 
 	selector.PodPhaseSelectors = append(selector.PodPhaseSelectors, s.PodPhaseSelectors...)
 
@@ -115,7 +115,7 @@ func (s *SelectorInfo) ParsePodSelector() v1alpha1.PodSelectorSpec {
 // ParsePhysicalMachineSelector parses SelectorInfo to v1alpha1.PhysicalMachineSelectorSpec
 func (s *SelectorInfo) ParsePhysicalMachineSelector() v1alpha1.PhysicalMachineSelectorSpec {
 	selector := v1alpha1.PhysicalMachineSelectorSpec{}
-	selector.CommonSelectorSpec = s.parseCommonSelector()
+	selector.GenericSelectorSpec = s.parseCommonSelector()
 
 	if s.PhysicalMachines != nil {
 		selector.PhysicalMachines = s.PhysicalMachines
@@ -124,9 +124,9 @@ func (s *SelectorInfo) ParsePhysicalMachineSelector() v1alpha1.PhysicalMachineSe
 	return selector
 }
 
-// parseCommonSelector parses SelectorInfo to v1alpha1.CommonSelectorSpec
-func (s *SelectorInfo) parseCommonSelector() v1alpha1.CommonSelectorSpec {
-	selector := v1alpha1.CommonSelectorSpec{}
+// parseCommonSelector parses SelectorInfo to v1alpha1.GenericSelectorSpec
+func (s *SelectorInfo) parseCommonSelector() v1alpha1.GenericSelectorSpec {
+	selector := v1alpha1.GenericSelectorSpec{}
 	selector.Namespaces = append(selector.Namespaces, s.Namespaces...)
 
 	selector.LabelSelectors = make(map[string]string)
