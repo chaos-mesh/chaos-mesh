@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+
 package fusedev
 
 // GrantAccess appends 'c 10:229 rwm' to devices.allow
