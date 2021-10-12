@@ -6,11 +6,8 @@ DOCKER_REGISTRY ?= "localhost:5000"
 DOCKER_REGISTRY_PREFIX := $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY)/,)
 DOCKER_BUILD_ARGS := --build-arg HTTP_PROXY=${HTTP_PROXY} --build-arg HTTPS_PROXY=${HTTPS_PROXY} --build-arg UI=${UI} --build-arg LDFLAGS="${LDFLAGS}" --build-arg CRATES_MIRROR="${CRATES_MIRROR}"
 
-GOVER_MAJOR := $(shell go version | sed -E -e "s/.*go([0-9]+)[.]([0-9]+).*/\1/")
-GOVER_MINOR := $(shell go version | sed -E -e "s/.*go([0-9]+)[.]([0-9]+).*/\2/")
-GO111 := $(shell [ $(GOVER_MAJOR) -gt 1 ] || [ $(GOVER_MAJOR) -eq 1 ] && [ $(GOVER_MINOR) -ge 11 ]; echo $$?)
-
 IMAGE_TAG := $(if $(IMAGE_TAG),$(IMAGE_TAG),latest)
+IMAGE_PROJECT := $(if $(IMAGE_PROJECT),$(IMAGE_PROJECT),pingcap)
 
 ROOT=$(shell pwd)
 OUTPUT_BIN=$(ROOT)/output/bin
@@ -23,10 +20,6 @@ IMAGE_BUILD_ENV_BUILD ?= 0
 IMAGE_DEV_ENV_PROJECT ?= chaos-mesh/chaos-mesh
 IMAGE_DEV_ENV_REGISTRY ?= ghcr.io
 IMAGE_DEV_ENV_BUILD ?= 0
-
-ifeq ($(GO111), 1)
-$(error Please upgrade your Go compiler to 1.11 or higher version)
-endif
 
 # Enable GO111MODULE=on explicitly, disable it with GO111MODULE=off when necessary.
 export GO111MODULE := on
@@ -43,13 +36,6 @@ PACKAGE_LIST := echo $$(go list ./... | grep -vE "chaos-mesh/test|pkg/ptrace|zz_
 
 # no version conversion
 CRD_OPTIONS ?= "crd:trivialVersions=true,preserveUnknownFields=false,crdVersions=v1"
-
-# Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
-ifeq (,$(shell go env GOBIN))
-GOBIN=$(shell go env GOPATH)/bin
-else
-GOBIN=$(shell go env GOBIN)
-endif
 
 GO_BUILD_CACHE ?= $(ROOT)/.cache/chaos-mesh
 
@@ -148,11 +134,11 @@ ifeq ($(TARGET_PLATFORM),)
 	UNAME_M := $(shell uname -m)
 	ifeq ($(UNAME_M),x86_64)
 		TARGET_PLATFORM := amd64
-	else ifeq($(UNAME_M),amd64)
+	else ifeq ($(UNAME_M),amd64)
 		TARGET_PLATFORM := amd64
-	else ifeq($(UNAME_M),arm64)
+	else ifeq ($(UNAME_M),arm64)
 		TARGET_PLATFORM := arm64
-	else ifeq($(UNAME_M),aarch64)
+	else ifeq ($(UNAME_M),aarch64)
 		TARGET_PLATFORM := arm64
 	else
 		$(error Please run this script on amd64 or arm64 machine)
@@ -249,7 +235,7 @@ define IMAGE_TEMPLATE
 
 $(4)_PROJECT := ${IMAGE_$(4)_PROJECT}
 ifeq ($$($(4)_PROJECT),)
-$(4)_PROJECT := pingcap
+$(4)_PROJECT := $(IMAGE_PROJECT)
 endif
 
 $(4)_REGISTRY := $(IMAGE_$(4)_REGISTRY)
