@@ -36,3 +36,7 @@ header:
     - '**/*_generated*'
     - '**/schema.resolvers.go'
     - '**/generated.go'
+    # k8s copyright
+    - 'hack/boilerplate/boilerplate.py'
+    # Dockerfiles
+    - '**/Dockerfile'
