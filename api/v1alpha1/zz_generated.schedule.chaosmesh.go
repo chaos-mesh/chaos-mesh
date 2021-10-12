@@ -8,30 +8,32 @@
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
+
 package v1alpha1
+
 
 import (
 	"fmt"
 )
 
+
 const (
-	ScheduleTypeAWSChaos             ScheduleTemplateType = "AWSChaos"
-	ScheduleTypeDNSChaos             ScheduleTemplateType = "DNSChaos"
-	ScheduleTypeGCPChaos             ScheduleTemplateType = "GCPChaos"
-	ScheduleTypeHTTPChaos            ScheduleTemplateType = "HTTPChaos"
-	ScheduleTypeIOChaos              ScheduleTemplateType = "IOChaos"
-	ScheduleTypeJVMChaos             ScheduleTemplateType = "JVMChaos"
-	ScheduleTypeKernelChaos          ScheduleTemplateType = "KernelChaos"
-	ScheduleTypeNetworkChaos         ScheduleTemplateType = "NetworkChaos"
+	ScheduleTypeAWSChaos ScheduleTemplateType = "AWSChaos"
+	ScheduleTypeDNSChaos ScheduleTemplateType = "DNSChaos"
+	ScheduleTypeGCPChaos ScheduleTemplateType = "GCPChaos"
+	ScheduleTypeHTTPChaos ScheduleTemplateType = "HTTPChaos"
+	ScheduleTypeIOChaos ScheduleTemplateType = "IOChaos"
+	ScheduleTypeJVMChaos ScheduleTemplateType = "JVMChaos"
+	ScheduleTypeKernelChaos ScheduleTemplateType = "KernelChaos"
+	ScheduleTypeNetworkChaos ScheduleTemplateType = "NetworkChaos"
 	ScheduleTypePhysicalMachineChaos ScheduleTemplateType = "PhysicalMachineChaos"
-	ScheduleTypePodChaos             ScheduleTemplateType = "PodChaos"
-	ScheduleTypeStressChaos          ScheduleTemplateType = "StressChaos"
-	ScheduleTypeTimeChaos            ScheduleTemplateType = "TimeChaos"
-	ScheduleTypeWorkflow             ScheduleTemplateType = "Workflow"
+	ScheduleTypePodChaos ScheduleTemplateType = "PodChaos"
+	ScheduleTypeStressChaos ScheduleTemplateType = "StressChaos"
+	ScheduleTypeTimeChaos ScheduleTemplateType = "TimeChaos"
+	ScheduleTypeWorkflow ScheduleTemplateType = "Workflow"
+
 )
 
 var allScheduleTemplateType = []ScheduleTemplateType{
@@ -48,6 +50,7 @@ var allScheduleTemplateType = []ScheduleTemplateType{
 	ScheduleTypeStressChaos,
 	ScheduleTypeTimeChaos,
 	ScheduleTypeWorkflow,
+
 }
 
 func (it *ScheduleItem) SpawnNewObject(templateType ScheduleTemplateType) (GenericChaos, error) {
@@ -112,3 +115,4 @@ func (it *ScheduleItem) SpawnNewObject(templateType ScheduleTemplateType) (Gener
 
 	return nil, nil
 }
+
