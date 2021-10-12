@@ -50,7 +50,11 @@ func (it *workflowCodeGenerator) Render() string {
 
 	spawnObjectMethod := ""
 	for _, item := range it.chaosTypes {
-		spawnObjectMethod += generateSpawnObjectMethodItem(item)
+		spawnObjectMethod += generateMethodItem(item, spawnObjectEntryTemplate)
+	}
+	restoreObjectMethod := ""
+	for _, item := range it.chaosTypes {
+		restoreObjectMethod += generateMethodItem(item, restoreObjectEntryTemplate)
 	}
 	spawnListMethod := ""
 	for _, item := range it.chaosTypes {
@@ -90,25 +94,27 @@ type EmbedChaos struct {
 }
 
 func (it *EmbedChaos) SpawnNewObject(templateType TemplateType) (GenericChaos, error) {
-
 	switch templateType {
 %s
 	default:
 		return nil, fmt.Errorf("unsupported template type %%s", templateType)
 	}
+}
 
-	return nil, nil
+func (it *EmbedChaos) RestoreChaosSpec(root interface{}) error {
+	switch chaos := root.(type) {
+%s
+	default:
+		return fmt.Errorf("unsupported chaos %%#v", root)
+	}
 }
 
 func (it *EmbedChaos) SpawnNewList(templateType TemplateType) (GenericChaosList, error) {
-
 	switch templateType {
 %s
 	default:
 		return nil, fmt.Errorf("unsupported template type %%s", templateType)
 	}
-
-	return nil, nil
 }
 
 %s
@@ -119,6 +125,7 @@ func (it *EmbedChaos) SpawnNewList(templateType TemplateType) (GenericChaosList,
 		allChaosTemplateTypeEntries,
 		embedChaosEntries,
 		spawnObjectMethod,
+		restoreObjectMethod,
 		spawnListMethod,
 		genericChaosListImplementations,
 	)
@@ -192,8 +199,13 @@ const spawnObjectEntryTemplate = `	case Type{{.Type}}:
 		return &result, nil
 `
 
-func generateSpawnObjectMethodItem(typeName string) string {
-	tmpl, err := template.New("spawnObjectEntry").Parse(spawnObjectEntryTemplate)
+const restoreObjectEntryTemplate = `	case *{{.Type}}:
+		*it.{{.Type}} = chaos.Spec
+		return nil
+`
+
+func generateMethodItem(typeName, methodTemplate string) string {
+	tmpl, err := template.New("fillMethodEntry").Parse(methodTemplate)
 	if err != nil {
 		log.Error(err, "fail to build template")
 		return ""

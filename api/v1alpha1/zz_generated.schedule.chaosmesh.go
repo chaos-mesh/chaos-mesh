@@ -52,7 +52,6 @@ var allScheduleTemplateType = []ScheduleTemplateType{
 }
 
 func (it *ScheduleItem) SpawnNewObject(templateType ScheduleTemplateType) (GenericChaos, error) {
-
 	switch templateType {
 	case ScheduleTypeAWSChaos:
 		result := AWSChaos{}
@@ -106,7 +105,48 @@ func (it *ScheduleItem) SpawnNewObject(templateType ScheduleTemplateType) (Gener
 	default:
 		return nil, fmt.Errorf("unsupported template type %s", templateType)
 	}
-
-	return nil, nil
 }
 
+func (it *ScheduleItem) RestoreChaosSpec(root interface{}) error {
+	switch chaos := root.(type) {
+	case *AWSChaos:
+		*it.AWSChaos = chaos.Spec
+		return nil
+	case *DNSChaos:
+		*it.DNSChaos = chaos.Spec
+		return nil
+	case *GCPChaos:
+		*it.GCPChaos = chaos.Spec
+		return nil
+	case *HTTPChaos:
+		*it.HTTPChaos = chaos.Spec
+		return nil
+	case *IOChaos:
+		*it.IOChaos = chaos.Spec
+		return nil
+	case *JVMChaos:
+		*it.JVMChaos = chaos.Spec
+		return nil
+	case *KernelChaos:
+		*it.KernelChaos = chaos.Spec
+		return nil
+	case *NetworkChaos:
+		*it.NetworkChaos = chaos.Spec
+		return nil
+	case *PodChaos:
+		*it.PodChaos = chaos.Spec
+		return nil
+	case *StressChaos:
+		*it.StressChaos = chaos.Spec
+		return nil
+	case *TimeChaos:
+		*it.TimeChaos = chaos.Spec
+		return nil
+	case *Workflow:
+		*it.Workflow = chaos.Spec
+		return nil
+
+	default:
+		return fmt.Errorf("unsupported chaos %#v", root)
+	}
+}

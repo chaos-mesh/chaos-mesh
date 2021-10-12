@@ -78,7 +78,12 @@ func (it *scheduleCodeGenerator) Render() string {
 
 	spawnMethod := ""
 	for _, item := range it.chaosTypes {
-		spawnMethod += generateSpawnScheduleItem(item)
+		spawnMethod += generateFillingMethodScheduleItem(item, scheduleFillingEntryTemplate)
+	}
+
+	restoreMethod := ""
+	for _, item := range it.chaosTypes {
+		restoreMethod += generateFillingMethodScheduleItem(item, scheduleRestoreEntryTemplate)
 	}
 
 	imports := `import (
@@ -99,22 +104,27 @@ var allScheduleTemplateType = []ScheduleTemplateType{
 }
 
 func (it *ScheduleItem) SpawnNewObject(templateType ScheduleTemplateType) (GenericChaos, error) {
-
 	switch templateType {
 %s
 	default:
 		return nil, fmt.Errorf("unsupported template type %%s", templateType)
 	}
-
-	return nil, nil
 }
 
+func (it *ScheduleItem) RestoreChaosSpec(root interface{}) error {
+	switch chaos := root.(type) {
+%s
+	default:
+		return fmt.Errorf("unsupported chaos %%#v", root)
+	}
+}
 `,
 		boilerplate,
 		imports,
 		scheduleTemplateTypesEntries,
 		scheduleTemplateTypeEntries,
 		spawnMethod,
+		restoreMethod,
 	)
 
 	return scheduleTemplateTypesCodes
@@ -176,8 +186,13 @@ const scheduleFillingEntryTemplate = `	case ScheduleType{{.Type}}:
 		return &result, nil
 `
 
-func generateSpawnScheduleItem(typeName string) string {
-	tmpl, err := template.New("fillingMethod").Parse(scheduleFillingEntryTemplate)
+const scheduleRestoreEntryTemplate = `	case *{{.Type}}:
+		*it.{{.Type}} = chaos.Spec
+		return nil
+`
+
+func generateFillingMethodScheduleItem(typeName, methodTemplate string) string {
+	tmpl, err := template.New("fillingMethod").Parse(methodTemplate)
 	if err != nil {
 		log.Error(err, "fail to build template")
 		return ""
