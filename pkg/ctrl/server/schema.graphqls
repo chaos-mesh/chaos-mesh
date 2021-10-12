@@ -1017,7 +1017,7 @@ type NetworkChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1
     finalizers: [String!]
     clusterName: String!
 
-	podnetworks: [PodNetworkChaos!]	@goField(forceResolver: true)
+	podnetwork: [PodNetworkChaos!]	@goField(forceResolver: true)
 }
 
 type StressChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.StressChaos") {

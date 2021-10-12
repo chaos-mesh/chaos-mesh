@@ -343,7 +343,7 @@ type ComplexityRoot struct {
 		Name                       func(childComplexity int) int
 		Namespace                  func(childComplexity int) int
 		OwnerReferences            func(childComplexity int) int
-		Podnetworks                func(childComplexity int) int
+		Podnetwork                 func(childComplexity int) int
 		ResourceVersion            func(childComplexity int) int
 		SelfLink                   func(childComplexity int) int
 		UID                        func(childComplexity int) int
@@ -780,7 +780,7 @@ type NetworkChaosResolver interface {
 	Labels(ctx context.Context, obj *v1alpha1.NetworkChaos) (map[string]interface{}, error)
 	Annotations(ctx context.Context, obj *v1alpha1.NetworkChaos) (map[string]interface{}, error)
 
-	Podnetworks(ctx context.Context, obj *v1alpha1.NetworkChaos) ([]*v1alpha1.PodNetworkChaos, error)
+	Podnetwork(ctx context.Context, obj *v1alpha1.NetworkChaos) ([]*v1alpha1.PodNetworkChaos, error)
 }
 type OwnerReferenceResolver interface {
 	UID(ctx context.Context, obj *v11.OwnerReference) (string, error)
@@ -2251,12 +2251,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.NetworkChaos.OwnerReferences(childComplexity), true
 
-	case "NetworkChaos.podnetworks":
-		if e.complexity.NetworkChaos.Podnetworks == nil {
+	case "NetworkChaos.podnetwork":
+		if e.complexity.NetworkChaos.Podnetwork == nil {
 			break
 		}
 
-		return e.complexity.NetworkChaos.Podnetworks(childComplexity), true
+		return e.complexity.NetworkChaos.Podnetwork(childComplexity), true
 
 	case "NetworkChaos.resourceVersion":
 		if e.complexity.NetworkChaos.ResourceVersion == nil {
@@ -4840,7 +4840,7 @@ type NetworkChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1
     finalizers: [String!]
     clusterName: String!
 
-	podnetworks: [PodNetworkChaos!]	@goField(forceResolver: true)
+	podnetwork: [PodNetworkChaos!]	@goField(forceResolver: true)
 }
 
 type StressChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.StressChaos") {
@@ -11415,7 +11415,7 @@ func (ec *executionContext) _NetworkChaos_clusterName(ctx context.Context, field
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _NetworkChaos_podnetworks(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.NetworkChaos) (ret graphql.Marshaler) {
+func (ec *executionContext) _NetworkChaos_podnetwork(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.NetworkChaos) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -11433,7 +11433,7 @@ func (ec *executionContext) _NetworkChaos_podnetworks(ctx context.Context, field
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.NetworkChaos().Podnetworks(rctx, obj)
+		return ec.resolvers.NetworkChaos().Podnetwork(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -21447,7 +21447,7 @@ func (ec *executionContext) _NetworkChaos(ctx context.Context, sel ast.Selection
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
-		case "podnetworks":
+		case "podnetwork":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -21455,7 +21455,7 @@ func (ec *executionContext) _NetworkChaos(ctx context.Context, sel ast.Selection
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._NetworkChaos_podnetworks(ctx, field, obj)
+				res = ec._NetworkChaos_podnetwork(ctx, field, obj)
 				return res
 			})
 		default:

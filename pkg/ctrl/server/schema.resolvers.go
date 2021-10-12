@@ -649,7 +649,7 @@ func (r *networkChaosResolver) Annotations(ctx context.Context, obj *v1alpha1.Ne
 	return annotations, nil
 }
 
-func (r *networkChaosResolver) Podnetworks(ctx context.Context, obj *v1alpha1.NetworkChaos) ([]*v1alpha1.PodNetworkChaos, error) {
+func (r *networkChaosResolver) Podnetwork(ctx context.Context, obj *v1alpha1.NetworkChaos) ([]*v1alpha1.PodNetworkChaos, error) {
 	podnetworks := make([]*v1alpha1.PodNetworkChaos, 0, len(obj.Status.Instances))
 	for id := range obj.Status.Instances {
 		podnetwork := new(v1alpha1.PodNetworkChaos)
