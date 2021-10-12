@@ -334,5 +334,5 @@ if [ -n "${ARTIFACTS}" -a -z "$SKIP_DUMP" ]; then
     kubetest2_args+=(--dump)
 fi
 
-echo "info: run 'kubetest2 ${kubetest2_args[@]} -- hack/run-e2e.sh $@'"
-$KUBETSTS2_BIN ${kubetest2_args[@]} -- hack/run-e2e.sh "$@"
+echo "info: run 'kubetest2 $kubetest2_args -- hack/run-e2e.sh $@'"
+$KUBETSTS2_BIN $kubetest2_args -- hack/run-e2e.sh "$@"

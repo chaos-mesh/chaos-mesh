@@ -117,7 +117,7 @@ images=(
     $DOCKER_REGISTRY_PREFIX/pingcap/chaos-dashboard:${IMAGE_TAG}
     $DOCKER_REGISTRY_PREFIX/pingcap/chaos-daemon:${IMAGE_TAG}
 )
-for n in ${images[@]}; do
+for n in $images; do
     echo "info: loading image $n"
     $KIND_BIN load docker-image --name $CLUSTER $n
 done
