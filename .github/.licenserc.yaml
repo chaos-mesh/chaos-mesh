@@ -33,6 +33,6 @@ header:
     - 'helm/chaos-mesh/crds/*'
     - 'config/**'
     - '**/*_gen.go'
-    - '**/*_generated.chaosmesh.go'
+    - '**/*_generated*'
     - '**/schema.resolvers.go'
     - '**/generated.go'
