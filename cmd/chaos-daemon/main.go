@@ -13,8 +13,6 @@
 
 package main
 
-// package collectors
-
 import (
 	"flag"
 	"os"
