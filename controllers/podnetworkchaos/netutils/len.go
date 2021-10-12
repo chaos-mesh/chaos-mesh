@@ -14,7 +14,7 @@
 package netutils
 
 import (
-	"crypto/sha1"
+	"crypto/sha256"
 	"fmt"
 	"log"
 )
@@ -39,7 +39,7 @@ func CompressName(originalName string, targetLength int, namePostFix string) (na
 	namePrefix := originalName[0:5]
 	nameRest := originalName[5:]
 
-	hasher := sha1.New()
+	hasher := sha256.New()
 	hasher.Write([]byte(nameRest))
 	hashValue := fmt.Sprintf("%x", hasher.Sum(nil))
 
