@@ -36,6 +36,12 @@ header:
     - '**/*_generated*'
     - '**/schema.resolvers.go'
     - '**/generated.go'
+    - 'ui/src/api/zz_generated.frontend.chaos-mesh.ts'
+    - 'pkg/dashboard/swaggerdocs/swagger.yaml'
+    - 'pkg/dashboard/swaggerdocs/docs.go'
+    - 'pkg/ctrlserver/graph/model/models_gen.go'
+    - 'pkg/ctrlserver/graph/generated/generated.go'
+    - 'pkg/ctrlserver/graph/schema.resolvers.go'
     # k8s copyright
     - 'hack/boilerplate/boilerplate.py'
     # Dockerfiles
