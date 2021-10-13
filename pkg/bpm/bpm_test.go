@@ -110,7 +110,7 @@ var _ = Describe("background process manager", func() {
 			err = m.KillBackgroundProcess(context.Background(), pid, ct)
 			Expect(err).To(BeNil())
 
-			procState, err = process.NewProcess(int32(pid))
+			_, err = process.NewProcess(int32(pid))
 			Expect(err).NotTo(BeNil())
 		})
 
