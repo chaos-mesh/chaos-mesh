@@ -58,6 +58,7 @@ func main() {
 
 	reg := prometheus.NewRegistry()
 	reg.MustRegister(
+		// Use collectors as prometheus functions deprecated
 		collectors.NewGoCollector(),
 		collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
 	)
