@@ -1,0 +1,49 @@
+header:
+  license:
+    spdx-id: Apache-2.0
+    copyright-owner: Chaos Mesh Authors.
+  paths-ignore:
+    - '.gitignore'
+    - '.dockerignore'
+    - '.editorconfig'
+    - '.lift.toml'
+    - '.muse.toml'
+    - '**/*.md'
+    - '**/*.json'
+    - 'vendor/**'
+    - '**/go.mod'
+    - '**/go.sum'
+    - 'LICENSE'
+    - '.github/workflows/*'
+    - '.github/.licenserc.yaml'
+    - 'Makefile'
+    - 'PROJECT'
+    - 'LICENSE'
+    - 'ui/.prettierignore'
+    # reported as unsupported by skywalking-eyes as of October 4th 2021
+    - 'helm/chaos-mesh/.helmignore'
+    - 'helm/chaos-mesh/templates/_helpers.tpl'
+    - 'pkg/chaosdaemon/pb/chaosdaemon.proto'
+    - 'pkg/chaoskernel/pb/bpfki.proto'
+    - 'test/integration_test/utils/check_contains'
+    - 'ui/.prettierrc'
+    - 'ui/src/setupProxy.js'
+    # skip auto-generated files
+    - 'manifests/crd-v1beta1.yaml'
+    - 'manifests/crd.yaml'
+    - 'helm/chaos-mesh/crds/*'
+    - 'config/**'
+    - '**/*_gen.go'
+    - '**/*_generated*'
+    - '**/schema.resolvers.go'
+    - '**/generated.go'
+    - 'ui/src/api/zz_generated.frontend.chaos-mesh.ts'
+    - 'pkg/dashboard/swaggerdocs/swagger.yaml'
+    - 'pkg/dashboard/swaggerdocs/docs.go'
+    - 'pkg/ctrlserver/graph/model/models_gen.go'
+    - 'pkg/ctrlserver/graph/generated/generated.go'
+    - 'pkg/ctrlserver/graph/schema.resolvers.go'
+    # k8s copyright
+    - 'hack/boilerplate/boilerplate.py'
+    # Dockerfiles
+    - '**/Dockerfile'
