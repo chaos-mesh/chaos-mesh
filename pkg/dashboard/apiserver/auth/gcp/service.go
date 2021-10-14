@@ -45,7 +45,7 @@ func NewService(
 
 // Register mounts HTTP handler on the mux.
 func Register(r *gin.RouterGroup, s *Service, conf *config.ChaosDashboardConfig) {
-	// If the gcp security mode is not set, just skip the registeration
+	// If the gcp security mode is not set, just skip the registration
 	if !conf.GcpSecurityMode {
 		return
 	}
