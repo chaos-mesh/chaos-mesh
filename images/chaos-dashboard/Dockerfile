@@ -9,7 +9,9 @@ ENV https_proxy $HTTPS_PROXY
 ARG UI
 ARG SWAGGER
 
-RUN apt-get update && apt-get install ca-certificates tzdata -y && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && \ 
+    apt-get install tzdata -y && \
+    rm -rf /var/lib/apt/lists/*
 
 ENV http_proxy=
 ENV https_proxy=

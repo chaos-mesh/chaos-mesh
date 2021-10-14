@@ -157,49 +157,6 @@ definitions:
       uid:
         type: string
     type: object
-  core.SelectorInfo:
-    properties:
-      annotation_selectors:
-        additionalProperties:
-          type: string
-        type: object
-      expression_selectors:
-        type: string
-      field_selectors:
-        additionalProperties:
-          type: string
-        type: object
-      label_selectors:
-        additionalProperties:
-          type: string
-        type: object
-      namespaces:
-        items:
-          type: string
-        type: array
-      node_selectors:
-        additionalProperties:
-          type: string
-        type: object
-      nodes:
-        items:
-          type: string
-        type: array
-      phase_selectors:
-        items:
-          type: string
-        type: array
-      pods:
-        additionalProperties:
-          items:
-            type: string
-          type: array
-        description: |-
-          Pods is a map of string keys and a set values that used to select pods.
-          The key defines the namespace which pods belong,
-          and the each values is a set of pod names.
-        type: object
-    type: object
   core.Topology:
     properties:
       nodes:
@@ -2550,7 +2507,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/core.SelectorInfo'
+          $ref: '#/definitions/v1alpha1.PodSelectorSpec'
       produces:
       - application/json
       responses:
