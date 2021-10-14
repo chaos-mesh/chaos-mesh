@@ -22,7 +22,6 @@ export enum TemplateType {
   Parallel = 'parallel',
   Suspend = 'suspend',
   Custom = 'custom',
-  HTTP = 'http',
 }
 
 export interface Template {

@@ -25,6 +25,7 @@ import HTTPTask from './HTTPTask'
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
 import RemoveCircleIcon from '@material-ui/icons/RemoveCircle'
+import SerialOrParallel from './SerailOrParallel'
 import Space from 'components-mui/Space'
 import Suspend from './Suspend'
 import T from 'components/T'
@@ -39,7 +40,13 @@ const useStyles = makeStyles({
   },
 })
 
-const types = Object.values(TemplateType)
+export enum RenderableTemplateType {
+  HTTP = 'http',
+}
+
+export type AllTemplateType = RenderableTemplateType | TemplateType
+
+const types = Object.values({ ...TemplateType, ...RenderableTemplateType })
 
 interface AddProps {
   childIndex?: number
@@ -67,7 +74,7 @@ const Add: React.FC<AddProps> = ({
   const { templates: storeTemplates } = useStoreSelector((state) => state.workflows)
 
   const [initialValues, setInitialValues] = useState({
-    type: TemplateType.Single,
+    type: TemplateType.Single as AllTemplateType,
     num: 2,
     name: '',
     deadline: '',
@@ -89,11 +96,16 @@ const Add: React.FC<AddProps> = ({
   })
   const [num, setNum] = useState(-1)
   const [expand, setExpand] = useState(-1)
-  const [otherTypes, setOtherTypes] = useState<'suspend' | 'http' | ''>('')
+  const [otherTypes, setOtherTypes] = useState<'suspend' | ''>('')
   const [templates, setTemplates] = useState<Template[]>([])
   const templateNames = [...new Set([...storeTemplates, ...templates].map((t) => t.name))]
   const formRef = useRef<any>()
   const newERef = useRef<NewExperimentHandles>(null)
+  const [typeOfTemplate, setTypeOfTemplate] = useState<AllTemplateType>(TemplateType.Single)
+
+  const isRenderedHTTPTask = (): boolean => {
+    return typeOfTemplate === RenderableTemplateType.HTTP
+  }
 
   const fillExperiment = (t: Template) => {
     const e = t.experiment
@@ -126,9 +138,10 @@ const Add: React.FC<AddProps> = ({
           setTemplates(templates)
           setNum(templates.length)
 
+          // TODO: if rendered http set type to http
+
           break
         case 'suspend':
-        case 'http':
           setOtherTypes(type)
           break
       }
@@ -151,6 +164,8 @@ const Add: React.FC<AddProps> = ({
   }
 
   const onValidate = ({ type, num: newNum }: { type: string; num: number }) => {
+    setTypeOfTemplate(type as AllTemplateType)
+
     if (type !== 'suspend' && type !== 'http') {
       setOtherTypes('')
     }
@@ -180,7 +195,7 @@ const Add: React.FC<AddProps> = ({
       return
     }
 
-    if (type === 'suspend' || type === 'http') {
+    if (type === 'suspend') {
       if (prevType === 'serial' || prevType === 'parallel' || prevType === 'custom') {
         resetNoSingle()
       }
@@ -344,6 +359,8 @@ const Add: React.FC<AddProps> = ({
             }
           }
 
+          console.log('type of template:' + typeOfTemplate)
+
           return (
             <>
               <StepLabel icon={<AddCircleIcon color="primary" />}>
@@ -372,189 +389,39 @@ const Add: React.FC<AddProps> = ({
                 </Space>
               </StepLabel>
 
-              {num > 0 && (
-                <Box mt={3} ml={8}>
-                  <Form>
-                    <Paper>
-                      <PaperTop title={T(`newW.${values.type}Title`)} boxProps={{ mb: 3 }} />
-                      {(values.type === 'serial' || values.type === 'parallel') && (
-                        <Space direction="row">
-                          <TextField
-                            name="name"
-                            label={T('common.name')}
-                            validate={validateName(T('newW.nameValidation', intl))}
-                            helperText={errors.name && touched.name ? errors.name : T('newW.node.nameHelper')}
-                            error={errors.name && touched.name ? true : false}
-                          />
-                          <TextField
-                            name="deadline"
-                            label={T('newW.node.deadline')}
-                            validate={validateDeadline(T('newW.node.deadlineValidation', intl))}
-                            helperText={
-                              errors.deadline && touched.deadline ? errors.deadline : T('newW.node.deadlineHelper')
-                            }
-                            error={errors.deadline && touched.deadline ? true : false}
-                          />
-                        </Space>
-                      )}
-                      {values.type === 'custom' && (
-                        <Space>
-                          <TextField
-                            fast
-                            name="name"
-                            label={T('common.name')}
-                            validate={validateName(T('newW.node.nameValidation', intl))}
-                            helperText={errors.name && touched.name ? errors.name : T('newW.node.nameHelper')}
-                            error={errors.name && touched.name ? true : false}
-                          />
-                          <Typography variant="body2">{T('newW.node.container.title')}</Typography>
-                          <TextField
-                            fast
-                            name="container.name"
-                            label={T('common.name')}
-                            validate={validateName(T('newW.node.container.nameValidation', intl))}
-                            helperText={
-                              errors.container?.name && touched.container?.name
-                                ? errors.container.name
-                                : T('newW.node.container.nameHelper')
-                            }
-                            error={errors.container?.name && touched.container?.name ? true : false}
-                          />
-                          <TextField
-                            fast
-                            name="container.image"
-                            label={T('newW.node.container.image')}
-                            validate={validateImage(T('newW.node.container.imageValidation', intl))}
-                            helperText={
-                              errors.container?.image && touched.container?.image
-                                ? errors.container.image
-                                : T('newW.node.container.imageHelper')
-                            }
-                            error={errors.container?.image && touched.container?.image ? true : false}
-                          />
-                          <LabelField
-                            name="container.command"
-                            label={T('newW.node.container.command')}
-                            helperText={T('newW.node.container.commandHelper')}
-                          />
-                          <Typography variant="body2">{T('newW.node.conditionalBranches.title')}</Typography>
-                          {conditionalBranches.length > 0 &&
-                            conditionalBranches.map((d, i) => (
-                              <Space key={i} direction="row" alignItems="center">
-                                <Typography component="div" variant="button">
-                                  if
-                                </Typography>
-                                <TextField
-                                  name={`conditionalBranches[${i}].expression`}
-                                  label={T('newW.node.conditionalBranches.expression')}
-                                />
-                                <Typography component="div" variant="button">
-                                  then
-                                </Typography>
-                                <Autocomplete
-                                  sx={{ width: 360 }}
-                                  options={templateNames}
-                                  noOptionsText={T('common.noOptions')}
-                                  value={(function () {
-                                    if (templates[i] && templates[i].name !== conditionalBranches[i].target) {
-                                      const name = templates[i].name
-
-                                      setFieldValue(`conditionalBranches[${i}].target`, name)
-
-                                      return name
-                                    }
-
-                                    return conditionalBranches[i].target
-                                  })()}
-                                  onChange={onChange(i)}
-                                  renderInput={(params) => (
-                                    <MUITextField
-                                      {...params}
-                                      name={`conditionalBranches[${i}].target`}
-                                      label={T('newW.node.conditionalBranches.target')}
-                                      size="small"
-                                      fullWidth
-                                    />
-                                  )}
-                                  PaperComponent={(props) => <Paper {...props} sx={{ p: 0 }} />}
-                                />
-                                {i !== conditionalBranches.length - 1 && (
-                                  <IconButton color="secondary" size="small" onClick={removeBranch(i)}>
-                                    <RemoveCircleIcon />
-                                  </IconButton>
-                                )}
-                                {i === conditionalBranches.length - 1 && (
-                                  <IconButton color="primary" size="small" onClick={addBranch(d)}>
-                                    <AddCircleIcon />
-                                  </IconButton>
-                                )}
-                              </Space>
-                            ))}
-                        </Space>
-                      )}
-                      <Submit disabled={values.type !== 'custom' && templates.length !== num} />
-                    </Paper>
-                  </Form>
-
-                  {Array(num)
-                    .fill(0)
-                    .map((_, index) => (
-                      <Box key={index} ml={8}>
-                        <Paper
-                          sx={{
-                            my: 6,
-                            p: 1.5,
-                            borderColor: templates[index] ? 'success.main' : undefined,
-                          }}
-                        >
-                          <Box display="flex" alignItems="center">
-                            <IconButton size="small" onClick={switchExpand(index)}>
-                              {expand === index ? <ArrowDropDownIcon /> : <ArrowRightIcon />}
-                            </IconButton>
-                            <Typography component="div" sx={{ ml: 1 }}>
-                              {templates.length > index
-                                ? templates[index].name
-                                : `${T(
-                                    values.type === 'custom'
-                                      ? 'newW.node.conditionalBranches.branch'
-                                      : 'newW.node.child',
-                                    intl
-                                  )} ${index + 1}`}
-                            </Typography>
-                          </Box>
-                        </Paper>
-                        {expand === index && (
-                          <Box mt={6}>
-                            <Add
-                              childIndex={index}
-                              parentTemplates={templates}
-                              setParentTemplates={setTemplates}
-                              setParentExpand={setExpand}
-                              externalTemplate={templates[index]}
-                            />
-                          </Box>
-                        )}
-                      </Box>
-                    ))}
-                </Box>
+              {(values.type === 'serial' || values.type === 'parallel') && (
+                <>
+                  <SerialOrParallel
+                    name={values.name}
+                    deadline={values.deadline}
+                    type={values.type as TemplateType}
+                    childrenCount={values.num}
+                    submitTemplate={submit}
+                    templates={templates}
+                  ></SerialOrParallel>
+                </>
               )}
             </>
           )
         }}
       </Formik>
+
+      {isRenderedHTTPTask() && (
+        <Box mt={3}>
+          <HTTPTask submit={submit} />
+        </Box>
+      )}
       {num < 0 && (
         <Box ml={8}>
-          <Box display={otherTypes === 'suspend' || otherTypes === 'http' ? 'none' : 'initial'}>
-            <NewExperimentNext ref={newERef} onSubmit={onSubmit} inWorkflow={true} />
-          </Box>
-          {otherTypes === 'suspend' && (
+          {typeOfTemplate === 'suspend' && (
             <Box mt={3}>
               <Suspend initialValues={initialValues} submit={submit} />
             </Box>
           )}
-          {otherTypes === 'http' && (
-            <Box mt={3}>
-              <HTTPTask submit={submit} />
+
+          {typeOfTemplate === 'single' && (
+            <Box display={otherTypes === 'suspend' ? 'none' : 'initial'}>
+              <NewExperimentNext ref={newERef} onSubmit={onSubmit} inWorkflow={true} />
             </Box>
           )}
         </Box>

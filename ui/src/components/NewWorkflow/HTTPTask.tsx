@@ -10,23 +10,13 @@ import T from 'components/T'
 import { renderHTTPTask } from 'api/workflows'
 import { useFormik } from 'formik'
 
-export interface RenderedHTTPTask {
-  name: string
-  container: {
-    name: string
-    image: string
-    command: string[]
-  }
-}
-
 interface HTTPTaskProps {
-  initialValues?: RenderedHTTPTask
+  initialValues?: any
   submit: (template: Template) => void
 }
 
 const HTTPTask: React.FC<HTTPTaskProps> = ({ initialValues, submit }) => {
   const onSubmit = (form: RequestForm) => {
-    // TODO: convert RequestFlags to RenderedHTTPTask
     renderHTTPTask(form)
       .then((response) => {
         const { name, task } = response.data!
@@ -48,6 +38,7 @@ const HTTPTask: React.FC<HTTPTaskProps> = ({ initialValues, submit }) => {
   const validateRequestForm = (newValue: RequestForm) => {
     console.log(newValue)
   }
+
   const formik = useFormik({
     initialValues: { name: '', url: '', method: 'GET', body: '', follow: false, json: false },
     validate: validateRequestForm,
