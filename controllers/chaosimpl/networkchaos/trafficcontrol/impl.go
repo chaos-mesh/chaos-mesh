@@ -34,10 +34,6 @@ import (
 )
 
 const (
-	networkTcActionMsg    = "network traffic control action duration %s"
-	networkChaosSourceMsg = "This is a source pod."
-	networkChaosTargetMsg = "This is a target pod."
-
 	targetIPSetPostFix = "tgt"
 	sourceIPSetPostFix = "src"
 )
