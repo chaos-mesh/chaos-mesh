@@ -33,11 +33,6 @@ type Impl struct {
 
 var _ common.ChaosImpl = (*Impl)(nil)
 
-const (
-	// Always fails a container
-	pauseImage = "gcr.io/google-containers/pause:latest"
-)
-
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	podchaos := obj.(*v1alpha1.PodChaos)
 
