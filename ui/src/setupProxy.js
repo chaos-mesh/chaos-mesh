@@ -8,5 +8,5 @@ module.exports = function (app) {
     createProxyMiddleware({
       target: API_URL,
     })
-  )
-};
+  );
+}
