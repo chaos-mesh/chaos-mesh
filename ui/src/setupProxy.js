@@ -9,4 +9,4 @@ module.exports = function (app) {
       target: API_URL,
     })
   )
-}
+};
