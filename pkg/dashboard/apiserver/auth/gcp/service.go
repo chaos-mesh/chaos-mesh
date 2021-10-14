@@ -44,7 +44,12 @@ func NewService(
 }
 
 // Register mounts HTTP handler on the mux.
-func Register(r *gin.RouterGroup, s *Service) {
+func Register(r *gin.RouterGroup, s *Service, conf *config.ChaosDashboardConfig) {
+	// If the gcp security mode is not set, just skip the registeration
+	if !conf.GcpSecurityMode {
+		return
+	}
+
 	r.Use(s.Middleware)
 
 	endpoint := r.Group("/auth/gcp")

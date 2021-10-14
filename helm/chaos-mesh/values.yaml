@@ -192,6 +192,7 @@ dashboard:
   imagePullPolicy: IfNotPresent
 
   securityMode: true
+  gcpSecurityMode: false
   gcpClientId: ""
   gcpClientSecret: ""
 

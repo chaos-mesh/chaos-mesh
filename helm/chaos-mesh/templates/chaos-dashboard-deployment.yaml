@@ -76,6 +76,8 @@ spec:
               value: "{{ .Values.controllerManager.enableFilterNamespace }}"
             - name: SECURITY_MODE
               value: "{{ .Values.dashboard.securityMode }}"
+            - name: GCP_SECURITY_MODE
+              value: "{{ .Values.dashboard.gcpSecurityMode }}"
             - name: GCP_CLIENT_ID
               value: "{{ .Values.dashboard.gcpClientId }}"
             - name: GCP_CLIENT_SECRET
