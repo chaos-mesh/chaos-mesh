@@ -1979,6 +1979,11 @@ var doc = `{
                     "type": "boolean",
                     "default": false
                 },
+                "gcp_security_mode": {
+                    "description": "GcpSecurityMode will use the gcloud authentication to login to GKE user",
+                    "type": "boolean",
+                    "default": false
+                },
                 "listen_host": {
                     "type": "string",
                     "default": "0.0.0.0"

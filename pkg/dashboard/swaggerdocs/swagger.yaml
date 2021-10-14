@@ -41,6 +41,11 @@ definitions:
           EnableFilterNamespace will filter namespace with annotation. Only the pods/containers in namespace
           annotated with `chaos-mesh.org/inject=enabled` will be injected.
         type: boolean
+      gcp_security_mode:
+        default: false
+        description: GcpSecurityMode will use the gcloud authentication to login to
+          GKE user
+        type: boolean
       listen_host:
         default: 0.0.0.0
         type: string
