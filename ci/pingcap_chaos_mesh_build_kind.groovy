@@ -1,3 +1,19 @@
+/*
+ * Copyright 2021 Chaos Mesh Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 //
 // E2E Jenkins file.
 //
@@ -38,6 +54,13 @@ spec:
     env:
     - name: DOCKER_IN_DOCKER_ENABLED
       value: "true"
+    - name: DOCKER_IO_MIRROR
+      value: https://registry-mirror.pingcap.net
+    - name: GCR_IO_MIRROR
+      value: https://registry-mirror.pingcap.net
+    - name: QUAY_IO_MIRROR
+      value: https://registry-mirror.pingcap.net
+
     resources:
       requests:
         memory: "4Gi"
@@ -250,8 +273,11 @@ def call(BUILD_BRANCH, CREDENTIALS_ID) {
 		builds["E2E on kubernetes 1.12.10"] = {
                 build("v1.12", "${GLOBALS} GINKGO_NODES=6 KUBE_VERSION=v1.12.10 KIND_VERSION=0.8.1 ./hack/e2e.sh -- --ginkgo.focus='Basic'")
         }
-        builds["E2E on kubernetes 1.20.4"] = {
-                build("v1.20", "${GLOBALS} GINKGO_NODES=6 KUBE_VERSION=v1.20.2 ./hack/e2e.sh -- --ginkgo.focus='Basic'")
+        builds["E2E on kubernetes 1.20.7"] = {
+                build("v1.20", "${GLOBALS} GINKGO_NODES=6 KUBE_VERSION=v1.20.7 ./hack/e2e.sh -- --ginkgo.focus='Basic'")
+        }
+        builds["E2E on kubernetes 1.22.1"] = {
+                build("v1.22", "${GLOBALS} GINKGO_NODES=6 KUBE_VERSION=v1.22.1 ./hack/e2e.sh -- --ginkgo.focus='Basic'")
         }
 		builds.failFast = false
 		if (!SKIP_TEST) {

@@ -4,12 +4,14 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package common
 
@@ -28,7 +30,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
-	"github.com/chaos-mesh/chaos-mesh/controllers/types"
+	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
@@ -56,7 +58,7 @@ type Params struct {
 	Reader          client.Reader    `name:"no-cache"`
 }
 
-func NewController(params Params) (types.Controller, error) {
+func Bootstrap(params Params) error {
 	logger := params.Logger
 	pairs := params.Impls
 	mgr := params.Mgr
@@ -67,11 +69,16 @@ func NewController(params Params) (types.Controller, error) {
 
 	setupLog := logger.WithName("setup-common")
 	for _, pair := range pairs {
+		name := pair.Name + "-records"
+		if !config.ShouldSpawnController(name) {
+			return nil
+		}
+
 		setupLog.Info("setting up controller", "resource-name", pair.Name)
 
 		builder := builder.Default(mgr).
 			For(pair.Object).
-			Named(pair.Name + "-records")
+			Named(name)
 
 		// Add owning resources
 		if len(pair.Controlls) > 0 {
@@ -104,8 +111,8 @@ func NewController(params Params) (types.Controller, error) {
 								}
 								if namespacedName == objName {
 									id := k8sTypes.NamespacedName{
-										Namespace: item.GetObjectMeta().Namespace,
-										Name:      item.GetObjectMeta().Name,
+										Namespace: item.GetNamespace(),
+										Name:      item.GetName(),
 									}
 									setupLog.Info("mapping requests", "source", objName, "target", id)
 									reqs = append(reqs, reconcile.Request{
@@ -130,10 +137,10 @@ func NewController(params Params) (types.Controller, error) {
 			Log:      logger.WithName("records"),
 		})
 		if err != nil {
-			return "", err
+			return err
 		}
 
 	}
 
-	return "records", nil
+	return nil
 }

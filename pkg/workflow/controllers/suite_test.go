@@ -4,12 +4,14 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package controllers
 
@@ -38,7 +40,7 @@ import (
 
 var app *fx.App
 var kubeClient client.Client
-var config *rest.Config
+var restConfig *rest.Config
 var testEnv *envtest.Environment
 var setupLog = ctrl.Log.WithName("setup")
 
@@ -69,18 +71,18 @@ var _ = BeforeSuite(func() {
 	err := v1alpha1.SchemeBuilder.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 
-	config, err = testEnv.Start()
+	restConfig, err = testEnv.Start()
 	Expect(err).ToNot(HaveOccurred())
-	Expect(config).ToNot(BeNil())
+	Expect(restConfig).ToNot(BeNil())
 
-	kubeClient, err = client.New(config, client.Options{Scheme: scheme.Scheme})
+	kubeClient, err = client.New(restConfig, client.Options{Scheme: scheme.Scheme})
 	Expect(err).ToNot(HaveOccurred())
 	Expect(kubeClient).ToNot(BeNil())
 
 	app = fx.New(
 		fx.Options(
 			test.Module,
-			fx.Supply(config),
+			fx.Supply(restConfig),
 			types.ChaosObjects,
 		),
 		// only startup workflow related
