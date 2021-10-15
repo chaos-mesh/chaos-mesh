@@ -1,15 +1,17 @@
-// Copyright 2019 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package collector
 
@@ -65,7 +67,7 @@ func (r *ChaosCollector) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		if chaosMeta, ok = obj.(metav1.Object); !ok {
 			r.Log.Error(nil, "failed to get chaos meta information")
 		}
-		if chaosMeta.GetLabels()["managed-by"] != "" {
+		if chaosMeta.GetLabels()[v1alpha1.LabelManagedBy] != "" {
 			manageFlag = true
 		}
 		if !manageFlag {
@@ -89,7 +91,7 @@ func (r *ChaosCollector) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		r.Log.Error(nil, "failed to get chaos meta information")
 	}
 
-	if chaosMeta.GetLabels()["managed-by"] != "" {
+	if chaosMeta.GetLabels()[v1alpha1.LabelManagedBy] != "" {
 		manageFlag = true
 	}
 
@@ -154,6 +156,12 @@ func (r *ChaosCollector) setUnarchivedExperiment(req ctrl.Request, obj v1alpha1.
 	case *v1alpha1.TimeChaos, *v1alpha1.KernelChaos, *v1alpha1.StressChaos:
 		archive.Action = ""
 	case *v1alpha1.DNSChaos:
+		archive.Action = string(chaos.Spec.Action)
+	case *v1alpha1.PhysicalMachineChaos:
+		archive.Action = string(chaos.Spec.Action)
+	case *v1alpha1.AWSChaos:
+		archive.Action = string(chaos.Spec.Action)
+	case *v1alpha1.GCPChaos:
 		archive.Action = string(chaos.Spec.Action)
 	default:
 		return errors.New("unsupported chaos type " + archive.Kind)

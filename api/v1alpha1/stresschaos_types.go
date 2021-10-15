@@ -1,15 +1,17 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package v1alpha1
 
@@ -23,7 +25,7 @@ import (
 // Stress chaos is a chaos to generate plenty of stresses over a collection of pods.
 
 // +kubebuilder:object:root=true
-// +chaos-mesh:base
+// +chaos-mesh:experiment
 
 // StressChaos is the Schema for the stresschaos API
 type StressChaos struct {
@@ -40,6 +42,7 @@ type StressChaos struct {
 
 var _ InnerObjectWithCustomStatus = (*StressChaos)(nil)
 var _ InnerObjectWithSelector = (*StressChaos)(nil)
+var _ InnerObject = (*StressChaos)(nil)
 
 // StressChaosSpec defines the desired state of StressChaos
 type StressChaosSpec struct {
@@ -97,7 +100,7 @@ type Stressors struct {
 // Normalize the stressors to comply with stress-ng
 func (in *Stressors) Normalize() (string, error) {
 	stressors := ""
-	if in.MemoryStressor != nil {
+	if in.MemoryStressor != nil && in.MemoryStressor.Workers != 0 {
 		stressors += fmt.Sprintf(" --vm %d --vm-keep", in.MemoryStressor.Workers)
 		if len(in.MemoryStressor.Size) != 0 {
 			if in.MemoryStressor.Size[len(in.MemoryStressor.Size)-1] != '%' {
@@ -118,7 +121,7 @@ func (in *Stressors) Normalize() (string, error) {
 			}
 		}
 	}
-	if in.CPUStressor != nil {
+	if in.CPUStressor != nil && in.CPUStressor.Workers != 0 {
 		stressors += fmt.Sprintf(" --cpu %d", in.CPUStressor.Workers)
 		if in.CPUStressor.Load != nil {
 			stressors += fmt.Sprintf(" --cpu-load %d",

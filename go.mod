@@ -12,6 +12,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/config v1.1.1
 	github.com/aws/aws-sdk-go-v2/credentials v1.1.1
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.5.0
+	github.com/bxcodec/faker v2.0.1+incompatible
 	github.com/chaos-mesh/chaos-mesh/api/v1alpha1 v0.0.0
 	github.com/chaos-mesh/k8s_dns_chaos v0.2.0
 	github.com/containerd/cgroups v1.0.2-0.20210605143700-23b51209bf7b
@@ -49,7 +50,6 @@ require (
 	github.com/pingcap/log v0.0.0-20200117041106-d28c14d3b1cd // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.11.0
-	github.com/robfig/cron v1.1.0
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/shirou/gopsutil v2.20.5+incompatible
 	github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749 // indirect

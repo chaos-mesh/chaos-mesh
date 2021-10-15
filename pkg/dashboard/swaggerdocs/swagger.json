@@ -668,7 +668,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/core.SelectorInfo"
+                            "$ref": "#/definitions/v1alpha1.PodSelectorSpec"
                         }
                     }
                 ],
@@ -2135,66 +2135,6 @@
                 }
             }
         },
-        "core.SelectorInfo": {
-            "type": "object",
-            "properties": {
-                "annotation_selectors": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "expression_selectors": {
-                    "type": "string"
-                },
-                "field_selectors": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "label_selectors": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "namespaces": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "node_selectors": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "nodes": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "phase_selectors": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "pods": {
-                    "description": "Pods is a map of string keys and a set values that used to select pods.\nThe key defines the namespace which pods belong,\nand the each values is a set of pod names.",
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
         "core.Topology": {
             "type": "object",
             "properties": {
@@ -2617,6 +2557,11 @@
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.NetworkChaosSpec"
                 },
+                "physicalmachineChaos": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.PhysicalMachineChaosSpec"
+                },
                 "podChaos": {
                     "description": "+optional",
                     "type": "object",
@@ -2731,6 +2676,34 @@
                     "description": "+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.ReorderSpec"
+                }
+            }
+        },
+        "v1alpha1.DiskFillSpec": {
+            "type": "object",
+            "properties": {
+                "fill_by_fallocate": {
+                    "type": "boolean"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.DiskPayloadSpec": {
+            "type": "object",
+            "properties": {
+                "path": {
+                    "type": "string"
+                },
+                "payload_process_num": {
+                    "type": "integer"
+                },
+                "size": {
+                    "type": "string"
                 }
             }
         },
@@ -3026,6 +2999,132 @@
                 }
             }
         },
+        "v1alpha1.JVMExceptionSpec": {
+            "type": "object",
+            "properties": {
+                "class": {
+                    "description": "Java class",
+                    "type": "string"
+                },
+                "exception": {
+                    "description": "the exception which needs to throw dor action `exception`",
+                    "type": "string"
+                },
+                "method": {
+                    "description": "the method in Java class",
+                    "type": "string"
+                },
+                "pid": {
+                    "description": "the pid of Java process which need to attach",
+                    "type": "integer"
+                },
+                "port": {
+                    "description": "the port of agent server",
+                    "type": "integer"
+                }
+            }
+        },
+        "v1alpha1.JVMGCSpec": {
+            "type": "object",
+            "properties": {
+                "pid": {
+                    "description": "the pid of Java process which need to attach",
+                    "type": "integer"
+                },
+                "port": {
+                    "description": "the port of agent server",
+                    "type": "integer"
+                }
+            }
+        },
+        "v1alpha1.JVMLatencySpec": {
+            "type": "object",
+            "properties": {
+                "class": {
+                    "description": "Java class",
+                    "type": "string"
+                },
+                "latency": {
+                    "description": "the latency duration for action 'latency', unit ms",
+                    "type": "integer"
+                },
+                "method": {
+                    "description": "the method in Java class",
+                    "type": "string"
+                },
+                "pid": {
+                    "description": "the pid of Java process which need to attach",
+                    "type": "integer"
+                },
+                "port": {
+                    "description": "the port of agent server",
+                    "type": "integer"
+                }
+            }
+        },
+        "v1alpha1.JVMReturnSpec": {
+            "type": "object",
+            "properties": {
+                "class": {
+                    "description": "Java class",
+                    "type": "string"
+                },
+                "method": {
+                    "description": "the method in Java class",
+                    "type": "string"
+                },
+                "pid": {
+                    "description": "the pid of Java process which need to attach",
+                    "type": "integer"
+                },
+                "port": {
+                    "description": "the port of agent server",
+                    "type": "integer"
+                },
+                "value": {
+                    "description": "the return value for action 'return'",
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.JVMRuleDataSpec": {
+            "type": "object",
+            "properties": {
+                "pid": {
+                    "description": "the pid of Java process which need to attach",
+                    "type": "integer"
+                },
+                "port": {
+                    "description": "the port of agent server",
+                    "type": "integer"
+                },
+                "rule-data": {
+                    "description": "RuleData used to save the rule file's data, will use it when recover",
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.JVMStressSpec": {
+            "type": "object",
+            "properties": {
+                "cpu-count": {
+                    "description": "the CPU core number need to use, only set it when action is stress",
+                    "type": "integer"
+                },
+                "mem-size": {
+                    "description": "the memory size need to locate, only set it when action is stress",
+                    "type": "integer"
+                },
+                "pid": {
+                    "description": "the pid of Java process which need to attach",
+                    "type": "integer"
+                },
+                "port": {
+                    "description": "the port of agent server",
+                    "type": "integer"
+                }
+            }
+        },
         "v1alpha1.KernelChaosSpec": {
             "type": "object",
             "properties": {
@@ -3172,6 +3271,228 @@
                 },
                 "value": {
                     "description": "Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.\nIf `FixedPodMode`, provide an integer of pods to do chaos action.\nIf `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.NetworkCorruptSpec": {
+            "type": "object",
+            "properties": {
+                "correlation": {
+                    "type": "string"
+                },
+                "device": {
+                    "type": "string"
+                },
+                "egress-port": {
+                    "type": "string"
+                },
+                "hostname": {
+                    "type": "string"
+                },
+                "ip-address": {
+                    "type": "string"
+                },
+                "ip-protocol": {
+                    "type": "string"
+                },
+                "percent": {
+                    "type": "string"
+                },
+                "source-port": {
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.NetworkDelaySpec": {
+            "type": "object",
+            "properties": {
+                "correlation": {
+                    "type": "string"
+                },
+                "device": {
+                    "type": "string"
+                },
+                "egress-port": {
+                    "type": "string"
+                },
+                "hostname": {
+                    "type": "string"
+                },
+                "ip-address": {
+                    "type": "string"
+                },
+                "ip-protocol": {
+                    "type": "string"
+                },
+                "jitter": {
+                    "type": "string"
+                },
+                "latency": {
+                    "type": "string"
+                },
+                "source-port": {
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.NetworkDuplicateSpec": {
+            "type": "object",
+            "properties": {
+                "correlation": {
+                    "type": "string"
+                },
+                "device": {
+                    "type": "string"
+                },
+                "egress-port": {
+                    "type": "string"
+                },
+                "hostname": {
+                    "type": "string"
+                },
+                "ip-address": {
+                    "type": "string"
+                },
+                "ip-protocol": {
+                    "type": "string"
+                },
+                "percent": {
+                    "type": "string"
+                },
+                "source-port": {
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.NetworkLossSpec": {
+            "type": "object",
+            "properties": {
+                "correlation": {
+                    "type": "string"
+                },
+                "device": {
+                    "type": "string"
+                },
+                "egress-port": {
+                    "type": "string"
+                },
+                "hostname": {
+                    "type": "string"
+                },
+                "ip-address": {
+                    "type": "string"
+                },
+                "ip-protocol": {
+                    "type": "string"
+                },
+                "percent": {
+                    "type": "string"
+                },
+                "source-port": {
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.PhysicalMachineChaosSpec": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "description": "the subAction, generate automatically\n+optional",
+                    "type": "string"
+                },
+                "address": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "disk-fill": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.DiskFillSpec"
+                },
+                "disk-read-payload": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.DiskPayloadSpec"
+                },
+                "disk-write-payload": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.DiskPayloadSpec"
+                },
+                "duration": {
+                    "description": "Duration represents the duration of the chaos action\n+optional\nDuration represents the duration of the chaos action",
+                    "type": "string"
+                },
+                "jvm-exception": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.JVMExceptionSpec"
+                },
+                "jvm-gc": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.JVMGCSpec"
+                },
+                "jvm-latency": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.JVMLatencySpec"
+                },
+                "jvm-return": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.JVMReturnSpec"
+                },
+                "jvm-rule-data": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.JVMRuleDataSpec"
+                },
+                "jvm-stress": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.JVMStressSpec"
+                },
+                "network-corrupt": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.NetworkCorruptSpec"
+                },
+                "network-delay": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.NetworkDelaySpec"
+                },
+                "network-duplicate": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.NetworkDuplicateSpec"
+                },
+                "network-loss": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.NetworkLossSpec"
+                },
+                "process": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.ProcessSpec"
+                },
+                "stress-cpu": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.StressCPUSpec"
+                },
+                "stress-mem": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.StressMemorySpec"
+                },
+                "uid": {
+                    "description": "the experiment ID\n+optional",
                     "type": "string"
                 }
             }
@@ -3381,6 +3702,17 @@
                 }
             }
         },
+        "v1alpha1.ProcessSpec": {
+            "type": "object",
+            "properties": {
+                "process": {
+                    "type": "string"
+                },
+                "signal": {
+                    "type": "integer"
+                }
+            }
+        },
         "v1alpha1.ReorderSpec": {
             "type": "object",
             "properties": {
@@ -3462,6 +3794,11 @@
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.NetworkChaosSpec"
                 },
+                "physicalmachineChaos": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.PhysicalMachineChaosSpec"
+                },
                 "podChaos": {
                     "description": "+optional",
                     "type": "object",
@@ -3508,6 +3845,17 @@
                 }
             }
         },
+        "v1alpha1.StressCPUSpec": {
+            "type": "object",
+            "properties": {
+                "load": {
+                    "type": "integer"
+                },
+                "workers": {
+                    "type": "integer"
+                }
+            }
+        },
         "v1alpha1.StressChaosSpec": {
             "type": "object",
             "properties": {
@@ -3542,6 +3890,14 @@
                 },
                 "value": {
                     "description": "Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.\nIf `FixedPodMode`, provide an integer of pods to do chaos action.\nIf `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.StressMemorySpec": {
+            "type": "object",
+            "properties": {
+                "size": {
                     "type": "string"
                 }
             }
@@ -3637,6 +3993,11 @@
                     "description": "+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.NetworkChaosSpec"
+                },
+                "physicalmachineChaos": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.PhysicalMachineChaosSpec"
                 },
                 "podChaos": {
                     "description": "+optional",
