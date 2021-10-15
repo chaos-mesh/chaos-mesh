@@ -166,6 +166,9 @@ func (it *EmbedChaos) RestoreChaosSpec(root interface{}) error {
 	case *NetworkChaos:
 		*it.NetworkChaos = chaos.Spec
 		return nil
+	case *PhysicalMachineChaos:
+		*it.PhysicalMachineChaos = chaos.Spec
+		return nil
 	case *PodChaos:
 		*it.PodChaos = chaos.Spec
 		return nil
