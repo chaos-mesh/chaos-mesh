@@ -208,6 +208,10 @@ export function parseYAML(
       spec.target.selector.annotationSelectors = spec.target.selector.annotationSelectors
         ? selectorsToArr(spec.target.selector.annotationSelectors, ': ')
         : []
+      spec.target.selector.phaseSelectors = spec.target.selector.phaseSelectors
+        ? selectorsToArr(spec.target.selector.phaseSelectors, ': ')
+        : []
+      spec.target.selector.pods = spec.target.selector.pods ? selectorsToArr(spec.target.selector.pods, ': ') : []
     }
   }
 
