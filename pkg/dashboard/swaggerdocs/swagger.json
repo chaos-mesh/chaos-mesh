@@ -668,7 +668,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/core.SelectorInfo"
+                            "$ref": "#/definitions/v1alpha1.PodSelectorSpec"
                         }
                     }
                 ],
@@ -2218,66 +2218,6 @@
                 },
                 "uid": {
                     "type": "string"
-                }
-            }
-        },
-        "core.SelectorInfo": {
-            "type": "object",
-            "properties": {
-                "annotation_selectors": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "expression_selectors": {
-                    "type": "string"
-                },
-                "field_selectors": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "label_selectors": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "namespaces": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "node_selectors": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "nodes": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "phase_selectors": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "pods": {
-                    "description": "Pods is a map of string keys and a set values that used to select pods.\nThe key defines the namespace which pods belong,\nand the each values is a set of pod names.",
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        }
-                    }
                 }
             }
         },

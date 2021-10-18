@@ -4,12 +4,14 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package finalizers
 
@@ -63,7 +65,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, nil
 	}
 
-	finalizers := obj.GetObjectMeta().Finalizers
+	finalizers := obj.GetFinalizers()
 	records := obj.GetStatus().Experiment.Records
 	shouldUpdate := false
 	if obj.IsDeleted() {
@@ -74,7 +76,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			}
 		}
 
-		if obj.GetObjectMeta().Annotations[AnnotationCleanFinalizer] == AnnotationCleanFinalizerForced || (resumed && len(finalizers) != 0) {
+		if obj.GetAnnotations()[AnnotationCleanFinalizer] == AnnotationCleanFinalizerForced || (resumed && len(finalizers) != 0) {
 			r.Recorder.Event(obj, recorder.FinalizerRemoved{})
 			finalizers = []string{}
 			shouldUpdate = true
@@ -83,7 +85,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		if !ContainsFinalizer(obj.(metav1.Object), RecordFinalizer) {
 			r.Recorder.Event(obj, recorder.FinalizerInited{})
 			shouldUpdate = true
-			finalizers = append(obj.GetObjectMeta().Finalizers, RecordFinalizer)
+			finalizers = append(obj.GetFinalizers(), RecordFinalizer)
 		}
 	}
 
@@ -96,7 +98,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 				return err
 			}
 
-			obj.GetObjectMeta().Finalizers = finalizers
+			obj.SetFinalizers(finalizers)
 			return r.Client.Update(context.TODO(), obj)
 		})
 		if updateError != nil {
