@@ -1,8 +1,7 @@
 import { Box, IconButton, Typography } from '@material-ui/core'
 import { Form, Formik } from 'formik'
-import React, { useEffect } from 'react'
 import { Submit, TextField } from 'components/FormField'
-import { Template, TemplateType, setTemplate } from 'slices/workflows'
+import { Template, TemplateType } from 'slices/workflows'
 import { useRef, useState } from 'react'
 import { validateDeadline, validateName } from 'lib/formikhelpers'
 
@@ -11,6 +10,7 @@ import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown'
 import ArrowRightIcon from '@material-ui/icons/ArrowRight'
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
+import React from 'react'
 import Space from 'components-mui/Space'
 import T from 'components/T'
 import { resetNewExperiment } from 'slices/experiments'
@@ -90,11 +90,13 @@ const SerialOrParallel: React.FC<SerialOrParallelProps> = (props) => {
     <>
       <Formik
         innerRef={formRef}
-        initialValues={{
-          name: props.name || '',
-          deadline: props.deadline || '',
-          type: props.type,
-        }}
+        initialValues={
+          {
+            name: props.name || '',
+            deadline: props.deadline || '',
+            type: props.type,
+          } as FormProps
+        }
         enableReinitialize
         onSubmit={submitSerialOrParallel}
         validate={onValidate}
@@ -106,26 +108,22 @@ const SerialOrParallel: React.FC<SerialOrParallelProps> = (props) => {
               <Form>
                 <Paper>
                   <PaperTop title={T(`newW.${values.type}Title`)} boxProps={{ mb: 3 }} />
-                  {(values.type === 'serial' || values.type === 'parallel') && (
-                    <Space direction="row">
-                      <TextField
-                        name="name"
-                        label={T('common.name')}
-                        validate={validateName(T('newW.nameValidation', intl))}
-                        helperText={errors.name && touched.name ? errors.name : T('newW.node.nameHelper')}
-                        error={errors.name && touched.name ? true : false}
-                      />
-                      <TextField
-                        name="deadline"
-                        label={T('newW.node.deadline')}
-                        validate={validateDeadline(T('newW.node.deadlineValidation', intl))}
-                        helperText={
-                          errors.deadline && touched.deadline ? errors.deadline : T('newW.node.deadlineHelper')
-                        }
-                        error={errors.deadline && touched.deadline ? true : false}
-                      />
-                    </Space>
-                  )}
+                  <Space direction="row">
+                    <TextField
+                      name="name"
+                      label={T('common.name')}
+                      validate={validateName(T('newW.nameValidation', intl))}
+                      helperText={errors.name && touched.name ? errors.name : T('newW.node.nameHelper')}
+                      error={errors.name && touched.name ? true : false}
+                    />
+                    <TextField
+                      name="deadline"
+                      label={T('newW.node.deadline')}
+                      validate={validateDeadline(T('newW.node.deadlineValidation', intl))}
+                      helperText={errors.deadline && touched.deadline ? errors.deadline : T('newW.node.deadlineHelper')}
+                      error={errors.deadline && touched.deadline ? true : false}
+                    />
+                  </Space>
                   <Submit disabled={templates.length !== props.childrenCount} />
                 </Paper>
               </Form>
