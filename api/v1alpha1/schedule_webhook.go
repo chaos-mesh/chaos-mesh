@@ -4,19 +4,20 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package v1alpha1
 
 import (
 	"fmt"
 
-	"github.com/robfig/cron/v3"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -77,7 +78,7 @@ func (in *ScheduleSpec) Validate() field.ErrorList {
 // validateSchedule validates the cron
 func (in *ScheduleSpec) validateSchedule(schedule *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
-	_, err := cron.ParseStandard(in.Schedule)
+	_, err := StandardCronParser.Parse(in.Schedule)
 	if err != nil {
 		allErrs = append(allErrs, field.Invalid(schedule,
 			in.Schedule,
@@ -91,7 +92,7 @@ func (in *ScheduleSpec) validateSchedule(schedule *field.Path) field.ErrorList {
 func (in *ScheduleSpec) validateChaos(chaos *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 	if in.Type != ScheduleTypeWorkflow {
-		allErrs = append(allErrs, in.EmbedChaos.Validate(string(in.Type))...)
+		allErrs = append(allErrs, in.EmbedChaos.Validate(chaos, string(in.Type))...)
 	}
 	return allErrs
 }

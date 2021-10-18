@@ -1,17 +1,18 @@
 #!/usr/bin/env bash
-
-# Copyright 2020 Chaos Mesh Authors.
+# Copyright 2021 Chaos Mesh Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+# http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
 
 # This is a script to quickly install chaos-mesh.
 # This script will check if docker and kubernetes are installed. If local mode is set and kubernetes is not installed,
@@ -62,7 +63,7 @@ main() {
     local local_kube=""
     local cm_version="latest"
     local kind_name="kind"
-    local kind_version="v0.7.0"
+    local kind_version="v0.11.1"
     local node_num=3
     local k8s_version="v1.17.2"
     local volume_num=5
@@ -914,6 +915,20 @@ metadata:
     app.kubernetes.io/component: chaos-daemon
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
+# Copyright 2021 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 kind: ServiceAccount
 apiVersion: v1
 metadata:
@@ -927,6 +942,20 @@ metadata:
     app.kubernetes.io/component: controller-manager
 ---
 # Source: chaos-mesh/templates/secrets-configuration.yaml
+# Copyright 2021 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 kind: Secret
 apiVersion: v1
 metadata:
@@ -1102,6 +1131,20 @@ subjects:
     namespace: "chaos-testing"
 ---
 # Source: chaos-mesh/templates/chaos-daemon-service.yaml
+# Copyright 2021 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 apiVersion: v1
 kind: Service
 metadata:
@@ -1152,6 +1195,20 @@ spec:
       name: http
 ---
 # Source: chaos-mesh/templates/controller-manager-service.yaml
+# Copyright 2021 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 apiVersion: v1
 kind: Service
 metadata:
@@ -1188,6 +1245,20 @@ spec:
     app.kubernetes.io/component: controller-manager
 ---
 # Source: chaos-mesh/templates/chaos-daemon-daemonset.yaml
+# Copyright 2021 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -1261,6 +1332,20 @@ spec:
             path: /sys
 ---
 # Source: chaos-mesh/templates/chaos-dashboard-deployment.yaml
+# Copyright 2021 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -1336,6 +1421,20 @@ spec:
         emptyDir: {}
 ---
 # Source: chaos-mesh/templates/controller-manager-deployment.yaml
+# Copyright 2021 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -1348,7 +1447,7 @@ metadata:
     app.kubernetes.io/version: v0.9.0
     app.kubernetes.io/component: controller-manager
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app.kubernetes.io/name: chaos-mesh
@@ -1400,6 +1499,10 @@ spec:
             value: !!str 31767
           - name: BPFKI_PORT
             value: !!str 50051
+          - name: ENABLED_CONTROLLERS
+            value: "*"
+          - name: ENABLED_WEBHOOKS
+            value: "*"
           - name: TEMPLATE_LABELS
             value: "app.kubernetes.io/component:template"
           - name: CONFIGMAP_LABELS
@@ -1418,6 +1521,14 @@ spec:
             value: "false"
           - name: POD_FAILURE_PAUSE_IMAGE
             value: gcr.io/google-containers/pause:latest
+          - name: ENABLE_LEADER_ELECTION
+            value: "true"
+          - name: LEADER_ELECT_LEASE_DURATION
+            value: "15s"
+          - name: LEADER_ELECT_RENEW_DEADLINE
+            value: "10s"
+          - name: LEADER_ELECT_RETRY_PERIOD
+            value: "2s"
         volumeMounts:
           - name: webhook-certs
             mountPath: /etc/webhook/certs
@@ -1436,8 +1547,184 @@ spec:
           secret:
             secretName: chaos-mesh-webhook-certs
 ---
+# Source: chaos-mesh/templates/chaos-daemon-rbac.yaml
+# Copyright 2021 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+---
+# Source: chaos-mesh/templates/chaos-dashboard-pvc.yaml
+# Copyright 2021 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+---
+# Source: chaos-mesh/templates/dns-configmap.yaml
+# Copyright 2021 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+---
+# Source: chaos-mesh/templates/dns-deployment.yaml
+# Copyright 2021 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+---
+# Source: chaos-mesh/templates/dns-rbac.yaml
+# Copyright 2021 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+---
+# Source: chaos-mesh/templates/dns-service.yaml
+# Copyright 2021 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+---
+# Source: chaos-mesh/templates/ingress.yaml
+# Copyright 2021 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+---
+# Source: chaos-mesh/templates/prometheus-configmap.yaml
+# Copyright 2021 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+---
+# Source: chaos-mesh/templates/prometheus-deployment.yaml
+# Copyright 2021 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+---
+# Source: chaos-mesh/templates/prometheus-rbac.yaml
+# Copyright 2021 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+---
+# Source: chaos-mesh/templates/prometheus-service.yaml
+# Copyright 2021 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+---
 # Source: chaos-mesh/templates/secrets-configuration.yaml
-apiVersion: admissionregistration.k8s.io/v1beta1
+apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
   name: chaos-mesh-mutation
@@ -1450,6 +1737,8 @@ metadata:
 webhooks:
   - name: admission-webhook.chaos-mesh.org
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     clientConfig:
       caBundle: "${CA_BUNDLE}"
       service:
@@ -1474,6 +1763,8 @@ webhooks:
     failurePolicy: Fail
     name: mpodchaos.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1493,6 +1784,8 @@ webhooks:
     failurePolicy: Fail
     name: miochaos.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1512,6 +1805,8 @@ webhooks:
     failurePolicy: Fail
     name: mtimechaos.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1531,6 +1826,8 @@ webhooks:
     failurePolicy: Fail
     name: mnetworkchaos.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1550,6 +1847,8 @@ webhooks:
     failurePolicy: Fail
     name: mkernelchaos.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1569,6 +1868,8 @@ webhooks:
     failurePolicy: Fail
     name: mstresschaos.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1588,6 +1889,8 @@ webhooks:
     failurePolicy: Fail
     name: mawschaos.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1607,6 +1910,8 @@ webhooks:
     failurePolicy: Fail
     name: mgcpchaos.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1626,6 +1931,8 @@ webhooks:
     failurePolicy: Fail
     name: mdnschaos.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1645,6 +1952,8 @@ webhooks:
     failurePolicy: Fail
     name: mjvmchaos.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1664,6 +1973,8 @@ webhooks:
     failurePolicy: Fail
     name: mschedule.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1683,6 +1994,8 @@ webhooks:
     failurePolicy: Fail
     name: mworkflow.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1702,6 +2015,8 @@ webhooks:
     failurePolicy: Fail
     name: mhttpchaos.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1712,9 +2027,30 @@ webhooks:
           - UPDATE
         resources:
           - httpchaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /mutate-chaos-mesh-org-v1alpha1-physicalmachinechaos
+    failurePolicy: Fail
+    name: mphysicalmachinechaos.kb.io
+    timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - physicalmachinechaos
 ---
 # Source: chaos-mesh/templates/secrets-configuration.yaml
-apiVersion: admissionregistration.k8s.io/v1beta1
+apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
   name: chaos-mesh-validation
@@ -1734,6 +2070,8 @@ webhooks:
     failurePolicy: Fail
     name: vpodchaos.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1753,6 +2091,8 @@ webhooks:
     failurePolicy: Fail
     name: viochaos.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1772,6 +2112,8 @@ webhooks:
     failurePolicy: Fail
     name: vtimechaos.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1791,6 +2133,8 @@ webhooks:
     failurePolicy: Fail
     name: vnetworkchaos.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1810,6 +2154,8 @@ webhooks:
     failurePolicy: Fail
     name: vkernelchaos.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1829,6 +2175,8 @@ webhooks:
     failurePolicy: Fail
     name: vstresschaos.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1848,6 +2196,8 @@ webhooks:
     failurePolicy: Fail
     name: vawschaos.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1867,6 +2217,8 @@ webhooks:
     failurePolicy: Fail
     name: vgcpchaos.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1886,6 +2238,8 @@ webhooks:
     failurePolicy: Fail
     name: vdnschaos.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1905,6 +2259,8 @@ webhooks:
     failurePolicy: Fail
     name: vjvmchaos.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1924,6 +2280,8 @@ webhooks:
     failurePolicy: Fail
     name: vschedule.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1943,6 +2301,8 @@ webhooks:
     failurePolicy: Fail
     name: vworkflow.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1962,6 +2322,8 @@ webhooks:
     failurePolicy: Fail
     name: vhttpchaos.kb.io
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1972,9 +2334,30 @@ webhooks:
           - UPDATE
         resources:
           - httpchaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /validate-chaos-mesh-org-v1alpha1-physicalmachinechaos
+    failurePolicy: Fail
+    name: vphysicalmachinechaos.kb.io
+    timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - physicalmachinechaos
 ---
 # Source: chaos-mesh/templates/secrets-configuration.yaml
-apiVersion: admissionregistration.k8s.io/v1beta1
+apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
   name: validate-auth
@@ -1993,6 +2376,9 @@ webhooks:
         path: /validate-auth
     failurePolicy: Fail
     name: vauth.kb.io
+    timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org

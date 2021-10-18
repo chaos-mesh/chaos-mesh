@@ -4,29 +4,22 @@ DOCKER_REGISTRY ?= "localhost:5000"
 
 # SET DOCKER_REGISTRY to change the docker registry
 DOCKER_REGISTRY_PREFIX := $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY)/,)
-DOCKER_BUILD_ARGS := --build-arg HTTP_PROXY=${HTTP_PROXY} --build-arg HTTPS_PROXY=${HTTPS_PROXY} --build-arg UI=${UI} --build-arg SWAGGER=${SWAGGER} --build-arg LDFLAGS="${LDFLAGS}" --build-arg CRATES_MIRROR="${CRATES_MIRROR}"
-
-GOVER_MAJOR := $(shell go version | sed -E -e "s/.*go([0-9]+)[.]([0-9]+).*/\1/")
-GOVER_MINOR := $(shell go version | sed -E -e "s/.*go([0-9]+)[.]([0-9]+).*/\2/")
-GO111 := $(shell [ $(GOVER_MAJOR) -gt 1 ] || [ $(GOVER_MAJOR) -eq 1 ] && [ $(GOVER_MINOR) -ge 11 ]; echo $$?)
+DOCKER_BUILD_ARGS := --build-arg HTTP_PROXY=${HTTP_PROXY} --build-arg HTTPS_PROXY=${HTTPS_PROXY} --build-arg UI=${UI} --build-arg LDFLAGS="${LDFLAGS}" --build-arg CRATES_MIRROR="${CRATES_MIRROR}"
 
 IMAGE_TAG := $(if $(IMAGE_TAG),$(IMAGE_TAG),latest)
+IMAGE_PROJECT := $(if $(IMAGE_PROJECT),$(IMAGE_PROJECT),pingcap)
 
 ROOT=$(shell pwd)
 OUTPUT_BIN=$(ROOT)/output/bin
 HELM_BIN=$(OUTPUT_BIN)/helm
 
 # Every branch should have its own image tag for build-env and dev-env
-IMAGE_BUILD_ENV_PROJECT ?= "chaos-mesh"
-IMAGE_BUILD_ENV_REGISTRY ?= "ghcr.io"
-IMAGE_BUILD_ENV_TAG ?= "latest"
-IMAGE_DEV_ENV_PROJECT ?= "chaos-mesh"
-IMAGE_DEV_ENV_REGISTRY ?= "ghcr.io"
-IMAGE_DEV_ENV_TAG ?= "latest"
-
-ifeq ($(GO111), 1)
-$(error Please upgrade your Go compiler to 1.11 or higher version)
-endif
+IMAGE_BUILD_ENV_PROJECT ?= chaos-mesh/chaos-mesh
+IMAGE_BUILD_ENV_REGISTRY ?= ghcr.io
+IMAGE_BUILD_ENV_BUILD ?= 0
+IMAGE_DEV_ENV_PROJECT ?= chaos-mesh/chaos-mesh
+IMAGE_DEV_ENV_REGISTRY ?= ghcr.io
+IMAGE_DEV_ENV_BUILD ?= 0
 
 # Enable GO111MODULE=on explicitly, disable it with GO111MODULE=off when necessary.
 export GO111MODULE := on
@@ -44,20 +37,9 @@ PACKAGE_LIST := echo $$(go list ./... | grep -vE "chaos-mesh/test|pkg/ptrace|zz_
 # no version conversion
 CRD_OPTIONS ?= "crd:trivialVersions=true,preserveUnknownFields=false,crdVersions=v1"
 
-# Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
-ifeq (,$(shell go env GOBIN))
-GOBIN=$(shell go env GOPATH)/bin
-else
-GOBIN=$(shell go env GOBIN)
-endif
-
 GO_BUILD_CACHE ?= $(ROOT)/.cache/chaos-mesh
 
 BUILD_TAGS ?=
-
-ifeq ($(SWAGGER),1)
-	BUILD_TAGS += swagger_server
-endif
 
 ifeq ($(UI),1)
 	BUILD_TAGS += ui_server
@@ -148,7 +130,26 @@ endif
 GO_TARGET_PHONY += $(1)
 endef
 
-BUILD_INDOCKER_ARG := --env IN_DOCKER=1 --volume $(ROOT):/mnt --user $(shell id -u):$(shell id -g)
+ifeq ($(TARGET_PLATFORM),)
+	UNAME_M := $(shell uname -m)
+	ifeq ($(UNAME_M),x86_64)
+		TARGET_PLATFORM := amd64
+	else ifeq ($(UNAME_M),amd64)
+		TARGET_PLATFORM := amd64
+	else ifeq ($(UNAME_M),arm64)
+		TARGET_PLATFORM := arm64
+	else ifeq ($(UNAME_M),aarch64)
+		TARGET_PLATFORM := arm64
+	else
+		$(error Please run this script on amd64 or arm64 machine)
+	endif
+endif
+
+BUILD_INDOCKER_ARG := --env IN_DOCKER=1 --volume $(ROOT):/mnt --user $(shell id -u):$(shell id -g) --platform=linux/$(TARGET_PLATFORM)
+
+ifeq ($(TARGET_PLATFORM),arm64)
+	BUILD_INDOCKER_ARG += --env ETCD_UNSUPPORTED_ARCH=arm64
+endif
 
 ifneq ($(GO_BUILD_CACHE),)
 	BUILD_INDOCKER_ARG += --volume $(GO_BUILD_CACHE)/chaos-mesh-gopath:/tmp/go
@@ -166,7 +167,7 @@ $(2): image-build-env go_build_cache_directory
 		sleep infinity); \
 	docker exec --workdir /mnt/ \
 		--env IMG_LDFLAGS="${LDFLAGS}" \
-		--env UI=${UI} --env SWAGGER=${SWAGGER} \
+		--env UI=${UI} \
 		$$$$DOCKER_ID /usr/bin/make $(2) && \
 	docker rm -f $$$$DOCKER_ID
 endif
@@ -229,11 +230,12 @@ e2e-test/image/e2e/chaos-mesh: helm/chaos-mesh
 # $(IMAGE_$(4)_PROJECT): the project name of the image, by default it is `pingcap`
 # $(IMAGE_$(4)_REGISTRY): the registry name of the image, it will override `DOCKER_REGISTRY`
 # $(IMAGE_$(4)_TAG): the tag of the image, it will override `IMAGE_TAG`
+# $(IMAGE_$(4)_BUILD): whether the image should be built locally rather than pulled from remote registry, by default it is `1`.
 define IMAGE_TEMPLATE
 
 $(4)_PROJECT := ${IMAGE_$(4)_PROJECT}
 ifeq ($$($(4)_PROJECT),)
-$(4)_PROJECT := pingcap
+$(4)_PROJECT := $(IMAGE_PROJECT)
 endif
 
 $(4)_REGISTRY := $(IMAGE_$(4)_REGISTRY)
@@ -250,11 +252,17 @@ endif
 
 $(4)_IMAGE := $$($(4)_DOCKER_REGISTRY_PREFIX)$$($(4)_PROJECT)/$(1):$$($(4)_TAG)
 
+IMAGE_$(4)_BUILD ?= 1
+
 CLEAN_TARGETS += $(2)/.dockerbuilt
 
 image-$(1): $(2)/.dockerbuilt
 
 $(2)/.dockerbuilt:$(image-$(1)-dependencies) $(2)/Dockerfile
+ifeq ($$(IMAGE_$(4)_BUILD),0)
+	docker pull $$($(4)_IMAGE)
+else
+
 ifeq ($(DOCKER_CACHE),1)
 
 ifneq ($(DISABLE_CACHE_FROM),1)
@@ -263,10 +271,10 @@ else
 	DOCKER_BUILDKIT=1 DOCKER_CLI_EXPERIMENTAL=enabled docker buildx build --load --cache-to type=local,dest=$(DOCKER_CACHE_DIR)/image-$(1) -t $$($(4)_IMAGE) ${DOCKER_BUILD_ARGS} $(2)
 endif
 
-else ifneq ($(TARGET_PLATFORM),)
-	DOCKER_BUILDKIT=1 docker buildx build --load --platform linux/$(TARGET_PLATFORM) -t $$($(4)_IMAGE) --build-arg TARGET_PLATFORM=$(TARGET_PLATFORM) ${DOCKER_BUILD_ARGS} $(2)
 else
-	DOCKER_BUILDKIT=1 docker build -t $$($(4)_IMAGE) ${DOCKER_BUILD_ARGS} $(2)
+	DOCKER_BUILDKIT=1 docker buildx build --load --platform linux/$(TARGET_PLATFORM) -t $$($(4)_IMAGE) --build-arg TARGET_PLATFORM=$(TARGET_PLATFORM) ${DOCKER_BUILD_ARGS} $(2)
+endif
+
 endif
 	touch $(2)/.dockerbuilt
 endef

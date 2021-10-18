@@ -4,12 +4,14 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package utils
 
@@ -37,7 +39,7 @@ func (lister *ActiveLister) ListActiveJobs(ctx context.Context, schedule *v1alph
 	}
 
 	list := kind.SpawnList()
-	err := lister.List(ctx, list, client.MatchingLabels{"managed-by": schedule.Name})
+	err := lister.List(ctx, list, client.MatchingLabels{v1alpha1.LabelManagedBy: schedule.Name})
 	if err != nil {
 		lister.Log.Error(err, "fail to list chaos")
 		return nil, nil
