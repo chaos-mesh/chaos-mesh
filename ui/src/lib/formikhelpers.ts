@@ -136,6 +136,12 @@ export function parseSubmit<K extends ExperimentKind>(
   }
 }
 
+function podSelectorsToArr(selector: Object) {
+  return Object.entries(selector)
+    .map(([ns, pods]) => pods.map((p: string) => `${ns}:${p}`))
+    .flat()
+}
+
 function selectorsToArr(selectors: Object, separator: string) {
   return Object.entries(selectors).map(([key, val]) => `${key}${separator}${val}`)
 }
@@ -208,10 +214,8 @@ export function parseYAML(
       spec.target.selector.annotationSelectors = spec.target.selector.annotationSelectors
         ? selectorsToArr(spec.target.selector.annotationSelectors, ': ')
         : []
-      spec.target.selector.phaseSelectors = spec.target.selector.phaseSelectors
-        ? selectorsToArr(spec.target.selector.phaseSelectors, ': ')
-        : []
-      spec.target.selector.pods = spec.target.selector.pods ? selectorsToArr(spec.target.selector.pods, ': ') : []
+      spec.target.selector.phaseSelectors = spec.target.selector.phaseSelectors || []
+      spec.target.selector.pods = spec.target.selector.pods ? podSelectorsToArr(spec.target.selector.pods) : []
     }
   }
 
