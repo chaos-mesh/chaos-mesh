@@ -30,7 +30,7 @@ const data = {
       namespaces: [],
       labelSelectors: [],
       annotationSelectors: [],
-      phaseSelectors: ['all'],
+      podPhaseSelectors: ['all'],
       pods: [],
     },
     mode: 'one',

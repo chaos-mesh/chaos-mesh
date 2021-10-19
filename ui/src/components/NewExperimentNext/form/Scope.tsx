@@ -182,8 +182,8 @@ const ScopeStep: React.FC<ScopeStepProps> = ({
         )}
 
         <SelectField
-          name={`${scope}.phaseSelectors`}
-          label={T('k8s.phaseSelectors')}
+          name={`${scope}.podPhaseSelectors`}
+          label={T('k8s.podPhaseSelectors')}
           helperText={T('common.multiOptions')}
           multiple
           onChange={handleChangeIncludeAll}
