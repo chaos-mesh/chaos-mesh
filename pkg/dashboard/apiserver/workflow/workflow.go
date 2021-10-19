@@ -49,6 +49,17 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint.DELETE("/:uid", s.deleteWorkflow)
 	endpoint.POST("/render-task/http", s.renderHTTPTask)
 	endpoint.POST("/parse-task/http", s.parseHTTPTask)
+	endpoint.POST("/validate-task/http", s.isValidRenderedHTTPTask)
+}
+
+// Service defines a handler service for workflows.
+type Service struct {
+	conf  *config.ChaosDashboardConfig
+	store core.WorkflowStore
+}
+
+func NewService(conf *config.ChaosDashboardConfig, store core.WorkflowStore) *Service {
+	return &Service{conf: conf, store: store}
 }
 
 // @Summary Render a task which sends HTTP request
@@ -74,6 +85,25 @@ func (it *Service) renderHTTPTask(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
+// @Summary Validate the given template is a valid rendered HTTP Task
+// @Description Validate the given template is a valid rendered HTTP Task
+// @Tags workflows
+// @Produce json
+// @Param request body v1alpha1.Template true "Rendered Task"
+// @Router /workflows/validate-task/http [post]
+// @Success 200 {object} bool
+// @Failure 400 {object} utils.APIError
+// @Failure 500 {object} utils.APIError
+func (it *Service) isValidRenderedHTTPTask(c *gin.Context) {
+	requestBody := v1alpha1.Template{}
+	if err := c.ShouldBindJSON(&requestBody); err != nil {
+		utils.SetAPIError(c, utils.ErrBadRequest.Wrap(err, "failed to parse request body"))
+		return
+	}
+	result := curl.IsValidRenderedTask(&requestBody)
+	c.JSON(http.StatusOK, result)
+}
+
 // @Summary Parse the rendered task back to the original request
 // @Description Parse the rendered task back to the original request
 // @Tags workflows
@@ -95,16 +125,6 @@ func (it *Service) parseHTTPTask(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, result)
-}
-
-// Service defines a handler service for workflows.
-type Service struct {
-	conf  *config.ChaosDashboardConfig
-	store core.WorkflowStore
-}
-
-func NewService(conf *config.ChaosDashboardConfig, store core.WorkflowStore) *Service {
-	return &Service{conf: conf, store: store}
 }
 
 // @Summary List workflows from Kubernetes cluster.

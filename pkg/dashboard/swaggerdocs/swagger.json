@@ -1858,6 +1858,49 @@
                 }
             }
         },
+        "/workflows/validate-task/http": {
+            "post": {
+                "description": "Validate the given template is a valid rendered HTTP Task",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workflows"
+                ],
+                "summary": "Validate the given template is a valid rendered HTTP Task",
+                "parameters": [
+                    {
+                        "description": "Rendered Task",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1alpha1.Template"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    }
+                }
+            }
+        },
         "/workflows/{uid}": {
             "get": {
                 "description": "Get detailed information about the specified workflow. If that object is not existed in kubernetes, it will only return ths persisted data in the database.",

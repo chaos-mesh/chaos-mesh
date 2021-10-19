@@ -3421,4 +3421,32 @@ paths:
       summary: Render a task which sends HTTP request
       tags:
       - workflows
+  /workflows/validate-task/http:
+    post:
+      description: Validate the given template is a valid rendered HTTP Task
+      parameters:
+      - description: Rendered Task
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/v1alpha1.Template'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: boolean
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Validate the given template is a valid rendered HTTP Task
+      tags:
+      - workflows
 swagger: "2.0"
