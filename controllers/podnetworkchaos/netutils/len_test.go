@@ -35,6 +35,6 @@ func Test_compressName(t *testing.T) {
 
 		name = CompressName(name, 13, "test")
 
-		g.Expect(name).Should(Equal("test _03_test"))
+		g.Expect(name).Should(Equal("test _90_test"))
 	})
 }
