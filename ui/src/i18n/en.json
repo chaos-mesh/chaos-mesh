@@ -347,6 +347,6 @@
     "namespaceSelectors": "Namespace Selectors",
     "labelSelectors": "Label Selectors",
     "annotationsSelectors": "Annotation Selectors",
-    "phaseSelectors": "Phase Selectors"
+    "podPhaseSelectors": "Phase Selectors"
   }
 }
