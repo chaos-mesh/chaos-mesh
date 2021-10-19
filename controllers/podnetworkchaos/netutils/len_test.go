@@ -29,7 +29,7 @@ func Test_compressName(t *testing.T) {
 
 		name = CompressName(name, 20, "test")
 
-		g.Expect(name).Should(Equal("Runni_a5e4631cf_test"))
+		g.Expect(name).Should(Equal("Runni_292d1924b_test"))
 
 		name = "test executed panic(nil) or runtime.Goexit: subtest may have called FailNow on a parent test"
 
