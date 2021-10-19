@@ -62,10 +62,10 @@ export function parseSubmit<K extends ExperimentKind>(
       delete scope.annotationSelectors
     }
 
-    // Parse phaseSelectors
-    const phaseSelectors = scope.phaseSelectors
-    if (phaseSelectors?.length === 1 && phaseSelectors[0] === 'all') {
-      delete scope.phaseSelectors
+    // Parse podPhaseSelectors
+    const podPhaseSelectors = scope.podPhaseSelectors
+    if (podPhaseSelectors?.length === 1 && podPhaseSelectors[0] === 'all') {
+      delete scope.podPhaseSelectors
     }
 
     // Parse pods
@@ -134,6 +134,12 @@ export function parseSubmit<K extends ExperimentKind>(
     metadata,
     spec,
   }
+}
+
+function podSelectorsToArr(selector: Object) {
+  return Object.entries(selector)
+    .map(([ns, pods]) => pods.map((p: string) => `${ns}:${p}`))
+    .flat()
 }
 
 function selectorsToArr(selectors: Object, separator: string) {
@@ -208,6 +214,8 @@ export function parseYAML(
       spec.target.selector.annotationSelectors = spec.target.selector.annotationSelectors
         ? selectorsToArr(spec.target.selector.annotationSelectors, ': ')
         : []
+      spec.target.selector.podPhaseSelectors = spec.target.selector.podPhaseSelectors || []
+      spec.target.selector.pods = spec.target.selector.pods ? podSelectorsToArr(spec.target.selector.pods) : []
     }
   }
 
