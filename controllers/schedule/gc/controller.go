@@ -18,6 +18,7 @@ package gc
 import (
 	"context"
 	"fmt"
+	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 	"reflect"
 	"sort"
 	"time"
@@ -45,12 +46,15 @@ type Reconciler struct {
 	Log      logr.Logger
 	Recorder recorder.ChaosRecorder
 
-	ActiveLister *utils.ActiveLister
+	ActiveLister     *utils.ActiveLister
+	MetricsCollector *metrics.ChaosControllerManagerMetricsCollector
 }
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	// In this controller, schedule could be out of date, as the reconcilation may be not caused by
 	// an update on Schedule, but by a *Chaos.
+	defer r.MetricsCollector.CollectReconcileDuration(controllerName, time.Now())
+
 	schedule := &v1alpha1.Schedule{}
 	err := r.Get(ctx, req.NamespacedName, schedule)
 	if err != nil {
@@ -142,7 +146,7 @@ type Objs struct {
 
 const controllerName = "schedule-gc"
 
-func Bootstrap(mgr ctrl.Manager, client client.Client, log logr.Logger, objs Objs, scheme *runtime.Scheme, lister *utils.ActiveLister, recorderBuilder *recorder.RecorderBuilder) error {
+func Bootstrap(mgr ctrl.Manager, client client.Client, log logr.Logger, objs Objs, scheme *runtime.Scheme, lister *utils.ActiveLister, recorderBuilder *recorder.RecorderBuilder, metricsCollector *metrics.ChaosControllerManagerMetricsCollector) error {
 	if !config.ShouldSpawnController(controllerName) {
 		return nil
 	}
@@ -162,5 +166,6 @@ func Bootstrap(mgr ctrl.Manager, client client.Client, log logr.Logger, objs Obj
 		log.WithName(controllerName),
 		recorderBuilder.Build(controllerName),
 		lister,
+		metricsCollector,
 	})
 }

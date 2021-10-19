@@ -17,6 +17,7 @@ package desiredphase
 
 import (
 	"context"
+	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -38,12 +39,15 @@ type Reconciler struct {
 	// Client is used to operate on the Kubernetes cluster
 	client.Client
 
-	Recorder recorder.ChaosRecorder
-	Log      logr.Logger
+	Recorder         recorder.ChaosRecorder
+	Log              logr.Logger
+	MetricsCollector *metrics.ChaosControllerManagerMetricsCollector
 }
 
 // Reconcile the common chaos
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	defer r.MetricsCollector.CollectReconcileDuration("desiredphase", time.Now())
+
 	obj := r.Object.DeepCopyObject().(v1alpha1.InnerObject)
 
 	if err := r.Client.Get(context.TODO(), req.NamespacedName, obj); err != nil {

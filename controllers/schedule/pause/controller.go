@@ -18,8 +18,10 @@ package pause
 import (
 	"context"
 	"fmt"
+	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 	"reflect"
 	"strconv"
+	"time"
 
 	"github.com/go-logr/logr"
 	k8sError "k8s.io/apimachinery/pkg/api/errors"
@@ -40,10 +42,13 @@ type Reconciler struct {
 	Log          logr.Logger
 	ActiveLister *utils.ActiveLister
 
-	Recorder recorder.ChaosRecorder
+	Recorder         recorder.ChaosRecorder
+	MetricsCollector *metrics.ChaosControllerManagerMetricsCollector
 }
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	defer r.MetricsCollector.CollectReconcileDuration(controllerName, time.Now())
+
 	schedule := &v1alpha1.Schedule{}
 	err := r.Get(ctx, req.NamespacedName, schedule)
 	if err != nil {
@@ -113,7 +118,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 const controllerName = "schedule-pause"
 
-func Bootstrap(mgr ctrl.Manager, client client.Client, log logr.Logger, lister *utils.ActiveLister, recorderBuilder *recorder.RecorderBuilder) error {
+func Bootstrap(mgr ctrl.Manager, client client.Client, log logr.Logger, lister *utils.ActiveLister, recorderBuilder *recorder.RecorderBuilder, metricsCollector *metrics.ChaosControllerManagerMetricsCollector) error {
 	if !config.ShouldSpawnController(controllerName) {
 		return nil
 	}
@@ -125,5 +130,6 @@ func Bootstrap(mgr ctrl.Manager, client client.Client, log logr.Logger, lister *
 			log.WithName(controllerName),
 			lister,
 			recorderBuilder.Build(controllerName),
+			metricsCollector,
 		})
 }

@@ -19,7 +19,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 	"net/http"
+	"time"
 
 	"github.com/go-logr/logr"
 	v1 "k8s.io/api/core/v1"
@@ -42,9 +44,12 @@ type Reconciler struct {
 	Recorder                 record.EventRecorder
 	Log                      logr.Logger
 	ChaosDaemonClientBuilder *chaosdaemon.ChaosDaemonClientBuilder
+	MetricsCollector         *metrics.ChaosControllerManagerMetricsCollector
 }
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	defer r.MetricsCollector.CollectReconcileDuration("podhttpchaos", time.Now())
+
 	obj := &v1alpha1.PodHttpChaos{}
 
 	if err := r.Client.Get(ctx, req.NamespacedName, obj); err != nil {

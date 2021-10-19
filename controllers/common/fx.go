@@ -17,6 +17,7 @@ package common
 
 import (
 	"context"
+	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 	"reflect"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -49,13 +50,14 @@ type ChaosImplPair struct {
 type Params struct {
 	fx.In
 
-	Mgr             ctrl.Manager
-	Client          client.Client
-	Logger          logr.Logger
-	Selector        *selector.Selector
-	RecorderBuilder *recorder.RecorderBuilder
-	Impls           []*ChaosImplPair `group:"impl"`
-	Reader          client.Reader    `name:"no-cache"`
+	Mgr              ctrl.Manager
+	Client           client.Client
+	Logger           logr.Logger
+	Selector         *selector.Selector
+	RecorderBuilder  *recorder.RecorderBuilder
+	Impls            []*ChaosImplPair `group:"impl"`
+	Reader           client.Reader    `name:"no-cache"`
+	MetricsCollector *metrics.ChaosControllerManagerMetricsCollector
 }
 
 func Bootstrap(params Params) error {
@@ -128,13 +130,14 @@ func Bootstrap(params Params) error {
 		}
 
 		err := builder.Complete(&Reconciler{
-			Impl:     pair.Impl,
-			Object:   pair.Object,
-			Client:   kubeclient,
-			Reader:   reader,
-			Recorder: recorderBuilder.Build("records"),
-			Selector: selector,
-			Log:      logger.WithName("records"),
+			Impl:             pair.Impl,
+			Object:           pair.Object,
+			Client:           kubeclient,
+			Reader:           reader,
+			Recorder:         recorderBuilder.Build("records"),
+			Selector:         selector,
+			Log:              logger.WithName("records"),
+			MetricsCollector: params.MetricsCollector,
 		})
 		if err != nil {
 			return err

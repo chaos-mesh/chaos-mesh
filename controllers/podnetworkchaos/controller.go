@@ -18,6 +18,8 @@ package podnetworkchaos
 import (
 	"context"
 	"fmt"
+	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
+	"time"
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
@@ -51,9 +53,12 @@ type Reconciler struct {
 	Log                      logr.Logger
 	AllowHostNetworkTesting  bool
 	ChaosDaemonClientBuilder *chaosdaemon.ChaosDaemonClientBuilder
+	MetricsCollector         *metrics.ChaosControllerManagerMetricsCollector
 }
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	defer r.MetricsCollector.CollectReconcileDuration("podnetworkchaos", time.Now())
+
 	obj := &v1alpha1.PodNetworkChaos{}
 
 	if err := r.Client.Get(ctx, req.NamespacedName, obj); err != nil {

@@ -17,8 +17,10 @@ package active
 
 import (
 	"context"
+	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 	"reflect"
 	"sort"
+	"time"
 
 	"github.com/go-logr/logr"
 	"go.uber.org/fx"
@@ -46,10 +48,13 @@ type Reconciler struct {
 
 	ActiveLister *utils.ActiveLister
 
-	Recorder recorder.ChaosRecorder
+	Recorder         recorder.ChaosRecorder
+	MetricsCollector *metrics.ChaosControllerManagerMetricsCollector
 }
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	defer r.MetricsCollector.CollectReconcileDuration(controllerName, time.Now())
+
 	schedule := &v1alpha1.Schedule{}
 	err := r.Get(ctx, req.NamespacedName, schedule)
 	if err != nil {
@@ -125,7 +130,7 @@ type Objs struct {
 
 const controllerName = "schedule-active"
 
-func Bootstrap(mgr ctrl.Manager, client client.Client, log logr.Logger, objs Objs, scheme *runtime.Scheme, lister *utils.ActiveLister, recorderBuilder *recorder.RecorderBuilder) error {
+func Bootstrap(mgr ctrl.Manager, client client.Client, log logr.Logger, objs Objs, scheme *runtime.Scheme, lister *utils.ActiveLister, recorderBuilder *recorder.RecorderBuilder, metricsCollector *metrics.ChaosControllerManagerMetricsCollector) error {
 	if !config.ShouldSpawnController(controllerName) {
 		return nil
 	}
@@ -145,5 +150,6 @@ func Bootstrap(mgr ctrl.Manager, client client.Client, log logr.Logger, objs Obj
 		log.WithName(controllerName),
 		lister,
 		recorderBuilder.Build(controllerName),
+		metricsCollector,
 	})
 }

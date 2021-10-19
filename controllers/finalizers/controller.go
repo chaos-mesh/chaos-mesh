@@ -17,6 +17,8 @@ package finalizers
 
 import (
 	"context"
+	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
+	"time"
 
 	"github.com/go-logr/logr"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -48,11 +50,14 @@ type Reconciler struct {
 
 	Recorder recorder.ChaosRecorder
 
-	Log logr.Logger
+	Log              logr.Logger
+	MetricsCollector *metrics.ChaosControllerManagerMetricsCollector
 }
 
 // Reconcile the common chaos
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	defer r.MetricsCollector.CollectReconcileDuration("finalizer", time.Now())
+
 	obj := r.Object.DeepCopyObject().(v1alpha1.InnerObject)
 
 	if err := r.Client.Get(context.TODO(), req.NamespacedName, obj); err != nil {

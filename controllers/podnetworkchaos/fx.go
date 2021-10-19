@@ -16,6 +16,7 @@
 package podnetworkchaos
 
 import (
+	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 	"reflect"
 
 	"github.com/go-logr/logr"
@@ -31,7 +32,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 )
 
-func Bootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, b *chaosdaemon.ChaosDaemonClientBuilder, recorderBuilder *recorder.RecorderBuilder) error {
+func Bootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, b *chaosdaemon.ChaosDaemonClientBuilder, recorderBuilder *recorder.RecorderBuilder, metricsCollector *metrics.ChaosControllerManagerMetricsCollector) error {
 	if !config.ShouldSpawnController("podnetworkchaos") {
 		return nil
 	}
@@ -55,5 +56,6 @@ func Bootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, b *ch
 			// TODO:
 			AllowHostNetworkTesting:  config.ControllerCfg.AllowHostNetworkTesting,
 			ChaosDaemonClientBuilder: b,
+			MetricsCollector:         metricsCollector,
 		})
 }

@@ -16,6 +16,7 @@
 package condition
 
 import (
+	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 	"github.com/go-logr/logr"
 	"go.uber.org/fx"
 
@@ -33,7 +34,7 @@ type Objs struct {
 	Objs []types.Object `group:"objs"`
 }
 
-func Bootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, objs Objs) error {
+func Bootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, objs Objs, metricsCollector *metrics.ChaosControllerManagerMetricsCollector) error {
 	setupLog := logger.WithName("setup-condition")
 	for _, obj := range objs.Objs {
 		name := obj.Name + "-condition"
@@ -47,10 +48,11 @@ func Bootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, objs 
 			For(obj.Object).
 			Named(name).
 			Complete(&Reconciler{
-				Object:   obj.Object,
-				Client:   client,
-				Recorder: mgr.GetEventRecorderFor("condition"),
-				Log:      logger.WithName("condition"),
+				Object:           obj.Object,
+				Client:           client,
+				Recorder:         mgr.GetEventRecorderFor("condition"),
+				Log:              logger.WithName("condition"),
+				MetricsCollector: metricsCollector,
 			})
 		if err != nil {
 			return err

@@ -17,8 +17,10 @@ package common
 
 import (
 	"context"
+	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 	"reflect"
 	"strings"
+	"time"
 
 	"github.com/go-logr/logr"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -51,7 +53,8 @@ type Reconciler struct {
 
 	Selector *selector.Selector
 
-	Log logr.Logger
+	Log              logr.Logger
+	MetricsCollector *metrics.ChaosControllerManagerMetricsCollector
 }
 
 type Operation string
@@ -64,6 +67,8 @@ const (
 
 // Reconcile the common chaos
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	defer r.MetricsCollector.CollectReconcileDuration("records", time.Now())
+
 	obj := r.Object.DeepCopyObject().(v1alpha1.InnerObjectWithSelector)
 
 	if err := r.Client.Get(context.TODO(), req.NamespacedName, obj); err != nil {

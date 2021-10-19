@@ -16,6 +16,7 @@
 package desiredphase
 
 import (
+	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 	"github.com/go-logr/logr"
 	"go.uber.org/fx"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -33,7 +34,7 @@ type Objs struct {
 	Objs []types.Object `group:"objs"`
 }
 
-func Bootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, recorderBuilder *recorder.RecorderBuilder, pairs Objs) error {
+func Bootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, recorderBuilder *recorder.RecorderBuilder, pairs Objs, metricsCollector *metrics.ChaosControllerManagerMetricsCollector) error {
 	for _, obj := range pairs.Objs {
 		name := obj.Name + "-desiredphase"
 		if !ccfg.ShouldSpawnController(name) {
@@ -44,10 +45,11 @@ func Bootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, recor
 			For(obj.Object).
 			Named(name).
 			Complete(&Reconciler{
-				Object:   obj.Object,
-				Client:   client,
-				Recorder: recorderBuilder.Build("desiredphase"),
-				Log:      logger.WithName("desiredphase"),
+				Object:           obj.Object,
+				Client:           client,
+				Recorder:         recorderBuilder.Build("desiredphase"),
+				Log:              logger.WithName("desiredphase"),
+				MetricsCollector: metricsCollector,
 			})
 		if err != nil {
 			return err

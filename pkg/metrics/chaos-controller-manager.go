@@ -16,23 +16,17 @@
 package metrics
 
 import (
-	"context"
-	"reflect"
-
 	"github.com/prometheus/client_golang/prometheus"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
-
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/pkg/status"
+	"time"
 )
 
-var log = ctrl.Log.WithName("metrics-collector")
+var log = ctrl.Log.WithName("chaos-controller-manager-metrics-collector")
 
-// ChaosCollector implements prometheus.Collector interface
-type ChaosCollector struct {
+// ChaosControllerManagerMetricsCollector implements prometheus.Collector interface
+type ChaosControllerManagerMetricsCollector struct {
 	store               cache.Cache
-	experimentStatus    *prometheus.GaugeVec
 	SidecarTemplates    prometheus.Gauge
 	ConfigTemplates     *prometheus.GaugeVec
 	InjectionConfigs    *prometheus.GaugeVec
@@ -41,16 +35,13 @@ type ChaosCollector struct {
 	ConfigNameDuplicate *prometheus.CounterVec
 	InjectRequired      *prometheus.CounterVec
 	Injections          *prometheus.CounterVec
+	reconcileDuration   *prometheus.HistogramVec
 }
 
-// NewChaosCollector initializes metrics and collector
-func NewChaosCollector(store cache.Cache, registerer prometheus.Registerer) *ChaosCollector {
-	c := &ChaosCollector{
-		store: store,
-		experimentStatus: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-			Name: "chaos_mesh_experiments",
-			Help: "Total number of chaos experiments and their phases",
-		}, []string{"namespace", "kind", "phase"}),
+// NewChaosControllerManagerMetricsCollector initializes metrics and collector
+func NewChaosControllerManagerMetricsCollector(manager ctrl.Manager, registerer *prometheus.Registry) *ChaosControllerManagerMetricsCollector {
+	c := &ChaosControllerManagerMetricsCollector{
+		store: manager.GetCache(),
 		SidecarTemplates: prometheus.NewGauge(prometheus.GaugeOpts{
 			Name: "chaos_mesh_templates",
 			Help: "Total number of injection templates",
@@ -83,65 +74,43 @@ func NewChaosCollector(store cache.Cache, registerer prometheus.Registerer) *Cha
 			Name: "chaos_mesh_injections_total",
 			Help: "Total number of sidecar injections performed on the webhook",
 		}, []string{"namespace", "config"}),
+		reconcileDuration: prometheus.NewHistogramVec(prometheus.HistogramOpts{
+			Name:    "chaos_controller_manager_reconcile_duration_seconds",
+			Help:    "Duration histogram for each reconcile request",
+			Buckets: prometheus.DefBuckets,
+		}, []string{"type"}),
 	}
 	registerer.MustRegister(c)
 	return c
 }
 
 // Describe implements the prometheus.Collector interface.
-func (c *ChaosCollector) Describe(ch chan<- *prometheus.Desc) {
-	c.experimentStatus.Describe(ch)
-	c.SidecarTemplates.Describe(ch)
-	c.ConfigTemplates.Describe(ch)
-	c.InjectionConfigs.Describe(ch)
-	c.TemplateNotExist.Describe(ch)
-	c.ConfigNameDuplicate.Describe(ch)
-	c.TemplateLoadError.Describe(ch)
-	c.InjectRequired.Describe(ch)
-	c.Injections.Describe(ch)
+func (collector *ChaosControllerManagerMetricsCollector) Describe(ch chan<- *prometheus.Desc) {
+	collector.SidecarTemplates.Describe(ch)
+	collector.ConfigTemplates.Describe(ch)
+	collector.InjectionConfigs.Describe(ch)
+	collector.TemplateNotExist.Describe(ch)
+	collector.ConfigNameDuplicate.Describe(ch)
+	collector.TemplateLoadError.Describe(ch)
+	collector.InjectRequired.Describe(ch)
+	collector.Injections.Describe(ch)
+	collector.reconcileDuration.Describe(ch)
 }
 
 // Collect implements the prometheus.Collector interface.
-func (c *ChaosCollector) Collect(ch chan<- prometheus.Metric) {
-	c.collect()
-	c.SidecarTemplates.Collect(ch)
-	c.ConfigTemplates.Collect(ch)
-	c.InjectionConfigs.Collect(ch)
-	c.TemplateNotExist.Collect(ch)
-	c.ConfigNameDuplicate.Collect(ch)
-	c.TemplateLoadError.Collect(ch)
-	c.InjectRequired.Collect(ch)
-	c.Injections.Collect(ch)
-	c.experimentStatus.Collect(ch)
+func (collector *ChaosControllerManagerMetricsCollector) Collect(ch chan<- prometheus.Metric) {
+	collector.SidecarTemplates.Collect(ch)
+	collector.ConfigTemplates.Collect(ch)
+	collector.InjectionConfigs.Collect(ch)
+	collector.TemplateNotExist.Collect(ch)
+	collector.ConfigNameDuplicate.Collect(ch)
+	collector.TemplateLoadError.Collect(ch)
+	collector.InjectRequired.Collect(ch)
+	collector.Injections.Collect(ch)
+	collector.reconcileDuration.Collect(ch)
 }
 
-func (c *ChaosCollector) collect() {
-	// TODO(yeya24) if there is an error in List
-	// the experiment status will be lost
-	c.experimentStatus.Reset()
-
-	for kind, obj := range v1alpha1.AllKinds() {
-		expCache := map[string]map[string]int{}
-		chaosList := obj.SpawnList()
-		if err := c.store.List(context.TODO(), chaosList); err != nil {
-			log.Error(err, "failed to list chaos", "kind", kind)
-			return
-		}
-
-		items := reflect.ValueOf(chaosList).Elem().FieldByName("Items")
-		for i := 0; i < items.Len(); i++ {
-			item := items.Index(i).Addr().Interface().(v1alpha1.InnerObject)
-			if _, ok := expCache[item.GetNamespace()]; !ok {
-				// There is only 4 supported phases
-				expCache[item.GetNamespace()] = make(map[string]int, 4)
-			}
-			expCache[item.GetNamespace()][string(status.GetChaosStatus(item))]++
-		}
-
-		for ns, v := range expCache {
-			for phase, count := range v {
-				c.experimentStatus.WithLabelValues(ns, kind, phase).Set(float64(count))
-			}
-		}
-	}
+func (collector *ChaosControllerManagerMetricsCollector) CollectReconcileDuration(typeLabel string, before time.Time) {
+	after := time.Now()
+	collector.reconcileDuration.WithLabelValues(typeLabel).Observe(after.Sub(before).Seconds())
 }
