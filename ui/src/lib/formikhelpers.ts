@@ -1,3 +1,19 @@
+/*
+ * Copyright 2021 Chaos Mesh Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 import { Experiment, ExperimentKind, Frame, Scope } from 'components/NewExperiment/types'
 
 import { ScheduleSpecific } from 'components/Schedule/types'
@@ -46,10 +62,10 @@ export function parseSubmit<K extends ExperimentKind>(
       delete scope.annotationSelectors
     }
 
-    // Parse phaseSelectors
-    const phaseSelectors = scope.phaseSelectors
-    if (phaseSelectors?.length === 1 && phaseSelectors[0] === 'all') {
-      delete scope.phaseSelectors
+    // Parse podPhaseSelectors
+    const podPhaseSelectors = scope.podPhaseSelectors
+    if (podPhaseSelectors?.length === 1 && podPhaseSelectors[0] === 'all') {
+      delete scope.podPhaseSelectors
     }
 
     // Parse pods
@@ -118,6 +134,12 @@ export function parseSubmit<K extends ExperimentKind>(
     metadata,
     spec,
   }
+}
+
+function podSelectorsToArr(selector: Object) {
+  return Object.entries(selector)
+    .map(([ns, pods]) => pods.map((p: string) => `${ns}:${p}`))
+    .flat()
 }
 
 function selectorsToArr(selectors: Object, separator: string) {
@@ -192,6 +214,8 @@ export function parseYAML(
       spec.target.selector.annotationSelectors = spec.target.selector.annotationSelectors
         ? selectorsToArr(spec.target.selector.annotationSelectors, ': ')
         : []
+      spec.target.selector.podPhaseSelectors = spec.target.selector.podPhaseSelectors || []
+      spec.target.selector.pods = spec.target.selector.pods ? podSelectorsToArr(spec.target.selector.pods) : []
     }
   }
 
