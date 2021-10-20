@@ -19,7 +19,6 @@ import (
 	"bytes"
 	"debug/elf"
 	"embed"
-	_ "embed"
 	"encoding/binary"
 	"errors"
 	"os"

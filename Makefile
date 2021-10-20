@@ -193,7 +193,7 @@ images/chaos-daemon/bin/pause: hack/pause.c
 	cc ./hack/pause.c -o images/chaos-daemon/bin/pause
 
 pkg/time/fakeclock/fake_clock_gettime.o: pkg/time/fakeclock/fake_clock_gettime.c
-	cc -c ./pkg/fakeclock/fake_clock_gettime.c -fPIE -O2 -o pkg/fakeclock/fake_clock_gettime.o
+	cc -c ./pkg/time/fakeclock/fake_clock_gettime.c -fPIE -O2 -o pkg/time/fakeclock/fake_clock_gettime.o
 endif
 $(eval $(call BUILD_IN_DOCKER_TEMPLATE,chaos-daemon,images/chaos-daemon/bin/pause))
 
