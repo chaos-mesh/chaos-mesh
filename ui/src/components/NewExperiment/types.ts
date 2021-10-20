@@ -25,7 +25,7 @@ interface Selector {
   namespaces: string[]
   labelSelectors?: string[]
   annotationSelectors?: string[]
-  phaseSelectors?: string[]
+  podPhaseSelectors?: string[]
   pods?: string[]
 }
 
