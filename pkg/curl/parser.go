@@ -89,7 +89,7 @@ func ParseWorkflowTaskTemplate(template *v1alpha1.Template) (*RequestForm, error
 }
 
 func IsValidRenderedTask(template *v1alpha1.Template) bool {
-	return strings.HasSuffix(template.Task.Container.Name, nameSuffix)
+	return template.Type == v1alpha1.TypeTask && strings.HasSuffix(template.Task.Container.Name, nameSuffix)
 }
 
 func parseHeader(headerKV string) (string, string) {
