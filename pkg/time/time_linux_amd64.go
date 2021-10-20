@@ -104,7 +104,7 @@ func init() {
 
 					sym := &syms[symNo-1]
 					fakeImage.offset[sym.Name] = len(fakeImage.content)
-					targetOffset := uint32(len(fakeImage.content)) - (uint32(rela.Off) - uint32(rela.Addend))
+					targetOffset := uint32(len(fakeImage.content)) - uint32(rela.Off) + uint32(rela.Addend)
 					elfFile.ByteOrder.PutUint32(fakeImage.content[rela.Off:rela.Off+4], targetOffset)
 
 					// TODO: support other length besides uint64 (which is 8 bytes)
