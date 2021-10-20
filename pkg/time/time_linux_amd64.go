@@ -17,57 +17,107 @@ package time
 
 import (
 	"bytes"
+	"debug/elf"
+	"embed"
+	_ "embed"
+	"encoding/binary"
 	"errors"
+	"fmt"
+	"os"
 	"runtime"
+	"strings"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/mapreader"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 	"github.com/chaos-mesh/chaos-mesh/pkg/ptrace"
 )
 
-// TODO: support more cpu architecture
-// TODO: auto generate these codes
-var fakeImage = []byte{
-	0xb8, 0xe4, 0x00, 0x00, 0x00, //mov    $0xe4,%eax
-	0x0f, 0x05, //syscall
-	0xba, 0x01, 0x00, 0x00, 0x00, //mov    $0x1,%edx
-	0x89, 0xf9, //mov    %edi,%ecx
-	0xd3, 0xe2, //shl    %cl,%edx
-	0x48, 0x8d, 0x0d, 0x74, 0x00, 0x00, 0x00, //lea    0x74(%rip),%rcx        # <CLOCK_IDS_MASK>
-	0x48, 0x63, 0xd2, //movslq %edx,%rdx
-	0x48, 0x85, 0x11, //test   %rdx,(%rcx)
-	0x74, 0x6b, //je     108a <clock_gettime+0x8a>
-	0x48, 0x8d, 0x15, 0x6d, 0x00, 0x00, 0x00, //lea    0x6d(%rip),%rdx        # <TV_SEC_DELTA>
-	0x4c, 0x8b, 0x46, 0x08, //mov    0x8(%rsi),%r8
-	0x48, 0x8b, 0x0a, //mov    (%rdx),%rcx
-	0x48, 0x8d, 0x15, 0x67, 0x00, 0x00, 0x00, //lea    0x67(%rip),%rdx        # <TV_NSEC_DELTA>
-	0x48, 0x8b, 0x3a, //mov    (%rdx),%rdi
-	0x4a, 0x8d, 0x14, 0x07, //lea    (%rdi,%r8,1),%rdx
-	0x48, 0x81, 0xfa, 0x00, 0xca, 0x9a, 0x3b, //cmp    $0x3b9aca00,%rdx
-	0x7e, 0x1c, //jle    <clock_gettime+0x60>
-	0x0f, 0x1f, 0x40, 0x00, //nopl   0x0(%rax)
-	0x48, 0x81, 0xef, 0x00, 0xca, 0x9a, 0x3b, //sub    $0x3b9aca00,%rdi
-	0x48, 0x83, 0xc1, 0x01, //add    $0x1,%rcx
-	0x49, 0x8d, 0x14, 0x38, //lea    (%r8,%rdi,1),%rdx
-	0x48, 0x81, 0xfa, 0x00, 0xca, 0x9a, 0x3b, //cmp    $0x3b9aca00,%rdx
-	0x7f, 0xe8, //jg     <clock_gettime+0x48>
-	0x48, 0x85, 0xd2, //test   %rdx,%rdx
-	0x79, 0x1e, //jns    <clock_gettime+0x83>
-	0x4a, 0x8d, 0xbc, 0x07, 0x00, 0xca, 0x9a, //lea    0x3b9aca00(%rdi,%r8,1),%rdi
-	0x3b,             //
-	0x0f, 0x1f, 0x00, //nopl   (%rax)
-	0x48, 0x89, 0xfa, //mov    %rdi,%rdx
-	0x48, 0x83, 0xe9, 0x01, //sub    $0x1,%rcx
-	0x48, 0x81, 0xc7, 0x00, 0xca, 0x9a, 0x3b, //add    $0x3b9aca00,%rdi
-	0x48, 0x85, 0xd2, //test   %rdx,%rdx
-	0x78, 0xed, //js     <clock_gettime+0x70>
-	0x48, 0x01, 0x0e, //add    %rcx,(%rsi)
-	0x48, 0x89, 0x56, 0x08, //mov    %rdx,0x8(%rsi)
-	0xc3, //retq
-	// constant
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, //CLOCK_IDS_MASK
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, //TV_SEC_DELTA
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, //TV_NSEC_DELTA
+//go:embed fakeclock/*.o
+var fakeclock embed.FS
+
+type FakeImage struct {
+	content []byte
+	offset  map[string]int
+}
+
+var fakeImages = map[string]FakeImage{}
+
+func init() {
+	// in this function, we will load fake image from `fakeclock/*.o`
+	entries, err := fakeclock.ReadDir("fakeclock")
+	if err != nil {
+		log.Error(err, "readdir from embedded fs")
+		os.Exit(1)
+	}
+
+	for _, entry := range entries {
+		path := "fakeclock/" + entry.Name()
+		object, err := fakeclock.ReadFile(path)
+		if err != nil {
+			log.Error(err, "read file from embedded fs", "path", path)
+			os.Exit(1)
+		}
+
+		elfFile, err := elf.NewFile(bytes.NewReader(object))
+		if err != nil {
+			log.Error(err, "parse elf", "path", path)
+			os.Exit(1)
+		}
+
+		syms, err := elfFile.Symbols()
+		if err != nil {
+			log.Error(err, "get symbols")
+			os.Exit(1)
+		}
+
+		fakeImage := FakeImage{
+			offset: make(map[string]int),
+		}
+		for _, r := range elfFile.Sections {
+			if r.Type == elf.SHT_PROGBITS && r.Name == ".text" {
+				fakeImage.content, err = r.Data()
+				if err != nil {
+					log.Error(err, "read text section")
+					os.Exit(1)
+				}
+
+				break
+			}
+		}
+
+		for _, r := range elfFile.Sections {
+			if r.Type == elf.SHT_RELA && r.Name == ".rela.text" {
+				rela_section, err := r.Data()
+				if err != nil {
+					log.Error(err, "read rela section")
+					os.Exit(1)
+				}
+				rela_section_reader := bytes.NewReader(rela_section)
+
+				var rela elf.Rela64
+				for rela_section_reader.Len() > 0 {
+					binary.Read(rela_section_reader, elfFile.ByteOrder, &rela)
+
+					symNo := rela.Info >> 32
+					if symNo == 0 || symNo > uint64(len(syms)) {
+						continue
+					}
+
+					sym := &syms[symNo-1]
+					fakeImage.offset[sym.Name] = len(fakeImage.content)
+					targetOffset := uint32(len(fakeImage.content)) - (uint32(rela.Off) - uint32(rela.Addend))
+					elfFile.ByteOrder.PutUint32(fakeImage.content[rela.Off:rela.Off+4], targetOffset)
+
+					// TODO: support other length besides uint64 (which is 8 bytes)
+					fakeImage.content = append(fakeImage.content, make([]byte, 8)...)
+				}
+
+				break
+			}
+		}
+
+		fakeImages[strings.TrimSuffix(entry.Name(), ".o")] = fakeImage
+	}
 }
 
 // ModifyTime modifies time of target process
@@ -111,57 +161,64 @@ func ModifyTime(pid int, deltaSec int64, deltaNsec int64, clockIdsMask uint64) e
 		return errors.New("cannot find [vdso] entry")
 	}
 
-	// minus tailing variable part
-	// 24 = 3 * 8 because we have three variables
-	constImageLen := len(fakeImage) - 24
-	var fakeEntry *mapreader.Entry
+	for name, fakeImage := range fakeImages {
+		switch name {
+		case "fake_clock_gettime":
+			// minus tailing variable part
+			// every variable has 8 bytes
+			constImageLen := len(fakeImage.content) - 8*len(fakeImage.offset)
+			var fakeEntry *mapreader.Entry
 
-	// find injected image to avoid redundant inject (which will lead to memory leak)
-	for _, e := range program.Entries {
-		e := e
+			// find injected image to avoid redundant inject (which will lead to memory leak)
+			for _, e := range program.Entries {
+				e := e
 
-		image, err := program.ReadSlice(e.StartAddress, uint64(constImageLen))
-		if err != nil {
-			continue
+				image, err := program.ReadSlice(e.StartAddress, uint64(constImageLen))
+				if err != nil {
+					continue
+				}
+
+				if bytes.Equal(*image, fakeImage.content[0:constImageLen]) {
+					fakeEntry = &e
+					log.Info("found injected image", "addr", fakeEntry.StartAddress)
+					break
+				}
+			}
+			if fakeEntry == nil {
+				fmt.Printf("%x\n", fakeImage.content)
+				fakeEntry, err = program.MmapSlice(fakeImage.content)
+				if err != nil {
+					return err
+				}
+
+				originAddr, err := program.FindSymbolInEntry("clock_gettime", vdsoEntry)
+				if err != nil {
+					return err
+				}
+
+				err = program.JumpToFakeFunc(originAddr, fakeEntry.StartAddress)
+				if err != nil {
+					return err
+				}
+			}
+
+			err = program.WriteUint64ToAddr(fakeEntry.StartAddress+uint64(fakeImage.offset["CLOCK_IDS_MASK"]), clockIdsMask)
+			if err != nil {
+				return err
+			}
+
+			// 147 is the index of TV_SEC_DELTA in fakeImage
+			err = program.WriteUint64ToAddr(fakeEntry.StartAddress+uint64(fakeImage.offset["TV_SEC_DELTA"]), uint64(deltaSec))
+			if err != nil {
+				return err
+			}
+
+			// 155 is the index of TV_NSEC_DELTA in fakeImage
+			err = program.WriteUint64ToAddr(fakeEntry.StartAddress+uint64(fakeImage.offset["TV_NSEC_DELTA"]), uint64(deltaNsec))
+			if err != nil {
+				return err
+			}
 		}
-
-		if bytes.Equal(*image, fakeImage[0:constImageLen]) {
-			fakeEntry = &e
-			log.Info("found injected image", "addr", fakeEntry.StartAddress)
-			break
-		}
 	}
-	if fakeEntry == nil {
-		fakeEntry, err = program.MmapSlice(fakeImage)
-		if err != nil {
-			return err
-		}
-	}
-	fakeAddr := fakeEntry.StartAddress
-
-	// 139 is the index of CLOCK_IDS_MASK in fakeImage
-	err = program.WriteUint64ToAddr(fakeAddr+139, clockIdsMask)
-	if err != nil {
-		return err
-	}
-
-	// 147 is the index of TV_SEC_DELTA in fakeImage
-	err = program.WriteUint64ToAddr(fakeAddr+147, uint64(deltaSec))
-	if err != nil {
-		return err
-	}
-
-	// 155 is the index of TV_NSEC_DELTA in fakeImage
-	err = program.WriteUint64ToAddr(fakeAddr+155, uint64(deltaNsec))
-	if err != nil {
-		return err
-	}
-
-	originAddr, err := program.FindSymbolInEntry("clock_gettime", vdsoEntry)
-	if err != nil {
-		return err
-	}
-
-	err = program.JumpToFakeFunc(originAddr, fakeAddr)
 	return err
 }

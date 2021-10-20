@@ -75,7 +75,7 @@ ifeq (${UI},1)
 	hack/embed_ui_assets.sh
 endif
 
-watchmaker:
+watchmaker: pkg/time/fakeclock/fake_clock_gettime.o
 	$(CGO) build -ldflags '$(LDFLAGS)' -o bin/watchmaker ./cmd/watchmaker/...
 
 # Build chaosctl
@@ -191,11 +191,15 @@ enter-devenv: image-dev-env go_build_cache_directory
 ifeq ($(IN_DOCKER),1)
 images/chaos-daemon/bin/pause: hack/pause.c
 	cc ./hack/pause.c -o images/chaos-daemon/bin/pause
+
+pkg/time/fakeclock/fake_clock_gettime.o: pkg/time/fakeclock/fake_clock_gettime.c
+	cc -c ./pkg/fakeclock/fake_clock_gettime.c -fPIE -O2 -o pkg/fakeclock/fake_clock_gettime.o
 endif
 $(eval $(call BUILD_IN_DOCKER_TEMPLATE,chaos-daemon,images/chaos-daemon/bin/pause))
 
+$(eval $(call BUILD_IN_DOCKER_TEMPLATE,chaos-daemon,pkg/time/fakeclock/fake_clock_gettime.o))
 $(eval $(call BUILD_IN_DOCKER_TEMPLATE,chaos-daemon,images/chaos-daemon/bin/chaos-daemon))
-$(eval $(call COMPILE_GO_TEMPLATE,images/chaos-daemon/bin/chaos-daemon,./cmd/chaos-daemon/main.go,1))
+$(eval $(call COMPILE_GO_TEMPLATE,images/chaos-daemon/bin/chaos-daemon,./cmd/chaos-daemon/main.go,1,pkg/time/fakeclock/fake_clock_gettime.o))
 
 $(eval $(call BUILD_IN_DOCKER_TEMPLATE,chaos-dashboard,images/chaos-dashboard/bin/chaos-dashboard))
 $(eval $(call COMPILE_GO_TEMPLATE,images/chaos-dashboard/bin/chaos-dashboard,./cmd/chaos-dashboard/main.go,1,ui))
