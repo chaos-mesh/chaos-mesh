@@ -75,7 +75,11 @@ func getAllInterfaces(pid uint32) ([]string, error) {
 		return []string{}, err
 	}
 	var data []map[string]interface{}
-	json.Unmarshal(ipOutput, &data)
+
+	err = json.Unmarshal(ipOutput, &data)
+	if err != nil {
+		return []string{}, err
+	}
 
 	var ifaces []string
 	for _, iface := range data {
