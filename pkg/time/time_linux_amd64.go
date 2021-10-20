@@ -49,6 +49,10 @@ func init() {
 	}
 
 	for _, entry := range entries {
+		if entry.Name() == ".embed.o" {
+			// skip the .embed.o file, as it's used to remove the error of `go fmt`
+			continue
+		}
 		path := "fakeclock/" + entry.Name()
 		object, err := fakeclock.ReadFile(path)
 		if err != nil {
