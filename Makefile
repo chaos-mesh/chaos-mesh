@@ -54,7 +54,7 @@ $(GO_BUILD_CACHE)/chaos-mesh-gobuild:
 $(GO_BUILD_CACHE)/chaos-mesh-gopath:
 	@mkdir -p $(GO_BUILD_CACHE)/chaos-mesh-gopath
 
-test-utils: timer multithread_tracee
+test-utils: timer multithread_tracee pkg/time/fakeclock/fake_clock_gettime.o
 
 timer:
 	$(GO) build -ldflags '$(LDFLAGS)' -o bin/test/timer ./test/cmd/timer/*.go
