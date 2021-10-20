@@ -3141,8 +3141,8 @@ var doc = `{
                     "description": "the CPU core number need to use, only set it when action is stress",
                     "type": "integer"
                 },
-                "mem-size": {
-                    "description": "the memory size need to locate, only set it when action is stress",
+                "mem-type": {
+                    "description": "the memory type need to locate, only set it when action is stress, the value can be 'stack' or 'heap'",
                     "type": "integer"
                 },
                 "pid": {
