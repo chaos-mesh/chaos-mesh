@@ -49,6 +49,8 @@ spec:
                 - network-duplicate
                 - network-loss
                 - network-delay
+                - network-partition
+                - network-dns
                 - process
                 - jvm-exception
                 - jvm-gc
@@ -56,11 +58,21 @@ spec:
                 - jvm-return
                 - jvm-stress
                 - jvm-rule-data
+                - clock
                 type: string
               address:
                 items:
                   type: string
                 type: array
+              clock:
+                properties:
+                  clock-ids-slice:
+                    type: string
+                  pid:
+                    type: integer
+                  time-offset:
+                    type: string
+                type: object
               disk-fill:
                 properties:
                   fill_by_fallocate:
@@ -225,6 +237,15 @@ spec:
                   source-port:
                     type: string
                 type: object
+              network-dns:
+                properties:
+                  dns-host:
+                    type: string
+                  dns-ip:
+                    type: string
+                  dns-server:
+                    type: string
+                type: object
               network-duplicate:
                 properties:
                   correlation:
@@ -261,6 +282,24 @@ spec:
                   percent:
                     type: string
                   source-port:
+                    type: string
+                type: object
+              network-partition:
+                properties:
+                  accept-tcp-flags:
+                    description: only the packet which match the tcp flag can be accepted,
+                      others will be dropped. only set when the IPProtocol is tcp,
+                      used for partition.
+                    type: string
+                  device:
+                    type: string
+                  direction:
+                    type: string
+                  hostname:
+                    type: string
+                  ip-address:
+                    type: string
+                  ip-protocol:
                     type: string
                 type: object
               process:
