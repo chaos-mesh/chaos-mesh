@@ -22,7 +22,6 @@ import (
 	_ "embed"
 	"encoding/binary"
 	"errors"
-	"fmt"
 	"os"
 	"runtime"
 	"strings"
@@ -185,7 +184,6 @@ func ModifyTime(pid int, deltaSec int64, deltaNsec int64, clockIdsMask uint64) e
 				}
 			}
 			if fakeEntry == nil {
-				fmt.Printf("%x\n", fakeImage.content)
 				fakeEntry, err = program.MmapSlice(fakeImage.content)
 				if err != nil {
 					return err
