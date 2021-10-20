@@ -15,9 +15,19 @@
  *
  */
 import { RequestForm, Workflow, WorkflowParams, WorkflowSingle } from './workflows.type'
+import { TemplateCustom, TemplateType } from 'slices/workflows'
 
 import { Archive } from './archives.type'
 import http from './http'
+
+// TODO: refactor this interface, use the union type from golang struct
+export interface APITemplate {
+  type: TemplateType
+  name: string
+  deadline?: string
+  children?: APITemplate[]
+  task?: TemplateCustom
+}
 
 export const newWorkflow = (data: any) => http.post('/workflows', data)
 
@@ -46,4 +56,4 @@ export const delArchive = (uuid: uuid) => http.delete(`/archives/workflows/${uui
 export const delArchives = (uuids: uuid[]) => http.delete(`/archives/workflows?uids=${uuids.join(',')}`)
 
 export const renderHTTPTask = (form: RequestForm) => http.post('/workflows/render-task/http', form)
-export const parseHTTPTask = (form: RequestForm) => http.post('/workflows/parse-task/http', form)
+export const parseHTTPTask = (t: APITemplate) => http.post('/workflows/parse-task/http', t)

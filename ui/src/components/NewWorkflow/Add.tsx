@@ -103,9 +103,7 @@ const Add: React.FC<AddProps> = ({
   const newERef = useRef<NewExperimentHandles>(null)
   const [typeOfTemplate, setTypeOfTemplate] = useState<AllTemplateType>(TemplateType.Single)
 
-  const isRenderedHTTPTask = (): boolean => {
-    return typeOfTemplate === RenderableTemplateType.HTTP
-  }
+  const [isRenderedHTTPTask, setIsRenderedHTTPTask] = useState(false)
 
   const fillExperiment = (t: Template) => {
     const e = t.experiment
@@ -120,6 +118,21 @@ const Add: React.FC<AddProps> = ({
       })
     )
   }
+
+  useEffect(() => {
+    // TODO: use API provided by server
+    if (externalTemplate) {
+      if (
+        externalTemplate.type === 'custom' &&
+        externalTemplate.custom &&
+        externalTemplate.custom.container.name.endsWith('-rendered-http-request')
+      ) {
+        setIsRenderedHTTPTask(true)
+      }
+    } else {
+      setIsRenderedHTTPTask(false)
+    }
+  }, [externalTemplate])
 
   useEffect(() => {
     if (externalTemplate) {
@@ -202,6 +215,10 @@ const Add: React.FC<AddProps> = ({
 
       setOtherTypes(type)
     }
+
+    if (type === 'http') {
+      setIsRenderedHTTPTask(true)
+    }
   }
 
   const submit = (template: Template) => {
@@ -279,8 +296,6 @@ const Add: React.FC<AddProps> = ({
         validateOnBlur={false}
       >
         {({ values, setFieldValue, errors, touched }) => {
-          console.log('type of template:' + typeOfTemplate)
-
           return (
             <>
               <StepLabel icon={<AddCircleIcon color="primary" />}>
@@ -321,7 +336,7 @@ const Add: React.FC<AddProps> = ({
                   ></SerialOrParallel>
                 </>
               )}
-              {values.type === 'custom' && (
+              {values.type === 'custom' && !isRenderedHTTPTask && (
                 <>
                   <Task
                     name={values.name}
@@ -335,16 +350,23 @@ const Add: React.FC<AddProps> = ({
                   ></Task>
                 </>
               )}
+              {isRenderedHTTPTask && (
+                <Box mt={3}>
+                  <HTTPTask
+                    name={values.name}
+                    type={values.type as TemplateType}
+                    childrenCount={values.num}
+                    templates={templates}
+                    submitTemplate={submit}
+                    externalTemplate={externalTemplate}
+                  />
+                </Box>
+              )}
             </>
           )
         }}
       </Formik>
 
-      {isRenderedHTTPTask() && (
-        <Box mt={3}>
-          <HTTPTask submit={submit} />
-        </Box>
-      )}
       {num < 0 && (
         <Box ml={8}>
           {typeOfTemplate === 'suspend' && (
