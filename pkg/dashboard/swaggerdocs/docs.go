@@ -3337,7 +3337,7 @@ var doc = `{
         "v1alpha1.NetworkDNSSpec": {
             "type": "object",
             "properties": {
-                "dns-host": {
+                "dns-domain-name": {
                     "type": "string"
                 },
                 "dns-ip": {

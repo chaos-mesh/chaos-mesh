@@ -2418,7 +2418,7 @@ spec:
               type: object
             network-dns:
               properties:
-                dns-host:
+                dns-domain-name:
                   type: string
                 dns-ip:
                   type: string
@@ -5155,7 +5155,7 @@ spec:
                   type: object
                 network-dns:
                   properties:
-                    dns-host:
+                    dns-domain-name:
                       type: string
                     dns-ip:
                       type: string
@@ -7504,7 +7504,7 @@ spec:
                             type: object
                           network-dns:
                             properties:
-                              dns-host:
+                              dns-domain-name:
                                 type: string
                               dns-ip:
                                 type: string
@@ -9540,7 +9540,7 @@ spec:
                                 type: object
                               network-dns:
                                 properties:
-                                  dns-host:
+                                  dns-domain-name:
                                     type: string
                                   dns-ip:
                                     type: string
@@ -15700,7 +15700,7 @@ spec:
                   type: object
                 network-dns:
                   properties:
-                    dns-host:
+                    dns-domain-name:
                       type: string
                     dns-ip:
                       type: string
@@ -17622,7 +17622,7 @@ spec:
                       type: object
                     network-dns:
                       properties:
-                        dns-host:
+                        dns-domain-name:
                           type: string
                         dns-ip:
                           type: string
@@ -20018,7 +20018,7 @@ spec:
                                 type: object
                               network-dns:
                                 properties:
-                                  dns-host:
+                                  dns-domain-name:
                                     type: string
                                   dns-ip:
                                     type: string
@@ -22118,7 +22118,7 @@ spec:
                                     type: object
                                   network-dns:
                                     properties:
-                                      dns-host:
+                                      dns-domain-name:
                                         type: string
                                       dns-ip:
                                         type: string
@@ -30929,7 +30929,7 @@ spec:
                         type: object
                       network-dns:
                         properties:
-                          dns-host:
+                          dns-domain-name:
                             type: string
                           dns-ip:
                             type: string
@@ -32919,7 +32919,7 @@ spec:
                             type: object
                           network-dns:
                             properties:
-                              dns-host:
+                              dns-domain-name:
                                 type: string
                               dns-ip:
                                 type: string

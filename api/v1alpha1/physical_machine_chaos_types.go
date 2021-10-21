@@ -215,9 +215,9 @@ type NetworkPartitionSpec struct {
 }
 
 type NetworkDNSSpec struct {
-	DNSServer string `json:"dns-server,omitempty"`
-	DNSIp     string `json:"dns-ip,omitempty"`
-	DNSHost   string `json:"dns-host,omitempty"`
+	DNSServer     string `json:"dns-server,omitempty"`
+	DNSIp         string `json:"dns-ip,omitempty"`
+	DNSDomainName string `json:"dns-domain-name,omitempty"`
 }
 
 type ProcessSpec struct {
