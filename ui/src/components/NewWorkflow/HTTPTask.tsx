@@ -20,12 +20,14 @@ import { Submit, TextField } from 'components/FormField'
 import { Template, TemplateType } from 'slices/workflows'
 import { parseHTTPTask, renderHTTPTask } from 'api/workflows'
 import { useEffect, useRef, useState } from 'react'
+import { validateDeadline, validateName } from 'lib/formikhelpers'
 
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
 import { RequestForm } from 'api/workflows.type'
 import Space from 'components-mui/Space'
 import T from 'components/T'
+import { useIntl } from 'react-intl'
 
 interface HTTPTaskProps extends CommonTemplateProps {
   childrenCount: number
@@ -50,6 +52,8 @@ interface FromProps {
 }
 
 const HTTPTask: React.FC<HTTPTaskProps> = (props) => {
+  const intl = useIntl()
+
   const { submitTemplate } = props
   const onSubmit = (form: RequestForm) => {
     renderHTTPTask(form)
@@ -134,7 +138,7 @@ const HTTPTask: React.FC<HTTPTaskProps> = (props) => {
                     <TextField
                       name="name"
                       label={T('common.name')}
-                      //   validate={validateName(T('newW.node.nameValidation', intl))}
+                      validate={validateName(T('newW.node.nameValidation', intl))}
                       helperText={errors.name && touched.name ? errors.name : T('newW.node.nameHelper')}
                       error={errors.name && touched.name ? true : false}
                       size="small"
@@ -143,14 +147,29 @@ const HTTPTask: React.FC<HTTPTaskProps> = (props) => {
                     <TextField
                       name="url"
                       label={T('newW.node.httpRequest.url')}
-                      //   validate={validateDeadline(T('newW.node.deadlineValidation', intl))}
-                      //   helperText={errors.deadline && touched.deadline ? errors.deadline : T('newW.node.deadlineHelper')}
-                      //   error={errors.deadline && touched.deadline ? true : false}
+                      helperText={errors.url && touched.url ? errors.url : T('newW.node.httpRequest.urlHelper')}
+                      error={errors.url && touched.url ? true : false}
                       size="small"
                       fullWidth
                     />
-                    <TextField name="method" label={T('newW.node.httpRequest.method')} size="small" fullWidth />
-                    <TextField name="body" label={T('newW.node.httpRequest.body')} size="small" fullWidth />
+                    <TextField
+                      name="method"
+                      label={T('newW.node.httpRequest.method')}
+                      helperText={
+                        errors.method && touched.method ? errors.method : T('newW.node.httpRequest.methodHelper')
+                      }
+                      size="small"
+                      fullWidth
+                    />
+                    {(values.method === 'POST' || values.method === 'PUT') && (
+                      <TextField
+                        name="body"
+                        label={T('newW.node.httpRequest.body')}
+                        helperText={errors.body && touched.body ? errors.body : T('newW.node.httpRequest.bodyHelper')}
+                        size="small"
+                        fullWidth
+                      />
+                    )}
 
                     <FormControlLabel
                       style={{ marginRight: 0 }}

@@ -131,7 +131,7 @@
       "container": {
         "title": "Container",
         "nameHelper": "The container name",
-        "nameValidation":"The container name is required",
+        "nameValidation": "The container name is required",
         "image": "Image",
         "imageHelper": "The image of container",
         "imageValidation": "The image is required",
@@ -146,8 +146,11 @@
       },
       "httpRequest": {
         "url": "URL",
+        "urlHelper": "Request URL",
         "method": "Method",
+        "methodHelper": "Request Method; Example: GET",
         "body": "Body",
+        "bodyHelper": "Request Body",
         "follow": "Follow 301/302 Location",
         "json": "Json Content"
       },
