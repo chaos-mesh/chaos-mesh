@@ -44,7 +44,7 @@ function generateWorkflowNodes(detail: WorkflowSingle) {
       return [type, node.serial!.filter((d) => d.name).map((d) => toCytoscapeNode(nodeMap.get(d.name)!)), node.name]
     } else if (type === 'ParallelNode' && node.parallel!.length) {
       return [type, node.parallel!.filter((d) => d.name).map((d) => toCytoscapeNode(nodeMap.get(d.name)!)), node.name]
-    } else if (type === 'TaskNode' && node.conditional_branches!.length) {
+    } else if (type === 'TaskNode' && node.conditional_branches && node.conditional_branches.length) {
       return [
         type,
         node.conditional_branches!.filter((d) => d.name).map((d) => toCytoscapeNode(nodeMap.get(d.name)!)),

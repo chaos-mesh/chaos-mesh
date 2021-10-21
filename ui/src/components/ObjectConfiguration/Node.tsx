@@ -112,31 +112,32 @@ const Custom = ({ template: t }: NodeConfigurationProps) => {
       <Typography variant="subtitle2" gutterBottom>
         {T('newW.node.conditionalBranches.title')}
       </Typography>
-      {t.conditionalBranches.map((d: Branch, i: number) => (
-        <Box key={i}>
-          <Typography variant="subtitle2" gutterBottom>
-            {T('newW.node.conditionalBranches.branch')} {i + 1}
-          </Typography>
-          <Table size="small">
-            <TableRow>
-              <TableCell>{T('newW.node.conditionalBranches.target')}</TableCell>
-              <TableCell>
-                <Typography variant="body2" color="textSecondary">
-                  {d.target}
-                </Typography>
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>{T('newW.node.conditionalBranches.expression')}</TableCell>
-              <TableCell>
-                <Typography variant="body2" color="textSecondary">
-                  {d.expression}
-                </Typography>
-              </TableCell>
-            </TableRow>
-          </Table>
-        </Box>
-      ))}
+      {t.conditionalBranches &&
+        t.conditionalBranches.map((d: Branch, i: number) => (
+          <Box key={i}>
+            <Typography variant="subtitle2" gutterBottom>
+              {T('newW.node.conditionalBranches.branch')} {i + 1}
+            </Typography>
+            <Table size="small">
+              <TableRow>
+                <TableCell>{T('newW.node.conditionalBranches.target')}</TableCell>
+                <TableCell>
+                  <Typography variant="body2" color="textSecondary">
+                    {d.target}
+                  </Typography>
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>{T('newW.node.conditionalBranches.expression')}</TableCell>
+                <TableCell>
+                  <Typography variant="body2" color="textSecondary">
+                    {d.expression}
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            </Table>
+          </Box>
+        ))}
     </>
   )
 }
