@@ -103,6 +103,7 @@ const Add: React.FC<AddProps> = ({
   const newERef = useRef<NewExperimentHandles>(null)
   const [typeOfTemplate, setTypeOfTemplate] = useState<AllTemplateType>(TemplateType.Single)
 
+  // use methods instead of this state
   const [isRenderedHTTPTask, setIsRenderedHTTPTask] = useState(false)
 
   const fillExperiment = (t: Template) => {
@@ -177,6 +178,7 @@ const Add: React.FC<AddProps> = ({
   }
 
   const onValidate = ({ type, num: newNum }: { type: string; num: number }) => {
+    setIsRenderedHTTPTask(type === 'http')
     setTypeOfTemplate(type as AllTemplateType)
 
     if (type !== 'suspend' && type !== 'http') {
@@ -214,10 +216,6 @@ const Add: React.FC<AddProps> = ({
       }
 
       setOtherTypes(type)
-    }
-
-    if (type === 'http') {
-      setIsRenderedHTTPTask(true)
     }
   }
 
