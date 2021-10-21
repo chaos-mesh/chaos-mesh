@@ -4,18 +4,20 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package networkchaos
 
 import (
 	"go.uber.org/fx"
-	"k8s.io/apimachinery/pkg/runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/action"
@@ -39,7 +41,7 @@ func NewImpl(impl Impl) *common.ChaosImplPair {
 		Object:     &v1alpha1.NetworkChaos{},
 		Impl:       &delegate,
 		ObjectList: &v1alpha1.NetworkChaosList{},
-		Controlls:  []runtime.Object{&v1alpha1.PodNetworkChaos{}},
+		Controlls:  []client.Object{&v1alpha1.PodNetworkChaos{}},
 	}
 }
 

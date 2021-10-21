@@ -4,12 +4,14 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package v1alpha1
 
@@ -25,7 +27,7 @@ import (
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:shortName=wf
 // +kubebuilder:subresource:status
-// +chaos-mesh:base
+// +chaos-mesh:experiment
 type Workflow struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -36,22 +38,6 @@ type Workflow struct {
 	// +optional
 	// Most recently observed status of the workflow
 	Status WorkflowStatus `json:"status"`
-}
-
-func (in *Workflow) GetChaos() *ChaosInstance {
-	instance := &ChaosInstance{
-		Name:      in.Name,
-		Namespace: in.Namespace,
-		Kind:      KindTimeChaos,
-		StartTime: in.CreationTimestamp.Time,
-		Action:    "",
-		UID:       string(in.UID),
-	}
-
-	if in.DeletionTimestamp != nil {
-		instance.EndTime = in.DeletionTimestamp.Time
-	}
-	return instance
 }
 
 func (in *Workflow) GetObjectMeta() *metav1.ObjectMeta {
@@ -181,12 +167,18 @@ type WorkflowList struct {
 	Items           []Workflow `json:"items"`
 }
 
-func (in *WorkflowList) ListChaos() []*ChaosInstance {
-	res := make([]*ChaosInstance, 0, len(in.Items))
+func (in *WorkflowList) GetItems() []GenericChaos {
+	var result []GenericChaos
 	for _, item := range in.Items {
-		res = append(res, item.GetChaos())
+		item := item
+		result = append(result, &item)
 	}
-	return res
+	return result
+}
+
+// TODO: refactor: not so accurate
+func (in *WorkflowList) DeepCopyList() GenericChaosList {
+	return in.DeepCopy()
 }
 
 func init() {
@@ -195,7 +187,7 @@ func init() {
 
 func FetchChaosByTemplateType(templateType TemplateType) (runtime.Object, error) {
 	if kind, ok := all.kinds[string(templateType)]; ok {
-		return kind.Chaos.DeepCopyObject(), nil
+		return kind.SpawnObject(), nil
 	}
 	return nil, fmt.Errorf("no such kind refers to template type %s", templateType)
 }

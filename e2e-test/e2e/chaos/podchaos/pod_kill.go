@@ -1,15 +1,17 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package podchaos
 
@@ -38,7 +40,7 @@ func TestcasePodKillOnceThenDelete(ns string, kubeCli kubernetes.Interface, cli 
 	defer cancel()
 
 	pod := fixture.NewCommonNginxPod("nginx", ns)
-	_, err := kubeCli.CoreV1().Pods(ns).Create(pod)
+	_, err := kubeCli.CoreV1().Pods(ns).Create(context.TODO(), pod, metav1.CreateOptions{})
 	framework.ExpectNoError(err, "create nginx pod error")
 	err = waitPodRunning("nginx", ns, kubeCli)
 	framework.ExpectNoError(err, "wait nginx running error")
@@ -69,7 +71,7 @@ func TestcasePodKillOnceThenDelete(ns string, kubeCli kubernetes.Interface, cli 
 	framework.ExpectNoError(err, "create pod chaos error")
 
 	err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
-		_, err = kubeCli.CoreV1().Pods(ns).Get("nginx", metav1.GetOptions{})
+		_, err = kubeCli.CoreV1().Pods(ns).Get(context.TODO(), "nginx", metav1.GetOptions{})
 		if err != nil && apierrors.IsNotFound(err) {
 			return true, nil
 		}
@@ -83,7 +85,7 @@ func TestcasePodKillPauseThenUnPause(ns string, kubeCli kubernetes.Interface, cl
 	defer cancel()
 
 	nd := fixture.NewCommonNginxDeployment("nginx", ns, 3)
-	_, err := kubeCli.AppsV1().Deployments(ns).Create(nd)
+	_, err := kubeCli.AppsV1().Deployments(ns).Create(context.TODO(), nd, metav1.CreateOptions{})
 	framework.ExpectNoError(err, "create nginx deployment error")
 	err = util.WaitDeploymentReady("nginx", ns, kubeCli)
 	framework.ExpectNoError(err, "wait nginx deployment ready error")
@@ -95,7 +97,7 @@ func TestcasePodKillPauseThenUnPause(ns string, kubeCli kubernetes.Interface, cl
 			"app": "nginx",
 		}).String(),
 	}
-	pods, err = kubeCli.CoreV1().Pods(ns).List(listOption)
+	pods, err = kubeCli.CoreV1().Pods(ns).List(context.TODO(), listOption)
 	framework.ExpectNoError(err, "get nginx pods error")
 
 	podKillChaos := &v1alpha1.PodChaos{
@@ -131,7 +133,7 @@ func TestcasePodKillPauseThenUnPause(ns string, kubeCli kubernetes.Interface, cl
 
 	// some pod is killed as expected
 	err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
-		newPods, err = kubeCli.CoreV1().Pods(ns).List(listOption)
+		newPods, err = kubeCli.CoreV1().Pods(ns).List(context.TODO(), listOption)
 		framework.ExpectNoError(err, "get nginx pods error")
 		return !fixture.HaveSameUIDs(pods.Items, newPods.Items), nil
 	})
@@ -153,10 +155,10 @@ func TestcasePodKillPauseThenUnPause(ns string, kubeCli kubernetes.Interface, cl
 	framework.ExpectError(err, "chaos shouldn't enter stopped phase")
 
 	// wait for 1 minutes and no pod is killed
-	pods, err = kubeCli.CoreV1().Pods(ns).List(listOption)
+	pods, err = kubeCli.CoreV1().Pods(ns).List(context.TODO(), listOption)
 	framework.ExpectNoError(err, "get nginx pods error")
 	err = wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
-		newPods, err = kubeCli.CoreV1().Pods(ns).List(listOption)
+		newPods, err = kubeCli.CoreV1().Pods(ns).List(context.TODO(), listOption)
 		framework.ExpectNoError(err, "get nginx pods error")
 		return !fixture.HaveSameUIDs(pods.Items, newPods.Items), nil
 	})

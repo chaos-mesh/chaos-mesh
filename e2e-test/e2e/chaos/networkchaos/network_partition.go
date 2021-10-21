@@ -1,15 +1,17 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package networkchaos
 
@@ -18,6 +20,8 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	. "github.com/onsi/ginkgo"
 	corev1 "k8s.io/api/core/v1"
@@ -47,7 +51,7 @@ func TestcaseForbidHostNetwork(
 	name := "network-peer-4"
 	nd := fixture.NewNetworkTestDeployment(name, ns, map[string]string{"partition": "0"})
 	nd.Spec.Template.Spec.HostNetwork = true
-	_, err := kubeCli.AppsV1().Deployments(ns).Create(nd)
+	_, err := kubeCli.AppsV1().Deployments(ns).Create(context.TODO(), nd, metav1.CreateOptions{})
 	framework.ExpectNoError(err, "create network-peer deployment error")
 	err = util.WaitDeploymentReady(name, ns, kubeCli)
 	framework.ExpectNoError(err, "wait network-peer deployment ready error")

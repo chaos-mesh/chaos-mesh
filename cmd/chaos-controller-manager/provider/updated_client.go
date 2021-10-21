@@ -4,12 +4,14 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package provider
 
@@ -35,7 +37,7 @@ type UpdatedClient struct {
 	cache *lru.Cache
 }
 
-func (c *UpdatedClient) objectKey(key client.ObjectKey, obj runtime.Object) (string, error) {
+func (c *UpdatedClient) objectKey(key client.ObjectKey, obj client.Object) (string, error) {
 	gvk, err := apiutil.GVKForObject(obj, c.scheme)
 	if err != nil {
 		return "", err
@@ -44,7 +46,7 @@ func (c *UpdatedClient) objectKey(key client.ObjectKey, obj runtime.Object) (str
 	return gvk.String() + "/" + key.String(), nil
 }
 
-func (c *UpdatedClient) Get(ctx context.Context, key client.ObjectKey, obj runtime.Object) error {
+func (c *UpdatedClient) Get(ctx context.Context, key client.ObjectKey, obj client.Object) error {
 	err := c.client.Get(ctx, key, obj)
 	if err != nil {
 		return err
@@ -85,19 +87,19 @@ func (c *UpdatedClient) Get(ctx context.Context, key client.ObjectKey, obj runti
 	return nil
 }
 
-func (c *UpdatedClient) List(ctx context.Context, list runtime.Object, opts ...client.ListOption) error {
+func (c *UpdatedClient) List(ctx context.Context, list client.ObjectList, opts ...client.ListOption) error {
 	return c.client.List(ctx, list, opts...)
 }
 
-func (c *UpdatedClient) Create(ctx context.Context, obj runtime.Object, opts ...client.CreateOption) error {
+func (c *UpdatedClient) Create(ctx context.Context, obj client.Object, opts ...client.CreateOption) error {
 	return c.client.Create(ctx, obj, opts...)
 }
 
-func (c *UpdatedClient) Delete(ctx context.Context, obj runtime.Object, opts ...client.DeleteOption) error {
+func (c *UpdatedClient) Delete(ctx context.Context, obj client.Object, opts ...client.DeleteOption) error {
 	return c.client.Delete(ctx, obj, opts...)
 }
 
-func (c *UpdatedClient) Update(ctx context.Context, obj runtime.Object, opts ...client.UpdateOption) error {
+func (c *UpdatedClient) Update(ctx context.Context, obj client.Object, opts ...client.UpdateOption) error {
 	err := c.client.Update(ctx, obj, opts...)
 	if err != nil {
 		return err
@@ -111,7 +113,7 @@ func (c *UpdatedClient) Update(ctx context.Context, obj runtime.Object, opts ...
 	return nil
 }
 
-func (c *UpdatedClient) writeCache(obj runtime.Object) error {
+func (c *UpdatedClient) writeCache(obj client.Object) error {
 	objMeta, err := meta.Accessor(obj)
 	if err != nil {
 		return nil
@@ -130,12 +132,20 @@ func (c *UpdatedClient) writeCache(obj runtime.Object) error {
 	return nil
 }
 
-func (c *UpdatedClient) Patch(ctx context.Context, obj runtime.Object, patch client.Patch, opts ...client.PatchOption) error {
+func (c *UpdatedClient) Patch(ctx context.Context, obj client.Object, patch client.Patch, opts ...client.PatchOption) error {
 	return c.client.Patch(ctx, obj, patch, opts...)
 }
 
-func (c *UpdatedClient) DeleteAllOf(ctx context.Context, obj runtime.Object, opts ...client.DeleteAllOfOption) error {
+func (c *UpdatedClient) DeleteAllOf(ctx context.Context, obj client.Object, opts ...client.DeleteAllOfOption) error {
 	return c.client.DeleteAllOf(ctx, obj, opts...)
+}
+
+func (c *UpdatedClient) Scheme() *runtime.Scheme {
+	return c.client.Scheme()
+}
+
+func (c *UpdatedClient) RESTMapper() meta.RESTMapper {
+	return c.client.RESTMapper()
 }
 
 func (c *UpdatedClient) Status() client.StatusWriter {
@@ -150,7 +160,7 @@ type UpdatedStatusWriter struct {
 	client       *UpdatedClient
 }
 
-func (c *UpdatedStatusWriter) Update(ctx context.Context, obj runtime.Object, opts ...client.UpdateOption) error {
+func (c *UpdatedStatusWriter) Update(ctx context.Context, obj client.Object, opts ...client.UpdateOption) error {
 	err := c.statusWriter.Update(ctx, obj, opts...)
 	if err != nil {
 		return err
@@ -164,6 +174,6 @@ func (c *UpdatedStatusWriter) Update(ctx context.Context, obj runtime.Object, op
 	return nil
 }
 
-func (c *UpdatedStatusWriter) Patch(ctx context.Context, obj runtime.Object, patch client.Patch, opts ...client.PatchOption) error {
+func (c *UpdatedStatusWriter) Patch(ctx context.Context, obj client.Object, patch client.Patch, opts ...client.PatchOption) error {
 	return c.statusWriter.Patch(ctx, obj, patch, opts...)
 }

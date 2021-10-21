@@ -27,9 +27,9 @@ See the following demo video for a quick view of Chaos Mesh:
 
 Chaos Operator injects chaos into the applications and Kubernetes infrastructure in a manageable way, which provides easy, custom definitions for chaos experiments and automatic orchestration. There are three components at play:
 
-**Controller-manager**: used to schedule and manage the lifecycle of CRD objects
+**Controller-manager**: used to schedule and manage the lifecycle of CRD objects.
 
-**Chaos-daemon**: runs as daemonset with privileged system permissions over network, Cgroup, etc. for a specific node
+**Chaos-daemon**: runs as daemonset with privileged system permissions over network, Cgroup, etc. for a specific node.
 
 ![Chaos Operator](./static/chaos-mesh.svg)
 
@@ -60,15 +60,16 @@ See [ADOPTERS](ADOPTERS.md).
 
 Blogs on Chaos Mesh design & implementation, features, chaos engineering, community updates, etc. See [Chaos Mesh Blogs](https://chaos-mesh.org/blog). Here are some recommended ones for you to start with:
 
-- [Chaos Mesh - Your Chaos Engineering Solution for System Resiliency on Kubernetes](https://pingcap.com/blog/chaos-mesh-your-chaos-engineering-solution-for-system-resiliency-on-kubernetes/)
-- [Run Your First Chaos Experiment in 10 Minutes](https://pingcap.com/blog/run-first-chaos-experiment-in-ten-minutes/)
-- [Simulating Clock Skew in K8s Without Affecting Other Containers on the Node](https://pingcap.com/blog/simulating-clock-skew-in-k8s-without-affecting-other-containers-on-node/)
+- [Chaos Mesh 2.0: To a Chaos Engineering Ecology](https://chaos-mesh.org/blog/chaos-mesh-2.0-to-a-chaos-engineering-ecology/)
+- [Chaos Mesh - Your Chaos Engineering Solution for System Resiliency on Kubernetes](https://chaos-mesh.org/blog/chaos_mesh_your_chaos_engineering_solution/)
+- [Run Your First Chaos Experiment in 10 Minutes](https://chaos-mesh.org/blog/run_your_first_chaos_experiment/)
+- [How to Simulate I/O Faults at Runtime](https://chaos-mesh.org/blog/how-to-simulate-io-faults-at-runtime/)
+- [Simulating Clock Skew in K8s Without Affecting Other Containers on the Node](hhttps://chaos-mesh.org/blog/simulating-clock-skew-in-k8s-without-affecting-other-containers-on-node/)
 - [Building an Automated Testing Framework Based on Chaos Mesh® and Argo](https://chaos-mesh.org/blog/building_automated_testing_framework)
-- [Chaos Mesh 1.0: Chaos Engineering on Kubernetes Made Easier](https://chaos-mesh.org/blog/chaos-mesh-1.0-chaos-engineering-on-kubernetes-made-easier)
 
 ## Contributing
 
-See the [contributing guide](./CONTRIBUTING.md) and [development guide](https://chaos-mesh.org/docs/development_guides/development_overview).
+See the [contributing guide](./CONTRIBUTING.md) and [development guide](https://chaos-mesh.org/docs/developer-guide-overview).
 
 ## Community
 
@@ -113,6 +114,7 @@ On the fourth Thursday of every month (unless otherwise specified), the Chaos Me
 - Saiyam Pathak
   - [Let's explore chaos mesh](https://youtu.be/kMbTYItsTTI)
   - [Chaos Mesh - Chaos Engineering for Kubernetes](https://youtu.be/HAU_cjW1bMw)
+  - [Chaos Mesh 2.0](https://youtu.be/HmQ9cFwxF7g)
 
 ## Media coverage
 

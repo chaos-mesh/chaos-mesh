@@ -4,12 +4,14 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package v1alpha1
 
@@ -30,11 +32,11 @@ const (
 	ValidateValueParseError = "parse value field error:%s"
 )
 
+// FIXME: interface ContainsDuration only used for validating EmbedChaos in Workflow
+
 // +kubebuilder:object:generate=false
-type CommonSpec interface {
+type ContainsDuration interface {
 	GetDuration() (*time.Duration, error)
-	Validate() field.ErrorList
-	Default()
 }
 
 type Duration string
@@ -60,13 +62,13 @@ func (d *Duration) Validate(root interface{}, path *field.Path) field.ErrorList 
 	return nil
 }
 
-func (d *Duration) Default(root interface{}, field reflect.StructField) {
+func (d *Duration) Default(root interface{}, field *reflect.StructField) {
 	if d == nil {
 		return
 	}
 
 	// d cannot be nil
-	if len(*d) == 0 {
+	if len(*d) == 0 && field != nil {
 		*d = Duration(field.Tag.Get("default"))
 	}
 }
@@ -114,7 +116,7 @@ func (p *PodSelector) Validate(root interface{}, path *field.Path) field.ErrorLi
 	return allErrs
 }
 
-func (p *PodSelector) Default(root interface{}, field reflect.StructField) {
+func (p *PodSelector) Default(root interface{}, field *reflect.StructField) {
 	if p == nil {
 		return
 	}
@@ -164,9 +166,9 @@ func (f *FloatStr) Validate(root interface{}, path *field.Path) field.ErrorList 
 	return nil
 }
 
-func (f *FloatStr) Default(root interface{}, field reflect.StructField) {
+func (f *FloatStr) Default(root interface{}, field *reflect.StructField) {
 	// f cannot be nil
-	if len(*f) == 0 {
+	if len(*f) == 0 && field != nil {
 		*f = FloatStr(field.Tag.Get("default"))
 	}
 }

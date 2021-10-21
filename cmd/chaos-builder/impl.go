@@ -1,15 +1,17 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package main
 
@@ -39,7 +41,7 @@ var ErrCanNotUpdateChaos = fmt.Errorf("Cannot update chaos spec")
 
 const implTemplate = `
 const Kind{{.Type}} = "{{.Type}}"
-
+{{if .IsExperiment}}
 // IsDeleted returns whether this resource has been deleted
 func (in *{{.Type}}) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
@@ -70,31 +72,6 @@ func (in *{{.Type}}Spec) GetDuration() (*time.Duration, error) {
 	return &duration, nil
 }
 
-// GetChaos would return the a record for chaos
-func (in *{{.Type}}) GetChaos() *ChaosInstance {
-	instance := &ChaosInstance{
-		Name:      in.Name,
-		Namespace: in.Namespace,
-		Kind:      Kind{{.Type}},
-		StartTime: in.CreationTimestamp.Time,
-		Action:    "",
-		UID:       string(in.UID),
-		Status:    in.Status.ChaosStatus,
-	}
-
-	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
-	if action.IsValid() {
-		instance.Action = action.String()
-	}
-	if in.Spec.Duration != nil {
-		instance.Duration = string(*in.Spec.Duration)
-	}
-	if in.DeletionTimestamp != nil {
-		instance.EndTime = in.DeletionTimestamp.Time
-	}
-	return instance
-}
-
 // GetStatus returns the status
 func (in *{{.Type}}) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
@@ -123,13 +100,18 @@ type {{.Type}}List struct {
 	Items           []{{.Type}} ` + "`" + `json:"items"` + "`" + `
 }
 
+func (in *{{.Type}}List) DeepCopyList() GenericChaosList {
+	return in.DeepCopy()
+}
+
 // ListChaos returns a list of chaos
-func (in *{{.Type}}List) ListChaos() []*ChaosInstance {
-	res := make([]*ChaosInstance, 0, len(in.Items))
+func (in *{{.Type}}List) ListChaos() []GenericChaos {
+	var result []GenericChaos
 	for _, item := range in.Items {
-		res = append(res, item.GetChaos())
+		item := item
+		result = append(result, &item)
 	}
-	return res
+	return result
 }
 
 func (in *{{.Type}}) DurationExceeded(now time.Time) (bool, time.Duration, error) {
@@ -151,17 +133,17 @@ func (in *{{.Type}}) DurationExceeded(now time.Time) (bool, time.Duration, error
 }
 
 func (in *{{.Type}}) IsOneShot() bool {
-	{{if .OneShotExp}}
+	{{- if .OneShotExp}}
 	if {{.OneShotExp}} {
 		return true
 	}
 
 	return false
-	{{else}}
+	{{- else}}
 	return false
-	{{end}}
+	{{- end}}
 }
-
+{{end}}
 var {{.Type}}WebhookLog = logf.Log.WithName("{{.Type}}-resource")
 
 func (in *{{.Type}}) ValidateCreate() error {
@@ -172,9 +154,11 @@ func (in *{{.Type}}) ValidateCreate() error {
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
 func (in *{{.Type}}) ValidateUpdate(old runtime.Object) error {
 	{{.Type}}WebhookLog.Info("validate update", "name", in.Name)
+	{{- if not .EnableUpdate}}
 	if !reflect.DeepEqual(in.Spec, old.(*{{.Type}}).Spec) {
 		return ErrCanNotUpdateChaos
 	}
+	{{- end}}
 	return in.Validate()
 }
 
@@ -200,7 +184,7 @@ func (in *{{.Type}}) Default() {
 }
 `
 
-func generateImpl(name string, oneShotExp string) string {
+func generateImpl(name string, oneShotExp string, isExperiment, enableUpdate bool) string {
 	tmpl, err := template.New("impl").Parse(implTemplate)
 	if err != nil {
 		log.Error(err, "fail to build template")
@@ -209,8 +193,10 @@ func generateImpl(name string, oneShotExp string) string {
 
 	buf := new(bytes.Buffer)
 	err = tmpl.Execute(buf, &metadata{
-		Type:       name,
-		OneShotExp: oneShotExp,
+		Type:         name,
+		OneShotExp:   oneShotExp,
+		IsExperiment: isExperiment,
+		EnableUpdate: enableUpdate,
 	})
 	if err != nil {
 		log.Error(err, "fail to execute template")

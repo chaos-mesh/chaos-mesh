@@ -1,15 +1,17 @@
-// Copyright 2019 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package common
 
@@ -217,12 +219,12 @@ func GetPods(ctx context.Context, chaosName string, status v1alpha1.ChaosStatus,
 func GetChaosList(ctx context.Context, chaosType string, chaosName string, ns string, c client.Client) ([]runtime.Object, []string, error) {
 	chaosType = upperCaseChaos(strings.ToLower(chaosType))
 	allKinds := v1alpha1.AllKinds()
-	chaosListInterface := allKinds[chaosType].ChaosList
+	chaosListInterface := allKinds[chaosType].SpawnList()
 
 	if err := c.List(ctx, chaosListInterface, client.InNamespace(ns)); err != nil {
 		return nil, nil, errors.Wrapf(err, "failed to get chaosList with namespace %s", ns)
 	}
-	chaosList := chaosListInterface.ListChaos()
+	chaosList := chaosListInterface.GetItems()
 	if len(chaosList) == 0 {
 		return nil, nil, fmt.Errorf("no chaos is found, please check your input")
 	}
@@ -230,13 +232,13 @@ func GetChaosList(ctx context.Context, chaosType string, chaosName string, ns st
 	var retList []runtime.Object
 	var retNameList []string
 	for _, ch := range chaosList {
-		if chaosName == "" || chaosName == ch.Name {
-			chaos, err := getChaos(ctx, chaosType, ch.Name, ns, c)
+		if chaosName == "" || chaosName == ch.GetName() {
+			chaos, err := getChaos(ctx, chaosType, ch.GetName(), ns, c)
 			if err != nil {
 				return nil, nil, err
 			}
 			retList = append(retList, chaos)
-			retNameList = append(retNameList, ch.Name)
+			retNameList = append(retNameList, ch.GetName())
 		}
 	}
 	if len(retList) == 0 {
@@ -248,7 +250,7 @@ func GetChaosList(ctx context.Context, chaosType string, chaosName string, ns st
 
 func getChaos(ctx context.Context, chaosType string, chaosName string, ns string, c client.Client) (runtime.Object, error) {
 	allKinds := v1alpha1.AllKinds()
-	chaos := allKinds[chaosType].Chaos
+	chaos := allKinds[chaosType].SpawnObject()
 	objectKey := client.ObjectKey{
 		Namespace: ns,
 		Name:      chaosName,
@@ -340,6 +342,16 @@ func forwardPorts(ctx context.Context, pod v1.Pod, port uint16) (context.CancelF
 	return pfCancel, localPort, err
 }
 
+func ForwardSvcPorts(ctx context.Context, ns, svc string, port uint16) (context.CancelFunc, uint16, error) {
+	commonRestClientGetter := NewCommonRestClientGetter()
+	fw, err := portforward.NewPortForwarder(ctx, commonRestClientGetter, false)
+	if err != nil {
+		return nil, 0, errors.Wrap(err, "failed to create port forwarder")
+	}
+	_, localPort, pfCancel, err := portforward.ForwardOnePort(fw, ns, svc, port)
+	return pfCancel, localPort, err
+}
+
 // Log print log of pod
 func Log(pod v1.Pod, tail int64, c *kubernetes.Clientset) (string, error) {
 	podLogOpts := v1.PodLogOptions{}
@@ -349,7 +361,8 @@ func Log(pod v1.Pod, tail int64, c *kubernetes.Clientset) (string, error) {
 	}
 
 	req := c.CoreV1().Pods(pod.Namespace).GetLogs(pod.Name, &podLogOpts)
-	podLogs, err := req.Stream()
+	// FIXME: get context from parameter
+	podLogs, err := req.Stream(context.TODO())
 	if err != nil {
 		return "", errors.Wrapf(err, "failed to open log stream for pod %s/%s", pod.GetNamespace(), pod.GetName())
 	}
@@ -408,7 +421,8 @@ func getTLSConfigFromSecrets() (*grpcUtils.TLSRaw, error) {
 	if err != nil {
 		return nil, err
 	}
-	secret, err := kubeClient.CoreV1().Secrets(ChaosDaemonNamespace).Get(ChaosDaemonClientCert, metav1.GetOptions{})
+	// FIXME: get context from parameter
+	secret, err := kubeClient.CoreV1().Secrets(ChaosDaemonNamespace).Get(context.TODO(), ChaosDaemonClientCert, metav1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}

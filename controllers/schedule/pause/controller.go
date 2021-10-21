@@ -4,12 +4,14 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package pause
 
@@ -27,8 +29,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/utils"
-	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 )
@@ -41,9 +43,7 @@ type Reconciler struct {
 	Recorder recorder.ChaosRecorder
 }
 
-func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	ctx := context.Background()
-
+func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	schedule := &v1alpha1.Schedule{}
 	err := r.Get(ctx, req.NamespacedName, schedule)
 	if err != nil {
@@ -76,8 +76,8 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		item := items.Index(i).Addr().Interface().(v1alpha1.InnerObject)
 		if item.IsPaused() != schedule.IsPaused() {
 			key := k8sTypes.NamespacedName{
-				Namespace: item.GetObjectMeta().GetNamespace(),
-				Name:      item.GetObjectMeta().GetName(),
+				Namespace: item.GetNamespace(),
+				Name:      item.GetName(),
 			}
 			pause := strconv.FormatBool(schedule.IsPaused())
 
@@ -88,10 +88,12 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 					r.Log.Error(err, "unable to get schedule")
 					return err
 				}
-				if item.GetObjectMeta().Annotations == nil {
-					item.GetObjectMeta().Annotations = make(map[string]string)
+				annotations := item.GetAnnotations()
+				if annotations == nil {
+					annotations = make(map[string]string)
 				}
-				item.GetObjectMeta().Annotations[v1alpha1.PauseAnnotationKey] = pause
+				annotations[v1alpha1.PauseAnnotationKey] = pause
+				item.SetAnnotations(annotations)
 
 				return r.Client.Update(ctx, item)
 			})
@@ -109,15 +111,19 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	return ctrl.Result{}, nil
 }
 
-func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger, lister *utils.ActiveLister, recorderBuilder *recorder.RecorderBuilder) (types.Controller, error) {
-	builder.Default(mgr).
+const controllerName = "schedule-pause"
+
+func Bootstrap(mgr ctrl.Manager, client client.Client, log logr.Logger, lister *utils.ActiveLister, recorderBuilder *recorder.RecorderBuilder) error {
+	if !config.ShouldSpawnController(controllerName) {
+		return nil
+	}
+	return builder.Default(mgr).
 		For(&v1alpha1.Schedule{}).
-		Named("schedule-pause").
+		Named(controllerName).
 		Complete(&Reconciler{
 			client,
-			log.WithName("schedule-pause"),
+			log.WithName(controllerName),
 			lister,
-			recorderBuilder.Build("schedule-pause"),
+			recorderBuilder.Build(controllerName),
 		})
-	return "schedule-pause", nil
 }

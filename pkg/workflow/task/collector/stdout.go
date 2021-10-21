@@ -4,12 +4,14 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package collector
 
@@ -45,10 +47,10 @@ func (it *StdoutCollector) CollectContext(ctx context.Context) (env map[string]i
 	request := client.CoreV1().Pods(it.namespace).GetLogs(it.podName, &v1.PodLogOptions{
 		TypeMeta:  metav1.TypeMeta{},
 		Container: it.containerName,
-	}).Context(ctx)
+	})
 
 	var bytes []byte
-	if bytes, err = request.Do().Raw(); err != nil {
+	if bytes, err = request.Do(ctx).Raw(); err != nil {
 		return nil, err
 	}
 	stdout := strings.TrimSpace(string(bytes))

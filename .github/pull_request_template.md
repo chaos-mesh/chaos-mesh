@@ -12,6 +12,10 @@ PR Title Format:
 
 ### What problem does this PR solve?
 
+<!--
+Automatically closes linked issue when PR is merged.
+Usage: `close #<issue number>`
+-->
 Issue Number: close #xxx <!-- REMOVE this line if no issue to close -->
 
 Problem Summary:

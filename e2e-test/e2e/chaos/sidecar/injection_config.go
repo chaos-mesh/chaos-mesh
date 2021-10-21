@@ -1,15 +1,17 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package sidecar
 
@@ -50,11 +52,11 @@ selector:
 			"app.kubernetes.io/component": "controller-manager",
 		}).String(),
 	}
-	pods, err := kubeCli.CoreV1().Pods(cmNamespace).List(listOptions)
+	pods, err := kubeCli.CoreV1().Pods(cmNamespace).List(context.TODO(), listOptions)
 	framework.ExpectNoError(err, "get chaos mesh controller pods error")
 
 	err = wait.Poll(time.Second, 10*time.Second, func() (done bool, err error) {
-		newPods, err := kubeCli.CoreV1().Pods(cmNamespace).List(listOptions)
+		newPods, err := kubeCli.CoreV1().Pods(cmNamespace).List(context.TODO(), listOptions)
 		framework.ExpectNoError(err, "get chaos mesh controller pods error")
 		if !fixture.HaveSameUIDs(pods.Items, newPods.Items) {
 			return true, nil
@@ -70,7 +72,7 @@ selector:
 	err = enableWebhook(ns)
 	framework.ExpectNoError(err, "enable webhook on ns error")
 	nd := fixture.NewIOTestDeployment("io-test", ns)
-	_, err = kubeCli.AppsV1().Deployments(ns).Create(nd)
+	_, err = kubeCli.AppsV1().Deployments(ns).Create(context.TODO(), nd, metav1.CreateOptions{})
 	framework.ExpectNoError(err, "create io-test deployment error")
 	err = util.WaitDeploymentReady("io-test", ns, kubeCli)
 	framework.ExpectNoError(err, "wait io-test deployment ready error")
@@ -103,11 +105,11 @@ selector:
 			"app.kubernetes.io/component": "controller-manager",
 		}).String(),
 	}
-	pods, err := kubeCli.CoreV1().Pods(cmNamespace).List(listOptions)
+	pods, err := kubeCli.CoreV1().Pods(cmNamespace).List(context.TODO(), listOptions)
 	framework.ExpectNoError(err, "get chaos mesh controller pods error")
 
 	err = wait.Poll(time.Second, 10*time.Second, func() (done bool, err error) {
-		newPods, err := kubeCli.CoreV1().Pods(cmNamespace).List(listOptions)
+		newPods, err := kubeCli.CoreV1().Pods(cmNamespace).List(context.TODO(), listOptions)
 		framework.ExpectNoError(err, "get chaos mesh controller pods error")
 		if !fixture.HaveSameUIDs(pods.Items, newPods.Items) {
 			return true, nil
@@ -123,7 +125,7 @@ selector:
 	err = enableWebhook(ns)
 	framework.ExpectNoError(err, "enable webhook on ns error")
 	nd := fixture.NewIOTestDeployment("io-test", ns)
-	_, err = kubeCli.AppsV1().Deployments(ns).Create(nd)
+	_, err = kubeCli.AppsV1().Deployments(ns).Create(context.TODO(), nd, metav1.CreateOptions{})
 	framework.ExpectNoError(err, "create io-test deployment error")
 	err = util.WaitDeploymentReady("io-test", ns, kubeCli)
 	framework.ExpectNoError(err, "wait io-test deployment ready error")

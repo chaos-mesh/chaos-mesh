@@ -4,12 +4,14 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package genericwebhook
 
@@ -20,7 +22,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
-type fieldCallback func(path *field.Path, obj interface{}, field reflect.StructField) bool
+type fieldCallback func(path *field.Path, obj interface{}, field *reflect.StructField) bool
 
 type FieldWalker struct {
 	obj      interface{}
@@ -37,7 +39,7 @@ func NewFieldWalker(obj interface{}, callback fieldCallback) *FieldWalker {
 type iterateNode struct {
 	Val   reflect.Value
 	Path  *field.Path
-	Field reflect.StructField
+	Field *reflect.StructField
 }
 
 func (w *FieldWalker) Walk() {
@@ -77,21 +79,30 @@ func (w *FieldWalker) Walk() {
 		}
 		objVal = reflect.Indirect(node.Val)
 		objType := objVal.Type()
-		if objType.Kind() != reflect.Struct {
-			continue
-		}
-		for i := 0; i < objVal.NumField(); i++ {
-			field := objType.Field(i)
-			fieldVal := objVal.Field(i)
+		switch objType.Kind() {
+		case reflect.Struct:
+			for i := 0; i < objVal.NumField(); i++ {
+				field := objType.Field(i)
+				fieldVal := objVal.Field(i)
 
-			// The field should be exported
-			if fieldVal.CanInterface() {
+				// The field should be exported
+				if fieldVal.CanInterface() {
+					items.PushBack(iterateNode{
+						Val:   fieldVal,
+						Path:  node.Path.Child(field.Name),
+						Field: &field,
+					})
+				}
+			}
+		case reflect.Slice:
+			for i := 0; i < objVal.Len(); i++ {
 				items.PushBack(iterateNode{
-					Val:   fieldVal,
-					Path:  node.Path.Child(field.Name),
-					Field: field,
+					Val:   objVal.Index(i),
+					Path:  node.Path.Index(i),
+					Field: nil,
 				})
 			}
 		}
+
 	}
 }

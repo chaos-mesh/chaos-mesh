@@ -1,3 +1,19 @@
+/*
+ * Copyright 2021 Chaos Mesh Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 import {
   Autocomplete,
   Box,
@@ -27,8 +43,8 @@ import RemoveCircleIcon from '@material-ui/icons/RemoveCircle'
 import Space from 'components-mui/Space'
 import Suspend from './Suspend'
 import T from 'components/T'
-import _snakecase from 'lodash.snakecase'
 import { makeStyles } from '@material-ui/styles'
+import { parseYAML } from 'lib/formikhelpers'
 import { setAlert } from 'slices/globalStatus'
 import { useIntl } from 'react-intl'
 
@@ -95,15 +111,15 @@ const Add: React.FC<AddProps> = ({
   const newERef = useRef<NewExperimentHandles>(null)
 
   const fillExperiment = (t: Template) => {
-    const e = t.experiment!
+    const e = t.experiment
 
-    const kind = e.target.kind
+    const { kind, basic, spec } = parseYAML(e)
 
     dispatch(
       setExternalExperiment({
-        kindAction: [kind, e.target[_snakecase(kind)].action ?? ''],
-        target: e.target,
-        basic: e.basic,
+        kindAction: [kind, spec.action ?? ''],
+        spec,
+        basic,
       })
     )
   }
@@ -189,6 +205,17 @@ const Add: React.FC<AddProps> = ({
   }
 
   const submit = (template: Template) => {
+    if (storeTemplates.some((t) => t.name === template.name)) {
+      dispatch(
+        setAlert({
+          type: 'warning',
+          message: T('newW.messages.redundant', intl),
+        })
+      )
+
+      return
+    }
+
     if (childIndex !== undefined) {
       if (parentTemplates![childIndex!]) {
         const tmp = JSON.parse(JSON.stringify(parentTemplates!))
@@ -209,7 +236,7 @@ const Add: React.FC<AddProps> = ({
   const onSubmit = (experiment: any) => {
     const type = formRef.current.values.type
 
-    const name = experiment.basic.name
+    const name = experiment.metadata.name
     const template = {
       type,
       name,

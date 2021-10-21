@@ -1,38 +1,75 @@
+/*
+ * Copyright 2021 Chaos Mesh Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 import * as Yup from 'yup'
 
+import { schema as scheduleSchema } from 'components/Schedule/types'
+
 const data = {
-  name: '',
-  namespace: '',
-  labels: [],
-  annotations: [],
-  scope: {
-    namespaces: [],
-    label_selectors: [],
-    annotation_selectors: [],
-    phase_selectors: ['all'],
-    mode: 'one',
-    value: '',
-    pods: [],
+  metadata: {
+    name: '',
+    namespace: '',
+    labels: [],
+    annotations: [],
   },
-  scheduler: {
+  spec: {
+    selector: {
+      namespaces: [],
+      labelSelectors: [],
+      annotationSelectors: [],
+      podPhaseSelectors: ['all'],
+      pods: [],
+    },
+    mode: 'one',
+    value: undefined,
     duration: '',
   },
 }
 
-export const schema = (options: { scopeDisabled: boolean }) => {
+export const schema = (options: { scopeDisabled: boolean; scheduled?: boolean; needDeadline?: boolean }) => {
   let result = Yup.object({
-    name: Yup.string().trim().required('The name is required'),
+    metadata: Yup.object({
+      name: Yup.string().trim().required('The name is required'),
+    }),
   })
 
-  if (!options.scopeDisabled) {
-    result = result.shape({
-      scope: Yup.object({
+  const { scopeDisabled, scheduled, needDeadline } = options
+  let spec = Yup.object()
+
+  if (!scopeDisabled) {
+    spec = spec.shape({
+      selector: Yup.object({
         namespaces: Yup.array().min(1, 'The namespace selectors is required'),
       }),
     })
   }
 
-  return result
+  if (scheduled) {
+    spec = spec.shape(scheduleSchema)
+  }
+
+  if (needDeadline) {
+    spec = spec.shape({
+      duration: Yup.string().trim().required('The deadline is required'),
+    })
+  }
+
+  return result.shape({
+    spec,
+  })
 }
 
 export type dataType = typeof data

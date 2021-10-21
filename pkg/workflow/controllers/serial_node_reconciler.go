@@ -4,12 +4,14 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package controllers
 
@@ -63,7 +65,7 @@ func NewSerialNodeReconciler(kubeClient client.Client, eventRecorder recorder.Ch
 // And We MUST update v1alpha1.WorkflowNodeStatus by "observing real world" at EACH TIME, such as listing controlled
 // children nodes.
 // We only update v1alpha1.WorkflowNodeStatus once(wrapped with retry on conflict), at the end of this method.
-func (it *SerialNodeReconciler) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+func (it *SerialNodeReconciler) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
 	startTime := time.Now()
 	defer func() {
 		it.logger.V(4).Info("Finished syncing for serial node",
@@ -71,8 +73,6 @@ func (it *SerialNodeReconciler) Reconcile(request reconcile.Request) (reconcile.
 			"duration", time.Since(startTime),
 		)
 	}()
-
-	ctx := context.TODO()
 
 	node := v1alpha1.WorkflowNode{}
 	err := it.kubeClient.Get(ctx, request.NamespacedName, &node)

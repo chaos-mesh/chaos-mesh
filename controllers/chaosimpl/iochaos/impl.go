@@ -1,15 +1,17 @@
-// Copyright 2019 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package iochaos
 
@@ -22,7 +24,6 @@ import (
 	"go.uber.org/fx"
 	v1 "k8s.io/api/core/v1"
 	k8sError "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -44,10 +45,12 @@ type Impl struct {
 	builder *podiochaosmanager.Builder
 }
 
+var _ common.ChaosImpl = (*Impl)(nil)
+
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	// The only possible phase to get in here is "Not Injected" or "Not Injected/Wait"
 
-	impl.Log.Info("iochaos Apply", "namespace", obj.GetObjectMeta().Namespace, "name", obj.GetObjectMeta().Name)
+	impl.Log.Info("iochaos Apply", "namespace", obj.GetNamespace(), "name", obj.GetName())
 	iochaos := obj.(*v1alpha1.IOChaos)
 	if iochaos.Status.Instances == nil {
 		iochaos.Status.Instances = make(map[string]int64)
@@ -184,7 +187,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		if k8sError.IsNotFound(err) {
 			return v1alpha1.NotInjected, nil
 		}
-		return v1alpha1.NotInjected, err
+		return v1alpha1.Injected, err
 	}
 
 	source := iochaos.Namespace + "/" + iochaos.Name
@@ -222,7 +225,7 @@ func NewImpl(c client.Client, b *podiochaosmanager.Builder, log logr.Logger) *co
 			builder: b,
 		},
 		ObjectList: &v1alpha1.IOChaosList{},
-		Controlls:  []runtime.Object{&v1alpha1.PodIOChaos{}},
+		Controlls:  []client.Object{&v1alpha1.PodIOChaos{}},
 	}
 }
 

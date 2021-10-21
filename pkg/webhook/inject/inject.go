@@ -1,15 +1,17 @@
-// Copyright 2019 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package inject
 
@@ -18,6 +20,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+
+	v1 "k8s.io/api/admission/v1"
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/metrics"
 	"github.com/chaos-mesh/chaos-mesh/pkg/annotation"
@@ -28,7 +32,6 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"k8s.io/api/admission/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -47,11 +50,11 @@ const (
 )
 
 // Inject do pod template config inject
-func Inject(res *v1beta1.AdmissionRequest, cli client.Client, cfg *config.Config, controllerCfg *controllerCfg.ChaosControllerConfig, metrics *metrics.ChaosCollector) *v1beta1.AdmissionResponse {
+func Inject(res *v1.AdmissionRequest, cli client.Client, cfg *config.Config, controllerCfg *controllerCfg.ChaosControllerConfig, metrics *metrics.ChaosCollector) *v1.AdmissionResponse {
 	var pod corev1.Pod
 	if err := json.Unmarshal(res.Object.Raw, &pod); err != nil {
 		log.Error(err, "Could not unmarshal raw object")
-		return &v1beta1.AdmissionResponse{
+		return &v1.AdmissionResponse{
 			Result: &metav1.Status{
 				Message: err.Error(),
 			},
@@ -73,7 +76,7 @@ func Inject(res *v1beta1.AdmissionRequest, cli client.Client, cfg *config.Config
 	requiredKey, ok := injectRequired(&pod.ObjectMeta, cli, cfg, controllerCfg)
 	if !ok {
 		log.Info("Skipping injection due to policy check", "namespace", pod.ObjectMeta.Namespace, "name", podName)
-		return &v1beta1.AdmissionResponse{
+		return &v1.AdmissionResponse{
 			Allowed: true,
 		}
 	}
@@ -86,7 +89,7 @@ func Inject(res *v1beta1.AdmissionRequest, cli client.Client, cfg *config.Config
 		log.Error(err, "Error getting injection config, permitting launch of pod with no sidecar injected", "injectionConfig",
 			injectionConfig)
 		// dont prevent pods from launching! just return allowed
-		return &v1beta1.AdmissionResponse{
+		return &v1.AdmissionResponse{
 			Allowed: true,
 		}
 	}
@@ -95,7 +98,7 @@ func Inject(res *v1beta1.AdmissionRequest, cli client.Client, cfg *config.Config
 		meet, err := podselector.CheckPodMeetSelector(pod, *injectionConfig.Selector)
 		if err != nil {
 			log.Error(err, "Failed to check pod selector", "namespace", pod.Namespace)
-			return &v1beta1.AdmissionResponse{
+			return &v1.AdmissionResponse{
 				Allowed: true,
 			}
 		}
@@ -103,7 +106,7 @@ func Inject(res *v1beta1.AdmissionRequest, cli client.Client, cfg *config.Config
 		if !meet {
 			log.Info("Skipping injection, this pod does not meet the selection criteria",
 				"namespace", pod.Namespace, "name", pod.Name)
-			return &v1beta1.AdmissionResponse{
+			return &v1.AdmissionResponse{
 				Allowed: true,
 			}
 		}
@@ -113,7 +116,7 @@ func Inject(res *v1beta1.AdmissionRequest, cli client.Client, cfg *config.Config
 
 	patchBytes, err := createPatch(&pod, injectionConfig, annotations)
 	if err != nil {
-		return &v1beta1.AdmissionResponse{
+		return &v1.AdmissionResponse{
 			Result: &metav1.Status{
 				Message: err.Error(),
 			},
@@ -124,13 +127,12 @@ func Inject(res *v1beta1.AdmissionRequest, cli client.Client, cfg *config.Config
 	if metrics != nil {
 		metrics.Injections.WithLabelValues(res.Namespace, requiredKey).Inc()
 	}
-	return &v1beta1.AdmissionResponse{
-		Allowed: true,
-		Patch:   patchBytes,
-		PatchType: func() *v1beta1.PatchType {
-			pt := v1beta1.PatchTypeJSONPatch
-			return &pt
-		}(),
+
+	patchType := v1.PatchTypeJSONPatch
+	return &v1.AdmissionResponse{
+		Allowed:   true,
+		Patch:     patchBytes,
+		PatchType: &patchType,
 	}
 }
 
@@ -527,7 +529,7 @@ func mergeVolumeMounts(volumeMounts []corev1.VolumeMount, containers []corev1.Co
 
 func updateAnnotations(target map[string]string, added map[string]string) (patch []patchOperation) {
 	for key, value := range added {
-		if target == nil || target[key] == "" {
+		if target == nil {
 			target = map[string]string{}
 			patch = append(patch, patchOperation{
 				Op:   "add",
@@ -537,14 +539,23 @@ func updateAnnotations(target map[string]string, added map[string]string) (patch
 				},
 			})
 		} else {
+			op := "add"
+			if target[key] != "" {
+				op = "replace"
+			}
 			patch = append(patch, patchOperation{
-				Op:    "replace",
-				Path:  "/metadata/annotations/" + key,
+				Op:    op,
+				Path:  "/metadata/annotations/" + escapeJSONPointerValue(key),
 				Value: value,
 			})
 		}
 	}
 	return patch
+}
+
+func escapeJSONPointerValue(in string) string {
+	step := strings.Replace(in, "~", "~0", -1)
+	return strings.Replace(step, "/", "~1", -1)
 }
 
 func updateShareProcessNamespace(value bool) (patch []patchOperation) {

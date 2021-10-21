@@ -4,12 +4,14 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package controllers
 
@@ -128,17 +130,18 @@ func conversionSchedule(origin *v1alpha1.ChaosOnlyScheduleSpec) *v1alpha1.Schedu
 		Type:                    origin.Type,
 		ScheduleItem: v1alpha1.ScheduleItem{
 			EmbedChaos: v1alpha1.EmbedChaos{
-				AWSChaos:     origin.EmbedChaos.AWSChaos,
-				DNSChaos:     origin.EmbedChaos.DNSChaos,
-				GCPChaos:     origin.EmbedChaos.GCPChaos,
-				HTTPChaos:    origin.EmbedChaos.HTTPChaos,
-				IOChaos:      origin.EmbedChaos.IOChaos,
-				JVMChaos:     origin.EmbedChaos.JVMChaos,
-				KernelChaos:  origin.EmbedChaos.KernelChaos,
-				NetworkChaos: origin.EmbedChaos.NetworkChaos,
-				PodChaos:     origin.EmbedChaos.PodChaos,
-				StressChaos:  origin.EmbedChaos.StressChaos,
-				TimeChaos:    origin.EmbedChaos.TimeChaos,
+				AWSChaos:             origin.EmbedChaos.AWSChaos,
+				DNSChaos:             origin.EmbedChaos.DNSChaos,
+				GCPChaos:             origin.EmbedChaos.GCPChaos,
+				HTTPChaos:            origin.EmbedChaos.HTTPChaos,
+				IOChaos:              origin.EmbedChaos.IOChaos,
+				JVMChaos:             origin.EmbedChaos.JVMChaos,
+				KernelChaos:          origin.EmbedChaos.KernelChaos,
+				NetworkChaos:         origin.EmbedChaos.NetworkChaos,
+				PodChaos:             origin.EmbedChaos.PodChaos,
+				StressChaos:          origin.EmbedChaos.StressChaos,
+				TimeChaos:            origin.EmbedChaos.TimeChaos,
+				PhysicalMachineChaos: origin.EmbedChaos.PhysicalMachineChaos,
 			},
 			Workflow: nil,
 		},

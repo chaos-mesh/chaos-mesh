@@ -4,12 +4,14 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package gc
 
@@ -29,6 +31,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/utils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
@@ -45,9 +48,7 @@ type Reconciler struct {
 	ActiveLister *utils.ActiveLister
 }
 
-func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	ctx := context.Background()
-
+func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	// In this controller, schedule could be out of date, as the reconcilation may be not caused by
 	// an update on Schedule, but by a *Chaos.
 	schedule := &v1alpha1.Schedule{}
@@ -69,14 +70,14 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	items := reflect.ValueOf(list).Elem().FieldByName("Items")
-	metaItems := []v1alpha1.MetaObject{}
+	metaItems := []client.Object{}
 	for i := 0; i < items.Len(); i++ {
-		item := items.Index(i).Addr().Interface().(v1alpha1.MetaObject)
+		item := items.Index(i).Addr().Interface().(client.Object)
 		metaItems = append(metaItems, item)
 	}
 
 	sort.Slice(metaItems, func(x, y int) bool {
-		return metaItems[x].GetObjectMeta().CreationTimestamp.Time.Before(metaItems[y].GetObjectMeta().CreationTimestamp.Time)
+		return metaItems[x].GetCreationTimestamp().Time.Before(metaItems[y].GetCreationTimestamp().Time)
 	})
 
 	exceededHistory := len(metaItems) - schedule.Spec.HistoryLimit
@@ -94,7 +95,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 						}
 
 						r.Recorder.Event(schedule, recorder.ScheduleSkipRemoveHistory{
-							RunningName: innerObj.GetChaos().Name,
+							RunningName: innerObj.GetName(),
 						})
 						continue
 					}
@@ -120,7 +121,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			err := r.Client.Delete(ctx, obj)
 			if err != nil && !k8sError.IsNotFound(err) {
 				r.Recorder.Event(schedule, recorder.Failed{
-					Activity: fmt.Sprintf("delete %s/%s", obj.GetObjectMeta().Namespace, obj.GetObjectMeta().Name),
+					Activity: fmt.Sprintf("delete %s/%s", obj.GetNamespace(), obj.GetName()),
 					Err:      err.Error(),
 				})
 			}
@@ -139,10 +140,15 @@ type Objs struct {
 	Objs         []types.Object `group:"objs"`
 }
 
-func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger, objs Objs, scheme *runtime.Scheme, lister *utils.ActiveLister, recorderBuilder *recorder.RecorderBuilder) (types.Controller, error) {
+const controllerName = "schedule-gc"
+
+func Bootstrap(mgr ctrl.Manager, client client.Client, log logr.Logger, objs Objs, scheme *runtime.Scheme, lister *utils.ActiveLister, recorderBuilder *recorder.RecorderBuilder) error {
+	if !config.ShouldSpawnController(controllerName) {
+		return nil
+	}
 	builder := builder.Default(mgr).
 		For(&v1alpha1.Schedule{}).
-		Named("schedule-gc")
+		Named(controllerName)
 
 	for _, obj := range objs.Objs {
 		// TODO: support workflow
@@ -151,11 +157,10 @@ func NewController(mgr ctrl.Manager, client client.Client, log logr.Logger, objs
 
 	builder = builder.Owns(&v1alpha1.Workflow{})
 
-	builder.Complete(&Reconciler{
+	return builder.Complete(&Reconciler{
 		client,
-		log.WithName("schedule-gc"),
-		recorderBuilder.Build("schedule-gc"),
+		log.WithName(controllerName),
+		recorderBuilder.Build(controllerName),
 		lister,
 	})
-	return "schedule-gc", nil
 }

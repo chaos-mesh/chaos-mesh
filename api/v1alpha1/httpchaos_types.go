@@ -1,15 +1,17 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package v1alpha1
 
@@ -18,7 +20,7 @@ import (
 )
 
 // +kubebuilder:object:root=true
-// +chaos-mesh:base
+// +chaos-mesh:experiment
 
 // HTTPChaos is the Schema for the HTTPchaos API
 type HTTPChaos struct {
@@ -28,6 +30,10 @@ type HTTPChaos struct {
 	Spec   HTTPChaosSpec   `json:"spec,omitempty"`
 	Status HTTPChaosStatus `json:"status,omitempty"`
 }
+
+var _ InnerObjectWithCustomStatus = (*HTTPChaos)(nil)
+var _ InnerObjectWithSelector = (*HTTPChaos)(nil)
+var _ InnerObject = (*HTTPChaos)(nil)
 
 type HTTPChaosSpec struct {
 	PodSelector `json:",inline"`
@@ -39,7 +45,7 @@ type HTTPChaosSpec struct {
 	PodHttpChaosActions `json:",inline"`
 
 	// Port represents the target port to be proxy of.
-	Port int32 `json:"port,omitempty"`
+	Port int32 `json:"port,omitempty" webhook:"Port"`
 
 	// Path is a rule to select target by uri path in http request.
 	// +optional
@@ -47,7 +53,7 @@ type HTTPChaosSpec struct {
 
 	// Method is a rule to select target by http method in request.
 	// +optional
-	Method *string `json:"method,omitempty"`
+	Method *string `json:"method,omitempty" webhook:"HTTPMethod"`
 
 	// Code is a rule to select target by http status code in response.
 	// +optional

@@ -1,16 +1,31 @@
+/*
+ * Copyright 2021 Chaos Mesh Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 import { AutocompleteMultipleField, LabelField, SelectField, Submit, TextField } from 'components/FormField'
 import { Form, Formik, FormikErrors, FormikTouched, getIn } from 'formik'
-import { Kind, Spec } from '../data/target'
+import { Kind, Spec } from '../data/types'
 import { useEffect, useState } from 'react'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
-import AdvancedOptions from 'components/AdvancedOptions'
 import { MenuItem } from '@material-ui/core'
 import { ObjectSchema } from 'yup'
+import OtherOptions from 'components/OtherOptions'
 import Scope from './Scope'
 import Space from 'components-mui/Space'
 import T from 'components/T'
-import _snakecase from 'lodash.snakecase'
 import basicData from '../data/basic'
 import { clearNetworkTargetPods } from 'slices/experiments'
 
@@ -22,7 +37,7 @@ interface TargetGeneratedProps {
 }
 
 const TargetGenerated: React.FC<TargetGeneratedProps> = ({ kind, data, validationSchema, onSubmit }) => {
-  const { namespaces, target } = useStoreSelector((state) => state.experiments)
+  const { namespaces, spec } = useStoreSelector((state) => state.experiments)
   const dispatch = useStoreDispatch()
 
   let initialValues = Object.entries(data).reduce((acc, [k, v]) => {
@@ -40,28 +55,26 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ kind, data, validatio
     delete initialValues.action
     const direction = initialValues.direction
     delete initialValues.direction
-    const externalTargets = initialValues.external_targets
-    delete initialValues.external_targets
+    const externalTargets = initialValues.externalTargets
+    delete initialValues.externalTargets
 
     initialValues = {
       action,
-      [action]: initialValues,
+      [action]: action !== 'partition' ? initialValues : undefined,
       direction,
-      external_targets: externalTargets,
+      externalTargets,
     }
   }
 
   const [init, setInit] = useState(initialValues)
 
   useEffect(() => {
-    if (target['kind']) {
-      setInit({
-        ...initialValues,
-        ...target[_snakecase(kind)],
-      })
-    }
+    setInit({
+      ...initialValues,
+      ...spec,
+    })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [target])
+  }, [spec])
 
   const parseDataToFormFields = (
     errors: FormikErrors<Record<string, any>>,
@@ -70,7 +83,7 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ kind, data, validatio
     const rendered = Object.entries(data)
       .filter(([_, v]) => v && v instanceof Object && v.field)
       .map(([k, v]) => {
-        if (kind === 'NetworkChaos' && k !== 'direction' && k !== 'external_targets') {
+        if (kind === 'NetworkChaos' && k !== 'direction' && k !== 'externalTargets') {
           k = `${data.action}.${k}`
         }
 
@@ -148,14 +161,18 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ kind, data, validatio
     <Formik enableReinitialize initialValues={init} validationSchema={validationSchema} onSubmit={onSubmit}>
       {({ values, setFieldValue, errors, touched }) => {
         const beforeTargetOpen = () => {
-          if (!getIn(values, 'target_scope')) {
-            setFieldValue('target_scope', basicData.scope)
+          if (!getIn(values, 'target')) {
+            setFieldValue('target', {
+              selector: basicData.spec.selector,
+              mode: basicData.spec.mode,
+              value: basicData.spec.value,
+            })
           }
         }
 
         const afterTargetClose = () => {
-          if (getIn(values, 'target_scope')) {
-            setFieldValue('target_scope', undefined)
+          if (getIn(values, 'target')) {
+            setFieldValue('target', undefined)
             dispatch(clearNetworkTargetPods())
           }
         }
@@ -164,20 +181,21 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ kind, data, validatio
           <Form>
             <Space>{parseDataToFormFields(errors, touched)}</Space>
             {kind === 'NetworkChaos' && (
-              <AdvancedOptions
+              <OtherOptions
                 title={T('newE.target.network.target.title')}
                 beforeOpen={beforeTargetOpen}
                 afterClose={afterTargetClose}
               >
-                {values.target_scope && (
+                {values.target && (
                   <Scope
                     namespaces={namespaces}
-                    scope="target_scope"
+                    scope="target.selector"
+                    modeScope="target"
                     podsPreviewTitle={T('newE.target.network.target.podsPreview')}
                     podsPreviewDesc={T('newE.target.network.target.podsPreviewHelper')}
                   />
                 )}
-              </AdvancedOptions>
+              </OtherOptions>
             )}
             <Submit />
           </Form>

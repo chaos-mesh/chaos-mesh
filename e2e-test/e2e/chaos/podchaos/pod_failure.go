@@ -1,15 +1,17 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package podchaos
 
@@ -41,7 +43,7 @@ func TestcasePodFailureOnceThenDelete(ns string, kubeCli kubernetes.Interface, c
 	By("preparing experiment pods")
 	appName := "timer-pod-failure1"
 	nd := fixture.NewTimerDeployment(appName, ns)
-	_, err := kubeCli.AppsV1().Deployments(ns).Create(nd)
+	_, err := kubeCli.AppsV1().Deployments(ns).Create(context.TODO(), nd, metav1.CreateOptions{})
 	framework.ExpectNoError(err, "create timer deployment error")
 	err = util.WaitDeploymentReady(appName, ns, kubeCli)
 	framework.ExpectNoError(err, "wait timer deployment ready error")
@@ -80,7 +82,7 @@ func TestcasePodFailureOnceThenDelete(ns string, kubeCli kubernetes.Interface, c
 
 	By("waiting for assertion some pod fall into failure")
 	err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
-		pods, err := kubeCli.CoreV1().Pods(ns).List(listOption)
+		pods, err := kubeCli.CoreV1().Pods(ns).List(context.TODO(), listOption)
 		if err != nil {
 			return false, nil
 		}
@@ -103,7 +105,7 @@ func TestcasePodFailureOnceThenDelete(ns string, kubeCli kubernetes.Interface, c
 
 	By("waiting for assertion recovering")
 	err = wait.Poll(5*time.Second, 2*time.Minute, func() (done bool, err error) {
-		pods, err := kubeCli.CoreV1().Pods(ns).List(listOption)
+		pods, err := kubeCli.CoreV1().Pods(ns).List(context.TODO(), listOption)
 		if err != nil {
 			return false, nil
 		}
@@ -128,7 +130,7 @@ func TestcasePodFailurePauseThenUnPause(ns string, kubeCli kubernetes.Interface,
 	By("preparing experiment pods")
 	appName := "timer-pod-failure2"
 	nd := fixture.NewTimerDeployment(appName, ns)
-	_, err := kubeCli.AppsV1().Deployments(ns).Create(nd)
+	_, err := kubeCli.AppsV1().Deployments(ns).Create(context.TODO(), nd, metav1.CreateOptions{})
 	framework.ExpectNoError(err, "create timer deployment error")
 	err = util.WaitDeploymentReady(appName, ns, kubeCli)
 	framework.ExpectNoError(err, "wait timer deployment ready error")
@@ -174,7 +176,7 @@ func TestcasePodFailurePauseThenUnPause(ns string, kubeCli kubernetes.Interface,
 	By("waiting for assertion some pod fall into failure")
 	// check whether the pod failure chaos succeeded or not
 	err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
-		pods, err := kubeCli.CoreV1().Pods(ns).List(listOption)
+		pods, err := kubeCli.CoreV1().Pods(ns).List(context.TODO(), listOption)
 		if err != nil {
 			return false, nil
 		}
@@ -206,10 +208,10 @@ func TestcasePodFailurePauseThenUnPause(ns string, kubeCli kubernetes.Interface,
 	framework.ExpectNoError(err, "check paused chaos failed")
 
 	By("wait for 30 seconds and no pod failure")
-	pods, err = kubeCli.CoreV1().Pods(ns).List(listOption)
+	pods, err = kubeCli.CoreV1().Pods(ns).List(context.TODO(), listOption)
 	framework.ExpectNoError(err, "get timer pod error")
 	err = wait.Poll(5*time.Second, 30*time.Second, func() (done bool, err error) {
-		pods, err = kubeCli.CoreV1().Pods(ns).List(listOption)
+		pods, err = kubeCli.CoreV1().Pods(ns).List(context.TODO(), listOption)
 		framework.ExpectNoError(err, "get timer pod error")
 		pod := pods.Items[0]
 		for _, c := range pod.Spec.Containers {
@@ -240,7 +242,7 @@ func TestcasePodFailurePauseThenUnPause(ns string, kubeCli kubernetes.Interface,
 
 	By("waiting for assert pod failure happens again")
 	err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
-		pods, err = kubeCli.CoreV1().Pods(ns).List(listOption)
+		pods, err = kubeCli.CoreV1().Pods(ns).List(context.TODO(), listOption)
 		framework.ExpectNoError(err, "get timer pod error")
 		pod := pods.Items[0]
 		for _, c := range pod.Spec.Containers {

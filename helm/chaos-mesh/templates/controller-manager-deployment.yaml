@@ -1,3 +1,17 @@
+# Copyright 2021 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -33,6 +47,9 @@ spec:
       {{- if .Values.chaosDlv.enable }}
       shareProcessNamespace: true
       {{- end }}
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets: {{ toYaml .Values.imagePullSecrets | nindent 8 }}
+      {{- end }}
       containers:
       - name: chaos-mesh
         image: {{template "registry-prefix" .}}{{ .Values.controllerManager.image }}
@@ -62,6 +79,10 @@ spec:
             value: !!str {{ .Values.chaosDaemon.grpcPort }}
           - name: BPFKI_PORT
             value: !!str {{ .Values.bpfki.grpcPort }}
+          - name: ENABLED_CONTROLLERS
+            value: {{ .Values.controllerManager.enabledControllers | join "," | quote }}
+          - name: ENABLED_WEBHOOKS
+            value: {{ .Values.controllerManager.enabledWebhooks | join "," | quote }}
           - name: TEMPLATE_LABELS
             value: "app.kubernetes.io/component:template"
           - name: CONFIGMAP_LABELS
@@ -71,6 +92,10 @@ spec:
           {{- if .Values.enableProfiling }}
           - name: PPROF_ADDR
             value: ":10081"
+          {{- end }}
+          {{- if .Values.enableCtrlServer }}
+          - name: CTRL_ADDR
+            value: ":10082"
           {{- end }}
           - name: CHAOS_DNS_SERVICE_NAME
             value: {{ .Values.dnsServer.name }}
@@ -94,6 +119,14 @@ spec:
           - name: POD_FAILURE_PAUSE_IMAGE
             value: {{ .Values.controllerManager.podChaos.podFailure.pauseImage }}
           {{- end }}
+          - name: ENABLE_LEADER_ELECTION
+            value: {{ .Values.controllerManager.leaderElection.enabled | quote }}
+          - name: LEADER_ELECT_LEASE_DURATION
+            value: {{ .Values.controllerManager.leaderElection.leaseDuration | quote }}
+          - name: LEADER_ELECT_RENEW_DEADLINE
+            value: {{ .Values.controllerManager.leaderElection.renewDeadline | quote }}
+          - name: LEADER_ELECT_RETRY_PERIOD
+            value: {{ .Values.controllerManager.leaderElection.retryPeriod | quote }}
         volumeMounts:
           - name: webhook-certs
             mountPath: /etc/webhook/certs
@@ -111,6 +144,10 @@ spec:
         {{- if .Values.enableProfiling }}
           - name: pprof
             containerPort: 10081
+        {{- end }}
+        {{- if .Values.enableCtrlServer }}
+          - name: ctrl
+            containerPort: 10082
         {{- end }}
       {{- if .Values.chaosDlv.enable }}
       - name: chaos-mesh-dlv
