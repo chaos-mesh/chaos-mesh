@@ -16,18 +16,28 @@
  */
 import { Form, Formik } from 'formik'
 import { FormControlLabel, Switch } from '@material-ui/core'
-import { Submit, TextField } from 'components/FormField'
+import { MenuItem, Typography } from '@material-ui/core'
+import { SelectField, Submit, TextField } from 'components/FormField'
 import { Template, TemplateType } from 'slices/workflows'
 import { parseHTTPTask, renderHTTPTask } from 'api/workflows'
 import { useEffect, useRef, useState } from 'react'
-import { validateDeadline, validateName } from 'lib/formikhelpers'
 
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
 import { RequestForm } from 'api/workflows.type'
 import Space from 'components-mui/Space'
 import T from 'components/T'
+import { makeStyles } from '@material-ui/styles'
 import { useIntl } from 'react-intl'
+import { validateName } from 'lib/formikhelpers'
+
+const useStyles = makeStyles({
+  field: {
+    width: 180,
+  },
+})
+
+const HTTPMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTION']
 
 interface HTTPTaskProps extends CommonTemplateProps {
   childrenCount: number
@@ -42,17 +52,9 @@ interface CommonTemplateProps {
   externalTemplate?: Template
 }
 
-interface FromProps {
-  name: string
-  url: string
-  method: string
-  body: string
-  follow: boolean
-  json: boolean
-}
-
 const HTTPTask: React.FC<HTTPTaskProps> = (props) => {
   const intl = useIntl()
+  const classes = useStyles()
 
   const { submitTemplate } = props
   const onSubmit = (form: RequestForm) => {
@@ -74,13 +76,13 @@ const HTTPTask: React.FC<HTTPTaskProps> = (props) => {
       .catch(console.error)
   }
   const formRef = useRef<any>()
-  const [initialValues, setInitialValues] = useState<FromProps>({
+  const [initialValues, setInitialValues] = useState<RequestForm>({
     name: props.name || '',
     url: '',
     method: '',
     body: '',
-    follow: false,
-    json: false,
+    followLocation: false,
+    jsonContent: false,
   })
 
   const validateRequestForm = (newValue: RequestForm) => {
@@ -91,9 +93,11 @@ const HTTPTask: React.FC<HTTPTaskProps> = (props) => {
 
   useEffect(() => {
     if (props.externalTemplate) {
+      // TODO: use unified name
+      const backendType = props.externalTemplate.type === 'custom' ? 'Task' : props.externalTemplate.type
       parseHTTPTask({
         name: props.externalTemplate.name,
-        type: props.externalTemplate.type,
+        templateType: backendType,
         task: {
           container: props.externalTemplate.custom!.container,
           conditionalBranches: props.externalTemplate.custom!.conditionalBranches,
@@ -107,8 +111,8 @@ const HTTPTask: React.FC<HTTPTaskProps> = (props) => {
               url: parsedForm.url,
               method: parsedForm.method,
               body: parsedForm.body,
-              follow: parsedForm.follow || false,
-              json: parsedForm.json || false,
+              followLocation: parsedForm.followLocation || false,
+              jsonContent: parsedForm.jsonContent || false,
             })
           }
         })
@@ -122,7 +126,6 @@ const HTTPTask: React.FC<HTTPTaskProps> = (props) => {
       <Paper>
         <Space>
           <PaperTop title={T('newW.httpTitle')} />
-
           <Formik
             innerRef={formRef}
             initialValues={initialValues}
@@ -152,15 +155,22 @@ const HTTPTask: React.FC<HTTPTaskProps> = (props) => {
                       size="small"
                       fullWidth
                     />
-                    <TextField
+
+                    <SelectField
+                      className={classes.field}
                       name="method"
                       label={T('newW.node.httpRequest.method')}
                       helperText={
                         errors.method && touched.method ? errors.method : T('newW.node.httpRequest.methodHelper')
                       }
                       size="small"
-                      fullWidth
-                    />
+                    >
+                      {HTTPMethods.map((method) => (
+                        <MenuItem key={method} value={method}>
+                          <Typography variant="body2">{method}</Typography>
+                        </MenuItem>
+                      ))}
+                    </SelectField>
                     {(values.method === 'POST' || values.method === 'PUT') && (
                       <TextField
                         name="body"
@@ -174,13 +184,13 @@ const HTTPTask: React.FC<HTTPTaskProps> = (props) => {
                     <FormControlLabel
                       style={{ marginRight: 0 }}
                       label={T('newW.node.httpRequest.follow')}
-                      control={<Switch name="follow" onChange={handleChange} />}
+                      control={<Switch name="followLocation" onChange={handleChange} />}
                     />
 
                     <FormControlLabel
                       style={{ marginRight: 0 }}
                       label={T('newW.node.httpRequest.json')}
-                      control={<Switch name="json" onChange={handleChange} />}
+                      control={<Switch name="jsonContent" onChange={handleChange} />}
                     />
                     <Submit />
                   </Space>

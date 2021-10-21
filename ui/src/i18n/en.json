@@ -148,7 +148,7 @@
         "url": "URL",
         "urlHelper": "Request URL",
         "method": "Method",
-        "methodHelper": "Request Method; Example: GET",
+        "methodHelper": "Request Method",
         "body": "Body",
         "bodyHelper": "Request Body",
         "follow": "Follow 301/302 Location",

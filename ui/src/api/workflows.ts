@@ -22,8 +22,8 @@ import http from './http'
 
 // TODO: refactor this interface, use the union type from golang struct
 export interface APITemplate {
-  type: TemplateType
   name: string
+  templateType: string
   deadline?: string
   children?: APITemplate[]
   task?: TemplateCustom

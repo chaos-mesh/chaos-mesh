@@ -64,6 +64,6 @@ export interface RequestForm {
   url: string
   method: string
   body: string
-  follow: boolean
-  json: boolean
+  followLocation: boolean
+  jsonContent: boolean
 }
