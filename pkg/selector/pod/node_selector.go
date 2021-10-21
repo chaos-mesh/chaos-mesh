@@ -13,6 +13,8 @@ type nodeSelector struct {
 	nodes []v1.Node
 }
 
+var _ generic.Selector = &nodeSelector{}
+
 func (s *nodeSelector) AddListOption(opts client.ListOptions) client.ListOptions {
 	return opts
 }

@@ -19,6 +19,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/registry"
 	"math"
 	"math/big"
 	"strconv"
@@ -29,7 +30,6 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -406,6 +406,10 @@ func CheckPodMeetSelector(pod v1.Pod, selector v1alpha1.PodSelectorSpec) (bool, 
 	}
 
 	return false, nil
+}
+
+func newPodSelectorRegistry(spec v1alpha1.PodSelectorSpec) registry.Registry {
+	return map[string]registry.SelectorFactory{}
 }
 
 // filterPodsByMode filters pods by mode from pod list

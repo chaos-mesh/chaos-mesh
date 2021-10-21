@@ -1,6 +1,7 @@
 package annotation
 
 import (
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/label"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic"
 	"k8s.io/apimachinery/pkg/labels"
@@ -27,12 +28,11 @@ func (s *annotationSelector) Match(obj client.Object) bool {
 	return s.Matches(annotations)
 }
 
-func New(selectors map[string]string) (generic.Selector, error) {
-	selectorStr := label.Label(selectors).String()
+func New(spec v1alpha1.GenericSelectorSpec) (generic.Selector, error) {
+	selectorStr := label.Label(spec.AnnotationSelectors).String()
 	s, err := labels.Parse(selectorStr)
 	if err != nil {
 		return nil, err
 	}
 	return &annotationSelector{s}, nil
 }
-

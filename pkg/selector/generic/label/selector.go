@@ -25,12 +25,15 @@ func (s *labelSelector) Match(obj client.Object) bool {
 	return true
 }
 
-func New(labels map[string]string, expressions v1alpha1.LabelSelectorRequirements) (generic.Selector, error) {
-	if len(labels) == 0 && len(expressions) == 0 {
+func New(spec v1alpha1.GenericSelectorSpec) (generic.Selector, error) {
+	labelSelectors := spec.LabelSelectors
+	expressions := spec.ExpressionSelectors
+
+	if len(labelSelectors) == 0 && len(expressions) == 0 {
 		return &labelSelector{}, nil
 	}
 	metav1Ls := &metav1.LabelSelector{
-		MatchLabels:      labels,
+		MatchLabels:      labelSelectors,
 		MatchExpressions: expressions,
 	}
 	ls, err := metav1.LabelSelectorAsSelector(metav1Ls)
@@ -39,4 +42,3 @@ func New(labels map[string]string, expressions v1alpha1.LabelSelectorRequirement
 	}
 	return &labelSelector{ls}, nil
 }
-

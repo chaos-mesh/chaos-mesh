@@ -16,6 +16,7 @@ package physicalmachine
 import (
 	"context"
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -24,17 +25,11 @@ import (
 
 var log = ctrl.Log.WithName("physicalmachineselector")
 
-type Option struct {
-	ClusterScoped         bool
-	TargetNamespace       string
-	EnableFilterNamespace bool
-}
-
 type SelectImpl struct {
 	c client.Client
 	r client.Reader
 
-	Option
+	generic.Option
 }
 
 type PhysicalMachine struct {

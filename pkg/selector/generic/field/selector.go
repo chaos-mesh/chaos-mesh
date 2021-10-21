@@ -1,6 +1,7 @@
 package field
 
 import (
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic"
 	"k8s.io/apimachinery/pkg/fields"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -31,7 +32,7 @@ func (s *fieldSelector) Match(obj client.Object) bool {
 	return true
 }
 
-func New() (generic.Selector, error) {
+func New(spec v1alpha1.GenericSelectorSpec) (generic.Selector, error) {
 
 	return &fieldSelector{}, nil
 }

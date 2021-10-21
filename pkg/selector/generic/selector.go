@@ -38,7 +38,7 @@ func ListObjects(c client.Client, lists []List,
 	return listObj(listF, opts)
 }
 
-func Filter(objs []client.Object, selectors []Selector) ([]client.Object, error) {
+func Filter(objs []client.Object, selectors []Selector) []client.Object {
 	filterObjs := make([]client.Object, 0, len(objs))
 
 	for _, obj := range objs {
@@ -53,5 +53,5 @@ func Filter(objs []client.Object, selectors []Selector) ([]client.Object, error)
 			filterObjs = append(filterObjs, obj)
 		}
 	}
-	return filterObjs, nil
+	return filterObjs
 }
