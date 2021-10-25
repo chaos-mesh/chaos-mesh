@@ -120,7 +120,11 @@ func (it *TaskReconciler) Reconcile(ctx context.Context, request reconcile.Reque
 
 	// update the status about conditional tasks
 	if len(pods) > 0 && (pods[0].Status.Phase == corev1.PodFailed || pods[0].Status.Phase == corev1.PodSucceeded) {
-		if !conditionalBranchesEvaluated(node) {
+		evaluated, err := it.conditionalBranchesEvaluated(ctx, node)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+		if !evaluated {
 			it.eventRecorder.Event(&node, recorder.TaskPodPodCompleted{PodName: pods[0].Name})
 			// task pod is terminated
 			updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
@@ -224,7 +228,11 @@ func (it *TaskReconciler) Reconcile(ctx context.Context, request reconcile.Reque
 	if err != nil {
 		return reconcile.Result{}, err
 	}
-	if conditionalBranchesEvaluated(evaluatedNode) {
+	evaluated, err := it.conditionalBranchesEvaluated(ctx, evaluatedNode)
+	if err != nil {
+		return reconcile.Result{}, err
+	}
+	if evaluated {
 		err = it.syncChildNodes(ctx, evaluatedNode)
 		if err != nil {
 			return reconcile.Result{}, err
@@ -266,8 +274,11 @@ func (it *TaskReconciler) Reconcile(ctx context.Context, request reconcile.Reque
 			}
 
 			// TODO: also check the consistent between spec in task and the spec in child node
-
-			if conditionalBranchesEvaluated(nodeNeedUpdate) && len(finishedChildren) == len(tasks) {
+			evaluated, err := it.conditionalBranchesEvaluated(ctx, nodeNeedUpdate)
+			if err != nil {
+				return err
+			}
+			if evaluated && len(finishedChildren) == len(tasks) {
 				SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
 					Type:   v1alpha1.ConditionAccomplished,
 					Status: corev1.ConditionTrue,
@@ -446,17 +457,34 @@ func (it *TaskReconciler) SpawnTaskPod(ctx context.Context, node *v1alpha1.Workf
 	return &taskPod, nil
 }
 
-func conditionalBranchesEvaluated(node v1alpha1.WorkflowNode) bool {
+func (it *TaskReconciler) conditionalBranchesEvaluated(ctx context.Context, node v1alpha1.WorkflowNode) (bool, error) {
+	// task pod should be completed, it's phase should be PodSucceeded or PodFailed
+	pods, err := it.FetchPodControlledByThisWorkflowNode(ctx, node)
+	if err != nil {
+		return false, err
+	}
+	if len(pods) == 0 {
+		return false, nil
+	}
+	if !(pods[0].Status.Phase == corev1.PodFailed || pods[0].Status.Phase == corev1.PodSucceeded) {
+		return false, nil
+	}
+
+	// conditional branches status should not be nil
 	if node.Status.ConditionalBranchesStatus == nil {
-		return false
+		return false, nil
 	}
+
+	// count of status should be equals to branches
 	if len(node.Spec.ConditionalBranches) != len(node.Status.ConditionalBranchesStatus.Branches) {
-		return false
+		return false, nil
 	}
+
+	// each status should be evaluated
 	for _, branch := range node.Status.ConditionalBranchesStatus.Branches {
 		if branch.EvaluationResult == corev1.ConditionUnknown {
-			return false
+			return false, nil
 		}
 	}
-	return true
+	return true, nil
 }
