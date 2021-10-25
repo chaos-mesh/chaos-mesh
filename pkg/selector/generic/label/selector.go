@@ -8,9 +8,13 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+const Name = "label"
+
 type labelSelector struct {
 	selector labels.Selector
 }
+
+var _ generic.Selector = &labelSelector{}
 
 func (s *labelSelector) AddListOption(opts client.ListOptions) client.ListOptions {
 	opts.LabelSelector = s.selector
@@ -25,7 +29,7 @@ func (s *labelSelector) Match(obj client.Object) bool {
 	return true
 }
 
-func New(spec v1alpha1.GenericSelectorSpec) (generic.Selector, error) {
+func New(spec v1alpha1.GenericSelectorSpec, _ generic.Option) (generic.Selector, error) {
 	labelSelectors := spec.LabelSelectors
 	expressions := spec.ExpressionSelectors
 

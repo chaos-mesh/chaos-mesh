@@ -7,32 +7,46 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+const Name = "field"
+
 type fieldSelector struct {
-	FieldSelectors map[string]string
-	r              client.Reader
+	selectors map[string]string
+	r         client.Reader
+	next      generic.Selector
 }
 
-func (s *fieldSelector) AddListOption(opts client.ListOptions) client.ListOptions {
-	if len(s.FieldSelectors) > 0 {
-		opts.FieldSelector = fields.SelectorFromSet(s.FieldSelectors)
+var _ generic.Selector = &fieldSelector{}
+
+func (s *fieldSelector) List(listFunc generic.ListFunc, opts client.ListOptions,
+	listObj func(listFunc generic.ListFunc, opts client.ListOptions) error) error {
+	if len(s.selectors) > 0 {
+		opts.FieldSelector = fields.SelectorFromSet(s.selectors)
 	}
-	return opts
-}
-
-func (s *fieldSelector) SetListFunc(f generic.ListFunc) generic.ListFunc {
 	// Since FieldSelectors need to implement index creation, Reader.List is used to get the pod list.
 	// Otherwise, just call Client.List directly, which can be obtained through cache.
-	if len(s.FieldSelectors) > 0 && s.r != nil {
-		return s.r.List
+	if len(s.selectors) > 0 && s.r != nil {
+		listFunc = s.r.List
 	}
-	return f
+	if s.next != nil {
+		return s.next.List(listFunc, opts, listObj)
+	}
+	return listObj(listFunc, opts)
 }
 
 func (s *fieldSelector) Match(obj client.Object) bool {
+	if s.next != nil {
+		return s.next.Match(obj)
+	}
 	return true
 }
 
-func New(spec v1alpha1.GenericSelectorSpec) (generic.Selector, error) {
+func (s *fieldSelector) Next(selector generic.Selector) {
+	s.next = selector
+}
 
-	return &fieldSelector{}, nil
+func New(spec v1alpha1.GenericSelectorSpec, r client.Reader, _ generic.Option) (generic.Selector, error) {
+	return &fieldSelector{
+		selectors: spec.FieldSelectors,
+		r:         r,
+	}, nil
 }

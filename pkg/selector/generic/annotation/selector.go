@@ -8,16 +8,25 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+const Name = "annotation"
+
 type annotationSelector struct {
 	labels.Selector
+	next generic.Selector
 }
 
-func (s *annotationSelector) AddListOption(opts client.ListOptions) client.ListOptions {
-	return opts
+var _ generic.Selector = &annotationSelector{}
+
+func (s *annotationSelector) List(listFunc generic.ListFunc, opts client.ListOptions,
+	listObj func(listFunc generic.ListFunc, opts client.ListOptions) error) error {
+	if s.next != nil {
+		return s.next.List(listFunc, opts, listObj)
+	}
+	return listObj(listFunc, opts)
 }
 
-func (s *annotationSelector) SetListFunc(f generic.ListFunc) generic.ListFunc {
-	return f
+func (s *annotationSelector) Next(selector generic.Selector) {
+	s.next = selector
 }
 
 func (s *annotationSelector) Match(obj client.Object) bool {
@@ -28,11 +37,11 @@ func (s *annotationSelector) Match(obj client.Object) bool {
 	return s.Matches(annotations)
 }
 
-func New(spec v1alpha1.GenericSelectorSpec) (generic.Selector, error) {
+func New(spec v1alpha1.GenericSelectorSpec, _ client.Reader, _ generic.Option) (generic.Selector, error) {
 	selectorStr := label.Label(spec.AnnotationSelectors).String()
 	s, err := labels.Parse(selectorStr)
 	if err != nil {
 		return nil, err
 	}
-	return &annotationSelector{s}, nil
+	return &annotationSelector{Selector: s}, nil
 }

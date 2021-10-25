@@ -2,6 +2,7 @@ package pod
 
 import (
 	"fmt"
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/labels"
@@ -14,6 +15,8 @@ type phaseSelector struct {
 	reqIncl []labels.Requirement
 	reqExcl []labels.Requirement
 }
+
+var _ generic.Selector = &phaseSelector{}
 
 func (s *phaseSelector) AddListOption(opts client.ListOptions) client.ListOptions {
 	return opts
@@ -47,16 +50,17 @@ func (s *phaseSelector) Match(obj client.Object) bool {
 	return included
 }
 
-func ParsePhaseSelector(podPhaseSelectors []string) (generic.Selector, error) {
-	selectorStr := strings.Join(podPhaseSelectors, ",")
+func NewPhaseSelector(spec v1alpha1.PodSelectorSpec) (generic.Selector, error) {
+	selectorStr := strings.Join(spec.PodPhaseSelectors, ",")
 	selector, err := labels.Parse(selectorStr)
 	if err != nil {
 		return nil, err
 	}
 
-	if selector.Empty() {
-		return pods, nil
-	}
+	// TODO
+	//if selector.Empty() {
+	//	return pods, nil
+	//}
 
 	reqs, _ := selector.Requirements()
 	var (

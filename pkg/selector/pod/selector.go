@@ -38,6 +38,10 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/label"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
+	generic_annotation "github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/annotation"
+	generic_field "github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/field"
+	generic_label "github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/label"
+	generic_namespace "github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/namespace"
 )
 
 var log = ctrl.Log.WithName("podselector")
@@ -136,7 +140,6 @@ func SelectAndFilterPods(ctx context.Context, c client.Client, r client.Reader, 
 // It returns all pods that match the configured label, annotation and namespace selectors.
 // If pods are specifically specified by `selector.Pods`, it just returns the selector.Pods.
 func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector v1alpha1.PodSelectorSpec, clusterScoped bool, targetNamespace string, enableFilterNamespace bool) ([]v1.Pod, error) {
-	// TODO: refactor: make different selectors to replace if-else logics
 	var pods []v1.Pod
 
 	namespaceCheck := make(map[string]bool)
@@ -183,48 +186,37 @@ func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector 
 		return pods, nil
 	}
 
-	//if !clusterScoped {
-	//	if len(selector.Namespaces) > 1 {
-	//		return nil, fmt.Errorf("could NOT use more than 1 namespace selector within namespace scoped mode")
-	//	} else if len(selector.Namespaces) == 1 {
-	//		if selector.Namespaces[0] != targetNamespace {
-	//			return nil, fmt.Errorf("could NOT list pods from out of scoped namespace: %s", selector.Namespaces[0])
-	//		}
-	//	}
-	//}
+	reg := newSelectorRegistry(ctx, c, selector)
+	selectors, err := registry.Parse(reg, selector.GenericSelectorSpec, generic.Option{
+		ClusterScoped:         clusterScoped,
+		TargetNamespace:       targetNamespace,
+		EnableFilterNamespace: enableFilterNamespace,
+	})
+	if err != nil {
+		return nil, err
+	}
 
-	//if !clusterScoped {
-	//	listOptions.Namespace = targetNamespace
-	//}
-	//if len(selector.LabelSelectors) > 0 || len(selector.ExpressionSelectors) > 0 {
-	//	metav1Ls := &metav1.LabelSelector{
-	//		MatchLabels:      selector.LabelSelectors,
-	//		MatchExpressions: selector.ExpressionSelectors,
-	//	}
-	//	ls, err := metav1.LabelSelectorAsSelector(metav1Ls)
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//	listOptions.LabelSelector = ls
-	//}
+	pods, err = ListPods(ctx, c, selector, selectors, namespaceCheck, enableFilterNamespace)
+	if err != nil {
+		return nil, err
+	}
 
-	//listFunc := c.List
+	// TODO
+	objs := generic.Filter(pods, selectors)
+	pods = objs.([]v1.Pod)
 
-	//if len(selector.FieldSelectors) > 0 {
-	//	listOptions.FieldSelector = fields.SelectorFromSet(selector.FieldSelectors)
-	//
-	//	// Since FieldSelectors need to implement index creation, Reader.List is used to get the pod list.
-	//	// Otherwise, just call Client.List directly, which can be obtained through cache.
-	//	if r != nil {
-	//		listFunc = r.List
-	//	}
-	//}
+	return pods, nil
+}
 
-	if err := generic.ListObjects(c, nil,
+func ListPods(ctx context.Context, c client.Client, spec v1alpha1.PodSelectorSpec,
+	selectors []generic.Selector, namespaceCheck map[string]bool, enableFilterNamespace bool) ([]v1.Pod, error) {
+	var pods []v1.Pod
+
+	if err := generic.ListObjects(c, selectors,
 		func(listFunc generic.ListFunc, opts client.ListOptions) error {
 			var podList v1.PodList
-			if len(selector.Namespaces) > 0 {
-				for _, namespace := range selector.Namespaces {
+			if len(spec.Namespaces) > 0 {
+				for _, namespace := range spec.Namespaces {
 					if enableFilterNamespace {
 						allow, ok := namespaceCheck[namespace]
 						if !ok {
@@ -253,56 +245,6 @@ func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector 
 		}); err != nil {
 		return nil, err
 	}
-
-	//var (
-	//	nodes           []v1.Node
-	//	nodeList        v1.NodeList
-	//	nodeListOptions = client.ListOptions{}
-	//)
-	// if both setting Nodes and NodeSelectors, the node list will be combined.
-	//if len(selector.Nodes) > 0 || len(selector.NodeSelectors) > 0 {
-	//	if len(selector.Nodes) > 0 {
-	//		for _, nodename := range selector.Nodes {
-	//			var node v1.Node
-	//			if err := c.Get(ctx, types.NamespacedName{Name: nodename}, &node); err != nil {
-	//				return nil, err
-	//			}
-	//			nodes = append(nodes, node)
-	//		}
-	//	}
-	//	if len(selector.NodeSelectors) > 0 {
-	//		nodeListOptions.LabelSelector = labels.SelectorFromSet(selector.NodeSelectors)
-	//		if err := c.List(ctx, &nodeList, &nodeListOptions); err != nil {
-	//			return nil, err
-	//		}
-	//		nodes = append(nodes, nodeList.Items...)
-	//	}
-	//	pods = filterPodByNode(pods, nodes)
-	//}
-
-	//namespaceSelector, err := parseSelector(strings.Join(selector.Namespaces, ","))
-	//if err != nil {
-	//	return nil, err
-	//}
-	//pods, err = filterByNamespaceSelector(pods, namespaceSelector)
-	//if err != nil {
-	//	return nil, err
-	//}
-
-	//annotationsSelector, err := parseSelector(label.Label(selector.AnnotationSelectors).String())
-	//if err != nil {
-	//	return nil, err
-	//}
-	//pods = filterByAnnotations(pods, annotationsSelector)
-
-	//phaseSelector, err := parseSelector(strings.Join(selector.PodPhaseSelectors, ","))
-	//if err != nil {
-	//	return nil, err
-	//}
-	//pods, err = filterByPhaseSelector(pods, phaseSelector)
-	//if err != nil {
-	//	return nil, err
-	//}
 
 	return pods, nil
 }
@@ -408,8 +350,19 @@ func CheckPodMeetSelector(pod v1.Pod, selector v1alpha1.PodSelectorSpec) (bool, 
 	return false, nil
 }
 
-func newPodSelectorRegistry(spec v1alpha1.PodSelectorSpec) registry.Registry {
-	return map[string]registry.SelectorFactory{}
+func newSelectorRegistry(ctx context.Context, c client.Client, spec v1alpha1.PodSelectorSpec) registry.Registry {
+	return map[string]registry.SelectorFactory{
+		generic_label.Name: generic_label.New,
+		"namespace":        generic_namespace.New,
+		generic_field.Name: generic_field.New,
+		"annotation":       generic_annotation.New,
+		"node": func(selector v1alpha1.GenericSelectorSpec, option generic.Option) (generic.Selector, error) {
+			return NewNodeSelector(ctx, c, spec)
+		},
+		"phase": func(selector v1alpha1.GenericSelectorSpec, option generic.Option) (generic.Selector, error) {
+			return NewPhaseSelector(spec)
+		},
+	}
 }
 
 // filterPodsByMode filters pods by mode from pod list

@@ -15,43 +15,8 @@ type Option struct {
 
 type ListFunc func(ctx context.Context, list client.ObjectList, opts ...client.ListOption) error
 
-type List interface {
-	AddListOption(client.ListOptions) client.ListOptions
-	SetListFunc(ListFunc) ListFunc
-}
-
 type Selector interface {
-	List
+	List(ListFunc, client.ListOptions, func(listFunc ListFunc, opts client.ListOptions) error) error
 	Match(client.Object) bool
-}
-
-func ListObjects(c client.Client, lists []List,
-	listObj func(listFunc ListFunc, opts client.ListOptions) error) error {
-	opts := client.ListOptions{}
-	listF := c.List
-
-	for _, list := range lists {
-		opts = list.AddListOption(opts)
-		listF = list.SetListFunc(listF)
-	}
-
-	return listObj(listF, opts)
-}
-
-func Filter(objs []client.Object, selectors []Selector) []client.Object {
-	filterObjs := make([]client.Object, 0, len(objs))
-
-	for _, obj := range objs {
-		var ok bool
-		for _, selector := range selectors {
-			ok = selector.Match(obj)
-			if !ok {
-				break
-			}
-		}
-		if ok {
-			filterObjs = append(filterObjs, obj)
-		}
-	}
-	return filterObjs
+	Next(Selector)
 }

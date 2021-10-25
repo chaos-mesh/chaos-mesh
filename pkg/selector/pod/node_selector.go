@@ -2,6 +2,7 @@ package pod
 
 import (
 	"context"
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/labels"
@@ -38,13 +39,13 @@ func (s *nodeSelector) Match(obj client.Object) bool {
 }
 
 // if both setting Nodes and NodeSelectors, the node list will be combined.
-func ParseNodeSelector(ctx context.Context, c client.Client, nodeNames []string, selectors map[string]string) (generic.Selector, error) {
-	if len(nodeNames) == 0 && len(selectors) == 0 {
+func NewNodeSelector(ctx context.Context, c client.Client, spec v1alpha1.PodSelectorSpec) (generic.Selector, error) {
+	if len(spec.Nodes) == 0 && len(spec.NodeSelectors) == 0 {
 		return nil, nil
 	}
 	var nodes []v1.Node
-	if len(nodeNames) > 0 {
-		for _, name := range nodeNames {
+	if len(spec.Nodes) > 0 {
+		for _, name := range spec.Nodes {
 			var node v1.Node
 			if err := c.Get(ctx, types.NamespacedName{Name: name}, &node); err != nil {
 				return nil, err
@@ -52,10 +53,10 @@ func ParseNodeSelector(ctx context.Context, c client.Client, nodeNames []string,
 			nodes = append(nodes, node)
 		}
 	}
-	if len(selectors) > 0 {
+	if len(spec.NodeSelectors) > 0 {
 		var nodeList v1.NodeList
 		if err := c.List(ctx, &nodeList, &client.ListOptions{
-			LabelSelector: labels.SelectorFromSet(selectors),
+			LabelSelector: labels.SelectorFromSet(spec.NodeSelectors),
 		}); err != nil {
 			return nil, err
 		}
