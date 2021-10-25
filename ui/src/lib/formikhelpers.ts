@@ -138,7 +138,7 @@ export function parseSubmit<K extends ExperimentKind>(
 
 function podSelectorsToArr(selector: Object) {
   return Object.entries(selector)
-    .map(([ns, pods]) => pods.map((p: string) => `${ns}:${p}`))
+    .map(([ns, pods]) => pods.map((p: string) => `${ns}: ${p}`))
     .flat()
 }
 
@@ -177,7 +177,7 @@ export function parseYAML(
         ...basicData.spec.selector,
         namespaces: spec.selector.namespaces ?? [],
         labelSelectors: spec.selector.labelSelectors ? selectorsToArr(spec.selector.labelSelectors, ': ') : [],
-        annotation_selectors: spec.selector.annotationSelectors
+        annotationSelectors: spec.selector.annotationSelectors
           ? selectorsToArr(spec.selector.annotationSelectors, ': ')
           : [],
       },
@@ -223,8 +223,8 @@ export function parseYAML(
     spec.attr = selectorsToArr(spec.attr, ':')
   }
 
-  if (kind === 'KernelChaos' && spec.fail_kern_request) {
-    spec.fail_kern_request.callchain = spec.fail_kern_request.callchain.map((frame: Frame) => {
+  if (kind === 'KernelChaos' && spec.failKernRequest) {
+    spec.failKernRequest.callchain = spec.failKernRequest.callchain.map((frame: Frame) => {
       if (!frame.parameters) {
         frame.parameters = ''
       }
