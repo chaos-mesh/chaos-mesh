@@ -18,16 +18,16 @@ type Fd struct {
 }
 
 type Namespace struct {
-	Ns         string                      `json:"ns"`
-	Component  []*v1.Pod                   `json:"component"`
-	Pod        []*v1.Pod                   `json:"pod"`
-	Stress     []*v1alpha1.StressChaos     `json:"stress"`
-	Io         []*v1alpha1.IOChaos         `json:"io"`
-	Podio      []*v1alpha1.PodIOChaos      `json:"podio"`
-	HTTP       []*v1alpha1.HTTPChaos       `json:"http"`
-	Podhttp    []*v1alpha1.PodHttpChaos    `json:"podhttp"`
-	Network    []*v1alpha1.NetworkChaos    `json:"network"`
-	Podnetwork []*v1alpha1.PodNetworkChaos `json:"podnetwork"`
+	Ns              string                      `json:"ns"`
+	Component       []*v1.Pod                   `json:"component"`
+	Pod             []*v1.Pod                   `json:"pod"`
+	Stresschaos     []*v1alpha1.StressChaos     `json:"stresschaos"`
+	Iochaos         []*v1alpha1.IOChaos         `json:"iochaos"`
+	Podiochaos      []*v1alpha1.PodIOChaos      `json:"podiochaos"`
+	Httpchaos       []*v1alpha1.HTTPChaos       `json:"httpchaos"`
+	Podhttpchaos    []*v1alpha1.PodHttpChaos    `json:"podhttpchaos"`
+	Networkchaos    []*v1alpha1.NetworkChaos    `json:"networkchaos"`
+	Podnetworkchaos []*v1alpha1.PodNetworkChaos `json:"podnetworkchaos"`
 }
 
 type Process struct {

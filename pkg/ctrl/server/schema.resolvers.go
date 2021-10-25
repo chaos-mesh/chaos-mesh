@@ -459,7 +459,7 @@ func (r *namespaceResolver) Pod(ctx context.Context, obj *model.Namespace, name 
 	return []*v1.Pod{pod}, nil
 }
 
-func (r *namespaceResolver) Stress(ctx context.Context, obj *model.Namespace, name *string) ([]*v1alpha1.StressChaos, error) {
+func (r *namespaceResolver) Stresschaos(ctx context.Context, obj *model.Namespace, name *string) ([]*v1alpha1.StressChaos, error) {
 	if name == nil {
 		var stressList v1alpha1.StressChaosList
 		var stresses []*v1alpha1.StressChaos
@@ -482,7 +482,7 @@ func (r *namespaceResolver) Stress(ctx context.Context, obj *model.Namespace, na
 	return []*v1alpha1.StressChaos{stress}, nil
 }
 
-func (r *namespaceResolver) Io(ctx context.Context, obj *model.Namespace, name *string) ([]*v1alpha1.IOChaos, error) {
+func (r *namespaceResolver) Iochaos(ctx context.Context, obj *model.Namespace, name *string) ([]*v1alpha1.IOChaos, error) {
 	if name == nil {
 		var ioList v1alpha1.IOChaosList
 		var ios []*v1alpha1.IOChaos
@@ -505,7 +505,7 @@ func (r *namespaceResolver) Io(ctx context.Context, obj *model.Namespace, name *
 	return []*v1alpha1.IOChaos{io}, nil
 }
 
-func (r *namespaceResolver) Podio(ctx context.Context, obj *model.Namespace, name *string) ([]*v1alpha1.PodIOChaos, error) {
+func (r *namespaceResolver) Podiochaos(ctx context.Context, obj *model.Namespace, name *string) ([]*v1alpha1.PodIOChaos, error) {
 	if name == nil {
 		var ioList v1alpha1.PodIOChaosList
 		var ios []*v1alpha1.PodIOChaos
@@ -529,7 +529,7 @@ func (r *namespaceResolver) Podio(ctx context.Context, obj *model.Namespace, nam
 	return []*v1alpha1.PodIOChaos{io}, nil
 }
 
-func (r *namespaceResolver) HTTP(ctx context.Context, obj *model.Namespace, name *string) ([]*v1alpha1.HTTPChaos, error) {
+func (r *namespaceResolver) Httpchaos(ctx context.Context, obj *model.Namespace, name *string) ([]*v1alpha1.HTTPChaos, error) {
 	if name == nil {
 		var httpList v1alpha1.HTTPChaosList
 		var https []*v1alpha1.HTTPChaos
@@ -552,7 +552,7 @@ func (r *namespaceResolver) HTTP(ctx context.Context, obj *model.Namespace, name
 	return []*v1alpha1.HTTPChaos{http}, nil
 }
 
-func (r *namespaceResolver) Podhttp(ctx context.Context, obj *model.Namespace, name *string) ([]*v1alpha1.PodHttpChaos, error) {
+func (r *namespaceResolver) Podhttpchaos(ctx context.Context, obj *model.Namespace, name *string) ([]*v1alpha1.PodHttpChaos, error) {
 	if name == nil {
 		var httpList v1alpha1.PodHttpChaosList
 		var https []*v1alpha1.PodHttpChaos
@@ -575,7 +575,7 @@ func (r *namespaceResolver) Podhttp(ctx context.Context, obj *model.Namespace, n
 	return []*v1alpha1.PodHttpChaos{http}, nil
 }
 
-func (r *namespaceResolver) Network(ctx context.Context, obj *model.Namespace, name *string) ([]*v1alpha1.NetworkChaos, error) {
+func (r *namespaceResolver) Networkchaos(ctx context.Context, obj *model.Namespace, name *string) ([]*v1alpha1.NetworkChaos, error) {
 	if name == nil {
 		var networkList v1alpha1.NetworkChaosList
 		var networks []*v1alpha1.NetworkChaos
@@ -598,7 +598,7 @@ func (r *namespaceResolver) Network(ctx context.Context, obj *model.Namespace, n
 	return []*v1alpha1.NetworkChaos{network}, nil
 }
 
-func (r *namespaceResolver) Podnetwork(ctx context.Context, obj *model.Namespace, name *string) ([]*v1alpha1.PodNetworkChaos, error) {
+func (r *namespaceResolver) Podnetworkchaos(ctx context.Context, obj *model.Namespace, name *string) ([]*v1alpha1.PodNetworkChaos, error) {
 	if name == nil {
 		var networkList v1alpha1.PodNetworkChaosList
 		var networks []*v1alpha1.PodNetworkChaos

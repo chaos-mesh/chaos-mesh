@@ -316,16 +316,16 @@ type ComplexityRoot struct {
 	}
 
 	Namespace struct {
-		Component  func(childComplexity int, component model.Component) int
-		HTTP       func(childComplexity int, name *string) int
-		Io         func(childComplexity int, name *string) int
-		Network    func(childComplexity int, name *string) int
-		Ns         func(childComplexity int) int
-		Pod        func(childComplexity int, name *string) int
-		Podhttp    func(childComplexity int, name *string) int
-		Podio      func(childComplexity int, name *string) int
-		Podnetwork func(childComplexity int, name *string) int
-		Stress     func(childComplexity int, name *string) int
+		Component       func(childComplexity int, component model.Component) int
+		Httpchaos       func(childComplexity int, name *string) int
+		Iochaos         func(childComplexity int, name *string) int
+		Networkchaos    func(childComplexity int, name *string) int
+		Ns              func(childComplexity int) int
+		Pod             func(childComplexity int, name *string) int
+		Podhttpchaos    func(childComplexity int, name *string) int
+		Podiochaos      func(childComplexity int, name *string) int
+		Podnetworkchaos func(childComplexity int, name *string) int
+		Stresschaos     func(childComplexity int, name *string) int
 	}
 
 	NetworkChaos struct {
@@ -763,13 +763,13 @@ type MistakeSpecResolver interface {
 type NamespaceResolver interface {
 	Component(ctx context.Context, obj *model.Namespace, component model.Component) ([]*v1.Pod, error)
 	Pod(ctx context.Context, obj *model.Namespace, name *string) ([]*v1.Pod, error)
-	Stress(ctx context.Context, obj *model.Namespace, name *string) ([]*v1alpha1.StressChaos, error)
-	Io(ctx context.Context, obj *model.Namespace, name *string) ([]*v1alpha1.IOChaos, error)
-	Podio(ctx context.Context, obj *model.Namespace, name *string) ([]*v1alpha1.PodIOChaos, error)
-	HTTP(ctx context.Context, obj *model.Namespace, name *string) ([]*v1alpha1.HTTPChaos, error)
-	Podhttp(ctx context.Context, obj *model.Namespace, name *string) ([]*v1alpha1.PodHttpChaos, error)
-	Network(ctx context.Context, obj *model.Namespace, name *string) ([]*v1alpha1.NetworkChaos, error)
-	Podnetwork(ctx context.Context, obj *model.Namespace, name *string) ([]*v1alpha1.PodNetworkChaos, error)
+	Stresschaos(ctx context.Context, obj *model.Namespace, name *string) ([]*v1alpha1.StressChaos, error)
+	Iochaos(ctx context.Context, obj *model.Namespace, name *string) ([]*v1alpha1.IOChaos, error)
+	Podiochaos(ctx context.Context, obj *model.Namespace, name *string) ([]*v1alpha1.PodIOChaos, error)
+	Httpchaos(ctx context.Context, obj *model.Namespace, name *string) ([]*v1alpha1.HTTPChaos, error)
+	Podhttpchaos(ctx context.Context, obj *model.Namespace, name *string) ([]*v1alpha1.PodHttpChaos, error)
+	Networkchaos(ctx context.Context, obj *model.Namespace, name *string) ([]*v1alpha1.NetworkChaos, error)
+	Podnetworkchaos(ctx context.Context, obj *model.Namespace, name *string) ([]*v1alpha1.PodNetworkChaos, error)
 }
 type NetworkChaosResolver interface {
 	UID(ctx context.Context, obj *v1alpha1.NetworkChaos) (string, error)
@@ -2050,41 +2050,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Namespace.Component(childComplexity, args["component"].(model.Component)), true
 
-	case "Namespace.http":
-		if e.complexity.Namespace.HTTP == nil {
+	case "Namespace.httpchaos":
+		if e.complexity.Namespace.Httpchaos == nil {
 			break
 		}
 
-		args, err := ec.field_Namespace_http_args(context.TODO(), rawArgs)
+		args, err := ec.field_Namespace_httpchaos_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Namespace.HTTP(childComplexity, args["name"].(*string)), true
+		return e.complexity.Namespace.Httpchaos(childComplexity, args["name"].(*string)), true
 
-	case "Namespace.io":
-		if e.complexity.Namespace.Io == nil {
+	case "Namespace.iochaos":
+		if e.complexity.Namespace.Iochaos == nil {
 			break
 		}
 
-		args, err := ec.field_Namespace_io_args(context.TODO(), rawArgs)
+		args, err := ec.field_Namespace_iochaos_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Namespace.Io(childComplexity, args["name"].(*string)), true
+		return e.complexity.Namespace.Iochaos(childComplexity, args["name"].(*string)), true
 
-	case "Namespace.network":
-		if e.complexity.Namespace.Network == nil {
+	case "Namespace.networkchaos":
+		if e.complexity.Namespace.Networkchaos == nil {
 			break
 		}
 
-		args, err := ec.field_Namespace_network_args(context.TODO(), rawArgs)
+		args, err := ec.field_Namespace_networkchaos_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Namespace.Network(childComplexity, args["name"].(*string)), true
+		return e.complexity.Namespace.Networkchaos(childComplexity, args["name"].(*string)), true
 
 	case "Namespace.ns":
 		if e.complexity.Namespace.Ns == nil {
@@ -2105,53 +2105,53 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Namespace.Pod(childComplexity, args["name"].(*string)), true
 
-	case "Namespace.podhttp":
-		if e.complexity.Namespace.Podhttp == nil {
+	case "Namespace.podhttpchaos":
+		if e.complexity.Namespace.Podhttpchaos == nil {
 			break
 		}
 
-		args, err := ec.field_Namespace_podhttp_args(context.TODO(), rawArgs)
+		args, err := ec.field_Namespace_podhttpchaos_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Namespace.Podhttp(childComplexity, args["name"].(*string)), true
+		return e.complexity.Namespace.Podhttpchaos(childComplexity, args["name"].(*string)), true
 
-	case "Namespace.podio":
-		if e.complexity.Namespace.Podio == nil {
+	case "Namespace.podiochaos":
+		if e.complexity.Namespace.Podiochaos == nil {
 			break
 		}
 
-		args, err := ec.field_Namespace_podio_args(context.TODO(), rawArgs)
+		args, err := ec.field_Namespace_podiochaos_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Namespace.Podio(childComplexity, args["name"].(*string)), true
+		return e.complexity.Namespace.Podiochaos(childComplexity, args["name"].(*string)), true
 
-	case "Namespace.podnetwork":
-		if e.complexity.Namespace.Podnetwork == nil {
+	case "Namespace.podnetworkchaos":
+		if e.complexity.Namespace.Podnetworkchaos == nil {
 			break
 		}
 
-		args, err := ec.field_Namespace_podnetwork_args(context.TODO(), rawArgs)
+		args, err := ec.field_Namespace_podnetworkchaos_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Namespace.Podnetwork(childComplexity, args["name"].(*string)), true
+		return e.complexity.Namespace.Podnetworkchaos(childComplexity, args["name"].(*string)), true
 
-	case "Namespace.stress":
-		if e.complexity.Namespace.Stress == nil {
+	case "Namespace.stresschaos":
+		if e.complexity.Namespace.Stresschaos == nil {
 			break
 		}
 
-		args, err := ec.field_Namespace_stress_args(context.TODO(), rawArgs)
+		args, err := ec.field_Namespace_stresschaos_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Namespace.Stress(childComplexity, args["name"].(*string)), true
+		return e.complexity.Namespace.Stresschaos(childComplexity, args["name"].(*string)), true
 
 	case "NetworkChaos.apiVersion":
 		if e.complexity.NetworkChaos.APIVersion == nil {
@@ -3850,15 +3850,15 @@ type Logger {
 
 type Namespace {
     ns: String!
-    component(component: Component!): [Pod!]    	@goField(forceResolver: true)
-	pod(name: String): [Pod!]                   	@goField(forceResolver: true)
-    stress(name: String): [StressChaos!]         	@goField(forceResolver: true)
-    io(name: String): [IOChaos!]                 	@goField(forceResolver: true)
-    podio(name: String): [PodIOChaos!]           	@goField(forceResolver: true)
-    http(name: String): [HTTPChaos!]             	@goField(forceResolver: true)
-    podhttp(name: String): [PodHTTPChaos!]       	@goField(forceResolver: true)
-    network(name: String): [NetworkChaos!]       	@goField(forceResolver: true)
-    podnetwork(name: String): [PodNetworkChaos!] 	@goField(forceResolver: true)
+    component(component: Component!): [Pod!]    		@goField(forceResolver: true)
+	pod(name: String): [Pod!]                   		@goField(forceResolver: true)
+    stresschaos(name: String): [StressChaos!]         	@goField(forceResolver: true)
+    iochaos(name: String): [IOChaos!]                 	@goField(forceResolver: true)
+    podiochaos(name: String): [PodIOChaos!]           	@goField(forceResolver: true)
+    httpchaos(name: String): [HTTPChaos!]             	@goField(forceResolver: true)
+    podhttpchaos(name: String): [PodHTTPChaos!]       	@goField(forceResolver: true)
+    networkchaos(name: String): [NetworkChaos!]       	@goField(forceResolver: true)
+    podnetworkchaos(name: String): [PodNetworkChaos!] 	@goField(forceResolver: true)
 }
 
 type OwnerReference @goModel(model: "k8s.io/apimachinery/pkg/apis/meta/v1.OwnerReference") {
@@ -4933,7 +4933,7 @@ func (ec *executionContext) field_Namespace_component_args(ctx context.Context, 
 	return args, nil
 }
 
-func (ec *executionContext) field_Namespace_http_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Namespace_httpchaos_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 *string
@@ -4948,7 +4948,7 @@ func (ec *executionContext) field_Namespace_http_args(ctx context.Context, rawAr
 	return args, nil
 }
 
-func (ec *executionContext) field_Namespace_io_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Namespace_iochaos_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 *string
@@ -4963,7 +4963,7 @@ func (ec *executionContext) field_Namespace_io_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
-func (ec *executionContext) field_Namespace_network_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Namespace_networkchaos_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 *string
@@ -4993,7 +4993,7 @@ func (ec *executionContext) field_Namespace_pod_args(ctx context.Context, rawArg
 	return args, nil
 }
 
-func (ec *executionContext) field_Namespace_podhttp_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Namespace_podhttpchaos_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 *string
@@ -5008,7 +5008,7 @@ func (ec *executionContext) field_Namespace_podhttp_args(ctx context.Context, ra
 	return args, nil
 }
 
-func (ec *executionContext) field_Namespace_podio_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Namespace_podiochaos_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 *string
@@ -5023,7 +5023,7 @@ func (ec *executionContext) field_Namespace_podio_args(ctx context.Context, rawA
 	return args, nil
 }
 
-func (ec *executionContext) field_Namespace_podnetwork_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Namespace_podnetworkchaos_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 *string
@@ -5038,7 +5038,7 @@ func (ec *executionContext) field_Namespace_podnetwork_args(ctx context.Context,
 	return args, nil
 }
 
-func (ec *executionContext) field_Namespace_stress_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Namespace_stresschaos_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 *string
@@ -10565,7 +10565,7 @@ func (ec *executionContext) _Namespace_pod(ctx context.Context, field graphql.Co
 	return ec.marshalOPod2ᚕᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐPodᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Namespace_stress(ctx context.Context, field graphql.CollectedField, obj *model.Namespace) (ret graphql.Marshaler) {
+func (ec *executionContext) _Namespace_stresschaos(ctx context.Context, field graphql.CollectedField, obj *model.Namespace) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -10582,7 +10582,7 @@ func (ec *executionContext) _Namespace_stress(ctx context.Context, field graphql
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Namespace_stress_args(ctx, rawArgs)
+	args, err := ec.field_Namespace_stresschaos_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -10590,7 +10590,7 @@ func (ec *executionContext) _Namespace_stress(ctx context.Context, field graphql
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Namespace().Stress(rctx, obj, args["name"].(*string))
+		return ec.resolvers.Namespace().Stresschaos(rctx, obj, args["name"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -10604,7 +10604,7 @@ func (ec *executionContext) _Namespace_stress(ctx context.Context, field graphql
 	return ec.marshalOStressChaos2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐStressChaosᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Namespace_io(ctx context.Context, field graphql.CollectedField, obj *model.Namespace) (ret graphql.Marshaler) {
+func (ec *executionContext) _Namespace_iochaos(ctx context.Context, field graphql.CollectedField, obj *model.Namespace) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -10621,7 +10621,7 @@ func (ec *executionContext) _Namespace_io(ctx context.Context, field graphql.Col
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Namespace_io_args(ctx, rawArgs)
+	args, err := ec.field_Namespace_iochaos_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -10629,7 +10629,7 @@ func (ec *executionContext) _Namespace_io(ctx context.Context, field graphql.Col
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Namespace().Io(rctx, obj, args["name"].(*string))
+		return ec.resolvers.Namespace().Iochaos(rctx, obj, args["name"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -10643,7 +10643,7 @@ func (ec *executionContext) _Namespace_io(ctx context.Context, field graphql.Col
 	return ec.marshalOIOChaos2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐIOChaosᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Namespace_podio(ctx context.Context, field graphql.CollectedField, obj *model.Namespace) (ret graphql.Marshaler) {
+func (ec *executionContext) _Namespace_podiochaos(ctx context.Context, field graphql.CollectedField, obj *model.Namespace) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -10660,7 +10660,7 @@ func (ec *executionContext) _Namespace_podio(ctx context.Context, field graphql.
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Namespace_podio_args(ctx, rawArgs)
+	args, err := ec.field_Namespace_podiochaos_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -10668,7 +10668,7 @@ func (ec *executionContext) _Namespace_podio(ctx context.Context, field graphql.
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Namespace().Podio(rctx, obj, args["name"].(*string))
+		return ec.resolvers.Namespace().Podiochaos(rctx, obj, args["name"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -10682,7 +10682,7 @@ func (ec *executionContext) _Namespace_podio(ctx context.Context, field graphql.
 	return ec.marshalOPodIOChaos2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodIOChaosᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Namespace_http(ctx context.Context, field graphql.CollectedField, obj *model.Namespace) (ret graphql.Marshaler) {
+func (ec *executionContext) _Namespace_httpchaos(ctx context.Context, field graphql.CollectedField, obj *model.Namespace) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -10699,7 +10699,7 @@ func (ec *executionContext) _Namespace_http(ctx context.Context, field graphql.C
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Namespace_http_args(ctx, rawArgs)
+	args, err := ec.field_Namespace_httpchaos_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -10707,7 +10707,7 @@ func (ec *executionContext) _Namespace_http(ctx context.Context, field graphql.C
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Namespace().HTTP(rctx, obj, args["name"].(*string))
+		return ec.resolvers.Namespace().Httpchaos(rctx, obj, args["name"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -10721,7 +10721,7 @@ func (ec *executionContext) _Namespace_http(ctx context.Context, field graphql.C
 	return ec.marshalOHTTPChaos2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐHTTPChaosᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Namespace_podhttp(ctx context.Context, field graphql.CollectedField, obj *model.Namespace) (ret graphql.Marshaler) {
+func (ec *executionContext) _Namespace_podhttpchaos(ctx context.Context, field graphql.CollectedField, obj *model.Namespace) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -10738,7 +10738,7 @@ func (ec *executionContext) _Namespace_podhttp(ctx context.Context, field graphq
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Namespace_podhttp_args(ctx, rawArgs)
+	args, err := ec.field_Namespace_podhttpchaos_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -10746,7 +10746,7 @@ func (ec *executionContext) _Namespace_podhttp(ctx context.Context, field graphq
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Namespace().Podhttp(rctx, obj, args["name"].(*string))
+		return ec.resolvers.Namespace().Podhttpchaos(rctx, obj, args["name"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -10760,7 +10760,7 @@ func (ec *executionContext) _Namespace_podhttp(ctx context.Context, field graphq
 	return ec.marshalOPodHTTPChaos2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodHttpChaosᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Namespace_network(ctx context.Context, field graphql.CollectedField, obj *model.Namespace) (ret graphql.Marshaler) {
+func (ec *executionContext) _Namespace_networkchaos(ctx context.Context, field graphql.CollectedField, obj *model.Namespace) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -10777,7 +10777,7 @@ func (ec *executionContext) _Namespace_network(ctx context.Context, field graphq
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Namespace_network_args(ctx, rawArgs)
+	args, err := ec.field_Namespace_networkchaos_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -10785,7 +10785,7 @@ func (ec *executionContext) _Namespace_network(ctx context.Context, field graphq
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Namespace().Network(rctx, obj, args["name"].(*string))
+		return ec.resolvers.Namespace().Networkchaos(rctx, obj, args["name"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -10799,7 +10799,7 @@ func (ec *executionContext) _Namespace_network(ctx context.Context, field graphq
 	return ec.marshalONetworkChaos2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐNetworkChaosᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Namespace_podnetwork(ctx context.Context, field graphql.CollectedField, obj *model.Namespace) (ret graphql.Marshaler) {
+func (ec *executionContext) _Namespace_podnetworkchaos(ctx context.Context, field graphql.CollectedField, obj *model.Namespace) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -10816,7 +10816,7 @@ func (ec *executionContext) _Namespace_podnetwork(ctx context.Context, field gra
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Namespace_podnetwork_args(ctx, rawArgs)
+	args, err := ec.field_Namespace_podnetworkchaos_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -10824,7 +10824,7 @@ func (ec *executionContext) _Namespace_podnetwork(ctx context.Context, field gra
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Namespace().Podnetwork(rctx, obj, args["name"].(*string))
+		return ec.resolvers.Namespace().Podnetworkchaos(rctx, obj, args["name"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -21236,7 +21236,7 @@ func (ec *executionContext) _Namespace(ctx context.Context, sel ast.SelectionSet
 				res = ec._Namespace_pod(ctx, field, obj)
 				return res
 			})
-		case "stress":
+		case "stresschaos":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -21244,10 +21244,10 @@ func (ec *executionContext) _Namespace(ctx context.Context, sel ast.SelectionSet
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Namespace_stress(ctx, field, obj)
+				res = ec._Namespace_stresschaos(ctx, field, obj)
 				return res
 			})
-		case "io":
+		case "iochaos":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -21255,10 +21255,10 @@ func (ec *executionContext) _Namespace(ctx context.Context, sel ast.SelectionSet
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Namespace_io(ctx, field, obj)
+				res = ec._Namespace_iochaos(ctx, field, obj)
 				return res
 			})
-		case "podio":
+		case "podiochaos":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -21266,10 +21266,10 @@ func (ec *executionContext) _Namespace(ctx context.Context, sel ast.SelectionSet
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Namespace_podio(ctx, field, obj)
+				res = ec._Namespace_podiochaos(ctx, field, obj)
 				return res
 			})
-		case "http":
+		case "httpchaos":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -21277,10 +21277,10 @@ func (ec *executionContext) _Namespace(ctx context.Context, sel ast.SelectionSet
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Namespace_http(ctx, field, obj)
+				res = ec._Namespace_httpchaos(ctx, field, obj)
 				return res
 			})
-		case "podhttp":
+		case "podhttpchaos":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -21288,10 +21288,10 @@ func (ec *executionContext) _Namespace(ctx context.Context, sel ast.SelectionSet
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Namespace_podhttp(ctx, field, obj)
+				res = ec._Namespace_podhttpchaos(ctx, field, obj)
 				return res
 			})
-		case "network":
+		case "networkchaos":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -21299,10 +21299,10 @@ func (ec *executionContext) _Namespace(ctx context.Context, sel ast.SelectionSet
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Namespace_network(ctx, field, obj)
+				res = ec._Namespace_networkchaos(ctx, field, obj)
 				return res
 			})
-		case "podnetwork":
+		case "podnetworkchaos":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -21310,7 +21310,7 @@ func (ec *executionContext) _Namespace(ctx context.Context, sel ast.SelectionSet
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Namespace_podnetwork(ctx, field, obj)
+				res = ec._Namespace_podnetworkchaos(ctx, field, obj)
 				return res
 			})
 		default:

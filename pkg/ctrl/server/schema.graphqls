@@ -21,21 +21,21 @@ type Query {
 }
 
 type Logger {
-    component(ns: String! = "chaos-testing", component: Component!): String!  @goField(forceResolver: true)
-    pod(ns: String! = "default", name: String!): String!                @goField(forceResolver: true)
+    component(ns: String! = "chaos-testing", component: Component!): String!  	@goField(forceResolver: true)
+	pod(ns: String! = "default", name: String!): String!                		@goField(forceResolver: true)
 }
 
 type Namespace {
     ns: String!
-    component(component: Component!): [Pod!]    	@goField(forceResolver: true)
-	pod(name: String): [Pod!]                   	@goField(forceResolver: true)
-    stress(name: String): [StressChaos!]         	@goField(forceResolver: true)
-    io(name: String): [IOChaos!]                 	@goField(forceResolver: true)
-    podio(name: String): [PodIOChaos!]           	@goField(forceResolver: true)
-    http(name: String): [HTTPChaos!]             	@goField(forceResolver: true)
-    podhttp(name: String): [PodHTTPChaos!]       	@goField(forceResolver: true)
-    network(name: String): [NetworkChaos!]       	@goField(forceResolver: true)
-    podnetwork(name: String): [PodNetworkChaos!] 	@goField(forceResolver: true)
+    component(component: Component!): [Pod!]    		@goField(forceResolver: true)
+	pod(name: String): [Pod!]                   		@goField(forceResolver: true)
+    stresschaos(name: String): [StressChaos!]         	@goField(forceResolver: true)
+    iochaos(name: String): [IOChaos!]                 	@goField(forceResolver: true)
+    podiochaos(name: String): [PodIOChaos!]           	@goField(forceResolver: true)
+    httpchaos(name: String): [HTTPChaos!]             	@goField(forceResolver: true)
+    podhttpchaos(name: String): [PodHTTPChaos!]       	@goField(forceResolver: true)
+    networkchaos(name: String): [NetworkChaos!]       	@goField(forceResolver: true)
+    podnetworkchaos(name: String): [PodNetworkChaos!] 	@goField(forceResolver: true)
 }
 
 type OwnerReference @goModel(model: "k8s.io/apimachinery/pkg/apis/meta/v1.OwnerReference") {
