@@ -193,6 +193,7 @@ func (r *Reconciler) SetIptables(ctx context.Context, pod *corev1.Pod, chaos *v1
 			Ipsets:    chain.IPSets,
 			Direction: direction,
 			Target:    "DROP",
+			Device:    chain.Device,
 		})
 	}
 	return iptable.SetIptablesChains(ctx, r.ChaosDaemonClientBuilder, pod, chains)
@@ -208,9 +209,10 @@ func (r *Reconciler) SetTcs(ctx context.Context, pod *corev1.Pod, chaos *v1alpha
 				return err
 			}
 			tcs = append(tcs, &pb.Tc{
-				Type:  pb.Tc_BANDWIDTH,
-				Tbf:   tbf,
-				Ipset: tc.IPSet,
+				Type:   pb.Tc_BANDWIDTH,
+				Tbf:    tbf,
+				Ipset:  tc.IPSet,
+				Device: tc.Device,
 			})
 		} else if tc.Type == v1alpha1.Netem {
 			netem, err := mergeNetem(tc.TcParameter)
@@ -218,9 +220,10 @@ func (r *Reconciler) SetTcs(ctx context.Context, pod *corev1.Pod, chaos *v1alpha
 				return err
 			}
 			tcs = append(tcs, &pb.Tc{
-				Type:  pb.Tc_NETEM,
-				Netem: netem,
-				Ipset: tc.IPSet,
+				Type:   pb.Tc_NETEM,
+				Netem:  netem,
+				Ipset:  tc.IPSet,
+				Device: tc.Device,
 			})
 		} else {
 			return fmt.Errorf("unknown tc type")
