@@ -53,7 +53,7 @@ func NewChaosControllerManagerMetricsCollector(store cache.Cache, registerer pro
 	c := &ChaosControllerManagerMetricsCollector{
 		store: store,
 		chaosExperimentCount: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-			Name: "chaos_controller_manager_chaos_experiments_count",
+			Name: "chaos_controller_manager_chaos_experiments",
 			Help: "Total number of chaos experiments and their phases",
 		}, []string{"namespace", "kind", "phase"}),
 		SidecarTemplates: prometheus.NewGauge(prometheus.GaugeOpts{
@@ -89,16 +89,16 @@ func NewChaosControllerManagerMetricsCollector(store cache.Cache, registerer pro
 			Help: "Total number of sidecar injections performed on the webhook",
 		}, []string{"namespace", "config"}),
 		chaosScheduleCount: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-			Name: "chaos_controller_manager_chaos_schedule_count",
-			Help: "Current count of chaos schedules",
+			Name: "chaos_controller_manager_chaos_schedules",
+			Help: "Total number of chaos schedules",
 		}, []string{"namespace"}),
 		chaosWorkflowCount: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-			Name: "chaos_controller_manager_chaos_workflow_count",
-			Help: "Current count of chaos workflow",
+			Name: "chaos_controller_manager_chaos_workflows",
+			Help: "Total number of chaos workflows",
 		}, []string{"namespace"}),
 		emittedEventCount: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-			Name: "chaos_controller_manager_emitted_event_count",
-			Help: "Current count of the emitted event by chaos-controller-manager",
+			Name: "chaos_controller_manager_emitted_events",
+			Help: "Total number of the emitted events by chaos-controller-manager",
 		}, []string{"type", "reason"}),
 	}
 	registerer.MustRegister(c)
