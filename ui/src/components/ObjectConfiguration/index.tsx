@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+
 import { Experiment, Selector, TableCell } from './common'
 import { Grid, Table, TableBody, TableRow, Typography } from '@material-ui/core'
 
@@ -104,7 +105,32 @@ const ObjectConfiguration: React.FC<ObjectConfigurationProps> = ({
             {T('newE.steps.scope')}
           </Typography>
 
-          <Selector data={experiment.selector} />
+          {(inNode
+            ? (config as any).templateType !== 'physicalmachineChaos'
+            : inSchedule
+            ? spec.type !== 'PhysicalMachineChaos'
+            : (config.kind as any) !== 'PhysicalMachineChaos') && <Selector data={experiment.selector} />}
+
+          {(inNode
+            ? (config as any).templateType === 'physicalmachineChaos'
+            : inSchedule
+            ? spec.type === 'PhysicalMachineChaos'
+            : (config.kind as any) === 'PhysicalMachineChaos') && (
+            <Table>
+              <TableRow>
+                <TableCell>{T('physic.address')}</TableCell>
+                <TableCell>
+                  <Typography variant="body2" color="textSecondary">
+                    {inNode
+                      ? (config as any).physicalmachineChaos.address
+                      : inSchedule
+                      ? spec.physicalmachineChaos.address
+                      : spec.address}
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            </Table>
+          )}
         </Grid>
 
         <Grid item xs={vertical ? 12 : 3}>

@@ -14,8 +14,10 @@
  * limitations under the License.
  *
  */
+
 import { Experiment, ExperimentKind, Frame, Scope } from 'components/NewExperiment/types'
 
+import { Env } from 'slices/experiments'
 import { ScheduleSpecific } from 'components/Schedule/types'
 import { Template } from 'slices/workflows'
 import { WorkflowBasic } from 'components/NewWorkflow'
@@ -25,6 +27,7 @@ import { toTitleCase } from './utils'
 import yaml from 'js-yaml'
 
 export function parseSubmit<K extends ExperimentKind>(
+  env: Env,
   kind: K,
   e: Experiment<Exclude<K, 'Schedule'>>,
   options?: {
@@ -36,7 +39,7 @@ export function parseSubmit<K extends ExperimentKind>(
 
   // Set default namespace when it's not present
   if (!metadata.namespace) {
-    metadata.namespace = spec.selector.namespaces[0]
+    metadata.namespace = env === 'k8s' ? spec.selector.namespaces[0] : 'default'
   }
 
   // Parse labels, annotations, labelSelectors, and annotationSelectors to object
@@ -84,6 +87,7 @@ export function parseSubmit<K extends ExperimentKind>(
       delete scope.pods
     }
   }
+
   if (metadata.labels?.length) {
     metadata.labels = helper1(metadata.labels) as any
   } else {
@@ -94,7 +98,27 @@ export function parseSubmit<K extends ExperimentKind>(
   } else {
     delete metadata.annotations
   }
-  helper2(spec.selector)
+
+  if (env === 'physic') {
+    const action = (spec as any).action
+
+    delete (spec as any)[action].action
+
+    return {
+      apiVersion: 'chaos-mesh.org/v1alpha1',
+      kind: 'PhysicalMachineChaos',
+      metadata,
+      spec: {
+        address: (spec as any).address,
+        action,
+        [action]: (spec as any)[action],
+      },
+    }
+  }
+
+  if (env === 'k8s') {
+    helper2(spec.selector)
+  }
 
   if (kind === 'NetworkChaos') {
     if (!(spec as any).externalTargets.length) {

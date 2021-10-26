@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+
 import { Box, Button, Divider, Grid, MenuItem, Typography } from '@material-ui/core'
 import { Form, Formik } from 'formik'
 import { LabelField, SelectField, TextField } from 'components/FormField'
@@ -24,6 +25,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
 import CheckIcon from '@material-ui/icons/Check'
+import Nodes from './form/Nodes'
 import OtherOptions from 'components/OtherOptions'
 import Paper from 'components-mui/Paper'
 import PublishIcon from '@material-ui/icons/Publish'
@@ -40,10 +42,10 @@ interface Step2Props {
 }
 
 const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false }) => {
-  const { namespaces, step2, kindAction, basic } = useStoreSelector((state) => state.experiments)
+  const { namespaces, step2, env, kindAction, basic } = useStoreSelector((state) => state.experiments)
   const [kind] = kindAction
   const scopeDisabled = kind === 'AWSChaos' || kind === 'GCPChaos'
-  const schema = basicSchema({ scopeDisabled, scheduled: inSchedule, needDeadline: inWorkflow })
+  const schema = basicSchema({ env, scopeDisabled, scheduled: inSchedule, needDeadline: inWorkflow })
   const dispatch = useStoreDispatch()
 
   const originalInit = useMemo(
@@ -111,7 +113,15 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false })
                       {T('newE.steps.scope')}
                       {scopeDisabled && T('newE.steps.scopeDisabled')}
                     </Typography>
-                    {namespaces.length ? <Scope namespaces={namespaces} /> : <SkeletonN n={6} />}
+                    {env === 'k8s' ? (
+                      namespaces.length ? (
+                        <Scope namespaces={namespaces} />
+                      ) : (
+                        <SkeletonN n={6} />
+                      )
+                    ) : (
+                      <Nodes />
+                    )}
                   </Space>
                 </Grid>
                 <Grid item xs={6}>

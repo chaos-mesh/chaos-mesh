@@ -14,12 +14,18 @@
  * limitations under the License.
  *
  */
+
 import * as Yup from 'yup'
 
 import { ExperimentKind } from 'components/NewExperiment/types'
 
 export type Kind = Exclude<ExperimentKind, 'HTTPChaos' | 'JVMChaos' | 'PhysicalMachineChaos'>
-type FieldType = 'text' | 'number' | 'select' | 'label' | 'autocomplete'
+export type KindPhysic =
+  | Extract<Kind, 'NetworkChaos' | 'StressChaos' | 'TimeChaos'>
+  | 'DiskChaos'
+  | 'JVMChaos'
+  | 'ProcessChaos'
+type FieldType = 'text' | 'textarea' | 'number' | 'select' | 'label' | 'autocomplete'
 interface SpecField {
   field: FieldType
   items?: any[]
@@ -28,6 +34,7 @@ interface SpecField {
   value: any
   helperText?: string
   inputProps?: Record<string, any>
+  if?: { key: string; equal: string | string[] }
 }
 export type Spec = Record<string, SpecField>
 interface Category {
@@ -534,14 +541,429 @@ const data: Record<Kind, Definition> = {
   },
 }
 
-const AwsChaosCommonSchema = Yup.object({
+const networkPhysicCommon: Spec = {
+  correlation: {
+    field: 'text',
+    label: 'Correlation',
+    value: '',
+    helperText: 'The correlation of corrupt',
+  },
+  device: {
+    field: 'text',
+    label: 'Device',
+    value: '',
+    helperText: 'Affected device, e.g., eth0',
+  },
+  hostname: {
+    field: 'text',
+    label: 'Hostname',
+    value: '',
+    helperText: 'Specify the hostname',
+  },
+  'ip-address': {
+    field: 'text',
+    label: 'IP Address',
+    value: '',
+    helperText: 'Specify the IP address',
+  },
+  'ip-protocol': {
+    field: 'select',
+    items: ['tcp', 'udp', 'icmp', 'all'],
+    label: 'IP Protocol',
+    value: 'all',
+    helperText: 'Specify the IP protocol',
+  },
+  sourceport: {
+    field: 'text',
+    label: 'Source Port',
+    value: '',
+    helperText: 'The source port, split by ,',
+    if: {
+      key: 'ip-protocol',
+      equal: ['tcp', 'udp'],
+    },
+  },
+  'egress-port': {
+    field: 'text',
+    label: 'Egress Port',
+    value: '',
+    helperText: 'The egress port, split by ,',
+  },
+  percent: {
+    field: 'text',
+    label: 'Percent',
+    value: '1',
+    helperText: 'Percentage of network packet duplication',
+  },
+}
+
+const diskPhysicCommon: Spec = {
+  size: {
+    field: 'text',
+    label: 'Size',
+    value: '',
+    helperText:
+      'The supported formats of the size are: c(=1), w(=2), kB(=1000), K(=1024), MB(=1024), M(=1024x1024), GB and so on.',
+  },
+  path: {
+    field: 'text',
+    label: 'Path',
+    value: '',
+    helperText: 'Specify the file path of the data to be read/written',
+  },
+}
+
+const jvmPhysicClassAndMethod: Spec = {
+  class: {
+    field: 'text',
+    label: 'Class',
+    value: '',
+    helperText: 'Class that is injected with faults',
+  },
+  method: {
+    field: 'text',
+    label: 'Method',
+    value: '',
+    helperText: 'Method that is injected with faults',
+  },
+}
+
+const jvmPhysicPidAndPort: Spec = {
+  pid: {
+    field: 'number',
+    label: 'Pid',
+    value: '',
+    helperText: 'ID of the Java process being injected into the fault',
+  },
+  port: {
+    field: 'number',
+    label: 'Port',
+    value: 9288,
+    helperText: 'The service port of the loaded agent, through which the rules are configured',
+  },
+}
+
+export const dataPhysic: Record<KindPhysic, Definition> = {
+  DiskChaos: {
+    categories: [
+      {
+        name: 'Read Payload',
+        key: 'disk-read-payload',
+        spec: {
+          action: 'disk-read-payload' as any,
+          ...diskPhysicCommon,
+          payload_process_num: {
+            field: 'number',
+            label: 'Payload process num',
+            value: 1,
+          },
+        },
+      },
+      {
+        name: 'Write Payload',
+        key: 'disk-write-payload',
+        spec: {
+          action: 'disk-write-payload' as any,
+          ...diskPhysicCommon,
+          payload_process_num: {
+            field: 'number',
+            label: 'Payload process num',
+            value: 1,
+          },
+        },
+      },
+      {
+        name: 'Fill',
+        key: 'disk-fill',
+        spec: {
+          action: 'disk-fill' as any,
+          ...diskPhysicCommon,
+          fill_by_fallocate: {
+            field: 'select',
+            items: [
+              {
+                label: 'true',
+                value: true,
+              },
+              {
+                label: 'false',
+                value: false,
+              },
+            ],
+            label: 'Fill by fallocate',
+            value: true,
+            helperText: 'Whether to use fallocate to quickly request disk space',
+          },
+        },
+      },
+    ],
+  },
+  JVMChaos: {
+    categories: [
+      {
+        name: 'Exception',
+        key: 'jvm-exception',
+        spec: {
+          action: 'jvm-exception' as any,
+          exception: {
+            field: 'text',
+            label: 'Exception',
+            value: '',
+            helperText: 'Specify the exception to be thrown',
+          },
+          ...jvmPhysicClassAndMethod,
+          ...jvmPhysicPidAndPort,
+        },
+      },
+      {
+        name: 'GC',
+        key: 'jvm-gc',
+        spec: {
+          action: 'jvm-gc' as any,
+          ...jvmPhysicPidAndPort,
+        },
+      },
+      {
+        name: 'Latency',
+        key: 'jvm-latency',
+        spec: {
+          action: 'jvm-latency' as any,
+          latency: {
+            field: 'number',
+            label: 'Latency',
+            value: '',
+            helperText: 'Specify the time of latency, unit is millisecond',
+          },
+          ...jvmPhysicClassAndMethod,
+          ...jvmPhysicPidAndPort,
+        },
+      },
+      {
+        name: 'Return',
+        key: 'jvm-return',
+        spec: {
+          action: 'jvm-return' as any,
+          value: {
+            field: 'text',
+            label: 'Value',
+            value: '',
+            helperText: 'Specify the return value',
+          },
+          ...jvmPhysicClassAndMethod,
+          ...jvmPhysicPidAndPort,
+        },
+      },
+      {
+        name: 'Stress',
+        key: 'jvm-stress',
+        spec: {
+          action: 'jvm-stress' as any,
+          'cpu-count': {
+            field: 'number',
+            label: 'CPU Count',
+            value: '',
+            helperText: 'Specify the CPU count',
+          },
+          'mem-type': {
+            field: 'select',
+            items: ['stack', 'heap'],
+            label: 'Mem Type',
+            value: '',
+            helperText: 'Specify the mem type',
+          },
+          ...jvmPhysicPidAndPort,
+        },
+      },
+      {
+        name: 'Rule',
+        key: 'jvm-rule-data',
+        spec: {
+          'rule-data': {
+            field: 'textarea',
+            label: 'Rule',
+            value: '',
+            helperText: 'byteman rule configuration',
+          },
+          ...jvmPhysicPidAndPort,
+        },
+      },
+    ],
+  },
+  NetworkChaos: {
+    categories: [
+      {
+        name: 'Corrupt',
+        key: 'network-corrupt',
+        spec: {
+          action: 'network-corrupt' as any,
+          ...networkPhysicCommon,
+        },
+      },
+      {
+        name: 'Duplicate',
+        key: 'network-duplicate',
+        spec: {
+          action: 'network-duplicate' as any,
+          ...networkPhysicCommon,
+        },
+      },
+      {
+        name: 'Loss',
+        key: 'network-loss',
+        spec: {
+          action: 'network-loss' as any,
+          ...networkPhysicCommon,
+        },
+      },
+      {
+        name: 'Delay',
+        key: 'network-delay',
+        spec: {
+          action: 'network-delay' as any,
+          latency: {
+            field: 'text',
+            label: 'Latency',
+            value: '',
+            helperText: 'The latency of delay',
+          },
+          jitter: {
+            field: 'text',
+            label: 'Jitter',
+            value: '',
+            helperText: 'The jitter of delay',
+          },
+          ...networkPhysicCommon,
+          percent: undefined as any,
+        },
+      },
+      {
+        name: 'Partition',
+        key: 'network-partition',
+        spec: {
+          action: 'network-partition' as any,
+          direction: networkCommon['direction'],
+          ...networkPhysicCommon,
+          'accept-tcp-flags': {
+            field: 'text',
+            label: 'Accept TCP Flags',
+            value: '',
+            if: {
+              key: 'ip-protocol',
+              equal: 'tcp',
+            },
+          },
+          correlation: undefined as any,
+          sourceport: undefined as any,
+          'egress-port': undefined as any,
+          percent: undefined as any,
+        },
+      },
+      {
+        name: 'DNS',
+        key: 'network-dns',
+        spec: {
+          action: 'network-dns' as any,
+          'dns-hostname': {
+            field: 'text',
+            label: 'Hostname',
+            value: '',
+            helperText: 'Affected domains',
+          },
+          'dns-ip': {
+            field: 'text',
+            label: 'IP',
+            value: '',
+            helperText: 'Indicates that the affected domain is mapped to this address',
+          },
+          'dns-server': {
+            field: 'text',
+            label: 'Server',
+            value: 'DNS server address',
+          },
+        },
+      },
+    ],
+  },
+  ProcessChaos: {
+    spec: {
+      action: 'process' as any,
+      process: {
+        field: 'text',
+        label: 'Process',
+        value: '',
+        helperText: 'The name or ID of the process to be killed',
+      },
+      signal: {
+        field: 'number',
+        label: 'Signal',
+        value: 9,
+        helperText: 'The process signal value',
+      },
+    },
+  },
+  StressChaos: {
+    categories: [
+      {
+        name: 'CPU',
+        key: 'stress-cpu',
+        spec: {
+          action: 'stress-cpu' as any,
+          workers: {
+            field: 'number',
+            label: 'Workers',
+            value: 0,
+            helperText: 'Workers',
+          },
+          load: {
+            field: 'number',
+            label: 'Load',
+            value: 0,
+            helperText: 'Load',
+          },
+        },
+      },
+      {
+        name: 'Memory',
+        key: 'stress-mem',
+        spec: {
+          action: 'stress-mem' as any,
+          size: {
+            field: 'text',
+            label: 'Size',
+            value: '',
+            helperText: 'The supported formats of the size are: B, KB/KiB, MB/MiB, GB/GiB, TB/TiB.',
+          },
+        },
+      },
+    ],
+  },
+  TimeChaos: {
+    spec: {
+      action: 'clock' as any,
+      'time-offset': {
+        field: 'text',
+        label: 'Offset',
+        value: '',
+        helperText: 'Fill the time offset',
+      },
+      pid: {
+        field: 'number',
+        label: 'Pid',
+        value: '',
+        helperText: 'ID of the process that will be injected into the fault',
+      },
+    },
+  },
+}
+
+const AWSChaosCommonSchema = Yup.object({
   awsRegion: Yup.string().required('The region is required'),
   ec2Instance: Yup.string().required('The ID of the EC2 instance is required'),
 })
 
 const patternsSchema = Yup.array().of(Yup.string()).required('The patterns is required')
 
-const GcpChaosCommonSchema = Yup.object({
+const GCPChaosCommonSchema = Yup.object({
   project: Yup.string().required('The project is required'),
   zone: Yup.string().required('The zone is required'),
   instance: Yup.string().required('The instance is required'),
@@ -553,9 +975,9 @@ const networkTargetSchema = Yup.object({
 
 export const schema: Partial<Record<Kind, Record<string, Yup.ObjectSchema>>> = {
   AWSChaos: {
-    'ec2-stop': AwsChaosCommonSchema,
-    'ec2-restart': AwsChaosCommonSchema,
-    'detach-volume': AwsChaosCommonSchema.shape({
+    'ec2-stop': AWSChaosCommonSchema,
+    'ec2-restart': AWSChaosCommonSchema,
+    'detach-volume': AWSChaosCommonSchema.shape({
       deviceName: Yup.string().required('The device name is required'),
       volumeID: Yup.string().required('The ID of the EBS volume is required'),
     }),
@@ -569,9 +991,9 @@ export const schema: Partial<Record<Kind, Record<string, Yup.ObjectSchema>>> = {
     }),
   },
   GCPChaos: {
-    'node-stop': GcpChaosCommonSchema,
-    'node-reset': GcpChaosCommonSchema,
-    'disk-loss': GcpChaosCommonSchema.shape({
+    'node-stop': GCPChaosCommonSchema,
+    'node-reset': GCPChaosCommonSchema,
+    'disk-loss': GCPChaosCommonSchema.shape({
       deviceNames: Yup.array().of(Yup.string()).required('At least one device name is required'),
     }),
   },
