@@ -91,6 +91,10 @@ type RawIptables struct {
 	// The block direction of this iptables rule
 	Direction ChainDirection `json:"direction"`
 
+	// Device represents the network device to be affected.
+	// +optional
+	Device string `json:"device,omitempty"`
+
 	RawRuleSource `json:",inline"`
 }
 
@@ -118,6 +122,10 @@ type RawTrafficControl struct {
 
 	// The name and namespace of the source network chaos
 	Source string `json:"source"`
+
+	// Device represents the network device to be affected.
+	// +optional
+	Device string `json:"device,omitempty"`
 }
 
 // TcParameter represents the parameters for a traffic control chaos
