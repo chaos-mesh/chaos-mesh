@@ -10,18 +10,21 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+const nodeSelectorName = "node"
+
 type nodeSelector struct {
 	nodes []v1.Node
 }
 
 var _ generic.Selector = &nodeSelector{}
 
-func (s *nodeSelector) AddListOption(opts client.ListOptions) client.ListOptions {
-	return opts
+
+func (s *nodeSelector) ListOption() client.ListOption {
+	return nil
 }
 
-func (s *nodeSelector) SetListFunc(f generic.ListFunc) generic.ListFunc {
-	return f
+func (s *nodeSelector) ListFunc() generic.ListFunc {
+	return nil
 }
 
 func (s *nodeSelector) Match(obj client.Object) bool {
@@ -39,9 +42,9 @@ func (s *nodeSelector) Match(obj client.Object) bool {
 }
 
 // if both setting Nodes and NodeSelectors, the node list will be combined.
-func NewNodeSelector(ctx context.Context, c client.Client, spec v1alpha1.PodSelectorSpec) (generic.Selector, error) {
+func newNodeSelector(ctx context.Context, c client.Client, spec v1alpha1.PodSelectorSpec) (generic.Selector, error) {
 	if len(spec.Nodes) == 0 && len(spec.NodeSelectors) == 0 {
-		return nil, nil
+		return &nodeSelector{}, nil
 	}
 	var nodes []v1.Node
 	if len(spec.Nodes) > 0 {

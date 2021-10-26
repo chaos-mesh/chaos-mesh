@@ -16,20 +16,20 @@ type labelSelector struct {
 
 var _ generic.Selector = &labelSelector{}
 
-func (s *labelSelector) AddListOption(opts client.ListOptions) client.ListOptions {
-	opts.LabelSelector = s.selector
-	return opts
+func (s *labelSelector) ListOption() client.ListOption {
+	return client.MatchingLabelsSelector{Selector: s.selector}
 }
 
-func (s *labelSelector) SetListFunc(f generic.ListFunc) generic.ListFunc {
-	return f
+func (s *labelSelector) ListFunc() generic.ListFunc {
+	return nil
 }
 
-func (s *labelSelector) Match(obj client.Object) bool {
+func (s *labelSelector) Match(_ client.Object) bool {
+
 	return true
 }
 
-func New(spec v1alpha1.GenericSelectorSpec, _ generic.Option) (generic.Selector, error) {
+func New(spec v1alpha1.GenericSelectorSpec, _ client.Reader, _ generic.Option) (generic.Selector, error) {
 	labelSelectors := spec.LabelSelectors
 	expressions := spec.ExpressionSelectors
 
@@ -44,5 +44,5 @@ func New(spec v1alpha1.GenericSelectorSpec, _ generic.Option) (generic.Selector,
 	if err != nil {
 		return nil, err
 	}
-	return &labelSelector{ls}, nil
+	return &labelSelector{selector: ls}, nil
 }

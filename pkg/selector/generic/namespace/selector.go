@@ -7,28 +7,38 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+const Name = "namespace"
+
 type namespaceSelector struct {
 	generic.Option
 }
 
 var _ generic.Selector = &namespaceSelector{}
 
-func (s *namespaceSelector) AddListOption(opts client.ListOptions) client.ListOptions {
+func (s *namespaceSelector) ListOption() client.ListOption {
 	if !s.ClusterScoped {
-		opts.Namespace = s.TargetNamespace
+		return client.InNamespace(s.TargetNamespace)
 	}
-	return opts
+	return nil
 }
 
-func (s *namespaceSelector) SetListFunc(f generic.ListFunc) generic.ListFunc {
-	return f
+func (s *namespaceSelector) ListFunc() generic.ListFunc {
+	return nil
 }
 
-func (s *namespaceSelector) Match(obj client.Object) bool {
+func (s *namespaceSelector) Match(_ client.Object) bool {
 	return true
 }
 
-func New(spec v1alpha1.GenericSelectorSpec, option generic.Option) (generic.Selector, error) {
+// TODO validate?
+func (s *namespaceSelector) Validate() error {
+	if !s.ClusterScoped{
+
+	}
+	return nil
+}
+
+func New(spec v1alpha1.GenericSelectorSpec, _ client.Reader, option generic.Option) (generic.Selector, error) {
 	if !option.ClusterScoped {
 		if len(spec.Namespaces) > 1 {
 			return nil, fmt.Errorf("could NOT use more than 1 namespace selector within namespace scoped mode")
@@ -40,7 +50,7 @@ func New(spec v1alpha1.GenericSelectorSpec, option generic.Option) (generic.Sele
 	}
 
 	return &namespaceSelector{
-		generic.Option{
+		Option: generic.Option{
 			option.ClusterScoped,
 			option.TargetNamespace,
 			option.EnableFilterNamespace,

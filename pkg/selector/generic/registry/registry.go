@@ -12,7 +12,7 @@ type Registry map[string]SelectorFactory
 // SelectorFactory is a function that builds a selector.
 type SelectorFactory = func(selector v1alpha1.GenericSelectorSpec, r client.Reader, option generic.Option) (generic.Selector, error)
 
-func Parse(registry Registry, spec v1alpha1.GenericSelectorSpec, r client.Reader, option generic.Option) ([]generic.Selector, error) {
+func Parse(registry Registry, spec v1alpha1.GenericSelectorSpec, r client.Reader, option generic.Option) (generic.SelectorChain, error) {
 	selectors := make([]generic.Selector, 0, len(registry))
 	for name, factory := range registry {
 		selector, err := factory(spec, r, option)

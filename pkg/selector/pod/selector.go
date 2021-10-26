@@ -20,23 +20,20 @@ import (
 	"fmt"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/registry"
-	"math"
-	"math/big"
-	"strconv"
-	"strings"
-
 	"go.uber.org/fx"
 	v1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/types"
+	"math"
+	"math/big"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"strconv"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
-	"github.com/chaos-mesh/chaos-mesh/pkg/label"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 	generic_annotation "github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/annotation"
 	generic_field "github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/field"
@@ -140,54 +137,13 @@ func SelectAndFilterPods(ctx context.Context, c client.Client, r client.Reader, 
 // It returns all pods that match the configured label, annotation and namespace selectors.
 // If pods are specifically specified by `selector.Pods`, it just returns the selector.Pods.
 func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector v1alpha1.PodSelectorSpec, clusterScoped bool, targetNamespace string, enableFilterNamespace bool) ([]v1.Pod, error) {
-	var pods []v1.Pod
-
-	namespaceCheck := make(map[string]bool)
 	// pods are specifically specified
 	if len(selector.Pods) > 0 {
-		for ns, names := range selector.Pods {
-			if !clusterScoped {
-				if targetNamespace != ns {
-					log.Info("skip namespace because ns is out of scope within namespace scoped mode", "namespace", ns)
-					continue
-				}
-			}
-
-			if enableFilterNamespace {
-				allow, ok := namespaceCheck[ns]
-				if !ok {
-					allow = checkNamespace(ctx, c, ns)
-					namespaceCheck[ns] = allow
-				}
-				if !allow {
-					continue
-				}
-			}
-			for _, name := range names {
-				var pod v1.Pod
-				err := c.Get(ctx, types.NamespacedName{
-					Namespace: ns,
-					Name:      name,
-				}, &pod)
-				if err == nil {
-					pods = append(pods, pod)
-					continue
-				}
-
-				if apierrors.IsNotFound(err) {
-					log.Error(err, "Pod is not found", "namespace", ns, "pod name", name)
-					continue
-				}
-
-				return nil, err
-			}
-		}
-
-		return pods, nil
+		return selectSpecifiedPod(ctx, c, selector, clusterScoped, targetNamespace, enableFilterNamespace)
 	}
 
 	reg := newSelectorRegistry(ctx, c, selector)
-	selectors, err := registry.Parse(reg, selector.GenericSelectorSpec, generic.Option{
+	selectorChain, err := registry.Parse(reg, selector.GenericSelectorSpec, r, generic.Option{
 		ClusterScoped:         clusterScoped,
 		TargetNamespace:       targetNamespace,
 		EnableFilterNamespace: enableFilterNamespace,
@@ -196,56 +152,63 @@ func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector 
 		return nil, err
 	}
 
-	pods, err = ListPods(ctx, c, selector, selectors, namespaceCheck, enableFilterNamespace)
+	var pods []v1.Pod
+	pods, err = listPods(ctx, c, selector, selectorChain, enableFilterNamespace)
 	if err != nil {
 		return nil, err
 	}
 
-	// TODO
-	objs := generic.Filter(pods, selectors)
-	pods = objs.([]v1.Pod)
-
-	return pods, nil
+	filterPods := make([]v1.Pod, 0, len(pods))
+	for _, pod := range pods {
+		if ok := selectorChain.Match(&pod); ok {
+			filterPods = append(filterPods, pod)
+		}
+	}
+	return filterPods, nil
 }
 
-func ListPods(ctx context.Context, c client.Client, spec v1alpha1.PodSelectorSpec,
-	selectors []generic.Selector, namespaceCheck map[string]bool, enableFilterNamespace bool) ([]v1.Pod, error) {
+func selectSpecifiedPod(ctx context.Context, c client.Client, spec v1alpha1.PodSelectorSpec,
+	clusterScoped bool, targetNamespace string, enableFilterNamespace bool) ([]v1.Pod, error) {
 	var pods []v1.Pod
+	namespaceCheck := make(map[string]bool)
 
-	if err := generic.ListObjects(c, selectors,
-		func(listFunc generic.ListFunc, opts client.ListOptions) error {
-			var podList v1.PodList
-			if len(spec.Namespaces) > 0 {
-				for _, namespace := range spec.Namespaces {
-					if enableFilterNamespace {
-						allow, ok := namespaceCheck[namespace]
-						if !ok {
-							allow = checkNamespace(ctx, c, namespace)
-							namespaceCheck[namespace] = allow
-						}
-						if !allow {
-							continue
-						}
-					}
-
-					opts.Namespace = namespace
-					if err := listFunc(ctx, &podList, &opts); err != nil {
-						return err
-					}
-					pods = append(pods, podList.Items...)
-				}
-			} else {
-				// in fact, this will never happen
-				if err := listFunc(ctx, &podList, &opts); err != nil {
-					return err
-				}
-				pods = append(pods, podList.Items...)
+	for ns, names := range spec.Pods {
+		if !clusterScoped {
+			if targetNamespace != ns {
+				log.Info("skip namespace because ns is out of scope within namespace scoped mode", "namespace", ns)
+				continue
 			}
-			return nil
-		}); err != nil {
-		return nil, err
-	}
+		}
 
+		if enableFilterNamespace {
+			allow, ok := namespaceCheck[ns]
+			if !ok {
+				allow = checkNamespace(ctx, c, ns)
+				namespaceCheck[ns] = allow
+			}
+			if !allow {
+				continue
+			}
+		}
+		for _, name := range names {
+			var pod v1.Pod
+			err := c.Get(ctx, types.NamespacedName{
+				Namespace: ns,
+				Name:      name,
+			}, &pod)
+			if err == nil {
+				pods = append(pods, pod)
+				continue
+			}
+
+			if apierrors.IsNotFound(err) {
+				log.Error(err, "Pod is not found", "namespace", ns, "pod name", name)
+				continue
+			}
+
+			return nil, err
+		}
+	}
 	return pods, nil
 }
 
@@ -271,7 +234,7 @@ func GetService(ctx context.Context, c client.Client, namespace, controllerNames
 }
 
 // CheckPodMeetSelector checks if this pod meets the selection criteria.
-// TODO: support to check fieldsSelector
+// TODO: refactor
 func CheckPodMeetSelector(pod v1.Pod, selector v1alpha1.PodSelectorSpec) (bool, error) {
 	if len(selector.Pods) > 0 {
 		meet := false
@@ -318,30 +281,30 @@ func CheckPodMeetSelector(pod v1.Pod, selector v1alpha1.PodSelectorSpec) (bool, 
 
 	pods := []v1.Pod{pod}
 
-	namespaceSelector, err := parseSelector(strings.Join(selector.Namespaces, ","))
-	if err != nil {
-		return false, err
-	}
+	//namespaceSelector, err := parseSelector(strings.Join(selector.Namespaces, ","))
+	//if err != nil {
+	//	return false, err
+	//}
 
-	pods, err = filterByNamespaceSelector(pods, namespaceSelector)
-	if err != nil {
-		return false, err
-	}
-
-	annotationsSelector, err := parseSelector(label.Label(selector.AnnotationSelectors).String())
-	if err != nil {
-		return false, err
-	}
-	pods = filterByAnnotations(pods, annotationsSelector)
-
-	phaseSelector, err := parseSelector(strings.Join(selector.PodPhaseSelectors, ","))
-	if err != nil {
-		return false, err
-	}
-	pods, err = filterByPhaseSelector(pods, phaseSelector)
-	if err != nil {
-		return false, err
-	}
+	//pods, err = filterByNamespaceSelector(pods, namespaceSelector)
+	//if err != nil {
+	//	return false, err
+	//}
+	//
+	//annotationsSelector, err := parseSelector(label.Label(selector.AnnotationSelectors).String())
+	//if err != nil {
+	//	return false, err
+	//}
+	//pods = filterByAnnotations(pods, annotationsSelector)
+	//
+	//phaseSelector, err := parseSelector(strings.Join(selector.PodPhaseSelectors, ","))
+	//if err != nil {
+	//	return false, err
+	//}
+	//pods, err = filterByPhaseSelector(pods, phaseSelector)
+	//if err != nil {
+	//	return false, err
+	//}
 
 	if len(pods) > 0 {
 		return true, nil
@@ -352,17 +315,59 @@ func CheckPodMeetSelector(pod v1.Pod, selector v1alpha1.PodSelectorSpec) (bool, 
 
 func newSelectorRegistry(ctx context.Context, c client.Client, spec v1alpha1.PodSelectorSpec) registry.Registry {
 	return map[string]registry.SelectorFactory{
-		generic_label.Name: generic_label.New,
-		"namespace":        generic_namespace.New,
-		generic_field.Name: generic_field.New,
-		"annotation":       generic_annotation.New,
-		"node": func(selector v1alpha1.GenericSelectorSpec, option generic.Option) (generic.Selector, error) {
-			return NewNodeSelector(ctx, c, spec)
+		generic_label.Name:      generic_label.New,
+		generic_namespace.Name:  generic_namespace.New,
+		generic_field.Name:      generic_field.New,
+		generic_annotation.Name: generic_annotation.New,
+		nodeSelectorName: func(selector v1alpha1.GenericSelectorSpec, _ client.Reader, _ generic.Option) (generic.Selector, error) {
+			return newNodeSelector(ctx, c, spec)
 		},
-		"phase": func(selector v1alpha1.GenericSelectorSpec, option generic.Option) (generic.Selector, error) {
-			return NewPhaseSelector(spec)
+		phaseSelectorName: func(selector v1alpha1.GenericSelectorSpec, _ client.Reader, _ generic.Option) (generic.Selector, error) {
+			return newPhaseSelector(spec)
 		},
 	}
+}
+
+func listPods(ctx context.Context, c client.Client, spec v1alpha1.PodSelectorSpec,
+	selectorChain generic.SelectorChain, enableFilterNamespace bool) ([]v1.Pod, error) {
+	var pods []v1.Pod
+	namespaceCheck := make(map[string]bool)
+
+	if err := selectorChain.ListObjects(c,
+		func(listFunc generic.ListFunc, opts client.ListOptions) error {
+			var podList v1.PodList
+			if len(spec.Namespaces) > 0 {
+				for _, namespace := range spec.Namespaces {
+					if enableFilterNamespace {
+						allow, ok := namespaceCheck[namespace]
+						if !ok {
+							allow = checkNamespace(ctx, c, namespace)
+							namespaceCheck[namespace] = allow
+						}
+						if !allow {
+							continue
+						}
+					}
+
+					opts.Namespace = namespace
+					if err := listFunc(ctx, &podList, &opts); err != nil {
+						return err
+					}
+					pods = append(pods, podList.Items...)
+				}
+			} else {
+				// in fact, this will never happen
+				if err := listFunc(ctx, &podList, &opts); err != nil {
+					return err
+				}
+				pods = append(pods, podList.Items...)
+			}
+			return nil
+		}); err != nil {
+		return nil, err
+	}
+
+	return pods, nil
 }
 
 // filterPodsByMode filters pods by mode from pod list

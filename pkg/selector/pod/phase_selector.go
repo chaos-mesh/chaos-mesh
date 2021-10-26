@@ -11,6 +11,8 @@ import (
 	"strings"
 )
 
+const phaseSelectorName = "phase"
+
 type phaseSelector struct {
 	reqIncl []labels.Requirement
 	reqExcl []labels.Requirement
@@ -18,12 +20,12 @@ type phaseSelector struct {
 
 var _ generic.Selector = &phaseSelector{}
 
-func (s *phaseSelector) AddListOption(opts client.ListOptions) client.ListOptions {
-	return opts
+func (s *phaseSelector) ListOption() client.ListOption {
+	return nil
 }
 
-func (s *phaseSelector) SetListFunc(f generic.ListFunc) generic.ListFunc {
-	return f
+func (s *phaseSelector) ListFunc() generic.ListFunc {
+	return nil
 }
 
 func (s *phaseSelector) Match(obj client.Object) bool {
@@ -50,7 +52,7 @@ func (s *phaseSelector) Match(obj client.Object) bool {
 	return included
 }
 
-func NewPhaseSelector(spec v1alpha1.PodSelectorSpec) (generic.Selector, error) {
+func newPhaseSelector(spec v1alpha1.PodSelectorSpec) (generic.Selector, error) {
 	selectorStr := strings.Join(spec.PodPhaseSelectors, ",")
 	selector, err := labels.Parse(selectorStr)
 	if err != nil {

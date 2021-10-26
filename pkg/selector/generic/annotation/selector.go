@@ -12,21 +12,16 @@ const Name = "annotation"
 
 type annotationSelector struct {
 	labels.Selector
-	next generic.Selector
 }
 
 var _ generic.Selector = &annotationSelector{}
 
-func (s *annotationSelector) List(listFunc generic.ListFunc, opts client.ListOptions,
-	listObj func(listFunc generic.ListFunc, opts client.ListOptions) error) error {
-	if s.next != nil {
-		return s.next.List(listFunc, opts, listObj)
-	}
-	return listObj(listFunc, opts)
+func (s *annotationSelector) ListOption() client.ListOption {
+	return nil
 }
 
-func (s *annotationSelector) Next(selector generic.Selector) {
-	s.next = selector
+func (s *annotationSelector) ListFunc() generic.ListFunc {
+	return nil
 }
 
 func (s *annotationSelector) Match(obj client.Object) bool {
