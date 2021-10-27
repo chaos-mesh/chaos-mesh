@@ -176,19 +176,16 @@ function selectorsToArr(selectors: Object, separator: string) {
   return Object.entries(selectors).map(([key, val]) => `${key}${separator}${val}`)
 }
 
-export function parseYAML(
-  yamlObj: any,
-  options?: {
-    isSchedule?: boolean
-  }
-): { kind: ExperimentKind; basic: any; spec: any } {
-  let { kind, metadata, spec } = yamlObj
+export function parseYAML(yamlObj: any): { kind: ExperimentKind; basic: any; spec: any } {
+  let { kind, metadata, spec }: { kind: ExperimentKind; metadata: any; spec: any } = yamlObj
 
   if (!kind || !metadata || !spec) {
     throw new Error('Fail to parse the YAML file. Please check the kind, metadata, and spec fields.')
   }
 
-  if (!options?.isSchedule && !spec.selector) {
+  const isSchedule = (kind as any) === 'Schedule'
+
+  if (!isSchedule && kind !== 'PhysicalMachineChaos' && !spec.selector) {
     throw new Error('The required spec.selector field is missing.')
   }
 
@@ -201,23 +198,29 @@ export function parseYAML(
     spec: {},
   }
 
-  function parseBasicSpec(spec: typeof basicData.spec) {
+  function parseBasicSpec(kind: ExperimentKind, spec: typeof basicData.spec) {
     return {
       selector: {
         ...basicData.spec.selector,
-        namespaces: spec.selector.namespaces ?? [],
-        labelSelectors: spec.selector.labelSelectors ? selectorsToArr(spec.selector.labelSelectors, ': ') : [],
-        annotationSelectors: spec.selector.annotationSelectors
-          ? selectorsToArr(spec.selector.annotationSelectors, ': ')
-          : [],
+        ...(kind !== 'PhysicalMachineChaos'
+          ? {
+              namespaces: spec.selector.namespaces ?? [],
+              labelSelectors: spec.selector.labelSelectors ? selectorsToArr(spec.selector.labelSelectors, ': ') : [],
+              annotation_selectors: spec.selector.annotationSelectors
+                ? selectorsToArr(spec.selector.annotationSelectors, ': ')
+                : [],
+            }
+          : undefined),
       },
+
       mode: spec.mode ?? 'one',
       value: spec.value,
+      address: spec.address ?? [],
       duration: spec.duration ?? '',
     }
   }
 
-  if (options?.isSchedule) {
+  if (isSchedule) {
     const { schedule, historyLimit, concurrencyPolicy, startingDeadlineSeconds, ...rest } =
       spec as unknown as ScheduleSpecific
     const scheduleSpec = {
@@ -228,13 +231,10 @@ export function parseYAML(
     }
     kind = (rest as any).type
     spec = (rest as any)[templateTypeToFieldName(kind)]
-    basic.spec = { ...parseBasicSpec(spec), ...scheduleSpec }
+    basic.spec = { ...parseBasicSpec(kind, spec), ...scheduleSpec }
   } else {
-    basic.spec = parseBasicSpec(spec)
+    basic.spec = parseBasicSpec(kind, spec)
   }
-
-  const { selector, mode, value, duration, ...rest } = spec
-  spec = rest
 
   if (kind === 'NetworkChaos') {
     if (spec.target) {
@@ -280,6 +280,42 @@ export function parseYAML(
       options: [],
       ...spec.stressors.memory,
     }
+  }
+
+  if (kind === 'PhysicalMachineChaos') {
+    const action: string = spec.action
+
+    spec = {
+      action,
+      ...spec[action],
+    }
+
+    if (action.startsWith('disk')) {
+      kind = 'DiskChaos' as any
+    }
+
+    if (action.startsWith('jvm')) {
+      kind = 'JVMChaos'
+    }
+
+    if (action.startsWith('network')) {
+      kind = 'NetworkChaos'
+    }
+
+    if (action.startsWith('process')) {
+      kind = 'ProcessChaos' as any
+    }
+
+    if (action.startsWith('stress')) {
+      kind = 'StressChaos'
+    }
+
+    if (action === 'clock') {
+      kind = 'TimeChaos'
+    }
+  } else {
+    const { selector, mode, value, duration, ...rest } = spec
+    spec = rest
   }
 
   return {

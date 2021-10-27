@@ -83,6 +83,7 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false })
 
   const handleUndo = () => dispatch(setStep2(false))
 
+  console.log(env)
   return (
     <Paper sx={{ borderColor: step2 ? 'success.main' : undefined }}>
       <Box display="flex" justifyContent="space-between" mb={step2 ? 0 : 6}>
