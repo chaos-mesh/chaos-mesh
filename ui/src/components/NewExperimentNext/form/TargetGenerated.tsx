@@ -121,11 +121,17 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ env, kind, data, vali
                 helperText={getIn(touched, k) && getIn(errors, k) ? getIn(errors, k) : v.helperText}
                 error={getIn(errors, k) && getIn(touched, k) ? true : false}
               >
-                {v.items!.map((option: string) => (
-                  <MenuItem key={option} value={option}>
-                    {option}
-                  </MenuItem>
-                ))}
+                {v.items?.map((option: string | { label: string; value: any }) =>
+                  option instanceof Object ? (
+                    <MenuItem key={option.label} value={option.value}>
+                      {option.label}
+                    </MenuItem>
+                  ) : (
+                    <MenuItem key={option} value={option}>
+                      {option}
+                    </MenuItem>
+                  )
+                )}
               </SelectField>
             )
           case 'label':
