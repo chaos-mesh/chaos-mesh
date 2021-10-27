@@ -43,7 +43,7 @@ export const namespace = (ns: string) => {
   }
 
   nsInterceptorId = http.interceptors.request.use((config) => {
-    if (/state|workflows|schedules|experiments|events(\/dry)?|archives$/g.test(config.url!)) {
+    if (/state|workflows|schedules|experiments|events|archives$/g.test(config.url!)) {
       config.params = {
         ...config.params,
         namespace: ns === 'All' ? null : ns,

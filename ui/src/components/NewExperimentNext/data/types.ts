@@ -1054,7 +1054,7 @@ export const schema: Partial<Record<Kind, Record<string, Yup.ObjectSchema>>> = {
   },
   TimeChaos: {
     default: Yup.object({
-      time_offset: Yup.string().required('The time offset is required'),
+      timeOffset: Yup.string().required('The time offset is required'),
     }),
   },
 }
