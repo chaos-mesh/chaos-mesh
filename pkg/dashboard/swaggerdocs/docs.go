@@ -667,6 +667,46 @@ var doc = `{
                 }
             }
         },
+        "/common/physical-machines": {
+            "post": {
+                "description": "Get PhysicalMachines from Kubernetes cluster.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "common"
+                ],
+                "summary": "Get PhysicalMachines from Kubernetes cluster.",
+                "parameters": [
+                    {
+                        "description": "Request body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/core.SelectorInfo"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/common.PhysicalMachine"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    }
+                }
+            }
+        },
         "/common/pods": {
             "post": {
                 "description": "Get pods from Kubernetes cluster.",
@@ -1945,6 +1985,20 @@ var doc = `{
                 }
             }
         },
+        "common.PhysicalMachine": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                }
+            }
+        },
         "common.Pod": {
             "type": "object",
             "properties": {
@@ -2199,8 +2253,18 @@ var doc = `{
                         "type": "string"
                     }
                 },
+                "physical_machines": {
+                    "description": "PhysicalMachines is a map of string keys and a set values that used to select physical machines.\nThe key defines the namespace which physical machine belong,\nand each value is a set of physical machine names.",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
                 "pods": {
-                    "description": "Pods is a map of string keys and a set values that used to select pods.\nThe key defines the namespace which pods belong,\nand the each values is a set of pod names.",
+                    "description": "Pods is a map of string keys and a set values that used to select pods.\nThe key defines the namespace which pods belong,\nand each value is a set of pod names.",
                     "type": "object",
                     "additionalProperties": {
                         "type": "array",
@@ -3614,7 +3678,7 @@ var doc = `{
                     }
                 },
                 "physicalMachines": {
-                    "description": "PhysicalMachines is a map of string keys and a set values that used to select physical machines.\nThe key defines the namespace which physical machine belong,\nand the each value is a set of physical machine names.\n+optional",
+                    "description": "PhysicalMachines is a map of string keys and a set values that used to select physical machines.\nThe key defines the namespace which physical machine belong,\nand each value is a set of physical machine names.\n+optional",
                     "type": "object",
                     "additionalProperties": {
                         "type": "array",

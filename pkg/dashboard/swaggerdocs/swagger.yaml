@@ -14,6 +14,15 @@ definitions:
         type: string
       type: array
     type: object
+  common.PhysicalMachine:
+    properties:
+      address:
+        type: string
+      name:
+        type: string
+      namespace:
+        type: string
+    type: object
   common.Pod:
     properties:
       ip:
@@ -190,6 +199,16 @@ definitions:
         items:
           type: string
         type: array
+      physical_machines:
+        additionalProperties:
+          items:
+            type: string
+          type: array
+        description: |-
+          PhysicalMachines is a map of string keys and a set values that used to select physical machines.
+          The key defines the namespace which physical machine belong,
+          and each value is a set of physical machine names.
+        type: object
       pods:
         additionalProperties:
           items:
@@ -198,7 +217,7 @@ definitions:
         description: |-
           Pods is a map of string keys and a set values that used to select pods.
           The key defines the namespace which pods belong,
-          and the each values is a set of pod names.
+          and each value is a set of pod names.
         type: object
     type: object
   core.Topology:
@@ -1516,7 +1535,7 @@ definitions:
         description: |-
           PhysicalMachines is a map of string keys and a set values that used to select physical machines.
           The key defines the namespace which physical machine belong,
-          and the each value is a set of physical machine names.
+          and each value is a set of physical machine names.
           +optional
         type: object
     type: object
@@ -2610,6 +2629,32 @@ paths:
           schema:
             $ref: '#/definitions/utils.APIError'
       summary: Get all namespaces from Kubernetes cluster.
+      tags:
+      - common
+  /common/physical-machines:
+    post:
+      description: Get PhysicalMachines from Kubernetes cluster.
+      parameters:
+      - description: Request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/core.SelectorInfo'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/common.PhysicalMachine'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Get PhysicalMachines from Kubernetes cluster.
       tags:
       - common
   /common/pods:

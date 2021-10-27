@@ -2512,7 +2512,7 @@ spec:
                       type: array
                     description: PhysicalMachines is a map of string keys and a set
                       values that used to select physical machines. The key defines
-                      the namespace which physical machine belong, and the each value
+                      the namespace which physical machine belong, and each value
                       is a set of physical machine names.
                     type: object
                 type: object
@@ -5032,6 +5032,15 @@ spec:
                 - mode
                 - selector
                 type: object
+              physicalMachine:
+                description: PhysicalMachineSpec defines the desired state of PhysicalMachine
+                properties:
+                  address:
+                    description: Address represents the duration of the chaos action
+                    type: string
+                required:
+                - address
+                type: object
               physicalmachineChaos:
                 description: PhysicalMachineChaosSpec defines the desired state of
                   PhysicalMachineChaos
@@ -5334,7 +5343,7 @@ spec:
                         description: PhysicalMachines is a map of string keys and
                           a set values that used to select physical machines. The
                           key defines the namespace which physical machine belong,
-                          and the each value is a set of physical machine names.
+                          and each value is a set of physical machine names.
                         type: object
                     type: object
                   stress-cpu:
@@ -7435,6 +7444,17 @@ spec:
                           - mode
                           - selector
                           type: object
+                        physicalMachine:
+                          description: PhysicalMachineSpec defines the desired state
+                            of PhysicalMachine
+                          properties:
+                            address:
+                              description: Address represents the duration of the
+                                chaos action
+                              type: string
+                          required:
+                          - address
+                          type: object
                         physicalmachineChaos:
                           description: PhysicalMachineChaosSpec defines the desired
                             state of PhysicalMachineChaos
@@ -7748,8 +7768,8 @@ spec:
                                   description: PhysicalMachines is a map of string
                                     keys and a set values that used to select physical
                                     machines. The key defines the namespace which
-                                    physical machine belong, and the each value is
-                                    a set of physical machine names.
+                                    physical machine belong, and each value is a set
+                                    of physical machine names.
                                   type: object
                               type: object
                             stress-cpu:
@@ -9539,6 +9559,17 @@ spec:
                               - mode
                               - selector
                               type: object
+                            physicalMachine:
+                              description: PhysicalMachineSpec defines the desired
+                                state of PhysicalMachine
+                              properties:
+                                address:
+                                  description: Address represents the duration of
+                                    the chaos action
+                                  type: string
+                              required:
+                              - address
+                              type: object
                             physicalmachineChaos:
                               description: PhysicalMachineChaosSpec defines the desired
                                 state of PhysicalMachineChaos
@@ -9855,8 +9886,8 @@ spec:
                                       description: PhysicalMachines is a map of string
                                         keys and a set values that used to select
                                         physical machines. The key defines the namespace
-                                        which physical machine belong, and the each
-                                        value is a set of physical machine names.
+                                        which physical machine belong, and each value
+                                        is a set of physical machine names.
                                       type: object
                                   type: object
                                 stress-cpu:
@@ -15826,6 +15857,15 @@ spec:
                 - mode
                 - selector
                 type: object
+              physicalMachine:
+                description: PhysicalMachineSpec defines the desired state of PhysicalMachine
+                properties:
+                  address:
+                    description: Address represents the duration of the chaos action
+                    type: string
+                required:
+                - address
+                type: object
               physicalmachineChaos:
                 description: PhysicalMachineChaosSpec defines the desired state of
                   PhysicalMachineChaos
@@ -16128,7 +16168,7 @@ spec:
                         description: PhysicalMachines is a map of string keys and
                           a set values that used to select physical machines. The
                           key defines the namespace which physical machine belong,
-                          and the each value is a set of physical machine names.
+                          and each value is a set of physical machine names.
                         type: object
                     type: object
                   stress-cpu:
@@ -17794,6 +17834,17 @@ spec:
                     - mode
                     - selector
                     type: object
+                  physicalMachine:
+                    description: PhysicalMachineSpec defines the desired state of
+                      PhysicalMachine
+                    properties:
+                      address:
+                        description: Address represents the duration of the chaos
+                          action
+                        type: string
+                    required:
+                    - address
+                    type: object
                   physicalmachineChaos:
                     description: PhysicalMachineChaosSpec defines the desired state
                       of PhysicalMachineChaos
@@ -18098,7 +18149,7 @@ spec:
                             description: PhysicalMachines is a map of string keys
                               and a set values that used to select physical machines.
                               The key defines the namespace which physical machine
-                              belong, and the each value is a set of physical machine
+                              belong, and each value is a set of physical machine
                               names.
                             type: object
                         type: object
@@ -20251,6 +20302,17 @@ spec:
                               - mode
                               - selector
                               type: object
+                            physicalMachine:
+                              description: PhysicalMachineSpec defines the desired
+                                state of PhysicalMachine
+                              properties:
+                                address:
+                                  description: Address represents the duration of
+                                    the chaos action
+                                  type: string
+                              required:
+                              - address
+                              type: object
                             physicalmachineChaos:
                               description: PhysicalMachineChaosSpec defines the desired
                                 state of PhysicalMachineChaos
@@ -20567,8 +20629,8 @@ spec:
                                       description: PhysicalMachines is a map of string
                                         keys and a set values that used to select
                                         physical machines. The key defines the namespace
-                                        which physical machine belong, and the each
-                                        value is a set of physical machine names.
+                                        which physical machine belong, and each value
+                                        is a set of physical machine names.
                                       type: object
                                   type: object
                                 stress-cpu:
@@ -22417,6 +22479,17 @@ spec:
                                   - mode
                                   - selector
                                   type: object
+                                physicalMachine:
+                                  description: PhysicalMachineSpec defines the desired
+                                    state of PhysicalMachine
+                                  properties:
+                                    address:
+                                      description: Address represents the duration
+                                        of the chaos action
+                                      type: string
+                                  required:
+                                  - address
+                                  type: object
                                 physicalmachineChaos:
                                   description: PhysicalMachineChaosSpec defines the
                                     desired state of PhysicalMachineChaos
@@ -22737,8 +22810,8 @@ spec:
                                             string keys and a set values that used
                                             to select physical machines. The key defines
                                             the namespace which physical machine belong,
-                                            and the each value is a set of physical
-                                            machine names.
+                                            and each value is a set of physical machine
+                                            names.
                                           type: object
                                       type: object
                                     stress-cpu:
@@ -31450,6 +31523,17 @@ spec:
                       - mode
                       - selector
                       type: object
+                    physicalMachine:
+                      description: PhysicalMachineSpec defines the desired state of
+                        PhysicalMachine
+                      properties:
+                        address:
+                          description: Address represents the duration of the chaos
+                            action
+                          type: string
+                      required:
+                      - address
+                      type: object
                     physicalmachineChaos:
                       description: PhysicalMachineChaosSpec defines the desired state
                         of PhysicalMachineChaos
@@ -31754,7 +31838,7 @@ spec:
                               description: PhysicalMachines is a map of string keys
                                 and a set values that used to select physical machines.
                                 The key defines the namespace which physical machine
-                                belong, and the each value is a set of physical machine
+                                belong, and each value is a set of physical machine
                                 names.
                               type: object
                           type: object
@@ -33498,6 +33582,17 @@ spec:
                           - mode
                           - selector
                           type: object
+                        physicalMachine:
+                          description: PhysicalMachineSpec defines the desired state
+                            of PhysicalMachine
+                          properties:
+                            address:
+                              description: Address represents the duration of the
+                                chaos action
+                              type: string
+                          required:
+                          - address
+                          type: object
                         physicalmachineChaos:
                           description: PhysicalMachineChaosSpec defines the desired
                             state of PhysicalMachineChaos
@@ -33811,8 +33906,8 @@ spec:
                                   description: PhysicalMachines is a map of string
                                     keys and a set values that used to select physical
                                     machines. The key defines the namespace which
-                                    physical machine belong, and the each value is
-                                    a set of physical machine names.
+                                    physical machine belong, and each value is a set
+                                    of physical machine names.
                                   type: object
                               type: object
                             stress-cpu:

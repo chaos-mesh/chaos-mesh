@@ -143,7 +143,7 @@ func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector 
 	}
 
 	reg := newSelectorRegistry(ctx, c, selector)
-	selectorChain, err := registry.Parse(reg, selector.GenericSelectorSpec, r, generic.Option{
+	selectorChain, err := registry.Parse(reg, selector.GenericSelectorSpec, generic.Option{
 		ClusterScoped:         clusterScoped,
 		TargetNamespace:       targetNamespace,
 		EnableFilterNamespace: enableFilterNamespace,
@@ -153,7 +153,7 @@ func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector 
 	}
 
 	var pods []v1.Pod
-	pods, err = listPods(ctx, c, selector, selectorChain, enableFilterNamespace)
+	pods, err = listPods(ctx, c, r, selector, selectorChain, enableFilterNamespace)
 	if err != nil {
 		return nil, err
 	}
@@ -319,21 +319,21 @@ func newSelectorRegistry(ctx context.Context, c client.Client, spec v1alpha1.Pod
 		generic_namespace.Name:  generic_namespace.New,
 		generic_field.Name:      generic_field.New,
 		generic_annotation.Name: generic_annotation.New,
-		nodeSelectorName: func(selector v1alpha1.GenericSelectorSpec, _ client.Reader, _ generic.Option) (generic.Selector, error) {
+		nodeSelectorName: func(selector v1alpha1.GenericSelectorSpec, _ generic.Option) (generic.Selector, error) {
 			return newNodeSelector(ctx, c, spec)
 		},
-		phaseSelectorName: func(selector v1alpha1.GenericSelectorSpec, _ client.Reader, _ generic.Option) (generic.Selector, error) {
+		phaseSelectorName: func(selector v1alpha1.GenericSelectorSpec, _ generic.Option) (generic.Selector, error) {
 			return newPhaseSelector(spec)
 		},
 	}
 }
 
-func listPods(ctx context.Context, c client.Client, spec v1alpha1.PodSelectorSpec,
+func listPods(ctx context.Context, c client.Client, r client.Reader, spec v1alpha1.PodSelectorSpec,
 	selectorChain generic.SelectorChain, enableFilterNamespace bool) ([]v1.Pod, error) {
 	var pods []v1.Pod
 	namespaceCheck := make(map[string]bool)
 
-	if err := selectorChain.ListObjects(c,
+	if err := selectorChain.ListObjects(c, r,
 		func(listFunc generic.ListFunc, opts client.ListOptions) error {
 			var podList v1.PodList
 			if len(spec.Namespaces) > 0 {

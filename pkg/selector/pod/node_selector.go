@@ -14,21 +14,21 @@ const nodeSelectorName = "node"
 
 type nodeSelector struct {
 	nodes []v1.Node
+	empty bool
 }
 
 var _ generic.Selector = &nodeSelector{}
-
 
 func (s *nodeSelector) ListOption() client.ListOption {
 	return nil
 }
 
-func (s *nodeSelector) ListFunc() generic.ListFunc {
+func (s *nodeSelector) ListFunc(_ client.Reader) generic.ListFunc {
 	return nil
 }
 
 func (s *nodeSelector) Match(obj client.Object) bool {
-	if len(s.nodes) == 0 {
+	if s.empty {
 		return true
 	}
 
@@ -44,7 +44,7 @@ func (s *nodeSelector) Match(obj client.Object) bool {
 // if both setting Nodes and NodeSelectors, the node list will be combined.
 func newNodeSelector(ctx context.Context, c client.Client, spec v1alpha1.PodSelectorSpec) (generic.Selector, error) {
 	if len(spec.Nodes) == 0 && len(spec.NodeSelectors) == 0 {
-		return &nodeSelector{}, nil
+		return &nodeSelector{empty: true}, nil
 	}
 	var nodes []v1.Node
 	if len(spec.Nodes) > 0 {

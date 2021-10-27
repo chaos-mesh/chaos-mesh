@@ -24,7 +24,7 @@ func (s *phaseSelector) ListOption() client.ListOption {
 	return nil
 }
 
-func (s *phaseSelector) ListFunc() generic.ListFunc {
+func (s *phaseSelector) ListFunc(_ client.Reader) generic.ListFunc {
 	return nil
 }
 

@@ -20,7 +20,7 @@ func (s *labelSelector) ListOption() client.ListOption {
 	return client.MatchingLabelsSelector{Selector: s.selector}
 }
 
-func (s *labelSelector) ListFunc() generic.ListFunc {
+func (s *labelSelector) ListFunc(_ client.Reader) generic.ListFunc {
 	return nil
 }
 
@@ -29,7 +29,7 @@ func (s *labelSelector) Match(_ client.Object) bool {
 	return true
 }
 
-func New(spec v1alpha1.GenericSelectorSpec, _ client.Reader, _ generic.Option) (generic.Selector, error) {
+func New(spec v1alpha1.GenericSelectorSpec, _ generic.Option) (generic.Selector, error) {
 	labelSelectors := spec.LabelSelectors
 	expressions := spec.ExpressionSelectors
 

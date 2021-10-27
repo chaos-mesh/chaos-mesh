@@ -332,7 +332,7 @@ spec:
                       type: array
                     description: PhysicalMachines is a map of string keys and a set
                       values that used to select physical machines. The key defines
-                      the namespace which physical machine belong, and the each value
+                      the namespace which physical machine belong, and each value
                       is a set of physical machine names.
                     type: object
                 type: object

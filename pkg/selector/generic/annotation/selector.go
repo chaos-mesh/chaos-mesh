@@ -20,7 +20,7 @@ func (s *annotationSelector) ListOption() client.ListOption {
 	return nil
 }
 
-func (s *annotationSelector) ListFunc() generic.ListFunc {
+func (s *annotationSelector) ListFunc(_ client.Reader) generic.ListFunc {
 	return nil
 }
 
@@ -32,7 +32,7 @@ func (s *annotationSelector) Match(obj client.Object) bool {
 	return s.Matches(annotations)
 }
 
-func New(spec v1alpha1.GenericSelectorSpec, _ client.Reader, _ generic.Option) (generic.Selector, error) {
+func New(spec v1alpha1.GenericSelectorSpec, _ generic.Option) (generic.Selector, error) {
 	selectorStr := label.Label(spec.AnnotationSelectors).String()
 	s, err := labels.Parse(selectorStr)
 	if err != nil {

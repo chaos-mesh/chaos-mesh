@@ -22,7 +22,7 @@ func (s *namespaceSelector) ListOption() client.ListOption {
 	return nil
 }
 
-func (s *namespaceSelector) ListFunc() generic.ListFunc {
+func (s *namespaceSelector) ListFunc(_ client.Reader) generic.ListFunc {
 	return nil
 }
 
@@ -30,15 +30,7 @@ func (s *namespaceSelector) Match(_ client.Object) bool {
 	return true
 }
 
-// TODO validate?
-func (s *namespaceSelector) Validate() error {
-	if !s.ClusterScoped{
-
-	}
-	return nil
-}
-
-func New(spec v1alpha1.GenericSelectorSpec, _ client.Reader, option generic.Option) (generic.Selector, error) {
+func New(spec v1alpha1.GenericSelectorSpec, option generic.Option) (generic.Selector, error) {
 	if !option.ClusterScoped {
 		if len(spec.Namespaces) > 1 {
 			return nil, fmt.Errorf("could NOT use more than 1 namespace selector within namespace scoped mode")

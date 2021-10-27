@@ -16,14 +16,14 @@ type Option struct {
 type ListFunc func(ctx context.Context, list client.ObjectList, opts ...client.ListOption) error
 
 type Selector interface {
-	ListFunc() ListFunc
+	ListFunc(client.Reader) ListFunc
 	ListOption() client.ListOption
 	Match(client.Object) bool
 }
 
 type SelectorChain []Selector
 
-func (s SelectorChain) ListObjects(c client.Client,
+func (s SelectorChain) ListObjects(c client.Client, r client.Reader,
 	listObj func(listFunc ListFunc, opts client.ListOptions) error) error {
 	var options []client.ListOption
 	listFunc := c.List
@@ -32,7 +32,7 @@ func (s SelectorChain) ListObjects(c client.Client,
 		if tmpOption := selector.ListOption(); tmpOption != nil {
 			options = append(options, selector.ListOption())
 		}
-		if tmpListFunc := selector.ListFunc(); tmpListFunc != nil {
+		if tmpListFunc := selector.ListFunc(r); tmpListFunc != nil {
 			listFunc = tmpListFunc
 		}
 	}
