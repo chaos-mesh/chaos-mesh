@@ -24,34 +24,33 @@ import (
 
 // ExperimentStore defines operations for working with experiments.
 type ExperimentStore interface {
-	// ListMeta returns experiment metadata list from the datastore.
-	ListMeta(ctx context.Context, kind, namespace, name string, archived bool) ([]*ExperimentMeta, error)
+	// ListByFilter(context.Context, Filter, bool) ([]*ExperimentMeta, error)
+
+	// ListMeta returns an experiment metadata list from the datastore.
+	ListMeta(ctx context.Context, namespace, name, kind string, archived bool) ([]*ExperimentMeta, error)
 
 	// FindByUID returns an experiment by UID.
 	FindByUID(ctx context.Context, UID string) (*Experiment, error)
 
-	// FindMetaByUID returns an experiment metadata by UID.
-	FindMetaByUID(context.Context, string) (*ExperimentMeta, error)
+	// Create persists a new experiment to the datastore.
+	Create(context.Context, *Experiment) error
 
-	// Set saves the experiment to datastore.
-	Set(context.Context, *Experiment) error
-
-	// Archive archives experiments which "archived" field is false.
+	// Archive archives experiments which archived field is false.
 	Archive(ctx context.Context, namespace, name string) error
 
 	// Delete deletes the archive from the datastore.
 	Delete(context.Context, *Experiment) error
 
-	// DeleteByFinishTime deletes archives which time difference is greater than the given time from FinishTime.
-	DeleteByFinishTime(context.Context, time.Duration) error
-
-	// DeleteByUIDs deletes archives by the uid list.
+	// DeleteByUIDs deletes archives by the UID list.
 	DeleteByUIDs(context.Context, []string) error
+
+	// DeleteByDuration delete experiments that exceed duration.
+	DeleteByDuration(context.Context, time.Duration) error
 
 	// DeleteIncompleteExperiments deletes all incomplete experiments.
 	// If the chaos-dashboard was restarted and the experiment is completed during the restart,
-	// which means the experiment would never save the finish_time.
-	// DeleteIncompleteExperiments can be used to delete all incomplete experiments to avoid this case.
+	// which means the experiment would never update the delete_at field.
+	// DeleteIncompleteExperiments can be used to delete all incomplete experiments to avoid this unexpected situation.
 	DeleteIncompleteExperiments(context.Context) error
 }
 
@@ -64,12 +63,10 @@ type Experiment struct {
 // ExperimentMeta defines the metadata of an experiment. Use in db.
 type ExperimentMeta struct {
 	gorm.Model
-	UID        string    `gorm:"index:uid" json:"uid"`
-	Kind       string    `json:"kind"`
-	Name       string    `json:"name"`
-	Namespace  string    `json:"namespace"`
-	Action     string    `json:"action"`
-	StartTime  time.Time `json:"start_time"`
-	FinishTime time.Time `json:"finish_time"`
-	Archived   bool      `json:"archived"`
+	UID       string `gorm:"index:uid" json:"uid"`
+	Namespace string `json:"namespace"`
+	Name      string `json:"name"`
+	Kind      string `json:"kind"`
+	Action    string `json:"action"`
+	Archived  bool   `json:"archived"`
 }

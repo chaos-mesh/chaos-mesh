@@ -51,7 +51,7 @@ type EventStore interface {
 	// DeleteByTime deletes events within the specified time interval.
 	DeleteByTime(context.Context, string, string) error
 
-	// DeleteByDuration selete events that exceed duration.
+	// DeleteByDuration delete events that exceed duration.
 	DeleteByDuration(context.Context, time.Duration) error
 }
 

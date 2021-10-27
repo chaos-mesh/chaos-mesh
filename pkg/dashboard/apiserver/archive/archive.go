@@ -34,13 +34,15 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
 )
 
+var log = u.Log.WithName("archives")
+
 // Service defines a handler service for archives.
 type Service struct {
 	archive         core.ExperimentStore
 	archiveSchedule core.ScheduleStore
 	event           core.EventStore
 	workflowStore   core.WorkflowStore
-	conf            *config.ChaosDashboardConfig
+	config          *config.ChaosDashboardConfig
 }
 
 func NewService(
@@ -48,14 +50,14 @@ func NewService(
 	archiveSchedule core.ScheduleStore,
 	event core.EventStore,
 	workflowStore core.WorkflowStore,
-	conf *config.ChaosDashboardConfig,
+	config *config.ChaosDashboardConfig,
 ) *Service {
 	return &Service{
 		archive:         archive,
 		archiveSchedule: archiveSchedule,
 		event:           event,
 		workflowStore:   workflowStore,
-		conf:            conf,
+		config:          config,
 	}
 }
 
@@ -63,7 +65,7 @@ func NewService(
 func Register(r *gin.RouterGroup, s *Service) {
 	endpoint := r.Group("/archives")
 	endpoint.Use(func(c *gin.Context) {
-		u.AuthMiddleware(c, s.conf)
+		u.AuthMiddleware(c, s.config)
 	})
 
 	endpoint.GET("", s.list)
@@ -82,38 +84,38 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint.DELETE("/workflows", s.batchDeleteWorkflow)
 }
 
-// Archive defines the basic information of an archive.
+// Archive defines the information of an archive.
 type Archive = core.ObjectBase
 
-// Detail represents an archive instance.
+// Detail adds KubeObjectDesc on Archive.
 type Detail struct {
 	Archive
 	KubeObject core.KubeObjectDesc `json:"kube_object"`
 }
 
-// @Summary Get archived chaos experiments.
-// @Description Get archived chaos experiments.
+// @Summary List archived chaos experiments.
+// @Description Get archived chaos experiments from DB.
 // @Tags archives
 // @Produce json
-// @Param namespace query string false "namespace"
-// @Param name query string false "name"
-// @Param kind query string false "kind" Enums(PodChaos, IOChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos)
+// @Param namespace query string false "filter exps by namespace"
+// @Param name query string false "filter exps by name"
+// @Param kind query string false "filter exps by kind" Enums(PodChaos, NetworkChaos, IOChaos, StressChaos, KernelChaos, TimeChaos, DNSChaos, AWSChaos, GCPChaos, JVMChaos, HTTPChaos)
 // @Success 200 {array} Archive
 // @Router /archives [get]
 // @Failure 500 {object} utils.APIError
 func (s *Service) list(c *gin.Context) {
-	kind := c.Query("kind")
-	name := c.Query("name")
-	ns := c.Query("namespace")
-	if len(ns) == 0 && !s.conf.ClusterScoped &&
-		len(s.conf.TargetNamespace) != 0 {
-		ns = s.conf.TargetNamespace
+	ns, name, kind := c.Query("namespace"), c.Query("name"), c.Query("kind")
+
+	if ns == "" && !s.config.ClusterScoped && s.config.TargetNamespace != "" {
+		ns = s.config.TargetNamespace
+
+		log.V(1).Info("Replace query namespace with", ns)
 	}
 
 	metas, err := s.archive.ListMeta(context.Background(), kind, ns, name, true)
 	if err != nil {
-		c.Status(http.StatusInternalServerError)
-		_ = c.Error(u.ErrInternalServer.NewWithNoMessage())
+		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
+
 		return
 	}
 
@@ -122,10 +124,10 @@ func (s *Service) list(c *gin.Context) {
 	for _, meta := range metas {
 		archives = append(archives, Archive{
 			UID:       meta.UID,
-			Kind:      meta.Kind,
 			Namespace: meta.Namespace,
 			Name:      meta.Name,
-			Created:   meta.StartTime.Format(time.RFC3339),
+			Kind:      meta.Kind,
+			Created:   meta.CreatedAt.Format(time.RFC3339),
 		})
 	}
 
@@ -160,10 +162,10 @@ func (s *Service) get(c *gin.Context) {
 	c.JSON(http.StatusOK, &Detail{
 		Archive: Archive{
 			UID:       exp.UID,
-			Kind:      exp.Kind,
-			Name:      exp.Name,
 			Namespace: exp.Namespace,
-			Created:   exp.StartTime.Format(time.RFC3339),
+			Name:      exp.Name,
+			Kind:      exp.Kind,
+			Created:   exp.CreatedAt.Format(time.RFC3339),
 		},
 		KubeObject: core.KubeObjectDesc{
 			TypeMeta: metav1.TypeMeta{
@@ -181,8 +183,8 @@ func (s *Service) get(c *gin.Context) {
 	})
 }
 
-// @Summary Delete the specified archived experiment.
-// @Description Delete the specified archived experiment.
+// @Summary Delete an archived experiment.
+// @Description Delete an archived experiment by uid.
 // @Tags archives
 // @Produce json
 // @Param uid path string true "uid"
@@ -191,66 +193,63 @@ func (s *Service) get(c *gin.Context) {
 // @Router /archives/{uid} [delete]
 func (s *Service) delete(c *gin.Context) {
 	var (
-		err error
 		exp *core.Experiment
+		err error
 	)
 
 	uid := c.Param("uid")
-
 	if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
 		if gorm.IsRecordNotFoundError(err) {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(u.ErrBadRequest.New("the archived experiment is not found"))
+			u.SetAPIError(c, u.ErrNotFound.New("Experiment "+uid+" not found"))
 		} else {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(err))
+			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		}
+
 		return
 	}
 
 	if err = s.archive.Delete(context.Background(), exp); err != nil {
-		c.Status(http.StatusInternalServerError)
-		_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(err))
+		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 	} else {
 		if err = s.event.DeleteByUID(context.Background(), uid); err != nil {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(err))
+			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		} else {
 			c.JSON(http.StatusOK, u.ResponseSuccess)
 		}
 	}
 }
 
-// @Summary Delete the specified archived experiment.
-// @Description Delete the specified archived experiment.
+// @Summary Batch delete archived chaos experiments.
+// @Description Batch delete archived chaos experiments by uids.
 // @Tags archives
 // @Produce json
 // @Param uids query string true "uids"
 // @Success 200 {object} utils.Response
+// @Failure 404 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
 // @Router /archives [delete]
 func (s *Service) batchDelete(c *gin.Context) {
 	var (
-		err      error
-		uidSlice []string
+		err error
 	)
 
 	uids := c.Query("uids")
 	if uids == "" {
-		c.Status(http.StatusBadRequest)
-		_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("uids cannot be empty")))
+		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
+
 		return
 	}
-	uidSlice = strings.Split(uids, ",")
+
+	uidSlice := strings.Split(uids, ",")
 
 	if err = s.archive.DeleteByUIDs(context.Background(), uidSlice); err != nil {
-		_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(err))
-		c.Status(http.StatusInternalServerError)
+		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
+
 		return
 	}
 	if err = s.event.DeleteByUIDs(context.Background(), uidSlice); err != nil {
-		_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(err))
-		c.Status(http.StatusInternalServerError)
+		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
+
 		return
 	}
 
@@ -296,7 +295,7 @@ func (s *Service) listSchedule(c *gin.Context) {
 // @Description Get the detail of an archived schedule experiment.
 // @Tags archives
 // @Produce json
-// @Param uid query string true "uid"
+// @Param uid path string true "uid"
 // @Success 200 {object} Detail
 // @Router /archives/schedules/{uid} [get]
 // @Failure 500 {object} utils.APIError
@@ -473,7 +472,7 @@ func (s *Service) listWorkflow(c *gin.Context) {
 // @Description Get the detail of an archived workflow.
 // @Tags archives
 // @Produce json
-// @Param uid query string true "uid"
+// @Param uid path string true "uid"
 // @Success 200 {object} Detail
 // @Router /archives/workflows/{uid} [get]
 // @Failure 500 {object} utils.APIError

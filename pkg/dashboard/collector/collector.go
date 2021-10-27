@@ -167,9 +167,9 @@ func (r *ChaosCollector) setUnarchivedExperiment(req ctrl.Request, obj v1alpha1.
 		return errors.New("unsupported chaos type " + archive.Kind)
 	}
 
-	archive.StartTime = chaosMeta.GetCreationTimestamp().Time
+	archive.CreatedAt = chaosMeta.GetCreationTimestamp().Time
 	if chaosMeta.GetDeletionTimestamp() != nil {
-		archive.FinishTime = chaosMeta.GetDeletionTimestamp().Time
+		archive.DeletedAt = &chaosMeta.GetDeletionTimestamp().Time
 	}
 
 	data, err := json.Marshal(chaosMeta)
@@ -193,7 +193,7 @@ func (r *ChaosCollector) setUnarchivedExperiment(req ctrl.Request, obj v1alpha1.
 		archive.UpdatedAt = find.UpdatedAt
 	}
 
-	if err := r.archive.Set(context.Background(), archive); err != nil {
+	if err := r.archive.Create(context.Background(), archive); err != nil {
 		r.Log.Error(err, "failed to update experiment", "archive", archive)
 		return err
 	}

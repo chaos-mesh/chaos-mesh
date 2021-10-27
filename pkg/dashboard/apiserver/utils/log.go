@@ -18,3 +18,4 @@ package utils
 import ctrl "sigs.k8s.io/controller-runtime"
 
 var Log = ctrl.Log.WithName("apiserver")
+var LogStore = ctrl.Log.WithName("store")

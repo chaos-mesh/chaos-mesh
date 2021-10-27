@@ -57,14 +57,12 @@ func (m *MockExperimentStore) ListMeta(ctx context.Context, kind, namespace, nam
 	var err error
 	if kind == "testKind" {
 		expMeta := &core.ExperimentMeta{
-			UID:        "testUID",
-			Kind:       "testKind",
-			Name:       "testName",
-			Namespace:  "testNamespace",
-			Action:     "testAction",
-			StartTime:  time.Time{},
-			FinishTime: time.Time{},
-			Archived:   true,
+			UID:       "testUID",
+			Kind:      "testKind",
+			Name:      "testName",
+			Namespace: "testNamespace",
+			Action:    "testAction",
+			Archived:  true,
 		}
 		res = append(res, expMeta)
 	} else {
@@ -82,14 +80,12 @@ func (m *MockExperimentStore) FindByUID(ctx context.Context, UID string) (*core.
 		jsonStr, _ := json.Marshal(chaos)
 		res = &core.Experiment{
 			ExperimentMeta: core.ExperimentMeta{
-				UID:        UID,
-				Kind:       v1alpha1.KindPodChaos,
-				Name:       "testName",
-				Namespace:  "testNamespace",
-				Action:     "testAction",
-				StartTime:  time.Time{},
-				FinishTime: time.Time{},
-				Archived:   true,
+				UID:       UID,
+				Kind:      v1alpha1.KindPodChaos,
+				Name:      "testName",
+				Namespace: "testNamespace",
+				Action:    "testAction",
+				Archived:  true,
 			},
 			Experiment: string(jsonStr),
 		}
@@ -98,14 +94,12 @@ func (m *MockExperimentStore) FindByUID(ctx context.Context, UID string) (*core.
 		jsonStr, _ := json.Marshal(chaos)
 		res = &core.Experiment{
 			ExperimentMeta: core.ExperimentMeta{
-				UID:        UID,
-				Kind:       v1alpha1.KindIOChaos,
-				Name:       "testName",
-				Namespace:  "testNamespace",
-				Action:     "testAction",
-				StartTime:  time.Time{},
-				FinishTime: time.Time{},
-				Archived:   true,
+				UID:       UID,
+				Kind:      v1alpha1.KindIOChaos,
+				Name:      "testName",
+				Namespace: "testNamespace",
+				Action:    "testAction",
+				Archived:  true,
 			},
 			Experiment: string(jsonStr),
 		}
@@ -114,14 +108,12 @@ func (m *MockExperimentStore) FindByUID(ctx context.Context, UID string) (*core.
 		jsonStr, _ := json.Marshal(chaos)
 		res = &core.Experiment{
 			ExperimentMeta: core.ExperimentMeta{
-				UID:        UID,
-				Kind:       v1alpha1.KindNetworkChaos,
-				Name:       "testName",
-				Namespace:  "testNamespace",
-				Action:     "testAction",
-				StartTime:  time.Time{},
-				FinishTime: time.Time{},
-				Archived:   true,
+				UID:       UID,
+				Kind:      v1alpha1.KindNetworkChaos,
+				Name:      "testName",
+				Namespace: "testNamespace",
+				Action:    "testAction",
+				Archived:  true,
 			},
 			Experiment: string(jsonStr),
 		}
@@ -130,14 +122,12 @@ func (m *MockExperimentStore) FindByUID(ctx context.Context, UID string) (*core.
 		jsonStr, _ := json.Marshal(chaos)
 		res = &core.Experiment{
 			ExperimentMeta: core.ExperimentMeta{
-				UID:        UID,
-				Kind:       v1alpha1.KindTimeChaos,
-				Name:       "testName",
-				Namespace:  "testNamespace",
-				Action:     "testAction",
-				StartTime:  time.Time{},
-				FinishTime: time.Time{},
-				Archived:   true,
+				UID:       UID,
+				Kind:      v1alpha1.KindTimeChaos,
+				Name:      "testName",
+				Namespace: "testNamespace",
+				Action:    "testAction",
+				Archived:  true,
 			},
 			Experiment: string(jsonStr),
 		}
@@ -146,14 +136,12 @@ func (m *MockExperimentStore) FindByUID(ctx context.Context, UID string) (*core.
 		jsonStr, _ := json.Marshal(chaos)
 		res = &core.Experiment{
 			ExperimentMeta: core.ExperimentMeta{
-				UID:        UID,
-				Kind:       v1alpha1.KindKernelChaos,
-				Name:       "testName",
-				Namespace:  "testNamespace",
-				Action:     "testAction",
-				StartTime:  time.Time{},
-				FinishTime: time.Time{},
-				Archived:   true,
+				UID:       UID,
+				Kind:      v1alpha1.KindKernelChaos,
+				Name:      "testName",
+				Namespace: "testNamespace",
+				Action:    "testAction",
+				Archived:  true,
 			},
 			Experiment: string(jsonStr),
 		}
@@ -162,28 +150,24 @@ func (m *MockExperimentStore) FindByUID(ctx context.Context, UID string) (*core.
 		jsonStr, _ := json.Marshal(chaos)
 		res = &core.Experiment{
 			ExperimentMeta: core.ExperimentMeta{
-				UID:        UID,
-				Kind:       v1alpha1.KindStressChaos,
-				Name:       "testName",
-				Namespace:  "testNamespace",
-				Action:     "testAction",
-				StartTime:  time.Time{},
-				FinishTime: time.Time{},
-				Archived:   true,
+				UID:       UID,
+				Kind:      v1alpha1.KindStressChaos,
+				Name:      "testName",
+				Namespace: "testNamespace",
+				Action:    "testAction",
+				Archived:  true,
 			},
 			Experiment: string(jsonStr),
 		}
 	case "testOtherChaos":
 		res = &core.Experiment{
 			ExperimentMeta: core.ExperimentMeta{
-				UID:        UID,
-				Kind:       "OtherChaos",
-				Name:       "testName",
-				Namespace:  "testNamespace",
-				Action:     "testAction",
-				StartTime:  time.Time{},
-				FinishTime: time.Time{},
-				Archived:   true,
+				UID:       UID,
+				Kind:      "OtherChaos",
+				Name:      "testName",
+				Namespace: "testNamespace",
+				Action:    "testAction",
+				Archived:  true,
 			},
 			Experiment: "",
 		}
@@ -201,14 +185,12 @@ func (m *MockExperimentStore) FindMetaByUID(ctx context.Context, UID string) (*c
 	switch UID {
 	case "tsetUID":
 		res = &core.ExperimentMeta{
-			UID:        "testUID",
-			Kind:       "testKind",
-			Name:       "testName",
-			Namespace:  "testNamespace",
-			Action:     "testAction",
-			StartTime:  time.Time{},
-			FinishTime: time.Time{},
-			Archived:   true,
+			UID:       "testUID",
+			Kind:      "testKind",
+			Name:      "testName",
+			Namespace: "testNamespace",
+			Action:    "testAction",
+			Archived:  true,
 		}
 	case "testErrRecordNotFound":
 		err = gorm.ErrRecordNotFound
@@ -218,7 +200,7 @@ func (m *MockExperimentStore) FindMetaByUID(ctx context.Context, UID string) (*c
 	return res, err
 }
 
-func (m *MockExperimentStore) Set(context.Context, *core.Experiment) error {
+func (m *MockExperimentStore) Create(context.Context, *core.Experiment) error {
 	panic("implement me")
 }
 
@@ -230,15 +212,15 @@ func (m *MockExperimentStore) Delete(context.Context, *core.Experiment) error {
 	panic("implement me")
 }
 
-func (m *MockExperimentStore) DeleteByFinishTime(context.Context, time.Duration) error {
+func (m *MockExperimentStore) DeleteByUIDs(context.Context, []string) error {
+	panic("implement me")
+}
+
+func (m *MockExperimentStore) DeleteByDuration(context.Context, time.Duration) error {
 	panic("implement me")
 }
 
 func (m *MockExperimentStore) DeleteIncompleteExperiments(context.Context) error {
-	panic("implement me")
-}
-
-func (m *MockExperimentStore) DeleteByUIDs(context.Context, []string) error {
 	panic("implement me")
 }
 
@@ -331,7 +313,7 @@ var _ = Describe("event", func() {
 			archive:         mockExpStore,
 			archiveSchedule: mockSchStore,
 			event:           nil,
-			conf: &config.ChaosDashboardConfig{
+			config: &config.ChaosDashboardConfig{
 				ClusterScoped: true,
 			},
 		}

@@ -16,124 +16,87 @@
 package experiment
 
 import (
-	"reflect"
+	"context"
+	"database/sql"
 	"testing"
+	"time"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
+
+	sqlmock "github.com/DATA-DOG/go-sqlmock"
+	"github.com/jinzhu/gorm"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
-func TestConstructQueryArgs(t *testing.T) {
-	cases := []struct {
-		kind          string
-		ns            string
-		name          string
-		uid           string
-		expectedQuery string
-		expectedArgs  []string
-	}{
-		{
-			kind:          "",
-			ns:            "",
-			name:          "",
-			uid:           "",
-			expectedQuery: "",
-			expectedArgs:  []string{},
-		},
-		{
-			kind:          "PodChaos",
-			ns:            "",
-			name:          "",
-			uid:           "",
-			expectedQuery: "kind = ?",
-			expectedArgs:  []string{"PodChaos"},
-		},
-		{
-			kind:          "",
-			ns:            "test-ns",
-			name:          "",
-			uid:           "",
-			expectedQuery: "namespace = ?",
-			expectedArgs:  []string{"test-ns"},
-		},
-		{
-			kind:          "",
-			ns:            "",
-			name:          "test-name",
-			uid:           "",
-			expectedQuery: "name = ?",
-			expectedArgs:  []string{"test-name"},
-		},
-		{
-			kind:          "PodChaos",
-			ns:            "test-ns",
-			name:          "",
-			uid:           "",
-			expectedQuery: "kind = ? AND namespace = ?",
-			expectedArgs:  []string{"PodChaos", "test-ns"},
-		},
-		{
-			kind:          "PodChaos",
-			ns:            "test-ns",
-			name:          "test-name",
-			uid:           "",
-			expectedQuery: "kind = ? AND namespace = ? AND name = ?",
-			expectedArgs:  []string{"PodChaos", "test-ns", "test-name"},
-		},
-		{
-			kind:          "",
-			ns:            "",
-			name:          "",
-			uid:           "test-uid",
-			expectedQuery: "uid = ?",
-			expectedArgs:  []string{"test-uid"},
-		},
-		{
-			kind:          "PodChaos",
-			ns:            "",
-			name:          "",
-			uid:           "test-uid",
-			expectedQuery: "kind = ? AND uid = ?",
-			expectedArgs:  []string{"PodChaos", "test-uid"},
-		},
-		{
-			kind:          "",
-			ns:            "test-ns",
-			name:          "",
-			uid:           "test-uid",
-			expectedQuery: "namespace = ? AND uid = ?",
-			expectedArgs:  []string{"test-ns", "test-uid"},
-		},
-		{
-			kind:          "",
-			ns:            "",
-			name:          "test-name",
-			uid:           "test-uid",
-			expectedQuery: "name = ? AND uid = ?",
-			expectedArgs:  []string{"test-name", "test-uid"},
-		},
-		{
-			kind:          "PodChaos",
-			ns:            "test-ns",
-			name:          "",
-			uid:           "test-uid",
-			expectedQuery: "kind = ? AND namespace = ? AND uid = ?",
-			expectedArgs:  []string{"PodChaos", "test-ns", "test-uid"},
-		},
-		{
-			kind:          "PodChaos",
-			ns:            "test-ns",
-			name:          "test-name",
-			uid:           "test-uid",
-			expectedQuery: "kind = ? AND namespace = ? AND name = ? AND uid = ?",
-			expectedArgs:  []string{"PodChaos", "test-ns", "test-name", "test-uid"},
-		},
-	}
-
-	for _, c := range cases {
-		query, args := constructQueryArgs(c.kind, c.ns, c.name, c.uid)
-		if query != c.expectedQuery {
-			t.Errorf("expected query %s but got %s", c.expectedQuery, query)
-		}
-		if !reflect.DeepEqual(c.expectedArgs, args) {
-			t.Errorf("expected args %v but got %v", c.expectedArgs, args)
-		}
-	}
+func TestExperiment(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Experiment Suite")
 }
+
+func genRows() *sqlmock.Rows {
+	return sqlmock.NewRows(
+		[]string{"id", "created_at", "delete_at", "uid", "namespace", "name", "kind", "action", "archived"},
+	)
+}
+
+func addRow(rows *sqlmock.Rows, exp *core.Experiment) {
+	rows.AddRow(exp.ID, exp.CreatedAt, exp.DeletedAt, exp.UID, exp.Namespace, exp.Name,
+		exp.Kind, exp.Action, exp.Archived)
+}
+
+var _ = Describe("Experiment", func() {
+	var (
+		err         error
+		db          *sql.DB
+		mock        sqlmock.Sqlmock
+		es          *experimentStore
+		experiment0 *core.Experiment
+	)
+
+	BeforeEach(func() {
+		db, mock, err = sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+		Expect(err).ShouldNot(HaveOccurred())
+
+		gdb, err := gorm.Open("sqlite3", db)
+		Expect(err).ShouldNot(HaveOccurred())
+
+		es = &experimentStore{db: gdb}
+
+		now := time.Now()
+		experiment0 = &core.Experiment{
+			ExperimentMeta: core.ExperimentMeta{
+				Model: gorm.Model{
+					ID:        0,
+					CreatedAt: now,
+					DeletedAt: nil,
+				},
+				UID:       "UID0",
+				Namespace: "default",
+				Name:      "experiment0",
+				Kind:      "PodChaos",
+				Action:    "pod-failure",
+				Archived:  false,
+			},
+		}
+	})
+
+	AfterEach(func() {
+		Expect(mock.ExpectationsWereMet()).ShouldNot(HaveOccurred())
+	})
+
+	Context("FindByUID", func() {
+		sql := "SELECT * FROM \"experiments\" WHERE \"experiments\".\"deleted_at\" IS NULL AND ((uid = ?)) ORDER BY \"experiments\".\"id\" ASC LIMIT 1"
+
+		It("experiment0 should be found", func() {
+			rows := genRows()
+			addRow(rows, experiment0)
+
+			mock.ExpectQuery(sql).WithArgs(experiment0.UID).WillReturnRows(rows)
+
+			exp, err := es.FindByUID(context.TODO(), "UID0")
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(exp).Should(Equal(experiment0))
+		})
+	})
+})

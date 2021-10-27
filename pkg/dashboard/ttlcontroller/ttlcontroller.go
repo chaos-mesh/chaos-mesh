@@ -76,5 +76,5 @@ func (c *Controller) runWorker() {
 	ctx := context.Background()
 
 	_ = c.event.DeleteByDuration(ctx, c.ttlconfig.EventTTL)
-	c.experiment.DeleteByFinishTime(ctx, c.ttlconfig.ArchiveTTL)
+	_ = c.experiment.DeleteByDuration(ctx, c.ttlconfig.ArchiveTTL)
 }
