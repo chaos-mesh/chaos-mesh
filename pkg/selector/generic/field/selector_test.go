@@ -15,4 +15,48 @@
 
 package field
 
-// TODO
+import (
+	"testing"
+)
+
+func TestMatch(t *testing.T) {
+	// TODO
+	//g := NewGomegaWithT(t)
+	//
+	//nameFiledSelector, err := New(v1alpha1.GenericSelectorSpec{FieldSelectors: map[string]string{"metadata.name": "p2"}}, generic.Option{})
+	//g.Expect(err).ShouldNot(HaveOccurred())
+	//
+	//emptySelector, err := New(v1alpha1.GenericSelectorSpec{}, generic.Option{})
+	//g.Expect(err).ShouldNot(HaveOccurred())
+	//
+	//p1Pod := NewPod(PodArg{Name: "p1"})
+	//p2Pod := NewPod(PodArg{Name: "p2"})
+	//
+	//tcs := []struct {
+	//	name     string
+	//	obj      client.Object
+	//	selector generic.Selector
+	//	match    bool
+	//}{
+	//	{
+	//		name:     "filter by name",
+	//		obj:      &p2Pod,
+	//		selector: nameFiledSelector,
+	//		match:    true,
+	//	}, {
+	//		name:     "filter by name",
+	//		obj:      NewPod(PodArg{Name: "p1", Labels: map[string]string{"p1": "p1"}}),
+	//		selector: nameFiledSelector,
+	//		match:    false,
+	//	}, {
+	//		name:     "empty filter",
+	//		obj:      NewPod(PodArg{Name: "p1", Labels: map[string]string{"p1": "p1"}}),
+	//		selector: emptySelector,
+	//		match:    true,
+	//	},
+	//}
+	//
+	//for _, tc := range tcs {
+	//	g.Expect(tc.selector.Match(tc.obj)).To(Equal(tc.match), tc.name)
+	//}
+}

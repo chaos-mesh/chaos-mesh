@@ -27,7 +27,6 @@ import (
 	. "github.com/chaos-mesh/chaos-mesh/pkg/testutils"
 )
 
-
 func TestMatch(t *testing.T) {
 	g := NewGomegaWithT(t)
 

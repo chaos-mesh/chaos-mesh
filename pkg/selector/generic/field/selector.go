@@ -16,6 +16,8 @@
 package field
 
 import (
+	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -48,13 +50,61 @@ func (s *fieldSelector) ListFunc(r client.Reader) generic.ListFunc {
 }
 
 func (s *fieldSelector) Match(obj client.Object) bool {
-	// TODO
-
-	return true
+	var objFields fields.Set
+	switch obj.(type) {
+	case *v1.Pod:
+		pod := obj.(*v1.Pod)
+		objFields = toPodSelectableFields(pod)
+	case *v1alpha1.PhysicalMachine:
+		physicalMachine := obj.(*v1alpha1.PhysicalMachine)
+		objFields = toPhysicalMachineSelectableFields(physicalMachine)
+	default:
+		// not support
+		return false
+	}
+	return s.Matches(objFields)
 }
 
 func New(spec v1alpha1.GenericSelectorSpec, _ generic.Option) (generic.Selector, error) {
 	return &fieldSelector{
 		Selector: fields.SelectorFromSet(spec.FieldSelectors),
 	}, nil
+}
+
+// toPodSelectableFields returns a field set that represents the object
+// https://github.com/kubernetes/kubernetes/blob/v1.22.2/pkg/registry/core/pod/strategy.go#L306
+func toPodSelectableFields(pod *v1.Pod) fields.Set {
+	// The purpose of allocation with a given number of elements is to reduce
+	// amount of allocations needed to create the fields.Set. If you add any
+	// field here or the number of object-meta related fields changes, this should
+	// be adjusted.
+	podSpecificFieldsSet := make(fields.Set, 9)
+	podSpecificFieldsSet["spec.nodeName"] = pod.Spec.NodeName
+	podSpecificFieldsSet["spec.restartPolicy"] = string(pod.Spec.RestartPolicy)
+	podSpecificFieldsSet["spec.schedulerName"] = pod.Spec.SchedulerName
+	podSpecificFieldsSet["spec.serviceAccountName"] = pod.Spec.ServiceAccountName
+	podSpecificFieldsSet["status.phase"] = string(pod.Status.Phase)
+	podIP := ""
+	if len(pod.Status.PodIPs) > 0 {
+		podIP = string(pod.Status.PodIPs[0].IP)
+	}
+	podSpecificFieldsSet["status.podIP"] = podIP
+	podSpecificFieldsSet["status.nominatedNodeName"] = pod.Status.NominatedNodeName
+	return addObjectMetaFieldsSet(podSpecificFieldsSet, &pod.ObjectMeta, true)
+}
+
+// toPhysicalMachineSelectableFields returns a field set that represents the object
+func toPhysicalMachineSelectableFields(physicalMachine *v1alpha1.PhysicalMachine) fields.Set {
+	pmSpecificFieldsSet := make(fields.Set, 3)
+	pmSpecificFieldsSet["spec.address"] = physicalMachine.Spec.Address
+	return addObjectMetaFieldsSet(pmSpecificFieldsSet, &physicalMachine.ObjectMeta, true)
+}
+
+// addObjectMetaFieldsSet add fields that represent the ObjectMeta to source.
+func addObjectMetaFieldsSet(source fields.Set, objectMeta *metav1.ObjectMeta, hasNamespaceField bool) fields.Set {
+	source["metadata.name"] = objectMeta.Name
+	if hasNamespaceField {
+		source["metadata.namespace"] = objectMeta.Namespace
+	}
+	return source
 }
