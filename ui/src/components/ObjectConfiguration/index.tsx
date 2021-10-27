@@ -106,13 +106,13 @@ const ObjectConfiguration: React.FC<ObjectConfigurationProps> = ({
           </Typography>
 
           {(inNode
-            ? (config as any).templateType !== 'physicalmachineChaos'
+            ? (config as any).templateType !== 'PhysicalMachineChaos'
             : inSchedule
             ? spec.type !== 'PhysicalMachineChaos'
             : (config.kind as any) !== 'PhysicalMachineChaos') && <Selector data={experiment.selector} />}
 
           {(inNode
-            ? (config as any).templateType === 'physicalmachineChaos'
+            ? (config as any).templateType === 'PhysicalMachineChaos'
             : inSchedule
             ? spec.type === 'PhysicalMachineChaos'
             : (config.kind as any) === 'PhysicalMachineChaos') && (
