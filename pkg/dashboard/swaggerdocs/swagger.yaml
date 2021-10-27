@@ -1212,6 +1212,11 @@ definitions:
           Delay represents the detail about delay action
           +optional
         type: object
+      device:
+        description: |-
+          Device represents the network device to be affected.
+          +optional
+        type: string
       direction:
         description: |-
           Direction represents the direction, this applies on netem and network partition action
@@ -1257,6 +1262,11 @@ definitions:
           Target represents network target, this applies on netem and network partition action
           +optional
         type: object
+      targetDevice:
+        description: |-
+          TargetDevice represents the network device to be affected in target scope.
+          +optional
+        type: string
       value:
         description: |-
           Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.

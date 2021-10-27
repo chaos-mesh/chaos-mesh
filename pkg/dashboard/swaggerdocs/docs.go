@@ -3260,6 +3260,10 @@ var doc = `{
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.DelaySpec"
                 },
+                "device": {
+                    "description": "Device represents the network device to be affected.\n+optional",
+                    "type": "string"
+                },
                 "direction": {
                     "description": "Direction represents the direction, this applies on netem and network partition action\n+optional\n+kubebuilder:validation:Enum=to;from;both;\"\"",
                     "type": "string"
@@ -3298,6 +3302,10 @@ var doc = `{
                     "description": "Target represents network target, this applies on netem and network partition action\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.PodSelector"
+                },
+                "targetDevice": {
+                    "description": "TargetDevice represents the network device to be affected in target scope.\n+optional",
+                    "type": "string"
                 },
                 "value": {
                     "description": "Value is required when the mode is set to ` + "`" + `FixedPodMode` + "`" + ` / ` + "`" + `FixedPercentPodMod` + "`" + ` / ` + "`" + `RandomMaxPercentPodMod` + "`" + `.\nIf ` + "`" + `FixedPodMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentPodMod` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentPodMod` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
