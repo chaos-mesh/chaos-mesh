@@ -28,12 +28,13 @@ import yaml from 'js-yaml'
 
 export function parseSubmit<K extends ExperimentKind>(
   env: Env,
-  kind: K,
+  _kind: K,
   e: Experiment<Exclude<K, 'Schedule'>>,
   options?: {
     inSchedule?: boolean
   }
 ) {
+  const kind = env === 'k8s' ? _kind : 'PhysicalMachineChaos'
   const values: typeof e = JSON.parse(JSON.stringify(e))
   let { metadata, spec } = values
 
@@ -99,29 +100,11 @@ export function parseSubmit<K extends ExperimentKind>(
     delete metadata.annotations
   }
 
-  if (env === 'physic') {
-    const action = (spec as any).action
-
-    delete (spec as any)[action].action
-
-    return {
-      apiVersion: 'chaos-mesh.org/v1alpha1',
-      kind: 'PhysicalMachineChaos',
-      metadata,
-      spec: {
-        address: (spec as any).address,
-        action,
-        [action]: (spec as any)[action],
-        duration: spec.duration,
-      },
-    }
-  }
-
   if (env === 'k8s') {
     helper2(spec.selector)
   }
 
-  if (kind === 'NetworkChaos') {
+  if (env === 'k8s' && kind === 'NetworkChaos') {
     if (!(spec as any).externalTargets.length) {
       delete (spec as any).externalTargets
     }
@@ -139,6 +122,24 @@ export function parseSubmit<K extends ExperimentKind>(
     ;(spec as any).attr = helper1((spec as any).attr as string[], (s: string) => parseInt(s, 10))
   }
 
+  function parsePhysicalMachineChaos(spec: any) {
+    delete spec.selector
+    delete spec.mode
+
+    const { action, address, duration } = spec as any
+
+    delete spec.action
+    delete spec.address
+    delete spec.duration
+
+    return {
+      address,
+      action,
+      [action]: spec,
+      duration,
+    }
+  }
+
   if (options?.inSchedule) {
     const { schedule, historyLimit, concurrencyPolicy, startingDeadlineSeconds, ...rest } =
       spec as unknown as ScheduleSpecific
@@ -148,9 +149,13 @@ export function parseSubmit<K extends ExperimentKind>(
       concurrencyPolicy,
       startingDeadlineSeconds,
       type: kind,
-      [templateTypeToFieldName(kind)]: rest,
+      [templateTypeToFieldName(kind)]: kind === 'PhysicalMachineChaos' ? parsePhysicalMachineChaos(rest) : rest,
     }
     spec = scheduleSpec as any
+  }
+
+  if (!options?.inSchedule && kind === 'PhysicalMachineChaos') {
+    spec = parsePhysicalMachineChaos(spec) as any
   }
 
   return {
