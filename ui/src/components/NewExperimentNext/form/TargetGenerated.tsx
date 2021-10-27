@@ -100,6 +100,19 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ env, kind, data, vali
                 {...v.inputProps}
               />
             )
+          case 'textarea':
+            return (
+              <TextField
+                key={k}
+                name={k}
+                label={v.label}
+                helperText={getIn(touched, k) && getIn(errors, k) ? getIn(errors, k) : v.helperText}
+                error={getIn(touched, k) && getIn(errors, k) ? true : false}
+                multiline
+                rows={6}
+                {...v.inputProps}
+              />
+            )
           case 'number':
             return (
               <TextField
