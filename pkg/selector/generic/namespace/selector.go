@@ -17,7 +17,10 @@ package namespace
 
 import (
 	"fmt"
+	"k8s.io/apimachinery/pkg/selection"
+	"strings"
 
+	"k8s.io/apimachinery/pkg/labels"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -28,6 +31,8 @@ const Name = "namespace"
 
 type namespaceSelector struct {
 	generic.Option
+	reqIncl []labels.Requirement
+	reqExcl []labels.Requirement
 }
 
 var _ generic.Selector = &namespaceSelector{}
@@ -43,8 +48,25 @@ func (s *namespaceSelector) ListFunc(_ client.Reader) generic.ListFunc {
 	return nil
 }
 
-func (s *namespaceSelector) Match(_ client.Object) bool {
-	return true
+func (s *namespaceSelector) Match(obj client.Object) bool {
+	included := len(s.reqIncl) == 0
+	selector := labels.Set{obj.GetNamespace(): ""}
+
+	// include pod if one including requirement matches
+	for _, req := range s.reqIncl {
+		if req.Matches(selector) {
+			included = true
+			break
+		}
+	}
+
+	// exclude pod if it is filtered out by at least one excluding requirement
+	for _, req := range s.reqExcl {
+		if !req.Matches(selector) {
+			return false
+		}
+	}
+	return included
 }
 
 func New(spec v1alpha1.GenericSelectorSpec, option generic.Option) (generic.Selector, error) {
@@ -58,11 +80,36 @@ func New(spec v1alpha1.GenericSelectorSpec, option generic.Option) (generic.Sele
 		}
 	}
 
+	selectorStr := strings.Join(spec.Namespaces, ",")
+	selector, err := labels.Parse(selectorStr)
+	if err != nil {
+		return nil, err
+	}
+
+	reqs, _ := selector.Requirements()
+	var (
+		reqIncl []labels.Requirement
+		reqExcl []labels.Requirement
+	)
+
+	for _, req := range reqs {
+		switch req.Operator() {
+		case selection.Exists:
+			reqIncl = append(reqIncl, req)
+		case selection.DoesNotExist:
+			reqExcl = append(reqExcl, req)
+		default:
+			return nil, fmt.Errorf("unsupported operator: %s", req.Operator())
+		}
+	}
+
 	return &namespaceSelector{
 		Option: generic.Option{
 			ClusterScoped:         option.ClusterScoped,
 			TargetNamespace:       option.TargetNamespace,
 			EnableFilterNamespace: option.EnableFilterNamespace,
 		},
+		reqIncl: reqIncl,
+		reqExcl: reqExcl,
 	}, nil
 }

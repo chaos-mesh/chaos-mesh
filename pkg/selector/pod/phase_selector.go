@@ -61,8 +61,7 @@ func (s *phaseSelector) Match(obj client.Object) bool {
 	// exclude pod if it is filtered out by at least one excluding requirement
 	for _, req := range s.reqExcl {
 		if !req.Matches(selector) {
-			included = false
-			break
+			return false
 		}
 	}
 
@@ -75,11 +74,6 @@ func newPhaseSelector(spec v1alpha1.PodSelectorSpec) (generic.Selector, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	// TODO
-	//if selector.Empty() {
-	//	return pods, nil
-	//}
 
 	reqs, _ := selector.Requirements()
 	var (

@@ -36,16 +36,22 @@ func TestMatch(t *testing.T) {
 		NewPod(PodArg{Name: "p4", Namespace: "n4"}),
 	}
 
-	n2Selector, err := New(v1alpha1.GenericSelectorSpec{Namespaces: []string{"n2"}}, generic.Option{})
+	option := generic.Option{
+		ClusterScoped:         true,
+		TargetNamespace:       "",
+		EnableFilterNamespace: false,
+	}
+
+	n2Selector, err := New(v1alpha1.GenericSelectorSpec{Namespaces: []string{"n2"}}, option)
 	g.Expect(err).ShouldNot(HaveOccurred())
 
-	emptySelector, err := New(v1alpha1.GenericSelectorSpec{}, generic.Option{})
+	emptySelector, err := New(v1alpha1.GenericSelectorSpec{}, option)
 	g.Expect(err).ShouldNot(HaveOccurred())
 
-	n2AndN3Selector, err := New(v1alpha1.GenericSelectorSpec{Namespaces: []string{"n2,n3"}}, generic.Option{})
+	n2AndN3Selector, err := New(v1alpha1.GenericSelectorSpec{Namespaces: []string{"n2,n3"}}, option)
 	g.Expect(err).ShouldNot(HaveOccurred())
 
-	n2AndN4Selector, err := New(v1alpha1.GenericSelectorSpec{Namespaces: []string{"n2,n4"}}, generic.Option{})
+	n2AndN4Selector, err := New(v1alpha1.GenericSelectorSpec{Namespaces: []string{"n2,n4"}}, option)
 	g.Expect(err).ShouldNot(HaveOccurred())
 
 	tcs := []struct {

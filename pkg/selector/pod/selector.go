@@ -27,8 +27,6 @@ import (
 	"go.uber.org/fx"
 	v1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -143,11 +141,11 @@ func SelectAndFilterPods(ctx context.Context, c client.Client, r client.Reader, 
 func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector v1alpha1.PodSelectorSpec, clusterScoped bool, targetNamespace string, enableFilterNamespace bool) ([]v1.Pod, error) {
 	// pods are specifically specified
 	if len(selector.Pods) > 0 {
-		return selectSpecifiedPod(ctx, c, selector, clusterScoped, targetNamespace, enableFilterNamespace)
+		return selectSpecifiedPods(ctx, c, selector, clusterScoped, targetNamespace, enableFilterNamespace)
 	}
 
-	reg := newSelectorRegistry(ctx, c, selector)
-	selectorChain, err := registry.Parse(reg, selector.GenericSelectorSpec, generic.Option{
+	selectorRegistry := newSelectorRegistry(ctx, c, selector)
+	selectorChain, err := registry.Parse(selectorRegistry, selector.GenericSelectorSpec, generic.Option{
 		ClusterScoped:         clusterScoped,
 		TargetNamespace:       targetNamespace,
 		EnableFilterNamespace: enableFilterNamespace,
@@ -164,14 +162,14 @@ func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector 
 
 	filterPods := make([]v1.Pod, 0, len(pods))
 	for _, pod := range pods {
-		if ok := selectorChain.Match(&pod); ok {
+		if selectorChain.Match(&pod) {
 			filterPods = append(filterPods, pod)
 		}
 	}
 	return filterPods, nil
 }
 
-func selectSpecifiedPod(ctx context.Context, c client.Client, spec v1alpha1.PodSelectorSpec,
+func selectSpecifiedPods(ctx context.Context, c client.Client, spec v1alpha1.PodSelectorSpec,
 	clusterScoped bool, targetNamespace string, enableFilterNamespace bool) ([]v1.Pod, error) {
 	var pods []v1.Pod
 	namespaceCheck := make(map[string]bool)
@@ -238,8 +236,7 @@ func GetService(ctx context.Context, c client.Client, namespace, controllerNames
 }
 
 // CheckPodMeetSelector checks if this pod meets the selection criteria.
-// TODO: refactor
-func CheckPodMeetSelector(pod v1.Pod, selector v1alpha1.PodSelectorSpec) (bool, error) {
+func CheckPodMeetSelector(c client.Client, pod v1.Pod, selector v1alpha1.PodSelectorSpec, clusterScoped bool, targetNamespace string, enableFilterNamespace bool) (bool, error) {
 	if len(selector.Pods) > 0 {
 		meet := false
 		for ns, names := range selector.Pods {
@@ -259,62 +256,17 @@ func CheckPodMeetSelector(pod v1.Pod, selector v1alpha1.PodSelectorSpec) (bool, 
 		}
 	}
 
-	// check pod labels.
-	if pod.Labels == nil {
-		pod.Labels = make(map[string]string)
+	selectorRegistry := newSelectorRegistry(context.TODO(), c, selector)
+	selectorChain, err := registry.Parse(selectorRegistry, selector.GenericSelectorSpec, generic.Option{
+		ClusterScoped:         clusterScoped,
+		TargetNamespace:       targetNamespace,
+		EnableFilterNamespace: enableFilterNamespace,
+	})
+	if err != nil {
+		return false, err
 	}
 
-	if selector.LabelSelectors == nil {
-		selector.LabelSelectors = make(map[string]string)
-	}
-
-	if len(selector.LabelSelectors) > 0 || len(selector.ExpressionSelectors) > 0 {
-		metav1Ls := &metav1.LabelSelector{
-			MatchLabels:      selector.LabelSelectors,
-			MatchExpressions: selector.ExpressionSelectors,
-		}
-		ls, err := metav1.LabelSelectorAsSelector(metav1Ls)
-		if err != nil {
-			return false, err
-		}
-		podLabels := labels.Set(pod.Labels)
-		if len(pod.Labels) == 0 || !ls.Matches(podLabels) {
-			return false, nil
-		}
-	}
-
-	pods := []v1.Pod{pod}
-
-	//namespaceSelector, err := parseSelector(strings.Join(selector.Namespaces, ","))
-	//if err != nil {
-	//	return false, err
-	//}
-
-	//pods, err = filterByNamespaceSelector(pods, namespaceSelector)
-	//if err != nil {
-	//	return false, err
-	//}
-	//
-	//annotationsSelector, err := parseSelector(label.Label(selector.AnnotationSelectors).String())
-	//if err != nil {
-	//	return false, err
-	//}
-	//pods = filterByAnnotations(pods, annotationsSelector)
-	//
-	//phaseSelector, err := parseSelector(strings.Join(selector.PodPhaseSelectors, ","))
-	//if err != nil {
-	//	return false, err
-	//}
-	//pods, err = filterByPhaseSelector(pods, phaseSelector)
-	//if err != nil {
-	//	return false, err
-	//}
-
-	if len(pods) > 0 {
-		return true, nil
-	}
-
-	return false, nil
+	return selectorChain.Match(&pod), nil
 }
 
 func newSelectorRegistry(ctx context.Context, c client.Client, spec v1alpha1.PodSelectorSpec) registry.Registry {
@@ -469,14 +421,6 @@ func IsAllowedNamespaces(ctx context.Context, c client.Client, namespace string)
 	}
 
 	return false, nil
-}
-
-func parseSelector(str string) (labels.Selector, error) {
-	selector, err := labels.Parse(str)
-	if err != nil {
-		return nil, err
-	}
-	return selector, nil
 }
 
 func getFixedSubListFromPodList(pods []v1.Pod, num int) []v1.Pod {

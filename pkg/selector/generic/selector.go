@@ -59,7 +59,7 @@ func (s SelectorChain) ListObjects(c client.Client, r client.Reader,
 
 func (s SelectorChain) Match(obj client.Object) bool {
 	for _, selector := range s {
-		if ok := selector.Match(obj); !ok {
+		if !selector.Match(obj) {
 			return false
 		}
 	}

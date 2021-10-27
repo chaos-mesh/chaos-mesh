@@ -27,38 +27,32 @@ import (
 const Name = "label"
 
 type labelSelector struct {
-	selector labels.Selector
+	labels.Selector
 }
 
 var _ generic.Selector = &labelSelector{}
 
 func (s *labelSelector) ListOption() client.ListOption {
-	return client.MatchingLabelsSelector{Selector: s.selector}
+	return client.MatchingLabelsSelector{Selector: s}
 }
 
 func (s *labelSelector) ListFunc(_ client.Reader) generic.ListFunc {
 	return nil
 }
 
-func (s *labelSelector) Match(_ client.Object) bool {
-
-	return true
+func (s *labelSelector) Match(obj client.Object) bool {
+	objLabels := labels.Set(obj.GetLabels())
+	return s.Matches(objLabels)
 }
 
 func New(spec v1alpha1.GenericSelectorSpec, _ generic.Option) (generic.Selector, error) {
-	labelSelectors := spec.LabelSelectors
-	expressions := spec.ExpressionSelectors
-
-	if len(labelSelectors) == 0 && len(expressions) == 0 {
-		return &labelSelector{}, nil
-	}
 	metav1Ls := &metav1.LabelSelector{
-		MatchLabels:      labelSelectors,
-		MatchExpressions: expressions,
+		MatchLabels:      spec.LabelSelectors,
+		MatchExpressions: spec.ExpressionSelectors,
 	}
 	ls, err := metav1.LabelSelectorAsSelector(metav1Ls)
 	if err != nil {
 		return nil, err
 	}
-	return &labelSelector{selector: ls}, nil
+	return &labelSelector{Selector: ls}, nil
 }

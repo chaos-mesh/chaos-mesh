@@ -41,9 +41,6 @@ func (s *annotationSelector) ListFunc(_ client.Reader) generic.ListFunc {
 }
 
 func (s *annotationSelector) Match(obj client.Object) bool {
-	if s.Empty() {
-		return true
-	}
 	annotations := labels.Set(obj.GetAnnotations())
 	return s.Matches(annotations)
 }

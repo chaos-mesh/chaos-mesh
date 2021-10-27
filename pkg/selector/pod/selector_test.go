@@ -175,6 +175,20 @@ func TestSelectPods(t *testing.T) {
 func TestCheckPodMeetSelector(t *testing.T) {
 	g := NewGomegaWithT(t)
 
+	objects, pods := GenerateNPods("p", 5, PodArg{Labels: map[string]string{"l1": "l1"}, Nodename: "az1-node1"})
+	objects2, pods2 := GenerateNPods("s", 2, PodArg{Namespace: "test-s", Labels: map[string]string{"l2": "l2"}, Nodename: "az2-node1"})
+
+	objects3, _ := GenerateNNodes("az1-node", 3, map[string]string{"disktype": "ssd", "zone": "az1"})
+	objects4, _ := GenerateNNodes("az2-node", 2, map[string]string{"disktype": "hdd", "zone": "az2"})
+
+	objects = append(objects, objects2...)
+	objects = append(objects, objects3...)
+	objects = append(objects, objects4...)
+
+	pods = append(pods, pods2...)
+
+	c := fake.NewClientBuilder().WithRuntimeObjects(objects...).Build()
+
 	type TestCase struct {
 		name          string
 		selector      v1alpha1.PodSelectorSpec
@@ -355,8 +369,13 @@ func TestCheckPodMeetSelector(t *testing.T) {
 		},
 	}
 
+	var (
+		testCfgClusterScoped   = true
+		testCfgTargetNamespace = ""
+	)
+
 	for _, tc := range tcs {
-		meet, err := CheckPodMeetSelector(tc.pod, tc.selector)
+		meet, err := CheckPodMeetSelector(c, tc.pod, tc.selector, testCfgClusterScoped, testCfgTargetNamespace, false)
 		g.Expect(err).ShouldNot(HaveOccurred(), tc.name)
 		g.Expect(meet).To(Equal(tc.expectedValue), tc.name)
 	}
