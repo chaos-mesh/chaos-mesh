@@ -91,18 +91,12 @@ const Step1 = () => {
   }
 
   const handleSubmitStep1 = (values: Record<string, any>) => {
-    const result =
-      env === 'k8s'
-        ? action
-          ? {
-              ...values,
-              action,
-            }
-          : values
-        : {
-            action: values.action,
-            [values.action]: values,
-          }
+    const result = action
+      ? {
+          ...values,
+          action,
+        }
+      : values
 
     if (process.env.NODE_ENV === 'development') {
       console.debug('Debug handleSubmitStep1:', result)
@@ -220,7 +214,7 @@ const Step1 = () => {
                   env={env}
                   kind={kind}
                   data={(typesData as any)[kind].spec!}
-                  validationSchema={schema.TimeChaos!.default}
+                  validationSchema={env === 'k8s' ? schema.TimeChaos!.default : undefined}
                   onSubmit={handleSubmitStep1}
                 />
               </Box>

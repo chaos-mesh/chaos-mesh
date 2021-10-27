@@ -112,6 +112,7 @@ export function parseSubmit<K extends ExperimentKind>(
         address: (spec as any).address,
         action,
         [action]: (spec as any)[action],
+        duration: spec.duration,
       },
     }
   }

@@ -52,7 +52,12 @@ const Step3: React.FC<Step3Props> = ({ onSubmit, inSchedule }) => {
         ...basic,
         spec: {
           ...basic.spec,
-          ...spec,
+          ...(env === 'k8s'
+            ? spec
+            : {
+                action: spec.action,
+                [spec.action]: spec,
+              }),
         },
       },
       { inSchedule }
