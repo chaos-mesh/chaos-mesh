@@ -878,7 +878,8 @@ export const dataPhysic: Record<KindPhysic, Definition> = {
           'dns-server': {
             field: 'text',
             label: 'Server',
-            value: 'DNS server address',
+            value: '',
+            helperText: 'DNS server address',
           },
         },
       },
