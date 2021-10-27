@@ -684,7 +684,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/core.SelectorInfo"
+                            "$ref": "#/definitions/v1alpha1.PhysicalMachineSelectorSpec"
                         }
                     }
                 ],
@@ -724,7 +724,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/core.SelectorInfo"
+                            "$ref": "#/definitions/v1alpha1.PodSelectorSpec"
                         }
                     }
                 ],
@@ -2205,76 +2205,6 @@ var doc = `{
                 }
             }
         },
-        "core.SelectorInfo": {
-            "type": "object",
-            "properties": {
-                "annotation_selectors": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "expression_selectors": {
-                    "type": "string"
-                },
-                "field_selectors": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "label_selectors": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "namespaces": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "node_selectors": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "nodes": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "phase_selectors": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "physical_machines": {
-                    "description": "PhysicalMachines is a map of string keys and a set values that used to select physical machines.\nThe key defines the namespace which physical machine belong,\nand each value is a set of physical machine names.",
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        }
-                    }
-                },
-                "pods": {
-                    "description": "Pods is a map of string keys and a set values that used to select pods.\nThe key defines the namespace which pods belong,\nand each value is a set of pod names.",
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
         "core.Topology": {
             "type": "object",
             "properties": {
@@ -2696,11 +2626,6 @@ var doc = `{
                     "description": "+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.NetworkChaosSpec"
-                },
-                "physicalMachine": {
-                    "description": "+optional",
-                    "type": "object",
-                    "$ref": "#/definitions/v1alpha1.PhysicalMachineSpec"
                 },
                 "physicalmachineChaos": {
                     "description": "+optional",
@@ -3375,6 +3300,10 @@ var doc = `{
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.DelaySpec"
                 },
+                "device": {
+                    "description": "Device represents the network device to be affected.\n+optional",
+                    "type": "string"
+                },
                 "direction": {
                     "description": "Direction represents the direction, this applies on netem and network partition action\n+optional\n+kubebuilder:validation:Enum=to;from;both;\"\"",
                     "type": "string"
@@ -3413,6 +3342,10 @@ var doc = `{
                     "description": "Target represents network target, this applies on netem and network partition action\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.PodSelector"
+                },
+                "targetDevice": {
+                    "description": "TargetDevice represents the network device to be affected in target scope.\n+optional",
+                    "type": "string"
                 },
                 "value": {
                     "description": "Value is required when the mode is set to ` + "`" + `FixedPodMode` + "`" + ` / ` + "`" + `FixedPercentPodMod` + "`" + ` / ` + "`" + `RandomMaxPercentPodMod` + "`" + `.\nIf ` + "`" + `FixedPodMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentPodMod` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentPodMod` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
@@ -3686,15 +3619,6 @@ var doc = `{
                             "type": "string"
                         }
                     }
-                }
-            }
-        },
-        "v1alpha1.PhysicalMachineSpec": {
-            "type": "object",
-            "properties": {
-                "address": {
-                    "description": "Address represents the duration of the chaos action",
-                    "type": "string"
                 }
             }
         },
@@ -3995,11 +3919,6 @@ var doc = `{
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.NetworkChaosSpec"
                 },
-                "physicalMachine": {
-                    "description": "+optional",
-                    "type": "object",
-                    "$ref": "#/definitions/v1alpha1.PhysicalMachineSpec"
-                },
                 "physicalmachineChaos": {
                     "description": "+optional",
                     "type": "object",
@@ -4199,11 +4118,6 @@ var doc = `{
                     "description": "+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.NetworkChaosSpec"
-                },
-                "physicalMachine": {
-                    "description": "+optional",
-                    "type": "object",
-                    "$ref": "#/definitions/v1alpha1.PhysicalMachineSpec"
                 },
                 "physicalmachineChaos": {
                     "description": "+optional",

@@ -1219,6 +1219,9 @@ spec:
                     required:
                     - latency
                     type: object
+                  device:
+                    description: Device represents the network device to be affected.
+                    type: string
                   direction:
                     description: Direction represents the direction, this applies
                       on netem and network partition action
@@ -1476,6 +1479,10 @@ spec:
                     - mode
                     - selector
                     type: object
+                  targetDevice:
+                    description: TargetDevice represents the network device to be
+                      affected in target scope.
+                    type: string
                   value:
                     description: Value is required when the mode is set to `FixedPodMode`
                       / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
@@ -1489,15 +1496,6 @@ spec:
                 - action
                 - mode
                 - selector
-                type: object
-              physicalMachine:
-                description: PhysicalMachineSpec defines the desired state of PhysicalMachine
-                properties:
-                  address:
-                    description: Address represents the duration of the chaos action
-                    type: string
-                required:
-                - address
                 type: object
               physicalmachineChaos:
                 description: PhysicalMachineChaosSpec defines the desired state of
@@ -3611,6 +3609,10 @@ spec:
                               required:
                               - latency
                               type: object
+                            device:
+                              description: Device represents the network device to
+                                be affected.
+                              type: string
                             direction:
                               description: Direction represents the direction, this
                                 applies on netem and network partition action
@@ -3887,6 +3889,10 @@ spec:
                               - mode
                               - selector
                               type: object
+                            targetDevice:
+                              description: TargetDevice represents the network device
+                                to be affected in target scope.
+                              type: string
                             value:
                               description: Value is required when the mode is set
                                 to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
@@ -3901,17 +3907,6 @@ spec:
                           - action
                           - mode
                           - selector
-                          type: object
-                        physicalMachine:
-                          description: PhysicalMachineSpec defines the desired state
-                            of PhysicalMachine
-                          properties:
-                            address:
-                              description: Address represents the duration of the
-                                chaos action
-                              type: string
-                          required:
-                          - address
                           type: object
                         physicalmachineChaos:
                           description: PhysicalMachineChaosSpec defines the desired
@@ -5716,6 +5711,10 @@ spec:
                                   required:
                                   - latency
                                   type: object
+                                device:
+                                  description: Device represents the network device
+                                    to be affected.
+                                  type: string
                                 direction:
                                   description: Direction represents the direction,
                                     this applies on netem and network partition action
@@ -6002,6 +6001,10 @@ spec:
                                   - mode
                                   - selector
                                   type: object
+                                targetDevice:
+                                  description: TargetDevice represents the network
+                                    device to be affected in target scope.
+                                  type: string
                                 value:
                                   description: Value is required when the mode is
                                     set to `FixedPodMode` / `FixedPercentPodMod` /
@@ -6016,17 +6019,6 @@ spec:
                               - action
                               - mode
                               - selector
-                              type: object
-                            physicalMachine:
-                              description: PhysicalMachineSpec defines the desired
-                                state of PhysicalMachine
-                              properties:
-                                address:
-                                  description: Address represents the duration of
-                                    the chaos action
-                                  type: string
-                              required:
-                              - address
                               type: object
                             physicalmachineChaos:
                               description: PhysicalMachineChaosSpec defines the desired

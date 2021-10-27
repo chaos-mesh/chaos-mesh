@@ -167,59 +167,6 @@ definitions:
       uid:
         type: string
     type: object
-  core.SelectorInfo:
-    properties:
-      annotation_selectors:
-        additionalProperties:
-          type: string
-        type: object
-      expression_selectors:
-        type: string
-      field_selectors:
-        additionalProperties:
-          type: string
-        type: object
-      label_selectors:
-        additionalProperties:
-          type: string
-        type: object
-      namespaces:
-        items:
-          type: string
-        type: array
-      node_selectors:
-        additionalProperties:
-          type: string
-        type: object
-      nodes:
-        items:
-          type: string
-        type: array
-      phase_selectors:
-        items:
-          type: string
-        type: array
-      physical_machines:
-        additionalProperties:
-          items:
-            type: string
-          type: array
-        description: |-
-          PhysicalMachines is a map of string keys and a set values that used to select physical machines.
-          The key defines the namespace which physical machine belong,
-          and each value is a set of physical machine names.
-        type: object
-      pods:
-        additionalProperties:
-          items:
-            type: string
-          type: array
-        description: |-
-          Pods is a map of string keys and a set values that used to select pods.
-          The key defines the namespace which pods belong,
-          and each value is a set of pod names.
-        type: object
-    type: object
   core.Topology:
     properties:
       nodes:
@@ -558,10 +505,6 @@ definitions:
         type: object
       networkChaos:
         $ref: '#/definitions/v1alpha1.NetworkChaosSpec'
-        description: +optional
-        type: object
-      physicalMachine:
-        $ref: '#/definitions/v1alpha1.PhysicalMachineSpec'
         description: +optional
         type: object
       physicalmachineChaos:
@@ -1268,6 +1211,11 @@ definitions:
           Delay represents the detail about delay action
           +optional
         type: object
+      device:
+        description: |-
+          Device represents the network device to be affected.
+          +optional
+        type: string
       direction:
         description: |-
           Direction represents the direction, this applies on netem and network partition action
@@ -1313,6 +1261,11 @@ definitions:
           Target represents network target, this applies on netem and network partition action
           +optional
         type: object
+      targetDevice:
+        description: |-
+          TargetDevice represents the network device to be affected in target scope.
+          +optional
+        type: string
       value:
         description: |-
           Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
@@ -1538,12 +1491,6 @@ definitions:
           and each value is a set of physical machine names.
           +optional
         type: object
-    type: object
-  v1alpha1.PhysicalMachineSpec:
-    properties:
-      address:
-        description: Address represents the duration of the chaos action
-        type: string
     type: object
   v1alpha1.PodChaosSpec:
     properties:
@@ -1849,10 +1796,6 @@ definitions:
         $ref: '#/definitions/v1alpha1.NetworkChaosSpec'
         description: +optional
         type: object
-      physicalMachine:
-        $ref: '#/definitions/v1alpha1.PhysicalMachineSpec'
-        description: +optional
-        type: object
       physicalmachineChaos:
         $ref: '#/definitions/v1alpha1.PhysicalMachineChaosSpec'
         description: +optional
@@ -2041,10 +1984,6 @@ definitions:
         type: string
       networkChaos:
         $ref: '#/definitions/v1alpha1.NetworkChaosSpec'
-        description: +optional
-        type: object
-      physicalMachine:
-        $ref: '#/definitions/v1alpha1.PhysicalMachineSpec'
         description: +optional
         type: object
       physicalmachineChaos:
@@ -2640,7 +2579,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/core.SelectorInfo'
+          $ref: '#/definitions/v1alpha1.PhysicalMachineSelectorSpec'
       produces:
       - application/json
       responses:
@@ -2666,7 +2605,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/core.SelectorInfo'
+          $ref: '#/definitions/v1alpha1.PodSelectorSpec'
       produces:
       - application/json
       responses:

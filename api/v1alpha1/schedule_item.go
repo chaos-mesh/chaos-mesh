@@ -4,12 +4,14 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package v1alpha1
 
@@ -25,7 +27,19 @@ type ScheduleItem struct {
 	Workflow *WorkflowSpec `json:"workflow,omitempty"`
 }
 
-func (in EmbedChaos) Validate(chaosType string) field.ErrorList {
-	gw.Default(&in)
-	return gw.Validate(&in)
+func (in EmbedChaos) Validate(path *field.Path, chaosType string) field.ErrorList {
+	var allErrors field.ErrorList
+	root, err := in.SpawnNewObject(TemplateType(chaosType))
+	if err != nil {
+		allErrors = append(allErrors, field.Invalid(path, in, err.Error()))
+		return allErrors
+	}
+
+	gw.Default(&root)
+	err = in.RestoreChaosSpec(root)
+	if err != nil {
+		allErrors = append(allErrors, field.Invalid(path, in, err.Error()))
+		return allErrors
+	}
+	return gw.Validate(root)
 }

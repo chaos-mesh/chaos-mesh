@@ -1,15 +1,17 @@
-// Copyright 2019 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package common
 
@@ -197,8 +199,10 @@ func GetPods(ctx context.Context, chaosName string, status v1alpha1.ChaosStatus,
 	for _, chaosPod := range pods {
 		nodeName := chaosPod.Spec.NodeName
 		daemonSelector := v1alpha1.PodSelectorSpec{
-			Nodes:          []string{nodeName},
-			LabelSelectors: map[string]string{"app.kubernetes.io/component": "chaos-daemon"},
+			Nodes: []string{nodeName},
+			GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+				LabelSelectors: map[string]string{"app.kubernetes.io/component": "chaos-daemon"},
+			},
 		}
 		daemons, err := pod.SelectPods(ctx, c, nil, daemonSelector, ctrlconfig.ControllerCfg.ClusterScoped, ctrlconfig.ControllerCfg.TargetNamespace, false)
 		if err != nil {

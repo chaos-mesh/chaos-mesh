@@ -1,15 +1,17 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package core
 
@@ -17,11 +19,7 @@ import (
 	"context"
 	"time"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	"github.com/jinzhu/gorm"
-
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
 // ExperimentStore defines operations for working with experiments.
@@ -74,77 +72,4 @@ type ExperimentMeta struct {
 	StartTime  time.Time `json:"start_time"`
 	FinishTime time.Time `json:"finish_time"`
 	Archived   bool      `json:"archived"`
-}
-
-// SelectorInfo defines the selector options of the Experiment.
-type SelectorInfo struct {
-	Namespaces          []string                          `json:"namespaces,omitempty" binding:"NamespaceSelectorsValid"`
-	Nodes               []string                          `json:"nodes,omitempty"`
-	NodeSelectors       map[string]string                 `json:"node_selectors,omitempty"`
-	FieldSelectors      map[string]string                 `json:"field_selectors,omitempty" binding:"MapSelectorsValid"`
-	LabelSelectors      map[string]string                 `json:"label_selectors,omitempty" binding:"MapSelectorsValid"`
-	ExpressionSelectors []metav1.LabelSelectorRequirement `json:"expression_selectors,omitempty" binding:"RequirementSelectorsValid"`
-	AnnotationSelectors map[string]string                 `json:"annotation_selectors,omitempty" binding:"MapSelectorsValid"`
-	PodPhaseSelectors   []string                          `json:"phase_selectors,omitempty" binding:"PhaseSelectorsValid"`
-
-	// Pods is a map of string keys and a set values that used to select pods.
-	// The key defines the namespace which pods belong,
-	// and each value is a set of pod names.
-	Pods map[string][]string `json:"pods,omitempty" binding:"PodsValid"`
-
-	// PhysicalMachines is a map of string keys and a set values that used to select physical machines.
-	// The key defines the namespace which physical machine belong,
-	// and each value is a set of physical machine names.
-	PhysicalMachines map[string][]string `json:"physical_machines,omitempty" binding:"PhysicalMachinesValid"`
-}
-
-// ParsePodSelector parses SelectorInfo to v1alpha1.PodSelectorSpec
-func (s *SelectorInfo) ParsePodSelector() v1alpha1.PodSelectorSpec {
-	selector := v1alpha1.PodSelectorSpec{}
-	selector.GenericSelectorSpec = s.parseCommonSelector()
-
-	selector.PodPhaseSelectors = append(selector.PodPhaseSelectors, s.PodPhaseSelectors...)
-
-	if s.Pods != nil {
-		selector.Pods = s.Pods
-	}
-
-	return selector
-}
-
-// ParsePhysicalMachineSelector parses SelectorInfo to v1alpha1.PhysicalMachineSelectorSpec
-func (s *SelectorInfo) ParsePhysicalMachineSelector() v1alpha1.PhysicalMachineSelectorSpec {
-	selector := v1alpha1.PhysicalMachineSelectorSpec{}
-	selector.GenericSelectorSpec = s.parseCommonSelector()
-
-	if s.PhysicalMachines != nil {
-		selector.PhysicalMachines = s.PhysicalMachines
-	}
-
-	return selector
-}
-
-// parseCommonSelector parses SelectorInfo to v1alpha1.GenericSelectorSpec
-func (s *SelectorInfo) parseCommonSelector() v1alpha1.GenericSelectorSpec {
-	selector := v1alpha1.GenericSelectorSpec{}
-	selector.Namespaces = append(selector.Namespaces, s.Namespaces...)
-
-	selector.LabelSelectors = make(map[string]string)
-	for key, val := range s.LabelSelectors {
-		selector.LabelSelectors[key] = val
-	}
-
-	selector.ExpressionSelectors = append(selector.ExpressionSelectors, s.ExpressionSelectors...)
-
-	selector.AnnotationSelectors = make(map[string]string)
-	for key, val := range s.AnnotationSelectors {
-		selector.AnnotationSelectors[key] = val
-	}
-
-	selector.FieldSelectors = make(map[string]string)
-	for key, val := range s.FieldSelectors {
-		selector.FieldSelectors[key] = val
-	}
-
-	return selector
 }
