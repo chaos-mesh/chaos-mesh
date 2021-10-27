@@ -1,34 +1,37 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package podnetworkchaos
 
 import (
 	"context"
-	"strings"
 	"testing"
 
 	. "github.com/onsi/gomega"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/client-go/kubernetes/scheme"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	"k8s.io/apimachinery/pkg/types"
+	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-controller-manager/provider"
 	. "github.com/chaos-mesh/chaos-mesh/controllers/test"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 	. "github.com/chaos-mesh/chaos-mesh/pkg/testutils"
@@ -44,64 +47,75 @@ func setHostNetwork(objs []runtime.Object) {
 
 func TestHostNetworkOption(t *testing.T) {
 	defer mock.With("MockChaosDaemonClient", &MockChaosDaemonClient{})()
+	RegisterTestingT(t)
 
 	testCases := []struct {
 		name                     string
 		enableHostNetworkTesting bool
-		errorEvaluation          func(t *testing.T, err error)
+		errorEvaluation          func(err string)
 	}{
 		{
 			name:                     "host networking testing disabled (default)",
 			enableHostNetworkTesting: false,
-			errorEvaluation: func(t *testing.T, err error) {
-				if err == nil {
-					t.Errorf("expected failure on hostNetwork pods")
-				}
-				if err != nil && !strings.Contains(err.Error(), "it's dangerous to inject network chaos on a pod") {
-					t.Errorf("expected failure on hostNetwork pods, but got %v", err)
-				}
+			errorEvaluation: func(err string) {
+				Expect(err).To(ContainSubstring("It's dangerous to inject network chaos on a pod"))
 			},
 		},
 		{
 			name:                     "host networking testing enabled",
 			enableHostNetworkTesting: true,
-			errorEvaluation: func(t *testing.T, err error) {
-				if err != nil {
-					t.Errorf("failed to apply hostNetwork chaos got %v", err)
-				}
+			errorEvaluation: func(err string) {
+				Expect(err).To(Equal(""))
 			},
 		},
 	}
 
 	for _, testCase := range testCases {
-		t.Run(testCase.name, func(t *testing.T) {
-			objs, _ := GenerateNPods("p", 1, PodArg{})
 
-			setHostNetwork(objs)
+		objs, _ := GenerateNPods("p", 1, PodArg{})
 
-			chaos := &v1alpha1.PodNetworkChaos{
-				TypeMeta: metav1.TypeMeta{
-					Kind:       "PodChaos",
-					APIVersion: "v1",
-				},
-				ObjectMeta: metav1.ObjectMeta{
+		setHostNetwork(objs)
+
+		chaos := &v1alpha1.PodNetworkChaos{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "PodNetworkChaos",
+				APIVersion: "v1",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace:  metav1.NamespaceDefault,
+				Name:       "p0",
+				Generation: 1,
+			},
+			Spec: v1alpha1.PodNetworkChaosSpec{},
+		}
+		objs = append(objs, chaos)
+
+		fakeClient := fake.NewClientBuilder().WithScheme(provider.NewScheme()).WithRuntimeObjects(objs...).Build()
+
+		recorder := recorder.NewDebugRecorder()
+		h := &Reconciler{
+			Client:                  fakeClient,
+			Recorder:                recorder,
+			Log:                     zap.New(zap.UseDevMode(true)),
+			AllowHostNetworkTesting: testCase.enableHostNetworkTesting,
+		}
+
+		_, err := h.Reconcile(
+			context.TODO(),
+			ctrl.Request{
+				NamespacedName: types.NamespacedName{
 					Namespace: metav1.NamespaceDefault,
 					Name:      "p0",
 				},
-				Spec: v1alpha1.PodNetworkChaosSpec{},
-			}
+			})
+		Expect(err).To(BeNil())
 
-			var r client.Reader
-			h := &Handler{
-				Client:                  fake.NewFakeClientWithScheme(scheme.Scheme, objs...),
-				Reader:                  r,
-				Log:                     zap.New(zap.UseDevMode(true)),
-				AllowHostNetworkTesting: testCase.enableHostNetworkTesting,
-			}
+		fakeClient.Get(context.Background(), types.NamespacedName{
+			Namespace: metav1.NamespaceDefault,
+			Name:      "p0",
+		}, chaos)
 
-			testCase.errorEvaluation(t, h.Apply(context.TODO(), chaos))
-		})
-
+		testCase.errorEvaluation(chaos.Status.FailedMessage)
 	}
 }
 

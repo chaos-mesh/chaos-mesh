@@ -1,15 +1,17 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package chaosdaemon
 
@@ -103,7 +105,7 @@ func createIPSet(ctx context.Context, enterNS bool, pid uint32, name string) err
 		output := string(out)
 		if !strings.Contains(output, ipsetExistErr) {
 			log.Error(err, "ipset create error", "command", cmd.String(), "output", output)
-			return err
+			return encodeOutputToError(out, err)
 		}
 
 		processBuilder = bpm.DefaultProcessBuilder("ipset", "flush", name).SetContext(ctx)
@@ -117,7 +119,7 @@ func createIPSet(ctx context.Context, enterNS bool, pid uint32, name string) err
 		out, err := cmd.CombinedOutput()
 		if err != nil {
 			log.Error(err, "ipset flush error", "command", cmd.String(), "output", string(out))
-			return err
+			return encodeOutputToError(out, err)
 		}
 	}
 
@@ -138,7 +140,7 @@ func addCIDRsToIPSet(ctx context.Context, enterNS bool, pid uint32, name string,
 			output := string(out)
 			if !strings.Contains(output, ipExistErr) {
 				log.Error(err, "ipset add error", "command", cmd.String(), "output", output)
-				return err
+				return encodeOutputToError(out, err)
 			}
 		}
 	}
@@ -160,7 +162,7 @@ func renameIPSet(ctx context.Context, enterNS bool, pid uint32, oldName string, 
 		output := string(out)
 		if !strings.Contains(output, ipsetNewNameExistErr) {
 			log.Error(err, "rename ipset failed", "command", cmd.String(), "output", output)
-			return err
+			return encodeOutputToError(out, err)
 		}
 
 		// swap the old ipset and the new ipset if the new ipset already exist.
@@ -174,7 +176,7 @@ func renameIPSet(ctx context.Context, enterNS bool, pid uint32, oldName string, 
 		out, err := cmd.CombinedOutput()
 		if err != nil {
 			log.Error(err, "swap ipset failed", "command", cmd.String(), "output", string(out))
-			return err
+			return encodeOutputToError(out, err)
 		}
 	}
 	return nil

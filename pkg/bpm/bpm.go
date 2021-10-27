@@ -1,28 +1,30 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package bpm
 
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"sync"
 	"syscall"
 
 	"github.com/shirou/gopsutil/process"
-
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
@@ -65,10 +67,17 @@ type ProcessPair struct {
 	CreateTime int64
 }
 
+// Stdio contains stdin, stdout and stderr
+type Stdio struct {
+	sync.Locker
+	Stdin, Stdout, Stderr io.ReadWriteCloser
+}
+
 // BackgroundProcessManager manages all background processes
 type BackgroundProcessManager struct {
 	deathSig    *sync.Map
 	identifiers *sync.Map
+	stdio       *sync.Map
 }
 
 // NewBackgroundProcessManager creates a background process manager
@@ -76,11 +85,12 @@ func NewBackgroundProcessManager() BackgroundProcessManager {
 	return BackgroundProcessManager{
 		deathSig:    &sync.Map{},
 		identifiers: &sync.Map{},
+		stdio:       &sync.Map{},
 	}
 }
 
 // StartProcess manages a process in manager
-func (m *BackgroundProcessManager) StartProcess(cmd *ManagedProcess) error {
+func (m *BackgroundProcessManager) StartProcess(cmd *ManagedProcess) (*process.Process, error) {
 	var identifierLock *sync.Mutex
 	if cmd.Identifier != nil {
 		lock, _ := m.identifiers.LoadOrStore(*cmd.Identifier, &sync.Mutex{})
@@ -93,17 +103,17 @@ func (m *BackgroundProcessManager) StartProcess(cmd *ManagedProcess) error {
 	err := cmd.Start()
 	if err != nil {
 		log.Error(err, "fail to start process")
-		return err
+		return nil, err
 	}
 
 	pid := cmd.Process.Pid
 	procState, err := process.NewProcess(int32(cmd.Process.Pid))
 	if err != nil {
-		return err
+		return nil, err
 	}
 	ct, err := procState.CreateTime()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	pair := ProcessPair{
@@ -114,14 +124,34 @@ func (m *BackgroundProcessManager) StartProcess(cmd *ManagedProcess) error {
 	channel, _ := m.deathSig.LoadOrStore(pair, make(chan bool, 1))
 	deathChannel := channel.(chan bool)
 
+	stdio := &Stdio{Locker: &sync.Mutex{}}
+	if cmd.Stdin != nil {
+		if stdin, ok := cmd.Stdin.(io.ReadWriteCloser); ok {
+			stdio.Stdin = stdin
+		}
+	}
+
+	if cmd.Stdout != nil {
+		if stdout, ok := cmd.Stdout.(io.ReadWriteCloser); ok {
+			stdio.Stdout = stdout
+		}
+	}
+
+	if cmd.Stderr != nil {
+		if stderr, ok := cmd.Stderr.(io.ReadWriteCloser); ok {
+			stdio.Stderr = stderr
+		}
+	}
+
+	m.stdio.Store(pair, stdio)
+
 	log := log.WithValues("pid", pid)
 
 	go func() {
 		err := cmd.Wait()
 		if err != nil {
-			err, ok := err.(*exec.ExitError)
-			if ok {
-				status := err.Sys().(syscall.WaitStatus)
+			if exitErr, ok := err.(*exec.ExitError); ok {
+				status := exitErr.Sys().(syscall.WaitStatus)
 				if status.Signaled() && status.Signal() == syscall.SIGTERM {
 					log.Info("process stopped with SIGTERM signal")
 				}
@@ -134,6 +164,27 @@ func (m *BackgroundProcessManager) StartProcess(cmd *ManagedProcess) error {
 
 		deathChannel <- true
 		m.deathSig.Delete(pair)
+		if io, loaded := m.stdio.LoadAndDelete(pair); loaded {
+			if stdio, ok := io.(*Stdio); ok {
+				stdio.Lock()
+				if stdio.Stdin != nil {
+					if err = stdio.Stdin.Close(); err != nil {
+						log.Error(err, "stdin fails to be closed")
+					}
+				}
+				if stdio.Stdout != nil {
+					if err = stdio.Stdout.Close(); err != nil {
+						log.Error(err, "stdout fails to be closed")
+					}
+				}
+				if stdio.Stderr != nil {
+					if err = stdio.Stderr.Close(); err != nil {
+						log.Error(err, "stderr fails to be closed")
+					}
+				}
+				stdio.Unlock()
+			}
+		}
 
 		if identifierLock != nil {
 			identifierLock.Unlock()
@@ -141,7 +192,7 @@ func (m *BackgroundProcessManager) StartProcess(cmd *ManagedProcess) error {
 		}
 	}()
 
-	return nil
+	return procState, nil
 }
 
 // KillBackgroundProcess sends SIGTERM to process
@@ -165,7 +216,10 @@ func (m *BackgroundProcessManager) KillBackgroundProcess(ctx context.Context, pi
 		// return successfully as the process has exited
 		return nil
 	}
-	if startTime != ct {
+
+	// There is a bug in calculating CreateTime in the new version of
+	// gopsutils. This is a temporary solution before the upstream fixes it.
+	if startTime-ct > 1000 || ct-startTime > 1000 {
 		log.Info("process has already been killed", "startTime", ct, "expectedStartTime", startTime)
 		// return successfully as the process has exited
 		return nil
@@ -192,7 +246,7 @@ func (m *BackgroundProcessManager) KillBackgroundProcess(ctx context.Context, pi
 
 	pair := ProcessPair{
 		Pid:        pid,
-		CreateTime: ct,
+		CreateTime: startTime,
 	}
 	channel, ok := m.deathSig.Load(pair)
 	if ok {
@@ -206,6 +260,45 @@ func (m *BackgroundProcessManager) KillBackgroundProcess(ctx context.Context, pi
 
 	log.Info("Successfully killed process")
 	return nil
+}
+
+func (m *BackgroundProcessManager) Stdio(pid int, startTime int64) *Stdio {
+	log := log.WithValues("pid", pid)
+
+	procState, err := process.NewProcess(int32(pid))
+	if err != nil {
+		log.Info("fail to get process information", "pid", pid)
+		// return successfully as the process has exited
+		return nil
+	}
+	ct, err := procState.CreateTime()
+	if err != nil {
+		log.Error(err, "fail to read create time")
+		// return successfully as the process has exited
+		return nil
+	}
+
+	// There is a bug in calculating CreateTime in the new version of
+	// gopsutils. This is a temporary solution before the upstream fixes it.
+	if startTime-ct > 1000 || ct-startTime > 1000 {
+		log.Info("process has exited", "startTime", ct, "expectedStartTime", startTime)
+		// return successfully as the process has exited
+		return nil
+	}
+
+	pair := ProcessPair{
+		Pid:        pid,
+		CreateTime: startTime,
+	}
+
+	io, ok := m.stdio.Load(pair)
+	if !ok {
+		log.Info("fail to load with pair", "pair", pair)
+		// stdio is not stored
+		return nil
+	}
+
+	return io.(*Stdio)
 }
 
 // DefaultProcessBuilder returns the default process builder
@@ -224,6 +317,7 @@ func DefaultProcessBuilder(cmd string, args ...string) *ProcessBuilder {
 type ProcessBuilder struct {
 	cmd  string
 	args []string
+	env  []string
 
 	nsOptions []nsOption
 
@@ -231,6 +325,9 @@ type ProcessBuilder struct {
 	localMnt bool
 
 	identifier *string
+	stdin      io.ReadWriteCloser
+	stdout     io.ReadWriteCloser
+	stderr     io.ReadWriteCloser
 
 	ctx context.Context
 }
@@ -238,6 +335,12 @@ type ProcessBuilder struct {
 // GetNsPath returns corresponding namespace path
 func GetNsPath(pid uint32, typ NsType) string {
 	return fmt.Sprintf("%s/%d/ns/%s", DefaultProcPrefix, pid, string(typ))
+}
+
+// SetEnv sets the environment variables of the process
+func (b *ProcessBuilder) SetEnv(key, value string) *ProcessBuilder {
+	b.env = append(b.env, fmt.Sprintf("%s=%s", key, value))
+	return b
 }
 
 // SetNS sets the namespace of the process
@@ -278,6 +381,27 @@ func (b *ProcessBuilder) EnableLocalMnt() *ProcessBuilder {
 // SetContext sets context for process
 func (b *ProcessBuilder) SetContext(ctx context.Context) *ProcessBuilder {
 	b.ctx = ctx
+
+	return b
+}
+
+// SetStdin sets stdin for process
+func (b *ProcessBuilder) SetStdin(stdin io.ReadWriteCloser) *ProcessBuilder {
+	b.stdin = stdin
+
+	return b
+}
+
+// SetStdout sets stdout for process
+func (b *ProcessBuilder) SetStdout(stdout io.ReadWriteCloser) *ProcessBuilder {
+	b.stdout = stdout
+
+	return b
+}
+
+// SetStderr sets stderr for process
+func (b *ProcessBuilder) SetStderr(stderr io.ReadWriteCloser) *ProcessBuilder {
+	b.stderr = stderr
 
 	return b
 }

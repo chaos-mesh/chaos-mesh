@@ -1,37 +1,29 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package bpm
 
 import (
 	"context"
 	"math/rand"
-	"testing"
 	"time"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/shirou/gopsutil/process"
-	"sigs.k8s.io/controller-runtime/pkg/envtest"
 )
-
-func TestBpm(t *testing.T) {
-	RegisterFailHandler(Fail)
-
-	RunSpecsWithDefaultAndCustomReporters(t,
-		"Background Process Manager Suite",
-		[]Reporter{envtest.NewlineReporter{}})
-}
 
 func RandomeIdentifier() string {
 	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
@@ -72,7 +64,7 @@ var _ = Describe("background process manager", func() {
 	Context("normally exited process", func() {
 		It("should work", func() {
 			cmd := DefaultProcessBuilder("sleep", "2").Build()
-			err := m.StartProcess(cmd)
+			_, err := m.StartProcess(cmd)
 			Expect(err).To(BeNil())
 
 			WaitProcess(&m, cmd, time.Second*5)
@@ -84,14 +76,14 @@ var _ = Describe("background process manager", func() {
 			cmd := DefaultProcessBuilder("sleep", "2").
 				SetIdentifier(identifier).
 				Build()
-			err := m.StartProcess(cmd)
+			_, err := m.StartProcess(cmd)
 			Expect(err).To(BeNil())
 
 			startTime := time.Now()
 			cmd2 := DefaultProcessBuilder("sleep", "2").
 				SetIdentifier(identifier).
 				Build()
-			err = m.StartProcess(cmd2)
+			_, err = m.StartProcess(cmd2)
 			costedTime := time.Since(startTime)
 			Expect(err).To(BeNil())
 			Expect(costedTime.Seconds()).Should(BeNumerically(">", 1.9))
@@ -106,7 +98,7 @@ var _ = Describe("background process manager", func() {
 	Context("kill process", func() {
 		It("should work", func() {
 			cmd := DefaultProcessBuilder("sleep", "2").Build()
-			err := m.StartProcess(cmd)
+			_, err := m.StartProcess(cmd)
 			Expect(err).To(BeNil())
 
 			pid := cmd.Process.Pid
@@ -118,7 +110,7 @@ var _ = Describe("background process manager", func() {
 			err = m.KillBackgroundProcess(context.Background(), pid, ct)
 			Expect(err).To(BeNil())
 
-			procState, err = process.NewProcess(int32(pid))
+			_, err = process.NewProcess(int32(pid))
 			Expect(err).NotTo(BeNil())
 		})
 
@@ -128,7 +120,7 @@ var _ = Describe("background process manager", func() {
 			cmd := DefaultProcessBuilder("sleep", "2").
 				SetIdentifier(identifier).
 				Build()
-			err := m.StartProcess(cmd)
+			_, err := m.StartProcess(cmd)
 			Expect(err).To(BeNil())
 
 			pid := cmd.Process.Pid
@@ -149,7 +141,7 @@ var _ = Describe("background process manager", func() {
 			}()
 
 			startTime := time.Now()
-			err = m.StartProcess(cmd2)
+			_, err = m.StartProcess(cmd2)
 			costedTime := time.Since(startTime)
 			Expect(err).To(BeNil())
 			Expect(costedTime.Seconds()).Should(And(BeNumerically("<", 2), BeNumerically(">", 1)))

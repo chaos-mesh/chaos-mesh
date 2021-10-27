@@ -1,24 +1,25 @@
 #!/usr/bin/env bash
-
-# Copyright 2020 Chaos Mesh Authors.
+# Copyright 2021 Chaos Mesh Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+# http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
 
 tmp_file="chaos-mesh.yaml"
 tmp_install_script="install.sh.bak"
 install_script="install.sh"
 
 helm template chaos-mesh helm/chaos-mesh --namespace=chaos-testing \
-      --set dashboard.create=true,controllerManager.hostNetwork=true,chaosDaemon.hostNetwork=true,dashboard.securityMode=false \
+      --set controllerManager.hostNetwork=true,chaosDaemon.hostNetwork=true,dashboard.securityMode=false \
       > ${tmp_file}
 
 sed -i.bak '/helm/d' $tmp_file

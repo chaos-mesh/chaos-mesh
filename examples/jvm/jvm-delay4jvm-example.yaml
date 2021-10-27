@@ -1,20 +1,37 @@
+# Copyright 2021 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 apiVersion: chaos-mesh.org/v1alpha1
-kind: JVMChaos
+kind: Schedule
 metadata:
   name: jvm-delay4jvm-example
   namespace: app
 spec:
-  action: delay
-  target: jvm
-  flags:
-    time: "10000"
-  matchers:
-    classname: "org.chaosmesh.jvm.Application"
-    methodname: "hello"
-  mode: one
-  selector:
-    labelSelectors:
-      app: springboot-jvmchaos-demo
-  duration: "50s"
-  scheduler:
-    cron: "@every 1m"
+  schedule: '@every 1m'
+  type: JVMChaos
+  historyLimit: 5
+  concurrencyPolicy: Forbid
+  jvmChaos:
+    action: delay
+    target: jvm
+    flags:
+      time: "10000"
+    matchers:
+      classname: org.chaosmesh.jvm.Application
+      methodname: hello
+    mode: one
+    selector:
+      labelSelectors:
+        app: springboot-jvmchaos-demo
+    duration: 50s

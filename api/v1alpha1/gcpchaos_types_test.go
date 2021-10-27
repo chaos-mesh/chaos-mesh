@@ -4,18 +4,19 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package v1alpha1
 
 import (
 	"context"
-	"time"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -27,10 +28,10 @@ import (
 // These tests are written in BDD-style using Ginkgo framework. Refer to
 // http://onsi.github.io/ginkgo to learn more.
 
-var _ = Describe("GcpChaos", func() {
+var _ = Describe("GCPChaos", func() {
 	var (
 		key              types.NamespacedName
-		created, fetched *GcpChaos
+		created, fetched *GCPChaos
 	)
 
 	BeforeEach(func() {
@@ -52,16 +53,18 @@ var _ = Describe("GcpChaos", func() {
 				Namespace: "default",
 			}
 
-			created = &GcpChaos{
+			created = &GCPChaos{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "foo",
 					Namespace: "default",
 				},
-				Spec: GcpChaosSpec{
-					Action:     NodeReset,
-					Project:    testProject,
-					Zone:       testZone,
-					Instance:   testInstance,
+				Spec: GCPChaosSpec{
+					Action: NodeReset,
+					GCPSelector: GCPSelector{
+						Project:  testProject,
+						Zone:     testZone,
+						Instance: testInstance,
+					},
 					SecretName: &testSecretName,
 				},
 			}
@@ -69,27 +72,13 @@ var _ = Describe("GcpChaos", func() {
 			By("creating an API obj")
 			Expect(k8sClient.Create(context.TODO(), created)).To(Succeed())
 
-			fetched = &GcpChaos{}
+			fetched = &GCPChaos{}
 			Expect(k8sClient.Get(context.TODO(), key, fetched)).To(Succeed())
 			Expect(fetched).To(Equal(created))
 
 			By("deleting the created object")
 			Expect(k8sClient.Delete(context.TODO(), created)).To(Succeed())
 			Expect(k8sClient.Get(context.TODO(), key, created)).ToNot(Succeed())
-		})
-
-		It("should set next start time successfully", func() {
-			gcpchaos := &GcpChaos{}
-			nTime := time.Now()
-			gcpchaos.SetNextStart(nTime)
-			Expect(gcpchaos.GetNextStart()).To(Equal(nTime))
-		})
-
-		It("should set recover time successfully", func() {
-			gcpchaos := &GcpChaos{}
-			nTime := time.Now()
-			gcpchaos.SetNextRecover(nTime)
-			Expect(gcpchaos.GetNextRecover()).To(Equal(nTime))
 		})
 	})
 })

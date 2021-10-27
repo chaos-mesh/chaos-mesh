@@ -1,21 +1,42 @@
-import React, { useState } from 'react'
+/*
+ * Copyright 2021 Chaos Mesh Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+import { Button, Grid } from '@material-ui/core'
 import Tour, { ReactourStep } from 'reactour'
-import { makeStyles, useTheme } from '@material-ui/core/styles'
 
-import AddIcon from '@material-ui/icons/Add'
+import AccountTreeOutlinedIcon from '@material-ui/icons/AccountTreeOutlined'
 import ArrowBackOutlinedIcon from '@material-ui/icons/ArrowBackOutlined'
 import ArrowForwardOutlinedIcon from '@material-ui/icons/ArrowForwardOutlined'
-import { Button } from '@material-ui/core'
+import ExperimentIcon from 'components-mui/Icons/Experiment'
 import { Link } from 'react-router-dom'
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
+import ScheduleIcon from '@material-ui/icons/Schedule'
+import Space from 'components-mui/Space'
 import T from 'components/T'
-import clsx from 'clsx'
+import { makeStyles } from '@material-ui/styles'
+import { useState } from 'react'
+import { useTheme } from '@material-ui/core/styles'
 
 const useStyles = makeStyles((theme) => ({
-  button: {
-    width: `calc(100% - ${theme.spacing(6)})`,
-    margin: theme.spacing(3),
+  space: {
+    width: '75%',
+    [theme.breakpoints.down('md')]: {
+      width: 'unset',
+    },
   },
 }))
 
@@ -25,40 +46,56 @@ const Welcome = () => {
 
   const steps: ReactourStep[] = [
     {
-      selector: '.sidebar-dashboard',
-      content: T('dashboard.tutorial.step1'),
+      selector: '.tutorial-dashboard',
+      content: T('dashboard.tutorial.steps.dashboard'),
     },
     {
-      selector: '.sidebar-experiments',
-      content: T('dashboard.tutorial.step2'),
+      selector: '.tutorial-workflows',
+      content: T('dashboard.tutorial.steps.workflows'),
     },
     {
-      selector: '.sidebar-events',
-      content: T('dashboard.tutorial.step3'),
+      selector: '.tutorial-schedules',
+      content: T('dashboard.tutorial.steps.schedules'),
     },
     {
-      selector: '.sidebar-archives',
-      content: T('dashboard.tutorial.step4'),
+      selector: '.tutorial-experiments',
+      content: T('dashboard.tutorial.steps.experiments'),
     },
     {
-      selector: '.dashboard-new-experiment',
-      content: T('dashboard.tutorial.step5'),
+      selector: '.tutorial-events',
+      content: T('dashboard.tutorial.steps.events'),
     },
     {
-      selector: '.nav-search',
-      content: T('dashboard.tutorial.step6'),
+      selector: '.tutorial-archives',
+      content: T('dashboard.tutorial.steps.archives'),
     },
     {
-      selector: '.nav-namespace',
-      content: T('dashboard.tutorial.step7'),
+      selector: '.tutorial-newW',
+      content: T('dashboard.tutorial.steps.newW'),
     },
     {
-      selector: '.predefined-upload',
-      content: T('dashboard.tutorial.step8'),
+      selector: '.tutorial-newS',
+      content: T('dashboard.tutorial.steps.newS'),
     },
     {
-      selector: '.dashboard-tutorial',
-      content: T('dashboard.tutorial.step9'),
+      selector: '.tutorial-newE',
+      content: T('dashboard.tutorial.steps.newE'),
+    },
+    {
+      selector: '.tutorial-search',
+      content: T('dashboard.tutorial.steps.search'),
+    },
+    {
+      selector: '.tutorial-namespace',
+      content: T('dashboard.tutorial.steps.namespace'),
+    },
+    {
+      selector: '.tutorial-predefined',
+      content: T('dashboard.tutorial.steps.predefined'),
+    },
+    {
+      selector: '.tutorial-end',
+      content: T('dashboard.tutorial.steps.end'),
     },
   ].map((d) => ({
     ...d,
@@ -70,39 +107,76 @@ const Welcome = () => {
   const [isTourOpen, setIsTourOpen] = useState(false)
 
   return (
-    <Paper style={{ height: '100%' }}>
-      <PaperTop title={T('dashboard.welcome')} subtitle={T('dashboard.welcomeDesc')} />
-      <Button
-        className={clsx(classes.button, 'dashboard-tutorial')}
-        variant="contained"
-        color="primary"
-        onClick={() => setIsTourOpen(true)}
-      >
-        {T('common.tutorial')}
-      </Button>
-      <Tour
-        steps={steps}
-        isOpen={isTourOpen}
-        onRequestClose={() => setIsTourOpen(false)}
-        accentColor={theme.palette.primary.main}
-        rounded={theme.shape.borderRadius}
-        prevButton={<ArrowBackOutlinedIcon color="action" />}
-        nextButton={<ArrowForwardOutlinedIcon color="action" />}
-        showCloseButton={false}
-      />
-
-      <PaperTop title={T('dashboard.veteran')} subtitle={T('dashboard.veteranDesc')} />
-      <Button
-        className={clsx(classes.button, 'dashboard-new-experiment')}
-        component={Link}
-        to="/newExperiment"
-        variant="contained"
-        color="primary"
-        startIcon={<AddIcon />}
-      >
-        {T('newE.title')}
-      </Button>
-    </Paper>
+    <Grid container spacing={6}>
+      <Grid item xs={6}>
+        <Paper style={{ height: '100%' }}>
+          <Space className={classes.space}>
+            <PaperTop title={T('dashboard.tutorial.title')} subtitle={T('dashboard.tutorial.desc')} />
+            <Button
+              className="tutorial-end"
+              variant="contained"
+              color="primary"
+              fullWidth
+              onClick={() => setIsTourOpen(true)}
+            >
+              {T('common.tutorial')}
+            </Button>
+            <Tour
+              steps={steps}
+              isOpen={isTourOpen}
+              onRequestClose={() => setIsTourOpen(false)}
+              accentColor={theme.palette.primary.main}
+              rounded={theme.shape.borderRadius as number}
+              prevButton={<ArrowBackOutlinedIcon color="action" />}
+              nextButton={<ArrowForwardOutlinedIcon color="action" />}
+              showCloseButton={false}
+            />
+            <PaperTop title={T('dashboard.newbie')} subtitle={T('dashboard.newbieDesc')} />
+            <Button
+              className="tutorial-newE"
+              component={Link}
+              to="/experiments/new"
+              variant="contained"
+              color="primary"
+              fullWidth
+              startIcon={<ExperimentIcon />}
+            >
+              {T('newE.title')}
+            </Button>
+          </Space>
+        </Paper>
+      </Grid>
+      <Grid item xs={6}>
+        <Paper style={{ height: '100%' }}>
+          <Space className={classes.space}>
+            <PaperTop title={T('dashboard.startAWorkflow')} subtitle={T('dashboard.startAWorkflowDesc')} />
+            <Button
+              className="tutorial-newW"
+              component={Link}
+              to="/workflows/new"
+              variant="contained"
+              color="primary"
+              fullWidth
+              startIcon={<AccountTreeOutlinedIcon />}
+            >
+              {T('newW.title')}
+            </Button>
+            <PaperTop title={T('dashboard.startASchedule')} subtitle={T('dashboard.startAScheduleDesc')} />
+            <Button
+              className="tutorial-newS"
+              component={Link}
+              to="/schedules/new"
+              variant="contained"
+              color="primary"
+              fullWidth
+              startIcon={<ScheduleIcon />}
+            >
+              {T('newS.title')}
+            </Button>
+          </Space>
+        </Paper>
+      </Grid>
+    </Grid>
   )
 }
 

@@ -1,30 +1,35 @@
-import { Box, Button } from '@material-ui/core'
+/*
+ * Copyright 2021 Chaos Mesh Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 import { Form, Formik, FormikHelpers } from 'formik'
-import { setTokenName, setTokens } from 'slices/globalStatus'
+import { Submit, TextField } from 'components/FormField'
+import { setAlert, setTokenName, setTokens } from 'slices/globalStatus'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
-import React from 'react'
+import Space from 'components-mui/Space'
 import T from 'components/T'
-import { TextField } from 'components/FormField'
 import api from 'api'
-import { setAlert } from 'slices/globalStatus'
 import { useIntl } from 'react-intl'
-
-function validateName(value: string) {
-  let error
-
-  if (value === '') {
-    error = (T('settings.addToken.nameValidation') as unknown) as string
-  }
-
-  return error
-}
+import { validateName } from 'lib/formikhelpers'
 
 function validateToken(value: string) {
   let error
 
   if (value === '') {
-    error = (T('settings.addToken.tokenValidation') as unknown) as string
+    error = T('settings.addToken.tokenValidation') as unknown as string
   }
 
   return error
@@ -55,7 +60,7 @@ const Token: React.FC<TokenProps> = ({ onSubmitCallback }) => {
       dispatch(
         setAlert({
           type: 'warning',
-          message: intl.formatMessage({ id: 'settings.addToken.duplicateDesc' }),
+          message: T('settings.addToken.duplicateDesc', intl),
         })
       )
 
@@ -95,27 +100,25 @@ const Token: React.FC<TokenProps> = ({ onSubmitCallback }) => {
     <Formik initialValues={{ name: '', token: '' }} onSubmit={submitToken}>
       {({ errors, touched }) => (
         <Form>
-          <TextField
-            name="name"
-            label={T('settings.addToken.name')}
-            validate={validateName}
-            helperText={errors.name && touched.name ? errors.name : T('settings.addToken.nameHelper')}
-            error={errors.name && touched.name ? true : false}
-          />
-          <TextField
-            name="token"
-            label={T('settings.addToken.token')}
-            multiline
-            rows={12}
-            validate={validateToken}
-            helperText={errors.token && touched.token ? errors.token : T('settings.addToken.tokenHelper')}
-            error={errors.token && touched.token ? true : false}
-          />
-          <Box textAlign="right">
-            <Button type="submit" variant="contained" color="primary">
-              {T('common.submit')}
-            </Button>
-          </Box>
+          <Space>
+            <TextField
+              name="name"
+              label={T('common.name')}
+              validate={validateName(T('settings.addToken.nameValidation') as unknown as string)}
+              helperText={errors.name && touched.name ? errors.name : T('settings.addToken.nameHelper')}
+              error={errors.name && touched.name ? true : false}
+            />
+            <TextField
+              name="token"
+              label={T('settings.addToken.token')}
+              multiline
+              rows={12}
+              validate={validateToken}
+              helperText={errors.token && touched.token ? errors.token : T('settings.addToken.tokenHelper')}
+              error={errors.token && touched.token ? true : false}
+            />
+            <Submit />
+          </Space>
         </Form>
       )}
     </Formik>

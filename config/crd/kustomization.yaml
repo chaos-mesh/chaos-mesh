@@ -1,3 +1,4 @@
+
 # This kustomization.yaml is not intended to be run by itself,
 # since it depends on service name and namespace that are out of this kustomize package.
 # It should be run by config/default
@@ -9,6 +10,7 @@ resources:
 - bases/chaos-mesh.org_kernelchaos.yaml
 - bases/chaos-mesh.org_stresschaos.yaml
 - bases/chaos-mesh.org_podiochaos.yaml
+- bases/chaos-mesh.org_podhttpchaos.yaml
 - bases/chaos-mesh.org_podnetworkchaos.yaml
 - bases/chaos-mesh.org_httpchaos.yaml
 - bases/chaos-mesh.org_dnschaos.yaml
@@ -17,6 +19,8 @@ resources:
 - bases/chaos-mesh.org_gcpchaos.yaml
 - bases/chaos-mesh.org_workflows.yaml
 - bases/chaos-mesh.org_workflownodes.yaml
+- bases/chaos-mesh.org_schedules.yaml
+- bases/chaos-mesh.org_physicalmachinechaos.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
 patchesStrategicMerge:

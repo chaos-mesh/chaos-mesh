@@ -1,19 +1,22 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package main
 
 import (
+	"context"
 	"flag"
 	"os"
 
@@ -28,28 +31,21 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver"
-	"github.com/chaos-mesh/chaos-mesh/pkg/collector"
-	"github.com/chaos-mesh/chaos-mesh/pkg/config"
-	"github.com/chaos-mesh/chaos-mesh/pkg/store"
-	"github.com/chaos-mesh/chaos-mesh/pkg/store/dbstore"
-	"github.com/chaos-mesh/chaos-mesh/pkg/ttlcontroller"
+	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
+	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver"
+	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/collector"
+	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/store"
+	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/ttlcontroller"
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
 )
 
-var (
-	log = ctrl.Log.WithName("setup")
-)
-
-var (
-	printVersion bool
-)
+var log = ctrl.Log.WithName("chaos-dashboard")
 
 // @title Chaos Mesh Dashboard API
-// @version 1.0
-// @description Swagger docs for Chaos Mesh Dashboard. If you encounter any problems with API, please click on the issues link below to report bugs or questions.
+// @version 2.0
+// @description Swagger for Chaos Mesh Dashboard. If you encounter any problems with API, please click on the issues link below to report.
 
-// @contact.name Issues
+// @contact.name GitHub Issues
 // @contact.url https://github.com/chaos-mesh/chaos-mesh/issues
 
 // @license.name Apache 2.0
@@ -57,6 +53,8 @@ var (
 
 // @BasePath /api
 func main() {
+	var printVersion bool
+
 	flag.BoolVar(&printVersion, "version", false, "print version information and exit")
 	flag.Parse()
 
@@ -66,27 +64,28 @@ func main() {
 	}
 
 	ctrl.SetLogger(zap.New(zap.UseDevMode(true)))
+	mainLog := log.WithName("main")
 
-	dashboardConfig, err := config.EnvironChaosDashboard()
+	dashboardConfig, err := config.GetChaosDashboardEnv()
 	if err != nil {
-		log.Error(err, "main: invalid ChaosDashboardConfig")
+		mainLog.Error(err, "invalid ChaosDashboardConfig")
 		os.Exit(1)
 	}
 	dashboardConfig.Version = version.Get().GitVersion
 
 	persistTTLConfigParsed, err := config.ParsePersistTTLConfig(dashboardConfig.PersistTTL)
 	if err != nil {
-		log.Error(err, "main: invalid PersistTTLConfig")
+		mainLog.Error(err, "invalid PersistTTLConfig")
 		os.Exit(1)
 	}
 
-	controllerRuntimeStopCh := ctrl.SetupSignalHandler()
+	controllerRuntimeSignalHandlerContext := ctrl.SetupSignalHandler()
 	app := fx.New(
 		fx.Provide(
-			func() (<-chan struct{}, *config.ChaosDashboardConfig, *ttlcontroller.TTLconfig) {
-				return controllerRuntimeStopCh, dashboardConfig, persistTTLConfigParsed
+			func() (context.Context, *config.ChaosDashboardConfig, *ttlcontroller.TTLconfig) {
+				return controllerRuntimeSignalHandlerContext, dashboardConfig, persistTTLConfigParsed
 			},
-			dbstore.NewDBStore,
+			store.NewDBStore,
 			collector.NewServer,
 			ttlcontroller.NewController,
 		),
@@ -97,5 +96,4 @@ func main() {
 	)
 
 	app.Run()
-	<-controllerRuntimeStopCh
 }

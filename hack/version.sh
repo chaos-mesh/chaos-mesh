@@ -1,17 +1,18 @@
 #!/usr/bin/env bash
-
-# Copyright 2020 Chaos Mesh Authors.
+# Copyright 2021 Chaos Mesh Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+# http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
 
 set -euo pipefail
 
@@ -19,8 +20,8 @@ function chaos_mesh::version::get_version_vars() {
   if [[ -n ${GIT_COMMIT-} ]] || GIT_COMMIT=$(git rev-parse "HEAD^{commit}" 2>/dev/null); then
     # Use git describe to find the version based on tags.
     if [[ -n ${GIT_VERSION-} ]] || GIT_VERSION=$(git describe --tags --abbrev=14 "${GIT_COMMIT}^{commit}" 2>/dev/null); then
-      DASHES_IN_VERSION=$(echo "${GIT_VERSION}" | sed "s/[^-]//g")
-      if [[ "${DASHES_IN_VERSION}" != "" ]] ; then
+      # if current commit is not on a certain tag
+      if ! git describe --tags --exact-match >/dev/null 2>&1 ; then
         # GIT_VERSION=gitBranch-gitCommitHash
         IFS='-' read -ra GIT_ARRAY <<< "$GIT_VERSION"
         GIT_VERSION=$(git rev-parse --abbrev-ref HEAD)-${GIT_ARRAY[${#GIT_ARRAY[@]}-1]}

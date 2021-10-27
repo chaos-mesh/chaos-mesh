@@ -4,12 +4,14 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package webhook
 
@@ -20,20 +22,23 @@ import (
 	"strings"
 
 	authv1 "k8s.io/api/authorization/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
 var alwaysAllowedKind = []string{
-	v1alpha1.KindAwsChaos,
+	v1alpha1.KindAWSChaos,
 	v1alpha1.KindPodNetworkChaos,
-	v1alpha1.KindPodIoChaos,
-	v1alpha1.KindGcpChaos,
-	"Workflow",
+	v1alpha1.KindPodIOChaos,
+	v1alpha1.KindGCPChaos,
+	v1alpha1.KindPodHttpChaos,
+	// TODO: check the auth for physical machine chaos
+	v1alpha1.KindPhysicalMachineChaos,
+
 	"WorkflowNode",
 }
 
@@ -44,8 +49,6 @@ var authLog = ctrl.Log.WithName("validate-auth")
 // AuthValidator validates the authority
 type AuthValidator struct {
 	enabled bool
-	client  client.Client
-	reader  client.Reader
 	authCli *authorizationv1.AuthorizationV1Client
 
 	decoder *admission.Decoder
@@ -56,12 +59,10 @@ type AuthValidator struct {
 }
 
 // NewAuthValidator returns a new AuthValidator
-func NewAuthValidator(enabled bool, client client.Client, reader client.Reader, authCli *authorizationv1.AuthorizationV1Client,
+func NewAuthValidator(enabled bool, authCli *authorizationv1.AuthorizationV1Client,
 	clusterScoped bool, targetNamespace string, enableFilterNamespace bool) *AuthValidator {
 	return &AuthValidator{
 		enabled:               enabled,
-		client:                client,
-		reader:                reader,
 		authCli:               authCli,
 		clusterScoped:         clusterScoped,
 		targetNamespace:       targetNamespace,
@@ -83,30 +84,19 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 		return admission.Allowed(fmt.Sprintf("skip the RBAC check for type %s", requestKind))
 	}
 
-	chaos := v1alpha1.GetChaosValidator(requestKind)
-	if chaos == nil {
+	kind, ok := v1alpha1.AllKindsIncludeScheduleAndWorkflow()[requestKind]
+	if !ok {
 		err := fmt.Errorf("kind %s is not support", requestKind)
 		return admission.Errored(http.StatusBadRequest, err)
 	}
+	chaos := kind.SpawnObject()
 
 	err := v.decoder.Decode(req, chaos)
 	if err != nil {
 		return admission.Errored(http.StatusBadRequest, err)
 	}
-	specs := chaos.GetSelectSpec()
 
-	requireClusterPrivileges := false
-	affectedNamespaces := make(map[string]struct{})
-
-	for _, spec := range specs {
-		if spec.GetSelector().ClusterScoped() {
-			requireClusterPrivileges = true
-		}
-
-		for _, namespace := range spec.GetSelector().AffectedNamespaces() {
-			affectedNamespaces[namespace] = struct{}{}
-		}
-	}
+	requireClusterPrivileges, affectedNamespaces := affectedNamespaces(chaos)
 
 	if requireClusterPrivileges {
 		allow, err := v.auth(username, groups, "", requestKind)
@@ -163,7 +153,8 @@ func (v *AuthValidator) auth(username string, groups []string, namespace string,
 		},
 	}
 
-	response, err := v.authCli.SubjectAccessReviews().Create(&sar)
+	// FIXME: get context from parameter
+	response, err := v.authCli.SubjectAccessReviews().Create(context.TODO(), &sar, metav1.CreateOptions{})
 	if err != nil {
 		return false, err
 	}

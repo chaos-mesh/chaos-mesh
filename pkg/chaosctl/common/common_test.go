@@ -1,15 +1,17 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package common
 
@@ -55,9 +57,9 @@ func TestGetChaosList(t *testing.T) {
 		},
 	}
 
-	v1alpha1.SchemeBuilder.AddToScheme(kubectlscheme.Scheme)
+	g.Expect(v1alpha1.SchemeBuilder.AddToScheme(kubectlscheme.Scheme)).To(BeNil())
 
-	client := fake.NewFakeClientWithScheme(kubectlscheme.Scheme, &chaos1, &chaos2)
+	client := fake.NewClientBuilder().WithScheme(kubectlscheme.Scheme).WithRuntimeObjects(&chaos1, &chaos2).Build()
 
 	tests := []struct {
 		name        string
@@ -127,9 +129,8 @@ func TestGetPods(t *testing.T) {
 
 	_ = v1alpha1.ChaosStatus{
 		Experiment: v1alpha1.ExperimentStatus{
-			Phase: v1alpha1.ExperimentPhaseRunning,
+			DesiredPhase: v1alpha1.RunningPhase,
 		},
-		Scheduler: v1alpha1.ScheduleStatus{},
 	}
 
 	nodeObjects, _ := utils.GenerateNNodes("node", 2, nil)
@@ -139,13 +140,12 @@ func TestGetPods(t *testing.T) {
 	daemonObjects1, _ := utils.GenerateNPods("daemon-node1", 1, utils.PodArg{Labels: map[string]string{"app.kubernetes.io/component": "chaos-daemon"}, Nodename: "node1"})
 
 	allObjects := append(nodeObjects, daemonObjects0[0], podObjects0[0], daemonObjects1[0], podObjects1[0])
-
-	v1alpha1.SchemeBuilder.AddToScheme(kubectlscheme.Scheme)
-	client := fake.NewFakeClientWithScheme(kubectlscheme.Scheme, allObjects...)
+	g.Expect(v1alpha1.SchemeBuilder.AddToScheme(kubectlscheme.Scheme)).To(BeNil())
+	client := fake.NewClientBuilder().WithScheme(kubectlscheme.Scheme).WithRuntimeObjects(allObjects...).Build()
 
 	tests := []struct {
 		name              string
-		chaosSelector     v1alpha1.SelectorSpec
+		chaosSelector     v1alpha1.PodSelectorSpec
 		chaosStatus       v1alpha1.ChaosStatus
 		wait              bool
 		expectedPodNum    int
@@ -154,7 +154,7 @@ func TestGetPods(t *testing.T) {
 	}{
 		{
 			name:              "chaos on two pods",
-			chaosSelector:     v1alpha1.SelectorSpec{LabelSelectors: map[string]string{"app": "pod"}},
+			chaosSelector:     v1alpha1.PodSelectorSpec{LabelSelectors: map[string]string{"app": "pod"}},
 			chaosStatus:       v1alpha1.ChaosStatus{},
 			expectedPodNum:    2,
 			expectedDaemonNum: 2,
@@ -162,7 +162,7 @@ func TestGetPods(t *testing.T) {
 		},
 		{
 			name: "chaos on one pod",
-			chaosSelector: v1alpha1.SelectorSpec{
+			chaosSelector: v1alpha1.PodSelectorSpec{
 				Nodes:          []string{"node0"},
 				LabelSelectors: map[string]string{"app": "pod"},
 			},
@@ -172,24 +172,8 @@ func TestGetPods(t *testing.T) {
 			expectedErr:       false,
 		},
 		{
-			name:          "wait for 100ms for chaos to start",
-			chaosSelector: v1alpha1.SelectorSpec{LabelSelectors: map[string]string{"app": "pod"}},
-			chaosStatus: v1alpha1.ChaosStatus{
-				Experiment: v1alpha1.ExperimentStatus{
-					Phase: v1alpha1.ExperimentPhaseWaiting,
-				},
-				Scheduler: v1alpha1.ScheduleStatus{
-					NextStart: &metav1.Time{Time: time.Now().Add(time.Millisecond * 50)},
-				},
-			},
-			wait:              true,
-			expectedPodNum:    2,
-			expectedDaemonNum: 2,
-			expectedErr:       false,
-		},
-		{
 			name:          "wrong selector to get pod",
-			chaosSelector: v1alpha1.SelectorSpec{LabelSelectors: map[string]string{"app": "oops"}},
+			chaosSelector: v1alpha1.PodSelectorSpec{LabelSelectors: map[string]string{"app": "oops"}},
 			chaosStatus:   v1alpha1.ChaosStatus{},
 			expectedErr:   true,
 		},

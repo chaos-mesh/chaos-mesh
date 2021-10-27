@@ -1,15 +1,17 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package v1alpha1
 
@@ -23,7 +25,7 @@ import (
 // Stress chaos is a chaos to generate plenty of stresses over a collection of pods.
 
 // +kubebuilder:object:root=true
-// +chaos-mesh:base
+// +chaos-mesh:experiment
 
 // StressChaos is the Schema for the stresschaos API
 type StressChaos struct {
@@ -38,21 +40,13 @@ type StressChaos struct {
 	Status StressChaosStatus `json:"status"`
 }
 
+var _ InnerObjectWithCustomStatus = (*StressChaos)(nil)
+var _ InnerObjectWithSelector = (*StressChaos)(nil)
+var _ InnerObject = (*StressChaos)(nil)
+
 // StressChaosSpec defines the desired state of StressChaos
 type StressChaosSpec struct {
-	// Mode defines the mode to run chaos action.
-	// Supported mode: one / all / fixed / fixed-percent / random-max-percent
-	Mode PodMode `json:"mode"`
-
-	// Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
-	// If `FixedPodMode`, provide an integer of pods to do chaos action.
-	// If `FixedPercentPodMod`, provide a number from 0-100 to specify the max % of pods the server can do chaos action.
-	// If `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the % of pods to do chaos action
-	// +optional
-	Value string `json:"value"`
-
-	// Selector is used to select pods that are used to inject chaos action.
-	Selector SelectorSpec `json:"selector"`
+	ContainerSelector `json:",inline"`
 
 	// Stressors defines plenty of stressors supported to stress system components out.
 	// You can use one or more of them to make up various kinds of stresses. At least
@@ -69,32 +63,9 @@ type StressChaosSpec struct {
 	// +optional
 	StressngStressors string `json:"stressngStressors,omitempty"`
 
-	// ContainerName indicates the target container to inject stress in
-	// +optional
-	ContainerName *string `json:"containerName,omitempty"`
-
 	// Duration represents the duration of the chaos action
 	// +optional
-	Duration *string `json:"duration,omitempty"`
-
-	// Scheduler defines some schedule rules to control the running time of the chaos experiment about time.
-	// +optional
-	Scheduler *SchedulerSpec `json:"scheduler,omitempty"`
-}
-
-// GetSelector is a getter for Selector (for implementing SelectSpec)
-func (in *StressChaosSpec) GetSelector() SelectorSpec {
-	return in.Selector
-}
-
-// GetMode is a getter for Mode (for implementing SelectSpec)
-func (in *StressChaosSpec) GetMode() PodMode {
-	return in.Mode
-}
-
-// GetValue is a getter for Value (for implementing SelectSpec)
-func (in *StressChaosSpec) GetValue() string {
-	return in.Value
+	Duration *string `json:"duration,omitempty" webhook:"Duration"`
 }
 
 // StressChaosStatus defines the observed state of StressChaos
@@ -120,26 +91,26 @@ type StressInstance struct {
 type Stressors struct {
 	// MemoryStressor stresses virtual memory out
 	// +optional
-	MemoryStressor *MemoryStressor `json:"memory,omitempty" mapstructure:"memory"`
+	MemoryStressor *MemoryStressor `json:"memory,omitempty"`
 	// CPUStressor stresses CPU out
 	// +optional
-	CPUStressor *CPUStressor `json:"cpu,omitempty" mapstructure:"cpu"`
+	CPUStressor *CPUStressor `json:"cpu,omitempty"`
 }
 
 // Normalize the stressors to comply with stress-ng
 func (in *Stressors) Normalize() (string, error) {
 	stressors := ""
-	if in.MemoryStressor != nil {
+	if in.MemoryStressor != nil && in.MemoryStressor.Workers != 0 {
 		stressors += fmt.Sprintf(" --vm %d --vm-keep", in.MemoryStressor.Workers)
 		if len(in.MemoryStressor.Size) != 0 {
 			if in.MemoryStressor.Size[len(in.MemoryStressor.Size)-1] != '%' {
-				size, err := units.FromHumanSize(in.MemoryStressor.Size)
+				size, err := units.FromHumanSize(string(in.MemoryStressor.Size))
 				if err != nil {
 					return "", err
 				}
 				stressors += fmt.Sprintf(" --vm-bytes %d", size)
 			} else {
-				stressors += fmt.Sprintf("--vm-bytes %s",
+				stressors += fmt.Sprintf(" --vm-bytes %s",
 					in.MemoryStressor.Size)
 			}
 		}
@@ -150,7 +121,7 @@ func (in *Stressors) Normalize() (string, error) {
 			}
 		}
 	}
-	if in.CPUStressor != nil {
+	if in.CPUStressor != nil && in.CPUStressor.Workers != 0 {
 		stressors += fmt.Sprintf(" --cpu %d", in.CPUStressor.Workers)
 		if in.CPUStressor.Load != nil {
 			stressors += fmt.Sprintf(" --cpu-load %d",
@@ -169,18 +140,20 @@ func (in *Stressors) Normalize() (string, error) {
 // Stressor defines common configurations of a stressor
 type Stressor struct {
 	// Workers specifies N workers to apply the stressor.
+	// Maximum 8192 workers can run by stress-ng
+	// +kubebuilder:validation:Maximum=8192
 	Workers int `json:"workers"`
 }
 
 // MemoryStressor defines how to stress memory out
 type MemoryStressor struct {
-	Stressor `json:",inline" mapstructure:",squash"`
+	Stressor `json:",inline"`
 
 	// Size specifies N bytes consumed per vm worker, default is the total available memory.
 	// One can specify the size as % of total available memory or in units of B, KB/KiB,
 	// MB/MiB, GB/GiB, TB/TiB.
 	// +optional
-	Size string `json:"size,omitempty"`
+	Size string `json:"size,omitempty" webhook:"Bytes"`
 
 	// extend stress-ng options
 	// +optional
@@ -189,7 +162,7 @@ type MemoryStressor struct {
 
 // CPUStressor defines how to stress CPU out
 type CPUStressor struct {
-	Stressor `json:",inline" mapstructure:",squash"`
+	Stressor `json:",inline"`
 	// Load specifies P percent loading per CPU worker. 0 is effectively a sleep (no load) and 100
 	// is full loading.
 	// +optional
@@ -198,4 +171,14 @@ type CPUStressor struct {
 	// extend stress-ng options
 	// +optional
 	Options []string `json:"options,omitempty"`
+}
+
+func (obj *StressChaos) GetSelectorSpecs() map[string]interface{} {
+	return map[string]interface{}{
+		".": &obj.Spec.ContainerSelector,
+	}
+}
+
+func (obj *StressChaos) GetCustomStatus() interface{} {
+	return &obj.Status.Instances
 }

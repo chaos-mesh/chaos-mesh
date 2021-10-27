@@ -1,8 +1,23 @@
+/*
+ * Copyright 2021 Chaos Mesh Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 import { Box, Button, Card, Modal, Typography } from '@material-ui/core'
 import { PreDefinedValue, getDB } from 'lib/idb'
-import React, { useEffect, useRef, useState } from 'react'
-import { parseSubmit, yamlToExperiment } from 'lib/formikhelpers'
-import { useStoreDispatch, useStoreSelector } from 'store'
+import { setAlert, setConfirm } from 'slices/globalStatus'
+import { useEffect, useRef, useState } from 'react'
 
 import { Ace } from 'ace-builds'
 import Paper from 'components-mui/Paper'
@@ -14,19 +29,14 @@ import api from 'api'
 import clsx from 'clsx'
 import { iconByKind } from 'lib/byKind'
 import loadable from '@loadable/component'
-import { makeStyles } from '@material-ui/core/styles'
-import { setAlert } from 'slices/globalStatus'
+import { makeStyles } from '@material-ui/styles'
 import { useIntl } from 'react-intl'
+import { useStoreDispatch } from 'store'
 import yaml from 'js-yaml'
 
 const YAMLEditor = loadable(() => import('components/YAMLEditor'))
 
 const useStyles = makeStyles((theme) => ({
-  container: {
-    display: 'flex',
-    height: 88,
-    overflowX: 'scroll',
-  },
   card: {
     flex: '0 0 240px',
     cursor: 'pointer',
@@ -41,23 +51,21 @@ const useStyles = makeStyles((theme) => ({
     position: 'absolute',
     top: '50%',
     left: '50%',
-    display: 'flex',
-    flexDirection: 'column',
-    width: '50vw',
+    width: '75vw',
     height: '90vh',
+    padding: 0,
     transform: 'translate(-50%, -50%)',
-    [theme.breakpoints.down('sm')]: {
+    [theme.breakpoints.down('lg')]: {
       width: '90vw',
     },
   },
 }))
 
-const Predefined = React.memo(() => {
+const Predefined = () => {
   const classes = useStyles()
 
   const intl = useIntl()
 
-  const { theme } = useStoreSelector((state) => state.settings)
   const dispatch = useStoreDispatch()
 
   const idb = useRef(getDB())
@@ -75,8 +83,10 @@ const Predefined = React.memo(() => {
     getExperiments()
   }, [])
 
-  const saveExperiment = async (y: any) => {
+  const saveExperiment = async (_y: any) => {
     const db = await idb.current
+
+    const y: any = yaml.load(_y)
 
     await db.put('predefined', {
       name: y.metadata.name,
@@ -94,28 +104,32 @@ const Predefined = React.memo(() => {
   const onModalClose = () => seteditorOpen(false)
 
   const handleApplyExperiment = () => {
-    const { basic, target } = yamlToExperiment(yaml.load(yamlEditor!.getValue()))
-    const parsedValues = parseSubmit({
-      ...basic,
-      target,
-    })
+    const exp: any = yaml.load(yamlEditor!.getValue())
 
-    if (process.env.NODE_ENV === 'development') {
-      console.debug('Debug parsedValues:', parsedValues)
-    }
+    const isSchedule = exp['kind'] === 'Schedule'
+    const action = isSchedule ? api.schedules.newSchedule : api.experiments.newExperiment
 
-    api.experiments
-      .newExperiment(parsedValues)
+    action(exp)
       .then(() => {
         seteditorOpen(false)
         dispatch(
           setAlert({
             type: 'success',
-            message: intl.formatMessage({ id: 'common.createSuccessfully' }),
+            message: T('confirm.success.create', intl),
           })
         )
       })
       .catch(console.error)
+  }
+
+  const handleDeleteConfirm = () => {
+    dispatch(
+      setConfirm({
+        title: `${T('common.delete', intl)} ${experiment!.name}`,
+        description: T('common.deleteDesc', intl),
+        handle: handleDeleteExperiment,
+      })
+    )
   }
 
   const handleDeleteExperiment = async () => {
@@ -128,17 +142,17 @@ const Predefined = React.memo(() => {
     dispatch(
       setAlert({
         type: 'success',
-        message: intl.formatMessage({ id: 'common.deleteSuccessfully' }),
+        message: T('confirm.success.delete', intl),
       })
     )
   }
 
   return (
     <>
-      <Space className={classes.container}>
+      <Space direction="row" sx={{ height: 88, overflowX: 'scroll' }}>
         <YAML
           callback={saveExperiment}
-          buttonProps={{ className: clsx(classes.card, classes.addCard, 'predefined-upload') }}
+          buttonProps={{ className: clsx(classes.card, classes.addCard, 'tutorial-predefined') }}
         />
         {experiments.map((d) => (
           <Card key={d.name} className={classes.card} variant="outlined" onClick={onModalOpen(d)}>
@@ -155,27 +169,31 @@ const Predefined = React.memo(() => {
       </Space>
       <Modal open={editorOpen} onClose={onModalClose}>
         <div>
-          <Paper className={classes.editorPaperWrapper} padding={false}>
+          <Paper className={classes.editorPaperWrapper}>
             {experiment && (
-              <>
-                <PaperTop title={experiment.name}>
-                  <Space display="flex">
-                    <Button color="secondary" size="small" onClick={handleDeleteExperiment}>
-                      {T('common.delete')}
-                    </Button>
-                    <Button variant="contained" color="primary" size="small" onClick={handleApplyExperiment}>
-                      {T('common.submit')}
-                    </Button>
-                  </Space>
-                </PaperTop>
-                <YAMLEditor theme={theme} data={yaml.dump(experiment.yaml)} mountEditor={setYAMLEditor} />
-              </>
+              <Box display="flex" flexDirection="column" height="100%">
+                <Box px={3} pt={3}>
+                  <PaperTop title={experiment.name}>
+                    <Space direction="row">
+                      <Button color="secondary" size="small" onClick={handleDeleteConfirm}>
+                        {T('common.delete')}
+                      </Button>
+                      <Button variant="contained" color="primary" size="small" onClick={handleApplyExperiment}>
+                        {T('common.submit')}
+                      </Button>
+                    </Space>
+                  </PaperTop>
+                </Box>
+                <Box flex={1}>
+                  <YAMLEditor data={yaml.dump(experiment.yaml)} mountEditor={setYAMLEditor} />
+                </Box>
+              </Box>
             )}
           </Paper>
         </div>
       </Modal>
     </>
   )
-})
+}
 
 export default Predefined

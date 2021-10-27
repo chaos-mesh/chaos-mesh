@@ -1,154 +1,124 @@
+/*
+ * Copyright 2021 Chaos Mesh Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 import { Box, FormControlLabel, Link, Switch, Typography } from '@material-ui/core'
-import { FormikErrors, FormikTouched, getIn } from 'formik'
-import React, { useEffect, useState } from 'react'
+import { FormikErrors, FormikTouched, getIn, useFormikContext } from 'formik'
+import { useEffect, useState } from 'react'
+import { validateDuration, validateSchedule } from 'lib/formikhelpers'
 
+import { ExperimentKind } from 'components/NewExperiment/types'
 import { FormattedMessage } from 'react-intl'
-import HelpOutlineIcon from '@material-ui/icons/HelpOutline'
-import { RootState } from 'store'
 import T from 'components/T'
 import { TextField } from 'components/FormField'
-import Tooltip from 'components-mui/Tooltip'
-import { useSelector } from 'react-redux'
+import { useStoreSelector } from 'store'
 
-const mustBeScheduled = ['pod-kill', 'container-kill']
-
-function validateCron(value: string) {
-  let error
-
-  if (value === '') {
-    error = 'The cron is required'
+function isInstant(kind: ExperimentKind | '', action: string) {
+  if (kind === 'PodChaos' && (action === 'pod-kill' || action === 'container-kill')) {
+    return true
   }
 
-  return error
-}
-
-function validateDuration(value: string) {
-  let error
-
-  if (value === '') {
-    error = 'The duration is required'
-  }
-
-  return error
+  return false
 }
 
 interface SchedulerProps {
   errors: FormikErrors<Record<string, any>>
   touched: FormikTouched<Record<string, any>>
+  inSchedule?: boolean
 }
 
-const Scheduler: React.FC<SchedulerProps> = ({ errors, touched }) => {
-  const { fromExternal, basic, target } = useSelector((state: RootState) => state.experiments)
-  const scheduled = target.kind
-    ? target.kind === 'PodChaos' && mustBeScheduled.includes(target.pod_chaos.action)
-      ? true
-      : false
-    : false
-  const [continuous, setContinuous] = useState(scheduled)
+const Scheduler: React.FC<SchedulerProps> = ({ errors, touched, inSchedule = false }) => {
+  const { fromExternal, kindAction, basic } = useStoreSelector((state) => state.experiments)
+  const { values, setFieldValue } = useFormikContext()
+  const [kind, action] = kindAction
+  const instant = isInstant(kind, action)
+
+  const [continuous, setContinuous] = useState(false)
 
   useEffect(() => {
-    if (scheduled) {
-      setContinuous(false)
-    }
-  }, [scheduled])
-
-  useEffect(() => {
-    if (fromExternal && basic.scheduler.cron === '' && basic.scheduler.duration === '') {
+    if (!inSchedule && fromExternal && basic.spec.duration === '') {
       setContinuous(true)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fromExternal])
 
-  const handleChecked = (_: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
-    if (scheduled) {
-      setContinuous(false)
-    } else {
-      setContinuous(checked)
+  const handleChecked = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const checked = e.target.checked
+
+    setContinuous(checked)
+
+    if (checked && getIn(values, 'spec.duration') !== '') {
+      setFieldValue('spec.duration', '')
     }
   }
 
   return (
     <>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography style={{ display: 'flex', alignItems: 'center' }}>
-          {T('newE.steps.schedule')}
-          <Tooltip
-            title={
-              <Typography variant="body2">
-                <FormattedMessage
-                  id="newE.schedule.tooltip"
-                  values={{
-                    cronv3: (
-                      <Link href="https://pkg.go.dev/github.com/robfig/cron/v3" target="_blank">
-                        https://pkg.go.dev/github.com/robfig/cron/v3
-                      </Link>
-                    ),
-                  }}
-                />
-              </Typography>
-            }
-            interactive
-          >
-            <HelpOutlineIcon fontSize="small" />
-          </Tooltip>
-        </Typography>
-        <Box>
+        <Typography>{T('newE.steps.run')}</Typography>
+        {!inSchedule && (
           <FormControlLabel
             style={{ marginRight: 0 }}
             control={
               <Switch name="continuous" color="primary" size="small" checked={continuous} onChange={handleChecked} />
             }
-            label={T('newE.schedule.continuous')}
+            label={T('newE.run.continuous')}
+            disabled={instant}
           />
-          {scheduled && (
-            <Typography variant="subtitle2" color="textSecondary">
-              {T('newE.schedule.mustBeScheduled')}
-            </Typography>
-          )}
-        </Box>
+        )}
       </Box>
 
-      {!continuous && (
-        <Box>
-          <TextField
-            fast
-            name="scheduler.cron"
-            label="Cron"
-            validate={validateCron}
-            helperText={
-              getIn(errors, 'scheduler.cron') && getIn(touched, 'scheduler.cron') ? (
-                getIn(errors, 'scheduler.cron')
-              ) : (
-                <FormattedMessage
-                  id="newE.schedule.cronHelper"
-                  values={{
-                    crontabguru: (
-                      <Link href="https://crontab.guru/" target="_blank" underline="always">
-                        https://crontab.guru/
-                      </Link>
-                    ),
-                  }}
-                />
-              )
-            }
-            error={getIn(errors, 'scheduler.cron') && getIn(touched, 'scheduler.cron') ? true : false}
-          />
+      {inSchedule && (
+        <TextField
+          fast
+          name="spec.schedule"
+          label={T('schedules.single')}
+          validate={validateSchedule()}
+          helperText={
+            getIn(errors, 'spec.schedule') && getIn(touched, 'spec.schedule') ? (
+              getIn(errors, 'spec.schedule')
+            ) : (
+              <FormattedMessage
+                id="newS.basic.scheduleHelper"
+                values={{
+                  crontabguru: (
+                    <Link href="https://crontab.guru/" target="_blank" underline="always">
+                      https://crontab.guru/
+                    </Link>
+                  ),
+                }}
+              />
+            )
+          }
+          error={getIn(errors, 'spec.schedule') && getIn(touched, 'spec.schedule') ? true : false}
+        />
+      )}
 
-          {!scheduled && (
-            <TextField
-              fast
-              name="scheduler.duration"
-              label={T('newE.schedule.duration')}
-              validate={validateDuration}
-              helperText={
-                getIn(errors, 'scheduler.duration') && getIn(touched, 'scheduler.duration')
-                  ? getIn(errors, 'scheduler.duration')
-                  : T('newE.schedule.durationHelper')
-              }
-              error={getIn(errors, 'scheduler.duration') && getIn(touched, 'scheduler.duration') ? true : false}
-            />
-          )}
-        </Box>
+      {!continuous && (
+        <TextField
+          name="spec.duration"
+          label={T('common.duration')}
+          validate={instant ? undefined : validateDuration()}
+          helperText={
+            getIn(errors, 'spec.duration') && getIn(touched, 'spec.duration')
+              ? getIn(errors, 'spec.duration')
+              : T('common.durationHelper')
+          }
+          error={getIn(errors, 'spec.duration') && getIn(touched, 'spec.duration') ? true : false}
+          disabled={instant}
+        />
       )}
     </>
   )

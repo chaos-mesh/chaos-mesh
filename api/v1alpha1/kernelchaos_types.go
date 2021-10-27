@@ -1,15 +1,17 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package v1alpha1
 
@@ -18,7 +20,7 @@ import (
 )
 
 // +kubebuilder:object:root=true
-// +chaos-mesh:base
+// +chaos-mesh:experiment
 
 // KernelChaos is the Schema for the kernelchaos API
 type KernelChaos struct {
@@ -33,46 +35,18 @@ type KernelChaos struct {
 	Status KernelChaosStatus `json:"status"`
 }
 
+var _ InnerObjectWithSelector = (*KernelChaos)(nil)
+var _ InnerObject = (*KernelChaos)(nil)
+
 // KernelChaosSpec defines the desired state of KernelChaos
 type KernelChaosSpec struct {
-	// Mode defines the mode to run chaos action.
-	// Supported mode: one / all / fixed / fixed-percent / random-max-percent
-	// +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
-	Mode PodMode `json:"mode"`
-
-	// Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
-	// If `FixedPodMode`, provide an integer of pods to do chaos action.
-	// If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
-	// If `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
-	// +optional
-	Value string `json:"value"`
-
-	// Selector is used to select pods that are used to inject chaos action.
-	Selector SelectorSpec `json:"selector"`
+	PodSelector `json:",inline"`
 
 	// FailKernRequest defines the request of kernel injection
 	FailKernRequest FailKernRequest `json:"failKernRequest"`
 
 	// Duration represents the duration of the chaos action
-	Duration *string `json:"duration,omitempty"`
-
-	// Scheduler defines some schedule rules to control the running time of the chaos experiment about time.
-	Scheduler *SchedulerSpec `json:"scheduler,omitempty"`
-}
-
-// GetSelector is a getter for Selector (for implementing SelectSpec)
-func (in *KernelChaosSpec) GetSelector() SelectorSpec {
-	return in.Selector
-}
-
-// GetMode is a getter for Mode (for implementing SelectSpec)
-func (in *KernelChaosSpec) GetMode() PodMode {
-	return in.Mode
-}
-
-// GetValue is a getter for Value (for implementing SelectSpec)
-func (in *KernelChaosSpec) GetValue() string {
-	return in.Value
+	Duration *string `json:"duration,omitempty" webhook:"Duration"`
 }
 
 // FailKernRequest defines the injection conditions
@@ -137,4 +111,10 @@ type Frame struct {
 // KernelChaosStatus defines the observed state of KernelChaos
 type KernelChaosStatus struct {
 	ChaosStatus `json:",inline"`
+}
+
+func (obj *KernelChaos) GetSelectorSpecs() map[string]interface{} {
+	return map[string]interface{}{
+		".": &obj.Spec.PodSelector,
+	}
 }

@@ -1,15 +1,17 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package fusedev
 
@@ -58,7 +60,8 @@ func GrantAccess() error {
 		return errors.Errorf("fail to find device cgroup")
 	}
 
-	deviceCgroupPath = "/sys/fs/cgroup/devices" + deviceCgroupPath + "/devices.allow"
+	// It's hard to use /pkg/chaosdaemon/cgroups to wrap this logic.
+	deviceCgroupPath = "/host-sys/fs/cgroup/devices" + deviceCgroupPath + "/devices.allow"
 	f, err := os.OpenFile(deviceCgroupPath, os.O_WRONLY, 0)
 	if err != nil {
 		return err
@@ -68,9 +71,5 @@ func GrantAccess() error {
 	// 10, 229 according to https://www.kernel.org/doc/Documentation/admin-guide/devices.txt
 	content := "c 10:229 rwm"
 	_, err = f.WriteString(content)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }

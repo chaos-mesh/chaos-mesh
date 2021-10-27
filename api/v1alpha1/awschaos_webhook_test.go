@@ -1,15 +1,17 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package v1alpha1
 
@@ -20,114 +22,81 @@ import (
 )
 
 var _ = Describe("awschaos_webhook", func() {
-	Context("ChaosValidator of awschaos", func() {
+	Context("webhook.Validator of awschaos", func() {
 		It("Validate", func() {
 
 			type TestCase struct {
 				name    string
-				chaos   AwsChaos
-				execute func(chaos *AwsChaos) error
+				chaos   AWSChaos
+				execute func(chaos *AWSChaos) error
 				expect  string
 			}
-			duration := "400s"
 			testDeviceName := "testDeviceName"
 			testEbsVolume := "testEbsVolume"
 			tcs := []TestCase{
 				{
 					name: "simple ValidateCreate for DetachVolume",
-					chaos: AwsChaos{
+					chaos: AWSChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
 							Name:      "foo1",
 						},
-						Spec: AwsChaosSpec{
+						Spec: AWSChaosSpec{
 							Action: DetachVolume,
 						},
 					},
-					execute: func(chaos *AwsChaos) error {
-						return chaos.ValidateCreate()
-					},
-					expect: "error",
-				},
-				{
-					name: "only define the Scheduler and execute Ec2Stop",
-					chaos: AwsChaos{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: metav1.NamespaceDefault,
-							Name:      "foo4",
-						},
-						Spec: AwsChaosSpec{
-							Scheduler: &SchedulerSpec{
-								Cron: "@every 10m",
-							},
-							Action: Ec2Stop,
-						},
-					},
-					execute: func(chaos *AwsChaos) error {
-						return chaos.ValidateCreate()
-					},
-					expect: "error",
-				},
-				{
-					name: "only define the Duration and execute Ec2Stop",
-					chaos: AwsChaos{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: metav1.NamespaceDefault,
-							Name:      "foo5",
-						},
-						Spec: AwsChaosSpec{
-							Action:   Ec2Stop,
-							Duration: &duration,
-						},
-					},
-					execute: func(chaos *AwsChaos) error {
+					execute: func(chaos *AWSChaos) error {
 						return chaos.ValidateCreate()
 					},
 					expect: "error",
 				},
 				{
 					name: "unknow action",
-					chaos: AwsChaos{
+					chaos: AWSChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
 							Name:      "foo6",
 						},
 					},
-					execute: func(chaos *AwsChaos) error {
+					execute: func(chaos *AWSChaos) error {
 						return chaos.ValidateCreate()
 					},
 					expect: "error",
 				},
 				{
 					name: "validate the DetachVolume without EbsVolume",
-					chaos: AwsChaos{
+					chaos: AWSChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
 							Name:      "foo7",
 						},
-						Spec: AwsChaosSpec{
-							Action:     DetachVolume,
-							DeviceName: &testDeviceName,
+						Spec: AWSChaosSpec{
+							Action: DetachVolume,
+							AWSSelector: AWSSelector{
+								DeviceName: &testDeviceName,
+							},
 						},
 					},
-					execute: func(chaos *AwsChaos) error {
+					execute: func(chaos *AWSChaos) error {
 						return chaos.ValidateCreate()
 					},
 					expect: "error",
 				},
 				{
 					name: "validate the DetachVolume without DeviceName",
-					chaos: AwsChaos{
+					chaos: AWSChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
 							Name:      "foo7",
 						},
-						Spec: AwsChaosSpec{
-							Action:    DetachVolume,
-							EbsVolume: &testEbsVolume,
+						Spec: AWSChaosSpec{
+							Action: DetachVolume,
+							AWSSelector: AWSSelector{
+								EbsVolume: &testEbsVolume,
+							},
 						},
 					},
-					execute: func(chaos *AwsChaos) error {
+					execute: func(chaos *AWSChaos) error {
 						return chaos.ValidateCreate()
 					},
 					expect: "error",

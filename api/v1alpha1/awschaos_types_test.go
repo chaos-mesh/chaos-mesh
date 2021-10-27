@@ -1,21 +1,22 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package v1alpha1
 
 import (
 	"context"
-	"time"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -27,10 +28,10 @@ import (
 // These tests are written in BDD-style using Ginkgo framework. Refer to
 // http://onsi.github.io/ginkgo to learn more.
 
-var _ = Describe("AwsChaos", func() {
+var _ = Describe("AWSChaos", func() {
 	var (
 		key              types.NamespacedName
-		created, fetched *AwsChaos
+		created, fetched *AWSChaos
 	)
 
 	BeforeEach(func() {
@@ -50,42 +51,30 @@ var _ = Describe("AwsChaos", func() {
 				Namespace: "default",
 			}
 
-			created = &AwsChaos{
+			created = &AWSChaos{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "foo",
 					Namespace: "default",
 				},
-				Spec: AwsChaosSpec{
-					Action:      Ec2Stop,
-					Ec2Instance: testInstance,
-					SecretName:  &testSecretName,
+				Spec: AWSChaosSpec{
+					Action: Ec2Stop,
+					AWSSelector: AWSSelector{
+						Ec2Instance: testInstance,
+					},
+					SecretName: &testSecretName,
 				},
 			}
 
 			By("creating an API obj")
 			Expect(k8sClient.Create(context.TODO(), created)).To(Succeed())
 
-			fetched = &AwsChaos{}
+			fetched = &AWSChaos{}
 			Expect(k8sClient.Get(context.TODO(), key, fetched)).To(Succeed())
 			Expect(fetched).To(Equal(created))
 
 			By("deleting the created object")
 			Expect(k8sClient.Delete(context.TODO(), created)).To(Succeed())
 			Expect(k8sClient.Get(context.TODO(), key, created)).ToNot(Succeed())
-		})
-
-		It("should set next start time successfully", func() {
-			awschaos := &AwsChaos{}
-			nTime := time.Now()
-			awschaos.SetNextStart(nTime)
-			Expect(awschaos.GetNextStart()).To(Equal(nTime))
-		})
-
-		It("should set recover time successfully", func() {
-			awschaos := &AwsChaos{}
-			nTime := time.Now()
-			awschaos.SetNextRecover(nTime)
-			Expect(awschaos.GetNextRecover()).To(Equal(nTime))
 		})
 	})
 })

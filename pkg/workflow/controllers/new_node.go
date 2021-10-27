@@ -4,17 +4,18 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package controllers
 
 import (
-	"errors"
 	"fmt"
 	"time"
 
@@ -44,8 +45,8 @@ func renderNodesByTemplates(workflow *v1alpha1.Workflow, parent *v1alpha1.Workfl
 			now := metav1.NewTime(time.Now())
 			var deadline *metav1.Time = nil
 
-			if template.Duration != nil {
-				duration, err := time.ParseDuration(*template.Duration)
+			if template.Deadline != nil {
+				duration, err := time.ParseDuration(*template.Deadline)
 				if err != nil {
 					// TODO: logger
 					return nil, err
@@ -60,13 +61,16 @@ func renderNodesByTemplates(workflow *v1alpha1.Workflow, parent *v1alpha1.Workfl
 					GenerateName: fmt.Sprintf("%s-", template.Name),
 				},
 				Spec: v1alpha1.WorkflowNodeSpec{
-					TemplateName: template.Name,
-					WorkflowName: workflow.Name,
-					Type:         template.Type,
-					StartTime:    &now,
-					Deadline:     deadline,
-					Tasks:        template.Tasks,
-					EmbedChaos:   template.EmbedChaos,
+					TemplateName:        template.Name,
+					WorkflowName:        workflow.Name,
+					Type:                template.Type,
+					StartTime:           &now,
+					Deadline:            deadline,
+					Children:            template.Children,
+					Task:                template.Task,
+					ConditionalBranches: template.ConditionalBranches,
+					EmbedChaos:          template.EmbedChaos,
+					Schedule:            conversionSchedule(template.Schedule),
 				},
 			}
 
@@ -105,11 +109,41 @@ func renderNodesByTemplates(workflow *v1alpha1.Workflow, parent *v1alpha1.Workfl
 			result = append(result, &renderedNode)
 			continue
 		}
-		return nil, errors.New(
-			fmt.Sprintf("workflow %s do not contains template called %s",
-				workflow.Name,
-				name,
-			))
+		return nil, fmt.Errorf(
+			"workflow %s do not contains template called %s",
+			workflow.Name,
+			name,
+		)
 	}
 	return result, nil
+}
+
+func conversionSchedule(origin *v1alpha1.ChaosOnlyScheduleSpec) *v1alpha1.ScheduleSpec {
+	if origin == nil {
+		return nil
+	}
+	return &v1alpha1.ScheduleSpec{
+		Schedule:                origin.Schedule,
+		StartingDeadlineSeconds: origin.StartingDeadlineSeconds,
+		ConcurrencyPolicy:       origin.ConcurrencyPolicy,
+		HistoryLimit:            origin.HistoryLimit,
+		Type:                    origin.Type,
+		ScheduleItem: v1alpha1.ScheduleItem{
+			EmbedChaos: v1alpha1.EmbedChaos{
+				AWSChaos:             origin.EmbedChaos.AWSChaos,
+				DNSChaos:             origin.EmbedChaos.DNSChaos,
+				GCPChaos:             origin.EmbedChaos.GCPChaos,
+				HTTPChaos:            origin.EmbedChaos.HTTPChaos,
+				IOChaos:              origin.EmbedChaos.IOChaos,
+				JVMChaos:             origin.EmbedChaos.JVMChaos,
+				KernelChaos:          origin.EmbedChaos.KernelChaos,
+				NetworkChaos:         origin.EmbedChaos.NetworkChaos,
+				PodChaos:             origin.EmbedChaos.PodChaos,
+				StressChaos:          origin.EmbedChaos.StressChaos,
+				TimeChaos:            origin.EmbedChaos.TimeChaos,
+				PhysicalMachineChaos: origin.EmbedChaos.PhysicalMachineChaos,
+			},
+			Workflow: nil,
+		},
+	}
 }

@@ -1,15 +1,17 @@
-// Copyright 2019 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package common
 
@@ -21,15 +23,10 @@ import (
 	"io"
 	"regexp"
 	"strings"
-	"time"
-
-	"google.golang.org/grpc"
-
-	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
-	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 
 	"github.com/fatih/color"
 	"github.com/pkg/errors"
+	"google.golang.org/grpc"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -42,8 +39,10 @@ import (
 	ctrlconfig "github.com/chaos-mesh/chaos-mesh/controllers/config"
 	daemonClient "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/client"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
+	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 	"github.com/chaos-mesh/chaos-mesh/pkg/portforward"
-	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
 )
 
 type Color string
@@ -90,7 +89,7 @@ const (
 const ChaosDaemonClientCert = "chaos-mesh-daemon-client-certs"
 const ChaosDaemonNamespace = "chaos-testing"
 
-var TLSFiles TLSFileConfig
+var TLSFiles grpcUtils.TLSFile
 var Insecure bool
 
 type ItemResult struct {
@@ -179,23 +178,14 @@ func InitClientSet() (*ClientSet, error) {
 }
 
 // GetPods returns pod list and corresponding chaos daemon
-func GetPods(ctx context.Context, chaosName string, status v1alpha1.ChaosStatus, selectorSpec v1alpha1.SelectorSpec, c client.Client) ([]v1.Pod, []v1.Pod, error) {
+func GetPods(ctx context.Context, chaosName string, status v1alpha1.ChaosStatus, selectorSpec v1alpha1.PodSelectorSpec, c client.Client) ([]v1.Pod, []v1.Pod, error) {
 	// get podName
-	failedMessage := status.FailedMessage
+	failedMessage := "" // TODO: fill in message
 	if failedMessage != "" {
 		PrettyPrint(fmt.Sprintf("chaos %s failed with: %s", chaosName, failedMessage), 0, Red)
 	}
 
-	phase := status.Experiment.Phase
-	nextStart := status.Scheduler.NextStart
-
-	if phase == v1alpha1.ExperimentPhaseWaiting {
-		waitTime := nextStart.Sub(time.Now())
-		L().WithName("GetPods").V(1).Info(fmt.Sprintf("Waiting for chaos %s to start, in %s\n", chaosName, waitTime))
-		time.Sleep(waitTime)
-	}
-
-	pods, err := selector.SelectPods(ctx, c, c, selectorSpec, ctrlconfig.ControllerCfg.ClusterScoped, ctrlconfig.ControllerCfg.TargetNamespace, ctrlconfig.ControllerCfg.EnableFilterNamespace)
+	pods, err := pod.SelectPods(ctx, c, c, selectorSpec, ctrlconfig.ControllerCfg.ClusterScoped, ctrlconfig.ControllerCfg.TargetNamespace, false)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "failed to SelectPods")
 	}
@@ -204,21 +194,20 @@ func GetPods(ctx context.Context, chaosName string, status v1alpha1.ChaosStatus,
 		return nil, nil, fmt.Errorf("no pods found for chaos %s, selector: %s", chaosName, selectorSpec)
 	}
 
-	// TODO: replace select daemon by
 	var chaosDaemons []v1.Pod
 	// get chaos daemon
-	for _, pod := range pods {
-		nodeName := pod.Spec.NodeName
-		daemonSelector := v1alpha1.SelectorSpec{
+	for _, chaosPod := range pods {
+		nodeName := chaosPod.Spec.NodeName
+		daemonSelector := v1alpha1.PodSelectorSpec{
 			Nodes:          []string{nodeName},
 			LabelSelectors: map[string]string{"app.kubernetes.io/component": "chaos-daemon"},
 		}
-		daemons, err := selector.SelectPods(ctx, c, nil, daemonSelector, ctrlconfig.ControllerCfg.ClusterScoped, ctrlconfig.ControllerCfg.TargetNamespace, ctrlconfig.ControllerCfg.EnableFilterNamespace)
+		daemons, err := pod.SelectPods(ctx, c, nil, daemonSelector, ctrlconfig.ControllerCfg.ClusterScoped, ctrlconfig.ControllerCfg.TargetNamespace, false)
 		if err != nil {
-			return nil, nil, errors.Wrap(err, fmt.Sprintf("failed to select daemon pod for pod %s", pod.GetName()))
+			return nil, nil, errors.Wrap(err, fmt.Sprintf("failed to select daemon pod for pod %s", chaosPod.GetName()))
 		}
 		if len(daemons) == 0 {
-			return nil, nil, fmt.Errorf("no daemons found for pod %s with selector: %s", pod.GetName(), daemonSelector)
+			return nil, nil, fmt.Errorf("no daemons found for pod %s with selector: %s", chaosPod.GetName(), daemonSelector)
 		}
 		chaosDaemons = append(chaosDaemons, daemons[0])
 	}
@@ -230,12 +219,12 @@ func GetPods(ctx context.Context, chaosName string, status v1alpha1.ChaosStatus,
 func GetChaosList(ctx context.Context, chaosType string, chaosName string, ns string, c client.Client) ([]runtime.Object, []string, error) {
 	chaosType = upperCaseChaos(strings.ToLower(chaosType))
 	allKinds := v1alpha1.AllKinds()
-	chaosListInterface := allKinds[chaosType].ChaosList
+	chaosListInterface := allKinds[chaosType].SpawnList()
 
 	if err := c.List(ctx, chaosListInterface, client.InNamespace(ns)); err != nil {
 		return nil, nil, errors.Wrapf(err, "failed to get chaosList with namespace %s", ns)
 	}
-	chaosList := chaosListInterface.ListChaos()
+	chaosList := chaosListInterface.GetItems()
 	if len(chaosList) == 0 {
 		return nil, nil, fmt.Errorf("no chaos is found, please check your input")
 	}
@@ -243,13 +232,13 @@ func GetChaosList(ctx context.Context, chaosType string, chaosName string, ns st
 	var retList []runtime.Object
 	var retNameList []string
 	for _, ch := range chaosList {
-		if chaosName == "" || chaosName == ch.Name {
-			chaos, err := getChaos(ctx, chaosType, ch.Name, ns, c)
+		if chaosName == "" || chaosName == ch.GetName() {
+			chaos, err := getChaos(ctx, chaosType, ch.GetName(), ns, c)
 			if err != nil {
 				return nil, nil, err
 			}
 			retList = append(retList, chaos)
-			retNameList = append(retNameList, ch.Name)
+			retNameList = append(retNameList, ch.GetName())
 		}
 	}
 	if len(retList) == 0 {
@@ -261,7 +250,7 @@ func GetChaosList(ctx context.Context, chaosType string, chaosName string, ns st
 
 func getChaos(ctx context.Context, chaosType string, chaosName string, ns string, c client.Client) (runtime.Object, error) {
 	allKinds := v1alpha1.AllKinds()
-	chaos := allKinds[chaosType].Chaos
+	chaos := allKinds[chaosType].SpawnObject()
 	objectKey := client.ObjectKey{
 		Namespace: ns,
 		Name:      chaosName,
@@ -353,6 +342,16 @@ func forwardPorts(ctx context.Context, pod v1.Pod, port uint16) (context.CancelF
 	return pfCancel, localPort, err
 }
 
+func ForwardSvcPorts(ctx context.Context, ns, svc string, port uint16) (context.CancelFunc, uint16, error) {
+	commonRestClientGetter := NewCommonRestClientGetter()
+	fw, err := portforward.NewPortForwarder(ctx, commonRestClientGetter, false)
+	if err != nil {
+		return nil, 0, errors.Wrap(err, "failed to create port forwarder")
+	}
+	_, localPort, pfCancel, err := portforward.ForwardOnePort(fw, ns, svc, port)
+	return pfCancel, localPort, err
+}
+
 // Log print log of pod
 func Log(pod v1.Pod, tail int64, c *kubernetes.Clientset) (string, error) {
 	podLogOpts := v1.PodLogOptions{}
@@ -362,7 +361,8 @@ func Log(pod v1.Pod, tail int64, c *kubernetes.Clientset) (string, error) {
 	}
 
 	req := c.CoreV1().Pods(pod.Namespace).GetLogs(pod.Name, &podLogOpts)
-	podLogs, err := req.Stream()
+	// FIXME: get context from parameter
+	podLogs, err := req.Stream(context.TODO())
 	if err != nil {
 		return "", errors.Wrapf(err, "failed to open log stream for pod %s/%s", pod.GetNamespace(), pod.GetName())
 	}
@@ -374,45 +374,6 @@ func Log(pod v1.Pod, tail int64, c *kubernetes.Clientset) (string, error) {
 		return "", errors.Wrapf(err, "failed to copy information from podLogs to buf")
 	}
 	return buf.String(), nil
-}
-
-// CheckFailedMessage provide debug info and suggestions from failed message
-func CheckFailedMessage(ctx context.Context, failedMessage string, daemons []v1.Pod, c *ClientSet) error {
-	if strings.Contains(failedMessage, "rpc error: code = Unavailable desc = connection error") || strings.Contains(failedMessage, "connect: connection refused") {
-		if err := checkConnForCtrlAndDaemon(ctx, daemons, c); err != nil {
-			return fmt.Errorf("error occurs when check failed message: %s", err)
-		}
-	}
-	return nil
-}
-
-func checkConnForCtrlAndDaemon(ctx context.Context, daemons []v1.Pod, c *ClientSet) error {
-	ctrlSelector := v1alpha1.SelectorSpec{
-		LabelSelectors: map[string]string{"app.kubernetes.io/component": "controller-manager"},
-	}
-	ctrlMgrs, err := selector.SelectPods(ctx, c.CtrlCli, c.CtrlCli, ctrlSelector, ctrlconfig.ControllerCfg.ClusterScoped, ctrlconfig.ControllerCfg.TargetNamespace, ctrlconfig.ControllerCfg.EnableFilterNamespace)
-	if err != nil {
-		return errors.Wrapf(err, "failed to select pod for controller-manager")
-	}
-	if len(ctrlMgrs) == 0 {
-		return fmt.Errorf("could not found controller manager")
-	}
-	for _, daemon := range daemons {
-		daemonIP := daemon.Status.PodIP
-		cmd := fmt.Sprintf("ping -c 1 %s > /dev/null; echo $?", daemonIP)
-		out, err := Exec(ctx, ctrlMgrs[0], cmd, c.KubeCli)
-		if err != nil {
-			return errors.Wrapf(err, "run command %s failed", cmd)
-		}
-		if string(out) == "0" {
-			PrettyPrint(fmt.Sprintf("Connection between Controller-Manager and Daemon %s (ip address: %s) works well", daemon.Name, daemonIP), 0, Green)
-		} else {
-			PrettyPrint(fmt.Sprintf(`Connection between Controller-Manager and Daemon %s (ip address: %s) is blocked.
-Please check network policy / firewall, or see FAQ on website`, daemon.Name, daemonIP), 0, Red)
-		}
-
-	}
-	return nil
 }
 
 // ConnectToLocalChaosDaemon would connect to ChaosDaemon run in localhost
@@ -432,23 +393,26 @@ func ConnectToLocalChaosDaemon(port int) (daemonClient.ChaosDaemonClientInterfac
 }
 
 func getGrpcClient(port int) (*grpc.ClientConn, error) {
+	builder := grpcUtils.Builder("localhost", port)
 	if Insecure {
-		return grpcUtils.CreateGrpcConnection("localhost", port, "", "", "")
-	}
-	if TLSFiles.CaCert == "" || TLSFiles.Cert == "" || TLSFiles.Key == "" {
-		PrettyPrint("TLS Files are not complete, fall back to use secrets.", 0, Green)
-		config, err := getTLSConfigFromSecrets()
-		if err != nil {
-			return nil, err
+		builder.Insecure()
+	} else {
+		if TLSFiles.CaCert == "" || TLSFiles.Cert == "" || TLSFiles.Key == "" {
+			PrettyPrint("TLS Files are not complete, fall back to use secrets.", 0, Green)
+			config, err := getTLSConfigFromSecrets()
+			if err != nil {
+				return nil, err
+			}
+			builder.TLSFromRaw(config.CaCert, config.Cert, config.Key)
+		} else {
+			PrettyPrint("Using TLS Files.", 0, Green)
+			builder.TLSFromFile(TLSFiles.CaCert, TLSFiles.Cert, TLSFiles.Key)
 		}
-		return grpcUtils.CreateGrpcConnectionFromRaw("localhost", port, config.caCert, config.cert, config.key)
 	}
-	PrettyPrint("Using TLS Files.", 0, Green)
-	return grpcUtils.CreateGrpcConnection("localhost", port, TLSFiles.CaCert, TLSFiles.Cert, TLSFiles.Key)
+	return builder.Build()
 }
 
-func getTLSConfigFromSecrets() (*rawTLSConfig, error) {
-	var cfg rawTLSConfig
+func getTLSConfigFromSecrets() (*grpcUtils.TLSRaw, error) {
 	restconfig, err := config.GetConfig()
 	if err != nil {
 		return nil, err
@@ -457,23 +421,15 @@ func getTLSConfigFromSecrets() (*rawTLSConfig, error) {
 	if err != nil {
 		return nil, err
 	}
-	secret, err := kubeClient.CoreV1().Secrets(ChaosDaemonNamespace).Get(ChaosDaemonClientCert, metav1.GetOptions{})
+	// FIXME: get context from parameter
+	secret, err := kubeClient.CoreV1().Secrets(ChaosDaemonNamespace).Get(context.TODO(), ChaosDaemonClientCert, metav1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}
-	cfg.caCert = secret.Data["ca.crt"]
-	cfg.cert = secret.Data["tls.crt"]
-	cfg.key = secret.Data["tls.key"]
+	cfg := grpcUtils.TLSRaw{
+		CaCert: secret.Data["ca.crt"],
+		Cert:   secret.Data["tls.crt"],
+		Key:    secret.Data["tls.key"],
+	}
 	return &cfg, nil
-}
-
-type rawTLSConfig struct {
-	caCert []byte
-	cert   []byte
-	key    []byte
-}
-type TLSFileConfig struct {
-	CaCert string
-	Cert   string
-	Key    string
 }

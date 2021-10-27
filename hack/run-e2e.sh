@@ -1,17 +1,18 @@
 #!/usr/bin/env bash
-
-# Copyright 2020 Chaos Mesh Authors.
+# Copyright 2021 Chaos Mesh Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+# http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
 
 set -o errexit
 set -o nounset
@@ -42,7 +43,7 @@ GINKGO_PARALLEL=${GINKGO_PARALLEL:-n} # set to 'y' to run tests in parallel
 GINKGO_NO_COLOR=${GINKGO_NO_COLOR:-n}
 GINKGO_STREAM=${GINKGO_STREAM:-y}
 SKIP_GINKGO=${SKIP_GINKGO:-}
-# We don't delete namespace on failure by default for easier debugging in local development.
+# We don't finalizers namespace on failure by default for easier debugging in local development.
 # TODO support this feature
 DELETE_NAMESPACE_ON_FAILURE=${DELETE_NAMESPACE_ON_FAILURE:-false}
 DOCKER_REGISTRY=${DOCKER_REGISTRY:-localhost:5000}

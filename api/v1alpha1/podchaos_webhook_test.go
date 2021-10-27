@@ -1,15 +1,17 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package v1alpha1
 
@@ -29,7 +31,7 @@ var _ = Describe("podchaos_webhook", func() {
 			Expect(podchaos.Spec.Selector.Namespaces[0]).To(Equal(metav1.NamespaceDefault))
 		})
 	})
-	Context("ChaosValidator of podchaos", func() {
+	Context("webhook.Validator of podchaos", func() {
 		It("Validate", func() {
 
 			type TestCase struct {
@@ -38,7 +40,6 @@ var _ = Describe("podchaos_webhook", func() {
 				execute func(chaos *PodChaos) error
 				expect  string
 			}
-			duration := "400s"
 			tcs := []TestCase{
 				{
 					name: "simple ValidateCreate for ContainerKillAction",
@@ -57,22 +58,6 @@ var _ = Describe("podchaos_webhook", func() {
 					expect: "error",
 				},
 				{
-					name: "simple ValidateUpdate for PodKillAction",
-					chaos: PodChaos{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: metav1.NamespaceDefault,
-							Name:      "foo2",
-						},
-						Spec: PodChaosSpec{
-							Action: PodKillAction,
-						},
-					},
-					execute: func(chaos *PodChaos) error {
-						return chaos.ValidateUpdate(chaos)
-					},
-					expect: "error",
-				},
-				{
 					name: "simple ValidateDelete",
 					chaos: PodChaos{
 						ObjectMeta: metav1.ObjectMeta{
@@ -86,56 +71,7 @@ var _ = Describe("podchaos_webhook", func() {
 					expect: "",
 				},
 				{
-					name: "only define the Scheduler and execute PodFailureAction",
-					chaos: PodChaos{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: metav1.NamespaceDefault,
-							Name:      "foo4",
-						},
-						Spec: PodChaosSpec{
-							Scheduler: &SchedulerSpec{
-								Cron: "@every 10m",
-							},
-							Action: PodFailureAction,
-						},
-					},
-					execute: func(chaos *PodChaos) error {
-						return chaos.ValidateCreate()
-					},
-					expect: "error",
-				},
-				{
-					name: "only define the Duration and execute PodFailureAction",
-					chaos: PodChaos{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: metav1.NamespaceDefault,
-							Name:      "foo5",
-						},
-						Spec: PodChaosSpec{
-							Action:   PodFailureAction,
-							Duration: &duration,
-						},
-					},
-					execute: func(chaos *PodChaos) error {
-						return chaos.ValidateCreate()
-					},
-					expect: "error",
-				},
-				{
-					name: "unknow action",
-					chaos: PodChaos{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: metav1.NamespaceDefault,
-							Name:      "foo6",
-						},
-					},
-					execute: func(chaos *PodChaos) error {
-						return chaos.ValidateCreate()
-					},
-					expect: "error",
-				},
-				{
-					name: "validate the ContainerName",
+					name: "validate the ContainerNames",
 					chaos: PodChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,

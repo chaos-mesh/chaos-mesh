@@ -1,7 +1,23 @@
+/*
+ * Copyright 2021 Chaos Mesh Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 import { PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 
-import { ExperimentScope } from 'components/NewExperiment/types'
-import { Kind } from 'components/NewExperimentNext/data/target'
+import { Kind } from 'components/NewExperimentNext/data/types'
+import { Scope } from 'components/NewExperiment/types'
 import api from 'api'
 
 export const getNamespaces = createAsyncThunk(
@@ -18,11 +34,11 @@ export const getAnnotations = createAsyncThunk(
 )
 export const getCommonPodsByNamespaces = createAsyncThunk(
   'common/pods',
-  async (data: Partial<ExperimentScope>) => (await api.common.pods(data)).data
+  async (data: Partial<Scope['selector']>) => (await api.common.pods(data)).data
 )
 export const getNetworkTargetPodsByNamespaces = createAsyncThunk(
   'network/target/pods',
-  async (data: Partial<ExperimentScope>) => (await api.common.pods(data)).data
+  async (data: Partial<Scope['selector']>) => (await api.common.pods(data)).data
 )
 
 const initialState: {
@@ -35,7 +51,7 @@ const initialState: {
   step1: boolean
   step2: boolean
   kindAction: [Kind | '', string]
-  target: any
+  spec: any
   basic: any
 } = {
   namespaces: [],
@@ -48,7 +64,7 @@ const initialState: {
   step1: false,
   step2: false,
   kindAction: ['', ''],
-  target: {},
+  spec: {},
   basic: {},
 }
 
@@ -67,27 +83,30 @@ const experimentsSlice = createSlice({
     },
     setKindAction(state, action) {
       state.kindAction = action.payload
+      state.spec = {}
     },
-    setTarget(state, action) {
-      state.target = action.payload
+    setSpec(state, action) {
+      state.spec = action.payload
     },
     setBasic(state, action) {
       state.basic = action.payload
     },
     setExternalExperiment(state, action: PayloadAction<any>) {
-      const { kindAction, target, basic } = action.payload
+      const { kindAction, spec, basic } = action.payload
 
       state.fromExternal = true
       state.kindAction = kindAction
-      state.target = target
+      state.spec = spec
       state.basic = basic
     },
     resetNewExperiment(state) {
+      state.pods = []
+      state.networkTargetPods = []
       state.fromExternal = false
       state.step1 = false
       state.step2 = false
       state.kindAction = ['', '']
-      state.target = {}
+      state.spec = {}
       state.basic = {}
     },
   },
@@ -115,7 +134,7 @@ export const {
   setStep1,
   setStep2,
   setKindAction,
-  setTarget,
+  setSpec,
   setBasic,
   setExternalExperiment,
   resetNewExperiment,

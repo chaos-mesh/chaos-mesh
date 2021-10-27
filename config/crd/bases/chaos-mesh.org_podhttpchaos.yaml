@@ -1,0 +1,215 @@
+
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.4.1
+  creationTimestamp: null
+  name: podhttpchaos.chaos-mesh.org
+spec:
+  group: chaos-mesh.org
+  names:
+    kind: PodHttpChaos
+    listKind: PodHttpChaosList
+    plural: podhttpchaos
+    singular: podhttpchaos
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: PodHttpChaos is the Schema for the podhttpchaos API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: PodHttpChaosSpec defines the desired state of PodHttpChaos.
+            properties:
+              rules:
+                description: Rules are a list of injection rule for http request.
+                items:
+                  description: PodHttpChaosRule defines the injection rule for http.
+                  properties:
+                    actions:
+                      description: Actions contains rules to inject target.
+                      properties:
+                        abort:
+                          description: Abort is a rule to abort a http session.
+                          type: boolean
+                        delay:
+                          description: Delay represents the delay of the target request/response.
+                            A duration string is a possibly unsigned sequence of decimal
+                            numbers, each with optional fraction and a unit suffix,
+                            such as "300ms", "2h45m". Valid time units are "ns", "us"
+                            (or "µs"), "ms", "s", "m", "h".
+                          type: string
+                        patch:
+                          description: Patch is a rule to patch some contents in target.
+                          properties:
+                            body:
+                              description: Body is a rule to patch message body of
+                                target.
+                              properties:
+                                type:
+                                  description: Type represents the patch type, only
+                                    support `JSON` as [merge patch json](https://tools.ietf.org/html/rfc7396)
+                                    currently.
+                                  type: string
+                                value:
+                                  description: Value is the patch contents.
+                                  type: string
+                              required:
+                              - type
+                              - value
+                              type: object
+                            headers:
+                              description: 'Headers is a rule to append http headers
+                                of target. For example: `[["Set-Cookie", "<one cookie>"],
+                                ["Set-Cookie", "<another cookie>"]]`.'
+                              items:
+                                items:
+                                  type: string
+                                type: array
+                              type: array
+                            queries:
+                              description: 'Queries is a rule to append uri queries
+                                of target(Request only). For example: `[["foo", "bar"],
+                                ["foo", "unknown"]]`.'
+                              items:
+                                items:
+                                  type: string
+                                type: array
+                              type: array
+                          type: object
+                        replace:
+                          description: Replace is a rule to replace some contents
+                            in target.
+                          properties:
+                            body:
+                              description: Body is a rule to replace http message
+                                body in target.
+                              format: byte
+                              type: string
+                            code:
+                              description: Code is a rule to replace http status code
+                                in response.
+                              format: int32
+                              type: integer
+                            headers:
+                              additionalProperties:
+                                type: string
+                              description: Headers is a rule to replace http headers
+                                of target. The key-value pairs represent header name
+                                and header value pairs.
+                              type: object
+                            method:
+                              description: Method is a rule to replace http method
+                                in request.
+                              type: string
+                            path:
+                              description: Path is rule to to replace uri path in
+                                http request.
+                              type: string
+                            queries:
+                              additionalProperties:
+                                type: string
+                              description: 'Queries is a rule to replace uri queries
+                                in http request. For example, with value `{ "foo":
+                                "unknown" }`, the `/?foo=bar` will be altered to `/?foo=unknown`,'
+                              type: object
+                          type: object
+                      type: object
+                    port:
+                      description: Port represents the target port to be proxy of.
+                      format: int32
+                      type: integer
+                    selector:
+                      description: Selector contains the rules to select target.
+                      properties:
+                        code:
+                          description: Code is a rule to select target by http status
+                            code in response.
+                          format: int32
+                          type: integer
+                        method:
+                          description: Method is a rule to select target by http method
+                            in request.
+                          type: string
+                        path:
+                          description: Path is a rule to select target by uri path
+                            in http request.
+                          type: string
+                        port:
+                          description: Port is a rule to select server listening on
+                            specific port.
+                          format: int32
+                          type: integer
+                        request_headers:
+                          additionalProperties:
+                            type: string
+                          description: RequestHeaders is a rule to select target by
+                            http headers in request. The key-value pairs represent
+                            header name and header value pairs.
+                          type: object
+                        response_headers:
+                          additionalProperties:
+                            type: string
+                          description: ResponseHeaders is a rule to select target
+                            by http headers in response. The key-value pairs represent
+                            header name and header value pairs.
+                          type: object
+                      type: object
+                    source:
+                      description: Source represents the source of current rules
+                      type: string
+                    target:
+                      description: Target is the object to be selected and injected,
+                        <Request|Response>.
+                      type: string
+                  required:
+                  - actions
+                  - port
+                  - selector
+                  - target
+                  type: object
+                type: array
+            type: object
+          status:
+            description: PodHttpChaosStatus defines the actual state of PodHttpChaos.
+            properties:
+              failedMessage:
+                type: string
+              observedGeneration:
+                format: int64
+                type: integer
+              pid:
+                description: Pid represents a running tproxy process id.
+                format: int64
+                type: integer
+              startTime:
+                description: StartTime represents the start time of a tproxy process.
+                format: int64
+                type: integer
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []

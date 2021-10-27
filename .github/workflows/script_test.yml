@@ -11,6 +11,7 @@ jobs:
   run:
     name: Script Test
     runs-on: ubuntu-latest
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-script-test') }}
     steps:
       - uses: actions/checkout@master
         with:
@@ -18,11 +19,11 @@ jobs:
           fetch-depth: 2
 
       - name: Creating kind cluster
-        uses: helm/kind-action@v1.0.0-rc.1
+        uses: helm/kind-action@v1.2.0
 
       - name: Install Chaos Mesh
         run: |
-          bash install.sh --local kind --crd ./manifests/crd.yaml
+          bash install.sh --runtime containerd --crd ./manifests/crd.yaml
 
       - name: Run integration test
         run: |

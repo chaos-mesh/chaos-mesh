@@ -1,15 +1,17 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package cmd
 
@@ -20,7 +22,6 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
-
 	"github.com/spf13/cobra"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -28,7 +29,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	cm "github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
-	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
 )
 
 type logsOptions struct {
@@ -88,7 +89,7 @@ func (o *logsOptions) Run(args []string) error {
 
 	componentsNeeded := []string{"controller-manager", "chaos-daemon", "chaos-dashboard"}
 	for _, name := range componentsNeeded {
-		selectorSpec := v1alpha1.SelectorSpec{
+		selectorSpec := v1alpha1.PodSelectorSpec{
 			LabelSelectors: map[string]string{"app.kubernetes.io/component": name},
 		}
 		if o.node != "" {
@@ -96,7 +97,7 @@ func (o *logsOptions) Run(args []string) error {
 		}
 
 		// TODO: just use kubernetes native label selector
-		components, err := selector.SelectPods(ctx, c.CtrlCli, nil, selectorSpec, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.EnableFilterNamespace)
+		components, err := pod.SelectPods(ctx, c.CtrlCli, nil, selectorSpec, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, false)
 		if err != nil {
 			return errors.Wrapf(err, "failed to SelectPods for component %s", name)
 		}
@@ -115,7 +116,8 @@ func (o *logsOptions) Run(args []string) error {
 }
 
 func listNodes(toComplete string, c *kubernetes.Clientset) ([]string, cobra.ShellCompDirective) {
-	nodes, err := c.CoreV1().Nodes().List(v1.ListOptions{})
+	// FIXME: get context from parameter
+	nodes, err := c.CoreV1().Nodes().List(context.TODO(), v1.ListOptions{})
 	if err != nil {
 		return nil, cobra.ShellCompDirectiveDefault
 	}

@@ -1,15 +1,17 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package chaosdaemon
 
@@ -22,8 +24,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/shirou/gopsutil/process"
-
 	jrpc "github.com/ethereum/go-ethereum/rpc"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -35,17 +35,17 @@ const (
 	todaBin = "/usr/local/bin/toda"
 )
 
-func (s *DaemonServer) ApplyIoChaos(ctx context.Context, in *pb.ApplyIoChaosRequest) (*pb.ApplyIoChaosResponse, error) {
+func (s *DaemonServer) ApplyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequest) (*pb.ApplyIOChaosResponse, error) {
 	log.Info("applying io chaos", "Request", in)
 
 	if in.Instance != 0 {
-		err := s.killIoChaos(ctx, in.Instance, in.StartTime)
+		err := s.killIOChaos(ctx, in.Instance, in.StartTime)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	actions := []v1alpha1.IoChaosAction{}
+	actions := []v1alpha1.IOChaosAction{}
 	err := json.Unmarshal([]byte(in.Actions), &actions)
 	if err != nil {
 		log.Error(err, "error while unmarshal json bytes")
@@ -54,7 +54,7 @@ func (s *DaemonServer) ApplyIoChaos(ctx context.Context, in *pb.ApplyIoChaosRequ
 
 	log.Info("the length of actions", "length", len(actions))
 	if len(actions) == 0 {
-		return &pb.ApplyIoChaosResponse{
+		return &pb.ApplyIOChaosResponse{
 			Instance:  0,
 			StartTime: 0,
 		}, nil
@@ -92,18 +92,11 @@ func (s *DaemonServer) ApplyIoChaos(ctx context.Context, in *pb.ApplyIoChaosRequ
 	cmd.Stdin = caller
 	cmd.Stdout = io.MultiWriter(receiver, os.Stdout)
 	cmd.Stderr = os.Stderr
-	err = s.backgroundProcessManager.StartProcess(cmd)
+	procState, err := s.backgroundProcessManager.StartProcess(cmd)
 	if err != nil {
-		log.Error(err, "bpm failed")
 		return nil, err
 	}
 	var ret string
-
-	procState, err := process.NewProcess(int32(cmd.Process.Pid))
-	if err != nil {
-		log.Error(err, "new process failed")
-		return nil, err
-	}
 	ct, err := procState.CreateTime()
 	if err != nil {
 		log.Error(err, "get create time failed")
@@ -124,19 +117,19 @@ func (s *DaemonServer) ApplyIoChaos(ctx context.Context, in *pb.ApplyIoChaosRequ
 		log.Info("Starting toda takes too long or encounter an error")
 		caller.Close()
 		receiver.Close()
-		if kerr := s.killIoChaos(ctx, int64(cmd.Process.Pid), ct); kerr != nil {
+		if kerr := s.killIOChaos(ctx, int64(cmd.Process.Pid), ct); kerr != nil {
 			log.Error(kerr, "kill toda failed", "request", in)
 		}
-		return nil, fmt.Errorf("Toda startup takes too long or an error occurs: %s", ret)
+		return nil, fmt.Errorf("toda startup takes too long or an error occurs: %s", ret)
 	}
 
-	return &pb.ApplyIoChaosResponse{
+	return &pb.ApplyIOChaosResponse{
 		Instance:  int64(cmd.Process.Pid),
 		StartTime: ct,
 	}, nil
 }
 
-func (s *DaemonServer) killIoChaos(ctx context.Context, pid int64, startTime int64) error {
+func (s *DaemonServer) killIOChaos(ctx context.Context, pid int64, startTime int64) error {
 	log.Info("killing toda", "pid", pid)
 
 	err := s.backgroundProcessManager.KillBackgroundProcess(ctx, int(pid), startTime)

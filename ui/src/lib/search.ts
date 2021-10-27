@@ -1,11 +1,29 @@
+/*
+ * Copyright 2021 Chaos Mesh Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 import { Archive } from 'api/archives.type'
-import { Event } from 'api/events.type'
 import { Experiment } from 'api/experiments.type'
+import { Schedule } from 'api/schedules.type'
+import { Workflow } from 'api/workflows.type'
 
-type Keyword = 'namespace' | 'kind' | 'pod' | 'ip'
+type Keyword = 'namespace' | 'ns' | 'kind'
 
 interface SearchData {
-  events: Event[]
+  workflows: Workflow[]
+  schedules: Schedule[]
   experiments: Experiment[]
   archives: Archive[]
 }
@@ -81,29 +99,30 @@ class SearchAutomata {
   }
 }
 
-const automata = new SearchAutomata(['namespace', 'kind', 'pod', 'ip'])
+const automata = new SearchAutomata(['namespace', 'ns', 'kind'])
 
 export default function search(data: SearchData, s: string) {
   const tokens = automata.parseStart(s)
 
-  const experiments = searchExperiments(data.experiments, tokens)
-  const events = searchEvents(data.events, tokens)
-  const archives = searchExperiments<Archive>(data.archives, tokens)
+  const workflows = searchObjects(data.workflows, tokens)
+  const schedules = searchObjects(data.schedules, tokens)
+  const experiments = searchObjects(data.experiments, tokens)
+  const archives = searchObjects(data.archives, tokens)
 
   automata.clearTokens()
 
-  return { experiments, events, archives }
+  return { workflows, schedules, experiments, archives }
 }
 
-function searchCommon(data: any, keyword: string, value: string) {
-  if (keyword === 'namespace' || keyword === 'kind') {
-    return data.filter((d: any) => d[keyword].toLowerCase().includes(value))
+function searchCommon(data: any, keyword: Keyword, value: string) {
+  if (keyword === 'ns') {
+    keyword = 'namespace'
   }
 
-  return data
+  return data.filter((d: any) => d[keyword].toLowerCase().includes(value))
 }
 
-function searchExperiments<T extends { name: string } = Experiment>(data: T[], tokens: Token[]) {
+function searchObjects<T extends { name: string }>(data: T[], tokens: Token[]) {
   let filtered = data
 
   tokens.forEach((t) => {
@@ -113,32 +132,6 @@ function searchExperiments<T extends { name: string } = Experiment>(data: T[], t
       filtered = searchCommon(filtered, t.keyword, val)
     } else if (t.type === 'content') {
       filtered = filtered.filter((d) => d.name.toLowerCase().includes(val))
-    }
-  })
-
-  return filtered
-}
-
-function searchEvents(data: SearchData['events'], tokens: Token[]) {
-  let filtered = data
-
-  tokens.forEach((t) => {
-    const val = t.value.toLowerCase()
-
-    if (t.type === 'keyword') {
-      switch (t.keyword) {
-        case 'pod':
-          filtered = filtered.filter((d) => d.pods?.some((pod) => pod.pod_name.toLowerCase().includes(val)))
-          break
-        case 'ip':
-          filtered = filtered.filter((d) => d.pods?.some((pod) => pod.pod_ip.includes(val)))
-          break
-        default:
-          filtered = searchCommon(filtered, t.keyword, val)
-          break
-      }
-    } else if (t.type === 'content') {
-      filtered = filtered.filter((d) => d.experiment.toLowerCase().includes(val))
     }
   })
 

@@ -1,3 +1,17 @@
+# Copyright 2021 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 {{- if .Values.chaosDaemon.serviceAccount }}
 ---
 kind: ServiceAccount
@@ -6,11 +20,8 @@ metadata:
   namespace: {{ .Release.Namespace | quote }}
   name: {{ .Values.chaosDaemon.serviceAccount }}
   labels:
-    app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: chaos-daemon
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
 {{- end}}
 {{- if .Values.chaosDaemon.podSecurityPolicy }}
 ---
@@ -19,13 +30,10 @@ kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ .Release.Name }}-chaos-daemon-target-namespace
-  namespace: chaos-testing
+  namespace: {{ .Release.Namespace | quote }}
   labels:
-    app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: chaos-daemon
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
 subjects:
   - kind: ServiceAccount
     name: {{ .Values.chaosDaemon.serviceAccount }}
@@ -41,11 +49,8 @@ kind: ClusterRole
 metadata:
   name: {{ .Release.Name }}-chaos-daemon-psp
   labels:
-    app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: chaos-daemon
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
 rules:
 - apiGroups:
   - policy
@@ -57,6 +62,7 @@ rules:
   verbs:
   - use
 ---
+{{- $chaos_daemon_needs_privileged := or (eq .Values.chaosDaemon.privileged true) (eq .Values.bpfki.create true) -}}
 # Restricted DEFAULT policy
 # ( Default policy for all new services )
 apiVersion: policy/v1beta1
@@ -64,22 +70,48 @@ kind: PodSecurityPolicy
 metadata:
   name: {{ .Release.Name }}-chaos-daemon
   labels:
-    app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: chaos-daemon
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
 spec:
-  privileged: false
-  allowPrivilegeEscalation: true
+  {{- if $chaos_daemon_needs_privileged }}
   allowedCapabilities:
-    - '*'
+    - SYS_PTRACE
+  {{- else }}
+  allowedCapabilities:
+    - SYS_PTRACE
+    - NET_ADMIN
+    - MKNOD
+    - SYS_CHROOT
+    - SYS_ADMIN
+    - KILL
+    # CAP_IPC_LOCK is used to lock memory
+    - IPC_LOCK
+  {{- end }}
+  allowedHostPaths:
+    - pathPrefix: {{ .Values.chaosDaemon.socketPath }}
+      readOnly: false
+    - pathPrefix: /sys
+      readOnly: false
+    {{- if .Values.bpfki.create }}
+    - pathPrefix: /etc/localtime
+      readOnly: false
+    - pathPrefix: /lib/modules
+      readOnly: false
+    - pathPrefix: /usr/src
+      readOnly: false
+    {{- end }}
+  allowPrivilegeEscalation: true
+  {{- if .Values.chaosDaemon.hostNetwork }}
   hostNetwork: true
+  {{- end }}
+  {{- if .Values.bpfki.create }}
   hostPorts:
-  - max: 65535
-    min: 0
+  - max: {{ .Values.bpfki.grpcPort }}
+    min: {{ .Values.bpfki.grpcPort }}
+  {{- end }}
   hostIPC: true
   hostPID: true
+  privileged: {{ $chaos_daemon_needs_privileged }}
   seLinux:
     rule: RunAsAny
   supplementalGroups:
@@ -89,6 +121,11 @@ spec:
   fsGroup:
     rule: RunAsAny
   volumes:
-  - '*'
+  - configMap
+  - downwardAPI
+  - emptyDir
+  - projected
+  - secret
+  - hostPath
 {{- end }}
 

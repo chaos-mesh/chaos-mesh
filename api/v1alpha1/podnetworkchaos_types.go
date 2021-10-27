@@ -1,15 +1,17 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package v1alpha1
 
@@ -20,10 +22,10 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// KindPodNetworkChaos is the kind for network chaos
-const KindPodNetworkChaos = "PodNetworkChaos"
-
 // +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
+// +chaos-mesh:base
+// +chaos-mesh:webhook:enableUpdate
 
 // PodNetworkChaos is the Schema for the PodNetworkChaos API
 type PodNetworkChaos struct {
@@ -82,10 +84,16 @@ type RawIptables struct {
 	Name string `json:"name"`
 
 	// The name of related ipset
-	IPSets []string `json:"ipsets"`
+	// +optional
+	// +nullable
+	IPSets []string `json:"ipsets,omitempty"`
 
 	// The block direction of this iptables rule
 	Direction ChainDirection `json:"direction"`
+
+	// Device represents the network device to be affected.
+	// +optional
+	Device string `json:"device,omitempty"`
 
 	RawRuleSource `json:",inline"`
 }
@@ -114,6 +122,10 @@ type RawTrafficControl struct {
 
 	// The name and namespace of the source network chaos
 	Source string `json:"source"`
+
+	// Device represents the network device to be affected.
+	// +optional
+	Device string `json:"device,omitempty"`
 }
 
 // TcParameter represents the parameters for a traffic control chaos
@@ -146,7 +158,9 @@ type RawRuleSource struct {
 
 // PodNetworkChaosStatus defines the observed state of PodNetworkChaos
 type PodNetworkChaosStatus struct {
-	ChaosStatus `json:",inline"`
+	FailedMessage string `json:"failedMessage,omitempty"`
+
+	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
 }
 
 // +kubebuilder:object:root=true
@@ -156,40 +170,4 @@ type PodNetworkChaosList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []PodNetworkChaos `json:"items"`
-}
-
-// GetStatus returns the status of chaos
-func (in *PodNetworkChaos) GetStatus() *ChaosStatus {
-	return &in.Status.ChaosStatus
-}
-
-// GetChaos returns a chaos instance
-func (in *PodNetworkChaos) GetChaos() *ChaosInstance {
-	instance := &ChaosInstance{
-		Name:      in.Name,
-		Namespace: in.Namespace,
-		Kind:      "NetworkChaos",
-		StartTime: in.CreationTimestamp.Time,
-		Status:    string(in.GetStatus().Experiment.Phase),
-	}
-	if in.DeletionTimestamp != nil {
-		instance.EndTime = in.DeletionTimestamp.Time
-	}
-	return instance
-}
-
-// ListChaos returns a list of network chaos
-func (in *PodNetworkChaosList) ListChaos() []*ChaosInstance {
-	if len(in.Items) == 0 {
-		return nil
-	}
-	res := make([]*ChaosInstance, 0, len(in.Items))
-	for _, item := range in.Items {
-		res = append(res, item.GetChaos())
-	}
-	return res
-}
-
-func init() {
-	SchemeBuilder.Register(&PodNetworkChaos{}, &PodNetworkChaosList{})
 }

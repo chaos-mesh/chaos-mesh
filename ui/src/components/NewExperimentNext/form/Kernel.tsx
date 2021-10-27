@@ -1,47 +1,60 @@
-import { Box, Button, Divider, InputAdornment, MenuItem, Typography } from '@material-ui/core'
+/*
+ * Copyright 2021 Chaos Mesh Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+import { Box, IconButton, InputAdornment, MenuItem, Typography } from '@material-ui/core'
 import { Form, Formik } from 'formik'
-import { LabelField, SelectField, TextField } from 'components/FormField'
-import React, { useEffect, useState } from 'react'
+import { LabelField, SelectField, Submit, TextField } from 'components/FormField'
+import { useEffect, useState } from 'react'
 
-import AddIcon from '@material-ui/icons/Add'
+import AddCircleIcon from '@material-ui/icons/AddCircle'
 import Paper from 'components-mui/Paper'
-import PaperTop from 'components-mui/PaperTop'
-import PublishIcon from '@material-ui/icons/Publish'
-import RemoveIcon from '@material-ui/icons/Remove'
-import { RootState } from 'store'
-import T from 'components/T'
-import targetData from '../data/target'
-import { useSelector } from 'react-redux'
+import RemoveCircleIcon from '@material-ui/icons/RemoveCircle'
+import Space from 'components-mui/Space'
+import typesData from '../data/types'
+import { useStoreSelector } from 'store'
 
 interface KernelProps {
   onSubmit: (values: Record<string, any>) => void
 }
 
 const Kernel: React.FC<KernelProps> = ({ onSubmit }) => {
-  const { target } = useSelector((state: RootState) => state.experiments)
+  const { spec } = useStoreSelector((state) => state.experiments)
 
-  const initialValues = targetData.KernelChaos.spec!
+  const initialValues = typesData.KernelChaos.spec!
 
   const [init, setInit] = useState(initialValues)
 
   useEffect(() => {
     setInit({
-      fail_kern_request: {
-        ...initialValues.fail_kern_request,
-        ...target['kernel_chaos']?.fail_kern_request,
+      failKernRequest: {
+        ...initialValues.failKernRequest,
+        ...spec.failKernRequest,
       },
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [target])
+  }, [spec])
 
   return (
     <Formik enableReinitialize initialValues={init} onSubmit={onSubmit}>
       {({ values, setFieldValue }) => {
-        const callchain = (values.fail_kern_request as any).callchain
+        const callchain = (values.failKernRequest as any).callchain
 
         const addFrame = () =>
           setFieldValue(
-            'fail_kern_request.callchain',
+            'failKernRequest.callchain',
             callchain.concat([
               {
                 funcname: '',
@@ -53,77 +66,67 @@ const Kernel: React.FC<KernelProps> = ({ onSubmit }) => {
 
         const removeFrame = (index: number) => () => {
           setFieldValue(
-            'fail_kern_request.callchain',
+            'failKernRequest.callchain',
             callchain.filter((_: any, i: number) => index !== i)
           )
         }
 
         return (
           <Form>
-            <Paper>
-              <PaperTop title="Callchain">
-                <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={addFrame}>
-                  Add
-                </Button>
-              </PaperTop>
-              <Box>
-                {callchain.map((_: any, i: number) => (
-                  <Box key={'frame' + i} p={3}>
-                    <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-                      <Typography variant="body2" gutterBottom>
-                        Frame {i + 1}
-                      </Typography>
-                      <Button
-                        variant="contained"
-                        color="secondary"
-                        size="small"
-                        startIcon={<RemoveIcon />}
-                        onClick={removeFrame(i)}
-                      >
-                        Remove
-                      </Button>
-                    </Box>
-                    <TextField name={`fail_kern_request.callchain[${i}].funcname`} label="funcname" />
-                    <TextField name={`fail_kern_request.callchain[${i}].parameters`} label="parameters" />
-                    <TextField name={`fail_kern_request.callchain[${i}].predicate`} label="predicate" />
-                  </Box>
-                ))}
+            <Paper sx={{ mb: 6 }}>
+              <Box display="flex" justifyContent="space-between" alignItems="center">
+                <Typography component="div">Callchain</Typography>
+                <IconButton color="primary" size="small" onClick={addFrame}>
+                  <AddCircleIcon />
+                </IconButton>
               </Box>
+              {callchain.length > 0 && (
+                <Space mt={6}>
+                  {callchain.map((_: any, i: number) => (
+                    <Space key={'frame' + i}>
+                      <Box display="flex" justifyContent="space-between" alignItems="center">
+                        <Typography variant="body2">Frame {i + 1}</Typography>
+                        <IconButton color="secondary" size="small" onClick={removeFrame(i)}>
+                          <RemoveCircleIcon />
+                        </IconButton>
+                      </Box>
+                      <TextField name={`failKernRequest.callchain[${i}].funcname`} label="funcname" />
+                      <TextField name={`failKernRequest.callchain[${i}].parameters`} label="parameters" />
+                      <TextField name={`failKernRequest.callchain[${i}].predicate`} label="predicate" />
+                    </Space>
+                  ))}
+                </Space>
+              )}
             </Paper>
-            <Box my={6}>
-              <Divider />
-            </Box>
-            <SelectField
-              name="fail_kern_request.failtype"
-              label="Failtype"
-              helperText="What to fail, can be set to 0 / 1 / 2"
-            >
-              {[0, 1, 2].map((option) => (
-                <MenuItem key={option} value={option}>
-                  {option}
-                </MenuItem>
-              ))}
-            </SelectField>
-            <LabelField
-              name="fail_kern_request.headers"
-              label="Headers"
-              helperText="Type string and end with a space to generate the appropriate kernel headers"
-            />
-            <TextField
-              type="number"
-              name="fail_kern_request.probability"
-              helperText="The fails with probability"
-              InputProps={{
-                endAdornment: <InputAdornment position="end">%</InputAdornment>,
-              }}
-            />
-            <TextField type="number" name="fail_kern_request.times" helperText="The max times of failures" />
+            <Space>
+              <SelectField
+                name="failKernRequest.failtype"
+                label="Failtype"
+                helperText="What to fail, can be set to 0 / 1 / 2"
+              >
+                {[0, 1, 2].map((option) => (
+                  <MenuItem key={option} value={option}>
+                    {option}
+                  </MenuItem>
+                ))}
+              </SelectField>
+              <LabelField
+                name="failKernRequest.headers"
+                label="Headers"
+                helperText="Type string and end with a space to generate the appropriate kernel headers"
+              />
+              <TextField
+                type="number"
+                name="failKernRequest.probability"
+                helperText="The fails with probability"
+                InputProps={{
+                  endAdornment: <InputAdornment position="end">%</InputAdornment>,
+                }}
+              />
+              <TextField type="number" name="failKernRequest.times" helperText="The max times of failures" />
+            </Space>
 
-            <Box mt={6} textAlign="right">
-              <Button type="submit" variant="contained" color="primary" startIcon={<PublishIcon />}>
-                {T('common.submit')}
-              </Button>
-            </Box>
+            <Submit />
           </Form>
         )
       }}

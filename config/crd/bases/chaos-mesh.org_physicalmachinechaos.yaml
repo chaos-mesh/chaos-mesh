@@ -1,0 +1,388 @@
+
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.4.1
+  creationTimestamp: null
+  name: physicalmachinechaos.chaos-mesh.org
+spec:
+  group: chaos-mesh.org
+  names:
+    kind: PhysicalMachineChaos
+    listKind: PhysicalMachineChaosList
+    plural: physicalmachinechaos
+    singular: physicalmachinechaos
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: PhysicalMachineChaos is the Schema for the physical machine chaos
+          API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: Spec defines the behavior of a physical machine chaos experiment
+            properties:
+              action:
+                description: the subAction, generate automatically
+                enum:
+                - stress-cpu
+                - stress-mem
+                - disk-read-payload
+                - disk-write-payload
+                - disk-fill
+                - network-corrupt
+                - network-duplicate
+                - network-loss
+                - network-delay
+                - network-partition
+                - network-dns
+                - process
+                - jvm-exception
+                - jvm-gc
+                - jvm-latency
+                - jvm-return
+                - jvm-stress
+                - jvm-rule-data
+                - clock
+                type: string
+              address:
+                items:
+                  type: string
+                type: array
+              clock:
+                properties:
+                  clock-ids-slice:
+                    type: string
+                  pid:
+                    type: integer
+                  time-offset:
+                    type: string
+                type: object
+              disk-fill:
+                properties:
+                  fill_by_fallocate:
+                    type: boolean
+                  path:
+                    type: string
+                  size:
+                    type: string
+                type: object
+              disk-read-payload:
+                properties:
+                  path:
+                    type: string
+                  payload_process_num:
+                    type: integer
+                  size:
+                    type: string
+                type: object
+              disk-write-payload:
+                properties:
+                  path:
+                    type: string
+                  payload_process_num:
+                    type: integer
+                  size:
+                    type: string
+                type: object
+              duration:
+                description: Duration represents the duration of the chaos action
+                  Duration represents the duration of the chaos action
+                type: string
+              jvm-exception:
+                properties:
+                  class:
+                    description: Java class
+                    type: string
+                  exception:
+                    description: the exception which needs to throw dor action `exception`
+                    type: string
+                  method:
+                    description: the method in Java class
+                    type: string
+                  pid:
+                    description: the pid of Java process which need to attach
+                    type: integer
+                  port:
+                    description: the port of agent server
+                    type: integer
+                type: object
+              jvm-gc:
+                properties:
+                  pid:
+                    description: the pid of Java process which need to attach
+                    type: integer
+                  port:
+                    description: the port of agent server
+                    type: integer
+                type: object
+              jvm-latency:
+                properties:
+                  class:
+                    description: Java class
+                    type: string
+                  latency:
+                    description: the latency duration for action 'latency', unit ms
+                    type: integer
+                  method:
+                    description: the method in Java class
+                    type: string
+                  pid:
+                    description: the pid of Java process which need to attach
+                    type: integer
+                  port:
+                    description: the port of agent server
+                    type: integer
+                type: object
+              jvm-return:
+                properties:
+                  class:
+                    description: Java class
+                    type: string
+                  method:
+                    description: the method in Java class
+                    type: string
+                  pid:
+                    description: the pid of Java process which need to attach
+                    type: integer
+                  port:
+                    description: the port of agent server
+                    type: integer
+                  value:
+                    description: the return value for action 'return'
+                    type: string
+                type: object
+              jvm-rule-data:
+                properties:
+                  pid:
+                    description: the pid of Java process which need to attach
+                    type: integer
+                  port:
+                    description: the port of agent server
+                    type: integer
+                  rule-data:
+                    description: RuleData used to save the rule file's data, will
+                      use it when recover
+                    type: string
+                type: object
+              jvm-stress:
+                properties:
+                  cpu-count:
+                    description: the CPU core number need to use, only set it when
+                      action is stress
+                    type: integer
+                  mem-type:
+                    description: the memory type need to locate, only set it when
+                      action is stress, the value can be 'stack' or 'heap'
+                    type: integer
+                  pid:
+                    description: the pid of Java process which need to attach
+                    type: integer
+                  port:
+                    description: the port of agent server
+                    type: integer
+                type: object
+              network-corrupt:
+                properties:
+                  correlation:
+                    type: string
+                  device:
+                    type: string
+                  egress-port:
+                    type: string
+                  hostname:
+                    type: string
+                  ip-address:
+                    type: string
+                  ip-protocol:
+                    type: string
+                  percent:
+                    type: string
+                  source-port:
+                    type: string
+                type: object
+              network-delay:
+                properties:
+                  correlation:
+                    type: string
+                  device:
+                    type: string
+                  egress-port:
+                    type: string
+                  hostname:
+                    type: string
+                  ip-address:
+                    type: string
+                  ip-protocol:
+                    type: string
+                  jitter:
+                    type: string
+                  latency:
+                    type: string
+                  source-port:
+                    type: string
+                type: object
+              network-dns:
+                properties:
+                  dns-domain-name:
+                    type: string
+                  dns-ip:
+                    type: string
+                  dns-server:
+                    type: string
+                type: object
+              network-duplicate:
+                properties:
+                  correlation:
+                    type: string
+                  device:
+                    type: string
+                  egress-port:
+                    type: string
+                  hostname:
+                    type: string
+                  ip-address:
+                    type: string
+                  ip-protocol:
+                    type: string
+                  percent:
+                    type: string
+                  source-port:
+                    type: string
+                type: object
+              network-loss:
+                properties:
+                  correlation:
+                    type: string
+                  device:
+                    type: string
+                  egress-port:
+                    type: string
+                  hostname:
+                    type: string
+                  ip-address:
+                    type: string
+                  ip-protocol:
+                    type: string
+                  percent:
+                    type: string
+                  source-port:
+                    type: string
+                type: object
+              network-partition:
+                properties:
+                  accept-tcp-flags:
+                    description: only the packet which match the tcp flag can be accepted,
+                      others will be dropped. only set when the IPProtocol is tcp,
+                      used for partition.
+                    type: string
+                  device:
+                    type: string
+                  direction:
+                    type: string
+                  hostname:
+                    type: string
+                  ip-address:
+                    type: string
+                  ip-protocol:
+                    type: string
+                type: object
+              process:
+                properties:
+                  process:
+                    type: string
+                  signal:
+                    type: integer
+                type: object
+              stress-cpu:
+                properties:
+                  load:
+                    type: integer
+                  workers:
+                    type: integer
+                type: object
+              stress-mem:
+                properties:
+                  size:
+                    type: string
+                type: object
+              uid:
+                description: the experiment ID
+                type: string
+            required:
+            - action
+            - address
+            type: object
+          status:
+            description: Most recently observed status of the chaos experiment
+            properties:
+              conditions:
+                description: Conditions represents the current global condition of
+                  the chaos
+                items:
+                  properties:
+                    reason:
+                      type: string
+                    status:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - status
+                  - type
+                  type: object
+                type: array
+              experiment:
+                description: Experiment records the last experiment state.
+                properties:
+                  containerRecords:
+                    description: Records are used to track the running status
+                    items:
+                      properties:
+                        id:
+                          type: string
+                        phase:
+                          type: string
+                        selectorKey:
+                          type: string
+                      required:
+                      - id
+                      - phase
+                      - selectorKey
+                      type: object
+                    type: array
+                  desiredPhase:
+                    enum:
+                    - Run
+                    - Stop
+                    type: string
+                type: object
+            required:
+            - experiment
+            type: object
+        required:
+        - spec
+        type: object
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []

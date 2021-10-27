@@ -1,15 +1,17 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package chaosdaemon
 
@@ -87,34 +89,55 @@ func (iptables *iptablesClient) setIptablesChains(chains []*pb.Chain) error {
 
 func (iptables *iptablesClient) setIptablesChain(chain *pb.Chain) error {
 	var matchPart string
+	var interfaceMatcher string
 	if chain.Direction == pb.Chain_INPUT {
 		matchPart = "src"
+		interfaceMatcher = "-i"
 	} else if chain.Direction == pb.Chain_OUTPUT {
 		matchPart = "dst"
+		interfaceMatcher = "-o"
 	} else {
 		return fmt.Errorf("unknown chain direction %d", chain.Direction)
 	}
 
-	protocolAndPort := chain.Protocol
-	if len(protocolAndPort) > 0 {
+	if chain.Device == "" {
+		chain.Device = defaultDevice
+	}
+
+	protocolAndPort := ""
+	if len(chain.Protocol) > 0 {
+		protocolAndPort += fmt.Sprintf("--protocol %s", chain.Protocol)
+
 		if len(chain.SourcePorts) > 0 {
-			protocolAndPort += " " + chain.SourcePorts
+			if strings.Contains(chain.SourcePorts, ",") {
+				protocolAndPort += fmt.Sprintf(" -m multiport --source-ports %s", chain.SourcePorts)
+			} else {
+				protocolAndPort += fmt.Sprintf(" --source-port %s", chain.SourcePorts)
+			}
 		}
 
 		if len(chain.DestinationPorts) > 0 {
-			protocolAndPort += " " + chain.DestinationPorts
+			if strings.Contains(chain.DestinationPorts, ",") {
+				protocolAndPort += fmt.Sprintf(" -m multiport --destination-ports %s", chain.DestinationPorts)
+			} else {
+				protocolAndPort += fmt.Sprintf(" --destination-port %s", chain.DestinationPorts)
+			}
+		}
+
+		if len(chain.TcpFlags) > 0 {
+			protocolAndPort += fmt.Sprintf(" --tcp-flags %s", chain.TcpFlags)
 		}
 	}
 
 	rules := []string{}
 
 	if len(chain.Ipsets) == 0 {
-		rules = append(rules, strings.TrimSpace(fmt.Sprintf("-A %s -j %s -w 5 %s", chain.Name, chain.Target, protocolAndPort)))
+		rules = append(rules, strings.TrimSpace(fmt.Sprintf("-A %s %s %s -j %s -w 5 %s", chain.Name, interfaceMatcher, chain.Device, chain.Target, protocolAndPort)))
 	}
 
 	for _, ipset := range chain.Ipsets {
-		rules = append(rules, strings.TrimSpace(fmt.Sprintf("-A %s -m set --match-set %s %s -j %s -w 5 %s",
-			chain.Name, ipset, matchPart, chain.Target, protocolAndPort)))
+		rules = append(rules, strings.TrimSpace(fmt.Sprintf("-A %s %s %s -m set --match-set %s %s -j %s -w 5 %s",
+			chain.Name, interfaceMatcher, chain.Device, ipset, matchPart, chain.Target, protocolAndPort)))
 	}
 	err := iptables.createNewChain(&iptablesChain{
 		Name:  chain.Name,

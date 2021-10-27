@@ -8,7 +8,7 @@ This chart bootstraps a [Chaos Mesh](https://github.com/chaos-mesh/chaos-mesh) d
 
 ## Deploy
 
-Before deploying Chaos Mesh, make sure you have installed the [Prerequisites](https://chaos-mesh.org/docs/user_guides/installation#prerequisites). And then follow the [install-by-helm](https://chaos-mesh.org/docs/user_guides/installation#install-by-helm) doc step by step.
+Before deploying Chaos Mesh, make sure you have installed the [Prerequisites](https://chaos-mesh.org/docs/production-installation-using-helm#prerequisites). And then follow the [install-by-helm](https://chaos-mesh.org/docs/production-installation-using-helm#install-chaos-mesh-using-helm) doc step by step.
 
 ## Configuration
 
@@ -22,6 +22,7 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `rbac.create` |  | `true`                                                |
 | `timezone` | The timezone where controller-manager, chaos-daemon and dashboard uses. For example: `UTC`, `Asia/Shanghai` | `UTC` |
 | `enableProfiling` | A flag to enable pprof in controller-manager and chaos-daemon  | `true` |
+| `imagePullSecrets` | Global Docker registry secret names as an array  | [] (does not add image pull secrets to deployed pods) |
 | `controllerManager.hostNetwork` | running chaos-controller-manager on host network | `false` |
 | `controllerManager.allowHostNetworkTesting`   | Allow testing on `hostNetwork` pods | `false` |
 | `controllerManager.serviceAccount` | The serviceAccount for chaos-controller-manager | `chaos-controller-manager` |
@@ -36,6 +37,11 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `controllerManager.affinity` |  Map of chaos-controller-manager node/pod affinities | `{}` |
 | `controllerManager.podAnnotations` |  Pod annotations of chaos-controller-manager | `{}`|
 | `controllerManager.enableFilterNamespace` | If enabled, only pods in the namespace annotated with `"chaos-mesh.org/inject": "enabled"` will be injected | false |
+| `controllerManager.podChaos.podFailure.pauseImage` | Custom Pause Container Image for Pod Failure Chaos | `gcr.io/google-containers/pause:latest` |
+| `controllerManager.leaderElection.enabled` | Enable leader election for controller manager. | true |
+| `controllerManager.leaderElection.leaseDuration` | The duration that non-leader candidates will wait to force acquire leadership. This is measured against time of last observed ack. | 15s |
+| `controllerManager.leaderElection.renewDeadline` | The duration that the acting control-plane will retry refreshing leadership before giving up. | 10s |
+| `controllerManager.leaderElection.retryPeriod` | The duration the LeaderElector clients should wait between tries of actions. | 2s |
 | `chaosDaemon.image` | docker image for chaos-daemon | `pingcap/chaos-mesh:latest` |
 | `chaosDaemon.imagePullPolicy` | image pull policy | `Always` |
 | `chaosDaemon.grpcPort` | The port which grpc server listens on | `31767` |
@@ -45,10 +51,11 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `chaosDaemon.privileged` | Run chaos-daemon container in privileged mode. If it is set to false, chaos-daemon will be run in some specified capabilities. capabilities: SYS_PTRACE, NET_ADMIN, MKNOD, SYS_CHROOT, SYS_ADMIN, KILL, IPC_LOCK | `true` |
 | `chaosDaemon.priorityClassName` | Custom priorityClassName for using pod priorities | `` |
 | `chaosDaemon.podAnnotations` | Pod annotations of chaos-daemon | `{}` |
-| `chaosDaemon.runtime` | Runtime specifies which container runtime to use. Currently we only supports docker and containerd. | `docker` |
+| `chaosDaemon.runtime` | Runtime specifies which container runtime to use. Currently we only supports docker, containerd and CRI-O. | `docker` |
 | `chaosDaemon.socketPath` | Specifies the container runtime socket | `/var/run/docker.sock` |
 | `chaosDaemon.tolerations` | Toleration labels for chaos-daemon pod assignment | `[]` |
 | `chaosDaemon.resources` | CPU/Memory resource requests/limits for chaosDaemon container | `requests: { cpu: "250m", memory: "512Mi" }, limits:{ cpu: "500m", memory: "1024Mi" }`  |
+| `customLabels` | Customized labels that will be tagged on all the resources of Chaos Mesh | `{}` |
 | `bpfki.create` | Enable chaos-kernel | `false` |
 | `bpfki.image` | Docker image for chaos-kernel | `pingcap/chaos-kernel:latest` |
 | `bpfki.imagePullPolicy` | Image pull policy | `Always` |
@@ -59,6 +66,7 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `dashboard.priorityClassName` | Custom priorityClassName for using pod priorities | `` |
 | `dashboard.image` | Docker image for chaos-dashboard | `pingcap/chaos-dashboard:latest` |
 | `dashboard.imagePullPolicy` | Image pull policy | `Always` |
+| `dashboard.hostNetwork` | running chaos-dashboard on host network | `false` |
 | `dashboard.nodeSelector` | Node labels for chaos-dashboard  pod assignment | `{}` |
 | `dashboard.tolerations` | Toleration labels for chaos-dashboard pod assignment | `[]` |
 | `dashboard.affinity` | Map of chaos-dashboard node/pod affinities | `{}` |

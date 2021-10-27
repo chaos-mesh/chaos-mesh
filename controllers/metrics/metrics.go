@@ -1,26 +1,30 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package metrics
 
 import (
 	"context"
+	"reflect"
 
 	"github.com/prometheus/client_golang/prometheus"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/pkg/status"
 )
 
 var log = ctrl.Log.WithName("metrics-collector")
@@ -118,16 +122,20 @@ func (c *ChaosCollector) collect() {
 
 	for kind, obj := range v1alpha1.AllKinds() {
 		expCache := map[string]map[string]int{}
-		if err := c.store.List(context.TODO(), obj.ChaosList); err != nil {
+		chaosList := obj.SpawnList()
+		if err := c.store.List(context.TODO(), chaosList); err != nil {
 			log.Error(err, "failed to list chaos", "kind", kind)
 			return
 		}
-		for _, chaos := range obj.ListChaos() {
-			if _, ok := expCache[chaos.Namespace]; !ok {
+
+		items := reflect.ValueOf(chaosList).Elem().FieldByName("Items")
+		for i := 0; i < items.Len(); i++ {
+			item := items.Index(i).Addr().Interface().(v1alpha1.InnerObject)
+			if _, ok := expCache[item.GetNamespace()]; !ok {
 				// There is only 4 supported phases
-				expCache[chaos.Namespace] = make(map[string]int, 4)
+				expCache[item.GetNamespace()] = make(map[string]int, 4)
 			}
-			expCache[chaos.Namespace][chaos.Status]++
+			expCache[item.GetNamespace()][string(status.GetChaosStatus(item))]++
 		}
 
 		for ns, v := range expCache {

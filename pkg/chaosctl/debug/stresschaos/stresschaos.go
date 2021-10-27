@@ -1,15 +1,17 @@
-// Copyright 2019 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package stresschaos
 
@@ -20,9 +22,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/pkg/errors"
-
 	"code.cloudfoundry.org/bytefmt"
+	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 
@@ -37,14 +38,10 @@ func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet, result *c
 		return fmt.Errorf("chaos is not stresschaos")
 	}
 	chaosStatus := stressChaos.Status.ChaosStatus
-	chaosSelector := stressChaos.Spec.GetSelector()
+	chaosSelector := stressChaos.Spec.Selector
 
 	pods, daemons, err := cm.GetPods(ctx, stressChaos.GetName(), chaosStatus, chaosSelector, c.CtrlCli)
 	if err != nil {
-		return err
-	}
-
-	if err := cm.CheckFailedMessage(ctx, chaosStatus.FailedMessage, daemons, c); err != nil {
 		return err
 	}
 
@@ -65,6 +62,7 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 	if err != nil {
 		return errors.Wrap(err, fmt.Sprintf("run command %s failed", cmd))
 	}
+	result.Items = append(result.Items, cm.ItemResult{Name: "cat /proc/cgroups", Value: string(out)})
 
 	cmd = "ps"
 	out, err = cm.ExecBypass(ctx, pod, daemon, cmd, c.KubeCli)
@@ -86,7 +84,7 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 		cmd = fmt.Sprintf("cat /proc/%s/cgroup", pids[i])
 		out, err = cm.ExecBypass(ctx, pod, daemon, cmd, c.KubeCli)
 		if err != nil {
-			cm.L().WithName("stress-chaos").V(2).Info("failed to fetch cgroup ofr certain process",
+			cm.L().WithName("stress-chaos").V(2).Info("failed to fetch cgroup for certain process",
 				"pod", fmt.Sprintf("%s/%s", pod.Namespace, pod.Name),
 				"pid", i,
 			)

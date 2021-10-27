@@ -10,7 +10,6 @@ tags
 *.fail.go
 vendor
 .DS_Store
-core.
 core.sqlite
 
 # Output of the go coverage tool, specifically when used with LiteIDE
@@ -25,20 +24,19 @@ core.sqlite
 
 /images/chaos-dashboard/build
 node_modules
+yarn.lock
 
 output/
 _artifacts/
 
-test/image/e2e/chaos-mesh
-test/image/e2e/manifests/
+e2e-test/image/e2e/chaos-mesh
+e2e-test/image/e2e/manifests/
 
-/pkg/uiserver/embedded_assets_handler.go
-
-/docs/swagger.*
-/docs/docs.go
+/pkg/dashboard/uiserver/embedded_assets_handler.go
 
 /images/*/bin/*
 !/images/*/bin/.gitkeep
 
 .dockerbuilt
-Dockerfile
+/Dockerfile
+.cache

@@ -1,111 +1,110 @@
+/*
+ * Copyright 2021 Chaos Mesh Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 import { Button, Checkbox, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@material-ui/core'
-import React, { useState } from 'react'
-import { setTokenName, setTokens } from 'slices/globalStatus'
+import { setConfirm, setConfirmOpen, setTokenName, setTokens } from 'slices/globalStatus'
+import { useStoreDispatch, useStoreSelector } from 'store'
 
-import ConfirmDialog from 'components-mui/ConfirmDialog'
 import LS from 'lib/localStorage'
 import PaperContainer from 'components-mui/PaperContainer'
-import { RootState } from 'store'
 import T from 'components/T'
 import { TokenFormValues } from 'components/Token'
 import api from 'api'
+import { useHistory } from 'react-router-dom'
 import { useIntl } from 'react-intl'
-import { useSelector } from 'react-redux'
-import { useStoreDispatch } from 'store'
 
 const TokensTable = () => {
   const intl = useIntl()
+  const history = useHistory()
 
-  const { tokens, tokenName } = useSelector((state: RootState) => state.globalStatus)
+  const { tokens, tokenName } = useStoreSelector((state) => state.globalStatus)
   const dispatch = useStoreDispatch()
 
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const [selected, setSelected] = useState({
-    tokenName: '',
-    title: '',
-    description: '',
-  })
-
-  const handleUseToken = (_token: TokenFormValues) => () => {
-    dispatch(setTokenName(_token.name))
-    api.auth.token(_token.token)
+  const handleUseToken = (token: TokenFormValues) => () => {
+    dispatch(setTokenName(token.name))
+    api.auth.token(token.token)
   }
 
-  const handleRemoveToken = (token: TokenFormValues) => (_: any, __: any) => {
-    setSelected({
-      tokenName: token.name,
-      title: `${intl.formatMessage({ id: 'common.delete' })} ${token.name}`,
-      description: intl.formatMessage({ id: 'settings.addToken.deleteDesc' }),
-    })
-    setDialogOpen(true)
-  }
+  const handleRemoveToken = (token: TokenFormValues) => () =>
+    dispatch(
+      setConfirm({
+        title: `${T('common.delete', intl)} ${token.name}`,
+        description: T('common.deleteDesc', intl),
+        handle: handleRemoveTokenConfirm(token.name),
+      })
+    )
 
-  const handleRemoveTokenConfirm = () => {
-    const current = tokens.filter(({ name }) => name !== selected.tokenName)
+  const handleRemoveTokenConfirm = (n: string) => () => {
+    const current = tokens.filter(({ name }) => name !== n)
 
     if (current.length) {
+      dispatch(setConfirmOpen(false))
+
       dispatch(setTokens(current))
 
-      if (selected.tokenName === tokenName) {
+      if (n === tokenName) {
         api.auth.resetToken()
-        dispatch(setTokenName(''))
+        handleUseToken(current[0])()
       }
     } else {
       LS.remove('token')
       LS.remove('token-name')
-      window.location.reload()
+      history.go(0)
     }
   }
 
   return (
-    <>
-      <TableContainer component={PaperContainer}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell />
-              <TableCell>{T('settings.addToken.name')}</TableCell>
-              <TableCell>{T('settings.addToken.token')}</TableCell>
-              <TableCell>{T('common.status')}</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {tokens.map((token) => {
-              const key = `${token.name}:${token.token}`
+    <TableContainer component={PaperContainer}>
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell />
+            <TableCell>{T('common.name')}</TableCell>
+            <TableCell>{T('settings.addToken.token')}</TableCell>
+            <TableCell>{T('common.status')}</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {tokens.map((token) => {
+            const key = `${token.name}:${token.token}`
 
-              return (
-                <TableRow key={key}>
-                  <TableCell padding="checkbox">
-                    <Checkbox indeterminate checked={true} onChange={handleRemoveToken(token)} />
-                  </TableCell>
-                  <TableCell>{token.name}</TableCell>
-                  <TableCell>{'*'.repeat(12)}</TableCell>
-                  <TableCell>
-                    <Button
-                      onClick={handleUseToken(token)}
-                      variant="outlined"
-                      color="primary"
-                      size="small"
-                      disabled={token.name === tokenName}
-                    >
-                      {token.name === tokenName ? T('common.using') : T('common.use')}
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              )
-            })}
-          </TableBody>
-        </Table>
-      </TableContainer>
-
-      <ConfirmDialog
-        open={dialogOpen}
-        setOpen={setDialogOpen}
-        title={selected.title}
-        description={selected.description}
-        onConfirm={handleRemoveTokenConfirm}
-      />
-    </>
+            return (
+              <TableRow key={key}>
+                <TableCell padding="checkbox">
+                  <Checkbox indeterminate checked={true} onChange={handleRemoveToken(token)} />
+                </TableCell>
+                <TableCell>{token.name}</TableCell>
+                <TableCell>{'*'.repeat(12)}</TableCell>
+                <TableCell>
+                  <Button
+                    onClick={handleUseToken(token)}
+                    variant="outlined"
+                    color="primary"
+                    size="small"
+                    disabled={token.name === tokenName}
+                  >
+                    {token.name === tokenName ? T('common.using') : T('common.use')}
+                  </Button>
+                </TableCell>
+              </TableRow>
+            )
+          })}
+        </TableBody>
+      </Table>
+    </TableContainer>
   )
 }
 

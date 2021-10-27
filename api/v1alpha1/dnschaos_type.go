@@ -1,15 +1,17 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package v1alpha1
 
@@ -35,7 +37,7 @@ const (
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
 // +kubebuilder:object:root=true
-// +chaos-mesh:base
+// +chaos-mesh:experiment
 
 // DNSChaos is the Schema for the networkchaos API
 type DNSChaos struct {
@@ -50,6 +52,9 @@ type DNSChaos struct {
 	Status DNSChaosStatus `json:"status"`
 }
 
+var _ InnerObjectWithSelector = (*DNSChaos)(nil)
+var _ InnerObject = (*DNSChaos)(nil)
+
 // DNSChaosSpec defines the desired state of DNSChaos
 type DNSChaosSpec struct {
 	// Action defines the specific DNS chaos action.
@@ -58,26 +63,10 @@ type DNSChaosSpec struct {
 	// +kubebuilder:validation:Enum=error;random
 	Action DNSChaosAction `json:"action"`
 
-	// Mode defines the mode to run chaos action.
-	// Supported mode: one / all / fixed / fixed-percent / random-max-percent
-	// +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
-	Mode PodMode `json:"mode"`
-
-	// Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
-	// If `FixedPodMode`, provide an integer of pods to do chaos action.
-	// If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
-	// If `RandomMaxPercentPodMod`, provide a number from 0-100 to specify the max percent of pods to do chaos action
-	// +optional
-	Value string `json:"value"`
-
-	// Selector is used to select pods that are used to inject chaos action.
-	Selector SelectorSpec `json:"selector"`
+	ContainerSelector `json:",inline"`
 
 	// Duration represents the duration of the chaos action
-	Duration *string `json:"duration,omitempty"`
-
-	// Scheduler defines some schedule rules to control the running time of the chaos experiment about network.
-	Scheduler *SchedulerSpec `json:"scheduler,omitempty"`
+	Duration *string `json:"duration,omitempty" webhook:"Duration"`
 
 	// Choose which domain names to take effect, support the placeholder ? and wildcard *, or the Specified domain name.
 	// Note:
@@ -90,22 +79,13 @@ type DNSChaosSpec struct {
 	DomainNamePatterns []string `json:"patterns"`
 }
 
-// GetSelector is a getter for Selector (for implementing SelectSpec)
-func (in *DNSChaosSpec) GetSelector() SelectorSpec {
-	return in.Selector
-}
-
-// GetMode is a getter for Mode (for implementing SelectSpec)
-func (in *DNSChaosSpec) GetMode() PodMode {
-	return in.Mode
-}
-
-// GetValue is a getter for Value (for implementing SelectSpec)
-func (in *DNSChaosSpec) GetValue() string {
-	return in.Value
-}
-
 // DNSChaosStatus defines the observed state of DNSChaos
 type DNSChaosStatus struct {
 	ChaosStatus `json:",inline"`
+}
+
+func (obj *DNSChaos) GetSelectorSpecs() map[string]interface{} {
+	return map[string]interface{}{
+		".": &obj.Spec.ContainerSelector,
+	}
 }

@@ -1,21 +1,52 @@
-import { Box, Button, Grid, Typography } from '@material-ui/core'
-import { useEffect, useState } from 'react'
+/*
+ * Copyright 2021 Chaos Mesh Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+import { Box, Button, Checkbox, Typography } from '@material-ui/core'
+import { Confirm, setAlert, setConfirm } from 'slices/globalStatus'
+import { FixedSizeList as RWList, ListChildComponentProps as RWListChildComponentProps } from 'react-window'
 
 import AddIcon from '@material-ui/icons/Add'
-import ConfirmDialog from 'components-mui/ConfirmDialog'
+import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
+import CloseIcon from '@material-ui/icons/Close'
 import { Experiment } from 'api/experiments.type'
-import ExperimentListItem from 'components/ExperimentListItem'
+import FilterListIcon from '@material-ui/icons/FilterList'
 import Loading from 'components-mui/Loading'
 import NotFound from 'components-mui/NotFound'
+import ObjectListItem from 'components/ObjectListItem'
+import PlaylistAddCheckIcon from '@material-ui/icons/PlaylistAddCheck'
+import Space from 'components-mui/Space'
 import T from 'components/T'
-import TuneIcon from '@material-ui/icons/Tune'
 import _groupBy from 'lodash.groupby'
 import api from 'api'
-import { setAlert } from 'slices/globalStatus'
+import { styled } from '@material-ui/styles'
 import { transByKind } from 'lib/byKind'
 import { useHistory } from 'react-router-dom'
+import { useIntervalFetch } from 'lib/hooks'
 import { useIntl } from 'react-intl'
+import { useState } from 'react'
 import { useStoreDispatch } from 'store'
+
+const StyledCheckBox = styled(Checkbox)({
+  position: 'relative',
+  left: -11,
+  paddingRight: 0,
+  '&:hover': {
+    background: 'none !important',
+  },
+})
 
 export default function Experiments() {
   const intl = useIntl()
@@ -23,122 +54,180 @@ export default function Experiments() {
 
   const dispatch = useStoreDispatch()
 
-  const [loading, setLoading] = useState(false)
-  const [experiments, setExperiments] = useState<Experiment[] | null>(null)
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const [selected, setSelected] = useState({
-    uuid: '',
-    title: '',
-    description: '',
-    action: 'archive',
-  })
+  const [loading, setLoading] = useState(true)
+  const [experiments, setExperiments] = useState<Experiment[]>([])
+  const [batch, setBatch] = useState<Record<uuid, boolean>>({})
+  const batchLength = Object.keys(batch).length
+  const isBatchEmpty = batchLength === 0
 
-  const fetchExperiments = () => {
-    setLoading(true)
-
+  const fetchExperiments = (intervalID?: number) => {
     api.experiments
       .experiments()
-      .then(({ data }) => setExperiments(data))
+      .then(({ data }) => {
+        setExperiments(data)
+
+        if (data.every((d) => d.status === 'finished' || d.status === 'paused')) {
+          clearInterval(intervalID)
+        }
+      })
       .catch(console.error)
       .finally(() => setLoading(false))
   }
 
-  // Get all experiments after mount
-  useEffect(fetchExperiments, [])
+  useIntervalFetch(fetchExperiments)
 
-  const handleExperiment = (action: string) => () => {
+  const handleSelect = (selected: Confirm) => dispatch(setConfirm(selected))
+  const onSelect = (selected: Confirm) =>
+    dispatch(
+      setConfirm({
+        title: selected.title,
+        description: selected.description,
+        handle: handleAction(selected.action, selected.uuid),
+      })
+    )
+
+  const handleAction = (action: string, uuid?: uuid) => () => {
     let actionFunc: any
+    let arg: any
 
     switch (action) {
       case 'archive':
-        actionFunc = api.experiments.deleteExperiment
+        actionFunc = api.experiments.del
+        arg = uuid
+
+        break
+      case 'archiveMulti':
+        action = 'archive'
+        actionFunc = api.experiments.delMulti
+        arg = Object.keys(batch)
+        setBatch({})
 
         break
       case 'pause':
-        actionFunc = api.experiments.pauseExperiment
+        actionFunc = api.experiments.pause
+        arg = uuid
 
         break
       case 'start':
-        actionFunc = api.experiments.startExperiment
+        actionFunc = api.experiments.start
+        arg = uuid
 
         break
-      default:
-        actionFunc = null
     }
 
-    if (actionFunc === null) {
-      return
+    if (actionFunc) {
+      actionFunc(arg)
+        .then(() => {
+          dispatch(
+            setAlert({
+              type: 'success',
+              message: T(`confirm.success.${action}`, intl),
+            })
+          )
+
+          setTimeout(fetchExperiments, 300)
+        })
+        .catch(console.error)
     }
-
-    setDialogOpen(false)
-
-    const { uuid } = selected
-
-    actionFunc(uuid)
-      .then(() => {
-        dispatch(
-          setAlert({
-            type: 'success',
-            message: intl.formatMessage({ id: `common.${action}Successfully` }),
-          })
-        )
-
-        setTimeout(fetchExperiments, 300)
-      })
-      .catch(console.error)
   }
+
+  const handleBatchSelect = () => setBatch(isBatchEmpty ? { [experiments[0].uid]: true } : {})
+
+  const handleBatchSelectAll = () =>
+    setBatch(
+      batchLength <= experiments.length
+        ? experiments.reduce<Record<uuid, boolean>>((acc, d) => {
+            acc[d.uid] = true
+
+            return acc
+          }, {})
+        : {}
+    )
+
+  const handleBatchDelete = () =>
+    handleSelect({
+      title: T('experiments.deleteMulti', intl),
+      description: T('experiments.deleteDesc', intl),
+      handle: handleAction('archiveMulti'),
+    })
+
+  const onCheckboxChange = (uuid: uuid) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    setBatch({
+      ...batch,
+      [uuid]: e.target.checked,
+    })
+  }
+
+  const Row = ({ data, index, style }: RWListChildComponentProps) => (
+    <Box display="flex" alignItems="center" mb={3} style={style}>
+      {!isBatchEmpty && (
+        <StyledCheckBox
+          color="primary"
+          checked={batch[data[index].uid] === true}
+          onChange={onCheckboxChange(data[index].uid)}
+          disableRipple
+        />
+      )}
+      <Box flex={1}>
+        <ObjectListItem data={data[index]} onSelect={onSelect} />
+      </Box>
+    </Box>
+  )
 
   return (
     <>
-      <Box mb={6}>
-        <Button variant="outlined" startIcon={<AddIcon />} onClick={() => history.push('/newExperiment')}>
+      <Space direction="row" mb={6}>
+        <Button variant="outlined" startIcon={<AddIcon />} onClick={() => history.push('/experiments/new')}>
           {T('newE.title')}
         </Button>
-      </Box>
+        <Button
+          variant="outlined"
+          startIcon={isBatchEmpty ? <FilterListIcon /> : <CloseIcon />}
+          onClick={handleBatchSelect}
+          disabled={experiments.length === 0}
+        >
+          {T(`common.${isBatchEmpty ? 'batchOperation' : 'cancel'}`)}
+        </Button>
+        {!isBatchEmpty && (
+          <>
+            <Button variant="outlined" startIcon={<PlaylistAddCheckIcon />} onClick={handleBatchSelectAll}>
+              {T('common.selectAll')}
+            </Button>
+            <Button
+              variant="outlined"
+              color="secondary"
+              startIcon={<ArchiveOutlinedIcon />}
+              onClick={handleBatchDelete}
+            >
+              {T('archives.single')}
+            </Button>
+          </>
+        )}
+      </Space>
 
-      {experiments &&
-        experiments.length > 0 &&
-        Object.entries(_groupBy(experiments, 'kind'))
-          .sort((a, b) => (a[0] > b[0] ? 1 : -1))
-          .map(([kind, experimentsByKind]) => (
-            <Box key={kind} mb={6}>
-              <Box mb={3} ml={1}>
-                <Typography variant="overline">{transByKind(kind as any)}</Typography>
-              </Box>
-              <Grid container spacing={6}>
-                {experimentsByKind.length > 0 &&
-                  experimentsByKind.map((e) => (
-                    <Grid key={e.uid} item xs={12}>
-                      <ExperimentListItem
-                        experiment={e}
-                        handleSelect={setSelected}
-                        handleDialogOpen={setDialogOpen}
-                        intl={intl}
-                      />
-                    </Grid>
-                  ))}
-              </Grid>
-            </Box>
-          ))}
-
-      {!loading && experiments && experiments.length === 0 && (
-        <NotFound textAlign="center">
-          <Box mb={3}>
-            <TuneIcon fontSize="large" />
+      {experiments.length > 0 &&
+        Object.entries(_groupBy(experiments, 'kind')).map(([kind, experimentsByKind]) => (
+          <Box key={kind} mb={6}>
+            <Typography variant="overline">{transByKind(kind as any)}</Typography>
+            <RWList
+              width="100%"
+              height={experimentsByKind.length > 3 ? 300 : experimentsByKind.length * 70}
+              itemCount={experimentsByKind.length}
+              itemSize={70}
+              itemData={experimentsByKind}
+            >
+              {Row}
+            </RWList>
           </Box>
-          <Typography variant="h6">{T('experiments.noExperimentsFound')}</Typography>
+        ))}
+
+      {!loading && experiments.length === 0 && (
+        <NotFound illustrated textAlign="center">
+          <Typography>{T('experiments.notFound')}</Typography>
         </NotFound>
       )}
 
       {loading && <Loading />}
-
-      <ConfirmDialog
-        open={dialogOpen}
-        setOpen={setDialogOpen}
-        title={selected.title}
-        description={selected.description}
-        onConfirm={handleExperiment(selected.action)}
-      />
     </>
   )
 }

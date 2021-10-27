@@ -1,10 +1,26 @@
+/*
+ * Copyright 2021 Chaos Mesh Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 import { Checkbox, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@material-ui/core'
-import React, { useMemo } from 'react'
 import { getIn, useFormikContext } from 'formik'
 
 import PaperContainer from 'components-mui/PaperContainer'
 import T from 'components/T'
 import { setAlert } from 'slices/globalStatus'
+import { useMemo } from 'react'
 import { useStoreDispatch } from 'store'
 
 interface ScopePodsTableProps {
@@ -62,10 +78,10 @@ const ScopePodsTable: React.FC<ScopePodsTableProps> = ({ scope = 'scope', pods }
         <TableHead>
           <TableRow>
             <TableCell />
-            <TableCell>{T('newE.scope.podsTable.name')}</TableCell>
-            <TableCell>{T('newE.scope.podsTable.namespace')}</TableCell>
-            <TableCell>{T('newE.scope.podsTable.ip')}</TableCell>
-            <TableCell>{T('newE.scope.podsTable.state')}</TableCell>
+            <TableCell>{T('common.name')}</TableCell>
+            <TableCell>{T('k8s.namespace')}</TableCell>
+            <TableCell>{T('common.ip')}</TableCell>
+            <TableCell>{T('common.status')}</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>

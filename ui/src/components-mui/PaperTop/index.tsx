@@ -1,41 +1,41 @@
-import { Box, Typography } from '@material-ui/core'
-
-import React from 'react'
-import { makeStyles } from '@material-ui/core/styles'
-
-const useStyles = makeStyles((theme) => ({
-  root: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: '100%',
-    padding: theme.spacing(3),
-  },
-}))
+/*
+ * Copyright 2021 Chaos Mesh Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+import { Box, BoxProps, Typography } from '@material-ui/core'
 
 interface PaperTopProps {
   title: string | JSX.Element
   subtitle?: string | JSX.Element
+  boxProps?: BoxProps
 }
 
-const PaperTop: React.FC<PaperTopProps> = ({ title, subtitle, children }) => {
-  const classes = useStyles()
-
-  return (
-    <Box className={classes.root}>
-      <Box>
-        <Typography component="div" gutterBottom={subtitle ? true : false}>
-          {title}
+const PaperTop: React.FC<PaperTopProps> = ({ title, subtitle, boxProps, children }) => (
+  <Box {...boxProps} display="flex" justifyContent="space-between" width="100%">
+    <div>
+      <Typography component="div" gutterBottom={subtitle ? true : false}>
+        {title}
+      </Typography>
+      {subtitle && (
+        <Typography variant="body2" color="textSecondary">
+          {subtitle}
         </Typography>
-        {subtitle && (
-          <Typography variant="body2" color="textSecondary">
-            {subtitle}
-          </Typography>
-        )}
-      </Box>
-      {children}
-    </Box>
-  )
-}
+      )}
+    </div>
+    {children}
+  </Box>
+)
 
 export default PaperTop

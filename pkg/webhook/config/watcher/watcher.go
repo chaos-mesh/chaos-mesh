@@ -1,19 +1,22 @@
-// Copyright 2019 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package watcher
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"html/template"
@@ -123,9 +126,12 @@ func validate(c *K8sConfigMapWatcher) error {
 func (c *K8sConfigMapWatcher) Watch(notifyMe chan<- interface{}, stopCh <-chan struct{}) error {
 	log.Info("Watching for ConfigMaps for changes",
 		"template namespace", c.TemplateNamespace, "labels", c.ConfigLabels)
-	templateWatcher, err := c.client.ConfigMaps(c.TemplateNamespace).Watch(metav1.ListOptions{
-		LabelSelector: mapStringStringToLabelSelector(c.TemplateLabels),
-	})
+	templateWatcher, err := c.client.ConfigMaps(c.TemplateNamespace).Watch(
+		// FIXME: get context from parameter
+		context.TODO(),
+		metav1.ListOptions{
+			LabelSelector: mapStringStringToLabelSelector(c.TemplateLabels),
+		})
 	if err != nil {
 		return fmt.Errorf("unable to create template watcher (possible serviceaccount RBAC/ACL failure?): %s", err.Error())
 	}
@@ -135,9 +141,12 @@ func (c *K8sConfigMapWatcher) Watch(notifyMe chan<- interface{}, stopCh <-chan s
 		targetNamespace = c.TargetNamespace
 	}
 
-	configWatcher, err := c.client.ConfigMaps(targetNamespace).Watch(metav1.ListOptions{
-		LabelSelector: mapStringStringToLabelSelector(c.ConfigLabels),
-	})
+	configWatcher, err := c.client.ConfigMaps(targetNamespace).Watch(
+		// FIXME: get context from parameter
+		context.TODO(),
+		metav1.ListOptions{
+			LabelSelector: mapStringStringToLabelSelector(c.ConfigLabels),
+		})
 	if err != nil {
 		return fmt.Errorf("unable to create config watcher (possible serviceaccount RBAC/ACL failure?): %s", err.Error())
 	}
@@ -276,9 +285,12 @@ func (c *K8sConfigMapWatcher) GetInjectionConfigs() (map[string][]*config.Inject
 // GetTemplates returns a map of common templates
 func (c *K8sConfigMapWatcher) GetTemplates() (map[string]string, error) {
 	log.Info("Fetching Template Configs...")
-	templateList, err := c.client.ConfigMaps(c.TemplateNamespace).List(metav1.ListOptions{
-		LabelSelector: mapStringStringToLabelSelector(c.TemplateLabels),
-	})
+	templateList, err := c.client.ConfigMaps(c.TemplateNamespace).List(
+		// FIXME: get context from parameter
+		context.TODO(),
+		metav1.ListOptions{
+			LabelSelector: mapStringStringToLabelSelector(c.TemplateLabels),
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -298,9 +310,12 @@ func (c *K8sConfigMapWatcher) GetTemplates() (map[string]string, error) {
 func (c *K8sConfigMapWatcher) GetConfigs() ([]*config.TemplateArgs, error) {
 	log.Info("Fetching Configs...")
 	// List all the configs with the required label selector
-	configList, err := c.client.ConfigMaps("").List(metav1.ListOptions{
-		LabelSelector: mapStringStringToLabelSelector(c.ConfigLabels),
-	})
+	configList, err := c.client.ConfigMaps("").List(
+		// FIXME: get context from parmeter
+		context.TODO(),
+		metav1.ListOptions{
+			LabelSelector: mapStringStringToLabelSelector(c.ConfigLabels),
+		})
 	if err != nil {
 		return nil, err
 	}

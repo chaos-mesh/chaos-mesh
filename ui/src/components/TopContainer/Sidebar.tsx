@@ -1,14 +1,30 @@
+/*
+ * Copyright 2021 Chaos Mesh Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 import { Box, Drawer, List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core'
 
+import AccountTreeOutlinedIcon from '@material-ui/icons/AccountTreeOutlined'
 import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
 import DashboardOutlinedIcon from '@material-ui/icons/DashboardOutlined'
+import ExperimentIcon from 'components-mui/Icons/Experiment'
 import GitHubIcon from '@material-ui/icons/GitHub'
-import HttpOutlinedIcon from '@material-ui/icons/HttpOutlined'
 import MenuBookOutlinedIcon from '@material-ui/icons/MenuBookOutlined'
 import { NavLink } from 'react-router-dom'
-import React from 'react'
+import ScheduleIcon from '@material-ui/icons/Schedule'
 import SettingsOutlinedIcon from '@material-ui/icons/SettingsOutlined'
-import StorageOutlinedIcon from '@material-ui/icons/StorageOutlined'
 import T from 'components/T'
 import TimelineOutlinedIcon from '@material-ui/icons/TimelineOutlined'
 import clsx from 'clsx'
@@ -16,7 +32,7 @@ import logo from 'images/logo.svg'
 import logoMini from 'images/logo-mini.svg'
 import logoMiniWhite from 'images/logo-mini-white.svg'
 import logoWhite from 'images/logo-white.svg'
-import { makeStyles } from '@material-ui/core/styles'
+import { makeStyles } from '@material-ui/styles'
 import { useStoreSelector } from 'store'
 
 export const drawerWidth = '14rem'
@@ -55,15 +71,12 @@ const useStyles = makeStyles((theme) => {
         duration: theme.transitions.duration.leavingScreen,
       }),
       overflowX: 'hidden',
-      [theme.breakpoints.down('xs')]: {
-        display: 'none',
-      },
     },
     toolbar: {
       minHeight: 56,
       display: 'flex',
-      alignItems: 'center',
       justifyContent: 'center',
+      alignItems: 'center',
       marginTop: theme.spacing(6),
     },
     logo: {
@@ -98,7 +111,15 @@ const useStyles = makeStyles((theme) => {
 const listItems = [
   { icon: <DashboardOutlinedIcon />, text: 'dashboard' },
   {
-    icon: <StorageOutlinedIcon />,
+    icon: <AccountTreeOutlinedIcon />,
+    text: 'workflows',
+  },
+  {
+    icon: <ScheduleIcon />,
+    text: 'schedules',
+  },
+  {
+    icon: <ExperimentIcon />,
     text: 'experiments',
   },
   {
@@ -152,7 +173,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open }) => {
             {listItems.map(({ icon, text }) => (
               <ListItem
                 key={text}
-                className={clsx(classes.listItem, `sidebar-${text}`)}
+                className={clsx(classes.listItem, `tutorial-${text}`)}
                 component={NavLink}
                 to={`/${text}`}
                 button
@@ -165,13 +186,6 @@ const Sidebar: React.FC<SidebarProps> = ({ open }) => {
         </Box>
 
         <List className={classes.list}>
-          <ListItem className={classes.listItem} component={NavLink} to="/swagger" button>
-            <ListItemIcon className={classes.listItemIcon}>
-              <HttpOutlinedIcon />
-            </ListItemIcon>
-            <ListItemText primary="Swagger API" />
-          </ListItem>
-
           <ListItem
             className={classes.listItem}
             component="a"

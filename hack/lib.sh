@@ -1,17 +1,18 @@
 #!/usr/bin/env bash
-
-# Copyright 2020 Chaos Mesh Authors.
+# Copyright 2021 Chaos Mesh Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+# http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
 
 if [ -z "$ROOT" ]; then
     echo "error: ROOT should be initialized"
@@ -22,19 +23,19 @@ OS=$(go env GOOS)
 ARCH=$(go env GOARCH)
 OUTPUT=${ROOT}/output
 OUTPUT_BIN=${OUTPUT}/bin
-KUBECTL_VERSION=1.20.4
+KUBECTL_VERSION=1.22.2
 KUBECTL_BIN=$OUTPUT_BIN/kubectl
 HELM_BIN=$OUTPUT_BIN/helm
 #
 # Don't upgrade to 2.15.x/2.16.x until this issue
 # (https://github.com/helm/helm/issues/6361) has been fixed.
 #
-HELM_VERSION=3.5.3
-KIND_VERSION=${KIND_VERSION:-0.10.0}
+HELM_VERSION=3.6.1
+KIND_VERSION=${KIND_VERSION:-0.11.1}
 KIND_BIN=$OUTPUT_BIN/kind
 KUBEBUILDER_PATH=$OUTPUT_BIN/kubebuilder
 KUBEBUILDER_BIN=$KUBEBUILDER_PATH/bin/kubebuilder
-KUBEBUILDER_VERSION=2.2.0
+KUBEBUILDER_VERSION=2.3.2
 KUSTOMIZE_BIN=$OUTPUT_BIN/kustomize
 KUSTOMIZE_VERSION=3.5.4
 KUBETEST2_VERSION=v0.1.0
@@ -123,7 +124,11 @@ function hack::ensure_kubebuilder() {
     fi
     tmpfile=$(mktemp)
     trap "test -f $tmpfile && rm $tmpfile" RETURN
-    curl --retry 10 -L -o ${tmpfile} https://go.kubebuilder.io/dl/$KUBEBUILDER_VERSION/$OS/$ARCH
+
+    # reference: https://github.com/kubernetes-sigs/kubebuilder/issues/2311#issuecomment-903940052
+    # and https://github.com/chaos-mesh/chaos-mesh/issues/2248
+    # kubebuilder_${KUBEBUILDER_VERSION}_${OS}_${ARCH}.tar.gz only works for kubebuilder v2.x, if we upgrade to v3 one day, we need to change the filename, remove the ${KUBEBUILDER_VERSION}
+    curl --retry 10 -L -o ${tmpfile} https://github.com/kubernetes-sigs/kubebuilder/releases/download/v${KUBEBUILDER_VERSION}/kubebuilder_${KUBEBUILDER_VERSION}_${OS}_${ARCH}.tar.gz
     tar -C ${OUTPUT_BIN} -xzf ${tmpfile}
     mv ${OUTPUT_BIN}/kubebuilder_${KUBEBUILDER_VERSION}_${OS}_${ARCH} ${KUBEBUILDER_PATH}
 }
