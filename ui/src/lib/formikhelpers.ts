@@ -102,6 +102,8 @@ export function parseSubmit<K extends ExperimentKind>(
 
   if (env === 'k8s') {
     helper2(spec.selector)
+
+    delete (spec as any).address // remove the address field only used in PhysicalMachineChaos
   }
 
   if (env === 'k8s' && kind === 'NetworkChaos') {
