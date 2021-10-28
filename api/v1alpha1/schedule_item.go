@@ -27,7 +27,19 @@ type ScheduleItem struct {
 	Workflow *WorkflowSpec `json:"workflow,omitempty"`
 }
 
-func (in EmbedChaos) Validate(chaosType string) field.ErrorList {
-	gw.Default(&in)
-	return gw.Validate(&in)
+func (in EmbedChaos) Validate(path *field.Path, chaosType string) field.ErrorList {
+	var allErrors field.ErrorList
+	root, err := in.SpawnNewObject(TemplateType(chaosType))
+	if err != nil {
+		allErrors = append(allErrors, field.Invalid(path, in, err.Error()))
+		return allErrors
+	}
+
+	gw.Default(&root)
+	err = in.RestoreChaosSpec(root)
+	if err != nil {
+		allErrors = append(allErrors, field.Invalid(path, in, err.Error()))
+		return allErrors
+	}
+	return gw.Validate(root)
 }

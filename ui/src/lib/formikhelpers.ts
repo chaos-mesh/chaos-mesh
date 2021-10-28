@@ -62,10 +62,10 @@ export function parseSubmit<K extends ExperimentKind>(
       delete scope.annotationSelectors
     }
 
-    // Parse phaseSelectors
-    const phaseSelectors = scope.phaseSelectors
-    if (phaseSelectors?.length === 1 && phaseSelectors[0] === 'all') {
-      delete scope.phaseSelectors
+    // Parse podPhaseSelectors
+    const podPhaseSelectors = scope.podPhaseSelectors
+    if (podPhaseSelectors?.length === 1 && podPhaseSelectors[0] === 'all') {
+      delete scope.podPhaseSelectors
     }
 
     // Parse pods
@@ -136,6 +136,12 @@ export function parseSubmit<K extends ExperimentKind>(
   }
 }
 
+function podSelectorsToArr(selector: Object) {
+  return Object.entries(selector)
+    .map(([ns, pods]) => pods.map((p: string) => `${ns}: ${p}`))
+    .flat()
+}
+
 function selectorsToArr(selectors: Object, separator: string) {
   return Object.entries(selectors).map(([key, val]) => `${key}${separator}${val}`)
 }
@@ -171,7 +177,7 @@ export function parseYAML(
         ...basicData.spec.selector,
         namespaces: spec.selector.namespaces ?? [],
         labelSelectors: spec.selector.labelSelectors ? selectorsToArr(spec.selector.labelSelectors, ': ') : [],
-        annotation_selectors: spec.selector.annotationSelectors
+        annotationSelectors: spec.selector.annotationSelectors
           ? selectorsToArr(spec.selector.annotationSelectors, ': ')
           : [],
       },
@@ -208,6 +214,8 @@ export function parseYAML(
       spec.target.selector.annotationSelectors = spec.target.selector.annotationSelectors
         ? selectorsToArr(spec.target.selector.annotationSelectors, ': ')
         : []
+      spec.target.selector.podPhaseSelectors = spec.target.selector.podPhaseSelectors || []
+      spec.target.selector.pods = spec.target.selector.pods ? podSelectorsToArr(spec.target.selector.pods) : []
     }
   }
 
@@ -215,8 +223,8 @@ export function parseYAML(
     spec.attr = selectorsToArr(spec.attr, ':')
   }
 
-  if (kind === 'KernelChaos' && spec.fail_kern_request) {
-    spec.fail_kern_request.callchain = spec.fail_kern_request.callchain.map((frame: Frame) => {
+  if (kind === 'KernelChaos' && spec.failKernRequest) {
+    spec.failKernRequest.callchain = spec.failKernRequest.callchain.map((frame: Frame) => {
       if (!frame.parameters) {
         frame.parameters = ''
       }

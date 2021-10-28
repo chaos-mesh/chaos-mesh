@@ -527,6 +527,15 @@ definitions:
           values'
         type: string
     type: object
+  v1alpha1.ClockSpec:
+    properties:
+      clock-ids-slice:
+        type: string
+      pid:
+        type: integer
+      time-offset:
+        type: string
+    type: object
   v1alpha1.ConditionalBranch:
     properties:
       expression:
@@ -1099,8 +1108,9 @@ definitions:
       cpu-count:
         description: the CPU core number need to use, only set it when action is stress
         type: integer
-      mem-size:
-        description: the memory size need to locate, only set it when action is stress
+      mem-type:
+        description: the memory type need to locate, only set it when action is stress,
+          the value can be 'stack' or 'heap'
         type: integer
       pid:
         description: the pid of Java process which need to attach
@@ -1222,6 +1232,11 @@ definitions:
           Delay represents the detail about delay action
           +optional
         type: object
+      device:
+        description: |-
+          Device represents the network device to be affected.
+          +optional
+        type: string
       direction:
         description: |-
           Direction represents the direction, this applies on netem and network partition action
@@ -1267,6 +1282,11 @@ definitions:
           Target represents network target, this applies on netem and network partition action
           +optional
         type: object
+      targetDevice:
+        description: |-
+          TargetDevice represents the network device to be affected in target scope.
+          +optional
+        type: string
       value:
         description: |-
           Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
@@ -1293,6 +1313,15 @@ definitions:
       percent:
         type: string
       source-port:
+        type: string
+    type: object
+  v1alpha1.NetworkDNSSpec:
+    properties:
+      dns-domain-name:
+        type: string
+      dns-ip:
+        type: string
+      dns-server:
         type: string
     type: object
   v1alpha1.NetworkDelaySpec:
@@ -1354,6 +1383,24 @@ definitions:
       source-port:
         type: string
     type: object
+  v1alpha1.NetworkPartitionSpec:
+    properties:
+      accept-tcp-flags:
+        description: |-
+          only the packet which match the tcp flag can be accepted, others will be dropped.
+          only set when the IPProtocol is tcp, used for partition.
+        type: string
+      device:
+        type: string
+      direction:
+        type: string
+      hostname:
+        type: string
+      ip-address:
+        type: string
+      ip-protocol:
+        type: string
+    type: object
   v1alpha1.PhysicalMachineChaosSpec:
     properties:
       action:
@@ -1365,6 +1412,10 @@ definitions:
         items:
           type: string
         type: array
+      clock:
+        $ref: '#/definitions/v1alpha1.ClockSpec'
+        description: +optional
+        type: object
       disk-fill:
         $ref: '#/definitions/v1alpha1.DiskFillSpec'
         description: +optional
@@ -1415,12 +1466,20 @@ definitions:
         $ref: '#/definitions/v1alpha1.NetworkDelaySpec'
         description: +optional
         type: object
+      network-dns:
+        $ref: '#/definitions/v1alpha1.NetworkDNSSpec'
+        description: +optional
+        type: object
       network-duplicate:
         $ref: '#/definitions/v1alpha1.NetworkDuplicateSpec'
         description: +optional
         type: object
       network-loss:
         $ref: '#/definitions/v1alpha1.NetworkLossSpec'
+        description: +optional
+        type: object
+      network-partition:
+        $ref: '#/definitions/v1alpha1.NetworkPartitionSpec'
         description: +optional
         type: object
       process:

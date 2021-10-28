@@ -72,7 +72,7 @@ func sendUDPPacket(c http.Client, port uint16, targetIP string) error {
 
 	result := string(out)
 	if result != "send successfully\n" {
-		return fmt.Errorf("doesn't send successfully")
+		return fmt.Errorf("doesn't send successfully: %s", result)
 	}
 
 	klog.Info("send request successfully")
@@ -276,6 +276,9 @@ func couldConnect(c http.Client, sourcePort uint16, targetPodIP string, targetPo
 		return false
 	}
 
+	// As this function ignores the data corruption, it will only return false when the
+	// e2e test cannot connect to the helper, or the helper failed to send (the iptables
+	// rules drop the sending packet on the sender side, which will give an "operation not permitted" error)
 	// FIXME: slow network may also make this happens
 	if data != "ping\n" {
 		klog.Infof("mismatch data return: %s, it may happens under bad network", data)
