@@ -208,13 +208,11 @@ func ModifyTime(pid int, deltaSec int64, deltaNsec int64, clockIdsMask uint64) e
 				return err
 			}
 
-			// 147 is the index of TV_SEC_DELTA in fakeImage
 			err = program.WriteUint64ToAddr(fakeEntry.StartAddress+uint64(fakeImage.offset["TV_SEC_DELTA"]), uint64(deltaSec))
 			if err != nil {
 				return err
 			}
 
-			// 155 is the index of TV_NSEC_DELTA in fakeImage
 			err = program.WriteUint64ToAddr(fakeEntry.StartAddress+uint64(fakeImage.offset["TV_NSEC_DELTA"]), uint64(deltaNsec))
 			if err != nil {
 				return err
