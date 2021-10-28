@@ -16,8 +16,9 @@
 package podiochaos
 
 import (
-	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 	"reflect"
+
+	"go.uber.org/fx"
 
 	"github.com/go-logr/logr"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -29,14 +30,25 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
+	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 )
 
-func Bootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, b *chaosdaemon.ChaosDaemonClientBuilder, metricsCollector *metrics.ChaosControllerManagerMetricsCollector) error {
+type Params struct {
+	fx.In
+
+	Mgr              ctrl.Manager
+	Client           client.Client
+	Logger           logr.Logger
+	Builder          *chaosdaemon.ChaosDaemonClientBuilder
+	MetricsCollector *metrics.ChaosControllerManagerMetricsCollector
+}
+
+func Bootstrap(params Params) error {
 	if !config.ShouldSpawnController("podiochaos") {
 		return nil
 	}
 
-	return builder.Default(mgr).
+	return builder.Default(params.Mgr).
 		For(&v1alpha1.PodIOChaos{}).
 		Named("podiochaos").
 		WithEventFilter(predicate.Funcs{
@@ -48,10 +60,10 @@ func Bootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, b *ch
 			},
 		}).
 		Complete(&Reconciler{
-			Client:                   client,
-			Log:                      logger.WithName("podiochaos"),
-			Recorder:                 mgr.GetEventRecorderFor("podiochaos"),
-			ChaosDaemonClientBuilder: b,
-			MetricsCollector:         metricsCollector,
+			Client:                   params.Client,
+			Log:                      params.Logger.WithName("podiochaos"),
+			Recorder:                 params.Mgr.GetEventRecorderFor("podiochaos"),
+			ChaosDaemonClientBuilder: params.Builder,
+			MetricsCollector:         params.MetricsCollector,
 		})
 }

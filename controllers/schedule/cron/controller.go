@@ -17,9 +17,10 @@ package cron
 
 import (
 	"context"
-	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 	"reflect"
 	"time"
+
+	"go.uber.org/fx"
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
@@ -35,6 +36,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
+	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/controllers"
 )
 
@@ -200,19 +202,30 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 const controllerName = "schedule-cron"
 
-func Bootstrap(mgr ctrl.Manager, client client.Client, log logr.Logger, lister *utils.ActiveLister, recorderBuilder *recorder.RecorderBuilder, metricsCollector *metrics.ChaosControllerManagerMetricsCollector) error {
+type Params struct {
+	fx.In
+
+	Mgr              ctrl.Manager
+	Client           client.Client
+	Logger           logr.Logger
+	Lister           *utils.ActiveLister
+	RecorderBuilder  *recorder.RecorderBuilder
+	MetricsCollector *metrics.ChaosControllerManagerMetricsCollector
+}
+
+func Bootstrap(params Params) error {
 	if !config.ShouldSpawnController(controllerName) {
 		return nil
 	}
 
-	return builder.Default(mgr).
+	return builder.Default(params.Mgr).
 		For(&v1alpha1.Schedule{}).
 		Named(controllerName).
 		Complete(&Reconciler{
-			client,
-			log.WithName(controllerName),
-			lister,
-			recorderBuilder.Build(controllerName),
-			metricsCollector,
+			params.Client,
+			params.Logger.WithName(controllerName),
+			params.Lister,
+			params.RecorderBuilder.Build(controllerName),
+			params.MetricsCollector,
 		})
 }

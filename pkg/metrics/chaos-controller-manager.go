@@ -36,6 +36,7 @@ type ChaosControllerManagerMetricsCollector struct {
 	InjectRequired      *prometheus.CounterVec
 	Injections          *prometheus.CounterVec
 	reconcileDuration   *prometheus.HistogramVec
+	EmittedEvents       *prometheus.CounterVec
 }
 
 // NewChaosControllerManagerMetricsCollector initializes metrics and collector
@@ -79,6 +80,10 @@ func NewChaosControllerManagerMetricsCollector(manager ctrl.Manager, registerer 
 			Help:    "Duration histogram for each reconcile request",
 			Buckets: prometheus.DefBuckets,
 		}, []string{"type"}),
+		EmittedEvents: prometheus.NewCounterVec(prometheus.CounterOpts{
+			Name: "chaos_controller_manager_emitted_event_total",
+			Help: "Total number of the emitted event by chaos-controller-manager",
+		}, []string{"type", "reason", "namespace"}),
 	}
 	registerer.MustRegister(c)
 	return c
@@ -95,6 +100,7 @@ func (collector *ChaosControllerManagerMetricsCollector) Describe(ch chan<- *pro
 	collector.InjectRequired.Describe(ch)
 	collector.Injections.Describe(ch)
 	collector.reconcileDuration.Describe(ch)
+	collector.EmittedEvents.Describe(ch)
 }
 
 // Collect implements the prometheus.Collector interface.
@@ -108,6 +114,7 @@ func (collector *ChaosControllerManagerMetricsCollector) Collect(ch chan<- prome
 	collector.InjectRequired.Collect(ch)
 	collector.Injections.Collect(ch)
 	collector.reconcileDuration.Collect(ch)
+	collector.EmittedEvents.Collect(ch)
 }
 
 func (collector *ChaosControllerManagerMetricsCollector) CollectReconcileDuration(typeLabel string, before time.Time) {

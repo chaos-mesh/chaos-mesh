@@ -18,7 +18,6 @@ package podnetworkchaos
 import (
 	"context"
 	"fmt"
-	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -38,6 +37,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 	pbutils "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/netem"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 	"github.com/chaos-mesh/chaos-mesh/pkg/netem"
 )
 

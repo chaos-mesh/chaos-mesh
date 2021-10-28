@@ -17,7 +17,6 @@ package finalizers
 
 import (
 	"context"
-	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -29,6 +28,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
+	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 )
 
 const (

@@ -17,7 +17,6 @@ package condition
 
 import (
 	"context"
-	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 	"reflect"
 	"time"
 
@@ -31,6 +30,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 )
 
 // Reconciler for common chaos

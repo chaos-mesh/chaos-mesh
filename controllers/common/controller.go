@@ -17,7 +17,6 @@ package common
 
 import (
 	"context"
-	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 	"reflect"
 	"strings"
 	"time"
@@ -30,6 +29,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
+	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 )
 

@@ -18,7 +18,6 @@ package gc
 import (
 	"context"
 	"fmt"
-	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 	"reflect"
 	"sort"
 	"time"
@@ -38,6 +37,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
+	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/controllers"
 )
 
@@ -137,8 +137,16 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}, nil
 }
 
-type Objs struct {
+type Params struct {
 	fx.In
+
+	Mgr              ctrl.Manager
+	Client           client.Client
+	Logger           logr.Logger
+	Scheme           *runtime.Scheme
+	Lister           *utils.ActiveLister
+	RecorderBuilder  *recorder.RecorderBuilder
+	MetricsCollector *metrics.ChaosControllerManagerMetricsCollector
 
 	ScheduleObjs []types.Object `group:"schedule"`
 	Objs         []types.Object `group:"objs"`
@@ -146,15 +154,15 @@ type Objs struct {
 
 const controllerName = "schedule-gc"
 
-func Bootstrap(mgr ctrl.Manager, client client.Client, log logr.Logger, objs Objs, scheme *runtime.Scheme, lister *utils.ActiveLister, recorderBuilder *recorder.RecorderBuilder, metricsCollector *metrics.ChaosControllerManagerMetricsCollector) error {
+func Bootstrap(params Params) error {
 	if !config.ShouldSpawnController(controllerName) {
 		return nil
 	}
-	builder := builder.Default(mgr).
+	builder := builder.Default(params.Mgr).
 		For(&v1alpha1.Schedule{}).
 		Named(controllerName)
 
-	for _, obj := range objs.Objs {
+	for _, obj := range params.Objs {
 		// TODO: support workflow
 		builder.Owns(obj.Object)
 	}
@@ -162,10 +170,10 @@ func Bootstrap(mgr ctrl.Manager, client client.Client, log logr.Logger, objs Obj
 	builder = builder.Owns(&v1alpha1.Workflow{})
 
 	return builder.Complete(&Reconciler{
-		client,
-		log.WithName(controllerName),
-		recorderBuilder.Build(controllerName),
-		lister,
-		metricsCollector,
+		params.Client,
+		params.Logger.WithName(controllerName),
+		params.RecorderBuilder.Build(controllerName),
+		params.Lister,
+		params.MetricsCollector,
 	})
 }

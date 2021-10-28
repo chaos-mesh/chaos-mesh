@@ -18,10 +18,11 @@ package pause
 import (
 	"context"
 	"fmt"
-	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 	"reflect"
 	"strconv"
 	"time"
+
+	"go.uber.org/fx"
 
 	"github.com/go-logr/logr"
 	k8sError "k8s.io/apimachinery/pkg/api/errors"
@@ -35,6 +36,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/utils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
+	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 )
 
 type Reconciler struct {
@@ -116,20 +118,31 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	return ctrl.Result{}, nil
 }
 
+type Params struct {
+	fx.In
+
+	Mgr              ctrl.Manager
+	Client           client.Client
+	Logger           logr.Logger
+	Lister           *utils.ActiveLister
+	RecorderBuilder  *recorder.RecorderBuilder
+	MetricsCollector *metrics.ChaosControllerManagerMetricsCollector
+}
+
 const controllerName = "schedule-pause"
 
-func Bootstrap(mgr ctrl.Manager, client client.Client, log logr.Logger, lister *utils.ActiveLister, recorderBuilder *recorder.RecorderBuilder, metricsCollector *metrics.ChaosControllerManagerMetricsCollector) error {
+func Bootstrap(params Params) error {
 	if !config.ShouldSpawnController(controllerName) {
 		return nil
 	}
-	return builder.Default(mgr).
+	return builder.Default(params.Mgr).
 		For(&v1alpha1.Schedule{}).
 		Named(controllerName).
 		Complete(&Reconciler{
-			client,
-			log.WithName(controllerName),
-			lister,
-			recorderBuilder.Build(controllerName),
-			metricsCollector,
+			params.Client,
+			params.Logger.WithName(controllerName),
+			params.Lister,
+			params.RecorderBuilder.Build(controllerName),
+			params.MetricsCollector,
 		})
 }

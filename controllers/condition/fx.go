@@ -16,7 +16,6 @@
 package condition
 
 import (
-	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 	"github.com/go-logr/logr"
 	"go.uber.org/fx"
 
@@ -26,17 +25,25 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
+	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 )
 
-type Objs struct {
+type Params struct {
 	fx.In
+
+	Mgr              ctrl.Manager
+	Client           client.Client
+	Logger           logr.Logger
+	MetricsCollector *metrics.ChaosControllerManagerMetricsCollector
 
 	Objs []types.Object `group:"objs"`
 }
 
-func Bootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, objs Objs, metricsCollector *metrics.ChaosControllerManagerMetricsCollector) error {
+func Bootstrap(params Params) error {
+	logger := params.Logger
+
 	setupLog := logger.WithName("setup-condition")
-	for _, obj := range objs.Objs {
+	for _, obj := range params.Objs {
 		name := obj.Name + "-condition"
 		if !config.ShouldSpawnController(name) {
 			return nil
@@ -44,15 +51,15 @@ func Bootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, objs 
 
 		setupLog.Info("setting up controller", "resource-name", obj.Name)
 
-		err := builder.Default(mgr).
+		err := builder.Default(params.Mgr).
 			For(obj.Object).
 			Named(name).
 			Complete(&Reconciler{
 				Object:           obj.Object,
-				Client:           client,
-				Recorder:         mgr.GetEventRecorderFor("condition"),
+				Client:           params.Client,
+				Recorder:         params.Mgr.GetEventRecorderFor("condition"),
 				Log:              logger.WithName("condition"),
-				MetricsCollector: metricsCollector,
+				MetricsCollector: params.MetricsCollector,
 			})
 		if err != nil {
 			return err
