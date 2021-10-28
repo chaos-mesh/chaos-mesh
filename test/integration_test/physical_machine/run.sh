@@ -57,7 +57,7 @@ echo "create physical machine chaos"
 localIP=`ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | head -1`
 
 cp physicalmachine.yaml physicalmachine_tmp.yaml
-sed -i 's/CHAOSD_ADDRESS/'$localIP'\:31768/g' chaos_tmp.yaml
+sed -i 's/CHAOSD_ADDRESS/'$localIP'\:31768/g' physicalmachine_tmp.yaml
 kubectl apply -f physicalmachine_tmp.yaml
 judge_stress true
 
