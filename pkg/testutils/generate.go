@@ -17,6 +17,7 @@ package testutils
 
 import (
 	"fmt"
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -110,4 +111,52 @@ func GenerateNNodes(
 		nodes = append(nodes, node)
 	}
 	return nodeObjects, nodes
+}
+
+// PhysicalMachineArg by default use `Namespace=metav1.NamespaceDefault`.
+// For the others, the default values are empty.
+type PhysicalMachineArg struct {
+	Name      string
+	Namespace string
+	Ans       map[string]string
+	Labels    map[string]string
+	Address   string
+}
+
+func NewPhysicalMachine(p PhysicalMachineArg) v1alpha1.PhysicalMachine {
+	if p.Namespace == "" {
+		p.Namespace = metav1.NamespaceDefault
+	}
+	return v1alpha1.PhysicalMachine{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "PhysicalMachine",
+			APIVersion: "v1alpha1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:        p.Name,
+			Namespace:   p.Namespace,
+			Labels:      p.Labels,
+			Annotations: p.Ans,
+		},
+		Spec: v1alpha1.PhysicalMachineSpec{
+			Address: p.Address,
+		},
+	}
+}
+
+func GenerateNPhysicalMachines(
+	namePrefix string,
+	n int,
+	arg PhysicalMachineArg,
+) ([]runtime.Object, []v1alpha1.PhysicalMachine) {
+	var physicalMachineObjects []runtime.Object
+	var physicalMachines []v1alpha1.PhysicalMachine
+	for i := 0; i < n; i++ {
+		arg.Name = fmt.Sprintf("%s%d", namePrefix, i)
+		physicalMachine := NewPhysicalMachine(arg)
+		physicalMachineObjects = append(physicalMachineObjects, &physicalMachine)
+		physicalMachines = append(physicalMachines, physicalMachine)
+	}
+
+	return physicalMachineObjects, physicalMachines
 }

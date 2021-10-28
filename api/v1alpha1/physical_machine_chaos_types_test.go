@@ -58,7 +58,7 @@ var _ = Describe("PhysicalMachineChaos", func() {
 					Action: "stress-mem",
 					PhysicalMachineSelector: PhysicalMachineSelector{
 						Selector: PhysicalMachineSelectorSpec{
-							CommonSelectorSpec: CommonSelectorSpec{
+							GenericSelectorSpec: GenericSelectorSpec{
 								LabelSelectors: map[string]string{
 									"foo": "bar",
 								},

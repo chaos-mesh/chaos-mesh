@@ -16,7 +16,11 @@
 package namespace
 
 import (
+	"context"
 	"fmt"
+	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/types"
+	ctrl "sigs.k8s.io/controller-runtime"
 	"strings"
 
 	"k8s.io/apimachinery/pkg/selection"
@@ -29,6 +33,8 @@ import (
 )
 
 const Name = "namespace"
+
+var log = ctrl.Log.WithName("namespaceselector")
 
 type namespaceSelector struct {
 	generic.Option
@@ -113,4 +119,32 @@ func New(spec v1alpha1.GenericSelectorSpec, option generic.Option) (generic.Sele
 		reqIncl: reqIncl,
 		reqExcl: reqExcl,
 	}, nil
+}
+
+func CheckNamespace(ctx context.Context, c client.Client, namespace string) bool {
+	ok, err := IsAllowedNamespaces(ctx, c, namespace)
+	if err != nil {
+		log.Error(err, "fail to check whether this namespace is allowed", "namespace", namespace)
+		return false
+	}
+
+	if !ok {
+		log.Info("namespace is not enabled for chaos-mesh", "namespace", namespace)
+	}
+	return ok
+}
+
+func IsAllowedNamespaces(ctx context.Context, c client.Client, namespace string) (bool, error) {
+	ns := &v1.Namespace{}
+
+	err := c.Get(ctx, types.NamespacedName{Name: namespace}, ns)
+	if err != nil {
+		return false, err
+	}
+
+	if ns.Annotations[generic.InjectAnnotationKey] == "enabled" {
+		return true, nil
+	}
+
+	return false, nil
 }

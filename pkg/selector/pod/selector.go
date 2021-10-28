@@ -185,7 +185,7 @@ func selectSpecifiedPods(ctx context.Context, c client.Client, spec v1alpha1.Pod
 		if enableFilterNamespace {
 			allow, ok := namespaceCheck[ns]
 			if !ok {
-				allow = checkNamespace(ctx, c, ns)
+				allow = generic_namespace.CheckNamespace(ctx, c, ns)
 				namespaceCheck[ns] = allow
 			}
 			if !allow {
@@ -297,7 +297,7 @@ func listPods(ctx context.Context, c client.Client, r client.Reader, spec v1alph
 					if enableFilterNamespace {
 						allow, ok := namespaceCheck[namespace]
 						if !ok {
-							allow = checkNamespace(ctx, c, namespace)
+							allow = generic_namespace.CheckNamespace(ctx, c, namespace)
 							namespaceCheck[namespace] = allow
 						}
 						if !allow {
@@ -393,34 +393,6 @@ func filterPodsByMode(pods []v1.Pod, mode v1alpha1.PodMode, value string) ([]v1.
 	default:
 		return nil, fmt.Errorf("mode %s not supported", mode)
 	}
-}
-
-func checkNamespace(ctx context.Context, c client.Client, namespace string) bool {
-	ok, err := IsAllowedNamespaces(ctx, c, namespace)
-	if err != nil {
-		log.Error(err, "fail to check whether this namespace is allowed", "namespace", namespace)
-		return false
-	}
-
-	if !ok {
-		log.Info("namespace is not enabled for chaos-mesh", "namespace", namespace)
-	}
-	return ok
-}
-
-func IsAllowedNamespaces(ctx context.Context, c client.Client, namespace string) (bool, error) {
-	ns := &v1.Namespace{}
-
-	err := c.Get(ctx, types.NamespacedName{Name: namespace}, ns)
-	if err != nil {
-		return false, err
-	}
-
-	if ns.Annotations[generic.InjectAnnotationKey] == "enabled" {
-		return true, nil
-	}
-
-	return false, nil
 }
 
 func getFixedSubListFromPodList(pods []v1.Pod, num int) []v1.Pod {
