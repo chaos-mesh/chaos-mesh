@@ -95,7 +95,7 @@ func Inject(res *v1.AdmissionRequest, cli client.Client, cfg *config.Config, con
 	}
 
 	if injectionConfig.Selector != nil {
-		meet, err := podselector.CheckPodMeetSelector(cli, pod, *injectionConfig.Selector,
+		meet, err := podselector.CheckPodMeetSelector(context.Background(), cli, pod, *injectionConfig.Selector,
 			controllerCfg.ClusterScoped, controllerCfg.TargetNamespace, controllerCfg.EnableFilterNamespace)
 		if err != nil {
 			log.Error(err, "Failed to check pod selector", "namespace", pod.Namespace)

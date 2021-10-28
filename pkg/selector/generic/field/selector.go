@@ -51,13 +51,11 @@ func (s *fieldSelector) ListFunc(r client.Reader) generic.ListFunc {
 
 func (s *fieldSelector) Match(obj client.Object) bool {
 	var objFields fields.Set
-	switch obj.(type) {
+	switch obj := obj.(type) {
 	case *v1.Pod:
-		pod := obj.(*v1.Pod)
-		objFields = toPodSelectableFields(pod)
+		objFields = toPodSelectableFields(obj)
 	case *v1alpha1.PhysicalMachine:
-		physicalMachine := obj.(*v1alpha1.PhysicalMachine)
-		objFields = toPhysicalMachineSelectableFields(physicalMachine)
+		objFields = toPhysicalMachineSelectableFields(obj)
 	default:
 		// not support
 		return false

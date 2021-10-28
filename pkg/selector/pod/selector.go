@@ -236,7 +236,7 @@ func GetService(ctx context.Context, c client.Client, namespace, controllerNames
 }
 
 // CheckPodMeetSelector checks if this pod meets the selection criteria.
-func CheckPodMeetSelector(c client.Client, pod v1.Pod, selector v1alpha1.PodSelectorSpec, clusterScoped bool, targetNamespace string, enableFilterNamespace bool) (bool, error) {
+func CheckPodMeetSelector(ctx context.Context, c client.Client, pod v1.Pod, selector v1alpha1.PodSelectorSpec, clusterScoped bool, targetNamespace string, enableFilterNamespace bool) (bool, error) {
 	if len(selector.Pods) > 0 {
 		meet := false
 		for ns, names := range selector.Pods {
@@ -256,7 +256,7 @@ func CheckPodMeetSelector(c client.Client, pod v1.Pod, selector v1alpha1.PodSele
 		}
 	}
 
-	selectorRegistry := newSelectorRegistry(context.TODO(), c, selector)
+	selectorRegistry := newSelectorRegistry(ctx, c, selector)
 	selectorChain, err := registry.Parse(selectorRegistry, selector.GenericSelectorSpec, generic.Option{
 		ClusterScoped:         clusterScoped,
 		TargetNamespace:       targetNamespace,

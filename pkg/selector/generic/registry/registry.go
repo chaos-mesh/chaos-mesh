@@ -32,7 +32,7 @@ func Parse(registry Registry, spec v1alpha1.GenericSelectorSpec, option generic.
 	for name, factory := range registry {
 		selector, err := factory(spec, option)
 		if err != nil {
-			return nil, fmt.Errorf("cannot parse %s selector", name)
+			return nil, fmt.Errorf("cannot parse %s selector, msg: %+v", name, err)
 		}
 		selectors = append(selectors, selector)
 	}
