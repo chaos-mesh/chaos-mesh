@@ -40,7 +40,7 @@ type PhysicalMachineChaos struct {
 
 // PhysicalMachineChaosSpec defines the desired state of PhysicalMachineChaos
 type PhysicalMachineChaosSpec struct {
-	// +kubebuilder:validation:Enum=stress-cpu;stress-mem;disk-read-payload;disk-write-payload;disk-fill;network-corrupt;network-duplicate;network-loss;network-delay;process;jvm-exception;jvm-gc;jvm-latency;jvm-return;jvm-stress;jvm-rule-data
+	// +kubebuilder:validation:Enum=stress-cpu;stress-mem;disk-read-payload;disk-write-payload;disk-fill;network-corrupt;network-duplicate;network-loss;network-delay;network-partition;network-dns;process;jvm-exception;jvm-gc;jvm-latency;jvm-return;jvm-stress;jvm-rule-data;clock
 	Action PhysicalMachineChaosAction `json:"action"`
 
 	PhysicalMachineSelector `json:",inline"`
@@ -118,6 +118,12 @@ type ExpInfo struct {
 	NetworkDelay *NetworkDelaySpec `json:"network-delay,omitempty"`
 
 	// +optional
+	NetworkPartition *NetworkPartitionSpec `json:"network-partition,omitempty"`
+
+	// +optional
+	NetworkDNS *NetworkDNSSpec `json:"network-dns,omitempty"`
+
+	// +optional
 	Process *ProcessSpec `json:"process,omitempty"`
 
 	// +optional
@@ -137,6 +143,9 @@ type ExpInfo struct {
 
 	// +optional
 	JVMRuleData *JVMRuleDataSpec `json:"jvm-rule-data,omitempty"`
+
+	// +optional
+	Clock *ClockSpec `json:"clock,omitempty"`
 }
 
 type StressCPUSpec struct {
@@ -198,6 +207,25 @@ type NetworkDelaySpec struct {
 	Latency string `json:"latency,omitempty"`
 }
 
+type NetworkPartitionSpec struct {
+	Device string `json:"device,omitempty"`
+
+	Hostname  string `json:"hostname,omitempty"`
+	IPAddress string `json:"ip-address,omitempty"`
+	Direction string `json:"direction,omitempty"`
+
+	IPProtocol string `json:"ip-protocol,omitempty"`
+	// only the packet which match the tcp flag can be accepted, others will be dropped.
+	// only set when the IPProtocol is tcp, used for partition.
+	AcceptTCPFlags string `json:"accept-tcp-flags,omitempty"`
+}
+
+type NetworkDNSSpec struct {
+	DNSServer     string `json:"dns-server,omitempty"`
+	DNSIp         string `json:"dns-ip,omitempty"`
+	DNSDomainName string `json:"dns-domain-name,omitempty"`
+}
+
 type ProcessSpec struct {
 	Process string `json:"process,omitempty"`
 	Signal  int    `json:"signal,omitempty"`
@@ -253,8 +281,8 @@ type JVMStressSpec struct {
 	// the CPU core number need to use, only set it when action is stress
 	CPUCount int `json:"cpu-count,omitempty"`
 
-	// the memory size need to locate, only set it when action is stress
-	MemorySize int `json:"mem-size,omitempty"`
+	// the memory type need to locate, only set it when action is stress, the value can be 'stack' or 'heap'
+	MemoryType int `json:"mem-type,omitempty"`
 }
 
 type JVMRuleDataSpec struct {
@@ -262,4 +290,12 @@ type JVMRuleDataSpec struct {
 
 	// RuleData used to save the rule file's data, will use it when recover
 	RuleData string `json:"rule-data,omitempty"`
+}
+
+type ClockSpec struct {
+	Pid int `json:"pid,omitempty"`
+
+	TimeOffset string `json:"time-offset,omitempty"`
+
+	ClockIdsSlice string `json:"clock-ids-slice,omitempty"`
 }

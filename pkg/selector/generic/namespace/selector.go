@@ -17,8 +17,9 @@ package namespace
 
 import (
 	"fmt"
-	"k8s.io/apimachinery/pkg/selection"
 	"strings"
+
+	"k8s.io/apimachinery/pkg/selection"
 
 	"k8s.io/apimachinery/pkg/labels"
 	"sigs.k8s.io/controller-runtime/pkg/client"

@@ -64,4 +64,3 @@ func TestMatch(t *testing.T) {
 		g.Expect(tc.selector.Match(&tc.pod)).To(Equal(tc.match), tc.name)
 	}
 }
-

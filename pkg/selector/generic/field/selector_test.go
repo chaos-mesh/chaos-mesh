@@ -16,13 +16,15 @@
 package field
 
 import (
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic"
-	. "github.com/chaos-mesh/chaos-mesh/pkg/testutils"
+	"testing"
+
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"testing"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic"
+	. "github.com/chaos-mesh/chaos-mesh/pkg/testutils"
 )
 
 func TestMatch(t *testing.T) {
