@@ -19,6 +19,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	generic_namespace "github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/namespace"
 	"strings"
 
 	v1 "k8s.io/api/admission/v1"
@@ -148,7 +149,7 @@ func injectRequired(metadata *metav1.ObjectMeta, cli client.Client, cfg *config.
 	}
 
 	if controllerCfg.EnableFilterNamespace {
-		ok, err := podselector.IsAllowedNamespaces(context.Background(), cli, metadata.Namespace)
+		ok, err := generic_namespace.IsAllowedNamespaces(context.Background(), cli, metadata.Namespace)
 		if err != nil {
 			log.Error(err, "fail to check whether this namespace should be injected", "namespace", metadata.Namespace)
 		}
