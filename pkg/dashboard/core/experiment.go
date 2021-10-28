@@ -32,8 +32,8 @@ type ExperimentStore interface {
 	// FindByUID returns an experiment by UID.
 	FindByUID(ctx context.Context, UID string) (*Experiment, error)
 
-	// Create persists a new experiment to the datastore.
-	Create(context.Context, *Experiment) error
+	// Save persists or update a experiment to the datastore.
+	Save(context.Context, *Experiment) error
 
 	// Archive archives experiments which archived field is false.
 	Archive(ctx context.Context, namespace, name string) error

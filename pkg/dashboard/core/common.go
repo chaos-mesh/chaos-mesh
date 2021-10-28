@@ -18,6 +18,7 @@ package core
 import (
 	"encoding/json"
 	"strings"
+	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -64,6 +65,7 @@ func (f *Filter) toMap() map[string]interface{} {
 	return fMap
 }
 
+const layout = "2006-01-02 15:04:05"
 const zeroTime = "0001-01-01 00:00:00"
 
 func (f *Filter) ConstructQueryArgs() (string, []interface{}) {
@@ -85,7 +87,12 @@ func (f *Filter) ConstructQueryArgs() (string, []interface{}) {
 		}
 	}
 
+	start, _ := time.Parse(time.RFC3339, f.Start)
+	end, _ := time.Parse(time.RFC3339, f.End)
+	f.Start = start.UTC().Format(layout)
+	f.End = end.UTC().Format(layout)
 	startEnd := ""
+
 	if f.Start != zeroTime && f.End != zeroTime {
 		startEnd = "created_at BETWEEN ? AND ?"
 		args = append(args, f.Start, f.End)

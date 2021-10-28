@@ -18,7 +18,7 @@ package collector
 import (
 	"context"
 	"encoding/json"
-	"errors"
+	"reflect"
 
 	"github.com/go-logr/logr"
 	"github.com/jinzhu/gorm"
@@ -41,20 +41,27 @@ type ChaosCollector struct {
 	event   core.EventStore
 }
 
-// Reconcile reconciles a chaos collector.
+// Setup setups ChaosCollector by Manager.
+func (r *ChaosCollector) Setup(mgr ctrl.Manager, apiType client.Object) error {
+	r.apiType = apiType
+
+	return ctrl.NewControllerManagedBy(mgr).
+		For(apiType).
+		Complete(r)
+}
+
+// Reconcile reconciles ChaosCollector.
 func (r *ChaosCollector) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	var (
-		chaosMeta  metav1.Object
-		ok         bool
-		manageFlag bool
+		chaosMeta metav1.Object
+		ok        bool
+		isManaged = false
 	)
 
 	if r.apiType == nil {
 		r.Log.Error(nil, "apiType has not been initialized")
 		return ctrl.Result{}, nil
 	}
-
-	manageFlag = false
 
 	obj, ok := r.apiType.DeepCopyObject().(v1alpha1.InnerObject)
 	if !ok {
@@ -68,9 +75,9 @@ func (r *ChaosCollector) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 			r.Log.Error(nil, "failed to get chaos meta information")
 		}
 		if chaosMeta.GetLabels()[v1alpha1.LabelManagedBy] != "" {
-			manageFlag = true
+			isManaged = true
 		}
-		if !manageFlag {
+		if !isManaged {
 			if err = r.archiveExperiment(req.Namespace, req.Name); err != nil {
 				r.Log.Error(err, "failed to archive experiment")
 			}
@@ -92,11 +99,11 @@ func (r *ChaosCollector) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	}
 
 	if chaosMeta.GetLabels()[v1alpha1.LabelManagedBy] != "" {
-		manageFlag = true
+		isManaged = true
 	}
 
 	if obj.IsDeleted() {
-		if !manageFlag {
+		if !isManaged {
 			if err = r.archiveExperiment(req.Namespace, req.Name); err != nil {
 				r.Log.Error(err, "failed to archive experiment")
 			}
@@ -108,24 +115,13 @@ func (r *ChaosCollector) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		return ctrl.Result{}, nil
 	}
 
-	if err := r.setUnarchivedExperiment(req, obj); err != nil {
-		r.Log.Error(err, "failed to archive experiment")
-		// ignore error here
-	}
+	// since the logging is done within the function, no error is judged here
+	r.createOrUpdateExperiment(req, obj)
 
 	return ctrl.Result{}, nil
 }
 
-// Setup setups collectors by Manager.
-func (r *ChaosCollector) Setup(mgr ctrl.Manager, apiType client.Object) error {
-	r.apiType = apiType
-
-	return ctrl.NewControllerManagedBy(mgr).
-		For(apiType).
-		Complete(r)
-}
-
-func (r *ChaosCollector) setUnarchivedExperiment(req ctrl.Request, obj v1alpha1.InnerObject) error {
+func (r *ChaosCollector) createOrUpdateExperiment(req ctrl.Request, obj v1alpha1.InnerObject) error {
 	var (
 		chaosMeta metav1.Object
 		ok        bool
@@ -134,67 +130,52 @@ func (r *ChaosCollector) setUnarchivedExperiment(req ctrl.Request, obj v1alpha1.
 	if chaosMeta, ok = obj.(metav1.Object); !ok {
 		r.Log.Error(nil, "failed to get chaos meta information")
 	}
-	UID := string(chaosMeta.GetUID())
 
-	archive := &core.Experiment{
+	uid, fieldAction, action :=
+		string(chaosMeta.GetUID()),
+		reflect.ValueOf(obj).Elem().FieldByName("Spec").FieldByName("Action"),
+		""
+	if fieldAction.IsValid() {
+		action = fieldAction.String()
+	}
+	exp := &core.Experiment{
 		ExperimentMeta: core.ExperimentMeta{
 			Namespace: req.Namespace,
 			Name:      req.Name,
 			Kind:      obj.GetObjectKind().GroupVersionKind().Kind,
-			UID:       UID,
+			Action:    action,
+			UID:       uid,
 			Archived:  false,
 		},
 	}
 
-	switch chaos := obj.(type) {
-	case *v1alpha1.PodChaos:
-		archive.Action = string(chaos.Spec.Action)
-	case *v1alpha1.NetworkChaos:
-		archive.Action = string(chaos.Spec.Action)
-	case *v1alpha1.IOChaos:
-		archive.Action = string(chaos.Spec.Action)
-	case *v1alpha1.TimeChaos, *v1alpha1.KernelChaos, *v1alpha1.StressChaos:
-		archive.Action = ""
-	case *v1alpha1.DNSChaos:
-		archive.Action = string(chaos.Spec.Action)
-	case *v1alpha1.PhysicalMachineChaos:
-		archive.Action = string(chaos.Spec.Action)
-	case *v1alpha1.AWSChaos:
-		archive.Action = string(chaos.Spec.Action)
-	case *v1alpha1.GCPChaos:
-		archive.Action = string(chaos.Spec.Action)
-	default:
-		return errors.New("unsupported chaos type " + archive.Kind)
-	}
-
-	archive.CreatedAt = chaosMeta.GetCreationTimestamp().Time
+	exp.CreatedAt = chaosMeta.GetCreationTimestamp().Time
 	if chaosMeta.GetDeletionTimestamp() != nil {
-		archive.DeletedAt = &chaosMeta.GetDeletionTimestamp().Time
+		exp.DeletedAt = &chaosMeta.GetDeletionTimestamp().Time
 	}
 
 	data, err := json.Marshal(chaosMeta)
 	if err != nil {
-		r.Log.Error(err, "failed to marshal chaos", "kind", archive.Kind,
-			"namespace", archive.Namespace, "name", archive.Name)
+		r.Log.Error(err, "failed to marshal chaos", "namespace", exp.Namespace, "name", exp.Name)
 		return err
 	}
 
-	archive.Experiment = string(data)
+	exp.Experiment = string(data)
 
-	find, err := r.archive.FindByUID(context.Background(), UID)
+	find, err := r.archive.FindByUID(context.Background(), uid)
 	if err != nil && !gorm.IsRecordNotFoundError(err) {
-		r.Log.Error(err, "failed to find experiment", "UID", UID)
+		r.Log.Error(err, "failed to find experiment", "UID", uid)
 		return err
 	}
 
 	if find != nil {
-		archive.ID = find.ID
-		archive.CreatedAt = find.CreatedAt
-		archive.UpdatedAt = find.UpdatedAt
+		exp.ID = find.ID
+		exp.CreatedAt = find.CreatedAt
+		exp.UpdatedAt = find.UpdatedAt
 	}
 
-	if err := r.archive.Create(context.Background(), archive); err != nil {
-		r.Log.Error(err, "failed to update experiment", "archive", archive)
+	if err := r.archive.Save(context.Background(), exp); err != nil {
+		r.Log.Error(err, "failed to create or update an experiment in db", "experiment", exp)
 		return err
 	}
 

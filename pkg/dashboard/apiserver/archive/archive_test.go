@@ -200,7 +200,7 @@ func (m *MockExperimentStore) FindMetaByUID(ctx context.Context, UID string) (*c
 	return res, err
 }
 
-func (m *MockExperimentStore) Create(context.Context, *core.Experiment) error {
+func (m *MockExperimentStore) Save(context.Context, *core.Experiment) error {
 	panic("implement me")
 }
 

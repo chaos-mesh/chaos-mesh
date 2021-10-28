@@ -44,7 +44,7 @@ func (e *experimentStore) ListByFilter(_ context.Context, filter core.Filter, ar
 	)
 
 	query, args := filter.ConstructQueryArgs()
-	statement := e.db.Table("experiments").Where(query, args...).Where("archived = ?", archived).Order("id desc")
+	statement := e.db.Table("experiments").Unscoped().Where(query, args...).Where("archived = ?", archived).Order("id desc")
 
 	if err := statement.Find(&exps).Error; err != nil {
 		return nil, err
@@ -71,8 +71,8 @@ func (e *experimentStore) FindByUID(_ context.Context, uid string) (*core.Experi
 	return experiment, nil
 }
 
-func (e *experimentStore) Create(_ context.Context, experiment *core.Experiment) error {
-	return e.db.Create(experiment).Error
+func (e *experimentStore) Save(_ context.Context, experiment *core.Experiment) error {
+	return e.db.Save(experiment).Error
 }
 
 func (e *experimentStore) Archive(_ context.Context, ns, name string) error {
@@ -90,7 +90,7 @@ func (e *experimentStore) Delete(_ context.Context, exp *core.Experiment) error 
 	return e.db.Unscoped().Delete(exp).Error
 }
 func (e *experimentStore) DeleteByUIDs(_ context.Context, uids []string) error {
-	return e.db.Where("uid IN (?)", uids).Unscoped().Delete(&core.Experiment{}).Error
+	return e.db.Unscoped().Where("uid IN (?)", uids).Delete(&core.Experiment{}).Error
 }
 
 func (e *experimentStore) DeleteByDuration(_ context.Context, duration time.Duration) error {
@@ -100,7 +100,7 @@ func (e *experimentStore) DeleteByDuration(_ context.Context, duration time.Dura
 }
 
 func (e *experimentStore) DeleteIncompleteExperiments(_ context.Context) error {
-	return e.db.Where("deleted_at IS NULL").Unscoped().Delete(&core.Experiment{}).Error
+	return e.db.Unscoped().Where("deleted_at IS NULL").Delete(&core.Experiment{}).Error
 }
 
 // DeleteIncompleteExperiments call core.ExperimentStore.DeleteIncompleteExperiments to deletes all incomplete experiments.
