@@ -29,7 +29,7 @@ func (in *PhysicalMachineSpec) Default(root interface{}, field *reflect.StructFi
 	}
 
 	// add http prefix for address
-	if !strings.HasPrefix(in.Address, "http") {
+	if len(in.Address) > 0 && !strings.HasPrefix(in.Address, "http") {
 		in.Address = fmt.Sprintf("http://%s", in.Address)
 	}
 }

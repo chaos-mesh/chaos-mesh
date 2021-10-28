@@ -30,7 +30,9 @@ spec:
       deadline: 1m
       physicalmachineChaos:
         action: stress-mem
-        address:
-          - CHAOSD_ADDRESS
         stress-mem:
           size: 100MB
+        selector:
+          physicalMachines:
+            chaos-testing:
+              - physicalmachine1

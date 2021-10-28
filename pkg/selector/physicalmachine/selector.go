@@ -17,12 +17,14 @@ package physicalmachine
 
 import (
 	"context"
+
+	"go.uber.org/fx"
+
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	generic_annotation "github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/annotation"
 	generic_field "github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/field"
 	generic_label "github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/label"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/registry"
-	"go.uber.org/fx"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"

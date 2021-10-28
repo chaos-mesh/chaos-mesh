@@ -26,7 +26,9 @@ spec:
   physicalmachineChaos:
     action: stress-mem
     duration: 4s
-    address: 
-      - CHAOSD_ADDRESS
     stress-mem:
       size: 100MB
+    selector:
+      physicalMachines:
+        chaos-testing:
+          - physicalmachine1

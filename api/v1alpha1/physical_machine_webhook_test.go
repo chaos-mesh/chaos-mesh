@@ -48,14 +48,6 @@ var _ = Describe("physicalmachine_webhook", func() {
 					},
 					"the address is empty",
 				},
-				{
-					PhysicalMachine{
-						Spec: PhysicalMachineSpec{
-							Address: "",
-						},
-					},
-					"the configuration corresponding to action is empty",
-				},
 			}
 
 			for _, testCase := range testCases {

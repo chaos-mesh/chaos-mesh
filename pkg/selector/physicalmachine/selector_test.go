@@ -17,13 +17,15 @@ package physicalmachine
 
 import (
 	"context"
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"testing"
+
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/kubectl/pkg/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
-	"testing"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 
 	. "github.com/chaos-mesh/chaos-mesh/pkg/testutils"
 )
@@ -70,7 +72,7 @@ func TestSelectPhysicalMachines(t *testing.T) {
 			expected: []v1alpha1.PhysicalMachine{physicalMachines[5], physicalMachines[6]},
 		},
 		{
-			name: "filter pods by label expressions",
+			name: "filter physicalMachines by label expressions",
 			selector: v1alpha1.PhysicalMachineSelectorSpec{
 				GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
 					ExpressionSelectors: []metav1.LabelSelectorRequirement{
@@ -85,7 +87,7 @@ func TestSelectPhysicalMachines(t *testing.T) {
 			expected: []v1alpha1.PhysicalMachine{physicalMachines[5], physicalMachines[6]},
 		},
 		{
-			name: "filter pods by label selectors and expression selectors",
+			name: "filter physicalMachines by label selectors and expression selectors",
 			selector: v1alpha1.PhysicalMachineSelectorSpec{
 				GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
 					LabelSelectors: map[string]string{"l1": "l1"},
@@ -128,8 +130,8 @@ func TestSelectPhysicalMachines(t *testing.T) {
 	)
 
 	for _, tc := range tcs {
-		filteredPods, err := SelectPhysicalMachines(context.Background(), c, r, tc.selector, testCfgClusterScoped, testCfgTargetNamespace, false)
+		filtered, err := SelectPhysicalMachines(context.Background(), c, r, tc.selector, testCfgClusterScoped, testCfgTargetNamespace, false)
 		g.Expect(err).ShouldNot(HaveOccurred(), tc.name)
-		g.Expect(len(filteredPods)).To(Equal(len(tc.expected)), tc.name)
+		g.Expect(len(filtered)).To(Equal(len(tc.expected)), tc.name)
 	}
 }

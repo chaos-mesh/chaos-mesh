@@ -19,8 +19,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	generic_namespace "github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/namespace"
 	"strings"
+
+	generic_namespace "github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/namespace"
 
 	v1 "k8s.io/api/admission/v1"
 
