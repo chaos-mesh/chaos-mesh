@@ -64,11 +64,14 @@ const NewExperiment: React.ForwardRefRenderFunction<NewExperimentHandles, NewExp
 
   const fillExperiment = (original: any) => {
     const { kind, basic, spec } = parseYAML(original)
+    const env = basic.spec.address.length ? 'physic' : 'k8s'
+    const action =
+      env === 'k8s' ? spec.action ?? '' : (kind as any) !== 'ProcessChaos' && kind !== 'TimeChaos' ? spec.action : ''
 
-    dispatch(setEnv(basic.spec.address.length ? 'physic' : 'k8s'))
+    dispatch(setEnv(env))
     dispatch(
       setExternalExperiment({
-        kindAction: [kind, spec.action ?? ''],
+        kindAction: [kind, action],
         spec,
         basic,
       })

@@ -15,7 +15,7 @@
  *
  */
 import { Box, Card, Divider, Typography } from '@material-ui/core'
-import { Env, resetNewExperiment, setEnv, setKindAction, setSpec, setStep1 } from 'slices/experiments'
+import { Env, setEnv, setKindAction, setSpec, setStep1 } from 'slices/experiments'
 import _typesData, { Definition, Kind, dataPhysic, schema } from './data/types'
 import { iconByKind, transByKind } from 'lib/byKind'
 import { useStoreDispatch, useStoreSelector } from 'store'
