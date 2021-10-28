@@ -76,14 +76,10 @@ func (e *experimentStore) Save(_ context.Context, experiment *core.Experiment) e
 }
 
 func (e *experimentStore) Archive(_ context.Context, ns, name string) error {
-	if err := e.db.
+	return e.db.
 		Model(&core.Experiment{}).
 		Where("namespace = ? AND name = ? AND archived = ?", ns, name, false).
-		Updates(map[string]interface{}{"archived": true, "deleted_at": time.Now()}).Error; err != nil {
-		return err
-	}
-
-	return nil
+		Updates(map[string]interface{}{"archived": true, "deleted_at": time.Now()}).Error
 }
 
 func (e *experimentStore) Delete(_ context.Context, exp *core.Experiment) error {
