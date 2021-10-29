@@ -16,10 +16,11 @@
 package metrics
 
 import (
+	"time"
+
 	"github.com/prometheus/client_golang/prometheus"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
-	"time"
 )
 
 var log = ctrl.Log.WithName("chaos-controller-manager-metrics-collector")
@@ -41,8 +42,13 @@ type ChaosControllerManagerMetricsCollector struct {
 
 // NewChaosControllerManagerMetricsCollector initializes metrics and collector
 func NewChaosControllerManagerMetricsCollector(manager ctrl.Manager, registerer *prometheus.Registry) *ChaosControllerManagerMetricsCollector {
+	var store cache.Cache
+	if manager != nil {
+		store = manager.GetCache()
+	}
+
 	c := &ChaosControllerManagerMetricsCollector{
-		store: manager.GetCache(),
+		store: store,
 		SidecarTemplates: prometheus.NewGauge(prometheus.GaugeOpts{
 			Name: "chaos_mesh_templates",
 			Help: "Total number of injection templates",
@@ -85,8 +91,16 @@ func NewChaosControllerManagerMetricsCollector(manager ctrl.Manager, registerer 
 			Help: "Total number of the emitted event by chaos-controller-manager",
 		}, []string{"type", "reason", "namespace"}),
 	}
-	registerer.MustRegister(c)
+
+	if registerer != nil {
+		registerer.MustRegister(c)
+	}
 	return c
+}
+
+// NewTestChaosControllerManagerMetricsCollector provides metrics collector for testing
+func NewTestChaosControllerManagerMetricsCollector() *ChaosControllerManagerMetricsCollector {
+	return NewChaosControllerManagerMetricsCollector(nil, nil)
 }
 
 // Describe implements the prometheus.Collector interface.
@@ -119,5 +133,6 @@ func (collector *ChaosControllerManagerMetricsCollector) Collect(ch chan<- prome
 
 func (collector *ChaosControllerManagerMetricsCollector) CollectReconcileDuration(typeLabel string, before time.Time) {
 	after := time.Now()
-	collector.reconcileDuration.WithLabelValues(typeLabel).Observe(after.Sub(before).Seconds())
+	duration := after.Sub(before).Seconds()
+	collector.reconcileDuration.WithLabelValues(typeLabel).Observe(duration)
 }
