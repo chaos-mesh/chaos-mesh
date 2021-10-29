@@ -15,6 +15,7 @@ package twophase
 
 import (
 	"context"
+	"reflect"
 	"strings"
 	"time"
 
@@ -225,6 +226,7 @@ func (m *chaosStateMachine) run(ctx context.Context, targetPhase v1alpha1.Experi
 }
 
 func (m *chaosStateMachine) Into(ctx context.Context, targetPhase v1alpha1.ExperimentPhase, now time.Time) error {
+	originFinalizers := m.Chaos.DeepCopyObject().(v1alpha1.InnerSchedulerObject).GetMeta().GetFinalizers()
 	updated, err := m.run(ctx, targetPhase, now)
 	if err != nil {
 		m.Log.Error(err, "error while executing state machine")
@@ -267,6 +269,11 @@ func (m *chaosStateMachine) Into(ctx context.Context, targetPhase v1alpha1.Exper
 			status.FailedMessage = m.Chaos.GetStatus().FailedMessage
 			status.Scheduler = m.Chaos.GetStatus().Scheduler
 			status.Experiment = m.Chaos.GetStatus().Experiment
+
+			newFinalizers := m.Chaos.GetMeta().GetFinalizers()
+			if !reflect.DeepEqual(originFinalizers, newFinalizers) {
+				chaos.GetMeta().SetFinalizers(newFinalizers)
+			}
 
 			// Try to update
 			return m.Update(ctx, chaos)

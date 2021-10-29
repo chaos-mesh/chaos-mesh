@@ -270,6 +270,7 @@ type InnerObject interface {
 	IsPaused() bool
 	GetChaos() *ChaosInstance
 	GetSpecAndMetaString() (string, error)
+	GetMeta() metav1.Object
 	StatefulObject
 }
 
