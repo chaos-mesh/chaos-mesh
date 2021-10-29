@@ -233,7 +233,7 @@ var _ = Describe("networkchaos_webhook", func() {
 						},
 						Spec: NetworkChaosSpec{
 							Target: &PodSelector{
-								Mode:  FixedPodMode,
+								Mode:  FixedMode,
 								Value: "0",
 							},
 						},

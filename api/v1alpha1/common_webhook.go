@@ -85,7 +85,7 @@ func (p *PodSelector) Validate(root interface{}, path *field.Path) field.ErrorLi
 	valueField := path.Child("value")
 
 	switch mode {
-	case FixedPodMode:
+	case FixedMode:
 		num, err := strconv.Atoi(value)
 		if err != nil {
 			allErrs = append(allErrs, field.Invalid(valueField, value,
@@ -95,10 +95,10 @@ func (p *PodSelector) Validate(root interface{}, path *field.Path) field.ErrorLi
 
 		if num <= 0 {
 			allErrs = append(allErrs, field.Invalid(valueField, value,
-				fmt.Sprintf("value must be greater than 0 with mode:%s", FixedPodMode)))
+				fmt.Sprintf("value must be greater than 0 with mode:%s", FixedMode)))
 		}
 
-	case RandomMaxPercentPodMode, FixedPercentPodMode:
+	case RandomMaxPercentMode, FixedPercentMode:
 		percentage, err := strconv.Atoi(value)
 		if err != nil {
 			allErrs = append(allErrs, field.Invalid(valueField, value,

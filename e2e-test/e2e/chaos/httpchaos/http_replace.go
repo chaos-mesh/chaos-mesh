@@ -86,10 +86,12 @@ func TestcaseHttpReplaceThenRecover(
 		Spec: v1alpha1.HTTPChaosSpec{
 			PodSelector: v1alpha1.PodSelector{
 				Selector: v1alpha1.PodSelectorSpec{
-					Namespaces:     []string{ns},
-					LabelSelectors: map[string]string{"app": "http"},
+					GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+						Namespaces:     []string{ns},
+						LabelSelectors: map[string]string{"app": "http"},
+					},
 				},
-				Mode: v1alpha1.OnePodMode,
+				Mode: v1alpha1.OneMode,
 			},
 			Port:   8080,
 			Target: "Request",
@@ -211,10 +213,12 @@ func TestcaseHttpReplacePauseAndUnPause(
 		Spec: v1alpha1.HTTPChaosSpec{
 			PodSelector: v1alpha1.PodSelector{
 				Selector: v1alpha1.PodSelectorSpec{
-					Namespaces:     []string{ns},
-					LabelSelectors: map[string]string{"app": "http"},
+					GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+						Namespaces:     []string{ns},
+						LabelSelectors: map[string]string{"app": "http"},
+					},
 				},
-				Mode: v1alpha1.OnePodMode,
+				Mode: v1alpha1.OneMode,
 			},
 			Port:   8080,
 			Target: "Request",

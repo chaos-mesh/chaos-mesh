@@ -109,7 +109,7 @@ var _ = Describe("iochaos_webhook", func() {
 							ContainerSelector: ContainerSelector{
 								PodSelector: PodSelector{
 									Value: "0",
-									Mode:  FixedPodMode,
+									Mode:  FixedMode,
 								},
 							},
 						},
@@ -130,7 +130,7 @@ var _ = Describe("iochaos_webhook", func() {
 							ContainerSelector: ContainerSelector{
 								PodSelector: PodSelector{
 									Value: "num",
-									Mode:  FixedPodMode,
+									Mode:  FixedMode,
 								},
 							},
 						},
@@ -151,7 +151,7 @@ var _ = Describe("iochaos_webhook", func() {
 							ContainerSelector: ContainerSelector{
 								PodSelector: PodSelector{
 									Value: "0",
-									Mode:  RandomMaxPercentPodMode,
+									Mode:  RandomMaxPercentMode,
 								},
 							},
 						},
@@ -172,7 +172,7 @@ var _ = Describe("iochaos_webhook", func() {
 							ContainerSelector: ContainerSelector{
 								PodSelector: PodSelector{
 									Value: "num",
-									Mode:  RandomMaxPercentPodMode,
+									Mode:  RandomMaxPercentMode,
 								},
 							},
 						},
@@ -193,7 +193,7 @@ var _ = Describe("iochaos_webhook", func() {
 							ContainerSelector: ContainerSelector{
 								PodSelector: PodSelector{
 									Value: "101",
-									Mode:  FixedPercentPodMode,
+									Mode:  FixedPercentMode,
 								},
 							},
 						},

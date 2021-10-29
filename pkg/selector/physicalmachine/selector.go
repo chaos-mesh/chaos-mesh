@@ -17,6 +17,7 @@ package physicalmachine
 
 import (
 	"context"
+	"errors"
 
 	"go.uber.org/fx"
 
@@ -68,7 +69,7 @@ func (impl *SelectImpl) Select(ctx context.Context, physicalMachineSelector *v1a
 		return []*PhysicalMachine{}, nil
 	}
 
-	physicalMachines, err := SelectPhysicalMachines(ctx, impl.c, impl.r, physicalMachineSelector.Selector, impl.ClusterScoped, impl.TargetNamespace, impl.EnableFilterNamespace)
+	physicalMachines, err := SelectAndFilterPhysicalMachines(ctx, impl.c, impl.r, physicalMachineSelector, impl.ClusterScoped, impl.TargetNamespace, impl.EnableFilterNamespace)
 	if err != nil {
 		return nil, err
 	}
@@ -90,6 +91,30 @@ func New(params Params) *SelectImpl {
 			EnableFilterNamespace: config.ControllerCfg.EnableFilterNamespace,
 		},
 	}
+}
+
+// SelectAndFilterPhysicalMachines returns the list of physical machines that filtered by selector and SelectorMode
+func SelectAndFilterPhysicalMachines(ctx context.Context, c client.Client, r client.Reader, spec *v1alpha1.PhysicalMachineSelector, clusterScoped bool, targetNamespace string, enableFilterNamespace bool) ([]v1alpha1.PhysicalMachine, error) {
+	selector := spec.Selector
+	mode := spec.Mode
+	value := spec.Value
+
+	physicalMachines, err := SelectPhysicalMachines(ctx, c, r, selector, clusterScoped, targetNamespace, enableFilterNamespace)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(physicalMachines) == 0 {
+		err = errors.New("no physical machine is selected")
+		return nil, err
+	}
+
+	filtered, err := filterPhysicalMachinesByMode(physicalMachines, mode, value)
+	if err != nil {
+		return nil, err
+	}
+
+	return filtered, nil
 }
 
 func SelectPhysicalMachines(ctx context.Context, c client.Client, r client.Reader,
@@ -217,4 +242,20 @@ func selectSpecifiedPhysicalMachines(ctx context.Context, c client.Client, spec 
 		}
 	}
 	return physicalMachines, nil
+}
+
+// filterPhysicalMachinesByMode filters physical machines by mode from physical machine list
+func filterPhysicalMachinesByMode(physicalMachines []v1alpha1.PhysicalMachine, mode v1alpha1.SelectorMode, value string) ([]v1alpha1.PhysicalMachine, error) {
+	indexes, err := generic.FilterObjectsByMode(mode, value, len(physicalMachines))
+	if err != nil {
+		return nil, err
+	}
+
+	var filtered []v1alpha1.PhysicalMachine
+
+	for _, index := range indexes {
+		index := index
+		filtered = append(filtered, physicalMachines[index])
+	}
+	return filtered, nil
 }

@@ -52,10 +52,12 @@ func TestcaseIOMistakeDurationForATimeThenRecover(
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{
 					Selector: v1alpha1.PodSelectorSpec{
-						Namespaces:     []string{ns},
-						LabelSelectors: map[string]string{"app": "io"},
+						GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+							Namespaces:     []string{ns},
+							LabelSelectors: map[string]string{"app": "io"},
+						},
 					},
-					Mode: v1alpha1.OnePodMode,
+					Mode: v1alpha1.OneMode,
 				},
 			},
 			Action:     v1alpha1.IoMistake,
@@ -124,10 +126,12 @@ func TestcaseIOMistakeDurationForATimePauseAndUnPause(
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{
 					Selector: v1alpha1.PodSelectorSpec{
-						Namespaces:     []string{ns},
-						LabelSelectors: map[string]string{"app": "io"},
+						GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+							Namespaces:     []string{ns},
+							LabelSelectors: map[string]string{"app": "io"},
+						},
 					},
-					Mode: v1alpha1.OnePodMode,
+					Mode: v1alpha1.OneMode,
 				},
 			},
 			Action:     v1alpha1.IoMistake,
@@ -247,10 +251,12 @@ func TestcaseIOMistakeWithSpecifiedContainer(
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{
 					Selector: v1alpha1.PodSelectorSpec{
-						Namespaces:     []string{ns},
-						LabelSelectors: map[string]string{"app": "io"},
+						GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+							Namespaces:     []string{ns},
+							LabelSelectors: map[string]string{"app": "io"},
+						},
 					},
-					Mode: v1alpha1.OnePodMode,
+					Mode: v1alpha1.OneMode,
 				},
 				ContainerNames: []string{containerName},
 			},

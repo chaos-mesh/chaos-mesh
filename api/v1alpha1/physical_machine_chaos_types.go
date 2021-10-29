@@ -67,6 +67,18 @@ func (obj *PhysicalMachineChaos) GetSelectorSpecs() map[string]interface{} {
 type PhysicalMachineSelector struct {
 	// Selector is used to select physical machines that are used to inject chaos action.
 	Selector PhysicalMachineSelectorSpec `json:"selector"`
+
+	// Mode defines the mode to run chaos action.
+	// Supported mode: one / all / fixed / fixed-percent / random-max-percent
+	// +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
+	Mode SelectorMode `json:"mode"`
+
+	// Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
+	// If `FixedMode`, provide an integer of physical machines to do chaos action.
+	// If `FixedPercentMode`, provide a number from 0-100 to specify the percent of physical machines the server can do chaos action.
+	// IF `RandomMaxPercentMode`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+	// +optional
+	Value string `json:"value,omitempty"`
 }
 
 // PhysicalMachineSelectorSpec defines the some selectors to select objects.

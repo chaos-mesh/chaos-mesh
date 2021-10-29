@@ -59,7 +59,6 @@ localIP=`ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-
 cp physicalmachine.yaml physicalmachine_tmp.yaml
 sed -i 's/CHAOSD_ADDRESS/'$localIP'\:31768/g' physicalmachine_tmp.yaml
 kubectl apply -f physicalmachine_tmp.yaml
-judge_stress true
 
 cp chaos.yaml chaos_tmp.yaml
 kubectl apply -f chaos_tmp.yaml

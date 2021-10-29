@@ -58,7 +58,7 @@ var _ = Describe("DNSChaos", func() {
 					Action: ErrorAction,
 					ContainerSelector: ContainerSelector{
 						PodSelector: PodSelector{
-							Mode: OnePodMode,
+							Mode: OneMode,
 						},
 					},
 					DomainNamePatterns: []string{},

@@ -17,12 +17,7 @@ package pod
 
 import (
 	"context"
-	"crypto/rand"
 	"errors"
-	"fmt"
-	"math"
-	"math/big"
-	"strconv"
 
 	"go.uber.org/fx"
 	v1 "k8s.io/api/core/v1"
@@ -102,7 +97,7 @@ func New(params Params) *SelectImpl {
 	}
 }
 
-// SelectAndFilterPods returns the list of pods that filtered by selector and PodMode
+// SelectAndFilterPods returns the list of pods that filtered by selector and SelectorMode
 func SelectAndFilterPods(ctx context.Context, c client.Client, r client.Reader, spec *v1alpha1.PodSelector, clusterScoped bool, targetNamespace string, enableFilterNamespace bool) ([]v1.Pod, error) {
 	if pods := mock.On("MockSelectAndFilterPods"); pods != nil {
 		return pods.(func() []v1.Pod)(), nil
@@ -327,76 +322,11 @@ func listPods(ctx context.Context, c client.Client, r client.Reader, spec v1alph
 }
 
 // filterPodsByMode filters pods by mode from pod list
-func filterPodsByMode(pods []v1.Pod, mode v1alpha1.PodMode, value string) ([]v1.Pod, error) {
-	if len(pods) == 0 {
-		return nil, errors.New("cannot generate pods from empty list")
+func filterPodsByMode(pods []v1.Pod, mode v1alpha1.SelectorMode, value string) ([]v1.Pod, error) {
+	indexes, err := generic.FilterObjectsByMode(mode, value, len(pods))
+	if err != nil {
+		return nil, err
 	}
-
-	switch mode {
-	case v1alpha1.OnePodMode:
-		index := getRandomNumber(len(pods))
-		pod := pods[index]
-
-		return []v1.Pod{pod}, nil
-	case v1alpha1.AllPodMode:
-		return pods, nil
-	case v1alpha1.FixedPodMode:
-		num, err := strconv.Atoi(value)
-		if err != nil {
-			return nil, err
-		}
-
-		if len(pods) < num {
-			num = len(pods)
-		}
-
-		if num <= 0 {
-			return nil, errors.New("cannot select any pod as value below or equal 0")
-		}
-
-		return getFixedSubListFromPodList(pods, num), nil
-	case v1alpha1.FixedPercentPodMode:
-		percentage, err := strconv.Atoi(value)
-		if err != nil {
-			return nil, err
-		}
-
-		if percentage == 0 {
-			return nil, errors.New("cannot select any pod as value below or equal 0")
-		}
-
-		if percentage < 0 || percentage > 100 {
-			return nil, fmt.Errorf("fixed percentage value of %d is invalid, Must be (0,100]", percentage)
-		}
-
-		num := int(math.Floor(float64(len(pods)) * float64(percentage) / 100))
-
-		return getFixedSubListFromPodList(pods, num), nil
-	case v1alpha1.RandomMaxPercentPodMode:
-		maxPercentage, err := strconv.Atoi(value)
-		if err != nil {
-			return nil, err
-		}
-
-		if maxPercentage == 0 {
-			return nil, errors.New("cannot select any pod as value below or equal 0")
-		}
-
-		if maxPercentage < 0 || maxPercentage > 100 {
-			return nil, fmt.Errorf("fixed percentage value of %d is invalid, Must be [0-100]", maxPercentage)
-		}
-
-		percentage := getRandomNumber(maxPercentage + 1) // + 1 because Intn works with half open interval [0,n) and we want [0,n]
-		num := int(math.Floor(float64(len(pods)) * float64(percentage) / 100))
-
-		return getFixedSubListFromPodList(pods, num), nil
-	default:
-		return nil, fmt.Errorf("mode %s not supported", mode)
-	}
-}
-
-func getFixedSubListFromPodList(pods []v1.Pod, num int) []v1.Pod {
-	indexes := RandomFixedIndexes(0, uint(len(pods)), uint(num))
 
 	var filteredPods []v1.Pod
 
@@ -404,45 +334,5 @@ func getFixedSubListFromPodList(pods []v1.Pod, num int) []v1.Pod {
 		index := index
 		filteredPods = append(filteredPods, pods[index])
 	}
-
-	return filteredPods
-}
-
-// RandomFixedIndexes returns the `count` random indexes between `start` and `end`.
-// [start, end)
-func RandomFixedIndexes(start, end, count uint) []uint {
-	var indexes []uint
-	m := make(map[uint]uint, count)
-
-	if end < start {
-		return indexes
-	}
-
-	if count > end-start {
-		for i := start; i < end; i++ {
-			indexes = append(indexes, i)
-		}
-
-		return indexes
-	}
-
-	for i := 0; i < int(count); {
-		index := uint(getRandomNumber(int(end-start))) + start
-
-		_, exist := m[index]
-		if exist {
-			continue
-		}
-
-		m[index] = index
-		indexes = append(indexes, index)
-		i++
-	}
-
-	return indexes
-}
-
-func getRandomNumber(max int) uint64 {
-	num, _ := rand.Int(rand.Reader, big.NewInt(int64(max)))
-	return num.Uint64()
+	return filteredPods, nil
 }

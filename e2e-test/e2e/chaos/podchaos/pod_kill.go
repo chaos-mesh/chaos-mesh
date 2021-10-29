@@ -55,14 +55,16 @@ func TestcasePodKillOnceThenDelete(ns string, kubeCli kubernetes.Interface, cli 
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{
 					Selector: v1alpha1.PodSelectorSpec{
-						Namespaces: []string{
-							ns,
-						},
-						LabelSelectors: map[string]string{
-							"app": "nginx",
+						GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+							Namespaces: []string{
+								ns,
+							},
+							LabelSelectors: map[string]string{
+								"app": "nginx",
+							},
 						},
 					},
-					Mode: v1alpha1.OnePodMode,
+					Mode: v1alpha1.OneMode,
 				},
 			},
 		},
@@ -111,14 +113,16 @@ func TestcasePodKillPauseThenUnPause(ns string, kubeCli kubernetes.Interface, cl
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{
 					Selector: v1alpha1.PodSelectorSpec{
-						Namespaces: []string{
-							ns,
-						},
-						LabelSelectors: map[string]string{
-							"app": "nginx",
+						GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+							Namespaces: []string{
+								ns,
+							},
+							LabelSelectors: map[string]string{
+								"app": "nginx",
+							},
 						},
 					},
-					Mode: v1alpha1.OnePodMode,
+					Mode: v1alpha1.OneMode,
 				},
 			},
 		},

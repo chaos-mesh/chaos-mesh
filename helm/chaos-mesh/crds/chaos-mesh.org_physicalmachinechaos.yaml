@@ -192,6 +192,16 @@ spec:
                     description: the port of agent server
                     type: integer
                 type: object
+              mode:
+                description: 'Mode defines the mode to run chaos action. Supported
+                  mode: one / all / fixed / fixed-percent / random-max-percent'
+                enum:
+                - one
+                - all
+                - fixed
+                - fixed-percent
+                - random-max-percent
+                type: string
               network-corrupt:
                 properties:
                   correlation:
@@ -390,8 +400,18 @@ spec:
               uid:
                 description: the experiment ID
                 type: string
+              value:
+                description: Value is required when the mode is set to `FixedMode`
+                  / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`, provide
+                  an integer of physical machines to do chaos action. If `FixedPercentMode`,
+                  provide a number from 0-100 to specify the percent of physical machines
+                  the server can do chaos action. IF `RandomMaxPercentMode`,  provide
+                  a number from 0-100 to specify the max percent of pods to do chaos
+                  action
+                type: string
             required:
             - action
+            - mode
             - selector
             type: object
           status:

@@ -116,7 +116,7 @@ var _ = Describe("HTTPChaos Webhook", func() {
 						Spec: HTTPChaosSpec{
 							PodSelector: PodSelector{
 								Value: "0",
-								Mode:  FixedPodMode,
+								Mode:  FixedMode,
 							},
 							Port:   80,
 							Target: PodHttpRequest,
@@ -137,7 +137,7 @@ var _ = Describe("HTTPChaos Webhook", func() {
 						Spec: HTTPChaosSpec{
 							PodSelector: PodSelector{
 								Value: "num",
-								Mode:  FixedPodMode,
+								Mode:  FixedMode,
 							},
 							Port:   80,
 							Target: PodHttpRequest,
@@ -158,7 +158,7 @@ var _ = Describe("HTTPChaos Webhook", func() {
 						Spec: HTTPChaosSpec{
 							PodSelector: PodSelector{
 								Value: "0",
-								Mode:  RandomMaxPercentPodMode,
+								Mode:  RandomMaxPercentMode,
 							},
 							Port:   80,
 							Target: PodHttpRequest,
@@ -179,7 +179,7 @@ var _ = Describe("HTTPChaos Webhook", func() {
 						Spec: HTTPChaosSpec{
 							PodSelector: PodSelector{
 								Value: "num",
-								Mode:  RandomMaxPercentPodMode,
+								Mode:  RandomMaxPercentMode,
 							},
 							Port:   80,
 							Target: PodHttpRequest,
@@ -200,7 +200,7 @@ var _ = Describe("HTTPChaos Webhook", func() {
 						Spec: HTTPChaosSpec{
 							PodSelector: PodSelector{
 								Value: "101",
-								Mode:  FixedPercentPodMode,
+								Mode:  FixedPercentMode,
 							},
 							Port:   80,
 							Target: PodHttpRequest,
