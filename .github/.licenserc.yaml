@@ -45,6 +45,7 @@ header:
     - 'pkg/ctrlserver/graph/schema.resolvers.go'
     - 'pkg/chaosdaemon/pb/chaosdaemon.pb.go'
     - 'pkg/chaoskernel/pb/bpfki.pb.go'
+    - 'pkg/time/fakeclock/.embed.o'
     # k8s copyright
     - 'hack/boilerplate/boilerplate.py'
     # Dockerfiles
