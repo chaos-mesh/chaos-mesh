@@ -21,11 +21,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"strings"
+
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
 
 	"github.com/go-logr/logr"
 	"go.uber.org/fx"
