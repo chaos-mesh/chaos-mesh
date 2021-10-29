@@ -72,11 +72,16 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		return v1alpha1.NotInjected, fmt.Errorf("impl decoder is nil")
 	}
 	decodedContainer, err := impl.decoder.DecodeContainerRecord(ctx, records[index])
+	if decodedContainer.PbClient != nil {
+		defer func() {
+			err := decodedContainer.PbClient.Close()
+			if err != nil {
+				impl.Log.Error(err, "fail to close pb client")
+			}
+		}()
+	}
 	if err != nil {
 		return v1alpha1.NotInjected, err
-	}
-	if decodedContainer.PbClient != nil {
-		defer decodedContainer.PbClient.Close()
 	}
 
 	jvmChaos := obj.(*v1alpha1.JVMChaos)
@@ -89,7 +94,6 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		ContainerId: decodedContainer.ContainerId,
 		Rule:        jvmChaos.Spec.RuleData,
 		Port:        jvmChaos.Spec.Port,
-		Enable:      true,
 		EnterNS:     true,
 	})
 	if err != nil {
@@ -107,7 +111,12 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	}
 	decodedContainer, err := impl.decoder.DecodeContainerRecord(ctx, records[index])
 	if decodedContainer.PbClient != nil {
-		defer decodedContainer.PbClient.Close()
+		defer func() {
+			err := decodedContainer.PbClient.Close()
+			if err != nil {
+				impl.Log.Error(err, "fail to close pb client")
+			}
+		}()
 	}
 	if err != nil {
 		return v1alpha1.Injected, err
@@ -119,11 +128,10 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		return v1alpha1.Injected, err
 	}
 
-	_, err = decodedContainer.PbClient.InstallJVMRules(ctx, &pb.InstallJVMRulesRequest{
+	_, err = decodedContainer.PbClient.UninstallJVMRules(ctx, &pb.UninstallJVMRulesRequest{
 		ContainerId: decodedContainer.ContainerId,
 		Rule:        jvmChaos.Spec.RuleData,
 		Port:        jvmChaos.Spec.Port,
-		Enable:      false,
 		EnterNS:     true,
 	})
 	if err != nil {

@@ -967,7 +967,7 @@ definitions:
         items:
           type: string
         type: array
-      cpu-count:
+      cpuCount:
         description: |-
           +optional
           the CPU core number need to use, only set it when action is stress
@@ -980,14 +980,14 @@ definitions:
       exception:
         description: |-
           +optional
-          the exception which needs to throw dor action `exception`
+          the exception which needs to throw for action `exception`
         type: string
       latency:
         description: |-
           +optional
           the latency duration for action 'latency', unit ms
         type: integer
-      mem-type:
+      memType:
         description: |-
           +optional
           the memory type need to locate, only set it when action is stress, the value can be 'stack' or 'heap'
@@ -1013,7 +1013,7 @@ definitions:
           +optional
           the port of agent server, default 9277
         type: integer
-      rule-data:
+      ruleData:
         description: +optional
         type: string
       selector:
@@ -1033,7 +1033,7 @@ definitions:
         description: Java class
         type: string
       exception:
-        description: the exception which needs to throw dor action `exception`
+        description: the exception which needs to throw for action `exception`
         type: string
       method:
         description: the method in Java class

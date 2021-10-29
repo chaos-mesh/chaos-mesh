@@ -43,6 +43,8 @@ header:
     - 'pkg/ctrlserver/graph/model/models_gen.go'
     - 'pkg/ctrlserver/graph/generated/generated.go'
     - 'pkg/ctrlserver/graph/schema.resolvers.go'
+    - 'pkg/chaosdaemon/pb/chaosdaemon.pb.go'
+    - 'pkg/chaoskernel/pb/bpfki.pb.go'
     # k8s copyright
     - 'hack/boilerplate/boilerplate.py'
     # Dockerfiles

@@ -56,7 +56,7 @@ spec:
                 items:
                   type: string
                 type: array
-              cpu-count:
+              cpuCount:
                 description: the CPU core number need to use, only set it when action
                   is stress
                 type: integer
@@ -64,12 +64,12 @@ spec:
                 description: Duration represents the duration of the chaos action
                 type: string
               exception:
-                description: the exception which needs to throw dor action `exception`
+                description: the exception which needs to throw for action `exception`
                 type: string
               latency:
                 description: the latency duration for action 'latency', unit ms
                 type: integer
-              mem-type:
+              memType:
                 description: the memory type need to locate, only set it when action
                   is stress, the value can be 'stack' or 'heap'
                 type: string
@@ -94,7 +94,7 @@ spec:
                 description: the port of agent server, default 9277
                 format: int32
                 type: integer
-              rule-data:
+              ruleData:
                 type: string
               selector:
                 description: Selector is used to select pods that are used to inject

@@ -2996,7 +2996,7 @@ var doc = `{
                         "type": "string"
                     }
                 },
-                "cpu-count": {
+                "cpuCount": {
                     "description": "+optional\nthe CPU core number need to use, only set it when action is stress",
                     "type": "integer"
                 },
@@ -3005,14 +3005,14 @@ var doc = `{
                     "type": "string"
                 },
                 "exception": {
-                    "description": "+optional\nthe exception which needs to throw dor action ` + "`" + `exception` + "`" + `",
+                    "description": "+optional\nthe exception which needs to throw for action ` + "`" + `exception` + "`" + `",
                     "type": "string"
                 },
                 "latency": {
                     "description": "+optional\nthe latency duration for action 'latency', unit ms",
                     "type": "integer"
                 },
-                "mem-type": {
+                "memType": {
                     "description": "+optional\nthe memory type need to locate, only set it when action is stress, the value can be 'stack' or 'heap'",
                     "type": "string"
                 },
@@ -3032,7 +3032,7 @@ var doc = `{
                     "description": "+optional\nthe port of agent server, default 9277",
                     "type": "integer"
                 },
-                "rule-data": {
+                "ruleData": {
                     "description": "+optional",
                     "type": "string"
                 },
@@ -3055,7 +3055,7 @@ var doc = `{
                     "type": "string"
                 },
                 "exception": {
-                    "description": "the exception which needs to throw dor action ` + "`" + `exception` + "`" + `",
+                    "description": "the exception which needs to throw for action ` + "`" + `exception` + "`" + `",
                     "type": "string"
                 },
                 "method": {

@@ -51,6 +51,12 @@ func (in *JVMChaosSpec) Validate(root interface{}, path *field.Path) field.Error
 		if in.CPUCount > 0 && len(in.MemoryType) > 0 {
 			allErrs = append(allErrs, field.Invalid(path, in, "inject stress on both CPU and memory is not support now"))
 		}
+
+		if len(in.MemoryType) != 0 {
+			if in.MemoryType != "stack" && in.MemoryType != "heap" {
+				allErrs = append(allErrs, field.Invalid(path, in, "value should be 'stack' or 'heap'"))
+			}
+		}
 	case JVMGCAction:
 		// do nothing
 	case JVMExceptionAction, JVMReturnAction, JVMLatencyAction:

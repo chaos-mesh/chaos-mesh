@@ -42,15 +42,6 @@ func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 		return nil, err
 	}
 
-	if req.Enable {
-		return s.installJVMRules(ctx, req, pid)
-	}
-
-	return s.uninstallJVMRules(ctx, req, pid)
-}
-
-func (s *DaemonServer) installJVMRules(ctx context.Context,
-	req *pb.InstallJVMRulesRequest, pid uint32) (*empty.Empty, error) {
 	bytemanHome := os.Getenv("BYTEMAN_HOME")
 	if len(bytemanHome) == 0 {
 		return nil, fmt.Errorf("environment variable BYTEMAN_HOME not set")
@@ -130,8 +121,15 @@ func (s *DaemonServer) installJVMRules(ctx context.Context,
 	return &empty.Empty{}, nil
 }
 
-func (s *DaemonServer) uninstallJVMRules(ctx context.Context,
-	req *pb.InstallJVMRulesRequest, pid uint32) (*empty.Empty, error) {
+func (s *DaemonServer) UninstallJVMRules(ctx context.Context,
+	req *pb.UninstallJVMRulesRequest) (*empty.Empty, error) {
+	log.Info("InstallJVMRules", "request", req)
+	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
+	if err != nil {
+		log.Error(err, "GetPidFromContainerID")
+		return nil, err
+	}
+
 	filename, err := writeDataIntoFile(req.Rule, "rule.btm")
 	if err != nil {
 		return nil, err

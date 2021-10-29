@@ -80,7 +80,7 @@ type JVMParameter struct {
 	ReturnValue string `json:"value"`
 
 	// +optional
-	// the exception which needs to throw dor action `exception`
+	// the exception which needs to throw for action `exception`
 	ThrowException string `json:"exception"`
 
 	// +optional
@@ -89,18 +89,18 @@ type JVMParameter struct {
 
 	// +optional
 	// the CPU core number need to use, only set it when action is stress
-	CPUCount int `json:"cpu-count"`
+	CPUCount int `json:"cpuCount"`
 
 	// +optional
 	// the memory type need to locate, only set it when action is stress, the value can be 'stack' or 'heap'
-	MemoryType string `json:"mem-type"`
+	MemoryType string `json:"memType"`
 
 	// +optional
 	// the port of agent server, default 9277
 	Port int32 `json:"port"`
 
 	// +optional
-	RuleData string `json:"rule-data"`
+	RuleData string `json:"ruleData"`
 }
 
 // JVMChaosStatus defines the observed state of JVMChaos
