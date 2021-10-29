@@ -951,8 +951,8 @@ definitions:
       action:
         description: |-
           Action defines the specific jvm chaos action.
-          Supported action: latency;return;exception;stress;gc;rule-data
-          +kubebuilder:validation:Enum=latency;return;exception;stress;gc;rule-data
+          Supported action: latency;return;exception;stress;gc;ruleData
+          +kubebuilder:validation:Enum=latency;return;exception;stress;gc;ruleData
         type: string
       class:
         description: |-

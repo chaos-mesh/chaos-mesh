@@ -82,7 +82,7 @@ func (in *JVMChaosSpec) Validate(root interface{}, path *field.Path) field.Error
 	case "":
 		allErrs = append(allErrs, field.Invalid(path, in, "action not provided"))
 	default:
-		allErrs = append(allErrs, field.Invalid(path, in, fmt.Sprintf("action %s not supported, action can be 'latency', 'exception', 'return', 'stress', 'gc' or 'rule-data'", in.Action)))
+		allErrs = append(allErrs, field.Invalid(path, in, fmt.Sprintf("action %s not supported, action can be 'latency', 'exception', 'return', 'stress', 'gc' or 'ruleData'", in.Action)))
 	}
 
 	return allErrs

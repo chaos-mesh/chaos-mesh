@@ -2982,7 +2982,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "action": {
-                    "description": "Action defines the specific jvm chaos action.\nSupported action: latency;return;exception;stress;gc;rule-data\n+kubebuilder:validation:Enum=latency;return;exception;stress;gc;rule-data",
+                    "description": "Action defines the specific jvm chaos action.\nSupported action: latency;return;exception;stress;gc;ruleData\n+kubebuilder:validation:Enum=latency;return;exception;stress;gc;ruleData",
                     "type": "string"
                 },
                 "class": {

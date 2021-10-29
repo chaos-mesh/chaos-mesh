@@ -28,8 +28,8 @@ type JVMChaosSpec struct {
 	Duration *string `json:"duration,omitempty" webhook:"Duration"`
 
 	// Action defines the specific jvm chaos action.
-	// Supported action: latency;return;exception;stress;gc;rule-data
-	// +kubebuilder:validation:Enum=latency;return;exception;stress;gc;rule-data
+	// Supported action: latency;return;exception;stress;gc;ruleData
+	// +kubebuilder:validation:Enum=latency;return;exception;stress;gc;ruleData
 	Action JVMChaosAction `json:"action"`
 
 	// JVMParameter represents the detail about jvm chaos action definition
@@ -58,7 +58,7 @@ const (
 
 	// JVMRuleDataAction represents inject fault with byteman's rule
 	// refer to https://downloads.jboss.org/byteman/4.0.14/byteman-programmers-guide.html#the-byteman-rule-language
-	JVMRuleDataAction JVMChaosAction = "rule-data"
+	JVMRuleDataAction JVMChaosAction = "ruleData"
 )
 
 // JVMParameter represents the detail about jvm chaos action definition

@@ -38,14 +38,14 @@ spec:
             properties:
               action:
                 description: 'Action defines the specific jvm chaos action. Supported
-                  action: latency;return;exception;stress;gc;rule-data'
+                  action: latency;return;exception;stress;gc;ruleData'
                 enum:
                 - latency
                 - return
                 - exception
                 - stress
                 - gc
-                - rule-data
+                - ruleData
                 type: string
               class:
                 description: Java class
