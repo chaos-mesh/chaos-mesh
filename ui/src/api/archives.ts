@@ -25,3 +25,4 @@ export const report = (uuid: uuid) =>
   })
 
 export const del = (uuid: uuid) => http.delete(`/archives/${uuid}`)
+export const delMulti = (uuids: uuid[]) => http.delete(`/archives?uids=${uuids.join(',')}`)

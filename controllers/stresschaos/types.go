@@ -72,6 +72,14 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 
 	stresschaos.Status.Instances = make(map[string]v1alpha1.StressInstance, len(pods))
 	if err = r.applyAllPods(ctx, pods, stresschaos); err != nil {
+		rd := recover.Delegate{Client: r.Client, Log: r.Log, RecoverIntf: &recoverer{r.Client, r.Log}}
+
+		finalizers, err := rd.CleanFinalizersAndRecover(ctx, chaos, stresschaos.Finalizers, stresschaos.Annotations)
+
+		if err != nil {
+			r.Log.Error(err, "failed to recover chaos after failing")
+		}
+		stresschaos.Finalizers = finalizers
 		r.Log.Error(err, "failed to apply chaos on all pods")
 		return err
 	}

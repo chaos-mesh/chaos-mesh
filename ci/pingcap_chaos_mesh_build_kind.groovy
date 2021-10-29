@@ -10,12 +10,12 @@ apiVersion: v1
 kind: Pod
 metadata:
   labels:
-    # we pretend as tidb-operator in order not to meet tidb-operator-e2e job in the same node
-    app: tidb-operator-e2e
+    # we pretend as tidb-operator in order not to meet chaos-mesh-e2e job in the same node
+    app: chaos-mesh-e2e
 spec:
   containers:
   - name: main
-    image: hub.pingcap.net/yangkeao/chaos-mesh-e2e-base
+    image: hub.pingcap.net/chaos-mesh/chaos-mesh-e2e-base
     command:
     - runner.sh
     # Clean containers on TERM signal in root process to avoid cgroup leaking.
@@ -81,7 +81,7 @@ spec:
           - key: ci.pingcap.com
             operator: In
             values:
-            # we pretend as tidb-operator in order not to meet tidb-operator-e2e job in the same node
+            # we pretend as tidb-operator in order not to meet chaos-mesh-e2e job in the same node
             - tidb-operator
     podAntiAffinity:
       preferredDuringSchedulingIgnoredDuringExecution:
@@ -92,8 +92,8 @@ spec:
             - key: app
               operator: In
               values:
-              # we pretend as tidb-operator in order not to meet tidb-operator-e2e job in the same node
-              - tidb-operator-e2e
+              # we pretend as tidb-operator in order not to meet chaos-mesh-e2e job in the same node
+              - chaos-mesh-e2e
           topologyKey: kubernetes.io/hostname
 '''
 

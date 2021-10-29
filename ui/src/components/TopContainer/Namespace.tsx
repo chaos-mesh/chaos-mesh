@@ -61,7 +61,7 @@ const ControlBar = () => {
           aria-label="Choose namespace"
         />
       )}
-      PaperComponent={(props) => <Paper {...props} padding={false} />}
+      PaperComponent={(props) => <Paper {...props} padding={0} />}
     />
   )
 }

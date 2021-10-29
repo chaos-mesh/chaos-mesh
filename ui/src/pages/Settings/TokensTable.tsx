@@ -1,59 +1,62 @@
 import { Button, Checkbox, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@material-ui/core'
-import React, { useState } from 'react'
+import ConfirmDialog, { ConfirmDialogHandles } from 'components-mui/ConfirmDialog'
+import React, { useRef, useState } from 'react'
 import { setTokenName, setTokens } from 'slices/globalStatus'
+import { useStoreDispatch, useStoreSelector } from 'store'
 
-import ConfirmDialog from 'components-mui/ConfirmDialog'
 import LS from 'lib/localStorage'
 import PaperContainer from 'components-mui/PaperContainer'
-import { RootState } from 'store'
 import T from 'components/T'
 import { TokenFormValues } from 'components/Token'
 import api from 'api'
+import { useHistory } from 'react-router-dom'
 import { useIntl } from 'react-intl'
-import { useSelector } from 'react-redux'
-import { useStoreDispatch } from 'store'
 
 const TokensTable = () => {
   const intl = useIntl()
+  const history = useHistory()
 
-  const { tokens, tokenName } = useSelector((state: RootState) => state.globalStatus)
+  const { tokens, tokenName } = useStoreSelector((state) => state.globalStatus)
   const dispatch = useStoreDispatch()
 
-  const [dialogOpen, setDialogOpen] = useState(false)
   const [selected, setSelected] = useState({
     tokenName: '',
     title: '',
     description: '',
   })
+  const confirmRef = useRef<ConfirmDialogHandles>(null)
 
-  const handleUseToken = (_token: TokenFormValues) => () => {
-    dispatch(setTokenName(_token.name))
-    api.auth.token(_token.token)
+  const handleUseToken = (token: TokenFormValues) => () => {
+    dispatch(setTokenName(token.name))
+    api.auth.token(token.token)
   }
 
-  const handleRemoveToken = (token: TokenFormValues) => (_: any, __: any) => {
+  const handleRemoveToken = (token: TokenFormValues) => () => {
     setSelected({
       tokenName: token.name,
       title: `${intl.formatMessage({ id: 'common.delete' })} ${token.name}`,
       description: intl.formatMessage({ id: 'settings.addToken.deleteDesc' }),
     })
-    setDialogOpen(true)
+
+    confirmRef.current!.setOpen(true)
   }
 
   const handleRemoveTokenConfirm = () => {
     const current = tokens.filter(({ name }) => name !== selected.tokenName)
 
     if (current.length) {
+      confirmRef.current!.setOpen(false)
+
       dispatch(setTokens(current))
 
       if (selected.tokenName === tokenName) {
         api.auth.resetToken()
-        dispatch(setTokenName(''))
+        handleUseToken(current[0])()
       }
     } else {
       LS.remove('token')
       LS.remove('token-name')
-      window.location.reload()
+      history.go(0)
     }
   }
 
@@ -99,8 +102,7 @@ const TokensTable = () => {
       </TableContainer>
 
       <ConfirmDialog
-        open={dialogOpen}
-        setOpen={setDialogOpen}
+        ref={confirmRef}
         title={selected.title}
         description={selected.description}
         onConfirm={handleRemoveTokenConfirm}

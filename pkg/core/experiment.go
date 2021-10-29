@@ -46,6 +46,9 @@ type ExperimentStore interface {
 	// DeleteByFinishTime deletes archives which time difference is greater than the given time from FinishTime.
 	DeleteByFinishTime(context.Context, time.Duration) error
 
+	// DeleteByUIDs deletes archives by the uid list.
+	DeleteByUIDs(context.Context, []string) error
+
 	// DeleteIncompleteExperiments deletes all incomplete experiments.
 	// If the chaos-dashboard was restarted and the experiment is completed during the restart,
 	// which means the experiment would never save the finish_time.
@@ -157,7 +160,7 @@ func (s *SelectorInfo) ParseSelector() v1alpha1.SelectorSpec {
 
 // TargetInfo defines the information of target objects.
 type TargetInfo struct {
-	Kind         string            `json:"kind" binding:"required,oneof=PodChaos NetworkChaos IoChaos KernelChaos TimeChaos StressChaos DNSChaos"`
+	Kind         string            `json:"kind" binding:"required,oneof=PodChaos NetworkChaos IoChaos KernelChaos TimeChaos StressChaos DNSChaos AwsChaos"`
 	PodChaos     *PodChaosInfo     `json:"pod_chaos,omitempty" binding:"RequiredFieldEqual=Kind:PodChaos"`
 	NetworkChaos *NetworkChaosInfo `json:"network_chaos,omitempty" binding:"RequiredFieldEqual=Kind:NetworkChaos"`
 	IOChaos      *IOChaosInfo      `json:"io_chaos,omitempty" binding:"RequiredFieldEqual=Kind:IoChaos"`
@@ -165,6 +168,7 @@ type TargetInfo struct {
 	TimeChaos    *TimeChaosInfo    `json:"time_chaos,omitempty" binding:"RequiredFieldEqual=Kind:TimeChaos"`
 	StressChaos  *StressChaosInfo  `json:"stress_chaos,omitempty" binding:"RequiredFieldEqual=Kind:StressChaos"`
 	DNSChaos     *DNSChaosInfo     `json:"dns_chaos,omitempty" binding:"RequiredFieldEqual=Kind:DNSChaos"`
+	AwsChaos     *AwsChaosInfo     `json:"aws_chaos,omitempty" binding:"RequiredFieldEqual=Kind:AwsChaos"`
 }
 
 // SchedulerInfo defines the scheduler information.
@@ -230,6 +234,16 @@ type StressChaosInfo struct {
 type DNSChaosInfo struct {
 	Action             string   `json:"action" binding:"oneof='error' 'random'"`
 	DomainNamePatterns []string `json:"patterns"`
+}
+
+// AwsChaosInfo defines the basic information of aws chaos for creating a new AwsChaos.
+type AwsChaosInfo struct {
+	Action      string  `json:"action" binding:"oneof='ec2-stop' 'ec2-restart' 'detach-volume'"`
+	SecretName  *string `json:"secretName,omitempty"`
+	AwsRegion   string  `json:"awsRegion"`
+	Ec2Instance string  `json:"ec2Instance"`
+	EbsVolume   *string `json:"volumeID,omitempty"`
+	DeviceName  *string `json:"deviceName,omitempty"`
 }
 
 // ParsePodChaos Parse PodChaos JSON string into ExperimentYAMLDescription.
@@ -355,6 +369,26 @@ func (e *Experiment) ParseStressChaos() (ExperimentYAMLDescription, error) {
 // ParseDNSChaos Parse DNSChaos JSON string into ExperimentYAMLDescription.
 func (e *Experiment) ParseDNSChaos() (ExperimentYAMLDescription, error) {
 	chaos := &v1alpha1.DNSChaos{}
+	if err := json.Unmarshal([]byte(e.Experiment), &chaos); err != nil {
+		return ExperimentYAMLDescription{}, err
+	}
+
+	return ExperimentYAMLDescription{
+		APIVersion: chaos.APIVersion,
+		Kind:       chaos.Kind,
+		Metadata: ExperimentYAMLMetadata{
+			Name:        chaos.Name,
+			Namespace:   chaos.Namespace,
+			Labels:      chaos.Labels,
+			Annotations: chaos.Annotations,
+		},
+		Spec: chaos.Spec,
+	}, nil
+}
+
+// ParseDNSChaos Parse AwsChaos JSON string into ExperimentYAMLDescription.
+func (e *Experiment) ParseAwsChaos() (ExperimentYAMLDescription, error) {
+	chaos := &v1alpha1.AwsChaos{}
 	if err := json.Unmarshal([]byte(e.Experiment), &chaos); err != nil {
 		return ExperimentYAMLDescription{}, err
 	}
