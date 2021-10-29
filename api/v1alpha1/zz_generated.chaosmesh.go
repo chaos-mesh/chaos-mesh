@@ -135,6 +135,11 @@ func (in *AwsChaos) GetSpecAndMetaString() (string, error) {
 	return string(spec) + meta.String(), nil
 }
 
+// GetMeta returns the object meta of this chaos object.
+func (in *AwsChaos) GetMeta() metav1.Object {
+	return &in.ObjectMeta
+}
+
 // +kubebuilder:object:root=true
 
 // AwsChaosList contains a list of AwsChaos
@@ -265,6 +270,11 @@ func (in *DNSChaos) GetSpecAndMetaString() (string, error) {
 	meta.SetGeneration(0)
 
 	return string(spec) + meta.String(), nil
+}
+
+// GetMeta returns the object meta of this chaos object.
+func (in *DNSChaos) GetMeta() metav1.Object {
+	return &in.ObjectMeta
 }
 
 // +kubebuilder:object:root=true
@@ -399,6 +409,11 @@ func (in *HTTPChaos) GetSpecAndMetaString() (string, error) {
 	return string(spec) + meta.String(), nil
 }
 
+// GetMeta returns the object meta of this chaos object.
+func (in *HTTPChaos) GetMeta() metav1.Object {
+	return &in.ObjectMeta
+}
+
 // +kubebuilder:object:root=true
 
 // HTTPChaosList contains a list of HTTPChaos
@@ -529,6 +544,11 @@ func (in *IoChaos) GetSpecAndMetaString() (string, error) {
 	meta.SetGeneration(0)
 
 	return string(spec) + meta.String(), nil
+}
+
+// GetMeta returns the object meta of this chaos object.
+func (in *IoChaos) GetMeta() metav1.Object {
+	return &in.ObjectMeta
 }
 
 // +kubebuilder:object:root=true
@@ -663,6 +683,11 @@ func (in *JVMChaos) GetSpecAndMetaString() (string, error) {
 	return string(spec) + meta.String(), nil
 }
 
+// GetMeta returns the object meta of this chaos object.
+func (in *JVMChaos) GetMeta() metav1.Object {
+	return &in.ObjectMeta
+}
+
 // +kubebuilder:object:root=true
 
 // JVMChaosList contains a list of JVMChaos
@@ -793,6 +818,11 @@ func (in *KernelChaos) GetSpecAndMetaString() (string, error) {
 	meta.SetGeneration(0)
 
 	return string(spec) + meta.String(), nil
+}
+
+// GetMeta returns the object meta of this chaos object.
+func (in *KernelChaos) GetMeta() metav1.Object {
+	return &in.ObjectMeta
 }
 
 // +kubebuilder:object:root=true
@@ -927,6 +957,11 @@ func (in *NetworkChaos) GetSpecAndMetaString() (string, error) {
 	return string(spec) + meta.String(), nil
 }
 
+// GetMeta returns the object meta of this chaos object.
+func (in *NetworkChaos) GetMeta() metav1.Object {
+	return &in.ObjectMeta
+}
+
 // +kubebuilder:object:root=true
 
 // NetworkChaosList contains a list of NetworkChaos
@@ -1057,6 +1092,11 @@ func (in *PodChaos) GetSpecAndMetaString() (string, error) {
 	meta.SetGeneration(0)
 
 	return string(spec) + meta.String(), nil
+}
+
+// GetMeta returns the object meta of this chaos object.
+func (in *PodChaos) GetMeta() metav1.Object {
+	return &in.ObjectMeta
 }
 
 // +kubebuilder:object:root=true
@@ -1191,6 +1231,11 @@ func (in *StressChaos) GetSpecAndMetaString() (string, error) {
 	return string(spec) + meta.String(), nil
 }
 
+// GetMeta returns the object meta of this chaos object.
+func (in *StressChaos) GetMeta() metav1.Object {
+	return &in.ObjectMeta
+}
+
 // +kubebuilder:object:root=true
 
 // StressChaosList contains a list of StressChaos
@@ -1321,6 +1366,11 @@ func (in *TimeChaos) GetSpecAndMetaString() (string, error) {
 	meta.SetGeneration(0)
 
 	return string(spec) + meta.String(), nil
+}
+
+// GetMeta returns the object meta of this chaos object.
+func (in *TimeChaos) GetMeta() metav1.Object {
+	return &in.ObjectMeta
 }
 
 // +kubebuilder:object:root=true

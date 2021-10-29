@@ -143,6 +143,11 @@ func (in *{{.Type}}) GetSpecAndMetaString() (string, error) {
 	return string(spec) + meta.String(), nil
 }
 
+// GetMeta returns the object meta of this chaos object.
+func (in *{{.Type}}) GetMeta() metav1.Object {
+	return &in.ObjectMeta
+}
+
 // +kubebuilder:object:root=true
 
 // {{.Type}}List contains a list of {{.Type}}
