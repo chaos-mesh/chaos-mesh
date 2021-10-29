@@ -64,6 +64,7 @@ var _ = Describe("PhysicalMachineChaos", func() {
 								},
 							},
 						},
+						Mode: OneMode,
 					},
 					ExpInfo: ExpInfo{
 						StressMemory: &StressMemorySpec{
