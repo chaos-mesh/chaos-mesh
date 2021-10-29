@@ -122,7 +122,7 @@ func (in *fakeTwoPhaseChaos) GetSpecAndMetaString() (string, error) {
 }
 
 func (in *fakeTwoPhaseChaos) GetMeta() metav1.Object {
-	return nil
+	return &in.ObjectMeta
 }
 
 func (r fakeEndpoint) Object() v1alpha1.InnerObject {
