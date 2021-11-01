@@ -57,6 +57,9 @@ func (m *MockExperimentStore) ListMeta(ctx context.Context, kind, namespace, nam
 	var err error
 	if kind == "testKind" {
 		expMeta := &core.ExperimentMeta{
+			Model: gorm.Model{
+				DeletedAt: &time.Time{},
+			},
 			UID:       "testUID",
 			Kind:      "testKind",
 			Name:      "testName",
