@@ -112,7 +112,7 @@ func (s *Service) list(c *gin.Context) {
 		log.V(1).Info("Replace query namespace with", ns)
 	}
 
-	metas, err := s.archive.ListMeta(context.Background(), ns, name, kind, true)
+	metas, err := s.archive.ListMeta(context.Background(), ns, name, kind)
 	if err != nil {
 		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 

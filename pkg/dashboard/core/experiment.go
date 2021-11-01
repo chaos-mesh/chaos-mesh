@@ -27,7 +27,7 @@ type ExperimentStore interface {
 	// ListByFilter(context.Context, Filter, bool) ([]*ExperimentMeta, error)
 
 	// ListMeta returns an experiment metadata list from the datastore.
-	ListMeta(ctx context.Context, namespace, name, kind string, archived bool) ([]*ExperimentMeta, error)
+	ListMeta(ctx context.Context, namespace, name, kind string) ([]*ExperimentMeta, error)
 
 	// FindByUID returns an experiment by UID.
 	FindByUID(ctx context.Context, UID string) (*Experiment, error)

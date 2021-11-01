@@ -52,14 +52,11 @@ func TestEvent(t *testing.T) {
 	RunSpecs(t, "Archive Suite")
 }
 
-func (m *MockExperimentStore) ListMeta(ctx context.Context, kind, namespace, name string, archived bool) ([]*core.ExperimentMeta, error) {
+func (m *MockExperimentStore) ListMeta(ctx context.Context, namespace, name, kind string) ([]*core.ExperimentMeta, error) {
 	var res []*core.ExperimentMeta
 	var err error
 	if kind == "testKind" {
 		expMeta := &core.ExperimentMeta{
-			Model: gorm.Model{
-				DeletedAt: &time.Time{},
-			},
 			UID:       "testUID",
 			Kind:      "testKind",
 			Name:      "testName",
@@ -291,7 +288,7 @@ func (m *MockScheduleStore) DeleteIncompleteSchedules(context.Context) error {
 	panic("implement me")
 }
 
-var _ = Describe("event", func() {
+var _ = Describe("archive", func() {
 	var router *gin.Engine
 	BeforeEach(func() {
 		pkgmock.With("AuthMiddleware", true)
@@ -337,6 +334,8 @@ var _ = Describe("event", func() {
 			rr := httptest.NewRecorder()
 			request, _ := http.NewRequest(http.MethodGet, "/api/archives?kind=testKind", nil)
 			router.ServeHTTP(rr, request)
+			fmt.Println(12345)
+			fmt.Println(rr.Body)
 			Expect(rr.Code).Should(Equal(http.StatusOK))
 			responseBody, err := json.Marshal(response)
 			Expect(err).ShouldNot(HaveOccurred())

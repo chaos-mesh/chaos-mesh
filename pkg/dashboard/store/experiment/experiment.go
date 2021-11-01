@@ -38,7 +38,7 @@ type experimentStore struct {
 	db *gorm.DB
 }
 
-func (e *experimentStore) ListByFilter(_ context.Context, filter core.Filter, archived bool) ([]*core.ExperimentMeta, error) {
+func (e *experimentStore) ListByFilter(_ context.Context, filter core.Filter) ([]*core.ExperimentMeta, error) {
 	var (
 		exps []*core.ExperimentMeta
 	)
@@ -53,12 +53,12 @@ func (e *experimentStore) ListByFilter(_ context.Context, filter core.Filter, ar
 	return exps, nil
 }
 
-func (e *experimentStore) ListMeta(c context.Context, namespace, name, kind string, archived bool) ([]*core.ExperimentMeta, error) {
+func (e *experimentStore) ListMeta(c context.Context, namespace, name, kind string) ([]*core.ExperimentMeta, error) {
 	return e.ListByFilter(c, core.Filter{
 		Namespace: namespace,
 		Name:      name,
 		Kind:      kind,
-	}, archived)
+	})
 }
 
 func (e *experimentStore) FindByUID(_ context.Context, uid string) (*core.Experiment, error) {
