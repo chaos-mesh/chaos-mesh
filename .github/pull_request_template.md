@@ -1,7 +1,7 @@
 <!--
 Thank you for contributing to Chaos Mesh!
 
-If you're not sure how to do it, please read the CONTRIBUTING document of Chaos Mesh first.
+If you're unsure where to start, please refer to the contributing doc:
 
 https://github.com/chaos-mesh/chaos-mesh/blob/master/CONTRIBUTING.md
 
