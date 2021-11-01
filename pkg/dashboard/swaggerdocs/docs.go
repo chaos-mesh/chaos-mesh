@@ -33,38 +33,43 @@ var doc = `{
     "paths": {
         "/archives": {
             "get": {
-                "description": "Get archived chaos experiments.",
+                "description": "Get archived chaos experiments from DB.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "archives"
                 ],
-                "summary": "Get archived chaos experiments.",
+                "summary": "List archived chaos experiments.",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "namespace",
+                        "description": "filter exps by namespace",
                         "name": "namespace",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "name",
+                        "description": "filter exps by name",
                         "name": "name",
                         "in": "query"
                     },
                     {
                         "enum": [
                             "PodChaos",
-                            "IOChaos",
                             "NetworkChaos",
-                            "TimeChaos",
+                            "IOChaos",
+                            "StressChaos",
                             "KernelChaos",
-                            "StressChaos"
+                            "TimeChaos",
+                            "DNSChaos",
+                            "AWSChaos",
+                            "GCPChaos",
+                            "JVMChaos",
+                            "HTTPChaos"
                         ],
                         "type": "string",
-                        "description": "kind",
+                        "description": "filter exps by kind",
                         "name": "kind",
                         "in": "query"
                     }
@@ -88,14 +93,14 @@ var doc = `{
                 }
             },
             "delete": {
-                "description": "Delete the specified archived experiment.",
+                "description": "Batch delete archived chaos experiments by uids.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "archives"
                 ],
-                "summary": "Delete the specified archived experiment.",
+                "summary": "Batch delete archived chaos experiments.",
                 "parameters": [
                     {
                         "type": "string",
@@ -110,6 +115,12 @@ var doc = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
                         }
                     },
                     "500": {
@@ -212,7 +223,7 @@ var doc = `{
                         "type": "string",
                         "description": "uid",
                         "name": "uid",
-                        "in": "query",
+                        "in": "path",
                         "required": true
                     }
                 ],
@@ -356,7 +367,7 @@ var doc = `{
                         "type": "string",
                         "description": "uid",
                         "name": "uid",
-                        "in": "query",
+                        "in": "path",
                         "required": true
                     }
                 ],
@@ -450,14 +461,14 @@ var doc = `{
                 }
             },
             "delete": {
-                "description": "Delete the specified archived experiment.",
+                "description": "Delete an archived experiment by uid.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "archives"
                 ],
-                "summary": "Delete the specified archived experiment.",
+                "summary": "Delete an archived experiment.",
                 "parameters": [
                     {
                         "type": "string",

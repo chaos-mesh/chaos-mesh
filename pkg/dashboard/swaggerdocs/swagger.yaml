@@ -2084,7 +2084,7 @@ info:
 paths:
   /archives:
     delete:
-      description: Delete the specified archived experiment.
+      description: Batch delete archived chaos experiments by uids.
       parameters:
       - description: uids
         in: query
@@ -2098,32 +2098,41 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/utils.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIError'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/utils.APIError'
-      summary: Delete the specified archived experiment.
+      summary: Batch delete archived chaos experiments.
       tags:
       - archives
     get:
-      description: Get archived chaos experiments.
+      description: Get archived chaos experiments from DB.
       parameters:
-      - description: namespace
+      - description: filter exps by namespace
         in: query
         name: namespace
         type: string
-      - description: name
+      - description: filter exps by name
         in: query
         name: name
         type: string
-      - description: kind
+      - description: filter exps by kind
         enum:
         - PodChaos
-        - IOChaos
         - NetworkChaos
-        - TimeChaos
-        - KernelChaos
+        - IOChaos
         - StressChaos
+        - KernelChaos
+        - TimeChaos
+        - DNSChaos
+        - AWSChaos
+        - GCPChaos
+        - JVMChaos
+        - HTTPChaos
         in: query
         name: kind
         type: string
@@ -2140,12 +2149,12 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/utils.APIError'
-      summary: Get archived chaos experiments.
+      summary: List archived chaos experiments.
       tags:
       - archives
   /archives/{uid}:
     delete:
-      description: Delete the specified archived experiment.
+      description: Delete an archived experiment by uid.
       parameters:
       - description: uid
         in: path
@@ -2163,7 +2172,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/utils.APIError'
-      summary: Delete the specified archived experiment.
+      summary: Delete an archived experiment.
       tags:
       - archives
     get:
@@ -2269,7 +2278,7 @@ paths:
       description: Get the detail of an archived schedule experiment.
       parameters:
       - description: uid
-        in: query
+        in: path
         name: uid
         required: true
         type: string
@@ -2364,7 +2373,7 @@ paths:
       description: Get the detail of an archived workflow.
       parameters:
       - description: uid
-        in: query
+        in: path
         name: uid
         required: true
         type: string

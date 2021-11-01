@@ -85,7 +85,7 @@ var _ = Describe("Experiment", func() {
 	})
 
 	Context("FindByUID", func() {
-		sql := "SELECT * FROM \"experiments\" WHERE \"experiments\".\"deleted_at\" IS NULL AND ((uid = ?)) ORDER BY \"experiments\".\"id\" ASC LIMIT 1"
+		sql := "SELECT * FROM \"experiments\" WHERE (uid = ?) ORDER BY \"experiments\".\"id\" ASC LIMIT 1"
 
 		It("experiment0 should be found", func() {
 			rows := genRows()

@@ -195,10 +195,6 @@ func (m *MockExperimentStore) Save(context.Context, *core.Experiment) error {
 	panic("implement me")
 }
 
-func (m *MockExperimentStore) Archive(ctx context.Context, namespace, name string) error {
-	panic("implement me")
-}
-
 func (m *MockExperimentStore) Delete(context.Context, *core.Experiment) error {
 	panic("implement me")
 }
