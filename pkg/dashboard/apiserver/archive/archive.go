@@ -114,7 +114,7 @@ func (s *Service) list(c *gin.Context) {
 
 	metas, err := s.archive.ListMeta(context.Background(), ns, name, kind, true)
 	if err != nil {
-		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
+		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 
 		return
 	}
