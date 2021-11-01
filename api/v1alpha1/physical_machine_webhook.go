@@ -18,8 +18,9 @@ package v1alpha1
 import (
 	"fmt"
 	"reflect"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"strings"
+
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )

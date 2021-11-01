@@ -2048,6 +2048,27 @@ webhooks:
           - UPDATE
         resources:
           - physicalmachinechaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /mutate-chaos-mesh-org-v1alpha1-physicalmachine
+    failurePolicy: Fail
+    name: mphysicalmachine.kb.io
+    timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - physicalmachines
 ---
 # Source: chaos-mesh/templates/secrets-configuration.yaml
 apiVersion: admissionregistration.k8s.io/v1
@@ -2355,6 +2376,27 @@ webhooks:
           - UPDATE
         resources:
           - physicalmachinechaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /validate-chaos-mesh-org-v1alpha1-physicalmachine
+    failurePolicy: Fail
+    name: vphysicalmachine.kb.io
+    timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - physicalmachines
 ---
 # Source: chaos-mesh/templates/secrets-configuration.yaml
 apiVersion: admissionregistration.k8s.io/v1

@@ -405,6 +405,7 @@ webhook:
     - workflow
     - httpchaos
     - physicalmachinechaos
+    - physicalmachine
 
 bpfki:
   create: false
