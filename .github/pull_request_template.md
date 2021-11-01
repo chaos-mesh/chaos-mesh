@@ -16,7 +16,7 @@ Please follow below Title Format when you open a new PR:
 ### What problem does this PR solve?
 
 <!-- Uncomment this line if some issues to close -->
-Issue Number: close #xxx
+<!-- Close #xxx -->
 
 > Problem Summary:
 
@@ -53,5 +53,5 @@ Side effects
 ```text
 Please add a release note.
 
-If you don't think this PR needs a release note you can safely ignore this part.
+You can safely ignore this section if you don't think this PR needs a release note.
 ```
