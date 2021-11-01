@@ -18,16 +18,20 @@ package v1alpha1
 import (
 	"fmt"
 	"reflect"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"strings"
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
+
+var physicalMachineLog = logf.Log.WithName("physical-machine-resource")
 
 func (in *PhysicalMachineSpec) Default(root interface{}, field *reflect.StructField) {
 	if in == nil {
 		return
 	}
 
+	physicalMachineLog.Info("default", "address", in.Address)
 	// add http prefix for address
 	if len(in.Address) > 0 && !strings.HasPrefix(in.Address, "http") {
 		in.Address = fmt.Sprintf("http://%s", in.Address)

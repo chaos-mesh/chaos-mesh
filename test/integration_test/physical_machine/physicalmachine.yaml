@@ -16,7 +16,7 @@
 apiVersion: chaos-mesh.org/v1alpha1
 kind: PhysicalMachine
 metadata:
-  name: physicalmachine1
+  name: physicalmachine2
   namespace: chaos-testing
 spec:
   address: CHAOSD_ADDRESS

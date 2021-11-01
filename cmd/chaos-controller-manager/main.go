@@ -78,6 +78,7 @@ func main() {
 			controllers.Module,
 			selector.Module,
 			types.ChaosObjects,
+			types.WebhookObjects,
 		),
 		fx.Invoke(Run),
 	)
@@ -94,7 +95,8 @@ type RunParams struct {
 	AuthCli             *authorizationv1.AuthorizationV1Client
 	DaemonClientBuilder *chaosdaemon.ChaosDaemonClientBuilder
 
-	Objs []types.Object `group:"objs"`
+	Objs        []types.Object        `group:"objs"`
+	WebhookObjs []types.WebhookObject `group:"webhookObjs"`
 }
 
 func Run(params RunParams) error {
@@ -103,6 +105,19 @@ func Run(params RunParams) error {
 
 	var err error
 	for _, obj := range params.Objs {
+		if !ccfg.ShouldStartWebhook(obj.Name) {
+			continue
+		}
+
+		err = ctrl.NewWebhookManagedBy(mgr).
+			For(obj.Object).
+			Complete()
+		if err != nil {
+			return err
+		}
+	}
+
+	for _, obj := range params.WebhookObjs {
 		if !ccfg.ShouldStartWebhook(obj.Name) {
 			continue
 		}
