@@ -1426,7 +1426,7 @@ spec:
             secretName: chaos-mesh-webhook-certs
 ---
 # Source: chaos-mesh/templates/secrets-configuration.yaml
-apiVersion: admissionregistration.k8s.io/v1beta1
+apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
   name: chaos-mesh-mutation
@@ -1439,6 +1439,8 @@ metadata:
 webhooks:
   - name: admission-webhook.chaos-mesh.org
     timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
     clientConfig:
       caBundle: "${CA_BUNDLE}"
       service:
@@ -1462,6 +1464,8 @@ webhooks:
         path: /mutate-chaos-mesh-org-v1alpha1-podchaos
     failurePolicy: Fail
     name: mpodchaos.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
     timeoutSeconds: 5
     rules:
       - apiGroups:
@@ -1481,6 +1485,8 @@ webhooks:
         path: /mutate-chaos-mesh-org-v1alpha1-iochaos
     failurePolicy: Fail
     name: miochaos.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
     timeoutSeconds: 5
     rules:
       - apiGroups:
@@ -1500,6 +1506,8 @@ webhooks:
         path: /mutate-chaos-mesh-org-v1alpha1-timechaos
     failurePolicy: Fail
     name: mtimechaos.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
     timeoutSeconds: 5
     rules:
       - apiGroups:
@@ -1519,6 +1527,8 @@ webhooks:
         path: /mutate-chaos-mesh-org-v1alpha1-networkchaos
     failurePolicy: Fail
     name: mnetworkchaos.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
     timeoutSeconds: 5
     rules:
       - apiGroups:
@@ -1538,6 +1548,8 @@ webhooks:
         path: /mutate-chaos-mesh-org-v1alpha1-kernelchaos
     failurePolicy: Fail
     name: mkernelchaos.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
     timeoutSeconds: 5
     rules:
       - apiGroups:
@@ -1557,6 +1569,8 @@ webhooks:
         path: /mutate-chaos-mesh-org-v1alpha1-stresschaos
     failurePolicy: Fail
     name: mstresschaos.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
     timeoutSeconds: 5
     rules:
       - apiGroups:
@@ -1576,6 +1590,8 @@ webhooks:
         path: /mutate-chaos-mesh-org-v1alpha1-awschaos
     failurePolicy: Fail
     name: mawschaos.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
     timeoutSeconds: 5
     rules:
       - apiGroups:
@@ -1595,6 +1611,8 @@ webhooks:
         path: /mutate-chaos-mesh-org-v1alpha1-gcpchaos
     failurePolicy: Fail
     name: mgcpchaos.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
     timeoutSeconds: 5
     rules:
       - apiGroups:
@@ -1614,6 +1632,8 @@ webhooks:
         path: /mutate-chaos-mesh-org-v1alpha1-dnschaos
     failurePolicy: Fail
     name: mdnschaos.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
     timeoutSeconds: 5
     rules:
       - apiGroups:
@@ -1633,6 +1653,8 @@ webhooks:
         path: /mutate-chaos-mesh-org-v1alpha1-jvmchaos
     failurePolicy: Fail
     name: mjvmchaos.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
     timeoutSeconds: 5
     rules:
       - apiGroups:
@@ -1652,6 +1674,8 @@ webhooks:
         path: /mutate-chaos-mesh-org-v1alpha1-schedule
     failurePolicy: Fail
     name: mschedule.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
     timeoutSeconds: 5
     rules:
       - apiGroups:
@@ -1671,6 +1695,8 @@ webhooks:
         path: /mutate-chaos-mesh-org-v1alpha1-workflow
     failurePolicy: Fail
     name: mworkflow.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
     timeoutSeconds: 5
     rules:
       - apiGroups:
@@ -1690,6 +1716,8 @@ webhooks:
         path: /mutate-chaos-mesh-org-v1alpha1-httpchaos
     failurePolicy: Fail
     name: mhttpchaos.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
     timeoutSeconds: 5
     rules:
       - apiGroups:
@@ -1703,7 +1731,7 @@ webhooks:
           - httpchaos
 ---
 # Source: chaos-mesh/templates/secrets-configuration.yaml
-apiVersion: admissionregistration.k8s.io/v1beta1
+apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
   name: chaos-mesh-validation
@@ -1722,6 +1750,8 @@ webhooks:
         path: /validate-chaos-mesh-org-v1alpha1-podchaos
     failurePolicy: Fail
     name: vpodchaos.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
     timeoutSeconds: 5
     rules:
       - apiGroups:
@@ -1741,6 +1771,8 @@ webhooks:
         path: /validate-chaos-mesh-org-v1alpha1-iochaos
     failurePolicy: Fail
     name: viochaos.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
     timeoutSeconds: 5
     rules:
       - apiGroups:
@@ -1760,6 +1792,8 @@ webhooks:
         path: /validate-chaos-mesh-org-v1alpha1-timechaos
     failurePolicy: Fail
     name: vtimechaos.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
     timeoutSeconds: 5
     rules:
       - apiGroups:
@@ -1779,6 +1813,8 @@ webhooks:
         path: /validate-chaos-mesh-org-v1alpha1-networkchaos
     failurePolicy: Fail
     name: vnetworkchaos.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
     timeoutSeconds: 5
     rules:
       - apiGroups:
@@ -1798,6 +1834,8 @@ webhooks:
         path: /validate-chaos-mesh-org-v1alpha1-kernelchaos
     failurePolicy: Fail
     name: vkernelchaos.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
     timeoutSeconds: 5
     rules:
       - apiGroups:
@@ -1817,6 +1855,8 @@ webhooks:
         path: /validate-chaos-mesh-org-v1alpha1-stresschaos
     failurePolicy: Fail
     name: vstresschaos.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
     timeoutSeconds: 5
     rules:
       - apiGroups:
@@ -1836,6 +1876,8 @@ webhooks:
         path: /validate-chaos-mesh-org-v1alpha1-awschaos
     failurePolicy: Fail
     name: vawschaos.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
     timeoutSeconds: 5
     rules:
       - apiGroups:
@@ -1855,6 +1897,8 @@ webhooks:
         path: /validate-chaos-mesh-org-v1alpha1-gcpchaos
     failurePolicy: Fail
     name: vgcpchaos.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
     timeoutSeconds: 5
     rules:
       - apiGroups:
@@ -1874,6 +1918,8 @@ webhooks:
         path: /validate-chaos-mesh-org-v1alpha1-dnschaos
     failurePolicy: Fail
     name: vdnschaos.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
     timeoutSeconds: 5
     rules:
       - apiGroups:
@@ -1893,6 +1939,8 @@ webhooks:
         path: /validate-chaos-mesh-org-v1alpha1-jvmchaos
     failurePolicy: Fail
     name: vjvmchaos.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
     timeoutSeconds: 5
     rules:
       - apiGroups:
@@ -1912,6 +1960,8 @@ webhooks:
         path: /validate-chaos-mesh-org-v1alpha1-schedule
     failurePolicy: Fail
     name: vschedule.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
     timeoutSeconds: 5
     rules:
       - apiGroups:
@@ -1931,6 +1981,8 @@ webhooks:
         path: /validate-chaos-mesh-org-v1alpha1-workflow
     failurePolicy: Fail
     name: vworkflow.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
     timeoutSeconds: 5
     rules:
       - apiGroups:
@@ -1950,6 +2002,8 @@ webhooks:
         path: /validate-chaos-mesh-org-v1alpha1-httpchaos
     failurePolicy: Fail
     name: vhttpchaos.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
     timeoutSeconds: 5
     rules:
       - apiGroups:
@@ -1963,7 +2017,7 @@ webhooks:
           - httpchaos
 ---
 # Source: chaos-mesh/templates/secrets-configuration.yaml
-apiVersion: admissionregistration.k8s.io/v1beta1
+apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
   name: validate-auth
@@ -1982,6 +2036,8 @@ webhooks:
         path: /validate-auth
     failurePolicy: Fail
     name: vauth.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
     rules:
       - apiGroups:
           - chaos-mesh.org
