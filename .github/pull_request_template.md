@@ -22,7 +22,7 @@ Please follow the Title Formats below when you open a new PR:
 
 ### What's changed and how it works?
 
-<!-- If this PR is associated with a proposal, please uncomment this line -->
+<!-- Uncomment this line if this PR is associated with a proposal -->
 <!-- Proposal: [xxx](url) -->
 
 > What's Changed:
