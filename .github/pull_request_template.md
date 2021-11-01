@@ -16,14 +16,14 @@ Please follow the Title Formats below when you open a new PR:
 ### What problem does this PR solve?
 
 <!-- Uncomment this line if some issues to close -->
-<!-- Close #xxx -->
+<!-- Close #<issue number> -->
 
 > Problem Summary:
 
 ### What's changed and how it works?
 
 <!-- Uncomment this line if this PR is associated with a proposal -->
-<!-- Proposal: [xxx](url) -->
+<!-- Proposal: [name](url) -->
 
 > What's Changed:
 
