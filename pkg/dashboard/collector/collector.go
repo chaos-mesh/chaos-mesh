@@ -22,7 +22,6 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/jinzhu/gorm"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -32,13 +31,13 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
 )
 
-// ChaosCollector represents a collector for Chaos Object.
+// ChaosCollector is used to collect chaos experiments into DB.
 type ChaosCollector struct {
 	client.Client
-	Log     logr.Logger
-	apiType runtime.Object
-	archive core.ExperimentStore
-	event   core.EventStore
+	Log        logr.Logger
+	apiType    runtime.Object
+	experiment core.ExperimentStore
+	event      core.EventStore
 }
 
 // Setup setups ChaosCollector by Manager.
@@ -70,25 +69,6 @@ func (r *ChaosCollector) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	}
 
 	err := r.Get(ctx, req.NamespacedName, obj)
-	if apierrors.IsNotFound(err) {
-		if chaosMeta, ok = obj.(metav1.Object); !ok {
-			r.Log.Error(nil, "failed to get chaos meta information")
-		}
-		if chaosMeta.GetLabels()[v1alpha1.LabelManagedBy] != "" {
-			isManaged = true
-		}
-		if !isManaged {
-			if err = r.archiveExperiment(req.Namespace, req.Name); err != nil {
-				r.Log.Error(err, "failed to archive experiment")
-			}
-		} else {
-			if err = r.event.DeleteByUID(ctx, string(chaosMeta.GetUID())); err != nil {
-				r.Log.Error(err, "failed to delete experiment related events")
-			}
-		}
-		return ctrl.Result{}, nil
-	}
-
 	if err != nil {
 		r.Log.Error(err, "failed to get chaos object", "request", req.NamespacedName)
 		return ctrl.Result{}, nil
@@ -102,21 +82,16 @@ func (r *ChaosCollector) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		isManaged = true
 	}
 
-	if obj.IsDeleted() {
-		if !isManaged {
-			if err = r.archiveExperiment(req.Namespace, req.Name); err != nil {
-				r.Log.Error(err, "failed to archive experiment")
-			}
-		} else {
-			if err = r.event.DeleteByUID(ctx, string(chaosMeta.GetUID())); err != nil {
-				r.Log.Error(err, "failed to delete experiment related events")
-			}
+	// Ignore errors because logging is already done in the function
+	r.createOrUpdateExperiment(req, obj)
+
+	if obj.IsDeleted() && !isManaged {
+		if err = r.event.DeleteByUID(ctx, string(chaosMeta.GetUID())); err != nil {
+			r.Log.Error(err, "failed to delete experiment related events")
 		}
+
 		return ctrl.Result{}, nil
 	}
-
-	// since the logging is done within the function, no error is judged here
-	r.createOrUpdateExperiment(req, obj)
 
 	return ctrl.Result{}, nil
 }
@@ -140,12 +115,11 @@ func (r *ChaosCollector) createOrUpdateExperiment(req ctrl.Request, obj v1alpha1
 	}
 	exp := &core.Experiment{
 		ExperimentMeta: core.ExperimentMeta{
+			UID:       uid,
 			Namespace: req.Namespace,
 			Name:      req.Name,
 			Kind:      obj.GetObjectKind().GroupVersionKind().Kind,
 			Action:    action,
-			UID:       uid,
-			Archived:  false,
 		},
 	}
 
@@ -162,7 +136,7 @@ func (r *ChaosCollector) createOrUpdateExperiment(req ctrl.Request, obj v1alpha1
 
 	exp.Experiment = string(data)
 
-	find, err := r.archive.FindByUID(context.Background(), uid)
+	find, err := r.experiment.FindByUID(context.Background(), uid)
 	if err != nil && !gorm.IsRecordNotFoundError(err) {
 		r.Log.Error(err, "failed to find experiment", "UID", uid)
 		return err
@@ -170,21 +144,10 @@ func (r *ChaosCollector) createOrUpdateExperiment(req ctrl.Request, obj v1alpha1
 
 	if find != nil {
 		exp.ID = find.ID
-		exp.CreatedAt = find.CreatedAt
-		exp.UpdatedAt = find.UpdatedAt
 	}
 
-	if err := r.archive.Save(context.Background(), exp); err != nil {
+	if err := r.experiment.Save(context.Background(), exp); err != nil {
 		r.Log.Error(err, "failed to create or update an experiment in db", "experiment", exp)
-		return err
-	}
-
-	return nil
-}
-
-func (r *ChaosCollector) archiveExperiment(ns, name string) error {
-	if err := r.archive.Archive(context.Background(), ns, name); err != nil {
-		r.Log.Error(err, "failed to archive experiment", "namespace", ns, "name", name)
 		return err
 	}
 

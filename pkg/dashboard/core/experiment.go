@@ -35,9 +35,6 @@ type ExperimentStore interface {
 	// Save persists or update a experiment to the datastore.
 	Save(context.Context, *Experiment) error
 
-	// Archive archives experiments which archived field is false.
-	Archive(ctx context.Context, namespace, name string) error
-
 	// Delete deletes the archive from the datastore.
 	Delete(context.Context, *Experiment) error
 
@@ -68,5 +65,4 @@ type ExperimentMeta struct {
 	Name      string `json:"name"`
 	Kind      string `json:"kind"`
 	Action    string `json:"action"`
-	Archived  bool   `json:"archived"`
 }

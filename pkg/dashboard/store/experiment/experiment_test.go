@@ -36,13 +36,13 @@ func TestExperiment(t *testing.T) {
 
 func genRows() *sqlmock.Rows {
 	return sqlmock.NewRows(
-		[]string{"id", "created_at", "delete_at", "uid", "namespace", "name", "kind", "action", "archived"},
+		[]string{"id", "created_at", "delete_at", "uid", "namespace", "name", "kind", "action"},
 	)
 }
 
 func addRow(rows *sqlmock.Rows, exp *core.Experiment) {
 	rows.AddRow(exp.ID, exp.CreatedAt, exp.DeletedAt, exp.UID, exp.Namespace, exp.Name,
-		exp.Kind, exp.Action, exp.Archived)
+		exp.Kind, exp.Action)
 }
 
 var _ = Describe("Experiment", func() {
@@ -76,7 +76,6 @@ var _ = Describe("Experiment", func() {
 				Name:      "experiment0",
 				Kind:      "PodChaos",
 				Action:    "pod-failure",
-				Archived:  false,
 			},
 		}
 	})

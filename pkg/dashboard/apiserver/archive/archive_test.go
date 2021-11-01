@@ -62,7 +62,6 @@ func (m *MockExperimentStore) ListMeta(ctx context.Context, kind, namespace, nam
 			Name:      "testName",
 			Namespace: "testNamespace",
 			Action:    "testAction",
-			Archived:  true,
 		}
 		res = append(res, expMeta)
 	} else {
@@ -85,7 +84,6 @@ func (m *MockExperimentStore) FindByUID(ctx context.Context, UID string) (*core.
 				Name:      "testName",
 				Namespace: "testNamespace",
 				Action:    "testAction",
-				Archived:  true,
 			},
 			Experiment: string(jsonStr),
 		}
@@ -99,7 +97,6 @@ func (m *MockExperimentStore) FindByUID(ctx context.Context, UID string) (*core.
 				Name:      "testName",
 				Namespace: "testNamespace",
 				Action:    "testAction",
-				Archived:  true,
 			},
 			Experiment: string(jsonStr),
 		}
@@ -113,7 +110,6 @@ func (m *MockExperimentStore) FindByUID(ctx context.Context, UID string) (*core.
 				Name:      "testName",
 				Namespace: "testNamespace",
 				Action:    "testAction",
-				Archived:  true,
 			},
 			Experiment: string(jsonStr),
 		}
@@ -127,7 +123,6 @@ func (m *MockExperimentStore) FindByUID(ctx context.Context, UID string) (*core.
 				Name:      "testName",
 				Namespace: "testNamespace",
 				Action:    "testAction",
-				Archived:  true,
 			},
 			Experiment: string(jsonStr),
 		}
@@ -141,7 +136,6 @@ func (m *MockExperimentStore) FindByUID(ctx context.Context, UID string) (*core.
 				Name:      "testName",
 				Namespace: "testNamespace",
 				Action:    "testAction",
-				Archived:  true,
 			},
 			Experiment: string(jsonStr),
 		}
@@ -155,7 +149,6 @@ func (m *MockExperimentStore) FindByUID(ctx context.Context, UID string) (*core.
 				Name:      "testName",
 				Namespace: "testNamespace",
 				Action:    "testAction",
-				Archived:  true,
 			},
 			Experiment: string(jsonStr),
 		}
@@ -167,7 +160,6 @@ func (m *MockExperimentStore) FindByUID(ctx context.Context, UID string) (*core.
 				Name:      "testName",
 				Namespace: "testNamespace",
 				Action:    "testAction",
-				Archived:  true,
 			},
 			Experiment: "",
 		}
@@ -190,7 +182,6 @@ func (m *MockExperimentStore) FindMetaByUID(ctx context.Context, UID string) (*c
 			Name:      "testName",
 			Namespace: "testNamespace",
 			Action:    "testAction",
-			Archived:  true,
 		}
 	case "testErrRecordNotFound":
 		err = gorm.ErrRecordNotFound
