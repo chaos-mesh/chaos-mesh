@@ -43,6 +43,7 @@ header:
     - 'pkg/ctrlserver/graph/model/models_gen.go'
     - 'pkg/ctrlserver/graph/generated/generated.go'
     - 'pkg/ctrlserver/graph/schema.resolvers.go'
+    - 'pkg/time/fakeclock/.embed.o'
     # k8s copyright
     - 'hack/boilerplate/boilerplate.py'
     # Dockerfiles

@@ -95,10 +95,10 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		impl.Log.Error(err, "")
 		return v1alpha1.NotInjected, err
 	}
+	delete(expInfoMap, string(physicalMachineChaos.Spec.Action))
 	for k, v := range configKV {
 		expInfoMap[k] = v
 	}
-	delete(expInfoMap, string(physicalMachineChaos.Spec.Action))
 
 	expInfoBytes, err = json.Marshal(expInfoMap)
 	if err != nil {
