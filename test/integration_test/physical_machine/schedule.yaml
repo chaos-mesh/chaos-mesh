@@ -32,3 +32,4 @@ spec:
       physicalMachines:
         chaos-testing:
           - physicalmachine1
+    mode: one
