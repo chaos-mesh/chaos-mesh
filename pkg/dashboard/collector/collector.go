@@ -85,7 +85,7 @@ func (r *ChaosCollector) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	// Ignore errors because logging is already done in the function
 	r.createOrUpdateExperiment(req, obj)
 
-	if obj.IsDeleted() && !isManaged {
+	if obj.IsDeleted() && isManaged {
 		if err = r.event.DeleteByUID(ctx, string(chaosMeta.GetUID())); err != nil {
 			r.Log.Error(err, "failed to delete experiment related events")
 		}
