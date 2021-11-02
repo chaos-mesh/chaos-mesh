@@ -2610,12 +2610,15 @@ var doc = `{
             "type": "object",
             "properties": {
                 "clock-ids-slice": {
+                    "description": "the identifier of the particular clock on which to act.\nMore clock description in linux kernel can be found in man page of clock_getres, clock_gettime, clock_settime.\nMuti clock ids should be split with \",\"",
                     "type": "string"
                 },
                 "pid": {
+                    "description": "the pid of target program.",
                     "type": "integer"
                 },
                 "time-offset": {
+                    "description": "specifies the length of time offset.",
                     "type": "string"
                 }
             }
@@ -2713,12 +2716,15 @@ var doc = `{
             "type": "object",
             "properties": {
                 "fill_by_fallocate": {
+                    "description": "fill disk by fallocate",
                     "type": "boolean"
                 },
                 "path": {
+                    "description": "specifies the location to fill data in. if path not provided,\npayload will write into a temp file, temp file will be deleted after writing",
                     "type": "string"
                 },
                 "size": {
+                    "description": "specifies how many units of data will write into the file path. support unit: c=1, w=2, b=512, kB=1000,\nK=1024, MB=1000*1000, M=1024*1024, GB=1000*1000*1000, G=1024*1024*1024 BYTES. example : 1M | 512kB",
                     "type": "string"
                 }
             }
@@ -2727,12 +2733,15 @@ var doc = `{
             "type": "object",
             "properties": {
                 "path": {
+                    "description": "specifies the location to fill data in. if path not provided,\npayload will write into a temp file, temp file will be deleted after writing",
                     "type": "string"
                 },
                 "payload_process_num": {
+                    "description": "specifies the number of process work on writing, default 1, only 1-255 is valid value",
                     "type": "integer"
                 },
                 "size": {
+                    "description": "specifies how many units of data will write into the file path. support unit: c=1, w=2, b=512, kB=1000,\nK=1024, MB=1000*1000, M=1024*1024, GB=1000*1000*1000, G=1024*1024*1024 BYTES. example : 1M | 512kB",
                     "type": "string"
                 }
             }
@@ -3317,27 +3326,35 @@ var doc = `{
             "type": "object",
             "properties": {
                 "correlation": {
+                    "description": "correlation is percentage (10 is 10%)",
                     "type": "string"
                 },
                 "device": {
+                    "description": "the network interface to impact",
                     "type": "string"
                 },
                 "egress-port": {
+                    "description": "only impact egress traffic to these destination ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.\nit can only be used in conjunction with -p tcp or -p udp",
                     "type": "string"
                 },
                 "hostname": {
+                    "description": "only impact traffic to these hostnames",
                     "type": "string"
                 },
                 "ip-address": {
+                    "description": "only impact egress traffic to these IP addresses",
                     "type": "string"
                 },
                 "ip-protocol": {
+                    "description": "only impact traffic using this IP protocol, supported: tcp, udp, icmp, all",
                     "type": "string"
                 },
                 "percent": {
+                    "description": "percentage of packets to corrupt (10 is 10%)",
                     "type": "string"
                 },
                 "source-port": {
+                    "description": "only impact egress traffic from these source ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.\nit can only be used in conjunction with -p tcp or -p udp",
                     "type": "string"
                 }
             }
@@ -3346,12 +3363,15 @@ var doc = `{
             "type": "object",
             "properties": {
                 "dns-domain-name": {
+                    "description": "map this host to specified IP",
                     "type": "string"
                 },
                 "dns-ip": {
+                    "description": "map specified host to this IP address",
                     "type": "string"
                 },
                 "dns-server": {
+                    "description": "update the DNS server in /etc/resolv.conf with this value",
                     "type": "string"
                 }
             }
@@ -3360,30 +3380,39 @@ var doc = `{
             "type": "object",
             "properties": {
                 "correlation": {
+                    "description": "correlation is percentage (10 is 10%)",
                     "type": "string"
                 },
                 "device": {
+                    "description": "the network interface to impact",
                     "type": "string"
                 },
                 "egress-port": {
+                    "description": "only impact egress traffic to these destination ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.\nit can only be used in conjunction with -p tcp or -p udp",
                     "type": "string"
                 },
                 "hostname": {
+                    "description": "only impact traffic to these hostnames",
                     "type": "string"
                 },
                 "ip-address": {
+                    "description": "only impact egress traffic to these IP addresses",
                     "type": "string"
                 },
                 "ip-protocol": {
+                    "description": "only impact traffic using this IP protocol, supported: tcp, udp, icmp, all",
                     "type": "string"
                 },
                 "jitter": {
+                    "description": "jitter time, time units: ns, us (or µs), ms, s, m, h.",
                     "type": "string"
                 },
                 "latency": {
+                    "description": "delay egress time, time units: ns, us (or µs), ms, s, m, h.",
                     "type": "string"
                 },
                 "source-port": {
+                    "description": "only impact egress traffic from these source ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.\nit can only be used in conjunction with -p tcp or -p udp",
                     "type": "string"
                 }
             }
@@ -3392,27 +3421,35 @@ var doc = `{
             "type": "object",
             "properties": {
                 "correlation": {
+                    "description": "correlation is percentage (10 is 10%)",
                     "type": "string"
                 },
                 "device": {
+                    "description": "the network interface to impact",
                     "type": "string"
                 },
                 "egress-port": {
+                    "description": "only impact egress traffic to these destination ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.\nit can only be used in conjunction with -p tcp or -p udp",
                     "type": "string"
                 },
                 "hostname": {
+                    "description": "only impact traffic to these hostnames",
                     "type": "string"
                 },
                 "ip-address": {
+                    "description": "only impact egress traffic to these IP addresses",
                     "type": "string"
                 },
                 "ip-protocol": {
+                    "description": "only impact traffic using this IP protocol, supported: tcp, udp, icmp, all",
                     "type": "string"
                 },
                 "percent": {
+                    "description": "percentage of packets to duplicate (10 is 10%)",
                     "type": "string"
                 },
                 "source-port": {
+                    "description": "only impact egress traffic from these source ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.\nit can only be used in conjunction with -p tcp or -p udp",
                     "type": "string"
                 }
             }
@@ -3421,27 +3458,35 @@ var doc = `{
             "type": "object",
             "properties": {
                 "correlation": {
+                    "description": "correlation is percentage (10 is 10%)",
                     "type": "string"
                 },
                 "device": {
+                    "description": "the network interface to impact",
                     "type": "string"
                 },
                 "egress-port": {
+                    "description": "only impact egress traffic to these destination ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.\nit can only be used in conjunction with -p tcp or -p udp",
                     "type": "string"
                 },
                 "hostname": {
+                    "description": "only impact traffic to these hostnames",
                     "type": "string"
                 },
                 "ip-address": {
+                    "description": "only impact egress traffic to these IP addresses",
                     "type": "string"
                 },
                 "ip-protocol": {
+                    "description": "only impact traffic using this IP protocol, supported: tcp, udp, icmp, all",
                     "type": "string"
                 },
                 "percent": {
+                    "description": "percentage of packets to loss (10 is 10%)",
                     "type": "string"
                 },
                 "source-port": {
+                    "description": "only impact egress traffic from these source ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.\nit can only be used in conjunction with -p tcp or -p udp",
                     "type": "string"
                 }
             }
@@ -3454,18 +3499,23 @@ var doc = `{
                     "type": "string"
                 },
                 "device": {
+                    "description": "the network interface to impact",
                     "type": "string"
                 },
                 "direction": {
+                    "description": "specifies the partition direction, values can be 'from', 'to'.\n'from' means packets coming from the 'IPAddress' or 'Hostname' and going to your server,\n'to' means packets originating from your server and going to the 'IPAddress' or 'Hostname'.",
                     "type": "string"
                 },
                 "hostname": {
+                    "description": "only impact traffic to these hostnames",
                     "type": "string"
                 },
                 "ip-address": {
+                    "description": "only impact egress traffic to these IP addresses",
                     "type": "string"
                 },
                 "ip-protocol": {
+                    "description": "only impact egress traffic to these IP addresses",
                     "type": "string"
                 }
             }
@@ -3504,7 +3554,7 @@ var doc = `{
                     "$ref": "#/definitions/v1alpha1.DiskPayloadSpec"
                 },
                 "duration": {
-                    "description": "Duration represents the duration of the chaos action\n+optional\nDuration represents the duration of the chaos action",
+                    "description": "Duration represents the duration of the chaos action\n+optional",
                     "type": "string"
                 },
                 "jvm-exception": {
@@ -3797,9 +3847,11 @@ var doc = `{
             "type": "object",
             "properties": {
                 "process": {
+                    "description": "the process name or the process ID",
                     "type": "string"
                 },
                 "signal": {
+                    "description": "the signal number to send",
                     "type": "integer"
                 }
             }
@@ -3940,9 +3992,11 @@ var doc = `{
             "type": "object",
             "properties": {
                 "load": {
+                    "description": "specifies P percent loading per CPU worker. 0 is effectively a sleep (no load) and 100 is full loading.",
                     "type": "integer"
                 },
                 "workers": {
+                    "description": "specifies N workers to apply the stressor.",
                     "type": "integer"
                 }
             }
@@ -3989,6 +4043,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "size": {
+                    "description": "specifies N bytes consumed per vm worker, default is the total available memory.\nOne can specify the size as % of total available memory or in units of B, KB/KiB, MB/MiB, GB/GiB, TB/TiB..",
                     "type": "string"
                 }
             }
