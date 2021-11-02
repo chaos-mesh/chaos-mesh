@@ -77,7 +77,6 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint.GET("/:uid", s.get)
 	endpoint.DELETE("/:uid", s.delete)
 	endpoint.DELETE("", s.batchDelete)
-	endpoint.PUT("", s.update)
 	endpoint.PUT("/pause/:uid", s.pause)
 	endpoint.PUT("/start/:uid", s.start)
 	endpoint.GET("/state", s.state)
@@ -467,53 +466,53 @@ func forceClean(kubeCli client.Client, chaos client.Object) error {
 // @Failure 404 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
 // @Router /experiments [put]
-func (s *Service) update(c *gin.Context) {
-	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
-	if err != nil {
-		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
+// func (s *Service) update(c *gin.Context) {
+// 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
+// 	if err != nil {
+// 		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
 
-		return
-	}
+// 		return
+// 	}
 
-	var exp map[string]interface{}
-	if err = u.ShouldBindBodyWithJSON(c, &exp); err != nil {
-		return
-	}
-	kind := exp["kind"].(string)
+// 	var exp map[string]interface{}
+// 	if err = u.ShouldBindBodyWithJSON(c, &exp); err != nil {
+// 		return
+// 	}
+// 	kind := exp["kind"].(string)
 
-	if chaosKind, ok := v1alpha1.AllKinds()[kind]; ok {
-		chaos := chaosKind.SpawnObject()
+// 	if chaosKind, ok := v1alpha1.AllKinds()[kind]; ok {
+// 		chaos := chaosKind.SpawnObject()
 
-		if err = u.ShouldBindBodyWithJSON(c, chaos); err != nil {
-			return
-		}
+// 		if err = u.ShouldBindBodyWithJSON(c, chaos); err != nil {
+// 			return
+// 		}
 
-		if err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
-			return internalUpdate(kubeCli, chaos)
-		}); err != nil {
-			u.SetAPImachineryError(c, err)
+// 		if err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
+// 			return internalUpdate(kubeCli, chaos)
+// 		}); err != nil {
+// 			u.SetAPImachineryError(c, err)
 
-			return
-		}
-	} else {
-		u.SetAPIError(c, u.ErrBadRequest.New("Kind "+kind+" is not supported"))
+// 			return
+// 		}
+// 	} else {
+// 		u.SetAPIError(c, u.ErrBadRequest.New("Kind "+kind+" is not supported"))
 
-		return
-	}
+// 		return
+// 	}
 
-	c.JSON(http.StatusOK, exp)
-}
+// 	c.JSON(http.StatusOK, exp)
+// }
 
-func internalUpdate(kubeCli client.Client, chaos client.Object) error {
-	namespace := reflect.ValueOf(chaos).Elem().FieldByName("Namespace").String()
-	name := reflect.ValueOf(chaos).Elem().FieldByName("Name").String()
+// func internalUpdate(kubeCli client.Client, chaos client.Object) error {
+// 	namespace := reflect.ValueOf(chaos).Elem().FieldByName("Namespace").String()
+// 	name := reflect.ValueOf(chaos).Elem().FieldByName("Name").String()
 
-	if err := kubeCli.Get(context.Background(), types.NamespacedName{Namespace: namespace, Name: name}, chaos); err != nil {
-		return err
-	}
+// 	if err := kubeCli.Get(context.Background(), types.NamespacedName{Namespace: namespace, Name: name}, chaos); err != nil {
+// 		return err
+// 	}
 
-	return kubeCli.Update(context.Background(), chaos)
-}
+// 	return kubeCli.Update(context.Background(), chaos)
+// }
 
 // @Summary Pause a chaos experiment.
 // @Description Pause a chaos experiment.

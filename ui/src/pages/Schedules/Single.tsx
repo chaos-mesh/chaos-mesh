@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+
 import { Box, Button, Grid, Grow } from '@material-ui/core'
 import { setAlert, setConfirm } from 'slices/globalStatus'
 import { useEffect, useState } from 'react'
@@ -156,22 +157,6 @@ const Single = () => {
     }
   }
 
-  const handleUpdateSchedule = (data: any) => {
-    api.schedules
-      .update(data)
-      .then(() => {
-        dispatch(
-          setAlert({
-            type: 'success',
-            message: T('confirm.success.update', intl),
-          })
-        )
-
-        fetchSchedule()
-      })
-      .catch(console.error)
-  }
-
   return (
     <>
       <Grow in={!loading} style={{ transformOrigin: '0 0 0' }}>
@@ -224,12 +209,7 @@ const Single = () => {
                     <Space display="flex" flexDirection="column" height="100%">
                       <PaperTop title={T('common.definition')} boxProps={{ p: 4.5, pb: 0 }} />
                       <Box flex={1}>
-                        <YAMLEditor
-                          name={single.name}
-                          data={yaml.dump(single.kube_object)}
-                          onUpdate={handleUpdateSchedule}
-                          download
-                        />
+                        <YAMLEditor name={single.name} data={yaml.dump(single.kube_object)} download />
                       </Box>
                     </Space>
                   )}

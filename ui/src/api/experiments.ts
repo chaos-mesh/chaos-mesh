@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+
 import { Experiment as ExperimentResponse, ExperimentSingle, StatusOfExperiments } from './experiments.type'
 
 import { Experiment } from 'components/NewExperiment/types'
@@ -38,8 +39,6 @@ export const experiments = (namespace = null, name = null, kind = null) =>
   })
 
 export const single = (uuid: uuid) => http.get<ExperimentSingle>(`/experiments/${uuid}`)
-
-export const update = (data: ExperimentSingle['kube_object']) => http.put('/experiments', data)
 
 export const del = (uuid: uuid) => http.delete(`/experiments/${uuid}`)
 export const delMulti = (uuids: uuid[]) => http.delete(`/experiments?uids=${uuids.join(',')}`)

@@ -28,7 +28,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 
@@ -73,7 +72,6 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint.GET("/:uid", s.get)
 	endpoint.DELETE("/:uid", s.delete)
 	endpoint.DELETE("", s.batchDelete)
-	endpoint.PUT("", s.update)
 	endpoint.PUT("/pause/:uid", s.pauseSchedule)
 	endpoint.PUT("/start/:uid", s.startSchedule)
 }
@@ -430,39 +428,39 @@ func checkAndDeleteSchedule(c *gin.Context, kubeCli client.Client, namespacedNam
 // @Failure 404 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
 // @Router /schedules [put]
-func (s *Service) update(c *gin.Context) {
-	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
-	if err != nil {
-		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
+// func (s *Service) update(c *gin.Context) {
+// 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
+// 	if err != nil {
+// 		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
 
-		return
-	}
+// 		return
+// 	}
 
-	var sch v1alpha1.Schedule
-	if err = u.ShouldBindBodyWithJSON(c, &sch); err != nil {
-		return
-	}
+// 	var sch v1alpha1.Schedule
+// 	if err = u.ShouldBindBodyWithJSON(c, &sch); err != nil {
+// 		return
+// 	}
 
-	if err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		return internalUpdate(kubeCli, &sch)
-	}); err != nil {
-		u.SetAPImachineryError(c, err)
+// 	if err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
+// 		return internalUpdate(kubeCli, &sch)
+// 	}); err != nil {
+// 		u.SetAPImachineryError(c, err)
 
-		return
-	}
+// 		return
+// 	}
 
-	c.JSON(http.StatusOK, sch)
-}
+// 	c.JSON(http.StatusOK, sch)
+// }
 
-func internalUpdate(kubeCli client.Client, sch *v1alpha1.Schedule) error {
-	ns, name := sch.Namespace, sch.Name
+// func internalUpdate(kubeCli client.Client, sch *v1alpha1.Schedule) error {
+// 	ns, name := sch.Namespace, sch.Name
 
-	if err := kubeCli.Get(context.Background(), types.NamespacedName{Namespace: ns, Name: name}, sch); err != nil {
-		return err
-	}
+// 	if err := kubeCli.Get(context.Background(), types.NamespacedName{Namespace: ns, Name: name}, sch); err != nil {
+// 		return err
+// 	}
 
-	return kubeCli.Update(context.Background(), sch)
-}
+// 	return kubeCli.Update(context.Background(), sch)
+// }
 
 // @Summary Pause a schedule.
 // @Description Pause a schedule.
