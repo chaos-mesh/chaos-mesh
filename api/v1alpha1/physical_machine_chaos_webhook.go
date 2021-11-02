@@ -34,10 +34,10 @@ func (in *PhysicalMachineChaosSpec) Default(root interface{}, field *reflect.Str
 		in.UID = uuid.New().String()
 	}
 
-	for i := range in.Address {
+	for i := range in.Addresses {
 		// add http prefix for address
-		if !strings.HasPrefix(in.Address[i], "http") {
-			in.Address[i] = fmt.Sprintf("http://%s", in.Address[i])
+		if !strings.HasPrefix(in.Addresses[i], "http") {
+			in.Addresses[i] = fmt.Sprintf("http://%s", in.Addresses[i])
 		}
 	}
 }
@@ -66,14 +66,14 @@ func (in *PhysicalMachineChaosSpec) Validate(root interface{}, path *field.Path)
 	}
 
 	// make sure address is not empty
-	if len(in.Address) == 0 {
+	if len(in.Addresses) == 0 {
 		allErrs = append(allErrs,
-			field.Invalid(path.Child("address"), in.Address, "the address is empty"))
+			field.Invalid(path.Child("address"), in.Addresses, "the address is empty"))
 	}
-	for _, address := range in.Address {
+	for _, address := range in.Addresses {
 		if len(address) == 0 {
 			allErrs = append(allErrs,
-				field.Invalid(path.Child("address"), in.Address, "the address is empty"))
+				field.Invalid(path.Child("address"), in.Addresses, "the address is empty"))
 		}
 	}
 

@@ -23,10 +23,27 @@ import (
 
 type SelectImpl struct{}
 
-func (impl *SelectImpl) Select(ctx context.Context, physicalMachineSelector *v1alpha1.PhysicalMachineSelector) ([]*v1alpha1.PhysicalMachineSelector, error) {
-	return []*v1alpha1.PhysicalMachineSelector{physicalMachineSelector}, nil
+func (impl *SelectImpl) Select(ctx context.Context, physicalMachineSelector *v1alpha1.PhysicalMachineSelector) ([]PhysicalMachineAddress, error) {
+	addresses := physicalMachineSelector.Addresses
+
+	physicalMachineAddress := make([]PhysicalMachineAddress, 0, len(addresses))
+	for _, address := range addresses {
+		physicalMachineAddress = append(physicalMachineAddress, PhysicalMachineAddress{
+			Address: address,
+		})
+	}
+
+	return physicalMachineAddress, nil
 }
 
 func New() *SelectImpl {
 	return &SelectImpl{}
+}
+
+type PhysicalMachineAddress struct {
+	Address string
+}
+
+func (c *PhysicalMachineAddress) Id() string {
+	return c.Address
 }
