@@ -1295,6 +1295,10 @@ spec:
                           required:
                           - latency
                           type: object
+                        device:
+                          description: Device represents the network device to be
+                            affected.
+                          type: string
                         direction:
                           description: Direction represents the direction, this applies
                             on netem and network partition action
@@ -1563,6 +1567,10 @@ spec:
                           - mode
                           - selector
                           type: object
+                        targetDevice:
+                          description: TargetDevice represents the network device
+                            to be affected in target scope.
+                          type: string
                         value:
                           description: Value is required when the mode is set to `FixedPodMode`
                             / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If
@@ -1594,6 +1602,8 @@ spec:
                           - network-duplicate
                           - network-loss
                           - network-delay
+                          - network-partition
+                          - network-dns
                           - process
                           - jvm-exception
                           - jvm-gc
@@ -1601,11 +1611,21 @@ spec:
                           - jvm-return
                           - jvm-stress
                           - jvm-rule-data
+                          - clock
                           type: string
                         address:
                           items:
                             type: string
                           type: array
+                        clock:
+                          properties:
+                            clock-ids-slice:
+                              type: string
+                            pid:
+                              type: integer
+                            time-offset:
+                              type: string
+                          type: object
                         disk-fill:
                           properties:
                             fill_by_fallocate:
@@ -1721,9 +1741,10 @@ spec:
                               description: the CPU core number need to use, only set
                                 it when action is stress
                               type: integer
-                            mem-size:
-                              description: the memory size need to locate, only set
-                                it when action is stress
+                            mem-type:
+                              description: the memory type need to locate, only set
+                                it when action is stress, the value can be 'stack'
+                                or 'heap'
                               type: integer
                             pid:
                               description: the pid of Java process which need to attach
@@ -1772,6 +1793,15 @@ spec:
                             source-port:
                               type: string
                           type: object
+                        network-dns:
+                          properties:
+                            dns-domain-name:
+                              type: string
+                            dns-ip:
+                              type: string
+                            dns-server:
+                              type: string
+                          type: object
                         network-duplicate:
                           properties:
                             correlation:
@@ -1808,6 +1838,24 @@ spec:
                             percent:
                               type: string
                             source-port:
+                              type: string
+                          type: object
+                        network-partition:
+                          properties:
+                            accept-tcp-flags:
+                              description: only the packet which match the tcp flag
+                                can be accepted, others will be dropped. only set
+                                when the IPProtocol is tcp, used for partition.
+                              type: string
+                            device:
+                              type: string
+                            direction:
+                              type: string
+                            hostname:
+                              type: string
+                            ip-address:
+                              type: string
+                            ip-protocol:
                               type: string
                           type: object
                         process:
@@ -3266,6 +3314,10 @@ spec:
                               required:
                               - latency
                               type: object
+                            device:
+                              description: Device represents the network device to
+                                be affected.
+                              type: string
                             direction:
                               description: Direction represents the direction, this
                                 applies on netem and network partition action
@@ -3542,6 +3594,10 @@ spec:
                               - mode
                               - selector
                               type: object
+                            targetDevice:
+                              description: TargetDevice represents the network device
+                                to be affected in target scope.
+                              type: string
                             value:
                               description: Value is required when the mode is set
                                 to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
@@ -3573,6 +3629,8 @@ spec:
                               - network-duplicate
                               - network-loss
                               - network-delay
+                              - network-partition
+                              - network-dns
                               - process
                               - jvm-exception
                               - jvm-gc
@@ -3580,11 +3638,21 @@ spec:
                               - jvm-return
                               - jvm-stress
                               - jvm-rule-data
+                              - clock
                               type: string
                             address:
                               items:
                                 type: string
                               type: array
+                            clock:
+                              properties:
+                                clock-ids-slice:
+                                  type: string
+                                pid:
+                                  type: integer
+                                time-offset:
+                                  type: string
+                              type: object
                             disk-fill:
                               properties:
                                 fill_by_fallocate:
@@ -3706,9 +3774,10 @@ spec:
                                   description: the CPU core number need to use, only
                                     set it when action is stress
                                   type: integer
-                                mem-size:
-                                  description: the memory size need to locate, only
-                                    set it when action is stress
+                                mem-type:
+                                  description: the memory type need to locate, only
+                                    set it when action is stress, the value can be
+                                    'stack' or 'heap'
                                   type: integer
                                 pid:
                                   description: the pid of Java process which need
@@ -3758,6 +3827,15 @@ spec:
                                 source-port:
                                   type: string
                               type: object
+                            network-dns:
+                              properties:
+                                dns-domain-name:
+                                  type: string
+                                dns-ip:
+                                  type: string
+                                dns-server:
+                                  type: string
+                              type: object
                             network-duplicate:
                               properties:
                                 correlation:
@@ -3794,6 +3872,25 @@ spec:
                                 percent:
                                   type: string
                                 source-port:
+                                  type: string
+                              type: object
+                            network-partition:
+                              properties:
+                                accept-tcp-flags:
+                                  description: only the packet which match the tcp
+                                    flag can be accepted, others will be dropped.
+                                    only set when the IPProtocol is tcp, used for
+                                    partition.
+                                  type: string
+                                device:
+                                  type: string
+                                direction:
+                                  type: string
+                                hostname:
+                                  type: string
+                                ip-address:
+                                  type: string
+                                ip-protocol:
                                   type: string
                               type: object
                             process:
