@@ -19,7 +19,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -28,6 +27,7 @@ import (
 
 	"github.com/go-logr/logr"
 	"go.uber.org/fx"
+	"github.com/pkg/errors"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -100,15 +100,15 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		url := fmt.Sprintf("%s/api/attack/%s", address, action)
 		impl.Log.Info("HTTP request", "address", address, "data", string(expInfoBytes))
 
-		statusCode, err := impl.doHttpRequest("POST", url, bytes.NewBuffer(expInfoBytes))
+		statusCode, body, err := impl.doHttpRequest("POST", url, bytes.NewBuffer(expInfoBytes))
 		if err != nil {
-			return v1alpha1.NotInjected, err
+			return v1alpha1.NotInjected, errors.Wrap(err, body)
 		}
 
 		if statusCode != http.StatusOK {
 			err = errors.New("HTTP status is not OK")
-			impl.Log.Error(err, "")
-			return v1alpha1.NotInjected, err
+			impl.Log.Error(err, body)
+			return v1alpha1.NotInjected, errors.Wrap(err, body)
 		}
 	}
 
@@ -124,28 +124,28 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	addressArray := strings.Split(addresses, ",")
 	for _, address := range addressArray {
 		url := fmt.Sprintf("%s/api/attack/%s", address, physicalMachinechaos.Spec.ExpInfo.UID)
-		statusCode, err := impl.doHttpRequest("DELETE", url, nil)
+		statusCode, body, err := impl.doHttpRequest("DELETE", url, nil)
 		if err != nil {
-			return v1alpha1.Injected, err
+			return v1alpha1.Injected, errors.Wrap(err, body)
 		}
 
 		if statusCode == http.StatusNotFound {
 			impl.Log.Info("experiment not found", "uid", physicalMachinechaos.Spec.ExpInfo.UID)
 		} else if statusCode != http.StatusOK {
 			err = errors.New("HTTP status is not OK")
-			impl.Log.Error(err, "")
-			return v1alpha1.Injected, err
+			impl.Log.Error(err, body)
+			return v1alpha1.Injected, errors.Wrap(err, body)
 		}
 	}
 
 	return v1alpha1.NotInjected, nil
 }
 
-func (impl *Impl) doHttpRequest(method, url string, data io.Reader) (int, error) {
+func (impl *Impl) doHttpRequest(method, url string, data io.Reader) (int, string, error) {
 	req, err := http.NewRequest(method, url, data)
 	if err != nil {
 		impl.Log.Error(err, "fail to generate HTTP request")
-		return 0, err
+		return 0, "", err
 	}
 	req.Header.Set("Content-Type", "application/json")
 
@@ -153,17 +153,17 @@ func (impl *Impl) doHttpRequest(method, url string, data io.Reader) (int, error)
 	resp, err := httpClient.Do(req)
 	if err != nil {
 		impl.Log.Error(err, "do HTTP request")
-		return 0, err
+		return 0, "", err
 	}
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return 0, err
+		return 0, "", err
 	}
 	impl.Log.Info("HTTP response", "url", url, "status", resp.Status, "body", string(body))
 
-	return resp.StatusCode, nil
+	return resp.StatusCode, string(body), nil
 }
 
 func NewImpl(c client.Client, log logr.Logger) *common.ChaosImplPair {
