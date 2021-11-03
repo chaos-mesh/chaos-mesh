@@ -32,7 +32,7 @@ import ScopePodsTable from './ScopePodsTable'
 import Space from 'components-mui/Space'
 import T from 'components/T'
 
-interface ScopeStepProps {
+interface ScopeProps {
   namespaces: string[]
   scope?: string
   modeScope?: string
@@ -49,7 +49,7 @@ const modes = [
 ]
 const modesWithAdornment = ['fixed-percent', 'random-max-percent']
 
-const ScopeStep: React.FC<ScopeStepProps> = ({
+const Scope: React.FC<ScopeProps> = ({
   namespaces,
   scope = 'spec.selector',
   modeScope = 'spec',
@@ -216,4 +216,4 @@ const ScopeStep: React.FC<ScopeStepProps> = ({
   )
 }
 
-export default ScopeStep
+export default Scope
