@@ -418,50 +418,6 @@ func checkAndDeleteSchedule(c *gin.Context, kubeCli client.Client, namespacedNam
 	return
 }
 
-// @Summary Update a schedule.
-// @Description Update a schedule.
-// @Tags schedules
-// @Produce json
-// @Param request body v1alpha1.Schedule true "Request body"
-// @Success 200 {object} v1alpha1.Schedule
-// @Failure 400 {object} utils.APIError
-// @Failure 404 {object} utils.APIError
-// @Failure 500 {object} utils.APIError
-// @Router /schedules [put]
-// func (s *Service) update(c *gin.Context) {
-// 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
-// 	if err != nil {
-// 		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
-
-// 		return
-// 	}
-
-// 	var sch v1alpha1.Schedule
-// 	if err = u.ShouldBindBodyWithJSON(c, &sch); err != nil {
-// 		return
-// 	}
-
-// 	if err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
-// 		return internalUpdate(kubeCli, &sch)
-// 	}); err != nil {
-// 		u.SetAPImachineryError(c, err)
-
-// 		return
-// 	}
-
-// 	c.JSON(http.StatusOK, sch)
-// }
-
-// func internalUpdate(kubeCli client.Client, sch *v1alpha1.Schedule) error {
-// 	ns, name := sch.Namespace, sch.Name
-
-// 	if err := kubeCli.Get(context.Background(), types.NamespacedName{Namespace: ns, Name: name}, sch); err != nil {
-// 		return err
-// 	}
-
-// 	return kubeCli.Update(context.Background(), sch)
-// }
-
 // @Summary Pause a schedule.
 // @Description Pause a schedule.
 // @Tags schedules

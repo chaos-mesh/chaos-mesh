@@ -456,64 +456,6 @@ func forceClean(kubeCli client.Client, chaos client.Object) error {
 	return kubeCli.Update(context.Background(), chaos)
 }
 
-// @Summary Update a chaos experiment.
-// @Description Update a chaos experiment.
-// @Tags experiments
-// @Produce json
-// @Param request body map[string]interface{} true "Request body"
-// @Success 200 {object} map[string]interface{}
-// @Failure 400 {object} utils.APIError
-// @Failure 404 {object} utils.APIError
-// @Failure 500 {object} utils.APIError
-// @Router /experiments [put]
-// func (s *Service) update(c *gin.Context) {
-// 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
-// 	if err != nil {
-// 		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
-
-// 		return
-// 	}
-
-// 	var exp map[string]interface{}
-// 	if err = u.ShouldBindBodyWithJSON(c, &exp); err != nil {
-// 		return
-// 	}
-// 	kind := exp["kind"].(string)
-
-// 	if chaosKind, ok := v1alpha1.AllKinds()[kind]; ok {
-// 		chaos := chaosKind.SpawnObject()
-
-// 		if err = u.ShouldBindBodyWithJSON(c, chaos); err != nil {
-// 			return
-// 		}
-
-// 		if err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
-// 			return internalUpdate(kubeCli, chaos)
-// 		}); err != nil {
-// 			u.SetAPImachineryError(c, err)
-
-// 			return
-// 		}
-// 	} else {
-// 		u.SetAPIError(c, u.ErrBadRequest.New("Kind "+kind+" is not supported"))
-
-// 		return
-// 	}
-
-// 	c.JSON(http.StatusOK, exp)
-// }
-
-// func internalUpdate(kubeCli client.Client, chaos client.Object) error {
-// 	namespace := reflect.ValueOf(chaos).Elem().FieldByName("Namespace").String()
-// 	name := reflect.ValueOf(chaos).Elem().FieldByName("Name").String()
-
-// 	if err := kubeCli.Get(context.Background(), types.NamespacedName{Namespace: namespace, Name: name}, chaos); err != nil {
-// 		return err
-// 	}
-
-// 	return kubeCli.Update(context.Background(), chaos)
-// }
-
 // @Summary Pause a chaos experiment.
 // @Description Pause a chaos experiment.
 // @Tags experiments
