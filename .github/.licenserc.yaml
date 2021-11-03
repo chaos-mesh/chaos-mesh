@@ -13,7 +13,6 @@ header:
     - 'vendor/**'
     - '**/go.mod'
     - '**/go.sum'
-    - 'LICENSE'
     - '.github/workflows/*'
     - '.github/.licenserc.yaml'
     - 'Makefile'
@@ -48,3 +47,5 @@ header:
     - 'hack/boilerplate/boilerplate.py'
     # Dockerfiles
     - '**/Dockerfile'
+    # UI SVGs
+    - 'ui/**/*.svg'

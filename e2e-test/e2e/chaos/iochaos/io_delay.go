@@ -61,8 +61,10 @@ func TestcaseIODelayDurationForATimeThenRecover(
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{
 					Selector: v1alpha1.PodSelectorSpec{
-						Namespaces:     []string{ns},
-						LabelSelectors: map[string]string{"app": "io"},
+						GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+							Namespaces:     []string{ns},
+							LabelSelectors: map[string]string{"app": "io"},
+						},
 					},
 					Mode: v1alpha1.OnePodMode,
 				},
@@ -130,8 +132,10 @@ func TestcaseIODelayDurationForATimePauseAndUnPause(
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{
 					Selector: v1alpha1.PodSelectorSpec{
-						Namespaces:     []string{ns},
-						LabelSelectors: map[string]string{"app": "io"},
+						GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+							Namespaces:     []string{ns},
+							LabelSelectors: map[string]string{"app": "io"},
+						},
 					},
 					Mode: v1alpha1.OnePodMode,
 				},
@@ -287,8 +291,10 @@ func TestcaseIODelayWithSpecifiedContainer(
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{
 					Selector: v1alpha1.PodSelectorSpec{
-						Namespaces:     []string{ns},
-						LabelSelectors: map[string]string{"app": "io"},
+						GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+							Namespaces:     []string{ns},
+							LabelSelectors: map[string]string{"app": "io"},
+						},
 					},
 					Mode: v1alpha1.OnePodMode,
 				},
@@ -352,8 +358,10 @@ func TestcaseIODelayWithWrongSpec(
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{
 					Selector: v1alpha1.PodSelectorSpec{
-						Namespaces:     []string{ns},
-						LabelSelectors: map[string]string{"app": "io"},
+						GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+							Namespaces:     []string{ns},
+							LabelSelectors: map[string]string{"app": "io"},
+						},
 					},
 					Mode: v1alpha1.OnePodMode,
 				},

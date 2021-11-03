@@ -81,7 +81,9 @@ var _ = Describe("Workflow", func() {
 							ContainerSelector: v1alpha1.ContainerSelector{
 								PodSelector: v1alpha1.PodSelector{
 									Selector: v1alpha1.PodSelectorSpec{
-										Namespaces: []string{ns},
+										GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+											Namespaces: []string{ns},
+										},
 									},
 									Mode: v1alpha1.AllPodMode,
 								},
@@ -132,9 +134,11 @@ var _ = Describe("Workflow", func() {
 									ContainerSelector: v1alpha1.ContainerSelector{
 										PodSelector: v1alpha1.PodSelector{
 											Selector: v1alpha1.PodSelectorSpec{
-												Namespaces: []string{ns},
-												LabelSelectors: map[string]string{
-													"app": "not-actually-exist",
+												GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+													Namespaces: []string{ns},
+													LabelSelectors: map[string]string{
+														"app": "not-actually-exist",
+													},
 												},
 											},
 											Mode: v1alpha1.AllPodMode,
