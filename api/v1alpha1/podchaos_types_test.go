@@ -58,7 +58,7 @@ var _ = Describe("PodChaos", func() {
 					Action: PodKillAction,
 					ContainerSelector: ContainerSelector{
 						PodSelector: PodSelector{
-							Mode: OnePodMode,
+							Mode: OneMode,
 						},
 					},
 				},

@@ -109,7 +109,7 @@ func New(params Params) *SelectImpl {
 	}
 }
 
-// SelectAndFilterPods returns the list of pods that filtered by selector and PodMode
+// SelectAndFilterPods returns the list of pods that filtered by selector and SelectorMode
 func SelectAndFilterPods(ctx context.Context, c client.Client, r client.Reader, spec *v1alpha1.PodSelector, clusterScoped bool, targetNamespace string, enableFilterNamespace bool) ([]v1.Pod, error) {
 	if pods := mock.On("MockSelectAndFilterPods"); pods != nil {
 		return pods.(func() []v1.Pod)(), nil
@@ -412,20 +412,20 @@ func filterPodByNode(pods []v1.Pod, nodes []v1.Node) []v1.Pod {
 }
 
 // filterPodsByMode filters pods by mode from pod list
-func filterPodsByMode(pods []v1.Pod, mode v1alpha1.PodMode, value string) ([]v1.Pod, error) {
+func filterPodsByMode(pods []v1.Pod, mode v1alpha1.SelectorMode, value string) ([]v1.Pod, error) {
 	if len(pods) == 0 {
 		return nil, errors.New("cannot generate pods from empty list")
 	}
 
 	switch mode {
-	case v1alpha1.OnePodMode:
+	case v1alpha1.OneMode:
 		index := getRandomNumber(len(pods))
 		pod := pods[index]
 
 		return []v1.Pod{pod}, nil
-	case v1alpha1.AllPodMode:
+	case v1alpha1.AllMode:
 		return pods, nil
-	case v1alpha1.FixedPodMode:
+	case v1alpha1.FixedMode:
 		num, err := strconv.Atoi(value)
 		if err != nil {
 			return nil, err
@@ -440,7 +440,7 @@ func filterPodsByMode(pods []v1.Pod, mode v1alpha1.PodMode, value string) ([]v1.
 		}
 
 		return getFixedSubListFromPodList(pods, num), nil
-	case v1alpha1.FixedPercentPodMode:
+	case v1alpha1.FixedPercentMode:
 		percentage, err := strconv.Atoi(value)
 		if err != nil {
 			return nil, err
@@ -457,7 +457,7 @@ func filterPodsByMode(pods []v1.Pod, mode v1alpha1.PodMode, value string) ([]v1.
 		num := int(math.Floor(float64(len(pods)) * float64(percentage) / 100))
 
 		return getFixedSubListFromPodList(pods, num), nil
-	case v1alpha1.RandomMaxPercentPodMode:
+	case v1alpha1.RandomMaxPercentMode:
 		maxPercentage, err := strconv.Atoi(value)
 		if err != nil {
 			return nil, err

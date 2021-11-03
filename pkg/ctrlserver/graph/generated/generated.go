@@ -4378,8 +4378,8 @@ type IOChaosSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.
 	# supported mode: one / all / fixed / fixed-percent / random-max-percent
 	mode: String!
 
-    # value is required when the mode is set to ` + "`" + `FixedPodMode` + "`" + ` / ` + "`" + `FixedPercentPodMod` + "`" + ` / ` + "`" + `RandomMaxPercentPodMod` + "`" + `.
-	# If ` + "`" + `FixedPodMode` + "`" + `, provide an integer of pods to do chaos action.
+    # value is required when the mode is set to ` + "`" + `FixedMode` + "`" + ` / ` + "`" + `FixedPercentPodMod` + "`" + ` / ` + "`" + `RandomMaxPercentPodMod` + "`" + `.
+	# If ` + "`" + `FixedMode` + "`" + `, provide an integer of pods to do chaos action.
 	# If ` + "`" + `FixedPercentPodMod` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
 	# IF ` + "`" + `RandomMaxPercentPodMod` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action
 	value: String
@@ -4601,8 +4601,8 @@ type HTTPChaosSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha
 	# supported mode: one / all / fixed / fixed-percent / random-max-percent
 	mode: String!
 
-    # value is required when the mode is set to ` + "`" + `FixedPodMode` + "`" + ` / ` + "`" + `FixedPercentPodMod` + "`" + ` / ` + "`" + `RandomMaxPercentPodMod` + "`" + `.
-	# If ` + "`" + `FixedPodMode` + "`" + `, provide an integer of pods to do chaos action.
+    # value is required when the mode is set to ` + "`" + `FixedMode` + "`" + ` / ` + "`" + `FixedPercentPodMod` + "`" + ` / ` + "`" + `RandomMaxPercentPodMod` + "`" + `.
+	# If ` + "`" + `FixedMode` + "`" + `, provide an integer of pods to do chaos action.
 	# If ` + "`" + `FixedPercentPodMod` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
 	# IF ` + "`" + `RandomMaxPercentPodMod` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action
 	value: String

@@ -62,7 +62,7 @@ var _ = Describe("Schedule", func() {
 							Action: PodKillAction,
 							ContainerSelector: ContainerSelector{
 								PodSelector: PodSelector{
-									Mode: OnePodMode,
+									Mode: OneMode,
 								},
 							},
 						},

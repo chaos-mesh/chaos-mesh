@@ -109,7 +109,7 @@ func testNetworkDelay(c http.Client, port uint16, targetIP string) (int64, error
 
 func makeNetworkPartitionChaos(
 	namespace, name string, fromLabelSelectors, toLabelSelectors map[string]string,
-	fromPodMode, toPodMode v1alpha1.PodMode,
+	fromPodMode, toPodMode v1alpha1.SelectorMode,
 	direction v1alpha1.Direction,
 	duration *string,
 ) *v1alpha1.NetworkChaos {
@@ -151,7 +151,7 @@ func makeNetworkPartitionChaos(
 
 func makeNetworkDelayChaos(
 	namespace, name string, fromLabelSelectors, toLabelSelectors map[string]string,
-	fromPodMode, toPodMode v1alpha1.PodMode, direction v1alpha1.Direction, tcparam v1alpha1.TcParameter, duration *string,
+	fromPodMode, toPodMode v1alpha1.SelectorMode, direction v1alpha1.Direction, tcparam v1alpha1.TcParameter, duration *string,
 ) *v1alpha1.NetworkChaos {
 	var target *v1alpha1.PodSelector
 	if toLabelSelectors != nil {
