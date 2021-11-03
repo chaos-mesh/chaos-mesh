@@ -35,7 +35,7 @@ FLAGS:
         --force-local-kube   Force reinstall local Kubernetes cluster if it is already installed
         --force-kubectl      Force reinstall kubectl client if it is already installed
         --force-kind         Force reinstall Kind if it is already installed
-        --docker-mirror      Use docker mirror to pull image, dockerhub.azk8s.cn => docker.io, gcr.azk8s.cn => gcr.io
+        --docker-mirror      Use docker mirror to pull image, dockerhub.azk8s.cn => docker.io, gcr.azk8s.cn => gcr.io; ghcr.io are NOT supported now.
         --volume-provisioner Deploy volume provisioner in local Kubernetes cluster
         --local-registry     Deploy local docker registry in local Kubernetes cluster
         --template           Locally render templates
@@ -84,7 +84,7 @@ main() {
     local k3s=false
     local microk8s=false
     local host_network=false
-    local docker_registry="docker.io"
+    local docker_registry="ghcr.io"
 
     while [[ $# -gt 0 ]]
     do
@@ -773,7 +773,7 @@ azk8spull() {
 			elif [ "${array[0]}"x = "quay.io"x ]; then
 				domainName="quay.azk8s.cn"
 			else
-				echo '## azk8spull can not support pulling $image right now.'
+				echo "## azk8spull can not support pulling $image right now."
 			fi
 		elif [ ${#array[*]} -eq 2 ]; then
 			if [ "${array[0]}"x = "k8s.gcr.io"x ]; then
@@ -792,7 +792,7 @@ azk8spull() {
 		else
 			echo '## azk8spull can not support pulling $image right now.'
 		fi
-		if [ $domainName != "" ]; then
+		if [ "$domainName" != "" ]; then
 			echo "## azk8spull try to pull image from mirror $domainName/$repoName/$imageName."
 			docker pull  $domainName/$repoName/$imageName
 			if [ $? -eq 0 ]; then
@@ -1290,10 +1290,10 @@ spec:
       serviceAccountName: chaos-daemon
       hostIPC: true
       hostPID: true
-      priorityClassName: 
+      priorityClassName:
       containers:
         - name: chaos-daemon
-          image: ${DOCKER_REGISTRY_PREFIX}/pingcap/chaos-daemon:${VERSION_TAG}
+          image: ${DOCKER_REGISTRY_PREFIX}/chaos-mesh/chaos-mesh/chaos-daemon:${VERSION_TAG}
           imagePullPolicy: IfNotPresent
           command:
             - /usr/local/bin/chaos-daemon
@@ -1376,10 +1376,10 @@ spec:
         rollme: "install.sh"
     spec:
       serviceAccountName: chaos-controller-manager
-      priorityClassName: 
+      priorityClassName:
       containers:
         - name: chaos-dashboard
-          image: ${DOCKER_REGISTRY_PREFIX}/pingcap/chaos-dashboard:${VERSION_TAG}
+          image: ${DOCKER_REGISTRY_PREFIX}/chaos-mesh/chaos-mesh/chaos-dashboard:${VERSION_TAG}
           imagePullPolicy: IfNotPresent
           resources:
             limits: {}
@@ -1466,10 +1466,10 @@ spec:
     spec:
       hostNetwork: ${host_network}
       serviceAccountName: chaos-controller-manager
-      priorityClassName: 
+      priorityClassName:
       containers:
       - name: chaos-mesh
-        image: ${DOCKER_REGISTRY_PREFIX}/pingcap/chaos-mesh:${VERSION_TAG}
+        image: ${DOCKER_REGISTRY_PREFIX}/chaos-mesh/chaos-mesh/chaos-mesh:${VERSION_TAG}
         imagePullPolicy: IfNotPresent
         resources:
             limits: {}
