@@ -181,9 +181,11 @@ var _ = Describe("Workflow", func() {
 									NetworkChaos: &v1alpha1.NetworkChaosSpec{
 										PodSelector: v1alpha1.PodSelector{
 											Selector: v1alpha1.PodSelectorSpec{
-												Namespaces: []string{ns},
-												LabelSelectors: map[string]string{
-													"app": "not-exist",
+												GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+													Namespaces: []string{ns},
+													LabelSelectors: map[string]string{
+														"app": "not-exist",
+													},
 												},
 											},
 											Mode: v1alpha1.AllPodMode,
@@ -199,9 +201,11 @@ var _ = Describe("Workflow", func() {
 										ContainerSelector: v1alpha1.ContainerSelector{
 											PodSelector: v1alpha1.PodSelector{
 												Selector: v1alpha1.PodSelectorSpec{
-													Namespaces: []string{ns},
-													LabelSelectors: map[string]string{
-														"app": "not-exist",
+													GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+														Namespaces: []string{ns},
+														LabelSelectors: map[string]string{
+															"app": "not-exist",
+														},
 													},
 												},
 												Mode: v1alpha1.AllPodMode,
@@ -219,9 +223,11 @@ var _ = Describe("Workflow", func() {
 										ContainerSelector: v1alpha1.ContainerSelector{
 											PodSelector: v1alpha1.PodSelector{
 												Selector: v1alpha1.PodSelectorSpec{
-													Namespaces: []string{ns},
-													LabelSelectors: map[string]string{
-														"app": "not-exist",
+													GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+														Namespaces: []string{ns},
+														LabelSelectors: map[string]string{
+															"app": "not-exist",
+														},
 													},
 												},
 												Mode: v1alpha1.AllPodMode,

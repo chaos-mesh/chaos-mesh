@@ -57,8 +57,10 @@ func TestcaseHttpDelayDurationForATimeThenRecover(
 		Spec: v1alpha1.HTTPChaosSpec{
 			PodSelector: v1alpha1.PodSelector{
 				Selector: v1alpha1.PodSelectorSpec{
-					Namespaces:     []string{ns},
-					LabelSelectors: map[string]string{"app": "http"},
+					GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+						Namespaces:     []string{ns},
+						LabelSelectors: map[string]string{"app": "http"},
+					},
 				},
 				Mode: v1alpha1.OnePodMode,
 			},
@@ -135,8 +137,10 @@ func TestcaseHttpDelayDurationForATimePauseAndUnPause(
 		Spec: v1alpha1.HTTPChaosSpec{
 			PodSelector: v1alpha1.PodSelector{
 				Selector: v1alpha1.PodSelectorSpec{
-					Namespaces:     []string{ns},
-					LabelSelectors: map[string]string{"app": "http"},
+					GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+						Namespaces:     []string{ns},
+						LabelSelectors: map[string]string{"app": "http"},
+					},
 				},
 				Mode: v1alpha1.OnePodMode,
 			},

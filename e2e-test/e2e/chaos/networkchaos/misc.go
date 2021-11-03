@@ -117,8 +117,10 @@ func makeNetworkPartitionChaos(
 	if toLabelSelectors != nil {
 		target = &v1alpha1.PodSelector{
 			Selector: v1alpha1.PodSelectorSpec{
-				Namespaces:     []string{namespace},
-				LabelSelectors: toLabelSelectors,
+				GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+					Namespaces:     []string{namespace},
+					LabelSelectors: toLabelSelectors,
+				},
 			},
 			Mode: toPodMode,
 		}
@@ -136,8 +138,10 @@ func makeNetworkPartitionChaos(
 			Duration:  duration,
 			PodSelector: v1alpha1.PodSelector{
 				Selector: v1alpha1.PodSelectorSpec{
-					Namespaces:     []string{namespace},
-					LabelSelectors: fromLabelSelectors,
+					GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+						Namespaces:     []string{namespace},
+						LabelSelectors: fromLabelSelectors,
+					},
 				},
 				Mode: fromPodMode,
 			},
@@ -153,8 +157,10 @@ func makeNetworkDelayChaos(
 	if toLabelSelectors != nil {
 		target = &v1alpha1.PodSelector{
 			Selector: v1alpha1.PodSelectorSpec{
-				Namespaces:     []string{namespace},
-				LabelSelectors: toLabelSelectors,
+				GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+					Namespaces:     []string{namespace},
+					LabelSelectors: toLabelSelectors,
+				},
 			},
 			Mode: toPodMode,
 		}
@@ -173,8 +179,10 @@ func makeNetworkDelayChaos(
 			Direction:   direction,
 			PodSelector: v1alpha1.PodSelector{
 				Selector: v1alpha1.PodSelectorSpec{
-					Namespaces:     []string{namespace},
-					LabelSelectors: fromLabelSelectors,
+					GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+						Namespaces:     []string{namespace},
+						LabelSelectors: fromLabelSelectors,
+					},
 				},
 				Mode: fromPodMode,
 			},
