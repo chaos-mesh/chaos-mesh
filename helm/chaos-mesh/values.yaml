@@ -57,7 +57,7 @@ controllerManager:
   replicaCount: 3
 
   priorityClassName: ""
-  image: pingcap/chaos-mesh:latest
+  image: ghcr.io/chaos-mesh/chaos-mesh/chaos-mesh:latest
   imagePullPolicy: IfNotPresent
 
   enableFilterNamespace: false
@@ -91,7 +91,7 @@ controllerManager:
 
   # A list of controllers to enable. "*" enables all controllers by default.
   enabledControllers:
-  - "*" 
+  - "*"
 
   # A list of webhooks to enable. "*" enables all webhooks by default.
   enabledWebhooks:
@@ -111,7 +111,7 @@ controllerManager:
     retryPeriod: 2s
 
 chaosDaemon:
-  image: pingcap/chaos-daemon:latest
+  image: ghcr.io/chaos-mesh/chaos-mesh/chaos-daemon:latest
   imagePullPolicy: IfNotPresent
   grpcPort: 31767
   httpPort: 31766
@@ -188,7 +188,7 @@ dashboard:
 
   serviceAccount: chaos-controller-manager
 
-  image: pingcap/chaos-dashboard:latest
+  image: ghcr.io/chaos-mesh/chaos-mesh/chaos-dashboard:latest
   imagePullPolicy: IfNotPresent
 
   securityMode: true
@@ -425,5 +425,5 @@ bpfki:
 
 chaosDlv:
   enable: false
-  image: pingcap/chaos-dlv:latest
+  image: ghcr.io/chaos-mesh/chaos-mesh/chaos-dlv:latest
   imagePullPolicy: IfNotPresent
