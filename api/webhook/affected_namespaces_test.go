@@ -34,7 +34,9 @@ func TestAffectedNamespaces(t *testing.T) {
 						ContainerSelector: v1alpha1.ContainerSelector{
 							PodSelector: v1alpha1.PodSelector{
 								Selector: v1alpha1.PodSelectorSpec{
-									Namespaces: []string{"ns1", "ns2"},
+									GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+										Namespaces: []string{"ns1", "ns2"},
+									},
 								},
 							},
 						},
@@ -56,7 +58,9 @@ func TestAffectedNamespaces(t *testing.T) {
 						NetworkChaos: &v1alpha1.NetworkChaosSpec{
 							Target: &v1alpha1.PodSelector{
 								Selector: v1alpha1.PodSelectorSpec{
-									Namespaces: []string{"ns1", "ns2"},
+									GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+										Namespaces: []string{"ns1", "ns2"},
+									},
 								},
 							},
 						},
@@ -88,7 +92,9 @@ func TestAffectedNamespaces(t *testing.T) {
 						NetworkChaos: &v1alpha1.NetworkChaosSpec{
 							Target: &v1alpha1.PodSelector{
 								Selector: v1alpha1.PodSelectorSpec{
-									Namespaces: []string{"ns1", "ns2"},
+									GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+										Namespaces: []string{"ns1", "ns2"},
+									},
 								},
 							},
 						},
@@ -99,7 +105,9 @@ func TestAffectedNamespaces(t *testing.T) {
 						NetworkChaos: &v1alpha1.NetworkChaosSpec{
 							Target: &v1alpha1.PodSelector{
 								Selector: v1alpha1.PodSelectorSpec{
-									Namespaces: []string{"ns3", "ns4"},
+									GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+										Namespaces: []string{"ns3", "ns4"},
+									},
 								},
 							},
 						},

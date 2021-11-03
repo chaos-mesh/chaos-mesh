@@ -35,7 +35,7 @@ func (in EmbedChaos) Validate(path *field.Path, chaosType string) field.ErrorLis
 		return allErrors
 	}
 
-	gw.Default(&root)
+	gw.Default(root)
 	err = in.RestoreChaosSpec(root)
 	if err != nil {
 		allErrors = append(allErrors, field.Invalid(path, in, err.Error()))
