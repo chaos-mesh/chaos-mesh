@@ -4,7 +4,7 @@ DOCKER_REGISTRY ?= "localhost:5000"
 
 # SET DOCKER_REGISTRY to change the docker registry
 DOCKER_REGISTRY_PREFIX := $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY)/,)
-DOCKER_BUILD_ARGS := --build-arg HTTP_PROXY=${HTTP_PROXY} --build-arg HTTPS_PROXY=${HTTPS_PROXY} --build-arg GOPROXY=${GOPROXY} --build-arg UI=${UI} --build-arg LDFLAGS="${LDFLAGS}" --build-arg CRATES_MIRROR="${CRATES_MIRROR}"
+DOCKER_BUILD_ARGS := --build-arg HTTP_PROXY=${HTTP_PROXY} --build-arg HTTPS_PROXY=${HTTPS_PROXY} --build-arg UI=${UI} --build-arg LDFLAGS="${LDFLAGS}" --build-arg CRATES_MIRROR="${CRATES_MIRROR}"
 
 IMAGE_TAG := $(if $(IMAGE_TAG),$(IMAGE_TAG),latest)
 IMAGE_PROJECT := $(if $(IMAGE_PROJECT),$(IMAGE_PROJECT),pingcap)
@@ -146,7 +146,7 @@ ifeq ($(TARGET_PLATFORM),)
 	endif
 endif
 
-BUILD_INDOCKER_ARG := --env IN_DOCKER=1 --volume $(ROOT):/mnt --user $(shell id -u):$(shell id -g) --platform=linux/$(TARGET_PLATFORM)
+BUILD_INDOCKER_ARG := --env IN_DOCKER=1 --env HTTP_PROXY=${HTTP_PROXY} --env HTTPS_PROXY=${HTTPS_PROXY} --env GOPROXY=${GOPROXY} --volume $(ROOT):/mnt --user $(shell id -u):$(shell id -g) --platform=linux/$(TARGET_PLATFORM)
 
 ifeq ($(TARGET_PLATFORM),arm64)
 	BUILD_INDOCKER_ARG += --env ETCD_UNSUPPORTED_ARCH=arm64
