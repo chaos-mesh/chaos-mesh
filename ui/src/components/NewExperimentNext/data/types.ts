@@ -19,7 +19,7 @@ import * as Yup from 'yup'
 
 import { ExperimentKind } from 'components/NewExperiment/types'
 
-export type Kind = Exclude<ExperimentKind, 'HTTPChaos' | 'JVMChaos' | 'PhysicalMachineChaos'>
+export type Kind = Exclude<ExperimentKind, 'JVMChaos' | 'PhysicalMachineChaos'>
 export type KindPhysic =
   | Extract<Kind, 'NetworkChaos' | 'StressChaos' | 'TimeChaos'>
   | 'DiskChaos'
@@ -141,6 +141,100 @@ const ioCommon: Spec = {
     label: 'Methods',
     value: [],
     helperText: 'Optional. The IO methods for injecting IOChaos actions',
+  },
+}
+
+const httpCommonSelect: Spec = {
+  port: {
+    field: 'number',
+    label: 'Port',
+    value: 0,
+    helperText: 'The target port of request',
+  },
+  method: {
+    field: 'select',
+    items: ['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'OPTIONS', 'PATCH'], 
+    label: 'Method',
+    value: 'GET',
+    helperText: 'Optional. The HTTP method of request',
+  },
+  path: {
+    field: 'text',
+    label: 'Path',
+    value: "",
+    helperText: 'Optional. The target URI path of request, support wildcards(https://www.wikiwand.com/en/Matching_wildcards)',
+  },
+  request_headers: {
+    field: 'label',
+    isKV: true,
+    label: 'Request Headers',
+    value: [],
+    helperText: 'Optional. The request headers',
+  },
+}
+
+const httpRequestCommon: Spec = {
+  target: 'Request' as any,
+  ...httpCommonSelect,
+}
+
+const httpResponseCommon: Spec = {
+  target: 'Response' as any,
+  ...httpCommonSelect,
+  code: {
+    field: 'number',
+    label: 'Status Code',
+    value: 0,
+    helperText: 'Optional. The target status code of response',
+  },
+  response_headers: {
+    field: 'label',
+    isKV: true,
+    label: 'Response Headers',
+    value: [],
+    helperText: 'Optional. The response headers',
+  },
+}
+
+const httpDelayCommon: Spec = {
+  delay: {
+    field: 'text',
+    label: 'Delay',
+    value: "",
+    helperText:
+      "The delay of request/response",
+  },
+}
+
+const httpReplaceCommon: Spec = {
+  "replace.header": {
+    field: 'label',
+    isKV: true,
+    label: 'Replace Headers',
+    value: [],
+    helperText: 'Optional. The headers to be replaced',
+  },
+  "replace.body": {
+    field: 'textarea',
+    label: 'Replace Body',
+    value: '',
+    helperText: 'Optional. The body(in base64 encoding) to be replaced',
+  },
+}
+
+const httpPatchCommon: Spec = {
+  "patch.body.type": {
+    field: 'select',
+    items: ['JSON'], 
+    label: 'Patch Body Type',
+    value: 'JSON',
+    helperText: 'The patch type of body',
+  },
+  "patch.body.value": {
+    field: 'textarea',
+    label: 'Patch Body Value',
+    value: '',
+    helperText: 'The value to be patched into body',
   },
 }
 
@@ -304,6 +398,101 @@ const data: Record<Kind, Definition> = {
             value: [],
           },
           ...ioCommon,
+        },
+      },
+    ],
+  },
+  // HTTP Injection
+  HTTPChaos: {
+    categories: [
+      {
+        name: 'Request Abort',
+        key: 'request-abort',
+        spec: {
+          abort: true as any,
+          ...httpRequestCommon,
+        },
+      },
+      {
+        name: 'Request Delay',
+        key: 'request-delay',
+        spec: {
+          ...httpRequestCommon,
+          ...httpDelayCommon,
+        },
+      },
+      {
+        name: 'Request Replace',
+        key: 'request-replace',
+        spec: {
+          ...httpRequestCommon,
+          ...httpReplaceCommon,
+          "replace.path": {
+            field: 'text',
+            label: 'Replace Path',
+            value: '',
+            helperText: 'Optional. The path to be replaced',
+          },
+          "replace.method": {
+            field: 'select',
+            items: ['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'OPTIONS', 'PATCH'], 
+            label: 'Replace Method',
+            value: '',
+            helperText: 'Optional. The HTTP method to be replaced',
+          },
+          "replace.queries": {
+            field: 'label',
+            isKV: true,
+            label: 'Replace Queries',
+            value: [],
+            helperText: 'Optional. The queries to be replaced',
+          },
+        },
+      },
+      {
+        name: 'Request Patch',
+        key: 'request-patch',
+        spec: {
+          ...httpRequestCommon,
+          ...httpPatchCommon,
+        },
+      },
+      {
+        name: 'Response Abort',
+        key: 'response-abort',
+        spec: {
+          abort: true as any,
+          ...httpResponseCommon,
+        },
+      },
+      {
+        name: 'Response Delay',
+        key: 'response-delay',
+        spec: {
+          ...httpResponseCommon,
+          ...httpDelayCommon,
+        },
+      },
+      {
+        name: 'Response Replace',
+        key: 'response-replace',
+        spec: {
+          ...httpResponseCommon,
+          ...httpReplaceCommon,
+          "replace.code": {
+            field: 'number',
+            label: 'Replace Status Code',
+            value: 0,
+            helperText: 'Optional. The status code to be replaced',
+          },
+        },
+      },
+      {
+        name: 'Response Patch',
+        key: 'response-patch',
+        spec: {
+          ...httpResponseCommon,
+          ...httpPatchCommon,
         },
       },
     ],
