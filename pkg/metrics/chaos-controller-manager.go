@@ -23,8 +23,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 )
 
-var log = ctrl.Log.WithName("chaos-controller-manager-metrics-collector")
-
 // ChaosControllerManagerMetricsCollector implements prometheus.Collector interface
 type ChaosControllerManagerMetricsCollector struct {
 	store               cache.Cache
