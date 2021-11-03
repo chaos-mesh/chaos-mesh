@@ -14,7 +14,9 @@
  * limitations under the License.
  *
  */
+
 import { forwardRef, useImperativeHandle, useState } from 'react'
+import { setEnv, setExternalExperiment } from 'slices/experiments'
 
 import { Box } from '@material-ui/core'
 import ByYAML from './ByYAML'
@@ -29,7 +31,6 @@ import TabContext from '@material-ui/lab/TabContext'
 import TabList from '@material-ui/lab/TabList'
 import TabPanel from '@material-ui/lab/TabPanel'
 import { parseYAML } from 'lib/formikhelpers'
-import { setExternalExperiment } from 'slices/experiments'
 import { useStoreDispatch } from 'store'
 
 type PanelType = 'initial' | 'existing' | 'yaml'
@@ -62,11 +63,15 @@ const NewExperiment: React.ForwardRefRenderFunction<NewExperimentHandles, NewExp
   }
 
   const fillExperiment = (original: any) => {
-    const { kind, basic, spec } = parseYAML(original, { isSchedule: original.kind === 'Schedule' })
+    const { kind, basic, spec } = parseYAML(original)
+    const env = basic.spec.address.length ? 'physic' : 'k8s'
+    const action =
+      env === 'k8s' ? spec.action ?? '' : (kind as any) !== 'ProcessChaos' && kind !== 'TimeChaos' ? spec.action : ''
 
+    dispatch(setEnv(env))
     dispatch(
       setExternalExperiment({
-        kindAction: [kind, spec.action ?? ''],
+        kindAction: [kind, action],
         spec,
         basic,
       })

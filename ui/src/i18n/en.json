@@ -62,8 +62,27 @@
     "target": {
       "kind": "Kind",
       "action": "Action",
-      "pod": {
-        "title": "Pod Fault"
+      "aws": {
+        "title": "AWS Fault"
+      },
+      "disk": {
+        "title": "Disk Fault"
+      },
+      "dns": {
+        "title": "DNS Fault"
+      },
+      "gcp": {
+        "title": "GCP Fault"
+      },
+
+      "io": {
+        "title": "IO Injection"
+      },
+      "jvm": {
+        "title": "JVM Fault"
+      },
+      "kernel": {
+        "title": "Kernel Fault"
       },
       "network": {
         "title": "Network Attack",
@@ -73,26 +92,20 @@
           "podsPreviewHelper": "Checking or unchecking Pods to further limit the scope of the target"
         }
       },
-      "io": {
-        "title": "IO Injection"
+      "physicalmachine": {
+        "title": "Physic Fault"
       },
-      "kernel": {
-        "title": "Kernel Fault"
+      "pod": {
+        "title": "Pod Fault"
       },
-      "time": {
-        "title": "Clock Skew"
+      "process": {
+        "title": "Process interruption"
       },
       "stress": {
         "title": "Stress Test"
       },
-      "dns": {
-        "title": "DNS Fault"
-      },
-      "aws": {
-        "title": "AWS Fault"
-      },
-      "gcp": {
-        "title": "GCP Fault"
+      "time": {
+        "title": "Clock Skew"
       }
     },
     "run": {
@@ -212,6 +225,11 @@
     "notFound": "No archives found",
     "deleteMulti": "Delete selected archives",
     "deleteDesc": "The Archive will be permanently deleted"
+  },
+  "physics": {
+    "title": "Physics",
+    "single": "Physic",
+    "notFound": "No physical machines found"
   },
   "settings": {
     "title": "Settings",
@@ -341,6 +359,7 @@
     }
   },
   "k8s": {
+    "title": "Kubernetes",
     "namespace": "Namespace",
     "labels": "Labels",
     "annotations": "Annotations",
@@ -348,5 +367,9 @@
     "labelSelectors": "Label Selectors",
     "annotationsSelectors": "Annotation Selectors",
     "podPhaseSelectors": "Phase Selectors"
+  },
+  "physic": {
+    "address": "Address",
+    "addressHelper": "Type and end with a space to add one or more chaosd addresses"
   }
 }

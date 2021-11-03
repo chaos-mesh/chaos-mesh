@@ -272,7 +272,9 @@ func Test_shouldBeNoEmbedChaos(t *testing.T) {
 			ContainerSelector: ContainerSelector{
 				PodSelector: PodSelector{
 					Selector: PodSelectorSpec{
-						Namespaces: []string{"default"},
+						GenericSelectorSpec: GenericSelectorSpec{
+							Namespaces: []string{"default"},
+						},
 					},
 				},
 			},
