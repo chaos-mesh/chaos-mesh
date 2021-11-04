@@ -47,7 +47,7 @@ var _ = Describe("StressChaos", func() {
 				Spec: StressChaosSpec{
 					ContainerSelector: ContainerSelector{
 						PodSelector: PodSelector{
-							Mode: OnePodMode,
+							Mode: OneMode,
 						},
 					},
 					Stressors: &Stressors{MemoryStressor: &MemoryStressor{Stressor: Stressor{Workers: 1}}},

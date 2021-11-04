@@ -94,7 +94,7 @@ func newEngine(config *config.ChaosDashboardConfig) *gin.Engine {
 			c.String(http.StatusOK, `Dashboard UI is not built.
 Please run UI=1 make.
 Run UI=1 make images/chaos-dashboard/bin/chaos-dashboard if you only want to build dashboard only.
-(Note: If you only want to build the binary, pass IN_DOCKER=1.)`)
+(Note: If you only want to build the binary in local, pass IN_DOCKER=1)`)
 		})
 	}
 
