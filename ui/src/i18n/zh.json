@@ -142,6 +142,7 @@
       "parallel": "并行",
       "suspend": "暂停",
       "custom": "自定义",
+      "http": "HTTP 请求",
       "number": "数目",
       "child": "子任务",
       "nameHelper": "任务的名称",
@@ -164,6 +165,16 @@
         "branch": "分支",
         "target": "目标",
         "expression": "表达式"
+      },
+      "httpRequest": {
+        "url": "URL",
+        "urlHelper": "请求 URL",
+        "method": "Method",
+        "methodHelper": "请求方法",
+        "body": "Body",
+        "bodyHelper": "请求体",
+        "follow": "跟随 301/302 跳转",
+        "json": "为 JSON 内容"
       },
       "deleteDesc": "此任务将被删除",
       "submitAll": "提交所有改动"
