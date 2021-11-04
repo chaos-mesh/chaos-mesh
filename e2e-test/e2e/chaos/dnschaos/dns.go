@@ -63,7 +63,7 @@ func TestcaseDNSRandom(
 			DomainNamePatterns: []string{"not-exist-?ost.*", "not_exist?host.abc", "not-exist-host.def"},
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{
-					Mode: v1alpha1.AllPodMode,
+					Mode: v1alpha1.AllMode,
 					Selector: v1alpha1.PodSelectorSpec{
 						GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
 							Namespaces:     []string{ns},
@@ -127,7 +127,7 @@ func TestcaseDNSError(
 			DomainNamePatterns: []string{"chaos-mes?.org", "github.com", "16?.co*"},
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{
-					Mode: v1alpha1.AllPodMode,
+					Mode: v1alpha1.AllMode,
 					Selector: v1alpha1.PodSelectorSpec{
 						GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
 							Namespaces:     []string{ns},
