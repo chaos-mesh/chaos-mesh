@@ -30,6 +30,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
+	chaosimpltypes "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common/condition"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common/desiredphase"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common/finalizers"
@@ -42,15 +43,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 )
 
-type ChaosImplPair struct {
-	Name   string
-	Object v1alpha1.InnerObjectWithSelector
-	Impl   ChaosImpl
-
-	ObjectList v1alpha1.GenericChaosList
-	Controlls  []client.Object
-}
-
 type Params struct {
 	fx.In
 
@@ -59,8 +51,8 @@ type Params struct {
 	Logger          logr.Logger
 	Selector        *selector.Selector
 	RecorderBuilder *recorder.RecorderBuilder
-	Impls           []*ChaosImplPair `group:"impl"`
-	Reader          client.Reader    `name:"no-cache"`
+	Impls           []*chaosimpltypes.ChaosImplPair `group:"impl"`
+	Reader          client.Reader                   `name:"no-cache"`
 }
 
 func Bootstrap(params Params) error {

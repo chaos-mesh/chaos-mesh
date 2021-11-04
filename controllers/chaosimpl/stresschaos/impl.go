@@ -25,10 +25,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	impltypes "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/utils"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 )
+
+var _ impltypes.ChaosImpl = (*Impl)(nil)
 
 type Impl struct {
 	client.Client
@@ -37,8 +39,6 @@ type Impl struct {
 
 	decoder *utils.ContianerRecordDecoder
 }
-
-var _ common.ChaosImpl = (*Impl)(nil)
 
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	decodedContainer, err := impl.decoder.DecodeContainerRecord(ctx, records[index])
@@ -125,8 +125,8 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	return v1alpha1.NotInjected, nil
 }
 
-func NewImpl(c client.Client, log logr.Logger, decoder *utils.ContianerRecordDecoder) *common.ChaosImplPair {
-	return &common.ChaosImplPair{
+func NewImpl(c client.Client, log logr.Logger, decoder *utils.ContianerRecordDecoder) *impltypes.ChaosImplPair {
+	return &impltypes.ChaosImplPair{
 		Name:   "stresschaos",
 		Object: &v1alpha1.StressChaos{},
 		Impl: &Impl{

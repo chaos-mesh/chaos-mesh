@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 
-package finalizers
+package common
 
 import (
 	"context"
@@ -26,6 +26,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/common/finalizers"
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to
@@ -77,7 +78,7 @@ var _ = Describe("Finalizer", func() {
 					if err != nil {
 						return false, err
 					}
-					return len(chaos.GetObjectMeta().GetFinalizers()) > 0 && chaos.GetObjectMeta().GetFinalizers()[0] == RecordFinalizer, nil
+					return len(chaos.GetObjectMeta().GetFinalizers()) > 0 && chaos.GetObjectMeta().GetFinalizers()[0] == finalizers.RecordFinalizer, nil
 				})
 				Expect(err).ToNot(HaveOccurred())
 			}

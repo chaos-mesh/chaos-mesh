@@ -25,10 +25,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+	impltypes "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
 	"github.com/chaos-mesh/chaos-mesh/pkg/jvm"
 )
+
+var _ impltypes.ChaosImpl = (*Impl)(nil)
 
 const sandboxPort = 10086
 
@@ -36,8 +38,6 @@ type Impl struct {
 	client.Client
 	Log logr.Logger
 }
-
-var _ common.ChaosImpl = (*Impl)(nil)
 
 // Apply applies jvm-chaos
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
@@ -131,8 +131,8 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 
 // Object would return the instance of chaos
 
-func NewImpl(c client.Client, log logr.Logger) *common.ChaosImplPair {
-	return &common.ChaosImplPair{
+func NewImpl(c client.Client, log logr.Logger) *impltypes.ChaosImplPair {
+	return &impltypes.ChaosImplPair{
 		Name:   "jvmchaos",
 		Object: &v1alpha1.JVMChaos{},
 		Impl: &Impl{

@@ -35,9 +35,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl"
 	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/utils"
-	"github.com/chaos-mesh/chaos-mesh/controllers/types"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/test"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 )
@@ -48,7 +47,7 @@ import (
 var app *fx.App
 var k8sClient client.Client
 var lister *utils.ActiveLister
-var config *rest.Config
+var cfg *rest.Config
 var testEnv *envtest.Environment
 var setupLog = ctrl.Log.WithName("setup")
 
@@ -77,20 +76,21 @@ var _ = BeforeSuite(func() {
 	err := v1alpha1.SchemeBuilder.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 
-	config, err = testEnv.Start()
+	cfg, err = testEnv.Start()
 	Expect(err).ToNot(HaveOccurred())
-	Expect(config).ToNot(BeNil())
+	Expect(cfg).ToNot(BeNil())
 
-	k8sClient, err = client.New(config, client.Options{Scheme: scheme.Scheme})
+	k8sClient, err = client.New(cfg, client.Options{Scheme: scheme.Scheme})
 	Expect(err).ToNot(HaveOccurred())
 	Expect(k8sClient).ToNot(BeNil())
 
 	app = fx.New(
 		fx.Options(
 			test.Module,
+			chaosimpl.AllImpl,
+			selector.Module,
 			fx.Invoke(Bootstrap),
-			fx.Supply(config),
-			types.ChaosObjects,
+			fx.Supply(cfg),
 		),
 		fx.Invoke(Run),
 	)
@@ -119,13 +119,8 @@ var _ = AfterSuite(func() {
 type RunParams struct {
 	fx.In
 
-	Mgr             ctrl.Manager
-	Client          client.Client
-	Logger          logr.Logger
-	Selector        *selector.Selector
-	RecorderBuilder *recorder.RecorderBuilder
-	Impls           []*ChaosImplPair
-	Reader          client.Reader
+	Mgr    ctrl.Manager
+	Logger logr.Logger
 }
 
 func Run(params RunParams) error {
