@@ -107,16 +107,16 @@ fi
 
 if [ -z "$SKIP_IMAGE_BUILD" ]; then
     echo "info: building docker images"
-    DOCKER_REGISTRY_PREFIX=$DOCKER_REGISTRY_PREFIX IMAGE_TAG=$IMAGE_TAG UI=1 SWAGGER=1 make image
+    DOCKER_REGISTRY_PREFIX=$DOCKER_REGISTRY_PREFIX IMAGE_PROJECT=chaos-mesh/chaos-mesh IMAGE_TAG=$IMAGE_TAG UI=1 SWAGGER=1 make image
 else
     echo "info: skip building docker images"
 fi
 
 echo "info: loading images into cluster"
 images=(
-    $DOCKER_REGISTRY_PREFIX/pingcap/chaos-mesh:${IMAGE_TAG}
-    $DOCKER_REGISTRY_PREFIX/pingcap/chaos-dashboard:${IMAGE_TAG}
-    $DOCKER_REGISTRY_PREFIX/pingcap/chaos-daemon:${IMAGE_TAG}
+    $DOCKER_REGISTRY_PREFIX/chaos-mesh/chaos-mesh/chaos-mesh:${IMAGE_TAG}
+    $DOCKER_REGISTRY_PREFIX/chaos-mesh/chaos-mesh/chaos-dashboard:${IMAGE_TAG}
+    $DOCKER_REGISTRY_PREFIX/chaos-mesh/chaos-mesh/chaos-daemon:${IMAGE_TAG}
 )
 for n in ${images[@]}; do
     echo "info: loading image $n"
