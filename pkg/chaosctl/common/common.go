@@ -199,8 +199,10 @@ func GetPods(ctx context.Context, chaosName string, status v1alpha1.ChaosStatus,
 	for _, chaosPod := range pods {
 		nodeName := chaosPod.Spec.NodeName
 		daemonSelector := v1alpha1.PodSelectorSpec{
-			Nodes:          []string{nodeName},
-			LabelSelectors: map[string]string{"app.kubernetes.io/component": "chaos-daemon"},
+			Nodes: []string{nodeName},
+			GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+				LabelSelectors: map[string]string{"app.kubernetes.io/component": "chaos-daemon"},
+			},
 		}
 		daemons, err := pod.SelectPods(ctx, c, nil, daemonSelector, ctrlconfig.ControllerCfg.ClusterScoped, ctrlconfig.ControllerCfg.TargetNamespace, false)
 		if err != nil {

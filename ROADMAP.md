@@ -1,6 +1,6 @@
 # Chaos Mesh Roadmap
 
-This document defines the roadmap for Chaos Mesh development.
+This document is intended to describe high-level plans for the Chaos Mesh project and is neither comprehensive nor prescriptive. For a more granular view of planned work, please refer to the project's upcoming [milestones](https://github.com/chaos-mesh/chaos-mesh/milestones).
 
 ## v1.0
 
@@ -15,18 +15,26 @@ This document defines the roadmap for Chaos Mesh development.
 
 ## v2.0
 
-- [ ] Improve Chaos Dashboard and make it easier to use
-- [ ] Support status checks. A status check is used to evaluate the health of your environment.
-- [ ] Support defining the scenario to manage a group of chaos experiments.
-- [ ] Support generating the report for each chaos scenario.
-- [ ] Add JVM chaos. Support injecting faults into Java applications.
-- [ ] Add HTTP Chaos. Support injecting faults into http connections.
-- [ ] Add GRPC Chaos. Support injecting faults into GRPC connections.
+- [x] Improve Chaos Dashboard and make it easier to use
+- [x] Support status checks. A status check is used to evaluate the health of your environment.
+- [x] Support defining the scenario to manage a group of chaos experiments.
+- [x] Support generating the report for each chaos scenario.
+- [x] Add JVM chaos. Support injecting faults into Java applications.
+- [x] Add HTTP Chaos. Support injecting faults into http connections.
+- [x] Add GRPC Chaos. Support injecting faults into GRPC connections.
+- [ ] ~~Support injecting faults into native components of Kubernetes.~~
+
+## Q3~Q4'2021
+
+- [ ] More comprehensive status inspection mechanism and reports.
+- [ ] Improve observability via events logs and metrics.
+- [ ] Manage and schedule chaos experiments on Kubernetes targets and non-Kubernetes targets on a unified dashboard.
+- [ ] Support doing chaos experiments on multiple Kubernetes clusters.
 - [ ] Support injecting faults into native components of Kubernetes.
+- [ ] Improve authentication system, and support using GCP/AWS account to log in chaos dashboard.
+- [ ] A new component to force recovery chaos experiments, and avoid experiments going out of control.
+- [ ] Provide a plugin approach to extend complex chaos types, such as RabbitMQChaos, RedisChaos...
+- [ ] Build a hub for users sharing their own chaos workflow and chaos types.
+- [ ] Improve JVMChaos and support dynamic injection.
+- [ ] Continue to enrich fault types.
 
-## Long-term
-
-- [x] chaos-operator
-- [x] chaos-dashboard
-- [ ] chaos-verify
-- [ ] chaos-cloud

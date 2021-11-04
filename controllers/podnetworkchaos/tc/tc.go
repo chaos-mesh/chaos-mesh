@@ -50,9 +50,7 @@ func SetTcs(ctx context.Context, builder *chaosdaemon.ChaosDaemonClientBuilder, 
 		_, err = pbClient.SetTcs(ctx, &pb.TcsRequest{
 			Tcs:         tcs,
 			ContainerId: containerID,
-			// Prevent tcs is empty, used to clean up tc rules
-			Device:  "eth0",
-			EnterNS: true,
+			EnterNS:     true,
 		})
 
 		if err != nil {
