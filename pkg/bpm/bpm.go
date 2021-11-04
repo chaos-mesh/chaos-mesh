@@ -24,6 +24,7 @@ import (
 	"sync"
 	"syscall"
 
+	"github.com/mitchellh/go-ps"
 	"github.com/shirou/gopsutil/process"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
@@ -299,6 +300,25 @@ func (m *BackgroundProcessManager) Stdio(pid int, startTime int64) *Stdio {
 	}
 
 	return io.(*Stdio)
+}
+
+// GetControlledProcessIDs find all process IDs controlled by BPM
+func (m *BackgroundProcessManager) GetControlledProcessIDs() ([]int, error) {
+	processes, err := ps.Processes()
+	if err != nil {
+		log.Error(err, "fail to get current process processes")
+		return nil, err
+	}
+
+	var res []int
+	pid := os.Getpid()
+	for _, p := range processes {
+		if pid == p.PPid() {
+			res = append(res, p.Pid())
+		}
+	}
+
+	return res, nil
 }
 
 // DefaultProcessBuilder returns the default process builder

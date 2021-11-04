@@ -156,4 +156,18 @@ var _ = Describe("background process manager", func() {
 			Expect(err).To(BeNil())
 		})
 	})
+
+	Context("get process id", func() {
+		It("should work", func() {
+			cmd := DefaultProcessBuilder("sleep", "2").Build()
+			_, err := m.StartProcess(cmd)
+			Expect(err).To(BeNil())
+
+			ids, err := m.GetControlledProcessIDs()
+			Expect(err).To(BeNil())
+			Expect(ids).To(Equal([]int{cmd.Process.Pid}))
+
+			WaitProcess(&m, cmd, time.Second*5)
+		})
+	})
 })
