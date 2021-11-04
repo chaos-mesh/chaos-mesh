@@ -2,7 +2,7 @@ name: Upload Image
 on:
   workflow_dispatch: {}
   schedule:
-    - cron:  '0 18 * * *'
+    - cron: "0 18 * * *"
   release:
     types: [published]
 
@@ -23,7 +23,7 @@ jobs:
         run: |
           IMAGE_TAG=${GITHUB_REF##*/}
           if [ "${IMAGE_TAG}" = "master" ] ; then
-            IMAGE_TAG=latest; 
+            IMAGE_TAG=latest;
           fi
 
           echo "::set-output name=image_tag::$(echo $IMAGE_TAG)"
@@ -44,8 +44,14 @@ jobs:
         run: |
           docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
 
-          make -B TARGET_PLATFORM=$ARCH IMAGE_TAG=$IMAGE_TAG-$ARCH IMAGE_PROJECT=chaos-mesh/chaos-mesh DOCKER_REGISTRY=ghcr.io image-$IMAGE
-      
+          if [ "${IMAGE}" = "chaos-dashboard" ]; then
+            UI=1
+          else
+            UI=0
+          fi
+
+          make -B TARGET_PLATFORM=$ARCH IMAGE_TAG=$IMAGE_TAG-$ARCH IMAGE_PROJECT=chaos-mesh/chaos-mesh DOCKER_REGISTRY=ghcr.io UI=$UI image-$IMAGE
+
       - name: Upload Chaos Mesh
         env:
           IMAGE_TAG: ${{ steps.image_tag.outputs.image_tag }}
@@ -69,7 +75,7 @@ jobs:
           docker manifest create ghcr.io/chaos-mesh/chaos-mesh/$IMAGE:$IMAGE_TAG \
             ghcr.io/chaos-mesh/chaos-mesh/$IMAGE:$IMAGE_TAG-amd64 \
             ghcr.io/chaos-mesh/chaos-mesh/$IMAGE:$IMAGE_TAG-arm64
-          
+
           docker manifest annotate ghcr.io/chaos-mesh/chaos-mesh/$IMAGE:$IMAGE_TAG \
             ghcr.io/chaos-mesh/chaos-mesh/$IMAGE:$IMAGE_TAG-amd64 \
             --os linux --arch amd64
