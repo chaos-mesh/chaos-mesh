@@ -27,18 +27,14 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 )
 
-type ChaosImpl interface {
-	Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error)
-	Recover(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error)
-}
-
 // Reconciler for common chaos
 type Reconciler struct {
-	Impl ChaosImpl
+	Impl types.ChaosImpl
 
 	// Object is used to mark the target type of this Reconciler
 	Object v1alpha1.InnerObjectWithSelector

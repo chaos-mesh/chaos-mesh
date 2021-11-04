@@ -37,6 +37,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl"
 	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/utils"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/test"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 )
@@ -89,6 +90,7 @@ var _ = BeforeSuite(func() {
 			test.Module,
 			chaosimpl.AllImpl,
 			selector.Module,
+			fx.Provide(chaosdaemon.New),
 			fx.Invoke(Bootstrap),
 			fx.Supply(cfg),
 		),
