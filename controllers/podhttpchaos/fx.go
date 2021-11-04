@@ -18,8 +18,6 @@ package podhttpchaos
 import (
 	"reflect"
 
-	"go.uber.org/fx"
-
 	"github.com/go-logr/logr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -30,25 +28,14 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
-	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 )
 
-type Params struct {
-	fx.In
-
-	Mgr              ctrl.Manager
-	Client           client.Client
-	Logger           logr.Logger
-	Builder          *chaosdaemon.ChaosDaemonClientBuilder
-	MetricsCollector *metrics.ChaosControllerManagerMetricsCollector
-}
-
-func Bootstrap(params Params) error {
+func Bootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, b *chaosdaemon.ChaosDaemonClientBuilder) error {
 	if !config.ShouldSpawnController("podhttpchaos") {
 		return nil
 	}
 
-	return builder.Default(params.Mgr).
+	return builder.Default(mgr).
 		For(&v1alpha1.PodHttpChaos{}).
 		Named("podhttpchaos").
 		WithEventFilter(predicate.Funcs{
@@ -60,10 +47,9 @@ func Bootstrap(params Params) error {
 			},
 		}).
 		Complete(&Reconciler{
-			Client:                   params.Client,
-			Log:                      params.Logger.WithName("podhttpchaos"),
-			Recorder:                 params.Mgr.GetEventRecorderFor("podhttpchaos"),
-			ChaosDaemonClientBuilder: params.Builder,
-			MetricsCollector:         params.MetricsCollector,
+			Client:                   client,
+			Log:                      logger.WithName("podhttpchaos"),
+			Recorder:                 mgr.GetEventRecorderFor("podhttpchaos"),
+			ChaosDaemonClientBuilder: b,
 		})
 }

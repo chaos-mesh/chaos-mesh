@@ -25,25 +25,17 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
-	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 )
 
-type Params struct {
+type Objs struct {
 	fx.In
-
-	Mgr              ctrl.Manager
-	Client           client.Client
-	Logger           logr.Logger
-	MetricsCollector *metrics.ChaosControllerManagerMetricsCollector
 
 	Objs []types.Object `group:"objs"`
 }
 
-func Bootstrap(params Params) error {
-	logger := params.Logger
-
+func Bootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, objs Objs) error {
 	setupLog := logger.WithName("setup-condition")
-	for _, obj := range params.Objs {
+	for _, obj := range objs.Objs {
 		name := obj.Name + "-condition"
 		if !config.ShouldSpawnController(name) {
 			return nil
@@ -51,15 +43,14 @@ func Bootstrap(params Params) error {
 
 		setupLog.Info("setting up controller", "resource-name", obj.Name)
 
-		err := builder.Default(params.Mgr).
+		err := builder.Default(mgr).
 			For(obj.Object).
 			Named(name).
 			Complete(&Reconciler{
-				Object:           obj.Object,
-				Client:           params.Client,
-				Recorder:         params.Mgr.GetEventRecorderFor("condition"),
-				Log:              logger.WithName("condition"),
-				MetricsCollector: params.MetricsCollector,
+				Object:   obj.Object,
+				Client:   client,
+				Recorder: mgr.GetEventRecorderFor("condition"),
+				Log:      logger.WithName("condition"),
 			})
 		if err != nil {
 			return err

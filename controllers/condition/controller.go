@@ -18,7 +18,6 @@ package condition
 import (
 	"context"
 	"reflect"
-	"time"
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
@@ -30,7 +29,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 )
 
 // Reconciler for common chaos
@@ -43,8 +41,7 @@ type Reconciler struct {
 
 	Recorder record.EventRecorder
 
-	Log              logr.Logger
-	MetricsCollector *metrics.ChaosControllerManagerMetricsCollector
+	Log logr.Logger
 }
 
 type StatusAndReason struct {
@@ -53,8 +50,6 @@ type StatusAndReason struct {
 }
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	defer r.MetricsCollector.CollectReconcileDuration("condition", time.Now())
-
 	obj := r.Object.DeepCopyObject().(v1alpha1.InnerObjectWithSelector)
 	if err := r.Client.Get(context.TODO(), req.NamespacedName, obj); err != nil {
 		if apierrors.IsNotFound(err) {

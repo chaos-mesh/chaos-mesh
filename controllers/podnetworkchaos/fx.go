@@ -18,8 +18,6 @@ package podnetworkchaos
 import (
 	"reflect"
 
-	"go.uber.org/fx"
-
 	"github.com/go-logr/logr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -31,26 +29,14 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
-	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 )
 
-type Params struct {
-	fx.In
-
-	Mgr              ctrl.Manager
-	Client           client.Client
-	Logger           logr.Logger
-	Builder          *chaosdaemon.ChaosDaemonClientBuilder
-	RecorderBuilder  *recorder.RecorderBuilder
-	MetricsCollector *metrics.ChaosControllerManagerMetricsCollector
-}
-
-func Bootstrap(params Params) error {
+func Bootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, b *chaosdaemon.ChaosDaemonClientBuilder, recorderBuilder *recorder.RecorderBuilder) error {
 	if !config.ShouldSpawnController("podnetworkchaos") {
 		return nil
 	}
 
-	return builder.Default(params.Mgr).
+	return builder.Default(mgr).
 		For(&v1alpha1.PodNetworkChaos{}).
 		Named("podnetworkchaos").
 		WithEventFilter(predicate.Funcs{
@@ -62,13 +48,12 @@ func Bootstrap(params Params) error {
 			},
 		}).
 		Complete(&Reconciler{
-			Client:   params.Client,
-			Log:      params.Logger.WithName("podnetworkchaos"),
-			Recorder: params.RecorderBuilder.Build("podnetworkchaos"),
+			Client:   client,
+			Log:      logger.WithName("podnetworkchaos"),
+			Recorder: recorderBuilder.Build("podnetworkchaos"),
 
 			// TODO:
 			AllowHostNetworkTesting:  config.ControllerCfg.AllowHostNetworkTesting,
-			ChaosDaemonClientBuilder: params.Builder,
-			MetricsCollector:         params.MetricsCollector,
+			ChaosDaemonClientBuilder: b,
 		})
 }

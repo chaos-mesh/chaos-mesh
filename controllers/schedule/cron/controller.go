@@ -20,8 +20,6 @@ import (
 	"reflect"
 	"time"
 
-	"go.uber.org/fx"
-
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -36,7 +34,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
-	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/controllers"
 )
 
@@ -45,14 +42,12 @@ type Reconciler struct {
 	Log          logr.Logger
 	ActiveLister *utils.ActiveLister
 
-	Recorder         recorder.ChaosRecorder
-	MetricsCollector *metrics.ChaosControllerManagerMetricsCollector
+	Recorder recorder.ChaosRecorder
 }
 
 var t = true
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	defer r.MetricsCollector.CollectReconcileDuration(controllerName, time.Now())
 
 	schedule := &v1alpha1.Schedule{}
 	err := r.Get(ctx, req.NamespacedName, schedule)
@@ -202,30 +197,18 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 const controllerName = "schedule-cron"
 
-type Params struct {
-	fx.In
-
-	Mgr              ctrl.Manager
-	Client           client.Client
-	Logger           logr.Logger
-	Lister           *utils.ActiveLister
-	RecorderBuilder  *recorder.RecorderBuilder
-	MetricsCollector *metrics.ChaosControllerManagerMetricsCollector
-}
-
-func Bootstrap(params Params) error {
+func Bootstrap(mgr ctrl.Manager, client client.Client, log logr.Logger, lister *utils.ActiveLister, recorderBuilder *recorder.RecorderBuilder) error {
 	if !config.ShouldSpawnController(controllerName) {
 		return nil
 	}
 
-	return builder.Default(params.Mgr).
+	return builder.Default(mgr).
 		For(&v1alpha1.Schedule{}).
 		Named(controllerName).
 		Complete(&Reconciler{
-			params.Client,
-			params.Logger.WithName(controllerName),
-			params.Lister,
-			params.RecorderBuilder.Build(controllerName),
-			params.MetricsCollector,
+			client,
+			log.WithName(controllerName),
+			lister,
+			recorderBuilder.Build(controllerName),
 		})
 }

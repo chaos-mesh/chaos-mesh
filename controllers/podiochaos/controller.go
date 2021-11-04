@@ -20,7 +20,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/go-logr/logr"
 	v1 "k8s.io/api/core/v1"
@@ -34,7 +33,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
-	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 )
 
 // Reconciler applys podioworkchaos
@@ -44,12 +42,9 @@ type Reconciler struct {
 
 	Log                      logr.Logger
 	ChaosDaemonClientBuilder *chaosdaemon.ChaosDaemonClientBuilder
-	MetricsCollector         *metrics.ChaosControllerManagerMetricsCollector
 }
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	defer r.MetricsCollector.CollectReconcileDuration("podiochaos", time.Now())
-
 	obj := &v1alpha1.PodIOChaos{}
 
 	if err := r.Client.Get(ctx, req.NamespacedName, obj); err != nil {

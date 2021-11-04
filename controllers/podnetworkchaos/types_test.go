@@ -33,7 +33,6 @@ import (
 	. "github.com/chaos-mesh/chaos-mesh/controllers/test"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
-	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 	. "github.com/chaos-mesh/chaos-mesh/pkg/testutils"
 )
@@ -99,7 +98,6 @@ func TestHostNetworkOption(t *testing.T) {
 			Recorder:                recorder,
 			Log:                     zap.New(zap.UseDevMode(true)),
 			AllowHostNetworkTesting: testCase.enableHostNetworkTesting,
-			MetricsCollector:        metrics.NewTestChaosControllerManagerMetricsCollector(),
 		}
 
 		_, err := h.Reconcile(

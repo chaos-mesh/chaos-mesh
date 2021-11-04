@@ -19,7 +19,6 @@ import (
 	"context"
 	"reflect"
 	"sort"
-	"time"
 
 	"github.com/go-logr/logr"
 	"go.uber.org/fx"
@@ -37,7 +36,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
-	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 )
 
 type Reconciler struct {
@@ -48,13 +46,10 @@ type Reconciler struct {
 
 	ActiveLister *utils.ActiveLister
 
-	Recorder         recorder.ChaosRecorder
-	MetricsCollector *metrics.ChaosControllerManagerMetricsCollector
+	Recorder recorder.ChaosRecorder
 }
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	defer r.MetricsCollector.CollectReconcileDuration(controllerName, time.Now())
-
 	schedule := &v1alpha1.Schedule{}
 	err := r.Get(ctx, req.NamespacedName, schedule)
 	if err != nil {
@@ -122,42 +117,33 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	return ctrl.Result{}, nil
 }
 
-const controllerName = "schedule-active"
-
-type Params struct {
+type Objs struct {
 	fx.In
-
-	Mgr              ctrl.Manager
-	Client           client.Client
-	Logger           logr.Logger
-	Scheme           *runtime.Scheme
-	Lister           *utils.ActiveLister
-	RecorderBuilder  *recorder.RecorderBuilder
-	MetricsCollector *metrics.ChaosControllerManagerMetricsCollector
 
 	Objs []types.Object `group:"objs"`
 }
 
-func Bootstrap(params Params) error {
+const controllerName = "schedule-active"
+
+func Bootstrap(mgr ctrl.Manager, client client.Client, log logr.Logger, objs Objs, scheme *runtime.Scheme, lister *utils.ActiveLister, recorderBuilder *recorder.RecorderBuilder) error {
 	if !config.ShouldSpawnController(controllerName) {
 		return nil
 	}
-	builder := builder.Default(params.Mgr).
+	builder := builder.Default(mgr).
 		For(&v1alpha1.Schedule{}).
 		Named(controllerName)
 
-	for _, obj := range params.Objs {
+	for _, obj := range objs.Objs {
 		// TODO: support workflow
 		builder = builder.Owns(obj.Object)
 	}
 	builder = builder.Owns(&v1alpha1.Workflow{})
 
 	return builder.Complete(&Reconciler{
-		params.Scheme,
-		params.Client,
-		params.Logger.WithName(controllerName),
-		params.Lister,
-		params.RecorderBuilder.Build(controllerName),
-		params.MetricsCollector,
+		scheme,
+		client,
+		log.WithName(controllerName),
+		lister,
+		recorderBuilder.Build(controllerName),
 	})
 }

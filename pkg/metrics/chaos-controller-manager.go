@@ -16,8 +16,6 @@
 package metrics
 
 import (
-	"time"
-
 	"github.com/prometheus/client_golang/prometheus"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
@@ -34,7 +32,6 @@ type ChaosControllerManagerMetricsCollector struct {
 	ConfigNameDuplicate *prometheus.CounterVec
 	InjectRequired      *prometheus.CounterVec
 	Injections          *prometheus.CounterVec
-	reconcileDuration   *prometheus.HistogramVec
 	EmittedEvents       *prometheus.CounterVec
 }
 
@@ -79,11 +76,6 @@ func NewChaosControllerManagerMetricsCollector(manager ctrl.Manager, registerer 
 			Name: "chaos_mesh_injections_total",
 			Help: "Total number of sidecar injections performed on the webhook",
 		}, []string{"namespace", "config"}),
-		reconcileDuration: prometheus.NewHistogramVec(prometheus.HistogramOpts{
-			Name:    "chaos_controller_manager_reconcile_duration_seconds",
-			Help:    "Duration histogram for each reconcile request",
-			Buckets: prometheus.DefBuckets,
-		}, []string{"type"}),
 		EmittedEvents: prometheus.NewCounterVec(prometheus.CounterOpts{
 			Name: "chaos_controller_manager_emitted_event_total",
 			Help: "Total number of the emitted event by chaos-controller-manager",
@@ -111,7 +103,6 @@ func (collector *ChaosControllerManagerMetricsCollector) Describe(ch chan<- *pro
 	collector.TemplateLoadError.Describe(ch)
 	collector.InjectRequired.Describe(ch)
 	collector.Injections.Describe(ch)
-	collector.reconcileDuration.Describe(ch)
 	collector.EmittedEvents.Describe(ch)
 }
 
@@ -125,12 +116,5 @@ func (collector *ChaosControllerManagerMetricsCollector) Collect(ch chan<- prome
 	collector.TemplateLoadError.Collect(ch)
 	collector.InjectRequired.Collect(ch)
 	collector.Injections.Collect(ch)
-	collector.reconcileDuration.Collect(ch)
 	collector.EmittedEvents.Collect(ch)
-}
-
-func (collector *ChaosControllerManagerMetricsCollector) CollectReconcileDuration(typeLabel string, before time.Time) {
-	after := time.Now()
-	duration := after.Sub(before).Seconds()
-	collector.reconcileDuration.WithLabelValues(typeLabel).Observe(duration)
 }

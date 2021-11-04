@@ -37,7 +37,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
-	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/controllers"
 )
 
@@ -46,15 +45,12 @@ type Reconciler struct {
 	Log      logr.Logger
 	Recorder recorder.ChaosRecorder
 
-	ActiveLister     *utils.ActiveLister
-	MetricsCollector *metrics.ChaosControllerManagerMetricsCollector
+	ActiveLister *utils.ActiveLister
 }
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	// In this controller, schedule could be out of date, as the reconcilation may be not caused by
 	// an update on Schedule, but by a *Chaos.
-	defer r.MetricsCollector.CollectReconcileDuration(controllerName, time.Now())
-
 	schedule := &v1alpha1.Schedule{}
 	err := r.Get(ctx, req.NamespacedName, schedule)
 	if err != nil {
@@ -137,16 +133,8 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}, nil
 }
 
-type Params struct {
+type Objs struct {
 	fx.In
-
-	Mgr              ctrl.Manager
-	Client           client.Client
-	Logger           logr.Logger
-	Scheme           *runtime.Scheme
-	Lister           *utils.ActiveLister
-	RecorderBuilder  *recorder.RecorderBuilder
-	MetricsCollector *metrics.ChaosControllerManagerMetricsCollector
 
 	ScheduleObjs []types.Object `group:"schedule"`
 	Objs         []types.Object `group:"objs"`
@@ -154,15 +142,15 @@ type Params struct {
 
 const controllerName = "schedule-gc"
 
-func Bootstrap(params Params) error {
+func Bootstrap(mgr ctrl.Manager, client client.Client, log logr.Logger, objs Objs, scheme *runtime.Scheme, lister *utils.ActiveLister, recorderBuilder *recorder.RecorderBuilder) error {
 	if !config.ShouldSpawnController(controllerName) {
 		return nil
 	}
-	builder := builder.Default(params.Mgr).
+	builder := builder.Default(mgr).
 		For(&v1alpha1.Schedule{}).
 		Named(controllerName)
 
-	for _, obj := range params.Objs {
+	for _, obj := range objs.Objs {
 		// TODO: support workflow
 		builder.Owns(obj.Object)
 	}
@@ -170,10 +158,9 @@ func Bootstrap(params Params) error {
 	builder = builder.Owns(&v1alpha1.Workflow{})
 
 	return builder.Complete(&Reconciler{
-		params.Client,
-		params.Logger.WithName(controllerName),
-		params.RecorderBuilder.Build(controllerName),
-		params.Lister,
-		params.MetricsCollector,
+		client,
+		log.WithName(controllerName),
+		recorderBuilder.Build(controllerName),
+		lister,
 	})
 }
