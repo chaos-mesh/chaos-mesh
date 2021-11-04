@@ -30,7 +30,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
+	"github.com/chaos-mesh/chaos-mesh/controllers/common/condition"
+	"github.com/chaos-mesh/chaos-mesh/controllers/common/desiredphase"
+	"github.com/chaos-mesh/chaos-mesh/controllers/common/finalizers"
+	"github.com/chaos-mesh/chaos-mesh/controllers/common/pipeline"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
+	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
@@ -78,7 +83,7 @@ func Bootstrap(params Params) error {
 
 		builder := builder.Default(mgr).
 			For(pair.Object).
-			Named(name)
+			Named(pair.Name + "-pipeline")
 
 		// Add owning resources
 		if len(pair.Controlls) > 0 {
@@ -127,15 +132,27 @@ func Bootstrap(params Params) error {
 			}
 		}
 
-		err := builder.Complete(&Reconciler{
-			Impl:     pair.Impl,
-			Object:   pair.Object,
-			Client:   kubeclient,
-			Reader:   reader,
-			Recorder: recorderBuilder.Build("records"),
-			Selector: selector,
-			Log:      logger.WithName("records"),
+		pipe := pipeline.NewPipeline(
+			&types.Object{Name: pair.Name, Object: pair.Object},
+			mgr, kubeclient, logger,
+			recorderBuilder,
+		)
+
+		pipe.AddStep(finalizers.Step)
+		pipe.AddStep(desiredphase.Step)
+		pipe.AddStep(condition.Step)
+		pipe.AddStep(func(pipeline *pipeline.Pipeline) reconcile.Reconciler {
+			return &Reconciler{
+				Impl:     pair.Impl,
+				Object:   pair.Object,
+				Client:   kubeclient,
+				Reader:   reader,
+				Recorder: recorderBuilder.Build("records"),
+				Selector: selector,
+				Log:      logger.WithName("records"),
+			}
 		})
+		err := builder.Complete(pipe)
 		if err != nil {
 			return err
 		}
