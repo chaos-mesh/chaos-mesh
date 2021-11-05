@@ -59,7 +59,8 @@ jobs:
           else
             UI=0
           fi
-          make -B IMAGE_TAG=$IMAGE_TAG IMAGE_PROJECT=strrl/chaos-mesh DOCKER_REGISTRY=ghcr.io UI=$UI image-$IMAGE
+          # ${VAR,,} convertion to lower case
+          make -B IMAGE_TAG=$IMAGE_TAG IMAGE_PROJECT=${GITHUB_REPOSITORY,,} DOCKER_REGISTRY=ghcr.io UI=$UI image-$IMAGE
 
       - name: Upload Chaos Mesh
         env:
@@ -67,4 +68,5 @@ jobs:
           ARCH: ${{ matrix.arch }}
           IMAGE: ${{ matrix.image }}
         run: |
-          docker push ghcr.io/strrl/chaos-mesh/$IMAGE:$IMAGE_TAG
+          # ${VAR,,} convertion to lower case
+          docker push ghcr.io/${GITHUB_REPOSITORY,,}/$IMAGE:$IMAGE_TAG
