@@ -1,0 +1,68 @@
+name: Upload Image
+on:
+  push:
+    branches:
+      # FIXME: only test on my branch
+      - building-images-for-realease-2.0
+#on:
+#  workflow_dispatch: {}
+#  schedule:
+#    # cron only works on master, so no worry about it.
+#    - cron: "0 18 * * *"
+#  release:
+#    types: [published]
+
+jobs:
+  build-specific-architecture:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [amd64]
+        image: [chaos-daemon, chaos-mesh, chaos-dashboard]
+    outputs:
+      image_tag: ${{ steps.image_tag.outputs.image_tag }}
+    steps:
+      - uses: actions/checkout@master
+
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '^1.16.9'
+      - run: go version
+      - name: Extract Image Tag
+        shell: bash
+        run: |
+          IMAGE_TAG=${GITHUB_REF##*/}
+          if [ "${IMAGE_TAG}" = "master" ] ; then
+            IMAGE_TAG=latest;
+          fi
+
+          echo "::set-output name=image_tag::$(echo $IMAGE_TAG)"
+        id: image_tag
+
+      - name: Log in to GitHub Docker Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Chaos Mesh
+        env:
+          IMAGE_TAG: ${{ steps.image_tag.outputs.image_tag }}
+          ARCH: ${{ matrix.arch }}
+          IMAGE: ${{ matrix.image }}
+        run: |
+          if [ "${IMAGE}" = "chaos-dashboard" ]; then
+            UI=1
+          else
+            UI=0
+          fi
+          make -B IMAGE_TAG=$IMAGE_TAG IMAGE_PROJECT=strrl/chaos-mesh DOCKER_REGISTRY=ghcr.io UI=$UI image-$IMAGE
+
+      - name: Upload Chaos Mesh
+        env:
+          IMAGE_TAG: ${{ steps.image_tag.outputs.image_tag }}
+          ARCH: ${{ matrix.arch }}
+          IMAGE: ${{ matrix.image }}
+        run: |
+          docker push ghcr.io/strrl/chaos-mesh/$IMAGE:$IMAGE_TAG
