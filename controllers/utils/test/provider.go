@@ -21,7 +21,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-controller-manager/provider"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/test/manager"
-	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/test/metrics"
 )
 
 var Module = fx.Provide(

@@ -111,11 +111,6 @@ func NewChaosControllerManagerMetricsCollector(manager ctrl.Manager, registerer 
 	return c
 }
 
-// NewTestChaosControllerManagerMetricsCollector provides metrics collector for testing
-func NewTestChaosControllerManagerMetricsCollector() *ChaosControllerManagerMetricsCollector {
-	return NewChaosControllerManagerMetricsCollector(nil, nil)
-}
-
 // Describe implements the prometheus.Collector interface.
 func (collector *ChaosControllerManagerMetricsCollector) Describe(ch chan<- *prometheus.Desc) {
 	collector.chaosExperiments.Describe(ch)
