@@ -1,18 +1,7 @@
 name: Upload Image
 on:
-  push:
-    branches:
-      # FIXME: only test on my branch
-      - building-images-for-realease-2.0
   release:
     types: [published]
-#on:
-#  workflow_dispatch: {}
-#  schedule:
-#    # cron only works on master, so no worry about it.
-#    - cron: "0 18 * * *"
-#  release:
-#    types: [published]
 
 jobs:
   build-specific-architecture:
