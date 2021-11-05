@@ -4,6 +4,8 @@ on:
     branches:
       # FIXME: only test on my branch
       - building-images-for-realease-2.0
+  release:
+    types: [published]
 #on:
 #  workflow_dispatch: {}
 #  schedule:
