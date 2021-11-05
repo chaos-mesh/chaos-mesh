@@ -4,6 +4,7 @@ DOCKER_REGISTRY ?= "localhost:5000"
 
 # SET DOCKER_REGISTRY to change the docker registry
 DOCKER_REGISTRY_PREFIX := $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY)/,)
+IMAGE_PROJECT := $(if $(IMAGE_PROJECT),$(IMAGE_PROJECT),pingcap)
 DOCKER_BUILD_ARGS := --build-arg HTTP_PROXY=${HTTP_PROXY} --build-arg HTTPS_PROXY=${HTTPS_PROXY} --build-arg UI=${UI} --build-arg SWAGGER=${SWAGGER} --build-arg LDFLAGS="${LDFLAGS}" --build-arg CRATES_MIRROR="${CRATES_MIRROR}"
 
 GOVER_MAJOR := $(shell go version | sed -E -e "s/.*go([0-9]+)[.]([0-9]+).*/\1/")
@@ -231,7 +232,7 @@ ifneq ($(IN_DOCKER),1)
 $(2): image-build-env go_build_cache_directory
 	DOCKER_ID=$$$$(docker run -d \
 		$(BUILD_INDOCKER_ARG) \
-		${DOCKER_REGISTRY_PREFIX}pingcap/build-env:${IMAGE_TAG} \
+		${DOCKER_REGISTRY_PREFIX}${IMAGE_PROJECT}/build-env:${IMAGE_TAG} \
 		sleep infinity); \
 	docker exec --workdir /mnt/ \
 		--env IMG_LDFLAGS="${LDFLAGS}" \
@@ -247,7 +248,7 @@ endef
 enter-buildenv:
 	docker run -it \
 		$(BUILD_INDOCKER_ARG) \
-		${DOCKER_REGISTRY_PREFIX}pingcap/build-env:${IMAGE_TAG} \
+		${DOCKER_REGISTRY_PREFIX}${IMAGE_PROJECT}/build-env:${IMAGE_TAG} \
 		bash
 
 ifeq ($(IN_DOCKER),1)
@@ -271,7 +272,7 @@ prepare-e2e: e2e-image docker-push-e2e
 
 GINKGO_FLAGS ?=
 e2e: e2e-build
-	./e2e-test/image/e2e/bin/ginkgo ${GINKGO_FLAGS} ./e2e-test/image/e2e/bin/e2e.test -- --e2e-image ${DOCKER_REGISTRY_PREFIX}pingcap/e2e-helper:${IMAGE_TAG}
+	./e2e-test/image/e2e/bin/ginkgo ${GINKGO_FLAGS} ./e2e-test/image/e2e/bin/e2e.test -- --e2e-image ${DOCKER_REGISTRY_PREFIX}${IMAGE_PROJECT}/e2e-helper:${IMAGE_TAG}
 
 image-chaos-mesh-e2e-dependencies += e2e-test/image/e2e/manifests e2e-test/image/e2e/chaos-mesh e2e-build
 CLEAN_TARGETS += e2e-test/image/e2e/manifests e2e-test/image/e2e/chaos-mesh
@@ -303,15 +304,15 @@ $(2)/.dockerbuilt:$(image-$(1)-dependencies) $(2)/Dockerfile
 ifeq ($(DOCKER_CACHE),1)
 
 ifneq ($(DISABLE_CACHE_FROM),1)
-	DOCKER_BUILDKIT=1 DOCKER_CLI_EXPERIMENTAL=enabled docker buildx build --load --cache-to type=local,dest=$(DOCKER_CACHE_DIR)/image-$(1) --cache-from type=local,src=$(DOCKER_CACHE_DIR)/image-$(1) -t ${DOCKER_REGISTRY_PREFIX}pingcap/$(1):${IMAGE_TAG} ${DOCKER_BUILD_ARGS} $(2)
+	DOCKER_BUILDKIT=1 DOCKER_CLI_EXPERIMENTAL=enabled docker buildx build --load --cache-to type=local,dest=$(DOCKER_CACHE_DIR)/image-$(1) --cache-from type=local,src=$(DOCKER_CACHE_DIR)/image-$(1) -t ${DOCKER_REGISTRY_PREFIX}${IMAGE_PROJECT}/$(1):${IMAGE_TAG} ${DOCKER_BUILD_ARGS} $(2)
 else
-	DOCKER_BUILDKIT=1 DOCKER_CLI_EXPERIMENTAL=enabled docker buildx build --load --cache-to type=local,dest=$(DOCKER_CACHE_DIR)/image-$(1) -t ${DOCKER_REGISTRY_PREFIX}pingcap/$(1):${IMAGE_TAG} ${DOCKER_BUILD_ARGS} $(2)
+	DOCKER_BUILDKIT=1 DOCKER_CLI_EXPERIMENTAL=enabled docker buildx build --load --cache-to type=local,dest=$(DOCKER_CACHE_DIR)/image-$(1) -t ${DOCKER_REGISTRY_PREFIX}${IMAGE_PROJECT}/$(1):${IMAGE_TAG} ${DOCKER_BUILD_ARGS} $(2)
 endif
 
 else ifneq ($(TARGET_PLATFORM),)
-	DOCKER_BUILDKIT=1 docker buildx build --load --platform linux/$(TARGET_PLATFORM) -t ${DOCKER_REGISTRY_PREFIX}pingcap/$(1):${IMAGE_TAG} --build-arg TARGET_PLATFORM=$(TARGET_PLATFORM) ${DOCKER_BUILD_ARGS} $(2)
+	DOCKER_BUILDKIT=1 docker buildx build --load --platform linux/$(TARGET_PLATFORM) -t ${DOCKER_REGISTRY_PREFIX}${IMAGE_PROJECT}/$(1):${IMAGE_TAG} --build-arg TARGET_PLATFORM=$(TARGET_PLATFORM) ${DOCKER_BUILD_ARGS} $(2)
 else
-	DOCKER_BUILDKIT=1 docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/$(1):${IMAGE_TAG} ${DOCKER_BUILD_ARGS} $(2)
+	DOCKER_BUILDKIT=1 docker build -t ${DOCKER_REGISTRY_PREFIX}${IMAGE_PROJECT}/$(1):${IMAGE_TAG} ${DOCKER_BUILD_ARGS} $(2)
 endif
 	touch $(2)/.dockerbuilt
 endef
@@ -329,12 +330,12 @@ $(eval $(call IMAGE_TEMPLATE,chaos-jvm,images/chaos-jvm))
 binary: $(BINARIES)
 
 docker-push:
-	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh:${IMAGE_TAG}"
-	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-dashboard:${IMAGE_TAG}"
-	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-daemon:${IMAGE_TAG}"
+	docker push "${DOCKER_REGISTRY_PREFIX}${IMAGE_PROJECT}/chaos-mesh:${IMAGE_TAG}"
+	docker push "${DOCKER_REGISTRY_PREFIX}${IMAGE_PROJECT}/chaos-dashboard:${IMAGE_TAG}"
+	docker push "${DOCKER_REGISTRY_PREFIX}${IMAGE_PROJECT}/chaos-daemon:${IMAGE_TAG}"
 
 docker-push-e2e:
-	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/e2e-helper:${IMAGE_TAG}"
+	docker push "${DOCKER_REGISTRY_PREFIX}${IMAGE_PROJECT}/e2e-helper:${IMAGE_TAG}"
 
 # the version of dns server should keep consistent with helm
 DNS_SERVER_VERSION ?= v0.2.0
