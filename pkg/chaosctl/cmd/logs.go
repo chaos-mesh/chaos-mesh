@@ -90,7 +90,9 @@ func (o *logsOptions) Run(args []string) error {
 	componentsNeeded := []string{"controller-manager", "chaos-daemon", "chaos-dashboard"}
 	for _, name := range componentsNeeded {
 		selectorSpec := v1alpha1.PodSelectorSpec{
-			LabelSelectors: map[string]string{"app.kubernetes.io/component": name},
+			GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+				LabelSelectors: map[string]string{"app.kubernetes.io/component": name},
+			},
 		}
 		if o.node != "" {
 			selectorSpec.Nodes = []string{o.node}

@@ -16,14 +16,23 @@
 package metrics
 
 import (
+	"context"
+	"reflect"
+
 	"github.com/prometheus/client_golang/prometheus"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/pkg/status"
 )
+
+var log = ctrl.Log.WithName("chaos-controller-manager-metrics-collector")
 
 // ChaosControllerManagerMetricsCollector implements prometheus.Collector interface
 type ChaosControllerManagerMetricsCollector struct {
 	store               cache.Cache
+	chaosExperiments    *prometheus.GaugeVec
 	SidecarTemplates    prometheus.Gauge
 	ConfigTemplates     *prometheus.GaugeVec
 	InjectionConfigs    *prometheus.GaugeVec
@@ -32,6 +41,8 @@ type ChaosControllerManagerMetricsCollector struct {
 	ConfigNameDuplicate *prometheus.CounterVec
 	InjectRequired      *prometheus.CounterVec
 	Injections          *prometheus.CounterVec
+	chaosSchedules      *prometheus.GaugeVec
+	chaosWorkflows      *prometheus.GaugeVec
 	EmittedEvents       *prometheus.CounterVec
 }
 
@@ -44,6 +55,10 @@ func NewChaosControllerManagerMetricsCollector(manager ctrl.Manager, registerer 
 
 	c := &ChaosControllerManagerMetricsCollector{
 		store: store,
+		chaosExperiments: prometheus.NewGaugeVec(prometheus.GaugeOpts{
+			Name: "chaos_controller_manager_chaos_experiments",
+			Help: "Total number of chaos experiments and their phases",
+		}, []string{"namespace", "kind", "phase"}),
 		SidecarTemplates: prometheus.NewGauge(prometheus.GaugeOpts{
 			Name: "chaos_mesh_templates",
 			Help: "Total number of injection templates",
@@ -76,6 +91,14 @@ func NewChaosControllerManagerMetricsCollector(manager ctrl.Manager, registerer 
 			Name: "chaos_mesh_injections_total",
 			Help: "Total number of sidecar injections performed on the webhook",
 		}, []string{"namespace", "config"}),
+		chaosSchedules: prometheus.NewGaugeVec(prometheus.GaugeOpts{
+			Name: "chaos_controller_manager_chaos_schedules",
+			Help: "Total number of chaos schedules",
+		}, []string{"namespace"}),
+		chaosWorkflows: prometheus.NewGaugeVec(prometheus.GaugeOpts{
+			Name: "chaos_controller_manager_chaos_workflows",
+			Help: "Total number of chaos workflows",
+		}, []string{"namespace"}),
 		EmittedEvents: prometheus.NewCounterVec(prometheus.CounterOpts{
 			Name: "chaos_controller_manager_emitted_event_total",
 			Help: "Total number of the emitted event by chaos-controller-manager",
@@ -95,6 +118,7 @@ func NewTestChaosControllerManagerMetricsCollector() *ChaosControllerManagerMetr
 
 // Describe implements the prometheus.Collector interface.
 func (collector *ChaosControllerManagerMetricsCollector) Describe(ch chan<- *prometheus.Desc) {
+	collector.chaosExperiments.Describe(ch)
 	collector.SidecarTemplates.Describe(ch)
 	collector.ConfigTemplates.Describe(ch)
 	collector.InjectionConfigs.Describe(ch)
@@ -104,10 +128,15 @@ func (collector *ChaosControllerManagerMetricsCollector) Describe(ch chan<- *pro
 	collector.InjectRequired.Describe(ch)
 	collector.Injections.Describe(ch)
 	collector.EmittedEvents.Describe(ch)
+	collector.chaosSchedules.Describe(ch)
+	collector.chaosWorkflows.Describe(ch)
 }
 
 // Collect implements the prometheus.Collector interface.
 func (collector *ChaosControllerManagerMetricsCollector) Collect(ch chan<- prometheus.Metric) {
+	collector.collectChaosExperiments()
+	collector.collectChaosSchedules()
+	collector.collectChaosWorkflows()
 	collector.SidecarTemplates.Collect(ch)
 	collector.ConfigTemplates.Collect(ch)
 	collector.InjectionConfigs.Collect(ch)
@@ -116,5 +145,79 @@ func (collector *ChaosControllerManagerMetricsCollector) Collect(ch chan<- prome
 	collector.TemplateLoadError.Collect(ch)
 	collector.InjectRequired.Collect(ch)
 	collector.Injections.Collect(ch)
+	collector.chaosExperiments.Collect(ch)
+	collector.chaosSchedules.Collect(ch)
+	collector.chaosWorkflows.Collect(ch)
 	collector.EmittedEvents.Collect(ch)
+}
+
+func (collector *ChaosControllerManagerMetricsCollector) collectChaosExperiments() {
+	// TODO(yeya24) if there is an error in List
+	// the experiment status will be lost
+	collector.chaosExperiments.Reset()
+
+	for kind, obj := range v1alpha1.AllKinds() {
+		expCache := map[string]map[string]int{}
+		chaosList := obj.SpawnList()
+		if err := collector.store.List(context.TODO(), chaosList); err != nil {
+			log.Error(err, "failed to list chaos", "kind", kind)
+			return
+		}
+
+		items := chaosList.GetItems()
+		for _, item := range items {
+			if _, ok := expCache[item.GetNamespace()]; !ok {
+				// There is only 4 supported phases
+				expCache[item.GetNamespace()] = make(map[string]int, 4)
+			}
+			innerObject := reflect.ValueOf(item).Interface().(v1alpha1.InnerObject)
+			expCache[item.GetNamespace()][string(status.GetChaosStatus(innerObject))]++
+		}
+
+		for ns, v := range expCache {
+			for phase, count := range v {
+				collector.chaosExperiments.WithLabelValues(ns, kind, phase).Set(float64(count))
+			}
+		}
+	}
+}
+
+func (collector *ChaosControllerManagerMetricsCollector) collectChaosSchedules() {
+	collector.chaosSchedules.Reset()
+
+	schedules := &v1alpha1.ScheduleList{}
+	if err := collector.store.List(context.TODO(), schedules); err != nil {
+		log.Error(err, "failed to list schedules")
+		return
+	}
+
+	countByNamespace := make(map[string]int)
+	items := schedules.GetItems()
+	for _, item := range items {
+		countByNamespace[item.GetNamespace()]++
+	}
+
+	for namespace, count := range countByNamespace {
+		collector.chaosSchedules.WithLabelValues(namespace).Set(float64(count))
+	}
+}
+
+func (collector *ChaosControllerManagerMetricsCollector) collectChaosWorkflows() {
+	collector.chaosWorkflows.Reset()
+
+	workflows := &v1alpha1.WorkflowList{}
+	if err := collector.store.List(context.TODO(), workflows); err != nil {
+		log.Error(err, "failed to list workflows")
+		return
+	}
+
+	countByNamespace := make(map[string]int)
+	items := workflows.GetItems()
+	for _, item := range items {
+		countByNamespace[item.GetNamespace()]++
+	}
+
+	for namespace, count := range countByNamespace {
+		collector.chaosWorkflows.WithLabelValues(namespace).Set(float64(count))
+	}
 }

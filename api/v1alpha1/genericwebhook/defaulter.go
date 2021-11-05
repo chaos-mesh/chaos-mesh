@@ -26,7 +26,13 @@ type Defaulter interface {
 	Default(root interface{}, field *reflect.StructField)
 }
 
+// Default would walk through all the fields of target struct recursively, and set the default value which declared with struct tag "default".
+//
+// Parameter obj should be a pointer to a data struct.
+//
+// Default should return an empty field.ErrorList.
 func Default(obj interface{}) field.ErrorList {
+	// TODO: how to resolve invalid input, for example: obj is a pointer to pointer
 	errorList := field.ErrorList{}
 
 	root := obj

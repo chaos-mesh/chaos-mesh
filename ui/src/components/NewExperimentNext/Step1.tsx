@@ -15,9 +15,9 @@
  *
  */
 import { Box, Card, Divider, Typography } from '@material-ui/core'
+import { Env, setEnv, setKindAction, setSpec, setStep1 } from 'slices/experiments'
+import _typesData, { Definition, Kind, dataPhysic, schema } from './data/types'
 import { iconByKind, transByKind } from 'lib/byKind'
-import { setKindAction, setSpec, setStep1 } from 'slices/experiments'
-import typesData, { Definition, Kind, schema } from './data/types'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
 import CheckIcon from '@material-ui/icons/Check'
@@ -65,15 +65,18 @@ const Step1 = () => {
 
   const state = useStoreSelector((state) => state)
   const { dnsServerCreate } = state.globalStatus
-  let typesDataEntries = Object.entries(typesData) as [Kind, Definition][]
-  if (!dnsServerCreate) {
-    typesDataEntries = typesDataEntries.filter((d) => d[0] !== 'DNSChaos')
-  }
   const {
+    env,
     kindAction: [kind, action],
     step1,
   } = state.experiments
   const dispatch = useStoreDispatch()
+
+  const typesData = env === 'k8s' ? _typesData : dataPhysic
+  let typesDataEntries = Object.entries(typesData) as [Kind, Definition][]
+  if (!dnsServerCreate) {
+    typesDataEntries = typesDataEntries.filter((d) => d[0] !== 'DNSChaos')
+  }
 
   const handleSelectTarget = (key: Kind) => () => {
     dispatch(setKindAction([key, '']))
@@ -83,19 +86,12 @@ const Step1 = () => {
     dispatch(setKindAction([kind, newAction]))
 
     if (submitDirectly.includes(newAction)) {
-      handleSubmitStep1({ action: newAction }, { direct: true })
+      handleSubmitStep1({ action: newAction })
     }
   }
 
-  const handleSubmitStep1 = (
-    values: Record<string, any>,
-    options?: {
-      direct?: boolean
-    }
-  ) => {
-    const result = options?.direct
-      ? values
-      : action
+  const handleSubmitStep1 = (values: Record<string, any>) => {
+    const result = action
       ? {
           ...values,
           action,
@@ -112,6 +108,11 @@ const Step1 = () => {
 
   const handleUndo = () => dispatch(setStep1(false))
 
+  const handleSwitchEnv = (env: Env) => () => {
+    dispatch(setKindAction(['', '']))
+    dispatch(setEnv(env))
+  }
+
   return (
     <Paper className={step1 ? classes.submit : ''}>
       <Box display="flex" justifyContent="space-between" mb={step1 ? 0 : 3}>
@@ -124,6 +125,39 @@ const Step1 = () => {
           <Typography>{T('newE.titleStep1')}</Typography>
         </Box>
         {step1 && <UndoIcon className={classes.asButton} onClick={handleUndo} />}
+      </Box>
+      <Box hidden={step1}>
+        <Box display="flex">
+          <Card
+            className={clsx(classes.card, env === 'k8s' ? classes.cardActive : '')}
+            variant="outlined"
+            onClick={handleSwitchEnv('k8s')}
+          >
+            <Box display="flex" justifyContent="center" alignItems="center" width={225} height={75}>
+              <Box display="flex" justifyContent="center" flex={1}>
+                {iconByKind('k8s')}
+              </Box>
+              <Box flex={1.5} textAlign="center">
+                <Typography variant="button">{T('k8s.title')}</Typography>
+              </Box>
+            </Box>
+          </Card>
+          <Card
+            className={clsx(classes.card, env === 'physic' ? classes.cardActive : '')}
+            variant="outlined"
+            onClick={handleSwitchEnv('physic')}
+          >
+            <Box display="flex" justifyContent="center" alignItems="center" width={225} height={75}>
+              <Box display="flex" justifyContent="center" flex={1}>
+                {iconByKind('physic')}
+              </Box>
+              <Box flex={1.5} textAlign="center">
+                <Typography variant="button">{T('physics.single')}</Typography>
+              </Box>
+            </Box>
+          </Card>
+        </Box>
+        <Divider sx={{ my: 6 }} />
       </Box>
       <Box hidden={step1}>
         <Box display="flex" flexWrap="wrap">
@@ -150,9 +184,9 @@ const Step1 = () => {
             <Box mt={6} mb={3}>
               <Divider />
             </Box>
-            {typesData[kind].categories ? (
+            {(typesData as any)[kind].categories ? (
               <Box display="flex" flexWrap="wrap">
-                {typesData[kind].categories!.map((d: any) => (
+                {(typesData as any)[kind].categories!.map((d: any) => (
                   <Card
                     key={d.key}
                     className={clsx(classes.card, action === d.key ? classes.cardActive : '')}
@@ -177,15 +211,25 @@ const Step1 = () => {
             ) : kind === 'TimeChaos' ? (
               <Box mt={6}>
                 <TargetGenerated
+                  env={env}
                   kind={kind}
-                  data={typesData[kind].spec!}
-                  validationSchema={schema.TimeChaos!.default}
+                  data={(typesData as any)[kind].spec!}
+                  validationSchema={env === 'k8s' ? schema.TimeChaos!.default : undefined}
                   onSubmit={handleSubmitStep1}
                 />
               </Box>
             ) : kind === 'StressChaos' ? (
               <Box mt={6}>
                 <Stress onSubmit={handleSubmitStep1} />
+              </Box>
+            ) : (kind as any) === 'ProcessChaos' ? (
+              <Box mt={6}>
+                <TargetGenerated
+                  env={env}
+                  kind={kind}
+                  data={(typesData as any)[kind].spec!}
+                  onSubmit={handleSubmitStep1}
+                />
               </Box>
             ) : null}
           </Box>
@@ -196,9 +240,10 @@ const Step1 = () => {
             <TargetGenerated
               // Force re-rendered after action changed
               key={kind + action}
+              env={env}
               kind={kind}
-              data={typesData[kind as Kind].categories!.filter(({ key }) => key === action)[0].spec}
-              validationSchema={schema[kind as Kind]![action]}
+              data={(typesData as any)[kind as Kind].categories!.filter(({ key }: any) => key === action)[0].spec}
+              validationSchema={env === 'k8s' ? schema[kind as Kind]![action] : undefined}
               onSubmit={handleSubmitStep1}
             />
           </>

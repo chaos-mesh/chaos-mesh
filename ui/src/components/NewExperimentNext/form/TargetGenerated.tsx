@@ -15,6 +15,7 @@
  *
  */
 import { AutocompleteMultipleField, LabelField, SelectField, Submit, TextField } from 'components/FormField'
+import { Env, clearNetworkTargetPods } from 'slices/experiments'
 import { Form, Formik, FormikErrors, FormikTouched, getIn } from 'formik'
 import { Kind, Spec } from '../data/types'
 import { useEffect, useState } from 'react'
@@ -27,16 +28,16 @@ import Scope from './Scope'
 import Space from 'components-mui/Space'
 import T from 'components/T'
 import basicData from '../data/basic'
-import { clearNetworkTargetPods } from 'slices/experiments'
 
 interface TargetGeneratedProps {
+  env: Env
   kind?: Kind | ''
   data: Spec
-  validationSchema: ObjectSchema
+  validationSchema?: ObjectSchema
   onSubmit: (values: Record<string, any>) => void
 }
 
-const TargetGenerated: React.FC<TargetGeneratedProps> = ({ kind, data, validationSchema, onSubmit }) => {
+const TargetGenerated: React.FC<TargetGeneratedProps> = ({ env, kind, data, validationSchema, onSubmit }) => {
   const { namespaces, spec } = useStoreSelector((state) => state.experiments)
   const dispatch = useStoreDispatch()
 
@@ -50,7 +51,7 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ kind, data, validatio
     return acc
   }, {} as Record<string, any>)
 
-  if (kind === 'NetworkChaos') {
+  if (env === 'k8s' && kind === 'NetworkChaos') {
     const action = initialValues.action
     delete initialValues.action
     const direction = initialValues.direction
@@ -83,7 +84,7 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ kind, data, validatio
     const rendered = Object.entries(data)
       .filter(([_, v]) => v && v instanceof Object && v.field)
       .map(([k, v]) => {
-        if (kind === 'NetworkChaos' && k !== 'direction' && k !== 'externalTargets') {
+        if (env === 'k8s' && kind === 'NetworkChaos' && k !== 'direction' && k !== 'externalTargets') {
           k = `${data.action}.${k}`
         }
 
@@ -96,6 +97,19 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ kind, data, validatio
                 label={v.label}
                 helperText={getIn(touched, k) && getIn(errors, k) ? getIn(errors, k) : v.helperText}
                 error={getIn(touched, k) && getIn(errors, k) ? true : false}
+                {...v.inputProps}
+              />
+            )
+          case 'textarea':
+            return (
+              <TextField
+                key={k}
+                name={k}
+                label={v.label}
+                helperText={getIn(touched, k) && getIn(errors, k) ? getIn(errors, k) : v.helperText}
+                error={getIn(touched, k) && getIn(errors, k) ? true : false}
+                multiline
+                rows={6}
                 {...v.inputProps}
               />
             )
@@ -120,11 +134,17 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ kind, data, validatio
                 helperText={getIn(touched, k) && getIn(errors, k) ? getIn(errors, k) : v.helperText}
                 error={getIn(errors, k) && getIn(touched, k) ? true : false}
               >
-                {v.items!.map((option: string) => (
-                  <MenuItem key={option} value={option}>
-                    {option}
-                  </MenuItem>
-                ))}
+                {v.items?.map((option: string | { label: string; value: any }) =>
+                  option instanceof Object ? (
+                    <MenuItem key={option.label} value={option.value}>
+                      {option.label}
+                    </MenuItem>
+                  ) : (
+                    <MenuItem key={option} value={option}>
+                      {option}
+                    </MenuItem>
+                  )
+                )}
               </SelectField>
             )
           case 'label':
@@ -180,7 +200,7 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ kind, data, validatio
         return (
           <Form>
             <Space>{parseDataToFormFields(errors, touched)}</Space>
-            {kind === 'NetworkChaos' && (
+            {env === 'k8s' && kind === 'NetworkChaos' && (
               <OtherOptions
                 title={T('newE.target.network.target.title')}
                 beforeOpen={beforeTargetOpen}
