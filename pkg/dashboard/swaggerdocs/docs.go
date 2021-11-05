@@ -3238,6 +3238,26 @@ var doc = `{
                 }
             }
         },
+        "v1alpha1.NetworkBandwidthSpec": {
+            "type": "object",
+            "properties": {
+                "buffer": {
+                    "type": "integer"
+                },
+                "limit": {
+                    "type": "integer"
+                },
+                "minburst": {
+                    "type": "integer"
+                },
+                "peakrate": {
+                    "type": "integer"
+                },
+                "rate": {
+                    "type": "string"
+                }
+            }
+        },
         "v1alpha1.NetworkChaosSpec": {
             "type": "object",
             "properties": {
@@ -3536,6 +3556,11 @@ var doc = `{
                     "description": "+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.JVMStressSpec"
+                },
+                "network-bandwidth": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.NetworkBandwidthSpec"
                 },
                 "network-corrupt": {
                     "description": "+optional",

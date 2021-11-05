@@ -2383,6 +2383,27 @@ spec:
                   description: the port of agent server
                   type: integer
               type: object
+            network-bandwidth:
+              properties:
+                buffer:
+                  format: int32
+                  type: integer
+                limit:
+                  format: int32
+                  type: integer
+                minburst:
+                  format: int32
+                  type: integer
+                peakrate:
+                  format: int64
+                  type: integer
+                rate:
+                  type: string
+              required:
+              - buffer
+              - limit
+              - rate
+              type: object
             network-corrupt:
               properties:
                 correlation:
@@ -5133,6 +5154,27 @@ spec:
                       description: the port of agent server
                       type: integer
                   type: object
+                network-bandwidth:
+                  properties:
+                    buffer:
+                      format: int32
+                      type: integer
+                    limit:
+                      format: int32
+                      type: integer
+                    minburst:
+                      format: int32
+                      type: integer
+                    peakrate:
+                      format: int64
+                      type: integer
+                    rate:
+                      type: string
+                  required:
+                  - buffer
+                  - limit
+                  - rate
+                  type: object
                 network-corrupt:
                   properties:
                     correlation:
@@ -7490,6 +7532,27 @@ spec:
                                 description: the port of agent server
                                 type: integer
                             type: object
+                          network-bandwidth:
+                            properties:
+                              buffer:
+                                format: int32
+                                type: integer
+                              limit:
+                                format: int32
+                                type: integer
+                              minburst:
+                                format: int32
+                                type: integer
+                              peakrate:
+                                format: int64
+                                type: integer
+                              rate:
+                                type: string
+                            required:
+                            - buffer
+                            - limit
+                            - rate
+                            type: object
                           network-corrupt:
                             properties:
                               correlation:
@@ -9532,6 +9595,27 @@ spec:
                                   port:
                                     description: the port of agent server
                                     type: integer
+                                type: object
+                              network-bandwidth:
+                                properties:
+                                  buffer:
+                                    format: int32
+                                    type: integer
+                                  limit:
+                                    format: int32
+                                    type: integer
+                                  minburst:
+                                    format: int32
+                                    type: integer
+                                  peakrate:
+                                    format: int64
+                                    type: integer
+                                  rate:
+                                    type: string
+                                required:
+                                - buffer
+                                - limit
+                                - rate
                                 type: object
                               network-corrupt:
                                 properties:
@@ -15700,6 +15784,27 @@ spec:
                       description: the port of agent server
                       type: integer
                   type: object
+                network-bandwidth:
+                  properties:
+                    buffer:
+                      format: int32
+                      type: integer
+                    limit:
+                      format: int32
+                      type: integer
+                    minburst:
+                      format: int32
+                      type: integer
+                    peakrate:
+                      format: int64
+                      type: integer
+                    rate:
+                      type: string
+                  required:
+                  - buffer
+                  - limit
+                  - rate
+                  type: object
                 network-corrupt:
                   properties:
                     correlation:
@@ -17627,6 +17732,27 @@ spec:
                         port:
                           description: the port of agent server
                           type: integer
+                      type: object
+                    network-bandwidth:
+                      properties:
+                        buffer:
+                          format: int32
+                          type: integer
+                        limit:
+                          format: int32
+                          type: integer
+                        minburst:
+                          format: int32
+                          type: integer
+                        peakrate:
+                          format: int64
+                          type: integer
+                        rate:
+                          type: string
+                      required:
+                      - buffer
+                      - limit
+                      - rate
                       type: object
                     network-corrupt:
                       properties:
@@ -20031,6 +20157,27 @@ spec:
                                     description: the port of agent server
                                     type: integer
                                 type: object
+                              network-bandwidth:
+                                properties:
+                                  buffer:
+                                    format: int32
+                                    type: integer
+                                  limit:
+                                    format: int32
+                                    type: integer
+                                  minburst:
+                                    format: int32
+                                    type: integer
+                                  peakrate:
+                                    format: int64
+                                    type: integer
+                                  rate:
+                                    type: string
+                                required:
+                                - buffer
+                                - limit
+                                - rate
+                                type: object
                               network-corrupt:
                                 properties:
                                   correlation:
@@ -22132,6 +22279,27 @@ spec:
                                       port:
                                         description: the port of agent server
                                         type: integer
+                                    type: object
+                                  network-bandwidth:
+                                    properties:
+                                      buffer:
+                                        format: int32
+                                        type: integer
+                                      limit:
+                                        format: int32
+                                        type: integer
+                                      minburst:
+                                        format: int32
+                                        type: integer
+                                      peakrate:
+                                        format: int64
+                                        type: integer
+                                      rate:
+                                        type: string
+                                    required:
+                                    - buffer
+                                    - limit
+                                    - rate
                                     type: object
                                   network-corrupt:
                                     properties:
@@ -30948,6 +31116,27 @@ spec:
                             description: the port of agent server
                             type: integer
                         type: object
+                      network-bandwidth:
+                        properties:
+                          buffer:
+                            format: int32
+                            type: integer
+                          limit:
+                            format: int32
+                            type: integer
+                          minburst:
+                            format: int32
+                            type: integer
+                          peakrate:
+                            format: int64
+                            type: integer
+                          rate:
+                            type: string
+                        required:
+                        - buffer
+                        - limit
+                        - rate
+                        type: object
                       network-corrupt:
                         properties:
                           correlation:
@@ -32945,6 +33134,27 @@ spec:
                               port:
                                 description: the port of agent server
                                 type: integer
+                            type: object
+                          network-bandwidth:
+                            properties:
+                              buffer:
+                                format: int32
+                                type: integer
+                              limit:
+                                format: int32
+                                type: integer
+                              minburst:
+                                format: int32
+                                type: integer
+                              peakrate:
+                                format: int64
+                                type: integer
+                              rate:
+                                type: string
+                            required:
+                            - buffer
+                            - limit
+                            - rate
                             type: object
                           network-corrupt:
                             properties:
