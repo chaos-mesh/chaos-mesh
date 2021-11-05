@@ -79,3 +79,25 @@ func (in *PhysicalMachineChaosSpec) Validate(root interface{}, path *field.Path)
 
 	return allErrs
 }
+
+func (in *NetworkBandwidthSpec) Validate(root interface{}, path *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+
+	if in.Buffer == 0 {
+		allErrs = append(allErrs,
+			field.Invalid(path.Child("buffer"), in.Buffer, "buffer should be greater than 0"))
+	}
+
+	if in.Limit == 0 {
+		allErrs = append(allErrs,
+			field.Invalid(path.Child("limit"), in.Limit, "limit should be greater than 0"))
+		// TODO: one of limit and minburst is required
+	}
+
+	if len(in.Rate) == 0 {
+		allErrs = append(allErrs,
+			field.Invalid(path.Child("rate"), in.Rate, "rate is required"))
+	}
+
+	return allErrs
+}

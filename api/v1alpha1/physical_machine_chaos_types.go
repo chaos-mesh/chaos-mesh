@@ -118,6 +118,9 @@ type ExpInfo struct {
 	NetworkDNS *NetworkDNSSpec `json:"network-dns,omitempty"`
 
 	// +optional
+	NetworkBandwidth *NetworkBandwidthSpec `json:"network-bandwidth,omitempty"`
+
+	// +optional
 	Process *ProcessSpec `json:"process,omitempty"`
 
 	// +optional
@@ -218,6 +221,15 @@ type NetworkDNSSpec struct {
 	DNSServer     string `json:"dns-server,omitempty"`
 	DNSIp         string `json:"dns-ip,omitempty"`
 	DNSDomainName string `json:"dns-domain-name,omitempty"`
+}
+
+type NetworkBandwidthSpec struct {
+	Rate   string `json:"rate"`
+	Limit  uint32 `json:"limit"`
+	Buffer uint32 `json:"buffer"`
+
+	Peakrate *uint64 `json:"peakrate,omitempty"`
+	Minburst *uint32 `json:"minburst,omitempty"`
 }
 
 type ProcessSpec struct {
