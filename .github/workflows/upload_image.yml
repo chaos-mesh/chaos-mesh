@@ -55,13 +55,13 @@ jobs:
 
           make -B TARGET_PLATFORM=$ARCH IMAGE_TAG=$IMAGE_TAG-$ARCH IMAGE_PROJECT=chaos-mesh/chaos-mesh DOCKER_REGISTRY=ghcr.io UI=$UI image-$IMAGE
 
-      - name: Upload Chaos Mesh
-        env:
-          IMAGE_TAG: ${{ steps.image_tag.outputs.image_tag }}
-          ARCH: ${{ matrix.arch }}
-          IMAGE: ${{ matrix.image }}
-        run: |
-          docker push ghcr.io/chaos-mesh/chaos-mesh/$IMAGE:$IMAGE_TAG-$ARCH
+#      - name: Upload Chaos Mesh
+#        env:
+#          IMAGE_TAG: ${{ steps.image_tag.outputs.image_tag }}
+#          ARCH: ${{ matrix.arch }}
+#          IMAGE: ${{ matrix.image }}
+#        run: |
+#          docker push ghcr.io/chaos-mesh/chaos-mesh/$IMAGE:$IMAGE_TAG-$ARCH
 
   upload-manifest:
     runs-on: ubuntu-latest
