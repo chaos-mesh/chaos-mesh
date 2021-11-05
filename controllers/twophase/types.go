@@ -24,6 +24,7 @@ import (
 	"github.com/robfig/cron/v3"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/pkg/finalizer"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 	"github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
 	sch "github.com/chaos-mesh/chaos-mesh/pkg/scheduler"
@@ -32,6 +33,9 @@ import (
 )
 
 const emptyString = ""
+
+// Prefinalizer protect chaos from being deleted straightly
+const Prefinalizer = `pre-finalizer.twophase.chaos-mesh.org`
 
 // Reconciler for the twophase reconciler
 type Reconciler struct {
@@ -64,6 +68,18 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, err
 	}
 	chaos := _chaos.(v1alpha1.InnerSchedulerObject)
+
+	if chaos.IsDeleted() {
+		// This chaos was deleted
+		r.Log.Info("Removing pre-finalizer")
+		chaos.GetMeta().SetFinalizers(finalizer.RemoveFromFinalizer(chaos.GetMeta().GetFinalizers(), Prefinalizer))
+	} else if !finalizer.ContainsFinalizer(chaos.GetMeta().GetFinalizers(), Prefinalizer) {
+		chaos.GetMeta().SetFinalizers(finalizer.InsertFinalizer(chaos.GetMeta().GetFinalizers(), Prefinalizer))
+		if err := r.Client.Update(ctx, chaos); err != nil {
+			r.Log.Error(err, "unable to update chaos")
+			return ctrl.Result{}, err
+		}
+	}
 
 	status := chaos.GetStatus()
 

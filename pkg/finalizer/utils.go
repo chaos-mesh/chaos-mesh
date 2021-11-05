@@ -13,6 +13,16 @@
 
 package finalizer
 
+func ContainsFinalizer(finalizers []string, finalizer string) bool {
+	for _, f := range finalizers {
+		if f == finalizer {
+			return true
+		}
+	}
+
+	return false
+}
+
 func RemoveFromFinalizer(finalizers []string, key string) []string {
 	slice := make([]string, 0, len(finalizers))
 	for _, f := range finalizers {

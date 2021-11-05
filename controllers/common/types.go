@@ -18,9 +18,11 @@ import (
 	"time"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/pkg/finalizer"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 	endpoint "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
 
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/util/retry"
 
@@ -32,6 +34,9 @@ const (
 	AnnotationCleanFinalizer = `chaos-mesh.chaos-mesh.org/cleanFinalizer`
 	// AnnotationCleanFinalizerForced value
 	AnnotationCleanFinalizerForced = `forced`
+
+	// Prefinalizer protect chaos from being deleted straightly
+	Prefinalizer = `pre-finalizer.common.chaos-mesh.org`
 )
 
 const emptyString = ""
@@ -75,8 +80,11 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			updateFailedMessage(ctx, r, chaos, err.Error())
 			return ctrl.Result{Requeue: true}, err
 		}
+		chaos.GetMeta().SetFinalizers(finalizer.RemoveFromFinalizer(chaos.GetMeta().GetFinalizers(), Prefinalizer))
 		status.Experiment.Phase = v1alpha1.ExperimentPhaseFinished
 		status.FailedMessage = emptyString
+	} else if !finalizer.ContainsFinalizer(chaos.GetMeta().GetFinalizers(), Prefinalizer) {
+		chaos.GetMeta().SetFinalizers(finalizer.InsertFinalizer(chaos.GetMeta().GetFinalizers(), Prefinalizer))
 	} else if chaos.IsPaused() {
 		if status.Experiment.Phase == v1alpha1.ExperimentPhaseRunning {
 			r.Log.Info("Pausing")
@@ -127,8 +135,29 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	if err := r.Update(ctx, chaos); err != nil {
-		r.Log.Error(err, "unable to update chaos status")
-		return ctrl.Result{}, err
+		if !errors.IsConflict(err) {
+			r.Log.Error(err, "fail to update chaos")
+			return ctrl.Result{}, err
+		}
+
+		r.Log.Error(err, "conflict on updating chaos")
+
+		updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+			obj := r.Object().DeepCopyObject().(v1alpha1.InnerObject)
+			if err = r.Client.Get(ctx, req.NamespacedName, obj); err != nil {
+				r.Log.Error(err, "unable to get chaos")
+				return err
+			}
+
+			*obj.GetStatus() = *status
+			obj.GetMeta().SetFinalizers(chaos.GetMeta().GetFinalizers())
+			return r.Update(ctx, obj)
+		})
+
+		if updateError != nil {
+			r.Log.Error(updateError, "unable to update chaos")
+			return ctrl.Result{}, updateError
+		}
 	}
 
 	return ctrl.Result{}, nil
