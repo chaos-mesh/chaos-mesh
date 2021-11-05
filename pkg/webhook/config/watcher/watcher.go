@@ -26,7 +26,7 @@ import (
 
 	"github.com/ghodss/yaml"
 
-	"github.com/chaos-mesh/chaos-mesh/controllers/metrics"
+	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
 
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -56,11 +56,11 @@ var ErrWatchChannelClosed = errors.New("watcher channel has closed")
 type K8sConfigMapWatcher struct {
 	Config
 	client  k8sv1.CoreV1Interface
-	metrics *metrics.ChaosCollector
+	metrics *metrics.ChaosControllerManagerMetricsCollector
 }
 
 // New creates a new K8sConfigMapWatcher
-func New(cfg Config, metrics *metrics.ChaosCollector) (*K8sConfigMapWatcher, error) {
+func New(cfg Config, metrics *metrics.ChaosControllerManagerMetricsCollector) (*K8sConfigMapWatcher, error) {
 	c := K8sConfigMapWatcher{Config: cfg, metrics: metrics}
 	if strings.TrimSpace(c.TemplateNamespace) == "" {
 		// ENHANCEMENT: support downward API/env vars instead? https://github.com/kubernetes/kubernetes/blob/release-1.0/docs/user-guide/downward-api.md
