@@ -59,7 +59,7 @@ var _ = Describe("JVMChaos", func() {
 					Target: SERVLET,
 					ContainerSelector: ContainerSelector{
 						PodSelector: PodSelector{
-							Mode: OnePodMode,
+							Mode: OneMode,
 						},
 					},
 				},
