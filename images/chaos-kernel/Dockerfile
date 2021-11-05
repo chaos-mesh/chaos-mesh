@@ -14,7 +14,7 @@ RUN echo "deb https://apt.kitware.com/ubuntu/ bionic main" >> /etc/apt/sources.l
 
 RUN wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | apt-key add -
 
-RUN apt-get update &&  apt-get install -y gcc-8 g++-8 bison build-essential \
+RUN ulimit -n 1024 && apt-get update &&  apt-get install -y gcc-8 g++-8 bison build-essential \
     flex git libedit-dev libllvm6.0 llvm-6.0-dev libclang-6.0-dev python python-pip \
     zlib1g-dev libelf-dev libssl-dev && pip install cmake==3.13.3
 

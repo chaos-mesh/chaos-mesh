@@ -1,5 +1,8 @@
 name: Upload Image
 on:
+  push:
+    branches:
+      - "*"
   workflow_dispatch: {}
   schedule:
     - cron: "0 18 * * *"
@@ -12,7 +15,7 @@ jobs:
     strategy:
       matrix:
         arch: [amd64, arm64]
-        image: [chaos-daemon, chaos-mesh, chaos-dashboard, chaos-dlv]
+        image: [chaos-daemon, chaos-mesh, chaos-dashboard, chaos-kernel, chaos-dlv]
     outputs:
       image_tag: ${{ steps.image_tag.outputs.image_tag }}
     steps:
@@ -22,10 +25,10 @@ jobs:
         shell: bash
         run: |
           IMAGE_TAG=${GITHUB_REF##*/}
-          if [ "${IMAGE_TAG}" = "master" ] ; then
-            IMAGE_TAG=latest;
-          fi
-
+          # if [ "${IMAGE_TAG}" = "master" ] ; then
+          #   IMAGE_TAG=latest;
+          # fi
+          IMAGE_TAG=latest;
           echo "::set-output name=image_tag::$(echo $IMAGE_TAG)"
         id: image_tag
 
@@ -64,7 +67,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        image: [chaos-daemon, chaos-mesh, chaos-dashboard, chaos-dlv]
+        image: [chaos-daemon, chaos-mesh, chaos-dashboard, chaos-kernel, chaos-dlv]
     needs: build-specific-architecture
     steps:
       - name: Build Chaos Mesh manifest
