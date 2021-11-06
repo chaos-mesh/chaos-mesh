@@ -14,7 +14,7 @@
 >
 > This readme and related documentation are Work in Progress.
 
-Chaos Mesh® is a [Cloud Native Computing Foundation (CNCF)](https://www.cncf.io/) hosted project. It is a cloud-native Chaos Engineering platform that orchestrates chaos on Kubernetes environments. At the current stage, it has the following components:
+Chaos Mesh is a [Cloud Native Computing Foundation (CNCF)](https://www.cncf.io/) hosted project. It is a cloud-native Chaos Engineering platform that orchestrates chaos on Kubernetes environments. At the current stage, it has the following components:
 
 - **Chaos Operator**: the core component for chaos orchestration. Fully open sourced.
 - **Chaos Dashboard**: a Web UI for managing, designing, monitoring Chaos Experiments.
@@ -64,8 +64,8 @@ Blogs on Chaos Mesh design & implementation, features, chaos engineering, commun
 - [Chaos Mesh - Your Chaos Engineering Solution for System Resiliency on Kubernetes](https://chaos-mesh.org/blog/chaos_mesh_your_chaos_engineering_solution/)
 - [Run Your First Chaos Experiment in 10 Minutes](https://chaos-mesh.org/blog/run_your_first_chaos_experiment/)
 - [How to Simulate I/O Faults at Runtime](https://chaos-mesh.org/blog/how-to-simulate-io-faults-at-runtime/)
-- [Simulating Clock Skew in K8s Without Affecting Other Containers on the Node](hhttps://chaos-mesh.org/blog/simulating-clock-skew-in-k8s-without-affecting-other-containers-on-node/)
-- [Building an Automated Testing Framework Based on Chaos Mesh® and Argo](https://chaos-mesh.org/blog/building_automated_testing_framework)
+- [Simulating Clock Skew in K8s Without Affecting Other Containers on the Node](https://chaos-mesh.org/blog/simulating-clock-skew-in-k8s-without-affecting-other-containers-on-node/)
+- [Building an Automated Testing Framework Based on Chaos Mesh and Argo](https://chaos-mesh.org/blog/building_automated_testing_framework)
 
 ## Contributing
 
@@ -141,4 +141,4 @@ Chaos Mesh is licensed under the Apache License, Version 2.0. See [LICENSE](./LI
 
 ## Trademark
 
-Chaos Mesh® is a trademark of The Linux Foundation. All rights reserved.
+Chaos Mesh is a trademark of The Linux Foundation. All rights reserved.
