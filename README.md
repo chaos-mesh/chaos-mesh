@@ -1,4 +1,4 @@
-<img src="static/logo.svg" alt="chaos-mesh-logo" width="450"/>
+<img src="static/logo.svg" alt="Chaos Mesh Logo" width="450"/>
 
 <!-- markdown-link-check-disable -->
 [![Build Status](https://ci.pingcap.net/view/chaos-mesh/job/build_chaos_mesh_master/badge/icon)](https://ci.pingcap.net/view/chaos-mesh/job/build_chaos_mesh_master/)
