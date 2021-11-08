@@ -69,8 +69,8 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 	chaos := _chaos.(v1alpha1.InnerSchedulerObject)
 
-	if chaos.IsDeleted() {
-		// This chaos was deleted
+	if chaos.GetStatus().Experiment.Phase == v1alpha1.ExperimentPhaseFinished {
+		// This chaos was finished, we should remove the finalizer
 		r.Log.Info("Removing pre-finalizer")
 		chaos.GetMeta().SetFinalizers(finalizer.RemoveFromFinalizer(chaos.GetMeta().GetFinalizers(), Prefinalizer))
 	} else if !finalizer.ContainsFinalizer(chaos.GetMeta().GetFinalizers(), Prefinalizer) {
