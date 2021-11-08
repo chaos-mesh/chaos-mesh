@@ -168,7 +168,7 @@ const httpCommonSelect: Spec = {
     field: 'label',
     isKV: true,
     label: 'Request Headers',
-    value: [],
+    value: {},
     helperText: 'Optional. The request headers',
   },
 }
@@ -191,7 +191,7 @@ const httpResponseCommon: Spec = {
     field: 'label',
     isKV: true,
     label: 'Response Headers',
-    value: [],
+    value: {},
     helperText: 'Optional. The response headers',
   },
 }
@@ -211,7 +211,7 @@ const httpReplaceCommon: Spec = {
     field: 'label',
     isKV: true,
     label: 'Replace Headers',
-    value: [],
+    value: {},
     helperText: 'Optional. The headers to be replaced',
   },
   "replace.body": {
@@ -233,7 +233,7 @@ const httpPatchCommon: Spec = {
   "patch.body.value": {
     field: 'textarea',
     label: 'Patch Body Value',
-    value: '',
+    value: '{}',
     helperText: 'The value to be patched into body',
   },
 }
@@ -444,7 +444,7 @@ const data: Record<Kind, Definition> = {
             field: 'label',
             isKV: true,
             label: 'Replace Queries',
-            value: [],
+            value: {},
             helperText: 'Optional. The queries to be replaced',
           },
         },
