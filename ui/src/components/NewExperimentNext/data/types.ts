@@ -1198,6 +1198,14 @@ export const schema: Partial<Record<Kind, Record<string, Yup.ObjectSchema>>> = {
       attr: Yup.array().of(Yup.string()).required('The attr is required'),
     }),
   },
+  HTTPChaos: {
+    'request-delay': Yup.object({
+      delay: Yup.string().required('The delay is required'),
+    }),
+    'response-delay': Yup.object({
+      delay: Yup.string().required('The delay is required'),
+    }),
+  },
   NetworkChaos: {
     partition: Yup.object({
       target: networkTargetSchema,

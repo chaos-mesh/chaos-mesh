@@ -92,6 +92,9 @@
           "podsPreviewHelper": "Checking or unchecking Pods to further limit the scope of the target"
         }
       },
+      "http": {
+        "title": "HTTP Fault"
+      },
       "physicalmachine": {
         "title": "Physic Fault"
       },

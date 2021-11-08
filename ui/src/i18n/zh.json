@@ -91,6 +91,9 @@
           "podsPreviewHelper": "通过勾选 Pod 来进一步限制目标的范围"
         }
       },
+      "http": {
+        "title": "HTTP 故障"
+      },
       "physicalmachine": {
         "title": "物理机故障"
       },
