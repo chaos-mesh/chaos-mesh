@@ -153,7 +153,7 @@ const httpCommonSelect: Spec = {
   },
   method: {
     field: 'select',
-    items: ['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'OPTIONS', 'PATCH'], 
+    items: ['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'OPTIONS', 'PATCH'],
     label: 'Method',
     value: 'GET',
     helperText: 'Optional. The HTTP method of request',
@@ -161,8 +161,9 @@ const httpCommonSelect: Spec = {
   path: {
     field: 'text',
     label: 'Path',
-    value: "",
-    helperText: 'Optional. The target URI path of request, support wildcards(https://www.wikiwand.com/en/Matching_wildcards)',
+    value: '',
+    helperText:
+      'Optional. The target URI path of request, support wildcards(https://www.wikiwand.com/en/Matching_wildcards)',
   },
   request_headers: {
     field: 'label',
@@ -184,7 +185,7 @@ const httpResponseCommon: Spec = {
   code: {
     field: 'number',
     label: 'Status Code',
-    value: '',
+    value: 0,
     helperText: 'Optional. The target status code of response',
   },
   response_headers: {
@@ -200,21 +201,20 @@ const httpDelayCommon: Spec = {
   delay: {
     field: 'text',
     label: 'Delay',
-    value: "",
-    helperText:
-      "The delay of request/response",
+    value: '',
+    helperText: 'The delay of request/response',
   },
 }
 
 const httpReplaceCommon: Spec = {
-  "replace.header": {
+  'replace.header': {
     field: 'label',
     isKV: true,
     label: 'Replace Headers',
     value: {},
     helperText: 'Optional. The headers to be replaced',
   },
-  "replace.body": {
+  'replace.body': {
     field: 'textarea',
     label: 'Replace Body',
     value: '',
@@ -223,14 +223,14 @@ const httpReplaceCommon: Spec = {
 }
 
 const httpPatchCommon: Spec = {
-  "patch.body.type": {
+  'patch.body.type': {
     field: 'select',
-    items: ['JSON'], 
+    items: ['JSON'],
     label: 'Patch Body Type',
     value: 'JSON',
     helperText: 'The patch type of body',
   },
-  "patch.body.value": {
+  'patch.body.value': {
     field: 'textarea',
     label: 'Patch Body Value',
     value: '{}',
@@ -427,20 +427,20 @@ const data: Record<Kind, Definition> = {
         spec: {
           ...httpRequestCommon,
           ...httpReplaceCommon,
-          "replace.path": {
+          'replace.path': {
             field: 'text',
             label: 'Replace Path',
             value: '',
             helperText: 'Optional. The path to be replaced',
           },
-          "replace.method": {
+          'replace.method': {
             field: 'select',
-            items: ['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'OPTIONS', 'PATCH'], 
+            items: ['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'OPTIONS', 'PATCH'],
             label: 'Replace Method',
             value: '',
             helperText: 'Optional. The HTTP method to be replaced',
           },
-          "replace.queries": {
+          'replace.queries': {
             field: 'label',
             isKV: true,
             label: 'Replace Queries',
@@ -479,7 +479,7 @@ const data: Record<Kind, Definition> = {
         spec: {
           ...httpResponseCommon,
           ...httpReplaceCommon,
-          "replace.code": {
+          'replace.code': {
             field: 'number',
             label: 'Replace Status Code',
             value: 0,
