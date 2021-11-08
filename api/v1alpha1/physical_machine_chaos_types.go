@@ -224,8 +224,10 @@ type NetworkDNSSpec struct {
 }
 
 type NetworkBandwidthSpec struct {
-	Rate   string `json:"rate"`
-	Limit  uint32 `json:"limit"`
+	Rate string `json:"rate"`
+	// +kubebuilder:validation:Minimum=1
+	Limit uint32 `json:"limit"`
+	// +kubebuilder:validation:Minimum=1
 	Buffer uint32 `json:"buffer"`
 
 	Peakrate *uint64 `json:"peakrate,omitempty"`
