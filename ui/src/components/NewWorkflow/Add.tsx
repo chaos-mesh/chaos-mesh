@@ -97,7 +97,6 @@ const Add: React.FC<AddProps> = ({
     ],
   })
   const [num, setNum] = useState(-1)
-  const [otherTypes, setOtherTypes] = useState<'suspend' | ''>('')
   const [templates, setTemplates] = useState<Template[]>([])
   const formRef = useRef<any>()
   const newERef = useRef<NewExperimentHandles>(null)
@@ -155,9 +154,6 @@ const Add: React.FC<AddProps> = ({
           // TODO: if rendered http set type to http
 
           break
-        case 'suspend':
-          setOtherTypes(type)
-          break
       }
 
       setInitialValues({
@@ -180,10 +176,6 @@ const Add: React.FC<AddProps> = ({
   const onValidate = ({ type, num: newNum }: { type: string; num: number }) => {
     setIsRenderedHTTPTask(type === 'http')
     setTypeOfTemplate(type as AllTemplateType)
-
-    if (type !== 'suspend' && type !== 'http') {
-      setOtherTypes('')
-    }
 
     const prevType = formRef.current.values.type
 
@@ -214,8 +206,6 @@ const Add: React.FC<AddProps> = ({
       if (prevType === 'serial' || prevType === 'parallel' || prevType === 'custom') {
         resetNoSingle()
       }
-
-      setOtherTypes(type)
     }
   }
 
@@ -372,7 +362,7 @@ const Add: React.FC<AddProps> = ({
           )}
 
           {typeOfTemplate === 'single' && (
-            <Box display={otherTypes === 'suspend' ? 'none' : 'initial'}>
+            <Box display="initial">
               <NewExperimentNext ref={newERef} onSubmit={onSubmit} inWorkflow={true} />
             </Box>
           )}
