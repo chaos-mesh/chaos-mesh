@@ -2,7 +2,7 @@
 
 Chaos Mesh now has over 40 adopters, here we have listed some of them. Some have already gone into production, and others are at various stages of testing.
 
-If you are an adopter, and are willing to share your Chaos Mesh story, feel free to raise a PR!
+If you are an adopter and are willing to share your Chaos Mesh story, feel free to raise a PR against this file!
 
 ## End users
 
