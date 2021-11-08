@@ -56,7 +56,7 @@ func NewScheme() *runtime.Scheme {
 func NewOption(logger logr.Logger) *ctrl.Options {
 	setupLog := logger.WithName("setup")
 
-	leaderElectionNamespace := config.ControllerCfg.TargetNamespace
+	leaderElectionNamespace := config.ControllerCfg.Namespace
 	if len(leaderElectionNamespace) == 0 {
 		leaderElectionNamespace = "default"
 	}
