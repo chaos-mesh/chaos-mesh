@@ -64,7 +64,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 
 	endpoint.GET("", s.list)
 	endpoint.GET("/:id", s.get)
-	endpoint.GET("/workflow/:id", s.cascadeFetchEventsForWorkflow)
+	endpoint.GET("/workflow/:uid", s.cascadeFetchEventsForWorkflow)
 }
 
 const layout = "2006-01-02 15:04:05"
@@ -187,7 +187,7 @@ func (s *Service) cascadeFetchEventsForWorkflow(c *gin.Context) {
 		return
 	}
 
-	var result []*core.Event
+	result := make([]*core.Event, 0)
 	// fetch events of Workflow
 	eventsForWorkflow, err := s.event.ListByFilter(ctx, core.Filter{
 		ObjectID:  uid,
