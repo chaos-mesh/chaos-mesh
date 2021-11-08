@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+
 import { PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 
 import { Kind } from 'components/NewExperimentNext/data/types'
@@ -41,6 +42,8 @@ export const getNetworkTargetPodsByNamespaces = createAsyncThunk(
   async (data: Partial<Scope['selector']>) => (await api.common.pods(data)).data
 )
 
+export type Env = 'k8s' | 'physic'
+
 const initialState: {
   namespaces: string[]
   labels: Record<string, string[]>
@@ -50,6 +53,7 @@ const initialState: {
   fromExternal: boolean
   step1: boolean
   step2: boolean
+  env: Env
   kindAction: [Kind | '', string]
   spec: any
   basic: any
@@ -63,6 +67,7 @@ const initialState: {
   fromExternal: false,
   step1: false,
   step2: false,
+  env: 'k8s',
   kindAction: ['', ''],
   spec: {},
   basic: {},
@@ -80,6 +85,9 @@ const experimentsSlice = createSlice({
     },
     setStep2(state, action: PayloadAction<boolean>) {
       state.step2 = action.payload
+    },
+    setEnv(state, action: PayloadAction<Env>) {
+      state.env = action.payload
     },
     setKindAction(state, action) {
       state.kindAction = action.payload
@@ -133,6 +141,7 @@ export const {
   clearNetworkTargetPods,
   setStep1,
   setStep2,
+  setEnv,
   setKindAction,
   setSpec,
   setBasic,

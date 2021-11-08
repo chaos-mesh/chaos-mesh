@@ -24,8 +24,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 
-	"github.com/chaos-mesh/chaos-mesh/controllers/metrics"
 	controllerCfg "github.com/chaos-mesh/chaos-mesh/pkg/config"
+	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/inject"
 )
@@ -40,7 +40,7 @@ type PodInjector struct {
 	decoder       *admission.Decoder
 	Config        *config.Config
 	ControllerCfg *controllerCfg.ChaosControllerConfig
-	Metrics       *metrics.ChaosCollector
+	Metrics       *metrics.ChaosControllerManagerMetricsCollector
 }
 
 // Handle is pod injector handler

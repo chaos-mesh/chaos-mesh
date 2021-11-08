@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+
 export interface Metadata {
   name: string
   namespace: string
@@ -25,7 +26,7 @@ interface Selector {
   namespaces: string[]
   labelSelectors?: string[]
   annotationSelectors?: string[]
-  phaseSelectors?: string[]
+  podPhaseSelectors?: string[]
   pods?: string[]
 }
 

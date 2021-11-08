@@ -4,7 +4,7 @@ DOCKER_REGISTRY ?= "localhost:5000"
 
 # SET DOCKER_REGISTRY to change the docker registry
 DOCKER_REGISTRY_PREFIX := $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY)/,)
-DOCKER_BUILD_ARGS := --build-arg HTTP_PROXY=${HTTP_PROXY} --build-arg HTTPS_PROXY=${HTTPS_PROXY} --build-arg UI=${UI} --build-arg LDFLAGS="${LDFLAGS}" --build-arg CRATES_MIRROR="${CRATES_MIRROR}"
+DOCKER_BUILD_ARGS := --build-arg HTTP_PROXY=${HTTP_PROXY} --build-arg HTTPS_PROXY=${HTTPS_PROXY} --build-arg GOPROXY=${GOPROXY} --build-arg UI=${UI} --build-arg LDFLAGS="${LDFLAGS}" --build-arg CRATES_MIRROR="${CRATES_MIRROR}"
 
 IMAGE_TAG := $(if $(IMAGE_TAG),$(IMAGE_TAG),latest)
 IMAGE_PROJECT := $(if $(IMAGE_PROJECT),$(IMAGE_PROJECT),pingcap)
@@ -23,14 +23,15 @@ IMAGE_DEV_ENV_BUILD ?= 0
 
 # Enable GO111MODULE=on explicitly, disable it with GO111MODULE=off when necessary.
 export GO111MODULE := on
-GOOS   := $(if $(GOOS),$(GOOS),"")
-GOARCH := $(if $(GOARCH),$(GOARCH),"")
-GOENV  := GO15VENDOREXPERIMENT="1" CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH)
-CGOENV := GO15VENDOREXPERIMENT="1" CGO_ENABLED=1 GOOS=$(GOOS) GOARCH=$(GOARCH)
-GO     := $(GOENV) go
-CGO    := $(CGOENV) go
-GOTEST := USE_EXISTING_CLUSTER=false NO_PROXY="${NO_PROXY},testhost" go test
-SHELL  := bash
+GOOS   	:= $(if $(GOOS),$(GOOS),"")
+GOARCH 	:= $(if $(GOARCH),$(GOARCH),"")
+GOPROXY := $(if $(GOPROXY),$(GOPROXY),"https://proxy.golang.org,direct")
+GOENV  	:= GO15VENDOREXPERIMENT="1" CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH) GOPROXY=$(GOPROXY)
+CGOENV 	:= GO15VENDOREXPERIMENT="1" CGO_ENABLED=1 GOOS=$(GOOS) GOARCH=$(GOARCH) GOPROXY=$(GOPROXY)
+GO     	:= $(GOENV) go
+CGO    	:= $(CGOENV) go
+GOTEST 	:= USE_EXISTING_CLUSTER=false NO_PROXY="${NO_PROXY},testhost" go test
+SHELL  	:= bash
 
 PACKAGE_LIST := echo $$(go list ./... | grep -vE "chaos-mesh/test|pkg/ptrace|zz_generated|vendor") github.com/chaos-mesh/chaos-mesh/api/v1alpha1
 
@@ -54,7 +55,7 @@ $(GO_BUILD_CACHE)/chaos-mesh-gobuild:
 $(GO_BUILD_CACHE)/chaos-mesh-gopath:
 	@mkdir -p $(GO_BUILD_CACHE)/chaos-mesh-gopath
 
-test-utils: timer multithread_tracee
+test-utils: timer multithread_tracee pkg/time/fakeclock/fake_clock_gettime.o
 
 timer:
 	$(GO) build -ldflags '$(LDFLAGS)' -o bin/test/timer ./test/cmd/timer/*.go
@@ -75,7 +76,7 @@ ifeq (${UI},1)
 	hack/embed_ui_assets.sh
 endif
 
-watchmaker:
+watchmaker: pkg/time/fakeclock/fake_clock_gettime.o
 	$(CGO) build -ldflags '$(LDFLAGS)' -o bin/watchmaker ./cmd/watchmaker/...
 
 # Build chaosctl
@@ -145,7 +146,7 @@ ifeq ($(TARGET_PLATFORM),)
 	endif
 endif
 
-BUILD_INDOCKER_ARG := --env IN_DOCKER=1 --volume $(ROOT):/mnt --user $(shell id -u):$(shell id -g) --platform=linux/$(TARGET_PLATFORM)
+BUILD_INDOCKER_ARG := --env IN_DOCKER=1 --env HTTP_PROXY=${HTTP_PROXY} --env HTTPS_PROXY=${HTTPS_PROXY} --env GOPROXY=${GOPROXY} --volume $(ROOT):/mnt --user $(shell id -u):$(shell id -g) --platform=linux/$(TARGET_PLATFORM)
 
 ifeq ($(TARGET_PLATFORM),arm64)
 	BUILD_INDOCKER_ARG += --env ETCD_UNSUPPORTED_ARCH=arm64
@@ -191,11 +192,15 @@ enter-devenv: image-dev-env go_build_cache_directory
 ifeq ($(IN_DOCKER),1)
 images/chaos-daemon/bin/pause: hack/pause.c
 	cc ./hack/pause.c -o images/chaos-daemon/bin/pause
+
+pkg/time/fakeclock/fake_clock_gettime.o: pkg/time/fakeclock/fake_clock_gettime.c
+	cc -c ./pkg/time/fakeclock/fake_clock_gettime.c -fPIE -O2 -o pkg/time/fakeclock/fake_clock_gettime.o
 endif
 $(eval $(call BUILD_IN_DOCKER_TEMPLATE,chaos-daemon,images/chaos-daemon/bin/pause))
 
+$(eval $(call BUILD_IN_DOCKER_TEMPLATE,chaos-daemon,pkg/time/fakeclock/fake_clock_gettime.o))
 $(eval $(call BUILD_IN_DOCKER_TEMPLATE,chaos-daemon,images/chaos-daemon/bin/chaos-daemon))
-$(eval $(call COMPILE_GO_TEMPLATE,images/chaos-daemon/bin/chaos-daemon,./cmd/chaos-daemon/main.go,1))
+$(eval $(call COMPILE_GO_TEMPLATE,images/chaos-daemon/bin/chaos-daemon,./cmd/chaos-daemon/main.go,1,pkg/time/fakeclock/fake_clock_gettime.o))
 
 $(eval $(call BUILD_IN_DOCKER_TEMPLATE,chaos-dashboard,images/chaos-dashboard/bin/chaos-dashboard))
 $(eval $(call COMPILE_GO_TEMPLATE,images/chaos-dashboard/bin/chaos-dashboard,./cmd/chaos-dashboard/main.go,1,ui))
@@ -401,7 +406,7 @@ endef
 $(eval $(call RUN_IN_DEV_ENV_TEMPLATE,tidy,clean))
 
 define generate-ctrl-make
-	go generate ./pkg/ctrlserver/graph
+	$(GO) generate ./pkg/ctrlserver/graph
 endef
 $(eval $(call RUN_IN_DEV_ENV_TEMPLATE,generate-ctrl))
 
@@ -462,7 +467,7 @@ endef
 $(eval $(call RUN_IN_DEV_ENV_TEMPLATE,swagger_spec))
 
 define generate-mock-make
-	go generate ./pkg/workflow
+	$(GO) generate ./pkg/workflow
 endef
 $(eval $(call RUN_IN_DEV_ENV_TEMPLATE,generate-mock))
 
@@ -472,5 +477,6 @@ $(eval $(call RUN_IN_DEV_ENV_TEMPLATE,generate-mock))
 	manager chaosfs chaosdaemon chaos-dashboard \
 	dashboard dashboard-server-frontend gosec-scan \
 	failpoint-enable failpoint-disable swagger_spec \
+	e2e-test/image/e2e/bin/e2e.test \
 	proto bin/chaos-builder go_build_cache_directory schedule-migration enter-buildenv enter-devenv \
 	manifests/crd.yaml

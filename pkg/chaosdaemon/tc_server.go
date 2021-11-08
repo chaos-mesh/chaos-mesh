@@ -17,6 +17,7 @@ package chaosdaemon
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -70,10 +71,30 @@ func generateQdiscArgs(action string, qdisc *pb.Qdisc) ([]string, error) {
 	return args, nil
 }
 
-func setDefaultTcsRequest(in *pb.TcsRequest) {
-	if len(in.Device) == 0 {
-		in.Device = defaultDevice
+func getAllInterfaces(pid uint32) ([]string, error) {
+	ipOutput, err := bpm.DefaultProcessBuilder("ip", "-j", "addr", "show").SetNS(pid, bpm.NetNS).Build().CombinedOutput()
+	if err != nil {
+		return []string{}, err
 	}
+	var data []map[string]interface{}
+
+	err = json.Unmarshal(ipOutput, &data)
+	if err != nil {
+		return []string{}, err
+	}
+
+	var ifaces []string
+	for _, iface := range data {
+		name, ok := iface["ifname"]
+		if !ok {
+			return []string{}, fmt.Errorf("fail to read ifname from ip -j addr show")
+		}
+
+		ifaces = append(ifaces, name.(string))
+	}
+
+	log.Info("get interfaces from ip command", "ifaces", ifaces)
+	return ifaces, nil
 }
 
 func (s *DaemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Empty, error) {
@@ -84,67 +105,88 @@ func (s *DaemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Em
 		return nil, status.Errorf(codes.Internal, "get pid from containerID error: %v", err)
 	}
 
-	setDefaultTcsRequest(in)
-
 	tcCli := buildTcClient(ctx, in.EnterNS, pid)
-	err = tcCli.flush(in.Device)
+
+	ifaces, err := getAllInterfaces(pid)
 	if err != nil {
-		log.Error(err, "error while flushing client")
+		log.Error(err, "error while getting interfaces")
+		return nil, err
+	}
+	for _, iface := range ifaces {
+		err = tcCli.flush(iface)
+		if err != nil {
+			log.Error(err, "fail to flush tc rules on device", "device", iface)
+		}
+	}
+	if err != nil {
 		return &empty.Empty{}, err
 	}
 
-	// tc rules are split into two different kinds according to whether it has filter.
-	// all tc rules without filter are called `globalTc` and the tc rules with filter will be called `filterTc`.
-	// the `globalTc` rules will be piped one by one from root, and the last `globalTc` will be connected with a PRIO
-	// qdisc, which has `3 + len(filterTc)` bands. Then the 4.. bands will be connected to `filterTc` and a filter will
-	// be setuped to flow packet from PRIO qdisc to it.
+	for device, rules := range s.groupRulesAccordingToDevices(in.Tcs) {
+		// tc rules are split into two different kinds according to whether it has filter.
+		// all tc rules without filter are called `globalTc` and the tc rules with filter will be called `filterTc`.
+		// the `globalTc` rules will be piped one by one from root, and the last `globalTc` will be connected with a PRIO
+		// qdisc, which has `3 + len(filterTc)` bands. Then the 4.. bands will be connected to `filterTc` and a filter will
+		// be setuped to flow packet from PRIO qdisc to it.
 
-	// for example, four tc rules:
-	// - NETEM: 50ms latency without filter
-	// - NETEM: 100ms latency without filter
-	// - NETEM: 50ms latency with filter ipset A
-	// - NETEM: 100ms latency with filter ipset B
-	// will generate tc rules:
-	//	tc qdisc del dev eth0 root
-	//  tc qdisc add dev eth0 root handle 1: netem delay 50000
-	//  tc qdisc add dev eth0 parent 1: handle 2: netem delay 100000
-	//  tc qdisc add dev eth0 parent 2: handle 3: prio bands 5 priomap 1 2 2 2 1 2 0 0 1 1 1 1 1 1 1 1
-	//  tc qdisc add dev eth0 parent 3:1 handle 4: sfq
-	//  tc qdisc add dev eth0 parent 3:2 handle 5: sfq
-	//  tc qdisc add dev eth0 parent 3:3 handle 6: sfq
-	//  tc qdisc add dev eth0 parent 3:4 handle 7: netem delay 50000
-	//  iptables -A TC-TABLES-0 -m set --match-set A dst -j CLASSIFY --set-class 3:4 -w 5
-	//  tc qdisc add dev eth0 parent 3:5 handle 8: netem delay 100000
-	//  iptables -A TC-TABLES-1 -m set --match-set B dst -j CLASSIFY --set-class 3:5 -w 5
+		// for example, four tc rules:
+		// - NETEM: 50ms latency without filter
+		// - NETEM: 100ms latency without filter
+		// - NETEM: 50ms latency with filter ipset A
+		// - NETEM: 100ms latency with filter ipset B
+		// will generate tc rules:
+		//	tc qdisc del dev eth0 root
+		//  tc qdisc add dev eth0 root handle 1: netem delay 50000
+		//  tc qdisc add dev eth0 parent 1: handle 2: netem delay 100000
+		//  tc qdisc add dev eth0 parent 2: handle 3: prio bands 5 priomap 1 2 2 2 1 2 0 0 1 1 1 1 1 1 1 1
+		//  tc qdisc add dev eth0 parent 3:1 handle 4: sfq
+		//  tc qdisc add dev eth0 parent 3:2 handle 5: sfq
+		//  tc qdisc add dev eth0 parent 3:3 handle 6: sfq
+		//  tc qdisc add dev eth0 parent 3:4 handle 7: netem delay 50000
+		//  iptables -A TC-TABLES-0 -o eth0 -m set --match-set A dst -j CLASSIFY --set-class 3:4 -w 5
+		//  tc qdisc add dev eth0 parent 3:5 handle 8: netem delay 100000
+		//  iptables -A TC-TABLES-1 -o eth0 -m set --match-set B dst -j CLASSIFY --set-class 3:5 -w 5
 
-	globalTc := []*pb.Tc{}
-	filterTc := make(map[string][]*pb.Tc)
+		globalTc := []*pb.Tc{}
+		filterTc := make(map[string][]*pb.Tc)
 
-	for _, tc := range in.Tcs {
-		filter := abstractTcFilter(tc)
-		if len(filter) > 0 {
-			filterTc[filter] = append(filterTc[filter], tc)
-			continue
+		for _, tc := range rules {
+			filter := abstractTcFilter(tc)
+			if len(filter) > 0 {
+				filterTc[filter] = append(filterTc[filter], tc)
+				continue
+			}
+			globalTc = append(globalTc, tc)
 		}
-		globalTc = append(globalTc, tc)
-	}
 
-	if len(globalTc) > 0 {
-		if err := s.setGlobalTcs(tcCli, globalTc, in.Device); err != nil {
-			log.Error(err, "error while setting global tc")
-			return &empty.Empty{}, err
+		if len(globalTc) > 0 {
+			if err := s.setGlobalTcs(tcCli, globalTc, device); err != nil {
+				log.Error(err, "error while setting global tc")
+				return &empty.Empty{}, err
+			}
 		}
-	}
 
-	if len(filterTc) > 0 {
-		iptablesCli := buildIptablesClient(ctx, in.EnterNS, pid)
-		if err := s.setFilterTcs(tcCli, iptablesCli, filterTc, in.Device, len(globalTc)); err != nil {
-			log.Error(err, "error while setting filter tc")
-			return &empty.Empty{}, err
+		if len(filterTc) > 0 {
+			iptablesCli := buildIptablesClient(ctx, in.EnterNS, pid)
+			if err := s.setFilterTcs(tcCli, iptablesCli, filterTc, device, len(globalTc)); err != nil {
+				log.Error(err, "error while setting filter tc")
+				return &empty.Empty{}, err
+			}
 		}
 	}
 
 	return &empty.Empty{}, nil
+}
+
+func (s *DaemonServer) groupRulesAccordingToDevices(tcs []*pb.Tc) map[string][]*pb.Tc {
+	rules := make(map[string][]*pb.Tc)
+	for _, tc := range tcs {
+		if tc.Device == "" {
+			tc.Device = defaultDevice
+		}
+		rules[tc.Device] = append(rules[tc.Device], tc)
+	}
+	return rules
 }
 
 func (s *DaemonServer) setGlobalTcs(cli tcClient, tcs []*pb.Tc, device string) error {
@@ -209,6 +251,7 @@ func (s *DaemonServer) setFilterTcs(
 			Name:      fmt.Sprintf("TC-TABLES-%d", index),
 			Direction: pb.Chain_OUTPUT,
 			Target:    fmt.Sprintf("CLASSIFY --set-class %d:%d", parent, index+4),
+			Device:    device,
 		}
 
 		tc := tcs[0]

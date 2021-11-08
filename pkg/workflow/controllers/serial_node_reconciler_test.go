@@ -96,12 +96,14 @@ var _ = Describe("Workflow", func() {
 									NetworkChaos: &v1alpha1.NetworkChaosSpec{
 										PodSelector: v1alpha1.PodSelector{
 											Selector: v1alpha1.PodSelectorSpec{
-												Namespaces: []string{ns},
-												LabelSelectors: map[string]string{
-													"app": "not-exist",
+												GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+													Namespaces: []string{ns},
+													LabelSelectors: map[string]string{
+														"app": "not-exist",
+													},
 												},
 											},
-											Mode: v1alpha1.AllPodMode,
+											Mode: v1alpha1.AllMode,
 										},
 										Action: v1alpha1.PartitionAction,
 									},
@@ -115,12 +117,14 @@ var _ = Describe("Workflow", func() {
 										ContainerSelector: v1alpha1.ContainerSelector{
 											PodSelector: v1alpha1.PodSelector{
 												Selector: v1alpha1.PodSelectorSpec{
-													Namespaces: []string{ns},
-													LabelSelectors: map[string]string{
-														"app": "not-exist",
+													GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+														Namespaces: []string{ns},
+														LabelSelectors: map[string]string{
+															"app": "not-exist",
+														},
 													},
 												},
-												Mode: v1alpha1.AllPodMode,
+												Mode: v1alpha1.AllMode,
 											},
 										},
 										Action: v1alpha1.PodKillAction,
@@ -136,12 +140,14 @@ var _ = Describe("Workflow", func() {
 										ContainerSelector: v1alpha1.ContainerSelector{
 											PodSelector: v1alpha1.PodSelector{
 												Selector: v1alpha1.PodSelectorSpec{
-													Namespaces: []string{ns},
-													LabelSelectors: map[string]string{
-														"app": "not-exist",
+													GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+														Namespaces: []string{ns},
+														LabelSelectors: map[string]string{
+															"app": "not-exist",
+														},
 													},
 												},
-												Mode: v1alpha1.AllPodMode,
+												Mode: v1alpha1.AllMode,
 											},
 										},
 										Stressors: &v1alpha1.Stressors{
