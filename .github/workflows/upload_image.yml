@@ -42,6 +42,7 @@ jobs:
           IMAGE_TAG: ${{ steps.image_tag.outputs.image_tag }}
           ARCH: ${{ matrix.arch }}
           IMAGE: ${{ matrix.image }}
+          GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
         run: |
           if [ "${IMAGE}" = "chaos-dashboard" ]; then
             UI=1
@@ -49,13 +50,14 @@ jobs:
             UI=0
           fi
           # ${VAR,,} convertion to lower case
-          make -B IMAGE_TAG=$IMAGE_TAG IMAGE_PROJECT=${GITHUB_REPOSITORY,,} DOCKER_REGISTRY=ghcr.io UI=$UI image-$IMAGE
+          make -B IMAGE_TAG=$IMAGE_TAG IMAGE_PROJECT=${GITHUB_REPOSITORY_OWNER,,} DOCKER_REGISTRY=ghcr.io UI=$UI image-$IMAGE
 
       - name: Upload Chaos Mesh
         env:
           IMAGE_TAG: ${{ steps.image_tag.outputs.image_tag }}
           ARCH: ${{ matrix.arch }}
           IMAGE: ${{ matrix.image }}
+          GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
         run: |
           # ${VAR,,} convertion to lower case
-          docker push ghcr.io/${GITHUB_REPOSITORY,,}/$IMAGE:$IMAGE_TAG
+          docker push ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE:$IMAGE_TAG
