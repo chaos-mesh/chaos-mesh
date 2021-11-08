@@ -156,14 +156,13 @@ const httpCommonSelect: Spec = {
     items: ['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'OPTIONS', 'PATCH'],
     label: 'Method',
     value: 'GET',
-    helperText: 'Optional. The HTTP method of request',
+    helperText: 'The HTTP method of request',
   },
   path: {
     field: 'text',
     label: 'Path',
-    value: '',
-    helperText:
-      'Optional. The target URI path of request, support wildcards(https://www.wikiwand.com/en/Matching_wildcards)',
+    value: '/*',
+    helperText: 'The target URI path of request, support wildcards(https://www.wikiwand.com/en/Matching_wildcards)',
   },
   request_headers: {
     field: 'label',
@@ -185,8 +184,8 @@ const httpResponseCommon: Spec = {
   code: {
     field: 'number',
     label: 'Status Code',
-    value: 0,
-    helperText: 'Optional. The target status code of response',
+    value: 200,
+    helperText: 'The target status code of response',
   },
   response_headers: {
     field: 'label',
@@ -430,7 +429,7 @@ const data: Record<Kind, Definition> = {
           'replace.path': {
             field: 'text',
             label: 'Replace Path',
-            value: '',
+            value: '/',
             helperText: 'Optional. The path to be replaced',
           },
           'replace.method': {
@@ -482,7 +481,7 @@ const data: Record<Kind, Definition> = {
           'replace.code': {
             field: 'number',
             label: 'Replace Status Code',
-            value: 0,
+            value: 200,
             helperText: 'Optional. The status code to be replaced',
           },
         },
