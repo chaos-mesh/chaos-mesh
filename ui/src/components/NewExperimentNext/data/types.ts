@@ -148,7 +148,7 @@ const httpCommonSelect: Spec = {
   port: {
     field: 'number',
     label: 'Port',
-    value: 0,
+    value: 80,
     helperText: 'The target port of request',
   },
   method: {
@@ -184,7 +184,7 @@ const httpResponseCommon: Spec = {
   code: {
     field: 'number',
     label: 'Status Code',
-    value: 0,
+    value: '',
     helperText: 'Optional. The target status code of response',
   },
   response_headers: {
