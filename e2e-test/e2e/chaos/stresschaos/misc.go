@@ -40,7 +40,7 @@ func makeMemoryStressChaos(
 		Spec: v1alpha1.StressChaosSpec{
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{
-					Mode: v1alpha1.AllPodMode,
+					Mode: v1alpha1.AllMode,
 					Selector: v1alpha1.PodSelectorSpec{
 						GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
 							Namespaces: []string{podNs},
@@ -73,7 +73,7 @@ func makeCPUStressChaos(
 		Spec: v1alpha1.StressChaosSpec{
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{
-					Mode: v1alpha1.AllPodMode,
+					Mode: v1alpha1.AllMode,
 					Selector: v1alpha1.PodSelectorSpec{
 						GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
 							Namespaces: []string{podNs},

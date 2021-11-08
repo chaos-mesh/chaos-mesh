@@ -409,7 +409,7 @@ func Test_convertWorkflowNode(t *testing.T) {
 							IOChaos: &v1alpha1.IOChaosSpec{
 								ContainerSelector: v1alpha1.ContainerSelector{
 									PodSelector: v1alpha1.PodSelector{
-										Mode: v1alpha1.OnePodMode,
+										Mode: v1alpha1.OneMode,
 									},
 								},
 								Action:     "delay",

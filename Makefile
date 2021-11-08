@@ -4,7 +4,7 @@ DOCKER_REGISTRY ?= "localhost:5000"
 
 # SET DOCKER_REGISTRY to change the docker registry
 DOCKER_REGISTRY_PREFIX := $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY)/,)
-DOCKER_BUILD_ARGS := --build-arg HTTP_PROXY=${HTTP_PROXY} --build-arg HTTPS_PROXY=${HTTPS_PROXY} --build-arg UI=${UI} --build-arg LDFLAGS="${LDFLAGS}" --build-arg CRATES_MIRROR="${CRATES_MIRROR}"
+DOCKER_BUILD_ARGS := --build-arg HTTP_PROXY=${HTTP_PROXY} --build-arg HTTPS_PROXY=${HTTPS_PROXY} --build-arg GOPROXY=${GOPROXY} --build-arg UI=${UI} --build-arg LDFLAGS="${LDFLAGS}" --build-arg CRATES_MIRROR="${CRATES_MIRROR}"
 
 IMAGE_TAG := $(if $(IMAGE_TAG),$(IMAGE_TAG),latest)
 IMAGE_PROJECT := $(if $(IMAGE_PROJECT),$(IMAGE_PROJECT),pingcap)
@@ -23,14 +23,15 @@ IMAGE_DEV_ENV_BUILD ?= 0
 
 # Enable GO111MODULE=on explicitly, disable it with GO111MODULE=off when necessary.
 export GO111MODULE := on
-GOOS   := $(if $(GOOS),$(GOOS),"")
-GOARCH := $(if $(GOARCH),$(GOARCH),"")
-GOENV  := GO15VENDOREXPERIMENT="1" CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH)
-CGOENV := GO15VENDOREXPERIMENT="1" CGO_ENABLED=1 GOOS=$(GOOS) GOARCH=$(GOARCH)
-GO     := $(GOENV) go
-CGO    := $(CGOENV) go
-GOTEST := USE_EXISTING_CLUSTER=false NO_PROXY="${NO_PROXY},testhost" go test
-SHELL  := bash
+GOOS   	:= $(if $(GOOS),$(GOOS),"")
+GOARCH 	:= $(if $(GOARCH),$(GOARCH),"")
+GOPROXY := $(if $(GOPROXY),$(GOPROXY),"https://proxy.golang.org,direct")
+GOENV  	:= GO15VENDOREXPERIMENT="1" CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH) GOPROXY=$(GOPROXY)
+CGOENV 	:= GO15VENDOREXPERIMENT="1" CGO_ENABLED=1 GOOS=$(GOOS) GOARCH=$(GOARCH) GOPROXY=$(GOPROXY)
+GO     	:= $(GOENV) go
+CGO    	:= $(CGOENV) go
+GOTEST 	:= USE_EXISTING_CLUSTER=false NO_PROXY="${NO_PROXY},testhost" go test
+SHELL  	:= bash
 
 PACKAGE_LIST := echo $$(go list ./... | grep -vE "chaos-mesh/test|pkg/ptrace|zz_generated|vendor") github.com/chaos-mesh/chaos-mesh/api/v1alpha1
 
@@ -145,7 +146,7 @@ ifeq ($(TARGET_PLATFORM),)
 	endif
 endif
 
-BUILD_INDOCKER_ARG := --env IN_DOCKER=1 --volume $(ROOT):/mnt --user $(shell id -u):$(shell id -g) --platform=linux/$(TARGET_PLATFORM)
+BUILD_INDOCKER_ARG := --env IN_DOCKER=1 --env HTTP_PROXY=${HTTP_PROXY} --env HTTPS_PROXY=${HTTPS_PROXY} --env GOPROXY=${GOPROXY} --volume $(ROOT):/mnt --user $(shell id -u):$(shell id -g) --platform=linux/$(TARGET_PLATFORM)
 
 ifeq ($(TARGET_PLATFORM),arm64)
 	BUILD_INDOCKER_ARG += --env ETCD_UNSUPPORTED_ARCH=arm64
@@ -405,7 +406,7 @@ endef
 $(eval $(call RUN_IN_DEV_ENV_TEMPLATE,tidy,clean))
 
 define generate-ctrl-make
-	go generate ./pkg/ctrlserver/graph
+	$(GO) generate ./pkg/ctrlserver/graph
 endef
 $(eval $(call RUN_IN_DEV_ENV_TEMPLATE,generate-ctrl))
 
@@ -466,7 +467,7 @@ endef
 $(eval $(call RUN_IN_DEV_ENV_TEMPLATE,swagger_spec))
 
 define generate-mock-make
-	go generate ./pkg/workflow
+	$(GO) generate ./pkg/workflow
 endef
 $(eval $(call RUN_IN_DEV_ENV_TEMPLATE,generate-mock))
 
