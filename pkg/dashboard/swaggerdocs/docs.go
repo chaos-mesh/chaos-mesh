@@ -2606,6 +2606,20 @@ var doc = `{
                 }
             }
         },
+        "v1alpha1.ClockSpec": {
+            "type": "object",
+            "properties": {
+                "clock-ids-slice": {
+                    "type": "string"
+                },
+                "pid": {
+                    "type": "integer"
+                },
+                "time-offset": {
+                    "type": "string"
+                }
+            }
+        },
         "v1alpha1.ConditionalBranch": {
             "type": "object",
             "properties": {
@@ -2667,7 +2681,7 @@ var doc = `{
                     "$ref": "#/definitions/v1alpha1.PodSelectorSpec"
                 },
                 "value": {
-                    "description": "Value is required when the mode is set to ` + "`" + `FixedPodMode` + "`" + ` / ` + "`" + `FixedPercentPodMod` + "`" + ` / ` + "`" + `RandomMaxPercentPodMod` + "`" + `.\nIf ` + "`" + `FixedPodMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentPodMod` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentPodMod` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
+                    "description": "Value is required when the mode is set to ` + "`" + `FixedMode` + "`" + ` / ` + "`" + `FixedPercentMode` + "`" + ` / ` + "`" + `RandomMaxPercentMode` + "`" + `.\nIf ` + "`" + `FixedMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentMode` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentMode` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
                     "type": "string"
                 }
             }
@@ -2889,7 +2903,7 @@ var doc = `{
                     "type": "string"
                 },
                 "value": {
-                    "description": "Value is required when the mode is set to ` + "`" + `FixedPodMode` + "`" + ` / ` + "`" + `FixedPercentPodMod` + "`" + ` / ` + "`" + `RandomMaxPercentPodMod` + "`" + `.\nIf ` + "`" + `FixedPodMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentPodMod` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentPodMod` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
+                    "description": "Value is required when the mode is set to ` + "`" + `FixedMode` + "`" + ` / ` + "`" + `FixedPercentMode` + "`" + ` / ` + "`" + `RandomMaxPercentMode` + "`" + `.\nIf ` + "`" + `FixedMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentMode` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentMode` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
                     "type": "string"
                 }
             }
@@ -2955,7 +2969,7 @@ var doc = `{
                     "$ref": "#/definitions/v1alpha1.PodSelectorSpec"
                 },
                 "value": {
-                    "description": "Value is required when the mode is set to ` + "`" + `FixedPodMode` + "`" + ` / ` + "`" + `FixedPercentPodMod` + "`" + ` / ` + "`" + `RandomMaxPercentPodMod` + "`" + `.\nIf ` + "`" + `FixedPodMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentPodMod` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentPodMod` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
+                    "description": "Value is required when the mode is set to ` + "`" + `FixedMode` + "`" + ` / ` + "`" + `FixedPercentMode` + "`" + ` / ` + "`" + `RandomMaxPercentMode` + "`" + `.\nIf ` + "`" + `FixedMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentMode` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentMode` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
                     "type": "string"
                 },
                 "volumePath": {
@@ -3010,7 +3024,7 @@ var doc = `{
                     "type": "string"
                 },
                 "value": {
-                    "description": "Value is required when the mode is set to ` + "`" + `FixedPodMode` + "`" + ` / ` + "`" + `FixedPercentPodMod` + "`" + ` / ` + "`" + `RandomMaxPercentPodMod` + "`" + `.\nIf ` + "`" + `FixedPodMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentPodMod` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentPodMod` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
+                    "description": "Value is required when the mode is set to ` + "`" + `FixedMode` + "`" + ` / ` + "`" + `FixedPercentMode` + "`" + ` / ` + "`" + `RandomMaxPercentMode` + "`" + `.\nIf ` + "`" + `FixedMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentMode` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentMode` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
                     "type": "string"
                 }
             }
@@ -3127,8 +3141,8 @@ var doc = `{
                     "description": "the CPU core number need to use, only set it when action is stress",
                     "type": "integer"
                 },
-                "mem-size": {
-                    "description": "the memory size need to locate, only set it when action is stress",
+                "mem-type": {
+                    "description": "the memory type need to locate, only set it when action is stress, the value can be 'stack' or 'heap'",
                     "type": "integer"
                 },
                 "pid": {
@@ -3163,7 +3177,7 @@ var doc = `{
                     "$ref": "#/definitions/v1alpha1.PodSelectorSpec"
                 },
                 "value": {
-                    "description": "Value is required when the mode is set to ` + "`" + `FixedPodMode` + "`" + ` / ` + "`" + `FixedPercentPodMod` + "`" + ` / ` + "`" + `RandomMaxPercentPodMod` + "`" + `.\nIf ` + "`" + `FixedPodMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentPodMod` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentPodMod` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
+                    "description": "Value is required when the mode is set to ` + "`" + `FixedMode` + "`" + ` / ` + "`" + `FixedPercentMode` + "`" + ` / ` + "`" + `RandomMaxPercentMode` + "`" + `.\nIf ` + "`" + `FixedMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentMode` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentMode` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
                     "type": "string"
                 }
             }
@@ -3246,6 +3260,10 @@ var doc = `{
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.DelaySpec"
                 },
+                "device": {
+                    "description": "Device represents the network device to be affected.\n+optional",
+                    "type": "string"
+                },
                 "direction": {
                     "description": "Direction represents the direction, this applies on netem and network partition action\n+optional\n+kubebuilder:validation:Enum=to;from;both;\"\"",
                     "type": "string"
@@ -3285,8 +3303,12 @@ var doc = `{
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.PodSelector"
                 },
+                "targetDevice": {
+                    "description": "TargetDevice represents the network device to be affected in target scope.\n+optional",
+                    "type": "string"
+                },
                 "value": {
-                    "description": "Value is required when the mode is set to ` + "`" + `FixedPodMode` + "`" + ` / ` + "`" + `FixedPercentPodMod` + "`" + ` / ` + "`" + `RandomMaxPercentPodMod` + "`" + `.\nIf ` + "`" + `FixedPodMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentPodMod` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentPodMod` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
+                    "description": "Value is required when the mode is set to ` + "`" + `FixedMode` + "`" + ` / ` + "`" + `FixedPercentMode` + "`" + ` / ` + "`" + `RandomMaxPercentMode` + "`" + `.\nIf ` + "`" + `FixedMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentMode` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentMode` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
                     "type": "string"
                 }
             }
@@ -3316,6 +3338,20 @@ var doc = `{
                     "type": "string"
                 },
                 "source-port": {
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.NetworkDNSSpec": {
+            "type": "object",
+            "properties": {
+                "dns-domain-name": {
+                    "type": "string"
+                },
+                "dns-ip": {
+                    "type": "string"
+                },
+                "dns-server": {
                     "type": "string"
                 }
             }
@@ -3410,6 +3446,30 @@ var doc = `{
                 }
             }
         },
+        "v1alpha1.NetworkPartitionSpec": {
+            "type": "object",
+            "properties": {
+                "accept-tcp-flags": {
+                    "description": "only the packet which match the tcp flag can be accepted, others will be dropped.\nonly set when the IPProtocol is tcp, used for partition.",
+                    "type": "string"
+                },
+                "device": {
+                    "type": "string"
+                },
+                "direction": {
+                    "type": "string"
+                },
+                "hostname": {
+                    "type": "string"
+                },
+                "ip-address": {
+                    "type": "string"
+                },
+                "ip-protocol": {
+                    "type": "string"
+                }
+            }
+        },
         "v1alpha1.PhysicalMachineChaosSpec": {
             "type": "object",
             "properties": {
@@ -3422,6 +3482,11 @@ var doc = `{
                     "items": {
                         "type": "string"
                     }
+                },
+                "clock": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.ClockSpec"
                 },
                 "disk-fill": {
                     "description": "+optional",
@@ -3482,6 +3547,11 @@ var doc = `{
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.NetworkDelaySpec"
                 },
+                "network-dns": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.NetworkDNSSpec"
+                },
                 "network-duplicate": {
                     "description": "+optional",
                     "type": "object",
@@ -3491,6 +3561,11 @@ var doc = `{
                     "description": "+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.NetworkLossSpec"
+                },
+                "network-partition": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.NetworkPartitionSpec"
                 },
                 "process": {
                     "description": "+optional",
@@ -3545,7 +3620,7 @@ var doc = `{
                     "$ref": "#/definitions/v1alpha1.PodSelectorSpec"
                 },
                 "value": {
-                    "description": "Value is required when the mode is set to ` + "`" + `FixedPodMode` + "`" + ` / ` + "`" + `FixedPercentPodMod` + "`" + ` / ` + "`" + `RandomMaxPercentPodMod` + "`" + `.\nIf ` + "`" + `FixedPodMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentPodMod` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentPodMod` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
+                    "description": "Value is required when the mode is set to ` + "`" + `FixedMode` + "`" + ` / ` + "`" + `FixedPercentMode` + "`" + ` / ` + "`" + `RandomMaxPercentMode` + "`" + `.\nIf ` + "`" + `FixedMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentMode` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentMode` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
                     "type": "string"
                 }
             }
@@ -3644,7 +3719,7 @@ var doc = `{
                     "$ref": "#/definitions/v1alpha1.PodSelectorSpec"
                 },
                 "value": {
-                    "description": "Value is required when the mode is set to ` + "`" + `FixedPodMode` + "`" + ` / ` + "`" + `FixedPercentPodMod` + "`" + ` / ` + "`" + `RandomMaxPercentPodMod` + "`" + `.\nIf ` + "`" + `FixedPodMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentPodMod` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentPodMod` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
+                    "description": "Value is required when the mode is set to ` + "`" + `FixedMode` + "`" + ` / ` + "`" + `FixedPercentMode` + "`" + ` / ` + "`" + `RandomMaxPercentMode` + "`" + `.\nIf ` + "`" + `FixedMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentMode` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentMode` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
                     "type": "string"
                 }
             }
@@ -3905,7 +3980,7 @@ var doc = `{
                     "$ref": "#/definitions/v1alpha1.Stressors"
                 },
                 "value": {
-                    "description": "Value is required when the mode is set to ` + "`" + `FixedPodMode` + "`" + ` / ` + "`" + `FixedPercentPodMod` + "`" + ` / ` + "`" + `RandomMaxPercentPodMod` + "`" + `.\nIf ` + "`" + `FixedPodMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentPodMod` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentPodMod` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
+                    "description": "Value is required when the mode is set to ` + "`" + `FixedMode` + "`" + ` / ` + "`" + `FixedPercentMode` + "`" + ` / ` + "`" + `RandomMaxPercentMode` + "`" + `.\nIf ` + "`" + `FixedMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentMode` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentMode` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
                     "type": "string"
                 }
             }
@@ -4080,7 +4155,7 @@ var doc = `{
                     "type": "string"
                 },
                 "value": {
-                    "description": "Value is required when the mode is set to ` + "`" + `FixedPodMode` + "`" + ` / ` + "`" + `FixedPercentPodMod` + "`" + ` / ` + "`" + `RandomMaxPercentPodMod` + "`" + `.\nIf ` + "`" + `FixedPodMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentPodMod` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentPodMod` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
+                    "description": "Value is required when the mode is set to ` + "`" + `FixedMode` + "`" + ` / ` + "`" + `FixedPercentMode` + "`" + ` / ` + "`" + `RandomMaxPercentMode` + "`" + `.\nIf ` + "`" + `FixedMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentMode` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentMode` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
                     "type": "string"
                 }
             }

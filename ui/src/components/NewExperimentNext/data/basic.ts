@@ -14,8 +14,10 @@
  * limitations under the License.
  *
  */
+
 import * as Yup from 'yup'
 
+import { Env } from 'slices/experiments'
 import { schema as scheduleSchema } from 'components/Schedule/types'
 
 const data = {
@@ -35,21 +37,22 @@ const data = {
     },
     mode: 'one',
     value: undefined,
+    address: [],
     duration: '',
   },
 }
 
-export const schema = (options: { scopeDisabled: boolean; scheduled?: boolean; needDeadline?: boolean }) => {
+export const schema = (options: { env: Env; scopeDisabled: boolean; scheduled?: boolean; needDeadline?: boolean }) => {
   let result = Yup.object({
     metadata: Yup.object({
       name: Yup.string().trim().required('The name is required'),
     }),
   })
 
-  const { scopeDisabled, scheduled, needDeadline } = options
+  const { env, scopeDisabled, scheduled, needDeadline } = options
   let spec = Yup.object()
 
-  if (!scopeDisabled) {
+  if (!scopeDisabled && env === 'k8s') {
     spec = spec.shape({
       selector: Yup.object({
         namespaces: Yup.array().min(1, 'The namespace selectors is required'),
