@@ -122,85 +122,83 @@ const HTTPTask: React.FC<HTTPTaskProps> = (props) => {
   }, [props.externalTemplate])
 
   return (
-    <>
-      <Paper>
-        <Space>
-          <PaperTop title={T('newW.httpTitle')} />
-          <Formik
-            innerRef={formRef}
-            initialValues={initialValues}
-            enableReinitialize
-            onSubmit={onSubmit}
-            validate={validateRequestForm}
-            validateOnBlur={false}
-          >
-            {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => {
-              return (
-                <Form>
-                  <Space>
+    <Paper>
+      <Space>
+        <PaperTop title={T('newW.httpTitle')} />
+        <Formik
+          innerRef={formRef}
+          initialValues={initialValues}
+          enableReinitialize
+          onSubmit={onSubmit}
+          validate={validateRequestForm}
+          validateOnBlur={false}
+        >
+          {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => {
+            return (
+              <Form>
+                <Space>
+                  <TextField
+                    name="name"
+                    label={T('common.name')}
+                    validate={validateName(T('newW.node.nameValidation', intl))}
+                    helperText={errors.name && touched.name ? errors.name : T('newW.node.nameHelper')}
+                    error={errors.name && touched.name ? true : false}
+                    size="small"
+                    fullWidth
+                  />
+                  <TextField
+                    name="url"
+                    label={T('newW.node.httpRequest.url')}
+                    helperText={errors.url && touched.url ? errors.url : T('newW.node.httpRequest.urlHelper')}
+                    error={errors.url && touched.url ? true : false}
+                    size="small"
+                    fullWidth
+                  />
+
+                  <SelectField
+                    className={classes.field}
+                    name="method"
+                    label={T('newW.node.httpRequest.method')}
+                    helperText={
+                      errors.method && touched.method ? errors.method : T('newW.node.httpRequest.methodHelper')
+                    }
+                    size="small"
+                  >
+                    {HTTPMethods.map((method) => (
+                      <MenuItem key={method} value={method}>
+                        <Typography variant="body2">{method}</Typography>
+                      </MenuItem>
+                    ))}
+                  </SelectField>
+                  {(values.method === 'POST' || values.method === 'PUT') && (
                     <TextField
-                      name="name"
-                      label={T('common.name')}
-                      validate={validateName(T('newW.node.nameValidation', intl))}
-                      helperText={errors.name && touched.name ? errors.name : T('newW.node.nameHelper')}
-                      error={errors.name && touched.name ? true : false}
+                      name="body"
+                      label={T('newW.node.httpRequest.body')}
+                      helperText={errors.body && touched.body ? errors.body : T('newW.node.httpRequest.bodyHelper')}
                       size="small"
                       fullWidth
                     />
-                    <TextField
-                      name="url"
-                      label={T('newW.node.httpRequest.url')}
-                      helperText={errors.url && touched.url ? errors.url : T('newW.node.httpRequest.urlHelper')}
-                      error={errors.url && touched.url ? true : false}
-                      size="small"
-                      fullWidth
-                    />
+                  )}
 
-                    <SelectField
-                      className={classes.field}
-                      name="method"
-                      label={T('newW.node.httpRequest.method')}
-                      helperText={
-                        errors.method && touched.method ? errors.method : T('newW.node.httpRequest.methodHelper')
-                      }
-                      size="small"
-                    >
-                      {HTTPMethods.map((method) => (
-                        <MenuItem key={method} value={method}>
-                          <Typography variant="body2">{method}</Typography>
-                        </MenuItem>
-                      ))}
-                    </SelectField>
-                    {(values.method === 'POST' || values.method === 'PUT') && (
-                      <TextField
-                        name="body"
-                        label={T('newW.node.httpRequest.body')}
-                        helperText={errors.body && touched.body ? errors.body : T('newW.node.httpRequest.bodyHelper')}
-                        size="small"
-                        fullWidth
-                      />
-                    )}
+                  <FormControlLabel
+                    style={{ marginRight: 0 }}
+                    label={T('newW.node.httpRequest.follow')}
+                    control={<Switch name="followLocation" onChange={handleChange} />}
+                  />
 
-                    <FormControlLabel
-                      style={{ marginRight: 0 }}
-                      label={T('newW.node.httpRequest.follow')}
-                      control={<Switch name="followLocation" onChange={handleChange} />}
-                    />
-
-                    <FormControlLabel
-                      style={{ marginRight: 0 }}
-                      label={T('newW.node.httpRequest.json')}
-                      control={<Switch name="jsonContent" onChange={handleChange} />}
-                    />
-                    <Submit />
-                  </Space>
-                </Form>
-              )
-            }}
-          </Formik>
-        </Space>
-      </Paper>
-    </>
+                  <FormControlLabel
+                    style={{ marginRight: 0 }}
+                    label={T('newW.node.httpRequest.json')}
+                    control={<Switch name="jsonContent" onChange={handleChange} />}
+                  />
+                  <Submit />
+                </Space>
+              </Form>
+            )
+          }}
+        </Formik>
+      </Space>
+    </Paper>
   )
 }
 

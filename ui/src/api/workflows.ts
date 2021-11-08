@@ -15,9 +15,9 @@
  *
  */
 import { RequestForm, Workflow, WorkflowParams, WorkflowSingle } from './workflows.type'
-import { TemplateCustom, TemplateType } from 'slices/workflows'
 
 import { Archive } from './archives.type'
+import { TemplateCustom } from 'slices/workflows'
 import http from './http'
 
 // TODO: refactor this interface, use the union type from golang struct

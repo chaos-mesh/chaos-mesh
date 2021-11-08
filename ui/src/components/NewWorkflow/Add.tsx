@@ -323,16 +323,14 @@ const Add: React.FC<AddProps> = ({
               </StepLabel>
 
               {(values.type === 'serial' || values.type === 'parallel') && (
-                <>
-                  <SerialOrParallel
-                    name={values.name}
-                    deadline={values.deadline}
-                    type={values.type as TemplateType}
-                    childrenCount={values.num}
-                    submitTemplate={submit}
-                    templates={templates}
-                  ></SerialOrParallel>
-                </>
+                <SerialOrParallel
+                  name={values.name}
+                  deadline={values.deadline}
+                  type={values.type as TemplateType}
+                  childrenCount={values.num}
+                  submitTemplate={submit}
+                  templates={templates}
+                ></SerialOrParallel>
               )}
               {values.type === 'custom' && !isRenderedHTTPTask && (
                 <>
