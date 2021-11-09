@@ -13,25 +13,16 @@
 # limitations under the License.
 #
 apiVersion: chaos-mesh.org/v1alpha1
-kind: Schedule
+kind: JVMChaos
 metadata:
-  name: jvm-return-example
-  namespace: app
+  name: return
+  namespace: helloworld
 spec:
-  schedule: '@every 1m'
-  type: JVMChaos
-  historyLimit: 5
-  concurrencyPolicy: Forbid
-  jvmChaos:
-    action: return
-    target: jvm
-    flags:
-      value: hello chaos mesh!
-    matchers:
-      classname: org.chaosmesh.jvm.Application
-      methodname: hello
-    mode: one
-    selector:
-      labelSelectors:
-        app: springboot-jvmchaos-demo
-    duration: 50s
+  action: return
+  class: Main
+  method: getnum
+  value: "9999"
+  mode: all
+  selector:
+    namespaces:
+      - helloworld
