@@ -22,6 +22,28 @@ import (
 // PhysicalMachineChaosAction represents the chaos action about physical machine.
 type PhysicalMachineChaosAction string
 
+var (
+	PMStressCPUAction        PhysicalMachineChaosAction = "stress-cpu"
+	PMStressMemAction        PhysicalMachineChaosAction = "stress-mem"
+	PMDiskWritePayloadAction PhysicalMachineChaosAction = "disk-write-payload"
+	PMDiskReadPayloadAction  PhysicalMachineChaosAction = "disk-read-payload"
+	PMDiskFillActionAction   PhysicalMachineChaosAction = "disk-fill"
+	PMNetworkCorruptAction   PhysicalMachineChaosAction = "network-corrupt"
+	PMNetworkDuplicateAction PhysicalMachineChaosAction = "network-duplicate"
+	PMNetworkLossAction      PhysicalMachineChaosAction = "network-loss"
+	PMNetworkDelayAction     PhysicalMachineChaosAction = "network-delay"
+	PMNetworkPartitionAction PhysicalMachineChaosAction = "network-partition"
+	PMNetworkDNSAction       PhysicalMachineChaosAction = "network-dns"
+	PMProcessAction          PhysicalMachineChaosAction = "process"
+	PMJVMExceptionAction     PhysicalMachineChaosAction = "jvm-exception"
+	PMJVMGCAction            PhysicalMachineChaosAction = "jvm-gc"
+	PMJVMLatencyAction       PhysicalMachineChaosAction = "jvm-latency"
+	PMJVMReturnAction        PhysicalMachineChaosAction = "jvm-return"
+	PMJVMStressAction        PhysicalMachineChaosAction = "jvm-stress"
+	PMJVMRuleDataAction      PhysicalMachineChaosAction = "jvm-rule-data"
+	PMClockAction            PhysicalMachineChaosAction = "clock"
+)
+
 // +kubebuilder:object:root=true
 // +chaos-mesh:experiment
 
@@ -153,7 +175,7 @@ type DiskFileSpec struct {
 	// K=1024, MB=1000*1000, M=1024*1024, GB=1000*1000*1000, G=1024*1024*1024 BYTES. example : 1M | 512kB
 	Size string `json:"size,omitempty"`
 	// specifies the location to fill data in. if path not provided,
-	// payload will write into a temp file, temp file will be deleted after writing
+	// payload will read/write from/into a temp file, temp file will be deleted after writing
 	Path string `json:"path,omitempty"`
 }
 
@@ -161,14 +183,14 @@ type DiskPayloadSpec struct {
 	DiskFileSpec `json:",inline"`
 
 	// specifies the number of process work on writing, default 1, only 1-255 is valid value
-	PayloadProcessNum uint8 `json:"payload_process_num,omitempty"`
+	PayloadProcessNum uint8 `json:"payload-process-num,omitempty"`
 }
 
 type DiskFillSpec struct {
 	DiskFileSpec `json:",inline"`
 
 	// fill disk by fallocate
-	FillByFallocate bool `json:"fill_by_fallocate,omitempty"`
+	FillByFallocate bool `json:"fill-by-fallocate,omitempty"`
 }
 
 type NetworkCommonSpec struct {
@@ -305,7 +327,7 @@ type JVMStressSpec struct {
 	CPUCount int `json:"cpu-count,omitempty"`
 
 	// the memory type need to locate, only set it when action is stress, the value can be 'stack' or 'heap'
-	MemoryType int `json:"mem-type,omitempty"`
+	MemoryType string `json:"mem-type,omitempty"`
 }
 
 type JVMRuleDataSpec struct {

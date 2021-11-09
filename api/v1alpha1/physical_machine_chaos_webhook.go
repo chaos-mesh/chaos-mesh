@@ -19,9 +19,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"strconv"
 	"strings"
 
 	"github.com/google/uuid"
+	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
@@ -77,5 +79,317 @@ func (in *PhysicalMachineChaosSpec) Validate(root interface{}, path *field.Path)
 		}
 	}
 
+	var validateErr error
+	switch in.Action {
+	case PMStressCPUAction:
+		validateErr = validateStressCPUAction(in.StressCPU)
+	case PMStressMemAction:
+		validateErr = validateStressMemAction(in.StressMemory)
+	case PMDiskWritePayloadAction:
+		validateErr = validateDiskPayloadAction(in.DiskWritePayload)
+	case PMDiskReadPayloadAction:
+		validateErr = validateDiskPayloadAction(in.DiskReadPayload)
+	case PMDiskFillActionAction:
+		validateErr = validateDiskFillAction(in.DiskFill)
+	case PMNetworkCorruptAction:
+		validateErr = validateNetworkCorruptAction(in.NetworkCorrupt)
+	case PMNetworkDuplicateAction:
+		validateErr = validateNetworkDuplicateAction(in.NetworkDuplicate)
+	case PMNetworkLossAction:
+		validateErr = validateNetworkLossAction(in.NetworkLoss)
+	case PMNetworkDelayAction:
+		validateErr = validateNetworkDelayAction(in.NetworkDelay)
+	case PMNetworkPartitionAction:
+		validateErr = validateNetworkPartitionAction(in.NetworkPartition)
+	case PMNetworkDNSAction:
+		validateErr = validateNetworkDNSAction(in.NetworkDNS)
+	case PMProcessAction:
+		validateErr = validateProcessAction(in.Process)
+	case PMJVMExceptionAction:
+		validateErr = validateJVMExceptionAction(in.JVMException)
+	case PMJVMGCAction:
+		validateErr = validateJVMGCAction(in.JVMGC)
+	case PMJVMLatencyAction:
+		validateErr = validateJVMLatencyAction(in.JVMLatency)
+	case PMJVMReturnAction:
+		validateErr = validateJVMReturnAction(in.JVMReturn)
+	case PMJVMStressAction:
+		validateErr = validateJVMStressAction(in.JVMStress)
+	case PMJVMRuleDataAction:
+		validateErr = validateJVMRuleDataAction(in.JVMRuleData)
+	case PMClockAction:
+		validateErr = validateClockAction(in.Clock)
+	}
+
+	if validateErr != nil {
+		allErrs = append(allErrs,
+			field.Invalid(path.Child("spec"), in,
+				"the configuration corresponding to action is invalid"))
+	}
+
 	return allErrs
+}
+
+func validateStressCPUAction(spec *StressCPUSpec) error {
+	if spec.Load == 0 {
+		return errors.New("load can't be 0")
+	}
+
+	if spec.Workers == 0 {
+		return errors.New("workers can't be 0")
+	}
+
+	return nil
+}
+
+func validateStressMemAction(spec *StressMemorySpec) error {
+	if len(spec.Size) == 0 {
+		return errors.New("size is required")
+	}
+
+	return nil
+}
+
+func validateDiskPayloadAction(spec *DiskPayloadSpec) error {
+	if spec.PayloadProcessNum == 0 {
+		return errors.New("payload-process-num can't be 0")
+	}
+
+	if len(spec.Size) == 0 {
+		return errors.New("size is required")
+	}
+
+	return nil
+}
+
+func validateDiskFillAction(spec *DiskFillSpec) error {
+	if len(spec.Size) == 0 {
+		return errors.New("size is required")
+	}
+
+	return nil
+}
+
+func validateNetworkCommon(spec *NetworkCommonSpec) error {
+	if !CheckPercent(spec.Correlation, true) {
+		return errors.Errorf("correlation %s is invalid", spec.Correlation)
+	}
+
+	if len(spec.Device) == 0 {
+		return errors.New("device is required")
+	}
+
+	if len(spec.IPAddress) == 0 && len(spec.Hostname) == 0 {
+		return errors.New("one of ip-address and hostname is required")
+	}
+
+	return nil
+}
+
+func validateNetworkCorruptAction(spec *NetworkCorruptSpec) error {
+	if err := validateNetworkCommon(&spec.NetworkCommonSpec); err != nil {
+		return err
+	}
+
+	if !CheckPercent(spec.Percent, false) {
+		return errors.New("percent is invalid")
+	}
+
+	return nil
+}
+
+func validateNetworkDuplicateAction(spec *NetworkDuplicateSpec) error {
+	if err := validateNetworkCommon(&spec.NetworkCommonSpec); err != nil {
+		return err
+	}
+
+	if !CheckPercent(spec.Percent, false) {
+		return errors.New("percent is invalid")
+	}
+
+	return nil
+}
+
+func validateNetworkLossAction(spec *NetworkLossSpec) error {
+	if err := validateNetworkCommon(&spec.NetworkCommonSpec); err != nil {
+		return err
+	}
+
+	if !CheckPercent(spec.Percent, false) {
+		return errors.New("percent is invalid")
+	}
+
+	return nil
+}
+
+func validateNetworkDelayAction(spec *NetworkDelaySpec) error {
+	if err := validateNetworkCommon(&spec.NetworkCommonSpec); err != nil {
+		return err
+	}
+	return nil
+}
+
+func validateNetworkPartitionAction(spec *NetworkPartitionSpec) error {
+	if len(spec.Device) == 0 {
+		return errors.New("device is required")
+	}
+
+	if len(spec.IPAddress) == 0 && len(spec.Hostname) == 0 {
+		return errors.New("one of ip-address and hostname is required")
+	}
+
+	if spec.Direction != "to" && spec.Direction != "from" {
+		return errors.New("direction should be one of 'to' and 'from'")
+	}
+
+	if len(spec.AcceptTCPFlags) > 0 && spec.IPProtocol != "tcp" {
+		return errors.Errorf("protocol should be 'tcp' when set accept-tcp-flags")
+	}
+
+	return nil
+}
+
+func validateNetworkDNSAction(spec *NetworkDNSSpec) error {
+	if (len(spec.DNSDomainName) != 0 && len(spec.DNSIp) == 0) || (len(spec.DNSDomainName) == 0 && len(spec.DNSIp) != 0) {
+		return errors.Errorf("DNS host %s must match a DNS ip %s", spec.DNSDomainName, spec.DNSIp)
+	}
+
+	return nil
+}
+
+func validateProcessAction(spec *ProcessSpec) error {
+	if len(spec.Process) == 0 {
+		return errors.New("process is required")
+	}
+
+	if spec.Signal == 0 {
+		return errors.New("signal is required")
+	}
+
+	return nil
+}
+
+func validateJVMClassMethod(spec *JVMClassMethodSpec) error {
+	if len(spec.Class) == 0 {
+		return errors.New("class is required")
+	}
+
+	if len(spec.Method) == 0 {
+		return errors.New("method is required")
+	}
+
+	return nil
+}
+
+func validateJVMExceptionAction(spec *JVMExceptionSpec) error {
+	if spec.Pid == 0 {
+		return errors.New("pid is required")
+	}
+
+	if err := validateJVMClassMethod(&spec.JVMClassMethodSpec); err != nil {
+		return err
+	}
+
+	if len(spec.ThrowException) == 0 {
+		return errors.New("exception is required")
+	}
+
+	return nil
+}
+
+
+func validateJVMGCAction(spec *JVMGCSpec) error {
+	if spec.Pid == 0 {
+		return errors.New("pid is required")
+	}
+
+	return nil
+}
+
+func validateJVMLatencyAction(spec *JVMLatencySpec) error {
+	if spec.Pid == 0 {
+		return errors.New("pid is required")
+	}
+
+	if err := validateJVMClassMethod(&spec.JVMClassMethodSpec); err != nil {
+		return err
+	}
+
+	if spec.LatencyDuration == 0 {
+		return errors.New("latency is required")
+	}
+
+	return nil
+}
+
+func validateJVMReturnAction(spec *JVMReturnSpec) error {
+	if spec.Pid == 0 {
+		return errors.New("pid is required")
+	}
+
+	if err := validateJVMClassMethod(&spec.JVMClassMethodSpec); err != nil {
+		return err
+	}
+
+	if len(spec.ReturnValue) == 0 {
+		return errors.New("value is required")
+	}
+
+	return nil
+}
+
+func validateJVMStressAction(spec *JVMStressSpec) error {
+	if spec.CPUCount == 0 && len(spec.MemoryType) == 0 {
+		return errors.New("one of cpu-count and mem-type is required")
+	}
+
+	if spec.CPUCount > 0 && len(spec.MemoryType) > 0 {
+		return errors.New("inject stress on both CPU and memory is not support")
+	}
+
+	return nil
+}
+
+func validateJVMRuleDataAction(spec *JVMRuleDataSpec) error {
+	if len(spec.RuleData) == 0 {
+		return errors.New("rule-data is required")
+	}
+
+	return nil
+}
+
+func validateClockAction(spec *ClockSpec) error {
+	if spec.Pid == 0 {
+		return errors.New("pid is required")
+	}
+
+	if len(spec.TimeOffset) == 0 {
+		return errors.New("time-offset is required")
+	}
+
+	return nil
+}
+
+func CheckPercent(p string, allowZero bool) bool {
+	if len(p) == 0 {
+		if allowZero {
+			return true
+		}
+		return false
+	}
+
+	v, err := strconv.ParseFloat(p, 32)
+	if err != nil {
+		return false
+	}
+
+	if v == 0 && !allowZero {
+		return false
+	}
+
+	if v < 0 || v > 100 {
+		return false
+	}
+
+	return true
 }

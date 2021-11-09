@@ -2715,12 +2715,12 @@ var doc = `{
         "v1alpha1.DiskFillSpec": {
             "type": "object",
             "properties": {
-                "fill_by_fallocate": {
+                "fill-by-fallocate": {
                     "description": "fill disk by fallocate",
                     "type": "boolean"
                 },
                 "path": {
-                    "description": "specifies the location to fill data in. if path not provided,\npayload will write into a temp file, temp file will be deleted after writing",
+                    "description": "specifies the location to fill data in. if path not provided,\npayload will read/write from/into a temp file, temp file will be deleted after writing",
                     "type": "string"
                 },
                 "size": {
@@ -2733,10 +2733,10 @@ var doc = `{
             "type": "object",
             "properties": {
                 "path": {
-                    "description": "specifies the location to fill data in. if path not provided,\npayload will write into a temp file, temp file will be deleted after writing",
+                    "description": "specifies the location to fill data in. if path not provided,\npayload will read/write from/into a temp file, temp file will be deleted after writing",
                     "type": "string"
                 },
-                "payload_process_num": {
+                "payload-process-num": {
                     "description": "specifies the number of process work on writing, default 1, only 1-255 is valid value",
                     "type": "integer"
                 },
@@ -3152,7 +3152,7 @@ var doc = `{
                 },
                 "mem-type": {
                     "description": "the memory type need to locate, only set it when action is stress, the value can be 'stack' or 'heap'",
-                    "type": "integer"
+                    "type": "string"
                 },
                 "pid": {
                     "description": "the pid of Java process which need to attach",
