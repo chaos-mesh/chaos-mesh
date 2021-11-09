@@ -34,6 +34,6 @@ WORKDIR /
 
 RUN git clone https://github.com/chaos-mesh/bpfki
 WORKDIR /bpfki/build
-RUN cmake .. && make -j 16 && mv bin/bpfki /usr/local/bin/ && mv examples/fail* /usr/local/bin/
+RUN cmake .. && make -j $[$(nproc)+1] && mv bin/bpfki /usr/local/bin/ && mv examples/fail* /usr/local/bin/
 
 WORKDIR /usr/local/bin
