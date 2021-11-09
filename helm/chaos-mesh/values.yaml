@@ -43,7 +43,7 @@ enableProfiling: true
 # enableCtrlServer is a flag to enable ctrlserver in controller-manager and chaos-daemon.
 enableCtrlServer: true
 
-registry: ""
+registry: "ghcr.io"
 
 ## Optional array of imagePullSecrets containing private registry credentials
 ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
@@ -57,7 +57,9 @@ controllerManager:
   replicaCount: 3
 
   priorityClassName: ""
-  image: ghcr.io/chaos-mesh/chaos-mesh/chaos-mesh:latest
+  image:
+    repository: chaos-mesh/chaos-mesh
+    tag: latest
   imagePullPolicy: IfNotPresent
 
   enableFilterNamespace: false
@@ -111,7 +113,9 @@ controllerManager:
     retryPeriod: 2s
 
 chaosDaemon:
-  image: ghcr.io/chaos-mesh/chaos-mesh/chaos-daemon:latest
+  image:
+    repository: chaos-mesh/chaos-daemon
+    tag: latest
   imagePullPolicy: IfNotPresent
   grpcPort: 31767
   httpPort: 31766
@@ -187,8 +191,9 @@ dashboard:
   priorityClassName: ""
 
   serviceAccount: chaos-controller-manager
-
-  image: ghcr.io/chaos-mesh/chaos-mesh/chaos-dashboard:latest
+  image:
+    repository: chaos-mesh/chaos-dashboard
+    tag: latest
   imagePullPolicy: IfNotPresent
 
   securityMode: true
@@ -408,7 +413,9 @@ webhook:
 
 bpfki:
   create: false
-  image: pingcap/chaos-kernel:latest
+  image:
+    repository: chaos-mesh/chaos-kernel
+    tag: latest
   imagePullPolicy: IfNotPresent
   grpcPort: 50051
   resources: {}
@@ -425,5 +432,7 @@ bpfki:
 
 chaosDlv:
   enable: false
-  image: ghcr.io/chaos-mesh/chaos-mesh/chaos-dlv:latest
+  image:
+    repository: chaos-mesh/chaos-dlv
+    tag: latest
   imagePullPolicy: IfNotPresent

@@ -53,7 +53,7 @@ spec:
       {{- end }}
       containers:
         - name: chaos-dashboard
-          image: {{template "registry-prefix" .}}{{ .Values.dashboard.image }}
+          image: {{template "chaos-dashboard.image" . }}
           imagePullPolicy: {{ .Values.dashboard.imagePullPolicy | default "IfNotPresent" }}
           resources:
 {{ toYaml .Values.dashboard.resources | indent 12 }}
@@ -87,7 +87,7 @@ spec:
               containerPort: {{ .Values.dashboard.env.LISTEN_PORT }}
         {{- if .Values.chaosDlv.enable }}
         - name: chaos-mesh-dlv
-          image: {{template "registry-prefix" .}}{{ .Values.chaosDlv.image }}
+          image: {{template "chaos-dlv.image" . }}
           imagePullPolicy: {{ .Values.chaosDlv.imagePullPolicy | default "IfNotPresent" }}
           env:
             - name: CMD_NAME
