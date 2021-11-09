@@ -107,6 +107,7 @@ func newGRPCServer(containerRuntime string, reg prometheus.Registerer, tlsConf t
 	grpcMetrics := grpc_prometheus.NewServerMetrics()
 	grpcMetrics.EnableHandlingTimeHistogram(
 		grpc_prometheus.WithHistogramBuckets([]float64{0.001, 0.01, 0.1, 0.3, 0.6, 1, 3, 6, 10}),
+		metrics.WithHistogramName("chaos_daemon_grpc_server_handling_seconds"),
 	)
 	reg.MustRegister(
 		grpcMetrics,

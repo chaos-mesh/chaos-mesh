@@ -18,6 +18,7 @@ package metrics
 import (
 	"context"
 
+	grpcprometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients"
@@ -152,5 +153,11 @@ func (collector *ChaosDaemonMetricsCollector) collectNetworkMetrics() {
 			log.Error(err, "fail to collect tc rules metric")
 		}
 		collector.tcRules.WithLabelValues(labelValues...).Set(float64(tcRules))
+	}
+}
+
+func WithHistogramName(name string) grpcprometheus.HistogramOption {
+	return func(opts *prometheus.HistogramOpts) {
+		opts.Name = name
 	}
 }
