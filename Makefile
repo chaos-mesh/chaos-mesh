@@ -135,7 +135,7 @@ BUILD_INDOCKER_ARG := --env IN_DOCKER=1 --env HTTP_PROXY=${HTTP_PROXY} --env HTT
 
 ifneq ($(TARGET_PLATFORM),)
 	BUILD_INDOCKER_ARG += --platform=linux/$(TARGET_PLATFORM)
-	DOCKER_BUILD_ARGS += --platform=linux/$(TARGET_PLATFORM) --build-arg TARGET_PLATFORM=amd64
+	DOCKER_BUILD_ARGS += --platform=linux/$(TARGET_PLATFORM) --build-arg TARGET_PLATFORM=$(TARGET_PLATFORM)
 else
 	UNAME_M := $(shell uname -m)
 	ifeq ($(UNAME_M),x86_64)
