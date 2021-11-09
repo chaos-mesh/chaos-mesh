@@ -10,7 +10,7 @@ jobs:
     strategy:
       matrix:
         arch: [amd64]
-        image: [chaos-daemon, chaos-mesh, chaos-dashboard]
+        image: [chaos-daemon, chaos-mesh, chaos-dashboard, chaos-kernel]
     outputs:
       image_tag: ${{ steps.image_tag.outputs.image_tag }}
     steps:
