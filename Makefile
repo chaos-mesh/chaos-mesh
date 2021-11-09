@@ -66,7 +66,7 @@ multithread_tracee: test/cmd/multithread_tracee/main.c
 yarn_dependencies:
 ifeq (${UI},1)
 	cd ui &&\
-	yarn install --frozen-lockfile
+	yarn install --frozen-lockfile --network-timeout 500000
 endif
 
 ui: yarn_dependencies
