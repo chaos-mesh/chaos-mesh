@@ -63,7 +63,7 @@ var _ = Describe("JVMChaos", func() {
 					},
 					ContainerSelector: ContainerSelector{
 						PodSelector: PodSelector{
-							Mode: OnePodMode,
+							Mode: OneMode,
 						},
 					},
 				},

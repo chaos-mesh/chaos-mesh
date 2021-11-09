@@ -99,7 +99,7 @@ var _ = Describe("iochaos_webhook", func() {
 					expect: "error",
 				},
 				{
-					name: "validate value with FixedPercentPodMode",
+					name: "validate value with FixedPercentMode",
 					chaos: IOChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
@@ -109,7 +109,7 @@ var _ = Describe("iochaos_webhook", func() {
 							ContainerSelector: ContainerSelector{
 								PodSelector: PodSelector{
 									Value: "0",
-									Mode:  FixedPodMode,
+									Mode:  FixedMode,
 								},
 							},
 						},
@@ -120,7 +120,7 @@ var _ = Describe("iochaos_webhook", func() {
 					expect: "error",
 				},
 				{
-					name: "validate value with FixedPercentPodMode, parse value error",
+					name: "validate value with FixedPercentMode, parse value error",
 					chaos: IOChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
@@ -130,7 +130,7 @@ var _ = Describe("iochaos_webhook", func() {
 							ContainerSelector: ContainerSelector{
 								PodSelector: PodSelector{
 									Value: "num",
-									Mode:  FixedPodMode,
+									Mode:  FixedMode,
 								},
 							},
 						},
@@ -141,7 +141,7 @@ var _ = Describe("iochaos_webhook", func() {
 					expect: "error",
 				},
 				{
-					name: "validate value with RandomMaxPercentPodMode",
+					name: "validate value with RandomMaxPercentMode",
 					chaos: IOChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
@@ -151,7 +151,7 @@ var _ = Describe("iochaos_webhook", func() {
 							ContainerSelector: ContainerSelector{
 								PodSelector: PodSelector{
 									Value: "0",
-									Mode:  RandomMaxPercentPodMode,
+									Mode:  RandomMaxPercentMode,
 								},
 							},
 						},
@@ -162,7 +162,7 @@ var _ = Describe("iochaos_webhook", func() {
 					expect: "error",
 				},
 				{
-					name: "validate value with RandomMaxPercentPodMode ,parse value error",
+					name: "validate value with RandomMaxPercentMode ,parse value error",
 					chaos: IOChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
@@ -172,7 +172,7 @@ var _ = Describe("iochaos_webhook", func() {
 							ContainerSelector: ContainerSelector{
 								PodSelector: PodSelector{
 									Value: "num",
-									Mode:  RandomMaxPercentPodMode,
+									Mode:  RandomMaxPercentMode,
 								},
 							},
 						},
@@ -183,7 +183,7 @@ var _ = Describe("iochaos_webhook", func() {
 					expect: "error",
 				},
 				{
-					name: "validate value with FixedPercentPodMode",
+					name: "validate value with FixedPercentMode",
 					chaos: IOChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
@@ -193,7 +193,7 @@ var _ = Describe("iochaos_webhook", func() {
 							ContainerSelector: ContainerSelector{
 								PodSelector: PodSelector{
 									Value: "101",
-									Mode:  FixedPercentPodMode,
+									Mode:  FixedPercentMode,
 								},
 							},
 						},

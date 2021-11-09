@@ -59,7 +59,7 @@ var _ = Describe("HTTPChaos", func() {
 				},
 				Spec: HTTPChaosSpec{
 					PodSelector: PodSelector{
-						Mode: OnePodMode,
+						Mode: OneMode,
 					},
 					Target: PodHttpRequest,
 					Port:   80,
