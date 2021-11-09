@@ -6,14 +6,25 @@ ARG HTTP_PROXY
 ENV http_proxy $HTTP_PROXY
 ENV https_proxy $HTTPS_PROXY
 
-RUN apt-get update && \ 
-    apt-get install -y tzdata iptables ipset stress-ng iproute2 fuse util-linux procps curl && \
+RUN mkdir -p /usr/share/man/man1 /usr/share/man/man2
+
+RUN apt-get update && \
+    apt-get install -y tzdata iptables ipset stress-ng iproute2 fuse util-linux procps curl openjdk-11-jre && \
     rm -rf /var/lib/apt/lists/*
 
 RUN update-alternatives --set iptables /usr/sbin/iptables-legacy
 
 ENV RUST_BACKTRACE 1
 ARG TARGET_PLATFORM=amd64
+
+# install byteman and set env
+RUN curl -L https://github.com/chaos-mesh/byteman/releases/download/4.0.14-cm/byteman.tar.gz -o /usr/local/bin/byteman.tar.gz
+RUN tar xvf /usr/local/bin/byteman.tar.gz -C /usr/local
+RUN rm /usr/local/bin/byteman.tar.gz
+
+ENV BYTEMAN_HOME /usr/local/byteman
+ENV PATH $PATH:/usr/local/byteman/bin
+ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
 
 # toda doesn't support arm64 yet
 RUN curl -L https://github.com/chaos-mesh/toda/releases/download/v0.2.0/toda-linux-amd64.tar.gz | tar xz -C /usr/local/bin

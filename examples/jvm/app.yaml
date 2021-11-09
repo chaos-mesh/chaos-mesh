@@ -12,25 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: v1
+kind: Pod
 metadata:
-  name: springboot-jvmchaos-demo
-  namespace: app
+  name: helloworld
+  namespace: helloworld
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: springboot-jvmchaos-demo
-  template:
-    metadata:
-      annotations:
-        admission-webhook.chaos-mesh.org/request: jvmchaos-sidecar
-      creationTimestamp: null
-      labels:
-        app: springboot-jvmchaos-demo
-    spec:
-      containers:
-      - image: 'gallardot/chaosmesh-jvmchaos-sample:latest'
-        imagePullPolicy: IfNotPresent
-        name: springboot-jvmchaos-demo
+  containers:
+    - name: helloworld
+      # source code: https://github.com/WangXiangUSTC/byteman-example/tree/main/example.helloworld
+      # this application will print log like this below:
+      # 0. Hello World
+      # 1. Hello World
+      # ...
+      image: xiang13225080/helloworld:v1.0
+      imagePullPolicy: IfNotPresent
