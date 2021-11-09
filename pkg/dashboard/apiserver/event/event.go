@@ -128,6 +128,8 @@ func (s *Service) cascadeFetchEventsForWorkflow(c *gin.Context) {
 	ctx := c.Request.Context()
 	ns := c.Query("namespace")
 	uid := c.Param("uid")
+	start, _ := time.Parse(time.RFC3339, c.Query("start"))
+	end, _ := time.Parse(time.RFC3339, c.Query("end"))
 	limit := 0
 	limitString := c.Query("limit")
 	if len(limitString) > 0 {
@@ -192,6 +194,8 @@ func (s *Service) cascadeFetchEventsForWorkflow(c *gin.Context) {
 	eventsForWorkflow, err := s.event.ListByFilter(ctx, core.Filter{
 		ObjectID:  uid,
 		Namespace: ns,
+		Start:     start.UTC().Format(layout),
+		End:       end.UTC().Format(layout),
 	})
 	if err != nil {
 		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
@@ -204,6 +208,8 @@ func (s *Service) cascadeFetchEventsForWorkflow(c *gin.Context) {
 		eventsForWorkflowNode, err := s.event.ListByFilter(ctx, core.Filter{
 			Namespace: ns,
 			Name:      workflowNode.GetName(),
+			Start:     start.UTC().Format(layout),
+			End:       end.UTC().Format(layout),
 		})
 		if err != nil {
 			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
