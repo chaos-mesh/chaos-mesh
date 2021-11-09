@@ -1,13 +1,10 @@
 name: Upload Image
 on:
-  push:
-    branches:
-      - "*"
-#  workflow_dispatch: {}
-#  schedule:
-#    - cron: "0 18 * * *"
-#  release:
-#    types: [published]
+ workflow_dispatch: {}
+ schedule:
+   - cron: "0 18 * * *"
+ release:
+   types: [published]
 
 jobs:
   build-specific-architecture:
@@ -25,9 +22,9 @@ jobs:
         shell: bash
         run: |
           IMAGE_TAG=${GITHUB_REF##*/}
-          # if [ "${IMAGE_TAG}" = "master" ] ; then
-          #   IMAGE_TAG=latest;
-          # fi
+          if [ "${IMAGE_TAG}" = "master" ] ; then
+            IMAGE_TAG=latest;
+          fi
           IMAGE_TAG=latest;
           echo "::set-output name=image_tag::$(echo $IMAGE_TAG)"
         id: image_tag
@@ -44,6 +41,7 @@ jobs:
           IMAGE_TAG: ${{ steps.image_tag.outputs.image_tag }}
           ARCH: ${{ matrix.arch }}
           IMAGE: ${{ matrix.image }}
+          GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
         run: |
           docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
 
@@ -52,16 +50,18 @@ jobs:
           else
             UI=0
           fi
-
-          make -B TARGET_PLATFORM=$ARCH IMAGE_TAG=$IMAGE_TAG-$ARCH IMAGE_PROJECT=strrl/chaos-mesh DOCKER_REGISTRY=ghcr.io UI=$UI image-$IMAGE
+          # ${VAR,,} convert VAR to lower case
+          make -B TARGET_PLATFORM=$ARCH IMAGE_TAG=$IMAGE_TAG-$ARCH IMAGE_PROJECT=${GITHUB_REPOSITORY_OWNER,,} DOCKER_REGISTRY=ghcr.io UI=$UI image-$IMAGE
 
       - name: Upload Chaos Mesh
         env:
           IMAGE_TAG: ${{ steps.image_tag.outputs.image_tag }}
           ARCH: ${{ matrix.arch }}
           IMAGE: ${{ matrix.image }}
+          GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
         run: |
-          docker push ghcr.io/strrl/chaos-mesh/$IMAGE:$IMAGE_TAG-$ARCH
+          # ${VAR,,} convert VAR to lower case
+          docker push ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE:$IMAGE_TAG-$ARCH
 
   upload-manifest:
     runs-on: ubuntu-latest
@@ -74,16 +74,18 @@ jobs:
         env:
           IMAGE: ${{ matrix.image }}
           IMAGE_TAG: ${{ needs.build-specific-architecture.outputs.image_tag }}
+          GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
         run: |
-          docker manifest create ghcr.io/strrl/chaos-mesh/$IMAGE:$IMAGE_TAG \
-            ghcr.io/strrl/chaos-mesh/$IMAGE:$IMAGE_TAG-amd64 \
-            ghcr.io/strrl/chaos-mesh/$IMAGE:$IMAGE_TAG-arm64
+          # ${VAR,,} convert VAR to lower case
+          docker manifest create ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE:$IMAGE_TAG \
+            ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE:$IMAGE_TAG-amd64 \
+            ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE:$IMAGE_TAG-arm64
 
-          docker manifest annotate ghcr.io/strrl/chaos-mesh/$IMAGE:$IMAGE_TAG \
-            ghcr.io/strrl/chaos-mesh/$IMAGE:$IMAGE_TAG-amd64 \
+          docker manifest annotate ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE:$IMAGE_TAG \
+            ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE:$IMAGE_TAG-amd64 \
             --os linux --arch amd64
-          docker manifest annotate ghcr.io/strrl/chaos-mesh/$IMAGE:$IMAGE_TAG \
-            ghcr.io/strrl/chaos-mesh/$IMAGE:$IMAGE_TAG-arm64 \
+          docker manifest annotate ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE:$IMAGE_TAG \
+            ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE:$IMAGE_TAG-arm64 \
             --os linux --arch arm64
 
       - name: Log in to GitHub Docker Registry
@@ -97,5 +99,7 @@ jobs:
         env:
           IMAGE: ${{ matrix.image }}
           IMAGE_TAG: ${{ needs.build-specific-architecture.outputs.image_tag }}
+          GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
         run: |
-          docker manifest push ghcr.io/strrl/chaos-mesh/$IMAGE:$IMAGE_TAG
+          # ${VAR,,} convert VAR to lower case
+          docker manifest push ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE:$IMAGE_TAG
