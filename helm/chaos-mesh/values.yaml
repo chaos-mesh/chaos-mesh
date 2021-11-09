@@ -57,7 +57,7 @@ controllerManager:
   replicaCount: 3
 
   priorityClassName: ""
-  image: ghcr.io/chaos-mesh/chaos-mesh/chaos-mesh:latest
+  image: ghcr.io/chaos-mesh/chaos-mesh:latest
   imagePullPolicy: IfNotPresent
 
   enableFilterNamespace: false
@@ -111,7 +111,7 @@ controllerManager:
     retryPeriod: 2s
 
 chaosDaemon:
-  image: ghcr.io/chaos-mesh/chaos-mesh/chaos-daemon:latest
+  image: ghcr.io/chaos-mesh/chaos-daemon:latest
   imagePullPolicy: IfNotPresent
   grpcPort: 31767
   httpPort: 31766
@@ -188,7 +188,7 @@ dashboard:
 
   serviceAccount: chaos-controller-manager
 
-  image: ghcr.io/chaos-mesh/chaos-mesh/chaos-dashboard:latest
+  image: ghcr.io/chaos-mesh/chaos-dashboard:latest
   imagePullPolicy: IfNotPresent
 
   securityMode: true
@@ -408,7 +408,7 @@ webhook:
 
 bpfki:
   create: false
-  image: pingcap/chaos-kernel:latest
+  image: ghcr.io/chaos-mesh/chaos-kernel:latest
   imagePullPolicy: IfNotPresent
   grpcPort: 50051
   resources: {}
@@ -425,5 +425,5 @@ bpfki:
 
 chaosDlv:
   enable: false
-  image: ghcr.io/chaos-mesh/chaos-mesh/chaos-dlv:latest
+  image: ghcr.io/chaos-mesh/chaos-dlv:latest
   imagePullPolicy: IfNotPresent
