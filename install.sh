@@ -629,9 +629,9 @@ install_chaos_mesh() {
     local microk8s=${12}
     printf "Install Chaos Mesh %s\n" "${release_name}"
 
-    local chaos_mesh_image="${docker_registry}/pingcap/chaos-mesh:${version}"
-    local chaos_daemon_image="${docker_registry}/pingcap/chaos-daemon:${version}"
-    local chaos_dashboard_image="${docker_registry}/pingcap/chaos-dashboard:${version}"
+    local chaos_mesh_image="${docker_registry}/chaos-mesh/chaos-mesh:${version}"
+    local chaos_daemon_image="${docker_registry}/chaos-mesh/chaos-daemon:${version}"
+    local chaos_dashboard_image="${docker_registry}/chaos-mesh/chaos-dashboard:${version}"
 
     if [ "$docker_mirror" == "true" ]; then
         azk8spull "${chaos_mesh_image}" || true
