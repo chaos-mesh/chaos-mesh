@@ -2,7 +2,7 @@ FROM ubuntu:bionic
 
 ARG HTTPS_PROXY
 ARG HTTP_PROXY
-ARG MAKE_JOBS
+ARG MAKE_JOBS=4
 ARG MIRROR=http://archive.ubuntu.com/ubuntu
 
 RUN apt-get update && apt-get install -y ca-certificates gnupg2 wget
@@ -34,6 +34,6 @@ WORKDIR /
 
 RUN git clone https://github.com/chaos-mesh/bpfki
 WORKDIR /bpfki/build
-RUN cmake .. && make -j $[$(nproc)+1] && mv bin/bpfki /usr/local/bin/ && mv examples/fail* /usr/local/bin/
+RUN cmake .. && make -j${MAKE_JOBS} && mv bin/bpfki /usr/local/bin/ && mv examples/fail* /usr/local/bin/
 
 WORKDIR /usr/local/bin
