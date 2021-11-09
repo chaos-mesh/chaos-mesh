@@ -25,7 +25,7 @@ jobs:
           if [ "${IMAGE_TAG}" = "master" ] ; then
             IMAGE_TAG=latest;
           fi
-          IMAGE_TAG=latest;
+
           echo "::set-output name=image_tag::$(echo $IMAGE_TAG)"
         id: image_tag
 
