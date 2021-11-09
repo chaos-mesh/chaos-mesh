@@ -37,6 +37,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
+	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 )
 
 var log = ctrl.Log.WithName("chaos-daemon-server")
@@ -93,7 +94,7 @@ func NewDaemonServerWithCRClient(crClient crclients.ContainerRuntimeInfoClient) 
 	return &DaemonServer{
 		IPSetLocker:              locker.New(),
 		crClient:                 crClient,
-		backgroundProcessManager: bpm.NewBackgroundProcessManager(),
+		backgroundProcessManager: bpm.NewBackgroundProcessManager(metrics.DefaultChaosDaemonMetricsCollector),
 	}
 }
 

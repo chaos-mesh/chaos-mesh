@@ -59,7 +59,7 @@ func WaitProcess(m *BackgroundProcessManager, cmd *ManagedProcess, exceedTime ti
 }
 
 var _ = Describe("background process manager", func() {
-	m := NewBackgroundProcessManager()
+	m := NewBackgroundProcessManager(nil)
 
 	Context("normally exited process", func() {
 		It("should work", func() {

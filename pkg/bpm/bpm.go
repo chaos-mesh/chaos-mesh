@@ -79,14 +79,24 @@ type BackgroundProcessManager struct {
 	deathSig    *sync.Map
 	identifiers *sync.Map
 	stdio       *sync.Map
+
+	metricsCollector BackgroundProcessManagerMetricsCollector
+}
+
+// BackgroundProcessManagerMetricsCollector is an interface for metrics collector
+// It is intended to resolve cycle dependency between bpm package and metrics package
+type BackgroundProcessManagerMetricsCollector interface {
+	IncreaseControlledProcesses()
 }
 
 // NewBackgroundProcessManager creates a background process manager
-func NewBackgroundProcessManager() BackgroundProcessManager {
+func NewBackgroundProcessManager(collector BackgroundProcessManagerMetricsCollector) BackgroundProcessManager {
 	return BackgroundProcessManager{
 		deathSig:    &sync.Map{},
 		identifiers: &sync.Map{},
 		stdio:       &sync.Map{},
+
+		metricsCollector: collector,
 	}
 }
 
@@ -193,6 +203,9 @@ func (m *BackgroundProcessManager) StartProcess(cmd *ManagedProcess) (*process.P
 		}
 	}()
 
+	if m.metricsCollector != nil {
+		m.metricsCollector.IncreaseControlledProcesses()
+	}
 	return procState, nil
 }
 
@@ -318,6 +331,7 @@ func (m *BackgroundProcessManager) GetControlledProcessIDs() ([]int, error) {
 		}
 	}
 
+	log.Info("all controlled processes has been scanned", "PID", res)
 	return res, nil
 }
 

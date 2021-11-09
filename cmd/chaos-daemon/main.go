@@ -26,6 +26,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon"
 	"github.com/chaos-mesh/chaos-mesh/pkg/fusedev"
+	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
 )
 
@@ -63,6 +64,7 @@ func main() {
 		// Use collectors as prometheus functions deprecated
 		collectors.NewGoCollector(),
 		collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
+		metrics.DefaultChaosDaemonMetricsCollector,
 	)
 
 	log.Info("grant access to /dev/fuse")
