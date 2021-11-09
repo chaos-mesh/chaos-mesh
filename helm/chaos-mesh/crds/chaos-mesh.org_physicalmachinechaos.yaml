@@ -81,13 +81,13 @@ spec:
                 type: object
               disk-fill:
                 properties:
-                  fill_by_fallocate:
+                  fill-by-fallocate:
                     description: fill disk by fallocate
                     type: boolean
                   path:
                     description: specifies the location to fill data in. if path not
-                      provided, payload will write into a temp file, temp file will
-                      be deleted after writing
+                      provided, payload will read/write from/into a temp file, temp
+                      file will be deleted after writing
                     type: string
                   size:
                     description: 'specifies how many units of data will write into
@@ -100,10 +100,10 @@ spec:
                 properties:
                   path:
                     description: specifies the location to fill data in. if path not
-                      provided, payload will write into a temp file, temp file will
-                      be deleted after writing
+                      provided, payload will read/write from/into a temp file, temp
+                      file will be deleted after writing
                     type: string
-                  payload_process_num:
+                  payload-process-num:
                     description: specifies the number of process work on writing,
                       default 1, only 1-255 is valid value
                     type: integer
@@ -118,10 +118,10 @@ spec:
                 properties:
                   path:
                     description: specifies the location to fill data in. if path not
-                      provided, payload will write into a temp file, temp file will
-                      be deleted after writing
+                      provided, payload will read/write from/into a temp file, temp
+                      file will be deleted after writing
                     type: string
-                  payload_process_num:
+                  payload-process-num:
                     description: specifies the number of process work on writing,
                       default 1, only 1-255 is valid value
                     type: integer
@@ -220,7 +220,7 @@ spec:
                   mem-type:
                     description: the memory type need to locate, only set it when
                       action is stress, the value can be 'stack' or 'heap'
-                    type: integer
+                    type: string
                   pid:
                     description: the pid of Java process which need to attach
                     type: integer

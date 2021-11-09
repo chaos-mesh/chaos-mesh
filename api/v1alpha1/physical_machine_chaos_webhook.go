@@ -36,10 +36,10 @@ func (in *PhysicalMachineChaosSpec) Default(root interface{}, field *reflect.Str
 		in.UID = uuid.New().String()
 	}
 
-	for i := range in.Addresses {
+	for i := range in.Address {
 		// add http prefix for address
-		if !strings.HasPrefix(in.Addresses[i], "http") {
-			in.Addresses[i] = fmt.Sprintf("http://%s", in.Addresses[i])
+		if !strings.HasPrefix(in.Address[i], "http") {
+			in.Address[i] = fmt.Sprintf("http://%s", in.Address[i])
 		}
 	}
 }
@@ -68,14 +68,14 @@ func (in *PhysicalMachineChaosSpec) Validate(root interface{}, path *field.Path)
 	}
 
 	// make sure address is not empty
-	if len(in.Addresses) == 0 {
+	if len(in.Address) == 0 {
 		allErrs = append(allErrs,
-			field.Invalid(path.Child("address"), in.Addresses, "the address is empty"))
+			field.Invalid(path.Child("address"), in.Address, "the address is empty"))
 	}
-	for _, address := range in.Addresses {
+	for _, address := range in.Address {
 		if len(address) == 0 {
 			allErrs = append(allErrs,
-				field.Invalid(path.Child("address"), in.Addresses, "the address is empty"))
+				field.Invalid(path.Child("address"), in.Address, "the address is empty"))
 		}
 	}
 
@@ -223,10 +223,7 @@ func validateNetworkLossAction(spec *NetworkLossSpec) error {
 }
 
 func validateNetworkDelayAction(spec *NetworkDelaySpec) error {
-	if err := validateNetworkCommon(&spec.NetworkCommonSpec); err != nil {
-		return err
-	}
-	return nil
+	return validateNetworkCommon(&spec.NetworkCommonSpec)
 }
 
 func validateNetworkPartitionAction(spec *NetworkPartitionSpec) error {
@@ -296,7 +293,6 @@ func validateJVMExceptionAction(spec *JVMExceptionSpec) error {
 
 	return nil
 }
-
 
 func validateJVMGCAction(spec *JVMGCSpec) error {
 	if spec.Pid == 0 {

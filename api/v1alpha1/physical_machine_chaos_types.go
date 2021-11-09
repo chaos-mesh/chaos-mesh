@@ -87,7 +87,7 @@ func (obj *PhysicalMachineChaos) GetSelectorSpecs() map[string]interface{} {
 }
 
 type PhysicalMachineSelector struct {
-	Addresses []string `json:"address"`
+	Address []string `json:"address"`
 }
 
 type ExpInfo struct {

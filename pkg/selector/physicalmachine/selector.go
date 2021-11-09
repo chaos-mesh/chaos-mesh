@@ -24,7 +24,7 @@ import (
 type SelectImpl struct{}
 
 func (impl *SelectImpl) Select(ctx context.Context, physicalMachineSelector *v1alpha1.PhysicalMachineSelector) ([]PhysicalMachineAddress, error) {
-	addresses := physicalMachineSelector.Addresses
+	addresses := physicalMachineSelector.Address
 
 	physicalMachineAddress := make([]PhysicalMachineAddress, 0, len(addresses))
 	for _, address := range addresses {
