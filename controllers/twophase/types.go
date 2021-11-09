@@ -73,6 +73,10 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		// This chaos was finished, we should remove the finalizer
 		r.Log.Info("Removing pre-finalizer")
 		chaos.GetMeta().SetFinalizers(finalizer.RemoveFromFinalizer(chaos.GetMeta().GetFinalizers(), Prefinalizer))
+		if err := r.Client.Update(ctx, chaos); err != nil {
+			r.Log.Error(err, "unable to update chaos")
+			return ctrl.Result{}, err
+		}
 	} else if !finalizer.ContainsFinalizer(chaos.GetMeta().GetFinalizers(), Prefinalizer) {
 		chaos.GetMeta().SetFinalizers(finalizer.InsertFinalizer(chaos.GetMeta().GetFinalizers(), Prefinalizer))
 		if err := r.Client.Update(ctx, chaos); err != nil {
