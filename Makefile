@@ -135,7 +135,20 @@ BUILD_INDOCKER_ARG := --env IN_DOCKER=1 --env HTTP_PROXY=${HTTP_PROXY} --env HTT
 
 ifneq ($(TARGET_PLATFORM),)
 	BUILD_INDOCKER_ARG += --platform=linux/$(TARGET_PLATFORM)
-	DOCKER_BUILD_ARGS += --platform linux/$(TARGET_PLATFORM) --build-arg TARGET_PLATFORM=$(TARGET_PLATFORM)
+	DOCKER_BUILD_ARGS += --platform=linux/$(TARGET_PLATFORM) --build-arg TARGET_PLATFORM=amd64
+else
+	UNAME_M := $(shell uname -m)
+	ifeq ($(UNAME_M),x86_64)
+		DOCKER_BUILD_ARGS += --build-arg TARGET_PLATFORM=amd64
+	else ifeq ($(UNAME_M),amd64)
+		DOCKER_BUILD_ARGS += --build-arg TARGET_PLATFORM=amd64
+	else ifeq ($(UNAME_M),arm64)
+		DOCKER_BUILD_ARGS += --build-arg TARGET_PLATFORM=arm64
+	else ifeq ($(UNAME_M),aarch64)
+		DOCKER_BUILD_ARGS += --build-arg TARGET_PLATFORM=arm64
+	else
+		$(error Please run this script on amd64 or arm64 machine)
+	endif
 endif
 
 ifeq ($(TARGET_PLATFORM),arm64)
