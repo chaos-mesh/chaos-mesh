@@ -60,7 +60,12 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 							PhysicalMachineSelector: PhysicalMachineSelector{
 								Address: []string{""},
 							},
-							ExpInfo: ExpInfo{},
+							ExpInfo: ExpInfo{
+								StressCPU: &StressCPUSpec{
+									Load:    10,
+									Workers: 1,
+								},
+							},
 						},
 					},
 					"the address is empty",
