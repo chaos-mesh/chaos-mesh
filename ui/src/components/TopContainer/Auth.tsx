@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+
 import { Box, Button, Divider, IconButton, Link, Typography } from '@material-ui/core'
 import { useEffect, useState } from 'react'
 
@@ -24,6 +25,7 @@ import Space from 'components-mui/Space'
 import T from 'components/T'
 import Token from 'components/Token'
 import { useHistory } from 'react-router-dom'
+import { useStoreSelector } from 'store'
 
 interface AuthProps {
   open: boolean
@@ -32,6 +34,8 @@ interface AuthProps {
 
 const Auth: React.FC<AuthProps> = ({ open, setOpen }) => {
   const history = useHistory()
+
+  const { gcpSecurityMode } = useStoreSelector((state) => state.globalStatus)
 
   const [tokenGenOpen, setTokenGenOpen] = useState(false)
 
@@ -62,12 +66,18 @@ const Auth: React.FC<AuthProps> = ({ open, setOpen }) => {
         </Typography>
         <Token onSubmitCallback={handleSubmitCallback} />
       </Space>
-      <Divider sx={{ mt: 6, mb: 3, color: 'text.secondary', typography: 'body2' }}>{T('settings.addToken.or')}</Divider>
-      <Box textAlign="center">
-        <IconButton color="primary" onClick={handleAuthGCP}>
-          <GoogleIcon />
-        </IconButton>
-      </Box>
+      {gcpSecurityMode && (
+        <>
+          <Divider sx={{ mt: 6, mb: 3, color: 'text.secondary', typography: 'body2' }}>
+            {T('settings.addToken.or')}
+          </Divider>
+          <Box textAlign="center">
+            <IconButton color="primary" onClick={handleAuthGCP}>
+              <GoogleIcon />
+            </IconButton>
+          </Box>
+        </>
+      )}
 
       <ConfirmDialog
         open={tokenGenOpen}

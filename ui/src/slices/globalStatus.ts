@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 
 import { Config } from 'api/common.type'
@@ -40,6 +41,7 @@ const initialState: {
   namespace: string
   securityMode: boolean
   dnsServerCreate: boolean
+  gcpSecurityMode: boolean
   version: string
   tokens: TokenFormValues[]
   tokenName: string
@@ -57,6 +59,7 @@ const initialState: {
   namespace: 'All',
   securityMode: true,
   dnsServerCreate: false,
+  gcpSecurityMode: false,
   version: '',
   tokens: [],
   tokenName: '',
@@ -83,6 +86,7 @@ const globalStatusSlice = createSlice({
     setConfig(state, action: PayloadAction<Config>) {
       state.securityMode = action.payload.security_mode
       state.dnsServerCreate = action.payload.dns_server_create
+      state.gcpSecurityMode = action.payload.gcp_security_mode
       state.version = action.payload.version
     },
     setNameSpace(state, action: PayloadAction<string>) {
