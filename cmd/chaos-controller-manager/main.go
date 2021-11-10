@@ -40,11 +40,11 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-controller-manager/provider"
 	"github.com/chaos-mesh/chaos-mesh/controllers"
 	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
-	"github.com/chaos-mesh/chaos-mesh/controllers/metrics"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
 	"github.com/chaos-mesh/chaos-mesh/pkg/ctrlserver"
 	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
+	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
@@ -135,7 +135,7 @@ func Run(params RunParams) error {
 	}
 
 	// Init metrics collector
-	metricsCollector := metrics.NewChaosCollector(mgr.GetCache(), controllermetrics.Registry)
+	metricsCollector := metrics.NewChaosControllerManagerMetricsCollector(mgr.GetCache(), controllermetrics.Registry)
 
 	setupLog.Info("Setting up webhook server")
 	hookServer := mgr.GetWebhookServer()

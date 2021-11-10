@@ -152,7 +152,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 				}
 			}
 
-			err := impl.SetDrop(ctx, m, targets, networkchaos, targetIPSetPostFix, v1alpha1.Output)
+			err := impl.SetDrop(ctx, m, targets, networkchaos, targetIPSetPostFix, v1alpha1.Output, networkchaos.Spec.Device)
 			if err != nil {
 				return v1alpha1.NotInjected, err
 			}
@@ -168,7 +168,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 				}
 			}
 
-			err := impl.SetDrop(ctx, m, targets, networkchaos, targetIPSetPostFix, v1alpha1.Input)
+			err := impl.SetDrop(ctx, m, targets, networkchaos, targetIPSetPostFix, v1alpha1.Input, networkchaos.Spec.Device)
 			if err != nil {
 				return v1alpha1.NotInjected, err
 			}
@@ -199,7 +199,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 				}
 			}
 
-			err := impl.SetDrop(ctx, m, targets, networkchaos, sourceIPSetPostFix, v1alpha1.Output)
+			err := impl.SetDrop(ctx, m, targets, networkchaos, sourceIPSetPostFix, v1alpha1.Output, networkchaos.Spec.TargetDevice)
 			if err != nil {
 				return v1alpha1.NotInjected, err
 			}
@@ -215,7 +215,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 				}
 			}
 
-			err := impl.SetDrop(ctx, m, targets, networkchaos, sourceIPSetPostFix, v1alpha1.Input)
+			err := impl.SetDrop(ctx, m, targets, networkchaos, sourceIPSetPostFix, v1alpha1.Input, networkchaos.Spec.TargetDevice)
 			if err != nil {
 				return v1alpha1.NotInjected, err
 			}
@@ -321,7 +321,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	return waitForRecoverSync, nil
 }
 
-func (impl *Impl) SetDrop(ctx context.Context, m *podnetworkchaosmanager.PodNetworkManager, targets []*v1alpha1.Record, networkchaos *v1alpha1.NetworkChaos, ipSetPostFix string, chainDirection v1alpha1.ChainDirection) error {
+func (impl *Impl) SetDrop(ctx context.Context, m *podnetworkchaosmanager.PodNetworkManager, targets []*v1alpha1.Record, networkchaos *v1alpha1.NetworkChaos, ipSetPostFix string, chainDirection v1alpha1.ChainDirection, device string) error {
 	externalCidrs, err := netutils.ResolveCidrs(networkchaos.Spec.ExternalTargets)
 	if err != nil {
 		return err
@@ -340,6 +340,7 @@ func (impl *Impl) SetDrop(ctx context.Context, m *podnetworkchaosmanager.PodNetw
 			RawRuleSource: v1alpha1.RawRuleSource{
 				Source: m.Source,
 			},
+			Device: device,
 		})
 		return nil
 	}
@@ -368,6 +369,7 @@ func (impl *Impl) SetDrop(ctx context.Context, m *podnetworkchaosmanager.PodNetw
 		RawRuleSource: v1alpha1.RawRuleSource{
 			Source: m.Source,
 		},
+		Device: device,
 	})
 
 	return nil

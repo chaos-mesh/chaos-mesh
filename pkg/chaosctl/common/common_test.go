@@ -153,8 +153,12 @@ func TestGetPods(t *testing.T) {
 		expectedErr       bool
 	}{
 		{
-			name:              "chaos on two pods",
-			chaosSelector:     v1alpha1.PodSelectorSpec{LabelSelectors: map[string]string{"app": "pod"}},
+			name: "chaos on two pods",
+			chaosSelector: v1alpha1.PodSelectorSpec{
+				GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+					LabelSelectors: map[string]string{"app": "pod"},
+				},
+			},
 			chaosStatus:       v1alpha1.ChaosStatus{},
 			expectedPodNum:    2,
 			expectedDaemonNum: 2,
@@ -163,8 +167,10 @@ func TestGetPods(t *testing.T) {
 		{
 			name: "chaos on one pod",
 			chaosSelector: v1alpha1.PodSelectorSpec{
-				Nodes:          []string{"node0"},
-				LabelSelectors: map[string]string{"app": "pod"},
+				Nodes: []string{"node0"},
+				GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+					LabelSelectors: map[string]string{"app": "pod"},
+				},
 			},
 			chaosStatus:       v1alpha1.ChaosStatus{},
 			expectedPodNum:    1,
@@ -172,10 +178,14 @@ func TestGetPods(t *testing.T) {
 			expectedErr:       false,
 		},
 		{
-			name:          "wrong selector to get pod",
-			chaosSelector: v1alpha1.PodSelectorSpec{LabelSelectors: map[string]string{"app": "oops"}},
-			chaosStatus:   v1alpha1.ChaosStatus{},
-			expectedErr:   true,
+			name: "wrong selector to get pod",
+			chaosSelector: v1alpha1.PodSelectorSpec{
+				GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+					LabelSelectors: map[string]string{"app": "oops"},
+				},
+			},
+			chaosStatus: v1alpha1.ChaosStatus{},
+			expectedErr: true,
 		},
 	}
 

@@ -25,6 +25,10 @@ service ChaosDaemon {
   rpc ApplyHttpChaos(ApplyHttpChaosRequest) returns (ApplyHttpChaosResponse) {}
 
   rpc SetDNSServer (SetDNSServerRequest) returns (google.protobuf.Empty) {}
+
+  rpc InstallJVMRules(InstallJVMRulesRequest) returns (google.protobuf.Empty) {}
+
+  rpc UninstallJVMRules(UninstallJVMRulesRequest) returns (google.protobuf.Empty) {}
 }
 
 message TcHandle {
@@ -141,6 +145,7 @@ message Chain {
   string source_ports = 6;
   string destination_ports = 7;
   string tcp_flags = 8;
+  string device = 9;
 }
 
 message TimeRequest {
@@ -215,7 +220,6 @@ message ApplyHttpChaosResponse {
 message TcsRequest {
   repeated Tc tcs = 1;
   string container_id = 2;
-  string device = 3;
   bool enterNS = 4;
 }
 
@@ -231,11 +235,26 @@ message Tc {
   string protocol = 5;
   string source_port = 6;
   string egress_port = 7;
+  string device = 9;
 }
 
 message SetDNSServerRequest {
   string container_id = 1;
   string dns_server = 2;
   bool enable = 3;
+  bool enterNS = 4;
+}
+
+message InstallJVMRulesRequest {
+  string container_id = 1;
+  string rule = 2;
+  int32 port = 3;
+  bool enterNS = 4;
+}
+
+message UninstallJVMRulesRequest {
+  string container_id = 1;
+  string rule = 2;
+  int32 port = 3;
   bool enterNS = 4;
 }
