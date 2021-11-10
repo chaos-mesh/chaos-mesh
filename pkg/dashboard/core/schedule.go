@@ -70,6 +70,6 @@ type ScheduleMeta struct {
 	Namespace  string    `json:"namespace"`
 	Action     string    `json:"action"`
 	StartTime  time.Time `json:"start_time"`
-	FinishTime time.Time `json:"finish_time"`
+	FinishTime *time.Time `json:"finish_time"`
 	Archived   bool      `json:"archived"`
 }
