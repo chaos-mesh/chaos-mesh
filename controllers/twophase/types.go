@@ -22,8 +22,11 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	"github.com/robfig/cron/v3"
+	"k8s.io/client-go/util/retry"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+	"github.com/chaos-mesh/chaos-mesh/pkg/finalizer"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 	"github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
 	sch "github.com/chaos-mesh/chaos-mesh/pkg/scheduler"
@@ -64,6 +67,47 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, err
 	}
 	chaos := _chaos.(v1alpha1.InnerSchedulerObject)
+
+	if chaos.GetStatus().Experiment.Phase == v1alpha1.ExperimentPhaseFinished {
+		// This chaos was finished, we should remove the finalizer
+		r.Log.Info("Removing pre-finalizer")
+
+		chaos.GetMeta().SetFinalizers(finalizer.RemoveFromFinalizer(chaos.GetMeta().GetFinalizers(), common.PreFinalizer))
+
+		updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+			obj := r.Object().DeepCopyObject().(v1alpha1.InnerObject)
+			if err = r.Client.Get(ctx, req.NamespacedName, obj); err != nil {
+				r.Log.Error(err, "unable to get chaos")
+				return err
+			}
+
+			obj.GetMeta().SetFinalizers(chaos.GetMeta().GetFinalizers())
+			return r.Update(ctx, obj)
+		})
+
+		if updateError != nil {
+			r.Log.Error(err, "unable to update chaos")
+			return ctrl.Result{}, err
+		}
+	} else if !finalizer.ContainsFinalizer(chaos.GetMeta().GetFinalizers(), common.PreFinalizer) {
+		chaos.GetMeta().SetFinalizers(finalizer.InsertFinalizer(chaos.GetMeta().GetFinalizers(), common.PreFinalizer))
+
+		updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+			obj := r.Object().DeepCopyObject().(v1alpha1.InnerObject)
+			if err = r.Client.Get(ctx, req.NamespacedName, obj); err != nil {
+				r.Log.Error(err, "unable to get chaos")
+				return err
+			}
+
+			obj.GetMeta().SetFinalizers(chaos.GetMeta().GetFinalizers())
+			return r.Update(ctx, obj)
+		})
+
+		if updateError != nil {
+			r.Log.Error(err, "unable to update chaos")
+			return ctrl.Result{}, err
+		}
+	}
 
 	status := chaos.GetStatus()
 

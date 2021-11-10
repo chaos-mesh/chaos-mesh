@@ -38,3 +38,13 @@ func InsertFinalizer(finalizers []string, finalizer string) []string {
 	}
 	return append(finalizers, finalizer)
 }
+
+func ContainsFinalizer(finalizers []string, finalizer string) bool {
+	for _, f := range finalizers {
+		if f == finalizer {
+			return true
+		}
+	}
+
+	return false
+}

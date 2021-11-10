@@ -23,7 +23,6 @@ import (
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/retry"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -33,7 +32,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/recover"
 	"github.com/chaos-mesh/chaos-mesh/pkg/annotation"
 	"github.com/chaos-mesh/chaos-mesh/pkg/events"
-	"github.com/chaos-mesh/chaos-mesh/pkg/finalizer"
 	"github.com/chaos-mesh/chaos-mesh/pkg/router"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 	end "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
@@ -81,25 +79,12 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 		r.Log.Error(err, "failed to select and filter pods")
 		return err
 	}
+	podchaos.Status.Experiment.PodRecords = make([]v1alpha1.PodStatus, 0, len(pods))
 	err = r.failAllPods(ctx, pods, podchaos)
 	if err != nil {
 		return err
 	}
 
-	podchaos.Status.Experiment.PodRecords = make([]v1alpha1.PodStatus, 0, len(pods))
-	for _, pod := range pods {
-		ps := v1alpha1.PodStatus{
-			Namespace: pod.Namespace,
-			Name:      pod.Name,
-			HostIP:    pod.Status.HostIP,
-			PodIP:     pod.Status.PodIP,
-			Action:    string(podchaos.Spec.Action),
-		}
-		if podchaos.Spec.Duration != nil {
-			ps.Message = fmt.Sprintf(podFailureActionMsg, *podchaos.Spec.Duration)
-		}
-		podchaos.Status.Experiment.PodRecords = append(podchaos.Status.Experiment.PodRecords, ps)
-	}
 	r.Event(podchaos, v1.EventTypeNormal, events.ChaosInjected, "")
 	return nil
 }
@@ -158,11 +143,17 @@ func (r *endpoint) failAllPods(ctx context.Context, pods []v1.Pod, podchaos *v1a
 	for index := range pods {
 		pod := &pods[index]
 
-		key, err := cache.MetaNamespaceKeyFunc(pod)
-		if err != nil {
-			return err
+		ps := v1alpha1.PodStatus{
+			Namespace: pod.Namespace,
+			Name:      pod.Name,
+			HostIP:    pod.Status.HostIP,
+			PodIP:     pod.Status.PodIP,
+			Action:    string(podchaos.Spec.Action),
 		}
-		podchaos.Finalizers = finalizer.InsertFinalizer(podchaos.Finalizers, key)
+		if podchaos.Spec.Duration != nil {
+			ps.Message = fmt.Sprintf(podFailureActionMsg, *podchaos.Spec.Duration)
+		}
+		podchaos.Status.Experiment.PodRecords = append(podchaos.Status.Experiment.PodRecords, ps)
 
 		g.Go(func() error {
 			return r.failPod(ctx, pod, podchaos)
@@ -229,19 +220,6 @@ func (r *endpoint) failPod(ctx context.Context, pod *v1.Pod, podchaos *v1alpha1.
 		r.Log.Error(patchErr, "unable to use fake image on pod")
 		return patchErr
 	}
-
-	ps := v1alpha1.PodStatus{
-		Namespace: pod.Namespace,
-		Name:      pod.Name,
-		HostIP:    pod.Status.HostIP,
-		PodIP:     pod.Status.PodIP,
-		Action:    string(podchaos.Spec.Action),
-	}
-	if podchaos.Spec.Duration != nil {
-		ps.Message = fmt.Sprintf(podFailureActionMsg, *podchaos.Spec.Duration)
-	}
-
-	podchaos.Status.Experiment.PodRecords = append(podchaos.Status.Experiment.PodRecords, ps)
 
 	return nil
 }
