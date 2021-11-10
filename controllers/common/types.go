@@ -143,7 +143,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			return ctrl.Result{}, err
 		}
 
-		r.Log.Error(err, "conflict on updating chaos")
+		r.Log.Info("conflict on updating chaos")
 
 		updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
 			obj := r.Object().DeepCopyObject().(v1alpha1.InnerObject)
