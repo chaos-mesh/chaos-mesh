@@ -58,7 +58,7 @@ var _ = Describe("IOChaos", func() {
 					Action: IoLatency,
 					ContainerSelector: ContainerSelector{
 						PodSelector: PodSelector{
-							Mode: OnePodMode,
+							Mode: OneMode,
 						},
 					},
 				},

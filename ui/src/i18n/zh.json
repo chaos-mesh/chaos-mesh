@@ -62,8 +62,26 @@
     "target": {
       "kind": "类别",
       "action": "行为",
-      "pod": {
-        "title": "Pod 故障"
+      "aws": {
+        "title": "AWS 故障"
+      },
+      "disk": {
+        "title": "磁盘故障"
+      },
+      "dns": {
+        "title": "DNS 故障"
+      },
+      "gcp": {
+        "title": "GCP 故障"
+      },
+      "io": {
+        "title": "文件系统注入"
+      },
+      "jvm": {
+        "title": "JVM 故障"
+      },
+      "kernel": {
+        "title": "内核故障"
       },
       "network": {
         "title": "网络攻击",
@@ -73,26 +91,20 @@
           "podsPreviewHelper": "通过勾选 Pod 来进一步限制目标的范围"
         }
       },
-      "io": {
-        "title": "文件系统注入"
+      "physicalmachine": {
+        "title": "物理机故障"
       },
-      "kernel": {
-        "title": "内核故障"
+      "pod": {
+        "title": "Pod 故障"
       },
-      "time": {
-        "title": "时钟偏移"
+      "process": {
+        "title": "进程中断"
       },
       "stress": {
         "title": "压力测试"
       },
-      "dns": {
-        "title": "DNS 故障"
-      },
-      "aws": {
-        "title": "AWS 故障"
-      },
-      "gcp": {
-        "title": "GCP 故障"
+      "time": {
+        "title": "时钟偏移"
       }
     },
     "run": {
@@ -214,6 +226,11 @@
     "notFound": "未发现归档",
     "deleteMulti": "删除所选归档",
     "deleteDesc": "归档将被永久删除"
+  },
+  "physics": {
+    "title": "物理机",
+    "single": "物理",
+    "notFound": "未发现物理机"
   },
   "settings": {
     "title": "设置",
@@ -343,6 +360,7 @@
     }
   },
   "k8s": {
+    "title": "Kubernetes",
     "namespace": "命名空间",
     "labels": "标签",
     "annotations": "注解",
@@ -350,5 +368,9 @@
     "labelSelectors": "标签选择器",
     "annotationsSelectors": "注解选择器",
     "podPhaseSelectors": "阶段选择器"
+  },
+  "physic": {
+    "address": "地址",
+    "addressHelper": "键入并以空格结尾来添加一个或多个 chaosd 地址"
   }
 }

@@ -109,7 +109,7 @@ func testNetworkDelay(c http.Client, port uint16, targetIP string) (int64, error
 
 func makeNetworkPartitionChaos(
 	namespace, name string, fromLabelSelectors, toLabelSelectors map[string]string,
-	fromPodMode, toPodMode v1alpha1.PodMode,
+	fromPodMode, toPodMode v1alpha1.SelectorMode,
 	direction v1alpha1.Direction,
 	duration *string,
 ) *v1alpha1.NetworkChaos {
@@ -117,8 +117,10 @@ func makeNetworkPartitionChaos(
 	if toLabelSelectors != nil {
 		target = &v1alpha1.PodSelector{
 			Selector: v1alpha1.PodSelectorSpec{
-				Namespaces:     []string{namespace},
-				LabelSelectors: toLabelSelectors,
+				GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+					Namespaces:     []string{namespace},
+					LabelSelectors: toLabelSelectors,
+				},
 			},
 			Mode: toPodMode,
 		}
@@ -136,8 +138,10 @@ func makeNetworkPartitionChaos(
 			Duration:  duration,
 			PodSelector: v1alpha1.PodSelector{
 				Selector: v1alpha1.PodSelectorSpec{
-					Namespaces:     []string{namespace},
-					LabelSelectors: fromLabelSelectors,
+					GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+						Namespaces:     []string{namespace},
+						LabelSelectors: fromLabelSelectors,
+					},
 				},
 				Mode: fromPodMode,
 			},
@@ -147,14 +151,16 @@ func makeNetworkPartitionChaos(
 
 func makeNetworkDelayChaos(
 	namespace, name string, fromLabelSelectors, toLabelSelectors map[string]string,
-	fromPodMode, toPodMode v1alpha1.PodMode, direction v1alpha1.Direction, tcparam v1alpha1.TcParameter, duration *string,
+	fromPodMode, toPodMode v1alpha1.SelectorMode, direction v1alpha1.Direction, tcparam v1alpha1.TcParameter, duration *string,
 ) *v1alpha1.NetworkChaos {
 	var target *v1alpha1.PodSelector
 	if toLabelSelectors != nil {
 		target = &v1alpha1.PodSelector{
 			Selector: v1alpha1.PodSelectorSpec{
-				Namespaces:     []string{namespace},
-				LabelSelectors: toLabelSelectors,
+				GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+					Namespaces:     []string{namespace},
+					LabelSelectors: toLabelSelectors,
+				},
 			},
 			Mode: toPodMode,
 		}
@@ -173,8 +179,10 @@ func makeNetworkDelayChaos(
 			Direction:   direction,
 			PodSelector: v1alpha1.PodSelector{
 				Selector: v1alpha1.PodSelectorSpec{
-					Namespaces:     []string{namespace},
-					LabelSelectors: fromLabelSelectors,
+					GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+						Namespaces:     []string{namespace},
+						LabelSelectors: fromLabelSelectors,
+					},
 				},
 				Mode: fromPodMode,
 			},
