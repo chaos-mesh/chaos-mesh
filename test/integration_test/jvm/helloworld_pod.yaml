@@ -12,26 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-apiVersion: chaos-mesh.org/v1alpha1
-kind: Schedule
+
+apiVersion: v1
+kind: Pod
 metadata:
-  name: jvm-delay4jvm-example
-  namespace: app
+  name: helloworld
+  namespace: helloworld
 spec:
-  schedule: '@every 1m'
-  type: JVMChaos
-  historyLimit: 5
-  concurrencyPolicy: Forbid
-  jvmChaos:
-    action: delay
-    target: jvm
-    flags:
-      time: "10000"
-    matchers:
-      classname: org.chaosmesh.jvm.Application
-      methodname: hello
-    mode: one
-    selector:
-      labelSelectors:
-        app: springboot-jvmchaos-demo
-    duration: 50s
+  containers:
+    - name: helloworld
+      image: xiang13225080/helloworld:v1.0
+      imagePullPolicy: IfNotPresent
