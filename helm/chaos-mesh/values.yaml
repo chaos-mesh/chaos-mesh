@@ -43,7 +43,11 @@ enableProfiling: true
 # enableCtrlServer is a flag to enable ctrlserver in controller-manager and chaos-daemon.
 enableCtrlServer: true
 
-registry: "ghcr.io"
+images:
+  # images.registry is the global container registry for the images, you could replace it with your self-hosted container registry.
+  registry: "ghcr.io"
+  # images.tag is the global image tag (for example, semiVer with prefix v, or latest).
+  tag: "latest"
 
 ## Optional array of imagePullSecrets containing private registry credentials
 ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
@@ -59,7 +63,7 @@ controllerManager:
   priorityClassName: ""
   image:
     repository: chaos-mesh/chaos-mesh
-    tag: latest
+    tag: ""
   imagePullPolicy: IfNotPresent
 
   enableFilterNamespace: false
@@ -115,7 +119,8 @@ controllerManager:
 chaosDaemon:
   image:
     repository: chaos-mesh/chaos-daemon
-    tag: latest
+    # empty tag means using the global images.tag
+    tag: ""
   imagePullPolicy: IfNotPresent
   grpcPort: 31767
   httpPort: 31766
@@ -193,7 +198,8 @@ dashboard:
   serviceAccount: chaos-controller-manager
   image:
     repository: chaos-mesh/chaos-dashboard
-    tag: latest
+    # empty tag means using the global images.tag
+    tag: ""
   imagePullPolicy: IfNotPresent
 
   securityMode: true
@@ -415,7 +421,8 @@ bpfki:
   create: false
   image:
     repository: chaos-mesh/chaos-kernel
-    tag: latest
+    # empty tag means using the global images.tag
+    tag: ""
   imagePullPolicy: IfNotPresent
   grpcPort: 50051
   resources: {}
@@ -434,5 +441,6 @@ chaosDlv:
   enable: false
   image:
     repository: chaos-mesh/chaos-dlv
-    tag: latest
+    # empty tag means using the global images.tag
+    tag: ""
   imagePullPolicy: IfNotPresent
