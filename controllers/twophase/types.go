@@ -22,7 +22,6 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	"github.com/robfig/cron/v3"
-	"k8s.io/client-go/util/retry"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
@@ -74,16 +73,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 		chaos.GetMeta().SetFinalizers(finalizer.RemoveFromFinalizer(chaos.GetMeta().GetFinalizers(), common.PreFinalizer))
 
-		updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-			obj := r.Object().DeepCopyObject().(v1alpha1.InnerObject)
-			if err = r.Client.Get(ctx, req.NamespacedName, obj); err != nil {
-				r.Log.Error(err, "unable to get chaos")
-				return err
-			}
-
-			obj.GetMeta().SetFinalizers(chaos.GetMeta().GetFinalizers())
-			return r.Update(ctx, obj)
-		})
+		updateError := r.Update(ctx, chaos)
 
 		if updateError != nil {
 			r.Log.Error(err, "unable to update chaos")
@@ -92,16 +82,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	} else if !finalizer.ContainsFinalizer(chaos.GetMeta().GetFinalizers(), common.PreFinalizer) {
 		chaos.GetMeta().SetFinalizers(finalizer.InsertFinalizer(chaos.GetMeta().GetFinalizers(), common.PreFinalizer))
 
-		updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-			obj := r.Object().DeepCopyObject().(v1alpha1.InnerObject)
-			if err = r.Client.Get(ctx, req.NamespacedName, obj); err != nil {
-				r.Log.Error(err, "unable to get chaos")
-				return err
-			}
-
-			obj.GetMeta().SetFinalizers(chaos.GetMeta().GetFinalizers())
-			return r.Update(ctx, obj)
-		})
+		updateError := r.Update(ctx, chaos)
 
 		if updateError != nil {
 			r.Log.Error(err, "unable to update chaos")
