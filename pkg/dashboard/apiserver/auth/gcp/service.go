@@ -60,12 +60,15 @@ func Register(r *gin.RouterGroup, s *Service, conf *config.ChaosDashboardConfig)
 }
 
 func (s *Service) getOauthConfig(c *gin.Context) oauth2.Config {
+	url := c.Request.URL
+	url.Path = "/api/auth/gcp/callback"
+	url.RawQuery = ""
+	url.Fragment = ""
+
 	return oauth2.Config{
 		ClientID:     s.clientId,
 		ClientSecret: s.clientSecret,
-		// TODO: use a better way to construct the url
-		// TODO: support https
-		RedirectURL: "http://" + c.Request.Host + "/api/auth/gcp/callback",
+		RedirectURL:  url.String(),
 		Scopes: []string{
 			"email", "profile",
 			"https://www.googleapis.com/auth/userinfo.email",
