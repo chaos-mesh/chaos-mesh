@@ -414,7 +414,7 @@ define generate-make
 	cd ./api/v1alpha1 ;\
 		controller-gen object:headerFile=../../hack/boilerplate/boilerplate.generatego.txt paths="./..." ;
 endef
-$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,generate,chaos-build generate-ctrl swagger_spec))
+$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,generate,chaos-build generate-ctrl swagger_spec api-reference/index.html))
 check: generate yaml vet boilerplate lint tidy install.sh fmt
 
 CLEAN_TARGETS+=e2e-test/image/e2e/bin/ginkgo
@@ -470,6 +470,23 @@ define generate-mock-make
 	$(GO) generate ./pkg/workflow
 endef
 $(eval $(call RUN_IN_DEV_ENV_TEMPLATE,generate-mock))
+
+define api-reference/index.asciidoc-make
+	cd /mnt; \
+	crd-ref-docs --source-path=./api/v1alpha1 \
+		--config=./api-reference/config.yaml \
+		--renderer=asciidoctor \
+		--templates-dir=./api-reference/asciidoctor \
+		--output-path=out.asciidoc \
+		--log-level debug --max-depth 1024 \
+		--output-path ./api-reference/index.asciidoc
+endef
+$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,api-reference/index.asciidoc,api/v1alpha1/*.go))
+
+define api-reference/index.html-make
+	asciidoctor -a toc2 -D api-reference -o ./index.html ./api-reference/index.asciidoc
+endef
+$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,api-reference/index.html,api-reference/index.asciidoc))
 
 .PHONY: all clean test install manifests groupimports fmt vet tidy image \
 	docker-push lint generate config mockgen generate-mock \

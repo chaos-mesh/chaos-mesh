@@ -19,6 +19,7 @@ RUN go install github.com/matm/gocov-html@v0.0.0-20200509184451-71874e2e203b
 RUN go install github.com/swaggo/swag/cmd/swag@v1.6.7
 RUN go install github.com/onsi/ginkgo/ginkgo@v1.16.4
 RUN go install github.com/golang/mock/mockgen@v1.5.0
+RUN go install github.com/elastic/crd-ref-docs@v0.0.7
 
 FROM debian:buster-slim
 
@@ -31,7 +32,7 @@ ENV http_proxy $HTTP_PROXY
 ENV https_proxy $HTTPS_PROXY
 
 RUN apt-get update && \ 
-    apt-get install unzip git build-essential curl python -y && \
+    apt-get install unzip git build-essential curl python asciidoctor -y && \
     rm -rf /var/lib/apt/lists/*
 
 # The `TARGET_PLATFORM` would be `amd64` or `arm64`

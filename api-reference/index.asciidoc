@@ -1,0 +1,2983 @@
+// Generated documentation. Please do not edit.
+:anchor_prefix: k8s-api
+
+[id="{p}-api-reference"]
+== API Reference
+
+.Packages
+- xref:{anchor_prefix}-chaos-mesh-org-v1alpha1[$$chaos-mesh.org/v1alpha1$$]
+
+
+[id="{anchor_prefix}-chaos-mesh-org-v1alpha1"]
+=== chaos-mesh.org/v1alpha1
+
+Package v1alpha1 contains API Schema definitions for the chaosmesh v1alpha1 API group
+
+.Resource Types
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-awschaos[$$AWSChaos$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-dnschaos[$$DNSChaos$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-gcpchaos[$$GCPChaos$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-httpchaos[$$HTTPChaos$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-iochaos[$$IOChaos$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmchaos[$$JVMChaos$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-kernelchaos[$$KernelChaos$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-networkchaos[$$NetworkChaos$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-physicalmachinechaos[$$PhysicalMachineChaos$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podchaos[$$PodChaos$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podhttpchaos[$$PodHttpChaos$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podiochaos[$$PodIOChaos$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podnetworkchaos[$$PodNetworkChaos$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-schedule[$$Schedule$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-stresschaos[$$StressChaos$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-timechaos[$$TimeChaos$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-workflow[$$Workflow$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-workflownode[$$WorkflowNode$$]
+
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-awschaos"]
+==== AWSChaos 
+
+AWSChaos is the Schema for the awschaos API
+
+
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`apiVersion`* __string__ | `chaos-mesh.org/v1alpha1`
+| *`kind`* __string__ | `AWSChaos`
+| *`TypeMeta`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#typemeta-v1-meta[$$TypeMeta$$]__ | 
+| *`metadata`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#objectmeta-v1-meta[$$ObjectMeta$$]__ | Refer to Kubernetes API documentation for fields of `metadata`.
+
+| *`spec`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-awschaosspec[$$AWSChaosSpec$$]__ | 
+| *`status`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-awschaosstatus[$$AWSChaosStatus$$]__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-awschaosaction"]
+==== AWSChaosAction (string) 
+
+AWSChaosAction represents the chaos action about aws.
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-awschaosspec[$$AWSChaosSpec$$]
+****
+
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-awschaosspec"]
+==== AWSChaosSpec 
+
+AWSChaosSpec is the content of the specification for an AWSChaos
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-awschaos[$$AWSChaos$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-embedchaos[$$EmbedChaos$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`action`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-awschaosaction[$$AWSChaosAction$$]__ | Action defines the specific aws chaos action. Supported action: ec2-stop / ec2-restart / detach-volume Default action: ec2-stop
+| *`duration`* __string__ | Duration represents the duration of the chaos action.
+| *`secretName`* __string__ | SecretName defines the name of kubernetes secret.
+| *`AWSSelector`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-awsselector[$$AWSSelector$$]__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-awschaosstatus"]
+==== AWSChaosStatus 
+
+AWSChaosStatus represents the status of an AWSChaos
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-awschaos[$$AWSChaos$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`ChaosStatus`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-chaosstatus[$$ChaosStatus$$]__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-awsselector"]
+==== AWSSelector 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-awschaosspec[$$AWSChaosSpec$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`endpoint`* __string__ | Endpoint indicates the endpoint of the aws server. Just used it in test now.
+| *`awsRegion`* __string__ | AWSRegion defines the region of aws.
+| *`ec2Instance`* __string__ | Ec2Instance indicates the ID of the ec2 instance.
+| *`volumeID`* __string__ | EbsVolume indicates the ID of the EBS volume. Needed in detach-volume.
+| *`deviceName`* __string__ | DeviceName indicates the name of the device. Needed in detach-volume.
+|===
+
+
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-attroverridespec"]
+==== AttrOverrideSpec 
+
+AttrOverrideSpec represents an override of attribution
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-iochaosaction[$$IOChaosAction$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-iochaosspec[$$IOChaosSpec$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`ino`* __integer__ | 
+| *`size`* __integer__ | 
+| *`blocks`* __integer__ | 
+| *`atime`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-timespec[$$Timespec$$]__ | 
+| *`mtime`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-timespec[$$Timespec$$]__ | 
+| *`ctime`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-timespec[$$Timespec$$]__ | 
+| *`kind`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-filetype[$$FileType$$]__ | 
+| *`perm`* __integer__ | 
+| *`nlink`* __integer__ | 
+| *`uid`* __integer__ | 
+| *`gid`* __integer__ | 
+| *`rdev`* __integer__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-bandwidthspec"]
+==== BandwidthSpec 
+
+BandwidthSpec defines detail of bandwidth limit.
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-tcparameter[$$TcParameter$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`rate`* __string__ | Rate is the speed knob. Allows bps, kbps, mbps, gbps, tbps unit. bps means bytes per second.
+| *`limit`* __integer__ | Limit is the number of bytes that can be queued waiting for tokens to become available.
+| *`buffer`* __integer__ | Buffer is the maximum amount of bytes that tokens can be available for instantaneously.
+| *`peakrate`* __integer__ | Peakrate is the maximum depletion rate of the bucket. The peakrate does not need to be set, it is only necessary if perfect millisecond timescale shaping is required.
+| *`minburst`* __integer__ | Minburst specifies the size of the peakrate bucket. For perfect accuracy, should be set to the MTU of the interface.  If a peakrate is needed, but some burstiness is acceptable, this size can be raised. A 3000 byte minburst allows around 3mbit/s of peakrate, given 1000 byte packets.
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-cpustressor"]
+==== CPUStressor 
+
+CPUStressor defines how to stress CPU out
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-stressors[$$Stressors$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`Stressor`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-stressor[$$Stressor$$]__ | 
+| *`load`* __integer__ | Load specifies P percent loading per CPU worker. 0 is effectively a sleep (no load) and 100 is full loading.
+| *`options`* __string array__ | extend stress-ng options
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-chaindirection"]
+==== ChainDirection (string) 
+
+ChainDirection represents the direction of chain
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-rawiptables[$$RawIptables$$]
+****
+
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-chaoscondition"]
+==== ChaosCondition 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-chaosstatus[$$ChaosStatus$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`type`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-chaosconditiontype[$$ChaosConditionType$$]__ | 
+| *`status`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#conditionstatus-v1-core[$$ConditionStatus$$]__ | 
+| *`reason`* __string__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-chaosconditiontype"]
+==== ChaosConditionType (string) 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-chaoscondition[$$ChaosCondition$$]
+****
+
+
+
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-chaosonlyschedulespec"]
+==== ChaosOnlyScheduleSpec 
+
+ChaosOnlyScheduleSpec is very similar with ScheduleSpec, but it could not schedule Workflow because we could not resolve nested CRD now
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-template[$$Template$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`schedule`* __string__ | 
+| *`startingDeadlineSeconds`* __integer__ | 
+| *`concurrencyPolicy`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-concurrencypolicy[$$ConcurrencyPolicy$$]__ | 
+| *`historyLimit`* __integer__ | 
+| *`type`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-scheduletemplatetype[$$ScheduleTemplateType$$]__ | TODO: use a custom type, as `TemplateType` contains other possible values
+| *`EmbedChaos`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-embedchaos[$$EmbedChaos$$]__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-chaosstatus"]
+==== ChaosStatus 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-awschaosstatus[$$AWSChaosStatus$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-dnschaosstatus[$$DNSChaosStatus$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-gcpchaosstatus[$$GCPChaosStatus$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-httpchaosstatus[$$HTTPChaosStatus$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-iochaosstatus[$$IOChaosStatus$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmchaosstatus[$$JVMChaosStatus$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-kernelchaosstatus[$$KernelChaosStatus$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-networkchaosstatus[$$NetworkChaosStatus$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-physicalmachinechaosstatus[$$PhysicalMachineChaosStatus$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podchaosstatus[$$PodChaosStatus$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-stresschaosstatus[$$StressChaosStatus$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-timechaosstatus[$$TimeChaosStatus$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`conditions`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-chaoscondition[$$ChaosCondition$$] array__ | Conditions represents the current global condition of the chaos
+| *`experiment`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-experimentstatus[$$ExperimentStatus$$]__ | Experiment records the last experiment state.
+|===
+
+
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-clockspec"]
+==== ClockSpec 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-expinfo[$$ExpInfo$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`pid`* __integer__ | 
+| *`time-offset`* __string__ | 
+| *`clock-ids-slice`* __string__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-concurrencypolicy"]
+==== ConcurrencyPolicy (string) 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-chaosonlyschedulespec[$$ChaosOnlyScheduleSpec$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-schedulespec[$$ScheduleSpec$$]
+****
+
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-conditionalbranch"]
+==== ConditionalBranch 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-template[$$Template$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-workflownodespec[$$WorkflowNodeSpec$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`target`* __string__ | Target is the name of other template, if expression is evaluated as true, this template will be spawned.
+| *`expression`* __string__ | Expression is the expression for this conditional branch, expected type of result is boolean. If expression is empty, this branch will always be selected/the template will be spawned.
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-conditionalbranchstatus"]
+==== ConditionalBranchStatus 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-conditionalbranchesstatus[$$ConditionalBranchesStatus$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`target`* __string__ | 
+| *`evaluationResult`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#conditionstatus-v1-core[$$ConditionStatus$$]__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-conditionalbranchesstatus"]
+==== ConditionalBranchesStatus 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-workflownodestatus[$$WorkflowNodeStatus$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`branches`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-conditionalbranchstatus[$$ConditionalBranchStatus$$] array__ | 
+| *`context`* __string array__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-containerselector"]
+==== ContainerSelector 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-dnschaosspec[$$DNSChaosSpec$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-iochaosspec[$$IOChaosSpec$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmchaosspec[$$JVMChaosSpec$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podchaosspec[$$PodChaosSpec$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-stresschaosspec[$$StressChaosSpec$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-timechaosspec[$$TimeChaosSpec$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`PodSelector`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podselector[$$PodSelector$$]__ | 
+| *`containerNames`* __string array__ | ContainerNames indicates list of the name of affected container. If not set, all containers will be injected
+|===
+
+
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-corruptspec"]
+==== CorruptSpec 
+
+CorruptSpec defines detail of a corrupt action
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-tcparameter[$$TcParameter$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`corrupt`* __string__ | 
+| *`correlation`* __string__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-dnschaos"]
+==== DNSChaos 
+
+DNSChaos is the Schema for the networkchaos API
+
+
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`apiVersion`* __string__ | `chaos-mesh.org/v1alpha1`
+| *`kind`* __string__ | `DNSChaos`
+| *`TypeMeta`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#typemeta-v1-meta[$$TypeMeta$$]__ | 
+| *`metadata`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#objectmeta-v1-meta[$$ObjectMeta$$]__ | Refer to Kubernetes API documentation for fields of `metadata`.
+
+| *`spec`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-dnschaosspec[$$DNSChaosSpec$$]__ | Spec defines the behavior of a pod chaos experiment
+| *`status`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-dnschaosstatus[$$DNSChaosStatus$$]__ | Most recently observed status of the chaos experiment about pods
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-dnschaosspec"]
+==== DNSChaosSpec 
+
+DNSChaosSpec defines the desired state of DNSChaos
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-dnschaos[$$DNSChaos$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-embedchaos[$$EmbedChaos$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`action`* __DNSChaosAction__ | Action defines the specific DNS chaos action. Supported action: error, random Default action: error
+| *`ContainerSelector`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-containerselector[$$ContainerSelector$$]__ | 
+| *`duration`* __string__ | Duration represents the duration of the chaos action
+| *`patterns`* __string array__ | Choose which domain names to take effect, support the placeholder ? and wildcard *, or the Specified domain name. Note:      1. The wildcard * must be at the end of the string. For example, chaos-*.org is invalid.      2. if the patterns is empty, will take effect on all the domain names. For example: 		The value is ["google.com", "github.*", "chaos-mes?.org"], 		will take effect on "google.com", "github.com" and "chaos-mesh.org"
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-dnschaosstatus"]
+==== DNSChaosStatus 
+
+DNSChaosStatus defines the observed state of DNSChaos
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-dnschaos[$$DNSChaos$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`ChaosStatus`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-chaosstatus[$$ChaosStatus$$]__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-delayspec"]
+==== DelaySpec 
+
+DelaySpec defines detail of a delay action
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-tcparameter[$$TcParameter$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`latency`* __string__ | 
+| *`correlation`* __string__ | 
+| *`jitter`* __string__ | 
+| *`reorder`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-reorderspec[$$ReorderSpec$$]__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-desiredphase"]
+==== DesiredPhase (string) 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-experimentstatus[$$ExperimentStatus$$]
+****
+
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-direction"]
+==== Direction (string) 
+
+Direction represents traffic direction from source to target, it could be netem, delay, loss, duplicate, corrupt or partition, check comments below for detail direction flow.
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-networkchaosspec[$$NetworkChaosSpec$$]
+****
+
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-diskfilespec"]
+==== DiskFileSpec 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-diskfillspec[$$DiskFillSpec$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-diskpayloadspec[$$DiskPayloadSpec$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`size`* __string__ | 
+| *`path`* __string__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-diskfillspec"]
+==== DiskFillSpec 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-expinfo[$$ExpInfo$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`DiskFileSpec`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-diskfilespec[$$DiskFileSpec$$]__ | 
+| *`fill_by_fallocate`* __boolean__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-diskpayloadspec"]
+==== DiskPayloadSpec 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-expinfo[$$ExpInfo$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`DiskFileSpec`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-diskfilespec[$$DiskFileSpec$$]__ | 
+| *`payload_process_num`* __integer__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-duplicatespec"]
+==== DuplicateSpec 
+
+DuplicateSpec defines detail of a duplicate action
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-tcparameter[$$TcParameter$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`duplicate`* __string__ | 
+| *`correlation`* __string__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-embedchaos"]
+==== EmbedChaos 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-chaosonlyschedulespec[$$ChaosOnlyScheduleSpec$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-scheduleitem[$$ScheduleItem$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-template[$$Template$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-workflownodespec[$$WorkflowNodeSpec$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`awsChaos`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-awschaosspec[$$AWSChaosSpec$$]__ | 
+| *`dnsChaos`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-dnschaosspec[$$DNSChaosSpec$$]__ | 
+| *`gcpChaos`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-gcpchaosspec[$$GCPChaosSpec$$]__ | 
+| *`httpChaos`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-httpchaosspec[$$HTTPChaosSpec$$]__ | 
+| *`ioChaos`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-iochaosspec[$$IOChaosSpec$$]__ | 
+| *`jvmChaos`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmchaosspec[$$JVMChaosSpec$$]__ | 
+| *`kernelChaos`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-kernelchaosspec[$$KernelChaosSpec$$]__ | 
+| *`networkChaos`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-networkchaosspec[$$NetworkChaosSpec$$]__ | 
+| *`physicalmachineChaos`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-physicalmachinechaosspec[$$PhysicalMachineChaosSpec$$]__ | 
+| *`podChaos`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podchaosspec[$$PodChaosSpec$$]__ | 
+| *`stressChaos`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-stresschaosspec[$$StressChaosSpec$$]__ | 
+| *`timeChaos`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-timechaosspec[$$TimeChaosSpec$$]__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-expinfo"]
+==== ExpInfo 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-physicalmachinechaosspec[$$PhysicalMachineChaosSpec$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`uid`* __string__ | the experiment ID
+| *`action`* __string__ | the subAction, generate automatically
+| *`stress-cpu`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-stresscpuspec[$$StressCPUSpec$$]__ | 
+| *`stress-mem`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-stressmemoryspec[$$StressMemorySpec$$]__ | 
+| *`disk-read-payload`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-diskpayloadspec[$$DiskPayloadSpec$$]__ | 
+| *`disk-write-payload`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-diskpayloadspec[$$DiskPayloadSpec$$]__ | 
+| *`disk-fill`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-diskfillspec[$$DiskFillSpec$$]__ | 
+| *`network-corrupt`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-networkcorruptspec[$$NetworkCorruptSpec$$]__ | 
+| *`network-duplicate`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-networkduplicatespec[$$NetworkDuplicateSpec$$]__ | 
+| *`network-loss`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-networklossspec[$$NetworkLossSpec$$]__ | 
+| *`network-delay`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-networkdelayspec[$$NetworkDelaySpec$$]__ | 
+| *`network-partition`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-networkpartitionspec[$$NetworkPartitionSpec$$]__ | 
+| *`network-dns`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-networkdnsspec[$$NetworkDNSSpec$$]__ | 
+| *`process`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-processspec[$$ProcessSpec$$]__ | 
+| *`jvm-exception`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmexceptionspec[$$JVMExceptionSpec$$]__ | 
+| *`jvm-gc`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmgcspec[$$JVMGCSpec$$]__ | 
+| *`jvm-latency`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmlatencyspec[$$JVMLatencySpec$$]__ | 
+| *`jvm-return`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmreturnspec[$$JVMReturnSpec$$]__ | 
+| *`jvm-stress`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmstressspec[$$JVMStressSpec$$]__ | 
+| *`jvm-rule-data`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmruledataspec[$$JVMRuleDataSpec$$]__ | 
+| *`clock`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-clockspec[$$ClockSpec$$]__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-experimentstatus"]
+==== ExperimentStatus 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-chaosstatus[$$ChaosStatus$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`desiredPhase`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-desiredphase[$$DesiredPhase$$]__ | 
+| *`containerRecords`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-record[$$Record$$] array__ | Records are used to track the running status
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-failkernrequest"]
+==== FailKernRequest 
+
+FailKernRequest defines the injection conditions
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-kernelchaosspec[$$KernelChaosSpec$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`failtype`* __integer__ | FailType indicates what to fail, can be set to '0' / '1' / '2' If `0`, indicates slab to fail (should_failslab) If `1`, indicates alloc_page to fail (should_fail_alloc_page) If `2`, indicates bio to fail (should_fail_bio) You can read:   1. https://www.kernel.org/doc/html/latest/fault-injection/fault-injection.html   2. http://github.com/iovisor/bcc/blob/master/tools/inject_example.txt to learn more
+| *`headers`* __string array__ | Headers indicates the appropriate kernel headers you need. Eg: "linux/mmzone.h", "linux/blkdev.h" and so on
+| *`callchain`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-frame[$$Frame$$] array__ | Callchain indicate a special call chain, such as:     ext4_mount       -> mount_subtree          -> ...             -> should_failslab With an optional set of predicates and an optional set of parameters, which used with predicates. You can read call chan and predicate examples from https://github.com/chaos-mesh/bpfki/tree/develop/examples to learn more. If no special call chain, just keep Callchain empty, which means it will fail at any call chain with slab alloc (eg: kmalloc).
+| *`probability`* __integer__ | Probability indicates the fails with probability. If you want 1%, please set this field with 1.
+| *`times`* __integer__ | Times indicates the max times of fails.
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-filetype"]
+==== FileType (string) 
+
+FileType represents type of a file
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-attroverridespec[$$AttrOverrideSpec$$]
+****
+
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-fillingtype"]
+==== FillingType (string) 
+
+FillingType represents type of data is filled for incorrectness
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-mistakespec[$$MistakeSpec$$]
+****
+
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-filter"]
+==== Filter 
+
+Filter represents a filter of IOChaos action, which will define the scope of an IOChaosAction
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-iochaosaction[$$IOChaosAction$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`path`* __string__ | Path represents a glob of injecting path
+| *`methods`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-iomethod[$$IoMethod$$]__ | Methods represents the method that the action will inject in
+| *`percent`* __integer__ | Percent represents the percent probability of injecting this action
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-frame"]
+==== Frame 
+
+Frame defines the function signature and predicate in function's body
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-failkernrequest[$$FailKernRequest$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`funcname`* __string__ | Funcname can be find from kernel source or `/proc/kallsyms`, such as `ext4_mount`
+| *`parameters`* __string__ | Parameters is used with predicate, for example, if you want to inject slab error in `d_alloc_parallel(struct dentry *parent, const struct qstr *name)` with a special name `bananas`, you need to set it to `struct dentry *parent, const struct qstr *name` otherwise omit it.
+| *`predicate`* __string__ | Predicate will access the arguments of this Frame, example with Parameters's, you can set it to `STRNCMP(name->name, "bananas", 8)` to make inject only with it, or omit it to inject for all d_alloc_parallel call chain.
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-gcpchaos"]
+==== GCPChaos 
+
+GCPChaos is the Schema for the gcpchaos API
+
+
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`apiVersion`* __string__ | `chaos-mesh.org/v1alpha1`
+| *`kind`* __string__ | `GCPChaos`
+| *`TypeMeta`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#typemeta-v1-meta[$$TypeMeta$$]__ | 
+| *`metadata`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#objectmeta-v1-meta[$$ObjectMeta$$]__ | Refer to Kubernetes API documentation for fields of `metadata`.
+
+| *`spec`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-gcpchaosspec[$$GCPChaosSpec$$]__ | 
+| *`status`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-gcpchaosstatus[$$GCPChaosStatus$$]__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-gcpchaosaction"]
+==== GCPChaosAction (string) 
+
+GCPChaosAction represents the chaos action about gcp.
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-gcpchaosspec[$$GCPChaosSpec$$]
+****
+
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-gcpchaosspec"]
+==== GCPChaosSpec 
+
+GCPChaosSpec is the content of the specification for a GCPChaos
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-embedchaos[$$EmbedChaos$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-gcpchaos[$$GCPChaos$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`action`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-gcpchaosaction[$$GCPChaosAction$$]__ | Action defines the specific gcp chaos action. Supported action: node-stop / node-reset / disk-loss Default action: node-stop
+| *`duration`* __string__ | Duration represents the duration of the chaos action.
+| *`secretName`* __string__ | SecretName defines the name of kubernetes secret. It is used for GCP credentials.
+| *`GCPSelector`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-gcpselector[$$GCPSelector$$]__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-gcpchaosstatus"]
+==== GCPChaosStatus 
+
+GCPChaosStatus represents the status of a GCPChaos
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-gcpchaos[$$GCPChaos$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`ChaosStatus`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-chaosstatus[$$ChaosStatus$$]__ | 
+| *`attachedDiskStrings`* __string array__ | The attached disk info strings. Needed in disk-loss.
+|===
+
+
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-gcpselector"]
+==== GCPSelector 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-gcpchaosspec[$$GCPChaosSpec$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`project`* __string__ | Project defines the name of gcp project.
+| *`zone`* __string__ | Zone defines the zone of gcp project.
+| *`instance`* __string__ | Instance defines the name of the instance
+| *`deviceNames`* __string array__ | The device name of disks to detach. Needed in disk-loss.
+|===
+
+
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-genericselectorspec"]
+==== GenericSelectorSpec 
+
+GenericSelectorSpec defines some selectors to select objects.
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podselectorspec[$$PodSelectorSpec$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`namespaces`* __string array__ | Namespaces is a set of namespace to which objects belong.
+| *`fieldSelectors`* __object (keys:string, values:string)__ | Map of string keys and values that can be used to select objects. A selector based on fields.
+| *`labelSelectors`* __object (keys:string, values:string)__ | Map of string keys and values that can be used to select objects. A selector based on labels.
+| *`expressionSelectors`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#labelselectorrequirement-v1-meta[$$LabelSelectorRequirement$$] array__ | a slice of label selector expressions that can be used to select objects. A list of selectors based on set-based label expressions.
+| *`annotationSelectors`* __object (keys:string, values:string)__ | Map of string keys and values that can be used to select objects. A selector based on annotations.
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-httpchaos"]
+==== HTTPChaos 
+
+HTTPChaos is the Schema for the HTTPchaos API
+
+
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`apiVersion`* __string__ | `chaos-mesh.org/v1alpha1`
+| *`kind`* __string__ | `HTTPChaos`
+| *`TypeMeta`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#typemeta-v1-meta[$$TypeMeta$$]__ | 
+| *`metadata`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#objectmeta-v1-meta[$$ObjectMeta$$]__ | Refer to Kubernetes API documentation for fields of `metadata`.
+
+| *`spec`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-httpchaosspec[$$HTTPChaosSpec$$]__ | 
+| *`status`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-httpchaosstatus[$$HTTPChaosStatus$$]__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-httpchaosspec"]
+==== HTTPChaosSpec 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-embedchaos[$$EmbedChaos$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-httpchaos[$$HTTPChaos$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`PodSelector`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podselector[$$PodSelector$$]__ | 
+| *`target`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podhttpchaostarget[$$PodHttpChaosTarget$$]__ | Target is the object to be selected and injected.
+| *`PodHttpChaosActions`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podhttpchaosactions[$$PodHttpChaosActions$$]__ | 
+| *`port`* __integer__ | Port represents the target port to be proxy of.
+| *`path`* __string__ | Path is a rule to select target by uri path in http request.
+| *`method`* __string__ | Method is a rule to select target by http method in request.
+| *`code`* __integer__ | Code is a rule to select target by http status code in response.
+| *`request_headers`* __object (keys:string, values:string)__ | RequestHeaders is a rule to select target by http headers in request. The key-value pairs represent header name and header value pairs.
+| *`response_headers`* __object (keys:string, values:string)__ | ResponseHeaders is a rule to select target by http headers in response. The key-value pairs represent header name and header value pairs.
+| *`duration`* __string__ | Duration represents the duration of the chaos action.
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-httpchaosstatus"]
+==== HTTPChaosStatus 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-httpchaos[$$HTTPChaos$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`ChaosStatus`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-chaosstatus[$$ChaosStatus$$]__ | 
+| *`instances`* __object (keys:string, values:integer)__ | Instances always specifies podhttpchaos generation or empty
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-iochaos"]
+==== IOChaos 
+
+IOChaos is the Schema for the iochaos API
+
+
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`apiVersion`* __string__ | `chaos-mesh.org/v1alpha1`
+| *`kind`* __string__ | `IOChaos`
+| *`TypeMeta`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#typemeta-v1-meta[$$TypeMeta$$]__ | 
+| *`metadata`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#objectmeta-v1-meta[$$ObjectMeta$$]__ | Refer to Kubernetes API documentation for fields of `metadata`.
+
+| *`spec`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-iochaosspec[$$IOChaosSpec$$]__ | 
+| *`status`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-iochaosstatus[$$IOChaosStatus$$]__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-iochaosaction"]
+==== IOChaosAction 
+
+IOChaosAction defines an possible action of IOChaos
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podiochaosspec[$$PodIOChaosSpec$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`type`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-iochaostype[$$IOChaosType$$]__ | 
+| *`Filter`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-filter[$$Filter$$]__ | 
+| *`faults`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-iofault[$$IoFault$$] array__ | Faults represents the fault to inject
+| *`latency`* __string__ | Latency represents the latency to inject
+| *`AttrOverrideSpec`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-attroverridespec[$$AttrOverrideSpec$$]__ | AttrOverride represents the attribution to override
+| *`mistake`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-mistakespec[$$MistakeSpec$$]__ | MistakeSpec represents the mistake to inject
+| *`source`* __string__ | Source represents the source of current rules
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-iochaosspec"]
+==== IOChaosSpec 
+
+IOChaosSpec defines the desired state of IOChaos
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-embedchaos[$$EmbedChaos$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-iochaos[$$IOChaos$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`ContainerSelector`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-containerselector[$$ContainerSelector$$]__ | 
+| *`action`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-iochaostype[$$IOChaosType$$]__ | Action defines the specific pod chaos action. Supported action: latency / fault / attrOverride / mistake
+| *`delay`* __string__ | Delay defines the value of I/O chaos action delay. A delay string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as "300ms". Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+| *`errno`* __integer__ | Errno defines the error code that returned by I/O action. refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html
+| *`attr`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-attroverridespec[$$AttrOverrideSpec$$]__ | Attr defines the overrided attribution
+| *`mistake`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-mistakespec[$$MistakeSpec$$]__ | Mistake defines what types of incorrectness are injected to IO operations
+| *`path`* __string__ | Path defines the path of files for injecting I/O chaos action.
+| *`methods`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-iomethod[$$IoMethod$$] array__ | Methods defines the I/O methods for injecting I/O chaos action. default: all I/O methods.
+| *`percent`* __integer__ | Percent defines the percentage of injection errors and provides a number from 0-100. default: 100.
+| *`volumePath`* __string__ | VolumePath represents the mount path of injected volume
+| *`duration`* __string__ | Duration represents the duration of the chaos action. It is required when the action is `PodFailureAction`. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as "300ms", "-1.5h" or "2h45m". Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-iochaosstatus"]
+==== IOChaosStatus 
+
+IOChaosStatus defines the observed state of IOChaos
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-iochaos[$$IOChaos$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`ChaosStatus`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-chaosstatus[$$ChaosStatus$$]__ | 
+| *`instances`* __object (keys:string, values:integer)__ | Instances always specifies podiochaos generation or empty
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-iochaostype"]
+==== IOChaosType (string) 
+
+IOChaosType represents the type of an IOChaos Action
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-iochaosaction[$$IOChaosAction$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-iochaosspec[$$IOChaosSpec$$]
+****
+
+
+
+
+
+
+
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-iofault"]
+==== IoFault 
+
+IoFault represents the fault to inject and their weight
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-iochaosaction[$$IOChaosAction$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`errno`* __integer__ | 
+| *`weight`* __integer__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-iomethod"]
+==== IoMethod (string) 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-filter[$$Filter$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-iochaosspec[$$IOChaosSpec$$]
+****
+
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmchaos"]
+==== JVMChaos 
+
+JVMChaos is the Schema for the jvmchaos API
+
+
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`apiVersion`* __string__ | `chaos-mesh.org/v1alpha1`
+| *`kind`* __string__ | `JVMChaos`
+| *`TypeMeta`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#typemeta-v1-meta[$$TypeMeta$$]__ | 
+| *`metadata`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#objectmeta-v1-meta[$$ObjectMeta$$]__ | Refer to Kubernetes API documentation for fields of `metadata`.
+
+| *`spec`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmchaosspec[$$JVMChaosSpec$$]__ | 
+| *`status`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmchaosstatus[$$JVMChaosStatus$$]__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmchaosaction"]
+==== JVMChaosAction (string) 
+
+JVMChaosAction represents the chaos action about jvm
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmchaosspec[$$JVMChaosSpec$$]
+****
+
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmchaosspec"]
+==== JVMChaosSpec 
+
+JVMChaosSpec defines the desired state of JVMChaos
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-embedchaos[$$EmbedChaos$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmchaos[$$JVMChaos$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`ContainerSelector`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-containerselector[$$ContainerSelector$$]__ | 
+| *`duration`* __string__ | Duration represents the duration of the chaos action
+| *`action`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmchaosaction[$$JVMChaosAction$$]__ | Action defines the specific jvm chaos action. Supported action: delay;return;script;cfl;oom;ccf;tce;cpf;tde;tpf
+| *`JVMParameter`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmparameter[$$JVMParameter$$]__ | JVMParameter represents the detail about jvm chaos action definition
+| *`target`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmchaostarget[$$JVMChaosTarget$$]__ | Target defines the specific jvm chaos target. Supported target: servlet;psql;jvm;jedis;http;dubbo;rocketmq;tars;mysql;druid;redisson;rabbitmq;mongodb
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmchaosstatus"]
+==== JVMChaosStatus 
+
+JVMChaosStatus defines the observed state of JVMChaos
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmchaos[$$JVMChaos$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`ChaosStatus`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-chaosstatus[$$ChaosStatus$$]__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmchaostarget"]
+==== JVMChaosTarget (string) 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmchaosspec[$$JVMChaosSpec$$]
+****
+
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmclassmethodspec"]
+==== JVMClassMethodSpec 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmexceptionspec[$$JVMExceptionSpec$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmlatencyspec[$$JVMLatencySpec$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmreturnspec[$$JVMReturnSpec$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`class`* __string__ | Java class
+| *`method`* __string__ | the method in Java class
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmcommonspec"]
+==== JVMCommonSpec 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmexceptionspec[$$JVMExceptionSpec$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmgcspec[$$JVMGCSpec$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmlatencyspec[$$JVMLatencySpec$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmreturnspec[$$JVMReturnSpec$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmruledataspec[$$JVMRuleDataSpec$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmstressspec[$$JVMStressSpec$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`port`* __integer__ | the port of agent server
+| *`pid`* __integer__ | the pid of Java process which need to attach
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmexceptionspec"]
+==== JVMExceptionSpec 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-expinfo[$$ExpInfo$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`JVMCommonSpec`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmcommonspec[$$JVMCommonSpec$$]__ | 
+| *`JVMClassMethodSpec`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmclassmethodspec[$$JVMClassMethodSpec$$]__ | 
+| *`exception`* __string__ | the exception which needs to throw dor action `exception`
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmgcspec"]
+==== JVMGCSpec 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-expinfo[$$ExpInfo$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`JVMCommonSpec`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmcommonspec[$$JVMCommonSpec$$]__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmlatencyspec"]
+==== JVMLatencySpec 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-expinfo[$$ExpInfo$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`JVMCommonSpec`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmcommonspec[$$JVMCommonSpec$$]__ | 
+| *`JVMClassMethodSpec`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmclassmethodspec[$$JVMClassMethodSpec$$]__ | 
+| *`latency`* __integer__ | the latency duration for action 'latency', unit ms
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmparameter"]
+==== JVMParameter 
+
+JVMParameter represents the detail about jvm chaos action definition
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmchaosspec[$$JVMChaosSpec$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`flags`* __object (keys:string, values:string)__ | Flags represents the flags of action
+| *`matchers`* __object (keys:string, values:string)__ | Matchers represents the matching rules for the target
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmreturnspec"]
+==== JVMReturnSpec 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-expinfo[$$ExpInfo$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`JVMCommonSpec`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmcommonspec[$$JVMCommonSpec$$]__ | 
+| *`JVMClassMethodSpec`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmclassmethodspec[$$JVMClassMethodSpec$$]__ | 
+| *`value`* __string__ | the return value for action 'return'
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmruledataspec"]
+==== JVMRuleDataSpec 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-expinfo[$$ExpInfo$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`JVMCommonSpec`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmcommonspec[$$JVMCommonSpec$$]__ | 
+| *`rule-data`* __string__ | RuleData used to save the rule file's data, will use it when recover
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmstressspec"]
+==== JVMStressSpec 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-expinfo[$$ExpInfo$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`JVMCommonSpec`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-jvmcommonspec[$$JVMCommonSpec$$]__ | 
+| *`cpu-count`* __integer__ | the CPU core number need to use, only set it when action is stress
+| *`mem-type`* __integer__ | the memory type need to locate, only set it when action is stress, the value can be 'stack' or 'heap'
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-kernelchaos"]
+==== KernelChaos 
+
+KernelChaos is the Schema for the kernelchaos API
+
+
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`apiVersion`* __string__ | `chaos-mesh.org/v1alpha1`
+| *`kind`* __string__ | `KernelChaos`
+| *`TypeMeta`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#typemeta-v1-meta[$$TypeMeta$$]__ | 
+| *`metadata`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#objectmeta-v1-meta[$$ObjectMeta$$]__ | Refer to Kubernetes API documentation for fields of `metadata`.
+
+| *`spec`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-kernelchaosspec[$$KernelChaosSpec$$]__ | Spec defines the behavior of a kernel chaos experiment
+| *`status`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-kernelchaosstatus[$$KernelChaosStatus$$]__ | Most recently observed status of the kernel chaos experiment
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-kernelchaosspec"]
+==== KernelChaosSpec 
+
+KernelChaosSpec defines the desired state of KernelChaos
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-embedchaos[$$EmbedChaos$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-kernelchaos[$$KernelChaos$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`PodSelector`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podselector[$$PodSelector$$]__ | 
+| *`failKernRequest`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-failkernrequest[$$FailKernRequest$$]__ | FailKernRequest defines the request of kernel injection
+| *`duration`* __string__ | Duration represents the duration of the chaos action
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-kernelchaosstatus"]
+==== KernelChaosStatus 
+
+KernelChaosStatus defines the observed state of KernelChaos
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-kernelchaos[$$KernelChaos$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`ChaosStatus`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-chaosstatus[$$ChaosStatus$$]__ | 
+|===
+
+
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-lossspec"]
+==== LossSpec 
+
+LossSpec defines detail of a loss action
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-tcparameter[$$TcParameter$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`loss`* __string__ | 
+| *`correlation`* __string__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-memorystressor"]
+==== MemoryStressor 
+
+MemoryStressor defines how to stress memory out
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-stressors[$$Stressors$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`Stressor`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-stressor[$$Stressor$$]__ | 
+| *`size`* __string__ | Size specifies N bytes consumed per vm worker, default is the total available memory. One can specify the size as % of total available memory or in units of B, KB/KiB, MB/MiB, GB/GiB, TB/TiB.
+| *`options`* __string array__ | extend stress-ng options
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-mistakespec"]
+==== MistakeSpec 
+
+MistakeSpec represents one type of mistake
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-iochaosaction[$$IOChaosAction$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-iochaosspec[$$IOChaosSpec$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`filling`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-fillingtype[$$FillingType$$]__ | Filling determines what is filled in the miskate data.
+| *`maxOccurrences`* __integer__ | There will be [1, MaxOccurrences] segments of wrong data.
+| *`maxLength`* __integer__ | Max length of each wrong data segment in bytes
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-networkchaos"]
+==== NetworkChaos 
+
+NetworkChaos is the Schema for the networkchaos API
+
+
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`apiVersion`* __string__ | `chaos-mesh.org/v1alpha1`
+| *`kind`* __string__ | `NetworkChaos`
+| *`TypeMeta`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#typemeta-v1-meta[$$TypeMeta$$]__ | 
+| *`metadata`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#objectmeta-v1-meta[$$ObjectMeta$$]__ | Refer to Kubernetes API documentation for fields of `metadata`.
+
+| *`spec`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-networkchaosspec[$$NetworkChaosSpec$$]__ | Spec defines the behavior of a pod chaos experiment
+| *`status`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-networkchaosstatus[$$NetworkChaosStatus$$]__ | Most recently observed status of the chaos experiment about pods
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-networkchaosaction"]
+==== NetworkChaosAction (string) 
+
+NetworkChaosAction represents the chaos action about network.
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-networkchaosspec[$$NetworkChaosSpec$$]
+****
+
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-networkchaosspec"]
+==== NetworkChaosSpec 
+
+NetworkChaosSpec defines the desired state of NetworkChaos
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-embedchaos[$$EmbedChaos$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-networkchaos[$$NetworkChaos$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`PodSelector`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podselector[$$PodSelector$$]__ | 
+| *`action`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-networkchaosaction[$$NetworkChaosAction$$]__ | Action defines the specific network chaos action. Supported action: partition, netem, delay, loss, duplicate, corrupt Default action: delay
+| *`device`* __string__ | Device represents the network device to be affected.
+| *`duration`* __string__ | Duration represents the duration of the chaos action
+| *`TcParameter`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-tcparameter[$$TcParameter$$]__ | TcParameter represents the traffic control definition
+| *`direction`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-direction[$$Direction$$]__ | Direction represents the direction, this applies on netem and network partition action
+| *`target`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podselector[$$PodSelector$$]__ | Target represents network target, this applies on netem and network partition action
+| *`targetDevice`* __string__ | TargetDevice represents the network device to be affected in target scope.
+| *`externalTargets`* __string array__ | ExternalTargets represents network targets outside k8s
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-networkchaosstatus"]
+==== NetworkChaosStatus 
+
+NetworkChaosStatus defines the observed state of NetworkChaos
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-networkchaos[$$NetworkChaos$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`ChaosStatus`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-chaosstatus[$$ChaosStatus$$]__ | 
+| *`instances`* __object (keys:string, values:integer)__ | Instances always specifies podnetworkchaos generation or empty
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-networkcommonspec"]
+==== NetworkCommonSpec 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-networkcorruptspec[$$NetworkCorruptSpec$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-networkdelayspec[$$NetworkDelaySpec$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-networkduplicatespec[$$NetworkDuplicateSpec$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-networklossspec[$$NetworkLossSpec$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`correlation`* __string__ | 
+| *`device`* __string__ | 
+| *`source-port`* __string__ | 
+| *`egress-port`* __string__ | 
+| *`ip-address`* __string__ | 
+| *`ip-protocol`* __string__ | 
+| *`hostname`* __string__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-networkcorruptspec"]
+==== NetworkCorruptSpec 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-expinfo[$$ExpInfo$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`NetworkCommonSpec`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-networkcommonspec[$$NetworkCommonSpec$$]__ | 
+| *`percent`* __string__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-networkdnsspec"]
+==== NetworkDNSSpec 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-expinfo[$$ExpInfo$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`dns-server`* __string__ | 
+| *`dns-ip`* __string__ | 
+| *`dns-domain-name`* __string__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-networkdelayspec"]
+==== NetworkDelaySpec 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-expinfo[$$ExpInfo$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`NetworkCommonSpec`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-networkcommonspec[$$NetworkCommonSpec$$]__ | 
+| *`jitter`* __string__ | 
+| *`latency`* __string__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-networkduplicatespec"]
+==== NetworkDuplicateSpec 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-expinfo[$$ExpInfo$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`NetworkCommonSpec`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-networkcommonspec[$$NetworkCommonSpec$$]__ | 
+| *`percent`* __string__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-networklossspec"]
+==== NetworkLossSpec 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-expinfo[$$ExpInfo$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`NetworkCommonSpec`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-networkcommonspec[$$NetworkCommonSpec$$]__ | 
+| *`percent`* __string__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-networkpartitionspec"]
+==== NetworkPartitionSpec 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-expinfo[$$ExpInfo$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`device`* __string__ | 
+| *`hostname`* __string__ | 
+| *`ip-address`* __string__ | 
+| *`direction`* __string__ | 
+| *`ip-protocol`* __string__ | 
+| *`accept-tcp-flags`* __string__ | only the packet which match the tcp flag can be accepted, others will be dropped. only set when the IPProtocol is tcp, used for partition.
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-parameterrules"]
+==== ParameterRules 
+
+ParameterRules defines the parameter validation rules
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-actionparameterrules[$$ActionParameterRules$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`Name`* __string__ | Name represents the name of parameter
+| *`ParameterType`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-parametertype[$$ParameterType$$]__ | ParameterType represents the parameter type
+| *`Required`* __boolean__ | Required defines whether it is a required parameter
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-parametertype"]
+==== ParameterType (string) 
+
+ParameterType defines the parameter type
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-parameterrules[$$ParameterRules$$]
+****
+
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-phase"]
+==== Phase (string) 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-record[$$Record$$]
+****
+
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-physicalmachinechaos"]
+==== PhysicalMachineChaos 
+
+PhysicalMachineChaos is the Schema for the physical machine chaos API
+
+
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`apiVersion`* __string__ | `chaos-mesh.org/v1alpha1`
+| *`kind`* __string__ | `PhysicalMachineChaos`
+| *`TypeMeta`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#typemeta-v1-meta[$$TypeMeta$$]__ | 
+| *`metadata`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#objectmeta-v1-meta[$$ObjectMeta$$]__ | Refer to Kubernetes API documentation for fields of `metadata`.
+
+| *`spec`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-physicalmachinechaosspec[$$PhysicalMachineChaosSpec$$]__ | Spec defines the behavior of a physical machine chaos experiment
+| *`status`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-physicalmachinechaosstatus[$$PhysicalMachineChaosStatus$$]__ | Most recently observed status of the chaos experiment
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-physicalmachinechaosspec"]
+==== PhysicalMachineChaosSpec 
+
+PhysicalMachineChaosSpec defines the desired state of PhysicalMachineChaos
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-embedchaos[$$EmbedChaos$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-physicalmachinechaos[$$PhysicalMachineChaos$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`action`* __PhysicalMachineChaosAction__ | 
+| *`PhysicalMachineSelector`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-physicalmachineselector[$$PhysicalMachineSelector$$]__ | 
+| *`ExpInfo`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-expinfo[$$ExpInfo$$]__ | ExpInfo string `json:"expInfo"`
+| *`duration`* __string__ | Duration represents the duration of the chaos action Duration represents the duration of the chaos action
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-physicalmachinechaosstatus"]
+==== PhysicalMachineChaosStatus 
+
+PhysicalMachineChaosStatus defines the observed state of PhysicalMachineChaos
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-physicalmachinechaos[$$PhysicalMachineChaos$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`ChaosStatus`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-chaosstatus[$$ChaosStatus$$]__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-physicalmachineselector"]
+==== PhysicalMachineSelector 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-physicalmachinechaosspec[$$PhysicalMachineChaosSpec$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`address`* __string array__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podchaos"]
+==== PodChaos 
+
+PodChaos is the control script`s spec.
+
+
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`apiVersion`* __string__ | `chaos-mesh.org/v1alpha1`
+| *`kind`* __string__ | `PodChaos`
+| *`TypeMeta`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#typemeta-v1-meta[$$TypeMeta$$]__ | 
+| *`metadata`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#objectmeta-v1-meta[$$ObjectMeta$$]__ | Refer to Kubernetes API documentation for fields of `metadata`.
+
+| *`spec`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podchaosspec[$$PodChaosSpec$$]__ | Spec defines the behavior of a pod chaos experiment
+| *`status`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podchaosstatus[$$PodChaosStatus$$]__ | Most recently observed status of the chaos experiment about pods
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podchaosaction"]
+==== PodChaosAction (string) 
+
+PodChaosAction represents the chaos action about pods.
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podchaosspec[$$PodChaosSpec$$]
+****
+
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podchaosspec"]
+==== PodChaosSpec 
+
+PodChaosSpec defines the attributes that a user creates on a chaos experiment about pods.
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-embedchaos[$$EmbedChaos$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podchaos[$$PodChaos$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`ContainerSelector`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-containerselector[$$ContainerSelector$$]__ | 
+| *`action`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podchaosaction[$$PodChaosAction$$]__ | Action defines the specific pod chaos action. Supported action: pod-kill / pod-failure / container-kill Default action: pod-kill
+| *`duration`* __string__ | Duration represents the duration of the chaos action. It is required when the action is `PodFailureAction`. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as "300ms", "-1.5h" or "2h45m". Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+| *`gracePeriod`* __integer__ | GracePeriod is used in pod-kill action. It represents the duration in seconds before the pod should be deleted. Value must be non-negative integer. The default value is zero that indicates delete immediately.
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podchaosstatus"]
+==== PodChaosStatus 
+
+PodChaosStatus represents the current status of the chaos experiment about pods.
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podchaos[$$PodChaos$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`ChaosStatus`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-chaosstatus[$$ChaosStatus$$]__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podhttpchaos"]
+==== PodHttpChaos 
+
+PodHttpChaos is the Schema for the podhttpchaos API
+
+
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`apiVersion`* __string__ | `chaos-mesh.org/v1alpha1`
+| *`kind`* __string__ | `PodHttpChaos`
+| *`TypeMeta`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#typemeta-v1-meta[$$TypeMeta$$]__ | 
+| *`metadata`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#objectmeta-v1-meta[$$ObjectMeta$$]__ | Refer to Kubernetes API documentation for fields of `metadata`.
+
+| *`spec`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podhttpchaosspec[$$PodHttpChaosSpec$$]__ | 
+| *`status`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podhttpchaosstatus[$$PodHttpChaosStatus$$]__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podhttpchaosactions"]
+==== PodHttpChaosActions 
+
+PodHttpChaosAction defines possible actions of HttpChaos.
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-httpchaosspec[$$HTTPChaosSpec$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podhttpchaosbaserule[$$PodHttpChaosBaseRule$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`abort`* __boolean__ | Abort is a rule to abort a http session.
+| *`delay`* __string__ | Delay represents the delay of the target request/response. A duration string is a possibly unsigned sequence of decimal numbers, each with optional fraction and a unit suffix, such as "300ms", "2h45m". Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+| *`replace`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podhttpchaosreplaceactions[$$PodHttpChaosReplaceActions$$]__ | Replace is a rule to replace some contents in target.
+| *`patch`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podhttpchaospatchactions[$$PodHttpChaosPatchActions$$]__ | Patch is a rule to patch some contents in target.
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podhttpchaosbaserule"]
+==== PodHttpChaosBaseRule 
+
+PodHttpChaosBaseRule defines the injection rule without source and port.
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podhttpchaosrule[$$PodHttpChaosRule$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`target`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podhttpchaostarget[$$PodHttpChaosTarget$$]__ | Target is the object to be selected and injected, <Request|Response>.
+| *`selector`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podhttpchaosselector[$$PodHttpChaosSelector$$]__ | Selector contains the rules to select target.
+| *`actions`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podhttpchaosactions[$$PodHttpChaosActions$$]__ | Actions contains rules to inject target.
+|===
+
+
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podhttpchaospatchactions"]
+==== PodHttpChaosPatchActions 
+
+PodHttpChaosPatchActions defines possible patch-actions of HttpChaos.
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podhttpchaosactions[$$PodHttpChaosActions$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`body`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podhttpchaospatchbodyaction[$$PodHttpChaosPatchBodyAction$$]__ | Body is a rule to patch message body of target.
+| *`queries`* __string array array__ | Queries is a rule to append uri queries of target(Request only). For example: `[["foo", "bar"], ["foo", "unknown"]]`.
+| *`headers`* __string array array__ | Headers is a rule to append http headers of target. For example: `[["Set-Cookie", "<one cookie>"], ["Set-Cookie", "<another cookie>"]]`.
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podhttpchaospatchbodyaction"]
+==== PodHttpChaosPatchBodyAction 
+
+PodHttpChaosPatchBodyAction defines patch body action of HttpChaos.
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podhttpchaospatchactions[$$PodHttpChaosPatchActions$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`type`* __string__ | Type represents the patch type, only support `JSON` as [merge patch json](https://tools.ietf.org/html/rfc7396) currently.
+| *`value`* __string__ | Value is the patch contents.
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podhttpchaosreplaceactions"]
+==== PodHttpChaosReplaceActions 
+
+PodHttpChaosReplaceActions defines possible replace-actions of HttpChaos.
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podhttpchaosactions[$$PodHttpChaosActions$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`path`* __string__ | Path is rule to to replace uri path in http request.
+| *`method`* __string__ | Method is a rule to replace http method in request.
+| *`code`* __integer__ | Code is a rule to replace http status code in response.
+| *`body`* __integer array__ | Body is a rule to replace http message body in target.
+| *`queries`* __object (keys:string, values:string)__ | Queries is a rule to replace uri queries in http request. For example, with value `{ "foo": "unknown" }`, the `/?foo=bar` will be altered to `/?foo=unknown`,
+| *`headers`* __object (keys:string, values:string)__ | Headers is a rule to replace http headers of target. The key-value pairs represent header name and header value pairs.
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podhttpchaosrule"]
+==== PodHttpChaosRule 
+
+PodHttpChaosRule defines the injection rule for http.
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podhttpchaosspec[$$PodHttpChaosSpec$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`PodHttpChaosBaseRule`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podhttpchaosbaserule[$$PodHttpChaosBaseRule$$]__ | 
+| *`source`* __string__ | Source represents the source of current rules
+| *`port`* __integer__ | Port represents the target port to be proxy of.
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podhttpchaosselector"]
+==== PodHttpChaosSelector 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podhttpchaosbaserule[$$PodHttpChaosBaseRule$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`port`* __integer__ | Port is a rule to select server listening on specific port.
+| *`path`* __string__ | Path is a rule to select target by uri path in http request.
+| *`method`* __string__ | Method is a rule to select target by http method in request.
+| *`code`* __integer__ | Code is a rule to select target by http status code in response.
+| *`request_headers`* __object (keys:string, values:string)__ | RequestHeaders is a rule to select target by http headers in request. The key-value pairs represent header name and header value pairs.
+| *`response_headers`* __object (keys:string, values:string)__ | ResponseHeaders is a rule to select target by http headers in response. The key-value pairs represent header name and header value pairs.
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podhttpchaosspec"]
+==== PodHttpChaosSpec 
+
+PodHttpChaosSpec defines the desired state of PodHttpChaos.
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podhttpchaos[$$PodHttpChaos$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`rules`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podhttpchaosrule[$$PodHttpChaosRule$$] array__ | Rules are a list of injection rule for http request.
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podhttpchaosstatus"]
+==== PodHttpChaosStatus 
+
+PodHttpChaosStatus defines the actual state of PodHttpChaos.
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podhttpchaos[$$PodHttpChaos$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`pid`* __integer__ | Pid represents a running tproxy process id.
+| *`startTime`* __integer__ | StartTime represents the start time of a tproxy process.
+| *`failedMessage`* __string__ | 
+| *`observedGeneration`* __integer__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podhttpchaostarget"]
+==== PodHttpChaosTarget (string) 
+
+PodHttpChaosTarget represents the type of an HttpChaos Action
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-httpchaosspec[$$HTTPChaosSpec$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podhttpchaosbaserule[$$PodHttpChaosBaseRule$$]
+****
+
+
+
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podiochaos"]
+==== PodIOChaos 
+
+PodIOChaos is the Schema for the podiochaos API
+
+
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`apiVersion`* __string__ | `chaos-mesh.org/v1alpha1`
+| *`kind`* __string__ | `PodIOChaos`
+| *`TypeMeta`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#typemeta-v1-meta[$$TypeMeta$$]__ | 
+| *`metadata`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#objectmeta-v1-meta[$$ObjectMeta$$]__ | Refer to Kubernetes API documentation for fields of `metadata`.
+
+| *`spec`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podiochaosspec[$$PodIOChaosSpec$$]__ | 
+| *`status`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podiochaosstatus[$$PodIOChaosStatus$$]__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podiochaosspec"]
+==== PodIOChaosSpec 
+
+PodIOChaosSpec defines the desired state of IOChaos
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podiochaos[$$PodIOChaos$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`volumeMountPath`* __string__ | VolumeMountPath represents the target mount path It must be a root of mount path now. TODO: search the mount parent of any path automatically. TODO: support multiple different volume mount path in one pod
+| *`container`* __string__ | TODO: support multiple different container to inject in one pod
+| *`actions`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-iochaosaction[$$IOChaosAction$$] array__ | Actions are a list of IOChaos actions
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podiochaosstatus"]
+==== PodIOChaosStatus 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podiochaos[$$PodIOChaos$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`pid`* __integer__ | Pid represents a running toda process id
+| *`startTime`* __integer__ | StartTime represents the start time of a toda process
+| *`failedMessage`* __string__ | 
+| *`observedGeneration`* __integer__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podnetworkchaos"]
+==== PodNetworkChaos 
+
+PodNetworkChaos is the Schema for the PodNetworkChaos API
+
+
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`apiVersion`* __string__ | `chaos-mesh.org/v1alpha1`
+| *`kind`* __string__ | `PodNetworkChaos`
+| *`TypeMeta`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#typemeta-v1-meta[$$TypeMeta$$]__ | 
+| *`metadata`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#objectmeta-v1-meta[$$ObjectMeta$$]__ | Refer to Kubernetes API documentation for fields of `metadata`.
+
+| *`spec`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podnetworkchaosspec[$$PodNetworkChaosSpec$$]__ | Spec defines the behavior of a pod chaos experiment
+| *`status`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podnetworkchaosstatus[$$PodNetworkChaosStatus$$]__ | Most recently observed status of the chaos experiment about pods
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podnetworkchaosspec"]
+==== PodNetworkChaosSpec 
+
+PodNetworkChaosSpec defines the desired state of PodNetworkChaos
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podnetworkchaos[$$PodNetworkChaos$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`ipsets`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-rawipset[$$RawIPSet$$] array__ | The ipset on the pod
+| *`iptables`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-rawiptables[$$RawIptables$$] array__ | The iptables rules on the pod
+| *`tcs`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-rawtrafficcontrol[$$RawTrafficControl$$] array__ | The tc rules on the pod
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podnetworkchaosstatus"]
+==== PodNetworkChaosStatus 
+
+PodNetworkChaosStatus defines the observed state of PodNetworkChaos
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podnetworkchaos[$$PodNetworkChaos$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`failedMessage`* __string__ | 
+| *`observedGeneration`* __integer__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podselector"]
+==== PodSelector 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-containerselector[$$ContainerSelector$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-httpchaosspec[$$HTTPChaosSpec$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-kernelchaosspec[$$KernelChaosSpec$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-networkchaosspec[$$NetworkChaosSpec$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`selector`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podselectorspec[$$PodSelectorSpec$$]__ | Selector is used to select pods that are used to inject chaos action.
+| *`mode`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-selectormode[$$SelectorMode$$]__ | Mode defines the mode to run chaos action. Supported mode: one / all / fixed / fixed-percent / random-max-percent
+| *`value`* __string__ | Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`, provide an integer of pods to do chaos action. If `FixedPercentMode`, provide a number from 0-100 to specify the percent of pods the server can do chaos action. IF `RandomMaxPercentMode`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podselectorspec"]
+==== PodSelectorSpec 
+
+PodSelectorSpec defines the some selectors to select objects. If the all selectors are empty, all objects will be used in chaos experiment.
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podselector[$$PodSelector$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`GenericSelectorSpec`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-genericselectorspec[$$GenericSelectorSpec$$]__ | 
+| *`nodes`* __string array__ | Nodes is a set of node name and objects must belong to these nodes.
+| *`pods`* __object (keys:string, values:string array)__ | Pods is a map of string keys and a set values that used to select pods. The key defines the namespace which pods belong, and the each values is a set of pod names.
+| *`nodeSelectors`* __object (keys:string, values:string)__ | Map of string keys and values that can be used to select nodes. Selector which must match a node's labels, and objects must belong to these selected nodes.
+| *`podPhaseSelectors`* __string array__ | PodPhaseSelectors is a set of condition of a pod at the current time. supported value: Pending / Running / Succeeded / Failed / Unknown
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-processspec"]
+==== ProcessSpec 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-expinfo[$$ExpInfo$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`process`* __string__ | 
+| *`signal`* __integer__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-rawipset"]
+==== RawIPSet 
+
+RawIPSet represents an ipset on specific pod
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podnetworkchaosspec[$$PodNetworkChaosSpec$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`name`* __string__ | The name of ipset
+| *`cidrs`* __string array__ | The contents of ipset
+| *`RawRuleSource`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-rawrulesource[$$RawRuleSource$$]__ | The name and namespace of the source network chaos
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-rawiptables"]
+==== RawIptables 
+
+RawIptables represents the iptables rules on specific pod
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podnetworkchaosspec[$$PodNetworkChaosSpec$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`name`* __string__ | The name of iptables chain
+| *`ipsets`* __string array__ | The name of related ipset
+| *`direction`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-chaindirection[$$ChainDirection$$]__ | The block direction of this iptables rule
+| *`device`* __string__ | Device represents the network device to be affected.
+| *`RawRuleSource`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-rawrulesource[$$RawRuleSource$$]__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-rawrulesource"]
+==== RawRuleSource 
+
+RawRuleSource represents the name and namespace of the source network chaos
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-rawipset[$$RawIPSet$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-rawiptables[$$RawIptables$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`source`* __string__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-rawtrafficcontrol"]
+==== RawTrafficControl 
+
+RawTrafficControl represents the traffic control chaos on specific pod
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podnetworkchaosspec[$$PodNetworkChaosSpec$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`type`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-tctype[$$TcType$$]__ | The type of traffic control
+| *`TcParameter`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-tcparameter[$$TcParameter$$]__ | 
+| *`ipset`* __string__ | The name of target ipset
+| *`source`* __string__ | The name and namespace of the source network chaos
+| *`device`* __string__ | Device represents the network device to be affected.
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-record"]
+==== Record 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-experimentstatus[$$ExperimentStatus$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`id`* __string__ | 
+| *`selectorKey`* __string__ | 
+| *`phase`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-phase[$$Phase$$]__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-reorderspec"]
+==== ReorderSpec 
+
+ReorderSpec defines details of packet reorder.
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-delayspec[$$DelaySpec$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`reorder`* __string__ | 
+| *`correlation`* __string__ | 
+| *`gap`* __integer__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-schedule"]
+==== Schedule 
+
+Schedule is the cronly schedule object
+
+
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`apiVersion`* __string__ | `chaos-mesh.org/v1alpha1`
+| *`kind`* __string__ | `Schedule`
+| *`TypeMeta`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#typemeta-v1-meta[$$TypeMeta$$]__ | 
+| *`metadata`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#objectmeta-v1-meta[$$ObjectMeta$$]__ | Refer to Kubernetes API documentation for fields of `metadata`.
+
+| *`spec`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-schedulespec[$$ScheduleSpec$$]__ | 
+| *`status`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-schedulestatus[$$ScheduleStatus$$]__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-scheduleitem"]
+==== ScheduleItem 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-schedulespec[$$ScheduleSpec$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`EmbedChaos`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-embedchaos[$$EmbedChaos$$]__ | 
+| *`workflow`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-workflowspec[$$WorkflowSpec$$]__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-schedulespec"]
+==== ScheduleSpec 
+
+ScheduleSpec is the specification of a schedule object
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-schedule[$$Schedule$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-workflownodespec[$$WorkflowNodeSpec$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`schedule`* __string__ | 
+| *`startingDeadlineSeconds`* __integer__ | 
+| *`concurrencyPolicy`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-concurrencypolicy[$$ConcurrencyPolicy$$]__ | 
+| *`historyLimit`* __integer__ | 
+| *`type`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-scheduletemplatetype[$$ScheduleTemplateType$$]__ | TODO: use a custom type, as `TemplateType` contains other possible values
+| *`ScheduleItem`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-scheduleitem[$$ScheduleItem$$]__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-schedulestatus"]
+==== ScheduleStatus 
+
+ScheduleStatus is the status of a schedule object
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-schedule[$$Schedule$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`active`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#objectreference-v1-core[$$ObjectReference$$] array__ | 
+| *`time`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#time-v1-meta[$$Time$$]__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-scheduletemplatetype"]
+==== ScheduleTemplateType (string) 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-chaosonlyschedulespec[$$ChaosOnlyScheduleSpec$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-schedulespec[$$ScheduleSpec$$]
+****
+
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-selectormode"]
+==== SelectorMode (string) 
+
+SelectorMode represents the mode to run chaos action.
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-podselector[$$PodSelector$$]
+****
+
+
+
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-stresscpuspec"]
+==== StressCPUSpec 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-expinfo[$$ExpInfo$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`load`* __integer__ | 
+| *`workers`* __integer__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-stresschaos"]
+==== StressChaos 
+
+StressChaos is the Schema for the stresschaos API
+
+
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`apiVersion`* __string__ | `chaos-mesh.org/v1alpha1`
+| *`kind`* __string__ | `StressChaos`
+| *`TypeMeta`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#typemeta-v1-meta[$$TypeMeta$$]__ | 
+| *`metadata`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#objectmeta-v1-meta[$$ObjectMeta$$]__ | Refer to Kubernetes API documentation for fields of `metadata`.
+
+| *`spec`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-stresschaosspec[$$StressChaosSpec$$]__ | Spec defines the behavior of a time chaos experiment
+| *`status`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-stresschaosstatus[$$StressChaosStatus$$]__ | Most recently observed status of the time chaos experiment
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-stresschaosspec"]
+==== StressChaosSpec 
+
+StressChaosSpec defines the desired state of StressChaos
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-embedchaos[$$EmbedChaos$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-stresschaos[$$StressChaos$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`ContainerSelector`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-containerselector[$$ContainerSelector$$]__ | 
+| *`stressors`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-stressors[$$Stressors$$]__ | Stressors defines plenty of stressors supported to stress system components out. You can use one or more of them to make up various kinds of stresses. At least one of the stressors should be specified.
+| *`stressngStressors`* __string__ | StressngStressors defines plenty of stressors just like `Stressors` except that it's an experimental feature and more powerful. You can define stressors in `stress-ng` (see also `man stress-ng`) dialect, however not all of the supported stressors are well tested. It maybe retired in later releases. You should always use `Stressors` to define the stressors and use this only when you want more stressors unsupported by `Stressors`. When both `StressngStressors` and `Stressors` are defined, `StressngStressors` wins.
+| *`duration`* __string__ | Duration represents the duration of the chaos action
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-stresschaosstatus"]
+==== StressChaosStatus 
+
+StressChaosStatus defines the observed state of StressChaos
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-stresschaos[$$StressChaos$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`ChaosStatus`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-chaosstatus[$$ChaosStatus$$]__ | 
+| *`instances`* __object (keys:string, values:xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-stressinstance[$$StressInstance$$])__ | Instances always specifies stressing instances
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-stressinstance"]
+==== StressInstance 
+
+StressInstance is an instance generates stresses
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-stresschaosstatus[$$StressChaosStatus$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`uid`* __string__ | UID is the instance identifier
+| *`startTime`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#time-v1-meta[$$Time$$]__ | StartTime specifies when the instance starts
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-stressmemoryspec"]
+==== StressMemorySpec 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-expinfo[$$ExpInfo$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`size`* __string__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-stressor"]
+==== Stressor 
+
+Stressor defines common configurations of a stressor
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-cpustressor[$$CPUStressor$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-memorystressor[$$MemoryStressor$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`workers`* __integer__ | Workers specifies N workers to apply the stressor. Maximum 8192 workers can run by stress-ng
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-stressors"]
+==== Stressors 
+
+Stressors defines plenty of stressors supported to stress system components out. You can use one or more of them to make up various kinds of stresses
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-stresschaosspec[$$StressChaosSpec$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`memory`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-memorystressor[$$MemoryStressor$$]__ | MemoryStressor stresses virtual memory out
+| *`cpu`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-cpustressor[$$CPUStressor$$]__ | CPUStressor stresses CPU out
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-task"]
+==== Task 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-template[$$Template$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-workflownodespec[$$WorkflowNodeSpec$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`container`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#container-v1-core[$$Container$$]__ | Container is the main container image to run in the pod
+| *`volumes`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#volume-v1-core[$$Volume$$] array__ | Volumes is a list of volumes that can be mounted by containers in a template.
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-tcparameter"]
+==== TcParameter 
+
+TcParameter represents the parameters for a traffic control chaos
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-networkchaosspec[$$NetworkChaosSpec$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-rawtrafficcontrol[$$RawTrafficControl$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`delay`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-delayspec[$$DelaySpec$$]__ | Delay represents the detail about delay action
+| *`loss`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-lossspec[$$LossSpec$$]__ | Loss represents the detail about loss action
+| *`duplicate`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-duplicatespec[$$DuplicateSpec$$]__ | DuplicateSpec represents the detail about loss action
+| *`corrupt`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-corruptspec[$$CorruptSpec$$]__ | Corrupt represents the detail about corrupt action
+| *`bandwidth`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-bandwidthspec[$$BandwidthSpec$$]__ | Bandwidth represents the detail about bandwidth control action
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-tctype"]
+==== TcType (string) 
+
+TcType the type of traffic control
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-rawtrafficcontrol[$$RawTrafficControl$$]
+****
+
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-template"]
+==== Template 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-workflowspec[$$WorkflowSpec$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`name`* __string__ | 
+| *`templateType`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-templatetype[$$TemplateType$$]__ | 
+| *`deadline`* __string__ | 
+| *`task`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-task[$$Task$$]__ | Task describes the behavior of the custom task. Only used when Type is TypeTask.
+| *`children`* __string array__ | Children describes the children steps of serial or parallel node. Only used when Type is TypeSerial or TypeParallel.
+| *`conditionalBranches`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-conditionalbranch[$$ConditionalBranch$$] array__ | ConditionalBranches describes the conditional branches of custom tasks. Only used when Type is TypeTask.
+| *`EmbedChaos`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-embedchaos[$$EmbedChaos$$]__ | EmbedChaos describe the chaos to be injected with chaos nodes. Only used when Type is Type<Something>Chaos.
+| *`schedule`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-chaosonlyschedulespec[$$ChaosOnlyScheduleSpec$$]__ | Schedule describe the Schedule(describing scheduled chaos) to be injected with chaos nodes. Only used when Type is TypeSchedule.
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-templatetype"]
+==== TemplateType (string) 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-template[$$Template$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-workflownodespec[$$WorkflowNodeSpec$$]
+****
+
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-timechaos"]
+==== TimeChaos 
+
+TimeChaos is the Schema for the timechaos API
+
+
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`apiVersion`* __string__ | `chaos-mesh.org/v1alpha1`
+| *`kind`* __string__ | `TimeChaos`
+| *`TypeMeta`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#typemeta-v1-meta[$$TypeMeta$$]__ | 
+| *`metadata`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#objectmeta-v1-meta[$$ObjectMeta$$]__ | Refer to Kubernetes API documentation for fields of `metadata`.
+
+| *`spec`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-timechaosspec[$$TimeChaosSpec$$]__ | Spec defines the behavior of a time chaos experiment
+| *`status`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-timechaosstatus[$$TimeChaosStatus$$]__ | Most recently observed status of the time chaos experiment
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-timechaosspec"]
+==== TimeChaosSpec 
+
+TimeChaosSpec defines the desired state of TimeChaos
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-embedchaos[$$EmbedChaos$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-timechaos[$$TimeChaos$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`ContainerSelector`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-containerselector[$$ContainerSelector$$]__ | 
+| *`timeOffset`* __string__ | TimeOffset defines the delta time of injected program. It's a possibly signed sequence of decimal numbers, such as "300ms", "-1.5h" or "2h45m". Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+| *`clockIds`* __string array__ | ClockIds defines all affected clock id All available options are ["CLOCK_REALTIME","CLOCK_MONOTONIC","CLOCK_PROCESS_CPUTIME_ID","CLOCK_THREAD_CPUTIME_ID", "CLOCK_MONOTONIC_RAW","CLOCK_REALTIME_COARSE","CLOCK_MONOTONIC_COARSE","CLOCK_BOOTTIME","CLOCK_REALTIME_ALARM", "CLOCK_BOOTTIME_ALARM"] Default value is ["CLOCK_REALTIME"]
+| *`duration`* __string__ | Duration represents the duration of the chaos action
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-timechaosstatus"]
+==== TimeChaosStatus 
+
+TimeChaosStatus defines the observed state of TimeChaos
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-timechaos[$$TimeChaos$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`ChaosStatus`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-chaosstatus[$$ChaosStatus$$]__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-timespec"]
+==== Timespec 
+
+Timespec represents a time
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-attroverridespec[$$AttrOverrideSpec$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`sec`* __integer__ | 
+| *`nsec`* __integer__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-workflow"]
+==== Workflow 
+
+
+
+
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`apiVersion`* __string__ | `chaos-mesh.org/v1alpha1`
+| *`kind`* __string__ | `Workflow`
+| *`TypeMeta`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#typemeta-v1-meta[$$TypeMeta$$]__ | 
+| *`metadata`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#objectmeta-v1-meta[$$ObjectMeta$$]__ | Refer to Kubernetes API documentation for fields of `metadata`.
+
+| *`spec`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-workflowspec[$$WorkflowSpec$$]__ | Spec defines the behavior of a workflow
+| *`status`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-workflowstatus[$$WorkflowStatus$$]__ | Most recently observed status of the workflow
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-workflowcondition"]
+==== WorkflowCondition 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-workflowstatus[$$WorkflowStatus$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`type`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-workflowconditiontype[$$WorkflowConditionType$$]__ | 
+| *`status`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#conditionstatus-v1-core[$$ConditionStatus$$]__ | 
+| *`reason`* __string__ | 
+| *`startTime`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#time-v1-meta[$$Time$$]__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-workflowconditiontype"]
+==== WorkflowConditionType (string) 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-workflowcondition[$$WorkflowCondition$$]
+****
+
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-workflownode"]
+==== WorkflowNode 
+
+
+
+
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`apiVersion`* __string__ | `chaos-mesh.org/v1alpha1`
+| *`kind`* __string__ | `WorkflowNode`
+| *`TypeMeta`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#typemeta-v1-meta[$$TypeMeta$$]__ | 
+| *`metadata`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#objectmeta-v1-meta[$$ObjectMeta$$]__ | Refer to Kubernetes API documentation for fields of `metadata`.
+
+| *`spec`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-workflownodespec[$$WorkflowNodeSpec$$]__ | Spec defines the behavior of a node of workflow
+| *`status`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-workflownodestatus[$$WorkflowNodeStatus$$]__ | Most recently observed status of the workflow node
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-workflownodecondition"]
+==== WorkflowNodeCondition 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-workflownodestatus[$$WorkflowNodeStatus$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`type`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-workflownodeconditiontype[$$WorkflowNodeConditionType$$]__ | 
+| *`status`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#conditionstatus-v1-core[$$ConditionStatus$$]__ | 
+| *`reason`* __string__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-workflownodeconditiontype"]
+==== WorkflowNodeConditionType (string) 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-workflownodecondition[$$WorkflowNodeCondition$$]
+****
+
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-workflownodespec"]
+==== WorkflowNodeSpec 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-workflownode[$$WorkflowNode$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`templateName`* __string__ | 
+| *`workflowName`* __string__ | 
+| *`type`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-templatetype[$$TemplateType$$]__ | 
+| *`startTime`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#time-v1-meta[$$Time$$]__ | 
+| *`deadline`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#time-v1-meta[$$Time$$]__ | 
+| *`task`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-task[$$Task$$]__ | 
+| *`children`* __string array__ | 
+| *`conditionalBranches`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-conditionalbranch[$$ConditionalBranch$$]__ | 
+| *`EmbedChaos`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-embedchaos[$$EmbedChaos$$]__ | 
+| *`schedule`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-schedulespec[$$ScheduleSpec$$]__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-workflownodestatus"]
+==== WorkflowNodeStatus 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-workflownode[$$WorkflowNode$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`chaosResource`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#typedlocalobjectreference-v1-core[$$TypedLocalObjectReference$$]__ | ChaosResource refs to the real chaos CR object.
+| *`conditionalBranchesStatus`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-conditionalbranchesstatus[$$ConditionalBranchesStatus$$]__ | ConditionalBranchesStatus records the evaluation result of each ConditionalBranch
+| *`activeChildren`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#localobjectreference-v1-core[$$LocalObjectReference$$]__ | ActiveChildren means the created children node
+| *`finishedChildren`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#localobjectreference-v1-core[$$LocalObjectReference$$]__ | Children is necessary for representing the order when replicated child template references by parent template.
+| *`conditions`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-workflownodecondition[$$WorkflowNodeCondition$$] array__ | Represents the latest available observations of a workflow node's current state.
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-workflowspec"]
+==== WorkflowSpec 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-scheduleitem[$$ScheduleItem$$]
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-workflow[$$Workflow$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`entry`* __string__ | 
+| *`templates`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-template[$$Template$$] array__ | 
+|===
+
+
+[id="{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-workflowstatus"]
+==== WorkflowStatus 
+
+
+
+.Appears In:
+****
+- xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-workflow[$$Workflow$$]
+****
+
+[cols="25a,75a", options="header"]
+|===
+| Field | Description
+| *`entryNode`* __string__ | 
+| *`startTime`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#time-v1-meta[$$Time$$]__ | 
+| *`endTime`* __link:https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#time-v1-meta[$$Time$$]__ | 
+| *`conditions`* __xref:{anchor_prefix}-github-com-chaos-mesh-chaos-mesh-api-v1alpha1-workflowcondition[$$WorkflowCondition$$] array__ | Represents the latest available observations of a workflow's current state.
+|===
+
+

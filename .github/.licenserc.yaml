@@ -49,3 +49,5 @@ header:
     - '**/Dockerfile'
     # UI SVGs
     - 'ui/**/*.svg'
+    # api reference
+    - 'api-reference/**/*'
