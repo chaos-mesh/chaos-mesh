@@ -42,9 +42,7 @@ import yaml from 'js-yaml'
 const YAMLEditor = loadable(() => import('components/YAMLEditor'))
 
 const useStyles = makeStyles((theme) => ({
-  root: {
-    height: `calc(100vh - 56px - ${theme.spacing(18)})`,
-  },
+  root: {},
   configPaper: {
     position: 'absolute',
     top: '50%',
@@ -239,7 +237,7 @@ const Single = () => {
                 {T('archives.single')}
               </Button>
             </Space>
-            <Paper sx={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+            <Paper sx={{ display: 'flex', flexDirection: 'column', height: 450 }}>
               <PaperTop
                 title={
                   <Space spacing={1.5} alignItems="center">
