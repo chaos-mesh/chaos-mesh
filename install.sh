@@ -1373,7 +1373,6 @@ spec:
         app.kubernetes.io/version: v0.9.0
         app.kubernetes.io/component: chaos-dashboard
       annotations:
-        rollme: "install.sh"
     spec:
       serviceAccountName: chaos-controller-manager
       priorityClassName: 
