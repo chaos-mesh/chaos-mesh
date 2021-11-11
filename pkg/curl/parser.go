@@ -36,16 +36,15 @@ func parseCommands(command Commands) (*CommandFlags, error) {
 	rawHeader := flagset.StringArrayP("header", "H", []string{}, "HTTP extra header")
 	data := flagset.StringP("data", "d", "", "data")
 	err := flagset.Parse(command)
+	if err != nil {
+		return nil, err
+	}
 
 	// first non-flag arg is the command itself, use the second non-flag arg as the url.
 	if flag.NArg() > 1 {
 		return nil, fmt.Errorf("can not find the url")
 	}
 	url := flagset.Arg(1)
-
-	if err != nil {
-		return nil, nil
-	}
 
 	isJson := false
 	var header Header
