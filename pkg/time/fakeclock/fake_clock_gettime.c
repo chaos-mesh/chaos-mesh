@@ -16,22 +16,43 @@
  */
 #include <time.h>
 #include <inttypes.h>
+#include <syscall.h>
 
-int64_t TV_SEC_DELTA = 0;
-int64_t TV_NSEC_DELTA = 0;
-uint64_t CLOCK_IDS_MASK = 0;
+extern int64_t TV_SEC_DELTA;
+extern int64_t TV_NSEC_DELTA;
+extern uint64_t CLOCK_IDS_MASK;
 
-long syscall(long number, ...);
-
-int clock_gettime(clockid_t clk_id, struct timespec *tp) {
+#if defined(__amd64__)
+inline int real_clock_gettime(clockid_t clk_id, struct timespec *tp) {
     int ret;
     asm volatile
         (
             "syscall"
             : "=a" (ret)
-            : "0"(228), "D"(clk_id), "S"(tp)
+            : "0"(__NR_clock_gettime), "D"(clk_id), "S"(tp)
             : "rcx", "r11", "memory"
         );
+
+    return ret;
+}
+#elif defined(__aarch64__)
+inline int real_clock_gettime(clockid_t clk_id, struct timespec *tp) {
+    register clockid_t x0 __asm__ ("x0") = clk_id;
+    register struct timespec *x1 __asm__ ("x1") = tp;
+    register uint64_t w8 __asm__ ("w8") = __NR_clock_gettime; /* syscall number */
+    __asm__ __volatile__ (
+        "svc 0;"
+        : "+r" (x0)
+        : "r" (x0), "r" (x1), "r" (w8)
+        : "memory"
+    );
+
+    return x0;
+}
+#endif
+
+int clock_gettime(clockid_t clk_id, struct timespec *tp) {
+    int ret = real_clock_gettime(clk_id, tp);
 
     int64_t sec_delta = TV_SEC_DELTA;
     int64_t nsec_delta = TV_NSEC_DELTA;

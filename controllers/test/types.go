@@ -96,3 +96,11 @@ func (c *MockChaosDaemonClient) SetTcs(ctx context.Context, in *chaosdaemon.TcsR
 func (c *MockChaosDaemonClient) Close() error {
 	return mockError("CloseChaosDaemonClient")
 }
+
+func (c *MockChaosDaemonClient) InstallJVMRules(ctx context.Context, in *chaosdaemon.InstallJVMRulesRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	return nil, mockError("InstallJVMRules")
+}
+
+func (c *MockChaosDaemonClient) UninstallJVMRules(ctx context.Context, in *chaosdaemon.UninstallJVMRulesRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	return nil, mockError("UninstallJVMRules")
+}

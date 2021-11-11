@@ -40,12 +40,13 @@ const Step3: React.FC<Step3Props> = ({ onSubmit, inSchedule }) => {
   const intl = useIntl()
 
   const state = useStoreSelector((state) => state)
-  const { step1, step2, kindAction, basic, spec } = state.experiments
+  const { step1, step2, kindAction, env, basic, spec } = state.experiments
   const { debugMode } = state.settings
   const dispatch = useStoreDispatch()
 
   const submitExperiment = () => {
     const parsedValues = parseSubmit(
+      env,
       kindAction[0] as ExperimentKind,
       {
         ...basic,

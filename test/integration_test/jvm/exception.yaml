@@ -12,21 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
 apiVersion: chaos-mesh.org/v1alpha1
-kind: Schedule
+kind: JVMChaos
 metadata:
-  name: jvm-cfl-example
-  namespace: app
+  name: exception
+  namespace: helloworld
 spec:
-  schedule: '@every 1m'
-  type: JVMChaos
-  historyLimit: 5
-  concurrencyPolicy: Forbid
-  jvmChaos:
-    action: cfl
-    target: jvm
-    mode: one
-    selector:
-      labelSelectors:
-        app: springboot-jvmchaos-demo
-    duration: 30s
+  action: exception
+  class: Main
+  method: sayhello
+  exception: java.io.IOException("BOOM")
+  mode: all
+  selector:
+    namespaces:
+      - helloworld

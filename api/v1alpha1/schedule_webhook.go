@@ -92,7 +92,7 @@ func (in *ScheduleSpec) validateSchedule(schedule *field.Path) field.ErrorList {
 func (in *ScheduleSpec) validateChaos(chaos *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 	if in.Type != ScheduleTypeWorkflow {
-		allErrs = append(allErrs, in.EmbedChaos.Validate(string(in.Type))...)
+		allErrs = append(allErrs, in.EmbedChaos.Validate(chaos, string(in.Type))...)
 	}
 	return allErrs
 }

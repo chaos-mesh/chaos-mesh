@@ -33,9 +33,9 @@ sed -i.bak 's/mountPath: \/var\/run\/docker.sock/mountPath: \$\{mountPath\}/g' $
 sed -i.bak 's/path: \/var\/run\/docker.sock/path: \$\{socketPath\}/g' $tmp_file
 sed -i.bak 's/- docker/- $\{runtime\}/g' $tmp_file
 sed -i.bak 's/hostNetwork: true/hostNetwork: \$\{host_network\}/g' $tmp_file
-sed -i.bak 's/pingcap\/chaos-mesh:.*/\${DOCKER_REGISTRY_PREFIX}\/pingcap\/chaos-mesh:\$\{VERSION_TAG\}/g' $tmp_file
-sed -i.bak 's/pingcap\/chaos-daemon:.*/\${DOCKER_REGISTRY_PREFIX}\/pingcap\/chaos-daemon:\$\{VERSION_TAG\}/g' $tmp_file
-sed -i.bak 's/pingcap\/chaos-dashboard:.*/\${DOCKER_REGISTRY_PREFIX}\/pingcap\/chaos-dashboard:\$\{VERSION_TAG\}/g' $tmp_file
+sed -i.bak 's/ghcr.io\/chaos-mesh\/chaos-mesh\/chaos-mesh:.*/\${DOCKER_REGISTRY_PREFIX}\/chaos-mesh\/chaos-mesh\/chaos-mesh:\$\{VERSION_TAG\}/g' $tmp_file
+sed -i.bak 's/ghcr.io\/chaos-mesh\/chaos-mesh\/chaos-daemon:.*/\${DOCKER_REGISTRY_PREFIX}\/chaos-mesh\/chaos-mesh\/chaos-daemon:\$\{VERSION_TAG\}/g' $tmp_file
+sed -i.bak 's/ghcr.io\/chaos-mesh\/chaos-mesh\/chaos-dashboard:.*/\${DOCKER_REGISTRY_PREFIX}\/chaos-mesh\/chaos-mesh\/chaos-dashboard:\$\{VERSION_TAG\}/g' $tmp_file
 sed -i.bak 's/value: UTC/value: \$\{timezone\}/g' $tmp_file
 mv $tmp_file $tmp_file.bak
 
