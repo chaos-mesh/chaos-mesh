@@ -478,7 +478,7 @@ define api-reference/index.asciidoc-make
 		--renderer=asciidoctor \
 		--templates-dir=./api-reference/asciidoctor \
 		--output-path=out.asciidoc \
-		--log-level debug --max-depth 1024 \
+		--max-depth 1024 \
 		--output-path ./api-reference/index.asciidoc
 endef
 $(eval $(call RUN_IN_DEV_ENV_TEMPLATE,api-reference/index.asciidoc,api/v1alpha1/*.go))
