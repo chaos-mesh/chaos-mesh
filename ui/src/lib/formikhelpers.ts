@@ -16,6 +16,7 @@
  */
 
 import { Experiment, ExperimentKind, Frame, Scope } from 'components/NewExperiment/types'
+import { sanitize, toTitleCase } from './utils'
 
 import { Env } from 'slices/experiments'
 import { ScheduleSpecific } from 'components/Schedule/types'
@@ -23,7 +24,6 @@ import { Template } from 'slices/workflows'
 import { WorkflowBasic } from 'components/NewWorkflow'
 import basicData from 'components/NewExperimentNext/data/basic'
 import { templateTypeToFieldName } from 'api/zz_generated.frontend.chaos-mesh'
-import { toTitleCase } from './utils'
 import yaml from 'js-yaml'
 
 export function parseSubmit<K extends ExperimentKind>(
@@ -160,12 +160,12 @@ export function parseSubmit<K extends ExperimentKind>(
     spec = parsePhysicalMachineChaos(spec) as any
   }
 
-  return {
+  return sanitize({
     apiVersion: 'chaos-mesh.org/v1alpha1',
     kind: options?.inSchedule ? 'Schedule' : kind,
     metadata,
     spec,
-  }
+  })
 }
 
 function podSelectorsToArr(selector: Object) {
@@ -320,11 +320,11 @@ export function parseYAML(yamlObj: any): { kind: ExperimentKind; basic: any; spe
     spec = rest
   }
 
-  return {
+  return sanitize({
     kind,
     basic,
     spec,
-  }
+  })
 }
 
 function validate(defaultI18n: string, i18n?: string) {
