@@ -12,24 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
 apiVersion: chaos-mesh.org/v1alpha1
-kind: Schedule
+kind: JVMChaos
 metadata:
-  name: jvm-oom-example
-  namespace: app
+  name: modify-return
+  namespace: helloworld
 spec:
-  schedule: '@every 1m'
-  type: JVMChaos
-  historyLimit: 5
-  concurrencyPolicy: Forbid
-  jvmChaos:
-    action: oom
-    target: jvm
-    flags:
-      area: HEAP
-      wild-mode: "true"
-    mode: one
-    selector:
-      labelSelectors:
-        app: springboot-jvmchaos-demo
-    duration: 30s
+  action: ruleData
+  ruleData: "RULE modify return value\nCLASS Main\nMETHOD getnum\nAT ENTRY\nIF true\nDO\n    return 9999\nENDRULE"
+  mode: all
+  selector:
+    namespaces:
+      - helloworld
