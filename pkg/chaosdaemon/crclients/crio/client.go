@@ -24,19 +24,25 @@ import (
 	"net/http"
 	"syscall"
 	"time"
+
+	"google.golang.org/grpc"
+	v1 "k8s.io/cri-api/pkg/apis/runtime/v1"
+	"k8s.io/kubernetes/pkg/kubelet/util"
 )
 
 const (
 	InspectContainersEndpoint = "/containers"
 
-	crioProtocolPrefix    = "cri-o://"
-	maxUnixSocketPathSize = len(syscall.RawSockaddrUnix{}.Path)
+	crioProtocolPrefix            = "cri-o://"
+	maxUnixSocketPathSize         = len(syscall.RawSockaddrUnix{}.Path)
+	containerRuntimeClientTimeout = 2 * time.Second
 )
 
 // CrioClient can get information from docker
 type CrioClient struct {
-	client     *http.Client
-	socketPath string
+	client        *http.Client
+	runtimeClient v1.RuntimeServiceClient
+	socketPath    string
 }
 
 // FormatContainerID strips protocol prefix from the container ID
@@ -90,6 +96,54 @@ func (c CrioClient) ContainerKillByContainerID(ctx context.Context, containerID 
 	return syscall.Kill(int(pid), syscall.SIGKILL)
 }
 
+// ListContainerIDs lists all container IDs
+func (c CrioClient) ListContainerIDs(ctx context.Context) ([]string, error) {
+	resp, err := c.runtimeClient.ListContainers(ctx, &v1.ListContainersRequest{})
+	if err != nil {
+		return nil, err
+	}
+
+	var ids []string
+	for _, container := range resp.Containers {
+		id := fmt.Sprintf("%s%s", crioProtocolPrefix, container.Id)
+		ids = append(ids, id)
+	}
+	return ids, nil
+}
+
+// GetLabelsFromContainerID returns the labels according to container ID
+func (c CrioClient) GetLabelsFromContainerID(ctx context.Context, containerID string) (map[string]string, error) {
+	id, err := c.FormatContainerID(ctx, containerID)
+	if err != nil {
+		return nil, err
+	}
+
+	container, err := c.runtimeClient.ContainerStatus(ctx, &v1.ContainerStatusRequest{
+		ContainerId: id,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return container.Status.Labels, nil
+}
+
+func buildRuntimeServiceClient(endpoint string) (v1.RuntimeServiceClient, error) {
+	addr, dialer, err := util.GetAddressAndDialer(endpoint)
+	if err != nil {
+		return nil, err
+	}
+
+	conn, err := grpc.Dial(addr, grpc.WithInsecure(), grpc.WithBlock(), grpc.WithContextDialer(dialer),
+		grpc.WithTimeout(containerRuntimeClientTimeout))
+	if err != nil {
+		return nil, err
+	}
+
+	client := v1.NewRuntimeServiceClient(conn)
+	return client, err
+}
+
 func New(socketPath string) (*CrioClient, error) {
 	tr := new(http.Transport)
 	if err := configureUnixTransport(tr, "unix", socketPath); err != nil {
@@ -98,9 +152,16 @@ func New(socketPath string) (*CrioClient, error) {
 	c := &http.Client{
 		Transport: tr,
 	}
+
+	runtimeClient, err := buildRuntimeServiceClient(socketPath)
+	if err != nil {
+		return nil, err
+	}
+
 	return &CrioClient{
-		client:     c,
-		socketPath: socketPath,
+		client:        c,
+		runtimeClient: runtimeClient,
+		socketPath:    socketPath,
 	}, nil
 }
 

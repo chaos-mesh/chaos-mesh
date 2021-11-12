@@ -18,6 +18,7 @@ package docker
 import (
 	"context"
 	"fmt"
+	"github.com/docker/docker/api/types/filters"
 	"net/http"
 
 	"github.com/docker/docker/api/types"
@@ -34,6 +35,7 @@ const (
 type DockerClientInterface interface {
 	ContainerInspect(ctx context.Context, containerID string) (types.ContainerJSON, error)
 	ContainerKill(ctx context.Context, containerID, signal string) error
+	ContainerList(ctx context.Context, options types.ContainerListOptions) ([]types.Container, error)
 }
 
 // DockerClient can get information from docker
@@ -79,6 +81,37 @@ func (c DockerClient) ContainerKillByContainerID(ctx context.Context, containerI
 	err = c.client.ContainerKill(ctx, id, "SIGKILL")
 
 	return err
+}
+
+// ListContainerIDs lists all container IDs
+func (c DockerClient) ListContainerIDs(ctx context.Context) ([]string, error) {
+	containers, err := c.client.ContainerList(ctx, types.ContainerListOptions{
+		Filters: filters.Args{},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	var ids []string
+	for _, container := range containers {
+		id := fmt.Sprintf("%s%s", dockerProtocolPrefix, container.ID)
+		ids = append(ids, id)
+	}
+	return ids, nil
+}
+
+// GetLabelsFromContainerID returns the labels according to container ID
+func (c DockerClient) GetLabelsFromContainerID(ctx context.Context, containerID string) (map[string]string, error) {
+	id, err := c.FormatContainerID(ctx, containerID)
+	if err != nil {
+		return nil, err
+	}
+	container, err := c.client.ContainerInspect(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return container.Config.Labels, nil
 }
 
 func New(host string, version string, client *http.Client, httpHeaders map[string]string) (*DockerClient, error) {
