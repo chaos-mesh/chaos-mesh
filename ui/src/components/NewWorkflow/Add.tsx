@@ -187,6 +187,11 @@ const Add: React.FC<AddProps> = ({
 
     if (type === 'serial' || type === 'parallel' || type === 'custom') {
       if (typeof newNum !== 'number' || newNum < 0) {
+        if (isRenderedHTTPTask) {
+          resetNoSingle()
+          return
+        }
+
         formRef.current.setFieldValue('num', 2)
 
         return
@@ -199,6 +204,11 @@ const Add: React.FC<AddProps> = ({
 
       setNum(newNum)
 
+      return
+    }
+
+    if (type === 'http') {
+      resetNoSingle()
       return
     }
 
