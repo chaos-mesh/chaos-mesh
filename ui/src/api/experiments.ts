@@ -23,8 +23,6 @@ export const experiments = (namespace = null, name = null, kind = null) =>
 
 export const single = (uuid: uuid) => http.get<ExperimentSingle>(`/experiments/detail/${uuid}`)
 
-export const update = (data: ExperimentSingle['kube_object']) => http.put('/experiments/update', data)
-
 export const del = (uuid: uuid) => http.delete(`/experiments/${uuid}`)
 export const delMulti = (uuids: uuid[]) => http.delete(`/experiments?uids=${uuids.join(',')}`)
 

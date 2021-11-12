@@ -14,8 +14,6 @@ export const schedules = (params?: ScheduleParams) =>
 
 export const single = (uuid: uuid) => http.get<ScheduleSingle>(`/schedules/${uuid}`)
 
-export const update = (data: ScheduleSingle['kube_object']) => http.put('/schedules', data)
-
 export const del = (uuid: uuid) => http.delete(`/schedules/${uuid}`)
 export const delMulti = (uuids: uuid[]) => http.delete(`/schedules?uids=${uuids.join(',')}`)
 
