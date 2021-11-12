@@ -61,8 +61,12 @@ controllerManager:
   replicaCount: 3
 
   priorityClassName: ""
+  # image would be constructed by <registry>/<repository>:<tag>
   image:
+    # empty registry means using the global images.registry
+    registry: ""
     repository: chaos-mesh/chaos-mesh
+    # empty tag means using the global images.tag
     tag: ""
   imagePullPolicy: IfNotPresent
 
@@ -117,7 +121,10 @@ controllerManager:
     retryPeriod: 2s
 
 chaosDaemon:
+  # image would be constructed by <registry>/<repository>:<tag>
   image:
+    # empty registry means using the global images.registry
+    registry: ""
     repository: chaos-mesh/chaos-daemon
     # empty tag means using the global images.tag
     tag: ""
@@ -419,7 +426,10 @@ webhook:
 
 bpfki:
   create: false
+  # image would be constructed by <registry>/<repository>:<tag>
   image:
+    # empty registry means using the global images.registry
+    registry: ""
     repository: chaos-mesh/chaos-kernel
     # empty tag means using the global images.tag
     tag: ""
@@ -439,7 +449,10 @@ bpfki:
 
 chaosDlv:
   enable: false
+  # image would be constructed by <registry>/<repository>:<tag>
   image:
+    # empty registry means using the global images.registry
+    registry: ""
     repository: chaos-mesh/chaos-dlv
     # empty tag means using the global images.tag
     tag: ""
