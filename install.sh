@@ -987,7 +987,7 @@ metadata:
     app.kubernetes.io/component: controller-manager
 rules:
   - apiGroups: [ "" ]
-    resources: [ "pods", "secrets"]
+    resources: [ "pods", "configmaps", "secrets"]
     verbs: [ "get", "list", "watch", "delete", "update", "patch" ]
   - apiGroups:
       - ""
@@ -1011,9 +1011,6 @@ rules:
       - watch
       - list
       - get
-  - apiGroups: [ "" ]
-    resources: [ "configmaps" ]
-    verbs: [ "*" ]
   - apiGroups: [ "chaos-mesh.org" ]
     resources:
       - "*"
@@ -1098,7 +1095,7 @@ metadata:
     app.kubernetes.io/component: controller-manager
 rules:
   - apiGroups: [ "" ]
-    resources: [ "configmaps", "services", "endpoints" ]
+    resources: [ "services", "endpoints" ]
     verbs: [ "get", "list", "watch" ]
   - apiGroups: [ "authorization.k8s.io" ]
     resources:
@@ -1107,6 +1104,9 @@ rules:
   - apiGroups: [ "" ]
     resources: [ "pods/exec" ]
     verbs: [ "create" ]
+  - apiGroups: [ "" ]
+    resources: [ "configmaps" ]
+    verbs: [ "*" ]
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 # binding for control plane namespace
