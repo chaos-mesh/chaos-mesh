@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+
 export function toTitleCase(s: string) {
   return s.charAt(0).toUpperCase() + s.substr(1)
 }
@@ -46,4 +47,26 @@ export function arrToObjBySep(arr: string[], sep: string) {
   })
 
   return result as object
+}
+
+/**
+ * Remove empty values from nested object.
+ *
+ * @export
+ * @param {*} obj
+ */
+export function sanitize(obj: any) {
+  return JSON.parse(
+    JSON.stringify(obj, (_, value) => {
+      if (!value) {
+        return undefined
+      }
+
+      if (Array.isArray(value) && value.length === 0) {
+        return undefined
+      }
+
+      return value
+    })
+  )
 }

@@ -15,10 +15,30 @@
  *
  */
 
-// jest-dom adds custom jest matchers for asserting on DOM nodes.
-// allows you to do things like:
-// expect(element).toHaveTextContent(/react/i)
-// learn more: https://github.com/testing-library/jest-dom
+import { sanitize } from './utils'
 
-import '@testing-library/jest-dom'
-import './setupTests.api'
+test('sanitize an object', () => {
+  expect(
+    sanitize({
+      a: 1,
+      b: '',
+      c: null,
+      d: 'd',
+    })
+  ).toEqual({
+    a: 1,
+    d: 'd',
+  })
+})
+
+test('sanitize an object where all values are empty', () => {
+  expect(
+    sanitize({
+      a: 0,
+      b: '',
+      c: null,
+      d: undefined,
+      e: [],
+    })
+  ).toEqual({})
+})
