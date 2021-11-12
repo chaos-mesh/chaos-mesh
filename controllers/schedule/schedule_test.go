@@ -63,7 +63,7 @@ var _ = Describe("Schedule", func() {
 							Duration:   &duration,
 							ContainerSelector: v1alpha1.ContainerSelector{
 								PodSelector: v1alpha1.PodSelector{
-									Mode: v1alpha1.OnePodMode,
+									Mode: v1alpha1.OneMode,
 								},
 							},
 						}},
@@ -111,7 +111,7 @@ var _ = Describe("Schedule", func() {
 							Duration:   &duration,
 							ContainerSelector: v1alpha1.ContainerSelector{
 								PodSelector: v1alpha1.PodSelector{
-									Mode: v1alpha1.OnePodMode,
+									Mode: v1alpha1.OneMode,
 								},
 							},
 						}},
@@ -176,7 +176,7 @@ var _ = Describe("Schedule", func() {
 							Duration:   &duration,
 							ContainerSelector: v1alpha1.ContainerSelector{
 								PodSelector: v1alpha1.PodSelector{
-									Mode: v1alpha1.OnePodMode,
+									Mode: v1alpha1.OneMode,
 								},
 							},
 						}},
@@ -234,7 +234,7 @@ var _ = Describe("Schedule", func() {
 							Duration:   &duration,
 							ContainerSelector: v1alpha1.ContainerSelector{
 								PodSelector: v1alpha1.PodSelector{
-									Mode: v1alpha1.OnePodMode,
+									Mode: v1alpha1.OneMode,
 								},
 							},
 						}},
