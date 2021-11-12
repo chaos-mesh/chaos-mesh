@@ -280,7 +280,7 @@ else
 endif
 
 else
-	DOCKER_BUILDKIT=1 docker buildx build --load -t $$($(4)_IMAGE)  ${DOCKER_BUILD_ARGS} $(2)
+	DOCKER_BUILDKIT=1 docker build -t $$($(4)_IMAGE) ${DOCKER_BUILD_ARGS} $(2)
 endif
 
 endif
