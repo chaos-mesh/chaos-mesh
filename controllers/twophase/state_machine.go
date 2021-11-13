@@ -16,10 +16,10 @@ package twophase
 import (
 	"context"
 	"reflect"
-	"strings"
 	"time"
 
 	"github.com/pkg/errors"
+	k8sError "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/retry"
@@ -239,11 +239,11 @@ func (m *chaosStateMachine) Into(ctx context.Context, targetPhase v1alpha1.Exper
 			return err
 		}
 
-		if !strings.Contains(updateError.Error(), "the object has been modified; please apply your changes to the latest version and try again") {
+		if !k8sError.IsConflict(updateError) {
 			return updateError
 		}
 
-		m.Log.Error(updateError, "fail to update, and will retry on conflict")
+		m.Log.Info("fail to update, and will retry on conflict")
 
 		// avoid panic
 		if m.Chaos.GetChaos() == nil || m.Chaos.GetStatus() == nil {
