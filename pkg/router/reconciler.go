@@ -23,6 +23,7 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
@@ -118,7 +119,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (result ctrl.Result, err error)
 }
 
 // NewReconciler creates a new reconciler
-func NewReconciler(name string, object runtime.Object, mgr ctrl.Manager, endpoints []routeEndpoint, clusterScoped bool, targetNamespace string) *Reconciler {
+func NewReconciler(name string, object runtime.Object, c client.Client, mgr ctrl.Manager, endpoints []routeEndpoint, clusterScoped bool, targetNamespace string) *Reconciler {
 	return &Reconciler{
 		Name:            name,
 		Object:          object,
@@ -127,7 +128,7 @@ func NewReconciler(name string, object runtime.Object, mgr ctrl.Manager, endpoin
 		TargetNamespace: targetNamespace,
 
 		Context: ctx.Context{
-			Client:        mgr.GetClient(),
+			Client:        c,
 			Reader:        mgr.GetAPIReader(),
 			EventRecorder: mgr.GetEventRecorderFor(name + "-controller"),
 			Log:           ctrl.Log.WithName("controllers").WithName(name),
