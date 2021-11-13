@@ -105,7 +105,10 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 		})
 	}
 	r.Log.Info("commiting updates of podiochaos")
+
 	responses := m.Commit(ctx)
+
+	var errors error
 	iochaos.Status.Experiment.PodRecords = make([]v1alpha1.PodStatus, 0, len(pods))
 	for _, keyErrorTuple := range responses {
 		key := keyErrorTuple.Key
@@ -113,6 +116,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 		if err != nil {
 			if err != podiochaosmanager.ErrPodNotFound && err != podiochaosmanager.ErrPodNotRunning {
 				r.Log.Error(err, "fail to commit")
+				errors = multierror.Append(errors, err)
 			} else {
 				r.Log.Info("pod is not found or not running", "key", key)
 			}
@@ -132,6 +136,10 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 
 		iochaos.Status.Experiment.PodRecords = append(iochaos.Status.Experiment.PodRecords, ps)
 	}
+	if errors != nil {
+		return errors
+	}
+
 	r.Event(iochaos, v1.EventTypeNormal, events.ChaosInjected, "")
 
 	return nil

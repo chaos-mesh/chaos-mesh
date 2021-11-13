@@ -27,7 +27,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
-	"github.com/chaos-mesh/chaos-mesh/controllers/iochaos/podiochaosmanager"
 	"github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/podnetworkchaosmanager"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/ipset"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/netutils"
@@ -148,17 +147,20 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 
 	responses := m.Commit(ctx)
 
+	var errors error
 	networkchaos.Status.Experiment.PodRecords = make([]v1alpha1.PodStatus, 0, len(pods))
 	for _, keyErrorTuple := range responses {
 		key := keyErrorTuple.Key
 		err := keyErrorTuple.Err
 		if err != nil {
-			if err != podiochaosmanager.ErrPodNotFound && err != podiochaosmanager.ErrPodNotRunning {
+			if err != podnetworkchaosmanager.ErrPodNotFound && err != podnetworkchaosmanager.ErrPodNotRunning {
 				r.Log.Error(err, "fail to commit")
+				errors = multierror.Append(errors, err)
 			} else {
 				r.Log.Info("pod is not found or not running", "key", key)
 			}
-			return err
+
+			continue
 		}
 
 		pod := keyPodMap[keyErrorTuple.Key]
@@ -180,6 +182,9 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 			ps.Message += fmt.Sprintf(networkTcActionMsg, *networkchaos.Spec.Duration)
 		}
 		networkchaos.Status.Experiment.PodRecords = append(networkchaos.Status.Experiment.PodRecords, ps)
+	}
+	if errors != nil {
+		return errors
 	}
 
 	r.Event(networkchaos, v1.EventTypeNormal, events.ChaosInjected, "")

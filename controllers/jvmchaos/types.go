@@ -61,22 +61,12 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 		return err
 	}
 
+	jvmchaos.Status.Experiment.PodRecords = make([]v1alpha1.PodStatus, 0, len(pods))
 	if err = r.applyAllPods(ctx, pods, jvmchaos); err != nil {
 		r.Log.Error(err, "failed to apply chaos on all pods")
 		return err
 	}
 
-	jvmchaos.Status.Experiment.PodRecords = make([]v1alpha1.PodStatus, 0, len(pods))
-	for _, pod := range pods {
-		ps := v1alpha1.PodStatus{
-			Namespace: pod.Namespace,
-			Name:      pod.Name,
-			HostIP:    pod.Status.HostIP,
-			PodIP:     pod.Status.PodIP,
-		}
-
-		jvmchaos.Status.Experiment.PodRecords = append(jvmchaos.Status.Experiment.PodRecords, ps)
-	}
 	r.Event(jvmchaos, v1.EventTypeNormal, events.ChaosInjected, "")
 	return nil
 }
@@ -86,12 +76,14 @@ func (r *endpoint) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1alp
 	for index := range pods {
 		pod := &pods[index]
 
-		key, err := cache.MetaNamespaceKeyFunc(pod)
-		if err != nil {
-			r.Log.Error(err, "get meta namespace key")
-			return err
+		ps := v1alpha1.PodStatus{
+			Namespace: pod.Namespace,
+			Name:      pod.Name,
+			HostIP:    pod.Status.HostIP,
+			PodIP:     pod.Status.PodIP,
+			Action:    string(chaos.Spec.Action),
 		}
-		chaos.Finalizers = finalizer.InsertFinalizer(chaos.Finalizers, key)
+		chaos.Status.Experiment.PodRecords = append(chaos.Status.Experiment.PodRecords, ps)
 
 		g.Go(func() error {
 			return r.applyPod(ctx, pod, chaos)

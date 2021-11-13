@@ -190,6 +190,7 @@ func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 
 	responses := m.Commit(ctx)
 
+	var errors error
 	networkchaos.Status.Experiment.PodRecords = make([]v1alpha1.PodStatus, 0, len(allPods))
 	for _, keyErrorTuple := range responses {
 		key := keyErrorTuple.Key
@@ -197,11 +198,11 @@ func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 		if err != nil {
 			if err != podnetworkchaosmanager.ErrPodNotFound && err != podnetworkchaosmanager.ErrPodNotRunning {
 				e.Log.Error(err, "fail to commit")
-
-				continue
+				errors = multierror.Append(errors, err)
+			} else {
+				e.Log.Info("pod is not found or not running", "key", key)
 			}
-
-			e.Log.Info("pod is not found or not running", "key", key)
+			continue
 		}
 
 		pod := keyPodMap[keyErrorTuple.Key]
@@ -223,6 +224,10 @@ func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 			ps.Message += fmt.Sprintf(networkPartitionActionMsg, *networkchaos.Spec.Duration)
 		}
 		networkchaos.Status.Experiment.PodRecords = append(networkchaos.Status.Experiment.PodRecords, ps)
+	}
+
+	if errors != nil {
+		return errors
 	}
 
 	e.Event(networkchaos, v1.EventTypeNormal, events.ChaosInjected, "")
