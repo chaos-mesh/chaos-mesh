@@ -2607,12 +2607,18 @@ spec:
                     description: specifies P percent loading per CPU worker. 0 is
                       effectively a sleep (no load) and 100 is full loading.
                     type: integer
+                  options:
+                    description: extend stress-ng options
+                    type: string
                   workers:
                     description: specifies N workers to apply the stressor.
                     type: integer
                 type: object
               stress-mem:
                 properties:
+                  options:
+                    description: extend stress-ng options
+                    type: string
                   size:
                     description: specifies N bytes consumed per vm worker, default
                       is the total available memory. One can specify the size as %
@@ -5473,12 +5479,18 @@ spec:
                         description: specifies P percent loading per CPU worker. 0
                           is effectively a sleep (no load) and 100 is full loading.
                         type: integer
+                      options:
+                        description: extend stress-ng options
+                        type: string
                       workers:
                         description: specifies N workers to apply the stressor.
                         type: integer
                     type: object
                   stress-mem:
                     properties:
+                      options:
+                        description: extend stress-ng options
+                        type: string
                       size:
                         description: specifies N bytes consumed per vm worker, default
                           is the total available memory. One can specify the size
@@ -8003,12 +8015,18 @@ spec:
                                     worker. 0 is effectively a sleep (no load) and
                                     100 is full loading.
                                   type: integer
+                                options:
+                                  description: extend stress-ng options
+                                  type: string
                                 workers:
                                   description: specifies N workers to apply the stressor.
                                   type: integer
                               type: object
                             stress-mem:
                               properties:
+                                options:
+                                  description: extend stress-ng options
+                                  type: string
                                 size:
                                   description: specifies N bytes consumed per vm worker,
                                     default is the total available memory. One can
@@ -10233,6 +10251,9 @@ spec:
                                         CPU worker. 0 is effectively a sleep (no load)
                                         and 100 is full loading.
                                       type: integer
+                                    options:
+                                      description: extend stress-ng options
+                                      type: string
                                     workers:
                                       description: specifies N workers to apply the
                                         stressor.
@@ -10240,6 +10261,9 @@ spec:
                                   type: object
                                 stress-mem:
                                   properties:
+                                    options:
+                                      description: extend stress-ng options
+                                      type: string
                                     size:
                                       description: specifies N bytes consumed per
                                         vm worker, default is the total available
@@ -16600,12 +16624,18 @@ spec:
                         description: specifies P percent loading per CPU worker. 0
                           is effectively a sleep (no load) and 100 is full loading.
                         type: integer
+                      options:
+                        description: extend stress-ng options
+                        type: string
                       workers:
                         description: specifies N workers to apply the stressor.
                         type: integer
                     type: object
                   stress-mem:
                     properties:
+                      options:
+                        description: extend stress-ng options
+                        type: string
                       size:
                         description: specifies N bytes consumed per vm worker, default
                           is the total available memory. One can specify the size
@@ -18665,12 +18695,18 @@ spec:
                             description: specifies P percent loading per CPU worker.
                               0 is effectively a sleep (no load) and 100 is full loading.
                             type: integer
+                          options:
+                            description: extend stress-ng options
+                            type: string
                           workers:
                             description: specifies N workers to apply the stressor.
                             type: integer
                         type: object
                       stress-mem:
                         properties:
+                          options:
+                            description: extend stress-ng options
+                            type: string
                           size:
                             description: specifies N bytes consumed per vm worker,
                               default is the total available memory. One can specify
@@ -21257,6 +21293,9 @@ spec:
                                         CPU worker. 0 is effectively a sleep (no load)
                                         and 100 is full loading.
                                       type: integer
+                                    options:
+                                      description: extend stress-ng options
+                                      type: string
                                     workers:
                                       description: specifies N workers to apply the
                                         stressor.
@@ -21264,6 +21303,9 @@ spec:
                                   type: object
                                 stress-mem:
                                   properties:
+                                    options:
+                                      description: extend stress-ng options
+                                      type: string
                                     size:
                                       description: specifies N bytes consumed per
                                         vm worker, default is the total available
@@ -23569,6 +23611,9 @@ spec:
                                             per CPU worker. 0 is effectively a sleep
                                             (no load) and 100 is full loading.
                                           type: integer
+                                        options:
+                                          description: extend stress-ng options
+                                          type: string
                                         workers:
                                           description: specifies N workers to apply
                                             the stressor.
@@ -23576,6 +23621,9 @@ spec:
                                       type: object
                                     stress-mem:
                                       properties:
+                                        options:
+                                          description: extend stress-ng options
+                                          type: string
                                         size:
                                           description: specifies N bytes consumed
                                             per vm worker, default is the total available
@@ -32689,12 +32737,18 @@ spec:
                                 0 is effectively a sleep (no load) and 100 is full
                                 loading.
                               type: integer
+                            options:
+                              description: extend stress-ng options
+                              type: string
                             workers:
                               description: specifies N workers to apply the stressor.
                               type: integer
                           type: object
                         stress-mem:
                           properties:
+                            options:
+                              description: extend stress-ng options
+                              type: string
                             size:
                               description: specifies N bytes consumed per vm worker,
                                 default is the total available memory. One can specify
@@ -34860,12 +34914,18 @@ spec:
                                     worker. 0 is effectively a sleep (no load) and
                                     100 is full loading.
                                   type: integer
+                                options:
+                                  description: extend stress-ng options
+                                  type: string
                                 workers:
                                   description: specifies N workers to apply the stressor.
                                   type: integer
                               type: object
                             stress-mem:
                               properties:
+                                options:
+                                  description: extend stress-ng options
+                                  type: string
                                 size:
                                   description: specifies N bytes consumed per vm worker,
                                     default is the total available memory. One can

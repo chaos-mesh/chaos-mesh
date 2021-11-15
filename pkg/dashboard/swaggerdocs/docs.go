@@ -3917,6 +3917,10 @@ var doc = `{
                     "description": "specifies P percent loading per CPU worker. 0 is effectively a sleep (no load) and 100 is full loading.",
                     "type": "integer"
                 },
+                "options": {
+                    "description": "extend stress-ng options",
+                    "type": "string"
+                },
                 "workers": {
                     "description": "specifies N workers to apply the stressor.",
                     "type": "integer"
@@ -3964,6 +3968,10 @@ var doc = `{
         "v1alpha1.StressMemorySpec": {
             "type": "object",
             "properties": {
+                "options": {
+                    "description": "extend stress-ng options",
+                    "type": "string"
+                },
                 "size": {
                     "description": "specifies N bytes consumed per vm worker, default is the total available memory.\nOne can specify the size as % of total available memory or in units of B, KB/KiB, MB/MiB, GB/GiB, TB/TiB..",
                     "type": "string"
