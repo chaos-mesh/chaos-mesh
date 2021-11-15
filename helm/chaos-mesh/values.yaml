@@ -204,6 +204,8 @@ dashboard:
 
   serviceAccount: chaos-controller-manager
   image:
+    # empty registry means using the global images.registry
+    registry: ""
     repository: chaos-mesh/chaos-dashboard
     # empty tag means using the global images.tag
     tag: ""

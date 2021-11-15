@@ -123,20 +123,20 @@ Define the prefix of
 
 {{/*Define the image for chaos-daemon*/}}
 {{- define "chaos-daemon.image" -}}
-{{.Values.images.registry | default .Values.images.registry}}/{{.Values.chaosDaemon.image.repository}}:{{.Values.chaosDaemon.image.tag | default .Values.images.tag}}
+{{.Values.chaosDaemon.image.registry | default .Values.images.registry}}/{{.Values.chaosDaemon.image.repository}}:{{.Values.chaosDaemon.image.tag | default .Values.images.tag}}
 {{- end -}}
 
 {{/*Define the image for chaos-dashboard*/}}
 {{- define "chaos-dashboard.image" -}}
-{{.Values.images.registry | default .Values.images.registry}}/{{.Values.dashboard.image.repository}}:{{.Values.dashboard.image.tag | default .Values.images.tag}}
+{{.Values.dashboard.image.registry | default .Values.images.registry}}/{{.Values.dashboard.image.repository}}:{{.Values.dashboard.image.tag | default .Values.images.tag}}
 {{- end -}}
 
 {{/*Define the image for chaos-kernel*/}}
 {{- define "chaos-kernel.image" -}}
-{{.Values.images.registry | default .Values.images.registry}}/{{.Values.bpfki.image.repository}}:{{.Values.bpfki.image.tag| default .Values.images.tag}}
+{{.Values.bpfki.image.registry | default .Values.images.registry}}/{{.Values.bpfki.image.repository}}:{{.Values.bpfki.image.tag| default .Values.images.tag}}
 {{- end -}}
 
 {{/*Define the image for chaos-dlv*/}}
 {{- define "chaos-dlv.image" -}}
-{{.Values.images.registry | default .Values.images.registry}}/{{.Values.chaosDlv.image.repository}}:{{.Values.chaosDlv.image.tag| default .Values.images.tag}}
+{{.Values.chaosDlv.image.registry | default .Values.images.registry}}/{{.Values.chaosDlv.image.repository}}:{{.Values.chaosDlv.image.tag| default .Values.images.tag}}
 {{- end -}}
