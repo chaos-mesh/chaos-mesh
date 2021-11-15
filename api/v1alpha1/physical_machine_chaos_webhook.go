@@ -61,7 +61,9 @@ func (in *PhysicalMachineChaosSpec) Validate(root interface{}, path *field.Path)
 			field.Invalid(path.Child("spec"), in, err.Error()))
 	}
 
+	skipConfigCheck := false
 	if _, ok := inInterface[string(in.Action)]; !ok {
+		skipConfigCheck = true
 		allErrs = append(allErrs,
 			field.Invalid(path.Child("spec"), in,
 				"the configuration corresponding to action is empty"))
@@ -79,52 +81,56 @@ func (in *PhysicalMachineChaosSpec) Validate(root interface{}, path *field.Path)
 		}
 	}
 
-	var validateErr error
-	switch in.Action {
-	case PMStressCPUAction:
-		validateErr = validateStressCPUAction(in.StressCPU)
-	case PMStressMemAction:
-		validateErr = validateStressMemAction(in.StressMemory)
-	case PMDiskWritePayloadAction:
-		validateErr = validateDiskPayloadAction(in.DiskWritePayload)
-	case PMDiskReadPayloadAction:
-		validateErr = validateDiskPayloadAction(in.DiskReadPayload)
-	case PMDiskFillActionAction:
-		validateErr = validateDiskFillAction(in.DiskFill)
-	case PMNetworkCorruptAction:
-		validateErr = validateNetworkCorruptAction(in.NetworkCorrupt)
-	case PMNetworkDuplicateAction:
-		validateErr = validateNetworkDuplicateAction(in.NetworkDuplicate)
-	case PMNetworkLossAction:
-		validateErr = validateNetworkLossAction(in.NetworkLoss)
-	case PMNetworkDelayAction:
-		validateErr = validateNetworkDelayAction(in.NetworkDelay)
-	case PMNetworkPartitionAction:
-		validateErr = validateNetworkPartitionAction(in.NetworkPartition)
-	case PMNetworkDNSAction:
-		validateErr = validateNetworkDNSAction(in.NetworkDNS)
-	case PMProcessAction:
-		validateErr = validateProcessAction(in.Process)
-	case PMJVMExceptionAction:
-		validateErr = validateJVMExceptionAction(in.JVMException)
-	case PMJVMGCAction:
-		validateErr = validateJVMGCAction(in.JVMGC)
-	case PMJVMLatencyAction:
-		validateErr = validateJVMLatencyAction(in.JVMLatency)
-	case PMJVMReturnAction:
-		validateErr = validateJVMReturnAction(in.JVMReturn)
-	case PMJVMStressAction:
-		validateErr = validateJVMStressAction(in.JVMStress)
-	case PMJVMRuleDataAction:
-		validateErr = validateJVMRuleDataAction(in.JVMRuleData)
-	case PMClockAction:
-		validateErr = validateClockAction(in.Clock)
+	if skipConfigCheck {
+		return allErrs
 	}
 
-	if validateErr != nil {
+	var validateConfigErr error
+	switch in.Action {
+	case PMStressCPUAction:
+		validateConfigErr = validateStressCPUAction(in.StressCPU)
+	case PMStressMemAction:
+		validateConfigErr = validateStressMemAction(in.StressMemory)
+	case PMDiskWritePayloadAction:
+		validateConfigErr = validateDiskPayloadAction(in.DiskWritePayload)
+	case PMDiskReadPayloadAction:
+		validateConfigErr = validateDiskPayloadAction(in.DiskReadPayload)
+	case PMDiskFillActionAction:
+		validateConfigErr = validateDiskFillAction(in.DiskFill)
+	case PMNetworkCorruptAction:
+		validateConfigErr = validateNetworkCorruptAction(in.NetworkCorrupt)
+	case PMNetworkDuplicateAction:
+		validateConfigErr = validateNetworkDuplicateAction(in.NetworkDuplicate)
+	case PMNetworkLossAction:
+		validateConfigErr = validateNetworkLossAction(in.NetworkLoss)
+	case PMNetworkDelayAction:
+		validateConfigErr = validateNetworkDelayAction(in.NetworkDelay)
+	case PMNetworkPartitionAction:
+		validateConfigErr = validateNetworkPartitionAction(in.NetworkPartition)
+	case PMNetworkDNSAction:
+		validateConfigErr = validateNetworkDNSAction(in.NetworkDNS)
+	case PMProcessAction:
+		validateConfigErr = validateProcessAction(in.Process)
+	case PMJVMExceptionAction:
+		validateConfigErr = validateJVMExceptionAction(in.JVMException)
+	case PMJVMGCAction:
+		validateConfigErr = validateJVMGCAction(in.JVMGC)
+	case PMJVMLatencyAction:
+		validateConfigErr = validateJVMLatencyAction(in.JVMLatency)
+	case PMJVMReturnAction:
+		validateConfigErr = validateJVMReturnAction(in.JVMReturn)
+	case PMJVMStressAction:
+		validateConfigErr = validateJVMStressAction(in.JVMStress)
+	case PMJVMRuleDataAction:
+		validateConfigErr = validateJVMRuleDataAction(in.JVMRuleData)
+	case PMClockAction:
+		validateConfigErr = validateClockAction(in.Clock)
+	}
+
+	if validateConfigErr != nil {
 		allErrs = append(allErrs,
 			field.Invalid(path.Child("spec"), in,
-				"the configuration corresponding to action is invalid"))
+				validateConfigErr.Error()))
 	}
 
 	return allErrs

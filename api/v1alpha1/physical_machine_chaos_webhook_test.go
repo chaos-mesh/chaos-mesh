@@ -36,6 +36,10 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					},
 					ExpInfo: ExpInfo{
 						UID: "",
+						StressCPU: &StressCPUSpec{
+							Load:    10,
+							Workers: 1,
+						},
 					},
 				},
 			}

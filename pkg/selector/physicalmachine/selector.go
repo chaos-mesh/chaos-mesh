@@ -44,6 +44,6 @@ type PhysicalMachineAddress struct {
 	Address string
 }
 
-func (c *PhysicalMachineAddress) Id() string {
+func (c PhysicalMachineAddress) Id() string {
 	return c.Address
 }

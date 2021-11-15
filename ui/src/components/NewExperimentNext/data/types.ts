@@ -558,13 +558,13 @@ const networkPhysicCommon: Spec = {
     field: 'text',
     label: 'Hostname',
     value: '',
-    helperText: 'Specify the hostname',
+    helperText: 'Specify the target hostname',
   },
   'ip-address': {
     field: 'text',
     label: 'IP Address',
     value: '',
-    helperText: 'Specify the IP address',
+    helperText: 'Specify the target IP address',
   },
   'ip-protocol': {
     field: 'select',
@@ -577,7 +577,7 @@ const networkPhysicCommon: Spec = {
     field: 'text',
     label: 'Source Port',
     value: '',
-    helperText: 'The source port, split by ,',
+    helperText: 'The source port of target ip address or hostname, split by ,',
     if: {
       key: 'ip-protocol',
       equal: ['tcp', 'udp'],
@@ -587,7 +587,7 @@ const networkPhysicCommon: Spec = {
     field: 'text',
     label: 'Egress Port',
     value: '',
-    helperText: 'The egress port, split by ,',
+    helperText: 'The egress port of target ip address or hostname, split by ,',
   },
   percent: {
     field: 'text',
@@ -652,7 +652,7 @@ export const dataPhysic: Record<KindPhysic, Definition> = {
         spec: {
           action: 'disk-read-payload' as any,
           ...diskPhysicCommon,
-          payload_process_num: {
+          'payload-process-num': {
             field: 'number',
             label: 'Payload process num',
             value: 1,
@@ -665,7 +665,7 @@ export const dataPhysic: Record<KindPhysic, Definition> = {
         spec: {
           action: 'disk-write-payload' as any,
           ...diskPhysicCommon,
-          payload_process_num: {
+          'payload-process-num': {
             field: 'number',
             label: 'Payload process num',
             value: 1,
@@ -678,7 +678,7 @@ export const dataPhysic: Record<KindPhysic, Definition> = {
         spec: {
           action: 'disk-fill' as any,
           ...diskPhysicCommon,
-          fill_by_fallocate: {
+          'fill-by-fallocate': {
             field: 'select',
             items: [
               {
