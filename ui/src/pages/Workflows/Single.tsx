@@ -24,7 +24,6 @@ import { Event } from 'api/events.type'
 import { EventHandler } from 'cytoscape'
 import EventsTimeline from 'components/EventsTimeline'
 import NodeConfiguration from 'components/ObjectConfiguration/Node'
-import NoteOutlinedIcon from '@material-ui/icons/NoteOutlined'
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
 import Space from 'components-mui/Space'
@@ -161,17 +160,6 @@ const Single = () => {
     }
   }
 
-  const handleOpenConfig = () => {
-    setData({
-      apiVersion: 'chaos-mesh.org/v1alpha1',
-      kind: 'Workflow',
-      ...single?.kube_object,
-    })
-    setSelected('workflow')
-
-    onModalOpen()
-  }
-
   const handleNodeClick: EventHandler = (e) => {
     const node = e.target
     const { template: nodeTemplate } = node.data()
@@ -181,41 +169,6 @@ const Single = () => {
     setSelected('node')
 
     onModalOpen()
-  }
-
-  const handleUpdateWorkflow = (data: any) => {
-    if (selected === 'node') {
-      const kubeObject = single?.kube_object
-      kubeObject.spec.templates = kubeObject.spec.templates.map((t: any) => {
-        if (t.name === (data as any).name) {
-          return data
-        }
-
-        return t
-      })
-
-      data = {
-        apiVersion: 'chaos-mesh.org/v1alpha1',
-        kind: 'Workflow',
-        ...kubeObject,
-      }
-    }
-
-    api.workflows
-      .update(uuid, data)
-      .then(() => {
-        onModalClose()
-
-        dispatch(
-          setAlert({
-            type: 'success',
-            message: T(`confirm.success.update`, intl),
-          })
-        )
-
-        fetchWorkflowSingle()
-      })
-      .catch(console.error)
   }
 
   return (
@@ -244,17 +197,7 @@ const Single = () => {
                     <Box>{T('workflow.topology')}</Box>
                   </Space>
                 }
-              >
-                <Button
-                  variant="outlined"
-                  size="small"
-                  color="primary"
-                  startIcon={<NoteOutlinedIcon />}
-                  onClick={handleOpenConfig}
-                >
-                  {T('common.configuration')}
-                </Button>
-              </PaperTop>
+              ></PaperTop>
               <div ref={topologyRef} style={{ flex: 1 }} />
             </Paper>
 
@@ -299,7 +242,7 @@ const Single = () => {
                       <NodeConfiguration template={data} />
                     </Box>
                   )}
-                  <YAMLEditor name={modalTitle} data={yaml.dump(data)} onUpdate={handleUpdateWorkflow} download />
+                  <YAMLEditor name={modalTitle} data={yaml.dump(data)} />
                 </Box>
               </Space>
             )}
