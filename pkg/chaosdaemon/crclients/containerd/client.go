@@ -27,6 +27,11 @@ import (
 
 const (
 	containerdProtocolPrefix = "containerd://"
+
+	// containerKindLabel is a label key intending to filter sandbox container
+	// ref: https://github.com/containerd/containerd/blob/main/pkg/cri/server/helpers.go#L74-L80
+	containerKindLabel     = "io.cri-containerd.kind"
+	containerKindContainer = "container"
 )
 
 // ContainerdClientInterface represents the ContainerClient, it's used to simply unit test
@@ -91,7 +96,10 @@ func (c ContainerdClient) ContainerKillByContainerID(ctx context.Context, contai
 
 // ListContainerIDs lists all container IDs
 func (c ContainerdClient) ListContainerIDs(ctx context.Context) ([]string, error) {
-	containers, err := c.client.Containers(ctx)
+	// filter sandbox containers
+	// ref: https://github.com/containerd/containerd/blob/main/pkg/cri/server/helpers.go#L281-L285
+	filter := fmt.Sprintf("labels.%q==%q", containerKindLabel, containerKindContainer)
+	containers, err := c.client.Containers(ctx, filter)
 	if err != nil {
 		return nil, err
 	}

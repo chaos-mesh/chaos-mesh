@@ -34,7 +34,7 @@ func (m *MockClient) ContainerInspect(ctx context.Context, containerID string) (
 		return types.ContainerJSON{}, err.(error)
 	}
 
-	var containerJSON types.ContainerJSON
+	containerJSON := types.ContainerJSON{}
 	if pid := mock.On("pid"); pid != nil {
 		containerJSON.ContainerJSONBase = &types.ContainerJSONBase{
 			State: &types.ContainerState{
@@ -111,7 +111,7 @@ func (m *MockContainer) ID() string {
 	return ""
 }
 
-func (m *MockClient) Labels(ctx context.Context) (map[string]string, error) {
+func (m *MockContainer) Labels(ctx context.Context) (map[string]string, error) {
 	if err := mock.On("LabelsError"); err != nil {
 		return nil, err.(error)
 	}

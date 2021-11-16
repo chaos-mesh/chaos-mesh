@@ -19,7 +19,6 @@ require (
 	github.com/containerd/containerd v1.5.1
 	github.com/coreos/go-systemd/v22 v22.3.2 // indirect
 	github.com/docker/docker v20.10.2+incompatible
-	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/ethereum/go-ethereum v1.10.2
 	github.com/fatih/color v1.9.0
 	github.com/ghodss/yaml v1.0.0
@@ -28,8 +27,8 @@ require (
 	github.com/go-logr/logr v0.4.0
 	github.com/go-logr/zapr v0.4.0
 	github.com/go-playground/validator/v10 v10.4.1
+	github.com/go-test/deep v1.0.8 // indirect
 	github.com/golang/protobuf v1.5.2
-	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/hashicorp/golang-lru v0.5.5-0.20210104140557-80c98217689d
@@ -40,17 +39,18 @@ require (
 	github.com/lib/pq v1.2.0 // indirect
 	github.com/mgechev/revive v1.0.2-0.20200225072153-6219ca02fffb
 	github.com/moby/locker v1.0.1
-	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/onsi/ginkgo v1.16.4
 	github.com/onsi/gomega v1.14.0
-	github.com/opencontainers/runc v1.0.0-rc95 // indirect
 	github.com/pingcap/check v0.0.0-20191216031241-8a5a85928f12 // indirect
 	github.com/pingcap/errors v0.11.5-0.20190809092503-95897b64e011
 	github.com/pingcap/failpoint v0.0.0-20200210140405-f8f9fb234798
 	github.com/pingcap/log v0.0.0-20200117041106-d28c14d3b1cd // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.11.0
+	github.com/retailnext/iptables_exporter v0.1.0
 	github.com/robfig/cron/v3 v3.0.1
+	github.com/romana/ipset v1.0.0
+	github.com/romana/rlog v0.0.0-20171115192701-f018bc92e7d7 // indirect
 	github.com/shirou/gopsutil v2.20.5+incompatible
 	github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749 // indirect
 	github.com/shurcooL/vfsgen v0.0.0-20181202132449-6a9ea43bcacd
@@ -78,8 +78,10 @@ require (
 	k8s.io/apiserver v0.21.3
 	k8s.io/cli-runtime v0.21.3
 	k8s.io/client-go v0.21.3
+	k8s.io/cri-api v0.20.6
 	k8s.io/klog v1.0.0
 	k8s.io/kubectl v0.21.3
+	k8s.io/kubernetes v1.21.3
 	k8s.io/utils v0.0.0-20210722164352-7f3ee0f31471
 	sigs.k8s.io/controller-runtime v0.9.5
 	sigs.k8s.io/controller-tools v0.4.1

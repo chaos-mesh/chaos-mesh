@@ -119,7 +119,7 @@ var _ = Describe("docker client", func() {
 		})
 	})
 
-	Context("DockerClient ListContainerIDs", func() {
+	Context("DockerClient GetLabelsFromContainerID", func() {
 		It("should work", func() {
 			sampleLabels := map[string]string{
 				types.KubernetesPodNamespaceLabel:  "default",
@@ -130,16 +130,23 @@ var _ = Describe("docker client", func() {
 
 			m := &test.MockClient{}
 			c := DockerClient{client: m}
-			labels, err := c.GetLabelsFromContainerID(context.Background(), "containerd://valid-container-id")
+			labels, err := c.GetLabelsFromContainerID(context.Background(), "docker://valid-container-id")
 
 			Expect(err).To(BeNil())
 			Expect(labels).To(Equal(sampleLabels))
 		})
 
 		It("should error on wrong protocol", func() {
+			sampleLabels := map[string]string{
+				types.KubernetesPodNamespaceLabel:  "default",
+				types.KubernetesPodNameLabel:       "busybox-5f8dd756dd-6rjzw",
+				types.KubernetesContainerNameLabel: "busybox",
+			}
+			defer mock.With("labels", sampleLabels)()
+
 			m := &test.MockClient{}
 			c := DockerClient{client: m}
-			_, err := c.GetLabelsFromContainerID(context.Background(), "docker://this-is-a-wrong-protocol")
+			_, err := c.GetLabelsFromContainerID(context.Background(), "containerd://this-is-a-wrong-protocol")
 
 			Expect(err).ToNot(BeNil())
 			Expect(fmt.Sprintf("%s", err)).To(ContainSubstring(fmt.Sprintf("expected %s but got", dockerProtocolPrefix)))

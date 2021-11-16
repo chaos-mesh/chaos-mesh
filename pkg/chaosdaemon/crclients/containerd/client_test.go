@@ -131,7 +131,7 @@ var _ = Describe("containerd client", func() {
 		})
 	})
 
-	Context("ContainerdClient ListContainerIDs", func() {
+	Context("ContainerdClient GetLabelsFromContainerID", func() {
 		It("should work", func() {
 			sampleLabels := map[string]string{
 				types.KubernetesPodNamespaceLabel:  "default",

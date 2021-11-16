@@ -20,6 +20,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
+	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 	"io/ioutil"
 	"net"
 
@@ -107,7 +108,10 @@ func newGRPCServer(containerRuntime string, reg prometheus.Registerer, tlsConf t
 	grpcMetrics.EnableHandlingTimeHistogram(
 		grpc_prometheus.WithHistogramBuckets([]float64{0.001, 0.01, 0.1, 0.3, 0.6, 1, 3, 6, 10}),
 	)
-	reg.MustRegister(grpcMetrics)
+	reg.MustRegister(
+		grpcMetrics,
+		metrics.DefaultChaosDaemonMetricsCollector.InjectCrClient(ds.crClient),
+	)
 
 	grpcOpts := []grpc.ServerOption{
 		grpc_middleware.WithUnaryServerChain(

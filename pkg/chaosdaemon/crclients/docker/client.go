@@ -29,6 +29,11 @@ import (
 
 const (
 	dockerProtocolPrefix = "docker://"
+
+	// containerKindLabel is a label key intending to filter sandbox container
+	// ref: https://github.com/kubernetes/kubernetes/blob/master/pkg/kubelet/dockershim/docker_service.go#L67-L75
+	containerKindLabel     = "io.cri-containerd.kind"
+	containerKindContainer = "container"
 )
 
 // DockerClientInterface represents the DockerClient, it's used to simply unit test
@@ -85,8 +90,10 @@ func (c DockerClient) ContainerKillByContainerID(ctx context.Context, containerI
 
 // ListContainerIDs lists all container IDs
 func (c DockerClient) ListContainerIDs(ctx context.Context) ([]string, error) {
+	// filter sandbox containers
+	filterArg := filters.Arg("label", fmt.Sprintf("%s=%s", containerKindLabel, containerKindContainer))
 	containers, err := c.client.ContainerList(ctx, types.ContainerListOptions{
-		Filters: filters.Args{},
+		Filters: filters.NewArgs(filterArg),
 	})
 	if err != nil {
 		return nil, err
