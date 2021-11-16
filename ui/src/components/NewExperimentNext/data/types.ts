@@ -151,18 +151,18 @@ const httpCommonSelect: Spec = {
     value: 80,
     helperText: 'The target port of request',
   },
-  method: {
-    field: 'select',
-    items: ['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'OPTIONS', 'PATCH'],
-    label: 'Method',
-    value: 'GET',
-    helperText: 'The HTTP method of request',
-  },
   path: {
     field: 'text',
     label: 'Path',
-    value: '/*',
+    value: '*',
     helperText: 'The target URI path of request, support wildcards(https://www.wikiwand.com/en/Matching_wildcards)',
+  },
+  method: {
+    field: 'select',
+    items: ['', 'GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'OPTIONS', 'PATCH'],
+    label: 'Method',
+    value: '',
+    helperText: 'The HTTP method of request',
   },
   request_headers: {
     field: 'label',
@@ -184,7 +184,7 @@ const httpResponseCommon: Spec = {
   code: {
     field: 'number',
     label: 'Status Code',
-    value: 200,
+    value: '',
     helperText: 'The target status code of response',
   },
   response_headers: {
@@ -224,15 +224,15 @@ const httpReplaceCommon: Spec = {
 const httpPatchCommon: Spec = {
   'patch.body.type': {
     field: 'select',
-    items: ['JSON'],
+    items: ['', 'JSON'],
     label: 'Patch Body Type',
-    value: 'JSON',
+    value: '',
     helperText: 'The patch type of body',
   },
   'patch.body.value': {
     field: 'textarea',
     label: 'Patch Body Value',
-    value: '{}',
+    value: '',
     helperText: 'The value to be patched into body',
   },
 }
@@ -429,12 +429,12 @@ const data: Record<Kind, Definition> = {
           'replace.path': {
             field: 'text',
             label: 'Replace Path',
-            value: '/',
+            value: '',
             helperText: 'Optional. The path to be replaced',
           },
           'replace.method': {
             field: 'select',
-            items: ['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'OPTIONS', 'PATCH'],
+            items: ['', 'GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'OPTIONS', 'PATCH'],
             label: 'Replace Method',
             value: '',
             helperText: 'Optional. The HTTP method to be replaced',
@@ -481,7 +481,7 @@ const data: Record<Kind, Definition> = {
           'replace.code': {
             field: 'number',
             label: 'Replace Status Code',
-            value: 200,
+            value: '',
             helperText: 'Optional. The status code to be replaced',
           },
         },
@@ -1162,6 +1162,14 @@ const networkTargetSchema = Yup.object({
   namespaces: Yup.array().min(1, 'The namespace selectors is required'),
 })
 
+const httpDelayCommonSchema = {
+  delay: Yup.string().required('The delay is required'),
+}
+
+const httpPathCommonSchema = {
+  path: Yup.string().required('The path is required'),
+}
+
 export const schema: Partial<Record<Kind, Record<string, Yup.ObjectSchema>>> = {
   AWSChaos: {
     'ec2-stop': AWSChaosCommonSchema,
@@ -1198,11 +1206,31 @@ export const schema: Partial<Record<Kind, Record<string, Yup.ObjectSchema>>> = {
     }),
   },
   HTTPChaos: {
+    'request-abort': Yup.object({
+      ...httpPathCommonSchema,
+    }),
     'request-delay': Yup.object({
-      delay: Yup.string().required('The delay is required'),
+      ...httpDelayCommonSchema,
+      ...httpPathCommonSchema,
+    }),
+    'request-replace': Yup.object({
+      ...httpPathCommonSchema,
+    }),
+    'request-patch': Yup.object({
+      ...httpPathCommonSchema,
+    }),
+    'response-abort': Yup.object({
+      ...httpPathCommonSchema,
     }),
     'response-delay': Yup.object({
-      delay: Yup.string().required('The delay is required'),
+      ...httpDelayCommonSchema,
+      ...httpPathCommonSchema,
+    }),
+    'response-replace': Yup.object({
+      ...httpPathCommonSchema,
+    }),
+    'response-patch': Yup.object({
+      ...httpPathCommonSchema,
     }),
   },
   NetworkChaos: {
