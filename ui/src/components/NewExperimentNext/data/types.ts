@@ -584,7 +584,7 @@ const data: Record<Kind, Definition> = {
         name: 'GC',
         key: 'gc',
         spec: {
-          action: 'jvm-gc' as any,
+          action: 'gc' as any,
           ...jvmPort,
         },
       },
@@ -623,13 +623,13 @@ const data: Record<Kind, Definition> = {
         key: 'stress',
         spec: {
           action: 'stress' as any,
-          'cpu-count': {
+          cpuCount: {
             field: 'number',
             label: 'CPU Count',
             value: '',
             helperText: 'Specify the CPU count',
           },
-          'mem-type': {
+          memType: {
             field: 'select',
             items: ['stack', 'heap'],
             label: 'Mem Type',
@@ -641,9 +641,9 @@ const data: Record<Kind, Definition> = {
       },
       {
         name: 'Rule',
-        key: 'rule-data',
+        key: 'ruleData',
         spec: {
-          'rule-data': {
+          ruleData: {
             field: 'textarea',
             label: 'Rule',
             value: '',
