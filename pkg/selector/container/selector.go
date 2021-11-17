@@ -18,14 +18,13 @@ package container
 import (
 	"context"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic"
-
 	"go.uber.org/fx"
 	v1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
 )
 
