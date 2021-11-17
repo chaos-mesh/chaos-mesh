@@ -168,7 +168,7 @@ const httpCommonSelect: Spec = {
     field: 'label',
     isKV: true,
     label: 'Request Headers',
-    value: {},
+    value: [],
     helperText: 'Optional. The request headers',
   },
 }
@@ -191,7 +191,7 @@ const httpResponseCommon: Spec = {
     field: 'label',
     isKV: true,
     label: 'Response Headers',
-    value: {},
+    value: [],
     helperText: 'Optional. The response headers',
   },
 }
@@ -206,11 +206,11 @@ const httpDelayCommon: Spec = {
 }
 
 const httpReplaceCommon: Spec = {
-  'replace.header': {
+  'replace.headers': {
     field: 'label',
     isKV: true,
     label: 'Replace Headers',
-    value: {},
+    value: [],
     helperText: 'Optional. The headers to be replaced',
   },
   'replace.body': {
@@ -443,7 +443,7 @@ const data: Record<Kind, Definition> = {
             field: 'label',
             isKV: true,
             label: 'Replace Queries',
-            value: {},
+            value: [],
             helperText: 'Optional. The queries to be replaced',
           },
         },

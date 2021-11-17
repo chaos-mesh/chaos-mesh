@@ -53,6 +53,19 @@ export function parseSubmit<K extends ExperimentKind>(
       return acc
     }, {})
   }
+
+  // Parse http headers to object
+  function helperHTTPHeaders(selectors: string[]) {
+    return selectors.reduce((acc: Record<string, any>, d) => {
+      console.log(`kv: ${d}`)
+      const splited = d.split(/:(.+)/)
+      console.log(`k: ${splited[0]}, v: ${splited[1].replace(/\s/g, '')}`)
+      acc[splited[0].replace(/\s/g, '')] = splited[1]
+
+      return acc
+    }, {})
+  }
+
   // Parse selector
   function helper2(scope: Scope['selector']) {
     if (scope.labelSelectors?.length) {
@@ -122,6 +135,20 @@ export function parseSubmit<K extends ExperimentKind>(
 
   if (kind === 'IOChaos' && (spec as any).action === 'attrOverride') {
     ;(spec as any).attr = helper1((spec as any).attr as string[], (s: string) => parseInt(s, 10))
+  }
+
+  if (kind === 'HTTPChaos') {
+    console.log(`spec: ${JSON.stringify(spec)}`)
+    ;(spec as any).request_headers = helperHTTPHeaders((spec as any).request_headers as string[])
+    if ((spec as any).response_headers) {
+      ;(spec as any).response_headers = helperHTTPHeaders((spec as any).response_headers as string[])
+    }
+    if ((spec as any)['replace.headers']) {
+      ;(spec as any)['replace.headers'] = helperHTTPHeaders((spec as any)['replace.headers'] as string[])
+    }
+    if ((spec as any)['replace.queries']) {
+      ;(spec as any)['replace.queries'] = helper1((spec as any)['replace.queries'] as string[])
+    }
   }
 
   function parsePhysicalMachineChaos(spec: any) {
