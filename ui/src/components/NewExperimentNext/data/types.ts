@@ -603,7 +603,7 @@ const diskPhysicCommon: Spec = {
     label: 'Size',
     value: '',
     helperText:
-      'The supported formats of the size are: c(=1), w(=2), kB(=1000), K(=1024), MB(=1024), M(=1024x1024), GB and so on.',
+      'The supported formats of the size are: c(=1), w(=2), kB(=1000), K(=1024), MB(=1000*1000), M(=1024*1024), GB and so on.',
   },
   path: {
     field: 'text',

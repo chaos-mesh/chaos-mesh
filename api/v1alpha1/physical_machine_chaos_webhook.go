@@ -22,6 +22,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/alecthomas/units"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/util/validation/field"
@@ -125,6 +126,9 @@ func (in *PhysicalMachineChaosSpec) Validate(root interface{}, path *field.Path)
 		validateConfigErr = validateJVMRuleDataAction(in.JVMRuleData)
 	case PMClockAction:
 		validateConfigErr = validateClockAction(in.Clock)
+	default:
+		allErrs = append(allErrs,
+			field.Invalid(path.Child("spec"), in, "unsupported action"))
 	}
 
 	if validateConfigErr != nil {
@@ -153,6 +157,10 @@ func validateStressMemAction(spec *StressMemorySpec) error {
 		return errors.New("size is required")
 	}
 
+	if _, err := ParseUnit(spec.Size); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -165,12 +173,20 @@ func validateDiskPayloadAction(spec *DiskPayloadSpec) error {
 		return errors.New("size is required")
 	}
 
+	if _, err := ParseUnit(spec.Size); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func validateDiskFillAction(spec *DiskFillSpec) error {
 	if len(spec.Size) == 0 {
 		return errors.New("size is required")
+	}
+
+	if _, err := ParseUnit(spec.Size); err != nil {
+		return err
 	}
 
 	return nil
@@ -285,8 +301,8 @@ func validateJVMClassMethod(spec *JVMClassMethodSpec) error {
 }
 
 func validateJVMExceptionAction(spec *JVMExceptionSpec) error {
-	if spec.Pid == 0 {
-		return errors.New("pid is required")
+	if err := CheckPid(spec.Pid); err != nil {
+		return err
 	}
 
 	if err := validateJVMClassMethod(&spec.JVMClassMethodSpec); err != nil {
@@ -301,16 +317,16 @@ func validateJVMExceptionAction(spec *JVMExceptionSpec) error {
 }
 
 func validateJVMGCAction(spec *JVMGCSpec) error {
-	if spec.Pid == 0 {
-		return errors.New("pid is required")
+	if err := CheckPid(spec.Pid); err != nil {
+		return err
 	}
 
 	return nil
 }
 
 func validateJVMLatencyAction(spec *JVMLatencySpec) error {
-	if spec.Pid == 0 {
-		return errors.New("pid is required")
+	if err := CheckPid(spec.Pid); err != nil {
+		return err
 	}
 
 	if err := validateJVMClassMethod(&spec.JVMClassMethodSpec); err != nil {
@@ -325,8 +341,8 @@ func validateJVMLatencyAction(spec *JVMLatencySpec) error {
 }
 
 func validateJVMReturnAction(spec *JVMReturnSpec) error {
-	if spec.Pid == 0 {
-		return errors.New("pid is required")
+	if err := CheckPid(spec.Pid); err != nil {
+		return err
 	}
 
 	if err := validateJVMClassMethod(&spec.JVMClassMethodSpec); err != nil {
@@ -361,12 +377,24 @@ func validateJVMRuleDataAction(spec *JVMRuleDataSpec) error {
 }
 
 func validateClockAction(spec *ClockSpec) error {
-	if spec.Pid == 0 {
-		return errors.New("pid is required")
+	if err := CheckPid(spec.Pid); err != nil {
+		return err
 	}
 
 	if len(spec.TimeOffset) == 0 {
 		return errors.New("time-offset is required")
+	}
+
+	return nil
+}
+
+func CheckPid(pid int) error {
+	if pid == 0 {
+		return errors.New("pid is required")
+	}
+
+	if pid < 0 {
+		return errors.New("pid is invalid")
 	}
 
 	return nil
@@ -394,4 +422,32 @@ func CheckPercent(p string, allowZero bool) bool {
 	}
 
 	return true
+}
+
+var (
+	// See https://en.wikipedia.org/wiki/Binary_prefix
+	shortBinaryUnitMap = units.MakeUnitMap("", "c", 1024)
+	binaryUnitMap      = units.MakeUnitMap("iB", "c", 1024)
+	decimalUnitMap     = units.MakeUnitMap("B", "c", 1000)
+)
+
+// ParseUnit parse a digit with unit such as "K" , "KiB", "KB", "c", "MiB", "MB", "M".
+// If input string is a digit without unit ,
+// it will be regarded as a digit with unit M(1024*1024 bytes).
+func ParseUnit(s string) (uint64, error) {
+	if _, err := strconv.Atoi(s); err == nil {
+		s += "B"
+	}
+	if n, err := units.ParseUnit(s, shortBinaryUnitMap); err == nil {
+		return uint64(n), nil
+	}
+
+	if n, err := units.ParseUnit(s, binaryUnitMap); err == nil {
+		return uint64(n), nil
+	}
+
+	if n, err := units.ParseUnit(s, decimalUnitMap); err == nil {
+		return uint64(n), nil
+	}
+	return 0, fmt.Errorf("units: unknown unit %s", s)
 }
