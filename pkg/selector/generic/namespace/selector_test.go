@@ -48,10 +48,10 @@ func TestMatch(t *testing.T) {
 	emptySelector, err := New(v1alpha1.GenericSelectorSpec{}, option)
 	g.Expect(err).ShouldNot(HaveOccurred())
 
-	n2AndN3Selector, err := New(v1alpha1.GenericSelectorSpec{Namespaces: []string{"n2,n3"}}, option)
+	n2AndN3Selector, err := New(v1alpha1.GenericSelectorSpec{Namespaces: []string{"n2", "n3"}}, option)
 	g.Expect(err).ShouldNot(HaveOccurred())
 
-	n2AndN4Selector, err := New(v1alpha1.GenericSelectorSpec{Namespaces: []string{"n2,n4"}}, option)
+	n2AndN4Selector, err := New(v1alpha1.GenericSelectorSpec{Namespaces: []string{"n2", "n4"}}, option)
 	g.Expect(err).ShouldNot(HaveOccurred())
 
 	tcs := []struct {
