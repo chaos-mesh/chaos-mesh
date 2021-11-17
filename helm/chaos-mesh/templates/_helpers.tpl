@@ -109,13 +109,6 @@ Define the webhook's name
 {{- printf "admission-webhook.chaos-mesh.org" -}}
 {{- end -}}
 
-{{/*
-Define the prefix of
-*/}}
-{{- define "registry-prefix" -}}
-{{if .Values.images.registry }}{{ .Values.images.registry }}/{{end}}
-{{- end -}}
-
 {{/*Define the image for chaos-controller-manager*/}}
 {{- define "chaos-controller-manager.image" -}}
 {{ .Values.controllerManager.image.registry | default .Values.images.registry }}/{{ .Values.controllerManager.image.repository }}:{{ .Values.controllerManager.image.tag | default .Values.images.tag }}
