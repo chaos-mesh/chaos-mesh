@@ -19,21 +19,28 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"testing"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/test"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
+func TestDockerClient(t *testing.T) {
+	RegisterFailHandler(Fail)
+
+	RunSpecsWithDefaultAndCustomReporters(t,
+		"Docker Container Client Test Suit",
+		[]Reporter{printer.NewlineReporter{}})
+}
+
 var _ = Describe("docker client", func() {
 	Context("DockerClient GetPidFromContainerID", func() {
 		It("should return the magic number 9527", func() {
-			defer func() {
-				err := mock.With("pid", int(9527))()
-				Expect(err).To(BeNil())
-			}()
+			defer mock.With("pid", int(9527))()
 
 			m := &test.MockClient{}
 			c := DockerClient{client: m}
@@ -52,10 +59,7 @@ var _ = Describe("docker client", func() {
 
 		It("should error on ContainerInspectError", func() {
 			errorStr := "this is a mocked error"
-			defer func() {
-				err := mock.With("ContainerInspectError", errors.New(errorStr))()
-				Expect(err).NotTo(BeNil())
-			}()
+			defer mock.With("ContainerInspectError", errors.New(errorStr))()
 			m := &test.MockClient{}
 			c := DockerClient{client: m}
 			_, err := c.GetPidFromContainerID(context.TODO(), "docker://valid-container-id")
@@ -76,10 +80,7 @@ var _ = Describe("docker client", func() {
 			errorStr := "this is a mocked error on ContainerKill"
 			m := &test.MockClient{}
 			c := DockerClient{client: m}
-			defer func() {
-				err := mock.With("ContainerKillError", errors.New(errorStr))()
-				Expect(err).ToNot(BeNil())
-			}()
+			defer mock.With("ContainerKillError", errors.New(errorStr))()
 			err := c.ContainerKillByContainerID(context.TODO(), "docker://valid-container-id")
 			Expect(err).ToNot(BeNil())
 			Expect(fmt.Sprintf("%s", err)).To(Equal(errorStr))

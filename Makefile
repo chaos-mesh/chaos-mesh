@@ -14,10 +14,10 @@ OUTPUT_BIN=$(ROOT)/output/bin
 HELM_BIN=$(OUTPUT_BIN)/helm
 
 # Every branch should have its own image tag for build-env and dev-env
-IMAGE_BUILD_ENV_PROJECT ?= chaos-mesh/chaos-mesh
+IMAGE_BUILD_ENV_PROJECT ?= chaos-mesh
 IMAGE_BUILD_ENV_REGISTRY ?= ghcr.io
 IMAGE_BUILD_ENV_BUILD ?= 0
-IMAGE_DEV_ENV_PROJECT ?= chaos-mesh/chaos-mesh
+IMAGE_DEV_ENV_PROJECT ?= chaos-mesh
 IMAGE_DEV_ENV_REGISTRY ?= ghcr.io
 IMAGE_DEV_ENV_BUILD ?= 0
 
@@ -280,7 +280,13 @@ else
 endif
 
 else
-	DOCKER_BUILDKIT=1 docker buildx build --load -t $$($(4)_IMAGE)  ${DOCKER_BUILD_ARGS} $(2)
+
+ifneq ($(TARGET_PLATFORM),)
+	DOCKER_BUILDKIT=1 docker buildx build --load -t $$($(4)_IMAGE) ${DOCKER_BUILD_ARGS} $(2)
+else
+	DOCKER_BUILDKIT=1 docker build -t $$($(4)_IMAGE) ${DOCKER_BUILD_ARGS} $(2)
+endif
+
 endif
 
 endif
