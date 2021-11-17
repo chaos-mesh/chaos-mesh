@@ -108,7 +108,7 @@ src
 ├── @types
 ├── api
 ├── components
-├── components-mui
+├── @ui/mui-extends/esm
 ├── i18n
 ├── lib
 ├── pages
@@ -124,7 +124,7 @@ The above tree structure explained as follow:
 - **`@types`** place global types, which use for Typescript.
 - **`api`** place all requests.
 - **`components`** place all packaged components.
-- **`components-mui`** nearly the same as `components`, but inherit from Material UI.
+- **`@ui/mui-extends/esm`** nearly the same as `components`, but inherit from Material UI.
 - **`i18n`** place all translations.
 - **`lib`** place some independent functions and common utils.
 - **`reducers`** (Redux reducers)
