@@ -216,7 +216,15 @@ const Single = () => {
                     <Space display="flex" flexDirection="column" height="100%">
                       <PaperTop title={T('common.definition')} boxProps={{ p: 4.5, pb: 0 }} />
                       <Box flex={1}>
-                        <YAMLEditor name={single.name} data={yaml.dump(single.kube_object)} download />
+                        <YAMLEditor
+                          name={single.name}
+                          data={yaml.dump({
+                            apiVersion: 'chaos-mesh.org/v1alpha1',
+                            kind: 'Workflow',
+                            ...single.kube_object,
+                          })}
+                          download
+                        />
                       </Box>
                     </Space>
                   )}
