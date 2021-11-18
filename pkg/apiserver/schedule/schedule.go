@@ -29,7 +29,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/client-go/util/retry"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
@@ -73,7 +72,6 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint.GET("", s.listSchedules)
 	endpoint.GET("/:uid", s.getScheduleDetail)
 	endpoint.POST("/", s.createSchedule)
-	endpoint.PUT("/", s.updateSchedule)
 	endpoint.DELETE("/:uid", s.deleteSchedule)
 	endpoint.DELETE("/", s.batchDeleteSchedule)
 	endpoint.PUT("/pause/:uid", s.pauseSchedule)
@@ -738,70 +736,6 @@ func (s *Service) deleteSchedule(c *gin.Context) {
 	c.JSON(http.StatusOK, StatusResponse{Status: "success"})
 }
 
-// @Summary Update a schedule experiment.
-// @Description Update a schedule experiment.
-// @Tags schedules
-// @Produce json
-// @Param request body core.KubeObjectDesc true "Request body"
-// @Success 200 {object} core.KubeObjectDesc
-// @Failure 400 {object} utils.APIError
-// @Failure 500 {object} utils.APIError
-// @Router /schedules [put]
-func (s *Service) updateSchedule(c *gin.Context) {
-	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
-	if err != nil {
-		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
-		return
-	}
-
-	exp := &core.KubeObjectDesc{}
-	if err := c.ShouldBindJSON(exp); err != nil {
-		c.Status(http.StatusBadRequest)
-		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
-		return
-	}
-
-	err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		return s.updateScheduleFun(exp, kubeCli)
-	})
-	if err != nil {
-		if apierrors.IsNotFound(err) {
-			c.Status(http.StatusNotFound)
-			_ = c.Error(utils.ErrNotFound.WrapWithNoMessage(err))
-		} else {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
-		}
-		return
-	}
-	c.JSON(http.StatusOK, exp)
-}
-
-func (s *Service) updateScheduleFun(exp *core.KubeObjectDesc, kubeCli client.Client) error {
-	sch := &v1alpha1.Schedule{}
-	meta := &exp.Meta
-	key := types.NamespacedName{Namespace: meta.Namespace, Name: meta.Name}
-
-	if err := kubeCli.Get(context.Background(), key, sch); err != nil {
-		return err
-	}
-
-	sch.SetLabels(meta.Labels)
-	sch.SetAnnotations(meta.Annotations)
-
-	var spec v1alpha1.ScheduleSpec
-	bytes, err := json.Marshal(exp.Spec)
-	if err != nil {
-		return err
-	}
-	if err = json.Unmarshal(bytes, &spec); err != nil {
-		return err
-	}
-	sch.Spec = spec
-
-	return kubeCli.Update(context.Background(), sch)
-}
-
 // @Summary Delete the specified schedule experiment.
 // @Description Delete the specified schedule experiment.
 // @Tags schedules
@@ -991,5 +925,5 @@ func (s *Service) patchSchedule(exp *Base, annotations map[string]string, kubeCl
 
 	return kubeCli.Patch(context.Background(),
 		sch,
-		client.ConstantPatch(types.MergePatchType, mergePatch))
+		client.RawPatch(types.MergePatchType, mergePatch))
 }
