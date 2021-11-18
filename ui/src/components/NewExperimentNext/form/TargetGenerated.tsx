@@ -16,7 +16,7 @@
  */
 import { AutocompleteMultipleField, LabelField, SelectField, Submit, TextField } from 'components/FormField'
 import { Env, clearNetworkTargetPods } from 'slices/experiments'
-import { Form, Formik, FormikErrors, FormikTouched, getIn } from 'formik'
+import { Form, Formik, FormikErrors, FormikTouched, getIn, setIn } from 'formik'
 import { Kind, Spec } from '../data/types'
 import { useEffect, useState } from 'react'
 import { useStoreDispatch, useStoreSelector } from 'store'
@@ -43,7 +43,7 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ env, kind, data, vali
 
   let initialValues = Object.entries(data).reduce((acc, [k, v]) => {
     if (v instanceof Object && v.field) {
-      acc[k] = v.value
+      acc[k] = setIn(acc, k, v.value)
     } else {
       acc[k] = v
     }
