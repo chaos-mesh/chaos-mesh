@@ -29,6 +29,7 @@ Please follow the Title Formats below when you open a new PR:
 - [ ] Need to update `Dashboard UI`
 - Need to **cheery-pick to release branches**
   - [ ] release-2.0
+  - [ ] release-1.2
 
 ### Checklist
 
