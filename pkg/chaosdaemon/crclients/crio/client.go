@@ -32,9 +32,8 @@ import (
 const (
 	InspectContainersEndpoint = "/containers"
 
-	crioProtocolPrefix            = "cri-o://"
-	maxUnixSocketPathSize         = len(syscall.RawSockaddrUnix{}.Path)
-	containerRuntimeClientTimeout = 2 * time.Second
+	crioProtocolPrefix    = "cri-o://"
+	maxUnixSocketPathSize = len(syscall.RawSockaddrUnix{}.Path)
 )
 
 // CrioClient can get information from docker
@@ -129,7 +128,7 @@ func (c CrioClient) GetLabelsFromContainerID(ctx context.Context, containerID st
 
 func buildRuntimeServiceClient(endpoint string) (v1.RuntimeServiceClient, error) {
 	addr := fmt.Sprintf("unix://%s", endpoint)
-	conn, err := grpc.Dial(addr, grpc.WithInsecure(), grpc.WithBlock(), grpc.WithTimeout(containerRuntimeClientTimeout))
+	conn, err := grpc.Dial(addr, grpc.WithBlock(), grpc.WithInsecure())
 	if err != nil {
 		return nil, err
 	}

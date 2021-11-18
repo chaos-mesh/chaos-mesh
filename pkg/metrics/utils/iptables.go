@@ -16,25 +16,29 @@
 package utils
 
 import (
+	"bytes"
+
 	"github.com/retailnext/iptables_exporter/iptables"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 )
 
-func CollectIptablesMetrics(pid uint32) (chains uint64, rules uint64, packets uint64, packetBytes uint64, err error) {
-	cmd := bpm.DefaultProcessBuilder("iptables-save", "-c").
-		SetNS(pid, bpm.NetNS).
-		Build()
+func GetIptablesRulesNumbersByNetNS(pid uint32) (chains uint64, rules uint64, packets uint64, packetBytes uint64, err error) {
+	return getIptablesRulesNumbers(true, pid)
+}
 
-	stdout := bpm.NewBlockingBuffer()
-	cmd.Stdout = stdout
-	manager := bpm.NewBackgroundProcessManager()
-	_, err = manager.StartProcess(cmd)
+func getIptablesRulesNumbers(enterNS bool, pid uint32) (chains uint64, rules uint64, packets uint64, packetBytes uint64, err error) {
+	builder := bpm.DefaultProcessBuilder("iptables-save", "-c")
+	if enterNS {
+		builder = builder.SetNS(pid, bpm.NetNS)
+	}
+
+	out, err := builder.Build().CombinedOutput()
 	if err != nil {
 		return 0, 0, 0, 0, err
 	}
 
-	tables, err := iptables.ParseIptablesSave(stdout)
+	tables, err := iptables.ParseIptablesSave(bytes.NewReader(out))
 	if err != nil {
 		return 0, 0, 0, 0, err
 	}

@@ -23,21 +23,23 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 )
 
-func CollectIPSetMembersMetric(pid uint32) (int, error) {
-	cmd := bpm.DefaultProcessBuilder("ipset", "save", "-o", "xml").
-		SetNS(pid, bpm.NetNS).
-		Build()
+func GetIPSetRulesNumberByNetNS(pid uint32) (int, error) {
+	return getIPSetRulesNumber(true, pid)
+}
 
-	stdout := bpm.NewBlockingBuffer()
-	cmd.Stdout = stdout
-	manager := bpm.NewBackgroundProcessManager()
-	_, err := manager.StartProcess(cmd)
+func getIPSetRulesNumber(enterNS bool, pid uint32) (int, error) {
+	builder := bpm.DefaultProcessBuilder("ipset", "save", "-o", "xml")
+	if enterNS {
+		builder = builder.SetNS(pid, bpm.NetNS)
+	}
+
+	out, err := builder.Build().CombinedOutput()
 	if err != nil {
 		return 0, err
 	}
 
 	var sets ipset.Ipset
-	if err = xml.NewDecoder(stdout).Decode(&sets); err != nil {
+	if err = xml.Unmarshal(out, &sets); err != nil {
 		return 0, err
 	}
 

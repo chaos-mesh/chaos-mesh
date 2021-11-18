@@ -134,7 +134,7 @@ func (collector *ChaosDaemonMetricsCollector) collectNetworkMetrics() {
 			"containerID", containerID,
 		)
 
-		chains, rules, packets, packetBytes, err := utils.CollectIptablesMetrics(pid)
+		chains, rules, packets, packetBytes, err := utils.GetIptablesRulesNumbersByNetNS(pid)
 		if err != nil {
 			log.Error(err, "fail to collect iptables metrics")
 		}
@@ -143,13 +143,13 @@ func (collector *ChaosDaemonMetricsCollector) collectNetworkMetrics() {
 		collector.iptablesPackets.WithLabelValues(labelValues...).Set(float64(packets))
 		collector.iptablesPacketBytes.WithLabelValues(labelValues...).Set(float64(packetBytes))
 
-		members, err := utils.CollectIPSetMembersMetric(pid)
+		members, err := utils.GetIPSetRulesNumberByNetNS(pid)
 		if err != nil {
 			log.Error(err, "fail to collect ipset member metric")
 		}
 		collector.ipsetMembers.WithLabelValues(labelValues...).Set(float64(members))
 
-		tcRules, err := utils.CollectTcRulesMetric(pid)
+		tcRules, err := utils.GetTcRulesNumberByNetNS(pid)
 		if err != nil {
 			log.Error(err, "fail to collect tc rules metric")
 		}
