@@ -54,7 +54,7 @@ spec:
               mountPath: /data
       containers:
       - name: prometheus
-        image: {{template "registry-prefix" .}}{{ .Values.prometheus.image }}
+        image: {{ .Values.prometheus.image }}
         imagePullPolicy: {{ .Values.prometheus.imagePullPolicy | default "IfNotPresent" }}
         {{- if .Values.chaosDaemon.resources }}
         resources:
