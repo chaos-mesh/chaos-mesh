@@ -27,7 +27,6 @@ import (
 
 	"google.golang.org/grpc"
 	v1 "k8s.io/cri-api/pkg/apis/runtime/v1"
-	"k8s.io/kubernetes/pkg/kubelet/util"
 )
 
 const (
@@ -129,13 +128,8 @@ func (c CrioClient) GetLabelsFromContainerID(ctx context.Context, containerID st
 }
 
 func buildRuntimeServiceClient(endpoint string) (v1.RuntimeServiceClient, error) {
-	addr, dialer, err := util.GetAddressAndDialer(endpoint)
-	if err != nil {
-		return nil, err
-	}
-
-	conn, err := grpc.Dial(addr, grpc.WithInsecure(), grpc.WithBlock(), grpc.WithContextDialer(dialer),
-		grpc.WithTimeout(containerRuntimeClientTimeout))
+	addr := fmt.Sprintf("unix://%s", endpoint)
+	conn, err := grpc.Dial(addr, grpc.WithInsecure(), grpc.WithBlock(), grpc.WithTimeout(containerRuntimeClientTimeout))
 	if err != nil {
 		return nil, err
 	}

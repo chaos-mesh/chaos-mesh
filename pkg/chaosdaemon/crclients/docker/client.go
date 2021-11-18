@@ -18,10 +18,10 @@ package docker
 import (
 	"context"
 	"fmt"
-	"github.com/docker/docker/api/types/filters"
 	"net/http"
 
 	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/filters"
 	dockerclient "github.com/docker/docker/client"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
@@ -32,7 +32,7 @@ const (
 
 	// containerKindLabel is a label key intending to filter sandbox container
 	// ref: https://github.com/kubernetes/kubernetes/blob/master/pkg/kubelet/dockershim/docker_service.go#L67-L75
-	containerKindLabel     = "io.cri-containerd.kind"
+	containerKindLabel     = "io.kubernetes.docker.type"
 	containerKindContainer = "container"
 )
 

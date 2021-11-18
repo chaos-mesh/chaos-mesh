@@ -23,7 +23,6 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"k8s.io/kubernetes/pkg/kubelet/types"
 	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/test"
@@ -122,9 +121,9 @@ var _ = Describe("docker client", func() {
 	Context("DockerClient GetLabelsFromContainerID", func() {
 		It("should work", func() {
 			sampleLabels := map[string]string{
-				types.KubernetesPodNamespaceLabel:  "default",
-				types.KubernetesPodNameLabel:       "busybox-5f8dd756dd-6rjzw",
-				types.KubernetesContainerNameLabel: "busybox",
+				"io.kubernetes.pod.namespace":  "default",
+				"io.kubernetes.pod.name":       "busybox-5f8dd756dd-6rjzw",
+				"io.kubernetes.container.name": "busybox",
 			}
 			defer mock.With("labels", sampleLabels)()
 
@@ -138,9 +137,9 @@ var _ = Describe("docker client", func() {
 
 		It("should error on wrong protocol", func() {
 			sampleLabels := map[string]string{
-				types.KubernetesPodNamespaceLabel:  "default",
-				types.KubernetesPodNameLabel:       "busybox-5f8dd756dd-6rjzw",
-				types.KubernetesContainerNameLabel: "busybox",
+				"io.kubernetes.pod.namespace":  "default",
+				"io.kubernetes.pod.name":       "busybox-5f8dd756dd-6rjzw",
+				"io.kubernetes.container.name": "busybox",
 			}
 			defer mock.With("labels", sampleLabels)()
 

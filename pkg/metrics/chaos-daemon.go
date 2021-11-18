@@ -19,7 +19,6 @@ import (
 	"context"
 
 	"github.com/prometheus/client_golang/prometheus"
-	"k8s.io/kubernetes/pkg/kubelet/types"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients"
 	"github.com/chaos-mesh/chaos-mesh/pkg/metrics/utils"
@@ -27,6 +26,15 @@ import (
 
 // DefaultChaosDaemonMetricsCollector is the default metrics collector for chaos daemon
 var DefaultChaosDaemonMetricsCollector = NewChaosDaemonMetricsCollector()
+
+const (
+	// kubernetesPodNameLabel, kubernetesPodNamespaceLabel and kubernetesContainerNameLabel are the label keys
+	//   indicating the kubernetes information of the container under `k8s.io/kubernetes` package
+	// And it is best not to set `k8s.io/kubernetes` as dependency, see more: https://github.com/kubernetes/kubernetes/issues/90358#issuecomment-617859364.
+	kubernetesPodNameLabel       = "io.kubernetes.pod.name"
+	kubernetesPodNamespaceLabel  = "io.kubernetes.pod.namespace"
+	kubernetesContainerNameLabel = "io.kubernetes.container.name"
+)
 
 type ChaosDaemonMetricsCollector struct {
 	crClient crclients.ContainerRuntimeInfoClient
@@ -115,8 +123,8 @@ func (collector *ChaosDaemonMetricsCollector) collectNetworkMetrics() {
 			continue
 		}
 
-		namespace, podName, containerName := labels[types.KubernetesPodNamespaceLabel],
-			labels[types.KubernetesPodNameLabel], labels[types.KubernetesContainerNameLabel]
+		namespace, podName, containerName := labels[kubernetesPodNamespaceLabel],
+			labels[kubernetesPodNameLabel], labels[kubernetesContainerNameLabel]
 
 		labelValues := []string{namespace, podName, containerName}
 		log := log.WithValues(
@@ -125,7 +133,6 @@ func (collector *ChaosDaemonMetricsCollector) collectNetworkMetrics() {
 			"containerName", containerName,
 			"containerID", containerID,
 		)
-		log.Info("collecting metrics", "pid", pid, "labels", labels)
 
 		chains, rules, packets, packetBytes, err := utils.CollectIptablesMetrics(pid)
 		if err != nil {

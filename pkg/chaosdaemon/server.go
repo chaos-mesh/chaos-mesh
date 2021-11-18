@@ -20,7 +20,6 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 	"io/ioutil"
 	"net"
 
@@ -38,6 +37,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
+	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 )
 
 var log = ctrl.Log.WithName("chaos-daemon-server")
