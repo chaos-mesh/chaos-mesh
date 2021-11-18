@@ -52,7 +52,7 @@ spec:
       {{- end }}
       containers:
       - name: chaos-mesh
-        image: {{template "registry-prefix" .}}{{ .Values.controllerManager.image }}
+        image: {{template "chaos-controller-manager.image" . }}
         imagePullPolicy: {{ .Values.controllerManager.imagePullPolicy | default "IfNotPresent" }}
         resources:
 {{ toYaml .Values.controllerManager.resources | indent 12 }}
@@ -151,7 +151,7 @@ spec:
         {{- end }}
       {{- if .Values.chaosDlv.enable }}
       - name: chaos-mesh-dlv
-        image: {{template "registry-prefix" .}}{{ .Values.chaosDlv.image }}
+        image: {{template "chaos-dlv.image" . }}
         imagePullPolicy: {{ .Values.chaosDlv.imagePullPolicy | default "IfNotPresent" }}
         env:
           - name: CMD_NAME
