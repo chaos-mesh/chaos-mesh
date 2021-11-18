@@ -18,20 +18,17 @@ Please follow the Title Formats below when you open a new PR:
 <!-- Uncomment this line if some issues to close -->
 <!-- Close #<issue number> -->
 
-> Problem Summary:
-
 ### What's changed and how it works?
 
 <!-- Uncomment this line if this PR is associated with a proposal -->
 <!-- Proposal: [name](url) -->
 
-> What's Changed:
-
 ### Related changes
 
 - [ ] Need to update `chaos-mesh/website`
-- [ ] Need to update `Chaos Dashboard`
-- [ ] Need to **cheery-pick to release branches**
+- [ ] Need to update `Dashboard UI`
+- Need to **cheery-pick to release branches**
+  - [ ] release-2.0
 
 ### Checklist
 
@@ -41,8 +38,10 @@ Tests
 
 - [ ] Unit test
 - [ ] E2E test
-- [ ] Manual test (add detailed scripts or steps below)
 - [ ] No code
+- [ ] Manual test (add steps below)
+
+<!-- > steps: -->
 
 Side effects
 
@@ -54,4 +53,13 @@ Side effects
 Please add a release note.
 
 You can safely ignore this section if you don't think this PR needs a release note.
+```
+
+### DCO
+
+If you find the DCO check fails, please run commands like below (Depends on the actual situations. For example, if the failed commit isn't the most recent) to fix it:
+
+```shell
+git commit --amend --signoff
+git push --force
 ```
