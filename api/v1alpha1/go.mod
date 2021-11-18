@@ -3,7 +3,7 @@ module github.com/chaos-mesh/chaos-mesh/api/v1alpha1
 go 1.13
 
 require (
-	github.com/alecthomas/units v0.0.0-20210927113745-59d0afb8317a // indirect
+	github.com/alecthomas/units v0.0.0-20210927113745-59d0afb8317a
 	github.com/bxcodec/faker v2.0.1+incompatible
 	github.com/docker/go-units v0.4.0
 	github.com/google/uuid v1.1.2
