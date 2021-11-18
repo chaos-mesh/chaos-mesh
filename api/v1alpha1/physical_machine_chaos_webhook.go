@@ -317,11 +317,7 @@ func validateJVMExceptionAction(spec *JVMExceptionSpec) error {
 }
 
 func validateJVMGCAction(spec *JVMGCSpec) error {
-	if err := CheckPid(spec.Pid); err != nil {
-		return err
-	}
-
-	return nil
+	return CheckPid(spec.Pid)
 }
 
 func validateJVMLatencyAction(spec *JVMLatencySpec) error {
