@@ -163,7 +163,7 @@ const jvmPort: Spec = {
   port: {
     field: 'number',
     label: 'Port',
-    value: 9288,
+    value: 9277,
     helperText: 'The service port of the loaded agent, through which the rules are configured',
   },
 }
