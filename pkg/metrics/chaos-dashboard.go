@@ -58,7 +58,6 @@ func (collector *ChaosDashboardMetricsCollector) Collect(ch chan<- prometheus.Me
 
 func (collector *ChaosDashboardMetricsCollector) ginMetricsCollector() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		log.Info("metrics collecting")
 		begin := time.Now()
 
 		ctx.Next()
