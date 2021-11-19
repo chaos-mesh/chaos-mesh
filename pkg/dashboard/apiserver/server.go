@@ -25,11 +25,13 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
 	"go.uber.org/fx"
+	controllermetrics "sigs.k8s.io/controller-runtime/pkg/metrics"
 
 	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apivalidator"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/swaggerserver"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/uiserver"
+	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 )
 
 var (
@@ -40,6 +42,8 @@ var (
 			newAPIRouter,
 		),
 		handlerModule,
+		fx.Supply(controllermetrics.Registry),
+		fx.Invoke(metrics.NewChaosDashboardMetricsCollector),
 		fx.Invoke(register),
 	)
 )
