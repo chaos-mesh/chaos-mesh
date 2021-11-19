@@ -43,7 +43,7 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ env, kind, data, vali
 
   let initialValues = Object.entries(data).reduce((acc, [k, v]) => {
     if (v instanceof Object && v.field) {
-      acc[k] = setIn(acc, k, v.value)
+      acc = setIn(acc, k, v.value)
     } else {
       acc[k] = v
     }

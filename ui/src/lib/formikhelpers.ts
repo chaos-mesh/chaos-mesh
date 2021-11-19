@@ -59,9 +59,8 @@ export function parseSubmit<K extends ExperimentKind>(
     return selectors.reduce((acc: Record<string, any>, d) => {
       console.log(`kv: ${d}`)
       const splited = d.split(/:(.+)/)
-      console.log(`k: ${splited[0]}, v: ${splited[1].replace(/\s/g, '')}`)
-      acc[splited[0].replace(/\s/g, '')] = splited[1]
-
+      console.log(`k: ${splited[0].trim()}, v: ${splited[1].trim()}`)
+      acc[splited[0].trim()] = splited[1].trim()
       return acc
     }, {})
   }
@@ -143,11 +142,11 @@ export function parseSubmit<K extends ExperimentKind>(
     if ((spec as any).response_headers) {
       ;(spec as any).response_headers = helperHTTPHeaders((spec as any).response_headers as string[])
     }
-    if ((spec as any)['replace.headers']) {
-      ;(spec as any)['replace.headers'] = helperHTTPHeaders((spec as any)['replace.headers'] as string[])
+    if ((spec as any).replace && (spec as any).replace.headers) {
+      ;(spec as any).replace.headers = helperHTTPHeaders((spec as any).replace.headers as string[])
     }
-    if ((spec as any)['replace.queries']) {
-      ;(spec as any)['replace.queries'] = helper1((spec as any)['replace.queries'] as string[])
+    if ((spec as any).replace && (spec as any).replace.queries) {
+      ;(spec as any).replace.queries = helper1((spec as any).replace.queries as string[])
     }
   }
 
