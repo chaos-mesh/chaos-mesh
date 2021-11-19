@@ -110,6 +110,9 @@
     "ts-interface-builder": "^0.2.3",
     "ts-interface-checker": "^0.1.13"
   },
+  "jest": {
+    "resetMocks": false
+  },
   "lint-staged": {
     "*.(j|t)s?(x)": "prettier --write"
   },
