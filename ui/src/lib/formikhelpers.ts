@@ -69,6 +69,7 @@ export function parseSubmit<K extends ExperimentKind>(
       return d
         .replace(/\s/g, '')
         .split(/:(.+)/)
+        .slice(0, 2)
         .map((s) => s.trim())
     })
   }
@@ -76,7 +77,10 @@ export function parseSubmit<K extends ExperimentKind>(
   // Parse http headers to patch object
   function helperHTTPPatchHeaders(selectors: string[]) {
     return selectors.map((d) => {
-      return d.split(/:(.+)/).map((s) => s.trim())
+      return d
+        .split(/:(.+)/)
+        .slice(0, 2)
+        .map((s) => s.trim())
     })
   }
 
