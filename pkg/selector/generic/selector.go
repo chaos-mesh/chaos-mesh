@@ -31,9 +31,19 @@ type Option struct {
 
 type ListFunc func(ctx context.Context, list client.ObjectList, opts ...client.ListOption) error
 
+// Selector is an interface implemented by things that know how to list objects from cluster and whether ths object matches the selector.
 type Selector interface {
+	// ListFunc returns the function to list object from kubernetes cluster.
+	// If no method is specified, returns `nil` directly. (default: `List` function of `client.Client`)
+	// If needed, `List` function of `client.Reader` can be returned. Only `field selector` uses it for now.
+	// When registering the Selector, it's important to note that multiple ListFunc will be overwritten in the SelectorChain.
 	ListFunc(client.Reader) ListFunc
+	// ListOption returns the client.ListOption that modifies options for a list request.
+	// If no option is specified, returns `nil` directly.
+	// When registering a Selector, it is important to note that multiple ListOptions will all apply to
+	// the same `client.ListOptions` and will be overwritten if they have the same fields in the SelectorChain.
 	ListOption() client.ListOption
+	// Match returns whether the object matches the selector
 	Match(client.Object) bool
 }
 
