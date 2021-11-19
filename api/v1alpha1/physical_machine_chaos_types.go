@@ -27,7 +27,7 @@ var (
 	PMStressMemAction        PhysicalMachineChaosAction = "stress-mem"
 	PMDiskWritePayloadAction PhysicalMachineChaosAction = "disk-write-payload"
 	PMDiskReadPayloadAction  PhysicalMachineChaosAction = "disk-read-payload"
-	PMDiskFillActionAction   PhysicalMachineChaosAction = "disk-fill"
+	PMDiskFillAction         PhysicalMachineChaosAction = "disk-fill"
 	PMNetworkCorruptAction   PhysicalMachineChaosAction = "network-corrupt"
 	PMNetworkDuplicateAction PhysicalMachineChaosAction = "network-duplicate"
 	PMNetworkLossAction      PhysicalMachineChaosAction = "network-loss"

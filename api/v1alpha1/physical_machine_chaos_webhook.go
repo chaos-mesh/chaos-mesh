@@ -96,7 +96,7 @@ func (in *PhysicalMachineChaosSpec) Validate(root interface{}, path *field.Path)
 		validateConfigErr = validateDiskPayloadAction(in.DiskWritePayload)
 	case PMDiskReadPayloadAction:
 		validateConfigErr = validateDiskPayloadAction(in.DiskReadPayload)
-	case PMDiskFillActionAction:
+	case PMDiskFillAction:
 		validateConfigErr = validateDiskFillAction(in.DiskFill)
 	case PMNetworkCorruptAction:
 		validateConfigErr = validateNetworkCorruptAction(in.NetworkCorrupt)
@@ -245,7 +245,15 @@ func validateNetworkLossAction(spec *NetworkLossSpec) error {
 }
 
 func validateNetworkDelayAction(spec *NetworkDelaySpec) error {
-	return validateNetworkCommon(&spec.NetworkCommonSpec)
+	if err := validateNetworkCommon(&spec.NetworkCommonSpec); err != nil {
+		return err
+	}
+
+	if len(spec.Latency) == 0 {
+		return errors.New("latency is invalid")
+	}
+
+	return nil
 }
 
 func validateNetworkPartitionAction(spec *NetworkPartitionSpec) error {
@@ -353,6 +361,10 @@ func validateJVMReturnAction(spec *JVMReturnSpec) error {
 }
 
 func validateJVMStressAction(spec *JVMStressSpec) error {
+	if err := CheckPid(spec.Pid); err != nil {
+		return err
+	}
+
 	if spec.CPUCount == 0 && len(spec.MemoryType) == 0 {
 		return errors.New("one of cpu-count and mem-type is required")
 	}
@@ -365,6 +377,10 @@ func validateJVMStressAction(spec *JVMStressSpec) error {
 }
 
 func validateJVMRuleDataAction(spec *JVMRuleDataSpec) error {
+	if err := CheckPid(spec.Pid); err != nil {
+		return err
+	}
+
 	if len(spec.RuleData) == 0 {
 		return errors.New("rule-data is required")
 	}
