@@ -162,7 +162,7 @@ const httpCommonSelect: Spec = {
     items: ['', 'GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'OPTIONS', 'PATCH'],
     label: 'Method',
     value: '',
-    helperText: 'The HTTP method of request',
+    helperText: 'Optional. The HTTP method of request',
   },
   request_headers: {
     field: 'label',
@@ -185,7 +185,7 @@ const httpResponseCommon: Spec = {
     field: 'number',
     label: 'Status Code',
     value: '',
-    helperText: 'The target status code of response',
+    helperText: 'Optional. The target status code of response',
   },
   response_headers: {
     field: 'label',
@@ -234,7 +234,7 @@ const httpPatchCommon: Spec = {
     items: ['', 'JSON'],
     label: 'Patch Body Type',
     value: '',
-    helperText: 'The patch type of body',
+    helperText: 'Optional. The patch type of body',
   },
   'patch.body.value': {
     field: 'textarea',
