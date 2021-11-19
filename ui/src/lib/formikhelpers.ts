@@ -57,9 +57,7 @@ export function parseSubmit<K extends ExperimentKind>(
   // Parse http headers to object
   function helperHTTPHeaders(selectors: string[]) {
     return selectors.reduce((acc: Record<string, any>, d) => {
-      console.log(`kv: ${d}`)
       const splited = d.split(/:(.+)/)
-      console.log(`k: ${splited[0].trim()}, v: ${splited[1].trim()}`)
       acc[splited[0].trim()] = splited[1].trim()
       return acc
     }, {})
@@ -137,7 +135,6 @@ export function parseSubmit<K extends ExperimentKind>(
   }
 
   if (kind === 'HTTPChaos') {
-    console.log(`spec: ${JSON.stringify(spec)}`)
     ;(spec as any).request_headers = helperHTTPHeaders((spec as any).request_headers as string[])
     if ((spec as any).response_headers) {
       ;(spec as any).response_headers = helperHTTPHeaders((spec as any).response_headers as string[])
