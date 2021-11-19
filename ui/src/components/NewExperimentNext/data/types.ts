@@ -19,7 +19,7 @@ import * as Yup from 'yup'
 
 import { ExperimentKind } from 'components/NewExperiment/types'
 
-export type Kind = Exclude<ExperimentKind, 'JVMChaos' | 'PhysicalMachineChaos'>
+export type Kind = Exclude<ExperimentKind, 'PhysicalMachineChaos'>
 export type KindPhysic =
   | Extract<Kind, 'NetworkChaos' | 'StressChaos' | 'TimeChaos'>
   | 'DiskChaos'
@@ -241,6 +241,30 @@ const httpPatchCommon: Spec = {
     label: 'Patch Body Value',
     value: '',
     helperText: 'The value to be patched into body',
+  },
+}
+
+const jvmClassAndMethod: Spec = {
+  class: {
+    field: 'text',
+    label: 'Class',
+    value: '',
+    helperText: 'Class that is injected with faults',
+  },
+  method: {
+    field: 'text',
+    label: 'Method',
+    value: '',
+    helperText: 'Method that is injected with faults',
+  },
+}
+
+const jvmPort: Spec = {
+  port: {
+    field: 'number',
+    label: 'Port',
+    value: 9277,
+    helperText: 'The service port of the loaded agent, through which the rules are configured',
   },
 }
 
@@ -741,6 +765,97 @@ const data: Record<Kind, Definition> = {
       },
     },
   },
+  JVMChaos: {
+    categories: [
+      {
+        name: 'Exception',
+        key: 'exception',
+        spec: {
+          action: 'exception' as any,
+          exception: {
+            field: 'text',
+            label: 'Exception',
+            value: '',
+            helperText: 'Specify the exception to be thrown',
+          },
+          ...jvmClassAndMethod,
+          ...jvmPort,
+        },
+      },
+      {
+        name: 'GC',
+        key: 'gc',
+        spec: {
+          action: 'gc' as any,
+          ...jvmPort,
+        },
+      },
+      {
+        name: 'Latency',
+        key: 'latency',
+        spec: {
+          action: 'latency' as any,
+          latency: {
+            field: 'number',
+            label: 'Latency',
+            value: '',
+            helperText: 'Specify the time of latency, unit is millisecond',
+          },
+          ...jvmClassAndMethod,
+          ...jvmPort,
+        },
+      },
+      {
+        name: 'Return',
+        key: 'return',
+        spec: {
+          action: 'return' as any,
+          value: {
+            field: 'text',
+            label: 'Value',
+            value: '',
+            helperText: 'Specify the return value',
+          },
+          ...jvmClassAndMethod,
+          ...jvmPort,
+        },
+      },
+      {
+        name: 'Stress',
+        key: 'stress',
+        spec: {
+          action: 'stress' as any,
+          cpuCount: {
+            field: 'number',
+            label: 'CPU Count',
+            value: '',
+            helperText: 'Specify the CPU count',
+          },
+          memType: {
+            field: 'select',
+            items: ['stack', 'heap'],
+            label: 'Mem Type',
+            value: '',
+            helperText: 'Specify the mem type',
+          },
+          ...jvmPort,
+        },
+      },
+      {
+        name: 'Rule',
+        key: 'ruleData',
+        spec: {
+          ruleData: {
+            field: 'textarea',
+            label: 'Rule',
+            value: '',
+            helperText: 'byteman rule configuration',
+          },
+          ...jvmPort,
+        },
+      },
+    ],
+  },
 }
 
 const networkPhysicCommon: Spec = {
@@ -815,21 +930,6 @@ const diskPhysicCommon: Spec = {
   },
 }
 
-const jvmPhysicClassAndMethod: Spec = {
-  class: {
-    field: 'text',
-    label: 'Class',
-    value: '',
-    helperText: 'Class that is injected with faults',
-  },
-  method: {
-    field: 'text',
-    label: 'Method',
-    value: '',
-    helperText: 'Method that is injected with faults',
-  },
-}
-
 const jvmPhysicPidAndPort: Spec = {
   pid: {
     field: 'number',
@@ -837,12 +937,7 @@ const jvmPhysicPidAndPort: Spec = {
     value: '',
     helperText: 'ID of the Java process being injected into the fault',
   },
-  port: {
-    field: 'number',
-    label: 'Port',
-    value: 9288,
-    helperText: 'The service port of the loaded agent, through which the rules are configured',
-  },
+  ...jvmPort,
 }
 
 export const dataPhysic: Record<KindPhysic, Definition> = {
@@ -913,7 +1008,7 @@ export const dataPhysic: Record<KindPhysic, Definition> = {
             value: '',
             helperText: 'Specify the exception to be thrown',
           },
-          ...jvmPhysicClassAndMethod,
+          ...jvmClassAndMethod,
           ...jvmPhysicPidAndPort,
         },
       },
@@ -936,7 +1031,7 @@ export const dataPhysic: Record<KindPhysic, Definition> = {
             value: '',
             helperText: 'Specify the time of latency, unit is millisecond',
           },
-          ...jvmPhysicClassAndMethod,
+          ...jvmClassAndMethod,
           ...jvmPhysicPidAndPort,
         },
       },
@@ -951,7 +1046,7 @@ export const dataPhysic: Record<KindPhysic, Definition> = {
             value: '',
             helperText: 'Specify the return value',
           },
-          ...jvmPhysicClassAndMethod,
+          ...jvmClassAndMethod,
           ...jvmPhysicPidAndPort,
         },
       },
