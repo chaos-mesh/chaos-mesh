@@ -19,21 +19,28 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"testing"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/test"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
+func TestContainerdClient(t *testing.T) {
+	RegisterFailHandler(Fail)
+
+	RunSpecsWithDefaultAndCustomReporters(t,
+		"Contianerd Container Client Test Suit",
+		[]Reporter{printer.NewlineReporter{}})
+}
+
 var _ = Describe("containerd client", func() {
 	Context("ContainerdClient GetPidFromContainerID", func() {
 		It("should return the magic number 9527", func() {
-			defer func() {
-				err := mock.With("pid", int(9527))()
-				Expect(err).To(BeNil())
-			}()
+			defer mock.With("pid", int(9527))()
 
 			m := &test.MockClient{}
 			c := ContainerdClient{client: m}
@@ -58,8 +65,7 @@ var _ = Describe("containerd client", func() {
 			_, err := c.GetPidFromContainerID(context.TODO(), "containerd://valid-container-id")
 			Expect(err).NotTo(BeNil())
 			Expect(fmt.Sprintf("%s", err)).To(Equal(errorStr))
-			err = mock.Reset("LoadContainerError")
-			Expect(err).NotTo(BeNil())
+			mock.Reset("LoadContainerError")
 
 			mock.With("TaskError", errors.New(errorStr))
 			m = &test.MockClient{}
@@ -67,8 +73,7 @@ var _ = Describe("containerd client", func() {
 			_, err = c.GetPidFromContainerID(context.TODO(), "containerd://valid-container-id")
 			Expect(err).NotTo(BeNil())
 			Expect(fmt.Sprintf("%s", err)).To(Equal(errorStr))
-			err = mock.Reset("TaskError")
-			Expect(err).NotTo(BeNil())
+			mock.Reset("TaskError")
 		})
 	})
 
