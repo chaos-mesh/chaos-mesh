@@ -222,6 +222,13 @@ const httpReplaceCommon: Spec = {
 }
 
 const httpPatchCommon: Spec = {
+  'patch.headers': {
+    field: 'label',
+    isKV: true,
+    label: 'Patch Headers',
+    value: [],
+    helperText: 'Optional. The headers to be patched',
+  },
   'patch.body.type': {
     field: 'select',
     items: ['', 'JSON'],
@@ -454,6 +461,13 @@ const data: Record<Kind, Definition> = {
         spec: {
           ...httpRequestCommon,
           ...httpPatchCommon,
+          'patch.queries': {
+            field: 'label',
+            isKV: true,
+            label: 'Patch Queries',
+            value: [],
+            helperText: 'Optional. The queries to be patched',
+          },
         },
       },
       {

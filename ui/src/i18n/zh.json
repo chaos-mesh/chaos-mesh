@@ -315,7 +315,7 @@
     "durationHelper": "持续时间支持的格式有：ms / s / m / h。",
     "edit": "修改",
     "ip": "IP 地址",
-    "isKVHelperText": "键入 key:value 并以空格结尾来创建一个键值对",
+    "isKVHelperText": "键入 key:value 并以 TAB 结尾来创建一个键值对",
     "multiOptions": "支持多选",
     "name": "名称",
     "noOptions": "无选项",

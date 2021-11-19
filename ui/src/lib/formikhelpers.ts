@@ -63,6 +63,23 @@ export function parseSubmit<K extends ExperimentKind>(
     }, {})
   }
 
+  // Parse http queries to patch object
+  function helperHTTPPatchQueries(selectors: string[]) {
+    return selectors.map((d) => {
+      return d
+        .replace(/\s/g, '')
+        .split(/:(.+)/)
+        .map((s) => s.trim())
+    })
+  }
+
+  // Parse http headers to patch object
+  function helperHTTPPatchHeaders(selectors: string[]) {
+    return selectors.map((d) => {
+      return d.split(/:(.+)/).map((s) => s.trim())
+    })
+  }
+
   // Parse selector
   function helper2(scope: Scope['selector']) {
     if (scope.labelSelectors?.length) {
@@ -144,6 +161,12 @@ export function parseSubmit<K extends ExperimentKind>(
     }
     if ((spec as any).replace && (spec as any).replace.queries) {
       ;(spec as any).replace.queries = helper1((spec as any).replace.queries as string[])
+    }
+    if ((spec as any).patch && (spec as any).patch.headers) {
+      ;(spec as any).patch.headers = helperHTTPPatchHeaders((spec as any).patch.headers as string[])
+    }
+    if ((spec as any).patch && (spec as any).patch.queries) {
+      ;(spec as any).patch.queries = helperHTTPPatchQueries((spec as any).patch.queries as string[])
     }
   }
 

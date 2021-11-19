@@ -314,7 +314,7 @@
     "durationHelper": "The supported formats of the duration are: ms / s / m / h.",
     "edit": "Edit",
     "ip": "IP address",
-    "isKVHelperText": "Type key:value and end with a space to generate a key/value pair",
+    "isKVHelperText": "Type key:value and end with a TAB to generate a key/value pair",
     "multiOptions": "Support mutiple options",
     "name": "Name",
     "noOptions": "No options",
