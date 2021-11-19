@@ -20,6 +20,7 @@ import (
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
@@ -69,10 +70,10 @@ func Register(name string, obj runtime.Object, routeFunc func(runtime.Object) bo
 }
 
 // SetupWithManagerAndConfigs setups reconciler with manager and controller configs
-func SetupWithManagerAndConfigs(mgr ctrl.Manager, cfg *config.ChaosControllerConfig) error {
+func SetupWithManagerAndConfigs(c client.Client, mgr ctrl.Manager, cfg *config.ChaosControllerConfig) error {
 	for typ, end := range routeTable {
 		log.Info("setup reconciler with manager", "type", typ, "endpoint", end.Name)
-		reconciler := NewReconciler(end.Name, end.Object, mgr, end.Endpoints, cfg.ClusterScoped, cfg.TargetNamespace)
+		reconciler := NewReconciler(end.Name, end.Object, c, mgr, end.Endpoints, cfg.ClusterScoped, cfg.TargetNamespace)
 		err := reconciler.SetupWithManager(mgr)
 		if err != nil {
 			log.Error(err, "fail to setup reconciler with manager")

@@ -30,6 +30,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos"
 	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
 	"github.com/chaos-mesh/chaos-mesh/pkg/router"
+	"github.com/chaos-mesh/chaos-mesh/pkg/updatedclient"
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config/watcher"
@@ -124,13 +125,19 @@ func main() {
 		os.Exit(1)
 	}
 
+	updatedClient, err := updatedclient.New(mgr, scheme)
+	if err != nil {
+		setupLog.Error(err, "fail to setup updated client")
+		os.Exit(1)
+	}
+
 	authCli, err := authorizationv1.NewForConfig(cfg)
 	if err != nil {
 		setupLog.Error(err, "unable to get authorization client")
 		os.Exit(1)
 	}
 
-	err = router.SetupWithManagerAndConfigs(mgr, ccfg.ControllerCfg)
+	err = router.SetupWithManagerAndConfigs(updatedClient, mgr, ccfg.ControllerCfg)
 	if err != nil {
 		setupLog.Error(err, "fail to setup with manager")
 		os.Exit(1)
@@ -139,7 +146,7 @@ func main() {
 	// We only setup webhook for podiochaos, and the logic of applying chaos are in the mutation
 	// webhook, because we need to get the running result synchronously in io chaos reconciler
 	v1alpha1.RegisterPodIoHandler(&podiochaos.Handler{
-		Client: mgr.GetClient(),
+		Client: updatedClient,
 		Log:    ctrl.Log.WithName("handler").WithName("PodIOChaos"),
 	})
 	if err = (&v1alpha1.PodIoChaos{}).SetupWebhookWithManager(mgr); err != nil {
@@ -150,7 +157,7 @@ func main() {
 	// We only setup webhook for podnetworkchaos, and the logic of applying chaos are in the validation
 	// webhook, because we need to get the running result synchronously in network chaos reconciler
 	v1alpha1.RegisterRawPodNetworkHandler(&podnetworkchaos.Handler{
-		Client:                  mgr.GetClient(),
+		Client:                  updatedClient,
 		Reader:                  mgr.GetAPIReader(),
 		Log:                     ctrl.Log.WithName("handler").WithName("PodNetworkChaos"),
 		AllowHostNetworkTesting: ccfg.ControllerCfg.AllowHostNetworkTesting,
@@ -199,7 +206,7 @@ func main() {
 	)
 
 	hookServer.Register("/validate-auth", &webhook.Admission{
-		Handler: apiWebhook.NewAuthValidator(ccfg.ControllerCfg.SecurityMode, mgr.GetClient(), mgr.GetAPIReader(), authCli,
+		Handler: apiWebhook.NewAuthValidator(ccfg.ControllerCfg.SecurityMode, updatedClient, mgr.GetAPIReader(), authCli,
 			ccfg.ControllerCfg.ClusterScoped, ccfg.ControllerCfg.TargetNamespace, ccfg.ControllerCfg.EnableFilterNamespace),
 	},
 	)
