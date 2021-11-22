@@ -1667,6 +1667,12 @@ spec:
                         format: int32
                         minimum: 1
                         type: integer
+                      device:
+                        type: string
+                      hostname:
+                        type: string
+                      ip-address:
+                        type: string
                       limit:
                         format: int32
                         minimum: 1
@@ -4082,6 +4088,12 @@ spec:
                                   format: int32
                                   minimum: 1
                                   type: integer
+                                device:
+                                  type: string
+                                hostname:
+                                  type: string
+                                ip-address:
+                                  type: string
                                 limit:
                                   format: int32
                                   minimum: 1
@@ -6187,6 +6199,12 @@ spec:
                                       format: int32
                                       minimum: 1
                                       type: integer
+                                    device:
+                                      type: string
+                                    hostname:
+                                      type: string
+                                    ip-address:
+                                      type: string
                                     limit:
                                       format: int32
                                       minimum: 1

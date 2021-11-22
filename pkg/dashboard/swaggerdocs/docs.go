@@ -3167,6 +3167,15 @@ var doc = `{
                     "description": "+kubebuilder:validation:Minimum=1",
                     "type": "integer"
                 },
+                "device": {
+                    "type": "string"
+                },
+                "hostname": {
+                    "type": "string"
+                },
+                "ip-address": {
+                    "type": "string"
+                },
                 "limit": {
                     "description": "+kubebuilder:validation:Minimum=1",
                     "type": "integer"

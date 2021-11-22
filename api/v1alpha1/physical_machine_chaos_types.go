@@ -232,6 +232,10 @@ type NetworkBandwidthSpec struct {
 
 	Peakrate *uint64 `json:"peakrate,omitempty"`
 	Minburst *uint32 `json:"minburst,omitempty"`
+
+	Device    string `json:"device,omitempty"`
+	IPAddress string `json:"ip-address,omitempty"`
+	Hostname  string `json:"hostname,omitempty"`
 }
 
 type ProcessSpec struct {

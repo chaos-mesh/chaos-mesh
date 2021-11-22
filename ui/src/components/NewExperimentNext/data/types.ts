@@ -989,8 +989,25 @@ export const dataPhysic: Record<KindPhysic, Definition> = {
             helperText: 'The maximum depletion rate of the bucket',
           },
           direction: networkCommon['direction'],
-          ...networkPhysicCommon,
-          correlation: undefined as any,
+          
+          device: {
+            field: 'text',
+            label: 'Device',
+            value: '',
+            helperText: 'Affected device, e.g., eth0',
+          },
+          hostname: {
+            field: 'text',
+            label: 'Hostname',
+            value: '',
+            helperText: 'Specify the hostname',
+          },
+          'ip-address': {
+            field: 'text',
+            label: 'IP Address',
+            value: '',
+            helperText: 'Specify the IP address',
+          },
         },
       },
       {
