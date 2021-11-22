@@ -30,6 +30,7 @@ require (
 	github.com/go-playground/validator/v10 v10.4.1
 	github.com/go-test/deep v1.0.8 // indirect
 	github.com/golang/protobuf v1.5.2
+	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/hashicorp/golang-lru v0.5.5-0.20210104140557-80c98217689d
@@ -43,6 +44,7 @@ require (
 	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/onsi/ginkgo v1.16.4
 	github.com/onsi/gomega v1.14.0
+	github.com/opencontainers/runc v1.0.0-rc95 // indirect
 	github.com/pingcap/check v0.0.0-20191216031241-8a5a85928f12 // indirect
 	github.com/pingcap/errors v0.11.5-0.20190809092503-95897b64e011
 	github.com/pingcap/failpoint v0.0.0-20200210140405-f8f9fb234798
