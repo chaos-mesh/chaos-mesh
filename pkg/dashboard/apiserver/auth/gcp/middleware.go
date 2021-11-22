@@ -16,7 +16,6 @@
 package gcp
 
 import (
-	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -36,8 +35,7 @@ func (s *Service) Middleware(c *gin.Context) {
 
 	expiry, err := time.Parse(time.RFC3339, c.Request.Header.Get("X-Authorization-Expiry"))
 	if err != nil {
-		c.Status(http.StatusInternalServerError)
-		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		utils.SetAPIError(c, utils.ErrInternalServer.WrapWithNoMessage(err))
 		return
 	}
 	oauth := s.getOauthConfig(c)
@@ -48,8 +46,7 @@ func (s *Service) Middleware(c *gin.Context) {
 	}).Token()
 
 	if err != nil {
-		c.Status(http.StatusInternalServerError)
-		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		utils.SetAPIError(c, utils.ErrInternalServer.WrapWithNoMessage(err))
 		return
 	}
 

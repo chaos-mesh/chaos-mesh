@@ -92,8 +92,7 @@ func (s *Service) authCallback(c *gin.Context) {
 	oauth := s.getOauthConfig(c)
 	oauth2Token, err := oauth.Exchange(ctx, c.Request.URL.Query().Get("code"), oauth2.AccessTypeOffline, oauth2.ApprovalForce)
 	if err != nil {
-		c.Status(http.StatusInternalServerError)
-		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		utils.SetAPIError(c, utils.ErrInternalServer.WrapWithNoMessage(err))
 		return
 	}
 
