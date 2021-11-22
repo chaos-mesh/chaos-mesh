@@ -22,7 +22,6 @@ import (
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/client-go/tools/cache"
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -34,7 +33,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/netutils"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/events"
-	"github.com/chaos-mesh/chaos-mesh/pkg/finalizer"
 	"github.com/chaos-mesh/chaos-mesh/pkg/router"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 	end "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
@@ -57,6 +55,11 @@ type endpoint struct {
 // Object implements the reconciler.InnerReconciler.Object
 func (e *endpoint) Object() v1alpha1.InnerObject {
 	return &v1alpha1.NetworkChaos{}
+}
+
+type podPositionTuple struct {
+	Pod      v1.Pod
+	Position string
 }
 
 // Apply applies the chaos operation
@@ -101,10 +104,6 @@ func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 
 	allPods := append(sources, targets...)
 
-	type podPositionTuple struct {
-		Pod      v1.Pod
-		Position string
-	}
 	keyPodMap := make(map[types.NamespacedName]podPositionTuple)
 	for index, pod := range allPods {
 		position := ""
@@ -191,6 +190,7 @@ func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 
 	responses := m.Commit(ctx)
 
+	var errors error
 	networkchaos.Status.Experiment.PodRecords = make([]v1alpha1.PodStatus, 0, len(allPods))
 	for _, keyErrorTuple := range responses {
 		key := keyErrorTuple.Key
@@ -198,10 +198,11 @@ func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 		if err != nil {
 			if err != podnetworkchaosmanager.ErrPodNotFound && err != podnetworkchaosmanager.ErrPodNotRunning {
 				e.Log.Error(err, "fail to commit")
+				errors = multierror.Append(errors, err)
 			} else {
 				e.Log.Info("pod is not found or not running", "key", key)
 			}
-			return err
+			continue
 		}
 
 		pod := keyPodMap[keyErrorTuple.Key]
@@ -225,6 +226,10 @@ func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 		networkchaos.Status.Experiment.PodRecords = append(networkchaos.Status.Experiment.PodRecords, ps)
 	}
 
+	if errors != nil {
+		return errors
+	}
+
 	e.Event(networkchaos, v1.EventTypeNormal, events.ChaosInjected, "")
 	return nil
 }
@@ -234,11 +239,6 @@ func (e *endpoint) SetChains(ctx context.Context, pods []v1.Pod, chains []v1alph
 	for index := range pods {
 		pod := &pods[index]
 
-		key, err := cache.MetaNamespaceKeyFunc(pod)
-		if err != nil {
-			return err
-		}
-
 		t := m.WithInit(types.NamespacedName{
 			Name:      pod.Name,
 			Namespace: pod.Namespace,
@@ -246,9 +246,6 @@ func (e *endpoint) SetChains(ctx context.Context, pods []v1.Pod, chains []v1alph
 		for _, chain := range chains {
 			t.Append(chain)
 		}
-
-		networkchaos.Finalizers = finalizer.InsertFinalizer(networkchaos.Finalizers, key)
-
 	}
 	return nil
 }
@@ -276,19 +273,18 @@ func (e *endpoint) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alpha
 	source := chaos.Namespace + "/" + chaos.Name
 	m := podnetworkchaosmanager.New(source, e.Log, e.Client)
 
-	for _, key := range chaos.Finalizers {
-		ns, name, err := cache.SplitMetaNamespaceKey(key)
-		if err != nil {
-			result = multierror.Append(result, err)
-			continue
+	keyRecordMap := make(map[types.NamespacedName]v1alpha1.PodStatus)
+	for _, podRecord := range chaos.Status.Experiment.PodRecords {
+		key := types.NamespacedName{
+			Namespace: podRecord.Namespace,
+			Name:      podRecord.Name,
 		}
-
-		_ = m.WithInit(types.NamespacedName{
-			Namespace: ns,
-			Name:      name,
-		})
+		_ = m.WithInit(key)
+		keyRecordMap[key] = podRecord
 	}
 	responses := m.Commit(ctx)
+
+	restRecord := []v1alpha1.PodStatus{}
 	for _, response := range responses {
 		key := response.Key
 		err := response.Err
@@ -298,13 +294,16 @@ func (e *endpoint) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alpha
 				e.Log.Error(err, "fail to commit", "key", key)
 
 				result = multierror.Append(result, err)
+				restRecord = append(restRecord, keyRecordMap[key])
 				continue
 			}
 
 			e.Log.Info("pod is not found or not running", "key", key)
 		}
+	}
 
-		chaos.Finalizers = finalizer.RemoveFromFinalizer(chaos.Finalizers, response.Key.String())
+	if len(restRecord) == 0 {
+		chaos.Finalizers = []string{}
 	}
 	e.Log.Info("After recovering", "finalizers", chaos.Finalizers)
 

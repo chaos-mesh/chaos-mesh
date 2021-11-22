@@ -21,12 +21,10 @@ import (
 	v1 "k8s.io/api/core/v1"
 	k8serror "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/client-go/tools/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
-	"github.com/chaos-mesh/chaos-mesh/pkg/finalizer"
 )
 
 type Delegate struct {
@@ -42,37 +40,40 @@ type RecoverIntf interface {
 func (r *Delegate) CleanFinalizersAndRecover(ctx context.Context, chaos v1alpha1.InnerObject, finalizers []string, annotations map[string]string) ([]string, error) {
 	var result error
 
-	for _, key := range finalizers {
-		ns, name, err := cache.SplitMetaNamespaceKey(key)
-		if err != nil {
-			result = multierror.Append(result, err)
-			continue
-		}
+	restRecords := []v1alpha1.PodStatus{}
+	for _, podRecord := range chaos.GetStatus().Experiment.PodRecords {
+		ns := podRecord.Namespace
+		name := podRecord.Name
 
 		var pod v1.Pod
-		err = r.Client.Get(ctx, types.NamespacedName{
+		err := r.Client.Get(ctx, types.NamespacedName{
 			Namespace: ns,
 			Name:      name,
 		}, &pod)
 
 		if err != nil {
-			if !k8serror.IsNotFound(err) {
-				result = multierror.Append(result, err)
+			if k8serror.IsNotFound(err) {
+				r.Log.Info("Pod not found", "namespace", ns, "name", name)
 				continue
 			}
 
-			r.Log.Info("Pod not found", "namespace", ns, "name", name)
-			finalizers = finalizer.RemoveFromFinalizer(finalizers, key)
+			result = multierror.Append(result, err)
+			restRecords = append(restRecords, podRecord)
+
 			continue
 		}
 
 		err = r.RecoverPod(ctx, &pod, chaos)
 		if err != nil {
 			result = multierror.Append(result, err)
+			restRecords = append(restRecords, podRecord)
+
 			continue
 		}
+	}
 
-		finalizers = finalizer.RemoveFromFinalizer(finalizers, key)
+	if len(restRecords) == 0 {
+		finalizers = []string{}
 	}
 
 	if annotations[common.AnnotationCleanFinalizer] == common.AnnotationCleanFinalizerForced {

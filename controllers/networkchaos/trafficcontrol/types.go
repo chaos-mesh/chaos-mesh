@@ -22,18 +22,15 @@ import (
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/client-go/tools/cache"
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
-	"github.com/chaos-mesh/chaos-mesh/controllers/iochaos/podiochaosmanager"
 	"github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/podnetworkchaosmanager"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/ipset"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/netutils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/events"
-	"github.com/chaos-mesh/chaos-mesh/pkg/finalizer"
 	"github.com/chaos-mesh/chaos-mesh/pkg/router"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 	end "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
@@ -150,17 +147,20 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 
 	responses := m.Commit(ctx)
 
+	var errors error
 	networkchaos.Status.Experiment.PodRecords = make([]v1alpha1.PodStatus, 0, len(pods))
 	for _, keyErrorTuple := range responses {
 		key := keyErrorTuple.Key
 		err := keyErrorTuple.Err
 		if err != nil {
-			if err != podiochaosmanager.ErrPodNotFound && err != podiochaosmanager.ErrPodNotRunning {
+			if err != podnetworkchaosmanager.ErrPodNotFound && err != podnetworkchaosmanager.ErrPodNotRunning {
 				r.Log.Error(err, "fail to commit")
+				errors = multierror.Append(errors, err)
 			} else {
 				r.Log.Info("pod is not found or not running", "key", key)
 			}
-			return err
+
+			continue
 		}
 
 		pod := keyPodMap[keyErrorTuple.Key]
@@ -182,6 +182,9 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 			ps.Message += fmt.Sprintf(networkTcActionMsg, *networkchaos.Spec.Duration)
 		}
 		networkchaos.Status.Experiment.PodRecords = append(networkchaos.Status.Experiment.PodRecords, ps)
+	}
+	if errors != nil {
+		return errors
 	}
 
 	r.Event(networkchaos, v1.EventTypeNormal, events.ChaosInjected, "")
@@ -210,19 +213,18 @@ func (r *endpoint) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alpha
 	source := chaos.Namespace + "/" + chaos.Name
 	m := podnetworkchaosmanager.New(source, r.Log, r.Client)
 
-	for _, key := range chaos.Finalizers {
-		ns, name, err := cache.SplitMetaNamespaceKey(key)
-		if err != nil {
-			result = multierror.Append(result, err)
-			continue
+	keyRecordMap := make(map[types.NamespacedName]v1alpha1.PodStatus)
+	for _, podRecord := range chaos.Status.Experiment.PodRecords {
+		key := types.NamespacedName{
+			Namespace: podRecord.Namespace,
+			Name:      podRecord.Name,
 		}
-
-		_ = m.WithInit(types.NamespacedName{
-			Namespace: ns,
-			Name:      name,
-		})
+		_ = m.WithInit(key)
+		keyRecordMap[key] = podRecord
 	}
 	responses := m.Commit(ctx)
+
+	restRecord := []v1alpha1.PodStatus{}
 	for _, response := range responses {
 		key := response.Key
 		err := response.Err
@@ -232,13 +234,16 @@ func (r *endpoint) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alpha
 				r.Log.Error(err, "fail to commit", "key", key)
 
 				result = multierror.Append(result, err)
+				restRecord = append(restRecord, keyRecordMap[key])
 				continue
 			}
 
 			r.Log.Info("pod is not found or not running", "key", key)
 		}
+	}
 
-		chaos.Finalizers = finalizer.RemoveFromFinalizer(chaos.Finalizers, response.Key.String())
+	if len(restRecord) == 0 {
+		chaos.Finalizers = []string{}
 	}
 	r.Log.Info("After recovering", "finalizers", chaos.Finalizers)
 
@@ -259,17 +264,6 @@ func (r *endpoint) applyTc(
 	m *podnetworkchaosmanager.PodNetworkManager,
 	networkchaos *v1alpha1.NetworkChaos,
 ) error {
-	for index := range sources {
-		pod := &sources[index]
-
-		key, err := cache.MetaNamespaceKeyFunc(pod)
-		if err != nil {
-			return err
-		}
-
-		networkchaos.Finalizers = finalizer.InsertFinalizer(networkchaos.Finalizers, key)
-	}
-
 	tcType := v1alpha1.Bandwidth
 	switch networkchaos.Spec.Action {
 	case v1alpha1.NetemAction, v1alpha1.DelayAction, v1alpha1.DuplicateAction, v1alpha1.CorruptAction, v1alpha1.LossAction:
