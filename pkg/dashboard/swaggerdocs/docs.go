@@ -812,6 +812,55 @@ var doc = `{
                 }
             }
         },
+        "/events/workflow/{uid}": {
+            "get": {
+                "description": "list all events for Workflow and related WorkflowNode.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "events"
+                ],
+                "summary": "cascadeFetchEventsForWorkflow list all events for Workflow and related WorkflowNode.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The namespace of the object",
+                        "name": "namespace",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "The UID of the Workflow",
+                        "name": "uid",
+                        "in": "path"
+                    },
+                    {
+                        "type": "string",
+                        "description": "The max length of events list",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/core.Event"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    }
+                }
+            }
+        },
         "/events/{id}": {
             "get": {
                 "description": "Get the event from db by ID.",

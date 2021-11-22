@@ -308,6 +308,7 @@ export const constructWorkflowTopology = (
     cy.layout(layout).run()
 
     cy.elements().animate(animateOptions({ opacity: 1 }), { duration: 500 })
+    cy.center()
   }
 
   updateElements(detail)
