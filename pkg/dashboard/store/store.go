@@ -58,7 +58,7 @@ func NewDBStore(lc fx.Lifecycle, conf *config.ChaosDashboardConfig) (*gorm.DB, e
 
 	gormDB, err := gorm.Open(conf.Database.Driver, ds)
 	if err != nil {
-		log.Error(err, "Failed to open DB: ", "driver => ", conf.Database.Driver, " datasource => ", conf.Database.Datasource)
+		log.Error(err, "Failed to open DB: ", "driver => ", conf.Database.Driver)
 
 		return nil, err
 	}

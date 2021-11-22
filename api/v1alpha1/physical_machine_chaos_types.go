@@ -245,7 +245,7 @@ type JVMExceptionSpec struct {
 	JVMCommonSpec      `json:",inline"`
 	JVMClassMethodSpec `json:",inline"`
 
-	// the exception which needs to throw dor action `exception`
+	// the exception which needs to throw for action `exception`
 	ThrowException string `json:"exception,omitempty"`
 }
 

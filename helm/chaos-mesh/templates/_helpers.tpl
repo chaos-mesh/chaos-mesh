@@ -109,9 +109,27 @@ Define the webhook's name
 {{- printf "admission-webhook.chaos-mesh.org" -}}
 {{- end -}}
 
-{{/*
-Define the prefix of
-*/}}
-{{- define "registry-prefix" -}}
-{{if .Values.registry}}{{.Values.registry}}/{{end}}
+{{/*Define the image for chaos-controller-manager*/}}
+{{- define "chaos-controller-manager.image" -}}
+{{ .Values.controllerManager.image.registry | default .Values.images.registry }}/{{ .Values.controllerManager.image.repository }}:{{ .Values.controllerManager.image.tag | default .Values.images.tag }}
+{{- end -}}
+
+{{/*Define the image for chaos-daemon*/}}
+{{- define "chaos-daemon.image" -}}
+{{ .Values.chaosDaemon.image.registry | default .Values.images.registry }}/{{ .Values.chaosDaemon.image.repository }}:{{ .Values.chaosDaemon.image.tag | default .Values.images.tag }}
+{{- end -}}
+
+{{/*Define the image for chaos-dashboard*/}}
+{{- define "chaos-dashboard.image" -}}
+{{ .Values.dashboard.image.registry | default .Values.images.registry }}/{{ .Values.dashboard.image.repository }}:{{ .Values.dashboard.image.tag | default .Values.images.tag }}
+{{- end -}}
+
+{{/*Define the image for chaos-kernel*/}}
+{{- define "chaos-kernel.image" -}}
+{{ .Values.bpfki.image.registry | default .Values.images.registry }}/{{ .Values.bpfki.image.repository }}:{{ .Values.bpfki.image.tag | default .Values.images.tag }}
+{{- end -}}
+
+{{/*Define the image for chaos-dlv*/}}
+{{- define "chaos-dlv.image" -}}
+{{ .Values.chaosDlv.image.registry | default .Values.images.registry }}/{{ .Values.chaosDlv.image.repository }}:{{ .Values.chaosDlv.image.tag | default .Values.images.tag }}
 {{- end -}}

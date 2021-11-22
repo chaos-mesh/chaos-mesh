@@ -109,6 +109,8 @@ func (r *ScheduleCollector) setUnarchivedSchedule(req ctrl.Request, schedule v1a
 		archive.Action = string(schedule.Spec.ScheduleItem.AWSChaos.Action)
 	case v1alpha1.ScheduleTypeGCPChaos:
 		archive.Action = string(schedule.Spec.ScheduleItem.GCPChaos.Action)
+	case v1alpha1.ScheduleTypeJVMChaos:
+		archive.Action = string(schedule.Spec.ScheduleItem.JVMChaos.Action)
 	case v1alpha1.ScheduleTypePhysicalMachineChaos:
 		archive.Action = string(schedule.Spec.ScheduleItem.PhysicalMachineChaos.Action)
 	default:
