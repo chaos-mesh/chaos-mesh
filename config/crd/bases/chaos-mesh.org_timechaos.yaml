@@ -161,11 +161,11 @@ spec:
                 type: string
               value:
                 description: Value is required when the mode is set to `FixedMode`
-                  / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedMode`,
-                  provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
-                  provide a number from 0-100 to specify the percent of pods the server
-                  can do chaos action. IF `RandomMaxPercentPodMod`,  provide a number
-                  from 0-100 to specify the max percent of pods to do chaos action
+                  / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`, provide
+                  an integer of pods to do chaos action. If `FixedPercentMode`, provide
+                  a number from 0-100 to specify the percent of pods the server can
+                  do chaos action. IF `RandomMaxPercentMode`,  provide a number from
+                  0-100 to specify the max percent of pods to do chaos action
                 type: string
             required:
             - mode

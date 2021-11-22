@@ -110,7 +110,7 @@ spec:
                     description: Java class
                     type: string
                   exception:
-                    description: the exception which needs to throw dor action `exception`
+                    description: the exception which needs to throw for action `exception`
                     type: string
                   method:
                     description: the method in Java class

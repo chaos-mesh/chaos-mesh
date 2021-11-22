@@ -439,7 +439,7 @@ type WorkflowStore interface {
 // WorkflowEntity is the gorm entity, refers to a row of data
 type WorkflowEntity struct {
 	WorkflowMeta
-	Workflow string `gorm:"size:32768"`
+	Workflow string `gorm:"type:text;size:32768"`
 }
 
 func WorkflowCR2WorkflowEntity(workflow *v1alpha1.Workflow) (*WorkflowEntity, error) {

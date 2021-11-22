@@ -15,18 +15,30 @@
  *
  */
 
-import { Provider } from 'react-redux'
-import { BrowserRouter as Router } from 'react-router-dom'
-import ThemeProvider from './ThemeProvider'
-import TopContainer from 'components/TopContainer'
-import store from './store'
+import { sanitize } from './utils'
 
-const App: React.FC = ({ children }) => (
-  <Provider store={store}>
-    <Router>
-      <ThemeProvider>{children || <TopContainer />}</ThemeProvider>
-    </Router>
-  </Provider>
-)
+test('sanitize an object', () => {
+  expect(
+    sanitize({
+      a: 1,
+      b: '',
+      c: null,
+      d: 'd',
+    })
+  ).toEqual({
+    a: 1,
+    d: 'd',
+  })
+})
 
-export default App
+test('sanitize an object where all values are empty', () => {
+  expect(
+    sanitize({
+      a: 0,
+      b: '',
+      c: null,
+      d: undefined,
+      e: [],
+    })
+  ).toEqual({})
+})

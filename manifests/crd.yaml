@@ -295,11 +295,11 @@ spec:
                 type: object
               value:
                 description: Value is required when the mode is set to `FixedMode`
-                  / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedMode`,
-                  provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
-                  provide a number from 0-100 to specify the percent of pods the server
-                  can do chaos action. IF `RandomMaxPercentPodMod`,  provide a number
-                  from 0-100 to specify the max percent of pods to do chaos action
+                  / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`, provide
+                  an integer of pods to do chaos action. If `FixedPercentMode`, provide
+                  a number from 0-100 to specify the percent of pods the server can
+                  do chaos action. IF `RandomMaxPercentMode`,  provide a number from
+                  0-100 to specify the max percent of pods to do chaos action
                 type: string
             required:
             - action
@@ -753,11 +753,11 @@ spec:
                 type: string
               value:
                 description: Value is required when the mode is set to `FixedMode`
-                  / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedMode`,
-                  provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
-                  provide a number from 0-100 to specify the percent of pods the server
-                  can do chaos action. IF `RandomMaxPercentPodMod`,  provide a number
-                  from 0-100 to specify the max percent of pods to do chaos action
+                  / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`, provide
+                  an integer of pods to do chaos action. If `FixedPercentMode`, provide
+                  a number from 0-100 to specify the percent of pods the server can
+                  do chaos action. IF `RandomMaxPercentMode`,  provide a number from
+                  0-100 to specify the max percent of pods to do chaos action
                 type: string
             required:
             - mode
@@ -1105,11 +1105,11 @@ spec:
                 type: object
               value:
                 description: Value is required when the mode is set to `FixedMode`
-                  / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedMode`,
-                  provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
-                  provide a number from 0-100 to specify the percent of pods the server
-                  can do chaos action. IF `RandomMaxPercentPodMod`,  provide a number
-                  from 0-100 to specify the max percent of pods to do chaos action
+                  / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`, provide
+                  an integer of pods to do chaos action. If `FixedPercentMode`, provide
+                  a number from 0-100 to specify the percent of pods the server can
+                  do chaos action. IF `RandomMaxPercentMode`,  provide a number from
+                  0-100 to specify the max percent of pods to do chaos action
                 type: string
               volumePath:
                 description: VolumePath represents the mount path of injected volume
@@ -1221,18 +1221,17 @@ spec:
             properties:
               action:
                 description: 'Action defines the specific jvm chaos action. Supported
-                  action: delay;return;script;cfl;oom;ccf;tce;cpf;tde;tpf'
+                  action: latency;return;exception;stress;gc;ruleData'
                 enum:
-                - delay
+                - latency
                 - return
-                - script
-                - cfl
-                - oom
-                - ccf
-                - tce
-                - cpf
-                - tde
-                - tpf
+                - exception
+                - stress
+                - gc
+                - ruleData
+                type: string
+              class:
+                description: Java class
                 type: string
               containerNames:
                 description: ContainerNames indicates list of the name of affected
@@ -1240,19 +1239,26 @@ spec:
                 items:
                   type: string
                 type: array
+              cpuCount:
+                description: the CPU core number need to use, only set it when action
+                  is stress
+                type: integer
               duration:
                 description: Duration represents the duration of the chaos action
                 type: string
-              flags:
-                additionalProperties:
-                  type: string
-                description: Flags represents the flags of action
-                type: object
-              matchers:
-                additionalProperties:
-                  type: string
-                description: Matchers represents the matching rules for the target
-                type: object
+              exception:
+                description: the exception which needs to throw for action `exception`
+                type: string
+              latency:
+                description: the latency duration for action 'latency', unit ms
+                type: integer
+              memType:
+                description: the memory type need to locate, only set it when action
+                  is stress, the value can be 'stack' or 'heap'
+                type: string
+              method:
+                description: the method in Java class
+                type: string
               mode:
                 description: 'Mode defines the mode to run chaos action. Supported
                   mode: one / all / fixed / fixed-percent / random-max-percent'
@@ -1262,6 +1268,16 @@ spec:
                 - fixed
                 - fixed-percent
                 - random-max-percent
+                type: string
+              name:
+                description: byteman rule name, should be unique, and will use JVMChaos'
+                  name if not set
+                type: string
+              port:
+                description: the port of agent server, default 9277
+                format: int32
+                type: integer
+              ruleData:
                 type: string
               selector:
                 description: Selector is used to select pods that are used to inject
@@ -1353,37 +1369,18 @@ spec:
                       belong, and the each values is a set of pod names.
                     type: object
                 type: object
-              target:
-                description: 'Target defines the specific jvm chaos target. Supported
-                  target: servlet;psql;jvm;jedis;http;dubbo;rocketmq;tars;mysql;druid;redisson;rabbitmq;mongodb'
-                enum:
-                - servlet
-                - psql
-                - jvm
-                - jedis
-                - http
-                - dubbo
-                - rocketmq
-                - tars
-                - mysql
-                - druid
-                - redisson
-                - rabbitmq
-                - mongodb
-                type: string
               value:
                 description: Value is required when the mode is set to `FixedMode`
-                  / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedMode`,
-                  provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
-                  provide a number from 0-100 to specify the percent of pods the server
-                  can do chaos action. IF `RandomMaxPercentPodMod`,  provide a number
-                  from 0-100 to specify the max percent of pods to do chaos action
+                  / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`, provide
+                  an integer of pods to do chaos action. If `FixedPercentMode`, provide
+                  a number from 0-100 to specify the percent of pods the server can
+                  do chaos action. IF `RandomMaxPercentMode`,  provide a number from
+                  0-100 to specify the max percent of pods to do chaos action
                 type: string
             required:
             - action
             - mode
             - selector
-            - target
             type: object
           status:
             description: JVMChaosStatus defines the observed state of JVMChaos
@@ -1651,11 +1648,11 @@ spec:
                 type: object
               value:
                 description: Value is required when the mode is set to `FixedMode`
-                  / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedMode`,
-                  provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
-                  provide a number from 0-100 to specify the percent of pods the server
-                  can do chaos action. IF `RandomMaxPercentPodMod`,  provide a number
-                  from 0-100 to specify the max percent of pods to do chaos action
+                  / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`, provide
+                  an integer of pods to do chaos action. If `FixedPercentMode`, provide
+                  a number from 0-100 to specify the percent of pods the server can
+                  do chaos action. IF `RandomMaxPercentMode`,  provide a number from
+                  0-100 to specify the max percent of pods to do chaos action
                 type: string
             required:
             - failKernRequest
@@ -2092,10 +2089,10 @@ spec:
                     type: object
                   value:
                     description: Value is required when the mode is set to `FixedMode`
-                      / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedMode`,
-                      provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
+                      / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
+                      provide an integer of pods to do chaos action. If `FixedPercentMode`,
                       provide a number from 0-100 to specify the percent of pods the
-                      server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                      server can do chaos action. IF `RandomMaxPercentMode`,  provide
                       a number from 0-100 to specify the max percent of pods to do
                       chaos action
                     type: string
@@ -2109,11 +2106,11 @@ spec:
                 type: string
               value:
                 description: Value is required when the mode is set to `FixedMode`
-                  / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedMode`,
-                  provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
-                  provide a number from 0-100 to specify the percent of pods the server
-                  can do chaos action. IF `RandomMaxPercentPodMod`,  provide a number
-                  from 0-100 to specify the max percent of pods to do chaos action
+                  / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`, provide
+                  an integer of pods to do chaos action. If `FixedPercentMode`, provide
+                  a number from 0-100 to specify the percent of pods the server can
+                  do chaos action. IF `RandomMaxPercentMode`,  provide a number from
+                  0-100 to specify the max percent of pods to do chaos action
                 type: string
             required:
             - action
@@ -2297,7 +2294,7 @@ spec:
                     description: Java class
                     type: string
                   exception:
-                    description: the exception which needs to throw dor action `exception`
+                    description: the exception which needs to throw for action `exception`
                     type: string
                   method:
                     description: the method in Java class
@@ -2764,11 +2761,11 @@ spec:
                 type: object
               value:
                 description: Value is required when the mode is set to `FixedMode`
-                  / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedMode`,
-                  provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
-                  provide a number from 0-100 to specify the percent of pods the server
-                  can do chaos action. IF `RandomMaxPercentPodMod`,  provide a number
-                  from 0-100 to specify the max percent of pods to do chaos action
+                  / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`, provide
+                  an integer of pods to do chaos action. If `FixedPercentMode`, provide
+                  a number from 0-100 to specify the percent of pods the server can
+                  do chaos action. IF `RandomMaxPercentMode`,  provide a number from
+                  0-100 to specify the max percent of pods to do chaos action
                 type: string
             required:
             - action
@@ -3710,10 +3707,10 @@ spec:
                     type: object
                   value:
                     description: Value is required when the mode is set to `FixedMode`
-                      / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedMode`,
-                      provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
+                      / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
+                      provide an integer of pods to do chaos action. If `FixedPercentMode`,
                       provide a number from 0-100 to specify the percent of pods the
-                      server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                      server can do chaos action. IF `RandomMaxPercentMode`,  provide
                       a number from 0-100 to specify the max percent of pods to do
                       chaos action
                     type: string
@@ -3988,10 +3985,10 @@ spec:
                     type: string
                   value:
                     description: Value is required when the mode is set to `FixedMode`
-                      / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedMode`,
-                      provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
+                      / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
+                      provide an integer of pods to do chaos action. If `FixedPercentMode`,
                       provide a number from 0-100 to specify the percent of pods the
-                      server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                      server can do chaos action. IF `RandomMaxPercentMode`,  provide
                       a number from 0-100 to specify the max percent of pods to do
                       chaos action
                     type: string
@@ -4245,10 +4242,10 @@ spec:
                     type: object
                   value:
                     description: Value is required when the mode is set to `FixedMode`
-                      / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedMode`,
-                      provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
+                      / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
+                      provide an integer of pods to do chaos action. If `FixedPercentMode`,
                       provide a number from 0-100 to specify the percent of pods the
-                      server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                      server can do chaos action. IF `RandomMaxPercentMode`,  provide
                       a number from 0-100 to specify the max percent of pods to do
                       chaos action
                     type: string
@@ -4267,18 +4264,17 @@ spec:
                 properties:
                   action:
                     description: 'Action defines the specific jvm chaos action. Supported
-                      action: delay;return;script;cfl;oom;ccf;tce;cpf;tde;tpf'
+                      action: latency;return;exception;stress;gc;ruleData'
                     enum:
-                    - delay
+                    - latency
                     - return
-                    - script
-                    - cfl
-                    - oom
-                    - ccf
-                    - tce
-                    - cpf
-                    - tde
-                    - tpf
+                    - exception
+                    - stress
+                    - gc
+                    - ruleData
+                    type: string
+                  class:
+                    description: Java class
                     type: string
                   containerNames:
                     description: ContainerNames indicates list of the name of affected
@@ -4286,19 +4282,26 @@ spec:
                     items:
                       type: string
                     type: array
+                  cpuCount:
+                    description: the CPU core number need to use, only set it when
+                      action is stress
+                    type: integer
                   duration:
                     description: Duration represents the duration of the chaos action
                     type: string
-                  flags:
-                    additionalProperties:
-                      type: string
-                    description: Flags represents the flags of action
-                    type: object
-                  matchers:
-                    additionalProperties:
-                      type: string
-                    description: Matchers represents the matching rules for the target
-                    type: object
+                  exception:
+                    description: the exception which needs to throw for action `exception`
+                    type: string
+                  latency:
+                    description: the latency duration for action 'latency', unit ms
+                    type: integer
+                  memType:
+                    description: the memory type need to locate, only set it when
+                      action is stress, the value can be 'stack' or 'heap'
+                    type: string
+                  method:
+                    description: the method in Java class
+                    type: string
                   mode:
                     description: 'Mode defines the mode to run chaos action. Supported
                       mode: one / all / fixed / fixed-percent / random-max-percent'
@@ -4308,6 +4311,16 @@ spec:
                     - fixed
                     - fixed-percent
                     - random-max-percent
+                    type: string
+                  name:
+                    description: byteman rule name, should be unique, and will use
+                      JVMChaos' name if not set
+                    type: string
+                  port:
+                    description: the port of agent server, default 9277
+                    format: int32
+                    type: integer
+                  ruleData:
                     type: string
                   selector:
                     description: Selector is used to select pods that are used to
@@ -4399,30 +4412,12 @@ spec:
                           which pods belong, and the each values is a set of pod names.
                         type: object
                     type: object
-                  target:
-                    description: 'Target defines the specific jvm chaos target. Supported
-                      target: servlet;psql;jvm;jedis;http;dubbo;rocketmq;tars;mysql;druid;redisson;rabbitmq;mongodb'
-                    enum:
-                    - servlet
-                    - psql
-                    - jvm
-                    - jedis
-                    - http
-                    - dubbo
-                    - rocketmq
-                    - tars
-                    - mysql
-                    - druid
-                    - redisson
-                    - rabbitmq
-                    - mongodb
-                    type: string
                   value:
                     description: Value is required when the mode is set to `FixedMode`
-                      / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedMode`,
-                      provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
+                      / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
+                      provide an integer of pods to do chaos action. If `FixedPercentMode`,
                       provide a number from 0-100 to specify the percent of pods the
-                      server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                      server can do chaos action. IF `RandomMaxPercentMode`,  provide
                       a number from 0-100 to specify the max percent of pods to do
                       chaos action
                     type: string
@@ -4430,7 +4425,6 @@ spec:
                 - action
                 - mode
                 - selector
-                - target
                 type: object
               kernelChaos:
                 description: KernelChaosSpec defines the desired state of KernelChaos
@@ -4610,10 +4604,10 @@ spec:
                     type: object
                   value:
                     description: Value is required when the mode is set to `FixedMode`
-                      / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedMode`,
-                      provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
+                      / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
+                      provide an integer of pods to do chaos action. If `FixedPercentMode`,
                       provide a number from 0-100 to specify the percent of pods the
-                      server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                      server can do chaos action. IF `RandomMaxPercentMode`,  provide
                       a number from 0-100 to specify the max percent of pods to do
                       chaos action
                     type: string
@@ -4963,10 +4957,10 @@ spec:
                         type: object
                       value:
                         description: Value is required when the mode is set to `FixedMode`
-                          / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedMode`,
-                          provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
+                          / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
+                          provide an integer of pods to do chaos action. If `FixedPercentMode`,
                           provide a number from 0-100 to specify the percent of pods
-                          the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                          the server can do chaos action. IF `RandomMaxPercentMode`,  provide
                           a number from 0-100 to specify the max percent of pods to
                           do chaos action
                         type: string
@@ -4980,10 +4974,10 @@ spec:
                     type: string
                   value:
                     description: Value is required when the mode is set to `FixedMode`
-                      / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedMode`,
-                      provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
+                      / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
+                      provide an integer of pods to do chaos action. If `FixedPercentMode`,
                       provide a number from 0-100 to specify the percent of pods the
-                      server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                      server can do chaos action. IF `RandomMaxPercentMode`,  provide
                       a number from 0-100 to specify the max percent of pods to do
                       chaos action
                     type: string
@@ -5069,7 +5063,7 @@ spec:
                         description: Java class
                         type: string
                       exception:
-                        description: the exception which needs to throw dor action
+                        description: the exception which needs to throw for action
                           `exception`
                         type: string
                       method:
@@ -5447,10 +5441,10 @@ spec:
                     type: object
                   value:
                     description: Value is required when the mode is set to `FixedMode`
-                      / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedMode`,
-                      provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
+                      / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
+                      provide an integer of pods to do chaos action. If `FixedPercentMode`,
                       provide a number from 0-100 to specify the percent of pods the
-                      server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                      server can do chaos action. IF `RandomMaxPercentMode`,  provide
                       a number from 0-100 to specify the max percent of pods to do
                       chaos action
                     type: string
@@ -5642,10 +5636,10 @@ spec:
                     type: object
                   value:
                     description: Value is required when the mode is set to `FixedMode`
-                      / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedMode`,
-                      provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
+                      / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
+                      provide an integer of pods to do chaos action. If `FixedPercentMode`,
                       provide a number from 0-100 to specify the percent of pods the
-                      server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                      server can do chaos action. IF `RandomMaxPercentMode`,  provide
                       a number from 0-100 to specify the max percent of pods to do
                       chaos action
                     type: string
@@ -5781,10 +5775,10 @@ spec:
                     type: string
                   value:
                     description: Value is required when the mode is set to `FixedMode`
-                      / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedMode`,
-                      provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
+                      / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
+                      provide an integer of pods to do chaos action. If `FixedPercentMode`,
                       provide a number from 0-100 to specify the percent of pods the
-                      server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                      server can do chaos action. IF `RandomMaxPercentMode`,  provide
                       a number from 0-100 to specify the max percent of pods to do
                       chaos action
                     type: string
@@ -6022,11 +6016,11 @@ spec:
                               type: object
                             value:
                               description: Value is required when the mode is set
-                                to `FixedMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+                                to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
                                 If `FixedMode`, provide an integer of pods to do chaos
-                                action. If `FixedPercentPodMod`, provide a number
-                                from 0-100 to specify the percent of pods the server
-                                can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                action. If `FixedPercentMode`, provide a number from
+                                0-100 to specify the percent of pods the server can
+                                do chaos action. IF `RandomMaxPercentMode`,  provide
                                 a number from 0-100 to specify the max percent of
                                 pods to do chaos action
                               type: string
@@ -6319,11 +6313,11 @@ spec:
                               type: string
                             value:
                               description: Value is required when the mode is set
-                                to `FixedMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+                                to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
                                 If `FixedMode`, provide an integer of pods to do chaos
-                                action. If `FixedPercentPodMod`, provide a number
-                                from 0-100 to specify the percent of pods the server
-                                can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                action. If `FixedPercentMode`, provide a number from
+                                0-100 to specify the percent of pods the server can
+                                do chaos action. IF `RandomMaxPercentMode`,  provide
                                 a number from 0-100 to specify the max percent of
                                 pods to do chaos action
                               type: string
@@ -6590,11 +6584,11 @@ spec:
                               type: object
                             value:
                               description: Value is required when the mode is set
-                                to `FixedMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+                                to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
                                 If `FixedMode`, provide an integer of pods to do chaos
-                                action. If `FixedPercentPodMod`, provide a number
-                                from 0-100 to specify the percent of pods the server
-                                can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                action. If `FixedPercentMode`, provide a number from
+                                0-100 to specify the percent of pods the server can
+                                do chaos action. IF `RandomMaxPercentMode`,  provide
                                 a number from 0-100 to specify the max percent of
                                 pods to do chaos action
                               type: string
@@ -6613,18 +6607,17 @@ spec:
                           properties:
                             action:
                               description: 'Action defines the specific jvm chaos
-                                action. Supported action: delay;return;script;cfl;oom;ccf;tce;cpf;tde;tpf'
+                                action. Supported action: latency;return;exception;stress;gc;ruleData'
                               enum:
-                              - delay
+                              - latency
                               - return
-                              - script
-                              - cfl
-                              - oom
-                              - ccf
-                              - tce
-                              - cpf
-                              - tde
-                              - tpf
+                              - exception
+                              - stress
+                              - gc
+                              - ruleData
+                              type: string
+                            class:
+                              description: Java class
                               type: string
                             containerNames:
                               description: ContainerNames indicates list of the name
@@ -6633,21 +6626,30 @@ spec:
                               items:
                                 type: string
                               type: array
+                            cpuCount:
+                              description: the CPU core number need to use, only set
+                                it when action is stress
+                              type: integer
                             duration:
                               description: Duration represents the duration of the
                                 chaos action
                               type: string
-                            flags:
-                              additionalProperties:
-                                type: string
-                              description: Flags represents the flags of action
-                              type: object
-                            matchers:
-                              additionalProperties:
-                                type: string
-                              description: Matchers represents the matching rules
-                                for the target
-                              type: object
+                            exception:
+                              description: the exception which needs to throw for
+                                action `exception`
+                              type: string
+                            latency:
+                              description: the latency duration for action 'latency',
+                                unit ms
+                              type: integer
+                            memType:
+                              description: the memory type need to locate, only set
+                                it when action is stress, the value can be 'stack'
+                                or 'heap'
+                              type: string
+                            method:
+                              description: the method in Java class
+                              type: string
                             mode:
                               description: 'Mode defines the mode to run chaos action.
                                 Supported mode: one / all / fixed / fixed-percent
@@ -6658,6 +6660,16 @@ spec:
                               - fixed
                               - fixed-percent
                               - random-max-percent
+                              type: string
+                            name:
+                              description: byteman rule name, should be unique, and
+                                will use JVMChaos' name if not set
+                              type: string
+                            port:
+                              description: the port of agent server, default 9277
+                              format: int32
+                              type: integer
+                            ruleData:
                               type: string
                             selector:
                               description: Selector is used to select pods that are
@@ -6755,31 +6767,13 @@ spec:
                                     values is a set of pod names.
                                   type: object
                               type: object
-                            target:
-                              description: 'Target defines the specific jvm chaos
-                                target. Supported target: servlet;psql;jvm;jedis;http;dubbo;rocketmq;tars;mysql;druid;redisson;rabbitmq;mongodb'
-                              enum:
-                              - servlet
-                              - psql
-                              - jvm
-                              - jedis
-                              - http
-                              - dubbo
-                              - rocketmq
-                              - tars
-                              - mysql
-                              - druid
-                              - redisson
-                              - rabbitmq
-                              - mongodb
-                              type: string
                             value:
                               description: Value is required when the mode is set
-                                to `FixedMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+                                to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
                                 If `FixedMode`, provide an integer of pods to do chaos
-                                action. If `FixedPercentPodMod`, provide a number
-                                from 0-100 to specify the percent of pods the server
-                                can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                action. If `FixedPercentMode`, provide a number from
+                                0-100 to specify the percent of pods the server can
+                                do chaos action. IF `RandomMaxPercentMode`,  provide
                                 a number from 0-100 to specify the max percent of
                                 pods to do chaos action
                               type: string
@@ -6787,7 +6781,6 @@ spec:
                           - action
                           - mode
                           - selector
-                          - target
                           type: object
                         kernelChaos:
                           description: KernelChaosSpec defines the desired state of
@@ -6983,11 +6976,11 @@ spec:
                               type: object
                             value:
                               description: Value is required when the mode is set
-                                to `FixedMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+                                to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
                                 If `FixedMode`, provide an integer of pods to do chaos
-                                action. If `FixedPercentPodMod`, provide a number
-                                from 0-100 to specify the percent of pods the server
-                                can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                action. If `FixedPercentMode`, provide a number from
+                                0-100 to specify the percent of pods the server can
+                                do chaos action. IF `RandomMaxPercentMode`,  provide
                                 a number from 0-100 to specify the max percent of
                                 pods to do chaos action
                               type: string
@@ -7366,11 +7359,11 @@ spec:
                                   type: object
                                 value:
                                   description: Value is required when the mode is
-                                    set to `FixedMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+                                    set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
                                     If `FixedMode`, provide an integer of pods to
-                                    do chaos action. If `FixedPercentPodMod`, provide
+                                    do chaos action. If `FixedPercentMode`, provide
                                     a number from 0-100 to specify the percent of
-                                    pods the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                    pods the server can do chaos action. IF `RandomMaxPercentMode`,  provide
                                     a number from 0-100 to specify the max percent
                                     of pods to do chaos action
                                   type: string
@@ -7384,11 +7377,11 @@ spec:
                               type: string
                             value:
                               description: Value is required when the mode is set
-                                to `FixedMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+                                to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
                                 If `FixedMode`, provide an integer of pods to do chaos
-                                action. If `FixedPercentPodMod`, provide a number
-                                from 0-100 to specify the percent of pods the server
-                                can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                action. If `FixedPercentMode`, provide a number from
+                                0-100 to specify the percent of pods the server can
+                                do chaos action. IF `RandomMaxPercentMode`,  provide
                                 a number from 0-100 to specify the max percent of
                                 pods to do chaos action
                               type: string
@@ -7476,7 +7469,7 @@ spec:
                                   type: string
                                 exception:
                                   description: the exception which needs to throw
-                                    dor action `exception`
+                                    for action `exception`
                                   type: string
                                 method:
                                   description: the method in Java class
@@ -7870,11 +7863,11 @@ spec:
                               type: object
                             value:
                               description: Value is required when the mode is set
-                                to `FixedMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+                                to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
                                 If `FixedMode`, provide an integer of pods to do chaos
-                                action. If `FixedPercentPodMod`, provide a number
-                                from 0-100 to specify the percent of pods the server
-                                can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                action. If `FixedPercentMode`, provide a number from
+                                0-100 to specify the percent of pods the server can
+                                do chaos action. IF `RandomMaxPercentMode`,  provide
                                 a number from 0-100 to specify the max percent of
                                 pods to do chaos action
                               type: string
@@ -8088,11 +8081,11 @@ spec:
                                   type: object
                                 value:
                                   description: Value is required when the mode is
-                                    set to `FixedMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+                                    set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
                                     If `FixedMode`, provide an integer of pods to
-                                    do chaos action. If `FixedPercentPodMod`, provide
+                                    do chaos action. If `FixedPercentMode`, provide
                                     a number from 0-100 to specify the percent of
-                                    pods the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                    pods the server can do chaos action. IF `RandomMaxPercentMode`,  provide
                                     a number from 0-100 to specify the max percent
                                     of pods to do chaos action
                                   type: string
@@ -8393,11 +8386,11 @@ spec:
                                   type: string
                                 value:
                                   description: Value is required when the mode is
-                                    set to `FixedMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+                                    set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
                                     If `FixedMode`, provide an integer of pods to
-                                    do chaos action. If `FixedPercentPodMod`, provide
+                                    do chaos action. If `FixedPercentMode`, provide
                                     a number from 0-100 to specify the percent of
-                                    pods the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                    pods the server can do chaos action. IF `RandomMaxPercentMode`,  provide
                                     a number from 0-100 to specify the max percent
                                     of pods to do chaos action
                                   type: string
@@ -8670,11 +8663,11 @@ spec:
                                   type: object
                                 value:
                                   description: Value is required when the mode is
-                                    set to `FixedMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+                                    set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
                                     If `FixedMode`, provide an integer of pods to
-                                    do chaos action. If `FixedPercentPodMod`, provide
+                                    do chaos action. If `FixedPercentMode`, provide
                                     a number from 0-100 to specify the percent of
-                                    pods the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                    pods the server can do chaos action. IF `RandomMaxPercentMode`,  provide
                                     a number from 0-100 to specify the max percent
                                     of pods to do chaos action
                                   type: string
@@ -8694,18 +8687,17 @@ spec:
                               properties:
                                 action:
                                   description: 'Action defines the specific jvm chaos
-                                    action. Supported action: delay;return;script;cfl;oom;ccf;tce;cpf;tde;tpf'
+                                    action. Supported action: latency;return;exception;stress;gc;ruleData'
                                   enum:
-                                  - delay
+                                  - latency
                                   - return
-                                  - script
-                                  - cfl
-                                  - oom
-                                  - ccf
-                                  - tce
-                                  - cpf
-                                  - tde
-                                  - tpf
+                                  - exception
+                                  - stress
+                                  - gc
+                                  - ruleData
+                                  type: string
+                                class:
+                                  description: Java class
                                   type: string
                                 containerNames:
                                   description: ContainerNames indicates list of the
@@ -8714,21 +8706,30 @@ spec:
                                   items:
                                     type: string
                                   type: array
+                                cpuCount:
+                                  description: the CPU core number need to use, only
+                                    set it when action is stress
+                                  type: integer
                                 duration:
                                   description: Duration represents the duration of
                                     the chaos action
                                   type: string
-                                flags:
-                                  additionalProperties:
-                                    type: string
-                                  description: Flags represents the flags of action
-                                  type: object
-                                matchers:
-                                  additionalProperties:
-                                    type: string
-                                  description: Matchers represents the matching rules
-                                    for the target
-                                  type: object
+                                exception:
+                                  description: the exception which needs to throw
+                                    for action `exception`
+                                  type: string
+                                latency:
+                                  description: the latency duration for action 'latency',
+                                    unit ms
+                                  type: integer
+                                memType:
+                                  description: the memory type need to locate, only
+                                    set it when action is stress, the value can be
+                                    'stack' or 'heap'
+                                  type: string
+                                method:
+                                  description: the method in Java class
+                                  type: string
                                 mode:
                                   description: 'Mode defines the mode to run chaos
                                     action. Supported mode: one / all / fixed / fixed-percent
@@ -8739,6 +8740,16 @@ spec:
                                   - fixed
                                   - fixed-percent
                                   - random-max-percent
+                                  type: string
+                                name:
+                                  description: byteman rule name, should be unique,
+                                    and will use JVMChaos' name if not set
+                                  type: string
+                                port:
+                                  description: the port of agent server, default 9277
+                                  format: int32
+                                  type: integer
+                                ruleData:
                                   type: string
                                 selector:
                                   description: Selector is used to select pods that
@@ -8840,31 +8851,13 @@ spec:
                                         and the each values is a set of pod names.
                                       type: object
                                   type: object
-                                target:
-                                  description: 'Target defines the specific jvm chaos
-                                    target. Supported target: servlet;psql;jvm;jedis;http;dubbo;rocketmq;tars;mysql;druid;redisson;rabbitmq;mongodb'
-                                  enum:
-                                  - servlet
-                                  - psql
-                                  - jvm
-                                  - jedis
-                                  - http
-                                  - dubbo
-                                  - rocketmq
-                                  - tars
-                                  - mysql
-                                  - druid
-                                  - redisson
-                                  - rabbitmq
-                                  - mongodb
-                                  type: string
                                 value:
                                   description: Value is required when the mode is
-                                    set to `FixedMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+                                    set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
                                     If `FixedMode`, provide an integer of pods to
-                                    do chaos action. If `FixedPercentPodMod`, provide
+                                    do chaos action. If `FixedPercentMode`, provide
                                     a number from 0-100 to specify the percent of
-                                    pods the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                    pods the server can do chaos action. IF `RandomMaxPercentMode`,  provide
                                     a number from 0-100 to specify the max percent
                                     of pods to do chaos action
                                   type: string
@@ -8872,7 +8865,6 @@ spec:
                               - action
                               - mode
                               - selector
-                              - target
                               type: object
                             kernelChaos:
                               description: KernelChaosSpec defines the desired state
@@ -9076,11 +9068,11 @@ spec:
                                   type: object
                                 value:
                                   description: Value is required when the mode is
-                                    set to `FixedMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+                                    set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
                                     If `FixedMode`, provide an integer of pods to
-                                    do chaos action. If `FixedPercentPodMod`, provide
+                                    do chaos action. If `FixedPercentMode`, provide
                                     a number from 0-100 to specify the percent of
-                                    pods the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                    pods the server can do chaos action. IF `RandomMaxPercentMode`,  provide
                                     a number from 0-100 to specify the max percent
                                     of pods to do chaos action
                                   type: string
@@ -9468,12 +9460,12 @@ spec:
                                       type: object
                                     value:
                                       description: Value is required when the mode
-                                        is set to `FixedMode` / `FixedPercentPodMod`
-                                        / `RandomMaxPercentPodMod`. If `FixedMode`,
+                                        is set to `FixedMode` / `FixedPercentMode`
+                                        / `RandomMaxPercentMode`. If `FixedMode`,
                                         provide an integer of pods to do chaos action.
-                                        If `FixedPercentPodMod`, provide a number
-                                        from 0-100 to specify the percent of pods
-                                        the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                        If `FixedPercentMode`, provide a number from
+                                        0-100 to specify the percent of pods the server
+                                        can do chaos action. IF `RandomMaxPercentMode`,  provide
                                         a number from 0-100 to specify the max percent
                                         of pods to do chaos action
                                       type: string
@@ -9487,11 +9479,11 @@ spec:
                                   type: string
                                 value:
                                   description: Value is required when the mode is
-                                    set to `FixedMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+                                    set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
                                     If `FixedMode`, provide an integer of pods to
-                                    do chaos action. If `FixedPercentPodMod`, provide
+                                    do chaos action. If `FixedPercentMode`, provide
                                     a number from 0-100 to specify the percent of
-                                    pods the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                    pods the server can do chaos action. IF `RandomMaxPercentMode`,  provide
                                     a number from 0-100 to specify the max percent
                                     of pods to do chaos action
                                   type: string
@@ -9579,7 +9571,7 @@ spec:
                                       type: string
                                     exception:
                                       description: the exception which needs to throw
-                                        dor action `exception`
+                                        for action `exception`
                                       type: string
                                     method:
                                       description: the method in Java class
@@ -9978,11 +9970,11 @@ spec:
                                   type: object
                                 value:
                                   description: Value is required when the mode is
-                                    set to `FixedMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+                                    set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
                                     If `FixedMode`, provide an integer of pods to
-                                    do chaos action. If `FixedPercentPodMod`, provide
+                                    do chaos action. If `FixedPercentMode`, provide
                                     a number from 0-100 to specify the percent of
-                                    pods the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                    pods the server can do chaos action. IF `RandomMaxPercentMode`,  provide
                                     a number from 0-100 to specify the max percent
                                     of pods to do chaos action
                                   type: string
@@ -10195,11 +10187,11 @@ spec:
                                   type: object
                                 value:
                                   description: Value is required when the mode is
-                                    set to `FixedMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+                                    set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
                                     If `FixedMode`, provide an integer of pods to
-                                    do chaos action. If `FixedPercentPodMod`, provide
+                                    do chaos action. If `FixedPercentMode`, provide
                                     a number from 0-100 to specify the percent of
-                                    pods the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                    pods the server can do chaos action. IF `RandomMaxPercentMode`,  provide
                                     a number from 0-100 to specify the max percent
                                     of pods to do chaos action
                                   type: string
@@ -10350,11 +10342,11 @@ spec:
                                   type: string
                                 value:
                                   description: Value is required when the mode is
-                                    set to `FixedMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+                                    set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
                                     If `FixedMode`, provide an integer of pods to
-                                    do chaos action. If `FixedPercentPodMod`, provide
+                                    do chaos action. If `FixedPercentMode`, provide
                                     a number from 0-100 to specify the percent of
-                                    pods the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                    pods the server can do chaos action. IF `RandomMaxPercentMode`,  provide
                                     a number from 0-100 to specify the max percent
                                     of pods to do chaos action
                                   type: string
@@ -10561,11 +10553,11 @@ spec:
                               type: object
                             value:
                               description: Value is required when the mode is set
-                                to `FixedMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+                                to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
                                 If `FixedMode`, provide an integer of pods to do chaos
-                                action. If `FixedPercentPodMod`, provide a number
-                                from 0-100 to specify the percent of pods the server
-                                can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                action. If `FixedPercentMode`, provide a number from
+                                0-100 to specify the percent of pods the server can
+                                do chaos action. IF `RandomMaxPercentMode`,  provide
                                 a number from 0-100 to specify the max percent of
                                 pods to do chaos action
                               type: string
@@ -13640,11 +13632,11 @@ spec:
                               type: string
                             value:
                               description: Value is required when the mode is set
-                                to `FixedMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+                                to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
                                 If `FixedMode`, provide an integer of pods to do chaos
-                                action. If `FixedPercentPodMod`, provide a number
-                                from 0-100 to specify the percent of pods the server
-                                can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                action. If `FixedPercentMode`, provide a number from
+                                0-100 to specify the percent of pods the server can
+                                do chaos action. IF `RandomMaxPercentMode`,  provide
                                 a number from 0-100 to specify the max percent of
                                 pods to do chaos action
                               type: string
@@ -13954,11 +13946,11 @@ spec:
                 type: object
               value:
                 description: Value is required when the mode is set to `FixedMode`
-                  / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedMode`,
-                  provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
-                  provide a number from 0-100 to specify the percent of pods the server
-                  can do chaos action. IF `RandomMaxPercentPodMod`,  provide a number
-                  from 0-100 to specify the max percent of pods to do chaos action
+                  / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`, provide
+                  an integer of pods to do chaos action. If `FixedPercentMode`, provide
+                  a number from 0-100 to specify the percent of pods the server can
+                  do chaos action. IF `RandomMaxPercentMode`,  provide a number from
+                  0-100 to specify the max percent of pods to do chaos action
                 type: string
             required:
             - mode
@@ -14198,11 +14190,11 @@ spec:
                 type: string
               value:
                 description: Value is required when the mode is set to `FixedMode`
-                  / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedMode`,
-                  provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
-                  provide a number from 0-100 to specify the percent of pods the server
-                  can do chaos action. IF `RandomMaxPercentPodMod`,  provide a number
-                  from 0-100 to specify the max percent of pods to do chaos action
+                  / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`, provide
+                  an integer of pods to do chaos action. If `FixedPercentMode`, provide
+                  a number from 0-100 to specify the percent of pods the server can
+                  do chaos action. IF `RandomMaxPercentMode`,  provide a number from
+                  0-100 to specify the max percent of pods to do chaos action
                 type: string
             required:
             - mode
@@ -14503,10 +14495,10 @@ spec:
                     type: object
                   value:
                     description: Value is required when the mode is set to `FixedMode`
-                      / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedMode`,
-                      provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
+                      / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
+                      provide an integer of pods to do chaos action. If `FixedPercentMode`,
                       provide a number from 0-100 to specify the percent of pods the
-                      server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                      server can do chaos action. IF `RandomMaxPercentMode`,  provide
                       a number from 0-100 to specify the max percent of pods to do
                       chaos action
                     type: string
@@ -14778,10 +14770,10 @@ spec:
                     type: string
                   value:
                     description: Value is required when the mode is set to `FixedMode`
-                      / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedMode`,
-                      provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
+                      / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
+                      provide an integer of pods to do chaos action. If `FixedPercentMode`,
                       provide a number from 0-100 to specify the percent of pods the
-                      server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                      server can do chaos action. IF `RandomMaxPercentMode`,  provide
                       a number from 0-100 to specify the max percent of pods to do
                       chaos action
                     type: string
@@ -15035,10 +15027,10 @@ spec:
                     type: object
                   value:
                     description: Value is required when the mode is set to `FixedMode`
-                      / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedMode`,
-                      provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
+                      / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
+                      provide an integer of pods to do chaos action. If `FixedPercentMode`,
                       provide a number from 0-100 to specify the percent of pods the
-                      server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                      server can do chaos action. IF `RandomMaxPercentMode`,  provide
                       a number from 0-100 to specify the max percent of pods to do
                       chaos action
                     type: string
@@ -15057,18 +15049,17 @@ spec:
                 properties:
                   action:
                     description: 'Action defines the specific jvm chaos action. Supported
-                      action: delay;return;script;cfl;oom;ccf;tce;cpf;tde;tpf'
+                      action: latency;return;exception;stress;gc;ruleData'
                     enum:
-                    - delay
+                    - latency
                     - return
-                    - script
-                    - cfl
-                    - oom
-                    - ccf
-                    - tce
-                    - cpf
-                    - tde
-                    - tpf
+                    - exception
+                    - stress
+                    - gc
+                    - ruleData
+                    type: string
+                  class:
+                    description: Java class
                     type: string
                   containerNames:
                     description: ContainerNames indicates list of the name of affected
@@ -15076,19 +15067,26 @@ spec:
                     items:
                       type: string
                     type: array
+                  cpuCount:
+                    description: the CPU core number need to use, only set it when
+                      action is stress
+                    type: integer
                   duration:
                     description: Duration represents the duration of the chaos action
                     type: string
-                  flags:
-                    additionalProperties:
-                      type: string
-                    description: Flags represents the flags of action
-                    type: object
-                  matchers:
-                    additionalProperties:
-                      type: string
-                    description: Matchers represents the matching rules for the target
-                    type: object
+                  exception:
+                    description: the exception which needs to throw for action `exception`
+                    type: string
+                  latency:
+                    description: the latency duration for action 'latency', unit ms
+                    type: integer
+                  memType:
+                    description: the memory type need to locate, only set it when
+                      action is stress, the value can be 'stack' or 'heap'
+                    type: string
+                  method:
+                    description: the method in Java class
+                    type: string
                   mode:
                     description: 'Mode defines the mode to run chaos action. Supported
                       mode: one / all / fixed / fixed-percent / random-max-percent'
@@ -15098,6 +15096,16 @@ spec:
                     - fixed
                     - fixed-percent
                     - random-max-percent
+                    type: string
+                  name:
+                    description: byteman rule name, should be unique, and will use
+                      JVMChaos' name if not set
+                    type: string
+                  port:
+                    description: the port of agent server, default 9277
+                    format: int32
+                    type: integer
+                  ruleData:
                     type: string
                   selector:
                     description: Selector is used to select pods that are used to
@@ -15189,30 +15197,12 @@ spec:
                           which pods belong, and the each values is a set of pod names.
                         type: object
                     type: object
-                  target:
-                    description: 'Target defines the specific jvm chaos target. Supported
-                      target: servlet;psql;jvm;jedis;http;dubbo;rocketmq;tars;mysql;druid;redisson;rabbitmq;mongodb'
-                    enum:
-                    - servlet
-                    - psql
-                    - jvm
-                    - jedis
-                    - http
-                    - dubbo
-                    - rocketmq
-                    - tars
-                    - mysql
-                    - druid
-                    - redisson
-                    - rabbitmq
-                    - mongodb
-                    type: string
                   value:
                     description: Value is required when the mode is set to `FixedMode`
-                      / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedMode`,
-                      provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
+                      / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
+                      provide an integer of pods to do chaos action. If `FixedPercentMode`,
                       provide a number from 0-100 to specify the percent of pods the
-                      server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                      server can do chaos action. IF `RandomMaxPercentMode`,  provide
                       a number from 0-100 to specify the max percent of pods to do
                       chaos action
                     type: string
@@ -15220,7 +15210,6 @@ spec:
                 - action
                 - mode
                 - selector
-                - target
                 type: object
               kernelChaos:
                 description: KernelChaosSpec defines the desired state of KernelChaos
@@ -15400,10 +15389,10 @@ spec:
                     type: object
                   value:
                     description: Value is required when the mode is set to `FixedMode`
-                      / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedMode`,
-                      provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
+                      / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
+                      provide an integer of pods to do chaos action. If `FixedPercentMode`,
                       provide a number from 0-100 to specify the percent of pods the
-                      server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                      server can do chaos action. IF `RandomMaxPercentMode`,  provide
                       a number from 0-100 to specify the max percent of pods to do
                       chaos action
                     type: string
@@ -15753,10 +15742,10 @@ spec:
                         type: object
                       value:
                         description: Value is required when the mode is set to `FixedMode`
-                          / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedMode`,
-                          provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
+                          / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
+                          provide an integer of pods to do chaos action. If `FixedPercentMode`,
                           provide a number from 0-100 to specify the percent of pods
-                          the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                          the server can do chaos action. IF `RandomMaxPercentMode`,  provide
                           a number from 0-100 to specify the max percent of pods to
                           do chaos action
                         type: string
@@ -15770,10 +15759,10 @@ spec:
                     type: string
                   value:
                     description: Value is required when the mode is set to `FixedMode`
-                      / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedMode`,
-                      provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
+                      / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
+                      provide an integer of pods to do chaos action. If `FixedPercentMode`,
                       provide a number from 0-100 to specify the percent of pods the
-                      server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                      server can do chaos action. IF `RandomMaxPercentMode`,  provide
                       a number from 0-100 to specify the max percent of pods to do
                       chaos action
                     type: string
@@ -15859,7 +15848,7 @@ spec:
                         description: Java class
                         type: string
                       exception:
-                        description: the exception which needs to throw dor action
+                        description: the exception which needs to throw for action
                           `exception`
                         type: string
                       method:
@@ -16237,10 +16226,10 @@ spec:
                     type: object
                   value:
                     description: Value is required when the mode is set to `FixedMode`
-                      / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedMode`,
-                      provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
+                      / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
+                      provide an integer of pods to do chaos action. If `FixedPercentMode`,
                       provide a number from 0-100 to specify the percent of pods the
-                      server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                      server can do chaos action. IF `RandomMaxPercentMode`,  provide
                       a number from 0-100 to specify the max percent of pods to do
                       chaos action
                     type: string
@@ -16436,10 +16425,10 @@ spec:
                         type: object
                       value:
                         description: Value is required when the mode is set to `FixedMode`
-                          / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedMode`,
-                          provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
+                          / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
+                          provide an integer of pods to do chaos action. If `FixedPercentMode`,
                           provide a number from 0-100 to specify the percent of pods
-                          the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                          the server can do chaos action. IF `RandomMaxPercentMode`,  provide
                           a number from 0-100 to specify the max percent of pods to
                           do chaos action
                         type: string
@@ -16724,10 +16713,10 @@ spec:
                         type: string
                       value:
                         description: Value is required when the mode is set to `FixedMode`
-                          / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedMode`,
-                          provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
+                          / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
+                          provide an integer of pods to do chaos action. If `FixedPercentMode`,
                           provide a number from 0-100 to specify the percent of pods
-                          the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                          the server can do chaos action. IF `RandomMaxPercentMode`,  provide
                           a number from 0-100 to specify the max percent of pods to
                           do chaos action
                         type: string
@@ -16985,10 +16974,10 @@ spec:
                         type: object
                       value:
                         description: Value is required when the mode is set to `FixedMode`
-                          / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedMode`,
-                          provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
+                          / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
+                          provide an integer of pods to do chaos action. If `FixedPercentMode`,
                           provide a number from 0-100 to specify the percent of pods
-                          the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                          the server can do chaos action. IF `RandomMaxPercentMode`,  provide
                           a number from 0-100 to specify the max percent of pods to
                           do chaos action
                         type: string
@@ -17007,18 +16996,17 @@ spec:
                     properties:
                       action:
                         description: 'Action defines the specific jvm chaos action.
-                          Supported action: delay;return;script;cfl;oom;ccf;tce;cpf;tde;tpf'
+                          Supported action: latency;return;exception;stress;gc;ruleData'
                         enum:
-                        - delay
+                        - latency
                         - return
-                        - script
-                        - cfl
-                        - oom
-                        - ccf
-                        - tce
-                        - cpf
-                        - tde
-                        - tpf
+                        - exception
+                        - stress
+                        - gc
+                        - ruleData
+                        type: string
+                      class:
+                        description: Java class
                         type: string
                       containerNames:
                         description: ContainerNames indicates list of the name of
@@ -17026,21 +17014,29 @@ spec:
                         items:
                           type: string
                         type: array
+                      cpuCount:
+                        description: the CPU core number need to use, only set it
+                          when action is stress
+                        type: integer
                       duration:
                         description: Duration represents the duration of the chaos
                           action
                         type: string
-                      flags:
-                        additionalProperties:
-                          type: string
-                        description: Flags represents the flags of action
-                        type: object
-                      matchers:
-                        additionalProperties:
-                          type: string
-                        description: Matchers represents the matching rules for the
-                          target
-                        type: object
+                      exception:
+                        description: the exception which needs to throw for action
+                          `exception`
+                        type: string
+                      latency:
+                        description: the latency duration for action 'latency', unit
+                          ms
+                        type: integer
+                      memType:
+                        description: the memory type need to locate, only set it when
+                          action is stress, the value can be 'stack' or 'heap'
+                        type: string
+                      method:
+                        description: the method in Java class
+                        type: string
                       mode:
                         description: 'Mode defines the mode to run chaos action. Supported
                           mode: one / all / fixed / fixed-percent / random-max-percent'
@@ -17050,6 +17046,16 @@ spec:
                         - fixed
                         - fixed-percent
                         - random-max-percent
+                        type: string
+                      name:
+                        description: byteman rule name, should be unique, and will
+                          use JVMChaos' name if not set
+                        type: string
+                      port:
+                        description: the port of agent server, default 9277
+                        format: int32
+                        type: integer
+                      ruleData:
                         type: string
                       selector:
                         description: Selector is used to select pods that are used
@@ -17143,30 +17149,12 @@ spec:
                               names.
                             type: object
                         type: object
-                      target:
-                        description: 'Target defines the specific jvm chaos target.
-                          Supported target: servlet;psql;jvm;jedis;http;dubbo;rocketmq;tars;mysql;druid;redisson;rabbitmq;mongodb'
-                        enum:
-                        - servlet
-                        - psql
-                        - jvm
-                        - jedis
-                        - http
-                        - dubbo
-                        - rocketmq
-                        - tars
-                        - mysql
-                        - druid
-                        - redisson
-                        - rabbitmq
-                        - mongodb
-                        type: string
                       value:
                         description: Value is required when the mode is set to `FixedMode`
-                          / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedMode`,
-                          provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
+                          / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
+                          provide an integer of pods to do chaos action. If `FixedPercentMode`,
                           provide a number from 0-100 to specify the percent of pods
-                          the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                          the server can do chaos action. IF `RandomMaxPercentMode`,  provide
                           a number from 0-100 to specify the max percent of pods to
                           do chaos action
                         type: string
@@ -17174,7 +17162,6 @@ spec:
                     - action
                     - mode
                     - selector
-                    - target
                     type: object
                   kernelChaos:
                     description: KernelChaosSpec defines the desired state of KernelChaos
@@ -17360,10 +17347,10 @@ spec:
                         type: object
                       value:
                         description: Value is required when the mode is set to `FixedMode`
-                          / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedMode`,
-                          provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
+                          / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
+                          provide an integer of pods to do chaos action. If `FixedPercentMode`,
                           provide a number from 0-100 to specify the percent of pods
-                          the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                          the server can do chaos action. IF `RandomMaxPercentMode`,  provide
                           a number from 0-100 to specify the max percent of pods to
                           do chaos action
                         type: string
@@ -17721,11 +17708,11 @@ spec:
                             type: object
                           value:
                             description: Value is required when the mode is set to
-                              `FixedMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+                              `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
                               If `FixedMode`, provide an integer of pods to do chaos
-                              action. If `FixedPercentPodMod`, provide a number from
+                              action. If `FixedPercentMode`, provide a number from
                               0-100 to specify the percent of pods the server can
-                              do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                              do chaos action. IF `RandomMaxPercentMode`,  provide
                               a number from 0-100 to specify the max percent of pods
                               to do chaos action
                             type: string
@@ -17739,10 +17726,10 @@ spec:
                         type: string
                       value:
                         description: Value is required when the mode is set to `FixedMode`
-                          / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedMode`,
-                          provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
+                          / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
+                          provide an integer of pods to do chaos action. If `FixedPercentMode`,
                           provide a number from 0-100 to specify the percent of pods
-                          the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                          the server can do chaos action. IF `RandomMaxPercentMode`,  provide
                           a number from 0-100 to specify the max percent of pods to
                           do chaos action
                         type: string
@@ -17828,7 +17815,7 @@ spec:
                             description: Java class
                             type: string
                           exception:
-                            description: the exception which needs to throw dor action
+                            description: the exception which needs to throw for action
                               `exception`
                             type: string
                           method:
@@ -18209,10 +18196,10 @@ spec:
                         type: object
                       value:
                         description: Value is required when the mode is set to `FixedMode`
-                          / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedMode`,
-                          provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
+                          / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
+                          provide an integer of pods to do chaos action. If `FixedPercentMode`,
                           provide a number from 0-100 to specify the percent of pods
-                          the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                          the server can do chaos action. IF `RandomMaxPercentMode`,  provide
                           a number from 0-100 to specify the max percent of pods to
                           do chaos action
                         type: string
@@ -18407,10 +18394,10 @@ spec:
                         type: object
                       value:
                         description: Value is required when the mode is set to `FixedMode`
-                          / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedMode`,
-                          provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
+                          / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
+                          provide an integer of pods to do chaos action. If `FixedPercentMode`,
                           provide a number from 0-100 to specify the percent of pods
-                          the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                          the server can do chaos action. IF `RandomMaxPercentMode`,  provide
                           a number from 0-100 to specify the max percent of pods to
                           do chaos action
                         type: string
@@ -18549,10 +18536,10 @@ spec:
                         type: string
                       value:
                         description: Value is required when the mode is set to `FixedMode`
-                          / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedMode`,
-                          provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
+                          / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
+                          provide an integer of pods to do chaos action. If `FixedPercentMode`,
                           provide a number from 0-100 to specify the percent of pods
-                          the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                          the server can do chaos action. IF `RandomMaxPercentMode`,  provide
                           a number from 0-100 to specify the max percent of pods to
                           do chaos action
                         type: string
@@ -18797,11 +18784,11 @@ spec:
                                   type: object
                                 value:
                                   description: Value is required when the mode is
-                                    set to `FixedMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+                                    set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
                                     If `FixedMode`, provide an integer of pods to
-                                    do chaos action. If `FixedPercentPodMod`, provide
+                                    do chaos action. If `FixedPercentMode`, provide
                                     a number from 0-100 to specify the percent of
-                                    pods the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                    pods the server can do chaos action. IF `RandomMaxPercentMode`,  provide
                                     a number from 0-100 to specify the max percent
                                     of pods to do chaos action
                                   type: string
@@ -19099,11 +19086,11 @@ spec:
                                   type: string
                                 value:
                                   description: Value is required when the mode is
-                                    set to `FixedMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+                                    set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
                                     If `FixedMode`, provide an integer of pods to
-                                    do chaos action. If `FixedPercentPodMod`, provide
+                                    do chaos action. If `FixedPercentMode`, provide
                                     a number from 0-100 to specify the percent of
-                                    pods the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                    pods the server can do chaos action. IF `RandomMaxPercentMode`,  provide
                                     a number from 0-100 to specify the max percent
                                     of pods to do chaos action
                                   type: string
@@ -19376,11 +19363,11 @@ spec:
                                   type: object
                                 value:
                                   description: Value is required when the mode is
-                                    set to `FixedMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+                                    set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
                                     If `FixedMode`, provide an integer of pods to
-                                    do chaos action. If `FixedPercentPodMod`, provide
+                                    do chaos action. If `FixedPercentMode`, provide
                                     a number from 0-100 to specify the percent of
-                                    pods the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                    pods the server can do chaos action. IF `RandomMaxPercentMode`,  provide
                                     a number from 0-100 to specify the max percent
                                     of pods to do chaos action
                                   type: string
@@ -19400,18 +19387,17 @@ spec:
                               properties:
                                 action:
                                   description: 'Action defines the specific jvm chaos
-                                    action. Supported action: delay;return;script;cfl;oom;ccf;tce;cpf;tde;tpf'
+                                    action. Supported action: latency;return;exception;stress;gc;ruleData'
                                   enum:
-                                  - delay
+                                  - latency
                                   - return
-                                  - script
-                                  - cfl
-                                  - oom
-                                  - ccf
-                                  - tce
-                                  - cpf
-                                  - tde
-                                  - tpf
+                                  - exception
+                                  - stress
+                                  - gc
+                                  - ruleData
+                                  type: string
+                                class:
+                                  description: Java class
                                   type: string
                                 containerNames:
                                   description: ContainerNames indicates list of the
@@ -19420,21 +19406,30 @@ spec:
                                   items:
                                     type: string
                                   type: array
+                                cpuCount:
+                                  description: the CPU core number need to use, only
+                                    set it when action is stress
+                                  type: integer
                                 duration:
                                   description: Duration represents the duration of
                                     the chaos action
                                   type: string
-                                flags:
-                                  additionalProperties:
-                                    type: string
-                                  description: Flags represents the flags of action
-                                  type: object
-                                matchers:
-                                  additionalProperties:
-                                    type: string
-                                  description: Matchers represents the matching rules
-                                    for the target
-                                  type: object
+                                exception:
+                                  description: the exception which needs to throw
+                                    for action `exception`
+                                  type: string
+                                latency:
+                                  description: the latency duration for action 'latency',
+                                    unit ms
+                                  type: integer
+                                memType:
+                                  description: the memory type need to locate, only
+                                    set it when action is stress, the value can be
+                                    'stack' or 'heap'
+                                  type: string
+                                method:
+                                  description: the method in Java class
+                                  type: string
                                 mode:
                                   description: 'Mode defines the mode to run chaos
                                     action. Supported mode: one / all / fixed / fixed-percent
@@ -19445,6 +19440,16 @@ spec:
                                   - fixed
                                   - fixed-percent
                                   - random-max-percent
+                                  type: string
+                                name:
+                                  description: byteman rule name, should be unique,
+                                    and will use JVMChaos' name if not set
+                                  type: string
+                                port:
+                                  description: the port of agent server, default 9277
+                                  format: int32
+                                  type: integer
+                                ruleData:
                                   type: string
                                 selector:
                                   description: Selector is used to select pods that
@@ -19546,31 +19551,13 @@ spec:
                                         and the each values is a set of pod names.
                                       type: object
                                   type: object
-                                target:
-                                  description: 'Target defines the specific jvm chaos
-                                    target. Supported target: servlet;psql;jvm;jedis;http;dubbo;rocketmq;tars;mysql;druid;redisson;rabbitmq;mongodb'
-                                  enum:
-                                  - servlet
-                                  - psql
-                                  - jvm
-                                  - jedis
-                                  - http
-                                  - dubbo
-                                  - rocketmq
-                                  - tars
-                                  - mysql
-                                  - druid
-                                  - redisson
-                                  - rabbitmq
-                                  - mongodb
-                                  type: string
                                 value:
                                   description: Value is required when the mode is
-                                    set to `FixedMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+                                    set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
                                     If `FixedMode`, provide an integer of pods to
-                                    do chaos action. If `FixedPercentPodMod`, provide
+                                    do chaos action. If `FixedPercentMode`, provide
                                     a number from 0-100 to specify the percent of
-                                    pods the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                    pods the server can do chaos action. IF `RandomMaxPercentMode`,  provide
                                     a number from 0-100 to specify the max percent
                                     of pods to do chaos action
                                   type: string
@@ -19578,7 +19565,6 @@ spec:
                               - action
                               - mode
                               - selector
-                              - target
                               type: object
                             kernelChaos:
                               description: KernelChaosSpec defines the desired state
@@ -19782,11 +19768,11 @@ spec:
                                   type: object
                                 value:
                                   description: Value is required when the mode is
-                                    set to `FixedMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+                                    set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
                                     If `FixedMode`, provide an integer of pods to
-                                    do chaos action. If `FixedPercentPodMod`, provide
+                                    do chaos action. If `FixedPercentMode`, provide
                                     a number from 0-100 to specify the percent of
-                                    pods the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                    pods the server can do chaos action. IF `RandomMaxPercentMode`,  provide
                                     a number from 0-100 to specify the max percent
                                     of pods to do chaos action
                                   type: string
@@ -20176,12 +20162,12 @@ spec:
                                       type: object
                                     value:
                                       description: Value is required when the mode
-                                        is set to `FixedMode` / `FixedPercentPodMod`
-                                        / `RandomMaxPercentPodMod`. If `FixedMode`,
+                                        is set to `FixedMode` / `FixedPercentMode`
+                                        / `RandomMaxPercentMode`. If `FixedMode`,
                                         provide an integer of pods to do chaos action.
-                                        If `FixedPercentPodMod`, provide a number
-                                        from 0-100 to specify the percent of pods
-                                        the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                        If `FixedPercentMode`, provide a number from
+                                        0-100 to specify the percent of pods the server
+                                        can do chaos action. IF `RandomMaxPercentMode`,  provide
                                         a number from 0-100 to specify the max percent
                                         of pods to do chaos action
                                       type: string
@@ -20195,11 +20181,11 @@ spec:
                                   type: string
                                 value:
                                   description: Value is required when the mode is
-                                    set to `FixedMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+                                    set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
                                     If `FixedMode`, provide an integer of pods to
-                                    do chaos action. If `FixedPercentPodMod`, provide
+                                    do chaos action. If `FixedPercentMode`, provide
                                     a number from 0-100 to specify the percent of
-                                    pods the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                    pods the server can do chaos action. IF `RandomMaxPercentMode`,  provide
                                     a number from 0-100 to specify the max percent
                                     of pods to do chaos action
                                   type: string
@@ -20287,7 +20273,7 @@ spec:
                                       type: string
                                     exception:
                                       description: the exception which needs to throw
-                                        dor action `exception`
+                                        for action `exception`
                                       type: string
                                     method:
                                       description: the method in Java class
@@ -20686,11 +20672,11 @@ spec:
                                   type: object
                                 value:
                                   description: Value is required when the mode is
-                                    set to `FixedMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+                                    set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
                                     If `FixedMode`, provide an integer of pods to
-                                    do chaos action. If `FixedPercentPodMod`, provide
+                                    do chaos action. If `FixedPercentMode`, provide
                                     a number from 0-100 to specify the percent of
-                                    pods the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                    pods the server can do chaos action. IF `RandomMaxPercentMode`,  provide
                                     a number from 0-100 to specify the max percent
                                     of pods to do chaos action
                                   type: string
@@ -20910,12 +20896,12 @@ spec:
                                       type: object
                                     value:
                                       description: Value is required when the mode
-                                        is set to `FixedMode` / `FixedPercentPodMod`
-                                        / `RandomMaxPercentPodMod`. If `FixedMode`,
+                                        is set to `FixedMode` / `FixedPercentMode`
+                                        / `RandomMaxPercentMode`. If `FixedMode`,
                                         provide an integer of pods to do chaos action.
-                                        If `FixedPercentPodMod`, provide a number
-                                        from 0-100 to specify the percent of pods
-                                        the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                        If `FixedPercentMode`, provide a number from
+                                        0-100 to specify the percent of pods the server
+                                        can do chaos action. IF `RandomMaxPercentMode`,  provide
                                         a number from 0-100 to specify the max percent
                                         of pods to do chaos action
                                       type: string
@@ -21228,12 +21214,12 @@ spec:
                                       type: string
                                     value:
                                       description: Value is required when the mode
-                                        is set to `FixedMode` / `FixedPercentPodMod`
-                                        / `RandomMaxPercentPodMod`. If `FixedMode`,
+                                        is set to `FixedMode` / `FixedPercentMode`
+                                        / `RandomMaxPercentMode`. If `FixedMode`,
                                         provide an integer of pods to do chaos action.
-                                        If `FixedPercentPodMod`, provide a number
-                                        from 0-100 to specify the percent of pods
-                                        the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                        If `FixedPercentMode`, provide a number from
+                                        0-100 to specify the percent of pods the server
+                                        can do chaos action. IF `RandomMaxPercentMode`,  provide
                                         a number from 0-100 to specify the max percent
                                         of pods to do chaos action
                                       type: string
@@ -21513,12 +21499,12 @@ spec:
                                       type: object
                                     value:
                                       description: Value is required when the mode
-                                        is set to `FixedMode` / `FixedPercentPodMod`
-                                        / `RandomMaxPercentPodMod`. If `FixedMode`,
+                                        is set to `FixedMode` / `FixedPercentMode`
+                                        / `RandomMaxPercentMode`. If `FixedMode`,
                                         provide an integer of pods to do chaos action.
-                                        If `FixedPercentPodMod`, provide a number
-                                        from 0-100 to specify the percent of pods
-                                        the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                        If `FixedPercentMode`, provide a number from
+                                        0-100 to specify the percent of pods the server
+                                        can do chaos action. IF `RandomMaxPercentMode`,  provide
                                         a number from 0-100 to specify the max percent
                                         of pods to do chaos action
                                       type: string
@@ -21538,18 +21524,17 @@ spec:
                                   properties:
                                     action:
                                       description: 'Action defines the specific jvm
-                                        chaos action. Supported action: delay;return;script;cfl;oom;ccf;tce;cpf;tde;tpf'
+                                        chaos action. Supported action: latency;return;exception;stress;gc;ruleData'
                                       enum:
-                                      - delay
+                                      - latency
                                       - return
-                                      - script
-                                      - cfl
-                                      - oom
-                                      - ccf
-                                      - tce
-                                      - cpf
-                                      - tde
-                                      - tpf
+                                      - exception
+                                      - stress
+                                      - gc
+                                      - ruleData
+                                      type: string
+                                    class:
+                                      description: Java class
                                       type: string
                                     containerNames:
                                       description: ContainerNames indicates list of
@@ -21558,21 +21543,30 @@ spec:
                                       items:
                                         type: string
                                       type: array
+                                    cpuCount:
+                                      description: the CPU core number need to use,
+                                        only set it when action is stress
+                                      type: integer
                                     duration:
                                       description: Duration represents the duration
                                         of the chaos action
                                       type: string
-                                    flags:
-                                      additionalProperties:
-                                        type: string
-                                      description: Flags represents the flags of action
-                                      type: object
-                                    matchers:
-                                      additionalProperties:
-                                        type: string
-                                      description: Matchers represents the matching
-                                        rules for the target
-                                      type: object
+                                    exception:
+                                      description: the exception which needs to throw
+                                        for action `exception`
+                                      type: string
+                                    latency:
+                                      description: the latency duration for action
+                                        'latency', unit ms
+                                      type: integer
+                                    memType:
+                                      description: the memory type need to locate,
+                                        only set it when action is stress, the value
+                                        can be 'stack' or 'heap'
+                                      type: string
+                                    method:
+                                      description: the method in Java class
+                                      type: string
                                     mode:
                                       description: 'Mode defines the mode to run chaos
                                         action. Supported mode: one / all / fixed
@@ -21583,6 +21577,17 @@ spec:
                                       - fixed
                                       - fixed-percent
                                       - random-max-percent
+                                      type: string
+                                    name:
+                                      description: byteman rule name, should be unique,
+                                        and will use JVMChaos' name if not set
+                                      type: string
+                                    port:
+                                      description: the port of agent server, default
+                                        9277
+                                      format: int32
+                                      type: integer
+                                    ruleData:
                                       type: string
                                     selector:
                                       description: Selector is used to select pods
@@ -21688,32 +21693,14 @@ spec:
                                             pod names.
                                           type: object
                                       type: object
-                                    target:
-                                      description: 'Target defines the specific jvm
-                                        chaos target. Supported target: servlet;psql;jvm;jedis;http;dubbo;rocketmq;tars;mysql;druid;redisson;rabbitmq;mongodb'
-                                      enum:
-                                      - servlet
-                                      - psql
-                                      - jvm
-                                      - jedis
-                                      - http
-                                      - dubbo
-                                      - rocketmq
-                                      - tars
-                                      - mysql
-                                      - druid
-                                      - redisson
-                                      - rabbitmq
-                                      - mongodb
-                                      type: string
                                     value:
                                       description: Value is required when the mode
-                                        is set to `FixedMode` / `FixedPercentPodMod`
-                                        / `RandomMaxPercentPodMod`. If `FixedMode`,
+                                        is set to `FixedMode` / `FixedPercentMode`
+                                        / `RandomMaxPercentMode`. If `FixedMode`,
                                         provide an integer of pods to do chaos action.
-                                        If `FixedPercentPodMod`, provide a number
-                                        from 0-100 to specify the percent of pods
-                                        the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                        If `FixedPercentMode`, provide a number from
+                                        0-100 to specify the percent of pods the server
+                                        can do chaos action. IF `RandomMaxPercentMode`,  provide
                                         a number from 0-100 to specify the max percent
                                         of pods to do chaos action
                                       type: string
@@ -21721,7 +21708,6 @@ spec:
                                   - action
                                   - mode
                                   - selector
-                                  - target
                                   type: object
                                 kernelChaos:
                                   description: KernelChaosSpec defines the desired
@@ -21933,12 +21919,12 @@ spec:
                                       type: object
                                     value:
                                       description: Value is required when the mode
-                                        is set to `FixedMode` / `FixedPercentPodMod`
-                                        / `RandomMaxPercentPodMod`. If `FixedMode`,
+                                        is set to `FixedMode` / `FixedPercentMode`
+                                        / `RandomMaxPercentMode`. If `FixedMode`,
                                         provide an integer of pods to do chaos action.
-                                        If `FixedPercentPodMod`, provide a number
-                                        from 0-100 to specify the percent of pods
-                                        the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                        If `FixedPercentMode`, provide a number from
+                                        0-100 to specify the percent of pods the server
+                                        can do chaos action. IF `RandomMaxPercentMode`,  provide
                                         a number from 0-100 to specify the max percent
                                         of pods to do chaos action
                                       type: string
@@ -22336,15 +22322,15 @@ spec:
                                           type: object
                                         value:
                                           description: Value is required when the
-                                            mode is set to `FixedMode` / `FixedPercentPodMod`
-                                            / `RandomMaxPercentPodMod`. If `FixedMode`,
+                                            mode is set to `FixedMode` / `FixedPercentMode`
+                                            / `RandomMaxPercentMode`. If `FixedMode`,
                                             provide an integer of pods to do chaos
-                                            action. If `FixedPercentPodMod`, provide
+                                            action. If `FixedPercentMode`, provide
                                             a number from 0-100 to specify the percent
                                             of pods the server can do chaos action.
-                                            IF `RandomMaxPercentPodMod`,  provide
-                                            a number from 0-100 to specify the max
-                                            percent of pods to do chaos action
+                                            IF `RandomMaxPercentMode`,  provide a
+                                            number from 0-100 to specify the max percent
+                                            of pods to do chaos action
                                           type: string
                                       required:
                                       - mode
@@ -22356,12 +22342,12 @@ spec:
                                       type: string
                                     value:
                                       description: Value is required when the mode
-                                        is set to `FixedMode` / `FixedPercentPodMod`
-                                        / `RandomMaxPercentPodMod`. If `FixedMode`,
+                                        is set to `FixedMode` / `FixedPercentMode`
+                                        / `RandomMaxPercentMode`. If `FixedMode`,
                                         provide an integer of pods to do chaos action.
-                                        If `FixedPercentPodMod`, provide a number
-                                        from 0-100 to specify the percent of pods
-                                        the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                        If `FixedPercentMode`, provide a number from
+                                        0-100 to specify the percent of pods the server
+                                        can do chaos action. IF `RandomMaxPercentMode`,  provide
                                         a number from 0-100 to specify the max percent
                                         of pods to do chaos action
                                       type: string
@@ -22449,7 +22435,7 @@ spec:
                                           type: string
                                         exception:
                                           description: the exception which needs to
-                                            throw dor action `exception`
+                                            throw for action `exception`
                                           type: string
                                         method:
                                           description: the method in Java class
@@ -22856,12 +22842,12 @@ spec:
                                       type: object
                                     value:
                                       description: Value is required when the mode
-                                        is set to `FixedMode` / `FixedPercentPodMod`
-                                        / `RandomMaxPercentPodMod`. If `FixedMode`,
+                                        is set to `FixedMode` / `FixedPercentMode`
+                                        / `RandomMaxPercentMode`. If `FixedMode`,
                                         provide an integer of pods to do chaos action.
-                                        If `FixedPercentPodMod`, provide a number
-                                        from 0-100 to specify the percent of pods
-                                        the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                        If `FixedPercentMode`, provide a number from
+                                        0-100 to specify the percent of pods the server
+                                        can do chaos action. IF `RandomMaxPercentMode`,  provide
                                         a number from 0-100 to specify the max percent
                                         of pods to do chaos action
                                       type: string
@@ -23080,12 +23066,12 @@ spec:
                                       type: object
                                     value:
                                       description: Value is required when the mode
-                                        is set to `FixedMode` / `FixedPercentPodMod`
-                                        / `RandomMaxPercentPodMod`. If `FixedMode`,
+                                        is set to `FixedMode` / `FixedPercentMode`
+                                        / `RandomMaxPercentMode`. If `FixedMode`,
                                         provide an integer of pods to do chaos action.
-                                        If `FixedPercentPodMod`, provide a number
-                                        from 0-100 to specify the percent of pods
-                                        the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                        If `FixedPercentMode`, provide a number from
+                                        0-100 to specify the percent of pods the server
+                                        can do chaos action. IF `RandomMaxPercentMode`,  provide
                                         a number from 0-100 to specify the max percent
                                         of pods to do chaos action
                                       type: string
@@ -23240,12 +23226,12 @@ spec:
                                       type: string
                                     value:
                                       description: Value is required when the mode
-                                        is set to `FixedMode` / `FixedPercentPodMod`
-                                        / `RandomMaxPercentPodMod`. If `FixedMode`,
+                                        is set to `FixedMode` / `FixedPercentMode`
+                                        / `RandomMaxPercentMode`. If `FixedMode`,
                                         provide an integer of pods to do chaos action.
-                                        If `FixedPercentPodMod`, provide a number
-                                        from 0-100 to specify the percent of pods
-                                        the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                        If `FixedPercentMode`, provide a number from
+                                        0-100 to specify the percent of pods the server
+                                        can do chaos action. IF `RandomMaxPercentMode`,  provide
                                         a number from 0-100 to specify the max percent
                                         of pods to do chaos action
                                       type: string
@@ -23459,11 +23445,11 @@ spec:
                                   type: object
                                 value:
                                   description: Value is required when the mode is
-                                    set to `FixedMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+                                    set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
                                     If `FixedMode`, provide an integer of pods to
-                                    do chaos action. If `FixedPercentPodMod`, provide
+                                    do chaos action. If `FixedPercentMode`, provide
                                     a number from 0-100 to specify the percent of
-                                    pods the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                    pods the server can do chaos action. IF `RandomMaxPercentMode`,  provide
                                     a number from 0-100 to specify the max percent
                                     of pods to do chaos action
                                   type: string
@@ -26710,11 +26696,11 @@ spec:
                                   type: string
                                 value:
                                   description: Value is required when the mode is
-                                    set to `FixedMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+                                    set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
                                     If `FixedMode`, provide an integer of pods to
-                                    do chaos action. If `FixedPercentPodMod`, provide
+                                    do chaos action. If `FixedPercentMode`, provide
                                     a number from 0-100 to specify the percent of
-                                    pods the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                    pods the server can do chaos action. IF `RandomMaxPercentMode`,  provide
                                     a number from 0-100 to specify the max percent
                                     of pods to do chaos action
                                   type: string
@@ -26914,10 +26900,10 @@ spec:
                     type: object
                   value:
                     description: Value is required when the mode is set to `FixedMode`
-                      / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedMode`,
-                      provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
+                      / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
+                      provide an integer of pods to do chaos action. If `FixedPercentMode`,
                       provide a number from 0-100 to specify the percent of pods the
-                      server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                      server can do chaos action. IF `RandomMaxPercentMode`,  provide
                       a number from 0-100 to specify the max percent of pods to do
                       chaos action
                     type: string
@@ -29688,10 +29674,10 @@ spec:
                     type: string
                   value:
                     description: Value is required when the mode is set to `FixedMode`
-                      / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedMode`,
-                      provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
+                      / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
+                      provide an integer of pods to do chaos action. If `FixedPercentMode`,
                       provide a number from 0-100 to specify the percent of pods the
-                      server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                      server can do chaos action. IF `RandomMaxPercentMode`,  provide
                       a number from 0-100 to specify the max percent of pods to do
                       chaos action
                     type: string
@@ -30061,12 +30047,12 @@ spec:
                           type: object
                         value:
                           description: Value is required when the mode is set to `FixedMode`
-                            / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If
-                            `FixedMode`, provide an integer of pods to do chaos action.
-                            If `FixedPercentPodMod`, provide a number from 0-100 to
-                            specify the percent of pods the server can do chaos action.
-                            IF `RandomMaxPercentPodMod`,  provide a number from 0-100
-                            to specify the max percent of pods to do chaos action
+                            / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
+                            provide an integer of pods to do chaos action. If `FixedPercentMode`,
+                            provide a number from 0-100 to specify the percent of
+                            pods the server can do chaos action. IF `RandomMaxPercentMode`,  provide
+                            a number from 0-100 to specify the max percent of pods
+                            to do chaos action
                           type: string
                       required:
                       - action
@@ -30349,12 +30335,12 @@ spec:
                           type: string
                         value:
                           description: Value is required when the mode is set to `FixedMode`
-                            / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If
-                            `FixedMode`, provide an integer of pods to do chaos action.
-                            If `FixedPercentPodMod`, provide a number from 0-100 to
-                            specify the percent of pods the server can do chaos action.
-                            IF `RandomMaxPercentPodMod`,  provide a number from 0-100
-                            to specify the max percent of pods to do chaos action
+                            / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
+                            provide an integer of pods to do chaos action. If `FixedPercentMode`,
+                            provide a number from 0-100 to specify the percent of
+                            pods the server can do chaos action. IF `RandomMaxPercentMode`,  provide
+                            a number from 0-100 to specify the max percent of pods
+                            to do chaos action
                           type: string
                       required:
                       - mode
@@ -30612,12 +30598,12 @@ spec:
                           type: object
                         value:
                           description: Value is required when the mode is set to `FixedMode`
-                            / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If
-                            `FixedMode`, provide an integer of pods to do chaos action.
-                            If `FixedPercentPodMod`, provide a number from 0-100 to
-                            specify the percent of pods the server can do chaos action.
-                            IF `RandomMaxPercentPodMod`,  provide a number from 0-100
-                            to specify the max percent of pods to do chaos action
+                            / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
+                            provide an integer of pods to do chaos action. If `FixedPercentMode`,
+                            provide a number from 0-100 to specify the percent of
+                            pods the server can do chaos action. IF `RandomMaxPercentMode`,  provide
+                            a number from 0-100 to specify the max percent of pods
+                            to do chaos action
                           type: string
                         volumePath:
                           description: VolumePath represents the mount path of injected
@@ -30634,18 +30620,17 @@ spec:
                       properties:
                         action:
                           description: 'Action defines the specific jvm chaos action.
-                            Supported action: delay;return;script;cfl;oom;ccf;tce;cpf;tde;tpf'
+                            Supported action: latency;return;exception;stress;gc;ruleData'
                           enum:
-                          - delay
+                          - latency
                           - return
-                          - script
-                          - cfl
-                          - oom
-                          - ccf
-                          - tce
-                          - cpf
-                          - tde
-                          - tpf
+                          - exception
+                          - stress
+                          - gc
+                          - ruleData
+                          type: string
+                        class:
+                          description: Java class
                           type: string
                         containerNames:
                           description: ContainerNames indicates list of the name of
@@ -30654,21 +30639,29 @@ spec:
                           items:
                             type: string
                           type: array
+                        cpuCount:
+                          description: the CPU core number need to use, only set it
+                            when action is stress
+                          type: integer
                         duration:
                           description: Duration represents the duration of the chaos
                             action
                           type: string
-                        flags:
-                          additionalProperties:
-                            type: string
-                          description: Flags represents the flags of action
-                          type: object
-                        matchers:
-                          additionalProperties:
-                            type: string
-                          description: Matchers represents the matching rules for
-                            the target
-                          type: object
+                        exception:
+                          description: the exception which needs to throw for action
+                            `exception`
+                          type: string
+                        latency:
+                          description: the latency duration for action 'latency',
+                            unit ms
+                          type: integer
+                        memType:
+                          description: the memory type need to locate, only set it
+                            when action is stress, the value can be 'stack' or 'heap'
+                          type: string
+                        method:
+                          description: the method in Java class
+                          type: string
                         mode:
                           description: 'Mode defines the mode to run chaos action.
                             Supported mode: one / all / fixed / fixed-percent / random-max-percent'
@@ -30678,6 +30671,16 @@ spec:
                           - fixed
                           - fixed-percent
                           - random-max-percent
+                          type: string
+                        name:
+                          description: byteman rule name, should be unique, and will
+                            use JVMChaos' name if not set
+                          type: string
+                        port:
+                          description: the port of agent server, default 9277
+                          format: int32
+                          type: integer
+                        ruleData:
                           type: string
                         selector:
                           description: Selector is used to select pods that are used
@@ -30772,38 +30775,19 @@ spec:
                                 a set of pod names.
                               type: object
                           type: object
-                        target:
-                          description: 'Target defines the specific jvm chaos target.
-                            Supported target: servlet;psql;jvm;jedis;http;dubbo;rocketmq;tars;mysql;druid;redisson;rabbitmq;mongodb'
-                          enum:
-                          - servlet
-                          - psql
-                          - jvm
-                          - jedis
-                          - http
-                          - dubbo
-                          - rocketmq
-                          - tars
-                          - mysql
-                          - druid
-                          - redisson
-                          - rabbitmq
-                          - mongodb
-                          type: string
                         value:
                           description: Value is required when the mode is set to `FixedMode`
-                            / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If
-                            `FixedMode`, provide an integer of pods to do chaos action.
-                            If `FixedPercentPodMod`, provide a number from 0-100 to
-                            specify the percent of pods the server can do chaos action.
-                            IF `RandomMaxPercentPodMod`,  provide a number from 0-100
-                            to specify the max percent of pods to do chaos action
+                            / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
+                            provide an integer of pods to do chaos action. If `FixedPercentMode`,
+                            provide a number from 0-100 to specify the percent of
+                            pods the server can do chaos action. IF `RandomMaxPercentMode`,  provide
+                            a number from 0-100 to specify the max percent of pods
+                            to do chaos action
                           type: string
                       required:
                       - action
                       - mode
                       - selector
-                      - target
                       type: object
                     kernelChaos:
                       description: KernelChaosSpec defines the desired state of KernelChaos
@@ -30991,12 +30975,12 @@ spec:
                           type: object
                         value:
                           description: Value is required when the mode is set to `FixedMode`
-                            / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If
-                            `FixedMode`, provide an integer of pods to do chaos action.
-                            If `FixedPercentPodMod`, provide a number from 0-100 to
-                            specify the percent of pods the server can do chaos action.
-                            IF `RandomMaxPercentPodMod`,  provide a number from 0-100
-                            to specify the max percent of pods to do chaos action
+                            / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
+                            provide an integer of pods to do chaos action. If `FixedPercentMode`,
+                            provide a number from 0-100 to specify the percent of
+                            pods the server can do chaos action. IF `RandomMaxPercentMode`,  provide
+                            a number from 0-100 to specify the max percent of pods
+                            to do chaos action
                           type: string
                       required:
                       - failKernRequest
@@ -31360,11 +31344,11 @@ spec:
                               type: object
                             value:
                               description: Value is required when the mode is set
-                                to `FixedMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+                                to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
                                 If `FixedMode`, provide an integer of pods to do chaos
-                                action. If `FixedPercentPodMod`, provide a number
-                                from 0-100 to specify the percent of pods the server
-                                can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                action. If `FixedPercentMode`, provide a number from
+                                0-100 to specify the percent of pods the server can
+                                do chaos action. IF `RandomMaxPercentMode`,  provide
                                 a number from 0-100 to specify the max percent of
                                 pods to do chaos action
                               type: string
@@ -31378,12 +31362,12 @@ spec:
                           type: string
                         value:
                           description: Value is required when the mode is set to `FixedMode`
-                            / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If
-                            `FixedMode`, provide an integer of pods to do chaos action.
-                            If `FixedPercentPodMod`, provide a number from 0-100 to
-                            specify the percent of pods the server can do chaos action.
-                            IF `RandomMaxPercentPodMod`,  provide a number from 0-100
-                            to specify the max percent of pods to do chaos action
+                            / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
+                            provide an integer of pods to do chaos action. If `FixedPercentMode`,
+                            provide a number from 0-100 to specify the percent of
+                            pods the server can do chaos action. IF `RandomMaxPercentMode`,  provide
+                            a number from 0-100 to specify the max percent of pods
+                            to do chaos action
                           type: string
                       required:
                       - action
@@ -31467,7 +31451,7 @@ spec:
                               description: Java class
                               type: string
                             exception:
-                              description: the exception which needs to throw dor
+                              description: the exception which needs to throw for
                                 action `exception`
                               type: string
                             method:
@@ -31850,12 +31834,12 @@ spec:
                           type: object
                         value:
                           description: Value is required when the mode is set to `FixedMode`
-                            / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If
-                            `FixedMode`, provide an integer of pods to do chaos action.
-                            If `FixedPercentPodMod`, provide a number from 0-100 to
-                            specify the percent of pods the server can do chaos action.
-                            IF `RandomMaxPercentPodMod`,  provide a number from 0-100
-                            to specify the max percent of pods to do chaos action
+                            / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
+                            provide an integer of pods to do chaos action. If `FixedPercentMode`,
+                            provide a number from 0-100 to specify the percent of
+                            pods the server can do chaos action. IF `RandomMaxPercentMode`,  provide
+                            a number from 0-100 to specify the max percent of pods
+                            to do chaos action
                           type: string
                       required:
                       - action
@@ -32061,11 +32045,11 @@ spec:
                               type: object
                             value:
                               description: Value is required when the mode is set
-                                to `FixedMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+                                to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
                                 If `FixedMode`, provide an integer of pods to do chaos
-                                action. If `FixedPercentPodMod`, provide a number
-                                from 0-100 to specify the percent of pods the server
-                                can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                action. If `FixedPercentMode`, provide a number from
+                                0-100 to specify the percent of pods the server can
+                                do chaos action. IF `RandomMaxPercentMode`,  provide
                                 a number from 0-100 to specify the max percent of
                                 pods to do chaos action
                               type: string
@@ -32361,11 +32345,11 @@ spec:
                               type: string
                             value:
                               description: Value is required when the mode is set
-                                to `FixedMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+                                to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
                                 If `FixedMode`, provide an integer of pods to do chaos
-                                action. If `FixedPercentPodMod`, provide a number
-                                from 0-100 to specify the percent of pods the server
-                                can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                action. If `FixedPercentMode`, provide a number from
+                                0-100 to specify the percent of pods the server can
+                                do chaos action. IF `RandomMaxPercentMode`,  provide
                                 a number from 0-100 to specify the max percent of
                                 pods to do chaos action
                               type: string
@@ -32632,11 +32616,11 @@ spec:
                               type: object
                             value:
                               description: Value is required when the mode is set
-                                to `FixedMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+                                to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
                                 If `FixedMode`, provide an integer of pods to do chaos
-                                action. If `FixedPercentPodMod`, provide a number
-                                from 0-100 to specify the percent of pods the server
-                                can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                action. If `FixedPercentMode`, provide a number from
+                                0-100 to specify the percent of pods the server can
+                                do chaos action. IF `RandomMaxPercentMode`,  provide
                                 a number from 0-100 to specify the max percent of
                                 pods to do chaos action
                               type: string
@@ -32655,18 +32639,17 @@ spec:
                           properties:
                             action:
                               description: 'Action defines the specific jvm chaos
-                                action. Supported action: delay;return;script;cfl;oom;ccf;tce;cpf;tde;tpf'
+                                action. Supported action: latency;return;exception;stress;gc;ruleData'
                               enum:
-                              - delay
+                              - latency
                               - return
-                              - script
-                              - cfl
-                              - oom
-                              - ccf
-                              - tce
-                              - cpf
-                              - tde
-                              - tpf
+                              - exception
+                              - stress
+                              - gc
+                              - ruleData
+                              type: string
+                            class:
+                              description: Java class
                               type: string
                             containerNames:
                               description: ContainerNames indicates list of the name
@@ -32675,21 +32658,30 @@ spec:
                               items:
                                 type: string
                               type: array
+                            cpuCount:
+                              description: the CPU core number need to use, only set
+                                it when action is stress
+                              type: integer
                             duration:
                               description: Duration represents the duration of the
                                 chaos action
                               type: string
-                            flags:
-                              additionalProperties:
-                                type: string
-                              description: Flags represents the flags of action
-                              type: object
-                            matchers:
-                              additionalProperties:
-                                type: string
-                              description: Matchers represents the matching rules
-                                for the target
-                              type: object
+                            exception:
+                              description: the exception which needs to throw for
+                                action `exception`
+                              type: string
+                            latency:
+                              description: the latency duration for action 'latency',
+                                unit ms
+                              type: integer
+                            memType:
+                              description: the memory type need to locate, only set
+                                it when action is stress, the value can be 'stack'
+                                or 'heap'
+                              type: string
+                            method:
+                              description: the method in Java class
+                              type: string
                             mode:
                               description: 'Mode defines the mode to run chaos action.
                                 Supported mode: one / all / fixed / fixed-percent
@@ -32700,6 +32692,16 @@ spec:
                               - fixed
                               - fixed-percent
                               - random-max-percent
+                              type: string
+                            name:
+                              description: byteman rule name, should be unique, and
+                                will use JVMChaos' name if not set
+                              type: string
+                            port:
+                              description: the port of agent server, default 9277
+                              format: int32
+                              type: integer
+                            ruleData:
                               type: string
                             selector:
                               description: Selector is used to select pods that are
@@ -32797,31 +32799,13 @@ spec:
                                     values is a set of pod names.
                                   type: object
                               type: object
-                            target:
-                              description: 'Target defines the specific jvm chaos
-                                target. Supported target: servlet;psql;jvm;jedis;http;dubbo;rocketmq;tars;mysql;druid;redisson;rabbitmq;mongodb'
-                              enum:
-                              - servlet
-                              - psql
-                              - jvm
-                              - jedis
-                              - http
-                              - dubbo
-                              - rocketmq
-                              - tars
-                              - mysql
-                              - druid
-                              - redisson
-                              - rabbitmq
-                              - mongodb
-                              type: string
                             value:
                               description: Value is required when the mode is set
-                                to `FixedMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+                                to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
                                 If `FixedMode`, provide an integer of pods to do chaos
-                                action. If `FixedPercentPodMod`, provide a number
-                                from 0-100 to specify the percent of pods the server
-                                can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                action. If `FixedPercentMode`, provide a number from
+                                0-100 to specify the percent of pods the server can
+                                do chaos action. IF `RandomMaxPercentMode`,  provide
                                 a number from 0-100 to specify the max percent of
                                 pods to do chaos action
                               type: string
@@ -32829,7 +32813,6 @@ spec:
                           - action
                           - mode
                           - selector
-                          - target
                           type: object
                         kernelChaos:
                           description: KernelChaosSpec defines the desired state of
@@ -33025,11 +33008,11 @@ spec:
                               type: object
                             value:
                               description: Value is required when the mode is set
-                                to `FixedMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+                                to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
                                 If `FixedMode`, provide an integer of pods to do chaos
-                                action. If `FixedPercentPodMod`, provide a number
-                                from 0-100 to specify the percent of pods the server
-                                can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                action. If `FixedPercentMode`, provide a number from
+                                0-100 to specify the percent of pods the server can
+                                do chaos action. IF `RandomMaxPercentMode`,  provide
                                 a number from 0-100 to specify the max percent of
                                 pods to do chaos action
                               type: string
@@ -33406,11 +33389,11 @@ spec:
                                   type: object
                                 value:
                                   description: Value is required when the mode is
-                                    set to `FixedMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+                                    set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
                                     If `FixedMode`, provide an integer of pods to
-                                    do chaos action. If `FixedPercentPodMod`, provide
+                                    do chaos action. If `FixedPercentMode`, provide
                                     a number from 0-100 to specify the percent of
-                                    pods the server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                    pods the server can do chaos action. IF `RandomMaxPercentMode`,  provide
                                     a number from 0-100 to specify the max percent
                                     of pods to do chaos action
                                   type: string
@@ -33424,11 +33407,11 @@ spec:
                               type: string
                             value:
                               description: Value is required when the mode is set
-                                to `FixedMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+                                to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
                                 If `FixedMode`, provide an integer of pods to do chaos
-                                action. If `FixedPercentPodMod`, provide a number
-                                from 0-100 to specify the percent of pods the server
-                                can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                action. If `FixedPercentMode`, provide a number from
+                                0-100 to specify the percent of pods the server can
+                                do chaos action. IF `RandomMaxPercentMode`,  provide
                                 a number from 0-100 to specify the max percent of
                                 pods to do chaos action
                               type: string
@@ -33516,7 +33499,7 @@ spec:
                                   type: string
                                 exception:
                                   description: the exception which needs to throw
-                                    dor action `exception`
+                                    for action `exception`
                                   type: string
                                 method:
                                   description: the method in Java class
@@ -33910,11 +33893,11 @@ spec:
                               type: object
                             value:
                               description: Value is required when the mode is set
-                                to `FixedMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+                                to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
                                 If `FixedMode`, provide an integer of pods to do chaos
-                                action. If `FixedPercentPodMod`, provide a number
-                                from 0-100 to specify the percent of pods the server
-                                can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                action. If `FixedPercentMode`, provide a number from
+                                0-100 to specify the percent of pods the server can
+                                do chaos action. IF `RandomMaxPercentMode`,  provide
                                 a number from 0-100 to specify the max percent of
                                 pods to do chaos action
                               type: string
@@ -34120,11 +34103,11 @@ spec:
                               type: object
                             value:
                               description: Value is required when the mode is set
-                                to `FixedMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+                                to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
                                 If `FixedMode`, provide an integer of pods to do chaos
-                                action. If `FixedPercentPodMod`, provide a number
-                                from 0-100 to specify the percent of pods the server
-                                can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                action. If `FixedPercentMode`, provide a number from
+                                0-100 to specify the percent of pods the server can
+                                do chaos action. IF `RandomMaxPercentMode`,  provide
                                 a number from 0-100 to specify the max percent of
                                 pods to do chaos action
                               type: string
@@ -34271,11 +34254,11 @@ spec:
                               type: string
                             value:
                               description: Value is required when the mode is set
-                                to `FixedMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+                                to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
                                 If `FixedMode`, provide an integer of pods to do chaos
-                                action. If `FixedPercentPodMod`, provide a number
-                                from 0-100 to specify the percent of pods the server
-                                can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                                action. If `FixedPercentMode`, provide a number from
+                                0-100 to specify the percent of pods the server can
+                                do chaos action. IF `RandomMaxPercentMode`,  provide
                                 a number from 0-100 to specify the max percent of
                                 pods to do chaos action
                               type: string
@@ -34477,12 +34460,12 @@ spec:
                           type: object
                         value:
                           description: Value is required when the mode is set to `FixedMode`
-                            / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If
-                            `FixedMode`, provide an integer of pods to do chaos action.
-                            If `FixedPercentPodMod`, provide a number from 0-100 to
-                            specify the percent of pods the server can do chaos action.
-                            IF `RandomMaxPercentPodMod`,  provide a number from 0-100
-                            to specify the max percent of pods to do chaos action
+                            / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
+                            provide an integer of pods to do chaos action. If `FixedPercentMode`,
+                            provide a number from 0-100 to specify the percent of
+                            pods the server can do chaos action. IF `RandomMaxPercentMode`,  provide
+                            a number from 0-100 to specify the max percent of pods
+                            to do chaos action
                           type: string
                       required:
                       - mode
@@ -37411,12 +37394,12 @@ spec:
                           type: string
                         value:
                           description: Value is required when the mode is set to `FixedMode`
-                            / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If
-                            `FixedMode`, provide an integer of pods to do chaos action.
-                            If `FixedPercentPodMod`, provide a number from 0-100 to
-                            specify the percent of pods the server can do chaos action.
-                            IF `RandomMaxPercentPodMod`,  provide a number from 0-100
-                            to specify the max percent of pods to do chaos action
+                            / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
+                            provide an integer of pods to do chaos action. If `FixedPercentMode`,
+                            provide a number from 0-100 to specify the percent of
+                            pods the server can do chaos action. IF `RandomMaxPercentMode`,  provide
+                            a number from 0-100 to specify the max percent of pods
+                            to do chaos action
                           type: string
                       required:
                       - mode

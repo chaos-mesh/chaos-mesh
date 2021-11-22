@@ -137,9 +137,11 @@ e2e_args=(
     ${ginkgo_args[@]:-}
     /usr/local/bin/e2e.test
     --
-    --manager-image="${DOCKER_REGISTRY}/pingcap/chaos-mesh"
+    --manager-image-registry="${DOCKER_REGISTRY}"
+    --manager-image="pingcap/chaos-mesh"
     --manager-image-tag="${IMAGE_TAG}"
-    --daemon-image="${DOCKER_REGISTRY}/pingcap/chaos-daemon"
+    --daemon-image-registry="${DOCKER_REGISTRY}"
+    --daemon-image="pingcap/chaos-daemon"
     --daemon-image-tag="${IMAGE_TAG}"
     --e2e-image="${DOCKER_REGISTRY}/pingcap/e2e-helper:${IMAGE_TAG}"
     --install-chaos-mesh
