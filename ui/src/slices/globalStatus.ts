@@ -39,7 +39,6 @@ const initialState: {
   confirmOpen: boolean // control global confirm dialog
   namespace: string
   securityMode: boolean
-  gcpSecurityMode: boolean
   dnsServerCreate: boolean
   version: string
   tokens: TokenFormValues[]
@@ -57,7 +56,6 @@ const initialState: {
   confirmOpen: false,
   namespace: 'All',
   securityMode: true,
-  gcpSecurityMode: false,
   dnsServerCreate: false,
   version: '',
   tokens: [],
