@@ -197,7 +197,7 @@ func (it *Service) createWorkflow(c *gin.Context) {
 
 	kubeClient, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		_ = c.Error(utils.ErrBadRequest.WrapWithNoMessage(err))
+		utils.SetAPImachineryError(c, err)
 		return
 	}
 
@@ -205,7 +205,7 @@ func (it *Service) createWorkflow(c *gin.Context) {
 
 	result, err := repo.Create(c.Request.Context(), payload)
 	if err != nil {
-		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		utils.SetAPImachineryError(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, result)
