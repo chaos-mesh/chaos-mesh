@@ -7,7 +7,7 @@ DOCKER_REGISTRY_PREFIX := $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY)/,)
 DOCKER_BUILD_ARGS := --build-arg HTTP_PROXY=${HTTP_PROXY} --build-arg HTTPS_PROXY=${HTTPS_PROXY} --build-arg GOPROXY=${GOPROXY} --build-arg UI=${UI} --build-arg LDFLAGS="${LDFLAGS}" --build-arg CRATES_MIRROR="${CRATES_MIRROR}"
 
 IMAGE_TAG := $(if $(IMAGE_TAG),$(IMAGE_TAG),latest)
-IMAGE_PROJECT := $(if $(IMAGE_PROJECT),$(IMAGE_PROJECT),pingcap)
+IMAGE_PROJECT := $(if $(IMAGE_PROJECT),$(IMAGE_PROJECT),chaos-mesh)
 
 ROOT=$(shell pwd)
 OUTPUT_BIN=$(ROOT)/output/bin
@@ -307,9 +307,9 @@ $(eval $(call IMAGE_TEMPLATE,chaos-dlv,images/chaos-dlv,0,CHAOS_DLV))
 binary: $(BINARIES)
 
 docker-push:
-	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh:${IMAGE_TAG}"
-	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-dashboard:${IMAGE_TAG}"
-	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-daemon:${IMAGE_TAG}"
+	docker push "${DOCKER_REGISTRY_PREFIX}chaos-mesh/chaos-mesh:${IMAGE_TAG}"
+	docker push "${DOCKER_REGISTRY_PREFIX}chaos-mesh/chaos-dashboard:${IMAGE_TAG}"
+	docker push "${DOCKER_REGISTRY_PREFIX}chaos-mesh/chaos-daemon:${IMAGE_TAG}"
 
 docker-push-e2e:
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/e2e-helper:${IMAGE_TAG}"
