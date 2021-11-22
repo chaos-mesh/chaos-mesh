@@ -1208,8 +1208,10 @@ definitions:
   v1alpha1.NetworkBandwidthSpec:
     properties:
       buffer:
+        description: +kubebuilder:validation:Minimum=1
         type: integer
       limit:
+        description: +kubebuilder:validation:Minimum=1
         type: integer
       minburst:
         type: integer

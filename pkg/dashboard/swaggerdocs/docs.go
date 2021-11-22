@@ -3164,9 +3164,11 @@ var doc = `{
             "type": "object",
             "properties": {
                 "buffer": {
+                    "description": "+kubebuilder:validation:Minimum=1",
                     "type": "integer"
                 },
                 "limit": {
+                    "description": "+kubebuilder:validation:Minimum=1",
                     "type": "integer"
                 },
                 "minburst": {

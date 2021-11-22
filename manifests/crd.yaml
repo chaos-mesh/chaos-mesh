@@ -2235,6 +2235,7 @@ spec:
                 - network-delay
                 - network-partition
                 - network-dns
+                - network-bandwidth
                 - process
                 - jvm-exception
                 - jvm-gc
@@ -2385,9 +2386,11 @@ spec:
                 properties:
                   buffer:
                     format: int32
+                    minimum: 1
                     type: integer
                   limit:
                     format: int32
+                    minimum: 1
                     type: integer
                   minburst:
                     format: int32
@@ -5004,6 +5007,7 @@ spec:
                     - network-delay
                     - network-partition
                     - network-dns
+                    - network-bandwidth
                     - process
                     - jvm-exception
                     - jvm-gc
@@ -5156,9 +5160,11 @@ spec:
                     properties:
                       buffer:
                         format: int32
+                        minimum: 1
                         type: integer
                       limit:
                         format: int32
+                        minimum: 1
                         type: integer
                       minburst:
                         format: int32
@@ -7408,6 +7414,7 @@ spec:
                               - network-delay
                               - network-partition
                               - network-dns
+                              - network-bandwidth
                               - process
                               - jvm-exception
                               - jvm-gc
@@ -7568,9 +7575,11 @@ spec:
                               properties:
                                 buffer:
                                   format: int32
+                                  minimum: 1
                                   type: integer
                                 limit:
                                   format: int32
+                                  minimum: 1
                                   type: integer
                                 minburst:
                                   format: int32
@@ -9510,6 +9519,7 @@ spec:
                                   - network-delay
                                   - network-partition
                                   - network-dns
+                                  - network-bandwidth
                                   - process
                                   - jvm-exception
                                   - jvm-gc
@@ -9670,9 +9680,11 @@ spec:
                                   properties:
                                     buffer:
                                       format: int32
+                                      minimum: 1
                                       type: integer
                                     limit:
                                       format: int32
+                                      minimum: 1
                                       type: integer
                                     minburst:
                                       format: int32
@@ -15789,6 +15801,7 @@ spec:
                     - network-delay
                     - network-partition
                     - network-dns
+                    - network-bandwidth
                     - process
                     - jvm-exception
                     - jvm-gc
@@ -15941,9 +15954,11 @@ spec:
                     properties:
                       buffer:
                         format: int32
+                        minimum: 1
                         type: integer
                       limit:
                         format: int32
+                        minimum: 1
                         type: integer
                       minburst:
                         format: int32
@@ -17756,6 +17771,7 @@ spec:
                         - network-delay
                         - network-partition
                         - network-dns
+                        - network-bandwidth
                         - process
                         - jvm-exception
                         - jvm-gc
@@ -17909,9 +17925,11 @@ spec:
                         properties:
                           buffer:
                             format: int32
+                            minimum: 1
                             type: integer
                           limit:
                             format: int32
+                            minimum: 1
                             type: integer
                           minburst:
                             format: int32
@@ -20212,6 +20230,7 @@ spec:
                                   - network-delay
                                   - network-partition
                                   - network-dns
+                                  - network-bandwidth
                                   - process
                                   - jvm-exception
                                   - jvm-gc
@@ -20372,9 +20391,11 @@ spec:
                                   properties:
                                     buffer:
                                       format: int32
+                                      minimum: 1
                                       type: integer
                                     limit:
                                       format: int32
+                                      minimum: 1
                                       type: integer
                                     minburst:
                                       format: int32
@@ -22374,6 +22395,7 @@ spec:
                                       - network-delay
                                       - network-partition
                                       - network-dns
+                                      - network-bandwidth
                                       - process
                                       - jvm-exception
                                       - jvm-gc
@@ -22535,9 +22557,11 @@ spec:
                                       properties:
                                         buffer:
                                           format: int32
+                                          minimum: 1
                                           type: integer
                                         limit:
                                           format: int32
+                                          minimum: 1
                                           type: integer
                                         minburst:
                                           format: int32
@@ -31392,6 +31416,7 @@ spec:
                           - network-delay
                           - network-partition
                           - network-dns
+                          - network-bandwidth
                           - process
                           - jvm-exception
                           - jvm-gc
@@ -31545,9 +31570,11 @@ spec:
                           properties:
                             buffer:
                               format: int32
+                              minimum: 1
                               type: integer
                             limit:
                               format: int32
+                              minimum: 1
                               type: integer
                             minburst:
                               format: int32
@@ -33438,6 +33465,7 @@ spec:
                               - network-delay
                               - network-partition
                               - network-dns
+                              - network-bandwidth
                               - process
                               - jvm-exception
                               - jvm-gc
@@ -33598,9 +33626,11 @@ spec:
                               properties:
                                 buffer:
                                   format: int32
+                                  minimum: 1
                                   type: integer
                                 limit:
                                   format: int32
+                                  minimum: 1
                                   type: integer
                                 minburst:
                                   format: int32
