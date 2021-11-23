@@ -243,7 +243,9 @@ const Step1 = () => {
               env={env}
               kind={kind}
               data={(typesData as any)[kind as Kind].categories!.filter(({ key }: any) => key === action)[0].spec}
-              validationSchema={env === 'k8s' ? schema[kind as Kind]![action] : undefined}
+              validationSchema={
+                env === 'k8s' ? (schema[kind as Kind] ? schema[kind as Kind]![action] : undefined) : undefined
+              }
               onSubmit={handleSubmitStep1}
             />
           </>
