@@ -85,12 +85,6 @@ const HTTPTask: React.FC<HTTPTaskProps> = (props) => {
     jsonContent: false,
   })
 
-  const validateRequestForm = (newValue: RequestForm) => {
-    console.log(newValue)
-    const errors: any = {}
-    return errors
-  }
-
   useEffect(() => {
     if (props.externalTemplate) {
       // TODO: use unified name
@@ -130,10 +124,9 @@ const HTTPTask: React.FC<HTTPTaskProps> = (props) => {
           initialValues={initialValues}
           enableReinitialize
           onSubmit={onSubmit}
-          validate={validateRequestForm}
           validateOnBlur={false}
         >
-          {({ values, errors, touched, handleChange, handleBlur, handleSubmit, isSubmitting }) => {
+          {({ values, errors, touched, handleChange }) => {
             return (
               <Form>
                 <Space>
