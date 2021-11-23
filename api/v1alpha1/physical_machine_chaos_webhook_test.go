@@ -101,14 +101,14 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 							},
 							ExpInfo: ExpInfo{
 								NetworkBandwidth: &NetworkBandwidthSpec{
-									Rate:   "1",
+									Rate:   "",
 									Limit:  0,
 									Buffer: 0,
 								},
 							},
 						},
 					},
-					"buffer should be greater than 0",
+					"rate is required",
 				},
 			}
 
