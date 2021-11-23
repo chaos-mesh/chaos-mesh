@@ -2711,6 +2711,39 @@ paths:
       summary: Get an event.
       tags:
       - events
+  /events/workflow/{uid}:
+    get:
+      description: list all events for Workflow and related WorkflowNode.
+      parameters:
+      - description: The namespace of the object
+        in: query
+        name: namespace
+        type: string
+      - description: The UID of the Workflow
+        in: path
+        name: uid
+        type: string
+      - description: The max length of events list
+        in: query
+        name: limit
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/core.Event'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: cascadeFetchEventsForWorkflow list all events for Workflow and related
+        WorkflowNode.
+      tags:
+      - events
   /experiments:
     delete:
       description: Batch delete chaos experiments by uids.
