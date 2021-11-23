@@ -66,8 +66,8 @@ echo "DOCKER_REGISTRY: $DOCKER_REGISTRY"
 
 function e2e::image_load() {
     local images=(
-        pingcap/chaos-mesh
-        pingcap/chaos-daemon
+        chaos-mesh/chaos-mesh
+        chaos-mesh/chaos-daemon
         pingcap/e2e-helper
     )
     if [ "$PROVIDER" == "kind" ]; then
