@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+
 import CommonTI from 'api/common.type-ti'
 import { createCheckers } from 'ts-interface-checker'
 
@@ -22,6 +23,7 @@ const { Config, RBACConfigParams } = createCheckers(CommonTI)
 const dummyConfig = {
   security_mode: true,
   dns_server_create: false,
+  gcp_security_mode: false,
   version: 'xxx',
 }
 
