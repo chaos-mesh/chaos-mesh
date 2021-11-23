@@ -31,6 +31,8 @@ const nodeSelectorName = "node"
 
 type nodeSelector struct {
 	nodes []v1.Node
+	// empty avoids the situation that v1alpha1.PodSelectorSpec.NodeSelectors does not match any nodes, which should not skip the selector check
+	// empty is true only when v1alpha1.PodSelectorSpec.Nodes and v1alpha1.PodSelectorSpec.NodeSelectors are both empty
 	empty bool
 }
 
