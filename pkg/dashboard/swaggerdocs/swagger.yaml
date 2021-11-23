@@ -41,6 +41,11 @@ definitions:
           EnableFilterNamespace will filter namespace with annotation. Only the pods/containers in namespace
           annotated with `chaos-mesh.org/inject=enabled` will be injected.
         type: boolean
+      gcp_security_mode:
+        default: false
+        description: GcpSecurityMode will use the gcloud authentication to login to
+          GKE user
+        type: boolean
       listen_host:
         default: 0.0.0.0
         type: string
@@ -49,8 +54,7 @@ definitions:
         type: integer
       security_mode:
         default: true
-        description: If SecurityMode is set to true, then the dashboard requires token
-          authentication.
+        description: SecurityMode will use the token login by the user if set to true
         type: boolean
       target_namespace:
         description: |-
