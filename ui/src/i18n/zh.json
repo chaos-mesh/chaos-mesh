@@ -195,6 +195,7 @@
     "parallelTitle": "填写并行任务",
     "suspendTitle": "设置暂停",
     "customTitle": "自定义任务",
+    "httpTitle": "HTTP 请求",
     "nameHelper": "工作流的名称",
     "nameValidation": "工作流名称不能为空",
     "durationValidation": "工作流持续时间不能为空",
