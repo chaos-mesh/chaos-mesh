@@ -195,6 +195,7 @@ chaosDaemon:
   affinity: {}
 
 dashboard:
+  rootUrl: http://localhost:2333
   create: true
   hostNetwork: false
 
