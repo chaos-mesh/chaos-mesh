@@ -100,7 +100,10 @@ func TestcaseHttpReplaceThenRecover(
 					Headers: map[string]string{
 						SECRET: replaceSecret,
 					},
-					Body: []byte(replacebody),
+					Body: &v1alpha1.PodHttpChaosReplaceBodyAction{
+						Type:  "TEXT",
+						Value: replacebody,
+					},
 				},
 			},
 		},
@@ -227,7 +230,10 @@ func TestcaseHttpReplacePauseAndUnPause(
 					Headers: map[string]string{
 						SECRET: replaceSecret,
 					},
-					Body: []byte(replacebody),
+					Body: &v1alpha1.PodHttpChaosReplaceBodyAction{
+						Type:  "TEXT",
+						Value: replacebody,
+					},
 				},
 			},
 		},

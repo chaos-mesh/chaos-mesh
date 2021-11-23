@@ -157,7 +157,7 @@ type PodHttpChaosReplaceActions struct {
 
 	// Body is a rule to replace http message body in target.
 	// +optional
-	Body []byte `json:"body,omitempty"`
+	Body *PodHttpChaosReplaceBodyAction `json:"body,omitempty"`
 
 	// Queries is a rule to replace uri queries in http request.
 	// For example, with value `{ "foo": "unknown" }`, the `/?foo=bar` will be altered to `/?foo=unknown`,
@@ -168,6 +168,15 @@ type PodHttpChaosReplaceActions struct {
 	// The key-value pairs represent header name and header value pairs.
 	// +optional
 	Headers map[string]string `json:"headers,omitempty"`
+}
+
+// PodHttpChaosReplaceBodyAction defines replace body action of HttpChaos.
+type PodHttpChaosReplaceBodyAction struct {
+	// Type represents the replace type, support `TEXT` and `BASE64` currently.
+	Type string `json:"type"`
+
+	// Value is the replace contents.
+	Value string `json:"value"`
 }
 
 // PodHttpChaosTarget represents the type of an HttpChaos Action
