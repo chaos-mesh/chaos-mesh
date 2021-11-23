@@ -101,10 +101,7 @@ const HTTPTask: React.FC<HTTPTaskProps> = (props) => {
           if (response.data) {
             const parsedForm = response.data as RequestForm
             setInitialValues({
-              name: parsedForm.name,
-              url: parsedForm.url,
-              method: parsedForm.method,
-              body: parsedForm.body,
+              ...parsedForm,
               followLocation: parsedForm.followLocation || false,
               jsonContent: parsedForm.jsonContent || false,
             })
