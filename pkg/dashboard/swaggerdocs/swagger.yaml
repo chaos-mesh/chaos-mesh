@@ -1600,12 +1600,11 @@ definitions:
   v1alpha1.PodHttpChaosReplaceActions:
     properties:
       body:
+        $ref: '#/definitions/v1alpha1.PodHttpChaosReplaceBodyAction'
         description: |-
           Body is a rule to replace http message body in target.
           +optional
-        items:
-          type: integer
-        type: array
+        type: object
       code:
         description: |-
           Code is a rule to replace http status code in response.
@@ -1637,6 +1636,16 @@ definitions:
           For example, with value `{ "foo": "unknown" }`, the `/?foo=bar` will be altered to `/?foo=unknown`,
           +optional
         type: object
+    type: object
+  v1alpha1.PodHttpChaosReplaceBodyAction:
+    properties:
+      type:
+        description: Type represents the replace type, support `TEXT` and `BASE64`
+          currently.
+        type: string
+      value:
+        description: Value is the replace contents.
+        type: string
     type: object
   v1alpha1.PodSelector:
     properties:

@@ -370,8 +370,18 @@ spec:
                       body:
                         description: Body is a rule to replace http message body in
                           target.
-                        format: byte
-                        type: string
+                        properties:
+                          type:
+                            description: Type represents the replace type, support
+                              `TEXT` and `BASE64` currently.
+                            type: string
+                          value:
+                            description: Value is the replace contents.
+                            type: string
+                        required:
+                        - type
+                        - value
+                        type: object
                       code:
                         description: Code is a rule to replace http status code in
                           response.
@@ -2288,8 +2298,18 @@ spec:
                           body:
                             description: Body is a rule to replace http message body
                               in target.
-                            format: byte
-                            type: string
+                            properties:
+                              type:
+                                description: Type represents the replace type, support
+                                  `TEXT` and `BASE64` currently.
+                                type: string
+                              value:
+                                description: Value is the replace contents.
+                                type: string
+                            required:
+                            - type
+                            - value
+                            type: object
                           code:
                             description: Code is a rule to replace http status code
                               in response.
@@ -4630,8 +4650,18 @@ spec:
                                     body:
                                       description: Body is a rule to replace http
                                         message body in target.
-                                      format: byte
-                                      type: string
+                                      properties:
+                                        type:
+                                          description: Type represents the replace
+                                            type, support `TEXT` and `BASE64` currently.
+                                          type: string
+                                        value:
+                                          description: Value is the replace contents.
+                                          type: string
+                                      required:
+                                      - type
+                                      - value
+                                      type: object
                                     code:
                                       description: Code is a rule to replace http
                                         status code in response.
@@ -6730,8 +6760,19 @@ spec:
                                         body:
                                           description: Body is a rule to replace http
                                             message body in target.
-                                          format: byte
-                                          type: string
+                                          properties:
+                                            type:
+                                              description: Type represents the replace
+                                                type, support `TEXT` and `BASE64`
+                                                currently.
+                                              type: string
+                                            value:
+                                              description: Value is the replace contents.
+                                              type: string
+                                          required:
+                                          - type
+                                          - value
+                                          type: object
                                         code:
                                           description: Code is a rule to replace http
                                             status code in response.

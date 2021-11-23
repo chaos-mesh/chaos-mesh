@@ -3649,10 +3649,8 @@ var doc = `{
             "properties": {
                 "body": {
                     "description": "Body is a rule to replace http message body in target.\n+optional",
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.PodHttpChaosReplaceBodyAction"
                 },
                 "code": {
                     "description": "Code is a rule to replace http status code in response.\n+optional",
@@ -3679,6 +3677,19 @@ var doc = `{
                     "additionalProperties": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "v1alpha1.PodHttpChaosReplaceBodyAction": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "description": "Type represents the replace type, support ` + "`" + `TEXT` + "`" + ` and ` + "`" + `BASE64` + "`" + ` currently.",
+                    "type": "string"
+                },
+                "value": {
+                    "description": "Value is the replace contents.",
+                    "type": "string"
                 }
             }
         },
