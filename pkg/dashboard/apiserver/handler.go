@@ -19,6 +19,7 @@ import (
 	"go.uber.org/fx"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/archive"
+	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/auth/gcp"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/common"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/event"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/experiment"
@@ -34,8 +35,12 @@ var handlerModule = fx.Options(
 		workflow.NewService,
 		event.NewService,
 		archive.NewService,
+		gcp.NewService,
 	),
 	fx.Invoke(
+		// gcp should register at the first, because it registers a middleware
+		gcp.Register,
+
 		common.Register,
 		experiment.Register,
 		schedule.Register,

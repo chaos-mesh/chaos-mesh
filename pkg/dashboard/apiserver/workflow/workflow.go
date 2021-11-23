@@ -197,7 +197,7 @@ func (it *Service) createWorkflow(c *gin.Context) {
 
 	kubeClient, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		_ = c.Error(utils.ErrBadRequest.WrapWithNoMessage(err))
+		utils.SetAPImachineryError(c, err)
 		return
 	}
 
@@ -205,7 +205,7 @@ func (it *Service) createWorkflow(c *gin.Context) {
 
 	result, err := repo.Create(c.Request.Context(), payload)
 	if err != nil {
-		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		utils.SetAPImachineryError(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, result)
@@ -264,7 +264,7 @@ func (it *Service) updateWorkflow(c *gin.Context) {
 
 	err := json.NewDecoder(c.Request.Body).Decode(&payload)
 	if err != nil {
-		_ = c.Error(utils.ErrInternalServer.Wrap(err, "failed to parse request body"))
+		utils.SetAPIError(c, utils.ErrInternalServer.Wrap(err, "failed to parse request body"))
 		return
 	}
 	uid := c.Param("uid")
@@ -278,25 +278,23 @@ func (it *Service) updateWorkflow(c *gin.Context) {
 	name := entity.Name
 
 	if namespace != payload.Namespace {
-		_ = c.Error(utils.ErrBadRequest.Wrap(err,
+		utils.SetAPIError(c, utils.ErrBadRequest.Wrap(err,
 			"namespace is not consistent, pathParameter: %s, metaInRaw: %s",
 			namespace,
-			payload.Namespace),
-		)
+			payload.Namespace))
 		return
 	}
 	if name != payload.Name {
-		_ = c.Error(utils.ErrBadRequest.Wrap(err,
+		utils.SetAPIError(c, utils.ErrBadRequest.Wrap(err,
 			"name is not consistent, pathParameter: %s, metaInRaw: %s",
 			name,
-			payload.Name),
-		)
+			payload.Name))
 		return
 	}
 
 	kubeClient, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		_ = c.Error(utils.ErrBadRequest.WrapWithNoMessage(err))
+		utils.SetAPImachineryError(c, err)
 		return
 	}
 
@@ -304,7 +302,7 @@ func (it *Service) updateWorkflow(c *gin.Context) {
 
 	result, err := repo.Update(c.Request.Context(), namespace, name, payload)
 	if err != nil {
-		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		utils.SetAPImachineryError(c, err)
 		return
 	}
 

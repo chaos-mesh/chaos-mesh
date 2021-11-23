@@ -39,8 +39,13 @@ type ChaosDashboardConfig struct {
 	// EnableFilterNamespace will filter namespace with annotation. Only the pods/containers in namespace
 	// annotated with `chaos-mesh.org/inject=enabled` will be injected.
 	EnableFilterNamespace bool `envconfig:"ENABLE_FILTER_NAMESPACE" default:"false"`
-	// If SecurityMode is set to true, then the dashboard requires token authentication.
-	SecurityMode    bool   `envconfig:"SECURITY_MODE" default:"true" json:"security_mode"`
+	// SecurityMode will use the token login by the user if set to true
+	SecurityMode bool `envconfig:"SECURITY_MODE" default:"true" json:"security_mode"`
+	// GcpSecurityMode will use the gcloud authentication to login to GKE user
+	GcpSecurityMode bool   `envconfig:"GCP_SECURITY_MODE" default:"false" json:"gcp_security_mode"`
+	GcpClientId     string `envconfig:"GCP_CLIENT_ID" default:"" json:"-"`
+	GcpClientSecret string `envconfig:"GCP_CLIENT_SECRET" default:"" json:"-"`
+
 	DNSServerCreate bool   `envconfig:"DNS_SERVER_CREATE" default:"false" json:"dns_server_create"`
 	Version         string `json:"version"`
 }

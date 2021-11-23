@@ -812,6 +812,55 @@ var doc = `{
                 }
             }
         },
+        "/events/workflow/{uid}": {
+            "get": {
+                "description": "list all events for Workflow and related WorkflowNode.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "events"
+                ],
+                "summary": "cascadeFetchEventsForWorkflow list all events for Workflow and related WorkflowNode.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The namespace of the object",
+                        "name": "namespace",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "The UID of the Workflow",
+                        "name": "uid",
+                        "in": "path"
+                    },
+                    {
+                        "type": "string",
+                        "description": "The max length of events list",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/core.Event"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    }
+                }
+            }
+        },
         "/events/{id}": {
             "get": {
                 "description": "Get the event from db by ID.",
@@ -926,55 +975,6 @@ var doc = `{
                     },
                     "400": {
                         "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/utils.APIError"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/utils.APIError"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "description": "Update a chaos experiment.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "experiments"
-                ],
-                "summary": "Update a chaos experiment.",
-                "parameters": [
-                    {
-                        "description": "Request body",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/utils.APIError"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/utils.APIError"
                         }
@@ -1361,53 +1361,6 @@ var doc = `{
                     },
                     "400": {
                         "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/utils.APIError"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/utils.APIError"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "description": "Update a schedule.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "schedules"
-                ],
-                "summary": "Update a schedule.",
-                "parameters": [
-                    {
-                        "description": "Request body",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/v1alpha1.Schedule"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/v1alpha1.Schedule"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/utils.APIError"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/utils.APIError"
                         }
@@ -1979,6 +1932,11 @@ var doc = `{
                     "type": "boolean",
                     "default": false
                 },
+                "gcp_security_mode": {
+                    "description": "GcpSecurityMode will use the gcloud authentication to login to GKE user",
+                    "type": "boolean",
+                    "default": false
+                },
                 "listen_host": {
                     "type": "string",
                     "default": "0.0.0.0"
@@ -1988,7 +1946,7 @@ var doc = `{
                     "default": 2333
                 },
                 "security_mode": {
-                    "description": "If SecurityMode is set to true, then the dashboard requires token authentication.",
+                    "description": "SecurityMode will use the token login by the user if set to true",
                     "type": "boolean",
                     "default": true
                 },

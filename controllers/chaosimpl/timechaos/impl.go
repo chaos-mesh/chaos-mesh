@@ -33,7 +33,7 @@ import (
 type Impl struct {
 	client.Client
 	Log     logr.Logger
-	decoder *utils.ContianerRecordDecoder
+	decoder *utils.ContainerRecordDecoder
 }
 
 var _ common.ChaosImpl = (*Impl)(nil)
@@ -109,7 +109,7 @@ func secAndNSecFromDuration(duration time.Duration) (sec int64, nsec int64) {
 	return
 }
 
-func NewImpl(c client.Client, log logr.Logger, decoder *utils.ContianerRecordDecoder) *common.ChaosImplPair {
+func NewImpl(c client.Client, log logr.Logger, decoder *utils.ContainerRecordDecoder) *common.ChaosImplPair {
 	return &common.ChaosImplPair{
 		Name:   "timechaos",
 		Object: &v1alpha1.TimeChaos{},

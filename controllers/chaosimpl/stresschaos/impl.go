@@ -35,7 +35,7 @@ type Impl struct {
 
 	Log logr.Logger
 
-	decoder *utils.ContianerRecordDecoder
+	decoder *utils.ContainerRecordDecoder
 }
 
 var _ common.ChaosImpl = (*Impl)(nil)
@@ -125,7 +125,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	return v1alpha1.NotInjected, nil
 }
 
-func NewImpl(c client.Client, log logr.Logger, decoder *utils.ContianerRecordDecoder) *common.ChaosImplPair {
+func NewImpl(c client.Client, log logr.Logger, decoder *utils.ContainerRecordDecoder) *common.ChaosImplPair {
 	return &common.ChaosImplPair{
 		Name:   "stresschaos",
 		Object: &v1alpha1.StressChaos{},
