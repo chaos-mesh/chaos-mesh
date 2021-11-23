@@ -60,7 +60,7 @@ type Impl struct {
 	client.Client
 	Log logr.Logger
 
-	decoder *utils.ContianerRecordDecoder
+	decoder *utils.ContainerRecordDecoder
 }
 
 var _ common.ChaosImpl = (*Impl)(nil)
@@ -206,7 +206,7 @@ func generateRuleData(spec *v1alpha1.JVMChaosSpec) error {
 
 // Object would return the instance of chaos
 
-func NewImpl(c client.Client, log logr.Logger, decoder *utils.ContianerRecordDecoder) *common.ChaosImplPair {
+func NewImpl(c client.Client, log logr.Logger, decoder *utils.ContainerRecordDecoder) *common.ChaosImplPair {
 	return &common.ChaosImplPair{
 		Name:   "jvmchaos",
 		Object: &v1alpha1.JVMChaos{},
