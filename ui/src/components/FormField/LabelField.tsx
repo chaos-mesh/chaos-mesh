@@ -86,6 +86,7 @@ const LabelField: React.FC<LabelFieldProps & TextFieldProps> = ({ isKV = false, 
     }
 
     if (e.key === 'Tab') {
+      e.preventDefault()
       processText()
     }
 
