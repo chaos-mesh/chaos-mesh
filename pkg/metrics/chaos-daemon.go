@@ -33,7 +33,6 @@ type ChaosDaemonMetricsCollector struct {
 // NewChaosDaemonMetricsCollector initializes metrics for each chaos daemon
 func NewChaosDaemonMetricsCollector() *ChaosDaemonMetricsCollector {
 	return &ChaosDaemonMetricsCollector{
-		backgroundProcessManager: bpm.NewBackgroundProcessManager(nil),
 		bpmControlledProcessTotal: prometheus.NewCounter(prometheus.CounterOpts{
 			Name: "chaos_daemon_bpm_controlled_process_total",
 			Help: "Total count of bpm controlled processes",
@@ -43,6 +42,11 @@ func NewChaosDaemonMetricsCollector() *ChaosDaemonMetricsCollector {
 			Help: "Current number of bpm controlled processes",
 		}),
 	}
+}
+
+func (collector *ChaosDaemonMetricsCollector) InjectBPM(bpm bpm.BackgroundProcessManager) *ChaosDaemonMetricsCollector {
+	collector.backgroundProcessManager = bpm
+	return collector
 }
 
 func (collector *ChaosDaemonMetricsCollector) Describe(ch chan<- *prometheus.Desc) {
@@ -61,10 +65,8 @@ func (collector *ChaosDaemonMetricsCollector) IncreaseControlledProcesses() {
 }
 
 func (collector *ChaosDaemonMetricsCollector) collectBpmControlledProcesses() {
-	ids, err := collector.backgroundProcessManager.GetControlledProcessIDs()
-	if err != nil {
-		return
+	if collector.bpmControlledProcesses != nil {
+		ids := collector.backgroundProcessManager.GetIdentifiers()
+		collector.bpmControlledProcesses.Set(float64(len(ids)))
 	}
-
-	collector.bpmControlledProcesses.Set(float64(len(ids)))
 }

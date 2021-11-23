@@ -91,10 +91,13 @@ func newDaemonServer(containerRuntime string) (*DaemonServer, error) {
 
 // NewDaemonServerWithCRClient returns DaemonServer with container runtime client
 func NewDaemonServerWithCRClient(crClient crclients.ContainerRuntimeInfoClient) *DaemonServer {
+	backgroundProcessManager := bpm.NewBackgroundProcessManager(metrics.DefaultChaosDaemonMetricsCollector)
+	metrics.DefaultChaosDaemonMetricsCollector.InjectBPM(backgroundProcessManager)
+
 	return &DaemonServer{
 		IPSetLocker:              locker.New(),
 		crClient:                 crClient,
-		backgroundProcessManager: bpm.NewBackgroundProcessManager(metrics.DefaultChaosDaemonMetricsCollector),
+		backgroundProcessManager: backgroundProcessManager,
 	}
 }
 
