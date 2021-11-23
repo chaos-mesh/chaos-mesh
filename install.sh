@@ -1317,6 +1317,8 @@ spec:
               mountPath: ${mountPath}
             - name: sys-path
               mountPath: /host-sys
+            - name: lib-modules
+              mountPath: /lib/modules
           ports:
             - name: grpc
               containerPort: 31767
@@ -1330,6 +1332,9 @@ spec:
         - name: sys-path
           hostPath:
             path: /sys
+        - name: lib-modules
+          hostPath:
+            path: /lib/modules
 ---
 # Source: chaos-mesh/templates/chaos-dashboard-deployment.yaml
 # Copyright 2021 Chaos Mesh Authors.
