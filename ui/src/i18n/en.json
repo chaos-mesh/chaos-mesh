@@ -92,6 +92,9 @@
           "podsPreviewHelper": "Checking or unchecking Pods to further limit the scope of the target"
         }
       },
+      "http": {
+        "title": "HTTP Fault"
+      },
       "physicalmachine": {
         "title": "Physic Fault"
       },
@@ -325,7 +328,7 @@
     "durationHelper": "The supported formats of the duration are: ms / s / m / h.",
     "edit": "Edit",
     "ip": "IP address",
-    "isKVHelperText": "Type key:value and end with a space to generate a key/value pair",
+    "isKVHelperText": "Type key:value and end with a TAB to generate a key/value pair",
     "logout": "Logout",
     "logoutDesc": "You need to re-enter the token after logging out",
     "multiOptions": "Support mutiple options",
