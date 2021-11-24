@@ -133,6 +133,7 @@
       "parallel": "Parallel",
       "suspend": "Suspend",
       "custom": "Task",
+      "http": "HTTP Request",
       "number": "Number",
       "child": "Child task",
       "nameHelper": "The task name",
@@ -143,6 +144,7 @@
       "container": {
         "title": "Container",
         "nameHelper": "The container name",
+        "nameValidation": "The container name is required",
         "image": "Image",
         "imageHelper": "The image of container",
         "imageValidation": "The image is required",
@@ -155,6 +157,16 @@
         "target": "Target",
         "expression": "Expression"
       },
+      "httpRequest": {
+        "url": "URL",
+        "urlHelper": "Request URL",
+        "method": "Method",
+        "methodHelper": "Request Method",
+        "body": "Body",
+        "bodyHelper": "Request Body",
+        "follow": "Follow 301/302 Location",
+        "json": "Json Content"
+      },
       "deleteDesc": "This task will be deleted",
       "submitAll": "Submit All"
     },
@@ -162,6 +174,7 @@
     "parallelTitle": "Set parallel",
     "suspendTitle": "Set suspend",
     "customTitle": "Set task",
+    "httpTitle": "Set HTTP Request",
     "nameHelper": "The workflow name",
     "nameValidation": "The workflow name is required",
     "durationValidation": "The workflow duration is required",

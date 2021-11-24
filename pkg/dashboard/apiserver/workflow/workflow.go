@@ -28,6 +28,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
 	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
+	"github.com/chaos-mesh/chaos-mesh/pkg/curl"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
 )
@@ -46,6 +47,9 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint.GET("/:uid", s.getWorkflowDetailByUID)
 	endpoint.PUT("/:uid", s.updateWorkflow)
 	endpoint.DELETE("/:uid", s.deleteWorkflow)
+	endpoint.POST("/render-task/http", s.renderHTTPTask)
+	endpoint.POST("/parse-task/http", s.parseHTTPTask)
+	endpoint.POST("/validate-task/http", s.isValidRenderedHTTPTask)
 }
 
 // Service defines a handler service for workflows.
@@ -56,6 +60,71 @@ type Service struct {
 
 func NewService(conf *config.ChaosDashboardConfig, store core.WorkflowStore) *Service {
 	return &Service{conf: conf, store: store}
+}
+
+// @Summary Render a task which sends HTTP request
+// @Description Render a task which sends HTTP request
+// @Tags workflows
+// @Produce json
+// @Param request body curl.RequestForm true "Origin HTTP Request"
+// @Router /workflows/render-task/http [post]
+// @Success 200 {object} v1alpha1.Template
+// @Failure 400 {object} utils.APIError
+// @Failure 500 {object} utils.APIError
+func (it *Service) renderHTTPTask(c *gin.Context) {
+	requestBody := curl.RequestForm{}
+	if err := c.ShouldBindJSON(&requestBody); err != nil {
+		utils.SetAPIError(c, utils.ErrBadRequest.Wrap(err, "failed to parse request body"))
+		return
+	}
+	result, err := curl.RenderWorkflowTaskTemplate(requestBody)
+	if err != nil {
+		utils.SetAPIError(c, utils.ErrInternalServer.Wrap(err, "failed to parse request body"))
+		return
+	}
+	c.JSON(http.StatusOK, result)
+}
+
+// @Summary Validate the given template is a valid rendered HTTP Task
+// @Description Validate the given template is a valid rendered HTTP Task
+// @Tags workflows
+// @Produce json
+// @Param request body v1alpha1.Template true "Rendered Task"
+// @Router /workflows/validate-task/http [post]
+// @Success 200 {object} bool
+// @Failure 400 {object} utils.APIError
+// @Failure 500 {object} utils.APIError
+func (it *Service) isValidRenderedHTTPTask(c *gin.Context) {
+	requestBody := v1alpha1.Template{}
+	if err := c.ShouldBindJSON(&requestBody); err != nil {
+		utils.SetAPIError(c, utils.ErrBadRequest.Wrap(err, "failed to parse request body"))
+		return
+	}
+	result := curl.IsValidRenderedTask(&requestBody)
+	c.JSON(http.StatusOK, result)
+}
+
+// @Summary Parse the rendered task back to the original request
+// @Description Parse the rendered task back to the original request
+// @Tags workflows
+// @Produce json
+// @Param request body v1alpha1.Template true "Rendered Task"
+// @Router /workflows/parse-task/http [post]
+// @Success 200 {object} curl.RequestForm
+// @Failure 400 {object} utils.APIError
+// @Failure 500 {object} utils.APIError
+func (it *Service) parseHTTPTask(c *gin.Context) {
+	requestBody := v1alpha1.Template{}
+	if err := c.ShouldBindJSON(&requestBody); err != nil {
+		utils.SetAPIError(c, utils.ErrBadRequest.Wrap(err, "failed to parse request body"))
+		return
+	}
+	result, err := curl.ParseWorkflowTaskTemplate(&requestBody)
+	if err != nil {
+		utils.SetAPIError(c, utils.ErrInternalServer.Wrap(err, "failed to parse request body"))
+		return
+	}
+	c.JSON(http.StatusOK, result)
 }
 
 // @Summary List workflows from Kubernetes cluster.
