@@ -18,6 +18,7 @@ package gcp
 import (
 	"net/http"
 	"net/url"
+	"path"
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/oauth2"
@@ -33,16 +34,26 @@ var log = ctrl.Log.WithName("gcp auth api")
 type Service struct {
 	clientId     string
 	clientSecret string
+	rootUrl      *url.URL
 }
 
 // NewService returns an experiment service instance.
 func NewService(
 	conf *config.ChaosDashboardConfig,
-) *Service {
+) (*Service, error) {
+	rootUrl, err := url.Parse(conf.RootUrl)
+	if err != nil {
+		return nil, err
+	}
+	if rootUrl.Path == "" {
+		rootUrl.Path = "/"
+	}
+
 	return &Service{
 		clientId:     conf.GcpClientId,
 		clientSecret: conf.GcpClientSecret,
-	}
+		rootUrl:      rootUrl,
+	}, nil
 }
 
 // Register mounts HTTP handler on the mux.
@@ -60,10 +71,8 @@ func Register(r *gin.RouterGroup, s *Service, conf *config.ChaosDashboardConfig)
 }
 
 func (s *Service) getOauthConfig(c *gin.Context) oauth2.Config {
-	url := c.Request.URL
-	url.Path = "/api/auth/gcp/callback"
-	url.RawQuery = ""
-	url.Fragment = ""
+	url := *s.rootUrl
+	url.Path = path.Join(s.rootUrl.Path, "./api/auth/gcp/callback")
 
 	return oauth2.Config{
 		ClientID:     s.clientId,
