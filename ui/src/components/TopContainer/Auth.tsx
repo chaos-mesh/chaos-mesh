@@ -14,14 +14,18 @@
  * limitations under the License.
  *
  */
-import { Box, Button, Link, Typography } from '@material-ui/core'
+
+import { Box, Button, Divider, IconButton, Link, Typography } from '@material-ui/core'
 import { useEffect, useState } from 'react'
 
 import ConfirmDialog from 'components-mui/ConfirmDialog'
+import GoogleIcon from '@material-ui/icons/Google'
 import RBACGenerator from 'components/RBACGenerator'
+import Space from 'components-mui/Space'
 import T from 'components/T'
 import Token from 'components/Token'
 import { useHistory } from 'react-router-dom'
+import { useStoreSelector } from 'store'
 
 interface AuthProps {
   open: boolean
@@ -31,6 +35,8 @@ interface AuthProps {
 const Auth: React.FC<AuthProps> = ({ open, setOpen }) => {
   const history = useHistory()
 
+  const { gcpSecurityMode } = useStoreSelector((state) => state.globalStatus)
+
   const [tokenGenOpen, setTokenGenOpen] = useState(false)
 
   useEffect(() => {
@@ -38,6 +44,7 @@ const Auth: React.FC<AuthProps> = ({ open, setOpen }) => {
   }, [open, setOpen])
 
   const handleSubmitCallback = () => history.go(0)
+  const handleAuthGCP = () => (window.location.href = '/api/auth/gcp/redirect')
 
   return (
     <ConfirmDialog
@@ -50,15 +57,28 @@ const Auth: React.FC<AuthProps> = ({ open, setOpen }) => {
         },
       }}
     >
-      <Box mb={3}>
+      <Space>
         <Typography variant="body2" color="textSecondary">
-          {T('settings.addToken.prompt2')}{' '}
-          <Link style={{ cursor: 'pointer' }} onClick={() => setTokenGenOpen(true)}>
+          {T('settings.addToken.prompt2')}
+          <Link sx={{ cursor: 'pointer' }} onClick={() => setTokenGenOpen(true)}>
             {T('settings.addToken.prompt3')}
           </Link>
         </Typography>
-      </Box>
-      <Token onSubmitCallback={handleSubmitCallback} />
+        <Token onSubmitCallback={handleSubmitCallback} />
+      </Space>
+      {gcpSecurityMode && (
+        <>
+          <Divider sx={{ mt: 6, mb: 3, color: 'text.secondary', typography: 'body2' }}>
+            {T('settings.addToken.or')}
+          </Divider>
+          <Box textAlign="center">
+            <IconButton color="primary" onClick={handleAuthGCP}>
+              <GoogleIcon />
+            </IconButton>
+          </Box>
+        </>
+      )}
+
       <ConfirmDialog
         open={tokenGenOpen}
         title={T('settings.addToken.generator')}
