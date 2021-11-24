@@ -2074,6 +2074,10 @@ var doc = `{
                     "type": "integer",
                     "default": 2333
                 },
+                "root_path": {
+                    "type": "string",
+                    "default": "http://localhost:2333"
+                },
                 "security_mode": {
                     "description": "SecurityMode will use the token login by the user if set to true",
                     "type": "boolean",
