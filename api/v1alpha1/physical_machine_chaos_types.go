@@ -16,13 +16,33 @@
 package v1alpha1
 
 import (
-	"strings"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // PhysicalMachineChaosAction represents the chaos action about physical machine.
 type PhysicalMachineChaosAction string
+
+var (
+	PMStressCPUAction        PhysicalMachineChaosAction = "stress-cpu"
+	PMStressMemAction        PhysicalMachineChaosAction = "stress-mem"
+	PMDiskWritePayloadAction PhysicalMachineChaosAction = "disk-write-payload"
+	PMDiskReadPayloadAction  PhysicalMachineChaosAction = "disk-read-payload"
+	PMDiskFillAction         PhysicalMachineChaosAction = "disk-fill"
+	PMNetworkCorruptAction   PhysicalMachineChaosAction = "network-corrupt"
+	PMNetworkDuplicateAction PhysicalMachineChaosAction = "network-duplicate"
+	PMNetworkLossAction      PhysicalMachineChaosAction = "network-loss"
+	PMNetworkDelayAction     PhysicalMachineChaosAction = "network-delay"
+	PMNetworkPartitionAction PhysicalMachineChaosAction = "network-partition"
+	PMNetworkDNSAction       PhysicalMachineChaosAction = "network-dns"
+	PMProcessAction          PhysicalMachineChaosAction = "process"
+	PMJVMExceptionAction     PhysicalMachineChaosAction = "jvm-exception"
+	PMJVMGCAction            PhysicalMachineChaosAction = "jvm-gc"
+	PMJVMLatencyAction       PhysicalMachineChaosAction = "jvm-latency"
+	PMJVMReturnAction        PhysicalMachineChaosAction = "jvm-return"
+	PMJVMStressAction        PhysicalMachineChaosAction = "jvm-stress"
+	PMJVMRuleDataAction      PhysicalMachineChaosAction = "jvm-rule-data"
+	PMClockAction            PhysicalMachineChaosAction = "clock"
+)
 
 // +kubebuilder:object:root=true
 // +chaos-mesh:experiment
@@ -52,7 +72,6 @@ type PhysicalMachineChaosSpec struct {
 
 	// Duration represents the duration of the chaos action
 	// +optional
-	// Duration represents the duration of the chaos action
 	Duration *string `json:"duration,omitempty" webhook:"Duration"`
 }
 
@@ -69,10 +88,6 @@ func (obj *PhysicalMachineChaos) GetSelectorSpecs() map[string]interface{} {
 
 type PhysicalMachineSelector struct {
 	Address []string `json:"address"`
-}
-
-func (selector *PhysicalMachineSelector) Id() string {
-	return strings.Join(selector.Address, ",")
 }
 
 type ExpInfo struct {
@@ -146,71 +161,106 @@ type ExpInfo struct {
 }
 
 type StressCPUSpec struct {
-	Load    int `json:"load,omitempty"`
+	// specifies P percent loading per CPU worker. 0 is effectively a sleep (no load) and 100 is full loading.
+	Load int `json:"load,omitempty"`
+	// specifies N workers to apply the stressor.
 	Workers int `json:"workers,omitempty"`
+	// extend stress-ng options
+	Options string `json:"options,omitempty"`
 }
 
 type StressMemorySpec struct {
+	// specifies N bytes consumed per vm worker, default is the total available memory.
+	// One can specify the size as % of total available memory or in units of B, KB/KiB, MB/MiB, GB/GiB, TB/TiB..
 	Size string `json:"size,omitempty"`
+	// extend stress-ng options
+	Options string `json:"options,omitempty"`
 }
 
 type DiskFileSpec struct {
+	// specifies how many units of data will write into the file path. support unit: c=1, w=2, b=512, kB=1000,
+	// K=1024, MB=1000*1000, M=1024*1024, GB=1000*1000*1000, G=1024*1024*1024 BYTES. example : 1M | 512kB
 	Size string `json:"size,omitempty"`
+	// specifies the location to fill data in. if path not provided,
+	// payload will read/write from/into a temp file, temp file will be deleted after writing
 	Path string `json:"path,omitempty"`
 }
 
 type DiskPayloadSpec struct {
-	DiskFileSpec      `json:",inline"`
-	PayloadProcessNum uint8 `json:"payload_process_num,omitempty"`
+	DiskFileSpec `json:",inline"`
+
+	// specifies the number of process work on writing, default 1, only 1-255 is valid value
+	PayloadProcessNum uint8 `json:"payload-process-num,omitempty"`
 }
 
 type DiskFillSpec struct {
-	DiskFileSpec    `json:",inline"`
-	FillByFallocate bool `json:"fill_by_fallocate,omitempty"`
+	DiskFileSpec `json:",inline"`
+
+	// fill disk by fallocate
+	FillByFallocate bool `json:"fill-by-fallocate,omitempty"`
 }
 
 type NetworkCommonSpec struct {
+	// correlation is percentage (10 is 10%)
 	Correlation string `json:"correlation,omitempty"`
-	Device      string `json:"device,omitempty"`
-	SourcePort  string `json:"source-port,omitempty"`
-	EgressPort  string `json:"egress-port,omitempty"`
-	IPAddress   string `json:"ip-address,omitempty"`
-	IPProtocol  string `json:"ip-protocol,omitempty"`
-	Hostname    string `json:"hostname,omitempty"`
+	// the network interface to impact
+	Device string `json:"device,omitempty"`
+	// only impact egress traffic from these source ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.
+	// it can only be used in conjunction with -p tcp or -p udp
+	SourcePort string `json:"source-port,omitempty"`
+	// only impact egress traffic to these destination ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.
+	// it can only be used in conjunction with -p tcp or -p udp
+	EgressPort string `json:"egress-port,omitempty"`
+	// only impact egress traffic to these IP addresses
+	IPAddress string `json:"ip-address,omitempty"`
+	// only impact traffic using this IP protocol, supported: tcp, udp, icmp, all
+	IPProtocol string `json:"ip-protocol,omitempty"`
+	// only impact traffic to these hostnames
+	Hostname string `json:"hostname,omitempty"`
 }
 
 type NetworkCorruptSpec struct {
 	NetworkCommonSpec `json:",inline"`
 
+	// percentage of packets to corrupt (10 is 10%)
 	Percent string `json:"percent,omitempty"`
 }
 
 type NetworkDuplicateSpec struct {
 	NetworkCommonSpec `json:",inline"`
 
+	// percentage of packets to duplicate (10 is 10%)
 	Percent string `json:"percent,omitempty"`
 }
 
 type NetworkLossSpec struct {
 	NetworkCommonSpec `json:",inline"`
 
+	// percentage of packets to loss (10 is 10%)
 	Percent string `json:"percent,omitempty"`
 }
 
 type NetworkDelaySpec struct {
 	NetworkCommonSpec `json:",inline"`
 
-	Jitter  string `json:"jitter,omitempty"`
+	// jitter time, time units: ns, us (or µs), ms, s, m, h.
+	Jitter string `json:"jitter,omitempty"`
+	// delay egress time, time units: ns, us (or µs), ms, s, m, h.
 	Latency string `json:"latency,omitempty"`
 }
 
 type NetworkPartitionSpec struct {
+	// the network interface to impact
 	Device string `json:"device,omitempty"`
-
-	Hostname  string `json:"hostname,omitempty"`
+	// only impact traffic to these hostnames
+	Hostname string `json:"hostname,omitempty"`
+	// only impact egress traffic to these IP addresses
 	IPAddress string `json:"ip-address,omitempty"`
+	// specifies the partition direction, values can be 'from', 'to'.
+	// 'from' means packets coming from the 'IPAddress' or 'Hostname' and going to your server,
+	// 'to' means packets originating from your server and going to the 'IPAddress' or 'Hostname'.
 	Direction string `json:"direction,omitempty"`
-
+	// only impact egress traffic to these IP addresses
 	IPProtocol string `json:"ip-protocol,omitempty"`
 	// only the packet which match the tcp flag can be accepted, others will be dropped.
 	// only set when the IPProtocol is tcp, used for partition.
@@ -218,8 +268,11 @@ type NetworkPartitionSpec struct {
 }
 
 type NetworkDNSSpec struct {
-	DNSServer     string `json:"dns-server,omitempty"`
-	DNSIp         string `json:"dns-ip,omitempty"`
+	// update the DNS server in /etc/resolv.conf with this value
+	DNSServer string `json:"dns-server,omitempty"`
+	// map specified host to this IP address
+	DNSIp string `json:"dns-ip,omitempty"`
+	// map this host to specified IP
 	DNSDomainName string `json:"dns-domain-name,omitempty"`
 }
 
@@ -239,8 +292,10 @@ type NetworkBandwidthSpec struct {
 }
 
 type ProcessSpec struct {
+	// the process name or the process ID
 	Process string `json:"process,omitempty"`
-	Signal  int    `json:"signal,omitempty"`
+	// the signal number to send
+	Signal int `json:"signal,omitempty"`
 }
 
 type JVMCommonSpec struct {
@@ -294,7 +349,7 @@ type JVMStressSpec struct {
 	CPUCount int `json:"cpu-count,omitempty"`
 
 	// the memory type need to locate, only set it when action is stress, the value can be 'stack' or 'heap'
-	MemoryType int `json:"mem-type,omitempty"`
+	MemoryType string `json:"mem-type,omitempty"`
 }
 
 type JVMRuleDataSpec struct {
@@ -305,9 +360,12 @@ type JVMRuleDataSpec struct {
 }
 
 type ClockSpec struct {
+	// the pid of target program.
 	Pid int `json:"pid,omitempty"`
-
+	// specifies the length of time offset.
 	TimeOffset string `json:"time-offset,omitempty"`
-
+	// the identifier of the particular clock on which to act.
+	// More clock description in linux kernel can be found in man page of clock_getres, clock_gettime, clock_settime.
+	// Muti clock ids should be split with ","
 	ClockIdsSlice string `json:"clock-ids-slice,omitempty"`
 }

@@ -58,3 +58,12 @@ export interface WorkflowSingle extends Workflow {
   }
   kube_object: any
 }
+
+export interface RequestForm {
+  name: string
+  url: string
+  method: string
+  body: string
+  followLocation: boolean
+  jsonContent: boolean
+}
