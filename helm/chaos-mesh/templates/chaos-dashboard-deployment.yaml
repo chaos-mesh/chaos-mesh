@@ -83,6 +83,8 @@ spec:
               value: "{{ .Values.dashboard.gcpClientSecret }}"
             - name: DNS_SERVER_CREATE
               value: "{{ .Values.dnsServer.create }}"
+            - name: ROOT_URL
+              value: "{{ .Values.dashboard.rootUrl }}"
           volumeMounts:
             - name: storage-volume
               mountPath: {{ .Values.dashboard.persistentVolume.mountPath }}

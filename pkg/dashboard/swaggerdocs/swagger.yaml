@@ -52,6 +52,9 @@ definitions:
       listen_port:
         default: 2333
         type: integer
+      root_path:
+        default: http://localhost:2333
+        type: string
       security_mode:
         default: true
         description: SecurityMode will use the token login by the user if set to true

@@ -56,17 +56,21 @@ export function arrToObjBySep(arr: string[], sep: string) {
  * @param {*} obj
  */
 export function sanitize(obj: any) {
-  return JSON.parse(
-    JSON.stringify(obj, (_, value) => {
-      if (!value) {
-        return undefined
-      }
+  function isEmpty(value: any): boolean {
+    if (!value) {
+      return true
+    }
 
-      if (Array.isArray(value) && value.length === 0) {
-        return undefined
-      }
+    if (Array.isArray(value) && value.length === 0) {
+      return true
+    }
 
-      return value
-    })
-  )
+    if (value instanceof Object) {
+      return Object.values(value).every(isEmpty)
+    }
+
+    return false
+  }
+
+  return JSON.parse(JSON.stringify(obj, (_, value: any) => (isEmpty(value) ? undefined : value)))
 }

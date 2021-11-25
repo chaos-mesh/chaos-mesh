@@ -1414,6 +1414,8 @@ spec:
               value: ""
             - name: DNS_SERVER_CREATE
               value: "false"
+            - name: ROOT_URL
+              value: "http://localhost:2333"
           volumeMounts:
             - name: storage-volume
               mountPath: /data
