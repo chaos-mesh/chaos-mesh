@@ -1156,6 +1156,63 @@ export const dataPhysic: Record<KindPhysic, Definition> = {
         },
       },
       {
+        name: 'Bandwidth',
+        key: 'network-bandwidth',
+        spec: {
+          action: 'network-bandwidth' as any,
+          rate: {
+            field: 'text',
+            label: 'Rate',
+            value: '',
+            helperText: 'The rate allows bps, kbps, mbps, gbps, tbps unit. For example, bps means bytes per second',
+          },
+          limit: {
+            field: 'number',
+            label: 'Limit',
+            value: 0,
+            helperText: 'The number of bytes that can be queued waiting for tokens to become available',
+          },
+          buffer: {
+            field: 'number',
+            label: 'Buffer',
+            value: 0,
+            helperText: 'The maximum amount of bytes that tokens can be available instantaneously',
+          },
+          minburst: {
+            field: 'number',
+            label: 'Min burst',
+            value: 0,
+            helperText: 'The size of the peakrate bucket',
+          },
+          peakrate: {
+            field: 'number',
+            label: 'Peak rate',
+            value: 0,
+            helperText: 'The maximum depletion rate of the bucket',
+          },
+          direction: networkCommon['direction'],
+          
+          device: {
+            field: 'text',
+            label: 'Device',
+            value: '',
+            helperText: 'Affected device, e.g., eth0',
+          },
+          hostname: {
+            field: 'text',
+            label: 'Hostname',
+            value: '',
+            helperText: 'Specify the hostname',
+          },
+          'ip-address': {
+            field: 'text',
+            label: 'IP Address',
+            value: '',
+            helperText: 'Specify the IP address',
+          },
+        },
+      },
+      {
         name: 'DNS',
         key: 'network-dns',
         spec: {

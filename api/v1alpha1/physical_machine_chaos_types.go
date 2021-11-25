@@ -62,7 +62,7 @@ type PhysicalMachineChaos struct {
 
 // PhysicalMachineChaosSpec defines the desired state of PhysicalMachineChaos
 type PhysicalMachineChaosSpec struct {
-	// +kubebuilder:validation:Enum=stress-cpu;stress-mem;disk-read-payload;disk-write-payload;disk-fill;network-corrupt;network-duplicate;network-loss;network-delay;network-partition;network-dns;process;jvm-exception;jvm-gc;jvm-latency;jvm-return;jvm-stress;jvm-rule-data;clock
+	// +kubebuilder:validation:Enum=stress-cpu;stress-mem;disk-read-payload;disk-write-payload;disk-fill;network-corrupt;network-duplicate;network-loss;network-delay;network-partition;network-dns;network-bandwidth;process;jvm-exception;jvm-gc;jvm-latency;jvm-return;jvm-stress;jvm-rule-data;clock
 	Action PhysicalMachineChaosAction `json:"action"`
 
 	PhysicalMachineSelector `json:",inline"`
@@ -131,6 +131,9 @@ type ExpInfo struct {
 
 	// +optional
 	NetworkDNS *NetworkDNSSpec `json:"network-dns,omitempty"`
+
+	// +optional
+	NetworkBandwidth *NetworkBandwidthSpec `json:"network-bandwidth,omitempty"`
 
 	// +optional
 	Process *ProcessSpec `json:"process,omitempty"`
@@ -271,6 +274,21 @@ type NetworkDNSSpec struct {
 	DNSIp string `json:"dns-ip,omitempty"`
 	// map this host to specified IP
 	DNSDomainName string `json:"dns-domain-name,omitempty"`
+}
+
+type NetworkBandwidthSpec struct {
+	Rate string `json:"rate"`
+	// +kubebuilder:validation:Minimum=1
+	Limit uint32 `json:"limit"`
+	// +kubebuilder:validation:Minimum=1
+	Buffer uint32 `json:"buffer"`
+
+	Peakrate *uint64 `json:"peakrate,omitempty"`
+	Minburst *uint32 `json:"minburst,omitempty"`
+
+	Device    string `json:"device,omitempty"`
+	IPAddress string `json:"ip-address,omitempty"`
+	Hostname  string `json:"hostname,omitempty"`
 }
 
 type ProcessSpec struct {

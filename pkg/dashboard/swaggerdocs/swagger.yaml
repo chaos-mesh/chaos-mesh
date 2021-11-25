@@ -1257,6 +1257,27 @@ definitions:
           +kubebuilder:validation:Minimum=1
         type: integer
     type: object
+  v1alpha1.NetworkBandwidthSpec:
+    properties:
+      buffer:
+        description: +kubebuilder:validation:Minimum=1
+        type: integer
+      device:
+        type: string
+      hostname:
+        type: string
+      ip-address:
+        type: string
+      limit:
+        description: +kubebuilder:validation:Minimum=1
+        type: integer
+      minburst:
+        type: integer
+      peakrate:
+        type: integer
+      rate:
+        type: string
+    type: object
   v1alpha1.NetworkChaosSpec:
     properties:
       action:
@@ -1571,6 +1592,10 @@ definitions:
         type: object
       jvm-stress:
         $ref: '#/definitions/v1alpha1.JVMStressSpec'
+        description: +optional
+        type: object
+      network-bandwidth:
+        $ref: '#/definitions/v1alpha1.NetworkBandwidthSpec'
         description: +optional
         type: object
       network-corrupt:

@@ -2235,6 +2235,7 @@ spec:
                 - network-delay
                 - network-partition
                 - network-dns
+                - network-bandwidth
                 - process
                 - jvm-exception
                 - jvm-gc
@@ -2411,6 +2412,35 @@ spec:
                   port:
                     description: the port of agent server
                     type: integer
+                type: object
+              network-bandwidth:
+                properties:
+                  buffer:
+                    format: int32
+                    minimum: 1
+                    type: integer
+                  device:
+                    type: string
+                  hostname:
+                    type: string
+                  ip-address:
+                    type: string
+                  limit:
+                    format: int32
+                    minimum: 1
+                    type: integer
+                  minburst:
+                    format: int32
+                    type: integer
+                  peakrate:
+                    format: int64
+                    type: integer
+                  rate:
+                    type: string
+                required:
+                - buffer
+                - limit
+                - rate
                 type: object
               network-corrupt:
                 properties:
@@ -5104,6 +5134,7 @@ spec:
                     - network-delay
                     - network-partition
                     - network-dns
+                    - network-bandwidth
                     - process
                     - jvm-exception
                     - jvm-gc
@@ -5282,6 +5313,35 @@ spec:
                       port:
                         description: the port of agent server
                         type: integer
+                    type: object
+                  network-bandwidth:
+                    properties:
+                      buffer:
+                        format: int32
+                        minimum: 1
+                        type: integer
+                      device:
+                        type: string
+                      hostname:
+                        type: string
+                      ip-address:
+                        type: string
+                      limit:
+                        format: int32
+                        minimum: 1
+                        type: integer
+                      minburst:
+                        format: int32
+                        type: integer
+                      peakrate:
+                        format: int64
+                        type: integer
+                      rate:
+                        type: string
+                    required:
+                    - buffer
+                    - limit
+                    - rate
                     type: object
                   network-corrupt:
                     properties:
@@ -7609,6 +7669,7 @@ spec:
                               - network-delay
                               - network-partition
                               - network-dns
+                              - network-bandwidth
                               - process
                               - jvm-exception
                               - jvm-gc
@@ -7802,6 +7863,35 @@ spec:
                                 port:
                                   description: the port of agent server
                                   type: integer
+                              type: object
+                            network-bandwidth:
+                              properties:
+                                buffer:
+                                  format: int32
+                                  minimum: 1
+                                  type: integer
+                                device:
+                                  type: string
+                                hostname:
+                                  type: string
+                                ip-address:
+                                  type: string
+                                limit:
+                                  format: int32
+                                  minimum: 1
+                                  type: integer
+                                minburst:
+                                  format: int32
+                                  type: integer
+                                peakrate:
+                                  format: int64
+                                  type: integer
+                                rate:
+                                  type: string
+                              required:
+                              - buffer
+                              - limit
+                              - rate
                               type: object
                             network-corrupt:
                               properties:
@@ -9834,6 +9924,7 @@ spec:
                                   - network-delay
                                   - network-partition
                                   - network-dns
+                                  - network-bandwidth
                                   - process
                                   - jvm-exception
                                   - jvm-gc
@@ -10029,6 +10120,35 @@ spec:
                                     port:
                                       description: the port of agent server
                                       type: integer
+                                  type: object
+                                network-bandwidth:
+                                  properties:
+                                    buffer:
+                                      format: int32
+                                      minimum: 1
+                                      type: integer
+                                    device:
+                                      type: string
+                                    hostname:
+                                      type: string
+                                    ip-address:
+                                      type: string
+                                    limit:
+                                      format: int32
+                                      minimum: 1
+                                      type: integer
+                                    minburst:
+                                      format: int32
+                                      type: integer
+                                    peakrate:
+                                      format: int64
+                                      type: integer
+                                    rate:
+                                      type: string
+                                  required:
+                                  - buffer
+                                  - limit
+                                  - rate
                                   type: object
                                 network-corrupt:
                                   properties:
@@ -16249,6 +16369,7 @@ spec:
                     - network-delay
                     - network-partition
                     - network-dns
+                    - network-bandwidth
                     - process
                     - jvm-exception
                     - jvm-gc
@@ -16427,6 +16548,35 @@ spec:
                       port:
                         description: the port of agent server
                         type: integer
+                    type: object
+                  network-bandwidth:
+                    properties:
+                      buffer:
+                        format: int32
+                        minimum: 1
+                        type: integer
+                      device:
+                        type: string
+                      hostname:
+                        type: string
+                      ip-address:
+                        type: string
+                      limit:
+                        format: int32
+                        minimum: 1
+                        type: integer
+                      minburst:
+                        format: int32
+                        type: integer
+                      peakrate:
+                        format: int64
+                        type: integer
+                      rate:
+                        type: string
+                    required:
+                    - buffer
+                    - limit
+                    - rate
                     type: object
                   network-corrupt:
                     properties:
@@ -18317,6 +18467,7 @@ spec:
                         - network-delay
                         - network-partition
                         - network-dns
+                        - network-bandwidth
                         - process
                         - jvm-exception
                         - jvm-gc
@@ -18497,6 +18648,35 @@ spec:
                           port:
                             description: the port of agent server
                             type: integer
+                        type: object
+                      network-bandwidth:
+                        properties:
+                          buffer:
+                            format: int32
+                            minimum: 1
+                            type: integer
+                          device:
+                            type: string
+                          hostname:
+                            type: string
+                          ip-address:
+                            type: string
+                          limit:
+                            format: int32
+                            minimum: 1
+                            type: integer
+                          minburst:
+                            format: int32
+                            type: integer
+                          peakrate:
+                            format: int64
+                            type: integer
+                          rate:
+                            type: string
+                        required:
+                        - buffer
+                        - limit
+                        - rate
                         type: object
                       network-corrupt:
                         properties:
@@ -20876,6 +21056,7 @@ spec:
                                   - network-delay
                                   - network-partition
                                   - network-dns
+                                  - network-bandwidth
                                   - process
                                   - jvm-exception
                                   - jvm-gc
@@ -21071,6 +21252,35 @@ spec:
                                     port:
                                       description: the port of agent server
                                       type: integer
+                                  type: object
+                                network-bandwidth:
+                                  properties:
+                                    buffer:
+                                      format: int32
+                                      minimum: 1
+                                      type: integer
+                                    device:
+                                      type: string
+                                    hostname:
+                                      type: string
+                                    ip-address:
+                                      type: string
+                                    limit:
+                                      format: int32
+                                      minimum: 1
+                                      type: integer
+                                    minburst:
+                                      format: int32
+                                      type: integer
+                                    peakrate:
+                                      format: int64
+                                      type: integer
+                                    rate:
+                                      type: string
+                                  required:
+                                  - buffer
+                                  - limit
+                                  - rate
                                   type: object
                                 network-corrupt:
                                   properties:
@@ -23174,6 +23384,7 @@ spec:
                                       - network-delay
                                       - network-partition
                                       - network-dns
+                                      - network-bandwidth
                                       - process
                                       - jvm-exception
                                       - jvm-gc
@@ -23374,6 +23585,35 @@ spec:
                                         port:
                                           description: the port of agent server
                                           type: integer
+                                      type: object
+                                    network-bandwidth:
+                                      properties:
+                                        buffer:
+                                          format: int32
+                                          minimum: 1
+                                          type: integer
+                                        device:
+                                          type: string
+                                        hostname:
+                                          type: string
+                                        ip-address:
+                                          type: string
+                                        limit:
+                                          format: int32
+                                          minimum: 1
+                                          type: integer
+                                        minburst:
+                                          format: int32
+                                          type: integer
+                                        peakrate:
+                                          format: int64
+                                          type: integer
+                                        rate:
+                                          type: string
+                                      required:
+                                      - buffer
+                                      - limit
+                                      - rate
                                       type: object
                                     network-corrupt:
                                       properties:
@@ -32347,6 +32587,7 @@ spec:
                           - network-delay
                           - network-partition
                           - network-dns
+                          - network-bandwidth
                           - process
                           - jvm-exception
                           - jvm-gc
@@ -32531,6 +32772,35 @@ spec:
                             port:
                               description: the port of agent server
                               type: integer
+                          type: object
+                        network-bandwidth:
+                          properties:
+                            buffer:
+                              format: int32
+                              minimum: 1
+                              type: integer
+                            device:
+                              type: string
+                            hostname:
+                              type: string
+                            ip-address:
+                              type: string
+                            limit:
+                              format: int32
+                              minimum: 1
+                              type: integer
+                            minburst:
+                              format: int32
+                              type: integer
+                            peakrate:
+                              format: int64
+                              type: integer
+                            rate:
+                              type: string
+                          required:
+                          - buffer
+                          - limit
+                          - rate
                           type: object
                         network-corrupt:
                           properties:
@@ -34508,6 +34778,7 @@ spec:
                               - network-delay
                               - network-partition
                               - network-dns
+                              - network-bandwidth
                               - process
                               - jvm-exception
                               - jvm-gc
@@ -34701,6 +34972,35 @@ spec:
                                 port:
                                   description: the port of agent server
                                   type: integer
+                              type: object
+                            network-bandwidth:
+                              properties:
+                                buffer:
+                                  format: int32
+                                  minimum: 1
+                                  type: integer
+                                device:
+                                  type: string
+                                hostname:
+                                  type: string
+                                ip-address:
+                                  type: string
+                                limit:
+                                  format: int32
+                                  minimum: 1
+                                  type: integer
+                                minburst:
+                                  format: int32
+                                  type: integer
+                                peakrate:
+                                  format: int64
+                                  type: integer
+                                rate:
+                                  type: string
+                              required:
+                              - buffer
+                              - limit
+                              - rate
                               type: object
                             network-corrupt:
                               properties:

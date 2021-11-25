@@ -1009,4 +1009,36 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 			}
 		})
 	})
+	Context("webhook.Validator of bandwidth physicalmachinechaos", func() {
+		It("Validate", func() {
+			testCases := []struct {
+				chaos PhysicalMachineChaos
+				err   string
+			}{
+				{
+					PhysicalMachineChaos{
+						Spec: PhysicalMachineChaosSpec{
+							Action: "network",
+							PhysicalMachineSelector: PhysicalMachineSelector{
+								Address: []string{""},
+							},
+							ExpInfo: ExpInfo{
+								NetworkBandwidth: &NetworkBandwidthSpec{
+									Rate:   "",
+									Limit:  0,
+									Buffer: 0,
+								},
+							},
+						},
+					},
+					"rate is required",
+				},
+			}
+
+			for _, testCase := range testCases {
+				err := testCase.chaos.ValidateCreate()
+				Expect(strings.Contains(err.Error(), testCase.err)).To(BeTrue())
+			}
+		})
+	})
 })
