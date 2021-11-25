@@ -46,6 +46,8 @@ type ChaosDashboardConfig struct {
 	GcpClientId     string `envconfig:"GCP_CLIENT_ID" default:"" json:"-"`
 	GcpClientSecret string `envconfig:"GCP_CLIENT_SECRET" default:"" json:"-"`
 
+	RootUrl string `envconfig:"ROOT_URL" default:"http://localhost:2333" json:"root_path"`
+
 	DNSServerCreate bool   `envconfig:"DNS_SERVER_CREATE" default:"false" json:"dns_server_create"`
 	Version         string `json:"version"`
 }
