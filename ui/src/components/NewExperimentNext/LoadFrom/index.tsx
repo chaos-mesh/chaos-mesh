@@ -40,25 +40,29 @@ const LoadFrom: React.FC<LoadFromProps> = ({ callback, inSchedule, inWorkflow })
   const [radio, setRadio] = useState('')
 
   useEffect(() => {
-    const fetchExperiments = api.experiments.experiments()
-    const fetchArchives = api.archives.archives()
-    const promises: Promise<any>[] = [fetchExperiments, fetchArchives]
+    const fetchExperiments = api.experiments.experiments
+    const fetchArchives = inSchedule ? api.schedules.archives : api.archives.archives
+    const promises: Promise<any>[] = [fetchExperiments(), fetchArchives()]
 
     if (inSchedule) {
       promises.push(api.schedules.schedules())
     }
 
     const fetchAll = async () => {
-      const data = await Promise.all(promises)
+      try {
+        const data = await Promise.all(promises)
 
-      setData({
-        experiments: data[0].data,
-        archives: data[1].data,
-        schedules: data[2] ? data[2].data : [],
-      })
+        setData({
+          experiments: data[0].data,
+          archives: data[1].data,
+          schedules: data[2] ? data[2].data : [],
+        })
+      } catch (error) {
+        console.error(error)
+      }
 
-      let _predefined = await (await getDB()).getAll('predefined' as never) // never?
-      if (inWorkflow) {
+      let _predefined = await (await getDB()).getAll('predefined')
+      if (!inSchedule) {
         _predefined = _predefined.filter((d) => d.kind !== 'Schedule')
       }
       setPredefined(_predefined)
@@ -90,21 +94,20 @@ const LoadFrom: React.FC<LoadFromProps> = ({ callback, inSchedule, inWorkflow })
     let apiRequest
     switch (type) {
       case 's':
-        apiRequest = api.schedules
+        apiRequest = api.schedules.single
         break
       case 'e':
-        apiRequest = api.experiments
+        apiRequest = api.experiments.single
         break
       case 'a':
-        apiRequest = api.archives
+        apiRequest = inSchedule ? api.schedules.singleArchive : api.archives.single
         break
     }
 
     setRadio(e.target.value)
 
     if (apiRequest) {
-      apiRequest
-        .single(uuid)
+      apiRequest(uuid)
         .then(({ data }) => {
           callback && callback(data.kube_object)
 
@@ -142,7 +145,7 @@ const LoadFrom: React.FC<LoadFromProps> = ({ callback, inSchedule, inWorkflow })
                 </Box>
               ) : (
                 <Typography variant="body2" color="textSecondary">
-                  {T('experiments.notFound')}
+                  {T('schedules.notFound')}
                 </Typography>
               )}
 
@@ -150,28 +153,32 @@ const LoadFrom: React.FC<LoadFromProps> = ({ callback, inSchedule, inWorkflow })
             </>
           )}
 
-          <Typography>{T('experiments.title')}</Typography>
+          {!inSchedule && (
+            <>
+              <Typography>{T('experiments.title')}</Typography>
 
-          {loading ? (
-            <SkeletonN n={3} />
-          ) : data.experiments.length > 0 ? (
-            <Box display="flex" flexWrap="wrap">
-              {data.experiments.map((d) => (
-                <FormControlLabel
-                  key={d.uid}
-                  value={`e+${d.uid}`}
-                  control={<Radio color="primary" />}
-                  label={RadioLabel(d.name, d.uid)}
-                />
-              ))}
-            </Box>
-          ) : (
-            <Typography variant="body2" color="textSecondary">
-              {T('experiments.notFound')}
-            </Typography>
+              {loading ? (
+                <SkeletonN n={3} />
+              ) : data.experiments.length > 0 ? (
+                <Box display="flex" flexWrap="wrap">
+                  {data.experiments.map((d) => (
+                    <FormControlLabel
+                      key={d.uid}
+                      value={`e+${d.uid}`}
+                      control={<Radio color="primary" />}
+                      label={RadioLabel(d.name, d.uid)}
+                    />
+                  ))}
+                </Box>
+              ) : (
+                <Typography variant="body2" color="textSecondary">
+                  {T('experiments.notFound')}
+                </Typography>
+              )}
+
+              <Divider />
+            </>
           )}
-
-          <Divider />
 
           <Typography>{T('archives.title')}</Typography>
 

@@ -4,7 +4,7 @@ import { ExperimentKind } from 'components/NewExperiment/types'
 
 export interface PreDefinedValue {
   name: string
-  kind: ExperimentKind
+  kind: ExperimentKind | 'Schedule'
   yaml: object
 }
 

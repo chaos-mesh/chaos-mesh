@@ -2,7 +2,6 @@ import { Box, Table, TableBody, TableRow, Typography } from '@material-ui/core'
 
 import { Branch } from 'slices/workflows'
 import ObjectConfiguration from '.'
-import PaperTop from 'components-mui/PaperTop'
 import T from 'components/T'
 import { TableCell } from './common'
 
