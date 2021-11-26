@@ -30,5 +30,7 @@ RUN case "$TARGET_PLATFORM" in \
     mv /usr/local/bin/libnsenter.so /usr/local/lib/libnsenter.so; \
     curl -L https://github.com/chaos-mesh/rs-tproxy/releases/download/v0.2.4/tproxy-$NSEXEC_ARCH-unknown-linux-gnu.tar.gz | tar xz -C /usr/local/bin
 
+RUN curl -L https://github.com/FingerLeader/memStress/releases/download/v0.1/memStress_v0.1_linux-amd64.tar.gz | tar xz -C /usr/local/bin
+
 COPY bin/chaos-daemon /usr/local/bin/chaos-daemon
 COPY bin/pause /usr/local/bin/pause

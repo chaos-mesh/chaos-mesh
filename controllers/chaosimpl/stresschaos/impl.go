@@ -62,32 +62,35 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	}
 
 	stressors := stresschaos.Spec.StressngStressors
+	cpuStressors := ""
+	memoryStressors := ""
 	if len(stressors) == 0 {
-		stressors, err = stresschaos.Spec.Stressors.Normalize()
+		cpuStressors, memoryStressors, err = stresschaos.Spec.Stressors.Normalize()
 		if err != nil {
 			impl.Log.Info("fail to ")
 			// TODO: add an event here
 			return v1alpha1.NotInjected, err
 		}
+		impl.Log.Info("message", "memoryStressors", memoryStressors)
 	}
 	res, err := pbClient.ExecStressors(ctx, &pb.ExecStressRequest{
-		Scope:     pb.ExecStressRequest_CONTAINER,
-		Target:    containerId,
-		Stressors: stressors,
-		EnterNS:   true,
+		Scope:           pb.ExecStressRequest_CONTAINER,
+		Target:          containerId,
+		CpuStressors:    cpuStressors,
+		MemoryStressors: memoryStressors,
+		EnterNS:         true,
 	})
 	if err != nil {
+		impl.Log.Info("message", "eeeeeeeeeeeeeeeeeeeerrrrrrrrrrrr", memoryStressors)
 		return v1alpha1.NotInjected, err
 	}
-
 	// TODO: support custom status
 	stresschaos.Status.Instances[records[index].Id] = v1alpha1.StressInstance{
-		UID: res.Instance,
+		UID: res.MemoryInstance,
 		StartTime: &metav1.Time{
-			Time: time.Unix(res.StartTime/1000, (res.StartTime%1000)*int64(time.Millisecond)),
+			Time: time.Unix(res.MemoryStartTime/1000, (res.MemoryStartTime%1000)*int64(time.Millisecond)),
 		},
 	}
-
 	return v1alpha1.Injected, nil
 }
 
@@ -115,8 +118,8 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		return v1alpha1.NotInjected, nil
 	}
 	if _, err = pbClient.CancelStressors(ctx, &pb.CancelStressRequest{
-		Instance:  instance.UID,
-		StartTime: instance.StartTime.UnixNano() / int64(time.Millisecond),
+		CpuInstance:  instance.UID,
+		CpuStartTime: instance.StartTime.UnixNano() / int64(time.Millisecond),
 	}); err != nil {
 		// TODO: check whether the erorr still exists
 		return v1alpha1.Injected, nil

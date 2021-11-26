@@ -18,7 +18,6 @@ package v1alpha1
 import (
 	"fmt"
 
-	"github.com/docker/go-units"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -98,43 +97,45 @@ type Stressors struct {
 }
 
 // Normalize the stressors to comply with stress-ng
-func (in *Stressors) Normalize() (string, error) {
-	stressors := ""
+func (in *Stressors) Normalize() (string, string, error) {
+	CPUStressors := ""
+	MemoryStressors := ""
 	if in.MemoryStressor != nil && in.MemoryStressor.Workers != 0 {
-		stressors += fmt.Sprintf(" --vm %d --vm-keep", in.MemoryStressor.Workers)
+		// MemoryStressors += fmt.Sprintf(" --vm %d --vm-keep", in.MemoryStressor.Workers)
 		if len(in.MemoryStressor.Size) != 0 {
 			if in.MemoryStressor.Size[len(in.MemoryStressor.Size)-1] != '%' {
-				size, err := units.FromHumanSize(string(in.MemoryStressor.Size))
-				if err != nil {
-					return "", err
-				}
-				stressors += fmt.Sprintf(" --vm-bytes %d", size)
+				// size, err := units.FromHumanSize(string())
+				// if err != nil {
+				// 	return "", "", err
+				// }
+				MemoryStressors += fmt.Sprintf(" --size %s", in.MemoryStressor.Size)
+				fmt.Println(in.MemoryStressor.Size)
 			} else {
-				stressors += fmt.Sprintf(" --vm-bytes %s",
+				MemoryStressors += fmt.Sprintf(" --size %s",
 					in.MemoryStressor.Size)
 			}
 		}
 
 		if in.MemoryStressor.Options != nil {
 			for _, v := range in.MemoryStressor.Options {
-				stressors += fmt.Sprintf(" %v ", v)
+				MemoryStressors += fmt.Sprintf(" %v ", v)
 			}
 		}
 	}
 	if in.CPUStressor != nil && in.CPUStressor.Workers != 0 {
-		stressors += fmt.Sprintf(" --cpu %d", in.CPUStressor.Workers)
+		CPUStressors += fmt.Sprintf(" --cpu %d", in.CPUStressor.Workers)
 		if in.CPUStressor.Load != nil {
-			stressors += fmt.Sprintf(" --cpu-load %d",
+			CPUStressors += fmt.Sprintf(" --cpu-load %d",
 				*in.CPUStressor.Load)
 		}
 
 		if in.CPUStressor.Options != nil {
 			for _, v := range in.CPUStressor.Options {
-				stressors += fmt.Sprintf(" %v ", v)
+				CPUStressors += fmt.Sprintf(" %v ", v)
 			}
 		}
 	}
-	return stressors, nil
+	return CPUStressors, MemoryStressors, nil
 }
 
 // Stressor defines common configurations of a stressor
