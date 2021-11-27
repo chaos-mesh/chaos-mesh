@@ -18,16 +18,12 @@ package metrics
 import (
 	"context"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
 	"github.com/prometheus/client_golang/prometheus"
 	"go.uber.org/fx"
-	ctrl "sigs.k8s.io/controller-runtime"
-
-	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
 )
 
 const chaosDashboardSubsystem = "chaos_dashboard"
-
-var log = ctrl.Log.WithName("metrics-collector")
 
 // Collector implements prometheus.Collector interface
 type Collector struct {
