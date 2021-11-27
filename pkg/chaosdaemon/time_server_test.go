@@ -31,7 +31,7 @@ import (
 
 var _ = Describe("time server", func() {
 	defer mock.With("MockContainerdClient", &test.MockClient{})()
-	s, _ := newDaemonServer(crclients.ContainerRuntimeContainerd)
+	s, _ := newDaemonServer(crclients.ContainerRuntimeContainerd, nil)
 
 	Context("SetTimeOffset", func() {
 		It("should work", func() {

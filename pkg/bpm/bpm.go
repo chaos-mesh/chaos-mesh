@@ -24,6 +24,7 @@ import (
 	"sync"
 	"syscall"
 
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/shirou/gopsutil/process"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
@@ -79,24 +80,23 @@ type BackgroundProcessManager struct {
 	identifiers *sync.Map
 	stdio       *sync.Map
 
-	metricsCollector BackgroundProcessManagerMetricsCollector
-}
-
-// BackgroundProcessManagerMetricsCollector is an interface for metrics collector
-// It is intended to resolve cycle dependency between bpm package and metrics package
-type BackgroundProcessManagerMetricsCollector interface {
-	IncreaseControlledProcesses()
+	metricsCollector *metricsCollector
 }
 
 // NewBackgroundProcessManager creates a background process manager
-func NewBackgroundProcessManager(collector BackgroundProcessManagerMetricsCollector) BackgroundProcessManager {
-	return BackgroundProcessManager{
-		deathSig:    &sync.Map{},
-		identifiers: &sync.Map{},
-		stdio:       &sync.Map{},
-
-		metricsCollector: collector,
+func NewBackgroundProcessManager(registry prometheus.Registerer) BackgroundProcessManager {
+	backgroundProcessManager := BackgroundProcessManager{
+		deathSig:         &sync.Map{},
+		identifiers:      &sync.Map{},
+		stdio:            &sync.Map{},
+		metricsCollector: nil,
 	}
+
+	if registry != nil {
+		backgroundProcessManager.metricsCollector = newMetricsCollector(backgroundProcessManager, registry)
+	}
+
+	return backgroundProcessManager
 }
 
 // StartProcess manages a process in manager
@@ -203,7 +203,7 @@ func (m *BackgroundProcessManager) StartProcess(cmd *ManagedProcess) (*process.P
 	}()
 
 	if m.metricsCollector != nil {
-		m.metricsCollector.IncreaseControlledProcesses()
+		m.metricsCollector.bpmControlledProcessTotal.Inc()
 	}
 	return procState, nil
 }
