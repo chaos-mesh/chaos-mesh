@@ -45,7 +45,7 @@ enableCtrlServer: true
 
 images:
   # images.registry is the global container registry for the images, you could replace it with your self-hosted container registry.
-  registry: "ghcr.io"
+  registry: "localhost:5000"
   # images.tag is the global image tag (for example, semiVer with prefix v, or latest).
   tag: "latest"
 
@@ -276,6 +276,8 @@ dashboard:
   env:
     LISTEN_HOST: "0.0.0.0"
     LISTEN_PORT: 2333
+    METRIC_HOST: "0.0.0.0"
+    METRIC_PORT: 8080
 
     # If you'd like to use a DB other than SQLite (the default), set a driver + DSN here.
     DATABASE_DRIVER: sqlite3
