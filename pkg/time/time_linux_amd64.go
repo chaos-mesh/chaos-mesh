@@ -20,14 +20,10 @@ import (
 	"debug/elf"
 	"embed"
 	"encoding/binary"
-	"errors"
 	"os"
-	"runtime"
 	"strings"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/mapreader"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
-	"github.com/chaos-mesh/chaos-mesh/pkg/ptrace"
 )
 
 //go:embed fakeclock/*.o
@@ -144,91 +140,5 @@ func ModifyTime(pid int, deltaSec int64, deltaNsec int64, clockIdsMask uint64) e
 			return nil
 		}
 	}
-
-	runtime.LockOSThread()
-	defer func() {
-		runtime.UnlockOSThread()
-	}()
-
-	program, err := ptrace.Trace(pid)
-	if err != nil {
-		return err
-	}
-	defer func() {
-		err = program.Detach()
-		if err != nil {
-			log.Error(err, "fail to detach program", "pid", program.Pid())
-		}
-	}()
-
-	var vdsoEntry *mapreader.Entry
-	for index := range program.Entries {
-		// reverse loop is faster
-		e := program.Entries[len(program.Entries)-index-1]
-		if e.Path == "[vdso]" {
-			vdsoEntry = &e
-			break
-		}
-	}
-	if vdsoEntry == nil {
-		return errors.New("cannot find [vdso] entry")
-	}
-
-	for name, fakeImage := range fakeImages {
-		switch name {
-		case "fake_clock_gettime":
-			// minus tailing variable part
-			// every variable has 8 bytes
-			constImageLen := len(fakeImage.content) - 8*len(fakeImage.offset)
-			var fakeEntry *mapreader.Entry
-
-			// find injected image to avoid redundant inject (which will lead to memory leak)
-			for _, e := range program.Entries {
-				e := e
-
-				image, err := program.ReadSlice(e.StartAddress, uint64(constImageLen))
-				if err != nil {
-					continue
-				}
-
-				if bytes.Equal(*image, fakeImage.content[0:constImageLen]) {
-					fakeEntry = &e
-					log.Info("found injected image", "addr", fakeEntry.StartAddress)
-					break
-				}
-			}
-			if fakeEntry == nil {
-				fakeEntry, err = program.MmapSlice(fakeImage.content)
-				if err != nil {
-					return err
-				}
-
-				originAddr, err := program.FindSymbolInEntry("clock_gettime", vdsoEntry)
-				if err != nil {
-					return err
-				}
-
-				err = program.JumpToFakeFunc(originAddr, fakeEntry.StartAddress)
-				if err != nil {
-					return err
-				}
-			}
-
-			err = program.WriteUint64ToAddr(fakeEntry.StartAddress+uint64(fakeImage.offset["CLOCK_IDS_MASK"]), clockIdsMask)
-			if err != nil {
-				return err
-			}
-
-			err = program.WriteUint64ToAddr(fakeEntry.StartAddress+uint64(fakeImage.offset["TV_SEC_DELTA"]), uint64(deltaSec))
-			if err != nil {
-				return err
-			}
-
-			err = program.WriteUint64ToAddr(fakeEntry.StartAddress+uint64(fakeImage.offset["TV_NSEC_DELTA"]), uint64(deltaNsec))
-			if err != nil {
-				return err
-			}
-		}
-	}
-	return err
+	return NewTimeSkew(deltaSec, deltaNsec, clockIdsMask).Inject(pid)
 }
