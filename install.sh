@@ -1193,6 +1193,10 @@ spec:
       port: 2333
       targetPort: 2333
       name: http
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+      name: metric
 ---
 # Source: chaos-mesh/templates/controller-manager-service.yaml
 # Copyright 2021 Chaos Mesh Authors.
@@ -1396,6 +1400,10 @@ spec:
               value: "0.0.0.0"
             - name: LISTEN_PORT
               value: "2333"
+            - name: METRIC_HOST
+              value: "0.0.0.0"
+            - name: METRIC_PORT
+              value: "8080"
             - name: TZ
               value: ${timezone}
             - name: CLUSTER_SCOPED
@@ -1423,6 +1431,8 @@ spec:
           ports:
             - name: http
               containerPort: 2333
+            - name: metric
+              containerPort: 8080
       volumes:
       - name: storage-volume
         emptyDir: {}

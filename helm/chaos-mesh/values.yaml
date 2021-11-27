@@ -45,7 +45,7 @@ enableCtrlServer: true
 
 images:
   # images.registry is the global container registry for the images, you could replace it with your self-hosted container registry.
-  registry: "localhost:5000"
+  registry: "ghcr.io"
   # images.tag is the global image tag (for example, semiVer with prefix v, or latest).
   tag: "latest"
 
