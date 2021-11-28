@@ -182,6 +182,8 @@ const (
 )
 
 // +kubebuilder:object:root=true
+// +kubebuilder:printcolumn:name="action",type=string,JSONPath=`.spec.action`
+// +kubebuilder:printcolumn:name="duration",type=string,JSONPath=`.spec.duration`
 
 // +chaos-mesh:base
 // +chaos-mesh:webhook:enableUpdate

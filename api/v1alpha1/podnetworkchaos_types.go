@@ -23,6 +23,8 @@ import (
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
 // +kubebuilder:object:root=true
+// +kubebuilder:printcolumn:name="action",type=string,JSONPath=`.spec.action`
+// +kubebuilder:printcolumn:name="duration",type=string,JSONPath=`.spec.duration`
 // +kubebuilder:subresource:status
 // +chaos-mesh:base
 // +chaos-mesh:webhook:enableUpdate
