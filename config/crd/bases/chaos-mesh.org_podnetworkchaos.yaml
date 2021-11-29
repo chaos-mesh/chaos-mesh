@@ -16,7 +16,14 @@ spec:
     singular: podnetworkchaos
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - jsonPath: .spec.action
+      name: action
+      type: string
+    - jsonPath: .spec.duration
+      name: duration
+      type: string
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: PodNetworkChaos is the Schema for the PodNetworkChaos API
