@@ -110,6 +110,10 @@ spec:
             value: /etc/chaos-daemon/cert/tls.key
           - name: CHAOS_MESH_CA_CERT
             value: /etc/chaos-daemon/cert/ca.crt
+          - name: CHAOSD_CLIENT_CERT
+            value: /etc/chaosd/cert/tls.crt
+          - name: CHAOSD_CLIENT_KEY
+            value: /etc/chaosd/cert/tls.key
           - name: QPS
             value: "30"
           - name: BURST
@@ -134,6 +138,11 @@ spec:
           {{- if .Values.dashboard.securityMode }}
           - name: chaos-daemon-client-cert
             mountPath: /etc/chaos-daemon/cert
+            readOnly: true
+          {{- end }}
+          {{- if .Values.controllerManager.chaosdSecurityMode }}
+          - name: chaosd-client-cert
+            mountPath: /etc/chaosd/cert
             readOnly: true
           {{- end }}
         ports:
@@ -173,6 +182,11 @@ spec:
           secret:
             secretName: {{ template "chaos-mesh.daemon-client.certs" . }}
         {{- end }}
+        {{ - if .Values.controllerManager.chaosdSecurityMode }}
+      - name: chaosd-client-cert
+        secret:
+          secretName: {{ template "chaos-mesh.chaosd-client.certs" . }}
+        {{ - end }}
     {{- with .Values.controllerManager.nodeSelector }}
       nodeSelector:
 {{ toYaml . | indent 8 }}

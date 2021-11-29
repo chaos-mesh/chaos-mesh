@@ -194,6 +194,9 @@ chaosDaemon:
 
   affinity: {}
 
+  # chaosdSecurityMode is enabled for mTLS connection between chaos-controller-manager and chaosd
+  chaosdSecurityMode: true
+
 dashboard:
   rootUrl: http://localhost:2333
   create: true
