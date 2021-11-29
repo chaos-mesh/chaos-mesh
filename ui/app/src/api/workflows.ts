@@ -14,10 +14,20 @@
  * limitations under the License.
  *
  */
-import { Workflow, WorkflowParams, WorkflowSingle } from './workflows.type'
+import { RequestForm, Workflow, WorkflowParams, WorkflowSingle } from './workflows.type'
 
 import { Archive } from './archives.type'
+import { TemplateCustom } from 'slices/workflows'
 import http from './http'
+
+// TODO: refactor this interface, use the union type from golang struct
+export interface APITemplate {
+  name: string
+  templateType: string
+  deadline?: string
+  children?: APITemplate[]
+  task?: TemplateCustom
+}
 
 export const newWorkflow = (data: any) => http.post('/workflows', data)
 
@@ -44,3 +54,6 @@ export const singleArchive = (uuid: uuid) => http.get<Archive>(`archives/workflo
 
 export const delArchive = (uuid: uuid) => http.delete(`/archives/workflows/${uuid}`)
 export const delArchives = (uuids: uuid[]) => http.delete(`/archives/workflows?uids=${uuids.join(',')}`)
+
+export const renderHTTPTask = (form: RequestForm) => http.post('/workflows/render-task/http', form)
+export const parseHTTPTask = (t: APITemplate) => http.post('/workflows/parse-task/http', t)

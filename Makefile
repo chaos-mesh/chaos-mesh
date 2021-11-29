@@ -8,16 +8,19 @@ DOCKER_BUILD_ARGS := --build-arg HTTP_PROXY=${HTTP_PROXY} --build-arg HTTPS_PROX
 
 IMAGE_TAG := $(if $(IMAGE_TAG),$(IMAGE_TAG),latest)
 IMAGE_PROJECT := $(if $(IMAGE_PROJECT),$(IMAGE_PROJECT),pingcap)
+IMAGE_CHAOS_MESH_PROJECT := chaos-mesh
+IMAGE_CHAOS_DAEMON_PROJECT := chaos-mesh
+IMAGE_CHAOS_DASHBOARD_PROJECT := chaos-mesh
 
 ROOT=$(shell pwd)
 OUTPUT_BIN=$(ROOT)/output/bin
 HELM_BIN=$(OUTPUT_BIN)/helm
 
 # Every branch should have its own image tag for build-env and dev-env
-IMAGE_BUILD_ENV_PROJECT ?= chaos-mesh/chaos-mesh
+IMAGE_BUILD_ENV_PROJECT ?= chaos-mesh
 IMAGE_BUILD_ENV_REGISTRY ?= ghcr.io
 IMAGE_BUILD_ENV_BUILD ?= 0
-IMAGE_DEV_ENV_PROJECT ?= chaos-mesh/chaos-mesh
+IMAGE_DEV_ENV_PROJECT ?= chaos-mesh
 IMAGE_DEV_ENV_REGISTRY ?= ghcr.io
 IMAGE_DEV_ENV_BUILD ?= 0
 
@@ -280,7 +283,13 @@ else
 endif
 
 else
-	DOCKER_BUILDKIT=1 docker buildx build --load -t $$($(4)_IMAGE)  ${DOCKER_BUILD_ARGS} $(2)
+
+ifneq ($(TARGET_PLATFORM),)
+	DOCKER_BUILDKIT=1 docker buildx build --load -t $$($(4)_IMAGE) ${DOCKER_BUILD_ARGS} $(2)
+else
+	DOCKER_BUILDKIT=1 docker build -t $$($(4)_IMAGE) ${DOCKER_BUILD_ARGS} $(2)
+endif
+
 endif
 
 endif
@@ -301,9 +310,9 @@ $(eval $(call IMAGE_TEMPLATE,chaos-dlv,images/chaos-dlv,0,CHAOS_DLV))
 binary: $(BINARIES)
 
 docker-push:
-	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh:${IMAGE_TAG}"
-	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-dashboard:${IMAGE_TAG}"
-	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-daemon:${IMAGE_TAG}"
+	docker push "${DOCKER_REGISTRY_PREFIX}chaos-mesh/chaos-mesh:${IMAGE_TAG}"
+	docker push "${DOCKER_REGISTRY_PREFIX}chaos-mesh/chaos-dashboard:${IMAGE_TAG}"
+	docker push "${DOCKER_REGISTRY_PREFIX}chaos-mesh/chaos-daemon:${IMAGE_TAG}"
 
 docker-push-e2e:
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/e2e-helper:${IMAGE_TAG}"
