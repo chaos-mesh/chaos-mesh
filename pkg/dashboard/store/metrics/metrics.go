@@ -52,15 +52,11 @@ func NewCollector(experimentStore core.ExperimentStore, scheduleStore core.Sched
 			Subsystem: chaosDashboardSubsystem,
 			Name:      "archived_schedules",
 			Help:      "Total number of archived chaos schedules",
-
-			// TODO: labels
 		}, []string{"namespace"}),
 		archivedWorkflows: prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Subsystem: chaosDashboardSubsystem,
 			Name:      "archived_workflows",
 			Help:      "Total number of archived chaos workflows",
-
-			// TODO: labels
 		}, []string{"namespace"}),
 	}
 }
