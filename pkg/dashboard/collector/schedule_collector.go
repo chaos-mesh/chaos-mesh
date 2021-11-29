@@ -101,7 +101,7 @@ func (r *ScheduleCollector) setUnarchivedSchedule(req ctrl.Request, schedule v1a
 		archive.Action = string(schedule.Spec.ScheduleItem.NetworkChaos.Action)
 	case v1alpha1.ScheduleTypeIOChaos:
 		archive.Action = string(schedule.Spec.ScheduleItem.IOChaos.Action)
-	case v1alpha1.ScheduleTypeTimeChaos, v1alpha1.ScheduleTypeKernelChaos, v1alpha1.ScheduleTypeStressChaos:
+	case v1alpha1.ScheduleTypeTimeChaos, v1alpha1.ScheduleTypeKernelChaos, v1alpha1.ScheduleTypeStressChaos, v1alpha1.ScheduleTypeHTTPChaos:
 		archive.Action = ""
 	case v1alpha1.ScheduleTypeDNSChaos:
 		archive.Action = string(schedule.Spec.ScheduleItem.DNSChaos.Action)
@@ -109,6 +109,8 @@ func (r *ScheduleCollector) setUnarchivedSchedule(req ctrl.Request, schedule v1a
 		archive.Action = string(schedule.Spec.ScheduleItem.AWSChaos.Action)
 	case v1alpha1.ScheduleTypeGCPChaos:
 		archive.Action = string(schedule.Spec.ScheduleItem.GCPChaos.Action)
+	case v1alpha1.ScheduleTypeJVMChaos:
+		archive.Action = string(schedule.Spec.ScheduleItem.JVMChaos.Action)
 	case v1alpha1.ScheduleTypePhysicalMachineChaos:
 		archive.Action = string(schedule.Spec.ScheduleItem.PhysicalMachineChaos.Action)
 	default:

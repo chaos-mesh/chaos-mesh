@@ -16,6 +16,7 @@
  */
 
 import { Experiment, ExperimentKind, Frame, Scope } from 'components/NewExperiment/types'
+import { sanitize, toTitleCase } from './utils'
 
 import { Env } from 'slices/experiments'
 import { ScheduleSpecific } from 'components/Schedule/types'
@@ -23,7 +24,6 @@ import { Template } from 'slices/workflows'
 import { WorkflowBasic } from 'components/NewWorkflow'
 import basicData from 'components/NewExperimentNext/data/basic'
 import { templateTypeToFieldName } from 'api/zz_generated.frontend.chaos-mesh'
-import { toTitleCase } from './utils'
 import yaml from 'js-yaml'
 
 export function parseSubmit<K extends ExperimentKind>(
@@ -53,6 +53,37 @@ export function parseSubmit<K extends ExperimentKind>(
       return acc
     }, {})
   }
+
+  // Parse http headers to object
+  function helperHTTPHeaders(selectors: string[]) {
+    return selectors.reduce((acc: Record<string, any>, d) => {
+      const splited = d.split(/:(.+)/)
+      acc[splited[0].trim()] = splited[1].trim()
+      return acc
+    }, {})
+  }
+
+  // Parse http queries to patch object
+  function helperHTTPPatchQueries(selectors: string[]) {
+    return selectors.map((d) => {
+      return d
+        .replace(/\s/g, '')
+        .split(/:(.+)/)
+        .slice(0, 2)
+        .map((s) => s.trim())
+    })
+  }
+
+  // Parse http headers to patch object
+  function helperHTTPPatchHeaders(selectors: string[]) {
+    return selectors.map((d) => {
+      return d
+        .split(/:(.+)/)
+        .slice(0, 2)
+        .map((s) => s.trim())
+    })
+  }
+
   // Parse selector
   function helper2(scope: Scope['selector']) {
     if (scope.labelSelectors?.length) {
@@ -124,6 +155,25 @@ export function parseSubmit<K extends ExperimentKind>(
     ;(spec as any).attr = helper1((spec as any).attr as string[], (s: string) => parseInt(s, 10))
   }
 
+  if (kind === 'HTTPChaos') {
+    ;(spec as any).request_headers = helperHTTPHeaders((spec as any).request_headers as string[])
+    if ((spec as any).response_headers) {
+      ;(spec as any).response_headers = helperHTTPHeaders((spec as any).response_headers as string[])
+    }
+    if ((spec as any).replace && (spec as any).replace.headers) {
+      ;(spec as any).replace.headers = helperHTTPHeaders((spec as any).replace.headers as string[])
+    }
+    if ((spec as any).replace && (spec as any).replace.queries) {
+      ;(spec as any).replace.queries = helper1((spec as any).replace.queries as string[])
+    }
+    if ((spec as any).patch && (spec as any).patch.headers) {
+      ;(spec as any).patch.headers = helperHTTPPatchHeaders((spec as any).patch.headers as string[])
+    }
+    if ((spec as any).patch && (spec as any).patch.queries) {
+      ;(spec as any).patch.queries = helperHTTPPatchQueries((spec as any).patch.queries as string[])
+    }
+  }
+
   function parsePhysicalMachineChaos(spec: any) {
     delete spec.selector
     delete spec.mode
@@ -160,12 +210,12 @@ export function parseSubmit<K extends ExperimentKind>(
     spec = parsePhysicalMachineChaos(spec) as any
   }
 
-  return {
+  return sanitize({
     apiVersion: 'chaos-mesh.org/v1alpha1',
     kind: options?.inSchedule ? 'Schedule' : kind,
     metadata,
     spec,
-  }
+  })
 }
 
 function podSelectorsToArr(selector: Object) {
@@ -320,11 +370,11 @@ export function parseYAML(yamlObj: any): { kind: ExperimentKind; basic: any; spe
     spec = rest
   }
 
-  return {
+  return sanitize({
     kind,
     basic,
     spec,
-  }
+  })
 }
 
 function validate(defaultI18n: string, i18n?: string) {

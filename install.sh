@@ -35,7 +35,7 @@ FLAGS:
         --force-local-kube   Force reinstall local Kubernetes cluster if it is already installed
         --force-kubectl      Force reinstall kubectl client if it is already installed
         --force-kind         Force reinstall Kind if it is already installed
-        --docker-mirror      Use docker mirror to pull image, dockerhub.azk8s.cn => docker.io, gcr.azk8s.cn => gcr.io
+        --docker-mirror      Use docker mirror to pull image, dockerhub.azk8s.cn => docker.io, gcr.azk8s.cn => gcr.io; ghcr.io are NOT supported now.
         --volume-provisioner Deploy volume provisioner in local Kubernetes cluster
         --local-registry     Deploy local docker registry in local Kubernetes cluster
         --template           Locally render templates
@@ -84,7 +84,7 @@ main() {
     local k3s=false
     local microk8s=false
     local host_network=false
-    local docker_registry="docker.io"
+    local docker_registry="ghcr.io"
 
     while [[ $# -gt 0 ]]
     do
@@ -629,9 +629,9 @@ install_chaos_mesh() {
     local microk8s=${12}
     printf "Install Chaos Mesh %s\n" "${release_name}"
 
-    local chaos_mesh_image="${docker_registry}/pingcap/chaos-mesh:${version}"
-    local chaos_daemon_image="${docker_registry}/pingcap/chaos-daemon:${version}"
-    local chaos_dashboard_image="${docker_registry}/pingcap/chaos-dashboard:${version}"
+    local chaos_mesh_image="${docker_registry}/chaos-mesh/chaos-mesh:${version}"
+    local chaos_daemon_image="${docker_registry}/chaos-mesh/chaos-daemon:${version}"
+    local chaos_dashboard_image="${docker_registry}/chaos-mesh/chaos-dashboard:${version}"
 
     if [ "$docker_mirror" == "true" ]; then
         azk8spull "${chaos_mesh_image}" || true
@@ -773,7 +773,7 @@ azk8spull() {
 			elif [ "${array[0]}"x = "quay.io"x ]; then
 				domainName="quay.azk8s.cn"
 			else
-				echo '## azk8spull can not support pulling $image right now.'
+				echo "## azk8spull can not support pulling $image right now."
 			fi
 		elif [ ${#array[*]} -eq 2 ]; then
 			if [ "${array[0]}"x = "k8s.gcr.io"x ]; then
@@ -792,7 +792,7 @@ azk8spull() {
 		else
 			echo '## azk8spull can not support pulling $image right now.'
 		fi
-		if [ $domainName != "" ]; then
+		if [ "$domainName" != "" ]; then
 			echo "## azk8spull try to pull image from mirror $domainName/$repoName/$imageName."
 			docker pull  $domainName/$repoName/$imageName
 			if [ $? -eq 0 ]; then
@@ -987,7 +987,7 @@ metadata:
     app.kubernetes.io/component: controller-manager
 rules:
   - apiGroups: [ "" ]
-    resources: [ "pods", "secrets"]
+    resources: [ "pods", "configmaps", "secrets"]
     verbs: [ "get", "list", "watch", "delete", "update", "patch" ]
   - apiGroups:
       - ""
@@ -1011,9 +1011,6 @@ rules:
       - watch
       - list
       - get
-  - apiGroups: [ "" ]
-    resources: [ "configmaps" ]
-    verbs: [ "*" ]
   - apiGroups: [ "chaos-mesh.org" ]
     resources:
       - "*"
@@ -1098,7 +1095,7 @@ metadata:
     app.kubernetes.io/component: controller-manager
 rules:
   - apiGroups: [ "" ]
-    resources: [ "configmaps", "services", "endpoints" ]
+    resources: [ "services", "endpoints" ]
     verbs: [ "get", "list", "watch" ]
   - apiGroups: [ "authorization.k8s.io" ]
     resources:
@@ -1107,6 +1104,9 @@ rules:
   - apiGroups: [ "" ]
     resources: [ "pods/exec" ]
     verbs: [ "create" ]
+  - apiGroups: [ "" ]
+    resources: [ "configmaps" ]
+    verbs: [ "*" ]
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 # binding for control plane namespace
@@ -1293,7 +1293,7 @@ spec:
       priorityClassName: 
       containers:
         - name: chaos-daemon
-          image: ${DOCKER_REGISTRY_PREFIX}/pingcap/chaos-daemon:${VERSION_TAG}
+          image: ${DOCKER_REGISTRY_PREFIX}/chaos-mesh/chaos-daemon:${VERSION_TAG}
           imagePullPolicy: IfNotPresent
           command:
             - /usr/local/bin/chaos-daemon
@@ -1373,13 +1373,12 @@ spec:
         app.kubernetes.io/version: v0.9.0
         app.kubernetes.io/component: chaos-dashboard
       annotations:
-        rollme: "install.sh"
     spec:
       serviceAccountName: chaos-controller-manager
       priorityClassName: 
       containers:
         - name: chaos-dashboard
-          image: ${DOCKER_REGISTRY_PREFIX}/pingcap/chaos-dashboard:${VERSION_TAG}
+          image: ${DOCKER_REGISTRY_PREFIX}/chaos-mesh/chaos-dashboard:${VERSION_TAG}
           imagePullPolicy: IfNotPresent
           resources:
             limits: {}
@@ -1407,8 +1406,16 @@ spec:
               value: "false"
             - name: SECURITY_MODE
               value: "false"
+            - name: GCP_SECURITY_MODE
+              value: "false"
+            - name: GCP_CLIENT_ID
+              value: ""
+            - name: GCP_CLIENT_SECRET
+              value: ""
             - name: DNS_SERVER_CREATE
               value: "false"
+            - name: ROOT_URL
+              value: "http://localhost:2333"
           volumeMounts:
             - name: storage-volume
               mountPath: /data
@@ -1469,7 +1476,7 @@ spec:
       priorityClassName: 
       containers:
       - name: chaos-mesh
-        image: ${DOCKER_REGISTRY_PREFIX}/pingcap/chaos-mesh:${VERSION_TAG}
+        image: ${DOCKER_REGISTRY_PREFIX}/chaos-mesh/chaos-mesh:${VERSION_TAG}
         imagePullPolicy: IfNotPresent
         resources:
             limits: {}

@@ -146,10 +146,12 @@ var _ = ginkgo.SynchronizedBeforeSuite(func() []byte {
 		framework.ExpectNoError(err, "failed to create clientset")
 		oa := test.NewOperatorAction(kubeCli, aggrCli, apiExtCli, e2econfig.TestConfig)
 		ocfg := test.NewDefaultOperatorConfig()
-		ocfg.Manager.Image = e2econfig.TestConfig.ManagerImage
-		ocfg.Manager.Tag = e2econfig.TestConfig.ManagerTag
-		ocfg.Daemon.Image = e2econfig.TestConfig.DaemonImage
-		ocfg.Daemon.Tag = e2econfig.TestConfig.DaemonTag
+		ocfg.Manager.ImageRegistry = e2econfig.TestConfig.ManagerImageRegistry
+		ocfg.Manager.ImageRepository = e2econfig.TestConfig.ManagerImage
+		ocfg.Manager.ImageTag = e2econfig.TestConfig.ManagerTag
+		ocfg.Daemon.ImageRegistry = e2econfig.TestConfig.DaemonImageRegistry
+		ocfg.Daemon.ImageRepository = e2econfig.TestConfig.DaemonImage
+		ocfg.Daemon.ImageTag = e2econfig.TestConfig.DaemonTag
 		ocfg.DNSImage = e2econfig.TestConfig.ChaosDNSImage
 		ocfg.EnableDashboard = e2econfig.TestConfig.EnableDashboard
 

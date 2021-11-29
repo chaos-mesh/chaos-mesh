@@ -35,7 +35,7 @@ var _ impltypes.ChaosImpl = (*Impl)(nil)
 type Impl struct {
 	client.Client
 	Log     logr.Logger
-	decoder *utils.ContianerRecordDecoder
+	decoder *utils.ContainerRecordDecoder
 }
 
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
@@ -109,7 +109,7 @@ func secAndNSecFromDuration(duration time.Duration) (sec int64, nsec int64) {
 	return
 }
 
-func NewImpl(c client.Client, log logr.Logger, decoder *utils.ContianerRecordDecoder) *impltypes.ChaosImplPair {
+func NewImpl(c client.Client, log logr.Logger, decoder *utils.ContainerRecordDecoder) *impltypes.ChaosImplPair {
 	return &impltypes.ChaosImplPair{
 		Name:   "timechaos",
 		Object: &v1alpha1.TimeChaos{},

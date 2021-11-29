@@ -107,10 +107,10 @@ type PodSelector struct {
 	// +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
 	Mode SelectorMode `json:"mode"`
 
-	// Value is required when the mode is set to `FixedMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+	// Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
 	// If `FixedMode`, provide an integer of pods to do chaos action.
-	// If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
-	// IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+	// If `FixedPercentMode`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
+	// IF `RandomMaxPercentMode`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
 	// +optional
 	Value string `json:"value,omitempty"`
 }

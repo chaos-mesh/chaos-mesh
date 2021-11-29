@@ -42,7 +42,7 @@ type Impl struct {
 	client.Client
 	Log logr.Logger
 
-	decoder *utils.ContianerRecordDecoder
+	decoder *utils.ContainerRecordDecoder
 }
 
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
@@ -186,14 +186,13 @@ func (impl *Impl) cancelDNSServerRules(dnsServerIP string, port int, name string
 	return nil
 }
 
-func NewImpl(c client.Client, log logr.Logger, decoder *utils.ContianerRecordDecoder) *impltypes.ChaosImplPair {
+func NewImpl(c client.Client, log logr.Logger, decoder *utils.ContainerRecordDecoder) *impltypes.ChaosImplPair {
 	return &impltypes.ChaosImplPair{
 		Name:   "dnschaos",
 		Object: &v1alpha1.DNSChaos{},
 		Impl: &Impl{
-			Client: c,
-			Log:    log.WithName("dnschaos"),
-
+			Client:  c,
+			Log:     log.WithName("dnschaos"),
 			decoder: decoder,
 		},
 	}

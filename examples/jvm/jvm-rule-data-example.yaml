@@ -13,22 +13,14 @@
 # limitations under the License.
 #
 apiVersion: chaos-mesh.org/v1alpha1
-kind: Schedule
+kind: JVMChaos
 metadata:
-  name: jvm-delay4servlet-example
-  namespace: app
+  name: modify-return
+  namespace: helloworld
 spec:
-  schedule: '@every 1m'
-  type: JVMChaos
-  historyLimit: 5
-  concurrencyPolicy: Forbid
-  jvmChaos:
-    action: delay
-    target: servlet
-    flags:
-      time: "10000"
-    mode: one
-    selector:
-      labelSelectors:
-        app: springboot-jvmchaos-demo
-    duration: 50s
+  action: ruleData
+  ruleData: "RULE modify return value\nCLASS Main\nMETHOD getnum\nAT ENTRY\nIF true\nDO\n    return 9999\nENDRULE"
+  mode: all
+  selector:
+    namespaces:
+      - helloworld

@@ -812,6 +812,55 @@ var doc = `{
                 }
             }
         },
+        "/events/workflow/{uid}": {
+            "get": {
+                "description": "list all events for Workflow and related WorkflowNode.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "events"
+                ],
+                "summary": "cascadeFetchEventsForWorkflow list all events for Workflow and related WorkflowNode.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The namespace of the object",
+                        "name": "namespace",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "The UID of the Workflow",
+                        "name": "uid",
+                        "in": "path"
+                    },
+                    {
+                        "type": "string",
+                        "description": "The max length of events list",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/core.Event"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    }
+                }
+            }
+        },
         "/events/{id}": {
             "get": {
                 "description": "Get the event from db by ID.",
@@ -926,55 +975,6 @@ var doc = `{
                     },
                     "400": {
                         "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/utils.APIError"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/utils.APIError"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "description": "Update a chaos experiment.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "experiments"
-                ],
-                "summary": "Update a chaos experiment.",
-                "parameters": [
-                    {
-                        "description": "Request body",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/utils.APIError"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/utils.APIError"
                         }
@@ -1373,53 +1373,6 @@ var doc = `{
                     }
                 }
             },
-            "put": {
-                "description": "Update a schedule.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "schedules"
-                ],
-                "summary": "Update a schedule.",
-                "parameters": [
-                    {
-                        "description": "Request body",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/v1alpha1.Schedule"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/v1alpha1.Schedule"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/utils.APIError"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/utils.APIError"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/utils.APIError"
-                        }
-                    }
-                }
-            },
             "post": {
                 "description": "Pass a JSON object to create a new schedule. The schema for JSON is the same as the YAML schema for the Kubernetes object.",
                 "consumes": [
@@ -1788,6 +1741,135 @@ var doc = `{
                 }
             }
         },
+        "/workflows/parse-task/http": {
+            "post": {
+                "description": "Parse the rendered task back to the original request",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workflows"
+                ],
+                "summary": "Parse the rendered task back to the original request",
+                "parameters": [
+                    {
+                        "description": "Rendered Task",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1alpha1.Template"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/curl.RequestForm"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    }
+                }
+            }
+        },
+        "/workflows/render-task/http": {
+            "post": {
+                "description": "Render a task which sends HTTP request",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workflows"
+                ],
+                "summary": "Render a task which sends HTTP request",
+                "parameters": [
+                    {
+                        "description": "Origin HTTP Request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/curl.RequestForm"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1alpha1.Template"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    }
+                }
+            }
+        },
+        "/workflows/validate-task/http": {
+            "post": {
+                "description": "Validate the given template is a valid rendered HTTP Task",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workflows"
+                ],
+                "summary": "Validate the given template is a valid rendered HTTP Task",
+                "parameters": [
+                    {
+                        "description": "Rendered Task",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1alpha1.Template"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    }
+                }
+            }
+        },
         "/workflows/{uid}": {
             "get": {
                 "description": "Get detailed information about the specified workflow. If that object is not existed in kubernetes, it will only return ths persisted data in the database.",
@@ -1979,6 +2061,11 @@ var doc = `{
                     "type": "boolean",
                     "default": false
                 },
+                "gcp_security_mode": {
+                    "description": "GcpSecurityMode will use the gcloud authentication to login to GKE user",
+                    "type": "boolean",
+                    "default": false
+                },
                 "listen_host": {
                     "type": "string",
                     "default": "0.0.0.0"
@@ -1987,8 +2074,12 @@ var doc = `{
                     "type": "integer",
                     "default": 2333
                 },
+                "root_path": {
+                    "type": "string",
+                    "default": "http://localhost:2333"
+                },
                 "security_mode": {
-                    "description": "If SecurityMode is set to true, then the dashboard requires token authentication.",
+                    "description": "SecurityMode will use the token login by the user if set to true",
                     "type": "boolean",
                     "default": true
                 },
@@ -2226,6 +2317,42 @@ var doc = `{
                     "type": "string"
                 },
                 "uid": {
+                    "type": "string"
+                }
+            }
+        },
+        "curl.Header": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            }
+        },
+        "curl.RequestForm": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "string"
+                },
+                "followLocation": {
+                    "type": "boolean"
+                },
+                "header": {
+                    "type": "object",
+                    "$ref": "#/definitions/curl.Header"
+                },
+                "jsonContent": {
+                    "type": "boolean"
+                },
+                "method": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "url": {
                     "type": "string"
                 }
             }
@@ -2610,12 +2737,15 @@ var doc = `{
             "type": "object",
             "properties": {
                 "clock-ids-slice": {
+                    "description": "the identifier of the particular clock on which to act.\nMore clock description in linux kernel can be found in man page of clock_getres, clock_gettime, clock_settime.\nMuti clock ids should be split with \",\"",
                     "type": "string"
                 },
                 "pid": {
+                    "description": "the pid of target program.",
                     "type": "integer"
                 },
                 "time-offset": {
+                    "description": "specifies the length of time offset.",
                     "type": "string"
                 }
             }
@@ -2681,7 +2811,7 @@ var doc = `{
                     "$ref": "#/definitions/v1alpha1.PodSelectorSpec"
                 },
                 "value": {
-                    "description": "Value is required when the mode is set to ` + "`" + `FixedMode` + "`" + ` / ` + "`" + `FixedPercentPodMod` + "`" + ` / ` + "`" + `RandomMaxPercentPodMod` + "`" + `.\nIf ` + "`" + `FixedMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentPodMod` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentPodMod` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
+                    "description": "Value is required when the mode is set to ` + "`" + `FixedMode` + "`" + ` / ` + "`" + `FixedPercentMode` + "`" + ` / ` + "`" + `RandomMaxPercentMode` + "`" + `.\nIf ` + "`" + `FixedMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentMode` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentMode` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
                     "type": "string"
                 }
             }
@@ -2712,13 +2842,16 @@ var doc = `{
         "v1alpha1.DiskFillSpec": {
             "type": "object",
             "properties": {
-                "fill_by_fallocate": {
+                "fill-by-fallocate": {
+                    "description": "fill disk by fallocate",
                     "type": "boolean"
                 },
                 "path": {
+                    "description": "specifies the location to fill data in. if path not provided,\npayload will read/write from/into a temp file, temp file will be deleted after writing",
                     "type": "string"
                 },
                 "size": {
+                    "description": "specifies how many units of data will write into the file path. support unit: c=1, w=2, b=512, kB=1000,\nK=1024, MB=1000*1000, M=1024*1024, GB=1000*1000*1000, G=1024*1024*1024 BYTES. example : 1M | 512kB",
                     "type": "string"
                 }
             }
@@ -2727,12 +2860,15 @@ var doc = `{
             "type": "object",
             "properties": {
                 "path": {
+                    "description": "specifies the location to fill data in. if path not provided,\npayload will read/write from/into a temp file, temp file will be deleted after writing",
                     "type": "string"
                 },
-                "payload_process_num": {
+                "payload-process-num": {
+                    "description": "specifies the number of process work on writing, default 1, only 1-255 is valid value",
                     "type": "integer"
                 },
                 "size": {
+                    "description": "specifies how many units of data will write into the file path. support unit: c=1, w=2, b=512, kB=1000,\nK=1024, MB=1000*1000, M=1024*1024, GB=1000*1000*1000, G=1024*1024*1024 BYTES. example : 1M | 512kB",
                     "type": "string"
                 }
             }
@@ -2903,7 +3039,7 @@ var doc = `{
                     "type": "string"
                 },
                 "value": {
-                    "description": "Value is required when the mode is set to ` + "`" + `FixedMode` + "`" + ` / ` + "`" + `FixedPercentPodMod` + "`" + ` / ` + "`" + `RandomMaxPercentPodMod` + "`" + `.\nIf ` + "`" + `FixedMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentPodMod` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentPodMod` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
+                    "description": "Value is required when the mode is set to ` + "`" + `FixedMode` + "`" + ` / ` + "`" + `FixedPercentMode` + "`" + ` / ` + "`" + `RandomMaxPercentMode` + "`" + `.\nIf ` + "`" + `FixedMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentMode` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentMode` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
                     "type": "string"
                 }
             }
@@ -2969,7 +3105,7 @@ var doc = `{
                     "$ref": "#/definitions/v1alpha1.PodSelectorSpec"
                 },
                 "value": {
-                    "description": "Value is required when the mode is set to ` + "`" + `FixedMode` + "`" + ` / ` + "`" + `FixedPercentPodMod` + "`" + ` / ` + "`" + `RandomMaxPercentPodMod` + "`" + `.\nIf ` + "`" + `FixedMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentPodMod` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentPodMod` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
+                    "description": "Value is required when the mode is set to ` + "`" + `FixedMode` + "`" + ` / ` + "`" + `FixedPercentMode` + "`" + ` / ` + "`" + `RandomMaxPercentMode` + "`" + `.\nIf ` + "`" + `FixedMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentMode` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentMode` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
                     "type": "string"
                 },
                 "volumePath": {
@@ -2982,7 +3118,11 @@ var doc = `{
             "type": "object",
             "properties": {
                 "action": {
-                    "description": "Action defines the specific jvm chaos action.\nSupported action: delay;return;script;cfl;oom;ccf;tce;cpf;tde;tpf\n+kubebuilder:validation:Enum=delay;return;script;cfl;oom;ccf;tce;cpf;tde;tpf",
+                    "description": "Action defines the specific jvm chaos action.\nSupported action: latency;return;exception;stress;gc;ruleData\n+kubebuilder:validation:Enum=latency;return;exception;stress;gc;ruleData",
+                    "type": "string"
+                },
+                "class": {
+                    "description": "+optional\nJava class",
                     "type": "string"
                 },
                 "containerNames": {
@@ -2992,26 +3132,44 @@ var doc = `{
                         "type": "string"
                     }
                 },
+                "cpuCount": {
+                    "description": "+optional\nthe CPU core number need to use, only set it when action is stress",
+                    "type": "integer"
+                },
                 "duration": {
                     "description": "Duration represents the duration of the chaos action\n+optional",
                     "type": "string"
                 },
-                "flags": {
-                    "description": "Flags represents the flags of action\n+optional",
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
+                "exception": {
+                    "description": "+optional\nthe exception which needs to throw for action ` + "`" + `exception` + "`" + `",
+                    "type": "string"
                 },
-                "matchers": {
-                    "description": "Matchers represents the matching rules for the target\n+optional",
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
+                "latency": {
+                    "description": "+optional\nthe latency duration for action 'latency', unit ms",
+                    "type": "integer"
+                },
+                "memType": {
+                    "description": "+optional\nthe memory type need to locate, only set it when action is stress, the value can be 'stack' or 'heap'",
+                    "type": "string"
+                },
+                "method": {
+                    "description": "+optional\nthe method in Java class",
+                    "type": "string"
                 },
                 "mode": {
                     "description": "Mode defines the mode to run chaos action.\nSupported mode: one / all / fixed / fixed-percent / random-max-percent\n+kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "+optional\nbyteman rule name, should be unique, and will use JVMChaos' name if not set",
+                    "type": "string"
+                },
+                "port": {
+                    "description": "+optional\nthe port of agent server, default 9277",
+                    "type": "integer"
+                },
+                "ruleData": {
+                    "description": "+optional",
                     "type": "string"
                 },
                 "selector": {
@@ -3019,12 +3177,8 @@ var doc = `{
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.PodSelectorSpec"
                 },
-                "target": {
-                    "description": "Target defines the specific jvm chaos target.\nSupported target: servlet;psql;jvm;jedis;http;dubbo;rocketmq;tars;mysql;druid;redisson;rabbitmq;mongodb\n+kubebuilder:validation:Enum=servlet;psql;jvm;jedis;http;dubbo;rocketmq;tars;mysql;druid;redisson;rabbitmq;mongodb",
-                    "type": "string"
-                },
                 "value": {
-                    "description": "Value is required when the mode is set to ` + "`" + `FixedMode` + "`" + ` / ` + "`" + `FixedPercentPodMod` + "`" + ` / ` + "`" + `RandomMaxPercentPodMod` + "`" + `.\nIf ` + "`" + `FixedMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentPodMod` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentPodMod` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
+                    "description": "+optional\nthe return value for action 'return'",
                     "type": "string"
                 }
             }
@@ -3037,7 +3191,7 @@ var doc = `{
                     "type": "string"
                 },
                 "exception": {
-                    "description": "the exception which needs to throw dor action ` + "`" + `exception` + "`" + `",
+                    "description": "the exception which needs to throw for action ` + "`" + `exception` + "`" + `",
                     "type": "string"
                 },
                 "method": {
@@ -3143,7 +3297,7 @@ var doc = `{
                 },
                 "mem-type": {
                     "description": "the memory type need to locate, only set it when action is stress, the value can be 'stack' or 'heap'",
-                    "type": "integer"
+                    "type": "string"
                 },
                 "pid": {
                     "description": "the pid of Java process which need to attach",
@@ -3177,7 +3331,7 @@ var doc = `{
                     "$ref": "#/definitions/v1alpha1.PodSelectorSpec"
                 },
                 "value": {
-                    "description": "Value is required when the mode is set to ` + "`" + `FixedMode` + "`" + ` / ` + "`" + `FixedPercentPodMod` + "`" + ` / ` + "`" + `RandomMaxPercentPodMod` + "`" + `.\nIf ` + "`" + `FixedMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentPodMod` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentPodMod` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
+                    "description": "Value is required when the mode is set to ` + "`" + `FixedMode` + "`" + ` / ` + "`" + `FixedPercentMode` + "`" + ` / ` + "`" + `RandomMaxPercentMode` + "`" + `.\nIf ` + "`" + `FixedMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentMode` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentMode` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
                     "type": "string"
                 }
             }
@@ -3235,6 +3389,37 @@ var doc = `{
                 "maxOccurrences": {
                     "description": "There will be [1, MaxOccurrences] segments of wrong data.\n+optional\n+kubebuilder:validation:Minimum=1",
                     "type": "integer"
+                }
+            }
+        },
+        "v1alpha1.NetworkBandwidthSpec": {
+            "type": "object",
+            "properties": {
+                "buffer": {
+                    "description": "+kubebuilder:validation:Minimum=1",
+                    "type": "integer"
+                },
+                "device": {
+                    "type": "string"
+                },
+                "hostname": {
+                    "type": "string"
+                },
+                "ip-address": {
+                    "type": "string"
+                },
+                "limit": {
+                    "description": "+kubebuilder:validation:Minimum=1",
+                    "type": "integer"
+                },
+                "minburst": {
+                    "type": "integer"
+                },
+                "peakrate": {
+                    "type": "integer"
+                },
+                "rate": {
+                    "type": "string"
                 }
             }
         },
@@ -3308,7 +3493,7 @@ var doc = `{
                     "type": "string"
                 },
                 "value": {
-                    "description": "Value is required when the mode is set to ` + "`" + `FixedMode` + "`" + ` / ` + "`" + `FixedPercentPodMod` + "`" + ` / ` + "`" + `RandomMaxPercentPodMod` + "`" + `.\nIf ` + "`" + `FixedMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentPodMod` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentPodMod` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
+                    "description": "Value is required when the mode is set to ` + "`" + `FixedMode` + "`" + ` / ` + "`" + `FixedPercentMode` + "`" + ` / ` + "`" + `RandomMaxPercentMode` + "`" + `.\nIf ` + "`" + `FixedMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentMode` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentMode` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
                     "type": "string"
                 }
             }
@@ -3317,27 +3502,35 @@ var doc = `{
             "type": "object",
             "properties": {
                 "correlation": {
+                    "description": "correlation is percentage (10 is 10%)",
                     "type": "string"
                 },
                 "device": {
+                    "description": "the network interface to impact",
                     "type": "string"
                 },
                 "egress-port": {
+                    "description": "only impact egress traffic to these destination ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.\nit can only be used in conjunction with -p tcp or -p udp",
                     "type": "string"
                 },
                 "hostname": {
+                    "description": "only impact traffic to these hostnames",
                     "type": "string"
                 },
                 "ip-address": {
+                    "description": "only impact egress traffic to these IP addresses",
                     "type": "string"
                 },
                 "ip-protocol": {
+                    "description": "only impact traffic using this IP protocol, supported: tcp, udp, icmp, all",
                     "type": "string"
                 },
                 "percent": {
+                    "description": "percentage of packets to corrupt (10 is 10%)",
                     "type": "string"
                 },
                 "source-port": {
+                    "description": "only impact egress traffic from these source ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.\nit can only be used in conjunction with -p tcp or -p udp",
                     "type": "string"
                 }
             }
@@ -3346,12 +3539,15 @@ var doc = `{
             "type": "object",
             "properties": {
                 "dns-domain-name": {
+                    "description": "map this host to specified IP",
                     "type": "string"
                 },
                 "dns-ip": {
+                    "description": "map specified host to this IP address",
                     "type": "string"
                 },
                 "dns-server": {
+                    "description": "update the DNS server in /etc/resolv.conf with this value",
                     "type": "string"
                 }
             }
@@ -3360,30 +3556,39 @@ var doc = `{
             "type": "object",
             "properties": {
                 "correlation": {
+                    "description": "correlation is percentage (10 is 10%)",
                     "type": "string"
                 },
                 "device": {
+                    "description": "the network interface to impact",
                     "type": "string"
                 },
                 "egress-port": {
+                    "description": "only impact egress traffic to these destination ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.\nit can only be used in conjunction with -p tcp or -p udp",
                     "type": "string"
                 },
                 "hostname": {
+                    "description": "only impact traffic to these hostnames",
                     "type": "string"
                 },
                 "ip-address": {
+                    "description": "only impact egress traffic to these IP addresses",
                     "type": "string"
                 },
                 "ip-protocol": {
+                    "description": "only impact traffic using this IP protocol, supported: tcp, udp, icmp, all",
                     "type": "string"
                 },
                 "jitter": {
+                    "description": "jitter time, time units: ns, us (or µs), ms, s, m, h.",
                     "type": "string"
                 },
                 "latency": {
+                    "description": "delay egress time, time units: ns, us (or µs), ms, s, m, h.",
                     "type": "string"
                 },
                 "source-port": {
+                    "description": "only impact egress traffic from these source ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.\nit can only be used in conjunction with -p tcp or -p udp",
                     "type": "string"
                 }
             }
@@ -3392,27 +3597,35 @@ var doc = `{
             "type": "object",
             "properties": {
                 "correlation": {
+                    "description": "correlation is percentage (10 is 10%)",
                     "type": "string"
                 },
                 "device": {
+                    "description": "the network interface to impact",
                     "type": "string"
                 },
                 "egress-port": {
+                    "description": "only impact egress traffic to these destination ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.\nit can only be used in conjunction with -p tcp or -p udp",
                     "type": "string"
                 },
                 "hostname": {
+                    "description": "only impact traffic to these hostnames",
                     "type": "string"
                 },
                 "ip-address": {
+                    "description": "only impact egress traffic to these IP addresses",
                     "type": "string"
                 },
                 "ip-protocol": {
+                    "description": "only impact traffic using this IP protocol, supported: tcp, udp, icmp, all",
                     "type": "string"
                 },
                 "percent": {
+                    "description": "percentage of packets to duplicate (10 is 10%)",
                     "type": "string"
                 },
                 "source-port": {
+                    "description": "only impact egress traffic from these source ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.\nit can only be used in conjunction with -p tcp or -p udp",
                     "type": "string"
                 }
             }
@@ -3421,27 +3634,35 @@ var doc = `{
             "type": "object",
             "properties": {
                 "correlation": {
+                    "description": "correlation is percentage (10 is 10%)",
                     "type": "string"
                 },
                 "device": {
+                    "description": "the network interface to impact",
                     "type": "string"
                 },
                 "egress-port": {
+                    "description": "only impact egress traffic to these destination ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.\nit can only be used in conjunction with -p tcp or -p udp",
                     "type": "string"
                 },
                 "hostname": {
+                    "description": "only impact traffic to these hostnames",
                     "type": "string"
                 },
                 "ip-address": {
+                    "description": "only impact egress traffic to these IP addresses",
                     "type": "string"
                 },
                 "ip-protocol": {
+                    "description": "only impact traffic using this IP protocol, supported: tcp, udp, icmp, all",
                     "type": "string"
                 },
                 "percent": {
+                    "description": "percentage of packets to loss (10 is 10%)",
                     "type": "string"
                 },
                 "source-port": {
+                    "description": "only impact egress traffic from these source ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.\nit can only be used in conjunction with -p tcp or -p udp",
                     "type": "string"
                 }
             }
@@ -3454,18 +3675,23 @@ var doc = `{
                     "type": "string"
                 },
                 "device": {
+                    "description": "the network interface to impact",
                     "type": "string"
                 },
                 "direction": {
+                    "description": "specifies the partition direction, values can be 'from', 'to'.\n'from' means packets coming from the 'IPAddress' or 'Hostname' and going to your server,\n'to' means packets originating from your server and going to the 'IPAddress' or 'Hostname'.",
                     "type": "string"
                 },
                 "hostname": {
+                    "description": "only impact traffic to these hostnames",
                     "type": "string"
                 },
                 "ip-address": {
+                    "description": "only impact egress traffic to these IP addresses",
                     "type": "string"
                 },
                 "ip-protocol": {
+                    "description": "only impact egress traffic to these IP addresses",
                     "type": "string"
                 }
             }
@@ -3504,7 +3730,7 @@ var doc = `{
                     "$ref": "#/definitions/v1alpha1.DiskPayloadSpec"
                 },
                 "duration": {
-                    "description": "Duration represents the duration of the chaos action\n+optional\nDuration represents the duration of the chaos action",
+                    "description": "Duration represents the duration of the chaos action\n+optional",
                     "type": "string"
                 },
                 "jvm-exception": {
@@ -3536,6 +3762,11 @@ var doc = `{
                     "description": "+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.JVMStressSpec"
+                },
+                "network-bandwidth": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.NetworkBandwidthSpec"
                 },
                 "network-corrupt": {
                     "description": "+optional",
@@ -3620,7 +3851,7 @@ var doc = `{
                     "$ref": "#/definitions/v1alpha1.PodSelectorSpec"
                 },
                 "value": {
-                    "description": "Value is required when the mode is set to ` + "`" + `FixedMode` + "`" + ` / ` + "`" + `FixedPercentPodMod` + "`" + ` / ` + "`" + `RandomMaxPercentPodMod` + "`" + `.\nIf ` + "`" + `FixedMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentPodMod` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentPodMod` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
+                    "description": "Value is required when the mode is set to ` + "`" + `FixedMode` + "`" + ` / ` + "`" + `FixedPercentMode` + "`" + ` / ` + "`" + `RandomMaxPercentMode` + "`" + `.\nIf ` + "`" + `FixedMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentMode` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentMode` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
                     "type": "string"
                 }
             }
@@ -3719,7 +3950,7 @@ var doc = `{
                     "$ref": "#/definitions/v1alpha1.PodSelectorSpec"
                 },
                 "value": {
-                    "description": "Value is required when the mode is set to ` + "`" + `FixedMode` + "`" + ` / ` + "`" + `FixedPercentPodMod` + "`" + ` / ` + "`" + `RandomMaxPercentPodMod` + "`" + `.\nIf ` + "`" + `FixedMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentPodMod` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentPodMod` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
+                    "description": "Value is required when the mode is set to ` + "`" + `FixedMode` + "`" + ` / ` + "`" + `FixedPercentMode` + "`" + ` / ` + "`" + `RandomMaxPercentMode` + "`" + `.\nIf ` + "`" + `FixedMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentMode` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentMode` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
                     "type": "string"
                 }
             }
@@ -3797,9 +4028,11 @@ var doc = `{
             "type": "object",
             "properties": {
                 "process": {
+                    "description": "the process name or the process ID",
                     "type": "string"
                 },
                 "signal": {
+                    "description": "the signal number to send",
                     "type": "integer"
                 }
             }
@@ -3940,9 +4173,15 @@ var doc = `{
             "type": "object",
             "properties": {
                 "load": {
+                    "description": "specifies P percent loading per CPU worker. 0 is effectively a sleep (no load) and 100 is full loading.",
                     "type": "integer"
                 },
+                "options": {
+                    "description": "extend stress-ng options",
+                    "type": "string"
+                },
                 "workers": {
+                    "description": "specifies N workers to apply the stressor.",
                     "type": "integer"
                 }
             }
@@ -3980,7 +4219,7 @@ var doc = `{
                     "$ref": "#/definitions/v1alpha1.Stressors"
                 },
                 "value": {
-                    "description": "Value is required when the mode is set to ` + "`" + `FixedMode` + "`" + ` / ` + "`" + `FixedPercentPodMod` + "`" + ` / ` + "`" + `RandomMaxPercentPodMod` + "`" + `.\nIf ` + "`" + `FixedMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentPodMod` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentPodMod` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
+                    "description": "Value is required when the mode is set to ` + "`" + `FixedMode` + "`" + ` / ` + "`" + `FixedPercentMode` + "`" + ` / ` + "`" + `RandomMaxPercentMode` + "`" + `.\nIf ` + "`" + `FixedMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentMode` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentMode` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
                     "type": "string"
                 }
             }
@@ -3988,7 +4227,12 @@ var doc = `{
         "v1alpha1.StressMemorySpec": {
             "type": "object",
             "properties": {
+                "options": {
+                    "description": "extend stress-ng options",
+                    "type": "string"
+                },
                 "size": {
+                    "description": "specifies N bytes consumed per vm worker, default is the total available memory.\nOne can specify the size as % of total available memory or in units of B, KB/KiB, MB/MiB, GB/GiB, TB/TiB..",
                     "type": "string"
                 }
             }
@@ -4155,7 +4399,7 @@ var doc = `{
                     "type": "string"
                 },
                 "value": {
-                    "description": "Value is required when the mode is set to ` + "`" + `FixedMode` + "`" + ` / ` + "`" + `FixedPercentPodMod` + "`" + ` / ` + "`" + `RandomMaxPercentPodMod` + "`" + `.\nIf ` + "`" + `FixedMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentPodMod` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentPodMod` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
+                    "description": "Value is required when the mode is set to ` + "`" + `FixedMode` + "`" + ` / ` + "`" + `FixedPercentMode` + "`" + ` / ` + "`" + `RandomMaxPercentMode` + "`" + `.\nIf ` + "`" + `FixedMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentMode` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentMode` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
                     "type": "string"
                 }
             }

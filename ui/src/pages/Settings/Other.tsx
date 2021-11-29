@@ -14,10 +14,12 @@
  * limitations under the License.
  *
  */
-import { Box, MenuItem, TextField, Typography } from '@material-ui/core'
+import { MenuItem, TextField, Typography } from '@material-ui/core'
 import { setLang, setTheme } from 'slices/settings'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
+import PaperTop from 'components-mui/PaperTop'
+import Space from 'components-mui/Space'
 import T from 'components/T'
 import messages from 'i18n/messages'
 
@@ -31,8 +33,8 @@ const Other = () => {
 
   return (
     <>
-      {/* Theme */}
-      <Box>
+      <PaperTop title={T('common.other')} divider />
+      <Space>
         <TextField
           select
           size="small"
@@ -43,16 +45,13 @@ const Other = () => {
           onChange={handleChangeTheme}
         >
           <MenuItem value="light">
-            <Typography>{T(`settings.theme.light`)}</Typography>
+            <Typography>{T('settings.theme.light')}</Typography>
           </MenuItem>
           <MenuItem value="dark">
-            <Typography>{T(`settings.theme.dark`)}</Typography>
+            <Typography>{T('settings.theme.dark')}</Typography>
           </MenuItem>
         </TextField>
-      </Box>
 
-      {/* Language */}
-      <Box>
         <TextField
           select
           size="small"
@@ -68,7 +67,7 @@ const Other = () => {
             </MenuItem>
           ))}
         </TextField>
-      </Box>
+      </Space>
     </>
   )
 }

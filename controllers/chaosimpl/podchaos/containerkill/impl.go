@@ -34,7 +34,7 @@ type Impl struct {
 
 	Log logr.Logger
 
-	decoder *utils.ContianerRecordDecoder
+	decoder *utils.ContainerRecordDecoder
 }
 
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
@@ -65,7 +65,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	return v1alpha1.NotInjected, nil
 }
 
-func NewImpl(c client.Client, log logr.Logger, decoder *utils.ContianerRecordDecoder) *Impl {
+func NewImpl(c client.Client, log logr.Logger, decoder *utils.ContainerRecordDecoder) *Impl {
 	return &Impl{
 		Client:  c,
 		Log:     log.WithName("containerkill"),
