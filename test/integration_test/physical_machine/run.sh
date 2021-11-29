@@ -19,10 +19,9 @@ cd $cur
 
 echo "download and deploy chaosd"
 
-# TODO: use a released version
-curl -fsSL -o chaosd-platform-linux-amd64.tar.gz https://mirrors.chaos-mesh.org/chaosd-platform-linux-amd64.tar.gz
-tar zxvf chaosd-platform-linux-amd64.tar.gz
-./chaosd-platform-linux-amd64/chaosd server --port 31768 > chaosd.log 2>&1 &
+curl -fsSL -o chaosd-v1.1.0-linux-amd64.tar.gz https://mirrors.chaos-mesh.org/chaosd-v1.1.0-linux-amd64.tar.gz
+tar zxvf chaosd-v1.1.0-linux-amd64.tar.gz
+./chaosd-v1.1.0-linux-amd64/chaosd server --port 31768 > chaosd.log 2>&1 &
 
 function judge_stress() {
     hava_stress=$1
@@ -85,8 +84,8 @@ judge_stress false
 
 echo "****** finish physical machine chaos test ******"
 # clean
-rm chaosd-platform-linux-amd64.tar.gz
-rm -rf chaosd-platform-linux-amd64
+rm chaosd-v1.1.0-linux-amd64.tar.gz
+rm -rf chaosd-v1.1.0-linux-amd64
 rm *_tmp.yaml
 rm chaosd.log
 killall chaosd
