@@ -35,7 +35,7 @@ import yaml from 'js-yaml'
 const YAMLEditor = loadable(() => import('components/YAMLEditor'))
 
 const Single = () => {
-  const { uuid } = useParams<{ uuid: string }>()
+  const { uuid } = useParams()
   const query = useQuery()
   let kind = query.get('kind') || 'experiment'
 
@@ -58,7 +58,7 @@ const Single = () => {
         break
     }
 
-    request(uuid)
+    request(uuid!)
       .then(({ data }) => {
         setSingle({ kind, data })
       })

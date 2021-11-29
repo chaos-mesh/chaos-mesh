@@ -36,27 +36,17 @@ const YAML: React.FC<YAMLProps> = ({ callback, buttonProps }) => {
     const f = e.target.files![0]
 
     const reader = new FileReader()
-    reader.onload = function (e) {
-      try {
-        const y = e.target!.result as string
+    reader.onload = function () {
+      const y = reader.result
 
-        callback(y)
+      callback(y)
 
-        dispatch(
-          setAlert({
-            type: 'success',
-            message: T('confirm.success.load', intl),
-          })
-        )
-      } catch (e) {
-        console.error(e)
-        dispatch(
-          setAlert({
-            type: 'error',
-            message: e.message,
-          })
-        )
-      }
+      dispatch(
+        setAlert({
+          type: 'success',
+          message: T('confirm.success.load', intl),
+        })
+      )
     }
     reader.readAsText(f)
   }

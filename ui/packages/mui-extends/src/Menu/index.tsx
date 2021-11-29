@@ -18,13 +18,9 @@
 import { IconButton, Menu as MUIMenu, MenuProps } from '@mui/material'
 
 import MoreVertIcon from '@mui/icons-material/MoreVert'
-import T from 'components/T'
-import { useIntl } from 'react-intl'
 import { useState } from 'react'
 
-const Menu = ({ children, ...rest }: Partial<MenuProps>) => {
-  const intl = useIntl()
-
+const Menu: React.FC<Omit<MenuProps, 'anchorEl' | 'open' | 'onClose'>> = ({ title, children, ...rest }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
 
   const onClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -37,7 +33,7 @@ const Menu = ({ children, ...rest }: Partial<MenuProps>) => {
 
   return (
     <div>
-      <IconButton size="small" title={T('common.options', intl)} onClick={onClick}>
+      <IconButton size="small" onClick={onClick}>
         <MoreVertIcon />
       </IconButton>
       <MUIMenu {...rest} anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={onClose}>

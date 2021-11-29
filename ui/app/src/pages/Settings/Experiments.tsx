@@ -14,11 +14,11 @@
  * limitations under the License.
  *
  */
-import { Box, Checkbox, FormControl, FormControlLabel, FormHelperText } from '@mui/material'
+import { Checkbox, FormControl, FormControlLabel, FormGroup, FormHelperText } from '@mui/material'
 import { setDebugMode, setEnableKubeSystemNS } from 'slices/settings'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
-import PaperTop from 'components-mui/PaperTop'
+import PaperTop from '@ui/mui-extends/esm/PaperTop'
 import T from 'components/T'
 
 const Experiments = () => {

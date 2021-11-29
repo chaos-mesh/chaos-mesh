@@ -14,10 +14,10 @@
  * limitations under the License.
  *
  */
-import { Box, Button, Grow, Modal, useTheme } from '@mui/material'
+import { Box, Button, Grid, Grow, Modal, useTheme } from '@mui/material'
 import { Confirm, setAlert, setConfirm } from 'slices/globalStatus'
 import { useEffect, useRef, useState } from 'react'
-import { useHistory, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 
 import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
 import { Event } from 'api/events.type'
@@ -59,9 +59,9 @@ const useStyles = makeStyles((theme) => ({
 const Single = () => {
   const classes = useStyles()
   const intl = useIntl()
-  const history = useHistory()
+  const navigate = useNavigate()
   const theme = useTheme()
-  const { uuid } = useParams<{ uuid: uuid }>()
+  const { uuid } = useParams()
 
   const dispatch = useStoreDispatch()
 
@@ -76,7 +76,7 @@ const Single = () => {
 
   const fetchWorkflowSingle = (intervalID?: number) =>
     api.workflows
-      .single(uuid)
+      .single(uuid!)
       .then(({ data }) => {
         // TODO: remove noise in API
         data.kube_object.metadata.annotations &&
@@ -110,7 +110,7 @@ const Single = () => {
 
     const fetchEvents = () => {
       api.events
-        .cascadeFetchEventsForWorkflow(uuid, { limit: 999 })
+        .cascadeFetchEventsForWorkflow(uuid!, { limit: 999 })
         .then(({ data }) => setEvents(data))
         .catch(console.error)
         .finally(() => {
@@ -153,7 +153,7 @@ const Single = () => {
           )
 
           if (action === 'archive') {
-            history.push('/workflows')
+            navigate('/workflows')
           }
         })
         .catch(console.error)

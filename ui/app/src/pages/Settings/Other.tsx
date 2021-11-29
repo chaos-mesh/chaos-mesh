@@ -18,8 +18,8 @@ import { MenuItem, TextField, Typography } from '@mui/material'
 import { setLang, setTheme } from 'slices/settings'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
-import PaperTop from 'components-mui/PaperTop'
-import Space from 'components-mui/Space'
+import PaperTop from '@ui/mui-extends/esm/PaperTop'
+import Space from '@ui/mui-extends/esm/Space'
 import T from 'components/T'
 import messages from 'i18n/messages'
 

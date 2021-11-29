@@ -28,7 +28,6 @@ import {
 } from '@mui/material'
 
 import { ExperimentKind } from 'components/NewExperiment/types'
-import PaperTop from '@ui/mui-extends/esm/PaperTop'
 import T from 'components/T'
 import { objToArrBySep } from 'lib/utils'
 

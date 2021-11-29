@@ -20,7 +20,7 @@ import { useEffect, useState } from 'react'
 import { Event } from 'api/events.type'
 import EventsTable from 'components/EventsTable'
 import Loading from '@ui/mui-extends/esm/Loading'
-import NotFound from '@ui/mui-extends/esm/NotFound'
+import NotFound from 'components/NotFound'
 import T from 'components/T'
 import api from 'api'
 

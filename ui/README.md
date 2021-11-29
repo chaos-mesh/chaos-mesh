@@ -151,7 +151,7 @@ First, we use [husky](https://github.com/typicode/husky) and [lint-staged](https
 
 #### Styles
 
-Currently, we use `@material-ui/styles` to isolate each component styles.
+Currently, we use `@mui/styles` to isolate each component styles.
 
 We hope you can follow this order **(Don't care about their value)** to organize all styles:
 

@@ -28,7 +28,12 @@ export const token = (token: string | GCPToken) => {
     http.interceptors.request.eject(tokenInterceptorId)
   }
 
-  const headers =
+  const headers: {
+    Authorization?: string
+    'X-Authorization-Method'?: string
+    'X-Authorization-AccessToken'?: string
+    'X-Authorization-Expiry'?: string
+  } =
     typeof token === 'string'
       ? {
           Authorization: `Bearer ${token}`,

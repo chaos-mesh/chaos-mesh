@@ -25,7 +25,7 @@ import CloseIcon from '@mui/icons-material/Close'
 import { Experiment } from 'api/experiments.type'
 import FilterListIcon from '@mui/icons-material/FilterList'
 import Loading from '@ui/mui-extends/esm/Loading'
-import NotFound from '@ui/mui-extends/esm/NotFound'
+import NotFound from 'components/NotFound'
 import ObjectListItem from 'components/ObjectListItem'
 import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck'
 import Space from '@ui/mui-extends/esm/Space'
@@ -33,9 +33,9 @@ import T from 'components/T'
 import _groupBy from 'lodash.groupby'
 import api from 'api'
 import { transByKind } from 'lib/byKind'
-import { useHistory } from 'react-router-dom'
 import { useIntervalFetch } from 'lib/hooks'
 import { useIntl } from 'react-intl'
+import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import { useStoreDispatch } from 'store'
 
@@ -50,7 +50,7 @@ const StyledCheckBox = styled(Checkbox)({
 
 export default function Experiments() {
   const intl = useIntl()
-  const history = useHistory()
+  const navigate = useNavigate()
 
   const dispatch = useStoreDispatch()
 
@@ -177,7 +177,7 @@ export default function Experiments() {
   return (
     <>
       <Space direction="row" mb={6}>
-        <Button variant="outlined" startIcon={<AddIcon />} onClick={() => history.push('/experiments/new')}>
+        <Button variant="outlined" startIcon={<AddIcon />} onClick={() => navigate('/experiments/new')}>
           {T('newE.title')}
         </Button>
         <Button

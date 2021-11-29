@@ -18,7 +18,7 @@
 import { Box, Button, Grid, Grow } from '@mui/material'
 import { setAlert, setConfirm } from 'slices/globalStatus'
 import { useEffect, useState } from 'react'
-import { useHistory, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 
 import Alert from '@mui/lab/Alert'
 import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
@@ -42,8 +42,8 @@ import yaml from 'js-yaml'
 const YAMLEditor = loadable(() => import('components/YAMLEditor'))
 
 export default function Single() {
-  const history = useHistory()
-  const { uuid } = useParams<{ uuid: uuid }>()
+  const navigate = useNavigate()
+  const { uuid } = useParams()
 
   const intl = useIntl()
 
@@ -55,7 +55,7 @@ export default function Single() {
 
   const fetchExperiment = () => {
     api.experiments
-      .single(uuid)
+      .single(uuid!)
       .then(({ data }) => setSingle(data))
       .catch(console.error)
   }
@@ -147,7 +147,7 @@ export default function Single() {
           )
 
           if (action === 'archive') {
-            history.push('/experiments')
+            navigate('/experiments')
           }
 
           if (action === 'pause' || action === 'start') {

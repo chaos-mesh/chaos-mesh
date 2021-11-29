@@ -15,21 +15,21 @@
  *
  */
 
-import { Box, Button } from '@material-ui/core'
+import { Box, Button } from '@mui/material'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
 import Cookies from 'js-cookie'
-import GoogleIcon from '@material-ui/icons/Google'
+import GoogleIcon from '@mui/icons-material/Google'
 import LS from 'lib/localStorage'
-import PaperTop from 'components-mui/PaperTop'
+import PaperTop from '@ui/mui-extends/esm/PaperTop'
 import T from 'components/T'
 import { setConfirm } from 'slices/globalStatus'
 import { truncate } from 'lib/utils'
-import { useHistory } from 'react-router-dom'
 import { useIntl } from 'react-intl'
+import { useNavigate } from 'react-router-dom'
 
 const Token = () => {
-  const history = useHistory()
+  const navigate = useNavigate()
   const intl = useIntl()
 
   const { tokens, tokenName } = useStoreSelector((state) => state.globalStatus)
@@ -63,7 +63,7 @@ const Token = () => {
       LS.remove('token-name')
     }
 
-    history.go(0)
+    navigate(0)
   }
 
   return (

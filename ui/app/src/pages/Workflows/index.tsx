@@ -19,16 +19,16 @@ import { Box, Button, Grow, Typography } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import DataTable from './DataTable'
 import Loading from '@ui/mui-extends/esm/Loading'
-import NotFound from '@ui/mui-extends/esm/NotFound'
+import NotFound from 'components/NotFound'
 import T from 'components/T'
 import { Workflow } from 'api/workflows.type'
 import api from 'api'
-import { useHistory } from 'react-router-dom'
 import { useIntervalFetch } from 'lib/hooks'
+import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 
 const Workflows = () => {
-  const history = useHistory()
+  const navigate = useNavigate()
 
   const [loading, setLoading] = useState(true)
   const [workflows, setWorkflows] = useState<Workflow[]>([])
@@ -54,7 +54,7 @@ const Workflows = () => {
       <Grow in={!loading} style={{ transformOrigin: '0 0 0' }}>
         <div>
           <Box mb={6}>
-            <Button variant="outlined" startIcon={<AddIcon />} onClick={() => history.push('/workflows/new')}>
+            <Button variant="outlined" startIcon={<AddIcon />} onClick={() => navigate('/workflows/new')}>
               {T('newW.title')}
             </Button>
           </Box>

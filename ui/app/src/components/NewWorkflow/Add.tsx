@@ -14,19 +14,7 @@
  * limitations under the License.
  *
  */
-import {
-  Autocomplete,
-  Box,
-  Button,
-  IconButton,
-  TextField as MUITextField,
-  MenuItem,
-  StepLabel,
-  Typography,
-} from '@mui/material'
-import { Branch, Template, setTemplate, updateTemplate } from 'slices/workflows'
-import { Form, Formik } from 'formik'
-import { LabelField, SelectField, Submit, TextField } from 'components/FormField'
+import { Box, Button, MenuItem, StepLabel, Typography } from '@mui/material'
 import NewExperimentNext, { NewExperimentHandles } from 'components/NewExperimentNext'
 import { SelectField, TextField } from 'components/FormField'
 import { Template, TemplateType, setTemplate, updateTemplate } from 'slices/workflows'
@@ -35,15 +23,14 @@ import { useEffect, useRef, useState } from 'react'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
 import AddCircleIcon from '@mui/icons-material/AddCircle'
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
-import ArrowRightIcon from '@mui/icons-material/ArrowRight'
 import CloseIcon from '@mui/icons-material/Close'
-import Paper from '@ui/mui-extends/esm/Paper'
-import PaperTop from '@ui/mui-extends/esm/PaperTop'
-import RemoveCircleIcon from '@mui/icons-material/RemoveCircle'
+import { Formik } from 'formik'
+import HTTPTask from './HTTPTask'
+import SerialOrParallel from './SerailOrParallel'
 import Space from '@ui/mui-extends/esm/Space'
 import Suspend from './Suspend'
 import T from 'components/T'
+import Task from './Task'
 import { makeStyles } from '@mui/styles'
 import { parseYAML } from 'lib/formikhelpers'
 import { setAlert } from 'slices/globalStatus'

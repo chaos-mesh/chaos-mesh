@@ -14,6 +14,7 @@
     "jsx": "react-jsx",
     "experimentalDecorators": true,
     "outDir": "esm",
+    "declaration": true,
     "baseUrl": "src"
   },
   "include": [

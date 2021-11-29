@@ -18,7 +18,7 @@ import { Box, BoxProps } from '@mui/material'
 import { ComputedDatum, PieTooltipProps, ResponsivePie } from '@nivo/pie'
 import { useEffect, useState } from 'react'
 
-import NotFound from '@ui/mui-extends/esm/NotFound'
+import NotFound from 'components/NotFound'
 import { PropertyAccessor } from '@nivo/core'
 import { StatusOfExperiments } from 'api/experiments.type'
 import T from 'components/T'

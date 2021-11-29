@@ -18,7 +18,7 @@ import { Box, BoxProps } from '@mui/material'
 import { useEffect, useRef } from 'react'
 
 import { Event } from 'api/events.type'
-import NotFound from '@ui/mui-extends/esm/NotFound'
+import NotFound from 'components/NotFound'
 import T from 'components/T'
 import genEventsChart from 'lib/d3/eventsChart'
 import { useStoreSelector } from 'store'

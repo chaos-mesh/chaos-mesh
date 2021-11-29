@@ -26,11 +26,11 @@ import PauseCircleOutlineIcon from '@mui/icons-material/PauseCircleOutline'
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline'
 import { Schedule } from 'api/schedules.type'
 import Space from '@ui/mui-extends/esm/Space'
-import StatusLabel from '@ui/mui-extends/esm/StatusLabel'
+import StatusLabel from 'components/StatusLabel'
 import T from 'components/T'
 import { truncate } from 'lib/utils'
-import { useHistory } from 'react-router-dom'
 import { useIntl } from 'react-intl'
+import { useNavigate } from 'react-router-dom'
 import { useStoreSelector } from 'store'
 
 interface ObjectListItemProps {
@@ -41,7 +41,7 @@ interface ObjectListItemProps {
 }
 
 const ObjectListItem: React.FC<ObjectListItemProps> = ({ data, type = 'experiment', archive, onSelect }) => {
-  const history = useHistory()
+  const navigate = useNavigate()
   const intl = useIntl()
 
   const { lang } = useStoreSelector((state) => state.settings)
@@ -103,7 +103,7 @@ const ObjectListItem: React.FC<ObjectListItemProps> = ({ data, type = 'experimen
         break
     }
 
-    history.push(path)
+    navigate(path)
   }
 
   const Actions = () => (

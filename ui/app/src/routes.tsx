@@ -32,67 +32,60 @@ import Workflows from 'pages/Workflows'
 
 const routes: RouteProps[] = [
   {
-    component: Dashboard,
+    element: <Dashboard />,
     path: '/dashboard',
-    exact: true,
   },
   {
-    component: NewWorkflow,
+    element: <NewWorkflow />,
     path: '/workflows/new',
   },
   {
-    component: Workflows,
+    element: <Workflows />,
     path: '/workflows',
-    exact: true,
   },
   {
-    component: Workflow,
+    element: <Workflow />,
     path: '/workflows/:uuid',
   },
   {
-    component: NewSchedule,
+    element: <NewSchedule />,
     path: '/schedules/new',
   },
   {
-    component: Schedules,
+    element: <Schedules />,
     path: '/schedules',
-    exact: true,
   },
   {
-    component: Schedule,
+    element: <Schedule />,
     path: '/schedules/:uuid',
   },
   {
-    component: NewExperiment,
+    element: <NewExperiment />,
     path: '/experiments/new',
   },
   {
-    component: Experiments,
+    element: <Experiments />,
     path: '/experiments',
-    exact: true,
   },
   {
-    component: Experiment,
+    element: <Experiment />,
     path: '/experiments/:uuid',
   },
   {
-    component: Events,
+    element: <Events />,
     path: '/events',
-    exact: true,
   },
   {
-    component: Archives,
+    element: <Archives />,
     path: '/archives',
-    exact: true,
   },
   {
-    component: Archive,
+    element: <Archive />,
     path: '/archives/:uuid',
   },
   {
-    component: Settings,
+    element: <Settings />,
     path: '/settings',
-    exact: true,
   },
 ]
 

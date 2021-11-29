@@ -20,12 +20,12 @@ import T from 'components/T'
 import api from 'api'
 import { resetNewExperiment } from 'slices/experiments'
 import { setAlert } from 'slices/globalStatus'
-import { useHistory } from 'react-router-dom'
 import { useIntl } from 'react-intl'
+import { useNavigate } from 'react-router-dom'
 import { useStoreDispatch } from 'store'
 
 const New = () => {
-  const history = useHistory()
+  const navigate = useNavigate()
   const intl = useIntl()
 
   const dispatch = useStoreDispatch()
@@ -43,7 +43,7 @@ const New = () => {
 
         dispatch(resetNewExperiment())
 
-        history.push('/schedules')
+        navigate('/schedules')
       })
       .catch(console.error)
   }

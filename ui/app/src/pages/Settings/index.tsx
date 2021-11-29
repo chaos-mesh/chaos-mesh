@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-import { Grid, Grow, Typography } from '@mui/material'
+import { Box, Grid, Grow, Typography } from '@mui/material'
 
 import Experiments from './Experiments'
 import Other from './Other'

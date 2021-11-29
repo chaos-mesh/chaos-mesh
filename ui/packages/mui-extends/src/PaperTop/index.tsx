@@ -14,7 +14,8 @@
  * limitations under the License.
  *
  */
-import { Box, BoxProps, Typography } from '@mui/material'
+
+import { Box, BoxProps, Divider, Typography } from '@mui/material'
 
 interface PaperTopProps {
   title: string | JSX.Element

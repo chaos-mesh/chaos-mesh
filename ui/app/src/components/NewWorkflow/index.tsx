@@ -51,8 +51,8 @@ import api from 'api'
 import { constructWorkflow } from 'lib/formikhelpers'
 import { makeStyles } from '@mui/styles'
 import { resetNewExperiment } from 'slices/experiments'
-import { useHistory } from 'react-router-dom'
 import { useIntl } from 'react-intl'
+import { useNavigate } from 'react-router-dom'
 import yaml from 'js-yaml'
 
 const useStyles = makeStyles((theme) => ({
@@ -88,7 +88,7 @@ export type WorkflowBasic = {
 const NewWorkflow = () => {
   const classes = useStyles()
   const intl = useIntl()
-  const history = useHistory()
+  const navigate = useNavigate()
 
   const state = useStoreSelector((state) => state)
   const { namespaces } = state.experiments
@@ -179,7 +179,7 @@ const NewWorkflow = () => {
       .then(() => {
         dispatch(resetWorkflow())
 
-        history.push('/workflows')
+        navigate('/workflows')
       })
       .catch(console.error)
   }

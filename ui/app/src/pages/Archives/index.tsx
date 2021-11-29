@@ -24,7 +24,7 @@ import CloseIcon from '@mui/icons-material/Close'
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
 import FilterListIcon from '@mui/icons-material/FilterList'
 import Loading from '@ui/mui-extends/esm/Loading'
-import NotFound from '@ui/mui-extends/esm/NotFound'
+import NotFound from 'components/NotFound'
 import ObjectListItem from 'components/ObjectListItem'
 import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck'
 import Space from '@ui/mui-extends/esm/Space'
@@ -35,8 +35,8 @@ import TabList from '@mui/lab/TabList'
 import _groupBy from 'lodash.groupby'
 import api from 'api'
 import { transByKind } from 'lib/byKind'
-import { useHistory } from 'react-router-dom'
 import { useIntl } from 'react-intl'
+import { useNavigate } from 'react-router-dom'
 import { useQuery } from 'lib/hooks'
 import { useStoreDispatch } from 'store'
 
@@ -52,7 +52,7 @@ const StyledCheckBox = styled(Checkbox)({
 type PanelType = 'workflow' | 'schedule' | 'experiment'
 
 export default function Archives() {
-  const history = useHistory()
+  const navigate = useNavigate()
   const intl = useIntl()
   const query = useQuery()
   let kind = query.get('kind') || 'experiment'
@@ -202,7 +202,7 @@ export default function Archives() {
   )
 
   const onTabChange = (_: any, newValue: PanelType) => {
-    history.push(`/archives?kind=${newValue}`)
+    navigate(`/archives?kind=${newValue}`)
     setPanel(newValue)
   }
 

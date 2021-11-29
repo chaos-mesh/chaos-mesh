@@ -18,7 +18,7 @@ import { Box, Typography } from '@mui/material'
 import DateTime, { format } from 'lib/luxon'
 
 import { Event } from 'api/events.type'
-import NotFound from '@ui/mui-extends/esm/NotFound'
+import NotFound from 'components/NotFound'
 import T from 'components/T'
 import Timeline from '@mui/lab/Timeline'
 import TimelineConnector from '@mui/lab/TimelineConnector'

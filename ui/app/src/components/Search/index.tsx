@@ -43,8 +43,8 @@ import { format } from 'lib/luxon'
 import { makeStyles } from '@mui/styles'
 import search from 'lib/search'
 import { truncate } from 'lib/utils'
-import { useHistory } from 'react-router-dom'
 import { useIntl } from 'react-intl'
+import { useNavigate } from 'react-router-dom'
 
 const Chip = (props: ChipProps) => <MUIChip {...props} variant="outlined" size="small" />
 
@@ -70,7 +70,7 @@ type Option = Workflow | Schedule | Experiment | Archive
 
 const Search: React.FC = () => {
   const classes = useStyles()
-  const history = useHistory()
+  const navigate = useNavigate()
   const intl = useIntl()
 
   const [open, setOpen] = useState(false)
@@ -146,7 +146,7 @@ const Search: React.FC = () => {
     const time = option.created_at
 
     const onClick = () => {
-      history.push(determineLink(uuid, type, kind))
+      navigate(determineLink(uuid, type, kind))
       setOpen(false)
     }
 
@@ -168,7 +168,7 @@ const Search: React.FC = () => {
 
   const onChange = (_: any, value: Option | null, reason: string) => {
     if (reason === 'selectOption') {
-      history.push(determineLink(value!.uid, value!.is, determineKind(value!)))
+      navigate(determineLink(value!.uid, value!.is, determineKind(value!)))
     }
   }
 

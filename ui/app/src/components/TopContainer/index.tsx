@@ -14,15 +14,15 @@
  * limitations under the License.
  *
  */
-import { Alert, Box, CssBaseline, Paper, Portal, Snackbar, useMediaQuery, useTheme } from '@mui/material'
-import { Redirect, Route, Switch } from 'react-router-dom'
+
+import { Alert, Box, Container, CssBaseline, Paper, Portal, Snackbar, useMediaQuery, useTheme } from '@mui/material'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import { drawerCloseWidth, drawerWidth } from './Sidebar'
 import { setAlertOpen, setConfig, setConfirmOpen, setNameSpace, setTokenName, setTokens } from 'slices/globalStatus'
 import { useEffect, useMemo, useState } from 'react'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
 import ConfirmDialog from '@ui/mui-extends/esm/ConfirmDialog'
-import ContentContainer from '@ui/mui-extends/esm/ContentContainer'
 import Cookies from 'js-cookie'
 import { IntlProvider } from 'react-intl'
 import LS from 'lib/localStorage'
@@ -186,19 +186,18 @@ const TopContainer = () => {
         <Sidebar open={openDrawer} />
         <Paper className={classes.main} component="main" elevation={0}>
           <Box className={classes.switchContent}>
-            <ContentContainer>
+            <Container maxWidth="xl" sx={{ position: 'relative' }}>
               <Navbar openDrawer={openDrawer} handleDrawerToggle={handleDrawerToggle} breadcrumbs={breadcrumbs} />
 
               {loading ? (
                 <Loading />
               ) : (
-                <Switch>
-                  <Redirect path="/" to="/dashboard" exact />
+                <Routes>
+                  <Route path="/" element={<Navigate replace to="/dashboard" />} />
                   {!authOpen && routes.map((route) => <Route key={route.path as string} {...route} />)}
-                  <Redirect to="/dashboard" />
-                </Switch>
+                </Routes>
               )}
-            </ContentContainer>
+            </Container>
           </Box>
         </Paper>
       </Box>

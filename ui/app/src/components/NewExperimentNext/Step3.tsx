@@ -27,8 +27,8 @@ import api from 'api'
 import { parseSubmit } from 'lib/formikhelpers'
 import { resetNewExperiment } from 'slices/experiments'
 import { setAlert } from 'slices/globalStatus'
-import { useHistory } from 'react-router-dom'
 import { useIntl } from 'react-intl'
+import { useNavigate } from 'react-router-dom'
 
 interface Step3Props {
   onSubmit?: (parsedValues: any) => void
@@ -36,7 +36,7 @@ interface Step3Props {
 }
 
 const Step3: React.FC<Step3Props> = ({ onSubmit, inSchedule }) => {
-  const history = useHistory()
+  const navigate = useNavigate()
   const intl = useIntl()
 
   const state = useStoreSelector((state) => state)
@@ -78,7 +78,7 @@ const Step3: React.FC<Step3Props> = ({ onSubmit, inSchedule }) => {
 
             dispatch(resetNewExperiment())
 
-            history.push('/experiments')
+            navigate('/experiments')
           })
           .catch(console.error)
       }

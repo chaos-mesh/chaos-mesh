@@ -15,7 +15,7 @@
  *
  */
 import { Autocomplete, TextField } from '@mui/material'
-import { useHistory, useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
 import Paper from '@ui/mui-extends/esm/Paper'
@@ -26,7 +26,7 @@ import { setNameSpace } from 'slices/globalStatus'
 import { useEffect } from 'react'
 
 const ControlBar = () => {
-  const history = useHistory()
+  const navigate = useNavigate()
   const { pathname } = useLocation()
 
   const { namespace } = useStoreSelector((state) => state.globalStatus)
@@ -43,8 +43,8 @@ const ControlBar = () => {
     api.auth.namespace(ns)
     dispatch(setNameSpace(ns))
 
-    history.replace('/namespaceSetted')
-    setTimeout(() => history.replace(pathname))
+    navigate('/namespaceSetted', { replace: true })
+    setTimeout(() => navigate(pathname, { replace: true }))
   }
 
   return (

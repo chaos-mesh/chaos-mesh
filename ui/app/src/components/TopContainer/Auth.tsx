@@ -14,15 +14,16 @@
  * limitations under the License.
  *
  */
-import { Box, Button, Link, Typography } from '@mui/material'
+import { Box, Button, Divider, IconButton, Link, Typography } from '@mui/material'
 import { useEffect, useState } from 'react'
 
 import ConfirmDialog from '@ui/mui-extends/esm/ConfirmDialog'
+import GoogleIcon from '@mui/icons-material/Google'
 import RBACGenerator from 'components/RBACGenerator'
-import Space from 'components-mui/Space'
+import Space from '@ui/mui-extends/esm/Space'
 import T from 'components/T'
 import Token from 'components/Token'
-import { useHistory } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useStoreSelector } from 'store'
 
 interface AuthProps {
@@ -31,7 +32,7 @@ interface AuthProps {
 }
 
 const Auth: React.FC<AuthProps> = ({ open, setOpen }) => {
-  const history = useHistory()
+  const navigate = useNavigate()
 
   const { gcpSecurityMode } = useStoreSelector((state) => state.globalStatus)
 
@@ -41,7 +42,7 @@ const Auth: React.FC<AuthProps> = ({ open, setOpen }) => {
     setOpen(open)
   }, [open, setOpen])
 
-  const handleSubmitCallback = () => history.go(0)
+  const handleSubmitCallback = () => navigate(0)
   const handleAuthGCP = () => (window.location.href = '/api/auth/gcp/redirect')
 
   return (

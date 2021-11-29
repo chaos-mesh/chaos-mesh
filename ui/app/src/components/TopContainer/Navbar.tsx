@@ -31,8 +31,7 @@ const useStyles = makeStyles((theme) => ({
   },
   appBar: {
     position: 'absolute',
-    width: `calc(100% - ${theme.spacing(12)})`,
-    margin: theme.spacing(6),
+    // width: `calc(100% - ${theme.spacing(12)})`,
   },
   menuButton: {
     [theme.breakpoints.down('md')]: {
@@ -61,8 +60,8 @@ const Navbar: React.FC<HeaderProps> = ({ openDrawer, handleDrawerToggle, breadcr
 
   return (
     <>
-      <Toolbar className={classes.toolbar} />
-      <AppBar className={classes.appBar} color="inherit" elevation={0}>
+      <Toolbar sx={{ my: 6 }} />
+      <AppBar className={classes.appBar} sx={{ my: 6, px: 3 }} color="inherit" elevation={0}>
         <Toolbar disableGutters>
           <IconButton
             className={classes.menuButton}

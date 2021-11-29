@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-import { Box, IconButton, Typography } from '@material-ui/core'
+import { Box, IconButton, Typography } from '@mui/material'
 import { Form, Formik } from 'formik'
 import { Submit, TextField } from 'components/FormField'
 import { Template, TemplateType } from 'slices/workflows'
@@ -22,12 +22,12 @@ import { useRef, useState } from 'react'
 import { validateDeadline, validateName } from 'lib/formikhelpers'
 
 import Add from './Add'
-import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown'
-import ArrowRightIcon from '@material-ui/icons/ArrowRight'
-import Paper from 'components-mui/Paper'
-import PaperTop from 'components-mui/PaperTop'
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
+import ArrowRightIcon from '@mui/icons-material/ArrowRight'
+import Paper from '@ui/mui-extends/esm/Paper'
+import PaperTop from '@ui/mui-extends/esm/PaperTop'
 import React from 'react'
-import Space from 'components-mui/Space'
+import Space from '@ui/mui-extends/esm/Space'
 import T from 'components/T'
 import { resetNewExperiment } from 'slices/experiments'
 import { setAlert } from 'slices/globalStatus'

@@ -18,7 +18,7 @@
 import { Box, Button, Grid, Grow } from '@mui/material'
 import { setAlert, setConfirm } from 'slices/globalStatus'
 import { useEffect, useState } from 'react'
-import { useHistory, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 
 import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
 import { Event } from 'api/events.type'
@@ -41,8 +41,8 @@ import yaml from 'js-yaml'
 const YAMLEditor = loadable(() => import('components/YAMLEditor'))
 
 const Single = () => {
-  const history = useHistory()
-  const { uuid } = useParams<{ uuid: uuid }>()
+  const navigate = useNavigate()
+  const { uuid } = useParams()
 
   const intl = useIntl()
 
@@ -54,7 +54,7 @@ const Single = () => {
 
   const fetchSchedule = () => {
     api.schedules
-      .single(uuid)
+      .single(uuid!)
       .then(({ data }) => setSingle(data))
       .catch(console.error)
   }
@@ -146,7 +146,7 @@ const Single = () => {
           )
 
           if (action === 'archive') {
-            history.push('/schedules')
+            navigate('/schedules')
           }
 
           if (action === 'pause' || action === 'start') {

@@ -22,12 +22,12 @@ import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
 import DateTime from 'lib/luxon'
 import Paper from '@ui/mui-extends/esm/Paper'
 import Space from '@ui/mui-extends/esm/Space'
-import StatusLabel from '@ui/mui-extends/esm/StatusLabel'
+import StatusLabel from 'components/StatusLabel'
 import T from 'components/T'
 import { Workflow } from 'api/workflows.type'
 import api from 'api'
-import { useHistory } from 'react-router-dom'
 import { useIntl } from 'react-intl'
+import { useNavigate } from 'react-router-dom'
 
 interface DataTableProps {
   data: Workflow[]
@@ -35,13 +35,13 @@ interface DataTableProps {
 }
 
 const DataTable: React.FC<DataTableProps> = ({ data, fetchData }) => {
-  const history = useHistory()
+  const navigate = useNavigate()
   const intl = useIntl()
 
   const { lang } = useStoreSelector((state) => state.settings)
   const dispatch = useStoreDispatch()
 
-  const handleJumpTo = (uuid: uuid) => () => history.push(`/workflows/${uuid}`)
+  const handleJumpTo = (uuid: uuid) => () => navigate(`/workflows/${uuid}`)
 
   const handleSelect = (selected: Confirm) => (event: React.MouseEvent<HTMLSpanElement>) => {
     event.stopPropagation()

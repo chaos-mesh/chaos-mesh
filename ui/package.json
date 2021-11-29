@@ -14,12 +14,9 @@
   "devDependencies": {
     "husky": "^7.0.4",
     "import-sort-style-eslint": "^6.0.0",
-    "lint-staged": "^12.0.2",
-    "prettier": "^2.4.1",
+    "lint-staged": "^12.1.2",
+    "prettier": "^2.5.0",
     "prettier-plugin-import-sort": "^0.0.7"
-  },
-  "jest": {
-    "resetMocks": false
   },
   "lint-staged": {
     "*.(j|t)s?(x)": "prettier --write"

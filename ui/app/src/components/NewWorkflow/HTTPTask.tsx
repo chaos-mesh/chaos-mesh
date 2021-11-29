@@ -15,19 +15,19 @@
  *
  */
 import { Form, Formik } from 'formik'
-import { FormControlLabel, Switch } from '@material-ui/core'
-import { MenuItem, Typography } from '@material-ui/core'
+import { FormControlLabel, Switch } from '@mui/material'
+import { MenuItem, Typography } from '@mui/material'
 import { SelectField, Submit, TextField } from 'components/FormField'
 import { Template, TemplateType } from 'slices/workflows'
 import { parseHTTPTask, renderHTTPTask } from 'api/workflows'
 import { useEffect, useRef, useState } from 'react'
 
-import Paper from 'components-mui/Paper'
-import PaperTop from 'components-mui/PaperTop'
+import Paper from '@ui/mui-extends/esm/Paper'
+import PaperTop from '@ui/mui-extends/esm/PaperTop'
 import { RequestForm } from 'api/workflows.type'
-import Space from 'components-mui/Space'
+import Space from '@ui/mui-extends/esm/Space'
 import T from 'components/T'
-import { makeStyles } from '@material-ui/styles'
+import { makeStyles } from '@mui/styles'
 import { useIntl } from 'react-intl'
 import { validateName } from 'lib/formikhelpers'
 
