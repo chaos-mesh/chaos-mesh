@@ -60,6 +60,11 @@ var _ = Describe("Schedule", func() {
 					Duration:   &duration,
 					ContainerSelector: v1alpha1.ContainerSelector{
 						PodSelector: v1alpha1.PodSelector{
+							Selector: v1alpha1.PodSelectorSpec{
+								Pods: map[string][]string{
+									"default": {testPod},
+								},
+							},
 							Mode: v1alpha1.OneMode,
 						},
 					},
@@ -94,7 +99,6 @@ var _ = Describe("Schedule", func() {
 			By("deleting the created object")
 			{
 				Expect(k8sClient.Delete(context.TODO(), chaos)).To(Succeed())
-				Expect(k8sClient.Get(context.TODO(), key, chaos)).ToNot(Succeed())
 			}
 		})
 		It("should stop paused chaos", func() {
@@ -114,6 +118,11 @@ var _ = Describe("Schedule", func() {
 					Duration:   &duration,
 					ContainerSelector: v1alpha1.ContainerSelector{
 						PodSelector: v1alpha1.PodSelector{
+							Selector: v1alpha1.PodSelectorSpec{
+								Pods: map[string][]string{
+									"default": {testPod},
+								},
+							},
 							Mode: v1alpha1.OneMode,
 						},
 					},
@@ -181,7 +190,6 @@ var _ = Describe("Schedule", func() {
 			By("deleting the created object")
 			{
 				Expect(k8sClient.Delete(context.TODO(), chaos)).To(Succeed())
-				Expect(k8sClient.Get(context.TODO(), key, chaos)).ToNot(Succeed())
 			}
 		})
 	})

@@ -45,13 +45,13 @@ var _ = Describe("Finalizer", func() {
 	Context("Adding finalizer", func() {
 		It("should add record finalizer", func() {
 			key := types.NamespacedName{
-				Name:      "foo1",
+				Name:      "final1",
 				Namespace: "default",
 			}
 			duration := "1000s"
 			chaos := &v1alpha1.TimeChaos{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      "foo1",
+					Name:      "final1",
 					Namespace: "default",
 				},
 				Spec: v1alpha1.TimeChaosSpec{
@@ -60,6 +60,11 @@ var _ = Describe("Finalizer", func() {
 					Duration:   &duration,
 					ContainerSelector: v1alpha1.ContainerSelector{
 						PodSelector: v1alpha1.PodSelector{
+							Selector: v1alpha1.PodSelectorSpec{
+								Pods: map[string][]string{
+									"default": {testPod},
+								},
+							},
 							Mode: v1alpha1.OneMode,
 						},
 					},

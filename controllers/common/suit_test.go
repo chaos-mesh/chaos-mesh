@@ -17,14 +17,21 @@ package common
 
 import (
 	"context"
+	"fmt"
+	"math/rand"
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/go-logr/logr"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"go.uber.org/fx"
+	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/rest"
 	"k8s.io/kubectl/pkg/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -51,12 +58,13 @@ var lister *utils.ActiveLister
 var cfg *rest.Config
 var testEnv *envtest.Environment
 var setupLog = ctrl.Log.WithName("setup")
+var testPod = fmt.Sprintf("test-%d", rand.Int63())
 
-func TestDesiredPhase(t *testing.T) {
+func TestCommon(t *testing.T) {
 	RegisterFailHandler(Fail)
 
 	RunSpecsWithDefaultAndCustomReporters(t,
-		"Desired Phase suit",
+		"Common suit",
 		[]Reporter{printer.NewlineReporter{}})
 }
 
@@ -85,6 +93,40 @@ var _ = BeforeSuite(func() {
 	Expect(err).ToNot(HaveOccurred())
 	Expect(k8sClient).ToNot(BeNil())
 
+	By("create target pod")
+	key := types.NamespacedName{
+		Name:      testPod,
+		Namespace: "default",
+	}
+	pod := v1.Pod{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      testPod,
+			Namespace: "default",
+		},
+		Spec: v1.PodSpec{
+			Containers: []v1.Container{
+				{
+					Name:  "nginx",
+					Image: "nginx",
+				},
+			},
+		},
+	}
+	Expect(k8sClient.Create(context.TODO(), &pod)).To(Succeed())
+
+	By("poll pod to ready")
+	{
+		err := wait.Poll(time.Second*1, time.Second*30, func() (ok bool, err error) {
+			err = k8sClient.Get(context.TODO(), key, &pod)
+			if err != nil {
+				return false, err
+			}
+			return pod.Status.Phase == v1.PodRunning, nil
+		})
+		Expect(err).ToNot(HaveOccurred())
+	}
+
+	By("start application")
 	app = fx.New(
 		fx.Options(
 			test.Module,
@@ -107,6 +149,15 @@ var _ = BeforeSuite(func() {
 }, 60)
 
 var _ = AfterSuite(func() {
+	By("delete target pod")
+	pod := v1.Pod{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      testPod,
+			Namespace: "default",
+		},
+	}
+	Expect(k8sClient.Delete(context.TODO(), &pod)).To(Succeed())
+
 	By("tearing down the test environment")
 	stopCtx, cancel := context.WithTimeout(context.Background(), app.StopTimeout())
 	defer cancel()
