@@ -39,8 +39,6 @@ const (
 type ChaosDaemonMetricsCollector struct {
 	crClient crclients.ContainerRuntimeInfoClient
 
-	iptablesChains      *prometheus.GaugeVec
-	iptablesRules       *prometheus.GaugeVec
 	iptablesPackets     *prometheus.GaugeVec
 	iptablesPacketBytes *prometheus.GaugeVec
 	ipsetMembers        *prometheus.GaugeVec
@@ -50,36 +48,26 @@ type ChaosDaemonMetricsCollector struct {
 // NewChaosDaemonMetricsCollector initializes metrics for each chaos daemon
 func NewChaosDaemonMetricsCollector() *ChaosDaemonMetricsCollector {
 	return &ChaosDaemonMetricsCollector{
-		iptablesChains: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-			Name: "chaos_daemon_iptables_chains",
-			Help: "Total number of iptables chains",
-		}, []string{"namespace", "pod_name", "container_name"}),
-		iptablesRules: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-			Name: "chaos_daemon_iptables_rules",
-			Help: "Total number of iptables rules",
-		}, []string{"namespace", "pod_name", "container_name"}),
 		iptablesPackets: prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Name: "chaos_daemon_iptables_packets",
 			Help: "Total number of iptables packets",
-		}, []string{"namespace", "pod_name", "container_name"}),
+		}, []string{"namespace", "pod", "container", "table", "chain", "policy", "rule"}),
 		iptablesPacketBytes: prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Name: "chaos_daemon_iptables_packet_bytes",
 			Help: "Total bytes of iptables packets",
-		}, []string{"namespace", "pod_name", "container_name"}),
+		}, []string{"namespace", "pod", "container", "table", "chain", "policy", "rule"}),
 		ipsetMembers: prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Name: "chaos_daemon_ipset_members",
 			Help: "Total number of ipset members",
-		}, []string{"namespace", "pod_name", "container_name"}),
+		}, []string{"namespace", "pod", "container"}),
 		tcRules: prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Name: "chaos_daemon_tcs",
 			Help: "Total number of tc rules",
-		}, []string{"namespace", "pod_name", "container_name"}),
+		}, []string{"namespace", "pod", "container"}),
 	}
 }
 
 func (collector *ChaosDaemonMetricsCollector) Describe(ch chan<- *prometheus.Desc) {
-	collector.iptablesChains.Describe(ch)
-	collector.iptablesRules.Describe(ch)
 	collector.iptablesPackets.Describe(ch)
 	collector.iptablesPacketBytes.Describe(ch)
 	collector.ipsetMembers.Describe(ch)
@@ -88,8 +76,6 @@ func (collector *ChaosDaemonMetricsCollector) Describe(ch chan<- *prometheus.Des
 
 func (collector *ChaosDaemonMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 	collector.collectNetworkMetrics()
-	collector.iptablesChains.Collect(ch)
-	collector.iptablesRules.Collect(ch)
 	collector.iptablesPackets.Collect(ch)
 	collector.iptablesPacketBytes.Collect(ch)
 	collector.ipsetMembers.Collect(ch)
@@ -102,7 +88,10 @@ func (collector *ChaosDaemonMetricsCollector) InjectCrClient(client crclients.Co
 }
 
 func (collector *ChaosDaemonMetricsCollector) collectNetworkMetrics() {
-	collector.iptablesChains.Reset()
+	collector.iptablesPackets.Reset()
+	collector.iptablesPacketBytes.Reset()
+	collector.ipsetMembers.Reset()
+	collector.tcRules.Reset()
 
 	containerIDs, err := collector.crClient.ListContainerIDs(context.Background())
 	if err != nil {
@@ -134,14 +123,23 @@ func (collector *ChaosDaemonMetricsCollector) collectNetworkMetrics() {
 			"containerID", containerID,
 		)
 
-		chains, rules, packets, packetBytes, err := utils.GetIptablesRulesNumbersByNetNS(pid)
+		tables, err := utils.GetIptablesContentByNetNS(pid)
 		if err != nil {
 			log.Error(err, "fail to collect iptables metrics")
 		}
-		collector.iptablesChains.WithLabelValues(labelValues...).Set(float64(chains))
-		collector.iptablesRules.WithLabelValues(labelValues...).Set(float64(rules))
-		collector.iptablesPackets.WithLabelValues(labelValues...).Set(float64(packets))
-		collector.iptablesPacketBytes.WithLabelValues(labelValues...).Set(float64(packetBytes))
+		for tableName, table := range tables {
+			for chainName, chain := range table {
+				for _, rule := range chain.Rules {
+					collector.iptablesPackets.
+						WithLabelValues(namespace, podName, containerName, tableName, chainName, chain.Policy, rule.Rule).
+						Set(float64(rule.Packets))
+
+					collector.iptablesPacketBytes.
+						WithLabelValues(namespace, podName, containerName, tableName, chainName, chain.Policy, rule.Rule).
+						Set(float64(rule.Bytes))
+				}
+			}
+		}
 
 		members, err := utils.GetIPSetRulesNumberByNetNS(pid)
 		if err != nil {

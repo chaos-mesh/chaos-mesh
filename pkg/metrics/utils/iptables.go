@@ -23,11 +23,11 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 )
 
-func GetIptablesRulesNumbersByNetNS(pid uint32) (chains uint64, rules uint64, packets uint64, packetBytes uint64, err error) {
-	return getIptablesRulesNumbers(true, pid)
+func GetIptablesContentByNetNS(pid uint32) (tables iptables.Tables, err error) {
+	return getIptablesContent(true, pid)
 }
 
-func getIptablesRulesNumbers(enterNS bool, pid uint32) (chains uint64, rules uint64, packets uint64, packetBytes uint64, err error) {
+func getIptablesContent(enterNS bool, pid uint32) (tables iptables.Tables, err error) {
 	builder := bpm.DefaultProcessBuilder("iptables-save", "-c")
 	if enterNS {
 		builder = builder.SetNS(pid, bpm.NetNS)
@@ -35,24 +35,8 @@ func getIptablesRulesNumbers(enterNS bool, pid uint32) (chains uint64, rules uin
 
 	out, err := builder.Build().CombinedOutput()
 	if err != nil {
-		return 0, 0, 0, 0, err
+		return nil, err
 	}
 
-	tables, err := iptables.ParseIptablesSave(bytes.NewReader(out))
-	if err != nil {
-		return 0, 0, 0, 0, err
-	}
-
-	for _, table := range tables {
-		for _, chain := range table {
-			chains++
-			for _, r := range chain.Rules {
-				rules++
-				packets += r.Packets
-				packetBytes += r.Bytes
-			}
-		}
-	}
-
-	return chains, rules, packets, packetBytes, nil
+	return iptables.ParseIptablesSave(bytes.NewReader(out))
 }
