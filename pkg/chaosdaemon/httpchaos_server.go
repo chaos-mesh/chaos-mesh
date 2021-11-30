@@ -40,7 +40,7 @@ type stdioTransport struct {
 }
 
 type tproxyConfig struct {
-	ProxyPorts []uint32                        `json:"proxy_ports"`
+	ProxyPorts []uint32                        `json:"proxy_ports,omitempty"`
 	Rules      []v1alpha1.PodHttpChaosBaseRule `json:"rules"`
 }
 
