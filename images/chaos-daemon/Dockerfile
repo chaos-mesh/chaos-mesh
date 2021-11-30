@@ -37,7 +37,7 @@ RUN case "$TARGET_PLATFORM" in \
     ;; \
     *) echo >&2 "error: unsupported architecture '$TARGET_PLATFORM'"; exit 1 ;; \
     esac; \
-    curl -L https://github.com/chaos-mesh/nsexec/releases/download/v0.4.3/nsexec-$NSEXEC_ARCH-unknown-linux-gnu.tar.gz | tar xz -C /usr/local/bin; \
+    curl -L https://github.com/chaos-mesh/nsexec/releases/download/v0.1.6/nsexec-$NSEXEC_ARCH-unknown-linux-gnu.tar.gz | tar xz -C /usr/local/bin; \
     mv /usr/local/bin/libnsenter.so /usr/local/lib/libnsenter.so; \
     curl -L https://github.com/chaos-mesh/rs-tproxy/releases/download/v0.4.3/tproxy-$NSEXEC_ARCH-unknown-linux-gnu.tar.gz | tar xz -C /usr/local/bin
 
