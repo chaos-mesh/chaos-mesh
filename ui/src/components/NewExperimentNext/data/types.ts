@@ -19,7 +19,7 @@ import * as Yup from 'yup'
 
 import { ExperimentKind } from 'components/NewExperiment/types'
 
-export type Kind = Exclude<ExperimentKind, 'HTTPChaos' | 'PhysicalMachineChaos'>
+export type Kind = Exclude<ExperimentKind, 'PhysicalMachineChaos'>
 export type KindPhysic =
   | Extract<Kind, 'NetworkChaos' | 'StressChaos' | 'TimeChaos'>
   | 'DiskChaos'
@@ -141,6 +141,106 @@ const ioCommon: Spec = {
     label: 'Methods',
     value: [],
     helperText: 'Optional. The IO methods for injecting IOChaos actions',
+  },
+}
+
+const httpCommonSelect: Spec = {
+  port: {
+    field: 'number',
+    label: 'Port',
+    value: 80,
+    helperText: 'The target port of request',
+  },
+  path: {
+    field: 'text',
+    label: 'Path',
+    value: '*',
+    helperText: 'The target URI path of request, support wildcards(https://www.wikiwand.com/en/Matching_wildcards)',
+  },
+  method: {
+    field: 'select',
+    items: ['', 'GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'OPTIONS', 'PATCH'],
+    label: 'Method',
+    value: '',
+    helperText: 'Optional. The HTTP method of request',
+  },
+  request_headers: {
+    field: 'label',
+    isKV: true,
+    label: 'Request Headers',
+    value: [],
+    helperText: 'Optional. The request headers',
+  },
+}
+
+const httpRequestCommon: Spec = {
+  target: 'Request' as any,
+  ...httpCommonSelect,
+}
+
+const httpResponseCommon: Spec = {
+  target: 'Response' as any,
+  ...httpCommonSelect,
+  code: {
+    field: 'number',
+    label: 'Status Code',
+    value: '',
+    helperText: 'Optional. The target status code of response',
+  },
+  response_headers: {
+    field: 'label',
+    isKV: true,
+    label: 'Response Headers',
+    value: [],
+    helperText: 'Optional. The response headers',
+  },
+}
+
+const httpDelayCommon: Spec = {
+  delay: {
+    field: 'text',
+    label: 'Delay',
+    value: '',
+    helperText: 'The delay of request/response',
+  },
+}
+
+const httpReplaceCommon: Spec = {
+  'replace.headers': {
+    field: 'label',
+    isKV: true,
+    label: 'Replace Headers',
+    value: [],
+    helperText: 'Optional. The headers to be replaced',
+  },
+  'replace.body': {
+    field: 'textarea',
+    label: 'Replace Body',
+    value: '',
+    helperText: 'Optional. The body(in base64 encoding) to be replaced',
+  },
+}
+
+const httpPatchCommon: Spec = {
+  'patch.headers': {
+    field: 'label',
+    isKV: true,
+    label: 'Patch Headers',
+    value: [],
+    helperText: 'Optional. The headers to be patched',
+  },
+  'patch.body.type': {
+    field: 'select',
+    items: ['', 'JSON'],
+    label: 'Patch Body Type',
+    value: '',
+    helperText: 'Optional. The patch type of body',
+  },
+  'patch.body.value': {
+    field: 'textarea',
+    label: 'Patch Body Value',
+    value: '',
+    helperText: 'The value to be patched into body',
   },
 }
 
@@ -328,6 +428,108 @@ const data: Record<Kind, Definition> = {
             value: [],
           },
           ...ioCommon,
+        },
+      },
+    ],
+  },
+  // HTTP Injection
+  HTTPChaos: {
+    categories: [
+      {
+        name: 'Request Abort',
+        key: 'request-abort',
+        spec: {
+          abort: true as any,
+          ...httpRequestCommon,
+        },
+      },
+      {
+        name: 'Request Delay',
+        key: 'request-delay',
+        spec: {
+          ...httpRequestCommon,
+          ...httpDelayCommon,
+        },
+      },
+      {
+        name: 'Request Replace',
+        key: 'request-replace',
+        spec: {
+          ...httpRequestCommon,
+          ...httpReplaceCommon,
+          'replace.path': {
+            field: 'text',
+            label: 'Replace Path',
+            value: '',
+            helperText: 'Optional. The path to be replaced',
+          },
+          'replace.method': {
+            field: 'select',
+            items: ['', 'GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'OPTIONS', 'PATCH'],
+            label: 'Replace Method',
+            value: '',
+            helperText: 'Optional. The HTTP method to be replaced',
+          },
+          'replace.queries': {
+            field: 'label',
+            isKV: true,
+            label: 'Replace Queries',
+            value: [],
+            helperText: 'Optional. The queries to be replaced',
+          },
+        },
+      },
+      {
+        name: 'Request Patch',
+        key: 'request-patch',
+        spec: {
+          ...httpRequestCommon,
+          ...httpPatchCommon,
+          'patch.queries': {
+            field: 'label',
+            isKV: true,
+            label: 'Patch Queries',
+            value: [],
+            helperText: 'Optional. The queries to be patched',
+          },
+        },
+      },
+      {
+        name: 'Response Abort',
+        key: 'response-abort',
+        spec: {
+          abort: true as any,
+          ...httpResponseCommon,
+        },
+      },
+      {
+        name: 'Response Delay',
+        key: 'response-delay',
+        spec: {
+          ...httpResponseCommon,
+          ...httpDelayCommon,
+        },
+      },
+      {
+        name: 'Response Replace',
+        key: 'response-replace',
+        spec: {
+          ...httpResponseCommon,
+          ...httpReplaceCommon,
+          'replace.code': {
+            field: 'number',
+            label: 'Replace Status Code',
+            value: '',
+            helperText: 'Optional. The status code to be replaced',
+          },
+        },
+      },
+      {
+        name: 'Response Patch',
+        key: 'response-patch',
+        spec: {
+          ...httpResponseCommon,
+          ...httpPatchCommon,
         },
       },
     ],
@@ -673,13 +875,13 @@ const networkPhysicCommon: Spec = {
     field: 'text',
     label: 'Hostname',
     value: '',
-    helperText: 'Specify the hostname',
+    helperText: 'Specify the target hostname',
   },
   'ip-address': {
     field: 'text',
     label: 'IP Address',
     value: '',
-    helperText: 'Specify the IP address',
+    helperText: 'Specify the target IP address',
   },
   'ip-protocol': {
     field: 'select',
@@ -692,7 +894,7 @@ const networkPhysicCommon: Spec = {
     field: 'text',
     label: 'Source Port',
     value: '',
-    helperText: 'The source port, split by ,',
+    helperText: 'The source port of target ip address or hostname, split by ,',
     if: {
       key: 'ip-protocol',
       equal: ['tcp', 'udp'],
@@ -702,7 +904,7 @@ const networkPhysicCommon: Spec = {
     field: 'text',
     label: 'Egress Port',
     value: '',
-    helperText: 'The egress port, split by ,',
+    helperText: 'The egress port of target ip address or hostname, split by ,',
   },
   percent: {
     field: 'text',
@@ -718,7 +920,7 @@ const diskPhysicCommon: Spec = {
     label: 'Size',
     value: '',
     helperText:
-      'The supported formats of the size are: c(=1), w(=2), kB(=1000), K(=1024), MB(=1024), M(=1024x1024), GB and so on.',
+      'The supported formats of the size are: c(=1), w(=2), kB(=1000), K(=1024), MB(=1000*1000), M(=1024*1024), GB and so on.',
   },
   path: {
     field: 'text',
@@ -747,7 +949,7 @@ export const dataPhysic: Record<KindPhysic, Definition> = {
         spec: {
           action: 'disk-read-payload' as any,
           ...diskPhysicCommon,
-          payload_process_num: {
+          'payload-process-num': {
             field: 'number',
             label: 'Payload process num',
             value: 1,
@@ -760,7 +962,7 @@ export const dataPhysic: Record<KindPhysic, Definition> = {
         spec: {
           action: 'disk-write-payload' as any,
           ...diskPhysicCommon,
-          payload_process_num: {
+          'payload-process-num': {
             field: 'number',
             label: 'Payload process num',
             value: 1,
@@ -773,7 +975,7 @@ export const dataPhysic: Record<KindPhysic, Definition> = {
         spec: {
           action: 'disk-fill' as any,
           ...diskPhysicCommon,
-          fill_by_fallocate: {
+          'fill-by-fallocate': {
             field: 'select',
             items: [
               {
@@ -954,6 +1156,63 @@ export const dataPhysic: Record<KindPhysic, Definition> = {
         },
       },
       {
+        name: 'Bandwidth',
+        key: 'network-bandwidth',
+        spec: {
+          action: 'network-bandwidth' as any,
+          rate: {
+            field: 'text',
+            label: 'Rate',
+            value: '',
+            helperText: 'The rate allows bps, kbps, mbps, gbps, tbps unit. For example, bps means bytes per second',
+          },
+          limit: {
+            field: 'number',
+            label: 'Limit',
+            value: 0,
+            helperText: 'The number of bytes that can be queued waiting for tokens to become available',
+          },
+          buffer: {
+            field: 'number',
+            label: 'Buffer',
+            value: 0,
+            helperText: 'The maximum amount of bytes that tokens can be available instantaneously',
+          },
+          minburst: {
+            field: 'number',
+            label: 'Min burst',
+            value: 0,
+            helperText: 'The size of the peakrate bucket',
+          },
+          peakrate: {
+            field: 'number',
+            label: 'Peak rate',
+            value: 0,
+            helperText: 'The maximum depletion rate of the bucket',
+          },
+          direction: networkCommon['direction'],
+          
+          device: {
+            field: 'text',
+            label: 'Device',
+            value: '',
+            helperText: 'Affected device, e.g., eth0',
+          },
+          hostname: {
+            field: 'text',
+            label: 'Hostname',
+            value: '',
+            helperText: 'Specify the hostname',
+          },
+          'ip-address': {
+            field: 'text',
+            label: 'IP Address',
+            value: '',
+            helperText: 'Specify the IP address',
+          },
+        },
+      },
+      {
         name: 'DNS',
         key: 'network-dns',
         spec: {
@@ -1069,6 +1328,14 @@ const networkTargetSchema = Yup.object({
   namespaces: Yup.array().min(1, 'The namespace selectors is required'),
 })
 
+const httpDelayCommonSchema = {
+  delay: Yup.string().required('The delay is required'),
+}
+
+const httpPathCommonSchema = {
+  path: Yup.string().required('The path is required'),
+}
+
 export const schema: Partial<Record<Kind, Record<string, Yup.ObjectSchema>>> = {
   AWSChaos: {
     'ec2-stop': AWSChaosCommonSchema,
@@ -1102,6 +1369,34 @@ export const schema: Partial<Record<Kind, Record<string, Yup.ObjectSchema>>> = {
     }),
     attrOverride: Yup.object({
       attr: Yup.array().of(Yup.string()).required('The attr is required'),
+    }),
+  },
+  HTTPChaos: {
+    'request-abort': Yup.object({
+      ...httpPathCommonSchema,
+    }),
+    'request-delay': Yup.object({
+      ...httpDelayCommonSchema,
+      ...httpPathCommonSchema,
+    }),
+    'request-replace': Yup.object({
+      ...httpPathCommonSchema,
+    }),
+    'request-patch': Yup.object({
+      ...httpPathCommonSchema,
+    }),
+    'response-abort': Yup.object({
+      ...httpPathCommonSchema,
+    }),
+    'response-delay': Yup.object({
+      ...httpDelayCommonSchema,
+      ...httpPathCommonSchema,
+    }),
+    'response-replace': Yup.object({
+      ...httpPathCommonSchema,
+    }),
+    'response-patch': Yup.object({
+      ...httpPathCommonSchema,
     }),
   },
   NetworkChaos: {

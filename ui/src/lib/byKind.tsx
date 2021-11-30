@@ -21,6 +21,7 @@ import { ReactComponent as DNSIcon } from 'images/chaos/dns.svg'
 import { ReactComponent as DiskIcon } from 'images/chaos/disk.svg'
 import { ExperimentKind } from 'components/NewExperiment/types'
 import { ReactComponent as FileSystemIOIcon } from 'images/chaos/io.svg'
+import { ReactComponent as HTTPIcon } from 'images/chaos/http.svg'
 import { ReactComponent as GCPIcon } from 'images/chaos/gcp.svg'
 import { ReactComponent as JavaIcon } from 'images/chaos/java.svg'
 import { ReactComponent as K8SIcon } from 'images/k8s.svg'
@@ -61,6 +62,9 @@ export function iconByKind(
       break
     case 'IOChaos':
       icon = <FileSystemIOIcon />
+      break
+    case 'HTTPChaos':
+      icon = <HTTPIcon />
       break
     case 'JVMChaos':
       icon = <JavaIcon />
