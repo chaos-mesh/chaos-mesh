@@ -27,8 +27,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/chaos-mesh/chaos-mesh/controllers/config"
-
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	"go.uber.org/fx"
@@ -36,6 +34,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 )
 
 type Impl struct {
@@ -184,9 +183,9 @@ func securityHTTPClient() (*http.Client, error) {
 	}
 
 	pool := x509.NewCertPool()
-	ca, err := ioutil.ReadFile(config.ControllerCfg.ChaosMeshCACert)
+	ca, err := ioutil.ReadFile(config.ControllerCfg.ChaosdCACert)
 	if err != nil {
-		return nil, errors.Wrap(err, "read ChaosMeshCACert file failed")
+		return nil, errors.Wrap(err, "read ChaosdCACert file failed")
 	}
 	pool.AppendCertsFromPEM(ca)
 

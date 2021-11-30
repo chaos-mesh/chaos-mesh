@@ -973,24 +973,6 @@ data:
   tls.crt: "${TLS_CRT}"
   tls.key: "${TLS_KEY}"
 ---
-# Source: chaos-mesh/templates/secrets-configuration.yaml
-kind: Secret
-apiVersion: v1
-metadata:
-  name: chaos-mesh-chaosd-client-certs
-  namespace: "chaos-testing"
-  labels:
-    app.kubernetes.io/instance: chaos-mesh
-    app.kubernetes.io/name: chaos-mesh
-    app.kubernetes.io/part-of: chaos-mesh
-    app.kubernetes.io/version: v0.9.0
-    app.kubernetes.io/component: chaosd-client-cert
-type: Opaque
-data:
-  ca.crt: "${CA_BUNDLE}"
-  tls.crt: "${TLS_CRT}"
-  tls.key: "${TLS_KEY}"
----
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 # roles
 kind: ClusterRole
@@ -1544,6 +1526,8 @@ spec:
             value: !!str 9288
           - name: SECURITY_MODE
             value: "false"
+          - name: CHAOSD_SECURITY_MODE
+            value: "false"
           - name: POD_FAILURE_PAUSE_IMAGE
             value: gcr.io/google-containers/pause:latest
           - name: ENABLE_LEADER_ELECTION
@@ -1558,9 +1542,6 @@ spec:
           - name: webhook-certs
             mountPath: /etc/webhook/certs
             readOnly: true
-          - name: chaosd-client-cert
-            mountPath: /etc/chaosd/cert
-            readOnly: true
         ports:
           - name: webhook
             containerPort: 9443 # Customize containerPort
@@ -1574,9 +1555,6 @@ spec:
         - name: webhook-certs
           secret:
             secretName: chaos-mesh-webhook-certs
-        - name: chaosd-client-cert
-          secret:
-            secretName: chaos-mesh-chaosd-client-certs
 ---
 # Source: chaos-mesh/templates/chaos-daemon-rbac.yaml
 # Copyright 2021 Chaos Mesh Authors.

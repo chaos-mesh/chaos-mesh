@@ -27,12 +27,13 @@ import (
 type TLSConfig struct {
 	// ChaosMeshCACert is the path of chaos daemon ca cert
 	ChaosMeshCACert string `envconfig:"CHAOS_MESH_CA_CERT" default:""`
-
 	// ChaosDaemonClientCert is the path of chaos daemon certificate
 	ChaosDaemonClientCert string `envconfig:"CHAOS_DAEMON_CLIENT_CERT" default:""`
 	// ChaosDaemonClientKey is the path of chaos daemon certificate key
 	ChaosDaemonClientKey string `envconfig:"CHAOS_DAEMON_CLIENT_KEY" default:""`
 
+	// ChaosdCACert is the path of chaosd ca cert
+	ChaosdCACert string `envconfig:"CHAOSD_CA_CERT" default:""`
 	// ChaosdClientCert is the path of chaosd certificate
 	ChaosdClientCert string `envconfig:"CHAOSD_CLIENT_CERT" default:""`
 	// ChaosdClientKey is the path of chaosd certificate key

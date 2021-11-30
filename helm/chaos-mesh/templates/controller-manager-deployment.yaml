@@ -102,7 +102,9 @@ spec:
           - name: CHAOS_DNS_SERVICE_PORT
             value: !!str {{ .Values.dnsServer.grpcPort }}
           - name: SECURITY_MODE
-            value: "{{ .Values.dashboard.securityMode }}"
+            value: {{ .Values.dashboard.securityMode | quote }}
+          - name: CHAOSD_SECURITY_MODE
+            value: {{ .Values.controllerManager.chaosdSecurityMode | quote }}
           {{- if .Values.dashboard.securityMode}}
           - name: CHAOS_DAEMON_CLIENT_CERT
             value: /etc/chaos-daemon/cert/tls.crt
@@ -110,14 +112,18 @@ spec:
             value: /etc/chaos-daemon/cert/tls.key
           - name: CHAOS_MESH_CA_CERT
             value: /etc/chaos-daemon/cert/ca.crt
-          - name: CHAOSD_CLIENT_CERT
-            value: /etc/chaosd/cert/tls.crt
-          - name: CHAOSD_CLIENT_KEY
-            value: /etc/chaosd/cert/tls.key
           - name: QPS
             value: "30"
           - name: BURST
             value: "50"
+          {{- end }}
+          {{- if .Values.controllerManager.chaosdSecurityMode }}
+          - name: CHAOSD_CA_CERT
+            value: /etc/chaosd/cert/ca.crt
+          - name: CHAOSD_CLIENT_CERT
+            value: /etc/chaosd/cert/tls.crt
+          - name: CHAOSD_CLIENT_KEY
+            value: /etc/chaosd/cert/tls.key
           {{- end }}
           {{- if .Values.controllerManager.podChaos.podFailure.pauseImage }}
           - name: POD_FAILURE_PAUSE_IMAGE
