@@ -154,14 +154,7 @@ func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector 
 	if err != nil {
 		return nil, err
 	}
-
-	filterPods := make([]v1.Pod, 0, len(pods))
-	for _, pod := range pods {
-		if selectorChain.Match(&pod) {
-			filterPods = append(filterPods, pod)
-		}
-	}
-	return filterPods, nil
+	return pods, nil
 }
 
 func selectSpecifiedPods(ctx context.Context, c client.Client, spec v1alpha1.PodSelectorSpec,
@@ -318,7 +311,13 @@ func listPods(ctx context.Context, c client.Client, r client.Reader, spec v1alph
 		return nil, err
 	}
 
-	return pods, nil
+	filterPods := make([]v1.Pod, 0, len(pods))
+	for _, pod := range pods {
+		if selectorChain.Match(&pod) {
+			filterPods = append(filterPods, pod)
+		}
+	}
+	return filterPods, nil
 }
 
 // filterPodsByMode filters pods by mode from pod list
