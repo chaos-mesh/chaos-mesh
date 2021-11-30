@@ -1491,6 +1491,10 @@ spec:
         command:
           - /usr/local/bin/chaos-controller-manager
         env:
+          - name: METRICS_PORT
+            value: "10080"
+          - name: WEBHOOK_PORT
+            value: "9443"
           - name: NAMESPACE
             valueFrom:
               fieldRef:
@@ -1547,7 +1551,7 @@ spec:
             readOnly: true
         ports:
           - name: webhook
-            containerPort: 9443 # Customize containerPort
+            containerPort: 9443
           - name: http
             containerPort: 10080
           - name: pprof
