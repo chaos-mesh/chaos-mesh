@@ -18,12 +18,17 @@ package event
 import (
 	"context"
 	"net/http"
+	"sort"
 	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
 	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
 	u "github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
@@ -33,17 +38,20 @@ var log = u.Log.WithName("events")
 
 // Service defines a handler service for events.
 type Service struct {
-	event core.EventStore
-	conf  *config.ChaosDashboardConfig
+	event         core.EventStore
+	workflowStore core.WorkflowStore
+	conf          *config.ChaosDashboardConfig
 }
 
 func NewService(
 	event core.EventStore,
+	workflowStore core.WorkflowStore,
 	conf *config.ChaosDashboardConfig,
 ) *Service {
 	return &Service{
-		event: event,
-		conf:  conf,
+		event:         event,
+		workflowStore: workflowStore,
+		conf:          conf,
 	}
 }
 
@@ -56,6 +64,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 
 	endpoint.GET("", s.list)
 	endpoint.GET("/:id", s.get)
+	endpoint.GET("/workflow/:uid", s.cascadeFetchEventsForWorkflow)
 }
 
 const layout = "2006-01-02 15:04:05"
@@ -103,6 +112,122 @@ func (s *Service) list(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, events)
+}
+
+// @Summary cascadeFetchEventsForWorkflow list all events for Workflow and related WorkflowNode.
+// @Description list all events for Workflow and related WorkflowNode.
+// @Tags events
+// @Produce json
+// @Param namespace query string false "The namespace of the object"
+// @Param uid path string false "The UID of the Workflow"
+// @Param limit query string false "The max length of events list"
+// @Success 200 {array} core.Event
+// @Failure 500 {object} utils.APIError
+// @Router /events/workflow/{uid} [get]
+func (s *Service) cascadeFetchEventsForWorkflow(c *gin.Context) {
+	ctx := c.Request.Context()
+	ns := c.Query("namespace")
+	uid := c.Param("uid")
+	start, _ := time.Parse(time.RFC3339, c.Query("start"))
+	end, _ := time.Parse(time.RFC3339, c.Query("end"))
+	limit := 0
+	limitString := c.Query("limit")
+	if len(limitString) > 0 {
+		parsedLimit, err := strconv.Atoi(limitString)
+		if err != nil {
+			u.SetAPIError(c, u.ErrBadRequest.Wrap(err, "parameter limit should be a integer"))
+			return
+		}
+		limit = parsedLimit
+	}
+
+	if ns == "" && !s.conf.ClusterScoped && s.conf.TargetNamespace != "" {
+		ns = s.conf.TargetNamespace
+
+		log.V(1).Info("Replace query namespace with", ns)
+	}
+
+	// we should fetch the events for Workflow and related WorkflowNode, so we need namespaced name at first
+	workflowEntity, err := s.workflowStore.FindByUID(ctx, uid)
+	if err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			u.SetAPIError(c, u.ErrNotFound.Wrap(err, "this requested workflow is not found, uid: %s", uid))
+		} else {
+			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
+		}
+		return
+	}
+
+	// if workflow has been archived, the Workflow CR and WorkflowNode CR also has been deleted from kubernetes, it's
+	// no way to "cascade fetch" anymore
+	if workflowEntity.Archived {
+		u.SetAPIError(c, u.ErrBadRequest.New("this requested workflow already been archived, can not list events for it"))
+		return
+	}
+
+	kubeClient, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
+	if err != nil {
+		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
+		return
+	}
+
+	// fetch all related WorkflowNodes
+	workflowNodeList := v1alpha1.WorkflowNodeList{}
+	controlledByThisWorkflow, err := metav1.LabelSelectorAsSelector(&metav1.LabelSelector{MatchLabels: map[string]string{
+		v1alpha1.LabelWorkflow: workflowEntity.Name,
+	}})
+	if err != nil {
+		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
+		return
+	}
+	err = kubeClient.List(ctx, &workflowNodeList, &client.ListOptions{
+		Namespace:     ns,
+		LabelSelector: controlledByThisWorkflow,
+	})
+	if err != nil {
+		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
+		return
+	}
+
+	result := make([]*core.Event, 0)
+	// fetch events of Workflow
+	eventsForWorkflow, err := s.event.ListByFilter(ctx, core.Filter{
+		ObjectID:  uid,
+		Namespace: ns,
+		Start:     start.UTC().Format(layout),
+		End:       end.UTC().Format(layout),
+	})
+	if err != nil {
+		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
+		return
+	}
+	result = append(result, eventsForWorkflow...)
+
+	// fetch all events of WorkflowNodes
+	for _, workflowNode := range workflowNodeList.Items {
+		eventsForWorkflowNode, err := s.event.ListByFilter(ctx, core.Filter{
+			Namespace: ns,
+			Name:      workflowNode.GetName(),
+			Start:     start.UTC().Format(layout),
+			End:       end.UTC().Format(layout),
+		})
+		if err != nil {
+			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
+			return
+		}
+		result = append(result, eventsForWorkflowNode...)
+	}
+
+	// sort by CreatedAt
+	sort.Slice(result, func(i, j int) bool {
+		return result[i].CreatedAt.UnixNano() > result[j].CreatedAt.UnixNano()
+	})
+
+	if limit > 0 && len(result) > limit {
+		c.JSON(http.StatusOK, result[:limit])
+		return
+	}
+	c.JSON(http.StatusOK, result)
 }
 
 // @Summary Get an event.
