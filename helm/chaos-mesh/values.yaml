@@ -120,6 +120,9 @@ controllerManager:
     renewDeadline: 10s
     retryPeriod: 2s
 
+  # chaosdSecurityMode is enabled for mTLS connection between chaos-controller-manager and chaosd
+  chaosdSecurityMode: true
+
 chaosDaemon:
   # image would be constructed by <registry>/<repository>:<tag>
   image:
@@ -193,9 +196,6 @@ chaosDaemon:
   tolerations: []
 
   affinity: {}
-
-  # chaosdSecurityMode is enabled for mTLS connection between chaos-controller-manager and chaosd
-  chaosdSecurityMode: true
 
 dashboard:
   rootUrl: http://localhost:2333

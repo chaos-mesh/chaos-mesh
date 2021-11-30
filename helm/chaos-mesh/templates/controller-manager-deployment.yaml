@@ -182,11 +182,11 @@ spec:
           secret:
             secretName: {{ template "chaos-mesh.daemon-client.certs" . }}
         {{- end }}
-        {{ - if .Values.controllerManager.chaosdSecurityMode }}
-      - name: chaosd-client-cert
-        secret:
-          secretName: {{ template "chaos-mesh.chaosd-client.certs" . }}
-        {{ - end }}
+        {{- if .Values.controllerManager.chaosdSecurityMode }}
+        - name: chaosd-client-cert
+          secret:
+            secretName: {{ template "chaos-mesh.chaosd-client.certs" . }}
+        {{- end }}
     {{- with .Values.controllerManager.nodeSelector }}
       nodeSelector:
 {{ toYaml . | indent 8 }}
