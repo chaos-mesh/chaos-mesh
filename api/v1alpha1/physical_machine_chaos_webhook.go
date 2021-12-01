@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
-	"strings"
 
 	"github.com/alecthomas/units"
 	"github.com/google/uuid"
@@ -35,13 +34,6 @@ func (in *PhysicalMachineChaosSpec) Default(root interface{}, field *reflect.Str
 
 	if len(in.UID) == 0 {
 		in.UID = uuid.New().String()
-	}
-
-	for i := range in.Address {
-		// add http prefix for address
-		if !strings.HasPrefix(in.Address[i], "http") {
-			in.Address[i] = fmt.Sprintf("http://%s", in.Address[i])
-		}
 	}
 }
 
@@ -68,18 +60,6 @@ func (in *PhysicalMachineChaosSpec) Validate(root interface{}, path *field.Path)
 		allErrs = append(allErrs,
 			field.Invalid(path.Child("spec"), in,
 				"the configuration corresponding to action is empty"))
-	}
-
-	// make sure address is not empty
-	if len(in.Address) == 0 {
-		allErrs = append(allErrs,
-			field.Invalid(path.Child("address"), in.Address, "the address is empty"))
-	}
-	for _, address := range in.Address {
-		if len(address) == 0 {
-			allErrs = append(allErrs,
-				field.Invalid(path.Child("address"), in.Address, "the address is empty"))
-		}
 	}
 
 	if skipConfigCheck {

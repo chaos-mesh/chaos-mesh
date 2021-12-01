@@ -28,12 +28,6 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 			physicalMachineChaos := &PhysicalMachineChaos{
 				Spec: PhysicalMachineChaosSpec{
 					Action: "stress-cpu",
-					PhysicalMachineSelector: PhysicalMachineSelector{
-						Address: []string{
-							"123.123.123.123:123",
-							"234.234.234.234:234",
-						},
-					},
 					ExpInfo: ExpInfo{
 						UID: "",
 						StressCPU: &StressCPUSpec{
@@ -45,10 +39,6 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 			}
 			physicalMachineChaos.Default()
 			Expect(physicalMachineChaos.Spec.UID).ToNot(Equal(""))
-			Expect(physicalMachineChaos.Spec.Address).To(BeEquivalentTo([]string{
-				"http://123.123.123.123:123",
-				"http://234.234.234.234:234",
-			}))
 		})
 	})
 	Context("webhook.Validator of physicalmachinechaos", func() {
@@ -60,28 +50,7 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 				{
 					PhysicalMachineChaos{
 						Spec: PhysicalMachineChaosSpec{
-							Action: "stress-cpu",
-							PhysicalMachineSelector: PhysicalMachineSelector{
-								Address: []string{""},
-							},
-							ExpInfo: ExpInfo{
-								StressCPU: &StressCPUSpec{
-									Load:    10,
-									Workers: 1,
-								},
-							},
-						},
-					},
-					"the address is empty",
-				},
-				{
-					PhysicalMachineChaos{
-						Spec: PhysicalMachineChaosSpec{
-							Action: "stress-cpu",
-							PhysicalMachineSelector: PhysicalMachineSelector{Address: []string{
-								"123.123.123.123:123",
-								"234.234.234.234:234",
-							}},
+							Action:  "stress-cpu",
 							ExpInfo: ExpInfo{},
 						},
 					},
@@ -992,10 +961,7 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 			for _, testCase := range testCases {
 				chaos := PhysicalMachineChaos{
 					Spec: PhysicalMachineChaosSpec{
-						Action: testCase.action,
-						PhysicalMachineSelector: PhysicalMachineSelector{Address: []string{
-							"123.123.123.123:123",
-						}},
+						Action:  testCase.action,
 						ExpInfo: testCase.expInfo,
 					},
 				}
@@ -1019,9 +985,6 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					PhysicalMachineChaos{
 						Spec: PhysicalMachineChaosSpec{
 							Action: "network",
-							PhysicalMachineSelector: PhysicalMachineSelector{
-								Address: []string{""},
-							},
 							ExpInfo: ExpInfo{
 								NetworkBandwidth: &NetworkBandwidthSpec{
 									Rate:   "",

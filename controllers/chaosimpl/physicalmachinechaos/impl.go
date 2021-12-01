@@ -24,6 +24,8 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
+
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	"go.uber.org/fx"
@@ -41,12 +43,21 @@ type Impl struct {
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	impl.Log.Info("apply physical machine chaos")
 
-	physicalMachinechaos := obj.(*v1alpha1.PhysicalMachineChaos)
-	address := records[index].Id
+	var physicalMachine v1alpha1.PhysicalMachine
+	physicalMachineChaos := obj.(*v1alpha1.PhysicalMachineChaos)
+	namespacedName, err := controller.ParseNamespacedName(records[index].Id)
+	if err != nil {
+		return v1alpha1.NotInjected, err
+	}
+	err = impl.Get(ctx, namespacedName, &physicalMachine)
+	if err != nil {
+		// TODO: handle this error
+		return v1alpha1.NotInjected, err
+	}
 
 	// for example, physicalMachinechaos.Spec.Action is 'network-delay', action is 'network', subAction is 'delay'
 	// notice: 'process' and 'clock' action has no subAction, set subAction to ""
-	actions := strings.SplitN(string(physicalMachinechaos.Spec.Action), "-", 2)
+	actions := strings.SplitN(string(physicalMachineChaos.Spec.Action), "-", 2)
 	if len(actions) == 1 {
 		actions = append(actions, "")
 	} else if len(actions) != 2 {
@@ -54,7 +65,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		return v1alpha1.NotInjected, err
 	}
 	action, subAction := actions[0], actions[1]
-	physicalMachinechaos.Spec.ExpInfo.Action = subAction
+	physicalMachineChaos.Spec.ExpInfo.Action = subAction
 
 	/*
 		transform ExpInfo in PhysicalMachineChaos to json data required by chaosd
@@ -71,19 +82,19 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 			transform to json data: "{\"uid\":\"123\",\"action\":\"cpu\",\"load\":1,\"workers\":1}
 	*/
 	var expInfoMap map[string]interface{}
-	expInfoBytes, _ := json.Marshal(physicalMachinechaos.Spec.ExpInfo)
-	err := json.Unmarshal(expInfoBytes, &expInfoMap)
+	expInfoBytes, _ := json.Marshal(physicalMachineChaos.Spec.ExpInfo)
+	err = json.Unmarshal(expInfoBytes, &expInfoMap)
 	if err != nil {
 		impl.Log.Error(err, "fail to unmarshal experiment info")
 		return v1alpha1.NotInjected, err
 	}
-	configKV, ok := expInfoMap[string(physicalMachinechaos.Spec.Action)].(map[string]interface{})
+	configKV, ok := expInfoMap[string(physicalMachineChaos.Spec.Action)].(map[string]interface{})
 	if !ok {
 		err = errors.New("transform action config to map failed")
 		impl.Log.Error(err, "")
 		return v1alpha1.NotInjected, err
 	}
-	delete(expInfoMap, string(physicalMachinechaos.Spec.Action))
+	delete(expInfoMap, string(physicalMachineChaos.Spec.Action))
 	for k, v := range configKV {
 		expInfoMap[k] = v
 	}
@@ -94,8 +105,8 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		return v1alpha1.NotInjected, err
 	}
 
-	url := fmt.Sprintf("%s/api/attack/%s", address, action)
-	impl.Log.Info("HTTP request", "address", address, "data", string(expInfoBytes))
+	url := fmt.Sprintf("%s/api/attack/%s", physicalMachine.Spec.Address, action)
+	impl.Log.Info("HTTP request", "address", physicalMachine.Spec.Address, "data", string(expInfoBytes))
 
 	statusCode, body, err := impl.doHttpRequest("POST", url, bytes.NewBuffer(expInfoBytes))
 	if err != nil {
@@ -114,17 +125,26 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	impl.Log.Info("recover physical machine chaos")
 
-	physicalMachinechaos := obj.(*v1alpha1.PhysicalMachineChaos)
-	address := records[index].Id
+	var physicalMachine v1alpha1.PhysicalMachine
+	physicalMachineChaos := obj.(*v1alpha1.PhysicalMachineChaos)
+	namespacedName, err := controller.ParseNamespacedName(records[index].Id)
+	if err != nil {
+		return v1alpha1.NotInjected, err
+	}
+	err = impl.Get(ctx, namespacedName, &physicalMachine)
+	if err != nil {
+		// TODO: handle this error
+		return v1alpha1.NotInjected, err
+	}
 
-	url := fmt.Sprintf("%s/api/attack/%s", address, physicalMachinechaos.Spec.ExpInfo.UID)
+	url := fmt.Sprintf("%s/api/attack/%s", physicalMachine.Spec.Address, physicalMachineChaos.Spec.ExpInfo.UID)
 	statusCode, body, err := impl.doHttpRequest("DELETE", url, nil)
 	if err != nil {
 		return v1alpha1.Injected, errors.Wrap(err, body)
 	}
 
 	if statusCode == http.StatusNotFound {
-		impl.Log.Info("experiment not found", "uid", physicalMachinechaos.Spec.ExpInfo.UID)
+		impl.Log.Info("experiment not found", "uid", physicalMachineChaos.Spec.ExpInfo.UID)
 	} else if statusCode != http.StatusOK {
 		err = errors.New("HTTP status is not OK")
 		impl.Log.Error(err, body)
