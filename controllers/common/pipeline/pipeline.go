@@ -31,8 +31,8 @@ import (
 )
 
 type Pipeline struct {
-	steps []reconcile.Reconciler
-	ctx   *PipelineContext
+	controllers []reconcile.Reconciler
+	ctx         *PipelineContext
 }
 
 type PipelineContext struct {
@@ -61,7 +61,7 @@ func (p *Pipeline) AddSteps(steps ...PipelineStep) {
 		if reconciler == nil {
 			return
 		}
-		p.steps = append(p.steps, reconciler)
+		p.controllers = append(p.controllers, reconciler)
 	}
 }
 
@@ -71,14 +71,25 @@ func (p *Pipeline) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result
 		Requeue: false,
 	}
 
-	for _, step := range p.steps {
-		ret, err := step.Reconcile(ctx, req)
+	for _, controller := range p.controllers {
+		ret, err := controller.Reconcile(ctx, req)
 		if err != nil {
 			return result, err
 		}
 
-		result.Requeue = result.Requeue || ret.Requeue
-		result.RequeueAfter = minDuration(result.RequeueAfter, ret.RequeueAfter)
+		p.ctx.Logger.WithName("pipeline").Info("reconcile result", "result", ret)
+
+		if ret.Requeue {
+			return ret, nil
+		}
+
+		if ret.RequeueAfter != 0 {
+			if result.RequeueAfter == 0 {
+				result.RequeueAfter = ret.RequeueAfter
+			} else {
+				result.RequeueAfter = minDuration(result.RequeueAfter, ret.RequeueAfter)
+			}
+		}
 	}
 
 	return result, nil
