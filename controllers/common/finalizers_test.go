@@ -60,11 +60,6 @@ var _ = Describe("Finalizer", func() {
 					Duration:   &duration,
 					ContainerSelector: v1alpha1.ContainerSelector{
 						PodSelector: v1alpha1.PodSelector{
-							Selector: v1alpha1.PodSelectorSpec{
-								Pods: map[string][]string{
-									"default": {testPod},
-								},
-							},
 							Mode: v1alpha1.OneMode,
 						},
 					},
