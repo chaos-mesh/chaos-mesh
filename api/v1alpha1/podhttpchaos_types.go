@@ -100,7 +100,7 @@ type PodHttpChaosReplaceBodyAction []byte
 
 func (p PodHttpChaosReplaceBodyAction) MarshalJSON() ([]byte, error) {
 	return json.Marshal(PodHttpChaosPatchBodyAction{
-		Type:  "TEXT",
+		Type:  "BASE64",
 		Value: string(p),
 	})
 }
