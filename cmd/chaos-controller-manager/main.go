@@ -95,7 +95,7 @@ type RunParams struct {
 	AuthCli             *authorizationv1.AuthorizationV1Client
 	DaemonClientBuilder *chaosdaemon.ChaosDaemonClientBuilder
 
-	Objs []types.Object `group:"objs"`
+	Objs        []types.Object        `group:"objs"`
 	WebhookObjs []types.WebhookObject `group:"webhookObjs"`
 }
 

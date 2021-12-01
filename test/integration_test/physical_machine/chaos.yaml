@@ -19,7 +19,8 @@ metadata:
   namespace: chaos-testing
 spec:
   action: stress-mem
-  address:
-    - CHAOSD_ADDRESS
+  selector:
+    labelSelectors:
+      arch: amd64
   stress-mem:
     size: 100MB

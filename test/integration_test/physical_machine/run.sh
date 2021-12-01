@@ -56,8 +56,11 @@ function judge_stress() {
 echo "create physical machine chaos"
 localIP=`ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | head -1`
 
+cp physical_machine.yaml physical_machine_tmp.yaml
+sed -i 's/CHAOSD_ADDRESS/'$localIP'\:31768/g' physical_machine.yaml
+kubectl apply -f physical_machine_tmp.yaml
+
 cp chaos.yaml chaos_tmp.yaml
-sed -i 's/CHAOSD_ADDRESS/'$localIP'\:31768/g' chaos_tmp.yaml
 kubectl apply -f chaos_tmp.yaml
 judge_stress true
 
@@ -66,7 +69,6 @@ judge_stress false
 
 echo "create physical machine schedule"
 cp schedule.yaml schedule_tmp.yaml
-sed -i 's/CHAOSD_ADDRESS/'$localIP'\:31768/g' schedule_tmp.yaml
 kubectl apply -f schedule_tmp.yaml
 judge_stress true
 
@@ -75,7 +77,6 @@ judge_stress false
 
 echo "create workflow include physical machine chaos"
 cp workflow.yaml workflow_tmp.yaml
-sed -i 's/CHAOSD_ADDRESS/'$localIP'\:31768/g' workflow_tmp.yaml
 kubectl apply -f workflow_tmp.yaml
 judge_stress true
 

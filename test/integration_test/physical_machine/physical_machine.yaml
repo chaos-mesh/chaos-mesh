@@ -12,22 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-kind: Schedule
 apiVersion: chaos-mesh.org/v1alpha1
+kind: PhysicalMachine
 metadata:
-  name: test
+  name: physicalmachine1
   namespace: chaos-testing
+  labels:
+    arch: amd64
 spec:
-  schedule: '@every 5s'
-  startingDeadlineSeconds: null
-  concurrencyPolicy: Forbid
-  historyLimit: 1
-  type: PhysicalMachineChaos
-  physicalmachineChaos:
-    action: stress-mem
-    duration: 4s
-    selector:
-      labelSelectors:
-        arch: amd64
-    stress-mem:
-      size: 100MB
+  address: CHAOSD_ADDRESS
