@@ -24,7 +24,7 @@ import (
 type Controller string
 
 type Object struct {
-	Object v1alpha1.InnerObject
+	Object v1alpha1.InnerObjectWithSelector
 	Name   string
 }
 

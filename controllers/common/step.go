@@ -13,28 +13,29 @@
 // limitations under the License.
 //
 
-package condition
+package common
 
 import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
+	"github.com/chaos-mesh/chaos-mesh/controllers/common/condition"
+	"github.com/chaos-mesh/chaos-mesh/controllers/common/desiredphase"
+	"github.com/chaos-mesh/chaos-mesh/controllers/common/finalizers"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common/pipeline"
-	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 )
 
 func Step(ctx *pipeline.PipelineContext) reconcile.Reconciler {
-	setupLog := ctx.Logger.WithName("setup-condition")
-	name := ctx.Object.Name + "-condition"
-	if !config.ShouldSpawnController(name) {
-		return nil
-	}
-
-	setupLog.Info("setting up controller", "name", name)
-
 	return &Reconciler{
+		Impl:     ctx.Impl,
 		Object:   ctx.Object.Object,
 		Client:   ctx.Client,
-		Recorder: ctx.Mgr.GetEventRecorderFor("condition"),
-		Log:      ctx.Logger.WithName("condition"),
+		Reader:   ctx.Reader,
+		Recorder: ctx.RecorderBuilder.Build("records"),
+		Selector: ctx.Selector,
+		Log:      ctx.Logger.WithName("records"),
 	}
+}
+
+func AllSteps() []pipeline.PipelineStep {
+	return []pipeline.PipelineStep{finalizers.Step, desiredphase.Step, condition.Step, Step}
 }

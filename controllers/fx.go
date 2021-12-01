@@ -34,7 +34,9 @@ var Module = fx.Options(
 		chaosdaemon.New,
 		recorder.NewRecorderBuilder,
 	),
-
+	fx.Provide(
+		common.AllSteps,
+	),
 	fx.Invoke(common.Bootstrap),
 	fx.Invoke(podhttpchaos.Bootstrap),
 	fx.Invoke(podnetworkchaos.Bootstrap),

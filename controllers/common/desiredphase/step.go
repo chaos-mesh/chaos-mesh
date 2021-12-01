@@ -22,9 +22,9 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 )
 
-func Step(pipeline *pipeline.Pipeline) reconcile.Reconciler {
-	setupLog := pipeline.GetLogger().WithName("setup-desiredphase")
-	name := pipeline.GetObject().Name + "-desiredphase"
+func Step(ctx *pipeline.PipelineContext) reconcile.Reconciler {
+	setupLog := ctx.Logger.WithName("setup-desiredphase")
+	name := ctx.Object.Name + "-desiredphase"
 	if !config.ShouldSpawnController(name) {
 		return nil
 	}
@@ -32,9 +32,9 @@ func Step(pipeline *pipeline.Pipeline) reconcile.Reconciler {
 	setupLog.Info("setting up controller", "name", name)
 
 	return &Reconciler{
-		Object:   pipeline.GetObject().Object,
-		Client:   pipeline.GetClient(),
-		Recorder: pipeline.GetRecordBuilder().Build("desiredphase"),
-		Log:      pipeline.GetLogger().WithName("desiredphase"),
+		Object:   ctx.Object.Object,
+		Client:   ctx.Client,
+		Recorder: ctx.RecorderBuilder.Build("desiredphase"),
+		Log:      ctx.Logger.WithName("desiredphase"),
 	}
 }

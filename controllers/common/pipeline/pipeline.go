@@ -24,54 +24,45 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
+	chaosimpltypes "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 )
 
 type Pipeline struct {
-	object          *types.Object
-	mgr             ctrl.Manager
-	client          client.Client
-	logger          logr.Logger
-	recorderBuilder *recorder.RecorderBuilder
-
 	steps []reconcile.Reconciler
+	ctx   *PipelineContext
 }
 
-type PipelineStep func(pipeline *Pipeline) reconcile.Reconciler
+type PipelineContext struct {
+	Object *types.Object
+	Mgr    ctrl.Manager
+	Client client.Client
+	client.Reader
 
-func NewPipeline(object *types.Object, mgr ctrl.Manager, client client.Client, logger logr.Logger, recorderBuilder *recorder.RecorderBuilder) *Pipeline {
+	Logger          logr.Logger
+	RecorderBuilder *recorder.RecorderBuilder
+	Impl            chaosimpltypes.ChaosImpl
+	Selector        *selector.Selector
+}
+
+type PipelineStep func(ctx *PipelineContext) reconcile.Reconciler
+
+func NewPipeline(ctx *PipelineContext) *Pipeline {
 	return &Pipeline{
-		object: object, mgr: mgr, client: client, logger: logger, recorderBuilder: recorderBuilder,
+		ctx: ctx,
 	}
 }
 
-func (p *Pipeline) GetObject() *types.Object {
-	return p.object
-}
-
-func (p *Pipeline) GetManager() ctrl.Manager {
-	return p.mgr
-}
-
-func (p *Pipeline) GetClient() client.Client {
-	return p.client
-}
-
-func (p *Pipeline) GetLogger() logr.Logger {
-	return p.logger
-}
-
-func (p *Pipeline) GetRecordBuilder() *recorder.RecorderBuilder {
-	return p.recorderBuilder
-}
-
-func (p *Pipeline) AddStep(step PipelineStep) {
-	reconciler := step(p)
-	if reconciler == nil {
-		return
+func (p *Pipeline) AddSteps(steps ...PipelineStep) {
+	for _, step := range steps {
+		reconciler := step(p.ctx)
+		if reconciler == nil {
+			return
+		}
+		p.steps = append(p.steps, reconciler)
 	}
-	p.steps = append(p.steps, reconciler)
 }
 
 // Reconcile the steps

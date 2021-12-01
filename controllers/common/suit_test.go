@@ -133,6 +133,7 @@ var _ = BeforeSuite(func() {
 			chaosimpl.AllImpl,
 			selector.Module,
 			fx.Provide(chaosdaemon.New),
+			fx.Provide(AllSteps),
 			fx.Invoke(Bootstrap),
 			fx.Supply(cfg),
 		),
