@@ -35,6 +35,7 @@ import SkeletonN from 'components-mui/SkeletonN'
 import Space from 'components-mui/Space'
 import T from 'components/T'
 import UndoIcon from '@material-ui/icons/Undo'
+import _isEmpty from 'lodash.isempty'
 
 interface Step2Props {
   inWorkflow?: boolean
@@ -64,10 +65,22 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false })
   const [init, setInit] = useState(originalInit)
 
   useEffect(() => {
-    setInit({
-      ...originalInit,
-      ...basic,
-    })
+    if (!_isEmpty(basic)) {
+      setInit({
+        metadata: {
+          ...originalInit.metadata,
+          ...basic.metadata,
+        },
+        spec: {
+          ...originalInit.spec,
+          ...basic.spec,
+          selector: {
+            ...originalInit.spec.selector,
+            ...basic.spec.selector,
+          },
+        },
+      })
+    }
   }, [originalInit, basic])
 
   const handleOnSubmitStep2 = (_values: Record<string, any>) => {

@@ -35,6 +35,8 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+
+	genericnamespace "github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/namespace"
 )
 
 var log = ctrl.Log.WithName("inject-webhook")
@@ -95,7 +97,8 @@ func Inject(res *v1.AdmissionRequest, cli client.Client, cfg *config.Config, con
 	}
 
 	if injectionConfig.Selector != nil {
-		meet, err := podselector.CheckPodMeetSelector(pod, *injectionConfig.Selector)
+		meet, err := podselector.CheckPodMeetSelector(context.Background(), cli, pod, *injectionConfig.Selector,
+			controllerCfg.ClusterScoped, controllerCfg.TargetNamespace, controllerCfg.EnableFilterNamespace)
 		if err != nil {
 			log.Error(err, "Failed to check pod selector", "namespace", pod.Namespace)
 			return &v1.AdmissionResponse{
@@ -147,7 +150,7 @@ func injectRequired(metadata *metav1.ObjectMeta, cli client.Client, cfg *config.
 	}
 
 	if controllerCfg.EnableFilterNamespace {
-		ok, err := podselector.IsAllowedNamespaces(context.Background(), cli, metadata.Namespace)
+		ok, err := genericnamespace.IsAllowedNamespaces(context.Background(), cli, metadata.Namespace)
 		if err != nil {
 			log.Error(err, "fail to check whether this namespace should be injected", "namespace", metadata.Namespace)
 		}
