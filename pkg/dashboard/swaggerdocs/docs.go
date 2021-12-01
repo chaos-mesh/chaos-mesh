@@ -3936,16 +3936,9 @@ var doc = `{
             }
         },
         "v1alpha1.PodHttpChaosReplaceBodyAction": {
-            "type": "object",
-            "properties": {
-                "type": {
-                    "description": "Type represents the replace type, support ` + "`" + `TEXT` + "`" + ` and ` + "`" + `BASE64` + "`" + ` currently.",
-                    "type": "string"
-                },
-                "value": {
-                    "description": "Value is the replace contents.",
-                    "type": "string"
-                }
+            "type": "array",
+            "items": {
+                "type": "integer"
             }
         },
         "v1alpha1.PodSelector": {

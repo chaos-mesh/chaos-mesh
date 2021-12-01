@@ -1774,15 +1774,9 @@ definitions:
         type: object
     type: object
   v1alpha1.PodHttpChaosReplaceBodyAction:
-    properties:
-      type:
-        description: Type represents the replace type, support `TEXT` and `BASE64`
-          currently.
-        type: string
-      value:
-        description: Value is the replace contents.
-        type: string
-    type: object
+    items:
+      type: integer
+    type: array
   v1alpha1.PodSelector:
     properties:
       mode:
