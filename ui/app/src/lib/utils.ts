@@ -46,7 +46,7 @@ export function arrToObjBySep(arr: string[], sep: string) {
     result[split[0]] = split[1]
   })
 
-  return result as object
+  return result
 }
 
 /**

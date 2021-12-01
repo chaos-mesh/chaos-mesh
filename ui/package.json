@@ -9,6 +9,7 @@
     "packages/*"
   ],
   "scripts": {
+    "bootstrap": "./scripts/bootstrap.sh",
     "prepare": "cd .. && husky install ./ui/.husky"
   },
   "devDependencies": {

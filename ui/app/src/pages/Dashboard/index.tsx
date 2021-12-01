@@ -222,7 +222,7 @@ export default function Dashboard() {
           <Grid container spacing={6} item xs={12} lg={4}>
             <Grid item xs={12}>
               <Paper>
-                <PaperTop title={T('dashboard.totalStatus')} />
+                <PaperTop title={T('dashboard.totalStatus')} boxProps={{ sx: { mb: 3 } }} />
                 <TotalStatus position="relative" height={data.experiments.length > 0 ? 300 : '100%'} />
               </Paper>
             </Grid>
