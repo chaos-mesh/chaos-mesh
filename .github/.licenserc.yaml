@@ -43,10 +43,11 @@ header:
     - 'pkg/time/fakeclock/.embed.o'
     # k8s copyright
     - 'hack/boilerplate/boilerplate.py'
+    - 'ui/.husky/pre-commit'
     - 'ui/.prettierignore'
     - 'ui/.prettierrc'
-    - 'ui/app/src/setupProxy.js'
     - 'ui/app/src/api/zz_generated.frontend.chaos-mesh.ts'
+    - 'ui/app/src/setupProxy.js'
     # Dockerfiles
     - '**/Dockerfile'
     # UI SVGs
