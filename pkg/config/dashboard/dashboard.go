@@ -28,7 +28,7 @@ type ChaosDashboardConfig struct {
 	ListenHost           string            `envconfig:"LISTEN_HOST" default:"0.0.0.0" json:"listen_host"`
 	ListenPort           int               `envconfig:"LISTEN_PORT" default:"2333" json:"listen_port"`
 	MetricHost           string            `envconfig:"METRIC_HOST" default:"0.0.0.0" json:"-"`
-	MetricPort           int               `envconfig:"METRIC_PORT" default:"8080" json:"-"`
+	MetricPort           int               `envconfig:"METRIC_PORT" default:"2334" json:"-"`
 	EnableLeaderElection bool              `envconfig:"ENABLE_LEADER_ELECTION" json:"-"`
 	Database             *DatabaseConfig   `json:"-"`
 	PersistTTL           *PersistTTLConfig `json:"-"`

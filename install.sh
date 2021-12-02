@@ -1194,8 +1194,8 @@ spec:
       targetPort: 2333
       name: http
     - protocol: TCP
-      port: 8080
-      targetPort: 8080
+      port: 2334
+      targetPort: 2334
       name: metric
 ---
 # Source: chaos-mesh/templates/controller-manager-service.yaml
@@ -1403,7 +1403,7 @@ spec:
             - name: METRIC_HOST
               value: "0.0.0.0"
             - name: METRIC_PORT
-              value: "8080"
+              value: "2334"
             - name: TZ
               value: ${timezone}
             - name: CLUSTER_SCOPED
@@ -1432,7 +1432,7 @@ spec:
             - name: http
               containerPort: 2333
             - name: metric
-              containerPort: 8080
+              containerPort: 2334
       volumes:
       - name: storage-volume
         emptyDir: {}
