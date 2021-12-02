@@ -37,7 +37,7 @@ type Reconciler struct {
 	Impl types.ChaosImpl
 
 	// Object is used to mark the target type of this Reconciler
-	Object v1alpha1.InnerObjectWithSelector
+	Object v1alpha1.InnerObject
 
 	// Client is used to operate on the Kubernetes cluster
 	client.Client
