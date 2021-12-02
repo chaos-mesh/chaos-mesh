@@ -33,5 +33,6 @@ spec:
         selector:
           labelSelectors:
             arch: amd64
+        mode: one
         stress-mem:
           size: 100MB
