@@ -25,13 +25,14 @@ tar zxvf chaosd-platform-linux-amd64.tar.gz
 ./chaosd-platform-linux-amd64/chaosd server --port 31768 > chaosd.log 2>&1 &
 
 function judge_stress() {
-    hava_stress=$1
+    have_stress=$1
     success=false
     for ((k=0; k<10; k++)); do
         stress_ng_num=`ps aux > test.temp && grep "stress-ng" test.temp | wc -l && rm test.temp`
-        if [ "$hava_stress" = true ]; then
+        if [ "$have_stress" = true ]; then
             if [ ${stress_ng_num} -lt 1 ]; then
                 echo "stress-ng is not run when creating stress chaos on physical machine"
+                tail chaosd.log
             else
                 success=true
                 break
@@ -39,6 +40,7 @@ function judge_stress() {
         else
             if [ ${stress_ng_num} -gt 0 ]; then
                 echo "stress-ng is still running when delete stress chaos on physical machine"
+                tail chaosd.log
             else
                 success=true
                 break
@@ -60,27 +62,24 @@ cp physical_machine.yaml physical_machine_tmp.yaml
 sed -i 's/CHAOSD_ADDRESS/'$localIP'\:31768/g' physical_machine.yaml
 kubectl apply -f physical_machine_tmp.yaml
 
-cp chaos.yaml chaos_tmp.yaml
-kubectl apply -f chaos_tmp.yaml
+kubectl apply -f chaos.yaml
 judge_stress true
 
-kubectl delete -f chaos_tmp.yaml
+kubectl delete -f chaos.yaml
 judge_stress false
 
 echo "create physical machine schedule"
-cp schedule.yaml schedule_tmp.yaml
-kubectl apply -f schedule_tmp.yaml
+kubectl apply -f schedule.yaml
 judge_stress true
 
-kubectl delete -f schedule_tmp.yaml
+kubectl delete -f schedule.yaml
 judge_stress false
 
 echo "create workflow include physical machine chaos"
-cp workflow.yaml workflow_tmp.yaml
-kubectl apply -f workflow_tmp.yaml
+kubectl apply -f workflow.yaml
 judge_stress true
 
-kubectl delete -f workflow_tmp.yaml
+kubectl delete -f workflow.yaml
 judge_stress false
 
 
