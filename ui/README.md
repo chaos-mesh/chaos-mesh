@@ -39,7 +39,7 @@ The following content can help you understand the overall structure of UI and ho
 We use Typescript + React + Redux + Material UI as the main technologies. If you are not familiar with them, please
 read their documentation first.
 
-We also use monorepo to manage the whole UI codebase. Here is the general structure:
+Also, we use monorepo to manage the whole UI codebase. Here is the general structure:
 
 ```sh
 ui
@@ -58,7 +58,7 @@ ui
 │   ├── mui-extends
 ```
 
-We split two parts: one is **app**, which describe the whole UI interface, and the other is **packages**, which provide more complete and independent functionality for app use.
+One is **app**, which describe the whole UI interface, and the other is **packages**, which provide more complete and independent functionalities for app use.
 
 ### Bootstrap
 
@@ -76,15 +76,17 @@ Into the `ui` folder, run:
 yarn bootstrap
 ```
 
-This command will install all deps the UI needed. (It will also build the API server binary)
+This command will install all deps the UI needed.
+
+> Note:
+>
+> It will also build the API server binary by default, please add `--compact` if you don't want it.
 
 Then, you need to provide an API server as a proxy, it will pass into an env var which named: `REACT_APP_API_URL`. There are three ways to get it:
 
 - **From a remote deployed Chaos Mesh Dashboard**
 
   If you have Chaos Mesh deployed in a remote cluster, you can use the dashboard service URL as the proxy.
-
-  Try to access it with `http://NodePort:2333`.
 
 - **From a local deployed Chaos Mesh Dashboard**
 
@@ -99,13 +101,13 @@ Then, you need to provide an API server as a proxy, it will pass into an env var
   There have two ways to run chaos-dashboard server in your terminal:
 
   - `cd .. && go run cmd/chaos-dashboard/main.go`
-  - `cd .. && ./images/chaos-dashboard/bin/chaos-dashboard`
+  - `cd .. && ./images/chaos-dashboard/bin/chaos-dashboard` (Already build in `yarn bootstrap`)
 
-  One is real-time, the other needs to be compiled before use. The compiled bundle the extra Swagger API HTML into the binary file.
+  One is real-time, the other needs to be compiled before use. The compiled bundles an extra Swagger docs into the binary file.
 
 #### Start
 
-We already place a one-step script to start the dashboard:
+We already place a one-step script to start the UI:
 
 ```sh
 # cross-env REACT_APP_API_URL=http://localhost:2333 BROWSER=none react-scripts start
@@ -119,6 +121,18 @@ REACT_APP_API_URL=xxx BROWSER=none yarn workspace @ui/app start
 ```
 
 Then open <http://localhost:3000> to view it in the browser.
+
+## Packages
+
+### mui-extends
+
+This package extends many of mui's components for use in the UI. It will use `tsc` to compile the code, simply run:
+
+```sh
+yarn workspace @ui/mui-extends build
+```
+
+to build them.
 
 ## License
 
