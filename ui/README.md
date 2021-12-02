@@ -13,6 +13,8 @@ A Web UI for Chaos Mesh. Powered by ⚛️ [Create React App](https://github.com
     - [Prepare](#prepare)
     - [Install deps](#install-deps)
     - [Start](#start)
+  - [Packages](#packages)
+    - [mui-extends](#mui-extends)
 - [License](#license)
 
 ## How to develop
@@ -122,9 +124,9 @@ REACT_APP_API_URL=xxx BROWSER=none yarn workspace @ui/app start
 
 Then open <http://localhost:3000> to view it in the browser.
 
-## Packages
+### Packages
 
-### mui-extends
+#### mui-extends
 
 This package extends many of mui's components for use in the UI. It will use `tsc` to compile the code, simply run:
 
