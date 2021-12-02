@@ -45,7 +45,7 @@ spec:
       protocol: TCP
       name: dlv
   {{- end }}
-    - port: 10080
+    - port: {{ .Values.controllerManager.env.METRICS_PORT }}
       targetPort: http
       protocol: TCP
       name: http
