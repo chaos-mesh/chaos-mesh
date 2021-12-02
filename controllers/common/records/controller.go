@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 
-package common
+package records
 
 import (
 	"context"
@@ -32,7 +32,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 )
 
-// Reconciler for common chaos
+// Reconciler for chaos records
 type Reconciler struct {
 	Impl types.ChaosImpl
 
@@ -58,7 +58,7 @@ const (
 	Nothing Operation = ""
 )
 
-// Reconcile the common chaos
+// Reconcile the chaos records
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	obj := r.Object.DeepCopyObject().(v1alpha1.InnerObjectWithSelector)
 

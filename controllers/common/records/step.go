@@ -13,16 +13,22 @@
 // limitations under the License.
 //
 
-package common
+package records
 
 import (
-	"github.com/chaos-mesh/chaos-mesh/controllers/common/condition"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common/desiredphase"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common/finalizers"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+
 	"github.com/chaos-mesh/chaos-mesh/controllers/common/pipeline"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common/records"
 )
 
-func AllSteps() []pipeline.PipelineStep {
-	return []pipeline.PipelineStep{finalizers.Step, desiredphase.Step, condition.Step, records.Step}
+func Step(ctx *pipeline.PipelineContext) reconcile.Reconciler {
+	return &Reconciler{
+		Impl:     ctx.Impl,
+		Object:   ctx.Object.Object,
+		Client:   ctx.Client,
+		Reader:   ctx.Reader,
+		Recorder: ctx.RecorderBuilder.Build("records"),
+		Selector: ctx.Selector,
+		Log:      ctx.Logger.WithName("records"),
+	}
 }
