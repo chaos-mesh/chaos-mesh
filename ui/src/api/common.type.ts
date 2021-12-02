@@ -14,9 +14,11 @@
  * limitations under the License.
  *
  */
+
 export interface Config {
   security_mode: boolean
   dns_server_create: boolean
+  gcp_security_mode: boolean
   version: string
 }
 

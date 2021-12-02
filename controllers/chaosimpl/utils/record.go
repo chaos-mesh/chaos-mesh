@@ -27,13 +27,13 @@ import (
 	chaosdaemonclient "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/client"
 )
 
-type ContianerRecordDecoder struct {
+type ContainerRecordDecoder struct {
 	client.Client
 	*chaosdaemon.ChaosDaemonClientBuilder
 }
 
-func NewContainerRecordDecoder(c client.Client, builder *chaosdaemon.ChaosDaemonClientBuilder) *ContianerRecordDecoder {
-	return &ContianerRecordDecoder{
+func NewContainerRecordDecoder(c client.Client, builder *chaosdaemon.ChaosDaemonClientBuilder) *ContainerRecordDecoder {
+	return &ContainerRecordDecoder{
 		Client:                   c,
 		ChaosDaemonClientBuilder: builder,
 	}
@@ -46,7 +46,7 @@ type DecodedContainerRecord struct {
 	Pod *v1.Pod
 }
 
-func (d *ContianerRecordDecoder) DecodeContainerRecord(ctx context.Context, record *v1alpha1.Record) (decoded DecodedContainerRecord, err error) {
+func (d *ContainerRecordDecoder) DecodeContainerRecord(ctx context.Context, record *v1alpha1.Record) (decoded DecodedContainerRecord, err error) {
 	var pod v1.Pod
 	podId, containerName, err := controller.ParseNamespacedNameContainer(record.Id)
 	if err != nil {

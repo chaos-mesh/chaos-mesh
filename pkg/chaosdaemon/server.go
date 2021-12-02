@@ -133,6 +133,7 @@ func newGRPCServer(containerRuntime string, reg prometheus.Registerer, tlsConf t
 			Certificates: []tls.Certificate{serverCert},
 			ClientCAs:    caCertPool,
 			ClientAuth:   tls.RequireAndVerifyClientCert,
+			MinVersion:   tls.VersionTLS13,
 		})
 
 		grpcOpts = append(grpcOpts, grpc.Creds(creds))
