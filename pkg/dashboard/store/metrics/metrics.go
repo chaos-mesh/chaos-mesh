@@ -20,11 +20,14 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"go.uber.org/fx"
+	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
 )
 
 const chaosDashboardSubsystem = "chaos_dashboard"
+
+var log = ctrl.Log.WithName("metrics-collector")
 
 // Collector implements prometheus.Collector interface
 type Collector struct {
@@ -83,6 +86,7 @@ func (collector *Collector) collectArchivedExperiments() {
 
 	metas, err := collector.experimentStore.ListMeta(context.TODO(), "", "", "", true)
 	if err != nil {
+		log.Error(err, "fail to list all archived chaos experiments")
 		return
 	}
 
@@ -107,6 +111,7 @@ func (collector *Collector) collectArchivedSchedules() {
 
 	metas, err := collector.scheduleStore.ListMeta(context.TODO(), "", "", true)
 	if err != nil {
+		log.Error(err, "fail to list all archived schedules")
 		return
 	}
 
@@ -125,6 +130,7 @@ func (collector *Collector) collectArchivedWorkflows() {
 
 	metas, err := collector.workflowStore.ListMeta(context.TODO(), "", "", true)
 	if err != nil {
+		log.Error(err, "fail to list all archived workflows")
 		return
 	}
 
