@@ -18,11 +18,13 @@ cur=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 cd $cur
 
 echo "download and deploy chaosd"
+localIP=`ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | head -1`
 
 # TODO: use a released version
 curl -fsSL -o chaosd-platform-linux-amd64.tar.gz https://mirrors.chaos-mesh.org/chaosd-platform-linux-amd64.tar.gz
 tar zxvf chaosd-platform-linux-amd64.tar.gz
 ./chaosd-platform-linux-amd64/chaosd server --port 31768 > chaosd.log 2>&1 &
+check_chaosd_health
 
 function judge_stress() {
     have_stress=$1
@@ -32,7 +34,6 @@ function judge_stress() {
         if [ "$have_stress" = true ]; then
             if [ ${stress_ng_num} -lt 1 ]; then
                 echo "stress-ng is not run when creating stress chaos on physical machine"
-                tail chaosd.log
             else
                 success=true
                 break
@@ -40,7 +41,6 @@ function judge_stress() {
         else
             if [ ${stress_ng_num} -gt 0 ]; then
                 echo "stress-ng is still running when delete stress chaos on physical machine"
-                tail chaosd.log
             else
                 success=true
                 break
@@ -51,17 +51,39 @@ function judge_stress() {
     done
 
     if [ "$success" = false ]; then
+        echo "chaos-controller-manager log:"
+        kubectl logs -n chaos-testing -l app.kubernetes.io/component=controller-manager --tail=20
+
+        echo "chaosd log:"
+        tail chaosd.log
         exit 1
     fi
 }
 
-echo "create physical machine chaos"
-localIP=`ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | head -1`
+function check_chaosd_health() {
+    success=false
+    for ((k=0; k<30; k++)); do
+        status=`curl -w '%{http_code}' -s -o /dev/null $localIP:31768/api/system/health`
+        if [ ${status} = 200 ];then
+            success=true
+            break
+        fi
+        sleep 1
+    done
 
+    if [ "$success" = false ];then
+        echo "chaosd starts failed!"
+        exit 1
+    fi
+    echo "chaosd starts succeed!"
+}
+
+echo "create physical machine"
 cp physical_machine.yaml physical_machine_tmp.yaml
 sed -i 's/CHAOSD_ADDRESS/'$localIP'\:31768/g' physical_machine.yaml
 kubectl apply -f physical_machine_tmp.yaml
 
+echo "create physical machine chaos"
 kubectl apply -f chaos.yaml
 judge_stress true
 
