@@ -29,7 +29,7 @@ done
 
 # step1
 if [[ ! -d node_modules ]]; then
-  echo "No node_modules found. Install by `yarn`:"
+  echo "No node_modules found. Install by yarn:"
 
   yarn
 else
@@ -47,7 +47,7 @@ CHAOS_DASHBOARD_BIN=../images/chaos-dashboard/bin
 if [[ "$COMPACT" == true ]]; then
   echo "--compact: skip building chaos-dashboard."
 elif [[ ! -f $CHAOS_DASHBOARD_BIN/chaos-dashboard ]]; then
-  echo "No chaos-dashboard binary found. Install by `IN_DOCKER=1 make images/chaos-dashboard/bin/chaos-dashboard`:"
+  echo "No chaos-dashboard binary found. Install by IN_DOCKER=1 make images/chaos-dashboard/bin/chaos-dashboard:"
 
   cd ..
   IN_DOCKER=1 make images/chaos-dashboard/bin/chaos-dashboard
