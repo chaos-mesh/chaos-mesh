@@ -70,6 +70,11 @@ controllerManager:
     tag: ""
   imagePullPolicy: IfNotPresent
 
+  # The keys within the "env" map are mounted as environment variables on the pod.
+  env:
+    WEBHOOK_PORT: 9443
+    METRICS_PORT: 10080
+
   enableFilterNamespace: false
 
   # targetNamespace only works with clusterScoped is false(namespace scoped mode).
