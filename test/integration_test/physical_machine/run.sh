@@ -14,6 +14,24 @@
 # limitations under the License.
 #
 
+function check_chaosd_health() {
+    success=false
+    for ((k=0; k<30; k++)); do
+        status=`curl -w '%{http_code}' -s -o /dev/null $localIP:31768/api/system/health`
+        if [ ${status} = 200 ];then
+            success=true
+            break
+        fi
+        sleep 1
+    done
+
+    if [ "$success" = false ];then
+        echo "chaosd starts failed!"
+        exit 1
+    fi
+    echo "chaosd starts succeed!"
+}
+
 cur=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 cd $cur
 
@@ -51,36 +69,19 @@ function judge_stress() {
     done
 
     if [ "$success" = false ]; then
-        echo "chaos-controller-manager log:"
+        echo "[debug] chaos-controller-manager log:"
         kubectl logs -n chaos-testing -l app.kubernetes.io/component=controller-manager --tail=20
 
-        echo "chaosd log:"
+        echo ""
+        echo "[debug]chaosd log:"
         tail chaosd.log
         exit 1
     fi
 }
 
-function check_chaosd_health() {
-    success=false
-    for ((k=0; k<30; k++)); do
-        status=`curl -w '%{http_code}' -s -o /dev/null $localIP:31768/api/system/health`
-        if [ ${status} = 200 ];then
-            success=true
-            break
-        fi
-        sleep 1
-    done
-
-    if [ "$success" = false ];then
-        echo "chaosd starts failed!"
-        exit 1
-    fi
-    echo "chaosd starts succeed!"
-}
-
 echo "create physical machine"
 cp physical_machine.yaml physical_machine_tmp.yaml
-sed -i 's/CHAOSD_ADDRESS/'$localIP'\:31768/g' physical_machine.yaml
+sed -i 's/CHAOSD_ADDRESS/'$localIP'\:31768/g' physical_machine_tmp.yaml
 kubectl apply -f physical_machine_tmp.yaml
 
 echo "create physical machine chaos"
