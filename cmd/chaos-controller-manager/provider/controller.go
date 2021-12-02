@@ -163,9 +163,7 @@ type controlPlaneCacheReader struct {
 	client.Reader `name:"control-plane-cache"`
 }
 
-func NewControlPlaneCacheReader(logger logr.Logger) (controlPlaneCacheReader, error) {
-	cfg := ctrl.GetConfigOrDie()
-
+func NewControlPlaneCacheReader(logger logr.Logger, cfg *rest.Config) (controlPlaneCacheReader, error) {
 	mapper, err := apiutil.NewDynamicRESTMapper(cfg)
 	if err != nil {
 		return controlPlaneCacheReader{}, err

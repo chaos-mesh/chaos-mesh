@@ -17,7 +17,6 @@ package common
 
 import (
 	"context"
-	"fmt"
 	"reflect"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -55,7 +54,6 @@ type Params struct {
 }
 
 func Bootstrap(params Params) error {
-	fmt.Println("going to setup common controller")
 	logger := params.Logger
 	pairs := params.Impls
 	mgr := params.Mgr

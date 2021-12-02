@@ -17,8 +17,6 @@ package common
 
 import (
 	"context"
-	"fmt"
-	"math/rand"
 	"os"
 	"path/filepath"
 	"testing"
@@ -57,7 +55,6 @@ var lister *utils.ActiveLister
 var cfg *rest.Config
 var testEnv *envtest.Environment
 var setupLog = ctrl.Log.WithName("setup")
-var testPod = fmt.Sprintf("test-%d", rand.Int63())
 
 func TestCommon(t *testing.T) {
 	RegisterFailHandler(Fail)
