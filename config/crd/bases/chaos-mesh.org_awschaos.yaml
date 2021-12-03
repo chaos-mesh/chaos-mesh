@@ -47,7 +47,6 @@ spec:
               awsRegion:
                 description: AWSRegion defines the region of aws.
                 type: string
-                default: us-east-1
               deviceName:
                 description: DeviceName indicates the name of the device. Needed in
                   detach-volume.
