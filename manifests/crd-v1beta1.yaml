@@ -538,9 +538,6 @@ metadata:
   name: httpchaos.chaos-mesh.org
 spec:
   additionalPrinterColumns:
-  - JSONPath: .spec.action
-    name: action
-    type: string
   - JSONPath: .spec.duration
     name: duration
     type: string
@@ -1496,9 +1493,6 @@ metadata:
   name: kernelchaos.chaos-mesh.org
 spec:
   additionalPrinterColumns:
-  - JSONPath: .spec.action
-    name: action
-    type: string
   - JSONPath: .spec.duration
     name: duration
     type: string
@@ -2795,13 +2789,6 @@ metadata:
   creationTimestamp: null
   name: podchaos.chaos-mesh.org
 spec:
-  additionalPrinterColumns:
-  - JSONPath: .spec.action
-    name: action
-    type: string
-  - JSONPath: .spec.duration
-    name: duration
-    type: string
   group: chaos-mesh.org
   names:
     kind: PodChaos
@@ -2810,7 +2797,6 @@ spec:
     singular: podchaos
   preserveUnknownFields: false
   scope: Namespaced
-  subresources: {}
   validation:
     openAPIV3Schema:
       description: PodChaos is the control script`s spec.
@@ -3041,13 +3027,6 @@ metadata:
   creationTimestamp: null
   name: podhttpchaos.chaos-mesh.org
 spec:
-  additionalPrinterColumns:
-  - JSONPath: .spec.action
-    name: action
-    type: string
-  - JSONPath: .spec.duration
-    name: duration
-    type: string
   group: chaos-mesh.org
   names:
     kind: PodHttpChaos
@@ -3479,13 +3458,6 @@ metadata:
   creationTimestamp: null
   name: podnetworkchaos.chaos-mesh.org
 spec:
-  additionalPrinterColumns:
-  - JSONPath: .spec.action
-    name: action
-    type: string
-  - JSONPath: .spec.duration
-    name: duration
-    type: string
   group: chaos-mesh.org
   names:
     kind: PodNetworkChaos
@@ -14240,9 +14212,6 @@ metadata:
   name: stresschaos.chaos-mesh.org
 spec:
   additionalPrinterColumns:
-  - JSONPath: .spec.action
-    name: action
-    type: string
   - JSONPath: .spec.duration
     name: duration
     type: string
@@ -14537,9 +14506,6 @@ metadata:
   name: timechaos.chaos-mesh.org
 spec:
   additionalPrinterColumns:
-  - JSONPath: .spec.action
-    name: action
-    type: string
   - JSONPath: .spec.duration
     name: duration
     type: string

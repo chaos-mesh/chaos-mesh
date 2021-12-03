@@ -16,14 +16,7 @@ spec:
     singular: podchaos
   scope: Namespaced
   versions:
-  - additionalPrinterColumns:
-    - jsonPath: .spec.action
-      name: action
-      type: string
-    - jsonPath: .spec.duration
-      name: duration
-      type: string
-    name: v1alpha1
+  - name: v1alpha1
     schema:
       openAPIV3Schema:
         description: PodChaos is the control script`s spec.
@@ -240,7 +233,6 @@ spec:
         type: object
     served: true
     storage: true
-    subresources: {}
 status:
   acceptedNames:
     kind: ""

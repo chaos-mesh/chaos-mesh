@@ -243,8 +243,6 @@ type PodIOChaosStatus struct {
 }
 
 // +kubebuilder:object:root=true
-// +kubebuilder:printcolumn:name="action",type=string,JSONPath=`.spec.action`
-// +kubebuilder:printcolumn:name="duration",type=string,JSONPath=`.spec.duration`
 
 // PodIOChaosList contains a list of PodIOChaos
 type PodIOChaosList struct {

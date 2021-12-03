@@ -17,9 +17,6 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - jsonPath: .spec.action
-      name: action
-      type: string
     - jsonPath: .spec.duration
       name: duration
       type: string
