@@ -92,6 +92,8 @@ spec:
           ports:
             - name: http
               containerPort: {{ .Values.dashboard.env.LISTEN_PORT }}
+            - name: metric
+              containerPort: {{ .Values.dashboard.env.METRIC_PORT }}
         {{- if .Values.chaosDlv.enable }}
         - name: chaos-mesh-dlv
           image: {{template "chaos-dlv.image" . }}
@@ -166,4 +168,8 @@ spec:
       protocol: TCP
       name: dlv
   {{- end }}
+    - protocol: TCP
+      port: {{ .Values.dashboard.env.METRIC_PORT }}
+      targetPort: {{ .Values.dashboard.env.METRIC_PORT }}
+      name: metric
 {{- end }}
