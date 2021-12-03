@@ -67,14 +67,12 @@ func (p *Pipeline) AddSteps(steps ...PipelineStep) {
 
 // Reconcile the steps
 func (p *Pipeline) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	result := ctrl.Result{
-		Requeue: false,
-	}
+	var deadline *time.Time
 
 	for _, controller := range p.controllers {
 		ret, err := controller.Reconcile(ctx, req)
 		if err != nil {
-			return result, err
+			return ctrl.Result{}, err
 		}
 
 		p.ctx.Logger.WithName("pipeline").Info("reconcile result", "result", ret)
@@ -84,20 +82,36 @@ func (p *Pipeline) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result
 		}
 
 		if ret.RequeueAfter != 0 {
-			if result.RequeueAfter == 0 {
-				result.RequeueAfter = ret.RequeueAfter
-			} else {
-				result.RequeueAfter = minDuration(result.RequeueAfter, ret.RequeueAfter)
-			}
+			end := time.Now().Add(ret.RequeueAfter)
+			deadline = minTime(deadline, &end)
 		}
 	}
 
-	return result, nil
+	ret := ctrl.Result{}
+
+	if deadline != nil {
+		if deadline.Before(time.Now()) {
+			ret.Requeue = true
+		} else {
+			ret.RequeueAfter = time.Until(*deadline)
+		}
+	}
+
+	return ret, nil
 }
 
-func minDuration(d1, d2 time.Duration) time.Duration {
-	if d1 < d2 {
+func minTime(d1, d2 *time.Time) *time.Time {
+	if d1 == nil {
+		return d2
+	}
+
+	if d2 == nil {
 		return d1
 	}
+
+	if d1.Before(*d2) {
+		return d1
+	}
+
 	return d2
 }
