@@ -542,9 +542,6 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - jsonPath: .spec.action
-      name: action
-      type: string
     - jsonPath: .spec.duration
       name: duration
       type: string
@@ -1504,9 +1501,6 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - jsonPath: .spec.action
-      name: action
-      type: string
     - jsonPath: .spec.duration
       name: duration
       type: string
@@ -2810,14 +2804,7 @@ spec:
     singular: podchaos
   scope: Namespaced
   versions:
-  - additionalPrinterColumns:
-    - jsonPath: .spec.action
-      name: action
-      type: string
-    - jsonPath: .spec.duration
-      name: duration
-      type: string
-    name: v1alpha1
+  - name: v1alpha1
     schema:
       openAPIV3Schema:
         description: PodChaos is the control script`s spec.
@@ -3034,7 +3021,6 @@ spec:
         type: object
     served: true
     storage: true
-    subresources: {}
 status:
   acceptedNames:
     kind: ""
@@ -3058,14 +3044,7 @@ spec:
     singular: podhttpchaos
   scope: Namespaced
   versions:
-  - additionalPrinterColumns:
-    - jsonPath: .spec.action
-      name: action
-      type: string
-    - jsonPath: .spec.duration
-      name: duration
-      type: string
-    name: v1alpha1
+  - name: v1alpha1
     schema:
       openAPIV3Schema:
         description: PodHttpChaos is the Schema for the podhttpchaos API
@@ -3493,14 +3472,7 @@ spec:
     singular: podnetworkchaos
   scope: Namespaced
   versions:
-  - additionalPrinterColumns:
-    - jsonPath: .spec.action
-      name: action
-      type: string
-    - jsonPath: .spec.duration
-      name: duration
-      type: string
-    name: v1alpha1
+  - name: v1alpha1
     schema:
       openAPIV3Schema:
         description: PodNetworkChaos is the Schema for the PodNetworkChaos API
@@ -14431,9 +14403,6 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - jsonPath: .spec.action
-      name: action
-      type: string
     - jsonPath: .spec.duration
       name: duration
       type: string
@@ -14728,9 +14697,6 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - jsonPath: .spec.action
-      name: action
-      type: string
     - jsonPath: .spec.duration
       name: duration
       type: string
