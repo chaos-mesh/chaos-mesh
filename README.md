@@ -31,7 +31,7 @@ Chaos Operator injects chaos into the applications and Kubernetes infrastructure
 
 **Chaos-daemon**: runs as daemonset with privileged system permissions over network, Cgroup, etc. for a specific node.
 
-![Chaos Operator](./static/chaos-mesh-architecture-2.0.png)
+![Chaos Operator](./static/chaos-mesh.svg)
 
 Chaos Operator uses [CustomResourceDefinition (CRD)](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/) to define chaos objects.
 The current implementation supports a few types of CRD objects for fault injection, namely DNSChaos, PodChaos, PodIOChaos, PodNetworkChaos, NetworkChaos, IOChaos, TimeChaos, StressChaos, and KernelChaos, which correspond to the following major actions (experiments):
