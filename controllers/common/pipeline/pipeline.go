@@ -77,11 +77,16 @@ func (p *Pipeline) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result
 
 		p.ctx.Logger.WithName("pipeline").Info("reconcile result", "result", ret)
 
-		if ret.Requeue {
+		if ret.Requeue || deadline.Before(time.Now()) {
+			ret.Requeue = true
 			return ret, nil
 		}
 
 		if ret.RequeueAfter != 0 {
+			// The controller wants us to re-enqueue after a certain amount of time,
+			// and the desiredphase controller will always return a RequeueAfter before the experiment is finished.
+			//
+			// So, DO NOT re-queue immediately.
 			end := time.Now().Add(ret.RequeueAfter)
 			deadline = minTime(deadline, &end)
 		}
