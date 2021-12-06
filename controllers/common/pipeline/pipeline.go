@@ -77,7 +77,7 @@ func (p *Pipeline) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result
 
 		p.ctx.Logger.WithName("pipeline").Info("reconcile result", "result", ret)
 
-		if ret.Requeue || deadline.Before(time.Now()) {
+		if ret.Requeue || deadline != nil && deadline.Before(time.Now()) {
 			ret.Requeue = true
 			return ret, nil
 		}
