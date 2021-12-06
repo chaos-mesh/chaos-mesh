@@ -13,6 +13,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 RUN update-alternatives --set iptables /usr/sbin/iptables-legacy
+RUN update-alternatives --set ebtables /usr/sbin/ebtables-legacy
 
 ENV RUST_BACKTRACE 1
 ARG TARGET_PLATFORM=amd64
