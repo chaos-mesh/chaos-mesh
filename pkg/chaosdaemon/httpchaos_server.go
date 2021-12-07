@@ -68,15 +68,15 @@ func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 	log := log.WithValues("Request", in)
 	log.Info("applying http chaos")
 
-	if in.Instance == 0 {
+	stdio := s.backgroundProcessManager.Stdio(int(in.Instance), in.StartTime)
+	for stdio == nil {
+		if err := s.backgroundProcessManager.KillBackgroundProcess(ctx, int(in.Instance), in.StartTime); err != nil {
+			return nil, err
+		}
 		if err := s.createHttpChaos(ctx, in); err != nil {
 			return nil, err
 		}
-	}
-
-	stdio := s.backgroundProcessManager.Stdio(int(in.Instance), in.StartTime)
-	if stdio == nil {
-		return nil, fmt.Errorf("fail to get stdio of process")
+		stdio = s.backgroundProcessManager.Stdio(int(in.Instance), in.StartTime)
 	}
 
 	transport := stdioTransport{stdio: stdio}
