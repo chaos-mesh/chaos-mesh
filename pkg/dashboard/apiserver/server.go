@@ -17,6 +17,7 @@ package apiserver
 
 import (
 	"fmt"
+	"github.com/prometheus/client_golang/prometheus"
 	"net"
 	"net/http"
 
@@ -42,7 +43,9 @@ var (
 			newAPIRouter,
 		),
 		handlerModule,
-		fx.Supply(controllermetrics.Registry),
+		fx.Provide(func() prometheus.Registerer {
+			return controllermetrics.Registry
+		}),
 		fx.Invoke(metrics.NewChaosDashboardMetricsCollector),
 		fx.Invoke(register),
 	)
