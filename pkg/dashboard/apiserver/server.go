@@ -17,7 +17,6 @@ package apiserver
 
 import (
 	"fmt"
-	"github.com/prometheus/client_golang/prometheus"
 	"net"
 	"net/http"
 
@@ -25,6 +24,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
+	"github.com/prometheus/client_golang/prometheus"
 	"go.uber.org/fx"
 	controllermetrics "sigs.k8s.io/controller-runtime/pkg/metrics"
 
