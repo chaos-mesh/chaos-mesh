@@ -26,7 +26,7 @@ import (
 func Example_renderCommands() {
 	commands, _ := renderCommands(CommandFlags{
 		Method:         http.MethodGet,
-		URL:            "https://github.com/chaos-mesh/chaos-mesh/v2",
+		URL:            "https://github.com/chaos-mesh/chaos-mesh",
 		Header:         nil,
 		Body:           "",
 		FollowLocation: true,
@@ -34,13 +34,13 @@ func Example_renderCommands() {
 	})
 
 	fmt.Println(strings.Join(commands, " "))
-	// Output: curl -i -s -L https://github.com/chaos-mesh/chaos-mesh/v2
+	// Output: curl -i -s -L https://github.com/chaos-mesh/chaos-mesh
 }
 
 func Example_renderCommands_withCustomHeader() {
 	commands, _ := renderCommands(CommandFlags{
 		Method: http.MethodGet,
-		URL:    "https://github.com/chaos-mesh/chaos-mesh/v2",
+		URL:    "https://github.com/chaos-mesh/chaos-mesh",
 		Header: Header{
 			"User-Agent": []string{"Go-http-client/1.1"},
 		},
@@ -50,7 +50,7 @@ func Example_renderCommands_withCustomHeader() {
 	})
 
 	fmt.Println(strings.Join(commands, " "))
-	// Output: curl -i -s -L -H User-Agent: Go-http-client/1.1 https://github.com/chaos-mesh/chaos-mesh/v2
+	// Output: curl -i -s -L -H User-Agent: Go-http-client/1.1 https://github.com/chaos-mesh/chaos-mesh
 }
 
 func Example_renderCommands_postJson() {

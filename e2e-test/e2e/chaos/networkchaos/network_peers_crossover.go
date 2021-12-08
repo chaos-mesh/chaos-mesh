@@ -30,7 +30,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/util"
 )
 
-// This test case is for https://github.com/chaos-mesh/chaos-mesh/v2/issues/1450
+// This test case is for https://github.com/chaos-mesh/chaos-mesh/issues/1450
 // For example, if the source is A, B, and the target is C, D, and the direction is both,
 // now the connection between A and B will also be affected by this chaos, this is unexpected.
 func TestcasePeersCrossover(

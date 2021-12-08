@@ -46,7 +46,7 @@ var log = ctrl.Log.WithName("chaos-dashboard")
 // @description Swagger for Chaos Mesh Dashboard. If you encounter any problems with API, please click on the issues link below to report.
 
 // @contact.name GitHub Issues
-// @contact.url https://github.com/chaos-mesh/chaos-mesh/v2/issues
+// @contact.url https://github.com/chaos-mesh/chaos-mesh/issues
 
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
