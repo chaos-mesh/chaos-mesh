@@ -104,6 +104,25 @@ func (p PodHttpChaosReplaceBodyAction) MarshalJSON() ([]byte, error) {
 	})
 }
 
+func (p *PodHttpChaosReplaceBodyAction) UnmarshalJSON(data []byte) error {
+	var pp PodHttpChaosPatchBodyAction
+	err := json.Unmarshal(data, &pp)
+	if err == nil {
+		newBody := PodHttpChaosReplaceBodyAction(pp.Value)
+		p = &newBody
+		return nil
+	}
+	bys := make([]byte, 0)
+	err = json.Unmarshal(data, &bys)
+	if err == nil {
+		newBody := PodHttpChaosReplaceBodyAction(bys)
+		p = &newBody
+		return nil
+	}
+	return err
+}
+
+
 // PodHttpChaosActions defines possible actions of HttpChaos.
 type PodHttpChaosActions struct {
 	// Abort is a rule to abort a http session.
