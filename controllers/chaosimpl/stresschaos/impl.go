@@ -47,6 +47,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	if pbClient != nil {
 		defer pbClient.Close()
 	}
+
 	if err != nil {
 		return v1alpha1.NotInjected, err
 	}
@@ -71,8 +72,8 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 			// TODO: add an event here
 			return v1alpha1.NotInjected, err
 		}
-		impl.Log.Info("message", "memoryStressors", memoryStressors)
 	}
+
 	res, err := pbClient.ExecStressors(ctx, &pb.ExecStressRequest{
 		Scope:           pb.ExecStressRequest_CONTAINER,
 		Target:          containerId,
@@ -80,17 +81,23 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		MemoryStressors: memoryStressors,
 		EnterNS:         true,
 	})
+
 	if err != nil {
-		impl.Log.Info("message", "eeeeeeeeeeeeeeeeeeeerrrrrrrrrrrr", memoryStressors)
 		return v1alpha1.NotInjected, err
 	}
 	// TODO: support custom status
+	impl.Log.Info("message", "cpuidd", res.CpuInstance, "memoryidd", res.MemoryInstance)
 	stresschaos.Status.Instances[records[index].Id] = v1alpha1.StressInstance{
-		UID: res.MemoryInstance,
-		StartTime: &metav1.Time{
+		CpuUID: res.CpuInstance,
+		CpuStartTime: &metav1.Time{
+			Time: time.Unix(res.CpuStartTime/1000, (res.CpuStartTime%1000)*int64(time.Millisecond)),
+		},
+		MemoryUID: res.MemoryInstance,
+		MemoryStartTime: &metav1.Time{
 			Time: time.Unix(res.MemoryStartTime/1000, (res.MemoryStartTime%1000)*int64(time.Millisecond)),
 		},
 	}
+	
 	return v1alpha1.Injected, nil
 }
 
@@ -113,13 +120,17 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		return v1alpha1.NotInjected, nil
 	}
 	instance, ok := stresschaos.Status.Instances[records[index].Id]
+	impl.Log.Info("message", "index", index, "id", records[index].Id)
+	impl.Log.Info("message", "cpuid", instance.CpuStartTime, "memoryid", instance.MemoryStartTime)
 	if !ok {
 		impl.Log.Info("Pod seems already recovered", "pod", decodedContainer.Pod.UID)
 		return v1alpha1.NotInjected, nil
 	}
 	if _, err = pbClient.CancelStressors(ctx, &pb.CancelStressRequest{
-		CpuInstance:  instance.UID,
-		CpuStartTime: instance.StartTime.UnixNano() / int64(time.Millisecond),
+		CpuInstance:     instance.CpuUID,
+		CpuStartTime:    instance.CpuStartTime.UnixNano() / int64(time.Millisecond),
+		MemoryInstance:  instance.MemoryUID,
+		MemoryStartTime: instance.MemoryStartTime.UnixNano() / int64(time.Millisecond),
 	}); err != nil {
 		// TODO: check whether the erorr still exists
 		return v1alpha1.Injected, nil

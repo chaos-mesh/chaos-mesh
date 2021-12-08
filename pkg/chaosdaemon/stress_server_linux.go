@@ -35,20 +35,20 @@ func (s *DaemonServer) ExecStressors(ctx context.Context,
 	log.Info("Executing stressors", "request", req)
 
 	// CpuStressors
-	// cpuInstance, cpuStartTime, err := s.ExecCpuStressors(ctx, req)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	log.Info("Executing mmmmmmmmmmmmmmmmmmmmstressors", "request", req)
+	cpuInstance, cpuStartTime, err := s.ExecCpuStressors(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
 	// memoryStressor
 	memoryInstance, memoryStartTime, err := s.ExecMemoryStressors(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-
+	log.Info("message", "cpu", cpuInstance, "mem", memoryInstance)
 	return &pb.ExecStressResponse{
-		// CpuInstance:     cpuInstance,
-		// CpuStartTime:    cpuStartTime,
+		CpuInstance:     cpuInstance,
+		CpuStartTime:    cpuStartTime,
 		MemoryInstance:  memoryInstance,
 		MemoryStartTime: memoryStartTime,
 	}, nil
@@ -56,16 +56,28 @@ func (s *DaemonServer) ExecStressors(ctx context.Context,
 
 func (s *DaemonServer) CancelStressors(ctx context.Context,
 	req *pb.CancelStressRequest) (*empty.Empty, error) {
-	pid, err := strconv.Atoi(req.CpuInstance)
+	CpuPid, err := strconv.Atoi(req.CpuInstance)
 	if err != nil {
 		return nil, err
 	}
+
+	MemoryPid, err := strconv.Atoi(req.MemoryInstance)
+	if err != nil {
+		return nil, err
+	}
+
 	log.Info("Canceling stressors", "request", req)
 
-	err = s.backgroundProcessManager.KillBackgroundProcess(ctx, pid, req.CpuStartTime)
+	err = s.backgroundProcessManager.KillBackgroundProcess(ctx, CpuPid, req.CpuStartTime)
 	if err != nil {
 		return nil, err
 	}
+
+	err = s.backgroundProcessManager.KillBackgroundProcess(ctx, MemoryPid, req.MemoryStartTime)
+	if err != nil {
+		return nil, err
+	}
+
 	log.Info("killing stressor successfully")
 	return &empty.Empty{}, nil
 }
@@ -145,7 +157,7 @@ func (s *DaemonServer) ExecMemoryStressors(ctx context.Context,
 		ProcessBuilder = ProcessBuilder.SetNS(pid, bpm.PidNS)
 	}
 	cmd := ProcessBuilder.Build()
-	
+
 	procState, err := s.backgroundProcessManager.StartProcess(cmd)
 	if err != nil {
 		return "", 0, err
@@ -173,7 +185,7 @@ func (s *DaemonServer) ExecMemoryStressors(ctx context.Context,
 		time.Sleep(time.Millisecond)
 		log.Info(strconv.Itoa(cmd.Process.Pid))
 		comm, err := ReadCommName(cmd.Process.Pid)
-		
+
 		if err != nil {
 			return "", 0, err
 		}

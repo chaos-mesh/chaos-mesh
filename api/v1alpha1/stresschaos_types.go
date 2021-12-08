@@ -77,12 +77,18 @@ type StressChaosStatus struct {
 
 // StressInstance is an instance generates stresses
 type StressInstance struct {
-	// UID is the instance identifier
+	// CpuUID is the stress-ng identifier
 	// +optional
-	UID string `json:"uid"`
-	// StartTime specifies when the instance starts
+	CpuUID string `json:"cpuUid"`
+	// MemoryUID is the memStress identifier
 	// +optional
-	StartTime *metav1.Time `json:"startTime"`
+	MemoryUID string `json:"memoryUid"`
+	// CpuStartTime specifies when the stress-ng starts
+	// +optional
+	CpuStartTime *metav1.Time `json:"cpuStartTime"`
+	// MemoryStartTime specifies when the memStress starts
+	// +optional
+	MemoryStartTime *metav1.Time `json:"memoryStartTime"`
 }
 
 // Stressors defines plenty of stressors supported to stress system components out.
@@ -101,18 +107,12 @@ func (in *Stressors) Normalize() (string, string, error) {
 	CPUStressors := ""
 	MemoryStressors := ""
 	if in.MemoryStressor != nil && in.MemoryStressor.Workers != 0 {
-		// MemoryStressors += fmt.Sprintf(" --vm %d --vm-keep", in.MemoryStressor.Workers)
+		MemoryStressors += fmt.Sprintf(" --workers %d", in.MemoryStressor.Workers)
 		if len(in.MemoryStressor.Size) != 0 {
 			if in.MemoryStressor.Size[len(in.MemoryStressor.Size)-1] != '%' {
-				// size, err := units.FromHumanSize(string())
-				// if err != nil {
-				// 	return "", "", err
-				// }
 				MemoryStressors += fmt.Sprintf(" --size %s", in.MemoryStressor.Size)
-				fmt.Println(in.MemoryStressor.Size)
 			} else {
-				MemoryStressors += fmt.Sprintf(" --size %s",
-					in.MemoryStressor.Size)
+				MemoryStressors += fmt.Sprintf(" --size %s", in.MemoryStressor.Size)
 			}
 		}
 
