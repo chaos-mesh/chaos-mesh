@@ -13,8 +13,8 @@
 # limitations under the License.
 #
 {{- if .Values.dashboard.create }}
-{{- if .Values.dashboard.persistentVolume.enabled -}}
-{{- if not .Values.dashboard.persistentVolume.existingClaim -}}
+{{- if .Values.dashboard.persistentVolume.enabled }}
+{{- if not .Values.dashboard.persistentVolume.existingClaim }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
