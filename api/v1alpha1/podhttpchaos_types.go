@@ -17,8 +17,6 @@ package v1alpha1
 
 import (
 	"encoding/json"
-	"fmt"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -104,26 +102,6 @@ func (p PodHttpChaosReplaceBodyAction) MarshalJSON() ([]byte, error) {
 		Type:  "TEXT",
 		Value: string(p),
 	})
-}
-
-func (p *PodHttpChaosReplaceBodyAction) UnmarshalJSON(data []byte) error {
-	fmt.Println("fffffffffffffffffffffaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
-	fmt.Println(string(data))
-	var pp PodHttpChaosPatchBodyAction
-	err := json.Unmarshal(data, &pp)
-	if err == nil {
-		newBody := PodHttpChaosReplaceBodyAction(pp.Value)
-		p = &newBody
-		return nil
-	}
-	bys := make([]byte, 0)
-	err = json.Unmarshal(data, &bys)
-	if err == nil {
-		newBody := PodHttpChaosReplaceBodyAction(bys)
-		p = &newBody
-		return nil
-	}
-	return err
 }
 
 // PodHttpChaosActions defines possible actions of HttpChaos.
