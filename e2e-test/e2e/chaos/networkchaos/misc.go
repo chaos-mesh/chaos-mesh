@@ -1,15 +1,17 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package networkchaos
 
@@ -70,7 +72,7 @@ func sendUDPPacket(c http.Client, port uint16, targetIP string) error {
 
 	result := string(out)
 	if result != "send successfully\n" {
-		return fmt.Errorf("doesn't send successfully")
+		return fmt.Errorf("doesn't send successfully: %s", result)
 	}
 
 	klog.Info("send request successfully")
@@ -107,7 +109,7 @@ func testNetworkDelay(c http.Client, port uint16, targetIP string) (int64, error
 
 func makeNetworkPartitionChaos(
 	namespace, name string, fromLabelSelectors, toLabelSelectors map[string]string,
-	fromPodMode, toPodMode v1alpha1.PodMode,
+	fromPodMode, toPodMode v1alpha1.SelectorMode,
 	direction v1alpha1.Direction,
 	duration *string,
 ) *v1alpha1.NetworkChaos {
@@ -115,8 +117,10 @@ func makeNetworkPartitionChaos(
 	if toLabelSelectors != nil {
 		target = &v1alpha1.PodSelector{
 			Selector: v1alpha1.PodSelectorSpec{
-				Namespaces:     []string{namespace},
-				LabelSelectors: toLabelSelectors,
+				GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+					Namespaces:     []string{namespace},
+					LabelSelectors: toLabelSelectors,
+				},
 			},
 			Mode: toPodMode,
 		}
@@ -134,8 +138,10 @@ func makeNetworkPartitionChaos(
 			Duration:  duration,
 			PodSelector: v1alpha1.PodSelector{
 				Selector: v1alpha1.PodSelectorSpec{
-					Namespaces:     []string{namespace},
-					LabelSelectors: fromLabelSelectors,
+					GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+						Namespaces:     []string{namespace},
+						LabelSelectors: fromLabelSelectors,
+					},
 				},
 				Mode: fromPodMode,
 			},
@@ -145,14 +151,16 @@ func makeNetworkPartitionChaos(
 
 func makeNetworkDelayChaos(
 	namespace, name string, fromLabelSelectors, toLabelSelectors map[string]string,
-	fromPodMode, toPodMode v1alpha1.PodMode, direction v1alpha1.Direction, tcparam v1alpha1.TcParameter, duration *string,
+	fromPodMode, toPodMode v1alpha1.SelectorMode, direction v1alpha1.Direction, tcparam v1alpha1.TcParameter, duration *string,
 ) *v1alpha1.NetworkChaos {
 	var target *v1alpha1.PodSelector
 	if toLabelSelectors != nil {
 		target = &v1alpha1.PodSelector{
 			Selector: v1alpha1.PodSelectorSpec{
-				Namespaces:     []string{namespace},
-				LabelSelectors: toLabelSelectors,
+				GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+					Namespaces:     []string{namespace},
+					LabelSelectors: toLabelSelectors,
+				},
 			},
 			Mode: toPodMode,
 		}
@@ -171,8 +179,10 @@ func makeNetworkDelayChaos(
 			Direction:   direction,
 			PodSelector: v1alpha1.PodSelector{
 				Selector: v1alpha1.PodSelectorSpec{
-					Namespaces:     []string{namespace},
-					LabelSelectors: fromLabelSelectors,
+					GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+						Namespaces:     []string{namespace},
+						LabelSelectors: fromLabelSelectors,
+					},
 				},
 				Mode: fromPodMode,
 			},
@@ -274,6 +284,9 @@ func couldConnect(c http.Client, sourcePort uint16, targetPodIP string, targetPo
 		return false
 	}
 
+	// As this function ignores the data corruption, it will only return false when the
+	// e2e test cannot connect to the helper, or the helper failed to send (the iptables
+	// rules drop the sending packet on the sender side, which will give an "operation not permitted" error)
 	// FIXME: slow network may also make this happens
 	if data != "ping\n" {
 		klog.Infof("mismatch data return: %s, it may happens under bad network", data)

@@ -4,12 +4,14 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package controllers
 
@@ -32,38 +34,18 @@ import (
 
 var Module = fx.Options(
 	fx.Provide(
-		fx.Annotated{
-			Group:  "controller",
-			Target: common.NewController,
-		},
-		fx.Annotated{
-			Group:  "controller",
-			Target: finalizers.NewController,
-		},
-		fx.Annotated{
-			Group:  "controller",
-			Target: desiredphase.NewController,
-		},
-		fx.Annotated{
-			Group:  "controller",
-			Target: condition.NewController,
-		},
-		fx.Annotated{
-			Group:  "controller",
-			Target: podnetworkchaos.NewController,
-		},
-		fx.Annotated{
-			Group:  "controller",
-			Target: podhttpchaos.NewController,
-		},
-		fx.Annotated{
-			Group:  "controller",
-			Target: podiochaos.NewController,
-		},
-
 		chaosdaemon.New,
 		recorder.NewRecorderBuilder,
 	),
+
+	fx.Invoke(common.Bootstrap),
+	fx.Invoke(podhttpchaos.Bootstrap),
+	fx.Invoke(podnetworkchaos.Bootstrap),
+	fx.Invoke(podiochaos.Bootstrap),
+	fx.Invoke(condition.Bootstrap),
+	fx.Invoke(desiredphase.Bootstrap),
+	fx.Invoke(finalizers.Bootstrap),
 	fx.Invoke(wfcontrollers.BootstrapWorkflowControllers),
+
 	schedule.Module,
 	chaosimpl.AllImpl)

@@ -138,16 +138,20 @@ helm install chaos-mesh helm/chaos-mesh --namespace=chaos-testing -f values.yaml
 
 ### Using cert-manager for certificate management
 
-[Cert-manager](https://github.com/jetstack/cert-manager) may be the default in the K8s world for certificate management now.If you want to install Cert-manager using the [Helm](https://helm.sh) package manager, please refer to the [official documents](https://github.com/jetstack/cert-manager/tree/master/deploy/charts/cert-manager).
+[Cert-manager](https://github.com/jetstack/cert-manager) may be the default in the K8s world for certificate management now. If you want to install Cert-manager using the [Helm](https://helm.sh) package manager, please refer to the [official documents](https://github.com/jetstack/cert-manager/tree/master/deploy/charts/cert-manager).
 
 Example for deploy Cert-manager
 
 ```bash
-kubectl create namespace cert-manager
-kubectl apply --validate=false -f https://raw.githubusercontent.com/jetstack/cert-manager/v0.13.1/deploy/manifests/00-crds.yaml
 helm repo add jetstack https://charts.jetstack.io
 helm repo update
-helm install cert-manager jetstack/cert-manager --namespace cert-manager --version v0.13.1
+
+# if Kubernetes > 1.18/Helm 3.2
+helm install cert-manager jetstack/cert-manager --namespace cert-manager --create-namespace --version v1.6.1 --set installCRDs=true
+
+# else
+kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.6.1/cert-manager.crds.yaml
+helm install cert-manager jetstack/cert-manager --namespace cert-manager --create-namespace --version v1.6.1
 ```
 
 In case you want to using Cert-manager for certificate management, you can use the `webhook.certManager.enabled` property.

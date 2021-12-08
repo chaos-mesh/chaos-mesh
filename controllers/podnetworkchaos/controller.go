@@ -1,15 +1,17 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package podnetworkchaos
 
@@ -191,6 +193,7 @@ func (r *Reconciler) SetIptables(ctx context.Context, pod *corev1.Pod, chaos *v1
 			Ipsets:    chain.IPSets,
 			Direction: direction,
 			Target:    "DROP",
+			Device:    chain.Device,
 		})
 	}
 	return iptable.SetIptablesChains(ctx, r.ChaosDaemonClientBuilder, pod, chains)
@@ -206,9 +209,10 @@ func (r *Reconciler) SetTcs(ctx context.Context, pod *corev1.Pod, chaos *v1alpha
 				return err
 			}
 			tcs = append(tcs, &pb.Tc{
-				Type:  pb.Tc_BANDWIDTH,
-				Tbf:   tbf,
-				Ipset: tc.IPSet,
+				Type:   pb.Tc_BANDWIDTH,
+				Tbf:    tbf,
+				Ipset:  tc.IPSet,
+				Device: tc.Device,
 			})
 		} else if tc.Type == v1alpha1.Netem {
 			netem, err := mergeNetem(tc.TcParameter)
@@ -216,9 +220,10 @@ func (r *Reconciler) SetTcs(ctx context.Context, pod *corev1.Pod, chaos *v1alpha
 				return err
 			}
 			tcs = append(tcs, &pb.Tc{
-				Type:  pb.Tc_NETEM,
-				Netem: netem,
-				Ipset: tc.IPSet,
+				Type:   pb.Tc_NETEM,
+				Netem:  netem,
+				Ipset:  tc.IPSet,
+				Device: tc.Device,
 			})
 		} else {
 			return fmt.Errorf("unknown tc type")

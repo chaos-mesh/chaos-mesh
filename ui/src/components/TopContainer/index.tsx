@@ -1,3 +1,19 @@
+/*
+ * Copyright 2021 Chaos Mesh Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 import { Alert, Box, CssBaseline, Paper, Portal, Snackbar, useMediaQuery, useTheme } from '@material-ui/core'
 import { Redirect, Route, Switch } from 'react-router-dom'
 import { drawerCloseWidth, drawerWidth } from './Sidebar'
@@ -7,11 +23,13 @@ import { useStoreDispatch, useStoreSelector } from 'store'
 
 import ConfirmDialog from 'components-mui/ConfirmDialog'
 import ContentContainer from 'components-mui/ContentContainer'
+import Cookies from 'js-cookie'
 import { IntlProvider } from 'react-intl'
 import LS from 'lib/localStorage'
 import Loading from 'components-mui/Loading'
 import Navbar from './Navbar'
 import Sidebar from './Sidebar'
+import { TokenFormValues } from 'components/Token'
 import api from 'api'
 import flat from 'flat'
 import insertCommonStyle from 'lib/d3/insertCommonStyle'
@@ -60,7 +78,6 @@ const useStyles = makeStyles((theme) => ({
 
 const TopContainer = () => {
   const theme = useTheme()
-  const isTabletScreen = useMediaQuery(theme.breakpoints.down('md'))
   const classes = useStyles()
 
   const { pathname } = useLocation()
@@ -84,61 +101,77 @@ const TopContainer = () => {
     LS.set('mini-sidebar', openDrawer ? 'y' : 'n')
   }
 
-  /**
-   * Render different components according to server configuration.
-   *
-   */
-  function fetchServerConfig() {
-    api.common
-      .config()
-      .then(({ data }) => {
-        if (data.security_mode) {
-          setAuth()
-        }
-
-        dispatch(setConfig(data))
-      })
-      .finally(() => setLoading(false))
-  }
-
   const [loading, setLoading] = useState(true)
   const [authOpen, setAuthOpen] = useState(false)
 
-  /**
-   * Set authorization (RBAC token) for API use.
-   *
-   */
-  function setAuth() {
-    const token = LS.get('token')
-    const tokenName = LS.get('token-name')
-    const globalNamespace = LS.get('global-namespace')
-
-    if (token && tokenName) {
-      const tokens = JSON.parse(token)
-
-      api.auth.token(tokens.filter(({ name }: { name: string }) => name === tokenName)[0].token)
-      dispatch(setTokens(tokens))
-      dispatch(setTokenName(tokenName))
-    } else {
-      setAuthOpen(true)
-    }
-
-    if (globalNamespace) {
-      api.auth.namespace(globalNamespace)
-      dispatch(setNameSpace(globalNamespace))
-    }
-  }
-
   useEffect(() => {
+    /**
+     * Set authorization (RBAC token / GCP) for API use.
+     *
+     */
+    function setAuth() {
+      // GCP
+      const accessToken = Cookies.get('access_token')
+      const expiry = Cookies.get('expiry')
+
+      if (accessToken && expiry) {
+        const token = {
+          accessToken,
+          expiry,
+        }
+
+        api.auth.token(token as any)
+        dispatch(setTokenName('gcp'))
+
+        return
+      }
+
+      const token = LS.get('token')
+      const tokenName = LS.get('token-name')
+      const globalNamespace = LS.get('global-namespace')
+
+      if (token && tokenName) {
+        const tokens: TokenFormValues[] = JSON.parse(token)
+
+        api.auth.token(tokens.find(({ name }) => name === tokenName)!.token)
+        dispatch(setTokens(tokens))
+        dispatch(setTokenName(tokenName))
+      } else {
+        setAuthOpen(true)
+      }
+
+      if (globalNamespace) {
+        api.auth.namespace(globalNamespace)
+        dispatch(setNameSpace(globalNamespace))
+      }
+    }
+
+    /**
+     * Render different components according to server configuration.
+     *
+     */
+    function fetchServerConfig() {
+      api.common
+        .config()
+        .then(({ data }) => {
+          if (data.security_mode) {
+            setAuth()
+          }
+
+          dispatch(setConfig(data))
+        })
+        .finally(() => setLoading(false))
+    }
+
     fetchServerConfig()
     insertCommonStyle()
-    // eslint-disable-next-line
-  }, [])
+  }, [dispatch])
 
   useEffect(() => {
     dispatch(setNavigationBreadcrumbs(pathname))
   }, [dispatch, pathname])
 
+  const isTabletScreen = useMediaQuery(theme.breakpoints.down('md'))
   useEffect(() => {
     if (isTabletScreen) {
       setOpenDrawer(false)
@@ -178,7 +211,7 @@ const TopContainer = () => {
             vertical: 'bottom',
             horizontal: 'center',
           }}
-          autoHideDuration={3000}
+          autoHideDuration={6000}
           open={alertOpen}
           onClose={handleSnackClose}
         >

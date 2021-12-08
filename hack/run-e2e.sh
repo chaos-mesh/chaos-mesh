@@ -1,17 +1,18 @@
 #!/usr/bin/env bash
-
-# Copyright 2020 Chaos Mesh Authors.
+# Copyright 2021 Chaos Mesh Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+# http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
 
 set -o errexit
 set -o nounset
@@ -65,8 +66,8 @@ echo "DOCKER_REGISTRY: $DOCKER_REGISTRY"
 
 function e2e::image_load() {
     local images=(
-        pingcap/chaos-mesh
-        pingcap/chaos-daemon
+        chaos-mesh/chaos-mesh
+        chaos-mesh/chaos-daemon
         pingcap/e2e-helper
     )
     if [ "$PROVIDER" == "kind" ]; then
@@ -136,9 +137,11 @@ e2e_args=(
     ${ginkgo_args[@]:-}
     /usr/local/bin/e2e.test
     --
-    --manager-image="${DOCKER_REGISTRY}/pingcap/chaos-mesh"
+    --manager-image-registry="${DOCKER_REGISTRY}"
+    --manager-image="chaos-mesh/chaos-mesh"
     --manager-image-tag="${IMAGE_TAG}"
-    --daemon-image="${DOCKER_REGISTRY}/pingcap/chaos-daemon"
+    --daemon-image-registry="${DOCKER_REGISTRY}"
+    --daemon-image="chaos-mesh/chaos-daemon"
     --daemon-image-tag="${IMAGE_TAG}"
     --e2e-image="${DOCKER_REGISTRY}/pingcap/e2e-helper:${IMAGE_TAG}"
     --install-chaos-mesh

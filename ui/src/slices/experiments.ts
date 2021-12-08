@@ -1,3 +1,20 @@
+/*
+ * Copyright 2021 Chaos Mesh Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
 import { PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 
 import { Kind } from 'components/NewExperimentNext/data/types'
@@ -25,6 +42,8 @@ export const getNetworkTargetPodsByNamespaces = createAsyncThunk(
   async (data: Partial<Scope['selector']>) => (await api.common.pods(data)).data
 )
 
+export type Env = 'k8s' | 'physic'
+
 const initialState: {
   namespaces: string[]
   labels: Record<string, string[]>
@@ -34,6 +53,7 @@ const initialState: {
   fromExternal: boolean
   step1: boolean
   step2: boolean
+  env: Env
   kindAction: [Kind | '', string]
   spec: any
   basic: any
@@ -47,6 +67,7 @@ const initialState: {
   fromExternal: false,
   step1: false,
   step2: false,
+  env: 'k8s',
   kindAction: ['', ''],
   spec: {},
   basic: {},
@@ -64,6 +85,9 @@ const experimentsSlice = createSlice({
     },
     setStep2(state, action: PayloadAction<boolean>) {
       state.step2 = action.payload
+    },
+    setEnv(state, action: PayloadAction<Env>) {
+      state.env = action.payload
     },
     setKindAction(state, action) {
       state.kindAction = action.payload
@@ -117,6 +141,7 @@ export const {
   clearNetworkTargetPods,
   setStep1,
   setStep2,
+  setEnv,
   setKindAction,
   setSpec,
   setBasic,

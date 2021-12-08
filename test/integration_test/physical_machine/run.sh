@@ -1,27 +1,28 @@
 #!/usr/bin/env bash
-
 # Copyright 2021 Chaos Mesh Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+# http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
 
 cur=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 cd $cur
 
 echo "download and deploy chaosd"
 
-# TODO: use a released version
-curl -fsSL -o chaosd-platform-linux-amd64.tar.gz https://mirrors.chaos-mesh.org/chaosd-platform-linux-amd64.tar.gz
-tar zxvf chaosd-platform-linux-amd64.tar.gz
-./chaosd-platform-linux-amd64/chaosd server --port 31768 > chaosd.log 2>&1 &
+CHAOSD_VERSION=v1.1.0
+curl -fsSL -o chaosd-${CHAOSD_VERSION}-linux-amd64.tar.gz https://mirrors.chaos-mesh.org/chaosd-${CHAOSD_VERSION}-linux-amd64.tar.gz
+tar zxvf chaosd-${CHAOSD_VERSION}-linux-amd64.tar.gz
+./chaosd-${CHAOSD_VERSION}-linux-amd64/chaosd server --port 31768 > chaosd.log 2>&1 &
 
 function judge_stress() {
     hava_stress=$1
@@ -84,8 +85,8 @@ judge_stress false
 
 echo "****** finish physical machine chaos test ******"
 # clean
-rm chaosd-platform-linux-amd64.tar.gz
-rm -rf chaosd-platform-linux-amd64
+rm chaosd-${CHAOSD_VERSION}-linux-amd64.tar.gz
+rm -rf chaosd-${CHAOSD_VERSION}-linux-amd64
 rm *_tmp.yaml
 rm chaosd.log
 killall chaosd

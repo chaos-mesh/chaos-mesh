@@ -4,12 +4,14 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package schedule
 
@@ -23,23 +25,11 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/utils"
 )
 
-var Module = fx.Provide(
-	fx.Annotated{
-		Group:  "controller",
-		Target: cron.NewController,
-	},
-	fx.Annotated{
-		Group:  "controller",
-		Target: active.NewController,
-	},
-	fx.Annotated{
-		Group:  "controller",
-		Target: gc.NewController,
-	},
+var Module = fx.Options(
+	fx.Invoke(cron.Bootstrap),
+	fx.Invoke(active.Bootstrap),
+	fx.Invoke(gc.Bootstrap),
+	fx.Invoke(pause.Bootstrap),
 
-	fx.Annotated{
-		Group:  "controller",
-		Target: pause.NewController,
-	},
-	utils.NewActiveLister,
+	fx.Provide(utils.NewActiveLister),
 )

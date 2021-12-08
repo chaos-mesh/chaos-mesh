@@ -1,15 +1,17 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package networkchaos
 
@@ -59,8 +61,8 @@ func TestcaseForbidHostNetwork(
 		ns, "network-chaos-1",
 		map[string]string{"app": "network-peer-4"},
 		map[string]string{"app": "network-peer-1"},
-		v1alpha1.OnePodMode,
-		v1alpha1.OnePodMode,
+		v1alpha1.OneMode,
+		v1alpha1.OneMode,
 		v1alpha1.To,
 		pointer.StringPtr("9m"),
 	)
@@ -129,8 +131,8 @@ func TestcaseNetworkPartition(
 		ns, "network-chaos-1",
 		map[string]string{"app": "network-peer-0"},
 		map[string]string{"app": "network-peer-1"},
-		v1alpha1.OnePodMode,
-		v1alpha1.OnePodMode,
+		v1alpha1.OneMode,
+		v1alpha1.OneMode,
 		v1alpha1.To,
 		testDelayDuration,
 	)
@@ -168,8 +170,8 @@ func TestcaseNetworkPartition(
 		ns, "network-chaos-1",
 		map[string]string{"app": "network-peer-0"},
 		map[string]string{"app": "network-peer-1"},
-		v1alpha1.OnePodMode,
-		v1alpha1.OnePodMode,
+		v1alpha1.OneMode,
+		v1alpha1.OneMode,
 		v1alpha1.Both,
 		testDelayDuration,
 	)
@@ -205,8 +207,8 @@ func TestcaseNetworkPartition(
 		ns, "network-chaos-1",
 		map[string]string{"app": "network-peer-0"},
 		map[string]string{"app": "network-peer-1"},
-		v1alpha1.OnePodMode,
-		v1alpha1.OnePodMode,
+		v1alpha1.OneMode,
+		v1alpha1.OneMode,
 		v1alpha1.From,
 		testDelayDuration,
 	)
@@ -244,8 +246,8 @@ func TestcaseNetworkPartition(
 		ns, "network-chaos-1",
 		map[string]string{"app": "network-peer-0"},
 		map[string]string{"partition": "1"},
-		v1alpha1.OnePodMode,
-		v1alpha1.AllPodMode,
+		v1alpha1.OneMode,
+		v1alpha1.AllMode,
 		v1alpha1.Both,
 		testDelayDuration,
 	)
@@ -281,8 +283,8 @@ func TestcaseNetworkPartition(
 		ns, "network-chaos-2",
 		map[string]string{"app": "network-peer-0"},
 		map[string]string{"partition": "0"},
-		v1alpha1.OnePodMode,
-		v1alpha1.AllPodMode,
+		v1alpha1.OneMode,
+		v1alpha1.AllMode,
 		v1alpha1.To,
 		testDelayDuration,
 	)
@@ -323,8 +325,8 @@ func TestcaseNetworkPartition(
 		ns, "network-chaos-without-target",
 		map[string]string{"app": "network-peer-0"},
 		nil,
-		v1alpha1.OnePodMode,
-		v1alpha1.AllPodMode,
+		v1alpha1.OneMode,
+		v1alpha1.AllMode,
 		v1alpha1.To,
 		testDelayDuration,
 	)
@@ -333,15 +335,13 @@ func TestcaseNetworkPartition(
 
 	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports, false)
-		if len(result[networkConditionBlocked]) != 5 || len(result[networkConditionSlow]) != 0 {
+		if len(result[networkConditionBlocked]) != 3 || len(result[networkConditionSlow]) != 0 {
 			return false, nil
 		}
 		return true, nil
 	})
 	// The expected behavior is to block only 0 -> 1, 0 -> 2 and 0 -> 3
-	// Actually, 1 -> 0, 2 -> 0, 3 -> 0 are not blocked, but the `recvUDP`
-	// request failed due to partition.
-	framework.ExpectEqual(result[networkConditionBlocked], [][]int{{0, 1}, {1, 0}, {0, 2}, {2, 0}, {0, 3}, {3, 0}})
+	framework.ExpectEqual(result[networkConditionBlocked], [][]int{{0, 1}, {0, 2}, {0, 3}})
 	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
 
 	By("recover")
@@ -364,8 +364,8 @@ func TestcaseNetworkPartition(
 		ns, "network-chaos-without-target",
 		map[string]string{"app": "network-peer-0"},
 		nil,
-		v1alpha1.OnePodMode,
-		v1alpha1.AllPodMode,
+		v1alpha1.OneMode,
+		v1alpha1.AllMode,
 		v1alpha1.From,
 		testDelayDuration,
 	)
@@ -373,16 +373,15 @@ func TestcaseNetworkPartition(
 	framework.ExpectNoError(err, "create network chaos error")
 
 	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
-		result = probeNetworkCondition(c, networkPeers, ports, false)
-		if len(result[networkConditionBlocked]) != 5 || len(result[networkConditionSlow]) != 0 {
+		result = probeNetworkCondition(c, networkPeers, ports, true)
+		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 0 {
 			return false, nil
 		}
 		return true, nil
 	})
 	// The expected behavior is to block only 0 -> 1, 0 -> 2 and 0 -> 3
-	// Actually, 1 -> 0, 2 -> 0, 3 -> 0 are not blocked, but the `recvUDP`
-	// request failed due to partition.
-	framework.ExpectEqual(result[networkConditionBlocked], [][]int{{0, 1}, {1, 0}, {0, 2}, {2, 0}, {0, 3}, {3, 0}})
+	// but the dropped packet will not throw an error
+	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
 	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
 
 	By("recover")

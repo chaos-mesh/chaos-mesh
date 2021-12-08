@@ -4,12 +4,14 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package schedule
 
@@ -26,7 +28,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 
@@ -71,7 +72,6 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint.GET("/:uid", s.get)
 	endpoint.DELETE("/:uid", s.delete)
 	endpoint.DELETE("", s.batchDelete)
-	endpoint.PUT("", s.update)
 	endpoint.PUT("/pause/:uid", s.pauseSchedule)
 	endpoint.PUT("/start/:uid", s.startSchedule)
 }
@@ -416,50 +416,6 @@ func checkAndDeleteSchedule(c *gin.Context, kubeCli client.Client, namespacedNam
 	}
 
 	return
-}
-
-// @Summary Update a schedule.
-// @Description Update a schedule.
-// @Tags schedules
-// @Produce json
-// @Param request body v1alpha1.Schedule true "Request body"
-// @Success 200 {object} v1alpha1.Schedule
-// @Failure 400 {object} utils.APIError
-// @Failure 404 {object} utils.APIError
-// @Failure 500 {object} utils.APIError
-// @Router /schedules [put]
-func (s *Service) update(c *gin.Context) {
-	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
-	if err != nil {
-		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
-
-		return
-	}
-
-	var sch v1alpha1.Schedule
-	if err = u.ShouldBindBodyWithJSON(c, &sch); err != nil {
-		return
-	}
-
-	if err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		return internalUpdate(kubeCli, &sch)
-	}); err != nil {
-		u.SetAPImachineryError(c, err)
-
-		return
-	}
-
-	c.JSON(http.StatusOK, sch)
-}
-
-func internalUpdate(kubeCli client.Client, sch *v1alpha1.Schedule) error {
-	ns, name := sch.Namespace, sch.Name
-
-	if err := kubeCli.Get(context.Background(), types.NamespacedName{Namespace: ns, Name: name}, sch); err != nil {
-		return err
-	}
-
-	return kubeCli.Update(context.Background(), sch)
 }
 
 // @Summary Pause a schedule.

@@ -4,12 +4,14 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package v1alpha1
 
@@ -105,7 +107,7 @@ var _ = Describe("HTTPChaos Webhook", func() {
 					expect: "error",
 				},
 				{
-					name: "validate value with FixedPercentPodMode",
+					name: "validate value with FixedPercentMode",
 					chaos: HTTPChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
@@ -114,7 +116,7 @@ var _ = Describe("HTTPChaos Webhook", func() {
 						Spec: HTTPChaosSpec{
 							PodSelector: PodSelector{
 								Value: "0",
-								Mode:  FixedPodMode,
+								Mode:  FixedMode,
 							},
 							Port:   80,
 							Target: PodHttpRequest,
@@ -126,7 +128,7 @@ var _ = Describe("HTTPChaos Webhook", func() {
 					expect: "error",
 				},
 				{
-					name: "validate value with FixedPercentPodMode, parse value error",
+					name: "validate value with FixedPercentMode, parse value error",
 					chaos: HTTPChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
@@ -135,7 +137,7 @@ var _ = Describe("HTTPChaos Webhook", func() {
 						Spec: HTTPChaosSpec{
 							PodSelector: PodSelector{
 								Value: "num",
-								Mode:  FixedPodMode,
+								Mode:  FixedMode,
 							},
 							Port:   80,
 							Target: PodHttpRequest,
@@ -147,7 +149,7 @@ var _ = Describe("HTTPChaos Webhook", func() {
 					expect: "error",
 				},
 				{
-					name: "validate value with RandomMaxPercentPodMode",
+					name: "validate value with RandomMaxPercentMode",
 					chaos: HTTPChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
@@ -156,7 +158,7 @@ var _ = Describe("HTTPChaos Webhook", func() {
 						Spec: HTTPChaosSpec{
 							PodSelector: PodSelector{
 								Value: "0",
-								Mode:  RandomMaxPercentPodMode,
+								Mode:  RandomMaxPercentMode,
 							},
 							Port:   80,
 							Target: PodHttpRequest,
@@ -168,7 +170,7 @@ var _ = Describe("HTTPChaos Webhook", func() {
 					expect: "error",
 				},
 				{
-					name: "validate value with RandomMaxPercentPodMode ,parse value error",
+					name: "validate value with RandomMaxPercentMode ,parse value error",
 					chaos: HTTPChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
@@ -177,7 +179,7 @@ var _ = Describe("HTTPChaos Webhook", func() {
 						Spec: HTTPChaosSpec{
 							PodSelector: PodSelector{
 								Value: "num",
-								Mode:  RandomMaxPercentPodMode,
+								Mode:  RandomMaxPercentMode,
 							},
 							Port:   80,
 							Target: PodHttpRequest,
@@ -189,7 +191,7 @@ var _ = Describe("HTTPChaos Webhook", func() {
 					expect: "error",
 				},
 				{
-					name: "validate value with FixedPercentPodMode",
+					name: "validate value with FixedPercentMode",
 					chaos: HTTPChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
@@ -198,7 +200,7 @@ var _ = Describe("HTTPChaos Webhook", func() {
 						Spec: HTTPChaosSpec{
 							PodSelector: PodSelector{
 								Value: "101",
-								Mode:  FixedPercentPodMode,
+								Mode:  FixedPercentMode,
 							},
 							Port:   80,
 							Target: PodHttpRequest,

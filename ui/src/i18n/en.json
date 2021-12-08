@@ -62,8 +62,27 @@
     "target": {
       "kind": "Kind",
       "action": "Action",
-      "pod": {
-        "title": "Pod Fault"
+      "aws": {
+        "title": "AWS Fault"
+      },
+      "disk": {
+        "title": "Disk Fault"
+      },
+      "dns": {
+        "title": "DNS Fault"
+      },
+      "gcp": {
+        "title": "GCP Fault"
+      },
+
+      "io": {
+        "title": "IO Injection"
+      },
+      "jvm": {
+        "title": "JVM Fault"
+      },
+      "kernel": {
+        "title": "Kernel Fault"
       },
       "network": {
         "title": "Network Attack",
@@ -73,26 +92,23 @@
           "podsPreviewHelper": "Checking or unchecking Pods to further limit the scope of the target"
         }
       },
-      "io": {
-        "title": "IO Injection"
+      "http": {
+        "title": "HTTP Fault"
       },
-      "kernel": {
-        "title": "Kernel Fault"
+      "physicalmachine": {
+        "title": "Physic Fault"
       },
-      "time": {
-        "title": "Clock Skew"
+      "pod": {
+        "title": "Pod Fault"
+      },
+      "process": {
+        "title": "Process interruption"
       },
       "stress": {
         "title": "Stress Test"
       },
-      "dns": {
-        "title": "DNS Fault"
-      },
-      "aws": {
-        "title": "AWS Fault"
-      },
-      "gcp": {
-        "title": "GCP Fault"
+      "time": {
+        "title": "Clock Skew"
       }
     },
     "run": {
@@ -120,6 +136,7 @@
       "parallel": "Parallel",
       "suspend": "Suspend",
       "custom": "Task",
+      "http": "HTTP Request",
       "number": "Number",
       "child": "Child task",
       "nameHelper": "The task name",
@@ -130,6 +147,7 @@
       "container": {
         "title": "Container",
         "nameHelper": "The container name",
+        "nameValidation": "The container name is required",
         "image": "Image",
         "imageHelper": "The image of container",
         "imageValidation": "The image is required",
@@ -142,6 +160,16 @@
         "target": "Target",
         "expression": "Expression"
       },
+      "httpRequest": {
+        "url": "URL",
+        "urlHelper": "Request URL",
+        "method": "Method",
+        "methodHelper": "Request Method",
+        "body": "Body",
+        "bodyHelper": "Request Body",
+        "follow": "Follow 301/302 Location",
+        "json": "Json Content"
+      },
       "deleteDesc": "This task will be deleted",
       "submitAll": "Submit All"
     },
@@ -149,6 +177,7 @@
     "parallelTitle": "Set parallel",
     "suspendTitle": "Set suspend",
     "customTitle": "Set task",
+    "httpTitle": "Set HTTP Request",
     "nameHelper": "The workflow name",
     "nameValidation": "The workflow name is required",
     "durationValidation": "The workflow duration is required",
@@ -213,6 +242,11 @@
     "deleteMulti": "Delete selected archives",
     "deleteDesc": "The Archive will be permanently deleted"
   },
+  "physics": {
+    "title": "Physics",
+    "single": "Physic",
+    "notFound": "No physical machines found"
+  },
   "settings": {
     "title": "Settings",
     "debugMode": {
@@ -238,7 +272,7 @@
     "addToken": {
       "prompt": "Enter the token (RBAC Authorization) to continue",
       "prompt2": "Don't know how to get the token?",
-      "prompt3": "Click here to generate.",
+      "prompt3": " Click here to generate",
       "generator": "Token generator",
       "generatorHelper": "👇 Generate different tokens by choosing different namespaces and roles.",
       "generatorHelper2": "1. After choosing, save below content as rbac.yaml.",
@@ -247,13 +281,14 @@
       "clustered": "Cluster scoped",
       "role": "Role",
       "roleHelper": "Choose role",
-      "title": "Add Token",
       "nameHelper": "Please fill the token name",
       "nameValidation": "The token name is required",
       "token": "Token",
       "tokenHelper": "Please fill the secret token",
       "tokenValidation": "The token is required",
-      "duplicateDesc": "Token name can't be duplicate"
+      "duplicateDesc": "Token name can't be duplicate",
+      "or": "Or use the following authentication methods",
+      "gcp": "Currently signed in with Google"
     }
   },
   "swagger": {
@@ -293,7 +328,9 @@
     "durationHelper": "The supported formats of the duration are: ms / s / m / h.",
     "edit": "Edit",
     "ip": "IP address",
-    "isKVHelperText": "Type key:value and end with a space to generate a key/value pair",
+    "isKVHelperText": "Type key:value and end with a TAB to generate a key/value pair",
+    "logout": "Logout",
+    "logoutDesc": "You need to re-enter the token after logging out",
     "multiOptions": "Support mutiple options",
     "name": "Name",
     "noOptions": "No options",
@@ -341,12 +378,17 @@
     }
   },
   "k8s": {
+    "title": "Kubernetes",
     "namespace": "Namespace",
     "labels": "Labels",
     "annotations": "Annotations",
     "namespaceSelectors": "Namespace Selectors",
     "labelSelectors": "Label Selectors",
     "annotationsSelectors": "Annotation Selectors",
-    "phaseSelectors": "Phase Selectors"
+    "podPhaseSelectors": "Phase Selectors"
+  },
+  "physic": {
+    "address": "Address",
+    "addressHelper": "Type and end with a space to add one or more chaosd addresses"
   }
 }

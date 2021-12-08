@@ -1,12 +1,29 @@
-import { Box, Button, Grow, Modal, useTheme } from '@material-ui/core'
+/*
+ * Copyright 2021 Chaos Mesh Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+import { Box, Button, Grid, Grow, Modal, useTheme } from '@material-ui/core'
 import { Confirm, setAlert, setConfirm } from 'slices/globalStatus'
 import { useEffect, useRef, useState } from 'react'
 import { useHistory, useParams } from 'react-router-dom'
 
 import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
+import { Event } from 'api/events.type'
 import { EventHandler } from 'cytoscape'
+import EventsTimeline from 'components/EventsTimeline'
 import NodeConfiguration from 'components/ObjectConfiguration/Node'
-import NoteOutlinedIcon from '@material-ui/icons/NoteOutlined'
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
 import Space from 'components-mui/Space'
@@ -24,9 +41,7 @@ import yaml from 'js-yaml'
 const YAMLEditor = loadable(() => import('components/YAMLEditor'))
 
 const useStyles = makeStyles((theme) => ({
-  root: {
-    height: `calc(100vh - 56px - ${theme.spacing(18)})`,
-  },
+  root: {},
   configPaper: {
     position: 'absolute',
     top: '50%',
@@ -56,6 +71,8 @@ const Single = () => {
   const modalTitle = selected === 'workflow' ? single?.name : selected === 'node' ? data.name : ''
   const [configOpen, setConfigOpen] = useState(false)
   const topologyRef = useRef<any>(null)
+
+  const [events, setEvents] = useState<Event[]>([])
 
   const fetchWorkflowSingle = (intervalID?: number) =>
     api.workflows
@@ -90,6 +107,21 @@ const Single = () => {
 
       topologyRef.current = updateElements
     }
+
+    const fetchEvents = () => {
+      api.events
+        .cascadeFetchEventsForWorkflow(uuid, { limit: 999 })
+        .then(({ data }) => setEvents(data))
+        .catch(console.error)
+        .finally(() => {
+          // setLoading(false)
+        })
+    }
+
+    if (single) {
+      fetchEvents()
+    }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [single])
 
@@ -128,17 +160,6 @@ const Single = () => {
     }
   }
 
-  const handleOpenConfig = () => {
-    setData({
-      apiVersion: 'chaos-mesh.org/v1alpha1',
-      kind: 'Workflow',
-      ...single?.kube_object,
-    })
-    setSelected('workflow')
-
-    onModalOpen()
-  }
-
   const handleNodeClick: EventHandler = (e) => {
     const node = e.target
     const { template: nodeTemplate } = node.data()
@@ -148,41 +169,6 @@ const Single = () => {
     setSelected('node')
 
     onModalOpen()
-  }
-
-  const handleUpdateWorkflow = (data: any) => {
-    if (selected === 'node') {
-      const kubeObject = single?.kube_object
-      kubeObject.spec.templates = kubeObject.spec.templates.map((t: any) => {
-        if (t.name === (data as any).name) {
-          return data
-        }
-
-        return t
-      })
-
-      data = {
-        apiVersion: 'chaos-mesh.org/v1alpha1',
-        kind: 'Workflow',
-        ...kubeObject,
-      }
-    }
-
-    api.workflows
-      .update(uuid, data)
-      .then(() => {
-        onModalClose()
-
-        dispatch(
-          setAlert({
-            type: 'success',
-            message: T(`confirm.success.update`, intl),
-          })
-        )
-
-        fetchWorkflowSingle()
-      })
-      .catch(console.error)
   }
 
   return (
@@ -204,26 +190,47 @@ const Single = () => {
                 {T('archives.single')}
               </Button>
             </Space>
-            <Paper sx={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+            <Paper sx={{ display: 'flex', flexDirection: 'column', height: 450 }}>
               <PaperTop
                 title={
                   <Space spacing={1.5} alignItems="center">
                     <Box>{T('workflow.topology')}</Box>
                   </Space>
                 }
-              >
-                <Button
-                  variant="outlined"
-                  size="small"
-                  color="primary"
-                  startIcon={<NoteOutlinedIcon />}
-                  onClick={handleOpenConfig}
-                >
-                  {T('common.configuration')}
-                </Button>
-              </PaperTop>
+              ></PaperTop>
               <div ref={topologyRef} style={{ flex: 1 }} />
             </Paper>
+
+            <Grid container>
+              <Grid item xs={12} lg={6} sx={{ pr: 3 }}>
+                <Paper sx={{ display: 'flex', flexDirection: 'column', height: 600 }}>
+                  <PaperTop title={T('events.title')} boxProps={{ mb: 3 }} />
+                  <Box flex={1} overflow="scroll">
+                    <EventsTimeline events={events} />
+                  </Box>
+                </Paper>
+              </Grid>
+              <Grid item xs={12} lg={6} sx={{ pl: 3 }}>
+                <Paper sx={{ height: 600, p: 0 }}>
+                  {single && (
+                    <Space display="flex" flexDirection="column" height="100%">
+                      <PaperTop title={T('common.definition')} boxProps={{ p: 4.5, pb: 0 }} />
+                      <Box flex={1}>
+                        <YAMLEditor
+                          name={single.name}
+                          data={yaml.dump({
+                            apiVersion: 'chaos-mesh.org/v1alpha1',
+                            kind: 'Workflow',
+                            ...single.kube_object,
+                          })}
+                          download
+                        />
+                      </Box>
+                    </Space>
+                  )}
+                </Paper>
+              </Grid>
+            </Grid>
           </Space>
         </div>
       </Grow>
@@ -243,7 +250,7 @@ const Single = () => {
                       <NodeConfiguration template={data} />
                     </Box>
                   )}
-                  <YAMLEditor name={modalTitle} data={yaml.dump(data)} onUpdate={handleUpdateWorkflow} download />
+                  <YAMLEditor name={modalTitle} data={yaml.dump(data)} />
                 </Box>
               </Space>
             )}

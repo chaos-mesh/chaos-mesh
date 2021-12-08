@@ -1,3 +1,19 @@
+/*
+ * Copyright 2021 Chaos Mesh Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 import {
   Box,
   Button,
@@ -169,116 +185,110 @@ const NewWorkflow = () => {
   }
 
   return (
-    <>
-      <Grid container spacing={9}>
-        <Grid item xs={12} md={8}>
-          <Space spacing={6}>
-            <Typography>{T('common.process')}</Typography>
-            <Stepper orientation="vertical" sx={{ mt: -1, p: 0 }}>
-              {steps.length > 0 &&
-                steps.map((step, index) => (
-                  <Step key={step.name}>
-                    {restoreIndex !== index ? (
-                      <StepLabel icon={<CheckIcon sx={{ color: 'success.main' }} />}>
-                        <Paper sx={{ p: 3, borderColor: 'success.main' }}>
-                          <Box display="flex" justifyContent="space-between">
-                            <Space direction="row" alignItems="center">
-                              <Chip label={T(`newW.node.${step.type}`)} color="primary" size="small" />
-                              <Typography component="div" variant="body1">
-                                {step.name}
-                              </Typography>
-                            </Space>
-                            <Space direction="row">
-                              <IconButton
-                                size="small"
-                                title={T('common.edit', intl)}
-                                onClick={restoreExperiment(index)}
-                              >
-                                <UndoIcon />
-                              </IconButton>
-                              <Menu>
-                                <MenuItem dense onClick={handleSelect(step.name, index, 'delete')}>
-                                  <ListItemIcon>
-                                    <RemoveIcon fontSize="small" />
-                                  </ListItemIcon>
-                                  <Typography variant="inherit">{T('common.delete')}</Typography>
-                                </MenuItem>
-                              </Menu>
-                            </Space>
-                          </Box>
-                        </Paper>
-                      </StepLabel>
-                    ) : (
-                      <Add externalTemplate={step} update={index} updateCallback={updateTemplateCallback} />
-                    )}
-                  </Step>
-                ))}
-              {restoreIndex < 0 && (
-                <Step>
-                  <Add />
+    <Grid container spacing={9}>
+      <Grid item xs={12} md={8}>
+        <Space spacing={6}>
+          <Typography>{T('common.process')}</Typography>
+          <Stepper orientation="vertical" sx={{ mt: -1, p: 0 }}>
+            {steps.length > 0 &&
+              steps.map((step, index) => (
+                <Step key={step.name}>
+                  {restoreIndex !== index ? (
+                    <StepLabel icon={<CheckIcon sx={{ color: 'success.main' }} />}>
+                      <Paper sx={{ p: 3, borderColor: 'success.main' }}>
+                        <Box display="flex" justifyContent="space-between">
+                          <Space direction="row" alignItems="center">
+                            <Chip label={T(`newW.node.${step.type}`)} color="primary" size="small" />
+                            <Typography component="div" variant="body1">
+                              {step.name}
+                            </Typography>
+                          </Space>
+                          <Space direction="row">
+                            <IconButton size="small" title={T('common.edit', intl)} onClick={restoreExperiment(index)}>
+                              <UndoIcon />
+                            </IconButton>
+                            <Menu>
+                              <MenuItem dense onClick={handleSelect(step.name, index, 'delete')}>
+                                <ListItemIcon>
+                                  <RemoveIcon fontSize="small" />
+                                </ListItemIcon>
+                                <Typography variant="inherit">{T('common.delete')}</Typography>
+                              </MenuItem>
+                            </Menu>
+                          </Space>
+                        </Box>
+                      </Paper>
+                    </StepLabel>
+                  ) : (
+                    <Add externalTemplate={step} update={index} updateCallback={updateTemplateCallback} />
+                  )}
                 </Step>
-              )}
-            </Stepper>
-          </Space>
-        </Grid>
-        <Grid item xs={12} md={4} className={classes.leftSticky}>
-          <Formik
-            initialValues={{ name: '', namespace: '', deadline: '' }}
-            onSubmit={submitWorkflow}
-            validate={onValidate}
-            validateOnBlur={false}
-          >
-            {({ errors, touched }) => (
-              <Form style={{ height: '100%' }}>
-                <Space height="100%">
-                  <Typography>{T('newW.titleBasic')}</Typography>
-                  <TextField
-                    name="name"
-                    label={T('common.name')}
-                    validate={validateName(T('newW.nameValidation', intl))}
-                    helperText={errors.name && touched.name ? errors.name : T('newW.nameHelper')}
-                    error={errors.name && touched.name ? true : false}
-                  />
-                  <SelectField name="namespace" label={T('k8s.namespace')} helperText={T('newE.basic.namespaceHelper')}>
-                    {namespaces.map((n) => (
-                      <MenuItem key={n} value={n}>
-                        {n}
-                      </MenuItem>
-                    ))}
-                  </SelectField>
-                  <TextField
-                    name="deadline"
-                    label={T('newW.node.deadline')}
-                    validate={validateDeadline(T('newW.node.deadlineValidation', intl))}
-                    helperText={errors.deadline && touched.deadline ? errors.deadline : T('newW.node.deadlineHelper')}
-                    error={errors.deadline && touched.deadline ? true : false}
-                  />
-                  <Typography>{T('common.preview')}</Typography>
-                  <Box flex={1}>
-                    <Paper sx={{ p: 0 }}>
-                      <YAMLEditor
-                        data={constructWorkflow(workflowBasic, Object.values(templates))}
-                        mountEditor={setYAMLEditor}
-                      />
-                    </Paper>
-                  </Box>
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    color="primary"
-                    startIcon={<PublishIcon />}
-                    fullWidth
-                    disabled={_isEmpty(templates)}
-                  >
-                    {T('newW.submit')}
-                  </Button>
-                </Space>
-              </Form>
+              ))}
+            {restoreIndex < 0 && (
+              <Step>
+                <Add />
+              </Step>
             )}
-          </Formik>
-        </Grid>
+          </Stepper>
+        </Space>
       </Grid>
-    </>
+      <Grid item xs={12} md={4} className={classes.leftSticky}>
+        <Formik
+          initialValues={{ name: '', namespace: '', deadline: '' }}
+          onSubmit={submitWorkflow}
+          validate={onValidate}
+          validateOnBlur={false}
+        >
+          {({ errors, touched }) => (
+            <Form style={{ height: '100%' }}>
+              <Space height="100%">
+                <Typography>{T('newW.titleBasic')}</Typography>
+                <TextField
+                  name="name"
+                  label={T('common.name')}
+                  validate={validateName(T('newW.nameValidation', intl))}
+                  helperText={errors.name && touched.name ? errors.name : T('newW.nameHelper')}
+                  error={errors.name && touched.name ? true : false}
+                />
+                <SelectField name="namespace" label={T('k8s.namespace')} helperText={T('newE.basic.namespaceHelper')}>
+                  {namespaces.map((n) => (
+                    <MenuItem key={n} value={n}>
+                      {n}
+                    </MenuItem>
+                  ))}
+                </SelectField>
+                <TextField
+                  name="deadline"
+                  label={T('newW.node.deadline')}
+                  validate={validateDeadline(T('newW.node.deadlineValidation', intl))}
+                  helperText={errors.deadline && touched.deadline ? errors.deadline : T('newW.node.deadlineHelper')}
+                  error={errors.deadline && touched.deadline ? true : false}
+                />
+                <Typography>{T('common.preview')}</Typography>
+                <Box flex={1}>
+                  <Paper sx={{ p: 0 }}>
+                    <YAMLEditor
+                      data={constructWorkflow(workflowBasic, Object.values(templates))}
+                      mountEditor={setYAMLEditor}
+                    />
+                  </Paper>
+                </Box>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                  startIcon={<PublishIcon />}
+                  fullWidth
+                  disabled={_isEmpty(templates)}
+                >
+                  {T('newW.submit')}
+                </Button>
+              </Space>
+            </Form>
+          )}
+        </Formik>
+      </Grid>
+    </Grid>
   )
 }
 

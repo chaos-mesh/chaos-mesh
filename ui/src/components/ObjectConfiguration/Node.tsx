@@ -1,3 +1,19 @@
+/*
+ * Copyright 2021 Chaos Mesh Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 import { Box, Table, TableBody, TableRow, Typography } from '@material-ui/core'
 
 import { Branch } from 'slices/workflows'
@@ -96,31 +112,32 @@ const Custom = ({ template: t }: NodeConfigurationProps) => {
       <Typography variant="subtitle2" gutterBottom>
         {T('newW.node.conditionalBranches.title')}
       </Typography>
-      {t.conditionalBranches.map((d: Branch, i: number) => (
-        <Box key={i}>
-          <Typography variant="subtitle2" gutterBottom>
-            {T('newW.node.conditionalBranches.branch')} {i + 1}
-          </Typography>
-          <Table size="small">
-            <TableRow>
-              <TableCell>{T('newW.node.conditionalBranches.target')}</TableCell>
-              <TableCell>
-                <Typography variant="body2" color="textSecondary">
-                  {d.target}
-                </Typography>
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>{T('newW.node.conditionalBranches.expression')}</TableCell>
-              <TableCell>
-                <Typography variant="body2" color="textSecondary">
-                  {d.expression}
-                </Typography>
-              </TableCell>
-            </TableRow>
-          </Table>
-        </Box>
-      ))}
+      {t.conditionalBranches &&
+        t.conditionalBranches.map((d: Branch, i: number) => (
+          <Box key={i}>
+            <Typography variant="subtitle2" gutterBottom>
+              {T('newW.node.conditionalBranches.branch')} {i + 1}
+            </Typography>
+            <Table size="small">
+              <TableRow>
+                <TableCell>{T('newW.node.conditionalBranches.target')}</TableCell>
+                <TableCell>
+                  <Typography variant="body2" color="textSecondary">
+                    {d.target}
+                  </Typography>
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>{T('newW.node.conditionalBranches.expression')}</TableCell>
+                <TableCell>
+                  <Typography variant="body2" color="textSecondary">
+                    {d.expression}
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            </Table>
+          </Box>
+        ))}
     </>
   )
 }

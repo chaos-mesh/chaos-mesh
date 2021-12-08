@@ -4,12 +4,14 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package desiredphase
 
@@ -19,6 +21,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
@@ -30,12 +33,16 @@ type Objs struct {
 	Objs []types.Object `group:"objs"`
 }
 
-func NewController(mgr ctrl.Manager, client client.Client, logger logr.Logger, recorderBuilder *recorder.RecorderBuilder, pairs Objs) (types.Controller, error) {
+func Bootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, recorderBuilder *recorder.RecorderBuilder, pairs Objs) error {
 	for _, obj := range pairs.Objs {
+		name := obj.Name + "-desiredphase"
+		if !ccfg.ShouldSpawnController(name) {
+			return nil
+		}
 
 		err := builder.Default(mgr).
 			For(obj.Object).
-			Named(obj.Name + "-desiredphase").
+			Named(name).
 			Complete(&Reconciler{
 				Object:   obj.Object,
 				Client:   client,
@@ -43,10 +50,10 @@ func NewController(mgr ctrl.Manager, client client.Client, logger logr.Logger, r
 				Log:      logger.WithName("desiredphase"),
 			})
 		if err != nil {
-			return "", err
+			return err
 		}
 
 	}
 
-	return "desiredphase", nil
+	return nil
 }

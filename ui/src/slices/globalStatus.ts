@@ -1,3 +1,20 @@
+/*
+ * Copyright 2021 Chaos Mesh Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 
 import { Config } from 'api/common.type'
@@ -24,6 +41,7 @@ const initialState: {
   namespace: string
   securityMode: boolean
   dnsServerCreate: boolean
+  gcpSecurityMode: boolean
   version: string
   tokens: TokenFormValues[]
   tokenName: string
@@ -41,6 +59,7 @@ const initialState: {
   namespace: 'All',
   securityMode: true,
   dnsServerCreate: false,
+  gcpSecurityMode: false,
   version: '',
   tokens: [],
   tokenName: '',
@@ -64,17 +83,18 @@ const globalStatusSlice = createSlice({
     setConfirmOpen(state, action: PayloadAction<boolean>) {
       state.confirmOpen = action.payload
     },
+    setConfig(state, action: PayloadAction<Config>) {
+      state.securityMode = action.payload.security_mode
+      state.dnsServerCreate = action.payload.dns_server_create
+      state.gcpSecurityMode = action.payload.gcp_security_mode
+      state.version = action.payload.version
+    },
     setNameSpace(state, action: PayloadAction<string>) {
       const ns = action.payload
 
       state.namespace = ns
 
       LS.set('global-namespace', ns)
-    },
-    setConfig(state, action: PayloadAction<Config>) {
-      state.securityMode = action.payload.security_mode
-      state.dnsServerCreate = action.payload.dns_server_create
-      state.version = action.payload.version
     },
     setTokens(state, action: PayloadAction<TokenFormValues[]>) {
       const tokens = action.payload
@@ -93,7 +113,7 @@ const globalStatusSlice = createSlice({
   },
 })
 
-export const { setAlert, setAlertOpen, setConfirm, setConfirmOpen, setNameSpace, setConfig, setTokens, setTokenName } =
+export const { setAlert, setAlertOpen, setConfirm, setConfirmOpen, setConfig, setNameSpace, setTokens, setTokenName } =
   globalStatusSlice.actions
 
 export default globalStatusSlice.reducer

@@ -1,15 +1,17 @@
-// Copyright 2019 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package main
 
@@ -38,11 +40,11 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-controller-manager/provider"
 	"github.com/chaos-mesh/chaos-mesh/controllers"
 	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
-	"github.com/chaos-mesh/chaos-mesh/controllers/metrics"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
 	ctrlserver "github.com/chaos-mesh/chaos-mesh/pkg/ctrl"
 	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
+	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
@@ -92,8 +94,7 @@ type RunParams struct {
 	AuthCli             *authorizationv1.AuthorizationV1Client
 	DaemonClientBuilder *chaosdaemon.ChaosDaemonClientBuilder
 
-	Controllers []types.Controller `group:"controller"`
-	Objs        []types.Object     `group:"objs"`
+	Objs []types.Object `group:"objs"`
 }
 
 func Run(params RunParams) error {
@@ -102,6 +103,10 @@ func Run(params RunParams) error {
 
 	var err error
 	for _, obj := range params.Objs {
+		if !ccfg.ShouldStartWebhook(obj.Name) {
+			continue
+		}
+
 		err = ctrl.NewWebhookManagedBy(mgr).
 			For(obj.Object).
 			Complete()
@@ -110,24 +115,27 @@ func Run(params RunParams) error {
 		}
 	}
 
-	// setup schedule webhook
-	err = ctrl.NewWebhookManagedBy(mgr).
-		For(&v1alpha1.Schedule{}).
-		Complete()
-	if err != nil {
-		return err
+	if ccfg.ShouldStartWebhook("schedule") {
+		// setup schedule webhook
+		err = ctrl.NewWebhookManagedBy(mgr).
+			For(&v1alpha1.Schedule{}).
+			Complete()
+		if err != nil {
+			return err
+		}
 	}
 
-	// setup workflow webhook
-	err = ctrl.NewWebhookManagedBy(mgr).
-		For(&v1alpha1.Workflow{}).
-		Complete()
-	if err != nil {
-		return err
+	if ccfg.ShouldStartWebhook("workflow") {
+		err = ctrl.NewWebhookManagedBy(mgr).
+			For(&v1alpha1.Workflow{}).
+			Complete()
+		if err != nil {
+			return err
+		}
 	}
 
 	// Init metrics collector
-	metricsCollector := metrics.NewChaosCollector(mgr.GetCache(), controllermetrics.Registry)
+	metricsCollector := metrics.NewChaosControllerManagerMetricsCollector(mgr.GetCache(), controllermetrics.Registry)
 
 	setupLog.Info("Setting up webhook server")
 	hookServer := mgr.GetWebhookServer()

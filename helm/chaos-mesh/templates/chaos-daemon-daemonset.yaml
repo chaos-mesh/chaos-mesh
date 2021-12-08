@@ -1,3 +1,17 @@
+# Copyright 2021 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -38,7 +52,7 @@ spec:
   {{- end }}
       containers:
         - name: chaos-daemon
-          image: {{template "registry-prefix" .}}{{ .Values.chaosDaemon.image }}
+          image: {{template "chaos-daemon.image" . }}
           imagePullPolicy: {{ .Values.chaosDaemon.imagePullPolicy | default "IfNotPresent" }}
           {{- if .Values.chaosDaemon.resources }}
           resources:
@@ -114,7 +128,7 @@ spec:
               containerPort: {{ .Values.chaosDaemon.httpPort }}
 {{- if .Values.bpfki.create }}
         - name: bpfki
-          image: {{template "registry-prefix" .}}{{ .Values.bpfki.image }}
+          image: {{template "chaos-kernel.image" . }}
           imagePullPolicy: {{ .Values.bpfki.imagePullPolicy | default "IfNotPresent" }}
           {{- if .Values.bpfki.resources }}
           resources:
@@ -143,7 +157,7 @@ spec:
 {{- end }}
         {{- if .Values.chaosDlv.enable }}
         - name: chaos-mesh-dlv
-          image: {{template "registry-prefix" .}}{{ .Values.chaosDlv.image }}
+          image: {{template "chaos-dlv.image" . }}
           imagePullPolicy: {{ .Values.chaosDlv.imagePullPolicy | default "IfNotPresent" }}
           env:
             - name: CMD_NAME

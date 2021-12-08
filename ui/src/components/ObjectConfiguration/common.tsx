@@ -1,3 +1,19 @@
+/*
+ * Copyright 2021 Chaos Mesh Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 import {
   ListItemProps,
   ListProps,
@@ -12,7 +28,6 @@ import {
 } from '@material-ui/core'
 
 import { ExperimentKind } from 'components/NewExperiment/types'
-import PaperTop from 'components-mui/PaperTop'
 import T from 'components/T'
 import { objToArrBySep } from 'lib/utils'
 
@@ -188,94 +203,38 @@ const IO = ({ data }: any) => (
 
 export const Stress = ({ data: { stressors, stressngStressors, containerName } }: any) => (
   <>
-    {stressors.cpu && (
-      <>
-        <PaperTop title="CPU" />
-        {stressors.cpu.workers && (
-          <TableRow>
-            <TableCell>Workers</TableCell>
-            <TableCell>
-              <Typography variant="body2" color="textSecondary">
-                {stressors.cpu.workers}
-              </Typography>
-            </TableCell>
-          </TableRow>
-        )}
-        {stressors.cpu.load && (
-          <TableRow>
-            <TableCell>Load</TableCell>
-            <TableCell>
-              <Typography variant="body2" color="textSecondary">
-                {stressors.cpu.load}
-              </Typography>
-            </TableCell>
-          </TableRow>
-        )}
-        {stressors.cpu.options && (
-          <TableRow>
-            <TableCell>Options</TableCell>
-            <TableCell>
-              <List>
-                {objToArrBySep(stressors.cpu.options, ': ').map((d) => (
-                  <ListItem key={d}>
-                    <Typography variant="body2" color="textSecondary">
-                      {d}
-                    </Typography>
-                  </ListItem>
-                ))}
-              </List>
-            </TableCell>
-          </TableRow>
-        )}
-      </>
+    {stressors.cpu && stressors.cpu.workers > 0 && (
+      <TableRow>
+        <TableCell>CPU</TableCell>
+        <TableCell>
+          <Typography variant="body2" color="textSecondary">
+            workers: {stressors.cpu.workers}
+          </Typography>
+          <Typography variant="body2" color="textSecondary">
+            size: {stressors.cpu.size}
+          </Typography>
+        </TableCell>
+      </TableRow>
     )}
-    {stressors.memory && (
-      <>
-        <PaperTop title="Memory" />
-        {stressors.memory.workers && (
-          <TableRow>
-            <TableCell>Workers</TableCell>
-            <TableCell>
-              <Typography variant="body2" color="textSecondary">
-                {stressors.memory.workers}
-              </Typography>
-            </TableCell>
-          </TableRow>
-        )}
-        {stressors.memory.size && (
-          <TableRow>
-            <TableCell>Size</TableCell>
-            <TableCell>
-              <Typography variant="body2" color="textSecondary">
-                {stressors.memory.size}
-              </Typography>
-            </TableCell>
-          </TableRow>
-        )}
-        {stressors.memory.options && (
-          <TableRow>
-            <TableCell>Options</TableCell>
-            <TableCell>
-              <List>
-                {objToArrBySep(stressors.memory.options, ': ').map((d) => (
-                  <ListItem key={d}>
-                    <Typography variant="body2" color="textSecondary">
-                      {d}
-                    </Typography>
-                  </ListItem>
-                ))}
-              </List>
-            </TableCell>
-          </TableRow>
-        )}
-      </>
+    {stressors.memory && stressors.memory.workers > 0 && (
+      <TableRow>
+        <TableCell>Memory</TableCell>
+        <TableCell>
+          <Typography variant="body2" color="textSecondary">
+            workers: {stressors.memory.workers}
+          </Typography>
+          <Typography variant="body2" color="textSecondary">
+            size: {stressors.memory.size}
+          </Typography>
+        </TableCell>
+      </TableRow>
     )}
-    {stressors.stressngStressors && (
+    {stressngStressors && (
       <TableRow>
         <TableCell>Options of stress-ng</TableCell>
         <TableCell>
           <List>
-            {objToArrBySep(stressors.stressngStressors, ': ').map((d) => (
+            {objToArrBySep(stressngStressors, ': ').map((d) => (
               <ListItem key={d}>
                 <Typography variant="body2" color="textSecondary">
                   {d}

@@ -1,3 +1,19 @@
+/*
+ * Copyright 2021 Chaos Mesh Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 import { AppBar, Box, Breadcrumbs, IconButton, Toolbar, Typography } from '@material-ui/core'
 
 import MenuIcon from '@material-ui/icons/Menu'
@@ -60,7 +76,7 @@ const Navbar: React.FC<HeaderProps> = ({ openDrawer, handleDrawerToggle, breadcr
           <Box display="flex" justifyContent="space-between" alignItems="center" width="100%">
             {b && (
               <Breadcrumbs className={classes.nav} aria-label="breadcrumb">
-                <Typography variant="h6" component="h2">
+                <Typography variant="h2">
                   {hasLocalBreadcrumb(b.name)
                     ? T(
                         `${

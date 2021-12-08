@@ -1,26 +1,46 @@
-import { Experiment, ExperimentKind, Frame, Scope } from 'components/NewExperiment/types'
+/*
+ * Copyright 2021 Chaos Mesh Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 
+import { Experiment, ExperimentKind, Frame, Scope } from 'components/NewExperiment/types'
+import { sanitize, toTitleCase } from './utils'
+
+import { Env } from 'slices/experiments'
 import { ScheduleSpecific } from 'components/Schedule/types'
 import { Template } from 'slices/workflows'
 import { WorkflowBasic } from 'components/NewWorkflow'
 import basicData from 'components/NewExperimentNext/data/basic'
 import { templateTypeToFieldName } from 'api/zz_generated.frontend.chaos-mesh'
-import { toTitleCase } from './utils'
 import yaml from 'js-yaml'
 
 export function parseSubmit<K extends ExperimentKind>(
-  kind: K,
+  env: Env,
+  _kind: K,
   e: Experiment<Exclude<K, 'Schedule'>>,
   options?: {
     inSchedule?: boolean
   }
 ) {
+  const kind = env === 'k8s' ? _kind : 'PhysicalMachineChaos'
   const values: typeof e = JSON.parse(JSON.stringify(e))
   let { metadata, spec } = values
 
   // Set default namespace when it's not present
   if (!metadata.namespace) {
-    metadata.namespace = spec.selector.namespaces[0]
+    metadata.namespace = env === 'k8s' ? spec.selector.namespaces[0] : 'default'
   }
 
   // Parse labels, annotations, labelSelectors, and annotationSelectors to object
@@ -33,6 +53,37 @@ export function parseSubmit<K extends ExperimentKind>(
       return acc
     }, {})
   }
+
+  // Parse http headers to object
+  function helperHTTPHeaders(selectors: string[]) {
+    return selectors.reduce((acc: Record<string, any>, d) => {
+      const splited = d.split(/:(.+)/)
+      acc[splited[0].trim()] = splited[1].trim()
+      return acc
+    }, {})
+  }
+
+  // Parse http queries to patch object
+  function helperHTTPPatchQueries(selectors: string[]) {
+    return selectors.map((d) => {
+      return d
+        .replace(/\s/g, '')
+        .split(/:(.+)/)
+        .slice(0, 2)
+        .map((s) => s.trim())
+    })
+  }
+
+  // Parse http headers to patch object
+  function helperHTTPPatchHeaders(selectors: string[]) {
+    return selectors.map((d) => {
+      return d
+        .split(/:(.+)/)
+        .slice(0, 2)
+        .map((s) => s.trim())
+    })
+  }
+
   // Parse selector
   function helper2(scope: Scope['selector']) {
     if (scope.labelSelectors?.length) {
@@ -46,10 +97,10 @@ export function parseSubmit<K extends ExperimentKind>(
       delete scope.annotationSelectors
     }
 
-    // Parse phaseSelectors
-    const phaseSelectors = scope.phaseSelectors
-    if (phaseSelectors?.length === 1 && phaseSelectors[0] === 'all') {
-      delete scope.phaseSelectors
+    // Parse podPhaseSelectors
+    const podPhaseSelectors = scope.podPhaseSelectors
+    if (podPhaseSelectors?.length === 1 && podPhaseSelectors[0] === 'all') {
+      delete scope.podPhaseSelectors
     }
 
     // Parse pods
@@ -68,6 +119,7 @@ export function parseSubmit<K extends ExperimentKind>(
       delete scope.pods
     }
   }
+
   if (metadata.labels?.length) {
     metadata.labels = helper1(metadata.labels) as any
   } else {
@@ -78,9 +130,14 @@ export function parseSubmit<K extends ExperimentKind>(
   } else {
     delete metadata.annotations
   }
-  helper2(spec.selector)
 
-  if (kind === 'NetworkChaos') {
+  if (env === 'k8s') {
+    helper2(spec.selector)
+
+    delete (spec as any).address // remove the address field only used in PhysicalMachineChaos
+  }
+
+  if (env === 'k8s' && kind === 'NetworkChaos') {
     if (!(spec as any).externalTargets.length) {
       delete (spec as any).externalTargets
     }
@@ -98,6 +155,43 @@ export function parseSubmit<K extends ExperimentKind>(
     ;(spec as any).attr = helper1((spec as any).attr as string[], (s: string) => parseInt(s, 10))
   }
 
+  if (kind === 'HTTPChaos') {
+    ;(spec as any).request_headers = helperHTTPHeaders((spec as any).request_headers as string[])
+    if ((spec as any).response_headers) {
+      ;(spec as any).response_headers = helperHTTPHeaders((spec as any).response_headers as string[])
+    }
+    if ((spec as any).replace && (spec as any).replace.headers) {
+      ;(spec as any).replace.headers = helperHTTPHeaders((spec as any).replace.headers as string[])
+    }
+    if ((spec as any).replace && (spec as any).replace.queries) {
+      ;(spec as any).replace.queries = helper1((spec as any).replace.queries as string[])
+    }
+    if ((spec as any).patch && (spec as any).patch.headers) {
+      ;(spec as any).patch.headers = helperHTTPPatchHeaders((spec as any).patch.headers as string[])
+    }
+    if ((spec as any).patch && (spec as any).patch.queries) {
+      ;(spec as any).patch.queries = helperHTTPPatchQueries((spec as any).patch.queries as string[])
+    }
+  }
+
+  function parsePhysicalMachineChaos(spec: any) {
+    delete spec.selector
+    delete spec.mode
+
+    const { action, address, duration } = spec as any
+
+    delete spec.action
+    delete spec.address
+    delete spec.duration
+
+    return {
+      address,
+      action,
+      [action]: spec,
+      duration,
+    }
+  }
+
   if (options?.inSchedule) {
     const { schedule, historyLimit, concurrencyPolicy, startingDeadlineSeconds, ...rest } =
       spec as unknown as ScheduleSpecific
@@ -107,36 +201,43 @@ export function parseSubmit<K extends ExperimentKind>(
       concurrencyPolicy,
       startingDeadlineSeconds,
       type: kind,
-      [templateTypeToFieldName(kind)]: rest,
+      [templateTypeToFieldName(kind)]: kind === 'PhysicalMachineChaos' ? parsePhysicalMachineChaos(rest) : rest,
     }
     spec = scheduleSpec as any
   }
 
-  return {
+  if (!options?.inSchedule && kind === 'PhysicalMachineChaos') {
+    spec = parsePhysicalMachineChaos(spec) as any
+  }
+
+  return sanitize({
     apiVersion: 'chaos-mesh.org/v1alpha1',
     kind: options?.inSchedule ? 'Schedule' : kind,
     metadata,
     spec,
-  }
+  })
+}
+
+function podSelectorsToArr(selector: Object) {
+  return Object.entries(selector)
+    .map(([ns, pods]) => pods.map((p: string) => `${ns}: ${p}`))
+    .flat()
 }
 
 function selectorsToArr(selectors: Object, separator: string) {
   return Object.entries(selectors).map(([key, val]) => `${key}${separator}${val}`)
 }
 
-export function parseYAML(
-  yamlObj: any,
-  options?: {
-    isSchedule?: boolean
-  }
-): { kind: ExperimentKind; basic: any; spec: any } {
-  let { kind, metadata, spec } = yamlObj
+export function parseYAML(yamlObj: any): { kind: ExperimentKind; basic: any; spec: any } {
+  let { kind, metadata, spec }: { kind: ExperimentKind; metadata: any; spec: any } = yamlObj
 
   if (!kind || !metadata || !spec) {
     throw new Error('Fail to parse the YAML file. Please check the kind, metadata, and spec fields.')
   }
 
-  if (!options?.isSchedule && !spec.selector) {
+  const isSchedule = (kind as any) === 'Schedule'
+
+  if (!isSchedule && kind !== 'PhysicalMachineChaos' && !spec.selector) {
     throw new Error('The required spec.selector field is missing.')
   }
 
@@ -149,23 +250,29 @@ export function parseYAML(
     spec: {},
   }
 
-  function parseBasicSpec(spec: typeof basicData.spec) {
+  function parseBasicSpec(kind: ExperimentKind, spec: typeof basicData.spec) {
     return {
       selector: {
         ...basicData.spec.selector,
-        namespaces: spec.selector.namespaces ?? [],
-        labelSelectors: spec.selector.labelSelectors ? selectorsToArr(spec.selector.labelSelectors, ': ') : [],
-        annotation_selectors: spec.selector.annotationSelectors
-          ? selectorsToArr(spec.selector.annotationSelectors, ': ')
-          : [],
+        ...(kind !== 'PhysicalMachineChaos'
+          ? {
+              namespaces: spec.selector.namespaces ?? [],
+              labelSelectors: spec.selector.labelSelectors ? selectorsToArr(spec.selector.labelSelectors, ': ') : [],
+              annotation_selectors: spec.selector.annotationSelectors
+                ? selectorsToArr(spec.selector.annotationSelectors, ': ')
+                : [],
+            }
+          : undefined),
       },
+
       mode: spec.mode ?? 'one',
       value: spec.value,
+      address: spec.address ?? [],
       duration: spec.duration ?? '',
     }
   }
 
-  if (options?.isSchedule) {
+  if (isSchedule) {
     const { schedule, historyLimit, concurrencyPolicy, startingDeadlineSeconds, ...rest } =
       spec as unknown as ScheduleSpecific
     const scheduleSpec = {
@@ -176,13 +283,10 @@ export function parseYAML(
     }
     kind = (rest as any).type
     spec = (rest as any)[templateTypeToFieldName(kind)]
-    basic.spec = { ...parseBasicSpec(spec), ...scheduleSpec }
+    basic.spec = { ...parseBasicSpec(kind, spec), ...scheduleSpec }
   } else {
-    basic.spec = parseBasicSpec(spec)
+    basic.spec = parseBasicSpec(kind, spec)
   }
-
-  const { selector, mode, value, duration, ...rest } = spec
-  spec = rest
 
   if (kind === 'NetworkChaos') {
     if (spec.target) {
@@ -192,6 +296,8 @@ export function parseYAML(
       spec.target.selector.annotationSelectors = spec.target.selector.annotationSelectors
         ? selectorsToArr(spec.target.selector.annotationSelectors, ': ')
         : []
+      spec.target.selector.podPhaseSelectors = spec.target.selector.podPhaseSelectors || []
+      spec.target.selector.pods = spec.target.selector.pods ? podSelectorsToArr(spec.target.selector.pods) : []
     }
   }
 
@@ -199,8 +305,8 @@ export function parseYAML(
     spec.attr = selectorsToArr(spec.attr, ':')
   }
 
-  if (kind === 'KernelChaos' && spec.fail_kern_request) {
-    spec.fail_kern_request.callchain = spec.fail_kern_request.callchain.map((frame: Frame) => {
+  if (kind === 'KernelChaos' && spec.failKernRequest) {
+    spec.failKernRequest.callchain = spec.failKernRequest.callchain.map((frame: Frame) => {
       if (!frame.parameters) {
         frame.parameters = ''
       }
@@ -228,11 +334,47 @@ export function parseYAML(
     }
   }
 
-  return {
+  if (kind === 'PhysicalMachineChaos') {
+    const action: string = spec.action
+
+    spec = {
+      action,
+      ...spec[action],
+    }
+
+    if (action.startsWith('disk')) {
+      kind = 'DiskChaos' as any
+    }
+
+    if (action.startsWith('jvm')) {
+      kind = 'JVMChaos'
+    }
+
+    if (action.startsWith('network')) {
+      kind = 'NetworkChaos'
+    }
+
+    if (action.startsWith('process')) {
+      kind = 'ProcessChaos' as any
+    }
+
+    if (action.startsWith('stress')) {
+      kind = 'StressChaos'
+    }
+
+    if (action === 'clock') {
+      kind = 'TimeChaos'
+    }
+  } else {
+    const { selector, mode, value, duration, ...rest } = spec
+    spec = rest
+  }
+
+  return sanitize({
     kind,
     basic,
     spec,
-  }
+  })
 }
 
 function validate(defaultI18n: string, i18n?: string) {

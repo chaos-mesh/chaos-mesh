@@ -4,12 +4,14 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package httpchaos
 
@@ -55,10 +57,12 @@ func TestcaseHttpDelayDurationForATimeThenRecover(
 		Spec: v1alpha1.HTTPChaosSpec{
 			PodSelector: v1alpha1.PodSelector{
 				Selector: v1alpha1.PodSelectorSpec{
-					Namespaces:     []string{ns},
-					LabelSelectors: map[string]string{"app": "http"},
+					GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+						Namespaces:     []string{ns},
+						LabelSelectors: map[string]string{"app": "http"},
+					},
 				},
-				Mode: v1alpha1.OnePodMode,
+				Mode: v1alpha1.OneMode,
 			},
 			Port:   8080,
 			Target: "Request",
@@ -133,10 +137,12 @@ func TestcaseHttpDelayDurationForATimePauseAndUnPause(
 		Spec: v1alpha1.HTTPChaosSpec{
 			PodSelector: v1alpha1.PodSelector{
 				Selector: v1alpha1.PodSelectorSpec{
-					Namespaces:     []string{ns},
-					LabelSelectors: map[string]string{"app": "http"},
+					GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+						Namespaces:     []string{ns},
+						LabelSelectors: map[string]string{"app": "http"},
+					},
 				},
-				Mode: v1alpha1.OnePodMode,
+				Mode: v1alpha1.OneMode,
 			},
 			Port:   8080,
 			Target: "Request",

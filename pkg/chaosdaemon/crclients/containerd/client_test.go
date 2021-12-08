@@ -4,12 +4,14 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package containerd
 
@@ -17,21 +19,28 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"testing"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/test"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
+func TestContainerdClient(t *testing.T) {
+	RegisterFailHandler(Fail)
+
+	RunSpecsWithDefaultAndCustomReporters(t,
+		"Contianerd Container Client Test Suit",
+		[]Reporter{printer.NewlineReporter{}})
+}
+
 var _ = Describe("containerd client", func() {
 	Context("ContainerdClient GetPidFromContainerID", func() {
 		It("should return the magic number 9527", func() {
-			defer func() {
-				err := mock.With("pid", int(9527))()
-				Expect(err).To(BeNil())
-			}()
+			defer mock.With("pid", int(9527))()
 
 			m := &test.MockClient{}
 			c := ContainerdClient{client: m}
@@ -56,8 +65,7 @@ var _ = Describe("containerd client", func() {
 			_, err := c.GetPidFromContainerID(context.TODO(), "containerd://valid-container-id")
 			Expect(err).NotTo(BeNil())
 			Expect(fmt.Sprintf("%s", err)).To(Equal(errorStr))
-			err = mock.Reset("LoadContainerError")
-			Expect(err).NotTo(BeNil())
+			mock.Reset("LoadContainerError")
 
 			mock.With("TaskError", errors.New(errorStr))
 			m = &test.MockClient{}
@@ -65,8 +73,7 @@ var _ = Describe("containerd client", func() {
 			_, err = c.GetPidFromContainerID(context.TODO(), "containerd://valid-container-id")
 			Expect(err).NotTo(BeNil())
 			Expect(fmt.Sprintf("%s", err)).To(Equal(errorStr))
-			err = mock.Reset("TaskError")
-			Expect(err).NotTo(BeNil())
+			mock.Reset("TaskError")
 		})
 	})
 

@@ -1,12 +1,28 @@
+/*
+ * Copyright 2021 Chaos Mesh Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 import { Form, Formik } from 'formik'
 import { Submit, TextField } from 'components/FormField'
+import { Template, TemplateType } from 'slices/workflows'
 import { validateDeadline, validateName } from 'lib/formikhelpers'
 
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
 import Space from 'components-mui/Space'
 import T from 'components/T'
-import { Template } from 'slices/workflows'
 import { schemaBasic } from './types'
 import { useIntl } from 'react-intl'
 
@@ -27,7 +43,7 @@ const Suspend: React.FC<SuspendProps> = ({ initialValues, submit }) => {
     const values = schemaBasic.cast({ name, deadline })
 
     submit({
-      type: 'suspend',
+      type: TemplateType.Suspend,
       ...values!,
     })
   }

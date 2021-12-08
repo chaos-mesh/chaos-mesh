@@ -1,3 +1,20 @@
+/*
+ * Copyright 2021 Chaos Mesh Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
 import { Box, Button, Grid, Grow } from '@material-ui/core'
 import { setAlert, setConfirm } from 'slices/globalStatus'
 import { useEffect, useState } from 'react'
@@ -141,22 +158,6 @@ export default function Single() {
     }
   }
 
-  const handleUpdateExperiment = (data: any) => {
-    api.experiments
-      .update(data)
-      .then(() => {
-        dispatch(
-          setAlert({
-            type: 'success',
-            message: T('confirm.success.update', intl),
-          })
-        )
-
-        fetchExperiment()
-      })
-      .catch(console.error)
-  }
-
   return (
     <>
       <Grow in={!loading} style={{ transformOrigin: '0 0 0' }}>
@@ -215,12 +216,7 @@ export default function Single() {
                     <Space display="flex" flexDirection="column" height="100%">
                       <PaperTop title={T('common.definition')} boxProps={{ p: 4.5, pb: 0 }} />
                       <Box flex={1}>
-                        <YAMLEditor
-                          name={single.name}
-                          data={yaml.dump(single.kube_object)}
-                          onUpdate={handleUpdateExperiment}
-                          download
-                        />
+                        <YAMLEditor name={single.name} data={yaml.dump(single.kube_object)} download />
                       </Box>
                     </Space>
                   )}

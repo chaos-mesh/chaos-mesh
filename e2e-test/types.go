@@ -1,15 +1,17 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package test
 
@@ -43,15 +45,17 @@ type OperatorConfig struct {
 
 // ManagerConfig describe the chaos-operator configuration during installing chaos-mesh
 type ManagerConfig struct {
-	Image           string
-	Tag             string
+	ImageRegistry   string
+	ImageRepository string
+	ImageTag        string
 	ImagePullPolicy string
 }
 
 // DaemonConfig describe the chaos-daemon configuration during installing chaos-mesh
 type DaemonConfig struct {
-	Image           string
-	Tag             string
+	ImageRegistry   string
+	ImageRepository string
+	ImageTag        string
 	Runtime         string
 	SocketPath      string
 	ImagePullPolicy string
@@ -64,13 +68,15 @@ func NewDefaultOperatorConfig() OperatorConfig {
 		ReleaseName: "chaos-mesh",
 		Tag:         "e2e",
 		Manager: ManagerConfig{
-			Image:           "localhost:5000/pingcap/chaos-mesh",
-			Tag:             "latest",
+			ImageRegistry:   "localhost:5000",
+			ImageRepository: "pingcap/chaos-mesh",
+			ImageTag:        "latest",
 			ImagePullPolicy: imagePullPolicyIfNotPresent,
 		},
 		Daemon: DaemonConfig{
-			Image:           "localhost:5000/pingcap/chaos-daemon",
-			Tag:             "latest",
+			ImageRegistry:   "localhost:5000",
+			ImageRepository: "pingcap/chaos-daemon",
+			ImageTag:        "latest",
 			ImagePullPolicy: imagePullPolicyIfNotPresent,
 			Runtime:         "containerd",
 			SocketPath:      "/run/containerd/containerd.sock",
@@ -89,15 +95,19 @@ type operatorAction struct {
 
 func (oi *OperatorConfig) operatorHelmSetValue() string {
 	set := map[string]string{
-		"controllerManager.image":           fmt.Sprintf("%s:%s", oi.Manager.Image, oi.Manager.Tag),
-		"controllerManager.imagePullPolicy": oi.Manager.ImagePullPolicy,
-		"chaosDaemon.image":                 fmt.Sprintf("%s:%s", oi.Daemon.Image, oi.Daemon.Tag),
-		"chaosDaemon.runtime":               oi.Daemon.Runtime,
-		"chaosDaemon.socketPath":            oi.Daemon.SocketPath,
-		"chaosDaemon.imagePullPolicy":       oi.Daemon.ImagePullPolicy,
-		"dnsServer.create":                  "true",
-		"dnsServer.image":                   oi.DNSImage,
-		"dashboard.create":                  fmt.Sprintf("%t", oi.EnableDashboard),
+		"controllerManager.image.registry":   oi.Manager.ImageRegistry,
+		"controllerManager.image.repository": oi.Manager.ImageRepository,
+		"controllerManager.image.tag":        oi.Manager.ImageTag,
+		"controllerManager.imagePullPolicy":  oi.Manager.ImagePullPolicy,
+		"chaosDaemon.image.registry":         oi.Daemon.ImageRegistry,
+		"chaosDaemon.image.repository":       oi.Daemon.ImageRepository,
+		"chaosDaemon.image.tag":              oi.Daemon.ImageTag,
+		"chaosDaemon.runtime":                oi.Daemon.Runtime,
+		"chaosDaemon.socketPath":             oi.Daemon.SocketPath,
+		"chaosDaemon.imagePullPolicy":        oi.Daemon.ImagePullPolicy,
+		"dnsServer.create":                   "true",
+		"dnsServer.image":                    oi.DNSImage,
+		"dashboard.create":                   fmt.Sprintf("%t", oi.EnableDashboard),
 	}
 	arr := make([]string, 0, len(set))
 	for k, v := range set {

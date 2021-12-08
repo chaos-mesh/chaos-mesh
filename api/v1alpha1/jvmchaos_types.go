@@ -1,15 +1,17 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package v1alpha1
 
@@ -26,110 +28,79 @@ type JVMChaosSpec struct {
 	Duration *string `json:"duration,omitempty" webhook:"Duration"`
 
 	// Action defines the specific jvm chaos action.
-	// Supported action: delay;return;script;cfl;oom;ccf;tce;cpf;tde;tpf
-	// +kubebuilder:validation:Enum=delay;return;script;cfl;oom;ccf;tce;cpf;tde;tpf
+	// Supported action: latency;return;exception;stress;gc;ruleData
+	// +kubebuilder:validation:Enum=latency;return;exception;stress;gc;ruleData
 	Action JVMChaosAction `json:"action"`
 
 	// JVMParameter represents the detail about jvm chaos action definition
 	// +optional
 	JVMParameter `json:",inline"`
-
-	// Target defines the specific jvm chaos target.
-	// Supported target: servlet;psql;jvm;jedis;http;dubbo;rocketmq;tars;mysql;druid;redisson;rabbitmq;mongodb
-	// +kubebuilder:validation:Enum=servlet;psql;jvm;jedis;http;dubbo;rocketmq;tars;mysql;druid;redisson;rabbitmq;mongodb
-	Target JVMChaosTarget `json:"target"`
 }
-
-type JVMChaosTarget string
-
-const (
-	// SERVLET represents servlet as a target of chaos
-	SERVLET JVMChaosTarget = "servlet"
-
-	// PSQL represents Postgresql JDBC as a target of chaos
-	PSQL JVMChaosTarget = "psql"
-
-	// JVM represents JVM as a target of chaos
-	JVM JVMChaosTarget = "jvm"
-
-	// JEDIS represents jedis (a java redis client) as a target of chaos
-	JEDIS JVMChaosTarget = "jedis"
-
-	// HTTP represents http client as a target of chaos
-	HTTP JVMChaosTarget = "http"
-
-	// DUBBO represents a Dubbo services as a target of chaos
-	DUBBO JVMChaosTarget = "dubbo"
-
-	// ROCKETMQ represents Rocketmq java client as a target of chaos
-	ROCKETMQ JVMChaosTarget = "rocketmq"
-
-	// MYSQL represents Mysql JDBC as a target of chaos
-	MYSQL JVMChaosTarget = "mysql"
-
-	// DRUID represents the Druid database connection pool as a target of chaos
-	DRUID JVMChaosTarget = "druid"
-
-	// TARS represents the Tars service as a target of chaos
-	TARS JVMChaosTarget = "tars"
-
-	// REDISSON represents Redisson (a java redis client) as a target of chaos
-	REDISSON JVMChaosTarget = "redisson"
-
-	// RABBITMQ represents the Rabbitmq java client as a target of chaos
-	RABBITMQ JVMChaosTarget = "rabbitmq"
-
-	// MONGODB represents the Mongodb java client as a target of chaos
-	MONGODB JVMChaosTarget = "mongodb"
-)
 
 // JVMChaosAction represents the chaos action about jvm
 type JVMChaosAction string
 
 const (
-	// JVMDelayAction represents the JVM chaos action of invoke delay
-	JVMDelayAction JVMChaosAction = "delay"
+	// JVMLatencyAction represents the JVM chaos action of invoke latency
+	JVMLatencyAction JVMChaosAction = "latency"
 
 	// JVMReturnAction represents the JVM chaos action of return value
 	JVMReturnAction JVMChaosAction = "return"
 
-	// JVMReturnAction represents the JVM chaos action for complex failure scenarios.
-	// Write Java or Groovy scripts, such as tampering with parameters, modifying return values,
-	// throwing custom exceptions, and so on
-	JVMScriptAction JVMChaosAction = "script"
-
-	// JVMCpuFullloadAction represents the JVM chaos action of CPU is full
-	JVMCpuFullloadAction JVMChaosAction = "cfl"
-
-	// JVMOOMAction represents the JVM chaos action of OOM exception
-	JVMOOMAction JVMChaosAction = "oom"
-
-	// JVMCodeCacheFillingAction represents the JVM chaos action of code cache filling
-	JVMCodeCacheFillingAction JVMChaosAction = "ccf"
-
 	// JVMExceptionAction represents the JVM chaos action of throwing custom exceptions
-	JVMExceptionAction JVMChaosAction = "tce"
+	JVMExceptionAction JVMChaosAction = "exception"
 
-	// JVMConnectionPoolFullAction represents the JVM chaos action of Connection Pool Full
-	JVMConnectionPoolFullAction JVMChaosAction = "cpf"
+	// JVMStressAction represents the JVM chaos action of stress like CPU and memory
+	JVMStressAction JVMChaosAction = "stress"
 
-	// JVMThrowDeclaredExceptionAction represents the JVM chaos action of throwing declared exception
-	JVMThrowDeclaredExceptionAction JVMChaosAction = "tde"
+	// JVMGCAction represents the JVM chaos action of trigger garbage collection
+	JVMGCAction JVMChaosAction = "gc"
 
-	// JVMThreadPoolFullAction represents the JVM chaos action of thread pool full
-	JVMThreadPoolFullAction JVMChaosAction = "tpf"
+	// JVMRuleDataAction represents inject fault with byteman's rule
+	// refer to https://downloads.jboss.org/byteman/4.0.14/byteman-programmers-guide.html#the-byteman-rule-language
+	JVMRuleDataAction JVMChaosAction = "ruleData"
 )
 
 // JVMParameter represents the detail about jvm chaos action definition
 type JVMParameter struct {
-
-	// Flags represents the flags of action
 	// +optional
-	Flags map[string]string `json:"flags,omitempty"`
+	// byteman rule name, should be unique, and will use JVMChaos' name if not set
+	Name string `json:"name"`
 
-	// Matchers represents the matching rules for the target
 	// +optional
-	Matchers map[string]string `json:"matchers,omitempty"`
+	// Java class
+	Class string `json:"class"`
+
+	// +optional
+	// the method in Java class
+	Method string `json:"method"`
+
+	// +optional
+	// the return value for action 'return'
+	ReturnValue string `json:"value"`
+
+	// +optional
+	// the exception which needs to throw for action `exception`
+	ThrowException string `json:"exception"`
+
+	// +optional
+	// the latency duration for action 'latency', unit ms
+	LatencyDuration int `json:"latency"`
+
+	// +optional
+	// the CPU core number need to use, only set it when action is stress
+	CPUCount int `json:"cpuCount"`
+
+	// +optional
+	// the memory type need to locate, only set it when action is stress, the value can be 'stack' or 'heap'
+	MemoryType string `json:"memType"`
+
+	// +optional
+	// the port of agent server, default 9277
+	Port int32 `json:"port"`
+
+	// +optional
+	RuleData string `json:"ruleData"`
 }
 
 // JVMChaosStatus defines the observed state of JVMChaos
@@ -138,7 +109,7 @@ type JVMChaosStatus struct {
 }
 
 // +kubebuilder:object:root=true
-// +chaos-mesh:base
+// +chaos-mesh:experiment
 
 // JVMChaos is the Schema for the jvmchaos API
 type JVMChaos struct {
@@ -158,6 +129,6 @@ func init() {
 
 func (obj *JVMChaos) GetSelectorSpecs() map[string]interface{} {
 	return map[string]interface{}{
-		".": &obj.Spec.PodSelector,
+		".": &obj.Spec.ContainerSelector,
 	}
 }
