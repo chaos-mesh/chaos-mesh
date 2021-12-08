@@ -26,7 +26,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common/finalizers"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/common/finalizers"
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to

@@ -27,9 +27,9 @@ import (
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/config"
-	cm "github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
-	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/config"
+	cm "github.com/chaos-mesh/chaos-mesh/v2/pkg/chaosctl/common"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/selector/pod"
 )
 
 type logsOptions struct {

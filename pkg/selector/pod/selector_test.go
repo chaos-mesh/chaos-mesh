@@ -23,7 +23,7 @@ import (
 
 	. "github.com/onsi/gomega"
 
-	. "github.com/chaos-mesh/chaos-mesh/pkg/testutils"
+	. "github.com/chaos-mesh/chaos-mesh/v2/pkg/testutils"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

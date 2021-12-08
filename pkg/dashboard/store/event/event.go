@@ -22,7 +22,7 @@ import (
 
 	"github.com/jinzhu/gorm"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/dashboard/core"
 )
 
 func NewStore(db *gorm.DB) core.EventStore {

@@ -24,10 +24,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 
-	controllerCfg "github.com/chaos-mesh/chaos-mesh/pkg/config"
-	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
-	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
-	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/inject"
+	controllerCfg "github.com/chaos-mesh/chaos-mesh/v2/pkg/config"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/metrics"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/webhook/config"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/webhook/inject"
 )
 
 var log = ctrl.Log.WithName("inject-webhook")

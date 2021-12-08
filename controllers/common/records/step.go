@@ -18,7 +18,7 @@ package records
 import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	"github.com/chaos-mesh/chaos-mesh/controllers/common/pipeline"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/common/pipeline"
 )
 
 func Step(ctx *pipeline.PipelineContext) reconcile.Reconciler {

@@ -23,9 +23,9 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
-	"github.com/chaos-mesh/chaos-mesh/pkg/ctrlserver/graph"
-	"github.com/chaos-mesh/chaos-mesh/pkg/ctrlserver/graph/generated"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/utils/chaosdaemon"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/ctrlserver/graph"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/ctrlserver/graph/generated"
 )
 
 func Handler(logger logr.Logger, client client.Client, clientset *kubernetes.Clientset, daemonClientBuilder *chaosdaemon.ChaosDaemonClientBuilder) http.Handler {

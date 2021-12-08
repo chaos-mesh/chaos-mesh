@@ -23,8 +23,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	controllerCfg "github.com/chaos-mesh/chaos-mesh/pkg/config"
-	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
+	controllerCfg "github.com/chaos-mesh/chaos-mesh/v2/pkg/config"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/webhook/config"
 )
 
 var _ = Describe("webhook inject", func() {

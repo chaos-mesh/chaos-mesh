@@ -24,7 +24,7 @@ import (
 	"k8s.io/client-go/rest"
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
+	ccfg "github.com/chaos-mesh/chaos-mesh/v2/controllers/config"
 )
 
 func NewTestManager(lc fx.Lifecycle, options *ctrl.Options, cfg *rest.Config) (ctrl.Manager, error) {

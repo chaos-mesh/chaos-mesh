@@ -20,7 +20,7 @@ import (
 
 	"github.com/kelseyhightower/envconfig"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config/watcher"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/webhook/config/watcher"
 )
 
 // TLSConfig defines the configuration for chaos-daemon tls client

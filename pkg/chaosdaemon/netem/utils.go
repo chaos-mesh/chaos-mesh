@@ -18,7 +18,7 @@ package netem
 import (
 	"math"
 
-	chaosdaemon "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	chaosdaemon "github.com/chaos-mesh/chaos-mesh/v2/pkg/chaosdaemon/pb"
 )
 
 // MergeNetem merges two Netem protos into a new one.

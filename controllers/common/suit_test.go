@@ -35,15 +35,15 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common/condition"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common/desiredphase"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common/finalizers"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common/pipeline"
-	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/utils"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/test"
-	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/chaosimpl"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/common/condition"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/common/desiredphase"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/common/finalizers"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/common/pipeline"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/schedule/utils"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/utils/chaosdaemon"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/utils/test"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/selector"
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to

@@ -24,9 +24,9 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/netutils"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
-	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/podnetworkchaos/netutils"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/utils/chaosdaemon"
+	pb "github.com/chaos-mesh/chaos-mesh/v2/pkg/chaosdaemon/pb"
 )
 
 var log = ctrl.Log.WithName("ipset")

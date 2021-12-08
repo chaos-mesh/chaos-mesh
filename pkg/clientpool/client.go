@@ -27,7 +27,7 @@ import (
 	"k8s.io/client-go/rest"
 	pkgclient "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/mock"
 )
 
 // K8sClients is an object of Clients

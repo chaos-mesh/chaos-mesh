@@ -23,9 +23,9 @@ import (
 	"github.com/gin-gonic/gin"
 	authorizationv1 "k8s.io/api/authorization/v1"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
-	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
-	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/clientpool"
+	config "github.com/chaos-mesh/chaos-mesh/v2/pkg/config/dashboard"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/mock"
 )
 
 var log = Log.WithName("auth middleware")

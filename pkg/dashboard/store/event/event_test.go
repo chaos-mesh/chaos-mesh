@@ -21,7 +21,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/dashboard/core"
 
 	sqlmock "github.com/DATA-DOG/go-sqlmock"
 	"github.com/jinzhu/gorm"

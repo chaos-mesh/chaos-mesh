@@ -28,7 +28,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	wfcontrollers "github.com/chaos-mesh/chaos-mesh/pkg/workflow/controllers"
+	wfcontrollers "github.com/chaos-mesh/chaos-mesh/v2/pkg/workflow/controllers"
 )
 
 type WorkflowRepository interface {

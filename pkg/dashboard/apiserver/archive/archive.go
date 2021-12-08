@@ -29,9 +29,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
-	u "github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/utils"
-	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
+	config "github.com/chaos-mesh/chaos-mesh/v2/pkg/config/dashboard"
+	u "github.com/chaos-mesh/chaos-mesh/v2/pkg/dashboard/apiserver/utils"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/dashboard/core"
 )
 
 // Service defines a handler service for archives.

@@ -27,8 +27,8 @@ import (
 	jrpc "github.com/ethereum/go-ethereum/rpc"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
-	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/bpm"
+	pb "github.com/chaos-mesh/chaos-mesh/v2/pkg/chaosdaemon/pb"
 )
 
 const (

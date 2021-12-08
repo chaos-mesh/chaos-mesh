@@ -23,7 +23,7 @@ import (
 	"github.com/containerd/containerd/cio"
 	"github.com/docker/docker/api/types"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/mock"
 )
 
 type MockClient struct{}

@@ -18,19 +18,19 @@ package chaosimpl
 import (
 	"go.uber.org/fx"
 
-	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/awschaos"
-	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/dnschaos"
-	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/gcpchaos"
-	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/httpchaos"
-	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/iochaos"
-	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/jvmchaos"
-	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/kernelchaos"
-	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/networkchaos"
-	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/physicalmachinechaos"
-	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/podchaos"
-	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/stresschaos"
-	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/timechaos"
-	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/utils"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/chaosimpl/awschaos"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/chaosimpl/dnschaos"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/chaosimpl/gcpchaos"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/chaosimpl/httpchaos"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/chaosimpl/iochaos"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/chaosimpl/jvmchaos"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/chaosimpl/kernelchaos"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/chaosimpl/networkchaos"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/chaosimpl/physicalmachinechaos"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/chaosimpl/podchaos"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/chaosimpl/stresschaos"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/chaosimpl/timechaos"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/chaosimpl/utils"
 )
 
 var AllImpl = fx.Options(

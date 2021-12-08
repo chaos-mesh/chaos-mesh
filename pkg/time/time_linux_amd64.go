@@ -25,9 +25,9 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/mapreader"
-	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
-	"github.com/chaos-mesh/chaos-mesh/pkg/ptrace"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/mapreader"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/mock"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/ptrace"
 )
 
 //go:embed fakeclock/*.o

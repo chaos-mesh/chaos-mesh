@@ -16,11 +16,11 @@
 package common
 
 import (
-	"github.com/chaos-mesh/chaos-mesh/controllers/common/condition"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common/desiredphase"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common/finalizers"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common/pipeline"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common/records"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/common/condition"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/common/desiredphase"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/common/finalizers"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/common/pipeline"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/common/records"
 )
 
 func AllSteps() []pipeline.PipelineStep {

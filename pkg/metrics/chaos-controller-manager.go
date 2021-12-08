@@ -24,7 +24,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/pkg/status"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/status"
 )
 
 var log = ctrl.Log.WithName("metrics-collector")

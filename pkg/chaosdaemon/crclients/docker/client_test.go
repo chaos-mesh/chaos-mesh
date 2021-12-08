@@ -25,8 +25,8 @@ import (
 	. "github.com/onsi/gomega"
 	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/test"
-	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/chaosdaemon/crclients/test"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/mock"
 )
 
 func TestDockerClient(t *testing.T) {

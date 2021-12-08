@@ -30,9 +30,9 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/mock"
 
-	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
-	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
-	pkgmock "github.com/chaos-mesh/chaos-mesh/pkg/mock"
+	config "github.com/chaos-mesh/chaos-mesh/v2/pkg/config/dashboard"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/dashboard/core"
+	pkgmock "github.com/chaos-mesh/chaos-mesh/v2/pkg/mock"
 )
 
 // MockEventService is a mock of core.EventStore

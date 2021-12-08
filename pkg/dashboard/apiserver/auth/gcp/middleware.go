@@ -21,7 +21,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"golang.org/x/oauth2"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/utils"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/dashboard/apiserver/utils"
 )
 
 func (s *Service) Middleware(c *gin.Context) {

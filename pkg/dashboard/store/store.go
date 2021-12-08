@@ -24,12 +24,12 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	controllermetrics "sigs.k8s.io/controller-runtime/pkg/metrics"
 
-	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
-	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/store/event"
-	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/store/experiment"
-	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/store/metrics"
-	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/store/schedule"
-	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/store/workflow"
+	config "github.com/chaos-mesh/chaos-mesh/v2/pkg/config/dashboard"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/dashboard/store/event"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/dashboard/store/experiment"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/dashboard/store/metrics"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/dashboard/store/schedule"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/dashboard/store/workflow"
 )
 
 var (

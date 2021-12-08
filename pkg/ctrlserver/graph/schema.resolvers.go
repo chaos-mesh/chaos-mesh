@@ -17,8 +17,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/pkg/ctrlserver/graph/generated"
-	"github.com/chaos-mesh/chaos-mesh/pkg/ctrlserver/graph/model"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/ctrlserver/graph/generated"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/ctrlserver/graph/model"
 )
 
 func (r *attrOverrideSpecResolver) Ino(ctx context.Context, obj *v1alpha1.AttrOverrideSpec) (*int, error) {

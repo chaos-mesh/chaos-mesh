@@ -26,11 +26,11 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
-	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
-	"github.com/chaos-mesh/chaos-mesh/pkg/curl"
-	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/utils"
-	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/clientpool"
+	config "github.com/chaos-mesh/chaos-mesh/v2/pkg/config/dashboard"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/curl"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/dashboard/apiserver/utils"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/dashboard/core"
 )
 
 var log = ctrl.Log.WithName("workflow api")

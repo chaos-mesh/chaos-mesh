@@ -18,9 +18,9 @@ package test
 import (
 	"go.uber.org/fx"
 
-	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-controller-manager/provider"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/test/manager"
+	"github.com/chaos-mesh/chaos-mesh/v2/cmd/chaos-controller-manager/provider"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/utils/recorder"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/utils/test/manager"
 )
 
 var Module = fx.Provide(

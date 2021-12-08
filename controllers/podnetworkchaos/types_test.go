@@ -29,12 +29,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-controller-manager/provider"
-	. "github.com/chaos-mesh/chaos-mesh/controllers/test"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
-	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
-	. "github.com/chaos-mesh/chaos-mesh/pkg/testutils"
+	"github.com/chaos-mesh/chaos-mesh/v2/cmd/chaos-controller-manager/provider"
+	. "github.com/chaos-mesh/chaos-mesh/v2/controllers/test"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/utils/recorder"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/mock"
+	. "github.com/chaos-mesh/chaos-mesh/v2/pkg/testutils"
 )
 
 func setHostNetwork(objs []runtime.Object) {

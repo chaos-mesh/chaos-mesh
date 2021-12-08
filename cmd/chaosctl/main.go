@@ -15,7 +15,7 @@
 
 package main
 
-import "github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/cmd"
+import "github.com/chaos-mesh/chaos-mesh/v2/pkg/chaosctl/cmd"
 
 func main() {
 	cmd.Execute()

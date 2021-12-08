@@ -22,7 +22,7 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/bpm"
 )
 
 // ReadCommName returns the command name of process

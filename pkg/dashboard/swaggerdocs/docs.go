@@ -20,7 +20,7 @@ var doc = `{
         "title": "{{.Title}}",
         "contact": {
             "name": "GitHub Issues",
-            "url": "https://github.com/chaos-mesh/chaos-mesh/issues"
+            "url": "https://github.com/chaos-mesh/chaos-mesh/v2/issues"
         },
         "license": {
             "name": "Apache 2.0",

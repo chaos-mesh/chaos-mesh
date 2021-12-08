@@ -19,7 +19,7 @@ package ptrace
 import (
 	"github.com/go-logr/logr"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/mapreader"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/mapreader"
 )
 
 // RegisterLogger registers a logger on ptrace pkg

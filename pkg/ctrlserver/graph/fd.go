@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/ctrlserver/graph/model"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/ctrlserver/graph/model"
 )
 
 // GetFdsOfProcess returns fd-target pairs

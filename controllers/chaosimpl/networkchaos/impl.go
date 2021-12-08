@@ -20,11 +20,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/action"
-	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/networkchaos/partition"
-	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/networkchaos/podnetworkchaosmanager"
-	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/networkchaos/trafficcontrol"
-	impltypes "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/types"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/action"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/chaosimpl/networkchaos/partition"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/chaosimpl/networkchaos/podnetworkchaosmanager"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/chaosimpl/networkchaos/trafficcontrol"
+	impltypes "github.com/chaos-mesh/chaos-mesh/v2/controllers/chaosimpl/types"
 )
 
 type Impl struct {

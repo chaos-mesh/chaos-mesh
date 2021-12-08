@@ -30,7 +30,7 @@ import (
 	kubectlscheme "k8s.io/kubectl/pkg/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/bpm"
 )
 
 // Exec executes certain command and returns the result

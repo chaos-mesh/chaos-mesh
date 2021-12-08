@@ -23,7 +23,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/chaosctl/common"
 )
 
 // completionCmd represents the completion command

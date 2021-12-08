@@ -25,8 +25,8 @@ import (
 	"golang.org/x/oauth2/google"
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
-	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/utils"
+	config "github.com/chaos-mesh/chaos-mesh/v2/pkg/config/dashboard"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/dashboard/apiserver/utils"
 )
 
 var log = ctrl.Log.WithName("gcp auth api")

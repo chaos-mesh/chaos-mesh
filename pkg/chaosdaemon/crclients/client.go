@@ -19,9 +19,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/containerd"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/crio"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/docker"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/chaosdaemon/crclients/containerd"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/chaosdaemon/crclients/crio"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/chaosdaemon/crclients/docker"
 )
 
 const (

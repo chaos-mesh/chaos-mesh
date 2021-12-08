@@ -35,11 +35,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/utils"
-	"github.com/chaos-mesh/chaos-mesh/controllers/types"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/test"
-	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/controllers"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/schedule/utils"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/types"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/utils/recorder"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/utils/test"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/workflow/controllers"
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to

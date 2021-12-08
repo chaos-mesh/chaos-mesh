@@ -18,8 +18,8 @@ package desiredphase
 import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	"github.com/chaos-mesh/chaos-mesh/controllers/common/pipeline"
-	"github.com/chaos-mesh/chaos-mesh/controllers/config"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/common/pipeline"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/config"
 )
 
 func Step(ctx *pipeline.PipelineContext) reconcile.Reconciler {

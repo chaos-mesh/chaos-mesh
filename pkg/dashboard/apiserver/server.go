@@ -26,10 +26,10 @@ import (
 	"github.com/go-playground/validator/v10"
 	"go.uber.org/fx"
 
-	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
-	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apivalidator"
-	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/swaggerserver"
-	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/uiserver"
+	config "github.com/chaos-mesh/chaos-mesh/v2/pkg/config/dashboard"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/dashboard/apivalidator"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/dashboard/swaggerserver"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/dashboard/uiserver"
 )
 
 var (

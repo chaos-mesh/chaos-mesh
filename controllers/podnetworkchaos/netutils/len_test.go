@@ -25,7 +25,7 @@ func Test_compressName(t *testing.T) {
 	g := NewWithT(t)
 
 	t.Run("compress name", func(t *testing.T) {
-		name := `Running tool: /usr/bin/go test -timeout 30s github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/netutils -run ^Test_compressName$`
+		name := `Running tool: /usr/bin/go test -timeout 30s github.com/chaos-mesh/chaos-mesh/v2/controllers/networkchaos/netutils -run ^Test_compressName$`
 
 		name = CompressName(name, 20, "test")
 

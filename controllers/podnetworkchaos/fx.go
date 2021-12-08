@@ -25,10 +25,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/config"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/config"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/utils/builder"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/utils/chaosdaemon"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/utils/recorder"
 )
 
 func Bootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, b *chaosdaemon.ChaosDaemonClientBuilder, recorderBuilder *recorder.RecorderBuilder) error {

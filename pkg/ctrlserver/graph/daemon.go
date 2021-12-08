@@ -22,8 +22,8 @@ import (
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/utils/chaosdaemon"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/chaosdaemon/pb"
 )
 
 type DaemonHelper struct {

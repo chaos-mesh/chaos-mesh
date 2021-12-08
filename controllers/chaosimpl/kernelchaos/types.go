@@ -27,13 +27,13 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	impltypes "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/types"
-	"github.com/chaos-mesh/chaos-mesh/controllers/config"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
-	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
-	pb_kernel "github.com/chaos-mesh/chaos-mesh/pkg/chaoskernel/pb"
-	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
+	impltypes "github.com/chaos-mesh/chaos-mesh/v2/controllers/chaosimpl/types"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/config"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/utils/chaosdaemon"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/utils/controller"
+	pb "github.com/chaos-mesh/chaos-mesh/v2/pkg/chaosdaemon/pb"
+	pb_kernel "github.com/chaos-mesh/chaos-mesh/v2/pkg/chaoskernel/pb"
+	grpcUtils "github.com/chaos-mesh/chaos-mesh/v2/pkg/grpc"
 )
 
 var _ impltypes.ChaosImpl = (*Impl)(nil)

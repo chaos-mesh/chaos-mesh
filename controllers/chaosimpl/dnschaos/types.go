@@ -29,11 +29,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	impltypes "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/types"
-	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/utils"
-	"github.com/chaos-mesh/chaos-mesh/controllers/config"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
-	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
+	impltypes "github.com/chaos-mesh/chaos-mesh/v2/controllers/chaosimpl/types"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/chaosimpl/utils"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/config"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/selector/pod"
 )
 
 var _ impltypes.ChaosImpl = (*Impl)(nil)

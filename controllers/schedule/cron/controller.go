@@ -29,12 +29,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/config"
-	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/utils"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
-	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/controllers"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/config"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/schedule/utils"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/utils/builder"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/utils/controller"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/utils/recorder"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/workflow/controllers"
 )
 
 type Reconciler struct {

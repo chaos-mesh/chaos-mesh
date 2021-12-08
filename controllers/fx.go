@@ -18,15 +18,15 @@ package controllers
 import (
 	"go.uber.org/fx"
 
-	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common"
-	"github.com/chaos-mesh/chaos-mesh/controllers/podhttpchaos"
-	"github.com/chaos-mesh/chaos-mesh/controllers/podiochaos"
-	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos"
-	"github.com/chaos-mesh/chaos-mesh/controllers/schedule"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
-	wfcontrollers "github.com/chaos-mesh/chaos-mesh/pkg/workflow/controllers"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/chaosimpl"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/common"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/podhttpchaos"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/podiochaos"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/podnetworkchaos"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/schedule"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/utils/chaosdaemon"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/utils/recorder"
+	wfcontrollers "github.com/chaos-mesh/chaos-mesh/v2/pkg/workflow/controllers"
 )
 
 var Module = fx.Options(

@@ -20,7 +20,7 @@ import (
 
 	"k8s.io/apimachinery/pkg/types"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/ctrlserver/graph/model"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/ctrlserver/graph/model"
 )
 
 const DefaultNamespace = "default"

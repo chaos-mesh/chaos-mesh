@@ -30,7 +30,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	cm "github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
+	cm "github.com/chaos-mesh/chaos-mesh/v2/pkg/chaosctl/common"
 )
 
 // Debug get chaos debug information

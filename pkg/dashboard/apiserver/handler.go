@@ -18,13 +18,13 @@ package apiserver
 import (
 	"go.uber.org/fx"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/archive"
-	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/auth/gcp"
-	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/common"
-	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/event"
-	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/experiment"
-	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/schedule"
-	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/workflow"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/dashboard/apiserver/archive"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/dashboard/apiserver/auth/gcp"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/dashboard/apiserver/common"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/dashboard/apiserver/event"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/dashboard/apiserver/experiment"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/dashboard/apiserver/schedule"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/dashboard/apiserver/workflow"
 )
 
 var handlerModule = fx.Options(

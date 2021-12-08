@@ -20,7 +20,7 @@ import (
 
 	. "github.com/onsi/gomega"
 
-	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	pb "github.com/chaos-mesh/chaos-mesh/v2/pkg/chaosdaemon/pb"
 )
 
 func Test_generateQdiscArgs(t *testing.T) {

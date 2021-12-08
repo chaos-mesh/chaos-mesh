@@ -31,7 +31,7 @@ import (
 	"go.uber.org/zap"
 	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 
-	"github.com/chaos-mesh/chaos-mesh/test/pkg/timer"
+	"github.com/chaos-mesh/chaos-mesh/v2/test/pkg/timer"
 )
 
 func TestPTrace(t *testing.T) {

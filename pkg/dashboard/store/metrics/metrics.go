@@ -22,7 +22,7 @@ import (
 	"go.uber.org/fx"
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/dashboard/core"
 )
 
 const chaosDashboardSubsystem = "chaos_dashboard"

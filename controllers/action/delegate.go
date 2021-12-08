@@ -23,7 +23,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	impltypes "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/types"
+	impltypes "github.com/chaos-mesh/chaos-mesh/v2/controllers/chaosimpl/types"
 )
 
 var _ impltypes.ChaosImpl = (*Delegate)(nil)

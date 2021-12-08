@@ -18,7 +18,7 @@ package client
 import (
 	"google.golang.org/grpc"
 
-	chaosdaemon "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	chaosdaemon "github.com/chaos-mesh/chaos-mesh/v2/pkg/chaosdaemon/pb"
 )
 
 // ChaosDaemonClientInterface represents the ChaosDaemonClient, it's used to simply unit test

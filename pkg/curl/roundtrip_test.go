@@ -34,7 +34,7 @@ func TestRoundTrip(t *testing.T) {
 			name: "simple get",
 			flags: CommandFlags{
 				Method:         http.MethodGet,
-				URL:            "github.com/chaos-mesh/chaos-mesh",
+				URL:            "github.com/chaos-mesh/chaos-mesh/v2",
 				Header:         nil,
 				Body:           "",
 				FollowLocation: false,
@@ -44,7 +44,7 @@ func TestRoundTrip(t *testing.T) {
 			name: "get with header",
 			flags: CommandFlags{
 				Method: http.MethodGet,
-				URL:    "https://github.com/chaos-mesh/chaos-mesh",
+				URL:    "https://github.com/chaos-mesh/chaos-mesh/v2",
 				Header: Header{
 					"User-Agent": []string{"Go-http-client/1.1"},
 				},

@@ -2296,7 +2296,7 @@ definitions:
 info:
   contact:
     name: GitHub Issues
-    url: https://github.com/chaos-mesh/chaos-mesh/issues
+    url: https://github.com/chaos-mesh/chaos-mesh/v2/issues
   description: Swagger for Chaos Mesh Dashboard. If you encounter any problems with
     API, please click on the issues link below to report.
   license:

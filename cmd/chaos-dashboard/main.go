@@ -31,12 +31,12 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
-	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver"
-	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/collector"
-	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/store"
-	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/ttlcontroller"
-	"github.com/chaos-mesh/chaos-mesh/pkg/version"
+	config "github.com/chaos-mesh/chaos-mesh/v2/pkg/config/dashboard"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/dashboard/apiserver"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/dashboard/collector"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/dashboard/store"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/dashboard/ttlcontroller"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/version"
 )
 
 var log = ctrl.Log.WithName("chaos-dashboard")
@@ -46,7 +46,7 @@ var log = ctrl.Log.WithName("chaos-dashboard")
 // @description Swagger for Chaos Mesh Dashboard. If you encounter any problems with API, please click on the issues link below to report.
 
 // @contact.name GitHub Issues
-// @contact.url https://github.com/chaos-mesh/chaos-mesh/issues
+// @contact.url https://github.com/chaos-mesh/chaos-mesh/v2/issues
 
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html

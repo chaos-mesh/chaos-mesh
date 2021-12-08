@@ -19,11 +19,11 @@ import (
 	"go.uber.org/fx"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/action"
-	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/gcpchaos/diskloss"
-	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/gcpchaos/nodereset"
-	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/gcpchaos/nodestop"
-	impltypes "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/types"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/action"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/chaosimpl/gcpchaos/diskloss"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/chaosimpl/gcpchaos/nodereset"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/chaosimpl/gcpchaos/nodestop"
+	impltypes "github.com/chaos-mesh/chaos-mesh/v2/controllers/chaosimpl/types"
 )
 
 type Impl struct {

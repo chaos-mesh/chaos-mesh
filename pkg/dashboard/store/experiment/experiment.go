@@ -22,7 +22,7 @@ import (
 	"github.com/jinzhu/gorm"
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/dashboard/core"
 )
 
 var log = ctrl.Log.WithName("store/experiment")

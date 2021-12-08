@@ -40,7 +40,7 @@ import (
 	"github.com/pkg/errors"
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/mapreader"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/mapreader"
 )
 
 var log = ctrl.Log.WithName("ptrace")

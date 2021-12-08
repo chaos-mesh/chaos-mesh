@@ -22,9 +22,9 @@ import (
 	v1 "k8s.io/api/core/v1"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/selector/generic"
 
-	. "github.com/chaos-mesh/chaos-mesh/pkg/testutils"
+	. "github.com/chaos-mesh/chaos-mesh/v2/pkg/testutils"
 )
 
 func TestMatch(t *testing.T) {

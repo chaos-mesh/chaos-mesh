@@ -18,11 +18,11 @@ package schedule
 import (
 	"go.uber.org/fx"
 
-	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/active"
-	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/cron"
-	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/gc"
-	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/pause"
-	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/utils"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/schedule/active"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/schedule/cron"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/schedule/gc"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/schedule/pause"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/schedule/utils"
 )
 
 var Module = fx.Options(

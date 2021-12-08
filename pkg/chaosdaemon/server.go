@@ -33,10 +33,10 @@ import (
 	"google.golang.org/grpc/reflection"
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients"
-	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
-	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/bpm"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/chaosdaemon/crclients"
+	pb "github.com/chaos-mesh/chaos-mesh/v2/pkg/chaosdaemon/pb"
+	grpcUtils "github.com/chaos-mesh/chaos-mesh/v2/pkg/grpc"
 )
 
 var log = ctrl.Log.WithName("chaos-daemon-server")

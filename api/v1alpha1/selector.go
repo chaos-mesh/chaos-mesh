@@ -128,7 +128,7 @@ type ContainerSelector struct {
 func (in PodSelectorSpec) ClusterScoped() bool {
 	// in fact, this will never happened, will add namespace if it is empty, so len(s.Namespaces) can not be 0,
 	// but still add judgentment here for safe
-	// https://github.com/chaos-mesh/chaos-mesh/blob/478d00d01bb0f9fb08a1085428a7da8c8f9df4e8/api/v1alpha1/common_webhook.go#L22
+	// https://github.com/chaos-mesh/chaos-mesh/v2/blob/478d00d01bb0f9fb08a1085428a7da8c8f9df4e8/api/v1alpha1/common_webhook.go#L22
 	if len(in.Namespaces) == 0 && len(in.Pods) == 0 {
 		return true
 	}

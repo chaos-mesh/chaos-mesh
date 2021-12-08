@@ -36,13 +36,13 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	ctrlconfig "github.com/chaos-mesh/chaos-mesh/controllers/config"
-	daemonClient "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/client"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
-	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
-	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
-	"github.com/chaos-mesh/chaos-mesh/pkg/portforward"
-	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
+	ctrlconfig "github.com/chaos-mesh/chaos-mesh/v2/controllers/config"
+	daemonClient "github.com/chaos-mesh/chaos-mesh/v2/pkg/chaosdaemon/client"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/chaosdaemon/pb"
+	grpcUtils "github.com/chaos-mesh/chaos-mesh/v2/pkg/grpc"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/mock"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/portforward"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/selector/pod"
 )
 
 type Color string

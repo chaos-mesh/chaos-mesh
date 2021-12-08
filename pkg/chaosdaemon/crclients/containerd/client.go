@@ -22,7 +22,7 @@ import (
 
 	"github.com/containerd/containerd"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/mock"
 )
 
 const (

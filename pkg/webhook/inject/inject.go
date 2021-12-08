@@ -23,11 +23,11 @@ import (
 
 	v1 "k8s.io/api/admission/v1"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/annotation"
-	controllerCfg "github.com/chaos-mesh/chaos-mesh/pkg/config"
-	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
-	podselector "github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
-	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/annotation"
+	controllerCfg "github.com/chaos-mesh/chaos-mesh/v2/pkg/config"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/metrics"
+	podselector "github.com/chaos-mesh/chaos-mesh/v2/pkg/selector/pod"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/webhook/config"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -36,7 +36,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 
-	genericnamespace "github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/namespace"
+	genericnamespace "github.com/chaos-mesh/chaos-mesh/v2/pkg/selector/generic/namespace"
 )
 
 var log = ctrl.Log.WithName("inject-webhook")

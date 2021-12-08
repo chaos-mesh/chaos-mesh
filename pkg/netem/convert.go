@@ -20,7 +20,7 @@ import (
 	"time"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	chaosdaemonpb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	chaosdaemonpb "github.com/chaos-mesh/chaos-mesh/v2/pkg/chaosdaemon/pb"
 )
 
 // FromDelay convert delay to netem

@@ -22,7 +22,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	cm "github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
+	cm "github.com/chaos-mesh/chaos-mesh/v2/pkg/chaosctl/common"
 )
 
 // rootCmd represents the base command when called without any subcommands

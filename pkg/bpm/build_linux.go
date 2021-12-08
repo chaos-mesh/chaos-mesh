@@ -21,7 +21,7 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/mock"
 )
 
 // Build builds the process

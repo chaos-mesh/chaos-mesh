@@ -19,7 +19,7 @@ import (
 	"fmt"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/selector/generic"
 )
 
 type Registry map[string]SelectorFactory

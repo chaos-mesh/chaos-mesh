@@ -22,8 +22,8 @@ import (
 	. "github.com/onsi/gomega"
 	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/config"
-	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config/watcher"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/config"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/webhook/config/watcher"
 )
 
 func TestValidations(t *testing.T) {

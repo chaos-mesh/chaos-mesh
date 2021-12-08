@@ -19,14 +19,14 @@ import (
 	"context"
 	"errors"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/test"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/chaosdaemon/crclients"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/chaosdaemon/crclients/test"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
-	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
+	pb "github.com/chaos-mesh/chaos-mesh/v2/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/mock"
 )
 
 var _ = Describe("time server", func() {

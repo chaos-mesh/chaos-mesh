@@ -24,10 +24,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	chaosimpltypes "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/types"
-	"github.com/chaos-mesh/chaos-mesh/controllers/types"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
-	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
+	chaosimpltypes "github.com/chaos-mesh/chaos-mesh/v2/controllers/chaosimpl/types"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/types"
+	"github.com/chaos-mesh/chaos-mesh/v2/controllers/utils/recorder"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/selector"
 )
 
 type Pipeline struct {

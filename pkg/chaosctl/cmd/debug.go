@@ -26,11 +26,11 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug/iochaos"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug/networkchaos"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug/stresschaos"
-	"github.com/chaos-mesh/chaos-mesh/pkg/grpc"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/chaosctl/common"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/chaosctl/debug/iochaos"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/chaosctl/debug/networkchaos"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/chaosctl/debug/stresschaos"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/grpc"
 )
 
 type DebugOptions struct {

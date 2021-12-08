@@ -22,11 +22,11 @@ import (
 	"github.com/pkg/errors"
 	"go.uber.org/fx"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/selector/aws"
-	"github.com/chaos-mesh/chaos-mesh/pkg/selector/container"
-	"github.com/chaos-mesh/chaos-mesh/pkg/selector/gcp"
-	"github.com/chaos-mesh/chaos-mesh/pkg/selector/physicalmachine"
-	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/selector/aws"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/selector/container"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/selector/gcp"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/selector/physicalmachine"
+	"github.com/chaos-mesh/chaos-mesh/v2/pkg/selector/pod"
 )
 
 type Selector struct {
