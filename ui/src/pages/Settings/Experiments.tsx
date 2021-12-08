@@ -14,10 +14,11 @@
  * limitations under the License.
  *
  */
-import { Box, Checkbox, FormControl, FormControlLabel, FormHelperText } from '@material-ui/core'
+import { Checkbox, FormControl, FormControlLabel, FormGroup, FormHelperText } from '@material-ui/core'
 import { setDebugMode, setEnableKubeSystemNS } from 'slices/settings'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
+import PaperTop from 'components-mui/PaperTop'
 import T from 'components/T'
 
 const Experiments = () => {
@@ -31,8 +32,8 @@ const Experiments = () => {
 
   return (
     <>
-      {/* devMode */}
-      <Box>
+      <PaperTop title={T('experiments.title')} divider />
+      <FormGroup>
         <FormControl>
           <FormControlLabel
             control={<Checkbox color="primary" checked={debugMode} onChange={handleChangeDebugMode} />}
@@ -40,10 +41,7 @@ const Experiments = () => {
           />
           <FormHelperText>{T('settings.debugMode.choose')}</FormHelperText>
         </FormControl>
-      </Box>
 
-      {/* Enable kube-system */}
-      <Box>
         <FormControl>
           <FormControlLabel
             control={
@@ -53,7 +51,7 @@ const Experiments = () => {
           />
           <FormHelperText>{T('settings.enableKubeSystemNS.choose')}</FormHelperText>
         </FormControl>
-      </Box>
+      </FormGroup>
     </>
   )
 }

@@ -40,7 +40,7 @@ type Impl struct {
 	client.Client
 	Log logr.Logger
 
-	decoder *utils.ContianerRecordDecoder
+	decoder *utils.ContainerRecordDecoder
 }
 
 var _ common.ChaosImpl = (*Impl)(nil)
@@ -186,7 +186,7 @@ func (impl *Impl) cancelDNSServerRules(dnsServerIP string, port int, name string
 	return nil
 }
 
-func NewImpl(c client.Client, log logr.Logger, decoder *utils.ContianerRecordDecoder) *common.ChaosImplPair {
+func NewImpl(c client.Client, log logr.Logger, decoder *utils.ContainerRecordDecoder) *common.ChaosImplPair {
 	return &common.ChaosImplPair{
 		Name:   "dnschaos",
 		Object: &v1alpha1.DNSChaos{},

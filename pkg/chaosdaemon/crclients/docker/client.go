@@ -133,6 +133,7 @@ func New(host string, version string, client *http.Client, httpHeaders map[strin
 	}
 
 	c, err := dockerclient.NewClientWithOpts(
+		dockerclient.FromEnv,
 		dockerclient.WithHost(host),
 		dockerclient.WithVersion(version),
 		dockerclient.WithHTTPClient(client),
