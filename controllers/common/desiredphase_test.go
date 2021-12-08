@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 
-package desiredphase
+package common
 
 import (
 	"context"
@@ -94,7 +94,6 @@ var _ = Describe("Schedule", func() {
 			By("deleting the created object")
 			{
 				Expect(k8sClient.Delete(context.TODO(), chaos)).To(Succeed())
-				Expect(k8sClient.Get(context.TODO(), key, chaos)).ToNot(Succeed())
 			}
 		})
 		It("should stop paused chaos", func() {
@@ -181,7 +180,6 @@ var _ = Describe("Schedule", func() {
 			By("deleting the created object")
 			{
 				Expect(k8sClient.Delete(context.TODO(), chaos)).To(Succeed())
-				Expect(k8sClient.Get(context.TODO(), key, chaos)).ToNot(Succeed())
 			}
 		})
 	})
