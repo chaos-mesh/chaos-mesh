@@ -1,4 +1,4 @@
-module github.com/chaos-mesh/chaos-mesh
+module github.com/chaos-mesh/chaos-mesh/v2
 
 require (
 	code.cloudfoundry.org/bytefmt v0.0.0-20200131002437-cf55d5288a48
