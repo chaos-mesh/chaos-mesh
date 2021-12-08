@@ -107,6 +107,9 @@ On the fourth Thursday of every month (unless otherwise specified), the Chaos Me
   - [Securing namespaces using restrict authorization feature in chaos mesh](https://anuragpaliwal-93749.medium.com/securing-namespaces-using-restrict-authorization-feature-in-chaos-mesh-2e110c3e0fb7)
 - Pavan Kumar: [Chaos Engineering in Kubernetes using Chaos Mesh](https://link.medium.com/1V90dEknugb)
 - Jessica Cherry: [Test your Kubernetes experiments with an open source web interface](https://opensource.com/article/21/6/chaos-mesh-kubernetes)
+- λ.eranga: [Chaos Engineering with Chaos Mesh](https://medium.com/rahasak/chaos-engineering-with-chaos-mesh-b040169b51bd)
+- Tomáš Kubica: [Kubernetes prakticky: zlounství s Chaos Mesh a Azure Chaos Studio](https://www.tomaskubica.cz/post/2021/kubernetes-prakticky-zlounstvi-s-chaos-mesh-a-azure-chaos-studio2/)
+- mend: [Chaos Meshで何ができるのか見てみた](https://qiita.com/mend/items/dcdfab5e980467bf58e9)
 
 ### Community talks
 
