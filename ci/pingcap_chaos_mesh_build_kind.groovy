@@ -149,13 +149,6 @@ def build(String name, String code) {
 							docker version
 							"""
 						}
-						stage('Extract docker cache') {
-							ansiColor('xterm') {
-								sh """
-								tar xvf /cache.tar.gz
-								"""
-							}
-						}
 						stage('Copy binary tools') {
 							ansiColor('xterm') {
 								sh """
@@ -167,8 +160,7 @@ def build(String name, String code) {
 						stage('Build image') {
 							ansiColor('xterm') {
 								sh """
-								rm -rf cache
-								curl http://fileserver.pingcap.net/download/builds/pingcap/chaos-mesh/cache-master.tar.gz
+								curl http://fileserver.pingcap.net/download/builds/pingcap/chaos-mesh/cache-master.tar.gz > cache-master.tar.gz
 								tar xvf cache-master.tar.gz
 								DOCKER_CLI_EXPERIMENTAL=enabled docker buildx create --use --name chaos-mesh-builder --config ./ci/builder.toml
 								make DOCKER_CACHE=1 DOCKER_CACHE_DIR=\$(pwd)/cache GO_BUILD_CACHE=\$(pwd)/cache image
