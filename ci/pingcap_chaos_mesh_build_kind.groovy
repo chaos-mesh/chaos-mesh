@@ -125,7 +125,7 @@ spec:
           topologyKey: kubernetes.io/hostname
 '''
 
-def build(String name, String code, String branch) {
+def build(String name, String code) {
 	podTemplate(yaml: podYAML) {
 		node(POD_LABEL) {
 			container('main') {
@@ -168,8 +168,8 @@ def build(String name, String code, String branch) {
 							ansiColor('xterm') {
 								sh """
 								rm -rf cache
-								curl http://fileserver.pingcap.net/upload/builds/pingcap/chaos-mesh/cache-${branch}.tar.gz
-								tar xvf cache-${branch}.tar.gz
+								curl http://fileserver.pingcap.net/upload/builds/pingcap/chaos-mesh/cache-master.tar.gz
+								tar xvf cache-master.tar.gz
 								DOCKER_CLI_EXPERIMENTAL=enabled docker buildx create --use --name chaos-mesh-builder --config ./ci/builder.toml
 								make DOCKER_CACHE=1 DOCKER_CACHE_DIR=\$(pwd)/cache GO_BUILD_CACHE=\$(pwd)/cache image
 								make DOCKER_CACHE=1 DOCKER_CACHE_DIR=\$(pwd)/cache GO_BUILD_CACHE=\$(pwd)/cache image-e2e-helper
@@ -278,13 +278,13 @@ def call(BUILD_BRANCH, CREDENTIALS_ID) {
 		def artifacts = "go/src/github.com/chaos-mesh/chaos-mesh/artifacts"
 		def builds = [:]
 		builds["E2E on kubernetes 1.12.10"] = {
-                build("v1.12", "${GLOBALS} GINKGO_NODES=6 KUBE_VERSION=v1.12.10 KIND_VERSION=0.8.1 ./hack/e2e.sh -- --ginkgo.focus='Basic'", BUILD_BRANCH)
+                build("v1.12", "${GLOBALS} GINKGO_NODES=6 KUBE_VERSION=v1.12.10 KIND_VERSION=0.8.1 ./hack/e2e.sh -- --ginkgo.focus='Basic'")
         }
         builds["E2E on kubernetes 1.20.7"] = {
-                build("v1.20", "${GLOBALS} GINKGO_NODES=6 KUBE_VERSION=v1.20.7 ./hack/e2e.sh -- --ginkgo.focus='Basic'", BUILD_BRANCH)
+                build("v1.20", "${GLOBALS} GINKGO_NODES=6 KUBE_VERSION=v1.20.7 ./hack/e2e.sh -- --ginkgo.focus='Basic'")
         }
         builds["E2E on kubernetes 1.22.1"] = {
-                build("v1.22", "${GLOBALS} GINKGO_NODES=6 KUBE_VERSION=v1.22.1 ./hack/e2e.sh -- --ginkgo.focus='Basic'", BUILD_BRANCH)
+                build("v1.22", "${GLOBALS} GINKGO_NODES=6 KUBE_VERSION=v1.22.1 ./hack/e2e.sh -- --ginkgo.focus='Basic'")
         }
 		builds.failFast = false
 		if (!SKIP_TEST) {
