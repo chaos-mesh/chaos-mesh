@@ -28,12 +28,17 @@ func IsChaosFinishedWithUntilStop(obj v1alpha1.InnerObject, now time.Time) (bool
 	status := obj.GetStatus()
 	if obj.IsOneShot() {
 		finished := true
-		for _, record := range status.Experiment.Records {
-			if record.Phase != v1alpha1.Injected {
-				finished = false
+		if len(status.Experiment.Records) == 0 {
+			finished = false
+		} else {
+			for _, record := range status.Experiment.Records {
+				if record.Phase != v1alpha1.Injected {
+					finished = false
+				}
 			}
 		}
-		return finished, time.Duration(0)
+		// this oneshot chaos hasn't finished, retry after 1 second
+		return finished, time.Duration(time.Second)
 	}
 
 	finished := true
