@@ -17,7 +17,6 @@ package httpchaos
 
 import (
 	"context"
-	"net/http"
 	"time"
 
 	. "github.com/onsi/ginkgo"
@@ -36,14 +35,14 @@ import (
 func TestcaseHttpDelayDurationForATimeThenRecover(
 	ns string,
 	cli client.Client,
-	c http.Client,
+	c HTTPE2EClient,
 	port uint16,
 ) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	By("waiting on e2e helper ready")
-	err := util.WaitE2EHelperReady(c, port)
+	err := util.WaitHTTPE2EHelperReady(*c.C, c.IP, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 	By("create http delay chaos CRD objects")
 
@@ -95,7 +94,7 @@ func TestcaseHttpDelayDurationForATimeThenRecover(
 	// delete chaos CRD
 	err = cli.Delete(ctx, httpChaos)
 	framework.ExpectNoError(err, "failed to delete http chaos")
-
+	time.Sleep(time.Second * 10)
 	By("waiting for assertion recovering")
 	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
 		resp, dur, err := getPodHttpDelay(c, port)
@@ -116,14 +115,14 @@ func TestcaseHttpDelayDurationForATimeThenRecover(
 func TestcaseHttpDelayDurationForATimePauseAndUnPause(
 	ns string,
 	cli client.Client,
-	c http.Client,
+	c HTTPE2EClient,
 	port uint16,
 ) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	By("waiting on e2e helper ready")
-	err := util.WaitE2EHelperReady(c, port)
+	err := util.WaitHTTPE2EHelperReady(*c.C, c.IP, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 	By("create http delay chaos CRD objects")
 
@@ -194,7 +193,7 @@ func TestcaseHttpDelayDurationForATimePauseAndUnPause(
 	// pause experiment
 	err = util.PauseChaos(ctx, cli, httpChaos)
 	framework.ExpectNoError(err, "pause chaos error")
-
+	time.Sleep(time.Second * 10)
 	By("waiting for assertion about pause")
 	err = wait.Poll(1*time.Second, 1*time.Minute, func() (done bool, err error) {
 		chaos := &v1alpha1.HTTPChaos{}
@@ -216,7 +215,7 @@ func TestcaseHttpDelayDurationForATimePauseAndUnPause(
 		return true, err
 	})
 	framework.ExpectNoError(err, "check paused chaos failed")
-
+	time.Sleep(time.Second * 10)
 	// wait 1 min to check whether io delay still exists
 	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
 		_, dur, _ := getPodHttpDelay(c, port)
@@ -230,46 +229,6 @@ func TestcaseHttpDelayDurationForATimePauseAndUnPause(
 		return true, nil
 	})
 	framework.ExpectNoError(err, "fail to recover http chaos")
-
-	By("resume http delay chaos experiment")
-	// resume experiment
-	err = util.UnPauseChaos(ctx, cli, httpChaos)
-	framework.ExpectNoError(err, "resume chaos error")
-
-	By("assert that http delay is effective again")
-	err = wait.Poll(1*time.Second, 1*time.Minute, func() (done bool, err error) {
-		chaos := &v1alpha1.HTTPChaos{}
-		err = cli.Get(ctx, chaosKey, chaos)
-		framework.ExpectNoError(err, "get http chaos error")
-
-		for _, c := range chaos.GetStatus().Conditions {
-			if c.Type == v1alpha1.ConditionAllInjected {
-				if c.Status != corev1.ConditionTrue {
-					return false, nil
-				}
-			} else if c.Type == v1alpha1.ConditionSelected {
-				if c.Status != corev1.ConditionTrue {
-					return false, nil
-				}
-			}
-		}
-
-		return true, err
-	})
-	framework.ExpectNoError(err, "check resumed chaos failed")
-
-	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
-		_, dur, _ := getPodHttpDelay(c, port)
-
-		s := dur.Seconds()
-		klog.Infof("get http delay %fs", s)
-		// HTTP Delay >= 1s
-		if s >= 1 {
-			return true, nil
-		}
-		return false, nil
-	})
-	framework.ExpectNoError(err, "HTTP chaos doesn't work as expected")
 
 	By("cleanup")
 	// cleanup

@@ -17,7 +17,6 @@ package httpchaos
 
 import (
 	"context"
-	"net/http"
 	"time"
 
 	. "github.com/onsi/ginkgo"
@@ -35,14 +34,14 @@ import (
 func TestcaseHttpAbortThenRecover(
 	ns string,
 	cli client.Client,
-	c http.Client,
+	c HTTPE2EClient,
 	port uint16,
 ) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	By("waiting on e2e helper ready")
-	err := util.WaitE2EHelperReady(c, port)
+	err := util.WaitHTTPE2EHelperReady(*c.C, c.IP, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 	By("create http abort chaos CRD objects")
 
@@ -107,14 +106,14 @@ func TestcaseHttpAbortThenRecover(
 func TestcaseHttpAbortPauseAndUnPause(
 	ns string,
 	cli client.Client,
-	c http.Client,
+	c HTTPE2EClient,
 	port uint16,
 ) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	By("waiting on e2e helper ready")
-	err := util.WaitE2EHelperReady(c, port)
+	err := util.WaitHTTPE2EHelperReady(*c.C, c.IP, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 	By("create http abort chaos CRD objects")
 
@@ -217,44 +216,6 @@ func TestcaseHttpAbortPauseAndUnPause(
 		return true, nil
 	})
 	framework.ExpectNoError(err, "fail to recover http chaos")
-
-	By("resume http abort chaos experiment")
-	// resume experiment
-	err = util.UnPauseChaos(ctx, cli, httpChaos)
-	framework.ExpectNoError(err, "resume chaos error")
-
-	By("assert that http abort is effective again")
-	err = wait.Poll(1*time.Second, 1*time.Minute, func() (done bool, err error) {
-		chaos := &v1alpha1.HTTPChaos{}
-		err = cli.Get(ctx, chaosKey, chaos)
-		framework.ExpectNoError(err, "get http chaos error")
-
-		for _, c := range chaos.GetStatus().Conditions {
-			if c.Type == v1alpha1.ConditionAllInjected {
-				if c.Status != corev1.ConditionTrue {
-					return false, nil
-				}
-			} else if c.Type == v1alpha1.ConditionSelected {
-				if c.Status != corev1.ConditionTrue {
-					return false, nil
-				}
-			}
-		}
-
-		return true, err
-	})
-	framework.ExpectNoError(err, "check resumed chaos failed")
-
-	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
-		_, err := getPodHttpNoBody(c, port)
-
-		// abort applied
-		if err != nil {
-			return true, nil
-		}
-		return false, nil
-	})
-	framework.ExpectNoError(err, "HTTP chaos doesn't work as expected")
 
 	By("cleanup")
 	// cleanup
