@@ -253,6 +253,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 			framework.ExpectNoError(err, "find pod list error")
 			for _, item := range podlist.Items {
 				if strings.Contains(item.Name, "http-test") {
+					framework.Logf("get http-test-pod %v",item)
 					client.IP = item.Status.PodIP
 				}
 			}
