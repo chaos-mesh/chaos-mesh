@@ -98,11 +98,17 @@ type PodHttpChaosSelector struct {
 
 type PodHttpChaosReplaceBodyAction []byte
 
+var BodyActionCustomMarshual bool
+
 func (p PodHttpChaosReplaceBodyAction) MarshalJSON() ([]byte, error) {
-	return json.Marshal(PodHttpChaosPatchBodyAction{
-		Type:  "TEXT",
-		Value: string(p),
-	})
+	if BodyActionCustomMarshual {
+		return json.Marshal(PodHttpChaosPatchBodyAction{
+			Type:  "TEXT",
+			Value: string(p),
+		})
+	} else {
+		return json.Marshal([]byte(p))
+	}
 }
 
 func (p *PodHttpChaosReplaceBodyAction) UnmarshalJSON(data []byte) error {

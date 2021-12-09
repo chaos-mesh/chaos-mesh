@@ -81,7 +81,7 @@ func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 
 	transport := stdioTransport{stdio: stdio}
 
-	rules := []v1alpha1.PodHttpChaosBaseRule{}
+	var rules []v1alpha1.PodHttpChaosBaseRule
 	err := json.Unmarshal([]byte(in.Rules), &rules)
 	if err != nil {
 		log.Error(err, "error while unmarshal json bytes")
@@ -94,7 +94,7 @@ func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 		ProxyPorts: in.ProxyPorts,
 		Rules:      rules,
 	}
-
+	v1alpha1.BodyActionCustomMarshual = true
 	config, err := json.Marshal(&httpChaosSpec)
 	if err != nil {
 		return nil, err
