@@ -64,6 +64,7 @@ type PodHttpChaosSelector struct {
 	ResponseHeaders map[string]string `json:"response_headers,omitempty"`
 }
 
+
 // PodHttpChaosActions defines possible actions of HttpChaos.
 type PodHttpChaosActions struct {
 	// Abort is a rule to abort a http session.
@@ -87,11 +88,34 @@ type PodHttpChaosActions struct {
 	Patch *PodHttpChaosPatchActions `json:"patch,omitempty"`
 }
 
+// PodHttpChaosPatchBody defines the patch-body action of HttpChaos.
+type PodHttpChaosPatchBody struct {
+	Contents PodHttpChaosBodyPatchContent `json:"contents"`
+}
+
+type PodHttpChaosBodyPatchContent struct {
+	// Type represents the patch type, only support `JSON` as [merge patch json](https://tools.ietf.org/html/rfc7396) currently.
+	Type string `json:"type"`
+
+	// Value is the patch contents.
+	Value string `json:"value"`
+}
+
+func (p *PodHttpChaosPatchBody) UnmarshalJSON(data []byte) error {
+	var pp PodHttpChaosBodyPatchContent
+	err := json.Unmarshal(data, &pp)
+	if err != nil {
+		return err
+	}
+	p.Contents = pp
+	return nil
+}
+
 // PodHttpChaosPatchActions defines possible patch-actions of HttpChaos.
 type PodHttpChaosPatchActions struct {
 	// Body is a rule to patch message body of target.
 	// +optional
-	Body *PodHttpChaosPatchBodyAction `json:"body,omitempty"`
+	Body *PodHttpChaosPatchBody `json:"body,omitempty"`
 
 	// Queries is a rule to append uri queries of target(Request only).
 	// For example: `[["foo", "bar"], ["foo", "unknown"]]`.
@@ -104,8 +128,12 @@ type PodHttpChaosPatchActions struct {
 	Headers [][]string `json:"headers,omitempty"`
 }
 
-// PodHttpChaosPatchBodyAction defines patch body action of HttpChaos.
-type PodHttpChaosPatchBodyAction struct {
+// PodHttpChaosReplaceBody defines the replace-body of HttpChaos.
+type PodHttpChaosReplaceBody struct {
+	Contents PodHttpChaosBodyReplaceContent `json:"contents"`
+}
+
+type PodHttpChaosBodyReplaceContent struct {
 	// Type represents the patch type, only support `JSON` as [merge patch json](https://tools.ietf.org/html/rfc7396) currently.
 	Type string `json:"type"`
 
@@ -113,35 +141,25 @@ type PodHttpChaosPatchBodyAction struct {
 	Value string `json:"value"`
 }
 
-type PodHttpChaosReplaceBodyAction struct {
-	inner string
-}
-
-func (p *PodHttpChaosReplaceBodyAction) MarshalJSON() ([]byte, error) {
-	return json.Marshal(PodHttpChaosPatchBodyAction{
-		Type:  "TEXT",
-		Value: p.inner,
-	})
-}
-
-func (p *PodHttpChaosReplaceBodyAction) UnmarshalJSON(data []byte) error {
-	var pp PodHttpChaosPatchBodyAction
+func (p *PodHttpChaosReplaceBody) UnmarshalJSON(data []byte) error {
+	var pp PodHttpChaosBodyReplaceContent
 	err := json.Unmarshal(data, &pp)
 	if err == nil {
-		p.inner = pp.Value
+		p.Contents = pp
 		return nil
 	}
 	var bys []byte
 
 	err = json.Unmarshal(data, &bys)
 	if err == nil {
-		p.inner = string(bys)
+		p.Contents = PodHttpChaosBodyReplaceContent{
+			Type:  "TEXT",
+			Value: string(bys),
+		}
 		return nil
 	}
 	return err
 }
-
-// PodHttpChaosActions defines possible actions of HttpChaos.
 
 // PodHttpChaosReplaceActions defines possible replace-actions of HttpChaos.
 type PodHttpChaosReplaceActions struct {
@@ -159,7 +177,7 @@ type PodHttpChaosReplaceActions struct {
 
 	// Body is a rule to replace http message body in target.
 	// +optional
-	Body PodHttpChaosReplaceBodyAction `json:"body,omitempty"`
+	Body PodHttpChaosReplaceBody `json:"body,omitempty"`
 
 	// Queries is a rule to replace uri queries in http request.
 	// For example, with value `{ "foo": "unknown" }`, the `/?foo=bar` will be altered to `/?foo=unknown`,
