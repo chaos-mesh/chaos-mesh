@@ -47,7 +47,6 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	if pbClient != nil {
 		defer pbClient.Close()
 	}
-
 	if err != nil {
 		return v1alpha1.NotInjected, err
 	}
@@ -86,7 +85,6 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		return v1alpha1.NotInjected, err
 	}
 	// TODO: support custom status
-	impl.Log.Info("message", "cpuidd", res.CpuInstance, "memoryidd", res.MemoryInstance)
 	stresschaos.Status.Instances[records[index].Id] = v1alpha1.StressInstance{
 		CpuUID: res.CpuInstance,
 		CpuStartTime: &metav1.Time{

@@ -109,11 +109,7 @@ func (in *Stressors) Normalize() (string, string, error) {
 	if in.MemoryStressor != nil && in.MemoryStressor.Workers != 0 {
 		MemoryStressors += fmt.Sprintf(" --workers %d", in.MemoryStressor.Workers)
 		if len(in.MemoryStressor.Size) != 0 {
-			if in.MemoryStressor.Size[len(in.MemoryStressor.Size)-1] != '%' {
-				MemoryStressors += fmt.Sprintf(" --size %s", in.MemoryStressor.Size)
-			} else {
-				MemoryStressors += fmt.Sprintf(" --size %s", in.MemoryStressor.Size)
-			}
+			MemoryStressors += fmt.Sprintf(" --size %s", in.MemoryStressor.Size)
 		}
 
 		if in.MemoryStressor.Options != nil {
