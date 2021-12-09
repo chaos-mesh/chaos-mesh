@@ -41,6 +41,8 @@ type ContainerRuntimeInfoClient interface {
 	GetPidFromContainerID(ctx context.Context, containerID string) (uint32, error)
 	ContainerKillByContainerID(ctx context.Context, containerID string) error
 	FormatContainerID(ctx context.Context, containerID string) (string, error)
+	ListContainerIDs(ctx context.Context) ([]string, error)
+	GetLabelsFromContainerID(ctx context.Context, containerID string) (map[string]string, error)
 }
 
 // CreateContainerRuntimeInfoClient creates a container runtime information client.

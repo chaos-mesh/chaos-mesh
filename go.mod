@@ -28,6 +28,7 @@ require (
 	github.com/go-logr/logr v0.4.0
 	github.com/go-logr/zapr v0.4.0
 	github.com/go-playground/validator/v10 v10.4.1
+	github.com/go-test/deep v1.0.8 // indirect
 	github.com/golang/protobuf v1.5.2
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0
@@ -50,7 +51,10 @@ require (
 	github.com/pingcap/log v0.0.0-20200117041106-d28c14d3b1cd // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.11.0
+	github.com/retailnext/iptables_exporter v0.1.0
 	github.com/robfig/cron/v3 v3.0.1
+	github.com/romana/ipset v1.0.0
+	github.com/romana/rlog v0.0.0-20171115192701-f018bc92e7d7 // indirect
 	github.com/shirou/gopsutil v2.20.5+incompatible
 	github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749 // indirect
 	github.com/shurcooL/vfsgen v0.0.0-20181202132449-6a9ea43bcacd
@@ -65,6 +69,7 @@ require (
 	go.uber.org/atomic v1.7.0
 	go.uber.org/fx v1.12.0
 	go.uber.org/zap v1.18.1
+	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac
 	golang.org/x/tools v0.1.4
@@ -78,6 +83,7 @@ require (
 	k8s.io/apiserver v0.21.3
 	k8s.io/cli-runtime v0.21.3
 	k8s.io/client-go v0.21.3
+	k8s.io/cri-api v0.20.6
 	k8s.io/klog v1.0.0
 	k8s.io/kubectl v0.21.3
 	k8s.io/utils v0.0.0-20210722164352-7f3ee0f31471
