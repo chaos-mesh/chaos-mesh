@@ -25,7 +25,21 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/ptrace"
 )
 
+// timeSkewFakeImage is the filename of fake image after compiling
 const timeSkewFakeImage = "fake_clock_gettime.o"
+
+// vdsoEntryName is the name of the vDSO entry
+const vdsoEntryName = "[vdso]"
+
+// clockGettime is the target function would be replaced
+const clockGettime = "clock_gettime"
+
+// These three consts corresponding to the three extern variables in the fake_clock_gettime.c
+const (
+	externVarClockIdsMask = "CLOCK_IDS_MASK"
+	externVarTvSecDelta   = "TV_SEC_DELTA"
+	externVarTvNsecDelta  = "TV_NSEC_DELTA"
+)
 
 type TimeSkew struct {
 	deltaSeconds     int64
@@ -71,7 +85,7 @@ func (it *TimeSkew) Inject(pid int) error {
 	for index := range program.Entries {
 		// reverse loop is faster
 		e := program.Entries[len(program.Entries)-index-1]
-		if e.Path == "[vdso]" {
+		if e.Path == vdsoEntryName {
 			vdsoEntry = &e
 			break
 		}
@@ -106,7 +120,7 @@ func (it *TimeSkew) Inject(pid int) error {
 			return err
 		}
 
-		originAddr, err := program.FindSymbolInEntry("clock_gettime", vdsoEntry)
+		originAddr, err := program.FindSymbolInEntry(clockGettime, vdsoEntry)
 		if err != nil {
 			return err
 		}
@@ -117,17 +131,17 @@ func (it *TimeSkew) Inject(pid int) error {
 		}
 	}
 
-	err = program.WriteUint64ToAddr(fakeEntry.StartAddress+uint64(it.fakeImage.offset["CLOCK_IDS_MASK"]), it.clockIDsMask)
+	err = program.WriteUint64ToAddr(fakeEntry.StartAddress+uint64(it.fakeImage.offset[externVarClockIdsMask]), it.clockIDsMask)
 	if err != nil {
 		return err
 	}
 
-	err = program.WriteUint64ToAddr(fakeEntry.StartAddress+uint64(it.fakeImage.offset["TV_SEC_DELTA"]), uint64(it.deltaSeconds))
+	err = program.WriteUint64ToAddr(fakeEntry.StartAddress+uint64(it.fakeImage.offset[externVarTvSecDelta]), uint64(it.deltaSeconds))
 	if err != nil {
 		return err
 	}
 
-	err = program.WriteUint64ToAddr(fakeEntry.StartAddress+uint64(it.fakeImage.offset["TV_NSEC_DELTA"]), uint64(it.deltaNanoSeconds))
+	err = program.WriteUint64ToAddr(fakeEntry.StartAddress+uint64(it.fakeImage.offset[externVarTvNsecDelta]), uint64(it.deltaNanoSeconds))
 	if err != nil {
 		return err
 	}
