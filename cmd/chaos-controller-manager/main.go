@@ -138,9 +138,6 @@ func Run(params RunParams) error {
 		}
 	}
 
-	// Init metrics collector
-	metricsCollector := metrics.NewChaosControllerManagerMetricsCollector(mgr.GetCache(), controllermetrics.Registry)
-
 	setupLog.Info("Setting up webhook server")
 	hookServer := mgr.GetWebhookServer()
 	hookServer.CertDir = ccfg.ControllerCfg.CertsDir

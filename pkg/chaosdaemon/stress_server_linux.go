@@ -93,12 +93,12 @@ func (s *DaemonServer) ExecCpuStressors(ctx context.Context,
 		return "", 0, err
 	}
 
-	ProcessBuilder := bpm.DefaultProcessBuilder("stress-ng", strings.Fields(req.CpuStressors)...).
+	processBuilder := bpm.DefaultProcessBuilder("stress-ng", strings.Fields(req.CpuStressors)...).
 		EnablePause()
 	if req.EnterNS {
-		ProcessBuilder = ProcessBuilder.SetNS(pid, bpm.PidNS)
+		processBuilder = processBuilder.SetNS(pid, bpm.PidNS)
 	}
-	cmd := ProcessBuilder.Build()
+	cmd := processBuilder.Build()
 
 	procState, err := s.backgroundProcessManager.StartProcess(cmd)
 	if err != nil {
@@ -150,13 +150,13 @@ func (s *DaemonServer) ExecMemoryStressors(ctx context.Context,
 	if err != nil {
 		return "", 0, err
 	}
-	ProcessBuilder := bpm.DefaultProcessBuilder("memStress", strings.Fields(req.MemoryStressors)...).
+	processBuilder := bpm.DefaultProcessBuilder("memStress", strings.Fields(req.MemoryStressors)...).
 		EnablePause()
 
 	if req.EnterNS {
-		ProcessBuilder = ProcessBuilder.SetNS(pid, bpm.PidNS)
+		processBuilder = processBuilder.SetNS(pid, bpm.PidNS)
 	}
-	cmd := ProcessBuilder.Build()
+	cmd := processBuilder.Build()
 
 	procState, err := s.backgroundProcessManager.StartProcess(cmd)
 	if err != nil {
