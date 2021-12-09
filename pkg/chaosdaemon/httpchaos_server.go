@@ -21,11 +21,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/tproxyconfig"
 	"io/ioutil"
 	"net/http"
 	"os"
 
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 )
@@ -37,11 +37,6 @@ const (
 
 type stdioTransport struct {
 	stdio *bpm.Stdio
-}
-
-type tproxyConfig struct {
-	ProxyPorts []uint32                        `json:"proxy_ports,omitempty"`
-	Rules      []v1alpha1.PodHttpChaosBaseRule `json:"rules"`
 }
 
 func (t stdioTransport) RoundTrip(req *http.Request) (resp *http.Response, err error) {
@@ -81,7 +76,7 @@ func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 
 	transport := stdioTransport{stdio: stdio}
 
-	var rules []v1alpha1.PodHttpChaosBaseRule
+	var rules []tproxyconfig.PodHttpChaosBaseRule
 	err := json.Unmarshal([]byte(in.Rules), &rules)
 	if err != nil {
 		log.Error(err, "error while unmarshal json bytes")
@@ -90,11 +85,11 @@ func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 
 	log.Info("the length of actions", "length", len(rules))
 
-	httpChaosSpec := tproxyConfig{
+	httpChaosSpec := tproxyconfig.Config{
 		ProxyPorts: in.ProxyPorts,
 		Rules:      rules,
 	}
-	v1alpha1.BodyActionCustomMarshual = true
+
 	config, err := json.Marshal(&httpChaosSpec)
 	if err != nil {
 		return nil, err
