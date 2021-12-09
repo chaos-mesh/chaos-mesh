@@ -3913,7 +3913,7 @@ type Pod @goModel(model: "k8s.io/api/core/v1.Pod") {
     generateName: String!
     namespace: String!
     selfLink: String!
-    uid: String! 
+    uid: String!
     resourceVersion: String!
     generation: Int!
     creationTimestamp: Time!
@@ -4131,7 +4131,7 @@ type ContainerStateTerminated @goModel(model: "k8s.io/api/core/v1.ContainerState
 
     # Message regarding the last termination of the container
     message: String
-    
+
     #Time at which previous execution of the container started
     startedAt: Time
 
@@ -4159,7 +4159,7 @@ type PodIOChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.P
     generateName: String!
     namespace: String!
     selfLink: String!
-    uid: String! 
+    uid: String!
     resourceVersion: String!
     generation: Int!
     creationTimestamp: Time!
@@ -4235,7 +4235,7 @@ type IOChaosAction @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha
     rdev: Int
 
     # MistakeSpec represents the mistake to inject
-    
+
     # filling determines what is filled in the miskate data.
     filling: String
 
@@ -4268,7 +4268,7 @@ type IOChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.IOCh
     generateName: String!
     namespace: String!
     selfLink: String!
-    uid: String! 
+    uid: String!
     resourceVersion: String!
     generation: Int!
     creationTimestamp: Time!
@@ -4396,7 +4396,7 @@ type PodHTTPChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1
     generateName: String!
     namespace: String!
     selfLink: String!
-    uid: String! 
+    uid: String!
     resourceVersion: String!
     generation: Int!
     creationTimestamp: Time!
@@ -4496,7 +4496,7 @@ type HTTPChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.HT
     generateName: String!
     namespace: String!
     selfLink: String!
-    uid: String! 
+    uid: String!
     resourceVersion: String!
     generation: Int!
     creationTimestamp: Time!
@@ -4689,7 +4689,7 @@ type PodNetworkChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alp
     generateName: String!
     namespace: String!
     selfLink: String!
-    uid: String! 
+    uid: String!
     resourceVersion: String!
     generation: Int!
     creationTimestamp: Time!
@@ -4843,7 +4843,7 @@ type NetworkChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1
     generateName: String!
     namespace: String!
     selfLink: String!
-    uid: String! 
+    uid: String!
     resourceVersion: String!
     generation: Int!
     creationTimestamp: Time!
@@ -4865,7 +4865,7 @@ type StressChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.
     generateName: String!
     namespace: String!
     selfLink: String!
-    uid: String! 
+    uid: String!
     resourceVersion: String!
     generation: Int!
     creationTimestamp: Time!

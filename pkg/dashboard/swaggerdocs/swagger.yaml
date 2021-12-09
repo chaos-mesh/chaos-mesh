@@ -1736,11 +1736,12 @@ definitions:
   v1alpha1.PodHttpChaosReplaceActions:
     properties:
       body:
-        $ref: '#/definitions/v1alpha1.PodHttpChaosReplaceBodyAction'
         description: |-
           Body is a rule to replace http message body in target.
           +optional
-        type: object
+        items:
+          type: integer
+        type: array
       code:
         description: |-
           Code is a rule to replace http status code in response.
@@ -1773,10 +1774,6 @@ definitions:
           +optional
         type: object
     type: object
-  v1alpha1.PodHttpChaosReplaceBodyAction:
-    items:
-      type: integer
-    type: array
   v1alpha1.PodSelector:
     properties:
       mode:
