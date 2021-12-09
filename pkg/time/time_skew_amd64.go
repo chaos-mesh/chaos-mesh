@@ -35,12 +35,14 @@ type TimeSkew struct {
 }
 
 func NewTimeSkew(deltaSeconds int64, deltaNanoSeconds int64, clockIDsMask uint64) (*TimeSkew, error) {
-	if _, ok := fakeImages[timeSkewFakeImage]; !ok {
-		return nil, errors.Errorf("construct TimeSkew: no such fake image called %s", timeSkewFakeImage)
+	var image *FakeImage
+	var err error
+
+	if image, err = LoadFakeImageFromEmbedFs(timeSkewFakeImage); err != nil {
+		return nil, err
 	}
 
-	image := fakeImages[timeSkewFakeImage]
-	return NewTimeSkewWithCustomFakeImage(deltaSeconds, deltaNanoSeconds, clockIDsMask, &image), nil
+	return NewTimeSkewWithCustomFakeImage(deltaSeconds, deltaNanoSeconds, clockIDsMask, image), nil
 }
 
 func NewTimeSkewWithCustomFakeImage(deltaSeconds int64, deltaNanoSeconds int64, clockIDsMask uint64, fakeImage *FakeImage) *TimeSkew {
