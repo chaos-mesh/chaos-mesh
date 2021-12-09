@@ -3450,7 +3450,7 @@ var doc = `{
                     "type": "string"
                 },
                 "direction": {
-                    "description": "Direction represents the direction, this applies on netem and network partition action\n+optional\n+kubebuilder:validation:Enum=to;from;both;\"\"",
+                    "description": "Direction represents the direction, this applies on netem and network partition action\n+optional\n+kubebuilder:validation:Enum=to;from;both",
                     "type": "string"
                 },
                 "duplicate": {
@@ -4076,7 +4076,7 @@ var doc = `{
                     "$ref": "#/definitions/v1alpha1.AWSChaosSpec"
                 },
                 "concurrencyPolicy": {
-                    "description": "+optional\n+kubebuilder:validation:Enum=Forbid;Allow",
+                    "description": "+optional\n+kubebuilder:default=Forbid\n+kubebuilder:validation:Enum=Forbid;Allow",
                     "type": "string"
                 },
                 "dnsChaos": {

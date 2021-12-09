@@ -135,7 +135,6 @@ spec:
                 - to
                 - from
                 - both
-                - ""
                 type: string
               duplicate:
                 description: DuplicateSpec represents the detail about loss action
