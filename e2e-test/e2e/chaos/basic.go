@@ -16,7 +16,6 @@
 package chaos
 
 import (
-	"chaos-mesh/e2e-test/e2e/e2econst"
 	"context"
 	"fmt"
 	"net/http"
@@ -37,6 +36,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	e2econfig "github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/config"
+	"github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/e2econst"
 	"github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/util"
 	"github.com/chaos-mesh/chaos-mesh/e2e-test/pkg/fixture"
 	"github.com/chaos-mesh/chaos-mesh/pkg/portforward"
