@@ -15,9 +15,9 @@
 
 package time
 
-// FakeClock could modify the time of certain process.
+// FakeClockInjector could modify the time of certain process.
 // TODO: rename this interface, it brings confusing with .c files under pkg/time/fakeclock.
-type FakeClock interface {
+type FakeClockInjector interface {
 	Inject(pid int) error
 	Recover(pid int) error
 }

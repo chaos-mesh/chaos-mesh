@@ -20,7 +20,7 @@ import (
 )
 
 // ModifyTime modifies time of target process
-// Deprecated:  Please use FakeClock.Inject and FakeClock.Recover instead.
+// Deprecated:  Please use FakeClockInjector.Inject and FakeClockInjector.Recover instead.
 func ModifyTime(pid int, deltaSec int64, deltaNsec int64, clockIdsMask uint64) error {
 	// Mock point to return error in unit test
 	if err := mock.On("ModifyTimeError"); err != nil {
