@@ -26,6 +26,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
@@ -153,7 +154,7 @@ func (impl *Impl) doHttpRequest(method, url string, data io.Reader) (int, string
 			impl.Log.Error(err, "generate HTTPS client")
 		}
 	} else {
-		httpClient = &http.Client{}
+		httpClient = &http.Client{Timeout: 5 * time.Second}
 	}
 
 	resp, err := httpClient.Do(req)
@@ -174,7 +175,7 @@ func (impl *Impl) doHttpRequest(method, url string, data io.Reader) (int, string
 
 func securityHTTPClient() (*http.Client, error) {
 	if !config.ControllerCfg.ChaosdSecurityMode {
-		return &http.Client{}, nil
+		return &http.Client{Timeout: 5 * time.Second}, nil
 	}
 
 	pair, err := tls.LoadX509KeyPair(config.ControllerCfg.ChaosdClientCert, config.ControllerCfg.ChaosdClientKey)
@@ -194,8 +195,10 @@ func securityHTTPClient() (*http.Client, error) {
 			TLSClientConfig: &tls.Config{
 				RootCAs:      pool,
 				Certificates: []tls.Certificate{pair},
+				ServerName:   "chaosd.chaos-mesh.org",
 			},
 		},
+		Timeout: 5 * time.Second,
 	}, nil
 }
 
