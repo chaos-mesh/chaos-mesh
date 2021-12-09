@@ -23,14 +23,14 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+	impltypes "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/types"
 )
+
+var _ impltypes.ChaosImpl = (*Delegate)(nil)
 
 type Delegate struct {
 	impl interface{}
 }
-
-var _ common.ChaosImpl = (*Delegate)(nil)
 
 func (i *Delegate) callAccordingToAction(action, methodName string, defaultPhase v1alpha1.Phase, args ...interface{}) (v1alpha1.Phase, error) {
 	implType := reflect.TypeOf(i.impl).Elem()

@@ -23,7 +23,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/podchaos/containerkill"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/podchaos/podfailure"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/podchaos/podkill"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+	impltypes "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/types"
 )
 
 type Impl struct {
@@ -34,9 +34,9 @@ type Impl struct {
 	ContainerKill *containerkill.Impl `action:"container-kill"`
 }
 
-func NewImpl(impl Impl) *common.ChaosImplPair {
+func NewImpl(impl Impl) *impltypes.ChaosImplPair {
 	delegate := action.New(&impl)
-	return &common.ChaosImplPair{
+	return &impltypes.ChaosImplPair{
 		Name:   "podchaos",
 		Object: &v1alpha1.PodChaos{},
 		Impl:   &delegate,

@@ -306,7 +306,7 @@ const data: Record<Kind, Definition> = {
         },
       },
       {
-        name: 'Detach Volumne',
+        name: 'Detach Volume',
         key: 'detach-volume',
         spec: {
           action: 'detach-volume' as any,
@@ -1191,7 +1191,7 @@ export const dataPhysic: Record<KindPhysic, Definition> = {
             helperText: 'The maximum depletion rate of the bucket',
           },
           direction: networkCommon['direction'],
-          
+
           device: {
             field: 'text',
             label: 'Device',
