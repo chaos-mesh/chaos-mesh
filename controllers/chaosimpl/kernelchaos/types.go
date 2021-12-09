@@ -25,8 +25,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
+	"github.com/chaos-mesh/chaos-mesh/controllers/records"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
@@ -214,8 +214,8 @@ func (impl *Impl) CreateBPFKIConnection(ctx context.Context, c client.Client, po
 	return builder.Build()
 }
 
-func NewImpl(c client.Client, log logr.Logger, builder *chaosdaemon.ChaosDaemonClientBuilder) *common.ChaosImplPair {
-	return &common.ChaosImplPair{
+func NewImpl(c client.Client, log logr.Logger, builder *chaosdaemon.ChaosDaemonClientBuilder) *records.ChaosImplPair {
+	return &records.ChaosImplPair{
 		Name:   "kernelchaos",
 		Object: &v1alpha1.KernelChaos{},
 		Impl: &Impl{

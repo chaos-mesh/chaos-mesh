@@ -28,7 +28,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/iochaos/podiochaosmanager"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+	"github.com/chaos-mesh/chaos-mesh/controllers/records"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
 )
 
@@ -196,8 +196,8 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	return waitForRecoverSync, nil
 }
 
-func NewImpl(c client.Client, b *podiochaosmanager.Builder, log logr.Logger) *common.ChaosImplPair {
-	return &common.ChaosImplPair{
+func NewImpl(c client.Client, b *podiochaosmanager.Builder, log logr.Logger) *records.ChaosImplPair {
+	return &records.ChaosImplPair{
 		Name:   "iochaos",
 		Object: &v1alpha1.IOChaos{},
 		Impl: &Impl{

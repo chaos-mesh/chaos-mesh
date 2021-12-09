@@ -22,7 +22,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/networkchaos/partition"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/networkchaos/podnetworkchaosmanager"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/networkchaos/trafficcontrol"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+	"github.com/chaos-mesh/chaos-mesh/controllers/records"
 )
 
 type Impl struct {
@@ -32,9 +32,9 @@ type Impl struct {
 	Partition      *partition.Impl      `action:"partition"`
 }
 
-func NewImpl(impl Impl) *common.ChaosImplPair {
+func NewImpl(impl Impl) *records.ChaosImplPair {
 	delegate := action.New(&impl)
-	return &common.ChaosImplPair{
+	return &records.ChaosImplPair{
 		Name:       "networkchaos",
 		Object:     &v1alpha1.NetworkChaos{},
 		Impl:       &delegate,
