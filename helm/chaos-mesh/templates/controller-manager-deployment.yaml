@@ -52,13 +52,17 @@ spec:
       {{- end }}
       containers:
       - name: chaos-mesh
-        image: {{template "registry-prefix" .}}{{ .Values.controllerManager.image }}
+        image: {{template "chaos-controller-manager.image" . }}
         imagePullPolicy: {{ .Values.controllerManager.imagePullPolicy | default "IfNotPresent" }}
         resources:
 {{ toYaml .Values.controllerManager.resources | indent 12 }}
         command:
           - /usr/local/bin/chaos-controller-manager
         env:
+          {{- range $envKey, $envVal := .Values.controllerManager.env }}
+          - name: {{ $envKey | upper }}
+            value: {{ $envVal | quote }}
+          {{- end }}
           - name: NAMESPACE
             valueFrom:
               fieldRef:
@@ -138,9 +142,9 @@ spec:
           {{- end }}
         ports:
           - name: webhook
-            containerPort: 9443 # Customize containerPort
+            containerPort: {{ .Values.controllerManager.env.WEBHOOK_PORT }}
           - name: http
-            containerPort: 10080
+            containerPort: {{ .Values.controllerManager.env.METRICS_PORT }}
         {{- if .Values.enableProfiling }}
           - name: pprof
             containerPort: 10081
@@ -151,7 +155,7 @@ spec:
         {{- end }}
       {{- if .Values.chaosDlv.enable }}
       - name: chaos-mesh-dlv
-        image: {{template "registry-prefix" .}}{{ .Values.chaosDlv.image }}
+        image: {{template "chaos-dlv.image" . }}
         imagePullPolicy: {{ .Values.chaosDlv.imagePullPolicy | default "IfNotPresent" }}
         env:
           - name: CMD_NAME

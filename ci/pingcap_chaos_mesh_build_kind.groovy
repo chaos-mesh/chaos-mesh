@@ -60,6 +60,10 @@ spec:
       value: https://registry-mirror.pingcap.net
     - name: QUAY_IO_MIRROR
       value: https://registry-mirror.pingcap.net
+    - name: IMAGE_BUILD_ENV_BUILD
+      value: "1"
+    - name: IMAGE_DEV_ENV_BUILD
+      value: "1"
 
     resources:
       requests:
@@ -249,12 +253,12 @@ def call(BUILD_BRANCH, CREDENTIALS_ID) {
 					}
 
 					def modifiedFiles = sh(script: "git diff --name-only origin/master...", returnStdout: true).trim().split('\n')
-					List ignoredModifications = modifiedFiles.findAll { 
+					List ignoredModifications = modifiedFiles.findAll {
 						// all files without extension and is not Makefile will be regarded as markdown file
-						it.endsWith('.md') || 
-							(!it.contains('.') && it != 'Makefile') || 
-							it.startsWith('ui') || 
-							it.startsWith('docs') || 
+						it.endsWith('.md') ||
+							(!it.contains('.') && it != 'Makefile') ||
+							it.startsWith('ui') ||
+							it.startsWith('docs') ||
 							it.startsWith('static')
 					}
 					echo 'Modified Files: ' + modifiedFiles.join(',')

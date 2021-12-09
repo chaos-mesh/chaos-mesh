@@ -14,18 +14,17 @@
  * limitations under the License.
  *
  */
+
 import { Provider } from 'react-redux'
 import { BrowserRouter as Router } from 'react-router-dom'
 import ThemeProvider from './ThemeProvider'
 import TopContainer from 'components/TopContainer'
 import store from './store'
 
-const App = () => (
+const App: React.FC = ({ children }) => (
   <Provider store={store}>
     <Router>
-      <ThemeProvider>
-        <TopContainer />
-      </ThemeProvider>
+      <ThemeProvider>{children || <TopContainer />}</ThemeProvider>
     </Router>
   </Provider>
 )

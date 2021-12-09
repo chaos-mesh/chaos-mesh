@@ -629,9 +629,9 @@ install_chaos_mesh() {
     local microk8s=${12}
     printf "Install Chaos Mesh %s\n" "${release_name}"
 
-    local chaos_mesh_image="${docker_registry}/pingcap/chaos-mesh:${version}"
-    local chaos_daemon_image="${docker_registry}/pingcap/chaos-daemon:${version}"
-    local chaos_dashboard_image="${docker_registry}/pingcap/chaos-dashboard:${version}"
+    local chaos_mesh_image="${docker_registry}/chaos-mesh/chaos-mesh:${version}"
+    local chaos_daemon_image="${docker_registry}/chaos-mesh/chaos-daemon:${version}"
+    local chaos_dashboard_image="${docker_registry}/chaos-mesh/chaos-dashboard:${version}"
 
     if [ "$docker_mirror" == "true" ]; then
         azk8spull "${chaos_mesh_image}" || true
@@ -1193,6 +1193,10 @@ spec:
       port: 2333
       targetPort: 2333
       name: http
+    - protocol: TCP
+      port: 2334
+      targetPort: 2334
+      name: metric
 ---
 # Source: chaos-mesh/templates/controller-manager-service.yaml
 # Copyright 2021 Chaos Mesh Authors.
@@ -1293,7 +1297,7 @@ spec:
       priorityClassName: 
       containers:
         - name: chaos-daemon
-          image: ${DOCKER_REGISTRY_PREFIX}/chaos-mesh/chaos-mesh/chaos-daemon:${VERSION_TAG}
+          image: ${DOCKER_REGISTRY_PREFIX}/chaos-mesh/chaos-daemon:${VERSION_TAG}
           imagePullPolicy: IfNotPresent
           command:
             - /usr/local/bin/chaos-daemon
@@ -1373,13 +1377,12 @@ spec:
         app.kubernetes.io/version: v0.9.0
         app.kubernetes.io/component: chaos-dashboard
       annotations:
-        rollme: "install.sh"
     spec:
       serviceAccountName: chaos-controller-manager
       priorityClassName: 
       containers:
         - name: chaos-dashboard
-          image: ${DOCKER_REGISTRY_PREFIX}/chaos-mesh/chaos-mesh/chaos-dashboard:${VERSION_TAG}
+          image: ${DOCKER_REGISTRY_PREFIX}/chaos-mesh/chaos-dashboard:${VERSION_TAG}
           imagePullPolicy: IfNotPresent
           resources:
             limits: {}
@@ -1397,6 +1400,10 @@ spec:
               value: "0.0.0.0"
             - name: LISTEN_PORT
               value: "2333"
+            - name: METRIC_HOST
+              value: "0.0.0.0"
+            - name: METRIC_PORT
+              value: "2334"
             - name: TZ
               value: ${timezone}
             - name: CLUSTER_SCOPED
@@ -1407,8 +1414,16 @@ spec:
               value: "false"
             - name: SECURITY_MODE
               value: "false"
+            - name: GCP_SECURITY_MODE
+              value: "false"
+            - name: GCP_CLIENT_ID
+              value: ""
+            - name: GCP_CLIENT_SECRET
+              value: ""
             - name: DNS_SERVER_CREATE
               value: "false"
+            - name: ROOT_URL
+              value: "http://localhost:2333"
           volumeMounts:
             - name: storage-volume
               mountPath: /data
@@ -1416,6 +1431,8 @@ spec:
           ports:
             - name: http
               containerPort: 2333
+            - name: metric
+              containerPort: 2334
       volumes:
       - name: storage-volume
         emptyDir: {}
@@ -1469,7 +1486,7 @@ spec:
       priorityClassName: 
       containers:
       - name: chaos-mesh
-        image: ${DOCKER_REGISTRY_PREFIX}/chaos-mesh/chaos-mesh/chaos-mesh:${VERSION_TAG}
+        image: ${DOCKER_REGISTRY_PREFIX}/chaos-mesh/chaos-mesh:${VERSION_TAG}
         imagePullPolicy: IfNotPresent
         resources:
             limits: {}
@@ -1479,6 +1496,10 @@ spec:
         command:
           - /usr/local/bin/chaos-controller-manager
         env:
+          - name: METRICS_PORT
+            value: "10080"
+          - name: WEBHOOK_PORT
+            value: "9443"
           - name: NAMESPACE
             valueFrom:
               fieldRef:
@@ -1535,7 +1556,7 @@ spec:
             readOnly: true
         ports:
           - name: webhook
-            containerPort: 9443 # Customize containerPort
+            containerPort: 9443
           - name: http
             containerPort: 10080
           - name: pprof

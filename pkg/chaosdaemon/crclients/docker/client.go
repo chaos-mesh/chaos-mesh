@@ -21,6 +21,7 @@ import (
 	"net/http"
 
 	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/filters"
 	dockerclient "github.com/docker/docker/client"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
@@ -28,12 +29,18 @@ import (
 
 const (
 	dockerProtocolPrefix = "docker://"
+
+	// containerKindLabel is a label key intending to filter sandbox container
+	// ref: https://github.com/kubernetes/kubernetes/blob/master/pkg/kubelet/dockershim/docker_service.go#L67-L75
+	containerKindLabel     = "io.kubernetes.docker.type"
+	containerKindContainer = "container"
 )
 
 // DockerClientInterface represents the DockerClient, it's used to simply unit test
 type DockerClientInterface interface {
 	ContainerInspect(ctx context.Context, containerID string) (types.ContainerJSON, error)
 	ContainerKill(ctx context.Context, containerID, signal string) error
+	ContainerList(ctx context.Context, options types.ContainerListOptions) ([]types.Container, error)
 }
 
 // DockerClient can get information from docker
@@ -81,6 +88,39 @@ func (c DockerClient) ContainerKillByContainerID(ctx context.Context, containerI
 	return err
 }
 
+// ListContainerIDs lists all container IDs
+func (c DockerClient) ListContainerIDs(ctx context.Context) ([]string, error) {
+	// filter sandbox containers
+	filterArg := filters.Arg("label", fmt.Sprintf("%s=%s", containerKindLabel, containerKindContainer))
+	containers, err := c.client.ContainerList(ctx, types.ContainerListOptions{
+		Filters: filters.NewArgs(filterArg),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	var ids []string
+	for _, container := range containers {
+		id := fmt.Sprintf("%s%s", dockerProtocolPrefix, container.ID)
+		ids = append(ids, id)
+	}
+	return ids, nil
+}
+
+// GetLabelsFromContainerID returns the labels according to container ID
+func (c DockerClient) GetLabelsFromContainerID(ctx context.Context, containerID string) (map[string]string, error) {
+	id, err := c.FormatContainerID(ctx, containerID)
+	if err != nil {
+		return nil, err
+	}
+	container, err := c.client.ContainerInspect(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return container.Config.Labels, nil
+}
+
 func New(host string, version string, client *http.Client, httpHeaders map[string]string) (*DockerClient, error) {
 	// Mock point to return error or mock client in unit test
 	if err := mock.On("NewDockerClientError"); err != nil {
@@ -93,6 +133,7 @@ func New(host string, version string, client *http.Client, httpHeaders map[strin
 	}
 
 	c, err := dockerclient.NewClientWithOpts(
+		dockerclient.FromEnv,
 		dockerclient.WithHost(host),
 		dockerclient.WithVersion(version),
 		dockerclient.WithHTTPClient(client),

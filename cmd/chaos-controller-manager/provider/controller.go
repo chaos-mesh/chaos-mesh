@@ -18,6 +18,8 @@ package provider
 import (
 	"context"
 	"math"
+	"net"
+	"strconv"
 
 	"github.com/go-logr/logr"
 	lru "github.com/hashicorp/golang-lru"
@@ -62,7 +64,7 @@ func NewOption(logger logr.Logger) *ctrl.Options {
 	}
 	options := ctrl.Options{
 		Scheme:                     scheme,
-		MetricsBindAddress:         config.ControllerCfg.MetricsAddr,
+		MetricsBindAddress:         net.JoinHostPort(config.ControllerCfg.MetricsHost, strconv.Itoa(config.ControllerCfg.MetricsPort)),
 		LeaderElection:             config.ControllerCfg.EnableLeaderElection,
 		LeaderElectionNamespace:    leaderElectionNamespace,
 		LeaderElectionResourceLock: "configmaps",
@@ -70,7 +72,8 @@ func NewOption(logger logr.Logger) *ctrl.Options {
 		LeaseDuration:              &config.ControllerCfg.LeaderElectLeaseDuration,
 		RetryPeriod:                &config.ControllerCfg.LeaderElectRetryPeriod,
 		RenewDeadline:              &config.ControllerCfg.LeaderElectRenewDeadline,
-		Port:                       9443,
+		Port:                       config.ControllerCfg.WebhookPort,
+		Host:                       config.ControllerCfg.WebhookHost,
 		// Don't aggregate events
 		EventBroadcaster: record.NewBroadcasterWithCorrelatorOptions(record.CorrelatorOptions{
 			MaxEvents:            math.MaxInt32,
@@ -163,9 +166,7 @@ type controlPlaneCacheReader struct {
 	client.Reader `name:"control-plane-cache"`
 }
 
-func NewControlPlaneCacheReader(logger logr.Logger) (controlPlaneCacheReader, error) {
-	cfg := ctrl.GetConfigOrDie()
-
+func NewControlPlaneCacheReader(logger logr.Logger, cfg *rest.Config) (controlPlaneCacheReader, error) {
 	mapper, err := apiutil.NewDynamicRESTMapper(cfg)
 	if err != nil {
 		return controlPlaneCacheReader{}, err

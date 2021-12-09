@@ -1,6 +1,6 @@
-# Common Controller
+# Records Controller
 
-Common controller controls the `.Status.Experiment.Records` field with the steps below:
+Records controller controls the `.Status.Experiment.Records` field with the steps below:
 
 1. if the `records` are nil, try to select new objects and save to the `records`.
 2. iterate over `records`, for every `record`, if the `Phase` of it doesn't match the `DesiredPhase`, try to sync them
