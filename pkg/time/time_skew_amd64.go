@@ -53,7 +53,7 @@ func NewTimeSkew(deltaSeconds int64, deltaNanoSeconds int64, clockIDsMask uint64
 	var err error
 
 	if image, err = LoadFakeImageFromEmbedFs(timeSkewFakeImage); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "load fake image")
 	}
 
 	return NewTimeSkewWithCustomFakeImage(deltaSeconds, deltaNanoSeconds, clockIDsMask, image), nil
@@ -72,7 +72,7 @@ func (it *TimeSkew) Inject(pid int) error {
 
 	program, err := ptrace.Trace(pid)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "ptrace on target process, pid: %d", pid)
 	}
 	defer func() {
 		err = program.Detach()
@@ -91,7 +91,7 @@ func (it *TimeSkew) Inject(pid int) error {
 		}
 	}
 	if vdsoEntry == nil {
-		return errors.New("cannot find [vdso] entry")
+		return errors.Errorf("cannot find [vdso] entry, pid: %d", pid)
 	}
 
 	// minus tailing variable part
@@ -110,42 +110,44 @@ func (it *TimeSkew) Inject(pid int) error {
 
 		if bytes.Equal(*image, it.fakeImage.content[0:constImageLen]) {
 			fakeEntry = &e
-			log.Info("found injected image", "addr", fakeEntry.StartAddress)
+			log.Info("found injected image", "addr", fakeEntry.StartAddress, "pid", pid)
 			break
 		}
 	}
+
+	// target process has not been injected yet
 	if fakeEntry == nil {
 		fakeEntry, err = program.MmapSlice(it.fakeImage.content)
 		if err != nil {
-			return err
+			return errors.Wrapf(err, "mmap fake image, pid: %d", pid)
 		}
 
 		originAddr, err := program.FindSymbolInEntry(clockGettime, vdsoEntry)
 		if err != nil {
-			return err
+			return errors.Wrapf(err, "find origin clock_gettime in vdso, pid: %d", pid)
 		}
 
 		err = program.JumpToFakeFunc(originAddr, fakeEntry.StartAddress)
 		if err != nil {
-			return err
+			return errors.Wrapf(err, "override origin clock_gettime, pid: %d", pid)
 		}
 	}
 
 	err = program.WriteUint64ToAddr(fakeEntry.StartAddress+uint64(it.fakeImage.offset[externVarClockIdsMask]), it.clockIDsMask)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "set %s for time skew, pid: %d", externVarClockIdsMask, pid)
 	}
 
 	err = program.WriteUint64ToAddr(fakeEntry.StartAddress+uint64(it.fakeImage.offset[externVarTvSecDelta]), uint64(it.deltaSeconds))
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "set %s for time skew, pid: %d", externVarTvSecDelta, pid)
 	}
 
 	err = program.WriteUint64ToAddr(fakeEntry.StartAddress+uint64(it.fakeImage.offset[externVarTvNsecDelta]), uint64(it.deltaNanoSeconds))
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "set %s for time skew, pid: %d", externVarTvNsecDelta, pid)
 	}
-	return err
+	return nil
 }
 
 func (it *TimeSkew) Recover(pid int) error {
