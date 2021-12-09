@@ -299,8 +299,8 @@ type ComplexityRoot struct {
 	}
 
 	Logger struct {
-		Component func(childComplexity int, ns *string, component model.Component) int
-		Pod       func(childComplexity int, ns *string, name string) int
+		Component func(childComplexity int, ns string, component model.Component) int
+		Pod       func(childComplexity int, ns string, name string) int
 	}
 
 	LossSpec struct {
@@ -315,24 +315,16 @@ type ComplexityRoot struct {
 	}
 
 	Namespace struct {
-		Component   func(childComplexity int, component model.Component) int
-		HTTP        func(childComplexity int, name string) int
-		HTTPS       func(childComplexity int) int
-		Io          func(childComplexity int, name string) int
-		Ios         func(childComplexity int) int
-		Network     func(childComplexity int, name string) int
-		Networks    func(childComplexity int) int
-		Ns          func(childComplexity int) int
-		Pod         func(childComplexity int, name string) int
-		Podhttp     func(childComplexity int, name string) int
-		Podhttps    func(childComplexity int) int
-		Podio       func(childComplexity int, name string) int
-		Podios      func(childComplexity int) int
-		Podnetwork  func(childComplexity int, name string) int
-		Podnetworks func(childComplexity int) int
-		Pods        func(childComplexity int) int
-		Stress      func(childComplexity int, name string) int
-		Stresses    func(childComplexity int) int
+		Component       func(childComplexity int, component model.Component) int
+		Httpchaos       func(childComplexity int, name *string) int
+		Iochaos         func(childComplexity int, name *string) int
+		Networkchaos    func(childComplexity int, name *string) int
+		Ns              func(childComplexity int) int
+		Pod             func(childComplexity int, name *string) int
+		Podhttpchaos    func(childComplexity int, name *string) int
+		Podiochaos      func(childComplexity int, name *string) int
+		Podnetworkchaos func(childComplexity int, name *string) int
+		Stresschaos     func(childComplexity int, name *string) int
 	}
 
 	NetworkChaos struct {
@@ -350,7 +342,7 @@ type ComplexityRoot struct {
 		Name                       func(childComplexity int) int
 		Namespace                  func(childComplexity int) int
 		OwnerReferences            func(childComplexity int) int
-		Podnetworks                func(childComplexity int) int
+		Podnetwork                 func(childComplexity int) int
 		ResourceVersion            func(childComplexity int) int
 		SelfLink                   func(childComplexity int) int
 		UID                        func(childComplexity int) int
@@ -595,7 +587,7 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Namepsace func(childComplexity int, ns *string) int
+		Namespace func(childComplexity int, ns *string) int
 	}
 
 	RawIPSet struct {
@@ -761,30 +753,22 @@ type IoFaultResolver interface {
 	Errno(ctx context.Context, obj *v1alpha1.IoFault) (int, error)
 }
 type LoggerResolver interface {
-	Component(ctx context.Context, ns *string, component model.Component) (<-chan string, error)
-	Pod(ctx context.Context, ns *string, name string) (<-chan string, error)
+	Component(ctx context.Context, ns string, component model.Component) (<-chan string, error)
+	Pod(ctx context.Context, ns string, name string) (<-chan string, error)
 }
 type MistakeSpecResolver interface {
 	Filling(ctx context.Context, obj *v1alpha1.MistakeSpec) (*string, error)
 }
 type NamespaceResolver interface {
 	Component(ctx context.Context, obj *model.Namespace, component model.Component) ([]*v1.Pod, error)
-	Pod(ctx context.Context, obj *model.Namespace, name string) (*v1.Pod, error)
-	Pods(ctx context.Context, obj *model.Namespace) ([]*v1.Pod, error)
-	Stress(ctx context.Context, obj *model.Namespace, name string) (*v1alpha1.StressChaos, error)
-	Stresses(ctx context.Context, obj *model.Namespace) ([]*v1alpha1.StressChaos, error)
-	Io(ctx context.Context, obj *model.Namespace, name string) (*v1alpha1.IOChaos, error)
-	Ios(ctx context.Context, obj *model.Namespace) ([]*v1alpha1.IOChaos, error)
-	Podio(ctx context.Context, obj *model.Namespace, name string) (*v1alpha1.PodIOChaos, error)
-	Podios(ctx context.Context, obj *model.Namespace) ([]*v1alpha1.PodIOChaos, error)
-	HTTP(ctx context.Context, obj *model.Namespace, name string) (*v1alpha1.HTTPChaos, error)
-	HTTPS(ctx context.Context, obj *model.Namespace) ([]*v1alpha1.HTTPChaos, error)
-	Podhttp(ctx context.Context, obj *model.Namespace, name string) (*v1alpha1.PodHttpChaos, error)
-	Podhttps(ctx context.Context, obj *model.Namespace) ([]*v1alpha1.PodHttpChaos, error)
-	Network(ctx context.Context, obj *model.Namespace, name string) (*v1alpha1.NetworkChaos, error)
-	Networks(ctx context.Context, obj *model.Namespace) ([]*v1alpha1.NetworkChaos, error)
-	Podnetwork(ctx context.Context, obj *model.Namespace, name string) (*v1alpha1.PodNetworkChaos, error)
-	Podnetworks(ctx context.Context, obj *model.Namespace) ([]*v1alpha1.PodNetworkChaos, error)
+	Pod(ctx context.Context, obj *model.Namespace, name *string) ([]*v1.Pod, error)
+	Stresschaos(ctx context.Context, obj *model.Namespace, name *string) ([]*v1alpha1.StressChaos, error)
+	Iochaos(ctx context.Context, obj *model.Namespace, name *string) ([]*v1alpha1.IOChaos, error)
+	Podiochaos(ctx context.Context, obj *model.Namespace, name *string) ([]*v1alpha1.PodIOChaos, error)
+	Httpchaos(ctx context.Context, obj *model.Namespace, name *string) ([]*v1alpha1.HTTPChaos, error)
+	Podhttpchaos(ctx context.Context, obj *model.Namespace, name *string) ([]*v1alpha1.PodHttpChaos, error)
+	Networkchaos(ctx context.Context, obj *model.Namespace, name *string) ([]*v1alpha1.NetworkChaos, error)
+	Podnetworkchaos(ctx context.Context, obj *model.Namespace, name *string) ([]*v1alpha1.PodNetworkChaos, error)
 }
 type NetworkChaosResolver interface {
 	UID(ctx context.Context, obj *v1alpha1.NetworkChaos) (string, error)
@@ -795,7 +779,7 @@ type NetworkChaosResolver interface {
 	Labels(ctx context.Context, obj *v1alpha1.NetworkChaos) (map[string]interface{}, error)
 	Annotations(ctx context.Context, obj *v1alpha1.NetworkChaos) (map[string]interface{}, error)
 
-	Podnetworks(ctx context.Context, obj *v1alpha1.NetworkChaos) ([]*v1alpha1.PodNetworkChaos, error)
+	Podnetwork(ctx context.Context, obj *v1alpha1.NetworkChaos) ([]*v1alpha1.PodNetworkChaos, error)
 }
 type OwnerReferenceResolver interface {
 	UID(ctx context.Context, obj *v11.OwnerReference) (string, error)
@@ -887,7 +871,7 @@ type ProcessResolver interface {
 	Fds(ctx context.Context, obj *model.Process) ([]*model.Fd, error)
 }
 type QueryResolver interface {
-	Namepsace(ctx context.Context, ns *string) (*model.Namespace, error)
+	Namespace(ctx context.Context, ns *string) ([]*model.Namespace, error)
 }
 type RawIptablesResolver interface {
 	Direction(ctx context.Context, obj *v1alpha1.RawIptables) (string, error)
@@ -2004,7 +1988,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Logger.Component(childComplexity, args["ns"].(*string), args["component"].(model.Component)), true
+		return e.complexity.Logger.Component(childComplexity, args["ns"].(string), args["component"].(model.Component)), true
 
 	case "Logger.pod":
 		if e.complexity.Logger.Pod == nil {
@@ -2016,7 +2000,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Logger.Pod(childComplexity, args["ns"].(*string), args["name"].(string)), true
+		return e.complexity.Logger.Pod(childComplexity, args["ns"].(string), args["name"].(string)), true
 
 	case "LossSpec.correlation":
 		if e.complexity.LossSpec.Correlation == nil {
@@ -2065,62 +2049,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Namespace.Component(childComplexity, args["component"].(model.Component)), true
 
-	case "Namespace.http":
-		if e.complexity.Namespace.HTTP == nil {
+	case "Namespace.httpchaos":
+		if e.complexity.Namespace.Httpchaos == nil {
 			break
 		}
 
-		args, err := ec.field_Namespace_http_args(context.TODO(), rawArgs)
+		args, err := ec.field_Namespace_httpchaos_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Namespace.HTTP(childComplexity, args["name"].(string)), true
+		return e.complexity.Namespace.Httpchaos(childComplexity, args["name"].(*string)), true
 
-	case "Namespace.https":
-		if e.complexity.Namespace.HTTPS == nil {
+	case "Namespace.iochaos":
+		if e.complexity.Namespace.Iochaos == nil {
 			break
 		}
 
-		return e.complexity.Namespace.HTTPS(childComplexity), true
-
-	case "Namespace.io":
-		if e.complexity.Namespace.Io == nil {
-			break
-		}
-
-		args, err := ec.field_Namespace_io_args(context.TODO(), rawArgs)
+		args, err := ec.field_Namespace_iochaos_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Namespace.Io(childComplexity, args["name"].(string)), true
+		return e.complexity.Namespace.Iochaos(childComplexity, args["name"].(*string)), true
 
-	case "Namespace.ios":
-		if e.complexity.Namespace.Ios == nil {
+	case "Namespace.networkchaos":
+		if e.complexity.Namespace.Networkchaos == nil {
 			break
 		}
 
-		return e.complexity.Namespace.Ios(childComplexity), true
-
-	case "Namespace.network":
-		if e.complexity.Namespace.Network == nil {
-			break
-		}
-
-		args, err := ec.field_Namespace_network_args(context.TODO(), rawArgs)
+		args, err := ec.field_Namespace_networkchaos_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Namespace.Network(childComplexity, args["name"].(string)), true
-
-	case "Namespace.networks":
-		if e.complexity.Namespace.Networks == nil {
-			break
-		}
-
-		return e.complexity.Namespace.Networks(childComplexity), true
+		return e.complexity.Namespace.Networkchaos(childComplexity, args["name"].(*string)), true
 
 	case "Namespace.ns":
 		if e.complexity.Namespace.Ns == nil {
@@ -2139,90 +2102,55 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Namespace.Pod(childComplexity, args["name"].(string)), true
+		return e.complexity.Namespace.Pod(childComplexity, args["name"].(*string)), true
 
-	case "Namespace.podhttp":
-		if e.complexity.Namespace.Podhttp == nil {
+	case "Namespace.podhttpchaos":
+		if e.complexity.Namespace.Podhttpchaos == nil {
 			break
 		}
 
-		args, err := ec.field_Namespace_podhttp_args(context.TODO(), rawArgs)
+		args, err := ec.field_Namespace_podhttpchaos_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Namespace.Podhttp(childComplexity, args["name"].(string)), true
+		return e.complexity.Namespace.Podhttpchaos(childComplexity, args["name"].(*string)), true
 
-	case "Namespace.podhttps":
-		if e.complexity.Namespace.Podhttps == nil {
+	case "Namespace.podiochaos":
+		if e.complexity.Namespace.Podiochaos == nil {
 			break
 		}
 
-		return e.complexity.Namespace.Podhttps(childComplexity), true
-
-	case "Namespace.podio":
-		if e.complexity.Namespace.Podio == nil {
-			break
-		}
-
-		args, err := ec.field_Namespace_podio_args(context.TODO(), rawArgs)
+		args, err := ec.field_Namespace_podiochaos_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Namespace.Podio(childComplexity, args["name"].(string)), true
+		return e.complexity.Namespace.Podiochaos(childComplexity, args["name"].(*string)), true
 
-	case "Namespace.podios":
-		if e.complexity.Namespace.Podios == nil {
+	case "Namespace.podnetworkchaos":
+		if e.complexity.Namespace.Podnetworkchaos == nil {
 			break
 		}
 
-		return e.complexity.Namespace.Podios(childComplexity), true
-
-	case "Namespace.podnetwork":
-		if e.complexity.Namespace.Podnetwork == nil {
-			break
-		}
-
-		args, err := ec.field_Namespace_podnetwork_args(context.TODO(), rawArgs)
+		args, err := ec.field_Namespace_podnetworkchaos_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Namespace.Podnetwork(childComplexity, args["name"].(string)), true
+		return e.complexity.Namespace.Podnetworkchaos(childComplexity, args["name"].(*string)), true
 
-	case "Namespace.podnetworks":
-		if e.complexity.Namespace.Podnetworks == nil {
+	case "Namespace.stresschaos":
+		if e.complexity.Namespace.Stresschaos == nil {
 			break
 		}
 
-		return e.complexity.Namespace.Podnetworks(childComplexity), true
-
-	case "Namespace.pods":
-		if e.complexity.Namespace.Pods == nil {
-			break
-		}
-
-		return e.complexity.Namespace.Pods(childComplexity), true
-
-	case "Namespace.stress":
-		if e.complexity.Namespace.Stress == nil {
-			break
-		}
-
-		args, err := ec.field_Namespace_stress_args(context.TODO(), rawArgs)
+		args, err := ec.field_Namespace_stresschaos_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Namespace.Stress(childComplexity, args["name"].(string)), true
-
-	case "Namespace.stresses":
-		if e.complexity.Namespace.Stresses == nil {
-			break
-		}
-
-		return e.complexity.Namespace.Stresses(childComplexity), true
+		return e.complexity.Namespace.Stresschaos(childComplexity, args["name"].(*string)), true
 
 	case "NetworkChaos.apiVersion":
 		if e.complexity.NetworkChaos.APIVersion == nil {
@@ -2322,12 +2250,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.NetworkChaos.OwnerReferences(childComplexity), true
 
-	case "NetworkChaos.podnetworks":
-		if e.complexity.NetworkChaos.Podnetworks == nil {
+	case "NetworkChaos.podnetwork":
+		if e.complexity.NetworkChaos.Podnetwork == nil {
 			break
 		}
 
-		return e.complexity.NetworkChaos.Podnetworks(childComplexity), true
+		return e.complexity.NetworkChaos.Podnetwork(childComplexity), true
 
 	case "NetworkChaos.resourceVersion":
 		if e.complexity.NetworkChaos.ResourceVersion == nil {
@@ -3533,17 +3461,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Process.Pod(childComplexity), true
 
-	case "Query.namepsace":
-		if e.complexity.Query.Namepsace == nil {
+	case "Query.namespace":
+		if e.complexity.Query.Namespace == nil {
 			break
 		}
 
-		args, err := ec.field_Query_namepsace_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_namespace_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.Namepsace(childComplexity, args["ns"].(*string)), true
+		return e.complexity.Query.Namespace(childComplexity, args["ns"].(*string)), true
 
 	case "RawIPSet.cidrs":
 		if e.complexity.RawIPSet.Cidrs == nil {
@@ -3906,6 +3834,7 @@ var sources = []*ast.Source{
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
 directive @goModel(model: String, models: [String!]) on OBJECT
     | INPUT_OBJECT
     | SCALAR
@@ -3925,33 +3854,25 @@ schema {
 }
 
 type Query {
-    namepsace(ns: String): Namespace!
+    namespace(ns: String): [Namespace!]
 }
 
 type Logger {
-    component(ns: String, component: Component!): String!  @goField(forceResolver: true)
-    pod(ns: String, name: String!): String!                @goField(forceResolver: true)
+    component(ns: String! = "chaos-testing", component: Component!): String!  	@goField(forceResolver: true)
+    pod(ns: String! = "default", name: String!): String!                		@goField(forceResolver: true)
 }
 
 type Namespace {
     ns: String!
-    component(component: Component!): [Pod!]    @goField(forceResolver: true)
-    pod(name: String!): Pod!                    @goField(forceResolver: true)
-    pods: [Pod!]                                @goField(forceResolver: true)
-    stress(name: String!): StressChaos!         @goField(forceResolver: true)
-    stresses: [StressChaos!]                    @goField(forceResolver: true)
-    io(name: String!): IOChaos!                 @goField(forceResolver: true)
-    ios: [IOChaos!]                             @goField(forceResolver: true)
-    podio(name: String!): PodIOChaos!           @goField(forceResolver: true)
-    podios: [PodIOChaos!]                       @goField(forceResolver: true)
-    http(name: String!): HTTPChaos!             @goField(forceResolver: true)
-    https: [HTTPChaos!]                         @goField(forceResolver: true)
-    podhttp(name: String!): PodHTTPChaos!       @goField(forceResolver: true)
-    podhttps: [PodHTTPChaos!]                   @goField(forceResolver: true)
-    network(name: String!): NetworkChaos!       @goField(forceResolver: true)
-    networks: [NetworkChaos!]                   @goField(forceResolver: true)
-    podnetwork(name: String!): PodNetworkChaos! @goField(forceResolver: true)
-    podnetworks: [PodNetworkChaos!]             @goField(forceResolver: true)
+    component(component: Component!): [Pod!]    		@goField(forceResolver: true)
+    pod(name: String): [Pod!]                   		@goField(forceResolver: true)
+    stresschaos(name: String): [StressChaos!]         	@goField(forceResolver: true)
+    iochaos(name: String): [IOChaos!]                 	@goField(forceResolver: true)
+    podiochaos(name: String): [PodIOChaos!]           	@goField(forceResolver: true)
+    httpchaos(name: String): [HTTPChaos!]             	@goField(forceResolver: true)
+    podhttpchaos(name: String): [PodHTTPChaos!]       	@goField(forceResolver: true)
+    networkchaos(name: String): [NetworkChaos!]       	@goField(forceResolver: true)
+    podnetworkchaos(name: String): [PodNetworkChaos!] 	@goField(forceResolver: true)
 }
 
 type OwnerReference @goModel(model: "k8s.io/apimachinery/pkg/apis/meta/v1.OwnerReference") {
@@ -3971,17 +3892,17 @@ enum Component {
 }
 
 type Process {
-	pod: Pod!
+    pod: Pod!
 
-	pid: String!
-	command: String!
+    pid: String!
+    command: String!
 
-	fds: [Fd!] @goField(forceResolver: true)
+    fds: [Fd!] @goField(forceResolver: true)
 }
 
 type Fd {
-	fd: String!
-	target: String!
+    fd: String!
+    target: String!
 }
 
 type Pod @goModel(model: "k8s.io/api/core/v1.Pod") {
@@ -4003,230 +3924,230 @@ type Pod @goModel(model: "k8s.io/api/core/v1.Pod") {
     finalizers: [String!]
     clusterName: String!
 
-	spec: PodSpec!
-	status: PodStatus!
+    spec: PodSpec!
+    status: PodStatus!
 
     logs: String! 			@goField(forceResolver: true)
-	daemon: Pod 			@goField(forceResolver: true)
-	processes: [Process!] 	@goField(forceResolver: true)
-	mounts: [String!]      	@goField(forceResolver: true)
-	ipset: String! 			@goField(forceResolver: true)
-	tcQdisc: String! 		@goField(forceResolver: true)
-	iptables: String!		@goField(forceResolver: true)
+    daemon: Pod 			@goField(forceResolver: true)
+    processes: [Process!] 	@goField(forceResolver: true)
+    mounts: [String!]      	@goField(forceResolver: true)
+    ipset: String! 			@goField(forceResolver: true)
+    tcQdisc: String! 		@goField(forceResolver: true)
+    iptables: String!		@goField(forceResolver: true)
 }
 
 # PodStatus represents information about the status of a pod. Status may trail the actual
 # state of a system, especially if the node that hosts the pod cannot contact the control
 # plane.
 type PodStatus @goModel(model: "k8s.io/api/core/v1.PodStatus") {
-	# The phase of a Pod is a simple, high-level summary of where the Pod is in its lifecycle.
-	# The conditions array, the reason and message fields, and the individual container status
-	# arrays contain more detail about the pod's status.
-	# There are five possible phase values:
-	#
-	# Pending: The pod has been accepted by the Kubernetes system, but one or more of the
-	# container images has not been created. This includes time before being scheduled as
-	# well as time spent downloading images over the network, which could take a while.
-	# Running: The pod has been bound to a node, and all of the containers have been created.
-	# At least one container is still running, or is in the process of starting or restarting.
-	# Succeeded: All containers in the pod have terminated in success, and will not be restarted.
-	# Failed: All containers in the pod have terminated, and at least one container has
-	# terminated in failure. The container either exited with non-zero status or was terminated
-	# by the system.
-	# Unknown: For some reason the state of the pod could not be obtained, typically due to an
-	# error in communicating with the host of the pod.
-	#
-	# More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#pod-phase
-	phase: String!
+    # The phase of a Pod is a simple, high-level summary of where the Pod is in its lifecycle.
+    # The conditions array, the reason and message fields, and the individual container status
+    # arrays contain more detail about the pod's status.
+    # There are five possible phase values:
+    #
+    # Pending: The pod has been accepted by the Kubernetes system, but one or more of the
+    # container images has not been created. This includes time before being scheduled as
+    # well as time spent downloading images over the network, which could take a while.
+    # Running: The pod has been bound to a node, and all of the containers have been created.
+    # At least one container is still running, or is in the process of starting or restarting.
+    # Succeeded: All containers in the pod have terminated in success, and will not be restarted.
+    # Failed: All containers in the pod have terminated, and at least one container has
+    # terminated in failure. The container either exited with non-zero status or was terminated
+    # by the system.
+    # Unknown: For some reason the state of the pod could not be obtained, typically due to an
+    # error in communicating with the host of the pod.
+    #
+    # More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#pod-phase
+    phase: String!
 
-	# Current service state of pod.
-	# More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#pod-conditions
-	conditions: [PodCondition!]
+    # Current service state of pod.
+    # More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#pod-conditions
+    conditions: [PodCondition!]
 
-	# A human readable message indicating details about why the pod is in this condition.
-	message: String!
+    # A human readable message indicating details about why the pod is in this condition.
+    message: String!
 
-	# A brief CamelCase message indicating details about why the pod is in this state.
-	# e.g. 'Evicted'
-	reason: String!
+    # A brief CamelCase message indicating details about why the pod is in this state.
+    # e.g. 'Evicted'
+    reason: String!
 
-	# nominatedNodeName is set only when this pod preempts other pods on the node, but it cannot be
-	# scheduled right away as preemption victims receive their graceful termination periods.
-	# This field does not guarantee that the pod will be scheduled on this node. Scheduler may decide
-	# to place the pod elsewhere if other nodes become available sooner. Scheduler may also decide to
-	# give the resources on this node to a higher priority pod that is created after preemption.
-	# As a result, this field may be different than PodSpec.nodeName when the pod is
-	# scheduled.
-	nominatedNodeName: String!
+    # nominatedNodeName is set only when this pod preempts other pods on the node, but it cannot be
+    # scheduled right away as preemption victims receive their graceful termination periods.
+    # This field does not guarantee that the pod will be scheduled on this node. Scheduler may decide
+    # to place the pod elsewhere if other nodes become available sooner. Scheduler may also decide to
+    # give the resources on this node to a higher priority pod that is created after preemption.
+    # As a result, this field may be different than PodSpec.nodeName when the pod is
+    # scheduled.
+    nominatedNodeName: String!
 
-	# IP address of the host to which the pod is assigned. Empty if not yet scheduled.
-	hostIP: String!
+    # IP address of the host to which the pod is assigned. Empty if not yet scheduled.
+    hostIP: String!
 
-	# IP address allocated to the pod. Routable at least within the cluster.
-	# Empty if not yet allocated.
-	podIP: String!
+    # IP address allocated to the pod. Routable at least within the cluster.
+    # Empty if not yet allocated.
+    podIP: String!
 
-	# podIPs holds the IP addresses allocated to the pod. If this field is specified, the 0th entry must
-	# match the podIP field. Pods may be allocated at most 1 value for each of IPv4 and IPv6. This list
-	# is empty if no IPs have been allocated yet.
-	podIPs: [PodIP!]
+    # podIPs holds the IP addresses allocated to the pod. If this field is specified, the 0th entry must
+    # match the podIP field. Pods may be allocated at most 1 value for each of IPv4 and IPv6. This list
+    # is empty if no IPs have been allocated yet.
+    podIPs: [PodIP!]
 
-	# RFC 3339 date and time at which the object was acknowledged by the Kubelet.
-	# This is before the Kubelet pulled the container image(s) for the pod.
-	startTime: Time
+    # RFC 3339 date and time at which the object was acknowledged by the Kubelet.
+    # This is before the Kubelet pulled the container image(s) for the pod.
+    startTime: Time
 
-	# The list has one entry per init container in the manifest. The most recent successful
-	# init container will have ready = true, the most recently started container will have
-	# startTime set.
-	# More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#pod-and-container-status
-	initContainerStatuses: [ContainerStatus!]
+    # The list has one entry per init container in the manifest. The most recent successful
+    # init container will have ready = true, the most recently started container will have
+    # startTime set.
+    # More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#pod-and-container-status
+    initContainerStatuses: [ContainerStatus!]
 
-	# The list has one entry per container in the manifest. Each entry is currently the output
-	# of ` + "`" + `docker inspect` + "`" + `.
-	# More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#pod-and-container-status
-	containerStatuses: [ContainerStatus!]
+    # The list has one entry per container in the manifest. Each entry is currently the output
+    # of ` + "`" + `docker inspect` + "`" + `.
+    # More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#pod-and-container-status
+    containerStatuses: [ContainerStatus!]
 
-	# The Quality of Service (QOS) classification assigned to the pod based on resource requirements
-	# See PodQOSClass type for available QOS classes
-	# More info: https://git.k8s.io/community/contributors/design-proposals/node/resource-qos.md
-	qosClass: String!
+    # The Quality of Service (QOS) classification assigned to the pod based on resource requirements
+    # See PodQOSClass type for available QOS classes
+    # More info: https://git.k8s.io/community/contributors/design-proposals/node/resource-qos.md
+    qosClass: String!
 
-	# Status for any ephemeral containers that have run in this pod.
-	# This field is alpha-level and is only populated by servers that enable the EphemeralContainers feature.
-	ephemeralContainerStatuses: [ContainerStatus!]
+    # Status for any ephemeral containers that have run in this pod.
+    # This field is alpha-level and is only populated by servers that enable the EphemeralContainers feature.
+    ephemeralContainerStatuses: [ContainerStatus!]
 }
 
 # IP address information for entries in the (plural) PodIPs field.
 # Each entry includes:
 #    IP: An IP address allocated to the pod. Routable at least within the cluster.
 type PodIP @goModel(model: "k8s.io/api/core/v1.PodIP") {
-	# ip is an IP address (IPv4 or IPv6) assigned to the pod
-	ip: String!
+    # ip is an IP address (IPv4 or IPv6) assigned to the pod
+    ip: String!
 }
 
 # PodCondition contains details for the current condition of this pod.
 type PodCondition @goModel(model: "k8s.io/api/core/v1.PodCondition") {
-	# Type is the type of the condition.
-	# More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#pod-conditions
-	type: String!
+    # Type is the type of the condition.
+    # More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#pod-conditions
+    type: String!
 
-	# Status is the status of the condition.
-	# Can be True, False, Unknown.
-	# More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#pod-conditions
-	status: String!
+    # Status is the status of the condition.
+    # Can be True, False, Unknown.
+    # More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#pod-conditions
+    status: String!
 
-	# Last time we probed the condition.
-	lastProbeTime: Time
+    # Last time we probed the condition.
+    lastProbeTime: Time
 
-	# Last time the condition transitioned from one status to another.
-	lastTransitionTime: Time
+    # Last time the condition transitioned from one status to another.
+    lastTransitionTime: Time
 
-	# Unique, one-word, CamelCase reason for the condition's last transition.
-	reason: String
+    # Unique, one-word, CamelCase reason for the condition's last transition.
+    reason: String
 
-	# Human-readable message indicating details about last transition.
-	message: String
+    # Human-readable message indicating details about last transition.
+    message: String
 }
 
 # ContainerStatus contains details for the current status of this container.
 type ContainerStatus @goModel(model: "k8s.io/api/core/v1.ContainerStatus") {
-	# This must be a DNS_LABEL. Each container in a pod must have a unique name.
-	# Cannot be updated.
-	name: String!
+    # This must be a DNS_LABEL. Each container in a pod must have a unique name.
+    # Cannot be updated.
+    name: String!
 
-	# Details about the container's current condition.
-	State: ContainerState
+    # Details about the container's current condition.
+    State: ContainerState
 
-	# Details about the container's last termination condition.
-	lastTerminationState: ContainerState
+    # Details about the container's last termination condition.
+    lastTerminationState: ContainerState
 
-	# Specifies whether the container has passed its readiness probe.
-	ready: Boolean!
+    # Specifies whether the container has passed its readiness probe.
+    ready: Boolean!
 
-	# The number of times the container has been restarted, currently based on
-	# the number of dead containers that have not yet been removed.
-	# Note that this is calculated from dead containers. But those containers are subject to
-	# garbage collection. This value will get capped at 5 by GC.
-	restartCount: Int!
+    # The number of times the container has been restarted, currently based on
+    # the number of dead containers that have not yet been removed.
+    # Note that this is calculated from dead containers. But those containers are subject to
+    # garbage collection. This value will get capped at 5 by GC.
+    restartCount: Int!
 
-	# The image the container is running.
-	# More info: https://kubernetes.io/docs/concepts/containers/images
-	# TODO(dchen1107): Which image the container is running with?
-	image: String!
+    # The image the container is running.
+    # More info: https://kubernetes.io/docs/concepts/containers/images
+    # TODO(dchen1107): Which image the container is running with?
+    image: String!
 
-	# ImageID of the container's image.
-	imageID: String!
+    # ImageID of the container's image.
+    imageID: String!
 
-	# Container's ID in the format 'docker://<container_id>'.
-	containerID: String!
+    # Container's ID in the format 'docker://<container_id>'.
+    containerID: String!
 
-	# Specifies whether the container has passed its startup probe.
-	# Initialized as false, becomes true after startupProbe is considered successful.
-	# Resets to false when the container is restarted, or if kubelet loses state temporarily.
-	# Is always true when no startupProbe is defined.
-	started: Boolean
+    # Specifies whether the container has passed its startup probe.
+    # Initialized as false, becomes true after startupProbe is considered successful.
+    # Resets to false when the container is restarted, or if kubelet loses state temporarily.
+    # Is always true when no startupProbe is defined.
+    started: Boolean
 }
 
 # ContainerState holds a possible state of container.
 # Only one of its members may be specified.
 # If none of them is specified, the default one is ContainerStateWaiting.
 type ContainerState @goModel(model: "k8s.io/api/core/v1.ContainerState") {
-	# Details about a waiting container
-	waiting: ContainerStateWaiting
+    # Details about a waiting container
+    waiting: ContainerStateWaiting
 
-	# Details about a running container
-	running: ContainerStateRunning
+    # Details about a running container
+    running: ContainerStateRunning
 
-	# Details about a terminated container
-	terminated: ContainerStateTerminated
+    # Details about a terminated container
+    terminated: ContainerStateTerminated
 }
 
 # ContainerStateWaiting is a waiting state of a container.
 type ContainerStateWaiting @goModel(model: "k8s.io/api/core/v1.ContainerStateWaiting") {
-	# (brief) reason the container is not yet running.
-	reason: String
+    # (brief) reason the container is not yet running.
+    reason: String
 
-	# Message regarding why the container is not yet running.
-	message: String
+    # Message regarding why the container is not yet running.
+    message: String
 }
 
 # ContainerStateRunning is a running state of a container.
 type ContainerStateRunning @goModel(model: "k8s.io/api/core/v1.ContainerStateRunning") {
-	# Time at which the container was last (re-)started
-	startedAt: Time
+    # Time at which the container was last (re-)started
+    startedAt: Time
 }
 
 # ContainerStateTerminated is a terminated state of a container.
 type ContainerStateTerminated @goModel(model: "k8s.io/api/core/v1.ContainerStateTerminated") {
-	# Exit status from the last termination of the container
-	exitCode: Int!
+    # Exit status from the last termination of the container
+    exitCode: Int!
 
-	# Signal from the last termination of the container
-	signal: Int
+    # Signal from the last termination of the container
+    signal: Int
 
-	# (brief) reason from the last termination of the container
-	reason: String
+    # (brief) reason from the last termination of the container
+    reason: String
 
-	# Message regarding the last termination of the container
-	message: String
-	
-	#Time at which previous execution of the container started
-	startedAt: Time
+    # Message regarding the last termination of the container
+    message: String
+    
+    #Time at which previous execution of the container started
+    startedAt: Time
 
-	# Time at which the container last terminated
-	finishedAt: Time
+    # Time at which the container last terminated
+    finishedAt: Time
 
-	# Container's ID in the format 'docker://<container_id>'
-	containerID: String
+    # Container's ID in the format 'docker://<container_id>'
+    containerID: String
 }
 
 
 # TODO: add more fields
 type PodSpec @goModel(model: "k8s.io/api/core/v1.PodSpec") {
-	# ndeName is a request to schedule this pod onto a specific node. If it is non-empty,
-	# the scheduler simply schedules this pod onto that node, assuming that it fits resource
-	# requirements.
-	nodeName: String!
+    # ndeName is a request to schedule this pod onto a specific node. If it is non-empty,
+    # the scheduler simply schedules this pod onto that node, assuming that it fits resource
+    # requirements.
+    nodeName: String!
 
 }
 
@@ -4258,84 +4179,84 @@ type PodIOChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.P
 
 # PodIOChaosSpec defines the desired state of PodIOChaos
 type PodIOChaosSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodIOChaosSpec") {
-	# volumeMountPath represents the target mount path
-	# It must be a root of mount path now.
-	volumeMountPath: String!
+    # volumeMountPath represents the target mount path
+    # It must be a root of mount path now.
+    volumeMountPath: String!
 
-	container: String
+    container: String
 
     # actions are a list of IOChaos actions
-	actions: [IOChaosAction!]
+    actions: [IOChaosAction!]
 }
 
 type PodIOChaosStatus @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodIOChaosStatus") {
 
-	# pid represents a running toda process id
-	pid: Int
+    # pid represents a running toda process id
+    pid: Int
 
-	# startTime represents the start time of a toda process
-	startTime: Int
-	failedMessage: String
-	observedGeneration: Int
+    # startTime represents the start time of a toda process
+    startTime: Int
+    failedMessage: String
+    observedGeneration: Int
 }
 
 # IOChaosAction defines an possible action of IOChaos
 type IOChaosAction @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.IOChaosAction") {
-	type: String!
+    type: String!
 
-	# path represents a glob of injecting path
-	path: String!
+    # path represents a glob of injecting path
+    path: String!
 
-	# methods represents the method that the action will inject in
-	methods: [String!]
+    # methods represents the method that the action will inject in
+    methods: [String!]
 
-	# percent represents the percent probability of injecting this action
-	percent: Int
+    # percent represents the percent probability of injecting this action
+    percent: Int
 
-	# faults represents the fault to inject
-	faults: [IoFault!]
+    # faults represents the fault to inject
+    faults: [IoFault!]
 
-	# Latency represents the latency to inject
-	latency: String
+    # Latency represents the latency to inject
+    latency: String
 
-	# attrOverrides represents the attribution to override
-	ino: Int
-	size: Int
-	blocks: Int
-	atime: Timespec
-	mtime: Timespec
+    # attrOverrides represents the attribution to override
+    ino: Int
+    size: Int
+    blocks: Int
+    atime: Timespec
+    mtime: Timespec
     ctime: Timespec
-	kind: String # the file kind
-	perm: Int
-	nlink: Int
-	uid: Int
+    kind: String # the file kind
+    perm: Int
+    nlink: Int
+    uid: Int
     gid: Int
     rdev: Int
 
-	# MistakeSpec represents the mistake to inject
-	
+    # MistakeSpec represents the mistake to inject
+    
     # filling determines what is filled in the miskate data.
-	filling: String
+    filling: String
 
-	# there will be [1, MaxOccurrences] segments of wrong data.
-	maxOccurrences: Int
+    # there will be [1, MaxOccurrences] segments of wrong data.
+    maxOccurrences: Int
 
-	# max length of each wrong data segment in bytes
-	maxLength: Int
+    # max length of each wrong data segment in bytes
+    maxLength: Int
 
-	# source represents the source of current rules
-	source: String!
+    # source represents the source of current rules
+    source: String!
 }
 
 type IoFault @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.IoFault") {
-	errno: Int!
-	weight: Int!
+    errno: Int!
+    weight: Int!
 }
 
 # Timespec represents a time
 type Timespec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.Timespec") {
-	sec: Int!
-	nsec: Int!
+    sec: Int!
+    nsec: Int!
 }
 
 
@@ -4367,104 +4288,104 @@ type IOChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.IOCh
 # IOChaosSpec defines the desired state of IOChaos
 type IOChaosSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.IOChaosSpec") {
     # containerNames indicates list of the name of affected container.
-	# If not set, all containers will be injected
-	containerNames: [String!]
+    # If not set, all containers will be injected
+    containerNames: [String!]
 
-	# selector is used to select pods that are used to inject chaos action.
-	selector: PodSelectorSpec!
+    # selector is used to select pods that are used to inject chaos action.
+    selector: PodSelectorSpec!
 
-	# mode defines the mode to run chaos action.
-	# supported mode: one / all / fixed / fixed-percent / random-max-percent
-	mode: String!
+    # mode defines the mode to run chaos action.
+    # supported mode: one / all / fixed / fixed-percent / random-max-percent
+    mode: String!
 
     # value is required when the mode is set to ` + "`" + `FixedPodMode` + "`" + ` / ` + "`" + `FixedPercentPodMod` + "`" + ` / ` + "`" + `RandomMaxPercentPodMod` + "`" + `.
-	# If ` + "`" + `FixedPodMode` + "`" + `, provide an integer of pods to do chaos action.
-	# If ` + "`" + `FixedPercentPodMod` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
-	# IF ` + "`" + `RandomMaxPercentPodMod` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action
-	value: String
+    # If ` + "`" + `FixedPodMode` + "`" + `, provide an integer of pods to do chaos action.
+    # If ` + "`" + `FixedPercentPodMod` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
+    # IF ` + "`" + `RandomMaxPercentPodMod` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+    value: String
 
 
-	# action defines the specific pod chaos action.
-	# Supported action: latency / fault / attrOverride / mistake
-	action: String!
+    # action defines the specific pod chaos action.
+    # Supported action: latency / fault / attrOverride / mistake
+    action: String!
 
-	# delay defines the value of I/O chaos action delay.
-	# A delay string is a possibly signed sequence of
-	# decimal numbers, each with optional fraction and a unit suffix,
-	# such as "300ms".
-	# Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
-	delay: String
+    # delay defines the value of I/O chaos action delay.
+    # A delay string is a possibly signed sequence of
+    # decimal numbers, each with optional fraction and a unit suffix,
+    # such as "300ms".
+    # Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+    delay: String
 
-	# errno defines the error code that returned by I/O action.
-	# refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html
-	errno: Int
+    # errno defines the error code that returned by I/O action.
+    # refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html
+    errno: Int
 
-	# attr defines the overrided attribution
-	attr: AttrOverrideSpec
+    # attr defines the overrided attribution
+    attr: AttrOverrideSpec
 
-	# mistake defines what types of incorrectness are injected to IO operations
-	mistake: MistakeSpec
+    # mistake defines what types of incorrectness are injected to IO operations
+    mistake: MistakeSpec
 
-	# path defines the path of files for injecting I/O chaos action.
-	path: String
+    # path defines the path of files for injecting I/O chaos action.
+    path: String
 
-	# methods defines the I/O methods for injecting I/O chaos action.
-	# default: all I/O methods.
-	methods: [String!]
+    # methods defines the I/O methods for injecting I/O chaos action.
+    # default: all I/O methods.
+    methods: [String!]
 
-	# percent defines the percentage of injection errors and provides a number from 0-100.
-	# default: 100.
-	percent: Int
+    # percent defines the percentage of injection errors and provides a number from 0-100.
+    # default: 100.
+    percent: Int
 
-	# volumePath represents the mount path of injected volume
-	volumePath: String!
+    # volumePath represents the mount path of injected volume
+    volumePath: String!
 
-	# duration represents the duration of the chaos action.
-	# It is required when the action is ` + "`" + `PodFailureAction` + "`" + `.
-	# A duration string is a possibly signed sequence of
-	# decimal numbers, each with optional fraction and a unit suffix,
-	# such as "300ms", "-1.5h" or "2h45m".
-	# Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
-	duration: String
+    # duration represents the duration of the chaos action.
+    # It is required when the action is ` + "`" + `PodFailureAction` + "`" + `.
+    # A duration string is a possibly signed sequence of
+    # decimal numbers, each with optional fraction and a unit suffix,
+    # such as "300ms", "-1.5h" or "2h45m".
+    # Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+    duration: String
 }
 
 # AttrOverrideSpec represents an override of attribution
 type AttrOverrideSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.AttrOverrideSpec") {
     ino: Int
-	size: Int
-	blocks: Int
-	atime: Timespec
-	mtime: Timespec
+    size: Int
+    blocks: Int
+    atime: Timespec
+    mtime: Timespec
     ctime: Timespec
-	kind: String # the file kind
-	perm: Int
-	nlink: Int
-	uid: Int
+    kind: String # the file kind
+    perm: Int
+    nlink: Int
+    uid: Int
     gid: Int
     rdev: Int
 }
 
 # MistakeSpec represents one type of mistake
 type MistakeSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.MistakeSpec") {
-	# filling determines what is filled in the miskate data.
-	filling: String
+    # filling determines what is filled in the miskate data.
+    filling: String
 
-	# there will be [1, MaxOccurrences] segments of wrong data.
-	maxOccurrences: Int
+    # there will be [1, MaxOccurrences] segments of wrong data.
+    maxOccurrences: Int
 
-	# max length of each wrong data segment in bytes
-	maxLength: Int
+    # max length of each wrong data segment in bytes
+    maxLength: Int
 }
 
 type IOChaosStatus @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.IOChaosStatus") {
     # conditions represents the current global condition of the chaos
-	conditions: [ChaosCondition!]
+    conditions: [ChaosCondition!]
 
-	# experiment records the last experiment state.
-	experiment: ExperimentStatus
+    # experiment records the last experiment state.
+    experiment: ExperimentStatus
 
     # instances always specifies podhttpchaos generation or empty
-	instances: Map
+    instances: Map
 }
 
 type PodHTTPChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodHttpChaos") {
@@ -4494,77 +4415,77 @@ type PodHTTPChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1
 
 # PodHttpChaosSpec defines the desired state of PodHttpChaos.
 type PodHttpChaosSpec  @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodHttpChaosSpec") {
-	# rules are a list of injection rule for http request.
-	rules: [PodHttpChaosRule!]!
+    # rules are a list of injection rule for http request.
+    rules: [PodHttpChaosRule!]!
 }
 
 # PodHttpChaosStatus defines the actual state of PodHttpChaos.
 type PodHttpChaosStatus @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodHttpChaosStatus") {
-	# pid represents a running tproxy process id.
-	pid: Int
+    # pid represents a running tproxy process id.
+    pid: Int
 
-	# startTime represents the start time of a tproxy process.
-	startTime: Int
+    # startTime represents the start time of a tproxy process.
+    startTime: Int
 
-	failedMessage: String
-	observedGeneration: Int
+    failedMessage: String
+    observedGeneration: Int
 }
 
 # PodHttpChaosRule defines the injection rule for http.
 type PodHttpChaosRule @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodHttpChaosRule") {
-	# target is the object to be selected and injected, <Request|Response>.
-	target: String!
+    # target is the object to be selected and injected, <Request|Response>.
+    target: String!
 
-	selector: PodHttpChaosSelector!
+    selector: PodHttpChaosSelector!
 
-	actions: PodHttpChaosActions!
+    actions: PodHttpChaosActions!
 
-	# source represents the source of current rules
-	source: String!
+    # source represents the source of current rules
+    source: String!
 
-	# port represents the target port to be proxy of.
-	port: Int!
+    # port represents the target port to be proxy of.
+    port: Int!
 }
 
 type PodHttpChaosSelector @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodHttpChaosSelector") {
     # port represents the target port to be proxy of.
-	port: Int
+    port: Int
 
-	# path is a rule to select target by uri path in http request.
-	path: String
+    # path is a rule to select target by uri path in http request.
+    path: String
 
-	# method is a rule to select target by http method in request.
-	method: String
+    # method is a rule to select target by http method in request.
+    method: String
 
-	# code is a rule to select target by http status code in response.
-	code: Int
+    # code is a rule to select target by http status code in response.
+    code: Int
 
-	# requestHeaders is a rule to select target by http headers in request.
-	# The key-value pairs represent header name and header value pairs.
-	requestHeaders: Map
+    # requestHeaders is a rule to select target by http headers in request.
+    # The key-value pairs represent header name and header value pairs.
+    requestHeaders: Map
 
-	# responseHeaders is a rule to select target by http headers in response.
-	# The key-value pairs represent header name and header value pairs.
-	responseHeaders: Map
+    # responseHeaders is a rule to select target by http headers in response.
+    # The key-value pairs represent header name and header value pairs.
+    responseHeaders: Map
 }
 
 # PodHttpChaosAction defines possible actions of HttpChaos.
 type PodHttpChaosActions @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodHttpChaosActions") {
-	# abort is a rule to abort a http session.
-	abort: Boolean
+    # abort is a rule to abort a http session.
+    abort: Boolean
 
-	# delay represents the delay of the target request/response.
-	# A duration string is a possibly unsigned sequence of
-	# decimal numbers, each with optional fraction and a unit suffix,
-	# such as "300ms", "2h45m".
-	# Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
-	delay: String
+    # delay represents the delay of the target request/response.
+    # A duration string is a possibly unsigned sequence of
+    # decimal numbers, each with optional fraction and a unit suffix,
+    # such as "300ms", "2h45m".
+    # Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+    delay: String
 
-	# replace is a rule to replace some contents in target.
-	replace: PodHttpChaosReplaceActions
+    # replace is a rule to replace some contents in target.
+    replace: PodHttpChaosReplaceActions
 
-	# patch is a rule to patch some contents in target.
-	patch: PodHttpChaosPatchActions
+    # patch is a rule to patch some contents in target.
+    patch: PodHttpChaosPatchActions
 }
 
 type HTTPChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.HTTPChaos") {
@@ -4594,170 +4515,170 @@ type HTTPChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.HT
 
 type HTTPChaosSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.HTTPChaosSpec") {
     # selector is used to select pods that are used to inject chaos action.
-	selector: PodSelectorSpec!
+    selector: PodSelectorSpec!
 
-	# mode defines the mode to run chaos action.
-	# supported mode: one / all / fixed / fixed-percent / random-max-percent
-	mode: String!
+    # mode defines the mode to run chaos action.
+    # supported mode: one / all / fixed / fixed-percent / random-max-percent
+    mode: String!
 
     # value is required when the mode is set to ` + "`" + `FixedPodMode` + "`" + ` / ` + "`" + `FixedPercentPodMod` + "`" + ` / ` + "`" + `RandomMaxPercentPodMod` + "`" + `.
-	# If ` + "`" + `FixedPodMode` + "`" + `, provide an integer of pods to do chaos action.
-	# If ` + "`" + `FixedPercentPodMod` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
-	# IF ` + "`" + `RandomMaxPercentPodMod` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action
-	value: String
+    # If ` + "`" + `FixedPodMode` + "`" + `, provide an integer of pods to do chaos action.
+    # If ` + "`" + `FixedPercentPodMod` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
+    # IF ` + "`" + `RandomMaxPercentPodMod` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+    value: String
 
-	# target is the object to be selected and injected.
-	target: String!
+    # target is the object to be selected and injected.
+    target: String!
 
-	# abort is a rule to abort a http session.
-	abort: Boolean
+    # abort is a rule to abort a http session.
+    abort: Boolean
 
-	# delay represents the delay of the target request/response.
-	# A duration string is a possibly unsigned sequence of
-	# decimal numbers, each with optional fraction and a unit suffix,
-	# such as "300ms", "2h45m".
-	# Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
-	delay: String
+    # delay represents the delay of the target request/response.
+    # A duration string is a possibly unsigned sequence of
+    # decimal numbers, each with optional fraction and a unit suffix,
+    # such as "300ms", "2h45m".
+    # Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+    delay: String
 
-	# replace is a rule to replace some contents in target.
-	replace: PodHttpChaosReplaceActions
+    # replace is a rule to replace some contents in target.
+    replace: PodHttpChaosReplaceActions
 
-	# patch is a rule to patch some contents in target.
-	patch: PodHttpChaosPatchActions
+    # patch is a rule to patch some contents in target.
+    patch: PodHttpChaosPatchActions
 
-	# port represents the target port to be proxy of.
-	port: Int
+    # port represents the target port to be proxy of.
+    port: Int
 
-	# path is a rule to select target by uri path in http request.
-	path: String
+    # path is a rule to select target by uri path in http request.
+    path: String
 
-	# method is a rule to select target by http method in request.
-	method: String
+    # method is a rule to select target by http method in request.
+    method: String
 
-	# code is a rule to select target by http status code in response.
-	code: Int
+    # code is a rule to select target by http status code in response.
+    code: Int
 
-	# requestHeaders is a rule to select target by http headers in request.
-	# The key-value pairs represent header name and header value pairs.
-	requestHeaders: Map
+    # requestHeaders is a rule to select target by http headers in request.
+    # The key-value pairs represent header name and header value pairs.
+    requestHeaders: Map
 
-	# responseHeaders is a rule to select target by http headers in response.
-	# The key-value pairs represent header name and header value pairs.
-	responseHeaders: Map
+    # responseHeaders is a rule to select target by http headers in response.
+    # The key-value pairs represent header name and header value pairs.
+    responseHeaders: Map
 
-	# duration represents the duration of the chaos action.
-	duration: String
+    # duration represents the duration of the chaos action.
+    duration: String
 }
 
 # PodSelectorSpec defines the some selectors to select objects.
 # If the all selectors are empty, all objects will be used in chaos experiment.
 type PodSelectorSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodSelectorSpec") {
     # namespaces is a set of namespace to which objects belong.
-	namespaces: [String!]
+    namespaces: [String!]
 
-	# nodes is a set of node name and objects must belong to these nodes.
-	nodes: [String!]
+    # nodes is a set of node name and objects must belong to these nodes.
+    nodes: [String!]
 
-	# pods is a map of string keys and a set values that used to select pods.
-	# The key defines the namespace which pods belong,
-	# and the each values is a set of pod names.
-	pods: Map
+    # pods is a map of string keys and a set values that used to select pods.
+    # The key defines the namespace which pods belong,
+    # and the each values is a set of pod names.
+    pods: Map
 
-	# map of string keys and values that can be used to select nodes.
-	# Selector which must match a node's labels,
-	# and objects must belong to these selected nodes.
-	nodeSelectors: Map
+    # map of string keys and values that can be used to select nodes.
+    # Selector which must match a node's labels,
+    # and objects must belong to these selected nodes.
+    nodeSelectors: Map
 
-	# map of string keys and values that can be used to select objects.
-	# A selector based on fields.
-	fieldSelectors: Map
+    # map of string keys and values that can be used to select objects.
+    # A selector based on fields.
+    fieldSelectors: Map
 
-	# map of string keys and values that can be used to select objects.
-	# A selector based on labels.
-	labelSelectors: Map
+    # map of string keys and values that can be used to select objects.
+    # A selector based on labels.
+    labelSelectors: Map
 
-	# map of string keys and values that can be used to select objects.
-	# A selector based on annotations.
-	annotationSelectors: Map
+    # map of string keys and values that can be used to select objects.
+    # A selector based on annotations.
+    annotationSelectors: Map
 
-	# podPhaseSelectors is a set of condition of a pod at the current time.
-	# supported value: Pending / Running / Succeeded / Failed / Unknown
-	podPhaseSelectors: [String!]
+    # podPhaseSelectors is a set of condition of a pod at the current time.
+    # supported value: Pending / Running / Succeeded / Failed / Unknown
+    podPhaseSelectors: [String!]
 }
 
 type PodHttpChaosReplaceActions @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodHttpChaosReplaceActions") {
     # path is rule to to replace uri path in http request.
-	path: String
+    path: String
 
-	# method is a rule to replace http method in request.
-	method: String
+    # method is a rule to replace http method in request.
+    method: String
 
-	# code is a rule to replace http status code in response.
-	code: Int
+    # code is a rule to replace http status code in response.
+    code: Int
 
-	# body is a rule to replace http message body in target.
-	body: String
+    # body is a rule to replace http message body in target.
+    body: String
 
-	# queries is a rule to replace uri queries in http request.
-	# For example, with value ` + "`" + `{ "foo": "unknown" }` + "`" + `, the ` + "`" + `/?foo=bar` + "`" + ` will be altered to ` + "`" + `/?foo=unknown` + "`" + `,
-	queries: Map
+    # queries is a rule to replace uri queries in http request.
+    # For example, with value ` + "`" + `{ "foo": "unknown" }` + "`" + `, the ` + "`" + `/?foo=bar` + "`" + ` will be altered to ` + "`" + `/?foo=unknown` + "`" + `,
+    queries: Map
 
-	# headers is a rule to replace http headers of target.
-	# The key-value pairs represent header name and header value pairs.
-	headers: Map
+    # headers is a rule to replace http headers of target.
+    # The key-value pairs represent header name and header value pairs.
+    headers: Map
 }
 
 # PodHttpChaosPatchActions defines possible patch-actions of HttpChaos.
 type PodHttpChaosPatchActions @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodHttpChaosPatchActions") {
-	# body is a rule to patch message body of target.
-	body: PodHttpChaosPatchBodyAction
+    # body is a rule to patch message body of target.
+    body: PodHttpChaosPatchBodyAction
 
-	# queries is a rule to append uri queries of target(Request only).
-	# For example: ` + "`" + `[["foo", "bar"], ["foo", "unknown"]]` + "`" + `.
-	queries: [[String!]!]
+    # queries is a rule to append uri queries of target(Request only).
+    # For example: ` + "`" + `[["foo", "bar"], ["foo", "unknown"]]` + "`" + `.
+    queries: [[String!]!]
 
-	# headers is a rule to append http headers of target.
-	# For example: ` + "`" + `[["Set-Cookie", "<one cookie>"], ["Set-Cookie", "<another cookie>"]]` + "`" + `.
-	headers: [[String!]!]
+    # headers is a rule to append http headers of target.
+    # For example: ` + "`" + `[["Set-Cookie", "<one cookie>"], ["Set-Cookie", "<another cookie>"]]` + "`" + `.
+    headers: [[String!]!]
 }
 
 # PodHttpChaosPatchBodyAction defines patch body action of HttpChaos.
 type PodHttpChaosPatchBodyAction @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodHttpChaosPatchBodyAction") {
-	# type represents the patch type, only support ` + "`" + `JSON` + "`" + ` as [merge patch json](https://tools.ietf.org/html/rfc7396) currently.
-	type: String!
+    # type represents the patch type, only support ` + "`" + `JSON` + "`" + ` as [merge patch json](https://tools.ietf.org/html/rfc7396) currently.
+    type: String!
 
-	# value is the patch contents.
-	value: String!
+    # value is the patch contents.
+    value: String!
 }
 
 type HTTPChaosStatus @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.HTTPChaosStatus") {
     # conditions represents the current global condition of the chaos
-	conditions: [ChaosCondition!]
+    conditions: [ChaosCondition!]
 
-	# experiment records the last experiment state.
-	experiment: ExperimentStatus
+    # experiment records the last experiment state.
+    experiment: ExperimentStatus
 
     # instances always specifies podhttpchaos generation or empty
-	instances: Map
+    instances: Map
 }
 
 type ChaosCondition @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.ChaosCondition") {
-	type: String!
-	status: String!
-	reason: String
+    type: String!
+    status: String!
+    reason: String
 }
 
 type ExperimentStatus @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.ExperimentStatus") {
-	desiredPhase: String!
+    desiredPhase: String!
 
-	# Records are used to track the running status
-	Records: [Record!]
+    # Records are used to track the running status
+    Records: [Record!]
 }
 
 type Record @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.Record") {
-	id: String!
-	selectorKey: String!
-	phase: String!
+    id: String!
+    selectorKey: String!
+    phase: String!
 }
 
 type PodNetworkChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodNetworkChaos") {
@@ -4779,139 +4700,139 @@ type PodNetworkChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alp
     finalizers: [String!]
     clusterName: String!
 
-	spec: PodNetworkChaosSpec!
-	status: PodNetworkChaosStatus!
+    spec: PodNetworkChaosSpec!
+    status: PodNetworkChaosStatus!
 
-	pod: Pod!       @goField(forceResolver: true)
+    pod: Pod!       @goField(forceResolver: true)
 }
 
 # PodNetworkChaosSpec defines the desired state of PodNetworkChaos
 type PodNetworkChaosSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodNetworkChaosSpec") {
-	# The ipset on the pod
-	ipSets: [RawIPSet!]
+    # The ipset on the pod
+    ipSets: [RawIPSet!]
 
-	# The iptables rules on the pod
-	iptables: [RawIptables!]
+    # The iptables rules on the pod
+    iptables: [RawIptables!]
 
-	# The tc rules on the pod
-	trafficControls: [RawTrafficControl!]
+    # The tc rules on the pod
+    trafficControls: [RawTrafficControl!]
 }
 
 # PodNetworkChaosStatus defines the observed state of PodNetworkChaos
 type PodNetworkChaosStatus @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodNetworkChaosStatus") {
-	failedMessage: String!
-	observedGeneration: Int!
+    failedMessage: String!
+    observedGeneration: Int!
 }
 
 # RawIPSet represents an ipset on specific pod
 type RawIPSet @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.RawIPSet") {
-	# The name of ipset
-	name: String!
+    # The name of ipset
+    name: String!
 
-	# The contents of ipset
-	cidrs: [String!]!
+    # The contents of ipset
+    cidrs: [String!]!
 
-	# The name and namespace of the source network chaos
-	source: String!
+    # The name and namespace of the source network chaos
+    source: String!
 }
 
 # RawIptables represents the iptables rules on specific pod
 type RawIptables @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.RawIptables") {
-	# The name of iptables chain
-	name: String!
+    # The name of iptables chain
+    name: String!
 
-	# The name of related ipset
-	ipSets: [String!]!
+    # The name of related ipset
+    ipSets: [String!]!
 
-	# The block direction of this iptables rule
-	direction: String!
+    # The block direction of this iptables rule
+    direction: String!
 
-	# The name and namespace of the source network chaos
-	source: String!
+    # The name and namespace of the source network chaos
+    source: String!
 }
 
 # RawTrafficControl represents the traffic control chaos on specific pod
 type RawTrafficControl @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.RawTrafficControl") {
-	# The type of traffic control
-	type: String!
+    # The type of traffic control
+    type: String!
 
-	# delay represents the detail about delay action
-	delay: DelaySpec
+    # delay represents the detail about delay action
+    delay: DelaySpec
 
-	# loss represents the detail about loss action
-	loss: LossSpec
+    # loss represents the detail about loss action
+    loss: LossSpec
 
-	# duplicateSpec represents the detail about loss action
-	duplicate: DuplicateSpec
+    # duplicateSpec represents the detail about loss action
+    duplicate: DuplicateSpec
 
-	# corrupt represents the detail about corrupt action
-	corrupt: CorruptSpec
+    # corrupt represents the detail about corrupt action
+    corrupt: CorruptSpec
 
-	# bandwidth represents the detail about bandwidth control action
-	Bandwidth: BandwidthSpec
+    # bandwidth represents the detail about bandwidth control action
+    Bandwidth: BandwidthSpec
 
-	# The name of target ipset
-	ipSet: String
+    # The name of target ipset
+    ipSet: String
 
-	# The name and namespace of the source network chaos
-	source: String
+    # The name and namespace of the source network chaos
+    source: String
 }
 
 # DelaySpec defines detail of a delay action
 type DelaySpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.DelaySpec") {
-	latency: String!
-	correlation: String
-	jitter: String
-	reorder: ReorderSpec
+    latency: String!
+    correlation: String
+    jitter: String
+    reorder: ReorderSpec
 }
 
 # LossSpec defines detail of a loss action
 type LossSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.LossSpec") {
-	loss: String!
-	correlation: String
+    loss: String!
+    correlation: String
 }
 
 # DuplicateSpec defines detail of a duplicate action
 type DuplicateSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.DuplicateSpec") {
-	duplicate: String!
-	correlation: String
+    duplicate: String!
+    correlation: String
 }
 
 # CorruptSpec defines detail of a corrupt action
 type CorruptSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.CorruptSpec") {
-	corrup: String!
-	correlation: String
+    corrup: String!
+    correlation: String
 }
 
 # BandwidthSpec defines detail of bandwidth limit.
 type BandwidthSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.BandwidthSpec") {
-	# rate is the speed knob. Allows bps, kbps, mbps, gbps, tbps unit. bps means bytes per second.
-	rate: String!
+    # rate is the speed knob. Allows bps, kbps, mbps, gbps, tbps unit. bps means bytes per second.
+    rate: String!
 
-	# limit is the number of bytes that can be queued waiting for tokens to become available.
-	limit: Int!
+    # limit is the number of bytes that can be queued waiting for tokens to become available.
+    limit: Int!
 
-	# buffer is the maximum amount of bytes that tokens can be available for instantaneously.
-	buffer: Int!
+    # buffer is the maximum amount of bytes that tokens can be available for instantaneously.
+    buffer: Int!
 
-	# peakrate is the maximum depletion rate of the bucket.
-	# The peakrate does not need to be set, it is only necessary
-	# if perfect millisecond timescale shaping is required.
-	peakrate: Int
+    # peakrate is the maximum depletion rate of the bucket.
+    # The peakrate does not need to be set, it is only necessary
+    # if perfect millisecond timescale shaping is required.
+    peakrate: Int
 
-	# minburst specifies the size of the peakrate bucket. For perfect
-	# accuracy, should be set to the MTU of the interface.  If a
-	# peakrate is needed, but some burstiness is acceptable, this
-	# size can be raised. A 3000 byte minburst allows around 3mbit/s
-	# of peakrate, given 1000 byte packets.
-	minburst: Int
+    # minburst specifies the size of the peakrate bucket. For perfect
+    # accuracy, should be set to the MTU of the interface.  If a
+    # peakrate is needed, but some burstiness is acceptable, this
+    # size can be raised. A 3000 byte minburst allows around 3mbit/s
+    # of peakrate, given 1000 byte packets.
+    minburst: Int
 }
 
 # ReorderSpec defines details of packet reorder.
 type ReorderSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.ReorderSpec") {
-	reorder: String!
-	correlation: String
-	gap: Int
+    reorder: String!
+    correlation: String
+    gap: Int
 }
 
 type NetworkChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.NetworkChaos") {
@@ -4933,7 +4854,7 @@ type NetworkChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1
     finalizers: [String!]
     clusterName: String!
 
-	podnetworks: [PodNetworkChaos!]	@goField(forceResolver: true)
+    podnetwork: [PodNetworkChaos!]	@goField(forceResolver: true)
 }
 
 type StressChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.StressChaos") {
@@ -4966,10 +4887,10 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 func (ec *executionContext) field_Logger_component_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *string
+	var arg0 string
 	if tmp, ok := rawArgs["ns"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ns"))
-		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -4990,10 +4911,10 @@ func (ec *executionContext) field_Logger_component_args(ctx context.Context, raw
 func (ec *executionContext) field_Logger_pod_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *string
+	var arg0 string
 	if tmp, ok := rawArgs["ns"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ns"))
-		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -5026,13 +4947,13 @@ func (ec *executionContext) field_Namespace_component_args(ctx context.Context, 
 	return args, nil
 }
 
-func (ec *executionContext) field_Namespace_http_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Namespace_httpchaos_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
+	var arg0 *string
 	if tmp, ok := rawArgs["name"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -5041,13 +4962,13 @@ func (ec *executionContext) field_Namespace_http_args(ctx context.Context, rawAr
 	return args, nil
 }
 
-func (ec *executionContext) field_Namespace_io_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Namespace_iochaos_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
+	var arg0 *string
 	if tmp, ok := rawArgs["name"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -5056,13 +4977,13 @@ func (ec *executionContext) field_Namespace_io_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
-func (ec *executionContext) field_Namespace_network_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Namespace_networkchaos_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
+	var arg0 *string
 	if tmp, ok := rawArgs["name"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -5074,10 +4995,10 @@ func (ec *executionContext) field_Namespace_network_args(ctx context.Context, ra
 func (ec *executionContext) field_Namespace_pod_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
+	var arg0 *string
 	if tmp, ok := rawArgs["name"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -5086,13 +5007,13 @@ func (ec *executionContext) field_Namespace_pod_args(ctx context.Context, rawArg
 	return args, nil
 }
 
-func (ec *executionContext) field_Namespace_podhttp_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Namespace_podhttpchaos_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
+	var arg0 *string
 	if tmp, ok := rawArgs["name"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -5101,13 +5022,13 @@ func (ec *executionContext) field_Namespace_podhttp_args(ctx context.Context, ra
 	return args, nil
 }
 
-func (ec *executionContext) field_Namespace_podio_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Namespace_podiochaos_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
+	var arg0 *string
 	if tmp, ok := rawArgs["name"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -5116,13 +5037,13 @@ func (ec *executionContext) field_Namespace_podio_args(ctx context.Context, rawA
 	return args, nil
 }
 
-func (ec *executionContext) field_Namespace_podnetwork_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Namespace_podnetworkchaos_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
+	var arg0 *string
 	if tmp, ok := rawArgs["name"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -5131,13 +5052,13 @@ func (ec *executionContext) field_Namespace_podnetwork_args(ctx context.Context,
 	return args, nil
 }
 
-func (ec *executionContext) field_Namespace_stress_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Namespace_stresschaos_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
+	var arg0 *string
 	if tmp, ok := rawArgs["name"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -5161,7 +5082,7 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_namepsace_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_namespace_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 *string
@@ -10303,7 +10224,7 @@ func (ec *executionContext) _Logger_component(ctx context.Context, field graphql
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Logger().Component(rctx, args["ns"].(*string), args["component"].(model.Component))
+		return ec.resolvers.Logger().Component(rctx, args["ns"].(string), args["component"].(model.Component))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -10355,7 +10276,7 @@ func (ec *executionContext) _Logger_pod(ctx context.Context, field graphql.Colle
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Logger().Pod(rctx, args["ns"].(*string), args["name"].(string))
+		return ec.resolvers.Logger().Pod(rctx, args["ns"].(string), args["name"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -10644,42 +10565,7 @@ func (ec *executionContext) _Namespace_pod(ctx context.Context, field graphql.Co
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Namespace().Pod(rctx, obj, args["name"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*v1.Pod)
-	fc.Result = res
-	return ec.marshalNPod2ᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐPod(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Namespace_pods(ctx context.Context, field graphql.CollectedField, obj *model.Namespace) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Namespace",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Namespace().Pods(rctx, obj)
+		return ec.resolvers.Namespace().Pod(rctx, obj, args["name"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -10693,7 +10579,7 @@ func (ec *executionContext) _Namespace_pods(ctx context.Context, field graphql.C
 	return ec.marshalOPod2ᚕᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐPodᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Namespace_stress(ctx context.Context, field graphql.CollectedField, obj *model.Namespace) (ret graphql.Marshaler) {
+func (ec *executionContext) _Namespace_stresschaos(ctx context.Context, field graphql.CollectedField, obj *model.Namespace) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -10710,7 +10596,7 @@ func (ec *executionContext) _Namespace_stress(ctx context.Context, field graphql
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Namespace_stress_args(ctx, rawArgs)
+	args, err := ec.field_Namespace_stresschaos_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -10718,42 +10604,7 @@ func (ec *executionContext) _Namespace_stress(ctx context.Context, field graphql
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Namespace().Stress(rctx, obj, args["name"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*v1alpha1.StressChaos)
-	fc.Result = res
-	return ec.marshalNStressChaos2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐStressChaos(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Namespace_stresses(ctx context.Context, field graphql.CollectedField, obj *model.Namespace) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Namespace",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Namespace().Stresses(rctx, obj)
+		return ec.resolvers.Namespace().Stresschaos(rctx, obj, args["name"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -10767,7 +10618,7 @@ func (ec *executionContext) _Namespace_stresses(ctx context.Context, field graph
 	return ec.marshalOStressChaos2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐStressChaosᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Namespace_io(ctx context.Context, field graphql.CollectedField, obj *model.Namespace) (ret graphql.Marshaler) {
+func (ec *executionContext) _Namespace_iochaos(ctx context.Context, field graphql.CollectedField, obj *model.Namespace) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -10784,7 +10635,7 @@ func (ec *executionContext) _Namespace_io(ctx context.Context, field graphql.Col
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Namespace_io_args(ctx, rawArgs)
+	args, err := ec.field_Namespace_iochaos_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -10792,42 +10643,7 @@ func (ec *executionContext) _Namespace_io(ctx context.Context, field graphql.Col
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Namespace().Io(rctx, obj, args["name"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*v1alpha1.IOChaos)
-	fc.Result = res
-	return ec.marshalNIOChaos2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐIOChaos(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Namespace_ios(ctx context.Context, field graphql.CollectedField, obj *model.Namespace) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Namespace",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Namespace().Ios(rctx, obj)
+		return ec.resolvers.Namespace().Iochaos(rctx, obj, args["name"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -10841,7 +10657,7 @@ func (ec *executionContext) _Namespace_ios(ctx context.Context, field graphql.Co
 	return ec.marshalOIOChaos2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐIOChaosᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Namespace_podio(ctx context.Context, field graphql.CollectedField, obj *model.Namespace) (ret graphql.Marshaler) {
+func (ec *executionContext) _Namespace_podiochaos(ctx context.Context, field graphql.CollectedField, obj *model.Namespace) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -10858,7 +10674,7 @@ func (ec *executionContext) _Namespace_podio(ctx context.Context, field graphql.
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Namespace_podio_args(ctx, rawArgs)
+	args, err := ec.field_Namespace_podiochaos_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -10866,42 +10682,7 @@ func (ec *executionContext) _Namespace_podio(ctx context.Context, field graphql.
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Namespace().Podio(rctx, obj, args["name"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*v1alpha1.PodIOChaos)
-	fc.Result = res
-	return ec.marshalNPodIOChaos2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodIOChaos(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Namespace_podios(ctx context.Context, field graphql.CollectedField, obj *model.Namespace) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Namespace",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Namespace().Podios(rctx, obj)
+		return ec.resolvers.Namespace().Podiochaos(rctx, obj, args["name"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -10915,7 +10696,7 @@ func (ec *executionContext) _Namespace_podios(ctx context.Context, field graphql
 	return ec.marshalOPodIOChaos2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodIOChaosᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Namespace_http(ctx context.Context, field graphql.CollectedField, obj *model.Namespace) (ret graphql.Marshaler) {
+func (ec *executionContext) _Namespace_httpchaos(ctx context.Context, field graphql.CollectedField, obj *model.Namespace) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -10932,7 +10713,7 @@ func (ec *executionContext) _Namespace_http(ctx context.Context, field graphql.C
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Namespace_http_args(ctx, rawArgs)
+	args, err := ec.field_Namespace_httpchaos_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -10940,42 +10721,7 @@ func (ec *executionContext) _Namespace_http(ctx context.Context, field graphql.C
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Namespace().HTTP(rctx, obj, args["name"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*v1alpha1.HTTPChaos)
-	fc.Result = res
-	return ec.marshalNHTTPChaos2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐHTTPChaos(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Namespace_https(ctx context.Context, field graphql.CollectedField, obj *model.Namespace) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Namespace",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Namespace().HTTPS(rctx, obj)
+		return ec.resolvers.Namespace().Httpchaos(rctx, obj, args["name"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -10989,7 +10735,7 @@ func (ec *executionContext) _Namespace_https(ctx context.Context, field graphql.
 	return ec.marshalOHTTPChaos2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐHTTPChaosᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Namespace_podhttp(ctx context.Context, field graphql.CollectedField, obj *model.Namespace) (ret graphql.Marshaler) {
+func (ec *executionContext) _Namespace_podhttpchaos(ctx context.Context, field graphql.CollectedField, obj *model.Namespace) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -11006,7 +10752,7 @@ func (ec *executionContext) _Namespace_podhttp(ctx context.Context, field graphq
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Namespace_podhttp_args(ctx, rawArgs)
+	args, err := ec.field_Namespace_podhttpchaos_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -11014,42 +10760,7 @@ func (ec *executionContext) _Namespace_podhttp(ctx context.Context, field graphq
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Namespace().Podhttp(rctx, obj, args["name"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*v1alpha1.PodHttpChaos)
-	fc.Result = res
-	return ec.marshalNPodHTTPChaos2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodHttpChaos(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Namespace_podhttps(ctx context.Context, field graphql.CollectedField, obj *model.Namespace) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Namespace",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Namespace().Podhttps(rctx, obj)
+		return ec.resolvers.Namespace().Podhttpchaos(rctx, obj, args["name"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -11063,7 +10774,7 @@ func (ec *executionContext) _Namespace_podhttps(ctx context.Context, field graph
 	return ec.marshalOPodHTTPChaos2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodHttpChaosᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Namespace_network(ctx context.Context, field graphql.CollectedField, obj *model.Namespace) (ret graphql.Marshaler) {
+func (ec *executionContext) _Namespace_networkchaos(ctx context.Context, field graphql.CollectedField, obj *model.Namespace) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -11080,7 +10791,7 @@ func (ec *executionContext) _Namespace_network(ctx context.Context, field graphq
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Namespace_network_args(ctx, rawArgs)
+	args, err := ec.field_Namespace_networkchaos_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -11088,42 +10799,7 @@ func (ec *executionContext) _Namespace_network(ctx context.Context, field graphq
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Namespace().Network(rctx, obj, args["name"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*v1alpha1.NetworkChaos)
-	fc.Result = res
-	return ec.marshalNNetworkChaos2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐNetworkChaos(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Namespace_networks(ctx context.Context, field graphql.CollectedField, obj *model.Namespace) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Namespace",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Namespace().Networks(rctx, obj)
+		return ec.resolvers.Namespace().Networkchaos(rctx, obj, args["name"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -11137,7 +10813,7 @@ func (ec *executionContext) _Namespace_networks(ctx context.Context, field graph
 	return ec.marshalONetworkChaos2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐNetworkChaosᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Namespace_podnetwork(ctx context.Context, field graphql.CollectedField, obj *model.Namespace) (ret graphql.Marshaler) {
+func (ec *executionContext) _Namespace_podnetworkchaos(ctx context.Context, field graphql.CollectedField, obj *model.Namespace) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -11154,7 +10830,7 @@ func (ec *executionContext) _Namespace_podnetwork(ctx context.Context, field gra
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Namespace_podnetwork_args(ctx, rawArgs)
+	args, err := ec.field_Namespace_podnetworkchaos_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -11162,42 +10838,7 @@ func (ec *executionContext) _Namespace_podnetwork(ctx context.Context, field gra
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Namespace().Podnetwork(rctx, obj, args["name"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*v1alpha1.PodNetworkChaos)
-	fc.Result = res
-	return ec.marshalNPodNetworkChaos2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodNetworkChaos(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Namespace_podnetworks(ctx context.Context, field graphql.CollectedField, obj *model.Namespace) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Namespace",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Namespace().Podnetworks(rctx, obj)
+		return ec.resolvers.Namespace().Podnetworkchaos(rctx, obj, args["name"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -11788,7 +11429,7 @@ func (ec *executionContext) _NetworkChaos_clusterName(ctx context.Context, field
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _NetworkChaos_podnetworks(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.NetworkChaos) (ret graphql.Marshaler) {
+func (ec *executionContext) _NetworkChaos_podnetwork(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.NetworkChaos) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -11806,7 +11447,7 @@ func (ec *executionContext) _NetworkChaos_podnetworks(ctx context.Context, field
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.NetworkChaos().Podnetworks(rctx, obj)
+		return ec.resolvers.NetworkChaos().Podnetwork(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -17492,7 +17133,7 @@ func (ec *executionContext) _Process_fds(ctx context.Context, field graphql.Coll
 	return ec.marshalOFd2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlserverᚋgraphᚋmodelᚐFdᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_namepsace(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_namespace(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -17509,7 +17150,7 @@ func (ec *executionContext) _Query_namepsace(ctx context.Context, field graphql.
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_namepsace_args(ctx, rawArgs)
+	args, err := ec.field_Query_namespace_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -17517,21 +17158,18 @@ func (ec *executionContext) _Query_namepsace(ctx context.Context, field graphql.
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Namepsace(rctx, args["ns"].(*string))
+		return ec.resolvers.Query().Namespace(rctx, args["ns"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Namespace)
+	res := resTmp.([]*model.Namespace)
 	fc.Result = res
-	return ec.marshalNNamespace2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlserverᚋgraphᚋmodelᚐNamespace(ctx, field.Selections, res)
+	return ec.marshalONamespace2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlserverᚋgraphᚋmodelᚐNamespaceᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -21610,12 +21248,9 @@ func (ec *executionContext) _Namespace(ctx context.Context, sel ast.SelectionSet
 					}
 				}()
 				res = ec._Namespace_pod(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
 				return res
 			})
-		case "pods":
+		case "stresschaos":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -21623,10 +21258,10 @@ func (ec *executionContext) _Namespace(ctx context.Context, sel ast.SelectionSet
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Namespace_pods(ctx, field, obj)
+				res = ec._Namespace_stresschaos(ctx, field, obj)
 				return res
 			})
-		case "stress":
+		case "iochaos":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -21634,13 +21269,10 @@ func (ec *executionContext) _Namespace(ctx context.Context, sel ast.SelectionSet
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Namespace_stress(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
+				res = ec._Namespace_iochaos(ctx, field, obj)
 				return res
 			})
-		case "stresses":
+		case "podiochaos":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -21648,10 +21280,10 @@ func (ec *executionContext) _Namespace(ctx context.Context, sel ast.SelectionSet
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Namespace_stresses(ctx, field, obj)
+				res = ec._Namespace_podiochaos(ctx, field, obj)
 				return res
 			})
-		case "io":
+		case "httpchaos":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -21659,13 +21291,10 @@ func (ec *executionContext) _Namespace(ctx context.Context, sel ast.SelectionSet
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Namespace_io(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
+				res = ec._Namespace_httpchaos(ctx, field, obj)
 				return res
 			})
-		case "ios":
+		case "podhttpchaos":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -21673,10 +21302,10 @@ func (ec *executionContext) _Namespace(ctx context.Context, sel ast.SelectionSet
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Namespace_ios(ctx, field, obj)
+				res = ec._Namespace_podhttpchaos(ctx, field, obj)
 				return res
 			})
-		case "podio":
+		case "networkchaos":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -21684,13 +21313,10 @@ func (ec *executionContext) _Namespace(ctx context.Context, sel ast.SelectionSet
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Namespace_podio(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
+				res = ec._Namespace_networkchaos(ctx, field, obj)
 				return res
 			})
-		case "podios":
+		case "podnetworkchaos":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -21698,107 +21324,7 @@ func (ec *executionContext) _Namespace(ctx context.Context, sel ast.SelectionSet
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Namespace_podios(ctx, field, obj)
-				return res
-			})
-		case "http":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Namespace_http(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
-		case "https":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Namespace_https(ctx, field, obj)
-				return res
-			})
-		case "podhttp":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Namespace_podhttp(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
-		case "podhttps":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Namespace_podhttps(ctx, field, obj)
-				return res
-			})
-		case "network":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Namespace_network(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
-		case "networks":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Namespace_networks(ctx, field, obj)
-				return res
-			})
-		case "podnetwork":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Namespace_podnetwork(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
-		case "podnetworks":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Namespace_podnetworks(ctx, field, obj)
+				res = ec._Namespace_podnetworkchaos(ctx, field, obj)
 				return res
 			})
 		default:
@@ -21935,7 +21461,7 @@ func (ec *executionContext) _NetworkChaos(ctx context.Context, sel ast.Selection
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
-		case "podnetworks":
+		case "podnetwork":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -21943,7 +21469,7 @@ func (ec *executionContext) _NetworkChaos(ctx context.Context, sel ast.Selection
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._NetworkChaos_podnetworks(ctx, field, obj)
+				res = ec._NetworkChaos_podnetwork(ctx, field, obj)
 				return res
 			})
 		default:
@@ -23539,7 +23065,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
-		case "namepsace":
+		case "namespace":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -23547,10 +23073,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_namepsace(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
+				res = ec._Query_namespace(ctx, field)
 				return res
 			})
 		case "__type":
@@ -24237,10 +23760,6 @@ func (ec *executionContext) marshalNFd2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑ
 	return ec._Fd(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNHTTPChaos2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐHTTPChaos(ctx context.Context, sel ast.SelectionSet, v v1alpha1.HTTPChaos) graphql.Marshaler {
-	return ec._HTTPChaos(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNHTTPChaos2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐHTTPChaos(ctx context.Context, sel ast.SelectionSet, v *v1alpha1.HTTPChaos) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -24257,10 +23776,6 @@ func (ec *executionContext) marshalNHTTPChaosSpec2githubᚗcomᚋchaosᚑmeshᚋ
 
 func (ec *executionContext) marshalNHTTPChaosStatus2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐHTTPChaosStatus(ctx context.Context, sel ast.SelectionSet, v v1alpha1.HTTPChaosStatus) graphql.Marshaler {
 	return ec._HTTPChaosStatus(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNIOChaos2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐIOChaos(ctx context.Context, sel ast.SelectionSet, v v1alpha1.IOChaos) graphql.Marshaler {
-	return ec._IOChaos(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNIOChaos2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐIOChaos(ctx context.Context, sel ast.SelectionSet, v *v1alpha1.IOChaos) graphql.Marshaler {
@@ -24334,10 +23849,6 @@ func (ec *executionContext) marshalNIoFault2githubᚗcomᚋchaosᚑmeshᚋchaos�
 	return ec._IoFault(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNNamespace2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlserverᚋgraphᚋmodelᚐNamespace(ctx context.Context, sel ast.SelectionSet, v model.Namespace) graphql.Marshaler {
-	return ec._Namespace(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNNamespace2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlserverᚋgraphᚋmodelᚐNamespace(ctx context.Context, sel ast.SelectionSet, v *model.Namespace) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -24346,10 +23857,6 @@ func (ec *executionContext) marshalNNamespace2ᚖgithubᚗcomᚋchaosᚑmeshᚋc
 		return graphql.Null
 	}
 	return ec._Namespace(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalNNetworkChaos2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐNetworkChaos(ctx context.Context, sel ast.SelectionSet, v v1alpha1.NetworkChaos) graphql.Marshaler {
-	return ec._NetworkChaos(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNNetworkChaos2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐNetworkChaos(ctx context.Context, sel ast.SelectionSet, v *v1alpha1.NetworkChaos) graphql.Marshaler {
@@ -24382,10 +23889,6 @@ func (ec *executionContext) marshalNPod2ᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐPod(ctx 
 
 func (ec *executionContext) marshalNPodCondition2k8sᚗioᚋapiᚋcoreᚋv1ᚐPodCondition(ctx context.Context, sel ast.SelectionSet, v v1.PodCondition) graphql.Marshaler {
 	return ec._PodCondition(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNPodHTTPChaos2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodHttpChaos(ctx context.Context, sel ast.SelectionSet, v v1alpha1.PodHttpChaos) graphql.Marshaler {
-	return ec._PodHTTPChaos(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNPodHTTPChaos2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodHttpChaos(ctx context.Context, sel ast.SelectionSet, v *v1alpha1.PodHttpChaos) graphql.Marshaler {
@@ -24455,10 +23958,6 @@ func (ec *executionContext) marshalNPodHttpChaosStatus2githubᚗcomᚋchaosᚑme
 	return ec._PodHttpChaosStatus(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNPodIOChaos2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodIOChaos(ctx context.Context, sel ast.SelectionSet, v v1alpha1.PodIOChaos) graphql.Marshaler {
-	return ec._PodIOChaos(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNPodIOChaos2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodIOChaos(ctx context.Context, sel ast.SelectionSet, v *v1alpha1.PodIOChaos) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -24479,10 +23978,6 @@ func (ec *executionContext) marshalNPodIOChaosStatus2githubᚗcomᚋchaosᚑmesh
 
 func (ec *executionContext) marshalNPodIP2k8sᚗioᚋapiᚋcoreᚋv1ᚐPodIP(ctx context.Context, sel ast.SelectionSet, v v1.PodIP) graphql.Marshaler {
 	return ec._PodIP(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNPodNetworkChaos2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodNetworkChaos(ctx context.Context, sel ast.SelectionSet, v v1alpha1.PodNetworkChaos) graphql.Marshaler {
-	return ec._PodNetworkChaos(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNPodNetworkChaos2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodNetworkChaos(ctx context.Context, sel ast.SelectionSet, v *v1alpha1.PodNetworkChaos) graphql.Marshaler {
@@ -24545,10 +24040,6 @@ func (ec *executionContext) marshalNRecord2ᚖgithubᚗcomᚋchaosᚑmeshᚋchao
 		return graphql.Null
 	}
 	return ec._Record(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalNStressChaos2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐStressChaos(ctx context.Context, sel ast.SelectionSet, v v1alpha1.StressChaos) graphql.Marshaler {
-	return ec._StressChaos(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNStressChaos2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐStressChaos(ctx context.Context, sel ast.SelectionSet, v *v1alpha1.StressChaos) graphql.Marshaler {
@@ -25338,6 +24829,46 @@ func (ec *executionContext) marshalOMistakeSpec2ᚖgithubᚗcomᚋchaosᚑmesh�
 		return graphql.Null
 	}
 	return ec._MistakeSpec(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalONamespace2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlserverᚋgraphᚋmodelᚐNamespaceᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Namespace) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNNamespace2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlserverᚋgraphᚋmodelᚐNamespace(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
 }
 
 func (ec *executionContext) marshalONetworkChaos2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐNetworkChaosᚄ(ctx context.Context, sel ast.SelectionSet, v []*v1alpha1.NetworkChaos) graphql.Marshaler {

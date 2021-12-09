@@ -17,24 +17,16 @@ type Fd struct {
 }
 
 type Namespace struct {
-	Ns          string                      `json:"ns"`
-	Component   []*v1.Pod                   `json:"component"`
-	Pod         *v1.Pod                     `json:"pod"`
-	Pods        []*v1.Pod                   `json:"pods"`
-	Stress      *v1alpha1.StressChaos       `json:"stress"`
-	Stresses    []*v1alpha1.StressChaos     `json:"stresses"`
-	Io          *v1alpha1.IOChaos           `json:"io"`
-	Ios         []*v1alpha1.IOChaos         `json:"ios"`
-	Podio       *v1alpha1.PodIOChaos        `json:"podio"`
-	Podios      []*v1alpha1.PodIOChaos      `json:"podios"`
-	HTTP        *v1alpha1.HTTPChaos         `json:"http"`
-	HTTPS       []*v1alpha1.HTTPChaos       `json:"https"`
-	Podhttp     *v1alpha1.PodHttpChaos      `json:"podhttp"`
-	Podhttps    []*v1alpha1.PodHttpChaos    `json:"podhttps"`
-	Network     *v1alpha1.NetworkChaos      `json:"network"`
-	Networks    []*v1alpha1.NetworkChaos    `json:"networks"`
-	Podnetwork  *v1alpha1.PodNetworkChaos   `json:"podnetwork"`
-	Podnetworks []*v1alpha1.PodNetworkChaos `json:"podnetworks"`
+	Ns              string                      `json:"ns"`
+	Component       []*v1.Pod                   `json:"component"`
+	Pod             []*v1.Pod                   `json:"pod"`
+	Stresschaos     []*v1alpha1.StressChaos     `json:"stresschaos"`
+	Iochaos         []*v1alpha1.IOChaos         `json:"iochaos"`
+	Podiochaos      []*v1alpha1.PodIOChaos      `json:"podiochaos"`
+	Httpchaos       []*v1alpha1.HTTPChaos       `json:"httpchaos"`
+	Podhttpchaos    []*v1alpha1.PodHttpChaos    `json:"podhttpchaos"`
+	Networkchaos    []*v1alpha1.NetworkChaos    `json:"networkchaos"`
+	Podnetworkchaos []*v1alpha1.PodNetworkChaos `json:"podnetworkchaos"`
 }
 
 type Process struct {

@@ -378,14 +378,9 @@ func (r *ioFaultResolver) Errno(ctx context.Context, obj *v1alpha1.IoFault) (int
 	return int(obj.Errno), nil
 }
 
-func (r *loggerResolver) Component(ctx context.Context, ns *string, component model.Component) (<-chan string, error) {
-	if ns == nil {
-		ns = new(string)
-		*ns = DefaultNamespace
-	}
-
+func (r *loggerResolver) Component(ctx context.Context, ns string, component model.Component) (<-chan string, error) {
 	var list v1.PodList
-	if err := r.Client.List(ctx, &list, client.MatchingLabels(componentLabels(component)), client.InNamespace(*ns)); err != nil {
+	if err := r.Client.List(ctx, &list, client.MatchingLabels(componentLabels(component)), client.InNamespace(ns)); err != nil {
 		return nil, err
 	}
 
@@ -393,16 +388,11 @@ func (r *loggerResolver) Component(ctx context.Context, ns *string, component mo
 		return nil, fmt.Errorf("instance of %s not found", component)
 	}
 
-	return r.Pod(ctx, &list.Items[0].Namespace, list.Items[0].Name)
+	return r.Pod(ctx, list.Items[0].Namespace, list.Items[0].Name)
 }
 
-func (r *loggerResolver) Pod(ctx context.Context, ns *string, name string) (<-chan string, error) {
-	if ns == nil {
-		ns = new(string)
-		*ns = DefaultNamespace
-	}
-
-	logs, err := r.Clientset.CoreV1().Pods(*ns).GetLogs(name, &v1.PodLogOptions{Follow: true}).Stream(ctx)
+func (r *loggerResolver) Pod(ctx context.Context, ns string, name string) (<-chan string, error) {
+	logs, err := r.Clientset.CoreV1().Pods(ns).GetLogs(name, &v1.PodLogOptions{Follow: true}).Stream(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -413,14 +403,14 @@ func (r *loggerResolver) Pod(ctx context.Context, ns *string, name string) (<-ch
 		for {
 			line, err := reader.ReadString('\n')
 			if err != nil {
-				r.Log.Error(err, fmt.Sprintf("fail to read log of pod(%s/%s)", *ns, name))
+				r.Log.Error(err, fmt.Sprintf("fail to read log of pod(%s/%s)", ns, name))
 				break
 			}
 			select {
 			case logChan <- string(line):
 				continue
 			case <-time.NewTimer(time.Minute).C:
-				r.Log.Info(fmt.Sprintf("client has not read log of pod(%s/%s) for 1m, close channel", *ns, name))
+				r.Log.Info(fmt.Sprintf("client has not read log of pod(%s/%s) for 1m, close channel", ns, name))
 				return
 			}
 		}
@@ -436,7 +426,7 @@ func (r *mistakeSpecResolver) Filling(ctx context.Context, obj *v1alpha1.Mistake
 func (r *namespaceResolver) Component(ctx context.Context, obj *model.Namespace, component model.Component) ([]*v1.Pod, error) {
 	var list v1.PodList
 	var pods []*v1.Pod
-	if err := r.Client.List(ctx, &list, client.MatchingLabels(componentLabels(component))); err != nil {
+	if err := r.Client.List(ctx, &list, client.MatchingLabels(componentLabels(component)), client.InNamespace(obj.Ns)); err != nil {
 		return nil, err
 	}
 	for i := range list.Items {
@@ -445,188 +435,189 @@ func (r *namespaceResolver) Component(ctx context.Context, obj *model.Namespace,
 	return pods, nil
 }
 
-func (r *namespaceResolver) Pod(ctx context.Context, obj *model.Namespace, name string) (*v1.Pod, error) {
-	key := types.NamespacedName{Namespace: obj.Ns, Name: name}
+func (r *namespaceResolver) Pod(ctx context.Context, obj *model.Namespace, name *string) ([]*v1.Pod, error) {
+	if name == nil {
+		var podList v1.PodList
+		var pods []*v1.Pod
+		if err := r.Client.List(ctx, &podList, &client.ListOptions{Namespace: obj.Ns}); err != nil {
+			return nil, err
+		}
+
+		for i := range podList.Items {
+			pods = append(pods, &podList.Items[i])
+		}
+
+		return pods, nil
+	}
+
+	key := types.NamespacedName{Namespace: obj.Ns, Name: *name}
 	pod := new(v1.Pod)
 	if err := r.Client.Get(ctx, key, pod); err != nil {
 		return nil, err
 	}
-	return pod, nil
+	return []*v1.Pod{pod}, nil
 }
 
-func (r *namespaceResolver) Pods(ctx context.Context, obj *model.Namespace) ([]*v1.Pod, error) {
-	var podList v1.PodList
-	var pods []*v1.Pod
-	if err := r.Client.List(ctx, &podList, &client.ListOptions{Namespace: obj.Ns}); err != nil {
-		return nil, err
+func (r *namespaceResolver) Stresschaos(ctx context.Context, obj *model.Namespace, name *string) ([]*v1alpha1.StressChaos, error) {
+	if name == nil {
+		var stressList v1alpha1.StressChaosList
+		var stresses []*v1alpha1.StressChaos
+		if err := r.Client.List(ctx, &stressList, &client.ListOptions{Namespace: obj.Ns}); err != nil {
+			return nil, err
+		}
+
+		for i := range stressList.Items {
+			stresses = append(stresses, &stressList.Items[i])
+		}
+
+		return stresses, nil
 	}
 
-	for i := range podList.Items {
-		pods = append(pods, &podList.Items[i])
-	}
-
-	return pods, nil
-}
-
-func (r *namespaceResolver) Stress(ctx context.Context, obj *model.Namespace, name string) (*v1alpha1.StressChaos, error) {
-	key := types.NamespacedName{Namespace: obj.Ns, Name: name}
+	key := types.NamespacedName{Namespace: obj.Ns, Name: *name}
 	stress := new(v1alpha1.StressChaos)
 	if err := r.Client.Get(ctx, key, stress); err != nil {
 		return nil, err
 	}
-	return stress, nil
+	return []*v1alpha1.StressChaos{stress}, nil
 }
 
-func (r *namespaceResolver) Stresses(ctx context.Context, obj *model.Namespace) ([]*v1alpha1.StressChaos, error) {
-	var stressList v1alpha1.StressChaosList
-	var stresses []*v1alpha1.StressChaos
-	if err := r.Client.List(ctx, &stressList, &client.ListOptions{Namespace: obj.Ns}); err != nil {
-		return nil, err
+func (r *namespaceResolver) Iochaos(ctx context.Context, obj *model.Namespace, name *string) ([]*v1alpha1.IOChaos, error) {
+	if name == nil {
+		var ioList v1alpha1.IOChaosList
+		var ios []*v1alpha1.IOChaos
+		if err := r.Client.List(ctx, &ioList, &client.ListOptions{Namespace: obj.Ns}); err != nil {
+			return nil, err
+		}
+
+		for i := range ioList.Items {
+			ios = append(ios, &ioList.Items[i])
+		}
+
+		return ios, nil
 	}
 
-	for i := range stressList.Items {
-		stresses = append(stresses, &stressList.Items[i])
-	}
-
-	return stresses, nil
-}
-
-func (r *namespaceResolver) Io(ctx context.Context, obj *model.Namespace, name string) (*v1alpha1.IOChaos, error) {
-	key := types.NamespacedName{Namespace: obj.Ns, Name: name}
+	key := types.NamespacedName{Namespace: obj.Ns, Name: *name}
 	io := new(v1alpha1.IOChaos)
 	if err := r.Client.Get(ctx, key, io); err != nil {
 		return nil, err
 	}
-	return io, nil
+	return []*v1alpha1.IOChaos{io}, nil
 }
 
-func (r *namespaceResolver) Ios(ctx context.Context, obj *model.Namespace) ([]*v1alpha1.IOChaos, error) {
-	var ioList v1alpha1.IOChaosList
-	var ios []*v1alpha1.IOChaos
-	if err := r.Client.List(ctx, &ioList, &client.ListOptions{Namespace: obj.Ns}); err != nil {
-		return nil, err
+func (r *namespaceResolver) Podiochaos(ctx context.Context, obj *model.Namespace, name *string) ([]*v1alpha1.PodIOChaos, error) {
+	if name == nil {
+		var ioList v1alpha1.PodIOChaosList
+		var ios []*v1alpha1.PodIOChaos
+		if err := r.Client.List(ctx, &ioList, &client.ListOptions{Namespace: obj.Ns}); err != nil {
+			return nil, err
+		}
+
+		for i := range ioList.Items {
+			ios = append(ios, &ioList.Items[i])
+		}
+
+		return ios, nil
 	}
 
-	for i := range ioList.Items {
-		ios = append(ios, &ioList.Items[i])
-	}
-
-	return ios, nil
-}
-
-func (r *namespaceResolver) Podio(ctx context.Context, obj *model.Namespace, name string) (*v1alpha1.PodIOChaos, error) {
-	key := types.NamespacedName{Namespace: obj.Ns, Name: name}
+	key := types.NamespacedName{Namespace: obj.Ns, Name: *name}
 	io := new(v1alpha1.PodIOChaos)
 	if err := r.Client.Get(ctx, key, io); err != nil {
 		return nil, err
 	}
-	return io, nil
+
+	return []*v1alpha1.PodIOChaos{io}, nil
 }
 
-func (r *namespaceResolver) Podios(ctx context.Context, obj *model.Namespace) ([]*v1alpha1.PodIOChaos, error) {
-	var ioList v1alpha1.PodIOChaosList
-	var ios []*v1alpha1.PodIOChaos
-	if err := r.Client.List(ctx, &ioList, &client.ListOptions{Namespace: obj.Ns}); err != nil {
-		return nil, err
+func (r *namespaceResolver) Httpchaos(ctx context.Context, obj *model.Namespace, name *string) ([]*v1alpha1.HTTPChaos, error) {
+	if name == nil {
+		var httpList v1alpha1.HTTPChaosList
+		var https []*v1alpha1.HTTPChaos
+		if err := r.Client.List(ctx, &httpList, &client.ListOptions{Namespace: obj.Ns}); err != nil {
+			return nil, err
+		}
+
+		for i := range httpList.Items {
+			https = append(https, &httpList.Items[i])
+		}
+
+		return https, nil
 	}
 
-	for i := range ioList.Items {
-		ios = append(ios, &ioList.Items[i])
-	}
-
-	return ios, nil
-}
-
-func (r *namespaceResolver) HTTP(ctx context.Context, obj *model.Namespace, name string) (*v1alpha1.HTTPChaos, error) {
-	key := types.NamespacedName{Namespace: obj.Ns, Name: name}
+	key := types.NamespacedName{Namespace: obj.Ns, Name: *name}
 	http := new(v1alpha1.HTTPChaos)
 	if err := r.Client.Get(ctx, key, http); err != nil {
 		return nil, err
 	}
-	return http, nil
+	return []*v1alpha1.HTTPChaos{http}, nil
 }
 
-func (r *namespaceResolver) HTTPS(ctx context.Context, obj *model.Namespace) ([]*v1alpha1.HTTPChaos, error) {
-	var httpList v1alpha1.HTTPChaosList
-	var https []*v1alpha1.HTTPChaos
-	if err := r.Client.List(ctx, &httpList, &client.ListOptions{Namespace: obj.Ns}); err != nil {
-		return nil, err
+func (r *namespaceResolver) Podhttpchaos(ctx context.Context, obj *model.Namespace, name *string) ([]*v1alpha1.PodHttpChaos, error) {
+	if name == nil {
+		var httpList v1alpha1.PodHttpChaosList
+		var https []*v1alpha1.PodHttpChaos
+		if err := r.Client.List(ctx, &httpList, &client.ListOptions{Namespace: obj.Ns}); err != nil {
+			return nil, err
+		}
+
+		for i := range httpList.Items {
+			https = append(https, &httpList.Items[i])
+		}
+
+		return https, nil
 	}
 
-	for i := range httpList.Items {
-		https = append(https, &httpList.Items[i])
-	}
-
-	return https, nil
-}
-
-func (r *namespaceResolver) Podhttp(ctx context.Context, obj *model.Namespace, name string) (*v1alpha1.PodHttpChaos, error) {
-	key := types.NamespacedName{Namespace: obj.Ns, Name: name}
+	key := types.NamespacedName{Namespace: obj.Ns, Name: *name}
 	http := new(v1alpha1.PodHttpChaos)
 	if err := r.Client.Get(ctx, key, http); err != nil {
 		return nil, err
 	}
-	return http, nil
+	return []*v1alpha1.PodHttpChaos{http}, nil
 }
 
-func (r *namespaceResolver) Podhttps(ctx context.Context, obj *model.Namespace) ([]*v1alpha1.PodHttpChaos, error) {
-	var httpList v1alpha1.PodHttpChaosList
-	var https []*v1alpha1.PodHttpChaos
-	if err := r.Client.List(ctx, &httpList, &client.ListOptions{Namespace: obj.Ns}); err != nil {
-		return nil, err
+func (r *namespaceResolver) Networkchaos(ctx context.Context, obj *model.Namespace, name *string) ([]*v1alpha1.NetworkChaos, error) {
+	if name == nil {
+		var networkList v1alpha1.NetworkChaosList
+		var networks []*v1alpha1.NetworkChaos
+		if err := r.Client.List(ctx, &networkList, &client.ListOptions{Namespace: obj.Ns}); err != nil {
+			return nil, err
+		}
+
+		for i := range networkList.Items {
+			networks = append(networks, &networkList.Items[i])
+		}
+
+		return networks, nil
 	}
 
-	for i := range httpList.Items {
-		https = append(https, &httpList.Items[i])
-	}
-
-	return https, nil
-}
-
-func (r *namespaceResolver) Network(ctx context.Context, obj *model.Namespace, name string) (*v1alpha1.NetworkChaos, error) {
-	key := types.NamespacedName{Namespace: obj.Ns, Name: name}
+	key := types.NamespacedName{Namespace: obj.Ns, Name: *name}
 	network := new(v1alpha1.NetworkChaos)
 	if err := r.Client.Get(ctx, key, network); err != nil {
 		return nil, err
 	}
-	return network, nil
+	return []*v1alpha1.NetworkChaos{network}, nil
 }
 
-func (r *namespaceResolver) Networks(ctx context.Context, obj *model.Namespace) ([]*v1alpha1.NetworkChaos, error) {
-	var networkList v1alpha1.NetworkChaosList
-	var networks []*v1alpha1.NetworkChaos
-	if err := r.Client.List(ctx, &networkList, &client.ListOptions{Namespace: obj.Ns}); err != nil {
-		return nil, err
+func (r *namespaceResolver) Podnetworkchaos(ctx context.Context, obj *model.Namespace, name *string) ([]*v1alpha1.PodNetworkChaos, error) {
+	if name == nil {
+		var networkList v1alpha1.PodNetworkChaosList
+		var networks []*v1alpha1.PodNetworkChaos
+		if err := r.Client.List(ctx, &networkList, &client.ListOptions{Namespace: obj.Ns}); err != nil {
+			return nil, err
+		}
+
+		for i := range networkList.Items {
+			networks = append(networks, &networkList.Items[i])
+		}
+
+		return networks, nil
 	}
 
-	for i := range networkList.Items {
-		networks = append(networks, &networkList.Items[i])
-	}
-
-	return networks, nil
-}
-
-func (r *namespaceResolver) Podnetwork(ctx context.Context, obj *model.Namespace, name string) (*v1alpha1.PodNetworkChaos, error) {
-	key := types.NamespacedName{Namespace: obj.Ns, Name: name}
+	key := types.NamespacedName{Namespace: obj.Ns, Name: *name}
 	network := new(v1alpha1.PodNetworkChaos)
 	if err := r.Client.Get(ctx, key, network); err != nil {
 		return nil, err
 	}
-	return network, nil
-}
-
-func (r *namespaceResolver) Podnetworks(ctx context.Context, obj *model.Namespace) ([]*v1alpha1.PodNetworkChaos, error) {
-	var networkList v1alpha1.PodNetworkChaosList
-	var networks []*v1alpha1.PodNetworkChaos
-	if err := r.Client.List(ctx, &networkList, &client.ListOptions{Namespace: obj.Ns}); err != nil {
-		return nil, err
-	}
-
-	for i := range networkList.Items {
-		networks = append(networks, &networkList.Items[i])
-	}
-
-	return networks, nil
+	return []*v1alpha1.PodNetworkChaos{network}, nil
 }
 
 func (r *networkChaosResolver) UID(ctx context.Context, obj *v1alpha1.NetworkChaos) (string, error) {
@@ -657,7 +648,7 @@ func (r *networkChaosResolver) Annotations(ctx context.Context, obj *v1alpha1.Ne
 	return annotations, nil
 }
 
-func (r *networkChaosResolver) Podnetworks(ctx context.Context, obj *v1alpha1.NetworkChaos) ([]*v1alpha1.PodNetworkChaos, error) {
+func (r *networkChaosResolver) Podnetwork(ctx context.Context, obj *v1alpha1.NetworkChaos) ([]*v1alpha1.PodNetworkChaos, error) {
 	podnetworks := make([]*v1alpha1.PodNetworkChaos, 0, len(obj.Status.Instances))
 	for id := range obj.Status.Instances {
 		podnetwork := new(v1alpha1.PodNetworkChaos)
@@ -992,12 +983,21 @@ func (r *processResolver) Fds(ctx context.Context, obj *model.Process) ([]*model
 	return r.GetFdsOfProcess(ctx, obj)
 }
 
-func (r *queryResolver) Namepsace(ctx context.Context, ns *string) (*model.Namespace, error) {
+func (r *queryResolver) Namespace(ctx context.Context, ns *string) ([]*model.Namespace, error) {
 	if ns == nil {
-		ns = new(string)
-		*ns = DefaultNamespace
+		var nsList v1.NamespaceList
+		var namespaces []*model.Namespace
+		if err := r.Client.List(ctx, &nsList); err != nil {
+			return nil, err
+		}
+
+		for _, ns := range nsList.Items {
+			namespaces = append(namespaces, &model.Namespace{Ns: ns.Name})
+		}
+
+		return namespaces, nil
 	}
-	return &model.Namespace{Ns: *ns}, nil
+	return []*model.Namespace{{Ns: *ns}}, nil
 }
 
 func (r *rawIptablesResolver) Direction(ctx context.Context, obj *v1alpha1.RawIptables) (string, error) {
