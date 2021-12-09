@@ -1,6 +1,23 @@
+// Copyright 2021 Chaos Mesh Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
 package tproxyconfig
 
-import "encoding/json"
+import (
+	"encoding/json"
+)
 
 type Config struct {
 	ProxyPorts []uint32               `json:"proxy_ports,omitempty"`
@@ -96,12 +113,14 @@ type PodHttpChaosPatchBodyAction struct {
 	Value string `json:"value"`
 }
 
-type PodHttpChaosReplaceBodyAction []byte
+type PodHttpChaosReplaceBodyAction struct {
+	inner string
+}
 
-func (p PodHttpChaosReplaceBodyAction) MarshalJSON() ([]byte, error) {
+func (p *PodHttpChaosReplaceBodyAction) MarshalJSON() ([]byte, error) {
 	return json.Marshal(PodHttpChaosPatchBodyAction{
 		Type:  "TEXT",
-		Value: string(p),
+		Value: p.inner,
 	})
 }
 
@@ -109,15 +128,14 @@ func (p *PodHttpChaosReplaceBodyAction) UnmarshalJSON(data []byte) error {
 	var pp PodHttpChaosPatchBodyAction
 	err := json.Unmarshal(data, &pp)
 	if err == nil {
-		newBody := PodHttpChaosReplaceBodyAction(pp.Value)
-		p = &newBody
+		p.inner = pp.Value
 		return nil
 	}
-	bys := make([]byte, 0)
+	var bys []byte
+
 	err = json.Unmarshal(data, &bys)
 	if err == nil {
-		newBody := PodHttpChaosReplaceBodyAction(bys)
-		p = &newBody
+		p.inner = string(bys)
 		return nil
 	}
 	return err
@@ -156,11 +174,3 @@ type PodHttpChaosReplaceActions struct {
 
 // PodHttpChaosTarget represents the type of an HttpChaos Action
 type PodHttpChaosTarget string
-
-const (
-	// PodHttpRequest represents injecting chaos for http request
-	PodHttpRequest PodHttpChaosTarget = "Request"
-
-	// PodHttpResponse represents injecting chaos for http response
-	PodHttpResponse PodHttpChaosTarget = "Response"
-)
