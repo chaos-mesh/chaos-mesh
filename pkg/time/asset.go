@@ -36,32 +36,6 @@ type FakeImage struct {
 	offset map[string]int
 }
 
-// fakeImages would be initialized in init.
-// Key presents the filename(compiled .o file, for example fake_clock_gettime.o), Value presents the corresponded FakeImage struct.
-// Deprecated: use LoadFakeImageFromEmbedFs
-var fakeImages = map[string]FakeImage{}
-
-func init() {
-	// in this function, we will load fake image from `fakeclock/*.o`
-	entries, err := fakeclock.ReadDir("fakeclock")
-	if err != nil {
-		log.Error(err, "readdir from embedded fs")
-		os.Exit(1)
-	}
-
-	for _, entry := range entries {
-		if entry.Name() == ".embed.o" {
-			// skip the .embed.o file, as it's used to remove the error of `go fmt`
-			continue
-		}
-		fakeImage, err := LoadFakeImageFromEmbedFs(entry.Name())
-		if err != nil {
-			log.Error(err, "failed to load fakeimage")
-		}
-		fakeImages[entry.Name()] = *fakeImage
-	}
-}
-
 func LoadFakeImageFromEmbedFs(filename string) (*FakeImage, error) {
 	path := "fakeclock/" + filename
 	object, err := fakeclock.ReadFile(path)
