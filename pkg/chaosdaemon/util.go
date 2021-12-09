@@ -29,7 +29,6 @@ import (
 func ReadCommName(pid int) (string, error) {
 	f, err := os.Open(fmt.Sprintf("%s/%d/comm", bpm.DefaultProcPrefix, pid))
 	if err != nil {
-		log.Info("ReadCommName errrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr")
 		return "", err
 	}
 	defer f.Close()

@@ -97,7 +97,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 			Time: time.Unix(res.MemoryStartTime/1000, (res.MemoryStartTime%1000)*int64(time.Millisecond)),
 		},
 	}
-	
+
 	return v1alpha1.Injected, nil
 }
 
@@ -120,8 +120,6 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		return v1alpha1.NotInjected, nil
 	}
 	instance, ok := stresschaos.Status.Instances[records[index].Id]
-	impl.Log.Info("message", "index", index, "id", records[index].Id)
-	impl.Log.Info("message", "cpuid", instance.CpuStartTime, "memoryid", instance.MemoryStartTime)
 	if !ok {
 		impl.Log.Info("Pod seems already recovered", "pod", decodedContainer.Pod.UID)
 		return v1alpha1.NotInjected, nil
