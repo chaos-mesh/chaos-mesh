@@ -17,13 +17,10 @@ import (
 	"go.uber.org/fx"
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl"
-	"github.com/chaos-mesh/chaos-mesh/controllers/condition"
-	"github.com/chaos-mesh/chaos-mesh/controllers/desiredphase"
-	"github.com/chaos-mesh/chaos-mesh/controllers/finalizers"
+	"github.com/chaos-mesh/chaos-mesh/controllers/pipeline"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podhttpchaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podiochaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos"
-	"github.com/chaos-mesh/chaos-mesh/controllers/records"
 	"github.com/chaos-mesh/chaos-mesh/controllers/schedule"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
@@ -32,21 +29,10 @@ import (
 
 var Module = fx.Options(
 	fx.Provide(
+		pipeline.AllSteps,
 		fx.Annotated{
 			Group:  "controller",
-			Target: records.NewController,
-		},
-		fx.Annotated{
-			Group:  "controller",
-			Target: finalizers.NewController,
-		},
-		fx.Annotated{
-			Group:  "controller",
-			Target: desiredphase.NewController,
-		},
-		fx.Annotated{
-			Group:  "controller",
-			Target: condition.NewController,
+			Target: pipeline.NewController,
 		},
 		fx.Annotated{
 			Group:  "controller",
