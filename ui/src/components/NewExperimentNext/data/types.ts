@@ -306,7 +306,7 @@ const data: Record<Kind, Definition> = {
         },
       },
       {
-        name: 'Detach Volumne',
+        name: 'Detach Volume',
         key: 'detach-volume',
         spec: {
           action: 'detach-volume' as any,
