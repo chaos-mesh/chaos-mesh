@@ -160,6 +160,7 @@ func WaitE2EHelperReady(c http.Client, port uint16) error {
 func WaitHTTPE2EHelperReady(c http.Client, ip string, port uint16) error {
 	return wait.Poll(2*time.Second, 5*time.Minute, func() (done bool, err error) {
 		if _, err = c.Get(fmt.Sprintf("http://%s:%d/ping", ip, port)); err != nil {
+			framework.Logf("Err : %v , IP : %s",err, ip)
 			return false, nil
 		}
 		return true, nil
