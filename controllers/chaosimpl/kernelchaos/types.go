@@ -27,7 +27,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+	impltypes "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
@@ -36,14 +36,14 @@ import (
 	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
 )
 
+var _ impltypes.ChaosImpl = (*Impl)(nil)
+
 type Impl struct {
 	client.Client
 	Log logr.Logger
 
 	chaosDaemonClientBuilder *chaosdaemon.ChaosDaemonClientBuilder
 }
-
-var _ common.ChaosImpl = (*Impl)(nil)
 
 // Apply applies KernelChaos
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
@@ -227,8 +227,8 @@ func (impl *Impl) CreateBPFKIConnection(ctx context.Context, c client.Client, po
 	return builder.Build()
 }
 
-func NewImpl(c client.Client, log logr.Logger, builder *chaosdaemon.ChaosDaemonClientBuilder) *common.ChaosImplPair {
-	return &common.ChaosImplPair{
+func NewImpl(c client.Client, log logr.Logger, builder *chaosdaemon.ChaosDaemonClientBuilder) *impltypes.ChaosImplPair {
+	return &impltypes.ChaosImplPair{
 		Name:   "kernelchaos",
 		Object: &v1alpha1.KernelChaos{},
 		Impl: &Impl{
