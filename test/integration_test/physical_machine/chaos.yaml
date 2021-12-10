@@ -20,6 +20,6 @@ metadata:
 spec:
   action: stress-mem
   address:
-    - https://CHAOSD_ADDRESS
+    - CHAOSD_ADDRESS
   stress-mem:
     size: 100MB
