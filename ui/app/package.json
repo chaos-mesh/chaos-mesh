@@ -1,6 +1,6 @@
 {
   "name": "@ui/app",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.7.0",

@@ -1,6 +1,6 @@
 {
   "name": "@ui/root",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "A Web UI for Chaos Mesh",
   "author": "Yue Yang <g1enyy0ung@gmail.com> (https://g1eny0ung.site)",
   "private": true,
@@ -11,7 +11,8 @@
   "scripts": {
     "bootstrap": "./scripts/bootstrap.sh",
     "build": "yarn workspace @ui/mui-extends build && yarn workspace @ui/app build",
-    "prepare": "cd .. && husky install ./ui/.husky"
+    "prepare": "cd .. && husky install ./ui/.husky",
+    "postinstall": "rm -rf node_modules/ace-builds/demo"
   },
   "devDependencies": {
     "husky": "^7.0.4",
