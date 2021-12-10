@@ -241,7 +241,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 
 		ginkgo.JustBeforeEach(func() {
 			svc := fixture.NewE2EService("http", ns)
-			svc, err := kubeCli.CoreV1().Services(ns).Create(context.TODO(), svc, metav1.CreateOptions{})
+			svc, err = kubeCli.CoreV1().Services(ns).Create(context.TODO(), svc, metav1.CreateOptions{})
 			framework.ExpectNoError(err, "create service error")
 			for _, servicePort := range svc.Spec.Ports {
 				if servicePort.Name == "http" {
