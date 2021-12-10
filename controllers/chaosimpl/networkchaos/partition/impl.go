@@ -28,13 +28,15 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/networkchaos/podnetworkchaosmanager"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+	impltypes "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/ipset"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/iptable"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/netutils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 )
+
+var _ impltypes.ChaosImpl = (*Impl)(nil)
 
 const (
 	sourceIPSetPostFix = "src"
@@ -48,8 +50,6 @@ type Impl struct {
 
 	Log logr.Logger
 }
-
-var _ common.ChaosImpl = (*Impl)(nil)
 
 const (
 	waitForApplySync   v1alpha1.Phase = "Not Injected/Wait"

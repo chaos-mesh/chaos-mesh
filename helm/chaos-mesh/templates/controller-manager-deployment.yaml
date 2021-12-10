@@ -59,6 +59,10 @@ spec:
         command:
           - /usr/local/bin/chaos-controller-manager
         env:
+          {{- range $envKey, $envVal := .Values.controllerManager.env }}
+          - name: {{ $envKey | upper }}
+            value: {{ $envVal | quote }}
+          {{- end }}
           - name: NAMESPACE
             valueFrom:
               fieldRef:
@@ -153,9 +157,9 @@ spec:
           {{- end }}
         ports:
           - name: webhook
-            containerPort: 9443 # Customize containerPort
+            containerPort: {{ .Values.controllerManager.env.WEBHOOK_PORT }}
           - name: http
-            containerPort: 10080
+            containerPort: {{ .Values.controllerManager.env.METRICS_PORT }}
         {{- if .Values.enableProfiling }}
           - name: pprof
             containerPort: 10081

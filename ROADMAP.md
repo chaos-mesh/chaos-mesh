@@ -21,19 +21,20 @@ This document is intended to describe high-level plans for the Chaos Mesh projec
 - [x] Support generating the report for each chaos scenario.
 - [x] Add JVM chaos. Support injecting faults into Java applications.
 - [x] Add HTTP Chaos. Support injecting faults into http connections.
-- [x] Add GRPC Chaos. Support injecting faults into GRPC connections.
+- [ ] ~~Add GRPC Chaos. Support injecting faults into GRPC connections.~~
 - [ ] ~~Support injecting faults into native components of Kubernetes.~~
 
 ## Medium term
 
+- [x] Manage and schedule chaos experiments on Kubernetes targets and non-Kubernetes targets on a unified dashboard.
+- [x] Improve JVMChaos and support dynamic injection.
+- [ ] Support injecting faults into native components of Kubernetes.
 - [ ] More comprehensive status inspection mechanism and reports.
 - [ ] Improve observability via events logs and metrics.
-- [ ] Manage and schedule chaos experiments on Kubernetes targets and non-Kubernetes targets on a unified dashboard.
-- [ ] Support injecting faults into native components of Kubernetes.
 - [ ] Improve authentication system, and support using GCP/AWS account to log in chaos dashboard.
+- [ ] Add GRPC Chaos. Support injecting faults into GRPC connections.
 - [ ] A new component to force recovery chaos experiments, and avoid experiments going out of control.
 - [ ] Build a hub for users sharing their own chaos workflow and chaos types.
-- [ ] Improve JVMChaos and support dynamic injection.
 - [ ] Support doing chaos experiments on multiple Kubernetes clusters.
 - [ ] Provide a plugin approach to extend complex chaos types, such as RabbitMQChaos, RedisChaos...
 - [ ] Continue to enrich fault types.

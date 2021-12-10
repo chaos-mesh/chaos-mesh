@@ -54,8 +54,12 @@ type ChaosControllerConfig struct {
 
 	// BPFKIPort is the port which BFFKI grpc server listens on
 	BPFKIPort int `envconfig:"BPFKI_PORT" default:"50051"`
-	// MetricsAddr is the address the metric endpoint binds to
-	MetricsAddr string `envconfig:"METRICS_ADDR" default:":10080"`
+	// WebhookHost and WebhookPort are combined into an address the webhook server bind to
+	WebhookHost string `envconfig:"WEBHOOK_HOST" default:"0.0.0.0"`
+	WebhookPort int    `envconfig:"WEBHOOK_PORT" default:"9443"`
+	// MetricsHost and MetricsPort are combined into an address the metric endpoint binds to
+	MetricsHost string `envconfig:"METRICS_HOST" default:"0.0.0.0"`
+	MetricsPort int    `envconfig:"METRICS_PORT" default:"10080"`
 	// PprofAddr is the address the pprof endpoint binds to.
 	PprofAddr string `envconfig:"PPROF_ADDR" default:"0"`
 

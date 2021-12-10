@@ -1193,6 +1193,10 @@ spec:
       port: 2333
       targetPort: 2333
       name: http
+    - protocol: TCP
+      port: 2334
+      targetPort: 2334
+      name: metric
 ---
 # Source: chaos-mesh/templates/controller-manager-service.yaml
 # Copyright 2021 Chaos Mesh Authors.
@@ -1396,6 +1400,10 @@ spec:
               value: "0.0.0.0"
             - name: LISTEN_PORT
               value: "2333"
+            - name: METRIC_HOST
+              value: "0.0.0.0"
+            - name: METRIC_PORT
+              value: "2334"
             - name: TZ
               value: ${timezone}
             - name: CLUSTER_SCOPED
@@ -1423,6 +1431,8 @@ spec:
           ports:
             - name: http
               containerPort: 2333
+            - name: metric
+              containerPort: 2334
       volumes:
       - name: storage-volume
         emptyDir: {}
@@ -1486,6 +1496,10 @@ spec:
         command:
           - /usr/local/bin/chaos-controller-manager
         env:
+          - name: METRICS_PORT
+            value: "10080"
+          - name: WEBHOOK_PORT
+            value: "9443"
           - name: NAMESPACE
             valueFrom:
               fieldRef:
@@ -1544,7 +1558,7 @@ spec:
             readOnly: true
         ports:
           - name: webhook
-            containerPort: 9443 # Customize containerPort
+            containerPort: 9443
           - name: http
             containerPort: 10080
           - name: pprof
