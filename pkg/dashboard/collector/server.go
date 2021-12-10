@@ -17,7 +17,9 @@ package collector
 
 import (
 	"context"
+	"net"
 	"os"
+	"strconv"
 
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -60,7 +62,7 @@ func NewServer(
 	// namespace scoped
 	options := ctrl.Options{
 		Scheme:             scheme,
-		MetricsBindAddress: conf.MetricAddress,
+		MetricsBindAddress: net.JoinHostPort(conf.MetricHost, strconv.Itoa(conf.MetricPort)),
 		LeaderElection:     conf.EnableLeaderElection,
 		Port:               9443,
 	}
