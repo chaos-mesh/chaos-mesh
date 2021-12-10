@@ -27,7 +27,7 @@ import (
 var fakeclock embed.FS
 
 // FakeImage introduce the replacement of VDSO ELF entry and customizable variables.
-// FakeImage could be constructed with
+// FakeImage could be constructed by LoadFakeImageFromEmbedFs(), and then used by FakeClockInjector.
 type FakeImage struct {
 	// content presents .text section which has been "manually relocation", the address of extern variables have been calculated manually
 	content []byte
@@ -36,6 +36,7 @@ type FakeImage struct {
 	offset map[string]int
 }
 
+// LoadFakeImageFromEmbedFs builds FakeImage from the embed filesystem. It parses the ELF file and extract the variables from the relocation section, reserves the space for them at the end of content, then calculates and saves offsets as "manually relocation"
 func LoadFakeImageFromEmbedFs(filename string) (*FakeImage, error) {
 	path := "fakeclock/" + filename
 	object, err := fakeclock.ReadFile(path)
