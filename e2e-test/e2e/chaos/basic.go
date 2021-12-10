@@ -241,20 +241,24 @@ var _ = ginkgo.Describe("[Basic]", func() {
 
 		ginkgo.JustBeforeEach(func() {
 			svc := fixture.NewE2EService("http", ns)
-			_, err = kubeCli.CoreV1().Services(ns).Create(context.TODO(), svc, metav1.CreateOptions{})
+			svc, err := kubeCli.CoreV1().Services(ns).Create(context.TODO(), svc, metav1.CreateOptions{})
 			framework.ExpectNoError(err, "create service error")
+			for _, servicePort := range svc.Spec.Ports {
+				if servicePort.Name == "http" {
+					port = uint16(servicePort.NodePort)
+				}
+			}
 			nd := fixture.NewHTTPTestDeployment("http-test", ns)
 			_, err = kubeCli.AppsV1().Deployments(ns).Create(context.TODO(), nd, metav1.CreateOptions{})
 			framework.ExpectNoError(err, "create http-test deployment error")
 			err = util.WaitDeploymentReady("http-test", ns, kubeCli)
 			framework.ExpectNoError(err, "wait http-test deployment ready error")
-			port = 8080
 			podlist, err := kubeCli.CoreV1().Pods(ns).List(context.TODO(), metav1.ListOptions{})
 			framework.ExpectNoError(err, "find pod list error")
 			for _, item := range podlist.Items {
 				if strings.Contains(item.Name, "http-test") {
-					framework.Logf("get http-test-pod %v",item)
-					client.IP = item.Status.PodIP
+					framework.Logf("get http-test-pod %v", item)
+					client.IP = item.Status.HostIP
 				}
 			}
 			client.C = &c
