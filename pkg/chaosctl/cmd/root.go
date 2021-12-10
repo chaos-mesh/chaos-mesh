@@ -81,7 +81,7 @@ func Execute() {
 	rootCmd.AddCommand(completionCmd)
 	rootCmd.AddCommand(forwardCmd)
 	rootCmd.AddCommand(schemaCmd)
-	rootCmd.AddCommand(NewQueryCmd(rootLogger.WithName("getter")))
+	rootCmd.AddCommand(NewQueryCmd(rootLogger.WithName("query")))
 	if err := rootCmd.Execute(); err != nil {
 		rootLogger.Error(err, "failed to execute cmd",
 			"errorVerbose", fmt.Sprintf("%+v", err),

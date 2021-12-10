@@ -49,10 +49,10 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 		return prefix
 	}
 
-	// getCmd represents the get command
-	var getCmd = &cobra.Command{
-		Use:   "get [resources]",
-		Short: "get the target resources",
+	// queryCmd represents the query command
+	var queryCmd = &cobra.Command{
+		Use:   "Query [resources]",
+		Short: "Query the target resources",
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			ctx := context.Background()
 			client, cancel, err := createClient(ctx, managerNamespace)
@@ -146,9 +146,9 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 		},
 	}
 
-	getCmd.Flags().StringVarP(&namespace, "namespace", "n", "default", "the namespace resources in")
-	getCmd.Flags().StringVarP(&root, "root", "r", "", "the root resource")
-	getCmd.RegisterFlagCompletionFunc("namespace", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	queryCmd.Flags().StringVarP(&namespace, "namespace", "n", "default", "the namespace resources in")
+	queryCmd.Flags().StringVarP(&root, "root", "r", "", "the root resource")
+	queryCmd.RegisterFlagCompletionFunc("namespace", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		ctx := context.Background()
 		client, cancel, err := createClient(ctx, managerNamespace)
 		if err != nil {
@@ -165,7 +165,7 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 
 		return completion, cobra.ShellCompDirectiveNoFileComp | cobra.ShellCompDirectiveNoSpace
 	})
-	getCmd.RegisterFlagCompletionFunc("root", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	queryCmd.RegisterFlagCompletionFunc("root", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		ctx := context.Background()
 		client, cancel, err := createClient(ctx, managerNamespace)
 		if err != nil {
@@ -183,7 +183,7 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 		return completion, cobra.ShellCompDirectiveNoFileComp | cobra.ShellCompDirectiveNoSpace
 	})
 
-	return getCmd
+	return queryCmd
 }
 
 func createClient(ctx context.Context, managerNamespace string) (*ctrlclient.CtrlClient, context.CancelFunc, error) {
