@@ -973,6 +973,25 @@ data:
   tls.crt: "${TLS_CRT}"
   tls.key: "${TLS_KEY}"
 ---
+# Source: chaos-mesh/templates/secrets-configuration.yaml
+kind: Secret
+apiVersion: v1
+metadata:
+  name: chaos-mesh-chaosd-client-certs
+  namespace: "chaos-testing"
+  labels:
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: v0.9.0
+    app.kubernetes.io/component: chaosd-client-cert
+type: Opaque
+data:
+  ca.crt: "${CA_BUNDLE}"
+  ca.key: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFb3dJQkFBS0NBUUVBdlhlekhGeUdzRktvRXQ0OHFNRnJQYmU0TVlHOTFJWTBMam1lS2NRWE44NUR3T1dPClhxUXdzYkFyNjhWenZHeHZRUzZsTUJGYTBrQVdhaDJYRzYwc2FRUGJxUmxiYXVScHV5Q1dVWDQvbmpwZ3hVNm0KdGF4NTc5MHh4NjB2d2R0S3NHL2lQOThscHBRN3dacWxqSFhjUVFrOWh1Ui9PUzk2dWtaOWFUOXhPUEs1S2VDKwpERGR0TGljbmFSOEUwM1RoczM2VFZzbjZBNXZMQ0pYTEUxNEczMkkxQldkVStSbUFvR1VFTGtkK0xHbE5RR09qCld3Wk1wWWpjRW51alRST255aGRERG5ZQ0dXWVBweHBPbHFmSmJBY3pIdFZ2anNIUXVOczlYeTJzNU5INTRDRGsKRHFZVFNtaDk0V2dJYzNBVVZ5TnZTZi9kRVBRblpvTituZUhVNndJREFRQUJBb0lCQVFDVjNwbFBWZUUwbUMxYQp2M0E4RE1OSGpvdWtuWHdMSUIwbWMyMG9uSFBCTU9kbkxpM3ZydkRWblFVZytvOFIvTFFFVzJGUEpHc3k1SDdXCmNaR1YwdVhPSzc4VmczbE1sR0VPSkRqRFBab1ZEeGg4K2pua2V3bjVNbjZ0ODlCVEI2T003UE9La25pMXk0dDUKR1ZyYVFHQjVFVllaM2FURkYwbDlEMFVrZTRxVUFBN1BOSzR2OHFucy9zeVhhMkt0Z2VFcHROY1lBS04xbW9jZgpuOURlb0JjcEtscUhlaDdZMHBqN2FLbE5WS3FaMG9Ua3JDL3BySTBodldheExBcVp5bDJzY3ZHR0JzS1BPVXlnCkMrOElEd2lRRXZkUWQ4bWQ5VVl4Z25BTXN5dmVWQVhKTDk3NWZia0lJV0RibFZCTnBhdHBnZDU1cFg4U25Nd0EKWkZkWjY2QUJBb0dCQU9TSHN2ekFVblB3WWhlOVdHZlZrQ1hwcFo2bUJXVnNSQ0VSdkxvOHJFRlBQamw1VTJRagoxMVZwN2Izai93S3ZpbEtiWkowbGRQYjNQQ1FnY2hvOG9wWjdLeFdza29LZjhkWlVuZVk0WTM5ZmJ5MFdwUWpICnlYNDNNTFcxb1ZEUElsSmRFeDZoTU9hWDVGTXJXY3B2M0tNUG9ndFZmaEFkeE5mV0hVZm5OejBMQW9HQkFOUTkKK1UzQjcwYUVYUnpWMlpyNCtPTmxQREQrRlRJSUxwZjZjcjRLbWMxcko4SEh0WkdienpKcHFHV2c1QVM5Vy91aQoyNFpxMXVrMGtaTmVxbXpvTXlvQmFJMS9BTmtmdDJlb0E1bzBqc3Q1ejV5YzBOTmtEVkd1MFkzb2xZL1VsSnlmCk83ZFJNQWErRkdZa3VMRXpDR3BBVkNmdGlNb2srNlRBMVFlaGVmT2hBb0dBZDh3VzdONFltd1JSTjZhZldGY2cKcUc4eHpkZTBEblhSeFJBYVFmcWFSZVkzZFVOL2pvZ25VblFrRjU0VVNTRWlQcW1NOWIvejc1NnRIVGNRK1dYOQp5U3FwN0VPNXpkWHduVzFnRkpaTXVqR2FBeVhTdjZhVG5xRnAzR2RwT0FaTk5LWHI1dXVTeWQ2bjUxMWJSWDZjClI3SmpQTlBGTU1lYUw1YmpaSlQxWlA4Q2dZQmYwSUtGbWZGOU1qQWUzbVBZVkdGM3RySVBwQVRKaTJ3TmJDRDAKcmpCMHpkVXE1QStSNW5jSldTMk9nNjJzZmhmU1o5a1d1NUM5d3QrZFdmVXlLVGsvMDFieDJjMzJOeDFEREZSagoveW9mcmFRT0hiVWdXV0N4Nld2czFueithNGVUbFVjT0lQYS9kSHdkQ0tMZ1RCdVdhK2dTQm1ma2FnRzRoTjBuCkRyelJRUUtCZ0IvdlV2MU9Uc1c0dnRjRkZ6U2pRWFcxQ0RmeWpwUlBQOHkyMUd6MCtjbmhESWtmS0lwOC9salEKcFNCSHNCZ1BCZ0xQc3hVaC9PVkdCU1RNTGZqck91dWxFTm5mRkY3dHZyOUc1MDZ1K1p2azBjci9QTmhZOVZNaAprZ3Y5NTBPcm0wSlRSL2RTa2ZxcnhGWWJqbXRIV3J4aWJRZkhweFZiRUY2bFkxSTBwT0RWCi0tLS0tRU5EIFJTQSBQUklWQVRFIEtFWS0tLS0tCg==
+  tls.crt: "${TLS_CRT}"
+  tls.key: "${TLS_KEY}"
+---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 # roles
 kind: ClusterRole
@@ -1541,7 +1560,13 @@ spec:
           - name: SECURITY_MODE
             value: "false"
           - name: CHAOSD_SECURITY_MODE
-            value: "false"
+            value: "true"
+          - name: CHAOSD_CA_CERT
+            value: /etc/chaosd/cert/ca.crt
+          - name: CHAOSD_CLIENT_CERT
+            value: /etc/chaosd/cert/tls.crt
+          - name: CHAOSD_CLIENT_KEY
+            value: /etc/chaosd/cert/tls.key
           - name: POD_FAILURE_PAUSE_IMAGE
             value: gcr.io/google-containers/pause:latest
           - name: ENABLE_LEADER_ELECTION
@@ -1556,6 +1581,9 @@ spec:
           - name: webhook-certs
             mountPath: /etc/webhook/certs
             readOnly: true
+          - name: chaosd-client-cert
+            mountPath: /etc/chaosd/cert
+            readOnly: true
         ports:
           - name: webhook
             containerPort: 9443
@@ -1569,6 +1597,9 @@ spec:
         - name: webhook-certs
           secret:
             secretName: chaos-mesh-webhook-certs
+        - name: chaosd-client-cert
+          secret:
+            secretName: chaos-mesh-chaosd-client-certs
 ---
 # Source: chaos-mesh/templates/chaos-daemon-rbac.yaml
 # Copyright 2021 Chaos Mesh Authors.
