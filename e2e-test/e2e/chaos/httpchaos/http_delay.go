@@ -95,6 +95,8 @@ func TestcaseHttpDelayDurationForATimeThenRecover(
 	err = cli.Delete(ctx, httpChaos)
 	framework.ExpectNoError(err, "failed to delete http chaos")
 
+	time.Sleep(time.Second * 5)
+
 	By("waiting for assertion recovering")
 	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
 		resp, dur, err := getPodHttpDelay(c, port)
