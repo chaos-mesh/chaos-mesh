@@ -94,7 +94,7 @@ func TestcaseHttpDelayDurationForATimeThenRecover(
 	// delete chaos CRD
 	err = cli.Delete(ctx, httpChaos)
 	framework.ExpectNoError(err, "failed to delete http chaos")
-	time.Sleep(time.Second * 10)
+
 	By("waiting for assertion recovering")
 	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
 		resp, dur, err := getPodHttpDelay(c, port)
@@ -193,7 +193,7 @@ func TestcaseHttpDelayDurationForATimePauseAndUnPause(
 	// pause experiment
 	err = util.PauseChaos(ctx, cli, httpChaos)
 	framework.ExpectNoError(err, "pause chaos error")
-	time.Sleep(time.Second * 10)
+
 	By("waiting for assertion about pause")
 	err = wait.Poll(1*time.Second, 1*time.Minute, func() (done bool, err error) {
 		chaos := &v1alpha1.HTTPChaos{}
@@ -215,7 +215,7 @@ func TestcaseHttpDelayDurationForATimePauseAndUnPause(
 		return true, err
 	})
 	framework.ExpectNoError(err, "check paused chaos failed")
-	time.Sleep(time.Second * 10)
+
 	// wait 1 min to check whether io delay still exists
 	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
 		_, dur, _ := getPodHttpDelay(c, port)

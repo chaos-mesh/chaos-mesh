@@ -70,7 +70,6 @@ var _ = ginkgo.Describe("[Basic]", func() {
 		clientRawConfig, err := e2econfig.LoadClientRawConfig()
 		framework.ExpectNoError(err, "failed to load raw config")
 		fw, err = portforward.NewPortForwarder(ctx, e2econfig.NewSimpleRESTClientGetter(clientRawConfig), true)
-		fmt.Println(fw)
 		framework.ExpectNoError(err, "failed to create port forwarder")
 		fwCancel = cancel
 		kubeCli = f.ClientSet
@@ -246,6 +245,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 			for _, servicePort := range svc.Spec.Ports {
 				if servicePort.Name == "http" {
 					port = uint16(servicePort.NodePort)
+					break
 				}
 			}
 			nd := fixture.NewHTTPTestDeployment("http-test", ns)
@@ -259,6 +259,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				if strings.Contains(item.Name, "http-test") {
 					framework.Logf("get http-test-pod %v", item)
 					client.IP = item.Status.HostIP
+					break
 				}
 			}
 			client.C = &c
