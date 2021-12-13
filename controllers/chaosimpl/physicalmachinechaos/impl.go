@@ -46,7 +46,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 
 	physicalMachineChaos := obj.(*v1alpha1.PhysicalMachineChaos)
 	var address string
-	if physicalMachineChaos.Spec.Address != nil {
+	if len(physicalMachineChaos.Spec.Address) > 0 {
 		address = records[index].Id
 	} else {
 		var physicalMachine v1alpha1.PhysicalMachine
@@ -134,7 +134,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 
 	physicalMachineChaos := obj.(*v1alpha1.PhysicalMachineChaos)
 	var address string
-	if physicalMachineChaos.Spec.Address != nil {
+	if len(physicalMachineChaos.Spec.Address) > 0 {
 		address = records[index].Id
 	} else {
 		var physicalMachine v1alpha1.PhysicalMachine

@@ -98,7 +98,7 @@ func New(params Params) *SelectImpl {
 
 // SelectAndFilterPhysicalMachines returns the list of physical machines that filtered by selector and SelectorMode
 func SelectAndFilterPhysicalMachines(ctx context.Context, c client.Client, r client.Reader, spec *v1alpha1.PhysicalMachineSelector, clusterScoped bool, targetNamespace string, enableFilterNamespace bool) ([]*PhysicalMachine, error) {
-	if spec.Address != nil {
+	if len(spec.Address) > 0 {
 		var result []*PhysicalMachine
 		for _, address := range spec.Address {
 			result = append(result, &PhysicalMachine{
