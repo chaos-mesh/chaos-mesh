@@ -24,8 +24,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
-
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	"go.uber.org/fx"
@@ -33,6 +31,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
 )
 
 type Impl struct {
@@ -43,16 +42,22 @@ type Impl struct {
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	impl.Log.Info("apply physical machine chaos")
 
-	var physicalMachine v1alpha1.PhysicalMachine
 	physicalMachineChaos := obj.(*v1alpha1.PhysicalMachineChaos)
-	namespacedName, err := controller.ParseNamespacedName(records[index].Id)
-	if err != nil {
-		return v1alpha1.NotInjected, err
-	}
-	err = impl.Get(ctx, namespacedName, &physicalMachine)
-	if err != nil {
-		// TODO: handle this error
-		return v1alpha1.NotInjected, err
+	var address string
+	if physicalMachineChaos.Spec.Address != nil {
+		address = records[index].Id
+	} else {
+		var physicalMachine v1alpha1.PhysicalMachine
+		namespacedName, err := controller.ParseNamespacedName(records[index].Id)
+		if err != nil {
+			return v1alpha1.NotInjected, err
+		}
+		err = impl.Get(ctx, namespacedName, &physicalMachine)
+		if err != nil {
+			// TODO: handle this error
+			return v1alpha1.NotInjected, err
+		}
+		address = physicalMachine.Spec.Address
 	}
 
 	// for example, physicalMachinechaos.Spec.Action is 'network-delay', action is 'network', subAction is 'delay'
@@ -83,7 +88,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	*/
 	var expInfoMap map[string]interface{}
 	expInfoBytes, _ := json.Marshal(physicalMachineChaos.Spec.ExpInfo)
-	err = json.Unmarshal(expInfoBytes, &expInfoMap)
+	err := json.Unmarshal(expInfoBytes, &expInfoMap)
 	if err != nil {
 		impl.Log.Error(err, "fail to unmarshal experiment info")
 		return v1alpha1.NotInjected, err
@@ -105,8 +110,8 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		return v1alpha1.NotInjected, err
 	}
 
-	url := fmt.Sprintf("%s/api/attack/%s", physicalMachine.Spec.Address, action)
-	impl.Log.Info("HTTP request", "address", physicalMachine.Spec.Address, "data", string(expInfoBytes))
+	url := fmt.Sprintf("%s/api/attack/%s", address, action)
+	impl.Log.Info("HTTP request", "address", address, "data", string(expInfoBytes))
 
 	statusCode, body, err := impl.doHttpRequest("POST", url, bytes.NewBuffer(expInfoBytes))
 	if err != nil {
@@ -125,19 +130,25 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	impl.Log.Info("recover physical machine chaos")
 
-	var physicalMachine v1alpha1.PhysicalMachine
 	physicalMachineChaos := obj.(*v1alpha1.PhysicalMachineChaos)
-	namespacedName, err := controller.ParseNamespacedName(records[index].Id)
-	if err != nil {
-		return v1alpha1.NotInjected, err
-	}
-	err = impl.Get(ctx, namespacedName, &physicalMachine)
-	if err != nil {
-		// TODO: handle this error
-		return v1alpha1.NotInjected, err
+	var address string
+	if physicalMachineChaos.Spec.Address != nil {
+		address = records[index].Id
+	} else {
+		var physicalMachine v1alpha1.PhysicalMachine
+		namespacedName, err := controller.ParseNamespacedName(records[index].Id)
+		if err != nil {
+			return v1alpha1.NotInjected, err
+		}
+		err = impl.Get(ctx, namespacedName, &physicalMachine)
+		if err != nil {
+			// TODO: handle this error
+			return v1alpha1.NotInjected, err
+		}
+		address = physicalMachine.Spec.Address
 	}
 
-	url := fmt.Sprintf("%s/api/attack/%s", physicalMachine.Spec.Address, physicalMachineChaos.Spec.ExpInfo.UID)
+	url := fmt.Sprintf("%s/api/attack/%s", address, physicalMachineChaos.Spec.ExpInfo.UID)
 	statusCode, body, err := impl.doHttpRequest("DELETE", url, nil)
 	if err != nil {
 		return v1alpha1.Injected, errors.Wrap(err, body)

@@ -28,6 +28,12 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 			physicalMachineChaos := &PhysicalMachineChaos{
 				Spec: PhysicalMachineChaosSpec{
 					Action: "stress-cpu",
+					PhysicalMachineSelector: PhysicalMachineSelector{
+						Address: []string{
+							"123.123.123.123:123",
+							"234.234.234.234:234",
+						},
+					},
 					ExpInfo: ExpInfo{
 						UID: "",
 						StressCPU: &StressCPUSpec{
@@ -39,6 +45,10 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 			}
 			physicalMachineChaos.Default()
 			Expect(physicalMachineChaos.Spec.UID).ToNot(Equal(""))
+			Expect(physicalMachineChaos.Spec.Address).To(BeEquivalentTo([]string{
+				"http://123.123.123.123:123",
+				"http://234.234.234.234:234",
+			}))
 		})
 	})
 	Context("webhook.Validator of physicalmachinechaos", func() {
@@ -55,6 +65,67 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 						},
 					},
 					"the configuration corresponding to action is empty",
+				},
+			}
+
+			for _, testCase := range testCases {
+				err := testCase.chaos.ValidateCreate()
+				Expect(strings.Contains(err.Error(), testCase.err)).To(BeTrue())
+			}
+		})
+
+		It("Validate selector", func() {
+			testCases := []struct {
+				chaos PhysicalMachineChaos
+				err   string
+			}{
+				{
+					PhysicalMachineChaos{
+						Spec: PhysicalMachineChaosSpec{
+							Action: "stress-cpu",
+							PhysicalMachineSelector: PhysicalMachineSelector{
+								Address: []string{
+									"123.123.123.123:123",
+									"234.234.234.234:234",
+								},
+								Selector: PhysicalMachineSelectorSpec{
+									PhysicalMachines: map[string][]string{
+										"default": {"physical-machine1"},
+									},
+								},
+							},
+							ExpInfo: ExpInfo{
+								UID: "",
+								StressCPU: &StressCPUSpec{
+									Load:    10,
+									Workers: 1,
+								},
+							},
+						},
+					},
+					"only one of address or selector could be specified",
+				},
+				{
+					PhysicalMachineChaos{
+						Spec: PhysicalMachineChaosSpec{
+							Action: "stress-cpu",
+							PhysicalMachineSelector: PhysicalMachineSelector{
+								Selector: PhysicalMachineSelectorSpec{
+									PhysicalMachines: map[string][]string{
+										"default": {"physical-machine1"},
+									},
+								},
+							},
+							ExpInfo: ExpInfo{
+								UID: "",
+								StressCPU: &StressCPUSpec{
+									Load:    10,
+									Workers: 1,
+								},
+							},
+						},
+					},
+					"",
 				},
 			}
 

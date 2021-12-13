@@ -3703,6 +3703,13 @@ var doc = `{
                     "description": "the subAction, generate automatically\n+optional",
                     "type": "string"
                 },
+                "address": {
+                    "description": "DEPRECATED: Use Selector instead.\nOnly one of Address and Selector could be specified.",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "clock": {
                     "description": "+optional",
                     "type": "object",

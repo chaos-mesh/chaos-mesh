@@ -308,6 +308,7 @@ func listPods(ctx context.Context, c client.Client, r client.Reader, spec v1alph
 
 	filterPods := make([]v1.Pod, 0, len(pods))
 	for _, pod := range pods {
+		pod := pod
 		if selectorChain.Match(&pod) {
 			filterPods = append(filterPods, pod)
 		}

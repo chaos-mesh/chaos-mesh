@@ -54,9 +54,13 @@ type Params struct {
 
 type PhysicalMachine struct {
 	v1alpha1.PhysicalMachine
+	Address string
 }
 
 func (pm *PhysicalMachine) Id() string {
+	if len(pm.Address) > 0 {
+		return pm.Address
+	}
 	return (types.NamespacedName{
 		Name:      pm.Name,
 		Namespace: pm.Namespace,
@@ -73,11 +77,11 @@ func (impl *SelectImpl) Select(ctx context.Context, physicalMachineSelector *v1a
 		return nil, err
 	}
 
-	var result []*PhysicalMachine
-	for _, physicalMachine := range physicalMachines {
-		result = append(result, &PhysicalMachine{physicalMachine})
+	filtered, err := filterPhysicalMachinesByMode(physicalMachines, physicalMachineSelector.Mode, physicalMachineSelector.Value)
+	if err != nil {
+		return nil, err
 	}
-	return result, nil
+	return filtered, nil
 }
 
 func New(params Params) *SelectImpl {
@@ -93,12 +97,18 @@ func New(params Params) *SelectImpl {
 }
 
 // SelectAndFilterPhysicalMachines returns the list of physical machines that filtered by selector and SelectorMode
-func SelectAndFilterPhysicalMachines(ctx context.Context, c client.Client, r client.Reader, spec *v1alpha1.PhysicalMachineSelector, clusterScoped bool, targetNamespace string, enableFilterNamespace bool) ([]v1alpha1.PhysicalMachine, error) {
-	selector := spec.Selector
-	mode := spec.Mode
-	value := spec.Value
+func SelectAndFilterPhysicalMachines(ctx context.Context, c client.Client, r client.Reader, spec *v1alpha1.PhysicalMachineSelector, clusterScoped bool, targetNamespace string, enableFilterNamespace bool) ([]*PhysicalMachine, error) {
+	if spec.Address != nil {
+		var result []*PhysicalMachine
+		for _, address := range spec.Address {
+			result = append(result, &PhysicalMachine{
+				Address: address,
+			})
+		}
+		return result, nil
+	}
 
-	physicalMachines, err := SelectPhysicalMachines(ctx, c, r, selector, clusterScoped, targetNamespace, enableFilterNamespace)
+	physicalMachines, err := SelectPhysicalMachines(ctx, c, r, spec.Selector, clusterScoped, targetNamespace, enableFilterNamespace)
 	if err != nil {
 		return nil, err
 	}
@@ -108,12 +118,13 @@ func SelectAndFilterPhysicalMachines(ctx context.Context, c client.Client, r cli
 		return nil, err
 	}
 
-	filtered, err := filterPhysicalMachinesByMode(physicalMachines, mode, value)
-	if err != nil {
-		return nil, err
+	var result []*PhysicalMachine
+	for _, physicalMachine := range physicalMachines {
+		result = append(result, &PhysicalMachine{
+			PhysicalMachine: physicalMachine,
+		})
 	}
-
-	return filtered, nil
+	return result, nil
 }
 
 func SelectPhysicalMachines(ctx context.Context, c client.Client, r client.Reader,
@@ -177,6 +188,7 @@ func listPhysicalMachines(ctx context.Context, c client.Client, r client.Reader,
 
 	filterList := make([]v1alpha1.PhysicalMachine, 0, len(physicalMachines))
 	for _, physicalMachine := range physicalMachines {
+		physicalMachine := physicalMachine
 		if selectorChain.Match(&physicalMachine) {
 			filterList = append(filterList, physicalMachine)
 		}
@@ -238,14 +250,13 @@ func selectSpecifiedPhysicalMachines(ctx context.Context, c client.Client, spec 
 }
 
 // filterPhysicalMachinesByMode filters physical machines by mode from physical machine list
-func filterPhysicalMachinesByMode(physicalMachines []v1alpha1.PhysicalMachine, mode v1alpha1.SelectorMode, value string) ([]v1alpha1.PhysicalMachine, error) {
+func filterPhysicalMachinesByMode(physicalMachines []*PhysicalMachine, mode v1alpha1.SelectorMode, value string) ([]*PhysicalMachine, error) {
 	indexes, err := generic.FilterObjectsByMode(mode, value, len(physicalMachines))
 	if err != nil {
 		return nil, err
 	}
 
-	var filtered []v1alpha1.PhysicalMachine
-
+	var filtered []*PhysicalMachine
 	for _, index := range indexes {
 		index := index
 		filtered = append(filtered, physicalMachines[index])

@@ -32,6 +32,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
 	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/utils"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector/physicalmachine"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
 )
 
@@ -109,6 +110,13 @@ type Pod struct {
 	State     string `json:"state"`
 }
 
+// PhysicalMachine defines the basic information of a physicalMachine
+type PhysicalMachine struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
+	Address   string `json:"address"`
+}
+
 // Service defines a handler service for cluster common objects.
 type Service struct {
 	// this kubeCli use the local token, used for list namespace of the K8s cluster
@@ -139,6 +147,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint.GET("/annotations", s.getAnnotations)
 	endpoint.GET("/config", s.getConfig)
 	endpoint.GET("/rbac-config", s.getRbacConfig)
+	endpoint.GET("/physicalmachines", s.listPhysicalMachines)
 }
 
 // @Summary Get pods from Kubernetes cluster.
@@ -423,6 +432,47 @@ func (s *Service) getRbacConfig(c *gin.Context) {
 	rbacMap[serviceAccountName] = serviceAccount + "\n---\n" + role + "\n---\n" + roleBinding
 
 	c.JSON(http.StatusOK, rbacMap)
+}
+
+// @Summary Get physicalMachines from Kubernetes cluster.
+// @Description Get physicalMachines from Kubernetes cluster.
+// @Tags common
+// @Produce json
+// @Param request body v1alpha1.PhysicalMachineSelectorSpec true "Request body"
+// @Success 200 {array} PhysicalMachine
+// @Router /common/physicalmachines [post]
+// @Failure 500 {object} utils.APIError
+func (s *Service) listPhysicalMachines(c *gin.Context) {
+	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
+	if err != nil {
+		_ = c.Error(utils.ErrBadRequest.WrapWithNoMessage(err))
+		return
+	}
+
+	selector := v1alpha1.PhysicalMachineSelectorSpec{}
+	if err := c.ShouldBindJSON(&selector); err != nil {
+		c.Status(http.StatusBadRequest)
+		_ = c.Error(utils.ErrBadRequest.WrapWithNoMessage(err))
+		return
+	}
+	ctx := context.TODO()
+	filtered, err := physicalmachine.SelectPhysicalMachines(ctx, kubeCli, nil, selector, s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.EnableFilterNamespace)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		return
+	}
+
+	physicalMachines := make([]PhysicalMachine, 0, len(filtered))
+	for _, pm := range filtered {
+		physicalMachines = append(physicalMachines, PhysicalMachine{
+			Name:      pm.Name,
+			Namespace: pm.Namespace,
+			Address:   pm.Spec.Address,
+		})
+	}
+
+	c.JSON(http.StatusOK, physicalMachines)
 }
 
 // inSlice checks given string in string slice or not.

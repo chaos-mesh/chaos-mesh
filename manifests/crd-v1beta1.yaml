@@ -2244,6 +2244,12 @@ spec:
               - jvm-rule-data
               - clock
               type: string
+            address:
+              description: 'DEPRECATED: Use Selector instead. Only one of Address
+                and Selector could be specified.'
+              items:
+                type: string
+              type: array
             clock:
               properties:
                 clock-ids-slice:
@@ -2735,6 +2741,7 @@ spec:
               type: string
           required:
           - action
+          - address
           - mode
           - selector
           type: object
@@ -5273,6 +5280,12 @@ spec:
                   - jvm-rule-data
                   - clock
                   type: string
+                address:
+                  description: 'DEPRECATED: Use Selector instead. Only one of Address
+                    and Selector could be specified.'
+                  items:
+                    type: string
+                  type: array
                 clock:
                   properties:
                     clock-ids-slice:
@@ -5777,6 +5790,7 @@ spec:
                   type: string
               required:
               - action
+              - address
               - mode
               - selector
               type: object
@@ -7859,6 +7873,12 @@ spec:
                             - jvm-rule-data
                             - clock
                             type: string
+                          address:
+                            description: 'DEPRECATED: Use Selector instead. Only one
+                              of Address and Selector could be specified.'
+                            items:
+                              type: string
+                            type: array
                           clock:
                             properties:
                               clock-ids-slice:
@@ -8390,6 +8410,7 @@ spec:
                             type: string
                         required:
                         - action
+                        - address
                         - mode
                         - selector
                         type: object
@@ -10158,6 +10179,12 @@ spec:
                                 - jvm-rule-data
                                 - clock
                                 type: string
+                              address:
+                                description: 'DEPRECATED: Use Selector instead. Only
+                                  one of Address and Selector could be specified.'
+                                items:
+                                  type: string
+                                type: array
                               clock:
                                 properties:
                                   clock-ids-slice:
@@ -10707,6 +10734,7 @@ spec:
                                 type: string
                             required:
                             - action
+                            - address
                             - mode
                             - selector
                             type: object
@@ -16605,6 +16633,12 @@ spec:
                   - jvm-rule-data
                   - clock
                   type: string
+                address:
+                  description: 'DEPRECATED: Use Selector instead. Only one of Address
+                    and Selector could be specified.'
+                  items:
+                    type: string
+                  type: array
                 clock:
                   properties:
                     clock-ids-slice:
@@ -17109,6 +17143,7 @@ spec:
                   type: string
               required:
               - action
+              - address
               - mode
               - selector
               type: object
@@ -18768,6 +18803,12 @@ spec:
                       - jvm-rule-data
                       - clock
                       type: string
+                    address:
+                      description: 'DEPRECATED: Use Selector instead. Only one of
+                        Address and Selector could be specified.'
+                      items:
+                        type: string
+                      type: array
                     clock:
                       properties:
                         clock-ids-slice:
@@ -19273,6 +19314,7 @@ spec:
                       type: string
                   required:
                   - action
+                  - address
                   - mode
                   - selector
                   type: object
@@ -21401,6 +21443,12 @@ spec:
                                 - jvm-rule-data
                                 - clock
                                 type: string
+                              address:
+                                description: 'DEPRECATED: Use Selector instead. Only
+                                  one of Address and Selector could be specified.'
+                                items:
+                                  type: string
+                                type: array
                               clock:
                                 properties:
                                   clock-ids-slice:
@@ -21950,6 +21998,7 @@ spec:
                                 type: string
                             required:
                             - action
+                            - address
                             - mode
                             - selector
                             type: object
@@ -23777,6 +23826,12 @@ spec:
                                     - jvm-rule-data
                                     - clock
                                     type: string
+                                  address:
+                                    description: 'DEPRECATED: Use Selector instead.
+                                      Only one of Address and Selector could be specified.'
+                                    items:
+                                      type: string
+                                    type: array
                                   clock:
                                     properties:
                                       clock-ids-slice:
@@ -24349,6 +24404,7 @@ spec:
                                     type: string
                                 required:
                                 - action
+                                - address
                                 - mode
                                 - selector
                                 type: object
@@ -32894,6 +32950,12 @@ spec:
                         - jvm-rule-data
                         - clock
                         type: string
+                      address:
+                        description: 'DEPRECATED: Use Selector instead. Only one of
+                          Address and Selector could be specified.'
+                        items:
+                          type: string
+                        type: array
                       clock:
                         properties:
                           clock-ids-slice:
@@ -33404,6 +33466,7 @@ spec:
                         type: string
                     required:
                     - action
+                    - address
                     - mode
                     - selector
                     type: object
@@ -35127,6 +35190,12 @@ spec:
                             - jvm-rule-data
                             - clock
                             type: string
+                          address:
+                            description: 'DEPRECATED: Use Selector instead. Only one
+                              of Address and Selector could be specified.'
+                            items:
+                              type: string
+                            type: array
                           clock:
                             properties:
                               clock-ids-slice:
@@ -35658,6 +35727,7 @@ spec:
                             type: string
                         required:
                         - action
+                        - address
                         - mode
                         - selector
                         type: object
