@@ -1,30 +1,28 @@
 # Set DEBUGGER=1 to build debug symbols
-LDFLAGS = $(if $(IMG_LDFLAGS),$(IMG_LDFLAGS),$(if $(DEBUGGER),,-s -w) $(shell ./hack/version.sh))
-DOCKER_REGISTRY ?= "localhost:5000"
+export LDFLAGS := $(if $(LDFLAGS),$(LDFLAGS),$(if $(DEBUGGER),,-s -w) $(shell ./hack/version.sh))
+export DOCKER_REGISTRY ?= "localhost:5000"
 
 # SET DOCKER_REGISTRY to change the docker registry
 DOCKER_REGISTRY_PREFIX := $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY)/,)
-DOCKER_BUILD_ARGS := --build-arg HTTP_PROXY=${HTTP_PROXY} --build-arg HTTPS_PROXY=${HTTPS_PROXY} --build-arg GOPROXY=${GOPROXY} --build-arg UI=${UI} --build-arg LDFLAGS="${LDFLAGS}" --build-arg CRATES_MIRROR="${CRATES_MIRROR}"
 
-IMAGE_TAG := $(if $(IMAGE_TAG),$(IMAGE_TAG),latest)
-IMAGE_PROJECT := $(if $(IMAGE_PROJECT),$(IMAGE_PROJECT),pingcap)
-IMAGE_CHAOS_MESH_PROJECT := chaos-mesh
-IMAGE_CHAOS_DAEMON_PROJECT := chaos-mesh
-IMAGE_CHAOS_DASHBOARD_PROJECT := chaos-mesh
+export IMAGE_TAG := $(if $(IMAGE_TAG),$(IMAGE_TAG),latest)
+export IMAGE_PROJECT := $(if $(IMAGE_PROJECT),$(IMAGE_PROJECT),pingcap)
+export IMAGE_CHAOS_MESH_PROJECT := chaos-mesh
+export IMAGE_CHAOS_DAEMON_PROJECT := chaos-mesh
+export IMAGE_CHAOS_DASHBOARD_PROJECT := chaos-mesh
 
 ROOT=$(shell pwd)
-OUTPUT_BIN=$(ROOT)/output/bin
-HELM_BIN=$(OUTPUT_BIN)/helm
+HELM_BIN=$(ROOT)/output/bin/helm
 
 # Every branch should have its own image tag for build-env and dev-env
-IMAGE_BUILD_ENV_PROJECT ?= chaos-mesh
-IMAGE_BUILD_ENV_REGISTRY ?= ghcr.io
-IMAGE_BUILD_ENV_BUILD ?= 0
-IMAGE_BUILD_ENV_TAG ?= latest
-IMAGE_DEV_ENV_PROJECT ?= chaos-mesh
-IMAGE_DEV_ENV_REGISTRY ?= ghcr.io
-IMAGE_DEV_ENV_BUILD ?= 0
-IMAGE_DEV_ENV_TAG ?= latest
+export IMAGE_BUILD_ENV_PROJECT ?= chaos-mesh
+export IMAGE_BUILD_ENV_REGISTRY ?= ghcr.io
+export IMAGE_BUILD_ENV_BUILD ?= 0
+export IMAGE_BUILD_ENV_TAG ?= latest
+export IMAGE_DEV_ENV_PROJECT ?= chaos-mesh
+export IMAGE_DEV_ENV_REGISTRY ?= ghcr.io
+export IMAGE_DEV_ENV_BUILD ?= 0
+export IMAGE_DEV_ENV_TAG ?= latest
 
 # Enable GO111MODULE=on explicitly, disable it with GO111MODULE=off when necessary.
 export GO111MODULE := on
@@ -43,7 +41,7 @@ PACKAGE_LIST := echo $$(go list ./... | grep -vE "chaos-mesh/test|pkg/ptrace|zz_
 # no version conversion
 CRD_OPTIONS ?= "crd:trivialVersions=true,preserveUnknownFields=false,crdVersions=v1"
 
-GO_BUILD_CACHE ?= $(ROOT)/.cache/chaos-mesh
+export GO_BUILD_CACHE ?= $(ROOT)/.cache/chaos-mesh
 
 BUILD_TAGS ?=
 
@@ -136,30 +134,6 @@ endif
 GO_TARGET_PHONY += $(1)
 endef
 
-BUILD_INDOCKER_ARG := --env IN_DOCKER=1 --env HTTP_PROXY=${HTTP_PROXY} --env HTTPS_PROXY=${HTTPS_PROXY} --env GOPROXY=${GOPROXY} --volume $(ROOT):/mnt --user $(shell id -u):$(shell id -g)
-
-ifneq ($(TARGET_PLATFORM),)
-	BUILD_INDOCKER_ARG += --platform=linux/$(TARGET_PLATFORM)
-	DOCKER_BUILD_ARGS += --platform=linux/$(TARGET_PLATFORM) --build-arg TARGET_PLATFORM=$(TARGET_PLATFORM)
-else
-	UNAME_M := $(shell uname -m)
-	ifeq ($(UNAME_M),x86_64)
-		DOCKER_BUILD_ARGS += --build-arg TARGET_PLATFORM=amd64
-	else ifeq ($(UNAME_M),amd64)
-		DOCKER_BUILD_ARGS += --build-arg TARGET_PLATFORM=amd64
-	else ifeq ($(UNAME_M),arm64)
-		DOCKER_BUILD_ARGS += --build-arg TARGET_PLATFORM=arm64
-	else ifeq ($(UNAME_M),aarch64)
-		DOCKER_BUILD_ARGS += --build-arg TARGET_PLATFORM=arm64
-	else
-		$(error Please run this script on amd64 or arm64 machine)
-	endif
-endif
-
-ifeq ($(TARGET_PLATFORM),arm64)
-	BUILD_INDOCKER_ARG += --env ETCD_UNSUPPORTED_ARCH=arm64
-endif
-
 ifneq ($(GO_BUILD_CACHE),)
 	BUILD_INDOCKER_ARG += --volume $(GO_BUILD_CACHE)/chaos-mesh-gopath:/tmp/go
 	BUILD_INDOCKER_ARG += --volume $(GO_BUILD_CACHE)/chaos-mesh-gobuild:/tmp/go-build
@@ -170,15 +144,7 @@ CLEAN_TARGETS += $(2)
 ifneq ($(IN_DOCKER),1)
 
 $(2): image-build-env go_build_cache_directory
-	@DOCKER_ID=$$$$(docker run -d \
-		$(BUILD_INDOCKER_ARG) \
-		$$(BUILD_ENV_IMAGE) \
-		sleep infinity); \
-	docker exec --workdir /mnt/ \
-		--env IMG_LDFLAGS="${LDFLAGS}" \
-		--env UI=${UI} \
-		$$$$DOCKER_ID /usr/bin/make $(2) && \
-	docker rm -f $$$$DOCKER_ID
+	$(ROOT)/build/run_in_docker.py build-env make $(2)
 endif
 
 image-$(1)-dependencies := $(image-$(1)-dependencies) $(2)
@@ -186,16 +152,10 @@ BINARIES := $(BINARIES) $(2)
 endef
 
 enter-buildenv: image-build-env go_build_cache_directory
-	@docker run -it \
-		$(BUILD_INDOCKER_ARG) \
-		$(BUILD_ENV_IMAGE) \
-		bash
+	$(ROOT)/build/run_in_docker.py build-env bash
 
 enter-devenv: image-dev-env go_build_cache_directory
-	@docker run -it \
-		$(BUILD_INDOCKER_ARG) \
-		$(DEV_ENV_IMAGE) \
-		bash
+	$(ROOT)/build/run_in_docker.py dev-env bash
 
 ifeq ($(IN_DOCKER),1)
 images/chaos-daemon/bin/pause: hack/pause.c
@@ -239,62 +199,13 @@ e2e-test/image/e2e/chaos-mesh: helm/chaos-mesh
 
 # $(1): the name of the image
 # $(2): the path of the Dockerfile build directory
-# $(3): whether building is optional. If $(3) equals 1, the image will be pulled from ghcr.io.
-# $(IMAGE_$(4)_PROJECT): the project name of the image, by default it is `pingcap`
-# $(IMAGE_$(4)_REGISTRY): the registry name of the image, it will override `DOCKER_REGISTRY`
-# $(IMAGE_$(4)_TAG): the tag of the image, it will override `IMAGE_TAG`
-# $(IMAGE_$(4)_BUILD): whether the image should be built locally rather than pulled from remote registry, by default it is `1`.
 define IMAGE_TEMPLATE
-
-$(4)_PROJECT := ${IMAGE_$(4)_PROJECT}
-ifeq ($$($(4)_PROJECT),)
-$(4)_PROJECT := $(IMAGE_PROJECT)
-endif
-
-$(4)_REGISTRY := $(IMAGE_$(4)_REGISTRY)
-ifeq ($$($(4)_REGISTRY),)
-$(4)_DOCKER_REGISTRY_PREFIX = $(DOCKER_REGISTRY_PREFIX)
-else
-$(4)_DOCKER_REGISTRY_PREFIX = $$($(4)_REGISTRY)/
-endif
-
-$(4)_TAG := $(IMAGE_$(4)_TAG)
-ifeq ($$($(4)_TAG),)
-$(4)_TAG := $(IMAGE_TAG)
-endif
-
-$(4)_IMAGE := $$($(4)_DOCKER_REGISTRY_PREFIX)$$($(4)_PROJECT)/$(1):$$($(4)_TAG)
-
-IMAGE_$(4)_BUILD ?= 1
-
 CLEAN_TARGETS += $(2)/.dockerbuilt
 
 image-$(1): $(2)/.dockerbuilt
 
 $(2)/.dockerbuilt:$(image-$(1)-dependencies) $(2)/Dockerfile
-ifeq ($$(IMAGE_$(4)_BUILD),0)
-	docker pull $$($(4)_IMAGE)
-else
-
-ifeq ($(DOCKER_CACHE),1)
-
-ifneq ($(DISABLE_CACHE_FROM),1)
-	DOCKER_BUILDKIT=1 DOCKER_CLI_EXPERIMENTAL=enabled docker buildx build --load --cache-to type=local,dest=$(DOCKER_CACHE_DIR)/image-$(1) --cache-from type=local,src=$(DOCKER_CACHE_DIR)/image-$(1) -t $$($(4)_IMAGE) ${DOCKER_BUILD_ARGS} $(2)
-else
-	DOCKER_BUILDKIT=1 DOCKER_CLI_EXPERIMENTAL=enabled docker buildx build --load --cache-to type=local,dest=$(DOCKER_CACHE_DIR)/image-$(1) -t $$($(4)_IMAGE) ${DOCKER_BUILD_ARGS} $(2)
-endif
-
-else
-
-ifneq ($(TARGET_PLATFORM),)
-	DOCKER_BUILDKIT=1 docker buildx build --load -t $$($(4)_IMAGE) ${DOCKER_BUILD_ARGS} $(2)
-else
-	DOCKER_BUILDKIT=1 docker build -t $$($(4)_IMAGE) ${DOCKER_BUILD_ARGS} $(2)
-endif
-
-endif
-
-endif
+	$(ROOT)/build/build_image.py $(1) $(2)
 	touch $(2)/.dockerbuilt
 endef
 
@@ -329,161 +240,143 @@ docker-push-dns-server:
 docker-push-chaos-kernel:
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-kernel:${IMAGE_TAG}"
 
+RUN_IN_DEV=@$(ROOT)/build/run_in_docker.py dev-env -- 
+
 bin/chaos-builder:
-	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/chaos-builder ./cmd/chaos-builder/...
+	$(RUN_IN_DEV) $(CGOENV) go build -ldflags \'$(LDFLAGS)\' -o bin/chaos-builder ./cmd/chaos-builder/...
 
 chaos-build: bin/chaos-builder
-	bin/chaos-builder
+	$(RUN_IN_DEV) bin/chaos-builder
 
-define RUN_IN_DEV_ENV_TEMPLATE
-ifeq ($$(IN_DOCKER),1)
-$(1):$(2)
-$($(1)-make)
-else
-$(1):image-dev-env go_build_cache_directory
-	@docker run $$$$(if [ -t 0 ] ;then echo -n "-it";fi) --rm --workdir /mnt/ \
-		--cap-add=sys_ptrace \
-		--env CI="${CI}" --env CODECOV_TOKEN="${CODECOV_TOKEN}" \
-		$(BUILD_INDOCKER_ARG) \
-		$$(DEV_ENV_IMAGE) \
-		/usr/bin/make $(1)
-endif
-endef
 
-define proto-make
+proto:
+ifeq ($(IN_DOCKER),1)
 	for dir in pkg/chaosdaemon pkg/chaoskernel ; do\
-		protoc -I $$$$dir/pb $$$$dir/pb/*.proto -I /usr/local/include --go_out=plugins=grpc:$$$$dir/pb --go_out=./$$$$dir/pb ;\
+		protoc -I $$dir/pb $$dir/pb/*.proto -I /usr/local/include --go_out=plugins=grpc:$$dir/pb --go_out=./$$dir/pb ;\
 	done
-endef
-$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,proto))
+else
+	$(RUN_IN_DEV) make proto
+endif
 
-define manifests/crd.yaml-make
+manifests/crd.yaml: config
+ifeq ($(IN_DOCKER),1)
 	kustomize build config/default > manifests/crd.yaml
-endef
-$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,manifests/crd.yaml,config))
+else
+	$(RUN_IN_DEV) make manifests/crd.yaml
+endif
 
-define manifests/crd-v1beta1.yaml-make
+manifests/crd-v1beta1.yaml: config
+ifeq ($(IN_DOCKER),1)
 	mkdir -p ./output
 	cp -Tr ./config ./output/config-v1beta1
 	cd ./api/v1alpha1 ;\
 		controller-gen "crd:trivialVersions=true,preserveUnknownFields=false,crdVersions=v1beta1" rbac:roleName=manager-role paths="./..." output:crd:artifacts:config=../../output/config-v1beta1/crd/bases ;
 	kustomize build output/config-v1beta1/default > manifests/crd-v1beta1.yaml
-endef
-$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,manifests/crd-v1beta1.yaml,config))
+else
+	$(RUN_IN_DEV) make manifests/crd-v1beta1.yaml
+endif
+
 yaml: manifests/crd.yaml manifests/crd-v1beta1.yaml
 
-define config-make
+config:
+ifeq ($(IN_DOCKER),1)
 	cd ./api/v1alpha1 ;\
 		controller-gen $(CRD_OPTIONS) rbac:roleName=manager-role paths="./..." output:crd:artifacts:config=../../config/crd/bases ;\
 		controller-gen $(CRD_OPTIONS) rbac:roleName=manager-role paths="./..." output:crd:artifacts:config=../../helm/chaos-mesh/crds ;
-endef
-$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,config))
+else
+	$(RUN_IN_DEV) make config
+endif
 
-define lint-make
-	revive -formatter friendly -config revive.toml $$$$($$(PACKAGE_LIST))
-endef
-$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,lint))
+lint:
+	$(RUN_IN_DEV) revive -formatter friendly -config revive.toml $$($(PACKAGE_LIST))
 
-define failpoint-enable-make
-	find $$$$PWD/* -type d | grep -vE "(\.git|bin|\.cache|ui)" | xargs failpoint-ctl enable
-endef
-$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,failpoint-enable))
+failpoint-enable:
+ifeq ($(IN_DOCKER),1)
+	find $(ROOT)/* -type d | grep -vE "(\.git|bin|\.cache|ui)" | xargs failpoint-ctl enable
+else
+	$(RUN_IN_DEV) make failpoint-enable
+endif
 
-define failpoint-disable-make
-	find $$$$PWD/* -type d | grep -vE "(\.git|bin|\.cache|ui)" | xargs failpoint-ctl disable
-endef
-$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,failpoint-disable))
+failpoint-disable:
+ifeq ($(IN_DOCKER),1)
+	find $(ROOT)/* -type d | grep -vE "(\.git|bin|\.cache|ui)" | xargs failpoint-ctl disable
+else
+	$(RUN_IN_DEV) make failpoint-disable
+endif
 
-define groupimports-make
-	goimports -w -l -local github.com/chaos-mesh/chaos-mesh $$$$(find . -type f -name '*.go' -not -path '**/zz_generated.*.go' -not -path './.cache/**')
-endef
-$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,groupimports))
+groupimports:
+	$(RUN_IN_DEV) goimports -w -l -local github.com/chaos-mesh/chaos-mesh $$(find . -type f -name '*.go' -not -path '**/zz_generated.*.go' -not -path './.cache/**')
 
-define fmt-make
-	$(CGO) fmt $$$$(go list ./... | grep -v 'zz_generated.*.go')
-endef
-$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,fmt,groupimports))
+fmt: groupimports
+	$(RUN_IN_DEV) $(CGO) fmt $$(go list ./... | grep -v 'zz_generated.*.go')
 
-define vet-make
-	$(CGOENV) go vet ./...
-endef
-$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,vet))
+vet:
+	$(RUN_IN_DEV) $(CGOENV) go vet ./...
 
-define tidy-make
+tidy: clean
+ifeq ($(IN_DOCKER),1)
 	@echo "go mod tidy"
 	GO111MODULE=on go mod tidy
 	git diff -U --exit-code go.mod go.sum
 	cd api/v1alpha1; GO111MODULE=on go mod tidy; git diff -U --exit-code go.mod go.sum
 	cd e2e-test; GO111MODULE=on go mod tidy; git diff -U --exit-code go.mod go.sum
 	cd e2e-test/cmd/e2e_helper; GO111MODULE=on go mod tidy; git diff -U --exit-code go.mod go.sum
-endef
-$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,tidy,clean))
+else
+	$(RUN_IN_DEV) make tidy
+endif
 
-define generate-ctrl-make
-	$(GO) generate ./pkg/ctrlserver/graph
-endef
-$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,generate-ctrl))
+generate-ctrl:
+	$(RUN_IN_DEV) $(GO) generate ./pkg/ctrlserver/graph
 
-define generate-make
+generate-deepcopy:
+ifeq ($(IN_DOCKER),1)
 	cd ./api/v1alpha1 ;\
 		controller-gen object:headerFile=../../hack/boilerplate/boilerplate.generatego.txt paths="./..." ;
-endef
-$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,generate,chaos-build generate-ctrl swagger_spec))
+else
+	$(RUN_IN_DEV) make generate-deepcopy
+endif
+
+generate: generate-deepcopy chaos-build generate-ctrl swagger_spec
+
 check: generate yaml vet boilerplate lint tidy install.sh fmt
 
 CLEAN_TARGETS+=e2e-test/image/e2e/bin/ginkgo
-define e2e-test/image/e2e/bin/ginkgo-make
+e2e-test/image/e2e/bin/ginkgo:
 	mkdir -p e2e-test/image/e2e/bin
-	cp $(shell which ginkgo) e2e-test/image/e2e/bin/ginkgo
-endef
-$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,e2e-test/image/e2e/bin/ginkgo))
+	$(RUN_IN_DEV) cp /go/bin/ginkgo e2e-test/image/e2e/bin/ginkgo
 
 CLEAN_TARGETS+=e2e-test/image/e2e/bin/e2e.test
-define e2e-test/image/e2e/bin/e2e.test-make
-	cd e2e-test && $(GO) test -c  -o ./image/e2e/bin/e2e.test ./e2e
-endef
-$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,e2e-test/image/e2e/bin/e2e.test,e2e-test/e2e/**/*.go))
+e2e-test/image/e2e/bin/e2e.test:
+	$(RUN_IN_DEV) "cd e2e-test && $(GO) test -c  -o ./image/e2e/bin/e2e.test ./e2e"
 
 # Run tests
 CLEAN_TARGETS += cover.out cover.out.tmp
-define test-make
-	CGO_ENABLED=1 $(GOTEST) -p 1 $$$$($$(PACKAGE_LIST)) -coverprofile cover.out.tmp
+test: failpoint-enable generate generate-mock manifests test-utils
+	$(RUN_IN_DEV) CGO_ENABLED=1 $(GOTEST) -p 1 $$($(PACKAGE_LIST)) -coverprofile cover.out.tmp
 	cat cover.out.tmp | grep -v "_generated.deepcopy.go" > cover.out
 	make failpoint-disable
-endef
-$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,test,failpoint-enable generate generate-mock manifests test-utils))
 
-define gosec-scan-make
-	gosec ./api/... ./controllers/... ./pkg/... || echo "*** sec-scan failed: known-issues ***"
-endef
-$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,gosec-scan))
+gosec-scan:
+	$(RUN_IN_DEV) gosec ./api/... ./controllers/... ./pkg/... || echo "*** sec-scan failed: known-issues ***"
 
-define coverage-make
+coverage:
 ifeq ("$(CI)", "1")
 	@bash <(curl -s https://codecov.io/bash) -f cover.out -t $(CODECOV_TOKEN)
 else
 	mkdir -p cover
-	gocov convert cover.out > cover.json
-	gocov-xml < cover.json > cover.xml
-	gocov-html < cover.json > cover/index.html
+	$(RUN_IN_DEV) gocov convert cover.out > cover.json
+	$(RUN_IN_DEV) gocov-xml < cover.json > cover.xml
+	$(RUN_IN_DEV) gocov-html < cover.json > cover/index.html
 endif
-endef
-$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,coverage))
 
-define install.sh-make
-	./hack/update_install_script.sh
-endef
-$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,install.sh))
+install.sh:
+	$(RUN_IN_DEV) ./hack/update_install_script.sh
 
-define swagger_spec-make
-	swag init -g cmd/chaos-dashboard/main.go --output pkg/dashboard/swaggerdocs
-endef
-$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,swagger_spec))
+swagger_spec:
+	$(RUN_IN_DEV) swag init -g cmd/chaos-dashboard/main.go --output pkg/dashboard/swaggerdocs
 
-define generate-mock-make
-	$(GO) generate ./pkg/workflow
-endef
-$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,generate-mock))
+generate-mock:
+	$(RUN_IN_DEV) $(GO) generate ./pkg/workflow
 
 .PHONY: all clean test install manifests groupimports fmt vet tidy image \
 	docker-push lint generate config mockgen generate-mock \
@@ -493,4 +386,4 @@ $(eval $(call RUN_IN_DEV_ENV_TEMPLATE,generate-mock))
 	failpoint-enable failpoint-disable swagger_spec \
 	e2e-test/image/e2e/bin/e2e.test \
 	proto bin/chaos-builder go_build_cache_directory schedule-migration enter-buildenv enter-devenv \
-	manifests/crd.yaml
+	manifests/crd.yaml generate-deepcopy
