@@ -131,7 +131,12 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 
 			for _, testCase := range testCases {
 				err := testCase.chaos.ValidateCreate()
-				Expect(strings.Contains(err.Error(), testCase.err)).To(BeTrue())
+				if len(testCase.err) != 0 {
+					Expect(err).To(HaveOccurred())
+					Expect(strings.Contains(err.Error(), testCase.err)).To(BeTrue())
+				} else {
+					Expect(err).ToNot(HaveOccurred())
+				}
 			}
 		})
 

@@ -14,6 +14,15 @@ definitions:
         type: string
       type: array
     type: object
+  common.PhysicalMachine:
+    properties:
+      address:
+        type: string
+      name:
+        type: string
+      namespace:
+        type: string
+    type: object
   common.Pod:
     properties:
       ip:
@@ -2804,6 +2813,32 @@ paths:
           schema:
             $ref: '#/definitions/utils.APIError'
       summary: Get all namespaces from Kubernetes cluster.
+      tags:
+      - common
+  /common/physicalmachines:
+    post:
+      description: Get physicalMachines from Kubernetes cluster.
+      parameters:
+      - description: Request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/v1alpha1.PhysicalMachineSelectorSpec'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/common.PhysicalMachine'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Get physicalMachines from Kubernetes cluster.
       tags:
       - common
   /common/pods:

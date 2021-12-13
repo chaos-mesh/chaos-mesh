@@ -89,7 +89,7 @@ func (obj *PhysicalMachineChaos) GetSelectorSpecs() map[string]interface{} {
 type PhysicalMachineSelector struct {
 	// DEPRECATED: Use Selector instead.
 	// Only one of Address and Selector could be specified.
-	Address []string `json:"address"`
+	Address []string `json:"address,omitempty"`
 
 	// Selector is used to select physical machines that are used to inject chaos action.
 	Selector PhysicalMachineSelectorSpec `json:"selector"`
