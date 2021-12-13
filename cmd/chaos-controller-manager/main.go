@@ -73,6 +73,8 @@ func main() {
 	ctrl.SetLogger(zap.New(zap.UseDevMode(true)))
 
 	app := fx.New(
+		fx.Supply(controllermetrics.Registry),
+		fx.Provide(metrics.NewChaosControllerManagerMetricsCollector),
 		fx.Options(
 			provider.Module,
 			controllers.Module,
@@ -94,6 +96,7 @@ type RunParams struct {
 	Logger              logr.Logger
 	AuthCli             *authorizationv1.AuthorizationV1Client
 	DaemonClientBuilder *chaosdaemon.ChaosDaemonClientBuilder
+	MetricsCollector    *metrics.ChaosControllerManagerMetricsCollector
 
 	Objs        []types.Object        `group:"objs"`
 	WebhookObjs []types.WebhookObject `group:"webhookObjs"`
@@ -102,6 +105,7 @@ type RunParams struct {
 func Run(params RunParams) error {
 	mgr := params.Mgr
 	authCli := params.AuthCli
+	metricsCollector := params.MetricsCollector
 
 	var err error
 	for _, obj := range params.Objs {
@@ -148,9 +152,6 @@ func Run(params RunParams) error {
 			return err
 		}
 	}
-
-	// Init metrics collector
-	metricsCollector := metrics.NewChaosControllerManagerMetricsCollector(mgr.GetCache(), controllermetrics.Registry)
 
 	setupLog.Info("Setting up webhook server")
 	hookServer := mgr.GetWebhookServer()

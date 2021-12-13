@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 
-package finalizers
+package common
 
 import (
 	"context"
@@ -21,25 +21,29 @@ import (
 	"path/filepath"
 	"testing"
 
-	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
-
 	"github.com/go-logr/logr"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"go.uber.org/fx"
-
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/utils"
-	"github.com/chaos-mesh/chaos-mesh/controllers/types"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/test"
-
 	"k8s.io/client-go/rest"
 	"k8s.io/kubectl/pkg/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
+	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl"
+	"github.com/chaos-mesh/chaos-mesh/controllers/common/condition"
+	"github.com/chaos-mesh/chaos-mesh/controllers/common/desiredphase"
+	"github.com/chaos-mesh/chaos-mesh/controllers/common/finalizers"
+	"github.com/chaos-mesh/chaos-mesh/controllers/common/pipeline"
+	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/utils"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/test"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to
@@ -48,15 +52,15 @@ import (
 var app *fx.App
 var k8sClient client.Client
 var lister *utils.ActiveLister
-var config *rest.Config
+var cfg *rest.Config
 var testEnv *envtest.Environment
 var setupLog = ctrl.Log.WithName("setup")
 
-func TestSchedule(t *testing.T) {
+func TestCommon(t *testing.T) {
 	RegisterFailHandler(Fail)
 
 	RunSpecsWithDefaultAndCustomReporters(t,
-		"Schedule suit",
+		"Common suit",
 		[]Reporter{printer.NewlineReporter{}})
 }
 
@@ -77,20 +81,26 @@ var _ = BeforeSuite(func() {
 	err := v1alpha1.SchemeBuilder.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 
-	config, err = testEnv.Start()
+	cfg, err = testEnv.Start()
 	Expect(err).ToNot(HaveOccurred())
-	Expect(config).ToNot(BeNil())
+	Expect(cfg).ToNot(BeNil())
 
-	k8sClient, err = client.New(config, client.Options{Scheme: scheme.Scheme})
+	k8sClient, err = client.New(cfg, client.Options{Scheme: scheme.Scheme})
 	Expect(err).ToNot(HaveOccurred())
 	Expect(k8sClient).ToNot(BeNil())
 
+	By("start application")
 	app = fx.New(
 		fx.Options(
 			test.Module,
+			chaosimpl.AllImpl,
+			selector.Module,
+			fx.Provide(chaosdaemon.New),
+			fx.Provide(func() []pipeline.PipelineStep {
+				return []pipeline.PipelineStep{finalizers.Step, desiredphase.Step, condition.Step}
+			}),
 			fx.Invoke(Bootstrap),
-			fx.Supply(config),
-			types.ChaosObjects,
+			fx.Supply(cfg),
 		),
 		fx.Invoke(Run),
 	)
@@ -121,9 +131,6 @@ type RunParams struct {
 
 	Mgr    ctrl.Manager
 	Logger logr.Logger
-
-	Controllers []types.Controller `group:"controller"`
-	Objs        []types.Object     `group:"objs"`
 }
 
 func Run(params RunParams) error {

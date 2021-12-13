@@ -30,9 +30,11 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/httpchaos/podhttpchaosmanager"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/iochaos/podiochaosmanager"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+	impltypes "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
 )
+
+var _ impltypes.ChaosImpl = (*Impl)(nil)
 
 const (
 	waitForApplySync   v1alpha1.Phase = "Not Injected/Wait"
@@ -45,8 +47,6 @@ type Impl struct {
 
 	builder *podhttpchaosmanager.Builder
 }
-
-var _ common.ChaosImpl = (*Impl)(nil)
 
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	// The only possible phase to get in here is "Not Injected" or "Not Injected/Wait"
@@ -208,8 +208,8 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	return waitForRecoverSync, nil
 }
 
-func NewImpl(c client.Client, b *podhttpchaosmanager.Builder, log logr.Logger) *common.ChaosImplPair {
-	return &common.ChaosImplPair{
+func NewImpl(c client.Client, b *podhttpchaosmanager.Builder, log logr.Logger) *impltypes.ChaosImplPair {
+	return &impltypes.ChaosImplPair{
 		Name:   "httpchaos",
 		Object: &v1alpha1.HTTPChaos{},
 		Impl: &Impl{

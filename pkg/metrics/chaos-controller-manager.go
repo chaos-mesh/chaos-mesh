@@ -27,7 +27,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/status"
 )
 
-var log = ctrl.Log.WithName("metrics-collector")
+var log = ctrl.Log.WithName("chaos-controller-manager-metrics-collector")
 
 // ChaosControllerManagerMetricsCollector implements prometheus.Collector interface
 type ChaosControllerManagerMetricsCollector struct {
@@ -43,10 +43,16 @@ type ChaosControllerManagerMetricsCollector struct {
 	Injections          *prometheus.CounterVec
 	chaosSchedules      *prometheus.GaugeVec
 	chaosWorkflows      *prometheus.GaugeVec
+	EmittedEvents       *prometheus.CounterVec
 }
 
 // NewChaosControllerManagerMetricsCollector initializes metrics and collector
-func NewChaosControllerManagerMetricsCollector(store cache.Cache, registerer prometheus.Registerer) *ChaosControllerManagerMetricsCollector {
+func NewChaosControllerManagerMetricsCollector(manager ctrl.Manager, registerer *prometheus.Registry) *ChaosControllerManagerMetricsCollector {
+	var store cache.Cache
+	if manager != nil {
+		store = manager.GetCache()
+	}
+
 	c := &ChaosControllerManagerMetricsCollector{
 		store: store,
 		chaosExperiments: prometheus.NewGaugeVec(prometheus.GaugeOpts{
@@ -93,8 +99,15 @@ func NewChaosControllerManagerMetricsCollector(store cache.Cache, registerer pro
 			Name: "chaos_controller_manager_chaos_workflows",
 			Help: "Total number of chaos workflows",
 		}, []string{"namespace"}),
+		EmittedEvents: prometheus.NewCounterVec(prometheus.CounterOpts{
+			Name: "chaos_controller_manager_emitted_event_total",
+			Help: "Total number of the emitted event by chaos-controller-manager",
+		}, []string{"type", "reason", "namespace"}),
 	}
-	registerer.MustRegister(c)
+
+	if registerer != nil {
+		registerer.MustRegister(c)
+	}
 	return c
 }
 
@@ -109,6 +122,7 @@ func (collector *ChaosControllerManagerMetricsCollector) Describe(ch chan<- *pro
 	collector.TemplateLoadError.Describe(ch)
 	collector.InjectRequired.Describe(ch)
 	collector.Injections.Describe(ch)
+	collector.EmittedEvents.Describe(ch)
 	collector.chaosSchedules.Describe(ch)
 	collector.chaosWorkflows.Describe(ch)
 }
@@ -129,6 +143,7 @@ func (collector *ChaosControllerManagerMetricsCollector) Collect(ch chan<- prome
 	collector.chaosExperiments.Collect(ch)
 	collector.chaosSchedules.Collect(ch)
 	collector.chaosWorkflows.Collect(ch)
+	collector.EmittedEvents.Collect(ch)
 }
 
 func (collector *ChaosControllerManagerMetricsCollector) collectChaosExperiments() {

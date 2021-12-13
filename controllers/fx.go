@@ -20,9 +20,6 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
-	"github.com/chaos-mesh/chaos-mesh/controllers/condition"
-	"github.com/chaos-mesh/chaos-mesh/controllers/desiredphase"
-	"github.com/chaos-mesh/chaos-mesh/controllers/finalizers"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podhttpchaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podiochaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos"
@@ -37,14 +34,13 @@ var Module = fx.Options(
 		chaosdaemon.New,
 		recorder.NewRecorderBuilder,
 	),
-
+	fx.Provide(
+		common.AllSteps,
+	),
 	fx.Invoke(common.Bootstrap),
 	fx.Invoke(podhttpchaos.Bootstrap),
 	fx.Invoke(podnetworkchaos.Bootstrap),
 	fx.Invoke(podiochaos.Bootstrap),
-	fx.Invoke(condition.Bootstrap),
-	fx.Invoke(desiredphase.Bootstrap),
-	fx.Invoke(finalizers.Bootstrap),
 	fx.Invoke(wfcontrollers.BootstrapWorkflowControllers),
 
 	schedule.Module,
