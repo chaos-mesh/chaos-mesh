@@ -569,9 +569,7 @@ spec:
                 type: string
             required:
             - action
-            - address
             - mode
-            - selector
             type: object
           status:
             description: Most recently observed status of the chaos experiment

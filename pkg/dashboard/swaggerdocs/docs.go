@@ -3758,7 +3758,7 @@ var doc = `{
                     "type": "string"
                 },
                 "address": {
-                    "description": "DEPRECATED: Use Selector instead.\nOnly one of Address and Selector could be specified.",
+                    "description": "DEPRECATED: Use Selector instead.\nOnly one of Address and Selector could be specified.\n+optional",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -3863,7 +3863,7 @@ var doc = `{
                     "$ref": "#/definitions/v1alpha1.ProcessSpec"
                 },
                 "selector": {
-                    "description": "Selector is used to select physical machines that are used to inject chaos action.",
+                    "description": "Selector is used to select physical machines that are used to inject chaos action.\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.PhysicalMachineSelectorSpec"
                 },

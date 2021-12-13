@@ -70,6 +70,10 @@ func (in *PhysicalMachineChaosSpec) Validate(root interface{}, path *field.Path)
 				"the configuration corresponding to action is empty"))
 	}
 
+	if len(in.Address) == 0 && in.Selector.Empty() {
+		allErrs = append(allErrs,
+			field.Invalid(path.Child("address"), in.Address, "one of address or selector should be specified"))
+	}
 	if len(in.Address) != 0 && !in.Selector.Empty() {
 		allErrs = append(allErrs,
 			field.Invalid(path.Child("address"), in.Address, "only one of address or selector could be specified"))

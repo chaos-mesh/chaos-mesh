@@ -2753,9 +2753,7 @@ spec:
                 type: string
             required:
             - action
-            - address
             - mode
-            - selector
             type: object
           status:
             description: Most recently observed status of the chaos experiment
@@ -5803,9 +5801,7 @@ spec:
                     type: string
                 required:
                 - action
-                - address
                 - mode
-                - selector
                 type: object
               podChaos:
                 description: PodChaosSpec defines the attributes that a user creates
@@ -8470,9 +8466,7 @@ spec:
                               type: string
                           required:
                           - action
-                          - address
                           - mode
-                          - selector
                           type: object
                         podChaos:
                           description: PodChaosSpec defines the attributes that a
@@ -10843,9 +10837,7 @@ spec:
                                   type: string
                               required:
                               - action
-                              - address
                               - mode
-                              - selector
                               type: object
                             podChaos:
                               description: PodChaosSpec defines the attributes that
@@ -17338,9 +17330,7 @@ spec:
                     type: string
                 required:
                 - action
-                - address
                 - mode
-                - selector
                 type: object
               podChaos:
                 description: PodChaosSpec defines the attributes that a user creates
@@ -19535,9 +19525,7 @@ spec:
                         type: string
                     required:
                     - action
-                    - address
                     - mode
-                    - selector
                     type: object
                   podChaos:
                     description: PodChaosSpec defines the attributes that a user creates
@@ -22270,9 +22258,7 @@ spec:
                                   type: string
                               required:
                               - action
-                              - address
                               - mode
-                              - selector
                               type: object
                             podChaos:
                               description: PodChaosSpec defines the attributes that
@@ -24728,9 +24714,7 @@ spec:
                                       type: string
                                   required:
                                   - action
-                                  - address
                                   - mode
-                                  - selector
                                   type: object
                                 podChaos:
                                   description: PodChaosSpec defines the attributes
@@ -33979,9 +33963,7 @@ spec:
                           type: string
                       required:
                       - action
-                      - address
                       - mode
-                      - selector
                       type: object
                     podChaos:
                       description: PodChaosSpec defines the attributes that a user
@@ -36287,9 +36269,7 @@ spec:
                               type: string
                           required:
                           - action
-                          - address
                           - mode
-                          - selector
                           type: object
                         podChaos:
                           description: PodChaosSpec defines the attributes that a

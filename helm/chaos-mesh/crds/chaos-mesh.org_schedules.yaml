@@ -2033,9 +2033,7 @@ spec:
                     type: string
                 required:
                 - action
-                - address
                 - mode
-                - selector
                 type: object
               podChaos:
                 description: PodChaosSpec defines the attributes that a user creates
@@ -4700,9 +4698,7 @@ spec:
                               type: string
                           required:
                           - action
-                          - address
                           - mode
-                          - selector
                           type: object
                         podChaos:
                           description: PodChaosSpec defines the attributes that a
@@ -7073,9 +7069,7 @@ spec:
                                   type: string
                               required:
                               - action
-                              - address
                               - mode
-                              - selector
                               type: object
                             podChaos:
                               description: PodChaosSpec defines the attributes that

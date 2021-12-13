@@ -127,6 +127,43 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					},
 					"",
 				},
+				{
+					PhysicalMachineChaos{
+						Spec: PhysicalMachineChaosSpec{
+							Action: "stress-cpu",
+							PhysicalMachineSelector: PhysicalMachineSelector{
+								Address: []string{
+									"123.123.123.123:123",
+									"234.234.234.234:234",
+								},
+							},
+							ExpInfo: ExpInfo{
+								UID: "",
+								StressCPU: &StressCPUSpec{
+									Load:    10,
+									Workers: 1,
+								},
+							},
+						},
+					},
+					"",
+				},
+				{
+					PhysicalMachineChaos{
+						Spec: PhysicalMachineChaosSpec{
+							Action:                  "stress-cpu",
+							PhysicalMachineSelector: PhysicalMachineSelector{},
+							ExpInfo: ExpInfo{
+								UID: "",
+								StressCPU: &StressCPUSpec{
+									Load:    10,
+									Workers: 1,
+								},
+							},
+						},
+					},
+					"one of address or selector should be specified",
+				},
 			}
 
 			for _, testCase := range testCases {

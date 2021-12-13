@@ -1558,6 +1558,7 @@ definitions:
         description: |-
           DEPRECATED: Use Selector instead.
           Only one of Address and Selector could be specified.
+          +optional
         items:
           type: string
         type: array
@@ -1646,8 +1647,9 @@ definitions:
         type: object
       selector:
         $ref: '#/definitions/v1alpha1.PhysicalMachineSelectorSpec'
-        description: Selector is used to select physical machines that are used to
-          inject chaos action.
+        description: |-
+          Selector is used to select physical machines that are used to inject chaos action.
+          +optional
         type: object
       stress-cpu:
         $ref: '#/definitions/v1alpha1.StressCPUSpec'
