@@ -28,6 +28,9 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/test/pkg/timer"
 )
 
+// These test cases required bin/test/timer as its workload.
+// You could use make test-utils to build it.
+
 func TestModifyTime(t *testing.T) {
 	RegisterFailHandler(Fail)
 
