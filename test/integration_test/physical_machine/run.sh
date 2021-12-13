@@ -94,10 +94,10 @@ sed -i 's/CHAOSD_ADDRESS/'$localIP'\:31768/g' physical_machine_tmp.yaml
 kubectl apply -f physical_machine_tmp.yaml
 
 echo "create physical machine chaos with selector"
-kubectl apply -f chaos.yaml
+kubectl apply -f chaos_selector.yaml
 judge_stress true
 
-kubectl delete -f chaos.yaml
+kubectl delete -f chaos_selector.yaml
 judge_stress false
 
 echo "create physical machine schedule"

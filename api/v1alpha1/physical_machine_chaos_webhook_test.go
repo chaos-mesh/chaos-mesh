@@ -60,6 +60,12 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 				{
 					PhysicalMachineChaos{
 						Spec: PhysicalMachineChaosSpec{
+							PhysicalMachineSelector: PhysicalMachineSelector{
+								Address: []string{
+									"123.123.123.123:123",
+									"234.234.234.234:234",
+								},
+							},
 							Action:  "stress-cpu",
 							ExpInfo: ExpInfo{},
 						},
@@ -1074,6 +1080,12 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 			for _, testCase := range testCases {
 				chaos := PhysicalMachineChaos{
 					Spec: PhysicalMachineChaosSpec{
+						PhysicalMachineSelector: PhysicalMachineSelector{
+							Address: []string{
+								"123.123.123.123:123",
+								"234.234.234.234:234",
+							},
+						},
 						Action:  testCase.action,
 						ExpInfo: testCase.expInfo,
 					},
@@ -1097,6 +1109,12 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 				{
 					PhysicalMachineChaos{
 						Spec: PhysicalMachineChaosSpec{
+							PhysicalMachineSelector: PhysicalMachineSelector{
+								Address: []string{
+									"123.123.123.123:123",
+									"234.234.234.234:234",
+								},
+							},
 							Action: "network",
 							ExpInfo: ExpInfo{
 								NetworkBandwidth: &NetworkBandwidthSpec{
