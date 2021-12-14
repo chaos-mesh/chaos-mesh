@@ -119,13 +119,13 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	rules := make([]v1alpha1.PodHttpChaosBaseRule, 0)
 	proxyPortsMap := make(map[uint32]bool)
-	proxyPorts := make([]uint32, 0)
 
 	for _, rule := range obj.Spec.Rules {
 		proxyPortsMap[uint32(rule.Port)] = true
 		rules = append(rules, rule.PodHttpChaosBaseRule)
 	}
 
+	var proxyPorts []uint32
 	for port := range proxyPortsMap {
 		proxyPorts = append(proxyPorts, port)
 	}

@@ -25,8 +25,13 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/metrics/utils"
 )
 
-// DefaultChaosDaemonMetricsCollector is the default metrics collector for chaos daemon
-var DefaultChaosDaemonMetricsCollector = NewChaosDaemonMetricsCollector()
+var (
+	// DefaultChaosDaemonMetricsCollector is the default metrics collector for chaos daemon
+	DefaultChaosDaemonMetricsCollector = NewChaosDaemonMetricsCollector()
+
+	// ChaosDaemonGrpcServerBuckets is the buckets for gRPC server handling histogram metrics
+	ChaosDaemonGrpcServerBuckets = []float64{0.001, 0.01, 0.1, 0.3, 0.6, 1, 3, 6, 10}
+)
 
 const (
 	// kubernetesPodNameLabel, kubernetesPodNamespaceLabel and kubernetesContainerNameLabel are the label keys
@@ -36,6 +41,12 @@ const (
 	kubernetesPodNamespaceLabel  = "io.kubernetes.pod.namespace"
 	kubernetesContainerNameLabel = "io.kubernetes.container.name"
 )
+
+func WithHistogramName(name string) grpcprometheus.HistogramOption {
+	return func(opts *prometheus.HistogramOpts) {
+		opts.Name = name
+	}
+}
 
 type ChaosDaemonMetricsCollector struct {
 	crClient crclients.ContainerRuntimeInfoClient
