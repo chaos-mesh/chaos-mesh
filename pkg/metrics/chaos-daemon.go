@@ -166,9 +166,3 @@ func (collector *ChaosDaemonMetricsCollector) collectNetworkMetrics() {
 		collector.tcRules.WithLabelValues(labelValues...).Set(float64(tcRules))
 	}
 }
-
-func WithHistogramName(name string) grpcprometheus.HistogramOption {
-	return func(opts *prometheus.HistogramOpts) {
-		opts.Name = name
-	}
-}
