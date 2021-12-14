@@ -26,11 +26,11 @@ export IMAGE_DEV_ENV_TAG ?= latest
 
 # Enable GO111MODULE=on explicitly, disable it with GO111MODULE=off when necessary.
 export GO111MODULE := on
-GOOS   	:= $(if $(GOOS),$(GOOS),"")
-GOARCH 	:= $(if $(GOARCH),$(GOARCH),"")
-GOPROXY := $(if $(GOPROXY),$(GOPROXY),"https://proxy.golang.org,direct")
-GOENV  	:= GO15VENDOREXPERIMENT="1" CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH) GOPROXY=$(GOPROXY)
-CGOENV 	:= GO15VENDOREXPERIMENT="1" CGO_ENABLED=1 GOOS=$(GOOS) GOARCH=$(GOARCH) GOPROXY=$(GOPROXY)
+export GOOS   	:= $(if $(GOOS),$(GOOS),"")
+export GOARCH 	:= $(if $(GOARCH),$(GOARCH),"")
+export GOPROXY  := $(if $(GOPROXY),$(GOPROXY),"https://proxy.golang.org,direct")
+GOENV  	:= CGO_ENABLED=0
+CGOENV 	:= CGO_ENABLED=1
 GO     	:= $(GOENV) go
 CGO    	:= $(CGOENV) go
 GOTEST 	:= USE_EXISTING_CLUSTER=false NO_PROXY="${NO_PROXY},testhost" go test
