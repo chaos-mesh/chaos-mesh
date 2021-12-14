@@ -24,9 +24,7 @@ export IMAGE_DEV_ENV_REGISTRY ?= ghcr.io
 export IMAGE_DEV_ENV_BUILD ?= 0
 export IMAGE_DEV_ENV_TAG ?= latest
 
-# Enable GO111MODULE=on explicitly, disable it with GO111MODULE=off when necessary.
-export GO111MODULE := on
-export GOPROXY  := $(if $(GOPROXY),$(GOPROXY),"https://proxy.golang.org,direct")
+export GOPROXY  := $(if $(GOPROXY),$(GOPROXY),https://proxy.golang.org,direct)
 GOENV  	:= CGO_ENABLED=0
 CGOENV 	:= CGO_ENABLED=1
 GO     	:= $(GOENV) go
@@ -122,8 +120,6 @@ define COMPILE_GO_TEMPLATE
 ifeq ($(IN_DOCKER),1)
 
 $(1): $(4)
-# print the env to debug TODO: delete me
-	env
 ifeq ($(3),1)
 	$(CGO) build -ldflags "$(LDFLAGS)" -tags "${BUILD_TAGS}" -o $(1) $(2)
 else
