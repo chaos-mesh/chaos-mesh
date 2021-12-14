@@ -1545,6 +1545,8 @@ spec:
             value: !!str 9288
           - name: SECURITY_MODE
             value: "false"
+          - name: CHAOSD_SECURITY_MODE
+            value: "false"
           - name: POD_FAILURE_PAUSE_IMAGE
             value: gcr.io/google-containers/pause:latest
           - name: ENABLE_LEADER_ELECTION

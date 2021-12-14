@@ -88,6 +88,10 @@ Define the secret's name of certs
 {{- printf "chaos-mesh-daemon-client-certs" -}}
 {{- end -}}
 
+{{- define "chaos-mesh.chaosd-client.certs" -}}
+{{- printf "chaos-mesh-chaosd-client-certs" -}}
+{{- end -}}
+
 {{/*
 Define the MutatingWebhookConfiguration's name
 */}}
