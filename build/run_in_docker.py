@@ -14,6 +14,12 @@ def pass_env_to_docker_arg(cmd, arg_name):
 
 if __name__ == '__main__':
     cmd = argparse.ArgumentParser(description='Helper script to run make in docker env.')
+    cmd.add_argument('--interactive', action='store_true', dest='interactive', help='Run in interactive mode')
+    cmd.set_defaults(interactive=False)
+
+    cmd.add_argument('--no-check', action='store_false', dest='check', help='Check the return value and exit')
+    cmd.set_defaults(check=True)
+
     cmd.add_argument('env_name', metavar="ENV_NAME", type=str, nargs=1, help="the name of environment image")
     cmd.add_argument('commands', metavar="COMMANDS", type=str, nargs='+', help="the commands to run in docker")
 
@@ -24,7 +30,10 @@ if __name__ == '__main__':
 
     env_image_full_name = build_image.get_image_full_name(args.env_name[0])
 
-    cmd = ["docker", "run", "-it", "--rm"]
+    cmd = ["docker", "run", "--rm"]
+    if args.interactive:
+        cmd += ["-it"]
+
     for env_key in common.export_env_variables:
         pass_env_to_docker_arg(cmd, env_key)
     cmd += ["--env", "IN_DOCKER=1"]
@@ -44,4 +53,4 @@ if __name__ == '__main__':
     cmd += ["--workdir", "/mnt"]
     cmd += [env_image_full_name]
     cmd += ["bash", "-c", " ".join(args.commands)]
-    subprocess.run(cmd, check=True)
+    subprocess.run(cmd, check=args.check)

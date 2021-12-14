@@ -152,10 +152,10 @@ BINARIES := $(BINARIES) $(2)
 endef
 
 enter-buildenv: image-build-env go_build_cache_directory
-	$(ROOT)/build/run_in_docker.py build-env bash
+	$(ROOT)/build/run_in_docker.py --interactive --no-check build-env bash
 
 enter-devenv: image-dev-env go_build_cache_directory
-	$(ROOT)/build/run_in_docker.py dev-env bash
+	$(ROOT)/build/run_in_docker.py --interactive --no-check dev-env bash
 
 ifeq ($(IN_DOCKER),1)
 images/chaos-daemon/bin/pause: hack/pause.c
