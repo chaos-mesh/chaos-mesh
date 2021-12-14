@@ -88,4 +88,5 @@ if __name__ == '__main__':
     else:
         cmd = ["docker", "pull", image_full_name]
 
-    subprocess.run(cmd, env=env)
+    print(cmd)
+    # subprocess.run(cmd, env=env)

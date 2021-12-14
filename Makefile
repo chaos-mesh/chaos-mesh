@@ -122,6 +122,8 @@ define COMPILE_GO_TEMPLATE
 ifeq ($(IN_DOCKER),1)
 
 $(1): $(4)
+# print the env to debug TODO: delete me
+	env
 ifeq ($(3),1)
 	$(CGO) build -ldflags "$(LDFLAGS)" -tags "${BUILD_TAGS}" -o $(1) $(2)
 else
@@ -139,8 +141,8 @@ endif
 
 define BUILD_IN_DOCKER_TEMPLATE
 CLEAN_TARGETS += $(2)
-ifneq ($(IN_DOCKER),1)
 
+ifneq ($(IN_DOCKER),1)
 $(2): image-build-env go_build_cache_directory
 	$(ROOT)/build/run_in_docker.py build-env make $(2)
 endif

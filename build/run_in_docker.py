@@ -68,4 +68,5 @@ if __name__ == '__main__':
     cmd += ["--workdir", "/mnt"]
     cmd += [env_image_full_name]
     cmd += ["bash", "-c", " ".join(args.commands)]
+
     subprocess.run(cmd, check=args.check)
