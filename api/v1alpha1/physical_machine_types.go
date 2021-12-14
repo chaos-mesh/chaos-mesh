@@ -34,7 +34,7 @@ type PhysicalMachine struct {
 // PhysicalMachineSpec defines the desired state of PhysicalMachine
 type PhysicalMachineSpec struct {
 
-	// Address represents the duration of the chaos action
+	// Address represents the address of the physical machine
 	Address string `json:"address"`
 }
 

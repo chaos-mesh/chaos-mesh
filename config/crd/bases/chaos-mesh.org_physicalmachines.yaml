@@ -37,7 +37,7 @@ spec:
             description: Spec defines the behavior of a physical machine
             properties:
               address:
-                description: Address represents the duration of the chaos action
+                description: Address represents the address of the physical machine
                 type: string
             required:
             - address
