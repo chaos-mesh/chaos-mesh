@@ -34,7 +34,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-
 	impltypes "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 )
@@ -151,10 +150,11 @@ func (impl *Impl) doHttpRequest(method, url string, data io.Reader) (int, string
 	req.Header.Set("Content-Type", "application/json")
 
 	var httpClient *http.Client
-	if strings.HasPrefix(url, "https") {
-		httpClient, err = securityHTTPClient()
+	if config.ControllerCfg.ChaosdSecurityMode {
+		httpClient, err = securityHTTPClient(url)
 		if err != nil {
 			impl.Log.Error(err, "generate HTTPS client")
+			return 0, "", err
 		}
 	} else {
 		httpClient = &http.Client{Timeout: 5 * time.Second}
@@ -176,9 +176,9 @@ func (impl *Impl) doHttpRequest(method, url string, data io.Reader) (int, string
 	return resp.StatusCode, string(body), nil
 }
 
-func securityHTTPClient() (*http.Client, error) {
-	if !config.ControllerCfg.ChaosdSecurityMode {
-		return &http.Client{Timeout: 5 * time.Second}, nil
+func securityHTTPClient(url string) (*http.Client, error) {
+	if !strings.Contains(url, "https") {
+		return nil, fmt.Errorf("a secure url should begin with `https` rather than `http`, url: %s", url)
 	}
 
 	pair, err := tls.LoadX509KeyPair(config.ControllerCfg.ChaosdClientCert, config.ControllerCfg.ChaosdClientKey)
