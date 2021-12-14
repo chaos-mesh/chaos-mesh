@@ -26,8 +26,6 @@ export IMAGE_DEV_ENV_TAG ?= latest
 
 # Enable GO111MODULE=on explicitly, disable it with GO111MODULE=off when necessary.
 export GO111MODULE := on
-export GOOS   	:= $(if $(GOOS),$(GOOS),"")
-export GOARCH 	:= $(if $(GOARCH),$(GOARCH),"")
 export GOPROXY  := $(if $(GOPROXY),$(GOPROXY),"https://proxy.golang.org,direct")
 GOENV  	:= CGO_ENABLED=0
 CGOENV 	:= CGO_ENABLED=1
