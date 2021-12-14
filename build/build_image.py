@@ -46,7 +46,8 @@ def get_image_full_name(name):
     return "%s/%s/%s:%s" % (registry, project, name, tag)
 
 def pass_env_to_build_arg(cmd, arg_name):
-    cmd += ["--build-arg", "%s=%s" % (arg_name, os.getenv(arg_name, ""))]
+    if os.getenv(arg_name) != None:
+        cmd += ["--build-arg", "%s=%s" % (arg_name, os.getenv(arg_name))]
 
 if __name__ == '__main__':
     cmd = argparse.ArgumentParser(description='Helper script to build Chaos Mesh image.')

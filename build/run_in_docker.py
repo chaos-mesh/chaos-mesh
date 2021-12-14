@@ -24,7 +24,8 @@ import common
 import utils
 
 def pass_env_to_docker_arg(cmd, arg_name):
-    cmd += ["--env", "%s=%s" % (arg_name, os.getenv(arg_name, ""))]
+    if os.getenv(arg_name) != None:
+        cmd += ["--env", "%s=%s" % (arg_name, os.getenv(arg_name))]
 
 if __name__ == '__main__':
     cmd = argparse.ArgumentParser(description='Helper script to run make in docker env.')
