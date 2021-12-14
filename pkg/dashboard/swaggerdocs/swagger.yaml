@@ -2692,13 +2692,16 @@ paths:
       - archives
   /common/annotations:
     get:
-      description: Get the annotations of the pods in the specified namespace from
-        Kubernetes cluster.
+      description: Get the annotations of the pods/physicalMachines in the specified
+        namespace from Kubernetes cluster.
       parameters:
       - description: The pod's namespace list, split by ,
         in: query
         name: podNamespaceList
-        required: true
+        type: string
+      - description: The physicalMachine's namespace list, split by ,
+        in: query
+        name: physicalMachineNamespaceList
         type: string
       produces:
       - application/json
@@ -2711,8 +2714,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/utils.APIError'
-      summary: Get the annotations of the pods in the specified namespace from Kubernetes
-        cluster.
+      summary: Get the annotations of the pods/physicalMachines in the specified namespace
+        from Kubernetes cluster.
       tags:
       - common
   /common/chaos-available-namespaces:
@@ -2774,13 +2777,16 @@ paths:
       - common
   /common/labels:
     get:
-      description: Get the labels of the pods in the specified namespace from Kubernetes
-        cluster.
+      description: Get the labels of the pods/physicalMachines in the specified namespace
+        from Kubernetes cluster.
       parameters:
       - description: The pod's namespace list, split by ,
         in: query
         name: podNamespaceList
-        required: true
+        type: string
+      - description: The physicalMachine's namespace list, split by ,
+        in: query
+        name: physicalMachineNamespaceList
         type: string
       produces:
       - application/json
@@ -2793,8 +2799,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/utils.APIError'
-      summary: Get the labels of the pods in the specified namespace from Kubernetes
-        cluster.
+      summary: Get the labels of the pods/physicalMachines in the specified namespace
+        from Kubernetes cluster.
       tags:
       - common
   /common/namespaces:

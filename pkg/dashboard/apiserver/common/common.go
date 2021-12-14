@@ -271,11 +271,12 @@ func (s *Service) getKinds(c *gin.Context) {
 // MapSlice defines a common map
 type MapSlice map[string][]string
 
-// @Summary Get the labels of the pods in the specified namespace from Kubernetes cluster.
-// @Description Get the labels of the pods in the specified namespace from Kubernetes cluster.
+// @Summary Get the labels of the pods/physicalMachines in the specified namespace from Kubernetes cluster.
+// @Description Get the labels of the pods/physicalMachines in the specified namespace from Kubernetes cluster.
 // @Tags common
 // @Produce json
-// @Param podNamespaceList query string true "The pod's namespace list, split by ,"
+// @Param podNamespaceList query string false "The pod's namespace list, split by ,"
+// @Param physicalMachineNamespaceList query string false "The physicalMachine's namespace list, split by ,"
 // @Success 200 {object} MapSlice
 // @Router /common/labels [get]
 // @Failure 500 {object} utils.APIError
@@ -287,47 +288,77 @@ func (s *Service) getLabels(c *gin.Context) {
 		return
 	}
 
-	podNamespaceList := c.Query("podNamespaceList")
-
-	if podNamespaceList == "" {
-		c.Status(http.StatusInternalServerError)
-		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("podNamespaceList cannot be empty")))
-		return
-	}
-
-	selector := v1alpha1.PodSelectorSpec{}
-	nsList := strings.Split(podNamespaceList, ",")
-	selector.Namespaces = nsList
-
-	ctx := context.TODO()
-	filteredPods, err := pod.SelectPods(ctx, kubeCli, nil, selector, s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.EnableFilterNamespace)
-	if err != nil {
-		c.Status(http.StatusInternalServerError)
-		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
-		return
-	}
-
 	labels := make(map[string][]string)
+	podNamespaceList := c.Query("podNamespaceList")
+	physicalMachineNamespaceList := c.Query("physicalMachineNamespaceList")
 
-	for _, pod := range filteredPods {
-		for k, v := range pod.Labels {
-			if _, ok := labels[k]; ok {
-				if !inSlice(v, labels[k]) {
-					labels[k] = append(labels[k], v)
+	if len(podNamespaceList) > 0 && len(physicalMachineNamespaceList) > 0 {
+		c.Status(http.StatusInternalServerError)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("only one of podNamespaceList and physicalMachineNamespaceList could be specified")))
+		return
+	} else if len(podNamespaceList) == 0 && len(physicalMachineNamespaceList) == 0 {
+		c.Status(http.StatusInternalServerError)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("one of podNamespaceList and physicalMachineNamespaceList is required")))
+		return
+	} else if len(podNamespaceList) > 0 {
+		selector := v1alpha1.PodSelectorSpec{}
+		nsList := strings.Split(podNamespaceList, ",")
+		selector.Namespaces = nsList
+
+		ctx := context.TODO()
+		filteredPods, err := pod.SelectPods(ctx, kubeCli, nil, selector, s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.EnableFilterNamespace)
+		if err != nil {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+			return
+		}
+
+		for _, pod := range filteredPods {
+			for k, v := range pod.Labels {
+				if _, ok := labels[k]; ok {
+					if !inSlice(v, labels[k]) {
+						labels[k] = append(labels[k], v)
+					}
+				} else {
+					labels[k] = []string{v}
 				}
-			} else {
-				labels[k] = []string{v}
+			}
+		}
+	} else {
+		selector := v1alpha1.PhysicalMachineSelectorSpec{}
+		nsList := strings.Split(physicalMachineNamespaceList, ",")
+		selector.Namespaces = nsList
+
+		ctx := context.TODO()
+		filtered, err := physicalmachine.SelectPhysicalMachines(ctx, kubeCli, nil, selector, s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.EnableFilterNamespace)
+		if err != nil {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+			return
+		}
+
+		for _, obj := range filtered {
+			for k, v := range obj.Labels {
+				if _, ok := labels[k]; ok {
+					if !inSlice(v, labels[k]) {
+						labels[k] = append(labels[k], v)
+					}
+				} else {
+					labels[k] = []string{v}
+				}
 			}
 		}
 	}
+
 	c.JSON(http.StatusOK, labels)
 }
 
-// @Summary Get the annotations of the pods in the specified namespace from Kubernetes cluster.
-// @Description Get the annotations of the pods in the specified namespace from Kubernetes cluster.
+// @Summary Get the annotations of the pods/physicalMachines in the specified namespace from Kubernetes cluster.
+// @Description Get the annotations of the pods/physicalMachines in the specified namespace from Kubernetes cluster.
 // @Tags common
 // @Produce json
-// @Param podNamespaceList query string true "The pod's namespace list, split by ,"
+// @Param podNamespaceList query string false "The pod's namespace list, split by ,"
+// @Param physicalMachineNamespaceList query string false "The physicalMachine's namespace list, split by ,"
 // @Success 200 {object} MapSlice
 // @Router /common/annotations [get]
 // @Failure 500 {object} utils.APIError
@@ -339,39 +370,68 @@ func (s *Service) getAnnotations(c *gin.Context) {
 		return
 	}
 
-	podNamespaceList := c.Query("podNamespaceList")
-
-	if podNamespaceList == "" {
-		c.Status(http.StatusInternalServerError)
-		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("podNamespaceList cannot be empty")))
-		return
-	}
-
-	selector := v1alpha1.PodSelectorSpec{}
-	nsList := strings.Split(podNamespaceList, ",")
-	selector.Namespaces = nsList
-
-	ctx := context.TODO()
-	filteredPods, err := pod.SelectPods(ctx, kubeCli, nil, selector, s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.EnableFilterNamespace)
-	if err != nil {
-		c.Status(http.StatusInternalServerError)
-		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
-		return
-	}
-
 	annotations := make(map[string][]string)
+	podNamespaceList := c.Query("podNamespaceList")
+	physicalMachineNamespaceList := c.Query("physicalMachineNamespaceList")
 
-	for _, pod := range filteredPods {
-		for k, v := range pod.Annotations {
-			if _, ok := annotations[k]; ok {
-				if !inSlice(v, annotations[k]) {
-					annotations[k] = append(annotations[k], v)
+	if len(podNamespaceList) > 0 && len(physicalMachineNamespaceList) > 0 {
+		c.Status(http.StatusInternalServerError)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("only one of podNamespaceList and physicalMachineNamespaceList could be specified")))
+		return
+	} else if len(podNamespaceList) == 0 && len(physicalMachineNamespaceList) == 0 {
+		c.Status(http.StatusInternalServerError)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("one of podNamespaceList and physicalMachineNamespaceList is required")))
+		return
+	} else if len(podNamespaceList) > 0 {
+		selector := v1alpha1.PodSelectorSpec{}
+		nsList := strings.Split(podNamespaceList, ",")
+		selector.Namespaces = nsList
+
+		ctx := context.TODO()
+		filteredPods, err := pod.SelectPods(ctx, kubeCli, nil, selector, s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.EnableFilterNamespace)
+		if err != nil {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+			return
+		}
+
+		for _, pod := range filteredPods {
+			for k, v := range pod.Annotations {
+				if _, ok := annotations[k]; ok {
+					if !inSlice(v, annotations[k]) {
+						annotations[k] = append(annotations[k], v)
+					}
+				} else {
+					annotations[k] = []string{v}
 				}
-			} else {
-				annotations[k] = []string{v}
+			}
+		}
+	} else {
+		selector := v1alpha1.PhysicalMachineSelectorSpec{}
+		nsList := strings.Split(physicalMachineNamespaceList, ",")
+		selector.Namespaces = nsList
+
+		ctx := context.TODO()
+		filtered, err := physicalmachine.SelectPhysicalMachines(ctx, kubeCli, nil, selector, s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.EnableFilterNamespace)
+		if err != nil {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+			return
+		}
+
+		for _, obj := range filtered {
+			for k, v := range obj.Annotations {
+				if _, ok := annotations[k]; ok {
+					if !inSlice(v, annotations[k]) {
+						annotations[k] = append(annotations[k], v)
+					}
+				} else {
+					annotations[k] = []string{v}
+				}
 			}
 		}
 	}
+
 	c.JSON(http.StatusOK, annotations)
 }
 
