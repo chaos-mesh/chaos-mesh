@@ -18,6 +18,7 @@ import argparse
 import os
 import subprocess
 import sys
+import pathlib
 
 import build_image
 import common
@@ -62,8 +63,13 @@ if __name__ == '__main__':
         cmd += ["--env", "ETCD_UNSUPPORTED_ARCH=arm64"]
     
     if os.getenv("GO_BUILD_CACHE") != None:
-        cmd += ["--volume", "%s/chaos-mesh-gopath:/tmp/go" % os.getenv("GO_BUILD_CACHE")]
-        cmd += ["--volume", "%s/chaos-mesh-gobuild:/tmp/go-build" % os.getenv("GO_BUILD_CACHE")]
+        tmp_go_dir = "%s/chaos-mesh-gopath" % os.getenv("GO_BUILD_CACHE")
+        tmp_go_build_dir = "%s/chaos-mesh-gobuild" % os.getenv("GO_BUILD_CACHE")
+
+        pathlib.Path(tmp_go_dir).mkdir(parents=True, exist_ok=True)
+        pathlib.Path(tmp_go_build_dir).mkdir(parents=True, exist_ok=True)
+        cmd += ["--volume", "%s:/tmp/go" % tmp_go_dir]
+        cmd += ["--volume", "%s:/tmp/go-build" % tmp_go_build_dir]
     
     cmd += ["--workdir", "/mnt"]
     cmd += [env_image_full_name]

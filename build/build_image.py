@@ -17,6 +17,7 @@
 import os
 import argparse
 import subprocess
+import pathlib
 
 import utils
 import common
@@ -64,6 +65,7 @@ if __name__ == '__main__':
         if os.getenv("DOCKER_CACHE") == "1":
             env = {"DOCKER_BUILDKIT": "1", "DOCKER_CLI_EXPERIMENTAL": "enabled"}
             cache_dir = os.getenv("DOCKER_CACHE_DIR", "%s/.cache/image-%s" % (os.getcwd(), name))
+            pathlib.Path(cache_dir).mkdir(parents=True, exist_ok=True)
             cmd = ["docker", "buildx", "build", "--load", "--cache-to", "type=local,dest=%s" % cache_dir]
             if os.getenv("DISABLE_CACHE_FROM") != "1":
                 cmd += ["--cache-from", "type=local,src=%s" % cache_dir]

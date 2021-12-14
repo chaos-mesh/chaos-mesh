@@ -48,11 +48,6 @@ endif
 CLEAN_TARGETS :=
 
 all: yaml image
-go_build_cache_directory:  $(GO_BUILD_CACHE)/chaos-mesh-gobuild $(GO_BUILD_CACHE)/chaos-mesh-gopath
-$(GO_BUILD_CACHE)/chaos-mesh-gobuild:
-	@mkdir -p $(GO_BUILD_CACHE)/chaos-mesh-gobuild
-$(GO_BUILD_CACHE)/chaos-mesh-gopath:
-	@mkdir -p $(GO_BUILD_CACHE)/chaos-mesh-gopath
 
 test-utils: timer multithread_tracee pkg/time/fakeclock/fake_clock_gettime.o
 
@@ -139,7 +134,7 @@ define BUILD_IN_DOCKER_TEMPLATE
 CLEAN_TARGETS += $(2)
 
 ifneq ($(IN_DOCKER),1)
-$(2): image-build-env go_build_cache_directory
+$(2): image-build-env
 	$(ROOT)/build/run_in_docker.py build-env make $(2)
 endif
 
@@ -147,10 +142,10 @@ image-$(1)-dependencies := $(image-$(1)-dependencies) $(2)
 BINARIES := $(BINARIES) $(2)
 endef
 
-enter-buildenv: image-build-env go_build_cache_directory
+enter-buildenv: image-build-env
 	$(ROOT)/build/run_in_docker.py --interactive --no-check build-env bash
 
-enter-devenv: image-dev-env go_build_cache_directory
+enter-devenv: image-dev-env
 	$(ROOT)/build/run_in_docker.py --interactive --no-check dev-env bash
 
 ifeq ($(IN_DOCKER),1)
