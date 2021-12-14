@@ -18,7 +18,6 @@ package httpchaos
 import (
 	"context"
 	"io/ioutil"
-	"net/http"
 	"time"
 
 	. "github.com/onsi/ginkgo"
@@ -37,14 +36,14 @@ import (
 func TestcaseHttpReplaceThenRecover(
 	ns string,
 	cli client.Client,
-	c http.Client,
+	c HTTPE2EClient,
 	port uint16,
 ) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	By("waiting on e2e helper ready")
-	err := util.WaitE2EHelperReady(c, port)
+	err := util.WaitHTTPE2EHelperReady(*c.C, c.IP, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
 	body := "Hello World"
@@ -164,14 +163,14 @@ func TestcaseHttpReplaceThenRecover(
 func TestcaseHttpReplacePauseAndUnPause(
 	ns string,
 	cli client.Client,
-	c http.Client,
+	c HTTPE2EClient,
 	port uint16,
 ) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	By("waiting on e2e helper ready")
-	err := util.WaitE2EHelperReady(c, port)
+	err := util.WaitHTTPE2EHelperReady(*c.C, c.IP, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
 	body := "Hello World"
@@ -328,7 +327,6 @@ func TestcaseHttpReplacePauseAndUnPause(
 		return false, nil
 	})
 	framework.ExpectNoError(err, "fail to recover http chaos")
-
 	By("resume http replace chaos experiment")
 	// resume experiment
 	err = util.UnPauseChaos(ctx, cli, httpChaos)
