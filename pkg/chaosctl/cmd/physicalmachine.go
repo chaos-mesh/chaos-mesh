@@ -16,46 +16,15 @@
 package cmd
 
 import (
+	"fmt"
+	"os"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/physicalmachine"
 	"github.com/go-logr/logr"
 	"github.com/spf13/cobra"
 )
 
-type PhysicalMachineInitOptions struct {
-	logger             logr.Logger
-	chaosMeshNamespace string
-	remoteIP           string
-	sshPort            int
-	chaosdPort         int
-	outputPath         string
-	namespace          string
-	labels             string
-}
-
-type PhysicalMachineGenerateOptions struct {
-	logger     logr.Logger
-	outputPath string
-	caCertFile string
-	caKeyFile  string
-}
-
-type PhysicalMachineCreateOptions struct {
-	logger     logr.Logger
-	namespace  string
-	labels     string
-	remoteIP   string
-	chaosdPort int
-}
-
 func NewPhysicalMachineCommand(logger logr.Logger) (*cobra.Command, error) {
-	initOption := &PhysicalMachineInitOptions{
-		logger: logger,
-	}
-	generateOption := &PhysicalMachineGenerateOptions{
-		logger: logger,
-	}
-	createOption := &PhysicalMachineCreateOptions{
-		logger: logger,
-	}
 
 	physicalMachineCmd := &cobra.Command{
 		Use:     `physical-machine (ACTION)`,
@@ -73,52 +42,32 @@ Examples:
 		ValidArgsFunction: noCompletions,
 	}
 
-	initCmd := &cobra.Command{
-		Use:           `init (PHYSICALMACHINE_NAME) [-n NAMESPACE]`,
-		Short:         `Generate TLS certs for certain physical machine automatically, and create PhysicalMachine CustomResource in Kubernetes cluster`,
-		Long:          `Generate TLS certs for certain physical machine automatically, and create PhysicalMachine CustomResource in Kubernetes cluster`,
-		SilenceErrors: true,
-		SilenceUsage:  true,
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return nil
-		},
+	initCmd, err := physicalmachine.NewPhysicalMachineInitCmd(logger)
+	if err != nil {
+		logger.Error(err, "failed to initialize cmd",
+			"cmd", "physicalmachine-init",
+			"errorVerbose", fmt.Sprintf("%+v", err),
+		)
+		os.Exit(1)
 	}
-	initCmd.PersistentFlags().StringVar(&initOption.chaosMeshNamespace, "chaos-mesh-namespace", "chaos-testing", "namespace where chaos mesh installed")
-	initCmd.PersistentFlags().StringVar(&initOption.remoteIP, "ip", "", "")
-	initCmd.PersistentFlags().IntVar(&initOption.sshPort, "ssh-port", 22, "")
-	initCmd.PersistentFlags().IntVar(&initOption.chaosdPort, "chaosd-port", 31768, "")
-	initCmd.PersistentFlags().StringVar(&initOption.outputPath, "path", "/etc/chaosd/ssl", "")
-	initCmd.PersistentFlags().StringVarP(&initOption.namespace, "namespace", "n", "default", "namespace where chaos mesh installed")
-	initCmd.PersistentFlags().StringVarP(&initOption.labels, "labels", "l", "", "Selector (label query) to filter on.(e.g. -l key1=value1,key2=value2)")
 
-	generateCmd := &cobra.Command{
-		Use:           `generate`,
-		Short:         `Generate TLS certs for certain physical machine`,
-		Long:          `Generate TLS certs for certain physical machine (please execute this command on the certain physical machine)`,
-		SilenceErrors: true,
-		SilenceUsage:  true,
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return nil
-		},
+	generateCmd, err := physicalmachine.NewPhysicalMachineGenerateCmd(logger)
+	if err != nil {
+		logger.Error(err, "failed to initialize cmd",
+			"cmd", "physicalmachine-generate",
+			"errorVerbose", fmt.Sprintf("%+v", err),
+		)
+		os.Exit(1)
 	}
-	generateCmd.PersistentFlags().StringVar(&generateOption.outputPath, "path", "/etc/chaosd/ssl", "")
-	generateCmd.PersistentFlags().StringVar(&generateOption.caCertFile, "cacert", "", "")
-	generateCmd.PersistentFlags().StringVar(&generateOption.caKeyFile, "cakey", "", "")
 
-	createCmd := &cobra.Command{
-		Use:           `create (PHYSICALMACHINE_NAME) [-n NAMESPACE]`,
-		Short:         `Create PhysicalMachine CustomResource in Kubernetes cluster`,
-		Long:          `Create PhysicalMachine CustomResource in Kubernetes cluster`,
-		SilenceErrors: true,
-		SilenceUsage:  true,
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return nil
-		},
+	createCmd, err := physicalmachine.NewPhysicalMachineCreateCmd(logger)
+	if err != nil {
+		logger.Error(err, "failed to initialize cmd",
+			"cmd", "physicalmachine-create",
+			"errorVerbose", fmt.Sprintf("%+v", err),
+		)
+		os.Exit(1)
 	}
-	createCmd.PersistentFlags().StringVarP(&createOption.namespace, "namespace", "n", "default", "namespace where chaos mesh installed")
-	createCmd.PersistentFlags().StringVarP(&createOption.labels, "labels", "l", "", "Selector (label query) to filter on.(e.g. -l key1=value1,key2=value2)")
-	createCmd.PersistentFlags().StringVar(&createOption.remoteIP, "ip", "", "")
-	createCmd.PersistentFlags().IntVar(&createOption.chaosdPort, "chaosd-port", 31768, "")
 
 	physicalMachineCmd.AddCommand(initCmd)
 	physicalMachineCmd.AddCommand(generateCmd)
