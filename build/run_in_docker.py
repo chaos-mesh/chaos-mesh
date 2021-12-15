@@ -46,7 +46,7 @@ if __name__ == '__main__':
 
     env_image_full_name = build_image.get_image_full_name(args.env_name[0])
 
-    cmd = ["docker", "run", "--rm"]
+    cmd = ["docker", "run", "--rm", "--privileged"]
     if args.interactive:
         cmd += ["-it"]
 
