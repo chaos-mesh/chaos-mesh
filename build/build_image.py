@@ -51,11 +51,11 @@ def pass_env_to_build_arg(cmd, arg_name):
         cmd += ["--build-arg", "%s=%s" % (arg_name, os.getenv(arg_name))]
 
 if __name__ == '__main__':
-    cmd = argparse.ArgumentParser(description='Helper script to build Chaos Mesh image.')
-    cmd.add_argument('name', metavar="NAME", type=str, nargs=1, help="the name of image")
-    cmd.add_argument('path', metavar="PATH", type=str, nargs=1, help="the path of the Dockerfile build directory")
+    cmdParser = argparse.ArgumentParser(description='Helper script to build Chaos Mesh image.')
+    cmdParser.add_argument('name', metavar="NAME", type=str, nargs=1, help="the name of image")
+    cmdParser.add_argument('path', metavar="PATH", type=str, nargs=1, help="the path of the Dockerfile build directory")
 
-    args = cmd.parse_args()
+    args = cmdParser.parse_args()
     name = args.name[0]
     image_full_name = get_image_full_name(name)
 

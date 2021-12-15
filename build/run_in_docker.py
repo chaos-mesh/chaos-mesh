@@ -29,17 +29,17 @@ def pass_env_to_docker_arg(cmd, arg_name):
         cmd += ["--env", "%s=%s" % (arg_name, os.getenv(arg_name))]
 
 if __name__ == '__main__':
-    cmd = argparse.ArgumentParser(description='Helper script to run make in docker env.')
-    cmd.add_argument('--interactive', action='store_true', dest='interactive', help='Run in interactive mode')
-    cmd.set_defaults(interactive=False)
+    cmdParser = argparse.ArgumentParser(description='Helper script to run make in docker env.')
+    cmdParser.add_argument('--interactive', action='store_true', dest='interactive', help='Run in interactive mode')
+    cmdParser.set_defaults(interactive=False)
 
-    cmd.add_argument('--no-check', action='store_false', dest='check', help='Check the return value and exit')
-    cmd.set_defaults(check=True)
+    cmdParser.add_argument('--no-check', action='store_false', dest='check', help='Check the return value and exit')
+    cmdParser.set_defaults(check=True)
 
-    cmd.add_argument('env_name', metavar="ENV_NAME", type=str, nargs=1, help="the name of environment image")
-    cmd.add_argument('commands', metavar="COMMANDS", type=str, nargs='+', help="the commands to run in docker")
+    cmdParser.add_argument('env_name', metavar="ENV_NAME", type=str, nargs=1, help="the name of environment image")
+    cmdParser.add_argument('commands', metavar="COMMANDS", type=str, nargs='+', help="the commands to run in docker")
 
-    args = cmd.parse_args()
+    args = cmdParser.parse_args()
 
     if os.getenv("IN_DOCKER") == "1":
         sys.exit("Already in docker, exiting")
