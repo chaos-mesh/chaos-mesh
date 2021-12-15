@@ -296,10 +296,11 @@ else
 endif
 
 groupimports:
-	$(RUN_IN_DEV) goimports -w -l -local github.com/chaos-mesh/chaos-mesh $$(find . -type f -name '*.go' -not -path '**/zz_generated.*.go' -not -path './.cache/**')
+	$(RUN_IN_DEV) "find . -type f -name '*.go' -not -path '**/zz_generated.*.go' -not -path './.cache/**' | xargs \
+		-d $$'\n' -n 10 goimports -w -l -local github.com/chaos-mesh/chaos-mesh"
 
 fmt: groupimports
-	$(RUN_IN_DEV) $(CGO) fmt $$(go list ./... | grep -v 'zz_generated.*.go')
+	$(RUN_IN_DEV) $(CGO) fmt $$($(PACKAGE_LIST))
 
 vet:
 	$(RUN_IN_DEV) $(CGOENV) go vet ./...
