@@ -51,10 +51,6 @@ jobs:
 
       - name: ${{ matrix.job }}
         run: |
-          # workaround for https://github.com/actions/setup-go/issues/14
-          export GOPATH=${GITHUB_WORKSPACE}/go
-          export PATH=$PATH:$GOPATH/bin
-
           if [[ "$job" == "verify" ]]; then
             make check
             echo "Please make check before creating a PR"
