@@ -29,7 +29,7 @@ import (
 // schemaCmd represents the schema command
 var schemaCmd = &cobra.Command{
 	Use:   "schema",
-	Short: "get the graphql schema of ctrl server",
+	Short: "Get the graphql schema of ctrl server",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctrlclient.DisableRuntimeErrorHandler()
 		ctx := context.Background()

@@ -51,7 +51,7 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 
 	// queryCmd represents the query command
 	var queryCmd = &cobra.Command{
-		Use:   "Query [resources]",
+		Use:   "query [resources]",
 		Short: "Query the target resources",
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			ctx := context.Background()
