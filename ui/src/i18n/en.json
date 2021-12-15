@@ -243,9 +243,9 @@
     "deleteDesc": "The Archive will be permanently deleted"
   },
   "physics": {
-    "title": "Physics",
-    "single": "Physic",
-    "notFound": "No physical machines found"
+    "title": "Hosts",
+    "single": "Hosts",
+    "notFound": "No hosts found"
   },
   "settings": {
     "title": "Settings",
