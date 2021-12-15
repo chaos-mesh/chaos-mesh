@@ -13,43 +13,15 @@
 // limitations under the License.
 //
 
-package v1alpha1
+package tproxyconfig
 
-import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+import (
+	"encoding/json"
+)
 
-// PodHttpChaosSpec defines the desired state of PodHttpChaos.
-type PodHttpChaosSpec struct {
-	// Rules are a list of injection rule for http request.
-	// +optional
-	Rules []PodHttpChaosRule `json:"rules,omitempty"`
-}
-
-// PodHttpChaosStatus defines the actual state of PodHttpChaos.
-type PodHttpChaosStatus struct {
-	// Pid represents a running tproxy process id.
-	// +optional
-	Pid int64 `json:"pid,omitempty"`
-
-	// StartTime represents the start time of a tproxy process.
-	// +optional
-	StartTime int64 `json:"startTime,omitempty"`
-
-	// +optional
-	FailedMessage string `json:"failedMessage,omitempty"`
-
-	// +optional
-	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
-}
-
-// PodHttpChaosRule defines the injection rule for http.
-type PodHttpChaosRule struct {
-	PodHttpChaosBaseRule `json:",inline"`
-
-	// Source represents the source of current rules
-	Source string `json:"source,omitempty"`
-
-	// Port represents the target port to be proxy of.
-	Port int32 `json:"port"`
+type Config struct {
+	ProxyPorts []uint32               `json:"proxy_ports,omitempty"`
+	Rules      []PodHttpChaosBaseRule `json:"rules"`
 }
 
 // PodHttpChaosBaseRule defines the injection rule without source and port.
@@ -115,11 +87,34 @@ type PodHttpChaosActions struct {
 	Patch *PodHttpChaosPatchActions `json:"patch,omitempty"`
 }
 
+// PodHttpChaosPatchBody defines the patch-body action of HttpChaos.
+type PodHttpChaosPatchBody struct {
+	Contents PodHttpChaosBodyPatchContent `json:"contents"`
+}
+
+type PodHttpChaosBodyPatchContent struct {
+	// Type represents the patch type, only support `JSON` as [merge patch json](https://tools.ietf.org/html/rfc7396) currently.
+	Type string `json:"type"`
+
+	// Value is the patch contents.
+	Value string `json:"value"`
+}
+
+func (p *PodHttpChaosPatchBody) UnmarshalJSON(data []byte) error {
+	var pp PodHttpChaosBodyPatchContent
+	err := json.Unmarshal(data, &pp)
+	if err != nil {
+		return err
+	}
+	p.Contents = pp
+	return nil
+}
+
 // PodHttpChaosPatchActions defines possible patch-actions of HttpChaos.
 type PodHttpChaosPatchActions struct {
 	// Body is a rule to patch message body of target.
 	// +optional
-	Body *PodHttpChaosPatchBodyAction `json:"body,omitempty"`
+	Body *PodHttpChaosPatchBody `json:"body,omitempty"`
 
 	// Queries is a rule to append uri queries of target(Request only).
 	// For example: `[["foo", "bar"], ["foo", "unknown"]]`.
@@ -132,13 +127,37 @@ type PodHttpChaosPatchActions struct {
 	Headers [][]string `json:"headers,omitempty"`
 }
 
-// PodHttpChaosPatchBodyAction defines patch body action of HttpChaos.
-type PodHttpChaosPatchBodyAction struct {
+// PodHttpChaosReplaceBody defines the replace-body of HttpChaos.
+type PodHttpChaosReplaceBody struct {
+	Contents PodHttpChaosBodyReplaceContent `json:"contents"`
+}
+
+type PodHttpChaosBodyReplaceContent struct {
 	// Type represents the patch type, only support `JSON` as [merge patch json](https://tools.ietf.org/html/rfc7396) currently.
 	Type string `json:"type"`
 
 	// Value is the patch contents.
 	Value string `json:"value"`
+}
+
+func (p *PodHttpChaosReplaceBody) UnmarshalJSON(data []byte) error {
+	var pp PodHttpChaosBodyReplaceContent
+	err := json.Unmarshal(data, &pp)
+	if err == nil {
+		p.Contents = pp
+		return nil
+	}
+	var bys []byte
+
+	err = json.Unmarshal(data, &bys)
+	if err == nil {
+		p.Contents = PodHttpChaosBodyReplaceContent{
+			Type:  "TEXT",
+			Value: string(bys),
+		}
+		return nil
+	}
+	return err
 }
 
 // PodHttpChaosReplaceActions defines possible replace-actions of HttpChaos.
@@ -157,7 +176,7 @@ type PodHttpChaosReplaceActions struct {
 
 	// Body is a rule to replace http message body in target.
 	// +optional
-	Body []byte `json:"body,omitempty"`
+	Body PodHttpChaosReplaceBody `json:"body,omitempty"`
 
 	// Queries is a rule to replace uri queries in http request.
 	// For example, with value `{ "foo": "unknown" }`, the `/?foo=bar` will be altered to `/?foo=unknown`,
@@ -172,34 +191,3 @@ type PodHttpChaosReplaceActions struct {
 
 // PodHttpChaosTarget represents the type of an HttpChaos Action
 type PodHttpChaosTarget string
-
-const (
-	// PodHttpRequest represents injecting chaos for http request
-	PodHttpRequest PodHttpChaosTarget = "Request"
-
-	// PodHttpResponse represents injecting chaos for http response
-	PodHttpResponse PodHttpChaosTarget = "Response"
-)
-
-// +kubebuilder:object:root=true
-
-// +chaos-mesh:base
-// +chaos-mesh:webhook:enableUpdate
-// +kubebuilder:subresource:status
-// PodHttpChaos is the Schema for the podhttpchaos API
-type PodHttpChaos struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
-
-	Spec   PodHttpChaosSpec   `json:"spec,omitempty"`
-	Status PodHttpChaosStatus `json:"status,omitempty"`
-}
-
-// +kubebuilder:object:root=true
-
-// PodHttpChaosList contains a list of PodHttpChaos
-type PodHttpChaosList struct {
-	metav1.TypeMeta `json:",inline"`
-	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []PodHttpChaos `json:"items"`
-}
