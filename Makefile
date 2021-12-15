@@ -100,7 +100,7 @@ install: manifests
 clean:
 	rm -rf $(CLEAN_TARGETS)
 
-SKYWALKING_EYES_HEADER = docker run -it --rm -v $(ROOT):/github/workspace apache/skywalking-eyes header -c /github/workspace/.github/.licenserc.yaml
+SKYWALKING_EYES_HEADER = docker run --rm -v $(ROOT):/github/workspace apache/skywalking-eyes header -c /github/workspace/.github/.licenserc.yaml
 boilerplate:
 	$(SKYWALKING_EYES_HEADER) check
 
