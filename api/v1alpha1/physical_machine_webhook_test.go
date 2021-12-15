@@ -46,7 +46,7 @@ var _ = Describe("physicalmachine_webhook", func() {
 							Address: "",
 						},
 					},
-					"the address is empty",
+					"the address is required",
 				},
 			}
 

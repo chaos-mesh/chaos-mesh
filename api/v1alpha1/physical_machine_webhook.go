@@ -45,7 +45,7 @@ func (in *PhysicalMachineSpec) Validate(root interface{}, path *field.Path) fiel
 	// make sure address is not empty
 	if len(in.Address) == 0 {
 		allErrs = append(allErrs,
-			field.Invalid(path.Child("address"), in.Address, "the address is empty"))
+			field.Invalid(path.Child("address"), in.Address, "the address is required"))
 	}
 
 	return allErrs

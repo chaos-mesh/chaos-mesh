@@ -127,5 +127,5 @@ type InnerObjectWithSelector interface {
 // WebhookObject is basic Object which implement `webhook.Validator` and `webhook.Defaulter`
 type WebhookObject interface {
 	webhook.Validator
-	Default()
+	webhook.Defaulter
 }
