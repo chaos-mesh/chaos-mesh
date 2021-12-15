@@ -244,7 +244,7 @@
   },
   "physics": {
     "title": "物理机",
-    "single": "物理",
+    "single": "物理机",
     "notFound": "未发现物理机"
   },
   "settings": {
