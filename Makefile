@@ -100,11 +100,11 @@ install: manifests
 clean:
 	rm -rf $(CLEAN_TARGETS)
 
-SKYWALKING_EYES_HEADER = docker run --rm -v $(ROOT):/github/workspace apache/skywalking-eyes header -c /github/workspace/.github/.licenserc.yaml
-boilerplate:
+SKYWALKING_EYES_HEADER = $(RUN_IN_DEV) /bin/license-eye header -c ./.github/.licenserc.yaml
+boilerplate: image-dev-env
 	$(SKYWALKING_EYES_HEADER) check
 
-boilerplate-fix:
+boilerplate-fix: image-dev-env
 	$(SKYWALKING_EYES_HEADER) fix
 
 image: image-chaos-daemon image-chaos-mesh image-chaos-dashboard $(if $(DEBUGGER), image-chaos-dlv)
@@ -237,14 +237,13 @@ docker-push-chaos-kernel:
 
 RUN_IN_DEV=@$(ROOT)/build/run_in_docker.py dev-env -- 
 
-bin/chaos-builder:
+bin/chaos-builder: image-dev-env
 	$(RUN_IN_DEV) $(CGOENV) go build -ldflags \'$(LDFLAGS)\' -o bin/chaos-builder ./cmd/chaos-builder/...
 
-chaos-build: bin/chaos-builder
+chaos-build: bin/chaos-builder image-dev-env
 	$(RUN_IN_DEV) bin/chaos-builder
 
-
-proto:
+proto: image-dev-env
 ifeq ($(IN_DOCKER),1)
 	for dir in pkg/chaosdaemon pkg/chaoskernel ; do\
 		protoc -I $$dir/pb $$dir/pb/*.proto -I /usr/local/include --go_out=plugins=grpc:$$dir/pb --go_out=./$$dir/pb ;\
@@ -253,14 +252,14 @@ else
 	$(RUN_IN_DEV) make proto
 endif
 
-manifests/crd.yaml: config
+manifests/crd.yaml: config image-dev-env
 ifeq ($(IN_DOCKER),1)
 	kustomize build config/default > manifests/crd.yaml
 else
 	$(RUN_IN_DEV) make manifests/crd.yaml
 endif
 
-manifests/crd-v1beta1.yaml: config
+manifests/crd-v1beta1.yaml: config image-dev-env
 ifeq ($(IN_DOCKER),1)
 	mkdir -p ./output
 	cp -Tr ./config ./output/config-v1beta1
@@ -273,7 +272,7 @@ endif
 
 yaml: manifests/crd.yaml manifests/crd-v1beta1.yaml
 
-config:
+config: image-dev-env
 ifeq ($(IN_DOCKER),1)
 	cd ./api/v1alpha1 ;\
 		controller-gen $(CRD_OPTIONS) rbac:roleName=manager-role paths="./..." output:crd:artifacts:config=../../config/crd/bases ;\
@@ -282,28 +281,28 @@ else
 	$(RUN_IN_DEV) make config
 endif
 
-lint:
+lint: image-dev-env
 ifeq ($(IN_DOCKER),1)
 	revive -formatter friendly -config revive.toml $$($(PACKAGE_LIST))
 else
 	$(RUN_IN_DEV) make lint
 endif
 
-failpoint-enable:
+failpoint-enable: image-dev-env
 ifeq ($(IN_DOCKER),1)
 	find $(ROOT)/* -type d | grep -vE "(\.git|bin|\.cache|ui)" | xargs failpoint-ctl enable
 else
 	$(RUN_IN_DEV) make failpoint-enable
 endif
 
-failpoint-disable:
+failpoint-disable: image-dev-env
 ifeq ($(IN_DOCKER),1)
 	find $(ROOT)/* -type d | grep -vE "(\.git|bin|\.cache|ui)" | xargs failpoint-ctl disable
 else
 	$(RUN_IN_DEV) make failpoint-disable
 endif
 
-groupimports:
+groupimports: image-dev-env
 ifeq ($(IN_DOCKER),1)
 	find . -type f -name '*.go' -not -path '**/zz_generated.*.go' -not -path './.cache/**' | xargs \
 		-d $$'\n' -n 10 goimports -w -l -local github.com/chaos-mesh/chaos-mesh
@@ -311,17 +310,17 @@ else
 	$(RUN_IN_DEV) make groupimports
 endif
 
-fmt: groupimports
+fmt: groupimports image-dev-env
 ifeq ($(IN_DOCKER),1)
 	$(CGO) fmt $$($(PACKAGE_LIST))
 else
 	$(RUN_IN_DEV) make fmt
 endif
 
-vet:
+vet: image-dev-env
 	$(RUN_IN_DEV) $(CGOENV) go vet ./...
 
-tidy: clean
+tidy: clean image-dev-env
 ifeq ($(IN_DOCKER),1)
 	@echo "go mod tidy"
 	GO111MODULE=on go mod tidy
@@ -333,10 +332,10 @@ else
 	$(RUN_IN_DEV) make tidy
 endif
 
-generate-ctrl:
+generate-ctrl: image-dev-env image-dev-env
 	$(RUN_IN_DEV) $(GO) generate ./pkg/ctrlserver/graph
 
-generate-deepcopy:
+generate-deepcopy: image-dev-env
 ifeq ($(IN_DOCKER),1)
 	cd ./api/v1alpha1 ;\
 		controller-gen object:headerFile=../../hack/boilerplate/boilerplate.generatego.txt paths="./..." ;
@@ -349,12 +348,12 @@ generate: generate-deepcopy chaos-build generate-ctrl swagger_spec
 check: generate yaml vet boilerplate lint tidy install.sh fmt
 
 CLEAN_TARGETS+=e2e-test/image/e2e/bin/ginkgo
-e2e-test/image/e2e/bin/ginkgo:
+e2e-test/image/e2e/bin/ginkgo: image-dev-env
 	mkdir -p e2e-test/image/e2e/bin
 	$(RUN_IN_DEV) cp /go/bin/ginkgo e2e-test/image/e2e/bin/ginkgo
 
 CLEAN_TARGETS+=e2e-test/image/e2e/bin/e2e.test
-e2e-test/image/e2e/bin/e2e.test:
+e2e-test/image/e2e/bin/e2e.test: image-dev-env
 	$(RUN_IN_DEV) "cd e2e-test && $(GO) test -c  -o ./image/e2e/bin/e2e.test ./e2e"
 
 # Run tests
