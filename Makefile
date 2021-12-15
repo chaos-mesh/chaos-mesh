@@ -100,8 +100,12 @@ install: manifests
 clean:
 	rm -rf $(CLEAN_TARGETS)
 
+SKYWALKING_EYES_HEADER = docker run -it --rm -v $(ROOT):/github/workspace apache/skywalking-eyes header -c /github/workspace/.github/.licenserc.yaml
 boilerplate:
-	./hack/verify-boilerplate.sh
+	$(SKYWALKING_EYES_HEADER) check
+
+boilerplate-fix:
+	$(SKYWALKING_EYES_HEADER) fix
 
 image: image-chaos-daemon image-chaos-mesh image-chaos-dashboard $(if $(DEBUGGER), image-chaos-dlv)
 
@@ -279,7 +283,11 @@ else
 endif
 
 lint:
-	$(RUN_IN_DEV) revive -formatter friendly -config revive.toml $$($(PACKAGE_LIST))
+ifeq ($(IN_DOCKER),1)
+	revive -formatter friendly -config revive.toml $$($(PACKAGE_LIST))
+else
+	$(RUN_IN_DEV) make lint
+endif
 
 failpoint-enable:
 ifeq ($(IN_DOCKER),1)
@@ -296,11 +304,19 @@ else
 endif
 
 groupimports:
-	$(RUN_IN_DEV) "find . -type f -name '*.go' -not -path '**/zz_generated.*.go' -not -path './.cache/**' | xargs \
-		-d $$'\n' -n 10 goimports -w -l -local github.com/chaos-mesh/chaos-mesh"
+ifeq ($(IN_DOCKER),1)
+	find . -type f -name '*.go' -not -path '**/zz_generated.*.go' -not -path './.cache/**' | xargs \
+		-d $$'\n' -n 10 goimports -w -l -local github.com/chaos-mesh/chaos-mesh
+else
+	$(RUN_IN_DEV) make groupimports
+endif
 
 fmt: groupimports
-	$(RUN_IN_DEV) $(CGO) fmt $$($(PACKAGE_LIST))
+ifeq ($(IN_DOCKER),1)
+	$(CGO) fmt $$($(PACKAGE_LIST))
+else
+	$(RUN_IN_DEV) make fmt
+endif
 
 vet:
 	$(RUN_IN_DEV) $(CGOENV) go vet ./...
@@ -378,4 +394,4 @@ generate-mock:
 	failpoint-enable failpoint-disable swagger_spec \
 	e2e-test/image/e2e/bin/e2e.test \
 	proto bin/chaos-builder go_build_cache_directory schedule-migration enter-buildenv enter-devenv \
-	manifests/crd.yaml generate-deepcopy
+	manifests/crd.yaml generate-deepcopy boilerplate boilerplate-fix

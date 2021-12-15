@@ -52,8 +52,10 @@ if __name__ == '__main__':
 
     for env_key in common.export_env_variables:
         pass_env_to_docker_arg(cmd, env_key)
+    
+    cwd = os.getcwd()
     cmd += ["--env", "IN_DOCKER=1"]
-    cmd += ["--volume", "%s:/mnt" % os.getcwd()]
+    cmd += ["--volume", "%s:%s" % (cwd, cwd)]
     cmd += ["--user", "%s:%s" % (os.getuid(), os.getgid())]
     
     target_platform = utils.get_target_platform()
@@ -71,7 +73,7 @@ if __name__ == '__main__':
         cmd += ["--volume", "%s:/tmp/go" % tmp_go_dir]
         cmd += ["--volume", "%s:/tmp/go-build" % tmp_go_build_dir]
     
-    cmd += ["--workdir", "/mnt"]
+    cmd += ["--workdir", cwd]
     cmd += [env_image_full_name]
     cmd += ["bash", "-c", " ".join(args.commands)]
 
