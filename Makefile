@@ -129,11 +129,6 @@ endif
 GO_TARGET_PHONY += $(1)
 endef
 
-ifneq ($(GO_BUILD_CACHE),)
-	BUILD_INDOCKER_ARG += --volume $(GO_BUILD_CACHE)/chaos-mesh-gopath:/tmp/go
-	BUILD_INDOCKER_ARG += --volume $(GO_BUILD_CACHE)/chaos-mesh-gobuild:/tmp/go-build
-endif
-
 define BUILD_IN_DOCKER_TEMPLATE
 CLEAN_TARGETS += $(2)
 
