@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+// Package action introduces a multiplexer for actions.
 package action
 
 import (
@@ -26,13 +27,37 @@ import (
 	impltypes "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/types"
 )
 
-var _ impltypes.ChaosImpl = (*Delegate)(nil)
+// TODO: refactor this as a map[name]impltypes.ChaosImpl style, remove reflect usage.
 
-type Delegate struct {
+var _ impltypes.ChaosImpl = (*Multiplexer)(nil)
+
+// Multiplexer could combine ChaosImpl implementations into one, and route them by Action in the ChaosSpec.
+// Field impl should be a struct which contains several fields with struct tag "action", each field should be an implementation of ChaosImpl.
+// For example:
+//   type tempStruct struct {
+//     impl1 impltypes.ChaosImpl `action:"action1"`
+//     impl2 impltypes.ChaosImpl `action:"action2"`
+//   }
+// is valid to be the field in Multiplexer.
+//
+// When some Chaos like:
+//   type SomeChaos struct {
+//     ***
+//     Spec SomeChaosSpec `json:"spec"`
+//     ***
+//   }
+//   type SomeChaosSpec struct {
+//     ***
+//     // available actions: action1, action2
+//     Action string `json:"action"`
+//     ***
+//   }
+// is created, the corresponding ChaosImpl(s) for each action will be invoked by struct tag.
+type Multiplexer struct {
 	impl interface{}
 }
 
-func (i *Delegate) callAccordingToAction(action, methodName string, defaultPhase v1alpha1.Phase, args ...interface{}) (v1alpha1.Phase, error) {
+func (i *Multiplexer) callAccordingToAction(action, methodName string, defaultPhase v1alpha1.Phase, args ...interface{}) (v1alpha1.Phase, error) {
 	implType := reflect.TypeOf(i.impl).Elem()
 	implVal := reflect.ValueOf(i.impl)
 
@@ -62,20 +87,23 @@ func (i *Delegate) callAccordingToAction(action, methodName string, defaultPhase
 	return defaultPhase, errors.Errorf("unknown action %s", action)
 }
 
-func (i *Delegate) getAction(obj v1alpha1.InnerObject) string {
+// TODO: refactor this by introduce a new interface called ContainsAction
+func (i *Multiplexer) getAction(obj v1alpha1.InnerObject) string {
 	return reflect.ValueOf(obj).Elem().FieldByName("Spec").FieldByName("Action").String()
 }
 
-func (i *Delegate) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
+func (i *Multiplexer) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	return i.callAccordingToAction(i.getAction(obj), "Apply", v1alpha1.NotInjected, ctx, index, records, obj)
 }
 
-func (i *Delegate) Recover(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
+func (i *Multiplexer) Recover(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	return i.callAccordingToAction(i.getAction(obj), "Recover", v1alpha1.Injected, ctx, index, records, obj)
 }
 
-func New(impl interface{}) Delegate {
-	return Delegate{
+// New is a constructor of Multiplexer.
+// For the detail of the parameter "impl", see the comment of type Multiplexer.
+func New(impl interface{}) Multiplexer {
+	return Multiplexer{
 		impl,
 	}
 }
