@@ -18,6 +18,8 @@ package main
 import (
 	"flag"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
@@ -71,8 +73,29 @@ func main() {
 		log.Error(err, "fail to grant access to /dev/fuse")
 	}
 
-	if err = chaosdaemon.StartServer(conf, reg); err != nil {
+	server, err := chaosdaemon.BuildServer(conf, reg)
+	if err != nil {
+		log.Error(err, "failed to build chaos-daemon server")
+		os.Exit(1)
+	}
+
+	err = server.Start()
+	if err != nil {
 		log.Error(err, "failed to start chaos-daemon server")
 		os.Exit(1)
 	}
+
+	sigc := make(chan os.Signal, 1)
+	signal.Notify(sigc,
+		syscall.SIGINT,
+		syscall.SIGTERM)
+
+	select {
+	case sig := <-sigc:
+		log.Info("received signal", "signal", sig)
+	case err = <-server.Errors():
+		log.Error(err, "error from chaos-daemon server")
+	}
+
+	server.Shutdown()
 }

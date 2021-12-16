@@ -27,7 +27,6 @@ import (
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/moby/locker"
 	"github.com/prometheus/client_golang/prometheus"
-	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/reflection"
@@ -98,12 +97,7 @@ func NewDaemonServerWithCRClient(crClient crclients.ContainerRuntimeInfoClient) 
 	}
 }
 
-func newGRPCServer(containerRuntime string, reg prometheus.Registerer, tlsConf tlsConfig) (*grpc.Server, error) {
-	ds, err := newDaemonServer(containerRuntime)
-	if err != nil {
-		return nil, err
-	}
-
+func newGRPCServer(daemonServer *DaemonServer, reg prometheus.Registerer, tlsConf tlsConfig) (*grpc.Server, error) {
 	grpcMetrics := grpc_prometheus.NewServerMetrics()
 	grpcMetrics.EnableHandlingTimeHistogram(
 		grpc_prometheus.WithHistogramBuckets(metrics.ChaosDaemonGrpcServerBuckets),
@@ -111,7 +105,7 @@ func newGRPCServer(containerRuntime string, reg prometheus.Registerer, tlsConf t
 	)
 	reg.MustRegister(
 		grpcMetrics,
-		metrics.DefaultChaosDaemonMetricsCollector.InjectCrClient(ds.crClient),
+		metrics.DefaultChaosDaemonMetricsCollector.InjectCrClient(daemonServer.crClient),
 	)
 
 	grpcOpts := []grpc.ServerOption{
@@ -147,7 +141,7 @@ func newGRPCServer(containerRuntime string, reg prometheus.Registerer, tlsConf t
 	s := grpc.NewServer(grpcOpts...)
 	grpcMetrics.InitializeMetrics(s)
 
-	pb.RegisterChaosDaemonServer(s, ds)
+	pb.RegisterChaosDaemonServer(s, daemonServer)
 	reflection.Register(s)
 
 	return s, nil
@@ -159,45 +153,81 @@ type RegisterGatherer interface {
 	prometheus.Gatherer
 }
 
-// StartServer starts chaos-daemon.
-func StartServer(conf *Config, reg RegisterGatherer) error {
-	g := &errgroup.Group{}
+// Server is the server for chaos daemon
+type Server struct {
+	errors       chan error
+	daemonServer *DaemonServer
 
-	httpBindAddr := conf.HttpAddr()
-	httpServer := newHTTPServerBuilder().Addr(httpBindAddr).Metrics(reg).Profiling(conf.Profiling).Build()
+	conf *Config
+	reg  RegisterGatherer
+}
 
-	grpcBindAddr := conf.GrpcAddr()
+// BuildServer builds a chaos daemon server
+func BuildServer(conf *Config, reg RegisterGatherer) (*Server, error) {
+	daemonServer, err := newDaemonServer(conf.Runtime)
+	if err != nil {
+		log.Error(err, "failed to create daemon server")
+		return nil, err
+	}
+
+	return &Server{
+		errors:       make(chan error),
+		daemonServer: daemonServer,
+		conf:         conf,
+		reg:          reg,
+	}, nil
+}
+
+// Start starts chaos-daemon.
+func (s *Server) Start() error {
+	httpBindAddr := s.conf.HttpAddr()
+	httpServer := newHTTPServerBuilder().Addr(httpBindAddr).Metrics(s.reg).Profiling(s.conf.Profiling).Build()
+
+	grpcBindAddr := s.conf.GrpcAddr()
 	grpcListener, err := net.Listen("tcp", grpcBindAddr)
 	if err != nil {
 		log.Error(err, "failed to listen grpc address", "grpcBindAddr", grpcBindAddr)
 		return err
 	}
 
-	grpcServer, err := newGRPCServer(conf.Runtime, reg, conf.tlsConfig)
+	daemonServer, err := newDaemonServer(s.conf.Runtime)
+	if err != nil {
+		log.Error(err, "failed to create daemon server")
+		return err
+	}
+
+	grpcServer, err := newGRPCServer(daemonServer, s.reg, s.conf.tlsConfig)
 	if err != nil {
 		log.Error(err, "failed to create grpc server")
 		return err
 	}
 
-	g.Go(func() error {
+	go func() {
 		log.Info("Starting http endpoint", "address", httpBindAddr)
 		if err := httpServer.ListenAndServe(); err != nil {
 			log.Error(err, "failed to start http endpoint")
 			httpServer.Shutdown(context.Background())
-			return err
+			s.errors <- err
 		}
-		return nil
-	})
+	}()
 
-	g.Go(func() error {
-		log.Info("Starting grpc endpoint", "address", grpcBindAddr, "runtime", conf.Runtime)
+	go func() {
+		log.Info("Starting grpc endpoint", "address", grpcBindAddr, "runtime", s.conf.Runtime)
 		if err := grpcServer.Serve(grpcListener); err != nil {
 			log.Error(err, "failed to start grpc endpoint")
 			grpcServer.Stop()
-			return err
+			s.errors <- err
 		}
-		return nil
-	})
+	}()
 
-	return g.Wait()
+	return nil
+}
+
+// Errors return the error channel
+func (s *Server) Errors() <-chan error {
+	return s.errors
+}
+
+func (s *Server) Shutdown() {
+	s.daemonServer.backgroundProcessManager.Shutdown()
 }
