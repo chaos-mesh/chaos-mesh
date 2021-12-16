@@ -27,18 +27,10 @@ import (
 func NewPhysicalMachineCommand(logger logr.Logger) (*cobra.Command, error) {
 
 	physicalMachineCmd := &cobra.Command{
-		Use:     `physical-machine (ACTION)`,
-		Aliases: []string{"pm"},
-		Short:   `Print the debug information for certain chaos`,
-		Long: `Print the debug information for certain chaos.
-Currently support networkchaos, stresschaos and iochaos.
-
-Examples:
-  # Return debug information from all networkchaos in default namespace
-  chaosctl debug networkchaos
-
-  # Return debug information from certain networkchaos
-  chaosctl debug networkchaos CHAOSNAME -n NAMESPACE`,
+		Use:               `physical-machine (ACTION)`,
+		Aliases:           []string{"pm"},
+		Short:             `Helper for generating TLS certs and creating resources for physical machines`,
+		Long:              `Helper for generating TLS certs and creating resources for physical machine`,
 		ValidArgsFunction: noCompletions,
 	}
 

@@ -32,6 +32,7 @@ type PhysicalMachineInitOptions struct {
 	logger             logr.Logger
 	chaosMeshNamespace string
 	remoteIP           string
+	sshUser            string
 	sshPort            int
 	chaosdPort         int
 	outputPath         string
@@ -45,9 +46,17 @@ func NewPhysicalMachineInitCmd(logger logr.Logger) (*cobra.Command, error) {
 	}
 
 	initCmd := &cobra.Command{
-		Use:           `init (PHYSICALMACHINE_NAME) [-n NAMESPACE]`,
-		Short:         `Generate TLS certs for certain physical machine automatically, and create PhysicalMachine CustomResource in Kubernetes cluster`,
-		Long:          `Generate TLS certs for certain physical machine automatically, and create PhysicalMachine CustomResource in Kubernetes cluster`,
+		Use:   `init (PHYSICALMACHINE_NAME) [-n NAMESPACE]`,
+		Short: `Generate TLS certs for certain physical machine automatically, and create PhysicalMachine CustomResource in Kubernetes cluster`,
+		Long: `Generate TLS certs for certain physical machine automatically, and create PhysicalMachine CustomResource in Kubernetes cluster
+
+Examples:
+  # Generate TLS certs for remote physical machine, and create PhysicalMachine CustomResource in certain namespace
+  chaosctl pm init PHYSICALMACHINE_NAME -n NAMESPACE --ip REMOTEIP
+  
+  # Generate TLS certs for remote physical machine, and create PhysicalMachine CustomResource in certain namespace with specified labels
+  chaosctl pm init PHYSICALMACHINE_NAME -n NAMESPACE --ip REMOTEIP -l key1=value1,key2=value2
+  `,
 		SilenceErrors: true,
 		SilenceUsage:  true,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -55,12 +64,13 @@ func NewPhysicalMachineInitCmd(logger logr.Logger) (*cobra.Command, error) {
 		},
 	}
 	initCmd.PersistentFlags().StringVar(&initOption.chaosMeshNamespace, "chaos-mesh-namespace", "chaos-testing", "namespace where chaos mesh installed")
-	initCmd.PersistentFlags().StringVar(&initOption.remoteIP, "ip", "", "")
-	initCmd.PersistentFlags().IntVar(&initOption.sshPort, "ssh-port", 22, "")
-	initCmd.PersistentFlags().IntVar(&initOption.chaosdPort, "chaosd-port", 31768, "")
-	initCmd.PersistentFlags().StringVar(&initOption.outputPath, "path", "/etc/chaosd/ssl", "")
-	initCmd.PersistentFlags().StringVarP(&initOption.namespace, "namespace", "n", "default", "namespace where chaos mesh installed")
-	initCmd.PersistentFlags().StringVarP(&initOption.labels, "labels", "l", "", "Selector (label query) to filter on.(e.g. -l key1=value1,key2=value2)")
+	initCmd.PersistentFlags().StringVar(&initOption.remoteIP, "ip", "", "ip of the remote physical machine")
+	initCmd.PersistentFlags().StringVar(&initOption.sshUser, "ssh-user", "root", "username for ssh connection")
+	initCmd.PersistentFlags().IntVar(&initOption.sshPort, "ssh-port", 22, "port of ssh connection")
+	initCmd.PersistentFlags().IntVar(&initOption.chaosdPort, "chaosd-port", 31768, "port of the remote chaosd server listen")
+	initCmd.PersistentFlags().StringVar(&initOption.outputPath, "path", "/etc/chaosd/ssl", "path to save generated certs")
+	initCmd.PersistentFlags().StringVarP(&initOption.namespace, "namespace", "n", "default", "namespace of the certain physical machine")
+	initCmd.PersistentFlags().StringVarP(&initOption.labels, "labels", "l", "", "labels of the certain physical machine (e.g. -l key1=value1,key2=value2)")
 	return initCmd, nil
 }
 
@@ -71,6 +81,10 @@ func (o *PhysicalMachineInitOptions) Run() error {
 	// }
 
 	return nil
+}
+
+func SSH() {
+
 }
 
 func GetChaosdCAFile(ctx context.Context, namespace string, c client.Client) (caCert []byte, caKey []byte, err error) {

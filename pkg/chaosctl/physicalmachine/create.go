@@ -26,6 +26,7 @@ type PhysicalMachineCreateOptions struct {
 	labels     string
 	remoteIP   string
 	chaosdPort int
+	secure     bool
 }
 
 func NewPhysicalMachineCreateCmd(logger logr.Logger) (*cobra.Command, error) {
@@ -43,10 +44,11 @@ func NewPhysicalMachineCreateCmd(logger logr.Logger) (*cobra.Command, error) {
 			return nil
 		},
 	}
-	createCmd.PersistentFlags().StringVarP(&createOption.namespace, "namespace", "n", "default", "namespace where chaos mesh installed")
-	createCmd.PersistentFlags().StringVarP(&createOption.labels, "labels", "l", "", "Selector (label query) to filter on.(e.g. -l key1=value1,key2=value2)")
-	createCmd.PersistentFlags().StringVar(&createOption.remoteIP, "ip", "", "")
-	createCmd.PersistentFlags().IntVar(&createOption.chaosdPort, "chaosd-port", 31768, "")
+	createCmd.PersistentFlags().StringVarP(&createOption.namespace, "namespace", "n", "default", "namespace of the certain physical machine")
+	createCmd.PersistentFlags().StringVarP(&createOption.labels, "labels", "l", "", "labels of the certain physical machine (e.g. -l key1=value1,key2=value2)")
+	createCmd.PersistentFlags().StringVar(&createOption.remoteIP, "ip", "", "ip of the remote physical machine")
+	createCmd.PersistentFlags().IntVar(&createOption.chaosdPort, "chaosd-port", 31768, "port of the remote chaosd server listen")
+	createCmd.PersistentFlags().BoolVar(&createOption.secure, "secure", true, "if true, represent that the remote chaosd serve HTTPS")
 
 	return createCmd, nil
 }

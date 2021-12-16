@@ -42,8 +42,8 @@ func NewPhysicalMachineGenerateCmd(logger logr.Logger) (*cobra.Command, error) {
 			return nil
 		},
 	}
-	generateCmd.PersistentFlags().StringVar(&generateOption.outputPath, "path", "/etc/chaosd/ssl", "")
-	generateCmd.PersistentFlags().StringVar(&generateOption.caCertFile, "cacert", "", "")
-	generateCmd.PersistentFlags().StringVar(&generateOption.caKeyFile, "cakey", "", "")
+	generateCmd.PersistentFlags().StringVar(&generateOption.outputPath, "path", "/etc/chaosd/ssl", "path to save generated certs")
+	generateCmd.PersistentFlags().StringVar(&generateOption.caCertFile, "cacert", "", "file path to cacert file")
+	generateCmd.PersistentFlags().StringVar(&generateOption.caKeyFile, "cakey", "", "file path to cakey file")
 	return generateCmd, nil
 }
