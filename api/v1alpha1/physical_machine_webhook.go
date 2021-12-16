@@ -49,7 +49,7 @@ func (in *PhysicalMachineSpec) Validate(root interface{}, path *field.Path) fiel
 			field.Invalid(path.Child("address"), in.Address, "the address is required"))
 	}
 
-	if _, err := url.Parse(in.Address); err != nil {
+	if _, err := url.ParseRequestURI(in.Address); err != nil {
 		allErrs = append(allErrs,
 			field.Invalid(path.Child("address"), in.Address, fmt.Sprintf("the address is invalid, %s", err)))
 	}
