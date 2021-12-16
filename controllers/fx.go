@@ -17,10 +17,7 @@ import (
 	"go.uber.org/fx"
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common"
-	"github.com/chaos-mesh/chaos-mesh/controllers/condition"
-	"github.com/chaos-mesh/chaos-mesh/controllers/desiredphase"
-	"github.com/chaos-mesh/chaos-mesh/controllers/finalizers"
+	"github.com/chaos-mesh/chaos-mesh/controllers/pipeline"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podhttpchaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podiochaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos"
@@ -32,21 +29,10 @@ import (
 
 var Module = fx.Options(
 	fx.Provide(
+		pipeline.AllSteps,
 		fx.Annotated{
 			Group:  "controller",
-			Target: common.NewController,
-		},
-		fx.Annotated{
-			Group:  "controller",
-			Target: finalizers.NewController,
-		},
-		fx.Annotated{
-			Group:  "controller",
-			Target: desiredphase.NewController,
-		},
-		fx.Annotated{
-			Group:  "controller",
-			Target: condition.NewController,
+			Target: pipeline.NewController,
 		},
 		fx.Annotated{
 			Group:  "controller",
