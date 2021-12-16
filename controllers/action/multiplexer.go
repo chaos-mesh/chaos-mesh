@@ -19,9 +19,10 @@ package action
 import (
 	"context"
 	"fmt"
-	"k8s.io/apimachinery/pkg/runtime"
 	"reflect"
 	"strings"
+
+	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	impltypes "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/types"
@@ -35,10 +36,12 @@ var _ impltypes.ChaosImpl = (*Multiplexer)(nil)
 // Field impl should be a struct which contains several fields with struct tag "action", each field should be an implementation of ChaosImpl.
 // For example:
 //   type tempStruct struct {
-//     impl1 impltypes.ChaosImpl `action:"action1"`
-//     impl2 impltypes.ChaosImpl `action:"action2"`
+//     Impl1 impltypes.ChaosImpl `action:"action1"`
+//     Impl2 impltypes.ChaosImpl `action:"action2"`
 //   }
 // is valid to be the field in Multiplexer.
+//
+// Because we use reflect fo iterate fields in tempStruct, so fields in tempStruct should be public/exported.
 //
 // When some Chaos like:
 //   type SomeChaos struct {

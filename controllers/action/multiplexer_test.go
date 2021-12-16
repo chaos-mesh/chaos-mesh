@@ -18,8 +18,9 @@ package action
 import (
 	"context"
 	"errors"
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"testing"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
 type mockApplyError struct {
