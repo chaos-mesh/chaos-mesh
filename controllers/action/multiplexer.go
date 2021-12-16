@@ -18,10 +18,10 @@ package action
 
 import (
 	"context"
+	"fmt"
+	"k8s.io/apimachinery/pkg/runtime"
 	"reflect"
 	"strings"
-
-	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	impltypes "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/types"
@@ -83,8 +83,24 @@ func (i *Multiplexer) callAccordingToAction(action, methodName string, defaultPh
 			}
 		}
 	}
+	var gvk = ""
+	if obj, ok := args[len(args)-1].(runtime.Object); ok {
+		gvk = obj.GetObjectKind().GroupVersionKind().String()
+	}
+	return defaultPhase, NewErrorUnknownAction(gvk, action)
+}
 
-	return defaultPhase, errors.Errorf("unknown action %s", action)
+type ErrorUnknownAction struct {
+	GroupVersionKind string
+	Action           string
+}
+
+func NewErrorUnknownAction(GVK string, action string) ErrorUnknownAction {
+	return ErrorUnknownAction{GroupVersionKind: GVK, Action: action}
+}
+
+func (it ErrorUnknownAction) Error() string {
+	return fmt.Sprintf("unknown action: Action: %s, GroupVersionKind: %s", it.Action, it.GroupVersionKind)
 }
 
 // TODO: refactor this by introduce a new interface called ContainsAction
