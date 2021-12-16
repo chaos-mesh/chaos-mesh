@@ -147,7 +147,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint.GET("/annotations", s.getAnnotations)
 	endpoint.GET("/config", s.getConfig)
 	endpoint.GET("/rbac-config", s.getRbacConfig)
-	endpoint.GET("/physicalmachines", s.listPhysicalMachines)
+	endpoint.POST("/physicalmachines", s.listPhysicalMachines)
 	endpoint.GET("/physicalmachine-labels", s.getPhysicalMachineLabels)
 	endpoint.GET("/physicalmachine-annotations", s.getPhysicalMachineAnnotations)
 }

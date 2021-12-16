@@ -109,7 +109,7 @@ type PhysicalMachineSelector struct {
 	Value string `json:"value,omitempty"`
 }
 
-// PhysicalMachineSelectorSpec defines the some selectors to select objects.
+// PhysicalMachineSelectorSpec defines some selectors to select objects.
 // If the all selectors are empty, all objects will be used in chaos experiment.
 type PhysicalMachineSelectorSpec struct {
 	GenericSelectorSpec `json:",inline"`
