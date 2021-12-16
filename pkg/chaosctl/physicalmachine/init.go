@@ -17,6 +17,8 @@ package physicalmachine
 
 import (
 	"context"
+	"crypto"
+	"crypto/x509"
 	"encoding/base64"
 
 	"github.com/pkg/errors"
@@ -87,7 +89,7 @@ func SSH() {
 
 }
 
-func GetChaosdCAFile(ctx context.Context, namespace string, c client.Client) (caCert []byte, caKey []byte, err error) {
+func GetChaosdCAFileFromCluster(ctx context.Context, namespace string, c client.Client) (caCert *x509.Certificate, caKey crypto.Signer, err error) {
 	var secret v1.Secret
 	if err := c.Get(ctx, types.NamespacedName{
 		Namespace: namespace,
@@ -96,19 +98,31 @@ func GetChaosdCAFile(ctx context.Context, namespace string, c client.Client) (ca
 		return nil, nil, errors.Wrapf(err, "could not found secret `chaos-mesh-chaosd-client-certs` in namespace %s", namespace)
 	}
 
+	var caCertBytes []byte
 	if caCertRaw, ok := secret.Data["ca.crt"]; !ok {
 		return nil, nil, errors.New("could not found ca cert file in `chaos-mesh-chaosd-client-certs` secret")
 	} else {
-		if _, err = base64.StdEncoding.Decode(caCert, caCertRaw); err != nil {
+		if _, err = base64.StdEncoding.Decode(caCertBytes, caCertRaw); err != nil {
 			return nil, nil, errors.Wrap(err, "decode ca cert file failed")
 		}
 	}
+	caCert, err = ParseCert(caCertBytes)
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "parse certs pem failed")
+	}
+
+	var caKeyBytes []byte
 	if caKeyRaw, ok := secret.Data["ca.key"]; !ok {
 		return nil, nil, errors.New("could not found ca key file in `chaos-mesh-chaosd-client-certs` secret")
 	} else {
-		if _, err = base64.StdEncoding.Decode(caKey, caKeyRaw); err != nil {
+		if _, err = base64.StdEncoding.Decode(caKeyBytes, caKeyRaw); err != nil {
 			return nil, nil, errors.Wrap(err, "decode ca key file failed")
 		}
 	}
+	caKey, err = ParsePrivateKey(caKeyBytes)
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "parse ca key file failed")
+	}
+
 	return caCert, caKey, nil
 }
