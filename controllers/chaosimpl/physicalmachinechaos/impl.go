@@ -18,11 +18,15 @@ package physicalmachinechaos
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
@@ -31,6 +35,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	impltypes "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/types"
+	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 )
 
 var _ impltypes.ChaosImpl = (*Impl)(nil)
@@ -144,7 +149,17 @@ func (impl *Impl) doHttpRequest(method, url string, data io.Reader) (int, string
 	}
 	req.Header.Set("Content-Type", "application/json")
 
-	httpClient := &http.Client{}
+	var httpClient *http.Client
+	if config.ControllerCfg.ChaosdSecurityMode {
+		httpClient, err = securityHTTPClient(url)
+		if err != nil {
+			impl.Log.Error(err, "generate HTTPS client")
+			return 0, "", err
+		}
+	} else {
+		httpClient = &http.Client{Timeout: 5 * time.Second}
+	}
+
 	resp, err := httpClient.Do(req)
 	if err != nil {
 		impl.Log.Error(err, "do HTTP request")
@@ -159,6 +174,35 @@ func (impl *Impl) doHttpRequest(method, url string, data io.Reader) (int, string
 	impl.Log.Info("HTTP response", "url", url, "status", resp.Status, "body", string(body))
 
 	return resp.StatusCode, string(body), nil
+}
+
+func securityHTTPClient(url string) (*http.Client, error) {
+	if !strings.Contains(url, "https") {
+		return nil, fmt.Errorf("a secure url should begin with `https` rather than `http`, url: %s", url)
+	}
+
+	pair, err := tls.LoadX509KeyPair(config.ControllerCfg.ChaosdClientCert, config.ControllerCfg.ChaosdClientKey)
+	if err != nil {
+		return nil, errors.Wrap(err, "load x509 key pair failed")
+	}
+
+	pool := x509.NewCertPool()
+	ca, err := ioutil.ReadFile(config.ControllerCfg.ChaosdCACert)
+	if err != nil {
+		return nil, errors.Wrap(err, "read ChaosdCACert file failed")
+	}
+	pool.AppendCertsFromPEM(ca)
+
+	return &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				RootCAs:      pool,
+				Certificates: []tls.Certificate{pair},
+				ServerName:   "chaosd.chaos-mesh.org",
+			},
+		},
+		Timeout: 5 * time.Second,
+	}, nil
 }
 
 func NewImpl(c client.Client, log logr.Logger) *impltypes.ChaosImplPair {

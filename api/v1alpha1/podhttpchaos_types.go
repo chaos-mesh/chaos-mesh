@@ -92,7 +92,7 @@ type PodHttpChaosSelector struct {
 	ResponseHeaders map[string]string `json:"response_headers,omitempty"`
 }
 
-// PodHttpChaosAction defines possible actions of HttpChaos.
+// PodHttpChaosActions defines possible actions of HttpChaos.
 type PodHttpChaosActions struct {
 	// Abort is a rule to abort a http session.
 	// +optional

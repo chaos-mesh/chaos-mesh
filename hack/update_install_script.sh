@@ -19,8 +19,8 @@ tmp_install_script="install.sh.bak"
 install_script="install.sh"
 
 helm template chaos-mesh helm/chaos-mesh --namespace=chaos-testing \
-      --set controllerManager.hostNetwork=true,chaosDaemon.hostNetwork=true,dashboard.securityMode=false \
-      > ${tmp_file}
+      --set controllerManager.hostNetwork=true,chaosDaemon.hostNetwork=true \
+      --set dashboard.securityMode=false,controllerManager.chaosdSecurityMode=false > ${tmp_file}
 
 sed -i.bak '/helm/d' $tmp_file
 sed -i.bak '/Helm/d' $tmp_file
