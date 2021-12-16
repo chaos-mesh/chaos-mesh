@@ -150,12 +150,12 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		var physicalMachine v1alpha1.PhysicalMachine
 		namespacedName, err := controller.ParseNamespacedName(records[index].Id)
 		if err != nil {
-			return v1alpha1.NotInjected, err
+			return v1alpha1.Injected, err
 		}
 		err = impl.Get(ctx, namespacedName, &physicalMachine)
 		if err != nil {
 			// TODO: handle this error
-			return v1alpha1.NotInjected, err
+			return v1alpha1.Injected, err
 		}
 		address = physicalMachine.Spec.Address
 	}

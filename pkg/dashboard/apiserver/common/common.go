@@ -289,7 +289,6 @@ func (s *Service) getLabels(c *gin.Context) {
 		return
 	}
 
-	labels := make(map[string][]string)
 	podNamespaceList := c.Query("podNamespaceList")
 
 	if len(podNamespaceList) == 0 {
@@ -310,6 +309,7 @@ func (s *Service) getLabels(c *gin.Context) {
 		return
 	}
 
+	labels := make(map[string][]string)
 	for _, pod := range filteredPods {
 		for k, v := range pod.Labels {
 			if _, ok := labels[k]; ok {
@@ -341,7 +341,6 @@ func (s *Service) getAnnotations(c *gin.Context) {
 		return
 	}
 
-	annotations := make(map[string][]string)
 	podNamespaceList := c.Query("podNamespaceList")
 
 	if len(podNamespaceList) == 0 {
@@ -362,6 +361,7 @@ func (s *Service) getAnnotations(c *gin.Context) {
 		return
 	}
 
+	annotations := make(map[string][]string)
 	for _, pod := range filteredPods {
 		for k, v := range pod.Annotations {
 			if _, ok := annotations[k]; ok {
@@ -491,7 +491,6 @@ func (s *Service) getPhysicalMachineLabels(c *gin.Context) {
 		return
 	}
 
-	labels := make(map[string][]string)
 	physicalMachineNamespaceList := c.Query("physicalMachineNamespaceList")
 
 	if len(physicalMachineNamespaceList) == 0 {
@@ -510,6 +509,7 @@ func (s *Service) getPhysicalMachineLabels(c *gin.Context) {
 		return
 	}
 
+	labels := make(map[string][]string)
 	for _, obj := range filtered {
 		for k, v := range obj.Labels {
 			if _, ok := labels[k]; ok {
@@ -541,7 +541,6 @@ func (s *Service) getPhysicalMachineAnnotations(c *gin.Context) {
 		return
 	}
 
-	annotations := make(map[string][]string)
 	physicalMachineNamespaceList := c.Query("physicalMachineNamespaceList")
 
 	if len(physicalMachineNamespaceList) == 0 {
@@ -559,6 +558,7 @@ func (s *Service) getPhysicalMachineAnnotations(c *gin.Context) {
 		return
 	}
 
+	annotations := make(map[string][]string)
 	for _, obj := range filtered {
 		for k, v := range obj.Annotations {
 			if _, ok := annotations[k]; ok {
