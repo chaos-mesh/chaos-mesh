@@ -52,7 +52,7 @@ func ExampleMultiplexer() {
 		AnyName1        *chaosImplForAction1 `action:"struct-tag"`
 		WhateverTheName *chaosImplForAction2 `action:"is-important"`
 	}
-	multiplexer := New(&adHoc{
+	multiplexer := NewMultiplexer(&adHoc{
 		AnyName1:        &chaosImplForAction1{},
 		WhateverTheName: &chaosImplForAction2{},
 	})

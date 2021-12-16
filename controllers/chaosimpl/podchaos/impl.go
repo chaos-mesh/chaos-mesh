@@ -35,7 +35,7 @@ type Impl struct {
 }
 
 func NewImpl(impl Impl) *impltypes.ChaosImplPair {
-	delegate := action.New(&impl)
+	delegate := action.NewMultiplexer(&impl)
 	return &impltypes.ChaosImplPair{
 		Name:   "podchaos",
 		Object: &v1alpha1.PodChaos{},

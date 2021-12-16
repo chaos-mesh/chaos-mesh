@@ -100,9 +100,9 @@ func (i *Multiplexer) Recover(ctx context.Context, index int, records []*v1alpha
 	return i.callAccordingToAction(i.getAction(obj), "Recover", v1alpha1.Injected, ctx, index, records, obj)
 }
 
-// New is a constructor of Multiplexer.
+// NewMultiplexer is a constructor of Multiplexer.
 // For the detail of the parameter "impl", see the comment of type Multiplexer.
-func New(impl interface{}) Multiplexer {
+func NewMultiplexer(impl interface{}) Multiplexer {
 	return Multiplexer{
 		impl,
 	}
