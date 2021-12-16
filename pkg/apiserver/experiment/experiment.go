@@ -346,16 +346,25 @@ func (s *Service) createStressChaos(exp *core.ExperimentInfo, kubeCli client.Cli
 	var stressors *v1alpha1.Stressors
 
 	// Error checking
-	if exp.Target.StressChaos.Stressors.CPUStressor.Workers <= 0 && exp.Target.StressChaos.Stressors.MemoryStressor.Workers > 0 {
+	originStressors := exp.Target.StressChaos.Stressors
+	if originStressors == nil {
+		return utils.ErrInvalidRequest.New("stressor is required")
+	}
+	if originStressors.CPUStressor == nil && originStressors.MemoryStressor == nil {
+		return utils.ErrInvalidRequest.New("one of CPUStressor or MemoryStressor is required")
+	}
+	if originStressors.MemoryStressor != nil && originStressors.MemoryStressor.Workers > 0 &&
+		(originStressors.CPUStressor == nil || originStressors.CPUStressor.Workers <= 0) {
 		stressors = &v1alpha1.Stressors{
-			MemoryStressor: exp.Target.StressChaos.Stressors.MemoryStressor,
+			MemoryStressor: originStressors.MemoryStressor,
 		}
-	} else if exp.Target.StressChaos.Stressors.MemoryStressor.Workers <= 0 && exp.Target.StressChaos.Stressors.CPUStressor.Workers > 0 {
+	} else if originStressors.CPUStressor != nil && originStressors.CPUStressor.Workers > 0 &&
+		(originStressors.MemoryStressor == nil || originStressors.MemoryStressor.Workers <= 0) {
 		stressors = &v1alpha1.Stressors{
-			CPUStressor: exp.Target.StressChaos.Stressors.CPUStressor,
+			CPUStressor: originStressors.CPUStressor,
 		}
 	} else {
-		stressors = exp.Target.StressChaos.Stressors
+		stressors = originStressors
 	}
 
 	chaos := &v1alpha1.StressChaos{
