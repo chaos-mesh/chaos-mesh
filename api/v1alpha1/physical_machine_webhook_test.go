@@ -47,12 +47,31 @@ var _ = Describe("physicalmachine_webhook", func() {
 						},
 					},
 					"the address is required",
+				}, {
+					PhysicalMachine{
+						Spec: PhysicalMachineSpec{
+							Address: "123",
+						},
+					},
+					"the address is invalid",
+				}, {
+					PhysicalMachine{
+						Spec: PhysicalMachineSpec{
+							Address: "http://123.123.123.123:123",
+						},
+					},
+					"",
 				},
 			}
 
 			for _, testCase := range testCases {
 				err := testCase.physicalMachine.ValidateCreate()
-				Expect(strings.Contains(err.Error(), testCase.err)).To(BeTrue())
+				if len(testCase.err) != 0 {
+					Expect(err).To(HaveOccurred())
+					Expect(strings.Contains(err.Error(), testCase.err)).To(BeTrue())
+				} else {
+					Expect(err).ToNot(HaveOccurred())
+				}
 			}
 		})
 	})

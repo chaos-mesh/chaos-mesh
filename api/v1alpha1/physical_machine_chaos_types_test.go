@@ -29,11 +29,6 @@ import (
 // http://onsi.github.io/ginkgo to learn more.
 
 var _ = Describe("PhysicalMachineChaos", func() {
-	var (
-		key              types.NamespacedName
-		created, fetched *PhysicalMachineChaos
-	)
-
 	BeforeEach(func() {
 		// Add any setup steps that needs to be executed before each test
 	})
@@ -44,46 +39,77 @@ var _ = Describe("PhysicalMachineChaos", func() {
 
 	Context("Create API", func() {
 		It("should create an object successfully", func() {
-			key = types.NamespacedName{
-				Name:      "foo",
-				Namespace: "default",
-			}
-
-			created = &PhysicalMachineChaos{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "foo",
-					Namespace: "default",
-				},
-				Spec: PhysicalMachineChaosSpec{
-					Action: "stress-mem",
-					PhysicalMachineSelector: PhysicalMachineSelector{
-						Selector: PhysicalMachineSelectorSpec{
-							GenericSelectorSpec: GenericSelectorSpec{
-								LabelSelectors: map[string]string{
-									"foo": "bar",
+			testCases := []struct {
+				physicalMachineChaos *PhysicalMachineChaos
+				key                  types.NamespacedName
+			}{
+				{
+					physicalMachineChaos: &PhysicalMachineChaos{
+						ObjectMeta: metav1.ObjectMeta{
+							Name:      "foo",
+							Namespace: "default",
+						},
+						Spec: PhysicalMachineChaosSpec{
+							Action: "stress-mem",
+							PhysicalMachineSelector: PhysicalMachineSelector{
+								Address: []string{"123.123.123.123.123"},
+								Mode:    OneMode,
+							},
+							ExpInfo: ExpInfo{
+								StressMemory: &StressMemorySpec{
+									Size: "10MB",
 								},
 							},
 						},
-						Mode: OneMode,
 					},
-					ExpInfo: ExpInfo{
-						StressMemory: &StressMemorySpec{
-							Size: "10MB",
+					key: types.NamespacedName{
+						Name:      "foo",
+						Namespace: "default",
+					},
+				}, {
+					physicalMachineChaos: &PhysicalMachineChaos{
+						ObjectMeta: metav1.ObjectMeta{
+							Name:      "foo1",
+							Namespace: "default",
 						},
+						Spec: PhysicalMachineChaosSpec{
+							Action: "stress-mem",
+							PhysicalMachineSelector: PhysicalMachineSelector{
+								Selector: PhysicalMachineSelectorSpec{
+									GenericSelectorSpec: GenericSelectorSpec{
+										LabelSelectors: map[string]string{
+											"foo1": "bar",
+										},
+									},
+								},
+								Mode: OneMode,
+							},
+							ExpInfo: ExpInfo{
+								StressMemory: &StressMemorySpec{
+									Size: "10MB",
+								},
+							},
+						},
+					},
+					key: types.NamespacedName{
+						Name:      "foo1",
+						Namespace: "default",
 					},
 				},
 			}
 
-			By("creating an API obj")
-			Expect(k8sClient.Create(context.TODO(), created)).To(Succeed())
+			for _, testCase := range testCases {
+				By("creating an API obj")
+				Expect(k8sClient.Create(context.TODO(), testCase.physicalMachineChaos)).To(Succeed())
 
-			fetched = &PhysicalMachineChaos{}
-			Expect(k8sClient.Get(context.TODO(), key, fetched)).To(Succeed())
-			Expect(fetched).To(Equal(created))
+				fetched := &PhysicalMachineChaos{}
+				Expect(k8sClient.Get(context.TODO(), testCase.key, fetched)).To(Succeed())
+				Expect(fetched).To(Equal(testCase.physicalMachineChaos))
 
-			By("deleting the created object")
-			Expect(k8sClient.Delete(context.TODO(), created)).To(Succeed())
-			Expect(k8sClient.Get(context.TODO(), key, created)).ToNot(Succeed())
+				By("deleting the created object")
+				Expect(k8sClient.Delete(context.TODO(), testCase.physicalMachineChaos)).To(Succeed())
+				Expect(k8sClient.Get(context.TODO(), testCase.key, testCase.physicalMachineChaos)).ToNot(Succeed())
+			}
 		})
 	})
 })

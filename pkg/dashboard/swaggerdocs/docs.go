@@ -485,26 +485,21 @@ var doc = `{
         },
         "/common/annotations": {
             "get": {
-                "description": "Get the annotations of the pods/physicalMachines in the specified namespace from Kubernetes cluster.",
+                "description": "Get the annotations of the pods in the specified namespace from Kubernetes cluster.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "common"
                 ],
-                "summary": "Get the annotations of the pods/physicalMachines in the specified namespace from Kubernetes cluster.",
+                "summary": "Get the annotations of the pods in the specified namespace from Kubernetes cluster.",
                 "parameters": [
                     {
                         "type": "string",
                         "description": "The pod's namespace list, split by ,",
                         "name": "podNamespaceList",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "The physicalMachine's namespace list, split by ,",
-                        "name": "physicalMachineNamespaceList",
-                        "in": "query"
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -609,26 +604,21 @@ var doc = `{
         },
         "/common/labels": {
             "get": {
-                "description": "Get the labels of the pods/physicalMachines in the specified namespace from Kubernetes cluster.",
+                "description": "Get the labels of the pods in the specified namespace from Kubernetes cluster.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "common"
                 ],
-                "summary": "Get the labels of the pods/physicalMachines in the specified namespace from Kubernetes cluster.",
+                "summary": "Get the labels of the pods in the specified namespace from Kubernetes cluster.",
                 "parameters": [
                     {
                         "type": "string",
                         "description": "The pod's namespace list, split by ,",
                         "name": "podNamespaceList",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "The physicalMachine's namespace list, split by ,",
-                        "name": "physicalMachineNamespaceList",
-                        "in": "query"
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -666,6 +656,76 @@ var doc = `{
                             "items": {
                                 "type": "string"
                             }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    }
+                }
+            }
+        },
+        "/common/physicalmachine-annotations": {
+            "get": {
+                "description": "Get the annotations of the physicalMachines in the specified namespace from Kubernetes cluster.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "common"
+                ],
+                "summary": "Get the annotations of the physicalMachines in the specified namespace from Kubernetes cluster.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The physicalMachine's namespace list, split by ,",
+                        "name": "physicalMachineNamespaceList",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/common.MapSlice"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    }
+                }
+            }
+        },
+        "/common/physicalmachine-labels": {
+            "get": {
+                "description": "Get the labels of the physicalMachines in the specified namespace from Kubernetes cluster.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "common"
+                ],
+                "summary": "Get the labels of the physicalMachines in the specified namespace from Kubernetes cluster.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The physicalMachine's namespace list, split by ,",
+                        "name": "physicalMachineNamespaceList",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/common.MapSlice"
                         }
                     },
                     "500": {

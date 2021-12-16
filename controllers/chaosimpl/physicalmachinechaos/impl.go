@@ -51,6 +51,11 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 
 	physicalMachineChaos := obj.(*v1alpha1.PhysicalMachineChaos)
 	var address string
+	// For compatibility with older versions, we now have two ways to select the address
+	// of the physical machine, so there will be two possible values for the records:
+	//
+	// 1. when using address directly, values in records are IP
+	// 2. when using selector, values in records are NamespacedName
 	if len(physicalMachineChaos.Spec.Address) > 0 {
 		address = records[index].Id
 	} else {
