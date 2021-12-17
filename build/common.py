@@ -20,4 +20,5 @@ export_env_variables = [
     "UI",
     "LDFLAGS",
     "CRATES_MIRROR",
+    "GO_BUILD_CACHE",
 ]
