@@ -53,9 +53,9 @@ BASIC_IMAGE_ENV=IMAGE_DEV_ENV_PROJECT=$(IMAGE_DEV_ENV_PROJECT) IMAGE_DEV_ENV_REG
 	GO_BUILD_CACHE=$(GO_BUILD_CACHE)
 
 RUN_IN_DEV_SHELL=$(shell $(BASIC_IMAGE_ENV)\
-	$(ROOT)/build/get_env_shell.py --interactive dev-env)
+	$(ROOT)/build/get_env_shell.py dev-env)
 RUN_IN_BUILD_SHELL=$(shell $(BASIC_IMAGE_ENV)\
-	$(ROOT)/build/get_env_shell.py --interactive build-env)
+	$(ROOT)/build/get_env_shell.py build-env)
 
 CLEAN_TARGETS :=
 
@@ -141,13 +141,13 @@ GO_TARGET_PHONY += $(1)
 CLEAN_TARGETS += $(1)
 endef
 
-enter-buildenv: SHELL:=$(RUN_IN_BUILD_SHELL)
+enter-buildenv: SHELL:=$(shell $(BASIC_IMAGE_ENV) $(ROOT)/build/get_env_shell.py --interactive build-env)
 enter-buildenv: image-build-env
-	bash
+	@bash
 
-enter-devenv: SHELL:=$(RUN_IN_DEV_SHELL)
+enter-devenv: SHELL:=$(shell $(BASIC_IMAGE_ENV) $(ROOT)/build/get_env_shell.py --interactive dev-env)
 enter-devenv: images/dev-env/.dockerbuilt
-	bash
+	@bash
 
 images/chaos-daemon/bin/pause: SHELL:=$(RUN_IN_BUILD_SHELL)
 images/chaos-daemon/bin/pause: hack/pause.c images/dev-env/.dockerbuilt
