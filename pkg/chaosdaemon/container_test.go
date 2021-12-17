@@ -30,7 +30,7 @@ import (
 
 var _ = Describe("container kill", func() {
 	defer mock.With("MockContainerdClient", &test.MockClient{})()
-	s, _ := newDaemonServer(crclients.ContainerRuntimeContainerd)
+	s, _ := newDaemonServer(crclients.ContainerRuntimeContainerd, nil)
 
 	Context("ContainerKill", func() {
 		It("should work", func() {
