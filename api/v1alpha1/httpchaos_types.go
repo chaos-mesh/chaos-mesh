@@ -19,7 +19,7 @@ import (
 
 // +kubebuilder:object:root=true
 // +chaos-mesh:base
-
+// +kubebuilder:printcolumn:name="duration",type=string,JSONPath=`.spec.duration`
 // HTTPChaos is the Schema for the HTTPchaos API
 type HTTPChaos struct {
 	metav1.TypeMeta   `json:",inline"`

@@ -16,7 +16,14 @@ spec:
     singular: gcpchaos
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - jsonPath: .spec.action
+      name: action
+      type: string
+    - jsonPath: .spec.duration
+      name: duration
+      type: string
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: GCPChaos is the Schema for the gcpchaos API
@@ -121,6 +128,7 @@ spec:
         type: object
     served: true
     storage: true
+    subresources: {}
 status:
   acceptedNames:
     kind: ""

@@ -19,7 +19,7 @@ import (
 
 // +kubebuilder:object:root=true
 // +chaos-mesh:base
-
+// +kubebuilder:printcolumn:name="duration",type=string,JSONPath=`.spec.duration`
 // TimeChaos is the Schema for the timechaos API
 type TimeChaos struct {
 	metav1.TypeMeta   `json:",inline"`
