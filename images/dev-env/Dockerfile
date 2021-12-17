@@ -31,7 +31,7 @@ ENV http_proxy $HTTP_PROXY
 ENV https_proxy $HTTPS_PROXY
 
 RUN apt-get update && \ 
-    apt-get install unzip git build-essential curl python musl musl-dev -y && \
+    apt-get install unzip git build-essential curl python musl musl-dev python3 -y && \
     rm -rf /var/lib/apt/lists/*
 
 # The `TARGET_PLATFORM` would be `amd64` or `arm64`
