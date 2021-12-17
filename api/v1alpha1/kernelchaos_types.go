@@ -19,7 +19,7 @@ import (
 
 // +kubebuilder:object:root=true
 // +chaos-mesh:base
-
+// +kubebuilder:printcolumn:name="duration",type=string,JSONPath=`.spec.duration`
 // KernelChaos is the Schema for the kernelchaos API
 type KernelChaos struct {
 	metav1.TypeMeta   `json:",inline"`

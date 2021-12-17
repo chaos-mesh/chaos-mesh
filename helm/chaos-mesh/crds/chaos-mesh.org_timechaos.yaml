@@ -16,7 +16,11 @@ spec:
     singular: timechaos
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - jsonPath: .spec.duration
+      name: duration
+      type: string
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: TimeChaos is the Schema for the timechaos API
@@ -183,6 +187,7 @@ spec:
         type: object
     served: true
     storage: true
+    subresources: {}
 status:
   acceptedNames:
     kind: ""

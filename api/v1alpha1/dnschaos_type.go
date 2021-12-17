@@ -36,6 +36,8 @@ const (
 
 // +kubebuilder:object:root=true
 // +chaos-mesh:base
+// +kubebuilder:printcolumn:name="action",type=string,JSONPath=`.spec.action`
+// +kubebuilder:printcolumn:name="duration",type=string,JSONPath=`.spec.duration`
 
 // DNSChaos is the Schema for the networkchaos API
 type DNSChaos struct {
