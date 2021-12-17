@@ -27,7 +27,8 @@ import (
 type ChaosDashboardConfig struct {
 	ListenHost           string            `envconfig:"LISTEN_HOST" default:"0.0.0.0" json:"listen_host"`
 	ListenPort           int               `envconfig:"LISTEN_PORT" default:"2333" json:"listen_port"`
-	MetricAddress        string            `envconfig:"METRIC_ADDRESS" json:"-"`
+	MetricHost           string            `envconfig:"METRIC_HOST" default:"0.0.0.0" json:"-"`
+	MetricPort           int               `envconfig:"METRIC_PORT" default:"2334" json:"-"`
 	EnableLeaderElection bool              `envconfig:"ENABLE_LEADER_ELECTION" json:"-"`
 	Database             *DatabaseConfig   `json:"-"`
 	PersistTTL           *PersistTTLConfig `json:"-"`
@@ -45,6 +46,8 @@ type ChaosDashboardConfig struct {
 	GcpSecurityMode bool   `envconfig:"GCP_SECURITY_MODE" default:"false" json:"gcp_security_mode"`
 	GcpClientId     string `envconfig:"GCP_CLIENT_ID" default:"" json:"-"`
 	GcpClientSecret string `envconfig:"GCP_CLIENT_SECRET" default:"" json:"-"`
+
+	RootUrl string `envconfig:"ROOT_URL" default:"http://localhost:2333" json:"root_path"`
 
 	DNSServerCreate bool   `envconfig:"DNS_SERVER_CREATE" default:"false" json:"dns_server_create"`
 	Version         string `json:"version"`

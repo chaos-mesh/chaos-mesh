@@ -52,6 +52,9 @@ definitions:
       listen_port:
         default: 2333
         type: integer
+      root_path:
+        default: http://localhost:2333
+        type: string
       security_mode:
         default: true
         description: SecurityMode will use the token login by the user if set to true
@@ -213,6 +216,30 @@ definitions:
       status:
         type: string
       uid:
+        type: string
+    type: object
+  curl.Header:
+    additionalProperties:
+      items:
+        type: string
+      type: array
+    type: object
+  curl.RequestForm:
+    properties:
+      body:
+        type: string
+      followLocation:
+        type: boolean
+      header:
+        $ref: '#/definitions/curl.Header'
+        type: object
+      jsonContent:
+        type: boolean
+      method:
+        type: string
+      name:
+        type: string
+      url:
         type: string
     type: object
   experiment.Detail:
@@ -1230,6 +1257,27 @@ definitions:
           +kubebuilder:validation:Minimum=1
         type: integer
     type: object
+  v1alpha1.NetworkBandwidthSpec:
+    properties:
+      buffer:
+        description: +kubebuilder:validation:Minimum=1
+        type: integer
+      device:
+        type: string
+      hostname:
+        type: string
+      ip-address:
+        type: string
+      limit:
+        description: +kubebuilder:validation:Minimum=1
+        type: integer
+      minburst:
+        type: integer
+      peakrate:
+        type: integer
+      rate:
+        type: string
+    type: object
   v1alpha1.NetworkChaosSpec:
     properties:
       action:
@@ -1544,6 +1592,10 @@ definitions:
         type: object
       jvm-stress:
         $ref: '#/definitions/v1alpha1.JVMStressSpec'
+        description: +optional
+        type: object
+      network-bandwidth:
+        $ref: '#/definitions/v1alpha1.NetworkBandwidthSpec'
         description: +optional
         type: object
       network-corrupt:
@@ -3489,6 +3541,90 @@ paths:
           schema:
             $ref: '#/definitions/utils.APIError'
       summary: Create a new workflow.
+      tags:
+      - workflows
+  /workflows/parse-task/http:
+    post:
+      description: Parse the rendered task back to the original request
+      parameters:
+      - description: Rendered Task
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/v1alpha1.Template'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/curl.RequestForm'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Parse the rendered task back to the original request
+      tags:
+      - workflows
+  /workflows/render-task/http:
+    post:
+      description: Render a task which sends HTTP request
+      parameters:
+      - description: Origin HTTP Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/curl.RequestForm'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1alpha1.Template'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Render a task which sends HTTP request
+      tags:
+      - workflows
+  /workflows/validate-task/http:
+    post:
+      description: Validate the given template is a valid rendered HTTP Task
+      parameters:
+      - description: Rendered Task
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/v1alpha1.Template'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: boolean
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Validate the given template is a valid rendered HTTP Task
       tags:
       - workflows
 swagger: "2.0"

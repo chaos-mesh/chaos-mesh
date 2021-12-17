@@ -70,6 +70,11 @@ controllerManager:
     tag: ""
   imagePullPolicy: IfNotPresent
 
+  # The keys within the "env" map are mounted as environment variables on the pod.
+  env:
+    WEBHOOK_PORT: 9443
+    METRICS_PORT: 10080
+
   enableFilterNamespace: false
 
   # targetNamespace only works with clusterScoped is false(namespace scoped mode).
@@ -119,6 +124,9 @@ controllerManager:
     leaseDuration: 15s
     renewDeadline: 10s
     retryPeriod: 2s
+
+  # chaosdSecurityMode is enabled for mTLS connection between chaos-controller-manager and chaosd
+  chaosdSecurityMode: true
 
 chaosDaemon:
   # image would be constructed by <registry>/<repository>:<tag>
@@ -195,6 +203,7 @@ chaosDaemon:
   affinity: {}
 
 dashboard:
+  rootUrl: http://localhost:2333
   create: true
   hostNetwork: false
 
@@ -275,6 +284,8 @@ dashboard:
   env:
     LISTEN_HOST: "0.0.0.0"
     LISTEN_PORT: 2333
+    METRIC_HOST: "0.0.0.0"
+    METRIC_PORT: 2334
 
     # If you'd like to use a DB other than SQLite (the default), set a driver + DSN here.
     DATABASE_DRIVER: sqlite3

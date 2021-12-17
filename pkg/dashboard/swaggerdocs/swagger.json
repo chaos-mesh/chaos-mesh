@@ -1725,6 +1725,135 @@
                 }
             }
         },
+        "/workflows/parse-task/http": {
+            "post": {
+                "description": "Parse the rendered task back to the original request",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workflows"
+                ],
+                "summary": "Parse the rendered task back to the original request",
+                "parameters": [
+                    {
+                        "description": "Rendered Task",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1alpha1.Template"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/curl.RequestForm"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    }
+                }
+            }
+        },
+        "/workflows/render-task/http": {
+            "post": {
+                "description": "Render a task which sends HTTP request",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workflows"
+                ],
+                "summary": "Render a task which sends HTTP request",
+                "parameters": [
+                    {
+                        "description": "Origin HTTP Request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/curl.RequestForm"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1alpha1.Template"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    }
+                }
+            }
+        },
+        "/workflows/validate-task/http": {
+            "post": {
+                "description": "Validate the given template is a valid rendered HTTP Task",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workflows"
+                ],
+                "summary": "Validate the given template is a valid rendered HTTP Task",
+                "parameters": [
+                    {
+                        "description": "Rendered Task",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1alpha1.Template"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    }
+                }
+            }
+        },
         "/workflows/{uid}": {
             "get": {
                 "description": "Get detailed information about the specified workflow. If that object is not existed in kubernetes, it will only return ths persisted data in the database.",
@@ -1928,6 +2057,10 @@
                 "listen_port": {
                     "type": "integer",
                     "default": 2333
+                },
+                "root_path": {
+                    "type": "string",
+                    "default": "http://localhost:2333"
                 },
                 "security_mode": {
                     "description": "SecurityMode will use the token login by the user if set to true",
@@ -2168,6 +2301,42 @@
                     "type": "string"
                 },
                 "uid": {
+                    "type": "string"
+                }
+            }
+        },
+        "curl.Header": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            }
+        },
+        "curl.RequestForm": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "string"
+                },
+                "followLocation": {
+                    "type": "boolean"
+                },
+                "header": {
+                    "type": "object",
+                    "$ref": "#/definitions/curl.Header"
+                },
+                "jsonContent": {
+                    "type": "boolean"
+                },
+                "method": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "url": {
                     "type": "string"
                 }
             }
@@ -3207,6 +3376,37 @@
                 }
             }
         },
+        "v1alpha1.NetworkBandwidthSpec": {
+            "type": "object",
+            "properties": {
+                "buffer": {
+                    "description": "+kubebuilder:validation:Minimum=1",
+                    "type": "integer"
+                },
+                "device": {
+                    "type": "string"
+                },
+                "hostname": {
+                    "type": "string"
+                },
+                "ip-address": {
+                    "type": "string"
+                },
+                "limit": {
+                    "description": "+kubebuilder:validation:Minimum=1",
+                    "type": "integer"
+                },
+                "minburst": {
+                    "type": "integer"
+                },
+                "peakrate": {
+                    "type": "integer"
+                },
+                "rate": {
+                    "type": "string"
+                }
+            }
+        },
         "v1alpha1.NetworkChaosSpec": {
             "type": "object",
             "properties": {
@@ -3546,6 +3746,11 @@
                     "description": "+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.JVMStressSpec"
+                },
+                "network-bandwidth": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.NetworkBandwidthSpec"
                 },
                 "network-corrupt": {
                     "description": "+optional",

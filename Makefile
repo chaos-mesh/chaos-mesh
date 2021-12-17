@@ -8,6 +8,9 @@ DOCKER_BUILD_ARGS := --build-arg HTTP_PROXY=${HTTP_PROXY} --build-arg HTTPS_PROX
 
 IMAGE_TAG := $(if $(IMAGE_TAG),$(IMAGE_TAG),latest)
 IMAGE_PROJECT := $(if $(IMAGE_PROJECT),$(IMAGE_PROJECT),pingcap)
+IMAGE_CHAOS_MESH_PROJECT := chaos-mesh
+IMAGE_CHAOS_DAEMON_PROJECT := chaos-mesh
+IMAGE_CHAOS_DASHBOARD_PROJECT := chaos-mesh
 
 ROOT=$(shell pwd)
 OUTPUT_BIN=$(ROOT)/output/bin
@@ -17,9 +20,11 @@ HELM_BIN=$(OUTPUT_BIN)/helm
 IMAGE_BUILD_ENV_PROJECT ?= chaos-mesh
 IMAGE_BUILD_ENV_REGISTRY ?= ghcr.io
 IMAGE_BUILD_ENV_BUILD ?= 0
+IMAGE_BUILD_ENV_TAG ?= latest
 IMAGE_DEV_ENV_PROJECT ?= chaos-mesh
 IMAGE_DEV_ENV_REGISTRY ?= ghcr.io
 IMAGE_DEV_ENV_BUILD ?= 0
+IMAGE_DEV_ENV_TAG ?= latest
 
 # Enable GO111MODULE=on explicitly, disable it with GO111MODULE=off when necessary.
 export GO111MODULE := on
@@ -307,9 +312,9 @@ $(eval $(call IMAGE_TEMPLATE,chaos-dlv,images/chaos-dlv,0,CHAOS_DLV))
 binary: $(BINARIES)
 
 docker-push:
-	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh:${IMAGE_TAG}"
-	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-dashboard:${IMAGE_TAG}"
-	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-daemon:${IMAGE_TAG}"
+	docker push "${DOCKER_REGISTRY_PREFIX}chaos-mesh/chaos-mesh:${IMAGE_TAG}"
+	docker push "${DOCKER_REGISTRY_PREFIX}chaos-mesh/chaos-dashboard:${IMAGE_TAG}"
+	docker push "${DOCKER_REGISTRY_PREFIX}chaos-mesh/chaos-daemon:${IMAGE_TAG}"
 
 docker-push-e2e:
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/e2e-helper:${IMAGE_TAG}"
@@ -417,13 +422,16 @@ $(eval $(call RUN_IN_DEV_ENV_TEMPLATE,tidy,clean))
 define generate-ctrl-make
 	$(GO) generate ./pkg/ctrlserver/graph
 endef
-$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,generate-ctrl))
+$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,generate-ctrl,generate-deepcopy))
 
-define generate-make
+define generate-deepcopy-make
 	cd ./api/v1alpha1 ;\
 		controller-gen object:headerFile=../../hack/boilerplate/boilerplate.generatego.txt paths="./..." ;
 endef
-$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,generate,chaos-build generate-ctrl swagger_spec))
+$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,generate-deepcopy,chaos-build))
+
+generate: generate-ctrl swagger_spec generate-deepcopy chaos-build
+
 check: generate yaml vet boilerplate lint tidy install.sh fmt
 
 CLEAN_TARGETS+=e2e-test/image/e2e/bin/ginkgo

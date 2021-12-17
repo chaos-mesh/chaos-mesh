@@ -14,7 +14,14 @@ spec:
     singular: awschaos
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - jsonPath: .spec.action
+      name: action
+      type: string
+    - jsonPath: .spec.duration
+      name: duration
+      type: string
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: AWSChaos is the Schema for the awschaos API
@@ -123,6 +130,7 @@ spec:
         type: object
     served: true
     storage: true
+    subresources: {}
 status:
   acceptedNames:
     kind: ""
@@ -146,7 +154,14 @@ spec:
     singular: dnschaos
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - jsonPath: .spec.action
+      name: action
+      type: string
+    - jsonPath: .spec.duration
+      name: duration
+      type: string
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: DNSChaos is the Schema for the networkchaos API
@@ -359,6 +374,7 @@ spec:
         type: object
     served: true
     storage: true
+    subresources: {}
 status:
   acceptedNames:
     kind: ""
@@ -382,7 +398,14 @@ spec:
     singular: gcpchaos
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - jsonPath: .spec.action
+      name: action
+      type: string
+    - jsonPath: .spec.duration
+      name: duration
+      type: string
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: GCPChaos is the Schema for the gcpchaos API
@@ -494,6 +517,7 @@ spec:
         type: object
     served: true
     storage: true
+    subresources: {}
 status:
   acceptedNames:
     kind: ""
@@ -517,7 +541,11 @@ spec:
     singular: httpchaos
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - jsonPath: .spec.duration
+      name: duration
+      type: string
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: HTTPChaos is the Schema for the HTTPchaos API
@@ -820,6 +848,7 @@ spec:
         type: object
     served: true
     storage: true
+    subresources: {}
 status:
   acceptedNames:
     kind: ""
@@ -843,7 +872,14 @@ spec:
     singular: iochaos
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - jsonPath: .spec.action
+      name: action
+      type: string
+    - jsonPath: .spec.duration
+      name: duration
+      type: string
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: IOChaos is the Schema for the iochaos API
@@ -1176,6 +1212,7 @@ spec:
         type: object
     served: true
     storage: true
+    subresources: {}
 status:
   acceptedNames:
     kind: ""
@@ -1199,7 +1236,14 @@ spec:
     singular: jvmchaos
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - jsonPath: .spec.action
+      name: action
+      type: string
+    - jsonPath: .spec.duration
+      name: duration
+      type: string
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: JVMChaos is the Schema for the jvmchaos API
@@ -1432,6 +1476,7 @@ spec:
         type: object
     served: true
     storage: true
+    subresources: {}
 status:
   acceptedNames:
     kind: ""
@@ -1455,7 +1500,11 @@ spec:
     singular: kernelchaos
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - jsonPath: .spec.duration
+      name: duration
+      type: string
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: KernelChaos is the Schema for the kernelchaos API
@@ -1711,6 +1760,7 @@ spec:
         type: object
     served: true
     storage: true
+    subresources: {}
 status:
   acceptedNames:
     kind: ""
@@ -1734,7 +1784,14 @@ spec:
     singular: networkchaos
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - jsonPath: .spec.action
+      name: action
+      type: string
+    - jsonPath: .spec.duration
+      name: duration
+      type: string
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: NetworkChaos is the Schema for the networkchaos API
@@ -2177,6 +2234,7 @@ spec:
         type: object
     served: true
     storage: true
+    subresources: {}
 status:
   acceptedNames:
     kind: ""
@@ -2200,7 +2258,14 @@ spec:
     singular: physicalmachinechaos
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - jsonPath: .spec.action
+      name: action
+      type: string
+    - jsonPath: .spec.duration
+      name: duration
+      type: string
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: PhysicalMachineChaos is the Schema for the physical machine chaos
@@ -2235,6 +2300,7 @@ spec:
                 - network-delay
                 - network-partition
                 - network-dns
+                - network-bandwidth
                 - process
                 - jvm-exception
                 - jvm-gc
@@ -2411,6 +2477,35 @@ spec:
                   port:
                     description: the port of agent server
                     type: integer
+                type: object
+              network-bandwidth:
+                properties:
+                  buffer:
+                    format: int32
+                    minimum: 1
+                    type: integer
+                  device:
+                    type: string
+                  hostname:
+                    type: string
+                  ip-address:
+                    type: string
+                  limit:
+                    format: int32
+                    minimum: 1
+                    type: integer
+                  minburst:
+                    format: int32
+                    type: integer
+                  peakrate:
+                    format: int64
+                    type: integer
+                  rate:
+                    type: string
+                required:
+                - buffer
+                - limit
+                - rate
                 type: object
               network-corrupt:
                 properties:
@@ -2685,6 +2780,7 @@ spec:
         type: object
     served: true
     storage: true
+    subresources: {}
 status:
   acceptedNames:
     kind: ""
@@ -5104,6 +5200,7 @@ spec:
                     - network-delay
                     - network-partition
                     - network-dns
+                    - network-bandwidth
                     - process
                     - jvm-exception
                     - jvm-gc
@@ -5282,6 +5379,35 @@ spec:
                       port:
                         description: the port of agent server
                         type: integer
+                    type: object
+                  network-bandwidth:
+                    properties:
+                      buffer:
+                        format: int32
+                        minimum: 1
+                        type: integer
+                      device:
+                        type: string
+                      hostname:
+                        type: string
+                      ip-address:
+                        type: string
+                      limit:
+                        format: int32
+                        minimum: 1
+                        type: integer
+                      minburst:
+                        format: int32
+                        type: integer
+                      peakrate:
+                        format: int64
+                        type: integer
+                      rate:
+                        type: string
+                    required:
+                    - buffer
+                    - limit
+                    - rate
                     type: object
                   network-corrupt:
                     properties:
@@ -7609,6 +7735,7 @@ spec:
                               - network-delay
                               - network-partition
                               - network-dns
+                              - network-bandwidth
                               - process
                               - jvm-exception
                               - jvm-gc
@@ -7802,6 +7929,35 @@ spec:
                                 port:
                                   description: the port of agent server
                                   type: integer
+                              type: object
+                            network-bandwidth:
+                              properties:
+                                buffer:
+                                  format: int32
+                                  minimum: 1
+                                  type: integer
+                                device:
+                                  type: string
+                                hostname:
+                                  type: string
+                                ip-address:
+                                  type: string
+                                limit:
+                                  format: int32
+                                  minimum: 1
+                                  type: integer
+                                minburst:
+                                  format: int32
+                                  type: integer
+                                peakrate:
+                                  format: int64
+                                  type: integer
+                                rate:
+                                  type: string
+                              required:
+                              - buffer
+                              - limit
+                              - rate
                               type: object
                             network-corrupt:
                               properties:
@@ -9834,6 +9990,7 @@ spec:
                                   - network-delay
                                   - network-partition
                                   - network-dns
+                                  - network-bandwidth
                                   - process
                                   - jvm-exception
                                   - jvm-gc
@@ -10029,6 +10186,35 @@ spec:
                                     port:
                                       description: the port of agent server
                                       type: integer
+                                  type: object
+                                network-bandwidth:
+                                  properties:
+                                    buffer:
+                                      format: int32
+                                      minimum: 1
+                                      type: integer
+                                    device:
+                                      type: string
+                                    hostname:
+                                      type: string
+                                    ip-address:
+                                      type: string
+                                    limit:
+                                      format: int32
+                                      minimum: 1
+                                      type: integer
+                                    minburst:
+                                      format: int32
+                                      type: integer
+                                    peakrate:
+                                      format: int64
+                                      type: integer
+                                    rate:
+                                      type: string
+                                  required:
+                                  - buffer
+                                  - limit
+                                  - rate
                                   type: object
                                 network-corrupt:
                                   properties:
@@ -14216,7 +14402,11 @@ spec:
     singular: stresschaos
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - jsonPath: .spec.duration
+      name: duration
+      type: string
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: StressChaos is the Schema for the stresschaos API
@@ -14482,6 +14672,7 @@ spec:
         type: object
     served: true
     storage: true
+    subresources: {}
 status:
   acceptedNames:
     kind: ""
@@ -14505,7 +14696,11 @@ spec:
     singular: timechaos
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - jsonPath: .spec.duration
+      name: duration
+      type: string
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: TimeChaos is the Schema for the timechaos API
@@ -14713,6 +14908,7 @@ spec:
         type: object
     served: true
     storage: true
+    subresources: {}
 status:
   acceptedNames:
     kind: ""
@@ -16249,6 +16445,7 @@ spec:
                     - network-delay
                     - network-partition
                     - network-dns
+                    - network-bandwidth
                     - process
                     - jvm-exception
                     - jvm-gc
@@ -16427,6 +16624,35 @@ spec:
                       port:
                         description: the port of agent server
                         type: integer
+                    type: object
+                  network-bandwidth:
+                    properties:
+                      buffer:
+                        format: int32
+                        minimum: 1
+                        type: integer
+                      device:
+                        type: string
+                      hostname:
+                        type: string
+                      ip-address:
+                        type: string
+                      limit:
+                        format: int32
+                        minimum: 1
+                        type: integer
+                      minburst:
+                        format: int32
+                        type: integer
+                      peakrate:
+                        format: int64
+                        type: integer
+                      rate:
+                        type: string
+                    required:
+                    - buffer
+                    - limit
+                    - rate
                     type: object
                   network-corrupt:
                     properties:
@@ -18317,6 +18543,7 @@ spec:
                         - network-delay
                         - network-partition
                         - network-dns
+                        - network-bandwidth
                         - process
                         - jvm-exception
                         - jvm-gc
@@ -18497,6 +18724,35 @@ spec:
                           port:
                             description: the port of agent server
                             type: integer
+                        type: object
+                      network-bandwidth:
+                        properties:
+                          buffer:
+                            format: int32
+                            minimum: 1
+                            type: integer
+                          device:
+                            type: string
+                          hostname:
+                            type: string
+                          ip-address:
+                            type: string
+                          limit:
+                            format: int32
+                            minimum: 1
+                            type: integer
+                          minburst:
+                            format: int32
+                            type: integer
+                          peakrate:
+                            format: int64
+                            type: integer
+                          rate:
+                            type: string
+                        required:
+                        - buffer
+                        - limit
+                        - rate
                         type: object
                       network-corrupt:
                         properties:
@@ -20876,6 +21132,7 @@ spec:
                                   - network-delay
                                   - network-partition
                                   - network-dns
+                                  - network-bandwidth
                                   - process
                                   - jvm-exception
                                   - jvm-gc
@@ -21071,6 +21328,35 @@ spec:
                                     port:
                                       description: the port of agent server
                                       type: integer
+                                  type: object
+                                network-bandwidth:
+                                  properties:
+                                    buffer:
+                                      format: int32
+                                      minimum: 1
+                                      type: integer
+                                    device:
+                                      type: string
+                                    hostname:
+                                      type: string
+                                    ip-address:
+                                      type: string
+                                    limit:
+                                      format: int32
+                                      minimum: 1
+                                      type: integer
+                                    minburst:
+                                      format: int32
+                                      type: integer
+                                    peakrate:
+                                      format: int64
+                                      type: integer
+                                    rate:
+                                      type: string
+                                  required:
+                                  - buffer
+                                  - limit
+                                  - rate
                                   type: object
                                 network-corrupt:
                                   properties:
@@ -23174,6 +23460,7 @@ spec:
                                       - network-delay
                                       - network-partition
                                       - network-dns
+                                      - network-bandwidth
                                       - process
                                       - jvm-exception
                                       - jvm-gc
@@ -23374,6 +23661,35 @@ spec:
                                         port:
                                           description: the port of agent server
                                           type: integer
+                                      type: object
+                                    network-bandwidth:
+                                      properties:
+                                        buffer:
+                                          format: int32
+                                          minimum: 1
+                                          type: integer
+                                        device:
+                                          type: string
+                                        hostname:
+                                          type: string
+                                        ip-address:
+                                          type: string
+                                        limit:
+                                          format: int32
+                                          minimum: 1
+                                          type: integer
+                                        minburst:
+                                          format: int32
+                                          type: integer
+                                        peakrate:
+                                          format: int64
+                                          type: integer
+                                        rate:
+                                          type: string
+                                      required:
+                                      - buffer
+                                      - limit
+                                      - rate
                                       type: object
                                     network-corrupt:
                                       properties:
@@ -32347,6 +32663,7 @@ spec:
                           - network-delay
                           - network-partition
                           - network-dns
+                          - network-bandwidth
                           - process
                           - jvm-exception
                           - jvm-gc
@@ -32531,6 +32848,35 @@ spec:
                             port:
                               description: the port of agent server
                               type: integer
+                          type: object
+                        network-bandwidth:
+                          properties:
+                            buffer:
+                              format: int32
+                              minimum: 1
+                              type: integer
+                            device:
+                              type: string
+                            hostname:
+                              type: string
+                            ip-address:
+                              type: string
+                            limit:
+                              format: int32
+                              minimum: 1
+                              type: integer
+                            minburst:
+                              format: int32
+                              type: integer
+                            peakrate:
+                              format: int64
+                              type: integer
+                            rate:
+                              type: string
+                          required:
+                          - buffer
+                          - limit
+                          - rate
                           type: object
                         network-corrupt:
                           properties:
@@ -34508,6 +34854,7 @@ spec:
                               - network-delay
                               - network-partition
                               - network-dns
+                              - network-bandwidth
                               - process
                               - jvm-exception
                               - jvm-gc
@@ -34701,6 +35048,35 @@ spec:
                                 port:
                                   description: the port of agent server
                                   type: integer
+                              type: object
+                            network-bandwidth:
+                              properties:
+                                buffer:
+                                  format: int32
+                                  minimum: 1
+                                  type: integer
+                                device:
+                                  type: string
+                                hostname:
+                                  type: string
+                                ip-address:
+                                  type: string
+                                limit:
+                                  format: int32
+                                  minimum: 1
+                                  type: integer
+                                minburst:
+                                  format: int32
+                                  type: integer
+                                peakrate:
+                                  format: int64
+                                  type: integer
+                                rate:
+                                  type: string
+                              required:
+                              - buffer
+                              - limit
+                              - rate
                               type: object
                             network-corrupt:
                               properties:

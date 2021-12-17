@@ -414,10 +414,7 @@ func CheckPid(pid int) error {
 
 func CheckPercent(p string, allowZero bool) bool {
 	if len(p) == 0 {
-		if allowZero {
-			return true
-		}
-		return false
+		return allowZero
 	}
 
 	v, err := strconv.ParseFloat(p, 32)
@@ -462,4 +459,15 @@ func ParseUnit(s string) (uint64, error) {
 		return uint64(n), nil
 	}
 	return 0, fmt.Errorf("units: unknown unit %s", s)
+}
+
+func (in *NetworkBandwidthSpec) Validate(root interface{}, path *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+
+	if len(in.Rate) == 0 {
+		allErrs = append(allErrs,
+			field.Invalid(path.Child("rate"), in.Rate, "rate is required"))
+	}
+
+	return allErrs
 }
