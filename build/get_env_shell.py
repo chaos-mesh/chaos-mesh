@@ -16,7 +16,6 @@
 
 import argparse
 import os
-import subprocess
 import sys
 import pathlib
 
@@ -37,12 +36,13 @@ if __name__ == '__main__':
     cmdParser.set_defaults(check=True)
 
     cmdParser.add_argument('env_name', metavar="ENV_NAME", type=str, nargs=1, help="the name of environment image")
-    cmdParser.add_argument('commands', metavar="COMMANDS", type=str, nargs='+', help="the commands to run in docker")
 
     args = cmdParser.parse_args()
 
     if os.getenv("IN_DOCKER") == "1":
-        sys.exit("Already in docker, exiting")
+        # TODO: check whether the target env is same with current env
+        print("bash")
+        sys.exit(0)
 
     env_image_full_name = build_image.get_image_full_name(args.env_name[0])
 
@@ -75,6 +75,6 @@ if __name__ == '__main__':
     
     cmd += ["--workdir", cwd]
     cmd += [env_image_full_name]
-    cmd += ["bash", "-c", " ".join(args.commands)]
+    cmd += ["/bin/bash"]
 
-    subprocess.run(cmd, check=args.check)
+    print(" ".join(cmd));

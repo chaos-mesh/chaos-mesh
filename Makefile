@@ -45,6 +45,16 @@ ifeq ($(UI),1)
 	BUILD_TAGS += ui_server
 endif
 
+BASIC_IMAGE_ENV=IMAGE_DEV_ENV_PROJECT=$(IMAGE_DEV_ENV_PROJECT) IMAGE_DEV_ENV_REGISTRY=$(IMAGE_DEV_ENV_REGISTRY) \
+	IMAGE_DEV_ENV_TAG=$(IMAGE_DEV_ENV_TAG) \
+	IMAGE_BUILD_ENV_PROJECT=$(IMAGE_BUILD_ENV_PROJECT) IMAGE_BUILD_ENV_REGISTRY=$(IMAGE_BUILD_ENV_REGISTRY) \
+	IMAGE_BUILD_ENV_TAG=$(IMAGE_BUILD_ENV_TAG) IN_DOCKER=$(IN_DOCKER) \
+	IMAGE_TAG=$(IMAGE_TAG) IMAGE_PROJECT=$(IMAGE_PROJECT) DOCKER_REGISTRY=$(DOCKER_REGISTRY) 
+RUN_IN_DEV_SHELL=$(shell $(BASIC_IMAGE_ENV)\
+	$(ROOT)/build/get_env_shell.py --interactive dev-env)
+RUN_IN_BUILD_SHELL=$(shell $(BASIC_IMAGE_ENV)\
+	$(ROOT)/build/get_env_shell.py --interactive build-env)
+
 CLEAN_TARGETS :=
 
 all: yaml image
@@ -100,10 +110,12 @@ install: manifests
 clean:
 	rm -rf $(CLEAN_TARGETS)
 
-SKYWALKING_EYES_HEADER = $(RUN_IN_DEV) /bin/license-eye header -c ./.github/.licenserc.yaml
+SKYWALKING_EYES_HEADER = /bin/license-eye header -c ./.github/.licenserc.yaml
+boilerplate: SHELL:=$(RUN_IN_DEV_SHELL)
 boilerplate: images/dev-env/.dockerbuilt
 	$(SKYWALKING_EYES_HEADER) check
 
+boilerplate-fix: SHELL:=$(RUN_IN_DEV_SHELL)
 boilerplate-fix: images/dev-env/.dockerbuilt
 	$(SKYWALKING_EYES_HEADER) fix
 
@@ -113,50 +125,40 @@ e2e-image: image-e2e-helper
 
 GO_TARGET_PHONY :=
 
-BINARIES :=
-
 define COMPILE_GO_TEMPLATE
-ifeq ($(IN_DOCKER),1)
 
-$(1): $(4)
+$(1): SHELL:=$(RUN_IN_BUILD_SHELL)
+$(1): $(4) image-build-env
 ifeq ($(3),1)
 	$(CGO) build -ldflags "$(LDFLAGS)" -tags "${BUILD_TAGS}" -o $(1) $(2)
 else
 	$(GO) build -ldflags "$(LDFLAGS)" -tags "${BUILD_TAGS}" -o $(1) $(2)
 endif
 
-endif
 GO_TARGET_PHONY += $(1)
+CLEAN_TARGETS += $(1)
 endef
 
 define BUILD_IN_DOCKER_TEMPLATE
-CLEAN_TARGETS += $(2)
-
-ifneq ($(IN_DOCKER),1)
-$(2): image-build-env
-	$(ROOT)/build/run_in_docker.py build-env make $(2)
-endif
-
 image-$(1)-dependencies := $(image-$(1)-dependencies) $(2)
-BINARIES := $(BINARIES) $(2)
 endef
 
+enter-buildenv: SHELL:=$(RUN_IN_BUILD_SHELL)
 enter-buildenv: image-build-env
-	$(ROOT)/build/run_in_docker.py --interactive --no-check build-env bash
+	bash
 
+enter-devenv: SHELL:=$(RUN_IN_DEV_SHELL)
 enter-devenv: images/dev-env/.dockerbuilt
-	$(ROOT)/build/run_in_docker.py --interactive --no-check dev-env bash
+	bash
 
-ifeq ($(IN_DOCKER),1)
-images/chaos-daemon/bin/pause: hack/pause.c
+images/chaos-daemon/bin/pause: SHELL:=$(RUN_IN_BUILD_SHELL)
+images/chaos-daemon/bin/pause: hack/pause.c images/dev-env/.dockerbuilt
 	cc ./hack/pause.c -o images/chaos-daemon/bin/pause
 
-pkg/time/fakeclock/fake_clock_gettime.o: pkg/time/fakeclock/fake_clock_gettime.c
+pkg/time/fakeclock/fake_clock_gettime.o: SHELL:=$(RUN_IN_BUILD_SHELL)
+pkg/time/fakeclock/fake_clock_gettime.o: pkg/time/fakeclock/fake_clock_gettime.c images/dev-env/.dockerbuilt
 	cc -c ./pkg/time/fakeclock/fake_clock_gettime.c -fPIE -O2 -o pkg/time/fakeclock/fake_clock_gettime.o
-endif
-$(eval $(call BUILD_IN_DOCKER_TEMPLATE,chaos-daemon,images/chaos-daemon/bin/pause))
 
-$(eval $(call BUILD_IN_DOCKER_TEMPLATE,chaos-daemon,pkg/time/fakeclock/fake_clock_gettime.o))
 $(eval $(call BUILD_IN_DOCKER_TEMPLATE,chaos-daemon,images/chaos-daemon/bin/chaos-daemon))
 $(eval $(call COMPILE_GO_TEMPLATE,images/chaos-daemon/bin/chaos-daemon,./cmd/chaos-daemon/main.go,1,pkg/time/fakeclock/fake_clock_gettime.o))
 
@@ -194,6 +196,7 @@ CLEAN_TARGETS += $(2)/.dockerbuilt
 
 image-$(1): $(2)/.dockerbuilt
 
+$(2)/.dockerbuilt:SHELL=bash
 $(2)/.dockerbuilt:$(image-$(1)-dependencies) $(2)/Dockerfile
 	$(ROOT)/build/build_image.py $(1) $(2)
 	touch $(2)/.dockerbuilt
@@ -209,8 +212,6 @@ $(eval $(call IMAGE_TEMPLATE,chaos-mesh-e2e,e2e-test/image/e2e,0,CHAOS_MESH_E2E)
 $(eval $(call IMAGE_TEMPLATE,chaos-kernel,images/chaos-kernel,0,CHAOS_KERNEL))
 $(eval $(call IMAGE_TEMPLATE,chaos-jvm,images/chaos-jvm,0,CHAOS_JVM))
 $(eval $(call IMAGE_TEMPLATE,chaos-dlv,images/chaos-dlv,0,CHAOS_DLV))
-
-binary: $(BINARIES)
 
 docker-push:
 	docker push "${DOCKER_REGISTRY_PREFIX}chaos-mesh/chaos-mesh:${IMAGE_TAG}"
@@ -230,155 +231,132 @@ docker-push-dns-server:
 docker-push-chaos-kernel:
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-kernel:${IMAGE_TAG}"
 
-RUN_IN_DEV=@$(ROOT)/build/run_in_docker.py dev-env -- 
+bin/chaos-builder: SHELL:=$(RUN_IN_DEV_SHELL)
+bin/chaos-builder: images/dev-env/.dockerbuilt 
+	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/chaos-builder ./cmd/chaos-builder/...
 
-bin/chaos-builder: images/dev-env/.dockerbuilt
-	$(RUN_IN_DEV) $(CGOENV) go build -ldflags \'$(LDFLAGS)\' -o bin/chaos-builder ./cmd/chaos-builder/...
-
+chaos-build: SHELL:=$(RUN_IN_DEV_SHELL)
 chaos-build: bin/chaos-builder images/dev-env/.dockerbuilt
-	$(RUN_IN_DEV) bin/chaos-builder
+	bin/chaos-builder
 
+proto: SHELL:=$(RUN_IN_DEV_SHELL)
 proto: images/dev-env/.dockerbuilt
-ifeq ($(IN_DOCKER),1)
 	for dir in pkg/chaosdaemon pkg/chaoskernel ; do\
 		protoc -I $$dir/pb $$dir/pb/*.proto -I /usr/local/include --go_out=plugins=grpc:$$dir/pb --go_out=./$$dir/pb ;\
 	done
-else
-	$(RUN_IN_DEV) make proto
-endif
 
+manifests/crd.yaml: SHELL:=$(RUN_IN_DEV_SHELL)
 manifests/crd.yaml: config images/dev-env/.dockerbuilt
-ifeq ($(IN_DOCKER),1)
 	kustomize build config/default > manifests/crd.yaml
-else
-	$(RUN_IN_DEV) make manifests/crd.yaml
-endif
 
+manifests/crd-v1beta1.yaml: SHELL:=$(RUN_IN_DEV_SHELL)
 manifests/crd-v1beta1.yaml: config images/dev-env/.dockerbuilt
-ifeq ($(IN_DOCKER),1)
 	mkdir -p ./output
 	cp -Tr ./config ./output/config-v1beta1
 	cd ./api/v1alpha1 ;\
 		controller-gen "crd:trivialVersions=true,preserveUnknownFields=false,crdVersions=v1beta1" rbac:roleName=manager-role paths="./..." output:crd:artifacts:config=../../output/config-v1beta1/crd/bases ;
 	kustomize build output/config-v1beta1/default > manifests/crd-v1beta1.yaml
-else
-	$(RUN_IN_DEV) make manifests/crd-v1beta1.yaml
-endif
 
 yaml: manifests/crd.yaml manifests/crd-v1beta1.yaml
 
+config: SHELL:=$(RUN_IN_DEV_SHELL)
 config: images/dev-env/.dockerbuilt
-ifeq ($(IN_DOCKER),1)
 	cd ./api/v1alpha1 ;\
 		controller-gen $(CRD_OPTIONS) rbac:roleName=manager-role paths="./..." output:crd:artifacts:config=../../config/crd/bases ;\
 		controller-gen $(CRD_OPTIONS) rbac:roleName=manager-role paths="./..." output:crd:artifacts:config=../../helm/chaos-mesh/crds ;
-else
-	$(RUN_IN_DEV) make config
-endif
 
+lint: SHELL:=$(RUN_IN_DEV_SHELL)
 lint: images/dev-env/.dockerbuilt
-ifeq ($(IN_DOCKER),1)
 	revive -formatter friendly -config revive.toml $$($(PACKAGE_LIST))
-else
-	$(RUN_IN_DEV) make lint
-endif
 
+failpoint-enable: SHELL:=$(RUN_IN_DEV_SHELL)
 failpoint-enable: images/dev-env/.dockerbuilt
-ifeq ($(IN_DOCKER),1)
 	find $(ROOT)/* -type d | grep -vE "(\.git|bin|\.cache|ui)" | xargs failpoint-ctl enable
-else
-	$(RUN_IN_DEV) make failpoint-enable
-endif
 
+failpoint-disable: SHELL:=$(RUN_IN_DEV_SHELL)
 failpoint-disable: images/dev-env/.dockerbuilt
-ifeq ($(IN_DOCKER),1)
 	find $(ROOT)/* -type d | grep -vE "(\.git|bin|\.cache|ui)" | xargs failpoint-ctl disable
-else
-	$(RUN_IN_DEV) make failpoint-disable
-endif
 
+groupimports: SHELL:=$(RUN_IN_DEV_SHELL)
 groupimports: images/dev-env/.dockerbuilt
-ifeq ($(IN_DOCKER),1)
 	find . -type f -name '*.go' -not -path '**/zz_generated.*.go' -not -path './.cache/**' | xargs \
 		-d $$'\n' -n 10 goimports -w -l -local github.com/chaos-mesh/chaos-mesh
-else
-	$(RUN_IN_DEV) make groupimports
-endif
 
+fmt: SHELL:=$(RUN_IN_DEV_SHELL)
 fmt: groupimports images/dev-env/.dockerbuilt
-ifeq ($(IN_DOCKER),1)
 	$(CGO) fmt $$($(PACKAGE_LIST))
-else
-	$(RUN_IN_DEV) make fmt
-endif
 
+vet: SHELL:=$(RUN_IN_DEV_SHELL)
 vet: images/dev-env/.dockerbuilt
-	$(RUN_IN_DEV) $(CGOENV) go vet ./...
+	$(CGOENV) go vet ./...
 
+tidy: SHELL:=$(RUN_IN_DEV_SHELL)
 tidy: images/dev-env/.dockerbuilt
-ifeq ($(IN_DOCKER),1)
 	@echo "go mod tidy"
 	GO111MODULE=on go mod tidy
 	git diff -U --exit-code go.mod go.sum
 	cd api/v1alpha1; GO111MODULE=on go mod tidy; git diff -U --exit-code go.mod go.sum
 	cd e2e-test; GO111MODULE=on go mod tidy; git diff -U --exit-code go.mod go.sum
 	cd e2e-test/cmd/e2e_helper; GO111MODULE=on go mod tidy; git diff -U --exit-code go.mod go.sum
-else
-	$(RUN_IN_DEV) make tidy
-endif
 
+generate-ctrl: SHELL:=$(RUN_IN_DEV_SHELL)
 generate-ctrl: images/dev-env/.dockerbuilt
-	$(RUN_IN_DEV) $(GO) generate ./pkg/ctrlserver/graph
+	$(GO) generate ./pkg/ctrlserver/graph
 
+generate-deepcopy: SHELL:=$(RUN_IN_DEV_SHELL)
 generate-deepcopy: images/dev-env/.dockerbuilt
-ifeq ($(IN_DOCKER),1)
 	cd ./api/v1alpha1 ;\
 		controller-gen object:headerFile=../../hack/boilerplate/boilerplate.generatego.txt paths="./..." ;
-else
-	$(RUN_IN_DEV) make generate-deepcopy
-endif
 
 generate: generate-deepcopy chaos-build generate-ctrl swagger_spec
 
 check: generate yaml vet boilerplate lint tidy install.sh fmt
 
 CLEAN_TARGETS+=e2e-test/image/e2e/bin/ginkgo
+e2e-test/image/e2e/bin/ginkgo: SHELL:=$(RUN_IN_DEV_SHELL)
 e2e-test/image/e2e/bin/ginkgo: images/dev-env/.dockerbuilt
 	mkdir -p e2e-test/image/e2e/bin
-	$(RUN_IN_DEV) cp /go/bin/ginkgo e2e-test/image/e2e/bin/ginkgo
+	cp /go/bin/ginkgo e2e-test/image/e2e/bin/ginkgo
 
 CLEAN_TARGETS+=e2e-test/image/e2e/bin/e2e.test
+e2e-test/image/e2e/bin/e2e.test: SHELL:=$(RUN_IN_DEV_SHELL)
 e2e-test/image/e2e/bin/e2e.test: images/dev-env/.dockerbuilt
-	$(RUN_IN_DEV) "cd e2e-test && $(GO) test -c  -o ./image/e2e/bin/e2e.test ./e2e"
+	cd e2e-test && $(GO) test -c  -o ./image/e2e/bin/e2e.test ./e2e
 
 # Run tests
 CLEAN_TARGETS += cover.out cover.out.tmp
-test: failpoint-enable generate generate-mock manifests test-utils
-	$(RUN_IN_DEV) CGO_ENABLED=1 $(GOTEST) -p 1 $$($(PACKAGE_LIST)) -coverprofile cover.out.tmp
+test: SHELL:=$(RUN_IN_DEV_SHELL)
+test: failpoint-enable generate generate-mock manifests test-utils images/dev-env/.dockerbuilt
+	CGO_ENABLED=1 $(GOTEST) -p 1 $$($(PACKAGE_LIST)) -coverprofile cover.out.tmp
 	cat cover.out.tmp | grep -v "_generated.deepcopy.go" > cover.out
 	make failpoint-disable
 
-gosec-scan:
-	$(RUN_IN_DEV) gosec ./api/... ./controllers/... ./pkg/... || echo "*** sec-scan failed: known-issues ***"
+gosec-scan: SHELL:=$(RUN_IN_DEV_SHELL)
+gosec-scan: images/dev-env/.dockerbuilt
+	gosec ./api/... ./controllers/... ./pkg/... || echo "*** sec-scan failed: known-issues ***"
 
-coverage:
+coverage: SHELL:=$(RUN_IN_DEV_SHELL)
+coverage: images/dev-env/.dockerbuilt
 ifeq ("$(CI)", "1")
 	@bash <(curl -s https://codecov.io/bash) -f cover.out -t $(CODECOV_TOKEN)
 else
 	mkdir -p cover
-	$(RUN_IN_DEV) gocov convert cover.out > cover.json
-	$(RUN_IN_DEV) gocov-xml < cover.json > cover.xml
-	$(RUN_IN_DEV) gocov-html < cover.json > cover/index.html
+	gocov convert cover.out > cover.json
+	gocov-xml < cover.json > cover.xml
+	gocov-html < cover.json > cover/index.html
 endif
 
-install.sh:
-	$(RUN_IN_DEV) ./hack/update_install_script.sh
+install.sh: SHELL:=$(RUN_IN_DEV_SHELL)
+install.sh: images/dev-env/.dockerbuilt
+	./hack/update_install_script.sh
 
-swagger_spec:
-	$(RUN_IN_DEV) swag init -g cmd/chaos-dashboard/main.go --output pkg/dashboard/swaggerdocs
+swagger_spec:SHELL:=$(RUN_IN_DEV_SHELL)
+swagger_spec: images/dev-env/.dockerbuilt
+	swag init -g cmd/chaos-dashboard/main.go --output pkg/dashboard/swaggerdocs
 
-generate-mock:
-	$(RUN_IN_DEV) $(GO) generate ./pkg/workflow
+generate-mock: SHELL:=$(RUN_IN_DEV_SHELL)
+generate-mock: images/dev-env/.dockerbuilt
+	$(GO) generate ./pkg/workflow
 
 .PHONY: all clean test install manifests groupimports fmt vet tidy image \
 	docker-push lint generate config mockgen generate-mock \
