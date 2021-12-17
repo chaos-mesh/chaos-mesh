@@ -24,8 +24,13 @@ import (
 
 const SECRET = "Secret"
 
-func getPodHttp(c http.Client, port uint16, secret, body string) (*http.Response, error) {
-	request, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://localhost:%d/http", port), strings.NewReader(body))
+type HTTPE2EClient struct {
+	IP string
+	C  *http.Client
+}
+
+func getPodHttp(c HTTPE2EClient, port uint16, secret, body string) (*http.Response, error) {
+	request, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://%s:%d/http", c.IP, port), strings.NewReader(body))
 	if err != nil {
 		return nil, err
 	}
@@ -37,20 +42,20 @@ func getPodHttp(c http.Client, port uint16, secret, body string) (*http.Response
 	return resp, err
 }
 
-func getPodHttpNoSecret(c http.Client, port uint16) (*http.Response, error) {
+func getPodHttpNoSecret(c HTTPE2EClient, port uint16) (*http.Response, error) {
 	return getPodHttp(c, port, "", "")
 }
 
-func getPodHttpDefaultSecret(c http.Client, port uint16, body string) (*http.Response, error) {
+func getPodHttpDefaultSecret(c HTTPE2EClient, port uint16, body string) (*http.Response, error) {
 	return getPodHttp(c, port, "foo", body)
 }
 
-func getPodHttpNoBody(c http.Client, port uint16) (*http.Response, error) {
+func getPodHttpNoBody(c HTTPE2EClient, port uint16) (*http.Response, error) {
 	return getPodHttpDefaultSecret(c, port, "")
 }
 
 // get pod http delay
-func getPodHttpDelay(c http.Client, port uint16) (*http.Response, time.Duration, error) {
+func getPodHttpDelay(c HTTPE2EClient, port uint16) (*http.Response, time.Duration, error) {
 	start := time.Now()
 	resp, err := getPodHttpNoBody(c, port)
 	if err != nil {
