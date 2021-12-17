@@ -327,10 +327,10 @@ else
 	$(RUN_IN_DEV) make tidy
 endif
 
-generate-ctrl: images/dev-env/.dockerbuilt
+generate-ctrl: images/dev-env/.dockerbuilt generate-deepcopy
 	$(RUN_IN_DEV) $(GO) generate ./pkg/ctrlserver/graph
 
-generate-deepcopy: images/dev-env/.dockerbuilt
+generate-deepcopy: images/dev-env/.dockerbuilt chaos-build
 ifeq ($(IN_DOCKER),1)
 	cd ./api/v1alpha1 ;\
 		controller-gen object:headerFile=../../hack/boilerplate/boilerplate.generatego.txt paths="./..." ;
@@ -338,7 +338,7 @@ else
 	$(RUN_IN_DEV) make generate-deepcopy
 endif
 
-generate: generate-deepcopy chaos-build generate-ctrl swagger_spec
+generate: generate-ctrl swagger_spec generate-deepcopy chaos-build
 
 check: generate yaml vet boilerplate lint tidy install.sh fmt
 
