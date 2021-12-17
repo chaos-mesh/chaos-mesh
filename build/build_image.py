@@ -37,6 +37,7 @@ def get_image_tag(name):
     return get_image_env(name, "TAG", "latest")
 
 def get_image_build(name):
+    print(get_image_env(name, "BUILD", "1"))
     return get_image_env(name, "BUILD", "1")
 
 def get_image_full_name(name):

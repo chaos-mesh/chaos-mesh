@@ -50,7 +50,7 @@ BASIC_IMAGE_ENV=IMAGE_DEV_ENV_PROJECT=$(IMAGE_DEV_ENV_PROJECT) IMAGE_DEV_ENV_REG
 	IMAGE_BUILD_ENV_PROJECT=$(IMAGE_BUILD_ENV_PROJECT) IMAGE_BUILD_ENV_REGISTRY=$(IMAGE_BUILD_ENV_REGISTRY) \
 	IMAGE_BUILD_ENV_TAG=$(IMAGE_BUILD_ENV_TAG) IN_DOCKER=$(IN_DOCKER) \
 	IMAGE_TAG=$(IMAGE_TAG) IMAGE_PROJECT=$(IMAGE_PROJECT) DOCKER_REGISTRY=$(DOCKER_REGISTRY) \
-	GO_BUILD_CACHE=$(GO_BUILD_CACHE) GOPROXY=$(GOPROXY) LDFLAGS=$(LDFLAGS) \
+	GO_BUILD_CACHE=$(GO_BUILD_CACHE)
 
 RUN_IN_DEV_SHELL=$(shell $(BASIC_IMAGE_ENV)\
 	$(ROOT)/build/get_env_shell.py --interactive dev-env)
@@ -141,10 +141,6 @@ GO_TARGET_PHONY += $(1)
 CLEAN_TARGETS += $(1)
 endef
 
-define BUILD_IN_DOCKER_TEMPLATE
-image-$(1)-dependencies := $(image-$(1)-dependencies) $(2)
-endef
-
 enter-buildenv: SHELL:=$(RUN_IN_BUILD_SHELL)
 enter-buildenv: image-build-env
 	bash
@@ -161,13 +157,8 @@ pkg/time/fakeclock/fake_clock_gettime.o: SHELL:=$(RUN_IN_BUILD_SHELL)
 pkg/time/fakeclock/fake_clock_gettime.o: pkg/time/fakeclock/fake_clock_gettime.c images/dev-env/.dockerbuilt
 	cc -c ./pkg/time/fakeclock/fake_clock_gettime.c -fPIE -O2 -o pkg/time/fakeclock/fake_clock_gettime.o
 
-$(eval $(call BUILD_IN_DOCKER_TEMPLATE,chaos-daemon,images/chaos-daemon/bin/chaos-daemon))
 $(eval $(call COMPILE_GO_TEMPLATE,images/chaos-daemon/bin/chaos-daemon,./cmd/chaos-daemon/main.go,1,pkg/time/fakeclock/fake_clock_gettime.o))
-
-$(eval $(call BUILD_IN_DOCKER_TEMPLATE,chaos-dashboard,images/chaos-dashboard/bin/chaos-dashboard))
 $(eval $(call COMPILE_GO_TEMPLATE,images/chaos-dashboard/bin/chaos-dashboard,./cmd/chaos-dashboard/main.go,1,ui))
-
-$(eval $(call BUILD_IN_DOCKER_TEMPLATE,chaos-mesh,images/chaos-mesh/bin/chaos-controller-manager))
 $(eval $(call COMPILE_GO_TEMPLATE,images/chaos-mesh/bin/chaos-controller-manager,./cmd/chaos-controller-manager/main.go,0))
 
 prepare-install: all docker-push docker-push-dns-server
@@ -193,27 +184,28 @@ e2e-test/image/e2e/chaos-mesh: helm/chaos-mesh
 
 # $(1): the name of the image
 # $(2): the path of the Dockerfile build directory
+# $(3): the dependency of the image
 define IMAGE_TEMPLATE
 CLEAN_TARGETS += $(2)/.dockerbuilt
 
 image-$(1): $(2)/.dockerbuilt
 
 $(2)/.dockerbuilt:SHELL=bash
-$(2)/.dockerbuilt:$(image-$(1)-dependencies) $(2)/Dockerfile
+$(2)/.dockerbuilt:$(3) $(2)/Dockerfile
 	$(ROOT)/build/build_image.py $(1) $(2)
 	touch $(2)/.dockerbuilt
 endef
 
-$(eval $(call IMAGE_TEMPLATE,chaos-daemon,images/chaos-daemon,0,CHAOS_DAEMON))
-$(eval $(call IMAGE_TEMPLATE,chaos-mesh,images/chaos-mesh,0,CHAOS_MESH))
-$(eval $(call IMAGE_TEMPLATE,chaos-dashboard,images/chaos-dashboard,0,CHAOS_DASHBOARD))
-$(eval $(call IMAGE_TEMPLATE,build-env,images/build-env,0,BUILD_ENV))
-$(eval $(call IMAGE_TEMPLATE,dev-env,images/dev-env,0,DEV_ENV))
-$(eval $(call IMAGE_TEMPLATE,e2e-helper,e2e-test/cmd/e2e_helper,0,E2E_HELPER))
-$(eval $(call IMAGE_TEMPLATE,chaos-mesh-e2e,e2e-test/image/e2e,0,CHAOS_MESH_E2E))
-$(eval $(call IMAGE_TEMPLATE,chaos-kernel,images/chaos-kernel,0,CHAOS_KERNEL))
-$(eval $(call IMAGE_TEMPLATE,chaos-jvm,images/chaos-jvm,0,CHAOS_JVM))
-$(eval $(call IMAGE_TEMPLATE,chaos-dlv,images/chaos-dlv,0,CHAOS_DLV))
+$(eval $(call IMAGE_TEMPLATE,chaos-daemon,images/chaos-daemon,images/chaos-daemon/bin/chaos-daemon))
+$(eval $(call IMAGE_TEMPLATE,chaos-mesh,images/chaos-mesh,images/chaos-mesh/bin/chaos-controller-manager))
+$(eval $(call IMAGE_TEMPLATE,chaos-dashboard,images/chaos-dashboard,images/chaos-dashboard/bin/chaos-dashboard))
+$(eval $(call IMAGE_TEMPLATE,build-env,images/build-env))
+$(eval $(call IMAGE_TEMPLATE,dev-env,images/dev-env))
+$(eval $(call IMAGE_TEMPLATE,e2e-helper,e2e-test/cmd/e2e_helper))
+$(eval $(call IMAGE_TEMPLATE,chaos-mesh-e2e,e2e-test/image/e2e))
+$(eval $(call IMAGE_TEMPLATE,chaos-kernel,images/chaos-kernel))
+$(eval $(call IMAGE_TEMPLATE,chaos-jvm,images/chaos-jvm))
+$(eval $(call IMAGE_TEMPLATE,chaos-dlv,images/chaos-dlv))
 
 docker-push:
 	docker push "${DOCKER_REGISTRY_PREFIX}chaos-mesh/chaos-mesh:${IMAGE_TAG}"
