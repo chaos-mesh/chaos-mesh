@@ -314,7 +314,7 @@ func (m *BackgroundProcessManager) Stdio(pid int, startTime int64) *Stdio {
 	return io.(*Stdio)
 }
 
-// GetIdentifiers find all identifiers in BPM
+// GetIdentifiers finds all identifiers in BPM
 func (m *BackgroundProcessManager) GetIdentifiers() []string {
 	var identifiers []string
 	m.identifiers.Range(func(key, value interface{}) bool {
