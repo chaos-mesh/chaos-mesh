@@ -60,7 +60,7 @@ func (t stdioTransport) RoundTrip(req *http.Request) (resp *http.Response, err e
 	return
 }
 
-func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaosRequest) (*pb.ApplyHttpChaosResponse, error) {
+func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaosRequest) (ret *pb.ApplyHttpChaosResponse, err error) {
 	log := log.WithValues("Request", in)
 	log.Info("applying http chaos")
 
@@ -70,6 +70,14 @@ func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 		}
 	}
 
+	defer func() {
+		if err != nil {
+			log.Error(err, "error while applying http chaos")
+			killError := s.backgroundProcessManager.KillBackgroundProcess(ctx, int(in.Instance), in.StartTime)
+			log.Error(killError, "error while killing http chaos")
+		}
+	}()
+
 	stdio := s.backgroundProcessManager.Stdio(int(in.Instance), in.StartTime)
 	if stdio == nil {
 		return nil, fmt.Errorf("fail to get stdio of process")
@@ -78,7 +86,7 @@ func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 	transport := stdioTransport{stdio: stdio}
 
 	var rules []tproxyconfig.PodHttpChaosBaseRule
-	err := json.Unmarshal([]byte(in.Rules), &rules)
+	err = json.Unmarshal([]byte(in.Rules), &rules)
 	if err != nil {
 		log.Error(err, "error while unmarshal json bytes")
 		return nil, err
