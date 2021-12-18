@@ -65,7 +65,7 @@ func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 	log.Info("applying http chaos")
 
 	if in.Instance == 0 {
-		if err := s.createHttpChaos(ctx, in); err != nil {
+		if err = s.createHttpChaos(ctx, in); err != nil {
 			return nil, err
 		}
 	}
