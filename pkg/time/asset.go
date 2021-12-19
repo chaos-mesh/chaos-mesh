@@ -20,6 +20,7 @@ import (
 	"debug/elf"
 	"embed"
 	"encoding/binary"
+
 	"github.com/pkg/errors"
 )
 

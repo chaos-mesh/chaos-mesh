@@ -17,10 +17,12 @@ package time
 
 import (
 	"bytes"
+	"runtime"
+
+	"github.com/pkg/errors"
+
 	"github.com/chaos-mesh/chaos-mesh/pkg/mapreader"
 	"github.com/chaos-mesh/chaos-mesh/pkg/ptrace"
-	"github.com/pkg/errors"
-	"runtime"
 )
 
 // vdsoEntryName is the name of the vDSO entry
