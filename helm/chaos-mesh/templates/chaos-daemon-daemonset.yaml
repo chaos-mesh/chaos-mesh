@@ -109,7 +109,7 @@ spec:
               {{- if eq .Values.chaosDaemon.runtime "docker" }}
               mountPath: /var/run/docker.sock
               {{- else if eq .Values.chaosDaemon.runtime "containerd" }}
-              mountPath: /run/containerd/containerd.sock
+              mountPath: /var/run/containerd/containerd.sock
               {{- else if eq .Values.chaosDaemon.runtime "crio" }}
               mountPath: /var/run/crio/crio.sock
               {{- end }}
