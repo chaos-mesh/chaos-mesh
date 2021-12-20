@@ -31,7 +31,7 @@ const (
 
 	// TODO(yeya24): make socket and ns configurable
 	defaultDockerSocket     = "unix:///var/run/docker.sock"
-	defaultContainerdSocket = "/run/containerd/containerd.sock"
+	defaultContainerdSocket = "/var/run/containerd/containerd.sock"
 	defaultCrioSocket       = "/var/run/crio/crio.sock"
 	containerdDefaultNS     = "k8s.io"
 )
