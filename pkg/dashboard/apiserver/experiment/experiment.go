@@ -29,6 +29,7 @@ import (
 	"github.com/jinzhu/gorm"
 	"golang.org/x/sync/errgroup"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/retry"
@@ -401,6 +402,19 @@ func (s *Service) batchDelete(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, u.ResponseSuccess)
+}
+
+func deleteChaosByUID(c *gin.Context, kubeCli client.Client, uid string) bool {
+	chaos := &unstructured.Unstructured{}
+	chaos.SetUID(types.UID(uid))
+
+	ctx := context.Background()
+	if err := kubeCli.Delete(ctx, chaos); err != nil {
+		u.SetAPImachineryError(c, err)
+		return false
+	}
+
+	return true
 }
 
 func checkAndDeleteChaos(c *gin.Context, kubeCli client.Client, namespacedName types.NamespacedName, kind string, force string) bool {
