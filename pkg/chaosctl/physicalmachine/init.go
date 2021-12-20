@@ -62,7 +62,7 @@ Examples:
 		SilenceErrors: true,
 		SilenceUsage:  true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return nil
+			return initOption.Run()
 		},
 	}
 	initCmd.PersistentFlags().StringVar(&initOption.chaosMeshNamespace, "chaos-mesh-namespace", "chaos-testing", "namespace where chaos mesh installed")
@@ -85,8 +85,12 @@ func (o *PhysicalMachineInitOptions) Run() error {
 	return nil
 }
 
-func SSH() {
+func SSH() error {
+	return nil
+}
 
+func SFTP() error {
+	return nil
 }
 
 func GetChaosdCAFileFromCluster(ctx context.Context, namespace string, c client.Client) (caCert *x509.Certificate, caKey crypto.Signer, err error) {
@@ -106,10 +110,6 @@ func GetChaosdCAFileFromCluster(ctx context.Context, namespace string, c client.
 			return nil, nil, errors.Wrap(err, "decode ca cert file failed")
 		}
 	}
-	caCert, err = ParseCert(caCertBytes)
-	if err != nil {
-		return nil, nil, errors.Wrap(err, "parse certs pem failed")
-	}
 
 	var caKeyBytes []byte
 	if caKeyRaw, ok := secret.Data["ca.key"]; !ok {
@@ -119,10 +119,6 @@ func GetChaosdCAFileFromCluster(ctx context.Context, namespace string, c client.
 			return nil, nil, errors.Wrap(err, "decode ca key file failed")
 		}
 	}
-	caKey, err = ParsePrivateKey(caKeyBytes)
-	if err != nil {
-		return nil, nil, errors.Wrap(err, "parse ca key file failed")
-	}
 
-	return caCert, caKey, nil
+	return ParseCertAndKey(caCertBytes, caKeyBytes)
 }
