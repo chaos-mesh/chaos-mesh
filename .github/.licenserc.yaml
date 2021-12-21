@@ -52,3 +52,5 @@ header:
     - '**/Dockerfile'
     # UI SVGs
     - 'ui/**/*.svg'
+    # codecov configuration file
+    - codecov.yml
