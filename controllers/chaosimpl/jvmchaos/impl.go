@@ -23,7 +23,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+	"github.com/chaos-mesh/chaos-mesh/controllers/records"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
 	"github.com/chaos-mesh/chaos-mesh/pkg/jvm"
 )
@@ -118,8 +118,8 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 
 // Object would return the instance of chaos
 
-func NewImpl(c client.Client, log logr.Logger) *common.ChaosImplPair {
-	return &common.ChaosImplPair{
+func NewImpl(c client.Client, log logr.Logger) *records.ChaosImplPair {
+	return &records.ChaosImplPair{
 		Name:   "jvmchaos",
 		Object: &v1alpha1.JVMChaos{},
 		Impl: &Impl{

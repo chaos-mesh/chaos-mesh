@@ -28,8 +28,8 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/utils"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
+	"github.com/chaos-mesh/chaos-mesh/controllers/records"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
 )
@@ -182,8 +182,8 @@ func (impl *Impl) cancelDNSServerRules(dnsServerIP string, port int, name string
 	return nil
 }
 
-func NewImpl(c client.Client, log logr.Logger, decoder *utils.ContianerRecordDecoder) *common.ChaosImplPair {
-	return &common.ChaosImplPair{
+func NewImpl(c client.Client, log logr.Logger, decoder *utils.ContianerRecordDecoder) *records.ChaosImplPair {
+	return &records.ChaosImplPair{
 		Name:   "dnschaos",
 		Object: &v1alpha1.DNSChaos{},
 		Impl: &Impl{

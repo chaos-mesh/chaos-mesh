@@ -22,7 +22,8 @@ import (
 
 // +kubebuilder:object:root=true
 // +chaos-mesh:base
-
+// +kubebuilder:printcolumn:name="action",type=string,JSONPath=`.spec.action`
+// +kubebuilder:printcolumn:name="duration",type=string,JSONPath=`.spec.duration`
 // IOChaos is the Schema for the iochaos API
 type IOChaos struct {
 	metav1.TypeMeta   `json:",inline"`
