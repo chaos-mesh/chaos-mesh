@@ -30,7 +30,9 @@ spec:
       deadline: 1m
       physicalmachineChaos:
         action: stress-mem
-        address:
-          - CHAOSD_ADDRESS
+        selector:
+          labelSelectors:
+            arch: amd64
+        mode: one
         stress-mem:
           size: 100MB
