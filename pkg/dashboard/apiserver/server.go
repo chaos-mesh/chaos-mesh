@@ -74,6 +74,7 @@ func newEngine(config *config.ChaosDashboardConfig) *gin.Engine {
 		v.RegisterValidation("ValueValid", apivalidator.ValueValid)
 		v.RegisterValidation("PodsValid", apivalidator.PodsValid)
 		v.RegisterValidation("RequiredFieldEqual", apivalidator.RequiredFieldEqualValid, true)
+		v.RegisterValidation("PhysicalMachineValid", apivalidator.PhysicalMachineValid)
 	}
 
 	ui := uiserver.AssetsFS()

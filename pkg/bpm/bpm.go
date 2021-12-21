@@ -24,6 +24,7 @@ import (
 	"sync"
 	"syscall"
 
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/shirou/gopsutil/process"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
@@ -78,15 +79,24 @@ type BackgroundProcessManager struct {
 	deathSig    *sync.Map
 	identifiers *sync.Map
 	stdio       *sync.Map
+
+	metricsCollector *metricsCollector
 }
 
 // NewBackgroundProcessManager creates a background process manager
-func NewBackgroundProcessManager() BackgroundProcessManager {
-	return BackgroundProcessManager{
-		deathSig:    &sync.Map{},
-		identifiers: &sync.Map{},
-		stdio:       &sync.Map{},
+func NewBackgroundProcessManager(registry prometheus.Registerer) BackgroundProcessManager {
+	backgroundProcessManager := BackgroundProcessManager{
+		deathSig:         &sync.Map{},
+		identifiers:      &sync.Map{},
+		stdio:            &sync.Map{},
+		metricsCollector: nil,
 	}
+
+	if registry != nil {
+		backgroundProcessManager.metricsCollector = newMetricsCollector(backgroundProcessManager, registry)
+	}
+
+	return backgroundProcessManager
 }
 
 // StartProcess manages a process in manager
@@ -192,6 +202,9 @@ func (m *BackgroundProcessManager) StartProcess(cmd *ManagedProcess) (*process.P
 		}
 	}()
 
+	if m.metricsCollector != nil {
+		m.metricsCollector.bpmControlledProcessTotal.Inc()
+	}
 	return procState, nil
 }
 
@@ -299,6 +312,17 @@ func (m *BackgroundProcessManager) Stdio(pid int, startTime int64) *Stdio {
 	}
 
 	return io.(*Stdio)
+}
+
+// GetIdentifiers finds all identifiers in BPM
+func (m *BackgroundProcessManager) GetIdentifiers() []string {
+	var identifiers []string
+	m.identifiers.Range(func(key, value interface{}) bool {
+		identifiers = append(identifiers, key.(string))
+		return true
+	})
+
+	return identifiers
 }
 
 // DefaultProcessBuilder returns the default process builder
