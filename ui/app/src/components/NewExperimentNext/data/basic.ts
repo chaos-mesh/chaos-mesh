@@ -35,7 +35,7 @@ const data = {
       podPhaseSelectors: ['all'],
       pods: [],
     },
-    mode: 'one',
+    mode: 'all',
     value: undefined,
     address: [],
     duration: '',
