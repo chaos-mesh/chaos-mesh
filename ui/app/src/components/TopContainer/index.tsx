@@ -186,7 +186,7 @@ const TopContainer = () => {
         <Sidebar open={openDrawer} />
         <Paper className={classes.main} component="main" elevation={0}>
           <Box className={classes.switchContent}>
-            <Container maxWidth="xl" sx={{ position: 'relative' }}>
+            <Container maxWidth="xl" sx={{ position: 'relative', pb: 6 }}>
               <Navbar openDrawer={openDrawer} handleDrawerToggle={handleDrawerToggle} breadcrumbs={breadcrumbs} />
 
               {loading ? (
