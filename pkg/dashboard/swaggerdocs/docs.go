@@ -667,6 +667,116 @@ var doc = `{
                 }
             }
         },
+        "/common/physicalmachine-annotations": {
+            "get": {
+                "description": "Get the annotations of the physicalMachines in the specified namespace from Kubernetes cluster.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "common"
+                ],
+                "summary": "Get the annotations of the physicalMachines in the specified namespace from Kubernetes cluster.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The physicalMachine's namespace list, split by ,",
+                        "name": "physicalMachineNamespaceList",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/common.MapSlice"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    }
+                }
+            }
+        },
+        "/common/physicalmachine-labels": {
+            "get": {
+                "description": "Get the labels of the physicalMachines in the specified namespace from Kubernetes cluster.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "common"
+                ],
+                "summary": "Get the labels of the physicalMachines in the specified namespace from Kubernetes cluster.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The physicalMachine's namespace list, split by ,",
+                        "name": "physicalMachineNamespaceList",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/common.MapSlice"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    }
+                }
+            }
+        },
+        "/common/physicalmachines": {
+            "post": {
+                "description": "Get physicalMachines from Kubernetes cluster.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "common"
+                ],
+                "summary": "Get physicalMachines from Kubernetes cluster.",
+                "parameters": [
+                    {
+                        "description": "Request body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1alpha1.PhysicalMachineSelectorSpec"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/common.PhysicalMachine"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    }
+                }
+            }
+        },
         "/common/pods": {
             "post": {
                 "description": "Get pods from Kubernetes cluster.",
@@ -2023,6 +2133,20 @@ var doc = `{
             "additionalProperties": {
                 "type": "array",
                 "items": {
+                    "type": "string"
+                }
+            }
+        },
+        "common.PhysicalMachine": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "namespace": {
                     "type": "string"
                 }
             }
@@ -3704,6 +3828,7 @@ var doc = `{
                     "type": "string"
                 },
                 "address": {
+                    "description": "DEPRECATED: Use Selector instead.\nOnly one of Address and Selector could be specified.\n+optional",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -3763,6 +3888,10 @@ var doc = `{
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.JVMStressSpec"
                 },
+                "mode": {
+                    "description": "Mode defines the mode to run chaos action.\nSupported mode: one / all / fixed / fixed-percent / random-max-percent\n+kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent",
+                    "type": "string"
+                },
                 "network-bandwidth": {
                     "description": "+optional",
                     "type": "object",
@@ -3803,6 +3932,11 @@ var doc = `{
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.ProcessSpec"
                 },
+                "selector": {
+                    "description": "Selector is used to select physical machines that are used to inject chaos action.\n+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.PhysicalMachineSelectorSpec"
+                },
                 "stress-cpu": {
                     "description": "+optional",
                     "type": "object",
@@ -3816,6 +3950,58 @@ var doc = `{
                 "uid": {
                     "description": "the experiment ID\n+optional",
                     "type": "string"
+                },
+                "value": {
+                    "description": "Value is required when the mode is set to ` + "`" + `FixedMode` + "`" + ` / ` + "`" + `FixedPercentMode` + "`" + ` / ` + "`" + `RandomMaxPercentMode` + "`" + `.\nIf ` + "`" + `FixedMode` + "`" + `, provide an integer of physical machines to do chaos action.\nIf ` + "`" + `FixedPercentMode` + "`" + `, provide a number from 0-100 to specify the percent of physical machines the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentMode` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.PhysicalMachineSelectorSpec": {
+            "type": "object",
+            "properties": {
+                "annotationSelectors": {
+                    "description": "Map of string keys and values that can be used to select objects.\nA selector based on annotations.\n+optional",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "expressionSelectors": {
+                    "description": "a slice of label selector expressions that can be used to select objects.\nA list of selectors based on set-based label expressions.\n+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.LabelSelectorRequirements"
+                },
+                "fieldSelectors": {
+                    "description": "Map of string keys and values that can be used to select objects.\nA selector based on fields.\n+optional",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "labelSelectors": {
+                    "description": "Map of string keys and values that can be used to select objects.\nA selector based on labels.\n+optional",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "namespaces": {
+                    "description": "Namespaces is a set of namespace to which objects belong.\n+optional",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "physicalMachines": {
+                    "description": "PhysicalMachines is a map of string keys and a set values that used to select physical machines.\nThe key defines the namespace which physical machine belong,\nand each value is a set of physical machine names.\n+optional",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
                 }
             }
         },

@@ -149,12 +149,7 @@ func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector 
 		return nil, err
 	}
 
-	var pods []v1.Pod
-	pods, err = listPods(ctx, c, r, selector, selectorChain, enableFilterNamespace)
-	if err != nil {
-		return nil, err
-	}
-	return pods, nil
+	return listPods(ctx, c, r, selector, selectorChain, enableFilterNamespace)
 }
 
 func selectSpecifiedPods(ctx context.Context, c client.Client, spec v1alpha1.PodSelectorSpec,
@@ -313,6 +308,7 @@ func listPods(ctx context.Context, c client.Client, r client.Reader, spec v1alph
 
 	filterPods := make([]v1.Pod, 0, len(pods))
 	for _, pod := range pods {
+		pod := pod
 		if selectorChain.Match(&pod) {
 			filterPods = append(filterPods, pod)
 		}
