@@ -33,7 +33,7 @@ import (
 
 var _ = Describe("ipset server", func() {
 	defer mock.With("MockContainerdClient", &test.MockClient{})()
-	s, _ := newDaemonServer(crclients.ContainerRuntimeContainerd)
+	s, _ := newDaemonServer(crclients.ContainerRuntimeContainerd, nil)
 
 	Context("createIPSet", func() {
 		It("should work", func() {
