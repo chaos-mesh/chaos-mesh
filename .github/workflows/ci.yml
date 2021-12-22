@@ -22,8 +22,7 @@ jobs:
           filters: |
             go:
               - makefile
-              - go.mod
-              - go.sum
+              - go.*
               - '**.go'
             ui:
               - 'ui/**'
@@ -67,6 +66,8 @@ jobs:
           make image-dev-env
 
       - name: ${{ matrix.job }}
+        env:
+          job: ${{ matrix.job }}
         run: |
           if [[ "$job" == "verify" ]]; then
             make check
@@ -80,9 +81,6 @@ jobs:
           else
             make $job
           fi
-        env:
-          job: ${{ matrix.job }}
-
   ui:
     needs: changes
     if: ${{ needs.changes.outputs.ui == 'true' }}
