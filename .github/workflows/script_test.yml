@@ -1,4 +1,4 @@
-name: Script Test
+name: Test install.sh
 on:
   pull_request:
     branches:
