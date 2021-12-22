@@ -28,7 +28,6 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Build Chaos Mesh Build Env
-        if: ${{ github.event.pull_request }}
         env:
           IMAGE_BUILD_ENV_BUILD: ${{ contains(github.event.pull_request.labels.*.name, 'rebuild-build-env-image') }}
         run: |
@@ -41,7 +40,6 @@ jobs:
           make image-build-env
 
       - name: Build Chaos Mesh Dev Env
-        if: ${{ github.event.pull_request }}
         env:
           IMAGE_DEV_ENV_BUILD: ${{ contains(github.event.pull_request.labels.*.name, 'rebuild-dev-env-image') }}
         run: |
