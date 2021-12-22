@@ -30,9 +30,6 @@ jobs:
       - name: Install dependencies
         run: yarn --frozen-lockfile
 
-      - name: Run UT
-        run: yarn workspace @ui/app test
-
       - name: Cache app build
         uses: actions/cache@v2
         with:
@@ -43,3 +40,6 @@ jobs:
 
       - name: Try build
         run: yarn build
+
+      - name: Run UT
+        run: yarn workspace @ui/app test
