@@ -1,4 +1,4 @@
-name: ui
+name: UI
 
 on:
   pull_request:

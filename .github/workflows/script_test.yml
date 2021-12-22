@@ -1,15 +1,13 @@
 name: Script Test
 on:
-  push:
-    branches:
-      - master
   pull_request:
     branches:
       - master
+    paths:
+      - 'install.sh'
 
 jobs:
   run:
-    name: Script Test
     runs-on: ubuntu-latest
     if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-script-test') }}
     steps:
