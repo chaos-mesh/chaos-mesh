@@ -129,16 +129,13 @@ func NewSignedCert(key crypto.Signer, caCert *x509.Certificate, caKey crypto.Sig
 
 	certTmpl := x509.Certificate{
 		Subject: pkix.Name{
-			CommonName:   "",
-			Organization: []string{""},
+			CommonName: "chaosd.chaos-mesh.org",
 		},
-		DNSNames: []string{""},
-		// IPAddresses:           []net.IP{},
-		SerialNumber: serial,
-		NotBefore:    caCert.NotBefore,
-		NotAfter:     notAfter,
-		KeyUsage:     keyUsage,
-		// ExtKeyUsage:           cfg.Usages,
+		DNSNames:              []string{"chaosd.chaos-mesh.org", "localhost"},
+		SerialNumber:          serial,
+		NotBefore:             caCert.NotBefore,
+		NotAfter:              notAfter,
+		KeyUsage:              keyUsage,
 		BasicConstraintsValid: true,
 		IsCA:                  isCA,
 	}

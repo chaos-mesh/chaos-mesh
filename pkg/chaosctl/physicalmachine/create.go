@@ -16,8 +16,16 @@
 package physicalmachine
 
 import (
+	"context"
+	"fmt"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
+	"github.com/chaos-mesh/chaos-mesh/pkg/label"
 	"github.com/go-logr/logr"
 	"github.com/spf13/cobra"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type PhysicalMachineCreateOptions struct {
@@ -41,7 +49,10 @@ func NewPhysicalMachineCreateCmd(logger logr.Logger) (*cobra.Command, error) {
 		SilenceErrors: true,
 		SilenceUsage:  true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return nil
+			if err := createOption.Validate(); err != nil {
+				return err
+			}
+			return createOption.Run(args)
 		},
 	}
 	createCmd.PersistentFlags().StringVarP(&createOption.namespace, "namespace", "n", "default", "namespace of the certain physical machine")
@@ -51,4 +62,59 @@ func NewPhysicalMachineCreateCmd(logger logr.Logger) (*cobra.Command, error) {
 	createCmd.PersistentFlags().BoolVar(&createOption.secure, "secure", true, "if true, represent that the remote chaosd serve HTTPS")
 
 	return createCmd, nil
+}
+
+func (o *PhysicalMachineCreateOptions) Validate() error {
+	if len(o.remoteIP) == 0 {
+		return fmt.Errorf("please provide a valid ip of the physical machine")
+	}
+	if o.chaosdPort == 0 {
+		return fmt.Errorf("please provide a vilid port of chaosd serving")
+	}
+	return nil
+}
+
+func (o *PhysicalMachineCreateOptions) Run(args []string) error {
+	if len(args) < 1 {
+		return fmt.Errorf("please provide physical machine name")
+	}
+	physicalMachineName := args[0]
+
+	labels, err := label.ParseLabel(o.labels)
+	if err != nil {
+		return err
+	}
+	address := formatAddress(o.remoteIP, o.chaosdPort, o.secure)
+
+	clientset, err := common.InitClientSet()
+	if err != nil {
+		return err
+	}
+
+	ctx := context.Background()
+	return CreatePhysicalMachine(ctx, clientset.CtrlCli, o.namespace, physicalMachineName, address, labels)
+}
+
+func CreatePhysicalMachine(ctx context.Context, c client.Client,
+	namespace, name, address string, labels map[string]string) error {
+	pm := v1alpha1.PhysicalMachine{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: namespace,
+			Name:      name,
+			Labels:    labels,
+		},
+		Spec: v1alpha1.PhysicalMachineSpec{
+			Address: address,
+		},
+	}
+
+	return c.Create(ctx, &pm)
+}
+
+func formatAddress(ip string, port int, secure bool) string {
+	protocol := "http"
+	if secure {
+		protocol = "https"
+	}
+	return fmt.Sprintf("%s://%s:%d", protocol, ip, port)
 }

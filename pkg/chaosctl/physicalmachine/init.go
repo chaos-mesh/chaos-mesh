@@ -21,6 +21,7 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
 	"github.com/pkg/errors"
 
 	"github.com/go-logr/logr"
@@ -77,12 +78,26 @@ Examples:
 }
 
 func (o *PhysicalMachineInitOptions) Run() error {
-	// clientset, err := common.InitClientSet()
-	// if err != nil {
-	// 	return err
-	// }
+	clientset, err := common.InitClientSet()
+	if err != nil {
+		return err
+	}
 
-	return nil
+	ctx := context.Background()
+	caCert, caKey, err := GetChaosdCAFileFromCluster(ctx, o.chaosMeshNamespace, clientset.CtrlCli)
+	if err != nil {
+		return err
+	}
+
+	// generate chaosd cert and private key
+	serverCert, serverKey, err := NewCertAndKey(caCert, caKey)
+	if err != nil {
+		return err
+	}
+
+	// create physical machine
+
+	return WriteCertAndKey("/tmp/chaosd-pki", "chaosd", serverCert, serverKey)
 }
 
 func SSH() error {
