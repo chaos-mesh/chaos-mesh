@@ -35,7 +35,7 @@ jobs:
         run: yarn --frozen-lockfile
 
       - name: Cache app build
-        if: ${{ matrix.job == "build" }}
+        if: ${{ matrix.job == 'build' }}
         uses: actions/cache@v2
         with:
           path: ./app/build
@@ -44,11 +44,11 @@ jobs:
             ${{ runner.os }}-yarn-
 
       - name: Try build
-        if: ${{ matrix.job == "build" }}
+        if: ${{ matrix.job == 'build' }}
         run: yarn build
 
       - name: Run UT
-        if: ${{ matrix.job == "test" }}
+        if: ${{ matrix.job == 'test' }}
         run: |
           yarn workspace @ui/mui-extends build
           yarn workspace @ui/app test
