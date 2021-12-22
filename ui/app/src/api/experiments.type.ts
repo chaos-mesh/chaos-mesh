@@ -30,7 +30,6 @@ export interface Experiment {
   namespace: string
   name: string
   created_at: string
-  // FIXME: support keyof in ts-interface-builder
   status: 'injecting' | 'running' | 'finished' | 'paused'
 }
 
