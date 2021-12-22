@@ -1,0 +1,42 @@
+name: ui
+
+on:
+  pull_request:
+    branches:
+      - master
+      - release-*
+    paths:
+      - "ui/**"
+      - "!ui/README.md"
+      - "!ui/.*"
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+          cache: "yarn"
+
+      - name: Install dependencies
+        working-directory: "./ui"
+        run: yarn --frozen-lockfile
+
+      - name: Run UT
+        working-directory: "./ui"
+        run: |
+          yarn workspace @ui/app test
+
+      - name: Cache app build
+        uses: actions/cache@v2
+        with:
+          path: ./ui/app/build
+          key: ${{ runner.os }}-yarn-${{ hashFiles('ui/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Try build
+        working-directory: "./ui"
+        run: yarn build

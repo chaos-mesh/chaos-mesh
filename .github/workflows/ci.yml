@@ -5,9 +5,13 @@ on:
     branches:
       - master
       - release-*
+    paths:
+      - makefile
+      - go.mod
+      - go.sum
+      - "**.go"
 
 jobs:
-
   pull:
     runs-on: ubuntu-latest
     strategy:

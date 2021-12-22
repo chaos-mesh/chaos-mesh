@@ -39,6 +39,7 @@ test('sanitize an object where all values are empty', () => {
       c: null,
       d: undefined,
       e: [],
+      f: {},
     })
   ).toEqual({})
 })

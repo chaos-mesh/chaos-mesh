@@ -50,7 +50,6 @@
     "build": "react-scripts build",
     "analyze": "source-map-explorer 'build/static/js/*.js' --only-mapped",
     "test": "react-scripts test",
-    "test:init": "./__tests__/interface-builder.sh",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
