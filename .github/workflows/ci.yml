@@ -5,27 +5,42 @@ on:
     branches:
       - master
       - release-*
-    paths:
-      - makefile
-      - go.mod
-      - go.sum
-      - "**.go"
 
 jobs:
-  pull:
+  # JOB to run change detection
+  changes:
+    runs-on: ubuntu-latest
+    # Set job outputs to values from filter step
+    outputs:
+      go: ${{ steps.filter.outputs.go }}
+      ui: ${{ steps.filter.outputs.ui }}
+    steps:
+      # For pull requests it's not necessary to checkout the code
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            go:
+              - makefile
+              - go.mod
+              - go.sum
+              - '**.go'
+            ui:
+              - 'ui/**'
+              - '!ui/README.md'
+              - '!ui/.*'
+  go:
+    needs: changes
+    if: ${{ needs.changes.outputs.go == 'true' }}
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
       matrix:
         job:
           - verify
           - build
           - test
     steps:
-      - name: Check out code into the Go module directory
-        uses: actions/checkout@v2
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/checkout@v2
 
       - name: Build Chaos Mesh Build Env
         env:
@@ -67,3 +82,47 @@ jobs:
           fi
         env:
           job: ${{ matrix.job }}
+
+  ui:
+    needs: changes
+    if: ${{ needs.changes.outputs.go == 'ui' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./ui
+    strategy:
+      matrix:
+        job:
+          - verify
+          - build
+          - test
+        node-version: ["14"]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "yarn"
+          cache-dependency-path: "ui/yarn.lock"
+
+      - name: Install dependencies
+        run: yarn --frozen-lockfile
+
+      - name: Cache app build
+        if: ${{ matrix.job == 'build' }}
+        uses: actions/cache@v2
+        with:
+          path: ./app/build
+          key: ${{ runner.os }}-yarn-${{ hashFiles('yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Try build
+        if: ${{ matrix.job == 'build' }}
+        run: yarn build
+
+      - name: Run UT
+        if: ${{ matrix.job == 'test' }}
+        run: |
+          yarn workspace @ui/mui-extends build
+          yarn workspace @ui/app test
