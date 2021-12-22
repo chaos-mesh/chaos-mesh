@@ -11,13 +11,17 @@ on:
       - "!ui/.*"
 
 jobs:
-  test-and-build:
+  pull:
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./ui
     strategy:
       matrix:
+        job:
+          - verify
+          - build
+          - test
         node-version: ["14"]
     steps:
       - uses: actions/checkout@v2
@@ -31,6 +35,7 @@ jobs:
         run: yarn --frozen-lockfile
 
       - name: Cache app build
+        if: ${{ matrix.job == "build" }}
         uses: actions/cache@v2
         with:
           path: ./app/build
@@ -39,7 +44,11 @@ jobs:
             ${{ runner.os }}-yarn-
 
       - name: Try build
+        if: ${{ matrix.job == "build" }}
         run: yarn build
 
       - name: Run UT
-        run: yarn workspace @ui/app test
+        if: ${{ matrix.job == "test" }}
+        run: |
+          yarn workspace @ui/mui-extends build
+          yarn workspace @ui/app test
