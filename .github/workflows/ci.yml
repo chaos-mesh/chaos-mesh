@@ -98,7 +98,6 @@ jobs:
     strategy:
       matrix:
         job:
-          - verify
           - build
           - test
         node-version: ["14"] # TODO: add nodejs-16?
