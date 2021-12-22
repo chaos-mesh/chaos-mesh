@@ -1,3 +1,10 @@
+# This workflow defines the go and ui related jobs.
+#
+# We will use the `job` matrix variable to run each subjob. Currently we have:
+#
+# - verify
+# - build
+# - test
 name: ci
 
 on:
@@ -94,7 +101,7 @@ jobs:
           - verify
           - build
           - test
-        node-version: ["14"]
+        node-version: ["14"] # TODO: add nodejs-16?
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
@@ -110,7 +117,7 @@ jobs:
         if: ${{ matrix.job == 'build' }}
         uses: actions/cache@v2
         with:
-          path: ./app/build
+          path: ./ui/app/build
           key: ${{ runner.os }}-yarn-${{ hashFiles('yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-yarn-
