@@ -85,7 +85,7 @@ jobs:
 
   ui:
     needs: changes
-    if: ${{ needs.changes.outputs.go == 'ui' }}
+    if: ${{ needs.changes.outputs.ui == 'true' }}
     runs-on: ubuntu-latest
     defaults:
       run:
