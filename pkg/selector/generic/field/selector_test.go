@@ -18,6 +18,8 @@ package field
 import (
 	"testing"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	. "github.com/onsi/gomega"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -40,6 +42,8 @@ func TestMatch(t *testing.T) {
 
 	p1Pod := NewPod(PodArg{Name: "p1"})
 	p2Pod := NewPod(PodArg{Name: "p2"})
+	p1PhysicalMachine := v1alpha1.PhysicalMachine{ObjectMeta: metav1.ObjectMeta{Name: "p1"}, Spec: v1alpha1.PhysicalMachineSpec{Address: "123"}}
+	p2PhysicalMachine := v1alpha1.PhysicalMachine{ObjectMeta: metav1.ObjectMeta{Name: "p2"}}
 
 	tcs := []struct {
 		name     string
@@ -62,6 +66,16 @@ func TestMatch(t *testing.T) {
 			obj:      &p1Pod,
 			selector: emptySelector,
 			match:    true,
+		}, {
+			name:     "filter by physical machine address",
+			obj:      &p1PhysicalMachine,
+			selector: addressFieldSelector,
+			match:    true,
+		}, {
+			name:     "filter by physical machine address",
+			obj:      &p2PhysicalMachine,
+			selector: addressFieldSelector,
+			match:    false,
 		}, {
 			name:     "filter by physical machine address",
 			obj:      &p1Pod,
