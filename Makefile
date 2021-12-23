@@ -454,7 +454,7 @@ define test-make
 	cat cover.out.tmp | grep -v "_generated.deepcopy.go" > cover.out
 	make failpoint-disable
 endef
-$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,test,failpoint-enable generate generate-mock manifests test-utils))
+$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,test,failpoint-enable generate manifests test-utils))
 
 define gosec-scan-make
 	gosec ./api/... ./controllers/... ./pkg/... || echo "*** sec-scan failed: known-issues ***"
