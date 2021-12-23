@@ -108,19 +108,19 @@ func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 
 	req, err := http.NewRequest(http.MethodPut, "/", bytes.NewReader(config))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("fail to create request: %v", err)
 	}
 
 	resp, err := transport.RoundTrip(req)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("fail to send request: %v", err)
 	}
 
 	log.Info("http chaos applied")
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("fail to read response body: %v", err)
 	}
 
 	return &pb.ApplyHttpChaosResponse{
