@@ -1904,6 +1904,7 @@ spec:
                 description: Device represents the network device to be affected.
                 type: string
               direction:
+                default: to
                 description: Direction represents the direction, this applies on netem
                   and network partition action
                 enum:
@@ -5054,6 +5055,7 @@ spec:
                     description: Device represents the network device to be affected.
                     type: string
                   direction:
+                    default: to
                     description: Direction represents the direction, this applies
                       on netem and network partition action
                     enum:
@@ -7660,6 +7662,7 @@ spec:
                                 be affected.
                               type: string
                             direction:
+                              default: to
                               description: Direction represents the direction, this
                                 applies on netem and network partition action
                               enum:
@@ -10003,6 +10006,7 @@ spec:
                                     to be affected.
                                   type: string
                                 direction:
+                                  default: to
                                   description: Direction represents the direction,
                                     this applies on netem and network partition action
                                   enum:
@@ -16590,6 +16594,7 @@ spec:
                     description: Device represents the network device to be affected.
                     type: string
                   direction:
+                    default: to
                     description: Direction represents the direction, this applies
                       on netem and network partition action
                     enum:
@@ -18773,6 +18778,7 @@ spec:
                         description: Device represents the network device to be affected.
                         type: string
                       direction:
+                        default: to
                         description: Direction represents the direction, this applies
                           on netem and network partition action
                         enum:
@@ -21432,6 +21438,7 @@ spec:
                                     to be affected.
                                   type: string
                                 direction:
+                                  default: to
                                   description: Direction represents the direction,
                                     this applies on netem and network partition action
                                   enum:
@@ -23852,6 +23859,7 @@ spec:
                                         to be affected.
                                       type: string
                                     direction:
+                                      default: to
                                       description: Direction represents the direction,
                                         this applies on netem and network partition
                                         action
@@ -33191,6 +33199,7 @@ spec:
                             affected.
                           type: string
                         direction:
+                          default: to
                           description: Direction represents the direction, this applies
                             on netem and network partition action
                           enum:
@@ -35467,6 +35476,7 @@ spec:
                                 be affected.
                               type: string
                             direction:
+                              default: to
                               description: Direction represents the direction, this
                                 applies on netem and network partition action
                               enum:
