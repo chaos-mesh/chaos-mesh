@@ -27,6 +27,7 @@ require (
 	github.com/go-logr/logr v0.4.0
 	github.com/go-logr/zapr v0.4.0
 	github.com/go-playground/validator/v10 v10.4.1
+	github.com/go-test/deep v1.0.8 // indirect
 	github.com/golang/protobuf v1.5.2
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0
@@ -50,8 +51,11 @@ require (
 	github.com/pingcap/log v0.0.0-20200117041106-d28c14d3b1cd // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.11.0
+	github.com/retailnext/iptables_exporter v0.1.0
 	github.com/robfig/cron/v3 v3.0.1
-	github.com/shirou/gopsutil v2.20.5+incompatible
+	github.com/romana/ipset v1.0.0
+	github.com/romana/rlog v0.0.0-20171115192701-f018bc92e7d7 // indirect
+	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749 // indirect
 	github.com/shurcooL/vfsgen v0.0.0-20181202132449-6a9ea43bcacd
 	github.com/spf13/cobra v1.2.1
@@ -60,8 +64,10 @@ require (
 	github.com/swaggo/files v0.0.0-20190704085106-630677cd5c14
 	github.com/swaggo/gin-swagger v1.2.0
 	github.com/swaggo/swag v1.6.7
+	github.com/tklauser/go-sysconf v0.3.9 // indirect
 	github.com/vektah/gqlparser/v2 v2.2.0
 	github.com/vishvananda/netlink v1.1.1-0.20201029203352-d40f9887b852
+	github.com/yusufpapurcu/wmi v1.2.2 // indirect
 	go.uber.org/atomic v1.7.0
 	go.uber.org/fx v1.12.0
 	go.uber.org/zap v1.18.1
@@ -79,6 +85,7 @@ require (
 	k8s.io/apiserver v0.21.3
 	k8s.io/cli-runtime v0.21.3
 	k8s.io/client-go v0.21.3
+	k8s.io/cri-api v0.20.6
 	k8s.io/klog v1.0.0
 	k8s.io/kubectl v0.21.3
 	k8s.io/utils v0.0.0-20210722164352-7f3ee0f31471

@@ -106,7 +106,7 @@ run: generate fmt vet manifests
 NAMESPACE ?= chaos-testing
 # Install CRDs into a cluster
 install: manifests
-	$(HELM_BIN) upgrade --install chaos-mesh helm/chaos-mesh --namespace=${NAMESPACE} --set registry=${DOCKER_REGISTRY} --set dnsServer.create=true --set dashboard.create=true;
+	$(HELM_BIN) upgrade --install chaos-mesh helm/chaos-mesh --namespace=${NAMESPACE} --set images.registry=${DOCKER_REGISTRY} --set dnsServer.create=true --set dashboard.create=true;
 
 clean:
 	rm -rf $(CLEAN_TARGETS)
@@ -422,13 +422,16 @@ $(eval $(call RUN_IN_DEV_ENV_TEMPLATE,tidy,clean))
 define generate-ctrl-make
 	$(GO) generate ./pkg/ctrl/server
 endef
-$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,generate-ctrl))
+$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,generate-ctrl,generate-deepcopy))
 
-define generate-make
+define generate-deepcopy-make
 	cd ./api/v1alpha1 ;\
 		controller-gen object:headerFile=../../hack/boilerplate/boilerplate.generatego.txt paths="./..." ;
 endef
-$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,generate,chaos-build generate-ctrl swagger_spec))
+$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,generate-deepcopy,chaos-build))
+
+generate: generate-ctrl swagger_spec generate-deepcopy chaos-build
+
 check: generate yaml vet boilerplate lint tidy install.sh fmt
 
 CLEAN_TARGETS+=e2e-test/image/e2e/bin/ginkgo

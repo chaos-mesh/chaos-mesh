@@ -17,7 +17,6 @@ package httpchaos
 
 import (
 	"context"
-	"net/http"
 	"time"
 
 	. "github.com/onsi/ginkgo"
@@ -36,14 +35,14 @@ import (
 func TestcaseHttpDelayDurationForATimeThenRecover(
 	ns string,
 	cli client.Client,
-	c http.Client,
+	c HTTPE2EClient,
 	port uint16,
 ) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	By("waiting on e2e helper ready")
-	err := util.WaitE2EHelperReady(c, port)
+	err := util.WaitHTTPE2EHelperReady(*c.C, c.IP, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 	By("create http delay chaos CRD objects")
 
@@ -96,6 +95,8 @@ func TestcaseHttpDelayDurationForATimeThenRecover(
 	err = cli.Delete(ctx, httpChaos)
 	framework.ExpectNoError(err, "failed to delete http chaos")
 
+	time.Sleep(time.Second * 5)
+
 	By("waiting for assertion recovering")
 	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
 		resp, dur, err := getPodHttpDelay(c, port)
@@ -116,14 +117,14 @@ func TestcaseHttpDelayDurationForATimeThenRecover(
 func TestcaseHttpDelayDurationForATimePauseAndUnPause(
 	ns string,
 	cli client.Client,
-	c http.Client,
+	c HTTPE2EClient,
 	port uint16,
 ) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	By("waiting on e2e helper ready")
-	err := util.WaitE2EHelperReady(c, port)
+	err := util.WaitHTTPE2EHelperReady(*c.C, c.IP, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 	By("create http delay chaos CRD objects")
 

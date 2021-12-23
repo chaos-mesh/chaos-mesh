@@ -24,12 +24,15 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
+	"github.com/prometheus/client_golang/prometheus"
 	"go.uber.org/fx"
+	controllermetrics "sigs.k8s.io/controller-runtime/pkg/metrics"
 
 	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apivalidator"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/swaggerserver"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/uiserver"
+	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 )
 
 var (
@@ -40,6 +43,10 @@ var (
 			newAPIRouter,
 		),
 		handlerModule,
+		fx.Provide(func() prometheus.Registerer {
+			return controllermetrics.Registry
+		}),
+		fx.Invoke(metrics.NewChaosDashboardMetricsCollector),
 		fx.Invoke(register),
 	)
 )
@@ -67,6 +74,7 @@ func newEngine(config *config.ChaosDashboardConfig) *gin.Engine {
 		v.RegisterValidation("ValueValid", apivalidator.ValueValid)
 		v.RegisterValidation("PodsValid", apivalidator.PodsValid)
 		v.RegisterValidation("RequiredFieldEqual", apivalidator.RequiredFieldEqualValid, true)
+		v.RegisterValidation("PhysicalMachineValid", apivalidator.PhysicalMachineValid)
 	}
 
 	ui := uiserver.AssetsFS()

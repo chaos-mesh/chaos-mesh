@@ -18,7 +18,6 @@ package httpchaos
 import (
 	"context"
 	"io/ioutil"
-	"net/http"
 	"strings"
 	"time"
 
@@ -38,14 +37,14 @@ import (
 func TestcaseHttpPatchThenRecover(
 	ns string,
 	cli client.Client,
-	c http.Client,
+	c HTTPE2EClient,
 	port uint16,
 ) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	By("waiting on e2e helper ready")
-	err := util.WaitE2EHelperReady(c, port)
+	err := util.WaitHTTPE2EHelperReady(*c.C, c.IP, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
 	body := `{"msg":"Hello","target":"World"}`
@@ -171,14 +170,14 @@ func TestcaseHttpPatchThenRecover(
 func TestcaseHttpPatchPauseAndUnPause(
 	ns string,
 	cli client.Client,
-	c http.Client,
+	c HTTPE2EClient,
 	port uint16,
 ) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	By("waiting on e2e helper ready")
-	err := util.WaitE2EHelperReady(c, port)
+	err := util.WaitHTTPE2EHelperReady(*c.C, c.IP, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
 	body := `{"msg":"Hello","target":"World"}`
