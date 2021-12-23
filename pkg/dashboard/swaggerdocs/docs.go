@@ -3450,7 +3450,7 @@ var doc = `{
                     "type": "string"
                 },
                 "direction": {
-                    "description": "Direction represents the direction, this applies on netem and network partition action\n+optional\n+kubebuilder:validation:Enum=to;from;both",
+                    "description": "Direction represents the direction, this applies on netem and network partition action\n+optional\n+kubebuilder:validation:Enum=to;from;both\n+kubebuilder:default=to",
                     "type": "string"
                 },
                 "duplicate": {

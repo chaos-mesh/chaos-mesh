@@ -108,6 +108,7 @@ type NetworkChaosSpec struct {
 	// Direction represents the direction, this applies on netem and network partition action
 	// +optional
 	// +kubebuilder:validation:Enum=to;from;both
+	// +kubebuilder:default=to
 	Direction Direction `json:"direction,omitempty"`
 
 	// Target represents network target, this applies on netem and network partition action
