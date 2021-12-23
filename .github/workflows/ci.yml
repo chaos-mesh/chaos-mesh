@@ -29,22 +29,22 @@ jobs:
           IMAGE_BUILD_ENV_BUILD: ${{ contains(github.event.pull_request.labels.*.name, 'rebuild-build-env-image') }}
         run: |
           if [ "${IMAGE_BUILD_ENV_BUILD}" = "true" ] ; then
-            export IMAGE_BUILD_ENV_BUILD=1; 
-          else 
-            export IMAGE_BUILD_ENV_BUILD=0; 
+            export IMAGE_BUILD_ENV_BUILD=1;
+          else
+            export IMAGE_BUILD_ENV_BUILD=0;
           fi
 
           make image-build-env
-      
+
       - name: Build Chaos Mesh Dev Env
         if: ${{ github.event.pull_request }}
         env:
           IMAGE_DEV_ENV_BUILD: ${{ contains(github.event.pull_request.labels.*.name, 'rebuild-dev-env-image') }}
         run: |
           if [ "${IMAGE_DEV_ENV_BUILD}" = "true" ] ; then
-            export IMAGE_DEV_ENV_BUILD=1; 
-          else 
-            export IMAGE_DEV_ENV_BUILD=0; 
+            export IMAGE_DEV_ENV_BUILD=1;
+          else
+            export IMAGE_DEV_ENV_BUILD=0;
           fi
 
           make image-dev-env
@@ -60,7 +60,6 @@ jobs:
           elif [[ "$job" == "test" ]]; then
             ROOT=$(pwd)
             KUBEBUILDER_ASSETS=${ROOT}/output/bin/kubebuilder/bin make test
-            BUILD_NUMBER=${BUILD_NUMBER} CODECOV_TOKEN="${CODECOV_TOKEN}" CI=1 make coverage
           else
             make $job
           fi
