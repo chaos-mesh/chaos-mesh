@@ -12,14 +12,15 @@
     "bootstrap": "./scripts/bootstrap.sh",
     "build": "yarn workspace @ui/mui-extends build && yarn workspace @ui/app build",
     "prepare": "cd .. && husky install ./ui/.husky",
-    "postinstall": "rm -rf node_modules/ace-builds/demo"
+    "clean": "rimraf app/node_modules && rimraf packages/**/node_modules && rimraf node_modules"
   },
   "devDependencies": {
     "husky": "^7.0.4",
     "import-sort-style-eslint": "^6.0.0",
     "lint-staged": "^12.1.2",
     "prettier": "^2.5.0",
-    "prettier-plugin-import-sort": "^0.0.7"
+    "prettier-plugin-import-sort": "^0.0.7",
+    "rimraf": "^3.0.2"
   },
   "lint-staged": {
     "*.(j|t)s?(x)": "prettier --write"
