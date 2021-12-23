@@ -15,7 +15,7 @@
  *
  */
 import { AutocompleteMultipleField, SelectField, TextField } from 'components/FormField'
-import { InputAdornment, MenuItem, Typography } from '@mui/material'
+import { Divider, InputAdornment, MenuItem, Typography } from '@mui/material'
 import { arrToObjBySep, objToArrBySep, toTitleCase } from 'lib/utils'
 import {
   getAnnotations,
@@ -154,34 +154,6 @@ const Scope: React.FC<ScopeProps> = ({
         />
 
         <SelectField
-          name={`${modeScope}.mode`}
-          label={T('newE.scope.mode')}
-          helperText={T('newE.scope.modeHelper')}
-          disabled={disabled}
-        >
-          <MenuItem value="all">All</MenuItem>
-          {modes.map((option) => (
-            <MenuItem key={option.value} value={option.value}>
-              {option.name}
-            </MenuItem>
-          ))}
-        </SelectField>
-
-        {!['all', 'one'].includes(getIn(values, modeScope).mode) && (
-          <TextField
-            name={`${modeScope}.value`}
-            label={T('newE.scope.modeValue')}
-            helperText={T('newE.scope.modeValueHelper')}
-            InputProps={{
-              endAdornment: modesWithAdornment.includes(getIn(values, scope).mode) && (
-                <InputAdornment position="end">%</InputAdornment>
-              ),
-            }}
-            disabled={disabled}
-          />
-        )}
-
-        <SelectField
           name={`${scope}.podPhaseSelectors`}
           label={T('k8s.podPhaseSelectors')}
           helperText={T('common.multiOptions')}
@@ -196,6 +168,39 @@ const Scope: React.FC<ScopeProps> = ({
           ))}
         </SelectField>
       </OtherOptions>
+
+      <Divider />
+      <Typography>{T('newE.scope.mode')}</Typography>
+
+      <SelectField
+        name={`${modeScope}.mode`}
+        label={T('newE.scope.mode')}
+        helperText={T('newE.scope.modeHelper')}
+        disabled={disabled}
+      >
+        <MenuItem value="all">All</MenuItem>
+        {modes.map((option) => (
+          <MenuItem key={option.value} value={option.value}>
+            {option.name}
+          </MenuItem>
+        ))}
+      </SelectField>
+
+      {!['all', 'one'].includes(getIn(values, modeScope).mode) && (
+        <TextField
+          name={`${modeScope}.value`}
+          label={T('newE.scope.modeValue')}
+          helperText={T('newE.scope.modeValueHelper')}
+          InputProps={{
+            endAdornment: modesWithAdornment.includes(getIn(values, scope).mode) && (
+              <InputAdornment position="end">%</InputAdornment>
+            ),
+          }}
+          disabled={disabled}
+        />
+      )}
+
+      <Divider />
 
       <div>
         <Typography sx={{ color: disabled ? 'text.disabled' : undefined }}>
