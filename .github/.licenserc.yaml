@@ -53,3 +53,5 @@ header:
     - 'ui/app/src/api/zz_generated.frontend.chaos-mesh.ts'
     - 'ui/app/src/setupProxy.js'
     - 'ui/**/*.svg'
+    # codecov configuration file
+    - codecov.yml
