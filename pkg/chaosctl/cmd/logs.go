@@ -62,8 +62,8 @@ Examples:
 		ValidArgsFunction: noCompletions,
 	}
 
-	logsCmd.Flags().Int64VarP(&o.tail, "tail", "t", -1, "Number of lines of recent log")
-	logsCmd.Flags().StringVarP(&o.node, "node", "n", "", "Number of lines of recent log")
+	logsCmd.Flags().Int64VarP(&o.tail, "tail", "t", -1, "number of lines of recent log")
+	logsCmd.Flags().StringVarP(&o.node, "node", "n", "", "the node of target pods")
 	err := logsCmd.RegisterFlagCompletionFunc("node", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		clientset, err := cm.InitClientSet()
 		if err != nil {

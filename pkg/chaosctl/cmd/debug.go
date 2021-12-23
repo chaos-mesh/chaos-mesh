@@ -153,7 +153,7 @@ Examples:
 	debugCmd.PersistentFlags().StringVar(&o.CaCertFile, "cacert", "", "file path to cacert file")
 	debugCmd.PersistentFlags().StringVar(&o.CertFile, "cert", "", "file path to cert file")
 	debugCmd.PersistentFlags().StringVar(&o.KeyFile, "key", "", "file path to key file")
-	debugCmd.PersistentFlags().BoolVarP(&o.Insecure, "insecure", "i", false, "Insecure mode will use unauthorized grpc")
+	debugCmd.PersistentFlags().BoolVarP(&o.Insecure, "insecure", "i", false, "insecure mode will use unauthorized grpc")
 	err := debugCmd.RegisterFlagCompletionFunc("namespace", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		clientset, err := common.InitClientSet()
 		if err != nil {
