@@ -13,14 +13,11 @@
 # limitations under the License.
 #
 apiVersion: chaos-mesh.org/v1alpha1
-kind: PhysicalMachineChaos
+kind: PhysicalMachine
 metadata:
-  name: physical-stress-mem
+  name: physicalmachine1
   namespace: chaos-testing
+  labels:
+    arch: amd64
 spec:
-  action: stress-mem
-  address: 
-  - CHAOSD_ADDRESS
-  mode: one
-  stress-mem:
-    size: 100MB
+  address: CHAOSD_ADDRESS

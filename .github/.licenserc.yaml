@@ -43,12 +43,15 @@ header:
     - 'pkg/time/fakeclock/.embed.o'
     # k8s copyright
     - 'hack/boilerplate/boilerplate.py'
+    # Dockerfiles
+    - '**/Dockerfile'
+    # UI
     - 'ui/.husky/pre-commit'
     - 'ui/.prettierignore'
     - 'ui/.prettierrc'
+    - 'ui/.yarnclean'
     - 'ui/app/src/api/zz_generated.frontend.chaos-mesh.ts'
     - 'ui/app/src/setupProxy.js'
-    # Dockerfiles
-    - '**/Dockerfile'
-    # UI SVGs
     - 'ui/**/*.svg'
+    # codecov configuration file
+    - codecov.yml

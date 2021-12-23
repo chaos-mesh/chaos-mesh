@@ -14,6 +14,15 @@ definitions:
         type: string
       type: array
     type: object
+  common.PhysicalMachine:
+    properties:
+      address:
+        type: string
+      name:
+        type: string
+      namespace:
+        type: string
+    type: object
   common.Pod:
     properties:
       ip:
@@ -1547,6 +1556,10 @@ definitions:
           +optional
         type: string
       address:
+        description: |-
+          DEPRECATED: Use Selector instead.
+          Only one of Address and Selector could be specified.
+          +optional
         items:
           type: string
         type: array
@@ -1595,6 +1608,12 @@ definitions:
         $ref: '#/definitions/v1alpha1.JVMStressSpec'
         description: +optional
         type: object
+      mode:
+        description: |-
+          Mode defines the mode to run chaos action.
+          Supported mode: one / all / fixed / fixed-percent / random-max-percent
+          +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
+        type: string
       network-bandwidth:
         $ref: '#/definitions/v1alpha1.NetworkBandwidthSpec'
         description: +optional
@@ -1627,6 +1646,12 @@ definitions:
         $ref: '#/definitions/v1alpha1.ProcessSpec'
         description: +optional
         type: object
+      selector:
+        $ref: '#/definitions/v1alpha1.PhysicalMachineSelectorSpec'
+        description: |-
+          Selector is used to select physical machines that are used to inject chaos action.
+          +optional
+        type: object
       stress-cpu:
         $ref: '#/definitions/v1alpha1.StressCPUSpec'
         description: +optional
@@ -1640,6 +1665,66 @@ definitions:
           the experiment ID
           +optional
         type: string
+      value:
+        description: |-
+          Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
+          If `FixedMode`, provide an integer of physical machines to do chaos action.
+          If `FixedPercentMode`, provide a number from 0-100 to specify the percent of physical machines the server can do chaos action.
+          IF `RandomMaxPercentMode`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+          +optional
+        type: string
+    type: object
+  v1alpha1.PhysicalMachineSelectorSpec:
+    properties:
+      annotationSelectors:
+        additionalProperties:
+          type: string
+        description: |-
+          Map of string keys and values that can be used to select objects.
+          A selector based on annotations.
+          +optional
+        type: object
+      expressionSelectors:
+        $ref: '#/definitions/v1alpha1.LabelSelectorRequirements'
+        description: |-
+          a slice of label selector expressions that can be used to select objects.
+          A list of selectors based on set-based label expressions.
+          +optional
+        type: object
+      fieldSelectors:
+        additionalProperties:
+          type: string
+        description: |-
+          Map of string keys and values that can be used to select objects.
+          A selector based on fields.
+          +optional
+        type: object
+      labelSelectors:
+        additionalProperties:
+          type: string
+        description: |-
+          Map of string keys and values that can be used to select objects.
+          A selector based on labels.
+          +optional
+        type: object
+      namespaces:
+        description: |-
+          Namespaces is a set of namespace to which objects belong.
+          +optional
+        items:
+          type: string
+        type: array
+      physicalMachines:
+        additionalProperties:
+          items:
+            type: string
+          type: array
+        description: |-
+          PhysicalMachines is a map of string keys and a set values that used to select physical machines.
+          The key defines the namespace which physical machine belong,
+          and each value is a set of physical machine names.
+          +optional
+        type: object
     type: object
   v1alpha1.PodChaosSpec:
     properties:
@@ -2732,6 +2817,82 @@ paths:
           schema:
             $ref: '#/definitions/utils.APIError'
       summary: Get all namespaces from Kubernetes cluster.
+      tags:
+      - common
+  /common/physicalmachine-annotations:
+    get:
+      description: Get the annotations of the physicalMachines in the specified namespace
+        from Kubernetes cluster.
+      parameters:
+      - description: The physicalMachine's namespace list, split by ,
+        in: query
+        name: physicalMachineNamespaceList
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.MapSlice'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Get the annotations of the physicalMachines in the specified namespace
+        from Kubernetes cluster.
+      tags:
+      - common
+  /common/physicalmachine-labels:
+    get:
+      description: Get the labels of the physicalMachines in the specified namespace
+        from Kubernetes cluster.
+      parameters:
+      - description: The physicalMachine's namespace list, split by ,
+        in: query
+        name: physicalMachineNamespaceList
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.MapSlice'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Get the labels of the physicalMachines in the specified namespace from
+        Kubernetes cluster.
+      tags:
+      - common
+  /common/physicalmachines:
+    post:
+      description: Get physicalMachines from Kubernetes cluster.
+      parameters:
+      - description: Request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/v1alpha1.PhysicalMachineSelectorSpec'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/common.PhysicalMachine'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Get physicalMachines from Kubernetes cluster.
       tags:
       - common
   /common/pods:
