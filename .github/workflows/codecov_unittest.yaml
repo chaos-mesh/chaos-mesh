@@ -7,6 +7,11 @@ on:
       - makefile
       - go.*
       - "**.go"
+  push:
+    paths:
+      - makefile
+      - go.*
+      - "**.go"
 
 jobs:
   unitTestAndCodeCoverage:
