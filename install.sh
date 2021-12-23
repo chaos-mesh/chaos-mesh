@@ -1321,6 +1321,8 @@ spec:
               mountPath: ${mountPath}
             - name: sys-path
               mountPath: /host-sys
+            - name: lib-modules
+              mountPath: /lib/modules
           ports:
             - name: grpc
               containerPort: 31767
@@ -1334,6 +1336,9 @@ spec:
         - name: sys-path
           hostPath:
             path: /sys
+        - name: lib-modules
+          hostPath:
+            path: /lib/modules
 ---
 # Source: chaos-mesh/templates/chaos-dashboard-deployment.yaml
 # Copyright 2021 Chaos Mesh Authors.
@@ -1539,6 +1544,8 @@ spec:
           - name: CHAOS_DNS_SERVICE_PORT
             value: !!str 9288
           - name: SECURITY_MODE
+            value: "false"
+          - name: CHAOSD_SECURITY_MODE
             value: "false"
           - name: POD_FAILURE_PAUSE_IMAGE
             value: gcr.io/google-containers/pause:latest

@@ -23,14 +23,21 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config/watcher"
 )
 
-// TLSConfig defines the configuration for chaos-daemon tls client
+// TLSConfig defines the configuration for chaos-daemon and chaosd tls client
 type TLSConfig struct {
+	// ChaosMeshCACert is the path of chaos daemon ca cert
+	ChaosMeshCACert string `envconfig:"CHAOS_MESH_CA_CERT" default:""`
 	// ChaosDaemonClientCert is the path of chaos daemon certificate
 	ChaosDaemonClientCert string `envconfig:"CHAOS_DAEMON_CLIENT_CERT" default:""`
 	// ChaosDaemonClientKey is the path of chaos daemon certificate key
 	ChaosDaemonClientKey string `envconfig:"CHAOS_DAEMON_CLIENT_KEY" default:""`
-	// ChaosMeshCACert is the path of chaos mesh ca cert
-	ChaosMeshCACert string `envconfig:"CHAOS_MESH_CA_CERT" default:""`
+
+	// ChaosdCACert is the path of chaosd ca cert
+	ChaosdCACert string `envconfig:"CHAOSD_CA_CERT" default:""`
+	// ChaosdClientCert is the path of chaosd certificate
+	ChaosdClientCert string `envconfig:"CHAOSD_CLIENT_CERT" default:""`
+	// ChaosdClientKey is the path of chaosd certificate key
+	ChaosdClientKey string `envconfig:"CHAOSD_CLIENT_KEY" default:""`
 }
 
 // ChaosControllerConfig defines the configuration for Chaos Controller
@@ -93,6 +100,9 @@ type ChaosControllerConfig struct {
 
 	// SecurityMode is used for enable authority validation in admission webhook
 	SecurityMode bool `envconfig:"SECURITY_MODE" default:"true" json:"security_mode"`
+
+	// ChaosdSecurityMode is used for enable mTLS connection between chaos-controller-manager and chaod
+	ChaosdSecurityMode bool `envconfig:"CHAOSD_SECURITY_MODE" default:"true" json:"chaosd_security_mode"`
 
 	// Namespace is the namespace which the controller manager run in
 	Namespace string `envconfig:"NAMESPACE" default:""`

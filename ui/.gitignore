@@ -9,7 +9,7 @@
 /coverage
 
 # production
-/build
+/app/build
 
 # misc
 .DS_Store
@@ -29,3 +29,5 @@ package-lock.json
 
 # ts-interface-builder
 *.type-ti.ts
+
+/packages/crd

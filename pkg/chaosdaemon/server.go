@@ -80,33 +80,34 @@ type DaemonServer struct {
 	IPSetLocker *locker.Locker
 }
 
-func newDaemonServer(containerRuntime string) (*DaemonServer, error) {
+func newDaemonServer(containerRuntime string, reg prometheus.Registerer) (*DaemonServer, error) {
 	crClient, err := crclients.CreateContainerRuntimeInfoClient(containerRuntime)
 	if err != nil {
 		return nil, err
 	}
 
-	return NewDaemonServerWithCRClient(crClient), nil
+	return NewDaemonServerWithCRClient(crClient, reg), nil
 }
 
 // NewDaemonServerWithCRClient returns DaemonServer with container runtime client
-func NewDaemonServerWithCRClient(crClient crclients.ContainerRuntimeInfoClient) *DaemonServer {
+func NewDaemonServerWithCRClient(crClient crclients.ContainerRuntimeInfoClient, reg prometheus.Registerer) *DaemonServer {
 	return &DaemonServer{
 		IPSetLocker:              locker.New(),
 		crClient:                 crClient,
-		backgroundProcessManager: bpm.NewBackgroundProcessManager(),
+		backgroundProcessManager: bpm.NewBackgroundProcessManager(reg),
 	}
 }
 
 func newGRPCServer(containerRuntime string, reg prometheus.Registerer, tlsConf tlsConfig) (*grpc.Server, error) {
-	ds, err := newDaemonServer(containerRuntime)
+	ds, err := newDaemonServer(containerRuntime, reg)
 	if err != nil {
 		return nil, err
 	}
 
 	grpcMetrics := grpc_prometheus.NewServerMetrics()
 	grpcMetrics.EnableHandlingTimeHistogram(
-		grpc_prometheus.WithHistogramBuckets([]float64{0.001, 0.01, 0.1, 0.3, 0.6, 1, 3, 6, 10}),
+		grpc_prometheus.WithHistogramBuckets(metrics.ChaosDaemonGrpcServerBuckets),
+		metrics.WithHistogramName("chaos_daemon_grpc_server_handling_seconds"),
 	)
 	reg.MustRegister(
 		grpcMetrics,

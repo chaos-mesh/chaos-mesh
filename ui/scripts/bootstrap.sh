@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 # Copyright 2021 Chaos Mesh Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,27 +13,44 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
-#
+
 # Don't run this script directly, use `yarn bootstrap` to exec it.
 
-# Check node deps.
+while [[ $# -gt 0 ]]; do
+  key="$1"
+
+  case $key in
+    --compact)
+      COMPACT=true
+      shift
+      ;;
+  esac
+done
+
+# step1
 if [[ ! -d node_modules ]]; then
   echo "No node_modules found. Install by yarn:"
 
   yarn
 else
-  echo "Already install node deps."
+  echo "Already install dependencies."
 fi
 
+# step2
+echo "Build packages..."
+
+yarn workspace @ui/mui-extends build
+
+# step3
 CHAOS_DASHBOARD_BIN=../images/chaos-dashboard/bin
 
-# Check dashboard server.
-if [[ ! -f $CHAOS_DASHBOARD_BIN/chaos-dashboard ]]; then
-  echo "No chaos-dashboard binary found. Install by make IN_DOCKER=1 images/chaos-dashboard/bin/chaos-dashboard:"
+if [[ "$COMPACT" == true ]]; then
+  echo "--compact: skip building chaos-dashboard."
+elif [[ ! -f $CHAOS_DASHBOARD_BIN/chaos-dashboard ]]; then
+  echo "No chaos-dashboard binary found. Install by IN_DOCKER=1 make images/chaos-dashboard/bin/chaos-dashboard:"
 
   cd ..
-  make IN_DOCKER=1 SWAGGER=1 images/chaos-dashboard/bin/chaos-dashboard && rm -f docs/docs.go && GO111MODULE=on go mod tidy
+  IN_DOCKER=1 make images/chaos-dashboard/bin/chaos-dashboard
   cd -
 else
   echo "Already build chaos-dashboard."
