@@ -58,10 +58,10 @@ func NewPhysicalMachineGenerateCmd(logger logr.Logger) (*cobra.Command, error) {
 
 func (o *PhysicalMachineGenerateOptions) Validate() error {
 	if len(o.caCertFile) == 0 {
-		return errors.New("please provide filepath to cacert file")
+		return errors.New("--cacert must be specified")
 	}
 	if len(o.caKeyFile) == 0 {
-		return errors.New("please provide filepath to cakey file")
+		return errors.New("--cakey must be specified")
 	}
 	return nil
 }

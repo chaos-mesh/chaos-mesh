@@ -67,17 +67,14 @@ func NewPhysicalMachineCreateCmd(logger logr.Logger) (*cobra.Command, error) {
 
 func (o *PhysicalMachineCreateOptions) Validate() error {
 	if len(o.remoteIP) == 0 {
-		return fmt.Errorf("please provide a valid ip of the physical machine")
-	}
-	if o.chaosdPort == 0 {
-		return fmt.Errorf("please provide a vilid port of chaosd serving")
+		return fmt.Errorf("--ip must be specified")
 	}
 	return nil
 }
 
 func (o *PhysicalMachineCreateOptions) Run(args []string) error {
 	if len(args) < 1 {
-		return fmt.Errorf("please provide physical machine name")
+		return fmt.Errorf("physical machine name is required")
 	}
 	physicalMachineName := args[0]
 
