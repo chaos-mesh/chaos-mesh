@@ -19,9 +19,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/physicalmachine"
 	"github.com/go-logr/logr"
 	"github.com/spf13/cobra"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/physicalmachine"
 )
 
 func NewPhysicalMachineCommand(logger logr.Logger) (*cobra.Command, error) {

@@ -19,15 +19,20 @@ import (
 	"context"
 	"crypto"
 	"crypto/x509"
-	"encoding/base64"
+	"fmt"
+	"os"
+	"path/filepath"
+
+	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
-	"github.com/pkg/errors"
+	"github.com/chaos-mesh/chaos-mesh/pkg/label"
 
 	"github.com/go-logr/logr"
 	"github.com/spf13/cobra"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/util/keyutil"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -37,6 +42,7 @@ type PhysicalMachineInitOptions struct {
 	remoteIP           string
 	sshUser            string
 	sshPort            int
+	sshPrivateKeyFile  string
 	chaosdPort         int
 	outputPath         string
 	namespace          string
@@ -63,21 +69,43 @@ Examples:
 		SilenceErrors: true,
 		SilenceUsage:  true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return initOption.Run()
+			if err := initOption.Validate(); err != nil {
+				return err
+			}
+			return initOption.Run(args)
 		},
 	}
 	initCmd.PersistentFlags().StringVar(&initOption.chaosMeshNamespace, "chaos-mesh-namespace", "chaos-testing", "namespace where chaos mesh installed")
 	initCmd.PersistentFlags().StringVar(&initOption.remoteIP, "ip", "", "ip of the remote physical machine")
 	initCmd.PersistentFlags().StringVar(&initOption.sshUser, "ssh-user", "root", "username for ssh connection")
+	initCmd.PersistentFlags().StringVar(&initOption.sshPrivateKeyFile, "ssh-key", filepath.Join(os.Getenv("HOME"), ".ssh", "id_rsa"), "private key filepath for ssh connection")
 	initCmd.PersistentFlags().IntVar(&initOption.sshPort, "ssh-port", 22, "port of ssh connection")
 	initCmd.PersistentFlags().IntVar(&initOption.chaosdPort, "chaosd-port", 31768, "port of the remote chaosd server listen")
-	initCmd.PersistentFlags().StringVar(&initOption.outputPath, "path", "/etc/chaosd/ssl", "path to save generated certs")
+	initCmd.PersistentFlags().StringVar(&initOption.outputPath, "path", "/etc/chaosd/pki", "path to save generated certs")
 	initCmd.PersistentFlags().StringVarP(&initOption.namespace, "namespace", "n", "default", "namespace of the certain physical machine")
 	initCmd.PersistentFlags().StringVarP(&initOption.labels, "labels", "l", "", "labels of the certain physical machine (e.g. -l key1=value1,key2=value2)")
 	return initCmd, nil
 }
 
-func (o *PhysicalMachineInitOptions) Run() error {
+func (o *PhysicalMachineInitOptions) Validate() error {
+	if len(o.remoteIP) == 0 {
+		return fmt.Errorf("please provide a valid ip of physical machine")
+	}
+	return nil
+}
+
+func (o *PhysicalMachineInitOptions) Run(args []string) error {
+	if len(args) < 1 {
+		return fmt.Errorf("please provide physical machine name")
+	}
+	physicalMachineName := args[0]
+
+	labels, err := label.ParseLabel(o.labels)
+	if err != nil {
+		return err
+	}
+	address := formatAddress(o.remoteIP, o.chaosdPort, true)
+
 	clientset, err := common.InitClientSet()
 	if err != nil {
 		return err
@@ -95,17 +123,20 @@ func (o *PhysicalMachineInitOptions) Run() error {
 		return err
 	}
 
-	// create physical machine
+	sshTunnel := NewSshTunnel(o.remoteIP, o.sshPort, o.sshUser, o.sshPrivateKeyFile)
+	if err := sshTunnel.Open(); err != nil {
+		return err
+	}
+	defer sshTunnel.Close()
 
-	return WriteCertAndKey("/tmp/chaosd-pki", "chaosd", serverCert, serverKey)
-}
+	if err := writeCertAndKeyToRemote(sshTunnel, o.outputPath, ChaosdPkiName, serverCert, serverKey); err != nil {
+		return err
+	}
+	if err := writeCertToRemote(sshTunnel, o.outputPath, "ca", caCert); err != nil {
+		return err
+	}
 
-func SSH() error {
-	return nil
-}
-
-func SFTP() error {
-	return nil
+	return CreatePhysicalMachine(ctx, clientset.CtrlCli, o.namespace, physicalMachineName, address, labels)
 }
 
 func GetChaosdCAFileFromCluster(ctx context.Context, namespace string, c client.Client) (caCert *x509.Certificate, caKey crypto.Signer, err error) {
@@ -118,22 +149,30 @@ func GetChaosdCAFileFromCluster(ctx context.Context, namespace string, c client.
 	}
 
 	var caCertBytes []byte
-	if caCertRaw, ok := secret.Data["ca.crt"]; !ok {
+	var ok bool
+	if caCertBytes, ok = secret.Data["ca.crt"]; !ok {
 		return nil, nil, errors.New("could not found ca cert file in `chaos-mesh-chaosd-client-certs` secret")
-	} else {
-		if _, err = base64.StdEncoding.Decode(caCertBytes, caCertRaw); err != nil {
-			return nil, nil, errors.Wrap(err, "decode ca cert file failed")
-		}
 	}
 
 	var caKeyBytes []byte
-	if caKeyRaw, ok := secret.Data["ca.key"]; !ok {
+	if caKeyBytes, ok = secret.Data["ca.key"]; !ok {
 		return nil, nil, errors.New("could not found ca key file in `chaos-mesh-chaosd-client-certs` secret")
-	} else {
-		if _, err = base64.StdEncoding.Decode(caKeyBytes, caKeyRaw); err != nil {
-			return nil, nil, errors.Wrap(err, "decode ca key file failed")
-		}
 	}
 
 	return ParseCertAndKey(caCertBytes, caKeyBytes)
+}
+
+func writeCertAndKeyToRemote(sshTunnel *SshTunnel, pkiPath, pkiName string, cert *x509.Certificate, key crypto.Signer) error {
+	keyBytes, err := keyutil.MarshalPrivateKeyToPEM(key)
+	if err != nil {
+		return err
+	}
+	if err := writeCertToRemote(sshTunnel, pkiPath, pkiName, cert); err != nil {
+		return err
+	}
+	return sshTunnel.SFTP(pathForKey(pkiPath, pkiName), keyBytes)
+}
+
+func writeCertToRemote(sshTunnel *SshTunnel, pkiPath, pkiName string, cert *x509.Certificate) error {
+	return sshTunnel.SFTP(pathForCert(pkiPath, pkiName), EncodeCertPEM(cert))
 }

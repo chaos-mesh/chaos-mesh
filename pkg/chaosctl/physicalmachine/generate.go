@@ -44,13 +44,26 @@ func NewPhysicalMachineGenerateCmd(logger logr.Logger) (*cobra.Command, error) {
 		SilenceErrors: true,
 		SilenceUsage:  true,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if err := generateOption.Validate(); err != nil {
+				return err
+			}
 			return generateOption.Run()
 		},
 	}
-	generateCmd.PersistentFlags().StringVar(&generateOption.outputPath, "path", "/etc/chaosd/ssl", "path to save generated certs")
+	generateCmd.PersistentFlags().StringVar(&generateOption.outputPath, "path", "/etc/chaosd/pki", "path to save generated certs")
 	generateCmd.PersistentFlags().StringVar(&generateOption.caCertFile, "cacert", "", "file path to cacert file")
 	generateCmd.PersistentFlags().StringVar(&generateOption.caKeyFile, "cakey", "", "file path to cakey file")
 	return generateCmd, nil
+}
+
+func (o *PhysicalMachineGenerateOptions) Validate() error {
+	if len(o.caCertFile) == 0 {
+		return errors.New("please provide filepath to cacert file")
+	}
+	if len(o.caKeyFile) == 0 {
+		return errors.New("please provide filepath to cakey file")
+	}
+	return nil
 }
 
 func (o *PhysicalMachineGenerateOptions) Run() error {
@@ -64,7 +77,7 @@ func (o *PhysicalMachineGenerateOptions) Run() error {
 		return err
 	}
 
-	return WriteCertAndKey(o.outputPath, "chaosd", serverCert, serverKey)
+	return WriteCertAndKey(o.outputPath, ChaosdPkiName, serverCert, serverKey)
 }
 
 func GetChaosdCAFileFromFile(caCertFile, caKeyFile string) (*x509.Certificate, crypto.Signer, error) {
