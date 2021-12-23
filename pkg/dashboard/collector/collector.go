@@ -95,19 +95,6 @@ func (r *ChaosCollector) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		manageFlag = true
 	}
 
-	if obj.IsDeleted() {
-		if !manageFlag {
-			if err = r.archiveExperiment(req.Namespace, req.Name); err != nil {
-				r.Log.Error(err, "failed to archive experiment")
-			}
-		} else {
-			if err = r.event.DeleteByUID(ctx, string(chaosMeta.GetUID())); err != nil {
-				r.Log.Error(err, "failed to delete experiment related events")
-			}
-		}
-		return ctrl.Result{}, nil
-	}
-
 	if err := r.setUnarchivedExperiment(req, obj); err != nil {
 		r.Log.Error(err, "failed to archive experiment")
 		// ignore error here
