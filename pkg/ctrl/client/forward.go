@@ -27,7 +27,6 @@ import (
 )
 
 const (
-	ManagerSvc     = "svc/chaos-mesh-controller-manager"
 	CtrlServerPort = 10082
 )
 
@@ -56,6 +55,6 @@ func ForwardSvcPorts(ctx context.Context, ns, svc string, port uint16) (context.
 	return pfCancel, localPort, err
 }
 
-func ForwardCtrlServer(ctx context.Context, ns string) (context.CancelFunc, uint16, error) {
-	return ForwardSvcPorts(ctx, ns, ManagerSvc, CtrlServerPort)
+func ForwardCtrlServer(ctx context.Context, ns, managerSvc string) (context.CancelFunc, uint16, error) {
+	return ForwardSvcPorts(ctx, ns, "svc/"+managerSvc, CtrlServerPort)
 }

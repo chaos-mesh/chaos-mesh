@@ -25,7 +25,7 @@ import (
 	cm "github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
 )
 
-var managerNamespace string
+var managerNamespace, managerSvc string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -72,7 +72,8 @@ func Execute() {
 		os.Exit(1)
 	}
 
-	rootCmd.Flags().StringVarP(&managerNamespace, "manager-namespace", "m", "chaos-testing", "the namespace chaos-manager in")
+	rootCmd.Flags().StringVarP(&managerNamespace, "manager-namespace", "n", "chaos-testing", "the namespace chaos-controller-manager in")
+	rootCmd.Flags().StringVarP(&managerSvc, "manager-svc", "s", "chaos-mesh-controller-manager", "the service to chaos-controller-manager")
 	rootCmd.AddCommand(debugCommand)
 	rootCmd.AddCommand(completionCmd)
 	rootCmd.AddCommand(forwardCmd)

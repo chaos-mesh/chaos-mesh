@@ -187,7 +187,7 @@ func NewQueryCmd(log logr.Logger) *cobra.Command {
 }
 
 func createClient(ctx context.Context, managerNamespace string) (*ctrlclient.CtrlClient, context.CancelFunc, error) {
-	cancel, port, err := ctrlclient.ForwardCtrlServer(ctx, managerNamespace)
+	cancel, port, err := ctrlclient.ForwardCtrlServer(ctx, managerNamespace, managerSvc)
 	if err != nil {
 		return nil, nil, err
 	}
