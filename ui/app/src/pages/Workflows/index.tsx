@@ -23,6 +23,7 @@ import NotFound from 'components/NotFound'
 import T from 'components/T'
 import { Workflow } from 'api/workflows.type'
 import api from 'api'
+import { comparator } from 'lib/luxon'
 import { useIntervalFetch } from 'lib/hooks'
 import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
@@ -37,7 +38,7 @@ const Workflows = () => {
     api.workflows
       .workflows()
       .then(({ data }) => {
-        setWorkflows(data)
+        setWorkflows(data.sort((a, b) => comparator(b.created_at, a.created_at)))
 
         if (data.every((d) => d.status === 'finished')) {
           clearInterval(intervalID)

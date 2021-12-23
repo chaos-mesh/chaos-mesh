@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+
 import {
   Box,
   Button,
@@ -45,15 +46,17 @@ import RemoveIcon from '@mui/icons-material/Remove'
 import Space from '@ui/mui-extends/esm/Space'
 import T from 'components/T'
 import UndoIcon from '@mui/icons-material/Undo'
-import YAMLEditor from 'components/YAMLEditor'
 import _isEmpty from 'lodash.isempty'
 import api from 'api'
 import { constructWorkflow } from 'lib/formikhelpers'
+import loadable from '@loadable/component'
 import { makeStyles } from '@mui/styles'
 import { resetNewExperiment } from 'slices/experiments'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
 import yaml from 'js-yaml'
+
+const YAMLEditor = loadable(() => import('components/YAMLEditor'))
 
 const useStyles = makeStyles((theme) => ({
   leftSticky: {
