@@ -18,7 +18,6 @@ RUN go install github.com/AlekSi/gocov-xml@v0.0.0-20190121064608-3a14fb1c4737
 RUN go install github.com/matm/gocov-html@v0.0.0-20200509184451-71874e2e203b
 RUN go install github.com/swaggo/swag/cmd/swag@v1.6.7
 RUN go install github.com/onsi/ginkgo/ginkgo@v1.16.4
-RUN go install github.com/golang/mock/mockgen@v1.5.0
 
 FROM debian:buster-slim
 

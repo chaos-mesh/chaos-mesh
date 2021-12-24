@@ -107,7 +107,7 @@ run: generate fmt vet manifests
 NAMESPACE ?= chaos-testing
 # Install CRDs into a cluster
 install: manifests
-	$(HELM_BIN) upgrade --install chaos-mesh helm/chaos-mesh --namespace=${NAMESPACE} --set registry=${DOCKER_REGISTRY} --set dnsServer.create=true --set dashboard.create=true;
+	$(HELM_BIN) upgrade --install chaos-mesh helm/chaos-mesh --namespace=${NAMESPACE} --set images.registry=${DOCKER_REGISTRY} --set dnsServer.create=true --set dashboard.create=true;
 
 clean:
 	rm -rf $(CLEAN_TARGETS)
@@ -320,7 +320,7 @@ e2e-test/image/e2e/bin/e2e.test: images/dev-env/.dockerbuilt
 # Run tests
 CLEAN_TARGETS += cover.out cover.out.tmp
 test: SHELL:=$(RUN_IN_DEV_SHELL)
-test: failpoint-enable generate generate-mock manifests test-utils images/dev-env/.dockerbuilt
+test: failpoint-enable generate manifests test-utils images/dev-env/.dockerbuilt
 	CGO_ENABLED=1 $(GOTEST) -p 1 $$($(PACKAGE_LIST)) -coverprofile cover.out.tmp
 	cat cover.out.tmp | grep -v "_generated.deepcopy.go" > cover.out
 	make failpoint-disable
@@ -348,12 +348,8 @@ swagger_spec:SHELL:=$(RUN_IN_DEV_SHELL)
 swagger_spec: images/dev-env/.dockerbuilt
 	swag init -g cmd/chaos-dashboard/main.go --output pkg/dashboard/swaggerdocs
 
-generate-mock: SHELL:=$(RUN_IN_DEV_SHELL)
-generate-mock: images/dev-env/.dockerbuilt
-	$(GO) generate ./pkg/workflow
-
 .PHONY: all clean test install manifests groupimports fmt vet tidy image \
-	docker-push lint generate config mockgen generate-mock \
+	docker-push lint generate config \
 	install.sh $(GO_TARGET_PHONY) \
 	manager chaosfs chaosdaemon chaos-dashboard \
 	dashboard dashboard-server-frontend gosec-scan \
