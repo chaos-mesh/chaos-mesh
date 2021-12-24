@@ -177,3 +177,29 @@ func PodsValid(fl validator.FieldLevel) bool {
 
 	return true
 }
+
+// PhysicalMachineValid can be used to check whether the physicalMachine name is valid.
+func PhysicalMachineValid(fl validator.FieldLevel) bool {
+	if fl.Field().IsNil() {
+		return true
+	}
+
+	physicalMachines, ok := fl.Field().Interface().(map[string][]string)
+	if !ok {
+		return false
+	}
+
+	for ns, ps := range physicalMachines {
+		if !checkName(ns) {
+			return false
+		}
+
+		for _, p := range ps {
+			if !checkName(p) {
+				return false
+			}
+		}
+	}
+
+	return true
+}
