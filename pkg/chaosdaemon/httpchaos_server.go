@@ -25,6 +25,8 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/go-logr/logr"
+
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
@@ -68,19 +70,25 @@ func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 	log := log.WithValues("Request", in)
 	log.Info("applying http chaos")
 
-	stdio := s.backgroundProcessManager.Stdio(int(in.Instance), in.StartTime)
-	for stdio == nil {
+	if s.backgroundProcessManager.Stdio(int(in.Instance), in.StartTime) == nil {
+		// chaos daemon may restart, create another tproxy instance
 		if err := s.backgroundProcessManager.KillBackgroundProcess(ctx, int(in.Instance), in.StartTime); err != nil {
 			return nil, err
 		}
 		if err := s.createHttpChaos(ctx, in); err != nil {
 			return nil, err
 		}
-		stdio = s.backgroundProcessManager.Stdio(int(in.Instance), in.StartTime)
+	}
+	return s.applyHttpChaos(ctx, log, in)
+}
+
+func (s *DaemonServer) applyHttpChaos(ctx context.Context, logger logr.Logger, in *pb.ApplyHttpChaosRequest) (*pb.ApplyHttpChaosResponse, error) {
+	stdio := s.backgroundProcessManager.Stdio(int(in.Instance), in.StartTime)
+	if stdio == nil {
+		return nil, fmt.Errorf("fail to get stdio of instance(%d)", in.Instance)
 	}
 
 	transport := stdioTransport{stdio: stdio}
-
 	rules := []v1alpha1.PodHttpChaosBaseRule{}
 	err := json.Unmarshal([]byte(in.Rules), &rules)
 	if err != nil {
