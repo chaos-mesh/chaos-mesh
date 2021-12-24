@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 
 	"github.com/pkg/errors"
 
@@ -123,7 +124,10 @@ func (o *PhysicalMachineInitOptions) Run(args []string) error {
 		return err
 	}
 
-	sshTunnel := NewSshTunnel(o.remoteIP, o.sshPort, o.sshUser, o.sshPrivateKeyFile)
+	sshTunnel, err := NewSshTunnel(o.remoteIP, strconv.Itoa(o.sshPort), o.sshUser, o.sshPrivateKeyFile)
+	if err != nil {
+		return err
+	}
 	if err := sshTunnel.Open(); err != nil {
 		return err
 	}

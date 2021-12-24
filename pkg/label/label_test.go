@@ -59,11 +59,11 @@ func TestParseLabel(t *testing.T) {
 	g.Expect(reflect.DeepEqual(labelMap2, result)).To(Equal(true))
 
 	label3 := ""
-	result, err = ParseLabel(label3)
+	_, err = ParseLabel(label3)
 	g.Expect(err).ToNot(HaveOccurred())
 
 	label4 := "k1=v2,,"
-	result, err = ParseLabel(label4)
+	_, err = ParseLabel(label4)
 	g.Expect(err).To(HaveOccurred())
 	g.Expect(strings.Contains(err.Error(), "invalid labels")).To(BeTrue())
 }

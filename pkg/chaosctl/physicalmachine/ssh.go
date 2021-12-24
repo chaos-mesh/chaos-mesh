@@ -16,9 +16,13 @@
 package physicalmachine
 
 import (
+	"bufio"
 	"fmt"
 	"io/ioutil"
+	"net"
+	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/pkg/errors"
@@ -29,11 +33,15 @@ import (
 type SshTunnel struct {
 	config *ssh.ClientConfig
 	host   string
-	port   int
+	port   string
 	client *ssh.Client
 }
 
-func NewSshTunnel(ip string, port int, user, privateKeyFile string) *SshTunnel {
+func NewSshTunnel(ip, port string, user, privateKeyFile string) (*SshTunnel, error) {
+	hostKey, err := getHostKey(ip)
+	if err != nil {
+		return nil, err
+	}
 	config := ssh.ClientConfig{
 		Timeout: 5 * time.Minute,
 		User:    user,
@@ -51,18 +59,18 @@ func NewSshTunnel(ip string, port int, user, privateKeyFile string) *SshTunnel {
 				return []ssh.Signer{signer}, nil
 			}),
 		},
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+		HostKeyCallback: ssh.FixedHostKey(hostKey),
 	}
 	return &SshTunnel{
 		config: &config,
 		host:   ip,
 		port:   port,
-	}
+	}, nil
 }
 
 func (s *SshTunnel) Open() error {
 	// first, try ssh with public keys
-	conn, err := ssh.Dial("tcp", fmt.Sprintf("%s:%d", s.host, s.port), s.config)
+	conn, err := ssh.Dial("tcp", net.JoinHostPort(s.host, s.port), s.config)
 	if err != nil {
 		// if failed, try ssh with password
 		fmt.Printf("please input the password: ")
@@ -70,7 +78,7 @@ func (s *SshTunnel) Open() error {
 		fmt.Scanf("%s\n", &password)
 
 		s.config.Auth = []ssh.AuthMethod{ssh.Password(password)}
-		conn, err = ssh.Dial("tcp", fmt.Sprintf("%s:%d", s.host, s.port), s.config)
+		conn, err = ssh.Dial("tcp", net.JoinHostPort(s.host, s.port), s.config)
 		if err != nil {
 			return err
 		}
@@ -112,4 +120,34 @@ func (s *SshTunnel) SFTP(filename string, data []byte) error {
 		return err
 	}
 	return nil
+}
+
+func getHostKey(host string) (ssh.PublicKey, error) {
+	file, err := os.Open(filepath.Join(os.Getenv("HOME"), ".ssh", "known_hosts"))
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	var hostKey ssh.PublicKey
+	for scanner.Scan() {
+		fields := strings.Split(scanner.Text(), " ")
+		if len(fields) != 3 {
+			continue
+		}
+		if strings.Contains(fields[0], host) {
+			var err error
+			hostKey, _, _, _, err = ssh.ParseAuthorizedKey(scanner.Bytes())
+			if err != nil {
+				return nil, fmt.Errorf("error parsing %q: %v", fields[2], err)
+			}
+			break
+		}
+	}
+
+	if hostKey == nil {
+		return nil, fmt.Errorf("no hostkey for %s", host)
+	}
+	return hostKey, nil
 }
