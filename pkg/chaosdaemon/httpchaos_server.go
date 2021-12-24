@@ -27,9 +27,9 @@ import (
 
 	"github.com/go-logr/logr"
 
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/tproxyconfig"
 )
 
 const (
@@ -39,11 +39,6 @@ const (
 
 type stdioTransport struct {
 	stdio *bpm.Stdio
-}
-
-type tproxyConfig struct {
-	ProxyPorts []uint32                        `json:"proxy_ports"`
-	Rules      []v1alpha1.PodHttpChaosBaseRule `json:"rules"`
 }
 
 func (t stdioTransport) RoundTrip(req *http.Request) (resp *http.Response, err error) {
@@ -89,7 +84,8 @@ func (s *DaemonServer) applyHttpChaos(ctx context.Context, logger logr.Logger, i
 	}
 
 	transport := stdioTransport{stdio: stdio}
-	rules := []v1alpha1.PodHttpChaosBaseRule{}
+	
+	var rules []tproxyconfig.PodHttpChaosBaseRule
 	err := json.Unmarshal([]byte(in.Rules), &rules)
 	if err != nil {
 		log.Error(err, "error while unmarshal json bytes")
@@ -98,8 +94,8 @@ func (s *DaemonServer) applyHttpChaos(ctx context.Context, logger logr.Logger, i
 
 	log.Info("the length of actions", "length", len(rules))
 
-	httpChaosSpec := tproxyConfig{
-		ProxyPorts: append([]uint32{}, in.ProxyPorts...),
+	httpChaosSpec := tproxyconfig.Config{
+		ProxyPorts: in.ProxyPorts,
 		Rules:      rules,
 	}
 

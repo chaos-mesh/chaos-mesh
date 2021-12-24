@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/onsi/ginkgo"
@@ -228,26 +229,40 @@ var _ = ginkgo.Describe("[Basic]", func() {
 		})
 	})
 
-	// http chaos case in [HTTPChaos] context
+	//http chaos case in [HTTPChaos] context
 	ginkgo.Context("[HTTPChaos]", func() {
-
 		var (
 			err      error
 			port     uint16
 			pfCancel context.CancelFunc
+			client   httpchaostestcases.HTTPE2EClient
 		)
 
 		ginkgo.JustBeforeEach(func() {
 			svc := fixture.NewE2EService("http", ns)
-			_, err = kubeCli.CoreV1().Services(ns).Create(context.TODO(), svc, metav1.CreateOptions{})
+			svc, err = kubeCli.CoreV1().Services(ns).Create(context.TODO(), svc, metav1.CreateOptions{})
 			framework.ExpectNoError(err, "create service error")
+			for _, servicePort := range svc.Spec.Ports {
+				if servicePort.Name == "http" {
+					port = uint16(servicePort.NodePort)
+					break
+				}
+			}
 			nd := fixture.NewHTTPTestDeployment("http-test", ns)
 			_, err = kubeCli.AppsV1().Deployments(ns).Create(context.TODO(), nd, metav1.CreateOptions{})
 			framework.ExpectNoError(err, "create http-test deployment error")
 			err = util.WaitDeploymentReady("http-test", ns, kubeCli)
 			framework.ExpectNoError(err, "wait http-test deployment ready error")
-			_, port, pfCancel, err = portforward.ForwardOnePort(fw, ns, "svc/http", 8080)
-			framework.ExpectNoError(err, "create helper io port port-forward failed")
+			podlist, err := kubeCli.CoreV1().Pods(ns).List(context.TODO(), metav1.ListOptions{})
+			framework.ExpectNoError(err, "find pod list error")
+			for _, item := range podlist.Items {
+				if strings.Contains(item.Name, "http-test") {
+					framework.Logf("get http-test-pod %v", item)
+					client.IP = item.Status.HostIP
+					break
+				}
+			}
+			client.C = &c
 		})
 
 		ginkgo.JustAfterEach(func() {
@@ -259,40 +274,40 @@ var _ = ginkgo.Describe("[Basic]", func() {
 		// http chaos case in [HTTPDelay] context
 		ginkgo.Context("[HTTPDelay]", func() {
 			ginkgo.It("[Schedule]", func() {
-				httpchaostestcases.TestcaseHttpDelayDurationForATimeThenRecover(ns, cli, c, port)
+				httpchaostestcases.TestcaseHttpDelayDurationForATimeThenRecover(ns, cli, client, port)
 			})
 			ginkgo.It("[Pause]", func() {
-				httpchaostestcases.TestcaseHttpDelayDurationForATimePauseAndUnPause(ns, cli, c, port)
+				httpchaostestcases.TestcaseHttpDelayDurationForATimePauseAndUnPause(ns, cli, client, port)
 			})
 		})
 
 		// http chaos case in [HTTPAbort] context
 		ginkgo.Context("[HTTPAbort]", func() {
 			ginkgo.It("[Schedule]", func() {
-				httpchaostestcases.TestcaseHttpAbortThenRecover(ns, cli, c, port)
+				httpchaostestcases.TestcaseHttpAbortThenRecover(ns, cli, client, port)
 			})
 			ginkgo.It("[Pause]", func() {
-				httpchaostestcases.TestcaseHttpAbortPauseAndUnPause(ns, cli, c, port)
+				httpchaostestcases.TestcaseHttpAbortPauseAndUnPause(ns, cli, client, port)
 			})
 		})
 
 		// http chaos case in [HTTPReplace] context
 		ginkgo.Context("[HTTPReplace]", func() {
 			ginkgo.It("[Schedule]", func() {
-				httpchaostestcases.TestcaseHttpReplaceThenRecover(ns, cli, c, port)
+				httpchaostestcases.TestcaseHttpReplaceThenRecover(ns, cli, client, port)
 			})
 			ginkgo.It("[Pause]", func() {
-				httpchaostestcases.TestcaseHttpReplacePauseAndUnPause(ns, cli, c, port)
+				httpchaostestcases.TestcaseHttpReplacePauseAndUnPause(ns, cli, client, port)
 			})
 		})
 
 		// http chaos case in [HTTPPatch] context
 		ginkgo.Context("[HTTPPatch]", func() {
 			ginkgo.It("[Schedule]", func() {
-				httpchaostestcases.TestcaseHttpPatchThenRecover(ns, cli, c, port)
+				httpchaostestcases.TestcaseHttpPatchThenRecover(ns, cli, client, port)
 			})
 			ginkgo.It("[Pause]", func() {
-				httpchaostestcases.TestcaseHttpPatchPauseAndUnPause(ns, cli, c, port)
+				httpchaostestcases.TestcaseHttpPatchPauseAndUnPause(ns, cli, client, port)
 			})
 		})
 	})

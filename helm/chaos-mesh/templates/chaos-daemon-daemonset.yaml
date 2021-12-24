@@ -115,6 +115,8 @@ spec:
               {{- end }}
             - name: sys-path
               mountPath: /host-sys
+            - name: lib-modules
+              mountPath: /lib/modules
             {{- if .Values.dashboard.securityMode}}
             - name: chaos-daemon-cert
               mountPath: /etc/chaos-daemon/cert
@@ -177,6 +179,9 @@ spec:
         - name: sys-path
           hostPath:
             path: /sys
+        - name: lib-modules
+          hostPath:
+            path: /lib/modules
         {{- if .Values.dashboard.securityMode}}
         - name: chaos-daemon-cert
           secret:

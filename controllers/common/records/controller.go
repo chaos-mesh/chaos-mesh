@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 
-package common
+package records
 
 import (
 	"context"
@@ -27,21 +27,17 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 )
 
-type ChaosImpl interface {
-	Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error)
-	Recover(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error)
-}
-
-// Reconciler for common chaos
+// Reconciler for chaos records
 type Reconciler struct {
-	Impl ChaosImpl
+	Impl types.ChaosImpl
 
 	// Object is used to mark the target type of this Reconciler
-	Object v1alpha1.InnerObjectWithSelector
+	Object v1alpha1.InnerObject
 
 	// Client is used to operate on the Kubernetes cluster
 	client.Client
@@ -62,7 +58,7 @@ const (
 	Nothing Operation = ""
 )
 
-// Reconcile the common chaos
+// Reconcile the chaos records
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	obj := r.Object.DeepCopyObject().(v1alpha1.InnerObjectWithSelector)
 
