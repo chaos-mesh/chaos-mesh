@@ -84,7 +84,7 @@ func (s *DaemonServer) applyHttpChaos(ctx context.Context, logger logr.Logger, i
 	}
 
 	transport := stdioTransport{stdio: stdio}
-	
+
 	var rules []tproxyconfig.PodHttpChaosBaseRule
 	err := json.Unmarshal([]byte(in.Rules), &rules)
 	if err != nil {
