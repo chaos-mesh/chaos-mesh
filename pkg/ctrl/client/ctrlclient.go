@@ -138,7 +138,7 @@ func (c *CtrlClient) GetQueryType() (*Type, error) {
 }
 
 // list tail arguments, expected queryStr: ["prefix1", "prefix2", "resource"]
-func (c *CtrlClient) ListArguments(ctx context.Context, queryStr []string, argumentName string) ([]string, error) {
+func (c *CtrlClient) ListArguments(ctx context.Context, queryStr []string, argumentName, startWith string) ([]string, error) {
 	queryType, err := c.GetQueryType()
 	if err != nil {
 		return nil, err
@@ -166,8 +166,7 @@ func (c *CtrlClient) ListArguments(ctx context.Context, queryStr []string, argum
 	if err != nil {
 		return nil, err
 	}
-
-	arguments, err := listArguments(queryValue, query, queryStr[len(queryStr)-1])
+	arguments, err := listArguments(queryValue, query, startWith)
 	if err != nil {
 		return nil, err
 	}
@@ -335,7 +334,7 @@ func (c *CtrlClient) completeObject(ctx *AutoCompleteContext, root *Type, comple
 			}
 		} else {
 			query := append([]string{}, ctx.query...)
-			args, err = c.ListArguments(ctx, append(query, string(field.Name)), string(field.Args[0].Name))
+			args, err = c.ListArguments(ctx, append(query, string(field.Name)), string(field.Args[0].Name), "")
 			if err != nil {
 				return nil, err
 			}

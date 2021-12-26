@@ -18,34 +18,27 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/go-logr/logr"
 	"github.com/spf13/cobra"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug/iochaos"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug/networkchaos"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug/stresschaos"
-	"github.com/chaos-mesh/chaos-mesh/pkg/grpc"
+	ctrlclient "github.com/chaos-mesh/chaos-mesh/pkg/ctrl/client"
 )
 
 type DebugOptions struct {
-	logger     logr.Logger
-	namespace  string
-	CaCertFile string
-	CertFile   string
-	KeyFile    string
-	Insecure   bool
+	logger    logr.Logger
+	namespace string
 }
 
 const (
 	networkChaos = "networkchaos"
 	stressChaos  = "stresschaos"
 	ioChaos      = "iochaos"
+	httpChaos    = "httpchaos"
 )
 
 func NewDebugCommand(logger logr.Logger) (*cobra.Command, error) {
@@ -83,14 +76,7 @@ Examples:
 		SilenceErrors: true,
 		SilenceUsage:  true,
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			clientset, err := common.InitClientSet()
-			if err != nil {
-				return nil, cobra.ShellCompDirectiveDefault
-			}
-			if len(args) != 0 {
-				return nil, cobra.ShellCompDirectiveNoFileComp
-			}
-			return listChaos(networkChaos, o.namespace, toComplete, clientset.CtrlCli)
+			return validArgsChaos(networkChaos, o.namespace, args, toComplete)
 		},
 	}
 
@@ -108,14 +94,7 @@ Examples:
 		SilenceErrors: true,
 		SilenceUsage:  true,
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			clientset, err := common.InitClientSet()
-			if err != nil {
-				return nil, cobra.ShellCompDirectiveDefault
-			}
-			if len(args) != 0 {
-				return nil, cobra.ShellCompDirectiveNoFileComp
-			}
-			return listChaos(stressChaos, o.namespace, toComplete, clientset.CtrlCli)
+			return validArgsChaos(stressChaos, o.namespace, args, toComplete)
 		},
 	}
 
@@ -134,32 +113,50 @@ Examples:
 		SilenceErrors: true,
 		SilenceUsage:  true,
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			return validArgsChaos(ioChaos, o.namespace, args, toComplete)
+		},
+	}
+
+	httpCmd := &cobra.Command{
+		Use:   `httpchaos (CHAOSNAME) [-n NAMESPACE]`,
+		Short: `Print the debug information for certain http chaos`,
+		Long:  `Print the debug information for certain http chaos`,
+		RunE: func(cmd *cobra.Command, args []string) error {
 			clientset, err := common.InitClientSet()
 			if err != nil {
-				return nil, cobra.ShellCompDirectiveDefault
+				return err
 			}
-			if len(args) != 0 {
-				return nil, cobra.ShellCompDirectiveNoFileComp
-			}
-			return listChaos(ioChaos, o.namespace, toComplete, clientset.CtrlCli)
+			return o.Run(httpChaos, args, clientset)
+
+		},
+		SilenceErrors: true,
+		SilenceUsage:  true,
+		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			return validArgsChaos(httpChaos, o.namespace, args, toComplete)
 		},
 	}
 
 	debugCmd.AddCommand(networkCmd)
 	debugCmd.AddCommand(stressCmd)
 	debugCmd.AddCommand(ioCmd)
+	debugCmd.AddCommand(httpCmd)
 
 	debugCmd.PersistentFlags().StringVarP(&o.namespace, "namespace", "n", "default", "namespace to find chaos")
-	debugCmd.PersistentFlags().StringVar(&o.CaCertFile, "cacert", "", "file path to cacert file")
-	debugCmd.PersistentFlags().StringVar(&o.CertFile, "cert", "", "file path to cert file")
-	debugCmd.PersistentFlags().StringVar(&o.KeyFile, "key", "", "file path to key file")
-	debugCmd.PersistentFlags().BoolVarP(&o.Insecure, "insecure", "i", false, "insecure mode will use unauthorized grpc")
 	err := debugCmd.RegisterFlagCompletionFunc("namespace", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		clientset, err := common.InitClientSet()
+		client, cancel, err := createClient(context.TODO(), managerNamespace)
 		if err != nil {
-			return nil, cobra.ShellCompDirectiveDefault
+			logger.Error(err, "fail to create client")
+			return nil, cobra.ShellCompDirectiveNoFileComp
 		}
-		return listNamespace(toComplete, clientset.KubeCli)
+		defer cancel()
+
+		completion, err := client.ListNamespace(context.TODO())
+		if err != nil {
+			logger.Error(err, "fail to complete resource")
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		}
+
+		return completion, cobra.ShellCompDirectiveNoFileComp | cobra.ShellCompDirectiveNoSpace
 	})
 	return debugCmd, err
 }
@@ -182,8 +179,6 @@ func (o *DebugOptions) Run(chaosType string, args []string, c *common.ClientSet)
 		return err
 	}
 	var result []common.ChaosResult
-	common.TLSFiles = grpc.TLSFile{CaCert: o.CaCertFile, Cert: o.CertFile, Key: o.KeyFile}
-	common.Insecure = o.Insecure
 
 	for i, chaos := range chaosList {
 		var chaosResult common.ChaosResult
@@ -210,33 +205,24 @@ func (o *DebugOptions) Run(chaosType string, args []string, c *common.ClientSet)
 	return nil
 }
 
-func listNamespace(toComplete string, c *kubernetes.Clientset) ([]string, cobra.ShellCompDirective) {
-	// FIXME: get context from parameter
-	namespaces, err := c.CoreV1().Namespaces().List(context.TODO(), v1.ListOptions{})
-	if err != nil {
-		return nil, cobra.ShellCompDirectiveDefault
-	}
-	var ret []string
-	for _, ns := range namespaces.Items {
-		if strings.HasPrefix(ns.Name, toComplete) {
-			ret = append(ret, ns.Name)
-		}
-	}
-	return ret, cobra.ShellCompDirectiveNoFileComp
+func listChaos(ctx context.Context, chaosType, namespace, toComplete string, c *ctrlclient.CtrlClient) ([]string, error) {
+	return c.ListArguments(ctx, []string{fmt.Sprintf("%s:%s", ctrlclient.NamespaceKey, namespace), chaosType}, "name", toComplete)
 }
 
-func listChaos(chaosType string, namespace string, toComplete string, c client.Client) ([]string, cobra.ShellCompDirective) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	_, chaosList, err := common.GetChaosList(ctx, chaosType, "", namespace, c)
+func validArgsChaos(chaosType, namespace string, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	if len(args) != 0 {
+		return nil, cobra.ShellCompDirectiveNoFileComp
+	}
+
+	client, cancel, err := createClient(context.TODO(), managerNamespace)
 	if err != nil {
-		return nil, cobra.ShellCompDirectiveDefault
+		return nil, cobra.ShellCompDirectiveNoFileComp
 	}
-	var ret []string
-	for _, chaos := range chaosList {
-		if strings.HasPrefix(chaos, toComplete) {
-			ret = append(ret, chaos)
-		}
+	defer cancel()
+
+	list, err := listChaos(context.TODO(), httpChaos, namespace, toComplete, client)
+	if err != nil {
+		return nil, cobra.ShellCompDirectiveNoFileComp
 	}
-	return ret, cobra.ShellCompDirectiveNoFileComp
+	return list, cobra.ShellCompDirectiveDefault
 }
