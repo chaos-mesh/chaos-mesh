@@ -14,7 +14,8 @@ jobs:
         uses: actions/checkout@v2
       - name: Unit Test
         run: |
-          make ensure-all test
+          ROOT=$(pwd)
+          KUBEBUILDER_ASSETS=${ROOT}/output/bin/kubebuilder/bin make test
       - name: Upload Code Coverage
         uses: codecov/codecov-action@v2
         with:
