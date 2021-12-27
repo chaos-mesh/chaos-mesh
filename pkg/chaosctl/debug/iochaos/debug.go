@@ -1,4 +1,19 @@
-package httpchaos
+// Copyright 2021 Chaos Mesh Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+package iochaos
 
 import (
 	"context"
@@ -23,13 +38,13 @@ func Debug(ctx context.Context, namespace, chaosName string, client *ctrlclient.
 
 	var query struct {
 		Namespace []struct {
-			HTTPChaos []struct {
-				Name    string
-				Podhttp []struct {
+			IOChaos []struct {
+				Name   string
+				Podios []struct {
 					Namespace string
 					Name      string
 					Pod       struct {
-						Iptables  string
+						Mounts    []string
 						Processes []struct {
 							Pid     string
 							Command string
@@ -39,7 +54,7 @@ func Debug(ctx context.Context, namespace, chaosName string, client *ctrlclient.
 						}
 					}
 				}
-			} `graphql:"httpchaos(name: $name)"`
+			} `graphql:"iochaos(name: $name)"`
 		} `graphql:"namespace(ns: $namespace)"`
 	}
 
@@ -57,20 +72,20 @@ func Debug(ctx context.Context, namespace, chaosName string, client *ctrlclient.
 		return results, nil
 	}
 
-	httpChaosList := &query.Namespace[0].HTTPChaos
+	ioChaosList := &query.Namespace[0].IOChaos
 
-	for _, httpChaos := range *httpChaosList {
+	for _, ioChaos := range *ioChaosList {
 		result := &common.ChaosResult{
-			Name: string(httpChaos.Name),
+			Name: ioChaos.Name,
 		}
 
-		for _, podhttpchaos := range httpChaos.Podhttp {
+		for _, podiochaos := range ioChaos.Podios {
 			podResult := common.PodResult{
-				Name: string(podhttpchaos.Name),
+				Name: podiochaos.Name,
 			}
 
-			podResult.Items = append(podResult.Items, common.ItemResult{Name: "Iptables", Value: string(podhttpchaos.Pod.Iptables)})
-			for _, process := range podhttpchaos.Pod.Processes {
+			podResult.Items = append(podResult.Items, common.ItemResult{Name: "Mount Information", Value: strings.Join(podiochaos.Pod.Mounts, "\n")})
+			for _, process := range podiochaos.Pod.Processes {
 				var fds []string
 				for _, fd := range process.Fds {
 					fds = append(fds, fmt.Sprintf("%s -> %s", fd.Fd, fd.Target))

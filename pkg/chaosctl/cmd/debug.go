@@ -24,6 +24,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug/httpchaos"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug/iochaos"
 	ctrlclient "github.com/chaos-mesh/chaos-mesh/pkg/ctrl/client"
 )
 
@@ -123,6 +124,8 @@ func (o *DebugOptions) Run(chaosType string, args []string, client *ctrlclient.C
 	var err error
 
 	switch chaosType {
+	case ioChaos:
+		result, err = iochaos.Debug(ctx, o.namespace, chaosName, client)
 	case httpChaos:
 		result, err = httpchaos.Debug(ctx, o.namespace, chaosName, client)
 	default:
@@ -152,8 +155,8 @@ func validArgsChaos(chaosType, namespace string, args []string, toComplete strin
 	}
 	defer cancel()
 
-	list, err := listChaos(context.TODO(), httpChaos, namespace, toComplete, client)
-	if err != nil {
+	list, err := listChaos(context.TODO(), chaosType, namespace, toComplete, client)
+	if err != nil || len(list) == 0 {
 		return nil, cobra.ShellCompDirectiveNoFileComp
 	}
 	return list, cobra.ShellCompDirectiveDefault

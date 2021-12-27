@@ -16,8 +16,6 @@
 package cmd
 
 import (
-	"fmt"
-	"log"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -46,7 +44,9 @@ Interacting with chaos mesh
 func Execute() {
 	rootLogger, flushFunc, err := cm.NewStderrLogger()
 	if err != nil {
-		log.Fatal("failed to initialize logger", err)
+		cm.PrettyPrint("failed to initialize logger: ", 0, cm.Red)
+		cm.PrettyPrint(err.Error(), 1, cm.Red)
+		os.Exit(1)
 	}
 	if flushFunc != nil {
 		defer flushFunc()
@@ -55,20 +55,16 @@ func Execute() {
 
 	logsCmd, err := NewLogsCmd(rootLogger.WithName("cmd-logs"))
 	if err != nil {
-		rootLogger.Error(err, "failed to initialize cmd",
-			"cmd", "logs",
-			"errorVerbose", fmt.Sprintf("%+v", err),
-		)
+		cm.PrettyPrint("failed to initialize cmd: ", 0, cm.Red)
+		cm.PrettyPrint("log command: "+err.Error(), 1, cm.Red)
 		os.Exit(1)
 	}
 	rootCmd.AddCommand(logsCmd)
 
 	debugCommand, err := NewDebugCommand(rootLogger.WithName("cmd-debug"))
 	if err != nil {
-		rootLogger.Error(err, "failed to initialize cmd",
-			"cmd", "debug",
-			"errorVerbose", fmt.Sprintf("%+v", err),
-		)
+		cm.PrettyPrint("failed to initialize cmd: ", 0, cm.Red)
+		cm.PrettyPrint("debug command: "+err.Error(), 1, cm.Red)
 		os.Exit(1)
 	}
 
@@ -80,9 +76,8 @@ func Execute() {
 	rootCmd.AddCommand(schemaCmd)
 	rootCmd.AddCommand(NewQueryCmd(rootLogger.WithName("query")))
 	if err := rootCmd.Execute(); err != nil {
-		rootLogger.Error(err, "failed to execute cmd",
-			"errorVerbose", fmt.Sprintf("%+v", err),
-		)
+		cm.PrettyPrint("failed to execute cmd: ", 0, cm.Red)
+		cm.PrettyPrint(err.Error(), 1, cm.Red)
 	}
 }
 
