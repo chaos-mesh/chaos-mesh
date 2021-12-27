@@ -28,7 +28,7 @@ jobs:
         with:
           filters: |
             go:
-              - makefile
+              - Makefile
               - go.*
               - '**.go'
             ui:
