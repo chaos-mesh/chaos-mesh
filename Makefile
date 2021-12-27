@@ -20,11 +20,9 @@ HELM_BIN=$(OUTPUT_BIN)/helm
 IMAGE_BUILD_ENV_PROJECT ?= chaos-mesh
 IMAGE_BUILD_ENV_REGISTRY ?= ghcr.io
 IMAGE_BUILD_ENV_BUILD ?= 0
-IMAGE_BUILD_ENV_TAG ?= latest
 IMAGE_DEV_ENV_PROJECT ?= chaos-mesh
 IMAGE_DEV_ENV_REGISTRY ?= ghcr.io
 IMAGE_DEV_ENV_BUILD ?= 0
-IMAGE_DEV_ENV_TAG ?= latest
 
 # Enable GO111MODULE=on explicitly, disable it with GO111MODULE=off when necessary.
 export GO111MODULE := on
