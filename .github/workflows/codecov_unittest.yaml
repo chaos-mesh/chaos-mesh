@@ -4,12 +4,12 @@ name: Unit Test And Code Coverage
 on:
   pull_request:
     paths:
-      - makefile
+      - Makefile
       - go.*
       - "**.go"
   push:
     paths:
-      - makefile
+      - Makefile
       - go.*
       - "**.go"
 
