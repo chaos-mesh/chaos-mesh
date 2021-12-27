@@ -61,85 +61,10 @@ Examples:
 		ValidArgsFunction: noCompletions,
 	}
 
-	// Need to separately support chaos-level completion, so split each chaos apart
-	networkCmd := &cobra.Command{
-		Use:   `networkchaos (CHAOSNAME) [-n NAMESPACE]`,
-		Short: `Print the debug information for certain network chaos`,
-		Long:  `Print the debug information for certain network chaos`,
-		RunE: func(cmd *cobra.Command, args []string) error {
-			clientset, err := common.InitClientSet()
-			if err != nil {
-				return err
-			}
-			return o.Run(networkChaos, args, clientset)
-		},
-		SilenceErrors: true,
-		SilenceUsage:  true,
-		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			return validArgsChaos(networkChaos, o.namespace, args, toComplete)
-		},
-	}
-
-	stressCmd := &cobra.Command{
-		Use:   `stresschaos (CHAOSNAME) [-n NAMESPACE]`,
-		Short: `Print the debug information for certain stress chaos`,
-		Long:  `Print the debug information for certain stress chaos`,
-		RunE: func(cmd *cobra.Command, args []string) error {
-			clientset, err := common.InitClientSet()
-			if err != nil {
-				return err
-			}
-			return o.Run(stressChaos, args, clientset)
-		},
-		SilenceErrors: true,
-		SilenceUsage:  true,
-		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			return validArgsChaos(stressChaos, o.namespace, args, toComplete)
-		},
-	}
-
-	ioCmd := &cobra.Command{
-		Use:   `iochaos (CHAOSNAME) [-n NAMESPACE]`,
-		Short: `Print the debug information for certain io chaos`,
-		Long:  `Print the debug information for certain io chaos`,
-		RunE: func(cmd *cobra.Command, args []string) error {
-			clientset, err := common.InitClientSet()
-			if err != nil {
-				return err
-			}
-			return o.Run(ioChaos, args, clientset)
-
-		},
-		SilenceErrors: true,
-		SilenceUsage:  true,
-		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			return validArgsChaos(ioChaos, o.namespace, args, toComplete)
-		},
-	}
-
-	httpCmd := &cobra.Command{
-		Use:   `httpchaos (CHAOSNAME) [-n NAMESPACE]`,
-		Short: `Print the debug information for certain http chaos`,
-		Long:  `Print the debug information for certain http chaos`,
-		RunE: func(cmd *cobra.Command, args []string) error {
-			clientset, err := common.InitClientSet()
-			if err != nil {
-				return err
-			}
-			return o.Run(httpChaos, args, clientset)
-
-		},
-		SilenceErrors: true,
-		SilenceUsage:  true,
-		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			return validArgsChaos(httpChaos, o.namespace, args, toComplete)
-		},
-	}
-
-	debugCmd.AddCommand(networkCmd)
-	debugCmd.AddCommand(stressCmd)
-	debugCmd.AddCommand(ioCmd)
-	debugCmd.AddCommand(httpCmd)
+	debugCmd.AddCommand(debugResouceCommand(o, networkChaos))
+	debugCmd.AddCommand(debugResouceCommand(o, stressChaos))
+	debugCmd.AddCommand(debugResouceCommand(o, ioChaos))
+	debugCmd.AddCommand(debugResouceCommand(o, httpChaos))
 
 	debugCmd.PersistentFlags().StringVarP(&o.namespace, "namespace", "n", "default", "namespace to find chaos")
 	err := debugCmd.RegisterFlagCompletionFunc("namespace", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -159,6 +84,27 @@ Examples:
 		return completion, cobra.ShellCompDirectiveNoFileComp | cobra.ShellCompDirectiveNoSpace
 	})
 	return debugCmd, err
+}
+
+func debugResouceCommand(option *DebugOptions, chaosType string) *cobra.Command {
+	return &cobra.Command{
+		Use:   fmt.Sprintf(`%s (CHAOSNAME) [-n NAMESPACE]`, chaosType),
+		Short: fmt.Sprintf(`Print the debug information for certain %s`, chaosType),
+		Long:  fmt.Sprintf(`Print the debug information for certain %s`, chaosType),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientset, err := common.InitClientSet()
+			if err != nil {
+				return err
+			}
+			return option.Run(chaosType, args, clientset)
+
+		},
+		SilenceErrors: true,
+		SilenceUsage:  true,
+		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			return validArgsChaos(chaosType, option.namespace, args, toComplete)
+		},
+	}
 }
 
 // Run debug
