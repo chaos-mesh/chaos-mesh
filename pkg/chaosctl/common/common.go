@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"io"
 	"regexp"
-	"strings"
 
 	"github.com/fatih/color"
 	"github.com/pkg/errors"
@@ -95,11 +94,6 @@ type ItemResult struct {
 func init() {
 	_ = v1alpha1.AddToScheme(scheme)
 	_ = clientgoscheme.AddToScheme(scheme)
-}
-
-func upperCaseChaos(str string) string {
-	parts := regexp.MustCompile("(.*)(chaos)").FindStringSubmatch(str)
-	return strings.Title(parts[1]) + strings.Title(parts[2])
 }
 
 // PrettyPrint print with tab number and color
