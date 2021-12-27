@@ -119,13 +119,6 @@ def build(String name, String code) {
 							docker version
 							"""
 						}
-						stage('Extract docker cache') {
-							ansiColor('xterm') {
-								sh """
-								tar xvf /cache.tar.gz
-								"""
-							}
-						}
 						stage('Copy binary tools') {
 							ansiColor('xterm') {
 								sh """
