@@ -17,142 +17,80 @@ package networkchaos
 
 import (
 	"context"
-	"fmt"
-	"io/ioutil"
-	"regexp"
-	"strconv"
-	"strings"
 
-	"github.com/pkg/errors"
-	"google.golang.org/grpc/grpclog"
-	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	"github.com/hasura/go-graphql-client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
 	cm "github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
+
+	ctrlclient "github.com/chaos-mesh/chaos-mesh/pkg/ctrl/client"
 )
 
 // Debug get chaos debug information
-func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet, result *cm.ChaosResult) error {
-	networkChaos, ok := chaos.(*v1alpha1.NetworkChaos)
-	if !ok {
-		return fmt.Errorf("chaos is not network")
-	}
-	chaosStatus := networkChaos.Status.ChaosStatus
-	chaosSelector := networkChaos.Spec.Selector
+func Debug(ctx context.Context, namespace, chaosName string, client *ctrlclient.CtrlClient) ([]*common.ChaosResult, error) {
+	var results []*common.ChaosResult
 
-	pods, daemons, err := cm.GetPods(ctx, networkChaos.GetName(), chaosStatus, chaosSelector, c.CtrlCli)
+	var name *graphql.String
+	if chaosName != "" {
+		n := graphql.String(chaosName)
+		name = &n
+	}
+
+	var query struct {
+		Namespace []struct {
+			NetworkChaos []struct {
+				Name       string
+				Podnetwork []struct {
+					Spec      *v1alpha1.PodNetworkChaosSpec
+					Namespace string
+					Name      string
+					Pod       struct {
+						Ipset    string
+						TcQdisc  string
+						Iptables string
+					}
+				}
+			} `graphql:"networkchaos(name: $name)"`
+		} `graphql:"namespace(ns: $namespace)"`
+	}
+
+	variables := map[string]interface{}{
+		"namespace": graphql.String(namespace),
+		"name":      name,
+	}
+
+	err := client.Client.Query(ctx, &query, variables)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	for i := range pods {
-		podName := pods[i].Name
-		podResult := cm.PodResult{Name: podName}
-		err = debugEachPod(ctx, pods[i], daemons[i], networkChaos, c, &podResult)
-		if err != nil {
-			fmt.Println(err)
+	if len(query.Namespace) == 0 {
+		return results, nil
+	}
+
+	for _, networkChaos := range query.Namespace[0].NetworkChaos {
+		result := &common.ChaosResult{
+			Name: networkChaos.Name,
 		}
-		result.Pods = append(result.Pods, podResult)
-		// TODO: V(4) log when err != nil, wait for #1433
-	}
-	return nil
-}
 
-func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha1.NetworkChaos, c *cm.ClientSet, result *cm.PodResult) error {
-	// To disable printing irrelevant log from grpc/clientconn.go
-	// see grpc/grpc-go#3918 for detail. could be resolved in the future
-	grpclog.SetLoggerV2(grpclog.NewLoggerV2(ioutil.Discard, ioutil.Discard, ioutil.Discard))
-	pid, err := cm.GetPidFromPod(ctx, pod, daemon)
-	if err != nil {
-		return err
-	}
-	nsenterPath := fmt.Sprintf("-n/proc/%d/ns/net", pid)
-
-	// print out debug info
-	cmd := fmt.Sprintf("/usr/bin/nsenter %s -- ipset list", nsenterPath)
-	out, err := cm.Exec(ctx, daemon, cmd, c.KubeCli)
-	if err != nil {
-		return errors.Wrap(err, fmt.Sprintf("run command '%s' failed", cmd))
-	}
-	result.Items = append(result.Items, cm.ItemResult{Name: "ipset list", Value: string(out)})
-
-	cmd = fmt.Sprintf("/usr/bin/nsenter %s -- tc qdisc list", nsenterPath)
-	out, err = cm.Exec(ctx, daemon, cmd, c.KubeCli)
-	if err != nil {
-		return errors.Wrap(err, fmt.Sprintf("run command '%s' failed", cmd))
-	}
-	itemResult := cm.ItemResult{Name: "tc qdisc list", Value: string(out)}
-
-	// A demo for comparison with expected. A bit messy actually, don't know if we still need this
-	action := chaos.Spec.Action
-	var netemExpect string
-	switch action {
-	case "delay":
-		latency := chaos.Spec.Delay.Latency
-		jitter := chaos.Spec.Delay.Jitter
-		correlation := chaos.Spec.Delay.Correlation
-		netemExpect = fmt.Sprintf("%v %v %v %v%%", action, latency, jitter, correlation)
-
-		netemCurrent := regexp.MustCompile("(?:limit 1000)(.*)").FindStringSubmatch(string(out))
-		if len(netemCurrent) == 0 {
-			return fmt.Errorf("no NetworkChaos is applied")
-		}
-		for i, netem := range strings.Fields(netemCurrent[1]) {
-			itemCurrent := netem
-			itemExpect := strings.Fields(netemExpect)[i]
-			if itemCurrent != itemExpect {
-				r := regexp.MustCompile("([0-9]*[.])?[0-9]+")
-				// digit could be different, so parse string to float
-				numCurrent, err := strconv.ParseFloat(r.FindString(itemCurrent), 64)
-				if err != nil {
-					return errors.Wrap(err, "parse itemCurrent failed")
-				}
-				numExpect, err := strconv.ParseFloat(r.FindString(itemExpect), 64)
-				if err != nil {
-					return errors.Wrap(err, "parse itemExpect failed")
-				}
-				if numCurrent == numExpect {
-					continue
-				}
-				// alphabetic characters
-				alpCurrent := regexp.MustCompile("[[:alpha:]]+").FindString(itemCurrent)
-				alpExpect := regexp.MustCompile("[[:alpha:]]+").FindString(itemExpect)
-				if alpCurrent == alpExpect {
-					continue
-				}
-				itemResult.Status = cm.ItemFailure
-				itemResult.ErrInfo = fmt.Sprintf("expect: %s, got: %v", netemExpect, netemCurrent)
+		for _, podNetworkChaos := range networkChaos.Podnetwork {
+			podResult := common.PodResult{
+				Name: podNetworkChaos.Name,
 			}
+
+			podResult.Items = append(podResult.Items, cm.ItemResult{Name: "ipset list", Value: podNetworkChaos.Pod.Ipset})
+			podResult.Items = append(podResult.Items, cm.ItemResult{Name: "tc qdisc list", Value: podNetworkChaos.Pod.TcQdisc})
+			podResult.Items = append(podResult.Items, cm.ItemResult{Name: "iptables list", Value: podNetworkChaos.Pod.Iptables})
+			output, err := cm.MarshalChaos(podNetworkChaos.Spec)
+			if err != nil {
+				return nil, err
+			}
+			podResult.Items = append(podResult.Items, cm.ItemResult{Name: "podNetworkChaos", Value: output})
+			result.Pods = append(result.Pods, podResult)
 		}
-		if itemResult.Status != cm.ItemFailure {
-			itemResult.Status = cm.ItemSuccess
-		}
-	}
-	result.Items = append(result.Items, itemResult)
 
-	cmd = fmt.Sprintf("/usr/bin/nsenter %s -- iptables --list", nsenterPath)
-	out, err = cm.Exec(ctx, daemon, cmd, c.KubeCli)
-	if err != nil {
-		return errors.Wrap(err, fmt.Sprintf("run command %s failed", cmd))
+		results = append(results, result)
 	}
-	result.Items = append(result.Items, cm.ItemResult{Name: "iptables list", Value: string(out)})
-
-	podNetworkChaos := &v1alpha1.PodNetworkChaos{}
-	objectKey := client.ObjectKey{
-		Namespace: pod.Namespace,
-		Name:      pod.Name,
-	}
-
-	if err = c.CtrlCli.Get(ctx, objectKey, podNetworkChaos); err != nil {
-		return errors.Wrap(err, fmt.Sprintf("failed to get network chaos %s/%s", podNetworkChaos.GetNamespace(), podNetworkChaos.GetName()))
-	}
-	output, err := cm.MarshalChaos(podNetworkChaos.Spec)
-	if err != nil {
-		return err
-	}
-	result.Items = append(result.Items, cm.ItemResult{Name: "podnetworkchaos", Value: output})
-
-	return nil
+	return results, nil
 }

@@ -25,6 +25,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug/httpchaos"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug/iochaos"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug/networkchaos"
 	ctrlclient "github.com/chaos-mesh/chaos-mesh/pkg/ctrl/client"
 )
 
@@ -124,6 +125,8 @@ func (o *DebugOptions) Run(chaosType string, args []string, client *ctrlclient.C
 	var err error
 
 	switch chaosType {
+	case networkChaos:
+		result, err = networkchaos.Debug(ctx, o.namespace, chaosName, client)
 	case ioChaos:
 		result, err = iochaos.Debug(ctx, o.namespace, chaosName, client)
 	case httpChaos:

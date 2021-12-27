@@ -57,9 +57,7 @@ func Debug(ctx context.Context, namespace, chaosName string, client *ctrlclient.
 		return results, nil
 	}
 
-	httpChaosList := &query.Namespace[0].HTTPChaos
-
-	for _, httpChaos := range *httpChaosList {
+	for _, httpChaos := range query.Namespace[0].HTTPChaos {
 		result := &common.ChaosResult{
 			Name: string(httpChaos.Name),
 		}
@@ -69,7 +67,7 @@ func Debug(ctx context.Context, namespace, chaosName string, client *ctrlclient.
 				Name: string(podhttpchaos.Name),
 			}
 
-			podResult.Items = append(podResult.Items, common.ItemResult{Name: "Iptables", Value: string(podhttpchaos.Pod.Iptables)})
+			podResult.Items = append(podResult.Items, common.ItemResult{Name: "iptables list", Value: string(podhttpchaos.Pod.Iptables)})
 			for _, process := range podhttpchaos.Pod.Processes {
 				var fds []string
 				for _, fd := range process.Fds {

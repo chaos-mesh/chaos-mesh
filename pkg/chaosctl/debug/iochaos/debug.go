@@ -72,9 +72,7 @@ func Debug(ctx context.Context, namespace, chaosName string, client *ctrlclient.
 		return results, nil
 	}
 
-	ioChaosList := &query.Namespace[0].IOChaos
-
-	for _, ioChaos := range *ioChaosList {
+	for _, ioChaos := range query.Namespace[0].IOChaos {
 		result := &common.ChaosResult{
 			Name: ioChaos.Name,
 		}
