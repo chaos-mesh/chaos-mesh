@@ -23,9 +23,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug/iochaos"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug/networkchaos"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug/stresschaos"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug/httpchaos"
 	ctrlclient "github.com/chaos-mesh/chaos-mesh/pkg/ctrl/client"
 )
 
@@ -92,12 +90,13 @@ func debugResouceCommand(option *DebugOptions, chaosType string) *cobra.Command 
 		Short: fmt.Sprintf(`Print the debug information for certain %s`, chaosType),
 		Long:  fmt.Sprintf(`Print the debug information for certain %s`, chaosType),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			clientset, err := common.InitClientSet()
+			ctrlclient.DisableRuntimeErrorHandler()
+			client, cancel, err := createClient(context.TODO(), managerNamespace)
 			if err != nil {
 				return err
 			}
-			return option.Run(chaosType, args, clientset)
-
+			defer cancel()
+			return option.Run(chaosType, args, client)
 		},
 		SilenceErrors: true,
 		SilenceUsage:  true,
@@ -108,7 +107,7 @@ func debugResouceCommand(option *DebugOptions, chaosType string) *cobra.Command 
 }
 
 // Run debug
-func (o *DebugOptions) Run(chaosType string, args []string, c *common.ClientSet) error {
+func (o *DebugOptions) Run(chaosType string, args []string, client *ctrlclient.CtrlClient) error {
 	if len(args) > 1 {
 		return fmt.Errorf("only one chaos could be specified")
 	}
@@ -120,33 +119,20 @@ func (o *DebugOptions) Run(chaosType string, args []string, c *common.ClientSet)
 		chaosName = args[0]
 	}
 
-	chaosList, chaosNameList, err := common.GetChaosList(ctx, chaosType, chaosName, o.namespace, c.CtrlCli)
+	var result []*common.ChaosResult
+	var err error
+
+	switch chaosType {
+	case httpChaos:
+		result, err = httpchaos.Debug(ctx, o.namespace, chaosName, client)
+	default:
+		err = fmt.Errorf("chaos type not supported")
+	}
+
 	if err != nil {
 		return err
 	}
-	var result []common.ChaosResult
 
-	for i, chaos := range chaosList {
-		var chaosResult common.ChaosResult
-		chaosResult.Name = chaosNameList[i]
-
-		var err error
-		switch chaosType {
-		case networkChaos:
-			err = networkchaos.Debug(ctx, chaos, c, &chaosResult)
-		case stressChaos:
-			err = stresschaos.Debug(ctx, chaos, c, &chaosResult)
-		case ioChaos:
-			err = iochaos.Debug(ctx, chaos, c, &chaosResult)
-		default:
-			return fmt.Errorf("chaos type not supported")
-		}
-		result = append(result, chaosResult)
-		if err != nil {
-			common.PrintResult(result)
-			return err
-		}
-	}
 	common.PrintResult(result)
 	return nil
 }

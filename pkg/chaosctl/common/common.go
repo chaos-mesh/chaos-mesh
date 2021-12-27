@@ -128,7 +128,7 @@ func PrettyPrint(s string, indentLevel int, color Color) {
 }
 
 // PrintResult prints result to users in prettier format
-func PrintResult(result []ChaosResult) {
+func PrintResult(result []*ChaosResult) {
 	for _, chaos := range result {
 		PrettyPrint("[Chaos]: "+chaos.Name, 0, Blue)
 		for _, pod := range chaos.Pods {
