@@ -137,6 +137,8 @@ def build(String name, String code) {
 						stage('Build image') {
 							ansiColor('xterm') {
 								sh """
+								curl http://fileserver.pingcap.net/download/builds/pingcap/chaos-mesh/cache-${ghprbTargetBranch}.tar.gz > cache-${ghprbTargetBranch}.tar.gz
+								tar xvf cache-${ghprbTargetBranch}.tar.gz
 								DOCKER_CLI_EXPERIMENTAL=enabled docker buildx create --use --name chaos-mesh-builder --config ./ci/builder.toml
 								make DOCKER_CACHE=1 DOCKER_CACHE_DIR=\$(pwd)/cache GO_BUILD_CACHE=\$(pwd)/cache image
 								make DOCKER_CACHE=1 DOCKER_CACHE_DIR=\$(pwd)/cache GO_BUILD_CACHE=\$(pwd)/cache image-e2e-helper
