@@ -976,6 +976,32 @@ func (r *podStatusResolver) QosClass(ctx context.Context, obj *v1.PodStatus) (st
 	return string(obj.QOSClass), nil
 }
 
+func (r *podStressChaosResolver) Cgroups(ctx context.Context, obj *model.PodStressChaos) (*model.Cgroups, error) {
+	return r.GetCgroups(ctx, obj)
+}
+
+func (r *podStressChaosResolver) ProcessStress(ctx context.Context, obj *model.PodStressChaos) ([]*model.ProcessStress, error) {
+	processes, err := r.Pod().Processes(ctx, obj.Pod)
+	if err != nil {
+		return nil, err
+	}
+
+	var processStress []*model.ProcessStress
+	for _, process := range processes {
+		cgroup, err := r.GetCgroup(ctx, obj.Pod, process.Pid)
+		if err != nil {
+			// ignore this process
+			continue
+		}
+
+		processStress = append(processStress, &model.ProcessStress{
+			Process: process,
+			Cgroup:  cgroup,
+		})
+	}
+	return processStress, nil
+}
+
 func (r *processResolver) Fds(ctx context.Context, obj *model.Process) ([]*model.Fd, error) {
 	return r.GetFdsOfProcess(ctx, obj)
 }
@@ -1035,6 +1061,27 @@ func (r *stressChaosResolver) Annotations(ctx context.Context, obj *v1alpha1.Str
 		annotations[k] = v
 	}
 	return annotations, nil
+}
+
+func (r *stressChaosResolver) Podstress(ctx context.Context, obj *v1alpha1.StressChaos) ([]*model.PodStressChaos, error) {
+	pods, _, err := GetPods(ctx, obj.Status.ChaosStatus, obj.Spec.Selector, r.Client)
+	if err != nil {
+		return nil, err
+	}
+
+	var podStress []*model.PodStressChaos
+	for _, pod := range pods {
+		p := pod
+		podStress = append(podStress, &model.PodStressChaos{
+			StressChaos: obj,
+			Pod:         &p,
+		})
+	}
+	return podStress, nil
+}
+
+func (r *stressChaosSpecResolver) Mode(ctx context.Context, obj *v1alpha1.StressChaosSpec) (string, error) {
+	return string(obj.Mode), nil
 }
 
 // AttrOverrideSpec returns generated.AttrOverrideSpecResolver implementation.
@@ -1148,6 +1195,11 @@ func (r *Resolver) PodSelectorSpec() generated.PodSelectorSpecResolver {
 // PodStatus returns generated.PodStatusResolver implementation.
 func (r *Resolver) PodStatus() generated.PodStatusResolver { return &podStatusResolver{r} }
 
+// PodStressChaos returns generated.PodStressChaosResolver implementation.
+func (r *Resolver) PodStressChaos() generated.PodStressChaosResolver {
+	return &podStressChaosResolver{r}
+}
+
 // Process returns generated.ProcessResolver implementation.
 func (r *Resolver) Process() generated.ProcessResolver { return &processResolver{r} }
 
@@ -1167,6 +1219,11 @@ func (r *Resolver) Record() generated.RecordResolver { return &recordResolver{r}
 
 // StressChaos returns generated.StressChaosResolver implementation.
 func (r *Resolver) StressChaos() generated.StressChaosResolver { return &stressChaosResolver{r} }
+
+// StressChaosSpec returns generated.StressChaosSpecResolver implementation.
+func (r *Resolver) StressChaosSpec() generated.StressChaosSpecResolver {
+	return &stressChaosSpecResolver{r}
+}
 
 type attrOverrideSpecResolver struct{ *Resolver }
 type bandwidthSpecResolver struct{ *Resolver }
@@ -1197,9 +1254,11 @@ type podIOChaosResolver struct{ *Resolver }
 type podNetworkChaosResolver struct{ *Resolver }
 type podSelectorSpecResolver struct{ *Resolver }
 type podStatusResolver struct{ *Resolver }
+type podStressChaosResolver struct{ *Resolver }
 type processResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type rawIptablesResolver struct{ *Resolver }
 type rawTrafficControlResolver struct{ *Resolver }
 type recordResolver struct{ *Resolver }
 type stressChaosResolver struct{ *Resolver }
+type stressChaosSpecResolver struct{ *Resolver }

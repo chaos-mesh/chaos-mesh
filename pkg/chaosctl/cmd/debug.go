@@ -23,11 +23,10 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug/httpchaos"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug/iochaos"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug/networkchaos"
 	ctrlclient "github.com/chaos-mesh/chaos-mesh/pkg/ctrl/client"
 )
+
+type Debugger func(ctx context.Context, namespace, chaosName string, client *ctrlclient.CtrlClient) ([]*common.ChaosResult, error)
 
 type DebugOptions struct {
 	logger    logr.Logger
@@ -41,7 +40,7 @@ const (
 	httpChaos    = "httpchaos"
 )
 
-func NewDebugCommand(logger logr.Logger) (*cobra.Command, error) {
+func NewDebugCommand(logger logr.Logger, debuggers map[string]Debugger) (*cobra.Command, error) {
 	o := &DebugOptions{
 		logger: logger,
 	}
@@ -61,10 +60,9 @@ Examples:
 		ValidArgsFunction: noCompletions,
 	}
 
-	debugCmd.AddCommand(debugResouceCommand(o, networkChaos))
-	debugCmd.AddCommand(debugResouceCommand(o, stressChaos))
-	debugCmd.AddCommand(debugResouceCommand(o, ioChaos))
-	debugCmd.AddCommand(debugResouceCommand(o, httpChaos))
+	for chaosType, debugger := range debuggers {
+		debugCmd.AddCommand(debugResouceCommand(o, chaosType, debugger))
+	}
 
 	debugCmd.PersistentFlags().StringVarP(&o.namespace, "namespace", "n", "default", "namespace to find chaos")
 	err := debugCmd.RegisterFlagCompletionFunc("namespace", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -86,7 +84,7 @@ Examples:
 	return debugCmd, err
 }
 
-func debugResouceCommand(option *DebugOptions, chaosType string) *cobra.Command {
+func debugResouceCommand(option *DebugOptions, chaosType string, debugger Debugger) *cobra.Command {
 	return &cobra.Command{
 		Use:   fmt.Sprintf(`%s (CHAOSNAME) [-n NAMESPACE]`, chaosType),
 		Short: fmt.Sprintf(`Print the debug information for certain %s`, chaosType),
@@ -98,7 +96,7 @@ func debugResouceCommand(option *DebugOptions, chaosType string) *cobra.Command 
 				return err
 			}
 			defer cancel()
-			return option.Run(chaosType, args, client)
+			return option.Run(debugger, args, client)
 		},
 		SilenceErrors: true,
 		SilenceUsage:  true,
@@ -109,7 +107,7 @@ func debugResouceCommand(option *DebugOptions, chaosType string) *cobra.Command 
 }
 
 // Run debug
-func (o *DebugOptions) Run(chaosType string, args []string, client *ctrlclient.CtrlClient) error {
+func (o *DebugOptions) Run(debugger Debugger, args []string, client *ctrlclient.CtrlClient) error {
 	if len(args) > 1 {
 		return fmt.Errorf("only one chaos could be specified")
 	}
@@ -124,17 +122,7 @@ func (o *DebugOptions) Run(chaosType string, args []string, client *ctrlclient.C
 	var result []*common.ChaosResult
 	var err error
 
-	switch chaosType {
-	case networkChaos:
-		result, err = networkchaos.Debug(ctx, o.namespace, chaosName, client)
-	case ioChaos:
-		result, err = iochaos.Debug(ctx, o.namespace, chaosName, client)
-	case httpChaos:
-		result, err = httpchaos.Debug(ctx, o.namespace, chaosName, client)
-	default:
-		err = fmt.Errorf("chaos type not supported")
-	}
-
+	result, err = debugger(ctx, o.namespace, chaosName, client)
 	if err != nil {
 		return err
 	}

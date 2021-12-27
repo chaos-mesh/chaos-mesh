@@ -18,148 +18,112 @@ package stresschaos
 import (
 	"context"
 	"fmt"
-	"regexp"
 	"strconv"
 	"strings"
 
 	"code.cloudfoundry.org/bytefmt"
+	"github.com/hasura/go-graphql-client"
 	"github.com/pkg/errors"
-	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	cm "github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
+	ctrlclient "github.com/chaos-mesh/chaos-mesh/pkg/ctrl/client"
 )
 
 // Debug get chaos debug information
-func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet, result *cm.ChaosResult) error {
-	stressChaos, ok := chaos.(*v1alpha1.StressChaos)
-	if !ok {
-		return fmt.Errorf("chaos is not stresschaos")
-	}
-	chaosStatus := stressChaos.Status.ChaosStatus
-	chaosSelector := stressChaos.Spec.Selector
+func Debug(ctx context.Context, namespace, chaosName string, client *ctrlclient.CtrlClient) ([]*common.ChaosResult, error) {
+	var results []*common.ChaosResult
 
-	pods, daemons, err := cm.GetPods(ctx, stressChaos.GetName(), chaosStatus, chaosSelector, c.CtrlCli)
+	var name *graphql.String
+	if chaosName != "" {
+		n := graphql.String(chaosName)
+		name = &n
+	}
+
+	var query struct {
+		Namespace []struct {
+			StressChaos []struct {
+				Name      string
+				Podstress []struct {
+					Pod struct {
+						Namespace string
+						Name      string
+					}
+					Cgroups struct {
+						Raw string
+						Cpu *struct {
+							Quota  int
+							Period int
+						}
+						Memory *struct {
+							Limit string
+						}
+					}
+					ProcessStress []struct {
+						Process struct {
+							Pid     string
+							Command string
+						}
+						Cgroup string
+					}
+				}
+			} `graphql:"stresschaos(name: $name)"`
+		} `graphql:"namespace(ns: $namespace)"`
+	}
+
+	variables := map[string]interface{}{
+		"namespace": graphql.String(namespace),
+		"name":      name,
+	}
+
+	err := client.Client.Query(ctx, &query, variables)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	for i := range pods {
-		podName := pods[i].Name
-		podResult := cm.PodResult{Name: podName}
-		_ = debugEachPod(ctx, pods[i], daemons[i], stressChaos, c, &podResult)
-		result.Pods = append(result.Pods, podResult)
-		// TODO: V(4) log when err != nil, wait for #1433
-	}
-	return nil
-}
-
-func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha1.StressChaos, c *cm.ClientSet, result *cm.PodResult) error {
-	// get process path
-	cmd := "cat /proc/cgroups"
-	out, err := cm.ExecBypass(ctx, pod, daemon, cmd, c.KubeCli)
-	if err != nil {
-		return errors.Wrap(err, fmt.Sprintf("run command %s failed", cmd))
-	}
-	result.Items = append(result.Items, cm.ItemResult{Name: "cat /proc/cgroups", Value: string(out)})
-
-	cmd = "ps"
-	out, err = cm.ExecBypass(ctx, pod, daemon, cmd, c.KubeCli)
-	if err != nil {
-		return errors.Wrap(err, fmt.Sprintf("run command %s failed", cmd))
-	}
-	result.Items = append(result.Items, cm.ItemResult{Name: "ps", Value: string(out)})
-	stressngLine := regexp.MustCompile("(.*)(stress-ng)").FindStringSubmatch(string(out))
-	if len(stressngLine) == 0 {
-		return fmt.Errorf("could not find stress-ng, StressChaos failed")
+	if len(query.Namespace) == 0 {
+		return results, nil
 	}
 
-	pids, commands, err := cm.GetPidFromPS(ctx, pod, daemon, c.KubeCli)
-	if err != nil {
-		return errors.Wrap(err, "get pid from ps failed")
-	}
-
-	for i := range pids {
-		cmd = fmt.Sprintf("cat /proc/%s/cgroup", pids[i])
-		out, err = cm.ExecBypass(ctx, pod, daemon, cmd, c.KubeCli)
-		if err != nil {
-			cm.L().WithName("stress-chaos").V(2).Info("failed to fetch cgroup for certain process",
-				"pod", fmt.Sprintf("%s/%s", pod.Namespace, pod.Name),
-				"pid", i,
-			)
-			result.Items = append(result.Items, cm.ItemResult{Name: fmt.Sprintf("/proc/%s/cgroup of %s", pids[i], commands[i]), Value: "No cgroup found"})
-		} else {
-			result.Items = append(result.Items, cm.ItemResult{Name: fmt.Sprintf("/proc/%s/cgroup of %s", pids[i], commands[i]), Value: string(out)})
-		}
-	}
-
-	// no more info for StressngStressors
-	if chaos.Spec.StressngStressors != "" {
-		return nil
-	}
-
-	isCPU := true
-	if cpuSpec := chaos.Spec.Stressors.CPUStressor; cpuSpec == nil {
-		isCPU = false
-	}
-
-	var expr, cpuMountType string
-	if isCPU {
-		if regexp.MustCompile("(cpu,cpuacct)").MatchString(string(out)) {
-			cpuMountType = "cpu,cpuacct"
-		} else {
-			cpuMountType = "cpu"
-		}
-		expr = "(?::" + cpuMountType + ":)(.*)"
-	} else {
-		expr = "(?::memory:)(.*)"
-	}
-	processPath := regexp.MustCompile(expr).FindStringSubmatch(string(out))[1]
-
-	// print out debug info
-	if isCPU {
-		cmd = fmt.Sprintf("cat /sys/fs/cgroup/%s/%s/cpu.cfs_quota_us", cpuMountType, processPath)
-		out, err = cm.Exec(ctx, daemon, cmd, c.KubeCli)
-		if err != nil {
-			return errors.Wrap(err, fmt.Sprintf("run command %s failed", cmd))
-		}
-		result.Items = append(result.Items, cm.ItemResult{Name: "cpu.cfs_quota_us", Value: string(out)})
-		quota, err := strconv.Atoi(strings.TrimSuffix(string(out), "\n"))
-		if err != nil {
-			return errors.Wrap(err, "could not get cpu.cfs_quota_us")
+	for _, stressChaos := range query.Namespace[0].StressChaos {
+		result := &common.ChaosResult{
+			Name: stressChaos.Name,
 		}
 
-		cmd = fmt.Sprintf("cat /sys/fs/cgroup/%s/%s/cpu.cfs_period_us", cpuMountType, processPath)
-		out, err = cm.Exec(ctx, daemon, cmd, c.KubeCli)
-		if err != nil {
-			return errors.Wrap(err, fmt.Sprintf("run command %s failed", cmd))
-		}
-		period, err := strconv.Atoi(strings.TrimSuffix(string(out), "\n"))
-		if err != nil {
-			return errors.Wrap(err, "could not get cpu.cfs_period_us")
-		}
-		itemResult := cm.ItemResult{Name: "cpu.cfs_period_us", Value: string(out)}
+		for _, podStressChaos := range stressChaos.Podstress {
+			podResult := common.PodResult{
+				Name: podStressChaos.Pod.Name,
+			}
 
-		if quota == -1 {
-			itemResult.Status = cm.ItemFailure
-			itemResult.ErrInfo = "no cpu limit is set for now"
-		} else {
-			itemResult.Status = cm.ItemSuccess
-			itemResult.SucInfo = fmt.Sprintf("cpu limit is equals to %.2f", float64(quota)/float64(period))
+			podResult.Items = append(podResult.Items, common.ItemResult{Name: "cat /proc/cgroups", Value: podStressChaos.Cgroups.Raw})
+			for _, process := range podStressChaos.ProcessStress {
+				podResult.Items = append(podResult.Items, common.ItemResult{
+					Name:  fmt.Sprintf("/proc/%s/cgroup of %s", process.Process.Pid, process.Process.Command),
+					Value: process.Cgroup,
+				})
+			}
+			if podStressChaos.Cgroups.Cpu != nil {
+				podResult.Items = append(podResult.Items, common.ItemResult{Name: "cpu.cfs_quota_us", Value: strconv.Itoa(podStressChaos.Cgroups.Cpu.Quota)})
+				periodItem := common.ItemResult{Name: "cpu.cfs_period_us", Value: strconv.Itoa(podStressChaos.Cgroups.Cpu.Period)}
+				if podStressChaos.Cgroups.Cpu.Quota == -1 {
+					periodItem.Status = common.ItemFailure
+					periodItem.ErrInfo = "no cpu limit is set for now"
+				} else {
+					periodItem.Status = common.ItemSuccess
+					periodItem.SucInfo = fmt.Sprintf("cpu limit is equals to %.2f", float64(podStressChaos.Cgroups.Cpu.Quota)/float64(podStressChaos.Cgroups.Cpu.Period))
+				}
+				podResult.Items = append(podResult.Items, periodItem)
+			}
+
+			if podStressChaos.Cgroups.Memory != nil {
+				limit, err := strconv.ParseUint(strings.TrimSuffix(podStressChaos.Cgroups.Memory.Limit, "\n"), 10, 64)
+				if err != nil {
+					return nil, errors.Wrap(err, "could not get memory.limit_in_bytes")
+				}
+				podResult.Items = append(podResult.Items, common.ItemResult{Name: "memory.limit_in_bytes", Value: bytefmt.ByteSize(limit) + "B"})
+			}
+			result.Pods = append(result.Pods, podResult)
 		}
-		result.Items = append(result.Items, itemResult)
-	} else {
-		cmd = fmt.Sprintf("cat /sys/fs/cgroup/memory/%s/memory.limit_in_bytes", processPath)
-		out, err = cm.Exec(ctx, daemon, cmd, c.KubeCli)
-		if err != nil {
-			return errors.Wrap(err, fmt.Sprintf("run command %s failed", cmd))
-		}
-		limit, err := strconv.ParseUint(strings.TrimSuffix(string(out), "\n"), 10, 64)
-		if err != nil {
-			return errors.Wrap(err, "could not get memory.limit_in_bytes")
-		}
-		result.Items = append(result.Items, cm.ItemResult{Name: "memory.limit_in_bytes", Value: bytefmt.ByteSize(limit) + "B"})
+		results = append(results, result)
 	}
-	return nil
+	return results, nil
 }

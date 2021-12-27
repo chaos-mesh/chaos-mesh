@@ -70,12 +70,14 @@ type ResolverRoot interface {
 	PodNetworkChaos() PodNetworkChaosResolver
 	PodSelectorSpec() PodSelectorSpecResolver
 	PodStatus() PodStatusResolver
+	PodStressChaos() PodStressChaosResolver
 	Process() ProcessResolver
 	Query() QueryResolver
 	RawIptables() RawIptablesResolver
 	RawTrafficControl() RawTrafficControlResolver
 	Record() RecordResolver
 	StressChaos() StressChaosResolver
+	StressChaosSpec() StressChaosSpecResolver
 }
 
 type DirectiveRoot struct {
@@ -103,6 +105,27 @@ type ComplexityRoot struct {
 		Minburst func(childComplexity int) int
 		Peakrate func(childComplexity int) int
 		Rate     func(childComplexity int) int
+	}
+
+	CPUStressor struct {
+		Load    func(childComplexity int) int
+		Options func(childComplexity int) int
+		Workers func(childComplexity int) int
+	}
+
+	Cgroups struct {
+		CPU    func(childComplexity int) int
+		Memory func(childComplexity int) int
+		Raw    func(childComplexity int) int
+	}
+
+	CgroupsCPU struct {
+		Period func(childComplexity int) int
+		Quota  func(childComplexity int) int
+	}
+
+	CgroupsMemory struct {
+		Limit func(childComplexity int) int
 	}
 
 	ChaosCondition struct {
@@ -306,6 +329,12 @@ type ComplexityRoot struct {
 	LossSpec struct {
 		Correlation func(childComplexity int) int
 		Loss        func(childComplexity int) int
+	}
+
+	MemoryStressor struct {
+		Options func(childComplexity int) int
+		Size    func(childComplexity int) int
+		Workers func(childComplexity int) int
 	}
 
 	MistakeSpec struct {
@@ -579,11 +608,23 @@ type ComplexityRoot struct {
 		StartTime                  func(childComplexity int) int
 	}
 
+	PodStressChaos struct {
+		Cgroups       func(childComplexity int) int
+		Pod           func(childComplexity int) int
+		ProcessStress func(childComplexity int) int
+		StressChaos   func(childComplexity int) int
+	}
+
 	Process struct {
 		Command func(childComplexity int) int
 		Fds     func(childComplexity int) int
 		Pid     func(childComplexity int) int
 		Pod     func(childComplexity int) int
+	}
+
+	ProcessStress struct {
+		Cgroup  func(childComplexity int) int
+		Process func(childComplexity int) int
 	}
 
 	Query struct {
@@ -643,9 +684,26 @@ type ComplexityRoot struct {
 		Name                       func(childComplexity int) int
 		Namespace                  func(childComplexity int) int
 		OwnerReferences            func(childComplexity int) int
+		Podstress                  func(childComplexity int) int
 		ResourceVersion            func(childComplexity int) int
 		SelfLink                   func(childComplexity int) int
+		Spec                       func(childComplexity int) int
 		UID                        func(childComplexity int) int
+	}
+
+	StressChaosSpec struct {
+		ContainerNames    func(childComplexity int) int
+		Duration          func(childComplexity int) int
+		Mode              func(childComplexity int) int
+		Selector          func(childComplexity int) int
+		StressngStressors func(childComplexity int) int
+		Stressors         func(childComplexity int) int
+		Value             func(childComplexity int) int
+	}
+
+	Stressors struct {
+		CPUStressor    func(childComplexity int) int
+		MemoryStressor func(childComplexity int) int
 	}
 
 	Timespec struct {
@@ -866,6 +924,10 @@ type PodStatusResolver interface {
 
 	QosClass(ctx context.Context, obj *v1.PodStatus) (string, error)
 }
+type PodStressChaosResolver interface {
+	Cgroups(ctx context.Context, obj *model.PodStressChaos) (*model.Cgroups, error)
+	ProcessStress(ctx context.Context, obj *model.PodStressChaos) ([]*model.ProcessStress, error)
+}
 type ProcessResolver interface {
 	Fds(ctx context.Context, obj *model.Process) ([]*model.Fd, error)
 }
@@ -889,6 +951,11 @@ type StressChaosResolver interface {
 
 	Labels(ctx context.Context, obj *v1alpha1.StressChaos) (map[string]interface{}, error)
 	Annotations(ctx context.Context, obj *v1alpha1.StressChaos) (map[string]interface{}, error)
+
+	Podstress(ctx context.Context, obj *v1alpha1.StressChaos) ([]*model.PodStressChaos, error)
+}
+type StressChaosSpecResolver interface {
+	Mode(ctx context.Context, obj *v1alpha1.StressChaosSpec) (string, error)
 }
 
 type executableSchema struct {
@@ -1024,6 +1091,69 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.BandwidthSpec.Rate(childComplexity), true
+
+	case "CPUStressor.load":
+		if e.complexity.CPUStressor.Load == nil {
+			break
+		}
+
+		return e.complexity.CPUStressor.Load(childComplexity), true
+
+	case "CPUStressor.options":
+		if e.complexity.CPUStressor.Options == nil {
+			break
+		}
+
+		return e.complexity.CPUStressor.Options(childComplexity), true
+
+	case "CPUStressor.workers":
+		if e.complexity.CPUStressor.Workers == nil {
+			break
+		}
+
+		return e.complexity.CPUStressor.Workers(childComplexity), true
+
+	case "Cgroups.cpu":
+		if e.complexity.Cgroups.CPU == nil {
+			break
+		}
+
+		return e.complexity.Cgroups.CPU(childComplexity), true
+
+	case "Cgroups.memory":
+		if e.complexity.Cgroups.Memory == nil {
+			break
+		}
+
+		return e.complexity.Cgroups.Memory(childComplexity), true
+
+	case "Cgroups.raw":
+		if e.complexity.Cgroups.Raw == nil {
+			break
+		}
+
+		return e.complexity.Cgroups.Raw(childComplexity), true
+
+	case "CgroupsCpu.period":
+		if e.complexity.CgroupsCPU.Period == nil {
+			break
+		}
+
+		return e.complexity.CgroupsCPU.Period(childComplexity), true
+
+	case "CgroupsCpu.quota":
+		if e.complexity.CgroupsCPU.Quota == nil {
+			break
+		}
+
+		return e.complexity.CgroupsCPU.Quota(childComplexity), true
+
+	case "CgroupsMemory.limit":
+		if e.complexity.CgroupsMemory.Limit == nil {
+			break
+		}
+
+		return e.complexity.CgroupsMemory.Limit(childComplexity), true
 
 	case "ChaosCondition.reason":
 		if e.complexity.ChaosCondition.Reason == nil {
@@ -2014,6 +2144,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.LossSpec.Loss(childComplexity), true
+
+	case "MemoryStressor.options":
+		if e.complexity.MemoryStressor.Options == nil {
+			break
+		}
+
+		return e.complexity.MemoryStressor.Options(childComplexity), true
+
+	case "MemoryStressor.size":
+		if e.complexity.MemoryStressor.Size == nil {
+			break
+		}
+
+		return e.complexity.MemoryStressor.Size(childComplexity), true
+
+	case "MemoryStressor.workers":
+		if e.complexity.MemoryStressor.Workers == nil {
+			break
+		}
+
+		return e.complexity.MemoryStressor.Workers(childComplexity), true
 
 	case "MistakeSpec.filling":
 		if e.complexity.MistakeSpec.Filling == nil {
@@ -3432,6 +3583,34 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.PodStatus.StartTime(childComplexity), true
 
+	case "PodStressChaos.cgroups":
+		if e.complexity.PodStressChaos.Cgroups == nil {
+			break
+		}
+
+		return e.complexity.PodStressChaos.Cgroups(childComplexity), true
+
+	case "PodStressChaos.pod":
+		if e.complexity.PodStressChaos.Pod == nil {
+			break
+		}
+
+		return e.complexity.PodStressChaos.Pod(childComplexity), true
+
+	case "PodStressChaos.processStress":
+		if e.complexity.PodStressChaos.ProcessStress == nil {
+			break
+		}
+
+		return e.complexity.PodStressChaos.ProcessStress(childComplexity), true
+
+	case "PodStressChaos.stressChaos":
+		if e.complexity.PodStressChaos.StressChaos == nil {
+			break
+		}
+
+		return e.complexity.PodStressChaos.StressChaos(childComplexity), true
+
 	case "Process.command":
 		if e.complexity.Process.Command == nil {
 			break
@@ -3459,6 +3638,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Process.Pod(childComplexity), true
+
+	case "ProcessStress.cgroup":
+		if e.complexity.ProcessStress.Cgroup == nil {
+			break
+		}
+
+		return e.complexity.ProcessStress.Cgroup(childComplexity), true
+
+	case "ProcessStress.process":
+		if e.complexity.ProcessStress.Process == nil {
+			break
+		}
+
+		return e.complexity.ProcessStress.Process(childComplexity), true
 
 	case "Query.namespace":
 		if e.complexity.Query.Namespace == nil {
@@ -3731,6 +3924,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.StressChaos.OwnerReferences(childComplexity), true
 
+	case "StressChaos.podstress":
+		if e.complexity.StressChaos.Podstress == nil {
+			break
+		}
+
+		return e.complexity.StressChaos.Podstress(childComplexity), true
+
 	case "StressChaos.resourceVersion":
 		if e.complexity.StressChaos.ResourceVersion == nil {
 			break
@@ -3745,12 +3945,82 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.StressChaos.SelfLink(childComplexity), true
 
+	case "StressChaos.spec":
+		if e.complexity.StressChaos.Spec == nil {
+			break
+		}
+
+		return e.complexity.StressChaos.Spec(childComplexity), true
+
 	case "StressChaos.uid":
 		if e.complexity.StressChaos.UID == nil {
 			break
 		}
 
 		return e.complexity.StressChaos.UID(childComplexity), true
+
+	case "StressChaosSpec.containerNames":
+		if e.complexity.StressChaosSpec.ContainerNames == nil {
+			break
+		}
+
+		return e.complexity.StressChaosSpec.ContainerNames(childComplexity), true
+
+	case "StressChaosSpec.duration":
+		if e.complexity.StressChaosSpec.Duration == nil {
+			break
+		}
+
+		return e.complexity.StressChaosSpec.Duration(childComplexity), true
+
+	case "StressChaosSpec.mode":
+		if e.complexity.StressChaosSpec.Mode == nil {
+			break
+		}
+
+		return e.complexity.StressChaosSpec.Mode(childComplexity), true
+
+	case "StressChaosSpec.selector":
+		if e.complexity.StressChaosSpec.Selector == nil {
+			break
+		}
+
+		return e.complexity.StressChaosSpec.Selector(childComplexity), true
+
+	case "StressChaosSpec.stressngStressors":
+		if e.complexity.StressChaosSpec.StressngStressors == nil {
+			break
+		}
+
+		return e.complexity.StressChaosSpec.StressngStressors(childComplexity), true
+
+	case "StressChaosSpec.stressors":
+		if e.complexity.StressChaosSpec.Stressors == nil {
+			break
+		}
+
+		return e.complexity.StressChaosSpec.Stressors(childComplexity), true
+
+	case "StressChaosSpec.value":
+		if e.complexity.StressChaosSpec.Value == nil {
+			break
+		}
+
+		return e.complexity.StressChaosSpec.Value(childComplexity), true
+
+	case "Stressors.cpuStressor":
+		if e.complexity.Stressors.CPUStressor == nil {
+			break
+		}
+
+		return e.complexity.Stressors.CPUStressor(childComplexity), true
+
+	case "Stressors.memoryStressor":
+		if e.complexity.Stressors.MemoryStressor == nil {
+			break
+		}
+
+		return e.complexity.Stressors.MemoryStressor(childComplexity), true
 
 	case "Timespec.nsec":
 		if e.complexity.Timespec.Nsec == nil {
@@ -3906,11 +4176,9 @@ enum Component {
 
 type Process {
     pod: Pod!
-
     pid: String!
     command: String!
-
-    fds: [Fd!] @goField(forceResolver: true)
+    fds: [Fd!]      @goField(forceResolver: true)
 }
 
 type Fd {
@@ -4876,6 +5144,77 @@ type NetworkChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1
     podnetwork: [PodNetworkChaos!]	@goField(forceResolver: true)
 }
 
+type MemoryStressor @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.MemoryStressor") {
+    # Workers specifies N workers to apply the stressor.
+	# Maximum 8192 workers can run by stress-ng
+	workers: Int!
+
+    # Size specifies N bytes consumed per vm worker, default is the total available memory.
+	# One can specify the size as % of total available memory or in units of B, KB/KiB,
+	# MB/MiB, GB/GiB, TB/TiB.
+	size: String
+
+	# extend stress-ng options
+	options: [String!]
+}
+
+type CPUStressor @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.CPUStressor") {
+     # Workers specifies N workers to apply the stressor.
+	# Maximum 8192 workers can run by stress-ng
+	workers: Int!
+
+    # Load specifies P percent loading per CPU worker. 0 is effectively a sleep (no load) and 100
+	# is full loading.
+    load: Int
+
+    # extend stress-ng options
+	options: [String!]
+}
+
+type Stressors @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.Stressors") {
+    memoryStressor: MemoryStressor
+    cpuStressor: CPUStressor
+}
+
+# StressChaosSpec defines the desired state of StressChaos
+type StressChaosSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.StressChaosSpec") {
+    # containerNames indicates list of the name of affected container.
+    # If not set, all containers will be injected
+    containerNames: [String!]
+
+    # selector is used to select pods that are used to inject chaos action.
+    selector: PodSelectorSpec!
+
+    # mode defines the mode to run chaos action.
+    # supported mode: one / all / fixed / fixed-percent / random-max-percent
+    mode: String!
+
+    # value is required when the mode is set to ` + "`" + `FixedPodMode` + "`" + ` / ` + "`" + `FixedPercentPodMod` + "`" + ` / ` + "`" + `RandomMaxPercentPodMod` + "`" + `.
+    # If ` + "`" + `FixedPodMode` + "`" + `, provide an integer of pods to do chaos action.
+    # If ` + "`" + `FixedPercentPodMod` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
+    # IF ` + "`" + `RandomMaxPercentPodMod` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+    value: String
+
+    stressors: Stressors
+
+
+    # StressngStressors defines plenty of stressors just like ` + "`" + `Stressors` + "`" + ` except that it's an experimental
+	# feature and more powerful. You can define stressors in ` + "`" + `stress-ng` + "`" + ` (see also ` + "`" + `man stress-ng` + "`" + `) dialect,
+	# however not all of the supported stressors are well tested. It maybe retired in later releases. You
+	# should always use ` + "`" + `Stressors` + "`" + ` to define the stressors and use this only when you want more stressors
+	# unsupported by ` + "`" + `Stressors` + "`" + `. When both ` + "`" + `StressngStressors` + "`" + ` and ` + "`" + `Stressors` + "`" + ` are defined, ` + "`" + `StressngStressors` + "`" + `
+	# wins.
+	stressngStressors: String
+
+    # duration represents the duration of the chaos action.
+    # It is required when the action is ` + "`" + `PodFailureAction` + "`" + `.
+    # A duration string is a possibly signed sequence of
+    # decimal numbers, each with optional fraction and a unit suffix,
+    # such as "300ms", "-1.5h" or "2h45m".
+    # Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+    duration: String
+}
+
 type StressChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.StressChaos") {
     kind: String!
     apiVersion: String!
@@ -4894,8 +5233,40 @@ type StressChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.
     ownerReferences: [OwnerReference!]
     finalizers: [String!]
     clusterName: String!
+
+    spec: StressChaosSpec!
+
+    podstress: [PodStressChaos!]	@goField(forceResolver: true)
 }
-`, BuiltIn: false},
+
+# PodStressChaos is a virtual type to describe relationship between pod and stress chaos
+type PodStressChaos {
+    stressChaos: StressChaos!
+
+    pod: Pod!
+    cgroups: Cgroups!	            @goField(forceResolver: true)
+    processStress: [ProcessStress!]	@goField(forceResolver: true)
+}
+
+type Cgroups {
+    raw: String!
+    cpu: CgroupsCpu
+    memory: CgroupsMemory
+}
+
+type CgroupsCpu {
+    quota: Int!
+    period: Int!
+}
+
+type CgroupsMemory {
+    limit: String!
+}
+
+type ProcessStress {
+    process: Process!
+    cgroup: String!
+}`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
@@ -5705,6 +6076,309 @@ func (ec *executionContext) _BandwidthSpec_minburst(ctx context.Context, field g
 	res := resTmp.(*int)
 	fc.Result = res
 	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _CPUStressor_workers(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.CPUStressor) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "CPUStressor",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Workers, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _CPUStressor_load(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.CPUStressor) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "CPUStressor",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Load, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _CPUStressor_options(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.CPUStressor) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "CPUStressor",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Options, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	fc.Result = res
+	return ec.marshalOString2ᚕstringᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Cgroups_raw(ctx context.Context, field graphql.CollectedField, obj *model.Cgroups) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Cgroups",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Raw, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Cgroups_cpu(ctx context.Context, field graphql.CollectedField, obj *model.Cgroups) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Cgroups",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CPU, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.CgroupsCPU)
+	fc.Result = res
+	return ec.marshalOCgroupsCpu2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐCgroupsCPU(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Cgroups_memory(ctx context.Context, field graphql.CollectedField, obj *model.Cgroups) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Cgroups",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Memory, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.CgroupsMemory)
+	fc.Result = res
+	return ec.marshalOCgroupsMemory2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐCgroupsMemory(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _CgroupsCpu_quota(ctx context.Context, field graphql.CollectedField, obj *model.CgroupsCPU) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "CgroupsCpu",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Quota, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _CgroupsCpu_period(ctx context.Context, field graphql.CollectedField, obj *model.CgroupsCPU) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "CgroupsCpu",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Period, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _CgroupsMemory_limit(ctx context.Context, field graphql.CollectedField, obj *model.CgroupsMemory) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "CgroupsMemory",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Limit, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _ChaosCondition_type(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.ChaosCondition) (ret graphql.Marshaler) {
@@ -10387,6 +11061,105 @@ func (ec *executionContext) _LossSpec_correlation(ctx context.Context, field gra
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _MemoryStressor_workers(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.MemoryStressor) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "MemoryStressor",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Workers, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _MemoryStressor_size(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.MemoryStressor) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "MemoryStressor",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Size, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _MemoryStressor_options(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.MemoryStressor) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "MemoryStressor",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Options, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	fc.Result = res
+	return ec.marshalOString2ᚕstringᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _MistakeSpec_filling(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.MistakeSpec) (ret graphql.Marshaler) {
@@ -17015,6 +17788,143 @@ func (ec *executionContext) _PodStatus_ephemeralContainerStatuses(ctx context.Co
 	return ec.marshalOContainerStatus2ᚕk8sᚗioᚋapiᚋcoreᚋv1ᚐContainerStatusᚄ(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _PodStressChaos_stressChaos(ctx context.Context, field graphql.CollectedField, obj *model.PodStressChaos) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodStressChaos",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.StressChaos, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*v1alpha1.StressChaos)
+	fc.Result = res
+	return ec.marshalNStressChaos2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐStressChaos(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodStressChaos_pod(ctx context.Context, field graphql.CollectedField, obj *model.PodStressChaos) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodStressChaos",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Pod, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*v1.Pod)
+	fc.Result = res
+	return ec.marshalNPod2ᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐPod(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodStressChaos_cgroups(ctx context.Context, field graphql.CollectedField, obj *model.PodStressChaos) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodStressChaos",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.PodStressChaos().Cgroups(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Cgroups)
+	fc.Result = res
+	return ec.marshalNCgroups2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐCgroups(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodStressChaos_processStress(ctx context.Context, field graphql.CollectedField, obj *model.PodStressChaos) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodStressChaos",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.PodStressChaos().ProcessStress(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.ProcessStress)
+	fc.Result = res
+	return ec.marshalOProcessStress2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐProcessStressᚄ(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Process_pod(ctx context.Context, field graphql.CollectedField, obj *model.Process) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -17150,6 +18060,76 @@ func (ec *executionContext) _Process_fds(ctx context.Context, field graphql.Coll
 	res := resTmp.([]*model.Fd)
 	fc.Result = res
 	return ec.marshalOFd2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐFdᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ProcessStress_process(ctx context.Context, field graphql.CollectedField, obj *model.ProcessStress) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ProcessStress",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Process, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Process)
+	fc.Result = res
+	return ec.marshalNProcess2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐProcess(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ProcessStress_cgroup(ctx context.Context, field graphql.CollectedField, obj *model.ProcessStress) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ProcessStress",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Cgroup, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_namespace(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -18611,6 +19591,367 @@ func (ec *executionContext) _StressChaos_clusterName(ctx context.Context, field 
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _StressChaos_spec(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.StressChaos) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "StressChaos",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Spec, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(v1alpha1.StressChaosSpec)
+	fc.Result = res
+	return ec.marshalNStressChaosSpec2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐStressChaosSpec(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _StressChaos_podstress(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.StressChaos) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "StressChaos",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.StressChaos().Podstress(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.PodStressChaos)
+	fc.Result = res
+	return ec.marshalOPodStressChaos2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐPodStressChaosᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _StressChaosSpec_containerNames(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.StressChaosSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "StressChaosSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ContainerNames, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	fc.Result = res
+	return ec.marshalOString2ᚕstringᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _StressChaosSpec_selector(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.StressChaosSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "StressChaosSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Selector, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(v1alpha1.PodSelectorSpec)
+	fc.Result = res
+	return ec.marshalNPodSelectorSpec2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodSelectorSpec(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _StressChaosSpec_mode(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.StressChaosSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "StressChaosSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.StressChaosSpec().Mode(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _StressChaosSpec_value(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.StressChaosSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "StressChaosSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Value, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _StressChaosSpec_stressors(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.StressChaosSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "StressChaosSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Stressors, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v1alpha1.Stressors)
+	fc.Result = res
+	return ec.marshalOStressors2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐStressors(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _StressChaosSpec_stressngStressors(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.StressChaosSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "StressChaosSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.StressngStressors, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _StressChaosSpec_duration(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.StressChaosSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "StressChaosSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Duration, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Stressors_memoryStressor(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.Stressors) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Stressors",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.MemoryStressor, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v1alpha1.MemoryStressor)
+	fc.Result = res
+	return ec.marshalOMemoryStressor2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐMemoryStressor(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Stressors_cpuStressor(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.Stressors) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Stressors",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CPUStressor, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v1alpha1.CPUStressor)
+	fc.Result = res
+	return ec.marshalOCPUStressor2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐCPUStressor(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Timespec_sec(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.Timespec) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -19980,6 +21321,127 @@ func (ec *executionContext) _BandwidthSpec(ctx context.Context, sel ast.Selectio
 	return out
 }
 
+var cPUStressorImplementors = []string{"CPUStressor"}
+
+func (ec *executionContext) _CPUStressor(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.CPUStressor) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, cPUStressorImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("CPUStressor")
+		case "workers":
+			out.Values[i] = ec._CPUStressor_workers(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "load":
+			out.Values[i] = ec._CPUStressor_load(ctx, field, obj)
+		case "options":
+			out.Values[i] = ec._CPUStressor_options(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var cgroupsImplementors = []string{"Cgroups"}
+
+func (ec *executionContext) _Cgroups(ctx context.Context, sel ast.SelectionSet, obj *model.Cgroups) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, cgroupsImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Cgroups")
+		case "raw":
+			out.Values[i] = ec._Cgroups_raw(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "cpu":
+			out.Values[i] = ec._Cgroups_cpu(ctx, field, obj)
+		case "memory":
+			out.Values[i] = ec._Cgroups_memory(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var cgroupsCpuImplementors = []string{"CgroupsCpu"}
+
+func (ec *executionContext) _CgroupsCpu(ctx context.Context, sel ast.SelectionSet, obj *model.CgroupsCPU) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, cgroupsCpuImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("CgroupsCpu")
+		case "quota":
+			out.Values[i] = ec._CgroupsCpu_quota(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "period":
+			out.Values[i] = ec._CgroupsCpu_period(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var cgroupsMemoryImplementors = []string{"CgroupsMemory"}
+
+func (ec *executionContext) _CgroupsMemory(ctx context.Context, sel ast.SelectionSet, obj *model.CgroupsMemory) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, cgroupsMemoryImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("CgroupsMemory")
+		case "limit":
+			out.Values[i] = ec._CgroupsMemory_limit(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var chaosConditionImplementors = []string{"ChaosCondition"}
 
 func (ec *executionContext) _ChaosCondition(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.ChaosCondition) graphql.Marshaler {
@@ -21238,6 +22700,37 @@ func (ec *executionContext) _LossSpec(ctx context.Context, sel ast.SelectionSet,
 			}
 		case "correlation":
 			out.Values[i] = ec._LossSpec_correlation(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var memoryStressorImplementors = []string{"MemoryStressor"}
+
+func (ec *executionContext) _MemoryStressor(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.MemoryStressor) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, memoryStressorImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("MemoryStressor")
+		case "workers":
+			out.Values[i] = ec._MemoryStressor_workers(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "size":
+			out.Values[i] = ec._MemoryStressor_size(ctx, field, obj)
+		case "options":
+			out.Values[i] = ec._MemoryStressor_options(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -23076,6 +24569,63 @@ func (ec *executionContext) _PodStatus(ctx context.Context, sel ast.SelectionSet
 	return out
 }
 
+var podStressChaosImplementors = []string{"PodStressChaos"}
+
+func (ec *executionContext) _PodStressChaos(ctx context.Context, sel ast.SelectionSet, obj *model.PodStressChaos) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, podStressChaosImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PodStressChaos")
+		case "stressChaos":
+			out.Values[i] = ec._PodStressChaos_stressChaos(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "pod":
+			out.Values[i] = ec._PodStressChaos_pod(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "cgroups":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._PodStressChaos_cgroups(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "processStress":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._PodStressChaos_processStress(ctx, field, obj)
+				return res
+			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var processImplementors = []string{"Process"}
 
 func (ec *executionContext) _Process(ctx context.Context, sel ast.SelectionSet, obj *model.Process) graphql.Marshaler {
@@ -23113,6 +24663,38 @@ func (ec *executionContext) _Process(ctx context.Context, sel ast.SelectionSet, 
 				res = ec._Process_fds(ctx, field, obj)
 				return res
 			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var processStressImplementors = []string{"ProcessStress"}
+
+func (ec *executionContext) _ProcessStress(ctx context.Context, sel ast.SelectionSet, obj *model.ProcessStress) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, processStressImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ProcessStress")
+		case "process":
+			out.Values[i] = ec._ProcessStress_process(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "cgroup":
+			out.Values[i] = ec._ProcessStress_cgroup(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -23507,6 +25089,99 @@ func (ec *executionContext) _StressChaos(ctx context.Context, sel ast.SelectionS
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
+		case "spec":
+			out.Values[i] = ec._StressChaos_spec(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "podstress":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._StressChaos_podstress(ctx, field, obj)
+				return res
+			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var stressChaosSpecImplementors = []string{"StressChaosSpec"}
+
+func (ec *executionContext) _StressChaosSpec(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.StressChaosSpec) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, stressChaosSpecImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("StressChaosSpec")
+		case "containerNames":
+			out.Values[i] = ec._StressChaosSpec_containerNames(ctx, field, obj)
+		case "selector":
+			out.Values[i] = ec._StressChaosSpec_selector(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "mode":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._StressChaosSpec_mode(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "value":
+			out.Values[i] = ec._StressChaosSpec_value(ctx, field, obj)
+		case "stressors":
+			out.Values[i] = ec._StressChaosSpec_stressors(ctx, field, obj)
+		case "stressngStressors":
+			out.Values[i] = ec._StressChaosSpec_stressngStressors(ctx, field, obj)
+		case "duration":
+			out.Values[i] = ec._StressChaosSpec_duration(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var stressorsImplementors = []string{"Stressors"}
+
+func (ec *executionContext) _Stressors(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.Stressors) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, stressorsImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Stressors")
+		case "memoryStressor":
+			out.Values[i] = ec._Stressors_memoryStressor(ctx, field, obj)
+		case "cpuStressor":
+			out.Values[i] = ec._Stressors_cpuStressor(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -23810,6 +25485,20 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
+func (ec *executionContext) marshalNCgroups2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐCgroups(ctx context.Context, sel ast.SelectionSet, v model.Cgroups) graphql.Marshaler {
+	return ec._Cgroups(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNCgroups2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐCgroups(ctx context.Context, sel ast.SelectionSet, v *model.Cgroups) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Cgroups(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNChaosCondition2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐChaosCondition(ctx context.Context, sel ast.SelectionSet, v v1alpha1.ChaosCondition) graphql.Marshaler {
 	return ec._ChaosCondition(ctx, sel, &v)
 }
@@ -24088,6 +25777,16 @@ func (ec *executionContext) marshalNPodStatus2k8sᚗioᚋapiᚋcoreᚋv1ᚐPodSt
 	return ec._PodStatus(ctx, sel, &v)
 }
 
+func (ec *executionContext) marshalNPodStressChaos2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐPodStressChaos(ctx context.Context, sel ast.SelectionSet, v *model.PodStressChaos) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._PodStressChaos(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNProcess2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐProcess(ctx context.Context, sel ast.SelectionSet, v *model.Process) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -24096,6 +25795,16 @@ func (ec *executionContext) marshalNProcess2ᚖgithubᚗcomᚋchaosᚑmeshᚋcha
 		return graphql.Null
 	}
 	return ec._Process(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNProcessStress2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐProcessStress(ctx context.Context, sel ast.SelectionSet, v *model.ProcessStress) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._ProcessStress(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNRawIPSet2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐRawIPSet(ctx context.Context, sel ast.SelectionSet, v v1alpha1.RawIPSet) graphql.Marshaler {
@@ -24128,6 +25837,10 @@ func (ec *executionContext) marshalNStressChaos2ᚖgithubᚗcomᚋchaosᚑmesh�
 		return graphql.Null
 	}
 	return ec._StressChaos(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNStressChaosSpec2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐStressChaosSpec(ctx context.Context, sel ast.SelectionSet, v v1alpha1.StressChaosSpec) graphql.Marshaler {
+	return ec._StressChaosSpec(ctx, sel, &v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
@@ -24476,6 +26189,27 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 		return graphql.Null
 	}
 	return graphql.MarshalBoolean(*v)
+}
+
+func (ec *executionContext) marshalOCPUStressor2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐCPUStressor(ctx context.Context, sel ast.SelectionSet, v *v1alpha1.CPUStressor) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._CPUStressor(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOCgroupsCpu2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐCgroupsCPU(ctx context.Context, sel ast.SelectionSet, v *model.CgroupsCPU) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._CgroupsCpu(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOCgroupsMemory2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐCgroupsMemory(ctx context.Context, sel ast.SelectionSet, v *model.CgroupsMemory) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._CgroupsMemory(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOChaosCondition2ᚕgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐChaosConditionᚄ(ctx context.Context, sel ast.SelectionSet, v []v1alpha1.ChaosCondition) graphql.Marshaler {
@@ -24902,6 +26636,13 @@ func (ec *executionContext) marshalOMap2map(ctx context.Context, sel ast.Selecti
 	return graphql.MarshalMap(v)
 }
 
+func (ec *executionContext) marshalOMemoryStressor2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐMemoryStressor(ctx context.Context, sel ast.SelectionSet, v *v1alpha1.MemoryStressor) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._MemoryStressor(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalOMistakeSpec2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐMistakeSpec(ctx context.Context, sel ast.SelectionSet, v *v1alpha1.MistakeSpec) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -25297,6 +27038,46 @@ func (ec *executionContext) marshalOPodNetworkChaos2ᚕᚖgithubᚗcomᚋchaos�
 	return ret
 }
 
+func (ec *executionContext) marshalOPodStressChaos2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐPodStressChaosᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.PodStressChaos) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNPodStressChaos2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐPodStressChaos(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
 func (ec *executionContext) marshalOProcess2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐProcessᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Process) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -25325,6 +27106,46 @@ func (ec *executionContext) marshalOProcess2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋ
 				defer wg.Done()
 			}
 			ret[i] = ec.marshalNProcess2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐProcess(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalOProcessStress2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐProcessStressᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.ProcessStress) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNProcessStress2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐProcessStress(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -25542,6 +27363,13 @@ func (ec *executionContext) marshalOStressChaos2ᚕᚖgithubᚗcomᚋchaosᚑmes
 	}
 	wg.Wait()
 	return ret
+}
+
+func (ec *executionContext) marshalOStressors2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐStressors(ctx context.Context, sel ast.SelectionSet, v *v1alpha1.Stressors) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Stressors(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {

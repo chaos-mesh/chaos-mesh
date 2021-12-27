@@ -16,11 +16,20 @@
 package server
 
 import (
+	"context"
+	"fmt"
 	"strings"
 
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/pkg/errors"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	ctrlconfig "github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/ctrl/server/model"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
 )
 
 const DefaultNamespace = "default"
@@ -50,4 +59,37 @@ func parseNamespacedName(namespacedName string) types.NamespacedName {
 		Namespace: parts[0],
 		Name:      parts[1],
 	}
+}
+
+// GetPods returns pod list and corresponding chaos daemon
+func GetPods(ctx context.Context, status v1alpha1.ChaosStatus, selectorSpec v1alpha1.PodSelectorSpec, c client.Client) ([]v1.Pod, []v1.Pod, error) {
+	pods, err := pod.SelectPods(ctx, c, c, selectorSpec, ctrlconfig.ControllerCfg.ClusterScoped, ctrlconfig.ControllerCfg.TargetNamespace, false)
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "failed to SelectPods")
+	}
+	if len(pods) == 0 {
+		return nil, nil, nil
+	}
+
+	var chaosDaemons []v1.Pod
+	// get chaos daemon
+	for _, chaosPod := range pods {
+		nodeName := chaosPod.Spec.NodeName
+		daemonSelector := v1alpha1.PodSelectorSpec{
+			Nodes: []string{nodeName},
+			GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+				LabelSelectors: map[string]string{"app.kubernetes.io/component": "chaos-daemon"},
+			},
+		}
+		daemons, err := pod.SelectPods(ctx, c, nil, daemonSelector, ctrlconfig.ControllerCfg.ClusterScoped, ctrlconfig.ControllerCfg.TargetNamespace, false)
+		if err != nil {
+			return nil, nil, errors.Wrap(err, fmt.Sprintf("failed to select daemon pod for pod %s", chaosPod.GetName()))
+		}
+		if len(daemons) == 0 {
+			return nil, nil, fmt.Errorf("no daemons found for pod %s with selector: %s", chaosPod.GetName(), daemonSelector)
+		}
+		chaosDaemons = append(chaosDaemons, daemons[0])
+	}
+
+	return pods, chaosDaemons, nil
 }

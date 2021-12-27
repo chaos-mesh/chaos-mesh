@@ -71,11 +71,9 @@ enum Component {
 
 type Process {
     pod: Pod!
-
     pid: String!
     command: String!
-
-    fds: [Fd!] @goField(forceResolver: true)
+    fds: [Fd!]      @goField(forceResolver: true)
 }
 
 type Fd {
@@ -1041,6 +1039,88 @@ type NetworkChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1
     podnetwork: [PodNetworkChaos!]	@goField(forceResolver: true)
 }
 
+type MemoryStressor @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.MemoryStressor") {
+    # Workers specifies N workers to apply the stressor.
+	# Maximum 8192 workers can run by stress-ng
+	workers: Int!
+
+    # Size specifies N bytes consumed per vm worker, default is the total available memory.
+	# One can specify the size as % of total available memory or in units of B, KB/KiB,
+	# MB/MiB, GB/GiB, TB/TiB.
+	size: String
+
+	# extend stress-ng options
+	options: [String!]
+}
+
+type CPUStressor @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.CPUStressor") {
+     # Workers specifies N workers to apply the stressor.
+	# Maximum 8192 workers can run by stress-ng
+	workers: Int!
+
+    # Load specifies P percent loading per CPU worker. 0 is effectively a sleep (no load) and 100
+	# is full loading.
+    load: Int
+
+    # extend stress-ng options
+	options: [String!]
+}
+
+type Stressors @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.Stressors") {
+    memoryStressor: MemoryStressor
+    cpuStressor: CPUStressor
+}
+
+# StressChaosSpec defines the desired state of StressChaos
+type StressChaosSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.StressChaosSpec") {
+    # containerNames indicates list of the name of affected container.
+    # If not set, all containers will be injected
+    containerNames: [String!]
+
+    # selector is used to select pods that are used to inject chaos action.
+    selector: PodSelectorSpec!
+
+    # mode defines the mode to run chaos action.
+    # supported mode: one / all / fixed / fixed-percent / random-max-percent
+    mode: String!
+
+    # value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+    # If `FixedPodMode`, provide an integer of pods to do chaos action.
+    # If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
+    # IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+    value: String
+
+    stressors: Stressors
+
+
+    # StressngStressors defines plenty of stressors just like `Stressors` except that it's an experimental
+	# feature and more powerful. You can define stressors in `stress-ng` (see also `man stress-ng`) dialect,
+	# however not all of the supported stressors are well tested. It maybe retired in later releases. You
+	# should always use `Stressors` to define the stressors and use this only when you want more stressors
+	# unsupported by `Stressors`. When both `StressngStressors` and `Stressors` are defined, `StressngStressors`
+	# wins.
+	stressngStressors: String
+
+    # duration represents the duration of the chaos action.
+    # It is required when the action is `PodFailureAction`.
+    # A duration string is a possibly signed sequence of
+    # decimal numbers, each with optional fraction and a unit suffix,
+    # such as "300ms", "-1.5h" or "2h45m".
+    # Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+    duration: String
+}
+
+type StressChaosStatus @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.StressChaosStatus") {
+    # conditions represents the current global condition of the chaos
+    conditions: [ChaosCondition!]
+
+    # experiment records the last experiment state.
+    experiment: ExperimentStatus
+
+    # instances always specifies stressing instances
+    instances: Map
+}
+
 type StressChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.StressChaos") {
     kind: String!
     apiVersion: String!
@@ -1059,4 +1139,37 @@ type StressChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.
     ownerReferences: [OwnerReference!]
     finalizers: [String!]
     clusterName: String!
+
+    spec: StressChaosSpec!
+
+    podstress: [PodStressChaos!]	@goField(forceResolver: true)
+}
+
+# PodStressChaos is a virtual type to describe relationship between pod and stress chaos
+type PodStressChaos {
+    stressChaos: StressChaos!
+
+    pod: Pod!
+    cgroups: Cgroups!	            @goField(forceResolver: true)
+    processStress: [ProcessStress!]	@goField(forceResolver: true)
+}
+
+type Cgroups {
+    raw: String!
+    cpu: CgroupsCpu
+    memory: CgroupsMemory
+}
+
+type CgroupsCpu {
+    quota: Int!
+    period: Int!
+}
+
+type CgroupsMemory {
+    limit: String!
+}
+
+type ProcessStress {
+    process: Process!
+    cgroup: String!
 }

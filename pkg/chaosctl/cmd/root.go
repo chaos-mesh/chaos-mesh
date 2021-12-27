@@ -21,6 +21,10 @@ import (
 	"github.com/spf13/cobra"
 
 	cm "github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug/httpchaos"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug/iochaos"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug/networkchaos"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug/stresschaos"
 )
 
 var managerNamespace, managerSvc string
@@ -61,7 +65,12 @@ func Execute() {
 	}
 	rootCmd.AddCommand(logsCmd)
 
-	debugCommand, err := NewDebugCommand(rootLogger.WithName("cmd-debug"))
+	debugCommand, err := NewDebugCommand(rootLogger.WithName("cmd-debug"), map[string]Debugger{
+		networkChaos: networkchaos.Debug,
+		ioChaos:      iochaos.Debug,
+		stressChaos:  stresschaos.Debug,
+		httpChaos:    httpchaos.Debug,
+	})
 	if err != nil {
 		cm.PrettyPrint("failed to initialize cmd: ", 0, cm.Red)
 		cm.PrettyPrint("debug command: "+err.Error(), 1, cm.Red)
@@ -78,6 +87,7 @@ func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		cm.PrettyPrint("failed to execute cmd: ", 0, cm.Red)
 		cm.PrettyPrint(err.Error(), 1, cm.Red)
+		os.Exit(1)
 	}
 }
 
