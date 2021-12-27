@@ -42,6 +42,25 @@ func Debug(ctx context.Context, namespace, chaosName string, client *ctrlclient.
 			NetworkChaos []struct {
 				Name       string
 				Podnetwork []struct {
+					// Spec struct {
+					// 	IPSets []struct {
+					// 		Name   string
+					// 		Cidrs  []string
+					// 		Source string
+					// 	}
+					// 	Iptables []struct {
+					// 		Name      string
+					// 		IPSets    []string
+					// 		Direction string
+					// 		Source    string
+					// 	}
+					// 	TrafficControls []struct {
+					// 		Type                 string
+					// 		v1alpha1.TcParameter `json:",inline"`
+					// 		IPSet                string `json:"ipset,omitempty"`
+					// 		Source               string `json:"source"`
+					// 	}
+					// }
 					Spec      *v1alpha1.PodNetworkChaosSpec
 					Namespace string
 					Name      string
@@ -86,7 +105,7 @@ func Debug(ctx context.Context, namespace, chaosName string, client *ctrlclient.
 			if err != nil {
 				return nil, err
 			}
-			podResult.Items = append(podResult.Items, cm.ItemResult{Name: "podNetworkChaos", Value: output})
+			podResult.Items = append(podResult.Items, cm.ItemResult{Name: "podnetworkchaos", Value: output})
 			result.Pods = append(result.Pods, podResult)
 		}
 

@@ -46,7 +46,6 @@ type ResolverRoot interface {
 	ChaosCondition() ChaosConditionResolver
 	ContainerStateRunning() ContainerStateRunningResolver
 	ContainerStateTerminated() ContainerStateTerminatedResolver
-	CorruptSpec() CorruptSpecResolver
 	ExperimentStatus() ExperimentStatusResolver
 	HTTPChaos() HTTPChaosResolver
 	HTTPChaosSpec() HTTPChaosSpecResolver
@@ -151,7 +150,7 @@ type ComplexityRoot struct {
 
 	CorruptSpec struct {
 		Correlation func(childComplexity int) int
-		Corrup      func(childComplexity int) int
+		Corrupt     func(childComplexity int) int
 	}
 
 	DelaySpec struct {
@@ -598,6 +597,7 @@ type ComplexityRoot struct {
 	}
 
 	RawIptables struct {
+		Device    func(childComplexity int) int
 		Direction func(childComplexity int) int
 		IPSets    func(childComplexity int) int
 		Name      func(childComplexity int) int
@@ -608,6 +608,7 @@ type ComplexityRoot struct {
 		Bandwidth func(childComplexity int) int
 		Corrupt   func(childComplexity int) int
 		Delay     func(childComplexity int) int
+		Device    func(childComplexity int) int
 		Duplicate func(childComplexity int) int
 		IPSet     func(childComplexity int) int
 		Loss      func(childComplexity int) int
@@ -681,9 +682,6 @@ type ContainerStateRunningResolver interface {
 type ContainerStateTerminatedResolver interface {
 	StartedAt(ctx context.Context, obj *v1.ContainerStateTerminated) (*time.Time, error)
 	FinishedAt(ctx context.Context, obj *v1.ContainerStateTerminated) (*time.Time, error)
-}
-type CorruptSpecResolver interface {
-	Corrup(ctx context.Context, obj *v1alpha1.CorruptSpec) (string, error)
 }
 type ExperimentStatusResolver interface {
 	DesiredPhase(ctx context.Context, obj *v1alpha1.ExperimentStatus) (string, error)
@@ -1209,12 +1207,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.CorruptSpec.Correlation(childComplexity), true
 
-	case "CorruptSpec.corrup":
-		if e.complexity.CorruptSpec.Corrup == nil {
+	case "CorruptSpec.corrupt":
+		if e.complexity.CorruptSpec.Corrupt == nil {
 			break
 		}
 
-		return e.complexity.CorruptSpec.Corrup(childComplexity), true
+		return e.complexity.CorruptSpec.Corrupt(childComplexity), true
 
 	case "DelaySpec.correlation":
 		if e.complexity.DelaySpec.Correlation == nil {
@@ -3495,6 +3493,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.RawIPSet.Source(childComplexity), true
 
+	case "RawIptables.device":
+		if e.complexity.RawIptables.Device == nil {
+			break
+		}
+
+		return e.complexity.RawIptables.Device(childComplexity), true
+
 	case "RawIptables.direction":
 		if e.complexity.RawIptables.Direction == nil {
 			break
@@ -3523,7 +3528,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.RawIptables.Source(childComplexity), true
 
-	case "RawTrafficControl.Bandwidth":
+	case "RawTrafficControl.bandwidth":
 		if e.complexity.RawTrafficControl.Bandwidth == nil {
 			break
 		}
@@ -3543,6 +3548,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.RawTrafficControl.Delay(childComplexity), true
+
+	case "RawTrafficControl.device":
+		if e.complexity.RawTrafficControl.Device == nil {
+			break
+		}
+
+		return e.complexity.RawTrafficControl.Device(childComplexity), true
 
 	case "RawTrafficControl.duplicate":
 		if e.complexity.RawTrafficControl.Duplicate == nil {
@@ -4750,6 +4762,9 @@ type RawIptables @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.
 
     # The name and namespace of the source network chaos
     source: String!
+
+    # Device represents the network device to be affected.
+    device: String
 }
 
 # RawTrafficControl represents the traffic control chaos on specific pod
@@ -4770,13 +4785,16 @@ type RawTrafficControl @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1a
     corrupt: CorruptSpec
 
     # bandwidth represents the detail about bandwidth control action
-    Bandwidth: BandwidthSpec
+    bandwidth: BandwidthSpec
 
     # The name of target ipset
     ipSet: String
 
     # The name and namespace of the source network chaos
     source: String
+
+    # Device represents the network device to be affected.
+    device: String
 }
 
 # DelaySpec defines detail of a delay action
@@ -4801,7 +4819,7 @@ type DuplicateSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha
 
 # CorruptSpec defines detail of a corrupt action
 type CorruptSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.CorruptSpec") {
-    corrup: String!
+    corrupt: String!
     correlation: String
 }
 
@@ -6516,7 +6534,7 @@ func (ec *executionContext) _ContainerStatus_started(ctx context.Context, field 
 	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _CorruptSpec_corrup(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.CorruptSpec) (ret graphql.Marshaler) {
+func (ec *executionContext) _CorruptSpec_corrupt(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.CorruptSpec) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -6527,14 +6545,14 @@ func (ec *executionContext) _CorruptSpec_corrup(ctx context.Context, field graph
 		Object:     "CorruptSpec",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.CorruptSpec().Corrup(rctx, obj)
+		return obj.Corrupt, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -17489,6 +17507,38 @@ func (ec *executionContext) _RawIptables_source(ctx context.Context, field graph
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _RawIptables_device(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.RawIptables) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "RawIptables",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Device, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _RawTrafficControl_type(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.RawTrafficControl) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -17652,7 +17702,7 @@ func (ec *executionContext) _RawTrafficControl_corrupt(ctx context.Context, fiel
 	return ec.marshalOCorruptSpec2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐCorruptSpec(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _RawTrafficControl_Bandwidth(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.RawTrafficControl) (ret graphql.Marshaler) {
+func (ec *executionContext) _RawTrafficControl_bandwidth(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.RawTrafficControl) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -17735,6 +17785,38 @@ func (ec *executionContext) _RawTrafficControl_source(ctx context.Context, field
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Source, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RawTrafficControl_device(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.RawTrafficControl) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "RawTrafficControl",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Device, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -20163,20 +20245,11 @@ func (ec *executionContext) _CorruptSpec(ctx context.Context, sel ast.SelectionS
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("CorruptSpec")
-		case "corrup":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._CorruptSpec_corrup(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
+		case "corrupt":
+			out.Values[i] = ec._CorruptSpec_corrupt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "correlation":
 			out.Values[i] = ec._CorruptSpec_correlation(ctx, field, obj)
 		default:
@@ -23169,6 +23242,8 @@ func (ec *executionContext) _RawIptables(ctx context.Context, sel ast.SelectionS
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
+		case "device":
+			out.Values[i] = ec._RawIptables_device(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -23213,12 +23288,14 @@ func (ec *executionContext) _RawTrafficControl(ctx context.Context, sel ast.Sele
 			out.Values[i] = ec._RawTrafficControl_duplicate(ctx, field, obj)
 		case "corrupt":
 			out.Values[i] = ec._RawTrafficControl_corrupt(ctx, field, obj)
-		case "Bandwidth":
-			out.Values[i] = ec._RawTrafficControl_Bandwidth(ctx, field, obj)
+		case "bandwidth":
+			out.Values[i] = ec._RawTrafficControl_bandwidth(ctx, field, obj)
 		case "ipSet":
 			out.Values[i] = ec._RawTrafficControl_ipSet(ctx, field, obj)
 		case "source":
 			out.Values[i] = ec._RawTrafficControl_source(ctx, field, obj)
+		case "device":
+			out.Values[i] = ec._RawTrafficControl_device(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

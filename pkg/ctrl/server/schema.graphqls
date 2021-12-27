@@ -927,6 +927,9 @@ type RawIptables @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.
 
     # The name and namespace of the source network chaos
     source: String!
+
+    # Device represents the network device to be affected.
+    device: String
 }
 
 # RawTrafficControl represents the traffic control chaos on specific pod
@@ -947,13 +950,16 @@ type RawTrafficControl @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1a
     corrupt: CorruptSpec
 
     # bandwidth represents the detail about bandwidth control action
-    Bandwidth: BandwidthSpec
+    bandwidth: BandwidthSpec
 
     # The name of target ipset
     ipSet: String
 
     # The name and namespace of the source network chaos
     source: String
+
+    # Device represents the network device to be affected.
+    device: String
 }
 
 # DelaySpec defines detail of a delay action
@@ -978,7 +984,7 @@ type DuplicateSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha
 
 # CorruptSpec defines detail of a corrupt action
 type CorruptSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.CorruptSpec") {
-    corrup: String!
+    corrupt: String!
     correlation: String
 }
 

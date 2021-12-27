@@ -137,10 +137,6 @@ func (r *containerStateTerminatedResolver) FinishedAt(ctx context.Context, obj *
 	return &obj.FinishedAt.Time, nil
 }
 
-func (r *corruptSpecResolver) Corrup(ctx context.Context, obj *v1alpha1.CorruptSpec) (string, error) {
-	return obj.Corrupt, nil
-}
-
 func (r *experimentStatusResolver) DesiredPhase(ctx context.Context, obj *v1alpha1.ExperimentStatus) (string, error) {
 	return string(obj.DesiredPhase), nil
 }
@@ -1064,9 +1060,6 @@ func (r *Resolver) ContainerStateTerminated() generated.ContainerStateTerminated
 	return &containerStateTerminatedResolver{r}
 }
 
-// CorruptSpec returns generated.CorruptSpecResolver implementation.
-func (r *Resolver) CorruptSpec() generated.CorruptSpecResolver { return &corruptSpecResolver{r} }
-
 // ExperimentStatus returns generated.ExperimentStatusResolver implementation.
 func (r *Resolver) ExperimentStatus() generated.ExperimentStatusResolver {
 	return &experimentStatusResolver{r}
@@ -1180,7 +1173,6 @@ type bandwidthSpecResolver struct{ *Resolver }
 type chaosConditionResolver struct{ *Resolver }
 type containerStateRunningResolver struct{ *Resolver }
 type containerStateTerminatedResolver struct{ *Resolver }
-type corruptSpecResolver struct{ *Resolver }
 type experimentStatusResolver struct{ *Resolver }
 type hTTPChaosResolver struct{ *Resolver }
 type hTTPChaosSpecResolver struct{ *Resolver }
