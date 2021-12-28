@@ -78,6 +78,7 @@ type ResolverRoot interface {
 	Record() RecordResolver
 	StressChaos() StressChaosResolver
 	StressChaosSpec() StressChaosSpecResolver
+	StressChaosStatus() StressChaosStatusResolver
 }
 
 type DirectiveRoot struct {
@@ -701,6 +702,12 @@ type ComplexityRoot struct {
 		Value             func(childComplexity int) int
 	}
 
+	StressChaosStatus struct {
+		Conditions func(childComplexity int) int
+		Experiment func(childComplexity int) int
+		Instances  func(childComplexity int) int
+	}
+
 	Stressors struct {
 		CPUStressor    func(childComplexity int) int
 		MemoryStressor func(childComplexity int) int
@@ -785,7 +792,9 @@ type IOChaosActionResolver interface {
 	Ino(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error)
 	Size(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error)
 	Blocks(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error)
-
+	Atime(ctx context.Context, obj *v1alpha1.IOChaosAction) (*v1alpha1.Timespec, error)
+	Mtime(ctx context.Context, obj *v1alpha1.IOChaosAction) (*v1alpha1.Timespec, error)
+	Ctime(ctx context.Context, obj *v1alpha1.IOChaosAction) (*v1alpha1.Timespec, error)
 	Kind(ctx context.Context, obj *v1alpha1.IOChaosAction) (*string, error)
 	Perm(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error)
 	Nlink(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error)
@@ -793,6 +802,8 @@ type IOChaosActionResolver interface {
 	Gid(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error)
 	Rdev(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error)
 	Filling(ctx context.Context, obj *v1alpha1.IOChaosAction) (*string, error)
+	MaxOccurrences(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error)
+	MaxLength(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error)
 }
 type IOChaosSpecResolver interface {
 	Mode(ctx context.Context, obj *v1alpha1.IOChaosSpec) (string, error)
@@ -956,6 +967,9 @@ type StressChaosResolver interface {
 }
 type StressChaosSpecResolver interface {
 	Mode(ctx context.Context, obj *v1alpha1.StressChaosSpec) (string, error)
+}
+type StressChaosStatusResolver interface {
+	Instances(ctx context.Context, obj *v1alpha1.StressChaosStatus) (map[string]interface{}, error)
 }
 
 type executableSchema struct {
@@ -4008,6 +4022,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.StressChaosSpec.Value(childComplexity), true
 
+	case "StressChaosStatus.conditions":
+		if e.complexity.StressChaosStatus.Conditions == nil {
+			break
+		}
+
+		return e.complexity.StressChaosStatus.Conditions(childComplexity), true
+
+	case "StressChaosStatus.experiment":
+		if e.complexity.StressChaosStatus.Experiment == nil {
+			break
+		}
+
+		return e.complexity.StressChaosStatus.Experiment(childComplexity), true
+
+	case "StressChaosStatus.instances":
+		if e.complexity.StressChaosStatus.Instances == nil {
+			break
+		}
+
+		return e.complexity.StressChaosStatus.Instances(childComplexity), true
+
 	case "Stressors.cpuStressor":
 		if e.complexity.Stressors.CPUStressor == nil {
 			break
@@ -4504,9 +4539,9 @@ type IOChaosAction @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha
     ino: Int
     size: Int
     blocks: Int
-    atime: Timespec
-    mtime: Timespec
-    ctime: Timespec
+    atime: Timespec @goField(forceResolver: true)
+    mtime: Timespec @goField(forceResolver: true)
+    ctime: Timespec @goField(forceResolver: true)
     kind: String # the file kind
     perm: Int
     nlink: Int
@@ -4520,10 +4555,10 @@ type IOChaosAction @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha
     filling: String
 
     # there will be [1, MaxOccurrences] segments of wrong data.
-    maxOccurrences: Int
+    maxOccurrences: Int @goField(forceResolver: true)
 
     # max length of each wrong data segment in bytes
-    maxLength: Int
+    maxLength: Int      @goField(forceResolver: true)
 
     # source represents the source of current rules
     source: String!
@@ -5213,6 +5248,17 @@ type StressChaosSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alp
     # such as "300ms", "-1.5h" or "2h45m".
     # Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
     duration: String
+}
+
+type StressChaosStatus @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.StressChaosStatus") {
+    # conditions represents the current global condition of the chaos
+    conditions: [ChaosCondition!]
+
+    # experiment records the last experiment state.
+    experiment: ExperimentStatus
+
+    # instances always specifies stressing instances
+    instances: Map
 }
 
 type StressChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.StressChaos") {
@@ -9858,14 +9904,14 @@ func (ec *executionContext) _IOChaosAction_atime(ctx context.Context, field grap
 		Object:     "IOChaosAction",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Atime, nil
+		return ec.resolvers.IOChaosAction().Atime(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -9890,14 +9936,14 @@ func (ec *executionContext) _IOChaosAction_mtime(ctx context.Context, field grap
 		Object:     "IOChaosAction",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Mtime, nil
+		return ec.resolvers.IOChaosAction().Mtime(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -9922,14 +9968,14 @@ func (ec *executionContext) _IOChaosAction_ctime(ctx context.Context, field grap
 		Object:     "IOChaosAction",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Ctime, nil
+		return ec.resolvers.IOChaosAction().Ctime(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -10178,14 +10224,14 @@ func (ec *executionContext) _IOChaosAction_maxOccurrences(ctx context.Context, f
 		Object:     "IOChaosAction",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.MaxOccurrences, nil
+		return ec.resolvers.IOChaosAction().MaxOccurrences(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -10194,9 +10240,9 @@ func (ec *executionContext) _IOChaosAction_maxOccurrences(ctx context.Context, f
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(int64)
+	res := resTmp.(*int)
 	fc.Result = res
-	return ec.marshalOInt2int64(ctx, field.Selections, res)
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _IOChaosAction_maxLength(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.IOChaosAction) (ret graphql.Marshaler) {
@@ -10210,14 +10256,14 @@ func (ec *executionContext) _IOChaosAction_maxLength(ctx context.Context, field 
 		Object:     "IOChaosAction",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.MaxLength, nil
+		return ec.resolvers.IOChaosAction().MaxLength(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -10226,9 +10272,9 @@ func (ec *executionContext) _IOChaosAction_maxLength(ctx context.Context, field 
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(int64)
+	res := resTmp.(*int)
 	fc.Result = res
-	return ec.marshalOInt2int64(ctx, field.Selections, res)
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _IOChaosAction_source(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.IOChaosAction) (ret graphql.Marshaler) {
@@ -19888,6 +19934,102 @@ func (ec *executionContext) _StressChaosSpec_duration(ctx context.Context, field
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _StressChaosStatus_conditions(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.StressChaosStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "StressChaosStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Conditions, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]v1alpha1.ChaosCondition)
+	fc.Result = res
+	return ec.marshalOChaosCondition2ᚕgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐChaosConditionᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _StressChaosStatus_experiment(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.StressChaosStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "StressChaosStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Experiment, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(v1alpha1.ExperimentStatus)
+	fc.Result = res
+	return ec.marshalOExperimentStatus2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐExperimentStatus(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _StressChaosStatus_instances(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.StressChaosStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "StressChaosStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.StressChaosStatus().Instances(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(map[string]interface{})
+	fc.Result = res
+	return ec.marshalOMap2map(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Stressors_memoryStressor(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.Stressors) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -22382,11 +22524,38 @@ func (ec *executionContext) _IOChaosAction(ctx context.Context, sel ast.Selectio
 				return res
 			})
 		case "atime":
-			out.Values[i] = ec._IOChaosAction_atime(ctx, field, obj)
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._IOChaosAction_atime(ctx, field, obj)
+				return res
+			})
 		case "mtime":
-			out.Values[i] = ec._IOChaosAction_mtime(ctx, field, obj)
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._IOChaosAction_mtime(ctx, field, obj)
+				return res
+			})
 		case "ctime":
-			out.Values[i] = ec._IOChaosAction_ctime(ctx, field, obj)
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._IOChaosAction_ctime(ctx, field, obj)
+				return res
+			})
 		case "kind":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -22465,9 +22634,27 @@ func (ec *executionContext) _IOChaosAction(ctx context.Context, sel ast.Selectio
 				return res
 			})
 		case "maxOccurrences":
-			out.Values[i] = ec._IOChaosAction_maxOccurrences(ctx, field, obj)
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._IOChaosAction_maxOccurrences(ctx, field, obj)
+				return res
+			})
 		case "maxLength":
-			out.Values[i] = ec._IOChaosAction_maxLength(ctx, field, obj)
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._IOChaosAction_maxLength(ctx, field, obj)
+				return res
+			})
 		case "source":
 			out.Values[i] = ec._IOChaosAction_source(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -25156,6 +25343,43 @@ func (ec *executionContext) _StressChaosSpec(ctx context.Context, sel ast.Select
 			out.Values[i] = ec._StressChaosSpec_stressngStressors(ctx, field, obj)
 		case "duration":
 			out.Values[i] = ec._StressChaosSpec_duration(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var stressChaosStatusImplementors = []string{"StressChaosStatus"}
+
+func (ec *executionContext) _StressChaosStatus(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.StressChaosStatus) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, stressChaosStatusImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("StressChaosStatus")
+		case "conditions":
+			out.Values[i] = ec._StressChaosStatus_conditions(ctx, field, obj)
+		case "experiment":
+			out.Values[i] = ec._StressChaosStatus_experiment(ctx, field, obj)
+		case "instances":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._StressChaosStatus_instances(ctx, field, obj)
+				return res
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

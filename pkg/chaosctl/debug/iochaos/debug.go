@@ -52,9 +52,21 @@ func Debug(ctx context.Context, namespace, chaosName string, client *ctrlclient.
 							v1alpha1.Filter `json:",inline"`
 							Faults          []v1alpha1.IoFault
 							Latency         string
-							// *v1alpha1.AttrOverrideSpec `json:",inline"`
-							// *v1alpha1.MistakeSpec      `json:",inline"`
-							// Source                     string
+							Ino             *int                  `json:"ino,omitempty"`
+							Size            *int                  `json:"size,omitempty"`
+							Blocks          *int                  `json:"blocks,omitempty"`
+							Atime           *v1alpha1.Timespec    `json:"atime,omitempty"`
+							Mtime           *v1alpha1.Timespec    `json:"mtime,omitempty"`
+							Ctime           *v1alpha1.Timespec    `json:"ctime,omitempty"`
+							Kind            *v1alpha1.FileType    `json:"kind,omitempty"`
+							Perm            *int                  `json:"perm,omitempty"`
+							Nlink           *int                  `json:"nlink,omitempty"`
+							UID             *int                  `json:"uid,omitempty"`
+							GID             *int                  `json:"gid,omitempty"`
+							Rdev            *int                  `json:"rdev,omitempty"`
+							Filling         *v1alpha1.FillingType `json:"filling,omitempty"`
+							MaxOccurrences  *int64                `json:"maxOccurrences,omitempty"`
+							MaxLength       *int64                `json:"maxLength,omitempty"`
 						}
 					}
 					Pod struct {

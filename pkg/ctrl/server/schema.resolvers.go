@@ -266,7 +266,7 @@ func (r *iOChaosActionResolver) Methods(ctx context.Context, obj *v1alpha1.IOCha
 }
 
 func (r *iOChaosActionResolver) Ino(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error) {
-	if obj.Ino == nil {
+	if obj.AttrOverrideSpec == nil || obj.Ino == nil {
 		return nil, nil
 	}
 	ino := (int)(*obj.Ino)
@@ -274,7 +274,7 @@ func (r *iOChaosActionResolver) Ino(ctx context.Context, obj *v1alpha1.IOChaosAc
 }
 
 func (r *iOChaosActionResolver) Size(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error) {
-	if obj.Size == nil {
+	if obj.AttrOverrideSpec == nil || obj.Size == nil {
 		return nil, nil
 	}
 	size := (int)(*obj.Size)
@@ -282,15 +282,36 @@ func (r *iOChaosActionResolver) Size(ctx context.Context, obj *v1alpha1.IOChaosA
 }
 
 func (r *iOChaosActionResolver) Blocks(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error) {
-	if obj.Blocks == nil {
+	if obj.AttrOverrideSpec == nil || obj.Blocks == nil {
 		return nil, nil
 	}
 	blocks := (int)(*obj.Blocks)
 	return &blocks, nil
 }
 
+func (r *iOChaosActionResolver) Atime(ctx context.Context, obj *v1alpha1.IOChaosAction) (*v1alpha1.Timespec, error) {
+	if obj.AttrOverrideSpec == nil {
+		return nil, nil
+	}
+	return obj.Atime, nil
+}
+
+func (r *iOChaosActionResolver) Mtime(ctx context.Context, obj *v1alpha1.IOChaosAction) (*v1alpha1.Timespec, error) {
+	if obj.AttrOverrideSpec == nil {
+		return nil, nil
+	}
+	return obj.Mtime, nil
+}
+
+func (r *iOChaosActionResolver) Ctime(ctx context.Context, obj *v1alpha1.IOChaosAction) (*v1alpha1.Timespec, error) {
+	if obj.AttrOverrideSpec == nil {
+		return nil, nil
+	}
+	return obj.Ctime, nil
+}
+
 func (r *iOChaosActionResolver) Kind(ctx context.Context, obj *v1alpha1.IOChaosAction) (*string, error) {
-	if obj.Kind == nil {
+	if obj.AttrOverrideSpec == nil || obj.Kind == nil {
 		return nil, nil
 	}
 	kind := (string)(*obj.Kind)
@@ -298,7 +319,7 @@ func (r *iOChaosActionResolver) Kind(ctx context.Context, obj *v1alpha1.IOChaosA
 }
 
 func (r *iOChaosActionResolver) Perm(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error) {
-	if obj.Perm == nil {
+	if obj.AttrOverrideSpec == nil || obj.Perm == nil {
 		return nil, nil
 	}
 	perm := (int)(*obj.Perm)
@@ -306,7 +327,7 @@ func (r *iOChaosActionResolver) Perm(ctx context.Context, obj *v1alpha1.IOChaosA
 }
 
 func (r *iOChaosActionResolver) Nlink(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error) {
-	if obj.Nlink == nil {
+	if obj.AttrOverrideSpec == nil || obj.Nlink == nil {
 		return nil, nil
 	}
 	nlink := (int)(*obj.Nlink)
@@ -314,7 +335,7 @@ func (r *iOChaosActionResolver) Nlink(ctx context.Context, obj *v1alpha1.IOChaos
 }
 
 func (r *iOChaosActionResolver) UID(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error) {
-	if obj.UID == nil {
+	if obj.AttrOverrideSpec == nil || obj.UID == nil {
 		return nil, nil
 	}
 	uid := (int)(*obj.UID)
@@ -322,7 +343,7 @@ func (r *iOChaosActionResolver) UID(ctx context.Context, obj *v1alpha1.IOChaosAc
 }
 
 func (r *iOChaosActionResolver) Gid(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error) {
-	if obj.GID == nil {
+	if obj.AttrOverrideSpec == nil || obj.GID == nil {
 		return nil, nil
 	}
 	gid := (int)(*obj.GID)
@@ -330,7 +351,7 @@ func (r *iOChaosActionResolver) Gid(ctx context.Context, obj *v1alpha1.IOChaosAc
 }
 
 func (r *iOChaosActionResolver) Rdev(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error) {
-	if obj.Rdev == nil {
+	if obj.AttrOverrideSpec == nil || obj.Rdev == nil {
 		return nil, nil
 	}
 	rdev := (int)(*obj.Rdev)
@@ -338,8 +359,27 @@ func (r *iOChaosActionResolver) Rdev(ctx context.Context, obj *v1alpha1.IOChaosA
 }
 
 func (r *iOChaosActionResolver) Filling(ctx context.Context, obj *v1alpha1.IOChaosAction) (*string, error) {
+	if obj.MistakeSpec == nil {
+		return nil, nil
+	}
 	filling := string(obj.Filling)
 	return &filling, nil
+}
+
+func (r *iOChaosActionResolver) MaxOccurrences(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error) {
+	if obj.MistakeSpec == nil {
+		return nil, nil
+	}
+	maxOccurrences := int(obj.MaxOccurrences)
+	return &maxOccurrences, nil
+}
+
+func (r *iOChaosActionResolver) MaxLength(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error) {
+	if obj.MistakeSpec == nil {
+		return nil, nil
+	}
+	maxLength := int(obj.MaxLength)
+	return &maxLength, nil
 }
 
 func (r *iOChaosSpecResolver) Mode(ctx context.Context, obj *v1alpha1.IOChaosSpec) (string, error) {
@@ -1084,6 +1124,10 @@ func (r *stressChaosSpecResolver) Mode(ctx context.Context, obj *v1alpha1.Stress
 	return string(obj.Mode), nil
 }
 
+func (r *stressChaosStatusResolver) Instances(ctx context.Context, obj *v1alpha1.StressChaosStatus) (map[string]interface{}, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
 // AttrOverrideSpec returns generated.AttrOverrideSpecResolver implementation.
 func (r *Resolver) AttrOverrideSpec() generated.AttrOverrideSpecResolver {
 	return &attrOverrideSpecResolver{r}
@@ -1225,6 +1269,11 @@ func (r *Resolver) StressChaosSpec() generated.StressChaosSpecResolver {
 	return &stressChaosSpecResolver{r}
 }
 
+// StressChaosStatus returns generated.StressChaosStatusResolver implementation.
+func (r *Resolver) StressChaosStatus() generated.StressChaosStatusResolver {
+	return &stressChaosStatusResolver{r}
+}
+
 type attrOverrideSpecResolver struct{ *Resolver }
 type bandwidthSpecResolver struct{ *Resolver }
 type chaosConditionResolver struct{ *Resolver }
@@ -1262,3 +1311,4 @@ type rawTrafficControlResolver struct{ *Resolver }
 type recordResolver struct{ *Resolver }
 type stressChaosResolver struct{ *Resolver }
 type stressChaosSpecResolver struct{ *Resolver }
+type stressChaosStatusResolver struct{ *Resolver }

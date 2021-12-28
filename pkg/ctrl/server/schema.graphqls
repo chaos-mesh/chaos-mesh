@@ -399,9 +399,9 @@ type IOChaosAction @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha
     ino: Int
     size: Int
     blocks: Int
-    atime: Timespec
-    mtime: Timespec
-    ctime: Timespec
+    atime: Timespec @goField(forceResolver: true)
+    mtime: Timespec @goField(forceResolver: true)
+    ctime: Timespec @goField(forceResolver: true)
     kind: String # the file kind
     perm: Int
     nlink: Int
@@ -415,10 +415,10 @@ type IOChaosAction @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha
     filling: String
 
     # there will be [1, MaxOccurrences] segments of wrong data.
-    maxOccurrences: Int
+    maxOccurrences: Int @goField(forceResolver: true)
 
     # max length of each wrong data segment in bytes
-    maxLength: Int
+    maxLength: Int      @goField(forceResolver: true)
 
     # source represents the source of current rules
     source: String!
