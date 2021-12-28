@@ -16,16 +16,12 @@
 package common
 
 import (
-	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"regexp"
 
 	"github.com/fatih/color"
 	"github.com/pkg/errors"
-	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -33,7 +29,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
 )
 
 type Color string
@@ -76,12 +71,6 @@ const (
 	ItemSuccess = iota + 1
 	ItemFailure
 )
-
-const ChaosDaemonClientCert = "chaos-mesh-daemon-client-certs"
-const ChaosDaemonNamespace = "chaos-testing"
-
-var TLSFiles grpcUtils.TLSFile
-var Insecure bool
 
 type ItemResult struct {
 	Name    string
@@ -161,28 +150,4 @@ func InitClientSet() (*ClientSet, error) {
 		return nil, errors.Wrap(err, "error in getting acess to k8s")
 	}
 	return &ClientSet{ctrlClient, kubeClient}, nil
-}
-
-// Log print log of pod
-func Log(pod v1.Pod, tail int64, c *kubernetes.Clientset) (string, error) {
-	podLogOpts := v1.PodLogOptions{}
-	//use negative tail to indicate no tail limit is needed
-	if tail >= 0 {
-		podLogOpts.TailLines = func(i int64) *int64 { return &i }(tail)
-	}
-
-	req := c.CoreV1().Pods(pod.Namespace).GetLogs(pod.Name, &podLogOpts)
-	// FIXME: get context from parameter
-	podLogs, err := req.Stream(context.TODO())
-	if err != nil {
-		return "", errors.Wrapf(err, "failed to open log stream for pod %s/%s", pod.GetNamespace(), pod.GetName())
-	}
-	defer podLogs.Close()
-
-	buf := new(bytes.Buffer)
-	_, err = io.Copy(buf, podLogs)
-	if err != nil {
-		return "", errors.Wrapf(err, "failed to copy information from podLogs to buf")
-	}
-	return buf.String(), nil
 }
