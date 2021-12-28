@@ -25,11 +25,12 @@ import (
 )
 
 // GetFdsOfProcess returns fd-target pairs
-func (r *Resolver) GetFdsOfProcess(ctx context.Context, process *model.Process) ([]*model.Fd, error) {
+func (r *Resolver) GetFdsOfProcess(ctx context.Context, process *model.Process) []*model.Fd {
 	cmd := fmt.Sprintf("ls -l /proc/%s/fd", process.Pid)
 	out, err := r.ExecBypass(ctx, process.Pod, cmd, bpm.PidNS, bpm.MountNS)
 	if err != nil {
-		return nil, err
+		r.Log.Error(err, "failed to get fds of process", "pid", process.Pid)
+		return nil
 	}
 	var fds []*model.Fd
 	for _, line := range strings.Split(out, "\n") {
@@ -46,5 +47,5 @@ func (r *Resolver) GetFdsOfProcess(ctx context.Context, process *model.Process) 
 		fds = append(fds, fd)
 	}
 
-	return fds, nil
+	return fds
 }

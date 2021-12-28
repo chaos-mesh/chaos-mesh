@@ -1041,7 +1041,7 @@ func (r *podStressChaosResolver) ProcessStress(ctx context.Context, obj *model.P
 }
 
 func (r *processResolver) Fds(ctx context.Context, obj *model.Process) ([]*model.Fd, error) {
-	return r.GetFdsOfProcess(ctx, obj)
+	return r.GetFdsOfProcess(ctx, obj), nil
 }
 
 func (r *queryResolver) Namespace(ctx context.Context, ns *string) ([]*model.Namespace, error) {
