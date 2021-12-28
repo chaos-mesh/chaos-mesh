@@ -82,7 +82,7 @@ func exec(ctx context.Context, pod *v1.Pod, cmd string, c *kubernetes.Clientset)
 }
 
 // ExecBypass use chaos-daemon to enter namespace and execute command in target pod
-func (r *Resolver) ExecBypass(ctx context.Context, pod *v1.Pod, cmd string) (string, error) {
+func (r *Resolver) ExecBypass(ctx context.Context, pod *v1.Pod, cmd string, nsTypes ...bpm.NsType) (string, error) {
 	// To disable printing irrelevant log from grpc/clientconn.go
 	// See grpc/grpc-go#3918 for detail. Could be resolved in the future
 	grpclog.SetLoggerV2(grpclog.NewLoggerV2(ioutil.Discard, ioutil.Discard, ioutil.Discard))
@@ -97,13 +97,14 @@ func (r *Resolver) ExecBypass(ctx context.Context, pod *v1.Pod, cmd string) (str
 		return "", err
 	}
 
-	// enter all possible namespaces needed, since there's no bad effect to do so
-	cmdBuilder := bpm.DefaultProcessBuilder(cmd).
-		SetNS(pid, bpm.MountNS).
-		SetNS(pid, bpm.PidNS).
-		SetNS(pid, bpm.NetNS).
-		EnableLocalMnt().
-		SetContext(ctx)
+	cmdBuilder := bpm.DefaultProcessBuilder(cmd)
+	for _, nsType := range nsTypes {
+		cmdBuilder = cmdBuilder.SetNS(pid, nsType)
+	}
 
-	return exec(ctx, daemon, cmdBuilder.Build().Cmd.String(), r.Clientset)
+	return exec(
+		ctx, daemon,
+		cmdBuilder.EnableLocalMnt().SetContext(ctx).Build().Cmd.String(),
+		r.Clientset,
+	)
 }

@@ -21,12 +21,14 @@ import (
 
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 )
 
 // GetMounts returns mounts info
 func (r *Resolver) GetMounts(ctx context.Context, pod *v1.Pod) ([]string, error) {
 	cmd := "cat /proc/mounts"
-	out, err := r.ExecBypass(ctx, pod, cmd)
+	out, err := r.ExecBypass(ctx, pod, cmd, bpm.PidNS, bpm.MountNS)
 	if err != nil {
 		return nil, errors.Wrapf(err, "run command %s failed", cmd)
 	}

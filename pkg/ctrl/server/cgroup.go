@@ -26,13 +26,14 @@ import (
 
 	"github.com/pkg/errors"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	"github.com/chaos-mesh/chaos-mesh/pkg/ctrl/server/model"
 )
 
 // GetCgroups returns result of cat /proc/cgroups
 func (r *Resolver) GetCgroups(ctx context.Context, obj *model.PodStressChaos) (*model.Cgroups, error) {
 	cmd := "cat /proc/cgroups"
-	raw, err := r.ExecBypass(ctx, obj.Pod, cmd)
+	raw, err := r.ExecBypass(ctx, obj.Pod, cmd, bpm.PidNS, bpm.MountNS)
 	if err != nil {
 		return nil, err
 	}
@@ -81,13 +82,13 @@ func (r *Resolver) GetCgroups(ctx context.Context, obj *model.PodStressChaos) (*
 // GetCgroup returns result of cat /proc/:pid/cgroup
 func (r *Resolver) GetCgroup(ctx context.Context, obj *v1.Pod, pid string) (string, error) {
 	cmd := fmt.Sprintf("cat /proc/%s/cgroup", pid)
-	return r.ExecBypass(ctx, obj, cmd)
+	return r.ExecBypass(ctx, obj, cmd, bpm.PidNS, bpm.MountNS)
 }
 
 // GetCPUQuota returns result of cat cat /sys/fs/cgroup/:cpuMountType/cpu.cfs_quota_us
 func (r *Resolver) GetCPUQuota(ctx context.Context, obj *v1.Pod, cpuMountType string) (int, error) {
 	cmd := fmt.Sprintf("cat /sys/fs/cgroup/%s/cpu.cfs_quota_us", cpuMountType)
-	out, err := r.ExecBypass(ctx, obj, cmd)
+	out, err := r.ExecBypass(ctx, obj, cmd, bpm.PidNS, bpm.MountNS)
 	if err != nil {
 		return 0, err
 	}
@@ -97,7 +98,7 @@ func (r *Resolver) GetCPUQuota(ctx context.Context, obj *v1.Pod, cpuMountType st
 // GetCPUPeriod returns result of cat cat /sys/fs/cgroup/:cpuMountType/cpu.cfs_period_us
 func (r *Resolver) GetCPUPeriod(ctx context.Context, obj *v1.Pod, cpuMountType string) (int, error) {
 	cmd := fmt.Sprintf("cat /sys/fs/cgroup/%s/cpu.cfs_period_us", cpuMountType)
-	out, err := r.ExecBypass(ctx, obj, cmd)
+	out, err := r.ExecBypass(ctx, obj, cmd, bpm.PidNS, bpm.MountNS)
 	if err != nil {
 		return 0, err
 	}
@@ -107,7 +108,7 @@ func (r *Resolver) GetCPUPeriod(ctx context.Context, obj *v1.Pod, cpuMountType s
 // GetMemoryLimit returns result of cat cat /sys/fs/cgroup/memory/memory.limit_in_bytes
 func (r *Resolver) GetMemoryLimit(ctx context.Context, obj *v1.Pod) (int64, error) {
 	cmd := "cat /sys/fs/cgroup/memory/memory.limit_in_bytes"
-	rawLimit, err := r.ExecBypass(ctx, obj, cmd)
+	rawLimit, err := r.ExecBypass(ctx, obj, cmd, bpm.PidNS, bpm.MountNS)
 	if err != nil {
 		return 0, errors.Wrap(err, "could not get memory.limit_in_bytes")
 	}

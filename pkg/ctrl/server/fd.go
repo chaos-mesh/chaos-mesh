@@ -20,13 +20,14 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	"github.com/chaos-mesh/chaos-mesh/pkg/ctrl/server/model"
 )
 
 // GetFdsOfProcess returns fd-target pairs
 func (r *Resolver) GetFdsOfProcess(ctx context.Context, process *model.Process) ([]*model.Fd, error) {
 	cmd := fmt.Sprintf("ls -l /proc/%s/fd", process.Pid)
-	out, err := r.ExecBypass(ctx, process.Pod, cmd)
+	out, err := r.ExecBypass(ctx, process.Pod, cmd, bpm.PidNS, bpm.MountNS)
 	if err != nil {
 		return nil, err
 	}
