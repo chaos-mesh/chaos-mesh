@@ -24,8 +24,14 @@ import common
 
 def get_image_env(name, env, default):
     default_env = os.getenv("IMAGE_" + env, default)
+    if default_env == "":
+        default_env = default
     env_mid_name = utils.underscore_uppercase(name)
-    return os.getenv("IMAGE_%s_%s" % (env_mid_name, env), default_env)
+    
+    env = os.getenv("IMAGE_%s_%s" % (env_mid_name, env), default_env)
+    if env == "":
+        env = default_env
+    return env
 
 def get_image_project(name):
     return get_image_env(name, "PROJECT", "pingcap")
@@ -84,11 +90,9 @@ if __name__ == '__main__':
 
         target_platform = utils.get_target_platform()
         cmd += ["--build-arg", "%s=%s" % ("TARGET_PLATFORM", target_platform)]
-        if os.getenv("TARGET_PLATFORM") != None:
-            cmd += ["--platform", "linux/%s" % os.getenv("TARGET_PLATFORM")]
-
         cmd += ["-t", image_full_name, args.path[0]]
     else:
         cmd = ["docker", "pull", image_full_name]
 
+    print(" ".join(cmd))
     subprocess.run(cmd, env=env)

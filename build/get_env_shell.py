@@ -59,12 +59,12 @@ if __name__ == '__main__':
     cmd += ["--user", "%s:%s" % (os.getuid(), os.getgid())]
     
     target_platform = utils.get_target_platform()
-    if os.getenv("TARGET_PLATFORM") != None:
+    if os.getenv("TARGET_PLATFORM") != None and os.getenv("TARGET_PLATFORM") != "":
         cmd += ["--platform", "linux/%s" % os.getenv("TARGET_PLATFORM")]
     if target_platform == "arm64":
         cmd += ["--env", "ETCD_UNSUPPORTED_ARCH=arm64"]
     
-    if os.getenv("GO_BUILD_CACHE") != None:
+    if os.getenv("GO_BUILD_CACHE") != None and os.getenv("GO_BUILD_CACHE") != "":
         tmp_go_dir = "%s/chaos-mesh-gopath" % os.getenv("GO_BUILD_CACHE")
         tmp_go_build_dir = "%s/chaos-mesh-gobuild" % os.getenv("GO_BUILD_CACHE")
 
