@@ -44,7 +44,8 @@ func Debug(ctx context.Context, namespace, chaosName string, client *ctrlclient.
 				Podios []struct {
 					Namespace string
 					Name      string
-					Spec      struct {
+					// TODO: fit types with v1alpha1.PodIOChaosSpec
+					Spec struct {
 						VolumeMountPath string
 						Container       *string
 						Actions         []struct {
