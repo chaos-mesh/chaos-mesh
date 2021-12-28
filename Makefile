@@ -18,11 +18,9 @@ HELM_BIN=$(ROOT)/output/bin/helm
 export IMAGE_BUILD_ENV_PROJECT ?= chaos-mesh
 export IMAGE_BUILD_ENV_REGISTRY ?= ghcr.io
 export IMAGE_BUILD_ENV_BUILD ?= 0
-export IMAGE_BUILD_ENV_TAG ?= latest
 export IMAGE_DEV_ENV_PROJECT ?= chaos-mesh
 export IMAGE_DEV_ENV_REGISTRY ?= ghcr.io
 export IMAGE_DEV_ENV_BUILD ?= 0
-export IMAGE_DEV_ENV_TAG ?= latest
 
 export GOPROXY  := $(if $(GOPROXY),$(GOPROXY),https://proxy.golang.org,direct)
 GOENV  	:= CGO_ENABLED=0
