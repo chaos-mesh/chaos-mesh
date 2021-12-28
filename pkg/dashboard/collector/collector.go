@@ -87,14 +87,6 @@ func (r *ChaosCollector) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		return ctrl.Result{}, nil
 	}
 
-	if chaosMeta, ok = obj.(metav1.Object); !ok {
-		r.Log.Error(nil, "failed to get chaos meta information")
-	}
-
-	if chaosMeta.GetLabels()[v1alpha1.LabelManagedBy] != "" {
-		manageFlag = true
-	}
-
 	if err := r.setUnarchivedExperiment(req, obj); err != nil {
 		r.Log.Error(err, "failed to archive experiment")
 		// ignore error here
