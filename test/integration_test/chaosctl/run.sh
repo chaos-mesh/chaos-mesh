@@ -22,9 +22,12 @@ cur=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 cd $cur/../../../bin
 
 pwd
-echo "deploy deployments and chaos for testing"
+echo "Deploy deployments and chaos for testing"
 wget https://mirrors.chaos-mesh.org/v1.1.2/web-show/deploy.sh
 bash deploy.sh
+
+echo "Run networkchaos"
+
 cat <<EOF >delay.yaml
 apiVersion: chaos-mesh.org/v1alpha1
 kind: NetworkChaos
@@ -44,17 +47,120 @@ spec:
 EOF
 kubectl apply -f delay.yaml
 
-echo "Checking chaosctl function"
+echo "Checking chaosctl logs"
 ./chaosctl logs 1>/dev/null
-status=$(./chaosctl debug networkchaos web-show-network-delay | grep "Execute as expected")
-if [[ -z "$status" ]]; then
-    ./chaosctl debug networkchaos web-show-network-delay
-    echo "Chaos is not running as expected"
+if [ $? -ne 0 ]; then
+    echo "chaosctl logs failed"
     code=1
 fi
-echo "Cleaning up"
+
+echo "Checking chaosctl debug networkchaos"
+./chaosctl debug networkchaos web-show-network-delay
+if [ $? -ne 0 ]; then
+    echo "chaosctl debug networkchaos failed"
+    code=1
+fi
+echo "Cleaning up networkchaos"
 kubectl delete -f delay.yaml
 rm delay.yaml
+
+echo "Run httpchaos"
+
+cat <<EOF >delay.yaml
+apiVersion: chaos-mesh.org/v1alpha1
+kind: HTTPChaos
+metadata:
+  name: web-show-http-delay
+spec:
+  mode: one # the mode to run chaos action; supported modes are one/all/fixed/fixed-percent/random-max-percent
+  selector: # pods where to inject chaos actions
+    namespaces:
+      - default
+    labelSelectors:
+      "app": "web-show"  # the label of the pod for chaos injection
+  target: Request
+  port: 8081
+  path: "*"
+  delay: "10ms"
+  duration: "30s" # duration for the injected chaos experiment
+EOF
+kubectl apply -f delay.yaml
+
+echo "Checking chaosctl debug httpchaos"
+./chaosctl debug httpchaos web-show-http-delay
+if [ $? -ne 0 ]; then
+    echo "chaosctl debug httpchaos failed"
+    code=1
+fi
+echo "Cleaning up httpchaos"
+kubectl delete -f delay.yaml
+rm delay.yaml
+
+echo "Run iochaos"
+
+cat <<EOF >delay.yaml
+apiVersion: chaos-mesh.org/v1alpha1
+kind: IOChaos
+metadata:
+  name: web-show-io-delay
+spec:
+  action: latency
+  mode: one # the mode to run chaos action; supported modes are one/all/fixed/fixed-percent/random-max-percent
+  selector: # pods where to inject chaos actions
+    namespaces:
+      - default
+    labelSelectors:
+      "app": "web-show"  # the label of the pod for chaos injection
+  volumePath: /var/run/secrets/kubernetes.io/serviceaccount
+  path: "/var/run/secrets/kubernetes.io/serviceaccount/**/*"
+  delay: "10ms"
+  percent: 50
+  duration: "30s" # duration for the injected chaos experiment
+EOF
+kubectl apply -f delay.yaml
+
+echo "Checking chaosctl debug iochaos"
+./chaosctl debug iochaos web-show-io-delay
+if [ $? -ne 0 ]; then
+    echo "chaosctl debug iochaos failed"
+    code=1
+fi
+echo "Cleaning up iochaos"
+kubectl delete -f delay.yaml
+rm delay.yaml
+
+echo "Run stresschaos"
+
+cat <<EOF >stress.yaml
+apiVersion: chaos-mesh.org/v1alpha1
+kind: StressChaos
+metadata:
+  name: web-show-memory-stress
+spec:
+  mode: one # the mode to run chaos action; supported modes are one/all/fixed/fixed-percent/random-max-percent
+  selector: # pods where to inject chaos actions
+    namespaces:
+      - default
+    labelSelectors:
+      "app": "web-show"  # the label of the pod for chaos injection
+  stressors:
+    memory:
+      workers: 4
+      size: '256MB'
+  duration: "30s" # duration for the injected chaos experiment
+EOF
+kubectl apply -f stress.yaml
+
+echo "Checking chaosctl debug stresschaos"
+./chaosctl debug stresschaos web-show-memory-stress
+if [ $? -ne 0 ]; then
+    echo "chaosctl debug stresschaos failed"
+    code=1
+fi
+echo "Cleaning up stresschaos"
+kubectl delete -f stress.yaml
+rm stress.yaml
+
 bash deploy.sh -d
 rm deploy.sh
 exit $code
