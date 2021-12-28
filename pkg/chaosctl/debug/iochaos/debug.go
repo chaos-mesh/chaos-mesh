@@ -52,18 +52,18 @@ func Debug(ctx context.Context, namespace, chaosName string, client *ctrlclient.
 							v1alpha1.Filter `json:",inline"`
 							Faults          []v1alpha1.IoFault
 							Latency         string
-							Ino             *int                  `json:"ino,omitempty"`
-							Size            *int                  `json:"size,omitempty"`
-							Blocks          *int                  `json:"blocks,omitempty"`
+							Ino             *uint64               `json:"ino,omitempty"`
+							Size            *uint64               `json:"size,omitempty"`
+							Blocks          *uint64               `json:"blocks,omitempty"`
 							Atime           *v1alpha1.Timespec    `json:"atime,omitempty"`
 							Mtime           *v1alpha1.Timespec    `json:"mtime,omitempty"`
 							Ctime           *v1alpha1.Timespec    `json:"ctime,omitempty"`
 							Kind            *v1alpha1.FileType    `json:"kind,omitempty"`
-							Perm            *int                  `json:"perm,omitempty"`
-							Nlink           *int                  `json:"nlink,omitempty"`
-							UID             *int                  `json:"uid,omitempty"`
-							GID             *int                  `json:"gid,omitempty"`
-							Rdev            *int                  `json:"rdev,omitempty"`
+							Perm            *uint                 `json:"perm,omitempty"`
+							Nlink           *uint                 `json:"nlink,omitempty"`
+							UID             *uint                 `json:"uid,omitempty"`
+							GID             *uint                 `json:"gid,omitempty"`
+							Rdev            *uint                 `json:"rdev,omitempty"`
 							Filling         *v1alpha1.FillingType `json:"filling,omitempty"`
 							MaxOccurrences  *int64                `json:"maxOccurrences,omitempty"`
 							MaxLength       *int64                `json:"maxLength,omitempty"`

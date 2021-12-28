@@ -9,6 +9,8 @@ import (
 
 	v1 "k8s.io/api/core/v1"
 
+	"github.com/pkg/errors"
+
 	"github.com/chaos-mesh/chaos-mesh/pkg/ctrl/server/model"
 )
 
@@ -88,7 +90,15 @@ func (r *Resolver) GetCPUPeriod(ctx context.Context, obj *v1.Pod, cpuMountType s
 }
 
 // GetMemoryLimit returns result of cat cat /sys/fs/cgroup/memory/memory.limit_in_bytes
-func (r *Resolver) GetMemoryLimit(ctx context.Context, obj *v1.Pod) (string, error) {
+func (r *Resolver) GetMemoryLimit(ctx context.Context, obj *v1.Pod) (int64, error) {
 	cmd := "cat /sys/fs/cgroup/memory/memory.limit_in_bytes"
-	return r.ExecBypass(ctx, obj, cmd)
+	rawLimit, err := r.ExecBypass(ctx, obj, cmd)
+	if err != nil {
+		return 0, errors.Wrap(err, "could not get memory.limit_in_bytes")
+	}
+	limit, err := strconv.ParseUint(strings.TrimSuffix(rawLimit, "\n"), 10, 64)
+	if err != nil {
+		return 0, errors.Wrap(err, "could not parse memory.limit_in_bytes")
+	}
+	return int64(limit), nil
 }

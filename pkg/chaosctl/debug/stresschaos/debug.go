@@ -19,11 +19,9 @@ import (
 	"context"
 	"fmt"
 	"strconv"
-	"strings"
 
 	"code.cloudfoundry.org/bytefmt"
 	"github.com/hasura/go-graphql-client"
-	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
 	ctrlclient "github.com/chaos-mesh/chaos-mesh/pkg/ctrl/client"
@@ -55,7 +53,7 @@ func Debug(ctx context.Context, namespace, chaosName string, client *ctrlclient.
 							Period int
 						}
 						Memory *struct {
-							Limit string
+							Limit uint64
 						}
 					}
 					ProcessStress []struct {
@@ -115,11 +113,7 @@ func Debug(ctx context.Context, namespace, chaosName string, client *ctrlclient.
 			}
 
 			if podStressChaos.Cgroups.Memory != nil {
-				limit, err := strconv.ParseUint(strings.TrimSuffix(podStressChaos.Cgroups.Memory.Limit, "\n"), 10, 64)
-				if err != nil {
-					return nil, errors.Wrap(err, "could not get memory.limit_in_bytes")
-				}
-				podResult.Items = append(podResult.Items, common.ItemResult{Name: "memory.limit_in_bytes", Value: bytefmt.ByteSize(limit) + "B"})
+				podResult.Items = append(podResult.Items, common.ItemResult{Name: "memory.limit_in_bytes", Value: bytefmt.ByteSize(podStressChaos.Cgroups.Memory.Limit) + "B"})
 			}
 			result.Pods = append(result.Pods, podResult)
 		}

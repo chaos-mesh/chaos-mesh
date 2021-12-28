@@ -25,6 +25,7 @@ directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITI
 
 scalar Time
 scalar Map
+scalar Int64
 
 schema {
     query: Query
@@ -396,18 +397,18 @@ type IOChaosAction @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha
     latency: String
 
     # attrOverrides represents the attribution to override
-    ino: Int
-    size: Int
-    blocks: Int
+    ino: Int64
+    size: Int64
+    blocks: Int64
     atime: Timespec @goField(forceResolver: true)
     mtime: Timespec @goField(forceResolver: true)
     ctime: Timespec @goField(forceResolver: true)
     kind: String # the file kind
     perm: Int
-    nlink: Int
-    uid: Int
-    gid: Int
-    rdev: Int
+    nlink: Int64
+    uid: Int64
+    gid: Int64
+    rdev: Int64
 
     # MistakeSpec represents the mistake to inject
     
@@ -415,10 +416,10 @@ type IOChaosAction @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha
     filling: String
 
     # there will be [1, MaxOccurrences] segments of wrong data.
-    maxOccurrences: Int @goField(forceResolver: true)
+    maxOccurrences: Int64 @goField(forceResolver: true)
 
     # max length of each wrong data segment in bytes
-    maxLength: Int      @goField(forceResolver: true)
+    maxLength: Int64      @goField(forceResolver: true)
 
     # source represents the source of current rules
     source: String!
@@ -1166,7 +1167,7 @@ type CgroupsCpu {
 }
 
 type CgroupsMemory {
-    limit: String!
+    limit: Int64!
 }
 
 type ProcessStress {

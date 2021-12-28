@@ -24,7 +24,7 @@ type CgroupsCPU struct {
 }
 
 type CgroupsMemory struct {
-	Limit string `json:"limit"`
+	Limit int64 `json:"limit"`
 }
 
 type Fd struct {

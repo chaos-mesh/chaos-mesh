@@ -265,27 +265,27 @@ func (r *iOChaosActionResolver) Methods(ctx context.Context, obj *v1alpha1.IOCha
 	return methods, nil
 }
 
-func (r *iOChaosActionResolver) Ino(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error) {
+func (r *iOChaosActionResolver) Ino(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int64, error) {
 	if obj.AttrOverrideSpec == nil || obj.Ino == nil {
 		return nil, nil
 	}
-	ino := (int)(*obj.Ino)
+	ino := (int64)(*obj.Ino)
 	return &ino, nil
 }
 
-func (r *iOChaosActionResolver) Size(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error) {
+func (r *iOChaosActionResolver) Size(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int64, error) {
 	if obj.AttrOverrideSpec == nil || obj.Size == nil {
 		return nil, nil
 	}
-	size := (int)(*obj.Size)
+	size := (int64)(*obj.Size)
 	return &size, nil
 }
 
-func (r *iOChaosActionResolver) Blocks(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error) {
+func (r *iOChaosActionResolver) Blocks(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int64, error) {
 	if obj.AttrOverrideSpec == nil || obj.Blocks == nil {
 		return nil, nil
 	}
-	blocks := (int)(*obj.Blocks)
+	blocks := (int64)(*obj.Blocks)
 	return &blocks, nil
 }
 
@@ -326,35 +326,35 @@ func (r *iOChaosActionResolver) Perm(ctx context.Context, obj *v1alpha1.IOChaosA
 	return &perm, nil
 }
 
-func (r *iOChaosActionResolver) Nlink(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error) {
+func (r *iOChaosActionResolver) Nlink(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int64, error) {
 	if obj.AttrOverrideSpec == nil || obj.Nlink == nil {
 		return nil, nil
 	}
-	nlink := (int)(*obj.Nlink)
+	nlink := (int64)(*obj.Nlink)
 	return &nlink, nil
 }
 
-func (r *iOChaosActionResolver) UID(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error) {
+func (r *iOChaosActionResolver) UID(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int64, error) {
 	if obj.AttrOverrideSpec == nil || obj.UID == nil {
 		return nil, nil
 	}
-	uid := (int)(*obj.UID)
+	uid := (int64)(*obj.UID)
 	return &uid, nil
 }
 
-func (r *iOChaosActionResolver) Gid(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error) {
+func (r *iOChaosActionResolver) Gid(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int64, error) {
 	if obj.AttrOverrideSpec == nil || obj.GID == nil {
 		return nil, nil
 	}
-	gid := (int)(*obj.GID)
+	gid := (int64)(*obj.GID)
 	return &gid, nil
 }
 
-func (r *iOChaosActionResolver) Rdev(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error) {
+func (r *iOChaosActionResolver) Rdev(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int64, error) {
 	if obj.AttrOverrideSpec == nil || obj.Rdev == nil {
 		return nil, nil
 	}
-	rdev := (int)(*obj.Rdev)
+	rdev := (int64)(*obj.Rdev)
 	return &rdev, nil
 }
 
@@ -366,20 +366,18 @@ func (r *iOChaosActionResolver) Filling(ctx context.Context, obj *v1alpha1.IOCha
 	return &filling, nil
 }
 
-func (r *iOChaosActionResolver) MaxOccurrences(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error) {
+func (r *iOChaosActionResolver) MaxOccurrences(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int64, error) {
 	if obj.MistakeSpec == nil {
 		return nil, nil
 	}
-	maxOccurrences := int(obj.MaxOccurrences)
-	return &maxOccurrences, nil
+	return &obj.MaxOccurrences, nil
 }
 
-func (r *iOChaosActionResolver) MaxLength(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error) {
+func (r *iOChaosActionResolver) MaxLength(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int64, error) {
 	if obj.MistakeSpec == nil {
 		return nil, nil
 	}
-	maxLength := int(obj.MaxLength)
-	return &maxLength, nil
+	return &obj.MaxLength, nil
 }
 
 func (r *iOChaosSpecResolver) Mode(ctx context.Context, obj *v1alpha1.IOChaosSpec) (string, error) {

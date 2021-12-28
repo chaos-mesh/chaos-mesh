@@ -789,21 +789,21 @@ type IOChaosActionResolver interface {
 
 	Methods(ctx context.Context, obj *v1alpha1.IOChaosAction) ([]string, error)
 
-	Ino(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error)
-	Size(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error)
-	Blocks(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error)
+	Ino(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int64, error)
+	Size(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int64, error)
+	Blocks(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int64, error)
 	Atime(ctx context.Context, obj *v1alpha1.IOChaosAction) (*v1alpha1.Timespec, error)
 	Mtime(ctx context.Context, obj *v1alpha1.IOChaosAction) (*v1alpha1.Timespec, error)
 	Ctime(ctx context.Context, obj *v1alpha1.IOChaosAction) (*v1alpha1.Timespec, error)
 	Kind(ctx context.Context, obj *v1alpha1.IOChaosAction) (*string, error)
 	Perm(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error)
-	Nlink(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error)
-	UID(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error)
-	Gid(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error)
-	Rdev(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error)
+	Nlink(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int64, error)
+	UID(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int64, error)
+	Gid(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int64, error)
+	Rdev(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int64, error)
 	Filling(ctx context.Context, obj *v1alpha1.IOChaosAction) (*string, error)
-	MaxOccurrences(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error)
-	MaxLength(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error)
+	MaxOccurrences(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int64, error)
+	MaxLength(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int64, error)
 }
 type IOChaosSpecResolver interface {
 	Mode(ctx context.Context, obj *v1alpha1.IOChaosSpec) (string, error)
@@ -4165,6 +4165,7 @@ directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITI
 
 scalar Time
 scalar Map
+scalar Int64
 
 schema {
     query: Query
@@ -4536,18 +4537,18 @@ type IOChaosAction @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha
     latency: String
 
     # attrOverrides represents the attribution to override
-    ino: Int
-    size: Int
-    blocks: Int
+    ino: Int64
+    size: Int64
+    blocks: Int64
     atime: Timespec @goField(forceResolver: true)
     mtime: Timespec @goField(forceResolver: true)
     ctime: Timespec @goField(forceResolver: true)
     kind: String # the file kind
     perm: Int
-    nlink: Int
-    uid: Int
-    gid: Int
-    rdev: Int
+    nlink: Int64
+    uid: Int64
+    gid: Int64
+    rdev: Int64
 
     # MistakeSpec represents the mistake to inject
     
@@ -4555,10 +4556,10 @@ type IOChaosAction @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha
     filling: String
 
     # there will be [1, MaxOccurrences] segments of wrong data.
-    maxOccurrences: Int @goField(forceResolver: true)
+    maxOccurrences: Int64 @goField(forceResolver: true)
 
     # max length of each wrong data segment in bytes
-    maxLength: Int      @goField(forceResolver: true)
+    maxLength: Int64      @goField(forceResolver: true)
 
     # source represents the source of current rules
     source: String!
@@ -5306,7 +5307,7 @@ type CgroupsCpu {
 }
 
 type CgroupsMemory {
-    limit: String!
+    limit: Int64!
 }
 
 type ProcessStress {
@@ -6422,9 +6423,9 @@ func (ec *executionContext) _CgroupsMemory_limit(ctx context.Context, field grap
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(int64)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNInt642int64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _ChaosCondition_type(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.ChaosCondition) (ret graphql.Marshaler) {
@@ -9824,9 +9825,9 @@ func (ec *executionContext) _IOChaosAction_ino(ctx context.Context, field graphq
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int)
+	res := resTmp.(*int64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+	return ec.marshalOInt642ᚖint64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _IOChaosAction_size(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.IOChaosAction) (ret graphql.Marshaler) {
@@ -9856,9 +9857,9 @@ func (ec *executionContext) _IOChaosAction_size(ctx context.Context, field graph
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int)
+	res := resTmp.(*int64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+	return ec.marshalOInt642ᚖint64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _IOChaosAction_blocks(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.IOChaosAction) (ret graphql.Marshaler) {
@@ -9888,9 +9889,9 @@ func (ec *executionContext) _IOChaosAction_blocks(ctx context.Context, field gra
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int)
+	res := resTmp.(*int64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+	return ec.marshalOInt642ᚖint64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _IOChaosAction_atime(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.IOChaosAction) (ret graphql.Marshaler) {
@@ -10080,9 +10081,9 @@ func (ec *executionContext) _IOChaosAction_nlink(ctx context.Context, field grap
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int)
+	res := resTmp.(*int64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+	return ec.marshalOInt642ᚖint64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _IOChaosAction_uid(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.IOChaosAction) (ret graphql.Marshaler) {
@@ -10112,9 +10113,9 @@ func (ec *executionContext) _IOChaosAction_uid(ctx context.Context, field graphq
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int)
+	res := resTmp.(*int64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+	return ec.marshalOInt642ᚖint64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _IOChaosAction_gid(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.IOChaosAction) (ret graphql.Marshaler) {
@@ -10144,9 +10145,9 @@ func (ec *executionContext) _IOChaosAction_gid(ctx context.Context, field graphq
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int)
+	res := resTmp.(*int64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+	return ec.marshalOInt642ᚖint64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _IOChaosAction_rdev(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.IOChaosAction) (ret graphql.Marshaler) {
@@ -10176,9 +10177,9 @@ func (ec *executionContext) _IOChaosAction_rdev(ctx context.Context, field graph
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int)
+	res := resTmp.(*int64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+	return ec.marshalOInt642ᚖint64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _IOChaosAction_filling(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.IOChaosAction) (ret graphql.Marshaler) {
@@ -10240,9 +10241,9 @@ func (ec *executionContext) _IOChaosAction_maxOccurrences(ctx context.Context, f
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int)
+	res := resTmp.(*int64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+	return ec.marshalOInt642ᚖint64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _IOChaosAction_maxLength(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.IOChaosAction) (ret graphql.Marshaler) {
@@ -10272,9 +10273,9 @@ func (ec *executionContext) _IOChaosAction_maxLength(ctx context.Context, field 
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int)
+	res := resTmp.(*int64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+	return ec.marshalOInt642ᚖint64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _IOChaosAction_source(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.IOChaosAction) (ret graphql.Marshaler) {
@@ -25836,6 +25837,21 @@ func (ec *executionContext) marshalNInt2int64(ctx context.Context, sel ast.Selec
 	return res
 }
 
+func (ec *executionContext) unmarshalNInt642int64(ctx context.Context, v interface{}) (int64, error) {
+	res, err := graphql.UnmarshalInt64(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNInt642int64(ctx context.Context, sel ast.SelectionSet, v int64) graphql.Marshaler {
+	res := graphql.MarshalInt64(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
+}
+
 func (ec *executionContext) marshalNIoFault2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐIoFault(ctx context.Context, sel ast.SelectionSet, v v1alpha1.IoFault) graphql.Marshaler {
 	return ec._IoFault(ctx, sel, &v)
 }
@@ -26792,6 +26808,21 @@ func (ec *executionContext) unmarshalOInt2ᚖint64(ctx context.Context, v interf
 }
 
 func (ec *executionContext) marshalOInt2ᚖint64(ctx context.Context, sel ast.SelectionSet, v *int64) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalInt64(*v)
+}
+
+func (ec *executionContext) unmarshalOInt642ᚖint64(ctx context.Context, v interface{}) (*int64, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalInt64(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOInt642ᚖint64(ctx context.Context, sel ast.SelectionSet, v *int64) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
