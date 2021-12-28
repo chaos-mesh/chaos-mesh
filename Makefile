@@ -20,11 +20,9 @@ HELM_BIN=$(OUTPUT_BIN)/helm
 IMAGE_BUILD_ENV_PROJECT ?= chaos-mesh
 IMAGE_BUILD_ENV_REGISTRY ?= ghcr.io
 IMAGE_BUILD_ENV_BUILD ?= 0
-IMAGE_BUILD_ENV_TAG ?= latest
 IMAGE_DEV_ENV_PROJECT ?= chaos-mesh
 IMAGE_DEV_ENV_REGISTRY ?= ghcr.io
 IMAGE_DEV_ENV_BUILD ?= 0
-IMAGE_DEV_ENV_TAG ?= latest
 
 # Enable GO111MODULE=on explicitly, disable it with GO111MODULE=off when necessary.
 export GO111MODULE := on
@@ -454,7 +452,7 @@ define test-make
 	cat cover.out.tmp | grep -v "_generated.deepcopy.go" > cover.out
 	make failpoint-disable
 endef
-$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,test,failpoint-enable generate generate-mock manifests test-utils))
+$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,test,failpoint-enable generate manifests test-utils))
 
 define gosec-scan-make
 	gosec ./api/... ./controllers/... ./pkg/... || echo "*** sec-scan failed: known-issues ***"
@@ -483,13 +481,8 @@ define swagger_spec-make
 endef
 $(eval $(call RUN_IN_DEV_ENV_TEMPLATE,swagger_spec))
 
-define generate-mock-make
-	$(GO) generate ./pkg/workflow
-endef
-$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,generate-mock))
-
 .PHONY: all clean test install manifests groupimports fmt vet tidy image \
-	docker-push lint generate config mockgen generate-mock \
+	docker-push lint generate config \
 	install.sh $(GO_TARGET_PHONY) \
 	manager chaosfs chaosdaemon chaos-dashboard \
 	dashboard dashboard-server-frontend gosec-scan \
