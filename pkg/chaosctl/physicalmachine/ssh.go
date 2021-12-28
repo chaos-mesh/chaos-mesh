@@ -23,11 +23,13 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/pkg/errors"
 	"github.com/pkg/sftp"
 	"golang.org/x/crypto/ssh"
+	"golang.org/x/term"
 )
 
 type SshTunnel struct {
@@ -49,14 +51,22 @@ func NewSshTunnel(ip, port string, user, privateKeyFile string) (*SshTunnel, err
 			ssh.PublicKeysCallback(func() ([]ssh.Signer, error) {
 				key, err := ioutil.ReadFile(privateKeyFile)
 				if err != nil {
-					return nil, fmt.Errorf("ssh key file read failed: %v", err)
+					return nil, errors.Wrap(err, "ssh key file read failed")
 				}
 
 				signer, err := ssh.ParsePrivateKey(key)
 				if err != nil {
-					return nil, fmt.Errorf("ssh key signer failed: %v", err)
+					return nil, errors.Wrap(err, "ssh key signer failed")
 				}
 				return []ssh.Signer{signer}, nil
+			}),
+			ssh.PasswordCallback(func() (secret string, err error) {
+				fmt.Printf("please input the password: ")
+				password, err := term.ReadPassword(int(syscall.Stdin))
+				if err != nil {
+					return "", errors.Wrap(err, "read ssh password failed")
+				}
+				return string(password), nil
 			}),
 		},
 		HostKeyCallback: ssh.FixedHostKey(hostKey),
@@ -69,19 +79,9 @@ func NewSshTunnel(ip, port string, user, privateKeyFile string) (*SshTunnel, err
 }
 
 func (s *SshTunnel) Open() error {
-	// first, try ssh with public keys
 	conn, err := ssh.Dial("tcp", net.JoinHostPort(s.host, s.port), s.config)
 	if err != nil {
-		// if failed, try ssh with password
-		fmt.Printf("please input the password: ")
-		password := ""
-		fmt.Scanf("%s\n", &password)
-
-		s.config.Auth = []ssh.AuthMethod{ssh.Password(password)}
-		conn, err = ssh.Dial("tcp", net.JoinHostPort(s.host, s.port), s.config)
-		if err != nil {
-			return err
-		}
+		return errors.Wrap(err, "open ssh tunnel failed")
 	}
 	s.client = conn
 	return nil
@@ -102,22 +102,22 @@ func (s *SshTunnel) SFTP(filename string, data []byte) error {
 	// open an SFTP session over an existing ssh connection.
 	client, err := sftp.NewClient(s.client)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "create sftp client failed")
 	}
 	defer client.Close()
 
 	if err := client.MkdirAll(filepath.Dir(filename)); err != nil {
-		return err
+		return errors.Wrapf(err, "make directory %s failed", filepath.Dir(filename))
 	}
 
 	f, err := client.Create(filename)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "create file %s failed", filename)
 	}
 	defer f.Close()
 
 	if _, err := f.Write(data); err != nil {
-		return err
+		return errors.Wrapf(err, "write file %s failed", filename)
 	}
 	return nil
 }
