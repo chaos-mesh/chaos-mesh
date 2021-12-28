@@ -16,19 +16,18 @@
 package physicalmachine
 
 import (
-	"bufio"
 	"fmt"
 	"io/ioutil"
 	"net"
 	"os"
 	"path/filepath"
-	"strings"
 	"syscall"
 	"time"
 
 	"github.com/pkg/errors"
 	"github.com/pkg/sftp"
 	"golang.org/x/crypto/ssh"
+	"golang.org/x/crypto/ssh/knownhosts"
 	"golang.org/x/term"
 )
 
@@ -40,7 +39,7 @@ type SshTunnel struct {
 }
 
 func NewSshTunnel(ip, port string, user, privateKeyFile string) (*SshTunnel, error) {
-	hostKey, err := getHostKey(ip)
+	hostKeyCallback, err := knownhosts.New(filepath.Join(os.Getenv("HOME"), ".ssh", "known_hosts"))
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +68,7 @@ func NewSshTunnel(ip, port string, user, privateKeyFile string) (*SshTunnel, err
 				return string(password), nil
 			}),
 		},
-		HostKeyCallback: ssh.FixedHostKey(hostKey),
+		HostKeyCallback: hostKeyCallback,
 	}
 	return &SshTunnel{
 		config: &config,
@@ -120,34 +119,4 @@ func (s *SshTunnel) SFTP(filename string, data []byte) error {
 		return errors.Wrapf(err, "write file %s failed", filename)
 	}
 	return nil
-}
-
-func getHostKey(host string) (ssh.PublicKey, error) {
-	file, err := os.Open(filepath.Join(os.Getenv("HOME"), ".ssh", "known_hosts"))
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-	var hostKey ssh.PublicKey
-	for scanner.Scan() {
-		fields := strings.Split(scanner.Text(), " ")
-		if len(fields) != 3 {
-			continue
-		}
-		if strings.Contains(fields[0], host) {
-			var err error
-			hostKey, _, _, _, err = ssh.ParseAuthorizedKey(scanner.Bytes())
-			if err != nil {
-				return nil, fmt.Errorf("error parsing %q: %v", fields[2], err)
-			}
-			break
-		}
-	}
-
-	if hostKey == nil {
-		return nil, fmt.Errorf("no hostkey for %s", host)
-	}
-	return hostKey, nil
 }
