@@ -1217,7 +1217,7 @@ export const dataPhysic: Record<KindPhysic, Definition> = {
         key: 'network-dns',
         spec: {
           action: 'network-dns' as any,
-          'dns-hostname': {
+          'dns-domain-name': {
             field: 'text',
             label: 'Hostname',
             value: '',
