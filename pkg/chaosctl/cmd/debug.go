@@ -29,7 +29,6 @@ import (
 type Debugger func(ctx context.Context, namespace, chaosName string, client *ctrlclient.CtrlClient) ([]*common.ChaosResult, error)
 
 type DebugOptions struct {
-	logger    logr.Logger
 	namespace string
 }
 
@@ -41,9 +40,7 @@ const (
 )
 
 func NewDebugCommand(logger logr.Logger, debuggers map[string]Debugger) (*cobra.Command, error) {
-	o := &DebugOptions{
-		logger: logger,
-	}
+	o := &DebugOptions{}
 
 	debugCmd := &cobra.Command{
 		Use:   `debug (CHAOSTYPE) [-c CHAOSNAME] [-n NAMESPACE]`,

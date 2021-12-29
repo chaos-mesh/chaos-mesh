@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/go-logr/logr"
 	"github.com/hasura/go-graphql-client"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -32,9 +31,8 @@ import (
 )
 
 type logsOptions struct {
-	logger logr.Logger
-	tail   int64
-	node   string
+	tail int64
+	node string
 }
 
 type Component string
@@ -46,10 +44,8 @@ const (
 	DnsServer Component = "DNSSERVER"
 )
 
-func NewLogsCmd(logger logr.Logger) (*cobra.Command, error) {
-	o := &logsOptions{
-		logger: logger,
-	}
+func NewLogsCmd() (*cobra.Command, error) {
+	o := &logsOptions{}
 
 	logsCmd := &cobra.Command{
 		Use:   `logs [-t LINE]`,

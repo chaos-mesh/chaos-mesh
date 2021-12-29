@@ -57,7 +57,7 @@ func Execute() {
 	}
 	cm.SetupGlobalLogger(rootLogger.WithName("global-logger"))
 
-	logsCmd, err := NewLogsCmd(rootLogger.WithName("cmd-logs"))
+	logsCmd, err := NewLogsCmd()
 	if err != nil {
 		cm.PrettyPrint("failed to initialize cmd: ", 0, cm.Red)
 		cm.PrettyPrint("log command: "+err.Error(), 1, cm.Red)
@@ -79,11 +79,19 @@ func Execute() {
 
 	rootCmd.Flags().StringVarP(&managerNamespace, "manager-namespace", "n", "chaos-testing", "the namespace chaos-controller-manager in")
 	rootCmd.Flags().StringVarP(&managerSvc, "manager-svc", "s", "chaos-mesh-controller-manager", "the service to chaos-controller-manager")
+	physicalMachineCommand, err := NewPhysicalMachineCommand()
+	if err != nil {
+		cm.PrettyPrint("failed to initialize cmd: ", 0, cm.Red)
+		cm.PrettyPrint("physicalmachine command: "+err.Error(), 1, cm.Red)
+		os.Exit(1)
+	}
+
 	rootCmd.AddCommand(debugCommand)
 	rootCmd.AddCommand(completionCmd)
 	rootCmd.AddCommand(forwardCmd)
 	rootCmd.AddCommand(schemaCmd)
 	rootCmd.AddCommand(NewQueryCmd(rootLogger.WithName("query")))
+	rootCmd.AddCommand(physicalMachineCommand)
 	if err := rootCmd.Execute(); err != nil {
 		cm.PrettyPrint("failed to execute cmd: ", 0, cm.Red)
 		cm.PrettyPrint(err.Error(), 1, cm.Red)
