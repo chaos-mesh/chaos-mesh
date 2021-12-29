@@ -70,7 +70,7 @@ func (s *DaemonServer) ApplyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequ
 
 	processBuilder := bpm.DefaultProcessBuilder(todaBin, strings.Split(args, " ")...).
 		EnableLocalMnt().
-		SetIdentifier(in.ContainerId)
+		SetIdentifier(fmt.Sprintf("toda-%s", in.ContainerId))
 
 	if in.EnterNS {
 		processBuilder = processBuilder.SetNS(pid, bpm.MountNS).SetNS(pid, bpm.PidNS)
