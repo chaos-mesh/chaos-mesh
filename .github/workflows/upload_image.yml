@@ -16,9 +16,12 @@ jobs:
     outputs:
       image_tag: ${{ steps.image_tag.outputs.image_tag }}
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v2
+        with:
+          # it is required for fetching branches which contains certain tag
+          fetch-depth: 0
 
-      - name: Extract Image Tag
+      - name: Extract Image Tags
         shell: bash
         run: |
           IMAGE_TAG=${GITHUB_REF##*/}
@@ -26,7 +29,18 @@ jobs:
             IMAGE_TAG=latest;
           fi
 
+          ENV_IMAGE_TAG=${IMAGE_TAG}
+
+          if [ "${GITHUB_REF_TYPE}" = "tag" ] ; then
+              BRANCHES=$(git branch -r --contains ${{ github.ref }})
+              ENV_IMAGE_TAG_RAW=$(git branch -r --contains ${{ github.ref }} | head -n 1)
+              ENV_IMAGE_TAG=${ENV_IMAGE_TAG_RAW/origin\/}
+              echo -e "available branches for this tag:\n${BRANCHES}\n"
+              echo "use dev-env and build-env for branch: ${ENV_IMAGE_TAG}"
+          fi
+
           echo "::set-output name=image_tag::$(echo $IMAGE_TAG)"
+          echo "::set-output name=env_image_tag::$(echo $ENV_IMAGE_TAG)"
         id: image_tag
 
       - name: Log in to GitHub Docker Registry
@@ -39,6 +53,8 @@ jobs:
       - name: Build Chaos Mesh
         env:
           IMAGE_TAG: ${{ steps.image_tag.outputs.image_tag }}
+          IMAGE_DEV_ENV_TAG: ${{ steps.image_tag.outputs.env_image_tag }}
+          IMAGE_BUILD_ENV_TAG: ${{ steps.image_tag.outputs.env_image_tag }}
           ARCH: ${{ matrix.arch }}
           IMAGE: ${{ matrix.image }}
           GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
@@ -51,7 +67,15 @@ jobs:
             UI=0
           fi
           # ${VAR,,} convert VAR to lower case
-          make -B TARGET_PLATFORM=$ARCH IMAGE_TAG=$IMAGE_TAG-$ARCH IMAGE_PROJECT=${GITHUB_REPOSITORY_OWNER,,} DOCKER_REGISTRY=ghcr.io UI=$UI image-$IMAGE
+          make -B \
+            TARGET_PLATFORM=$ARCH \
+            IMAGE_DEV_ENV_TAG=$IMAGE_DEV_ENV_TAG \
+            IMAGE_BUILD_ENV_TAG=$IMAGE_BUILD_ENV_TAG \
+            IMAGE_TAG=$IMAGE_TAG-$ARCH \
+            IMAGE_PROJECT=${GITHUB_REPOSITORY_OWNER,,} \
+            DOCKER_REGISTRY=ghcr.io \
+            UI=$UI \
+            image-$IMAGE
 
       - name: Upload Chaos Mesh
         env:
