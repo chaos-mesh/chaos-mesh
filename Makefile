@@ -318,9 +318,10 @@ e2e-test/image/e2e/bin/e2e.test: images/dev-env/.dockerbuilt
 
 # Run tests
 CLEAN_TARGETS += cover.out cover.out.tmp
+
 test: SHELL:=$(RUN_IN_DEV_SHELL)
 test: failpoint-enable generate manifests test-utils images/dev-env/.dockerbuilt
-	CGO_ENABLED=1 $(GOTEST) -p 1 $$($(PACKAGE_LIST)) -coverprofile cover.out.tmp
+	CGO_ENABLED=1 $(GOTEST) -p 1 $$($(PACKAGE_LIST)) -coverprofile cover.out.tmp -covermode=atomic
 	cat cover.out.tmp | grep -v "_generated.deepcopy.go" > cover.out
 	make failpoint-disable
 
