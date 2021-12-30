@@ -66,7 +66,7 @@ if __name__ == '__main__':
     name = args.name[0]
     image_full_name = get_image_full_name(name)
 
-    env = {}
+    env = os.environ.copy()
     cmd = []
     if get_image_build(name) == "1":
         if os.getenv("DOCKER_CACHE") == "1":
