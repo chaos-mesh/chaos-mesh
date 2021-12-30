@@ -46,10 +46,10 @@ type BlockChaosSpec struct {
 	Action BlockChaosAction `json:"action"`
 
 	// IOPS defines the limit of IO frequency.
-	IOPS int `json:"iops"`
+	IOPS int `json:"iopsn,omitempty"`
 
 	// Delay defines the latency of every io request.
-	Delay string `json:"delay" webhook:"Duration"`
+	Delay string `json:"delayn,omitempty" webhook:"Duration"`
 
 	// +optional
 	Correlation string `json:"correlation,omitempty" default:"0" webhook:"FloatStr"`
@@ -57,15 +57,15 @@ type BlockChaosSpec struct {
 	// +optional
 	Jitter string `json:"jitter,omitempty" default:"0ms" webhook:"Duration"`
 
-	NodePVSelector `json:",inline"`
+	NodeVolumePathSelector `json:",inline"`
 
 	// Duration represents the duration of the chaos action.
 	// +optional
 	Duration *string `json:"duration,omitempty" webhook:"Duration"`
 }
 
-// NodePVSelector is the selector to select a node and a PV on it
-type NodePVSelector struct {
+// NodeVolumePathSelector is the selector to select a node and a PV on it
+type NodeVolumePathSelector struct {
 	PodSelector `json:",inline"`
 
 	VolumeName string `json:"volumeName"`
@@ -78,6 +78,12 @@ type BlockChaosStatus struct {
 	// InjectionIds always specifies the number of injected chaos action
 	// +optional
 	InjectionIds map[string]int `json:"ids,omitempty"`
+}
+
+func (obj *BlockChaos) GetSelectorSpecs() map[string]interface{} {
+	return map[string]interface{}{
+		".": &obj.Spec.NodeVolumePathSelector,
+	}
 }
 
 func (obj *BlockChaos) GetCustomStatus() interface{} {

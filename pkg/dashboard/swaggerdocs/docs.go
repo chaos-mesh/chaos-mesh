@@ -2629,6 +2629,53 @@ var doc = `{
                 }
             }
         },
+        "v1alpha1.BlockChaosSpec": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "description": "Action defines the specific block chaos action.\nSupported action: limit / delay\n+kubebuilder:validation:Enum=limit;delay",
+                    "type": "string"
+                },
+                "correlation": {
+                    "description": "+optional",
+                    "type": "string",
+                    "default": "0"
+                },
+                "delayn": {
+                    "description": "Delay defines the latency of every io request.",
+                    "type": "string"
+                },
+                "duration": {
+                    "description": "Duration represents the duration of the chaos action.\n+optional",
+                    "type": "string"
+                },
+                "iopsn": {
+                    "description": "IOPS defines the limit of IO frequency.",
+                    "type": "integer"
+                },
+                "jitter": {
+                    "description": "+optional",
+                    "type": "string",
+                    "default": "0ms"
+                },
+                "mode": {
+                    "description": "Mode defines the mode to run chaos action.\nSupported mode: one / all / fixed / fixed-percent / random-max-percent\n+kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent",
+                    "type": "string"
+                },
+                "selector": {
+                    "description": "Selector is used to select pods that are used to inject chaos action.",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.PodSelectorSpec"
+                },
+                "value": {
+                    "description": "Value is required when the mode is set to ` + "`" + `FixedMode` + "`" + ` / ` + "`" + `FixedPercentMode` + "`" + ` / ` + "`" + `RandomMaxPercentMode` + "`" + `.\nIf ` + "`" + `FixedMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentMode` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentMode` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
+                    "type": "string"
+                },
+                "volumeName": {
+                    "type": "string"
+                }
+            }
+        },
         "v1alpha1.CPUStressor": {
             "type": "object",
             "properties": {
@@ -2656,6 +2703,11 @@ var doc = `{
                     "description": "+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.AWSChaosSpec"
+                },
+                "blockChaos": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.BlockChaosSpec"
                 },
                 "concurrencyPolicy": {
                     "description": "+optional\n+kubebuilder:validation:Enum=Forbid;Allow",
@@ -4075,6 +4127,11 @@ var doc = `{
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.AWSChaosSpec"
                 },
+                "blockChaos": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.BlockChaosSpec"
+                },
                 "concurrencyPolicy": {
                     "description": "+optional\n+kubebuilder:validation:Enum=Forbid;Allow",
                     "type": "string"
@@ -4272,6 +4329,11 @@ var doc = `{
                     "description": "+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.AWSChaosSpec"
+                },
+                "blockChaos": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.BlockChaosSpec"
                 },
                 "children": {
                     "description": "Children describes the children steps of serial or parallel node. Only used when Type is TypeSerial or TypeParallel.\n+optional",
