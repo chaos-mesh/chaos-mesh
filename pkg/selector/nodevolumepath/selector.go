@@ -18,12 +18,15 @@ package nodevolumepath
 import (
 	"context"
 
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic"
-	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
+	"go.uber.org/fx"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/config"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
 )
 
 type SelectImpl struct {
@@ -88,15 +91,38 @@ func (impl *SelectImpl) Select(ctx context.Context, selector *v1alpha1.NodeVolum
 							})
 						} else {
 							// TODO: handle the case when the PV source is not supported
+							continue
 						}
 					} else {
 						// TODO: handle the case that pvc is not bound
+						continue
 					}
+				} else {
+					// TODO: handle the case (at least reutrn an error) that the volume source is not supported
+					continue
 				}
-				// TODO: handle the case (at least reutrn an error) that the volume source is not supported
 			}
 		}
 	}
 
 	return result, nil
+}
+
+type Params struct {
+	fx.In
+
+	Client client.Client
+	Reader client.Reader `name:"no-cache"`
+}
+
+func New(params Params) *SelectImpl {
+	return &SelectImpl{
+		params.Client,
+		params.Reader,
+		generic.Option{
+			ClusterScoped:         config.ControllerCfg.ClusterScoped,
+			TargetNamespace:       config.ControllerCfg.TargetNamespace,
+			EnableFilterNamespace: config.ControllerCfg.EnableFilterNamespace,
+		},
+	}
 }

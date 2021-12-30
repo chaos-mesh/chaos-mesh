@@ -1031,6 +1031,8 @@ rules:
   - apiGroups: [ "" ]
     resources:
       - nodes
+      - persistentvolumes
+      - persistentvolumeclaims
       - namespaces
       - services
     verbs: [ "get", "list", "watch" ]

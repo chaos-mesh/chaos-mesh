@@ -1,0 +1,11 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: BlockChaos
+metadata:
+  name: hostpath-example
+spec:
+  selector:
+    labelSelectors:
+      app: hostpath-example
+  mode: all
+  volumeName: hostpath-example
+  action: delay
