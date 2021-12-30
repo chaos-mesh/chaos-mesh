@@ -50,12 +50,13 @@ require (
 	github.com/pingcap/failpoint v0.0.0-20200210140405-f8f9fb234798
 	github.com/pingcap/log v0.0.0-20200117041106-d28c14d3b1cd // indirect
 	github.com/pkg/errors v0.9.1
+	github.com/pkg/sftp v1.13.4
 	github.com/prometheus/client_golang v1.11.0
 	github.com/retailnext/iptables_exporter v0.1.0
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/romana/ipset v1.0.0
 	github.com/romana/rlog v0.0.0-20171115192701-f018bc92e7d7 // indirect
-	github.com/shirou/gopsutil v2.20.5+incompatible
+	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749 // indirect
 	github.com/shurcooL/vfsgen v0.0.0-20181202132449-6a9ea43bcacd
 	github.com/spf13/cobra v1.1.1
@@ -64,13 +65,17 @@ require (
 	github.com/swaggo/files v0.0.0-20190704085106-630677cd5c14
 	github.com/swaggo/gin-swagger v1.2.0
 	github.com/swaggo/swag v1.6.7
+	github.com/tklauser/go-sysconf v0.3.9 // indirect
 	github.com/vektah/gqlparser/v2 v2.2.0
 	github.com/vishvananda/netlink v1.1.1-0.20201029203352-d40f9887b852
+	github.com/yusufpapurcu/wmi v1.2.2 // indirect
 	go.uber.org/atomic v1.7.0
 	go.uber.org/fx v1.12.0
 	go.uber.org/zap v1.18.1
+	golang.org/x/crypto v0.0.0-20211215153901-e495a2d5b3d3
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
+	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211
 	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac
 	golang.org/x/tools v0.1.4
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1

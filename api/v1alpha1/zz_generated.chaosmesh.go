@@ -1372,6 +1372,45 @@ func (in *PhysicalMachineChaos) Default() {
 	gw.Default(in)
 }
 
+const KindPhysicalMachine = "PhysicalMachine"
+
+var PhysicalMachineWebhookLog = logf.Log.WithName("PhysicalMachine-resource")
+
+func (in *PhysicalMachine) ValidateCreate() error {
+	PhysicalMachineWebhookLog.Info("validate create", "name", in.Name)
+	return in.Validate()
+}
+
+// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
+func (in *PhysicalMachine) ValidateUpdate(old runtime.Object) error {
+	PhysicalMachineWebhookLog.Info("validate update", "name", in.Name)
+	if !reflect.DeepEqual(in.Spec, old.(*PhysicalMachine).Spec) {
+		return ErrCanNotUpdateChaos
+	}
+	return in.Validate()
+}
+
+// ValidateDelete implements webhook.Validator so a webhook will be registered for the type
+func (in *PhysicalMachine) ValidateDelete() error {
+	PhysicalMachineWebhookLog.Info("validate delete", "name", in.Name)
+
+	// Nothing to do?
+	return nil
+}
+
+var _ webhook.Validator = &PhysicalMachine{}
+
+func (in *PhysicalMachine) Validate() error {
+	errs := gw.Validate(in)
+	return gw.Aggregate(errs)
+}
+
+var _ webhook.Defaulter = &PhysicalMachine{}
+
+func (in *PhysicalMachine) Default() {
+	gw.Default(in)
+}
+
 const KindPodChaos = "PodChaos"
 
 // IsDeleted returns whether this resource has been deleted
@@ -1944,6 +1983,8 @@ func init() {
 		chaos: &PhysicalMachineChaos{},
 		list:  &PhysicalMachineChaosList{},
 	})
+
+	SchemeBuilder.Register(&PhysicalMachine{}, &PhysicalMachineList{})
 
 	SchemeBuilder.Register(&PodChaos{}, &PodChaosList{})
 	all.register(KindPodChaos, &ChaosKind{
