@@ -125,6 +125,9 @@ controllerManager:
     renewDeadline: 10s
     retryPeriod: 2s
 
+  # chaosdSecurityMode is enabled for mTLS connection between chaos-controller-manager and chaosd
+  chaosdSecurityMode: true
+
 chaosDaemon:
   # image would be constructed by <registry>/<repository>:<tag>
   image:
@@ -436,6 +439,7 @@ webhook:
     - workflow
     - httpchaos
     - physicalmachinechaos
+    - physicalmachine
 
 bpfki:
   create: false

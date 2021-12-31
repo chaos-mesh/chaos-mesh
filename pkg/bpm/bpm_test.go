@@ -59,7 +59,7 @@ func WaitProcess(m *BackgroundProcessManager, cmd *ManagedProcess, exceedTime ti
 }
 
 var _ = Describe("background process manager", func() {
-	m := NewBackgroundProcessManager()
+	m := NewBackgroundProcessManager(nil)
 
 	Context("normally exited process", func() {
 		It("should work", func() {
@@ -154,6 +154,40 @@ var _ = Describe("background process manager", func() {
 
 			err = m.KillBackgroundProcess(context.Background(), pid2, ct2)
 			Expect(err).To(BeNil())
+		})
+	})
+
+	Context("get identifiers", func() {
+		It("should work", func() {
+			identifier := RandomeIdentifier()
+			cmd := DefaultProcessBuilder("sleep", "2").
+				SetIdentifier(identifier).
+				Build()
+
+			_, err := m.StartProcess(cmd)
+			Expect(err).To(BeNil())
+
+			ids := m.GetIdentifiers()
+			Expect(ids).To(Equal([]string{identifier}))
+
+			WaitProcess(&m, cmd, time.Second*5)
+
+			// wait for deleting identifier
+			time.Sleep(time.Second * 2)
+			ids = m.GetIdentifiers()
+			Expect(len(ids)).To(Equal(0))
+		})
+
+		It("should work with nil identifier", func() {
+			cmd := DefaultProcessBuilder("sleep", "2").Build()
+
+			_, err := m.StartProcess(cmd)
+			Expect(err).To(BeNil())
+
+			ids := m.GetIdentifiers()
+			Expect(len(ids)).To(Equal(0))
+
+			WaitProcess(&m, cmd, time.Second*5)
 		})
 	})
 })

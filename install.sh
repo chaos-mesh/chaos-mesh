@@ -1321,6 +1321,8 @@ spec:
               mountPath: ${mountPath}
             - name: sys-path
               mountPath: /host-sys
+            - name: lib-modules
+              mountPath: /lib/modules
           ports:
             - name: grpc
               containerPort: 31767
@@ -1334,6 +1336,9 @@ spec:
         - name: sys-path
           hostPath:
             path: /sys
+        - name: lib-modules
+          hostPath:
+            path: /lib/modules
 ---
 # Source: chaos-mesh/templates/chaos-dashboard-deployment.yaml
 # Copyright 2021 Chaos Mesh Authors.
@@ -1539,6 +1544,8 @@ spec:
           - name: CHAOS_DNS_SERVICE_PORT
             value: !!str 9288
           - name: SECURITY_MODE
+            value: "false"
+          - name: CHAOSD_SECURITY_MODE
             value: "false"
           - name: POD_FAILURE_PAUSE_IMAGE
             value: gcr.io/google-containers/pause:latest
@@ -2069,6 +2076,27 @@ webhooks:
           - UPDATE
         resources:
           - physicalmachinechaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /mutate-chaos-mesh-org-v1alpha1-physicalmachine
+    failurePolicy: Fail
+    name: mphysicalmachine.kb.io
+    timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - physicalmachines
 ---
 # Source: chaos-mesh/templates/secrets-configuration.yaml
 apiVersion: admissionregistration.k8s.io/v1
@@ -2376,6 +2404,27 @@ webhooks:
           - UPDATE
         resources:
           - physicalmachinechaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /validate-chaos-mesh-org-v1alpha1-physicalmachine
+    failurePolicy: Fail
+    name: vphysicalmachine.kb.io
+    timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - physicalmachines
 ---
 # Source: chaos-mesh/templates/secrets-configuration.yaml
 apiVersion: admissionregistration.k8s.io/v1

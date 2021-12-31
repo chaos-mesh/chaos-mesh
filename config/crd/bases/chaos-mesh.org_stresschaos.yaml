@@ -16,7 +16,11 @@ spec:
     singular: stresschaos
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - jsonPath: .spec.duration
+      name: duration
+      type: string
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: StressChaos is the Schema for the stresschaos API
@@ -289,6 +293,7 @@ spec:
         type: object
     served: true
     storage: true
+    subresources: {}
 status:
   acceptedNames:
     kind: ""

@@ -20,11 +20,9 @@ HELM_BIN=$(OUTPUT_BIN)/helm
 IMAGE_BUILD_ENV_PROJECT ?= chaos-mesh
 IMAGE_BUILD_ENV_REGISTRY ?= ghcr.io
 IMAGE_BUILD_ENV_BUILD ?= 0
-IMAGE_BUILD_ENV_TAG ?= latest
 IMAGE_DEV_ENV_PROJECT ?= chaos-mesh
 IMAGE_DEV_ENV_REGISTRY ?= ghcr.io
 IMAGE_DEV_ENV_BUILD ?= 0
-IMAGE_DEV_ENV_TAG ?= latest
 
 # Enable GO111MODULE=on explicitly, disable it with GO111MODULE=off when necessary.
 export GO111MODULE := on
@@ -106,7 +104,7 @@ run: generate fmt vet manifests
 NAMESPACE ?= chaos-testing
 # Install CRDs into a cluster
 install: manifests
-	$(HELM_BIN) upgrade --install chaos-mesh helm/chaos-mesh --namespace=${NAMESPACE} --set registry=${DOCKER_REGISTRY} --set dnsServer.create=true --set dashboard.create=true;
+	$(HELM_BIN) upgrade --install chaos-mesh helm/chaos-mesh --namespace=${NAMESPACE} --set images.registry=${DOCKER_REGISTRY} --set dnsServer.create=true --set dashboard.create=true;
 
 clean:
 	rm -rf $(CLEAN_TARGETS)
@@ -422,13 +420,16 @@ $(eval $(call RUN_IN_DEV_ENV_TEMPLATE,tidy,clean))
 define generate-ctrl-make
 	$(GO) generate ./pkg/ctrlserver/graph
 endef
-$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,generate-ctrl))
+$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,generate-ctrl,generate-deepcopy))
 
-define generate-make
+define generate-deepcopy-make
 	cd ./api/v1alpha1 ;\
 		controller-gen object:headerFile=../../hack/boilerplate/boilerplate.generatego.txt paths="./..." ;
 endef
-$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,generate,chaos-build generate-ctrl swagger_spec))
+$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,generate-deepcopy,chaos-build))
+
+generate: generate-ctrl swagger_spec generate-deepcopy chaos-build
+
 check: generate yaml vet boilerplate lint tidy install.sh fmt
 
 CLEAN_TARGETS+=e2e-test/image/e2e/bin/ginkgo
@@ -447,11 +448,11 @@ $(eval $(call RUN_IN_DEV_ENV_TEMPLATE,e2e-test/image/e2e/bin/e2e.test,e2e-test/e
 # Run tests
 CLEAN_TARGETS += cover.out cover.out.tmp
 define test-make
-	CGO_ENABLED=1 $(GOTEST) -p 1 $$$$($$(PACKAGE_LIST)) -coverprofile cover.out.tmp
+	CGO_ENABLED=1 $(GOTEST) -p 1 $$$$($$(PACKAGE_LIST)) -coverprofile cover.out.tmp -covermode=atomic
 	cat cover.out.tmp | grep -v "_generated.deepcopy.go" > cover.out
 	make failpoint-disable
 endef
-$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,test,failpoint-enable generate generate-mock manifests test-utils))
+$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,test,failpoint-enable generate manifests test-utils))
 
 define gosec-scan-make
 	gosec ./api/... ./controllers/... ./pkg/... || echo "*** sec-scan failed: known-issues ***"
@@ -480,13 +481,8 @@ define swagger_spec-make
 endef
 $(eval $(call RUN_IN_DEV_ENV_TEMPLATE,swagger_spec))
 
-define generate-mock-make
-	$(GO) generate ./pkg/workflow
-endef
-$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,generate-mock))
-
 .PHONY: all clean test install manifests groupimports fmt vet tidy image \
-	docker-push lint generate config mockgen generate-mock \
+	docker-push lint generate config \
 	install.sh $(GO_TARGET_PHONY) \
 	manager chaosfs chaosdaemon chaos-dashboard \
 	dashboard dashboard-server-frontend gosec-scan \

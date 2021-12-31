@@ -24,6 +24,7 @@ import (
 // Stress chaos is a chaos to generate plenty of stresses over a collection of pods.
 
 // +kubebuilder:object:root=true
+// +kubebuilder:printcolumn:name="duration",type=string,JSONPath=`.spec.duration`
 // +chaos-mesh:experiment
 
 // StressChaos is the Schema for the stresschaos API

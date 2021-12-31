@@ -1607,6 +1607,8 @@ spec:
                           - clock
                           type: string
                         address:
+                          description: 'DEPRECATED: Use Selector instead. Only one
+                            of Address and Selector could be specified.'
                           items:
                             type: string
                           type: array
@@ -1782,6 +1784,16 @@ spec:
                               description: the port of agent server
                               type: integer
                           type: object
+                        mode:
+                          description: 'Mode defines the mode to run chaos action.
+                            Supported mode: one / all / fixed / fixed-percent / random-max-percent'
+                          enum:
+                          - one
+                          - all
+                          - fixed
+                          - fixed-percent
+                          - random-max-percent
+                          type: string
                         network-bandwidth:
                           properties:
                             buffer:
@@ -2009,6 +2021,79 @@ spec:
                               description: the signal number to send
                               type: integer
                           type: object
+                        selector:
+                          description: Selector is used to select physical machines
+                            that are used to inject chaos action.
+                          properties:
+                            annotationSelectors:
+                              additionalProperties:
+                                type: string
+                              description: Map of string keys and values that can
+                                be used to select objects. A selector based on annotations.
+                              type: object
+                            expressionSelectors:
+                              description: a slice of label selector expressions that
+                                can be used to select objects. A list of selectors
+                                based on set-based label expressions.
+                              items:
+                                description: A label selector requirement is a selector
+                                  that contains values, a key, and an operator that
+                                  relates the key and values.
+                                properties:
+                                  key:
+                                    description: key is the label key that the selector
+                                      applies to.
+                                    type: string
+                                  operator:
+                                    description: operator represents a key's relationship
+                                      to a set of values. Valid operators are In,
+                                      NotIn, Exists and DoesNotExist.
+                                    type: string
+                                  values:
+                                    description: values is an array of string values.
+                                      If the operator is In or NotIn, the values array
+                                      must be non-empty. If the operator is Exists
+                                      or DoesNotExist, the values array must be empty.
+                                      This array is replaced during a strategic merge
+                                      patch.
+                                    items:
+                                      type: string
+                                    type: array
+                                required:
+                                - key
+                                - operator
+                                type: object
+                              type: array
+                            fieldSelectors:
+                              additionalProperties:
+                                type: string
+                              description: Map of string keys and values that can
+                                be used to select objects. A selector based on fields.
+                              type: object
+                            labelSelectors:
+                              additionalProperties:
+                                type: string
+                              description: Map of string keys and values that can
+                                be used to select objects. A selector based on labels.
+                              type: object
+                            namespaces:
+                              description: Namespaces is a set of namespace to which
+                                objects belong.
+                              items:
+                                type: string
+                              type: array
+                            physicalMachines:
+                              additionalProperties:
+                                items:
+                                  type: string
+                                type: array
+                              description: PhysicalMachines is a map of string keys
+                                and a set values that used to select physical machines.
+                                The key defines the namespace which physical machine
+                                belong, and each value is a set of physical machine
+                                names.
+                              type: object
+                          type: object
                         stress-cpu:
                           properties:
                             load:
@@ -2038,9 +2123,19 @@ spec:
                         uid:
                           description: the experiment ID
                           type: string
+                        value:
+                          description: Value is required when the mode is set to `FixedMode`
+                            / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
+                            provide an integer of physical machines to do chaos action.
+                            If `FixedPercentMode`, provide a number from 0-100 to
+                            specify the percent of physical machines the server can
+                            do chaos action. IF `RandomMaxPercentMode`,  provide a
+                            number from 0-100 to specify the max percent of pods to
+                            do chaos action
+                          type: string
                       required:
                       - action
-                      - address
+                      - mode
                       type: object
                     podChaos:
                       description: PodChaosSpec defines the attributes that a user
@@ -3798,6 +3893,8 @@ spec:
                               - clock
                               type: string
                             address:
+                              description: 'DEPRECATED: Use Selector instead. Only
+                                one of Address and Selector could be specified.'
                               items:
                                 type: string
                               type: array
@@ -3982,6 +4079,17 @@ spec:
                                   description: the port of agent server
                                   type: integer
                               type: object
+                            mode:
+                              description: 'Mode defines the mode to run chaos action.
+                                Supported mode: one / all / fixed / fixed-percent
+                                / random-max-percent'
+                              enum:
+                              - one
+                              - all
+                              - fixed
+                              - fixed-percent
+                              - random-max-percent
+                              type: string
                             network-bandwidth:
                               properties:
                                 buffer:
@@ -4216,6 +4324,82 @@ spec:
                                   description: the signal number to send
                                   type: integer
                               type: object
+                            selector:
+                              description: Selector is used to select physical machines
+                                that are used to inject chaos action.
+                              properties:
+                                annotationSelectors:
+                                  additionalProperties:
+                                    type: string
+                                  description: Map of string keys and values that
+                                    can be used to select objects. A selector based
+                                    on annotations.
+                                  type: object
+                                expressionSelectors:
+                                  description: a slice of label selector expressions
+                                    that can be used to select objects. A list of
+                                    selectors based on set-based label expressions.
+                                  items:
+                                    description: A label selector requirement is a
+                                      selector that contains values, a key, and an
+                                      operator that relates the key and values.
+                                    properties:
+                                      key:
+                                        description: key is the label key that the
+                                          selector applies to.
+                                        type: string
+                                      operator:
+                                        description: operator represents a key's relationship
+                                          to a set of values. Valid operators are
+                                          In, NotIn, Exists and DoesNotExist.
+                                        type: string
+                                      values:
+                                        description: values is an array of string
+                                          values. If the operator is In or NotIn,
+                                          the values array must be non-empty. If the
+                                          operator is Exists or DoesNotExist, the
+                                          values array must be empty. This array is
+                                          replaced during a strategic merge patch.
+                                        items:
+                                          type: string
+                                        type: array
+                                    required:
+                                    - key
+                                    - operator
+                                    type: object
+                                  type: array
+                                fieldSelectors:
+                                  additionalProperties:
+                                    type: string
+                                  description: Map of string keys and values that
+                                    can be used to select objects. A selector based
+                                    on fields.
+                                  type: object
+                                labelSelectors:
+                                  additionalProperties:
+                                    type: string
+                                  description: Map of string keys and values that
+                                    can be used to select objects. A selector based
+                                    on labels.
+                                  type: object
+                                namespaces:
+                                  description: Namespaces is a set of namespace to
+                                    which objects belong.
+                                  items:
+                                    type: string
+                                  type: array
+                                physicalMachines:
+                                  additionalProperties:
+                                    items:
+                                      type: string
+                                    type: array
+                                  description: PhysicalMachines is a map of string
+                                    keys and a set values that used to select physical
+                                    machines. The key defines the namespace which
+                                    physical machine belong, and each value is a set
+                                    of physical machine names.
+                                  type: object
+                              type: object
                             stress-cpu:
                               properties:
                                 load:
@@ -4245,9 +4429,19 @@ spec:
                             uid:
                               description: the experiment ID
                               type: string
+                            value:
+                              description: Value is required when the mode is set
+                                to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
+                                If `FixedMode`, provide an integer of physical machines
+                                to do chaos action. If `FixedPercentMode`, provide
+                                a number from 0-100 to specify the percent of physical
+                                machines the server can do chaos action. IF `RandomMaxPercentMode`,  provide
+                                a number from 0-100 to specify the max percent of
+                                pods to do chaos action
+                              type: string
                           required:
                           - action
-                          - address
+                          - mode
                           type: object
                         podChaos:
                           description: PodChaosSpec defines the attributes that a
