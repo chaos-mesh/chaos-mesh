@@ -449,7 +449,7 @@ define test-make
 	cat cover.out.tmp | grep -v "_generated.deepcopy.go" > cover.out
 	make failpoint-disable
 endef
-$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,test,failpoint-enable generate generate-mock manifests test-utils))
+$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,test,failpoint-enable generate manifests test-utils))
 
 define gosec-scan-make
 	gosec ./api/... ./controllers/... ./pkg/... || echo "*** sec-scan failed: known-issues ***"
@@ -478,13 +478,8 @@ define swagger_spec-make
 endef
 $(eval $(call RUN_IN_DEV_ENV_TEMPLATE,swagger_spec))
 
-define generate-mock-make
-	$(GO) generate ./pkg/workflow
-endef
-$(eval $(call RUN_IN_DEV_ENV_TEMPLATE,generate-mock))
-
 .PHONY: all clean test install manifests groupimports fmt vet tidy image \
-	docker-push lint generate config mockgen generate-mock \
+	docker-push lint generate config \
 	install.sh $(GO_TARGET_PHONY) \
 	manager chaosfs chaosdaemon chaos-dashboard \
 	dashboard dashboard-server-frontend gosec-scan \
