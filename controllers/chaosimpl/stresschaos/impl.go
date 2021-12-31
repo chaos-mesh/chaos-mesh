@@ -86,8 +86,8 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	}
 	// TODO: support custom status
 	stresschaos.Status.Instances[records[index].Id] = v1alpha1.StressInstance{
-		CpuUID: res.CpuInstance,
-		CpuStartTime: &metav1.Time{
+		UID: res.CpuInstance,
+		StartTime: &metav1.Time{
 			Time: time.Unix(res.CpuStartTime/1000, (res.CpuStartTime%1000)*int64(time.Millisecond)),
 		},
 		MemoryUID: res.MemoryInstance,
@@ -123,8 +123,8 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		return v1alpha1.NotInjected, nil
 	}
 	if _, err = pbClient.CancelStressors(ctx, &pb.CancelStressRequest{
-		CpuInstance:     instance.CpuUID,
-		CpuStartTime:    instance.CpuStartTime.UnixNano() / int64(time.Millisecond),
+		CpuInstance:     instance.UID,
+		CpuStartTime:    instance.StartTime.UnixNano() / int64(time.Millisecond),
 		MemoryInstance:  instance.MemoryUID,
 		MemoryStartTime: instance.MemoryStartTime.UnixNano() / int64(time.Millisecond),
 	}); err != nil {

@@ -77,15 +77,15 @@ type StressChaosStatus struct {
 
 // StressInstance is an instance generates stresses
 type StressInstance struct {
-	// CpuUID is the stress-ng identifier
+	// UID is the stress-ng identifier
 	// +optional
-	CpuUID string `json:"cpuUid"`
+	UID string `json:"uid"`
 	// MemoryUID is the memStress identifier
 	// +optional
 	MemoryUID string `json:"memoryUid"`
-	// CpuStartTime specifies when the stress-ng starts
+	// StartTime specifies when the stress-ng starts
 	// +optional
-	CpuStartTime *metav1.Time `json:"cpuStartTime"`
+	StartTime *metav1.Time `json:"startTime"`
 	// MemoryStartTime specifies when the memStress starts
 	// +optional
 	MemoryStartTime *metav1.Time `json:"memoryStartTime"`
